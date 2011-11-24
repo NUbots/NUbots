@@ -29,6 +29,7 @@ public:
     bool Run();
     bool WriteLog(const std::string& logPath);
     bool WriteReport(const std::string& reportPath);
+    bool WriteXML(const std::string& xmlPath);
     int NumberOfLogFrames();
     int NumberOfFrames();
     const Localisation* GetFrame(int frameNumber);

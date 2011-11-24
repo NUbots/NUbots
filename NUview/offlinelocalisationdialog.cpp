@@ -150,12 +150,12 @@ void OfflineLocalisationDialog::SaveAsReport()
     {
         initial_path = m_previous_log_path;
     }
-    QString save_name = QFileDialog::getSaveFileName(this,"Save Report",QString(),"Comma-Seperated Values (*.csv)");
+    QString save_name = QFileDialog::getSaveFileName(this,"Save Report",QString(),"Extensible Markup Language (*.xml)");
     if(!save_name.isEmpty())
     {
         QFileInfo file_info(save_name);
         m_previous_log_path = file_info.absolutePath();
-        m_offline_loc->WriteReport(save_name.toStdString());
+        m_offline_loc->WriteXML(save_name.toStdString());
     }
     return;
 }

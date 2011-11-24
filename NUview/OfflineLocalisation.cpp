@@ -9,6 +9,7 @@
 #include "Localisation/SelfLocalisationTests.h"
 #include <QElapsedTimer>
 #include "Tools/Math/General.h"
+#include "Tools/Math/Vector3.h"
 
 /*! @brief Default Constructor
  */
@@ -314,6 +315,8 @@ bool OfflineLocalisation::WriteLog(const std::string& logPath)
  */
 bool OfflineLocalisation::WriteReport(const std::string& reportPath)
 {
+    return WriteXML(reportPath);
+
     std::string temp;
     bool file_saved = false;
     if(hasSimData())
@@ -365,6 +368,240 @@ bool OfflineLocalisation::WriteReport(const std::string& reportPath)
             output_file << error_x_line.str() << std::endl;
             output_file << error_y_line.str() << std::endl;
             output_file << error_heading_line.str() << std::endl;
+
+        }
+        output_file.close();
+    }
+    return file_saved;
+}
+
+
+std::string BeginTag(std::string tag)
+{
+    std::stringstream temp;
+    temp << "<" << tag << ">";
+    return temp.str();
+}
+
+std::string EndTag(std::string tag)
+{
+    std::stringstream temp;
+    temp << "</" << tag << ">";
+    return temp.str();
+}
+
+std::string Tabbing(unsigned int num_tabs)
+{
+    std::stringstream result;
+    for(unsigned int tab = 0; tab < num_tabs; ++tab)
+    {
+        result << "  ";
+    }
+    return result.str();
+}
+
+/*! @brief Writes a text based summary of the current experiment to file.
+    @param logPath Path to which the log will be written
+ */
+bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
+{
+    std::string temp = "", tag="";
+    unsigned int tab_depth = 0;
+    bool file_saved = false;
+
+    if(hasSimData())
+    {
+        // Collect the data to be added to the report.
+        // This is perforiming the loop done while porcessing, but reading the data back here makes the
+        // whole process a lot neater.
+        unsigned int total_frames  = m_self_loc_frame_buffer.size();
+        temp = m_log_reader->path().toStdString();
+        std::string path = temp.erase(temp.rfind('/')+1);   // unix/linux based path
+
+        unsigned int num_frames = NumberOfFrames();
+
+        std::vector< Vector3<float> > measured_positions(num_frames);
+        std::vector< Vector3<float> > estimated_positions(num_frames);
+        std::vector<unsigned int> stationary_object_count;
+        std::vector<unsigned int> ambiguous_object_count;
+        stationary_object_count.resize(FieldObjects::NUM_STAT_FIELD_OBJECTS, 0);
+        ambiguous_object_count.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS, 0);
+
+
+        std::vector<unsigned int> obs_frames;
+        std::vector<unsigned int> obs_ids;
+        std::vector<float> obs_distance;
+        std::vector<float> obs_heading;
+        std::vector<float> exp_distance;
+        std::vector<float> exp_heading;
+
+        FieldObjects* tempObjects;
+        const TeamInformation* tempTeamInfo;
+        const GameInformation* tempGameInfo;
+        const SelfLocalisation* temp_loc;
+
+        m_log_reader->blockSignals(true);
+        for (unsigned int frame = 0; frame < num_frames; ++frame)
+        {
+            m_log_reader->setFrame(frame);
+            tempObjects = m_log_reader->GetObjectData();
+            NUSensorsData tempSensor = (*m_log_reader->GetSensorData());
+            tempTeamInfo = m_log_reader->GetTeamInfo();
+            tempGameInfo = m_log_reader->GetGameInfo();
+
+            vector<float> gps;
+            float compass;
+            Vector3<float> measure(0,0,0);
+            Self gps_location;
+            if(tempSensor.getGps(gps) and tempSensor.getCompass(compass))
+            {
+                measure.x = gps[0];
+                measure.y = gps[1];
+                measure.z = compass;
+                gps_location.updateLocationOfSelf(measure.x, measure.y,measure.z,0.1,0.1,0.01,false);
+            }
+            measured_positions[frame] = measure;
+
+
+            for(std::vector<StationaryObject>::const_iterator object = tempObjects->stationaryFieldObjects.begin(); object != tempObjects->stationaryFieldObjects.end(); ++object)
+            {
+                if(object->isObjectVisible())
+                {
+                    stationary_object_count[object->getID()]++;
+                    obs_frames.push_back(frame);
+                    obs_ids.push_back(object->getID());
+                    obs_distance.push_back(object->measuredDistance()*cos(object->estimatedElevation()));
+                    obs_heading.push_back(object->measuredBearing());
+                    exp_distance.push_back(gps_location.CalculateDistanceToStationaryObject(*object));
+                    exp_heading.push_back(gps_location.CalculateBearingToStationaryObject(*object));
+                }
+            }
+            for(std::vector<AmbiguousObject>::const_iterator object = tempObjects->ambiguousFieldObjects.begin(); object != tempObjects->ambiguousFieldObjects.end(); ++object)
+            {
+                if(object->isObjectVisible())
+                {
+                    ambiguous_object_count[object->getID()]++;
+//                    obs_frames.push_back(frame);
+//                    obs_ids.push_back(object->getID());
+//                    obs_distance.push_back(object->measuredDistance()*cos(object->estimatedElevation()));
+//                    obs_heading.push_back(object->measuredBearing());
+//                    exp_distance.push_back(0);
+//                    exp_heading.push_back(0);
+                }
+            }
+
+            // All of these vectors should be the same size.
+            assert(obs_frames.size() == obs_ids.size());
+            assert(obs_ids.size() == obs_distance.size());
+            assert(obs_distance.size() == obs_heading.size());
+
+            temp_loc = GetSelfFrame(frame+1);
+            assert(temp_loc);
+            Vector3<float> estimate(0,0,0);
+            const Model* best_model = temp_loc->getBestModel();
+            estimate.x = best_model->mean(Model::states_x);
+            estimate.y = best_model->mean(Model::states_y);
+            estimate.z = best_model->mean(Model::states_heading);
+            estimated_positions[frame] = estimate;
+        }
+
+        // Write info to file
+        std::ofstream output_file(xmlPath.c_str());
+        if(output_file.is_open() && output_file.good())
+        {
+            // Experiment details
+            output_file << Tabbing(tab_depth++) << BeginTag("report") << std::endl;
+            output_file << Tabbing(tab_depth++) << BeginTag("experiment") << std::endl;
+
+            output_file << Tabbing(tab_depth) << BeginTag("filename") << path << EndTag("filename") << std::endl;
+            output_file << Tabbing(tab_depth) << BeginTag("frames") << total_frames << EndTag("frames") << std::endl;
+
+            FieldObjects* tempObjects = m_log_reader->GetObjectData();
+
+            // Add the stationary objects.
+            output_file << Tabbing(tab_depth++) << BeginTag("stationary_objects") << std::endl;
+            for(std::vector<StationaryObject>::const_iterator object = tempObjects->stationaryFieldObjects.begin(); object != tempObjects->stationaryFieldObjects.end(); ++object)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("object") << std::endl;
+
+                output_file << Tabbing(tab_depth) << BeginTag("id") << object->getID() << EndTag("id") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("name") << object->getName() << EndTag("name") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("count") << stationary_object_count[object->getID()] << EndTag("count") << std::endl;
+
+                output_file << Tabbing(--tab_depth) << EndTag("object") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("stationary_objects") << std::endl;
+
+            // Add the ambiguous objects.
+            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_objects") << std::endl;
+            for(unsigned int id = 0; id < FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS; ++id)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("object") << std::endl;
+
+                output_file << Tabbing(tab_depth) << BeginTag("id") << id << EndTag("id") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("name") << FieldObjects::ambiguousName(id) << EndTag("name") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("count") << ambiguous_object_count[id] << EndTag("count") << std::endl;
+
+                output_file << Tabbing(--tab_depth) << EndTag("object") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_objects") << std::endl;
+
+            output_file << Tabbing(--tab_depth) << EndTag("experiment") << std::endl;
+
+            // Experiment results.
+            output_file << Tabbing(tab_depth++) << BeginTag("results") << std::endl;
+
+            output_file << Tabbing(tab_depth) << BeginTag("branch_method") << m_settings.branchMethodString() << EndTag("branch_method") << std::endl;
+            output_file << Tabbing(tab_depth) << BeginTag("prune_method") << m_settings.pruneMethodString() << EndTag("prune_method") << std::endl;
+            output_file << Tabbing(tab_depth) << BeginTag("total_models") << m_num_models_created << EndTag("total_models") << std::endl;
+            output_file << Tabbing(tab_depth) << BeginTag("runtime") << m_experiment_run_time << EndTag("runtime") << std::endl;
+
+            output_file << Tabbing(tab_depth++) << BeginTag("position_data") << std::endl;
+            for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+
+                output_file << Tabbing(tab_depth) << BeginTag("frame") << frame_id << EndTag("frame") <<std::endl;
+
+                output_file << Tabbing(tab_depth++) << BeginTag("measured") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("x") << measured_positions[frame_id].x << EndTag("x") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("y") << measured_positions[frame_id].y << EndTag("y") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("heading") << measured_positions[frame_id].z << EndTag("heading") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("measured") << std::endl;
+
+                output_file << Tabbing(tab_depth++) << BeginTag("estimate") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("x") << estimated_positions[frame_id].x << EndTag("x") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("y") << estimated_positions[frame_id].y << EndTag("y") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("heading") << estimated_positions[frame_id].z << EndTag("heading") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("estimate") << std::endl;
+
+                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("position_data") << std::endl;
+
+            output_file << Tabbing(tab_depth++) << BeginTag("observations") << std::endl;
+            for (unsigned int i = 0; i < obs_frames.size(); ++i)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("frame") << obs_frames[i] << EndTag("frame") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("id") << obs_ids[i] << EndTag("id") <<std::endl;
+
+                output_file << Tabbing(tab_depth++) << BeginTag("estimate") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("distance") << obs_distance[i] << EndTag("distance") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("heading") << obs_heading[i] << EndTag("heading") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("estimate") << std::endl;
+
+                output_file << Tabbing(tab_depth++) << BeginTag("expected") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("distance") << exp_distance[i] << EndTag("distance") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("heading") << exp_heading[i] << EndTag("heading") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("expected") << std::endl;
+
+                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("observations") << std::endl;
+
+            output_file << Tabbing(--tab_depth) << EndTag("results") << std::endl;
+            output_file << Tabbing(--tab_depth) << EndTag("report") << std::endl;
 
         }
         output_file.close();
