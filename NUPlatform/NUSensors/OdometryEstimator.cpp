@@ -113,7 +113,7 @@ void OdometryEstimator::WriteLogData(std::vector<float>& gps, float compass,
     @param forceLeft The force in newtons of the left foot.
     @param forceRight The force in newtons of the right foot.
  */
-OdometryEstimator::LegIdentifier OdometryEstimator::SelectSupportLeg(float forceLeft, float forceRight)
+OdometryEstimator::LegIdentifier OdometryEstimator::SelectSupportLegTouch(float forceLeft, float forceRight)
 {
     LegIdentifier currSupport = m_support_leg;
     float min_force = m_minimum_support_foot_pressure;
@@ -147,6 +147,24 @@ OdometryEstimator::LegIdentifier OdometryEstimator::SelectSupportLeg(float force
     return currSupport;
 }
 
+/*! @brief Determines the current support leg based on kinematic based height of each foot.
+    @param left_z The position of the left foot in respect to the torso z-axis.
+    @param right_z The position of the left foot in respect to the torso z-axis.
+ */
+OdometryEstimator::LegIdentifier OdometryEstimator::SelectSupportLegKinematic(float left_z, float right_z)
+{
+    LegIdentifier result;
+    if(right_z < left_z)
+    {
+        result = right;
+    }
+    else
+    {
+        result = left;
+    }
+    return result;
+}
+
 /*! @brief Calculate the odometry estimate from the previous estimation
     @param leftPos Left foot positional data.
     @param rightPos Right foot positional data.
@@ -159,7 +177,15 @@ std::vector<float> OdometryEstimator::CalculateNextStep(const std::vector<float>
                                                         float forceLeft, float forceRight, std::vector<float>& gps, float compass)
 {
     std::vector<float> result;
-    LegIdentifier currSupport = SelectSupportLeg(forceLeft, forceRight);
+    LegIdentifier currSupport;
+    if(forceLeft != 0 or forceRight != 0)
+    {
+        currSupport = SelectSupportLegTouch(forceLeft, forceRight);
+    }
+    else
+    {
+        currSupport = SelectSupportLegKinematic(leftPos[2], rightPos[2]);
+    }
 
     // Calculate left foot motion
     std::vector<float> LOdom(3);
