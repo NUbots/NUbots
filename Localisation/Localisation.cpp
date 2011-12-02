@@ -171,7 +171,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
     vector<float> odo;
     bool odom_available = sensor_data->getOdometry(odo);
 
-    #if !defined(USE_VISION) || 1
+    #if !defined(USE_VISION)// || 1
         // If vision is disabled, gps coordinates are used in its place to trach location.
         vector<float> gps;
         float compass;
