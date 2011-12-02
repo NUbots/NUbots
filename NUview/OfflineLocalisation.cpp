@@ -435,6 +435,8 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
         std::vector<float> exp_distance;
         std::vector<float> exp_heading;
 
+        std::vector<std::vector<float> > odom;
+
         FieldObjects* tempObjects;
         const TeamInformation* tempTeamInfo;
         const GameInformation* tempGameInfo;
@@ -462,6 +464,18 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             }
             measured_positions[frame] = measure;
 
+            std::vector<float> odometry;
+            if(tempSensor.getOdometry(odometry))
+            {
+                odometry.push_back(frame);
+                odom.push_back(odometry);
+            }
+            else
+            {
+                odometry.resize(3,0);
+                odometry.push_back(frame);
+                odom.push_back(odometry);
+            }
 
             for(std::vector<StationaryObject>::const_iterator object = tempObjects->stationaryFieldObjects.begin(); object != tempObjects->stationaryFieldObjects.end(); ++object)
             {
@@ -490,6 +504,8 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                 }
             }
 
+            m_log_reader->blockSignals(false);
+
             // All of these vectors should be the same size.
             assert(obs_frames.size() == obs_ids.size());
             assert(obs_ids.size() == obs_distance.size());
@@ -509,7 +525,9 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
         std::ofstream output_file(xmlPath.c_str());
         if(output_file.is_open() && output_file.good())
         {
+            // ******************
             // Experiment details
+            // ******************
             output_file << Tabbing(tab_depth++) << BeginTag("report") << std::endl;
             output_file << Tabbing(tab_depth++) << BeginTag("experiment") << std::endl;
 
@@ -546,39 +564,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             }
             output_file << Tabbing(--tab_depth) << EndTag("ambiguous_objects") << std::endl;
 
-            output_file << Tabbing(--tab_depth) << EndTag("experiment") << std::endl;
-
-            // Experiment results.
-            output_file << Tabbing(tab_depth++) << BeginTag("results") << std::endl;
-
-            output_file << Tabbing(tab_depth) << BeginTag("branch_method") << m_settings.branchMethodString() << EndTag("branch_method") << std::endl;
-            output_file << Tabbing(tab_depth) << BeginTag("prune_method") << m_settings.pruneMethodString() << EndTag("prune_method") << std::endl;
-            output_file << Tabbing(tab_depth) << BeginTag("total_models") << m_num_models_created << EndTag("total_models") << std::endl;
-            output_file << Tabbing(tab_depth) << BeginTag("runtime") << m_experiment_run_time << EndTag("runtime") << std::endl;
-
-            output_file << Tabbing(tab_depth++) << BeginTag("position_data") << std::endl;
-            for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
-            {
-                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
-
-                output_file << Tabbing(tab_depth) << BeginTag("frame") << frame_id << EndTag("frame") <<std::endl;
-
-                output_file << Tabbing(tab_depth++) << BeginTag("measured") << std::endl;
-                output_file << Tabbing(tab_depth) << BeginTag("x") << measured_positions[frame_id].x << EndTag("x") <<std::endl;
-                output_file << Tabbing(tab_depth) << BeginTag("y") << measured_positions[frame_id].y << EndTag("y") <<std::endl;
-                output_file << Tabbing(tab_depth) << BeginTag("heading") << measured_positions[frame_id].z << EndTag("heading") <<std::endl;
-                output_file << Tabbing(--tab_depth) << EndTag("measured") << std::endl;
-
-                output_file << Tabbing(tab_depth++) << BeginTag("estimate") << std::endl;
-                output_file << Tabbing(tab_depth) << BeginTag("x") << estimated_positions[frame_id].x << EndTag("x") <<std::endl;
-                output_file << Tabbing(tab_depth) << BeginTag("y") << estimated_positions[frame_id].y << EndTag("y") <<std::endl;
-                output_file << Tabbing(tab_depth) << BeginTag("heading") << estimated_positions[frame_id].z << EndTag("heading") <<std::endl;
-                output_file << Tabbing(--tab_depth) << EndTag("estimate") << std::endl;
-
-                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
-            }
-            output_file << Tabbing(--tab_depth) << EndTag("position_data") << std::endl;
-
+            // Add observations
             output_file << Tabbing(tab_depth++) << BeginTag("observations") << std::endl;
             for (unsigned int i = 0; i < obs_frames.size(); ++i)
             {
@@ -599,6 +585,56 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                 output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
             }
             output_file << Tabbing(--tab_depth) << EndTag("observations") << std::endl;
+
+            // Add odometry information
+            output_file << Tabbing(tab_depth++) << BeginTag("odometry") << std::endl;
+            for(std::vector<std::vector<float> >::iterator odom_it = odom.begin(); odom_it != odom.end(); ++odom_it)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("frame") << (*odom_it)[3] << EndTag("frame") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("x") << (*odom_it)[0] << EndTag("x") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("y") << (*odom_it)[1] << EndTag("y") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("turn") << (*odom_it)[2] << EndTag("turn") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("odometry") << std::endl;
+
+            // Add measured position data
+            output_file << Tabbing(tab_depth++) << BeginTag("measured_position") << std::endl;
+            for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("frame") << frame_id << EndTag("frame") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("x") << measured_positions[frame_id].x << EndTag("x") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("y") << measured_positions[frame_id].y << EndTag("y") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("heading") << measured_positions[frame_id].z << EndTag("heading") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("measured_position") << std::endl;
+
+            output_file << Tabbing(--tab_depth) << EndTag("experiment") << std::endl;
+
+            // *******************
+            // Experiment results.
+            // *******************
+            output_file << Tabbing(tab_depth++) << BeginTag("results") << std::endl;
+
+            output_file << Tabbing(tab_depth) << BeginTag("branch_method") << m_settings.branchMethodString() << EndTag("branch_method") << std::endl;
+            output_file << Tabbing(tab_depth) << BeginTag("prune_method") << m_settings.pruneMethodString() << EndTag("prune_method") << std::endl;
+            output_file << Tabbing(tab_depth) << BeginTag("total_models") << m_num_models_created << EndTag("total_models") << std::endl;
+            output_file << Tabbing(tab_depth) << BeginTag("runtime") << m_experiment_run_time << EndTag("runtime") << std::endl;
+
+            output_file << Tabbing(tab_depth++) << BeginTag("estimated_position") << std::endl;
+            for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("frame") << frame_id << EndTag("frame") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("x") << estimated_positions[frame_id].x << EndTag("x") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("y") << estimated_positions[frame_id].y << EndTag("y") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("heading") << estimated_positions[frame_id].z << EndTag("heading") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("estimated_position") << std::endl;
 
             output_file << Tabbing(--tab_depth) << EndTag("results") << std::endl;
             output_file << Tabbing(--tab_depth) << EndTag("report") << std::endl;
