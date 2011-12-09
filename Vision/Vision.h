@@ -40,14 +40,13 @@ class NUIO;
 //! Contains vision processing tools and functions.
 class Vision
 {
-
     private:
     const NUImage* currentImage;                //!< Storage of a pointer to the raw colour image.
     const unsigned char* currentLookupTable;    //!< Storage of the current colour lookup table.
     unsigned char* LUTBuffer;                   //!< Storage of the current colour lookup table.
     unsigned char* testLUTBuffer;
     int spacings;
-    
+
     NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
     NUActionatorsData* m_actions;               //!< pointer to shared actionators data object
     friend class SaveImagesThread;
@@ -70,6 +69,10 @@ class Vision
     void SaveAnImage();
 
     public:
+
+    static const int OBSTACLE_HEIGH_THRESH = 20;
+    static const int OBSTACLE_WIDTH_MIN = 2;
+
     //! FieldObjects Container
     FieldObjects* AllFieldObjects;
     Horizon m_horizonLine;
@@ -250,6 +253,11 @@ class Vision
 
     //ADDED BY SHANNON 23-11-11
     vector<AmbiguousObject> getObjectsFromCandidates(vector<ObjectCandidate> candidates);
+    //ADDED BY SHANNON 08-12-11
+    vector<int> getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const;
+    vector<ObjectCandidate> getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+                                                  int height_thresh, int width_min) const;
+/**ADDED BY SHANNON**/
 
 };
 #endif // VISION_H

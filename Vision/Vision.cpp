@@ -139,6 +139,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     AllFieldObjects->preProcess(image->m_timestamp);
 
     std::vector< Vector2<int> > points;
+    std::vector< Vector2<int> > green_border_points;
     //std::vector< Vector2<int> > verticalPoints;
     //std::vector< TransitionSegment > allsegments;
     //std::vector< TransitionSegment > segments;
@@ -159,14 +160,16 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         m_saveimages_thread->signal();
     }
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Generating Horizon Line: " <<endl;
+        debug << "Generating Horizon Line: " << endl;
     #endif
     //Generate HorizonLine:
     vector <float> horizonInfo;
 
 
     if(m_sensor_data->get(NUSensorsData::Horizon, horizonInfo))
+    {
         m_horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
+    }
     else
     {
         #if DEBUG_VISION_VERBOSITY > 5
@@ -174,7 +177,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #endif
         //AllFieldObjects->postProcess(image->m_timestamp);
         //return;
-		m_horizonLine.setLine(1,0,0);
+        m_horizonLine.setLine(1,0,0);
     }
 
     #if DEBUG_VISION_VERBOSITY > 7
@@ -200,10 +203,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     //setImage(&image);
     //! Find the green edges
     #if DEBUG_VISION_VERBOSITY > 5
-    debug << "Begin Scanning: " << endl;
+        debug << "Begin Scanning: " << endl;
     #endif
 
-    points = findGreenBorderPoints(spacings,&m_horizonLine);
+    green_border_points = findGreenBorderPoints(spacings,&m_horizonLine);
 
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tFind Edges: finnished" << endl;
@@ -211,13 +214,32 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
     //! Find the Field border:
-    points = getConvexFieldBorders(points);
+    points = getConvexFieldBorders(green_border_points);
     points = interpolateBorders(points,spacings);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tGenerating Green Boarder: Finnished" <<endl;
+        debug << "\tGenerating Green Border: Finnished" <<endl;
     #endif
 
+//START OBSTACLE DETECTION
+    vector<ObjectCandidate> obstacle_candidates;
+    vector<AmbiguousObject> obstacle_objects;
+
+    obstacle_candidates = getObstacleCandidates(green_border_points, points, OBSTACLE_HEIGH_THRESH, OBSTACLE_WIDTH_MIN);
+    obstacle_objects = getObjectsFromCandidates(obstacle_candidates);
+
+    //insert obstacles as ambiguous objects
+    AllFieldObjects->ambiguousFieldObjects.insert(AllFieldObjects->ambiguousFieldObjects.end(), obstacle_objects.begin(), obstacle_objects.end());
+
+
+    #if DEBUG_VISION_VERBOSITY > 7
+        debug << "\tObstacles Detected: " << obstacle_objects.size() << endl;
+    #endif
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tObstacle Detection: Finnished" <<endl;
+    #endif
+//END OBSTACLE DETECTION
 
     //! Scan Below Horizon Image:
     ClassifiedSection vertScanArea = verticalScan(points,spacings);
@@ -2987,6 +3009,8 @@ bool Vision::isPixelOnScreen(int x, int y)
         return true;
 }
 
+//OBSTACLE DETECTION
+
 vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate> candidates)
 {
     vector<AmbiguousObject> objectList;
@@ -3028,4 +3052,88 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
     }
 
     return objectList;
+}
+
+vector<int> Vision::getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const
+{
+    //returns a vector of pairwise vertical distance values from prehull to hull (in screen coordinates)
+    vector<int> result;
+    int next_diff;
+    if(prehull.size() != hull.size()) {
+        //non matching vectors - return empty result
+        //debug
+        #if DEBUG_VISION_VERBOSITY > 1
+            debug << "Non matching vectors - no obstacle detection\n";
+        #endif
+
+        return result;
+    }
+    else {
+        for(unsigned int i=0; i<hull.size(); i++) {
+            //loop through the vectors in parallel
+            next_diff = prehull.at(i).y - hull.at(i).y;  //prehull has larger y value (counts down from top)
+            result.push_back(next_diff);
+        }
+        return result;
+    }
+}
+
+vector<ObjectCandidate> Vision::getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+                                                          int height_thresh, int width_min) const
+{
+    vector<ObjectCandidate> result;
+    ObjectCandidate next_obst;
+    Vector2<int> start, end, top_left, bottom_right;
+    int width, height;
+
+    vector<int> differences = getVerticalDifferences(prehull, hull);
+
+    int consecutive_hull_breaks = 0;
+    int lowest_point;
+
+    for(unsigned int i=0; i<differences.size(); i++) {
+        if(differences.at(i) >= height_thresh) {
+            //there is a break
+            if(consecutive_hull_breaks == 0) {
+                //first scan of break
+                start = prehull.at(i);
+                end = prehull.at(i);
+                lowest_point = start.y;
+                height = lowest_point - hull.at(i).y;
+            }
+            else {
+                //consecutive scan of break
+                end = prehull.at(i);
+                if(end.y > lowest_point) {
+                    lowest_point = end.y; //keep track of minimum
+                    height = lowest_point - hull.at(i).y;
+                }
+            }
+            consecutive_hull_breaks++;
+        }
+        else {
+            //possible end of break
+            if(consecutive_hull_breaks >= width_min) {
+                //break large enough to indicate obstacle
+                //  x-position given by centre of break
+                //  y-position given by lowest point in break
+                width = start.x - end.x;
+                //next_obst.x = width / 2; //centre of break
+                //next_obst.y = lowest_point;
+
+                top_left.x = start.x;
+                top_left.y = lowest_point - height;
+                bottom_right.x = end.x;
+                bottom_right.y = lowest_point;
+
+                next_obst.setTopLeft(top_left);
+                next_obst.setBottomRight(bottom_right);
+
+                result.push_back(next_obst);
+            }
+            //restart
+            consecutive_hull_breaks = 0;
+        }
+    }
+    return result;
 }

@@ -265,39 +265,6 @@ void virtualNUbot::printObjects(const vector<AmbiguousObject>& objects, filedesc
     out.close();
 }
 
-void virtualNUbot::matchHorizons(vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull, int screenHeight) const
-{
-    //Makes sure the horizon pre and post hull vectors match one-to-one in x value - will insert
-    //points into prehull to do so - these points will have y value = screenHeight
-
-    if(prehull.size() != hull.size()) {
-        //only change if mismatched
-        Vector2<int> insert, cur_hull, cur_prehull;
-        vector< Vector2<int> >::iterator prehull_it;
-        vector< Vector2<int> >::const_iterator hull_it;
-
-        //non matching vectors - need to fix prehull
-        prehull_it = prehull.begin();
-        hull_it = hull.begin();
-
-        while(hull_it != hull.end())
-        {
-            //loop through hull points
-            cur_hull = *hull_it;
-            cur_prehull = *prehull_it;
-            if(cur_hull.x != cur_prehull.x)
-            {
-                //only fix if the x values don't match
-                insert.x = cur_prehull.x;
-                insert.y = screenHeight;
-                prehull_it = prehull.insert(prehull_it,insert);
-            }
-            hull_it++;
-            prehull_it++;
-        }
-    }
-}
-
 //OBSTACLE DETECTION
 vector<int> virtualNUbot::getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const
 {
@@ -307,7 +274,8 @@ vector<int> virtualNUbot::getVerticalDifferences(const vector< Vector2<int> >& p
     if(prehull.size() != hull.size()) {
         //non matching vectors - return empty result
         //debug
-        qDebug() << "Non matching vectors - no obstacle detection\n";
+        if(DEBUG_ON)
+            qDebug() << "Non matching vectors - no obstacle detection\n";
 
         return result;
     }
@@ -321,50 +289,7 @@ vector<int> virtualNUbot::getVerticalDifferences(const vector< Vector2<int> >& p
     }
 }
 
-vector< Vector2<int> > virtualNUbot::getObstaclePositions(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
-                                                          int height_thresh, int width_min) const
-{
-    vector< Vector2<int> > result;
-    Vector2<int> next_obst;
-    Vector2<int> start, end;
 
-    vector<int> differences = getVerticalDifferences(prehull, hull);
-
-    int consecutive_hull_breaks = 0;
-    int lowest_point;
-
-    for(unsigned int i=0; i<differences.size(); i++) {
-        if(differences.at(i) >= height_thresh) {
-            //there is a break
-            if(consecutive_hull_breaks == 0) {
-                //first scan of break
-                start = prehull.at(i);
-                end = prehull.at(i);
-                lowest_point = start.y;
-            }
-            else {
-                end = prehull.at(i);
-                if(end.y > lowest_point)
-                    lowest_point = end.y; //keep track of minimum
-            }
-            consecutive_hull_breaks++;
-        }
-        else {
-            //possible end of break
-            if(consecutive_hull_breaks >= width_min) {
-                //break large enough to indicate obstacle
-                //  x-position given by centre of break
-                //  y-position given by lowest point in break
-                next_obst.x = start.x + end.x / 2; //centre of break
-                next_obst.y = lowest_point;
-                result.push_back(next_obst);
-            }
-            //restart
-            consecutive_hull_breaks = 0;
-        }
-    }
-    return result;
-}
 
 vector<ObjectCandidate> virtualNUbot::getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
                                                           int height_thresh, int width_min) const
@@ -490,24 +415,39 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
     hull_points = interpolatedBoarderPoints;    //make a copy for obstacle detection
     //printPoints(interpolatedBoarderPoints,GREEN_HOR_HULL_POINTS);
-    //OBSTACLE DETECTION
-    int width_min = 2;
-    int height_thresh = 20;
 
-    //matchHorizons(pre_hull_points, hull_points, vision.getImageHeight());
-    vector< Vector2<int> > obstacle_points = getObstaclePositions(pre_hull_points, hull_points, height_thresh, width_min);
-    vector<ObjectCandidate> obstacle_candidates = getObstacleCandidates(pre_hull_points, hull_points, height_thresh, width_min);
-    //printPoints(obstacle_points,OBSTACLE_POINTS);
+    //! Detect Obstacles
+//START OBSTACLE DETECTION
+    vector<ObjectCandidate> obstacle_candidates = getObstacleCandidates(pre_hull_points, hull_points, Vision::OBSTACLE_HEIGH_THRESH, Vision::OBSTACLE_WIDTH_MIN);
+
+    if(DEBUG_ON) {
+        //generate list of points from candidates and print to debug file
+        vector< Vector2<int> > obstacle_points;
+        Vector2<int> next_point;
+        for(unsigned int i=0; i<obstacle_candidates.size(); i++)
+        {
+            next_point.x = obstacle_candidates.at(i).getCentreX();
+            next_point.y = obstacle_candidates.at(i).getBottomRight().y;
+            obstacle_points.push_back(next_point);
+        }
+        printPoints(obstacle_points,OBSTACLE_POINTS);
+    }
+
     candidates.insert(candidates.end(),obstacle_candidates.begin(),obstacle_candidates.end());
 
     vector<AmbiguousObject> obstacle_objects = vision.getObjectsFromCandidates(obstacle_candidates);
-    //qDebug() << "Size of obstacle_objects: " << obstacle_objects.size() << "\n";
-    //printObjects(obstacle_objects,OBSTACLE_OBJECTS);
+
+    if(DEBUG_ON)
+    {
+        qDebug() << "Size of obstacle_objects: " << obstacle_objects.size() << "\n";
+        printObjects(obstacle_objects,OBSTACLE_OBJECTS);
+    }
 
     vision.AllFieldObjects->ambiguousFieldObjects.insert(vision.AllFieldObjects->ambiguousFieldObjects.end(), obstacle_objects.begin(), obstacle_objects.end());
-    //printObjects(obstacle_objects,AMBIGUOUS_OBJECTS);
 
-    //END OBSTACLE DETECTION
+    if(DEBUG_ON)
+        printObjects(obstacle_objects,AMBIGUOUS_OBJECTS);
+//END OBSTACLE DETECTION
 
 
     emit pointsDisplayChanged(interpolatedBoarderPoints,GLDisplay::greenHorizonPoints);
