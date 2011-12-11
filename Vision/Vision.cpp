@@ -3030,7 +3030,6 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
         float bearing = CalculateBearing(cx);
         float elevation = CalculateElevation(cy);
         float distance = 0;
-        //qDebug() << i << ": Object: get transform";
         vector<float> ctgvector;
         Vector3<float> measured(distance,bearing,elevation);
         Vector2<float> screenPositionAngle(bearing,elevation);
@@ -3041,7 +3040,7 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
             measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
             #if DEBUG_VISION_VERBOSITY > 6
-                debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+                debug << "\t\tCalculated Distance to Point: " << distance << endl;
             #endif
         }
         //qDebug() << i << ": Obstacle: get things in order";

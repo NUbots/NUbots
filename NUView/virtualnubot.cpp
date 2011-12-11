@@ -265,93 +265,6 @@ void virtualNUbot::printObjects(const vector<AmbiguousObject>& objects, filedesc
     out.close();
 }
 
-//OBSTACLE DETECTION
-vector<int> virtualNUbot::getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const
-{
-    //returns a vector of pairwise vertical distance values from prehull to hull (in screen coordinates)
-    vector<int> result;
-    int next_diff;
-    if(prehull.size() != hull.size()) {
-        //non matching vectors - return empty result
-        //debug
-        if(DEBUG_ON)
-            qDebug() << "Non matching vectors - no obstacle detection\n";
-
-        return result;
-    }
-    else {
-        for(unsigned int i=0; i<hull.size(); i++) {
-            //loop through the vectors in parallel
-            next_diff = prehull.at(i).y - hull.at(i).y;  //prehull has larger y value (counts down from top)
-            result.push_back(next_diff);
-        }
-        return result;
-    }
-}
-
-
-
-vector<ObjectCandidate> virtualNUbot::getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
-                                                          int height_thresh, int width_min) const
-{
-    vector<ObjectCandidate> result;
-    ObjectCandidate next_obst;
-    Vector2<int> start, end, top_left, bottom_right;
-    int width, height;
-
-    vector<int> differences = getVerticalDifferences(prehull, hull);
-
-    int consecutive_hull_breaks = 0;
-    int lowest_point;
-
-    for(unsigned int i=0; i<differences.size(); i++) {
-        if(differences.at(i) >= height_thresh) {
-            //there is a break
-            if(consecutive_hull_breaks == 0) {
-                //first scan of break
-                start = prehull.at(i);
-                end = prehull.at(i);
-                lowest_point = start.y;
-                height = lowest_point - hull.at(i).y;
-            }
-            else {
-                end = prehull.at(i);
-                if(end.y > lowest_point) {
-                    lowest_point = end.y; //keep track of minimum
-                    height = lowest_point - hull.at(i).y;
-                }
-            }
-            consecutive_hull_breaks++;
-        }
-        else {
-            //possible end of break
-            if(consecutive_hull_breaks >= width_min) {
-                //break large enough to indicate obstacle
-                //  x-position given by centre of break
-                //  y-position given by lowest point in break
-                width = start.x - end.x;
-                //next_obst.x = width / 2; //centre of break
-                //next_obst.y = lowest_point;
-
-                top_left.x = start.x;
-                top_left.y = lowest_point - height;
-                bottom_right.x = end.x;
-                bottom_right.y = lowest_point;
-
-                next_obst.setTopLeft(top_left);
-                next_obst.setBottomRight(bottom_right);
-
-                result.push_back(next_obst);
-            }
-            //restart
-            consecutive_hull_breaks = 0;
-        }
-    }
-    return result;
-}
-
-
-
 void virtualNUbot::processVisionFrame()
 {
     processVisionFrame(rawImage);
@@ -418,7 +331,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
     //! Detect Obstacles
 //START OBSTACLE DETECTION
-    vector<ObjectCandidate> obstacle_candidates = getObstacleCandidates(pre_hull_points, hull_points, Vision::OBSTACLE_HEIGH_THRESH, Vision::OBSTACLE_WIDTH_MIN);
+    vector<ObjectCandidate> obstacle_candidates = vision.getObstacleCandidates(pre_hull_points, hull_points, Vision::OBSTACLE_HEIGH_THRESH, Vision::OBSTACLE_WIDTH_MIN);
 
     if(DEBUG_ON) {
         //generate list of points from candidates and print to debug file

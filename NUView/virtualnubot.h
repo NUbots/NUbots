@@ -106,9 +106,9 @@ private:
     void printObjects(const vector<AmbiguousObject>& objects, filedesc_t filedesc) const;
 
     //OBSTACLE DETECTION METHODS
-    vector<int> getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const;
-    vector<ObjectCandidate> getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
-                                                  int height_thresh, int width_min) const;
+    //vector<int> getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const;
+    //vector<ObjectCandidate> getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+    //                                              int height_thresh, int width_min) const;
     //AmbiguousObject getObjectFromPosition(Vector2<int> centre, Vector2<int> dim, const int bottom_y, float timestamp) const;
 /**ADDED BY SHANNON**/
 
