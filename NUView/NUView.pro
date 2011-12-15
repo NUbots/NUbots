@@ -187,7 +187,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/SelfLocalisationTests.h \
     OfflineLocalisationSettingsDialog.h \
     LocalisationPerformanceMeasure.h \
-    ../Localisation/LocalisationSettings.h
+    ../Localisation/LocalisationSettings.h \
+    ../Tools/KFTools.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -319,7 +320,8 @@ SOURCES += mainwindow.cpp \
     ../Localisation/SelfLocalisationtests.cpp \
     OfflineLocalisationSettingsDialog.cpp \
     LocalisationPerformanceMeasure.cpp \
-    ../Localisation/LocalisationSettings.cpp
+    ../Localisation/LocalisationSettings.cpp \
+    ../Tools/KFTools.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -333,6 +335,8 @@ RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
 
 FORMS += \
     OfflineLocalisationSettingsDialog.ui
+
+
 
 
 
