@@ -435,6 +435,15 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
         std::vector<float> exp_distance;
         std::vector<float> exp_heading;
 
+        std::vector<unsigned int> amb_obs_frames;
+        std::vector<unsigned int> amb_obs_ids;
+        std::vector<int> amb_exp_id;
+        std::vector<float> amb_obs_distance;
+        std::vector<float> amb_obs_heading;
+        std::vector<float> amb_exp_distance;
+        std::vector<float> amb_exp_heading;
+        std::vector<unsigned int> amb_decision_id;
+
         std::vector<std::vector<float> > odom;
 
         FieldObjects* tempObjects;
@@ -477,8 +486,20 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                 odom.push_back(odometry);
             }
 
+            // Localisation result
+            temp_loc = GetSelfFrame(frame+1);
+            assert(temp_loc);
+            Vector3<float> estimate(0,0,0);
+            const Model* best_model = temp_loc->getBestModel();
+            estimate.x = best_model->mean(Model::states_x);
+            estimate.y = best_model->mean(Model::states_y);
+            estimate.z = best_model->mean(Model::states_heading);
+            estimated_positions[frame] = estimate;
+
+
             for(std::vector<StationaryObject>::const_iterator object = tempObjects->stationaryFieldObjects.begin(); object != tempObjects->stationaryFieldObjects.end(); ++object)
             {
+                // Add if seen
                 if(object->isObjectVisible())
                 {
                     stationary_object_count[object->getID()]++;
@@ -492,34 +513,42 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             }
             for(std::vector<AmbiguousObject>::const_iterator object = tempObjects->ambiguousFieldObjects.begin(); object != tempObjects->ambiguousFieldObjects.end(); ++object)
             {
+                // Add if seen
                 if(object->isObjectVisible())
                 {
+                    // Ignore the mobile objects for now.
+                    if(object->getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN) continue;
+                    if(object->getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
+                    if(object->getID() == FieldObjects::FO_ROBOT_UNKNOWN) continue;
+
                     ambiguous_object_count[object->getID()]++;
-//                    obs_frames.push_back(frame);
-//                    obs_ids.push_back(object->getID());
-//                    obs_distance.push_back(object->measuredDistance()*cos(object->estimatedElevation()));
-//                    obs_heading.push_back(object->measuredBearing());
-//                    exp_distance.push_back(0);
-//                    exp_heading.push_back(0);
+                    amb_obs_frames.push_back(frame);
+                    amb_obs_ids.push_back(object->getID());
+                    amb_obs_distance.push_back(object->measuredDistance()*cos(object->estimatedElevation()));
+                    amb_obs_heading.push_back(object->measuredBearing());
+
+                    // Determine most likely option and use it to get expected measurements
+                    int likely_id = tempObjects->getClosestStationaryOption(gps_location, *object);
+                    assert(likely_id >= 0);
+                    amb_exp_id.push_back(likely_id);
+                    amb_exp_distance.push_back(gps_location.CalculateDistanceToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
+                    amb_exp_heading.push_back(gps_location.CalculateBearingToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
+
+                    // Now we want to check which option was chosen as the best by the localistion system at the time of update.
+                    unsigned int decision_id = temp_loc->getBestModel()->previousSplitOption(*object);
+                    amb_decision_id.push_back(decision_id);
+                    //std::cout << "Split decision: " << object->getName() << " Decision: " << decision_id;
+                    //std::cout << " Measured: " << likely_id << std::endl;
                 }
             }
-
-            m_log_reader->blockSignals(false);
 
             // All of these vectors should be the same size.
             assert(obs_frames.size() == obs_ids.size());
             assert(obs_ids.size() == obs_distance.size());
             assert(obs_distance.size() == obs_heading.size());
-
-            temp_loc = GetSelfFrame(frame+1);
-            assert(temp_loc);
-            Vector3<float> estimate(0,0,0);
-            const Model* best_model = temp_loc->getBestModel();
-            estimate.x = best_model->mean(Model::states_x);
-            estimate.y = best_model->mean(Model::states_y);
-            estimate.z = best_model->mean(Model::states_heading);
-            estimated_positions[frame] = estimate;
         }
+        // Re-enable signals from the log reader.
+        m_log_reader->blockSignals(false);
 
         // Write info to file
         std::ofstream output_file(xmlPath.c_str());
@@ -586,6 +615,29 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             }
             output_file << Tabbing(--tab_depth) << EndTag("observations") << std::endl;
 
+            // Add ambiguous observations
+            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_observations") << std::endl;
+            for (unsigned int i = 0; i < obs_frames.size(); ++i)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("frame") << amb_obs_frames[i] << EndTag("frame") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("id") << amb_obs_ids[i] << EndTag("id") <<std::endl;
+
+                output_file << Tabbing(tab_depth++) << BeginTag("estimate") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("distance") << amb_obs_distance[i] << EndTag("distance") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("heading") << amb_obs_heading[i] << EndTag("heading") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("estimate") << std::endl;
+
+                output_file << Tabbing(tab_depth++) << BeginTag("expected") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("id") << amb_exp_id[i] << EndTag("id") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("distance") << amb_exp_distance[i] << EndTag("distance") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("heading") << amb_exp_heading[i] << EndTag("heading") << std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("expected") << std::endl;
+
+                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_observations") << std::endl;
+
             // Add odometry information
             output_file << Tabbing(tab_depth++) << BeginTag("odometry") << std::endl;
             for(std::vector<std::vector<float> >::iterator odom_it = odom.begin(); odom_it != odom.end(); ++odom_it)
@@ -617,7 +669,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             // *******************
             // Experiment results.
             // *******************
-            output_file << Tabbing(tab_depth++) << BeginTag("results") << std::endl;
+            output_file << Tabbing(tab_depth++) <<  BeginTag("results") << std::endl;
 
             output_file << Tabbing(tab_depth) << BeginTag("branch_method") << m_settings.branchMethodString() << EndTag("branch_method") << std::endl;
             output_file << Tabbing(tab_depth) << BeginTag("prune_method") << m_settings.pruneMethodString() << EndTag("prune_method") << std::endl;
@@ -635,6 +687,15 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                 output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
             }
             output_file << Tabbing(--tab_depth) << EndTag("estimated_position") << std::endl;
+
+            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_decision") << std::endl;
+            for (std::vector<unsigned int>::iterator dec_it = amb_decision_id.begin(); dec_it != amb_decision_id.end(); ++dec_it)
+            {
+                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("id") << (*dec_it) << EndTag("id") <<std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+            }
+            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_decision") << std::endl;
 
             output_file << Tabbing(--tab_depth) << EndTag("results") << std::endl;
             output_file << Tabbing(--tab_depth) << EndTag("report") << std::endl;
