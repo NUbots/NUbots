@@ -4,6 +4,7 @@
 #include "Tools/Math/FieldCalculations.h"
 #include <sstream>
 #include "Tools/FileFormats/FileFormatException.h"
+#include "Tools/Math/General.h"
 
 FieldObjects::FieldObjects()
 {
@@ -403,6 +404,42 @@ std::vector<StationaryObject*> FieldObjects::getExpectedAmbiguousDecisions(float
     }
     return expectedObjects;
 }
+
+int FieldObjects::getClosestStationaryOption(const Self& location, const AmbiguousObject& amb_object)
+{
+    float min_err = 100000, min_err_id = -1;
+    std::vector<int> options = amb_object.getPossibleObjectIDs();
+
+    for(std::vector<int>::const_iterator option_it = options.begin(); option_it != options.end(); ++option_it)
+    {
+        StationaryObject* obj = &stationaryFieldObjects[*option_it];
+        float expectedDist = location.CalculateDistanceToStationaryObject(*obj);
+        float expectedBear = location.CalculateBearingToStationaryObject(*obj);
+
+        // Use total distance between the two relative points as the error.
+        float x_meas = amb_object.measuredDistance() * cos(amb_object.measuredBearing());
+        float y_meas = amb_object.measuredDistance() * sin(amb_object.measuredBearing());
+
+        float x_exp = expectedDist * cos(expectedBear);
+        float y_exp = expectedDist * sin(expectedBear);
+
+        float x_diff = x_meas - x_exp;
+        float y_diff = y_meas - y_exp;
+
+        float total_error = sqrt(x_diff*x_diff + y_diff*y_diff);
+
+//        std::cout << "option: " << obj->getName() << std::endl;
+//        std::cout << "error: " << total_weighted_error << " curr min: " << min_err << std::endl;
+        // Get smalest value for error
+        if(total_error < min_err)
+        {
+            min_err_id = *option_it;
+            min_err = total_error;
+        }
+    }
+    return min_err_id;
+}
+
 
 std::string FieldObjects::ambiguousName(unsigned int id)
 {
