@@ -45,7 +45,7 @@ ScriptedPoseProvider::ScriptedPoseProvider(Behaviour* manager) : BehaviourProvid
     isStart = 0;
     m_saving_images = false;
 
-    m_script = MotionScript("PoseTestSequence");
+    m_script = MotionScript("Test");
     m_script_playing = false;
 
 }
@@ -80,14 +80,14 @@ void ScriptedPoseProvider::doBehaviour()
 void ScriptedPoseProvider::doSelectedMotion()
 {
     //Initialisation: First 50 Frames, will be used to stand up
-    if (isStart < 50)
+    if (isStart < 10)
     {
         vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50);
         m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
 		isStart++;
     }
-    else if (isStart < 200)
+    else if (isStart < 50)
     {
         m_jobs->addMotionJob(new MotionFreezeJob());
     	isStart++;

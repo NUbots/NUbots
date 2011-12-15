@@ -361,3 +361,16 @@ void NUData::printMap(ostream& output)
     }
 }
 
+NUData::id_t* NUData::getId(const std::string& name)
+{
+    for (size_t j=0; j<m_id_to_indices.size(); j++)
+    {
+        if(name == m_ids_copy[j]->Name)
+        {
+            return m_ids_copy[j];
+        }
+    }
+    errorlog << "NUData::getId(): Name not found: " << name << std::endl;
+    return NULL;
+}
+

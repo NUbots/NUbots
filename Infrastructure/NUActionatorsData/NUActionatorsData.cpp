@@ -227,7 +227,7 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
                 }
             }
             #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-                debug << a.Name << " [" << positions[i] << "," << gains[i] << "] target: [" << time - CurrentTime << "," << position << "]" << endl;
+                debug << a.Name << " [" << positions[i] << "," << gains[i] << "] target: " << time - CurrentTime << ": " << positions_current[i] << " -> " << position << "]" << endl;
             #endif
         }
     }
@@ -359,7 +359,7 @@ void NUActionatorsData::getNextSounds(vector<string>& sounds)
 float NUActionatorsData::interpolate(const double& time, const float& current, const float& target)
 {
     float dT = CurrentTime - PreviousTime;
-    if (dT > 0 and dT < 500)
+    if (dT > 0)
     {
         if (time - CurrentTime > dT)
             return current + ((target - current)/(time - CurrentTime))*dT;
@@ -367,7 +367,7 @@ float NUActionatorsData::interpolate(const double& time, const float& current, c
             return target;
     }
     else
-        return target;
+        return current;
 }
 
 /*! @brief Returns true if a member named name belongs to the group

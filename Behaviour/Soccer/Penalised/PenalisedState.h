@@ -36,6 +36,8 @@ public:
     BehaviourState* nextState();
 protected:
     void doState();
+private:
+    int m_previous_penalty_reason;
 };
 
 

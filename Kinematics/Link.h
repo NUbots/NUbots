@@ -9,7 +9,7 @@ public:
     Link(const TransformMatrices::DHParameters& linkParameters, const std::string& linkName = std::string("Unknown"));
     ~Link();
     Matrix calculateTransform(double angle);
-    std::string Name() {return m_name;};
+    std::string name() const {return m_name;};
 private:
     std::string m_name;
     TransformMatrices::DHParameters m_parameters;

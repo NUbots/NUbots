@@ -83,6 +83,18 @@ bool GameInformation::amIASubstitute() const
     return getPenaltyReason() == PENALTY_SPL_SUBSTITUTE;
 }
 
+/*! @brief Returns the player number of the substitute player */
+int GameInformation::getSubstituteNumber() const
+{
+    vector<vector<int> > penalties = getPenaltyReasons();
+    for (size_t i=0; i<penalties.size(); i++)
+    {
+        if (penalties[i][1] == PENALTY_SPL_SUBSTITUTE)
+            return penalties[i][0];
+    }
+    return -1;
+}
+
 /*! @brief Returns true if the game controller is working */
 bool GameInformation::gameControllerWorking() const
 {

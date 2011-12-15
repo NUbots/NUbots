@@ -34,6 +34,12 @@ struct ClassifiedPacketData{
     uint8 classImage[76800];    //!< Array of unsigned 8-bit integers containing the classified image
 };
 
+enum filedesc_t {GREEN_HOR_SCAN_POINTS,
+                 GREEN_HOR_HULL_POINTS,
+                 OBSTACLE_POINTS,
+                 OBSTACLE_OBJECTS,
+                 AMBIGUOUS_OBJECTS
+                };
 
 class virtualNUbot : public QObject
 {
@@ -94,9 +100,18 @@ private:
         unsigned char colour;
     };
 /**ADDED BY SHANNON**/
-    void printPoints(const vector<LinePoint>& points) const;
-    void printCandidates(const vector<ObjectCandidate>& candidates, ofstream& file) const;
-    void printOtherPoints(const vector<LinePoint>& points, ofstream& file) const;
+    //DEBUG METHODS
+    void printPoints(const vector< Vector2<int> >& points, filedesc_t filedesc) const;
+    void printObjects(const vector<AmbiguousObject>& objects, filedesc_t filedesc) const;
+
+    //OBSTACLE DETECTION METHODS
+    void matchHorizons(vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull, int screenHeight) const;
+    vector<int> getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const;
+    vector< Vector2<int> > getObstaclePositions(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+                                                int height_thresh, int width_min) const;
+    vector<ObjectCandidate> getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+                                                                  int height_thresh, int width_min) const;
+    AmbiguousObject getObjectFromPosition(Vector2<int> centre, Vector2<int> dim, const int bottom_y, float timestamp) const;
 /**ADDED BY SHANNON**/
 
     void processVisionFrame(const NUImage* image);

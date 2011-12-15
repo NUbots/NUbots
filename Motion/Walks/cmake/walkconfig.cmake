@@ -71,6 +71,18 @@ ELSE()
          "Set to ON to use bearwalk, set to OFF use something else")
 ENDIF()
 
+####### Darwin
+IF (${TARGET_ROBOT} STREQUAL DARWIN)
+    SET( NUBOT_USE_MOTION_WALK_DARWINWALK
+         ON
+         CACHE BOOL
+         "Set to ON to use bearwalk, set to OFF use something else")
+ELSE()
+    SET( NUBOT_USE_MOTION_WALK_DARWINWALK
+         OFF
+         CACHE BOOL
+         "Set to ON to use bearwalk, set to OFF use something else")
+ENDIF()
 
 ############################ other walk engines
 
@@ -92,6 +104,7 @@ MARK_AS_ADVANCED(
 	NUBOT_USE_MOTION_WALK_VSCWALK
 	NUBOT_USE_MOTION_WALK_ALWALK
     NUBOT_USE_MOTION_WALK_BEARWALK
+	NUBOT_USE_MOTION_WALK_DARWINWALK
 )
 	
 

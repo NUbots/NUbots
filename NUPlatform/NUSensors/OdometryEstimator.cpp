@@ -27,7 +27,7 @@
  */
 OdometryEstimator::OdometryEstimator()
 {
-    m_logging_enabled = false;
+    m_logging_enabled = true;
 
     // Tuning variables
     m_minimum_support_foot_pressure = 1.0; // in Newtons. 0.75 initial (robot 214)
@@ -65,7 +65,7 @@ void OdometryEstimator::IntialiseFile(std::string filename)
         m_odometry_log << "GPS X, GPS Y, Compass,";
         m_odometry_log << "L Odom X, L Odom Y, L Odom Turn,";
         m_odometry_log << "R Odom X, R Odom Y, R Odom Turn,";
-        m_odometry_log << "L Force Sum, R Force Sum, Curr Support Leg";
+        m_odometry_log << "L Force Sum, R Force Sum, Left Z, Right Z, Curr Support Leg";
         m_odometry_log << std::endl;
         m_logging_enabled = true;
         debug << "Odometry log created sucessfully." << std::endl;
@@ -88,7 +88,7 @@ void OdometryEstimator::IntialiseFile(std::string filename)
  */
 void OdometryEstimator::WriteLogData(std::vector<float>& gps, float compass,
                                     const std::vector<float>& leftOdom, const std::vector<float>& rightOdom,
-                                    float forceLeft, float forceRight, OdometryEstimator::LegIdentifier supportLeg)
+                                    float forceLeft, float forceRight, float leftZ, float rightZ, OdometryEstimator::LegIdentifier supportLeg)
 {
     if(m_odometry_log.is_open() and m_odometry_log.good())
     {
@@ -104,7 +104,8 @@ void OdometryEstimator::WriteLogData(std::vector<float>& gps, float compass,
             m_odometry_log << "," << leftOdom[n];
         for(unsigned int n=0; n<rightOdom.size(); n++)
             m_odometry_log << "," << rightOdom[n];
-        m_odometry_log << "," << forceLeft << "," << forceRight << "," << supportLeg;
+        m_odometry_log << "," << forceLeft << "," << forceRight;
+        m_odometry_log << "," << leftZ << "," << rightZ << "," << supportLeg;
         m_odometry_log << std::endl;
     }
 }
@@ -113,21 +114,21 @@ void OdometryEstimator::WriteLogData(std::vector<float>& gps, float compass,
     @param forceLeft The force in newtons of the left foot.
     @param forceRight The force in newtons of the right foot.
  */
-OdometryEstimator::LegIdentifier OdometryEstimator::SelectSupportLeg(float forceLeft, float forceRight)
+OdometryEstimator::LegIdentifier OdometryEstimator::SelectSupportLegTouch(float forceLeft, float forceRight)
 {
     LegIdentifier currSupport = m_support_leg;
     float min_force = m_minimum_support_foot_pressure;
 
     if(currSupport == left)
     {
-        if(forceLeft < min_force)
+        if(forceLeft < min_force and forceLeft < forceRight)
         {
                 currSupport = right;
         }
     }
     else if(currSupport == right)
     {
-        if(forceRight < min_force)
+        if(forceRight < min_force and forceRight < forceLeft)
         {
                 currSupport = left;
         }
@@ -147,6 +148,24 @@ OdometryEstimator::LegIdentifier OdometryEstimator::SelectSupportLeg(float force
     return currSupport;
 }
 
+/*! @brief Determines the current support leg based on kinematic based height of each foot.
+    @param left_z The position of the left foot in respect to the torso z-axis.
+    @param right_z The position of the left foot in respect to the torso z-axis.
+ */
+OdometryEstimator::LegIdentifier OdometryEstimator::SelectSupportLegKinematic(float left_z, float right_z)
+{
+    LegIdentifier result;
+    if(right_z < left_z)
+    {
+        result = right;
+    }
+    else
+    {
+        result = left;
+    }
+    return result;
+}
+
 /*! @brief Calculate the odometry estimate from the previous estimation
     @param leftPos Left foot positional data.
     @param rightPos Right foot positional data.
@@ -159,7 +178,19 @@ std::vector<float> OdometryEstimator::CalculateNextStep(const std::vector<float>
                                                         float forceLeft, float forceRight, std::vector<float>& gps, float compass)
 {
     std::vector<float> result;
-    LegIdentifier currSupport = SelectSupportLeg(forceLeft, forceRight);
+    LegIdentifier currSupport;
+
+    float leftZ = leftPos[2];
+    float rightZ = rightPos[2];
+
+    if(forceLeft != 0 or forceRight != 0)
+    {
+        currSupport = SelectSupportLegTouch(forceLeft, forceRight);
+    }
+    else
+    {
+        currSupport = SelectSupportLegKinematic(leftZ, rightZ);
+    }
 
     // Calculate left foot motion
     std::vector<float> LOdom(3);
@@ -184,7 +215,7 @@ std::vector<float> OdometryEstimator::CalculateNextStep(const std::vector<float>
     // If external position data is available write to log.
     if(m_logging_enabled)
     {
-        WriteLogData(gps, compass, LOdom, ROdom, forceLeft, forceRight, currSupport);
+        WriteLogData(gps, compass, LOdom, ROdom, forceLeft, forceRight, leftZ, rightZ, currSupport);
     }
 
     // Save historical data

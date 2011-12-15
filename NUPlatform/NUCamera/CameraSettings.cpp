@@ -12,8 +12,6 @@ CameraSettings::CameraSettings()
 CameraSettings::CameraSettings(const CameraSettings& source)
 {
     // Image settings
-    
-    
     p_brightness = source.p_brightness;
     p_contrast = source.p_contrast;
     p_saturation = source.p_saturation;
@@ -25,6 +23,7 @@ CameraSettings::CameraSettings(const CameraSettings& source)
     p_autoExposure = source.p_autoExposure;
     p_autoWhiteBalance = source.p_autoWhiteBalance;
     p_autoGain = source.p_autoGain;
+    p_valid = true;
     
     copyParams();
 
@@ -54,6 +53,7 @@ CameraSettings::CameraSettings(const std::vector<float> parameters)
     p_autoExposure.set(parameters[8], 0, 0, "permanently off");
     p_autoWhiteBalance.set(parameters[9], 0, 0, "permanently off");
     p_autoGain.set(parameters[10], 0, 0, "permanently off");
+    p_valid = true;
     
     copyParams();  
     
@@ -75,6 +75,7 @@ CameraSettings::CameraSettings(const std::vector<Parameter> parameters)
     p_autoExposure = parameters[8];
     p_autoWhiteBalance = parameters[9];
     p_autoGain = parameters[10];
+    p_valid = true;
     
     copyParams();
     
@@ -127,6 +128,7 @@ std::vector<Parameter> CameraSettings::getAsParameters()
 
 void CameraSettings::SetDefaults()
 {    
+	p_valid = false;
     p_brightness.set(0, 0, 255, "an attribute of visual perception in which a source appears to be radiating or reflecting light");  
     p_contrast.set(0, 0, 127, "the difference in color and light between parts of an image");
     p_saturation.set(0, 0, 255, "the difference between a color against gray");
@@ -153,29 +155,31 @@ void CameraSettings::LoadFromFile(const std::string& configFileName)
     vector<Parameter> parameters;   
      
     SetDefaults();  // Set default values incase some are missing in the file.
-    while (not myStream.eof())
+    if (myStream.is_open())
     {
-          Parameter p;
-          myStream >> p;
-          if (p.name().size() != 0)
-             parameters.push_back(p);
+		while (not myStream.eof())
+		{
+			  Parameter p;
+			  myStream >> p;
+			  if (p.name().size() != 0)
+				 parameters.push_back(p);
+		}
+
+		p_brightness = parameters[0];
+		p_contrast = parameters[1];
+		p_saturation = parameters[2];
+		p_hue = parameters[3];
+		p_redChroma = parameters[4];
+		p_blueChroma = parameters[5];
+		p_exposure = parameters[6];
+		p_gain = parameters[7];
+		p_autoExposure = parameters[8];
+		p_autoWhiteBalance = parameters[9];
+		p_autoGain = parameters[10];
+		p_valid = true;
     }
-    
-    //debug << "HELLO WORLD" << endl;
-    //debug << parameters << endl;
-    //debug << "HELLO WORLD 2" << endl;
-    
-    p_brightness = parameters[0];
-    p_contrast = parameters[1];
-    p_saturation = parameters[2];
-    p_hue = parameters[3];
-    p_redChroma = parameters[4];
-    p_blueChroma = parameters[5];
-    p_exposure = parameters[6];
-    p_gain = parameters[7];
-    p_autoExposure = parameters[8];
-    p_autoWhiteBalance = parameters[9];
-    p_autoGain = parameters[10];
+    else
+    	debug << "CameraSettings::LoadFromFile() Failed to load CameraSettings from " << configFileName << endl;
     
     copyParams();
     
@@ -217,6 +221,7 @@ std::ostream& operator<< (std::ostream& output, const CameraSettings& p_cameraSe
     output << p_cameraSetting.p_autoExposure.get() << " ";
     output << p_cameraSetting.p_autoWhiteBalance.get() << " ";
     output << p_cameraSetting.p_autoGain.get() << " ";
+    output << p_cameraSetting.p_valid << " ";
 
     output << p_cameraSetting.activeCamera << " ";
 
@@ -251,10 +256,10 @@ std::istream& operator>> (std::istream& input, CameraSettings& p_cameraSetting)
     input >> temp;
     p_cameraSetting.p_autoWhiteBalance.set(temp);
     input >> temp;
-    p_cameraSetting.p_autoGain.set(temp); 
+    p_cameraSetting.p_autoGain.set(temp);
+    input >> temp;
+    p_cameraSetting.p_valid = temp;
     
-    
-
     int tempCamera;
     input >> tempCamera;
     p_cameraSetting.activeCamera = CameraSettings::Camera(tempCamera);

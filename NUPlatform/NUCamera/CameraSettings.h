@@ -60,6 +60,7 @@ class CameraSettings
         
         Camera activeCamera;
         
+        bool p_valid;					//!< true if the parameters are valid, false if they should be ignored
         Parameter p_brightness;         //!< Brightness setting.
         Parameter p_contrast;           //!< Contrast setting.
         Parameter p_saturation;         //!< Saturation setting.

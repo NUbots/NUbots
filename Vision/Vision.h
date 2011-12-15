@@ -81,8 +81,8 @@ class Vision
     double m_timestamp;
 
 
-    double CalculateBearing(double cx);
-    double CalculateElevation(double cy);
+    double CalculateBearing(double cx) const;
+    double CalculateElevation(double cy) const;
 
     double EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS();
 
@@ -247,6 +247,9 @@ class Vision
     bool checkIfBufferContains(boost::circular_buffer<unsigned char> cb, const std::vector<unsigned char> &colourList);
 
     int CalculateSkipSpacing(int currentPosition, int lineLength, bool greenSeen);
+
+    //ADDED BY SHANNON 23-11-11
+    vector<AmbiguousObject> getObjectsFromCandidates(vector<ObjectCandidate> candidates);
 
 };
 #endif // VISION_H

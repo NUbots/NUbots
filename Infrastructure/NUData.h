@@ -160,6 +160,7 @@ public:
     double PreviousTime;
     
     vector<id_t*> mapIdToIds(const id_t& id);
+    NUData::id_t* getId(const std::string& name);
 protected:
     static vector<id_t*> m_common_ids;
     vector<id_t*> m_ids_copy;                       //!< this is a non-static copy of the ids. It is non-static so that it is not shared between derived classes (ie sensors and actionators have different ids)
