@@ -1355,7 +1355,7 @@ int SelfLocalisation::PruneNScan(unsigned int N)
 int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
 
-    const float outlier_factor = 0.0005;
+    const float outlier_factor = 0.0001;
     ModelContainer new_models;
     Model* temp_mod;
 
@@ -1366,6 +1366,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
         if((*model_it)->inactive()) continue;
+        unsigned int models_added = 0;
         for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
         {
             temp_mod = new Model(*(*model_it), ambiguousObject, *(*obj_it), error, GetTimestamp());
@@ -1376,6 +1377,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
             if(temp_mod->active())
             {
                 m_frame_log << "Valid update (Alpha = " << temp_mod->alpha() << ")";
+                models_added++;
             }
             else
             {
@@ -1385,7 +1387,14 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
 #endif
         }
         removeInactiveModels(new_models);
-        (*model_it)->setAlpha(outlier_factor * (*model_it)->alpha());
+        if(models_added)
+        {
+            (*model_it)->setActive(false);
+        }
+        else
+        {
+            (*model_it)->setAlpha(outlier_factor * (*model_it)->alpha());
+        }
     }
     if(new_models.size() > 0)
     {
