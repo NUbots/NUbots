@@ -47,8 +47,9 @@ public:
     // Model and decision tracking stuff
     unsigned int id() const {return m_id;}
     unsigned int parentid() const {return m_parent_id;}
-    unsigned int history(unsigned int samples_back);
-    unsigned int history_depth(){return m_history_depth;}
+    unsigned int history(unsigned int samples_back) const;
+    unsigned int history_depth() const {return m_history_depth;}
+    boost::circular_buffer<unsigned int> full_history() const {return m_history_buffer;}
     unsigned int splitOption() const {return m_split_option;}
     double creationTime() const {return m_creation_time;}
     unsigned int previousSplitOption(const AmbiguousObject& theObject) const;

@@ -146,7 +146,7 @@ Self SelfModel::GenerateSelfState() const
     @param steps_back The number of steps back along the decision tree to get the value for. This valaue should be in the range 1..history_depth.
     @return The model ID of the parent at the given step in the decision tree.
 */
-unsigned int SelfModel::history(unsigned int steps_back)
+unsigned int SelfModel::history(unsigned int steps_back) const
 {
     unsigned int result = 0;
     unsigned int index = m_history_buffer.size() - steps_back;    // Oldest value is at [0], newest at [size - 1]
