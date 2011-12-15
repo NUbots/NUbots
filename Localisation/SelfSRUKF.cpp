@@ -47,8 +47,14 @@ SelfSRUKF::SelfSRUKF(const SelfSRUKF& parent, const AmbiguousObject& object, con
     update.CopyObject(object);
 
     SelfSRUKF::updateResult result = MeasurementUpdate(update, error);
-    if(result == RESULT_OUTLIER) setActive(false);
-    else setActive(true);
+    if(result == RESULT_OUTLIER)
+    {
+        setActive(false);
+    }
+    else
+    {
+        setActive(true);
+    }
     return;
 }
 
