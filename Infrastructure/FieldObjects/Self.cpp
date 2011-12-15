@@ -131,10 +131,10 @@ std::vector<float> Self::CalculateDifferenceFromStationaryObject(const Stationar
 }
 
 /*! @brief Calculate the distance to a stationary object */
-float Self::CalculateDistanceToStationaryObject(const StationaryObject& theObject)
+float Self::CalculateDistanceToStationaryObject(const StationaryObject& theObject) const
 {
-    float selfX = WorldModelLocation[0];
-    float selfY = WorldModelLocation[1];
+    float selfX = WorldModelLocation.x;
+    float selfY = WorldModelLocation.y;
     float diffX = theObject.X() - selfX;
     float diffY = theObject.Y() - selfY;
     float distance = sqrt( diffX * diffX + diffY * diffY );
@@ -142,11 +142,11 @@ float Self::CalculateDistanceToStationaryObject(const StationaryObject& theObjec
 }
 
 /*! @brief Calculate the bearing to a stationary object */
-float Self::CalculateBearingToStationaryObject(const StationaryObject& theObject)
+float Self::CalculateBearingToStationaryObject(const StationaryObject& theObject) const
 {
-    float selfX = WorldModelLocation[0];
-    float selfY = WorldModelLocation[1];
-    float selfHeading = WorldModelLocation[2];
+    float selfX = WorldModelLocation.x;
+    float selfY = WorldModelLocation.y;
+    float selfHeading = WorldModelLocation.z;
     float diffX = theObject.X() - selfX;
     float diffY = theObject.Y() - selfY;
     float positionHeading = atan2(diffY, diffX);

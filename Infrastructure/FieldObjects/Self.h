@@ -29,8 +29,8 @@ class Self {
         std::vector<float> CalculateDifferenceFromFieldState(const std::vector<float> desiredState);
         std::vector<float> CalculateDifferenceFromFieldLocation(const std::vector<float> desiredLocation);
         std::vector<float> CalculateDifferenceFromStationaryObject(const StationaryObject& theObject);
-        float CalculateDistanceToStationaryObject(const StationaryObject& theObject);
-        float CalculateBearingToStationaryObject(const StationaryObject& theObject);
+        float CalculateDistanceToStationaryObject(const StationaryObject& theObject) const;
+        float CalculateBearingToStationaryObject(const StationaryObject& theObject) const;
     
         std::vector<float> CalculateDifferenceFromGoal(const StationaryObject& goalpost);
         float CalculateAngularWidthOfGoal(const StationaryObject& goalpost);
