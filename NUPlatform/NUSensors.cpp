@@ -532,8 +532,6 @@ void NUSensors::calculateKinematics()
         if(joint_positions.size() == eff_it->joints.size())
         {
             result = m_kinematicModel->CalculateTransform(eff_it->index, joint_positions);
-            debug << "Effector: " << (eff_it->transform_id) << std::endl;
-            debug << result << std::endl;
             m_data->set(*eff_it->transform_id, time, result.asVector());
             // If the effectors position and orientation are kept, write modify them here.
             if(eff_it->effector_id)
