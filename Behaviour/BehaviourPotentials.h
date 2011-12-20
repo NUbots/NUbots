@@ -287,7 +287,7 @@ public:
     {
         // Get obstacle distances from the sensors
         vector<float> temp_l;
-        vecotr<float> temp_r;
+        vector<float> temp_r;
 		float leftobstacle = 255;
         float rightobstacle = 255;
 	
