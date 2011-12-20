@@ -370,6 +370,7 @@ NUData::id_t* NUData::getId(const std::string& name)
             return m_ids_copy[j];
         }
     }
+    debug << "NUData::getId(): Name not found: " << name << std::endl;
     errorlog << "NUData::getId(): Name not found: " << name << std::endl;
     return NULL;
 }
