@@ -70,8 +70,6 @@ DarwinWalk::DarwinWalk(NUSensorsData* data, NUActionatorsData* actions) :  NUWal
 	//Robot::Walking::GetInstance()->SaveINISettings(ini);
 	Robot::Walking::GetInstance()->Initialize();
 	Robot::Walking::GetInstance()->PERIOD_TIME = 500;
-	
-	
 }
 
 /*! @brief Destructor for walk module
