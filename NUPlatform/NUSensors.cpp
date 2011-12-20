@@ -202,7 +202,9 @@ void NUSensors::initialise()
         m_kinematics_map.push_back(temp);
         ++index;
     }
-    debug << "Kinematic table initialisation:" <<std::endl;
+
+#if DEBUG_NUSENSORS_VERBOSITY > 0
+    debug << "Kinematic table initialisation:" <<std::endl << std::endl;
 
     for (std::vector<KinematicMap>::iterator f_it = m_kinematics_map.begin(); f_it != m_kinematics_map.end(); ++f_it)
     {
@@ -216,6 +218,7 @@ void NUSensors::initialise()
         }
         debug << std::endl << std::endl;
     }
+#endif
 
     return;
 }
@@ -532,8 +535,6 @@ void NUSensors::calculateKinematics()
         if(joint_positions.size() == eff_it->joints.size())
         {
             result = m_kinematicModel->CalculateTransform(eff_it->index, joint_positions);
-            debug << "Effector: " << (eff_it->transform_id) << std::endl;
-            debug << result << std::endl;
             m_data->set(*eff_it->transform_id, time, result.asVector());
             // If the effectors position and orientation are kept, write modify them here.
             if(eff_it->effector_id)
