@@ -523,8 +523,8 @@ void NUSensors::calculateKinematics()
             }
             else
             {
-                debug << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it)->Name << endl;
-                errorlog << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it)->Name << endl;
+                debug << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << endl;
+                errorlog << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << endl;
                 break;  // no use going further with this effector.
             }
 
@@ -546,8 +546,8 @@ void NUSensors::calculateKinematics()
         else
         {
             m_data->setAsInvalid(*eff_it->transform_id);
-            debug << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << " " << eff_it->joints.size() << " required, " << joint_positions.size() << endl;
-            errorlog << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << " " << eff_it->joints.size() << " required, " << joint_positions.size() << endl;
+            debug << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << ": " << eff_it->joints.size() << " Required, " << joint_positions.size() << " Found." << endl;
+            errorlog << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << ": " << eff_it->joints.size() << " Required, " << joint_positions.size() << " Found." << endl;
         }
     }
 
