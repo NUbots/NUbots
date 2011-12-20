@@ -31,7 +31,7 @@
 
 using namespace std;
 
-/*! @brief Constructor for Bear robotic platform
+/*! @brief Constructor for Darwin robotic platform
  */
 DarwinPlatform::DarwinPlatform()
 {
