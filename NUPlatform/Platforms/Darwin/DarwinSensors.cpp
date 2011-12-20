@@ -104,12 +104,17 @@ void DarwinSensors::copyFromHardwareCommunications()
 	//delete CMdatatable;
 	//READ FROM JOINTS and CONTROL BOARD:
 	result = cm730->BulkRead();
-	/*while(result != Robot::CM730::SUCCESS)
+	
+	while(result != Robot::CM730::SUCCESS)
 	{
-		cout << "BulkRead Error: " << result  << " Trying Again"<<endl;
+		#if DEBUG_NUSENSORS_VERBOSITY > 0
+		debug << "BulkRead Error: " << result  << " Trying Again"<<endl;
+		#endif
+		errorlog << "BulkRead Error: " << result  << " Trying Again"<<endl;
 		result = cm730->BulkRead();
 		//return;
-	}*/
+	}
+	
 }
 
 /*! @brief Copys the joint sensor data 
@@ -122,6 +127,7 @@ void DarwinSensors::copyFromJoints()
     float delta_t = (m_current_time - m_previous_time)/1000;
 	int data;
 	int addr;
+	
 	//int start_addr = int(Robot::MX28::P_TORQUE_ENABLE);
 	//int end_addr   = int(Robot::MX28::P_PRESENT_TEMPERATURE);
 
@@ -135,7 +141,6 @@ void DarwinSensors::copyFromJoints()
 
 	for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
     {
-		
 		//int result = cm730->ReadTable(int(platform->m_servo_IDs[i]),table_start_addr,end_addr,datatable,&error);
 		//if(result != Robot::CM730::SUCCESS)
 		//{

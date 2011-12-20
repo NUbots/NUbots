@@ -286,35 +286,42 @@ public:
     static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 40, float dontcaredistance = 75)
     {
         // Get obstacle distances from the sensors
-        vector<float> temp;
-        float leftobstacle = 255;
+        vector<float> temp_l;
+        vecotr<float> temp_r;
+		float leftobstacle = 255;
         float rightobstacle = 255;
-
-		vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
-		AmbiguousObject tempobj;
-		Vector3<float> temploc;
-
-		for(unsigned int i=0; i<objects.size(); i++)
+	
+		// See if ultrasonic sensors are available
+		if(sensors->get(NUSensorsData::LDistance, temp_l) and sensors->get(NUSensorsData::RDistance, temp_r))
 		{
-			tempobj = objects.at(i);
-			if(tempobj.isObjectVisible())
-			{
-				temploc = tempobj.getMeasuredRelativeLocation();
-				if(temploc.y > 0)
-					if(temploc.x < leftobstacle)
-						leftobstacle = temploc.x;
-				else
-					if(temploc.x < rightobstacle)
-						rightobstacle = temploc.x;
-			}
+			//NAO
+		    if (temp_l.size() > 0)
+		        leftobstacle = temp_l[0];
+		    if (temp_r.size() > 0)
+		        rightobstacle = temp_r[0];
 		}
-		
-		/*
-        if (sensors->get(NUSensorsData::LDistance, temp) and temp.size() > 0)
-            leftobstacle = temp[0];
-        if (sensors->get(NUSensorsData::RDistance, temp) and temp.size() > 0)
-            rightobstacle = temp[0];
-		*/
+		else
+		{		
+			//DARWIN
+			vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
+			AmbiguousObject tempobj;
+			Vector3<float> temploc;
+
+			for(unsigned int i=0; i<objects.size(); i++)
+			{
+				tempobj = objects.at(i);
+				if(tempobj.isObjectVisible())
+				{
+					temploc = tempobj.getMeasuredRelativeLocation();
+					if(temploc.y > 0)
+						if(temploc.x < leftobstacle)
+							leftobstacle = temploc.x;
+					else
+						if(temploc.x < rightobstacle)
+							rightobstacle = temploc.x;
+				}
+			}
+		}		
         
         if (fabs(speed[1]) > mathGeneral::PI/2)
         {   // if the speed is not in the range of the ultrasonic sensors then don't both dodging

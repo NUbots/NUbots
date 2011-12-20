@@ -110,7 +110,7 @@ void DarwinActionators::copyToServos()
 	int joint_num = 0;
 
 	//Defaults from data sheet:
-	int P_GAIN = 8;
+	int P_GAIN = 64;
 	int I_GAIN = 0;
 	int D_GAIN = 0;
 	//platform->m_servo_IDs.size()
@@ -150,7 +150,8 @@ void DarwinActionators::copyToServos()
 			}
 			
 			param[n++] = platform->m_servo_IDs[i];
-			param[n++] = P_GAIN;
+			//param[n++] = P_GAIN;
+			param[n++] = gains[i] / 128 * 100;			
 			param[n++] = I_GAIN;
 			param[n++] = D_GAIN;
 			param[n++] = 0;
