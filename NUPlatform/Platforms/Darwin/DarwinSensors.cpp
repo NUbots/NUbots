@@ -87,7 +87,7 @@ void DarwinSensors::copyFromHardwareCommunications()
 	int result;
 	if(m_current_time < 2000)
 	{
-		result = cm730->BulkRead();
+		result = cm730->BulkReadLight();
 		return;
 	}
 
@@ -103,7 +103,7 @@ void DarwinSensors::copyFromHardwareCommunications()
 
 	//delete CMdatatable;
 	//READ FROM JOINTS and CONTROL BOARD:
-	result = cm730->BulkRead();
+	result = cm730->BulkReadLight();
 	
 	while(result != Robot::CM730::SUCCESS)
 	{
@@ -111,7 +111,7 @@ void DarwinSensors::copyFromHardwareCommunications()
 		debug << "BulkRead Error: " << result  << " Trying Again"<<endl;
 		#endif
 		errorlog << "BulkRead Error: " << result  << " Trying Again"<<endl;
-		result = cm730->BulkRead();
+		result = cm730->BulkReadLight();
 		//return;
 	}
 	
