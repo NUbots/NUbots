@@ -564,15 +564,44 @@ void NUSensors::calculateKinematics()
     bool validsupportdata = m_data->getSupport(NUSensorsData::LLeg,leftFootSupport);
     validsupportdata &= m_data->getSupport(NUSensorsData::RLeg,rightFootSupport);
 
+    
+    bool leftSupport = false;
+    bool rightSupport = false;
     if(validsupportdata)    // if the support data was successfully retrieved.
     {
+        leftSupport = leftFootSupport;
+        rightSupport = rightFootSupport;
+    }
+    else    // Use foot height information.
+    {
+        bool data_ok;
+        float leftHeight = 0;
+        float rightHeight = 0;
+        data_ok = m_data->get(NUSensorsData::LLegTransform, temp);
+        if(data_ok) leftHeight = Matrix4x4fromVector(temp)[2][3];
+        data_ok = m_data->get(NUSensorsData::RLegTransform, temp);
+        if(data_ok) rightHeight = Matrix4x4fromVector(temp)[2][3];
+        if(rightHeight < leftHeight)
+        {
+            leftSupport = false;
+            rightSupport = true;
+        }
+        else
+        {
+            leftSupport = true;
+            rightSupport = false;
+        }
+    }
+    
+    if(leftSupport || rightSupport)
+    {
         // if left foot cannot be used use right
-        if(!leftFootSupport && rightFootSupport)
+        if(!leftSupport && rightSupport)
         {
             legTransform = m_data->get(NUSensorsData::LLegTransform, temp);
         }
         // otherwise use left
-        else if(leftFootSupport)
+        else if(leftSupport)
         {
             legTransform = m_data->get(NUSensorsData::RLegTransform, temp);
         }
