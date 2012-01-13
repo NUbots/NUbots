@@ -4,9 +4,9 @@
     @class DarwinActionators
     @brief The darwin actionators class
  
-    @author Jason Kulk
+    @author Jason Kulk, Steven Nicklin
  
-  Copyright (c) 2011 Jason Kulk
+  Copyright (c) 2011 Jason Kulk, Steven Nicklin
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,13 @@
 #define DARWINACTIONATORS_H
 
 #include "NUPlatform/NUActionators.h"
-#include "DarwinPlatform.h"
+
+class DarwinJointMapping;
+class DarwinPlatform;
+namespace Robot
+{
+    class CM730;
+}
 
 
 class DarwinActionators : public NUActionators
@@ -35,24 +41,18 @@ public:
     DarwinActionators(DarwinPlatform*, Robot::CM730*);
     ~DarwinActionators();
     
-private:
-	void InitialiseMotors();
+protected:
+    void InitialiseMotors();
     void copyToHardwareCommunications();
     void copyToServos();
     void copyToLeds();
 
-    
-private:
-	Robot::CM730* cm730;
-	DarwinPlatform* platform;
-	int count;
-	//Conversions:
-	static const float RATIO_VALUE2RADIAN = 0.001533980; 			//!< 2pi / 4096
-	static const float RATIO_RADIAN2VALUE = 651.8986469; 			//!< 4096 / 2pi
-	static int Radian2Value(float radian) { return (int)(radian*RATIO_RADIAN2VALUE)+Robot::MX28::CENTER_VALUE; }
-	static float Value2Radian(int value) { return (float)(value-Robot::MX28::CENTER_VALUE)*RATIO_VALUE2RADIAN; }
+    Robot::CM730* cm730;
+    DarwinPlatform* platform;
+    int count;
+    DarwinJointMapping* m_joint_mapping;
 
-	static vector<string> m_footled_names;
+    static vector<string> m_footled_names;
     static unsigned int m_num_footleds;
     static vector<string> m_chestled_names;
     static unsigned int m_num_chestleds;
