@@ -21,6 +21,7 @@ Doxyfile
 *.*~
 *.o
 *.orig
+*.tmp
 
 Autoconfig/*
 *.old*
