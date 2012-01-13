@@ -5,9 +5,9 @@
     @brief A module to provide locomotion using Darwin Default walk engine.
  
  
-    @author Aaron Wong
+    @author Aaron Wong, Steven Nicklin
  
-  	Copyright (c) 2011 Aaron Wong, Jason Kulk
+        Copyright (c) 2011 Aaron Wong, Jason Kulk, Steven Nicklin
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,35 +25,28 @@
 
 #ifndef DARWINWALK_H
 #define DARWINWALK_H
-
+#include <vector>
 #include "Motion/NUWalk.h"
 
 class NUSensorsData;
 class NUActionatorsData;
-
-//From Darwin Library:
-#include <Walking.h>	//Darwin Controller
-
-#include <vector>
-#include <fstream>
-using namespace std;
-
 class DarwinJointMapping;
+
+using namespace std;
 
 class DarwinWalk : public NUWalk
 {
 public:
     DarwinWalk(NUSensorsData* data, NUActionatorsData* actions);
     ~DarwinWalk();
-    
-	void doWalk();
-	void updateActionatorsData();
-	void updateWalkEngineSensorData();
+    void doWalk();
+    void updateActionatorsData();
+    void updateWalkEngineSensorData();
 private:
-	Robot::Walking* DarwinWalkEngine;
-	void SetDarwinSensor(int,float);
-        float GetDarwinSensor(int walk_id);
-        DarwinJointMapping* m_joint_mapping;
+    void setDarwinSensor(int id,float joint);
+    float getTarget(int id);
+    DarwinJointMapping* m_joint_mapping;
+    std::vector<int> m_darwin_ids;
 };
 
 #endif
