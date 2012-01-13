@@ -21,7 +21,7 @@
 
 #include "DarwinSensors.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
-
+#include "DarwinJointMapping.h"
 
 
 #include "Tools/Math/General.h"
@@ -85,11 +85,11 @@ DarwinSensors::~DarwinSensors()
 void DarwinSensors::copyFromHardwareCommunications()
 {
 	int result;
-	if(m_current_time < 2000)
-	{
-		result = cm730->BulkReadLight();
-		return;
-	}
+//	if(m_current_time < 2000)
+//	{
+//		result = cm730->BulkReadLight();
+//		return;
+//	}
 
 
 	//Control Board Data:
@@ -124,7 +124,7 @@ void DarwinSensors::copyFromJoints()
 	
 	static const float NaN = numeric_limits<float>::quiet_NaN();
 	vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
-    float delta_t = (m_current_time - m_previous_time)/1000;
+        float delta_t = (m_current_time - m_previous_time)/1000;
 	int data;
 	int addr;
 	
@@ -151,14 +151,17 @@ void DarwinSensors::copyFromJoints()
 		addr = int(Robot::MX28::P_PRESENT_POSITION_L);
 		data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
 		//cm730->MakeWord(datatable[addr-start_addr],datatable[addr-start_addr+1]);
-		if(i == 0 || i == 1)
-		{
-			joint[NUSensorsData::PositionId] = -(Value2Radian(data)) + platform->m_servo_Offsets[i];
-		}
-		else
-		{
-			joint[NUSensorsData::PositionId] = Value2Radian(data) + platform->m_servo_Offsets[i];
-		}
+//		if(i == 0 || i == 1)
+//		{
+//			joint[NUSensorsData::PositionId] = -(Value2Radian(data)) + platform->m_servo_Offsets[i];
+//		}
+//		else
+//		{
+//			joint[NUSensorsData::PositionId] = Value2Radian(data) + platform->m_servo_Offsets[i];
+//		}
+                joint[NUSensorsData::PositionId] = Value2Radian(data) + platform->m_servo_Offsets[i];
+                joint[NUSensorsData::PositionId] = DarwinJointMapping::convertJointPosition(i, joint[NUSensorsData::PositionId]);
+
 		/*
 		addr = int(Robot::MX28::P_GOAL_POSITION_L);
 		data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
@@ -201,8 +204,8 @@ void DarwinSensors::copyFromJoints()
 
 		m_data->set(*m_joint_ids[i], m_current_time, joint);
         
-        m_previous_positions[i] = joint[NUSensorsData::PositionId];
-        m_previous_velocities[i] = joint[NUSensorsData::VelocityId];
+                m_previous_positions[i] = joint[NUSensorsData::PositionId];
+                m_previous_velocities[i] = joint[NUSensorsData::VelocityId];
 		#if DEBUG_NUSENSORS_VERBOSITY > 0
         debug << "DarwinSensors::CopyFromJoints " << i << " " << joint[NUSensorsData::PositionId]<<endl;
     	#endif

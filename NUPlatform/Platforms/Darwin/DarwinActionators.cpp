@@ -21,11 +21,14 @@
 
 #include "DarwinActionators.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "DarwinJointMapping.h"
 
 #include <cmath>
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
+#include <limits>
+
 
 /*! @brief Constructs a nubot actionator class with a Darwin backend
             
@@ -137,18 +140,10 @@ void DarwinActionators::copyToServos()
 
 		if(gains[i] > 0)
 		{
-			
 			int value = 0;
-
-			if(i == 0 || i == 1)
-			{
-				value = Radian2Value(-positions[i]-platform->m_servo_Offsets[i]);
-			}
-			else
-			{
-				value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
-			}
-			
+                        float pos = DarwinJointMapping::convertJointPosition(i, positions[i]);
+                        pos = pos - platform->m_servo_Offsets[i];
+                        value = Radian2Value(pos);
 			param[n++] = platform->m_servo_IDs[i];
 			//param[n++] = P_GAIN;
 			param[n++] = gains[i] / 128 * 100;			

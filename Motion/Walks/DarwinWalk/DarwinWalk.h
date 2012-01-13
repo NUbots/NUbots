@@ -27,6 +27,7 @@
 #define DARWINWALK_H
 
 #include "Motion/NUWalk.h"
+
 class NUSensorsData;
 class NUActionatorsData;
 
@@ -37,6 +38,8 @@ class NUActionatorsData;
 #include <fstream>
 using namespace std;
 
+class DarwinJointMapping;
+
 class DarwinWalk : public NUWalk
 {
 public:
@@ -46,10 +49,11 @@ public:
 	void doWalk();
 	void updateActionatorsData();
 	void updateWalkEngineSensorData();
-
 private:
 	Robot::Walking* DarwinWalkEngine;
 	void SetDarwinSensor(int,float);
+        float GetDarwinSensor(int walk_id);
+        DarwinJointMapping* m_joint_mapping;
 };
 
 #endif
