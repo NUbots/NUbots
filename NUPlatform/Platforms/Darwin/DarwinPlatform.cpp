@@ -61,25 +61,10 @@ DarwinPlatform::DarwinPlatform()
 									Robot::JointData::ID_R_HIP_ROLL, Robot::JointData::ID_R_HIP_PITCH, Robot::JointData::ID_R_HIP_YAW, \
 									Robot::JointData::ID_R_KNEE, Robot::JointData::ID_R_ANKLE_ROLL, Robot::JointData::ID_R_ANKLE_PITCH};
 
-	float temp_servo_Offsets[] = 		{	0.0, 	0.0, \
-										//JointID::ID_L_SHOULDER_ROLL, JointID::ID_L_SHOULDER_PITCH, JointID::ID_L_ELBOW,
-										-0.7853981, 1.5707963, -1.5707963, \
-										//JointID::ID_R_SHOULDER_ROLL, JointID::ID_R_SHOULDER_PITCH, JointID::ID_R_ELBOW,
-										0.7853981, -1.5707963, 1.5707963, \
-										//JointID::ID_L_HIP_ROLL, JointID::ID_L_HIP_PITCH, JointID::ID_L_HIP_YAW,
-										0.0,	0.0,	0.0,	\
-										//JointID::ID_L_KNEE, JointID::ID_L_ANKLE_ROLL, JointID::ID_L_ANKLE_PITCH,
-										0.0,	0.0,	0.0,	\
-										//JointID::ID_R_HIP_ROLL, JointID::ID_R_HIP_PITCH, JointID::ID_R_HIP_YAW, 
-										0.0,	0.0,	0.0,	\
-										//JointID::ID_R_KNEE, JointID::ID_R_ANKLE_ROLL, JointID::ID_R_ANKLE_PITCH};
-										0.0,	0.0,	0.0};
-
 	float zeros[sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs)] = {0};
 
     m_servo_names = vector<string>(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 	m_servo_IDs = vector<int>(temp_servo_IDs, temp_servo_IDs + sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs));
-	m_servo_Offsets = vector<float>(temp_servo_Offsets, temp_servo_Offsets + sizeof(temp_servo_Offsets)/sizeof(*temp_servo_Offsets));
 
 	m_servo_Goal_Positions = vector<float>(zeros, zeros + sizeof(zeros)/sizeof(*zeros));
 	m_servo_Stiffness = vector<float>(zeros, zeros + sizeof(zeros)/sizeof(*zeros));
