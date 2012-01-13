@@ -1,7 +1,7 @@
 /*! @file DarwinActionators.cpp
     @brief Implementation of darwin actionators class
 
-    @author Jason Kulk, Steven Nicklin
+    @author Jason Kulk
  
   Copyright (c) 2011 Jason Kulk
  

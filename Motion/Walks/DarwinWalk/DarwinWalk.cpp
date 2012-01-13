@@ -1,7 +1,9 @@
 /*! @file DarwinWalk.cpp
     @brief Implementation of DarwinWalk class
 
-    @author Aaron Wong,  Jason Kulk, Steven Nicklin
+    @author Aaron Wong
+    @author Jason Kulk
+    @author Steven Nicklin
  
  Copyright (c) 2009,2011 Jason Kulk, Aaron Wong, Steven Nicklin
  
@@ -36,7 +38,14 @@
 
 #include <math.h>
 
-/*! Creates a module to walk using Darwin's walk engine
+/*! @brief Creates a module to walk using Darwin's walk engine
+
+  Also initialises the table used to retrive the joint ids used by the walk engine.
+  The walk parameters are read from file and applied.
+  The intial walk stance is also set.
+
+  @param data The NUSensorsData class containg sensor data collected from the robot.
+  @param actions The NUActionatorsData class used to apply actions for the robot to undertake.
  */
 DarwinWalk::DarwinWalk(NUSensorsData* data, NUActionatorsData* actions) :  NUWalk(data, actions)
 {
@@ -94,6 +103,12 @@ DarwinWalk::~DarwinWalk()
 {
 }
 
+/*! @brief Calculates and applies the next target position for the walk
+
+  This function is called whenever the walk is active to update the motors target positions.
+  The actions to perform the current walk command are calculated and target motor positions are applied.
+
+ */
 void DarwinWalk::doWalk()
 {
 
@@ -117,6 +132,9 @@ void DarwinWalk::doWalk()
     updateActionatorsData();
     return;
 }
+
+/*! @brief Updates the walk engine with the current sensor data.
+ */
 void DarwinWalk::updateWalkEngineSensorData()
 {
     //Joint Order is same as platform
@@ -143,6 +161,10 @@ void DarwinWalk::updateWalkEngineSensorData()
     Robot::MotionStatus::RL_ACCEL = accel_data[1]*VALUETOACCEL_RATIO;
 }
 
+/*! @brief Sets an indivdiual sensor value in the walk engine.
+    @param The id of the motor (local).
+    @param angle The joint angle in radians.
+ */
 void DarwinWalk::setDarwinSensor(int id, float angle)
 {
     // Note: All of the sensors have been converted to fit our desired position system. i.e. right hand rule about the robots origin reference frame.
@@ -151,6 +173,10 @@ void DarwinWalk::setDarwinSensor(int id, float angle)
     Robot::Walking::GetInstance()->m_Joint.SetValue(m_darwin_ids[id],value);
 }
 
+/*! @brief Retrieve a indivdiual motor target position from the walk engine
+    @param The id of the motor (local).
+    @return The target joint position.
+ */
 float DarwinWalk::getTarget(int id)
 {
     // Note: All of the sensors have been converted to fit our desired position system. i.e. right hand rule about the robots origin reference frame.
@@ -159,6 +185,8 @@ float DarwinWalk::getTarget(int id)
     return m_joint_mapping->raw2joint(id, value);
 }
 
+/*! @brief Create the joint commands required to apply the target positions to the motors.
+ */
 void DarwinWalk::updateActionatorsData()
 {
     // the vectors are all static since they are used often and we wish to reduce memory operations.
