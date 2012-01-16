@@ -132,7 +132,7 @@ public:
     /*!
     @brief Image access operator, access the pixel at the desired position of the image.
 
-    This access operator allows the image cocrdinates to be mapped to different buffer positions.
+    This access operator allows the image coordinates to be mapped to different buffer positions.
 
     @param x Image x coordinate
     @param y Image y coordinate
