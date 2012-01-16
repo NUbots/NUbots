@@ -181,7 +181,8 @@ HEADERS += ui_mainwindow.h \
     offlinelocalisationdialog.h \
     ../Tools/Math/Moment.h \
     ../Localisation/SelfModel.h \
-    ../Localisation/SelfUKF.h
+    ../Localisation/SelfUKF.h \
+    ../NUPlatform/NUCamera/NUCameraData.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -306,7 +307,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
     ../Tools/Math/Moment.cpp \
-    ../Localisation/SelfModel.cpp
+    ../Localisation/SelfModel.cpp \
+    ../NUPlatform/NUCamera/NUCameraData.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -317,3 +319,5 @@ SOURCES += mainwindow.cpp \
 }
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
+
+

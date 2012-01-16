@@ -1,80 +1,77 @@
 #include "NUCameraData.h"
-#include "Tools/FileFormats/Parse.h"
+#include <istream>
+#include <sstream>
+#include "debug.h"
+#include "Tools/Math/General.h"
 
-CameraData::CameraData()
+NUCameraData::NUCameraData()
 {
 }
 
-CameraData::CameraData(const char* fileName)
+NUCameraData::NUCameraData(const std::string& fileName)
+{
+    LoadFromConfigFile(fileName.c_str());
+    return;
+}
+
+NUCameraData::NUCameraData(const char* fileName)
 {
     LoadFromConfigFile(fileName);
     return;
 }
 
-CameraData::CameraData(const CameraSpecifications& sourceSpec)
+NUCameraData::NUCameraData(const NUCameraData& sourceData)
 {
-    this->resolutionWidth = sourceSpec.resolutionWidth;
-    this->resolutionHeight = sourceSpec.resolutionHeight;
-    this->fps = sourceSpec.fps;
-    this->horizontalFov = sourceSpec.horizontalFov;
-    this->verticalFov = sourceSpec.verticalFov;
-    this->focalLength = sourceSpec.focalLength;
+    this->m_cameraID = sourceData.m_cameraID;
+    this->m_horizontalFov = sourceData.m_horizontalFov;
+    this->m_verticalFov = sourceData.m_verticalFov;
     return;
 }
 
-bool CameraData::LoadFromConfigFile(const char* fileName)
+bool NUCameraData::SetByName(const std::string& parameter, float value)
 {
-    Parse file;
-    bool fileParsed = file.ParseFile(fileName);
-    if(fileParsed == false) return false;
-    if(file.HasKey("Resolution Width"))
+    bool set = false;
+    if (parameter == "horizontal fov")
     {
-        this->resolutionWidth = file.GetAsInt("Resolution Width");
+        this->m_horizontalFov = mathGeneral::deg2rad(value);
+        set = true;
     }
-    else
+    else if (parameter == "vertical fov")
     {
-        this->resolutionWidth = 0;
+        this->m_verticalFov = mathGeneral::deg2rad(value);
+        set = true;
     }
-    if(file.HasKey("Resolution Height"))
+    if(set)
     {
-        this->resolutionHeight = file.GetAsInt("Resolution Height");
+        std::cout << parameter << ": " << value << std::endl;
     }
-    else
-    {
-        this->resolutionHeight = 0;
-    }
+    return set;
+}
 
-    if(file.HasKey("Fps"))
+bool NUCameraData::LoadFromConfigFile(const char* fileName)
+{
+    bool loaded = false;
+    std::ifstream file(fileName);
+    if (file.is_open())
     {
-        this->fps = file.GetAsInt("Fps");
+        while (not file.eof())
+        {
+            std::string buffer;
+            std::string setting_buffer;
+            float value_buffer;
+
+            std::getline(file, buffer);
+            std::stringstream ss(buffer);
+            std::getline(ss, setting_buffer, ':');
+            ss >> value_buffer;
+            SetByName(setting_buffer, value_buffer);
+        }
+        loaded = true;
     }
     else
     {
-        this->fps = 0;
+        errorlog << "NUCameraData::LoadFromConfigFile(). Unable to load camera specifications." << std::endl;
     }
-    if(file.HasKey("Horizontal Fov"))
-    {
-        this->horizontalFov = file.GetAsDouble("Horizontal Fov");
-    }
-    else
-    {
-        this->horizontalFov = 0.0;
-    }
-    if(file.HasKey("Vertical Fov"))
-    {
-        this->verticalFov = file.GetAsDouble("Vertical Fov");
-    }
-    else
-    {
-        this->verticalFov = 0.0;
-    }
-    if(file.HasKey("Focal Length"))
-    {
-        this->focalLength = file.GetAsDouble("Focal Length");
-    }
-    else
-    {
-        this->verticalFov = 0.0;
-    }
-    return fileParsed;
+    file.close();
+    return loaded;
 }

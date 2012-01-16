@@ -30,6 +30,7 @@ class NUSensorsData;
 class NUActionatorsData;
 class SaveImagesThread;
 class NUPlatform;
+class NUCameraData;
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
@@ -65,6 +66,7 @@ class Vision
     int numFramesDropped;               //!< the number of frames dropped since the last call to getNumFramesDropped()
     int numFramesProcessed;             //!< the number of frames processed since the last call to getNumFramesProcessed()
     CameraSettings currentSettings;
+    NUCameraData* m_camera_specs;
 
     void SaveAnImage();
 

@@ -93,6 +93,7 @@ NUImage* NUOpenCVCamera::grabNewImage()
 
 void NUOpenCVCamera::setSettings(const CameraSettings& newset)
 {
+    return;
 	if (newset.p_valid)
 	{
 		m_camera->set(CV_CAP_PROP_BRIGHTNESS, newset.p_brightness.get());

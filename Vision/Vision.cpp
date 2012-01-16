@@ -28,6 +28,7 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
+#include "NUPlatform/NUCamera/NUCameraData.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
@@ -48,7 +49,7 @@ Vision::Vision()
     ImageFrameNumber = 0;
     numFramesDropped = 0;
     numFramesProcessed = 0;
-
+    m_camera_specs = new NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
     return;
 }
 
@@ -58,6 +59,7 @@ Vision::~Vision()
     delete [] LUTBuffer;
     imagefile.close();
     sensorfile.close();
+    delete m_camera_specs;
     return;
 }
 
@@ -2880,19 +2882,22 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 }
 
 double Vision::CalculateBearing(double cx) const{
-    double FOVx = deg2rad(46.40f); //Taken from Old Globals
+    //double FOVx = deg2rad(46.40f); //Taken from Old Globals
+    double FOVx = m_camera_specs->m_horizontalFov;
     return atan( (currentImage->getWidth()/2-cx) / ( (currentImage->getWidth()/2) / (tan(FOVx/2.0)) ) );
 }
 
 
 double Vision::CalculateElevation(double cy) const{
-    double FOVy = deg2rad(34.80f); //Taken from DOCUMENTATION OF NAO
+    //double FOVy = deg2rad(34.80f); //Taken from DOCUMENTATION OF NAO
+    double FOVy = m_camera_specs->m_verticalFov;
     return atan( (currentImage->getHeight()/2-cy) / ( (currentImage->getHeight()/2) / (tan(FOVy/2.0)) ) );
 }
 
 double Vision::EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()
 {
-    double FOVx = deg2rad(46.40f); //Taken from DOCUMENTATION OF NAO
+    //double FOVx = deg2rad(46.40f); //Taken from DOCUMENTATION OF NAO
+    double FOVx = m_camera_specs->m_horizontalFov;
     return (0.5*currentImage->getWidth())/(tan(0.5*FOVx));
 }
 
