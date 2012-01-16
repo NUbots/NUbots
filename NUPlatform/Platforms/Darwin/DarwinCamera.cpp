@@ -74,7 +74,7 @@ NUImage* DarwinCamera::grabNewImage()
 			}
 		}
 	}
-	m_image->m_timestamp = Platform->getTime();
+        m_image->setTimestamp(Platform->getTime());
 	return m_image;
 }
 

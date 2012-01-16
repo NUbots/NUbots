@@ -46,7 +46,7 @@ void frameInformationWidget::setFrameSource(QString sourceName)
 void frameInformationWidget::setRawImage(const NUImage* image)
 {
     setImageResolution(image->getWidth(), image->getHeight());
-    setTimestamp(image->m_timestamp);
+    setTimestamp(image->GetTimestamp());
 }
 
 void frameInformationWidget::setImageResolution(int imageWidth, int imageHeight)

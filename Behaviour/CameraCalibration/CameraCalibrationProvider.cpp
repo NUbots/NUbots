@@ -261,7 +261,7 @@ vector<int> CameraCalibrationProvider::getColourAvg(const int x, const int y)
      {
          for (int j = y-10; j < y+10; j++)
          {
-             tmp = refImage.m_image[j][i];
+             tmp = refImage(i,j);
              y1_temp += (int)tmp.yCbCrPadding;
              y2_temp += (int)tmp.y;
              cb_temp += (int)tmp.cb;

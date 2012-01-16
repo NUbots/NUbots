@@ -132,13 +132,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     m_actions = actions;
     setFieldObjects(fieldobjects);
 
-    if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
+    if (currentImage != NULL and image->GetTimestamp() - m_timestamp > 40)
         numFramesDropped++;
     numFramesProcessed++;
         
     setImage(image);
     //debug << "Camera Settings: " << image->getCameraSettings();
-    AllFieldObjects->preProcess(image->m_timestamp);
+    AllFieldObjects->preProcess(image->GetTimestamp());
 
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > green_border_points;
@@ -530,7 +530,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "Finished Object Recognition: " <<endl;
     #endif
-    AllFieldObjects->postProcess(image->m_timestamp);
+    AllFieldObjects->postProcess(image->GetTimestamp());
 
     //PLAY A SOUND IF OBJECT SEEN:
     /*if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
@@ -797,7 +797,7 @@ void Vision::setImage(const NUImage* newImage)
 {
 
     currentImage = newImage;
-    m_timestamp = currentImage->m_timestamp;
+    m_timestamp = currentImage->GetTimestamp();
     spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     ImageFrameNumber++;
 }
@@ -2745,7 +2745,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
                                                                                       positionAngle,
                                                                                       viewPosition,
                                                                                       sizeOnScreen,
-                                                                                      currentImage->m_timestamp);
+                                                                                      currentImage->GetTimestamp());
         //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
 

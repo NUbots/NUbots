@@ -146,9 +146,9 @@ class Vision
     inline unsigned char classifyPixel(int x, int y)
     {
         classifiedCounter++;
-        Pixel* temp = &currentImage->m_image[y][x];
+        Pixel temp = (*currentImage)(x,y);
         //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
-        return  currentLookupTable[LUTTools::getLUTIndex(*temp)]; // 7bit LUT
+        return  currentLookupTable[LUTTools::getLUTIndex(temp)]; // 7bit LUT
     }
 
     enum tCLASSIFY_METHOD
