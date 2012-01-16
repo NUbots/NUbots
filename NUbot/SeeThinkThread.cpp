@@ -20,7 +20,6 @@
  */
 
 
-
 #include "NUPlatform/NUPlatform.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
