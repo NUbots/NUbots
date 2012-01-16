@@ -767,10 +767,28 @@ void Vision::setLUT(unsigned char* newLUT)
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
     LUTTools lutLoader;
+    bool lut_loaded;
     if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+    {
+        lut_loaded = true;
         setLUT(LUTBuffer);
+    }
     else
+    {
+        lut_loaded = false;
         errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
+    }
+    
+#if DEBUG_VISION_VERBOSITY > 0
+    if(lut_loaded)
+    {
+        debug << "Lookup table: " << fileName << " loaded sucesfully." << std::endl;
+    }
+    else
+    {
+        debug << "Unable to load lookup table: " << fileName << std::endl;
+    }
+#endif
 }
 
 void Vision::setImage(const NUImage* newImage)
