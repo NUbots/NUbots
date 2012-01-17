@@ -20,7 +20,6 @@
  */
 
 
-
 #include "NUPlatform/NUPlatform.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
@@ -119,13 +118,17 @@ void SeeThinkThread::run()
             #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
                 wait();
             #endif
+            
+            #ifdef THREAD_SEETHINK_PROFILE
+                prof.start();
+            #endif
             #ifdef USE_VISION
                 m_nubot->m_platform->updateImage();
                 *(m_nubot->m_io) << m_nubot;  //<! Raw IMAGE STREAMING (TCP)
             #endif
             
             #ifdef THREAD_SEETHINK_PROFILE
-                prof.start();
+                prof.split("frame grab");
             #endif
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef USE_VISION

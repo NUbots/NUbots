@@ -30,6 +30,7 @@ class NUSensorsData;
 class NUActionatorsData;
 class SaveImagesThread;
 class NUPlatform;
+class NUCameraData;
 
 #define ORANGE_BALL_DIAMETER 6.5 //IN CM for NEW BALL
 
@@ -65,6 +66,7 @@ class Vision
     int numFramesDropped;               //!< the number of frames dropped since the last call to getNumFramesDropped()
     int numFramesProcessed;             //!< the number of frames processed since the last call to getNumFramesProcessed()
     CameraSettings currentSettings;
+    NUCameraData* m_camera_specs;
 
     void SaveAnImage();
 
@@ -144,9 +146,9 @@ class Vision
     inline unsigned char classifyPixel(int x, int y)
     {
         classifiedCounter++;
-        Pixel* temp = &currentImage->m_image[y][x];
+        Pixel temp = (*currentImage)(x,y);
         //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
-        return  currentLookupTable[LUTTools::getLUTIndex(*temp)]; // 7bit LUT
+        return  currentLookupTable[LUTTools::getLUTIndex(temp)]; // 7bit LUT
     }
 
     enum tCLASSIFY_METHOD

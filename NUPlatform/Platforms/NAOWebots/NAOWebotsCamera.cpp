@@ -90,7 +90,7 @@ NUImage* NAOWebotsCamera::grabNewImage()
     }
     
     m_image->MapBufferToImage(m_yuyv_buffer, m_width, m_height);  // have NUImage use m_yuyv_buffer
-    m_image->m_timestamp = Platform->getTime();
+    m_image->setTimestamp(Platform->getTime());
     return m_image;
 }
 

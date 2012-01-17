@@ -35,8 +35,9 @@ public:
     void IntialiseFile(std::string filename);
     void WriteLogData(std::vector<float>& gps, float compass,
                       const std::vector<float>& leftOdom, const std::vector<float>& rightOdom,
-                      float leftForce, float rightForce, OdometryEstimator::LegIdentifier supportLeg);
-    LegIdentifier SelectSupportLeg(float forceLeft, float forceRight);
+                      float leftForce, float rightForce, float leftZ, float rightZ, OdometryEstimator::LegIdentifier supportLeg);
+    LegIdentifier SelectSupportLegTouch(float forceLeft, float forceRight);
+    LegIdentifier SelectSupportLegKinematic(float left_z, float right_z);
     std::vector<float> CalculateNextStep(const std::vector<float>& leftPos, const std::vector<float>& rightPos,
                                          float forceLeft, float forceRight, std::vector<float>& gps, float compass);
 private:

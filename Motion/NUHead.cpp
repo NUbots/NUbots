@@ -33,12 +33,13 @@
 #include "debug.h"
 #include "debugverbositynumotion.h"
 #include "nubotdataconfig.h"
+#include "NUPlatform/NUCamera/NUCameraData.h"
 
 #include <math.h>
 #include <algorithm>
 using namespace std;
 
-NUHead::NUHead(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUHead", data, actions), m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981 + NUCamera::CameraOffset), m_CAMERA_FOV_X(0.8098), m_CAMERA_FOV_Y(0.6074)
+NUHead::NUHead(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUHead", data, actions), m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981 + NUCamera::CameraOffset)
 {
     m_camera_height = 46;
     m_body_pitch = 0;
@@ -48,7 +49,6 @@ NUHead::NUHead(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvid
     m_is_panning = false;
     m_is_nodding = false;
     m_move_end_time = 0;
-    
     load();
 }
 
@@ -242,8 +242,10 @@ void NUHead::calculateHeadTarget(float elevation, float bearing, float centreele
     if (m_data and m_actions)
     {
         getSensorValues();
-        const float gain_pitch = 0.8;           // proportional gain in the pitch direction
-        const float gain_yaw = 0.6;             // proportional gain in the yaw direction
+//        const float gain_pitch = 0.8;           // proportional gain in the pitch direction
+//        const float gain_yaw = 0.6;             // proportional gain in the yaw direction
+        const float gain_pitch = 0.3;           // proportional gain in the pitch direction
+        const float gain_yaw = 0.15;             // proportional gain in the yaw direction
         
         float c_pitch = -centreelevation;
         float c_yaw = -centrebearing;
@@ -644,6 +646,7 @@ void NUHead::load()
 {
     loadConfig();
     loadPanConfig();
+    loadCameraSpecs();
 }
 
 /*! @brief Loads the maximum speed, maximum acceleration, and default gains from Head.cfg
@@ -706,5 +709,12 @@ void NUHead::loadPanConfig()
     }
 }
 
-
+/*! @brief Loads the specifications for the camera from CameraSpecs.cfg
+ */
+void NUHead::loadCameraSpecs()
+{
+    NUCameraData cameraSpecs(string(CONFIG_DIR) + "CameraSpecs.cfg");
+    m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
+    m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
+}
 

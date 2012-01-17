@@ -204,7 +204,7 @@ int VisionCalibrationProvider::classifyImage()
         for (int x = 0; x < width; x++)
         {
             NUImage* image = Blackboard->Image;
-            Pixel temp = image->m_image[y][x];
+            Pixel temp = (*image)(x,y);
             unsigned char classifiedPixel = currentLookupTable[LUTTools::getLUTIndex(temp)];
             if(classifiedPixel  == ClassIndex::unclassified || temp.y < 50)
             {

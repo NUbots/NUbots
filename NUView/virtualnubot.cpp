@@ -136,7 +136,7 @@ Pixel virtualNUbot::selectRawPixel(int x, int y)
 {
     if(x < rawImage->getWidth() && y < rawImage->getHeight() && imageAvailable())
     {
-        return rawImage->m_image[y][x];
+        return (*rawImage)(x,y);
     }
     else
     {
@@ -304,7 +304,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
     vision.setFieldObjects(AllObjects);
     vision.setImage(image);
     //qDebug() <<  "Image Set" << image->m_timestamp << vision.AllFieldObjects->stationaryFieldObjects.size();
-    vision.AllFieldObjects->preProcess(image->m_timestamp);
+    vision.AllFieldObjects->preProcess(image->GetTimestamp());
     //qDebug() << "Image Pre-processed";
     //int spacings = (int)image->getWidth()/20;
     int spacings = (int)image->getWidth()/40;
@@ -671,8 +671,8 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
 
     //POST PROCESS:
-    vision.AllFieldObjects->postProcess(image->m_timestamp);
-    qDebug() << image->m_timestamp ;
+    vision.AllFieldObjects->postProcess(image->GetTimestamp());
+    qDebug() << image->GetTimestamp() ;
     emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
     emit fieldObjectsChanged(vision.AllFieldObjects);
     emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);

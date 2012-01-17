@@ -202,7 +202,9 @@ void NUSensors::initialise()
         m_kinematics_map.push_back(temp);
         ++index;
     }
-    debug << "Kinematic table initialisation:" <<std::endl;
+
+#if DEBUG_NUSENSORS_VERBOSITY > 0
+    debug << "Kinematic table initialisation:" <<std::endl << std::endl;
 
     for (std::vector<KinematicMap>::iterator f_it = m_kinematics_map.begin(); f_it != m_kinematics_map.end(); ++f_it)
     {
@@ -216,6 +218,7 @@ void NUSensors::initialise()
         }
         debug << std::endl << std::endl;
     }
+#endif
 
     return;
 }
@@ -523,8 +526,8 @@ void NUSensors::calculateKinematics()
             }
             else
             {
-                debug << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it)->Name << endl;
-                errorlog << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it)->Name << endl;
+                debug << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << endl;
+                errorlog << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << endl;
                 break;  // no use going further with this effector.
             }
 
@@ -532,8 +535,6 @@ void NUSensors::calculateKinematics()
         if(joint_positions.size() == eff_it->joints.size())
         {
             result = m_kinematicModel->CalculateTransform(eff_it->index, joint_positions);
-            debug << "Effector: " << (eff_it->transform_id) << std::endl;
-            debug << result << std::endl;
             m_data->set(*eff_it->transform_id, time, result.asVector());
             // If the effectors position and orientation are kept, write modify them here.
             if(eff_it->effector_id)
@@ -546,8 +547,8 @@ void NUSensors::calculateKinematics()
         else
         {
             m_data->setAsInvalid(*eff_it->transform_id);
-            debug << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << " " << eff_it->joints.size() << " required, " << joint_positions.size() << endl;
-            errorlog << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << " " << eff_it->joints.size() << " required, " << joint_positions.size() << endl;
+            debug << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << ": " << eff_it->joints.size() << " Required, " << joint_positions.size() << " Found." << endl;
+            errorlog << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << ": " << eff_it->joints.size() << " Required, " << joint_positions.size() << " Found." << endl;
         }
     }
 
@@ -563,15 +564,44 @@ void NUSensors::calculateKinematics()
     bool validsupportdata = m_data->getSupport(NUSensorsData::LLeg,leftFootSupport);
     validsupportdata &= m_data->getSupport(NUSensorsData::RLeg,rightFootSupport);
 
+    
+    bool leftSupport = false;
+    bool rightSupport = false;
     if(validsupportdata)    // if the support data was successfully retrieved.
     {
+        leftSupport = leftFootSupport;
+        rightSupport = rightFootSupport;
+    }
+    else    // Use foot height information.
+    {
+        bool data_ok;
+        float leftHeight = 0;
+        float rightHeight = 0;
+        data_ok = m_data->get(NUSensorsData::LLegTransform, temp);
+        if(data_ok) leftHeight = Matrix4x4fromVector(temp)[2][3];
+        data_ok = m_data->get(NUSensorsData::RLegTransform, temp);
+        if(data_ok) rightHeight = Matrix4x4fromVector(temp)[2][3];
+        if(rightHeight < leftHeight)
+        {
+            leftSupport = false;
+            rightSupport = true;
+        }
+        else
+        {
+            leftSupport = true;
+            rightSupport = false;
+        }
+    }
+    
+    if(leftSupport || rightSupport)
+    {
         // if left foot cannot be used use right
-        if(!leftFootSupport && rightFootSupport)
+        if(!leftSupport && rightSupport)
         {
             legTransform = m_data->get(NUSensorsData::LLegTransform, temp);
         }
         // otherwise use left
-        else if(leftFootSupport)
+        else if(leftSupport)
         {
             legTransform = m_data->get(NUSensorsData::RLegTransform, temp);
         }

@@ -92,7 +92,7 @@ public:
         debug << "Colours: "<< Tr << Tg << Tb;
         while (i < numRandomPoints)
         {
-            Pixel pixel = Blackboard->Image->m_image[rand()%(Blackboard->Image->getHeight()-1)][rand()%(Blackboard->Image->getWidth()-1)];
+            Pixel pixel = (*Blackboard->Image)(rand()%(Blackboard->Image->getWidth()-1),rand()%(Blackboard->Image->getHeight()-1));
             ColorModelConversions::fromYCbCrToRGB(pixel.y, pixel.cb,pixel.cr,R,G,B);
             Tr = Tr + R;
             Tg = Tg + G;

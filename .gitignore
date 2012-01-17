@@ -21,6 +21,7 @@ Doxyfile
 *.*~
 *.o
 *.orig
+*.tmp
 
 Autoconfig/*
 *.old*
@@ -30,6 +31,7 @@ Autoconfig/*
 
 # ignore Qt builds
 NUView-build-desktop-Desktop_Qt_4_7_4_for_GCC__Qt_SDK__Debug/*
+NUView-build-desktop-Desktop_Qt_4_7_4_for_GCC__Qt_SDK__Release/*
 /NUView/debug/*
 /NUView/release/*
 *.Debug

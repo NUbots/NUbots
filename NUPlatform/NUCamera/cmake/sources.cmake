@@ -21,7 +21,8 @@ ENDIF(DEBUG)
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  
-CameraSettings.cpp
+CameraSettings.cpp CameraSettings.h
+NUCameraData.cpp NUCameraData.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

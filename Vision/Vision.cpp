@@ -28,6 +28,7 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
+#include "NUPlatform/NUCamera/NUCameraData.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
@@ -48,7 +49,7 @@ Vision::Vision()
     ImageFrameNumber = 0;
     numFramesDropped = 0;
     numFramesProcessed = 0;
-
+    m_camera_specs = new NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
     return;
 }
 
@@ -58,6 +59,7 @@ Vision::~Vision()
     delete [] LUTBuffer;
     imagefile.close();
     sensorfile.close();
+    delete m_camera_specs;
     return;
 }
 
@@ -130,13 +132,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     m_actions = actions;
     setFieldObjects(fieldobjects);
 
-    if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
+    if (currentImage != NULL and image->GetTimestamp() - m_timestamp > 40)
         numFramesDropped++;
     numFramesProcessed++;
         
     setImage(image);
     //debug << "Camera Settings: " << image->getCameraSettings();
-    AllFieldObjects->preProcess(image->m_timestamp);
+    AllFieldObjects->preProcess(image->GetTimestamp());
 
     std::vector< Vector2<int> > points;
     std::vector< Vector2<int> > green_border_points;
@@ -528,7 +530,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "Finished Object Recognition: " <<endl;
     #endif
-    AllFieldObjects->postProcess(image->m_timestamp);
+    AllFieldObjects->postProcess(image->GetTimestamp());
 
     //PLAY A SOUND IF OBJECT SEEN:
     /*if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
@@ -767,17 +769,35 @@ void Vision::setLUT(unsigned char* newLUT)
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
     LUTTools lutLoader;
+    bool lut_loaded;
     if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+    {
+        lut_loaded = true;
         setLUT(LUTBuffer);
+    }
     else
+    {
+        lut_loaded = false;
         errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
+    }
+    
+#if DEBUG_VISION_VERBOSITY > 0
+    if(lut_loaded)
+    {
+        debug << "Lookup table: " << fileName << " loaded sucesfully." << std::endl;
+    }
+    else
+    {
+        debug << "Unable to load lookup table: " << fileName << std::endl;
+    }
+#endif
 }
 
 void Vision::setImage(const NUImage* newImage)
 {
 
     currentImage = newImage;
-    m_timestamp = currentImage->m_timestamp;
+    m_timestamp = currentImage->GetTimestamp();
     spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     ImageFrameNumber++;
 }
@@ -2725,7 +2745,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
                                                                                       positionAngle,
                                                                                       viewPosition,
                                                                                       sizeOnScreen,
-                                                                                      currentImage->m_timestamp);
+                                                                                      currentImage->GetTimestamp());
         //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
 
@@ -2862,19 +2882,22 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 }
 
 double Vision::CalculateBearing(double cx) const{
-    double FOVx = deg2rad(46.40f); //Taken from Old Globals
+    //double FOVx = deg2rad(46.40f); //Taken from Old Globals
+    double FOVx = m_camera_specs->m_horizontalFov;
     return atan( (currentImage->getWidth()/2-cx) / ( (currentImage->getWidth()/2) / (tan(FOVx/2.0)) ) );
 }
 
 
 double Vision::CalculateElevation(double cy) const{
-    double FOVy = deg2rad(34.80f); //Taken from DOCUMENTATION OF NAO
+    //double FOVy = deg2rad(34.80f); //Taken from DOCUMENTATION OF NAO
+    double FOVy = m_camera_specs->m_verticalFov;
     return atan( (currentImage->getHeight()/2-cy) / ( (currentImage->getHeight()/2) / (tan(FOVy/2.0)) ) );
 }
 
 double Vision::EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()
 {
-    double FOVx = deg2rad(46.40f); //Taken from DOCUMENTATION OF NAO
+    //double FOVx = deg2rad(46.40f); //Taken from DOCUMENTATION OF NAO
+    double FOVx = m_camera_specs->m_horizontalFov;
     return (0.5*currentImage->getWidth())/(tan(0.5*FOVx));
 }
 
