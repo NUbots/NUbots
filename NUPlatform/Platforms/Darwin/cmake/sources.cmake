@@ -23,7 +23,7 @@ SET (YOUR_SRCS  main.cpp
                 DarwinSensors.cpp DarwinSensors.h
                 DarwinActionators.cpp DarwinActionators.h
                 DarwinIO.cpp DarwinIO.h
-                ../Generic/Cameras/NUOpenCVCamera.h ../Generic/Cameras/NUOpenCVCamera.cpp
+				../Generic/Cameras/NUOpenCVCamera.h ../Generic/Cameras/NUOpenCVCamera.cpp
 )
 ####################################################################################
 

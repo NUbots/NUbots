@@ -117,6 +117,14 @@ string& Parameter::name()
     return Name;
 }
 
+/*! @brief Returns whether this parameters name matches n
+    @return whether Name matches n
+ */
+bool Parameter::compareName(const string n) const
+{
+    return Name.compare(n) == 0;
+}
+
 /*! @brief Gets the description of the parameter
  	@return the description
  */

@@ -93,6 +93,7 @@ NUImage* NUOpenCVCamera::grabNewImage()
 
 void NUOpenCVCamera::setSettings(const CameraSettings& newset)
 {
+	/*
 	if (newset.p_valid)
 	{
 		m_camera->set(CV_CAP_PROP_BRIGHTNESS, newset.p_brightness.get());
@@ -101,6 +102,24 @@ void NUOpenCVCamera::setSettings(const CameraSettings& newset)
 		m_camera->set(CV_CAP_PROP_HUE, newset.p_hue.get());
 		m_camera->set(CV_CAP_PROP_GAIN, newset.p_gain.get());
 		m_camera->set(CV_CAP_PROP_EXPOSURE, newset.p_exposure.get());
+	}
+	*/
+	if (newset.p_valid)
+	{
+		m_camera->set(CV_CAP_PROP_BRIGHTNESS, newset.p_brightness.get()/(double)newset.p_brightness.max());
+		m_camera->set(CV_CAP_PROP_CONTRAST, newset.p_contrast.get()/(double)newset.p_contrast.max());
+		m_camera->set(CV_CAP_PROP_SATURATION, newset.p_saturation.get()/(double)newset.p_saturation.max());
+		m_camera->set(CV_CAP_PROP_HUE, newset.p_hue.get()/(double)newset.p_hue.max());
+		m_camera->set(CV_CAP_PROP_GAIN, newset.p_gain.get()/(double)newset.p_gain.max());
+		m_camera->set(CV_CAP_PROP_EXPOSURE, newset.p_exposure.get()/(double)newset.p_exposure.max());
+        /*
+		debug << "NUOpenCVCamera::p_brightness: " << newset.p_brightness.get() << " max: " << newset.p_brightness.max() << "\n";
+		debug << "NUOpenCVCamera::p_contrast: " << newset.p_contrast.get() << " max: " << newset.p_contrast.max() << "\n";
+		debug << "NUOpenCVCamera::p_saturation: " << newset.p_saturation.get() << " max: " << newset.p_saturation.max() << "\n";
+		debug << "NUOpenCVCamera::p_hue: " << newset.p_hue.get() << " max: " << newset.p_hue.max() << "\n";
+		debug << "NUOpenCVCamera::p_gain: " << newset.p_gain.get() << " max: " << newset.p_gain.max() << "\n";
+		debug << "NUOpenCVCamera::p_exposure: " << newset.p_exposure.get() << " max: " << newset.p_exposure.max() << "\n";
+        */
 	}
 }
 
