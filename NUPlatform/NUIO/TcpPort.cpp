@@ -234,7 +234,7 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
     
     for(int y = 0; y < imageheight; y++)
     {
-        Pixel line_start = p_image.at(0, y);    // We want to transmit the raw data, so use the at() access function or lines may get out of order.
+        const Pixel& line_start = p_image.at(0, y);    // We want to transmit the raw data, so use the at() access function or lines may get out of order.
         network_data_t linedata;
         linedata.data = (char*) &line_start;
         linedata.size = sizeof(line_start)*imagewidth;
