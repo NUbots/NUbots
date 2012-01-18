@@ -78,7 +78,7 @@ public:
     @param width The width of the image.
     @param height The height of the image.
     */
-    void MapYUV422BufferToImage(const unsigned char* buffer, int width, int height);
+    void MapYUV422BufferToImage(const unsigned char* buffer, int width, int height, bool flip=false);
 
     /*!
     @brief Copies a YUV422 formatted image buffer to the image. A local copy IS made.
@@ -140,8 +140,7 @@ public:
     */
     const Pixel& operator()(unsigned int x, unsigned int y) const
     {
-        bool flip = true;
-        if(flip)
+        if(flipped)
         {
             //return at(getWidth() - x - 1, getHeight() - y - 1);
             return at(x, getHeight() - y - 1);
@@ -216,6 +215,8 @@ public:
       @return returns the subimage from the super image
       */
     //QImage getSubImage(int x, int y, int width, int height, int decimation_spacing) const;
+
+    bool flipped;
 
 protected:
     Pixel **m_image;                    //!< Pointer to the image array.

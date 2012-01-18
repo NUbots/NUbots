@@ -10,6 +10,7 @@
 NUImage::NUImage(): m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
 {
     m_image = 0;
+    flipped = false;
 }
 
 NUImage::NUImage(int width, int height, bool useInternalBuffer): m_imageWidth(width), m_imageHeight(height), m_usingInternalBuffer(useInternalBuffer)
@@ -19,6 +20,7 @@ NUImage::NUImage(int width, int height, bool useInternalBuffer): m_imageWidth(wi
     {
         addInternalBuffer(width, height);
     }
+    flipped = false;
 }
 
 NUImage::NUImage(const NUImage& source): TimestampedData(), m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
@@ -33,6 +35,7 @@ NUImage::NUImage(const NUImage& source): TimestampedData(), m_imageWidth(0), m_i
     {
         memcpy ( &m_image[y][0], &source.m_image[y][0], sizeof(source.m_image[y][0])*sourceWidth);
     }
+    flipped = source.flipped;
 }
 
 NUImage::~NUImage()
@@ -60,6 +63,7 @@ void NUImage::copyFromExisting(const NUImage& source)
         memcpy ( &m_image[y][0], &source.m_image[y][0], sizeof(source.m_image[y][0])*sourceWidth);
     }
     m_timestamp = source.m_timestamp;
+    flipped = source.flipped;
 }
 
 void NUImage::cloneExisting(const NUImage& source)
@@ -73,7 +77,7 @@ void NUImage::cloneExisting(const NUImage& source)
     }
     else
     {
-        MapYUV422BufferToImage((unsigned char*)&source.m_image[0][0], sourceWidth*2, sourceHeight*2);
+        MapYUV422BufferToImage((unsigned char*)&source.m_image[0][0], sourceWidth*2, sourceHeight*2, source.flipped);
     }
     m_timestamp = source.m_timestamp;
 }
@@ -118,7 +122,7 @@ Pixel* NUImage::allocateBuffer(int width, int height)
     return buffer;
 }
 
-void NUImage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int height)
+void NUImage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int height, bool flip)
 {
     useInternalBuffer(false);
     int arrayWidth = width;
@@ -145,6 +149,7 @@ void NUImage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int
     }
     m_imageWidth = width;
     m_imageHeight = height;
+    flipped = flip;
 }
 
 void NUImage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height)
