@@ -104,7 +104,7 @@ void OpenglManager::writeNUImageToDisplay(const NUImage* newImage, GLDisplay::di
         imageLine = (QRgb*)image.scanLine(y);
         for (int x = 0; x < width; x++)
         {
-            Pixel pix = (*newImage)(x,y);
+            const Pixel& pix = (*newImage)(x,y);
             ColorModelConversions::fromYCbCrToRGB(pix.y, pix.cb, pix.cr, r, g, b);
             imageLine[x] = qRgb(r,g,b);
         }
