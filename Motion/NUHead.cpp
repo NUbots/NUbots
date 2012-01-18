@@ -242,10 +242,8 @@ void NUHead::calculateHeadTarget(float elevation, float bearing, float centreele
     if (m_data and m_actions)
     {
         getSensorValues();
-//        const float gain_pitch = 0.8;           // proportional gain in the pitch direction
-//        const float gain_yaw = 0.6;             // proportional gain in the yaw direction
-        const float gain_pitch = 0.3;           // proportional gain in the pitch direction
-        const float gain_yaw = 0.15;             // proportional gain in the yaw direction
+        const float gain_pitch = 0.8;           // proportional gain in the pitch direction
+        const float gain_yaw = 0.6;             // proportional gain in the yaw direction
         
         float c_pitch = -centreelevation;
         float c_yaw = -centrebearing;
