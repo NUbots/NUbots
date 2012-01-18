@@ -45,6 +45,7 @@ public:
     float min() const;
     float max() const;
     string& name();
+    bool compareName(const string n) const;
     string& desc();
     void set(float value);
     void set(float value, float min, float max, string desc);

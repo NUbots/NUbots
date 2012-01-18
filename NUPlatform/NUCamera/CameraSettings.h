@@ -43,37 +43,55 @@ class CameraSettings
             return camera_name;
         }
 
-        
+
+        bool p_valid;                   //!< true if the parameters are valid, false if they should be ignored
+
+        //!< COMMON PARAMETERS
         int brightness;         //!< Brightness setting.
         int contrast;           //!< Contrast setting.
         int saturation;         //!< Saturation setting.
-        int hue;                //!< Hue setting.
-        int redChroma;          //!< Red Chroma setting.
-        int blueChroma;         //!< Blue Chroma setting.
         int gain;               //!< Gain setting.
         int exposure;           //!< Exposure setting
-
-        int autoExposure;       //!< Auto Exposure setting.
         int autoWhiteBalance;   //!< Auto White Balance setting.
-        int autoGain;           //!< Auto Gain setting.
-        
-        
-        Camera activeCamera;
-        
-        bool p_valid;					//!< true if the parameters are valid, false if they should be ignored
+
         Parameter p_brightness;         //!< Brightness setting.
         Parameter p_contrast;           //!< Contrast setting.
         Parameter p_saturation;         //!< Saturation setting.
+        Parameter p_gain;               //!< Gain setting.
+        Parameter p_exposure;           //!< Exposure setting
+        Parameter p_autoWhiteBalance;   //!< Auto White Balance setting.
+
+        //!< NAO ONLY
+        int hue;                //!< Hue setting.
+        int redChroma;          //!< Red Chroma setting.
+        int blueChroma;         //!< Blue Chroma setting.
+        int autoExposure;       //!< Auto Exposure setting.
+        int autoGain;           //!< Auto Gain setting.
+        
+        Camera activeCamera;
+
         Parameter p_hue;                //!< Hue setting.
         Parameter p_redChroma;          //!< Red Chroma setting.
         Parameter p_blueChroma;         //!< Blue Chroma setting.
-        Parameter p_gain;               //!< Gain setting.
-        Parameter p_exposure;           //!< Exposure setting
-
         Parameter p_autoExposure;       //!< Auto Exposure setting.
-        Parameter p_autoWhiteBalance;   //!< Auto White Balance setting.
         Parameter p_autoGain;           //!< Auto Gain setting.
+
+        //!< DARWIN ONLY
+        int powerLineFrequency;
+        int whiteBalanceTemperature;
+        int sharpness;
+        int exposureAuto;
+        int exposureAbsolute;
+        int exposureAutoPriority;
+
+        Parameter p_powerLineFrequency;
+        Parameter p_whiteBalanceTemperature;
+        Parameter p_sharpness;
+        Parameter p_exposureAuto;
+        Parameter p_exposureAbsolute;
+        Parameter p_exposureAutoPriority;
         
+
 
         /*!
             @brief Default Constructor. Loads the default camera settings.
@@ -114,10 +132,13 @@ class CameraSettings
         */
         
         void copyParams();
-        
+
         void LoadFromFile(const std::string& configFileName);
+
+
+        bool SetByName(const Parameter& p);
         
-        std::vector<float> getAsVector();
+        std::vector<float> getAsVector() const;
         
         /*!
             @brief Get camera settings and return as a vector of parameter values
