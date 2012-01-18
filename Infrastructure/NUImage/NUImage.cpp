@@ -257,9 +257,11 @@ std::ostream& operator<< (std::ostream& output, const NUImage& p_image)
     int sourceWidth = p_image.getWidth();
     int sourceHeight = p_image.getHeight();
     double timeStamp = p_image.m_timestamp;
+    bool flipped = p_image.flipped;
     output.write(reinterpret_cast<char*>(&sourceWidth), sizeof(sourceWidth));
     output.write(reinterpret_cast<char*>(&sourceHeight), sizeof(sourceHeight));
     output.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
+    output.write(reinterpret_cast<char*>(&flipped), sizeof(flipped));
     for(int y = 0; y < sourceHeight; y++)
     {
         output.write(reinterpret_cast<char*>(p_image.m_image[y]), sizeof(p_image.m_image[y][0])*sourceWidth);
@@ -273,7 +275,7 @@ std::istream& operator>> (std::istream& input, NUImage& p_image)
     input.read(reinterpret_cast<char*>(&width), sizeof(width));
     input.read(reinterpret_cast<char*>(&height), sizeof(height));
     input.read(reinterpret_cast<char*>(&p_image.m_timestamp), sizeof(p_image.m_timestamp));
-
+    input.read(reinterpret_cast<char*>(&p_image.flipped), sizeof(p_image.flipped));
     p_image.setImageDimensions(width, height);
     p_image.useInternalBuffer(true);
 

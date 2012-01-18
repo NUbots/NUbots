@@ -221,10 +221,12 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
     int imagewidth = p_image.getWidth();
     int imageheight = p_image.getHeight();
     double timeStamp = p_image.GetTimestamp();
+    bool flipped = p_image.flipped;
     buffer.write(reinterpret_cast<char*>(&sensorsSize), sizeof(sensorsSize));
     buffer.write(reinterpret_cast<char*>(&imagewidth), sizeof(imagewidth));
     buffer.write(reinterpret_cast<char*>(&imageheight), sizeof(imageheight));
     buffer.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
+    buffer.write(reinterpret_cast<char*>(&flipped), sizeof(flipped));
     
     string s = buffer.str();
     netdata.data = (char*) s.c_str();

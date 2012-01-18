@@ -196,7 +196,7 @@ void visionStreamWidget::readPendingData()
         buffer.read(reinterpret_cast<char*>(&height), sizeof(height));
 
         //qDebug() << height << ", " << width;
-        imageSize = height*width*4+buffer.tellg()+sizeof(double);
+        imageSize = height*width*4+buffer.tellg()+sizeof(double)+sizeof(bool);
         sensorsSize = sizeOfSensors;
         datasize = imageSize + sensorsSize; // height*width*4+buffer.tellg()+sizeof(double)+ sizeof(NUSensorsData);
     }

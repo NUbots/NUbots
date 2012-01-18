@@ -142,8 +142,8 @@ public:
     {
         if(flipped)
         {
-            //return at(getWidth() - x - 1, getHeight() - y - 1);
-            return at(x, getHeight() - y - 1);
+            return at(getWidth() - x - 1, getHeight() - y - 1);
+            //return at(x, getHeight() - y - 1);
         }
         else
         {
