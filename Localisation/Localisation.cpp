@@ -97,6 +97,14 @@ Localisation::Localisation(const Localisation& source): TimestampedData()
     *this = source;
 }
 
+
+void Localisation::writeLog()
+{
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
+   debug_file <<  m_frame_log.str() << std::endl;
+    #endif
+}
+
 Localisation& Localisation::operator=(const Localisation& source)
 {
     if (this != &source) // protect against invalid self-assignment
@@ -141,7 +149,13 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
 
     m_frame_log.str(""); // Clear buffer.
     if (sensor_data == NULL or fobs == NULL)
+    {
+        m_frame_log << "Data not available." << std::cout;
+        std::cout << "Data not available." << std::cout;
+        writeLog();
         return;
+    }
+
 
     // Calculate time passed since previous frame.
     float time_increment = sensor_data->CurrentTime - m_timestamp;
@@ -149,7 +163,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
     m_currentFrameNumber++;
 
 #if LOC_SUMMARY > 0
-    m_frame_log << "Frame " << m_currentFrameNumber << " Time: " << m_timestamp << std::endl;
+    m_frame_log << "_____ Frame " << m_currentFrameNumber << " Time: " << m_timestamp << " _____"<< std::endl;
 #endif
 
     // Check if processing is required.
@@ -160,6 +174,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         #if LOC_SUMMARY > 0
         m_frame_log << "Processing Cancelled." << std::endl;
         #endif
+        writeLog();
         return;
     }
 
@@ -177,6 +192,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             m_frame_log << "Setting position from GPS: (" << gps[0] << "," << gps[1] << "," << compass << ")" << std::endl;
             #endif
             fobs->self.updateLocationOfSelf(gps[0], gps[1], compass, 0.1, 0.1, 0.01, false);
+            writeLog();
             return;
         }
     #else
@@ -199,6 +215,10 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             #if LOC_SUMMARY > 0
             m_frame_log << std::endl << "Result: " << getBestModel().summary(false);
             #endif
+        }
+        else
+        {
+            cout << "Localisatiojn unable to retrieve odometry!" << std::endl;
         }
 
         std::vector<TeamPacket::SharedBall> sharedBalls = FindNewSharedBalls(teamInfo->getSharedBalls());
@@ -249,6 +269,8 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
 #endif
     #endif
+    writeLog();
+    return;
 }
 
 std::vector<TeamPacket::SharedBall> Localisation::FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls)
