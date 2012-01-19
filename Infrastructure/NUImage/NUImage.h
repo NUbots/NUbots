@@ -22,9 +22,49 @@ to this standard image format we are able to have our software support multiple 
 platforms.
 */
 
+#define NUIMAGE_HEADER_IDENTIFIER_LENGTH 4
+#define NUIMAGE_IDENTIFIER "IMAG"
+
 class NUImage: public TimestampedData
 {
 public:
+    enum Version
+    {
+        VERSION_UNKNOWN,
+        VERSION_001,
+        VERSIONS_TOTAL
+    };
+
+    struct Header
+    {
+        char identifier[NUIMAGE_HEADER_IDENTIFIER_LENGTH];
+        Version version;
+    };
+
+    static Header currentVersionHeader()
+    {
+        Header currHeader;
+        const Version currVersion = VERSION_001;
+        for(unsigned int i = 0; i <  NUIMAGE_HEADER_IDENTIFIER_LENGTH ; ++i)
+        {
+            currHeader.identifier[i] = NUIMAGE_IDENTIFIER[i];
+        }
+        currHeader.version = currVersion;
+        return currHeader;
+    }
+
+    static bool validHeader(const Header& header)
+    {
+        for(unsigned int i = 0; i <  NUIMAGE_HEADER_IDENTIFIER_LENGTH ; ++i)
+        {
+            if(header.identifier[i] != NUIMAGE_IDENTIFIER[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /*!
     @brief Default constructor.
     */
