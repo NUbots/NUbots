@@ -247,7 +247,9 @@ void NUSensors::calculateOrientation()
         Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
         if(validKinematics)
             orientation = Kinematics::OrientationFromTransform(supportLegTransform);
-        
+
+        validKinematics = validKinematics && (fabs(acceleration[2]) > 2*fabs(acceleration[1]) && fabs(acceleration[2]) > 2*fabs(acceleration[0]));
+
         if(!m_orientationFilter->Initialised())
             m_orientationFilter->initialise(m_current_time,gyros,acceleration,validKinematics,orientation);
         else
@@ -405,16 +407,24 @@ void NUSensors::calculateFallSense()
             if (fabs(acceleration[0]) > fabs(acceleration[1]))
             {   
                 if (acceleration[0] > 0)
-                    fallen[3] = Fallen;
+                {
+                    fallen[3] = Fallen;     // Front
+                }
                 else
-                    fallen[4] = Fallen;
+                {
+                    fallen[4] = Fallen;     // Back
+                }
             }
             else
             {
                 if (acceleration[1] > 0)
-                    fallen[1] = Fallen;
+                {
+                    fallen[1] = Fallen;     // Left
+                }
                 else
-                    fallen[2] = Fallen;
+                {
+                    fallen[2] = Fallen;     // Right
+                }
             }
         }
         m_data->set(NUSensorsData::Fallen, m_current_time, fallen);
