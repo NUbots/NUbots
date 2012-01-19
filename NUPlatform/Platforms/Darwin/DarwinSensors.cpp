@@ -65,7 +65,11 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
     m_previous_positions = vector<float>(platform->m_servo_names.size(), 0);
     m_previous_velocities = vector<float>(platform->m_servo_names.size(), 0);
     m_joint_mapping = &DarwinJointMapping::Instance();
-	
+
+    std::vector<float> invalid(NUSensorsData::NumEndEffectorIndices, numeric_limits<float>::quiet_NaN());
+    m_data->set(NUSensorsData::RLegEndEffector, m_data->CurrentTime, invalid);
+    m_data->set(NUSensorsData::LLegEndEffector, m_data->CurrentTime, invalid);
+
 }
 
 /*! @brief Destructor for DarwinSensors
