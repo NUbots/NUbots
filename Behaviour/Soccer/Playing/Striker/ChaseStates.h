@@ -187,17 +187,13 @@ protected:
             vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
             vector<float> result;
             // decide whether we need to dodge or not
-            float leftobstacle = 255;
-            float rightobstacle = 255;
-            vector<float> temp;
-            if (m_data->get(NUSensorsData::LDistance, temp) and temp.size() > 0)
-                leftobstacle = temp[0];
-            if (m_data->get(NUSensorsData::RDistance, temp) and temp.size() > 0)
-                rightobstacle = temp[0];
-            
+            vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
+            float leftobstacle = obstacles.at(0);
+            float rightobstacle = obstacles.at(1);
+
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
             if (ball.estimatedDistance() > 40 and min(leftobstacle, rightobstacle) < ball.estimatedDistance())
-                result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, min(ball.estimatedDistance(), 25.0f), 50);
+                result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, obstacles, min(ball.estimatedDistance(), 25.0f), 50);
             else
                 result = speed;
             
