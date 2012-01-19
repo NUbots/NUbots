@@ -78,10 +78,10 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
         if(circle.isDefined)
         {
             bool DistanceIsOK = isVisualBallDistanceCloseDistanceToPoint(circle, vision, largestCandidate, AllObjects);
-            if(DistanceIsOK)
-            {
+//            if(DistanceIsOK)
+//            {
                 result = circle;
-            }
+//            }
         }
     }
     return result;

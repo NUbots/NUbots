@@ -192,10 +192,23 @@ void visionStreamWidget::readPendingData()
         //stream->setByteOrder(QDataStream::LittleEndian);
 
         buffer.read(reinterpret_cast<char*>(&sizeOfSensors), sizeof(sizeOfSensors));
+        std::streampos img_begin = buffer.tellg();
+        NUImage::Header image_header;
+        NUImage::Version img_version = NUImage::VERSION_UNKNOWN;
+        buffer.read(reinterpret_cast<char*>(&image_header), sizeof(image_header));
+        if(NUImage::validHeader(image_header))
+        {
+            img_version = image_header.version;
+        }
+        else
+        {
+            buffer.seekg(img_begin);
+        }
+//        qDebug() << "Image Version: " << img_version;
         buffer.read(reinterpret_cast<char*>(&width), sizeof(width));
         buffer.read(reinterpret_cast<char*>(&height), sizeof(height));
 
-        //qDebug() << height << ", " << width;
+//        qDebug() << height << ", " << width;
         imageSize = height*width*4+buffer.tellg()+sizeof(double)+sizeof(bool);
         sensorsSize = sizeOfSensors;
         datasize = imageSize + sensorsSize; // height*width*4+buffer.tellg()+sizeof(double)+ sizeof(NUSensorsData);

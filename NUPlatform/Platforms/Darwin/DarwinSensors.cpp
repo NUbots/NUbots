@@ -65,7 +65,11 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
     m_previous_positions = vector<float>(platform->m_servo_names.size(), 0);
     m_previous_velocities = vector<float>(platform->m_servo_names.size(), 0);
     m_joint_mapping = &DarwinJointMapping::Instance();
-	
+
+    std::vector<float> invalid(NUSensorsData::NumEndEffectorIndices, numeric_limits<float>::quiet_NaN());
+    m_data->set(NUSensorsData::RLegEndEffector, m_data->CurrentTime, invalid);
+    m_data->set(NUSensorsData::LLegEndEffector, m_data->CurrentTime, invalid);
+
 }
 
 /*! @brief Destructor for DarwinSensors
@@ -237,11 +241,12 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     //cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
     m_data->set(NUSensorsData::Gyro,m_current_time, data);
 
-    addr = int(Robot::CM730::P_ACCEL_X_L);
+    addr = int(Robot::CM730::P_ACCEL_Y_L);
     data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[0] = (data[0]-centrevalue)/VALUETOACCEL_RATIO;
-    addr = int(Robot::CM730::P_ACCEL_Y_L);
+    data[0] = -(data[0]-centrevalue)/VALUETOACCEL_RATIO;
+
+    addr = int(Robot::CM730::P_ACCEL_X_L);
     data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[1] = (data[1]-centrevalue)/VALUETOACCEL_RATIO;
@@ -249,7 +254,7 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     addr = int(Robot::CM730::P_ACCEL_Z_L);
     data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[2] = (data[2]-centrevalue)/VALUETOACCEL_RATIO;
+    data[2] = -(data[2]-centrevalue)/VALUETOACCEL_RATIO;
 	
     m_data->set(NUSensorsData::Accelerometer,m_current_time, data);
 }

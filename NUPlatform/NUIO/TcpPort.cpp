@@ -218,11 +218,13 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
     sensordata.size = sensorsString.size();
     
     int sensorsSize = sensordata.size;
+    NUImage::Header image_header = NUImage::currentVersionHeader();
     int imagewidth = p_image.getWidth();
     int imageheight = p_image.getHeight();
     double timeStamp = p_image.GetTimestamp();
     bool flipped = p_image.flipped;
     buffer.write(reinterpret_cast<char*>(&sensorsSize), sizeof(sensorsSize));
+    buffer.write(reinterpret_cast<char*>(&image_header), sizeof(image_header));
     buffer.write(reinterpret_cast<char*>(&imagewidth), sizeof(imagewidth));
     buffer.write(reinterpret_cast<char*>(&imageheight), sizeof(imageheight));
     buffer.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));

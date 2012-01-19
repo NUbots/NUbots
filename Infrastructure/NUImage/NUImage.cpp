@@ -254,10 +254,12 @@ QImage NUImage::getSubImage(int x, int y, int width, int height, int decimation_
  */
 std::ostream& operator<< (std::ostream& output, const NUImage& p_image)
 {
+    NUImage::Header image_header = NUImage::currentVersionHeader();
     int sourceWidth = p_image.getWidth();
     int sourceHeight = p_image.getHeight();
     double timeStamp = p_image.m_timestamp;
     bool flipped = p_image.flipped;
+    output.write(reinterpret_cast<char*>(&image_header), sizeof(image_header));
     output.write(reinterpret_cast<char*>(&sourceWidth), sizeof(sourceWidth));
     output.write(reinterpret_cast<char*>(&sourceHeight), sizeof(sourceHeight));
     output.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
@@ -272,13 +274,28 @@ std::ostream& operator<< (std::ostream& output, const NUImage& p_image)
 std::istream& operator>> (std::istream& input, NUImage& p_image)
 {
     int width, height;
+    std::streampos start = input.tellg();
+    NUImage::Header header;
+    NUImage::Version image_version = NUImage::VERSION_UNKNOWN;
+    input.read(reinterpret_cast<char*>(&header), sizeof(header));
+    if(NUImage::validHeader(header) == true)
+    {
+        image_version = header.version;
+    }
+    else
+    {
+        input.seekg(start);
+    }
+
     input.read(reinterpret_cast<char*>(&width), sizeof(width));
     input.read(reinterpret_cast<char*>(&height), sizeof(height));
     input.read(reinterpret_cast<char*>(&p_image.m_timestamp), sizeof(p_image.m_timestamp));
-    input.read(reinterpret_cast<char*>(&p_image.flipped), sizeof(p_image.flipped));
+    if(image_version >= NUImage::VERSION_001)
+    {
+        input.read(reinterpret_cast<char*>(&p_image.flipped), sizeof(p_image.flipped));
+    }
     p_image.setImageDimensions(width, height);
     p_image.useInternalBuffer(true);
-
     for(int y = 0; y < height; y++)
     {
         if(!input.good()) throw std::exception();
