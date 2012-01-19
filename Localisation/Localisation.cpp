@@ -101,7 +101,7 @@ Localisation::Localisation(const Localisation& source): TimestampedData()
 void Localisation::writeLog()
 {
     #if DEBUG_LOCALISATION_VERBOSITY > 0
-   debug_file <<  m_frame_log.str() << std::endl;
+   debug_file  << std::endl << std::endl <<  m_frame_log.str();
     #endif
 }
 
