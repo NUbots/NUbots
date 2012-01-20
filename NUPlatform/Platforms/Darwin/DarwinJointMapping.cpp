@@ -11,7 +11,8 @@ DarwinJointMapping::DarwinJointMapping()
 {
     float temp_off[] =
     {
-        0.0f,           // [0]  HEAD_PITCH
+        //0.0f,           // [0]  HEAD_PITCH
+        -0.523598667,
         0.0f,           // [1]  HEAD_YAW
         -0.7853981f,    // [2]  L_SHOULDER_ROLL
         1.5707963f,     // [3]  L_SHOULDER_PITCH
