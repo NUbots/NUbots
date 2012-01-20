@@ -279,6 +279,66 @@ public:
         result[2] = yawsum;
         return result;
     }
+
+    /*! @brief Returns a vector of the left and right obstacles using either the ultrasonics
+                on the NAOs or the Darwin Vision obstacles
+     */
+    static vector<float> getObstacleDistances(NUSensorsData* sensors)
+    {
+        vector<float> result;
+        vector<float> temp_l;
+        vector<float> temp_r;
+        float leftobstacle = 255;
+        float rightobstacle = 255;
+
+        // See if ultrasonic sensors are available
+        if(sensors->get(NUSensorsData::LDistance, temp_l) and sensors->get(NUSensorsData::RDistance, temp_r))
+        {
+            //NAO
+            if (temp_l.size() > 0)
+                leftobstacle = temp_l[0];
+            if (temp_r.size() > 0)
+                rightobstacle = temp_r[0];
+        }
+        else
+        {
+            //DARWIN
+            vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
+            AmbiguousObject tempobj;
+            Vector3<float> temploc;
+
+            for(unsigned int i=0; i<objects.size(); i++)
+            {
+                tempobj = objects.at(i);
+                //check object was seen this frame
+                if(tempobj.isObjectVisible())
+                {
+                    temploc = tempobj.getMeasuredRelativeLocation();
+                    //check obstacle is within 120 degree cone
+                    if(!(abs(temploc.y) > mathGeneral::PI/3))
+                    {
+                        //check if obstacle is on left or right
+                        if(temploc.y > 0) {
+                            //check obstacle is wihing
+                            if(temploc.x < leftobstacle) {
+                                leftobstacle = temploc.x;
+                            }
+                        }
+                        else {
+                            if(temploc.x < rightobstacle) {
+                                rightobstacle = temploc.x;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        result.push_back(leftobstacle);
+        result.push_back(rightobstacle);
+
+        return result;
+    }
     
     /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
         @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
@@ -286,42 +346,9 @@ public:
     static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 40, float dontcaredistance = 75)
     {
         // Get obstacle distances from the sensors
-        vector<float> temp_l;
-        vector<float> temp_r;
-		float leftobstacle = 255;
-        float rightobstacle = 255;
-	
-		// See if ultrasonic sensors are available
-		if(sensors->get(NUSensorsData::LDistance, temp_l) and sensors->get(NUSensorsData::RDistance, temp_r))
-		{
-			//NAO
-		    if (temp_l.size() > 0)
-		        leftobstacle = temp_l[0];
-		    if (temp_r.size() > 0)
-		        rightobstacle = temp_r[0];
-		}
-		else
-		{		
-			//DARWIN
-			vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
-			AmbiguousObject tempobj;
-			Vector3<float> temploc;
-
-			for(unsigned int i=0; i<objects.size(); i++)
-			{
-				tempobj = objects.at(i);
-				if(tempobj.isObjectVisible())
-				{
-					temploc = tempobj.getMeasuredRelativeLocation();
-					if(temploc.y > 0)
-						if(temploc.x < leftobstacle)
-							leftobstacle = temploc.x;
-					else
-						if(temploc.x < rightobstacle)
-							rightobstacle = temploc.x;
-				}
-			}
-		}		
+        vector<float> obstacles = getObstacleDistances(sensors);
+        float leftobstacle = obstacles.at(0);
+        float rightobstacle = obstacles.at(1);
         
         if (fabs(speed[1]) > mathGeneral::PI/2)
         {   // if the speed is not in the range of the ultrasonic sensors then don't both dodging
@@ -341,6 +368,47 @@ public:
             else                                // if we are 'outside' the object
                 dodgeangle = asin(objectsize/obstacle);
             
+            if (leftobstacle <= rightobstacle)
+            {   // the obstacle is on the left
+                if (speed[1] > -dodgeangle)
+                    newspeed[1] = -dodgeangle;
+            }
+            else
+            {   // the obstacle is on the right
+                if (speed[1] < dodgeangle)
+                    newspeed[1] = dodgeangle;
+            }
+            return newspeed;
+        }
+    }
+
+    /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
+                with provided obstacles - does not calculate its own obstacles
+        @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
+     */
+    static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, vector<float> obstacles, float objectsize = 40, float dontcaredistance = 75)
+    {
+        float leftobstacle = obstacles.at(0);
+        float rightobstacle = obstacles.at(1);
+
+        if (fabs(speed[1]) > mathGeneral::PI/2)
+        {   // if the speed is not in the range of the ultrasonic sensors then don't both dodging
+            return speed;
+        }
+        else if (leftobstacle > dontcaredistance and rightobstacle > dontcaredistance)
+        {   // if the obstacles are too far away don't dodge
+            return speed;
+        }
+        else
+        {   // an obstacle needs to be dodged
+            vector<float> newspeed = speed;
+            float obstacle = min(leftobstacle, rightobstacle);
+            float dodgeangle;
+            if (obstacle < objectsize)          // if we are 'inside' the object
+                dodgeangle = mathGeneral::PI/2 + asin((objectsize - obstacle)/objectsize);
+            else                                // if we are 'outside' the object
+                dodgeangle = asin(objectsize/obstacle);
+
             if (leftobstacle <= rightobstacle)
             {   // the obstacle is on the left
                 if (speed[1] > -dodgeangle)
