@@ -174,6 +174,8 @@ void NUSensors::initialise()
         // Check if the effector is one that is stored in the sensor data.
         if(effector_name == "Bottom Camera" or effector_name == "Camera")   // On NAO we just use the bottom camera.
         {
+            if(effector_name == "Bottom Camera") m_camera_number = 1;
+            else m_camera_number = 0;
             p_transform_id = &NUSensorsData::CameraTransform;
             p_effector_id = NULL;       // No end effector for the camera.
         }
@@ -290,7 +292,8 @@ void NUSensors::calculateHorizon()
 
     validKinematics &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
     validKinematics &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
-    int camera = 1;
+    int camera = m_camera_number;
+
 
     if (validKinematics)
     {
