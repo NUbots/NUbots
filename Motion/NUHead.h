@@ -105,7 +105,7 @@ private:
     
     const float m_BALL_SIZE;
     const float m_FIELD_DIAGONAL;
-    const float m_CAMERA_OFFSET;
+    float m_CAMERA_OFFSET;
     float m_CAMERA_FOV_X;
     float m_CAMERA_FOV_Y;
     
