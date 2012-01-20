@@ -472,9 +472,17 @@ void NUSensors::calculateOdometry()
     if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data vector is of the correct size.
 
     // Retrieve the foot pressures.
+
     float leftForce, rightForce;
-    m_data->getForce(NUSensorsData::LFoot,leftForce);
-    m_data->getForce(NUSensorsData::RFoot,rightForce);
+    bool force_sensors = true;
+    force_sensors = force_sensors && m_data->getForce(NUSensorsData::LFoot,leftForce);
+    force_sensors = force_sensors && m_data->getForce(NUSensorsData::RFoot,rightForce);
+
+    if(!force_sensors)
+    {
+        leftForce = -1.0f;
+        rightForce = -1.0f;
+    }
 
     // Retrieve the foot positions.
     bool validFootPosition = true;

@@ -183,7 +183,7 @@ std::vector<float> OdometryEstimator::CalculateNextStep(const std::vector<float>
     float leftZ = leftPos[2];
     float rightZ = rightPos[2];
 
-    if(forceLeft != 0 or forceRight != 0)
+    if(forceLeft != -1.0f or forceRight != -1.0f)
     {
         currSupport = SelectSupportLegTouch(forceLeft, forceRight);
     }
