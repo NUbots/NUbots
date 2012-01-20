@@ -410,6 +410,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
         AmbiguousObjectsConstIt endAmb(fobs->ambiguousFieldObjects.end());
         for(; currAmb != endAmb; ++currAmb){
             if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
+            if(currAmb->getID() == FieldObjects::FO_OBSTACLE) continue; // Skip objects that were not seen.
             //updateResult = doAmbiguousLandmarkMeasurementUpdate((*currAmb), fobs->stationaryFieldObjects);
             updateResult = doAmbiguousLandmarkMeasurementUpdateDiscard((*currAmb), fobs->stationaryFieldObjects);
             NormaliseAlphas();
