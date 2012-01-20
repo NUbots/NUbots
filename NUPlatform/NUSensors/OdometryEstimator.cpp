@@ -27,7 +27,7 @@
  */
 OdometryEstimator::OdometryEstimator()
 {
-    m_logging_enabled = true;
+    m_logging_enabled = false;
 
     // Tuning variables
     m_minimum_support_foot_pressure = 1.0; // in Newtons. 0.75 initial (robot 214)
