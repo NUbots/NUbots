@@ -3072,7 +3072,7 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
         tempObject.UpdateVisualObject(measured, measuredError, screenPositionAngle, screen_centre, screen_dim, m_timestamp);
         objectList.push_back(tempObject);
 
-        #ifdef DEBUG_VISION_VERBOSITY > 0
+        #if DEBUG_VISION_VERBOSITY > 0
             debug << "Obst " << i << " bottom: (" << cx << ", " << cy << ") centre: (" <<
                      screen_centre.x << ", " << screen_centre.y << ") d2p: " <<
                      measured.x << "cm b2p:" << measured.y << "rad e2p:" << measured.z <<endl;
