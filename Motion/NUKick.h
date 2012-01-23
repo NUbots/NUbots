@@ -58,15 +58,15 @@ public:
     void stopLegs();
     virtual void kill();
 
-    bool isActive();
-    bool isUsingHead();
-    bool isUsingArms();
-    bool isUsingLegs();
+    virtual bool isActive();
+    virtual bool isUsingHead();
+    virtual bool isUsingArms();
+    virtual bool isUsingLegs();
     bool isReady();
 
-    bool requiresHead() {return isUsingHead();}
-    bool requiresArms() {return isUsingArms();}
-    bool requiresLegs() {return true;}
+    virtual bool requiresHead() {return isUsingHead();}
+    virtual bool requiresArms() {return isUsingArms();}
+    virtual bool requiresLegs() {return true;}
 
     virtual void setArmEnabled(bool leftarm, bool rightarm);
     virtual void setHeadEnabled(bool head);
