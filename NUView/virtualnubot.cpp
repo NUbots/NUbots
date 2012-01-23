@@ -15,6 +15,8 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
+#include "../Kinematics/Kinematics.h"
+
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
     //! TODO: Load LUT from filename.
@@ -333,33 +335,57 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 //START OBSTACLE DETECTION
     vector<ObjectCandidate> obstacle_candidates = vision.getObstacleCandidates(pre_hull_points, hull_points, Vision::OBSTACLE_HEIGH_THRESH, Vision::OBSTACLE_WIDTH_MIN);
 
-    if(DEBUG_ON) {
-        //generate list of points from candidates and print to debug file
-        vector< Vector2<int> > obstacle_points;
-        Vector2<int> next_point;
-        for(unsigned int i=0; i<obstacle_candidates.size(); i++)
-        {
-            next_point.x = obstacle_candidates.at(i).getCentreX();
-            next_point.y = obstacle_candidates.at(i).getBottomRight().y;
-            obstacle_points.push_back(next_point);
-        }
-        printPoints(obstacle_points,OBSTACLE_POINTS);
-    }
-
     candidates.insert(candidates.end(),obstacle_candidates.begin(),obstacle_candidates.end());
 
     vector<AmbiguousObject> obstacle_objects = vision.getObjectsFromCandidates(obstacle_candidates);
 
     if(DEBUG_ON)
     {
+        qDebug() << "\nObstacle Detection:";
+        vector< Vector2<int> > obstacle_points;
+        Vector2<int> next_point;
+        for(unsigned int i=0; i<obstacle_candidates.size(); i++)
+        {
+            qDebug() << "Candidate " << i << ":";
+            next_point.x = obstacle_candidates.at(i).getCentreX();
+            next_point.y = obstacle_candidates.at(i).getBottomRight().y;
+            obstacle_points.push_back(next_point);
+            qDebug() << "\tscreen pos (" << next_point.x << ", " << next_point.y << ")";
+            float bearing = vision.CalculateBearing(next_point.x);
+            float elevation = vision.CalculateElevation(next_point.y);
+            float distance = 0;
+            qDebug() << "\tbearing: " << bearing << " elevation: " << elevation << "";
+            //vector<float> ctgvector;
+            vector<float> ctvector;
+            Vector3<float> measured(distance,bearing,elevation);
+
+            bool isOK = vision.getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
+            if(isOK == true) {
+                Matrix cameraTransform = Matrix4x4fromVector(ctvector);
+                measured = Kinematics::TransformPosition(cameraTransform, measured);
+                qDebug() << "\tmeasured: " << measured.x << " " << measured.y << " " << measured.z << "";
+            }
+            /*
+            bool isOK = vision.getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+            if(isOK == true) {
+                Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
+                measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+                qDebug() << "\tmeasured: " << measured.x << " " << measured.y << " " << measured.z << "";
+            }
+            */
+            else {
+                qDebug() << "\tgetSensorsData fail";
+            }
+        }
+        printPoints(obstacle_points,OBSTACLE_POINTS);
+
         qDebug() << "Size of obstacle_objects: " << obstacle_objects.size() << "\n";
         printObjects(obstacle_objects,OBSTACLE_OBJECTS);
+
+        printObjects(obstacle_objects,AMBIGUOUS_OBJECTS);
     }
 
     vision.AllFieldObjects->ambiguousFieldObjects.insert(vision.AllFieldObjects->ambiguousFieldObjects.end(), obstacle_objects.begin(), obstacle_objects.end());
-
-    if(DEBUG_ON)
-        printObjects(obstacle_objects,AMBIGUOUS_OBJECTS);
 //END OBSTACLE DETECTION
 
 

@@ -285,6 +285,8 @@ public:
      */
     static vector<float> getObstacleDistances(NUSensorsData* sensors)
     {
+        float VIEW_ANGLE_RANGE = mathGeneral::PI/6;
+        float OVERLAP_ANGLE = mathGeneral::PI/24;
         vector<float> result;
         vector<float> temp_l;
         vector<float> temp_r;
@@ -315,16 +317,26 @@ public:
                 {
                     temploc = tempobj.getMeasuredRelativeLocation();
                     //check obstacle is within 120 degree cone
-                    if(!(abs(temploc.y) > mathGeneral::PI/3))
+                    if(!(fabs(temploc.y) > VIEW_ANGLE_RANGE))
                     {
-                        //check if obstacle is on left or right
+                        //check if obstacle is in front, on left or on right
+                        if(fabs(temploc.y) < OVERLAP_ANGLE) {
+                            //obstacle is within 15 degrees of centre - flag as left AND right obstacle
+                            if(temploc.x < leftobstacle) {
+                                leftobstacle = temploc.x;
+                            }
+                            if(temploc.x < rightobstacle) {
+                                rightobstacle = temploc.x;
+                            }
+                        }
                         if(temploc.y > 0) {
-                            //check obstacle is wihing
+                            //obstacle is to right
                             if(temploc.x < leftobstacle) {
                                 leftobstacle = temploc.x;
                             }
                         }
                         else {
+                            //obstacle is to left
                             if(temploc.x < rightobstacle) {
                                 rightobstacle = temploc.x;
                             }
