@@ -29,6 +29,7 @@
 #include "Soccer/SoccerProvider.h"
 #include "MiscBehaviours/VisionCalibrationProvider.h"
 #include "ChaseBall/ChaseBallProvider.h"
+#include "Zombie/ZombieProvider.h"
 #include "WalkOptimisation/WalkOptimisationProvider.h"
 #include "Kicker/KickerProvider.h"
 #include "PassingChallenge/PassingChallengeProvider.h"
@@ -61,6 +62,8 @@ Behaviour::Behaviour()
     #elif defined(TARGET_IS_CYCLOID)
         m_behaviour = new QuietStanceProvider(this);
     #else
+        cout << "Starting Behaviour" << endl;
+        //m_behaviour = new ZombieProvider(this);
         m_behaviour = new SoccerProvider(this);
     #endif
     m_next_behaviour = NULL;
