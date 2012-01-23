@@ -385,7 +385,6 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     method = Vision::PRIMS;
     for (int i = 0; i < 4; i++)
     {
-
         switch (i)
         {
             case ROBOTS:
@@ -665,6 +664,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         }
         */
         //END: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
+
+        #if DEBUG_VISION_VERBOSITY > 1
+            debug << "Visible Objects:\n" << AllFieldObjects->toString(true) << endl;
+        #endif
 }
 
 void Vision::SaveAnImage()
