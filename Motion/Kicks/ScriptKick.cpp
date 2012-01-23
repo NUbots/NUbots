@@ -121,14 +121,14 @@ void ScriptKick::doKick()
 {
     if(m_current_script and m_kick_enabled and m_kick_ready and (m_script_start_time == -1))
     {
-        std::cout << "Kick Beginning." << std::endl;
+        //std::cout << "Kick Beginning." << std::endl;
         m_current_script->play(m_data, m_actions);
         m_script_start_time = m_data->CurrentTime;
     }
 
     if(m_data->CurrentTime > m_current_script->timeFinished())
     {
-        std::cout << "Kick Complete. " << m_data->CurrentTime << ", " << m_current_script->timeFinished() << ", " << m_script_start_time << std::endl;
+        //std::cout << "Kick Complete. " << m_data->CurrentTime << ", " << m_current_script->timeFinished() << ", " << m_script_start_time << std::endl;
         // Kick has finished
         m_current_script = NULL;
         m_script_start_time = -1;
@@ -159,7 +159,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
 
     if(fabs(theta) > angle_margin)
     {
-        std::cout << "Angle Too Large: " << theta << std::endl;
+        //std::cout << "Angle Too Large: " << theta << std::endl;
         return;
     }
 
@@ -178,7 +178,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
     }
     else
     {
-        std::cout << "No kick available for position: (" << ball_x << ", " << ball_y << ")" << std::endl;
+        //std::cout << "No kick available for position: (" << ball_x << ", " << ball_y << ")" << std::endl;
         return;
     }
 
@@ -188,7 +188,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         m_kick_enabled = true;
         setArmEnabled(true, true);
         setHeadEnabled(true);
-        std::cout << "Starting kick: " << toString(m_kicking_leg) << std::endl;
+        //std::cout << "Starting kick: " << toString(m_kicking_leg) << std::endl;
     }
     return;
 }
