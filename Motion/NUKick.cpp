@@ -38,9 +38,11 @@ using namespace mathGeneral;
 //#if DEBUG_LOCALISATION_VERBOSITY > 0
 
 #include "Kicks/NAOKick.h"
+#include "Kicks/ScriptKick.h"
 NUKick* NUKick::getKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions)
 {
-    return new NAOKick(walk, data, actions);
+    //return new NAOKick(walk, data, actions);
+    return new ScriptKick(walk, data, actions);
 }
 
 NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUKick", data, actions)

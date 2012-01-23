@@ -22,6 +22,7 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS	IK.cpp IK.h
 		NAOKick.cpp NAOKick.h
+		ScriptKick.cpp ScriptKick.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
