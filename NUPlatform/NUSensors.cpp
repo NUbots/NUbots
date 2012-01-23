@@ -174,6 +174,8 @@ void NUSensors::initialise()
         // Check if the effector is one that is stored in the sensor data.
         if(effector_name == "Bottom Camera" or effector_name == "Camera")   // On NAO we just use the bottom camera.
         {
+            if(effector_name == "Bottom Camera") m_camera_number = 1;
+            else m_camera_number = 0;
             p_transform_id = &NUSensorsData::CameraTransform;
             p_effector_id = NULL;       // No end effector for the camera.
         }
@@ -290,7 +292,8 @@ void NUSensors::calculateHorizon()
 
     validKinematics &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
     validKinematics &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
-    int camera = 1;
+    int camera = m_camera_number;
+
 
     if (validKinematics)
     {
@@ -469,9 +472,17 @@ void NUSensors::calculateOdometry()
     if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data vector is of the correct size.
 
     // Retrieve the foot pressures.
+
     float leftForce, rightForce;
-    m_data->getForce(NUSensorsData::LFoot,leftForce);
-    m_data->getForce(NUSensorsData::RFoot,rightForce);
+    bool force_sensors = true;
+    force_sensors = force_sensors && m_data->getForce(NUSensorsData::LFoot,leftForce);
+    force_sensors = force_sensors && m_data->getForce(NUSensorsData::RFoot,rightForce);
+
+    if(!force_sensors)
+    {
+        leftForce = -1.0f;
+        rightForce = -1.0f;
+    }
 
     // Retrieve the foot positions.
     bool validFootPosition = true;

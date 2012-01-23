@@ -39,7 +39,7 @@
 #include <algorithm>
 using namespace std;
 
-NUHead::NUHead(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUHead", data, actions), m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721), m_CAMERA_OFFSET(0.6981 + NUCamera::CameraOffset)
+NUHead::NUHead(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUHead", data, actions), m_BALL_SIZE(6.5), m_FIELD_DIAGONAL(721)
 {
     m_camera_height = 46;
     m_body_pitch = 0;
@@ -257,7 +257,7 @@ void NUHead::calculateHeadTarget(float elevation, float bearing, float centreele
         times.push_back(m_data->CurrentTime);
         
         // clip the head targets to 'limits'
-        float min_pitch = (m_CAMERA_FOV_Y/2 - m_CAMERA_OFFSET - m_body_pitch - 0.05);
+        float min_pitch = m_pitch_limits[0];//(m_CAMERA_FOV_Y/2 - m_CAMERA_OFFSET - m_body_pitch - 0.05);
         float max_pitch = m_pitch_limits[1];
         if (new_pitch < min_pitch)
             new_pitch = min_pitch;
@@ -655,6 +655,7 @@ void NUHead::loadConfig()
     if (file.is_open() == false)
     {
         errorlog << "NUHead::loadConfig(). Unable to open head configuration file" << endl;
+        m_CAMERA_OFFSET = NUCamera::CameraOffset;
         m_max_speeds = vector<float>(2, 2);
         m_max_accelerations = vector<float>(2, 8);
         m_default_gains = vector<float>(2, 50);
@@ -663,6 +664,7 @@ void NUHead::loadConfig()
     }
     else
     {
+        m_CAMERA_OFFSET = MotionFileTools::toFloat(file) + NUCamera::CameraOffset;
         m_max_speeds = MotionFileTools::toFloatVector(file);
         m_max_accelerations = MotionFileTools::toFloatVector(file);
         m_default_gains = MotionFileTools::toFloatVector(file);

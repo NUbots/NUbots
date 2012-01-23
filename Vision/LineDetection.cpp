@@ -470,9 +470,9 @@ void LineDetection::FindLineOrRobotPoints(ClassifiedSection* scanArea,Vision* vi
                 int MidY = (int) (segment->getEndPoint().y+segment->getStartPoint().y)/2;
                 int LEFTX = 0;
                 int RIGHTX = 0;
-                if (MidX + VERT_POINT_THICKNESS *1.2> image_width)
+                if (MidX + VERT_POINT_THICKNESS *1.2>= image_width)
                 {
-                    RIGHTX  = image_width;
+                    RIGHTX  = image_width-1;
                 }
                 else
                 {
