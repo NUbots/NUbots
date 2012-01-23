@@ -39,6 +39,7 @@ class FieldObjects;
 
 class NUKick : public NUMotionProvider
 {
+public:
     enum KickingLeg
     {
         leftLeg,
@@ -46,7 +47,6 @@ class NUKick : public NUMotionProvider
         noLeg
     };
 
-public:
     static NUKick* getKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
 
     NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
@@ -65,7 +65,7 @@ public:
     bool isReady();
 
     bool requiresHead() {return isUsingHead();}
-    bool requiresArms() {return true;}
+    bool requiresArms() {return isUsingArms();}
     bool requiresLegs() {return true;}
 
     virtual void setArmEnabled(bool leftarm, bool rightarm);
@@ -78,13 +78,14 @@ public:
 
     virtual void doKick() = 0;
 
+    bool kickPossible(float ball_x, float ball_y, float target_x, float target_y);
+
     std::string toString(KickingLeg theLeg);
 
 
 protected:
     virtual void kickToPoint(const vector<float>& position, const vector<float>& target);
     NUWalk* m_walk;                     //!< local pointer to the walk engine
-    Kinematics* m_kinematicModel;
     
     float m_ball_x;                    //!< the current ball x position relative to robot in cm
     float m_ball_y;                    //!< the current ball y position relative to robot in cm
@@ -100,7 +101,7 @@ protected:
     vector<float> m_initial_lleg;
     vector<float> m_initial_rleg;
 
-    KickingLeg m_kickingLeg;
+    KickingLeg m_kicking_leg;
 
     bool m_kick_ready;
     bool m_kick_enabled;                            //!< true if the kick is enabled, false otherwise
@@ -111,7 +112,7 @@ protected:
     double m_currentTimestamp;
     double m_previousTimestamp;
 
-    vector<Rectangle> m_kickableAreas;
+    vector<Rectangle> m_kick_regions;
 
 };
 

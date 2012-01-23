@@ -45,9 +45,7 @@ NUKick* NUKick::getKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* ac
 
 NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUKick", data, actions)
 {
-    m_kinematicModel = new Kinematics();
-    m_kinematicModel->LoadModel();
-    m_kickingLeg = noLeg;
+    m_kicking_leg = noLeg;
 
     m_currentTimestamp = 0;
     m_previousTimestamp = 0;
@@ -59,7 +57,6 @@ NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
 NUKick::~NUKick()
 {
     kill();
-    delete m_kinematicModel;
 }
 
 std::string NUKick::toString(KickingLeg theLeg)
@@ -93,7 +90,7 @@ bool NUKick::isActive()
 
 bool NUKick::isReady()
 {
-    return m_kick_enabled;
+    return m_kick_ready;
 }
 
 /*! @brief Returns true if the kick is using the head */
@@ -231,5 +228,15 @@ void NUKick::process(KickJob* job)
 
 void NUKick::kickToPoint(const vector<float>& position, const vector<float>& target)
 {
+    // Evaluate the kicking target to start a new kick, or change a kick in progress.
+    m_ball_x = position[0];
+    m_ball_y = position[1];
+
+    m_target_x = target[0];
+    m_target_y = target[1];
+
+#if DEBUG_NUMOTION_VERBOSITY > 4
+    debug << "void NAOKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << endl;
+#endif
 
 }

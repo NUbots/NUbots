@@ -41,11 +41,10 @@ using namespace mathGeneral;
 
 NAOKick::NAOKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUKick(walk, data, actions)
 {
-    m_walk = walk;
     m_kinematicModel = new Kinematics();
     m_kinematicModel->LoadModel();
     pose = DO_NOTHING;
-    m_kickingLeg = noLeg;
+    m_kicking_leg = noLeg;
 
     m_stateCommandGiven = false;
     m_estimatedStateCompleteTime = 0.0;
@@ -56,8 +55,6 @@ NAOKick::NAOKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) 
     m_pauseState = false;
     m_variableGainValue = 0.01;
     m_armCommandSent = false;
-    m_kickReady = false;
-    m_kickActive = false;
     m_kickWait = false;
 }
 
@@ -138,24 +135,6 @@ void NAOKick::loadKickParameters()
     RightFootLeftKickableArea = Rectangle(xMin, xReachSide, -footWidth/2.0, -yReachSide);
     //RightFootRightKickableArea = Rectangle(xMin, xReachSide, -2.0f*footWidth, -3.0f/2.0f*footWidth - yReachSide);
     RightFootRightKickableArea = Rectangle();
-}
-
-std::string NAOKick::toString(legId_t theLeg)
-{
-    std::string result;
-    switch(theLeg)
-    {
-    case leftLeg:
-        result = "Left";
-        break;
-    case rightLeg:
-        result = "Right";
-        break;
-    default:
-        result = "None";
-        break;
-    }
-    return result;
 }
 
 std::string NAOKick::toString(swingDirection_t theSwingDirection)
@@ -242,48 +221,25 @@ std::string NAOKick::toString(poseType_t thePose)
     return result;
 }
 
-/*! @brief Returns true if the kick is active */
-bool NAOKick::isActive()
-{
-    return m_kickActive;
-}
-
-bool NAOKick::isReady()
-{
-    return m_kickReady;
-}
-
-/*! @brief Returns true if the kick is using the head */
-bool NAOKick::isUsingHead()
-{
-    bool usingHead;
-    switch (pose)
-    {
-        case PRE_KICK:
-        case DO_NOTHING:
-        case POST_KICK:
-        case TRANSFER_TO_SUPPORT:
-        case UNSHIFT_LEG:
-            usingHead = false;
-            break;
-        default:
-            usingHead = true;
-            break;
-    }
-    return usingHead;
-}
-
-/*! @brief Returns true if the kick is using the arms */
-bool NAOKick::isUsingArms()
-{
-    return isActive();
-}
-
-/*! @brief Returns true if the kick is using the legs */
-bool NAOKick::isUsingLegs()
-{
-    return isActive();
-}
+///*! @brief Returns true if the kick is using the head */
+//bool NAOKick::isUsingHead()
+//{
+//    bool usingHead;
+//    switch (pose)
+//    {
+//        case PRE_KICK:
+//        case DO_NOTHING:
+//        case POST_KICK:
+//        case TRANSFER_TO_SUPPORT:
+//        case UNSHIFT_LEG:
+//            usingHead = false;
+//            break;
+//        default:
+//            usingHead = true;
+//            break;
+//    }
+//    return usingHead;
+//}
 
 /*! @brief Kills the kick module
  */
@@ -295,25 +251,8 @@ void NAOKick::kill()
     pose = DO_NOTHING;
     m_stateCommandGiven = false;
     m_estimatedStateCompleteTime = m_data->CurrentTime;
-    m_kickActive = false;
-    m_kickReady = false;
-}
-
-void NAOKick::stop()
-{
-    stopHead();
-    stopArms();
-    stopLegs();
-}
-
-void NAOKick::stopHead()
-{   // If another module wants to use the head, Steve says to bad...
-    return;
-}
-
-void NAOKick::stopArms()
-{   // if another module wants to use the arms, Steve says to bad...
-    return;
+    m_kick_enabled = false;
+    m_kick_ready = false;
 }
 
 void NAOKick::stopLegs()
@@ -326,7 +265,7 @@ void NAOKick::stopLegs()
     {
         case PRE_KICK:
             pose = POST_KICK;
-            m_kickingLeg = noLeg;
+            m_kicking_leg = noLeg;
             break;
         case TRANSFER_TO_SUPPORT:
             pose = UNSHIFT_LEG;
@@ -346,62 +285,6 @@ void NAOKick::stopLegs()
     }
 }
 
-/*! @brief Process new sensor data, and produce actionator commands
- 
-    @param data a pointer to the most recent sensor data storage class
-    @param actions a pointer to the actionators data storage class. 
-*/
-void NAOKick::process(NUSensorsData* data, NUActionatorsData* actions)
-{
-    if (actions == NULL || data == NULL)
-        return;
-    #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NAOKick::process(" << data << ", " << actions << ")" << endl;
-        debug << "NAOKick::process in " << toString(pose) << " ready: " << m_kickReady << " active: " << m_kickActive << endl;
-    #endif
-    
-    m_data = data;
-    m_actions = actions;
-    m_previousTimestamp = m_currentTimestamp;
-    m_currentTimestamp = data->CurrentTime;
-
-    if(!isActive() && !isReady())
-        return;
-    doKick();
-}
-
-/*! @brief Process a kick job
-    @param job the kick job
- */
-void NAOKick::process(KickJob* job)
-{
-    #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "void NAOKick::process(KickJob* job)" << endl;
-    #endif
-    double time;
-    vector<float> kickposition;
-    vector<float> kicktarget;
-    job->getKick(time, kickposition, kicktarget);
-    if(kickposition[0] == 1.0 && kickposition[1] == 2.0 && kicktarget[0] == 3.0f && kicktarget[1] == 4.0f)
-        m_pauseState = !m_pauseState;
-    else if(kickposition[0] == 1.0 && kickposition[1] == 1.0 && kicktarget[0] == 1.0f && kicktarget[1] == 1.0f)
-    {
-        m_variableGainValue += 0.001;
-        #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "Special kick command: increasing variable gain to " << m_variableGainValue << endl;
-        #endif
-    }
-    else if(kickposition[0] == -1.0 && kickposition[1] == -1.0 && kicktarget[0] == -1.0f && kicktarget[1] == -1.0f)
-    {
-        m_variableGainValue -= 0.001;
-        #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "Special kick command: decreasing variable gain to " << m_variableGainValue << endl;
-        #endif
-    }
-    kickToPoint(kickposition, kicktarget);
-}
-
-
 void NAOKick::kickToPoint(const vector<float>& position, const vector<float>& target)
 {
     // Evaluate the kicking target to start a new kick, or change a kick in progress.
@@ -410,7 +293,6 @@ void NAOKick::kickToPoint(const vector<float>& position, const vector<float>& ta
 	
 	m_target_x = target[0];
 	m_target_y = target[1];
-	m_target_timestamp = Platform->getTime();
 
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "void NAOKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << endl;
@@ -422,7 +304,7 @@ void NAOKick::kickToPoint(const vector<float>& position, const vector<float>& ta
         #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NAOKick::Choosing leg." << endl;
         #endif
-        m_kickReady = chooseLeg();
+        m_kick_ready = chooseLeg();
 
     }
     else
@@ -445,12 +327,12 @@ void NAOKick::doKick()
     bool done = false;
     float balanceYoffset = 0.0f;
     float balanceXoffset = 3.0f;
-    legId_t supportLeg = noLeg;
-    if(m_kickingLeg == rightLeg)
+    KickingLeg supportLeg = noLeg;
+    if(m_kicking_leg == rightLeg)
     {
         supportLeg = leftLeg;
     }
-    else if(m_kickingLeg == leftLeg)
+    else if(m_kicking_leg == leftLeg)
     {
         supportLeg = rightLeg;
     }
@@ -513,13 +395,13 @@ void NAOKick::doKick()
 
         case LIFT_LEG:
         {
-            done = LiftKickingLeg(m_kickingLeg, 1.5f);
+            done = LiftKickingLeg(m_kicking_leg, 1.5f);
             BalanceCoP(supportLeg);
             if(m_swingDirection == ForwardSwing)
             {
                 if(!m_armCommandSent)
                 {
-                    MoveArmsToKickPose(m_kickingLeg, 0.7f);
+                    MoveArmsToKickPose(m_kicking_leg, 0.7f);
                     m_armCommandSent = true;
                 }
             }
@@ -554,8 +436,8 @@ void NAOKick::doKick()
 
         case POISE_LEG:
         {
-            done = doPoise(m_kickingLeg, 0.5, 1.5f);
-            if(m_kickingLeg == leftLeg)
+            done = doPoise(m_kicking_leg, 0.5, 1.5f);
+            if(m_kicking_leg == leftLeg)
             {
                 BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
             }
@@ -577,7 +459,7 @@ void NAOKick::doKick()
 
         case ALIGN_BALL:
         {
-            done = AlignYposition(m_kickingLeg, 0.01, m_ball_y);
+            done = AlignYposition(m_kicking_leg, 0.01, m_ball_y);
             BalanceCoP(supportLeg);
             if(done && !m_pauseState)
             {
@@ -601,7 +483,7 @@ void NAOKick::doKick()
             {
                 yTarget = m_ball_y + (m_footWidth/2.0f + m_ballRadius);
             }
-            done = AlignYposition(m_kickingLeg, 0.01, yTarget);
+            done = AlignYposition(m_kicking_leg, 0.01, yTarget);
             BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
             if(done && !m_pauseState)
             {
@@ -616,7 +498,7 @@ void NAOKick::doKick()
 
         case EXTEND_SIDE:
         {
-            done = AlignXposition(m_kickingLeg, 0.01, m_ball_x);
+            done = AlignXposition(m_kicking_leg, 0.01, m_ball_x);
             BalanceCoP(supportLeg, balanceXoffset, balanceYoffset);
             if(done && !m_pauseState)
             {
@@ -639,7 +521,7 @@ void NAOKick::doKick()
                     debug << "Kicking Distance: " << kickDistance << endl;
                     debug << "Swinging at speed: " << kickSpeed << endl;
                     #endif
-                    done = SwingLegForward(m_kickingLeg, kickSpeed);
+                    done = SwingLegForward(m_kicking_leg, kickSpeed);
                     if(!m_armCommandSent)
                     {
                         MoveArmsToKickPose(supportLeg, kickSpeed);
@@ -648,7 +530,7 @@ void NAOKick::doKick()
                 }
                 else if( (m_swingDirection == LeftSwing) || (m_swingDirection == RightSwing))
                 {
-                    done = SwingLegSideward(m_kickingLeg, CalculateSidewardSwingSpeed(kickDistance));
+                    done = SwingLegSideward(m_kicking_leg, CalculateSidewardSwingSpeed(kickDistance));
                 }
 
                 BalanceCoP(supportLeg, balanceXoffset, balanceYoffset);
@@ -665,7 +547,7 @@ void NAOKick::doKick()
         }
         case RETRACT:
             {
-                done = LiftKickingLeg(m_kickingLeg, 1.5f);
+                done = LiftKickingLeg(m_kicking_leg, 1.5f);
                 //BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
                 if(done && !m_pauseState)
                 {
@@ -679,7 +561,7 @@ void NAOKick::doKick()
             }
         case REALIGN_LEGS:
             {
-                done = LowerLeg(m_kickingLeg, 0.7f);
+                done = LowerLeg(m_kicking_leg, 0.7f);
                 //BalanceCoP(supportLeg,balanceXoffset,balanceYoffset);
                 if(done && !m_pauseState)
                 {
@@ -693,7 +575,7 @@ void NAOKick::doKick()
             }
         case UNSHIFT_LEG:
         {
-                //done = ShiftWeightToFoot(m_kickingLeg,0.5f,0.01f, 500.0f);
+                //done = ShiftWeightToFoot(m_kicking_leg,0.5f,0.01f, 500.0f);
                 done = ShiftWeightToFootClosedLoop(supportLeg, 0.5f, 0.3);
                 if(done && !m_pauseState)
                 {
@@ -800,14 +682,14 @@ bool NAOKick::doPostKick()
     done = !m_stateCommandGiven;
     if(done)
     {
-        m_kickingLeg = noLeg;
-        m_kickActive = false;
-        m_kickReady = false;
+        m_kicking_leg = noLeg;
+        m_kick_enabled = false;
+        m_kick_ready = false;
     }
     return done;
 }
 
-bool NAOKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage, float speed, float time)
+bool NAOKick::ShiftWeightToFoot(KickingLeg targetLeg, float targetWeightPercentage, float speed, float time)
 {
     const float maxShiftSpeed = speed * SpeedMultiplier();
     const float reqiredAccuracy = 0.1; // 10%
@@ -887,7 +769,7 @@ bool NAOKick::ShiftWeightToFoot(legId_t targetLeg, float targetWeightPercentage,
 }
 
 
-bool NAOKick::ShiftWeightToFootClosedLoop(legId_t p_targetLeg, float targetWeightPercentage, float speed)
+bool NAOKick::ShiftWeightToFootClosedLoop(KickingLeg p_targetLeg, float targetWeightPercentage, float speed)
 {
     bool validData = true;
     NUData::id_t targetLeg;
@@ -974,7 +856,7 @@ bool NAOKick::ShiftWeightToFootClosedLoop(legId_t p_targetLeg, float targetWeigh
 }
 
 
-bool NAOKick::LiftKickingLeg(legId_t p_kickingLeg, float speed)
+bool NAOKick::LiftKickingLeg(KickingLeg p_kickingLeg, float speed)
 {
     bool validData = true;
     NUData::id_t kickingLeg;
@@ -1027,7 +909,7 @@ bool NAOKick::LiftKickingLeg(legId_t p_kickingLeg, float speed)
     return false;
 }
 
-bool NAOKick::doPoise(legId_t poiseLeg, float angleChange, float speed)
+bool NAOKick::doPoise(KickingLeg poiseLeg, float angleChange, float speed)
 {
     bool validData = true;
     NUData::id_t kickingLeg;
@@ -1093,7 +975,7 @@ float NAOKick::GainMultiplier()
     return TimeBetweenFrames() / 20.0f;
 }
 
-bool NAOKick::LimitJoints(legId_t leg, vector<float> jointPositions)
+bool NAOKick::LimitJoints(KickingLeg leg, vector<float> jointPositions)
 {
     bool changed = false;
     float previousValue;
@@ -1123,7 +1005,7 @@ bool NAOKick::IsPastTime(float time){
     return (m_data->CurrentTime > time);
 }
 
-bool NAOKick::BalanceCoP(legId_t p_supportLeg, float targetX, float targetY)
+bool NAOKick::BalanceCoP(KickingLeg p_supportLeg, float targetX, float targetY)
 {
     bool validData = true;
 
@@ -1160,7 +1042,7 @@ bool NAOKick::BalanceCoP(legId_t p_supportLeg, float targetX, float targetY)
     return false;
 }
 
-void NAOKick::BalanceCoPLevelTorso(legId_t theLeg, vector<float>& jointAngles, float CoPx, float CoPy, float targetX, float targetY)
+void NAOKick::BalanceCoPLevelTorso(KickingLeg theLeg, vector<float>& jointAngles, float CoPx, float CoPy, float targetX, float targetY)
 {
     // Linear controller to centre CoP
     const float gainx = -0.01 * GainMultiplier();
@@ -1226,7 +1108,7 @@ void NAOKick::BalanceCoPHipAndAnkle(vector<float>& jointAngles, float CoPx, floa
     return;
 }
 
-bool NAOKick::AlignXposition(legId_t p_kickingLeg, float speed, float xPos)
+bool NAOKick::AlignXposition(KickingLeg p_kickingLeg, float speed, float xPos)
 {
     const float gain = 0.01;
     bool validData = true;
@@ -1302,7 +1184,7 @@ bool NAOKick::AlignXposition(legId_t p_kickingLeg, float speed, float xPos)
     return (fabs(deltaX) < 0.5) || jointLimitReached;
 }
 
-bool NAOKick::AlignYposition(legId_t p_kickingLeg, float speed, float yPos)
+bool NAOKick::AlignYposition(KickingLeg p_kickingLeg, float speed, float yPos)
 {
     const float gain = 0.01;
     bool validData = true;
@@ -1371,12 +1253,12 @@ float NAOKick::FlatFootAnkleRoll(float hipRoll)
     return -(hipRoll);
 }
 
-void NAOKick::MaintainSwingHeight(legId_t supportLeg, vector<float>& supportLegJoints, legId_t swingLeg, vector<float>& swingLegJoints, float swingHeight)
+void NAOKick::MaintainSwingHeight(KickingLeg supportLeg, vector<float>& supportLegJoints, KickingLeg swingLeg, vector<float>& swingLegJoints, float swingHeight)
 {
     return;
 }
 
-void NAOKick::MoveArmsToKickPose(legId_t leadingArmleg, float speed)
+void NAOKick::MoveArmsToKickPose(KickingLeg leadingArmleg, float speed)
 {
     return;
     NUData::id_t leadingArm;
@@ -1426,7 +1308,7 @@ void NAOKick::MoveArmsToKickPose(legId_t leadingArmleg, float speed)
     }
 }
 
-bool NAOKick::SwingLegForward(legId_t p_kickingLeg, float speed)
+bool NAOKick::SwingLegForward(KickingLeg p_kickingLeg, float speed)
 {
     float swingSpeed = speed;
     bool validData = true;
@@ -1506,7 +1388,7 @@ bool NAOKick::SwingLegForward(legId_t p_kickingLeg, float speed)
     return false;
 }
 
-bool NAOKick::SwingLegSideward(legId_t p_kickingLeg, float speed)
+bool NAOKick::SwingLegSideward(KickingLeg p_kickingLeg, float speed)
 {
     float swingSpeed = speed;
     bool validData = true;
@@ -1560,7 +1442,7 @@ bool NAOKick::SwingLegSideward(legId_t p_kickingLeg, float speed)
     return false;
 }
 
-bool NAOKick::LowerLeg(legId_t p_kickingLeg, float speed)
+bool NAOKick::LowerLeg(KickingLeg p_kickingLeg, float speed)
 {
     bool validData = true;
     NUData::id_t kickingLeg;
@@ -1685,14 +1567,14 @@ bool NAOKick::chooseLeg()
             #endif
             if(RightFootForwardKickableArea.PointInside(leftFootRelativeBallLocation.x,leftFootRelativeBallLocation.y))
             {
-                m_kickingLeg = rightLeg;
+                m_kicking_leg = rightLeg;
                 m_swingDirection = ForwardSwing;
                 pose = PRE_KICK;
                 kickSelected = true;
             }
             else if(LeftFootForwardKickableArea.PointInside(rightFootRelativeBallLocation.x,rightFootRelativeBallLocation.y))
             {
-                m_kickingLeg = leftLeg;
+                m_kicking_leg = leftLeg;
                 m_swingDirection = ForwardSwing;
                 pose = PRE_KICK;
                 kickSelected = true;
@@ -1703,14 +1585,14 @@ bool NAOKick::chooseLeg()
         {
             if(RightFootLeftKickableArea.PointInside(m_ball_x,m_ball_y))
             {
-                m_kickingLeg = rightLeg;
+                m_kicking_leg = rightLeg;
                 m_swingDirection = LeftSwing;
                 pose = PRE_KICK;
                 kickSelected = true;
             }
             else if(LeftFootLeftKickableArea.PointInside(m_ball_x,m_ball_y))
             {
-                m_kickingLeg = leftLeg;
+                m_kicking_leg = leftLeg;
                 m_swingDirection = LeftSwing;
                 pose = PRE_KICK;
                 kickSelected = true;
@@ -1721,14 +1603,14 @@ bool NAOKick::chooseLeg()
         {
             if(LeftFootRightKickableArea.PointInside(m_ball_x,m_ball_y))
             {
-                m_kickingLeg = leftLeg;
+                m_kicking_leg = leftLeg;
                 m_swingDirection = RightSwing;
                 pose = PRE_KICK;
                 kickSelected = true;
             }
             if(RightFootRightKickableArea.PointInside(m_ball_x,m_ball_y))
             {
-                m_kickingLeg = rightLeg;
+                m_kicking_leg = rightLeg;
                 m_swingDirection = RightSwing;
                 pose = PRE_KICK;
                 kickSelected = true;
@@ -1739,10 +1621,10 @@ bool NAOKick::chooseLeg()
             stop();
         else
         {
-            m_kickActive = true; // Set the kick to active now, we are doing stuff!
+            m_kick_enabled = true; // Set the kick to active now, we are doing stuff!
             m_kickWait = true;
             #if DEBUG_NUMOTION_VERBOSITY > 3
-                debug << "Kick Selected - Kicking Foot: " << toString(m_kickingLeg) << ", Swing Direction: " << toString(m_swingDirection) << endl;
+                debug << "Kick Selected - Kicking Foot: " << toString(m_kicking_leg) << ", Swing Direction: " << toString(m_swingDirection) << endl;
             #endif
         }
         return kickSelected;
