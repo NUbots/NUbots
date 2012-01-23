@@ -39,7 +39,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         vector < ObjectCandidate > ::iterator it;
         //qDebug()<< "Candidate Size[Before Extending Above Horizon]: " <<FO_Candidates.size() << "\t Above horizon: " << FO_AboveHorizonCandidates.size();
         //! Go through all the candidates: to find a possible goal
-        for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
+        for(it = FO_Candidates.begin(); it  < FO_Candidates.end();)
 	{
             if(!isObjectAPossibleGoal(*it))
             {
@@ -65,21 +65,21 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         //    qDebug() << (*it).getSegments().size();
         //}
         //! Combine Any "OverLapping" Candidates:
-        CombineOverlappingCandidates(FO_Candidates);
+ //       CombineOverlappingCandidates(FO_Candidates);
         //qDebug()<< "Candidate Size[Before Ratio Size Checks]: " <<FO_Candidates.size();
         //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
         //{
         //    qDebug() << (*it).getSegments().size();
         //}
         //! Check if the ratio of the object candidate is OK
-        CheckCandidateSizeRatio(FO_Candidates, height, width);
+//        CheckCandidateSizeRatio(FO_Candidates, height, width);
         //qDebug()<< "Candidate Size[After Ratio Size Checks]: " <<FO_Candidates.size();
         //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
         //{
         //    qDebug() << (*it).getSegments().size();
         //}
         //! Check if the Goal is in a Robot:
-        CheckCandidateIsInRobot(FO_Candidates, AllObjects);
+//        CheckCandidateIsInRobot(FO_Candidates, AllObjects);
         //qDebug()<< "Candidate Size[After IsInRobot Checks]: " <<FO_Candidates.size();
         //for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); it++)
         //{
@@ -157,7 +157,6 @@ bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
                 return false;
             }
         }
-
     }
     else{
         return false;
@@ -165,7 +164,12 @@ bool GoalDetection::isObjectAPossibleGoal(const ObjectCandidate &PossibleGoal)
     return false;
 }
 
-
+bool GoalDetection::doCandidatesOverlap(ObjectCandidate& PossibleGoal, ObjectCandidate AboveHorizonCandidate, int margin)
+{
+    return (AboveHorizonCandidate.getTopLeft().x < PossibleGoal.getTopLeft().x + margin && AboveHorizonCandidate.getTopLeft().x > PossibleGoal.getTopLeft().x - margin &&
+            AboveHorizonCandidate.getBottomRight().x > PossibleGoal.getBottomRight().x - margin && AboveHorizonCandidate.getBottomRight().x < PossibleGoal.getBottomRight().x + margin &&
+            PossibleGoal.getColour() == AboveHorizonCandidate.getColour());
+}
 
 bool GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                            std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
@@ -187,9 +191,10 @@ bool GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
         //qDebug() << itAboveHorizon->getTopLeft().x << "," << itAboveHorizon->getTopLeft().y << "\t " << itAboveHorizon->getBottomRight().x << "," << itAboveHorizon->getBottomRight().y;
         //qDebug() << TopLeft.x << BottomRight.x;
         //qDebug() << Colour << itAboveHorizon->getColour();
-        if( itAboveHorizon->getTopLeft().x < TopLeft.x + margin &&
-            itAboveHorizon->getBottomRight().x > BottomRight.x - margin &&
-            Colour == itAboveHorizon->getColour())
+        //if( itAboveHorizon->getTopLeft().x < TopLeft.x + margin &&
+        //    itAboveHorizon->getBottomRight().x > BottomRight.x - margin &&
+        //    Colour == itAboveHorizon->getColour())
+        if( doCandidatesOverlap(*PossibleGoal, *itAboveHorizon, margin))
         {
             if(itAboveHorizon->getTopLeft().x <= TopLeft.x)
             {
@@ -218,14 +223,18 @@ bool GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
 
             //qDebug() << "OverLapping: Join Cand " << endl;
             //usedAbovehorizonCandidate[i] = true;
-            //debug <<"Found OverLapping Candidate Above horizon" << FO_AboveHorizonCandidates.size();
+            //qDebug() <<"Found OverLapping Candidate Above horizon" << FO_AboveHorizonCandidates.size();
         }
         else
         {
+            //qDebug() <<"Not OverLapping";
             ++itAboveHorizon;
         }
 
     }
+
+    //qDebug() << "Final Possible Goal" << PossibleGoal->getTopLeft().x << ", " << PossibleGoal->getTopLeft().y <<
+    //            "\t" << PossibleGoal->getBottomRight().x << ", " << PossibleGoal->getBottomRight().y << endl;
 /*    //SCANS UP THE IMAGE
     std::vector<TransitionSegment>::reverse_iterator revIt = horizontalSegments.rbegin();
     for (; revIt != horizontalSegments.rend(); ++revIt)
@@ -996,16 +1005,20 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
         //qDebug() << "Average MidPoints Distance:" << distance << "cm using " << widthSum << "pixels.";
     }
 
-    /*
+
     float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
 
-    qDebug() << "After Average Distance to Bottom Of Goals: Width:"<< distance << ", D2PDistance: " << D2Pdistance;
+//#if DEBUG_VISION_VERBOSITY > 5
+    debug << "Possible Goal " << PossibleGoal.getColour() << "d2p: " << D2Pdistance << " Other dist: " << distance << endl;
+//#endif
+
+    //qDebug() << "After Average Distance to Bottom Of Goals: Width:"<< distance << ", D2PDistance: " << D2Pdistance;
     float distanceBuffer = 0;
     if(distance > D2Pdistance + distanceBuffer)
     {
         distance = D2Pdistance;
     }
-    */
+
 
     //To the bottom of the Goal Post.
     Vector2<int> bottomCentrePoint;
@@ -1050,7 +1063,7 @@ float GoalDetection::DistanceToPoint(const ObjectCandidate &PossibleGoal, Vision
         elevation = result[2];
 
         #if DEBUG_VISION_VERBOSITY > 6
-            debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+            debug << "\t\tCalculated Distance to Point: " << D2Pdistance <<endl;
         #endif
     }
     return D2Pdistance;
