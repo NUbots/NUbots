@@ -26,6 +26,7 @@ class GoalDetection
 
 
   private:
+        bool doCandidatesOverlap(ObjectCandidate& PossibleGoal, ObjectCandidate AboveHorizonCandidate, int margin);
 
         bool ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
                                     std::vector<ObjectCandidate>& FO_AboveHorizonCandidates,
