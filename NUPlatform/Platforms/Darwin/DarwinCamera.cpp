@@ -370,6 +370,19 @@ void DarwinCamera::readCameraSettings()
     m_settings.p_exposureAbsolute.set(m_settings.exposureAbsolute);
     m_settings.p_powerLineFrequency.set(m_settings.powerLineFrequency);
     m_settings.p_sharpness.set(m_settings.sharpness);
+
+#if DEBUG_NUCAMERA_VERBOSITY > 1
+    debug << "\t" << m_settings.exposureAuto  << " ";
+    debug << m_settings.autoWhiteBalance  << " ";
+    debug << m_settings.exposureAutoPriority  << " ";
+    debug << m_settings.brightness  << " ";
+    debug << m_settings.contrast  << " ";
+    debug << m_settings.saturation  << " ";
+    debug << m_settings.gain  << " ";
+    debug << m_settings.exposureAbsolute  << " ";
+    debug << m_settings.powerLineFrequency  << " ";
+    debug << m_settings.sharpness  << endl;
+#endif
 }
 
 int DarwinCamera::readSetting(unsigned int id)
