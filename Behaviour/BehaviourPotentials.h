@@ -246,8 +246,8 @@ public:
                     around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
-                //around_rotation = -mathGeneral::sign(around_direction)*around_speed*1/distance;        // previous value for NAO
-                around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // 11 is rough speed in cm/s
+                //around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // previous value for NAO
+                around_rotation = -mathGeneral::sign(around_direction)*around_speed*1/distance;        // 11 is rough speed in cm/s
             }
             else
             {
