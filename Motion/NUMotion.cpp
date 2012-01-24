@@ -86,7 +86,7 @@ NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
         m_getup = new Getup(m_walk, m_data, m_actions);
         m_fall_protection = new FallProtection(m_walk, m_data, m_actions);
         #if defined(USE_KICK)
-            m_kick = new NUKick(m_walk, m_data, m_actions);
+            m_kick = NUKick::getKick(m_walk, m_data, m_actions);
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
             m_save = new NUSave(m_walk, m_data, m_actions);
@@ -98,7 +98,7 @@ NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
         m_getup = new Getup(NULL, m_data, m_actions);
         m_fall_protection = new FallProtection(NULL, m_data, m_actions);
         #if defined(USE_KICK)
-            m_kick = new NUKick(NULL, m_data, m_actions);
+            m_kick = NUKick::getKick(NULL, m_data, m_actions);
         #endif
         #if defined(USE_BLOCK) or defined(USE_SAVE)
             m_save = new NUSave(NULL, m_data, m_actions);
