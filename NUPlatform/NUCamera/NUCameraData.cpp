@@ -41,10 +41,10 @@ bool NUCameraData::SetByName(const std::string& parameter, float value)
         this->m_verticalFov = mathGeneral::deg2rad(value);
         set = true;
     }
-    if(set)
-    {
-        std::cout << parameter << ": " << value << std::endl;
-    }
+//    if(set)
+//    {
+//        std::cout << parameter << ": " << value << std::endl;
+//    }
     return set;
 }
 

@@ -154,7 +154,10 @@ public:
         vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
         if (false)//ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
         {   // if the ball is moving go to where the ball will be!
+
+    
             float x = ball_prediction[1];
+
             float y = ball_prediction[2];
             float distance = sqrt(x*x + y*y);
             float bearing = atan2(y,x);
@@ -173,6 +176,9 @@ public:
 
             float x = distance * cos(bearing);
             float y = distance * sin(bearing);
+            
+            
+
             
             const float offsetDistance = 5.0f;
             float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
@@ -205,19 +211,23 @@ public:
             {   // if we are too close to the ball then we need to go backwards
                 position_speed = (kickingdistance - distance)/kickingdistance;
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
-                position_rotation = 0.5*bearing;
+                
+                //position_rotation = 0.5*bearing; //previous value for NAO
+                position_rotation = 0.3*bearing;
             }
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
                 position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
-                position_rotation = 0.5*bearing;
+                //position_rotation = 0.5*bearing; //previous value for NAO
+                position_rotation = 0.3*bearing;
             }
             else
             {   // if it is outside the stopping distance - full speed
                 position_speed = 1;
                 position_direction = bearing;
-                position_rotation = 0.5*bearing;
+                //position_rotation = 0.5*bearing; //previous value for NAO
+                position_rotation = 0.3*bearing;
             }
             
             // calculate the component to go around the ball to face the heading
@@ -236,8 +246,8 @@ public:
                     around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
-                
-                around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // 11 is rough speed in cm/s
+                //around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // previous value for NAO
+                around_rotation = -mathGeneral::sign(around_direction)*around_speed*1/distance;        // 11 is rough speed in cm/s
             }
             else
             {
