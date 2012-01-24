@@ -51,6 +51,7 @@ NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
 
     m_currentTimestamp = 0;
     m_previousTimestamp = 0;
+    m_walk = walk;
     loadKickParameters();
 }
 
