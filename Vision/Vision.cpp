@@ -385,7 +385,6 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     method = Vision::PRIMS;
     for (int i = 0; i < 4; i++)
     {
-
         switch (i)
         {
             case ROBOTS:
@@ -665,6 +664,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         }
         */
         //END: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
+
+        #if DEBUG_VISION_VERBOSITY > 1
+            debug << "Visible Objects:\n" << AllFieldObjects->toString(true) << endl;
+        #endif
 }
 
 void Vision::SaveAnImage()
@@ -2734,7 +2737,6 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         {
             Matrix cameraTransform = Matrix4x4fromVector(ctvector);
             transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
-
         }
         //qDebug() << "Vision::DetectBall : Update FO_Ball" << (ball.radius*2);
         sizeOnScreen.x = int(ball.radius*2);
@@ -3042,13 +3044,13 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
     {
         AmbiguousObject tempObject(FieldObjects::FO_OBSTACLE, "UNKNOWN OBSTACLE");
 
-        Vector2<int> screen_centre(candidates.at(i).getCentreX(), candidates.at(i).getCentreY());
-        Vector2<int> screen_dim(candidates.at(i).width(), candidates.at(i).height());
-        Vector2<int> bottomRight = candidates.at(i).getBottomRight();
+        Vector2<int> visual_centre(candidates.at(i).getCentreX(), candidates.at(i).getCentreY());
+        Vector2<int> visual_dim(candidates.at(i).width(), candidates.at(i).height());
+        Vector2<int> bottom_right = candidates.at(i).getBottomRight();
 
         //calculate position based on bottom centre of candidate
-        float cx = screen_centre.x;
-        float cy = bottomRight.y;
+        float cx = visual_centre.x;
+        float cy = bottom_right.y;
 
         float bearing = CalculateBearing(cx);
         float elevation = CalculateElevation(cy);
@@ -3056,11 +3058,20 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
         vector<float> ctgvector;
         Vector3<float> measured(distance,bearing,elevation);
         Vector2<float> screenPositionAngle(bearing,elevation);
+        //bool isOK = getSensorsData()->get(NUSensorsData::CameraTransform, ctgvector);
         bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
         if(isOK == true)
         {
+            //Matrix cameraTransform = Matrix4x4fromVector(ctgvector);
+            //measured = Kinematics::TransformPosition(cameraTransform, measured);
             Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
             measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+
+            if(cy == currentImage->getHeight()) {
+                //Object seen at bottom of image, should look down for better view, however
+                //currently just assume object very close
+                measured.x = 15;
+            }
 
             #if DEBUG_VISION_VERBOSITY > 6
                 debug << "\t\tCalculated Distance to Point: " << distance << endl;
@@ -3069,12 +3080,12 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
         //qDebug() << i << ": Obstacle: get things in order";
         Vector3<float> measuredError(0,0,0);
         //qDebug() << i << ": Obstacle: update object with vision data";
-        tempObject.UpdateVisualObject(measured, measuredError, screenPositionAngle, screen_centre, screen_dim, m_timestamp);
+        tempObject.UpdateVisualObject(measured, measuredError, screenPositionAngle, visual_centre, visual_dim, m_timestamp);
         objectList.push_back(tempObject);
 
         #if DEBUG_VISION_VERBOSITY > 0
             debug << "Obst " << i << " bottom: (" << cx << ", " << cy << ") centre: (" <<
-                     screen_centre.x << ", " << screen_centre.y << ") d2p: " <<
+                     visual_centre.x << ", " << visual_centre.y << ") d2p: " <<
                      measured.x << "cm b2p:" << measured.y << "rad e2p:" << measured.z <<endl;
         #endif
     }

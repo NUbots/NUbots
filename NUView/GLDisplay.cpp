@@ -3,6 +3,9 @@
 #include <qclipboard.h>
 #include <QApplication>
 #include <QDataStream>
+#include <sstream>
+
+int GLDisplay::imageCount;
 
 GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
         QGLWidget(parent,(QGLWidget*)shareWidget), imageWidth(80), imageHeight(60)
@@ -268,5 +271,17 @@ void GLDisplay::snapshotToClipboard()
     paintGL(); // Redraw the scene in case it needs to be updated.
     QClipboard *cb = QApplication::clipboard(); // get the clipboard
     QImage tempPicture(this->grabFrameBuffer(false)); // grab current image
-    cb->setImage(tempPicture); // put current image on the clipboard.
+    cb->setImage(tempPicture); // put current image on the clipboard
+}
+
+void GLDisplay::snapshotToFile()
+{
+    paintGL(); // Redraw the scene in case it needs to be updated.
+    QImage tempPicture(this->grabFrameBuffer(false)); // grab current image
+    //save image to file
+    stringstream fileName (stringstream::in|stringstream::out);
+    fileName << "camera_image" << imageCount << ".png";
+    imageCount++;
+    tempPicture.save(fileName.str().c_str());
+    //tempPicture.save("camera_image.png");
 }

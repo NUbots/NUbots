@@ -68,6 +68,7 @@ public slots:
     void openLog();                    //!< To open a file
     void openLog(const QString& fileName); //!< To open a log file
     void copy();                    //!< To copy the contents of the selected display to file.
+    void saveViewImage();               //!< To save the contents of the selected display to the local executable directory.
     void openLUT();                 //!< To open a LUT file
     void selectFrame();             //!< Takes you to a selected frame
 
@@ -182,6 +183,7 @@ private:
 
     QAction *openAction;            //!< Instance of the open action
     QAction *copyAction;            //!< Instance of the copy action
+    QAction *saveAction;            //!< Instance of the save action
     QAction *undoAction;            //!< Instance of the undo action
     QAction *LUT_Action;            //!< Instance of the open action
     QAction *exitAction;            //!< Instance of the exit action
