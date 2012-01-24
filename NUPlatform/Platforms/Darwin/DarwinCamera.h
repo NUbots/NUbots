@@ -39,11 +39,10 @@ public:
     NUImage* grabNewImage();
     void applySettings(const CameraSettings& newset);
     void setSettings(const CameraSettings& newset){
-        //setActiveCamera(newset.activeCamera);
         applySettings(newset);
-    };
-
+    }
     void forceApplySettings(const CameraSettings& newset);
+
 private:
     void loadCameraOffset();
 private:
@@ -75,7 +74,6 @@ private:
     double getTimeStamp() const;
 
     NUImage currentBufferedImage;
-    CameraSettings m_cameraSettings;
 };
 
 #endif
