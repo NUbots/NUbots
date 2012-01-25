@@ -162,13 +162,13 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
     }
 
     // Ball is in position for left kick.
-    if(m_left_kick_area.PointInside(ball_x, ball_y))
+    if(m_left_kick_script->isValid() and m_left_kick_area.PointInside(ball_x, ball_y))
     {
         kick_begin = true;
         m_kicking_leg = leftLeg;
         m_current_script = m_left_kick_script;
     }
-    else if(m_right_kick_area.PointInside(ball_x, ball_y))
+    else if(m_right_kick_script->isValid() and m_right_kick_area.PointInside(ball_x, ball_y))
     {
         kick_begin = true;
         m_kicking_leg = rightLeg;
