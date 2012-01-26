@@ -277,9 +277,9 @@ vector<vector<float> > MotionFileTools::toFloatMatrix(const string& data)
  */
 vector<vector<float> > MotionFileTools::toFloatMatrix(istream& input)
 {
-    char buffer[256];
-    input.ignore(256, '[');
-    input.getline(buffer, 256);
+    char buffer[512];
+    input.ignore(512, '[');
+    input.getline(buffer, 512);
     return toFloatMatrix(buffer);
 }
 
