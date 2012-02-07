@@ -42,6 +42,8 @@ class GLDisplay : public QGLWidget
 {
 Q_OBJECT
 public:
+    static int imageCount; //!< The number of images that have been saved before
+
     /*!
       @brief Constructor.
       @param parent The parent widget.
@@ -245,6 +247,11 @@ public slots:
       */
     void snapshotToClipboard();
 
+    /*!
+      @brief Copy the current image displayed to the executable directory as a png.
+      */
+    void snapshotToFile();
+
 signals:
     /*!
       @brief Returns the selected pixel in image coordinates when selected with a left mouse button click.
@@ -283,6 +290,7 @@ protected:
 private:
     int imageWidth; //!< The width of the windows current primary display
     int imageHeight; //!< The height of the windows current primary display
+
     Layer* primaryLayer; //!< The current primary layer.
     Layer overlays[numDisplays]; //!< Array of all of the layers.
     //! Overriden function for the mouse press event.

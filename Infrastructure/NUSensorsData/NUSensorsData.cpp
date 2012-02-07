@@ -866,15 +866,26 @@ bool NUSensorsData::isFallen()
         return false;
 }
 
-/*! @brief Returns true if the robot is on the ground, false otherwise
+/*! @brief Returns true if the robot is on the ground or there are insufficient sensors to determine its state, false otherwise
  */
 bool NUSensorsData::isOnGround()
 {
     float lf, rf;
-    if (getEndEffectorData(LFoot, ContactId, lf) and getEndEffectorData(RFoot, ContactId, rf) and (lf > 0 or rf > 0))
+    if (getEndEffectorData(LFoot, ContactId, lf) and getEndEffectorData(RFoot, ContactId, rf))
+    {
+        if((lf > 0 or rf > 0))
+        {
+            return true;    // Return true if the foot sensors indicate that it is on the ground.
+        }
+        else
+        {   
+            return false;   // Return false if the foot sensors indicate that the robot is off the ground.
+        } 
+    }
+    else    // Return true if there are no foot sensors.
+    {
         return true;
-    else
-        return false;
+    }
 }
 
 /*! @brief Returns true if the robot is currently incapacitated. A robot is incapacitated if it is falling, fallen, not on the ground or getting up

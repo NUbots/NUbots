@@ -48,6 +48,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     errorlog.open("error.log");
     m_previous_log_path = "";
 
+    //initialise a static int to count image saves
+    GLDisplay::imageCount = 0;
+
     m_platform = new NUPlatform();                      // you could make the arguement that NUView should have its own platform, for now we just use a 'blank' one
     m_blackboard = new NUBlackboard();
     m_blackboard->add(new NUSensorsData());
@@ -204,6 +207,7 @@ MainWindow::~MainWindow()
 // Delete Actions
     delete openAction;
     delete copyAction;
+    delete saveAction;
     delete undoAction;
     delete exitAction;
     delete firstFrameAction;
@@ -237,6 +241,12 @@ void MainWindow::createActions()
     copyAction->setShortcut(QKeySequence::Copy);
     copyAction->setStatusTip(tr("Copy"));
     connect(copyAction, SIGNAL(triggered()), this, SLOT(copy()));
+
+    // Save Image Action
+    saveAction = new QAction(QIcon(":/icons/copy.png"),tr("&Save Image"), this);
+    saveAction->setShortcut(QKeySequence::Save);
+    saveAction->setStatusTip(tr("Save Image"));
+    connect(saveAction, SIGNAL(triggered()), this, SLOT(saveViewImage()));
 
     // Undo action
     undoAction = new QAction(QIcon(":/icons/undo.png"),tr("&Undo"), this);
@@ -349,6 +359,8 @@ void MainWindow::createMenus()
     editMenu->addAction(undoAction);
     editMenu->addSeparator();
     editMenu->addAction(copyAction);
+    editMenu->addSeparator();
+    editMenu->addAction(saveAction);
 
     // Navigation Menu
     navigationMenu = menuBar()->addMenu(tr("&Navigation"));
@@ -498,6 +510,7 @@ void MainWindow::createConnections()
 
     connect(offlinelocDialog,SIGNAL(LocalisationInfoChanged(QString)),locInfoDisplay, SLOT(setText(QString)));
     connect(offlinelocDialog,SIGNAL(SelfLocalisationInfoChanged(QString)),selflocInfoDisplay, SLOT(setText(QString)));
+    connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
     qDebug() <<"Finnished Connecting Widgets";
 }
 
@@ -601,6 +614,24 @@ void MainWindow::copy()
         {
             locWmGlDisplay* currWindow = qobject_cast<locWmGlDisplay *>(widget);
             currWindow->snapshotToClipboard();
+        }
+    }
+}
+
+void MainWindow::saveViewImage()
+{
+    if(QMdiSubWindow *activeSubWindow = mdiArea->activeSubWindow())
+    {
+        QWidget* widget = activeSubWindow->widget();
+        if(typeid(*widget) == typeid(GLDisplay))
+        {
+            GLDisplay* currWindow = qobject_cast<GLDisplay *>(widget);
+            currWindow->snapshotToFile();
+        }
+        else if(typeid(*widget) == typeid(locWmGlDisplay))
+        {
+            //locWmGlDisplay* currWindow = qobject_cast<locWmGlDisplay *>(widget);
+            //currWindow->snapshotToFile();
         }
     }
 }

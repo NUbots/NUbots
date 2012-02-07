@@ -25,16 +25,16 @@
 #ifndef DARWINSENSORS_H
 #define DARWINSENSORS_H
 
+#include <vector>
 #include "NUPlatform/NUSensors.h"
 #include "Infrastructure/NUData.h"
-#include "DarwinPlatform.h"
 
-#include <vector>
-#include <string>
-
-
-//using namespace Robot;
-
+class DarwinJointMapping;
+class DarwinPlatform;
+namespace Robot
+{
+    class CM730;
+}
 
 class DarwinSensors : public NUSensors
 {
@@ -49,19 +49,13 @@ public:
     void copyFromButtons();
     void copyFromBattery();
     
-private:
-	vector<NUData::id_t*> m_joint_ids;    	//!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
+protected:
+    vector<NUData::id_t*> m_joint_ids;    	//!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
     vector<float> m_previous_positions;
     vector<float> m_previous_velocities;
-	DarwinPlatform* platform;
-	Robot::CM730* cm730;
-
-
-	//Conversions:
-	static const float RATIO_VALUE2RADIAN = 0.001533980; 			//!< 2pi / 4096
-	static const float RATIO_RADIAN2VALUE = 651.8986469; 			//!< 4096 / 2pi
-	static int Radian2Value(float radian) { return (int)(radian*RATIO_RADIAN2VALUE)+Robot::MX28::CENTER_VALUE; }
-	static float Value2Radian(int value) { return (float)(value-Robot::MX28::CENTER_VALUE)*RATIO_VALUE2RADIAN; }
+    DarwinPlatform* platform;
+    Robot::CM730* cm730;
+    DarwinJointMapping* m_joint_mapping;
 };
 
 #endif

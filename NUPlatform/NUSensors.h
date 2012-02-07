@@ -75,6 +75,7 @@ protected:
 private:
 protected:
     bool m_initialised;     //!< Intialisation flag used to ensure initialisation is only performed once.
+    unsigned int m_camera_number;
     NUSensorsData* m_data;
     double m_current_time;
     double m_previous_time;

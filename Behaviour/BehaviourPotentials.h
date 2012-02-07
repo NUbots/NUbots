@@ -154,7 +154,10 @@ public:
         vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
         if (false)//ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
         {   // if the ball is moving go to where the ball will be!
+
+    
             float x = ball_prediction[1];
+
             float y = ball_prediction[2];
             float distance = sqrt(x*x + y*y);
             float bearing = atan2(y,x);
@@ -173,6 +176,9 @@ public:
 
             float x = distance * cos(bearing);
             float y = distance * sin(bearing);
+            
+            
+
             
             const float offsetDistance = 5.0f;
             float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
@@ -205,19 +211,23 @@ public:
             {   // if we are too close to the ball then we need to go backwards
                 position_speed = (kickingdistance - distance)/kickingdistance;
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
-                position_rotation = 0.5*bearing;
+                
+                //position_rotation = 0.5*bearing; //previous value for NAO
+                position_rotation = 0.3*bearing;
             }
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
                 position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
-                position_rotation = 0.5*bearing;
+                //position_rotation = 0.5*bearing; //previous value for NAO
+                position_rotation = 0.3*bearing;
             }
             else
             {   // if it is outside the stopping distance - full speed
                 position_speed = 1;
                 position_direction = bearing;
-                position_rotation = 0.5*bearing;
+                //position_rotation = 0.5*bearing; //previous value for NAO
+                position_rotation = 0.3*bearing;
             }
             
             // calculate the component to go around the ball to face the heading
@@ -236,8 +246,8 @@ public:
                     around_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI/2);
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
-                
-                around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // 11 is rough speed in cm/s
+                //around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // previous value for NAO
+                around_rotation = -mathGeneral::sign(around_direction)*around_speed*1/distance;        // 11 is rough speed in cm/s
             }
             else
             {
@@ -279,6 +289,78 @@ public:
         result[2] = yawsum;
         return result;
     }
+
+    /*! @brief Returns a vector of the left and right obstacles using either the ultrasonics
+                on the NAOs or the Darwin Vision obstacles
+     */
+    static vector<float> getObstacleDistances(NUSensorsData* sensors)
+    {
+        float VIEW_ANGLE_RANGE = mathGeneral::PI/6;
+        float OVERLAP_ANGLE = mathGeneral::PI/24;
+        vector<float> result;
+        vector<float> temp_l;
+        vector<float> temp_r;
+        float leftobstacle = 255;
+        float rightobstacle = 255;
+
+        // See if ultrasonic sensors are available
+        if(sensors->get(NUSensorsData::LDistance, temp_l) and sensors->get(NUSensorsData::RDistance, temp_r))
+        {
+            //NAO
+            if (temp_l.size() > 0)
+                leftobstacle = temp_l[0];
+            if (temp_r.size() > 0)
+                rightobstacle = temp_r[0];
+        }
+        else
+        {
+            //DARWIN
+            vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
+            AmbiguousObject tempobj;
+            Vector3<float> temploc;
+
+            for(unsigned int i=0; i<objects.size(); i++)
+            {
+                tempobj = objects.at(i);
+                //check object was seen this frame
+                if(tempobj.isObjectVisible())
+                {
+                    temploc = tempobj.getMeasuredRelativeLocation();
+                    //check obstacle is within 120 degree cone
+                    if(!(fabs(temploc.y) > VIEW_ANGLE_RANGE))
+                    {
+                        //check if obstacle is in front, on left or on right
+                        if(fabs(temploc.y) < OVERLAP_ANGLE) {
+                            //obstacle is within 15 degrees of centre - flag as left AND right obstacle
+                            if(temploc.x < leftobstacle) {
+                                leftobstacle = temploc.x;
+                            }
+                            if(temploc.x < rightobstacle) {
+                                rightobstacle = temploc.x;
+                            }
+                        }
+                        if(temploc.y > 0) {
+                            //obstacle is to right
+                            if(temploc.x < leftobstacle) {
+                                leftobstacle = temploc.x;
+                            }
+                        }
+                        else {
+                            //obstacle is to left
+                            if(temploc.x < rightobstacle) {
+                                rightobstacle = temploc.x;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        result.push_back(leftobstacle);
+        result.push_back(rightobstacle);
+
+        return result;
+    }
     
     /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
         @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
@@ -286,13 +368,9 @@ public:
     static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 40, float dontcaredistance = 75)
     {
         // Get obstacle distances from the sensors
-        vector<float> temp;
-        float leftobstacle = 255;
-        float rightobstacle = 255;
-        if (sensors->get(NUSensorsData::LDistance, temp) and temp.size() > 0)
-            leftobstacle = temp[0];
-        if (sensors->get(NUSensorsData::RDistance, temp) and temp.size() > 0)
-            rightobstacle = temp[0];
+        vector<float> obstacles = getObstacleDistances(sensors);
+        float leftobstacle = obstacles.at(0);
+        float rightobstacle = obstacles.at(1);
         
         if (fabs(speed[1]) > mathGeneral::PI/2)
         {   // if the speed is not in the range of the ultrasonic sensors then don't both dodging
@@ -312,6 +390,47 @@ public:
             else                                // if we are 'outside' the object
                 dodgeangle = asin(objectsize/obstacle);
             
+            if (leftobstacle <= rightobstacle)
+            {   // the obstacle is on the left
+                if (speed[1] > -dodgeangle)
+                    newspeed[1] = -dodgeangle;
+            }
+            else
+            {   // the obstacle is on the right
+                if (speed[1] < dodgeangle)
+                    newspeed[1] = dodgeangle;
+            }
+            return newspeed;
+        }
+    }
+
+    /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
+                with provided obstacles - does not calculate its own obstacles
+        @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
+     */
+    static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, vector<float> obstacles, float objectsize = 40, float dontcaredistance = 75)
+    {
+        float leftobstacle = obstacles.at(0);
+        float rightobstacle = obstacles.at(1);
+
+        if (fabs(speed[1]) > mathGeneral::PI/2)
+        {   // if the speed is not in the range of the ultrasonic sensors then don't both dodging
+            return speed;
+        }
+        else if (leftobstacle > dontcaredistance and rightobstacle > dontcaredistance)
+        {   // if the obstacles are too far away don't dodge
+            return speed;
+        }
+        else
+        {   // an obstacle needs to be dodged
+            vector<float> newspeed = speed;
+            float obstacle = min(leftobstacle, rightobstacle);
+            float dodgeangle;
+            if (obstacle < objectsize)          // if we are 'inside' the object
+                dodgeangle = mathGeneral::PI/2 + asin((objectsize - obstacle)/objectsize);
+            else                                // if we are 'outside' the object
+                dodgeangle = asin(objectsize/obstacle);
+
             if (leftobstacle <= rightobstacle)
             {   // the obstacle is on the left
                 if (speed[1] > -dodgeangle)

@@ -10,8 +10,7 @@ class Object;
 class StationaryObject;
 class NUSensorsData;
 class SelfLocalisation;
-
-#include "Localisation/SelfLocalisation.h"
+class GLUquadric;
 
 class locWmGlDisplay : public QGLWidget
 {

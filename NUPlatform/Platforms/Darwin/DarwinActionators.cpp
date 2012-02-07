@@ -21,11 +21,15 @@
 
 #include "DarwinActionators.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "DarwinJointMapping.h"
+#include "DarwinPlatform.h"
 
 #include <cmath>
 
 #include "debug.h"
 #include "debugverbositynuactionators.h"
+#include <limits>
+
 
 /*! @brief Constructs a nubot actionator class with a Darwin backend
             
@@ -50,25 +54,24 @@ DarwinActionators::DarwinActionators(DarwinPlatform* darwin,Robot::CM730* subboa
         debug << "DarwinActionators::DarwinActionators()" <<endl;
     #endif
     m_current_time = 0;
-    
-	platform = darwin;
-	cm730 = subboard;
-	count = 0;
+    platform = darwin;
+    cm730 = subboard;
+    count = 0;
     vector<string> sound(1, "Sound");
-	vector<string> names;
+    vector<string> names;
     names.insert(names.end(), platform->m_servo_names.begin(), platform->m_servo_names.end());
-	names.insert(names.end(), m_chestled_names.begin(), m_chestled_names.end());
-	names.insert(names.end(), m_footled_names.begin(), m_footled_names.end());
+    names.insert(names.end(), m_chestled_names.begin(), m_chestled_names.end());
+    names.insert(names.end(), m_footled_names.begin(), m_footled_names.end());
     names.insert(names.end(), sound.begin(), sound.end());
     m_data->addActionators(names);
-    //m_data->addActionators(platform->m_servo_names);
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
         debug << "DarwinActionators::DarwinActionators(). Avaliable Actionators: " << endl;
         m_data->summaryTo(debug);
     #endif
 
-	InitialiseMotors();
+    InitialiseMotors();
+    m_joint_mapping = &DarwinJointMapping::Instance();
 }
 
 DarwinActionators::~DarwinActionators()
@@ -77,10 +80,10 @@ DarwinActionators::~DarwinActionators()
 }
 void DarwinActionators::InitialiseMotors()
 {
-	for(int i = 0; i < platform->m_servo_IDs.size(); i++)
-	{
-		cm730->WriteByte(platform->m_servo_IDs[i], Robot::MX28::P_TORQUE_ENABLE, 0, 0);
-	}
+    for(int i = 0; i < platform->m_servo_IDs.size(); i++)
+    {
+        cm730->WriteByte(platform->m_servo_IDs[i], Robot::MX28::P_TORQUE_ENABLE, 0, 0);
+    }
 }
 
 void DarwinActionators::copyToHardwareCommunications()
@@ -93,7 +96,7 @@ void DarwinActionators::copyToHardwareCommunications()
     #endif
     copyToServos();
     copyToLeds();
-	copyToSound();
+    copyToSound();
 }
 
 void DarwinActionators::copyToServos()
@@ -102,97 +105,84 @@ void DarwinActionators::copyToServos()
     static vector<float> gains;
     
     m_data->getNextServos(positions, gains);
-	//return;
 
-	//Data for Sync Write:
-	int param[platform->m_servo_IDs.size() * (Robot::MX28::PARAM_BYTES)];
-	int n = 0;
-	int joint_num = 0;
+    //Data for Sync Write:
+    int param[platform->m_servo_IDs.size() * (Robot::MX28::PARAM_BYTES)];
+    int n = 0;
+    int joint_num = 0;
 
-	//Defaults from data sheet:
-	int P_GAIN = 8;
-	int I_GAIN = 0;
-	int D_GAIN = 0;
-	//platform->m_servo_IDs.size()
+    //Defaults from data sheet:
+    // int P_GAIN = 64;
+    int I_GAIN = 0;
+    int D_GAIN = 0;
 	
     for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
     {
-		platform->setMotorGoalPosition(i,positions[i]);
-		platform->setMotorStiffness(i,gains[i]);
+        platform->setMotorGoalPosition(i,positions[i]);
+        platform->setMotorStiffness(i,gains[i]);
 		
-		//cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
+        //cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
     	//cm730->WriteWord(m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-		/*if(gains[i] > 0)
-		{
-			int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
-			//int value = Radian2Value(0-platform->m_servo_Offsets[i]);
-			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-			cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
-		}
-		else
-		{
-			//cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 0, 0);
-		}
-		*/
+        /*
+        if(gains[i] > 0)
+        {
+            int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
+            //int value = Radian2Value(0-platform->m_servo_Offsets[i]);
+            cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
+            cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
+        }
+        else
+        {
+            //cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 0, 0);
+        }
+        */
 
-		if(gains[i] > 0)
-		{
-			
-			int value = 0;
-
-			if(i == 0 || i == 1)
-			{
-				value = Radian2Value(-positions[i]-platform->m_servo_Offsets[i]);
-			}
-			else
-			{
-				value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
-			}
-			
-			param[n++] = platform->m_servo_IDs[i];
-			param[n++] = P_GAIN;
-			param[n++] = I_GAIN;
-			param[n++] = D_GAIN;
-			param[n++] = 0;
-			param[n++] = Robot::CM730::GetLowByte(value);
-			param[n++] = Robot::CM730::GetHighByte(value);	
-			joint_num++;
-		}
-	}
-	
-	int result = cm730->SyncWrite(Robot::MX28::P_P_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
+        if(gains[i] > 0)
+        {
+            int value = m_joint_mapping->joint2raw(i, positions[i]);
+            param[n++] = platform->m_servo_IDs[i];
+            //param[n++] = P_GAIN;
+            param[n++] = gains[i] / 128 * 100;
+            param[n++] = I_GAIN;
+            param[n++] = D_GAIN;
+            param[n++] = 0;
+            param[n++] = Robot::CM730::GetLowByte(value);
+            param[n++] = Robot::CM730::GetHighByte(value);
+            joint_num++;
+        }
+    }
+    int result = cm730->SyncWrite(Robot::MX28::P_P_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
 }
 
 void DarwinActionators::copyToLeds()
 {
-	// LED DATA STRUCTURE: 
-	//		Chest: 		LedValues[0][0][0,1,2]
-	//		Feet Left:  LedValues[1][0][0,1,2]
-	//		Feet Right: LedValues[2][0][0,1,2]
+    // LED DATA STRUCTURE:
+    //  Chest:      LedValues[0][0][0,1,2]
+    //  Feet Left:  LedValues[1][0][0,1,2]
+    //  Feet Right: LedValues[2][0][0,1,2]
 
-	// BOARD DATA STRUCTURE:
-	// 		LED:		[0 BBBB GGGG RRRR]
+    // BOARD DATA STRUCTURE:
+    //  LED:        [0 BBBB GGGG RRRR]
 	
-	if(count % 10 == 0)
-	{
-		static vector<  vector < vector < float > > > ledvalues;
-    	m_data->getNextLeds(ledvalues);
-		int value = (int(ledvalues[0][0][0]*31) << 0) + (int(ledvalues[0][0][1]*31) << 5) + (int(ledvalues[0][0][2]*31) << 10);
-		cm730->WriteWord(Robot::CM730::P_LED_HEAD_L, value, 0);
+    if(count % 10 == 0)
+    {
+        static vector<  vector < vector < float > > > ledvalues;
+        m_data->getNextLeds(ledvalues);
+        int value = (int(ledvalues[0][0][0]*31) << 0) + (int(ledvalues[0][0][1]*31) << 5) + (int(ledvalues[0][0][2]*31) << 10);
+        cm730->WriteWord(Robot::CM730::P_LED_HEAD_L, value, 0);
 
-		if(count % 20 == 0)
-		{
-			int value = (int(ledvalues[1][0][0]*31) << 0) + (int(ledvalues[1][0][1]*31) << 5) + (int(ledvalues[1][0][2]*31) << 10);
-			cm730->WriteWord(Robot::CM730::P_LED_EYE_L, value, 0);
-		}
-		else
-		{
-			int value = (int(ledvalues[2][0][0]*31) << 0) + (int(ledvalues[2][0][1]*31) << 5) + (int(ledvalues[2][0][2]*31) << 10);
-			cm730->WriteWord(Robot::CM730::P_LED_EYE_L, value, 0);
-		}
-	}
-
-	count++;
+        if(count % 20 == 0)
+        {
+            int value = (int(ledvalues[1][0][0]*31) << 0) + (int(ledvalues[1][0][1]*31) << 5) + (int(ledvalues[1][0][2]*31) << 10);
+            cm730->WriteWord(Robot::CM730::P_LED_EYE_L, value, 0);
+        }
+        else
+        {
+            int value = (int(ledvalues[2][0][0]*31) << 0) + (int(ledvalues[2][0][1]*31) << 5) + (int(ledvalues[2][0][2]*31) << 10);
+            cm730->WriteWord(Robot::CM730::P_LED_EYE_L, value, 0);
+        }
+    }
+    count++;
 }
 
 

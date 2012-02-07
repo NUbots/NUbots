@@ -22,9 +22,49 @@ to this standard image format we are able to have our software support multiple 
 platforms.
 */
 
+#define NUIMAGE_HEADER_IDENTIFIER_LENGTH 4
+#define NUIMAGE_IDENTIFIER "IMAG"
+
 class NUImage: public TimestampedData
 {
 public:
+    enum Version
+    {
+        VERSION_UNKNOWN,
+        VERSION_001,
+        VERSIONS_TOTAL
+    };
+
+    struct Header
+    {
+        char identifier[NUIMAGE_HEADER_IDENTIFIER_LENGTH];
+        Version version;
+    };
+
+    static Header currentVersionHeader()
+    {
+        Header currHeader;
+        const Version currVersion = VERSION_001;
+        for(unsigned int i = 0; i <  NUIMAGE_HEADER_IDENTIFIER_LENGTH ; ++i)
+        {
+            currHeader.identifier[i] = NUIMAGE_IDENTIFIER[i];
+        }
+        currHeader.version = currVersion;
+        return currHeader;
+    }
+
+    static bool validHeader(const Header& header)
+    {
+        for(unsigned int i = 0; i <  NUIMAGE_HEADER_IDENTIFIER_LENGTH ; ++i)
+        {
+            if(header.identifier[i] != NUIMAGE_IDENTIFIER[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /*!
     @brief Default constructor.
     */
@@ -78,7 +118,7 @@ public:
     @param width The width of the image.
     @param height The height of the image.
     */
-    void MapYUV422BufferToImage(const unsigned char* buffer, int width, int height);
+    void MapYUV422BufferToImage(const unsigned char* buffer, int width, int height, bool flip=false);
 
     /*!
     @brief Copies a YUV422 formatted image buffer to the image. A local copy IS made.
@@ -130,6 +170,42 @@ public:
     }
 
     /*!
+    @brief Image access operator, access the pixel at the desired position of the image.
+
+    This access operator allows the image coordinates to be mapped to different buffer positions.
+
+    @param x Image x coordinate
+    @param y Image y coordinate
+    @return The pixel at the coordinate (x,y)
+    */
+    const Pixel& operator()(unsigned int x, unsigned int y) const
+    {
+        if(flipped)
+        {
+            return at(getWidth() - x - 1, getHeight() - y - 1);
+            //return at(x, getHeight() - y - 1);
+        }
+        else
+        {
+            return at(x,y);
+        }
+    }
+
+    /*!
+    @brief Image raw access operator, access the pixel at the desired image buffer position.
+
+    This access operator allows direct access to the image buffer.
+
+    @param x Buffer x position
+    @param y Buffer y position
+    @return The pixel at the buffer position (x,y)
+    */
+    const Pixel& at(unsigned int x, unsigned int y) const
+    {
+        return m_image[y][x];
+    }
+
+    /*!
     @brief Get the current buffering state of the image.
     @return The current buffering state. True when buffered internally. False when buffered externally.
     */
@@ -151,6 +227,11 @@ public:
     void setCameraSettings(CameraSettings newCameraSettings)
     {
         m_currentCameraSettings = newCameraSettings;
+    }
+
+    void setTimestamp(double time)
+    {
+        m_timestamp = time;
     }
 
     /*!
@@ -175,9 +256,11 @@ public:
       */
     //QImage getSubImage(int x, int y, int width, int height, int decimation_spacing) const;
 
+    bool flipped;
+
+protected:
     Pixel **m_image;                    //!< Pointer to the image array.
     double m_timestamp;			//!< Time point at which the image was captured. (Unix Time)
-private:
     int m_imageWidth;                   //!< The current image width.
     int m_imageHeight;                  //!< The current image height.
     bool m_usingInternalBuffer;         //!< The current image buffering state. True when buffered internally. false when buffered externally.

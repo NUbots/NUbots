@@ -21,6 +21,39 @@
      
      You should have received a copy of the GNU General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+     @page useful_links Useful Links
+     @section RoboCup
+     <a href="http://www.tzi.de/spl/pub/Website/Downloads/GameController2011.zip">Game Controller (Direct Download Link)</a>
+
+     The game controller can be used to control the robots states. It also keeps track of the game statistics.
+
+     <a href="https://github.com/nubots/robocup">Source Repository</a>
+
+     The NUbout source control used is Git and is hosted online at github.com
+
+     <a href="http://www.tzi.de/spl/bin/view/Website/WebHome">Standard Plaform League (SPL) Website</a>
+
+     The official website for the RoboCup SPL.
+
+     <a href="http://www.tzi.de/humanoid/bin/view/Website/WebHome">Humanoid Legaue Website</a>
+
+     The official website for the RoboCup Humanoid League.
+
+     @section Darwin
+     <a href="http://darwin-op.springnote.com/">Darwin Documentation</a>
+
+     The online documentation page on the Darwin robot.
+
+     <a href="http://sourceforge.net/projects/darwinop/">Darwin Source Code</a>
+
+    The sourceforge project page for the Darwin-op code.
+
+    @section NAO
+    <a href="http://www.aldebaran-robotics.com/documentation/index.html">NAO Documentation</a>
+
+    Documentation for the NAO robot. (May require login)
+
 */
 
 #ifndef NUBOT_H

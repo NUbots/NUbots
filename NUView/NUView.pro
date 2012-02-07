@@ -189,7 +189,8 @@ HEADERS += ui_mainwindow.h \
     OfflineLocalisationSettingsDialog.h \
     LocalisationPerformanceMeasure.h \
     ../Localisation/LocalisationSettings.h \
-    ../Tools/KFTools.h
+    ../Tools/KFTools.h \
+    ../NUPlatform/NUCamera/NUCameraData.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -322,7 +323,8 @@ SOURCES += mainwindow.cpp \
     OfflineLocalisationSettingsDialog.cpp \
     LocalisationPerformanceMeasure.cpp \
     ../Localisation/LocalisationSettings.cpp \
-    ../Tools/KFTools.cpp
+    ../Tools/KFTools.cpp \
+    ../NUPlatform/NUCamera/NUCameraData.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -333,23 +335,7 @@ SOURCES += mainwindow.cpp \
 }
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
-
 FORMS += \
     OfflineLocalisationSettingsDialog.ui
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

@@ -218,13 +218,17 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
     sensordata.size = sensorsString.size();
     
     int sensorsSize = sensordata.size;
+    NUImage::Header image_header = NUImage::currentVersionHeader();
     int imagewidth = p_image.getWidth();
     int imageheight = p_image.getHeight();
-    double timeStamp = p_image.m_timestamp;
+    double timeStamp = p_image.GetTimestamp();
+    bool flipped = p_image.flipped;
     buffer.write(reinterpret_cast<char*>(&sensorsSize), sizeof(sensorsSize));
+    buffer.write(reinterpret_cast<char*>(&image_header), sizeof(image_header));
     buffer.write(reinterpret_cast<char*>(&imagewidth), sizeof(imagewidth));
     buffer.write(reinterpret_cast<char*>(&imageheight), sizeof(imageheight));
     buffer.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
+    buffer.write(reinterpret_cast<char*>(&flipped), sizeof(flipped));
     
     string s = buffer.str();
     netdata.data = (char*) s.c_str();
@@ -234,9 +238,10 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
     
     for(int y = 0; y < imageheight; y++)
     {
+        const Pixel& line_start = p_image.at(0, y);    // We want to transmit the raw data, so use the at() access function or lines may get out of order.
         network_data_t linedata;
-        linedata.data = (char*) &p_image.m_image[y][0];
-        linedata.size = sizeof(p_image.m_image[y][0])*imagewidth;
+        linedata.data = (char*) &line_start;
+        linedata.size = sizeof(line_start)*imagewidth;
         sendData(linedata);
     }
     sendData(sensordata);
@@ -253,7 +258,7 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
         network_data_t sizedata;
         stringstream buffer;
         buffer << p_locwm;
-        //buffer << p_objects;
+        buffer << p_objects;
         netdata.data = (char*) buffer.str().c_str();
         netdata.size = buffer.str().size();
 

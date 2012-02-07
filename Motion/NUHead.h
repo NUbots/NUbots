@@ -95,6 +95,7 @@ private:
     void load();
     void loadConfig();
     void loadPanConfig();
+    void loadCameraSpecs();
 
 private:
     float m_camera_height;                      //!< the camera height in cm
@@ -104,9 +105,9 @@ private:
     
     const float m_BALL_SIZE;
     const float m_FIELD_DIAGONAL;
-    const float m_CAMERA_OFFSET;
-    const float m_CAMERA_FOV_X;
-    const float m_CAMERA_FOV_Y;
+    float m_CAMERA_OFFSET;
+    float m_CAMERA_FOV_X;
+    float m_CAMERA_FOV_Y;
     
     bool m_is_panning;                          //!< true if we are currently panning the head
     HeadPanJob::head_pan_t m_pan_type;          //!< the type of pan we are currently performing

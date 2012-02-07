@@ -31,6 +31,7 @@ SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS  Soccer
                 ChaseBall
+                Zombie
                 MiscBehaviours
                 WalkOptimisation
                 Kicker

@@ -20,7 +20,11 @@ class NUSensorsData;
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
 
-#define LOC_SUMMARY 3
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+    #define LOC_SUMMARY DEBUG_LOCALISATION_VERBOSITY
+#else
+    #define LOC_SUMMARY 0
+#endif
 
 class Localisation: public TimestampedData
 {
@@ -71,8 +75,8 @@ class Localisation: public TimestampedData
 
         void removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& ambiguousobjects, bool yellow_seen, bool blue_seen);
 
-        void resetPlayingStateModels();
-
+		void resetPlayingStateModels();
+        void writeLog();
         bool IsValidObject(const Object& theObject);
         bool amILost;                       // true if we are 'lost' in this frame
         int lostCount;                      // the number of consecutive frames in which we are 'lost'

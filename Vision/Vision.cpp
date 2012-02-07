@@ -28,6 +28,7 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 #include "NUPlatform/NUIO.h"
+#include "NUPlatform/NUCamera/NUCameraData.h"
 
 #include "Vision/Threads/SaveImagesThread.h"
 #include <iostream>
@@ -48,7 +49,7 @@ Vision::Vision()
     ImageFrameNumber = 0;
     numFramesDropped = 0;
     numFramesProcessed = 0;
-
+    m_camera_specs = new NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
     return;
 }
 
@@ -58,6 +59,7 @@ Vision::~Vision()
     delete [] LUTBuffer;
     imagefile.close();
     sensorfile.close();
+    delete m_camera_specs;
     return;
 }
 
@@ -130,15 +132,16 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     m_actions = actions;
     setFieldObjects(fieldobjects);
 
-    if (currentImage != NULL and image->m_timestamp - m_timestamp > 40)
+    if (currentImage != NULL and image->GetTimestamp() - m_timestamp > 40)
         numFramesDropped++;
     numFramesProcessed++;
         
     setImage(image);
     //debug << "Camera Settings: " << image->getCameraSettings();
-    AllFieldObjects->preProcess(image->m_timestamp);
+    AllFieldObjects->preProcess(image->GetTimestamp());
 
     std::vector< Vector2<int> > points;
+    std::vector< Vector2<int> > green_border_points;
     //std::vector< Vector2<int> > verticalPoints;
     //std::vector< TransitionSegment > allsegments;
     //std::vector< TransitionSegment > segments;
@@ -159,14 +162,16 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         m_saveimages_thread->signal();
     }
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Generating Horizon Line: " <<endl;
+        debug << "Generating Horizon Line: " << endl;
     #endif
     //Generate HorizonLine:
     vector <float> horizonInfo;
 
 
     if(m_sensor_data->get(NUSensorsData::Horizon, horizonInfo))
+    {
         m_horizonLine.setLine((double)horizonInfo[0],(double)horizonInfo[1],(double)horizonInfo[2]);
+    }
     else
     {
         #if DEBUG_VISION_VERBOSITY > 5
@@ -174,7 +179,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #endif
         //AllFieldObjects->postProcess(image->m_timestamp);
         //return;
-		m_horizonLine.setLine(1,0,0);
+        m_horizonLine.setLine(1,0,0);
     }
 
     #if DEBUG_VISION_VERBOSITY > 7
@@ -200,10 +205,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     //setImage(&image);
     //! Find the green edges
     #if DEBUG_VISION_VERBOSITY > 5
-    debug << "Begin Scanning: " << endl;
+        debug << "Begin Scanning: " << endl;
     #endif
 
-    points = findGreenBorderPoints(spacings,&m_horizonLine);
+    green_border_points = findGreenBorderPoints(spacings,&m_horizonLine);
 
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tFind Edges: finnished" << endl;
@@ -211,13 +216,32 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
     //! Find the Field border:
-    points = getConvexFieldBorders(points);
+    points = getConvexFieldBorders(green_border_points);
     points = interpolateBorders(points,spacings);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tGenerating Green Boarder: Finnished" <<endl;
+        debug << "\tGenerating Green Border: Finnished" <<endl;
     #endif
 
+//START OBSTACLE DETECTION
+    vector<ObjectCandidate> obstacle_candidates;
+    vector<AmbiguousObject> obstacle_objects;
+
+    obstacle_candidates = getObstacleCandidates(green_border_points, points, OBSTACLE_HEIGH_THRESH, OBSTACLE_WIDTH_MIN);
+    obstacle_objects = getObjectsFromCandidates(obstacle_candidates);
+
+    //insert obstacles as ambiguous objects
+    AllFieldObjects->ambiguousFieldObjects.insert(AllFieldObjects->ambiguousFieldObjects.end(), obstacle_objects.begin(), obstacle_objects.end());
+
+
+    #if DEBUG_VISION_VERBOSITY > 7
+        debug << "\tObstacles Detected: " << obstacle_objects.size() << endl;
+    #endif
+
+    #if DEBUG_VISION_VERBOSITY > 5
+        debug << "\tObstacle Detection: Finnished" <<endl;
+    #endif
+//END OBSTACLE DETECTION
 
     //! Scan Below Horizon Image:
     ClassifiedSection vertScanArea = verticalScan(points,spacings);
@@ -361,7 +385,6 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     method = Vision::PRIMS;
     for (int i = 0; i < 4; i++)
     {
-
         switch (i)
         {
             case ROBOTS:
@@ -506,7 +529,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "Finished Object Recognition: " <<endl;
     #endif
-    AllFieldObjects->postProcess(image->m_timestamp);
+    AllFieldObjects->postProcess(image->GetTimestamp());
 
     //PLAY A SOUND IF OBJECT SEEN:
     /*if(AllFieldObjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].isObjectVisible())
@@ -641,6 +664,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         }
         */
         //END: UNCOMMENT TO SAVE IMAGES OF A CERTIAN FIELDOBJECT!!------------------------------------------------------------------------------------
+
+        #if DEBUG_VISION_VERBOSITY > 1
+            debug << "Visible Objects:\n" << AllFieldObjects->toString(true) << endl;
+        #endif
 }
 
 void Vision::SaveAnImage()
@@ -745,17 +772,35 @@ void Vision::setLUT(unsigned char* newLUT)
 void Vision::loadLUTFromFile(const std::string& fileName)
 {
     LUTTools lutLoader;
+    bool lut_loaded;
     if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
+    {
+        lut_loaded = true;
         setLUT(LUTBuffer);
+    }
     else
+    {
+        lut_loaded = false;
         errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
+    }
+    
+#if DEBUG_VISION_VERBOSITY > 0
+    if(lut_loaded)
+    {
+        debug << "Lookup table: " << fileName << " loaded sucesfully." << std::endl;
+    }
+    else
+    {
+        debug << "Unable to load lookup table: " << fileName << std::endl;
+    }
+#endif
 }
 
 void Vision::setImage(const NUImage* newImage)
 {
 
     currentImage = newImage;
-    m_timestamp = currentImage->m_timestamp;
+    m_timestamp = currentImage->GetTimestamp();
     spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     ImageFrameNumber++;
 }
@@ -2692,7 +2737,6 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         {
             Matrix cameraTransform = Matrix4x4fromVector(ctvector);
             transformedSphericalPosition = Kinematics::TransformPosition(cameraTransform,visualSphericalPosition);
-
         }
         //qDebug() << "Vision::DetectBall : Update FO_Ball" << (ball.radius*2);
         sizeOnScreen.x = int(ball.radius*2);
@@ -2703,7 +2747,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
                                                                                       positionAngle,
                                                                                       viewPosition,
                                                                                       sizeOnScreen,
-                                                                                      currentImage->m_timestamp);
+                                                                                      currentImage->GetTimestamp());
         //ballObject.UpdateVisualObject(sphericalPosition,sphericalError,viewPosition);
         //qDebug() << "Setting FieldObject:" << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible();
 
@@ -2840,19 +2884,22 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
 }
 
 double Vision::CalculateBearing(double cx) const{
-    double FOVx = deg2rad(46.40f); //Taken from Old Globals
+    //double FOVx = deg2rad(46.40f); //Taken from Old Globals
+    double FOVx = m_camera_specs->m_horizontalFov;
     return atan( (currentImage->getWidth()/2-cx) / ( (currentImage->getWidth()/2) / (tan(FOVx/2.0)) ) );
 }
 
 
 double Vision::CalculateElevation(double cy) const{
-    double FOVy = deg2rad(34.80f); //Taken from DOCUMENTATION OF NAO
+    //double FOVy = deg2rad(34.80f); //Taken from DOCUMENTATION OF NAO
+    double FOVy = m_camera_specs->m_verticalFov;
     return atan( (currentImage->getHeight()/2-cy) / ( (currentImage->getHeight()/2) / (tan(FOVy/2.0)) ) );
 }
 
 double Vision::EFFECTIVE_CAMERA_DISTANCE_IN_PIXELS()
 {
-    double FOVx = deg2rad(46.40f); //Taken from DOCUMENTATION OF NAO
+    //double FOVx = deg2rad(46.40f); //Taken from DOCUMENTATION OF NAO
+    double FOVx = m_camera_specs->m_horizontalFov;
     return (0.5*currentImage->getWidth())/(tan(0.5*FOVx));
 }
 
@@ -2987,6 +3034,8 @@ bool Vision::isPixelOnScreen(int x, int y)
         return true;
 }
 
+//OBSTACLE DETECTION
+
 vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate> candidates)
 {
     vector<AmbiguousObject> objectList;
@@ -2995,37 +3044,135 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
     {
         AmbiguousObject tempObject(FieldObjects::FO_OBSTACLE, "UNKNOWN OBSTACLE");
 
-        Vector2<int> screen_centre(candidates.at(i).getCentreX(), candidates.at(i).getCentreY());
-        Vector2<int> screen_dim(candidates.at(i).width(), candidates.at(i).height());
-        Vector2<int> bottomRight = candidates.at(i).getBottomRight();
+        Vector2<int> visual_centre(candidates.at(i).getCentreX(), candidates.at(i).getCentreY());
+        Vector2<int> visual_dim(candidates.at(i).width(), candidates.at(i).height());
+        Vector2<int> bottom_right = candidates.at(i).getBottomRight();
 
         //calculate position based on bottom centre of candidate
-        float cx = screen_centre.x;
-        float cy = bottomRight.y;
+        float cx = visual_centre.x;
+        float cy = bottom_right.y;
 
         float bearing = CalculateBearing(cx);
         float elevation = CalculateElevation(cy);
         float distance = 0;
-        //qDebug() << i << ": Object: get transform";
         vector<float> ctgvector;
         Vector3<float> measured(distance,bearing,elevation);
         Vector2<float> screenPositionAngle(bearing,elevation);
+        //bool isOK = getSensorsData()->get(NUSensorsData::CameraTransform, ctgvector);
         bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
         if(isOK == true)
         {
+            //Matrix cameraTransform = Matrix4x4fromVector(ctgvector);
+            //measured = Kinematics::TransformPosition(cameraTransform, measured);
             Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
             measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
+            if(cy == currentImage->getHeight()) {
+                //Object seen at bottom of image, should look down for better view, however
+                //currently just assume object very close
+                measured.x = 15;
+            }
+
             #if DEBUG_VISION_VERBOSITY > 6
-                debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+                debug << "\t\tCalculated Distance to Point: " << distance << endl;
             #endif
         }
         //qDebug() << i << ": Obstacle: get things in order";
         Vector3<float> measuredError(0,0,0);
         //qDebug() << i << ": Obstacle: update object with vision data";
-        tempObject.UpdateVisualObject(measured, measuredError, screenPositionAngle, screen_centre, screen_dim, m_timestamp);
+        tempObject.UpdateVisualObject(measured, measuredError, screenPositionAngle, visual_centre, visual_dim, m_timestamp);
         objectList.push_back(tempObject);
+
+        #if DEBUG_VISION_VERBOSITY > 0
+            debug << "Obst " << i << " bottom: (" << cx << ", " << cy << ") centre: (" <<
+                     visual_centre.x << ", " << visual_centre.y << ") d2p: " <<
+                     measured.x << "cm b2p:" << measured.y << "rad e2p:" << measured.z <<endl;
+        #endif
     }
 
     return objectList;
+}
+
+vector<int> Vision::getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const
+{
+    //returns a vector of pairwise vertical distance values from prehull to hull (in screen coordinates)
+    vector<int> result;
+    int next_diff;
+    if(prehull.size() != hull.size()) {
+        //non matching vectors - return empty result
+        //debug
+        #if DEBUG_VISION_VERBOSITY > 1
+            debug << "Non matching vectors - no obstacle detection\n";
+        #endif
+
+        return result;
+    }
+    else {
+        for(unsigned int i=0; i<hull.size(); i++) {
+            //loop through the vectors in parallel
+            next_diff = prehull.at(i).y - hull.at(i).y;  //prehull has larger y value (counts down from top)
+            result.push_back(next_diff);
+        }
+        return result;
+    }
+}
+
+vector<ObjectCandidate> Vision::getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+                                                          int height_thresh, int width_min) const
+{
+    vector<ObjectCandidate> result;
+    ObjectCandidate next_obst;
+    Vector2<int> start, end, top_left, bottom_right;
+    int width, height;
+
+    vector<int> differences = getVerticalDifferences(prehull, hull);
+
+    int consecutive_hull_breaks = 0;
+    int lowest_point;
+
+    for(unsigned int i=0; i<differences.size(); i++) {
+        if(differences.at(i) >= height_thresh) {
+            //there is a break
+            if(consecutive_hull_breaks == 0) {
+                //first scan of break
+                start = prehull.at(i);
+                end = prehull.at(i);
+                lowest_point = start.y;
+                height = lowest_point - hull.at(i).y;
+            }
+            else {
+                //consecutive scan of break
+                end = prehull.at(i);
+                if(end.y > lowest_point) {
+                    lowest_point = end.y; //keep track of minimum
+                    height = lowest_point - hull.at(i).y;
+                }
+            }
+            consecutive_hull_breaks++;
+        }
+        else {
+            //possible end of break
+            if(consecutive_hull_breaks >= width_min) {
+                //break large enough to indicate obstacle
+                //  x-position given by centre of break
+                //  y-position given by lowest point in break
+                width = start.x - end.x;
+                //next_obst.x = width / 2; //centre of break
+                //next_obst.y = lowest_point;
+
+                top_left.x = start.x;
+                top_left.y = lowest_point - height;
+                bottom_right.x = end.x;
+                bottom_right.y = lowest_point;
+
+                next_obst.setTopLeft(top_left);
+                next_obst.setBottomRight(bottom_right);
+
+                result.push_back(next_obst);
+            }
+            //restart
+            consecutive_hull_breaks = 0;
+        }
+    }
+    return result;
 }

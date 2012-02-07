@@ -78,10 +78,10 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
         if(circle.isDefined)
         {
             bool DistanceIsOK = isVisualBallDistanceCloseDistanceToPoint(circle, vision, largestCandidate, AllObjects);
-            if(DistanceIsOK)
-            {
+//            if(DistanceIsOK)
+//            {
                 result = circle;
-            }
+//            }
         }
     }
     return result;
@@ -120,9 +120,9 @@ bool Ball::isVisualBallDistanceCloseDistanceToPoint(Circle circ, Vision* vision,
         Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
         Vector3<float> relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
         distanceD2P = relativePoint[0];
-        //#if DEBUG_VISION_VERBOSITY > 6
-        //    debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
-        //#endif
+        #if DEBUG_VISION_VERBOSITY > 6
+            debug << "\t\tCalculated Distance to Point: " << distanceD2P << endl;
+        #endif
     }
     else
     {
@@ -131,11 +131,11 @@ bool Ball::isVisualBallDistanceCloseDistanceToPoint(Circle circ, Vision* vision,
 
     //COMPARE: VisualDistance and Distance to Point:
 
-    //#if TARGET_OS_IS_WINDOWS
-    //    qDebug() << "Distance Check: "<< "Measured:"<<VisualFlatDistance << "D2P:"<<distanceD2P;
-    //#endif
+    #if DEBUG_VISION_VERBOSITY > 6
+        debug << "Ball Distance Check: "<< "Measured:"<< VisualFlatDistance << "D2P:"<< distanceD2P <<endl;
+    #endif
     //qDebug() << VisualFlatDistance << distanceD2P << elevation << 3.14/2-headElevation<<VisualDistance;
-    float DistanceDifference = fabs(VisualFlatDistance - distanceD2P);
+    //float DistanceDifference = fabs(VisualFlatDistance - distanceD2P);
 
     return distanceD2P < 1.1*VisualFlatDistance;
 }

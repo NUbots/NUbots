@@ -10,6 +10,7 @@
 NUImage::NUImage(): m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
 {
     m_image = 0;
+    flipped = false;
 }
 
 NUImage::NUImage(int width, int height, bool useInternalBuffer): m_imageWidth(width), m_imageHeight(height), m_usingInternalBuffer(useInternalBuffer)
@@ -19,6 +20,7 @@ NUImage::NUImage(int width, int height, bool useInternalBuffer): m_imageWidth(wi
     {
         addInternalBuffer(width, height);
     }
+    flipped = false;
 }
 
 NUImage::NUImage(const NUImage& source): TimestampedData(), m_imageWidth(0), m_imageHeight(0), m_usingInternalBuffer(false)
@@ -33,6 +35,7 @@ NUImage::NUImage(const NUImage& source): TimestampedData(), m_imageWidth(0), m_i
     {
         memcpy ( &m_image[y][0], &source.m_image[y][0], sizeof(source.m_image[y][0])*sourceWidth);
     }
+    flipped = source.flipped;
 }
 
 NUImage::~NUImage()
@@ -60,6 +63,7 @@ void NUImage::copyFromExisting(const NUImage& source)
         memcpy ( &m_image[y][0], &source.m_image[y][0], sizeof(source.m_image[y][0])*sourceWidth);
     }
     m_timestamp = source.m_timestamp;
+    flipped = source.flipped;
 }
 
 void NUImage::cloneExisting(const NUImage& source)
@@ -73,7 +77,7 @@ void NUImage::cloneExisting(const NUImage& source)
     }
     else
     {
-        MapYUV422BufferToImage((unsigned char*)&source.m_image[0][0], sourceWidth*2, sourceHeight*2);
+        MapYUV422BufferToImage((unsigned char*)&source.m_image[0][0], sourceWidth*2, sourceHeight*2, source.flipped);
     }
     m_timestamp = source.m_timestamp;
 }
@@ -118,7 +122,7 @@ Pixel* NUImage::allocateBuffer(int width, int height)
     return buffer;
 }
 
-void NUImage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int height)
+void NUImage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int height, bool flip)
 {
     useInternalBuffer(false);
     int arrayWidth = width;
@@ -145,6 +149,7 @@ void NUImage::MapYUV422BufferToImage(const unsigned char* buffer, int width, int
     }
     m_imageWidth = width;
     m_imageHeight = height;
+    flipped = flip;
 }
 
 void NUImage::CopyFromYUV422Buffer(const unsigned char* buffer, int width, int height)
@@ -249,12 +254,16 @@ QImage NUImage::getSubImage(int x, int y, int width, int height, int decimation_
  */
 std::ostream& operator<< (std::ostream& output, const NUImage& p_image)
 {
+    NUImage::Header image_header = NUImage::currentVersionHeader();
     int sourceWidth = p_image.getWidth();
     int sourceHeight = p_image.getHeight();
     double timeStamp = p_image.m_timestamp;
+    bool flipped = p_image.flipped;
+    output.write(reinterpret_cast<char*>(&image_header), sizeof(image_header));
     output.write(reinterpret_cast<char*>(&sourceWidth), sizeof(sourceWidth));
     output.write(reinterpret_cast<char*>(&sourceHeight), sizeof(sourceHeight));
     output.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
+    output.write(reinterpret_cast<char*>(&flipped), sizeof(flipped));
     for(int y = 0; y < sourceHeight; y++)
     {
         output.write(reinterpret_cast<char*>(p_image.m_image[y]), sizeof(p_image.m_image[y][0])*sourceWidth);
@@ -265,13 +274,28 @@ std::ostream& operator<< (std::ostream& output, const NUImage& p_image)
 std::istream& operator>> (std::istream& input, NUImage& p_image)
 {
     int width, height;
+    std::streampos start = input.tellg();
+    NUImage::Header header;
+    NUImage::Version image_version = NUImage::VERSION_UNKNOWN;
+    input.read(reinterpret_cast<char*>(&header), sizeof(header));
+    if(NUImage::validHeader(header) == true)
+    {
+        image_version = header.version;
+    }
+    else
+    {
+        input.seekg(start);
+    }
+
     input.read(reinterpret_cast<char*>(&width), sizeof(width));
     input.read(reinterpret_cast<char*>(&height), sizeof(height));
     input.read(reinterpret_cast<char*>(&p_image.m_timestamp), sizeof(p_image.m_timestamp));
-
+    if(image_version >= NUImage::VERSION_001)
+    {
+        input.read(reinterpret_cast<char*>(&p_image.flipped), sizeof(p_image.flipped));
+    }
     p_image.setImageDimensions(width, height);
     p_image.useInternalBuffer(true);
-
     for(int y = 0; y < height; y++)
     {
         if(!input.good()) throw std::exception();
