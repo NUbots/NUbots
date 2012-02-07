@@ -2,6 +2,7 @@
 #define LOCWMGLDISPLAY_H
 
 #include <QGLWidget>
+#include "Localisation/SelfLocalisation.h"
 
 class KF;
 class Localisation;
