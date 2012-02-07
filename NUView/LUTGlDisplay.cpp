@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <qclipboard.h>
 #include <QApplication>
+#include <glu.h>
 #include "Tools/Math/General.h"
 #include "Tools/FileFormats/LUTTools.h"
 
