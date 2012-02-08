@@ -1,12 +1,21 @@
 #ifndef H_NAOINVERSEKINEMATICS_H_DEFINED
 #define H_NAOINVERSEKINEMATICS_H_DEFINED
 
+/**
+ * @file InverseKinematic.h
+ * @author Alexander H‰rtl
+ * @author jeff
+ */
+
 /*!
     @file NAOInverseKinematics.h
+    @author Alexander H‰rtl
+    @author jeff
     @author Steven Nicklin
+ 
     @brief Declaration of NAOInverseKinematics class
-    Based off of B-Human 2011 code release inverse kinematics. Re-written to support NUbots
-    code base.
+    Heavily modified version of the B-Human code release 2011 inverse kinematics, modified to be used within the NUbots
+    robot software framework.
     @class NAOInverseKinematics
     @brief Implementation of inverse kinematics calculations for the NAO robot.
  */
