@@ -14,7 +14,7 @@
 #include <math.h>
 
 /** This class represents a 2-vector */
-template <class V> class Vector2{
+template <class V = float> class Vector2{
   public:
 
   /** The vector values */

@@ -21,11 +21,16 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
+WalkingEngine.h WalkingEngine.cpp
+#WalkingEngineKick.h WalkingEngineKick.cpp
+Matrix.h Matrix.cpp
+Vector.h
+Pose2D.h Pose2D.cpp
+RotationMatrix.h RotationMatrix.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Requirements 
 )
 ####################################################################################
 
