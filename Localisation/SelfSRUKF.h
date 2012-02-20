@@ -25,8 +25,9 @@ public:
     updateResult TimeUpdate(const std::vector<float>& odometry, OdometryMotionModel& motion_model, float deltaTime);
     updateResult MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement);
 
-    updateResult MeasurementUpdate(const std::vector<StationaryObject*>& objects);
     updateResult MeasurementUpdate(const StationaryObject& object, const MeasurementError& error);
+    updateResult MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects);
+
 
     Matrix CalculateSigmaPoints() const;
     float CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const;

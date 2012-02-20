@@ -310,6 +310,12 @@ SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const StationaryObject& obj
     return RESULT_OK;
 }
 
+SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects)
+{
+    return RESULT_OK;
+}
+
+
 /*! @brief  Calculation of sigma points
 Calculates the sigma points for the current model state.
 
