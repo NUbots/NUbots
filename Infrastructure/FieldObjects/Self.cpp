@@ -54,7 +54,7 @@ std::vector<float> Self::wmState()
 	return state;
 }
 
-bool Self::lost()
+bool Self::lost() const
 {
     return amILost;
 }
