@@ -444,6 +444,8 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
         std::vector<float> amb_exp_heading;
         std::vector<unsigned int> amb_decision_id;
 
+        unsigned int total_amb_obj = 0;
+
         std::vector<std::vector<float> > odom;
 
         FieldObjects* tempObjects;
@@ -521,6 +523,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                     if(object->getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
                     if(object->getID() == FieldObjects::FO_ROBOT_UNKNOWN) continue;
 
+                    total_amb_obj++;
                     ambiguous_object_count[object->getID()]++;
                     amb_obs_frames.push_back(frame);
                     amb_obs_ids.push_back(object->getID());
@@ -535,10 +538,17 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                     amb_exp_heading.push_back(gps_location.CalculateBearingToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
 
                     // Now we want to check which option was chosen as the best by the localistion system at the time of update.
-                    unsigned int decision_id = temp_loc->getBestModel()->previousSplitOption(*object);
-                    amb_decision_id.push_back(decision_id);
-                    //std::cout << "Split decision: " << object->getName() << " Decision: " << decision_id;
-                    //std::cout << " Measured: " << likely_id << std::endl;
+                    // Must be a new model to be the result of a split.
+                    if(temp_loc->GetTimestamp() == temp_loc->getBestModel()->creationTime())
+                    {
+                        unsigned int decision_id = temp_loc->getBestModel()->previousSplitOption(*object);
+                        amb_decision_id.push_back(decision_id);
+                    }
+                    // If there was no new update used, set the id to the num of objects (invalid)
+                    else
+                    {
+                        amb_decision_id.push_back(FieldObjects::NUM_STAT_FIELD_OBJECTS);
+                    }
                 }
             }
 
@@ -546,6 +556,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             assert(obs_frames.size() == obs_ids.size());
             assert(obs_ids.size() == obs_distance.size());
             assert(obs_distance.size() == obs_heading.size());
+            assert(amb_decision_id.size() == total_amb_obj);
         }
         // Re-enable signals from the log reader.
         m_log_reader->blockSignals(false);
