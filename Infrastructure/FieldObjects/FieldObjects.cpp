@@ -440,6 +440,45 @@ int FieldObjects::getClosestStationaryOption(const Self& location, const Ambiguo
     return min_err_id;
 }
 
+vector<StationaryObject*> FieldObjects::filterToVisible(const Self& location, const AmbiguousObject& amb_object, float headPan, float fovX)
+{
+    const float c_view_direction = location.Heading() + headPan;
+    const float c_view_range = fovX + location.sdHeading();
+    const float c_minHeading =  c_view_direction - c_view_range;
+    const float c_maxHeading =  c_view_direction + c_view_range;
+
+    vector<int> poss_ids = amb_object.getPossibleObjectIDs();
+    vector<StationaryObject*> result;
+
+
+
+    std::cout << "Ambiguous object: " << amb_object.getName() << std::endl;
+    std::cout << "View direction: " << c_view_direction << " heading: " << location.Heading() << " pan: " << headPan << std::endl;
+    std::cout << "View range: "<< c_view_range << " sd: " << location.sdHeading() << " fov: " << fovX << std::endl;
+    std::cout << "Min heading: "<< c_minHeading << " Max heading: " << c_maxHeading << std::endl;
+    for(vector<int>::iterator pos_it = poss_ids.begin(); pos_it != poss_ids.end(); ++pos_it)
+    {
+        unsigned int index = *pos_it;
+        StationaryObject* object = &stationaryFieldObjects.at(index);
+        float obj_heading = self.CalculateBearingToStationaryObject(*object);
+        std::cout << "* Object - " << object->getName() << " heading: " << obj_heading << " -> ";
+        // Calculate the distance from the viewing direction to the object.
+        float delta_angle = mathGeneral::normaliseAngle(obj_heading - c_view_direction);
+
+        // If the distance to the object heading is within the viewing range the object may be seen,
+        if(fabs(delta_angle) < c_view_range)
+        {
+            std::cout << "Visible" << std::endl;
+            result.push_back(object);
+        }
+        else
+        {
+            std::cout << "Not visible" << std::endl;
+        }
+    }
+    return result;
+}
+
 
 std::string FieldObjects::ambiguousName(unsigned int id)
 {
