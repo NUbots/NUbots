@@ -77,6 +77,23 @@ class Object
         int getObjectWidth() const {return sizeOnScreen.x;}
         int getObjectHeight() const {return sizeOnScreen.y;}
         std::string toString() const;
+
+        /*! @brief Determine if the object give a valid measurement.
+            This gives protection from the possablilty of measurements that may contain the NaN flag indicating an invalid number.
+
+            @return True if the measurments are valid. False if they are not.
+        */
+        bool validMeasurement()
+        {
+            // 0 distance should not be possible.
+            if(measuredDistance() == 0.0f) return false;
+            // Check for NaN measurement.
+            if(measuredDistance() != measuredDistance()) return false;
+            if(measuredBearing() != measuredBearing()) return false;
+            if(measuredElevation() != measuredElevation()) return false;
+            return true;
+        }
+
         /*!
         @brief Output streaming operation.
         @param output The output stream.
