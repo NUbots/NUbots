@@ -55,6 +55,12 @@ void OfflineLocalisationSettingsDialog::initialiseSettings(const LocalisationSet
     case LocalisationSettings::branch_selective:
         branch_combo_box->setCurrentIndex(branch_combo_box->findText("Selective"));
         break;
+    case LocalisationSettings::branch_constraint:
+        branch_combo_box->setCurrentIndex(branch_combo_box->findText("Constraint"));
+        break;
+    case LocalisationSettings::branch_probDataAssoc:
+        branch_combo_box->setCurrentIndex(branch_combo_box->findText("Probabalistic"));
+        break;
     default:
         branch_combo_box->setCurrentIndex(branch_combo_box->findText("Exhaustive"));
         break;
@@ -117,6 +123,14 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
     else if(branch_text == "selective")
     {
         result.setBranchMethod(LocalisationSettings::branch_selective);
+    }
+    else if(branch_text == "constraint")
+    {
+        result.setBranchMethod(LocalisationSettings::branch_constraint);
+    }
+    else if(branch_text == "probabalistic")
+    {
+        result.setBranchMethod(LocalisationSettings::branch_probDataAssoc);
     }
     else
     {

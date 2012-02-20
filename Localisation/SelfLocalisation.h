@@ -14,7 +14,8 @@ class NUSensorsData;
 #include <sstream>
 #include <list>
 
-// Debug output level
+// Debug output level.
+// Please follow this guide.
 // 0 - No messages
 // 1 - Error messages
 // 2 - Update messages
@@ -47,9 +48,17 @@ class SelfLocalisation: public TimestampedData
 
         int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
         int landmarkUpdate(StationaryObject &landmark);
+
+        // Ambiguous object updates.
+        // Main function.
         int ambiguousLandmarkUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
+        // Individual methods.
         int ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int ambiguousLandmarkUpdateSelective(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
+        int ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
+        int ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject);
+
+
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         unsigned int getNumActiveModels();
         unsigned int getNumFreeModels();
@@ -59,14 +68,16 @@ class SelfLocalisation: public TimestampedData
         void NormaliseAlphas();
         int FindNextFreeModel();
 
-        // Pruning functions
+        // Pruning functions.
         int PruneModels();
         int PruneMaxLikelyhood();
         int PruneViterbi(unsigned int order);
         int PruneNScan(unsigned int N);
+        void MergeModels(int maxAfterMerge);
+
+        // Merging helper functions.
         bool MergeTwoModels(Model* modelA, Model* modelB);
         double MergeMetric(const Model* modelA, const Model* modelB) const;
-        void MergeModels(int maxAfterMerge);
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
         void PrintModelStatus(const Model* model);
         std::string ModelStatusSummary();
@@ -75,7 +86,6 @@ class SelfLocalisation: public TimestampedData
 
         void resetPlayingStateModels();
 
-        bool IsValidObject(const Object& theObject);
         bool m_amILost;                       // true if we are 'lost' in this frame
         int m_lostCount;                      // the number of consecutive frames in which we are 'lost'
         float m_timeSinceFieldObjectSeen;     // the time since a useful field object has been seen

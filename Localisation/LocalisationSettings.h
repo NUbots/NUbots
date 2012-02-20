@@ -19,7 +19,9 @@ public:
     {
         branch_unknown,
         branch_exhaustive,
-        branch_selective
+        branch_selective,
+        branch_constraint,
+        branch_probDataAssoc
     };
 
     LocalisationSettings();

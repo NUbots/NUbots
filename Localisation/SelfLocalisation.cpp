@@ -68,13 +68,7 @@ const float SelfLocalisation::sdTwoObjectAngle = 0.05f; //Small! error in angle 
 /*! @brief Constructor
     @param playerNumber The player number of the current robot/system. This assists in choosing reset positions.
  */
-// Prue Methods
-//"Merge"
-//"MaxLikelyhood"
-//"Viterbi"
-//"Nscan"
 
-//SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0), m_pruning_method("Merge"), m_branching_method("Exhaustive")
 SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings& settings): m_timestamp(0), m_settings(settings)
 {
     m_hasGps = false;
@@ -117,7 +111,6 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     m_timeSinceFieldObjectSeen = 0;
 
     m_models.clear();
-    //m_models.reserve(c_MAX_MODELS);
 
     // Set default settings
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
@@ -260,8 +253,10 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
         m_frame_log << "Time Update - Odometry: (" << fwd << "," << side << "," << turn << ")";
         m_frame_log << " Time Increment: " << time_increment << std::endl;
         #endif
+        // Hack... Sometimes we get really big odometry turn values that are not real.
+        // TODO: See if this can be removed.
+        if(fabs(turn) > 1.0f) turn = 0;
 
-        if(fabs(turn) > 1.0f) turn = 0; // Hack... Sometimes we get really big odometry turn values that are not real.
         doTimeUpdate(fwd, side, turn, time_increment);
 
         #if LOC_SUMMARY > 0
@@ -408,7 +403,6 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             }
 
             updateResult = ambiguousLandmarkUpdate((*currAmb), poss_obj);
-            //updateResult = doAmbiguousLandmarkMeasurementUpdateDiscard((*currAmb), fobs->stationaryFieldObjects);
             NormaliseAlphas();
             numUpdates++;
             if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN or currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
@@ -1095,7 +1089,7 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
     int kf_return;
     int numSuccessfulUpdates = 0;
 
-    if(IsValidObject(landmark) == false)
+    if(landmark.validMeasurement() == false)
     {
     #if LOC_SUMMARY > 0
         m_frame_log << "Skipping invalid." << std::endl;
@@ -1227,6 +1221,14 @@ int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, 
     else if (m_settings.branchMethod() == LocalisationSettings::branch_selective)
     {
         return ambiguousLandmarkUpdateSelective(ambiguousObject, possibleObjects);
+    }
+    else if (m_settings.branchMethod() == LocalisationSettings::branch_constraint)
+    {
+        return ambiguousLandmarkUpdateConstraint(ambiguousObject);
+    }
+    else if (m_settings.branchMethod() == LocalisationSettings::branch_probDataAssoc)
+    {
+        return ambiguousLandmarkUpdateProbDataAssoc(ambiguousObject, possibleObjects);
     }
     return 0;
 }
@@ -1398,18 +1400,76 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
     }
     if(new_models.size() > 0)
     {
-        //cout << "replacing old models (" << m_models.size() << ") with new models (" << new_models.size() << ")" << std::endl;
-        //cout << "appending new models (" << m_models.size() << " -> " << new_models.size() << ")" << std::endl;
         m_models.insert(m_models.end(), new_models.begin(), new_models.end());
         new_models.clear();
     }
-//    else
-//    {
-//        cout << "All options outliers." << std::endl;
-//    }
     return Model::RESULT_OUTLIER;
 }
 
+/*! @brief Performs an ambiguous measurement update using the constraint method.
+    This method uses only options that should be visible.
+    @return Returns RESULT_OK if measurment updates were sucessfully performed, RESULT_OUTLIER if they were not.
+*/
+int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject)
+{
+
+    const float outlier_factor = 0.0001;
+    ModelContainer new_models;
+    Model* temp_mod, *curr_model;
+
+    MeasurementError error;
+    error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation()),2));
+    error.setHeading(R_obj_theta);
+
+    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+    {
+        curr_model = (*model_it);
+        if(curr_model->inactive()) continue;
+        vector<StationaryObject*> poss_objects;
+        unsigned int models_added = 0;
+        Self position = curr_model->GenerateSelfState();
+        float headYaw;
+        Blackboard->Sensors->getPosition(NUSensorsData::HeadYaw, headYaw);
+        //! TODO: The FOV of the camera should NOT be hard-coded!
+        poss_objects = Blackboard->Objects->filterToVisible(position, ambiguousObject, headYaw, 0.81f);
+
+        for(std::vector<StationaryObject*>::const_iterator obj_it = poss_objects.begin(); obj_it != poss_objects.end(); ++obj_it)
+        {
+            temp_mod = new Model(*curr_model, ambiguousObject, *(*obj_it), error, GetTimestamp());
+            new_models.push_back(temp_mod);
+
+#if LOC_SUMMARY > 0
+            m_frame_log << "Model [" << curr_model->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
+            m_frame_log << "  Result: " << (temp_mod->active() ? "Valid update" : "Outlier");
+            if(temp_mod->active())
+            {
+                m_frame_log << "Valid update (Alpha = " << temp_mod->alpha() << ")";
+                models_added++;
+            }
+            else
+            {
+                m_frame_log << "Outlier";
+            }
+            m_frame_log << std::endl;
+#endif
+        }
+        removeInactiveModels(new_models);
+        if(models_added)
+        {
+            (*model_it)->setActive(false);
+        }
+        else
+        {
+            (*model_it)->setAlpha(outlier_factor * (*model_it)->alpha());
+        }
+    }
+    if(new_models.size() > 0)
+    {
+        m_models.insert(m_models.end(), new_models.begin(), new_models.end());
+        new_models.clear();
+    }
+    return Model::RESULT_OUTLIER;
+}
 
 int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
@@ -1494,6 +1554,12 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
         return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
     }
     return Model::RESULT_OUTLIER;
+}
+
+int SelfLocalisation::ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects)
+{
+    Model::updateResult result = m_models.front()->MeasurementUpdate(ambigousObject, possibleObjects);
+    return result;
 }
 
 /*! @brief Merges two models into a single model.
@@ -1608,21 +1674,6 @@ const Model* SelfLocalisation::getBestModel() const
     return result;
 }
 
-/*! @brief Determine if the object give a valid measurement.
-    This gives protection from the possablilty of meausrements that may contain the NaN flag indicating an invalid number.
-
-    @param theObject The object to be checked.
-*/
-bool SelfLocalisation::IsValidObject(const Object& theObject)
-{
-    bool isValid = true;
-    if(theObject.measuredDistance() == 0.0) isValid = false;
-    if(theObject.measuredDistance() != theObject.measuredDistance()) isValid = false;
-    if(theObject.measuredBearing() != theObject.measuredBearing()) isValid = false;
-    if(theObject.measuredElevation() != theObject.measuredElevation()) isValid = false;
-    return isValid;
-}
-
 bool SelfLocalisation::CheckModelForOutlierReset(int modelID)
 {
     // RHM 7/7/08: Suggested incorporation of 'Resetting' for possibly 'kidnapped' robot
@@ -1661,6 +1712,9 @@ bool SelfLocalisation::CheckModelForOutlierReset(int modelID)
     return reset;
 }
 
+
+/*! @brief Not yet implemented.
+*/
 int  SelfLocalisation::CheckForOutlierResets()
 {
     int numResets = 0;

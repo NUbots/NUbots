@@ -129,6 +129,16 @@
       <string>Selective</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>Constraint</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Probabalistic</string>
+     </property>
+    </item>
    </widget>
   </widget>
  </widget>
