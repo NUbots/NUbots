@@ -7,7 +7,8 @@
 */
 
 #include "Matrix.h"
-
+namespace b_human
+{
 template <> Matrix<1, 1, float> Matrix<1, 1, float>::invert() const
 {
   return Matrix<1, 1, float>(1.f / c[0][0]);
@@ -378,3 +379,4 @@ template class Matrix<2, 2, float>;
 template class Matrix<3, 3, float>;
 template class Matrix<4, 4, float>;
 
+}

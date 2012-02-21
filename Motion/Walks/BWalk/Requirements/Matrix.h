@@ -9,6 +9,8 @@
 #ifndef B_MATRIX_H
 #define B_MATRIX_H
 #include "Vector.h"
+namespace b_human
+{
 
 /** This class represents a mxn-matrix */
 template <int m = 2, int n = 2, class V = float> class Matrix
@@ -297,4 +299,5 @@ typedef Matrix<3, 3, float> Matrix3x3f;
 typedef Matrix<4, 4, float> Matrix4x4f;
 typedef Matrix<4, 2, float> Matrix4x2f;
 typedef Matrix<2, 4, float> Matrix2x4f;
+}
 #endif
