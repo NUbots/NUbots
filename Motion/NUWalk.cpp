@@ -51,6 +51,7 @@
     #include "Walks/DarwinWalk/DarwinWalk.h"
 #endif
 #include "Walks/BlankWalk.h"
+#include "Walks/BWalk/WalkingEngine.h"
 
 #include "debug.h"
 #include "debugverbositynumotion.h"
@@ -60,8 +61,11 @@ using namespace std;
 #include "Tools/Math/General.h"
 using namespace mathGeneral;
 
-NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions)
+class NUInverseKinematics;
+
+NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions, NUInverseKinematics* ik)
 {
+    return new WalkingEngine(data, actions, ik);
     #ifdef USE_JWALK
         return new JWalk();
     #endif

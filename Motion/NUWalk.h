@@ -34,11 +34,12 @@ class WalkJob;
 class WalkToPointJob;
 class WalkParametersJob;
 class WalkPerturbationJob;
+class NUInverseKinematics;
 
 class NUWalk : public NUMotionProvider
 {
 public:
-    static NUWalk* getWalkEngine(NUSensorsData* data, NUActionatorsData* actions);
+    static NUWalk* getWalkEngine(NUSensorsData* data, NUActionatorsData* actions, NUInverseKinematics* ik);
     virtual ~NUWalk();
     virtual void stop();
     void stopHead() {};
