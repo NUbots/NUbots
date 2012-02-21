@@ -21,7 +21,7 @@ template <class V = float> class Vector2{
   V x,y;
 
   /** Default constructor. */
-  Vector2<V>():x(0),y(0)
+  Vector2<V>():x(),y()
   {
   }
   /** Default constructor. */

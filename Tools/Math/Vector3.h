@@ -22,7 +22,7 @@ public:
   V x,y,z;
 
   /** Default constructor 4 gcc. */
-  Vector3<V>():x(0),y(0),z(0)
+  Vector3<V>():x(),y(),z()
   {
   }
 
