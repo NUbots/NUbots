@@ -6,31 +6,36 @@
 
 #pragma once
 
-#include "RobotDimensions.h"
-#include "RingBuffer.h"
-#include "RingBufferWithSum.h"
-#include "Matrix.h"
+#include "Requirements/RobotDimensions.h"
+#include "Requirements/RingBuffer.h"
+#include "Requirements/RingBufferWithSum.h"
+#include "Requirements/Matrix.h"
 #include "Tools/Math/Vector2.h"
 #include "Tools/Math/Vector3.h"
-#include "Range.h"
-#include "Pose2D.h"
-#include "Pose3D.h"
-#include "RotationMatrix.h"
+#include "Requirements/Range.h"
+#include "Requirements/Pose2D.h"
+#include "Requirements/Pose3D.h"
+#include "Requirements/RotationMatrix.h"
+#include "Requirements/RobotModel.h"
+#include "Motion/NUWalk.h"
+#include "Tools/Math/Matrix.h"
 //#include "WalkingEngineKick.h"
 
+class NUInverseKinematics;
 
-class WalkingEngine
+class WalkingEngine: public NUWalk
 {
 public:
   /**
   * Default constructor
   */
-  WalkingEngine();
+  WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NUInverseKinematics* ik);
 
   /*
   * Destructor
   */
   ~WalkingEngine();
+  void doWalk();
 
 private:
 
@@ -363,7 +368,7 @@ private:
     void applyCorrection(const Vector3<>& leftError, const Vector3<>& rightError, float deltaTime);
 
   private:
-    Matrix4x4f cov;
+    b_human::Matrix4x4f cov;
   };
 
 //  class KickPlayer
@@ -421,6 +426,11 @@ private:
 //  */
 //  void update(WalkingEngineStandOutput& standOutput) {(JointRequest&)standOutput = jointRequest;}
 
+  float m_prev_time;
+  float m_cycle_time;
+  RobotModel theRobotModel;
+  NUInverseKinematics* m_ik;
+
   void updateMotionRequest();
   MotionType requestedMotionType;
   Pose2D requestedWalkTarget;
@@ -476,4 +486,6 @@ private:
   StepSize lastStepOffset;
   Pose2D upcomingOdometryOffset;
   bool upcomingOdometryOffsetValid;
+
+  Matrix Pose2Matrix(const Pose3D& pose);
 };
