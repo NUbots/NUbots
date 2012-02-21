@@ -112,7 +112,6 @@ public:
          // the hip joints of both legs must be equal, so it is computed as weighted mean and the foot positions are
          // recomputed with fixed joint0 and left open foot rotation (as possible failure)
         float joint0 = (jointPositions[Joint::LHipYawPitch] + jointPositions[Joint::RHipYawPitch]) * 0.5;
-        std::cout << "joint0: "  << joint0 << std::endl;
         if(!calculateLegFixedHip(leftPosition, jointPositions, joint0, true))
           targetReachable = false;
         if(!calculateLegFixedHip(rightPosition, jointPositions, joint0, false))
@@ -187,11 +186,11 @@ private:
         {
             // set computed joints in jointData
             jointPositions[Joint::LHipYawPitch] = joint0;
-            jointPositions[Joint::LHipRoll] = joint1;
+            jointPositions[Joint::LHipRoll] = -joint1;
             jointPositions[Joint::LHipPitch] = joint2;
             jointPositions[Joint::LKneePitch] = joint3;
             jointPositions[Joint::LAnklePitch] = joint4;
-            jointPositions[Joint::LAnkleRoll] = joint5;
+            jointPositions[Joint::LAnkleRoll] = -joint5;
         }
         else
         {
@@ -216,8 +215,6 @@ private:
 
         target[1][3] += sign * lengthBetweenLegs * 0.5;
         target = TransformMatrices::RotX(sign*mathGeneral::PI*0.25) * TransformMatrices::RotZ(-sign*joint0) * target; // compute residual transformation with fixed joint0
-
-        std::cout << target << std::endl;
 
         float length = sqrt(target[0][3]*target[0][3] + target[1][3]*target[1][3] + target[2][3]*target[2][3]);
         float sqrLength = length * length;
@@ -263,11 +260,11 @@ private:
         {
             // set computed joints in jointData
             jointPositions[Joint::LHipYawPitch] = joint0;
-            jointPositions[Joint::LHipRoll] = joint1;
+            jointPositions[Joint::LHipRoll] = -joint1;
             jointPositions[Joint::LHipPitch] = joint2;
             jointPositions[Joint::LKneePitch] = joint3;
             jointPositions[Joint::LAnklePitch] = joint4;
-            jointPositions[Joint::LAnkleRoll] = joint5;
+            jointPositions[Joint::LAnkleRoll] = -joint5;
         }
         else
         {
