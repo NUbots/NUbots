@@ -21,6 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
+WalkingEngine.h WalkingEngine.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
