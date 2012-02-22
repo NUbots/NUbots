@@ -1,5 +1,6 @@
 #include "SelfSRUKF.h"
 #include "Tools/Math/General.h"
+#include "Tools/Math/statistics.h"
 #include <sstream>
 
 // Define Constants
@@ -25,7 +26,7 @@ SelfSRUKF::SelfSRUKF(double time): SelfModel(time)
 /*! @brief Copy constructor
 
  */
-SelfSRUKF::SelfSRUKF(const SelfSRUKF& source): SelfModel(source)
+SelfSRUKF::SelfSRUKF(const SelfModel& source): SelfModel(source)
 {
     InitialiseCachedValues();
 }
@@ -39,7 +40,7 @@ Takes a parent filter and performs a split on an ambiguous object using the give
 @param splitOption The option to be evaluated within this model.
 @param time The current time of the update
 */
-SelfSRUKF::SelfSRUKF(const SelfSRUKF& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time):
+SelfSRUKF::SelfSRUKF(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time):
         SelfModel(parent, object, splitOption, time)
 {
     InitialiseCachedValues();
@@ -310,8 +311,128 @@ SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const StationaryObject& obj
     return RESULT_OK;
 }
 
-SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects)
+
+/*!
+    @brief  Perform update for Probabalistic Data Association Method
+    The Probabalistic Data Association Method performs an single update performed by
+    calculating a weighted sum of the correction, combining all possible options.
+
+    @param object The ambiguous object containing the measruement to the object.
+    @param possible_objects The possible stationary objects containing the potential
+    positions of the observed object.
+
+    @return Matrix containing the sigma points for the current model.
+*/
+SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error)
 {
+    const float c_threshold2 = 15.0f;
+    // Calculate update uncertainties - S_obj_rel & R_obj_rel
+    Matrix S_obj_rel = Matrix(2,2,false);
+    S_obj_rel[0][0] = sqrt(error.distance());
+    S_obj_rel[1][1] = sqrt(error.heading());
+
+    Matrix R_obj_rel = S_obj_rel * S_obj_rel.transp(); // R = S^2
+
+    // Unscented KF Stuff.
+    Matrix yBar;                                  	//reset
+    Matrix Py;
+    Matrix Pxy; //  = Matrix(7, 2, false);                   //Pxy=[0;0;0];
+    Matrix scriptX = CalculateSigmaPoints();
+    const unsigned int numSigmaPoints = scriptX.getn();
+
+    Matrix scriptY = Matrix(2, numSigmaPoints, false);
+    Matrix temp = Matrix(2, 1, false);
+
+    Matrix y = Matrix(2,1,false); // Measurement. (Distance, heading).
+    y[0][0] = object.measuredDistance() * cos(object.measuredElevation());
+    y[1][0] = object.measuredBearing();
+
+    Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
+    Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
+
+    Matrix innovation;
+    std::vector<Matrix> innovations;
+    std::vector<Matrix> kf_gains;
+    std::vector<float> mvdists;
+    float mv_sum = 0.0f;
+
+    const float Pd = 0.95;  // Target detection probability
+    const float Pg = 0.95;  // Gate probability (the probability that the gate contains the true measurement if detected)
+
+    Matrix M1 = sqrtOfTestWeightings;
+
+    for (std::vector<StationaryObject*>::const_iterator obj_it = possible_objects.begin(); obj_it != possible_objects.end(); ++obj_it)
+    {
+        StationaryObject* object = (*obj_it);
+        // Calculate the expected measurement based on the current state.
+        for(unsigned int i = 0; i < numSigmaPoints; i++)
+        {
+            const double dX = object->X() - scriptX[0][i];
+            const double dY = object->Y() - scriptX[1][i];
+            temp[0][0] = sqrt(dX*dX + dY*dY);
+            temp[1][0] = mathGeneral::normaliseAngle(atan2(dY,dX) - scriptX[2][i]);
+            scriptY.setCol(i, temp.getCol(0));
+        }
+
+
+        for(unsigned int i = 0; i < numSigmaPoints; i++)
+        {
+            Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
+            My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
+        }
+
+        Matrix M1 = sqrtOfTestWeightings;
+        yBar = My * M1.transp(); // Predicted Measurement.
+        Py = (My - yBar * M1) * (My - yBar * M1).transp();
+        Pxy = (Mx - m_mean * M1) * (My - yBar * M1).transp();
+
+        Matrix Sk = Py + R_obj_rel;
+
+        // Calculate the Kalman filter gain.
+        Matrix K = Pxy * Invert22(Sk); // K = Kalman filter gain.
+        // Calculate the innovation.
+        innovation = yBar - y;
+
+        // Calculate Association Probability
+        float mv = MultiVariateNormalDistribution(Sk, y, yBar);
+        mv_sum += mv;
+        mvdists.push_back(mv);
+        innovations.push_back(innovation);
+        kf_gains.push_back(K);
+
+//        //end of standard ukf stuff
+//        //RHM: 20/06/08 Outlier rejection.
+//        double innovation2 = convDble((yBar - y).transp() * Invert22(Py + R_obj_rel) * (yBar - y));
+
+//        // Update Alpha
+//        double innovation2measError = convDble((yBar - y).transp() * Invert22(R_obj_rel) * (yBar - y));
+//        m_alpha *= 1 / (1 + innovation2measError);
+//        //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
+
+//        if (innovation2 > c_threshold2)
+//        {
+//            return RESULT_OUTLIER;
+//        }
+    }
+
+
+    // Combine the weighted innovations.
+    float weight_mult = 1 / (1-Pd*Pg + mv_sum);
+    float none_correct_weight = (1-Pd*Pg) * weight_mult;
+    Matrix combined_innovation(y.getm(), y.getn(), false);
+    Matrix kf_gain(kf_gains[0].getm(), kf_gains[0].getn(), false);
+
+    for(unsigned int index = 0; index < innovations.size(); ++index)
+    {
+        float weight = mvdists[index] * weight_mult;
+        combined_innovation = combined_innovation + weight * innovations[index];
+        kf_gain = kf_gain + weight*kf_gains[index];
+    }
+
+
+    // Update the model.
+    m_covariance = HT( horzcat(Mx - m_mean*M1 - kf_gain*My + kf_gain*yBar*M1, kf_gain*S_obj_rel) );
+    m_mean = m_mean - kf_gain*combined_innovation;
     return RESULT_OK;
 }
 
@@ -364,32 +485,6 @@ float SelfSRUKF::CalculateAlphaWeighting(const Matrix& innovation, const Matrix&
     return notOutlierLikelyhood * fracRes * expRes + outlierLikelyhood;
 }
 
-bool SelfSRUKF::clipState(int stateIndex, double minValue, double maxValue){
-    bool clipped = false;
-    if(m_mean[stateIndex][0] > maxValue){
-        double mult, Pii;
-        Matrix Si;
-        Si = m_covariance.getRow(stateIndex);
-        Pii = convDble(Si * Si.transp());
-        mult = (m_mean[stateIndex][0] - maxValue) / Pii;
-        m_mean = m_mean - mult * m_covariance * Si.transp();
-        m_mean[stateIndex][0] = maxValue;
-        clipped = true;
-    }
-    if(m_mean[stateIndex][0] < minValue){
-        double mult, Pii;
-        Matrix Si;
-        Si = m_covariance.getRow(stateIndex);
-        Pii = convDble(Si * Si.transp());
-        mult = (m_mean[stateIndex][0] - minValue) / Pii;
-        m_mean = m_mean - mult * m_covariance * Si.transp();
-        m_mean[stateIndex][0] = minValue;
-        clipped = true;
-    }
-    m_mean[states_heading][0] = mathGeneral::normaliseAngle(m_mean[states_heading][0]);
-    return clipped;
-}
-
 std::ostream& operator<< (std::ostream& output, const SelfSRUKF& p_model)
 {
     const SelfModel* model = static_cast<const SelfModel*>(&p_model);
@@ -402,31 +497,4 @@ std::istream& operator>> (std::istream& input, SelfSRUKF& p_model)
     SelfModel* model = static_cast<SelfModel*>(&p_model);
     input >> (*model);
     return input;
-}
-
-std::string SelfSRUKF::summary(bool brief) const
-{
-    std::stringstream buffer;
-    buffer << "Model Id: " << id() << " Active: " << active() << " Alpha: " << alpha() << " Position: (" << mean(states_x) << ",";
-    buffer << mean(states_y) << "," << mean(states_heading) << ")" << std::endl;
-    if(!brief)
-    {
-            buffer << "Variance - Position: (" << sd(states_x)*sd(states_x) << ",";
-            buffer << sd(states_y)*sd(states_y) << "," << sd(states_heading)*sd(states_heading) << ")" << endl;
-            if(m_history_buffer.size() > 0)
-            {
-                buffer << "History: ";
-
-                for(boost::circular_buffer<unsigned int>::const_iterator buff_it = m_history_buffer.begin(); buff_it != m_history_buffer.end(); ++buff_it)
-                {
-                    if(buff_it != m_history_buffer.begin())
-                    {
-                        buffer << "->";
-                    }
-                    buffer << (*buff_it);
-                }
-                buffer << std::endl;
-            }
-    }
-    return buffer.str();
 }

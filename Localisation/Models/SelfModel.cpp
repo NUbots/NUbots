@@ -1,5 +1,6 @@
 #include "SelfModel.h"
 #include "Tools/Math/General.h"
+#include <sstream>
 
 /*! @brief Default time constructor
 
@@ -60,9 +61,9 @@ SelfModel::SelfModel(const SelfModel& parent, const AmbiguousObject& object, con
 
 
     // copy information from the parent model.
-    m_alpha = parent.alpha();
-    m_mean = parent.m_mean;
-    m_covariance = parent.m_covariance;
+    setAlpha(parent.alpha());
+    setMean(parent.mean());
+    setCovariance(parent.covariance());
 
     m_creation_time = time;
     return;
@@ -170,6 +171,31 @@ unsigned int SelfModel::previousSplitOption(const AmbiguousObject& theObject) co
     return result;
 }
 
+bool SelfModel::clipState(int stateIndex, double minValue, double maxValue){
+    bool clipped = false;
+    if(m_mean[stateIndex][0] > maxValue){
+        double mult, Pii;
+        Matrix Si;
+        Si = m_covariance.getRow(stateIndex);
+        Pii = convDble(Si * Si.transp());
+        mult = (m_mean[stateIndex][0] - maxValue) / Pii;
+        m_mean = m_mean - mult * m_covariance * Si.transp();
+        m_mean[stateIndex][0] = maxValue;
+        clipped = true;
+    }
+    if(m_mean[stateIndex][0] < minValue){
+        double mult, Pii;
+        Matrix Si;
+        Si = m_covariance.getRow(stateIndex);
+        Pii = convDble(Si * Si.transp());
+        mult = (m_mean[stateIndex][0] - minValue) / Pii;
+        m_mean = m_mean - mult * m_covariance * Si.transp();
+        m_mean[stateIndex][0] = minValue;
+        clipped = true;
+    }
+    m_mean[states_heading][0] = mathGeneral::normaliseAngle(m_mean[states_heading][0]);
+    return clipped;
+}
 
 std::ostream& operator<< (std::ostream& output, const SelfModel& p_model)
 {
@@ -204,3 +230,30 @@ std::istream& operator>> (std::istream& input, SelfModel& p_model)
 
     return input;
 }
+
+std::string SelfModel::summary(bool brief) const
+{
+    std::stringstream buffer;
+    buffer << "Model Id: " << id() << " Active: " << active() << " Alpha: " << alpha() << " Position: (" << mean(states_x) << ",";
+    buffer << mean(states_y) << "," << mean(states_heading) << ")" << std::endl;
+    if(!brief)
+    {
+            buffer << "Covariance - Position:" << std::endl << m_covariance << std::endl;
+            if(m_history_buffer.size() > 0)
+            {
+                buffer << "History: ";
+
+                for(boost::circular_buffer<unsigned int>::const_iterator buff_it = m_history_buffer.begin(); buff_it != m_history_buffer.end(); ++buff_it)
+                {
+                    if(buff_it != m_history_buffer.begin())
+                    {
+                        buffer << "->";
+                    }
+                    buffer << (*buff_it);
+                }
+                buffer << std::endl;
+            }
+    }
+    return buffer.str();
+}
+

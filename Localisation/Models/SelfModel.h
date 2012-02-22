@@ -7,6 +7,9 @@
 #include <iostream>
 #include <boost/circular_buffer.hpp>
 
+class OdometryMotionModel;
+class MeasurementError;
+
 /*!
   * A class used to template a self localisation kalman filter.
   * The model uses three states to track the pose, x  position, y position, and heading angle
@@ -22,6 +25,13 @@ public:
         states_total
     };
 
+    enum updateResult
+    {
+        RESULT_OK,
+        RESULT_OUTLIER,
+        RESULT_FAILED
+    };
+
     SelfModel(float time);
     SelfModel(const SelfModel& source);
     SelfModel(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, float time);
@@ -31,6 +41,28 @@ public:
 
     static Matrix CalculateMeasurementPrediction(const Matrix& state, float xLocation, float yLocation);
     static Matrix CalculateMeasurementPrediction(const Matrix& state, float xLocation, float yLocation, float orientation);
+
+    // Update functions
+    virtual updateResult TimeUpdate(const std::vector<float>& odometry, OdometryMotionModel& motion_model, float deltaTime)
+    {
+        assert(false);
+        return RESULT_FAILED;
+    }
+    virtual updateResult MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement)
+    {
+        assert(false);
+        return RESULT_FAILED;
+    }
+    virtual updateResult MeasurementUpdate(const StationaryObject& object, const MeasurementError& error)
+    {
+        assert(false);
+        return RESULT_FAILED;
+    }
+    virtual updateResult MeasurementUpdate(const std::vector<StationaryObject*>& objects)
+    {
+        assert(false);
+        return RESULT_FAILED;
+    }
 
     bool isLost() const;
     Self GenerateSelfState() const;
@@ -64,6 +96,8 @@ public:
         return (alpha() > model.alpha());
     }
 
+    bool clipState(int stateIndex, double minValue, double maxValue);
+
     /*!
     @brief Output streaming operation.
     @param output The output stream.
@@ -77,6 +111,8 @@ public:
     @param p_kf The destination model to be streamed to.
     */
     friend std::istream& operator>> (std::istream& input, SelfModel& p_model);
+
+    std::string summary(bool brief=true) const;
 
 protected:
     bool m_active;                  //!< Active flag.

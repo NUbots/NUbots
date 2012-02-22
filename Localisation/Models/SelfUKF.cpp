@@ -1,6 +1,7 @@
 #include "SelfUKF.h"
 #include "Tools/Math/General.h"
 #include <sstream>
+#include <iostream>
 
 // Define Constants
 const float SelfUKF::c_Kappa = 1.0f;
@@ -25,7 +26,7 @@ SelfUKF::SelfUKF(double time): SelfModel(time)
 /*! @brief Copy constructor
 
  */
-SelfUKF::SelfUKF(const SelfUKF& source): SelfModel(source)
+SelfUKF::SelfUKF(const SelfModel& source): SelfModel(source)
 {
     InitialiseCachedValues();
 }
@@ -39,7 +40,7 @@ Takes a parent filter and performs a split on an ambiguous object using the give
 @param splitOption The option to be evaluated within this model.
 @param time The current time of the update
 */
-SelfUKF::SelfUKF(const SelfUKF& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time):
+SelfUKF::SelfUKF(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time):
         SelfModel(parent, object, splitOption, time)
 {
     InitialiseCachedValues();
@@ -68,9 +69,9 @@ void SelfUKF::InitialiseCachedValues()
     CalculateSigmaWeights(c_Kappa);
 
     sqrtOfProcessNoise = Matrix(3,3,true);
-    sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
-    sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
-    sqrtOfProcessNoise[2][2] = 0.005; // Robot Theta. 0.00001
+    sqrtOfProcessNoise[0][0] = 0.02; // Robot X coord.
+    sqrtOfProcessNoise[1][1] = 0.02; // Robot Y coord.
+    sqrtOfProcessNoise[2][2] = 0.00001; // Robot Theta. 0.00001
 
     return;
 }
@@ -122,7 +123,11 @@ SelfUKF::updateResult SelfUKF::TimeUpdate(const std::vector<float>& odometry, Od
     diffOdom.Y = y;
     diffOdom.Theta = heading;
 
-    cout << "initial sigma points" << std::endl << sigmaPoints << std::endl;
+    if(id() == 3149)
+    {
+        std::cout << "before:" << std::endl;
+        std::cout << sigmaPoints << std::endl;
+    }
 
     for (unsigned int i = 0 ; i < numSigmaPoints; i++)
     {
@@ -136,8 +141,6 @@ SelfUKF::updateResult SelfUKF::TimeUpdate(const std::vector<float>& odometry, Od
         sigmaPoints[1][i] = *(newPose+1);
         sigmaPoints[2][i] = *(newPose+2);
     }
-
-    cout << "resulting sigma points" << std::endl << sigmaPoints << std::endl;
 
 //    // Step 4: Calculate new state based on propagated sigma points and the weightings of the sigmaPoints
     Matrix newMean(m_mean.getm(),m_mean.getn(), false);
@@ -171,12 +174,12 @@ SelfUKF::updateResult SelfUKF::TimeUpdate(const std::vector<float>& odometry, Od
         covariance = covariance + m_sigmaWeights[0][i]*diff*diff.transp();
     }
 
-    cout << "timeupdate mean" << std::endl << m_mean << std::endl << "new mean" << std::endl << newMean << std::endl;
-    cout << "timeupdate covariance" << std::endl << m_covariance << std::endl << "new covariance" << std::endl << HT(horzcat(covariance, sqrtOfProcessNoise*sqrtOfProcessNoise.transp())) << std::endl;
-
     m_covariance = HT(horzcat(covariance, sqrtOfProcessNoise*sqrtOfProcessNoise.transp()));
     m_mean = newMean;
-
+    if(id() == 3149)
+    {
+        std::cout << "cov head:" << variance(states_heading) << std::endl;
+    }
     return RESULT_OK;
 }
 
@@ -270,6 +273,7 @@ SelfUKF::updateResult SelfUKF::MultipleObjectUpdate(const Matrix& locations, con
 
     m_covariance = HT( horzcat(Mx - m_mean*M1 - K*My + K*yBar*M1, K*S_obj_rel) );
     m_mean = m_mean - K*(yBar - y);
+
     return RESULT_OK;
 }
 
@@ -350,7 +354,7 @@ Performs an update for a single landmark.
 
 SelfUKF::updateResult SelfUKF::MeasurementUpdate(const StationaryObject& object, const MeasurementError& error)
 {
-    const float c_threshold2 = 15.0f;
+    const float c_threshold2 = 3.0f;
 
     Matrix stateEstimateSigmas = CalculateSigmaPoints();
 
@@ -417,10 +421,6 @@ SelfUKF::updateResult SelfUKF::MeasurementUpdate(const StationaryObject& object,
     m_mean = m_mean + K * (y - yBar);
     m_covariance = m_covariance - K*Pyy*K.transp();
 
-    cout << "m_mean" << std::endl << m_mean << std::endl;
-
-    cout << "covariance " << std::endl << m_covariance << std::endl;
-
     return RESULT_OK;
 }
 
@@ -437,7 +437,15 @@ Matrix SelfUKF::CalculateSigmaPoints() const
 
     sigmaPoints.setCol(0,m_mean); // First sigma point is the current mean with no deviation
     Matrix deviation;
-    Matrix sqtCovariance = cholesky(m_numStates / (1-weights[0][0]) * m_covariance);
+    Matrix param = m_numStates / (1-weights[0][0]) * m_covariance;
+    Matrix sqtCovariance;
+
+    sqtCovariance = cholesky(param);
+    if(sqtCovariance.isValid() != true)
+    {
+        sqtCovariance = cholesky(param.transp());
+        assert(sqtCovariance.isValid());
+    }
 
     double sigmaAngleMax = 2.5;
     double min_angle = -sigmaAngleMax + m_mean[states_heading][0];
@@ -535,17 +543,4 @@ std::istream& operator>> (std::istream& input, SelfUKF& p_model)
     SelfModel* model = static_cast<SelfModel*>(&p_model);
     input >> (*model);
     return input;
-}
-
-std::string SelfUKF::summary(bool brief) const
-{
-    std::stringstream buffer;
-    buffer << "Model Id: " << id() << " Active: " << active() << " Alpha: " << alpha() << " Position: (" << mean(states_x) << ",";
-    buffer << mean(states_y) << "," << mean(states_heading) << ")" << std::endl;
-    if(!brief)
-    {
-            buffer << "Variance - Position: (" << sd(states_x)*sd(states_x) << ",";
-            buffer << sd(states_y)*sd(states_y) << "," << sd(states_heading)*sd(states_heading) << endl;
-    }
-    return buffer.str();
 }
