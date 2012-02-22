@@ -1,6 +1,7 @@
 #ifndef SELF_LOCWM_H_DEFINED
 #define SELF_LOCWM_H_DEFINED
-#include "SelfSRUKF.h"
+#include "Models/SelfSRUKF.h"
+#include "Models/SelfUKF.h"
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -24,8 +25,9 @@ class NUSensorsData;
 
 #define LOC_SUMMARY 3
 
+//typedef SelfSRUKF Model;
 typedef SelfSRUKF Model;
-typedef std::list<Model*> ModelContainer;
+typedef std::list<SelfModel*> ModelContainer;
 typedef std::pair<unsigned int, float> ParentSum;
 #include "LocalisationSettings.h"
 
@@ -42,8 +44,8 @@ class SelfLocalisation: public TimestampedData
         void ProcessObjects(FieldObjects* fobs, float time_increment);
         void writeToLog();
         bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double time_increment);
-        void WriteModelToObjects(const Model* model, FieldObjects* fobs);
-        bool clipModelToField(Model* theModel);
+        void WriteModelToObjects(const SelfModel* model, FieldObjects* fobs);
+        bool clipModelToField(SelfModel* theModel);
         bool clipActiveModelsToField();
 
         int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
@@ -64,7 +66,7 @@ class SelfLocalisation: public TimestampedData
         unsigned int getNumFreeModels();
         bool CheckModelForOutlierReset(int modelID);
         int  CheckForOutlierResets();
-        const Model* getBestModel() const;
+        const SelfModel* getBestModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
 
@@ -76,10 +78,10 @@ class SelfLocalisation: public TimestampedData
         void MergeModels(int maxAfterMerge);
 
         // Merging helper functions.
-        bool MergeTwoModels(Model* modelA, Model* modelB);
-        double MergeMetric(const Model* modelA, const Model* modelB) const;
+        bool MergeTwoModels(SelfModel* modelA, SelfModel* modelB);
+        double MergeMetric(const SelfModel* modelA, const SelfModel* modelB) const;
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
-        void PrintModelStatus(const Model* model);
+        void PrintModelStatus(const SelfModel* model);
         std::string ModelStatusSummary();
 
         void removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& ambiguousobjects, bool yellow_seen, bool blue_seen);
@@ -139,7 +141,8 @@ class SelfLocalisation: public TimestampedData
 
         SelfLocalisation& operator= (const SelfLocalisation & source);
 
-protected:
+    protected:
+        MeasurementError calculateError(const Object& theObject);
 
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
@@ -169,18 +172,18 @@ protected:
 
         std::vector<AmbiguousObject> m_pastAmbiguous;
 
-        // Tuning Constants -- Values assigned in LocWM.cpp
+        // Outlier tuning Constants -- Values assigned in SelfLocalisation.cpp
         static const float c_LargeAngleSD;
         static const float c_OBJECT_ERROR_THRESHOLD;
         static const float c_OBJECT_ERROR_DECAY;
         static const float c_RESET_SUM_THRESHOLD;
         static const int c_RESET_NUM_THRESHOLD;
 
-        // Object distance measurement error weightings (Constant) -- Values assigned in LocWM.cpp
-        static const float R_obj_theta;
-        static const float R_obj_range_offset;
-        static const float R_obj_range_relative;
-        static const float centreCircleBearingError;
+        // Object distance measurement error weightings (Constant) -- Values assigned in SelfLocalisation.cpp
+        static const float c_obj_theta_variance;
+        static const float c_obj_range_offset_variance;
+        static const float c_obj_range_relative_variance;
+        static const float c_centre_circle_heading_variance;
         static const float sdTwoObjectAngle;
 };
 

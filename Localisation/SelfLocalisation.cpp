@@ -57,11 +57,11 @@ const float SelfLocalisation::c_RESET_SUM_THRESHOLD = 3.0f; // 3 // then 8.0 (ho
 const int SelfLocalisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
-const float SelfLocalisation::R_obj_theta = 0.1f*0.1f;        // (0.01 rad)^2
-const float SelfLocalisation::R_obj_range_offset = 10.0f*10.0f;     // (10cm)^2
-const float SelfLocalisation::R_obj_range_relative = 0.20f*0.20f;   // 20% of range added
+const float SelfLocalisation::c_obj_theta_variance = 0.1f*0.1f;        // (0.01 rad)^2
+const float SelfLocalisation::c_obj_range_offset_variance = 10.0f*10.0f;     // (10cm)^2
+const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
 
-const float SelfLocalisation::centreCircleBearingError = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
+const float SelfLocalisation::c_centre_circle_heading_variance = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
 const float SelfLocalisation::sdTwoObjectAngle = 0.05f; //Small! error in angle difference is normally very small
 
@@ -428,7 +428,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             m_timeSinceFieldObjectSeen += time_increment;
 
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-        const Model* bestModel = getBestModel();
+        const SelfModel* bestModel = getBestModel();
         if(numUpdates > 0)
         {
             for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
@@ -511,7 +511,7 @@ void SelfLocalisation::removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& am
     @param fieldObjects The objects to which the state will be written.
 
  */
-void SelfLocalisation::WriteModelToObjects(const Model* model, FieldObjects* fieldObjects)
+void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects* fieldObjects)
 {
 
     // Check if lost.
@@ -865,7 +865,7 @@ void SelfLocalisation::swapFieldStateTeam(float& x, float& y, float& heading)
 
     @return True if clipping was required. False if not.
 */
-bool SelfLocalisation::clipModelToField(Model* theModel)
+bool SelfLocalisation::clipModelToField(SelfModel* theModel)
 {
     const double fieldXLength = 680.0;
     const double fieldYLength = 440.0;
@@ -948,7 +948,7 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
         (*model_it)->TimeUpdate(odom, odom_Model, timeIncrement);
     }
     
-    const Model* bestModel = getBestModel();
+    const SelfModel* bestModel = getBestModel();
     double rmsDistance = 0;
     double entropy = 0;
     double bestModelEntropy = 0;
@@ -1012,8 +1012,8 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
         measurements[index+1][0] = (*currStat)->measuredBearing();
 
         // R
-        R_measurement[index][index] = R_obj_range_offset + R_obj_range_relative * pow(measurements[index][0], 2);
-        R_measurement[index+1][index+1] = R_obj_theta;
+        R_measurement[index][index] = c_obj_range_offset_variance + c_obj_range_relative_variance * pow(measurements[index][0], 2);
+        R_measurement[index+1][index+1] = c_obj_theta_variance;
 
         objIds.push_back((*currStat)->getID());
         measurementNumber++;
@@ -1033,7 +1033,7 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
         if((*model_it)->active() == false) continue; // Skip Inactive models.
-        kf_return = Model::RESULT_OK;
+        kf_return = SelfModel::RESULT_OK;
         kf_return = (*model_it)->MultipleObjectUpdate(locations, measurements, R_measurement);
 
 #if LOC_SUMMARY > 0
@@ -1049,16 +1049,12 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
         m_frame_log << "Expected Measurements: " << std::endl << temp << std::endl;
         m_frame_log <<" Result: " << ((kf_return==Model::RESULT_OK)?"Successful":"Outlier") << std::endl;
 #endif
-        if(kf_return == Model::RESULT_OUTLIER)
+        if(kf_return == SelfModel::RESULT_OUTLIER)
         {
             currStat = landmarks.begin();
             for(; currStat != endStat; ++currStat)
             {
-                double flatObjectDistance = (*currStat)->measuredDistance() * cos((*currStat)->measuredElevation());
-                MeasurementError temp_error;
-                temp_error.setDistance(R_obj_range_offset + flatObjectDistance * R_obj_range_relative);
-                temp_error.setHeading(R_obj_theta);
-                kf_return = (*model_it)->MeasurementUpdate(*(*currStat), temp_error);
+                MeasurementError temp_error = calculateError(*(*currStat));
 
 //                kf_return = m_models[modelID].fieldObjectmeas(flatObjectDistance, (*currStat)->measuredBearing(),(*currStat)->X(), (*currStat)->Y(),
 //                                R_obj_range_offset, R_obj_range_relative, R_obj_theta);
@@ -1076,7 +1072,7 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
     #if LOC_SUMMARY > 0
 
     #endif
-        if(kf_return == Model::RESULT_OK) numSuccessfulUpdates++;
+        if(kf_return == SelfModel::RESULT_OK) numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
 }
@@ -1101,14 +1097,14 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
         debug_out  << " Bearing = " << landmark.measuredBearing();
         debug_out  << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
-        return Model::RESULT_OUTLIER;
+        return SelfModel::RESULT_OUTLIER;
     }
 
     double flatObjectDistance = landmark.measuredDistance() * cos(landmark.measuredElevation());
 
     MeasurementError temp_error;
-    temp_error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(flatObjectDistance,2));
-    temp_error.setHeading(R_obj_theta);
+    temp_error.setDistance(c_obj_range_offset_variance + c_obj_range_relative_variance * pow(flatObjectDistance,2));
+    temp_error.setHeading(c_obj_theta_variance);
 
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
@@ -1129,7 +1125,7 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
             continue;
         }
-        kf_return = Model::RESULT_OK;
+        kf_return = SelfModel::RESULT_OK;
 
 
         kf_return = (*model_it)->MeasurementUpdate(landmark, temp_error);
@@ -1139,7 +1135,7 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
 //        if(kf_return == Model::RESULT_OUTLIER) m_modelObjectErrors[modelID][landmark.getID()] += 1.0;
 
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-        if(kf_return != Model::RESULT_OK)
+        if(kf_return != SelfModel::RESULT_OK)
         {
             Matrix estimated_measurement = (*model_it)->CalculateMeasurementPrediction(landmark.X(),landmark.Y());
             debug_out << "OUTLIER!" << endl;
@@ -1181,7 +1177,7 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
         m_frame_log << "Result = ";
         m_frame_log << ((kf_return==Model::RESULT_OUTLIER)?"Outlier":"Success") << std::endl;
     #endif
-        if(kf_return == Model::RESULT_OK) numSuccessfulUpdates++;
+        if(kf_return == SelfModel::RESULT_OK) numSuccessfulUpdates++;
     }
     return numSuccessfulUpdates;
 }
@@ -1268,7 +1264,7 @@ int SelfLocalisation::PruneMaxLikelyhood()
 
 
 struct model_ptr_cmp{
-    bool operator()( Model* lhs, Model* rhs){
+    bool operator()( SelfModel* lhs, SelfModel* rhs){
         return * lhs < * rhs;
     }
 };
@@ -1359,11 +1355,9 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
 
     const float outlier_factor = 0.0001;
     ModelContainer new_models;
-    Model* temp_mod;
+    SelfModel* temp_mod;
 
-    MeasurementError error;
-    error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation()),2));
-    error.setHeading(R_obj_theta);
+    MeasurementError error = calculateError(ambiguousObject);
 
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
@@ -1403,7 +1397,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
         m_models.insert(m_models.end(), new_models.begin(), new_models.end());
         new_models.clear();
     }
-    return Model::RESULT_OUTLIER;
+    return SelfModel::RESULT_OUTLIER;
 }
 
 /*! @brief Performs an ambiguous measurement update using the constraint method.
@@ -1415,11 +1409,9 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
 
     const float outlier_factor = 0.0001;
     ModelContainer new_models;
-    Model* temp_mod, *curr_model;
+    SelfModel* temp_mod, *curr_model;
 
-    MeasurementError error;
-    error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation()),2));
-    error.setHeading(R_obj_theta);
+    MeasurementError error = calculateError(ambiguousObject);
 
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
@@ -1468,7 +1460,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
         m_models.insert(m_models.end(), new_models.begin(), new_models.end());
         new_models.clear();
     }
-    return Model::RESULT_OUTLIER;
+    return SelfModel::RESULT_OUTLIER;
 }
 
 int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
@@ -1490,9 +1482,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
         float heading_delta = fabs(ambiguousObject.measuredBearing() - m_pastAmbiguous[ambiguousObject.getID()].measuredBearing());
 
         // Calculate the allowable deviation
-        MeasurementError error;
-        error.setDistance(R_obj_range_offset + R_obj_range_relative * pow(ambiguousObject.measuredDistance() * cos(ambiguousObject.measuredElevation()),2));
-        error.setHeading(R_obj_theta);
+        MeasurementError error = calculateError(ambiguousObject);
         float max_distance_deviation = error.distance();
         float max_heading_deviation = error.heading();
 
@@ -1503,7 +1493,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
         {
             // Third Step (A): Apply mesurment using previous decision if measurement is consistant.
             ModelContainer new_models;
-            Model* temp_model = NULL;
+            SelfModel* temp_model = NULL;
 
             for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
             {
@@ -1553,12 +1543,14 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
         // Use the regular splitting method.
         return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
     }
-    return Model::RESULT_OUTLIER;
+    return SelfModel::RESULT_OUTLIER;
 }
 
-int SelfLocalisation::ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects)
+int SelfLocalisation::ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
-    Model::updateResult result = m_models.front()->MeasurementUpdate(ambigousObject, possibleObjects);
+    MeasurementError error = calculateError(ambiguousObject);
+    SelfModel::updateResult result = SelfModel::RESULT_FAILED;
+    //result = m_models.front()->MeasurementUpdate(ambiguousObject, possibleObjects, error);
     return result;
 }
 
@@ -1567,7 +1559,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambi
     @param modelB Second model to merge.
     @return True if the models were merged successfully. False if unsuccessful.
 */
-bool SelfLocalisation::MergeTwoModels(Model* modelA, Model* modelB)
+bool SelfLocalisation::MergeTwoModels(SelfModel* modelA, SelfModel* modelB)
 {
     // Merges second model into first model, then disables second model.
     bool success = true;
@@ -1616,8 +1608,12 @@ bool SelfLocalisation::MergeTwoModels(Model* modelA, Model* modelB)
     xDiff = modelB->mean() - xMerged;
     Matrix pB = (modelB->covariance() * modelB->covariance().transp() + xDiff * xDiff.transp());
   
-    Matrix sMerged = cholesky(alphaA * pA + alphaB * pB); // P merged = alphaA * pA + alphaB * pB.
-
+    Matrix sWSum = alphaA * pA + alphaB * pB;
+    Matrix sMerged = cholesky(sWSum); // P merged = alphaA * pA + alphaB * pB.
+    if(sMerged.isValid() == false)
+    {
+        sMerged = cholesky(sWSum.transp()); // P merged = alphaA * pA + alphaB * pB.
+    }
     // Copy merged value to first model
     modelA->setAlpha(alphaMerged);
     modelA->setMean(xMerged);
@@ -1655,7 +1651,7 @@ unsigned int SelfLocalisation::getNumFreeModels()
     @param modelB The second model.
     @return True if modelA is smaller than modelB. False if Model A is greater than or equal to ModelB.
 */
-bool model_alpha_lesser(Model* modelA, Model* modelB)
+bool model_alpha_lesser(SelfModel* modelA, SelfModel* modelB)
 {
     return modelA->alpha() < modelB->alpha();
 }
@@ -1663,10 +1659,10 @@ bool model_alpha_lesser(Model* modelA, Model* modelB)
 /*! @brief Retrieve the best available model.
     @return A pointer to the best available model.
 */
-const Model* SelfLocalisation::getBestModel() const
+const SelfModel* SelfLocalisation::getBestModel() const
 {
     assert(m_models.size() > 0);
-    Model* result;
+    SelfModel* result;
     ModelContainer::const_iterator best_mod_it;
 
     best_mod_it = max_element(m_models.begin(), m_models.end(), model_alpha_lesser);
@@ -1790,7 +1786,7 @@ std::string SelfLocalisation::ModelStatusSummary()
 
     @param model The model
 */
-void SelfLocalisation::PrintModelStatus(const Model* model)
+void SelfLocalisation::PrintModelStatus(const SelfModel* model)
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 2
   debug_out  <<"[" << m_currentFrameNumber << "]: Model[" << model->id() << "]";
@@ -1814,8 +1810,8 @@ void SelfLocalisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
             {
                 continue;
             }
-            Model* modelA = (*i);
-            Model* modelB = (*j);
+            SelfModel* modelA = (*i);
+            SelfModel* modelB = (*j);
             if (modelA->inactive() || modelB->inactive())
             {
                 continue;
@@ -1846,7 +1842,7 @@ void SelfLocalisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
 
     @return The merge metric of the pair.
 */
-double SelfLocalisation::MergeMetric(const Model *modelA, const Model *modelB) const
+double SelfLocalisation::MergeMetric(const SelfModel *modelA, const SelfModel *modelB) const
 {   
     if (modelA==modelB) return 10000.0;
     if (modelA->inactive() || modelB->inactive()) return 10000.0; //at least one model inactive
@@ -1948,7 +1944,7 @@ void SelfLocalisation::InitialiseModels(const std::vector<Moment>& positions)
 {
     if(positions.size() <= 0) return;      // Don't do anything if no positions are given.
     const float split_alpha = 1.0f / positions.size();            // Uniform split alpha for all models.
-    Model* temp;
+    SelfModel* temp;
     clearModels();
 
 #if LOC_SUMMARY > 0
@@ -2011,7 +2007,7 @@ Creates a 3x3 covariance matrix with the variance of each attribute set as speci
 */
 Matrix SelfLocalisation::covariance_matrix(float x_var, float y_var, float heading_var)
 {
-    Matrix temp_cov(Model::states_total, Model::states_total, false);
+    Matrix temp_cov(SelfModel::states_total, SelfModel::states_total, false);
     temp_cov[Model::states_x][Model::states_x] = x_var;
     temp_cov[Model::states_y][Model::states_y] = y_var;
     temp_cov[Model::states_heading][Model::states_heading] = heading_var;
@@ -2031,7 +2027,7 @@ unsigned int SelfLocalisation::removeInactiveModels()
     return result;
 }
 
-bool is_null(const Model* pointer)
+bool is_null(const SelfModel* pointer)
 {
     return (pointer == NULL);
 }
@@ -2059,4 +2055,15 @@ unsigned int SelfLocalisation::removeInactiveModels(ModelContainer& container)
     return num_before - container.size();               // Return number removed, original size - new size
 }
 
-
+/*!
+@brief Calculate the variance in the given measurement based on the objects distance.
+@param theObject The object the error variance is to be calculated for.
+@return The error of the measurement given as the variance.
+*/
+MeasurementError SelfLocalisation::calculateError(const Object& theObject)
+{
+    MeasurementError error;
+    error.setDistance(c_obj_range_offset_variance + c_obj_range_relative_variance * pow(theObject.measuredDistance() * cos(theObject.measuredElevation()),2));
+    error.setHeading(c_obj_theta_variance);
+    return error;
+}
