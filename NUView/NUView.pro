@@ -180,17 +180,18 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/FileFormatException.h \
     offlinelocalisationdialog.h \
     ../Tools/Math/Moment.h \
-    ../Localisation/SelfModel.h \
-    ../Localisation/SelfUKF.h \
+    ../Localisation/Models/SelfModel.h \
+    ../Localisation/Models/SelfUKF.h \
     ../Localisation/SelfLocalisation.h \
-    ../Localisation/SelfSRUKF.h \
+    ../Localisation/Models/SelfSRUKF.h \
     ../Localisation/MeasurementError.h \
     ../Localisation/SelfLocalisationTests.h \
     OfflineLocalisationSettingsDialog.h \
     LocalisationPerformanceMeasure.h \
     ../Localisation/LocalisationSettings.h \
     ../Tools/KFTools.h \
-    ../NUPlatform/NUCamera/NUCameraData.h
+    ../NUPlatform/NUCamera/NUCameraData.h \
+    ../Tools/Math/statistics.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -267,7 +268,7 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
     ../Localisation/KF.cpp \
-    ../Localisation/SelfUKF.cpp \
+    ../Localisation/Models/SelfUKF.cpp \
     ../Localisation/Localisation.cpp \
     ../Infrastructure/FieldObjects/WorldModelShareObject.cpp \
     ../Infrastructure/GameInformation/GameInformation.cpp \
@@ -315,16 +316,17 @@ SOURCES += mainwindow.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
     ../Tools/Math/Moment.cpp \
-    ../Localisation/SelfModel.cpp \
+    ../Localisation/Models/SelfModel.cpp \
     ../Localisation/SelfLocalisation.cpp \
-    ../Localisation/SelfSRUKF.cpp \
+    ../Localisation/Models/SelfSRUKF.cpp \
     ../Localisation/MeasurementError.cpp \
     ../Localisation/SelfLocalisationtests.cpp \
     OfflineLocalisationSettingsDialog.cpp \
     LocalisationPerformanceMeasure.cpp \
     ../Localisation/LocalisationSettings.cpp \
     ../Tools/KFTools.cpp \
-    ../NUPlatform/NUCamera/NUCameraData.cpp
+    ../NUPlatform/NUCamera/NUCameraData.cpp \
+    ../Tools/Math/statistics.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

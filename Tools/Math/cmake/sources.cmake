@@ -29,6 +29,7 @@ UKF.cpp
 Rectangle.cpp
 FieldCalculations.cpp
 FIRFilter.cpp
+statistics.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
