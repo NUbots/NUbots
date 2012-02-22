@@ -276,7 +276,16 @@ bool NscanTest()
     ModelContainer example_tree;
     // N=2
     Model* model0 = new Model();
+    model0->setAlpha(0.5);
+    model0->setMean(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f));
+    model0->setCovariance(SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f));
+    model0->setActive();
+
     Model* model1 = new Model();
+    model1->setAlpha(0.5);
+    model1->setMean(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f));
+    model1->setCovariance(SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f));
+    model1->setActive();
 
     // N=1
     Model* model2 = new Model(*model0, ambPost, *leftGoal, error, 100);
