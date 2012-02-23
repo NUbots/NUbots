@@ -492,7 +492,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             temp_loc = GetSelfFrame(frame+1);
             assert(temp_loc);
             Vector3<float> estimate(0,0,0);
-            const Model* best_model = temp_loc->getBestModel();
+            const SelfModel* best_model = temp_loc->getBestModel();
             estimate.x = best_model->mean(Model::states_x);
             estimate.y = best_model->mean(Model::states_y);
             estimate.z = best_model->mean(Model::states_heading);
