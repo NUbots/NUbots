@@ -11,6 +11,8 @@ const float SelfSRUKF::c_Kappa = 1.0f;
 SelfSRUKF::SelfSRUKF(): SelfModel(0.0)
 {
     InitialiseCachedValues();
+    m_sqrt_covariance = covariance();   // both will be zero.
+
 }
 
 /*! @brief Default time constructor
@@ -21,6 +23,7 @@ SelfSRUKF::SelfSRUKF(): SelfModel(0.0)
 SelfSRUKF::SelfSRUKF(double time): SelfModel(time)
 {
     InitialiseCachedValues();
+    m_sqrt_covariance = covariance();   // both will be zero.
 }
 
 /*! @brief Copy constructor
@@ -29,6 +32,13 @@ SelfSRUKF::SelfSRUKF(double time): SelfModel(time)
 SelfSRUKF::SelfSRUKF(const SelfModel& source): SelfModel(source)
 {
     InitialiseCachedValues();
+    Matrix newCovariance = covariance();
+    m_sqrt_covariance = cholesky(newCovariance);
+    if(!m_sqrt_covariance.isValid())
+    {
+        m_sqrt_covariance = cholesky(newCovariance.transp());
+        assert(m_sqrt_covariance.isValid());
+    }
 }
 
 /*! @brief Split constructor
@@ -46,6 +56,13 @@ SelfSRUKF::SelfSRUKF(const SelfModel& parent, const AmbiguousObject& object, con
     InitialiseCachedValues();
     StationaryObject update(splitOption);
     update.CopyObject(object);
+    Matrix newCovariance = covariance();
+    m_sqrt_covariance = cholesky(newCovariance);
+    if(!m_sqrt_covariance.isValid())
+    {
+        m_sqrt_covariance = cholesky(newCovariance.transp());
+        assert(m_sqrt_covariance.isValid());
+    }
 
     SelfSRUKF::updateResult result = MeasurementUpdate(update, error);
     if(result == RESULT_OUTLIER)
@@ -57,6 +74,25 @@ SelfSRUKF::SelfSRUKF(const SelfModel& parent, const AmbiguousObject& object, con
         setActive(true);
     }
     return;
+}
+
+void SelfSRUKF::setCovariance(const Matrix& newCovariance)
+{
+    SelfModel::setCovariance(newCovariance);
+    m_sqrt_covariance = cholesky(newCovariance);
+    if(!m_sqrt_covariance.isValid())
+    {
+        std::cout << newCovariance << std::endl;
+        m_sqrt_covariance = cholesky(newCovariance.transp());
+        assert(m_sqrt_covariance.isValid());
+    }
+    return;
+}
+
+void SelfSRUKF::setSqrtCovariance(const Matrix& newSqrtCovariance)
+{
+    SelfModel::setCovariance(newSqrtCovariance * newSqrtCovariance.transp());
+    m_sqrt_covariance = newSqrtCovariance;
 }
 
 void SelfSRUKF::InitialiseCachedValues()
@@ -139,8 +175,11 @@ SelfSRUKF::updateResult SelfSRUKF::TimeUpdate(const std::vector<float>& odometry
         Mx.setCol(i, sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newMean));      // Error matrix
     }
 
-    m_covariance = HT(horzcat(Mx, sqrtOfProcessNoise));
-    m_mean = newMean;
+    Matrix new_sqrt_covariance = HT(horzcat(Mx, sqrtOfProcessNoise));
+    Matrix new_mean = newMean;
+
+    setSqrtCovariance(new_sqrt_covariance);
+    setMean(new_mean);
 
     return RESULT_OK;
 }
@@ -155,7 +194,7 @@ Performs a simultaneous update for N landmarks.
 
 @return The result of the update. RESULT_OK if update was successful, RESULT_OUTLIER if the update was ignored.
 */
-SelfSRUKF::updateResult SelfSRUKF::MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement)
+SelfModel::updateResult SelfSRUKF::MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement)
 {
     unsigned int numObs = measurements.getm();
     const float c_threshold2 = 15.0f;
@@ -231,8 +270,10 @@ SelfSRUKF::updateResult SelfSRUKF::MultipleObjectUpdate(const Matrix& locations,
     m_alpha *= 1 / (1 + innovation2measError);
     //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
 
-    m_covariance = HT( horzcat(Mx - m_mean*M1 - K*My + K*yBar*M1, K*S_obj_rel) );
-    m_mean = m_mean - K*(yBar - y);
+    Matrix new_sqrt_covariance = HT( horzcat(Mx - m_mean*M1 - K*My + K*yBar*M1, K*S_obj_rel) );
+    setSqrtCovariance(new_sqrt_covariance);
+    Matrix new_mean = m_mean - K*(yBar - y);
+    setMean(new_mean);
     return RESULT_OK;
 }
 
@@ -244,7 +285,7 @@ Performs an update for a single landmark.
 
 @return The result of the update. RESULT_OK if update was successful, RESULT_OUTLIER if the update was ignored.
 */
-SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const StationaryObject& object, const MeasurementError& error)
+SelfModel::updateResult SelfSRUKF::MeasurementUpdate(const StationaryObject& object, const MeasurementError& error)
 {
     const float c_threshold2 = 15.0f;
     // Calculate update uncertainties - S_obj_rel & R_obj_rel
@@ -306,8 +347,10 @@ SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const StationaryObject& obj
         return RESULT_OUTLIER;
     }
 
-    m_covariance = HT( horzcat(Mx - m_mean*M1 - K*My + K*yBar*M1, K*S_obj_rel) );
-    m_mean = m_mean - K*(yBar - y);
+    Matrix new_sqrt_covariance = HT( horzcat(Mx - m_mean*M1 - K*My + K*yBar*M1, K*S_obj_rel) );
+    setSqrtCovariance(new_sqrt_covariance);
+    Matrix new_mean = m_mean - K*(yBar - y);
+    setMean(new_mean);
     return RESULT_OK;
 }
 
@@ -323,7 +366,7 @@ SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const StationaryObject& obj
 
     @return Matrix containing the sigma points for the current model.
 */
-SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error)
+SelfModel::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error)
 {
     const float c_threshold2 = 15.0f;
     // Calculate update uncertainties - S_obj_rel & R_obj_rel
@@ -431,8 +474,10 @@ SelfSRUKF::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& obje
 
 
     // Update the model.
-    m_covariance = HT( horzcat(Mx - m_mean*M1 - kf_gain*My + kf_gain*yBar*M1, kf_gain*S_obj_rel) );
-    m_mean = m_mean - kf_gain*combined_innovation;
+    Matrix new_sqrtCovariance = HT( horzcat(Mx - m_mean*M1 - kf_gain*My + kf_gain*yBar*M1, kf_gain*S_obj_rel) );
+    setSqrtCovariance(new_sqrtCovariance);
+    Matrix new_mean = m_mean - kf_gain*combined_innovation;
+    setMean(new_mean);
     return RESULT_OK;
 }
 
@@ -455,11 +500,11 @@ Matrix SelfSRUKF::CalculateSigmaPoints() const
     {//hack to make test points distributed
         neg_index = states_total + i;
         // Addition Portion.
-        sigmaPoints.setCol(i, m_mean + sqrt((double)states_total + c_Kappa) * m_covariance.getCol(i - 1));
+        sigmaPoints.setCol(i, m_mean + sqrt((double)states_total + c_Kappa) * m_sqrt_covariance.getCol(i - 1));
         // Crop heading
         sigmaPoints[states_heading][i] = mathGeneral::crop(sigmaPoints[states_heading][i], (-sigmaAngleMax + m_mean[states_heading][0]), (sigmaAngleMax + m_mean[states_heading][0]));
         // Subtraction Portion.
-        sigmaPoints.setCol(neg_index, m_mean - sqrt((double)states_total + c_Kappa) * m_covariance.getCol(i - 1));
+        sigmaPoints.setCol(neg_index, m_mean - sqrt((double)states_total + c_Kappa) * m_sqrt_covariance.getCol(i - 1));
         // Crop heading
         sigmaPoints[states_heading][neg_index] = mathGeneral::crop(sigmaPoints[states_heading][neg_index], (-sigmaAngleMax + m_mean[states_heading][0]), (sigmaAngleMax + m_mean[states_heading][0]));
     }

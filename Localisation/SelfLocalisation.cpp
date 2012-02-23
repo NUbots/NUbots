@@ -966,7 +966,7 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
 	
     Matrix bestModelCovariance = bestModel->covariance();
 	
-    bestModelCovariance = bestModelCovariance * bestModelCovariance.transp();							   
+    bestModelCovariance = bestModelCovariance;
     bestModelEntropy =  0.5 * ( 3 + 3*log(2 * PI ) + log(  determinant(bestModelCovariance) ) ) ;
 	
     if(entropy > 100 && bestModel->alpha() < 50 )
@@ -1603,21 +1603,17 @@ bool SelfLocalisation::MergeTwoModels(SelfModel* modelA, SelfModel* modelB)
  
     // Merge Covariance matrix (S = sqrt(P))
     Matrix xDiff = modelA->mean() - xMerged;
-    Matrix pA = (modelA->covariance() * modelA->covariance().transp() + xDiff * xDiff.transp());
+    Matrix pA = (modelA->covariance() + xDiff * xDiff.transp());
 
     xDiff = modelB->mean() - xMerged;
-    Matrix pB = (modelB->covariance() * modelB->covariance().transp() + xDiff * xDiff.transp());
+    Matrix pB = (modelB->covariance() + xDiff * xDiff.transp());
   
-    Matrix sWSum = alphaA * pA + alphaB * pB;
-    Matrix sMerged = cholesky(sWSum); // P merged = alphaA * pA + alphaB * pB.
-    if(sMerged.isValid() == false)
-    {
-        sMerged = cholesky(sWSum.transp()); // P merged = alphaA * pA + alphaB * pB.
-    }
+    Matrix pMerged = alphaA * pA + alphaB * pB;
+
     // Copy merged value to first model
     modelA->setAlpha(alphaMerged);
     modelA->setMean(xMerged);
-    modelA->setCovariance(sMerged);
+    modelA->setCovariance(pMerged);
 
     // Disable second model
     modelA->setActive(true);
@@ -1847,8 +1843,8 @@ double SelfLocalisation::MergeMetric(const SelfModel *modelA, const SelfModel *m
     if (modelA==modelB) return 10000.0;
     if (modelA->inactive() || modelB->inactive()) return 10000.0; //at least one model inactive
     Matrix xdif = modelA->mean() - modelB->mean();
-    Matrix p1 = modelA->covariance() * modelA->covariance().transp();
-    Matrix p2 = modelB->covariance() * modelB->covariance().transp();
+    Matrix p1 = modelA->covariance();
+    Matrix p2 = modelB->covariance();
   
     xdif[Model::states_heading][0] = normaliseAngle(xdif[Model::states_heading][0]);
 
@@ -1980,7 +1976,7 @@ void SelfLocalisation::setModels(ModelContainer& newModels)
 
 /*! @brief Create a 3x1 mean matrix with value as defiend by the parameters.
 
-Creates a 3x1 covariance matrix with the mean of each attribute set as specified.
+Creates a 3x1 matrix with the mean of each attribute set as specified.
 
 @param x_var Mean in the x state.
 @param y_var Mean in the y state.

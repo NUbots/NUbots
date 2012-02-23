@@ -23,6 +23,10 @@ public:
     updateResult MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error);
 
 
+    void setCovariance(const Matrix& newCovariance);
+    void setSqrtCovariance(const Matrix& newSqrtCovariance);
+
+
     Matrix CalculateSigmaPoints() const;
     float CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const;
 
@@ -45,6 +49,7 @@ protected:
     Matrix sqrtOfTestWeightings; // Square root of W (Constant)
     Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
     static const float c_Kappa;
+    Matrix m_sqrt_covariance;
 
 };
 

@@ -25,8 +25,8 @@ class NUSensorsData;
 
 #define LOC_SUMMARY 3
 
-//typedef SelfSRUKF Model;
 typedef SelfSRUKF Model;
+//typedef SelfUKF Model;
 typedef std::list<SelfModel*> ModelContainer;
 typedef std::pair<unsigned int, float> ParentSum;
 #include "LocalisationSettings.h"
