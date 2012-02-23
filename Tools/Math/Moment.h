@@ -21,7 +21,7 @@ public:
     float covariance(unsigned int row, unsigned int col) const;
     float variance(unsigned int stateNumber) const;
     void setMean(const Matrix& newMean);
-    void setCovariance(const Matrix& newCovariance);
+    virtual void setCovariance(const Matrix& newCovariance);
     bool isNull() const;
     std::string string() const;
     void writeData(std::ostream& output) const;
