@@ -50,51 +50,63 @@ SelfUKF::SelfUKF(const SelfModel& parent, const AmbiguousObject& object, const S
     SelfUKF::updateResult result = MeasurementUpdate(update, error);
     if(result == RESULT_OUTLIER) setActive(false);
     else setActive(true);
+    std::cout << summary(false) << std::endl;
     return;
 }
 
 void SelfUKF::InitialiseCachedValues()
 {
-    const unsigned int numSigmaPoints = 2*states_total+1;
+    double alpha = 0.001;
+    m_alpha_2 = alpha * alpha;
+    m_beta = 2.0f;
+    m_x = 0.0f;
 
-    // Create square root of W matrix
-    sqrtOfTestWeightings = Matrix(1,numSigmaPoints,false);
-    sqrtOfTestWeightings[0][0] = sqrt(c_Kappa/(states_total+c_Kappa));
-    double outerWeighting = sqrt(1.0/(2*(states_total+c_Kappa)));
-    for(int i=1; i <= 2*states_total; i++)
-    {
-      sqrtOfTestWeightings[0][i] = (outerWeighting);
-    }
+    m_mean_weights = CalculateWeights(states_total, false);
+    m_covariance_weights = CalculateWeights(states_total, false);
 
-    CalculateSigmaWeights(c_Kappa);
-
-    sqrtOfProcessNoise = Matrix(3,3,true);
-    sqrtOfProcessNoise[0][0] = 0.02; // Robot X coord.
-    sqrtOfProcessNoise[1][1] = 0.02; // Robot Y coord.
-    sqrtOfProcessNoise[2][2] = 0.00001; // Robot Theta. 0.00001
-
+    Matrix sqrtOfProcessNoise = Matrix(3,3,true);
+    sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
+    sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
+    sqrtOfProcessNoise[2][2] = 0.005; // Robot Theta. 0.00001
+    m_process_noise = sqrtOfProcessNoise * sqrtOfProcessNoise.transp();
     return;
 }
 
-void SelfUKF::CalculateSigmaWeights(float kappa)
+Matrix SelfUKF::CalculateWeights(unsigned int num_states, bool covariance)
 {
-    unsigned int numPoints = 2*states_total + 1;
-    m_sigmaWeights = Matrix(1,numPoints, false);
-    m_sqrtSigmaWeights = Matrix(1,numPoints, false);
+    const double alpha_2 = m_alpha_2;
+    const double beta = m_beta;
+    const double x = m_x;
+    const unsigned int L = num_states;
 
-    double meanWeight = kappa/(states_total+kappa);
-    double outerWeight = (1.0-meanWeight)/(2*states_total);
+    //const double lambda = alpha_2 * (L+x) - L;
+    const double lambda = 1.0;
+
+    unsigned int num_sigma_points = 2*L + 1;
+
+    double weight_sum = 0.0;
+
+    Matrix weights = Matrix(1,num_sigma_points, false);
+
+    double meanWeight = lambda/(L+lambda);
+    double outerWeight = 1.0/(2*(L+lambda));
 
     // First weight
-    m_sigmaWeights[0][0] = meanWeight;
-    m_sqrtSigmaWeights[0][0] = sqrt(meanWeight);
-    // The rest
-    for(unsigned int i = 1; i < numPoints; i++)
+    weights[0][0] = meanWeight;
+    weight_sum += weights[0][0];
+    if(covariance)
     {
-        m_sigmaWeights[0][i] = outerWeight;
-        m_sqrtSigmaWeights[0][i] = sqrt(outerWeight);
+         //weights[0][0] += (1 - alpha_2 + beta);
     }
-    return;
+    // The rest
+    for(unsigned int i = 1; i < num_sigma_points; i++)
+    {
+        weights[0][i] = outerWeight;
+        weight_sum += weights[0][i];
+    }
+
+    //assert(weight_sum == 1.0);
+    return weights;
 }
 
 /*! @brief Time update
@@ -111,8 +123,8 @@ SelfUKF::updateResult SelfUKF::TimeUpdate(const std::vector<float>& odometry, Od
     float heading = odometry[2];
 
     // Step 1 : Calculate new sigma points based on previous covariance
-    Matrix sigmaPoints = CalculateSigmaPoints();
-    const unsigned int numSigmaPoints = sigmaPoints.getn();
+    Matrix sigma_points = CalculateSigmaPoints(mean(), covariance());
+    const unsigned int numSigmaPoints = sigma_points.getn();
     //-----------------------------------------------------------------------------------------------
 
     // Step 3: Update the state estimate - Pass all sigma points through motion model
@@ -123,63 +135,43 @@ SelfUKF::updateResult SelfUKF::TimeUpdate(const std::vector<float>& odometry, Od
     diffOdom.Y = y;
     diffOdom.Theta = heading;
 
-    if(id() == 3149)
-    {
-        std::cout << "before:" << std::endl;
-        std::cout << sigmaPoints << std::endl;
-    }
+    Matrix propogated_sigma_points(m_mean.getm(), numSigmaPoints, false);
 
     for (unsigned int i = 0 ; i < numSigmaPoints; i++)
     {
-        oldPose.X = sigmaPoints[0][i];
-        oldPose.Y = sigmaPoints[1][i];
-        oldPose.Theta = sigmaPoints[2][i];
+        oldPose.X = sigma_points[0][i];
+        oldPose.Y = sigma_points[1][i];
+        oldPose.Theta = sigma_points[2][i];
 
         newPose = motion_model.getNextSigma(diffOdom,oldPose);
 
-        sigmaPoints[0][i] = *newPose;
-        sigmaPoints[1][i] = *(newPose+1);
-        sigmaPoints[2][i] = *(newPose+2);
+        propogated_sigma_points[0][i] = *newPose;
+        propogated_sigma_points[1][i] = *(newPose+1);
+        propogated_sigma_points[2][i] = *(newPose+2);
     }
 
 //    // Step 4: Calculate new state based on propagated sigma points and the weightings of the sigmaPoints
     Matrix newMean(m_mean.getm(),m_mean.getn(), false);
 
-//    for(unsigned int i=0; i < numSigmaPoints; i++)
-//    {
-//        // Eqn 20
-//        newMean = newMean + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*sigmaPoints.getCol(i);
-//    }
-//    //-----------------------------------------------------------------------------------------------
+    for(unsigned int i = 0; i < numSigmaPoints; ++i)
+    {
+        newMean = newMean + m_mean_weights[0][i] * propogated_sigma_points.getCol(i) ;
+    }
 
-    newMean = sigmaPoints * m_sigmaWeights.transp();
-
-
-//    // Step 5: Calculate measurement error and then find new srukfSx
-//    Matrix newSrukfSx(m_covariance.getm(),m_covariance.getn(), false);
-//    Matrix Mx(sigmaPoints.getm(),sigmaPoints.getn(), false);
-
-//    for(unsigned int i=0; i < numSigmaPoints; i++)
-//    {
-//        // Eqn 21 part
-//        Mx.setCol(i, sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newMean));      // Error matrix
-//    }
-
-    unsigned int numPoints = sigmaPoints.getn();
     Matrix covariance(states_total, states_total, false);
     Matrix diff;
-    for(unsigned int i = 0; i < numPoints; ++i)
+    for(unsigned int i = 0; i < numSigmaPoints; ++i)
     {
-        diff = sigmaPoints.getCol(i) - newMean;
-        covariance = covariance + m_sigmaWeights[0][i]*diff*diff.transp();
+        diff = propogated_sigma_points.getCol(i) - newMean;
+        covariance = covariance + m_covariance_weights[0][i]*diff*diff.transp();
     }
 
-    m_covariance = HT(horzcat(covariance, sqrtOfProcessNoise*sqrtOfProcessNoise.transp()));
-    m_mean = newMean;
-    if(id() == 3149)
-    {
-        std::cout << "cov head:" << variance(states_heading) << std::endl;
-    }
+    Matrix new_mean = newMean;
+    Matrix new_covariance = covariance + m_process_noise;
+
+    setMean(new_mean);
+    setCovariance(new_covariance);
+
     return RESULT_OK;
 }
 
@@ -196,6 +188,7 @@ Performs a simultaneous update for N landmarks.
 SelfUKF::updateResult SelfUKF::MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement)
 {
     return RESULT_OUTLIER;
+    /*
     unsigned int numObs = measurements.getm();
     const float c_threshold2 = 15.0f;
     Matrix R_obj_rel(R_Measurement);        // R = S^2
@@ -275,6 +268,7 @@ SelfUKF::updateResult SelfUKF::MultipleObjectUpdate(const Matrix& locations, con
     m_mean = m_mean - K*(yBar - y);
 
     return RESULT_OK;
+    */
 }
 
 /*! @brief  Single object update
@@ -354,31 +348,30 @@ Performs an update for a single landmark.
 
 SelfUKF::updateResult SelfUKF::MeasurementUpdate(const StationaryObject& object, const MeasurementError& error)
 {
-    const float c_threshold2 = 3.0f;
+    const float c_threshold2 = 15.0f;
+    Matrix y(2,1,false);
+    y[0][0] = object.measuredDistance();
+    y[1][0] = object.measuredBearing();
 
-    Matrix stateEstimateSigmas = CalculateSigmaPoints();
+    Matrix measNoise = error.errorCovariance();
+
+    Matrix current_mean = mean();
+
+    Matrix stateEstimateSigmas = CalculateSigmaPoints(current_mean, covariance());
 
     const int numMeasurements = 2;
     const int numberOfSigmaPoints = stateEstimateSigmas.getn();
 
-    Matrix measurementNoise = error.errorCovariance();
-    Matrix Pyy(measurementNoise);
+    Matrix Pyy(measNoise);
     Matrix Pxy(stateEstimateSigmas.getm(),numMeasurements,false);
 
     Matrix temp_pred(2,1,false);
     Matrix temp;
 
-    Matrix y(2,1,false);
-    y[0][0] = object.measuredDistance();
-    y[1][0] = object.measuredBearing();
-
     Matrix yBar(2,1,false);
-    const float dx = object.X() - m_mean[states_x][0];
-    const float dy = object.Y() - m_mean[states_y][0];
-    yBar[0][0] = sqrt(dx*dx + dy*dy);
-    yBar[1][0] = mathGeneral::normaliseAngle(atan2(dy,dx) - m_mean[states_heading][0]);
-
     // Calculate predicted measurement sigma points.
+    Matrix projected_sigmas(yBar.getm(), stateEstimateSigmas.getn(), false);
+
     for(int i =0; i < numberOfSigmaPoints; i++)
     {
         const Matrix estimate = stateEstimateSigmas.getCol(i);
@@ -388,10 +381,22 @@ SelfUKF::updateResult SelfUKF::MeasurementUpdate(const StationaryObject& object,
         const float heading = mathGeneral::normaliseAngle(atan2(dy,dx) - estimate[states_heading][0]);
         temp_pred[0][0] = distance;
         temp_pred[1][0] = heading;
-        temp = temp_pred - yBar;
-        Pyy = Pyy + m_sigmaWeights[0][i] * temp * temp.transp();
-        Pxy = Pxy + m_sigmaWeights[0][i] * (stateEstimateSigmas.getCol(i) - m_mean) * temp.transp();
+        projected_sigmas.setCol(i, temp_pred);
+
+        yBar = yBar + m_mean_weights[0][i] * temp_pred;
     }
+    for(int i =0; i < numberOfSigmaPoints; i++)
+    {
+        temp = projected_sigmas.getCol(i) - yBar;
+        Pyy = Pyy + m_covariance_weights[0][i] * temp * temp.transp();
+        Pxy = Pxy + m_covariance_weights[0][i] * (stateEstimateSigmas.getCol(i) - current_mean) * temp.transp();
+    }
+    Matrix temp_Pxy(m_mean.getm(), Pxy.getn(), false);
+    for (unsigned int i = 0; i < temp_Pxy.getm(); ++i)
+    {
+        temp_Pxy.setRow(i,Pxy.getRow(i));
+    }
+    Pxy = temp_Pxy;
 
     Matrix K;
     if(numMeasurements == 2)
@@ -405,86 +410,213 @@ SelfUKF::updateResult SelfUKF::MeasurementUpdate(const StationaryObject& object,
 
     //end of standard ukf stuff
     //RHM: 20/06/08 Outlier rejection.
-    double innovation2 = convDble((yBar - y).transp() * Invert22(Pyy + measurementNoise) * (yBar - y));
+    double innovation2 = convDble((yBar - y).transp() * Invert22(Pyy + measNoise) * (yBar - y));
 
     // Update Alpha
-    double innovation2measError = convDble((yBar - y).transp() * Invert22(measurementNoise) * (yBar - y));
+    double innovation2measError = convDble((yBar - y).transp() * Invert22(measNoise) * (yBar - y));
 
     m_alpha *= 1 / (1 + innovation2measError);
-    //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
 
     if (innovation2 > c_threshold2)
     {
         return RESULT_OUTLIER;
     }
 
-    m_mean = m_mean + K * (y - yBar);
-    m_covariance = m_covariance - K*Pyy*K.transp();
+    Matrix innovation = (y - yBar);
 
+    Matrix new_mean = mean() + K * innovation;
+    Matrix new_covariance = covariance() - K*Pyy*K.transp();
+
+    setMean(new_mean);
+    setCovariance(new_covariance);
     return RESULT_OK;
 }
+
+
+
+/*!
+    @brief  Perform update for Probabalistic Data Association Method
+    The Probabalistic Data Association Method performs an single update performed by
+    calculating a weighted sum of the correction, combining all possible options.
+
+    @param object The ambiguous object containing the measruement to the object.
+    @param possible_objects The possible stationary objects containing the potential
+    positions of the observed object.
+
+    @return Matrix containing the sigma points for the current model.
+*/
+SelfModel::updateResult SelfUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error)
+{
+    const float c_threshold2 = 15.0f;
+
+//    // Calculate update uncertainties - S_obj_rel & R_obj_rel
+//    Matrix S_obj_rel = Matrix(2,2,false);
+//    S_obj_rel[0][0] = sqrt(error.distance());
+//    S_obj_rel[1][1] = sqrt(error.heading());
+
+//    Matrix R_obj_rel = S_obj_rel * S_obj_rel.transp(); // R = S^2
+
+//    // Unscented KF Stuff.
+//    Matrix yBar;                                  	//reset
+//    Matrix Py;
+//    Matrix Pxy; //  = Matrix(7, 2, false);                   //Pxy=[0;0;0];
+//    Matrix scriptX = CalculateSigmaPoints();
+//    const unsigned int numSigmaPoints = scriptX.getn();
+
+//    Matrix scriptY = Matrix(2, numSigmaPoints, false);
+//    Matrix temp = Matrix(2, 1, false);
+
+//    Matrix y = Matrix(2,1,false); // Measurement. (Distance, heading).
+//    y[0][0] = object.measuredDistance() * cos(object.measuredElevation());
+//    y[1][0] = object.measuredBearing();
+
+//    Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
+//    Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
+
+//    Matrix innovation;
+//    std::vector<Matrix> innovations;
+//    std::vector<Matrix> kf_gains;
+//    std::vector<float> mvdists;
+//    float mv_sum = 0.0f;
+
+//    const float Pd = 0.95;  // Target detection probability
+//    const float Pg = 0.95;  // Gate probability (the probability that the gate contains the true measurement if detected)
+
+//    Matrix M1 = sqrtOfTestWeightings;
+
+//    for (std::vector<StationaryObject*>::const_iterator obj_it = possible_objects.begin(); obj_it != possible_objects.end(); ++obj_it)
+//    {
+//        StationaryObject* object = (*obj_it);
+//        // Calculate the expected measurement based on the current state.
+//        for(unsigned int i = 0; i < numSigmaPoints; i++)
+//        {
+//            const double dX = object->X() - scriptX[0][i];
+//            const double dY = object->Y() - scriptX[1][i];
+//            temp[0][0] = sqrt(dX*dX + dY*dY);
+//            temp[1][0] = mathGeneral::normaliseAngle(atan2(dY,dX) - scriptX[2][i]);
+//            scriptY.setCol(i, temp.getCol(0));
+//        }
+
+
+//        for(unsigned int i = 0; i < numSigmaPoints; i++)
+//        {
+//            Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
+//            My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
+//        }
+
+//        Matrix M1 = sqrtOfTestWeightings;
+//        yBar = My * M1.transp(); // Predicted Measurement.
+//        Py = (My - yBar * M1) * (My - yBar * M1).transp();
+//        Pxy = (Mx - m_mean * M1) * (My - yBar * M1).transp();
+
+//        Matrix Sk = Py + R_obj_rel;
+
+//        // Calculate the Kalman filter gain.
+//        Matrix K = Pxy * Invert22(Sk); // K = Kalman filter gain.
+//        // Calculate the innovation.
+//        innovation = yBar - y;
+
+//        // Calculate Association Probability
+//        float mv = MultiVariateNormalDistribution(Sk, y, yBar);
+//        mv_sum += mv;
+//        mvdists.push_back(mv);
+//        innovations.push_back(innovation);
+//        kf_gains.push_back(K);
+
+////        //end of standard ukf stuff
+////        //RHM: 20/06/08 Outlier rejection.
+////        double innovation2 = convDble((yBar - y).transp() * Invert22(Py + R_obj_rel) * (yBar - y));
+
+////        // Update Alpha
+////        double innovation2measError = convDble((yBar - y).transp() * Invert22(R_obj_rel) * (yBar - y));
+////        m_alpha *= 1 / (1 + innovation2measError);
+////        //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
+
+////        if (innovation2 > c_threshold2)
+////        {
+////            return RESULT_OUTLIER;
+////        }
+//    }
+
+
+//    // Combine the weighted innovations.
+//    float weight_mult = 1 / (1-Pd*Pg + mv_sum);
+//    float none_correct_weight = (1-Pd*Pg) * weight_mult;
+//    Matrix combined_innovation(y.getm(), y.getn(), false);
+//    Matrix kf_gain(kf_gains[0].getm(), kf_gains[0].getn(), false);
+
+//    for(unsigned int index = 0; index < innovations.size(); ++index)
+//    {
+//        float weight = mvdists[index] * weight_mult;
+//        combined_innovation = combined_innovation + weight * innovations[index];
+//        kf_gain = kf_gain + weight*kf_gains[index];
+//    }
+
+
+//    // Update the model.
+////    Matrix new_sqrtCovariance = HT( horzcat(Mx - m_mean*M1 - kf_gain*My + kf_gain*yBar*M1, kf_gain*S_obj_rel) );
+////    setSqrtCovariance(new_sqrtCovariance);
+////    Matrix new_mean = m_mean - kf_gain*combined_innovation;
+////    setMean(new_mean);
+    return RESULT_OK;
+}
+
+
 
 /*! @brief  Calculation of sigma points
 Calculates the sigma points for the current model state.
 @return Matrix containing the sigma points for the current model.
 */
-Matrix SelfUKF::CalculateSigmaPoints() const
+Matrix SelfUKF::CalculateSigmaPoints(Matrix mean, Matrix covariance) const
 {
-    int numberOfSigmaPoints = 2*states_total + 1;
-    Matrix sigmaPoints(m_mean.getm(), numberOfSigmaPoints, false);
+    const double alpha_2 = m_alpha_2;
+    const double x = m_x;
 
-    const Matrix weights = m_sigmaWeights;
+    const unsigned int L = mean.getm();
+    assert(L == covariance.getm());
+    assert(L == covariance.getn());
 
-    sigmaPoints.setCol(0,m_mean); // First sigma point is the current mean with no deviation
+    //const double lambda = alpha_2 * (L+x) - L;
+    const double lambda = 1.0;
+
+    int numberOfSigmaPoints = 2*L + 1;
+    Matrix sigma_points(L, numberOfSigmaPoints, false);
+
     Matrix deviation;
-    Matrix param = m_numStates / (1-weights[0][0]) * m_covariance;
+    //Matrix param = m_numStates / (1-weights[0][0]) * m_covariance;
+    Matrix param = (L + lambda) * covariance;
     Matrix sqtCovariance;
 
     sqtCovariance = cholesky(param);
     if(sqtCovariance.isValid() != true)
     {
+        std::cout << "Bad matrix:" << std::endl;
+        std::cout << param << std::endl;
+        std::cout << "In model:" << std::endl;
+        std::cout << summary(false) << std::endl;
         sqtCovariance = cholesky(param.transp());
         assert(sqtCovariance.isValid());
     }
 
     double sigmaAngleMax = 2.5;
-    double min_angle = -sigmaAngleMax + m_mean[states_heading][0];
-    double max_angle = sigmaAngleMax + m_mean[states_heading][0];
+    double min_angle = -sigmaAngleMax + mean[states_heading][0];
+    double max_angle = sigmaAngleMax + mean[states_heading][0];
 
     unsigned int negIndex;
-    for(unsigned int i = 1; i < states_total+1; i++)
+    sigma_points.setCol(0,mean); // First sigma point is the current mean with no deviation
+    for(unsigned int i = 1; i < L+1; i++)
     {
-        negIndex = i + states_total;
+        negIndex = i + L;
         deviation = sqtCovariance.getCol(i - 1);        // Get weighted deviation
-        sigmaPoints.setCol(i, (m_mean + deviation));                // Add mean + deviation
-        sigmaPoints.setCol(negIndex, (m_mean - deviation));  // Add mean - deviation
+        sigma_points.setCol(i, (mean + deviation));                // Add mean + deviation
+        sigma_points.setCol(negIndex, (mean - deviation));  // Add mean - deviation
         // Crop heading
-        sigmaPoints[states_heading][i] = mathGeneral::crop(sigmaPoints[states_heading][i], min_angle, max_angle);
-        sigmaPoints[states_heading][negIndex] = mathGeneral::crop(sigmaPoints[states_heading][negIndex], min_angle, max_angle);
+        sigma_points[states_heading][i] = mathGeneral::crop(sigma_points[states_heading][i], min_angle, max_angle);
+        sigma_points[states_heading][negIndex] = mathGeneral::crop(sigma_points[states_heading][negIndex], min_angle, max_angle);
     }
-    return sigmaPoints;
-
-//    const unsigned int numSigmaPoints = 2 * states_total + 1;
-//    Matrix sigmaPoints = Matrix(m_mean.getm(), numSigmaPoints, false);
-//    sigmaPoints.setCol(0, m_mean);
-
-//    //----------------Saturate ScriptX angle sigma points to not wrap
-//    double sigmaAngleMax = 2.5;
-//    unsigned int neg_index;
-//    for(int i=1;i<states_total+1;i++)
-//    {//hack to make test points distributed
-//        neg_index = states_total + i;
-//        // Addition Portion.
-//        sigmaPoints.setCol(i, m_mean + sqrt((double)states_total + c_Kappa) * m_covariance.getCol(i - 1));
-//        // Crop heading
-//        sigmaPoints[states_heading][i] = mathGeneral::crop(sigmaPoints[states_heading][i], (-sigmaAngleMax + m_mean[states_heading][0]), (sigmaAngleMax + m_mean[states_heading][0]));
-//        // Subtraction Portion.
-//        sigmaPoints.setCol(neg_index, m_mean - sqrt((double)states_total + c_Kappa) * m_covariance.getCol(i - 1));
-//        // Crop heading
-//        sigmaPoints[states_heading][neg_index] = mathGeneral::crop(sigmaPoints[states_heading][neg_index], (-sigmaAngleMax + m_mean[states_heading][0]), (sigmaAngleMax + m_mean[states_heading][0]));
-//    }
-//    return sigmaPoints;
+    return sigma_points;
 }
+
 
 /*! @brief  Calculation of alpha weighting for the update
 Calculates the alpha weighting adjustment factor depending on the current updates variation
@@ -528,6 +660,10 @@ bool SelfUKF::clipState(int stateIndex, double minValue, double maxValue){
         clipped = true;
     }
     m_mean[states_heading][0] = mathGeneral::normaliseAngle(m_mean[states_heading][0]);
+    if(clipped)
+    {
+        std::cout << "Cipping model: " << id() << std::endl;
+    }
     return clipped;
 }
 

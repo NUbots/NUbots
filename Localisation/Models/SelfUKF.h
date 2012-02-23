@@ -15,15 +15,16 @@ public:
     SelfUKF(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time);
 
     void InitialiseCachedValues();
-    void CalculateSigmaWeights(float kappa);
-
+    Matrix CalculateWeights(unsigned int num_states, bool covariance);
     // Update functions
     updateResult TimeUpdate(const std::vector<float>& odometry, OdometryMotionModel& motion_model, float deltaTime);
-    updateResult MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement);
-
     updateResult MeasurementUpdate(const StationaryObject& object, const MeasurementError& error);
+    updateResult MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement);
+    updateResult MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error);
 
-    Matrix CalculateSigmaPoints() const;
+
+
+    Matrix CalculateSigmaPoints(Matrix mean, Matrix covariance) const;
     float CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const;
 
     bool clipState(int stateIndex, double minValue, double maxValue);
@@ -43,11 +44,13 @@ public:
     friend std::istream& operator>> (std::istream& input, SelfUKF& p_model);
 
 protected:
-    Matrix m_sigmaWeights;
-    Matrix m_sqrtSigmaWeights;
-    Matrix sqrtOfTestWeightings; // Square root of W (Constant)
-    Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
+    Matrix m_process_noise; // Square root of Process Noise (Q matrix). (Constant)
+    Matrix m_mean_weights;
+    Matrix m_covariance_weights;
     static const float c_Kappa;
+    double m_alpha_2;
+    double m_beta;
+    double m_x;
 
 };
 
