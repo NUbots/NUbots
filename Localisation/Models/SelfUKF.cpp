@@ -447,8 +447,90 @@ SelfUKF::updateResult SelfUKF::MeasurementUpdate(const StationaryObject& object,
 */
 SelfModel::updateResult SelfUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error)
 {
+    /*
     const float c_threshold2 = 15.0f;
+    Matrix y(2,1,false);
+    y[0][0] = object.measuredDistance();
+    y[1][0] = object.measuredBearing();
 
+    Matrix measNoise = error.errorCovariance();
+
+    Matrix current_mean = mean();
+
+    Matrix stateEstimateSigmas = CalculateSigmaPoints(current_mean, covariance());
+
+    const int numMeasurements = 2;
+    const int numberOfSigmaPoints = stateEstimateSigmas.getn();
+
+    Matrix Pyy(measNoise);
+    Matrix Pxy(stateEstimateSigmas.getm(),numMeasurements,false);
+
+    Matrix temp_pred(2,1,false);
+    Matrix temp;
+
+    Matrix yBar(2,1,false);
+    // Calculate predicted measurement sigma points.
+    Matrix projected_sigmas(yBar.getm(), stateEstimateSigmas.getn(), false);
+
+    for(int i =0; i < numberOfSigmaPoints; i++)
+    {
+        const Matrix estimate = stateEstimateSigmas.getCol(i);
+        const float dx = object.X() - estimate[states_x][0];
+        const float dy = object.Y() - estimate[states_y][0];
+        const float distance = sqrt(dx*dx + dy*dy);
+        const float heading = mathGeneral::normaliseAngle(atan2(dy,dx) - estimate[states_heading][0]);
+        temp_pred[0][0] = distance;
+        temp_pred[1][0] = heading;
+        projected_sigmas.setCol(i, temp_pred);
+
+        yBar = yBar + m_mean_weights[0][i] * temp_pred;
+    }
+    for(int i =0; i < numberOfSigmaPoints; i++)
+    {
+        temp = projected_sigmas.getCol(i) - yBar;
+        Pyy = Pyy + m_covariance_weights[0][i] * temp * temp.transp();
+        Pxy = Pxy + m_covariance_weights[0][i] * (stateEstimateSigmas.getCol(i) - current_mean) * temp.transp();
+    }
+    Matrix temp_Pxy(m_mean.getm(), Pxy.getn(), false);
+    for (unsigned int i = 0; i < temp_Pxy.getm(); ++i)
+    {
+        temp_Pxy.setRow(i,Pxy.getRow(i));
+    }
+    Pxy = temp_Pxy;
+
+    Matrix K;
+    if(numMeasurements == 2)
+    {
+        K = Pxy * Invert22(Pyy);
+    }
+    else
+    {
+        K = Pxy * InverseMatrix(Pyy);
+    }
+
+    //end of standard ukf stuff
+    //RHM: 20/06/08 Outlier rejection.
+    double innovation2 = convDble((yBar - y).transp() * Invert22(Pyy + measNoise) * (yBar - y));
+
+    // Update Alpha
+    double innovation2measError = convDble((yBar - y).transp() * Invert22(measNoise) * (yBar - y));
+
+    m_alpha *= 1 / (1 + innovation2measError);
+
+    if (innovation2 > c_threshold2)
+    {
+        return RESULT_OUTLIER;
+    }
+
+    Matrix innovation = (y - yBar);
+
+    Matrix new_mean = mean() + K * innovation;
+    Matrix new_covariance = covariance() - K*Pyy*K.transp();
+
+    setMean(new_mean);
+    setCovariance(new_covariance);
+    return RESULT_OK;
+    */
 //    // Calculate update uncertainties - S_obj_rel & R_obj_rel
 //    Matrix S_obj_rel = Matrix(2,2,false);
 //    S_obj_rel[0][0] = sqrt(error.distance());
@@ -558,7 +640,7 @@ SelfModel::updateResult SelfUKF::MeasurementUpdate(const AmbiguousObject& object
 ////    setSqrtCovariance(new_sqrtCovariance);
 ////    Matrix new_mean = m_mean - kf_gain*combined_innovation;
 ////    setMean(new_mean);
-    return RESULT_OK;
+//    return RESULT_OK;
 }
 
 
