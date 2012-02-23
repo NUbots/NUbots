@@ -628,16 +628,17 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
     drawBallMarker(modelColor, model.state(KF::ballX), model.state(KF::ballY));
 }
 
-void locWmGlDisplay::DrawModelMarkers(const Model* model, QColor& modelColor)
+void locWmGlDisplay::DrawModelMarkers(const SelfModel* model, QColor& modelColor)
 {
     drawRobotMarker(modelColor, model->mean(Model::states_x), model->mean(Model::states_y), model->mean(Model::states_heading));
     if(drawSigmaPoints)
     {
-        Matrix sigmaPoints = model->CalculateSigmaPoints();
-        for (int i=1; i < sigmaPoints.getn(); i++)
-        {
-            DrawSigmaPoint(modelColor, sigmaPoints[Model::states_x][i], sigmaPoints[Model::states_y][i], sigmaPoints[Model::states_heading][i]);
-        }
+        //! TODO: FIX THIS DISPLAY ISSUE
+//        Matrix sigmaPoints = model->CalculateSigmaPoints();
+//        for (int i=1; i < sigmaPoints.getn(); i++)
+//        {
+//            DrawSigmaPoint(modelColor, sigmaPoints[Model::states_x][i], sigmaPoints[Model::states_y][i], sigmaPoints[Model::states_heading][i]);
+//        }
     }
 }
 
@@ -672,7 +673,7 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     if(drawBestModelOnly)
     {
         modelColor.setAlpha(255);
-        const Model* model = localisation.getBestModel();
+        const SelfModel* model = localisation.getBestModel();
         DrawModelMarkers(model, modelColor);
     }
     else

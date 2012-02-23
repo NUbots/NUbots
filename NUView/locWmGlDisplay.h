@@ -87,7 +87,7 @@ protected:
         void DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor);
 
         void DrawModelMarkers(const KF& model, QColor& modelColor);
-        void DrawModelMarkers(const Model* model, QColor& modelColor);
+        void DrawModelMarkers(const SelfModel* model, QColor& modelColor);
         void DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor);
         void drawLocalisationMarkers(const SelfLocalisation& localisation, QColor& modelColor);
 
