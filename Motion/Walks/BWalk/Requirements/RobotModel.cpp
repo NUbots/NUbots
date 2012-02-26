@@ -5,6 +5,7 @@
 */
 
 #include "RobotModel.h"
+#include "ForwardKinematic.h"
 
 RobotModel::RobotModel(const std::vector<float>& joints, const MassCalibration& massCalibration)
 {
@@ -13,13 +14,13 @@ RobotModel::RobotModel(const std::vector<float>& joints, const MassCalibration& 
 
 void RobotModel::setJointData(const std::vector<float>& joints, const MassCalibration& massCalibration)
 {
-  //ForwardKinematic::calculateHeadChain(joints, robotDimensions, massCalibration, limbs);
+  ForwardKinematic::calculateHeadChain(joints, massCalibration, limbs);
 
   for(int side = 0; side < 2; side++)
   {
     const bool left = side == 0;
-    //ForwardKinematic::calculateArmChain(left, joints, robotDimensions, massCalibration, limbs);
-    //ForwardKinematic::calculateLegChain(left, joints, robotDimensions, massCalibration, limbs);
+    ForwardKinematic::calculateArmChain(left, joints, massCalibration, limbs);
+    ForwardKinematic::calculateLegChain(left, joints, massCalibration, limbs);
   }
 
   // calculate center of mass
@@ -29,7 +30,9 @@ void RobotModel::setJointData(const std::vector<float>& joints, const MassCalibr
   {
     const MassCalibration::MassInfo& limb(massCalibration.masses[i]);
     totalMass += limb.mass;
+    //std::cout << "Adding mass (" << i << " = [" << ((limbs[i] * limb.offset) * limb.mass).x << ", " << ((limbs[i] * limb.offset) * limb.mass).y << ", " << ((limbs[i] * limb.offset) * limb.mass).z << "]" << std::endl;
     centerOfMass += (limbs[i] * limb.offset) * limb.mass;
   }
   centerOfMass /= totalMass;
+  //std::cout << "Centre of mass: [" << centerOfMass.x << ", " << centerOfMass.y << ", " << centerOfMass.z << "]" << std::endl;
 }
