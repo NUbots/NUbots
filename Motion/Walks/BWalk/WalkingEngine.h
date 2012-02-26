@@ -36,6 +36,8 @@ public:
   */
   ~WalkingEngine();
   void doWalk();
+  bool m_initialised;
+
 
 private:
 
@@ -428,7 +430,9 @@ private:
 
   float m_prev_time;
   float m_cycle_time;
+  bool m_walk_requested;
   RobotModel theRobotModel;
+  MassCalibration theMassCalibration;
   NUInverseKinematics* m_ik;
 
   void updateMotionRequest();
