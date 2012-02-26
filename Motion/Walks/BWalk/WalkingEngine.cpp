@@ -412,10 +412,18 @@ void WalkingEngine::computeMeasuredStance()
     std::vector<float> orientation_sensors;
     bool validKinematics = m_data->getOrientation(orientation_sensors);
 
+//    std::vector<float> accelerations;
+//    m_data->getAccelerometer(accelerations);
+//    float roll = mathGeneral::PI/2.f + atan2(accelerations[2], accelerations[1]);
+//    float pitch = mathGeneral::PI/2.f + atan2(accelerations[2], accelerations[0]);
+
+
     std::vector<float> accelerations;
     m_data->getAccelerometer(accelerations);
-    float roll = mathGeneral::PI/2.f + atan2(accelerations[2], accelerations[1]);
-    float pitch = mathGeneral::PI/2.f + atan2(accelerations[2], accelerations[0]);
+    Vector3<> accel(accelerations[0], accelerations[1], accelerations[2]);
+    float roll = asin(accel.y / accel.abs());
+    float pitch = asin(accel.x / accel.abs());
+
 
 //    std::cout << "pitch: " << pitch << std::endl;
 //    std::cout << "roll: " << roll << std::endl;
@@ -423,7 +431,7 @@ void WalkingEngine::computeMeasuredStance()
 //    std::cout << "orientation: [" << orientation_sensors[0] << ", " << orientation_sensors[1] << "]" << std::endl;
     const Vector3<> acc_axis(roll, pitch, 0);
     const Vector3<> axis(orientation_sensors[0], orientation_sensors[1], 0);
-    RotationMatrix torso(axis);
+    RotationMatrix torso(acc_axis);
 
   switch(p.observerMeasurementMode)
   {
@@ -824,17 +832,33 @@ void WalkingEngine::generateJointRequest()
     }
   }
 
-  RobotModel robotModel(joint_positions, theMassCalibration);
-  std::vector<float> orientation_sensors;
-  m_data->getOrientation(orientation_sensors);
-  const Vector3<> axis(orientation_sensors[0], orientation_sensors[1], 0);
-  RotationMatrix torso(axis);
+//  RobotModel robotModel(joint_positions, theMassCalibration);
+//  std::vector<float> orientation_sensors;
+//  m_data->getOrientation(orientation_sensors);
+//  Vector3<> axis(orientation_sensors[0], orientation_sensors[1], 0);
+//  axis.y = -0.018f;
+//  RotationMatrix torso(axis);
 
-  Vector3<> targetLeftToCom = -Pose3D(torso).translate(-robotModel.centerOfMass).conc(robotModel.limbs[MassCalibration::footLeft]).translate(0.f, 0.f, -heightLeg5Joint).translation;
-  Vector3<> targetRightToCom = -Pose3D(torso).translate(-robotModel.centerOfMass).conc(robotModel.limbs[MassCalibration::footRight]).translate(0.f, 0.f, -heightLeg5Joint).translation;
+//  std::vector<float> accelerations;
+//  m_data->getAccelerometer(accelerations);
+//  Vector3<> accel(accelerations[0], accelerations[1], accelerations[2]);
+//  float roll = asin(accel.y / accel.abs());
+//  float pitch = asin(accel.x / accel.abs());
 
-  std::cout << "targetLeftToCom: " << targetLeftToCom << std::endl;
-  std::cout << "targetRightToCom: " << targetRightToCom << std::endl;
+//  std::cout << "Accel: " << accel << std::endl;
+
+//  const Vector3<> acc_axis(roll, pitch, 0);
+
+
+//  std::cout << "orientation y: " << orientation_sensors[1] << std::endl;
+//  std::cout << "axis: " << axis << std::endl;
+//  std::cout << "acc_axis: " << acc_axis << std::endl;
+
+//  Vector3<> targetLeftToCom = -Pose3D(torso).translate(-robotModel.centerOfMass).conc(robotModel.limbs[MassCalibration::footLeft]).translate(0.f, 0.f, -heightLeg5Joint).translation;
+//  Vector3<> targetRightToCom = -Pose3D(torso).translate(-robotModel.centerOfMass).conc(robotModel.limbs[MassCalibration::footRight]).translate(0.f, 0.f, -heightLeg5Joint).translation;
+
+//  std::cout << "targetLeftToCom: " << targetLeftToCom << std::endl;
+//  std::cout << "targetRightToCom: " << targetRightToCom << std::endl;
 
   /*
   #ifdef TARGET_SIM
