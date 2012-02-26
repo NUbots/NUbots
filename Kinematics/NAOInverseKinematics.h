@@ -62,7 +62,7 @@ namespace Joint
 class NAOInverseKinematics: public NUInverseKinematics
 {
 public:
-    static void test()
+    void test()
     {
         std::vector<float> joints(22,0.0f);
         NAOInverseKinematics kin;
@@ -98,6 +98,22 @@ public:
         std::cout << "Right Position: " << std::endl << rightPosition << std::endl;
 
         std::cout << "Joint Positions: " << std::endl << joints << std::endl;
+
+        leftPosition[0][3] = 0;
+        leftPosition[1][3] = 50;
+        leftPosition[2][3] = -150;
+
+        rightPosition[0][3] = 0;
+        rightPosition[1][3] = -50;
+        rightPosition[2][3] = -150;
+
+        ret = kin.calculateLegJoints(leftPosition, rightPosition, joints);
+
+        std::cout << "Position 3: " << std::endl;
+        std::cout << "Left Position: " << std::endl << leftPosition << std::endl;
+        std::cout << "Right Position: " << std::endl << rightPosition << std::endl;
+
+        std::cout << "Joint Positions: " << std::endl << joints << std::endl;
         
     }
     bool calculateLegJoints(const Matrix& leftPosition, const Matrix& rightPosition, std::vector<float>& jointPositions)
@@ -126,7 +142,12 @@ public:
         return targetReachable;
     }
 private:
-    static bool calculateLeg(const Matrix& position, std::vector<float>& jointPositions, bool isLeft)
+    bool isInside(float t, float min, float max) const
+    {return min <= max ? t >= min && t <= max : t >= min || t <= max;}
+    float limit(float t, float min, float max) const {return t < min ? min : t > max ? max : t;}
+
+
+    bool calculateLeg(const Matrix& position, std::vector<float>& jointPositions, bool isLeft)
     {
         const float lengthBetweenLegs = 100.0f;
         Matrix target(position);
@@ -149,17 +170,25 @@ private:
         float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2 * upperLeg * lowerLeg);
 
         bool targetReachable = true;
-        // Crop joints.
-        if(cosKnee > -1.0f || cosKnee < 1.0f)
+
+        const float min = -1.0f;
+        const float max = 1.0f;
+
+        //!< TODO: Check if this cosLowerLeg shoud condition should be inverted.
+        if(!isInside(cosKnee,min,max) || isInside(cosLowerLeg, min, max))
         {
-            cosKnee = mathGeneral::crop(cosKnee, -1.0f, 1.0f);
-            targetReachable = false;
+//            std::cout << "calculateLeg: Not reachable - " << cosKnee << " - " << cosLowerLeg << std::endl;
+//            std::cout << "cosKnee in range: " << (isInside(cosKnee,min,max)?"True":"False") << std::endl;
+//            std::cout << "cosLowerLeg in range: " << (isInside(cosLowerLeg,min,max)?"True":"False") << std::endl;
+
+          cosKnee = limit(cosKnee, min, max);
+          cosLowerLeg = limit(cosLowerLeg, min, max);
+
+//          std::cout << "linited values: " << cosKnee << " - " << cosLowerLeg << std::endl;
+
+          targetReachable = false;
         }
-        if(cosLowerLeg < -1.0f || cosLowerLeg > 1.0f)
-        {
-            cosLowerLeg = mathGeneral::crop(cosLowerLeg, -1.0f, 1.0f);
-            targetReachable = false;
-        }
+
         float joint3 = mathGeneral::PI - acos(cosKnee);
         float joint4 = -acos(cosLowerLeg);
         double yzabs = sqrt(target[1][3]*target[1][3] + target[2][3]*target[2][3]);
@@ -206,7 +235,7 @@ private:
         return targetReachable;
     }
 
-    static bool calculateLegFixedHip(const Matrix& position, std::vector<float>& jointPositions, float hipPosition, bool isLeft)
+    bool calculateLegFixedHip(const Matrix& position, std::vector<float>& jointPositions, float hipPosition, bool isLeft)
     {
         Matrix target(position);
         const int sign(isLeft ? -1 : 1);
@@ -226,16 +255,24 @@ private:
         float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2 * upperLeg * lowerLeg);
 
         bool targetReachable = true;
-        // Crop joints.
-        if(cosKnee > -1.0f || cosKnee < 1.0f)
+
+        const float min = -1.0f;
+        const float max = 1.0f;
+
+        //!< TODO: Check if this cosLowerLeg shoud condition should be inverted.
+        if(!isInside(cosKnee,min,max) || isInside(cosUpperLeg, min, max))
         {
-            cosKnee = mathGeneral::crop(cosKnee, -1.0f, 1.0f);
-            targetReachable = false;
-        }
-        if(cosUpperLeg < -1.0f || cosUpperLeg > 1.0f)
-        {
-            cosUpperLeg = mathGeneral::crop(cosUpperLeg, -1.0f, 1.0f);
-            targetReachable = false;
+//            std::cout << "Length: " << length << std::endl;
+//            std::cout << "calculateLegFixedHip: Not reachable - " << cosKnee << " - " << cosUpperLeg << std::endl;
+//            std::cout << "cosKnee in range: " << (isInside(cosKnee,min,max)?"True":"False") << std::endl;
+//            std::cout << "cosUpperLeg in range: " << (isInside(cosUpperLeg,min,max)?"True":"False") << std::endl;
+
+          cosKnee = limit(cosKnee, min, max);
+          cosUpperLeg = limit(cosUpperLeg, min, max);
+
+//          std::cout << "linited values: " << cosKnee << " - " << cosUpperLeg << std::endl;
+
+          targetReachable = false;
         }
 
         float joint1 = target[2][3] == 0.0f ? 0.0f : atan(target[1][3] / -target[2][3]) * sign;
