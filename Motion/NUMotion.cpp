@@ -114,8 +114,6 @@ NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
     m_next_head_provider = m_current_head_provider;
     m_next_arm_provider = m_current_arm_provider;
     m_next_leg_provider = m_current_leg_provider;
-
-    NAOInverseKinematics::test();
 }
 
 /*! @brief Destructor for motion module
