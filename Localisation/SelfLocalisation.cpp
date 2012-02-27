@@ -603,6 +603,12 @@ void SelfLocalisation::initSingleModel(float x, float y, float heading)
     InitialiseModels(positions);
 }
 
+void SelfLocalisation::doSingleInitialReset(GameInformation::TeamColour team_colour)
+{
+    float initial_heading = 0 + (team_colour==GameInformation::RedTeam?mathGeneral::PI:0);
+    initSingleModel(0,0,initial_heading);
+}
+
 void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
 {
     #if LOC_SUMMARY > 0
@@ -611,7 +617,11 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
 #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_out  << "Performing initial->ready reset." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
-    
+
+    // For the probabalistic data association technique we only want a single model present.
+    if(m_settings.branchMethod() == LocalisationSettings::branch_probDataAssoc)
+        return doSingleInitialReset(team_colour);
+
     clearModels();
     
     // The models are always in the team's own half
@@ -666,7 +676,6 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     positions.push_back(temp);
 
     InitialiseModels(positions);
-
     return;
 }
 

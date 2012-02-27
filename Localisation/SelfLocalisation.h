@@ -101,6 +101,7 @@ class SelfLocalisation: public TimestampedData
         void initSingleModel(float x, float y, float heading);
         bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
         void doInitialReset(GameInformation::TeamColour team_colour);
+        void doSingleInitialReset(GameInformation::TeamColour team_colour);
         void doSetReset(GameInformation::TeamColour team_colour, int player_number, bool have_kickoff);
         void doPenaltyReset();
         void doBallOutReset();
