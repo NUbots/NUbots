@@ -1,5 +1,6 @@
 #include "SelfUKF.h"
 #include "Tools/Math/General.h"
+#include "Tools/Math/statistics.h"
 #include <sstream>
 #include <iostream>
 
@@ -447,7 +448,7 @@ SelfUKF::updateResult SelfUKF::MeasurementUpdate(const StationaryObject& object,
 */
 SelfModel::updateResult SelfUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error)
 {
-    /*
+
     const float c_threshold2 = 15.0f;
     Matrix y(2,1,false);
     y[0][0] = object.measuredDistance();
@@ -472,65 +473,115 @@ SelfModel::updateResult SelfUKF::MeasurementUpdate(const AmbiguousObject& object
     // Calculate predicted measurement sigma points.
     Matrix projected_sigmas(yBar.getm(), stateEstimateSigmas.getn(), false);
 
-    for(int i =0; i < numberOfSigmaPoints; i++)
+    Matrix innovation;
+    std::vector<Matrix> innovations;
+    std::vector<Matrix> innovation_covariances;
+    std::vector<Matrix> Pyys;
+    std::vector<Matrix> kf_gains;
+    std::vector<float> mvdists;
+
+    float mv_sum = 0.0f;
+
+    const float Pd = 0.95;  // Target detection probability
+    const float Pg = 0.95;  // Gate probability (the probability that the gate contains the true measurement if detected)
+
+    for (std::vector<StationaryObject*>::const_iterator obj_it = possible_objects.begin(); obj_it != possible_objects.end(); ++obj_it)
     {
-        const Matrix estimate = stateEstimateSigmas.getCol(i);
-        const float dx = object.X() - estimate[states_x][0];
-        const float dy = object.Y() - estimate[states_y][0];
-        const float distance = sqrt(dx*dx + dy*dy);
-        const float heading = mathGeneral::normaliseAngle(atan2(dy,dx) - estimate[states_heading][0]);
-        temp_pred[0][0] = distance;
-        temp_pred[1][0] = heading;
-        projected_sigmas.setCol(i, temp_pred);
+        StationaryObject* object = (*obj_it);
+        for(int i =0; i < numberOfSigmaPoints; i++)
+        {
+            const Matrix& estimate = stateEstimateSigmas.getCol(i);
+            const float dx = object->X() - estimate[states_x][0];
+            const float dy = object->Y() - estimate[states_y][0];
+            const float distance = sqrt(dx*dx + dy*dy);
+            const float heading = mathGeneral::normaliseAngle(atan2(dy,dx) - estimate[states_heading][0]);
+            temp_pred[0][0] = distance;
+            temp_pred[1][0] = heading;
+            projected_sigmas.setCol(i, temp_pred);
 
-        yBar = yBar + m_mean_weights[0][i] * temp_pred;
+            yBar = yBar + m_mean_weights[0][i] * temp_pred;
+        }
+        for(int i =0; i < numberOfSigmaPoints; i++)
+        {
+            temp = projected_sigmas.getCol(i) - yBar;
+            Pyy = Pyy + m_covariance_weights[0][i] * temp * temp.transp();
+            Pxy = Pxy + m_covariance_weights[0][i] * (stateEstimateSigmas.getCol(i) - current_mean) * temp.transp();
+        }
+        Matrix temp_Pxy(m_mean.getm(), Pxy.getn(), false);
+        for (unsigned int i = 0; i < temp_Pxy.getm(); ++i)
+        {
+            temp_Pxy.setRow(i,Pxy.getRow(i));
+        }
+        Pxy = temp_Pxy;
+
+        Matrix Sk = Pyy + measNoise;
+
+        // Calculate the Kalman filter gain.
+        Matrix K = Pxy * Invert22(Sk); // K = Kalman filter gain.
+        // Calculate the innovation.
+        innovation = yBar - y;
+
+        // Calculate Association Probability
+        float mv = MultiVariateNormalDistribution(Sk, y, yBar);
+        mv_sum += mv;
+        mvdists.push_back(mv);
+        innovations.push_back(innovation);
+        Pyys.push_back(Pyy);
+        kf_gains.push_back(K);
+
+        //end of standard ukf stuff
+        //RHM: 20/06/08 Outlier rejection.
+        double innovation2 = convDble((yBar - y).transp() * Invert22(Pyy + measNoise) * (yBar - y));
+
+        // Update Alpha
+        double innovation2measError = convDble((yBar - y).transp() * Invert22(measNoise) * (yBar - y));
+
+        m_alpha *= 1 / (1 + innovation2measError);
+
+        if (innovation2 > c_threshold2)
+        {
+            return RESULT_OUTLIER;
+        }
     }
-    for(int i =0; i < numberOfSigmaPoints; i++)
+
+
+    // Combine the weighted innovations.
+    float weight_mult = 1 / (1-Pd*Pg + mv_sum);
+    float none_correct_weight = (1-Pd*Pg) * weight_mult;
+    Matrix combined_innovation(y.getm(), y.getn(), false);
+    Matrix combined_K(kf_gains[0].getm(), kf_gains[0].getn(), false);
+    Matrix innovation_spread(m_covariance.getm(), m_covariance.getn(), false);
+    for(unsigned int index = 0; index < innovations.size(); ++index)
     {
-        temp = projected_sigmas.getCol(i) - yBar;
-        Pyy = Pyy + m_covariance_weights[0][i] * temp * temp.transp();
-        Pxy = Pxy + m_covariance_weights[0][i] * (stateEstimateSigmas.getCol(i) - current_mean) * temp.transp();
+        float weight = mvdists[index] * weight_mult;
+        combined_innovation = combined_innovation + weight * innovations[index];
+        combined_K = combined_K + weight*kf_gains[index];
     }
-    Matrix temp_Pxy(m_mean.getm(), Pxy.getn(), false);
-    for (unsigned int i = 0; i < temp_Pxy.getm(); ++i)
+
+
+    // Calculate variance values for the update.
+    Matrix innov_mult = combined_innovation*combined_innovation.transp();
+    Matrix combined_innovation_covariance(innovation_covariances[0].getm(), innovation_covariances[0].getn());
+    Matrix combined_Pyy = combined_innovation_covariance;
+    for(unsigned int index = 0; index < innovations.size(); ++index)
     {
-        temp_Pxy.setRow(i,Pxy.getRow(i));
+        float weight = mvdists[index] * weight_mult;
+        innovation_spread = innovation_spread + weight*innovations[index]*innovations[index].transp() - innov_mult;
+        combined_Pyy = combined_Pyy + weight*Pyys[index];
     }
-    Pxy = temp_Pxy;
+    innovation_spread = combined_K*innovation_spread*combined_K.transp();
+    combined_innovation_covariance = combined_Pyy + measNoise;
+    Matrix correct_meas_cov = covariance() - combined_K * combined_innovation_covariance * combined_K.transp();
 
-    Matrix K;
-    if(numMeasurements == 2)
-    {
-        K = Pxy * Invert22(Pyy);
-    }
-    else
-    {
-        K = Pxy * InverseMatrix(Pyy);
-    }
+    // Calculate the results of the update.
+    Matrix new_mean = mean() + combined_K * combined_innovation;
+    Matrix new_covariance = none_correct_weight*covariance() + (1-none_correct_weight)*correct_meas_cov + innovation_spread;
 
-    //end of standard ukf stuff
-    //RHM: 20/06/08 Outlier rejection.
-    double innovation2 = convDble((yBar - y).transp() * Invert22(Pyy + measNoise) * (yBar - y));
-
-    // Update Alpha
-    double innovation2measError = convDble((yBar - y).transp() * Invert22(measNoise) * (yBar - y));
-
-    m_alpha *= 1 / (1 + innovation2measError);
-
-    if (innovation2 > c_threshold2)
-    {
-        return RESULT_OUTLIER;
-    }
-
-    Matrix innovation = (y - yBar);
-
-    Matrix new_mean = mean() + K * innovation;
-    Matrix new_covariance = covariance() - K*Pyy*K.transp();
-
+    // Update filter with the result.
     setMean(new_mean);
     setCovariance(new_covariance);
     return RESULT_OK;
-    */
+
 //    // Calculate update uncertainties - S_obj_rel & R_obj_rel
 //    Matrix S_obj_rel = Matrix(2,2,false);
 //    S_obj_rel[0][0] = sqrt(error.distance());
