@@ -22,7 +22,6 @@ void OfflineLocalisationSettingsDialog::on_PruneMethodComboBox_currentIndexChang
     QSpinBox* spin_box = qFindChild<QSpinBox*>(this, "PruneMethodParamSpinBox");
 
     // Display and additional parameters that may be required.
-
     if (arg1.toLower() == "viterbi")
     {
         label->show();
@@ -41,6 +40,34 @@ void OfflineLocalisationSettingsDialog::on_PruneMethodComboBox_currentIndexChang
         spin_box->hide();
     }
     return;
+}
+
+void OfflineLocalisationSettingsDialog::on_BranchMethodComboBox_currentIndexChanged(const QString &arg1)
+{
+    const QString c_none_label = "None";
+    QComboBox* prune_combo_box = qFindChild<QComboBox*>(this, "PruneMethodComboBox");
+
+    if(arg1.compare("probabalistic", Qt::CaseInsensitive) == 0)
+    {
+        // Set to none
+        m_previous_id = prune_combo_box->currentIndex();
+        prune_combo_box->setEnabled(false);
+        prune_combo_box->addItem(c_none_label);
+        prune_combo_box->setCurrentIndex(prune_combo_box->findText(c_none_label));
+    }
+    else
+    {
+        // Remove none
+        prune_combo_box->setEnabled(true);
+        int id = prune_combo_box->findText(c_none_label);
+        // id = -1 if the text is not found.
+        if(id != -1)
+        {
+            prune_combo_box->removeItem(id);
+            prune_combo_box->setCurrentIndex(m_previous_id);
+        }
+    }
+
 }
 
 void OfflineLocalisationSettingsDialog::initialiseSettings(const LocalisationSettings& settings)
@@ -95,19 +122,19 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
     QString prune_text = prune_combo_box->currentText().toLower();
     QString branch_text = branch_combo_box->currentText().toLower();
 
-    if(prune_text == "merge")
+    if(prune_text.compare("merge", Qt::CaseInsensitive) == 0)
     {
         result.setPruneMethod(LocalisationSettings::prune_merge);
     }
-    else if (prune_text == "max likelyhood")
+    else if (prune_text.compare("likelyhood", Qt::CaseInsensitive) == 0)
     {
         result.setPruneMethod((LocalisationSettings::prune_max_likelyhood));
     }
-    else if (prune_text == "viterbi")
+    else if (prune_text.compare("viterbi", Qt::CaseInsensitive) == 0)
     {
         result.setPruneMethod((LocalisationSettings::prune_viterbi));
     }
-    else if (prune_text == "n-scan")
+    else if (prune_text.compare("n-scan", Qt::CaseInsensitive) == 0)
     {
         result.setPruneMethod((LocalisationSettings::prune_nscan));
     }
@@ -116,19 +143,19 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
         result.setPruneMethod((LocalisationSettings::prune_unknown));
     }
 
-    if(branch_text == "exhaustive")
+    if(branch_text.compare("exhaustive", Qt::CaseInsensitive) == 0)
     {
         result.setBranchMethod(LocalisationSettings::branch_exhaustive);
     }
-    else if(branch_text == "selective")
+    else if(branch_text.compare("selective", Qt::CaseInsensitive) == 0)
     {
         result.setBranchMethod(LocalisationSettings::branch_selective);
     }
-    else if(branch_text == "constraint")
+    else if(branch_text.compare("constraint", Qt::CaseInsensitive) == 0)
     {
         result.setBranchMethod(LocalisationSettings::branch_constraint);
     }
-    else if(branch_text == "probabalistic")
+    else if(branch_text.compare("probabalistic", Qt::CaseInsensitive) == 0)
     {
         result.setBranchMethod(LocalisationSettings::branch_probDataAssoc);
     }
@@ -136,6 +163,5 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
     {
         result.setBranchMethod(LocalisationSettings::branch_unknown);
     }
-
     return result;
 }

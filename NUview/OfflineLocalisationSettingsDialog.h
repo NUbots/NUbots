@@ -21,7 +21,10 @@ public:
 private slots:
     void on_PruneMethodComboBox_currentIndexChanged(const QString &arg1);
 
+    void on_BranchMethodComboBox_currentIndexChanged(const QString &arg1);
+
 private:
     Ui::OfflineLocalisationSettingsDialog *ui;
+    int m_previous_id;
 };
 #endif // OFFLINELOCALISATIONSETTINGSDIALOG_H
