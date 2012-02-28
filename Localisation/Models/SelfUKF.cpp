@@ -51,7 +51,6 @@ SelfUKF::SelfUKF(const SelfModel& parent, const AmbiguousObject& object, const S
     SelfUKF::updateResult result = MeasurementUpdate(update, error);
     if(result == RESULT_OUTLIER) setActive(false);
     else setActive(true);
-    std::cout << summary(false) << std::endl;
     return;
 }
 
