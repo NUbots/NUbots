@@ -15,6 +15,9 @@
 #include "Requirements/MassCalibration.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Requirements/ForwardKinematic.h"
+#include "NUPlatform/NUPlatform.h"
+#include "debug.h"
+
 //#include "Tools/InverseKinematic.h"
 //#include "Tools/MessageQueue/InMessage.h"
 //#include "Tools/Streams/InStreams.h"
@@ -67,9 +70,9 @@ template<typename T> ostream& operator<<(ostream& output, const Vector2<T>& v)
     return output;
 }
 
-WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NUInverseKinematics* ik) : NUWalk(data,actions), m_ik(ik), emergencyShutOff(false), currentMotionType(stand), instable(true), beginOfStable(0)
+WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NUInverseKinematics* ik) : NUWalk(data,actions), emergencyShutOff(false), currentMotionType(stand),  m_ik(ik), instable(true), beginOfStable(0)
 {
-  m_walk_parameters.load("NBWalkStart");
+  m_walk_parameters.load("BWalk");
 
   observedPendulumPlayer.walkingEngine = this;
 
@@ -121,8 +124,8 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.speedMaxBackwards = 50 * 2.f;
   p.speedMaxChange = Pose2D(0.3f, 8.f, 20.f);
 
-  p.observerMeasurementMode = Parameters::torsoMatrix;
-  //p.observerMeasurementMode = Parameters::robotModel;
+  //p.observerMeasurementMode = Parameters::torsoMatrix;
+  p.observerMeasurementMode = Parameters::robotModel;
   p.observerMeasurementDelay = 40.f;
 
   p.observerErrorMode = Parameters::mixed;
@@ -177,6 +180,7 @@ void WalkingEngine::init()
   m_cycle_time = 0;
   m_initialised = false;
   m_walk_requested = false;
+  m_pedantic = false;
 
   // Write initial positions.
   m_initial_larm.resize(4,0.0f);
@@ -192,6 +196,7 @@ void WalkingEngine::init()
   m_initial_rarm[3] = 1.571;
 
   std::vector<float> joints(Joint::total_joints,0.0f);
+
   Matrix leftTarget(4,4,true);
   leftTarget[1][3] = 50;
   leftTarget[2][3] = -200;
@@ -222,8 +227,9 @@ void WalkingEngine::doWalk()
 {
     static std::vector<float> joints(Joint::total_joints, 0.0f);
 
-    m_cycle_time = 0.001 * (m_data->CurrentTime - m_prev_time);
-    m_prev_time = m_data->CurrentTime;
+//    m_cycle_time = 0.001 * (m_data->CurrentTime - m_prev_time);
+//    m_prev_time = m_data->CurrentTime;
+    m_cycle_time = 0.02;
     bool validJoints = m_data->getPosition(NUSensorsData::All, joints);
     if(validJoints)
     {
@@ -242,11 +248,12 @@ void WalkingEngine::update(/*WalkingEngineOutput& walkingEngineOutput*/)
 {
     bool walking = true;
     bool careful = false;
+    m_pedantic = careful;
 
   if(walking/*theMotionSelection.ratios[MotionRequest::walk] > 0.f || theMotionSelection.ratios[MotionRequest::stand] > 0.f*/)
   {
     //Vector2<> targetBalanceStepSize = theMotionRequest.walkRequest.pedantic ? p.balanceStepSizeWhenPedantic : p.balanceStepSize;
-      Vector2<> targetBalanceStepSize = careful ? p.balanceStepSizeWhenPedantic : p.balanceStepSize;
+      Vector2<> targetBalanceStepSize = m_pedantic ? p.balanceStepSizeWhenPedantic : p.balanceStepSize;
     Vector2<> step = targetBalanceStepSize - balanceStepSize;
     Vector2<> maxStep(std::abs(balanceStepSize.x - p.balanceStepSizeWhenPedantic.x) * p.balanceStepSizeInterpolation,
                       std::abs(balanceStepSize.y - p.balanceStepSizeWhenPedantic.y) * p.balanceStepSizeInterpolation);
@@ -298,11 +305,11 @@ void WalkingEngine::updateMotionRequest()
 //  }
 
     // Get values from the NUWalk speeds.
-    std::cout << "Requested walk speed: [" <<  m_speed_x << ", " << m_speed_y << ", " << m_speed_yaw;
-    requestedWalkTarget = Pose2D(m_speed_yaw, 0.01 * m_speed_x * p.speedMax.translation.x, 0.01 * m_speed_y * p.speedMax.translation.y);
+    requestedWalkTarget = Pose2D(m_speed_yaw, 10*m_speed_x, 10*m_speed_y);
+//    requestedWalkTarget = Pose2D(1.0, 0, 0);
     requestedMotionType = stand;
 
-    if(fabs(m_speed_x) > 0.1 or fabs(m_speed_y) > 0.1 or fabs(m_speed_x) > 0.01)
+    if(fabs(m_speed_x) > 1 or fabs(m_speed_y) > 1 or fabs(m_speed_yaw) > 0.001)
     {
         m_walk_requested = true;
         if(!instable)
@@ -421,7 +428,7 @@ void WalkingEngine::computeMeasuredStance()
     std::vector<float> accelerations;
     m_data->getAccelerometer(accelerations);
     Vector3<> accel(accelerations[0], accelerations[1], accelerations[2]);
-    float roll = asin(accel.y / accel.abs());
+    float roll = -asin(accel.y / accel.abs());
     float pitch = asin(accel.x / accel.abs());
 
 
@@ -658,8 +665,8 @@ void WalkingEngine::getStandStance(LegStance& stance) const
   stance.rightOriginToFoot = Pose3D(Vector3<>(0.f, -p.standComPosition.y, 0.f));
   if(currentMotionType == stand)
   {
-    //stance.leftOriginToCom = stance.rightOriginToCom = Vector3<>(p.standComPosition.x + currentRefX, 0.f, p.standComPosition.z);
-    stance.leftOriginToCom = stance.rightOriginToCom = Vector3<>(p.standComPosition.x + p.standStandbyRefX, 0.f, p.standComPosition.z);
+    stance.leftOriginToCom = stance.rightOriginToCom = Vector3<>(p.standComPosition.x + currentRefX, 0.f, p.standComPosition.z);
+    //stance.leftOriginToCom = stance.rightOriginToCom = Vector3<>(p.standComPosition.x + p.standStandbyRefX, 0.f, p.standComPosition.z);
   }
   else
   {
@@ -726,50 +733,22 @@ void WalkingEngine::generateJointRequest()
   RotationMatrix bodyRotation(Vector3<>(additionalBodyRotation + bodyRotationX, bodyRotationY, 0.f));
   bodyRotation *= p.standBodyRotation;
 
-//  std::cout << "bodyRotationX: " << bodyRotationX << " bodyRotationY: " << bodyRotationY << " additionalBodyRotation: " << additionalBodyRotation << std::endl;
-
   const Pose3D comToLeftOrigin = Pose3D(bodyRotation, correctedLeftOriginToCom).invert();
   const Pose3D comToRightOrigin = Pose3D(bodyRotation, correctedRightOriginToCom).invert();
-
-//  std::cout << "comToLeftOrigin = " << std::endl;
-//  std::cout <<  Pose2Matrix(comToLeftOrigin) << std::endl;
-//  std::cout << "comToRightOrigin = " << std::endl;
-//  std::cout <<  Pose2Matrix(comToRightOrigin) << std::endl;
 
   // TODO: optimize this by calculating the inverted left/rightOriginToCom pose directly
   const Pose3D comToLeftAnkle = Pose3D(comToLeftOrigin).conc(targetStance.leftOriginToFoot).translate(0.f, 0.f, heightLeg5Joint);
   const Pose3D comToRightAnkle = Pose3D(comToRightOrigin).conc(targetStance.rightOriginToFoot).translate(0.f, 0.f, heightLeg5Joint);
   const Vector3<> averageComToAnkle = (comToLeftAnkle.translation + comToRightAnkle.translation) * 0.5f;
 
-//  std::cout << "comToLeftAnkle: " << std::endl << Pose2Matrix(comToLeftAnkle) << std::endl;
-//  std::cout << "comToRightAnkle: " << std::endl << Pose2Matrix(comToRightAnkle) << std::endl;
-//  std::cout << "averageComToAnkle: " << averageComToAnkle << std::endl;
-
   Vector3<> bodyToCom = this->bodyToCom;
   Vector3<> bodyToComOffset = lastAverageComToAnkle != Vector3<>() ? (averageComToAnkle - lastAverageComToAnkle) * 0.4f : Vector3<>();
   lastAverageComToAnkle = averageComToAnkle;
   bodyToCom += bodyToComOffset;
 
-//  std::cout << "averageComToAnkle: " << averageComToAnkle << std::endl;
-//  std::cout << "lastAverageComToAnkle: " << lastAverageComToAnkle << std::endl;
-//  std::cout << "local bodyToCom: " << bodyToCom << std::endl;
-
-
-//  std::cout << "comToLeftAnkle = " << std::endl;
-//  std::cout <<  Pose2Matrix(comToLeftAnkle) << std::endl;
-//  std::cout << "comToRightAnkle = " << std::endl;
-//  std::cout <<  Pose2Matrix(comToRightAnkle) << std::endl;
-//  std::cout << "averageComToAnkle = " << std::endl;
-//  std::cout <<  Pose2Matrix(averageComToAnkle) << std::endl;
-
   Pose3D bodyToLeftAnkle(comToLeftAnkle.rotation, bodyToCom + comToLeftAnkle.translation);
 
   Pose3D bodyToRightAnkle(comToRightAnkle.rotation, bodyToCom + comToRightAnkle.translation);
-//  std::cout << "bodyToLeftAnkle (initial) = " << std::endl;
-//  std::cout <<  Pose2Matrix(bodyToLeftAnkle) << std::endl;
-
-//  std::cout << "bodyToRightAnkle (initial) = " << std::endl;
-//  std::cout <<  Pose2Matrix(bodyToRightAnkle) << std::endl;
   bool reachable = m_ik->calculateLegJoints(Pose2Matrix(bodyToLeftAnkle), Pose2Matrix(bodyToRightAnkle), joint_positions);
 
   for(int i = 0; i < 7; ++i)
@@ -792,15 +771,6 @@ void WalkingEngine::generateJointRequest()
 
       Vector3<> tmpAverageComToAnkle = (tmpComToLeftAnkle.translation + tmpComToRightAnkle.translation) * 0.5f;
       bodyToComOffset = (averageComToAnkle - tmpAverageComToAnkle) * 1.3f;
-
-//      std::cout << "robotModel.centerOfMass: " << robotModel.centerOfMass << std::endl;
-//      std::cout << "robotModel.limbs[MassCalibration::footLeft]: " << robotModel.limbs[MassCalibration::footLeft].translation << std::endl;
-//      std::cout << "robotModel.limbs[MassCalibration::footRight]: " << robotModel.limbs[MassCalibration::footRight].translation << std::endl;
-
-//      std::cout << "tmpComToLeftAnkle: " << std::endl << Pose2Matrix(tmpComToLeftAnkle) << std::endl;
-//      std::cout << "tmpComToRightAnkle: " << std::endl << InverseMatrix(Pose2Matrix(tmpComToRightAnkle)) << std::endl;
-//      std::cout << "averageComToAnkle: " << averageComToAnkle << std::endl;
-//      std::cout << "tmpAverageComToAnkle: " << tmpAverageComToAnkle << std::endl;
     }
     else
     {
@@ -813,52 +783,15 @@ void WalkingEngine::generateJointRequest()
     bodyToLeftAnkle.translation = bodyToCom + comToLeftAnkle.translation;
     bodyToRightAnkle.translation = bodyToCom + comToRightAnkle.translation;
 
-//    std::cout << "bodyToLeftAnkle = " << std::endl;
-//    std::cout <<  Pose2Matrix(bodyToLeftAnkle) << std::endl;
-
-//    std::cout << "bodyToRightAnkle = " << std::endl;
-//    std::cout <<  Pose2Matrix(bodyToRightAnkle) << std::endl;
-
-    std::cout << "bodyToCom: " << bodyToCom << std::endl;
-
-//    std::cout << bodyToComOffset << std::endl;
-
     reachable = m_ik->calculateLegJoints(Pose2Matrix(bodyToLeftAnkle), Pose2Matrix(bodyToRightAnkle), joint_positions);
+    RobotModel robotModel(joint_positions, theMassCalibration);
 
     if(abs(bodyToComOffset.x) < 0.05 && abs(bodyToComOffset.y) < 0.05 && abs(bodyToComOffset.z) < 0.05)
     {
-        std::cout << "Required accuracy achieved." << std::endl;
       break;
     }
   }
 
-//  RobotModel robotModel(joint_positions, theMassCalibration);
-//  std::vector<float> orientation_sensors;
-//  m_data->getOrientation(orientation_sensors);
-//  Vector3<> axis(orientation_sensors[0], orientation_sensors[1], 0);
-//  axis.y = -0.018f;
-//  RotationMatrix torso(axis);
-
-//  std::vector<float> accelerations;
-//  m_data->getAccelerometer(accelerations);
-//  Vector3<> accel(accelerations[0], accelerations[1], accelerations[2]);
-//  float roll = asin(accel.y / accel.abs());
-//  float pitch = asin(accel.x / accel.abs());
-
-//  std::cout << "Accel: " << accel << std::endl;
-
-//  const Vector3<> acc_axis(roll, pitch, 0);
-
-
-//  std::cout << "orientation y: " << orientation_sensors[1] << std::endl;
-//  std::cout << "axis: " << axis << std::endl;
-//  std::cout << "acc_axis: " << acc_axis << std::endl;
-
-//  Vector3<> targetLeftToCom = -Pose3D(torso).translate(-robotModel.centerOfMass).conc(robotModel.limbs[MassCalibration::footLeft]).translate(0.f, 0.f, -heightLeg5Joint).translation;
-//  Vector3<> targetRightToCom = -Pose3D(torso).translate(-robotModel.centerOfMass).conc(robotModel.limbs[MassCalibration::footRight]).translate(0.f, 0.f, -heightLeg5Joint).translation;
-
-//  std::cout << "targetLeftToCom: " << targetLeftToCom << std::endl;
-//  std::cout << "targetRightToCom: " << targetRightToCom << std::endl;
 
   /*
   #ifdef TARGET_SIM
@@ -895,58 +828,32 @@ void WalkingEngine::generateJointRequest()
 
   //UPDATE ARMS:
 //  static vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
-  m_actions->add(NUActionatorsData::RArm, m_data->CurrentTime, nu_nextRightArmJoints, 50);
-  m_actions->add(NUActionatorsData::LArm, m_data->CurrentTime, nu_nextLeftArmJoints, 50);
-  /*
-  std::cout << "All: ";
-  for (std::vector<float>::iterator it = joint_positions.begin(); it != joint_positions.end(); ++it)
-  {
-      std::cout << (*it) << ", ";
-  }
-  std::cout << std::endl;
-
-  std::cout << "Left Arm (" <<  nu_nextLeftArmJoints .size() << "): ";
-  for (std::vector<float>::iterator it = nu_nextLeftArmJoints.begin(); it != nu_nextLeftArmJoints.end(); ++it)
-  {
-      std::cout << (*it) << ", ";
-  }
-  std::cout << std::endl;
-
-  std::cout << "Right Arm (" <<  nu_nextRightArmJoints .size() << "): ";
-  for (std::vector<float>::iterator it = nu_nextRightArmJoints.begin(); it != nu_nextRightArmJoints.end(); ++it)
-  {
-      std::cout << (*it) << ", ";
-  }
-  std::cout << std::endl;
-*/
-  std::cout << "Left Leg (" <<  nu_nextLeftLegJoints .size() << "): ";
-  for (std::vector<float>::iterator it = nu_nextLeftLegJoints.begin(); it != nu_nextLeftLegJoints.end(); ++it)
-  {
-      std::cout << (*it) << ", ";
-  }
-  std::cout << std::endl;
-
-  std::cout << "Right Leg (" <<  nu_nextRightLegJoints .size() << "): ";
-  for (std::vector<float>::iterator it = nu_nextRightLegJoints.begin(); it != nu_nextRightLegJoints.end(); ++it)
-  {
-      std::cout << (*it) << ", ";
-  }
-  std::cout << std::endl;
+  m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, 50);
+  m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, 50);
 
   //UPDATE LEGS:
 //  static vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
-  std::vector<float> legstiffness(m_actions->getSize(NUActionatorsData::LLeg), 100.0f);
+  std::vector<float> legstiffness(m_actions->getSize(NUActionatorsData::LLeg), 75.0f);
   legstiffness[5] = p.standHardnessAnkleRoll;
   legstiffness[6] = p.standHardnessAnklePitch;
 
 //  nu_nextRightLegJoints[1] -= 0.2;
 //  nu_nextLeftLegJoints[1] -= 0.2;
 
-  m_actions->add(NUActionatorsData::RLeg, m_data->CurrentTime, nu_nextRightLegJoints, legstiffness);
-  m_actions->add(NUActionatorsData::LLeg, m_data->CurrentTime, nu_nextLeftLegJoints, legstiffness);
-  std::vector<float> head(2,0.0f);
+
+//  for(std::vector<float>::iterator it = nu_nextRightLegJoints.begin(); it != nu_nextRightLegJoints.end(); ++it)
+//  {
+//      if(it != nu_nextRightLegJoints.begin()) debug << ", ";
+//      debug << (*it);
+//  }
+//  debug << std::endl;
+
+
+  m_actions->add(NUActionatorsData::RLeg, 0, nu_nextRightLegJoints, legstiffness);
+  m_actions->add(NUActionatorsData::LLeg, 0, nu_nextLeftLegJoints, legstiffness);
+  //std::vector<float> head(2,0.0f);
   //head[0] = -0.7;
-  m_actions->add(NUActionatorsData::Head, m_data->CurrentTime, head, 100);
+  //m_actions->add(NUActionatorsData::Head, m_data->CurrentTime, head, 70);
     return;
 }
 
@@ -1117,7 +1024,7 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
           // get requested walk target and speed
           Pose2D walkTarget = requestedWalkTarget;
           //Pose2D requestedSpeed = theMotionRequest.walkRequest.speed;
-          Pose2D requestedSpeed = Pose2D(m_speed_yaw, m_speed_x, m_speed_y);
+          Pose2D requestedSpeed = Pose2D(m_speed_yaw, 10*m_speed_x, 10*m_speed_y);
 //          if(theMotionRequest.walkRequest.mode == WalkRequest::targetMode) // remove upcoming odometry offset
 //          {
 
@@ -1143,9 +1050,9 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
 //          }
 //          else if(theMotionRequest.walkRequest.mode == WalkRequest::percentageSpeedMode)
 //          {
-            requestedSpeed.rotation *= p.speedMax.rotation;
-            requestedSpeed.translation.x *= (requestedSpeed.translation.x >= 0.f ? p.speedMax.translation.x : p.speedMaxBackwards);
-            requestedSpeed.translation.y *= p.speedMax.translation.y;
+//            requestedSpeed.rotation *= p.speedMax.rotation;
+//            requestedSpeed.translation.x *= (requestedSpeed.translation.x >= 0.f ? p.speedMax.translation.x : p.speedMaxBackwards);
+//            requestedSpeed.translation.y *= p.speedMax.translation.y;
 //          }
 
           // compute max speeds for the requested walk direction
@@ -1564,7 +1471,7 @@ void WalkingEngine::PendulumPlayer::computeSwapTimes(float t, float xt, float xv
 
   Parameters& p = walkingEngine->p;
 
-  if(errory != 0.f && walkingEngine->balanceStepSize.y != 0.f /*&& kickType == WalkRequest::none /*&& !walkingEngine->theMotionRequest.walkRequest.pedantic*/)
+  if(errory != 0.f && walkingEngine->balanceStepSize.y != 0.f && !walkingEngine->m_pedantic/*&& kickType == WalkRequest::none /*&& !walkingEngine->theMotionRequest.walkRequest.pedantic*/)
   {
     assert(next.xv0.y == 0.f);
     float sy = next.xtb.y * -2.f;
@@ -1648,7 +1555,7 @@ void WalkingEngine::PendulumPlayer::computeRefZmp(float t, float xt, float xvt, 
   }
 
   Parameters& p = walkingEngine->p;
-  if(errorx != 0.f && walkingEngine->balanceStepSize.x != 0.f /*&& kickType == WalkRequest::none  /*&& !walkingEngine->theMotionRequest.walkRequest.pedantic */)
+  if(errorx != 0.f && walkingEngine->balanceStepSize.x != 0.f && !walkingEngine->m_pedantic/*&& kickType == WalkRequest::none  /*&& !walkingEngine->theMotionRequest.walkRequest.pedantic */)
   {
     assert(next.x0.x == 0.f);
     float sx = next.xv0.x * sinh(next.k.x * next.tb) / (-0.5f * next.k.x);

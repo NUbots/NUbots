@@ -37,6 +37,7 @@ public:
   ~WalkingEngine();
   void doWalk();
   bool m_initialised;
+  bool m_pedantic;
 
 
 private:
