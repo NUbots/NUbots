@@ -149,7 +149,7 @@ void CameraSettings::SetDefaults()
     p_saturation.set(0, 0, 255, "the difference between a color against gray");
     p_gain.set(0, 0, 255, "ISO sensitivity");
     p_exposure.set(0, 0, 510, "total amount of light allowed to fall on the photographic medium");
-    p_autoWhiteBalance.set(0, 0, 0, "permanently off");
+    p_autoWhiteBalance.set(0, 1, 1, "permanently off");
     p_hue.set(0, -180, 180, "the degree to which a stimulus can be described as similar to or different from stimuli that are described as red, green, blue, and yellow");
     p_redChroma.set(0, 0, 255, "the perceived intensity of a specific color (red)");
     p_blueChroma.set(0, 0, 255, "the perceived intensity of a specific color (blue)");
@@ -189,6 +189,9 @@ void CameraSettings::LoadFromFile(const std::string& configFileName)
         for(int i=0; i<parameters.size(); i++) {
             if(!SetByName(parameters[i]))
                 debug << "CameraSettings::LoadFromFile(): \"" << parameters[i].name() << "\" not found." << endl;
+            else
+                debug << "CameraSettings::LoadFromFile(): " << parameters[i].name() << " " << parameters[i].get() <<
+                         " [" << parameters[i].min() << ", " << parameters[i].max() << "]" << endl;
         }
         p_valid = true;
     }

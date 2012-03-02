@@ -1008,9 +1008,9 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
 
     float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
 
-//#if DEBUG_VISION_VERBOSITY > 5
+#if DEBUG_VISION_VERBOSITY > 5
     debug << "Possible Goal " << PossibleGoal.getColour() << "d2p: " << D2Pdistance << " Other dist: " << distance << endl;
-//#endif
+#endif
 
     //qDebug() << "After Average Distance to Bottom Of Goals: Width:"<< distance << ", D2PDistance: " << D2Pdistance;
     float distanceBuffer = 0;

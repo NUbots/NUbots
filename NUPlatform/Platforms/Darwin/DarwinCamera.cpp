@@ -129,7 +129,7 @@ std::string controlName(unsigned int id)
             name = "Sharpness";
             break;
         case V4L2_CID_EXPOSURE_AUTO:
-            name = "Auto Exposure";
+            name = "Exposure Auto";
             break;
         case V4L2_CID_EXPOSURE_ABSOLUTE:
             name = "Absolute Exposure";
@@ -161,14 +161,14 @@ storedTimeStamp(Platform->getTime())
     //Read camera settings from file.
     CameraSettings fileSettings;
     fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
+    debug << "Loading settings from " << CONFIG_DIR + string("Camera.cfg") << endl;
 
     // Open device
     openCameraDevice("/dev/video0");
 
     //Initialise
     initialiseCamera();
-    readCameraSettings();
-    m_cameraSettings = m_settings;
+    //readCameraSettings();
     forceApplySettings(fileSettings);
 
     readCameraSettings();
@@ -370,6 +370,20 @@ void DarwinCamera::readCameraSettings()
     m_settings.p_exposureAbsolute.set(m_settings.exposureAbsolute);
     m_settings.p_powerLineFrequency.set(m_settings.powerLineFrequency);
     m_settings.p_sharpness.set(m_settings.sharpness);
+
+#if DEBUG_NUCAMERA_VERBOSITY > 1
+    debug << "DarwinCamera::readCameraSettings()" << endl;
+    debug << "\texposureAuto " << m_settings.exposureAuto  << endl;
+    debug << "autoWhiteBalance " << m_settings.autoWhiteBalance  << endl;
+    debug << "exposureAutoPriority " << m_settings.exposureAutoPriority  << endl;
+    debug << "brightness " << m_settings.brightness  << endl;
+    debug << "contrast " << m_settings.contrast  << endl;
+    debug << "saturation " << m_settings.saturation  << endl;
+    debug << "gain " << m_settings.gain  << endl;
+    debug << "exposureAbsolute " << m_settings.exposureAbsolute  << endl;
+    debug << "powerLineFrequency " << m_settings.powerLineFrequency  << endl;
+    debug << "sharpness " << m_settings.sharpness  << endl;
+#endif
 }
 
 int DarwinCamera::readSetting(unsigned int id)
@@ -394,6 +408,7 @@ int DarwinCamera::readSetting(unsigned int id)
 
 bool DarwinCamera::applySetting(unsigned int id, int value)
 {
+    debug << "DarwinCamera: Trying: " << controlName(id) << " -> " << value << std::endl;
     struct v4l2_queryctrl queryctrl;
     queryctrl.id = id;
     if(ioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) < 0)
@@ -480,17 +495,21 @@ void DarwinCamera::applySettings(const CameraSettings& newset)
 
 void DarwinCamera::forceApplySettings(const CameraSettings& newset)
 {
+#if DEBUG_NUCAMERA_VERBOSITY > 1
     //Copying the new Paramters into m_settings
-    m_settings.p_exposureAuto.set(newset.p_exposureAuto.get());
-    m_settings.p_autoWhiteBalance.set(newset.p_autoWhiteBalance.get());
-    m_settings.p_exposureAutoPriority.set(newset.p_exposureAutoPriority.get());
-    m_settings.p_brightness.set(newset.p_brightness.get());
-    m_settings.p_contrast.set(newset.p_contrast.get());
-    m_settings.p_saturation.set(newset.p_saturation.get());
-    m_settings.p_gain.set(newset.p_gain.get());
-    m_settings.p_exposureAbsolute.set(newset.p_exposureAbsolute.get());
-    m_settings.p_powerLineFrequency.set(newset.p_powerLineFrequency.get());
-    m_settings.p_sharpness.set(newset.p_sharpness.get());
+    debug << "p_exposureAuto" << newset.p_exposureAuto.get() << endl;
+    debug << "p_autoWhiteBalance" << newset.p_autoWhiteBalance.get() << endl;
+    debug << "p_exposureAutoPriority" << newset.p_exposureAutoPriority.get() << endl;
+    debug << "p_brightness" << newset.p_brightness.get() << endl;
+    debug << "p_contrast" << newset.p_contrast.get() << endl;
+    debug << "p_saturation" << newset.p_saturation.get() << endl;
+    debug << "p_gain" << newset.p_gain.get() << endl;
+    debug << "p_exposureAbsolute" << newset.p_exposureAbsolute.get() << endl;
+    debug << "p_powerLineFrequency" << newset.p_powerLineFrequency.get() << endl;
+    debug << "p_sharpness" << newset.p_sharpness.get() << endl;
+#endif
+    //Copying the new Paramters into m_settings
+    m_settings = newset;
 
     // Auto Controls
     applySetting(V4L2_CID_EXPOSURE_AUTO, (m_settings.p_exposureAuto.get()));
