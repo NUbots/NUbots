@@ -62,6 +62,7 @@ namespace Joint
 class NAOInverseKinematics: public NUInverseKinematics
 {
 public:
+
     void test()
     {
         std::vector<float> joints(22,0.0f);
@@ -243,7 +244,7 @@ private:
         const float joint0 = hipPosition;
 
         target[1][3] += sign * lengthBetweenLegs * 0.5;
-        target = TransformMatrices::RotX(sign*mathGeneral::PI*0.25) * TransformMatrices::RotZ(-sign*joint0) * target; // compute residual transformation with fixed joint0
+        target = TransformMatrices::RotZ(-sign*joint0) * TransformMatrices::RotX(sign*mathGeneral::PI*0.25) * target; // compute residual transformation with fixed joint0
 
         float length = sqrt(target[0][3]*target[0][3] + target[1][3]*target[1][3] + target[2][3]*target[2][3]);
         float sqrLength = length * length;
@@ -281,7 +282,8 @@ private:
         joint2 -= atan2(target[0][3], yzabs * -mathGeneral::sign(target[2][3]));
         float joint3 = mathGeneral::PI - acos(cosKnee);
 
-        Matrix beforeFoot = TransformMatrices::RotY(joint2 + joint3) * TransformMatrices::RotX(joint1*sign);
+        //Matrix beforeFoot = TransformMatrices::RotY(joint2 + joint3) * TransformMatrices::RotX(joint1*sign);
+        Matrix beforeFoot = TransformMatrices::RotX(joint1*sign) * TransformMatrices::RotY(joint2 + joint3);
         joint1 -= mathGeneral::PI * 0.25; // because of the strange hip of Nao
 
         // compute joints from rotation matrix using theorem of euler angles
