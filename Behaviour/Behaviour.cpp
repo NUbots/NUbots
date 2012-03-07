@@ -57,6 +57,7 @@ using namespace std;
 Behaviour::Behaviour()
 {
     #if defined(TARGET_IS_NAOWEBOTS)
+        //m_behaviour = new ForwardWalkProvider(this);
         //m_behaviour = new WalkOptimisationProvider(this);
         m_behaviour = new IKTestProvider(this);
         //m_behaviour = new SoccerProvider(this);
