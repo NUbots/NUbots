@@ -26,6 +26,7 @@
 #ifndef IKTESTPROVIDER_H
 #define IKTESTPROVIDER_H
 
+#include <vector>
 #include "../BehaviourProvider.h"
 class Ik_motion;
 class NUInverseKinematics;
@@ -37,9 +38,17 @@ public:
     ~IKTestProvider();
 protected:
     void doBehaviour();
+    bool inPosition();
+    bool m_moving_to_position;
     Ik_motion* m_current_ik_motion;
     NUInverseKinematics* m_ik;
+    unsigned int m_sequence_count;
     double m_prev_time;
+    std::vector<float> m_initial_left_arm;
+    std::vector<float> m_initial_right_arm;
+    std::vector<float> m_initial_left_leg;
+    std::vector<float> m_initial_right_leg;
+
 private:
 };
 
