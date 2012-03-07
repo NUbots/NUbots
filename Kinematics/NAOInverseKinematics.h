@@ -22,6 +22,7 @@
 
 #include "Tools/Math/Matrix.h"
 #include "NUInverseKinematics.h"
+#include "Kinematics.h"
 #include "Tools/Math/TransformMatrices.h"
 #include "Tools/Math/General.h"
 #include "Tools/Math/StlVector.h"
@@ -152,11 +153,12 @@ private:
     {
         const float lengthBetweenLegs = 100.0f;
         Matrix target(position);
+        const double pi_4 = mathGeneral::PI / 4.0;
 
         const int sign(isLeft ? -1 : 1);
 
         target[1][3] += sign * lengthBetweenLegs * 0.5;
-        target = TransformMatrices::RotX(sign * mathGeneral::PI / 4.0f) * target;
+        target = TransformMatrices::RotX(sign * pi_4) * target;
         target = InverseMatrix(target);
 
         // Matrix access format is matrix[row][collumn]
@@ -178,15 +180,8 @@ private:
         //!< TODO: Check if this cosLowerLeg shoud condition should be inverted.
         if(!isInside(cosKnee,min,max) || isInside(cosLowerLeg, min, max))
         {
-//            std::cout << "calculateLeg: Not reachable - " << cosKnee << " - " << cosLowerLeg << std::endl;
-//            std::cout << "cosKnee in range: " << (isInside(cosKnee,min,max)?"True":"False") << std::endl;
-//            std::cout << "cosLowerLeg in range: " << (isInside(cosLowerLeg,min,max)?"True":"False") << std::endl;
-
           cosKnee = limit(cosKnee, min, max);
           cosLowerLeg = limit(cosLowerLeg, min, max);
-
-//          std::cout << "linited values: " << cosKnee << " - " << cosLowerLeg << std::endl;
-
           targetReachable = false;
         }
 
@@ -198,7 +193,8 @@ private:
 
         // calulate rotation matrix before hip joints
         Matrix hipFromFoot(4,4,true);
-        hipFromFoot = TransformMatrices::RotY(-joint4-joint3) * TransformMatrices::RotX(-sign*joint5) * hipFromFoot;
+        //hipFromFoot = TransformMatrices::RotY(-joint4-joint3) * TransformMatrices::RotX(-sign*joint5) * hipFromFoot;
+        hipFromFoot = hipFromFoot * TransformMatrices::RotX(-sign*joint5) * TransformMatrices::RotY(-joint4-joint3);
 
         // compute rotation matrix for hip from rotation before hip and desired rotation
         Matrix hip = InverseMatrix(hipFromFoot) * target;
@@ -207,7 +203,7 @@ private:
         // see http://www.geometrictools.com/Documentation/EulerAngles.pdf
         // this is possible because of the known order of joints (z, x, y seen from body resp. y, x, z seen from foot)
         float joint1 = asin(-hip[1][2]) * -sign;
-        joint1 -= mathGeneral::PI * 0.25; // because of the 45∞-rotational construction of the Nao legs
+        joint1 -= pi_4; // because of the 45∞-rotational construction of the Nao legs
         float joint2 = -atan2(hip[0][2], hip[2][2]);
         float joint0 = atan2(hip[1][0], hip[1][1]) * -sign;
 
@@ -242,9 +238,10 @@ private:
         const int sign(isLeft ? -1 : 1);
         const float lengthBetweenLegs = 100.0f;
         const float joint0 = hipPosition;
+        const double pi_4 = mathGeneral::PI / 4.0;
 
         target[1][3] += sign * lengthBetweenLegs * 0.5;
-        target = TransformMatrices::RotZ(-sign*joint0) * TransformMatrices::RotX(sign*mathGeneral::PI*0.25) * target; // compute residual transformation with fixed joint0
+        target = TransformMatrices::RotZ(-sign*joint0) * TransformMatrices::RotX(sign*pi_4) * target; // compute residual transformation with fixed joint0
 
         float length = sqrt(target[0][3]*target[0][3] + target[1][3]*target[1][3] + target[2][3]*target[2][3]);
         float sqrLength = length * length;
@@ -263,16 +260,8 @@ private:
         //!< TODO: Check if this cosLowerLeg shoud condition should be inverted.
         if(!isInside(cosKnee,min,max) || isInside(cosUpperLeg, min, max))
         {
-//            std::cout << "Length: " << length << std::endl;
-//            std::cout << "calculateLegFixedHip: Not reachable - " << cosKnee << " - " << cosUpperLeg << std::endl;
-//            std::cout << "cosKnee in range: " << (isInside(cosKnee,min,max)?"True":"False") << std::endl;
-//            std::cout << "cosUpperLeg in range: " << (isInside(cosUpperLeg,min,max)?"True":"False") << std::endl;
-
           cosKnee = limit(cosKnee, min, max);
           cosUpperLeg = limit(cosUpperLeg, min, max);
-
-//          std::cout << "linited values: " << cosKnee << " - " << cosUpperLeg << std::endl;
-
           targetReachable = false;
         }
 
@@ -284,7 +273,7 @@ private:
 
         //Matrix beforeFoot = TransformMatrices::RotY(joint2 + joint3) * TransformMatrices::RotX(joint1*sign);
         Matrix beforeFoot = TransformMatrices::RotX(joint1*sign) * TransformMatrices::RotY(joint2 + joint3);
-        joint1 -= mathGeneral::PI * 0.25; // because of the strange hip of Nao
+        joint1 -= pi_4; // because of the strange hip of Nao
 
         // compute joints from rotation matrix using theorem of euler angles
         // see http://www.geometrictools.com/Documentation/EulerAngles.pdf
@@ -292,7 +281,7 @@ private:
         Matrix foot = InverseMatrix(beforeFoot) * target;
 
         float joint5 = asin(-foot[1][2]) * sign;
-        float joint4 = -atan2(foot[0][2], foot[2][2]) * -1;
+        float joint4 = atan2(foot[0][2], foot[2][2]);
 
         // Since the joint ordering is different simplest way is to directly index.
         if(isLeft)
@@ -315,7 +304,6 @@ private:
             jointPositions[Joint::RAnklePitch] = joint4;
             jointPositions[Joint::RAnkleRoll] = joint5;
         }
-
         return targetReachable;
     }
 };
