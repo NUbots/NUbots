@@ -657,6 +657,7 @@ void NUSensors::calculateKinematics()
 
 void NUSensors::calculateCameraHeight()
 {
+//! TODO: most cases where camera height is used should really use head height at the pivot point
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateCameraHeight()" << endl;
 #endif
