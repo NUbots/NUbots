@@ -45,6 +45,7 @@ public:
 
     bool seek(double deltaTime_ms)
     {
+        if(complete()) return false;
         double next_cycle_start = m_cycle_start_time_ms + m_period_ms;
         m_current_time_ms += deltaTime_ms;
         if(m_current_time_ms >= next_cycle_start)
