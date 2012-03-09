@@ -56,7 +56,6 @@ private:
 
     bool applySetting(unsigned int settingID, int value);
     int readSetting(unsigned int id);
-    //CameraSettings::Camera setActiveCamera(CameraSettings::Camera newCamera);
     void initialiseCamera();
     void readCameraSettings();
     void openCameraDevice(std::string device_name);
