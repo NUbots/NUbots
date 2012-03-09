@@ -553,8 +553,8 @@ public:
         StationaryObject middle(location);
         float middleBearing = self.CalculateBearingToStationaryObject(middle);
 
-        bool result_posts = ((leftGoalBearing > 0.2f) && (rightGoalBearing < -0.2f));
-        bool result_centre = (fabs(middleBearing) < mathGeneral::PI/16.0f);
+        bool result_posts = ((leftGoalBearing > 0.f) && (rightGoalBearing < -0.f));
+        bool result_centre = (fabs(middleBearing) < mathGeneral::PI/12.0f);
         
         /*
         if(result_posts || result_centre)
