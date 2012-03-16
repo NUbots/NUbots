@@ -70,6 +70,12 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
     m_data->set(NUSensorsData::RLegEndEffector, m_data->CurrentTime, invalid);
     m_data->set(NUSensorsData::LLegEndEffector, m_data->CurrentTime, invalid);
 
+    motor_error = false;
+    error_fields.resize(NUM_MOTORS);
+    for(int i = 0 ; i < NUM_MOTORS ; i++)
+    {
+        error_fields[i].resize(2);
+    }
 }
 
 /*! @brief Destructor for DarwinSensors
@@ -103,18 +109,47 @@ void DarwinSensors::copyFromHardwareCommunications()
     copyFromJoints();
     copyFromFeet();
 
-    //delete CMdatatable;
     //READ FROM JOINTS and CONTROL BOARD:
     result = cm730->BulkReadLight();
+
+    if(motor_error) {
+        #if DEBUG_NUSENSORS_VERBOSITY > 0
+            debug << "DarwinSensors::copyFromHardwareCommunications\nMotor error: " <<endl;
+        #endif
+        errorlog << "Motor error: " <<endl;
+
+        for(int i=0; i<NUM_MOTORS; i++) {
+            #if DEBUG_NUSENSORS_VERBOSITY > 0
+                debug << "ID: " << error_fields[i][0] << " err: " << error_fields[i][1] << endl;
+            #endif
+            errorlog << "ID: " << error_fields[i][0] << " err: " << error_fields[i][1] << endl;
+        }
+
+//        cm730->DXLPowerOff();
+//        platform->msleep(500);
+//        cm730->DXLPowerOn();
+
+        motor_error = false;
+    }
+
+    //delete CMdatatable;
+
 	
+    int num_tries = 0;
     while(result != Robot::CM730::SUCCESS)
     {
+//        if(num_tries == 50) {
+//            cm730->DXLPowerOff();
+//            platform->msleep(500);
+//            cm730->DXLPowerOn();
+//        }
         #if DEBUG_NUSENSORS_VERBOSITY > 0
-            debug << "BulkRead Error: " << result  << " Trying Again"<<endl;
+            debug << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
         #endif
-        errorlog << "BulkRead Error: " << result  << " Trying Again"<<endl;
+        errorlog << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
         result = cm730->BulkReadLight();
         //return;
+        num_tries++;
     }
     return;
 }
@@ -139,6 +174,7 @@ void DarwinSensors::copyFromJoints()
     //unsigned char* datatable = new unsigned char[datasize+1];
     //int addr;
     //int error;
+    motor_error = false;
 
     for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
     {
@@ -151,6 +187,13 @@ void DarwinSensors::copyFromJoints()
 
         addr = int(Robot::MX28::P_PRESENT_POSITION_L);
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
+
+        //error fields
+        error_fields[i][0] = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(int(Robot::MX28::P_ID));
+        error_fields[i][1] = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].error;
+        if(error_fields[i][1] != 0)
+            motor_error = true;
+
         //cm730->MakeWord(datatable[addr-start_addr],datatable[addr-start_addr+1]);
 
         joint[NUSensorsData::PositionId] = m_joint_mapping->raw2joint(i, data);

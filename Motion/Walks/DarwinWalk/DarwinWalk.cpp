@@ -77,13 +77,15 @@ DarwinWalk::DarwinWalk(NUSensorsData* data, NUActionatorsData* actions) :  NUWal
     m_darwin_ids = vector<int>(temp_ids, temp_ids + sizeof(temp_ids)/sizeof(*temp_ids));
 
 
-    m_walk_parameters.load("DarwinWalkDefault");
 
     // Load the walk settings
-    minIni* ini = new minIni("config.ini");
+    ini = new minIni("config.ini");
     Robot::Walking::GetInstance()->LoadINISettings(ini);
     Robot::Walking::GetInstance()->Initialize();
     Robot::Walking::GetInstance()->PERIOD_TIME = 500;
+
+    m_walk_parameters.load("DarwinWalkDefault");
+    //writeParameters();
 
     // Read in the initial positions from the walk engine.
     std::vector<float> joints(20, 0.0f);
@@ -101,6 +103,7 @@ DarwinWalk::DarwinWalk(NUSensorsData* data, NUActionatorsData* actions) :  NUWal
  */
 DarwinWalk::~DarwinWalk()
 {
+    delete ini;
 }
 
 /*! @brief Calculates and applies the next target position for the walk
@@ -131,6 +134,79 @@ void DarwinWalk::doWalk()
     //GET THE NEW TARGET POSITIONS FROM THE WALK ENGINE
     updateActionatorsData();
     return;
+}
+
+/*! @brief Applies new walk parameters
+
+  Sets the parent member walk parameters and also changes the internal walk parameters
+  to match those passed in.
+ */
+void DarwinWalk::setWalkParameters(const WalkParameters& walkparameters)
+{
+    m_walk_parameters = walkparameters;
+    //update ini
+    writeParameters();
+}
+
+void DarwinWalk::writeParameters()
+{
+#if DEBUG_NUMOTION_VERBOSITY > 0
+    debug << "DarwinWalk::writeParameters: " << endl;
+#endif
+    vector<Parameter>& params = m_walk_parameters.getParameters();
+    for(unsigned int i=0; i<params.size(); i++) {
+        string& nm = params.at(i).name();
+        float value = params.at(i).get();
+#if DEBUG_NUMOTION_VERBOSITY > 0
+    debug << nm << " <- " << value << endl;
+#endif
+        if(nm.compare("x_offset") == 0)
+            Robot::Walking::GetInstance()->X_OFFSET = value;
+        else if(nm.compare("y_offset") == 0)
+            Robot::Walking::GetInstance()->Y_OFFSET = value;
+        else if(nm.compare("z_offset") == 0)
+            Robot::Walking::GetInstance()->Z_OFFSET = value;
+        else if(nm.compare("roll_offset") == 0)
+            Robot::Walking::GetInstance()->R_OFFSET = value;
+        else if(nm.compare("pitch_offset") == 0)
+            Robot::Walking::GetInstance()->P_OFFSET = value;
+        else if(nm.compare("yaw_offset") == 0)
+            Robot::Walking::GetInstance()->A_OFFSET = value;
+        else if(nm.compare("hip_pitch_offset") == 0)
+            Robot::Walking::GetInstance()->HIP_PITCH_OFFSET = value;
+        else if(nm.compare("period_time") == 0)
+            Robot::Walking::GetInstance()->PERIOD_TIME = value;
+        else if(nm.compare("dsp_ratio") == 0)
+            Robot::Walking::GetInstance()->DSP_RATIO = value;
+        else if(nm.compare("step_forward_back_ratio") == 0)
+            Robot::Walking::GetInstance()->STEP_FB_RATIO = value;
+        else if(nm.compare("foot_height") == 0)
+            Robot::Walking::GetInstance()->Z_MOVE_AMPLITUDE = value;
+        else if(nm.compare("swing_right_left") == 0)
+            Robot::Walking::GetInstance()->Y_SWAP_AMPLITUDE = value;
+        else if(nm.compare("swing_top_down") == 0)
+            Robot::Walking::GetInstance()->Z_SWAP_AMPLITUDE = value;
+        else if(nm.compare("pelvis_offset") == 0)
+            Robot::Walking::GetInstance()->PELVIS_OFFSET = value;
+        else if(nm.compare("arm_swing_gain") == 0)
+            Robot::Walking::GetInstance()->ARM_SWING_GAIN = value;
+        else if(nm.compare("balance_knee_gain") == 0)
+            Robot::Walking::GetInstance()->BALANCE_KNEE_GAIN = value;
+        else if(nm.compare("balance_ankle_pitch_gain") == 0)
+            Robot::Walking::GetInstance()->BALANCE_ANKLE_PITCH_GAIN = value;
+        else if(nm.compare("balance_hip_roll_gain") == 0)
+            Robot::Walking::GetInstance()->BALANCE_HIP_ROLL_GAIN = value;
+        else if(nm.compare("balance_ankle_roll_gain") == 0)
+            Robot::Walking::GetInstance()->BALANCE_ANKLE_ROLL_GAIN = value;
+        else if(nm.compare("p_gain") == 0)
+            Robot::Walking::GetInstance()->P_GAIN = (int)value;
+        else if(nm.compare("i_gain") == 0)
+            Robot::Walking::GetInstance()->I_GAIN = (int)value;
+        else if(nm.compare("d_gain") == 0)
+            Robot::Walking::GetInstance()->D_GAIN = (int)value;
+        else
+            debug << "DarwinWalk::setWalkParameters(): No matching parameter found" << endl;
+    }
 }
 
 /*! @brief Updates the walk engine with the current sensor data.

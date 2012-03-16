@@ -56,6 +56,12 @@ protected:
     DarwinPlatform* platform;
     Robot::CM730* cm730;
     DarwinJointMapping* m_joint_mapping;
+
+    vector<vector<int> > error_fields;      //! A vector of motor id/error field pairs
+    bool motor_error;                       //! A flag to indicate a motor indicated an error
+
+private:
+    static const unsigned int NUM_MOTORS=20;
 };
 
 #endif
