@@ -26,6 +26,7 @@ SET (YOUR_SRCS  BehaviourProvider.cpp BehaviourProvider.h
                 BehaviourFSMState.cpp BehaviourFSMState.h
                 BehaviourPotentials.h
                 Behaviour.cpp Behaviour.h
+                Potentials.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
