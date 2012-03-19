@@ -1,7 +1,9 @@
 #include "SelfLocalisationTests.h"
 #include "SelfLocalisation.h"
 #include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include <iostream>
+#include <QTime>
 
 bool RunTests()
 {
@@ -14,6 +16,91 @@ bool RunTests()
     std::cout << "Merge Test..." << (success ? "Success.":"Failed.") << std::endl;
     success = success && NscanTest();
     std::cout << "N-Scan Test..." << (success ? "Success.":"Failed.") << std::endl;
+    return success;
+}
+
+bool timingTest()
+{
+    Model theModel(0.0);
+    bool success = true;
+    const unsigned int total_updates = 100000;
+
+    // make the objects.
+    FieldObjects objects;
+    StationaryObject* leftYGoal = &objects.stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+    StationaryObject* rightYGoal = &objects.stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+
+    Vector3<float> left_measure(130,-0.19, 0);
+    Vector3<float> right_measure(161.92, -1.17, 0);
+    Vector3<float> empty_3f;
+    Vector2<float> empty_2f;
+    Vector2<int> empty_2i;
+
+    QTime seq_update;
+    QTime comb_update;
+
+    // add mesurement
+    leftYGoal->UpdateVisualObject(left_measure, empty_3f, empty_2f, empty_2i, empty_2i, 100.00f);
+    rightYGoal->UpdateVisualObject(right_measure, empty_3f, empty_2f, empty_2i, empty_2i, 100.00f);
+
+    Matrix initial_mean(3,1,false);
+    initial_mean[0][0] = 0;
+    initial_mean[1][0] = 0;
+    initial_mean[2][0] = 0;
+
+    Matrix initial_cov(3, 3, false);
+    initial_cov[0][0] = 150;
+    initial_cov[1][1] = 200;
+    initial_cov[2][2] = 6.5;
+
+    theModel.setMean(initial_mean);
+    theModel.setCovariance(initial_cov);
+
+    seq_update.start();
+    for (unsigned int i = 0; i < total_updates; ++i)
+    {
+        MeasurementError temp_error;
+        temp_error.setDistance(100 + 0.04 * pow(leftYGoal->estimatedDistance(),2));
+        temp_error.setHeading(0.01);
+        theModel.MeasurementUpdate(*leftYGoal, temp_error);
+
+        temp_error.setDistance(100 + 0.04 * pow(rightYGoal->estimatedDistance(),2));
+        temp_error.setHeading(0.01);
+        theModel.MeasurementUpdate(*rightYGoal, temp_error);
+    }
+    int seq_time = seq_update.elapsed();
+    std::cout << seq_time << std::endl;
+
+    theModel.setMean(initial_mean);
+    theModel.setCovariance(initial_cov);
+    comb_update.start();
+    for (unsigned int i = 0; i < total_updates; ++i)
+    {
+        const unsigned int num_objects = 2;
+        Matrix locations(4, 1, false);
+        Matrix measurements(4, 1, false);
+        Matrix R_measurement(4, 4, false);
+
+        locations[0][0] = leftYGoal->X();
+        locations[1][0] = leftYGoal->Y();
+        locations[2][0] = rightYGoal->X();
+        locations[3][0] = rightYGoal->Y();
+
+        measurements[0][0] = leftYGoal->measuredDistance();
+        measurements[1][0] = leftYGoal->measuredBearing();
+        measurements[2][0] = rightYGoal->measuredDistance();
+        measurements[3][0] = rightYGoal->measuredBearing();
+
+        R_measurement[0][0] = 100 + 0.04 * pow(leftYGoal->measuredDistance(), 2);
+        R_measurement[1][1] = 0.01;
+        R_measurement[2][2] = 100 + 0.04 * pow(rightYGoal->measuredDistance(), 2);
+        R_measurement[3][3] = 0.01;
+
+        theModel.MultipleObjectUpdate(locations, measurements, R_measurement);
+    }
+    int comb_time = comb_update.elapsed();
+    std::cout << comb_time << std::endl;
+
     return success;
 }
 
