@@ -51,7 +51,7 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
 
-#include "Kinematics/NAOInverseKinematics.h"
+#include "Kinematics/InverseKinematics.h"
 
 /*! @brief Constructor for motion module
  */
@@ -76,7 +76,10 @@ NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
     m_next_arm_provider = 0;
     m_next_leg_provider = 0;
     
-    m_ik = new NAOInverseKinematics();
+    DarwinInverseKinematics* darwinModel = new DarwinInverseKinematics();
+    darwinModel->test();
+    delete darwinModel;
+    m_ik = InverseKinematics::getInverseKinematicModel();
     
     #ifdef USE_HEAD
         m_head = new NUHead(m_data, m_actions);
@@ -114,6 +117,7 @@ NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
     m_next_head_provider = m_current_head_provider;
     m_next_arm_provider = m_current_arm_provider;
     m_next_leg_provider = m_current_leg_provider;
+
 }
 
 /*! @brief Destructor for motion module

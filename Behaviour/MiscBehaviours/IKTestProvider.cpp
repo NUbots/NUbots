@@ -33,12 +33,12 @@
 #include "debugverbositybehaviour.h"
 #include "Kinematics/Ik_squat.h"
 #include "Kinematics/Ik_hula.h"
-#include "Kinematics/NAOInverseKinematics.h"
+#include "Kinematics/InverseKinematics.h"
 using namespace std;
 
 IKTestProvider::IKTestProvider(Behaviour* manager) : BehaviourProvider(manager),m_current_ik_motion(NULL)
 {
-    m_ik = new NAOInverseKinematics();
+    m_ik = InverseKinematics::getInverseKinematicModel();
     m_sequence_count = 0;
 }
 
@@ -83,7 +83,7 @@ void IKTestProvider::doBehaviour()
 //        temp->initialiseTiming(Blackboard->Sensors->CurrentTime, 4000, 0);
 //        temp->initialiseSquat(200, 100, 0.5, 200);
 
-        const unsigned int total_steps = 6;
+        const unsigned int total_steps = 3;
         unsigned int current_step = m_sequence_count % total_steps;
         switch (current_step)
         {
@@ -91,7 +91,7 @@ void IKTestProvider::doBehaviour()
             {
                 Ik_squat* temp = new Ik_squat();
                 temp->initialiseTiming(Blackboard->Sensors->CurrentTime, 3000, 5);
-                temp->initialiseSquat(200, 100, 200, 0.5);
+                temp->initialiseSquat(150, 100, 75, 0.0);
                 m_current_ik_motion = temp;
             }
             break;
@@ -99,8 +99,8 @@ void IKTestProvider::doBehaviour()
         case 1:
             {
             Ik_hula* temp = new Ik_hula();
-            temp->initialiseTiming(Blackboard->Sensors->CurrentTime, 2000, 3);
-            temp->initialiseHula(170, 150, 0.5, 50);
+            temp->initialiseTiming(Blackboard->Sensors->CurrentTime, 4000, 3);
+            temp->initialiseHula(160, 80, 0.5, 25);
             m_current_ik_motion = temp;
             }
             break;
@@ -109,7 +109,7 @@ void IKTestProvider::doBehaviour()
             {
             Ik_squat* temp = new Ik_squat();
             temp->initialiseTiming(Blackboard->Sensors->CurrentTime, 2000, 5);
-            temp->initialiseSquat(200, 100, 100, 0);
+            temp->initialiseSquat(160, 80, 100, 0);
             m_current_ik_motion = temp;
             }
             break;
@@ -118,7 +118,7 @@ void IKTestProvider::doBehaviour()
             {
             Ik_hula* temp = new Ik_hula();
             temp->initialiseTiming(Blackboard->Sensors->CurrentTime, 1500, 3);
-            temp->initialiseHula(170, 100, 0.0, 40);
+            temp->initialiseHula(160, 80, 0.0, 40);
             m_current_ik_motion = temp;
             }
             break;
@@ -127,7 +127,7 @@ void IKTestProvider::doBehaviour()
             {
             Ik_hula* temp = new Ik_hula();
             temp->initialiseTiming(Blackboard->Sensors->CurrentTime, 1500, 3);
-            temp->initialiseHula(110, 250, 0.0, 40);
+            temp->initialiseHula(110, 130, 0.0, 40);
             m_current_ik_motion = temp;
             }
             break;
@@ -136,7 +136,7 @@ void IKTestProvider::doBehaviour()
              {
                  Ik_squat* temp = new Ik_squat();
                  temp->initialiseTiming(Blackboard->Sensors->CurrentTime, 3000, 5);
-                 temp->initialiseSquat(150, 100, 300, 1.5);
+                 temp->initialiseSquat(150, 100, 200, 1.5);
                  m_current_ik_motion = temp;
              }
              break;
@@ -151,6 +151,8 @@ void IKTestProvider::doBehaviour()
 
         actions->add(NUActionatorsData::LLeg, m_data->CurrentTime + 1000, left_leg_joints, 75);
         actions->add(NUActionatorsData::RLeg, m_data->CurrentTime + 1000, right_leg_joints, 75);
+        debug << "Left leg target:" << std::endl << left_leg_joints << std::endl;
+        debug << "Right leg target:" << std::endl << right_leg_joints << std::endl;
 
     }
 
@@ -231,9 +233,10 @@ bool IKTestProvider::inPosition()
     l_leg_targets.assign(l_leg_start, r_leg_start);
     r_leg_targets.assign(r_leg_start, target_joints.end());
 
-
     m_data->getPosition(NUSensorsData::LLeg, l_leg_positions);
     m_data->getPosition(NUSensorsData::RLeg, r_leg_positions);
 
-    return mathGeneral::allEqual(l_leg_positions, l_leg_targets, 0.1f) and mathGeneral::allEqual(r_leg_positions, r_leg_targets, 0.1f);
+    bool in_position = mathGeneral::allEqual(l_leg_positions, l_leg_targets, 0.15f) and mathGeneral::allEqual(r_leg_positions, r_leg_targets, 0.15f);
+    debug << (in_position?"In":"Not in") << " position." << std::endl;
+    return in_position;
 }

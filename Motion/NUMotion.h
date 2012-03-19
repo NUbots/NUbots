@@ -31,7 +31,7 @@ class JobList;
 class MotionKillJob;
 class MotionFreezeJob;
 class NUMotionProvider;
-class NAOInverseKinematics;
+class NUInverseKinematics;
 
 #include "motionconfig.h"
 #ifdef USE_HEAD
@@ -106,7 +106,7 @@ private:
     #ifdef USE_SCRIPT
         Script* m_script;                   //!< the script module
     #endif
-    NAOInverseKinematics* m_ik;
+    NUInverseKinematics* m_ik;
     
     double m_current_time;              //!< the current time (ms)
     double m_previous_time;             //!< the previous time (ms)

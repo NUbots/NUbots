@@ -65,7 +65,7 @@ class NUInverseKinematics;
 
 NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions, NUInverseKinematics* ik)
 {
-    return new WalkingEngine(data, actions, ik);
+    //return new WalkingEngine(data, actions, ik);
     #ifdef USE_JWALK
         return new JWalk();
     #endif
