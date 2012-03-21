@@ -231,7 +231,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     obstacle_objects = getObjectsFromCandidates(obstacle_candidates);
 
     //insert obstacles as ambiguous objects
-    //AllFieldObjects->ambiguousFieldObjects.insert(AllFieldObjects->ambiguousFieldObjects.end(), obstacle_objects.begin(), obstacle_objects.end());
+    AllFieldObjects->ambiguousFieldObjects.insert(AllFieldObjects->ambiguousFieldObjects.end(), obstacle_objects.begin(), obstacle_objects.end());
 
 
     #if DEBUG_VISION_VERBOSITY > 7

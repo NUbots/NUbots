@@ -34,6 +34,10 @@
 #define DARWINWALK_H
 #include <vector>
 #include "Motion/NUWalk.h"
+//From Darwin Library:
+#include "minIni.h"
+
+#define WALKING_SECTION "Walking Config"
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -47,6 +51,9 @@ public:
     DarwinWalk(NUSensorsData* data, NUActionatorsData* actions);
     ~DarwinWalk();
     void doWalk();
+    void setWalkParameters(const WalkParameters& walkparameters);
+    void writeParameters();
+
 protected:
     void setDarwinSensor(int id,float joint);
     float getTarget(int id);
@@ -54,6 +61,9 @@ protected:
     void updateWalkEngineSensorData();
     DarwinJointMapping* m_joint_mapping;
     std::vector<int> m_darwin_ids;
+
+private:
+    minIni* ini;
 };
 
 #endif
