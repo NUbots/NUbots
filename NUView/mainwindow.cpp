@@ -862,6 +862,8 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
 QMdiSubWindow* MainWindow::createLUTGlDisplay()
 {
     LUTGlDisplay* temp = new LUTGlDisplay(this, &glManager);
+    unsigned char* lut = virtualRobot.getLUT();
+    temp->SetLUT(lut);
     connect(&virtualRobot,SIGNAL(LUTChanged(unsigned char*)),temp,SLOT(SetLUT(unsigned char*)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
