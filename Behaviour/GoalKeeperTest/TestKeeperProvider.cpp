@@ -50,7 +50,7 @@ TestKeeperProvider::TestKeeperProvider(Behaviour* manager) : BehaviourProvider(m
 }
 
 
-TestKeeperProvider::~GoalKeeperProvider()
+TestKeeperProvider::~TestKeeperProvider()
 {
 }
 
@@ -60,7 +60,6 @@ void TestKeeperProvider::doBehaviour()
     //while (m_game_info->getCurrentState() != GameInformation::PlayingState)
     //    m_game_info->doManualStateChange();
     
-    HeadBehaviour* head = HeadBehaviour::getInstance();
     Self& self = m_field_objects->self;
     MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
     
