@@ -3,7 +3,8 @@
 #include <QMouseEvent>
 #include <qclipboard.h>
 #include <QApplication>
-#include <glu.h>
+//#include <glu.h>
+#include <GL/glu.h>
 #include "Tools/Math/General.h"
 #include "Localisation/Localisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
