@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <qclipboard.h>
 #include <QApplication>
+#include <glu.h>
 #include "Tools/Math/General.h"
 #include "Tools/FileFormats/LUTTools.h"
 
@@ -180,6 +181,7 @@ void LUTGlDisplay::initializeGL()
 
 void LUTGlDisplay::paintGL()
 {
+    makeCurrent();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);         // Clear The Screen And The Depth Buffer
     glLoadIdentity();						// Reset The Current Modelview Matrix
 
