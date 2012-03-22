@@ -28,7 +28,7 @@ SET( NUBOT_USE_MOTION_WALK
 	CACHE BOOL
     "Set to ON to use walk, set to OFF to have no walk")
 SET( NUBOT_USE_MOTION_KICK
-	OFF 
+	ON 
 	CACHE BOOL
     "Set to ON to use kick, set to OFF to not have kick")
 SET( NUBOT_USE_MOTION_BLOCK
