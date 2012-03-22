@@ -37,11 +37,9 @@ namespace Joint
         LShoulderRoll,
         LShoulderPitch,
         LElbowRoll,
-        LElbowYaw,
         RShoulderRoll,
         RShoulderPitch,
         RElbowRoll,
-        RElbowYaw,
         LHipRoll,
         LHipPitch,
         LHipYaw,
@@ -58,32 +56,31 @@ namespace Joint
     };
 }
 
-class ForwardKinematic
+class DarwinForwardKinematic
 {
 public:
   static void calculateArmChain(bool left, const std::vector<float>& joints, const MassCalibration& massCalibration, Pose3D limbs[MassCalibration::numOfLimbs])
   {
-    Vector3<> armOffset(0, 98,185);
-    float yElbowShoulder = 15;
-    float upperArmLength = 105;
+    const Vector3<> armOffset(0, 82.0,122.2);
+    const float zElbowShoulder = 16;
+    const float xShoulderPitchRoll = 16;
+    const float upperArmLength = 60;
 
     int sign = left ? -1 : 1;
-    float joint0, joint1, joint2, joint3;
+    float joint0, joint1, joint2;
     // Since the joint ordering is different simplest way is to directly index.
     if(left)
     {
         // set computed joints in jointData
         joint0 = joints[Joint::LShoulderPitch];
         joint1 = joints[Joint::LShoulderRoll];
-        joint2 = joints[Joint::LElbowYaw];
-        joint3 = joints[Joint::LElbowRoll];
+        joint2 = joints[Joint::LElbowRoll];
     }
     else
     {
         joint0 = joints[Joint::RShoulderPitch];
         joint1 = joints[Joint::RShoulderRoll];
-        joint2 = joints[Joint::RElbowYaw];
-        joint3 = joints[Joint::RElbowRoll];
+        joint2 = joints[Joint::RElbowRoll];
     }
 
     MassCalibration::Limb shoulder = left ? MassCalibration::shoulderLeft : MassCalibration::shoulderRight;
@@ -91,19 +88,23 @@ public:
     limbs[shoulder + 0] = Pose3D( armOffset.x, armOffset.y * -sign, armOffset.z)
                           .rotateY(joint0);
     limbs[shoulder + 1] = Pose3D(limbs[shoulder + 0])
+                          .translate(xShoulderPitchRoll, 0.f, 0.f)
                           .rotateZ(joint1);
-    limbs[shoulder + 2] = Pose3D(limbs[shoulder + 1])
-                          .translate(upperArmLength, yElbowShoulder * -sign, 0)
+    // Skip extra joint not valid on the darwin.
+    limbs[shoulder + 3] = Pose3D(limbs[shoulder + 1])
+                          .translate(upperArmLength, 0, zElbowShoulder)
                           .rotateX(joint2);
-    limbs[shoulder + 3] = Pose3D(limbs[shoulder + 2])
-                          .rotateZ(joint3);
+
   }
 
   static void calculateLegChain(bool left, const std::vector<float>& joints, const MassCalibration& massCalibration, Pose3D limbs[MassCalibration::numOfLimbs])
   {
-    float lengthBetweenLegs = 100;
-    float upperLegLength = 100;
-    float lowerLegLength = 102.9; // 102.75 / 102.74
+    float lengthBetweenLegs = 74.0f;
+    Vector3<> legOffset(-0.5, lengthBetweenLegs / 2.0f,0);
+
+    float upperLegLength = 93.0;
+    float lowerLegLength = 93.0;
+
 
     int sign = left ? -1 : 1;
     float joint0, joint1, joint2, joint3, joint4, joint5;
@@ -112,7 +113,7 @@ public:
     if(left)
     {
         // set computed joints in jointData
-        joint0 = joints[Joint::LHipYawPitch];
+        joint0 = joints[Joint::LHipYaw];
         joint1 = -joints[Joint::LHipRoll];
         joint2 = joints[Joint::LHipPitch];
         joint3 = joints[Joint::LKneePitch];
@@ -121,7 +122,7 @@ public:
     }
     else
     {
-        joint0 = joints[Joint::RHipYawPitch];
+        joint0 = joints[Joint::RHipYaw];
         joint1 = joints[Joint::RHipRoll];
         joint2 = joints[Joint::RHipPitch];
         joint3 = joints[Joint::RKneePitch];
@@ -131,10 +132,8 @@ public:
 
     MassCalibration::Limb pelvis = left ? MassCalibration::pelvisLeft : MassCalibration::pelvisRight;
 
-    limbs[pelvis + 0] =  Pose3D(0, lengthBetweenLegs / 2.0f * -sign, 0)
-                         .rotateX(-mathGeneral::PI/4.0f * sign)
-                         .rotateZ(joint0 * sign)
-                         .rotateX(mathGeneral::PI/4.0f * sign);
+    limbs[pelvis + 0] =  Pose3D(legOffset.x, legOffset.y * -sign, legOffset.z)
+                         .rotateZ(joint0 * sign);
     limbs[pelvis + 1] = Pose3D(limbs[pelvis + 0])
                         .rotateX(joint1*sign);
     limbs[pelvis + 2] = Pose3D(limbs[pelvis + 1])
@@ -151,7 +150,7 @@ public:
 
   static void calculateHeadChain(const std::vector<float>& joints, const MassCalibration& massCalibration, Pose3D limbs[MassCalibration::numOfLimbs])
   {
-    float zLegJoint1ToHeadPan = 211.5;
+    float zLegJoint1ToHeadPan = 172.7f;
     limbs[MassCalibration::neck] = Pose3D(0, 0, zLegJoint1ToHeadPan)
                                    .rotateZ(joints[Joint::HeadYaw]);
     limbs[MassCalibration::head] = Pose3D(limbs[MassCalibration::neck])
