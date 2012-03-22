@@ -40,6 +40,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 #include "Tools/Math/StlVector.h"
+#include "Tools/Math/Vector2.h"
 #include "Tools/Math/General.h"
 
 using namespace std;
@@ -47,6 +48,7 @@ using namespace std;
 TestKeeperProvider::TestKeeperProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
     m_block_time = Blackboard->Sensors->GetTimestamp();
+    //m_script = MotionScript("SaveLeft");
 }
 
 
@@ -57,22 +59,18 @@ TestKeeperProvider::~TestKeeperProvider()
 void TestKeeperProvider::doBehaviour()
 {
     // hack it, and put the GameState into Playing
-    //while (m_game_info->getCurrentState() != GameInformation::PlayingState)
-    //    m_game_info->doManualStateChange();
+    while (m_game_info->getCurrentState() != GameInformation::PlayingState)
+        m_game_info->doManualStateChange();
     
-    Self& self = m_field_objects->self;
-    MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+    //Self& self = m_field_objects->self;
+    MobileObject& ball = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL];
     
-    //handle our simple state transitions
-    float turnamount,moveX,moveY,moveMagnitude;
 	
 	// do the head motion (track ball if visible, pan if not)
 	if (ball.isObjectVisible())
 	{   // track the ball if it is visible
 		m_jobs->addMotionJob(new HeadTrackJob(ball));
-		if (Blackboard->Sensors->GetTimestamp() > m_block_time and doSave()) {
-			;
-		}
+		doSave();
 	}
 	else if (ball.TimeSinceLastSeen() > 250 and ball.TimeSinceLastSeen() < 3000)
 	{   // pan for the ball if it hasn't been seen for a bit
@@ -81,8 +79,7 @@ void TestKeeperProvider::doBehaviour()
 	else
 		m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
 	
-
-	if (ball.TimeLastSeen() < m_block_time+8000 and Blackboard->Sensors->GetTimestamp() > m_block_time) {
+    if (Blackboard->Sensors->GetTimestamp() > m_block_time) {
 		Blackboard->Jobs->addMotionJob(new WalkJob(0.01,0,0));
 	}
 }
@@ -90,14 +87,22 @@ void TestKeeperProvider::doBehaviour()
 
 bool TestKeeperProvider::doSave(float maxInterceptTime,float interceptErrorFraction) {
     
-    Self& self = m_field_objects->self;
-    MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+    Self& self = Blackboard->Objects->self;
+    MobileObject& ball = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL];
     
     
     //get the relative Y intercept of the object to me (0,0)
     // (ie how far to either side the ball will go)
     Vector2<float> ballVelocity = ball.getEstimatedVelocity();
+    Vector2<float> ballVelocityError = ball.getEstimatedVelocityError();
     Vector2<float> ballPosition = ball.getEstimatedFieldLocation(); 
+    Vector2<float> ballPositionError = ball.getEstimatedFieldLocationError();
+    //cout << "Ball Position: " << self.wmX() << ", " << self.wmY() << endl;
+    
+    float velocityErrorMagnitude = sqrt(ballVelocityError.x*ballVelocityError.x+ballVelocityError.y*ballVelocityError.y);
+    float velocityMagnitude = sqrt(ballVelocity.x*ballVelocityError.x+ballVelocityError.y*ballVelocityError.y);
+    float positionErrorMagnitude = sqrt(ballPositionError.x*ballPositionError.x+ballPositionError.y*ballPositionError.y);
+    float positionMagnitude = sqrt(ballPosition.x*ballPosition.x+ballPosition.y*ballPosition.y);
     
     //transform from worldspace to robot space
     Vector2<float> relativeBallPosition;
@@ -109,9 +114,11 @@ bool TestKeeperProvider::doSave(float maxInterceptTime,float interceptErrorFract
     relativeBallVelocity.y = ballVelocity.x*sin(self.Heading())+ballVelocity.y*cos(self.Heading());
     
     //cout << "Relative X pos: " << relativeBallPosition.x << ", Relative X vel: " << relativeBallVelocity.x << endl;
+    //cout << velocityErrorMagnitude << " position:" << positionErrorMagnitude << endl;
+    
     
     //check the ball is heading towards us
-    if (relativeBallPosition.x > 0. and relativeBallVelocity.x < 0.) {
+    if (relativeBallPosition.x > 0. and relativeBallVelocity.x < 0. and ball.TimeSeen() > 500) {
         
         //calculate intercept time
         float interceptTime = relativeBallPosition.x/(-relativeBallVelocity.x);
@@ -123,11 +130,13 @@ bool TestKeeperProvider::doSave(float maxInterceptTime,float interceptErrorFract
         
         //XXX: parameterize defensive area size - this is set to goalsize (*errorFraction for uncertainty)
         float defensiveArea = 150.;
-        if (interceptTime < maxInterceptTime and fabs(interceptY) < defensiveArea*(1.+interceptErrorFraction)/2.) {
+        if (interceptTime < maxInterceptTime and interceptTime > 2.5 and fabs(interceptY) < defensiveArea*(1.+interceptErrorFraction)/2.) {
             
             //we have decided we should intercept, now check what move to use
             float standingBlockHalfSize = 12.5; //width of the robot on the half it is defending
             float standingSideBlockHalfSize = 18.; //width of the robot on the half it is defending
+
+            cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << endl;
             
             string blockSide;
             if (interceptY > 0) {
@@ -145,10 +154,11 @@ bool TestKeeperProvider::doSave(float maxInterceptTime,float interceptErrorFract
                 blockType = "DiveBlock";
             }
             
-            cout << "Saving!" << endl;
-            ScriptJob* currentSave = new ScriptJob(m_data->CurrentTime+10, "SaveLeft"); //blockType+blockSide);
+            //cout << "Saving!" << endl;
+            ScriptJob* currentSave = new ScriptJob(m_data->CurrentTime+10, "Save"+blockSide); //blockType+blockSide);
+            //m_script.play(m_data,m_actions);
             m_jobs->addMotionJob(currentSave);
-            m_block_time = currentSave->getTime() + 2000;
+            m_block_time = Blackboard->Sensors->GetTimestamp()+1000;
             return true;
         }
     }

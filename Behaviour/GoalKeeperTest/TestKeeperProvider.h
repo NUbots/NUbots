@@ -27,6 +27,7 @@
 #define TESTKEEPER_PROVIDER_H
 
 #include "../BehaviourProvider.h"
+#include "Motion/Tools/MotionScript.h"
 
 class TestKeeperProvider : public BehaviourProvider
 {
@@ -38,8 +39,9 @@ protected:
 
 private:
     
-    float m_block_time;
-    bool doSave(float maxInterceptTime=18,float interceptErrorFraction=0.5);
+    float m_block_time,m_walk_time;
+    MotionScript m_script;
+    bool doSave(float maxInterceptTime=7,float interceptErrorFraction=0.5);
 };
 
 
