@@ -39,7 +39,7 @@ protected:
 
 private:
     
-    float m_block_time;
+    float m_block_time,m_walk_time;
     MotionScript m_script;
     bool doSave(float maxInterceptTime=7,float interceptErrorFraction=0.5);
 };
