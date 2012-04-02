@@ -55,10 +55,6 @@ IF(NUBOT_USE_MOTION_WALK_DARWINWALK)
 	LIST(APPEND YOUR_DIRS DarwinWalk)
 ENDIF()
 
-## !!! WARNING HACK BELOW !!!
-LIST(APPEND YOUR_DIRS BWalk)
-## !!! END HACK !!!
-
 ####################################################################################
 
 # Now I need to append each element to NUBOT_SRCS
