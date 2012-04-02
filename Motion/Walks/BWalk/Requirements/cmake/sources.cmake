@@ -27,6 +27,7 @@ Vector.h
 Pose2D.h Pose2D.cpp
 RotationMatrix.h RotationMatrix.cpp
 RobotModel.cpp RobotModel.h
+MassCalibration.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
