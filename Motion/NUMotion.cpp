@@ -76,9 +76,6 @@ NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
     m_next_arm_provider = 0;
     m_next_leg_provider = 0;
     
-    DarwinInverseKinematics* darwinModel = new DarwinInverseKinematics();
-    darwinModel->test();
-    delete darwinModel;
     m_ik = InverseKinematics::getInverseKinematicModel();
     
     #ifdef USE_HEAD
