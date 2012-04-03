@@ -97,6 +97,14 @@ Localisation::Localisation(const Localisation& source): TimestampedData()
     *this = source;
 }
 
+Localisation::~Localisation()
+{
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
+    debug_file.close();
+    m_prevSharedBalls.clear();
+    m_gps.clear();
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
+}
 
 void Localisation::writeLog()
 {
@@ -131,15 +139,6 @@ Localisation& Localisation::operator=(const Localisation& source)
     // by convention, always return *this
     return *this;
 }
-
-
-Localisation::~Localisation()
-{
-    #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_file.close();
-    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
-}
-
 
 //--------------------------------- MAIN FUNCTIONS  ---------------------------------//
 
