@@ -35,6 +35,9 @@ public:
     SelfModel(float time);
     SelfModel(const SelfModel& source);
     SelfModel(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, float time);
+    virtual ~SelfModel()
+    {
+    }
 
     Matrix CalculateMeasurementPrediction(float xLocation, float yLocation) const;
     Matrix CalculateMeasurementPrediction(float xLocation, float yLocation, float orientation) const;

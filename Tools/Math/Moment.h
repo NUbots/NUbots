@@ -14,6 +14,10 @@ public:
     Moment();
     Moment(unsigned int numStates);
     Moment(const Moment& source);
+    virtual ~Moment()
+    {
+    }
+
     float mean(unsigned int stateNumber) const;
     Matrix mean() const;
     float sd(unsigned int stateNumber) const;

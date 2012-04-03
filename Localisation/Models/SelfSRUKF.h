@@ -13,6 +13,9 @@ public:
     SelfSRUKF(double time);
     SelfSRUKF(const SelfModel& source);
     SelfSRUKF(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time);
+    virtual ~SelfSRUKF()
+    {
+    }
 
     void InitialiseCachedValues();
 
