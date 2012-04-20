@@ -191,7 +191,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/LocalisationSettings.h \
     ../Tools/KFTools.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
-    ../Tools/Math/statistics.h
+    ../Tools/Math/statistics.h \
+    OfflineLocBatch.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -326,7 +327,8 @@ SOURCES += mainwindow.cpp \
     ../Localisation/LocalisationSettings.cpp \
     ../Tools/KFTools.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
-    ../Tools/Math/statistics.cpp
+    ../Tools/Math/statistics.cpp \
+    OfflineLocBatch.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

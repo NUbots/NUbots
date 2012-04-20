@@ -30,10 +30,10 @@ public:
     BranchMethod branchMethod() const {return m_branching_method;}
     void setPruneMethod(PruneMethod newMethod){m_pruning_method = newMethod;}
     void setBranchMethod(BranchMethod newMethod){m_branching_method = newMethod;}
-    std::string branchMethodString(){return branchMethodString(m_branching_method);}
-    std::string pruneMethodString(){return pruneMethodString(m_pruning_method);}
-    std::string branchMethodString(BranchMethod);
-    std::string pruneMethodString(PruneMethod);
+    std::string branchMethodString() const {return branchMethodString(m_branching_method);}
+    std::string pruneMethodString() const {return pruneMethodString(m_pruning_method);}
+    std::string branchMethodString(BranchMethod) const;
+    std::string pruneMethodString(PruneMethod) const;
 protected:
     PruneMethod m_pruning_method;
     BranchMethod m_branching_method;

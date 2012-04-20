@@ -27,6 +27,7 @@ public:
     void Initialise(const Localisation& intialState);
     bool OpenLogs(const std::string& intialLogPath);
     bool Run();
+    bool Running() {return m_running;}
     bool WriteLog(const std::string& logPath);
     bool WriteReport(const std::string& reportPath);
     bool WriteXML(const std::string& xmlPath);
@@ -39,6 +40,7 @@ public:
     bool IsInitialised();
     void run();
     void stop(){m_stop_called = true;}
+
     bool wasStopped(){return m_stop_called;}
     bool hasSimData(){return m_sim_data_available;}
     bool HasRequiredData(QStringList& availableData);
@@ -60,9 +62,11 @@ private:
     LocalisationSettings m_settings;
     unsigned int m_num_models_created;
     float m_experiment_run_time;
+    bool m_running;
 
 signals:
     void SimDataChanged(bool);
+    void ProcessingComplete(QString path);
     void updateProgress(int,int);
 };
 

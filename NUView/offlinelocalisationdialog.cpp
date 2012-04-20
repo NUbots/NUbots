@@ -15,6 +15,8 @@
 #include "FileAccess/LogFileReader.h"
 #include "OfflineLocalisationSettingsDialog.h"
 
+#include "OfflineLocBatch.h"
+
 OfflineLocalisationDialog::OfflineLocalisationDialog(QWidget *parent) :
     QDialog(parent)
 {
@@ -22,6 +24,7 @@ OfflineLocalisationDialog::OfflineLocalisationDialog(QWidget *parent) :
     m_external_reader = false;
     m_offline_loc = new OfflineLocalisation(m_reader);
     m_previous_log_path = "";
+    m_batch_processsor = new OfflineLocBatch(this);
     MakeLayout();
 }
 
@@ -30,12 +33,15 @@ OfflineLocalisationDialog::OfflineLocalisationDialog(LogFileReader* reader, QWid
     m_reader = reader;
     m_external_reader = true;
     m_offline_loc = new OfflineLocalisation(m_reader);
+    m_previous_log_path = "";
+    m_batch_processsor = new OfflineLocBatch(this);
     MakeLayout();
 }
 
 OfflineLocalisationDialog::~OfflineLocalisationDialog()
 {
     if(m_offline_loc) delete m_offline_loc;
+    delete m_batch_processsor;
 }
 
 void OfflineLocalisationDialog::MakeLayout()
@@ -47,6 +53,11 @@ void OfflineLocalisationDialog::MakeLayout()
     QPushButton *openFileButton = new QPushButton("&Open Log...");
     connect(openFileButton,SIGNAL(clicked()), this, SLOT(OpenLogFiles()));
     buttonsLayout->addWidget(openFileButton);
+
+    QPushButton *batchButton = new QPushButton("Batch...");
+    batchButton->setEnabled(true);
+    connect(batchButton,SIGNAL(clicked()), this, SLOT(BeginBatch()));
+    buttonsLayout->addWidget(batchButton);
 
     QPushButton *settingsButton = new QPushButton("Settings...");
     settingsButton->setEnabled(true);
@@ -95,6 +106,9 @@ void OfflineLocalisationDialog::MakeLayout()
     m_progressBar->setMinimumDuration(100);
     connect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
     connect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
+    connect(m_batch_processsor, SIGNAL(ProgressChanged(int,int)), this, SLOT(DiplayProgress(int,int)));
+    connect(m_batch_processsor, SIGNAL(ProcessingComplete()), this, SLOT(CompleteSimulation()));
+    connect(m_batch_processsor, SIGNAL(StatusChanged(QString)), m_progressBar, SLOT(setLabelText(QString)));
     connect(m_progressBar, SIGNAL(canceled()), this, SLOT(CancelProgress()));
 
     connect(m_reader, SIGNAL(OpenLogFilesChanged(std::vector<QFileInfo>)), this, SLOT(SetOpenFileList(std::vector<QFileInfo>)));
@@ -187,12 +201,64 @@ void OfflineLocalisationDialog::ValidateData(bool available)
     }
 }
 
+void OfflineLocalisationDialog::BeginBatch()
+{
+    connect(this, SIGNAL(PostBatchJob(QStringList)), m_batch_processsor, SLOT(ProcessFiles(QStringList)));
+    QString initial_path = ".";         // Default path.
+    if(!m_previous_log_path.isEmpty())
+    {
+        initial_path = m_previous_log_path;
+    }
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),initial_path);
+    if(dir.isEmpty())
+    {
+        return;
+    }
+    m_previous_log_path = dir;
+
+    QStringList log_paths = GetLogPaths(QDir(dir));  // get the paths with log files in them
+    qDebug() << log_paths;
+    m_progressBar->setRange(0, 0);
+    m_progressBar->setValue(0);
+    m_progressBar->setAutoClose(false);
+    m_progressBar->reset();
+    emit PostBatchJob(log_paths);
+}
+
+QStringList OfflineLocalisationDialog::GetLogPaths(const QDir& directory)
+{
+    QStringList name_filter;
+    name_filter << "*.strm";
+    QStringList good_dirs;
+    QStringList sub_dirs = directory.entryList(QDir::AllDirs| QDir::NoDotAndDotDot);
+    for(QStringList::Iterator str = sub_dirs.begin(); str != sub_dirs.end(); ++str)
+    {
+        QString curr_sub_dir = *str;
+        QDir dir(directory);
+        if(dir.cd(curr_sub_dir))
+        {
+            QStringList log_files = dir.entryList(name_filter);
+            if(!log_files.empty())
+            {
+                good_dirs << dir.path();
+            }
+            good_dirs << GetLogPaths(dir);
+        }
+        else
+        {
+            qDebug() << "ERROR CHANGING DIRECTORY.";
+        }
+    }
+    return good_dirs;
+}
+
 void OfflineLocalisationDialog::BeginSimulation()
 {
     if(m_offline_loc->isRunning()) return;
     m_progressBar->setRange(0, m_offline_loc->NumberOfLogFrames());
     m_progressBar->setValue(0);
-
+    m_progressBar->setAutoClose(true);
+    m_progressBar->reset();
 //    m_progressBar = new QProgressDialog("Runing localisation...","Cancel",0, m_offline_loc->NumberOfLogFrames(),this);
 //    m_progressBar->setWindowModality(Qt::WindowModal);
 //    m_progressBar->setValue(0);
@@ -207,6 +273,8 @@ void OfflineLocalisationDialog::BeginSimulation()
 
 void OfflineLocalisationDialog::CompleteSimulation()
 {
+    m_progressBar->close();
+
 //    disconnect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
 //    disconnect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
     //delete m_progressBar;
@@ -215,17 +283,50 @@ void OfflineLocalisationDialog::CompleteSimulation()
 
 void OfflineLocalisationDialog::DiplayProgress(int frame, int total)
 {
-    if(m_progressBar && !m_offline_loc->wasStopped())
+
+    if(m_progressBar->wasCanceled()) return;
+
+    // set correct maximum if it is not correct.
+    if(m_progressBar and (m_progressBar->maximum() != total))
     {
-        QString labelText = QString("Running Localisation... Frame %1 of %2").arg(frame).arg(total);
+        m_progressBar->setMaximum(total);
+    }
+
+    QString labelText;
+    bool display = false;
+    // update for single experiment
+    if(m_progressBar and m_offline_loc->isRunning())
+    {
+        display = true;
+        labelText = QString("Running Localisation...");
+    }
+    // update for batch experiment.
+    else if (m_progressBar and m_batch_processsor->isRunning())
+    {
+        display = true;
+        labelText = QString("Running Localisation...\n %1").arg( m_batch_processsor->statusMessage());
+    }
+    if(display)
+    {
+        if(total != 0)
+        {
+            labelText.append(QString("\nFrame %1 of %2").arg(frame).arg(total));
+        }
         m_progressBar->setLabelText(labelText);
         m_progressBar->setValue(frame);
+
+        // Busy bars do not auto display.
+        if(total == 0)
+        {
+            m_progressBar->show();
+        }
     }
 }
 
 void OfflineLocalisationDialog::CancelProgress()
 {
     if(m_offline_loc->isRunning()) m_offline_loc->stop();
+    if(m_batch_processsor->isRunning()) m_batch_processsor->StopProcessing();
 }
 
 void OfflineLocalisationDialog::SetFrame(int frameNumber, int total)

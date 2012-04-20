@@ -11,7 +11,7 @@ LocalisationSettings::LocalisationSettings(const LocalisationSettings& source)
     return;
 }
 
-std::string LocalisationSettings::branchMethodString(BranchMethod method)
+std::string LocalisationSettings::branchMethodString(BranchMethod method) const
 {
     std::string result;
     switch(method)
@@ -22,6 +22,12 @@ std::string LocalisationSettings::branchMethodString(BranchMethod method)
     case branch_selective:
         result = "selective";
         break;
+    case branch_constraint:
+        result = "constraint";
+        break;
+    case branch_probDataAssoc:
+        result = "probabalistic data association";
+        break;
     default:
         result = "unknown";
         break;
@@ -29,7 +35,7 @@ std::string LocalisationSettings::branchMethodString(BranchMethod method)
     return result;
 }
 
-std::string LocalisationSettings::pruneMethodString(PruneMethod method)
+std::string LocalisationSettings::pruneMethodString(PruneMethod method) const
 {
     std::string result;
 

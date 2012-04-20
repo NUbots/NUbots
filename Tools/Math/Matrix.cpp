@@ -52,7 +52,8 @@ Matrix::Matrix(const Matrix& a)
 // Destructor
 Matrix::~Matrix()
 {
-	delete [] X; X = 0;
+    //std::cout << ""
+    delete [] X; X = 0;
 }
 
 // Matrix Index Operator

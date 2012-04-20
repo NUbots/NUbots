@@ -1,5 +1,6 @@
 #include "OfflineLocalisationSettingsDialog.h"
 #include "ui_OfflineLocalisationSettingsDialog.h"
+#include <iostream>
 
 OfflineLocalisationSettingsDialog::OfflineLocalisationSettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -126,7 +127,7 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
     {
         result.setPruneMethod(LocalisationSettings::prune_merge);
     }
-    else if (prune_text.compare("likelyhood", Qt::CaseInsensitive) == 0)
+    else if (prune_text.compare("max likelyhood", Qt::CaseInsensitive) == 0)
     {
         result.setPruneMethod((LocalisationSettings::prune_max_likelyhood));
     }

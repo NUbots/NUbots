@@ -23,7 +23,7 @@ class NUSensorsData;
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
 
-#define LOC_SUMMARY 3
+//#define LOC_SUMMARY 3
 
 typedef SelfSRUKF Model;
 //typedef SelfUKF Model;

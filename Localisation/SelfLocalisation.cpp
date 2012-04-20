@@ -80,12 +80,11 @@ SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings&
     m_lostCount = 100;
     m_timeSinceFieldObjectSeen = 0;
 
-    m_models.clear();
     //m_models.reserve(c_MAX_MODELS);
-
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
+    return;
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
         std::stringstream debugLogName;
@@ -286,7 +285,6 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     m_frame_log << "Mobile Objects: " << objseen << std::endl;
     m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
     #endif
-
     ProcessObjects(fobs, time_increment);
 
     // Check for model reset. -> with multiple models just remove if not last one??
@@ -363,6 +361,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
 		}
 #endif
     }
+
     updateResult = multipleLandmarkUpdate(update_objects);
     numUpdates+=objectsAdded;
     usefulObjectCount+=objectsAdded;
@@ -394,6 +393,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
         AmbiguousObjectsConstIt endAmb(fobs->ambiguousFieldObjects.end());
         for(; currAmb != endAmb; ++currAmb){
             if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
+            //std::cout << "Ambiguous object update: " << currAmb->getName() << " (" << m_models.size() << ")" << std::endl << std::flush;
             std::vector<int> possible_ids = currAmb->getPossibleObjectIDs();
             std::vector<StationaryObject*> poss_obj;
             poss_obj.reserve(possible_ids.size());
@@ -407,6 +407,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             numUpdates++;
             if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN or currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
                 usefulObjectCount++;
+            PruneModels();
         }
 #endif // MULTIPLE_MODELS_ON
         PruneModels();
@@ -1243,6 +1244,8 @@ int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, 
 */
 int SelfLocalisation::PruneModels()
 {
+    removeInactiveModels();    // Clear out all deactivated models.
+
     if(m_settings.pruneMethod() == LocalisationSettings::prune_merge)
     {
         MergeModels(c_MAX_MODELS_AFTER_MERGE);
@@ -1257,7 +1260,7 @@ int SelfLocalisation::PruneModels()
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_nscan)
     {
-        PruneNScan(4);
+        PruneNScan(3);
     }
     NormaliseAlphas();
     return 0;
@@ -1284,14 +1287,13 @@ struct model_ptr_cmp{
 */
 int SelfLocalisation::PruneViterbi(unsigned int order)
 {
-    if(m_models.size() <= order) return 0;                      // No pruning required if less than maximum.
-    m_models.sort(model_ptr_cmp());                                            // Sort, results in order smallest to largest.
+    if(m_models.size() <= order) return 0;                      // No pruning required if not above maximum.
+    m_models.sort(model_ptr_cmp());                             // Sort, results in order smallest to largest.
     unsigned int num_to_remove = m_models.size() - order;       // Number of models that need to be removed.
 
     ModelContainer::iterator begin_remove = m_models.begin();   // Beginning of removal range
     ModelContainer::iterator end_remove = m_models.begin();
     std::advance(end_remove,num_to_remove);                     // End of removal range (not removed)
-
 
     std::for_each (begin_remove, end_remove, std::bind2nd(std::mem_fun(&Model::setActive), false));
 
@@ -1933,12 +1935,11 @@ std::istream& operator>> (std::istream& input, SelfLocalisation& p_loc)
  */
 void SelfLocalisation::clearModels()
 {
-    for (ModelContainer::iterator mod = m_models.begin(); mod != m_models.end(); mod++)
+    while(!m_models.empty())
     {
-        delete *mod;
-        *mod = 0;
+        delete m_models.back();
+        m_models.pop_back();
     }
-    m_models.clear();
 }
 
 /*! @brief Initialises all of the models desribed in the vector and weights them evenly.
@@ -1961,11 +1962,9 @@ void SelfLocalisation::InitialiseModels(const std::vector<Moment>& positions)
         m_frame_log << ") - (" << (*pos_it).sd(Model::states_x) << "," << (*pos_it).sd(Model::states_y) << "," << (*pos_it).sd(Model::states_heading) << std::endl;
     }
 #endif
-
     for (std::vector<Moment>::const_iterator pos = positions.begin(); pos != positions.end(); pos++)
     {
         temp = new Model(GetTimestamp());
-
         temp->setAlpha(split_alpha);
         temp->setMean((*pos).mean());
         temp->setCovariance((*pos).covariance());

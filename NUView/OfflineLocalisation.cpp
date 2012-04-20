@@ -24,6 +24,7 @@ OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent)
     m_experiment_run_time = 0.0f;
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_merge);
+    m_running = false;
     RunTests();
 }
 
@@ -53,7 +54,7 @@ void OfflineLocalisation::ClearBuffer()
     m_localisation_frame_buffer.clear();
     m_frame_info.clear();
     m_self_frame_info.clear();
-    m_performance .clear();
+    m_performance.clear();
     m_sim_data_available = false;
     emit SimDataChanged(m_sim_data_available);
 }
@@ -130,11 +131,20 @@ bool OfflineLocalisation::HasRequiredData(QStringList& available_data)
 /*! @brief Run the simulation using the available data.
     @return True if simulation sucessful. False if unsuccessful.
  */
+#include <sstream>
 void OfflineLocalisation::run()
 {
+    qDebug("Starting experiment.");
+    m_running = true;
     Initialise(Localisation());
     // Don't do anything if not initialised properly.
-    if(IsInitialised() == false) return;
+    if(IsInitialised() == false)
+    {
+        qDebug("Not initialised.");
+        m_running = false;
+        return;
+    }
+
     m_stop_called = false;
     m_sim_data_available = false;
     const NUSensorsData* tempSensor;
@@ -145,6 +155,7 @@ void OfflineLocalisation::run()
     int framesProcessed = 0;
     int totalFrames = m_log_reader->numFrames();
     m_log_reader->firstFrame();
+
     emit updateProgress(framesProcessed+1,totalFrames);
 
     bool save_signal = m_log_reader->blockSignals(true); // Block signals
@@ -162,9 +173,15 @@ void OfflineLocalisation::run()
         tempGameInfo = m_log_reader->GetGameInfo();
 
         // Break if things look bad.
-        if(tempSensor == NULL or tempObjects == NULL or tempTeamInfo == NULL or tempGameInfo == NULL) break;
+        if(tempSensor == NULL or tempObjects == NULL or tempTeamInfo == NULL or tempGameInfo == NULL)
+        {
+            break;
+        }
         AddFrame(tempSensor, tempObjects, tempTeamInfo, tempGameInfo);
-        if(m_log_reader->nextFrameAvailable()) m_log_reader->nextFrame();
+        if(m_log_reader->nextFrameAvailable())
+        {
+            m_log_reader->nextFrame();
+        }
         else break;
         ++framesProcessed;
         if(m_stop_called) break;
@@ -188,11 +205,11 @@ void OfflineLocalisation::run()
     std::cout << "Total Processing time: " << total_time * 1000 << " ms" <<std::endl;
     std::cout << "Experiment time: " << m_experiment_run_time << " ms" << std::endl;
 
-
     m_log_reader->setFrame(save_frame);
     m_log_reader->blockSignals(save_signal);
-
+    m_running = false;
     emit SimDataChanged(m_sim_data_available);
+    emit ProcessingComplete(m_log_reader->path());
     return;
 }
 
@@ -205,7 +222,6 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
     // Need to make copies, since source is const
     NUSensorsData tempSensors = (*sensorData);
     NUSensorsData tempSensors2 = (*sensorData);
-    //FieldObjects tempObj = (*objectData);
     QElapsedTimer timer;
     long int ms_elapsed;
 
@@ -532,7 +548,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
 
                     // Determine most likely option and use it to get expected measurements
                     int likely_id = tempObjects->getClosestStationaryOption(gps_location, *object);
-                    assert(likely_id >= 0);
+                    //assert(likely_id >= 0);
                     amb_exp_id.push_back(likely_id);
                     amb_exp_distance.push_back(gps_location.CalculateDistanceToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
                     amb_exp_heading.push_back(gps_location.CalculateBearingToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
