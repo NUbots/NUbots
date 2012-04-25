@@ -39,7 +39,7 @@
 // --------------------------------------------------------------- Module header files
 #ifdef USE_VISION
     #include "Infrastructure/NUImage/NUImage.h"
-    #include "Vision/Vision.h"
+    #include "Vision/VisionControlWrapper.h"
 #endif
 
 #ifdef USE_BEHAVIOUR
@@ -271,7 +271,7 @@ void NUbot::createModules()
     #endif
     
     #ifdef USE_VISION
-        m_vision = new Vision();
+        m_vision = VisionControlWrapper::getInstance();
     #endif
         
     #ifdef USE_LOCALISATION
@@ -299,7 +299,6 @@ void NUbot::destroyModules()
     #endif
     
     #ifdef USE_VISION
-        delete m_vision;
         m_vision = 0;
     #endif
         

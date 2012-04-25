@@ -67,7 +67,7 @@ class NUPlatform;
 class NUIO;
 
 #ifdef USE_VISION
-    class Vision;
+    class VisionControlWrapper;
 #endif
 
 #ifdef USE_LOCALISATION
@@ -123,7 +123,7 @@ private:
     NUPlatform* m_platform;               //!< interface to robot platform
     NUBlackboard* m_blackboard;           //!< a pointer to the public store
     #ifdef USE_VISION
-        Vision* m_vision;                 //!< vision module
+        VisionControlWrapper* m_vision;                 //!< vision module
     #endif
     
     #ifdef USE_LOCALISATION

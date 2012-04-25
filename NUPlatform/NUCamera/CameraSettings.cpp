@@ -78,7 +78,7 @@ CameraSettings::CameraSettings(const std::vector<Parameter> parameters)
 {
     SetDefaults();
 
-    for(int i=0; i<parameters.size(); i++) {
+    for(unsigned int i=0; i<parameters.size(); i++) {
         if(!SetByName(parameters[i]))
             debug << "CameraSettings::LoadFromFile(): \"" << parameters[i] << "\" not found." << endl;
     }
@@ -186,7 +186,7 @@ void CameraSettings::LoadFromFile(const std::string& configFileName)
 				 parameters.push_back(p);
 		}
 
-        for(int i=0; i<parameters.size(); i++) {
+        for(unsigned int i=0; i<parameters.size(); i++) {
             if(!SetByName(parameters[i]))
                 debug << "CameraSettings::LoadFromFile(): \"" << parameters[i].name() << "\" not found." << endl;
             else

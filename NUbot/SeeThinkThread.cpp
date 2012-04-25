@@ -132,7 +132,7 @@ void SeeThinkThread::run()
             #endif
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef USE_VISION
-                m_nubot->m_vision->ProcessFrame(Blackboard->Image, Blackboard->Sensors, Blackboard->Actions, Blackboard->Objects);
+                m_nubot->m_vision->RunFrame();
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision");
                 #endif

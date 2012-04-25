@@ -21,16 +21,18 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
+colourreplacementrule.cpp
+coloursegment.cpp
+colourtransitionrule.cpp
+objectcandidate.cpp
+segmentedregion.cpp
+transition.cpp
+visionfieldobject.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Threads
-Modules
-VisionBlackboard
-VisionTools
-VisionTypes
-VisionWrapper
+
 )
 ####################################################################################
 

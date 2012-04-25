@@ -21,16 +21,16 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
+greenhorizonch.cpp
+horizoninterpolate.cpp
+objectdetectionch.cpp
+scanlines.cpp
+segmentfilter.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Threads
-Modules
-VisionBlackboard
-VisionTools
-VisionTypes
-VisionWrapper
+
 )
 ####################################################################################
 
