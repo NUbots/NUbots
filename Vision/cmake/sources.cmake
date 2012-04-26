@@ -21,13 +21,14 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
+visionblackboard.cpp
+visioncontroller.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
 Threads
 Modules
-VisionBlackboard
 VisionTools
 VisionTypes
 VisionWrapper

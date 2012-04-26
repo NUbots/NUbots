@@ -1,9 +1,9 @@
 #ifndef TRANSITION_H
 #define TRANSITION_H
 
-#include "basicvisiontypes.h"
-#include "VisionTools/classificationcolours.h"
-#include "VisionTypes/coloursegment.h"
+#include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTools/classificationcolours.h"
+#include "Vision/VisionTypes/coloursegment.h"
 
 using namespace VisionID;
 

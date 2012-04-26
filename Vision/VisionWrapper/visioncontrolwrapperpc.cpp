@@ -1,4 +1,4 @@
-#include "visioncontrolwrapper.h"
+#include "visioncontrolwrapperpc.h"
 
 VisionControlWrapper* VisionControlWrapper::instance = 0;
 

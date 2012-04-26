@@ -9,10 +9,9 @@
 
 #include "Tools/Math/Line.h"
 
-#include "VisionTools/pccamera.h"
-#include "VisionTools/lookuptable.h"
-
-#include "basicvisiontypes.h"
+#include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTools/pccamera.h"
+#include "Vision/VisionTools/lookuptable.h"
 
 #define GROUP_NAME "/home/shannon/Images/paper"
 #define GROUP_EXT ".png"

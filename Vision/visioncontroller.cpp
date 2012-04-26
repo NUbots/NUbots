@@ -5,7 +5,7 @@ VisionController* VisionController::instance = 0;
 
 VisionController::VisionController()
 {
-    blackboard = VisionBlackboard::getInstance();
+    m_blackboard = VisionBlackboard::getInstance();
 }
 
 VisionController::~VisionController()
@@ -21,7 +21,7 @@ VisionController* VisionController::getInstance()
 
 int VisionController::runFrame()
 {
-    blackboard->update();
+    m_blackboard->update();
 
     GreenHorizonCH::calculateHorizon();
     HorizonInterpolate::interpolate(32);
@@ -31,8 +31,8 @@ int VisionController::runFrame()
     ScanLines::classifyVerticalScanLines();
     segment_filter.run();
     
-    blackboard->publish();
-    blackboard->debugPublish();
+    m_blackboard->publish();
+    m_blackboard->debugPublish();
 
     return 0;
 }
@@ -48,4 +48,9 @@ int VisionController::run()
     }
 
     return 0;
+}
+
+CameraSettings VisionController::getCurrentCameraSettings() const
+{
+    return m_blackboard->getCameraSettings();
 }

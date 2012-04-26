@@ -4,10 +4,10 @@
 #include <vector>
 #include <fstream>
 
-#include "VisionTypes/colourreplacementrule.h"
-#include "VisionTypes/colourtransitionrule.h"
-#include "VisionTypes/transition.h"
-#include "VisionTypes/segmentedregion.h"
+#include "Vision/VisionTypes/colourreplacementrule.h"
+#include "Vision/VisionTypes/colourtransitionrule.h"
+#include "Vision/VisionTypes/transition.h"
+#include "Vision/VisionTypes/segmentedregion.h"
 
 class SegmentFilter
 {

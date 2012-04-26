@@ -2,8 +2,9 @@
 #define OBJECTCANDIDATE_H
 
 #include <vector>
-#include "VisionTypes/transition.h"
-#include "basicvisiontypes.h"
+
+#include "Vision/VisionTypes/transition.h"
+#include "Vision/basicvisiontypes.h"
 
 using namespace std;
 

@@ -16,8 +16,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "visionblackboard.h"
-#include "VisionTools/classificationcolours.h"
+#include "Vision/visionblackboard.h"
+#include "Vision/VisionTools/classificationcolours.h"
 
 using namespace std;
 using namespace cv;

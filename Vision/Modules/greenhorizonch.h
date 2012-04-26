@@ -18,8 +18,8 @@
 
 #include "Tools/Math/Line.h"
 
-#include "visionblackboard.h"
-#include "VisionTools/classificationcolours.h"
+#include "Vision/visionblackboard.h"
+#include "Vision/VisionTools/classificationcolours.h"
 
 using namespace std;
 using namespace cv;

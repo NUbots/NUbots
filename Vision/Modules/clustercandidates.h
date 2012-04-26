@@ -4,10 +4,10 @@
 #include <vector>
 #include <queue>
 
-#include "basicvisiontypes.h"
-#include "VisionTools/classificationcolours.h"
-#include "VisionTypes/transition.h"
-#include "VisionTypes/objectcandidate.h"
+#include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTools/classificationcolours.h"
+#include "Vision/VisionTypes/transition.h"
+#include "Vision/VisionTypes/objectcandidate.h"
 
 using namespace std;
 

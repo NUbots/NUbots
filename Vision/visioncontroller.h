@@ -11,14 +11,16 @@
 #ifndef VISIONCONTROLLER_H
 #define VISIONCONTROLLER_H
 
-#include "visionblackboard.h"
-#include "VisionWrapper/datawrappercurrent.h"
-#include "VisionTools/lookuptable.h"
-#include "Modules/greenhorizonch.h"
-#include "Modules/horizoninterpolate.h"
-#include "Modules/objectdetectionch.h"
-#include "Modules/scanlines.h"
-#include "Modules/segmentfilter.h"
+#include "Infrastructure/Jobs/JobList.h"
+
+#include "Vision/visionblackboard.h"
+#include "Vision/VisionWrapper/datawrappercurrent.h"
+#include "Vision/VisionTools/lookuptable.h"
+#include "Vision/Modules/greenhorizonch.h"
+#include "Vision/Modules/horizoninterpolate.h"
+#include "Vision/Modules/objectdetectionch.h"
+#include "Vision/Modules/scanlines.h"
+#include "Vision/Modules/segmentfilter.h"
 
 class VisionController
 {
@@ -39,6 +41,13 @@ public:
     *   @return A status indication of the execution.
     */
     int run();
+    
+    /**
+    *   @brief Gets the current camera settings from the blackboard and returns them
+    *   @return The current camera settings
+    */
+    CameraSettings getCurrentCameraSettings() const;
+    
 private:
     //! @brief Private constructor for controller.
     VisionController();
@@ -56,8 +65,10 @@ private:
 
 //! VARIABLES
     //VisionWrapper* wrapper;             //! @variable Reference to singleton Wrapper for vision system
-    VisionBlackboard* blackboard;            //! @variable Reference to singleton Blackboard for vision system
+    VisionBlackboard* m_blackboard;            //! @variable Reference to singleton Blackboard for vision system
     SegmentFilter segment_filter;       //! @variable Segment filter object for pre-classification filtering
+    
+    
 
 };
 

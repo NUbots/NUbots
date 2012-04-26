@@ -344,7 +344,7 @@ int VisionBlackboard::getImageHeight() const
 */
 CameraSettings VisionBlackboard::getCameraSettings() const
 {
-    return wrapper->getCameraSettings();
+    return  original_image->getCameraSettings();
 }
 
 /**
@@ -362,7 +362,6 @@ void VisionBlackboard::update()
 {
     //Get updated kinematics data
     kinematics_horizon = wrapper->getKinematicsHorizon();
-    //kinematics_horizon_points = wrapper->getKinematicsHorizon();
     ctgvalid = wrapper->getCTGVector(ctgvector);
 }
 

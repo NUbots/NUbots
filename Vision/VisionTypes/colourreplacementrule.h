@@ -2,10 +2,10 @@
 #define COLOURREPLACEMENTRULE_H
 
 
-#include "visionblackboard.h"
+#include "Vision/visionblackboard.h"
 
-#include "VisionTools/classificationcolours.h"
-#include "VisionTypes/coloursegment.h"
+#include "Vision/VisionTools/classificationcolours.h"
+#include "Vision/VisionTypes/coloursegment.h"
 
 class ColourReplacementRule
 {

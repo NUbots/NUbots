@@ -76,7 +76,6 @@ public:
 
     const vector<PointType>& getObjectPoints() const;
 
-
     const LookUpTable& getLUT() const;
 
 

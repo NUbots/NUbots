@@ -13,14 +13,19 @@ contains(PLATFORM, "darwin") {
 
     ROBOCUP_DIR = /home/shannon/robocup/            #change to darwin directory later
     INCLUDEPATH += $$ROBOCUP_DIR
+    INCLUDE_PATH += $$ROBOCUP_DIR/Autoconfig/
     
     HEADERS += \
         NUPlatform/Platforms/Darwin/DarwinCamera.h \
         VisionWrapper/datawrapperdarwin.h \
+        $$ROBOCUP_DIR/Autoconfig/debug.h \
+        $$ROBOCUP_DIR/Autoconfig/nubotdataconfig.h \
+        VisionWrapper/visioncontrolwrapperdarwin.h \
     
     SOURCES += \
         $$ROBOCUP_DIR\NUPlatform/Platforms/Darwin/DarwinCamera.cpp \
         VisionWrapper/datawrapperdarwin.cpp \
+        VisionWrapper/visioncontrolwrapperdarwin.cpp \
 }
 
 contains(PLATFORM, "pc") {
@@ -28,20 +33,24 @@ contains(PLATFORM, "pc") {
 
     ROBOCUP_DIR = /home/shannon/robocup/ 
     INCLUDEPATH += $$ROBOCUP_DIR
+    INCLUDE_PATH += $$ROBOCUP_DIR/Autoconfig/
   
     HEADERS += \
         VisionTools/pccamera.h \
         VisionWrapper/datawrapperpc.h \
+        VisionWrapper/visioncontrolwrapperpc.h \
+        debug.h \
     
     SOURCES += \
         VisionTools/pccamera.cpp \
         VisionWrapper/datawrapperpc.cpp \
+        VisionWrapper/visioncontrolwrapperpc.cpp\
 }
+
 
 #this
 HEADERS += \
     visionblackboard.h \
-    visioncontroller.h \
     VisionTools/lookuptable.h \
     VisionWrapper/datawrappercurrent.h \
     VisionTools/GTAssert.h \
@@ -62,7 +71,7 @@ HEADERS += \
     basicvisiontypes.h \
     valgorithm.h \
     Modules/clustercandidates.h \
-    VisionWrapper/visioncontrolwrapper.h
+    visioncontroller.h \
 
 SOURCES += \
     visionblackboard.cpp \
@@ -82,7 +91,6 @@ SOURCES += \
     VisionTypes/objectcandidate.cpp \
     main.cpp \
     Modules/clustercandidates.cpp \
-    VisionWrapper/visioncontrolwrapper.cpp
 
 #robocup
 HEADERS += \
@@ -91,7 +99,6 @@ HEADERS += \
     $$ROBOCUP_DIR/Tools/Math/Line.h \
     $$ROBOCUP_DIR/Infrastructure/NUImage/NUImage.h \
     $$ROBOCUP_DIR/NUPlatform/NUCamera/CameraSettings.h \
-    debug.h \
 
 SOURCES += \
     $$ROBOCUP_DIR/Tools/FileFormats/LUTTools.cpp \

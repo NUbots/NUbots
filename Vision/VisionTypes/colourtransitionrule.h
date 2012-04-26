@@ -14,11 +14,10 @@
 #include <vector>
 #include <iostream>
 
-#include "visionblackboard.h"
-
-#include "VisionTools/classificationcolours.h"
-#include "VisionTypes/coloursegment.h"
-#include "VisionTypes/visionfieldobject.h"
+#include "Vision/visionblackboard.h"
+#include "Vision/VisionTools/classificationcolours.h"
+#include "Vision/VisionTypes/coloursegment.h"
+#include "Vision/VisionTypes/visionfieldobject.h"
 
 using namespace std;
 

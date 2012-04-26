@@ -2,8 +2,9 @@
 #define SEGMENTEDREGION_H
 
 #include <vector>
-#include "VisionTypes/coloursegment.h"
-#include "basicvisiontypes.h"
+
+#include "Vision/VisionTypes/coloursegment.h"
+#include "Vision/basicvisiontypes.h"
 
 using std::vector;
 using VisionID::ScanDirection;

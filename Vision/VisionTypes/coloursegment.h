@@ -14,8 +14,8 @@
 #include <vector>
 #include <iostream>
 
-#include "basicvisiontypes.h"
-#include "VisionTools/classificationcolours.h"
+#include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTools/classificationcolours.h"
 
 using namespace std;
 

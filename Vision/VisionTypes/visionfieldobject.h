@@ -1,7 +1,7 @@
 #ifndef VISIONFIELDOBJECT_H
 #define VISIONFIELDOBJECT_H
 
-#include "basicvisiontypes.h"
+#include "Vision/basicvisiontypes.h"
 
 
 class VisionFieldObject

@@ -3,7 +3,7 @@
 
 #define PC_WRAPPER 1
 
-#include "datawrapperpc.h"
-//#include "datawrapperdarwin.h"
+#include "Vision/VisionWrapper/datawrapperpc.h"
+//#include "Vision/VisionWrapper/datawrapperdarwin.h"
 
 #endif // DATAWRAPPERCURRENT_H

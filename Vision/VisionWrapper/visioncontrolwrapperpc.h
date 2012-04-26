@@ -1,7 +1,10 @@
 #ifndef CONTROLWRAPPER_H
 #define CONTROLWRAPPER_H
 
-#include "visioncontroller.h"
+#include "Vision/visioncontroller.h"
+
+class NUSensorsData;
+class NUActionatorsData;
 
 class VisionControlWrapper
 {
