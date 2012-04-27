@@ -1,9 +1,9 @@
-/*! @file VisionCalibrationProvider.cpp
-    @brief Implementation of Pose behaviour class
+/*! @file IKTestProvider.cpp
+    @brief Implementation of IK test behaviour class
 
-    @author Aaron Wong
+    @author Steven Nicklin
  
- Copyright (c) 2010 Aaron Wong
+ Copyright (c) 2012 Steven Nicklin
  
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
