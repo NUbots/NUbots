@@ -82,7 +82,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   //p.standComPosition = Vector3<>(/*20.5f*/ 3.5f /*0.f*/, 50.f, /*259.f*/ /*261.5f*/ 258.0f);
   //p.standComPosition = Vector3<>(3.5f, 50.f,258.0f);
   p.standComPosition = Vector3<>(3.5f, 40.f, 180.0f);
-  p.standBodyTilt = 0.f;
+  p.standBodyTilt = 0.0f; //01f;
   p.standArmJointAngles = Vector2<>(0.2f, 0.f);
 
   p.standHardnessAnklePitch = 75;
@@ -97,9 +97,9 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.walkRefYAtFullSpeedX = 38.f;
 //  p.walkRefYAtFullSpeedY = 50.f;
   p.walkRefYAtFullSpeedY = 40.f;
-  p.walkStepDuration = 500.f;
-  p.walkStepDurationAtFullSpeedX = 480.f;
-  p.walkStepDurationAtFullSpeedY = 440.f;
+  p.walkStepDuration = 470.f;
+  p.walkStepDurationAtFullSpeedX = 400.f;
+  p.walkStepDurationAtFullSpeedY = 400.f;
   p.walkHeight = Vector2<>(p.standComPosition.z, 300.f);
   p.walkArmRotation = 0.4f;
   p.walkRefXSoftLimit.min = -3.f;
@@ -113,7 +113,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   //p.walkLiftOffset = Vector3<>(0.f, -5.f, 17.f);
   p.walkLiftOffset = Vector3<>(0.f, -5.f, 25.f);
   p.walkLiftOffsetJerk = 0.f;
-  p.walkLiftOffsetAtFullSpeedY = Vector3<>(0.f, -20.f, 25.f);
+  p.walkLiftOffsetAtFullSpeedY = Vector3<>(0.f, -10.f, 27.f);
   p.walkLiftRotation = Vector3<>(-0.05f, -0.05f, 0.f);
   p.walkAntiLiftOffset = Vector3<>(0.f, 0.f, 2.3f);
   p.walkAntiLiftOffsetAtFullSpeedY = Vector3<>(0.f, 0.f, 2.3f);
@@ -125,7 +125,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.kickX0Y = 1.f;
   p.kickHeight = Vector2<>(p.standComPosition.z, 300.f);
 
-  p.speedMax = Pose2D(0.8f, 60.f * 2.f, 50.f);
+  p.speedMax = Pose2D(0.6f, 60.f * 2.f, 50.f);
   p.speedMaxMin = Pose2D(0.2f, 10.f, 0.f);
   p.speedMaxBackwards = 50 * 2.f;
   p.speedMaxChange = Pose2D(0.3f, 8.f, 20.f);
@@ -144,9 +144,12 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   //p.balance = false;
   p.balanceMinError = Vector3<>(0.f, 0.f, 0.f);
   p.balanceMaxError = Vector3<>(10.f, 10.f, 10.f);
-  //p.balanceCom.x = PIDCorrector::Parameters(0.f, 0.01f, 0.f, 3.f);
-  //p.balanceCom.y = PIDCorrector::Parameters(0.f, 0.01f, 0.f, 3.f);
-  //p.balanceCom.z = PIDCorrector::Parameters(0.2f, 0.2f, 0.f, 3.f);
+  //p.balanceCom.x = PIDCorrector::Parameters(0.1f, 0.2f, 0.1f, 2.f); // known good value
+  p.balanceCom.x = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 4.f);
+  p.balanceCom.y = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 4.f);
+  p.balanceCom.z = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 4.f);
+  //p.balanceCom.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 0.f);
+  p.balanceCom.z = PIDCorrector::Parameters(0.0f, 0.0f, 0.f, 0.f);
   p.balanceBodyRotation.x = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
   p.balanceBodyRotation.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
   p.balanceStepSize = Vector2<>(0.08f, -0.04f);
