@@ -14,7 +14,7 @@
 #include <math.h>
 
 /** This class represents a 3-vector */
-template <class V = double> class Vector3
+template <class V = float> class Vector3
 {
 public:
 
@@ -22,7 +22,7 @@ public:
   V x,y,z;
 
   /** Default constructor 4 gcc. */
-  Vector3<V>():x(0),y(0),z(0)
+  Vector3<V>():x(),y(),z()
   {
   }
 
@@ -210,6 +210,14 @@ public:
     if (lenghtOfVector == 0) return *this;
     return *this /= lenghtOfVector;
   }
+    
+    /** Negation of this vector.
+     *\return A new object that contains the result of the calculation.
+     */
+    inline Vector3<V> operator-() const
+    {
+        return Vector3<V>(-x, -y, -z);
+    }
 };
 
 /**

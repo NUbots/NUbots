@@ -17,6 +17,22 @@
     #undef USE_MOTION
 #endif
 
+// Kinematics
+    #define USE_MODEL_NAO_${NUBOT_USE_MOTION_MODEL_NAO}
+    #ifdef USE_MODEL_NAO_ON
+        #define USE_MODEL_NAO
+    #else
+        #undef USE_MODEL_NAO
+    #endif
+    #define USE_MODEL_DARWIN_${NUBOT_USE_MOTION_MODEL_DARWIN}
+    #ifdef USE_MODEL_DARWIN_ON
+        #define USE_MODEL_DARWIN
+    #else
+        #undef USE_MODEL_DARWIN
+    #endif
+
+
+
 #ifdef USE_MOTION
     #define USE_HEAD_${NUBOT_USE_MOTION_HEAD}
     #ifdef USE_HEAD_ON
@@ -72,6 +88,8 @@
     #undef USE_KICK
     #undef USE_GETUP
     #undef USE_FALL_PROTECTION
+    #undef USE_MODEL_NAO
+    #undef USE_MODEL_DARWIN
 #endif
 
 #endif // !MOTIONCONFIG_H

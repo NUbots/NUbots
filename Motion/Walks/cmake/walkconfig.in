@@ -23,6 +23,12 @@
     #else
         #undef USE_JWALK
     #endif
+    #define USE_WALK_BWALK_${NUBOT_USE_MOTION_WALK_BWALK} 
+    #ifdef USE_WALK_BWALK_ON
+        #define USE_BWALK
+    #else
+        #undef USE_BWALK
+    #endif
     #define USE_WALK_JUPPWALK_${NUBOT_USE_MOTION_WALK_JUPPWALK} 
     #ifdef USE_WALK_JUPPWALK_ON
         #define USE_JUPPWALK

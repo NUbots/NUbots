@@ -32,6 +32,9 @@
 #ifdef USE_JWALK
     #include "Walks/JWalk/JWalk.h"
 #endif
+#ifdef USE_BWALK
+    #include "Walks/BWalk/WalkingEngine.h"
+#endif
 #ifdef USE_JUPPWALK
     #include "Walks/JuppWalk/JuppWalk.h"
 #endif
@@ -60,10 +63,16 @@ using namespace std;
 #include "Tools/Math/General.h"
 using namespace mathGeneral;
 
-NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions)
+class NUInverseKinematics;
+
+NUWalk* NUWalk::getWalkEngine(NUSensorsData* data, NUActionatorsData* actions, NUInverseKinematics* ik)
 {
     #ifdef USE_JWALK
         return new JWalk();
+    #endif
+
+    #ifdef USE_BWALK
+        return new WalkingEngine(data, actions, ik);
     #endif
     
     #ifdef USE_JUPPWALK

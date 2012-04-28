@@ -12,7 +12,7 @@
 class Kinematics
 {
 public:
-    typedef std::vector<EndEffector> RobotModel; 
+    typedef std::vector<EndEffector> RobotModel;
 
     /*!
         @brief Loads a localisation model from the default configuration file
@@ -51,7 +51,7 @@ public:
     * @param text The text containing the description of the translation matrix to create.
     * @return Transform matrix containing the translation.
     */
-    Matrix TranslationFromText(const std::string& text);
+    static Matrix TranslationFromText(const std::string& text);
 
     /*!
     * @brief Creates a Rotation matrix from the a text description.
@@ -63,7 +63,7 @@ public:
     * @param text The text containing the description of the rotation matrix to create.
     * @return Transform matrix containing the rotation.
     */
-    Matrix RotationFromText(const std::string& text);
+    static Matrix RotationFromText(const std::string& text);
 
     /*!
     * @brief Creates a Link using the modified D-H notation, from the a text description.
@@ -77,7 +77,12 @@ public:
     * @param text The text containing the description of the link to create.
     * @return Link created to the specifications in the text.
     */
-    Link LinkFromText(const std::string& text);
+    static Link LinkFromText(const std::string& text);
+
+    void UpdateEffector(unsigned int index, const std::vector<float>& jointValues);
+    Matrix EndEffectorPosition(unsigned int index) const;
+    Vector3<float> calculateCentreOfMass();
+
 
     /*!
     * @brief Calculates the transform to the end of an effector.
@@ -209,7 +214,7 @@ public:
     * @param theFootTransformMatrix The transform matrix of the other foot.
     * @return The distance between the two feet.
     */
-    double CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix);
+    static double CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix);
 
     /*!
     * @brief Converts a relative 2D field position into a position relative to a particular foot.
@@ -226,7 +231,7 @@ public:
     *
     * @return A pointer to the current robot model.
     */
-    const RobotModel* getModel(){return &m_endEffectors;}
+    const RobotModel* getModel() const {return &m_endEffectors;}
 
 protected:
     RobotModel m_endEffectors;  //!< Robot model made up of a list of end effectors.

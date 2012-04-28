@@ -36,6 +36,7 @@
 #include "MiscBehaviours/PoseProvider.h"
 #include "MiscBehaviours/ScriptedPoseProvider.h"
 #include "MiscBehaviours/ForwardWalkProvider.h"
+#include "MiscBehaviours/IKTestProvider.h"
 #include "RoboPedestrian/RoboPedestrianProvider.h"
 
 #include "CameraCalibration/CameraCalibrationProvider.h"
@@ -56,15 +57,20 @@ using namespace std;
 Behaviour::Behaviour()
 {
     #if defined(TARGET_IS_NAOWEBOTS)
-        m_behaviour = new SoccerProvider(this);
+        //m_behaviour = new ForwardWalkProvider(this);
+        //m_behaviour = new WalkOptimisationProvider(this);
+        m_behaviour = new IKTestProvider(this);
+        //m_behaviour = new SoccerProvider(this);
     #elif defined(TARGET_IS_BEAR)
         m_behaviour = new BearModeProvider(this);
     #elif defined(TARGET_IS_CYCLOID)
         m_behaviour = new QuietStanceProvider(this);
     #else
-        cout << "Starting Behaviour" << endl;
         //m_behaviour = new ZombieProvider(this);
         m_behaviour = new SoccerProvider(this);
+        //m_behaviour = new WalkOptimisationProvider(this);
+        //m_behaviour = new ForwardWalkProvider(this);
+        //m_behaviour = new IKTestProvider(this);
     #endif
     m_next_behaviour = NULL;
 }

@@ -19,43 +19,19 @@ IF(DEBUG)
     MESSAGE(STATUS ${CMAKE_CURRENT_LIST_FILE})
 ENDIF()
 
-# I need to prefix each file and directory with the correct path
-STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
-
-INCLUDE("${THIS_SRC_DIR}/cmake/walkconfig.cmake")
-
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  BlankWalk.h
+SET (YOUR_SRCS
+WalkingEngine.h WalkingEngine.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS )
-IF(NUBOT_USE_MOTION_WALK_JWALK)
-	LIST(APPEND YOUR_DIRS JWalk)
-ENDIF()
-IF(NUBOT_USE_MOTION_WALK_BWALK)
-	LIST(APPEND YOUR_DIRS BWalk)
-ENDIF()
-IF(NUBOT_USE_MOTION_WALK_JUPPWALK)
-	LIST(APPEND YOUR_DIRS JuppWalk)
-ENDIF()
-IF(NUBOT_USE_MOTION_WALK_NBWALK)
-	LIST(APPEND YOUR_DIRS NBWalk)
-ENDIF()
-IF(NUBOT_USE_MOTION_WALK_VSCWALK)
-	LIST(APPEND YOUR_DIRS VSCWalk)
-ENDIF()
-IF(NUBOT_USE_MOTION_WALK_ALWALK)
-	LIST(APPEND YOUR_DIRS ALWalk)
-ENDIF()
-IF(NUBOT_USE_MOTION_WALK_BEARWALK)
-	LIST(APPEND YOUR_DIRS BearWalk)
-ENDIF()
-IF(NUBOT_USE_MOTION_WALK_DARWINWALK)
-	LIST(APPEND YOUR_DIRS DarwinWalk)
-ENDIF()
-
+SET (YOUR_DIRS
+Requirements 
+)
 ####################################################################################
+
+# I need to prefix each file and directory with the correct path
+STRING(REPLACE "/cmake/sources.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
 
 # Now I need to append each element to NUBOT_SRCS
 FOREACH(loop_var ${YOUR_SRCS}) 
