@@ -160,11 +160,6 @@ protected:
         
         if (not m_pan_started or m_pan_finished)
         {
-            //xxx: fixme: need to find the most recently seen goal, and if we haven't seen it in a while look for the closest goal
-            float goalLastSeen = Blackboard->Objects->StationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].timeSinceLastSeen();
-            goalLastSeen = min(goalLastSeen,Blackboard->Objects->StationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].timeSinceLastSeen());
-            goalLastSeen = min(goalLastSeen,Blackboard->Objects->StationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].timeSinceLastSeen());
-            goalLastSeen = min(goalLastSeen,Blackboard->Objects->StationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].timeSinceLastSeen());
             
             if (ball.TimeSinceLastSeen() > 2300)
             {
@@ -262,4 +257,5 @@ protected:
 
 
 #endif
+
 
