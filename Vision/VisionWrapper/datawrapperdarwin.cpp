@@ -69,18 +69,12 @@ NUImage* DataWrapper::getFrame()
     return Blackboard->Image;
 }
 
-bool DataWrapper::getCTGVector(vector<float> &ctgvector)
-{
-    bool isOK = Blackboard->Sensors->get(NUSensorsData::CameraToGroundTransform, ctgvector);
-    return isOK;
-}
-    
 /*! @brief Retrieves the horizon data and builds a Horizon and returns it.
 *   @return m_kinematics_horizon A reference to the kinematics horizon line.
 *   @note This method has a chance of retrieving an invalid line, in this case
 *           the old line is returned with the "exists" flag set to false.
 */
-const Horizon& DataWrapper::getKinematicsHorizon() const
+const Horizon& DataWrapper::getKinematicsHorizon()
 {
     if(m_sensor_data->getHorizon(m_horizon_coefficients)) {
         m_kinematics_horizon.setLine(m_horizon_coefficients.at(0), m_horizon_coefficients.at(1), m_horizon_coefficients.at(2));

@@ -2,6 +2,7 @@
 #define DATAWRAPPERDARWIN_H
 
 #include <iostream>
+#include <fstream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -11,6 +12,7 @@
 #include "Kinematics/Horizon.h"
 
 #include "Vision/VisionTools/lookuptable.h"
+#include "Vision/basicvisiontypes.h"
 
 using namespace std;
 using namespace cv;
@@ -22,6 +24,30 @@ class DataWrapper
 {
     friend class VisionController;
     friend class VisionControlWrapper;
+    
+public:
+    enum DATA_ID {
+        DID_IMAGE,
+        DID_CLASSED_IMAGE
+    };
+    
+    enum DEBUG_ID {
+        DBID_IMAGE=0,
+        DBID_H_SCANS=1,
+        DBID_V_SCANS=2,
+        DBID_SEGMENTS=3,
+        DBID_TRANSITIONS=4,
+        DBID_HORIZON=5,
+        DBID_GREENHORIZON_SCANS=6,
+        DBID_GREENHORIZON_FINAL=7,
+        DBID_OBJECT_POINTS=8,
+        DBID_FILTERED_SEGMENTS=9,
+        NUMBER_OF_IDS=10
+    };
+
+    static string getIDName(DEBUG_ID id);
+    static string getIDName(DATA_ID id);
+    static DataWrapper* getInstance();
 
 public:
     //! Data access interface
@@ -32,9 +58,6 @@ public:
     
     //! @brief Returns a reference to the kinematics horizon line.
     const Horizon& getKinematicsHorizon();
-
-    //! @brief Generates spoofed camera transform vector.
-    bool getCTGVector(vector<float>& ctgvector);    //for transforms
 
     const LookUpTable& getLUT() const;
         
@@ -64,8 +87,6 @@ private:
     
     static DataWrapper* instance;
 
-    NUImage* m_current_frame;
-    NUSensorsData* m_sensor_data;
     LookUpTable m_LUT;
     
     vector<float> m_horizon_coefficients;
@@ -84,32 +105,9 @@ private:
     ofstream sensorfile;
     
     //! Shared data objects
+    NUImage* m_current_frame;
     NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
     NUActionatorsData* m_actions;               //!< pointer to shared actionators data object
-    
-public:
-    enum DATA_ID {
-        DID_IMAGE,
-        DID_CLASSED_IMAGE
-    };
-    
-    enum DEBUG_ID {
-        DBID_IMAGE=0,
-        DBID_H_SCANS=1,
-        DBID_V_SCANS=2,
-        DBID_SEGMENTS=3,
-        DBID_TRANSITIONS=4,
-        DBID_HORIZON=5,
-        DBID_GREENHORIZON_SCANS=6,
-        DBID_GREENHORIZON_FINAL=7,
-        DBID_OBJECT_POINTS=8,
-        DBID_FILTERED_SEGMENTS=9,
-        NUMBER_OF_IDS=10
-    };
-
-    static string getIDName(DEBUG_ID id);
-    static string getIDName(DATA_ID id);
-    static DataWrapper* getInstance();
 };
 
 #endif // DATAWRAPPERDARWIN_H
