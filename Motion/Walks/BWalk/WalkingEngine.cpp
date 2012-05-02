@@ -145,11 +145,10 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.balanceMinError = Vector3<>(0.f, 0.f, 0.f);
   p.balanceMaxError = Vector3<>(10.f, 10.f, 10.f);
   //p.balanceCom.x = PIDCorrector::Parameters(0.1f, 0.2f, 0.1f, 2.f); // known good value
-  p.balanceCom.x = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 4.f);
-  p.balanceCom.y = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 4.f);
-  p.balanceCom.z = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 4.f);
+  p.balanceCom.x = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
+  p.balanceCom.y = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
+  p.balanceCom.z = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
   //p.balanceCom.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 0.f);
-  p.balanceCom.z = PIDCorrector::Parameters(0.0f, 0.0f, 0.f, 0.f);
   p.balanceBodyRotation.x = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
   p.balanceBodyRotation.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
   p.balanceStepSize = Vector2<>(0.08f, -0.04f);
@@ -221,6 +220,122 @@ void WalkingEngine::init()
 
   m_initial_lleg.assign(l_leg_start,l_leg_end);
   m_initial_rleg.assign(r_leg_start,r_leg_end);
+}
+
+void WalkingEngine::setWalkParameters(const WalkParameters &walkparameters)
+{
+    m_walk_parameters = walkparameters;
+    writeParameters();
+}
+
+void WalkingEngine::writeParameters()
+{
+#if DEBUG_NUMOTION_VERBOSITY > 0
+    debug << "WalkingEngine::writeParameters: " << endl;
+#endif
+    vector<Parameter>& params = m_walk_parameters.getParameters();
+    for(unsigned int i=0; i<params.size(); i++) {
+        string& nm = params.at(i).name();
+        float value = params.at(i).get();
+#if DEBUG_NUMOTION_VERBOSITY > 0
+    debug << nm << " <- " << value << endl;
+#endif
+        if(nm.compare("walkRefX") == 0)
+            p.walkRefX = value;
+        else if(nm.compare("walkRefXAtFullSpeedX") == 0)
+            p.walkRefXAtFullSpeedX = value;
+        else if(nm.compare("walkRefY") == 0)
+            p.walkRefY = value;
+        else if(nm.compare("walkRefYAtFullSpeedX") == 0)
+            p.walkRefYAtFullSpeedX = value;
+        else if(nm.compare("walkRefYAtFullSpeedY") == 0)
+            p.walkRefYAtFullSpeedY = value;
+        else if(nm.compare("walkStepDuration") == 0)
+            p.walkStepDuration = value;
+        else if(nm.compare("walkStepDurationAtFullSpeedX") == 0)
+            p.walkStepDurationAtFullSpeedX = value;
+        else if(nm.compare("walkStepDurationAtFullSpeedY") == 0)
+            p.walkStepDurationAtFullSpeedY = value;
+        else if(nm.compare("walkLiftOffset0") == 0)
+            p.walkLiftOffset.x = value;
+        else if(nm.compare("walkLiftOffset1") == 0)
+            p.walkLiftOffset.y = value;
+        else if(nm.compare("walkLiftOffset2") == 0)
+            p.walkLiftOffset.z = value;
+        else if(nm.compare("walkLiftOffsetJerk") == 0)
+            p.walkLiftOffsetJerk = value;
+        else if(nm.compare("walkLiftOffsetAtFullSpeedY0") == 0)
+            p.walkLiftOffsetAtFullSpeedY.x = value;
+        else if(nm.compare("walkLiftOffsetAtFullSpeedY1") == 0)
+            p.walkLiftOffsetAtFullSpeedY.y = value;
+        else if(nm.compare("walkLiftOffsetAtFullSpeedY2") == 0)
+            p.walkLiftOffsetAtFullSpeedY.z = value;
+        else if(nm.compare("walkLiftRotation0") == 0)
+            p.walkLiftRotation.x = value;
+        else if(nm.compare("walkLiftRotation1") == 0)
+            p.walkLiftRotation.y = value;
+        else if(nm.compare("walkLiftRotation2") == 0)
+            p.walkLiftRotation.z = value;
+        else if(nm.compare("walkAntiLiftOffset0") == 0)
+            p.walkAntiLiftOffset.x = value;
+        else if(nm.compare("walkAntiLiftOffset1") == 0)
+            p.walkAntiLiftOffset.y = value;
+        else if(nm.compare("walkAntiLiftOffset2") == 0)
+            p.walkAntiLiftOffset.z = value;
+        else if(nm.compare("walkAntiLiftOffsetAtFullSpeedY0") == 0)
+            p.walkAntiLiftOffsetAtFullSpeedY.x = value;
+        else if(nm.compare("walkAntiLiftOffsetAtFullSpeedY1") == 0)
+            p.walkAntiLiftOffsetAtFullSpeedY.y = value;
+        else if(nm.compare("walkAntiLiftOffsetAtFullSpeedY2") == 0)
+            p.walkAntiLiftOffsetAtFullSpeedY.z = value;
+        else if(nm.compare("walkComBodyRotation") == 0)
+            p.walkComBodyRotation = value;
+        else if(nm.compare("speedMaxRot") == 0)
+            p.speedMax.rotation = value;
+        else if(nm.compare("speedMaxX") == 0)
+            p.speedMax.translation.x = value;
+        else if(nm.compare("speedMaxY") == 0)
+            p.speedMax.translation.y = value;
+        else if(nm.compare("speedMaxMinRot") == 0)
+            p.speedMaxMin.rotation = value;
+        else if(nm.compare("speedMaxMinX") == 0)
+            p.speedMaxMin.translation.x = value;
+        else if(nm.compare("speedMaxMinY") == 0)
+            p.speedMaxMin.translation.y = value;
+        else if(nm.compare("speedMaxBackwards") == 0)
+            p.speedMaxBackwards = value;
+        else if(nm.compare("speedMaxChangeRot") == 0)
+            p.speedMaxChange.rotation = value;
+        else if(nm.compare("speedMaxChangeX") == 0)
+            p.speedMaxChange.translation.x = value;
+        else if(nm.compare("speedMaxChangeY") == 0)
+            p.speedMaxChange.translation.y = value;
+        else if(nm.compare("balanceComXP") == 0)
+            p.balanceCom.x.p = value;
+        else if(nm.compare("balanceComXD") == 0)
+            p.balanceCom.x.d = value;
+        else if(nm.compare("balanceComYP") == 0)
+            p.balanceCom.y.p = value;
+        else if(nm.compare("balanceComYD") == 0)
+            p.balanceCom.y.d = value;
+        else if(nm.compare("balanceComZP") == 0)
+            p.balanceCom.z.p = value;
+        else if(nm.compare("balanceComZD") == 0)
+            p.balanceCom.z.d = value;
+        else if(nm.compare("balanceBodyRotationXP") == 0)
+            p.balanceBodyRotation.x.p = value;
+        else if(nm.compare("balanceBodyRotationXD") == 0)
+            p.balanceBodyRotation.x.d = value;
+        else if(nm.compare("balanceBodyRotationYP") == 0)
+            p.balanceBodyRotation.y.p = value;
+        else if(nm.compare("balanceBodyRotationYD") == 0)
+            p.balanceBodyRotation.y.d = value;
+        else
+            debug << "WalkingEngine::setWalkParameters(): No matching parameter found: " << nm << endl;
+    }
+    
+    //must do this
+    p.computeContants();
 }
 
 void WalkingEngine::doWalk()

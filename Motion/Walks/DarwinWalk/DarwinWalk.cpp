@@ -205,7 +205,7 @@ void DarwinWalk::writeParameters()
         else if(nm.compare("d_gain") == 0)
             Robot::Walking::GetInstance()->D_GAIN = (int)value;
         else
-            debug << "DarwinWalk::setWalkParameters(): No matching parameter found" << endl;
+            debug << "DarwinWalk::setWalkParameters(): No matching parameter found: " << nm << endl;
     }
 }
 
