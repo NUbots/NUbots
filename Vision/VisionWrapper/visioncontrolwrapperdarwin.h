@@ -5,17 +5,21 @@
 
 #include "Vision/visioncontroller.h"
 
-class NUSensorsData;
-class NUActionatorsData;
-
 class VisionControlWrapper
 {
 public:
     static VisionControlWrapper* getInstance();
     
+    //! Vision Control Interface
     int runFrame();
-    
     void process(JobList* jobs);
+    
+    //! Vision Save Images Interface
+    void saveAnImage() const;
+    
+    //! Vision Performace Data Interface    
+    int getNumFramesDropped() const {return data_wrapper->getNumFramesDropped();}      //! @brief Returns the number of dropped frames since start.
+    int getNumFramesProcessed() const {return data_wrapper->getNumFramesProcessed();}  //! @brief Returns the number of processed frames since start.
     
 private:
     VisionControlWrapper();
@@ -23,14 +27,10 @@ private:
     static VisionControlWrapper* instance;
     
     VisionController* controller;
+    DataWrapper* data_wrapper;
     
-    //! SavingImages:
-    bool isSavingImages;
-    bool isSavingImagesWithVaryingSettings;
-    ofstream imagefile;
-    ofstream sensorfile;
-    NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
-    NUActionatorsData* m_actions;               //!< pointer to shared actionators data object
+    
+    //! Other members
     CameraSettings currentSettings;
 };
 

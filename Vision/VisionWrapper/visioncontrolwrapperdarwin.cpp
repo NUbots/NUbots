@@ -1,6 +1,6 @@
 #include "visioncontrolwrapperdarwin.h"
 
-#include "Autoconfig/nubotdataconfig.h"
+#include "nubotdataconfig.h"
 #include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
 VisionControlWrapper* VisionControlWrapper::instance = 0;
@@ -15,6 +15,7 @@ VisionControlWrapper* VisionControlWrapper::getInstance()
 VisionControlWrapper::VisionControlWrapper()
 {
     controller = VisionController::getInstance();
+    data_wrapper = DataWrapper::getInstance();
 }
 
 int VisionControlWrapper::runFrame()
@@ -24,48 +25,82 @@ int VisionControlWrapper::runFrame()
 
 void VisionControlWrapper::process(JobList* jobs)
 {
-    #if DEBUG_VISION_VERBOSITY > 1
-        debug  << "VisionControlWrapper::Process - Begin" << endl;
-    #endif
-    static list<Job*>::iterator it;     // the iterator over the motion jobs
     
-    for (it = jobs->vision_begin(); it != jobs->vision_end();)
-    {
-        if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
-        {   
-            #if DEBUG_VISION_VERBOSITY > 1
-                debug << "VisionControlWrapper::process(): Processing a save images job." << endl;
-            #endif
-            static SaveImagesJob* job;
-            job = (SaveImagesJob*) (*it);
-            if(isSavingImages != job->saving())
-            {
-                if(job->saving() == true)
-                {
-                    currentSettings = controller->getCurrentCameraSettings();
-                    if (!imagefile.is_open())
-                        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
-                    if (!sensorfile.is_open())
-                        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
-                    m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
-                }
-                else
-                {
-                    imagefile.flush();
-                    sensorfile.flush();
+}
 
-                    ChangeCameraSettingsJob* newJob  = new ChangeCameraSettingsJob(currentSettings);
-                    jobs->addCameraJob(newJob);
-                    m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
-                }
-            }
-            isSavingImages = job->saving();
-            isSavingImagesWithVaryingSettings = job->varyCameraSettings();
-            it = jobs->removeVisionJob(it);
-        }
-        else 
+void VisionControlWrapper::saveAnImage() const
+{
+    #if DEBUG_VISION_VERBOSITY > 1
+        debug << "VisionControlWrapper::SaveAnImage(). Starting..." << endl;
+    #endif
+
+    if (!imagefile.is_open())
+        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+    if (!sensorfile.is_open())
+        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
+
+    if (imagefile.is_open() and numSavedImages < 2500)
+    {
+        if(sensorfile.is_open())
         {
-            ++it;
+            sensorfile << (*m_sensor_data) << flush;
+        }
+        NUImage buffer;
+        buffer.cloneExisting(*currentImage);
+        imagefile << buffer;
+        numSavedImages++;
+        
+        if (isSavingImagesWithVaryingSettings)
+        {
+            CameraSettings tempCameraSettings = currentImage->getCameraSettings();
+            if (numSavedImages % 10 == 0 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 0);
+            }
+            else if (numSavedImages % 10 == 1 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 50);
+            }
+            else if (numSavedImages % 10 == 2 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 25);
+            }
+            else if (numSavedImages % 10 == 3 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 0);
+            }
+            else if (numSavedImages % 10 == 4 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 25);
+            }
+            else if (numSavedImages % 10 == 5 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 50);
+            }
+            else if (numSavedImages % 10 == 6 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 100);
+            }
+            else if (numSavedImages % 10 == 7 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 150);
+            }
+            else if (numSavedImages % 10 == 8 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 200);
+            }
+            else if (numSavedImages % 10 == 9 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 300);
+            }
+            
+            //Set the Camera Setttings using Jobs:
+            ChangeCameraSettingsJob* newJob = new ChangeCameraSettingsJob(tempCameraSettings);
+            Blackboard->Jobs->addCameraJob(newJob);
+            //m_camera->setSettings(tempCameraSettings);
         }
     }
+    #if DEBUG_VISION_VERBOSITY > 1
+        debug << "Vision::SaveAnImage(). Finished" << endl;
+    #endif
 }

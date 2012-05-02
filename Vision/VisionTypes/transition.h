@@ -11,10 +11,10 @@ class Transition
 {
 public:
     Transition();
-    Transition(PointType& location, ClassIndex::Colour& before, ClassIndex::Colour& after, ScanDirection& direction);
+    Transition(PointType& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);
     Transition(ColourSegment before, ColourSegment after, ScanDirection direction);
     
-    void set(PointType& location, ClassIndex::Colour& before, ClassIndex::Colour& after, ScanDirection& direction);
+    void set(const PointType& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);
     void set(const ColourSegment& before, const ColourSegment& after, ScanDirection direction);
     
     const PointType& getLocation() const;

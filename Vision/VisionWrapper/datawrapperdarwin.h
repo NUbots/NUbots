@@ -7,6 +7,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/Jobs/JobList.h"
 #include "Kinematics/Horizon.h"
 
 #include "Vision/VisionTools/lookuptable.h"
@@ -14,10 +15,78 @@
 using namespace std;
 using namespace cv;
 
+class NUSensorsData;
+class NUActionatorsData;
 
 class DataWrapper
 {
     friend class VisionController;
+    friend class VisionControlWrapper;
+
+public:
+    //! Data access interface
+    
+    NUImage* getFrame();
+
+    bool getCTGVector(vector<float>& ctgvector);    //for transforms
+    
+    //! @brief Returns a reference to the kinematics horizon line.
+    const Horizon& getKinematicsHorizon();
+
+    //! @brief Generates spoofed camera transform vector.
+    bool getCTGVector(vector<float>& ctgvector);    //for transforms
+
+    const LookUpTable& getLUT() const;
+        
+    //! Data publish interface
+    void publish(DATA_ID id, const Mat& img);
+    //void publish(DATA_ID id, vector<VisionObject> data);
+
+    void debugRefresh();
+    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const Scalar& colour);
+    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours);
+    bool debugPublish(DEBUG_ID id, const Mat& img);
+
+    //! Control interface       
+private:    
+    void updateFrame();
+    bool loadLUTFromFile(const string& fileName);
+    int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
+    int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
+    void process(JobList* jobs);
+    
+    //! Vision Save Images Interface
+    void saveAnImage() const;
+    
+private:
+    DataWrapper();
+    ~DataWrapper();
+    
+    static DataWrapper* instance;
+
+    NUImage* m_current_frame;
+    NUSensorsData* m_sensor_data;
+    LookUpTable m_LUT;
+    
+    vector<float> m_horizon_coefficients;
+    Horizon m_kinematics_horizon;
+    
+    //! Frame info
+    double m_timestamp;
+    int numFramesDropped;
+    int numFramesProcessed;
+    
+    //! SavingImages:
+    bool isSavingImages;
+    bool isSavingImagesWithVaryingSettings;
+    int numSavedImages;
+    ofstream imagefile;
+    ofstream sensorfile;
+    
+    //! Shared data objects
+    NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
+    NUActionatorsData* m_actions;               //!< pointer to shared actionators data object
+    
 public:
     enum DATA_ID {
         DID_IMAGE,
@@ -41,48 +110,6 @@ public:
     static string getIDName(DEBUG_ID id);
     static string getIDName(DATA_ID id);
     static DataWrapper* getInstance();
-
-    /**
-    *   @brief Fetches the next frame from the webcam.
-    */
-    NUImage* getFrame();
-
-    bool getCTGVector(vector<float>& ctgvector);    //for transforms
-    
-    //! @brief Returns a reference to the kinematics horizon line.
-    const Horizon& getKinematicsHorizon();
-
-    //! @brief Generates spoofed camera transform vector.
-    bool getCTGVector(vector<float>& ctgvector);    //for transforms
-
-    const LookUpTable& getLUT() const;
-        
-    //! PUBLISH METHODS
-    void publish(DATA_ID id, const Mat& img);
-    //void publish(DATA_ID id, vector<VisionObject> data);
-
-    void debugRefresh();
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const Scalar& colour);
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours);
-    bool debugPublish(DEBUG_ID id, const Mat& img);
-
-private:
-    DataWrapper();
-    ~DataWrapper();
-    
-    void updateFrame();
-    bool loadLUTFromFile(const string& fileName);
-    
-    
-private:
-    static DataWrapper* instance;
-
-    NUImage* m_current_frame;
-    NUSensorsData* m_sensor_data;
-    LookUpTable m_LUT;
-    
-    vector<float> m_horizon_coefficients;
-    Horizon m_kinematics_horizon;
 };
 
 #endif // DATAWRAPPERDARWIN_H

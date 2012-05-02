@@ -357,6 +357,8 @@ void VisionBlackboard::updateLUT()
 
 /**
 *   @brief Retrieves a new image and sensor data from the wrapper.
+*   This method instructs the wrapper to update itself, then grabs the new information 
+*   from the wrapper.
 */
 void VisionBlackboard::update()
 {

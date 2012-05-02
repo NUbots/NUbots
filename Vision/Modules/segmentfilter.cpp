@@ -1,5 +1,7 @@
-#include "debug.h"
 #include "segmentfilter.h"
+
+#include "debug.h"
+#include "nubotdataconfig.h"
 
 #include <fstream>
 #include <boost/foreach.hpp>
@@ -41,9 +43,6 @@ void SegmentFilter::run() const
     outfile.open("2f.txt");
     outfile << v_filtered.getSegments();
     outfile.close();
-    
-    debug << "SegmentFilter::run - \nhorizontal " << h_result.size() << " matches.\n" << h_result;
-    debug << "vertical " << v_result.size() << " matches.\n" << v_result << endl;
 #endif
     //push results to BB
     vbb->setHorizontalTransitionsMap(h_result);
@@ -89,21 +88,17 @@ void SegmentFilter::preFilter(const SegmentedRegion &scans, SegmentedRegion &res
 
 void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::VFO_ID, vector<Transition> > &result) const
 {
-    vector<Transition> matches;
-    
     switch(scans.getDirection()) {
     case VERTICAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_v) {
-            checkRuleAgainstRegion(scans, rule, matches);
             vector<Transition>& result_trans = result[rule.getVFO_ID()];
-            result_trans.insert(result_trans.end(), matches.begin(), matches.end());
+            checkRuleAgainstRegion(scans, rule, result_trans);
         }
         break;
     case HORIZONTAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_h) {
-            checkRuleAgainstRegion(scans, rule, matches);
             vector<Transition>& result_trans = result[rule.getVFO_ID()];
-            result_trans.insert(result_trans.end(), matches.begin(), matches.end());
+            checkRuleAgainstRegion(scans, rule, result_trans);
         }
         break;
     default:
@@ -123,6 +118,13 @@ void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const C
     BOOST_FOREACH(const vector<ColourSegment> vs, segments) {
         //move down segments in scan pairwise
         before_it = vs.begin();
+        //first check start segment alone
+        if(rule.match(ColourTransitionRule::nomatch, *before_it, dir)) {
+            next_transition.set(before_it->getStart(), ClassIndex::invalid, before_it->getColour(), dir);
+            debug << "begin match: " << next_transition << endl;
+            matches.push_back(next_transition);
+        }
+        //then check the rest pairwise
         for(after_it = before_it+1; after_it < vs.end(); after_it++) {
             if(rule.match(*before_it, *after_it, dir)) {
                 next_transition.set(*before_it, *after_it, dir);
@@ -130,22 +132,13 @@ void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const C
             }
             before_it = after_it;
         }
+        //lastly check final segment alone - final segment is before_it
+        if(rule.match(*before_it, ColourTransitionRule::nomatch, dir)) {
+            next_transition.set(before_it->getEnd(), before_it->getColour(), ClassIndex::invalid, dir);
+            debug << "end match: " << next_transition << endl;
+            matches.push_back(next_transition);
+        }
     }
-    
-//    vector<vector<ColourSegment> >::const_iterator line_it;
-//    for(line_it = segments.begin(); line_it < segments.end(); line_it++) {
-//        //move down segments in scan pairwise
-//        before_it = line_it->begin();
-//        for(after_it = before_it+1; after_it < line_it->end(); after_it++) {
-//            if(rule.match(*before_it, *after_it, dir)) {
-//                cout << before_it->getStart() << " " << before_it->getEnd() << " ";
-//                cout << after_it->getStart() << " " << after_it->getEnd() << endl;
-//                next_transition.set(*before_it, *after_it, dir);
-//                matches.push_back(next_transition);
-//                before_it = after_it;
-//            }
-//        }
-//    }
 }
 
 void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, vector<ColourSegment>& replacements, ScanDirection dir) const

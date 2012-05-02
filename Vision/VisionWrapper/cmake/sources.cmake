@@ -22,7 +22,7 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
 datawrapperdarwin.cpp
-visioncontrolwrapper.cpp
+visioncontrolwrapperdarwin.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

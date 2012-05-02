@@ -1,6 +1,7 @@
 #include "pccamera.h"
 
 #include "debug.h"
+#include "nubotdataconfig.h"
 #include "GTAssert.h"
 
 #include <cstring>

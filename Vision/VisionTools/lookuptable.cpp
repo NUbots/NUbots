@@ -1,6 +1,6 @@
 #include "lookuptable.h"
 #include "debug.h"
-#include "VisionTools/classificationcolours.h"
+#include "Vision/VisionTools/classificationcolours.h"
 
 LookUpTable::LookUpTable()
 {

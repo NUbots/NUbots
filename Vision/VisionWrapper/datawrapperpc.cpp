@@ -2,6 +2,7 @@
 #include "datawrapperpc.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
 #include "debug.h"
+#include "nubotdataconfig.h"
 
 DataWrapper* DataWrapper::instance = 0;
 
@@ -114,6 +115,8 @@ DataWrapper::DataWrapper()
     results_window_name = "Results";
     namedWindow(results_window_name, CV_WINDOW_KEEPRATIO);
     results_img.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
+    
+    numFramesDropped = numFramesProcessed = 0;
 
 }
 
@@ -395,6 +398,8 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const Mat &img)
 
 void DataWrapper::updateFrame()
 {
+    numFramesProcessed++;
+    
     switch(METHOD) {
     case CAMERA:
         m_current_image = m_camera->grabNewImage();   //force get new frame
@@ -419,7 +424,6 @@ void DataWrapper::updateFrame()
         }
         break;
     }
-    
 }
 
 /**

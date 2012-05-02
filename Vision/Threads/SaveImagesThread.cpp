@@ -20,17 +20,18 @@
  */
 
 #include "SaveImagesThread.h"
-#include "Vision/Vision.h"
 
 #include "debug.h"
 #include "debugverbosityvision.h"
+
+#include "Vision/VisionWrapper/visioncontrolwrapperdarwin.h"
 
 #include <errno.h>
 
 /*! @brief Constructs the network thread
  */
 
-SaveImagesThread::SaveImagesThread(Vision* vision) : ConditionalThread(string("SaveImagesThread"), 0)
+SaveImagesThread::SaveImagesThread(VisionControlWrapper* vision) : ConditionalThread(string("SaveImagesThread"), 0)
 {
     #if DEBUG_VISION_VERBOSITY > 0
         debug << "SaveImagesThread::SaveImagesThread(" << vision << ") with priority " << static_cast<int>(m_priority) << endl;
@@ -60,7 +61,7 @@ void SaveImagesThread::run()
     {
         wait();
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-        m_vision->SaveAnImage();
+        m_vision->saveAnImage();
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         
     } 

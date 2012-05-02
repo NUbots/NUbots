@@ -36,11 +36,11 @@ public:
     */
     int runFrame();
 
-    /**
-    *   @brief Runs the vision system until a keypress is given.
-    *   @return A status indication of the execution.
-    */
-    int run();
+//    /**
+//    *   @brief Runs the vision system until a keypress is given.
+//    *   @return A status indication of the execution.
+//    */
+//    int run();
     
     /**
     *   @brief Gets the current camera settings from the blackboard and returns them
@@ -64,12 +64,9 @@ private:
     static VisionController* instance;           //! @variable Singleton instance
 
 //! VARIABLES
-    //VisionWrapper* wrapper;             //! @variable Reference to singleton Wrapper for vision system
-    VisionBlackboard* m_blackboard;            //! @variable Reference to singleton Blackboard for vision system
-    SegmentFilter segment_filter;       //! @variable Segment filter object for pre-classification filtering
-    
-    
-
+    DataWrapper* m_data_wrapper;               //! @variable Reference to singleton Wrapper for vision system
+    VisionBlackboard* m_blackboard;     //! @variable Reference to singleton Blackboard for vision system
+    SegmentFilter m_segment_filter;       //! @variable Segment filter object for pre-classification filtering
 };
 
 #endif // VISIONCONTROLLER_H

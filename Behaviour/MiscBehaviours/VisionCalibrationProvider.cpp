@@ -32,7 +32,7 @@
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUImage/NUImage.h"
-#include "Vision/ClassificationColours.h"
+#include "Vision/VisionTools/classificationcolours.h"
 #include "nubotdataconfig.h"
 
 #include "debug.h"

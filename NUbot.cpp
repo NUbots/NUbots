@@ -39,7 +39,7 @@
 // --------------------------------------------------------------- Module header files
 #ifdef USE_VISION
     #include "Infrastructure/NUImage/NUImage.h"
-    #include "Vision/VisionWrapper/visioncontrolwrapper.h"
+    #include "Vision/VisionWrapper/visioncontrolwrapperdarwin.h"
 #endif
 
 #ifdef USE_BEHAVIOUR

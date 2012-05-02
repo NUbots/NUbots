@@ -22,6 +22,7 @@ using namespace cv;
 class DataWrapper
 {
     friend class VisionController;
+    friend class VisionControlWrapper;
 
 public:
     
@@ -70,12 +71,15 @@ public:
     bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours);
     bool debugPublish(DEBUG_ID id, const Mat& img);
     
+    
 private:
     DataWrapper();
     ~DataWrapper();
     //void startImageFileGroup(string filename);
     void updateFrame();
     bool loadLUTFromFile(const string& fileName);
+    int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
+    int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
     
     void ycrcb2ycbcr(Mat* img_ycrcb);
     void generateImageFromMat(Mat& frame);
@@ -124,6 +128,11 @@ private:
     //! Used for displaying results
     string results_window_name;
     Mat results_img;
+    
+    //! Frame info
+    double m_timestamp;
+    int numFramesDropped;
+    int numFramesProcessed;
 
     
     //NUSensorsData* m_sensor_data;

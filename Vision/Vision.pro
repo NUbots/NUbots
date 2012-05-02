@@ -13,7 +13,7 @@ contains(PLATFORM, "darwin") {
 
     ROBOCUP_DIR = /home/shannon/robocup/            #change to darwin directory later
     INCLUDEPATH += $$ROBOCUP_DIR
-    INCLUDE_PATH += $$ROBOCUP_DIR/Autoconfig/
+    INCLUDEPATH += $$ROBOCUP_DIR/Autoconfig/
     
     HEADERS += \
         NUPlatform/Platforms/Darwin/DarwinCamera.h \
@@ -33,13 +33,15 @@ contains(PLATFORM, "pc") {
 
     ROBOCUP_DIR = /home/shannon/robocup/ 
     INCLUDEPATH += $$ROBOCUP_DIR
-    INCLUDE_PATH += $$ROBOCUP_DIR/Autoconfig/
+    INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
   
     HEADERS += \
         VisionTools/pccamera.h \
         VisionWrapper/datawrapperpc.h \
         VisionWrapper/visioncontrolwrapperpc.h \
+        debugverbosityvision.h \
         debug.h \
+        nubotdataconfig.h \
     
     SOURCES += \
         VisionTools/pccamera.cpp \
@@ -67,7 +69,6 @@ HEADERS += \
     VisionTypes/segmentedregion.h \
     VisionTypes/visionfieldobject.h \
     VisionTypes/objectcandidate.h \
-    debugvisionverbosities.h \
     basicvisiontypes.h \
     valgorithm.h \
     Modules/clustercandidates.h \
