@@ -145,6 +145,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.balanceMinError = Vector3<>(0.f, 0.f, 0.f);
   p.balanceMaxError = Vector3<>(10.f, 10.f, 10.f);
   //p.balanceCom.x = PIDCorrector::Parameters(0.1f, 0.2f, 0.1f, 2.f); // known good value
+
   p.balanceCom.x = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
   p.balanceCom.y = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
   p.balanceCom.z = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
@@ -190,25 +191,36 @@ void WalkingEngine::init()
   m_walk_requested = false;
   m_pedantic = false;
 
-  // Write initial positions.
-  m_initial_larm.resize(4,0.0f);
-  m_initial_larm[0] = 0.2;
-  m_initial_larm[1] = 1.571;
-  m_initial_larm[2] = -0.2;
-  m_initial_larm[3] = -1.571;
+  float halfArmRotation = p.walkArmRotation * 0.5f;
 
-  m_initial_rarm.resize(4,0.0f);
-  m_initial_rarm[0] = -0.2;
-  m_initial_rarm[1] = 1.571;
-  m_initial_rarm[2] = 0.2;
-  m_initial_rarm[3] = 1.571;
+  // Write initial positions.
+  m_initial_larm.resize(m_actions->getSize(NUActionatorsData::LArm),0.0f);
+  m_initial_larm[0] = p.standArmJointAngles.x;
+  m_initial_larm[1] = -(-mathGeneral::PI/2.0f + p.standArmJointAngles.y);
+  m_initial_larm[2] = -p.standArmJointAngles.y - halfArmRotation;
+  if(m_initial_larm.size() > 3)
+  {
+    m_initial_larm[3] = -mathGeneral::PI/2.0f;
+  }
+
+  m_initial_rarm.resize(m_actions->getSize(NUActionatorsData::RArm),0.0f);
+  m_initial_rarm[0] = -p.standArmJointAngles.x;
+  m_initial_rarm[1] = -(-mathGeneral::PI/2.0f + p.standArmJointAngles.y);
+  m_initial_rarm[2] = -(-p.standArmJointAngles.y - halfArmRotation);
+  if(m_initial_larm.size() > 3)
+  {
+    m_initial_rarm[3] = -(-mathGeneral::PI/2.0f);
+  }
 
   std::vector<float> joints(m_actions->getSize(NUActionatorsData::All),0.0f);
 
   Matrix leftTarget(4,4,true);
+
+  leftTarget[0][3] = p.standStandbyRefX;
   leftTarget[1][3] = p.standComPosition.y;
   leftTarget[2][3] = -p.standComPosition.z + 30.0f;
   Matrix rightTarget(4,4,true);
+  rightTarget[0][3] = p.standStandbyRefX;
   rightTarget[1][3] = -p.standComPosition.y;
   rightTarget[2][3] = -p.standComPosition.z + 30.0f;
   m_ik->calculateLegJoints(leftTarget, rightTarget, joints);
@@ -220,6 +232,11 @@ void WalkingEngine::init()
 
   m_initial_lleg.assign(l_leg_start,l_leg_end);
   m_initial_rleg.assign(r_leg_start,r_leg_end);
+
+  nu_nextLeftArmJoints.resize(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
+  nu_nextRightArmJoints.resize(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
+  nu_nextLeftLegJoints.resize(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
+  nu_nextRightLegJoints.resize(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
 }
 
 void WalkingEngine::setWalkParameters(const WalkParameters &walkparameters)
@@ -344,7 +361,7 @@ void WalkingEngine::doWalk()
 
 //    m_cycle_time = 0.001 * (m_data->CurrentTime - m_prev_time);
 //    m_prev_time = m_data->CurrentTime;
-    m_cycle_time = 0.02;
+    m_cycle_time = 0.02; // time in seconds.
     bool validJoints = m_data->getPosition(NUSensorsData::All, joints);
     if(validJoints)
     {
@@ -364,6 +381,19 @@ void WalkingEngine::update(/*WalkingEngineOutput& walkingEngineOutput*/)
     bool walking = true;
     bool careful = false;
     m_pedantic = careful;
+
+    float delta_time = m_data->CurrentTime - m_prev_time;
+    if(delta_time > (25 * m_cycle_time * 1000))
+    {
+        m_speed_yaw = 0.0f;
+        m_speed_x = 0.0f;
+        m_speed_y = 0.0f;
+        requestedWalkTarget = Pose2D(0, 0, 0);
+        requestedMotionType = stand;
+        currentRefX = p.standStandbyRefX;
+    }
+
+  m_prev_time = m_data->CurrentTime;
 
   if(walking/*theMotionSelection.ratios[MotionRequest::walk] > 0.f || theMotionSelection.ratios[MotionRequest::stand] > 0.f*/)
   {
@@ -833,39 +863,24 @@ void WalkingEngine::generateJointRequest()
 
   *(l_arm_it++) = targetStance.leftArmJointAngles[1];
   *(l_arm_it++) = targetStance.leftArmJointAngles[0];
+  *(l_arm_it++) = targetStance.leftArmJointAngles[3];
+
   if(total_arm_joints > 3)
   {
-    *(l_arm_it++) = targetStance.leftArmJointAngles[3];
     *(l_arm_it++) = targetStance.leftArmJointAngles[2];
   }
-  else
-  {
-  *(l_arm_it++) = targetStance.leftArmJointAngles[3];
-  }
+
   assert(l_arm_it == l_arm_end);
 
   *(r_arm_it++) = targetStance.rightArmJointAngles[1];
   *(r_arm_it++) = targetStance.rightArmJointAngles[0];
+  *(r_arm_it++) = targetStance.rightArmJointAngles[3];
   if(total_arm_joints > 3)
   {
-    *(r_arm_it++) = targetStance.rightArmJointAngles[3];
-    *(r_arm_it++) = targetStance.rightArmJointAngles[2];
-  }
-  else
-  {
-    *(r_arm_it++) = -targetStance.rightArmJointAngles[3];
+      *(r_arm_it++) = targetStance.rightArmJointAngles[2];
   }
 
   assert(r_arm_it == r_arm_end);
-
-//  joint_positions[Joint::LShoulderPitch] = targetStance.leftArmJointAngles[0];
-//  joint_positions[Joint::LShoulderRoll] = targetStance.leftArmJointAngles[1];
-//  joint_positions[Joint::LElbowYaw] = targetStance.leftArmJointAngles[2];
-//  joint_positions[Joint::LElbowRoll] = targetStance.leftArmJointAngles[3];
-//  joint_positions[Joint::RShoulderPitch] = targetStance.rightArmJointAngles[0];
-//  joint_positions[Joint::RShoulderRoll] = targetStance.rightArmJointAngles[1];
-//  joint_positions[Joint::RElbowYaw] = targetStance.rightArmJointAngles[2];
-//  joint_positions[Joint::RElbowRoll] = targetStance.rightArmJointAngles[3];
 
   float bodyRotationX = 0.f, bodyRotationY = 0.f;
   if(p.balance)
@@ -939,28 +954,6 @@ void WalkingEngine::generateJointRequest()
     }
   }
 
-
-  /*
-  #ifdef TARGET_SIM
-  RobotModel robotModel(jointRequest, theRobotDimensions, theMassCalibration);
-  Pose3D tmpComToLeftAnkle = Pose3D(-robotModel.centerOfMass).conc(robotModel.limbs[MassCalibration::footLeft]);
-  Pose3D tmpComToRightAnkle = Pose3D(-robotModel.centerOfMass).conc(robotModel.limbs[MassCalibration::footRight]);
-  assert(abs(tmpComToLeftAnkle.translation.x - comToLeftAnkle.translation.x) < 0.1f && abs(tmpComToLeftAnkle.translation.y - comToLeftAnkle.translation.y) < 0.1f && abs(tmpComToLeftAnkle.translation.z - comToLeftAnkle.translation.z) < 0.1f);
-  assert(abs(tmpComToRightAnkle.translation.x - comToRightAnkle.translation.x) < 0.1f && abs(tmpComToRightAnkle.translation.y - comToRightAnkle.translation.y) < 0.1f && abs(tmpComToRightAnkle.translation.z - comToRightAnkle.translation.z) < 0.1f);
-  #endif
-  */
-//  unsigned int num_joints = m_actions->getSize(NUActionatorsData::All);
-//  std::vector<float> joint_stiffness(num_joints, 0.0f);
-//  joint_stiffness[Joint::LAnklePitch] = p.standHardnessAnklePitch;
-//  joint_stiffness[Joint::LAnkleRoll] = p.standHardnessAnkleRoll;
-//  joint_stiffness[Joint::RAnklePitch] = p.standHardnessAnklePitch;
-//  joint_stiffness[Joint::RAnkleRoll] = p.standHardnessAnkleRoll;
-
-  static vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
-  static vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
-  static vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
-  static vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
-
   std::vector<float>::iterator startIndex = joint_positions.begin()+2;
   std::vector<float>::iterator endIndex = startIndex + nu_nextLeftArmJoints.size();
   nu_nextLeftArmJoints.assign(startIndex, endIndex);
@@ -974,40 +967,18 @@ void WalkingEngine::generateJointRequest()
   endIndex = startIndex + nu_nextRightLegJoints.size();
   nu_nextRightLegJoints.assign(startIndex, endIndex);
 
-  //UPDATE ARMS:
-//  static vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
-  m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, 50);
-  m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, 50);
+  // If generated motion was a standing motion, save this as the new initial target.
+  if(currentMotionType == stand)
+  {
+      m_initial_lleg.assign(nu_nextLeftLegJoints.begin(), nu_nextLeftLegJoints.end());
+      m_initial_rleg.assign(nu_nextRightLegJoints.begin(), nu_nextRightLegJoints.end());
+  }
 
-  //UPDATE LEGS:
-//  static vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
-  std::vector<float> legstiffness(m_actions->getSize(NUActionatorsData::LLeg), 75.0f);
-  legstiffness[5] = p.standHardnessAnkleRoll;
-  legstiffness[6] = p.standHardnessAnklePitch;
-
-//  nu_nextRightLegJoints[1] -= 0.2;
-//  nu_nextLeftLegJoints[1] -= 0.2;
-
-
-//  for(std::vector<float>::iterator it = nu_nextRightLegJoints.begin(); it != nu_nextRightLegJoints.end(); ++it)
-//  {
-//      if(it != nu_nextRightLegJoints.begin()) debug << ", ";
-//      debug << (*it);
-//  }
-//  debug << std::endl;
-
-
-  m_actions->add(NUActionatorsData::RLeg, 0, nu_nextRightLegJoints, legstiffness);
-  m_actions->add(NUActionatorsData::LLeg, 0, nu_nextLeftLegJoints, legstiffness);
-  //std::vector<float> head(2,0.0f);
-  //head[0] = -0.7;
-  //m_actions->add(NUActionatorsData::Head, m_data->CurrentTime, head, 70);
     return;
 }
 
 void WalkingEngine::generateOutput(/*WalkingEngineOutput& walkingEngineOutput*/)
 {
-    return;
 //  if(observedPendulumPlayer.isActive())
 //  {
 //    const float stepDuration = (observedPendulumPlayer.te - observedPendulumPlayer.next.tb) * 2.f;
@@ -1030,6 +1001,19 @@ void WalkingEngine::generateOutput(/*WalkingEngineOutput& walkingEngineOutput*/)
 //  walkingEngineOutput.executedWalk = theMotionRequest.walkRequest;
 //  walkingEngineOutput.executedWalk.kickType = kickPlayer.isActive() ? kickPlayer.getType() : WalkRequest::none;
 //  (JointRequest&)walkingEngineOutput = jointRequest;
+
+    // Set the arm positions.
+    m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, 50);
+    m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, 50);
+
+    // Set the leg positions.
+    std::vector<float> legstiffness(m_actions->getSize(NUActionatorsData::LLeg), 75.0f);
+    legstiffness[5] = p.standHardnessAnkleRoll;
+    legstiffness[6] = p.standHardnessAnklePitch;
+
+    m_actions->add(NUActionatorsData::RLeg, 0, nu_nextRightLegJoints, legstiffness);
+    m_actions->add(NUActionatorsData::LLeg, 0, nu_nextLeftLegJoints, legstiffness);
+    return;
 }
 
 void WalkingEngine::generateDummyOutput(/*WalkingEngineOutput& walkingEngineOutput*/)

@@ -46,6 +46,11 @@ public:
 
 private:
 
+  vector<float> nu_nextLeftArmJoints;   // Left Arm
+  vector<float> nu_nextRightArmJoints;  // Right Arm
+  vector<float> nu_nextLeftLegJoints;   // Left Leg
+  vector<float> nu_nextRightLegJoints;  // Right Leg
+
   class PIDCorrector
   {
   public:
