@@ -21,8 +21,6 @@
 using namespace std;
 using namespace cv;
 
-typedef Point_<int> PointType;  //! Use opencv points.
-
 class HorizonInterpolate
 {
 public:

@@ -3,7 +3,8 @@
 
 #include <opencv2/core/core.hpp>
 
-typedef cv::Point2i PointType;      //! Use opencv points.
+//typedef cv::Point2i PointType;      //! Use opencv points.
+typedef cv::Point_<unsigned int> PointType;
 
 namespace VisionID {
     enum ScanDirection {

@@ -6,7 +6,7 @@ INCLUDEPATH += /usr/include/boost/
 
 LIBS += -lopencv_core -lopencv_highgui
 
-PLATFORM = darwin
+PLATFORM = pc
 
 contains(PLATFORM, "darwin") {
     message("Compiling for Darwin")
