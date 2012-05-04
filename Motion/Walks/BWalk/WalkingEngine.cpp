@@ -17,6 +17,7 @@
 #include "Requirements/ForwardKinematic.h"
 #include "NUPlatform/NUPlatform.h"
 #include "debug.h"
+#include "debugverbositynumotion.h"
 
 //#include "Tools/InverseKinematic.h"
 //#include "Tools/MessageQueue/InMessage.h"
@@ -72,11 +73,9 @@ template<typename T> ostream& operator<<(ostream& output, const Vector2<T>& v)
 
 WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NUInverseKinematics* ik) : NUWalk(data,actions), emergencyShutOff(false), currentMotionType(stand),  m_ik(ik), instable(true), beginOfStable(0)
 {
-  m_walk_parameters.load("BWalk");
-
   observedPendulumPlayer.walkingEngine = this;
 
-  // default parameters
+  // default values for parameters not in the cfg file
   p.standBikeRefX = 20.f;
   p.standStandbyRefX = 3.f;
   //p.standComPosition = Vector3<>(/*20.5f*/ 3.5f /*0.f*/, 50.f, /*259.f*/ /*261.5f*/ 258.0f);
@@ -88,18 +87,18 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.standHardnessAnklePitch = 75;
   p.standHardnessAnkleRoll = 75;
 
-  p.walkRefX = 15.f;
+  //p.walkRefX = 15.f;
 //  p.walkRefX = 10.f;
-  p.walkRefXAtFullSpeedX = 7.f;
+  //p.walkRefXAtFullSpeedX = 7.f;
 //  p.walkRefXAtFullSpeedX = 3.f;
 //  p.walkRefY = 50.f;
-  p.walkRefY = 40.f;
-  p.walkRefYAtFullSpeedX = 38.f;
+  //p.walkRefY = 40.f;
+  //p.walkRefYAtFullSpeedX = 38.f;
 //  p.walkRefYAtFullSpeedY = 50.f;
-  p.walkRefYAtFullSpeedY = 40.f;
-  p.walkStepDuration = 470.f;
-  p.walkStepDurationAtFullSpeedX = 400.f;
-  p.walkStepDurationAtFullSpeedY = 400.f;
+  //p.walkRefYAtFullSpeedY = 40.f;
+  //p.walkStepDuration = 470.f;
+  //p.walkStepDurationAtFullSpeedX = 400.f;
+  //p.walkStepDurationAtFullSpeedY = 400.f;
   p.walkHeight = Vector2<>(p.standComPosition.z, 300.f);
   p.walkArmRotation = 0.4f;
   p.walkRefXSoftLimit.min = -3.f;
@@ -111,24 +110,24 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.walkRefYLimitAtFullSpeedX.min = -30.f;
   p.walkRefYLimitAtFullSpeedX.max = 30.f;
   //p.walkLiftOffset = Vector3<>(0.f, -5.f, 17.f);
-  p.walkLiftOffset = Vector3<>(0.f, -5.f, 25.f);
-  p.walkLiftOffsetJerk = 0.f;
-  p.walkLiftOffsetAtFullSpeedY = Vector3<>(0.f, -10.f, 27.f);
-  p.walkLiftRotation = Vector3<>(-0.05f, -0.05f, 0.f);
-  p.walkAntiLiftOffset = Vector3<>(0.f, 0.f, 2.3f);
-  p.walkAntiLiftOffsetAtFullSpeedY = Vector3<>(0.f, 0.f, 2.3f);
+  //p.walkLiftOffset = Vector3<>(0.f, -5.f, 25.f);
+  //p.walkLiftOffsetJerk = 0.f;
+  //p.walkLiftOffsetAtFullSpeedY = Vector3<>(0.f, -10.f, 27.f);
+  //p.walkLiftRotation = Vector3<>(-0.05f, -0.05f, 0.f);
+  //p.walkAntiLiftOffset = Vector3<>(0.f, 0.f, 2.3f);
+  //p.walkAntiLiftOffsetAtFullSpeedY = Vector3<>(0.f, 0.f, 2.3f);
 
-  p.walkComBodyRotation = 0.05f;
+  //p.walkComBodyRotation = 0.05f;
   p.walkFadeInShape = Parameters::sine;
 
   p.kickComPosition = Vector3<>(20.f, 0.f, 245.f);
   p.kickX0Y = 1.f;
   p.kickHeight = Vector2<>(p.standComPosition.z, 300.f);
 
-  p.speedMax = Pose2D(0.6f, 60.f * 2.f, 50.f);
-  p.speedMaxMin = Pose2D(0.2f, 10.f, 0.f);
-  p.speedMaxBackwards = 50 * 2.f;
-  p.speedMaxChange = Pose2D(0.3f, 8.f, 20.f);
+  //p.speedMax = Pose2D(0.6f, 60.f * 2.f, 50.f);
+  //p.speedMaxMin = Pose2D(0.2f, 10.f, 0.f);
+  //p.speedMaxBackwards = 50 * 2.f;
+  //p.speedMaxChange = Pose2D(0.3f, 8.f, 20.f);
 
   //p.observerMeasurementMode = Parameters::torsoMatrix;
   p.observerMeasurementMode = Parameters::robotModel;
@@ -146,12 +145,12 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.balanceMaxError = Vector3<>(10.f, 10.f, 10.f);
   //p.balanceCom.x = PIDCorrector::Parameters(0.1f, 0.2f, 0.1f, 2.f); // known good value
 
-  p.balanceCom.x = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
-  p.balanceCom.y = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
-  p.balanceCom.z = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
+  //p.balanceCom.x = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
+  //p.balanceCom.y = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
+  //p.balanceCom.z = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
   //p.balanceCom.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 0.f);
-  p.balanceBodyRotation.x = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
-  p.balanceBodyRotation.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
+  //p.balanceBodyRotation.x = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
+  //p.balanceBodyRotation.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
   p.balanceStepSize = Vector2<>(0.08f, -0.04f);
   p.balanceStepSizeWhenInstable = Vector2<>(0.16f, -0.06f);
   p.balanceStepSizeWhenPedantic = Vector2<>(0.04f, -0.02f);
@@ -167,6 +166,10 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.odometryUpcomingOffset = Pose2D(0.f, 0.f, 0.f);
 
   bodyToCom = Vector3<>(0,0,0);
+  
+  m_walk_parameters.load("BWalkStart");
+  writeParameters();
+  
   init();
 }
 
@@ -239,8 +242,11 @@ void WalkingEngine::init()
   nu_nextRightLegJoints.resize(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
 }
 
-void WalkingEngine::setWalkParameters(const WalkParameters &walkparameters)
+void WalkingEngine::setWalkParameters(const WalkParameters& walkparameters)
 {
+#if DEBUG_NUMOTION_VERBOSITY > 0
+    debug << "WalkingEngine::setWalkParameters: " << endl;
+#endif
     m_walk_parameters = walkparameters;
     writeParameters();
 }
@@ -255,7 +261,7 @@ void WalkingEngine::writeParameters()
         string& nm = params.at(i).name();
         float value = params.at(i).get();
 #if DEBUG_NUMOTION_VERBOSITY > 0
-    debug << nm << " <- " << value << endl;
+    debug << nm << " : " << value << endl;
 #endif
         if(nm.compare("walkRefX") == 0)
             p.walkRefX = value;
@@ -393,47 +399,47 @@ void WalkingEngine::update(/*WalkingEngineOutput& walkingEngineOutput*/)
         currentRefX = p.standStandbyRefX;
     }
 
-  m_prev_time = m_data->CurrentTime;
-
-  if(walking/*theMotionSelection.ratios[MotionRequest::walk] > 0.f || theMotionSelection.ratios[MotionRequest::stand] > 0.f*/)
-  {
-    //Vector2<> targetBalanceStepSize = theMotionRequest.walkRequest.pedantic ? p.balanceStepSizeWhenPedantic : p.balanceStepSize;
-      Vector2<> targetBalanceStepSize = m_pedantic ? p.balanceStepSizeWhenPedantic : p.balanceStepSize;
-    Vector2<> step = targetBalanceStepSize - balanceStepSize;
-    Vector2<> maxStep(std::abs(balanceStepSize.x - p.balanceStepSizeWhenPedantic.x) * p.balanceStepSizeInterpolation,
-                      std::abs(balanceStepSize.y - p.balanceStepSizeWhenPedantic.y) * p.balanceStepSizeInterpolation);
-    if(step.x > maxStep.x)
-      step.x = maxStep.x;
-    else if(step.x < -maxStep.x)
-      step.x = -maxStep.x;
-    if(step.y > maxStep.y)
-      step.y = maxStep.y;
-    else if(step.y < -maxStep.y)
-      step.y = -maxStep.y;
-
-    balanceStepSize += step;
-    updateMotionRequest();
-    updateObservedPendulumPlayer();
-    computeMeasuredStance();
-    computeExpectedStance();
-    computeError();
-    updatePendulumPlayer();
-//    updateKickPlayer();
-    generateTargetStance();
-    generateJointRequest();
-    computeOdometryOffset();
-    generateOutput(/*walkingEngineOutput*/);
-  }
-  else
-  {
-    currentMotionType = stand;
-    /*
-    if(theMotionSelection.ratios[MotionRequest::specialAction] >= 1.f)
-      if(theMotionSelection.specialActionRequest.specialAction == SpecialActionRequest::playDead || theMotionSelection.specialActionRequest.specialAction == SpecialActionRequest::sitDown)
-        currentRefX = p.standStandbyRefX;
-        */
-    generateDummyOutput(/*walkingEngineOutput*/);
-  }
+    m_prev_time = m_data->CurrentTime;
+    
+    if(walking/*theMotionSelection.ratios[MotionRequest::walk] > 0.f || theMotionSelection.ratios[MotionRequest::stand] > 0.f*/)
+    {
+        //Vector2<> targetBalanceStepSize = theMotionRequest.walkRequest.pedantic ? p.balanceStepSizeWhenPedantic : p.balanceStepSize;
+        Vector2<> targetBalanceStepSize = m_pedantic ? p.balanceStepSizeWhenPedantic : p.balanceStepSize;
+        Vector2<> step = targetBalanceStepSize - balanceStepSize;
+        Vector2<> maxStep(std::abs(balanceStepSize.x - p.balanceStepSizeWhenPedantic.x) * p.balanceStepSizeInterpolation,
+                          std::abs(balanceStepSize.y - p.balanceStepSizeWhenPedantic.y) * p.balanceStepSizeInterpolation);
+        if(step.x > maxStep.x)
+            step.x = maxStep.x;
+        else if(step.x < -maxStep.x)
+            step.x = -maxStep.x;
+        if(step.y > maxStep.y)
+            step.y = maxStep.y;
+        else if(step.y < -maxStep.y)
+            step.y = -maxStep.y;
+        
+        balanceStepSize += step;
+        updateMotionRequest();
+        updateObservedPendulumPlayer();
+        computeMeasuredStance();
+        computeExpectedStance();
+        computeError();
+        updatePendulumPlayer();
+        //    updateKickPlayer();
+        generateTargetStance();
+        generateJointRequest();
+        computeOdometryOffset();
+        generateOutput(/*walkingEngineOutput*/);
+    }
+    else
+    {
+        currentMotionType = stand;
+        /*
+        if(theMotionSelection.ratios[MotionRequest::specialAction] >= 1.f)
+          if(theMotionSelection.specialActionRequest.specialAction == SpecialActionRequest::playDead || theMotionSelection.specialActionRequest.specialAction == SpecialActionRequest::sitDown)
+            currentRefX = p.standStandbyRefX;
+            */
+        generateDummyOutput(/*walkingEngineOutput*/);
+    }
 }
 
 void WalkingEngine::updateMotionRequest()
