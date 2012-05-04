@@ -80,7 +80,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.standStandbyRefX = 3.f;
   //p.standComPosition = Vector3<>(/*20.5f*/ 3.5f /*0.f*/, 50.f, /*259.f*/ /*261.5f*/ 258.0f);
   //p.standComPosition = Vector3<>(3.5f, 50.f,258.0f);
-  p.standComPosition = Vector3<>(3.5f, 40.f, 180.0f);
+  p.standComPosition = Vector3<>(3.5f, 50.f, 160.0f);
   p.standBodyTilt = 0.0f; //01f;
   p.standArmJointAngles = Vector2<>(0.2f, 0.f);
 
@@ -142,15 +142,15 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   p.balance = true;
   //p.balance = false;
   p.balanceMinError = Vector3<>(0.f, 0.f, 0.f);
-  p.balanceMaxError = Vector3<>(10.f, 10.f, 10.f);
+  p.balanceMaxError = Vector3<>(8.f, 8.f, 8.f);
   //p.balanceCom.x = PIDCorrector::Parameters(0.1f, 0.2f, 0.1f, 2.f); // known good value
 
-  //p.balanceCom.x = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
-  //p.balanceCom.y = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
-  //p.balanceCom.z = PIDCorrector::Parameters(0.11f, 0.3f, 0.0f, 30.f);
-  //p.balanceCom.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 0.f);
-  //p.balanceBodyRotation.x = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
-  //p.balanceBodyRotation.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
+  p.balanceCom.x = PIDCorrector::Parameters(0.11f, 0.0f, 0.0f, 30.f);
+  p.balanceCom.y = PIDCorrector::Parameters(0.11f, 0.0f, 0.0f, 30.f);
+  p.balanceCom.z = PIDCorrector::Parameters(0.11f, 0.0f, 0.0f, 30.f);
+  p.balanceCom.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 0.f);
+  p.balanceBodyRotation.x = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
+  p.balanceBodyRotation.y = PIDCorrector::Parameters(0.f, 0.0f, 0.f, 30.f);
   p.balanceStepSize = Vector2<>(0.08f, -0.04f);
   p.balanceStepSizeWhenInstable = Vector2<>(0.16f, -0.06f);
   p.balanceStepSizeWhenPedantic = Vector2<>(0.04f, -0.02f);
@@ -167,7 +167,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
 
   bodyToCom = Vector3<>(0,0,0);
   
-  m_walk_parameters.load("BWalkStart");
+  m_walk_parameters.load("BWalk");
   writeParameters();
   
   init();
@@ -253,17 +253,19 @@ void WalkingEngine::setWalkParameters(const WalkParameters& walkparameters)
 
 void WalkingEngine::writeParameters()
 {
-#if DEBUG_NUMOTION_VERBOSITY > 0
+//#if DEBUG_NUMOTION_VERBOSITY > 0
     debug << "WalkingEngine::writeParameters: " << endl;
-#endif
+//#endif
     vector<Parameter>& params = m_walk_parameters.getParameters();
     for(unsigned int i=0; i<params.size(); i++) {
         string& nm = params.at(i).name();
         float value = params.at(i).get();
-#if DEBUG_NUMOTION_VERBOSITY > 0
+//#if DEBUG_NUMOTION_VERBOSITY > 0
     debug << nm << " : " << value << endl;
-#endif
-        if(nm.compare("walkRefX") == 0)
+//#endif
+        if(nm.compare("standComPositionZ") == 0)
+            p.standComPosition.z = value;
+        else if(nm.compare("walkRefX") == 0)
             p.walkRefX = value;
         else if(nm.compare("walkRefXAtFullSpeedX") == 0)
             p.walkRefXAtFullSpeedX = value;
