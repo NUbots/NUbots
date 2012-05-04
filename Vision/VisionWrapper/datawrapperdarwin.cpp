@@ -99,7 +99,7 @@ bool DataWrapper::getCTGVector(vector<float>& ctgvector)
 const LookUpTable& DataWrapper::getLUT() const
 {
     //! @todo Implement + Comment
-    return LUT;
+    return m_LUT;
 }
     
 //! PUBLISH METHODS
@@ -108,10 +108,10 @@ void DataWrapper::publish(DATA_ID id, const Mat& img)
     //! @todo Implement + Comment
 }
 
-void DataWrapper::publish(DATA_ID id, vector<VisionFieldObject> data)
-{
-    //! @todo Implement + Comment
-}
+//void DataWrapper::publish(DATA_ID id, vector<VisionFieldObject> data)
+//{
+//    //! @todo Implement + Comment
+//}
 
 void DataWrapper::debugRefresh()
 {

@@ -9,6 +9,7 @@
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 #include "Kinematics/Horizon.h"
 
 #include "Vision/VisionTools/lookuptable.h"
