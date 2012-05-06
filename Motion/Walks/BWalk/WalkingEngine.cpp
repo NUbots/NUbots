@@ -462,7 +462,7 @@ void WalkingEngine::updateMotionRequest()
 //    requestedWalkTarget = Pose2D(1.0, 0, 0);
     requestedMotionType = stand;
 
-    if(fabs(m_speed_x) > 1 or fabs(m_speed_y) > 1 or fabs(m_speed_yaw) > 0.001)
+    if(true or fabs(m_speed_x) > 1 or fabs(m_speed_y) > 1 or fabs(m_speed_yaw) > 0.001)
     {
         m_walk_requested = true;
         if(!instable)
@@ -974,6 +974,19 @@ void WalkingEngine::generateJointRequest()
   startIndex = endIndex;
   endIndex = startIndex + nu_nextRightLegJoints.size();
   nu_nextRightLegJoints.assign(startIndex, endIndex);
+  
+  // Hack to move both feet.
+  const unsigned int hip_yaw_index = 2;
+  if (fabs(nu_nextRightLegJoints[hip_yaw_index]) < fabs(nu_nextLeftLegJoints[hip_yaw_index]))
+  {
+    nu_nextRightLegJoints[hip_yaw_index] = nu_nextLeftLegJoints[hip_yaw_index] / -2.0f;
+    nu_nextLeftLegJoints[hip_yaw_index] /= 2.0f;
+  }
+  else if (fabs(nu_nextRightLegJoints[hip_yaw_index]) >  fabs(nu_nextLeftLegJoints[hip_yaw_index]))
+  {
+    nu_nextLeftLegJoints[hip_yaw_index] = nu_nextRightLegJoints[hip_yaw_index] / -2.0f;
+    nu_nextRightLegJoints[hip_yaw_index] /= 2.0f;
+  }
 
   // If generated motion was a standing motion, save this as the new initial target.
   if(currentMotionType == stand)
