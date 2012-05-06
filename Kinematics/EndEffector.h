@@ -8,6 +8,7 @@ class EndEffector
 {
     Matrix m_startTransform;
     std::vector<Link> m_links;
+    std::vector<Matrix> m_transforms;
     Matrix m_endTransform;
     std::string m_name;
 
@@ -17,6 +18,8 @@ public:
                 const Matrix& endTrans,
                 const std::string& effectorName = std::string("Unknown"));
     Matrix CalculateTransform(std::vector<float> jointValues);
+    void UpdateModel(std::vector<float> jointValues);
+    Matrix EndPosition() const;
     std::string name() const {return m_name;}
     const std::vector<Link>* links() const {return &m_links;}
 };

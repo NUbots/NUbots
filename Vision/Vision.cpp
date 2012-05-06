@@ -241,6 +241,8 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
 
 //START OBSTACLE DETECTION
+//! TODO: TURN THIS BACK ON ONCE FIXED.
+/*
     vector<ObjectCandidate> obstacle_candidates;
     vector<AmbiguousObject> obstacle_objects;
 
@@ -258,6 +260,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "\tObstacle Detection: Finnished" <<endl;
     #endif
+ */
 //END OBSTACLE DETECTION
 
     //! Scan Below Horizon Image:

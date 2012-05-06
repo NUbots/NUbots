@@ -239,10 +239,29 @@ Link Kinematics::LinkFromText(const std::string& text)
     return Link(tempParam, jointName);
 }
 
+void Kinematics::UpdateEffector(unsigned int index, const std::vector<float>& jointValues)
+{
+    m_endEffectors[index].UpdateModel(jointValues);
+}
+
+Matrix Kinematics::EndEffectorPosition(unsigned int index) const
+{
+    return m_endEffectors[index].EndPosition();
+}
 
 Matrix Kinematics::CalculateTransform(unsigned int index, const std::vector<float>& jointValues)
 {
     return m_endEffectors[index].CalculateTransform(jointValues);
+}
+
+Vector3<float> Kinematics::calculateCentreOfMass()
+{
+    Vector3<float> com_position; // Position of CoM in 3D space (x,y,z)
+    for (RobotModel::iterator effector = m_endEffectors.begin(); effector != m_endEffectors.end(); ++effector)
+    {
+        // do something.
+    }
+    return com_position;
 }
 
 Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY)

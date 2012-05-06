@@ -160,11 +160,6 @@ protected:
         
         if (not m_pan_started or m_pan_finished)
         {
-            //xxx: fixme: need to find the most recently seen goal, and if we haven't seen it in a while look for the closest goal
-            float goalLastSeen = Blackboard->Objects->StationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].timeSinceLastSeen();
-            goalLastSeen = min(goalLastSeen,Blackboard->Objects->StationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].timeSinceLastSeen());
-            goalLastSeen = min(goalLastSeen,Blackboard->Objects->StationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].timeSinceLastSeen());
-            goalLastSeen = min(goalLastSeen,Blackboard->Objects->StationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].timeSinceLastSeen());
             
             if (ball.TimeSinceLastSeen() > 2300)
             {
@@ -202,7 +197,7 @@ protected:
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         }
         
-        if((ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSeen() > 0 && m_pan_finished)
+        if((ball.estimatedDistance() < 21.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSeen() > 0 && m_pan_finished)
         {
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
@@ -262,4 +257,5 @@ protected:
 
 
 #endif
+
 
