@@ -1,20 +1,20 @@
 #include "visionfieldobject.h"
 
-std::map<VisionFieldObject::VFO_ID, VisionID::EXTERNAL_FIELD_OBJECT_ID> createMap()
-{
-  std::map<VisionFieldObject::VFO_ID, VisionID::EXTERNAL_FIELD_OBJECT_ID> m;
-  m[VisionFieldObject::BALL]            = VisionID::BALL;
-  m[VisionFieldObject::GOAL_Y]          = VisionID::GOAL_Y;
-  m[VisionFieldObject::GOAL_B]          = VisionID::GOAL_B;
-  m[VisionFieldObject::LINE]            = VisionID::LINE;
-  m[VisionFieldObject::CORNER]          = VisionID::CORNER;
-  m[VisionFieldObject::CENTRE_CIRCLE]   = VisionID::CENTRE_CIRCLE;
-  m[VisionFieldObject::OBSTACLE]        = VisionID::OBSTACLE;
-  m[VisionFieldObject::UNKNOWN]         = VisionID::UNKNOWN;
-  return m;
-}
+//std::map<VisionFieldObject::VFO_ID, VisionID::EXTERNAL_FIELD_OBJECT_ID> createMap()
+//{
+//  std::map<VisionFieldObject::VFO_ID, VisionID::EXTERNAL_FIELD_OBJECT_ID> m;
+//  m[VisionFieldObject::BALL]            = VisionID::BALL;
+//  m[VisionFieldObject::GOAL_Y]          = VisionID::GOAL_Y;
+//  m[VisionFieldObject::GOAL_B]          = VisionID::GOAL_B;
+//  m[VisionFieldObject::LINE]            = VisionID::LINE;
+//  m[VisionFieldObject::CORNER]          = VisionID::CORNER;
+//  m[VisionFieldObject::CENTRE_CIRCLE]   = VisionID::CENTRE_CIRCLE;
+//  m[VisionFieldObject::OBSTACLE]        = VisionID::OBSTACLE;
+//  m[VisionFieldObject::UNKNOWN]         = VisionID::UNKNOWN;
+//  return m;
+//}
 
-static std::map<VisionFieldObject::VFO_ID, VisionID::EXTERNAL_FIELD_OBJECT_ID> id_map = createMap();
+//static std::map<VisionFieldObject::VFO_ID, VisionID::EXTERNAL_FIELD_OBJECT_ID> id_map = createMap();
 
 std::string VisionFieldObject::getVFOName(VFO_ID id)
 {
@@ -52,10 +52,10 @@ VisionFieldObject::VFO_ID VisionFieldObject::getVFOFromName(const std::string &n
 
 VisionFieldObject::VisionFieldObject()
 {
-    VisionFieldObject(UNKNOWN);
+    
 }
 
-VisionFieldObject::VisionFieldObject(VFO_ID id)
-{
-    this->id = id;
-}
+//VisionFieldObject::VisionFieldObject(VFO_ID id)
+//{
+//    this->id = id;
+//}

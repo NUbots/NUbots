@@ -4,6 +4,7 @@
 #include "Infrastructure/Jobs/JobList.h"
 
 #include "Vision/visioncontroller.h"
+#include "Vision/VisionWrapper/datawrappercurrent.h"
 
 class VisionControlWrapper
 {
@@ -28,10 +29,6 @@ private:
     
     VisionController* controller;
     DataWrapper* data_wrapper;
-    
-    
-    //! Other members
-    CameraSettings currentSettings;
 };
 
 #endif // CONTROLWRAPPER_H

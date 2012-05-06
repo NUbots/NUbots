@@ -80,7 +80,7 @@ private:
     void process(JobList* jobs);
     
     //! Vision Save Images Interface
-    void saveAnImage() const;
+    void saveAnImage();
     
 private:
     DataWrapper();
@@ -104,6 +104,7 @@ private:
     int numSavedImages;
     ofstream imagefile;
     ofstream sensorfile;
+    CameraSettings currentSettings;
     
     //! Shared data objects
     NUImage* m_current_frame;

@@ -2,6 +2,12 @@
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
+#include "nubotdataconfig.h"
+#include "debug.h"
+#include "debugverbosityvision.h"
+
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "NUPlatform/NUActionators/NUSounds.h"
 
 DataWrapper* DataWrapper::instance = 0;
 
@@ -96,13 +102,17 @@ bool DataWrapper::getCTGVector(vector<float>& ctgvector)
     return m_sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
 }
 
+/*! @brief Returns a reference to the stored Lookup Table
+*   @return mLUT A reference to the current LUT
+*/
 const LookUpTable& DataWrapper::getLUT() const
 {
-    //! @todo Implement + Comment
     return m_LUT;
 }
     
 //! PUBLISH METHODS
+
+
 void DataWrapper::publish(DATA_ID id, const Mat& img)
 {
     //! @todo Implement + Comment
@@ -134,6 +144,10 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const Mat& img)
     //! @todo better debug printing + Comment
 }
 
+/*! @brief Updates the held information ready for a new frame.
+*   Gets copies of the actions and sensors pointers from the blackboard and
+*   gets a new image from the blackboard. Updates framecounts.
+*/
 void DataWrapper::updateFrame()
 {
     //! @todo Finish implementing & Comment
@@ -147,11 +161,21 @@ void DataWrapper::updateFrame()
     m_timestamp = Blackboard->Image->GetTimestamp();
 }
 
+/**
+*   @brief loads the colour look up table
+*   @param filename The filename for the LUT stored on disk
+*   @note Taken from original vision system
+*/
 bool DataWrapper::loadLUTFromFile(const string& fileName)
 {
-    //! @todo Implement + Comment
+    return LUT.loadLUTFromFile(fileName);
 }
 
+/**
+*   @brief Processes saving images jobs.
+*   @param jobs The current JobList
+*   @note Taken from original vision system
+*/
 void DataWrapper::process(JobList* jobs)
 {
     #if DEBUG_VISION_VERBOSITY > 1
@@ -168,19 +192,19 @@ void DataWrapper::process(JobList* jobs)
             #endif
             static SaveImagesJob* job;
             job = (SaveImagesJob*) (*it);
-            if(isSavingImages != job->saving())
-            {
-                if(job->saving() == true)
-                {
-                    currentSettings = controller->getCurrentCameraSettings();
+            if(isSavingImages != job->saving()) {
+                //if the job changes the saving images state
+                if(job->saving() == true) {
+                    //we weren't saving and now we've started
+                    currentSettings = m_current_frame->getCameraSettings();
                     if (!imagefile.is_open())
                         imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
                     if (!sensorfile.is_open())
                         sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
                     m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
-                else
-                {
+                else {
+                    //we were saving and now we've finished
                     imagefile.flush();
                     sensorfile.flush();
 
@@ -200,7 +224,11 @@ void DataWrapper::process(JobList* jobs)
     }
 }
 
-void DataWrapper::saveAnImage() const
+/**
+*   @brief Saves an image and the current sensor data to the associated streams.
+*   @note Taken from original vision system
+*/
+void DataWrapper::saveAnImage()
 {
     #if DEBUG_VISION_VERBOSITY > 1
         debug << "VisionControlWrapper::SaveAnImage(). Starting..." << endl;
@@ -224,7 +252,7 @@ void DataWrapper::saveAnImage() const
         
         if (isSavingImagesWithVaryingSettings)
         {
-            CameraSettings tempCameraSettings = currentImage->getCameraSettings();
+            CameraSettings tempCameraSettings = m_current_frame->getCameraSettings();
             if (numSavedImages % 10 == 0 )
             {
                 tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 0);

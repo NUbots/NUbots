@@ -2,11 +2,14 @@
 #define VISIONFIELDOBJECT_H
 
 #include "Vision/basicvisiontypes.h"
+#include <vector>
 
+using namespace std;
 
 class VisionFieldObject
 {
 public:
+    //! VFO_ID enum and associated string conversion methods
     enum VFO_ID {
         BALL,
         GOAL_Y,
@@ -18,20 +21,23 @@ public:
         UNKNOWN
     };
 
-    /*! @var map id_map
-     *  @brief Static map between internal and external FO IDs.
-     */
-    static std::map<VFO_ID, VisionID::EXTERNAL_FIELD_OBJECT_ID> id_map;
-
     static std::string getVFOName(VFO_ID id);
     static VFO_ID getVFOFromName(const std::string& name);
     
 public:
     VisionFieldObject();
-    VisionFieldObject(VFO_ID id);
+    
+    const PointType& getLocationPixels() const;
+    const vector<float>& getLocationAngular() const;
+    virtual const vector<float>& getRelativeFieldCoords() const;
+    //virtual ____ convertToExternalFO() const;
+    
 
 private:
-    VFO_ID id;
+    PointType m_location_pixels;        //! @variable The pixel location of the object on the screen.
+    vector<float> m_location_angular;   //! @variable The angular location of the object relative to the screen centre.
+    float confidence;   //! unused
+    float error;        //! unused
 };
 
 #endif // VISIONFIELDOBJECT_H

@@ -73,6 +73,9 @@ HEADERS += \
     valgorithm.h \
     Modules/clustercandidates.h \
     visioncontroller.h \
+    VisionTypes/ball.h \
+    VisionTypes/goal.h \
+    VisionTypes/beacon.h
 
 SOURCES += \
     visionblackboard.cpp \
@@ -92,6 +95,9 @@ SOURCES += \
     VisionTypes/objectcandidate.cpp \
     main.cpp \
     Modules/clustercandidates.cpp \
+    VisionTypes/ball.cpp \
+    VisionTypes/goal.cpp \
+    VisionTypes/beacon.cpp
 
 #robocup
 HEADERS += \
