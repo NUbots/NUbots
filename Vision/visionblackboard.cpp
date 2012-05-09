@@ -1,6 +1,7 @@
 #include "visionblackboard.h"
 #include "VisionWrapper/datawrappercurrent.h"
 #include "debug.h"
+#include "debugverbosityvision.h"
 
 #include <algorithm>
 #include <boost/foreach.hpp>
@@ -362,9 +363,17 @@ void VisionBlackboard::updateLUT()
 */
 void VisionBlackboard::update()
 {
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::update() - Begin" << endl;
+    #endif
     //Get updated kinematics data
     kinematics_horizon = wrapper->getKinematicsHorizon();
     ctgvalid = wrapper->getCTGVector(ctgvector);
+    //get new image pointer
+    original_image = wrapper->getFrame();
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::update() - Finish" << endl;
+    #endif
 }
 
 /**
@@ -372,6 +381,9 @@ void VisionBlackboard::update()
 */
 void VisionBlackboard::publish() const
 {
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::publish() - Begin" << endl;
+    #endif
     Mat classed;
     LUT.classifyImage(*original_image, classed);
     wrapper->publish(DataWrapper::DID_CLASSED_IMAGE, classed);
@@ -382,12 +394,17 @@ void VisionBlackboard::publish() const
 */
 void VisionBlackboard::debugPublish() const
 {
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::debugPublish() - Begin" << endl;
+    #endif
     vector<Scalar> colours;
     vector<PointType> pts;
+    map<VisionFieldObject::VFO_ID, vector<Transition> >::const_iterator it;
+    vector<Transition> v_t;
 
 #if VISION_BLACKBOARD_VERBOSITY > 1
     debug << "VisionBlackboard::debugPublish - " << endl;
-    debug << "kinematics_horizon_points: " << kinematics_horizon_points.size() << endl;
+    debug << "kinematics_horizon: " << kinematics_horizon.getA() << " " << kinematics_horizon.getB() << " " << kinematics_horizon.getC() << endl;
     debug << "horizon_scan_points: " << horizon_scan_points.size() << endl;
     debug << "horizon_points: " << horizon_points.size() << endl;
     debug << "object_points: " << object_points.size() << endl;
@@ -397,9 +414,16 @@ void VisionBlackboard::debugPublish() const
     debug << "vertical_segmented_scanlines: " << vertical_segmented_scanlines.getSegments().size() << endl;
     debug << "horizontal_filtered_segments: " << horizontal_segmented_scanlines.getSegments().size() << endl;
     debug << "vertical_filtered_segments: " << vertical_segmented_scanlines.getSegments().size() << endl;
-    debug << "horizontal_transitions: " << horizontal_transitions.size() << endl;
-    debug << "vertical_transitions: " << vertical_transitions.size() << endl;
-    debug << vertical_transitions << endl;
+    int size=0;
+    for(it=mapped_horizontal_transitions.begin(); it!=mapped_horizontal_transitions.end(); it++) {
+        size += it->second.size();
+    }
+    debug << "mapped_horizontal_transitions: " << size << endl;
+    size=0;
+    for(it=mapped_vertical_transitions.begin(); it!=mapped_vertical_transitions.end(); it++) {
+        size += it->second.size();
+    }
+    debug << "mapped_vertical_transitions: " << size << endl;
 #endif
 
     wrapper->debugRefresh();
@@ -461,8 +485,6 @@ void VisionBlackboard::debugPublish() const
     wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, pts, colours);
     
     //horizontal transitions
-    map<VisionFieldObject::VFO_ID, vector<Transition> >::const_iterator it;
-    vector<Transition> v_t;
     pts.clear();
     for(it=mapped_horizontal_transitions.begin(); it!=mapped_horizontal_transitions.end(); it++) {
         v_t = it->second;

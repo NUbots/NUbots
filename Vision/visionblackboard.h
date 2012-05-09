@@ -121,7 +121,7 @@ private:
     vector<PointType> object_points;   //! @variable Vector of points indicating potential objects
     
     //! Kinematics Data
-    Line kinematics_horizon;    //! @variable Line defining kinematics horizon
+    Horizon kinematics_horizon;    //! @variable Line defining kinematics horizon
     vector<float> ctgvector;    //! @variable The camera to ground vector (for d2p)
     bool ctgvalid;              //! @variable Whether the ctgvector is valid
 

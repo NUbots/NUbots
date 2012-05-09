@@ -14,6 +14,9 @@ SegmentFilter::SegmentFilter()
 
 void SegmentFilter::run() const
 {
+    #if VISION_FILTER_VERBOSITY > 1
+        debug << "SegmentFilter::run() - Begin" << endl;
+    #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const SegmentedRegion& h_segments = vbb->getHorizontalSegmentedRegion();
     const SegmentedRegion& v_segments = vbb->getVerticalSegmentedRegion();

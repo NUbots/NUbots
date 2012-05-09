@@ -1,5 +1,6 @@
 #include "lookuptable.h"
 #include "debug.h"
+#include "debugverbosityvision.h"
 #include "Vision/VisionTools/classificationcolours.h"
 
 LookUpTable::LookUpTable()
@@ -19,7 +20,7 @@ bool LookUpTable::loadLUTFromFile(const string& fileName)
         errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
     }
 
-#if DEBUG_VISION_VERBOSITY > 0
+#ifdef DEBUG_VISION_VERBOSITY_ON
     if(load_success)
     {
         debug << "Lookup table: " << fileName << " loaded sucesfully." << std::endl;

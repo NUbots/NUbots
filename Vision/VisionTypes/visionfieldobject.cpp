@@ -55,6 +55,15 @@ VisionFieldObject::VisionFieldObject()
     
 }
 
+const PointType& VisionFieldObject::getLocationPixels() const
+{
+    return m_location_pixels;
+}
+const vector<float>& VisionFieldObject::getLocationAngular() const
+{
+    return m_location_angular;
+}
+
 //VisionFieldObject::VisionFieldObject(VFO_ID id)
 //{
 //    this->id = id;

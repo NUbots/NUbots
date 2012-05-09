@@ -8,6 +8,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 #include "Kinematics/Horizon.h"
@@ -73,7 +74,7 @@ public:
 
     //! Control interface       
 private:    
-    void updateFrame();
+    bool updateFrame();
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
@@ -107,9 +108,10 @@ private:
     CameraSettings currentSettings;
     
     //! Shared data objects
-    NUImage* m_current_frame;
-    NUSensorsData* m_sensor_data;               //!< pointer to shared sensor data object
-    NUActionatorsData* m_actions;               //!< pointer to shared actionators data object
+    NUImage* current_frame;
+    NUSensorsData* sensor_data;             //! pointer to shared sensor data
+    NUActionatorsData* actions;             //! pointer to shared actionators data
+    FieldObjects* field_objects;            //! pointer to shared fieldobject data
 };
 
 #endif // DATAWRAPPERDARWIN_H

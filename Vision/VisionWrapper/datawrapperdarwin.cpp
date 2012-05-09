@@ -54,6 +54,7 @@ DataWrapper::DataWrapper()
     numFramesDropped = 0;
     numFramesProcessed = 0;
     numSavedImages = 0;
+    loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
 }
 
 DataWrapper::~DataWrapper()
@@ -68,11 +69,11 @@ DataWrapper* DataWrapper::getInstance()
 }
 
 /**
-*   @brief Fetches the next frame from the webcam.
+*   @brief Fetches the next frame from the shared Blackboard.
 */
 NUImage* DataWrapper::getFrame()
 {
-    return Blackboard->Image;
+    return current_frame;
 }
 
 /*! @brief Retrieves the horizon data and builds a Horizon and returns it.
@@ -82,11 +83,20 @@ NUImage* DataWrapper::getFrame()
 */
 const Horizon& DataWrapper::getKinematicsHorizon()
 {
-    if(m_sensor_data->getHorizon(m_horizon_coefficients)) {
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::getKinematicsHorizon() - Begin" << endl;
+    #endif
+    if(sensor_data->getHorizon(m_horizon_coefficients)) {
+        #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "DataWrapper::getKinematicsHorizon() - success" << endl;
+        #endif
         m_kinematics_horizon.setLine(m_horizon_coefficients.at(0), m_horizon_coefficients.at(1), m_horizon_coefficients.at(2));
         m_kinematics_horizon.exists = true;
     }
     else {
+        #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
+        #endif
         m_kinematics_horizon.exists = false;
     }
     
@@ -99,7 +109,11 @@ const Horizon& DataWrapper::getKinematicsHorizon()
 */
 bool DataWrapper::getCTGVector(vector<float>& ctgvector)
 {
-    return m_sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::getCTGVector()" << endl;
+    #endif
+        return false;
+    return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
 }
 
 /*! @brief Returns a reference to the stored Lookup Table
@@ -147,18 +161,38 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const Mat& img)
 /*! @brief Updates the held information ready for a new frame.
 *   Gets copies of the actions and sensors pointers from the blackboard and
 *   gets a new image from the blackboard. Updates framecounts.
+*   @return Whether the fetched data is valid.
 */
-void DataWrapper::updateFrame()
+bool DataWrapper::updateFrame()
 {
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::updateFrame() - Begin" << endl;
+    #endif
     //! @todo Finish implementing & Comment
-    m_actions = Blackboard->Actions;
-    m_sensor_data = Blackboard->Sensors;
+    actions = Blackboard->Actions;
+    sensor_data = Blackboard->Sensors;
+    field_objects = Blackboard->Objects;
     
-    if (m_current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
+    if (current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
         numFramesDropped++;
     numFramesProcessed++;
-    m_current_frame = Blackboard->Image;
+    current_frame = Blackboard->Image;
     m_timestamp = Blackboard->Image->GetTimestamp();
+    
+    if (current_frame == NULL || sensor_data == NULL || actions == NULL || field_objects == NULL)
+    {
+        #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "DataWrapper::updateFrame(): null reference from BB" << endl;
+        #endif
+        // keep object times updated.
+        if(field_objects && sensor_data)
+        {
+            field_objects->preProcess(sensor_data->GetTimestamp());
+            field_objects->postProcess(sensor_data->GetTimestamp());
+        }
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -168,7 +202,10 @@ void DataWrapper::updateFrame()
 */
 bool DataWrapper::loadLUTFromFile(const string& fileName)
 {
-    return LUT.loadLUTFromFile(fileName);
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::loadLUTFromFile() - " << fileName << endl;
+    #endif
+    return m_LUT.loadLUTFromFile(fileName);
 }
 
 /**
@@ -178,8 +215,8 @@ bool DataWrapper::loadLUTFromFile(const string& fileName)
 */
 void DataWrapper::process(JobList* jobs)
 {
-    #if DEBUG_VISION_VERBOSITY > 1
-        debug  << "VisionControlWrapper::Process - Begin" << endl;
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug  << "DataWrapper::Process - Begin" << endl;
     #endif
     static list<Job*>::iterator it;     // the iterator over the motion jobs
     
@@ -187,8 +224,8 @@ void DataWrapper::process(JobList* jobs)
     {
         if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
         {   
-            #if DEBUG_VISION_VERBOSITY > 1
-                debug << "VisionControlWrapper::process(): Processing a save images job." << endl;
+            #if VISION_WRAPPER_VERBOSITY > 1
+                debug << "DataWrapper::process(): Processing a save images job." << endl;
             #endif
             static SaveImagesJob* job;
             job = (SaveImagesJob*) (*it);
@@ -196,12 +233,12 @@ void DataWrapper::process(JobList* jobs)
                 //if the job changes the saving images state
                 if(job->saving() == true) {
                     //we weren't saving and now we've started
-                    currentSettings = m_current_frame->getCameraSettings();
+                    currentSettings = current_frame->getCameraSettings();
                     if (!imagefile.is_open())
                         imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
                     if (!sensorfile.is_open())
                         sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
-                    m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
+                    actions->add(NUActionatorsData::Sound, sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else {
                     //we were saving and now we've finished
@@ -210,7 +247,7 @@ void DataWrapper::process(JobList* jobs)
 
                     ChangeCameraSettingsJob* newJob  = new ChangeCameraSettingsJob(currentSettings);
                     jobs->addCameraJob(newJob);
-                    m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
+                    actions->add(NUActionatorsData::Sound, sensor_data->CurrentTime, NUSounds::STOP_SAVING_IMAGES);
                 }
             }
             isSavingImages = job->saving();
@@ -230,8 +267,8 @@ void DataWrapper::process(JobList* jobs)
 */
 void DataWrapper::saveAnImage()
 {
-    #if DEBUG_VISION_VERBOSITY > 1
-        debug << "VisionControlWrapper::SaveAnImage(). Starting..." << endl;
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::SaveAnImage(). Starting..." << endl;
     #endif
 
     if (!imagefile.is_open())
@@ -243,16 +280,16 @@ void DataWrapper::saveAnImage()
     {
         if(sensorfile.is_open())
         {
-            sensorfile << (*m_sensor_data) << flush;
+            sensorfile << (*sensor_data) << flush;
         }
         NUImage buffer;
-        buffer.cloneExisting(*m_current_frame);
+        buffer.cloneExisting(*current_frame);
         imagefile << buffer;
         numSavedImages++;
         
         if (isSavingImagesWithVaryingSettings)
         {
-            CameraSettings tempCameraSettings = m_current_frame->getCameraSettings();
+            CameraSettings tempCameraSettings = current_frame->getCameraSettings();
             if (numSavedImages % 10 == 0 )
             {
                 tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 0);
@@ -300,7 +337,7 @@ void DataWrapper::saveAnImage()
             //m_camera->setSettings(tempCameraSettings);
         }
     }
-    #if DEBUG_VISION_VERBOSITY > 1
-        debug << "Vision::SaveAnImage(). Finished" << endl;
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::SaveAnImage(). Finished" << endl;
     #endif
 }

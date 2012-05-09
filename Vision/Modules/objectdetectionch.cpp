@@ -10,6 +10,10 @@
 
 void ObjectDetectionCH::detectObjects()
 {
+    #if VISION_HORIZON_VERBOSITY > 1
+        debug << "HorizonInterpolate::interpolate() - Begin" << endl;
+        debug << "VER_SEGMENTS = " << VER_SEGMENTS << endl;
+    #endif
     // get blackboard instance
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();

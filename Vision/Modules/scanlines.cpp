@@ -10,6 +10,9 @@
 
 void ScanLines::generateScanLines()
 {
+    #if VISION_SCAN_VERBOSITY > 1
+        debug << "ScanLines::generateScanLines() - Begin" << endl;
+    #endif
     VisionBlackboard *vbb = VisionBlackboard::getInstance();
     const vector<PointType>& horizon_points = vbb->getHorizonPoints();
     vector<unsigned int> horizontal_scan_lines;
@@ -39,6 +42,9 @@ void ScanLines::generateScanLines()
 
 void ScanLines::classifyHorizontalScanLines()
 {
+    #if VISION_SCAN_VERBOSITY > 1
+        debug << "ScanLines::classifyHorizontalScanLines() - Begin" << endl;
+    #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
     const vector<unsigned int>& horizontal_scan_lines = vbb->getHorizontalScanlines();
@@ -53,6 +59,9 @@ void ScanLines::classifyHorizontalScanLines()
 
 void ScanLines::classifyVerticalScanLines()
 {
+    #if VISION_SCAN_VERBOSITY > 1
+        debug << "ScanLines::classifyVerticalScanLines() - Begin" << endl;
+    #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
     const vector<PointType>& vertical_start_points = vbb->getHorizonPoints();

@@ -272,6 +272,7 @@ SET(NUBOT_DEBUG_VISION_HORIZON_VERBOSITY 0 CACHE STRING "Set the verbosity of de
 SET(NUBOT_DEBUG_VISION_WRAPPER_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the vision wrapper (0 to 3)")
 SET(NUBOT_DEBUG_VISION_LUT_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the vision Lookup Table (0 to 3)")
 SET(NUBOT_DEBUG_VISION_FILTER_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the vision filters (0 to 3)")
+SET(NUBOT_DEBUG_VISION_OBSTACLE_VERBOSITY 0 CACHE STRING "Set the verbosity of debug information of the vision obstacle detection (0 to 3)")
 
 OPTION( NUBOT_USE_VISION
         "Set to ON to run vision, set to OFF to run blind"

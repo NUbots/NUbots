@@ -13,6 +13,10 @@
 */
 void HorizonInterpolate::interpolate(const unsigned int VER_SEGMENTS)
 {
+    #if VISION_HORIZON_VERBOSITY > 1
+        debug << "HorizonInterpolate::interpolate() - Begin" << endl;
+        debug << "VER_SEGMENTS = " << VER_SEGMENTS << endl;
+    #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();  // blackboard instance
     const vector<PointType> horizon_points = vbb->getHorizonPoints();
 

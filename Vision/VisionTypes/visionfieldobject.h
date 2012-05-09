@@ -1,3 +1,9 @@
+/** @file visionfieldobject.h
+*   @class VisionFieldObject
+*   @author Shannon Fenn: shannon.fenn@uon.edu.au
+*   @brief Abstract parent class for internal representation of field objects.
+*/
+
 #ifndef VISIONFIELDOBJECT_H
 #define VISIONFIELDOBJECT_H
 
@@ -29,7 +35,7 @@ public:
     
     const PointType& getLocationPixels() const;
     const vector<float>& getLocationAngular() const;
-    virtual const vector<float>& getRelativeFieldCoords() const;
+    virtual const vector<float>& getRelativeFieldCoords() const = 0;
     //virtual ____ convertToExternalFO() const;
     
 
