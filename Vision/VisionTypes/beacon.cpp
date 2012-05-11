@@ -16,3 +16,8 @@ Beacon::Beacon(ID id, const Quad &corners)
     m_corners = corners;
     //SET WIDTH
 }
+
+void Beacon::getRelativeFieldCoords(vector<float> &coords) const
+{
+    
+}

@@ -20,7 +20,7 @@ public:
     Goal(ID id);
     Goal(ID id, const Quad& corners);
     
-    const vector<float>& getRelativeFieldCoords() const;
+    void getRelativeFieldCoords(vector<float>& coords) const;
     
 private:    
     ID m_id;

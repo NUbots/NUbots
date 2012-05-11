@@ -7,9 +7,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "Tools/Math/Line.h"
+#include "Kinematics/Horizon.h"
 
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/segmentedregion.h"
 #include "Vision/VisionTools/pccamera.h"
 #include "Vision/VisionTools/lookuptable.h"
 
@@ -56,7 +57,7 @@ public:
     bool getCTGVector(vector<float>& ctgvector);    //for transforms
     
     //! @brief Generates spoofed horizon line.
-    const Line& getKinematicsHorizon();
+    const Horizon& getKinematicsHorizon();
 
     CameraSettings getCameraSettings();
 
@@ -67,8 +68,8 @@ public:
     //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const Scalar& colour);
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours);
+    bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
+    bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id, const Mat& img);
     
     
@@ -76,7 +77,7 @@ private:
     DataWrapper();
     ~DataWrapper();
     //void startImageFileGroup(string filename);
-    void updateFrame();
+    bool updateFrame();
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
@@ -92,7 +93,7 @@ private:
     };
     
 private:
-    static const INPUT_METHOD METHOD = CAMERA;  //CAMERA, STREAM, FILE
+    static const INPUT_METHOD METHOD = STREAM;  //CAMERA, STREAM, FILE
 
     static DataWrapper* instance;
 
@@ -101,7 +102,7 @@ private:
     string LUTname;
     LookUpTable LUT;
 
-    Line kinematics_horizon;
+    Horizon kinematics_horizon;
 
     PCCamera* m_camera;          //! Used when streaming from camera
 

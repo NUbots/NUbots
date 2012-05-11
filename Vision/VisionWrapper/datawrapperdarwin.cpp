@@ -9,6 +9,11 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
 
+#include "Vision/VisionTypes/coloursegment.h"
+#include "Vision/basicvisiontypes.h"
+
+#include <boost/foreach.hpp>
+
 DataWrapper* DataWrapper::instance = 0;
 
 string DataWrapper::getIDName(DATA_ID id) {
@@ -142,15 +147,47 @@ void DataWrapper::debugRefresh()
     //! @todo Implement + Comment
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType> data_points, const Scalar& colour)
+bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
+{
+    //! @todo better debug printing + Comment
+    vector<PointType>::const_iterator it;
+
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::debugPublish - " << endl;
+        if(data_points.empty()) {
+            debug << "\tempty vector DEBUG_ID = " << getIDName(id) << endl;
+            return false;
+        }
+    #endif
+
+    #if VISION_WRAPPER_VERBOSITY > 2
+        debug << "\t" << id << endl;
+        debug << "\t" << data_points << endl;
+    #endif
+
+    return true;
+}
+
+bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     //! @todo better debug printing + Comment
     
-}
+    if(region.getSegments().empty()) {
+        errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
+        return false;
+    }
+    
+    BOOST_FOREACH(const vector<ColourSegment>& line, region.getSegments()) {
+        if(region.getDirection() == VisionID::HORIZONTAL)
+            debug << "y: " << line.front().getStart().y << endl;
+        else
+            debug << "x: " << line.front().getStart().x << endl;
+        BOOST_FOREACH(const ColourSegment& seg, line) {
+            debug << "\t" << seg;
+        }
+    }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours)
-{
-    //! @todo better debug printing + Comment
+    return true;
 }
 
 bool DataWrapper::debugPublish(DEBUG_ID id, const Mat& img)

@@ -124,7 +124,6 @@ void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const C
         //first check start segment alone
         if(rule.match(ColourTransitionRule::nomatch, *before_it, dir)) {
             next_transition.set(before_it->getStart(), ClassIndex::invalid, before_it->getColour(), dir);
-            debug << "begin match: " << next_transition << endl;
             matches.push_back(next_transition);
         }
         //then check the rest pairwise
@@ -138,7 +137,6 @@ void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const C
         //lastly check final segment alone - final segment is before_it
         if(rule.match(*before_it, ColourTransitionRule::nomatch, dir)) {
             next_transition.set(before_it->getEnd(), before_it->getColour(), ClassIndex::invalid, dir);
-            debug << "end match: " << next_transition << endl;
             matches.push_back(next_transition);
         }
     }

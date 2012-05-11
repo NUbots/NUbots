@@ -23,7 +23,7 @@ contains(PLATFORM, "darwin") {
         VisionWrapper/visioncontrolwrapperdarwin.h \
     
     SOURCES += \
-        $$ROBOCUP_DIR\NUPlatform/Platforms/Darwin/DarwinCamera.cpp \
+        $$ROBOCUP_DIR/NUPlatform/Platforms/Darwin/DarwinCamera.cpp \
         VisionWrapper/datawrapperdarwin.cpp \
         VisionWrapper/visioncontrolwrapperdarwin.cpp \
 }
@@ -75,7 +75,7 @@ HEADERS += \
     visioncontroller.h \
     VisionTypes/ball.h \
     VisionTypes/goal.h \
-    VisionTypes/beacon.h
+    VisionTypes/beacon.h \
 
 SOURCES += \
     visionblackboard.cpp \
@@ -97,7 +97,7 @@ SOURCES += \
     Modules/clustercandidates.cpp \
     VisionTypes/ball.cpp \
     VisionTypes/goal.cpp \
-    VisionTypes/beacon.cpp
+    VisionTypes/beacon.cpp \
 
 #robocup
 HEADERS += \
@@ -106,6 +106,8 @@ HEADERS += \
     $$ROBOCUP_DIR/Tools/Math/Line.h \
     $$ROBOCUP_DIR/Infrastructure/NUImage/NUImage.h \
     $$ROBOCUP_DIR/NUPlatform/NUCamera/CameraSettings.h \
+    $$ROBOCUP_DIR/Kinematics/Horizon.h \
+    $$ROBOCUP_DIR/NUPlatform/NUCamera.h \
 
 SOURCES += \
     $$ROBOCUP_DIR/Tools/FileFormats/LUTTools.cpp \
@@ -113,3 +115,5 @@ SOURCES += \
     $$ROBOCUP_DIR/Tools/Math/Line.cpp \
     $$ROBOCUP_DIR/Infrastructure/NUImage/NUImage.cpp \
     $$ROBOCUP_DIR/NUPlatform/NUCamera/CameraSettings.cpp \
+    $$ROBOCUP_DIR/Kinematics/Horizon.cpp \
+    $$ROBOCUP_DIR/NUPlatform/NUCamera.cpp \

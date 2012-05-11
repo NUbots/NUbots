@@ -20,7 +20,7 @@
 */
 
 #include "ColorModelConversions.h"
-#include "Vision/ClassificationColours.h"
+#include "Vision/VisionTools/classificationcolours.h"
 #include "openglmanager.h"
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"

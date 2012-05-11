@@ -11,7 +11,7 @@ Ball::Ball(int radius)
 }
 
 
-const vector<float>& Ball::getRelativeFieldCoords() const
+void Ball::getRelativeFieldCoords(vector<float>& coords) const
 {
     
 }

@@ -8,19 +8,7 @@
 
 VisionBlackboard* VisionBlackboard::instance = 0;
 
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<Scalar>& colours, vector<PointType>& pts)
-{
-    unsigned char r, g, b;
-    
-    BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
-        BOOST_FOREACH(const ColourSegment& seg, line) {
-            ClassIndex::getColourAsRGB(seg.getColour(), r, g, b);
-            pts.push_back(seg.getStart());
-            pts.push_back(seg.getEnd());
-            colours.push_back(Scalar(b,g,r));
-        }
-    }
-}
+
 
 //! @brief Private constructor for blackboard.
 VisionBlackboard::VisionBlackboard()
@@ -384,9 +372,9 @@ void VisionBlackboard::publish() const
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::publish() - Begin" << endl;
     #endif
-    Mat classed;
-    LUT.classifyImage(*original_image, classed);
-    wrapper->publish(DataWrapper::DID_CLASSED_IMAGE, classed);
+//    Mat classed;
+//    LUT.classifyImage(*original_image, classed);
+//    wrapper->publish(DataWrapper::DID_CLASSED_IMAGE, classed);
 }
 
 /**
@@ -397,7 +385,6 @@ void VisionBlackboard::debugPublish() const
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::debugPublish() - Begin" << endl;
     #endif
-    vector<Scalar> colours;
     vector<PointType> pts;
     map<VisionFieldObject::VFO_ID, vector<Transition> >::const_iterator it;
     vector<Transition> v_t;
@@ -435,54 +422,42 @@ void VisionBlackboard::debugPublish() const
     if(B!=0) {
         pts.push_back(PointType(0, -1*C/B));
         pts.push_back(PointType(original_image->getHeight(), -1*A/B*original_image->getWidth() - C/B));
-        wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts, Scalar(0,255,255));
+        wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts);
     }
     else {
         errorlog << "VisionBlackboard::publishDebug - vertical horizon!" << endl;
     }
     
     //horizon scans
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_SCANS, horizon_scan_points, Scalar(127,127,127));
+    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_SCANS, horizon_scan_points);
     
     //horizon points
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_FINAL, horizon_points, Scalar(255,0,255));
+    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_FINAL, horizon_points);
     
     //object points
-    wrapper->debugPublish(DataWrapper::DBID_OBJECT_POINTS, object_points, Scalar(0,0,255));
+    wrapper->debugPublish(DataWrapper::DBID_OBJECT_POINTS, object_points);
     
     //horizontal scans
     pts.clear();
     for(unsigned int i=0; i<horizontal_scanlines.size(); i++) {
         pts.push_back(PointType(0, horizontal_scanlines.at(i)));
     }
-    wrapper->debugPublish(DataWrapper::DBID_H_SCANS, pts, Scalar(127,127,127));
+    wrapper->debugPublish(DataWrapper::DBID_H_SCANS, pts);
     
     //vertical scans
-    wrapper->debugPublish(DataWrapper::DBID_V_SCANS, horizon_points, Scalar(127,127,127));
+    wrapper->debugPublish(DataWrapper::DBID_V_SCANS, horizon_points);
     
     //horizontal segments
-    colours.clear();
-    pts.clear();
-    getPointsAndColoursFromSegments(horizontal_segmented_scanlines.getSegments(), colours, pts);
-    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, pts, colours);
+    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, horizontal_segmented_scanlines);
     
     //vertical segments
-    colours.clear();
-    pts.clear();
-    getPointsAndColoursFromSegments(vertical_segmented_scanlines.getSegments(), colours, pts);
-    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, pts, colours);
+    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, vertical_segmented_scanlines);
     
     //horizontal filtered segments
-    colours.clear();
-    pts.clear();
-    getPointsAndColoursFromSegments(horizontal_filtered_segments.getSegments(), colours, pts);
-    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, pts, colours);
+    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, horizontal_filtered_segments);
     
     //vertical filtered segments
-    colours.clear();
-    pts.clear();
-    getPointsAndColoursFromSegments(vertical_filtered_segments.getSegments(), colours, pts);
-    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, pts, colours);
+    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, vertical_filtered_segments);
     
     //horizontal transitions
     pts.clear();
@@ -492,7 +467,7 @@ void VisionBlackboard::debugPublish() const
             pts.push_back(t.getLocation());
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts, Scalar(255,255,0));
+    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
     
     //vertical transitions
     pts.clear();
@@ -502,5 +477,5 @@ void VisionBlackboard::debugPublish() const
             pts.push_back(t.getLocation());
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts, Scalar(0,255,255));
+    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
 }

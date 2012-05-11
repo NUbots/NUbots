@@ -9,7 +9,7 @@ public:
     Ball();
     Ball(int radius);
     
-    const vector<float>& getRelativeFieldCoords() const;
+    void getRelativeFieldCoords(vector<float>& coords) const;
     
 private:
     int m_radius;

@@ -16,3 +16,9 @@ Goal::Goal(ID id, const Quad &corners)
     m_corners = corners;
     //SET WIDTH
 }
+
+
+void Goal::getRelativeFieldCoords(vector<float>& coords) const
+{
+    
+}

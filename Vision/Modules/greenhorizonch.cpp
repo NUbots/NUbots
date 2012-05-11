@@ -12,33 +12,28 @@
 
 void GreenHorizonCH::calculateHorizon()
 {
-    cout << 0 << endl;
     #if VISION_HORIZON_VERBOSITY > 1
         debug << "GreenHorizonCH::calculateHorizon() - Begin" << endl;
     #endif
     // get blackboard instance
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    cout << "01" << endl;
     const NUImage& img = vbb->getOriginalImage();
-    cout << "02" << endl;
     int width = img.getWidth(),
         height = img.getHeight();
-
-    cout << 1 << endl;
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() width: " << width << " height: " << height << endl;
+    #endif
     
     // variable declarations    
     vector<PointType> horizon_points;
     vector<PointType> temp;
     horizon_points.reserve(VER_SEGMENTS);
     temp.reserve(VER_SEGMENTS);
-    
-    cout << 2 << endl;
 
     const Line& kin_hor = vbb->getKinematicsHorizon();
     int kin_hor_y;
 
     
-    cout << 3 << endl;
     unsigned int position;
     for (unsigned int x = 0; x <= VER_SEGMENTS; x++) {
         position = min(x*width/VER_SEGMENTS, static_cast<unsigned int>(width-1));
@@ -69,14 +64,11 @@ void GreenHorizonCH::calculateHorizon()
                 horizon_points.push_back(PointType(position, height-1));
             }
         }
-        cout << x << " ";
     }
     
-    cout << endl << 4 << endl;
     // provide blackboard the original set of scan points
     vbb->setHorizonScanPoints(horizon_points);
     
-    cout << 5 << endl;
     // statistical filter for green horizon points
     for (unsigned int x = 0; x < VER_SEGMENTS; x++) {
         if (horizon_points.at(x).y < height-1)     // if not at bottom of image
@@ -86,7 +78,6 @@ void GreenHorizonCH::calculateHorizon()
     meanStdDev(Mat(temp), mean, std_dev);
     temp.clear();
     
-    cout << 6 << endl;
     // copy values into format for convexHull function
     temp.push_back(horizon_points.at(0));
     for (unsigned int x = VER_SEGMENTS-1; x > 0; x--) {
@@ -96,7 +87,6 @@ void GreenHorizonCH::calculateHorizon()
         }
     }
     
-    cout << 7 << endl;
     horizon_points.clear();
 
     // convex hull
@@ -120,7 +110,6 @@ void GreenHorizonCH::calculateHorizon()
     // add RHS point
     temp.push_back(horizon_points.at(0));
     
-    cout << 8 << endl;
     // if empty hull
     if (temp.size() <= 2) {
         temp.clear();
@@ -151,7 +140,6 @@ void GreenHorizonCH::calculateHorizon()
         }
     }
     
-    cout << 9 << endl;
     // set hull points
     vbb->setHullPoints(temp);
 }
@@ -160,5 +148,5 @@ void GreenHorizonCH::calculateHorizon()
 bool GreenHorizonCH::isPixelGreen(const NUImage& img, int x, int y)
 {
     const LookUpTable& LUT = VisionBlackboard::getInstance()->getLUT();
-    return ClassIndex::getColourFromIndex(LUT.classifyPixel(img.at(x,y))) == ClassIndex::green;
+    return ClassIndex::getColourFromIndex(LUT.classifyPixel(img(x,y))) == ClassIndex::green;
 }

@@ -35,7 +35,7 @@ public:
     
     const PointType& getLocationPixels() const;
     const vector<float>& getLocationAngular() const;
-    virtual const vector<float>& getRelativeFieldCoords() const = 0;
+    virtual void getRelativeFieldCoords(vector<float>& coords) const = 0;
     //virtual ____ convertToExternalFO() const;
     
 

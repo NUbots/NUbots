@@ -47,7 +47,7 @@ void LookUpTable::classifyImage(const NUImage& src, Mat& dest) const
         unsigned char* row = dest.ptr<unsigned char>(y);
         for (int x = 0; x < width; x++)
         {
-            ClassIndex::getColourIndexAsRGB((int)classifyPixel(src.at(x,y)), r, g, b);
+            ClassIndex::getColourIndexAsRGB((int)classifyPixel(src(x,y)), r, g, b);
             row[3*x] = b;
             row[3*x+1] = g;
             row[3*x+2] = r;

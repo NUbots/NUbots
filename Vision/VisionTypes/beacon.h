@@ -17,7 +17,7 @@ public:
     Beacon(ID id);
     Beacon(ID id, const Quad& corners);
     
-    const vector<float>& getRelativeFieldCoords() const;
+    void getRelativeFieldCoords(vector<float>& coords) const;
     
 private:
     ID m_id;

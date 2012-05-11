@@ -8,7 +8,7 @@
 *
 */
 
-#include "Tools/Math/Line.h"
+#include "Kinematics/Horizon.h"
 
 #include "VisionWrapper/datawrappercurrent.h"
 #include "VisionTools/lookuptable.h"

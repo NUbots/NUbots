@@ -15,6 +15,7 @@
 
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/segmentedregion.h"
 
 using namespace std;
 using namespace cv;
@@ -68,8 +69,8 @@ public:
     //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const Scalar& colour);
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours);
+    bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
+    bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id, const Mat& img);
 
     //! Control interface       

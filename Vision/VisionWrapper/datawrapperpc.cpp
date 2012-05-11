@@ -4,6 +4,8 @@
 #include "debug.h"
 #include "nubotdataconfig.h"
 
+#include "Vision/VisionTypes/coloursegment.h"
+
 DataWrapper* DataWrapper::instance = 0;
 
 string DataWrapper::getIDName(DATA_ID id) {
@@ -44,6 +46,20 @@ string DataWrapper::getIDName(DEBUG_ID id) {
     }
 }
 
+void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<Scalar>& colours, vector<PointType>& pts)
+{
+    unsigned char r, g, b;
+    
+    BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
+        BOOST_FOREACH(const ColourSegment& seg, line) {
+            ClassIndex::getColourAsRGB(seg.getColour(), r, g, b);
+            pts.push_back(seg.getStart());
+            pts.push_back(seg.getEnd());
+            colours.push_back(Scalar(b,g,r));
+        }
+    }
+}
+
 DataWrapper::DataWrapper()
 {
     //frame grab methods
@@ -54,7 +70,7 @@ DataWrapper::DataWrapper()
         LUTname = string(DATA_DIR) + string("default.lut");
         break;
     case STREAM:
-        streamname = "../StreamTest/image.strm";
+        streamname = string(DATA_DIR) +  string("image.strm");
         imagestrm.open(streamname.c_str());
         m_current_image = new NUImage();
         if(imagestrm.is_open()) {
@@ -63,7 +79,7 @@ DataWrapper::DataWrapper()
         else {
             errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
         }
-        LUTname = "../StreamTest/default.lut";
+        LUTname = string(DATA_DIR) + string("default.lut");
         break;
     case FILE:
         m_camera = NULL;
@@ -180,7 +196,7 @@ bool DataWrapper::getCTGVector(vector<float> &ctgvector)
 }
 
 //! @brief Returns spoofed kinematics horizon.
-const Line& DataWrapper::getKinematicsHorizon()
+const Horizon& DataWrapper::getKinematicsHorizon()
 { 
     return kinematics_horizon;
 }
@@ -235,9 +251,12 @@ void DataWrapper::debugRefresh()
     for(int i=0; i<debug_window_num; i++) {
         debug_windows[i].second = Scalar(0,0,0);
     }
+    
+    LUT.classifyImage(*m_current_image, results_img);
+    imshow(results_window_name, results_img);
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType> data_points, const Scalar& colour)
+bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
 {
     map<DEBUG_ID, pair<string, Mat>* >::iterator map_it;
     vector<PointType>::const_iterator it;
@@ -269,39 +288,39 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType> data_points,
     switch(id) {
     case DBID_H_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, PointType(0, pt.y), PointType(img.cols, pt.y), colour, 1);
+            line(img, PointType(0, pt.y), PointType(img.cols, pt.y), Scalar(127,127,127), 1);
         }
         break;
     case DBID_V_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, pt, PointType(pt.x, img.rows), colour, 1);
+            line(img, pt, PointType(pt.x, img.rows), Scalar(127,127,127), 1);
         }
         break;
     case DBID_TRANSITIONS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            circle(img, pt, 1, colour, 4);
+            circle(img, pt, 1, Scalar(255,255,0), 4);
         }
         break;
     case DBID_HORIZON:
-        line(img, data_points.front(), data_points.back(), colour, 1);
+        line(img, data_points.front(), data_points.back(), Scalar(0,255,255), 1);
         break;
     case DBID_GREENHORIZON_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, PointType(pt.x, 0), PointType(pt.x, img.rows), colour, 1);
-            circle(img, pt, 1, colour, 2);
+            line(img, PointType(pt.x, 0), PointType(pt.x, img.rows), Scalar(127,127,127), 1);
+            circle(img, pt, 1, Scalar(127,127,127), 2);
         }
         break;
     case DBID_GREENHORIZON_FINAL:
         for(it=data_points.begin(); it<data_points.end(); it++) {
             if (it > data_points.begin()) {
-                line(img, *(it-1), *it, colour, 1);
+                line(img, *(it-1), *it, Scalar(255,0,255), 1);
             }
-            circle(img, *it, 1, colour, 2);
+            circle(img, *it, 1, Scalar(255,0,255), 2);
         }
         break;
     case DBID_OBJECT_POINTS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            circle(img, pt, 1, colour, 4);
+            circle(img, pt, 1, Scalar(0,0,255), 4);
         }
         break;
     default:
@@ -315,12 +334,16 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType> data_points,
 }
 
 //! Outputs debug data to the appropriate external interface
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours)
+bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
+    vector<PointType> data_points;
+    vector<Scalar> colours;
     map<DEBUG_ID, pair<string, Mat>* >::iterator map_it;
     vector<PointType>::const_iterator it;
     vector<Scalar>::const_iterator c_it;
 
+    getPointsAndColoursFromSegments(region.getSegments(), colours, data_points);
+    
     if(data_points.empty() || colours.empty()) {
         errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
         return false;
@@ -396,7 +419,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const Mat &img)
 
 }
 
-void DataWrapper::updateFrame()
+bool DataWrapper::updateFrame()
 {
     numFramesProcessed++;
     
@@ -405,7 +428,13 @@ void DataWrapper::updateFrame()
         m_current_image = m_camera->grabNewImage();   //force get new frame
         break;
     case STREAM:
-        if(imagestrm.is_open()) {
+        try {
+            imagestrm >> *m_current_image;
+        }
+        catch(std::exception& e){
+            cout << "Stream error - resetting: " << e.what() << endl;
+            imagestrm.clear() ;
+            imagestrm.seekg(0, ios::beg) ;
             imagestrm >> *m_current_image;
         }
         break;
@@ -424,6 +453,8 @@ void DataWrapper::updateFrame()
         }
         break;
     }
+    
+    return true;
 }
 
 /**

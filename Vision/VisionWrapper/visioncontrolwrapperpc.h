@@ -2,6 +2,7 @@
 #define CONTROLWRAPPER_H
 
 #include "Vision/visioncontroller.h"
+#include "Vision/VisionWrapper/datawrapperpc.h"
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -19,6 +20,7 @@ private:
     static VisionControlWrapper* instance;
     
     VisionController* controller;
+    DataWrapper* wrapper;
 };
 
 #endif // CONTROLWRAPPER_H

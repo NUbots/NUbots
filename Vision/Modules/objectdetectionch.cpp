@@ -76,5 +76,5 @@ void ObjectDetectionCH::detectObjects()
 bool ObjectDetectionCH::isPixelGreen(const NUImage& img, int x, int y)
 {
     const LookUpTable& LUT = VisionBlackboard::getInstance()->getLUT();
-    return ClassIndex::getColourFromIndex(LUT.classifyPixel(img.at(x,y))) == ClassIndex::green;
+    return ClassIndex::getColourFromIndex(LUT.classifyPixel(img(x,y))) == ClassIndex::green;
 }
