@@ -1,7 +1,7 @@
 #ifndef BALL_H
 #define BALL_H
 
-#include "Vision/VisionTypes/visionfieldobject.h"
+#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
 
 class Ball : public VisionFieldObject
 {
@@ -10,6 +10,7 @@ public:
     Ball(int radius);
     
     void getRelativeFieldCoords(vector<float>& coords) const;
+    bool addToExternalFieldObjects(FieldObjects *fieldobjects) const;
     
 private:
     int m_radius;

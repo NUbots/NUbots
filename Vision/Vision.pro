@@ -31,7 +31,7 @@ contains(PLATFORM, "darwin") {
 contains(PLATFORM, "pc") {
      message("Compiling for PC")
 
-    ROBOCUP_DIR = /home/shannon/robocup/ 
+    ROBOCUP_DIR = /home/shannon/robocup/
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
   
@@ -52,9 +52,8 @@ contains(PLATFORM, "pc") {
 
 #this
 HEADERS += \
-    visionblackboard.h \
-    VisionTools/lookuptable.h \
     VisionWrapper/datawrappercurrent.h \
+    VisionTools/lookuptable.h \
     VisionTools/GTAssert.h \
     VisionTools/classificationcolours.h \
     Modules/greenhorizonch.h \
@@ -67,19 +66,17 @@ HEADERS += \
     VisionTypes/colourreplacementrule.h \
     VisionTypes/transition.h \
     VisionTypes/segmentedregion.h \
-    VisionTypes/visionfieldobject.h \
     VisionTypes/objectcandidate.h \
+    VisionTypes/VisionFieldObjects/visionfieldobject.h \
+    VisionTypes/VisionFieldObjects/ball.h \
+    VisionTypes/VisionFieldObjects/goal.h \
+    VisionTypes/VisionFieldObjects/beacon.h \
     basicvisiontypes.h \
     valgorithm.h \
-    Modules/clustercandidates.h \
+    visionblackboard.h \
     visioncontroller.h \
-    VisionTypes/ball.h \
-    VisionTypes/goal.h \
-    VisionTypes/beacon.h \
 
 SOURCES += \
-    visionblackboard.cpp \
-    visioncontroller.cpp \
     VisionTools/lookuptable.cpp \
     Modules/greenhorizonch.cpp \
     Modules/horizoninterpolate.cpp \
@@ -91,15 +88,15 @@ SOURCES += \
     VisionTypes/colourreplacementrule.cpp \
     VisionTypes/transition.cpp \
     VisionTypes/segmentedregion.cpp \
-    VisionTypes/visionfieldobject.cpp \
     VisionTypes/objectcandidate.cpp \
-    main.cpp \
-    Modules/clustercandidates.cpp \
-    VisionTypes/ball.cpp \
-    VisionTypes/goal.cpp \
-    VisionTypes/beacon.cpp \
-
-#robocup
+    VisionTypes/VisionFieldObjects/visionfieldobject.cpp \
+    VisionTypes/VisionFieldObjects/ball.cpp \
+    VisionTypes/VisionFieldObjects/goal.cpp \
+    VisionTypes/VisionFieldObjects/beacon.cpp \
+    visionblackboard.cpp \
+    visioncontroller.cpp \
+    main.cpp 
+##robocup
 HEADERS += \
     $$ROBOCUP_DIR/Tools/FileFormats/LUTTools.h \
     $$ROBOCUP_DIR/Tools/Optimisation/Parameter.h \

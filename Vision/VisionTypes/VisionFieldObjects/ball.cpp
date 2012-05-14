@@ -15,3 +15,8 @@ void Ball::getRelativeFieldCoords(vector<float>& coords) const
 {
     
 }
+
+bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects) const
+{
+    
+}

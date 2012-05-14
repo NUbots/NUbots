@@ -16,6 +16,7 @@
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/basicvisiontypes.h"
 #include "Vision/VisionTypes/segmentedregion.h"
+#include "Vision/VisionTypes/visionfieldobject.h"
 
 using namespace std;
 using namespace cv;
@@ -65,7 +66,7 @@ public:
     const LookUpTable& getLUT() const;
         
     //! Data publish interface
-    void publish(DATA_ID id, const Mat& img);
+    void publish(const vector<VisionFieldObject>& visual_objects);
     //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();

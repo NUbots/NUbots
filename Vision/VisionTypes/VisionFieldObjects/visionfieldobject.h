@@ -8,6 +8,8 @@
 #define VISIONFIELDOBJECT_H
 
 #include "Vision/basicvisiontypes.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 #include <vector>
 
 using namespace std;
@@ -27,8 +29,8 @@ public:
         UNKNOWN
     };
 
-    static std::string getVFOName(VFO_ID id);
-    static VFO_ID getVFOFromName(const std::string& name);
+    static string getVFOName(VFO_ID id);
+    static VFO_ID getVFOFromName(const string& name);
     
 public:
     VisionFieldObject();
@@ -36,7 +38,7 @@ public:
     const PointType& getLocationPixels() const;
     const vector<float>& getLocationAngular() const;
     virtual void getRelativeFieldCoords(vector<float>& coords) const = 0;
-    //virtual ____ convertToExternalFO() const;
+    virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects) const = 0;
     
 
 private:

@@ -16,7 +16,7 @@
 
 //static std::map<VisionFieldObject::VFO_ID, VisionID::EXTERNAL_FIELD_OBJECT_ID> id_map = createMap();
 
-std::string VisionFieldObject::getVFOName(VFO_ID id)
+string VisionFieldObject::getVFOName(VFO_ID id)
 {
     switch(id) {
     case BALL:          return "BALL";
@@ -30,7 +30,7 @@ std::string VisionFieldObject::getVFOName(VFO_ID id)
     }
 }
 
-VisionFieldObject::VFO_ID VisionFieldObject::getVFOFromName(const std::string &name)
+VisionFieldObject::VFO_ID VisionFieldObject::getVFOFromName(const string &name)
 {
     if(name.compare("BALL") == 0)
         return BALL;
@@ -63,8 +63,3 @@ const vector<float>& VisionFieldObject::getLocationAngular() const
 {
     return m_location_angular;
 }
-
-//VisionFieldObject::VisionFieldObject(VFO_ID id)
-//{
-//    this->id = id;
-//}

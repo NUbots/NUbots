@@ -1,7 +1,8 @@
 #ifndef GOAL_H
 #define GOAL_H
 
-#include "Vision/VisionTypes/visionfieldobject.h"
+#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Infrastructure/FieldObjects/Object.h"
 
 class Goal : public VisionFieldObject
 {
@@ -16,12 +17,13 @@ public:
         Invalid
     };
     
-    Goal();
-    Goal(ID id);
-    Goal(ID id, const Quad& corners);
+    static string getIDName(ID id);
+       
+    Goal(ID id=Invalid, const Quad& corners=Quad(0,0,0,0));
     
     void getRelativeFieldCoords(vector<float>& coords) const;
-    
+    bool addToExternalFieldObjects(FieldObjects *fieldobjects) const;
+        
 private:    
     ID m_id;
     Quad m_corners;

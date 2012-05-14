@@ -8,8 +8,6 @@
 
 VisionBlackboard* VisionBlackboard::instance = 0;
 
-
-
 //! @brief Private constructor for blackboard.
 VisionBlackboard::VisionBlackboard()
 {
@@ -203,7 +201,7 @@ const LookUpTable& VisionBlackboard::getLUT() const
 *   @brief returns the kinematics horizon line.
 *   @return kinematics_horizon A Line defining the kinematics horizon.
 */
-const Line& VisionBlackboard::getKinematicsHorizon() const
+const Horizon& VisionBlackboard::getKinematicsHorizon() const
 {
     return kinematics_horizon;
 }

@@ -1,7 +1,7 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-#include "Vision/VisionTypes/visionfieldobject.h"
+#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
 
 class Beacon : public VisionFieldObject
 {
@@ -13,11 +13,14 @@ public:
         Invalid
     };
     
+    static string getIDName(ID id);
+    
     Beacon();
     Beacon(ID id);
     Beacon(ID id, const Quad& corners);
     
     void getRelativeFieldCoords(vector<float>& coords) const;
+    bool addToExternalFieldObjects(FieldObjects *fieldobjects) const;
     
 private:
     ID m_id;

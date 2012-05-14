@@ -17,7 +17,7 @@
 #include "VisionTypes/coloursegment.h"
 #include "VisionTypes/segmentedregion.h"
 #include "VisionTypes/transition.h"
-#include "VisionTypes/visionfieldobject.h"
+#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
 
 #ifndef VISIONBLACKBOARD_H
 #define VISIONBLACKBOARD_H
@@ -72,14 +72,14 @@ public:
     const map<VisionFieldObject::VFO_ID, vector<Transition> >& getHorizontalTransitionsMap() const;
     const map<VisionFieldObject::VFO_ID, vector<Transition> >& getVerticalTransitionsMap() const;
     
-    const Line& getKinematicsHorizon() const;
+    const Horizon& getKinematicsHorizon() const;
 
     const vector<PointType>& getObjectPoints() const;
 
     const LookUpTable& getLUT() const;
 
 
-    unsigned int getHorizonYFromX(unsigned int x) const;
+    //unsigned int getHorizonYFromX(unsigned int x) const;
 
     int getImageWidth() const;
     int getImageHeight() const;

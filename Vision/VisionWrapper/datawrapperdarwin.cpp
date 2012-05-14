@@ -132,9 +132,12 @@ const LookUpTable& DataWrapper::getLUT() const
 //! PUBLISH METHODS
 
 
-void DataWrapper::publish(DATA_ID id, const Mat& img)
+void DataWrapper::publish(const vector<VisionFieldObject> &visual_objects)
 {
     //! @todo Implement + Comment
+    
+    //postprocess at end
+    field_objects->postProcess(current_frame->GetTimestamp());
 }
 
 //void DataWrapper::publish(DATA_ID id, vector<VisionFieldObject> data)
@@ -229,6 +232,8 @@ bool DataWrapper::updateFrame()
         }
         return false;
     }
+    //succesful
+    field_objects->preProcess(current_frame->GetTimestamp());
     return true;
 }
 
