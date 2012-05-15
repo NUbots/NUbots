@@ -59,6 +59,7 @@ public:
     NUImage* getFrame();
 
     bool getCTGVector(vector<float>& ctgvector);    //for transforms
+    bool getCTVector(vector<float>& ctvector);    //for transforms
     
     //! @brief Returns a reference to the kinematics horizon line.
     const Horizon& getKinematicsHorizon();

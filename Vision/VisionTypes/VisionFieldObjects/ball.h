@@ -9,8 +9,11 @@ public:
     Ball();
     Ball(int radius);
     
-    void getRelativeFieldCoords(vector<float>& coords) const;
-    bool addToExternalFieldObjects(FieldObjects *fieldobjects) const;
+    Vector3<float> getRelativeFieldCoords() const;
+    bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
+    
+private:
+    void calculatePositions();
     
 private:
     int m_radius;

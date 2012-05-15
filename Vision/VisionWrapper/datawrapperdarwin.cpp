@@ -108,7 +108,7 @@ const Horizon& DataWrapper::getKinematicsHorizon()
     return m_kinematics_horizon;
 }
 
-/*! @brief Retrieves the camera transform vectord returns it.
+/*! @brief Retrieves the camera to ground vector returns it.
 *   @param ctgvector A reference to a float vector to fill.
 *   @return valid Whether the retrieved values are valid or not.
 */
@@ -117,8 +117,19 @@ bool DataWrapper::getCTGVector(vector<float>& ctgvector)
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::getCTGVector()" << endl;
     #endif
-        return false;
     return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+}
+
+/*! @brief Retrieves the camera transform vector returns it.
+*   @param ctgvector A reference to a float vector to fill.
+*   @return valid Whether the retrieved values are valid or not.
+*/
+bool DataWrapper::getCTVector(vector<float>& ctvector)
+{
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::getCTVector()" << endl;
+    #endif
+    return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
 }
 
 /*! @brief Returns a reference to the stored Lookup Table

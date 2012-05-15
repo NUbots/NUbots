@@ -8,8 +8,11 @@
 #define VISIONFIELDOBJECT_H
 
 #include "Vision/basicvisiontypes.h"
+
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Tools/Math/Vector3.h"
+
 #include <vector>
 
 using namespace std;
@@ -36,16 +39,22 @@ public:
     VisionFieldObject();
     
     const PointType& getLocationPixels() const;
-    const vector<float>& getLocationAngular() const;
-    virtual void getRelativeFieldCoords(vector<float>& coords) const = 0;
-    virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects) const = 0;
+    const Vector2<float>& getLocationAngular() const;
+    virtual Vector3<float> getRelativeFieldCoords() const = 0;
+    virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const = 0;
     
-
 private:
-    PointType m_location_pixels;        //! @variable The pixel location of the object on the screen.
-    vector<float> m_location_angular;   //! @variable The angular location of the object relative to the screen centre.
+    virtual void calculatePositions() = 0;
+
+protected:
+    PointType m_location_pixels;            //! @variable The pixel location of the object on the screen.
+    Vector2<float> m_location_angular;       //! @variable The angular location of the object relative to the screen centre.
+    Vector3<float> m_spherical_position;    //! @variable The position (distance, bearing, elevation) of the object relative to the robot
     float confidence;   //! unused
     float error;        //! unused
+    Vector2<int> m_size_on_screen;
+    Vector3<float> m_spherical_error;
+    Vector3 <float> m_transformed_spherical_pos;
 };
 
 #endif // VISIONFIELDOBJECT_H

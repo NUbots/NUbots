@@ -55,6 +55,7 @@ public:
     NUImage* getFrame();
 
     bool getCTGVector(vector<float>& ctgvector);    //for transforms
+    bool getCTVector(vector<float>& ctvector);    //for transforms
     
     //! @brief Generates spoofed horizon line.
     const Horizon& getKinematicsHorizon();
@@ -93,7 +94,7 @@ private:
     };
     
 private:
-    static const INPUT_METHOD METHOD = STREAM;  //CAMERA, STREAM, FILE
+    static const INPUT_METHOD METHOD = CAMERA;  //CAMERA, STREAM, FILE
 
     static DataWrapper* instance;
 

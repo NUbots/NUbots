@@ -59,7 +59,7 @@ const PointType& VisionFieldObject::getLocationPixels() const
 {
     return m_location_pixels;
 }
-const vector<float>& VisionFieldObject::getLocationAngular() const
+const Vector2<float>& VisionFieldObject::getLocationAngular() const
 {
     return m_location_angular;
 }

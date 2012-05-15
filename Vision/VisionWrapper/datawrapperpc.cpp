@@ -195,6 +195,19 @@ bool DataWrapper::getCTGVector(vector<float> &ctgvector)
     return false;
 }
 
+//! @brief Generates spoofed camera transform vector.
+bool DataWrapper::getCTVector(vector<float> &ctvector)
+{
+    //bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    //return isOK;
+    ctvector.clear();
+    ctvector.push_back(0);
+    ctvector.push_back(0);
+    ctvector.push_back(0);
+    ctvector.push_back(0);
+    return false;
+}
+
 //! @brief Returns spoofed kinematics horizon.
 const Horizon& DataWrapper::getKinematicsHorizon()
 { 

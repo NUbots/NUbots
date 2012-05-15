@@ -29,12 +29,12 @@ Beacon::Beacon(ID id, const Quad &corners)
     //SET WIDTH
 }
 
-void Beacon::getRelativeFieldCoords(vector<float> &coords) const
+Vector3<float> Beacon::getRelativeFieldCoords() const
 {
-    
+    return m_spherical_position;
 }
 
-bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects) const
+bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Beacon::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
@@ -58,3 +58,15 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects) const
         #endif
     }
 }
+
+void Beacon::calculatePositions()
+{
+    //! @todo implement 
+    m_spherical_position[0] = 0; //dist
+    m_spherical_position[1] = 0; //bearing
+    m_spherical_position[2] = 0; //elevation
+    
+    m_location_angular.x = 0; //bearing
+    m_location_angular.y = 0; //elevation
+}
+

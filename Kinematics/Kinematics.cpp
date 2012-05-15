@@ -6,6 +6,8 @@
 #include "nubotdataconfig.h"
 #include "debug.h"
 
+#include <cstdlib>
+
 
 using namespace TransformMatrices;
 

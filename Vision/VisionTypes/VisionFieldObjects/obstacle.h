@@ -1,0 +1,23 @@
+#ifndef OBSTACLE_H
+#define OBSTACLE_H
+
+#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "VisionTypes/quad.h"
+#include "Tools/Math/Vector2.h"
+
+class Obstacle : public VisionFieldObject
+{
+public:
+    Obstacle(const PointType& position, int width, int height);
+    
+    Vector3<float> getRelativeFieldCoords() const;
+    bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
+        
+private:
+    void calculatePositions();
+    
+private:    
+    Vector2<int> m_bottom_centre;
+};
+
+#endif // OBSTACLE_H

@@ -4,7 +4,7 @@
 #include <opencv2/core/core.hpp>
 
 typedef cv::Point2i PointType;      //! Use opencv points.
-typedef cv::Scalar Quad;
+//typedef cv::Scalar Quad;
 
 namespace VisionID {
     enum ScanDirection {

@@ -2,6 +2,7 @@
 #include "VisionWrapper/datawrappercurrent.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
+#include "nubotdataconfig.h"
 
 #include <algorithm>
 #include <boost/foreach.hpp>
@@ -20,6 +21,10 @@ VisionBlackboard::VisionBlackboard()
 
     //get Camera to ground vector
     ctgvalid = wrapper->getCTGVector(ctgvector);
+    
+    m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
+    
+    calculateFOVAndCamDist();
 }
 
 /** @brief Private destructor.
@@ -197,6 +202,15 @@ const LookUpTable& VisionBlackboard::getLUT() const
     return LUT;
 }
 
+double VisionBlackboard::calculateBearing(double x) const {
+    return atan( (original_image->getWidth()/2-x) / ( (original_image->getWidth()/2) / (tan(m_FOV.x/2.0)) ) );
+}
+
+
+double VisionBlackboard::calculateElevation(double y) const {
+    return atan( (original_image->getHeight()/2-y) / ( (original_image->getHeight()/2) / (tan(m_FOV.y/2.0)) ) );
+}
+
 /**
 *   @brief returns the kinematics horizon line.
 *   @return kinematics_horizon A Line defining the kinematics horizon.
@@ -204,6 +218,26 @@ const LookUpTable& VisionBlackboard::getLUT() const
 const Horizon& VisionBlackboard::getKinematicsHorizon() const
 {
     return kinematics_horizon;
+}
+
+bool VisionBlackboard::isCameraToGroundValid() const
+{
+    return ctgvalid;
+}
+
+const vector<float>& VisionBlackboard::getCameraToGroundVector() const
+{
+    return ctgvector;
+}
+
+bool VisionBlackboard::isCameraTransformValid() const
+{
+    return ctvalid;
+}
+
+const vector<float>& VisionBlackboard::getCameraTransformVector() const
+{
+    return ctvector;
 }
 
 /**
@@ -326,6 +360,11 @@ int VisionBlackboard::getImageHeight() const
     return original_image->getHeight();
 }
 
+double VisionBlackboard::getCameraDistanceInPixels() const
+{
+    return effective_camera_dist_pixels;
+}
+
 /*! @brief Retrieves camera settings from the wrapper and returns them.
 *   @return camera settings
 */
@@ -342,6 +381,12 @@ void VisionBlackboard::updateLUT()
     LUT = wrapper->getLUT();
 }
 
+void VisionBlackboard::calculateFOVAndCamDist()
+{
+    m_FOV = Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov);
+    effective_camera_dist_pixels = (0.5*original_image->getWidth())/tan(0.5*m_FOV.x);
+}
+
 /**
 *   @brief Retrieves a new image and sensor data from the wrapper.
 *   This method instructs the wrapper to update itself, then grabs the new information 
@@ -355,6 +400,7 @@ void VisionBlackboard::update()
     //Get updated kinematics data
     kinematics_horizon = wrapper->getKinematicsHorizon();
     ctgvalid = wrapper->getCTGVector(ctgvector);
+    ctvalid = wrapper->getCTVector(ctvector);
     //get new image pointer
     original_image = wrapper->getFrame();
     #if VISION_BLACKBOARD_VERBOSITY > 1
