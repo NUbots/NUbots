@@ -58,7 +58,7 @@ BehaviourState* EvaluateWalkParametersState::nextState()
 		finish();
 		return m_parent->m_generate;
 	}
-	else if (m_time_in_state > 120000 or getting_up)
+	else if (m_time_in_state > 100000 or getting_up)
 		return m_parent->m_generate;
 	else
 		return this;
@@ -80,7 +80,7 @@ void EvaluateWalkParametersState::doState()
     if (pointReached())
         m_current_target_state = getNextPoint();
 
-    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, m_parent->stoppingDistance(), 9000);
+    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 20, 5000);
     m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
 }
 
@@ -106,7 +106,7 @@ vector<float> EvaluateWalkParametersState::getStartPoint()
 bool EvaluateWalkParametersState::pointReached()
 {
     vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
-    if (difference[0] < 10 and fabs(difference[2]) < 0.2)
+    if (difference[0] < 35 and fabs(difference[2]) < 0.4)
         return true;
     else
         return false;

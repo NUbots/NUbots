@@ -38,8 +38,8 @@ using namespace boost::accumulators;
  */
 PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
-    m_step_size = 0.05;        	   // Tune this
-    m_epsilon = 0.05;              // Tune this
+    m_step_size = 0.01;        	   // Tune this
+    m_epsilon = 0.01;              // Tune this
     m_num_particles = 12;      	   // Tune this
     m_stalled_threshold = 25;	   // Might need to tune this
 

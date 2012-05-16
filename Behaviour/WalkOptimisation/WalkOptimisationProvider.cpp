@@ -65,7 +65,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     loadId();
     loadWayPoints();
     #ifdef TARGET_IS_DARWIN
-        loadParameters("DarwinWalkStart");
+        loadParameters("BWalk");
     #else
         loadParameters("NBWalkStart");
     #endif

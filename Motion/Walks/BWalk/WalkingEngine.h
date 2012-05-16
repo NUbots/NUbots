@@ -35,6 +35,10 @@ public:
   * Destructor
   */
   ~WalkingEngine();
+  
+  void setWalkParameters(const WalkParameters& walkparameters);
+  void writeParameters();
+  
   void doWalk();
   bool m_initialised;
   bool m_pedantic;
