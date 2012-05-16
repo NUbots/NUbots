@@ -12,6 +12,7 @@
 /html
 /latex
 Doxyfile
+Doxyfile.bak
 
 # Python Ignores:
 #we don't want to include .pyc files
