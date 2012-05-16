@@ -44,6 +44,7 @@ void GoalDetection::detectGoals()
         Beacon beacon(Beacon::UnknownBeacon, unknown_beacons.at(i));
         vbb->addBeacon(beacon);
     }
+    
     // BLUE POSTS
     for (unsigned int i = 0; i < blue_posts.size(); i++) {
         Goal post(Goal::BlueUnknownGoal, blue_posts.at(i));
