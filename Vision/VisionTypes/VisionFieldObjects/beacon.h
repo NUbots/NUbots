@@ -18,6 +18,9 @@ public:
     
     Beacon(BeaconID id = InvalidBeacon, const Quad& corners = Quad(0,0,0,0));
     
+    const Quad& getQuad() const;
+    BeaconID getID() const;
+    
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
     

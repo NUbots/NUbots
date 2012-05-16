@@ -34,6 +34,16 @@ Goal::Goal(GoalID id, const Quad &corners)
     calculatePositions();
 }
 
+const Quad& Goal::getQuad() const
+{
+    return m_corners;
+}
+
+Goal::GoalID Goal::getID() const
+{
+    return m_id;
+}
+
 /*!
 *   @brief Returns the position in spherical coordinates.
 *   @return m_spherical_position The spherical coordinates for this goal.

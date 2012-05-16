@@ -22,7 +22,7 @@ int VisionControlWrapper::runFrame()
         debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
     #endif
     frame++;
-    cout << frame << endl;
+    
     if(!wrapper->updateFrame()) {
         #if VISION_WRAPPER_VERBOSITY > 1
             debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;

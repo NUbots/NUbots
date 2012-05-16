@@ -4,6 +4,8 @@
 #include <opencv2/core/core.hpp>
 #include "Tools/Math/Vector2.h"
 
+#include "Vision/basicvisiontypes.h"
+
 class Quad
 {
 public:
@@ -14,6 +16,8 @@ public:
     
     Vector2<int> getBottomCentre() const;
     Vector2<int> getCentre() const;
+    PointType getBottomLeft() const;
+    PointType getTopRight() const;
     int getWidth() const;
     int getHeight() const;
     

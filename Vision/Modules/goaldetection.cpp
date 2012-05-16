@@ -29,6 +29,11 @@ void GoalDetection::detectGoals()
     overlapCheck(&yellow_posts);
     
     //ADD TO BLACKBOARD
+    cout << "bb" << blue_beacons.size() << endl;
+    cout << "yb" << yellow_beacons.size() << endl;
+    cout << "ub" << unknown_beacons.size() << endl;
+    cout << "bg" << blue_posts.size() << endl;
+    cout << "yg" << yellow_posts.size() << endl;
     // BLUE BEACONS
     for (unsigned int i = 0; i < blue_beacons.size(); i++) {
         Beacon beacon(Beacon::BlueBeacon, blue_beacons.at(i));
