@@ -7,18 +7,16 @@
 class Beacon : public VisionFieldObject
 {
 public:
-    enum ID {
-        Yellow,
-        Blue,
-        Unknown,
-        Invalid
+    enum BeaconID {
+        YellowBeacon,
+        BlueBeacon,
+        UnknownBeacon,
+        InvalidBeacon
     };
     
-    static string getIDName(ID id);
+    static string getIDName(BeaconID id);
     
-    Beacon();
-    Beacon(ID id);
-    Beacon(ID id, const Quad& corners);
+    Beacon(BeaconID id = InvalidBeacon, const Quad& corners = Quad(0,0,0,0));
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
@@ -27,7 +25,7 @@ private:
     void calculatePositions();
     
 private:
-    ID m_id;
+    BeaconID m_id;
     Quad m_corners;
     int width;
 };

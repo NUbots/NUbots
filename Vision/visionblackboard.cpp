@@ -81,6 +81,26 @@ void VisionBlackboard::setObjectPoints(const vector<PointType>& points)
     object_points = points;
 }
 
+void VisionBlackboard::addGoal(const Goal& newgoal) 
+{
+    m_goals.push_back(newgoal);
+}
+
+void VisionBlackboard::addBeacon(const Beacon& newbeacon)
+{
+    m_beacons.push_back(newbeacon);
+}
+
+void VisionBlackboard::addBall(const Ball& newball)
+{
+    m_balls.push_back(newball);
+}
+
+void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
+{
+    m_obstacles.push_back(newobstacle);
+}
+
 /**
 *   @brief sets the horizontal scan lines.
 *   @param horizontal_scanlines A vector of unsigned ints defining horizontal scanlines.

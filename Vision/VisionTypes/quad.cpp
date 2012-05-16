@@ -40,3 +40,8 @@ int Quad::getHeight() const
 {
     return abs(m_bottom - m_top);
 }
+
+cv::Scalar Quad::getAsScalar() const
+{
+    return cv::Scalar(m_left, m_bottom, m_right, m_top);
+}

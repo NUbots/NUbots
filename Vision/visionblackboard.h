@@ -19,6 +19,10 @@
 #include "VisionTypes/segmentedregion.h"
 #include "VisionTypes/transition.h"
 #include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "VisionTypes/VisionFieldObjects/ball.h"
+#include "VisionTypes/VisionFieldObjects/goal.h"
+#include "VisionTypes/VisionFieldObjects/beacon.h"
+#include "VisionTypes/VisionFieldObjects/obstacle.h"
 
 #ifndef VISIONBLACKBOARD_H
 #define VISIONBLACKBOARD_H
@@ -52,6 +56,11 @@ public:
     void setVerticalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<Transition> >& t_map);
 
     void setObjectPoints(const vector<PointType>& points);
+    
+    void addGoal(const Goal& newgoal);
+    void addBeacon(const Beacon& newbeacon);
+    void addBall(const Ball& newball);
+    void addObstacle(const Obstacle& newobstacle);
 
 
     //ACCESSORS
@@ -152,6 +161,12 @@ private:
     map<VisionFieldObject::VFO_ID, vector<Transition> > mapped_vertical_transitions;
     //vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments
     //vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments
+    
+    vector<Goal> m_goals;
+    vector<Beacon> m_beacons;
+    vector<Ball> m_balls;
+    vector<Obstacle> m_obstacles;
+    
 };
 
 #endif // VISIONBLACKBOARD_H

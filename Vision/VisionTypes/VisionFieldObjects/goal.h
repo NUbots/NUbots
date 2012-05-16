@@ -9,14 +9,14 @@
 class Goal : public VisionFieldObject
 {
 public:
-    enum ID {
-        YellowLeft,
-        YellowRight,
-        YellowUnknown,
-        BlueLeft,
-        BlueRight,
-        BlueUnknown,
-        Invalid
+    enum GoalID {
+        YellowLeftGoal,
+        YellowRightGoal,
+        YellowUnknownGoal,
+        BlueLeftGoal,
+        BlueRightGoal,
+        BlueUnknownGoal,
+        InvalidGoal
     };
     
     enum DISTANCE_METHOD {
@@ -26,9 +26,9 @@ public:
     
     static const DISTANCE_METHOD METHOD = Width;
     
-    static string getIDName(ID id);
+    static string getIDName(GoalID id);
        
-    Goal(ID id=Invalid, const Quad& corners=Quad(0,0,0,0));
+    Goal(GoalID id=InvalidGoal, const Quad& corners=Quad(0,0,0,0));
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
@@ -38,7 +38,7 @@ private:
     float distanceToGoal(float bearing, float elevation) const;
     
 private:    
-    ID m_id;
+    GoalID m_id;
     Quad m_corners;
     Vector2<int> m_bottom_centre;
     Vector2<int> m_centre;

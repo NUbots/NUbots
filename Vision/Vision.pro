@@ -73,6 +73,7 @@ HEADERS += \
     Modules/objectdetectionch.h \
     Modules/scanlines.h \
     Modules/segmentfilter.h \
+    Modules/goaldetection.h \
     basicvisiontypes.h \
     valgorithm.h \
     visionblackboard.h \
@@ -98,6 +99,7 @@ SOURCES += \
     Modules/objectdetectionch.cpp \
     Modules/scanlines.cpp \
     Modules/segmentfilter.cpp \
+    Modules/goaldetection.cpp \
     visionblackboard.cpp \
     visioncontroller.cpp \
     visionconstants.cpp \

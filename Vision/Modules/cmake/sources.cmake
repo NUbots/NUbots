@@ -26,6 +26,7 @@ horizoninterpolate.cpp
 objectdetectionch.cpp
 scanlines.cpp
 segmentfilter.cpp
+goaldetection.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

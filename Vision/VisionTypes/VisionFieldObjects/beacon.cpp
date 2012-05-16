@@ -2,27 +2,17 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 
-string Beacon::getIDName(ID id)
+string Beacon::getIDName(BeaconID id)
 {
     switch(id) {
-    case Yellow:    return "Yellow";
-    case Blue:      return "Blue";
-    case Unknown:   return "Unknown";
-    case Invalid:   return "Invalid";
+    case YellowBeacon:    return "YellowBeacon";
+    case BlueBeacon:      return "BlueBeacon";
+    case UnknownBeacon:   return "UnknownBeacon";
+    case InvalidBeacon:   return "InvalidBeacon";
     }
 }
 
-Beacon::Beacon()
-{
-    Beacon(Invalid);
-}
-
-Beacon::Beacon(ID id)
-{
-    Beacon(id, Quad(0,0,0,0));
-}
-
-Beacon::Beacon(ID id, const Quad &corners)
+Beacon::Beacon(BeaconID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
@@ -41,13 +31,13 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
     #endif
         
     switch(m_id) {
-    case Yellow:
+    case YellowBeacon:
         
         break;
-    case Blue:
+    case BlueBeacon:
         
         break;
-    case Unknown:
+    case UnknownBeacon:
         
         break;
     default:

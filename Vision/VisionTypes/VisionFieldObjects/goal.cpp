@@ -8,20 +8,21 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-string Goal::getIDName(ID id)
+string Goal::getIDName(GoalID id)
 {
     switch(id) {
-    case YellowLeft:        return "YellowLeft";
-    case YellowRight:       return "YellowRight";
-    case YellowUnknown:     return "YellowUnknown";
-    case BlueLeft:          return "BlueLeft";
-    case BlueRight:         return "BlueRight";
-    case BlueUnknown:       return "BlueUnknown";
-    case Invalid:           return "Invalid";
+    case YellowLeftGoal:        return "YellowLeftGoal";
+    case YellowRightGoal:       return "YellowRightGoal";
+    case YellowUnknownGoal:     return "YellowUnknownGoal";
+    case BlueLeftGoal:          return "BlueLeftGoal";
+    case BlueRightGoal:         return "BlueRightGoal";
+    case BlueUnknownGoal:       return "BlueUnknownGoal";
+    case InvalidGoal:           return "InvalidGoal";
+    default:                    return "InvalidGoal";
     }
 }
 
-Goal::Goal(ID id, const Quad &corners)
+Goal::Goal(GoalID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
@@ -33,55 +34,61 @@ Goal::Goal(ID id, const Quad &corners)
     calculatePositions();
 }
 
-
+/*!
+*   @brief Returns the position in spherical coordinates.
+*   @return m_spherical_position The spherical coordinates for this goal.
+*/
 Vector3<float> Goal::getRelativeFieldCoords() const
 {
     return m_spherical_position;
 }
 
+/*!
+*   @brief Updates the external field objects with this goal.
+*   @param fieldobjects A pointer to the external field objects.
+*   @param timestamp The current timestamp to apply to the field objects.
+*
+*   This method uses the id of the goal to determine where to place it, it also
+*   includes no checks before placing them, and nor should it. For example, if this is 
+*   called on multiple YellowLeftGoals then localisation will only see the last one.
+*/
 bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Goal::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
     #endif
     AmbiguousObject newAmbObj;
+    FieldObjects::StationaryFieldObjectID stat_id;
+    bool stationary = false;
 
     switch(m_id) {
-    case YellowLeft:
-        
+    case YellowLeftGoal:
+        stat_id = FieldObjects::FO_YELLOW_LEFT_GOALPOST;
+        stationary = true;
         break;
-    case YellowRight:
-        
+    case YellowRightGoal:
+        stat_id = FieldObjects::FO_YELLOW_RIGHT_GOALPOST;
+        stationary = true;
         break;
-    case YellowUnknown:
+    case BlueLeftGoal:
+        stat_id = FieldObjects::FO_BLUE_LEFT_GOALPOST;
+        stationary = true;
+        break;
+    case BlueRightGoal:
+        stat_id = FieldObjects::FO_BLUE_RIGHT_GOALPOST;
+        stationary = true;
+        break;
+    case YellowUnknownGoal:
         newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
         newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
         newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-        newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
-                                     m_spherical_error,
-                                     m_location_angular,
-                                     m_centre,
-                                     m_size_on_screen,
-                                     timestamp);
-        fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
+        stationary = false;
         break;
-    case BlueLeft:
-        
-        break;
-    case BlueRight:
-        
-        break;
-    case BlueUnknown:
+    case BlueUnknownGoal:
         newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
         newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
         newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
-        newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
-                                     m_spherical_error,
-                                     m_location_angular,
-                                     m_centre,
-                                     m_size_on_screen,
-                                     timestamp);
-        fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
+        stationary = false;
         break;
     default:
         //invalid object - do not push to fieldobjects
@@ -91,15 +98,44 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         #endif
         return false;
     }
+    
+    if(stationary) {
+        //add post to stationaryFieldObjects
+        fieldobjects->stationaryFieldObjects[stat_id].UpdateVisualObject(m_transformed_spherical_pos,
+                                                                        m_spherical_error,
+                                                                        m_location_angular,
+                                                                        m_centre,
+                                                                        m_size_on_screen,
+                                                                        timestamp);
+    }
+    else {
+        //update ambiguous goal post and add it to ambiguousFieldObjects
+        newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
+                                     m_spherical_error,
+                                     m_location_angular,
+                                     m_centre,
+                                     m_size_on_screen,
+                                     timestamp);
+        fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
+    }
+    
+    return true;
 }
 
+/*!
+*   @brief Updates the spherical position, angular location and transformed spherical position.
+*   
+*   This method uses the camera transform and as such if it was not valid when retrieved from the wrapper
+*   this will leave m_transformed_spherical_position at all zeros.
+*/
 void Goal::calculatePositions()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
-    float distance;
     float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
     float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
+    
+    float distance = distanceToGoal(bearing, elevation);
 
     m_spherical_position[0] = distance;//distance
     m_spherical_position[1] = bearing;
@@ -107,15 +143,21 @@ void Goal::calculatePositions()
     
     m_location_angular = Vector2<float>(bearing, elevation);
     //m_spherical_error - not calculated
-    
-    
-    if(vbb->isCameraTransformValid())
-    {        
+        
+    if(vbb->isCameraTransformValid()) {        
         Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
         m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
     }
+    else {
+        m_transformed_spherical_pos = Vector3<float>(0,0,0);
+    }
 }
 
+/*!
+*   @brief Calculates the distance using the set METHOD and the provided coordinate angles.
+*   @param bearing The angle about the z axis.
+*   @param elevation The angle about the y axis.
+*/
 float Goal::distanceToGoal(float bearing, float elevation) const {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     float distance = 0;
