@@ -19,6 +19,16 @@ Beacon::Beacon(BeaconID id, const Quad &corners)
     //SET WIDTH
 }
 
+const Quad& Beacon::getQuad() const
+{
+    return m_corners;
+}
+
+Beacon::BeaconID Beacon::getID() const
+{
+    return m_id;
+}
+
 Vector3<float> Beacon::getRelativeFieldCoords() const
 {
     return m_spherical_position;

@@ -23,6 +23,7 @@ ENDIF()
 SET (YOUR_SRCS
 visionblackboard.cpp
 visioncontroller.cpp
+visionconstants.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

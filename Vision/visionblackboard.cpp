@@ -426,6 +426,11 @@ void VisionBlackboard::update()
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::update() - Finish" << endl;
     #endif
+    //clear out result vectors
+    m_balls.clear();
+    m_beacons.clear();
+    m_goals.clear();
+    m_obstacles.clear();
 }
 
 /**
@@ -500,6 +505,12 @@ void VisionBlackboard::debugPublish() const
     
     //object points
     wrapper->debugPublish(DataWrapper::DBID_OBJECT_POINTS, object_points);
+    
+    //field objects
+    wrapper->debugPublish(m_goals);
+    wrapper->debugPublish(m_beacons);
+    wrapper->debugPublish(m_balls);
+    wrapper->debugPublish(m_obstacles);
     
     //horizontal scans
     pts.clear();

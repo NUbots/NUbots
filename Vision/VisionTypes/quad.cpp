@@ -31,6 +31,16 @@ Vector2<int> Quad::getCentre() const
     return Vector2<int>((m_right+m_left)*0.5, (m_bottom+m_top)*0.5);
 }
 
+PointType Quad::getBottomLeft() const
+{
+    return PointType(m_left, m_bottom);
+}
+
+PointType Quad::getTopRight() const
+{
+    return PointType(m_right, m_top);
+}
+
 int Quad::getWidth() const
 {
     return abs(m_right - m_left);

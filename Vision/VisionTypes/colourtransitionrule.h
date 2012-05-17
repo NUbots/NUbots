@@ -17,7 +17,7 @@
 #include "Vision/visionblackboard.h"
 #include "Vision/VisionTools/classificationcolours.h"
 #include "Vision/VisionTypes/coloursegment.h"
-#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
 
 using namespace std;
 

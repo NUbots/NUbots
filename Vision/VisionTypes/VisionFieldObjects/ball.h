@@ -1,7 +1,7 @@
 #ifndef BALL_H
 #define BALL_H
 
-#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
 
 class Ball : public VisionFieldObject
 {

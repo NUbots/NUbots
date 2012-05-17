@@ -27,6 +27,7 @@ colourtransitionrule.cpp
 objectcandidate.cpp
 segmentedregion.cpp
 transition.cpp
+quad.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

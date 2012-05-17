@@ -1,7 +1,7 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
 #include "Vision/VisionTypes/quad.h"
 
 class Beacon : public VisionFieldObject
@@ -17,6 +17,9 @@ public:
     static string getIDName(BeaconID id);
     
     Beacon(BeaconID id = InvalidBeacon, const Quad& corners = Quad(0,0,0,0));
+    
+    const Quad& getQuad() const;
+    BeaconID getID() const;
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;

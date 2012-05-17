@@ -127,6 +127,10 @@ DataWrapper::DataWrapper()
     debug_map[DBID_GREENHORIZON_FINAL]  = &debug_windows[0];
     debug_map[DBID_OBJECT_POINTS]       = &debug_windows[0];
     debug_map[DBID_FILTERED_SEGMENTS]   = &debug_windows[1];
+    debug_map[DBID_GOALS]               = &debug_windows[0];
+    debug_map[DBID_BEACONS]             = &debug_windows[0];
+    debug_map[DBID_BALLS]               = &debug_windows[0];
+    debug_map[DBID_OBSTACLES]           = &debug_windows[0];
     
     results_window_name = "Results";
     namedWindow(results_window_name, CV_WINDOW_KEEPRATIO);
@@ -267,6 +271,60 @@ void DataWrapper::debugRefresh()
     
     LUT.classifyImage(*m_current_image, results_img);
     imshow(results_window_name, results_img);
+}
+
+bool DataWrapper::debugPublish(vector<Ball> data) {
+    
+}
+
+bool DataWrapper::debugPublish(vector<Beacon> data) {
+    
+#if VISION_WRAPPER_VERBOSITY > 1
+    if(data.empty()) {
+        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        return false;
+    }
+#endif
+    
+    Mat& img = results_img;    //get image from pair
+    string& window = results_window_name; //get window name from pair
+    
+    BOOST_FOREACH(Beacon b, data) {
+        if(b.getID() == Beacon::BlueBeacon)
+            rectangle(img, b.getQuad().getBottomLeft(), b.getQuad().getTopRight(), Scalar(255,0,255), 2, 8, 0);
+        else if(b.getID() == Beacon::YellowBeacon)
+            rectangle(img, b.getQuad().getBottomLeft(), b.getQuad().getTopRight(), Scalar(255,255,0), 2, 8, 0);
+        else
+            rectangle(img, b.getQuad().getBottomLeft(), b.getQuad().getTopRight(), Scalar(255,255,255), 2, 8, 0);
+    }
+    
+    imshow(window, img);    //refresh this particular debug window
+}
+
+bool DataWrapper::debugPublish(vector<Goal> data) {
+
+#if VISION_WRAPPER_VERBOSITY > 1
+    if(data.empty()) {
+        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        return false;
+    }
+#endif
+    
+    Mat& img = results_img;    //get image from pair
+    string& window = results_window_name; //get window name from pair
+    
+    BOOST_FOREACH(Goal post, data) {
+        if(post.getID() == Goal::BlueLeftGoal || post.getID() == Goal::BlueRightGoal || post.getID() == Goal::BlueUnknownGoal)
+            rectangle(img, post.getQuad().getBottomLeft(), post.getQuad().getTopRight(), Scalar(0,255,255), 2, 8, 0);
+        else
+            rectangle(img, post.getQuad().getBottomLeft(), post.getQuad().getTopRight(), Scalar(255,0,0), 2, 8, 0);
+    }
+    
+    imshow(window, img);    //refresh this particular debug window
+}
+
+bool DataWrapper::debugPublish(vector<Obstacle> data) {
+    
 }
 
 bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)

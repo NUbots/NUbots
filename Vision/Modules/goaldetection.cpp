@@ -44,6 +44,7 @@ void GoalDetection::detectGoals()
         Beacon beacon(Beacon::UnknownBeacon, unknown_beacons.at(i));
         vbb->addBeacon(beacon);
     }
+    
     // BLUE POSTS
     if (blue_posts.size() != 2)
         for (unsigned int i = 0; i < blue_posts.size(); i++) {
@@ -94,7 +95,7 @@ void GoalDetection::detectGoals()
 void GoalDetection::ratioCheck(vector<Quad>* posts)
 {
     const int   HEIGHT_TO_WIDTH_RATIO_LOW = 3,
-                HEIGHT_TO_WIDTH_RATION_HIGH = 15;
+                HEIGHT_TO_WIDTH_RATIO_HIGH = 15;
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
         Quad candidate = *it;
@@ -102,7 +103,7 @@ void GoalDetection::ratioCheck(vector<Quad>* posts)
         int width = candidate.getWidth();
 //        int height = candidate.val[3] - candidate.val[1],
 //            width = candidate.val[2] - candidate.val[0];
-        if (height/width < HEIGHT_TO_WIDTH_RATIO_LOW || height/width > HEIGHT_TO_WIDTH_RATION_HIGH)
+        if (height/width < HEIGHT_TO_WIDTH_RATIO_LOW || height/width > HEIGHT_TO_WIDTH_RATIO_HIGH)
             it = posts->erase(it);
         else
             it++;
@@ -329,8 +330,9 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
                 unsigned int    x_pos = start_trans.at(j).getLocation().x,
                                 y_pos = start_trans.at(j).getLocation().y;
                 if (x_pos >= start_pos && x_pos <= end_pos) {
-                    if(x_pos < start_min && x_pos >= mean - SDEV_THRESHOLD*sdev)
+                    if(x_pos < start_min && x_pos >= mean - SDEV_THRESHOLD*sdev) {
                         start_min = x_pos;
+                    }
                     if(y_pos < bot_min)
                         bot_min = y_pos;
                     else if (y_pos > top_max)
@@ -370,8 +372,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
 
             bool contains_vertical = false;
 
-            unsigned int    vert_max = 0,
-                            vert_min = -1;
+            //unsigned int    vert_max = 0,
+            //                vert_min = -1;
 
             for (unsigned int j = 0; j < ver_trans.size(); j++) {
                 // extend with vertical segments (increase height)
@@ -383,23 +385,26 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
                         bot_min = y_pos;
                     else if (y_pos > top_max)
                         top_max = y_pos;
-                if (x_pos < vert_min)
-                    vert_min = x_pos;
-                else if (x_pos > vert_max)
-                    vert_max = x_pos;
+                //if (x_pos < vert_min) {
+                //    vert_min = x_pos;
+                //    cout << "ln356:" << x_pos;
+                //}
+                //else if (x_pos > vert_max)
+                //    vert_max = x_pos;
                 }
             }
 
             // force width to be no greater than that given by vertical segments (inc. SLACK)
-            unsigned int SLACK = 2;
-            if (vert_min - SLACK > start_min)
-                start_min = vert_min - SLACK;
-            if (vert_max + SLACK < end_max)
-                end_max = vert_max + SLACK;
+//            unsigned int SLACK = 2;
+//            if (vert_min - SLACK > start_min)   //THIS SHOULDN'T HAPPEN WHEN THERE ARE NO VERTICAL TRANSITIONS, BUT IT DOES
+//                start_min = vert_min - SLACK;
+//            if (vert_max + SLACK < end_max)
+//                end_max = vert_max + SLACK;
 
             // throw out if no vertical segments contained
             //if (contains_vertical)
                 candidates->push_back(Quad(start_min, bot_min, end_max, top_max));
+                //cout << start_min << " " << bot_min << " " << end_max << " " << top_max << endl;
         }
     }
 }

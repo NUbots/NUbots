@@ -1,8 +1,8 @@
 #ifndef GOAL_H
 #define GOAL_H
 
-#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
-#include "VisionTypes/quad.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/quad.h"
 #include "Infrastructure/FieldObjects/Object.h"
 #include "Tools/Math/Vector2.h"
 
@@ -29,6 +29,9 @@ public:
     static string getIDName(GoalID id);
        
     Goal(GoalID id=InvalidGoal, const Quad& corners=Quad(0,0,0,0));
+    
+    const Quad& getQuad() const;
+    GoalID getID() const;
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
