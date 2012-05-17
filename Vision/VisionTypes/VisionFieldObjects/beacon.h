@@ -1,7 +1,7 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
 #include "Vision/VisionTypes/quad.h"
 
 class Beacon : public VisionFieldObject

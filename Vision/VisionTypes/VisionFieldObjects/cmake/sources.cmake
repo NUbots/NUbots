@@ -25,6 +25,7 @@ visionfieldobject.cpp
 ball.cpp
 beacon.cpp
 goal.cpp
+obstacle.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

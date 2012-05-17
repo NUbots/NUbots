@@ -16,7 +16,11 @@
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/basicvisiontypes.h"
 #include "Vision/VisionTypes/segmentedregion.h"
-#include "Vision/VisionTypes/visionfieldobject.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/VisionFieldObjects/ball.h"
+#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
+#include "Vision/VisionTypes/VisionFieldObjects/goal.h"
+#include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 
 using namespace std;
 using namespace cv;
@@ -67,10 +71,14 @@ public:
     const LookUpTable& getLUT() const;
         
     //! Data publish interface
-    void publish(const vector<VisionFieldObject>& visual_objects);
+    void publish(const vector<VisionFieldObject*>& visual_objects);
     //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();
+    bool debugPublish(vector<Ball> data);
+    bool debugPublish(vector<Beacon> data);
+    bool debugPublish(vector<Goal> data);
+    bool debugPublish(vector<Obstacle> data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id, const Mat& img);

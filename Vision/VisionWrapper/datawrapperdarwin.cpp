@@ -143,22 +143,71 @@ const LookUpTable& DataWrapper::getLUT() const
 //! PUBLISH METHODS
 
 
-void DataWrapper::publish(const vector<VisionFieldObject> &visual_objects)
+void DataWrapper::publish(const vector<VisionFieldObject*> &visual_objects)
 {
     //! @todo Implement + Comment
-    
+    BOOST_FOREACH(VisionFieldObject* obj, visual_objects) {
+        obj->addToExternalFieldObjects(field_objects, m_timestamp);
+    }
     //postprocess at end
-    field_objects->postProcess(current_frame->GetTimestamp());
+    field_objects->postProcess(m_timestamp);
 }
-
-//void DataWrapper::publish(DATA_ID id, vector<VisionFieldObject> data)
-//{
-//    //! @todo Implement + Comment
-//}
 
 void DataWrapper::debugRefresh()
 {
     //! @todo Implement + Comment
+}
+
+bool DataWrapper::debugPublish(vector<Ball> data) {
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(data.empty()) {
+            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BALLS) << endl;
+            return false;
+        }
+        BOOST_FOREACH(Ball ball, data) {
+            debug << "DataWrapper::debugPublish - Ball = " << ball << endl;
+        }
+    #endif
+    return true; 
+}
+
+bool DataWrapper::debugPublish(vector<Beacon> data) {  
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(data.empty()) {
+            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
+            return false;
+        }
+        BOOST_FOREACH(Beacon beacon, data) {
+            debug << "DataWrapper::debugPublish - Beacon = " << beacon << endl;
+        }
+    #endif
+    return true;    
+}
+
+bool DataWrapper::debugPublish(vector<Goal> data) {
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(data.empty()) {
+            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+            return false;
+        }
+        BOOST_FOREACH(Goal post, data) {
+            debug << "DataWrapper::debugPublish - Goal = " << post << endl;
+        }
+    #endif
+    return true;    
+}
+
+bool DataWrapper::debugPublish(vector<Obstacle> data) {
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(data.empty()) {
+            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_OBSTACLES) << endl;
+            return false;
+        }
+        BOOST_FOREACH(Obstalce obst, data) {
+            debug << "DataWrapper::debugPublish - Obstacle = " << obst << endl;
+        }
+    #endif
+    return true;  
 }
 
 bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)

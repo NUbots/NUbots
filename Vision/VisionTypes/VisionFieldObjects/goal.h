@@ -1,8 +1,8 @@
 #ifndef GOAL_H
 #define GOAL_H
 
-#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
-#include "VisionTypes/quad.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/quad.h"
 #include "Infrastructure/FieldObjects/Object.h"
 #include "Tools/Math/Vector2.h"
 

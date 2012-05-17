@@ -1,8 +1,8 @@
 #ifndef OBSTACLE_H
 #define OBSTACLE_H
 
-#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
-#include "VisionTypes/quad.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/quad.h"
 #include "Tools/Math/Vector2.h"
 
 class Obstacle : public VisionFieldObject
