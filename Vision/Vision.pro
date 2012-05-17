@@ -11,7 +11,7 @@ PLATFORM = pc
 contains(PLATFORM, "darwin") {
     message("Compiling for Darwin")
 
-    ROBOCUP_DIR = /home/shannon/robocup/            #change to darwin directory later
+    ROBOCUP_DIR = /home/david/robocup/            #change to darwin directory later
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Autoconfig/
     
@@ -31,7 +31,7 @@ contains(PLATFORM, "darwin") {
 contains(PLATFORM, "pc") {
      message("Compiling for PC")
 
-    ROBOCUP_DIR = /home/shannon/robocup/
+    ROBOCUP_DIR = /home/david/robocup/
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
   
