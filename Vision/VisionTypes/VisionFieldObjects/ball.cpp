@@ -32,3 +32,24 @@ void Ball::calculatePositions()
     m_location_angular.y = 0; //elevation
 }
 
+/*! @brief Stream insertion operator for a single ColourSegment.
+ *      The segment is terminated by a newline.
+ */
+ostream& operator<< (ostream& output, const Ball& b)
+{
+    output << "Ball - pixelloc:" << b.getLocationPixels();
+    output << " angularloc: [" << b.getLocationAngular().x << ", " << b.getLocationAngular().y << "]";
+    output << " relative field coords: [" << b.getRelativeFieldCoords().x << ", " << b.getRelativeFieldCoords().y << ", " << b.getRelativeFieldCoords().z << "]";
+    return output;
+}
+
+/*! @brief Stream insertion operator for a vector of ColourSegments.
+ *      Each segment is terminated by a newline.
+ *  @relates ColourSegment
+ */
+ostream& operator<< (ostream& output, const vector<Ball>& b)
+{
+    for (size_t i=0; i<b.size(); i++)
+        output << b[i] << endl;
+    return output;
+}

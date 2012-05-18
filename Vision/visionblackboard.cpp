@@ -23,8 +23,6 @@ VisionBlackboard::VisionBlackboard()
     ctgvalid = wrapper->getCTGVector(ctgvector);
     
     m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
-    
-    calculateFOVAndCamDist();
 }
 
 /** @brief Private destructor.
@@ -403,8 +401,10 @@ void VisionBlackboard::updateLUT()
 
 void VisionBlackboard::calculateFOVAndCamDist()
 {
+    debug << "VisionBlackboard::calculateFOVAndCamDist - Begin" << endl; 
     m_FOV = Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov);
     effective_camera_dist_pixels = (0.5*original_image->getWidth())/tan(0.5*m_FOV.x);
+    debug << "VisionBlackboard::calculateFOVAndCamDist - End" << endl; 
 }
 
 /**
@@ -423,6 +423,8 @@ void VisionBlackboard::update()
     ctvalid = wrapper->getCTVector(ctvector);
     //get new image pointer
     original_image = wrapper->getFrame();
+    //calculate the field of view and effective camera distance
+    calculateFOVAndCamDist();
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::update() - Finish" << endl;
     #endif

@@ -41,6 +41,14 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_OBJECT_POINTS";
     case DBID_FILTERED_SEGMENTS:
         return "DBID_FILTERED_SEGMENTS";
+    case DBID_GOALS:
+        return "DBID_GOALS";
+    case DBID_BEACONS:
+        return "DBID_BEACONS";
+    case DBID_BALLS:
+        return "DBID_BALLS";
+    case DBID_OBSTACLES:
+        return "DBID_OBSTACLES";
     default:
         return "NOT VALID";
     }

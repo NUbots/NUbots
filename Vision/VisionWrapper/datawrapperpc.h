@@ -105,7 +105,7 @@ private:
     };
     
 private:
-    static const INPUT_METHOD METHOD = CAMERA;  //CAMERA, STREAM, FILE
+    static const INPUT_METHOD METHOD = STREAM;  //CAMERA, STREAM, FILE
 
     static DataWrapper* instance;
 

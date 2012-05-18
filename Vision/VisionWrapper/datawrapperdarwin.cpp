@@ -49,6 +49,14 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_OBJECT_POINTS";
     case DBID_FILTERED_SEGMENTS:
         return "DBID_FILTERED_SEGMENTS";
+    case DBID_GOALS:
+        return "DBID_GOALS";
+    case DBID_BEACONS:
+        return "DBID_BEACONS";
+    case DBID_BALLS:
+        return "DBID_BALLS";
+    case DBID_OBSTACLES:
+        return "DBID_OBSTACLES";
     default:
         return "NOT VALID";
     }
@@ -117,6 +125,7 @@ bool DataWrapper::getCTGVector(vector<float>& ctgvector)
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::getCTGVector()" << endl;
     #endif
+    return false;
     return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
 }
 
@@ -129,6 +138,7 @@ bool DataWrapper::getCTVector(vector<float>& ctvector)
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::getCTVector()" << endl;
     #endif
+    return false;
     return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
 }
 
@@ -203,7 +213,7 @@ bool DataWrapper::debugPublish(vector<Obstacle> data) {
             debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_OBSTACLES) << endl;
             return false;
         }
-        BOOST_FOREACH(Obstalce obst, data) {
+        BOOST_FOREACH(Obstacle obst, data) {
             debug << "DataWrapper::debugPublish - Obstacle = " << obst << endl;
         }
     #endif

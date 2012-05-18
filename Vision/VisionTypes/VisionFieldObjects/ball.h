@@ -12,6 +12,9 @@ public:
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
     
+    friend ostream& operator<< (ostream& output, const Ball& b);
+    friend ostream& operator<< (ostream& output, const vector<Ball>& b);
+    
 private:
     void calculatePositions();
     

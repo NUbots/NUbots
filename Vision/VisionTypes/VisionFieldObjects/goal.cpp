@@ -187,3 +187,25 @@ float Goal::distanceToGoal(float bearing, float elevation) const {
     
     return distance;
 }
+
+/*! @brief Stream insertion operator for a single ColourSegment.
+ *      The segment is terminated by a newline.
+ */
+ostream& operator<< (ostream& output, const Goal& g)
+{
+    output << "Ball - pixelloc:" << g.getLocationPixels();
+    output << " angularloc: [" << g.getLocationAngular().x << ", " << g.getLocationAngular().y << "]";
+    output << " relative field coords: [" << g.getRelativeFieldCoords().x << ", " << g.getRelativeFieldCoords().y << ", " << g.getRelativeFieldCoords().z << "]";
+    return output;
+}
+
+/*! @brief Stream insertion operator for a vector of ColourSegments.
+ *      Each segment is terminated by a newline.
+ *  @relates ColourSegment
+ */
+ostream& operator<< (ostream& output, const vector<Goal>& g)
+{
+    for (size_t i=0; i<g.size(); i++)
+        output << g[i] << endl;
+    return output;
+}
