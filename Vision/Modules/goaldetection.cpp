@@ -46,14 +46,49 @@ void GoalDetection::detectGoals()
     }
     
     // BLUE POSTS
-    for (unsigned int i = 0; i < blue_posts.size(); i++) {
-        Goal post(Goal::BlueUnknownGoal, blue_posts.at(i));
-        vbb->addGoal(post);
+    if (blue_posts.size() != 2)
+        for (unsigned int i = 0; i < blue_posts.size(); i++) {
+            Goal post(Goal::BlueUnknownGoal, blue_posts.at(i));
+            vbb->addGoal(post);
+        }
+    else {
+        Quad post1 = blue_posts.at(0),
+             post2 = blue_posts.at(1);
+        if (post1.getCentre().x < post2.getCentre().x) {
+            Goal post_left(Goal::BlueLeftGoal, post1);
+            Goal post_right(Goal::BlueRightGoal, post2);
+            vbb->addGoal(post_left);
+            vbb->addGoal(post_right);
+        }
+        else {
+            Goal post_left(Goal::BlueLeftGoal, post2);
+            Goal post_right(Goal::BlueRightGoal, post1);
+            vbb->addGoal(post_left);
+            vbb->addGoal(post_right);
+        }
     }
+
     // YELLOW POSTS
-    for (unsigned int i = 0; i < yellow_posts.size(); i++) {
-        Goal post(Goal::YellowUnknownGoal, yellow_posts.at(i));
-        vbb->addGoal(post);
+    if (yellow_posts.size() != 2)
+        for (unsigned int i = 0; i < yellow_posts.size(); i++) {
+            Goal post(Goal::YellowUnknownGoal, yellow_posts.at(i));
+            vbb->addGoal(post);
+        }
+    else {
+        Quad post1 = yellow_posts.at(0),
+             post2 = yellow_posts.at(1);
+        if (post1.getCentre().x < post2.getCentre().x) {
+            Goal post_left(Goal::YellowLeftGoal, post1);
+            Goal post_right(Goal::YellowRightGoal, post2);
+            vbb->addGoal(post_left);
+            vbb->addGoal(post_right);
+        }
+        else {
+            Goal post_left(Goal::YellowLeftGoal, post2);
+            Goal post_right(Goal::YellowRightGoal, post1);
+            vbb->addGoal(post_left);
+            vbb->addGoal(post_right);
+        }
     }
 }
 
