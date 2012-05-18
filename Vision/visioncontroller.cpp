@@ -68,6 +68,10 @@ int VisionController::runFrame()
     debug << "VisionController::runFrame() - goal detection done" << endl;
 #endif
     
+    BallDetection::detectBall();
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - ball detection done" << endl;
+#endif
     
     #if VISION_CONTROLLER_VERBOSITY > 1
         debug << "VisionController::runFrame() - Publish Results" << endl;

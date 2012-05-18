@@ -78,7 +78,8 @@ HEADERS += \
     valgorithm.h \
     visionblackboard.h \
     visioncontroller.h \ 
-    visionconstants.h
+    visionconstants.h \
+    Modules/balldetection.h
 
 SOURCES += \
     VisionTypes/coloursegment.cpp \
@@ -104,6 +105,7 @@ SOURCES += \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
+    Modules/balldetection.cpp
 
 ##robocup
 HEADERS += \
