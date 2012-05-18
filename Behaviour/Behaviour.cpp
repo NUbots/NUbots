@@ -38,6 +38,8 @@
 #include "MiscBehaviours/ForwardWalkProvider.h"
 #include "MiscBehaviours/IKTestProvider.h"
 #include "RoboPedestrian/RoboPedestrianProvider.h"
+#include "GoalKeeperTest/TestKeeperProvider.h"
+#include "FootSlipTest/SlipTestProvider.h"
 
 #include "CameraCalibration/CameraCalibrationProvider.h"
 #include "EnvironmentalEmotions/EnvironmentalEmotionsProvider.h"
@@ -66,9 +68,9 @@ Behaviour::Behaviour()
     #elif defined(TARGET_IS_CYCLOID)
         m_behaviour = new QuietStanceProvider(this);
     #else
-        //m_behaviour = new ZombieProvider(this);
-        //m_behaviour = new SoccerProvider(this);
-        m_behaviour = new WalkOptimisationProvider(this);
+        //m_behaviour = new TestKeeperProvider(this);
+        m_behaviour = new SlipTestProvider(this);
+        //m_behaviour = new WalkOptimisationProvider(this);
         //m_behaviour = new ForwardWalkProvider(this);
         //m_behaviour = new IKTestProvider(this);
     #endif

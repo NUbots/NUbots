@@ -99,7 +99,7 @@ public:
             }
         }
         m_previous_time = Blackboard->Sensors->CurrentTime;
-        
+        result[2] /= 1.5;
         return result;
     }
     
