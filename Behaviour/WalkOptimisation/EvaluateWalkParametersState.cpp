@@ -94,7 +94,7 @@ vector<float> EvaluateWalkParametersState::getStartPoint()
     if (distance_from_forward <= distance_from_reverse)
         m_reverse_points = false;
     else
-        m_reverse_points = true;
+        m_reverse_points = false;
 
     if (not m_reverse_points)
         return m_way_points[m_current_point_index];
@@ -149,8 +149,8 @@ vector<float> EvaluateWalkParametersState::reversePoint(const vector<float>& poi
     }
     else
     {
-        reverse[0] = m_previous_reverse[0] - (m_way_points[m_current_point_index][0] - m_way_points[m_current_point_index-1][0]);
-        reverse[1] = m_previous_reverse[1] - (m_way_points[m_current_point_index][1] - m_way_points[m_current_point_index-1][1]);
+        reverse[0] = m_way_points[m_current_point_index-1][0];
+        reverse[1] = m_way_points[m_current_point_index-1][1];
         reverse[2] += 3.14;
         m_previous_reverse = reverse;
         return reverse;
