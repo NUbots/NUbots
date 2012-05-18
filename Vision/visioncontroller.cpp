@@ -55,6 +55,7 @@ int VisionController::runFrame()
 #if VISION_CONTROLLER_VERBOSITY > 2
     debug << "VisionController::runFrame() - classifyHorizontalScanLines done" << endl;
 #endif
+    cout << "omg" << endl;
     ScanLines::classifyVerticalScanLines();
 #if VISION_CONTROLLER_VERBOSITY > 2
     debug << "VisionController::runFrame() - classifyVerticalScanLines done" << endl;

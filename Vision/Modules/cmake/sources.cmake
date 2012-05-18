@@ -27,6 +27,7 @@ objectdetectionch.cpp
 scanlines.cpp
 segmentfilter.cpp
 goaldetection.cpp
+balldetection.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

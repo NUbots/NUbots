@@ -7,6 +7,7 @@
 */
 
 #include "greenhorizonch.h"
+#include "Kinematics/Horizon.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
 
@@ -30,9 +31,12 @@ void GreenHorizonCH::calculateHorizon()
     horizon_points.reserve(VER_SEGMENTS);
     temp.reserve(VER_SEGMENTS);
 
-    const Line& kin_hor = vbb->getKinematicsHorizon();
+    const Horizon& kin_hor = vbb->getKinematicsHorizon();
     int kin_hor_y;
 
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
+    #endif
     
     unsigned int position;
     for (unsigned int x = 0; x <= VER_SEGMENTS; x++) {
@@ -40,8 +44,12 @@ void GreenHorizonCH::calculateHorizon()
         unsigned int green_top = 0;
         unsigned int green_count = 0;
 
-
         kin_hor_y = kin_hor.findYFromX(x);
+        
+        if(kin_hor_y < 0)
+            kin_hor_y = 0;
+        else if(kin_hor_y >= height)
+            kin_hor_y = height-1;
         
         for (int y = kin_hor_y; y < height; y++) {
             if (isPixelGreen(img, position, y)) {
@@ -66,6 +74,9 @@ void GreenHorizonCH::calculateHorizon()
         }
     }
     
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
+    #endif
     // provide blackboard the original set of scan points
     vbb->setHorizonScanPoints(horizon_points);
     
@@ -78,6 +89,10 @@ void GreenHorizonCH::calculateHorizon()
     meanStdDev(Mat(temp), mean, std_dev);
     temp.clear();
     
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Statistical filter prep done" << endl;
+    #endif
+    
     // copy values into format for convexHull function
     temp.push_back(horizon_points.at(0));
     for (unsigned int x = VER_SEGMENTS-1; x > 0; x--) {
@@ -86,12 +101,19 @@ void GreenHorizonCH::calculateHorizon()
             temp.push_back(horizon_points.at(x));
         }
     }
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << endl;
+    #endif
     
     horizon_points.clear();
 
     // convex hull
     convexHull(Mat(temp), horizon_points, false, true);
 
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;
+    #endif
+    
     // get top half (silly ordering)
     temp.clear();
     bool top = false;   // is LHS point found
@@ -110,6 +132,10 @@ void GreenHorizonCH::calculateHorizon()
     // add RHS point
     temp.push_back(horizon_points.at(0));
     
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Convex hull reordering done" << endl;
+    #endif
+    
     // if empty hull
     if (temp.size() <= 2) {
         temp.clear();
@@ -121,24 +147,30 @@ void GreenHorizonCH::calculateHorizon()
     else {
         // extend to right edge
         if (static_cast<unsigned int>(width-1) > temp.at(temp.size()-1).x + width/VER_SEGMENTS) {
-            temp.push_back(PointType(temp.at(temp.size()-1).x + width/VER_SEGMENTS, height-1));
+//            temp.push_back(PointType(temp.at(temp.size()-1).x + width/VER_SEGMENTS, height-1));
+//            temp.push_back(PointType(width-1, height-1));
             temp.push_back(PointType(width-1, height-1));
         }
         else {
+//            temp.push_back(PointType(width-1, temp.at(temp.size()-1).y));
             temp.push_back(PointType(width-1, temp.at(temp.size()-1).y));
         }
 
         // extend to left edge
-        if (temp.at(0).y == height-1) {
-            if (temp.at(1).x > width/static_cast<int>(VER_SEGMENTS)) {
-                //temp->insert(1, PointType(0, 0));
-                vector<PointType>::iterator it;
-                it = temp.begin();
-                it++;
-                it = temp.insert (it , PointType(temp.at(1).x - width/VER_SEGMENTS, height-1));
-            }
-        }
+//        if (temp.at(0).y == height-1) {
+//            if (temp.at(1).x > width/static_cast<int>(VER_SEGMENTS)) {
+//                //temp->insert(1, PointType(0, 0));
+//                vector<PointType>::iterator it;
+//                it = temp.begin();
+//                it++;
+//                it = temp.insert (it , PointType(temp.at(1).x - width/VER_SEGMENTS, height-1));
+//            }
+//        }
     }
+    
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Side extension done" << endl;
+    #endif
     
     // set hull points
     vbb->setHullPoints(temp);

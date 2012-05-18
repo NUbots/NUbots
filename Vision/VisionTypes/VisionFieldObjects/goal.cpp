@@ -24,6 +24,7 @@ string Goal::getIDName(GoalID id)
 
 Goal::Goal(GoalID id, const Quad &corners)
 {
+    debug << "yay goal" << endl;
     m_id = id;
     m_corners = corners;
     //SET WIDTH

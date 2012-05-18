@@ -59,6 +59,7 @@ void ScanLines::classifyHorizontalScanLines()
 
 void ScanLines::classifyVerticalScanLines()
 {
+    cout << "omg" << endl;
     #if VISION_SCAN_VERBOSITY > 1
         debug << "ScanLines::classifyVerticalScanLines() - Begin" << endl;
     #endif
