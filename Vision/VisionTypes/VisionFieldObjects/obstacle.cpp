@@ -78,7 +78,7 @@ void Obstacle::calculatePositions()
  */
 ostream& operator<< (ostream& output, const Obstacle& o)
 {
-    output << "Ball - pixelloc:" << o.getLocationPixels();
+    output << "Obstacle - pixelloc: [" << o.getLocationPixels().x << ", " << o.getLocationPixels().y << "]";
     output << " angularloc: [" << o.getLocationAngular().x << ", " << o.getLocationAngular().y << "]";
     output << " relative field coords: [" << o.getRelativeFieldCoords().x << ", " << o.getRelativeFieldCoords().y << ", " << o.getRelativeFieldCoords().z << "]";
     return output;

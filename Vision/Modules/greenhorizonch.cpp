@@ -45,11 +45,9 @@ void GreenHorizonCH::calculateHorizon()
         unsigned int green_count = 0;
 
         kin_hor_y = kin_hor.findYFromX(x);
-        
-        if(kin_hor_y < 0)
-            kin_hor_y = 0;
-        else if(kin_hor_y >= height)
-            kin_hor_y = height-1;
+        //clamp green horizon values
+        kin_hor_y = max(0,kin_hor_y);
+        kin_hor_y = min(height-1, kin_hor_y);
         
         for (int y = kin_hor_y; y < height; y++) {
             if (isPixelGreen(img, position, y)) {
@@ -141,8 +139,16 @@ void GreenHorizonCH::calculateHorizon()
         temp.clear();
         //temp->push_back(PointType(0, height-1));
         //temp->push_back(PointType(width-1, height-1));
-        temp.push_back(PointType(0, kin_hor.findYFromX(0)));
-        temp.push_back(PointType(width-1, kin_hor.findYFromX(width-1)));
+        int kin_hor_left_y = kin_hor.findYFromX(0),
+            kin_hor_right_y = kin_hor.findYFromX(width-1);
+        //clamp kinematics horizon values
+        kin_hor_left_y = max(0,kin_hor_left_y);
+        kin_hor_right_y = max(0,kin_hor_right_y);
+        kin_hor_left_y = min(height-1, kin_hor_left_y);
+        kin_hor_right_y = min(height-1, kin_hor_right_y);
+        //add new points at edge
+        temp.push_back(PointType(0, kin_hor_left_y));
+        temp.push_back(PointType(width-1, kin_hor_right_y));
     }
     else {
         // extend to right edge

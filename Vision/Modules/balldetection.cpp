@@ -2,12 +2,6 @@
 
 void BallDetection::detectBall()
 {
-    //cout << "IT'S WORKING" << endl;
-    NUImage img = VisionBlackboard::getInstance()->getOriginalImage();
-    const LookUpTable& lut = VisionBlackboard::getInstance()->getLUT();
-    Mat cvimg;
-    lut.classifyImage(img, cvimg);
-
     // BEGIN BALL DETECTION -----------------------------------------------------------------
 
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -47,12 +41,4 @@ void BallDetection::detectBall()
     }
     x_pos = pow(x_pos, 1.0/transitions.size());
     y_pos = pow(y_pos, 1.0/transitions.size());
-
-
-    // END BALL DETECTION -------------------------------------------------------------------
-
-    circle(cvimg, PointType((int)x_pos,(int)y_pos), 5, Scalar(0,0,255), 2);
-
-    namedWindow("BALL DETECTION", CV_WINDOW_KEEPRATIO);
-    imshow("BALL DETECTION", cvimg);
 }

@@ -110,6 +110,8 @@ private:
     void update();
     void publish() const;
     void debugPublish() const;
+    
+    void checkHorizon();
 
 
     CameraSettings getCameraSettings() const;

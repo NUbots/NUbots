@@ -96,24 +96,25 @@ NUImage* DataWrapper::getFrame()
 */
 const Horizon& DataWrapper::getKinematicsHorizon()
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getKinematicsHorizon() - Begin" << endl;
-    #endif
-    if(sensor_data->getHorizon(m_horizon_coefficients)) {
-        #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::getKinematicsHorizon() - success" << endl;
-        #endif
-        m_kinematics_horizon.setLine(m_horizon_coefficients.at(0), m_horizon_coefficients.at(1), m_horizon_coefficients.at(2));
-        m_kinematics_horizon.exists = true;
-    }
-    else {
-        #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
-        #endif
-        m_kinematics_horizon.exists = false;
-    }
     
-    return m_kinematics_horizon;
+//    #if VISION_WRAPPER_VERBOSITY > 1
+//        debug << "DataWrapper::getKinematicsHorizon() - Begin" << endl;
+//    #endif
+//    if(sensor_data->getHorizon(m_horizon_coefficients)) {
+//        #if VISION_WRAPPER_VERBOSITY > 1
+//            debug << "DataWrapper::getKinematicsHorizon() - success" << endl;
+//        #endif
+//        m_kinematics_horizon.setLine(m_horizon_coefficients.at(0), m_horizon_coefficients.at(1), m_horizon_coefficients.at(2));
+//        m_kinematics_horizon.exists = true;
+//    }
+//    else {
+//        #if VISION_WRAPPER_VERBOSITY > 1
+//            debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
+//        #endif
+//        m_kinematics_horizon.exists = false;
+//    }
+    
+//    return m_kinematics_horizon;
 }
 
 /*! @brief Retrieves the camera to ground vector returns it.

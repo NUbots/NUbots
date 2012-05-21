@@ -7,7 +7,7 @@ class Ball : public VisionFieldObject
 {
 public:
     Ball();
-    Ball(int radius);
+    Ball(const PointType& centre, int radius);
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;

@@ -47,7 +47,6 @@ private:
     GoalID m_id;
     Quad m_corners;
     Vector2<int> m_bottom_centre;
-    Vector2<int> m_centre;
 };
 
 #endif // GOAL_H

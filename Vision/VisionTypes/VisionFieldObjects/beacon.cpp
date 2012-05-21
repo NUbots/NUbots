@@ -75,7 +75,7 @@ void Beacon::calculatePositions()
  */
 ostream& operator<< (ostream& output, const Beacon& b)
 {
-    output << "Ball - pixelloc:" << b.getLocationPixels();
+    output << "Beacon - pixelloc: [" << b.getLocationPixels().x << ", " << b.getLocationPixels().y << "]";
     output << " angularloc: [" << b.getLocationAngular().x << ", " << b.getLocationAngular().y << "]";
     output << " relative field coords: [" << b.getRelativeFieldCoords().x << ", " << b.getRelativeFieldCoords().y << ", " << b.getRelativeFieldCoords().z << "]";
     return output;

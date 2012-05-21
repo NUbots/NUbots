@@ -401,10 +401,16 @@ void VisionBlackboard::updateLUT()
 
 void VisionBlackboard::calculateFOVAndCamDist()
 {
-    debug << "VisionBlackboard::calculateFOVAndCamDist - Begin" << endl; 
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::calculateFOVAndCamDist - Begin" << endl;
+    #endif  
+    
     m_FOV = Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov);
     effective_camera_dist_pixels = (0.5*original_image->getWidth())/tan(0.5*m_FOV.x);
-    debug << "VisionBlackboard::calculateFOVAndCamDist - End" << endl; 
+    
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::calculateFOVAndCamDist - End" << endl;
+    #endif  
 }
 
 /**
@@ -418,7 +424,11 @@ void VisionBlackboard::update()
         debug << "VisionBlackboard::update() - Begin" << endl;
     #endif
     //Get updated kinematics data
+        
+    //kinematics_horizon.setLine(0, 1, 50);
     kinematics_horizon = wrapper->getKinematicsHorizon();
+    checkHorizon();
+    
     ctgvalid = wrapper->getCTGVector(ctgvector);
     ctvalid = wrapper->getCTVector(ctvector);
     //get new image pointer
@@ -555,4 +565,31 @@ void VisionBlackboard::debugPublish() const
         }
     }
     wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
+}
+
+void VisionBlackboard::checkHorizon()
+{
+    int width = original_image->getWidth(),
+        height = original_image->getHeight();
+    if(kinematics_horizon.getB() == 0) {
+        //vertical horizon
+        #if VISION_BLACKBOARD_VERBOSITY > 1
+            debug << "VisionBlackboard::checkHorizon() - Vertical Horizon, clamping to top." << endl;
+        #endif
+        //kinematics_horizon.setLineFromPoints(Point(0, height), Point(width, height));
+    }
+    else {
+        if(kinematics_horizon.findYFromX(0) < 0 || kinematics_horizon.findYFromX(0) > height) {
+            //left point off screen
+            #if VISION_BLACKBOARD_VERBOSITY > 1
+                debug << "VisionBlackboard::checkHorizon() - Left kinematics horizon point off screen." << endl;
+            #endif
+        }
+        if(kinematics_horizon.findYFromX(width) < 0 || kinematics_horizon.findYFromX(width) > height) {
+            //right point off screen
+            #if VISION_BLACKBOARD_VERBOSITY > 1
+                debug << "VisionBlackboard::checkHorizon() - Right kinematics horizon point off screen." << endl;
+            #endif
+        }
+    }
 }

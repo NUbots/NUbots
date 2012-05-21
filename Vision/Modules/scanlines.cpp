@@ -59,7 +59,6 @@ void ScanLines::classifyHorizontalScanLines()
 
 void ScanLines::classifyVerticalScanLines()
 {
-    cout << "omg" << endl;
     #if VISION_SCAN_VERBOSITY > 1
         debug << "ScanLines::classifyVerticalScanLines() - Begin" << endl;
     #endif
@@ -102,13 +101,13 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& 
     segment.set(PointType(start_pos, y), PointType(x, y), start_colour);
     result.push_back(segment);
     
-#if VISION_SCAN_VERBOSITY > 1
-    PointType end;
-    for(int i=0; i<result.size(); i++) {
-        cout << result.at(i).getStart() << " " << result.at(i).getEnd() << " " << (end==result.at(i).getStart()) << endl;
-        end = result.at(i).getEnd();
-    }
-#endif
+    #if VISION_SCAN_VERBOSITY > 1
+        PointType end;
+        for(int i=0; i<result.size(); i++) {
+            debug << result.at(i).getStart() << " " << result.at(i).getEnd() << " " << (end==result.at(i).getStart()) << endl;
+            end = result.at(i).getEnd();
+        }
+    #endif
     return result;
 }
 

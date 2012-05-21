@@ -30,7 +30,7 @@ Goal::Goal(GoalID id, const Quad &corners)
     //SET WIDTH
     m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
     m_bottom_centre = corners.getBottomCentre();
-    m_centre = corners.getCentre();
+    m_location_pixels = corners.getCentre();
     //CALCULATE DISTANCE AND BEARING VALS
     calculatePositions();
 }
@@ -115,7 +115,7 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         fieldobjects->stationaryFieldObjects[stat_id].UpdateVisualObject(m_transformed_spherical_pos,
                                                                         m_spherical_error,
                                                                         m_location_angular,
-                                                                        m_centre,
+                                                                        m_location_pixels,
                                                                         m_size_on_screen,
                                                                         timestamp);
     }
@@ -124,7 +124,7 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
                                      m_spherical_error,
                                      m_location_angular,
-                                     m_centre,
+                                     m_location_pixels,
                                      m_size_on_screen,
                                      timestamp);
         fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
@@ -194,7 +194,7 @@ float Goal::distanceToGoal(float bearing, float elevation) const {
  */
 ostream& operator<< (ostream& output, const Goal& g)
 {
-    output << "Ball - pixelloc:" << g.getLocationPixels();
+    output << "Goal - pixelloc: [" << g.getLocationPixels().x << ", " << g.getLocationPixels().y << "]";
     output << " angularloc: [" << g.getLocationAngular().x << ", " << g.getLocationAngular().y << "]";
     output << " relative field coords: [" << g.getRelativeFieldCoords().x << ", " << g.getRelativeFieldCoords().y << ", " << g.getRelativeFieldCoords().z << "]";
     return output;
