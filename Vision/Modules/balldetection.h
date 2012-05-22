@@ -15,8 +15,6 @@
 #include "Vision/VisionTypes/quad.h"
 
 using namespace std;
-using namespace cv;
-
 
 class BallDetection
 {

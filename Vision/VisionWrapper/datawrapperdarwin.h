@@ -23,7 +23,6 @@
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 
 using namespace std;
-using namespace cv;
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -75,7 +74,7 @@ public:
     const LookUpTable& getLUT() const;
         
     //! Data publish interface
-    void publish(const vector<VisionFieldObject*>& visual_objects);
+    void publish(const vector<const VisionFieldObject*>& visual_objects);
     //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();
@@ -85,7 +84,7 @@ public:
     bool debugPublish(vector<Obstacle> data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
-    bool debugPublish(DEBUG_ID id, const Mat& img);
+    bool debugPublish(DEBUG_ID id, const cv::Mat& img);
 
     //! Control interface       
 private:    

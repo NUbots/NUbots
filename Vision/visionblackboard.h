@@ -27,7 +27,6 @@
 #ifndef VISIONBLACKBOARD_H
 #define VISIONBLACKBOARD_H
 
-using namespace cv;
 using namespace std;
 
 class VisionWrapper;
@@ -164,6 +163,7 @@ private:
     //vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments
     //vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments
     
+    vector<const VisionFieldObject*> m_vfos;
     vector<Goal> m_goals;
     vector<Beacon> m_beacons;
     vector<Ball> m_balls;

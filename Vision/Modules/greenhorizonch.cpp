@@ -83,8 +83,8 @@ void GreenHorizonCH::calculateHorizon()
         if (horizon_points.at(x).y < height-1)     // if not at bottom of image
             temp.push_back(horizon_points.at(x));
     }
-    Mat mean, std_dev;
-    meanStdDev(Mat(temp), mean, std_dev);
+    cv::Mat mean, std_dev;
+    meanStdDev(cv::Mat(temp), mean, std_dev);
     temp.clear();
     
     #if VISION_HORIZON_VERBOSITY > 2
@@ -106,7 +106,7 @@ void GreenHorizonCH::calculateHorizon()
     horizon_points.clear();
 
     // convex hull
-    convexHull(Mat(temp), horizon_points, false, true);
+    convexHull(cv::Mat(temp), horizon_points, false, true);
 
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;

@@ -22,7 +22,7 @@
 #define GROUP_EXT ".png"
 
 using namespace std;
-using namespace cv;
+//using namespace cv;
 
 class DataWrapper
 {

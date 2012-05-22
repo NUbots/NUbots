@@ -20,7 +20,6 @@
 //#include "../VisionTools/classificationcolours.h"
 
 using namespace std;
-using namespace cv;
 
 class ScanLines
 {

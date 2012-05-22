@@ -96,25 +96,25 @@ NUImage* DataWrapper::getFrame()
 */
 const Horizon& DataWrapper::getKinematicsHorizon()
 {
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::getKinematicsHorizon() - Begin" << endl;
+    #endif
+    if(sensor_data->getHorizon(m_horizon_coefficients)) {
+        #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "DataWrapper::getKinematicsHorizon() - success" << endl;
+        #endif
+        m_kinematics_horizon.setLine(m_horizon_coefficients.at(0), m_horizon_coefficients.at(1), m_horizon_coefficients.at(2));
+        m_kinematics_horizon.exists = true;
+    }
+    else {
+        #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
+        #endif
+        m_kinematics_horizon.setLineFromPoints(Point(0, current_frame->getHeight()), Point(current_frame->getWidth(), current_frame->getHeight()));
+        m_kinematics_horizon.exists = false;
+    }
     
-//    #if VISION_WRAPPER_VERBOSITY > 1
-//        debug << "DataWrapper::getKinematicsHorizon() - Begin" << endl;
-//    #endif
-//    if(sensor_data->getHorizon(m_horizon_coefficients)) {
-//        #if VISION_WRAPPER_VERBOSITY > 1
-//            debug << "DataWrapper::getKinematicsHorizon() - success" << endl;
-//        #endif
-//        m_kinematics_horizon.setLine(m_horizon_coefficients.at(0), m_horizon_coefficients.at(1), m_horizon_coefficients.at(2));
-//        m_kinematics_horizon.exists = true;
-//    }
-//    else {
-//        #if VISION_WRAPPER_VERBOSITY > 1
-//            debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
-//        #endif
-//        m_kinematics_horizon.exists = false;
-//    }
-    
-//    return m_kinematics_horizon;
+    return m_kinematics_horizon;
 }
 
 /*! @brief Retrieves the camera to ground vector returns it.
@@ -154,11 +154,11 @@ const LookUpTable& DataWrapper::getLUT() const
 //! PUBLISH METHODS
 
 
-void DataWrapper::publish(const vector<VisionFieldObject*> &visual_objects)
+void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
 {
     //! @todo Implement + Comment
-    BOOST_FOREACH(VisionFieldObject* obj, visual_objects) {
-        obj->addToExternalFieldObjects(field_objects, m_timestamp);
+    for(int i=0; i<visual_objects.size(); i++) {
+        visual_objects.at(i)->addToExternalFieldObjects(field_objects, m_timestamp);
     }
     //postprocess at end
     field_objects->postProcess(m_timestamp);
@@ -264,7 +264,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const Mat& img)
+bool DataWrapper::debugPublish(DEBUG_ID id, const cv::Mat& img)
 {
     //! @todo better debug printing + Comment
 }
@@ -283,6 +283,8 @@ bool DataWrapper::updateFrame()
     actions = Blackboard->Actions;
     sensor_data = Blackboard->Sensors;
     field_objects = Blackboard->Objects;
+    
+    
     
     if (current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
         numFramesDropped++;

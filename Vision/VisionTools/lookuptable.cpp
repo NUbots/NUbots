@@ -34,7 +34,7 @@ bool LookUpTable::loadLUTFromFile(const string& fileName)
     return load_success;
 }
 
-void LookUpTable::classifyImage(const NUImage& src, Mat& dest) const
+void LookUpTable::classifyImage(const NUImage& src, cv::Mat& dest) const
 {
     int width = src.getWidth();
     int height = src.getHeight();
