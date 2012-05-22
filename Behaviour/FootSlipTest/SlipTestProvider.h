@@ -42,6 +42,8 @@ private:
     float m_trans_speed,m_trans_direction,m_turn_speed,m_start_x,m_start_y,m_start_heading,m_odomX,m_odomY,m_odomB;
     bool m_return_to_start;
     double m_run_start;
+    int samplePointIndex;
+    vector<float> hist_odomX,hist_odomY,hist_odomB,hist_gpsX,hist_gpsY,hist_gpsB;
 };
 
 
