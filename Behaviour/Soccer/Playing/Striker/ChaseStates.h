@@ -191,13 +191,13 @@ protected:
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
             result = speed;
             
-            if (m_pan_started and not m_pan_finished and ball.estimatedDistance() < 20)
+            if (m_pan_started and not m_pan_finished and ball.estimatedDistance() < 15)
                 result = vector<float>(3,0);
             
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         }
         
-        if((ball.estimatedDistance() < 21.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSeen() > 0 && m_pan_finished)
+        if((ball.estimatedDistance() < 14.7f) && ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) || 1) && ball.TimeSeen() > 0 && m_pan_finished)
         {
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
