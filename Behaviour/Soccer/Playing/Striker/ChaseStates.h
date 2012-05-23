@@ -203,7 +203,7 @@ protected:
             
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
-                debug << m_data->CurrentTime << ": Going to Ball - (" << result[0] << ", " << result[1] << ", " << result[2] << endl;
+                debug << m_data->CurrentTime << ": Going to Ball - (" << result[0] << ", " << result[1] << ", " << result[2] << ")" << endl;
             #endif
         }
         
@@ -223,7 +223,8 @@ protected:
         }
         #if DEBUG_BEHAVIOUR_VERBOSITY > 2
             debug << m_data->CurrentTime << ": pan_started: " << m_pan_started << " pan_finished: " << m_pan_finished << " pan end time: " << m_pan_end_time << endl; 
-            debug << m_data->CurrentTime << ": ball distance: " << ball.estimatedDistance() << " kicking: " << iskicking << " ball seen: " << ball.TimeSeen() << endl; 
+            debug << m_data->CurrentTime << ": ball distance: " << ball.estimatedDistance() << " ball seen: " << ball.TimeSeen() << endl; 
+            debug << " kicking: " << iskicking << endl;
         #endif
         m_previous_time = m_data->CurrentTime;
     }

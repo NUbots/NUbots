@@ -466,7 +466,7 @@ void WalkingEngine::updateMotionRequest()
 //    requestedWalkTarget = Pose2D(1.0, 0, 0);
     requestedMotionType = stand;
 
-    if(true or fabs(m_speed_x) > 1 or fabs(m_speed_y) > 1 or fabs(m_speed_yaw) > 0.001)
+    if(fabs(m_speed_x) > 0.1 or fabs(m_speed_y) > 0.1 or fabs(m_speed_yaw) > 0.001)
     {
         m_walk_requested = true;
         if(!instable)
