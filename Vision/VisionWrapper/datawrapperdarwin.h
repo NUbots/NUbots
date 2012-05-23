@@ -15,9 +15,14 @@
 
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/segmentedregion.h"
+#include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "Vision/VisionTypes/VisionFieldObjects/ball.h"
+#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
+#include "Vision/VisionTypes/VisionFieldObjects/goal.h"
+#include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 
 using namespace std;
-using namespace cv;
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -44,7 +49,11 @@ public:
         DBID_GREENHORIZON_FINAL=7,
         DBID_OBJECT_POINTS=8,
         DBID_FILTERED_SEGMENTS=9,
-        NUMBER_OF_IDS=10
+        DBID_GOALS=10,
+        DBID_BEACONS=11,
+        DBID_BALLS=12,
+        DBID_OBSTACLES=13,
+        NUMBER_OF_IDS=14
     };
 
     static string getIDName(DEBUG_ID id);
@@ -57,6 +66,7 @@ public:
     NUImage* getFrame();
 
     bool getCTGVector(vector<float>& ctgvector);    //for transforms
+    bool getCTVector(vector<float>& ctvector);    //for transforms
     
     //! @brief Returns a reference to the kinematics horizon line.
     const Horizon& getKinematicsHorizon();
@@ -64,13 +74,17 @@ public:
     const LookUpTable& getLUT() const;
         
     //! Data publish interface
-    void publish(DATA_ID id, const Mat& img);
+    void publish(const vector<const VisionFieldObject*>& visual_objects);
     //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const Scalar& colour);
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours);
-    bool debugPublish(DEBUG_ID id, const Mat& img);
+    bool debugPublish(vector<Ball> data);
+    bool debugPublish(vector<Beacon> data);
+    bool debugPublish(vector<Goal> data);
+    bool debugPublish(vector<Obstacle> data);
+    bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
+    bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
+    bool debugPublish(DEBUG_ID id, const cv::Mat& img);
 
     //! Control interface       
 private:    

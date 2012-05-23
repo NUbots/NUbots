@@ -27,12 +27,12 @@ colourtransitionrule.cpp
 objectcandidate.cpp
 segmentedregion.cpp
 transition.cpp
-visionfieldobject.cpp
+quad.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-
+VisionFieldObjects
 )
 ####################################################################################
 

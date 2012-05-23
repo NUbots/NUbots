@@ -8,21 +8,25 @@
 *
 */
 
-#include "Tools/Math/Line.h"
+#include "Kinematics/Horizon.h"
+#include "NUPlatform/NUCamera/NUCameraData.h"
+#include "Tools/Math/Vector2.h"
 
 #include "VisionWrapper/datawrappercurrent.h"
 #include "VisionTools/lookuptable.h"
-
 #include "basicvisiontypes.h"
 #include "VisionTypes/coloursegment.h"
 #include "VisionTypes/segmentedregion.h"
 #include "VisionTypes/transition.h"
-#include "VisionTypes/visionfieldobject.h"
+#include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
+#include "VisionTypes/VisionFieldObjects/ball.h"
+#include "VisionTypes/VisionFieldObjects/goal.h"
+#include "VisionTypes/VisionFieldObjects/beacon.h"
+#include "VisionTypes/VisionFieldObjects/obstacle.h"
 
 #ifndef VISIONBLACKBOARD_H
 #define VISIONBLACKBOARD_H
 
-using namespace cv;
 using namespace std;
 
 class VisionWrapper;
@@ -51,6 +55,11 @@ public:
     void setVerticalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<Transition> >& t_map);
 
     void setObjectPoints(const vector<PointType>& points);
+    
+    void addGoal(const Goal& newgoal);
+    void addBeacon(const Beacon& newbeacon);
+    void addBall(const Ball& newball);
+    void addObstacle(const Obstacle& newobstacle);
 
 
     //ACCESSORS
@@ -72,17 +81,23 @@ public:
     const map<VisionFieldObject::VFO_ID, vector<Transition> >& getHorizontalTransitionsMap() const;
     const map<VisionFieldObject::VFO_ID, vector<Transition> >& getVerticalTransitionsMap() const;
     
-    const Line& getKinematicsHorizon() const;
+    const Horizon& getKinematicsHorizon() const;
+    bool isCameraToGroundValid() const;
+    const vector<float>& getCameraToGroundVector() const;
+    bool isCameraTransformValid() const;
+    const vector<float>& getCameraTransformVector() const;
 
     const vector<PointType>& getObjectPoints() const;
 
     const LookUpTable& getLUT() const;
-
-
-    unsigned int getHorizonYFromX(unsigned int x) const;
+    
+    double calculateBearing(double x) const;
+    double calculateElevation(double y) const; 
 
     int getImageWidth() const;
     int getImageHeight() const;
+    
+    double getCameraDistanceInPixels() const;
 
 private:
 
@@ -90,9 +105,12 @@ private:
     ~VisionBlackboard();
 
     void updateLUT();
+    void calculateFOVAndCamDist();
     void update();
     void publish() const;
     void debugPublish() const;
+    
+    void checkHorizon();
 
 
     CameraSettings getCameraSettings() const;
@@ -108,7 +126,12 @@ private:
 //    Mat* original_image_cv;                 //! @variable Opencv mat for storing the original image 3 channels
 //    Mat* original_image_cv_4ch;             //! @variable Opencv mat for storing the original image 4 channels
     NUImage* original_image;                  //! @variable Image for storing the original image
-
+    
+    NUCameraData m_camera_specs;
+    
+    Vector2<double> m_FOV;
+    double effective_camera_dist_pixels;
+    
     LookUpTable LUT;
 
     //vector<VFieldObject*> VFO_list;   //! @variable Vector of Vision Field Objects    
@@ -124,6 +147,8 @@ private:
     Horizon kinematics_horizon;    //! @variable Line defining kinematics horizon
     vector<float> ctgvector;    //! @variable The camera to ground vector (for d2p)
     bool ctgvalid;              //! @variable Whether the ctgvector is valid
+    vector<float> ctvector;    //! @variable The camera transform vector
+    bool ctvalid;              //! @variable Whether the ctvector is valid
 
     //! Scanline/Segmentation data    
     vector<unsigned int> horizontal_scanlines;         //! @variable Vector of unsigned ints representing heights of horizontal scan lines
@@ -137,6 +162,13 @@ private:
     map<VisionFieldObject::VFO_ID, vector<Transition> > mapped_vertical_transitions;
     //vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments
     //vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments
+    
+    vector<const VisionFieldObject*> m_vfos;
+    vector<Goal> m_goals;
+    vector<Beacon> m_beacons;
+    vector<Ball> m_balls;
+    vector<Obstacle> m_obstacles;
+    
 };
 
 #endif // VISIONBLACKBOARD_H

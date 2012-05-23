@@ -24,8 +24,8 @@ void ObjectDetectionCH::detectObjects()
 
     object_points.reserve(horizon_points.size());
 
-    Mat mean, std_dev;
-    meanStdDev(Mat(horizon_points), mean, std_dev);
+    cv::Mat mean, std_dev;
+    meanStdDev(cv::Mat(horizon_points), mean, std_dev);
 
     //cout << mean << " " << std_dev << endl;
 
@@ -76,5 +76,5 @@ void ObjectDetectionCH::detectObjects()
 bool ObjectDetectionCH::isPixelGreen(const NUImage& img, int x, int y)
 {
     const LookUpTable& LUT = VisionBlackboard::getInstance()->getLUT();
-    return ClassIndex::getColourFromIndex(LUT.classifyPixel(img.at(x,y))) == ClassIndex::green;
+    return ClassIndex::getColourFromIndex(LUT.classifyPixel(img(x,y))) == ClassIndex::green;
 }

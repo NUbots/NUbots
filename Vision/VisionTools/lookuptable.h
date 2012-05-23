@@ -16,7 +16,6 @@
 #include "Infrastructure/NUImage/NUImage.h"
 
 using namespace std;
-using namespace cv;
 
 class LookUpTable
 {
@@ -41,7 +40,7 @@ public:
         return  LUT[LUTTools::getLUTIndex(p)]; // 7bit LUT
     }
 
-    void classifyImage(const NUImage& src, Mat& dest) const;
+    void classifyImage(const NUImage& src, cv::Mat& dest) const;
 
 private:
     const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.

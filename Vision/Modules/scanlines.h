@@ -20,11 +20,14 @@
 //#include "../VisionTools/classificationcolours.h"
 
 using namespace std;
-using namespace cv;
 
 class ScanLines
 {
 public:
+    static const unsigned int HORIZONTAL_SCANLINES = 128;
+    static const unsigned int VERTICAL_SCANLINE_SKIP = 2;
+    static const int HORIZONTAL_SKIP = 1;
+    static const int VERTICAL_SKIP = 1;
 
     static void generateScanLines();
     
@@ -35,10 +38,6 @@ private:
     static vector<ColourSegment> classifyHorizontalScan(const VisionBlackboard& vbb, const NUImage& img, unsigned int y);
     static vector<ColourSegment> classifyVerticalScan(const VisionBlackboard& vbb, const NUImage& img, const PointType& start);
     
-private:
-    static const unsigned int VERTICAL_SCANLINE_SKIP = 10;
-    static const int HORIZONTAL_SKIP = 1;
-    static const int VERTICAL_SKIP = 1;
     
 };
 

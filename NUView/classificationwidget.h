@@ -9,7 +9,7 @@
 
 #include <QDockWidget>
 #include <vector>
-#include "Vision/ClassificationColours.h"
+#include "Vision/VisionTools/classificationcolours.h"
 #include "Infrastructure/NUImage/Pixel.h"
 class QComboBox;
 class QLabel;

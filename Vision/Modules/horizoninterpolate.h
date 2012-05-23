@@ -19,7 +19,6 @@
 #include "Vision/visionblackboard.h"
 
 using namespace std;
-using namespace cv;
 
 class HorizonInterpolate
 {

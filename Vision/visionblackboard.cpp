@@ -2,25 +2,12 @@
 #include "VisionWrapper/datawrappercurrent.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
+#include "nubotdataconfig.h"
 
 #include <algorithm>
 #include <boost/foreach.hpp>
 
 VisionBlackboard* VisionBlackboard::instance = 0;
-
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<Scalar>& colours, vector<PointType>& pts)
-{
-    unsigned char r, g, b;
-    
-    BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
-        BOOST_FOREACH(const ColourSegment& seg, line) {
-            ClassIndex::getColourAsRGB(seg.getColour(), r, g, b);
-            pts.push_back(seg.getStart());
-            pts.push_back(seg.getEnd());
-            colours.push_back(Scalar(b,g,r));
-        }
-    }
-}
 
 //! @brief Private constructor for blackboard.
 VisionBlackboard::VisionBlackboard()
@@ -34,6 +21,8 @@ VisionBlackboard::VisionBlackboard()
 
     //get Camera to ground vector
     ctgvalid = wrapper->getCTGVector(ctgvector);
+    
+    m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
 }
 
 /** @brief Private destructor.
@@ -88,6 +77,30 @@ void VisionBlackboard::setHorizonScanPoints(const vector<PointType>& points)
 void VisionBlackboard::setObjectPoints(const vector<PointType>& points)
 {
     object_points = points;
+}
+
+void VisionBlackboard::addGoal(const Goal& newgoal) 
+{
+    m_goals.push_back(newgoal);
+    m_vfos.push_back(static_cast<const VisionFieldObject*>(&newgoal));
+}
+
+void VisionBlackboard::addBeacon(const Beacon& newbeacon)
+{
+    m_beacons.push_back(newbeacon);
+    m_vfos.push_back(static_cast<const VisionFieldObject*>(&newbeacon));
+}
+
+void VisionBlackboard::addBall(const Ball& newball)
+{
+    m_balls.push_back(newball);
+    m_vfos.push_back(static_cast<const VisionFieldObject*>(&newball));
+}
+
+void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
+{
+    m_obstacles.push_back(newobstacle);
+    m_vfos.push_back(static_cast<const VisionFieldObject*>(&newobstacle));
 }
 
 /**
@@ -211,13 +224,42 @@ const LookUpTable& VisionBlackboard::getLUT() const
     return LUT;
 }
 
+double VisionBlackboard::calculateBearing(double x) const {
+    return atan( (original_image->getWidth()/2-x) / ( (original_image->getWidth()/2) / (tan(m_FOV.x/2.0)) ) );
+}
+
+
+double VisionBlackboard::calculateElevation(double y) const {
+    return atan( (original_image->getHeight()/2-y) / ( (original_image->getHeight()/2) / (tan(m_FOV.y/2.0)) ) );
+}
+
 /**
 *   @brief returns the kinematics horizon line.
 *   @return kinematics_horizon A Line defining the kinematics horizon.
 */
-const Line& VisionBlackboard::getKinematicsHorizon() const
+const Horizon& VisionBlackboard::getKinematicsHorizon() const
 {
     return kinematics_horizon;
+}
+
+bool VisionBlackboard::isCameraToGroundValid() const
+{
+    return ctgvalid;
+}
+
+const vector<float>& VisionBlackboard::getCameraToGroundVector() const
+{
+    return ctgvector;
+}
+
+bool VisionBlackboard::isCameraTransformValid() const
+{
+    return ctvalid;
+}
+
+const vector<float>& VisionBlackboard::getCameraTransformVector() const
+{
+    return ctvector;
 }
 
 /**
@@ -340,6 +382,11 @@ int VisionBlackboard::getImageHeight() const
     return original_image->getHeight();
 }
 
+double VisionBlackboard::getCameraDistanceInPixels() const
+{
+    return effective_camera_dist_pixels;
+}
+
 /*! @brief Retrieves camera settings from the wrapper and returns them.
 *   @return camera settings
 */
@@ -356,6 +403,20 @@ void VisionBlackboard::updateLUT()
     LUT = wrapper->getLUT();
 }
 
+void VisionBlackboard::calculateFOVAndCamDist()
+{
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::calculateFOVAndCamDist - Begin" << endl;
+    #endif  
+    
+    m_FOV = Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov);
+    effective_camera_dist_pixels = (0.5*original_image->getWidth())/tan(0.5*m_FOV.x);
+    
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::calculateFOVAndCamDist - End" << endl;
+    #endif  
+}
+
 /**
 *   @brief Retrieves a new image and sensor data from the wrapper.
 *   This method instructs the wrapper to update itself, then grabs the new information 
@@ -366,14 +427,30 @@ void VisionBlackboard::update()
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::update() - Begin" << endl;
     #endif
-    //Get updated kinematics data
-    kinematics_horizon = wrapper->getKinematicsHorizon();
+        
+    //kinematics_horizon.setLine(0, 1, 50);
+    
     ctgvalid = wrapper->getCTGVector(ctgvector);
+    ctvalid = wrapper->getCTVector(ctvector);
     //get new image pointer
     original_image = wrapper->getFrame();
+    
+    //Get updated kinematics data
+    kinematics_horizon = wrapper->getKinematicsHorizon();
+    checkHorizon();
+    
+    //calculate the field of view and effective camera distance
+    calculateFOVAndCamDist();
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::update() - Finish" << endl;
     #endif
+        
+    //clear out result vectors
+    m_balls.clear();
+    m_beacons.clear();
+    m_goals.clear();
+    m_obstacles.clear();
+    m_vfos.clear();
 }
 
 /**
@@ -384,9 +461,7 @@ void VisionBlackboard::publish() const
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::publish() - Begin" << endl;
     #endif
-    Mat classed;
-    LUT.classifyImage(*original_image, classed);
-    wrapper->publish(DataWrapper::DID_CLASSED_IMAGE, classed);
+    wrapper->publish(m_vfos);
 }
 
 /**
@@ -397,7 +472,6 @@ void VisionBlackboard::debugPublish() const
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::debugPublish() - Begin" << endl;
     #endif
-    vector<Scalar> colours;
     vector<PointType> pts;
     map<VisionFieldObject::VFO_ID, vector<Transition> >::const_iterator it;
     vector<Transition> v_t;
@@ -435,54 +509,48 @@ void VisionBlackboard::debugPublish() const
     if(B!=0) {
         pts.push_back(PointType(0, -1*C/B));
         pts.push_back(PointType(original_image->getHeight(), -1*A/B*original_image->getWidth() - C/B));
-        wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts, Scalar(0,255,255));
+        wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts);
     }
     else {
         errorlog << "VisionBlackboard::publishDebug - vertical horizon!" << endl;
     }
     
     //horizon scans
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_SCANS, horizon_scan_points, Scalar(127,127,127));
+    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_SCANS, horizon_scan_points);
     
     //horizon points
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_FINAL, horizon_points, Scalar(255,0,255));
+    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_FINAL, horizon_points);
     
     //object points
-    wrapper->debugPublish(DataWrapper::DBID_OBJECT_POINTS, object_points, Scalar(0,0,255));
+    wrapper->debugPublish(DataWrapper::DBID_OBJECT_POINTS, object_points);
+    
+    //field objects
+    wrapper->debugPublish(m_goals);
+    wrapper->debugPublish(m_beacons);
+    wrapper->debugPublish(m_balls);
+    wrapper->debugPublish(m_obstacles);
     
     //horizontal scans
     pts.clear();
     for(unsigned int i=0; i<horizontal_scanlines.size(); i++) {
         pts.push_back(PointType(0, horizontal_scanlines.at(i)));
     }
-    wrapper->debugPublish(DataWrapper::DBID_H_SCANS, pts, Scalar(127,127,127));
+    wrapper->debugPublish(DataWrapper::DBID_H_SCANS, pts);
     
     //vertical scans
-    wrapper->debugPublish(DataWrapper::DBID_V_SCANS, horizon_points, Scalar(127,127,127));
+    wrapper->debugPublish(DataWrapper::DBID_V_SCANS, horizon_points);
     
     //horizontal segments
-    colours.clear();
-    pts.clear();
-    getPointsAndColoursFromSegments(horizontal_segmented_scanlines.getSegments(), colours, pts);
-    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, pts, colours);
+    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, horizontal_segmented_scanlines);
     
     //vertical segments
-    colours.clear();
-    pts.clear();
-    getPointsAndColoursFromSegments(vertical_segmented_scanlines.getSegments(), colours, pts);
-    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, pts, colours);
+    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, vertical_segmented_scanlines);
     
     //horizontal filtered segments
-    colours.clear();
-    pts.clear();
-    getPointsAndColoursFromSegments(horizontal_filtered_segments.getSegments(), colours, pts);
-    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, pts, colours);
+    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, horizontal_filtered_segments);
     
     //vertical filtered segments
-    colours.clear();
-    pts.clear();
-    getPointsAndColoursFromSegments(vertical_filtered_segments.getSegments(), colours, pts);
-    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, pts, colours);
+    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, vertical_filtered_segments);
     
     //horizontal transitions
     pts.clear();
@@ -492,7 +560,7 @@ void VisionBlackboard::debugPublish() const
             pts.push_back(t.getLocation());
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts, Scalar(255,255,0));
+    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
     
     //vertical transitions
     pts.clear();
@@ -502,5 +570,43 @@ void VisionBlackboard::debugPublish() const
             pts.push_back(t.getLocation());
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts, Scalar(0,255,255));
+    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
+}
+
+void VisionBlackboard::checkHorizon()
+{
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::checkHorizon() - Begin." << endl;
+    #endif
+    int width = original_image->getWidth(),
+        height = original_image->getHeight();
+    debug << 1 << endl;
+    if(kinematics_horizon.exists) {
+        if(kinematics_horizon.isVertical()) {
+            //vertical horizon
+            #if VISION_BLACKBOARD_VERBOSITY > 1
+                debug << "VisionBlackboard::checkHorizon() - Vertical Horizon, clamping to top." << endl;
+            #endif
+            //kinematics_horizon.setLineFromPoints(Point(0, height), Point(width, height));
+        }
+        else {
+            if(kinematics_horizon.findYFromX(0) < 0 || kinematics_horizon.findYFromX(0) > height) {
+                //left point off screen
+                #if VISION_BLACKBOARD_VERBOSITY > 1
+                    debug << "VisionBlackboard::checkHorizon() - Left kinematics horizon point off screen." << endl;
+                #endif
+            }
+            if(kinematics_horizon.findYFromX(width) < 0 || kinematics_horizon.findYFromX(width) > height) {
+                //right point off screen
+                #if VISION_BLACKBOARD_VERBOSITY > 1
+                    debug << "VisionBlackboard::checkHorizon() - Right kinematics horizon point off screen." << endl;
+                #endif
+            }
+        }
+    }
+    else {
+        #if VISION_BLACKBOARD_VERBOSITY > 1
+            debug << "VisionBlackboard::checkHorizon() - Horizon non-existant." << endl;
+        #endif
+    }
 }

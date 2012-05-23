@@ -21,6 +21,8 @@
 #include "Vision/Modules/objectdetectionch.h"
 #include "Vision/Modules/scanlines.h"
 #include "Vision/Modules/segmentfilter.h"
+#include "Vision/Modules/goaldetection.h"
+#include "Vision/Modules/balldetection.h"
 
 class VisionController
 {

@@ -12,9 +12,22 @@ VisionControlWrapper* VisionControlWrapper::getInstance()
 VisionControlWrapper::VisionControlWrapper()
 {
     controller = VisionController::getInstance();
+    wrapper = DataWrapper::getInstance();
 }
 
 int VisionControlWrapper::runFrame()
 {
+    static int frame = 0;
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
+    #endif
+    frame++;
+    
+    if(!wrapper->updateFrame()) {
+        #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;
+        #endif
+        return -1;  //failure - do not run vision
+    }
     return controller->runFrame();
 }

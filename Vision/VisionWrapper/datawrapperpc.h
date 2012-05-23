@@ -7,17 +7,22 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "Tools/Math/Line.h"
+#include "Kinematics/Horizon.h"
 
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/segmentedregion.h"
 #include "Vision/VisionTools/pccamera.h"
 #include "Vision/VisionTools/lookuptable.h"
+#include "Vision/VisionTypes/VisionFieldObjects/ball.h"
+#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
+#include "Vision/VisionTypes/VisionFieldObjects/goal.h"
+#include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 
 #define GROUP_NAME "/home/shannon/Images/paper"
 #define GROUP_EXT ".png"
 
 using namespace std;
-using namespace cv;
+//using namespace cv;
 
 class DataWrapper
 {
@@ -42,7 +47,11 @@ public:
         DBID_GREENHORIZON_FINAL=7,
         DBID_OBJECT_POINTS=8,
         DBID_FILTERED_SEGMENTS=9,
-        NUMBER_OF_IDS=10
+        DBID_GOALS=10,
+        DBID_BEACONS=11,
+        DBID_BALLS=12,
+        DBID_OBSTACLES=13,
+        NUMBER_OF_IDS=14
     };
 
     static string getIDName(DEBUG_ID id);
@@ -54,9 +63,10 @@ public:
     NUImage* getFrame();
 
     bool getCTGVector(vector<float>& ctgvector);    //for transforms
+    bool getCTVector(vector<float>& ctvector);    //for transforms
     
     //! @brief Generates spoofed horizon line.
-    const Line& getKinematicsHorizon();
+    const Horizon& getKinematicsHorizon();
 
     CameraSettings getCameraSettings();
 
@@ -64,11 +74,14 @@ public:
         
     //! PUBLISH METHODS
     void publish(DATA_ID id, const Mat& img);
-    //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const Scalar& colour);
-    bool debugPublish(DEBUG_ID id, const vector<PointType> data_points, const vector<Scalar>& colours);
+    bool debugPublish(vector<Ball> data);
+    bool debugPublish(vector<Beacon> data);
+    bool debugPublish(vector<Goal> data);
+    bool debugPublish(vector<Obstacle> data);
+    bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
+    bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id, const Mat& img);
     
     
@@ -76,7 +89,7 @@ private:
     DataWrapper();
     ~DataWrapper();
     //void startImageFileGroup(string filename);
-    void updateFrame();
+    bool updateFrame();
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
@@ -101,7 +114,7 @@ private:
     string LUTname;
     LookUpTable LUT;
 
-    Line kinematics_horizon;
+    Horizon kinematics_horizon;
 
     PCCamera* m_camera;          //! Used when streaming from camera
 

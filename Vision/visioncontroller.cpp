@@ -36,19 +36,42 @@ int VisionController::runFrame()
     #endif
     //run modules    
     GreenHorizonCH::calculateHorizon();
-    debug << "calculateHorizon done" << endl;
-    HorizonInterpolate::interpolate(32);
-    debug << "interpolate done" << endl;
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - calculateHorizon done" << endl;
+#endif
+    HorizonInterpolate::interpolate(ScanLines::HORIZONTAL_SCANLINES);
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - interpolate done" << endl;
+#endif
     ObjectDetectionCH::detectObjects();
-    debug << "detectObjects done" << endl;
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - detectObjects done" << endl;
+#endif
     ScanLines::generateScanLines();
-    debug << "generateScanLines done" << endl;
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - generateScanLines done" << endl;
+#endif
     ScanLines::classifyHorizontalScanLines();
-    debug << "classifyHorizontalScanLines done" << endl;
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - classifyHorizontalScanLines done" << endl;
+#endif
     ScanLines::classifyVerticalScanLines();
-    debug << "classifyVerticalScanLines done" << endl;
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - classifyVerticalScanLines done" << endl;
+#endif
     m_segment_filter.run();
-    debug << "segment filter done" << endl;
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - segment filter done" << endl;
+#endif
+    GoalDetection::detectGoals();
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - goal detection done" << endl;
+#endif
+    
+    BallDetection::detectBall();
+#if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "VisionController::runFrame() - ball detection done" << endl;
+#endif
     
     #if VISION_CONTROLLER_VERBOSITY > 1
         debug << "VisionController::runFrame() - Publish Results" << endl;
