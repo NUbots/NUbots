@@ -362,7 +362,13 @@ void WalkingEngine::writeParameters()
         else
             debug << "WalkingEngine::setWalkParameters(): No matching parameter found: " << nm << endl;
     }
-    
+
+    // Copy the default NUwalk parameter speed limits into the B-Human walk speed limits.
+    std::vector<float> max_speeds = m_walk_parameters.getMaxSpeeds();
+    p.speedMax.translation.x = max_speeds[0] * 10.0f;   // Conversion from cm to mm
+    p.speedMax.translation.y = max_speeds[1] * 10.0f;   // Conversion from cm to mm
+    p.speedMax.rotation = max_speeds[2];
+
     //must do this
     p.computeContants();
 }
