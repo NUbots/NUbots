@@ -209,25 +209,31 @@ public:
             float position_rotation;
             if (distance < kickingdistance)
             {   // if we are too close to the ball then we need to go backwards
-                position_speed = (kickingdistance - distance)/kickingdistance;
+                position_speed = (kickingdistance - distance)/(kickingdistance);
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
                 
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.3*bearing;
+                position_rotation = 0.5*bearing;
             }
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
                 position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.3*bearing;
+                position_rotation = 0.5*bearing;
             }
             else
             {   // if it is outside the stopping distance - full speed
-                position_speed = 1;
-                position_direction = bearing;
+                if ( fabs (bearing) < 0.2) {
+                    position_speed = 1;
+                    position_direction = bearing;
+                } else {
+                    position_speed = 0.05;
+                    position_direction = bearing;
+                    position_rotation = 0.5*bearing;
+                }
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.3*bearing;
+                //position_rotation = 0.05*bearing;
             }
             
             // calculate the component to go around the ball to face the heading
