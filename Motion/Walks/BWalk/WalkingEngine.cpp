@@ -462,7 +462,7 @@ void WalkingEngine::updateMotionRequest()
 //  }
 
     // Get values from the NUWalk speeds.
-    requestedWalkTarget = Pose2D(m_speed_yaw, 10*m_speed_x, 10*m_speed_y);
+    requestedWalkTarget = Pose2D(m_target_speed_yaw, 10*m_target_speed_x, 10*m_target_speed_y);
 //    requestedWalkTarget = Pose2D(1.0, 0, 0);
     requestedMotionType = stand;
 
