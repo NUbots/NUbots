@@ -19,12 +19,12 @@ public:
         InvalidGoal
     };
     
-    enum DISTANCE_METHOD {
+    enum GOAL_DISTANCE_METHOD {
         Width,
         D2P
     };
     
-    static const DISTANCE_METHOD METHOD = Width;
+    static const GOAL_DISTANCE_METHOD METHOD = Width;
     
     static string getIDName(GoalID id);
        

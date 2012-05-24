@@ -9,9 +9,10 @@ public:
 
     static int BALL_EDGE_THRESHOLD;
     static int BALL_ORANGE_TOLERANCE;
-    //! For the Goals
+    //! Field Constants
     static float GOAL_WIDTH;
     static float DISTANCE_BETWEEN_POSTS;
+    static float BALL_WIDTH;
     
     static void loadFromFile(std::string filename);
     
