@@ -7,8 +7,8 @@ class VisionConstants
 {
 public:
     //! For the Goals
-    static unsigned int GOAL_WIDTH;
-    static unsigned int DISTANCE_BETWEEN_POSTS;
+    static float GOAL_WIDTH;
+    static float DISTANCE_BETWEEN_POSTS;
     
     static void loadFromFile(std::string filename);
     

@@ -1,7 +1,7 @@
 #include "visionconstants.h"
 
-unsigned int VisionConstants::GOAL_WIDTH;
-unsigned int VisionConstants::DISTANCE_BETWEEN_POSTS;
+float VisionConstants::GOAL_WIDTH;
+float VisionConstants::DISTANCE_BETWEEN_POSTS;
 
 VisionConstants::VisionConstants()
 {

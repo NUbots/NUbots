@@ -270,6 +270,16 @@ void DataWrapper::publish(DATA_ID id, const Mat &img)
     }
 }
 
+void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
+{
+
+}
+
+void DataWrapper::publish(const VisionFieldObject* visual_object)
+{
+    
+}
+
 //! Outputs debug data to the appropriate external interface
 void DataWrapper::debugRefresh()
 {
@@ -518,7 +528,7 @@ bool DataWrapper::updateFrame()
         }
         break;
     case FILE:
-        char c = waitKey(10);
+        char c = cv::waitKey(10);
         if(c > 0) {
             cur_image = (cur_image+1)%num_images;
             stringstream strm;
