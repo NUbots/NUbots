@@ -121,25 +121,27 @@ void GreenHorizonCH::calculateHorizon()
     else {
         // extend to right edge
         if (static_cast<unsigned int>(width-1) > temp.at(temp.size()-1).x + width/VER_SEGMENTS) {
-            temp.push_back(PointType(temp.at(temp.size()-1).x + width/VER_SEGMENTS, height-1));
+//            temp.push_back(PointType(temp.at(temp.size()-1).x + width/VER_SEGMENTS, height-1));
+//            temp.push_back(PointType(width-1, height-1));
             temp.push_back(PointType(width-1, height-1));
         }
         else {
-            temp.push_back(PointType(width-1, temp.at(temp.size()-1).y));
+//            temp.push_back(PointType(width-1, height-1));
+            temp.push_back(PointType(width-1,temp.at(temp.size()-1).y));
         }
 
         // extend to left edge
-        if (temp.at(0).y == height-1) {
-            if (temp.at(1).x > width/static_cast<int>(VER_SEGMENTS)) {
-                //temp->insert(1, PointType(0, 0));
-                vector<PointType>::iterator it;
-                it = temp.begin();
-                it++;
-                it = temp.insert (it , PointType(temp.at(1).x - width/VER_SEGMENTS, height-1));
-            }
-        }
+//        if (temp.at(0).y == height-1) {
+//            if (temp.at(1).x > width/static_cast<int>(VER_SEGMENTS)) {
+//                //temp->insert(1, PointType(0, 0));
+//                vector<PointType>::iterator it;
+//                it = temp.begin();
+//                it++;
+//                it = temp.insert (it , PointType(temp.at(1).x - width/VER_SEGMENTS, height-1));
+//            }
+//        }
     }
-    
+
     // set hull points
     vbb->setHullPoints(temp);
 }

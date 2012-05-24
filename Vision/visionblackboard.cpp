@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
+#include "visionconstants.h"
 
 #include <algorithm>
 #include <boost/foreach.hpp>
@@ -25,6 +26,8 @@ VisionBlackboard::VisionBlackboard()
     m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
     
     calculateFOVAndCamDist();
+
+    VisionConstants::loadFromFile("");
 }
 
 /** @brief Private destructor.

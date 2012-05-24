@@ -14,6 +14,8 @@
 #include "Vision/VisionTools/classificationcolours.h"
 #include "Vision/VisionTypes/quad.h"
 
+#include "Vision/visionconstants.h"
+
 using namespace std;
 using namespace cv;
 

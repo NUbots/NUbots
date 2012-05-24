@@ -9,6 +9,9 @@ public:
     //! For the Goals
     static unsigned int GOAL_WIDTH;
     static unsigned int DISTANCE_BETWEEN_POSTS;
+
+    static int BALL_EDGE_THRESHOLD;
+    static int BALL_ORANGE_TOLERANCE;
     
     static void loadFromFile(std::string filename);
     
