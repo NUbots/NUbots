@@ -35,7 +35,10 @@ public:
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
-        
+    
+    friend ostream& operator<< (ostream& output, const Goal& g);
+    friend ostream& operator<< (ostream& output, const vector<Goal>& g);    
+    
 private:
     void calculatePositions();
     float distanceToGoal(float bearing, float elevation) const;
@@ -44,7 +47,6 @@ private:
     GoalID m_id;
     Quad m_corners;
     Vector2<int> m_bottom_centre;
-    Vector2<int> m_centre;
 };
 
 #endif // GOAL_H

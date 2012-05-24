@@ -49,6 +49,14 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_OBJECT_POINTS";
     case DBID_FILTERED_SEGMENTS:
         return "DBID_FILTERED_SEGMENTS";
+    case DBID_GOALS:
+        return "DBID_GOALS";
+    case DBID_BEACONS:
+        return "DBID_BEACONS";
+    case DBID_BALLS:
+        return "DBID_BALLS";
+    case DBID_OBSTACLES:
+        return "DBID_OBSTACLES";
     default:
         return "NOT VALID";
     }
@@ -102,6 +110,7 @@ const Horizon& DataWrapper::getKinematicsHorizon()
         #if VISION_WRAPPER_VERBOSITY > 1
             debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
         #endif
+        m_kinematics_horizon.setLineFromPoints(Point(0, current_frame->getHeight()), Point(current_frame->getWidth(), current_frame->getHeight()));
         m_kinematics_horizon.exists = false;
     }
     
@@ -143,14 +152,19 @@ const LookUpTable& DataWrapper::getLUT() const
 //! PUBLISH METHODS
 
 
-void DataWrapper::publish(const vector<VisionFieldObject*> &visual_objects)
+void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
 {
     //! @todo Implement + Comment
-    BOOST_FOREACH(VisionFieldObject* obj, visual_objects) {
-        obj->addToExternalFieldObjects(field_objects, m_timestamp);
+    
+    for(int i=0; i<visual_objects.size(); i++) {
+        visual_objects.at(i)->addToExternalFieldObjects(field_objects, m_timestamp);
     }
-    //postprocess at end
-    field_objects->postProcess(m_timestamp);
+}
+
+void DataWrapper::publish(const VisionFieldObject* visual_object)
+{
+    //! @todo Implement + Comment
+    visual_object->addToExternalFieldObjects(field_objects, m_timestamp);
 }
 
 void DataWrapper::debugRefresh()
@@ -203,7 +217,7 @@ bool DataWrapper::debugPublish(vector<Obstacle> data) {
             debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_OBSTACLES) << endl;
             return false;
         }
-        BOOST_FOREACH(Obstalce obst, data) {
+        BOOST_FOREACH(Obstacle obst, data) {
             debug << "DataWrapper::debugPublish - Obstacle = " << obst << endl;
         }
     #endif
@@ -235,25 +249,29 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     //! @todo better debug printing + Comment
     
-    if(region.getSegments().empty()) {
-        errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
-        return false;
-    }
-    
-    BOOST_FOREACH(const vector<ColourSegment>& line, region.getSegments()) {
-        if(region.getDirection() == VisionID::HORIZONTAL)
-            debug << "y: " << line.front().getStart().y << endl;
-        else
-            debug << "x: " << line.front().getStart().x << endl;
-        BOOST_FOREACH(const ColourSegment& seg, line) {
-            debug << "\t" << seg;
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(region.getSegments().empty()) {
+            errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
+            return false;
         }
-    }
+    #endif
+        
+    #if VISION_WRAPPER_VERBOSITY > 2
+        BOOST_FOREACH(const vector<ColourSegment>& line, region.getSegments()) {
+            if(region.getDirection() == VisionID::HORIZONTAL)
+                debug << "y: " << line.front().getStart().y << endl;
+            else
+                debug << "x: " << line.front().getStart().x << endl;
+            BOOST_FOREACH(const ColourSegment& seg, line) {
+                debug << "\t" << seg;
+            }
+        }
+    #endif
 
     return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const Mat& img)
+bool DataWrapper::debugPublish(DEBUG_ID id, const cv::Mat& img)
 {
     //! @todo better debug printing + Comment
 }
@@ -272,6 +290,8 @@ bool DataWrapper::updateFrame()
     actions = Blackboard->Actions;
     sensor_data = Blackboard->Sensors;
     field_objects = Blackboard->Objects;
+    
+    
     
     if (current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
         numFramesDropped++;
@@ -295,6 +315,14 @@ bool DataWrapper::updateFrame()
     //succesful
     field_objects->preProcess(current_frame->GetTimestamp());
     return true;
+}
+
+/**
+*   @brief Post processes field objects with image timestamp.
+*/
+void DataWrapper::postProcess()
+{
+    field_objects->postProcess(current_frame->GetTimestamp());
 }
 
 /**

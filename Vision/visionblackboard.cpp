@@ -21,11 +21,9 @@ VisionBlackboard::VisionBlackboard()
     original_image = wrapper->getFrame();
 
     //get Camera to ground vector
-    ctgvalid = wrapper->getCTGVector(ctgvector);
+    //ctgvalid = wrapper->getCTGVector(ctgvector);
     
     m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
-    
-    calculateFOVAndCamDist();
 
     VisionConstants::loadFromFile("");
 }
@@ -87,21 +85,25 @@ void VisionBlackboard::setObjectPoints(const vector<PointType>& points)
 void VisionBlackboard::addGoal(const Goal& newgoal) 
 {
     m_goals.push_back(newgoal);
+    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_goals.back())));
 }
 
 void VisionBlackboard::addBeacon(const Beacon& newbeacon)
 {
     m_beacons.push_back(newbeacon);
+    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_beacons.back())));
 }
 
 void VisionBlackboard::addBall(const Ball& newball)
 {
     m_balls.push_back(newball);
+    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_balls.back())));
 }
 
 void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
 {
     m_obstacles.push_back(newobstacle);
+    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_obstacles.back())));
 }
 
 /**
@@ -406,8 +408,16 @@ void VisionBlackboard::updateLUT()
 
 void VisionBlackboard::calculateFOVAndCamDist()
 {
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::calculateFOVAndCamDist - Begin" << endl;
+    #endif  
+    
     m_FOV = Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov);
     effective_camera_dist_pixels = (0.5*original_image->getWidth())/tan(0.5*m_FOV.x);
+    
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::calculateFOVAndCamDist - End" << endl;
+    #endif  
 }
 
 /**
@@ -420,20 +430,30 @@ void VisionBlackboard::update()
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::update() - Begin" << endl;
     #endif
-    //Get updated kinematics data
-    kinematics_horizon = wrapper->getKinematicsHorizon();
+        
+    //kinematics_horizon.setLine(0, 1, 50);
+    
     ctgvalid = wrapper->getCTGVector(ctgvector);
     ctvalid = wrapper->getCTVector(ctvector);
     //get new image pointer
     original_image = wrapper->getFrame();
+    
+    //Get updated kinematics data
+    kinematics_horizon = wrapper->getKinematicsHorizon();
+    checkHorizon();
+    
+    //calculate the field of view and effective camera distance
+    calculateFOVAndCamDist();
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::update() - Finish" << endl;
     #endif
+        
     //clear out result vectors
     m_balls.clear();
     m_beacons.clear();
     m_goals.clear();
     m_obstacles.clear();
+    m_vfos.clear();
 }
 
 /**
@@ -444,9 +464,23 @@ void VisionBlackboard::publish() const
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::publish() - Begin" << endl;
     #endif
-//    Mat classed;
-//    LUT.classifyImage(*original_image, classed);
-//    wrapper->publish(DataWrapper::DID_CLASSED_IMAGE, classed);
+    //wrapper->publish(m_vfos);
+    int i;
+    for(i=0; i<m_balls.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_balls.at(i)));
+    }
+    for(i=0; i<m_beacons.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_beacons.at(i)));
+    }
+    for(i=0; i<m_goals.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_goals.at(i)));
+    }
+    for(i=0; i<m_obstacles.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_obstacles.at(i)));
+    }
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::publish() - End" << endl;
+    #endif
 }
 
 /**
@@ -556,4 +590,42 @@ void VisionBlackboard::debugPublish() const
         }
     }
     wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
+}
+
+void VisionBlackboard::checkHorizon()
+{
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::checkHorizon() - Begin." << endl;
+    #endif
+    int width = original_image->getWidth(),
+        height = original_image->getHeight();
+    
+    if(kinematics_horizon.exists) {
+        if(kinematics_horizon.isVertical()) {
+            //vertical horizon
+            #if VISION_BLACKBOARD_VERBOSITY > 1
+                debug << "VisionBlackboard::checkHorizon() - Vertical Horizon, clamping to top." << endl;
+            #endif
+            //kinematics_horizon.setLineFromPoints(Point(0, height), Point(width, height));
+        }
+        else {
+            if(kinematics_horizon.findYFromX(0) < 0 || kinematics_horizon.findYFromX(0) > height) {
+                //left point off screen
+                #if VISION_BLACKBOARD_VERBOSITY > 1
+                    debug << "VisionBlackboard::checkHorizon() - Left kinematics horizon point off screen." << endl;
+                #endif
+            }
+            if(kinematics_horizon.findYFromX(width) < 0 || kinematics_horizon.findYFromX(width) > height) {
+                //right point off screen
+                #if VISION_BLACKBOARD_VERBOSITY > 1
+                    debug << "VisionBlackboard::checkHorizon() - Right kinematics horizon point off screen." << endl;
+                #endif
+            }
+        }
+    }
+    else {
+        #if VISION_BLACKBOARD_VERBOSITY > 1
+            debug << "VisionBlackboard::checkHorizon() - Horizon non-existant." << endl;
+        #endif
+    }
 }

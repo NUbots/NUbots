@@ -7,16 +7,19 @@ class Ball : public VisionFieldObject
 {
 public:
     Ball();
-    Ball(int radius);
+    Ball(const PointType& centre, float radius);
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
+    
+    friend ostream& operator<< (ostream& output, const Ball& b);
+    friend ostream& operator<< (ostream& output, const vector<Ball>& b);
     
 private:
     void calculatePositions();
     
 private:
-    int m_radius;
+    float m_radius;
 };
 
 #endif // BALL_H

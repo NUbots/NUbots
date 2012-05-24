@@ -38,7 +38,7 @@ public:
 public:
     VisionFieldObject();
     
-    const PointType& getLocationPixels() const;
+    const Vector2<int>& getLocationPixels() const;
     const Vector2<float>& getLocationAngular() const;
     virtual Vector3<float> getRelativeFieldCoords() const = 0;
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const = 0;
@@ -47,7 +47,7 @@ private:
     virtual void calculatePositions() = 0;
 
 protected:
-    PointType m_location_pixels;            //! @variable The pixel location of the object on the screen.
+    Vector2<int> m_location_pixels;            //! @variable The pixel location of the object on the screen.
     Vector2<float> m_location_angular;       //! @variable The angular location of the object relative to the screen centre.
     Vector3<float> m_spherical_position;    //! @variable The position (distance, bearing, elevation) of the object relative to the robot
     float confidence;   //! unused

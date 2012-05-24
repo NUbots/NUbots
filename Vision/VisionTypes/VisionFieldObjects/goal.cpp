@@ -29,7 +29,7 @@ Goal::Goal(GoalID id, const Quad &corners)
     //SET WIDTH
     m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
     m_bottom_centre = corners.getBottomCentre();
-    m_centre = corners.getCentre();
+    m_location_pixels = corners.getCentre();
     //CALCULATE DISTANCE AND BEARING VALS
     calculatePositions();
 }
@@ -66,6 +66,7 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Goal::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
+        debug << "    " << *this << endl;
     #endif
     AmbiguousObject newAmbObj;
     FieldObjects::StationaryFieldObjectID stat_id;
@@ -114,7 +115,7 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         fieldobjects->stationaryFieldObjects[stat_id].UpdateVisualObject(m_transformed_spherical_pos,
                                                                         m_spherical_error,
                                                                         m_location_angular,
-                                                                        m_centre,
+                                                                        m_location_pixels,
                                                                         m_size_on_screen,
                                                                         timestamp);
     }
@@ -123,7 +124,7 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
                                      m_spherical_error,
                                      m_location_angular,
-                                     m_centre,
+                                     m_location_pixels,
                                      m_size_on_screen,
                                      timestamp);
         fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
@@ -147,6 +148,8 @@ void Goal::calculatePositions()
     
     float distance = distanceToGoal(bearing, elevation);
 
+    debug << "Goal::calculatePositions() distance: " << distance << endl;
+    
     m_spherical_position[0] = distance;//distance
     m_spherical_position[1] = bearing;
     m_spherical_position[2] = elevation;
@@ -181,9 +184,39 @@ float Goal::distanceToGoal(float bearing, float elevation) const {
         }
         break;
     case Width:
+        debug << "Goal::distanceToGoal: VisionConstants::GOAL_WIDTH: " << VisionConstants::GOAL_WIDTH << endl;
+        debug << "Goal::distanceToGoal: vbb->getCameraDistanceInPixels(): " << vbb->getCameraDistanceInPixels() << endl;
+        debug << "Goal::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
         distance = VisionConstants::GOAL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
+        debug << "Goal::distanceToGoal distance: " << distance << endl;
         break;
     }
     
     return distance;
+}
+
+/*! @brief Stream insertion operator for a single ColourSegment.
+ *      The segment is terminated by a newline.
+ */
+ostream& operator<< (ostream& output, const Goal& g)
+{
+    output << "Goal - " << Goal::getIDName(g.m_id) << endl;
+    output << "\tpixelloc: [" << g.m_location_pixels.x << ", " << g.m_location_pixels.y << "]" << endl;
+    output << " angularloc: [" << g.m_location_angular.x << ", " << g.m_location_angular.y << "]" << endl;
+    output << "\trelative field coords: [" << g.m_spherical_position.x << ", " << g.m_spherical_position.y << ", " << g.m_spherical_position.z << "]" << endl;
+    output << "\ttransformed field coords: [" << g.m_transformed_spherical_pos.x << ", " << g.m_transformed_spherical_pos.y << ", " << g.m_transformed_spherical_pos.z << "]" << endl;
+    output << "\tspherical error: [" << g.m_spherical_error.x << ", " << g.m_spherical_error.y << "]" << endl;
+    output << "\tsize on screen: [" << g.m_size_on_screen.x << ", " << g.m_size_on_screen.y << "]";
+    return output;
+}
+
+/*! @brief Stream insertion operator for a vector of ColourSegments.
+ *      Each segment is terminated by a newline.
+ *  @relates ColourSegment
+ */
+ostream& operator<< (ostream& output, const vector<Goal>& g)
+{
+    for (size_t i=0; i<g.size(); i++)
+        output << g[i] << endl;
+    return output;
 }

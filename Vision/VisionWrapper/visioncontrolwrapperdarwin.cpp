@@ -34,10 +34,11 @@ int VisionControlWrapper::runFrame()
     }
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "VisionControlWrapper::runFrame() - updateFrame() succeeded" << endl;
-        debug << controller << endl;
     #endif
         
-    int result = controller->runFrame();
+    int result = controller->runFrame(); //run vision on the frame
+    
+    data_wrapper->postProcess();    //post process all the field objects
     
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "VisionControlWrapper::runFrame() - Finish" << endl;

@@ -2,13 +2,11 @@
 
 void BallDetection::detectBall()
 {
-    //cout << "IT'S WORKING" << endl;
-    NUImage img = VisionBlackboard::getInstance()->getOriginalImage();
-    const LookUpTable& lut = VisionBlackboard::getInstance()->getLUT();
-    Mat cvimg;
-    lut.classifyImage(img, cvimg);    
-
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
+    NUImage img = vbb->getOriginalImage();
+    const LookUpTable& lut = vbb->getLUT();
+    // BEGIN BALL DETECTION -----------------------------------------------------------------
+
     vector<Transition> transitions = vbb->getVerticalTransitions(VisionFieldObject::BALL);    
 
     const vector<PointType>& horizon = vbb->getHorizonPoints();
@@ -214,13 +212,10 @@ void BallDetection::detectBall()
         }
 
         // DEBUG OUT
-        if (top != bottom && left != right) {
-            circle(cvimg, center, max((right-left)/2, (bottom-top)/2), Scalar(255,0,255),2);
-        }
+        //if (top != bottom && left != right) {
+            Ball newball(center, max((right-left), (bottom-top))*0.5);
+            vbb->addBall(newball);
+        //}
 
-    }    
-
-    namedWindow("BALL DETECTION", CV_WINDOW_KEEPRATIO);
-    imshow("BALL DETECTION", cvimg);
-
+    }
 }

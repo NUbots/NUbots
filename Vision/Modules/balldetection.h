@@ -17,8 +17,6 @@
 #include "Vision/visionconstants.h"
 
 using namespace std;
-using namespace cv;
-
 
 class BallDetection
 {

@@ -7,6 +7,7 @@
 */
 
 #include "greenhorizonch.h"
+#include "Kinematics/Horizon.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
 
@@ -30,9 +31,12 @@ void GreenHorizonCH::calculateHorizon()
     horizon_points.reserve(VER_SEGMENTS);
     temp.reserve(VER_SEGMENTS);
 
-    const Line& kin_hor = vbb->getKinematicsHorizon();
+    const Horizon& kin_hor = vbb->getKinematicsHorizon();
     int kin_hor_y;
 
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
+    #endif
     
     unsigned int position;
     for (unsigned int x = 0; x <= VER_SEGMENTS; x++) {
@@ -40,8 +44,10 @@ void GreenHorizonCH::calculateHorizon()
         unsigned int green_top = 0;
         unsigned int green_count = 0;
 
-
         kin_hor_y = kin_hor.findYFromX(x);
+        //clamp green horizon values
+        kin_hor_y = max(0,kin_hor_y);
+        kin_hor_y = min(height-1, kin_hor_y);
         
         for (int y = kin_hor_y; y < height; y++) {
             if (isPixelGreen(img, position, y)) {
@@ -66,6 +72,9 @@ void GreenHorizonCH::calculateHorizon()
         }
     }
     
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
+    #endif
     // provide blackboard the original set of scan points
     vbb->setHorizonScanPoints(horizon_points);
     
@@ -74,9 +83,13 @@ void GreenHorizonCH::calculateHorizon()
         if (horizon_points.at(x).y < height-1)     // if not at bottom of image
             temp.push_back(horizon_points.at(x));
     }
-    Mat mean, std_dev;
-    meanStdDev(Mat(temp), mean, std_dev);
+    cv::Mat mean, std_dev;
+    meanStdDev(cv::Mat(temp), mean, std_dev);
     temp.clear();
+    
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Statistical filter prep done" << endl;
+    #endif
     
     // copy values into format for convexHull function
     temp.push_back(horizon_points.at(0));
@@ -86,12 +99,19 @@ void GreenHorizonCH::calculateHorizon()
             temp.push_back(horizon_points.at(x));
         }
     }
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << endl;
+    #endif
     
     horizon_points.clear();
 
     // convex hull
-    convexHull(Mat(temp), horizon_points, false, true);
+    convexHull(cv::Mat(temp), horizon_points, false, true);
 
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;
+    #endif
+    
     // get top half (silly ordering)
     temp.clear();
     bool top = false;   // is LHS point found
@@ -110,13 +130,25 @@ void GreenHorizonCH::calculateHorizon()
     // add RHS point
     temp.push_back(horizon_points.at(0));
     
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Convex hull reordering done" << endl;
+    #endif
+    
     // if empty hull
     if (temp.size() <= 2) {
         temp.clear();
         //temp->push_back(PointType(0, height-1));
         //temp->push_back(PointType(width-1, height-1));
-        temp.push_back(PointType(0, kin_hor.findYFromX(0)));
-        temp.push_back(PointType(width-1, kin_hor.findYFromX(width-1)));
+        int kin_hor_left_y = kin_hor.findYFromX(0),
+            kin_hor_right_y = kin_hor.findYFromX(width-1);
+        //clamp kinematics horizon values
+        kin_hor_left_y = max(0,kin_hor_left_y);
+        kin_hor_right_y = max(0,kin_hor_right_y);
+        kin_hor_left_y = min(height-1, kin_hor_left_y);
+        kin_hor_right_y = min(height-1, kin_hor_right_y);
+        //add new points at edge
+        temp.push_back(PointType(0, kin_hor_left_y));
+        temp.push_back(PointType(width-1, kin_hor_right_y));
     }
     else {
         // extend to right edge
@@ -141,6 +173,9 @@ void GreenHorizonCH::calculateHorizon()
 //            }
 //        }
     }
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug << "GreenHorizonCH::calculateHorizon() - Side extension done" << endl;
+    #endif
 
     // set hull points
     vbb->setHullPoints(temp);

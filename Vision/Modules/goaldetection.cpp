@@ -135,10 +135,10 @@ void GoalDetection::overlapCheck(vector<Quad>* posts)
 //        }
 //    }
     for (unsigned int i = 0; i < posts->size(); i++) {
-        Scalar left = posts->at(i).getAsScalar();
+        cv::Scalar left = posts->at(i).getAsScalar();
         for (unsigned int j = i+1; j < posts->size(); j++) {
             vector<Quad>::iterator it = posts->begin()+j;
-            Scalar right = it->getAsScalar();
+            cv::Scalar right = it->getAsScalar();
             if (left.val[2] >= right.val[0] && left.val[0] <= right.val[2])
                 posts->erase(it);
         }
@@ -152,19 +152,19 @@ void GoalDetection::splitIntoObjects(vector<Quad>* blue_candidates, vector<Quad>
     for (unsigned int i = 0; i < blue_candidates->size(); i++) {
         bool is_beacon = false;
         //Quad blue = blue_candidates->at(i);
-        Scalar blue = blue_candidates->at(i).getAsScalar();
+        cv::Scalar blue = blue_candidates->at(i).getAsScalar();
         if ((int)blue.val[0] < 0) continue;     // FIX THIS
         int b_start = (int)blue.val[0];
         int b_end = (int)blue.val[2];
 
         for (vector<Quad>::iterator y_it = yellow_candidates->begin(); y_it < yellow_candidates->end(); y_it++) {
             //Quad yellow = *y_it;
-            Scalar yellow = y_it->getAsScalar();
+            cv::Scalar yellow = y_it->getAsScalar();
             if ((int)yellow.val[0] < 0) continue;
             int y_start = (int)yellow.val[0];
             int y_end = (int)yellow.val[2];
             if ((y_start <= b_start && y_end >= b_end) || (y_start >= b_start && y_start <= b_end) || (y_end >= b_start && y_end <= b_end)) {
-                //circle(cvimg, cvPoint(y_start, 10), 1, Scalar(255,255,255), 2, 8, 0);
+                //circle(cvimg, cvPoint(y_start, 10), 1, cv::Scalar(255,255,255), 2, 8, 0);
                 int y_top = (int)yellow.val[3];
                 int y_bottom = (int)yellow.val[1];
                 int b_top = (int)blue.val[3];

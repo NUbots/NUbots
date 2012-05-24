@@ -1,9 +1,9 @@
 #include "visionconstants.h"
 
-unsigned int VisionConstants::GOAL_WIDTH;
-unsigned int VisionConstants::DISTANCE_BETWEEN_POSTS;
 int VisionConstants::BALL_EDGE_THRESHOLD;
 int VisionConstants::BALL_ORANGE_TOLERANCE;
+float VisionConstants::GOAL_WIDTH;
+float VisionConstants::DISTANCE_BETWEEN_POSTS;
 
 VisionConstants::VisionConstants()
 {

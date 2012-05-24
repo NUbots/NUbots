@@ -23,7 +23,6 @@
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 
 using namespace std;
-using namespace cv;
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -50,7 +49,11 @@ public:
         DBID_GREENHORIZON_FINAL=7,
         DBID_OBJECT_POINTS=8,
         DBID_FILTERED_SEGMENTS=9,
-        NUMBER_OF_IDS=10
+        DBID_GOALS=10,
+        DBID_BEACONS=11,
+        DBID_BALLS=12,
+        DBID_OBSTACLES=13,
+        NUMBER_OF_IDS=14
     };
 
     static string getIDName(DEBUG_ID id);
@@ -71,7 +74,8 @@ public:
     const LookUpTable& getLUT() const;
         
     //! Data publish interface
-    void publish(const vector<VisionFieldObject*>& visual_objects);
+    void publish(const vector<const VisionFieldObject*>& visual_objects);
+    void publish(const VisionFieldObject* visual_object);
     //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();
@@ -81,11 +85,12 @@ public:
     bool debugPublish(vector<Obstacle> data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
-    bool debugPublish(DEBUG_ID id, const Mat& img);
+    bool debugPublish(DEBUG_ID id, const cv::Mat& img);
 
     //! Control interface       
 private:    
     bool updateFrame();
+    void postProcess();
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.

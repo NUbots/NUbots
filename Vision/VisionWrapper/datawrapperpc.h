@@ -22,7 +22,12 @@
 #define GROUP_EXT ".png"
 
 using namespace std;
-using namespace cv;
+//using namespace cv;
+using cv::Mat;
+using cv::VideoCapture;
+using cv::Scalar;
+using cv::namedWindow;
+using cv::Vec3b;
 
 class DataWrapper
 {
@@ -74,6 +79,8 @@ public:
         
     //! PUBLISH METHODS
     void publish(DATA_ID id, const Mat& img);
+    void publish(const vector<const VisionFieldObject*> &visual_objects);
+    void publish(const VisionFieldObject* visual_object);
 
     void debugRefresh();
     bool debugPublish(vector<Ball> data);

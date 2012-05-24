@@ -20,7 +20,6 @@
 #include "Vision/VisionTools/classificationcolours.h"
 
 using namespace std;
-using namespace cv;
 
 class ObjectDetectionCH
 {

@@ -25,7 +25,7 @@ bool Obstacle::addToExternalFieldObjects(FieldObjects *fieldobjects, float times
 {
     //! @todo implement robot mapping
     #if VISION_FIELDOBJECT_VERBOSITY > 1
-        debug << "Goal::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
+        debug << "Goal::addToExternalFieldObjects - m_id: Obstacle" << endl;
     #endif
     AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Yellow Post");
     //newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_ROBOT_UNKNOWN);
@@ -71,4 +71,26 @@ void Obstacle::calculatePositions()
         Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
         m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
     }
+}
+
+/*! @brief Stream insertion operator for a single ColourSegment.
+ *      The segment is terminated by a newline.
+ */
+ostream& operator<< (ostream& output, const Obstacle& o)
+{
+    output << "Obstacle - pixelloc: [" << o.getLocationPixels().x << ", " << o.getLocationPixels().y << "]";
+    output << " angularloc: [" << o.getLocationAngular().x << ", " << o.getLocationAngular().y << "]";
+    output << " relative field coords: [" << o.getRelativeFieldCoords().x << ", " << o.getRelativeFieldCoords().y << ", " << o.getRelativeFieldCoords().z << "]";
+    return output;
+}
+
+/*! @brief Stream insertion operator for a vector of ColourSegments.
+ *      Each segment is terminated by a newline.
+ *  @relates ColourSegment
+ */
+ostream& operator<< (ostream& output, const vector<Obstacle>& o)
+{
+    for (size_t i=0; i<o.size(); i++)
+        output << o[i] << endl;
+    return output;
 }
