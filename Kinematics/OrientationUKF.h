@@ -18,7 +18,7 @@ public:
     void initialise(double time, const std::vector<float>& gyroReadings, const std::vector<float>& accelerations, bool validkinematics, const std::vector<float> kinematicorientation);
     void TimeUpdate(const std::vector<float>& gyroReadings, double timestamp);
     void MeasurementUpdate(const std::vector<float>& accelerations, bool validKinematics, const std::vector<float>& kinematicsOrientation);
-    bool Initialised(){return m_initialised;};
+    bool Initialised(){return m_initialised;}
 
 private:
     void AccelerationFromOrientation(const Matrix& orientation, Matrix& accelerations);

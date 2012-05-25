@@ -51,6 +51,8 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
 
+#include "Kinematics/InverseKinematics.h"
+
 /*! @brief Constructor for motion module
  */
 NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
@@ -74,13 +76,15 @@ NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
     m_next_arm_provider = 0;
     m_next_leg_provider = 0;
     
+    m_ik = InverseKinematics::getInverseKinematicModel();
+    
     #ifdef USE_HEAD
         m_head = new NUHead(m_data, m_actions);
         m_current_head_provider = m_head;
     #endif
     
     #if defined(USE_WALK)
-        m_walk = NUWalk::getWalkEngine(m_data, m_actions);
+        m_walk = NUWalk::getWalkEngine(m_data, m_actions, m_ik);
         m_current_arm_provider = m_walk;
         m_current_leg_provider = m_walk;
         m_getup = new Getup(m_walk, m_data, m_actions);
@@ -110,6 +114,7 @@ NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
     m_next_head_provider = m_current_head_provider;
     m_next_arm_provider = m_current_arm_provider;
     m_next_leg_provider = m_current_leg_provider;
+
 }
 
 /*! @brief Destructor for motion module

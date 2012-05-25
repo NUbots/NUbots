@@ -551,11 +551,12 @@ void NUSensors::calculateKinematics()
                 errorlog << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << endl;
                 break;  // no use going further with this effector.
             }
-
         }
         if(joint_positions.size() == eff_it->joints.size())
         {
-            result = m_kinematicModel->CalculateTransform(eff_it->index, joint_positions);
+            m_kinematicModel->UpdateEffector(eff_it->index, joint_positions);
+//            result = m_kinematicModel->CalculateTransform(eff_it->index, joint_positions);
+            result = m_kinematicModel->EndEffectorPosition(eff_it->index);
             m_data->set(*eff_it->transform_id, time, result.asVector());
             // If the effectors position and orientation are kept, write modify them here.
             if(eff_it->effector_id)
@@ -657,6 +658,7 @@ void NUSensors::calculateKinematics()
 
 void NUSensors::calculateCameraHeight()
 {
+//! TODO: most cases where camera height is used should really use head height at the pivot point
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateCameraHeight()" << endl;
 #endif

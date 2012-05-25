@@ -26,6 +26,8 @@ Kinematics.cpp
 Link.cpp
 EndEffector.cpp
 OrientationUKF.cpp
+NUInverseKinematics.h
+NAOInverseKinematics.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

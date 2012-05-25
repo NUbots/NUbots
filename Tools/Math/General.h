@@ -193,6 +193,20 @@ inline bool PointInsideConvexHull(float x, float y, const std::vector<std::vecto
     return true;
 }
 
+/*! @brief Assigns C to the projected point from A through B to distancePast after B.
+    @param A the start point
+    @param B the point to project through
+    @param distancePast the distance past B to go
+    @param C the destination value
+ */
+inline void ProjectFromAtoB(float* A, float* B, float distancePast, float* C) {
+    float xdiff = B[0]-A[0];
+    float ydiff = B[1]-A[1];
+    float dist = sqrt(sqr(xdiff)+sqr(ydiff));
+    dist = (dist+distancePast)/dist;
+    C[0] = A[0]+dist*xdiff;
+    C[1] = A[1]+dist*ydiff;
+}
 
 } // End namespace
 

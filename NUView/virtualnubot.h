@@ -51,7 +51,7 @@ public:
     {
         return (rawImage != 0);
     }
-
+    unsigned char* getLUT() {return classificationTable;}
     QString fileType;
 public slots:
     /** Processes a Classified Image Packet, to be displayed in program

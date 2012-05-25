@@ -80,8 +80,8 @@ protected:
             m_pan_finished = false;
         }
         
-        Self& self = m_field_objects->self;
-        MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+        Self& self = Blackboard->Objects->self;
+        MobileObject& ball = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL];
         bool iskicking;
         m_data->get(NUSensorsData::MotionKickActive, iskicking);
         
@@ -160,17 +160,8 @@ protected:
         
         if (not m_pan_started or m_pan_finished)
         {
-            if (ball.isObjectVisible())
-            {
-                //cout << m_data->CurrentTime << ": Tracking ball" << endl;
-                m_jobs->addMotionJob(new HeadTrackJob(ball));
-            }
-            else if (ball.TimeSinceLastSeen() > 3000)
-            {
-                //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                m_jobs->addMotionJob(new HeadPanJob(ball));
-            }   
-            else if (ball.TimeSinceLastSeen() > 1500)
+            
+            if (ball.TimeSinceLastSeen() > 2300)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
                 m_jobs->addMotionJob(new HeadPanJob(ball, 0.5));
@@ -178,7 +169,13 @@ protected:
             else if (ball.TimeSinceLastSeen() > 750)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
+                if (ball.isObjectVisible())
+                {
+                    //cout << m_data->CurrentTime << ": Tracking ball" << endl;
+                    m_jobs->addMotionJob(new HeadTrackJob(ball));
+                } else {
+                    m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
+                }
             }
         }
         
@@ -192,18 +189,15 @@ protected:
             float rightobstacle = obstacles.at(1);
 
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
-            if (ball.estimatedDistance() > 40 and min(leftobstacle, rightobstacle) < ball.estimatedDistance())
-                result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, obstacles, min(ball.estimatedDistance(), 25.0f), 50);
-            else
-                result = speed;
+            result = speed;
             
-            if (m_pan_started and not m_pan_finished and ball.estimatedDistance() < 50)
+            if (m_pan_started and not m_pan_finished and ball.estimatedDistance() < 20)
                 result = vector<float>(3,0);
             
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         }
         
-        if((ball.estimatedDistance() < 25.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSeen() > 0 && m_pan_finished)
+        if((ball.estimatedDistance() < 21.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSeen() > 0 && m_pan_finished)
         {
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
@@ -263,4 +257,5 @@ protected:
 
 
 #endif
+
 

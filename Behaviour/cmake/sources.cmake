@@ -40,6 +40,7 @@ SET (YOUR_DIRS  Soccer
                 RoboPedestrian
 				CameraCalibration
                 EnvironmentalEmotions
+                GoalKeeperTest
 )
 IF(${TARGET_ROBOT} STREQUAL BEAR)
     LIST(APPEND YOUR_DIRS BearMode)
