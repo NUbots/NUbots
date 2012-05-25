@@ -134,7 +134,7 @@ protected:
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 1500)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 2500)
         {
             m_pan_started = false;
             m_pan_finished = false;
@@ -165,15 +165,15 @@ protected:
         if (not m_pan_started or m_pan_finished)
         {
             
-            if (ball.TimeSinceLastSeen() > 1200)
+            if (ball.TimeSinceLastSeen() > 2300)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                m_jobs->addMotionJob(new HeadPanJob(ball, 0.2));
+                m_jobs->addMotionJob(new HeadPanJob(ball, 0.5));
             }
             else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                if (ball.isObjectVisible())
+                if (ball.isObjectVisible() or ball.TimeSinceLastSeen < 750)
                 {
                     #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                         debug << m_data->CurrentTime << ": Tracking ball" << endl;
@@ -181,7 +181,7 @@ protected:
                     //cout << m_data->CurrentTime << ": Tracking ball" << endl;
                     m_jobs->addMotionJob(new HeadTrackJob(ball));
                 } else {
-                    m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
+                    m_jobs->addMotionJob(new HeadPanJob(ball, 0.3));
                 }
             }
         }
