@@ -179,7 +179,9 @@ public:
             
 
             
-            const float offsetDistance = 5.0f;
+            float offsetDistance = 3.0f;
+            
+            
             float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
             float left_foot_y = y + offsetDistance * sin(heading - mathGeneral::PI/2);
             float left_foot_distance = sqrt(pow(left_foot_x,2) + pow(left_foot_y,2));
@@ -198,6 +200,8 @@ public:
                 x = right_foot_x;
                 y = right_foot_y;
             }
+            
+            
 
             distance = sqrt(x*x + y*y);
             bearing = atan2(y,x);
@@ -216,7 +220,8 @@ public:
             }
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
-                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
+                
+                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance)+0.05;
                 position_direction = bearing;
                 //position_rotation = 0.5*bearing; //previous value for NAO
                 position_rotation = 0.5*bearing;
