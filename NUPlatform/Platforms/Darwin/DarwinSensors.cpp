@@ -219,15 +219,15 @@ void DarwinSensors::copyFromJoints()
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadByte(addr);
         //data = int(datatable[addr-start_addr]);
         joint[NUSensorsData::StiffnessId] = 100*data;
-		
+		*/
         addr = int(Robot::MX28::P_PRESENT_LOAD_L);
-        data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
+        data = (int)cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
         //data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-        joint[NUSensorsData::TorqueId] = data;
+        joint[NUSensorsData::TorqueId] = data*1.262e-3;
         //<! Current is blank
-        joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
+        //joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
         //<! Copy into m_data
-        */
+        
 
         //Calculate Speed:
         joint[NUSensorsData::VelocityId] = (joint[NUSensorsData::PositionId] - m_previous_positions[i])/delta_t;

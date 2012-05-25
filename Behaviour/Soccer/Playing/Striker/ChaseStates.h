@@ -98,6 +98,7 @@ protected:
         {   
             if (ball.estimatedDistance() < 100 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
             {   
+                
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
                 StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
                 StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
@@ -127,10 +128,13 @@ protected:
                 m_pan_end_time = m_data->CurrentTime + 500;
                 m_pan_time_captured = false;
                 m_pan_finished = false;
+                #if DEBUG_BEHAVIOUR_VERBOSITY > 2
+                    debug << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
+                #endif
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 45000)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 1500)
         {
             m_pan_started = false;
             m_pan_finished = false;
@@ -161,16 +165,19 @@ protected:
         if (not m_pan_started or m_pan_finished)
         {
             
-            if (ball.TimeSinceLastSeen() > 2300)
+            if (ball.TimeSinceLastSeen() > 1200)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                m_jobs->addMotionJob(new HeadPanJob(ball, 0.5));
+                m_jobs->addMotionJob(new HeadPanJob(ball, 0.2));
             }
-            else if (ball.TimeSinceLastSeen() > 750)
+            else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
                 if (ball.isObjectVisible())
                 {
+                    #if DEBUG_BEHAVIOUR_VERBOSITY > 2
+                        debug << m_data->CurrentTime << ": Tracking ball" << endl;
+                    #endif
                     //cout << m_data->CurrentTime << ": Tracking ball" << endl;
                     m_jobs->addMotionJob(new HeadTrackJob(ball));
                 } else {
@@ -178,10 +185,27 @@ protected:
                 }
             }
         }
+        float targetKickDistance = 13.;
         
-        if(not iskicking)
+        
+        if((ball.estimatedDistance() < targetKickDistance) && ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) )) // && ball.TimeSeen() > 0 && m_pan_finished)
         {
-            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
+            m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+            vector<float> kickPosition(2,0);
+            vector<float> targetPosition(2,0);
+            kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
+            kickPosition[1] = ball.estimatedDistance() * sin(ball.estimatedBearing());
+            targetPosition[0] = kickPosition[0] + 1000.0f;
+            targetPosition[1] = kickPosition[1];
+            KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
+            m_jobs->addMotionJob(kjob);
+            #if DEBUG_BEHAVIOUR_VERBOSITY > 2
+                debug << m_data->CurrentTime << ": Kicking Ball at distance " << ball.estimatedDistance() << endl;
+            #endif
+        } else if(not iskicking)
+        {
+            
+            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.5,42.);
             vector<float> result;
             // decide whether we need to dodge or not
             vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
@@ -191,25 +215,22 @@ protected:
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
             result = speed;
             
-            if (m_pan_started and not m_pan_finished and ball.estimatedDistance() < 20)
+            if ((m_pan_started and not m_pan_finished or not m_pan_started) and ball.estimatedDistance() < targetKickDistance-1. and BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info))
                 result = vector<float>(3,0);
             
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
+            #if DEBUG_BEHAVIOUR_VERBOSITY > 2
+                debug << m_data->CurrentTime << ": Going to Ball - (" << result[0] << ", " << result[1] << ", " << result[2] << ")" << endl;
+            #endif
         }
         
-        if((ball.estimatedDistance() < 21.0f) && BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) && ball.TimeSeen() > 0 && m_pan_finished)
-        {
-            vector<float> kickPosition(2,0);
-            vector<float> targetPosition(2,0);
-            kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
-            kickPosition[1] = ball.estimatedDistance() * sin(ball.estimatedBearing());
-            targetPosition[0] = kickPosition[0] + 1000.0f;
-            targetPosition[1] = kickPosition[1];
-            KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
-            m_jobs->addMotionJob(kjob);
-        }
         
-        //cout << m_data->CurrentTime << ": pan_started: " << m_pan_started << " pan_finished: " << m_pan_finished << " pan end time: " << m_pan_end_time << endl; 
+        
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 2
+            debug << m_data->CurrentTime << ": pan_started: " << m_pan_started << " pan_finished: " << m_pan_finished << " pan end time: " << m_pan_end_time << endl; 
+            debug << m_data->CurrentTime << ": ball distance: " << ball.estimatedDistance() << " ball seen: " << ball.TimeSeen() << endl; 
+            debug << " kicking: " << iskicking << endl;
+        #endif
         m_previous_time = m_data->CurrentTime;
     }
     

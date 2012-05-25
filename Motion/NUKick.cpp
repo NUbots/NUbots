@@ -132,6 +132,7 @@ void NUKick::stop()
     stopHead();
     stopArms();
     stopLegs();
+    m_kick_enabled = false;
 }
 
 void NUKick::stopHead()
