@@ -892,9 +892,10 @@ void WalkingEngine::generateJointRequest()
 
   *(r_arm_it++) = targetStance.rightArmJointAngles[1];
   *(r_arm_it++) = targetStance.rightArmJointAngles[0];
-  *(r_arm_it++) = targetStance.rightArmJointAngles[3];
+  *(r_arm_it++) = -targetStance.rightArmJointAngles[3];
   if(total_arm_joints > 3)
   {
+      *(r_arm_it-1) = -*(r_arm_it-1);
       *(r_arm_it++) = targetStance.rightArmJointAngles[2];
   }
 
