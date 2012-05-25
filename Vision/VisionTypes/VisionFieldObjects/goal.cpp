@@ -184,8 +184,6 @@ float Goal::distanceToGoal(float bearing, float elevation) const {
         }
         break;
     case Width:
-        debug << "Goal::distanceToGoal: VisionConstants::GOAL_WIDTH: " << VisionConstants::GOAL_WIDTH << endl;
-        debug << "Goal::distanceToGoal: vbb->getCameraDistanceInPixels(): " << vbb->getCameraDistanceInPixels() << endl;
         debug << "Goal::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
         distance = VisionConstants::GOAL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
         debug << "Goal::distanceToGoal distance: " << distance << endl;

@@ -95,8 +95,6 @@ float Ball::distanceToBall(float bearing, float elevation) const {
         }
         break;
     case Width:
-        debug << "Ball::distanceToGoal: VisionConstants::GOAL_WIDTH: " << VisionConstants::BALL_WIDTH << endl;
-        debug << "Ball::distanceToGoal: vbb->getCameraDistanceInPixels(): " << vbb->getCameraDistanceInPixels() << endl;
         debug << "Ball::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
         distance = VisionConstants::BALL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
         debug << "Ball::distanceToGoal distance: " << distance << endl;
@@ -111,9 +109,13 @@ float Ball::distanceToBall(float bearing, float elevation) const {
  */
 ostream& operator<< (ostream& output, const Ball& b)
 {
-    output << "Ball - pixelloc: [" << b.getLocationPixels().x << ", " << b.getLocationPixels().y << "]";
-    output << " angularloc: [" << b.getLocationAngular().x << ", " << b.getLocationAngular().y << "]";
-    output << " relative field coords: [" << b.getRelativeFieldCoords().x << ", " << b.getRelativeFieldCoords().y << ", " << b.getRelativeFieldCoords().z << "]";
+    output << "Ball " << endl;
+    output << "\tpixelloc: [" << b.m_location_pixels.x << ", " << b.m_location_pixels.y << "]" << endl;
+    output << " angularloc: [" << b.m_location_angular.x << ", " << b.m_location_angular.y << "]" << endl;
+    output << "\trelative field coords: [" << b.m_spherical_position.x << ", " << b.m_spherical_position.y << ", " << b.m_spherical_position.z << "]" << endl;
+    output << "\ttransformed field coords: [" << b.m_transformed_spherical_pos.x << ", " << b.m_transformed_spherical_pos.y << ", " << b.m_transformed_spherical_pos.z << "]" << endl;
+    output << "\tspherical error: [" << b.m_spherical_error.x << ", " << b.m_spherical_error.y << "]" << endl;
+    output << "\tsize on screen: [" << b.m_size_on_screen.x << ", " << b.m_size_on_screen.y << "]";
     return output;
 }
 
