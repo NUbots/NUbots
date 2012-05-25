@@ -134,7 +134,7 @@ protected:
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 45000)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 1500)
         {
             m_pan_started = false;
             m_pan_finished = false;
@@ -165,12 +165,12 @@ protected:
         if (not m_pan_started or m_pan_finished)
         {
             
-            if (ball.TimeSinceLastSeen() > 2300)
+            if (ball.TimeSinceLastSeen() > 1200)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                m_jobs->addMotionJob(new HeadPanJob(ball, 0.5));
+                m_jobs->addMotionJob(new HeadPanJob(ball, 0.2));
             }
-            else if (ball.TimeSinceLastSeen() > 750)
+            else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
                 if (ball.isObjectVisible())
@@ -185,31 +185,12 @@ protected:
                 }
             }
         }
-        float targetKickDistance = 11.;
-        if(not iskicking)
-        {
-            
-            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance+1.5,42.);
-            vector<float> result;
-            // decide whether we need to dodge or not
-            vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
-            float leftobstacle = obstacles.at(0);
-            float rightobstacle = obstacles.at(1);
-
-            // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
-            result = speed;
-            
-            if (m_pan_started and not m_pan_finished and ball.estimatedDistance() < targetKickDistance+1.5)
-                result = vector<float>(3,0);
-            
-            m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
-            #if DEBUG_BEHAVIOUR_VERBOSITY > 2
-                debug << m_data->CurrentTime << ": Going to Ball - (" << result[0] << ", " << result[1] << ", " << result[2] << ")" << endl;
-            #endif
-        }
+        float targetKickDistance = 13.;
+        
         
         if((ball.estimatedDistance() < targetKickDistance) && ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) )) // && ball.TimeSeen() > 0 && m_pan_finished)
         {
+            m_jobs->addMotionJob(new WalkJob(0, 0, 0));
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
             kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
@@ -221,7 +202,30 @@ protected:
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << m_data->CurrentTime << ": Kicking Ball at distance " << ball.estimatedDistance() << endl;
             #endif
+        } else if(not iskicking)
+        {
+            
+            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.5,42.);
+            vector<float> result;
+            // decide whether we need to dodge or not
+            vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
+            float leftobstacle = obstacles.at(0);
+            float rightobstacle = obstacles.at(1);
+
+            // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
+            result = speed;
+            
+            if ((m_pan_started and not m_pan_finished or not m_pan_started) and ball.estimatedDistance() < targetKickDistance-1. and BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info))
+                result = vector<float>(3,0);
+            
+            m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
+            #if DEBUG_BEHAVIOUR_VERBOSITY > 2
+                debug << m_data->CurrentTime << ": Going to Ball - (" << result[0] << ", " << result[1] << ", " << result[2] << ")" << endl;
+            #endif
         }
+        
+        
+        
         #if DEBUG_BEHAVIOUR_VERBOSITY > 2
             debug << m_data->CurrentTime << ": pan_started: " << m_pan_started << " pan_finished: " << m_pan_finished << " pan end time: " << m_pan_end_time << endl; 
             debug << m_data->CurrentTime << ": ball distance: " << ball.estimatedDistance() << " ball seen: " << ball.TimeSeen() << endl; 
