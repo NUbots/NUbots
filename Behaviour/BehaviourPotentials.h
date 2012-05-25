@@ -63,7 +63,7 @@ public:
      */
     static vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
     {
-        static const float m_HYSTERESIS = 0.4;      // the fraction of hysteresis in the turning point toward the desired heading
+        static const float m_HYSTERESIS = 0.2;      // the fraction of hysteresis in the turning point toward the desired heading
         static double m_previous_time = 0;          // the previous time in ms
         static bool m_previous_turning = false;     // the previous turning state; used to implement hysteresis in the decision to turn around.
         
@@ -99,7 +99,6 @@ public:
             }
         }
         m_previous_time = Blackboard->Sensors->CurrentTime;
-        result[2] /= 1.5;
         return result;
     }
     
@@ -180,7 +179,9 @@ public:
             
 
             
-            const float offsetDistance = 5.0f;
+            float offsetDistance = 3.0f;
+            
+            
             float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
             float left_foot_y = y + offsetDistance * sin(heading - mathGeneral::PI/2);
             float left_foot_distance = sqrt(pow(left_foot_x,2) + pow(left_foot_y,2));
@@ -199,6 +200,8 @@ public:
                 x = right_foot_x;
                 y = right_foot_y;
             }
+            
+            
 
             distance = sqrt(x*x + y*y);
             bearing = atan2(y,x);
@@ -217,7 +220,8 @@ public:
             }
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
-                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
+                
+                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance)+0.05;
                 position_direction = bearing;
                 //position_rotation = 0.5*bearing; //previous value for NAO
                 position_rotation = 0.5*bearing;

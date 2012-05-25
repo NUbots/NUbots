@@ -94,7 +94,7 @@ void SlipTestProvider::doBehaviour()
     hist_gpsX.push_back(self.wmX());
     hist_gpsY.push_back(self.wmY());
     hist_gpsB.push_back(self.Heading());
-    cout << odometry[0] << ", " << odometry[1] << ", " << odometry[2] << ", " << self.wmX() << ", " << self.wmY() << ", " << self.Heading() << endl << flush;
+    debug << "SlipTestOdometry: " << odometry[0] << ", " << odometry[1] << ", " << odometry[2] << ", " << self.wmX() << ", " << self.wmY() << ", " << self.Heading() << endl << flush;
      
     //return to the start location
     if (m_return_to_start) {
@@ -153,7 +153,7 @@ void SlipTestProvider::doBehaviour()
             m_odomY = 0.;
             m_odomB = 0.;
             
-            if (samplePointIndex % 20 == 0) {
+            /*if (samplePointIndex % 20 == 0) {
             vector<float> odom_gpsX,odom_gpsY,odom_gpsB;
             odom_gpsX.push_back(0.);
             odom_gpsY.push_back(0.);
@@ -194,7 +194,7 @@ void SlipTestProvider::doBehaviour()
             cout << Sampling::Covariance1D(hist_odomB,odom_gpsB)/Sampling::Variance1D(hist_odomB);
             cout << ", " << endl << flush;
             
-            }
+            }*/
             
             
         }
