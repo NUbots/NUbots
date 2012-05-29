@@ -102,7 +102,6 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/Kinematics.h \
     ../Tools/Math/TransformMatrices.h \
     frameInformationWidget.h \
-    ../Tools/Math/UKF.h \
     ../Tools/Math/SRUKF.h \
     ../Kinematics/Link.h \
     ../Kinematics/EndEffector.h \
@@ -192,7 +191,11 @@ HEADERS += ui_mainwindow.h \
     ../Tools/KFTools.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
     ../Tools/Math/statistics.h \
-    OfflineLocBatch.h
+    OfflineLocBatch.h \
+    ../Tools/Math/Filters/UnscentedTransform.h \
+    ../Tools/Math/Filters/UKF.h \
+    ../Tools/Math/Filters/MobileObjectUKF.h \
+    ../Tools/Math/depUKF.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -279,7 +282,6 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Tools/Math/TransformMatrices.cpp \
     frameInformationWidget.cpp \
-    ../Tools/Math/UKF.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
     ../Kinematics/EndEffector.cpp \
@@ -328,7 +330,10 @@ SOURCES += mainwindow.cpp \
     ../Tools/KFTools.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
     ../Tools/Math/statistics.cpp \
-    OfflineLocBatch.cpp
+    OfflineLocBatch.cpp \
+    ../Tools/Math/Filters/UKF.cpp \
+    ../Tools/Math/Filters/MobileObjectUKF.cpp \
+    ../Tools/Math/depUKF.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
