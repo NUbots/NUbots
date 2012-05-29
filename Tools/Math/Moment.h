@@ -29,6 +29,7 @@ public:
     bool isNull() const;
     std::string string() const;
     void writeData(std::ostream& output) const;
+    unsigned int totalStates() const  {return m_numStates;}
 
     Moment& operator= (const Moment & source);
 
