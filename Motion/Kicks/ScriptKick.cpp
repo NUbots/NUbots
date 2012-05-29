@@ -123,6 +123,11 @@ void ScriptKick::doKick()
             m_script_start_time = m_data->CurrentTime;
         }
     }
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+    debug << "Current Time: " << m_data->CurrentTime << endl;
+    debug << "Walk: " << m_walk->isActive()<< endl;
+    debug << "Script will finish at: " << m_current_script->timeFinished() << endl;
+    #endif
 
     if(m_data->CurrentTime > m_current_script->timeFinished())
     {
