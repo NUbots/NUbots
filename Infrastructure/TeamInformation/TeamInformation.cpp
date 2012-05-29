@@ -135,7 +135,6 @@ float TeamInformation::getTimeToBall()
     MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
     float balldistance = ball.estimatedDistance();
     float ballbearing = ball.estimatedBearing();
-    
     if (m_data->isIncapacitated())                                   // if we are incapacitated then we can't chase a ball
         return time;
     else if (m_player_number == 1 and balldistance > 150)            // goal keeper is a special case, don't chase balls too far away
@@ -143,9 +142,16 @@ float TeamInformation::getTimeToBall()
     else if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 5000)
     {   // if neither the ball or self are lost or if we can see the ball then we can chase.
         vector<float> walkspeed, maxspeed;
-        m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed);
-        m_data->get(NUSensorsData::MotionWalkMaxSpeed, maxspeed);
-        
+        bool walk_speed_good = m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed);
+        bool max_speed_good = m_data->get(NUSensorsData::MotionWalkMaxSpeed, maxspeed);
+
+        // If walk speed is not available, then we may not be able to get to the ball.
+        if(not (walk_speed_good and max_speed_good))
+        {
+            debug << "Warning: Walk values not available - walk_speed_good: " << walk_speed_good << " max_speed_good: " <<  max_speed_good << std::endl;
+            return time;
+        }
+
         // Add time for the movement to the ball
         time = balldistance/maxspeed[0] + fabs(ballbearing)/maxspeed[2];
         
@@ -153,7 +159,6 @@ float TeamInformation::getTimeToBall()
         {   // Add time for the 'acceleration' from the current speed to the speed required to the ball
             time += 1.5*fabs(cos(ballbearing) - walkspeed[0]/maxspeed[0]) + 1.5*fabs(sin(ballbearing) - walkspeed[1]/maxspeed[1]) + 1.5*fabs(ballbearing - walkspeed[2]/maxspeed[2]);
         }
-        
         if (self.lost())
             time += 3;
     }
