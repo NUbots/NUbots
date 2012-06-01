@@ -1,5 +1,6 @@
 #include "colourtransitionrule.h"
 #include <boost/algorithm/string.hpp>
+#include "debug.h"
 
 ColourSegment ColourTransitionRule::nomatch(PointType(0,0), PointType(0,0), ClassIndex::invalid);
 
@@ -177,7 +178,12 @@ istream& operator>> (istream& input, vector<ColourTransitionRule>& v)
     while(input.good())
     {
         input >> temp;
-        v.push_back(temp);
+        if(temp.getVFO_ID() != VisionFieldObject::UNKNOWN) {
+            v.push_back(temp);
+        }
+        else {
+            errorlog << "ColourTransitionRule istream operator: UNKOWN match ignored." << endl;
+        }
     }
 
     return input;
