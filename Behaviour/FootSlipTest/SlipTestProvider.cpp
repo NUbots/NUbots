@@ -49,13 +49,15 @@ using namespace std;
 
 SlipTestProvider::SlipTestProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
-    cout << "Sample ID, Start X, Start Y, Start Heading, End X, End Y, End Heading, Trans Speed, Trans Direction, Turn Speed, X-odometry, Y-odometry, Bearing-odometry, Time Taken" << endl << flush;
+    //cout << "Sample ID, Start X, Start Y, Start Heading, End X, End Y, End Heading, Trans Speed, Trans Direction, Turn Speed, X-odometry, Y-odometry, Bearing-odometry, Time Taken" << endl << flush;
     samplePointIndex = 0;
     vector<float> walk = Sampling::HaltonPointND(samplePointIndex,3);
     m_trans_speed = walk[0]*2.-1.;
     m_trans_direction = walk[1]*6.-3.;
     m_turn_speed = walk[2]*2.-1.;
     
+    m_slip_matrix = {{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}};
+    m_av_count = 0;
     m_start_x = 0.;
     m_start_y = 0.;
     m_start_heading = 0.;
@@ -88,13 +90,60 @@ void SlipTestProvider::doBehaviour()
     Blackboard->Sensors->getOdometry(odometry);
     
     //save odometry history
+    m_av_count += 1;
     hist_odomX.push_back(odometry[0]);
     hist_odomY.push_back(odometry[1]);
     hist_odomB.push_back(odometry[2]);
     hist_gpsX.push_back(self.wmX());
     hist_gpsY.push_back(self.wmY());
     hist_gpsB.push_back(self.Heading());
-    debug << "SlipTestOdometry: " << odometry[0] << ", " << odometry[1] << ", " << odometry[2] << ", " << self.wmX() << ", " << self.wmY() << ", " << self.Heading() << endl << flush;
+    //cout << "SlipTestOdometry: " << odometry[0] << ", " << odometry[1] << ", " << odometry[2] << ", " << self.wmX() << ", " << self.wmY() << ", " << self.Heading() << endl << flush;
+    
+    //incremental linear filter
+    if (m_av_count == 50) {
+        
+        float target[3] = {0.,0.,0.};
+        float actual[3] = {0.,0.,0.};
+        float inputs[3] = {0.,0.,0.};
+        
+        //sum the odometry
+        for (int i = 1; i < m_av_count; i++) {
+            if (not (hist_gpsX[i] == 0. and hist_gpsY[i] == 0. or hist_gpsX[i-1] == 0. and hist_gpsY[i-1] == 0.) and not (fabs(hist_gpsX[i]-hist_gpsX[i-1]) > 3. or fabs(hist_gpsY[i]-hist_gpsY[i-1]) > 3. or fabs(hist_gpsB[i]-hist_gpsB[i-1]) > 0.2)) {
+            target[0] += hist_odomX[i];
+            target[1] += hist_odomY[i];
+            target[2] += hist_odomB[i];
+            
+            inputs[0] += (hist_gpsX[i]-hist_gpsX[i-1])*cos(hist_gpsB[i-1]) - (hist_gpsY[i]-hist_gpsY[i-1])*sin(hist_gpsB[i-1]);
+            inputs[1] += (hist_gpsX[i]-hist_gpsX[i-1])*sin(hist_gpsB[i-1]) + (hist_gpsY[i]-hist_gpsY[i-1])*cos(hist_gpsB[i-1]);
+            inputs[2] += hist_gpsB[i]-hist_gpsB[i-1];
+            }
+        }
+        hist_odomX.clear();
+        hist_odomY.clear();
+        hist_odomB.clear();
+        hist_gpsX.clear();
+        hist_gpsY.clear();
+        hist_gpsB.clear();
+        m_av_count = 0;
+        
+        //calculate the estimate
+        actual[0] = m_slip_matrix[0][0]*inputs[0]+m_slip_matrix[0][1]*inputs[1]+m_slip_matrix[0][2]*inputs[2];
+        actual[1] = m_slip_matrix[1][0]*inputs[0]+m_slip_matrix[1][1]*inputs[1]+m_slip_matrix[1][2]*inputs[2];
+        actual[2] = m_slip_matrix[2][0]*inputs[0]+m_slip_matrix[2][1]*inputs[1]+m_slip_matrix[2][2]*inputs[2];
+        
+        //do the correction
+        for (int i = 0; i < 3; i++) {
+            m_slip_matrix[i][0] -= inputs[0]*(actual[i]-target[i])*0.0001;
+            m_slip_matrix[i][1] -= inputs[1]*(actual[i]-target[i])*0.0001;
+            m_slip_matrix[i][2] -= inputs[2]*(actual[i]-target[i])*0.0001;
+        }
+        
+        cout << "Updated Filter:" << endl;
+        for (int i = 0; i < 3; i++) {
+            cout << m_slip_matrix[i][0] << "  \t" << m_slip_matrix[i][1] << "  \t" << m_slip_matrix[i][2] << endl;
+        }
+
+    }
      
     //return to the start location
     if (m_return_to_start) {
@@ -115,7 +164,7 @@ void SlipTestProvider::doBehaviour()
             m_run_start = Blackboard->Sensors->CurrentTime;
             samplePointIndex++;
             vector<float> walk = Sampling::HaltonPointND(samplePointIndex,3);
-            m_trans_speed = walk[0]*2.-1.;
+            m_trans_speed = walk[0];
             m_trans_direction = walk[1]*6.-3.;
             m_turn_speed = walk[2]*2.-1.;
         }
@@ -124,19 +173,17 @@ void SlipTestProvider::doBehaviour()
     } else {
         
         //stand still for a bit at the start
-        if (m_run_start < Blackboard->Sensors->CurrentTime-2000. && m_run_start > Blackboard->Sensors->CurrentTime-6500.) {
+        if (m_run_start < Blackboard->Sensors->CurrentTime && m_run_start > Blackboard->Sensors->CurrentTime-7000.) {
             Blackboard->Jobs->addMotionJob(new WalkJob(m_trans_speed,m_trans_direction,m_turn_speed));
             //cout << "walking around";
             
             
             
             //sum odometry
-            m_odomX += odometry[0]*cos(m_odomB) + odometry[1]*sin(m_odomB);
-            m_odomY += odometry[1]*cos(m_odomB) + odometry[0]*sin(m_odomB);
-            m_odomB += odometry[2];
+            //m_odomX += odometry[0]*cos(m_odomB) + odometry[1]*sin(m_odomB);
+            //m_odomY += odometry[1]*cos(m_odomB) + odometry[0]*sin(m_odomB);
+            //m_odomB += odometry[2];
             
-        } else if (m_run_start < Blackboard->Sensors->CurrentTime-6500. && m_run_start > Blackboard->Sensors->CurrentTime-7000.) {
-            Blackboard->Jobs->addMotionJob(new MotionFreezeJob());
         } else {
             Blackboard->Jobs->addMotionJob(new WalkJob(0.,0.,0.));
             m_start_x = self.wmX();
@@ -149,52 +196,7 @@ void SlipTestProvider::doBehaviour()
             
             //cout << samplePointIndex << ", " << m_start_x << ", " << m_start_y << ", " << m_start_heading << ", " << self.wmX() << ", " << self.wmY() << ", " << self.Heading() << ", " << m_trans_speed << ", " << m_trans_direction << ", " << m_turn_speed << ", " << m_odomX << ", " << m_odomY << ", " << m_odomB << ", " << Blackboard->Sensors->CurrentTime-m_run_start-2000. << endl << flush;
             m_return_to_start = true;
-            m_odomX = 0.;
-            m_odomY = 0.;
-            m_odomB = 0.;
             
-            /*if (samplePointIndex % 20 == 0) {
-            vector<float> odom_gpsX,odom_gpsY,odom_gpsB;
-            odom_gpsX.push_back(0.);
-            odom_gpsY.push_back(0.);
-            odom_gpsB.push_back(0.);
-            for (int i = 1; i < hist_gpsX.size(); i++) {
-                float dx = hist_gpsX[i]-hist_gpsX[i-1];
-                float dy = hist_gpsY[i]-hist_gpsY[i-1];
-                float db = hist_gpsB[i]-hist_gpsB[i-1];
-                odom_gpsX.push_back(dx*cos(hist_gpsB[i])+dy*sin(hist_gpsB[i]));
-                odom_gpsY.push_back(dy*cos(hist_gpsB[i])+dx*sin(hist_gpsB[i]));
-                odom_gpsB.push_back(db);
-                
-                cout << hist_odomX[i] << ", " << hist_odomY[i] << ", " << hist_odomB[i] << ", " << odom_gpsX[i] << ", " << odom_gpsY[i] << ", " << odom_gpsB[i] << endl << flush;
-            }
-            
-            cout << "<X>, <Y>, <B>" << endl;
-            //predict realX
-            cout << Sampling::Covariance1D(hist_odomX,odom_gpsX)/Sampling::Variance1D(hist_odomX);
-            cout << ", ";
-            cout << Sampling::Covariance1D(hist_odomY,odom_gpsX)/Sampling::Variance1D(hist_odomY);
-            cout << ", ";
-            cout << Sampling::Covariance1D(hist_odomB,odom_gpsX)/Sampling::Variance1D(hist_odomB);
-            cout << ", " << endl;
-            
-            //[redict realY
-            cout << Sampling::Covariance1D(hist_odomX,odom_gpsY)/Sampling::Variance1D(hist_odomX);
-            cout << ", ";
-            cout << Sampling::Covariance1D(hist_odomY,odom_gpsY)/Sampling::Variance1D(hist_odomY);
-            cout << ", ";
-            cout << Sampling::Covariance1D(hist_odomB,odom_gpsY)/Sampling::Variance1D(hist_odomB);
-            cout << ", " << endl;
-            
-            //predict realB
-            cout << Sampling::Covariance1D(hist_odomX,odom_gpsB)/Sampling::Variance1D(hist_odomX);
-            cout << ", ";
-            cout << Sampling::Covariance1D(hist_odomY,odom_gpsB)/Sampling::Variance1D(hist_odomY);
-            cout << ", ";
-            cout << Sampling::Covariance1D(hist_odomB,odom_gpsB)/Sampling::Variance1D(hist_odomB);
-            cout << ", " << endl << flush;
-            
-            }*/
             
             
         }
