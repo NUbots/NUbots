@@ -5,6 +5,7 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/FieldObjects/Self.h"
 #include <iostream>
+#include <assert.h>
 #include <boost/circular_buffer.hpp>
 
 class OdometryMotionModel;

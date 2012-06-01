@@ -91,7 +91,7 @@ public:
     
     double lambda() const
     {
-        return pow(m_alpha,2) *  (m_L + m_kappa) - m_L;
+        return pow(m_alpha,2) * (m_L + m_kappa) - m_L;
     }
 
     unsigned int totalSigmaPoints() const

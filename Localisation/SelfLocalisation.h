@@ -2,6 +2,7 @@
 #define SELF_LOCWM_H_DEFINED
 #include "Models/SelfSRUKF.h"
 #include "Models/SelfUKF.h"
+#include "Tools/Math/Filters/MobileObjectUKF.h"
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -50,6 +51,7 @@ class SelfLocalisation: public TimestampedData
 
         int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
         int landmarkUpdate(StationaryObject &landmark);
+        bool ballUpdate(const MobileObject& ball);
 
         // Ambiguous object updates.
         // Main function.
@@ -99,6 +101,7 @@ class SelfLocalisation: public TimestampedData
 
         // Model Reset Functions
         void initSingleModel(float x, float y, float heading);
+        void initBallModel(MobileObjectUKF* ball_model);
         bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
         void doInitialReset(GameInformation::TeamColour team_colour);
         void doSingleInitialReset(GameInformation::TeamColour team_colour);
@@ -150,6 +153,7 @@ class SelfLocalisation: public TimestampedData
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
         static const int c_numOutlierTrackedObjects = FieldObjects::NUM_STAT_FIELD_OBJECTS;
         ModelContainer m_models;
+        MobileObjectUKF* m_ball_model;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
         ofstream debug_file; // Logging file

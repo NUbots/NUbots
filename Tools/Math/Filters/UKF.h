@@ -2,7 +2,7 @@
  @brief Declaration of general UKF class
 
  @class UKF
- @brief This calss is a template to create a custom UKF specific for an application.
+ @brief This class is a template to create a custom UKF specific for an application.
 
  The processEquation and measurementEquation virtual functions must be defined for each application,
  the remainder of the algorithm is otherwise identical.
@@ -30,7 +30,7 @@
 #include "Tools/Math/Matrix.h"
 #include "UnscentedTransform.h"
 
-class UKF: public UnscentedTransform, Moment
+class UKF: public UnscentedTransform, public Moment
 {
 public:
     UKF();
@@ -40,7 +40,7 @@ public:
 
     // Public functions, these are the only two functions that should need to be called externally.
     // They are virtual in case the need to be redefined, but the default functions should work in most cases.
-    virtual bool timeUpdate(double deltaT, const Matrix& measurment, const Matrix& linearProcessNoise);
+    virtual bool timeUpdate(double deltaT, const Matrix& measurment, const Matrix& linearProcessNoise, const Matrix& measurementNoise);
     virtual bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs = Matrix());
 
 protected:
@@ -56,7 +56,7 @@ protected:
    Matrix CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const;
 
    // These functions need to be defined for each implementation of a filter, as they are dependent on the specific application.
-   virtual Matrix processEquation(const Matrix& sigma_point, float deltaT, const Matrix& measurement) = 0;
+   virtual Matrix processEquation(const Matrix& sigma_point, double deltaT, const Matrix& measurement) = 0;
    virtual Matrix measurementEquation(const Matrix& sigma_point, const Matrix& measurementArgs) = 0;
 
 };

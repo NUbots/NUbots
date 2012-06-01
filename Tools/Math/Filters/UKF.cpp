@@ -6,6 +6,7 @@ using namespace std;
 
 UKF::UKF(): Moment(0), UnscentedTransform(0)
 {
+    CalculateWeights();
 }
 
 UKF::UKF(unsigned int numStates): Moment(numStates), UnscentedTransform(numStates)
@@ -15,6 +16,7 @@ UKF::UKF(unsigned int numStates): Moment(numStates), UnscentedTransform(numState
 
 UKF::UKF(const UKF& source): Moment(source), UnscentedTransform(source)
 {
+    CalculateWeights();
 }
 
 UKF::~UKF()
@@ -29,7 +31,7 @@ void UKF::CalculateWeights()
 {
     const unsigned int totalWeights = totalSigmaPoints();
 
-    // initialise to correct sizes.
+    // initialise to correct sizes. These are row vectors.
     m_mean_weights = Matrix(1, totalWeights, false);
     m_covariance_weights = Matrix(1, totalWeights, false);
 
@@ -53,8 +55,8 @@ Matrix UKF::GenerateSigmaPoints() const
     Matrix points(totalStates(), numPoints, false);
 
     points.setCol(0, current_mean); // First sigma point is the current mean with no deviation
-    Matrix deviation;
     Matrix sqtCovariance = cholesky(covarianceSigmaWeight() * covariance());
+    Matrix deviation;
 
     for(unsigned int i = 1; i < totalStates() + 1; i++){
         int negIndex = i+totalStates();
@@ -84,12 +86,14 @@ Matrix UKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
 Matrix UKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const
 {
     const unsigned int numPoints = totalSigmaPoints();
-    Matrix covariance(m_numStates,m_numStates, false);  // Blank covariance matrix.
+    const unsigned int numStates = totalStates();
+    Matrix covariance(numStates, numStates, false);  // Blank covariance matrix.
     Matrix diff;
     for(unsigned int i = 0; i < numPoints; ++i)
     {
+        const double weight = m_covariance_weights[0][i];
         diff = sigmaPoints.getCol(i) - mean;
-        covariance = covariance + m_covariance_weights[0][i]*diff*diff.transp();
+        covariance = covariance + weight*diff*diff.transp();
     }
     return covariance;
 }
@@ -101,7 +105,7 @@ Matrix UKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matri
  * @param linearProcessNoise The linear process noise that will be added.
  * @return True if the time update was performed successfully. False if it was not.
  */
-bool UKF::timeUpdate(double deltaT, const Matrix& measurement, const Matrix& linearProcessNoise)
+bool UKF::timeUpdate(double deltaT, const Matrix& measurement, const Matrix& linearProcessNoise, const Matrix& measurementNoise)
 {
     const unsigned int totalPoints = totalSigmaPoints();
 
@@ -119,12 +123,16 @@ bool UKF::timeUpdate(double deltaT, const Matrix& measurement, const Matrix& lin
 
     // Calculate the new mean and covariance values.
     Matrix predictedMean = CalculateMeanFromSigmas(m_sigma_points);
-    Matrix predictedCovaraince = CalculateCovarianceFromSigmas(m_sigma_points, predictedMean) + linearProcessNoise;
+    Matrix predictedCovariance = CalculateCovarianceFromSigmas(m_sigma_points, predictedMean) + linearProcessNoise;
 
     // Set the new mean and covariance values.
     m_sigma_mean = predictedMean;
     setMean(predictedMean);
-    setCovariance(predictedCovaraince);
+    setCovariance(predictedCovariance);
+
+    // Redraw sigma point to include process noise.
+    m_sigma_points = GenerateSigmaPoints();
+
     return true;
 }
 
@@ -138,7 +146,8 @@ bool UKF::timeUpdate(double deltaT, const Matrix& measurement, const Matrix& lin
 bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs)
 {
     const unsigned int totalPoints = totalSigmaPoints();
-    const unsigned int totalMeasurements = measurement.getn();
+    const unsigned int numStates = totalStates();
+    const unsigned int totalMeasurements = measurement.getm();
     Matrix currentPoint; // temporary storage.
 
     Matrix Yprop(totalMeasurements, totalPoints);
@@ -154,13 +163,13 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
     Matrix Ymean = CalculateMeanFromSigmas(Yprop);
 
     Matrix Pyy(measurementNoise);   // measurement noise is added, so just use as the beginning value of the sum.
-    Matrix Pxy(totalPoints, totalMeasurements, false);
+    Matrix Pxy(numStates, totalMeasurements, false);
 
     // Calculate the Pyy and Pxy variance matrices.
     for(unsigned int i = 0; i < totalPoints; ++i)
     {
         double weight = m_covariance_weights[0][i];
-        // store difference between prediction and measurment.
+        // store difference between prediction and measurement.
         currentPoint = Yprop.getCol(i) - Ymean;
         // Innovation covariance - Add Measurement noise
         Pyy = Pyy + weight * currentPoint * currentPoint.transp();

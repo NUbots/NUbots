@@ -45,6 +45,7 @@
 
 #ifdef USE_LOCALISATION
     #include "Localisation/Localisation.h"
+    #include "Localisation/SelfLocalisation.h"
 #endif
 
 #ifdef USE_MOTION
@@ -111,6 +112,7 @@ void SeeThinkThread::run()
     #endif
     ofstream locfile((string(DATA_DIR) + string("locwm.strm")).c_str(), ios_base::trunc);
     int err = 0;
+    SelfLocalisation* locTest = new SelfLocalisation(2);
     while (err == 0 && errno != EINTR)
     {
         try
@@ -144,7 +146,8 @@ void SeeThinkThread::run()
             m_logrecorder->WriteData(Blackboard);
 
             #ifdef USE_LOCALISATION
-                m_nubot->m_localisation->process(Blackboard->Sensors, Blackboard->Objects, Blackboard->GameInfo, Blackboard->TeamInfo);
+                locTest->process(Blackboard->Sensors, Blackboard->Objects, Blackboard->GameInfo, Blackboard->TeamInfo);
+                //m_nubot->m_localisation->process(Blackboard->Sensors, Blackboard->Objects, Blackboard->GameInfo, Blackboard->TeamInfo);
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("localisation");
                 #endif

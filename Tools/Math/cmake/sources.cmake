@@ -30,10 +30,11 @@ Rectangle.cpp
 FieldCalculations.cpp
 FIRFilter.cpp
 statistics.cpp
+Moment.cpp Moment.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS
+SET (YOUR_DIRS Filters
 )
 ####################################################################################
 

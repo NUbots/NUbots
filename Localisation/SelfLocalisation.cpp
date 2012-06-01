@@ -84,6 +84,8 @@ SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings&
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
+    m_ball_model = new MobileObjectUKF();
+    initBallModel(m_ball_model);
     return;
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -118,6 +120,9 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
+
+    m_ball_model = new MobileObjectUKF();
+    initBallModel(m_ball_model);
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
         std::stringstream debugLogName;
@@ -174,6 +179,7 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
 SelfLocalisation::~SelfLocalisation()
 {
     clearModels();
+    delete m_ball_model;
     #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_file.close();
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -412,6 +418,12 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
 #endif // MULTIPLE_MODELS_ON
         PruneModels();
 
+        MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
+        if(ball.isObjectVisible())
+        {
+            ballUpdate(ball);
+        }
+
 #if DEBUG_LOCALISATION_VERBOSITY > 1
         for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
         {
@@ -514,12 +526,38 @@ void SelfLocalisation::removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& am
  */
 void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects* fieldObjects)
 {
-
     // Check if lost.
     bool lost = false;
     if (m_lostCount > 20)
         lost = true;
     fieldObjects->self = model->GenerateSelfState();
+
+    MobileObject& ball = fieldObjects->mobileFieldObjects[FieldObjects::FO_BALL];
+    double measuredDistance = ball.measuredDistance() * cos (ball.measuredElevation());
+    double measuredBearing = ball.measuredBearing();
+    double ballMeasuredX = measuredDistance * cos(measuredBearing);
+    double ballMeasuredY = measuredDistance * sin(measuredBearing);
+
+    if(!ball.isObjectVisible())
+    {
+        ballMeasuredX = 0;
+        ballMeasuredY = 0;
+    }
+
+//    std::cout << "Ball ";
+//    MobileObject& ball = fieldObjects->mobileFieldObjects[FieldObjects::FO_BALL];
+//    if(ball.isObjectVisible())
+//    {
+//        std::cout << "seen, Distance: " << ball.measuredDistance() * cos(ball.measuredElevation());
+//        std::cout << " Heading: " << ball.measuredBearing() << std::endl;
+//    }
+//    else
+//    {
+//        std::cout << "NOT seen" << std::endl;
+//    }
+//    std::cout << "Ball x: " << m_ball_model->mean(MobileObjectUKF::x_pos) << " Ball y: " << m_ball_model->mean(MobileObjectUKF::y_pos);
+//    std::cout << " Ball x velocity: " << m_ball_model->mean(MobileObjectUKF::x_vel) << " Ball y velocity: " << m_ball_model->mean(MobileObjectUKF::y_vel) << std::endl;
+    std::cout << ballMeasuredX << "," << ballMeasuredY << "," << m_ball_model->mean(MobileObjectUKF::x_pos) << "," << m_ball_model->mean(MobileObjectUKF::y_pos) << "," << m_ball_model->mean(MobileObjectUKF::x_vel) << "," <<  m_ball_model->mean(MobileObjectUKF::y_vel) << std::endl;
 }
 
 
@@ -602,6 +640,28 @@ void SelfLocalisation::initSingleModel(float x, float y, float heading)
     temp.setCovariance(covariance_matrix(150.0f, 100.0f, 2*PI));
     positions.push_back(temp);
     InitialiseModels(positions);
+}
+
+void SelfLocalisation::initBallModel(MobileObjectUKF* ball_model)
+{
+    MobileObjectUKF::State state;
+    Matrix mean(ball_model->totalStates(), 1, false);
+    Matrix covariance(ball_model->totalStates(), ball_model->totalStates(), false);
+
+    // Assign initial covariance
+    const double initial_pos_cov = 100*100;
+    const double initial_vel_cov = 10*10;
+    state = MobileObjectUKF::x_pos;
+    covariance[state][state] = initial_pos_cov;
+    state = MobileObjectUKF::y_pos;
+    covariance[state][state] = initial_pos_cov;
+    state = MobileObjectUKF::x_vel;
+    covariance[state][state] = initial_vel_cov;
+    state = MobileObjectUKF::y_vel;
+    covariance[state][state] = initial_vel_cov;
+
+    ball_model->setMean(mean);
+    ball_model->setCovariance(covariance);
 }
 
 void SelfLocalisation::doSingleInitialReset(GameInformation::TeamColour team_colour)
@@ -944,6 +1004,38 @@ bool SelfLocalisation::clipActiveModelsToField()
 
 bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double timeIncrement)
 {
+    // put values into odometry measurement matrix
+    Matrix odometry(3,1,false);
+    odometry[0][0] = odomForward;
+    odometry[1][0] = odomLeft;
+    odometry[2][0] = odomTurn;
+
+    // testing values. Not up to odometry yet
+    odometry[0][0] = 0.0;
+    odometry[1][0] = 0.0;
+    odometry[2][0] = 0.0;
+
+    // calculate the measurement noise.
+    Matrix measurementNoise = Matrix(3,3,true);
+    measurementNoise[0][0] = 0.2*0.2; // Robot X coord.
+    measurementNoise[1][1] = 0.2*0.2; // Robot Y coord.
+    measurementNoise[2][2] = 0.005*0.005; // Robot Theta. 0.00001
+
+    // calculate the linear process noise.
+    Matrix processNoise = Matrix(4,4,true);
+    processNoise[0][0] = 15*15;
+    processNoise[1][1] = 15*15;
+    processNoise[2][2] = 30*30;
+    processNoise[3][3] = 30*30;
+
+    double deltaTimeSeconds = timeIncrement * 1e-3; // Convert from milliseconds to seconds.
+
+    processNoise = deltaTimeSeconds * processNoise;
+
+    // perform time update on the ball model.
+    m_ball_model->timeUpdate(deltaTimeSeconds, odometry, processNoise, measurementNoise);
+
+    // Put measurement in the vector format.
     std::vector<float> odom(3,0.0f);
     odom[0] = odomForward;
     odom[1] = odomLeft;
@@ -1237,6 +1329,23 @@ int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, 
         return ambiguousLandmarkUpdateProbDataAssoc(ambiguousObject, possibleObjects);
     }
     return 0;
+}
+
+bool SelfLocalisation::ballUpdate(const MobileObject& ball)
+{
+    const float distance = ball.measuredDistance() * cos(ball.measuredElevation());
+    const float heading = ball.measuredBearing();
+
+    Matrix measurement(2,1,false);
+    measurement[0][0] = distance;
+    measurement[1][0] = heading;
+
+    Matrix measurementNoise(2,2,false);
+    measurementNoise[0][0] = 5.0*5.0 + c_obj_range_relative_variance * pow(distance,2);
+    measurementNoise[1][1] = 0.01*0.01;
+
+    m_ball_model->measurementUpdate(measurement, measurementNoise);
+
 }
 
 /*! @brief Prunes the models using a selectable method. This is a interface function to access a variety of methods.
