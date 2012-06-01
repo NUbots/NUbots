@@ -157,9 +157,13 @@ void Goal::calculatePositions()
     m_location_angular = Vector2<float>(bearing, elevation);
     //m_spherical_error - not calculated
         
-    if(vbb->isCameraTransformValid()) {        
-        Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
-        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
+//    if(vbb->isCameraTransformValid()) {        
+//        Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
+//        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
+//    }
+    if(vbb->isCameraToGroundValid()) {        
+        Matrix cameraToGroundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
+        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,m_spherical_position);
     }
     else {
         m_transformed_spherical_pos = Vector3<float>(0,0,0);

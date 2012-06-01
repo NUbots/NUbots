@@ -17,6 +17,8 @@ public:
     Ball();
     Ball(const PointType& centre, float radius);
     
+    float getRadius() const;
+    
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
     

@@ -25,6 +25,10 @@ Ball::Ball(const PointType& centre, float radius)
     calculatePositions();
 }
 
+float Ball::getRadius() const
+{
+    return m_radius;
+}
 
 Vector3<float> Ball::getRelativeFieldCoords() const
 {
@@ -57,8 +61,9 @@ void Ball::calculatePositions()
     
     float distance = distanceToBall(bearing, elevation);
     
-    debug << "Ball::calculatePositions() distance: " << distance << endl;
-    
+    #if VISION_FIELDOBJECT_VERBOSITY > 1
+        debug << "Ball::calculatePositions() distance: " << distance << endl;
+    #endif
     //! @todo implement 
     m_spherical_position[0] = distance; //dist
     m_spherical_position[1] = bearing; //bearing
@@ -67,9 +72,13 @@ void Ball::calculatePositions()
     m_location_angular = Vector2<float>(bearing, elevation);
     //m_spherical_error - not calculated
     
-    if(vbb->isCameraTransformValid()) {        
-        Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
-        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
+//    if(vbb->isCameraTransformValid()) {        
+//        Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
+//        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
+//    }
+    if(vbb->isCameraToGroundValid()) {        
+        Matrix cameraToGroundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
+        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,m_spherical_position);
     }
     else {
         m_transformed_spherical_pos = Vector3<float>(0,0,0);
@@ -93,11 +102,19 @@ float Ball::distanceToBall(float bearing, float elevation) const {
             Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
             distance = result[0];
         }
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::distanceToBall: Method: D2P" << endl;
+            debug << "Ball::distanceToBall: bearing: " << bearing << " elevation: " << elevation << endl;
+            debug << "Ball::distanceToBall distance: " << distance << endl;
+        #endif
         break;
     case Width:
-        debug << "Ball::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
         distance = VisionConstants::BALL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
-        debug << "Ball::distanceToGoal distance: " << distance << endl;
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::distanceToBall: Method: Width" << endl;
+            debug << "Ball::distanceToBall: m_size_on_screen.x: " << m_size_on_screen.x << endl;
+            debug << "Ball::distanceToBall distance: " << distance << endl;
+        #endif
         break;
     }
     

@@ -292,7 +292,21 @@ void DataWrapper::debugRefresh()
 }
 
 bool DataWrapper::debugPublish(vector<Ball> data) {
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(data.empty()) {
+            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BALLS) << endl;
+            return false;
+        }
+    #endif
     
+    Mat& img = results_img;    //get image from pair
+    string& window = results_window_name; //get window name from pair
+    
+    BOOST_FOREACH(Ball b, data) {
+        circle(img, PointType(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius(), Scalar(255,255,0), 2);
+    }
+    
+    imshow(window, img);    //refresh this particular debug window
 }
 
 bool DataWrapper::debugPublish(vector<Beacon> data) {
