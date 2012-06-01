@@ -173,7 +173,7 @@ protected:
             else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                if (ball.isObjectVisible() or ball.TimeSinceLastSeen < 750)
+                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 750)
                 {
                     #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                         debug << m_data->CurrentTime << ": Tracking ball" << endl;

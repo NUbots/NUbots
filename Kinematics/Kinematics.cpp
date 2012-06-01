@@ -375,11 +375,11 @@ Matrix Kinematics::TransformPosition(const Matrix& Camera2GroundTransform, const
     return mathGeneral::Cartesian2Spherical(resultMatrix);
 }
 
-std::vector<float> Kinematics::LookToPoint(const std::vector<float>& pointFieldCoordinates)
-{
-    std::vector<float> result;
-    return result;
-}
+//std::vector<float> Kinematics::LookToPoint(const std::vector<float>& pointFieldCoordinates)
+//{
+//    std::vector<float> result;
+//    return result;
+//}
 
 double Kinematics::CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix)
 {

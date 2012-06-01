@@ -217,7 +217,7 @@ void BallDetection::detectBall()
             vbb->addBall(newball);
         }
         else {
-            #if VISION_FIELDOBJECT_VERBOSITY > 2
+            #if VISION_FIELDOBJECT_VERBOSITY > 1
                 debug << "BallDetection::detectBall - (1,1) ball thrown out" << endl;
             #endif
         }
