@@ -9,6 +9,7 @@ class FieldObjects;
 class Object;
 class StationaryObject;
 class NUSensorsData;
+class GLUquadric;
 
 class locWmGlDisplay : public QGLWidget
 {

@@ -29,6 +29,7 @@ UKF.cpp
 Rectangle.cpp
 FieldCalculations.cpp
 FIRFilter.cpp
+Sampling.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

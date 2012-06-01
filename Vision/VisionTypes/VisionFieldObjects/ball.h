@@ -6,8 +6,18 @@
 class Ball : public VisionFieldObject
 {
 public:
+    
+    enum BALL_DISTANCE_METHOD {
+        Width,
+        D2P
+    };
+    
+    static const BALL_DISTANCE_METHOD METHOD = Width;
+    
     Ball();
-    Ball(const PointType& centre, int radius);
+    Ball(const PointType& centre, float radius);
+    
+    float getRadius() const;
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
@@ -17,9 +27,10 @@ public:
     
 private:
     void calculatePositions();
+    float distanceToBall(float bearing, float elevation) const;
     
 private:
-    int m_radius;
+    float m_radius;
 };
 
 #endif // BALL_H

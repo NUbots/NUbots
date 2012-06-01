@@ -27,6 +27,7 @@
 #include "Kinematics/Horizon.h"
 #include <QPainter>
 #include <QDebug>
+#include <glu.h>
 
 OpenglManager::OpenglManager(): width(320), height(240)
 {

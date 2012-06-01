@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
+#include "visionconstants.h"
 
 #include <algorithm>
 #include <boost/foreach.hpp>
@@ -20,9 +21,11 @@ VisionBlackboard::VisionBlackboard()
     original_image = wrapper->getFrame();
 
     //get Camera to ground vector
-    ctgvalid = wrapper->getCTGVector(ctgvector);
+    //ctgvalid = wrapper->getCTGVector(ctgvector);
     
     m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
+
+    VisionConstants::loadFromFile("");
 }
 
 /** @brief Private destructor.
@@ -82,25 +85,25 @@ void VisionBlackboard::setObjectPoints(const vector<PointType>& points)
 void VisionBlackboard::addGoal(const Goal& newgoal) 
 {
     m_goals.push_back(newgoal);
-    m_vfos.push_back(static_cast<const VisionFieldObject*>(&newgoal));
+    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_goals.back())));
 }
 
 void VisionBlackboard::addBeacon(const Beacon& newbeacon)
 {
     m_beacons.push_back(newbeacon);
-    m_vfos.push_back(static_cast<const VisionFieldObject*>(&newbeacon));
+    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_beacons.back())));
 }
 
 void VisionBlackboard::addBall(const Ball& newball)
 {
     m_balls.push_back(newball);
-    m_vfos.push_back(static_cast<const VisionFieldObject*>(&newball));
+    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_balls.back())));
 }
 
 void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
 {
     m_obstacles.push_back(newobstacle);
-    m_vfos.push_back(static_cast<const VisionFieldObject*>(&newobstacle));
+    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_obstacles.back())));
 }
 
 /**
@@ -461,7 +464,23 @@ void VisionBlackboard::publish() const
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::publish() - Begin" << endl;
     #endif
-    wrapper->publish(m_vfos);
+    //wrapper->publish(m_vfos);
+    unsigned int i;
+    for(i=0; i<m_balls.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_balls.at(i)));
+    }
+    for(i=0; i<m_beacons.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_beacons.at(i)));
+    }
+    for(i=0; i<m_goals.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_goals.at(i)));
+    }
+    for(i=0; i<m_obstacles.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_obstacles.at(i)));
+    }
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::publish() - End" << endl;
+    #endif
 }
 
 /**
@@ -580,7 +599,7 @@ void VisionBlackboard::checkHorizon()
     #endif
     int width = original_image->getWidth(),
         height = original_image->getHeight();
-    debug << 1 << endl;
+    
     if(kinematics_horizon.exists) {
         if(kinematics_horizon.isVertical()) {
             //vertical horizon

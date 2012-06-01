@@ -132,6 +132,7 @@ void NUKick::stop()
     stopHead();
     stopArms();
     stopLegs();
+    m_kick_enabled = false;
 }
 
 void NUKick::stopHead()
@@ -183,7 +184,7 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
         return;
     #if DEBUG_NUMOTION_VERBOSITY > 3
         debug << "NUKick::process(" << data << ", " << actions << ")" << endl;
-        debug << "NUKick::process in " << toString(pose) << " ready: " << m_kickReady << " active: " << m_kickActive << endl;
+        debug << "NUKick::process " << " ready: " << m_kick_ready << " active: " << m_kick_enabled << endl;
     #endif
     
     m_data = data;

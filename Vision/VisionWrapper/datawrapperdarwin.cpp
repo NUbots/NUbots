@@ -126,7 +126,6 @@ bool DataWrapper::getCTGVector(vector<float>& ctgvector)
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::getCTGVector()" << endl;
     #endif
-    return false;
     return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
 }
 
@@ -139,7 +138,6 @@ bool DataWrapper::getCTVector(vector<float>& ctvector)
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::getCTVector()" << endl;
     #endif
-    return false;
     return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
 }
 
@@ -157,11 +155,16 @@ const LookUpTable& DataWrapper::getLUT() const
 void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
 {
     //! @todo Implement + Comment
+    
     for(int i=0; i<visual_objects.size(); i++) {
         visual_objects.at(i)->addToExternalFieldObjects(field_objects, m_timestamp);
     }
-    //postprocess at end
-    field_objects->postProcess(m_timestamp);
+}
+
+void DataWrapper::publish(const VisionFieldObject* visual_object)
+{
+    //! @todo Implement + Comment
+    visual_object->addToExternalFieldObjects(field_objects, m_timestamp);
 }
 
 void DataWrapper::debugRefresh()
@@ -246,20 +249,24 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     //! @todo better debug printing + Comment
     
-    if(region.getSegments().empty()) {
-        errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
-        return false;
-    }
-    
-    BOOST_FOREACH(const vector<ColourSegment>& line, region.getSegments()) {
-        if(region.getDirection() == VisionID::HORIZONTAL)
-            debug << "y: " << line.front().getStart().y << endl;
-        else
-            debug << "x: " << line.front().getStart().x << endl;
-        BOOST_FOREACH(const ColourSegment& seg, line) {
-            debug << "\t" << seg;
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(region.getSegments().empty()) {
+            errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
+            return false;
         }
-    }
+    #endif
+        
+    #if VISION_WRAPPER_VERBOSITY > 2
+        BOOST_FOREACH(const vector<ColourSegment>& line, region.getSegments()) {
+            if(region.getDirection() == VisionID::HORIZONTAL)
+                debug << "y: " << line.front().getStart().y << endl;
+            else
+                debug << "x: " << line.front().getStart().x << endl;
+            BOOST_FOREACH(const ColourSegment& seg, line) {
+                debug << "\t" << seg;
+            }
+        }
+    #endif
 
     return true;
 }
@@ -308,6 +315,14 @@ bool DataWrapper::updateFrame()
     //succesful
     field_objects->preProcess(current_frame->GetTimestamp());
     return true;
+}
+
+/**
+*   @brief Post processes field objects with image timestamp.
+*/
+void DataWrapper::postProcess()
+{
+    field_objects->postProcess(current_frame->GetTimestamp());
 }
 
 /**

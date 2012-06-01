@@ -5,6 +5,8 @@
 #include <QGLWidget>
 #include "openglmanager.h"
 
+class GLUquadric;
+
 class LUTGlDisplay : public QGLWidget
 {
 Q_OBJECT

@@ -18,6 +18,31 @@ ENDIF()
 # I need to prefix each file and directory with the correct path
 STRING(REPLACE "/cmake/motionconfig.cmake" "" THIS_SRC_DIR ${CMAKE_CURRENT_LIST_FILE})
 
+##### Kinematic models
+IF (${TARGET_ROBOT} STREQUAL NAO OR ${TARGET_ROBOT} STREQUAL NAOWEBOTS)
+    SET( NUBOT_USE_MOTION_MODEL_NAO
+         ON
+         CACHE BOOL
+         "Set to ON to use Nao motion models, set to OFF use something else")
+ELSE()
+    SET( NUBOT_USE_MOTION_MODEL_NAO
+         OFF
+         CACHE BOOL
+         "Set to ON to use Nao motion models, set to OFF use something else")
+ENDIF()
+
+IF (${TARGET_ROBOT} STREQUAL DARWIN OR ${TARGET_ROBOT} STREQUAL DARWINWEBOTS)
+    SET( NUBOT_USE_MOTION_MODEL_DARWIN
+         ON
+         CACHE BOOL
+         "Set to ON to use Darwin motion models, set to OFF use something else")
+ELSE()
+    SET( NUBOT_USE_MOTION_MODEL_DARWIN
+         OFF
+         CACHE BOOL
+         "Set to ON to use Darwin motion models, set to OFF use something else")
+ENDIF()
+
 ############################ walk engine options
 SET( NUBOT_USE_MOTION_HEAD
 	ON
@@ -28,7 +53,7 @@ SET( NUBOT_USE_MOTION_WALK
 	CACHE BOOL
     "Set to ON to use walk, set to OFF to have no walk")
 SET( NUBOT_USE_MOTION_KICK
-	OFF 
+	ON 
 	CACHE BOOL
     "Set to ON to use kick, set to OFF to not have kick")
 SET( NUBOT_USE_MOTION_BLOCK
@@ -61,6 +86,8 @@ MARK_AS_ADVANCED(
     NUBOT_USE_MOTION_SCRIPT
 	NUBOT_USE_MOTION_GETUP
 	NUBOT_USE_MOTION_FALL_PROTECTION
+	NUBOT_USE_MOTION_MODEL_NAO
+	NUBOT_USE_MOTION_MODEL_DARWIN
 )
 
 	

@@ -2,6 +2,8 @@
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 
+#include <limits>
+
 void GoalDetection::detectGoals()
 {    
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -208,11 +210,11 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             end_trans.push_back(hor_trans.at(i));
     }
 
-    const unsigned int MAX_OBJECTS = 8;
+    const int MAX_OBJECTS = 8;
     const int BINS = 20;
     const int WIDTH = VisionBlackboard::getInstance()->getImageWidth();
     const int BIN_WIDTH = WIDTH/BINS;
-    const unsigned int MIN_THRESHOLD = 5;
+    const int MIN_THRESHOLD = 5;
     const float SDEV_THRESHOLD = 0.75;
 
     int histogram[2][BINS], peaks[2][MAX_OBJECTS], peak_widths[2][MAX_OBJECTS];
@@ -223,15 +225,15 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     for (int repeats = 0; repeats < 2; repeats++) {
 
         // initialise histograms
-        for (unsigned int i = 0; i < BINS; i++)
+        for (int i = 0; i < BINS; i++)
             histogram[repeats][i] = 0;
-        for (unsigned int i = 0; i < MAX_OBJECTS; i++)
+        for (int i = 0; i < MAX_OBJECTS; i++)
             peak_widths[repeats][i] = 1;
 
         // fill histogram bins
         if (repeats == 0) {
             for (unsigned int i = 0; i < start_trans.size(); i++)
-                for (unsigned int j = 0; j < BINS; j++)
+                for (int j = 0; j < BINS; j++)
                     if (start_trans.at(i).getLocation().x < (j+1)*BIN_WIDTH) {
                         histogram[repeats][j]++;
                         break;
@@ -239,7 +241,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         }
         else {
             for (unsigned int i = 0; i < end_trans.size(); i++)
-                for (unsigned int j = 0; j < BINS; j++)
+                for (int j = 0; j < BINS; j++)
                     if (end_trans.at(i).getLocation().x < (j+1)*BIN_WIDTH) {
                         histogram[repeats][j]++;
                         break;
@@ -247,10 +249,10 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         }
 
         // find MAX_OBJECT peaks
-        for (unsigned int i = 0; i < MAX_OBJECTS; i++) {
+        for (int i = 0; i < MAX_OBJECTS; i++) {
             int max = 0;
             peaks[repeats][i] = 0;
-            for (unsigned int j = 0; j < BINS; j++)
+            for (int j = 0; j < BINS; j++)
                 if (histogram[repeats][j] > max) {
                     peaks[repeats][i] = j;
                     max = histogram[repeats][j];
@@ -259,20 +261,20 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         }
 
         // restore histogram values
-        for (unsigned int i = 0; i < BINS; i++)
+        for (int i = 0; i < BINS; i++)
             if (histogram[repeats][i] < 0)
                 histogram[repeats][i] *= -1;
 
         // remove below threshold
-        for (unsigned int i = 0; i < MAX_OBJECTS; i++)
+        for (int i = 0; i < MAX_OBJECTS; i++)
             if (histogram[repeats][peaks[repeats][i]] < MIN_THRESHOLD)
                 peaks[repeats][i] = -1;
 
         // merge adjacent histogram bins (if both peaks)
-        for (unsigned int i = 0; i < MAX_OBJECTS; i++) {
+        for (int i = 0; i < MAX_OBJECTS; i++) {
             int peak = peaks[repeats][i];
             int span = 0;
-            for (unsigned int j = i; j < MAX_OBJECTS; j++) {
+            for (int j = i; j < MAX_OBJECTS; j++) {
                 if (i == j) continue;
                 else if (peak - peaks[repeats][j] <= 1+span && peak - peaks[repeats][j] > 0) {
                     peak_widths[repeats][i] ++;
@@ -299,15 +301,15 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
                 }
 
     // Calculate bounding boxes for posts
-    for (unsigned int i = 0; i < MAX_OBJECTS; i++) {
+    for (int i = 0; i < MAX_OBJECTS; i++) {
         if (merged_peaks[i][0] >= 0 && merged_peaks[i][1] >= 0) {
             // find bounding box
-            unsigned int    start_pos = std::max(0, merged_peaks[i][0] * BIN_WIDTH),
-                            end_pos = min(WIDTH, (merged_peaks[i][1] + 1) * BIN_WIDTH),
-                            start_min = -1,
-                            end_max = 0,
-                            bot_min = -1,
-                            top_max = 0;
+            int    start_pos = std::max(0, merged_peaks[i][0] * BIN_WIDTH),
+                   end_pos = min(WIDTH, (merged_peaks[i][1] + 1) * BIN_WIDTH),
+                   start_min = std::numeric_limits<int>::max(),
+                   end_max = 0,
+                   bot_min = std::numeric_limits<int>::max(),
+                   top_max = 0;
 
             // FIND LEFT EDGE
             int mean = 0, sdev = 0, counter = 0;
@@ -327,8 +329,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             sdev = sqrt(sdev/counter);
 
             for (unsigned int j = 0; j < start_trans.size(); j++) {
-                unsigned int    x_pos = start_trans.at(j).getLocation().x,
-                                y_pos = start_trans.at(j).getLocation().y;
+                int    x_pos = start_trans.at(j).getLocation().x,
+                       y_pos = start_trans.at(j).getLocation().y;
                 if (x_pos >= start_pos && x_pos <= end_pos) {
                     if(x_pos < start_min && x_pos >= mean - SDEV_THRESHOLD*sdev) {
                         start_min = x_pos;
@@ -358,8 +360,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             sdev = sqrt(sdev/counter);
 
             for (unsigned int j = 0; j < end_trans.size(); j++) {
-                unsigned int    x_pos = end_trans.at(j).getLocation().x,
-                                y_pos = end_trans.at(j).getLocation().y;
+                int    x_pos = end_trans.at(j).getLocation().x,
+                       y_pos = end_trans.at(j).getLocation().y;
                 if (x_pos >= start_pos && x_pos <= end_pos) {
                     if (x_pos > end_max && x_pos <= mean + SDEV_THRESHOLD*sdev)
                     end_max = x_pos;
@@ -373,12 +375,12 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             bool contains_vertical = false;
 
             //unsigned int    vert_max = 0,
-            //                vert_min = -1;
+            //                vert_min = std::numeric_limits<int>::max();
 
             for (unsigned int j = 0; j < ver_trans.size(); j++) {
                 // extend with vertical segments (increase height)
-                unsigned int x_pos = ver_trans.at(j).getLocation().x;
-                unsigned int y_pos = ver_trans.at(j).getLocation().y;
+                int x_pos = ver_trans.at(j).getLocation().x;
+                int y_pos = ver_trans.at(j).getLocation().y;
                 if (x_pos >= start_min && x_pos <= end_max) {
                     contains_vertical = true;
                     if (y_pos < bot_min)

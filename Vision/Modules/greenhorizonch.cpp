@@ -158,8 +158,8 @@ void GreenHorizonCH::calculateHorizon()
             temp.push_back(PointType(width-1, height-1));
         }
         else {
-//            temp.push_back(PointType(width-1, temp.at(temp.size()-1).y));
-            temp.push_back(PointType(width-1, temp.at(temp.size()-1).y));
+//            temp.push_back(PointType(width-1, height-1));
+            temp.push_back(PointType(width-1,temp.at(temp.size()-1).y));
         }
 
         // extend to left edge
@@ -173,11 +173,10 @@ void GreenHorizonCH::calculateHorizon()
 //            }
 //        }
     }
-    
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Side extension done" << endl;
     #endif
-    
+
     // set hull points
     vbb->setHullPoints(temp);
 }

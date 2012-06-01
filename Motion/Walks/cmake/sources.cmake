@@ -33,6 +33,9 @@ SET (YOUR_DIRS )
 IF(NUBOT_USE_MOTION_WALK_JWALK)
 	LIST(APPEND YOUR_DIRS JWalk)
 ENDIF()
+IF(NUBOT_USE_MOTION_WALK_BWALK)
+	LIST(APPEND YOUR_DIRS BWalk)
+ENDIF()
 IF(NUBOT_USE_MOTION_WALK_JUPPWALK)
 	LIST(APPEND YOUR_DIRS JuppWalk)
 ENDIF()
@@ -51,6 +54,7 @@ ENDIF()
 IF(NUBOT_USE_MOTION_WALK_DARWINWALK)
 	LIST(APPEND YOUR_DIRS DarwinWalk)
 ENDIF()
+
 ####################################################################################
 
 # Now I need to append each element to NUBOT_SRCS

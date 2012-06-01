@@ -55,7 +55,7 @@
 #define USE_PGRL
 #define USE_MO
 #define USE_COST
-#define USE_STIFFNESS
+//#define USE_STIFFNESS
 
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
@@ -65,7 +65,7 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     loadId();
     loadWayPoints();
     #ifdef TARGET_IS_DARWIN
-        loadParameters("DarwinWalkStart");
+        loadParameters("BWalk");
     #else
         loadParameters("NBWalkStart");
     #endif

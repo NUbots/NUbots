@@ -270,6 +270,16 @@ void DataWrapper::publish(DATA_ID id, const Mat &img)
     }
 }
 
+void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
+{
+
+}
+
+void DataWrapper::publish(const VisionFieldObject* visual_object)
+{
+    
+}
+
 //! Outputs debug data to the appropriate external interface
 void DataWrapper::debugRefresh()
 {
@@ -282,7 +292,22 @@ void DataWrapper::debugRefresh()
 }
 
 bool DataWrapper::debugPublish(vector<Ball> data) {
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(data.empty()) {
+            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BALLS) << endl;
+            return false;
+        }
+    #endif
     
+    Mat& img = results_img;    //get image from pair
+    string& window = results_window_name; //get window name from pair
+    
+    BOOST_FOREACH(Ball b, data) {
+        circle(img, PointType(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius(), Scalar(255,255,0), 2);
+    }
+    
+    imshow(window, img);    //refresh this particular debug window
+    return true;
 }
 
 bool DataWrapper::debugPublish(vector<Beacon> data) {
@@ -307,6 +332,7 @@ bool DataWrapper::debugPublish(vector<Beacon> data) {
     }
     
     imshow(window, img);    //refresh this particular debug window
+    return true;
 }
 
 bool DataWrapper::debugPublish(vector<Goal> data) {
@@ -329,10 +355,12 @@ bool DataWrapper::debugPublish(vector<Goal> data) {
     }
     
     imshow(window, img);    //refresh this particular debug window
+    return true;
 }
 
 bool DataWrapper::debugPublish(vector<Obstacle> data) {
     
+    return false;
 }
 
 bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
@@ -518,7 +546,7 @@ bool DataWrapper::updateFrame()
         }
         break;
     case FILE:
-        char c = waitKey(10);
+        char c = cv::waitKey(10);
         if(c > 0) {
             cur_image = (cur_image+1)%num_images;
             stringstream strm;

@@ -25,7 +25,8 @@ void HorizonInterpolate::interpolate(const unsigned int VER_SEGMENTS)
     vector<PointType> inter_points;
     inter_points.reserve(VER_SEGMENTS);
 
-    unsigned int position, y_new;
+    //unsigned int position, y_new;
+    int position, y_new;
     vector<PointType>::const_iterator it_start, it_end;
     it_start = horizon_points.begin();
     it_end = horizon_points.begin();

@@ -47,7 +47,7 @@ public:
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    static vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
+    static vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 30, float turningdistance = 70)
     {
         vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
         return goToPoint(relativestate[0], relativestate[1], relativestate[2], stoppeddistance, stoppingdistance, turningdistance);
@@ -63,7 +63,7 @@ public:
      */
     static vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
     {
-        static const float m_HYSTERESIS = 0.4;      // the fraction of hysteresis in the turning point toward the desired heading
+        static const float m_HYSTERESIS = 0.2;      // the fraction of hysteresis in the turning point toward the desired heading
         static double m_previous_time = 0;          // the previous time in ms
         static bool m_previous_turning = false;     // the previous turning state; used to implement hysteresis in the decision to turn around.
         
@@ -99,7 +99,6 @@ public:
             }
         }
         m_previous_time = Blackboard->Sensors->CurrentTime;
-        
         return result;
     }
     
@@ -180,7 +179,9 @@ public:
             
 
             
-            const float offsetDistance = 5.0f;
+            float offsetDistance = 3.0f;
+            
+            
             float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
             float left_foot_y = y + offsetDistance * sin(heading - mathGeneral::PI/2);
             float left_foot_distance = sqrt(pow(left_foot_x,2) + pow(left_foot_y,2));
@@ -199,6 +200,8 @@ public:
                 x = right_foot_x;
                 y = right_foot_y;
             }
+            
+            
 
             distance = sqrt(x*x + y*y);
             bearing = atan2(y,x);
@@ -209,25 +212,32 @@ public:
             float position_rotation;
             if (distance < kickingdistance)
             {   // if we are too close to the ball then we need to go backwards
-                position_speed = (kickingdistance - distance)/kickingdistance;
+                position_speed = (kickingdistance - distance)/(kickingdistance);
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
                 
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.3*bearing;
+                position_rotation = 0.5*bearing;
             }
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
-                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
+                
+                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance)+0.05;
                 position_direction = bearing;
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.3*bearing;
+                position_rotation = 0.5*bearing;
             }
             else
             {   // if it is outside the stopping distance - full speed
-                position_speed = 1;
-                position_direction = bearing;
+                if ( fabs (bearing) < 0.2) {
+                    position_speed = 1;
+                    position_direction = bearing;
+                } else {
+                    position_speed = 0.05;
+                    position_direction = bearing;
+                    position_rotation = 0.5*bearing;
+                }
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.3*bearing;
+                //position_rotation = 0.05*bearing;
             }
             
             // calculate the component to go around the ball to face the heading
@@ -553,8 +563,8 @@ public:
         StationaryObject middle(location);
         float middleBearing = self.CalculateBearingToStationaryObject(middle);
 
-        bool result_posts = ((leftGoalBearing > 0.2f) && (rightGoalBearing < -0.2f));
-        bool result_centre = (fabs(middleBearing) < mathGeneral::PI/16.0f);
+        bool result_posts = ((leftGoalBearing > 0.f) && (rightGoalBearing < -0.f));
+        bool result_centre = (fabs(middleBearing) < mathGeneral::PI/12.0f);
         
         /*
         if(result_posts || result_centre)
@@ -574,4 +584,5 @@ public:
 
 
 #endif
+
 

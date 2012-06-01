@@ -132,6 +132,7 @@ void virtualNUbot::loadLookupTableFile(QString fileName)
 {
     LUTTools::LoadLUT(classificationTable,LUTTools::LUT_SIZE,fileName.toAscii());
     processVisionFrame();
+    emit LUTChanged(classificationTable);
 }
 
 Pixel virtualNUbot::selectRawPixel(int x, int y)

@@ -85,7 +85,11 @@ protected:
         #endif
         // keep track of the time in this state
         bool kickIsActive = false;
+        
         m_data->get(NUSensorsData::MotionKickActive, kickIsActive);
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+            debug << "Kick Active: " << kickIsActive << " State Changed: " << m_parent->stateChanged() << " Time delta: " << m_data->CurrentTime - m_previous_time << endl;
+        #endif
         if (m_parent->stateChanged() or kickIsActive or m_data->CurrentTime - m_previous_time > 200)
             reset();
         else
@@ -99,13 +103,17 @@ protected:
                 m_pan_started = true;
         }
         
+        #if DEBUG_BEHAVIOUR_VERBOSITY > 1
+            debug << "Time in state: " << m_time_in_state << endl;
+        #endif
+        
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         else
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
         
-        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+        m_jobs->addMotionJob(new WalkJob(0, 0, 0.01));
     }
 private:
     void reset()

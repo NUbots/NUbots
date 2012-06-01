@@ -1624,7 +1624,7 @@ bool NAOKick::chooseLeg()
             m_kick_enabled = true; // Set the kick to active now, we are doing stuff!
             m_kickWait = true;
             #if DEBUG_NUMOTION_VERBOSITY > 3
-                debug << "Kick Selected - Kicking Foot: " << toString(m_kicking_leg) << ", Swing Direction: " << toString(m_swingDirection) << endl;
+                debug << "Kick Selected - Kicking Foot: " << NUKick::toString(m_kicking_leg) << ", Swing Direction: " << toString(m_swingDirection) << endl;
             #endif
         }
         return kickSelected;
