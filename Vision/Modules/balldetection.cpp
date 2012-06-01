@@ -212,10 +212,15 @@ void BallDetection::detectBall()
         }
 
         // DEBUG OUT
-        //if (top != bottom && left != right) {
+        if (!(center.x ==1 and center.y==1)) {
             Ball newball(center, max((right-left), (bottom-top))*0.5);
             vbb->addBall(newball);
-        //}
+        }
+        else {
+            #if VISION_FIELDOBJECT_VERBOSITY > 2
+                debug << "BallDetection::detectBall - (1,1) ball thrown out" << endl;
+            #endif
+        }
 
     }
 }
