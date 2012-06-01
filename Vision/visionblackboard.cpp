@@ -465,7 +465,7 @@ void VisionBlackboard::publish() const
         debug << "VisionBlackboard::publish() - Begin" << endl;
     #endif
     //wrapper->publish(m_vfos);
-    int i;
+    unsigned int i;
     for(i=0; i<m_balls.size(); i++) {
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_balls.at(i)));
     }

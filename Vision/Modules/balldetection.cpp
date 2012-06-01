@@ -16,7 +16,7 @@ void BallDetection::detectBall()
     it = transitions.begin();
     while (it < transitions.end()) {
         bool flag = 0;
-        for (int i = 0; i < horizon.size(); i++) {
+        for (unsigned int i = 0; i < horizon.size(); i++) {
             //if (horizon.at(i).y >= it->getLocation().y) {
             if (horizon.at(i).x >= it->getLocation().x) {   // inefficient; use math to calculate exact index.
                 if (horizon.at(i).y >= it->getLocation().y) {
@@ -35,7 +35,7 @@ void BallDetection::detectBall()
         // Arithmetic mean
         int x_mean = 0,
             y_mean = 0;
-        for (int i = 0; i < transitions.size(); i++) {
+        for (unsigned int i = 0; i < transitions.size(); i++) {
             x_mean += transitions.at(i).getLocation().x;
             y_mean += transitions.at(i).getLocation().y;
         }
@@ -45,7 +45,7 @@ void BallDetection::detectBall()
         // Standard deviation
         int x_dev = 0,
             y_dev = 0;
-        for (int i = 0; i < transitions.size(); i++) {
+        for (unsigned int i = 0; i < transitions.size(); i++) {
             x_dev += abs(transitions.at(i).getLocation().x - x_mean);
             y_dev += abs(transitions.at(i).getLocation().y - y_mean);
         }
@@ -67,7 +67,7 @@ void BallDetection::detectBall()
         // Geometric mean
         long double x_pos = 1,
                y_pos = 1;
-        for (int i = 0; i < transitions.size(); i++) {
+        for (unsigned int i = 0; i < transitions.size(); i++) {
             int x = transitions.at(i).getLocation().x,
                 y = transitions.at(i).getLocation().y;
 

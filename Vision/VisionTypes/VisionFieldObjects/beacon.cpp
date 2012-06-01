@@ -56,7 +56,9 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Beacon::addToExternalFieldObjects - attempt to add invalid beacon object" << endl;
         #endif
+       return false;
     }
+    return true;
 }
 
 void Beacon::calculatePositions()

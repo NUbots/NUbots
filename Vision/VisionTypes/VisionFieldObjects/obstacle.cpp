@@ -27,7 +27,7 @@ bool Obstacle::addToExternalFieldObjects(FieldObjects *fieldobjects, float times
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Goal::addToExternalFieldObjects - m_id: Obstacle" << endl;
     #endif
-    AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Yellow Post");
+    AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Obstacle");
     //newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_ROBOT_UNKNOWN);
     newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
                                  m_spherical_error,
@@ -36,6 +36,7 @@ bool Obstacle::addToExternalFieldObjects(FieldObjects *fieldobjects, float times
                                  m_size_on_screen,
                                  timestamp);
     fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
+    return true;
 }
 
 void Obstacle::calculatePositions()

@@ -307,6 +307,7 @@ bool DataWrapper::debugPublish(vector<Ball> data) {
     }
     
     imshow(window, img);    //refresh this particular debug window
+    return true;
 }
 
 bool DataWrapper::debugPublish(vector<Beacon> data) {
@@ -331,6 +332,7 @@ bool DataWrapper::debugPublish(vector<Beacon> data) {
     }
     
     imshow(window, img);    //refresh this particular debug window
+    return true;
 }
 
 bool DataWrapper::debugPublish(vector<Goal> data) {
@@ -353,10 +355,12 @@ bool DataWrapper::debugPublish(vector<Goal> data) {
     }
     
     imshow(window, img);    //refresh this particular debug window
+    return true;
 }
 
 bool DataWrapper::debugPublish(vector<Obstacle> data) {
     
+    return false;
 }
 
 bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
