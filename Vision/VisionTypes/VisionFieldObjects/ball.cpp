@@ -14,6 +14,7 @@ Ball::Ball()
     m_location_pixels.x = 0;
     m_location_pixels.y = 0;
     calculatePositions();
+    check();
 }
 
 Ball::Ball(const PointType& centre, float radius)
@@ -23,6 +24,7 @@ Ball::Ball(const PointType& centre, float radius)
     m_location_pixels.y = centre.y;
     m_size_on_screen = Vector2<int>(radius*2, radius*2);
     calculatePositions();
+    check();
 }
 
 float Ball::getRadius() const
@@ -41,15 +43,36 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         debug << "Ball::addToExternalFieldObjects:" << endl;
         debug << *this << endl;
     #endif
-    
-    //add ball to mobileFieldObjects
-    fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(m_transformed_spherical_pos,
-                                                                    m_spherical_error,
-                                                                    m_location_angular,
-                                                                    m_location_pixels,
-                                                                    m_size_on_screen,
-                                                                    timestamp);
-    return true;
+    if(valid) {
+        //add ball to mobileFieldObjects
+        fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(m_transformed_spherical_pos,
+                                                                        m_spherical_error,
+                                                                        m_location_angular,
+                                                                        m_location_pixels,
+                                                                        m_size_on_screen,
+                                                                        timestamp);
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::addToExternalFieldObjects: valid" << endl;
+        #endif
+        return true;
+    }
+    else {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::addToExternalFieldObjects: invalid" << endl;
+        #endif
+        return false;
+    }
+}
+
+void Ball::check()
+{
+    if(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
+        valid = true;
+    }
+    else {
+        valid = false;
+        errorlog << "Ball::check() - Ball below horizon: should not occur" << endl;
+    }
 }
 
 void Ball::calculatePositions()
@@ -93,32 +116,40 @@ void Ball::calculatePositions()
 */
 float Ball::distanceToBall(float bearing, float elevation) const {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    float distance = 0;
+    float distance = 0,
+          d2p = 0,
+          width_dist = 0;
+    //get distance to point from base
+    if(vbb->isCameraToGroundValid())
+    {
+        Matrix camera2groundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
+        Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+        d2p = result[0];
+    }
+    //get distance from width
+    width_dist = VisionConstants::BALL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
+
+#if VISION_FIELDOBJECT_VERBOSITY > 1
+    debug << "Ball::distanceToBall: bearing: " << bearing << " elevation: " << elevation << endl;
+    debug << "Ball::distanceToBall: d2p: " << d2p << endl;
+    debug << "Ball::distanceToBall: m_size_on_screen.x: " << m_size_on_screen.x << endl;
+    debug << "Ball::distanceToBall: width_dist: " << width_dist << endl;
+#endif
     switch(METHOD) {
-    case D2P:    
-        if(vbb->isCameraToGroundValid())
-        {
-            Matrix camera2groundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
-            Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
-            distance = result[0];
-        }
+    case D2P:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Ball::distanceToBall: Method: D2P" << endl;
-            debug << "Ball::distanceToBall: bearing: " << bearing << " elevation: " << elevation << endl;
-            debug << "Ball::distanceToBall distance: " << distance << endl;
+            debug << "Ball::distanceToBall: Method: Combo" << endl;
         #endif
-        break;
+        return d2p;
     case Width:
-        distance = VisionConstants::BALL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::distanceToBall: Method: Width" << endl;
-            debug << "Ball::distanceToBall: m_size_on_screen.x: " << m_size_on_screen.x << endl;
-            debug << "Ball::distanceToBall distance: " << distance << endl;
         #endif
-        break;
+        return width_dist;
+    case Average:
+        //average distances
+        return (d2p + width_dist) * 0.5;
     }
-    
-    return distance;
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.

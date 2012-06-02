@@ -12,6 +12,7 @@ public:
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
+    void check();
     
     friend ostream& operator<< (ostream& output, const Obstacle& o);
     friend ostream& operator<< (ostream& output, const vector<Obstacle>& o);

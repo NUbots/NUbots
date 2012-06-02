@@ -17,6 +17,8 @@ Beacon::Beacon(BeaconID id, const Quad &corners)
     m_id = id;
     m_corners = corners;
     //SET WIDTH
+
+    check(); //this must be last
 }
 
 const Quad& Beacon::getQuad() const
@@ -59,6 +61,11 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
        return false;
     }
     return true;
+}
+
+void Beacon::check()
+{
+
 }
 
 void Beacon::calculatePositions()

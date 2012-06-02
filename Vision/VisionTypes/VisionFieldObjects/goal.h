@@ -21,7 +21,8 @@ public:
     
     enum GOAL_DISTANCE_METHOD {
         Width,
-        D2P
+        D2P,
+        Average
     };
     
     static const GOAL_DISTANCE_METHOD METHOD = Width;
@@ -35,6 +36,7 @@ public:
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
+    void check();
     
     friend ostream& operator<< (ostream& output, const Goal& g);
     friend ostream& operator<< (ostream& output, const vector<Goal>& g);    
