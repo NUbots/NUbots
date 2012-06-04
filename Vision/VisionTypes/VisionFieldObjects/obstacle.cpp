@@ -13,6 +13,7 @@ Obstacle::Obstacle(const PointType &position, int width, int height)
     m_bottom_centre = Vector2<int>(position.x, position.y);
     //CALCULATE DISTANCE AND BEARING VALS
     calculatePositions();
+    check();
 }
 
 
@@ -37,6 +38,11 @@ bool Obstacle::addToExternalFieldObjects(FieldObjects *fieldobjects, float times
                                  timestamp);
     fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
     return true;
+}
+
+void Obstacle::check()
+{
+    //! @todo Do a check based on width and d2p consistency
 }
 
 void Obstacle::calculatePositions()

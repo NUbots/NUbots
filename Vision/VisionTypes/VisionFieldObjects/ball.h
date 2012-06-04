@@ -9,7 +9,8 @@ public:
     
     enum BALL_DISTANCE_METHOD {
         Width,
-        D2P
+        D2P,
+        Average
     };
     
     static const BALL_DISTANCE_METHOD METHOD = Width;
@@ -21,7 +22,8 @@ public:
     
     Vector3<float> getRelativeFieldCoords() const;
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
-    
+    void check();
+
     friend ostream& operator<< (ostream& output, const Ball& b);
     friend ostream& operator<< (ostream& output, const vector<Ball>& b);
     
