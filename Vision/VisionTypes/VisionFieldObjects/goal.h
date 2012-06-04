@@ -22,7 +22,8 @@ public:
     enum GOAL_DISTANCE_METHOD {
         Width,
         D2P,
-        Average
+        Average,
+        Least
     };
     
     static const GOAL_DISTANCE_METHOD METHOD = Width;

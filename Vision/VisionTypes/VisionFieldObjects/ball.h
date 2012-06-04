@@ -10,7 +10,8 @@ public:
     enum BALL_DISTANCE_METHOD {
         Width,
         D2P,
-        Average
+        Average,
+        Least
     };
     
     static const BALL_DISTANCE_METHOD METHOD = Width;

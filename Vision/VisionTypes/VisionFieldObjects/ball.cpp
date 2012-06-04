@@ -149,6 +149,8 @@ float Ball::distanceToBall(float bearing, float elevation) const {
     case Average:
         //average distances
         return (d2p + width_dist) * 0.5;
+    case Least:
+        return min(d2p, width_dist);
     }
 }
 
