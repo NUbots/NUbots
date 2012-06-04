@@ -201,6 +201,12 @@ public:
                 y = right_foot_y;
             }
             
+            float approachOffset = 20.;
+            if (Blackboard->GameInfo->getTeamColour() == GameInformation::BlueTeam and distance > (kickingdistance + approachOffset)) {
+                x -= approachOffset-5.;
+            } else if (distance > kickingdistance + approachOffset) {
+                x += approachOffset-5.;
+            }
             
 
             distance = sqrt(x*x + y*y);
@@ -221,8 +227,11 @@ public:
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
                 
-                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance)+0.05;
+                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
+                if (bearing > 1.f and position_speed < 0.2) {
+                    position_speed += 0.2;
+                }
                 //position_rotation = 0.5*bearing; //previous value for NAO
                 position_rotation = 0.5*bearing;
             }

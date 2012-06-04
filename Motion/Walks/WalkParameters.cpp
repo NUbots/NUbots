@@ -482,7 +482,12 @@ void WalkParameters::load(const string& name)
         file.close();
     }
     else
+    {
+        // This is important, so shout it everywhere.
         debug << "WalkParameters::load(): Failed to load file " << filepath << endl;
+        errorlog << "WalkParameters::load(): Failed to load file " << filepath << endl;
+        cout << "WARNING: WalkParameters::load(): Failed to load file " << filepath << endl;
+    }
     file.close();
 }
 
