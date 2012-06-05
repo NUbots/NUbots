@@ -220,6 +220,29 @@ bool DataWrapper::getCTVector(vector<float> &ctvector)
     return false;
 }
 
+
+//! @brief Generates spoofed camera height.
+bool DataWrapper::getCameraHeight(float& height)
+{
+    height = 0;
+    return false;
+}
+
+
+//! @brief Generates spoofed camera pitch.
+bool DataWrapper::getCameraPitch(float& pitch)
+{
+    pitch = 0;
+    return false;
+}
+
+//! @brief Generates spoofed body pitch.
+bool DataWrapper::getBodyPitch(float& pitch)
+{
+    pitch = 0;
+    return false;
+}
+
 //! @brief Returns spoofed kinematics horizon.
 const Horizon& DataWrapper::getKinematicsHorizon()
 { 

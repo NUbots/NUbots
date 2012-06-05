@@ -141,6 +141,42 @@ bool DataWrapper::getCTVector(vector<float>& ctvector)
     return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
 }
 
+/*! @brief Retrieves the camera height returns it.
+*   @param height A reference to a float to change.
+*   @return valid Whether the retrieved value is valid or not.
+*/
+bool DataWrapper::getCameraHeight(float& height)
+{
+    return sensor_data->getCameraHeight(height);
+}
+
+/*! @brief Retrieves the camera pitch returns it.
+*   @param pitch A reference to a float to change.
+*   @return valid Whether the retrieved value is valid or not.
+*/
+bool DataWrapper::getCameraPitch(float& pitch)
+{
+    return sensor_data->getPosition(NUSensorsData::HeadPitch, pitch);
+}
+
+/*! @brief Retrieves the body pitch returns it.
+*   @param pitch A reference to a float to change.
+*   @return valid Whether the retrieved value is valid or not.
+*/
+bool DataWrapper::getBodyPitch(float& pitch)
+{
+    vector<float> orientation;
+    bool valid = sensor_data->get(NUSensorsData::Orientation, orientation);
+    if(valid && orientation.size() > 2) {
+        pitch = orientation.at(1);
+        return true;
+    }
+    else {
+        pitch = 0;
+        return false;
+    }
+}
+
 /*! @brief Returns a reference to the stored Lookup Table
 *   @return mLUT A reference to the current LUT
 */

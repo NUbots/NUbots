@@ -7,12 +7,35 @@ class VisionConstants
 {
 public:
 
-    static int BALL_EDGE_THRESHOLD;
-    static int BALL_ORANGE_TOLERANCE;
-    //! Field Constants
-    static float GOAL_WIDTH;
-    static float DISTANCE_BETWEEN_POSTS;
-    static float BALL_WIDTH;
+    //! Field-object filtering constants
+    static bool THROWOUT_ON_ABOVE_KIN_HOR_GOALS;
+    static bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
+    static bool THROWOUT_ON_DISTANCE_DISCREPENCY_GOALS;
+    static bool THROWOUT_ON_DISTANCE_DISCREPENCY_BALL;
+    static float MAX_DISTANCE_DISCREPENCY_GOALS;    //! The maximum allowed discrepency between the d2p and width distance measures for goal posts
+    static float MAX_DISTANCE_DISCREPENCY_BALL;     //! The maximum allowed discrepency between the d2p and width distance measures for the ball
+    
+    //! Distance calculation options
+    static bool D2P_INCLUDE_BODY_PITCH;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
+    static bool BALL_DISTANCE_POSITION_BOTTOM;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
+    enum BallDistanceMethod {
+        Width,
+        D2P,
+        Average,
+        Least
+    };
+    static BallDistanceMethod getBallMethodFromName(std::string name);
+    static std::string getBallMethodName(BallDistanceMethod method);
+    
+    static BallDistanceMethod BALL_DISTANCE_METHOD;
+    
+    //! Field-object detection constants
+    static int BALL_EDGE_THRESHOLD;         //! 
+    static int BALL_ORANGE_TOLERANCE;       //! 
+    //! Field dimension constants
+    static float GOAL_WIDTH;                //! The physical width of the goal posts in cm
+    static float DISTANCE_BETWEEN_POSTS;    //! The physical distance between the posts in cm
+    static float BALL_WIDTH;                //! The physical width of the ball in cm
     
     static void loadFromFile(std::string filename);
     

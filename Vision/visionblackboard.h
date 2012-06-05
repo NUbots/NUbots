@@ -86,6 +86,12 @@ public:
     const vector<float>& getCameraToGroundVector() const;
     bool isCameraTransformValid() const;
     const vector<float>& getCameraTransformVector() const;
+    bool isCameraPitchValid() const;
+    float getCameraPitch() const;
+    bool isCameraHeightValid() const;
+    float getCameraHeight() const;
+    bool isBodyPitchValid() const;
+    float getBodyPitch() const;
 
     const vector<PointType>& getObjectPoints() const;
 
@@ -117,15 +123,15 @@ private:
 
 private:
 //! SELF
-    static VisionBlackboard* instance;           //! @variable Singleton instance
+    static VisionBlackboard* instance;           //! @variable Singleton instance.
 
 //! VARIABLES
 
     //! Image Data
     DataWrapper* wrapper;
-//    Mat* original_image_cv;                 //! @variable Opencv mat for storing the original image 3 channels
-//    Mat* original_image_cv_4ch;             //! @variable Opencv mat for storing the original image 4 channels
-    NUImage* original_image;                  //! @variable Image for storing the original image
+//    Mat* original_image_cv;                 //! @variable Opencv mat for storing the original image 3 channels.
+//    Mat* original_image_cv_4ch;             //! @variable Opencv mat for storing the original image 4 channels.
+    NUImage* original_image;                  //! @variable Image for storing the original image.
     
     NUCameraData m_camera_specs;
     
@@ -137,31 +143,37 @@ private:
     //vector<VFieldObject*> VFO_list;   //! @variable Vector of Vision Field Objects    
     
     //! Green Horizon data
-    vector<PointType> horizon_points;      //! @variable Vector of points forming the green horizon
-    vector<PointType> horizon_scan_points; //! @variable Vector of points used in green horizon scanning
+    vector<PointType> horizon_points;      //! @variable Vector of points forming the green horizon.
+    vector<PointType> horizon_scan_points; //! @variable Vector of points used in green horizon scanning.
     
     //! Object data
-    vector<PointType> object_points;   //! @variable Vector of points indicating potential objects
+    vector<PointType> object_points;   //! @variable Vector of points indicating potential objects.
     
     //! Kinematics Data
-    Horizon kinematics_horizon;    //! @variable Line defining kinematics horizon
-    vector<float> ctgvector;    //! @variable The camera to ground vector (for d2p)
-    bool ctgvalid;              //! @variable Whether the ctgvector is valid
-    vector<float> ctvector;    //! @variable The camera transform vector
-    bool ctvalid;              //! @variable Whether the ctvector is valid
+    Horizon kinematics_horizon; //! @variable Line defining kinematics horizon.
+    vector<float> ctgvector;    //! @variable The camera to ground vector (for d2p).
+    bool ctgvalid;              //! @variable Whether the ctgvector is valid.
+    vector<float> ctvector;     //! @variable The camera transform vector.
+    bool ctvalid;               //! @variable Whether the ctvector is valid.
+    float camera_pitch;         //! @variable The camera pitch angle.
+    bool camera_pitch_valid;    //! @variable Whether the camera pitch is valid.
+    float camera_height;        //! @variable The height of the camera from the ground.
+    bool camera_height_valid;   //! @variable Whether the camera height is valid.
+    float body_pitch;           //! @variable The body pitch angle.
+    bool body_pitch_valid;      //! @variable Whether the body pitch is valid.
 
     //! Scanline/Segmentation data    
-    vector<unsigned int> horizontal_scanlines;         //! @variable Vector of unsigned ints representing heights of horizontal scan lines
-    SegmentedRegion horizontal_segmented_scanlines;     //! @variable The segmented horizontal scanlines
-    SegmentedRegion vertical_segmented_scanlines;       //! @variable The segmented vertical scanlines
-    SegmentedRegion horizontal_filtered_segments;     //! @variable The filtered segmented horizontal scanlines
-    SegmentedRegion vertical_filtered_segments;       //! @variable The filtered segmented vertical scanlines
+    vector<unsigned int> horizontal_scanlines;         //! @variable Vector of unsigned ints representing heights of horizontal scan lines.
+    SegmentedRegion horizontal_segmented_scanlines;     //! @variable The segmented horizontal scanlines.
+    SegmentedRegion vertical_segmented_scanlines;       //! @variable The segmented vertical scanlines.
+    SegmentedRegion horizontal_filtered_segments;     //! @variable The filtered segmented horizontal scanlines.
+    SegmentedRegion vertical_filtered_segments;       //! @variable The filtered segmented vertical scanlines.
 
     //! Transitions
     map<VisionFieldObject::VFO_ID, vector<Transition> > mapped_horizontal_transitions;
     map<VisionFieldObject::VFO_ID, vector<Transition> > mapped_vertical_transitions;
-    //vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments
-    //vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments
+    //vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments.
+    //vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments.
     
     vector<const VisionFieldObject*> m_vfos;
     vector<Goal> m_goals;

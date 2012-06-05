@@ -14,7 +14,7 @@
 *   Note: Do not implement level 1 to print more than once.
 */
 
-//#define DEBUG_VISION_VERBOSITY_ON
+#define DEBUG_VISION_VERBOSITY_ON
 #ifdef DEBUG_VISION_VERBOSITY_ON
     #define VISION_SCAN_VERBOSITY       2
     #define VISION_BLACKBOARD_VERBOSITY 2

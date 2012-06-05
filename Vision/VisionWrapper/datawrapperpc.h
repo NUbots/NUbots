@@ -69,6 +69,9 @@ public:
 
     bool getCTGVector(vector<float>& ctgvector);    //for transforms
     bool getCTVector(vector<float>& ctvector);    //for transforms
+    bool getCameraHeight(float& height);            //for transforms
+    bool getCameraPitch(float& pitch);              //for transforms
+    bool getBodyPitch(float& pitch);
     
     //! @brief Generates spoofed horizon line.
     const Horizon& getKinematicsHorizon();

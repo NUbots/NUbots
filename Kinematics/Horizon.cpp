@@ -68,6 +68,6 @@ void Horizon::Calculate(double bodyPitch, double bodyRoll, double headYaw, doubl
     return;
 }
 
-bool Horizon::IsBelowHorizon(int x, int y){
+bool Horizon::IsBelowHorizon(int x, int y) const{
   return findYFromX(x) < y;
 }

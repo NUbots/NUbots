@@ -41,7 +41,7 @@ class Horizon : public Line{
       @param y The y coordinate of the pixel.
       @return True if The pixel lies below the horizon line. False if it lies on or above the horizon line.
       */
-    bool IsBelowHorizon(int x, int y);
+    bool IsBelowHorizon(int x, int y) const;
 };
 
 #endif

@@ -25,7 +25,7 @@ VisionBlackboard::VisionBlackboard()
     
     m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
 
-    VisionConstants::loadFromFile("");
+    VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
 }
 
 /** @brief Private destructor.
@@ -228,12 +228,12 @@ const LookUpTable& VisionBlackboard::getLUT() const
 }
 
 double VisionBlackboard::calculateBearing(double x) const {
-    return atan( (original_image->getWidth()/2-x) / ( (original_image->getWidth()/2) / (tan(m_FOV.x/2.0)) ) );
+    return atan( (original_image->getWidth()*0.5-x)  * (tan(m_FOV.x*0.5)) / (original_image->getWidth()*0.5) );
 }
 
 
 double VisionBlackboard::calculateElevation(double y) const {
-    return atan( (original_image->getHeight()/2-y) / ( (original_image->getHeight()/2) / (tan(m_FOV.y/2.0)) ) );
+    return atan( (original_image->getHeight()*0.5-y) * (tan(m_FOV.y*0.5)) / (original_image->getHeight()*0.5) );
 }
 
 /**
@@ -263,6 +263,36 @@ bool VisionBlackboard::isCameraTransformValid() const
 const vector<float>& VisionBlackboard::getCameraTransformVector() const
 {
     return ctvector;
+}
+
+bool VisionBlackboard::isCameraPitchValid() const
+{
+    return camera_pitch_valid;
+}
+
+float VisionBlackboard::getCameraPitch() const 
+{
+    return camera_pitch;
+}
+
+bool VisionBlackboard::isCameraHeightValid() const
+{
+    return camera_height_valid;
+}
+
+float VisionBlackboard::getCameraHeight() const
+{
+    return camera_height;
+}
+
+bool VisionBlackboard::isBodyPitchValid() const
+{
+    return body_pitch_valid;
+}
+
+float VisionBlackboard::getBodyPitch() const 
+{
+    return body_pitch;
 }
 
 /**
@@ -431,10 +461,12 @@ void VisionBlackboard::update()
         debug << "VisionBlackboard::update() - Begin" << endl;
     #endif
         
-    //kinematics_horizon.setLine(0, 1, 50);
-    
+    //update sensor data copies
     ctgvalid = wrapper->getCTGVector(ctgvector);
     ctvalid = wrapper->getCTVector(ctvector);
+    camera_pitch_valid = wrapper->getCameraPitch(camera_pitch);
+    camera_height_valid = wrapper->getCameraHeight(camera_height);
+    body_pitch_valid = wrapper->getBodyPitch(body_pitch);
     //get new image pointer
     original_image = wrapper->getFrame();
     

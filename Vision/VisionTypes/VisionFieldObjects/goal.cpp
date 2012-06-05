@@ -149,13 +149,26 @@ void Goal::check()
 {
     //various throwouts here
     //throwout for base below horizon
-    if(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y)) {
-        //the base of the goal is below the kinematics horizon, keep it
-        valid = true;
-    }
-    else {
+    if(not (VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y) and
+            VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS)) {
         valid = false;
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::check - Goal thrown out: base above kinematics horizon" << endl;
+        #endif
     }
+    
+    //throwout for distances not agreeing
+    if(not (abs(d2p-width_dist) <= VisionConstants::MAX_DISTANCE_DISCREPENCY_GOALS and
+            VisionConstants::THROWOUT_ON_DISTANCE_DISCREPENCY_GOALS)) {
+        valid = false;
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::check - Goal thrown out: distances don't agree" << endl;
+            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_DISCREPENCY_GOALS: " << VisionConstants::MAX_DISTANCE_DISCREPENCY_GOALS << endl;
+        #endif
+    }
+    
+    //all checks passed, keep goalpost
+    valid = true;
 }
 
 /*!
@@ -200,11 +213,11 @@ void Goal::calculatePositions()
 *   @param bearing The angle about the z axis.
 *   @param elevation The angle about the y axis.
 */
-float Goal::distanceToGoal(float bearing, float elevation) const {
+float Goal::distanceToGoal(float bearing, float elevation) {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    float distance = 0,
-          d2p = 0,
-          width_dist = 0;
+    //reset distance values
+    d2p = 0,
+    width_dist = 0;
     //get distance to point from base
     if(vbb->isCameraToGroundValid())
     {
@@ -213,7 +226,7 @@ float Goal::distanceToGoal(float bearing, float elevation) const {
         d2p = result[0];
     }
     //get distance from width
-    distance = VisionConstants::GOAL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
+    width_dist = VisionConstants::GOAL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
 
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Ball::distanceToBall: bearing: " << bearing << " elevation: " << elevation << endl;

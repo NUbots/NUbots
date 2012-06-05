@@ -26,7 +26,7 @@ public:
         Least
     };
     
-    static const GOAL_DISTANCE_METHOD METHOD = Width;
+    static const GOAL_DISTANCE_METHOD METHOD = Least;
     
     static string getIDName(GoalID id);
        
@@ -44,12 +44,15 @@ public:
     
 private:
     void calculatePositions();
-    float distanceToGoal(float bearing, float elevation) const;
+    float distanceToGoal(float bearing, float elevation);
     
 private:    
     GoalID m_id;
     Quad m_corners;
     Vector2<int> m_bottom_centre;
+    
+    float d2p;
+    float width_dist;
 };
 
 #endif // GOAL_H
