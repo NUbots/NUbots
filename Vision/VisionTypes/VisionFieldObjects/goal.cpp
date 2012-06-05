@@ -32,7 +32,7 @@ Goal::Goal(GoalID id, const Quad &corners)
     m_location_pixels = corners.getCentre();
     //CALCULATE DISTANCE AND BEARING VALS
     calculatePositions();
-    check();
+    valid = check();
 }
 
 const Quad& Goal::getQuad() const
@@ -145,30 +145,30 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
     }
 }
 
-void Goal::check()
+bool Goal::check() const
 {
     //various throwouts here
     //throwout for base below horizon
-    if(not (VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y) and
-            VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS)) {
-        valid = false;
+    if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS and
+       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y)) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: base above kinematics horizon" << endl;
         #endif
+        return false;
     }
     
     //throwout for distances not agreeing
-    if(not (abs(d2p-width_dist) <= VisionConstants::MAX_DISTANCE_DISCREPENCY_GOALS and
-            VisionConstants::THROWOUT_ON_DISTANCE_DISCREPENCY_GOALS)) {
-        valid = false;
+    if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS and
+       abs(d2p-width_dist) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: distances don't agree" << endl;
-            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_DISCREPENCY_GOALS: " << VisionConstants::MAX_DISTANCE_DISCREPENCY_GOALS << endl;
+            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_GOALS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS << endl;
         #endif
+        return false;
     }
     
     //all checks passed, keep goalpost
-    valid = true;
+    return true;
 }
 
 /*!
@@ -216,23 +216,52 @@ void Goal::calculatePositions()
 float Goal::distanceToGoal(float bearing, float elevation) {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //reset distance values
+    bool d2pvalid = false;
     d2p = 0,
     width_dist = 0;
     //get distance to point from base
-    if(vbb->isCameraToGroundValid())
-    {
-        Matrix camera2groundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
-        Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
-        d2p = result[0];
+//    if(vbb->isCameraToGroundValid())
+//    {
+//        d2pvalid = true;
+//        Matrix camera2groundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
+//        Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+//        d2p = result[0];
+//    }
+    if(vbb->isCameraHeightValid() && vbb->isCameraPitchValid()) {
+        float cam_height = vbb->getCameraHeight(),
+              cam_pitch = vbb->getCameraPitch(),
+              theta = 0;    //resultant angle inclusive of body pitch, camera pitch and pixel elevation
+        if(VisionConstants::D2P_INCLUDE_BODY_PITCH) {
+            if(vbb->isBodyPitchValid()) {
+                d2pvalid = true;
+                float body_pitch = vbb->getBodyPitch();
+                theta = mathGeneral::PI*0.5 - cam_pitch + elevation - body_pitch;
+                d2p = cam_height / cos(theta);
+            }
+        }
+        else {
+            d2pvalid = true;
+
+            theta = mathGeneral::PI*0.5 - cam_pitch + elevation;
+            //d2p = cam_height * tan(theta);
+            d2p = cam_height / cos(theta);
+        }
     }
+
     //get distance from width
     width_dist = VisionConstants::GOAL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
 
+
     #if VISION_FIELDOBJECT_VERBOSITY > 1
-        debug << "Ball::distanceToBall: bearing: " << bearing << " elevation: " << elevation << endl;
-        debug << "Ball::distanceToBall: d2p: " << d2p << endl;
-        debug << "Ball::distanceToBall: m_size_on_screen.x: " << m_size_on_screen.x << endl;
-        debug << "Ball::distanceToBall: width_dist: " << width_dist << endl;
+        if(!d2pvalid)
+            debug << "Goal::distanceToBall: d2p invalid - combination methods will only return width_dist" << endl;
+    #endif
+
+    #if VISION_FIELDOBJECT_VERBOSITY > 1
+        debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
+        debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
+        debug << "Goal::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
+        debug << "Goal::distanceToGoal: width_dist: " << width_dist << endl;
     #endif
     switch(METHOD) {
     case D2P:
@@ -247,9 +276,15 @@ float Goal::distanceToGoal(float bearing, float elevation) {
         return width_dist;
     case Average:
         //average distances
-        return (d2p + width_dist) * 0.5;
+        if(d2pvalid)
+            return (d2p + width_dist) * 0.5;
+        else
+            return width_dist;
     case Least:
-        return min(d2p, width_dist);
+        if(d2pvalid)
+            return min(d2p, width_dist);
+        else
+            return width_dist;
     }
 }
 

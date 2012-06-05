@@ -40,7 +40,7 @@ bool Obstacle::addToExternalFieldObjects(FieldObjects *fieldobjects, float times
     return true;
 }
 
-void Obstacle::check()
+bool Obstacle::check() const
 {
     //! @todo Do a check based on width and d2p consistency
 }

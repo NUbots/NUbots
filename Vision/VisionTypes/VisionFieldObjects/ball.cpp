@@ -15,7 +15,7 @@ Ball::Ball()
     m_location_pixels.x = 0;
     m_location_pixels.y = 0;
     calculatePositions();
-    check();
+    valid = check();
 }
 
 Ball::Ball(const PointType& centre, float radius)
@@ -25,7 +25,7 @@ Ball::Ball(const PointType& centre, float radius)
     m_location_pixels.y = centre.y;
     m_size_on_screen = Vector2<int>(radius*2, radius*2);
     calculatePositions();
-    check();
+    valid = check();
 }
 
 float Ball::getRadius() const
@@ -65,30 +65,38 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
     }
 }
 
-void Ball::check()
+bool Ball::check() const
 {
     //various throwouts here
     //throwout for below horizon
-    if(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
-        //throwout for distances not agreeing
-        if(abs(d2p-width_dist) <= VisionConstants::MAX_DISTANCE_DISCREPENCY_BALL) {
-            valid = true;
-        }
-        else {
-            valid = false;
-            #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "Ball::check - Ball thrown out: distances don't agree" << endl;
-                debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_DISCREPENCY_BALL << endl;
-            #endif
-        }
-    }
-    else {
-        valid = false;
+    if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL and
+       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
         errorlog << "Ball::check() - Ball below horizon: should not occur" << endl;
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: above kinematics horizon" << endl;
         #endif
+        return false;
     }
+
+    //throwout for distances not agreeing
+    if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL and
+       abs(d2p-width_dist) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::check - Ball thrown out: distances don't agree" << endl;
+            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << endl;
+        #endif
+        return false;
+    }
+
+    //throw out if ball is too small
+    if(VisionConstants::THROWOUT_SMALL_BALLS and m_radius*2 < VisionConstants::MIN_BALL_DIAMETER_PIXELS) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::check - Ball thrown out: too small" << endl;
+            debug << "\tdiameter: " << m_radius*2 << " MIN_BALL_DIAMETER_PIXELS: " << VisionConstants::MIN_BALL_DIAMETER_PIXELS << endl;
+        #endif
+    }
+
+    return true;
 }
 
 void Ball::calculatePositions()
@@ -190,7 +198,7 @@ float Ball::distanceToBall(float bearing, float elevation) {
     
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         if(!d2pvalid)
-            debug << "Ball::distanceToBall: d2p invalid - most methods will only return width_dist" << endl;
+            debug << "Ball::distanceToBall: d2p invalid - combination methods will only return width_dist" << endl;
     #endif
         
     //get distance from width

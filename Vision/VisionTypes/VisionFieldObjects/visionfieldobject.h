@@ -42,7 +42,7 @@ public:
     const Vector2<float>& getLocationAngular() const;
     virtual Vector3<float> getRelativeFieldCoords() const = 0;
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const = 0;
-    virtual void check() = 0;
+    virtual bool check() const = 0;
 
 protected:
     Vector2<int> m_location_pixels;            //! @variable The pixel location of the object on the screen.

@@ -211,9 +211,8 @@ void BallDetection::detectBall()
             center = PointType((right+left)/2,(top+bottom)/2);
         }
 
-        // DEBUG OUT
         if (!(center.x ==1 and center.y==1)) {
-            Ball newball(center, max((right-left), (bottom-top))*0.5);
+            Ball newball(center, max((right-left+1), (bottom-top+1))*0.5);
             vbb->addBall(newball);
         }
         else {

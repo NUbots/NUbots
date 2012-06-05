@@ -63,7 +63,7 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
     return true;
 }
 
-void Beacon::check()
+bool Beacon::check() const
 {
 
 }
