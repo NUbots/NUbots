@@ -39,7 +39,8 @@ protected:
 
 private:
     
-    float m_trans_speed,m_trans_direction,m_turn_speed,m_start_x,m_start_y,m_start_heading,m_odomX,m_odomY,m_odomB;
+    float m_trans_speed,m_trans_direction,m_turn_speed,m_start_x,m_start_y,m_start_heading,m_odomX,m_odomY,m_odomB,m_av_count;
+    float m_slip_matrix[3][3];
     bool m_return_to_start;
     double m_run_start;
     int samplePointIndex;
