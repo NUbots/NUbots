@@ -176,7 +176,7 @@ public:
             float x = distance * cos(bearing);
             float y = distance * sin(bearing);
             
-            
+            float dist_hysteresis = 5.f;
 
             
             float offsetDistance = 3.0f;
@@ -203,9 +203,9 @@ public:
             
             float approachOffset = 20.;
             if (Blackboard->GameInfo->getTeamColour() == GameInformation::BlueTeam and distance > (kickingdistance + approachOffset)) {
-                x -= approachOffset-5.;
+                x -= approachOffset-dist_hysteresis;
             } else if (distance > kickingdistance + approachOffset) {
-                x += approachOffset-5.;
+                x += approachOffset-dist_hysteresis;
             }
             
 
@@ -216,13 +216,19 @@ public:
             float position_speed;
             float position_direction;
             float position_rotation;
-            if (distance < kickingdistance)
+            if (distance < kickingdistance + dist_hysteresis)
             {   // if we are too close to the ball then we need to go backwards
                 position_speed = (kickingdistance - distance)/(kickingdistance);
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
                 
                 //position_rotation = 0.5*bearing; //previous value for NAO
                 position_rotation = 0.5*bearing;
+                
+                //speed up if we're too slow at shuffling
+                if (bearing > 1.f and position_speed < 0.3) {
+                    position_speed += 0.25;
+                }
+                
             }
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
