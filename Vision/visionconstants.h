@@ -47,6 +47,7 @@ public:
 
     //! Distance calculation options
     static bool D2P_INCLUDE_BODY_PITCH;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
+    static float D2P_ANGLE_CORRECTION;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
     static bool BALL_DISTANCE_POSITION_BOTTOM;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
 
     //! Distance method options

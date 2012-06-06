@@ -36,6 +36,7 @@ bool VisionConstants::THROWOUT_INSIGNIFICANT_BALLS;
 int VisionConstants::MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL;
 // Distance calculation options
 bool VisionConstants::D2P_INCLUDE_BODY_PITCH;
+float VisionConstants::D2P_ANGLE_CORRECTION;
 bool VisionConstants::BALL_DISTANCE_POSITION_BOTTOM;
 //Distance method options
 VisionConstants::DistanceMethod VisionConstants::BALL_DISTANCE_METHOD;
@@ -139,6 +140,10 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("D2P_INCLUDE_BODY_PITCH") == 0) {
             in >> bval;
             D2P_INCLUDE_BODY_PITCH = bval;
+        }
+        else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
+            in >> fval;
+            D2P_ANGLE_CORRECTION = fval;
         }
         else if(name.compare("BALL_DISTANCE_POSITION_BOTTOM") == 0) {
             in >> bval;
@@ -248,6 +253,7 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tMIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL: " << MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL << std::endl;
 
     debug << "\tD2P_INCLUDE_BODY_PITCH: " << D2P_INCLUDE_BODY_PITCH << std::endl;
+    debug << "\tD2P_ANGLE_CORRECTION: " << D2P_ANGLE_CORRECTION << std::endl;
     debug << "\tBALL_DISTANCE_POSITION_BOTTOM: " << BALL_DISTANCE_POSITION_BOTTOM << std::endl;
 
     debug << "\tBALL_DISTANCE_METHOD: " << getDistanceMethodName(BALL_DISTANCE_METHOD) << std::endl;
@@ -261,7 +267,6 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tDISTANCE_BETWEEN_POSTS: " << DISTANCE_BETWEEN_POSTS << std::endl;
     debug << "\tBALL_WIDTH: " << BALL_WIDTH << std::endl;
 }
-
 
 VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)
 {
