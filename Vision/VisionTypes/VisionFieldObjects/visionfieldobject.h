@@ -35,6 +35,8 @@ public:
     static string getVFOName(VFO_ID id);
     static VFO_ID getVFOFromName(const string& name);
     
+    static Vector2<float> correctDistortion(const Vector2<float>& pt);
+    
 public:
     VisionFieldObject();
     

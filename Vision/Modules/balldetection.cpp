@@ -212,7 +212,9 @@ void BallDetection::detectBall()
         }
 
         if (!(center.x ==1 and center.y==1)) {
+            //Ball newball(top_pt, bottom_pt, left_pt, right_pt);
             Ball newball(center, max((right-left+1), (bottom-top+1))*0.5);
+            //Ball newball(top, bottom, left, right);
             vbb->addBall(newball);
         }
         else {

@@ -8,6 +8,10 @@
 #include <boost/algorithm/string.hpp>
 //#include <iostream>
 
+
+bool VisionConstants::DO_RADIAL_CORRECTION;
+float VisionConstants::RADIAL_CORRECTION_COEFFICIENT;
+
 bool VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS;
 bool VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS;
 bool VisionConstants::THROWOUT_DISTANT_GOALS;
@@ -49,7 +53,15 @@ void VisionConstants::loadFromFile(std::string filename)
     while(in.good()) {
         getline(in, name, ':');
         boost::to_upper(name);
-        if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_GOALS") == 0) {
+        if(name.compare("DO_RADIAL_CORRECTION") == 0) {
+            in >> bval;
+            DO_RADIAL_CORRECTION = bval;
+        }
+        else if(name.compare("RADIAL_CORRECTION_COEFFICIENT") == 0) {
+            in >> fval;
+            RADIAL_CORRECTION_COEFFICIENT = fval;
+        }
+        else if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_GOALS") == 0) {
             in >> bval;
             THROWOUT_ON_ABOVE_KIN_HOR_GOALS = bval;
         }
@@ -135,6 +147,10 @@ void VisionConstants::loadFromFile(std::string filename)
     in.close();
     
     debug << "VisionConstants::loadFromFile-" << std::endl;
+    
+    
+    debug << "\tDO_RADIAL_CORRECTION: " << DO_RADIAL_CORRECTION << std::endl;
+    debug << "\tRADIAL_CORRECTION_COEFFICIENT: " << RADIAL_CORRECTION_COEFFICIENT << std::endl;
 
     debug << "\tTHROWOUT_ON_ABOVE_KIN_HOR_GOALS: " << THROWOUT_ON_ABOVE_KIN_HOR_GOALS << std::endl;
     debug << "\tTHROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS: " << THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS << std::endl;

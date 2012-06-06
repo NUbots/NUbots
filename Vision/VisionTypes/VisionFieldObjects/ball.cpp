@@ -18,12 +18,30 @@ Ball::Ball()
     valid = check();
 }
 
-Ball::Ball(const PointType& centre, float radius)
+Ball::Ball(PointType centre, float radius)
 {
-    m_radius = radius;
-    m_location_pixels.x = centre.x;
-    m_location_pixels.y = centre.y;
-    m_size_on_screen = Vector2<int>(radius*2, radius*2);
+    int top = centre.y - radius,
+        bottom = centre.y + radius,
+        left = centre.x - radius,
+        right = centre.x + radius;
+    Vector2<float> top_pt = Vector2<float>((right-left)*0.5, top);
+    Vector2<float> bottom_pt = Vector2<float>((right-left)*0.5, bottom);
+    Vector2<float> right_pt = Vector2<float>(right, (bottom-top)*0.5);
+    Vector2<float> left_pt = Vector2<float>(left, (bottom-top)*0.5);
+    Vector2<float> centre_pt = Vector2<float>(centre.x, centre.y);
+    if(VisionConstants::DO_RADIAL_CORRECTION) {
+        top_pt = correctDistortion(top_pt);
+        bottom_pt = correctDistortion(bottom_pt);
+        right_pt = correctDistortion(right_pt);
+        left_pt = correctDistortion(left_pt);
+        centre_pt = correctDistortion(centre_pt);
+    }
+        
+    m_radius = max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x)*0.5;
+    cout << m_radius << endl;
+    m_location_pixels.x = mathGeneral::roundNumberToInt(centre_pt.x);
+    m_location_pixels.y = mathGeneral::roundNumberToInt(centre_pt.y);
+    m_size_on_screen = Vector2<int>(m_radius*2, m_radius*2);
     calculatePositions();
     valid = check();
 }
@@ -45,6 +63,7 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         debug << *this << endl;
     #endif
     if(valid) {
+        cout << m_transformed_spherical_pos.x << endl;
         //add ball to mobileFieldObjects
         fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(m_transformed_spherical_pos,
                                                                         m_spherical_error,
@@ -133,10 +152,10 @@ void Ball::calculatePositions()
         Matrix cameraToGroundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
         
         //debugging
-        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,Vector3<float>(d2p, bearing, elevation));
-        cout << " " << m_transformed_spherical_pos.x;
-        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,Vector3<float>(width_dist, bearing, elevation));
-        cout << " " << m_transformed_spherical_pos.x << endl;
+//        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,Vector3<float>(d2p, bearing, elevation));
+//        cout << " " << m_transformed_spherical_pos.x;
+//        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,Vector3<float>(width_dist, bearing, elevation));
+//        cout << " " << m_transformed_spherical_pos.x << endl;
         
         //real
         m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,m_spherical_position);
@@ -189,11 +208,6 @@ float Ball::distanceToBall(float bearing, float elevation) {
             //d2p = cam_height * tan(theta);
             d2p = cam_height / cos(theta);
         }
-//        cout << "Ball::distanceToBall: x, y: ";
-//        cout << m_location_pixels.x << " " << m_location_pixels.y << endl;
-//        cout << "Ball::distanceToBall: bearing, elevation, cam_height, cam_pitch: ";
-//        cout << bearing << " " << elevation << " " << cam_height << " " << cam_pitch << endl;
-//        cout << "Ball::distanceToBall: new d2p: ";
     }
     
     #if VISION_FIELDOBJECT_VERBOSITY > 1
@@ -210,7 +224,7 @@ float Ball::distanceToBall(float bearing, float elevation) {
         debug << "Ball::distanceToBall: m_size_on_screen.x: " << m_size_on_screen.x << endl;
         debug << "Ball::distanceToBall: width_dist: " << width_dist << endl;
     #endif
-    cout << "Ball::distanceToBall: d2p: " << d2p << " width_dist: " << width_dist;
+    //cout << "Ball::distanceToBall: d2p: " << d2p << " width_dist: " << width_dist;
     switch(VisionConstants::BALL_DISTANCE_METHOD) {
     case VisionConstants::D2P:
         #if VISION_FIELDOBJECT_VERBOSITY > 1

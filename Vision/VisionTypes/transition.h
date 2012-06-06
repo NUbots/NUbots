@@ -10,8 +10,10 @@ using namespace VisionID;
 class Transition
 {
 public:
+    //static PointType correctDistortion(const PointType& pt);
+    
     Transition();
-    Transition(PointType& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);
+    Transition(const PointType& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);
     Transition(ColourSegment before, ColourSegment after, ScanDirection direction);
     
     void set(const PointType& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);

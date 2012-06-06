@@ -7,6 +7,10 @@ class VisionConstants
 {
 public:
 
+    //! Distortion Correction
+    static bool DO_RADIAL_CORRECTION;
+    static float RADIAL_CORRECTION_COEFFICIENT;
+    
     //! Goal filtering constants
     static bool THROWOUT_ON_ABOVE_KIN_HOR_GOALS;
     static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS;

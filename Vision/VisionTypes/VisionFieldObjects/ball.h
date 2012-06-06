@@ -8,7 +8,7 @@ class Ball : public VisionFieldObject
 public:
     
     Ball();
-    Ball(const PointType& centre, float radius);
+    Ball(PointType centre, float radius);
     
     float getRadius() const;
     
