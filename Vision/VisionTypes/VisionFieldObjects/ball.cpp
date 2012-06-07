@@ -64,6 +64,7 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
     if(valid) {
         //cout << m_transformed_spherical_pos.x << endl;
         //add ball to mobileFieldObjects
+        cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << endl;
         fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(m_transformed_spherical_pos,
                                                                         m_spherical_error,
                                                                         m_location_angular,
