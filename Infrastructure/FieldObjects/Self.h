@@ -22,16 +22,16 @@ class Self {
                 float wmY() const {return WorldModelLocation.y;}
                 float Heading() const {return WorldModelLocation.z;}
 		std::vector<float> wmState();
-        float sdX() {return WorldModelLocationError[0];}
-        float sdY() {return WorldModelLocationError[1];}
-        float sdHeading() {return WorldModelLocationError[2];}
-        bool lost();
+        float sdX() const {return WorldModelLocationError.x;}
+        float sdY() const {return WorldModelLocationError.y;}
+        float sdHeading() const {return WorldModelLocationError.z;}
+        bool lost() const;
     
         std::vector<float> CalculateDifferenceFromFieldState(const std::vector<float> desiredState);
         std::vector<float> CalculateDifferenceFromFieldLocation(const std::vector<float> desiredLocation);
         std::vector<float> CalculateDifferenceFromStationaryObject(const StationaryObject& theObject);
-        float CalculateDistanceToStationaryObject(const StationaryObject& theObject);
-        float CalculateBearingToStationaryObject(const StationaryObject& theObject);
+        float CalculateDistanceToStationaryObject(const StationaryObject& theObject) const;
+        float CalculateBearingToStationaryObject(const StationaryObject& theObject) const;
     
         std::vector<float> CalculateDifferenceFromGoal(const StationaryObject& goalpost);
         float CalculateAngularWidthOfGoal(const StationaryObject& goalpost);

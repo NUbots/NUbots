@@ -113,7 +113,8 @@ class FieldObjects: public TimestampedData
     
             void preProcess(const float timestamp);
             void postProcess(const float timestamp);
-            double GetTimestamp() const{return m_timestamp;};
+            double GetTimestamp() const {return m_timestamp;}
+            static std::string ambiguousName(unsigned int id);
             std::string toString(bool visibleOnly=false) const;
 
     std::vector<FieldObjects::StationaryFieldObjectID> GetPossibleObservationIds(float x, float y, float theta, 
@@ -136,6 +137,11 @@ class FieldObjects: public TimestampedData
             @param p_kf The destination localisation data to be streamed to.
             */
             friend std::istream& operator>> (std::istream& input, FieldObjects& p_mob);
+            std::vector<StationaryObject*> getExpectedAmbiguousDecisions(float x, float y, float heading);
+
+            int getClosestStationaryOption(const Self& location, const AmbiguousObject& amb_object);
+            vector<StationaryObject*> filterToVisible(const Self& location, const AmbiguousObject& amb_object, float headPan, float fovX);
+
 
 	private:
             void InitStationaryFieldObjects();

@@ -103,7 +103,6 @@ HEADERS += ui_mainwindow.h \
     ../Kinematics/Kinematics.h \
     ../Tools/Math/TransformMatrices.h \
     frameInformationWidget.h \
-    ../Tools/Math/UKF.h \
     ../Tools/Math/SRUKF.h \
     ../Kinematics/Link.h \
     ../Kinematics/EndEffector.h \
@@ -181,9 +180,23 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/FileFormatException.h \
     offlinelocalisationdialog.h \
     ../Tools/Math/Moment.h \
-    ../Localisation/SelfModel.h \
-    ../Localisation/SelfUKF.h \
-    ../NUPlatform/NUCamera/NUCameraData.h
+    ../Localisation/Models/SelfModel.h \
+    ../Localisation/Models/SelfUKF.h \
+    ../Localisation/SelfLocalisation.h \
+    ../Localisation/Models/SelfSRUKF.h \
+    ../Localisation/MeasurementError.h \
+    ../Localisation/SelfLocalisationTests.h \
+    OfflineLocalisationSettingsDialog.h \
+    LocalisationPerformanceMeasure.h \
+    ../Localisation/LocalisationSettings.h \
+    ../Tools/KFTools.h \
+    ../NUPlatform/NUCamera/NUCameraData.h \
+    ../Tools/Math/statistics.h \
+    OfflineLocBatch.h \
+    ../Tools/Math/Filters/UnscentedTransform.h \
+    ../Tools/Math/Filters/UKF.h \
+    ../Tools/Math/Filters/MobileObjectUKF.h \
+    ../Tools/Math/depUKF.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -260,7 +273,7 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
     ../Localisation/KF.cpp \
-    ../Localisation/SelfUKF.cpp \
+    ../Localisation/Models/SelfUKF.cpp \
     ../Localisation/Localisation.cpp \
     ../Infrastructure/FieldObjects/WorldModelShareObject.cpp \
     ../Infrastructure/GameInformation/GameInformation.cpp \
@@ -270,7 +283,6 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Tools/Math/TransformMatrices.cpp \
     frameInformationWidget.cpp \
-    ../Tools/Math/UKF.cpp \
     ../Tools/Math/SRUKF.cpp \
     ../Kinematics/Link.cpp \
     ../Kinematics/EndEffector.cpp \
@@ -308,8 +320,21 @@ SOURCES += mainwindow.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
     ../Tools/Math/Moment.cpp \
-    ../Localisation/SelfModel.cpp \
-    ../NUPlatform/NUCamera/NUCameraData.cpp
+    ../Localisation/Models/SelfModel.cpp \
+    ../Localisation/SelfLocalisation.cpp \
+    ../Localisation/Models/SelfSRUKF.cpp \
+    ../Localisation/MeasurementError.cpp \
+    ../Localisation/SelfLocalisationtests.cpp \
+    OfflineLocalisationSettingsDialog.cpp \
+    LocalisationPerformanceMeasure.cpp \
+    ../Localisation/LocalisationSettings.cpp \
+    ../Tools/KFTools.cpp \
+    ../NUPlatform/NUCamera/NUCameraData.cpp \
+    ../Tools/Math/statistics.cpp \
+    OfflineLocBatch.cpp \
+    ../Tools/Math/Filters/UKF.cpp \
+    ../Tools/Math/Filters/MobileObjectUKF.cpp \
+    ../Tools/Math/depUKF.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -320,5 +345,7 @@ SOURCES += mainwindow.cpp \
 }
     
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
+FORMS += \
+    OfflineLocalisationSettingsDialog.ui
 
 

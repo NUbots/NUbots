@@ -97,6 +97,14 @@ Localisation::Localisation(const Localisation& source): TimestampedData()
     *this = source;
 }
 
+Localisation::~Localisation()
+{
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
+    debug_file.close();
+    m_prevSharedBalls.clear();
+    m_gps.clear();
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
+}
 
 void Localisation::writeLog()
 {
@@ -131,15 +139,6 @@ Localisation& Localisation::operator=(const Localisation& source)
     // by convention, always return *this
     return *this;
 }
-
-
-Localisation::~Localisation()
-{
-    #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_file.close();
-    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
-}
-
 
 //--------------------------------- MAIN FUNCTIONS  ---------------------------------//
 
@@ -178,11 +177,15 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         return;
     }
 
-        if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
-        {
-            m_hasGps = true;
-        }
-    #ifndef USE_VISION
+    if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
+    {
+        m_hasGps = true;
+    }
+
+    vector<float> odo;
+    bool odom_available = sensor_data->getOdometry(odo);
+
+    #if !defined(USE_VISION)// || 1
         // If vision is disabled, gps coordinates are used in its place to trach location.
         vector<float> gps;
         float compass;
@@ -196,8 +199,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
             return;
         }
     #else
-        vector<float> odo;
-        if (sensor_data->getOdometry(odo))
+        if (odom_available)
         {
             float fwd = odo[0];
             float side = odo[1];
@@ -367,37 +369,37 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
 #endif
 
 
-    // Proccess the Moving Known Field Objects
-    MobileObjectsIt currMob(fobs->mobileFieldObjects.begin());
-    MobileObjectsConstIt endMob(fobs->mobileFieldObjects.end());
+//    // Proccess the Moving Known Field Objects
+//    MobileObjectsIt currMob(fobs->mobileFieldObjects.begin());
+//    MobileObjectsConstIt endMob(fobs->mobileFieldObjects.end());
 
-    for (; currMob != endMob; ++currMob)
-    {
-        if(currMob->isObjectVisible() == false) continue; // Skip objects that were not seen.
-        updateResult = doBallMeasurementUpdate((*currMob));
-        numUpdates++;
-        usefulObjectCount++;
-    }
+//    for (; currMob != endMob; ++currMob)
+//    {
+//        if(currMob->isObjectVisible() == false) continue; // Skip objects that were not seen.
+//        updateResult = doBallMeasurementUpdate((*currMob));
+//        numUpdates++;
+//        usefulObjectCount++;
+//    }
 
-    NormaliseAlphas();
+//    NormaliseAlphas();
 
-    // Check the game packets.
-    // We only want to do the shared ball updates if we can't see the ball ourselves.
-    // there have been probems where the team will keep sharing the previous position of their ball
-    // and updates in vision do not supercede the shared data.
+//    // Check the game packets.
+//    // We only want to do the shared ball updates if we can't see the ball ourselves.
+//    // there have been probems where the team will keep sharing the previous position of their ball
+//    // and updates in vision do not supercede the shared data.
     
     
-    if(fobs->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 500)    // TODO: Change to a SD value
-    { 
-        for (size_t i=0; i<sharedballs.size(); i++)
-        {
-            #if SHARED_BALL_ON
-                doSharedBallUpdate(sharedballs[i]);
-            #endif
-            if (sharedballs[i].TimeSinceLastSeen < 5000)    // if another robot can see the ball then it is not lost
-                fobs->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false, m_timestamp);
-        }
-    }
+//    if(fobs->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 500)    // TODO: Change to a SD value
+//    {
+//        for (size_t i=0; i<sharedballs.size(); i++)
+//        {
+//            #if SHARED_BALL_ON
+//                doSharedBallUpdate(sharedballs[i]);
+//            #endif
+//            if (sharedballs[i].TimeSinceLastSeen < 5000)    // if another robot can see the ball then it is not lost
+//                fobs->mobileFieldObjects[FieldObjects::FO_BALL].updateIsLost(false, m_timestamp);
+//        }
+//    }
 
         NormaliseAlphas();
 
@@ -664,7 +666,7 @@ void Localisation::doInitialReset(GameInformation::TeamColour team_colour)
     }
     
     setupModel(0, num_models, front_x, right_y, right_heading);
-    setupModel(0, 1, front_x, right_y, right_heading);
+    //setupModel(0, 1, front_x, right_y, right_heading);
     setupModelSd(0, 50, 15, 0.2);
     setupModel(1, num_models, back_x, right_y, right_heading);
     setupModelSd(1, 50, 15, 0.2);
@@ -1446,6 +1448,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
         //m_modelObjectErrors[modelID][ambigousObject.getID()] += 1.0;
 
         std::vector<unsigned int> modelsUsed;
+        float flat_measured_distance = ambigousObject.measuredDistance() * cos(ambigousObject.measuredElevation());
         // Now go through each of the possible options, and apply it to a copy of the model
         for(unsigned int optionNumber = 0; optionNumber < numOptions; optionNumber++)
         {
@@ -1473,7 +1476,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
             }
 
             // Do the update.
-            kf_return =  m_models[newModelID].fieldObjectmeas(ambigousObject.measuredDistance(), ambigousObject.measuredBearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
+            kf_return =  m_models[newModelID].fieldObjectmeas(flat_measured_distance, ambigousObject.measuredBearing(),possibleObjects[possibleObjectID].X(), possibleObjects[possibleObjectID].Y(), R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
             #if DEBUG_LOCALISATION_VERBOSITY > 2
             debug_out  <<"[" << m_timestamp << "]: Splitting model[" << modelID << "] to model[" << newModelID << "].";

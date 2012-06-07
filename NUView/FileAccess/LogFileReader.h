@@ -53,6 +53,13 @@ public:
         else
             return QStringList("None");
     }
+    QString path()
+    {
+        if(currentFileReader)
+            return currentFileReader->filePath();
+        else
+            return QString("None");
+    }
 
 
 signals:

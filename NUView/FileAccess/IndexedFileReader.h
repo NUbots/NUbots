@@ -51,7 +51,7 @@ public:
 
 
     IndexedFileReader();
-    ~IndexedFileReader();
+    virtual ~IndexedFileReader();
 
     // Public File Access Functions
     bool IsValid();

@@ -55,9 +55,6 @@ bool Kinematics::LoadModelFromFile(std::ifstream& file)
     // Joint Number, Joint Name, alpha, a, thetaOffset, d
     // [Effector]
     // Joint Number, Joint Name, alpha, a, thetaOffset, d
-    // Trans x, y, z
-    // Rot axis, value
-    // [Effector]
     // etc..
 
     m_endEffectors.clear();
