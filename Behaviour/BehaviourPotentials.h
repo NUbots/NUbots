@@ -222,12 +222,14 @@ public:
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
                 
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.5*bearing;
+                position_rotation = 0.8*bearing;
                 
                 //speed up if we're too slow at shuffling
-                if (bearing > 1.f and position_speed < 0.3) {
-                    position_speed += 0.25;
-                }
+                if (fabs(bearing) > 0.8f and position_speed < 0.5) {
+                    position_speed += 0.45;
+                } else if (position_speed < 0.3) {
+                    position_speed += 0.1;
+                } 
                 
             }
             else if (distance < stoppingdistance)
@@ -235,7 +237,7 @@ public:
                 
                 position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
-                if (bearing > 1.f and position_speed < 0.2) {
+                if (fabs(bearing) > 1.f and position_speed < 0.2) {
                     position_speed += 0.2;
                 }
                 //position_rotation = 0.5*bearing; //previous value for NAO
