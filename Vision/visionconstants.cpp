@@ -51,6 +51,7 @@ int VisionConstants::BALL_ORANGE_TOLERANCE;
 float VisionConstants::GOAL_WIDTH;
 float VisionConstants::DISTANCE_BETWEEN_POSTS;
 float VisionConstants::BALL_WIDTH;
+float VisionConstants::BEACON_WIDTH;
 
 VisionConstants::VisionConstants()
 {
@@ -197,6 +198,10 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> fval;
             BALL_WIDTH = fval;
         }
+        else if(name.compare("BEACON_WIDTH") == 0) {
+            in >> fval;
+            BEACON_WIDTH = fval;
+        }
         else if(name.compare("THROWOUT_INSIGNIFICANT_GOALS") == 0) {
             in >> bval;
             THROWOUT_INSIGNIFICANT_GOALS = bval;
@@ -276,6 +281,7 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tGOAL_WIDTH: " << GOAL_WIDTH << std::endl;
     debug << "\tDISTANCE_BETWEEN_POSTS: " << DISTANCE_BETWEEN_POSTS << std::endl;
     debug << "\tBALL_WIDTH: " << BALL_WIDTH << std::endl;
+    debug << "\tBEACON_WIDTH: " << BEACON_WIDTH << std::endl;
 }
 
 VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)
