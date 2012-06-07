@@ -139,7 +139,7 @@ void DarwinActionators::copyToServos()
 
         if(gains[i] > 0)
         {
-            int value = m_joint_mapping->joint2raw(i, positions[i]);
+            int value = m_joint_mapping->joint2rawClipped(i, positions[i]);
             param[n++] = platform->m_servo_IDs[i];
             //param[n++] = P_GAIN;
             param[n++] = gains[i] / 128 * 100;
