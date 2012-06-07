@@ -266,6 +266,45 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     float centrevalue = 512;
     vector<float> data(3,0);
 
+
+    //<! Assign the robot data to the NUSensor Structure:
+    addr = int(Robot::CM730::P_GYRO_X_L);
+    //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+    data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    data[0] = (data[0]-centrevalue)/VALUETORPS_RATIO;
+	
+    addr = int(Robot::CM730::P_GYRO_Y_L);
+    //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+    data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    data[1] = (data[1]-centrevalue)/VALUETORPS_RATIO;
+
+    addr = int(Robot::CM730::P_GYRO_Z_L);
+    //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+    data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    data[2] = (data[2]-centrevalue)/VALUETORPS_RATIO;
+    //cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
+    m_data->set(NUSensorsData::Gyro,m_current_time, data);
+
+    addr = int(Robot::CM730::P_ACCEL_Y_L);
+    data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+    data[0] = -(data[0]-centrevalue)/VALUETOACCEL_RATIO;
+
+    addr = int(Robot::CM730::P_ACCEL_X_L);
+    data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+    data[1] = (data[1]-centrevalue)/VALUETOACCEL_RATIO;
+	
+    addr = int(Robot::CM730::P_ACCEL_Z_L);
+    data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
+    data[2] = -(data[2]-centrevalue)/VALUETOACCEL_RATIO;
+	
+    m_data->set(NUSensorsData::Accelerometer,m_current_time, data);
+}
+
+void DarwinSensors::copyFromFeet()
+{
     int fsr1 = int(Robot::FSR::P_FSR1_L);
     int fsr2 = int(Robot::FSR::P_FSR2_L);
     int fsr3 = int(Robot::FSR::P_FSR3_L);
@@ -321,46 +360,6 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
         m_data->setAsInvalid(NUSensorsData::RFootTouch);
         m_data->setAsInvalid(NUSensorsData::LFootTouch);
     }
-
-    //<! Assign the robot data to the NUSensor Structure:
-    addr = int(Robot::CM730::P_GYRO_X_L);
-    //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
-    data[0] = (data[0]-centrevalue)/VALUETORPS_RATIO;
-	
-    addr = int(Robot::CM730::P_GYRO_Y_L);
-    //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
-    data[1] = (data[1]-centrevalue)/VALUETORPS_RATIO;
-
-    addr = int(Robot::CM730::P_GYRO_Z_L);
-    //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
-    data[2] = (data[2]-centrevalue)/VALUETORPS_RATIO;
-    //cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
-    m_data->set(NUSensorsData::Gyro,m_current_time, data);
-
-    addr = int(Robot::CM730::P_ACCEL_Y_L);
-    data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
-    //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[0] = -(data[0]-centrevalue)/VALUETOACCEL_RATIO;
-
-    addr = int(Robot::CM730::P_ACCEL_X_L);
-    data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
-    //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[1] = (data[1]-centrevalue)/VALUETOACCEL_RATIO;
-	
-    addr = int(Robot::CM730::P_ACCEL_Z_L);
-    data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
-    //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[2] = -(data[2]-centrevalue)/VALUETOACCEL_RATIO;
-	
-    m_data->set(NUSensorsData::Accelerometer,m_current_time, data);
-}
-
-void DarwinSensors::copyFromFeet()
-{
-    //Darwin has no feet sensors atm.
     return;
 }
 
