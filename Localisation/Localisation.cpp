@@ -505,12 +505,13 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 {
     // Set the balls location.
     float distance,bearing;
+    MobileObject& ball = fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL];
     distance = model.getDistanceToPosition(model.state(KF::ballX), model.state(KF::ballY));
     bearing = model.getBearingToPosition(model.state(KF::ballX), model.state(KF::ballY));
-    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectLocation(model.state(KF::ballX),model.state(KF::ballY),model.sd(KF::ballX), model.sd(KF::ballY));
-    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateObjectVelocities(model.state(KF::ballXVelocity),model.state(KF::ballYVelocity),model.sd(KF::ballXVelocity), model.sd(KF::ballYVelocity));
-    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateEstimatedRelativeVariables(distance, bearing, 0.0f);
-    fieldObjects->mobileFieldObjects[fieldObjects->FO_BALL].updateSharedCovariance(model.GetBallSR());
+    ball.updateObjectLocation(model.state(KF::ballX),model.state(KF::ballY),model.sd(KF::ballX), model.sd(KF::ballY));
+    ball.updateObjectVelocities(model.state(KF::ballXVelocity),model.state(KF::ballYVelocity),model.sd(KF::ballXVelocity), model.sd(KF::ballYVelocity));
+    ball.updateEstimatedRelativeVariables(distance, bearing, 0.0f);
+    ball.updateSharedCovariance(model.GetBallSR());
 
     // Check if lost.
     bool lost = false;
@@ -518,8 +519,34 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
         lost = true;
 
     // Set my location.
-    fieldObjects->self.updateLocationOfSelf(model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta),
+    Self& robot = fieldObjects->self;
+    robot.updateLocationOfSelf(model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta),
                                             model.sd(KF::selfX), model.sd(KF::selfY), model.sd(KF::selfTheta),lost);
+
+    Vector2<float> wmRelBallPos = robot.CalculateRelativeCoordFromFieldCoord(ball.X(), ball.Y());
+    Vector2<float> wmBallVel = robot.CalculateRelativeCoordFromFieldCoord(ball.velX(), ball.velY());
+
+//    std::cout << "Robot: x = " << robot.wmX() << " y = " << robot.wmY() << " heading = " << robot.Heading() << std::endl;
+//    std::cout << "Ball: x = " << ball.X() << " y = " << ball.Y() << std::endl;
+//    std::cout << "Relative: x = " << wmRelBallPos.x << " y = " << wmRelBallPos.y << std::endl;
+
+
+    std::cout << wmRelBallPos.x << "," << wmRelBallPos.y;
+
+    float ballMeasureRelX = ball.measuredDistance() * cos(ball.measuredElevation()) * cos(ball.measuredBearing());
+    float ballMeasureRelY = ball.measuredDistance() * cos(ball.measuredElevation()) * sin(ball.measuredBearing());
+    if(true || ball.isObjectVisible())
+    {
+        std::cout << "," << ballMeasureRelX << "," << ballMeasureRelY;
+    }
+    else
+    {
+        std::cout << ",0,0";
+    }
+
+    std::cout << "," << robot.wmX() << "," << robot.wmY() << "," << robot.Heading();
+    std::cout << "," << ball.velX() << "," <<  ball.velY() << std::endl;
+
 }
 
 bool Localisation::CheckGameState(bool currently_incapacitated, const GameInformation* game_info)

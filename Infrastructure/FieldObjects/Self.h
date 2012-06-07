@@ -2,6 +2,7 @@
 #define FIELDOBJECTS_SELF_H
 
 #include "../../Tools/Math/Vector3.h"
+#include "../../Tools/Math/Vector2.h"
 #include <vector>
 #include <iostream>
 class StationaryObject;
@@ -42,6 +43,8 @@ class Self {
 		float CalculateXInterceptOfMobileObject(const MobileObject& theObject);
         std::vector<float> CalculatePositionBetweenMobileObjectAndGoal(const MobileObject& mobileobject, const StationaryObject& goalpost, float distancefrommobile);
         std::vector<float> CalculatePositionToProtectGoalFromMobileObject(const MobileObject& mobileobject, const StationaryObject& goalpost, float blockingwidth);
+
+        Vector2<float> CalculateRelativeCoordFromFieldCoord(float fieldX, float fieldY);
 
         std::string toString() const;
 

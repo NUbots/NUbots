@@ -380,6 +380,22 @@ std::string Self::toString() const
     return result.str();
 }
 
+Vector2<float> Self::CalculateRelativeCoordFromFieldCoord(float fieldX, float fieldY)
+{
+    Vector2<float> result;
+
+    const float x_diff = fieldX - wmX();
+    const float y_diff = fieldY - wmY();
+
+    const float hcos = cos(Heading());
+    const float hsin = sin(Heading());
+
+    result.x = x_diff * hcos + y_diff * hsin;
+    result.y = -x_diff * hsin + y_diff * hcos;
+
+    return result;
+}
+
 std::ostream& operator<< (std::ostream& output, const Self& p_self)
 {
     output.write(reinterpret_cast<const char*>(&p_self.WorldModelLocation.x), sizeof(p_self.WorldModelLocation.x));
