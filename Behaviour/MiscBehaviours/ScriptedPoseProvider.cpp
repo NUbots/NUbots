@@ -45,7 +45,8 @@ ScriptedPoseProvider::ScriptedPoseProvider(Behaviour* manager) : BehaviourProvid
     isStart = 0;
     m_saving_images = false;
 
-    m_script = MotionScript("Test");
+    //m_script = MotionScript("Test");
+    m_script = MotionScript("KickLeft");
     m_script_playing = false;
 
 }

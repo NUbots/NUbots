@@ -20,14 +20,14 @@
 */
 
 #include "ColorModelConversions.h"
-#include "Vision/ClassificationColours.h"
+#include "Vision/VisionTools/classificationcolours.h"
 #include "openglmanager.h"
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
 #include <QDebug>
-#include <glu.h>
+#include <GL/glu.h>
 
 OpenglManager::OpenglManager(): width(320), height(240)
 {

@@ -1,7 +1,7 @@
 #ifndef LUTGLDISPLAY_H
 #define LUTGLDISPLAY_H
 
-#include "Vision/ClassificationColours.h"
+#include "Vision/VisionTools/classificationcolours.h"
 #include <QGLWidget>
 #include "openglmanager.h"
 

@@ -14,7 +14,7 @@
 #include <QMainWindow>
 #include <QTextStream>
 #include "ColorModelConversions.h"
-#include "Vision/ClassificationColours.h"
+#include "Vision/VisionTools/classificationcolours.h"
 
 ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent)
 {
