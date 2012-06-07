@@ -104,6 +104,7 @@ public:
     int getImageHeight() const;
     
     double getCameraDistanceInPixels() const;
+    bool distanceToPoint(float bearing, float elevation, float& distance) const;
 
 private:
 

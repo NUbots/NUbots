@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <boost/foreach.hpp>
+#include "Tools/Math/General.h"
 
 VisionBlackboard* VisionBlackboard::instance = 0;
 
@@ -418,6 +419,32 @@ int VisionBlackboard::getImageHeight() const
 double VisionBlackboard::getCameraDistanceInPixels() const
 {
     return effective_camera_dist_pixels;
+}
+
+bool VisionBlackboard::distanceToPoint(float bearing, float elevation, float& distance) const
+{
+    float theta = 0;
+    if(camera_height_valid && camera_pitch_valid) {
+        //resultant angle inclusive of body pitch, camera pitch, pixel elevation and angle correction factor
+        theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;    
+        if(VisionConstants::D2P_INCLUDE_BODY_PITCH) {
+            if(body_pitch_valid) {
+                distance = camera_height / cos(theta - body_pitch) / cos(bearing);
+                return true;
+            }
+            else {
+                distance = 0;
+                return false;
+            }
+        }
+        else {
+            distance = camera_height / cos(theta) / cos(bearing);
+            return true;
+        }
+    }
+    else {
+        return false;
+    }
 }
 
 /*! @brief Retrieves camera settings from the wrapper and returns them.

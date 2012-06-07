@@ -157,12 +157,22 @@ bool Goal::check() const
         return false;
     }
     
-    //throwout for distances not agreeing
+    //Distance discrepency throwout - if width method says goal is a lot closer than d2p (by specified value) then discard
     if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS and
-       abs(d2p-width_dist) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS) {
+            width_dist + VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS < d2p) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: distances don't agree" << endl;
+        debug << "Goal::check - Goal thrown out: width distance too much smaller than d2p" << endl;
             debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_GOALS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS << endl;
+        #endif
+        return false;
+    }
+    
+    //throw out if goal is too far away
+    if(VisionConstants::THROWOUT_DISTANT_GOALS and 
+        m_transformed_spherical_pos.x > VisionConstants::MAX_GOAL_DISTANCE) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::check - Goal thrown out: too far away" << endl;
+            debug << "\td2p: " << m_transformed_spherical_pos.x << " MAX_GOAL_DISTANCE: " << VisionConstants::MAX_GOAL_DISTANCE << endl;
         #endif
         return false;
     }
@@ -206,6 +216,11 @@ void Goal::calculatePositions()
     else {
         m_transformed_spherical_pos = Vector3<float>(0,0,0);
     }
+    
+    #if VISION_FIELDOBJECT_VERBOSITY > 2
+        debug << "Goal::calculatePositions: ";
+        debug << d2p << " " << width_dist << " " << distance << " " << m_transformed_spherical_pos.x << endl;
+    #endif
 }
 
 /*!
@@ -227,35 +242,14 @@ float Goal::distanceToGoal(float bearing, float elevation) {
 //        Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 //        d2p = result[0];
 //    }
-    if(vbb->isCameraHeightValid() && vbb->isCameraPitchValid()) {
-        float cam_height = vbb->getCameraHeight(),
-              cam_pitch = vbb->getCameraPitch(),
-              theta = 0;    //resultant angle inclusive of body pitch, camera pitch and pixel elevation
-        if(VisionConstants::D2P_INCLUDE_BODY_PITCH) {
-            if(vbb->isBodyPitchValid()) {
-                d2pvalid = true;
-                float body_pitch = vbb->getBodyPitch();
-                theta = mathGeneral::PI*0.5 - cam_pitch + elevation - body_pitch;
-                d2p = cam_height / cos(theta);
-            }
-        }
-        else {
-            d2pvalid = true;
-
-            theta = mathGeneral::PI*0.5 - cam_pitch + elevation;
-            //d2p = cam_height * tan(theta);
-            d2p = cam_height / cos(theta);
-        }
-    }
-
-    //get distance from width
-    width_dist = VisionConstants::GOAL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
-
+    d2pvalid = vbb->distanceToPoint(bearing, elevation, d2p);
 
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         if(!d2pvalid)
-            debug << "Goal::distanceToBall: d2p invalid - combination methods will only return width_dist" << endl;
+            debug << "Goal::distanceToGoal: d2p invalid - combination methods will only return width_dist" << endl;
     #endif
+    //get distance from width
+    width_dist = VisionConstants::GOAL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
 
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;

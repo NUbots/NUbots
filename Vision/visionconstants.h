@@ -44,6 +44,8 @@ public:
     static float MIN_BALL_DIAMETER_PIXELS;
     static bool THROWOUT_INSIGNIFICANT_BALLS;
     static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL;
+    static bool THROWOUT_DISTANT_BALLS;
+    static float MAX_BALL_DISTANCE;
 
     //! Distance calculation options
     static bool D2P_INCLUDE_BODY_PITCH;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre

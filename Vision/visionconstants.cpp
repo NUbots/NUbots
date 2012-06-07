@@ -34,6 +34,8 @@ bool VisionConstants::THROWOUT_SMALL_BALLS;
 float VisionConstants::MIN_BALL_DIAMETER_PIXELS;
 bool VisionConstants::THROWOUT_INSIGNIFICANT_BALLS;
 int VisionConstants::MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL;
+bool VisionConstants::THROWOUT_DISTANT_BALLS;
+float VisionConstants::MAX_BALL_DISTANCE;
 // Distance calculation options
 bool VisionConstants::D2P_INCLUDE_BODY_PITCH;
 float VisionConstants::D2P_ANGLE_CORRECTION;
@@ -136,6 +138,14 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("MIN_BALL_DIAMETER_PIXELS") == 0) {
             in >> fval;
             MIN_BALL_DIAMETER_PIXELS = fval;
+        }
+        else if(name.compare("THROWOUT_DISTANT_BALLS") == 0) {
+            in >> bval;
+            THROWOUT_DISTANT_BALLS = bval;
+        }
+        else if(name.compare("MAX_BALL_DISTANCE") == 0) {
+            in >> fval;
+            MAX_BALL_DISTANCE = fval;
         }
         else if(name.compare("D2P_INCLUDE_BODY_PITCH") == 0) {
             in >> bval;

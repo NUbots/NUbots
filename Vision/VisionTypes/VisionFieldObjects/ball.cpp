@@ -7,7 +7,6 @@
 
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
-#include "Tools/Math/General.h"
 
 Ball::Ball()
 {
@@ -38,7 +37,7 @@ Ball::Ball(PointType centre, float radius)
     }
         
     m_radius = max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x)*0.5;
-    cout << m_radius << endl;
+    //cout << m_radius << endl;
     m_location_pixels.x = mathGeneral::roundNumberToInt(centre_pt.x);
     m_location_pixels.y = mathGeneral::roundNumberToInt(centre_pt.y);
     m_size_on_screen = Vector2<int>(m_radius*2, m_radius*2);
@@ -63,7 +62,7 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         debug << *this << endl;
     #endif
     if(valid) {
-        cout << m_transformed_spherical_pos.x << endl;
+        //cout << m_transformed_spherical_pos.x << endl;
         //add ball to mobileFieldObjects
         fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(m_transformed_spherical_pos,
                                                                         m_spherical_error,
@@ -90,31 +89,44 @@ bool Ball::check() const
     //throwout for below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL and
        not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
-        errorlog << "Ball::check() - Ball below horizon: should not occur" << endl;
+        errorlog << "Ball::check() - Ball above horizon: should not occur" << endl;
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: above kinematics horizon" << endl;
         #endif
         return false;
     }
-
-    //throwout for distances not agreeing
+    
+    //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
     if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL and
-       abs(d2p-width_dist) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL) {
+            width_dist + VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL < d2p) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Ball::check - Ball thrown out: distances don't agree" << endl;
+        debug << "Ball::check - Ball thrown out: width distance too much smaller than d2p" << endl;
             debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << endl;
         #endif
         return false;
     }
 
     //throw out if ball is too small
-    if(VisionConstants::THROWOUT_SMALL_BALLS and m_radius*2 < VisionConstants::MIN_BALL_DIAMETER_PIXELS) {
+    if(VisionConstants::THROWOUT_SMALL_BALLS and 
+        m_radius*2 < VisionConstants::MIN_BALL_DIAMETER_PIXELS) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: too small" << endl;
             debug << "\tdiameter: " << m_radius*2 << " MIN_BALL_DIAMETER_PIXELS: " << VisionConstants::MIN_BALL_DIAMETER_PIXELS << endl;
         #endif
+        return false;
     }
-
+    
+    //throw out if ball is too far away
+    if(VisionConstants::THROWOUT_DISTANT_BALLS and 
+        m_transformed_spherical_pos.x > VisionConstants::MAX_BALL_DISTANCE) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::check - Ball thrown out: too far away" << endl;
+            debug << "\td2p: " << m_transformed_spherical_pos.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << endl;
+        #endif
+        return false;
+    }
+    
+    //all checks passed, keep ball
     return true;
 }
 
@@ -189,26 +201,7 @@ float Ball::distanceToBall(float bearing, float elevation) {
 //        Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 //        d2p = result[0];
 //    }
-    if(vbb->isCameraHeightValid() && vbb->isCameraPitchValid()) {
-        float cam_height = vbb->getCameraHeight(),
-              cam_pitch = vbb->getCameraPitch(),
-              theta = 0;    //resultant angle inclusive of body pitch, camera pitch and pixel elevation
-        if(VisionConstants::D2P_INCLUDE_BODY_PITCH) {
-            if(vbb->isBodyPitchValid()) {
-                d2pvalid = true;
-                float body_pitch = vbb->getBodyPitch();
-                theta = mathGeneral::PI*0.5 - cam_pitch + elevation - body_pitch;
-                d2p = cam_height / cos(theta);
-            }
-        }
-        else {
-            d2pvalid = true;
-            
-            theta = mathGeneral::PI*0.5 - cam_pitch + elevation;
-            //d2p = cam_height * tan(theta);
-            d2p = cam_height / cos(theta);
-        }
-    }
+    d2pvalid = vbb->distanceToPoint(bearing, elevation, d2p);
     
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         if(!d2pvalid)
