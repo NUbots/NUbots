@@ -4,9 +4,17 @@
 #include <QMouseEvent>
 #include <qclipboard.h>
 #include <QApplication>
-#include <GL/glu.h>
 #include "Tools/Math/General.h"
 #include "Tools/FileFormats/LUTTools.h"
+
+// Apple has to be different...
+#if defined(__APPLE__) || defined(MACOSX)
+  #include <glu.h>
+#else
+  #include <GL/glu.h>
+#endif
+
+
 
 
 /*!

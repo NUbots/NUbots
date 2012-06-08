@@ -27,7 +27,13 @@
 #include "Kinematics/Horizon.h"
 #include <QPainter>
 #include <QDebug>
-#include <GL/glu.h>
+
+// Apple has to be different...
+#if defined(__APPLE__) || defined(MACOSX)
+  #include <glu.h>
+#else
+  #include <GL/glu.h>
+#endif
 
 OpenglManager::OpenglManager(): width(320), height(240)
 {
