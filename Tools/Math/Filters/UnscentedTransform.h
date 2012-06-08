@@ -23,6 +23,7 @@
  */
 
 #pragma once
+#include <iostream>
 
 class UnscentedTransform
 {
@@ -142,6 +143,32 @@ public:
     double covarianceSigmaWeight() const
     {
         return L() + lambda();
+    }
+
+    /*!
+    @brief Outputs a binary representation of the Unscented transform object to a stream.
+    @param output The output stream.
+    @return The output stream.
+    */
+    std::ostream& writeStreamBinary (std::ostream& output) const
+    {
+        output.write(reinterpret_cast<const char*>(&m_L), sizeof(m_L));
+        output.write(reinterpret_cast<const char*>(&m_alpha), sizeof(m_alpha));
+        output.write(reinterpret_cast<const char*>(&m_kappa), sizeof(m_kappa));
+        output.write(reinterpret_cast<const char*>(&m_beta), sizeof(m_beta));
+    }
+
+    /*!
+    @brief Reads in a Unscented Transform object from the input stream.
+    @param input The input stream.
+    @return The input stream.
+    */
+    std::istream& readStreamBinary (std::istream& input)
+    {
+        input.read(reinterpret_cast<char*>(&m_L), sizeof(m_L));
+        input.read(reinterpret_cast<char*>(&m_alpha), sizeof(m_alpha));
+        input.read(reinterpret_cast<char*>(&m_kappa), sizeof(m_kappa));
+        input.read(reinterpret_cast<char*>(&m_beta), sizeof(m_beta));
     }
 
 private:
