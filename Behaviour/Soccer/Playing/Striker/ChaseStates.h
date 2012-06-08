@@ -96,7 +96,7 @@ protected:
         
         if (not m_pan_started and not iskicking)
         {   
-            if (ball.estimatedDistance() < 100 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 3000)
+            if (ball.estimatedDistance() < 100 and ball.estimatedDistance > 20. and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 600)
             {   
                 
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
@@ -165,7 +165,7 @@ protected:
         if (not m_pan_started or m_pan_finished)
         {
             
-            if (ball.TimeSinceLastSeen() > 2300)
+            if (ball.TimeSinceLastSeen() > 1500)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
                 m_jobs->addMotionJob(new HeadPanJob(ball, 0.5));
@@ -173,7 +173,7 @@ protected:
             else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 750)
+                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 40)
                 {
                     #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                         debug << m_data->CurrentTime << ": Tracking ball" << endl;
@@ -181,16 +181,20 @@ protected:
                     //cout << m_data->CurrentTime << ": Tracking ball" << endl;
                     m_jobs->addMotionJob(new HeadTrackJob(ball));
                 } else {
-                    m_jobs->addMotionJob(new HeadPanJob(ball, 0.3));
+                    m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
                 }
             }
         }
         float targetKickDistance = 13.;
         
         
-        if((ball.estimatedDistance() < targetKickDistance) && ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) )) // && ball.TimeSeen() > 0 && m_pan_finished)
+        if((ball.estimatedDistance() < targetKickDistance) && 
+            ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) ) && 
+              fabs(ball.estimatedBearing()) > 0.25 && //ball is not "between" our feet
+              fabs(ball.estimatedBearing()) < 0.75) //ball is not "outside" our feet
+              // && ball.TimeSeen() > 0 && m_pan_finished)
         {
-            m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+            //m_jobs->addMotionJob(new WalkJob(0, 0, 0));
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
             kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
