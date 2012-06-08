@@ -51,15 +51,6 @@ VisionFieldObject::VFO_ID VisionFieldObject::getVFOFromName(const string &name)
         return UNKNOWN;
 }
 
-Vector2<float> VisionFieldObject::correctDistortion(const Vector2<float>& pt)
-{
-    Vector2<float> centre_relative = pt - Vector2<float>(160,120);
-    float r2 = centre_relative.x*centre_relative.x + centre_relative.y*centre_relative.y;
-    float corr_factor = 1 + VisionConstants::RADIAL_CORRECTION_COEFFICIENT*r2;
-    Vector2<float> result = centre_relative* corr_factor;
-    return Vector2<float>(result.x, result.y) + Vector2<float>(160,120);  //need to correct the additive
-}
-
 VisionFieldObject::VisionFieldObject()
 {
     

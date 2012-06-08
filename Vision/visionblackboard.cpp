@@ -228,6 +228,25 @@ const LookUpTable& VisionBlackboard::getLUT() const
     return LUT;
 }
 
+Vector2<float> VisionBlackboard::correctDistortion(const Vector2<float>& pt)
+{
+    float width_offset = original_image->getWidth()*0.5;
+    float height_offset = original_image->getHeight()*0.5;
+    //get position relative to centre
+    Vector2<float> centre_relative = pt - Vector2<float>(width_offset,height_offset);
+    //calculate squared distance from centre
+    float r2 = centre_relative.x*centre_relative.x + centre_relative.y*centre_relative.y;
+    //calculate correction factor -> 1+kr^2
+    float corr_factor = 1 + VisionConstants::RADIAL_CORRECTION_COEFFICIENT*r2;
+    //multiply by factor
+    Vector2<float> result = centre_relative* corr_factor;
+    //scale the edges back out to meet again
+    result.x /= (1+VisionConstants::RADIAL_CORRECTION_COEFFICIENT*width_offset*width_offset);
+    result.y /= (1+VisionConstants::RADIAL_CORRECTION_COEFFICIENT*height_offset*height_offset);
+    //get the original position back from the centre relative position
+    return Vector2<float>(result.x, result.y) + Vector2<float>(width_offset,height_offset);  
+}
+
 double VisionBlackboard::calculateBearing(double x) const {
     return atan( (original_image->getWidth()*0.5-x)  * (tan(m_FOV.x*0.5)) / (original_image->getWidth()*0.5) );
 }

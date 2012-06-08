@@ -1,4 +1,4 @@
-#include "visioncontrolwrapperpc.h"
+#include "visioncontrolwrappernuview.h"
 
 VisionControlWrapper* VisionControlWrapper::instance = 0;
 
@@ -30,4 +30,19 @@ int VisionControlWrapper::runFrame()
         return -1;  //failure - do not run vision
     }
     return controller->runFrame(true, true);
+}
+
+void VisionControlWrapper::setRawImage(NUImage* image)
+{
+    wrapper->setRawImage(image);
+}
+
+void VisionControlWrapper::setSensorData(NUSensorsData* sensors)
+{
+    wrapper->setSensorData(sensors);
+}
+
+void VisionControlWrapper::setFieldObjects(FieldObjects *fieldObjects)
+{
+    wrapper->setFieldObjects(fieldObjects);
 }

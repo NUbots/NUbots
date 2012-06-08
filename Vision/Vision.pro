@@ -81,7 +81,9 @@ HEADERS += \
     visionblackboard.h \
     visioncontroller.h \ 
     visionconstants.h \
-    Modules/balldetection.h
+    Modules/balldetection.h \
+    VisionWrapper/visioncontrolwrappernuview.h \
+    VisionWrapper/datawrappernuview.h
 
 SOURCES += \
     VisionTypes/coloursegment.cpp \
@@ -107,7 +109,9 @@ SOURCES += \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
-    Modules/balldetection.cpp
+    Modules/balldetection.cpp \
+    VisionWrapper/visioncontrolwrappernuview.cpp \
+    VisionWrapper/datawrappernuview.cpp
 
 ##robocup
 HEADERS += \

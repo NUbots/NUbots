@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "Vision/visionconstants.h"
+#include "Vision/visionblackboard.h"
 
 //PointType Transition::correctDistortion(const PointType& pt)
 //{
@@ -32,13 +33,12 @@ Transition::Transition(ColourSegment before, ColourSegment after, ScanDirection 
 
 void Transition::set(const PointType &location, ClassIndex::Colour before_colour, ClassIndex::Colour after_colour, ScanDirection &direction)
 {
-//    if(VisionConstants::DO_RADIAL_CORRECTION) {
-//        m_location = correctDistortion(location);
-//    }
-//    else {
-//        m_location = location;
-//    }
-    m_location = location;
+    if(VisionConstants::DO_RADIAL_CORRECTION) {
+        m_location = VisionBlackboard::getInstance()->correctDistortion(location);
+    }
+    else {
+        m_location = location;
+    }
     m_before_colour = before_colour;
     m_after_colour = after_colour;
     m_direction = direction;
@@ -51,11 +51,11 @@ void Transition::set(const ColourSegment& before, const ColourSegment& after, Sc
         if(before.getEnd() != after.getStart())
             debug << "Transition::set(): segments not adjacent" << endl;
     #endif
-    
-    m_location = before.getEnd();
-    m_before_colour = before.getColour();
-    m_after_colour = after.getColour();
-    m_direction = direction;
+    set(before.getEnd(), before.getColour(), after.getColour(), direction);
+//    m_location = before.getEnd();
+//    m_before_colour = before.getColour();
+//    m_after_colour = after.getColour();
+//    m_direction = direction;
 }
 
 /*! @brief Returns the transition pixel location.

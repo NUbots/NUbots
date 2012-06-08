@@ -97,6 +97,8 @@ public:
 
     const LookUpTable& getLUT() const;
     
+    
+    Vector2<float> correctDistortion(const Vector2<float>& pt);
     double calculateBearing(double x) const;
     double calculateElevation(double y) const; 
 

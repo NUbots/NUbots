@@ -10,7 +10,6 @@
 #include "Kinematics/Horizon.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "GLDisplay.h"
-#include "VisionOld/Vision.h"
 #include "Tools/Math/LSFittedLine.h"
 #include "VisionOld/CornerPoint.h"
 #include "VisionOld/Circle.h"
@@ -18,6 +17,9 @@
 #include <fstream>
 #include "FileAccess/LogFileReader.h"
 #include "debugverbositynetwork.h"
+
+//#include "VisionOld/Vision.h"
+#include "Vision/VisionWrapper/visioncontrolwrappernuview.h"
 
 class NUBlackboard;
 
@@ -125,7 +127,7 @@ private:
     const NUImage* rawImage;
 
     ClassifiedImage classImage, previewClassImage;
-    Vision vision;
+    VisionControlWrapper* vision;
     FieldObjects* AllObjects;
     int cameraNumber;
     Horizon horizonLine;
