@@ -96,9 +96,9 @@ protected:
         
         if (not m_pan_started and not iskicking)
         {   
-            if (ball.estimatedDistance() < 100 and ball.estimatedDistance() > 24. and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 600)
+            if (ball.estimatedDistance() < 100 and ball.estimatedDistance() > 34. and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
             {   
-                Blackboard->lookForBall = false;
+                //Blackboard->lookForBall = false;
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
                 StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
                 StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
@@ -125,7 +125,7 @@ protected:
                 }
                 m_jobs->addMotionJob(new HeadPanJob(posts, hackfactor));
                 m_pan_started = true;
-                m_pan_end_time = m_data->CurrentTime + 500;
+                m_pan_end_time = m_data->CurrentTime + 1000;
                 m_pan_time_captured = false;
                 m_pan_finished = false;
                 #if DEBUG_BEHAVIOUR_VERBOSITY > 2
@@ -134,11 +134,10 @@ protected:
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 1800)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 2500)
         {
             m_pan_started = false;
             m_pan_finished = false;
-            Blackboard->lookForBall = true;
         }
         
         // this is a hack to get the pan end time right given the delay in the update of the motion sensors
@@ -152,11 +151,9 @@ protected:
             {
                 m_pan_end_time = endtime;
                 m_pan_time_captured = true;
-                //Blackboard->lookForBall = true;
             }
             if (m_data->CurrentTime >= m_pan_end_time)
                 m_pan_finished = true;
-                Blackboard->lookForBall = true;
         }
         
         // this is a HUGE hack
@@ -165,9 +162,15 @@ protected:
         if (m_pan_started and not m_pan_finished)       
             ball.updateTimeLastSeen(m_data->CurrentTime - 1000);
         
+        /*if (m_data->CurrentTime >= m_pan_end_time+200) {
+            Blackboard->lookForBall = true;
+        } else if (m_data->CurrentTime <= m_pan_end_time and not m_pan_finished) {
+            Blackboard->lookForBall = false;
+        }*/
+        
         if (not m_pan_started or m_pan_finished)
         {
-            Blackboard->lookForBall = true;
+            
             if (ball.TimeSinceLastSeen() > 1500)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
