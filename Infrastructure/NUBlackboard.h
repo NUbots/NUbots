@@ -65,6 +65,7 @@ public:
     JobList* Jobs;
     GameInformation* GameInfo;
     TeamInformation* TeamInfo;
+    bool lookForBall;
 };
 
 extern NUBlackboard* Blackboard;
