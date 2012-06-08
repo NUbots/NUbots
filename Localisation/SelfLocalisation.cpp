@@ -530,18 +530,75 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     bool lost = false;
     if (m_lostCount > 20)
         lost = true;
-    fieldObjects->self = model->GenerateSelfState();
 
+    // Update the robots location.
+    fieldObjects->self = model->GenerateSelfState();
+    Self& self = fieldObjects->self;
+
+
+    // Now update the ball
     MobileObject& ball = fieldObjects->mobileFieldObjects[FieldObjects::FO_BALL];
+
+    // pre-calculate the trig.
+    float hcos = cos(self.Heading());
+    float hsin = sin(self.Heading());
+
+    // Retrieve the ball model values.
+    float relBallX = m_ball_model->mean(MobileObjectUKF::x_pos);
+    float relBallY = m_ball_model->mean(MobileObjectUKF::y_pos);
+    float relBallSdX = m_ball_model->sd(MobileObjectUKF::x_pos);
+    float relBallSdY = m_ball_model->sd(MobileObjectUKF::y_pos);
+    float relBallXVel = m_ball_model->mean(MobileObjectUKF::x_vel);
+    float relBallYVel = m_ball_model->mean(MobileObjectUKF::y_vel);
+    float relBallSdXVel = m_ball_model->sd(MobileObjectUKF::x_vel);
+    float relBallSdYVel = m_ball_model->sd(MobileObjectUKF::y_vel);
+
+    // Rotate the relative ball postion to alight with the forward looking robot on the field.
+    float rotatedX = relBallX * hcos + relBallY * hsin;
+    float rotatedY = -relBallX * hsin + relBallY * hcos;
+
+    // Calculate the Ball location in field coordinates.
+    float ballFieldLocationX = self.wmX() + rotatedX;
+    float ballFieldLocationY = self.wmY() + rotatedY;
+
+    // Calculate the ball location SD in field coordinates. - Not yet implemented
+    float ballFieldSdX = relBallSdX;
+    float ballFieldSdY = relBallSdY;
+
+    // Calculate the Ball velocity in field coordinates.
+    float ballFieldVelocityX = relBallXVel * hcos + relBallYVel * hsin;
+    float ballFieldVelocityY = -relBallXVel * hsin + relBallYVel * hcos;
+
+    // Calculate the ball velocity SD in field coordinates. - Not yet implemented
+    float ballFieldVelocitySdX = relBallSdXVel;
+    float ballFieldVelocitySdY = relBallSdYVel;
+
+    // Calculate the relative distance and heading.
+    float ballDistance = sqrt(relBallX*relBallX + relBallY*relBallY);
+    float ballHeading = atan2(relBallY, relBallX);
+
+    // Write the results to the ball object.
+    ball.updateObjectLocation(ballFieldLocationX, ballFieldLocationY, ballFieldSdX, ballFieldSdY);
+    ball.updateObjectVelocities(ballFieldVelocityX,ballFieldVelocityY,ballFieldVelocitySdX, ballFieldVelocitySdY);
+    ball.updateEstimatedRelativeVariables(ballDistance, ballHeading, 0.0f);
+    ball.updateSharedCovariance(m_ball_model->covariance());
+
+
+    // Get the visual information
+    // Note: THIS IS FOR DEBUGGING PURPOSES - REMOVE LATER>
     double measuredDistance = ball.measuredDistance() * cos (ball.measuredElevation());
     double measuredBearing = ball.measuredBearing();
     double ballMeasuredX = measuredDistance * cos(measuredBearing);
     double ballMeasuredY = measuredDistance * sin(measuredBearing);
 
+    std::cout << "Robot: x = " << self.wmX() << " y = " << self.wmY() << " heading = " << self.Heading() << std::endl;
+//    std::cout << "Relative ball: x = " << relBallX << " y = " << relBallY << std::endl;
+//    std::cout << "Field ball: x = " << ballFieldLocationX << " y = " << ballFieldLocationY << std::endl;
+
+
     if(!ball.isObjectVisible())
     {
-        ballMeasuredX = 0;
-        ballMeasuredY = 0;
+        ballMeasuredX = ballMeasuredY = 0;
     }
 
 //    std::cout << "Ball ";
@@ -557,7 +614,9 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
 //    }
 //    std::cout << "Ball x: " << m_ball_model->mean(MobileObjectUKF::x_pos) << " Ball y: " << m_ball_model->mean(MobileObjectUKF::y_pos);
 //    std::cout << " Ball x velocity: " << m_ball_model->mean(MobileObjectUKF::x_vel) << " Ball y velocity: " << m_ball_model->mean(MobileObjectUKF::y_vel) << std::endl;
-    std::cout << ballMeasuredX << "," << ballMeasuredY << "," << m_ball_model->mean(MobileObjectUKF::x_pos) << "," << m_ball_model->mean(MobileObjectUKF::y_pos) << "," << m_ball_model->mean(MobileObjectUKF::x_vel) << "," <<  m_ball_model->mean(MobileObjectUKF::y_vel) << std::endl;
+
+
+//    std::cout << ballMeasuredX << "," << ballMeasuredY << "," << m_ball_model->mean(MobileObjectUKF::x_pos) << "," << m_ball_model->mean(MobileObjectUKF::y_pos) << "," << m_ball_model->mean(MobileObjectUKF::x_vel) << "," <<  m_ball_model->mean(MobileObjectUKF::y_vel) << std::endl;
 }
 
 
@@ -1010,11 +1069,6 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
     odometry[1][0] = odomLeft;
     odometry[2][0] = odomTurn;
 
-    // testing values. Not up to odometry yet
-    odometry[0][0] = 0.0;
-    odometry[1][0] = 0.0;
-    odometry[2][0] = 0.0;
-
     // calculate the measurement noise.
     Matrix measurementNoise = Matrix(3,3,true);
     measurementNoise[0][0] = 0.2*0.2; // Robot X coord.
@@ -1023,10 +1077,10 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
 
     // calculate the linear process noise.
     Matrix processNoise = Matrix(4,4,true);
-    processNoise[0][0] = 15*15;
-    processNoise[1][1] = 15*15;
-    processNoise[2][2] = 30*30;
-    processNoise[3][3] = 30*30;
+    processNoise[0][0] = 20*20;
+    processNoise[1][1] = 20*20;
+    processNoise[2][2] = 40*40;
+    processNoise[3][3] = 40*40;
 
     double deltaTimeSeconds = timeIncrement * 1e-3; // Convert from milliseconds to seconds.
 
