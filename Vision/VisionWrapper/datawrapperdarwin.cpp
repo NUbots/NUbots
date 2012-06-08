@@ -68,6 +68,8 @@ DataWrapper::DataWrapper()
     numFramesProcessed = 0;
     numSavedImages = 0;
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
+    Blackboard->lookForBall = true; //initialise
+    Blackboard->lookForLandmarks = true; //initialise
 }
 
 DataWrapper::~DataWrapper()

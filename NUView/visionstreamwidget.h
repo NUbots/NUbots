@@ -23,7 +23,7 @@ class visionStreamWidget : public QWidget
     Q_OBJECT
 public:
     visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent = 0);
-
+    ~visionStreamWidget();
 
 public slots:
     /**
@@ -92,8 +92,8 @@ private:
     QWidget* window;
     QTcpSocket* tcpSocket;
     QTimer time;
-    NUImage image;
-    NUSensorsData sensors;
+    NUImage* image;
+    NUSensorsData* sensors;
     QTime timeToRecievePacket;
 
 };

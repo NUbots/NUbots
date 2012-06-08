@@ -9,7 +9,7 @@ class AmbiguousObject : public Object{
 //		AmbiguousObject();
                 AmbiguousObject(int id = -1, const std::string& initName = "Unknown");
 		~AmbiguousObject();
-                vector<int> getPossibleObjectIDs(){return PossibleObjectIDs;}
+                vector<int> getPossibleObjectIDs() const {return PossibleObjectIDs;}
 		void addPossibleObjectID(int ID);
                 void setPossibleObjectIDs(vector<int> VectorOfIDs);
                 bool isObjectAPossibility(int ID);

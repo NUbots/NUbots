@@ -120,6 +120,7 @@ private:
     NUViewIO* m_nuview_io;
     //! Converts robot formatted data into opengl drawing instructions to form displays.
     OpenglManager glManager;
+    QString m_previous_log_path;
 
     int getNumMdiWindowType(const QString& windowType);
 
@@ -155,6 +156,7 @@ private:
     GameInformationDisplayWidget* gameInfoDisplay;
     TeamInformationDisplayWidget* teamInfoDisplay;
     QTextBrowser* locInfoDisplay;
+    QTextBrowser* selflocInfoDisplay;
     //QDockWidget* walkParameterDock;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.

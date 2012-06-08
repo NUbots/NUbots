@@ -19,15 +19,6 @@ public:
         InvalidGoal
     };
     
-    enum GOAL_DISTANCE_METHOD {
-        Width,
-        D2P,
-        Average,
-        Least
-    };
-    
-    static const GOAL_DISTANCE_METHOD METHOD = Least;
-    
     static string getIDName(GoalID id);
        
     Goal(GoalID id=InvalidGoal, const Quad& corners=Quad(0,0,0,0));

@@ -2,6 +2,12 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 
+#include "Vision/visionconstants.h"
+#include "Vision/visionblackboard.h"
+
+#include "Kinematics/Kinematics.h"
+#include "Tools/Math/Matrix.h"
+
 string Beacon::getIDName(BeaconID id)
 {
     switch(id) {
@@ -16,9 +22,13 @@ Beacon::Beacon(BeaconID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
-    //SET WIDTH
-
-    check(); //this must be last
+    
+    m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
+    m_bottom_centre = corners.getBottomCentre();
+    m_location_pixels = corners.getCentre();
+    //CALCULATE DISTANCE AND BEARING VALS
+    calculatePositions();
+    valid = check(); //this must be last
 }
 
 const Quad& Beacon::getQuad() const
@@ -40,27 +50,69 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Beacon::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
+        debug << "    " << *this << endl;
     #endif
         
-    switch(m_id) {
-    case YellowBeacon:
-        
-        break;
-    case BlueBeacon:
-        
-        break;
-    case UnknownBeacon:
-        
-        break;
-    default:
-        //invalid object - do not push to fieldobjects
-        errorlog << "Beacon::addToExternalFieldObjects - attempt to add invalid beacon object" << endl;
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Beacon::addToExternalFieldObjects - attempt to add invalid beacon object" << endl;
-        #endif
-       return false;
-    }
-    return true;
+        if(valid) {
+            #if VISION_FIELDOBJECT_VERBOSITY > 1
+                debug << "Beacon::addToExternalFieldObjects - valid" << endl;
+            #endif
+            AmbiguousObject newAmbObj;
+            FieldObjects::StationaryFieldObjectID stat_id;
+            bool stationary = false;
+    
+            switch(m_id) {
+            case YellowBeacon:
+                stat_id = FieldObjects::FO_YELLOW_BEACON;
+                stationary = true;
+                break;
+            case BlueBeacon:
+                stat_id = FieldObjects::FO_BLUE_BEACON;
+                stationary = true;
+                break;
+            case UnknownBeacon:
+                newAmbObj = AmbiguousObject(FieldObjects::FO_BEACON_UNKNOWN, "Unknown Beacon");
+                newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_BEACON);
+                newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_BEACON);
+                stationary = false;
+                break;
+            default:
+                //invalid object - do not push to fieldobjects
+                errorlog << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
+                #if VISION_FIELDOBJECT_VERBOSITY > 1
+                    debug << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
+                #endif
+                return false;
+            }
+    
+            if(stationary) {
+                //add Beacon to stationaryFieldObjects
+                fieldobjects->stationaryFieldObjects[stat_id].UpdateVisualObject(m_transformed_spherical_pos,
+                                                                                m_spherical_error,
+                                                                                m_location_angular,
+                                                                                m_location_pixels,
+                                                                                m_size_on_screen,
+                                                                                timestamp);
+            }
+            else {
+                //update ambiguous Beacon and add it to ambiguousFieldObjects
+                newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
+                                             m_spherical_error,
+                                             m_location_angular,
+                                             m_location_pixels,
+                                             m_size_on_screen,
+                                             timestamp);
+                fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
+            }
+    
+            return true;
+        }
+        else {
+            #if VISION_FIELDOBJECT_VERBOSITY > 1
+                debug << "Beacon::addToExternalFieldObjects - invalid" << endl;
+            #endif
+            return false;
+        }
 }
 
 bool Beacon::check() const
@@ -70,13 +122,103 @@ bool Beacon::check() const
 
 void Beacon::calculatePositions()
 {
-    //! @todo implement 
-    m_spherical_position[0] = 0; //dist
-    m_spherical_position[1] = 0; //bearing
-    m_spherical_position[2] = 0; //elevation
+    VisionBlackboard* vbb = VisionBlackboard::getInstance();
+    //To the bottom of the Goal Post.
+    float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
+    float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
     
-    m_location_angular.x = 0; //bearing
-    m_location_angular.y = 0; //elevation
+    float distance = distanceToBeacon(bearing, elevation);
+
+    //debug << "Goal::calculatePositions() distance: " << distance << endl;
+    
+    m_spherical_position[0] = distance;//distance
+    m_spherical_position[1] = bearing;
+    m_spherical_position[2] = elevation;
+    
+    m_location_angular = Vector2<float>(bearing, elevation);
+    //m_spherical_error - not calculated
+        
+//    if(vbb->isCameraTransformValid()) {        
+//        Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
+//        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
+//    }
+    if(vbb->isCameraToGroundValid()) {        
+        Matrix cameraToGroundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
+        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,m_spherical_position);
+    }
+    else {
+        m_transformed_spherical_pos = Vector3<float>(0,0,0);
+    }
+    
+    #if VISION_FIELDOBJECT_VERBOSITY > 2
+        debug << "Beacon::calculatePositions: ";
+        debug << d2p << " " << width_dist << " " << distance << " " << m_transformed_spherical_pos.x << endl;
+    #endif
+}
+
+/*!
+*   @brief Calculates the distance using the set METHOD and the provided coordinate angles.
+*   @param bearing The angle about the z axis.
+*   @param elevation The angle about the y axis.
+*/
+float Beacon::distanceToBeacon(float bearing, float elevation) {
+    VisionBlackboard* vbb = VisionBlackboard::getInstance();
+    //reset distance values
+    bool d2pvalid = false;
+    d2p = 0,
+    width_dist = 0;
+    //get distance to point from base
+//    if(vbb->isCameraToGroundValid())
+//    {
+//        d2pvalid = true;
+//        Matrix camera2groundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
+//        Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
+//        d2p = result[0];
+//    }
+    d2pvalid = vbb->distanceToPoint(bearing, elevation, d2p);
+
+    #if VISION_FIELDOBJECT_VERBOSITY > 1
+        if(!d2pvalid)
+            debug << "Beacon::distanceToBeacon: d2p invalid - combination methods will only return width_dist" << endl;
+    #endif
+    //get distance from width
+    width_dist = VisionConstants::BEACON_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
+
+    #if VISION_FIELDOBJECT_VERBOSITY > 1
+        debug << "Beacon::distanceToBeacon: bearing: " << bearing << " elevation: " << elevation << endl;
+        debug << "Beacon::distanceToBeacon: d2p: " << d2p << endl;
+        debug << "Beacon::distanceToBeacon: m_size_on_screen.x: " << m_size_on_screen.x << endl;
+        debug << "Beacon::distanceToBeacon: width_dist: " << width_dist << endl;
+    #endif
+    switch(VisionConstants::BEACON_DISTANCE_METHOD) {
+    case VisionConstants::D2P:
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::distanceToBeacon: Method: Combo" << endl;
+        #endif
+        return d2p;
+    case VisionConstants::Width:
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::distanceToBeacon: Method: Width" << endl;
+        #endif
+        return width_dist;
+    case VisionConstants::Average:
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::distanceToBeacon: Method: Average" << endl;
+        #endif
+        //average distances
+        if(d2pvalid)
+            return (d2p + width_dist) * 0.5;
+        else
+            return width_dist;
+    case VisionConstants::Least:
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::distanceToBeacon: Method: Least" << endl;
+        #endif
+        if(d2pvalid)
+            return min(d2p, width_dist);
+        else
+            return width_dist;
+    }
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.
@@ -85,8 +227,12 @@ void Beacon::calculatePositions()
 ostream& operator<< (ostream& output, const Beacon& b)
 {
     output << "Beacon - pixelloc: [" << b.getLocationPixels().x << ", " << b.getLocationPixels().y << "]";
-    output << " angularloc: [" << b.getLocationAngular().x << ", " << b.getLocationAngular().y << "]";
-    output << " relative field coords: [" << b.getRelativeFieldCoords().x << ", " << b.getRelativeFieldCoords().y << ", " << b.getRelativeFieldCoords().z << "]";
+    output << "\tpixelloc: [" << b.m_location_pixels.x << ", " << b.m_location_pixels.y << "]" << endl;
+    output << " angularloc: [" << b.m_location_angular.x << ", " << b.m_location_angular.y << "]" << endl;
+    output << "\trelative field coords: [" << b.m_spherical_position.x << ", " << b.m_spherical_position.y << ", " << b.m_spherical_position.z << "]" << endl;
+    output << "\ttransformed field coords: [" << b.m_transformed_spherical_pos.x << ", " << b.m_transformed_spherical_pos.y << ", " << b.m_transformed_spherical_pos.z << "]" << endl;
+    output << "\tspherical error: [" << b.m_spherical_error.x << ", " << b.m_spherical_error.y << "]" << endl;
+    output << "\tsize on screen: [" << b.m_size_on_screen.x << ", " << b.m_size_on_screen.y << "]";
     return output;
 }
 

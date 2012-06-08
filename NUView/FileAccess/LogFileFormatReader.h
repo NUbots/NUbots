@@ -20,7 +20,7 @@ class LogFileFormatReader : public QObject
 Q_OBJECT
 public:
     explicit LogFileFormatReader(QObject *parent = 0);
-    ~LogFileFormatReader();
+    virtual ~LogFileFormatReader();
     virtual int openFile(const QString& filename) = 0;  // Must be implemented by derived classes.
     virtual bool closeFile() = 0;                       // Must be implemented by derived classes.
 

@@ -35,6 +35,7 @@ public:
 	
 	void print(); // print values
         std::vector<float> asVector();
+        bool isValid();
 };
 
 // Overloaded Operators

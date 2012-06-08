@@ -1,9 +1,9 @@
 #ifndef ORIENTATIONUKF_H
 #define ORIENTATIONUKF_H
 
-#include "Tools/Math/UKF.h"
+#include "Tools/Math/depUKF.h"
 
-class OrientationUKF : public UKF
+class OrientationUKF : public depUKF
 {
 public:
     OrientationUKF();

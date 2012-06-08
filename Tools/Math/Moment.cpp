@@ -1,4 +1,5 @@
 #include "Moment.h"
+#include <assert.h>
 #include <sstream>
 
 /*! @brief Default constructor
@@ -8,7 +9,7 @@
  */
 Moment::Moment(): m_numStates(0)
 {
-    m_mean = Matrix(m_numStates,0,false);
+    m_mean = Matrix(m_numStates,1,false);
     m_covariance = Matrix(m_numStates, m_numStates, false);
 }
 
@@ -20,8 +21,26 @@ Moment::Moment(): m_numStates(0)
  */
 Moment::Moment(unsigned int numStates): m_numStates(numStates)
 {
-    m_mean = Matrix(m_numStates,0,false);
+    m_mean = Matrix(m_numStates,1,false);
     m_covariance = Matrix(m_numStates, m_numStates, false);
+}
+
+Moment::Moment(const Moment& source): m_numStates(source.m_numStates)
+{
+    m_mean = source.m_mean;
+    m_covariance = source.m_covariance;
+}
+
+Moment& Moment::operator=(const Moment& source)
+{
+    if (this != &source) // protect against invalid self-assignment
+    {
+        m_numStates = source.m_numStates;
+        setMean(source.mean());
+        setCovariance(source.covariance());
+    }
+    // by convention, always return *this
+    return *this;
 }
 
 /*! @brief Returns the mean of the specified state.
@@ -47,6 +66,13 @@ Matrix Moment::mean() const
 Matrix Moment::covariance() const
 {
     return m_covariance;
+}
+
+float Moment::covariance(unsigned int row, unsigned int col) const
+{
+    if( (row < m_numStates) and (col < m_numStates) )
+        return m_covariance[row][col];
+    return 0.0f;
 }
 
 /*! @brief Returns the standard deviation of the specified state.
@@ -77,10 +103,8 @@ float Moment::variance(unsigned int stateNumber) const
  */
 void Moment::setMean(const Matrix& newMean)
 {
-    if( ((unsigned int)newMean.getm() == m_numStates) && newMean.getn() == 1)
-    {
-        m_mean = newMean;
-    }
+    assert(((unsigned int)newMean.getm() == m_numStates) && (newMean.getn() == 1));
+    m_mean = newMean;
     return;
 }
 
@@ -92,10 +116,8 @@ void Moment::setMean(const Matrix& newMean)
  */
 void Moment::setCovariance(const Matrix& newCovariance)
 {
-    if( ((unsigned int)newCovariance.getm() == m_numStates) && ((unsigned int)newCovariance.getn() == m_numStates))
-    {
-        m_covariance = newCovariance;
-    }
+    assert((newCovariance.getm() == m_numStates) && (newCovariance.getn() == m_numStates));
+    m_covariance = newCovariance;
     return;
 }
 
@@ -111,7 +133,7 @@ bool Moment::isNull() const
 std::string Moment::string() const
 {
     std::stringstream result;
-    result << "Mean: " << mean() << std::endl;
+    result << "Mean: " << std::endl << mean() << std::endl;
     result << "Covariance: " << std::endl;
     result << covariance();
     return result.str();
@@ -142,4 +164,38 @@ void Moment::writeData(std::ostream& output) const
         }
     }
     return;
+}
+
+std::ostream& operator<< (std::ostream& output, const Moment& p_moment)
+{
+    output.write(reinterpret_cast<const char*>(&p_moment.m_numStates), sizeof(p_moment.m_numStates));
+    for (unsigned int i = 0; i < p_moment.m_numStates; ++i)
+    {
+        output.write(reinterpret_cast<const char*>(&p_moment.m_mean[i][0]), sizeof(p_moment.m_mean[i][0]));
+    }
+    for (unsigned int i = 0; i < p_moment.m_numStates; ++i)
+    {
+        for (unsigned int j = 0; j < p_moment.m_numStates; ++j)
+        {
+        output.write(reinterpret_cast<const char*>(&p_moment.m_covariance[i][j]), sizeof(p_moment.m_covariance[i][j]));
+        }
+    }
+    return output;
+}
+
+std::istream& operator>> (std::istream& input, Moment& p_moment)
+{
+    input.read(reinterpret_cast<char*>(&p_moment.m_numStates), sizeof(p_moment.m_numStates));
+    for (unsigned int i = 0; i < p_moment.m_numStates; ++i)
+    {
+        input.read(reinterpret_cast<char*>(&p_moment.m_mean[i][0]), sizeof(p_moment.m_mean[i][0]));
+    }
+    for (unsigned int i = 0; i < p_moment.m_numStates; ++i)
+    {
+        for (unsigned int j = 0; j < p_moment.m_numStates; ++j)
+        {
+        input.read(reinterpret_cast<char*>(&p_moment.m_covariance[i][j]), sizeof(p_moment.m_covariance[i][j]));
+        }
+    }
+    return input;
 }

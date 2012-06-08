@@ -15,37 +15,37 @@ visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *paren
     robotName = QString("");
     setWindowTitle(tr("Vision"));
     setObjectName(tr("Vision"));
-    nameLabel = new QLabel("Robot name: ");
-    nameLineEdit = new QLineEdit();
+    nameLabel = new QLabel("Robot name: ", this);
+    nameLineEdit = new QLineEdit(this);
     nameLineEdit->setText("IP ADDRESS");
-    connectButton = new QPushButton("Connect");
-    disconnectButton = new QPushButton("Disconnect");
-    getImageButton = new QPushButton("Get an &Image");
-    startStreamButton = new QPushButton("Start Stream");
-    stopStreamButton = new QPushButton("Stop Stream");
-    layout = new QVBoxLayout;
-    selectLayout1 = new QHBoxLayout;
+    connectButton = new QPushButton("Connect",this);
+    disconnectButton = new QPushButton("Disconnect",this);
+    getImageButton = new QPushButton("Get an &Image",this);
+    startStreamButton = new QPushButton("Start Stream",this);
+    stopStreamButton = new QPushButton("Stop Stream",this);
+    layout = new QVBoxLayout(this);
+    selectLayout1 = new QHBoxLayout(this);
     selectLayout1->setAlignment(Qt::AlignTop);
     selectLayout1->addWidget(nameLabel);
     selectLayout1->addWidget(nameLineEdit,2);
     //selectLayout1->addWidget(connectButton,1);
     selectLayout1->addWidget(getImageButton,1);
-    selectLayout2 = new QHBoxLayout;
-    statusLabel = new QLabel("Status: ");
-    statusNetworkLabel = new QLabel("Not connected");
-    frameRateLabel = new QLabel("Maximum Frame Rate (FPS): ");
-    frameRateMessageLabel = new QLabel("0");
+    selectLayout2 = new QHBoxLayout(this);
+    statusLabel = new QLabel("Status: ",this);
+    statusNetworkLabel = new QLabel("Not connected",this);
+    frameRateLabel = new QLabel("Maximum Frame Rate (FPS): ",this);
+    frameRateMessageLabel = new QLabel("0",this);
     selectLayout2->setAlignment(Qt::AlignTop);
     selectLayout2->addWidget(statusLabel);
     selectLayout2->addWidget(statusNetworkLabel,2);
 
 
-    selectLayout3 = new QHBoxLayout;
+    selectLayout3 = new QHBoxLayout(this);
     selectLayout3->setAlignment(Qt::AlignTop);
     selectLayout3->addWidget(startStreamButton,1);
     selectLayout3->addWidget(stopStreamButton,1);
 
-    selectLayout4 = new QHBoxLayout;
+    selectLayout4 = new QHBoxLayout(this);
     selectLayout4->setAlignment(Qt::AlignTop);
     selectLayout4->addWidget(frameRateLabel,2);
     selectLayout4->addWidget(frameRateMessageLabel,1);
@@ -82,9 +82,15 @@ visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *paren
     //time.setSingleShot(true);
     connect(&time,SIGNAL(timeout()),this,SLOT(sendRequestForImage()));
 
-
+    image = new NUImage();
+    sensors = new NUSensorsData();
 }
 
+visionStreamWidget::~visionStreamWidget()
+{
+    delete image;
+    delete sensors;
+}
 
 //SLOTS:
 void visionStreamWidget::connectToRobot()
@@ -230,12 +236,12 @@ void visionStreamWidget::readPendingData()
         {
             std::stringstream buffer;
             buffer.write(reinterpret_cast<char*>(netdata.data()+ sizeof(sizeOfSensors)), imageSize);
-            buffer >> image;
-            emit rawImageChanged(&image);
+            buffer >> (*image);
+            emit rawImageChanged(image);
             buffer.write(reinterpret_cast<char*>(netdata.data()+ sizeof(sizeOfSensors) + imageSize), sensorsSize);
-            buffer >> sensors;
+            buffer >> (*sensors);
             qDebug() << "Size of Data:" << sensorsSize;
-            emit sensorsDataChanged(&sensors);
+            emit sensorsDataChanged(sensors);
 
             int mstime = timeToRecievePacket.elapsed();
             time.setInterval(0);

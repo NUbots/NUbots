@@ -19,7 +19,7 @@ public:
 public:
     explicit SplitStreamFileFormatReader(QObject *parent = 0);
     explicit SplitStreamFileFormatReader(const QString& filename, QObject *parent = 0);
-    ~SplitStreamFileFormatReader();
+    virtual ~SplitStreamFileFormatReader();
 
     int openFile(const QString& filename);
     bool closeFile();

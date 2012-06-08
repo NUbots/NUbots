@@ -26,7 +26,7 @@ Goal::Goal(GoalID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
-    //SET WIDTH
+    
     m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
     m_bottom_centre = corners.getBottomCentre();
     m_location_pixels = corners.getCentre();
@@ -257,24 +257,30 @@ float Goal::distanceToGoal(float bearing, float elevation) {
         debug << "Goal::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
         debug << "Goal::distanceToGoal: width_dist: " << width_dist << endl;
     #endif
-    switch(METHOD) {
-    case D2P:
+    switch(VisionConstants::GOAL_DISTANCE_METHOD) {
+    case VisionConstants::D2P:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Ball::distanceToBall: Method: Combo" << endl;
+            debug << "Goal::distanceToGoal: Method: Combo" << endl;
         #endif
         return d2p;
-    case Width:
+    case VisionConstants::Width:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Ball::distanceToBall: Method: Width" << endl;
+            debug << "Goal::distanceToGoal: Method: Width" << endl;
         #endif
         return width_dist;
-    case Average:
+    case VisionConstants::Average:
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::distanceToGoal: Method: Average" << endl;
+        #endif
         //average distances
         if(d2pvalid)
             return (d2p + width_dist) * 0.5;
         else
             return width_dist;
-    case Least:
+    case VisionConstants::Least:
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::distanceToGoal: Method: Least" << endl;
+        #endif
         if(d2pvalid)
             return min(d2p, width_dist);
         else

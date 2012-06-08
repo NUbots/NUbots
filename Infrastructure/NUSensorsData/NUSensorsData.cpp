@@ -1210,8 +1210,10 @@ ostream& operator<< (ostream& output, const NUSensorsData& p_data)
  */
 istream& operator>> (istream& input, NUSensorsData& p_data)
 {
-    input >> p_data.m_common_ids;
-    input >> p_data.m_ids_copy;
+    //input >> p_data.m_common_ids;
+    readIdList(input, p_data.m_common_ids);
+    //input >> p_data.m_ids_copy;
+    readIdList(input, p_data.m_ids_copy);
     input >> p_data.m_id_to_indices;
     input >> p_data.m_available_ids;
     p_data.m_sensors.clear();
@@ -1230,4 +1232,33 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
     return input;
 }
 
+void readIdList(istream& input, std::vector<NUData::id_t*>& list)
+{
+    stringstream wholevector;
+    //list.clear();
+    // get all of the data between [ ... ]
+    input.ignore(128, '[');
+    char c;
+    int brackets = 1;
+    while (brackets != 0 and input.good())
+    {
+        input.get(c);
+        wholevector << c;
+        if (c == '[')
+            brackets++;
+        else if (c == ']')
+            brackets--;
+    }
+
+    NUData::id_t* buffer;
+    unsigned int counter = 0;
+    // now split the data based on the commas
+    while (wholevector.peek() != ']' and wholevector.good())
+    {
+        buffer = list[counter++];
+        wholevector >> buffer;
+        wholevector.ignore(128, ',');
+        //list.push_back(buffer);
+    }
+}
 

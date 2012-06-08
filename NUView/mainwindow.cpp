@@ -19,6 +19,7 @@
 #include <QTabWidget>
 #include <QImage>
 #include <typeinfo>
+#include <QFileInfo>
 
 #include "NUPlatform/NUPlatform.h"
 #include "Infrastructure/NUBlackboard.h"
@@ -45,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     qDebug() << "NUView is starting in: MainWindow.cpp";
     debug.open("debug.log");
     errorlog.open("error.log");
+    m_previous_log_path = "";
 
     //initialise a static int to count image saves
     GLDisplay::imageCount = 0;
@@ -112,6 +114,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     locInfoDock->setWidget(locInfoDisplay);
     locInfoDock->setShown(false);
     addDockWidget(Qt::RightDockWidgetArea,locInfoDock);
+
+    selflocInfoDisplay = new QTextBrowser(this);
+    QDockWidget* selflocInfoDock = new QDockWidget("Self Localisation Information");
+    selflocInfoDock->setObjectName("Self Localisation Information");
+    selflocInfoDock->setWidget(selflocInfoDisplay);
+    selflocInfoDock->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,selflocInfoDock);
 
     // Add localisation widget
     localisation = new LocalisationWidget(this);
@@ -500,26 +509,38 @@ void MainWindow::createConnections()
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
 
     connect(offlinelocDialog,SIGNAL(LocalisationInfoChanged(QString)),locInfoDisplay, SLOT(setText(QString)));
+    connect(offlinelocDialog,SIGNAL(SelfLocalisationInfoChanged(QString)),selflocInfoDisplay, SLOT(setText(QString)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
     qDebug() <<"Finnished Connecting Widgets";
 }
 
 void MainWindow::RunOfflineLocalisation()
 {
-    //if(!offlinelocDialog) offlinelocDialog = new OfflineLocalisationDialog(this);
-
-    offlinelocDialog->show();
+    offlinelocDialog->show();   // Make visible.
+    offlinelocDialog->raise();  // Bring to foreground.
     return;
 }
 
 void MainWindow::openLog()
 {
-
+    QString intial_directory = ".";
+    if(!m_previous_log_path.isEmpty())
+    {
+        intial_directory = m_previous_log_path;
+    }
     QString fileName = QFileDialog::getOpenFileName(this,
-                            tr("Open Replay File"), ".",
+                            tr("Open Replay File"), intial_directory,
                             tr("All NUbot Image Files(*.nul;*.nif;*.nurf;*.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
-    openLog(fileName);
-
+    if(!fileName.isEmpty())
+    {
+        QFileInfo file_info(fileName);
+        if(file_info.exists())
+        {
+            m_previous_log_path = file_info.absolutePath();
+            openLog(fileName);
+        }
+    }
+    return;
 }
 
 void MainWindow::openLog(const QString& fileName)
@@ -854,6 +875,7 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
     connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
     connect(offlinelocDialog, SIGNAL(LocalisationChanged(const Localisation*)),temp, SLOT(SetLocalLocalisation(const Localisation*)));
+    connect(offlinelocDialog, SIGNAL(SelfLocalisationChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
     return window;

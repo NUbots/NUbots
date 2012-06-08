@@ -62,9 +62,12 @@ public:
             m_game_info->doManualStateChange();
         
         //head tracking job
-        //HeadTrackJob* head = new HeadTrackJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]);
-        //HeadPanJob* head = new HeadPanJob(m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL], 0.5);
         //m_provider->m_jobs->addMotionJob(head);
+
+        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+            m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
+        else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
         
         NUActionatorsData* m_actions = Blackboard->Actions;
         
@@ -85,7 +88,7 @@ public:
         nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
         
         //UPDATE HEAD
-        m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
+        //m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
 
         //UPDATE ARMS:
         m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 30);
