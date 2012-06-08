@@ -23,7 +23,8 @@ private:
     DataWrapper* wrapper;
     //for virtualnubot
     void setRawImage(NUImage* image);
-    void setSensorData(NUSensorsData* NUSensorsData);
+    void setSensorData(NUSensorsData* sensors);
+    void setFieldObjects(FieldObjects* fieldObjects);
 };
 
 #endif // VISIONCONTROLWRAPPERNUVIEW_H

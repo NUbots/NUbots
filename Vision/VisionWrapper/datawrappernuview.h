@@ -108,6 +108,7 @@ private:
     //for virtualnubot
     void setRawImage(NUImage* image);
     void setSensorData(NUSensorsData* NUSensorsData);
+    void setFieldObjects(FieldObjects* fieldObjects);
     
     
 private:

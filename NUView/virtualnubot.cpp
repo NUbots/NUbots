@@ -77,51 +77,18 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
     //qDebug() << data.str().c_str() << endl;
 
     sensorsData = newsensorsData;
+    vision->setSensorData(sensorsData);
     vector<float> horizondata;
     bool isOK = sensorsData->getHorizon(horizondata);
     if(isOK)
     {
         horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
-        vision.m_horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
     }
     else
     {
-        //qDebug() << "Invalid Horizon Line Information" << horizondata.size() ;//<< horizondata[0]<< horizondata[1] <<horizondata[2];
-        horizondata.push_back(0);
-        horizondata.push_back(-320);
-        horizondata.push_back(320);
-
         horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
-        vision.m_horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
     }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
-
-    /*Horizon testHorizonLine;
-    float bodyPitch;
-    float bodyRoll;
-    bodyRoll = newsensorsData->BalanceOrientation->Data[0];
-    bodyPitch = newsensorsData->BalanceOrientation->Data[1];
-    float headYaw = 0.0;
-    bool isok = newsensorsData->getJointPosition(NUSensorsData::HeadYaw,headYaw);
-    qDebug() << "Is HeadYaw Ok: " << isok;
-
-    float headPitch = 0.0;
-    isok = newsensorsData->getJointPosition(NUSensorsData::HeadPitch,headPitch);
-    qDebug() << "Is HeadPitch Ok: " << isok;
-
-    headPitch = -0.82 + 0.12; //7degrees in radians
-    int camera = 1;
-
-    float elevation = vision.CalculateElevation(120 - 16);
-    qDebug() << "Elevation: " << elevation;
-        testHorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)headYaw,(double)headPitch,camera);
-
-    qDebug() <<"Body Pitch: " << bodyPitch << "\tBody Roll: " << bodyRoll << "\tHeadPitch:" << headPitch << "\tHeadYaw:" << headYaw;
-    qDebug() << "Test: Horizon Information: " << testHorizonLine.getGradient() << "x + " << testHorizonLine.getYIntercept();
-
-    qDebug() << "Horizon Information: " << horizonLine.getGradient() << "x + " << horizonLine.getYIntercept();
-    qDebug() << horizonLine.getA() << "x + "<< horizonLine.getB() << "y + " << horizonLine.getC();
-    */
 
 }
 
@@ -172,15 +139,6 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
     classImage.MapBufferToImage(currentPacket->classImage,currentPacket->frameWidth, currentPacket->frameHeight);
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
     processVisionFrame(classImage);
-/*
-    //Update Image:
-    classifiedImage.height = currentPacket->frameHeight;
-    classifiedImage.width = currentPacket->frameWidth;
-    classifiedImage.imageBuffer = currentPacket->classImage;
-    classifiedImage.imageFormat = NUImage::CLASSIFIED;
-    processVisionFrame(classifiedImage);
-    emit classifiedImageChanged(&classifiedImage);
-    */
 }
 
 void virtualNUbot::generateClassifiedImage()
@@ -190,100 +148,19 @@ void virtualNUbot::generateClassifiedImage()
     return;
 }
 
-//DEBUG
-void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t filedesc) const
-{
-    string filename = "../NUView/DebugFiles/";
-    string filename2;
-    switch(filedesc)
-    {
-    case GREEN_HOR_SCAN_POINTS:
-        filename += "HorScanPoints";
-        break;
-    case GREEN_HOR_HULL_POINTS:
-        filename += "HorHullPoints";
-        break;
-    case OBSTACLE_POINTS:
-        filename += "Obstacles";
-        break;
-    default:
-        //invalid descriptor
-        qDebug() << "Invalid file descriptor for printPoints: " << filedesc;
-        return;
-    }
-    ofstream out;
-    filename2 = filename + ".txt";
-    out.open(filename2.c_str());
-    if(out.good()) {
-        for(unsigned int i=0; i<points.size(); i++)
-            out << points.at(i).x << " " << points.at(i).y << "\n";
-    }
-    else {
-        //debug
-        qDebug() << "Error opening " << filename2.c_str() << "\n";
-    }
-    out.close();
-
-    //cumulative
-    filename2 = filename + "_cumulative.txt";
-    out.open(filename2.c_str(), ios::out | ios::app);
-    if(out.good()) {
-        for(unsigned int i=0; i<points.size(); i++)
-            out << points.at(i).x << " " << points.at(i).y << "\n";
-        out << "\n";
-    }
-    else {
-        //debug
-        qDebug() << "Error opening " << filename2.c_str() << "\n";
-    }
-    out.close();
-}
-
-void virtualNUbot::printObjects(const vector<AmbiguousObject>& objects, filedesc_t filedesc) const
-{
-    string filename = "../NUView/DebugFiles/";
-    string filename2;
-    switch(filedesc)
-    {
-    case OBSTACLE_OBJECTS:
-        filename += "ObstObj";
-        break;
-    case AMBIGUOUS_OBJECTS:
-        filename += "AmbObj";
-        break;
-    default:
-        //invalid descriptor
-        qDebug() << "Invalid file descriptor for printObjects: " << filedesc;
-        return;
-    }
-    ofstream out;
-    filename2 = filename + ".txt";
-    out.open(filename2.c_str());
-    if(out.good()) {
-        for(unsigned int i=0; i<objects.size(); i++)
-            out << objects.at(i).toString() << "\n";
-    }
-    else {
-        //debug
-        qDebug() << "Error opening " << filename2.c_str() << "\n";
-    }
-    out.close();
-}
 
 void virtualNUbot::processVisionFrame()
 {
     processVisionFrame(rawImage);
 }
 
-
 void virtualNUbot::processVisionFrame(const NUImage* image)
 {
 
-    vision.setSensorsData(sensorsData);
-    vision.setFieldObjects(AllObjects);
-    vision.setImage(image);
+    vision->setSensorsData(sensorsData);
+    vision->setFieldObjects(AllObjects);
+    vision->setImage(image);
     
-    vision.AllFieldObjects->preProcess(image->GetTimestamp());
     vision.setLUT(classificationTable);
     
     generateClassifiedImage();
