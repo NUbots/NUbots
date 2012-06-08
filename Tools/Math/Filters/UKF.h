@@ -43,6 +43,20 @@ public:
     virtual bool timeUpdate(double deltaT, const Matrix& measurment, const Matrix& linearProcessNoise, const Matrix& measurementNoise);
     virtual bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs = Matrix());
 
+    /*!
+    @brief Outputs a binary representation of the UKF object to a stream.
+    @param output The output stream.
+    @return The output stream.
+    */
+    std::ostream& writeStreamBinary (std::ostream& output) const;
+
+    /*!
+    @brief Reads in a UKF object from the input stream.
+    @param input The input stream.
+    @return The input stream.
+    */
+    std::istream& readStreamBinary (std::istream& input);
+
 protected:
    Matrix m_mean_weights;
    Matrix m_covariance_weights;

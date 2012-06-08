@@ -23,7 +23,6 @@ UKF::~UKF()
 {
 }
 
-
 /*!
  * @brief Pre-calculate the sigma point weightings, based on the current unscented transform parameters.
  */
@@ -195,4 +194,25 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
     setMean(newMean);
     setCovariance(newCovariance);
     return true;
+}
+
+std::ostream& UKF::writeStreamBinary (std::ostream& output) const
+{
+    UnscentedTransform::writeStreamBinary(output);
+    Moment::writeStreamBinary(output);
+    WriteMatrix(output, m_mean_weights);
+    WriteMatrix(output, m_covariance_weights);
+    WriteMatrix(output, m_sigma_points);
+    return output;
+}
+
+std::istream& UKF::readStreamBinary (std::istream& input)
+{
+    UnscentedTransform::readStreamBinary(input);
+    Moment::readStreamBinary(input);
+    m_mean_weights = ReadMatrix(input);
+    m_covariance_weights = ReadMatrix(input);
+    m_sigma_points = ReadMatrix(input);
+    m_sigma_mean = CalculateMeanFromSigmas(m_sigma_points);
+    return input;
 }
