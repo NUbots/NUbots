@@ -172,6 +172,10 @@ public:
         {
             float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
             float bearing = ball.estimatedBearing();
+            
+            
+            
+            
 
             float x = distance * cos(bearing);
             float y = distance * sin(bearing);
@@ -180,6 +184,10 @@ public:
 
             
             float offsetDistance = 3.0f;
+            
+            if (ball.isObjectVisible()) {
+                bearing = ball.measuredBearing();
+            }
             
             
             float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
