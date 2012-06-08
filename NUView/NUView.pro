@@ -195,6 +195,7 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Filters/UnscentedTransform.h \
     ../Tools/Math/Filters/UKF.h \
     ../Tools/Math/Filters/MobileObjectUKF.h \
+    ../Localisation/Models/WeightedModel.h \
     ../Tools/Math/depUKF.h
 
 !win32 {
@@ -333,6 +334,7 @@ SOURCES += mainwindow.cpp \
     OfflineLocBatch.cpp \
     ../Tools/Math/Filters/UKF.cpp \
     ../Tools/Math/Filters/MobileObjectUKF.cpp \
+    ../Localisation/Models/WeightedModel.cpp \
     ../Tools/Math/depUKF.cpp
 
 !win32{
