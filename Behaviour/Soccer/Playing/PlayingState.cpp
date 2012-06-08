@@ -82,14 +82,28 @@ void PlayingState::doStateCommons()
 
 BehaviourFSMState* PlayingState::nextStateCommons()
 {   // do state transitions in playing state machine
-    if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost())
-        return m_ball_is_lost_state;
-    else if (m_team_info->amIClosestToBall())
-        return m_chase_state;
-    else if (m_field_objects->self.lost())
-        return m_im_lost_state;
-    else
-        return m_positioning_state;
+    if (true) { //striker state transitions
+        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost())
+            return m_ball_is_lost_state;
+        else if (m_team_info->amIClosestToBall())
+            return m_chase_state;
+        else if (m_field_objects->self.lost())
+            return m_im_lost_state;
+        else
+            return m_positioning_state;
+            
+    } /*else { //goalkeeper state transitions
+        if (m_field_objects->self.lost())
+            return m_im_lost_state;
+        else if (m_team_info->amIClosestToBall())
+            return m_chase_state;
+        else if () //distance to where I should be is too large
+            return m_positioning_state;
+        else //if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost())
+            return m_ball_is_lost_state;
+        //else //goalie save state
+        //    return m_goalkeeper_state;
+    }*/
 }
 
 BehaviourFSMState* PlayingState::nextState()
