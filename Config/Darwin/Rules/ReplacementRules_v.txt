@@ -27,3 +27,21 @@ before: (0.05, 1) [green]                   //12 pix min
 middle: (0 , 0.016666666) [unclassified]    //4 pix max
 after: (0, 1) [green]                       //1 pix min
 replacement: before                         //before, after, split
+
+ball1:
+before: (0.008333333, 1) [orange]            //2 pix min
+middle: (0 , 0.008333333) [unclassified, yellow]   //2 pix max
+after: (0.008333333, 1) [orange]             //2 pix min
+replacement: before                     //before, after, split
+
+yellowgoal1:
+before: (0, 1) []                   // pix min
+middle: (0 , 0.004166667) [orange]     //1 pix max
+after: (0.0125, 1) [yellow]       //3 pix min
+replacement: after                 //before, after, split
+
+yellowgoal2:
+before: (0.0125, 1) [yellow]       //3 pix min
+middle: (0 , 0.004166667) [orange]     //1 pix max
+after: (0,1) []
+replacement: before                 //before, after, split
