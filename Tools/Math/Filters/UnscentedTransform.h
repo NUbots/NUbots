@@ -156,6 +156,7 @@ public:
         output.write(reinterpret_cast<const char*>(&m_alpha), sizeof(m_alpha));
         output.write(reinterpret_cast<const char*>(&m_kappa), sizeof(m_kappa));
         output.write(reinterpret_cast<const char*>(&m_beta), sizeof(m_beta));
+        return output;
     }
 
     /*!
@@ -169,6 +170,7 @@ public:
         input.read(reinterpret_cast<char*>(&m_alpha), sizeof(m_alpha));
         input.read(reinterpret_cast<char*>(&m_kappa), sizeof(m_kappa));
         input.read(reinterpret_cast<char*>(&m_beta), sizeof(m_beta));
+        return input;
     }
 
 private:
