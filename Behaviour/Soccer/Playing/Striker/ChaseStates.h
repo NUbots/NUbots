@@ -26,7 +26,7 @@
 class SoccerFSMState;       // ChaseState is a SoccerFSMState
 
 #include "Behaviour/BehaviourPotentials.h"
-
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
@@ -98,7 +98,7 @@ protected:
         {   
             if (ball.estimatedDistance() < 100 and ball.estimatedDistance() > 24. and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 600)
             {   
-                
+                Blackboard->lookForBall = false;
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
                 StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
                 StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
@@ -134,10 +134,11 @@ protected:
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 2500)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 1800)
         {
             m_pan_started = false;
             m_pan_finished = false;
+            Blackboard->lookForBall = true;
         }
         
         // this is a hack to get the pan end time right given the delay in the update of the motion sensors
@@ -151,9 +152,11 @@ protected:
             {
                 m_pan_end_time = endtime;
                 m_pan_time_captured = true;
+                //Blackboard->lookForBall = true;
             }
             if (m_data->CurrentTime >= m_pan_end_time)
                 m_pan_finished = true;
+                Blackboard->lookForBall = true;
         }
         
         // this is a HUGE hack
@@ -164,7 +167,7 @@ protected:
         
         if (not m_pan_started or m_pan_finished)
         {
-            
+            Blackboard->lookForBall = true;
             if (ball.TimeSinceLastSeen() > 1500)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;

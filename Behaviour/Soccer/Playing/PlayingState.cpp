@@ -26,7 +26,7 @@
 #include "ImLost/ImLostState.h"
 
 #include "../SoccerProvider.h"
-
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -83,14 +83,18 @@ void PlayingState::doStateCommons()
 BehaviourFSMState* PlayingState::nextStateCommons()
 {   // do state transitions in playing state machine
     if (true) { //striker state transitions
-        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost())
+        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost()) {
+            Blackboard->lookForBall = true;
             return m_ball_is_lost_state;
-        else if (m_team_info->amIClosestToBall())
+        } else if (m_team_info->amIClosestToBall()) {
             return m_chase_state;
-        else if (m_field_objects->self.lost())
+        } else if (m_field_objects->self.lost()) {
+            Blackboard->lookForBall = true;
             return m_im_lost_state;
-        else
+        } else {
+            Blackboard->lookForBall = true;
             return m_positioning_state;
+            }
             
     } /*else { //goalkeeper state transitions
         if (m_field_objects->self.lost())
