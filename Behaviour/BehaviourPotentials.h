@@ -201,12 +201,12 @@ public:
                 y = right_foot_y;
             }
             
-            float approachOffset = 20.;
+            /*float approachOffset = 20.;
             if (Blackboard->GameInfo->getTeamColour() == GameInformation::BlueTeam and distance > (kickingdistance + approachOffset)) {
                 x -= approachOffset-dist_hysteresis;
             } else if (distance > kickingdistance + approachOffset) {
                 x += approachOffset-dist_hysteresis;
-            }
+            }*/
             
 
             distance = sqrt(x*x + y*y);
@@ -225,10 +225,10 @@ public:
                 position_rotation = 0.6*bearing;
                 
                 //speed up if we're too slow at shuffling
-                if (fabs(bearing) > 0.8f and position_speed < 0.5) {
-                    position_speed += 0.25;
-                } else if (fabs(bearing) > 1.0f and position_speed < 0.3) {
+                if (fabs(bearing) > 0.8f and position_speed < 0.3) {
                     position_speed += 0.1;
+                } else if (fabs(bearing) > 1.0f and position_speed < 0.3) {
+                    position_speed += 0.15;
                 } 
                 
             }
@@ -247,13 +247,13 @@ public:
             {   // if it is outside the stopping distance - full speed
                 //if ( fabs (bearing) < 0.2) {
                     position_speed = 1;
-                    position_direction = bearing*0.5;
+                    position_direction = bearing*0.6;
                 /*} else {
                     position_speed = 0.05;
                     position_direction = bearing;
                     position_rotation = 0.7*bearing;
                 }*/
-                //position_rotation = 0.5*bearing; //previous value for NAO
+                position_rotation = 0.5*bearing; //previous value for NAO
                 //position_rotation = 0.05*bearing;
             }
             
