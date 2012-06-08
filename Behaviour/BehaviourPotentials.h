@@ -247,7 +247,7 @@ public:
             {   // if it is outside the stopping distance - full speed
                 //if ( fabs (bearing) < 0.2) {
                     position_speed = 1;
-                    position_direction = bearing;
+                    position_direction = bearing*0.5;
                 /*} else {
                     position_speed = 0.05;
                     position_direction = bearing;
