@@ -69,8 +69,8 @@ Behaviour::Behaviour()
         m_behaviour = new QuietStanceProvider(this);
     #else
         //m_behaviour = new ScriptedPoseProvider(this);
-        //m_behaviour = new SoccerProvider(this);
-        m_behaviour = new ZombieProvider(this);
+        m_behaviour = new SoccerProvider(this);
+        //m_behaviour = new ZombieProvider(this);
         //m_behaviour = new ChaseBallProvider(this);
         //m_behaviour = new WalkOptimisationProvider(this);
         //m_behaviour = new ForwardWalkProvider(this);
