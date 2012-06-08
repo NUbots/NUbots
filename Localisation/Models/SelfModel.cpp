@@ -7,13 +7,8 @@
     This constructor requires a creation time.
 
  */
-SelfModel::SelfModel(float time): Moment(states_total)
+SelfModel::SelfModel(float time): Moment(states_total), WeightedModel(time)
 {
-    m_id = GenerateId();
-    m_creation_time = time;
-    m_alpha = 1.0f;
-    m_history_depth = 5;
-    m_history_buffer = boost::circular_buffer<unsigned int>(m_history_depth);
     m_previous_decisions.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS, FieldObjects::NUM_STAT_FIELD_OBJECTS);
     return;
 }
@@ -22,18 +17,9 @@ SelfModel::SelfModel(float time): Moment(states_total)
 
     Creates an exact copy of the original model, Preserving id, parent and splitting information.
  */
-SelfModel::SelfModel(const SelfModel& source): Moment(source)
+SelfModel::SelfModel(const SelfModel& source): Moment(source), WeightedModel(source)
 {
-    m_active = source.m_active;
-    m_alpha =  source.m_alpha;
-    m_covariance = source.m_covariance;
-    m_id = source.m_id;
-    m_mean = source.m_mean;
-    m_parent_id = source.m_parent_id;
     m_split_option = source.m_split_option;
-    m_creation_time = source.m_creation_time;
-    m_history_depth = source.m_history_depth;
-    m_history_buffer = source.m_history_buffer;
     m_previous_decisions = source.m_previous_decisions;
     return;
 }
@@ -47,25 +33,13 @@ Takes a parent model and performs a split on an ambiguous object using the given
 @param splitOption the option to be evaluated within this model.
 @param time the current time of the update
 */
-SelfModel::SelfModel(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, float time): Moment(states_total)
+SelfModel::SelfModel(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, float time): Moment(parent), WeightedModel(parent,time)
 {
     // Save the information about the model
-    m_id = GenerateId();
-    m_parent_id = parent.id();
-    m_history_buffer = parent.m_history_buffer; // Get parents history.
-    m_history_buffer.push_back(m_parent_id);    // Add parent to the history.
     m_split_option = splitOption.getID();
     assert(object.getID() < FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
     m_previous_decisions = parent.m_previous_decisions;
     m_previous_decisions[object.getID()] = splitOption.getID();
-
-
-    // copy information from the parent model.
-    setAlpha(parent.alpha());
-    setMean(parent.mean());
-    setCovariance(parent.covariance());
-
-    m_creation_time = time;
     return;
 }
 
@@ -143,21 +117,6 @@ Self SelfModel::GenerateSelfState() const
     return result;
 }
 
-/*! @brief Get the historical parents of this model.
-    @param steps_back The number of steps back along the decision tree to get the value for. This valaue should be in the range 1..history_depth.
-    @return The model ID of the parent at the given step in the decision tree.
-*/
-unsigned int SelfModel::history(unsigned int steps_back) const
-{
-    unsigned int result = 0;
-    unsigned int index = m_history_buffer.size() - steps_back;    // Oldest value is at [0], newest at [size - 1]
-    if((index < m_history_buffer.size()) and (index >= 0))
-    {
-        result = m_history_buffer[index];
-    }
-    return result;
-}
-
 /*! @brief Get the previous decision path when this ambiguous object was last encountered.
     @param theObject The ambiguous object.
     @return The object id of the unique object that was last chosen.
@@ -197,62 +156,40 @@ bool SelfModel::clipState(int stateIndex, double minValue, double maxValue){
     return clipped;
 }
 
+std::ostream& SelfModel::writeStreamBinary (std::ostream& output) const
+{
+    WeightedModel::writeStreamBinary(output);
+    Moment::writeStreamBinary(output);
+    output.write(reinterpret_cast<const char*>(&m_split_option), sizeof(m_split_option));
+    return output;
+}
+
+std::istream& SelfModel::readStreamBinary (std::istream& input)
+{
+    WeightedModel::readStreamBinary(input);
+    Moment::readStreamBinary(input);
+    input.read(reinterpret_cast<char*>(&m_split_option), sizeof(m_split_option));
+    return input;
+}
+
 std::ostream& operator<< (std::ostream& output, const SelfModel& p_model)
 {
-    // Model member variables
-    output.write(reinterpret_cast<const char*>(&p_model.m_active), sizeof(p_model.m_active));
-    output.write(reinterpret_cast<const char*>(&p_model.m_alpha), sizeof(p_model.m_alpha));
-    output.write(reinterpret_cast<const char*>(&p_model.m_id), sizeof(p_model.m_id));
-    output.write(reinterpret_cast<const char*>(&p_model.m_parent_id), sizeof(p_model.m_parent_id));
-    output.write(reinterpret_cast<const char*>(&p_model.m_split_option), sizeof(p_model.m_split_option));
-    output.write(reinterpret_cast<const char*>(&p_model.m_creation_time), sizeof(p_model.m_creation_time));
-
-    // Write values from base class.
-    const Moment* moment = static_cast<const Moment*>(&p_model);
-    output << (*moment);
-
-    return output;
+    return p_model.writeStreamBinary(output);
 }
 
 std::istream& operator>> (std::istream& input, SelfModel& p_model)
 {
-    // Model member variables
-    input.read(reinterpret_cast<char*>(&p_model.m_active), sizeof(p_model.m_active));
-    input.read(reinterpret_cast<char*>(&p_model.m_alpha), sizeof(p_model.m_alpha));
-    input.read(reinterpret_cast<char*>(&p_model.m_id), sizeof(p_model.m_id));
-    input.read(reinterpret_cast<char*>(&p_model.m_parent_id), sizeof(p_model.m_parent_id));
-    input.read(reinterpret_cast<char*>(&p_model.m_split_option), sizeof(p_model.m_split_option));
-    input.read(reinterpret_cast<char*>(&p_model.m_creation_time), sizeof(p_model.m_creation_time));
-
-    // Read values to base class
-    Moment* moment = static_cast<Moment*>(&p_model);
-    input >> (*moment);
-
-    return input;
+    return p_model.readStreamBinary(input);
 }
 
 std::string SelfModel::summary(bool brief) const
 {
     std::stringstream buffer;
-    buffer << "Model Id: " << id() << " Active: " << active() << " Alpha: " << alpha() << " Position: (" << mean(states_x) << ",";
-    buffer << mean(states_y) << "," << mean(states_heading) << ")" << std::endl;
+    buffer << WeightedModel::summary(brief);
+    buffer << "Position: (" << mean(states_x) << "," << mean(states_y) << "," << mean(states_heading) << ")" << std::endl;
     if(!brief)
     {
             buffer << "Covariance - Position:" << std::endl << m_covariance << std::endl;
-            if(m_history_buffer.size() > 0)
-            {
-                buffer << "History: ";
-
-                for(boost::circular_buffer<unsigned int>::const_iterator buff_it = m_history_buffer.begin(); buff_it != m_history_buffer.end(); ++buff_it)
-                {
-                    if(buff_it != m_history_buffer.begin())
-                    {
-                        buffer << "->";
-                    }
-                    buffer << (*buff_it);
-                }
-                buffer << std::endl;
-            }
     }
     return buffer.str();
 }
