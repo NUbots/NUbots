@@ -166,36 +166,46 @@ void Moment::writeData(std::ostream& output) const
     return;
 }
 
-std::ostream& operator<< (std::ostream& output, const Moment& p_moment)
+std::ostream& Moment::writeStreamBinary (std::ostream& output) const
 {
-    output.write(reinterpret_cast<const char*>(&p_moment.m_numStates), sizeof(p_moment.m_numStates));
-    for (unsigned int i = 0; i < p_moment.m_numStates; ++i)
+    output.write(reinterpret_cast<const char*>(&m_numStates), sizeof(m_numStates));
+    for (unsigned int i = 0; i < m_numStates; ++i)
     {
-        output.write(reinterpret_cast<const char*>(&p_moment.m_mean[i][0]), sizeof(p_moment.m_mean[i][0]));
+        output.write(reinterpret_cast<const char*>(&m_mean[i][0]), sizeof(m_mean[i][0]));
     }
-    for (unsigned int i = 0; i < p_moment.m_numStates; ++i)
+    for (unsigned int i = 0; i < m_numStates; ++i)
     {
-        for (unsigned int j = 0; j < p_moment.m_numStates; ++j)
+        for (unsigned int j = 0; j < m_numStates; ++j)
         {
-        output.write(reinterpret_cast<const char*>(&p_moment.m_covariance[i][j]), sizeof(p_moment.m_covariance[i][j]));
+        output.write(reinterpret_cast<const char*>(&m_covariance[i][j]), sizeof(m_covariance[i][j]));
         }
     }
     return output;
 }
 
-std::istream& operator>> (std::istream& input, Moment& p_moment)
+std::istream& Moment::readStreamBinary (std::istream& input)
 {
-    input.read(reinterpret_cast<char*>(&p_moment.m_numStates), sizeof(p_moment.m_numStates));
-    for (unsigned int i = 0; i < p_moment.m_numStates; ++i)
+    input.read(reinterpret_cast<char*>(&m_numStates), sizeof(m_numStates));
+    for (unsigned int i = 0; i < m_numStates; ++i)
     {
-        input.read(reinterpret_cast<char*>(&p_moment.m_mean[i][0]), sizeof(p_moment.m_mean[i][0]));
+        input.read(reinterpret_cast<char*>(&m_mean[i][0]), sizeof(m_mean[i][0]));
     }
-    for (unsigned int i = 0; i < p_moment.m_numStates; ++i)
+    for (unsigned int i = 0; i < m_numStates; ++i)
     {
-        for (unsigned int j = 0; j < p_moment.m_numStates; ++j)
+        for (unsigned int j = 0; j < m_numStates; ++j)
         {
-        input.read(reinterpret_cast<char*>(&p_moment.m_covariance[i][j]), sizeof(p_moment.m_covariance[i][j]));
+        input.read(reinterpret_cast<char*>(&m_covariance[i][j]), sizeof(m_covariance[i][j]));
         }
     }
     return input;
+}
+
+std::ostream& operator<< (std::ostream& output, const Moment& p_moment)
+{
+    return p_moment.writeStreamBinary(output);
+}
+
+std::istream& operator>> (std::istream& input, Moment& p_moment)
+{
+    return p_moment.readStreamBinary(input);
 }

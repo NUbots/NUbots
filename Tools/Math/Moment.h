@@ -33,6 +33,19 @@ public:
 
     Moment& operator= (const Moment & source);
 
+    /*!
+    @brief Outputs a binary representation of the Moment object to a stream.
+    @param output The output stream.
+    @return The output stream.
+    */
+    std::ostream& writeStreamBinary (std::ostream& output) const;
+
+    /*!
+    @brief Reads in a Moment from the input stream.
+    @param input The input stream.
+    @return The input stream.
+    */
+    std::istream& readStreamBinary (std::istream& input);
 
     /*!
     @brief Output streaming operation.
