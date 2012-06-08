@@ -735,7 +735,6 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
 
 void OpenglManager::setExpectedVision(const NUSensorsData* data, const KF* filter, GLDisplay::display displayId)
 {
-    GLUquadricObj *qobj;
     makeCurrent();
     glDisable(GL_TEXTURE_2D);
     glLineWidth(4.0);
