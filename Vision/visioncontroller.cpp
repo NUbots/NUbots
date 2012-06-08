@@ -22,7 +22,7 @@ VisionController* VisionController::getInstance()
     return instance;
 }
 
-int VisionController::runFrame(bool lookForBall)
+int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 {
     #if VISION_CONTROLLER_VERBOSITY > 1
         debug << "VisionController::runFrame() - Begin" << endl;
@@ -63,9 +63,10 @@ int VisionController::runFrame(bool lookForBall)
 #if VISION_CONTROLLER_VERBOSITY > 2
     debug << "VisionController::runFrame() - segment filter done" << endl;
 #endif
-    GoalDetection::detectGoals();
+    if(lookForLandmarks)
+        GoalDetection::detectGoals();
 #if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - goal detection done" << endl;
+    debug << "VisionController::runFrame() - goal detection done - lookForLandmarks: " << lookForLandmarks << endl;
 #endif
     if(lookForBall)
         BallDetection::detectBall();

@@ -37,7 +37,6 @@ Ball::Ball(PointType centre, float radius)
     }
         
     m_radius = max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x)*0.5;
-    //cout << m_radius << endl;
     m_location_pixels.x = mathGeneral::roundNumberToInt(centre_pt.x);
     m_location_pixels.y = mathGeneral::roundNumberToInt(centre_pt.y);
     m_size_on_screen = Vector2<int>(m_radius*2, m_radius*2);
@@ -62,9 +61,8 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         debug << *this << endl;
     #endif
     if(valid) {
-        //cout << m_transformed_spherical_pos.x << endl;
         //add ball to mobileFieldObjects
-        cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << endl;
+        //cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << endl;
         fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(m_transformed_spherical_pos,
                                                                         m_spherical_error,
                                                                         m_location_angular,
@@ -218,7 +216,6 @@ float Ball::distanceToBall(float bearing, float elevation) {
         debug << "Ball::distanceToBall: m_size_on_screen.x: " << m_size_on_screen.x << endl;
         debug << "Ball::distanceToBall: width_dist: " << width_dist << endl;
     #endif
-    //cout << "Ball::distanceToBall: d2p: " << d2p << " width_dist: " << width_dist;
     switch(VisionConstants::BALL_DISTANCE_METHOD) {
     case VisionConstants::D2P:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
