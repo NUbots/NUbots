@@ -27,6 +27,7 @@
 //From Darwin Library:
 #include <LinuxCM730.h>	//Darwin Controller
 #include <MX28.h>		//Darwin Motors
+#include <FSR.h>		//Darwin FSR sensors
 #include <JointData.h>
 
 class DarwinPlatform : public NUPlatform

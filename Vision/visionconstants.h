@@ -64,6 +64,7 @@ public:
     static float GOAL_WIDTH;                //! The physical width of the goal posts in cm
     static float DISTANCE_BETWEEN_POSTS;    //! The physical distance between the posts in cm
     static float BALL_WIDTH;                //! The physical width of the ball in cm
+    static float BEACON_WIDTH;              //! The physical width of the beacons in cm
     
     // static methods
     static DistanceMethod getDistanceMethodFromName(std::string name);

@@ -44,6 +44,7 @@
 #define DARWINJOINTMAPPING_H
 
 #include <vector>
+#include "Tools/Math/Limit.h"
 
 class DarwinJointMapping
 {
@@ -58,6 +59,7 @@ public:
     }
 
     int joint2raw(unsigned int id, float joint) const;
+    int joint2rawClipped(unsigned int id, float joint) const;
     float raw2joint(unsigned int id, int raw) const;
     std::vector<int> body2raw(const std::vector<float>& body) const;
     std::vector<float> raw2body(const std::vector<int>& raw) const;
@@ -66,6 +68,7 @@ public:
 protected:
     std::vector<float> m_offsets;                               //!< Table of offset values for each joint.
     std::vector<char> m_multipliers;                            //!< Table of multiplier values for each joint.
+    std::vector<Limit> m_limits;                                 //!< Limit value for each joint.
     DarwinJointMapping();                                       //!< Private constructor
     DarwinJointMapping(const DarwinJointMapping&);              //!< Prevent copy-construction
     DarwinJointMapping& operator=(const DarwinJointMapping&);   //!< Prevent assignment

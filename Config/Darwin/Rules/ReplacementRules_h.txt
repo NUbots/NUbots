@@ -1,0 +1,29 @@
+fieldnoise_v_small:
+before: (0.00675, 1) [green]            //3 pix min
+middle: (0 , 0.003125) [unclassified]   //1 pix max
+after: (0.00675, 1) [green]             //3 pix min
+replacement: before                     //before, after, split
+
+fieldnoise_h_med:
+before: (0.01875, 1) [green]            //6 pix min
+middle: (0 , 0.00625) [unclassified]    //2 pix max
+after: (0.01875, 1) [green]             //6 pix min
+replacement: before                     //before, after, split
+
+fieldnoise_h_large:
+before: (0.0375, 1) [green]             //12 pix min
+middle: (0 , 0.0125) [unclassified]     //4 pix max
+after: (0.0375, 1) [green]              //12 pix min
+replacement: before                     //before, after, split
+
+fieldnoise_v_oneway_1:
+before: (0, 1) [green]                  //1 pix min
+middle: (0 , 0.0125) [unclassified]     //4 pix max
+after: (0.0375, 1) [green]              //12 pix min
+replacement: before                     //before, after, split
+
+fieldnoise_v_oneway_2:
+before: (0.0375, 1) [green]             //12 pix min
+middle: (0 , 0.0125) [unclassified]     //4 pix max
+after: (0, 1) [green]                   //1 pix min
+replacement: before                     //before, after, split

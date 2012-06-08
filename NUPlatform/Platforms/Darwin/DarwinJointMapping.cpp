@@ -61,6 +61,76 @@ DarwinJointMapping::DarwinJointMapping()
 
     m_offsets = std::vector<float>(temp_off, temp_off + sizeof(temp_off)/sizeof(*temp_off));
     m_multipliers = std::vector<char>(temp_mult, temp_mult + sizeof(temp_mult)/sizeof(*temp_mult));
+
+    Limit temp;
+    m_limits.clear();
+
+    float TwoPi = 2*mathGeneral::PI;
+
+    const Limit defaultLimit(-TwoPi, TwoPi);
+
+
+    // [0]  HEAD_PITCH
+    m_limits.push_back(defaultLimit);
+
+    // [1]  HEAD_YAW
+    temp.setLimits(mathGeneral::deg2rad(-100.0f), mathGeneral::deg2rad(100.0f));
+    m_limits.push_back(temp);
+
+    // [2]  L_SHOULDER_ROLL
+    m_limits.push_back(defaultLimit);
+
+    // [3]  L_SHOULDER_PITCH
+    m_limits.push_back(defaultLimit);
+
+    // [4]  L_ELBOW
+    m_limits.push_back(defaultLimit);
+
+    // [5]  R_SHOULDER_ROLL
+    m_limits.push_back(defaultLimit);
+
+    // [6]  R_SHOULDER_PITCH
+    m_limits.push_back(defaultLimit);
+
+    // [7]  R_ELBOW
+    m_limits.push_back(defaultLimit);
+
+    // [8]  L_HIP_ROLL
+    m_limits.push_back(defaultLimit);
+
+    // [9]  L_HIP_PITCH
+    m_limits.push_back(defaultLimit);
+
+    // [10] L_HIP_YAW
+    m_limits.push_back(defaultLimit);
+
+    // [11] L_KNEE
+    m_limits.push_back(defaultLimit);
+
+    // [12] L_ANKLE_ROLL
+    m_limits.push_back(defaultLimit);
+
+    // [13] L_ANKLE_PITCH
+    m_limits.push_back(defaultLimit);
+
+    // [14] R_HIP_ROLL
+    m_limits.push_back(defaultLimit);
+
+    // [15] R_HIP_PITCH
+    m_limits.push_back(defaultLimit);
+
+    // [16] R_HIP_YAW
+    m_limits.push_back(defaultLimit);
+
+    // [17] R_KNEE
+    m_limits.push_back(defaultLimit);
+
+    // [18] R_ANKLE_ROLL
+    m_limits.push_back(defaultLimit);
+
+    // [19] R_ANKLE_PITCH
+    m_limits.push_back(defaultLimit);
+
     return;
 }
 
@@ -101,6 +171,12 @@ int DarwinJointMapping::joint2raw(unsigned int id, float joint) const
 {
     int raw = Radian2Value(m_multipliers[id] * joint - m_offsets[id]);
     return raw;
+}
+
+int DarwinJointMapping::joint2rawClipped(unsigned int id, float joint) const
+{
+    float clippedPosition = m_limits.at(id).clip(joint);
+    return joint2raw(id, clippedPosition);
 }
 
 /*! @brief  Converts a Robotis MX28 motor value into a joint angle in radians within the NUbots joint space.

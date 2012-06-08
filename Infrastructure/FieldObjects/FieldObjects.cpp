@@ -182,8 +182,8 @@ void FieldObjects::InitStationaryFieldObjects()
                     y = 0.0f;
                     objectName = "Yellow Penalty Spot";
                     break;
-		case FO_CORNER_CENTRE_CIRCLE:
-		    x = 0.0f;
+                case FO_CORNER_CENTRE_CIRCLE:
+                    x = 0.0f;
                     y = 0.0f;
                     objectName = "Centre Circle";
                     break;
@@ -207,6 +207,14 @@ void FieldObjects::InitStationaryFieldObjects()
                     y = 200.0f;
                     objectName = "Projected T Blue Right";
                     break;
+                case FO_BLUE_BEACON:
+                    x = 0.0f;
+                    y = -200.f; // NOTE: This is not to field spec
+                    objectName = "Blue Beacon";
+                case FO_YELLOW_BEACON:
+                    x = 0.0f;
+                    y = 200.0f; // NOTE: This is not to field spec
+                    objectName = "Yellow Beacon";
                 default:
                     x = y = 0.0f;
                     objectName = "Undefined";
