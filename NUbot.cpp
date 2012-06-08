@@ -47,7 +47,7 @@
 #endif
 
 #ifdef USE_LOCALISATION
-    #include "Localisation/Localisation.h"
+    #include "Localisation/SelfLocalisation.h"
 #endif
 
 #ifdef USE_MOTION
@@ -276,9 +276,9 @@ void NUbot::createModules()
         
     #ifdef USE_LOCALISATION
         #if defined(TARGET_IS_NAOWEBOTS)
-            m_localisation = new Localisation(Platform->getRobotNumber());
+            m_localisation = new SelfLocalisation(Platform->getRobotNumber());
         #else
-            m_localisation = new Localisation();
+            m_localisation = new SelfLocalisation();
         #endif // defined(TARGET_IS_NAOWEBOTS)
     #endif
         
