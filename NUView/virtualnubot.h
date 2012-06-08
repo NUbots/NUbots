@@ -10,10 +10,10 @@
 #include "Kinematics/Horizon.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "GLDisplay.h"
-#include "/home/shannon/Backups/VisionOld/Vision.h"
+#include "VisionOld/Vision.h"
 #include "Tools/Math/LSFittedLine.h"
-#include "/home/shannon/Backups/VisionOld/CornerPoint.h"
-#include "/home/shannon/Backups/VisionOld/Circle.h"
+#include "VisionOld/CornerPoint.h"
+#include "VisionOld/Circle.h"
 #include <vector>
 #include <fstream>
 #include "FileAccess/LogFileReader.h"

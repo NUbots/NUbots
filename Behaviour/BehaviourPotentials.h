@@ -172,6 +172,10 @@ public:
         {
             float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
             float bearing = ball.estimatedBearing();
+            
+            
+            
+            
 
             float x = distance * cos(bearing);
             float y = distance * sin(bearing);
@@ -180,6 +184,10 @@ public:
 
             
             float offsetDistance = 3.0f;
+            
+            if (ball.isObjectVisible()) {
+                bearing = ball.measuredBearing();
+            }
             
             
             float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
@@ -201,12 +209,12 @@ public:
                 y = right_foot_y;
             }
             
-            float approachOffset = 20.;
+            /*float approachOffset = 20.;
             if (Blackboard->GameInfo->getTeamColour() == GameInformation::BlueTeam and distance > (kickingdistance + approachOffset)) {
                 x -= approachOffset-dist_hysteresis;
             } else if (distance > kickingdistance + approachOffset) {
                 x += approachOffset-dist_hysteresis;
-            }
+            }*/
             
 
             distance = sqrt(x*x + y*y);
@@ -222,13 +230,13 @@ public:
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
                 
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.8*bearing;
+                position_rotation = 0.6*bearing;
                 
                 //speed up if we're too slow at shuffling
-                if (fabs(bearing) > 0.8f and position_speed < 0.5) {
-                    position_speed += 0.45;
-                } else if (position_speed < 0.3) {
+                if (fabs(bearing) > 0.8f and position_speed < 0.3) {
                     position_speed += 0.1;
+                } else if (fabs(bearing) > 1.0f and position_speed < 0.3) {
+                    position_speed += 0.15;
                 } 
                 
             }
@@ -237,21 +245,22 @@ public:
                 
                 position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
-                if (fabs(bearing) > 1.f and position_speed < 0.2) {
+                if (fabs(bearing) > 0.7f and position_speed < 0.2) {
                     position_speed += 0.2;
                 }
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.5*bearing;
+                position_rotation = 0.6*bearing;
             }
             else
             {   // if it is outside the stopping distance - full speed
-                if ( fabs (bearing) < 0.2) {
-                    position_speed = 1;
-                    position_direction = bearing;
+                if ( fabs (bearing) < 0.3 or (fabs (bearing) < 0.5) and distance > stoppingdistance*1.25) {
+                    position_speed = 1.0;
+                    position_direction = bearing*0.6;
+                    position_rotation = 0.;//6*bearing;
                 } else {
                     position_speed = 0.05;
                     position_direction = bearing;
-                    position_rotation = 0.5*bearing;
+                    position_rotation = 0.3*bearing;
                 }
                 //position_rotation = 0.5*bearing; //previous value for NAO
                 //position_rotation = 0.05*bearing;
@@ -289,6 +298,7 @@ public:
             float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
             speed[1] = atan2(ysum, xsum);
             speed[2] = position_rotation + around_rotation;
+            cout << speed[0] << ", " << speed[1] << ", " << speed[2] << ", " << ball.measuredBearing() << ", " << ball.estimatedBearing() << endl;
             return speed;
         }
     }

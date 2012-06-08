@@ -26,7 +26,7 @@
 class SoccerFSMState;       // ChaseState is a SoccerFSMState
 
 #include "Behaviour/BehaviourPotentials.h"
-
+#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
@@ -96,9 +96,9 @@ protected:
         
         if (not m_pan_started and not iskicking)
         {   
-            if (ball.estimatedDistance() < 100 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 3000)
+            if (ball.estimatedDistance() < 120. and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
             {   
-                
+                //Blackboard->lookForBall = false;
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
                 StationaryObject& yellow_right = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
                 StationaryObject& blue_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
@@ -107,7 +107,7 @@ protected:
                 float timesinceyellowgoalseen = min(yellow_left.TimeSinceLastSeen(), yellow_right.TimeSinceLastSeen());
                 float timesincebluegoalseen = min(blue_left.TimeSinceLastSeen(), blue_right.TimeSinceLastSeen());
                 float timesincegoalseen = min(timesinceyellowgoalseen, timesincebluegoalseen);
-                float hackfactor = (9.0/35000.0)*timesincegoalseen + 1;
+                float hackfactor = ball.estimatedDistance()/20.; //(9.0/35000.0)*timesincegoalseen + 1;
                 
                 float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
                 float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
@@ -125,7 +125,7 @@ protected:
                 }
                 m_jobs->addMotionJob(new HeadPanJob(posts, hackfactor));
                 m_pan_started = true;
-                m_pan_end_time = m_data->CurrentTime + 500;
+                m_pan_end_time = m_data->CurrentTime + 800;
                 m_pan_time_captured = false;
                 m_pan_finished = false;
                 #if DEBUG_BEHAVIOUR_VERBOSITY > 2
@@ -134,7 +134,7 @@ protected:
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 2500)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 2900)
         {
             m_pan_started = false;
             m_pan_finished = false;
@@ -160,12 +160,18 @@ protected:
         // I am feeling really lazy at the moment; I am updating the time the ball was last seen even though it is NOT seen
         // This is to simply prevent the ball from being lost during the look away pan (this will also trick the other robots via a team information)
         if (m_pan_started and not m_pan_finished)       
-            ball.updateTimeLastSeen(m_data->CurrentTime - 1000);
+            ball.updateTimeLastSeen(m_data->CurrentTime - 750);
+        
+        /*if (m_data->CurrentTime >= m_pan_end_time+200) {
+            Blackboard->lookForBall = true;
+        } else if (m_data->CurrentTime <= m_pan_end_time and not m_pan_finished) {
+            Blackboard->lookForBall = false;
+        }*/
         
         if (not m_pan_started or m_pan_finished)
         {
             
-            if (ball.TimeSinceLastSeen() > 2300)
+            if (ball.TimeSinceLastSeen() > 1800)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
                 m_jobs->addMotionJob(new HeadPanJob(ball, 0.5));
@@ -173,7 +179,7 @@ protected:
             else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 750)
+                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 40)
                 {
                     #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                         debug << m_data->CurrentTime << ": Tracking ball" << endl;
@@ -181,16 +187,20 @@ protected:
                     //cout << m_data->CurrentTime << ": Tracking ball" << endl;
                     m_jobs->addMotionJob(new HeadTrackJob(ball));
                 } else {
-                    m_jobs->addMotionJob(new HeadPanJob(ball, 0.3));
+                    m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
                 }
             }
         }
-        float targetKickDistance = 13.;
+        float targetKickDistance = 12.;
         
         
-        if((ball.estimatedDistance() < targetKickDistance) && ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) )) // && ball.TimeSeen() > 0 && m_pan_finished)
+        if((ball.estimatedDistance() < targetKickDistance) && 
+            ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) ) && 
+              fabs(ball.estimatedBearing()) > 0.25 && //ball is not "between" our feet
+              fabs(ball.estimatedBearing()) < 0.75) //ball is not "outside" our feet
+              // && ball.TimeSeen() > 0 && m_pan_finished)
         {
-            m_jobs->addMotionJob(new WalkJob(0, 0, 0));
+            //m_jobs->addMotionJob(new WalkJob(0, 0, 0));
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
             kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
@@ -205,7 +215,7 @@ protected:
         } else if(not iskicking)
         {
             
-            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.5,42.);
+            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance,42.);
             vector<float> result;
             // decide whether we need to dodge or not
             vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);

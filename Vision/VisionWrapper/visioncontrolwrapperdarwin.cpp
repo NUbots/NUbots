@@ -36,7 +36,7 @@ int VisionControlWrapper::runFrame()
         debug << "VisionControlWrapper::runFrame() - updateFrame() succeeded" << endl;
     #endif
         
-    int result = controller->runFrame(); //run vision on the frame
+    int result = controller->runFrame(Blackboard->lookForBall, Blackboard->lookForLandmarks); //run vision on the frame
     
     data_wrapper->postProcess();    //post process all the field objects
     

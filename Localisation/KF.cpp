@@ -61,23 +61,23 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
   init();									//Initialisation of Xhat and S
 
 // Process Noise - Matrix Square Root of Q
-//  sqrtOfProcessNoise = Matrix(7,7,true);
-//  sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
-//  sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
-//  sqrtOfProcessNoise[2][2] = 0.005; // Robot Theta. 0.00001
-//  sqrtOfProcessNoise[3][3] = 5.0; // Ball X.
-//  sqrtOfProcessNoise[4][4] = 5.0; // Ball Y.
-//  sqrtOfProcessNoise[5][5] = 5.6569; // Ball X Velocity.
-//  sqrtOfProcessNoise[6][6] = 5.6569; // Ball Y Velocity.
-
   sqrtOfProcessNoise = Matrix(7,7,true);
-  sqrtOfProcessNoise[0][0] = 6.0; // Robot X coord.
-  sqrtOfProcessNoise[1][1] = 6.0; // Robot Y coord.
-  sqrtOfProcessNoise[2][2] = 0.15; // Robot Theta. 0.00001
-  sqrtOfProcessNoise[3][3] = 15.0; // Ball X.
-  sqrtOfProcessNoise[4][4] = 15.0; // Ball Y.
-  sqrtOfProcessNoise[5][5] = 30.0; // Ball X Velocity.
-  sqrtOfProcessNoise[6][6] = 30.0; // Ball Y Velocity.
+  sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
+  sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
+  sqrtOfProcessNoise[2][2] = 0.005; // Robot Theta. 0.00001
+  sqrtOfProcessNoise[3][3] = 5.0; // Ball X.
+  sqrtOfProcessNoise[4][4] = 5.0; // Ball Y.
+  sqrtOfProcessNoise[5][5] = 5.6569; // Ball X Velocity.
+  sqrtOfProcessNoise[6][6] = 5.6569; // Ball Y Velocity.
+
+//  sqrtOfProcessNoise = Matrix(7,7,true);
+//  sqrtOfProcessNoise[0][0] = 6.0; // Robot X coord.
+//  sqrtOfProcessNoise[1][1] = 6.0; // Robot Y coord.
+//  sqrtOfProcessNoise[2][2] = 0.15; // Robot Theta. 0.00001
+//  sqrtOfProcessNoise[3][3] = 15.0; // Ball X.
+//  sqrtOfProcessNoise[4][4] = 15.0; // Ball Y.
+//  sqrtOfProcessNoise[5][5] = 30.0; // Ball X Velocity.
+//  sqrtOfProcessNoise[6][6] = 30.0; // Ball Y Velocity.
 
 
 	//RHM 7/7/08: Extra matrix for resetting
@@ -286,7 +286,7 @@ void KF::timeUpdate(double deltaTime){
     updateUncertainties[4][6] = deltaTimeSeconds; // [ballY][ballYvelocity]
 
     // Householder transform. Unscented KF algorithm. Takes a while.
-    stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, deltaTime*sqrtOfProcessNoise));
+    stateStandardDeviations=HT(horzcat(updateUncertainties*stateStandardDeviations, sqrtOfProcessNoise));
     stateEstimates[2][0] = normaliseAngle(stateEstimates[2][0]); // unwrap the robots angle to keep within -pi < theta < pi.
     return;
 }

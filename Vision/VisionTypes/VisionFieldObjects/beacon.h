@@ -30,11 +30,15 @@ public:
     
 private:
     void calculatePositions();
+    float distanceToBeacon(float bearing, float elevation);
     
 private:
     BeaconID m_id;
     Quad m_corners;
-    int width;
+    Vector2<int> m_bottom_centre;
+    
+    float d2p;
+    float width_dist;
 };
 
 #endif // BEACON_H
