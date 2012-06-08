@@ -36,7 +36,6 @@ win32 {
 # LIBS += -L"C:\Program Files\OpenCV\lib" -lcv -lcvaux -lhighgui -lcxcore
 # Input
 # HEADERS += "C:\Program Files\OpenCV\cv\include\cv.h" "C:\Program Files\OpenCV\otherlibs\highgui\highgui.h"
-INCLUDEPATH += /home/shannon/Backupss/VisionOld/
 INCLUDEPATH += ../
 INCLUDEPATH += ../NUview/
 INCLUDEPATH += NUViewConfig/
@@ -45,9 +44,9 @@ HEADERS += ui_mainwindow.h \
     connectionwidget.h \
     ColorModelConversions.h \
     classificationwidget.h \
-    /home/shannon/Backups/VisionOld/ClassificationColours.h \
+    ../VisionOld/ClassificationColours.h \
     ../Tools/FileFormats/NUbotImage.h \
-    /home/shannon/Backups/VisionOld/Vision.h \
+    ../VisionOld/Vision.h \
     ../Tools/FileFormats/LUTTools.h \
     virtualnubot.h \
     ../Infrastructure/NUImage/BresenhamLine.h \
@@ -58,13 +57,13 @@ HEADERS += ui_mainwindow.h \
     GLDisplay.h \
     ../Infrastructure/NUImage/NUImage.h \
     ../Infrastructure/NUImage/ClassifiedImage.h \
-    /home/shannon/Backups/VisionOld/ClassifiedSection.h \
-    /home/shannon/Backups/VisionOld/ScanLine.h \
-    /home/shannon/Backups/VisionOld/TransitionSegment.h \
-    /home/shannon/Backups/VisionOld/GoalDetection.h \
+    ../VisionOld/ClassifiedSection.h \
+    ../VisionOld/ScanLine.h \
+    ../VisionOld/TransitionSegment.h \
+    ../VisionOld/GoalDetection.h \
     LayerSelectionWidget.h \
     locWmGlDisplay.h \
-    /home/shannon/Backups/VisionOld/LineDetection.h \
+    ../VisionOld/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
     ../Tools/Math/Vector3.h \
     ../Infrastructure/FieldObjects/StationaryObject.h \
@@ -73,8 +72,8 @@ HEADERS += ui_mainwindow.h \
     ../Infrastructure/FieldObjects/MobileObject.h \
     ../Infrastructure/FieldObjects/AmbiguousObject.h \
     ../Infrastructure/FieldObjects/FieldObjects.h \
-    /home/shannon/Backups/VisionOld/Threads/SaveImagesThread.h \
-    /home/shannon/Backups/VisionOld/ObjectCandidate.h \
+    ../VisionOld/Threads/SaveImagesThread.h \
+    ../VisionOld/ObjectCandidate.h \
     ../Localisation/WMPoint.h \
     ../Localisation/WMLine.h \
     ../Localisation/sphere.h \
@@ -82,8 +81,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/cameramatrix.h \
     ../Tools/Math/matrix.h \
     localisationwidget.h \
-    /home/shannon/Backups/VisionOld/Ball.h \
-    /home/shannon/Backups/VisionOld/CircleFitting.h \
+    ../VisionOld/Ball.h \
+    ../VisionOld/CircleFitting.h \
     FileAccess/LogFileFormatReader.h \
     FileAccess/nifVersion1FormatReader.h \
     FileAccess/LogFileReader.h \
@@ -113,53 +112,53 @@ HEADERS += ui_mainwindow.h \
     ../Infrastructure/NUBlackboard.h \
     ../NUPlatform/NUPlatform.h \
     ../Tools/Math/General.h \
-    /home/shannon/Backups/VisionOld/CornerPoint.h \
+    ../VisionOld/CornerPoint.h \
     ../Kinematics/OrientationUKF.h \
     FileAccess/StreamFileReader.h \
     ../Tools/FileFormats/TimestampedData.h \
     FileAccess/ImageStreamFileReader.h \
     ../Motion/Tools/MotionScript.h \
     ../Motion/Tools/MotionCurves.h \
-    /home/shannon/Backups/VisionOld/EllipseFit.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_version.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_vec.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_subscript.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_stopwatch.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_sparse_matrix_csr.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_math_utils.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_i_refvec.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_fortran_array3d_utils.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_fortran_array3d.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_fortran_array2d_utils.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_fortran_array2d.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_fortran_array1d_utils.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_fortran_array1d.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_cmat.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_array3d_utils.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_array3d.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_array2d_utils.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_array2d.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_array1d_utils.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt_array1d.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/tnt.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/jama_svd.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/jama_qr.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/jama_lu.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/jama_eig.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/jama_cholesky.h \
+    ../VisionOld/EllipseFit.h \
+    ../VisionOld/EllipseFitting/tnt_version.h \
+    ../VisionOld/EllipseFitting/tnt_vec.h \
+    ../VisionOld/EllipseFitting/tnt_subscript.h \
+    ../VisionOld/EllipseFitting/tnt_stopwatch.h \
+    ../VisionOld/EllipseFitting/tnt_sparse_matrix_csr.h \
+    ../VisionOld/EllipseFitting/tnt_math_utils.h \
+    ../VisionOld/EllipseFitting/tnt_i_refvec.h \
+    ../VisionOld/EllipseFitting/tnt_fortran_array3d_utils.h \
+    ../VisionOld/EllipseFitting/tnt_fortran_array3d.h \
+    ../VisionOld/EllipseFitting/tnt_fortran_array2d_utils.h \
+    ../VisionOld/EllipseFitting/tnt_fortran_array2d.h \
+    ../VisionOld/EllipseFitting/tnt_fortran_array1d_utils.h \
+    ../VisionOld/EllipseFitting/tnt_fortran_array1d.h \
+    ../VisionOld/EllipseFitting/tnt_cmat.h \
+    ../VisionOld/EllipseFitting/tnt_array3d_utils.h \
+    ../VisionOld/EllipseFitting/tnt_array3d.h \
+    ../VisionOld/EllipseFitting/tnt_array2d_utils.h \
+    ../VisionOld/EllipseFitting/tnt_array2d.h \
+    ../VisionOld/EllipseFitting/tnt_array1d_utils.h \
+    ../VisionOld/EllipseFitting/tnt_array1d.h \
+    ../VisionOld/EllipseFitting/tnt.h \
+    ../VisionOld/EllipseFitting/jama_svd.h \
+    ../VisionOld/EllipseFitting/jama_qr.h \
+    ../VisionOld/EllipseFitting/jama_lu.h \
+    ../VisionOld/EllipseFitting/jama_eig.h \
+    ../VisionOld/EllipseFitting/jama_cholesky.h \
     ../Localisation/odometryMotionModel.h \
     ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
     locwmstreamwidget.h \
-    /home/shannon/Backups/VisionOld/EllipseFitting/FittingCalculations.h \
+    ../VisionOld/EllipseFitting/FittingCalculations.h \
     ../Tools/Math/Rectangle.h \
     ../NUPlatform/NUCamera.h \
-    /home/shannon/Backups/VisionOld/fitellipsethroughcircle.h \
+    ../VisionOld/fitellipsethroughcircle.h \
     ../Localisation/LocWmFrame.h \
     FileAccess/IndexedFileReader.h \
     LUTGlDisplay.h \
-    /home/shannon/Backups/VisionOld/SplitAndMerge/SAM.h \
+    ../VisionOld/SplitAndMerge/SAM.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h \
     ../NUPlatform/NUSensors/OdometryEstimator.h \
     ../Tools/Math/StlVector.h \
@@ -199,7 +198,7 @@ SOURCES += mainwindow.cpp \
     connectionwidget.cpp \
     classificationwidget.cpp \
     ../Tools/FileFormats/NUbotImage.cpp \
-    /home/shannon/Backups/VisionOld/Vision.cpp \
+    ../VisionOld/Vision.cpp \
     ../Tools/FileFormats/LUTTools.cpp \
     virtualnubot.cpp \
     ../Infrastructure/NUImage/BresenhamLine.cpp \
@@ -209,10 +208,10 @@ SOURCES += mainwindow.cpp \
     GLDisplay.cpp \
     ../Infrastructure/NUImage/NUImage.cpp \
     ../Infrastructure/NUImage/ClassifiedImage.cpp \
-    /home/shannon/Backups/VisionOld/ClassifiedSection.cpp \
-    /home/shannon/Backups/VisionOld/ScanLine.cpp \
-    /home/shannon/Backups/VisionOld/TransitionSegment.cpp \
-    /home/shannon/Backups/VisionOld/GoalDetection.cpp \
+    ../VisionOld/ClassifiedSection.cpp \
+    ../VisionOld/ScanLine.cpp \
+    ../VisionOld/TransitionSegment.cpp \
+    ../VisionOld/GoalDetection.cpp \
     LayerSelectionWidget.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
@@ -232,8 +231,8 @@ SOURCES += mainwindow.cpp \
     $$files(../Infrastructure/Jobs/VisionJobs/*.cpp) \
     $$files(../Infrastructure/Jobs/MotionJobs/*.cpp) \
     locWmGlDisplay.cpp \
-    /home/shannon/Backups/VisionOld/ObjectCandidate.cpp \
-    /home/shannon/Backups/VisionOld/LineDetection.cpp \
+    ../VisionOld/ObjectCandidate.cpp \
+    ../VisionOld/LineDetection.cpp \
     ../Tools/Math/LSFittedLine.cpp \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
     ../Infrastructure/FieldObjects/Self.cpp \
@@ -241,7 +240,7 @@ SOURCES += mainwindow.cpp \
     ../Infrastructure/FieldObjects/MobileObject.cpp \
     ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
     ../Infrastructure/FieldObjects/FieldObjects.cpp \
-    /home/shannon/Backups/VisionOld/Threads/SaveImagesThread.cpp \
+    ../VisionOld/Threads/SaveImagesThread.cpp \
     ../Localisation/WMPoint.cpp \
     ../Localisation/WMLine.cpp \
     ../Localisation/sphere.cpp \
@@ -249,8 +248,8 @@ SOURCES += mainwindow.cpp \
     ../Localisation/cameramatrix.cpp \
     ../Tools/Math/matrix.cpp \
     localisationwidget.cpp \
-    /home/shannon/Backups/VisionOld/Ball.cpp \
-    /home/shannon/Backups/VisionOld/CircleFitting.cpp \
+    ../VisionOld/Ball.cpp \
+    ../VisionOld/CircleFitting.cpp \
     FileAccess/LogFileFormatReader.cpp \
     FileAccess/nifVersion1FormatReader.cpp \
     FileAccess/LogFileReader.cpp \
@@ -277,20 +276,20 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/OrientationUKF.cpp \
     ../Motion/Tools/MotionScript.cpp \
     ../Motion/Tools/MotionCurves.cpp \
-    /home/shannon/Backups/VisionOld/EllipseFit.cpp \
+    ../VisionOld/EllipseFit.cpp \
     ../Localisation/odometryMotionModel.cpp \
     ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
     locwmstreamwidget.cpp \
-    /home/shannon/Backups/VisionOld/EllipseFitting/FittingCalculations.cpp \
+    ../VisionOld/EllipseFitting/FittingCalculations.cpp \
     ../Tools/Math/Rectangle.cpp \
     ../NUPlatform/NUCamera.cpp \
-    /home/shannon/Backups/VisionOld/fitellipsethroughcircle.cpp \
+    ../VisionOld/fitellipsethroughcircle.cpp \
     ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
-    /home/shannon/Backups/VisionOld/SplitAndMerge/SAM.cpp \
+    ../VisionOld/SplitAndMerge/SAM.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
     ../Tools/Math/FieldCalculations.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
