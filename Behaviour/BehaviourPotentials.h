@@ -237,7 +237,7 @@ public:
                 
                 position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
-                if (fabs(bearing) > 1.f and position_speed < 0.2) {
+                if (fabs(bearing) > 0.7f and position_speed < 0.2) {
                     position_speed += 0.2;
                 }
                 //position_rotation = 0.5*bearing; //previous value for NAO
@@ -245,15 +245,16 @@ public:
             }
             else
             {   // if it is outside the stopping distance - full speed
-                //if ( fabs (bearing) < 0.2) {
-                    position_speed = 1;
+                if ( fabs (bearing) < 0.3 or (fabs (bearing) < 0.5) and distance > stoppingdistance*1.25) {
+                    position_speed = 1.0;
                     position_direction = bearing*0.6;
-                /*} else {
+                    position_rotation = 0.;//6*bearing;
+                } else {
                     position_speed = 0.05;
                     position_direction = bearing;
-                    position_rotation = 0.7*bearing;
-                }*/
-                position_rotation = 0.5*bearing; //previous value for NAO
+                    position_rotation = 0.3*bearing;
+                }
+                //position_rotation = 0.5*bearing; //previous value for NAO
                 //position_rotation = 0.05*bearing;
             }
             
@@ -289,6 +290,7 @@ public:
             float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
             speed[1] = atan2(ysum, xsum);
             speed[2] = position_rotation + around_rotation;
+            cout << speed[0] << ", " << speed[1] << ", " << speed[2] << ", " << ball.measuredBearing() << ", " << ball.estimatedBearing() << endl;
             return speed;
         }
     }

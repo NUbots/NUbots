@@ -96,7 +96,7 @@ protected:
         
         if (not m_pan_started and not iskicking)
         {   
-            if (ball.estimatedDistance() < 100 and ball.estimatedDistance() > 34. and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
+            if (ball.estimatedDistance() < 120. and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
             {   
                 //Blackboard->lookForBall = false;
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
@@ -107,7 +107,7 @@ protected:
                 float timesinceyellowgoalseen = min(yellow_left.TimeSinceLastSeen(), yellow_right.TimeSinceLastSeen());
                 float timesincebluegoalseen = min(blue_left.TimeSinceLastSeen(), blue_right.TimeSinceLastSeen());
                 float timesincegoalseen = min(timesinceyellowgoalseen, timesincebluegoalseen);
-                float hackfactor = 0.3; //(9.0/35000.0)*timesincegoalseen + 1;
+                float hackfactor = 0.2; //(9.0/35000.0)*timesincegoalseen + 1;
                 
                 float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
                 float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
@@ -125,7 +125,7 @@ protected:
                 }
                 m_jobs->addMotionJob(new HeadPanJob(posts, hackfactor));
                 m_pan_started = true;
-                m_pan_end_time = m_data->CurrentTime + 1000;
+                m_pan_end_time = m_data->CurrentTime + 800;
                 m_pan_time_captured = false;
                 m_pan_finished = false;
                 #if DEBUG_BEHAVIOUR_VERBOSITY > 2
@@ -134,7 +134,7 @@ protected:
                 //cout << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
             }
         }
-        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 2500)
+        else if (m_pan_finished and m_data->CurrentTime - m_pan_end_time > 2900)
         {
             m_pan_started = false;
             m_pan_finished = false;
@@ -160,7 +160,7 @@ protected:
         // I am feeling really lazy at the moment; I am updating the time the ball was last seen even though it is NOT seen
         // This is to simply prevent the ball from being lost during the look away pan (this will also trick the other robots via a team information)
         if (m_pan_started and not m_pan_finished)       
-            ball.updateTimeLastSeen(m_data->CurrentTime - 1000);
+            ball.updateTimeLastSeen(m_data->CurrentTime - 750);
         
         /*if (m_data->CurrentTime >= m_pan_end_time+200) {
             Blackboard->lookForBall = true;
@@ -171,7 +171,7 @@ protected:
         if (not m_pan_started or m_pan_finished)
         {
             
-            if (ball.TimeSinceLastSeen() > 1500)
+            if (ball.TimeSinceLastSeen() > 1800)
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
                 m_jobs->addMotionJob(new HeadPanJob(ball, 0.5));
@@ -191,7 +191,7 @@ protected:
                 }
             }
         }
-        float targetKickDistance = 13.;
+        float targetKickDistance = 10.;
         
         
         if((ball.estimatedDistance() < targetKickDistance) && 
@@ -215,7 +215,7 @@ protected:
         } else if(not iskicking)
         {
             
-            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.5,42.);
+            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance,42.);
             vector<float> result;
             // decide whether we need to dodge or not
             vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
