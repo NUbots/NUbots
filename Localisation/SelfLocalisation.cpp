@@ -686,7 +686,7 @@ void SelfLocalisation::initSingleModel(float x, float y, float heading)
     positions.reserve(1);
     Moment temp(Model::states_total);
     temp.setMean(mean_matrix(x,y,heading));
-    temp.setCovariance(covariance_matrix(150.0f, 100.0f, 2*PI));
+    temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*PI*2*PI));
     positions.push_back(temp);
     InitialiseModels(positions);
 }
@@ -804,7 +804,7 @@ void SelfLocalisation::doSetReset(GameInformation::TeamColour team_colour, int p
     int num_models;
     std::vector<Moment> positions;
     Moment temp(Model::states_total);
-    temp.setCovariance(covariance_matrix(position_sd, position_sd, heading_sd));
+    temp.setCovariance(covariance_matrix(position_sd*position_sd, position_sd*position_sd, heading_sd*heading_sd));
     if (player_number == 1)
     {   // if we are the goal keeper and we get manually positioned we know exactly where we will be put
         num_models = 1;
@@ -888,7 +888,7 @@ void SelfLocalisation::doPenaltyReset()
     std::vector<Moment> positions;
     positions.reserve(2);
     Moment temp(Model::states_total);
-    temp.setCovariance(covariance_matrix(75.0f, 25.0f, 0.35f));
+    temp.setCovariance(covariance_matrix(75.0f*75.0f, 25.0f*25.0f, 0.35f*0.35f));
 
     // setup model 0 as top 'T'
     temp.setMean(mean_matrix(0.0f, 200.0, -PI/2.0f));
@@ -933,7 +933,7 @@ void SelfLocalisation::doReset()
 
     Moment temp(Model::states_total);
 
-    temp.setCovariance(covariance_matrix(150.0f, 100.0f, 2*PI));
+    temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*PI*2*PI));
 
     // First position ->
     temp.setMean(mean_matrix(300.0f, 0.0f, PI));
