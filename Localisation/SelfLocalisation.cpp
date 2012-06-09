@@ -50,11 +50,6 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 
 // Constant value initialisation
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
-const float SelfLocalisation::c_OBJECT_ERROR_THRESHOLD = 0.3f;
-const float SelfLocalisation::c_OBJECT_ERROR_DECAY = 0.94f;
-
-const float SelfLocalisation::c_RESET_SUM_THRESHOLD = 3.0f; // 3 // then 8.0 (home)
-const int SelfLocalisation::c_RESET_NUM_THRESHOLD = 2;
 
 // Object distance measurement error weightings (Constant)
 const float SelfLocalisation::c_obj_theta_variance = 0.1f*0.1f;        // (0.01 rad)^2
@@ -141,6 +136,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
  */
 SelfLocalisation::SelfLocalisation(const SelfLocalisation& source): TimestampedData(), m_settings(source.m_settings)
 {
+    m_ball_model = NULL;
     *this = source;
 }
 
@@ -169,6 +165,8 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
         {
             m_models.push_back(new Model(*(*model_it)));
         }
+        if (m_ball_model!=NULL) delete m_ball_model;
+        m_ball_model = new MobileObjectUKF(*source.m_ball_model);
     }
     // by convention, always return *this
     return *this;
@@ -179,7 +177,7 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
 SelfLocalisation::~SelfLocalisation()
 {
     clearModels();
-    delete m_ball_model;
+    if (m_ball_model!=NULL) delete m_ball_model;
     #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_file.close();
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -292,14 +290,6 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
     #endif
     ProcessObjects(fobs, time_increment);
-
-    // Check for model reset. -> with multiple models just remove if not last one??
-    // Need to re-do reset to be model specific.
-    int num_models = getNumActiveModels();
-    int num_reset = CheckForOutlierResets();
-
-//    if(num_reset == num_models)
-//        ProcessObjects(fobs, time_increment);
 
     // clip models back on to field.
     clipActiveModelsToField();
@@ -768,7 +758,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
         back_x = -back_x;
     }
     
-    Matrix cov_matrix = covariance_matrix(50.0f, 15.0f, 0.2f);
+    Matrix cov_matrix = covariance_matrix(50.0f*50.0f, 15.0f*15.0f, 0.2f*0.2f);
     Moment temp(Model::states_total);
     temp.setCovariance(cov_matrix);
     std::vector<Moment> positions;
@@ -791,7 +781,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     positions.push_back(temp);
 
     // Postition 5
-    temp.setCovariance(covariance_matrix(100.0f, 150.0f, PI/2.0f));
+    temp.setCovariance(covariance_matrix(100.0f*100.0f, 150.0f*150.0f, PI/2.0f*PI/2.0f));
     temp.setMean(mean_matrix(centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
@@ -1840,53 +1830,6 @@ const SelfModel* SelfLocalisation::getBestModel() const
     return result;
 }
 
-bool SelfLocalisation::CheckModelForOutlierReset(int modelID)
-{
-    // RHM 7/7/08: Suggested incorporation of 'Resetting' for possibly 'kidnapped' robot
-    //----------------------------------------------------------
-    double sum = 0.0;
-    int numObjects = 0;
-    bool reset = false;
-    for(int objID = 0; objID < c_numOutlierTrackedObjects; objID++)
-    {
-        switch(objID)
-        {
-            case FieldObjects::FO_BLUE_LEFT_GOALPOST:
-            case FieldObjects::FO_BLUE_RIGHT_GOALPOST:
-            case FieldObjects::FO_YELLOW_LEFT_GOALPOST:
-            case FieldObjects::FO_YELLOW_RIGHT_GOALPOST:
-            case FieldObjects::FO_CORNER_BLUE_PEN_LEFT:
-            case FieldObjects::FO_CORNER_BLUE_PEN_RIGHT:
-            case FieldObjects::FO_CORNER_BLUE_T_LEFT:
-            case FieldObjects::FO_CORNER_BLUE_T_RIGHT:
-                sum += m_modelObjectErrors[modelID][objID];
-                if (m_modelObjectErrors[modelID][objID] > c_OBJECT_ERROR_THRESHOLD) numObjects+=1;
-                m_modelObjectErrors[modelID][objID] *= c_OBJECT_ERROR_DECAY;
-                break;
-            default:
-                break;
-        }
-    }
-
-    // Check if enough recent 'outliers' that we should reset ?
-    if ((sum > c_RESET_SUM_THRESHOLD) && (numObjects >= c_RESET_NUM_THRESHOLD)) {
-        reset = true;
-        //m_models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
-
-        for (int i=0; i<c_numOutlierTrackedObjects; i++) m_modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
-    }
-    return reset;
-}
-
-
-/*! @brief Not yet implemented.
-*/
-int  SelfLocalisation::CheckForOutlierResets()
-{
-    int numResets = 0;
-    return numResets;
-}
-
 /*! @brief Normalises the alphas of all exisiting models.
     The alphas of all existing models are normalised so that the total probablility of the set sums to 1.0.
 */
@@ -2019,7 +1962,7 @@ double SelfLocalisation::MergeMetric(const SelfModel *modelA, const SelfModel *m
     Matrix xdif = modelA->mean() - modelB->mean();
     Matrix p1 = modelA->covariance();
     Matrix p2 = modelB->covariance();
-  
+
     xdif[Model::states_heading][0] = normaliseAngle(xdif[Model::states_heading][0]);
 
     double dij=0;
@@ -2219,7 +2162,7 @@ unsigned int SelfLocalisation::removeInactiveModels(ModelContainer& container)
         }
     }
     container.erase(remove_if(container.begin(), container.end(), is_null), container.end());
-    return num_before - container.size();               // Return number removed, original size - new size
+    return num_before - container.size();               // Return number removed: original size - new size
 }
 
 /*!

@@ -66,14 +66,14 @@ class SelfLocalisation: public TimestampedData
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         unsigned int getNumActiveModels();
         unsigned int getNumFreeModels();
-        bool CheckModelForOutlierReset(int modelID);
-        int  CheckForOutlierResets();
         const SelfModel* getBestModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
 
         // Pruning functions.
+        // Main function.
         int PruneModels();
+        // Individual methods.
         int PruneMaxLikelyhood();
         int PruneViterbi(unsigned int order);
         int PruneNScan(unsigned int N);
@@ -127,6 +127,7 @@ class SelfLocalisation: public TimestampedData
             return m_frame_log.str();
         }
 
+        // Implementation of virtual function from TimestampedData class.
         double GetTimestamp() const {return m_timestamp;}
 
         /*!
@@ -151,7 +152,6 @@ class SelfLocalisation: public TimestampedData
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
-        static const int c_numOutlierTrackedObjects = FieldObjects::NUM_STAT_FIELD_OBJECTS;
         ModelContainer m_models;
         MobileObjectUKF* m_ball_model;
 
@@ -161,7 +161,6 @@ class SelfLocalisation: public TimestampedData
 
         double m_timestamp;
         int m_currentFrameNumber;
-        float m_modelObjectErrors[c_MAX_MODELS][c_numOutlierTrackedObjects]; // Storage of outlier history.
 
         // Game state memory
         bool m_previously_incapacitated;
@@ -179,10 +178,6 @@ class SelfLocalisation: public TimestampedData
 
         // Outlier tuning Constants -- Values assigned in SelfLocalisation.cpp
         static const float c_LargeAngleSD;
-        static const float c_OBJECT_ERROR_THRESHOLD;
-        static const float c_OBJECT_ERROR_DECAY;
-        static const float c_RESET_SUM_THRESHOLD;
-        static const int c_RESET_NUM_THRESHOLD;
 
         // Object distance measurement error weightings (Constant) -- Values assigned in SelfLocalisation.cpp
         static const float c_obj_theta_variance;
