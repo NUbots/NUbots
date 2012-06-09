@@ -21,9 +21,10 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-               SelfModel.cpp SelfModel.h
-               SelfSRUKF.cpp SelfSRUKF.h
-               SelfUKF.cpp  SelfUKF.h
+        SelfModel.cpp 		SelfModel.h
+        SelfSRUKF.cpp 		SelfSRUKF.h
+        SelfUKF.cpp  		SelfUKF.h
+        WeightedModel.cpp	WeightedModel.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
