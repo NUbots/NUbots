@@ -12,6 +12,15 @@ class StationaryObject;
 class NUSensorsData;
 class SelfLocalisation;
 class GLUquadric;
+class Matrix;
+class QPoint;
+
+struct FieldPose
+{
+    float x;
+    float y;
+    float angle;
+};
 
 class locWmGlDisplay : public QGLWidget
 {
@@ -91,6 +100,11 @@ protected:
         void drawRobotMarker(QColor colour, float x, float y, float theta);
         void DrawSigmaPoint(QColor colour, float x, float y, float theta);
         void DrawBallSigma(QColor colour, float x, float y);
+
+        //void DrawErrorElipse(QColor colour, float x, float y);
+
+        FieldPose CalculateErrorElipse(float xx, float xy, float yy);
+        void DrawElipse(const QPoint& location, const QPoint& size, float angle, const QColor& lineColour, const QColor& fillColour);
 
         void DrawModelObjects(const KF& model, const QColor& modelColor);
         void DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor);

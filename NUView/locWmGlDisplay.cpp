@@ -8,6 +8,7 @@
 #include "Localisation/SelfLocalisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Tools/Math/Limit.h"
 
 // Apple has to be different...
 #if defined(__APPLE__) || defined(MACOSX)
@@ -199,6 +200,8 @@ void locWmGlDisplay::wheelEvent ( QWheelEvent * event )
     int magnitude = event->delta();
     float zoomDistance = (float)magnitude / 10.0f;
     viewTranslation[2] += zoomDistance;
+    Limit zoomLimit(-9000, -20);
+    viewTranslation[2] = zoomLimit.clip(viewTranslation[2]);
     update();
 }
 
@@ -766,8 +769,25 @@ void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, c
 
 void locWmGlDisplay::DrawModelMarkers(const KF& model, const QColor& modelColor)
 {
+    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
+    float mean_x = model.state(KF::selfX);
+    float mean_y = model.state(KF::selfY);
+    float mean_angle = model.state(KF::selfTheta);
+    drawRobotMarker(modelColor, mean_x, mean_y, mean_angle);
 
-    drawRobotMarker(modelColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
+    // Need to multiply by its transpose to do conversion: standard deviation -> variance.
+    Matrix cov = model.stateStandardDeviations * model.stateStandardDeviations.transp();
+    float xx = cov[KF::selfX][KF::selfX];
+    float xy = cov[KF::selfX][KF::selfY];
+    float yy = cov[KF::selfY][KF::selfY];
+    FieldPose pose = CalculateErrorElipse(xx,xy,yy);
+
+    QColor outline(modelColor);
+    outline.setAlphaF(std::max((float)model.alpha(), c_min_display_alpha / 255.0f));
+    QColor fill(modelColor);
+    fill.setAlpha(std::max((int)(100 * model.alpha()), c_min_display_alpha));
+    DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
+
     if(drawSigmaPoints)
     {
         Matrix sigmaPoints = model.CalculateSigmaPoints();
@@ -782,7 +802,23 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, const QColor& modelColor)
 
 void locWmGlDisplay::DrawModelMarkers(const SelfModel* model, const QColor& modelColor)
 {
-    drawRobotMarker(modelColor, model->mean(Model::states_x), model->mean(Model::states_y), model->mean(Model::states_heading));
+    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
+    float mean_x = model->mean(Model::states_x);
+    float mean_y = model->mean(Model::states_y);
+    float mean_angle = model->mean(Model::states_heading);
+    drawRobotMarker(modelColor, mean_x, mean_y, mean_angle);
+
+    Matrix cov = model->covariance();
+    float xx = cov[Model::states_x][Model::states_x];
+    float xy = cov[Model::states_x][Model::states_y];
+    float yy = cov[Model::states_y][Model::states_y];
+    FieldPose pose = CalculateErrorElipse(xx,xy,yy);
+
+    QColor outline(modelColor);
+    outline.setAlphaF(std::max(model->alpha(), c_min_display_alpha / 255.0f));
+    QColor fill(modelColor);
+    fill.setAlpha(std::max((int)(100 * model->alpha()), c_min_display_alpha));
+    DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
     if(drawSigmaPoints)
     {
         //! TODO: FIX THIS DISPLAY ISSUE
@@ -844,6 +880,84 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
             }
         }
     }
+
+
+}
+
+FieldPose locWmGlDisplay::CalculateErrorElipse(float xx, float xy, float yy)
+{
+    const float scalefactor = 2.4477; // for 95% confidence.
+    FieldPose result;
+    float Eig1 = (xx+yy)/2 + sqrt(4*xy*xy + (xx-yy)*(xx-yy))/2;
+    float Eig2 = (xx+yy)/2 - sqrt(4*xy*xy + (xx-yy)*(xx-yy))/2;
+
+    float maxEig = std::max(Eig1,Eig2);
+    float minEig = std::min(Eig1,Eig2);
+
+    if(sqrt(xx) < sqrt(yy))
+    {
+        result.x = sqrt(minEig) * scalefactor;
+        result.y = sqrt(maxEig) * scalefactor;
+    }
+    else
+    {
+        result.x = sqrt(maxEig) * scalefactor;
+        result.y = sqrt(minEig) * scalefactor;
+    }
+
+    const float aspectratio = 1.0;
+    result.angle = 0.5 * atan((1/aspectratio) * (2*xy) / (xx-yy));
+    return result;
+}
+
+void locWmGlDisplay::DrawElipse(const QPoint& location, const QPoint& size, float angle, const QColor& lineColour, const QColor& fillColour)
+{
+    const float DEG2RAD = 3.14159/180;
+    glLineWidth(3);
+
+    float xradius = size.x();
+    float yradius = size.y();
+
+    glDisable(GL_LIGHTING);      // Enable Global Lighting
+    glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+    glEnable(GL_BLEND);		// Turn Blending On
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+    glPushMatrix();
+    glTranslatef(location.x(),location.y(),0.0f);    // Move to centre of goal.
+    glRotatef(angle,0.0f,0.0f,1.0f);				// Rotate The ellipse On It's Z Axis
+
+    GLfloat glLineColour[4];
+    qSetColor(glLineColour, lineColour);
+
+    GLfloat glFillColour[4];
+    qSetColor(glFillColour, fillColour);
+
+    glColor4fv(glFillColour);
+
+    glBegin(GL_POLYGON);
+    for (int i=0; i < 360; i++)
+    {
+        //convert degrees into radians
+        float degInRad = i*DEG2RAD;
+        glVertex2f(cos(degInRad)*xradius,sin(degInRad)*yradius);
+    }
+    glEnd();
+
+    glColor4fv(glLineColour);
+    glBegin(GL_LINE_LOOP);
+    for (int i=0; i < 360; i++)
+    {
+        //convert degrees into radians
+        float degInRad = i*DEG2RAD;
+        glVertex2f(cos(degInRad)*xradius,sin(degInRad)*yradius);
+    }
+    glEnd();
+
+    glPopMatrix();
+    glDisable(GL_BLEND);		// Turn Blending On
+    glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+    glEnable(GL_LIGHTING);      // Enable Global Lighting
 }
 
 void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, const QColor& modelColor)
