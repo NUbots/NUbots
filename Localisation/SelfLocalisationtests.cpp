@@ -7,16 +7,16 @@
 
 bool RunTests()
 {
-    bool success = true;
-    success = success && MaxLikelyhoodTest();
-    std::cout << "Max Likelyhood Test..." << (success ? "Success.":"Failed.") << std::endl;
-    success = success && ViterbiTest();
-    std::cout << "Viterbi Test..." << (success ? "Success.":"Failed.") << std::endl;
-    success = success && MergingTest();
-    std::cout << "Merge Test..." << (success ? "Success.":"Failed.") << std::endl;
-    success = success && NscanTest();
-    std::cout << "N-Scan Test..." << (success ? "Success.":"Failed.") << std::endl;
-    return success;
+    bool maxLikely, viterbi, merge, nscan;
+    maxLikely = MaxLikelyhoodTest();
+    std::cout << "Max Likelyhood Test..." << (maxLikely ? "Success.":"Failed.") << std::endl;
+    viterbi = ViterbiTest();
+    std::cout << "Viterbi Test..." << (viterbi ? "Success.":"Failed.") << std::endl;
+    merge = MergingTest();
+    std::cout << "Merge Test..." << (merge ? "Success.":"Failed.") << std::endl;
+    nscan = NscanTest();
+    std::cout << "N-Scan Test..." << (nscan ? "Success.":"Failed.") << std::endl;
+    return maxLikely and viterbi and merge and nscan;
 }
 
 bool timingTest()
@@ -122,7 +122,7 @@ bool MergingTest()
 
     temp = new Model();
     temp->setAlpha(0.5);
-    temp->setMean(SelfLocalisation::mean_matrix(102.0f, 0.0f, 0.0f));
+    temp->setMean(SelfLocalisation::mean_matrix(99.5f, 0.0f, 0.0f));
     temp->setCovariance(SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f));
     temp->setActive();
     models.push_back(temp);
@@ -135,6 +135,7 @@ bool MergingTest()
     models.push_back(temp);
 
     loc.setModels(models);
+
 
     loc.PruneModels();
 
