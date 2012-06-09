@@ -59,14 +59,23 @@ public slots:
       */
     void snapshotToClipboard();
 
+public slots:
+    void setXRotation(int angle);
+    void setYRotation(int angle);
+    void setZRotation(int angle);
+
 protected:
         void keyPressEvent ( QKeyEvent * e );
         void mousePressEvent ( QMouseEvent * event );
         void mouseMoveEvent ( QMouseEvent * event );
         void wheelEvent ( QWheelEvent * event );
         void initializeGL();
-        void paintGL();
+        void paintEvent(QPaintEvent *event);
+        //void paintGL(QPaintEvent *event);
         void resizeGL(int width, int height);
+        void setupViewport(int width, int height);
+
+
         void drawField();
 
         bool loadTexture(QString fileName, GLuint* textureId);
@@ -83,35 +92,45 @@ protected:
         void DrawSigmaPoint(QColor colour, float x, float y, float theta);
         void DrawBallSigma(QColor colour, float x, float y);
 
-        void DrawModelObjects(const KF& model, QColor& modelColor);
-        void DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor);
+        void DrawModelObjects(const KF& model, const QColor& modelColor);
+        void DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor);
 
-        void DrawModelMarkers(const KF& model, QColor& modelColor);
-        void DrawModelMarkers(const SelfModel* model, QColor& modelColor);
-        void DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor);
-        void drawLocalisationMarkers(const SelfLocalisation& localisation, QColor& modelColor);
+        void DrawModelMarkers(const KF& model,const QColor& modelColor);
+        void DrawModelMarkers(const SelfModel* model, const QColor& modelColor);
+        void DrawLocalisationMarkers(const Localisation& localisation, const QColor& modelColor);
+        void drawLocalisationMarkers(const SelfLocalisation& localisation, const QColor& modelColor);
 
-        void DrawLocalisationOverlay(const Localisation& localisation, QColor& modelColor);
+        void DrawLocalisationOverlay(const Localisation& localisation, const QColor& modelColor);
 
         void drawStationaryObjectLabel(const StationaryObject& object);
         void drawFieldObjectLabels(const FieldObjects& theFieldObjectsobject);
+
+        void drawLegend(QPainter* painter);
 
         GLuint robotAuraTexture;
         GLuint fieldLineTexture;
         GLuint grassTexture;
         GLuint robotTexture;
         GLuint robotBackTexture;
-        GLUquadric* quadratic;
         float viewTranslation[3];
-        float viewOrientation[3];
-        QPoint dragStartPosition;
-        QPoint prevDragPos;
+        int xRot;
+        int yRot;
+        int zRot;
+        QPoint lastPos;
 
         const Localisation* currentLocalisation;
         const Localisation* localLocalisation;
         const FieldObjects* currentObjects;
         const SelfLocalisation* m_self_loc;
         NUSensorsData* currentSensorData;
+
+        QColor m_currentColour;
+        QColor m_localColour;
+        QColor m_selfColour;
+        QColor m_fieldObjColour;
+        QColor m_sensorColour;
+        QColor m_backgroundColour;
+
 
         bool light;
         bool perspective;
