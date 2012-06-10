@@ -14,6 +14,7 @@ VisionBlackboard* VisionBlackboard::instance = 0;
 //! @brief Private constructor for blackboard.
 VisionBlackboard::VisionBlackboard()
 {
+    cout << "wtf" << endl;
     wrapper = DataWrapper::getInstance();
 
     LUT = wrapper->getLUT();
@@ -56,9 +57,9 @@ VisionBlackboard* VisionBlackboard::getInstance()
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setHullPoints(const vector<PointType>& points)
+void VisionBlackboard::setGreenHullPoints(const vector<PointType>& points)
 {
-    horizon_points = points;
+    green_horizon.set(points);
 }
 
 /**
@@ -67,9 +68,9 @@ void VisionBlackboard::setHullPoints(const vector<PointType>& points)
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setHorizonScanPoints(const vector<PointType>& points)
+void VisionBlackboard::setGreenHorizonScanPoints(const vector<PointType>& points)
 {
-    horizon_scan_points = points;
+    green_horizon_scan_points = points;
 }
 
 /**
@@ -193,21 +194,20 @@ void VisionBlackboard::setVerticalTransitionsMap(const map<VisionFieldObject::VF
 }
 
 /**
-*   @brief returns the kinematics horizon data set.
-*   @return A vector of values defining horizon line.
+*   @brief returns the green horizon.
 */
-const vector<PointType>& VisionBlackboard::getHorizonPoints() const
+const GreenHorizon& VisionBlackboard::getGreenHorizon() const
 {
-    return horizon_points;
+    return green_horizon;
 }
 
 /**
 *   @brief returns the green horizon scan point set.
 *   @return points A vector of pixel locations for the green horizon scan.
 */
-const vector<PointType>& VisionBlackboard::getHorizonScanPoints() const
+const vector<PointType>& VisionBlackboard::getGreenHorizonScanPoints() const
 {
-    return horizon_scan_points;
+    return green_horizon_scan_points;
 }
 
 /**
@@ -518,7 +518,7 @@ void VisionBlackboard::update()
     
     //Get updated kinematics data
     kinematics_horizon = wrapper->getKinematicsHorizon();
-    checkHorizon();
+    checkKinematicsHorizon();
     
     //calculate the field of view and effective camera distance
     calculateFOVAndCamDist();
@@ -576,11 +576,9 @@ void VisionBlackboard::debugPublish() const
 #if VISION_BLACKBOARD_VERBOSITY > 1
     debug << "VisionBlackboard::debugPublish - " << endl;
     debug << "kinematics_horizon: " << kinematics_horizon.getA() << " " << kinematics_horizon.getB() << " " << kinematics_horizon.getC() << endl;
-    debug << "horizon_scan_points: " << horizon_scan_points.size() << endl;
-    debug << "horizon_points: " << horizon_points.size() << endl;
+    debug << "horizon_scan_points: " << green_horizon_scan_points.size() << endl;
     debug << "object_points: " << object_points.size() << endl;
     debug << "horizontal_scanlines: " << horizontal_scanlines.size() << endl;
-    debug << "horizon_points: " << horizon_points.size() << endl;
     debug << "horizontal_segmented_scanlines: " << horizontal_segmented_scanlines.getSegments().size() << endl;
     debug << "vertical_segmented_scanlines: " << vertical_segmented_scanlines.getSegments().size() << endl;
     debug << "horizontal_filtered_segments: " << horizontal_segmented_scanlines.getSegments().size() << endl;
@@ -613,10 +611,10 @@ void VisionBlackboard::debugPublish() const
     }
     
     //horizon scans
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_SCANS, horizon_scan_points);
+    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_SCANS, green_horizon_scan_points);
     
     //horizon points
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_FINAL, horizon_points);
+    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_FINAL, green_horizon.getInterpolatedPoints());
     
     //object points
     wrapper->debugPublish(DataWrapper::DBID_OBJECT_POINTS, object_points);
@@ -635,7 +633,7 @@ void VisionBlackboard::debugPublish() const
     wrapper->debugPublish(DataWrapper::DBID_H_SCANS, pts);
     
     //vertical scans
-    wrapper->debugPublish(DataWrapper::DBID_V_SCANS, horizon_points);
+    wrapper->debugPublish(DataWrapper::DBID_V_SCANS, green_horizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING));
     
     //horizontal segments
     wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, horizontal_segmented_scanlines);
@@ -670,7 +668,7 @@ void VisionBlackboard::debugPublish() const
     wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
 }
 
-void VisionBlackboard::checkHorizon()
+void VisionBlackboard::checkKinematicsHorizon()
 {
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::checkHorizon() - Begin." << endl;
@@ -684,7 +682,7 @@ void VisionBlackboard::checkHorizon()
             #if VISION_BLACKBOARD_VERBOSITY > 1
                 debug << "VisionBlackboard::checkHorizon() - Vertical Horizon, clamping to top." << endl;
             #endif
-            //kinematics_horizon.setLineFromPoints(Point(0, height), Point(width, height));
+            kinematics_horizon.setLineFromPoints(Point(0, 0), Point(width, 0));
         }
         else {
             if(kinematics_horizon.findYFromX(0) < 0 || kinematics_horizon.findYFromX(0) > height) {

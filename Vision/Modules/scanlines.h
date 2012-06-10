@@ -24,11 +24,6 @@ using namespace std;
 class ScanLines
 {
 public:
-    static const unsigned int HORIZONTAL_SCANLINES = 128;
-    static const unsigned int VERTICAL_SCANLINE_SKIP = 2;
-    static const int HORIZONTAL_SKIP = 1;
-    static const int VERTICAL_SKIP = 1;
-
     static void generateScanLines();
     
     static void classifyHorizontalScanLines();

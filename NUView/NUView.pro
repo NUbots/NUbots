@@ -27,7 +27,11 @@ win32 {
 }
 !macx{
     !win32{
-        LIBS += -ldns_sd
+        INCLUDEPATH += /usr/local/include/opencv2/
+        INCLUDEPATH += /usr/include/boost/
+
+        LIBS += -lopencv_core -lopencv_highgui
+        LIBS += -ldns_sd -lGLU
     }
 }
 
@@ -46,7 +50,7 @@ HEADERS += ui_mainwindow.h \
     classificationwidget.h \
     ../VisionOld/ClassificationColours.h \
     ../Tools/FileFormats/NUbotImage.h \
-    ../VisionOld/Vision.h \
+    #../VisionOld/Vision.h \
     ../Tools/FileFormats/LUTTools.h \
     virtualnubot.h \
     ../Infrastructure/NUImage/BresenhamLine.h \
@@ -60,10 +64,10 @@ HEADERS += ui_mainwindow.h \
     ../VisionOld/ClassifiedSection.h \
     ../VisionOld/ScanLine.h \
     ../VisionOld/TransitionSegment.h \
-    ../VisionOld/GoalDetection.h \
+    #../VisionOld/GoalDetection.h \
     LayerSelectionWidget.h \
     locWmGlDisplay.h \
-    ../VisionOld/LineDetection.h \
+    #../VisionOld/LineDetection.h \
     ../Tools/Math/LSFittedLine.h \
     ../Tools/Math/Vector3.h \
     ../Infrastructure/FieldObjects/StationaryObject.h \
@@ -72,7 +76,7 @@ HEADERS += ui_mainwindow.h \
     ../Infrastructure/FieldObjects/MobileObject.h \
     ../Infrastructure/FieldObjects/AmbiguousObject.h \
     ../Infrastructure/FieldObjects/FieldObjects.h \
-    ../VisionOld/Threads/SaveImagesThread.h \
+    ../Vision/Threads/SaveImagesThread.h \
     ../VisionOld/ObjectCandidate.h \
     ../Localisation/WMPoint.h \
     ../Localisation/WMLine.h \
@@ -81,7 +85,7 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/cameramatrix.h \
     ../Tools/Math/matrix.h \
     localisationwidget.h \
-    ../VisionOld/Ball.h \
+    #../VisionOld/Ball.h \
     ../VisionOld/CircleFitting.h \
     FileAccess/LogFileFormatReader.h \
     FileAccess/nifVersion1FormatReader.h \
@@ -154,11 +158,11 @@ HEADERS += ui_mainwindow.h \
     ../VisionOld/EllipseFitting/FittingCalculations.h \
     ../Tools/Math/Rectangle.h \
     ../NUPlatform/NUCamera.h \
-    ../VisionOld/fitellipsethroughcircle.h \
+    #../VisionOld/fitellipsethroughcircle.h \
     ../Localisation/LocWmFrame.h \
     FileAccess/IndexedFileReader.h \
     LUTGlDisplay.h \
-    ../VisionOld/SplitAndMerge/SAM.h \
+    #../VisionOld/SplitAndMerge/SAM.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h \
     ../NUPlatform/NUSensors/OdometryEstimator.h \
     ../Tools/Math/StlVector.h \
@@ -182,7 +186,7 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Moment.h \
     ../Localisation/SelfModel.h \
     ../Localisation/SelfUKF.h \
-    ../NUPlatform/NUCamera/NUCameraData.h
+    ../NUPlatform/NUCamera/NUCameraData.h \
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -198,7 +202,7 @@ SOURCES += mainwindow.cpp \
     connectionwidget.cpp \
     classificationwidget.cpp \
     ../Tools/FileFormats/NUbotImage.cpp \
-    ../VisionOld/Vision.cpp \
+    #../VisionOld/Vision.cpp \
     ../Tools/FileFormats/LUTTools.cpp \
     virtualnubot.cpp \
     ../Infrastructure/NUImage/BresenhamLine.cpp \
@@ -211,7 +215,7 @@ SOURCES += mainwindow.cpp \
     ../VisionOld/ClassifiedSection.cpp \
     ../VisionOld/ScanLine.cpp \
     ../VisionOld/TransitionSegment.cpp \
-    ../VisionOld/GoalDetection.cpp \
+    #../VisionOld/GoalDetection.cpp \
     LayerSelectionWidget.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
     ../NUPlatform/NUIO.cpp \
@@ -232,7 +236,7 @@ SOURCES += mainwindow.cpp \
     $$files(../Infrastructure/Jobs/MotionJobs/*.cpp) \
     locWmGlDisplay.cpp \
     ../VisionOld/ObjectCandidate.cpp \
-    ../VisionOld/LineDetection.cpp \
+    #../VisionOld/LineDetection.cpp \
     ../Tools/Math/LSFittedLine.cpp \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
     ../Infrastructure/FieldObjects/Self.cpp \
@@ -240,7 +244,7 @@ SOURCES += mainwindow.cpp \
     ../Infrastructure/FieldObjects/MobileObject.cpp \
     ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
     ../Infrastructure/FieldObjects/FieldObjects.cpp \
-    ../VisionOld/Threads/SaveImagesThread.cpp \
+    ../Vision/Threads/SaveImagesThread.cpp \
     ../Localisation/WMPoint.cpp \
     ../Localisation/WMLine.cpp \
     ../Localisation/sphere.cpp \
@@ -248,7 +252,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/cameramatrix.cpp \
     ../Tools/Math/matrix.cpp \
     localisationwidget.cpp \
-    ../VisionOld/Ball.cpp \
+    #../VisionOld/Ball.cpp \
     ../VisionOld/CircleFitting.cpp \
     FileAccess/LogFileFormatReader.cpp \
     FileAccess/nifVersion1FormatReader.cpp \
@@ -285,11 +289,11 @@ SOURCES += mainwindow.cpp \
     ../VisionOld/EllipseFitting/FittingCalculations.cpp \
     ../Tools/Math/Rectangle.cpp \
     ../NUPlatform/NUCamera.cpp \
-    ../VisionOld/fitellipsethroughcircle.cpp \
+    #../VisionOld/fitellipsethroughcircle.cpp \
     ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
-    ../VisionOld/SplitAndMerge/SAM.cpp \
+    #../VisionOld/SplitAndMerge/SAM.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
     ../Tools/Math/FieldCalculations.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
@@ -308,7 +312,7 @@ SOURCES += mainwindow.cpp \
     offlinelocalisationdialog.cpp \
     ../Tools/Math/Moment.cpp \
     ../Localisation/SelfModel.cpp \
-    ../NUPlatform/NUCamera/NUCameraData.cpp
+    ../NUPlatform/NUCamera/NUCameraData.cpp \
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -318,6 +322,65 @@ SOURCES += mainwindow.cpp \
     ConnectionManager/RobotSelectDialog.cpp
 }
     
+HEADERS += \
+    ../Vision/VisionTypes/coloursegment.h \
+    ../Vision/VisionTypes/colourtransitionrule.h \
+    ../Vision/VisionTypes/colourreplacementrule.h \
+    ../Vision/VisionTypes/transition.h \
+    ../Vision/VisionTypes/segmentedregion.h \
+    #../Vision/VisionTypes/objectcandidate.h \
+    ../Vision/VisionTypes/quad.h \
+    ../Vision/VisionTypes/greenhorizon.h \
+    ../Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h \
+    ../Vision/VisionTypes/VisionFieldObjects/ball.h \
+    ../Vision/VisionTypes/VisionFieldObjects/goal.h \
+    ../Vision/VisionTypes/VisionFieldObjects/beacon.h \
+    ../Vision/VisionTypes/VisionFieldObjects/obstacle.h \
+    ../Vision/VisionWrapper/datawrappercurrent.h \
+    ../Vision/VisionWrapper/visioncontrolwrappernuview.h \
+    ../Vision/VisionWrapper/datawrappernuview.h \
+    ../Vision/VisionTools/lookuptable.h \
+    ../Vision/VisionTools/GTAssert.h \
+    ../Vision/VisionTools/classificationcolours.h \
+    ../Vision/Modules/greenhorizonch.h \
+    ../Vision/Modules/objectdetectionch.h \
+    ../Vision/Modules/scanlines.h \
+    ../Vision/Modules/segmentfilter.h \
+    ../Vision/Modules/goaldetection.h \
+    ../Vision/Modules/balldetection.h \
+    ../Vision/basicvisiontypes.h \
+    ../Vision/valgorithm.h \
+    ../Vision/visionblackboard.h \
+    ../Vision/visioncontroller.h \
+    ../Vision/visionconstants.h \
+
+SOURCES += \
+    ../Vision/VisionTypes/coloursegment.cpp \
+    ../Vision/VisionTypes/colourtransitionrule.cpp \
+    ../Vision/VisionTypes/colourreplacementrule.cpp \
+    ../Vision/VisionTypes/transition.cpp \
+    ../Vision/VisionTypes/segmentedregion.cpp \
+    #../Vision/VisionTypes/objectcandidate.cpp \
+    ../Vision/VisionTypes/quad.cpp \
+    ../Vision/VisionTypes/greenhorizon.cpp \
+    ../Vision/VisionTypes/VisionFieldObjects/visionfieldobject.cpp \
+    ../Vision/VisionTypes/VisionFieldObjects/ball.cpp \
+    ../Vision/VisionTypes/VisionFieldObjects/goal.cpp \
+    ../Vision/VisionTypes/VisionFieldObjects/beacon.cpp \
+    ../Vision/VisionTypes/VisionFieldObjects/obstacle.cpp \
+    ../Vision/VisionTools/lookuptable.cpp \
+    ../Vision/Modules/greenhorizonch.cpp \
+    ../Vision/Modules/objectdetectionch.cpp \
+    ../Vision/Modules/scanlines.cpp \
+    ../Vision/Modules/segmentfilter.cpp \
+    ../Vision/Modules/goaldetection.cpp \
+    ../Vision/Modules/balldetection.cpp \
+    ../Vision/visionblackboard.cpp \
+    ../Vision/visioncontroller.cpp \
+    ../Vision/visionconstants.cpp \
+    ../Vision/VisionWrapper/visioncontrolwrappernuview.cpp \
+    ../Vision/VisionWrapper/datawrappernuview.cpp \
+
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
 
 

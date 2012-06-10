@@ -8,6 +8,8 @@
 
 #include "objectdetectionch.h"
 
+#include "Vision/visionconstants.h"
+
 void ObjectDetectionCH::detectObjects()
 {
     #if VISION_HORIZON_VERBOSITY > 1
@@ -18,7 +20,8 @@ void ObjectDetectionCH::detectObjects()
     const NUImage& img = vbb->getOriginalImage();
     unsigned int height = img.getHeight();
 
-    const vector<PointType>& horizon_points = vbb->getHorizonPoints();
+    const vector<PointType>& horizon_points = vbb->getGreenHorizon().getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
+
     vector<PointType> object_points;
 
     object_points.reserve(horizon_points.size());

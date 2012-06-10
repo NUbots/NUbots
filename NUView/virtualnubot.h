@@ -19,6 +19,9 @@
 #include "debugverbositynetwork.h"
 
 //#include "VisionOld/Vision.h"
+
+#include "VisionOld/TransitionSegment.h"
+#include "VisionOld/ObjectCandidate.h"
 #include "Vision/VisionWrapper/visioncontrolwrappernuview.h"
 
 class NUBlackboard;

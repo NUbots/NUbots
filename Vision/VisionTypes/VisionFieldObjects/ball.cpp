@@ -60,6 +60,7 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         debug << "Ball::addToExternalFieldObjects:" << endl;
         debug << *this << endl;
     #endif
+        cout << "Ball::addToExternalFieldObjects - " << m_location_pixels.x << " " << m_location_pixels.y << " radius: " << m_radius << endl;
     if(valid) {
         //add ball to mobileFieldObjects
         //cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << endl;

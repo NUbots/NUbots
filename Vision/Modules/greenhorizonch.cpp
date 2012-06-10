@@ -76,7 +76,7 @@ void GreenHorizonCH::calculateHorizon()
         debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
     #endif
     // provide blackboard the original set of scan points
-    vbb->setHorizonScanPoints(horizon_points);
+    vbb->setGreenHorizonScanPoints(horizon_points);
     
     // statistical filter for green horizon points
     for (unsigned int x = 0; x < VER_SEGMENTS; x++) {
@@ -178,7 +178,7 @@ void GreenHorizonCH::calculateHorizon()
     #endif
 
     // set hull points
-    vbb->setHullPoints(temp);
+    vbb->setGreenHullPoints(temp);
 }
 
 

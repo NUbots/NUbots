@@ -2,9 +2,12 @@
 #include "datawrappernuview.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
 #include "debug.h"
+#include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
 
 #include "Vision/VisionTypes/coloursegment.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
 
 DataWrapper* DataWrapper::instance = 0;
 
@@ -70,15 +73,7 @@ void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segm
 
 DataWrapper::DataWrapper()
 {
-    m_current_image = m_camera->grabNewImage();
-    LUTname = string(getenv("HOME")) +  string("/_nubot/default.lut");
-
-    if(!loadLUTFromFile(LUTname)){
-        errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
-    }
-
     numFramesDropped = numFramesProcessed = 0;
-
 }
 
 DataWrapper::~DataWrapper()
@@ -95,7 +90,7 @@ DataWrapper* DataWrapper::getInstance()
 /**
 *   @brief Fetches the next frame from the webcam.
 */
-NUImage* DataWrapper::getFrame()
+const NUImage* DataWrapper::getFrame()
 {
     return m_current_image;
 }
@@ -160,7 +155,8 @@ const Horizon& DataWrapper::getKinematicsHorizon()
         #if VISION_WRAPPER_VERBOSITY > 1
             debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
         #endif
-        m_kinematics_horizon.setLineFromPoints(Point(0, current_frame->getHeight()), Point(current_frame->getWidth(), current_frame->getHeight()));
+        m_kinematics_horizon.setLineFromPoints(Point(0, 0), Point(m_current_image->getWidth(), 0));
+
         m_kinematics_horizon.exists = false;
     }
     
@@ -198,12 +194,14 @@ void DataWrapper::publish(DATA_ID id, const Mat &img)
 
 void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
 {
-
+    for(int i=0; i<visual_objects.size(); i++) {
+        visual_objects.at(i)->addToExternalFieldObjects(field_objects, m_timestamp);
+    }
 }
 
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
-    
+    visual_object->addToExternalFieldObjects(field_objects, m_timestamp);
 }
 
 //! Outputs debug data to the appropriate external interface
@@ -248,6 +246,19 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const Mat &img)
 
 bool DataWrapper::updateFrame()
 {
+    if (m_current_image == NULL || sensor_data == NULL || actions == NULL || field_objects == NULL)
+    {
+        #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "DataWrapper::updateFrame(): null reference from BB" << endl;
+        #endif
+        // keep object times updated.
+        if(field_objects && sensor_data)
+        {
+            field_objects->preProcess(sensor_data->GetTimestamp());
+            field_objects->postProcess(sensor_data->GetTimestamp());
+        }
+        return false;
+    }
     return true;
 }
 
@@ -261,17 +272,133 @@ bool DataWrapper::loadLUTFromFile(const string& fileName)
     return LUT.loadLUTFromFile(fileName);
 }
 
-void DataWrapper::setRawImage(NUImage* image)
+void DataWrapper::setRawImage(const NUImage* image)
 {
     m_current_image = image;
 }
 
-void DataWrapper::setSensorData(NUSensorsData* NUSensorsData)
+void DataWrapper::setSensorData(NUSensorsData* sensors)
 {
-    sensor_data = NUSensorsData;
+    sensor_data = sensors;
 }
 
 void DataWrapper::setFieldObjects(FieldObjects *fieldObjects)
 {
     field_objects = fieldObjects;
+}
+
+void DataWrapper::setLUT(unsigned char *vals)
+{
+    LUT.set(vals);
+}
+
+void DataWrapper::classifyImage(ClassifiedImage &target) const
+{
+    if(m_current_image != NULL) {
+        int width = m_current_image->getWidth();
+        int height = m_current_image->getHeight();
+
+        target.setImageDimensions(width,height);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                target.image[y][x] = LUT.classifyPixel((*m_current_image)(x,y));
+            }
+        }
+    }
+}
+
+void DataWrapper::classifyPreviewImage(ClassifiedImage &target,unsigned char* temp_vals) const
+{
+    int width = m_current_image->getWidth();
+    int height = m_current_image->getHeight();
+
+    target.setImageDimensions(width,height);
+    LookUpTable tempLUT(temp_vals);
+    //qDebug() << "Begin Loop:";
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            target.image[y][x] = tempLUT.classifyPixel((*m_current_image)(x,y));
+        }
+    }
+}
+
+void DataWrapper::saveAnImage()
+{
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::SaveAnImage(). Starting..." << endl;
+    #endif
+
+    if (!imagefile.is_open())
+        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+    if (!sensorfile.is_open())
+        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
+
+    if (imagefile.is_open() and numSavedImages < 2500)
+    {
+        if(sensorfile.is_open())
+        {
+            sensorfile << (*sensor_data) << flush;
+        }
+        NUImage buffer;
+        buffer.cloneExisting(*m_current_image);
+        imagefile << buffer;
+        numSavedImages++;
+
+        if (isSavingImagesWithVaryingSettings)
+        {
+            CameraSettings tempCameraSettings = m_current_image->getCameraSettings();
+            if (numSavedImages % 10 == 0 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 0);
+            }
+            else if (numSavedImages % 10 == 1 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 50);
+            }
+            else if (numSavedImages % 10 == 2 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 25);
+            }
+            else if (numSavedImages % 10 == 3 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() - 0);
+            }
+            else if (numSavedImages % 10 == 4 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 25);
+            }
+            else if (numSavedImages % 10 == 5 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 50);
+            }
+            else if (numSavedImages % 10 == 6 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 100);
+            }
+            else if (numSavedImages % 10 == 7 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 150);
+            }
+            else if (numSavedImages % 10 == 8 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 200);
+            }
+            else if (numSavedImages % 10 == 9 )
+            {
+                tempCameraSettings.p_exposure.set(currentSettings.p_exposure.get() + 300);
+            }
+
+            //Set the Camera Setttings using Jobs:
+            ChangeCameraSettingsJob* newJob = new ChangeCameraSettingsJob(tempCameraSettings);
+            Blackboard->Jobs->addCameraJob(newJob);
+            //m_camera->setSettings(tempCameraSettings);
+        }
+    }
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "DataWrapper::SaveAnImage(). Finished" << endl;
+    #endif
 }

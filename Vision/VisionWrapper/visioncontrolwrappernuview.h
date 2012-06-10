@@ -9,10 +9,12 @@ class NUActionatorsData;
 
 class VisionControlWrapper
 {
+    friend class virtualNUbot;
 public:
     static VisionControlWrapper* getInstance();
     
     int runFrame();
+    void saveAnImage() const;
     
 private:
     VisionControlWrapper();
@@ -22,9 +24,13 @@ private:
     VisionController* controller;
     DataWrapper* wrapper;
     //for virtualnubot
-    void setRawImage(NUImage* image);
+    void setRawImage(const NUImage* image);
     void setSensorData(NUSensorsData* sensors);
-    void setFieldObjects(FieldObjects* fieldObjects);
+    void setFieldObjects(FieldObjects* field_objects);
+    void setLUT(unsigned char* vals);
+    void classifyImage(ClassifiedImage& classed_image);
+    void classifyPreviewImage(ClassifiedImage &target,unsigned char* temp_vals) const;
+
 };
 
 #endif // VISIONCONTROLWRAPPERNUVIEW_H

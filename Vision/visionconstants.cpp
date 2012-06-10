@@ -52,6 +52,9 @@ float VisionConstants::GOAL_WIDTH;
 float VisionConstants::DISTANCE_BETWEEN_POSTS;
 float VisionConstants::BALL_WIDTH;
 float VisionConstants::BEACON_WIDTH;
+// ScanLine options
+unsigned int VisionConstants::HORIZONTAL_SCANLINE_SPACING;
+unsigned int VisionConstants::VERTICAL_SCANLINE_SPACING;
 
 VisionConstants::VisionConstants()
 {
@@ -62,6 +65,8 @@ VisionConstants::VisionConstants()
   */
 void VisionConstants::loadFromFile(std::string filename) 
 {
+    HORIZONTAL_SCANLINE_SPACING = 3; //defaults in case of bad file
+    VERTICAL_SCANLINE_SPACING = 3;
     std::ifstream in(filename.c_str());
     std::string name;
     int         ival;
@@ -226,6 +231,14 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> ival;
             MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL = ival;
         }
+        else if(name.compare("HORIZONTAL_SCANLINE_SPACING") == 0) {
+            in >> ival;
+            HORIZONTAL_SCANLINE_SPACING = ival;
+        }
+        else if(name.compare("VERTICAL_SCANLINE_SPACING") == 0) {
+            in >> ival;
+            VERTICAL_SCANLINE_SPACING = ival;
+        }
         else {
             errorlog << "VisionConstants::loadFromFile - unknown constant: " << name << std::endl;
         }
@@ -282,6 +295,9 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tDISTANCE_BETWEEN_POSTS: " << DISTANCE_BETWEEN_POSTS << std::endl;
     debug << "\tBALL_WIDTH: " << BALL_WIDTH << std::endl;
     debug << "\tBEACON_WIDTH: " << BEACON_WIDTH << std::endl;
+
+    debug << "\tHORIZONTAL_SCANLINE_SPACING: " << HORIZONTAL_SCANLINE_SPACING << std::endl;
+    debug << "\tVERTICAL_SCANLINE_SPACING: " << VERTICAL_SCANLINE_SPACING << std::endl;
 }
 
 VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)

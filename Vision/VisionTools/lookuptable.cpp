@@ -6,6 +6,19 @@
 LookUpTable::LookUpTable()
 {
     LUTbuffer = new unsigned char[LUTTools::LUT_SIZE];
+    for(int i=0; i<LUTTools::LUT_SIZE; i++)
+        LUTbuffer[i] = ClassIndex::unclassified;
+}
+
+LookUpTable::LookUpTable(unsigned char *vals)
+{
+    set(vals);
+}
+
+void LookUpTable::set(unsigned char *vals)
+{
+    LUTbuffer = vals;
+    LUT = LUTbuffer;
 }
 
 bool LookUpTable::loadLUTFromFile(const string& fileName)

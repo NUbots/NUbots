@@ -9,6 +9,10 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "Kinematics/Horizon.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
+//#include "Infrastructure/Jobs/JobList.h"
+//#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
 #include "Vision/basicvisiontypes.h"
 #include "Vision/VisionTypes/segmentedregion.h"
@@ -18,9 +22,8 @@
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
+#include "Infrastructure/NUImage/ClassifiedImage.h"
 
-#define GROUP_NAME "/home/shannon/Images/paper"
-#define GROUP_EXT ".png"
 
 using namespace std;
 //using namespace cv;
@@ -34,6 +37,7 @@ class DataWrapper
 {
     friend class VisionController;
     friend class VisionControlWrapper;
+    friend class virtualNUbot;
 
 public:
     
@@ -66,7 +70,7 @@ public:
     static DataWrapper* getInstance();
 
     //! RETRIEVAL METHODS
-    NUImage* getFrame();
+    const NUImage* getFrame();
 
     bool getCTGVector(vector<float>& ctgvector);    //for transforms
     bool getCTVector(vector<float>& ctvector);    //for transforms
@@ -104,31 +108,43 @@ private:
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
+    void saveAnImage();
     
     //for virtualnubot
-    void setRawImage(NUImage* image);
-    void setSensorData(NUSensorsData* NUSensorsData);
+    void setRawImage(const NUImage *image);
+    void setSensorData(NUSensorsData* sensors);
     void setFieldObjects(FieldObjects* fieldObjects);
+    void setLUT(unsigned char* vals);
+    void classifyImage(ClassifiedImage &target) const;
+    void classifyPreviewImage(ClassifiedImage &target,unsigned char* temp_vals) const;
     
     
 private:
 
     static DataWrapper* instance;
 
-    NUImage* m_current_image;
+    const NUImage* m_current_image;
 
     string LUTname;
     LookUpTable LUT;
 
-    Horizon kinematics_horizon;
+    vector<float> m_horizon_coefficients;
+    Horizon m_kinematics_horizon;
     
     //! Frame info
     double m_timestamp;
     int numFramesDropped;
     int numFramesProcessed;
 
+    //! SavingImages:
+    bool isSavingImages;
+    bool isSavingImagesWithVaryingSettings;
+    int numSavedImages;
+    ofstream imagefile;
+    ofstream sensorfile;
+    CameraSettings currentSettings;
+
     //! Shared data objects
-    NUImage* current_frame;
     NUSensorsData* sensor_data;             //! pointer to shared sensor data
     NUActionatorsData* actions;             //! pointer to shared actionators data
     FieldObjects* field_objects;            //! pointer to shared fieldobject data

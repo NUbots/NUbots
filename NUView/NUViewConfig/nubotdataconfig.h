@@ -29,6 +29,7 @@
 
 
 #define CONFIG_DIR (DATA_DIR + std::string("/Config/NUview/"))
+#define RULE_DIR (CONFIG_DIR + std::string("/Rules/"))
 
 #endif // !NUBOTCONFIG_H
 

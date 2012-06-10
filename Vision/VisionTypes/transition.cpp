@@ -4,6 +4,8 @@
 #include "Vision/visionconstants.h"
 #include "Vision/visionblackboard.h"
 
+#include "Tools/Math/General.h"
+
 //PointType Transition::correctDistortion(const PointType& pt)
 //{
 //    PointType from_centre = pt - PointType(160,120);
@@ -34,7 +36,9 @@ Transition::Transition(ColourSegment before, ColourSegment after, ScanDirection 
 void Transition::set(const PointType &location, ClassIndex::Colour before_colour, ClassIndex::Colour after_colour, ScanDirection &direction)
 {
     if(VisionConstants::DO_RADIAL_CORRECTION) {
-        m_location = VisionBlackboard::getInstance()->correctDistortion(location);
+        Vector2<float> result = VisionBlackboard::getInstance()->correctDistortion(Vector2<float>(location.x, location.y));
+        m_location.x = mathGeneral::roundNumberToInt(result.x);
+        m_location.y = mathGeneral::roundNumberToInt(result.y);
     }
     else {
         m_location = location;

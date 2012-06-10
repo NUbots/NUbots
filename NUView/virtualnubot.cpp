@@ -19,6 +19,7 @@
 
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
+    vision = VisionControlWrapper::getInstance();
     //! TODO: Load LUT from filename.
     AllObjects = new FieldObjects();
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
@@ -40,11 +41,6 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 
     sensorsData = new NUSensorsData();
     setSensorData(sensorsData);
-    
-    vision = VisionControlWrapper::getInstance();
-    //debug<<"VirtualNUBot started";
-    //TEST:
-
 }
 
 virtualNUbot::~virtualNUbot()
@@ -55,7 +51,7 @@ virtualNUbot::~virtualNUbot()
 void virtualNUbot::setRawImage(const NUImage* image)
 {
     rawImage = image;
-    vision.setImage(image);
+    vision->setRawImage(image);
     return;
 }
 
@@ -86,7 +82,7 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
     }
     else
     {
-        horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
+        horizonLine.setLineFromPoints(Point(0, 0), Point(320,0));
     }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
 
@@ -99,6 +95,7 @@ void virtualNUbot::saveLookupTableFile(QString fileName)
 
 void virtualNUbot::loadLookupTableFile(QString fileName)
 {
+    cout << "thisone" << endl;
     LUTTools::LoadLUT(classificationTable,LUTTools::LUT_SIZE,fileName.toAscii());
     processVisionFrame();
     emit LUTChanged(classificationTable);
@@ -143,7 +140,7 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
 
 void virtualNUbot::generateClassifiedImage()
 {
-    vision.classifyImage(classImage);
+    vision->classifyImage(classImage);
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
     return;
 }
@@ -156,72 +153,72 @@ void virtualNUbot::processVisionFrame()
 
 void virtualNUbot::processVisionFrame(const NUImage* image)
 {
+    if(image != NULL) {
+        vision->setSensorData(sensorsData);
+        vision->setFieldObjects(AllObjects);
+        vision->setRawImage(image);
 
-    vision->setSensorsData(sensorsData);
-    vision->setFieldObjects(AllObjects);
-    vision->setImage(image);
-    
-    vision.setLUT(classificationTable);
-    
-    generateClassifiedImage();
+        vision->setLUT(classificationTable);
 
-    QImage* canvas = new QImage(image->getWidth(), image->getHeight(), QImage::Format_ARGB32);
+        vision->runFrame();
 
-    //Blank canvas - zero alpha (transparent)
-    for (int x = 0; x < canvas->width(); x++)
-        for(int y = 0; y < canvas->height(); y++)
-            canvas->setPixel(x,y,0);
-    emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
+        generateClassifiedImage();
 
-    float datavalue = 0.0;
-    sensorsData->get(NUSensorsData::HeadPitch,datavalue);
-    qDebug() << "Sensors Data: Head Elevation: " << datavalue;
+        QImage* canvas = new QImage(image->getWidth(), image->getHeight(), QImage::Format_ARGB32);
+
+        //Blank canvas - zero alpha (transparent)
+        for (int x = 0; x < canvas->width(); x++)
+            for(int y = 0; y < canvas->height(); y++)
+                canvas->setPixel(x,y,0);
+        emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
+
+        float datavalue = 0.0;
+        sensorsData->get(NUSensorsData::HeadPitch,datavalue);
+        qDebug() << "Sensors Data: Head Elevation: " << datavalue;
 
 
-    //POST PROCESS:
-    vision.AllFieldObjects->postProcess(image->GetTimestamp());
-    qDebug() << image->GetTimestamp() ;
-    emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    emit fieldObjectsChanged(vision.AllFieldObjects);
-    emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
+        FieldObjects* field_objects = vision->wrapper->field_objects;
+        //POST PROCESS:
+        qDebug() << image->GetTimestamp() ;
+        emit fieldObjectsChanged(field_objects);
+        emit fieldObjectsDisplayChanged(field_objects,GLDisplay::FieldObjects);
 
-    //SUMMARY:
-    qDebug() << "Time: " << vision.m_timestamp;
-    for(unsigned int i = 0; i < vision.AllFieldObjects->stationaryFieldObjects.size();i++)
-    {
-        if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
+        //SUMMARY:
+        qDebug() << "Time: " << vision->wrapper->m_timestamp;
+        for(unsigned int i = 0; i < field_objects->stationaryFieldObjects.size();i++)
         {
-            qDebug() << "Stationary Object: " << i << ":" << QString(vision.AllFieldObjects->stationaryFieldObjects[i].getName().c_str())
-                     <<"Seen at "<<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenX()
-                     <<","       <<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenY()
-                    << "\t Distance: " << vision.AllFieldObjects->stationaryFieldObjects[i].measuredDistance();
+            if(field_objects->stationaryFieldObjects[i].isObjectVisible() == true)
+            {
+                qDebug() << "Stationary Object: " << i << ":" << QString(field_objects->stationaryFieldObjects[i].getName().c_str())
+                         <<"Seen at "<<  field_objects->stationaryFieldObjects[i].ScreenX()
+                         <<","       <<  field_objects->stationaryFieldObjects[i].ScreenY()
+                        << "\t Distance: " << field_objects->stationaryFieldObjects[i].measuredDistance();
+            }
+        }
+        for(unsigned  int i = 0; i < field_objects->mobileFieldObjects.size();i++)
+        {
+            if(field_objects->mobileFieldObjects[i].isObjectVisible() == true)
+            {
+                qDebug() << "Mobile Object: " << i << ":" << QString(field_objects->mobileFieldObjects[i].getName().c_str())
+                         << "Seen at "   <<  field_objects->mobileFieldObjects[i].ScreenX()
+                         <<","           <<  field_objects->mobileFieldObjects[i].ScreenY()
+                        << "\t Distance: " << field_objects->mobileFieldObjects[i].measuredDistance();
+            }
+        }
+
+        for(unsigned int i = 0; i < field_objects->ambiguousFieldObjects.size();i++)
+        {
+            if(field_objects->ambiguousFieldObjects[i].isObjectVisible() == true)
+            {
+                qDebug() << "Ambiguous Object: " << i << ":" << field_objects->ambiguousFieldObjects[i].getID()
+                         <<  QString(field_objects->ambiguousFieldObjects[i].getName().c_str())
+                         << "Seen at "          <<  field_objects->ambiguousFieldObjects[i].ScreenX()
+                         << ","                 <<  field_objects->ambiguousFieldObjects[i].ScreenY()
+                         << "\t Distance: " << field_objects->ambiguousFieldObjects[i].measuredDistance();
+
+            }
         }
     }
-    for(unsigned  int i = 0; i < vision.AllFieldObjects->mobileFieldObjects.size();i++)
-    {
-        if(vision.AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
-        {
-            qDebug() << "Mobile Object: " << i << ":" << QString(vision.AllFieldObjects->mobileFieldObjects[i].getName().c_str())
-                     << "Seen at "   <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenX()
-                     <<","           <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenY()
-                    << "\t Distance: " << vision.AllFieldObjects->mobileFieldObjects[i].measuredDistance();
-        }
-    }
-
-    for(unsigned int i = 0; i < vision.AllFieldObjects->ambiguousFieldObjects.size();i++)
-    {
-        if(vision.AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
-        {
-            qDebug() << "Ambiguous Object: " << i << ":" << vision.AllFieldObjects->ambiguousFieldObjects[i].getID()
-                     <<  QString(vision.AllFieldObjects->ambiguousFieldObjects[i].getName().c_str())
-                     << "Seen at "          <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenX()
-                     << ","                 <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenY()
-                     << "\t Distance: " << vision.AllFieldObjects->ambiguousFieldObjects[i].measuredDistance();
-
-        }
-    }
-
-    return;
 }
 
 void virtualNUbot::processVisionFrame(ClassifiedImage& image)
@@ -255,7 +252,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel>
     emit updateStatistics(LUTSelectedCounter);
 
     // Create Classifed Image based on lookup table.
-    vision.classifyPreviewImage(previewClassImage,tempLut);
+    vision->classifyPreviewImage(previewClassImage,tempLut);
 
     // Remove selection from temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)

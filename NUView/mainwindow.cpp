@@ -36,15 +36,17 @@
 
 #include "Kinematics/Kinematics.h"
 
+#include "debug.h"
+
 using namespace std;
-ofstream debug;
-ofstream errorlog;
+ofstream debug("debug.log");
+ofstream errorlog("error.log");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     qDebug() << "NUView is starting in: MainWindow.cpp";
-    debug.open("debug.log");
-    errorlog.open("error.log");
+    //debug.open;
+    //errorlog.open;
 
     //initialise a static int to count image saves
     GLDisplay::imageCount = 0;

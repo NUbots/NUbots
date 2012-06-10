@@ -1,4 +1,6 @@
 #include "balldetection.h"
+#include "debug.h"
+#include "debugverbosityvision.h"
 
 void BallDetection::detectBall()
 {
@@ -9,25 +11,26 @@ void BallDetection::detectBall()
 
     vector<Transition> transitions = vbb->getVerticalTransitions(VisionFieldObject::BALL);    
 
-    const vector<PointType>& horizon = vbb->getHorizonPoints();
+    #if VISION_FIELDOBJECT_VERBOSITY > 1
+        debug << "BallDetection::detectBall() - number of ball transitions: " << transitions.size() << endl;
+    #endif
+    cout << "BallDetection::detectBall() - number of ball transitions: " << transitions.size() << endl;
+
+    const GreenHorizon& green_horizon = vbb->getGreenHorizon();
 
     // Throw out points above the horizon
     vector<Transition>::iterator it;
     it = transitions.begin();
     while (it < transitions.end()) {
-        bool flag = 0;
-        for (unsigned int i = 0; i < horizon.size(); i++) {
-            //if (horizon.at(i).y >= it->getLocation().y) {
-            if (horizon.at(i).x >= it->getLocation().x) {   // inefficient; use math to calculate exact index.
-                if (horizon.at(i).y >= it->getLocation().y) {
-                    it = transitions.erase(it);
-                    flag = 1;
-                }
-                break;
-            }
+        if(green_horizon.isBelowHorizon(it->getLocation())) {
+            it++;   //move to next transitions
         }
-        if (!flag)
-            it++;
+        else {
+            #if VISION_FIELDOBJECT_VERBOSITY > 2
+                debug << "BallDetection::detectBall() - transition thrown out, above GH: " << *it << endl;
+            #endif
+            it = transitions.erase(it);
+        }
     }
 
     if (transitions.size() > 0) {

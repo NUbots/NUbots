@@ -60,12 +60,17 @@ public:
     //! Field-object detection constants
     static int BALL_EDGE_THRESHOLD;         //! Dave?
     static int BALL_ORANGE_TOLERANCE;       //! Dave?
+
     //! Field dimension constants
     static float GOAL_WIDTH;                //! The physical width of the goal posts in cm
     static float DISTANCE_BETWEEN_POSTS;    //! The physical distance between the posts in cm
     static float BALL_WIDTH;                //! The physical width of the ball in cm
     static float BEACON_WIDTH;              //! The physical width of the beacons in cm
     
+    //! ScanLine options
+    static unsigned int HORIZONTAL_SCANLINE_SPACING;
+    static unsigned int VERTICAL_SCANLINE_SPACING;
+
     // static methods
     static DistanceMethod getDistanceMethodFromName(std::string name);
     static std::string getDistanceMethodName(DistanceMethod method);

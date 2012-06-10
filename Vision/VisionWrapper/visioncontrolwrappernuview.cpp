@@ -32,7 +32,15 @@ int VisionControlWrapper::runFrame()
     return controller->runFrame(true, true);
 }
 
-void VisionControlWrapper::setRawImage(NUImage* image)
+void VisionControlWrapper::saveAnImage() const
+{
+    #if VISION_WRAPPER_VERBOSITY > 1
+        debug << "VisionControlWrapper::saveAnImage():" << endl;
+    #endif
+    wrapper->saveAnImage();
+}
+
+void VisionControlWrapper::setRawImage(const NUImage* image)
 {
     wrapper->setRawImage(image);
 }
@@ -42,7 +50,22 @@ void VisionControlWrapper::setSensorData(NUSensorsData* sensors)
     wrapper->setSensorData(sensors);
 }
 
-void VisionControlWrapper::setFieldObjects(FieldObjects *fieldObjects)
+void VisionControlWrapper::setFieldObjects(FieldObjects *field_objects)
 {
-    wrapper->setFieldObjects(fieldObjects);
+    wrapper->setFieldObjects(field_objects);
+}
+
+void VisionControlWrapper::setLUT(unsigned char *vals)
+{
+    wrapper->setLUT(vals);
+}
+
+void VisionControlWrapper::classifyImage(ClassifiedImage &classed_image)
+{
+    wrapper->classifyImage(classed_image);
+}
+
+void VisionControlWrapper::classifyPreviewImage(ClassifiedImage &target,unsigned char* temp_vals) const
+{
+    wrapper->classifyPreviewImage(target, temp_vals);
 }

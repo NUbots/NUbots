@@ -21,6 +21,9 @@ class LookUpTable
 {
 public:
     LookUpTable();
+    LookUpTable(unsigned char* vals);
+
+    void set(unsigned char* vals);
 
     /*!
       @brief Loads a new LUT from a given file.
