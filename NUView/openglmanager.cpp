@@ -355,7 +355,6 @@ void OpenglManager::writeCalGridToDisplay(GLDisplay::display displayId)
     glEndList();                                    // END OF LIST
 
     displayStored[displayId] = true;
-    qDebug() << "Drawing Grid";
     emit updatedDisplay(displayId, displays[displayId], width, height);
     return;
 }
