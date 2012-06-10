@@ -326,7 +326,7 @@ bool DataWrapper::debugPublish(vector<Ball> data) {
     string& window = results_window_name; //get window name from pair
     
     BOOST_FOREACH(Ball b, data) {
-        circle(img, PointType(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius(), Scalar(255,255,0), 2);
+        circle(img, cv::Point2i(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius(), Scalar(255,255,0), 2);
         cout << b.getLocationPixels().x << " " << b.getLocationPixels().y << endl;
     }
 
@@ -345,14 +345,17 @@ bool DataWrapper::debugPublish(vector<Beacon> data) {
     
     Mat& img = results_img;    //get image from pair
     string& window = results_window_name; //get window name from pair
-    
+    PointType bl, tr;
+
     BOOST_FOREACH(Beacon b, data) {
+        bl = b.getQuad().getBottomLeft();
+        tr = b.getQuad().getTopRight();
         if(b.getID() == Beacon::BlueBeacon)
-            rectangle(img, b.getQuad().getBottomLeft(), b.getQuad().getTopRight(), Scalar(255,0,255), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(255,0,255), 2, 8, 0);
         else if(b.getID() == Beacon::YellowBeacon)
-            rectangle(img, b.getQuad().getBottomLeft(), b.getQuad().getTopRight(), Scalar(255,255,0), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(255,255,0), 2, 8, 0);
         else
-            rectangle(img, b.getQuad().getBottomLeft(), b.getQuad().getTopRight(), Scalar(255,255,255), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(255,255,255), 2, 8, 0);
     }
     
     imshow(window, img);    //refresh this particular debug window
@@ -371,11 +374,15 @@ bool DataWrapper::debugPublish(vector<Goal> data) {
     Mat& img = results_img;    //get image from pair
     string& window = results_window_name; //get window name from pair
     
+    PointType bl, tr;
+
     BOOST_FOREACH(Goal post, data) {
+        bl = post.getQuad().getBottomLeft();
+        tr = post.getQuad().getTopRight();
         if(post.getID() == Goal::BlueLeftGoal || post.getID() == Goal::BlueRightGoal || post.getID() == Goal::BlueUnknownGoal)
-            rectangle(img, post.getQuad().getBottomLeft(), post.getQuad().getTopRight(), Scalar(0,255,255), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(0,255,255), 2, 8, 0);
         else
-            rectangle(img, post.getQuad().getBottomLeft(), post.getQuad().getTopRight(), Scalar(255,0,0), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(255,0,0), 2, 8, 0);
     }
     
     imshow(window, img);    //refresh this particular debug window
@@ -419,32 +426,32 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
     switch(id) {
     case DBID_H_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, PointType(0, pt.y), PointType(img.cols, pt.y), Scalar(127,127,127), 1);
+            line(img, cv::Point2i(0, pt.y), cv::Point2i(img.cols, pt.y), Scalar(127,127,127), 1);
         }
         break;
     case DBID_V_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, pt, PointType(pt.x, img.rows), Scalar(127,127,127), 1);
+            line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), Scalar(127,127,127), 1);
         }
         break;
     case DBID_TRANSITIONS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            circle(img, pt, 1, Scalar(255,255,0), 4);
+            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(255,255,0), 4);
         }
         break;
     case DBID_HORIZON:
-        line(img, data_points.front(), data_points.back(), Scalar(0,255,255), 1);
+        line(img, cv::Point2i(data_points.front().x, data_points.front().y), cv::Point2i(data_points.back().x, data_points.back().y), Scalar(0,255,255), 1);
         break;
     case DBID_GREENHORIZON_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, PointType(pt.x, 0), PointType(pt.x, img.rows), Scalar(127,127,127), 1);
-            circle(img, pt, 1, Scalar(127,127,127), 2);
+            line(img, cv::Point2i(pt.x, 0), cv::Point2i(pt.x, img.rows), Scalar(127,127,127), 1);
+            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(127,127,127), 2);
         }
         break;
     case DBID_GREENHORIZON_FINAL:
         for(it=data_points.begin(); it<data_points.end(); it++) {
             if (it > data_points.begin()) {
-                line(img, *(it-1), *it, Scalar(255,0,255), 1);
+                line(img, cv::Point2i((it-1), *it, Scalar(255,0,255), 1);
             }
             circle(img, *it, 1, Scalar(255,0,255), 2);
         }

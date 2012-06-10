@@ -12,6 +12,7 @@
 #define __Vector2_h__
 
 #include <math.h>
+#include <fstream>
 
 /** This class represents a 2-vector */
 template <class V = float> class Vector2{
@@ -235,6 +236,17 @@ template <class V = float> class Vector2{
   /** Calculation of the angle of this vector */
   double angle() const
   {return atan2((double)y,(double)x);}
+
+  //! MODIFIED BEYOND THIS POINT BY SHANNON FENN 10/06/12
+
+  /**
+  * @brief output stream operator result of the form (x,y)
+  */
+  friend std::ostream& operator<< (std::ostream& output, const Vector2<V>& v)
+  {
+      output << "(" << v.x << "," << v.y << ")";
+      return output;
+  }
 };
 
 #endif // __Vector2_h__
