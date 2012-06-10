@@ -37,7 +37,7 @@ class WalkParameterWidget : public QWidget
 {
     Q_OBJECT
 public:
-    WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent = 0);
+    WalkParameterWidget(QWidget *parent = 0);
     ~WalkParameterWidget();
     
 private slots:

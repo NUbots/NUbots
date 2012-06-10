@@ -33,7 +33,7 @@ public:
     /*!
       @brief Default constructor.
       */
-    KickWidget(QMdiArea* parentMdiWidget, QWidget *parent = 0);
+    KickWidget(QWidget *parent = 0);
     /*!
       @brief Destructor.
       */

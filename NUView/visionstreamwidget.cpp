@@ -10,7 +10,7 @@
 #include <sstream>
 
 
-visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
+visionStreamWidget::visionStreamWidget(QWidget *parent): QWidget(parent)
 {
     robotName = QString("");
     setWindowTitle(tr("Vision"));
@@ -23,14 +23,18 @@ visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *paren
     getImageButton = new QPushButton("Get an &Image",this);
     startStreamButton = new QPushButton("Start Stream",this);
     stopStreamButton = new QPushButton("Stop Stream",this);
+
+    // The main layout
     layout = new QVBoxLayout(this);
-    selectLayout1 = new QHBoxLayout(this);
+
+    selectLayout1 = new QHBoxLayout();
     selectLayout1->setAlignment(Qt::AlignTop);
     selectLayout1->addWidget(nameLabel);
     selectLayout1->addWidget(nameLineEdit,2);
     //selectLayout1->addWidget(connectButton,1);
     selectLayout1->addWidget(getImageButton,1);
-    selectLayout2 = new QHBoxLayout(this);
+
+    selectLayout2 = new QHBoxLayout();
     statusLabel = new QLabel("Status: ",this);
     statusNetworkLabel = new QLabel("Not connected",this);
     frameRateLabel = new QLabel("Maximum Frame Rate (FPS): ",this);
@@ -39,13 +43,12 @@ visionStreamWidget::visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *paren
     selectLayout2->addWidget(statusLabel);
     selectLayout2->addWidget(statusNetworkLabel,2);
 
-
-    selectLayout3 = new QHBoxLayout(this);
+    selectLayout3 = new QHBoxLayout();
     selectLayout3->setAlignment(Qt::AlignTop);
     selectLayout3->addWidget(startStreamButton,1);
     selectLayout3->addWidget(stopStreamButton,1);
 
-    selectLayout4 = new QHBoxLayout(this);
+    selectLayout4 = new QHBoxLayout();
     selectLayout4->setAlignment(Qt::AlignTop);
     selectLayout4->addWidget(frameRateLabel,2);
     selectLayout4->addWidget(frameRateMessageLabel,1);

@@ -11,7 +11,7 @@
 #include "Localisation/Localisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
-locwmStreamWidget::locwmStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
+locwmStreamWidget::locwmStreamWidget(QWidget *parent): QWidget(parent)
 {
 
     locwm = new Localisation();
@@ -24,7 +24,7 @@ locwmStreamWidget::locwmStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent)
     nameLineEdit->setText("IP ADDRESS");
     connectButton = new QPushButton("Connect");
     disconnectButton = new QPushButton("Disconnect");
-    getImageButton = new QPushButton("Get a LocWm Frame");
+    getImageButton = new QPushButton("Get Frame");
     startStreamButton = new QPushButton("Start Stream");
     stopStreamButton = new QPushButton("Stop Stream");
     layout = new QVBoxLayout;
