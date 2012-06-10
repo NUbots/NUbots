@@ -20,6 +20,7 @@
 #include "GameInformationDisplayWidget.h"
 #include "TeamInformationDisplayWidget.h"
 #include <QHostInfo>
+#include <QList>
 
 class QMdiArea;
 class QMdiSubWindow;
@@ -113,6 +114,12 @@ protected slots:
     void PrintConnectionInfo(const QHostInfo &hostInfo, int);
 
 private:
+    enum ColourScheme
+    {
+        DefaultColours,
+        StevenColours
+    };
+
     //! Virtual robot, does data storage and robot based processing.
     virtualNUbot virtualRobot;
     NUPlatform* m_platform;
@@ -136,6 +143,8 @@ private:
     void writeSettings();
     QString getMdiWindowType(QWidget* theWidget);
 
+    void setColourTheme(ColourScheme newColors);
+
     ClassificationWidget* classification;       //!< Instance of the classification widget
     ConnectionWidget* connection;               //!< Instance of the connection widget; allows connections with robots
     LocalisationWidget* localisation;           //!< Instance of the localisation widget.
@@ -143,6 +152,7 @@ private:
     LayerSelectionWidget* layerSelection;
     visionStreamWidget* VisionStreamer;         //!< Instance of VisionStreamWidget
     locwmStreamWidget* LocWmStreamer;
+    ConnectionManager* m_connection_manager;
 
     //QDockWidget* layerSelectionDock;
     QDockWidget* visionTabDock;
@@ -158,6 +168,9 @@ private:
     QTextBrowser* locInfoDisplay;
     QTextBrowser* selflocInfoDisplay;
     //QDockWidget* walkParameterDock;
+
+    QList<QDockWidget*> m_dockable_windows;
+    QList<QAction*> m_show_dockable_actions;
 
     QStatusBar* statusBar;          //!< Instance of the status bar.
     QMdiArea* mdiArea;              //!< Instance of QMdiArea: the main are in the middle of the app (focal point)
@@ -205,6 +218,7 @@ private:
     QAction *doBonjourTestAction;    //!< Instance of the do test Action
     OfflineLocalisationDialog* offlinelocDialog;
     LogFileReader* LogReader;
+    ColourScheme currentColourScheme;
 
 protected:
     void closeEvent(QCloseEvent *event);
