@@ -106,8 +106,6 @@ public slots:
 
     void imageFrameChanged(int currFrame, int totalFrames);
 protected slots:
-//    GLDisplay* createGLDisplay();
-//    locWmGlDisplay* createLocWmGlDisplay();
     QMdiSubWindow* createGLDisplay();
     QMdiSubWindow* createLocWmGlDisplay();
     QMdiSubWindow* createLUTGlDisplay();
@@ -130,6 +128,7 @@ private:
     QString m_previous_log_path;
 
     int getNumMdiWindowType(const QString& windowType);
+    void addAsDockable(QWidget* widget, const QString& name);
 
     // Initialisation functions
     void createActions();           //!< Generate Actions
@@ -154,7 +153,6 @@ private:
     locwmStreamWidget* LocWmStreamer;
     ConnectionManager* m_connection_manager;
 
-    //QDockWidget* layerSelectionDock;
     QDockWidget* visionTabDock;
     QDockWidget* networkTabDock;
     WalkParameterWidget* walkParameter;         //!< A very simple widget to tune the walk parameter
@@ -167,34 +165,16 @@ private:
     TeamInformationDisplayWidget* teamInfoDisplay;
     QTextBrowser* locInfoDisplay;
     QTextBrowser* selflocInfoDisplay;
-    //QDockWidget* walkParameterDock;
 
     QList<QDockWidget*> m_dockable_windows;
-    QList<QAction*> m_show_dockable_actions;
 
-    QStatusBar* statusBar;          //!< Instance of the status bar.
     QMdiArea* mdiArea;              //!< Instance of QMdiArea: the main are in the middle of the app (focal point)
-    QTabWidget* visionTabs;
-    QTabWidget* networkTabs;
-
-    QMenu *fileMenu;                //!< Instance of the file menu
-    QMenu *editMenu;                //!< Instance of the edit menu
-    QMenu *navigationMenu;          //!< Instance of the naivigation menu
-    QMenu *windowMenu;              //!< Instance of the window menu
-    QMenu *testMenu;                //!< Instance of the test menu
-    QMenu *toolsMenu;                //!< Instance of the tools menu
-    QMenu *visionWindowMenu;        //!< Instance of the vision window menu
-    QMenu *localisationWindowMenu;  //!< Instance of the localisation window menu
-    QMenu *networkWindowMenu;        //!< Instance of the network window menu
-    QMenu *LUTWindowMenu;           //!< Instance of the LUT display menu
-
 
     QToolBar *fileToolBar;          //!< Instance of the file toolbar
     QToolBar *editToolBar;          //!< Instance of the edit toolbar
     QToolBar *navigationToolbar;    //!< Instance of the navigation toolbar
     QToolBar *windowDisplayToolbar; //!< Instance of the window display toolbar
     QToolBar *connectionToolBar;	//!< Instance of the connection toolbar
-
 
     QAction *openAction;            //!< Instance of the open action
     QAction *copyAction;            //!< Instance of the copy action
