@@ -14,6 +14,7 @@
 #include <opencv2/core/core.hpp>
 #include "Tools/FileFormats/LUTTools.h"
 #include "Infrastructure/NUImage/NUImage.h"
+#include "debug.h"
 
 using namespace std;
 
@@ -40,7 +41,13 @@ public:
     inline unsigned char classifyPixel(const Pixel& p) const
     {
         //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
-        return  LUT[LUTTools::getLUTIndex(p)]; // 7bit LUT
+        if(LUT != NULL) {
+            return  LUT[LUTTools::getLUTIndex(p)]; // 7bit LUT
+        }
+        else {
+            errorlog << "LookUpTable::classifyPixel - null LUT" << std::endl;
+            return 0;
+        }
     }
 
     void classifyImage(const NUImage& src, cv::Mat& dest) const;

@@ -167,7 +167,7 @@ private:
     float body_pitch;           //! @variable The body pitch angle.
     bool body_pitch_valid;      //! @variable Whether the body pitch is valid.
 
-    //! Scanline/Segmentation data    
+    //! Scanline/Segmentation data
     vector<unsigned int> horizontal_scanlines;         //! @variable Vector of unsigned ints representing heights of horizontal scan lines.
     SegmentedRegion horizontal_segmented_scanlines;     //! @variable The segmented horizontal scanlines.
     SegmentedRegion vertical_segmented_scanlines;       //! @variable The segmented vertical scanlines.

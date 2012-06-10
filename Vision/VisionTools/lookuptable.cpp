@@ -8,16 +8,20 @@ LookUpTable::LookUpTable()
     LUTbuffer = new unsigned char[LUTTools::LUT_SIZE];
     for(int i=0; i<LUTTools::LUT_SIZE; i++)
         LUTbuffer[i] = ClassIndex::unclassified;
+    LUT = LUTbuffer;
 }
 
 LookUpTable::LookUpTable(unsigned char *vals)
 {
+    LUTbuffer = new unsigned char[LUTTools::LUT_SIZE];
     set(vals);
 }
 
 void LookUpTable::set(unsigned char *vals)
 {
-    LUTbuffer = vals;
+    for(int i=0; i<LUTTools::LUT_SIZE; i++) {
+        LUTbuffer[i] = vals[i];
+    }
     LUT = LUTbuffer;
 }
 

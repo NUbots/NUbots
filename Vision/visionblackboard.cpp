@@ -365,7 +365,7 @@ const SegmentedRegion& VisionBlackboard::getVerticalFilteredRegion() const
 *   @param vfo_if The identifier of the field object
 *   @return horizontal_transitions The horizontal transition rule matches
 *
-*   @note This method cannot be const as an element is insert by the [] operator
+*   @note This method cannot be const as an element is accessed by the [] operator
 *   in the case that this does not find a mapping (using the default constructor). This
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
@@ -380,7 +380,7 @@ const vector<Transition>& VisionBlackboard::getHorizontalTransitions(VisionField
 *   @param vfo_if The identifier of the field object
 *   @return vertical_transitions The vertical transition rule matches
 *
-*   @note This method cannot be const as an element is insert by the [] operator
+*   @note This method cannot be const as an element is accessed by the [] operator
 *   in the case that this does not find a mapping (using the default constructor). This
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
@@ -526,6 +526,10 @@ void VisionBlackboard::update()
         debug << "VisionBlackboard::update() - Finish" << endl;
     #endif
         
+    //clear intermediates
+    mapped_horizontal_transitions.clear();
+    mapped_vertical_transitions.clear();
+
     //clear out result vectors
     m_balls.clear();
     m_beacons.clear();

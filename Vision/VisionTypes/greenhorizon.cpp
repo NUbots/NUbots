@@ -20,11 +20,12 @@ void GreenHorizon::set(const vector<PointType> &initial_points)
     VisionBlackboard* vbb = VisionBlackboard::getInstance();  // blackboard instance
 
     original_points = initial_points;
+    interpolated_points.clear();
     int width = vbb->getImageWidth(),
         height = vbb->getImageHeight();
 
     //unsigned int position, y_new;
-    int position, y_new;
+    int y_new;
     vector<PointType>::const_iterator it_start, it_end;
     it_start = original_points.begin();
     it_end = it_start + 1;
@@ -37,12 +38,12 @@ void GreenHorizon::set(const vector<PointType> &initial_points)
         // calculate y value for interpolated point
         y_new = static_cast<float>(it_end->y - it_start->y)/(it_end->x - it_start->x)*(i - it_start->x) + it_start->y;
 
-        #if VISION_HORIZON_VERBOSITY > 1
-            debug << "GreenHorizon::set: " << y_new << " it_start: " << *it_start << " it_end: " << *it_end << " pos: " << position << endl;
+        #if VISION_HORIZON_VERBOSITY > 2
+            debug << "GreenHorizon::set: x: " << i << " y: " << y_new << " it_start: " << *it_start << " it_end: " << *it_end << endl;
         #endif
 
         if(y_new >= height)
-            errorlog << "GreenHorizon::set: " << y_new << " it_start: " << *it_start << " it_end: " << *it_end << " pos: " << position << endl;
+            errorlog << "GreenHorizon::set: " << y_new << " it_start: " << *it_start << " it_end: " << *it_end << endl;
         interpolated_points.push_back(PointType(i, y_new));
     }
 }

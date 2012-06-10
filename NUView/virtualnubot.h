@@ -58,6 +58,8 @@ public:
     }
     unsigned char* getLUT() {return classificationTable;}
     QString fileType;
+
+    void emitPoints(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
 public slots:
     /** Processes a Classified Image Packet, to be displayed in program
     *  @param datagram The classified image packet that is recieved, and to be processed by program for visualisation and further vision processing

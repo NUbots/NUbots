@@ -451,14 +451,14 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
     case DBID_GREENHORIZON_FINAL:
         for(it=data_points.begin(); it<data_points.end(); it++) {
             if (it > data_points.begin()) {
-                line(img, cv::Point2i((it-1), *it, Scalar(255,0,255), 1);
+                line(img, cv::Point2i((it-1)->x, (it-1)->y), cv::Point2i(it->x, it->y), Scalar(255,0,255), 1);
             }
-            circle(img, *it, 1, Scalar(255,0,255), 2);
+            circle(img, cv::Point2i(it->x, it->y), 1, Scalar(255,0,255), 2);
         }
         break;
     case DBID_OBJECT_POINTS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            circle(img, pt, 1, Scalar(0,0,255), 4);
+            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(0,0,255), 4);
         }
         break;
     default:
@@ -509,7 +509,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
         c_it = colours.begin();
         for (it = data_points.begin(); it < data_points.end()-1; it+=2) {
             //draws a line between each consecutive pair of points of the corresponding colour
-            line(img, *it, *(it+1), *c_it, 1);
+            line(img, cv::Point2i(it->x, it->y), cv::Point2i((it+1)->x, (it+1)->y), *c_it, 1);
             c_it++;
         }
         break;
@@ -517,7 +517,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
         c_it = colours.begin();
         for (it = data_points.begin(); it < data_points.end()-1; it+=2) {
             //draws a line between each consecutive pair of points of the corresponding colour
-            line(img, *it, *(it+1), *c_it, 1);
+            line(img, cv::Point2i(it->x, it->y), cv::Point2i((it+1)->x, (it+1)->y), *c_it, 1);
             c_it++;
         }
         break;

@@ -15,6 +15,11 @@ VisionControlWrapper::VisionControlWrapper()
     wrapper = DataWrapper::getInstance();
 }
 
+//void VisionControlWrapper::setCallBack(virtualNUbot *virtual_nubot)
+//{
+//    wrapper->setCallBack(virtual_nubot);
+//}
+
 int VisionControlWrapper::runFrame()
 {
     static int frame = 0;

@@ -4,6 +4,8 @@
 #include "Vision/visioncontroller.h"
 #include "Vision/VisionWrapper/datawrappernuview.h"
 
+#include "virtualnubot.h"
+
 class NUSensorsData;
 class NUActionatorsData;
 
@@ -13,6 +15,8 @@ class VisionControlWrapper
 public:
     static VisionControlWrapper* getInstance();
     
+    //void setCallBack(virtualNUbot* virtual_nubot);
+
     int runFrame();
     void saveAnImage() const;
     

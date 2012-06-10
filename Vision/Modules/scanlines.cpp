@@ -32,7 +32,7 @@ void ScanLines::generateScanLines()
     if(static_cast<int>(bottom_horizontal_scan) >= vbb->getImageHeight())
         errorlog << "cast avg: " << static_cast<int>(bottom_horizontal_scan) << " avg: " << bottom_horizontal_scan << endl;
 
-    for (int y = static_cast<int>(bottom_horizontal_scan); y >= 0; y--) {
+    for (int y = static_cast<int>(bottom_horizontal_scan); y >= 0; y -= VisionConstants::HORIZONTAL_SCANLINE_SPACING) {
         if(static_cast<unsigned int>(y) >= vbb->getImageHeight())
             errorlog << "sy: " << static_cast<unsigned int>(y) << " y: " << y << endl;
         horizontal_scan_lines.push_back(static_cast<unsigned int>(y));

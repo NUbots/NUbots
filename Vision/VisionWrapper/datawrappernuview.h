@@ -24,6 +24,8 @@
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 
+//for virtualNUbot/Qt
+#include "GLDisplay.h"
 
 using namespace std;
 //using namespace cv;
@@ -32,6 +34,8 @@ using cv::VideoCapture;
 using cv::Scalar;
 using cv::namedWindow;
 using cv::Vec3b;
+
+class virtualNUbot;
 
 class DataWrapper
 {
@@ -122,6 +126,8 @@ private:
 private:
 
     static DataWrapper* instance;
+
+    void (*display_callback)(vector< Vector2<int> >, GLDisplay::display);
 
     const NUImage* m_current_image;
 

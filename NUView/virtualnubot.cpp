@@ -17,9 +17,29 @@
 
 #include "../Kinematics/Kinematics.h"
 
+virtualNUbot* this_vn = NULL;
+
+void callBack(vector< Vector2<int> > updatedPoints, GLDisplay::display displayId)
+{
+    if(this_vn != NULL)
+        emit this_vn->emitPoints(updatedPoints, displayId);
+    else
+        debug << "virtualNUbot callBack - this_vn == NULL";
+}
+
+void virtualNUbot::emitPoints(vector< Vector2<int> > updatedPoints, GLDisplay::display displayId)
+{
+    for(int i=0; i<updatedPoints.size(); i++)
+        cout << updatedPoints.at(i) << " ";
+    cout << endl;
+    emit pointsDisplayChanged(updatedPoints, displayId);
+}
+
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
     vision = VisionControlWrapper::getInstance();
+    this_vn = this;
+    vision->wrapper->display_callback = &callBack;
     //! TODO: Load LUT from filename.
     AllObjects = new FieldObjects();
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
@@ -95,7 +115,6 @@ void virtualNUbot::saveLookupTableFile(QString fileName)
 
 void virtualNUbot::loadLookupTableFile(QString fileName)
 {
-    cout << "thisone" << endl;
     LUTTools::LoadLUT(classificationTable,LUTTools::LUT_SIZE,fileName.toAscii());
     processVisionFrame();
     emit LUTChanged(classificationTable);
@@ -225,7 +244,6 @@ void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 {
     return;
 }
-
 
 void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel> indexs)
 {
