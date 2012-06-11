@@ -12,6 +12,7 @@
 /html
 /latex
 Doxyfile
+Doxyfile.bak
 
 # Python Ignores:
 #we don't want to include .pyc files
@@ -52,7 +53,11 @@ NUView-build*/*
 /NUView/release/*
 /NUView/Makefile
 /NUView/NUView.pro.user
-/NUView-build-desktop-Desktop_Qt_4_7_4_for_GCC__Qt_SDK__Debug/Makefile
+
+/Vision-build-desktop*/*
+/Vision/Vision.pro.user
+/BWalkMaker-build*/*
+/BWalkMaker/BWalkMaker.pro.user
 
 # Ignore our data file formats
 *.lut

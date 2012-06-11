@@ -25,14 +25,17 @@ Line.cpp
 LSFittedLine.cpp
 Matrix.cpp  
 TransformMatrices.cpp
-UKF.cpp
+depUKF.cpp
 Rectangle.cpp
 FieldCalculations.cpp
 FIRFilter.cpp
+Sampling.h
+statistics.cpp
+Moment.cpp Moment.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS
+SET (YOUR_DIRS Filters
 )
 ####################################################################################
 

@@ -39,12 +39,12 @@
 #include <QGLWidget>
 #include "GLDisplay.h"
 #include "Tools/Math/Vector2.h"
-#include "Vision/TransitionSegment.h"
+#include "VisionOld//TransitionSegment.h"
 #include "Tools/Math/LSFittedLine.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "localisationwidget.h"
-#include "Vision/ObjectCandidate.h"
-#include "Vision/CornerPoint.h"
+#include "VisionOld//ObjectCandidate.h"
+#include "VisionOld//CornerPoint.h"
 
 class NUImage;
 class ClassifiedImage;

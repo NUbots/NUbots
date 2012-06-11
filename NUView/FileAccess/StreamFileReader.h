@@ -65,7 +65,7 @@ public:
     /**
       *     Destructor. Removes dynamically allocated memory and closes any open files.
       */
-    ~StreamFileReader()
+    virtual ~StreamFileReader()
     {
         delete m_dataBuffer;
     }

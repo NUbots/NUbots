@@ -63,7 +63,7 @@ void MobileObject::postProcess(const float timestamp)
         isLost = false;
     else if (timestamp - timeLastLostUpdate < 3000)
         isLost = false;
-    else if (timeSinceLastSeen > 5000)
+    else if (timeSinceLastSeen > 12000)
         isLost = true;
 }
 

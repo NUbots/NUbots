@@ -129,9 +129,13 @@ void NUKick::kill()
 
 void NUKick::stop()
 {
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+    debug << "Kick stop called." << endl;
+    #endif
     stopHead();
     stopArms();
     stopLegs();
+    m_kick_enabled = false;
 }
 
 void NUKick::stopHead()
@@ -149,7 +153,7 @@ void NUKick::stopArms()
 void NUKick::stopLegs()
 {   // if another module wants to use the legs, then we should stop
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Kick stop called." << endl;
+    debug << "Legs stop called." << endl;
     #endif
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
 }

@@ -39,7 +39,7 @@
 // --------------------------------------------------------------- Module header files
 #ifdef USE_VISION
     #include "Infrastructure/NUImage/NUImage.h"
-    #include "Vision/Vision.h"
+    #include "Vision/VisionWrapper/visioncontrolwrapperdarwin.h"
 #endif
 
 #ifdef USE_BEHAVIOUR
@@ -47,7 +47,7 @@
 #endif
 
 #ifdef USE_LOCALISATION
-    #include "Localisation/Localisation.h"
+    #include "Localisation/SelfLocalisation.h"
 #endif
 
 #ifdef USE_MOTION
@@ -271,14 +271,14 @@ void NUbot::createModules()
     #endif
     
     #ifdef USE_VISION
-        m_vision = new Vision();
+        m_vision = VisionControlWrapper::getInstance();
     #endif
         
     #ifdef USE_LOCALISATION
         #if defined(TARGET_IS_NAOWEBOTS)
-            m_localisation = new Localisation(Platform->getRobotNumber());
+            m_localisation = new SelfLocalisation(Platform->getRobotNumber());
         #else
-            m_localisation = new Localisation();
+            m_localisation = new SelfLocalisation();
         #endif // defined(TARGET_IS_NAOWEBOTS)
     #endif
         
@@ -299,7 +299,6 @@ void NUbot::destroyModules()
     #endif
     
     #ifdef USE_VISION
-        delete m_vision;
         m_vision = 0;
     #endif
         

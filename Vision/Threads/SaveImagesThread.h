@@ -27,20 +27,20 @@
 
 #include "Tools/Threading/ConditionalThread.h"
 
-class Vision;
+class VisionControlWrapper;
 
 /*! @brief The top-level class
  */
 class SaveImagesThread : public ConditionalThread
 {
 public:
-    SaveImagesThread(Vision* vision);
+    SaveImagesThread(VisionControlWrapper* vision);
     ~SaveImagesThread();
 protected:
     void run();
     
 private:
-    Vision* m_vision;
+    VisionControlWrapper* m_vision;
 };
 
 #endif

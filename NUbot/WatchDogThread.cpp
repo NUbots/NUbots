@@ -29,7 +29,7 @@
 #include "Infrastructure/GameInformation/GameInformation.h"
 
 #ifdef USE_VISION
-    #include "Vision/Vision.h"
+    #include "Vision/VisionWrapper/visioncontrolwrapperdarwin.h"
 #endif
 
 #include "debug.h"

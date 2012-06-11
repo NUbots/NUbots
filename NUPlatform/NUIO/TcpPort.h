@@ -39,6 +39,7 @@
 class NUImage;
 class NUSensorsData;
 class Localisation;
+class SelfLocalisation;
 class FieldObjects;
 
 #include <sstream>
@@ -63,6 +64,7 @@ public:
     void sendData(const NUImage& p_image, const NUSensorsData& p_sensors);
     #if defined(USE_LOCALISATION)
         void sendData(const Localisation& p_locwm, const FieldObjects& p_objects);
+        void sendData(const SelfLocalisation& p_locwm, const FieldObjects& p_objects);
     #endif
     network_data_t receiveData();
 private:

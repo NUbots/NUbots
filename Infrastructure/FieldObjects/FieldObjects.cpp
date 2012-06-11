@@ -4,6 +4,7 @@
 #include "Tools/Math/FieldCalculations.h"
 #include <sstream>
 #include "Tools/FileFormats/FileFormatException.h"
+#include "Tools/Math/General.h"
 
 FieldObjects::FieldObjects()
 {
@@ -182,8 +183,8 @@ void FieldObjects::InitStationaryFieldObjects()
                     y = 0.0f;
                     objectName = "Yellow Penalty Spot";
                     break;
-		case FO_CORNER_CENTRE_CIRCLE:
-		    x = 0.0f;
+                case FO_CORNER_CENTRE_CIRCLE:
+                    x = 0.0f;
                     y = 0.0f;
                     objectName = "Centre Circle";
                     break;
@@ -207,6 +208,14 @@ void FieldObjects::InitStationaryFieldObjects()
                     y = 200.0f;
                     objectName = "Projected T Blue Right";
                     break;
+                case FO_BLUE_BEACON:
+                    x = 0.0f;
+                    y = -200.f; // NOTE: This is not to field spec
+                    objectName = "Blue Beacon";
+                case FO_YELLOW_BEACON:
+                    x = 0.0f;
+                    y = 200.0f; // NOTE: This is not to field spec
+                    objectName = "Yellow Beacon";
                 default:
                     x = y = 0.0f;
                     objectName = "Undefined";
@@ -358,6 +367,161 @@ std::vector<FieldObjects::MobileFieldObjectID> FieldObjects::GetPossibleMobileOb
             visibleIds.push_back(MobileFieldObjectID(stat_obj_iterator->getID()));
     }
     return visibleIds;
+}
+
+/*! @brief Determines the most likely option for the current ambiguous objects, given a specific field location for the observer.
+ @param x x position of observer.
+ @param y y position of observer.
+ @param heading Heading of observer.
+ @return A vector of stationary objects representing the most likely stationary field objects.
+ */
+std::vector<StationaryObject*> FieldObjects::getExpectedAmbiguousDecisions(float x, float y, float heading)
+{
+    std::vector<StationaryObject*> expectedObjects;
+    const float c_distance_weight = 1.0f;
+    const float c_heading_weight = 100.0f;
+
+    // Loop through each of the ambiguous objects and determine the best election option based on the given field position.
+    for(std::vector<AmbiguousObject>::iterator amb_it = ambiguousFieldObjects.begin(); amb_it != ambiguousFieldObjects.end(); ++amb_it)
+    {
+        Self given_location;
+        given_location.updateLocationOfSelf(x, y, heading, 1.0f, 1.0f, 1.0f, false);
+        float measured_distance = amb_it->measuredDistance();
+        float measured_heading = amb_it->measuredBearing();
+        float minimum_error = 1000.0f;
+        StationaryObject* bestObject = NULL;
+
+        for(std::vector<int>::iterator obj_id_it = amb_it->getPossibleObjectIDs().begin(); obj_id_it != amb_it->getPossibleObjectIDs().end(); ++amb_it)
+        {
+            StationaryObject* temp_object = &stationaryFieldObjects[(*obj_id_it)];
+            float estimated_distance = given_location.CalculateDistanceToStationaryObject(*temp_object);
+            float estimated_heading = given_location.CalculateBearingToStationaryObject(*temp_object);
+
+            float distanceError = c_distance_weight * (estimated_distance - measured_distance);
+            float headingError = c_heading_weight * (estimated_heading - measured_heading);
+
+            float error_magnitude = sqrt(pow(distanceError,2) + pow(headingError,2));
+            if( (!bestObject) or (error_magnitude < minimum_error) )
+            {
+                bestObject = temp_object;
+                minimum_error = error_magnitude;
+            }
+        }
+
+        expectedObjects.push_back(bestObject);
+    }
+    return expectedObjects;
+}
+
+int FieldObjects::getClosestStationaryOption(const Self& location, const AmbiguousObject& amb_object)
+{
+    float min_err = 100000, min_err_id = -1;
+    std::vector<int> options = amb_object.getPossibleObjectIDs();
+
+    for(std::vector<int>::const_iterator option_it = options.begin(); option_it != options.end(); ++option_it)
+    {
+        StationaryObject* obj = &stationaryFieldObjects[*option_it];
+        float expectedDist = location.CalculateDistanceToStationaryObject(*obj);
+        float expectedBear = location.CalculateBearingToStationaryObject(*obj);
+
+        // Use total distance between the two relative points as the error.
+        float x_meas = amb_object.measuredDistance() * cos(amb_object.measuredBearing());
+        float y_meas = amb_object.measuredDistance() * sin(amb_object.measuredBearing());
+
+        float x_exp = expectedDist * cos(expectedBear);
+        float y_exp = expectedDist * sin(expectedBear);
+
+        float x_diff = x_meas - x_exp;
+        float y_diff = y_meas - y_exp;
+
+        float total_error = sqrt(x_diff*x_diff + y_diff*y_diff);
+
+//        std::cout << "option: " << obj->getName() << std::endl;
+//        std::cout << "error: " << total_weighted_error << " curr min: " << min_err << std::endl;
+        // Get smalest value for error
+        if(total_error < min_err)
+        {
+            min_err_id = *option_it;
+            min_err = total_error;
+        }
+    }
+    return min_err_id;
+}
+
+vector<StationaryObject*> FieldObjects::filterToVisible(const Self& location, const AmbiguousObject& amb_object, float headPan, float fovX)
+{
+    const float c_view_direction = location.Heading() + headPan;
+    const float c_view_range = fovX + location.sdHeading();
+    const float c_minHeading =  c_view_direction - c_view_range;
+    const float c_maxHeading =  c_view_direction + c_view_range;
+
+    vector<int> poss_ids = amb_object.getPossibleObjectIDs();
+    vector<StationaryObject*> result;
+
+//    std::cout << "Ambiguous object: " << amb_object.getName() << std::endl;
+//    std::cout << "View direction: " << c_view_direction << " heading: " << location.Heading() << " pan: " << headPan << std::endl;
+//    std::cout << "View range: "<< c_view_range << " sd: " << location.sdHeading() << " fov: " << fovX << std::endl;
+//    std::cout << "Min heading: "<< c_minHeading << " Max heading: " << c_maxHeading << std::endl;
+    for(vector<int>::iterator pos_it = poss_ids.begin(); pos_it != poss_ids.end(); ++pos_it)
+    {
+        unsigned int index = *pos_it;
+        StationaryObject* object = &stationaryFieldObjects.at(index);
+        float obj_heading = self.CalculateBearingToStationaryObject(*object);
+//        std::cout << "* Object - " << object->getName() << " heading: " << obj_heading << " -> ";
+        // Calculate the distance from the viewing direction to the object.
+        float delta_angle = mathGeneral::normaliseAngle(obj_heading - c_view_direction);
+
+        // If the distance to the object heading is within the viewing range the object may be seen,
+        if(fabs(delta_angle) < c_view_range)
+        {
+            //std::cout << "Visible" << std::endl;
+            result.push_back(object);
+        }
+        else
+        {
+            //std::cout << "Not visible" << std::endl;
+        }
+    }
+    return result;
+}
+
+
+std::string FieldObjects::ambiguousName(unsigned int id)
+{
+    std::string name;
+    switch(id)
+    {
+        case FO_ROBOT_UNKNOWN:
+            name = "Unknown Robot";
+            break;
+        case FO_BLUE_ROBOT_UNKNOWN:
+            name = "Unknown Blue Robot";
+            break;
+        case FO_PINK_ROBOT_UNKNOWN:
+            name = "Unknown Pink Robot";
+            break;
+        case FO_BLUE_GOALPOST_UNKNOWN:
+            name = "Unknown Blue Goal Post";
+            break;
+        case FO_YELLOW_GOALPOST_UNKNOWN:
+            name = "Unknown Yellow Goal Post";
+            break;
+        case FO_CORNER_UNKNOWN_INSIDE_L:
+            name = "Unknown Inside L";
+            break;
+        case FO_CORNER_UNKNOWN_OUTSIDE_L:
+            name = "Unknown Outside L";
+            break;
+        case FO_CORNER_UNKNOWN_T:
+            name = "Unknown T";
+            break;
+        case FO_PENALTY_UNKNOWN:
+            name = "Unknown Penalty Spot";
+            break;
+        default:
+            name = "Unknown";
+    }
+    return name;
 }
 
 std::string FieldObjects::toString(bool visibleOnly) const

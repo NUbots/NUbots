@@ -1,6 +1,5 @@
 #ifndef LOCWM_H_DEFINED
 #define LOCWM_H_DEFINED
-#include "KF.h"
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -12,6 +11,7 @@ class NUSensorsData;
 #include "Tools/FileFormats/TimestampedData.h"
 #include <fstream>
 #include <sstream>
+#include "KF.h"
 
 // Debug output level
 // 0 - No messages
@@ -76,7 +76,7 @@ class Localisation: public TimestampedData
         void removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& ambiguousobjects, bool yellow_seen, bool blue_seen);
 
 		void resetPlayingStateModels();
-                void writeLog();
+        void writeLog();
         bool IsValidObject(const Object& theObject);
         bool amILost;                       // true if we are 'lost' in this frame
         int lostCount;                      // the number of consecutive frames in which we are 'lost'

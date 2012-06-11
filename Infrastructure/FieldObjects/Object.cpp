@@ -99,6 +99,21 @@ void Object::CopyObject(const Object& sourceObject)
         timeSeen += sourceObject.TimeSeen() - previousFrameTimestamp;
         timeSinceLastSeen = 0;
 }
+
+void Object::CopyMeasurement(const Object& sourceObject)
+{
+    measuredRelativePosition = sourceObject.measuredRelativePosition;
+    relativeMeasurementError = sourceObject.relativeMeasurementError;
+    imagePositionAngle = sourceObject.imagePositionAngle;
+    imagePosition = sourceObject.imagePosition;
+    sizeOnScreen = sourceObject.sizeOnScreen;
+
+    isVisible = sourceObject.isVisible;
+    timeLastSeen = sourceObject.timeLastSeen;
+    timeSinceLastSeen = sourceObject.timeSinceLastSeen;
+    timeSeen = sourceObject.timeSeen;
+}
+
 /*
 void Object::setRelativeLocationVariables(float distance, float bearing, float elevation)
 {

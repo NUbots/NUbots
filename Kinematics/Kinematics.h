@@ -104,6 +104,7 @@ public:
     * @param origin2Camera The transform from the origin to the camera space
     * @return Transform matrix from the camera to the ground space.
     */
+
     static Matrix CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2Camera);
 
     /*!
@@ -161,7 +162,7 @@ public:
     * @param pointFieldCoordinates The 2d position in field coordinates.
     * @return The joint angles required to look at the given position.
     */
-    static std::vector<float> LookToPoint(const std::vector<float>& pointFieldCoordinates);
+//    static std::vector<float> LookToPoint(const std::vector<float>& pointFieldCoordinates);
 
     /*!
     * @brief Calculate position in relative 3D space from a 4x4 transform matrix.

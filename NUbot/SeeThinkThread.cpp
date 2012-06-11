@@ -35,7 +35,7 @@
 #ifdef USE_VISION
     #include "Infrastructure/FieldObjects/FieldObjects.h"
     #include "Infrastructure/NUImage/NUImage.h"
-    #include "Vision/Vision.h"
+    #include "Vision/VisionWrapper/visioncontrolwrapperdarwin.h"
 #endif
 
 #ifdef USE_BEHAVIOUR
@@ -44,7 +44,7 @@
 #endif
 
 #ifdef USE_LOCALISATION
-    #include "Localisation/Localisation.h"
+    #include "Localisation/SelfLocalisation.h"
 #endif
 
 #ifdef USE_MOTION
@@ -77,10 +77,10 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
     #endif
     m_nubot = nubot;
     m_logrecorder = new LogRecorder(m_nubot->m_blackboard->GameInfo->getPlayerNumber());
-//    m_logrecorder->SetLogging("locsensor",true);
-//    m_logrecorder->SetLogging("gameinfo",true);
-//    m_logrecorder->SetLogging("teaminfo",true);
-//    m_logrecorder->SetLogging("object",true);
+    m_logrecorder->SetLogging("sensor",true);
+    m_logrecorder->SetLogging("gameinfo",true);
+    m_logrecorder->SetLogging("teaminfo",true);
+    m_logrecorder->SetLogging("object",true);
 }
 
 SeeThinkThread::~SeeThinkThread()
@@ -132,7 +132,7 @@ void SeeThinkThread::run()
             #endif
             // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
             #ifdef USE_VISION
-                m_nubot->m_vision->ProcessFrame(Blackboard->Image, Blackboard->Sensors, Blackboard->Actions, Blackboard->Objects);
+                m_nubot->m_vision->runFrame();
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision");
                 #endif
@@ -159,12 +159,15 @@ void SeeThinkThread::run()
             
             #if DEBUG_VERBOSITY > 0
                 Blackboard->Jobs->summaryTo(debug);
+                #ifdef THREAD_SEETHINK_PROFILE
+                    prof.split("debug print job summary");
+                #endif
             #endif
 
             #ifdef USE_VISION
 
-            m_nubot->m_vision->process(Blackboard->Jobs) ; //<! Networking for Vision
-            m_nubot->m_platform->process(Blackboard->Jobs, m_nubot->m_io); //<! Networking for Platform
+                m_nubot->m_vision->process(Blackboard->Jobs) ; //<! Networking for Vision
+                m_nubot->m_platform->process(Blackboard->Jobs, m_nubot->m_io); //<! Networking for Platform
                 #ifdef THREAD_SEETHINK_PROFILE
                     prof.split("vision_jobs");
                 #endif

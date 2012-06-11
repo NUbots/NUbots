@@ -20,15 +20,20 @@
 */
 
 #include "ColorModelConversions.h"
-#include "Vision/ClassificationColours.h"
+#include "Vision/VisionTools/classificationcolours.h"
 #include "openglmanager.h"
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
 #include <QDebug>
-//#include <glu.h>
-#include <GL/glu.h>
+
+// Apple has to be different...
+#if defined(__APPLE__) || defined(MACOSX)
+  #include <glu.h>
+#else
+  #include <GL/glu.h>
+#endif
 
 OpenglManager::OpenglManager(): width(320), height(240)
 {
@@ -730,7 +735,6 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
 
 void OpenglManager::setExpectedVision(const NUSensorsData* data, const KF* filter, GLDisplay::display displayId)
 {
-    GLUquadricObj *qobj;
     makeCurrent();
     glDisable(GL_TEXTURE_2D);
     glLineWidth(4.0);

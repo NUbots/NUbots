@@ -6,6 +6,8 @@
 #include "nubotdataconfig.h"
 #include "debug.h"
 
+#include <cstdlib>
+
 
 using namespace TransformMatrices;
 
@@ -53,9 +55,6 @@ bool Kinematics::LoadModelFromFile(std::ifstream& file)
     // Joint Number, Joint Name, alpha, a, thetaOffset, d
     // [Effector]
     // Joint Number, Joint Name, alpha, a, thetaOffset, d
-    // Trans x, y, z
-    // Rot axis, value
-    // [Effector]
     // etc..
 
     m_endEffectors.clear();
@@ -373,11 +372,11 @@ Matrix Kinematics::TransformPosition(const Matrix& Camera2GroundTransform, const
     return mathGeneral::Cartesian2Spherical(resultMatrix);
 }
 
-std::vector<float> Kinematics::LookToPoint(const std::vector<float>& pointFieldCoordinates)
-{
-    std::vector<float> result;
-    return result;
-}
+//std::vector<float> Kinematics::LookToPoint(const std::vector<float>& pointFieldCoordinates)
+//{
+//    std::vector<float> result;
+//    return result;
+//}
 
 double Kinematics::CalculateRelativeFootHeight(const Matrix& supportFootTransformMatrix,const Matrix& theFootTransformMatrix)
 {

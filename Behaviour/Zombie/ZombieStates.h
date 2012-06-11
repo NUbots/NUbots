@@ -38,6 +38,7 @@
 #include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 #include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
 #include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 
 #include "debug.h"
 
@@ -57,6 +58,17 @@ public:
     BehaviourState* nextState() {return m_provider->m_state;};
     void doState()
     {
+        while (m_game_info->getCurrentState() != GameInformation::PlayingState)
+            m_game_info->doManualStateChange();
+        
+        //head tracking job
+        //m_provider->m_jobs->addMotionJob(head);
+
+        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+            m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
+        else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        
         NUActionatorsData* m_actions = Blackboard->Actions;
         
         // the vectors are all static since they are used often and we wish to reduce memory operations.
@@ -76,7 +88,7 @@ public:
         nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
         
         //UPDATE HEAD
-        m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 30);
+        //m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
 
         //UPDATE ARMS:
         m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 30);

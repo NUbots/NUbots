@@ -67,11 +67,11 @@ class NUPlatform;
 class NUIO;
 
 #ifdef USE_VISION
-    class Vision;
+    class VisionControlWrapper;
 #endif
 
 #ifdef USE_LOCALISATION
-    class Localisation;
+    class SelfLocalisation;
 #endif
 
 #ifdef USE_BEHAVIOUR
@@ -99,7 +99,7 @@ public:
     ~NUbot();
     void run();
 #ifdef USE_LOCALISATION
-    const Localisation* GetLocWm(){return m_localisation;};
+    const SelfLocalisation* GetLocWm(){return m_localisation;};
 #endif
     
 private:
@@ -123,11 +123,11 @@ private:
     NUPlatform* m_platform;               //!< interface to robot platform
     NUBlackboard* m_blackboard;           //!< a pointer to the public store
     #ifdef USE_VISION
-        Vision* m_vision;                 //!< vision module
+        VisionControlWrapper* m_vision;                 //!< vision module
     #endif
     
     #ifdef USE_LOCALISATION
-        Localisation* m_localisation;     //!< localisation module
+        SelfLocalisation* m_localisation;     //!< localisation module
     #endif
     
     #ifdef USE_BEHAVIOUR

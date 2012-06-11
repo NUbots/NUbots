@@ -219,15 +219,15 @@ void DarwinSensors::copyFromJoints()
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadByte(addr);
         //data = int(datatable[addr-start_addr]);
         joint[NUSensorsData::StiffnessId] = 100*data;
-		
+		*/
         addr = int(Robot::MX28::P_PRESENT_LOAD_L);
-        data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
+        data = (int)cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
         //data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-        joint[NUSensorsData::TorqueId] = data;
+        joint[NUSensorsData::TorqueId] = data*1.262e-3;
         //<! Current is blank
-        joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
+        //joint[NUSensorsData::AccelerationId] = (joint[NUSensorsData::VelocityId] - m_previous_velocities[i])/delta_t;
         //<! Copy into m_data
-        */
+        
 
         //Calculate Speed:
         joint[NUSensorsData::VelocityId] = (joint[NUSensorsData::PositionId] - m_previous_positions[i])/delta_t;
@@ -265,6 +265,7 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     int x,y,z;
     float centrevalue = 512;
     vector<float> data(3,0);
+
 
     //<! Assign the robot data to the NUSensor Structure:
     addr = int(Robot::CM730::P_GYRO_X_L);
@@ -304,7 +305,61 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
 
 void DarwinSensors::copyFromFeet()
 {
-    //Darwin has no feet sensors atm.
+    int fsr1 = int(Robot::FSR::P_FSR1_L);
+    int fsr2 = int(Robot::FSR::P_FSR2_L);
+    int fsr3 = int(Robot::FSR::P_FSR3_L);
+    int fsr4 = int(Robot::FSR::P_FSR4_L);
+
+    std::vector<float> right_fsr(4,0.f);
+    std::vector<float> left_fsr(4,0.f);
+
+    // Darwin FSR give value in milli newtons - we want newtons
+    const float fsr_scale_factor = 1e-3;
+
+    int right_fsr_error = cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].error;
+    int left_fsr_error = cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].error;
+
+    // Test if the FSR sensors are available.
+    if(right_fsr_error == 0 and left_fsr_error == 0)
+    {
+        // For NUbot system FSR should be in order:
+        // front left
+        // front right
+        // back right
+        // back left
+
+        // For right foot, fsr positions are as follows:
+        // 1 - front left
+        // 2 - front right
+        // 3 - back right
+        // 4 - back left
+
+        right_fsr[0] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr1);
+        right_fsr[1] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr2);
+        right_fsr[2] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr3);
+        right_fsr[3] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr4);
+
+        // For left foot, fsr positions are as follows:
+        // 1 - back right
+        // 2 - back left
+        // 3 - front left
+        // 4 - front right
+
+        left_fsr[0] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr3);
+        left_fsr[1] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr4);
+        left_fsr[2] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr1);
+        left_fsr[3] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr2);
+
+        // Write to sensor values.
+        m_data->set(NUSensorsData::RFootTouch, m_current_time, right_fsr);
+        m_data->set(NUSensorsData::LFootTouch, m_current_time, left_fsr);
+    }
+    else
+    {
+        // Invalidate if values could not be found.
+        m_data->setAsInvalid(NUSensorsData::RFootTouch);
+        m_data->setAsInvalid(NUSensorsData::LFootTouch);
+    }
     return;
 }
 

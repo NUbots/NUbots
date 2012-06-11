@@ -55,7 +55,7 @@
 #define USE_PGRL
 #define USE_MO
 #define USE_COST
-#define USE_STIFFNESS
+//#define USE_STIFFNESS
 
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {

@@ -70,6 +70,16 @@ KF::KF():odom_Model(0.07,0.00005,0.00005,0.000005)
   sqrtOfProcessNoise[5][5] = 5.6569; // Ball X Velocity.
   sqrtOfProcessNoise[6][6] = 5.6569; // Ball Y Velocity.
 
+//  sqrtOfProcessNoise = Matrix(7,7,true);
+//  sqrtOfProcessNoise[0][0] = 6.0; // Robot X coord.
+//  sqrtOfProcessNoise[1][1] = 6.0; // Robot Y coord.
+//  sqrtOfProcessNoise[2][2] = 0.15; // Robot Theta. 0.00001
+//  sqrtOfProcessNoise[3][3] = 15.0; // Ball X.
+//  sqrtOfProcessNoise[4][4] = 15.0; // Ball Y.
+//  sqrtOfProcessNoise[5][5] = 30.0; // Ball X Velocity.
+//  sqrtOfProcessNoise[6][6] = 30.0; // Ball Y Velocity.
+
+
 	//RHM 7/7/08: Extra matrix for resetting
   // Process noise for used for reset.
 //  sqrtOfProcessNoiseReset = Matrix(7,7,false);

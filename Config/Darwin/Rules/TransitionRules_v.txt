@@ -1,0 +1,23 @@
+GOAL_Y:
+before: (0, 1) [yellow]
+after: (0, 1) []
+
+GOAL_Y:
+before: (0, 1) []
+after: (0, 1) [yellow]
+
+GOAL_B:
+before: (0, 1) [blue]
+after: (0, 1) []
+
+GOAL_B:
+before: (0, 1) []
+after: (0, 1) [blue]
+
+BALL:
+before: (0, 1) [orange]
+after: (0, 1) []
+
+BALL:
+before: (0, 1) []
+after: (0, 1) [orange]

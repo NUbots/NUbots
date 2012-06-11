@@ -56,8 +56,11 @@ class Object
         //void setViewPosition(Vector2<int> newViewPosition);
 	//void setViewPositionVariables(int x, int y);
         Vector2<int> getImagePosition() const {return imagePosition;}
+        Vector2<float> getImagePositionAngle() const {return imagePositionAngle;}
+        Vector2<int> getSizeOnScreen() const {return sizeOnScreen;}
         //For COPY of whole object:
         void CopyObject(const Object& sourceObject);
+        void CopyMeasurement(const Object& sourceObject);
 
         //Access vision variables:
         bool isObjectVisible() const {return isVisible;}
@@ -74,6 +77,23 @@ class Object
         int getObjectWidth() const {return sizeOnScreen.x;}
         int getObjectHeight() const {return sizeOnScreen.y;}
         std::string toString() const;
+
+        /*! @brief Determine if the object give a valid measurement.
+            This gives protection from the possablilty of measurements that may contain the NaN flag indicating an invalid number.
+
+            @return True if the measurments are valid. False if they are not.
+        */
+        bool validMeasurement()
+        {
+            // 0 distance should not be possible.
+            if(measuredDistance() == 0.0f) return false;
+            // Check for NaN measurement.
+            if(measuredDistance() != measuredDistance()) return false;
+            if(measuredBearing() != measuredBearing()) return false;
+            if(measuredElevation() != measuredElevation()) return false;
+            return true;
+        }
+
         /*!
         @brief Output streaming operation.
         @param output The output stream.
