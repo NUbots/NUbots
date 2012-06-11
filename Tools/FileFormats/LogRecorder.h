@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "nubotdataconfig.h"
+#include "targetconfig.h"
 #include "Infrastructure/NUBlackboard.h"
 
 enum LogFileStatus
@@ -68,7 +69,11 @@ public:
     {
         const std::string extension = "strm";
         const std::string seperator = ".";
-        const std::string data_dir = "/var/volatile/";//std::string(DATA_DIR);
+#ifdef TARGET_IS_NAO
+        const std::string data_dir = "/var/volatile/";
+#else
+        const std::string data_dir = std::string(DATA_DIR);
+#endif
         std::stringstream filename;
         filename << data_dir << robot_number << "_" << data_name << seperator << extension;
         return filename.str();

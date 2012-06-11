@@ -1,15 +1,21 @@
-#ifndef UKF_H
-#define UKF_H
+#ifndef depUKF_H
+#define depUKF_H
 
 #include "Matrix.h"
-
-class UKF
+//\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//#######################################################################################################
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// This is the old depricated UKF class, you do not want to use it. The new one is much better, trust me.
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//#######################################################################################################
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+class depUKF
 {
 public:
-    UKF();
-    UKF(unsigned int numStates);
-    UKF(const UKF& source);
-    ~UKF();
+    depUKF();
+    depUKF(unsigned int numStates);
+    depUKF(const depUKF& source);
+    ~depUKF();
     void CalculateSigmaWeights(float kappa = 1.0f);
     Matrix GenerateSigmaPoints() const;
     Matrix CalculateMeanFromSigmas(const Matrix& sigmaPoints) const;
@@ -32,4 +38,4 @@ protected:
    float m_kappa;
 };
 
-#endif // UKF_H
+#endif // depUKF_H

@@ -54,7 +54,7 @@ std::vector<float> Self::wmState()
 	return state;
 }
 
-bool Self::lost()
+bool Self::lost() const
 {
     return amILost;
 }
@@ -131,10 +131,10 @@ std::vector<float> Self::CalculateDifferenceFromStationaryObject(const Stationar
 }
 
 /*! @brief Calculate the distance to a stationary object */
-float Self::CalculateDistanceToStationaryObject(const StationaryObject& theObject)
+float Self::CalculateDistanceToStationaryObject(const StationaryObject& theObject) const
 {
-    float selfX = WorldModelLocation[0];
-    float selfY = WorldModelLocation[1];
+    float selfX = WorldModelLocation.x;
+    float selfY = WorldModelLocation.y;
     float diffX = theObject.X() - selfX;
     float diffY = theObject.Y() - selfY;
     float distance = sqrt( diffX * diffX + diffY * diffY );
@@ -142,11 +142,11 @@ float Self::CalculateDistanceToStationaryObject(const StationaryObject& theObjec
 }
 
 /*! @brief Calculate the bearing to a stationary object */
-float Self::CalculateBearingToStationaryObject(const StationaryObject& theObject)
+float Self::CalculateBearingToStationaryObject(const StationaryObject& theObject) const
 {
-    float selfX = WorldModelLocation[0];
-    float selfY = WorldModelLocation[1];
-    float selfHeading = WorldModelLocation[2];
+    float selfX = WorldModelLocation.x;
+    float selfY = WorldModelLocation.y;
+    float selfHeading = WorldModelLocation.z;
     float diffX = theObject.X() - selfX;
     float diffY = theObject.Y() - selfY;
     float positionHeading = atan2(diffY, diffX);
@@ -378,6 +378,22 @@ std::string Self::toString() const
     result << "Location: (" << WorldModelLocation.x << "," << WorldModelLocation.y << "," << WorldModelLocation.z << ")" << std::endl;
     result << "Location Error: (" << WorldModelLocationError.x << "," << WorldModelLocationError.y << "," << WorldModelLocationError.z << ")" << std::endl;
     return result.str();
+}
+
+Vector2<float> Self::CalculateRelativeCoordFromFieldCoord(float fieldX, float fieldY)
+{
+    Vector2<float> result;
+
+    const float x_diff = fieldX - wmX();
+    const float y_diff = fieldY - wmY();
+
+    const float hcos = cos(Heading());
+    const float hsin = sin(Heading());
+
+    result.x = x_diff * hcos + y_diff * hsin;
+    result.y = -x_diff * hsin + y_diff * hcos;
+
+    return result;
 }
 
 std::ostream& operator<< (std::ostream& output, const Self& p_self)

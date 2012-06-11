@@ -47,7 +47,7 @@ ostream& operator << (ostream& output, const NUData::id_t* id)
  */
 istream& operator >> (istream& input, NUData::id_t* id)
 {
-    id = new NUData::id_t();
+    //id = new NUData::id_t();
     input >> id->Id;
     input >> id->Name;
     return input;

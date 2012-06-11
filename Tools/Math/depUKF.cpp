@@ -1,21 +1,21 @@
-#include "UKF.h"
+#include "depUKF.h"
 #include "debug.h"
 
 using namespace std;
 
 
-UKF::UKF(): m_numStates(0)
+depUKF::depUKF(): m_numStates(0)
 {
 }
 
-UKF::UKF(unsigned int numStates): m_numStates(numStates)
+depUKF::depUKF(unsigned int numStates): m_numStates(numStates)
 {
     m_mean = Matrix(m_numStates,1,false);
     m_covariance = Matrix(m_numStates,m_numStates,true);
     CalculateSigmaWeights();
 }
 
-UKF::UKF(const UKF& source)
+depUKF::depUKF(const depUKF& source)
 {
     m_numStates = source.m_numStates;
     m_mean = source.m_mean;
@@ -23,11 +23,11 @@ UKF::UKF(const UKF& source)
     CalculateSigmaWeights();
 }
 
-UKF::~UKF()
+depUKF::~depUKF()
 {
 }
 
-Matrix UKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
+Matrix depUKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
 {
     //unsigned int numPoints = sigmaPoints.getn();
     Matrix mean(sigmaPoints.getm(),1,false);
@@ -35,7 +35,7 @@ Matrix UKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
     return mean;
 }
 
-Matrix UKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const
+Matrix depUKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const
 {
     unsigned int numPoints = sigmaPoints.getn();
     Matrix covariance(m_numStates,m_numStates, false);
@@ -48,7 +48,7 @@ Matrix UKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matri
     return covariance;
 }
 
-void UKF::CalculateSigmaWeights(float kappa)
+void depUKF::CalculateSigmaWeights(float kappa)
 {
     unsigned int numPoints = 2*m_numStates + 1;
     m_sigmaWeights = Matrix(1,numPoints, false);
@@ -68,7 +68,7 @@ void UKF::CalculateSigmaWeights(float kappa)
     }
 }
 
-Matrix UKF::GenerateSigmaPoints() const
+Matrix depUKF::GenerateSigmaPoints() const
 {
     int numberOfSigmaPoints = 2*m_numStates+1;
     Matrix sigmaPoints(m_mean.getm(), numberOfSigmaPoints, false);
@@ -86,17 +86,17 @@ Matrix UKF::GenerateSigmaPoints() const
     return sigmaPoints;
 }
 
-double UKF::getMean(int stateId) const
+double depUKF::getMean(int stateId) const
 {
     return m_mean[stateId][0];
 }
 
-double UKF::calculateSd(int stateId) const
+double depUKF::calculateSd(int stateId) const
 {
     return sqrt(m_covariance[stateId][stateId]);
 }
 
-bool UKF::setState(Matrix mean, Matrix covariance)
+bool depUKF::setState(Matrix mean, Matrix covariance)
 {
     if( (mean.getm() == covariance.getm()) && (mean.getm() == covariance.getn()) )
     {
@@ -112,7 +112,7 @@ bool UKF::setState(Matrix mean, Matrix covariance)
     }
 }
 
-bool  UKF::timeUpdate(const Matrix& updatedSigmaPoints, const Matrix& processNoise)
+bool  depUKF::timeUpdate(const Matrix& updatedSigmaPoints, const Matrix& processNoise)
 {
     m_mean = CalculateMeanFromSigmas(updatedSigmaPoints);
     // Update covariance assuming additive process noise.
@@ -120,7 +120,7 @@ bool  UKF::timeUpdate(const Matrix& updatedSigmaPoints, const Matrix& processNoi
     return true;
 }
 
-bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& predictedMeasurementSigmas, const Matrix& stateEstimateSigmas)
+bool depUKF::measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& predictedMeasurementSigmas, const Matrix& stateEstimateSigmas)
 {
     const int numMeasurements = measurement.getm();
     const int numberOfSigmaPoints = stateEstimateSigmas.getn();

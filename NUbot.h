@@ -71,7 +71,7 @@ class NUIO;
 #endif
 
 #ifdef USE_LOCALISATION
-    class Localisation;
+    class SelfLocalisation;
 #endif
 
 #ifdef USE_BEHAVIOUR
@@ -99,7 +99,7 @@ public:
     ~NUbot();
     void run();
 #ifdef USE_LOCALISATION
-    const Localisation* GetLocWm(){return m_localisation;};
+    const SelfLocalisation* GetLocWm(){return m_localisation;};
 #endif
     
 private:
@@ -127,7 +127,7 @@ private:
     #endif
     
     #ifdef USE_LOCALISATION
-        Localisation* m_localisation;     //!< localisation module
+        SelfLocalisation* m_localisation;     //!< localisation module
     #endif
     
     #ifdef USE_BEHAVIOUR

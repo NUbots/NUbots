@@ -3,21 +3,29 @@
 #include <QMouseEvent>
 #include <qclipboard.h>
 #include <QApplication>
-#include <GL/glu.h>
 #include "Tools/Math/General.h"
 #include "Localisation/Localisation.h"
+#include "Localisation/SelfLocalisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Tools/Math/Limit.h"
 
-locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocalisation(0)
+// Apple has to be different...
+#if defined(__APPLE__) || defined(MACOSX)
+  #include <glu.h>
+#else
+  #include <GL/glu.h>
+#endif
+
+locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(QGLFormat(QGL::SampleBuffers), parent), currentLocalisation(0)
 {
     setWindowTitle("World Model Visualisation");
     viewTranslation[0] = 0.0f;
     viewTranslation[1] = 0.0f;
     viewTranslation[2] = -700.0f;
-    viewOrientation[0] = 0.0f;
-    viewOrientation[1] = 0.0f;
-    viewOrientation[2] = 0.0f;
+    xRot = 0;
+    yRot = 0;
+    zRot = 0;
     setFocusPolicy(Qt::StrongFocus); // Required to get keyboard events.
     light = true;
     perspective = true;
@@ -29,12 +37,69 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(parent), currentLocal
     currentObjects = 0;
     localLocalisation = 0;
     currentSensorData = 0;
+    m_self_loc = 0;
+
+    m_currentColour = QColor(0,0,255);    // Log
+    m_localColour = QColor(255,255,0);    // Old
+    m_selfColour = QColor(142, 56, 142);  // New
+    m_fieldObjColour = QColor(255,0,0);   // Robot when recorded
+    m_sensorColour = QColor(0,0,0);         // Externally measured
+    m_backgroundColour = QColor(0x3f,0x3f,0x3f);
+
+    setAutoFillBackground(false);
+    setMinimumSize(200, 200);
 }
 
 locWmGlDisplay::~locWmGlDisplay()
 {
     makeCurrent();
     return;
+}
+
+static void qNormalizeAngle(int &angle)
+{
+    while (angle < 0)
+        angle += 360 * 16;
+    while (angle > 360 * 16)
+        angle -= 360 * 16;
+}
+
+static inline void qSetColor(float colorVec[], QColor c)
+{
+    colorVec[0] = c.redF();
+    colorVec[1] = c.greenF();
+    colorVec[2] = c.blueF();
+    colorVec[3] = c.alphaF();
+}
+
+void locWmGlDisplay::setXRotation(int angle)
+{
+    qNormalizeAngle(angle);
+    if (angle != xRot)
+    {
+        xRot = angle;
+        update();
+    }
+}
+
+void locWmGlDisplay::setYRotation(int angle)
+{
+    qNormalizeAngle(angle);
+    if (angle != yRot)
+    {
+        yRot = angle;
+        update();
+    }
+}
+
+void locWmGlDisplay::setZRotation(int angle)
+{
+    qNormalizeAngle(angle);
+    if (angle != zRot)
+    {
+        zRot = angle;
+        update();
+    }
 }
 
 void locWmGlDisplay::restoreState(const QByteArray & state)
@@ -85,9 +150,9 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
             viewTranslation[0] = 0.0f;
             viewTranslation[1] = 0.0f;
             viewTranslation[2] = -700.0f;
-            viewOrientation[0] = 0.0f;
-            viewOrientation[1] = 0.0f;
-            viewOrientation[2] = 0.0f;
+            xRot = 0;
+            yRot = 0;
+            zRot = 0;
             update();
             break;
         case Qt::Key_S:
@@ -112,36 +177,22 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
 
 void locWmGlDisplay::mousePressEvent ( QMouseEvent * event )
 {
-    switch(event->button())
-    {
-        case Qt::RightButton:
-            dragStartPosition = event->pos();
-            prevDragPos = dragStartPosition;
-            break;
-        default:
-            QGLWidget::mousePressEvent(event);
-    }
+    lastPos = event->pos();
 }
 
 void locWmGlDisplay::mouseMoveEvent ( QMouseEvent * event )
 {
-    if((event->buttons()&Qt::RightButton) && (event->buttons()&Qt::LeftButton)){
-        QPoint currPos = event->pos();
-        viewTranslation[2] += (currPos.y() - prevDragPos.y());
-        prevDragPos = currPos;
-        update();
+    int dx = event->x() - lastPos.x();
+    int dy = event->y() - lastPos.y();
+
+    if (event->buttons() & Qt::LeftButton) {
+        setXRotation(xRot + 8 * dy);
+        setYRotation(yRot + 8 * dx);
+    } else if (event->buttons() & Qt::RightButton) {
+        setXRotation(xRot + 8 * dy);
+        setZRotation(zRot + 8 * dx);
     }
-    else if(event->buttons()&Qt::RightButton){
-        QPoint currPos = event->pos();
-        viewOrientation[0] += (currPos.y() - prevDragPos.y());
-        viewOrientation[2] += (currPos.x() - prevDragPos.x());
-        prevDragPos = currPos;
-        update();
-    }
-    else
-    {
-        QGLWidget::mouseMoveEvent(event);
-    }
+    lastPos = event->pos();
 }
 
 void locWmGlDisplay::wheelEvent ( QWheelEvent * event )
@@ -149,6 +200,8 @@ void locWmGlDisplay::wheelEvent ( QWheelEvent * event )
     int magnitude = event->delta();
     float zoomDistance = (float)magnitude / 10.0f;
     viewTranslation[2] += zoomDistance;
+    Limit zoomLimit(-9000, -20);
+    viewTranslation[2] = zoomLimit.clip(viewTranslation[2]);
     update();
 }
 
@@ -172,104 +225,121 @@ bool locWmGlDisplay::loadTexture(QString fileName, GLuint* textureId)
 void locWmGlDisplay::initializeGL()
 {
     makeCurrent();
-    GLfloat LightAmbient[]= { 0.0f, 0.0f, 0.0f, 1.0f };         // Ambient Light Values
-    GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f };		// Diffuse Light Values
-    GLfloat LightSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f };        // Diffuse Light Values
-    GLfloat LightPosition[]= { 0.0f, 0.0f, 200.0f, 1.0f };	// Light Position
-
-    quadratic = gluNewQuadric();
-    gluQuadricNormals(quadratic, GLU_SMOOTH);	// Create Smooth Normals
-
-    glEnable(GL_TEXTURE_2D);                    // Enable Texture Mapping
-    glShadeModel(GL_SMOOTH);    		// Enable Smooth Shading
-
-    glClearColor (0.0, 0.0, 0.0, 0.0);
-    glClearDepth(1.0f);                         		// Depth Buffer Setup
-    glEnable(GL_DEPTH_TEST);					// Enables Depth Testing
-    glDepthFunc(GL_LEQUAL);					// The Type Of Depth Test To Do
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);		// Really Nice Perspective Calculations
-
+    glEnable(GL_MULTISAMPLE);
 
     loadTexture(":/textures/robotAura.png", &robotAuraTexture);
     loadTexture(":/textures/FieldLines.png", &fieldLineTexture);
     loadTexture(":/textures/grass_texture.jpg", &grassTexture);
     loadTexture(":/textures/PlaceholderRobot.png", &robotTexture);
     loadTexture(":/textures/PlaceholderRobotBack.png", &robotBackTexture);
-
-    // Lighting
-    glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);			// Setup The Ambient Light
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);			// Setup The Diffuse Light
-    glLightfv(GL_LIGHT1, GL_SPECULAR,LightSpecular);			// Setup Specular Light
-    glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);			// Position The Light
-
-    glEnable(GL_LIGHT1);						// Enable Light One
-
-    glEnable(GL_LIGHTING);      // Enable Global Lighting
 }
 
-void locWmGlDisplay::paintGL()
+void locWmGlDisplay::paintEvent(QPaintEvent *event)
 {
+    QColor qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
     makeCurrent();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);         // Clear The Screen And The Depth Buffer
-    glLoadIdentity();						// Reset The Current Modelview Matrix
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
 
-    glEnable(GL_COLOR_MATERIAL);                                // Enable Material Colour Tracking
-    GLfloat MatSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f };          // Diffuse Material Values
-    GLfloat MatEmission[]= { 0.0f, 0.0f, 0.0f, 1.0f };  	// Diffuse Material Values
+    qglClearColor(m_backgroundColour);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
+    glEnable(GL_MULTISAMPLE);
+    glEnable(GL_NORMALIZE);
 
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE); // Set Ambient and Diffuse Material Values to Track
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,MatSpecular);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,MatEmission);
-    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,100.0f);
+    glClearDepth(1.0f);                         		// Depth Buffer Setup
+    glEnable(GL_DEPTH_TEST);					// Enables Depth Testing
+    glDepthFunc(GL_LEQUAL);					// The Type Of Depth Test To Do
+
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);		// Really Nice Perspective Calculations
+
+    static GLfloat lightPosition0[]= { 0.0, 0.0, 200.0, 1.0 };      // Light Position
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+//    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
+
+    setupViewport(width(), height());
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
 
     glTranslatef(viewTranslation[0],viewTranslation[1],viewTranslation[2]); // Move to centre of field position.
-    glRotatef(viewOrientation[0],1.0f,0.0f,0.0f); // Rotate about X-Axis
-    glRotatef(viewOrientation[1],0.0f,1.0f,0.0f); // Rotate about Y-Axis
-    glRotatef(viewOrientation[2],0.0f,0.0f,1.0f); // Rotate about Z-Axis
+    glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
+    glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+    glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
 
-    // Position Lighting
-    GLfloat LightPosition[]= { 0.0f, 0.0f, 300.0f, 1.0f };      // Light Position
-    glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);		// Set Light Position
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
 
     drawField();        // Draw the Standard Field Layout.
-
     drawMarkers();
     drawObjects();
     drawOverlays();
 
-    glFlush ();         // Run Queued Commands
+    glShadeModel(GL_FLAT);
+    //glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    drawLegend(&painter);
+    painter.end();
     return;
+}
+
+void locWmGlDisplay::setupViewport(int width, int height)
+{
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    if(perspective)
+        gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,10000.0f);
+    else
+    {
+    #ifdef QT_OPENGL_ES
+        glOrthof(-370.0,  370.0, -270.0, 270.0,0.1,10000.0);
+    #else
+        glOrtho(-370.0,  370.0, -270.0, 270.0,0.1,10000.0);
+    #endif
+    }
+    glMatrixMode(GL_MODELVIEW);
 }
 
 void locWmGlDisplay::drawMarkers()
 {
     if(currentSensorData)
     {
-        QColor sensorColor(0,0,0);
         std::vector<float> gpsPosition;
         float compassHeading;
         if(currentSensorData->getGps(gpsPosition))
         {
             if(!currentSensorData->getCompass(compassHeading)) compassHeading = 3.14;
-            drawRobotMarker(sensorColor, gpsPosition[0], gpsPosition[1],compassHeading);
+            drawRobotMarker(m_sensorColour, gpsPosition[0], gpsPosition[1],compassHeading);
         }
 
     }
+
     if(currentObjects)
     {
-        QColor currentColor(255,0,0);
-        drawRobotMarker(currentColor, currentObjects->self.wmX(), currentObjects->self.wmY(),currentObjects->self.Heading());
+        drawRobotMarker(m_fieldObjColour, currentObjects->self.wmX(), currentObjects->self.wmY(),currentObjects->self.Heading());
     }
 
     if(currentLocalisation)
     {
-        QColor currentColor(0,0,255);
-        DrawLocalisationMarkers(*currentLocalisation, currentColor);
+        DrawLocalisationMarkers(*currentLocalisation, m_currentColour);
     }
     if(localLocalisation)
     {
-        QColor localColor(255,255,0);
-        DrawLocalisationMarkers(*localLocalisation, localColor);
+        DrawLocalisationMarkers(*localLocalisation, m_localColour);
+    }
+    if(m_self_loc)
+    {
+        drawLocalisationMarkers(*m_self_loc, m_selfColour);
     }
 }
 
@@ -277,25 +347,22 @@ void locWmGlDisplay::drawObjects()
 {
     if(currentSensorData)
     {
-        QColor sensorColor(0,0,0);
         std::vector<float> gpsPosition;
         float compassHeading;
         if(currentSensorData->getGps(gpsPosition))
         {
             if(!currentSensorData->getCompass(compassHeading)) compassHeading = 3.14;
-            drawRobot(sensorColor, gpsPosition[0], gpsPosition[1],compassHeading);
+            drawRobot(m_sensorColour, gpsPosition[0], gpsPosition[1],compassHeading);
         }
 
     }
     if(currentLocalisation)
     {
-        QColor currentColor(0,0,255);
-        DrawLocalisationObjects(*currentLocalisation, currentColor);
+        DrawLocalisationObjects(*currentLocalisation, m_currentColour);
     }
     if(localLocalisation)
     {
-        QColor localColor(255,255,0);
-        DrawLocalisationObjects(*localLocalisation, localColor);
+        DrawLocalisationObjects(*localLocalisation, m_localColour);
     }
 }
 
@@ -303,8 +370,7 @@ void locWmGlDisplay::drawOverlays()
 {
     if(currentLocalisation)
     {
-        QColor currentColor(0,0,255);
-        DrawLocalisationOverlay(*currentLocalisation, currentColor);
+        DrawLocalisationOverlay(*currentLocalisation, m_currentColour);
     }
     if(currentObjects)
     {
@@ -312,8 +378,7 @@ void locWmGlDisplay::drawOverlays()
     }
     if(localLocalisation)
     {
-        QColor localColor(255,255,0);
-        DrawLocalisationOverlay(*localLocalisation, localColor);
+        DrawLocalisationOverlay(*localLocalisation, m_localColour);
     }
 }
 
@@ -328,33 +393,90 @@ void locWmGlDisplay::snapshotToClipboard()
 void locWmGlDisplay::drawField()
 {
     glPushMatrix();
+    glEnable(GL_TEXTURE_2D);                    // Enable Texture Mapping
+    glShadeModel(GL_SMOOTH);    		// Enable Smooth Shading
     glEnable(GL_BLEND);		// Turn Blending On
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-    glColor3f(1.0f,1.0f,1.0f);                                // Set The Color To White
+    GLfloat faceColor[4];
+    qSetColor(faceColor, Qt::white);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, faceColor);
 
     glEnable(GL_TEXTURE_2D);                                            // Enable Texture Mapping
     glBindTexture(GL_TEXTURE_2D, grassTexture);
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
-    glBegin(GL_QUADS);
-        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-370.0f,  270.0f,  0.0f);      // Bottom Left Of The Texture and Quad
-        glTexCoord2f(7.4f, 0.0f); glVertex3f( 370.0f,  270.0f,  0.0f);    // Bottom Right Of The Texture and Quad
-        glTexCoord2f(7.4f, 5.4f); glVertex3f( 370.0f, -270.0f,  0.0f);     // Top Right Of The Texture and Quad
-        glTexCoord2f(0.0f, 5.4f); glVertex3f(-370.0f, -270.0f,  0.0f);       // Top Left Of The Texture and Quad
-    glEnd();
 
+        const unsigned int x_size = 10;
+        const unsigned int y_size = 10;
+        glBegin(GL_QUADS);
+        // Draw texture using 10x10 grids for shading.
+        for (int x = -370; x < 370; x += x_size)
+        {
+            for (int y = -270; y < 270; y += y_size)
+            {
+                float texBottom = (y+270) / 100.0f;
+                float texTop = texBottom + y_size / 100.0;
+                float texLeft = (x+370) / 100.0f;
+                float texRight = texLeft + x_size / 100.0;
+
+                float quadBottom = y;
+                float quadTop = quadBottom + y_size;
+                float quadLeft = x;
+                float quadRight = quadLeft + x_size;
+
+                glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+                glTexCoord2f(texLeft, texBottom); glVertex3f(quadLeft,  quadBottom,  0.0f);      // Bottom Left Of The Texture and Quad
+                glTexCoord2f(texRight, texBottom); glVertex3f(quadRight,  quadBottom,  0.0f);    // Bottom Right Of The Texture and Quad
+                glTexCoord2f(texRight, texTop); glVertex3f(quadRight, quadTop,  0.0f);     // Top Right Of The Texture and Quad
+                glTexCoord2f(texLeft, texTop); glVertex3f(quadLeft, quadTop,  0.0f);       // Top Left Of The Texture and Quad
+            }
+        }
+        glEnd();
+
+//    glBegin(GL_QUADS);
+//        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+//        glTexCoord2f(0.0f, 0.0f); glVertex3f(-370.0f,  270.0f,  0.0f);      // Bottom Left Of The Texture and Quad
+//        glTexCoord2f(7.4f, 0.0f); glVertex3f( 370.0f,  270.0f,  0.0f);    // Bottom Right Of The Texture and Quad
+//        glTexCoord2f(7.4f, 5.4f); glVertex3f( 370.0f, -270.0f,  0.0f);     // Top Right Of The Texture and Quad
+//        glTexCoord2f(0.0f, 5.4f); glVertex3f(-370.0f, -270.0f,  0.0f);       // Top Left Of The Texture and Quad
+//    glEnd();
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, faceColor);
     glBindTexture(GL_TEXTURE_2D, fieldLineTexture);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
-    glBegin(GL_QUADS);
-        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-370.0f,  270.0f,  0.0f);      // Bottom Left Of The Texture and Quad
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( 370.0f,  270.0f,  0.0f);    // Bottom Right Of The Texture and Quad
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( 370.0f, -270.0f,  0.0f);     // Top Right Of The Texture and Quad
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-370.0f, -270.0f,  0.0f);       // Top Left Of The Texture and Quad
-    glEnd();
+//    glBegin(GL_QUADS);
+//        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+//        glTexCoord2f(0.0f, 0.0f); glVertex3f(-370.0f,  270.0f,  0.0f);      // Bottom Left Of The Texture and Quad
+//        glTexCoord2f(1.0f, 0.0f); glVertex3f( 370.0f,  270.0f,  0.0f);    // Bottom Right Of The Texture and Quad
+//        glTexCoord2f(1.0f, 1.0f); glVertex3f( 370.0f, -270.0f,  0.0f);     // Top Right Of The Texture and Quad
+//        glTexCoord2f(0.0f, 1.0f); glVertex3f(-370.0f, -270.0f,  0.0f);       // Top Left Of The Texture and Quad
+//    glEnd();
+        glBegin(GL_QUADS);
+        // Draw texture using 10x10 grids for shading.
+        for (int x = -370; x < 370; x += x_size)
+        {
+            for (int y = -270; y < 270; y += y_size)
+            {
+                float texBottom = (y + 270) / 540.0f;
+                float texTop = (y + 270 + y_size) / 540.0f;
+                float texLeft = (x+370) / 740.0f;
+                float texRight = (x + 370 + x_size) / 740.0f;
+
+                float quadBottom = y;
+                float quadTop = quadBottom + y_size;
+                float quadLeft = x;
+                float quadRight = quadLeft + x_size;
+
+                glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
+                glTexCoord2f(texLeft, texBottom); glVertex3f(quadLeft,  quadBottom,  0.0f);      // Bottom Left Of The Texture and Quad
+                glTexCoord2f(texRight, texBottom); glVertex3f(quadRight,  quadBottom,  0.0f);    // Bottom Right Of The Texture and Quad
+                glTexCoord2f(texRight, texTop); glVertex3f(quadRight, quadTop,  0.0f);     // Top Right Of The Texture and Quad
+                glTexCoord2f(texLeft, texTop); glVertex3f(quadLeft, quadTop,  0.0f);       // Top Left Of The Texture and Quad
+            }
+        }
+        glEnd();
     glDisable(GL_BLEND);            // Turn Blending Off
     glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
 
@@ -368,38 +490,54 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
     float postRadius = 5;
     float crossBarRadius = 2.5;
     glPushMatrix();
-    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
+    GLfloat goalColour[4];
+    qSetColor(goalColour, colour);
+    GLfloat white[4];
+    QColor temp_white = Qt::white;
+    temp_white.setAlphaF(colour.alphaF());
+    qSetColor(white, temp_white);
 
+    glShadeModel(GL_SMOOTH);    		// Enable Smooth Shading
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+
+    GLUquadric* quad = gluNewQuadric();
+    gluQuadricDrawStyle(quad, GLU_FILL);
+    gluQuadricNormals(quad, GLU_SMOOTH);	// Create Smooth Normals
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, goalColour);
     glTranslatef(x,y,0.0f);    // Move to centre of goal.
     glRotatef(facing,0.0f,0.0f,1.0f);				// Rotate The Pyramid On It's Y Axis
+
     glTranslatef(0.0f,70.0f,0.0f);    // Move to right post.
-    gluCylinder(quadratic,postRadius,postRadius,80.0f,128,128);	// Draw right post
+    gluCylinder(quad,postRadius,postRadius,80.0f,128,128);	// Draw right post
 
-    glColor4f(1.0f,1.0f,1.0f,colour.alpha());
 
+    // Draw right post triangle.
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
     glBegin(GL_TRIANGLES);				// Drawing Using Triangles
         glVertex3f( -postRadius, 0.0f, 40.0f);		// Top
-        glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);	// Bottom Left
         glVertex3f( -postRadius,0.0f, 0.0f);		// Bottom Right
+        glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);	// Bottom Left
     glEnd();						// Finished Drawing The Triangle
 
 
     glTranslatef(0.0f,-2*70.0f,0.0f);    // Move to left post.
-    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
-    gluCylinder(quadratic,postRadius,postRadius,80.0f,128,128);	// Draw left post
-    glColor4f(1.0f,1.0f,1.0f,colour.alpha());
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, goalColour);
+    gluCylinder(quad,postRadius,postRadius,80.0f,128,128);	// Draw left post
 
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
     glBegin(GL_TRIANGLES);				// Drawing Using Triangles
         glVertex3f( -postRadius, 0.0f, 40.0f);		// Top
-        glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);	// Bottom Left
         glVertex3f( -postRadius,0.0f, 0.0f);		// Bottom Right
+        glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);	// Bottom Left
     glEnd();						// Finished Drawing The Triangle
 
     glTranslatef(0.0f,-postRadius,80.0f - crossBarRadius);    // Move to top of left post.
     glRotatef(-90.0,1.0f,0.0f,0.0f);
-    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
-    gluCylinder(quadratic,crossBarRadius,crossBarRadius,140.0f+2.0f*postRadius,128,128);	// Draw cross bar
-    glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, goalColour);
+    gluCylinder(quad,crossBarRadius,crossBarRadius,140.0f+2.0f*postRadius,128,128);	// Draw cross bar
+
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     glPopMatrix();
 
 }
@@ -407,13 +545,19 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
 void locWmGlDisplay::drawBall(QColor colour, float x, float y)
 {
     const float ballRadius = 6.5/2.0;
+    GLfloat ballColour[4];
+    qSetColor(ballColour, colour);
+
+    GLUquadric* quad = gluNewQuadric();
+    gluQuadricDrawStyle(quad, GLU_FILL);
+    gluQuadricNormals(quad, GLU_SMOOTH);	// Create Smooth Normals
 
     glPushMatrix();
     glEnable(GL_BLEND);		// Turn Blending On
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, ballColour);
     glTranslatef(x,y,ballRadius);    // Move to centre of ball.
-    gluSphere(quadratic,ballRadius,128,128);		// Draw A Sphere
+    gluSphere(quad,ballRadius,128,128);		// Draw A Sphere
     glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
     glDisable(GL_BLEND);		// Turn Blending On
     glPopMatrix();
@@ -423,15 +567,18 @@ void locWmGlDisplay::drawBallMarker(QColor colour, float x, float y)
 {
     const float ballRadius = 6.5/2.0;
 
+    GLUquadric* quad = gluNewQuadric();
+    gluQuadricDrawStyle(quad, GLU_FILL);
+    gluQuadricNormals(quad, GLU_SMOOTH);	// Create Smooth Normals
+
     glPushMatrix();
     glEnable(GL_BLEND);		// Turn Blending On
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
     glDisable(GL_LIGHTING);      // Disable Global Lighting
-    glColor4ub(colour.red(), colour.green(), colour.blue(), colour.alpha());
+    glColor4ub(colour.red(),colour.green(),colour.blue(),colour.alpha());
     glTranslatef(x,y,0);    // Move to centre of ball.
-    gluDisk(quadratic, ballRadius, ballRadius+2, 32, 32);
-    glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
+    gluDisk(quad, ballRadius, ballRadius+2, 32, 32);
     glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
     glEnable(GL_LIGHTING);      // Enable Global Lighting
     glDisable(GL_BLEND);		// Turn Blending On
@@ -442,6 +589,11 @@ void locWmGlDisplay::drawBallMarker(QColor colour, float x, float y)
 void locWmGlDisplay::drawRobotMarker(QColor colour, float x, float y, float theta)
 {
     const float robotWidth = 30.0f;
+
+    GLUquadric* quad = gluNewQuadric();
+    gluQuadricDrawStyle(quad, GLU_FILL);
+    gluQuadricNormals(quad, GLU_SMOOTH);	// Create Smooth Normals
+
     glPushMatrix();
     glEnable(GL_BLEND);		// Turn Blending On
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -482,7 +634,12 @@ void locWmGlDisplay::drawRobot(QColor colour, float x, float y, float theta)
     glTranslatef(x,y,0);    // Move to centre of robot.
     glRotatef(mathGeneral::rad2deg(theta),0.0f, 0.0f, 1.0f);
 
-    glColor4ub(255,255,255,colour.alpha());
+    GLfloat white[4];
+    QColor temp_white = Qt::white;
+    temp_white.setAlphaF(colour.alphaF());
+    qSetColor(white, temp_white);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+
     if(drawRobotModel)
     {
         glTranslatef(0,0,robotHeight/2.0);    // Move to centre of robot.
@@ -552,6 +709,10 @@ void locWmGlDisplay::DrawBallSigma(QColor colour, float x, float y)
 {
     const float ballRadius = 2.0;
 
+    GLUquadric* quad = gluNewQuadric();
+    gluQuadricDrawStyle(quad, GLU_FILL);
+    gluQuadricNormals(quad, GLU_SMOOTH);	// Create Smooth Normals
+
     glPushMatrix();
     glEnable(GL_BLEND);		// Turn Blending On
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -559,7 +720,7 @@ void locWmGlDisplay::DrawBallSigma(QColor colour, float x, float y)
     glDisable(GL_LIGHTING);      // Disable Global Lighting
     glColor4ub(colour.red(), colour.green(), colour.blue(), colour.alpha());
     glTranslatef(x,y,0);    // Move to centre of ball.
-    gluDisk(quadratic, ballRadius, ballRadius+2, 32, 32);
+    gluDisk(quad, ballRadius, ballRadius+2, 32, 32);
     glColor4f(1.0f,1.0f,1.0f,1.0f); // Back to white
     glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
     glEnable(GL_LIGHTING);      // Enable Global Lighting
@@ -568,25 +729,26 @@ void locWmGlDisplay::DrawBallSigma(QColor colour, float x, float y)
     return;
 }
 
-void locWmGlDisplay::DrawModelObjects(const KF& model, QColor& modelColor)
+void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
 {
+    QColor drawColor(modelColor);
     int alpha = 255*model.alpha();
     if(alpha < 25) alpha = 25;
-    modelColor.setAlpha(alpha);
-    drawRobot(modelColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
+    drawColor.setAlpha(alpha);
+    drawRobot(drawColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
     if(drawSigmaPoints)
     {
         Matrix sigmaPoints = model.CalculateSigmaPoints();
         for (int i=1; i < sigmaPoints.getn(); i++)
         {
-            DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
+            DrawSigmaPoint(drawColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
     drawBall(QColor(255,165,0,alpha), model.state(KF::ballX), model.state(KF::ballY));
 }
 
-void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, QColor& modelColor)
-{
+void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor)
+{   
     if(drawBestModelOnly)
     {
         const KF model = localisation.getBestModel();
@@ -605,10 +767,27 @@ void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, Q
     }
 }
 
-void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
+void locWmGlDisplay::DrawModelMarkers(const KF& model, const QColor& modelColor)
 {
+    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
+    float mean_x = model.state(KF::selfX);
+    float mean_y = model.state(KF::selfY);
+    float mean_angle = model.state(KF::selfTheta);
+    drawRobotMarker(modelColor, mean_x, mean_y, mean_angle);
 
-    drawRobotMarker(modelColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
+    // Need to multiply by its transpose to do conversion: standard deviation -> variance.
+    Matrix cov = model.stateStandardDeviations * model.stateStandardDeviations.transp();
+    float xx = cov[KF::selfX][KF::selfX];
+    float xy = cov[KF::selfX][KF::selfY];
+    float yy = cov[KF::selfY][KF::selfY];
+    FieldPose pose = CalculateErrorElipse(xx,xy,yy);
+
+    QColor outline(modelColor);
+    outline.setAlphaF(std::max((float)model.alpha(), c_min_display_alpha / 255.0f));
+    QColor fill(modelColor);
+    fill.setAlpha(std::max((int)(100 * model.alpha()), c_min_display_alpha));
+    DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
+
     if(drawSigmaPoints)
     {
         Matrix sigmaPoints = model.CalculateSigmaPoints();
@@ -621,14 +800,45 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, QColor& modelColor)
     drawBallMarker(modelColor, model.state(KF::ballX), model.state(KF::ballY));
 }
 
-void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, QColor& modelColor)
+void locWmGlDisplay::DrawModelMarkers(const SelfModel* model, const QColor& modelColor)
 {
+    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
+    float mean_x = model->mean(Model::states_x);
+    float mean_y = model->mean(Model::states_y);
+    float mean_angle = model->mean(Model::states_heading);
+    drawRobotMarker(modelColor, mean_x, mean_y, mean_angle);
+
+    Matrix cov = model->covariance();
+    float xx = cov[Model::states_x][Model::states_x];
+    float xy = cov[Model::states_x][Model::states_y];
+    float yy = cov[Model::states_y][Model::states_y];
+    FieldPose pose = CalculateErrorElipse(xx,xy,yy);
+
+    QColor outline(modelColor);
+    outline.setAlphaF(std::max(model->alpha(), c_min_display_alpha / 255.0f));
+    QColor fill(modelColor);
+    fill.setAlpha(std::max((int)(100 * model->alpha()), c_min_display_alpha));
+    DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
+    if(drawSigmaPoints)
+    {
+        //! TODO: FIX THIS DISPLAY ISSUE
+//        Matrix sigmaPoints = model->CalculateSigmaPoints();
+//        for (int i=1; i < sigmaPoints.getn(); i++)
+//        {
+//            DrawSigmaPoint(modelColor, sigmaPoints[Model::states_x][i], sigmaPoints[Model::states_y][i], sigmaPoints[Model::states_heading][i]);
+//        }
+    }
+}
+
+void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, const QColor& modelColor)
+{
+    QColor drawColor(modelColor);
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
     if(drawBestModelOnly)
     {
-        modelColor.setAlpha(255);
+        drawColor.setAlpha(255);
         const KF model = localisation.getBestModel();
-        DrawModelMarkers(model, modelColor);
+        DrawModelMarkers(model, drawColor);
     }
     else
     {
@@ -639,16 +849,119 @@ void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, Q
             if(model.active())
             {
                 int alpha = std::max(c_min_display_alpha, (int)(255*model.alpha()));
-                modelColor.setAlpha(alpha);
-                DrawModelMarkers(model, modelColor);
+                drawColor.setAlpha(alpha);
+                DrawModelMarkers(model, drawColor);
             }
         }
     }
 }
 
-void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, QColor& modelColor)
+void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisation, const QColor& modelColor)
 {
-    QColor draw_colour = modelColor;
+    QColor drawColor(modelColor);
+    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
+    if(drawBestModelOnly)
+    {
+        drawColor.setAlpha(255);
+        const SelfModel* model = localisation.getBestModel();
+        DrawModelMarkers(model, drawColor);
+    }
+    else
+    {
+        QString displayString("Model %1 (%2%)");
+        ModelContainer models = localisation.allModels();
+        for(ModelContainer::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
+        {
+            if((*model_it)->active())
+            {
+                int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->alpha()));
+                drawColor.setAlpha(alpha);
+                DrawModelMarkers((*model_it), drawColor);
+            }
+        }
+    }
+
+
+}
+
+FieldPose locWmGlDisplay::CalculateErrorElipse(float xx, float xy, float yy)
+{
+    const float scalefactor = 2.4477; // for 95% confidence.
+    FieldPose result;
+    float Eig1 = (xx+yy)/2 + sqrt(4*xy*xy + (xx-yy)*(xx-yy))/2;
+    float Eig2 = (xx+yy)/2 - sqrt(4*xy*xy + (xx-yy)*(xx-yy))/2;
+
+    float maxEig = std::max(Eig1,Eig2);
+    float minEig = std::min(Eig1,Eig2);
+
+    if(sqrt(xx) < sqrt(yy))
+    {
+        result.x = sqrt(minEig) * scalefactor;
+        result.y = sqrt(maxEig) * scalefactor;
+    }
+    else
+    {
+        result.x = sqrt(maxEig) * scalefactor;
+        result.y = sqrt(minEig) * scalefactor;
+    }
+
+    const float aspectratio = 1.0;
+    result.angle = 0.5 * atan((1/aspectratio) * (2*xy) / (xx-yy));
+    return result;
+}
+
+void locWmGlDisplay::DrawElipse(const QPoint& location, const QPoint& size, float angle, const QColor& lineColour, const QColor& fillColour)
+{
+    const float DEG2RAD = 3.14159/180;
+    glLineWidth(3);
+
+    float xradius = size.x();
+    float yradius = size.y();
+
+    glDisable(GL_LIGHTING);      // Enable Global Lighting
+    glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
+    glEnable(GL_BLEND);		// Turn Blending On
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+    glPushMatrix();
+    glTranslatef(location.x(),location.y(),0.0f);    // Move to centre of goal.
+    glRotatef(angle,0.0f,0.0f,1.0f);				// Rotate The ellipse On It's Z Axis
+
+    GLfloat glLineColour[4];
+    qSetColor(glLineColour, lineColour);
+
+    GLfloat glFillColour[4];
+    qSetColor(glFillColour, fillColour);
+
+    glColor4fv(glFillColour);
+
+    glBegin(GL_POLYGON);
+    for (int i=0; i < 360; i++)
+    {
+        //convert degrees into radians
+        float degInRad = i*DEG2RAD;
+        glVertex2f(cos(degInRad)*xradius,sin(degInRad)*yradius);
+    }
+    glEnd();
+
+    glColor4fv(glLineColour);
+    glBegin(GL_LINE_LOOP);
+    for (int i=0; i < 360; i++)
+    {
+        //convert degrees into radians
+        float degInRad = i*DEG2RAD;
+        glVertex2f(cos(degInRad)*xradius,sin(degInRad)*yradius);
+    }
+    glEnd();
+
+    glPopMatrix();
+    glDisable(GL_BLEND);		// Turn Blending On
+    glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
+    glEnable(GL_LIGHTING);      // Enable Global Lighting
+}
+
+void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, const QColor& modelColor)
+{
     if(!drawBestModelOnly)
     {
         QString displayString("Model %1 (%2%)");
@@ -685,24 +998,83 @@ void locWmGlDisplay::drawFieldObjectLabels(const FieldObjects& theFieldObjects)
     glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
 }
 
+void locWmGlDisplay::drawLegend(QPainter* painter)
+{
+    const QSize blockSize(16,16);
+    const QPoint legendOrigin(20, 20);
+
+    std::vector<QColor> colours;
+    colours.push_back(m_currentColour);
+    colours.push_back(m_localColour);
+    colours.push_back(m_selfColour);
+    colours.push_back(m_fieldObjColour);
+    colours.push_back(m_sensorColour);
+
+    std::vector<QString> legendLabel;
+    legendLabel.push_back("Localisation log");
+    legendLabel.push_back("Original localisation");
+    legendLabel.push_back("New localisation");
+    legendLabel.push_back("Field Object Self");
+    legendLabel.push_back("Measured Position");
+
+
+    std::vector<float> temp(3,0);
+    std::vector<bool> valid;
+    valid.push_back(currentLocalisation != NULL);
+    valid.push_back(localLocalisation != NULL);
+    valid.push_back(m_self_loc != NULL);
+    valid.push_back(currentObjects != NULL);
+    valid.push_back((currentSensorData != NULL) and currentSensorData->getGps(temp));
+
+    unsigned int currLegendKey = 0;
+    for(unsigned int i = 0; i < colours.size(); ++i)
+    {
+        if(not valid.at(i)) continue;
+        QPixmap colourBlock(blockSize);
+        colourBlock.fill();
+        QPainter pixPaint(&colourBlock);
+        pixPaint.fillRect(1,1,14,14,colours.at(i));
+        pixPaint.end();
+        QPoint blockDrawPos = legendOrigin + QPoint(0, currLegendKey*20);
+        QPoint textDrawPos = blockDrawPos + QPoint(20, 12);
+        painter->drawPixmap(blockDrawPos, colourBlock);
+
+        QPen pen;
+        pen.setColor(Qt::white);
+        painter->setPen(pen);
+        painter->drawText(textDrawPos, legendLabel.at(i));
+        currLegendKey++;
+
+//        QPainterPath path;
+//        QFont font = painter->font();
+//        pen.setWidth(1);
+
+//        painter->setBrush(QBrush(Qt::black));
+
+//        path.addText(textDrawPos, font, legendLabel.at(i)); //Adjust the position
+//        painter->drawPath(path);
+    }
+}
+
 void locWmGlDisplay::resizeGL(int width, int height)
 {
-        glViewport(0, 0, width, height);
-        glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
-        glLoadIdentity();							// Reset The Projection Matrix
-        if(perspective)
-        {
-            gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,10000.0f);
-        }
-        else
-        {
-            glOrtho(-370.0,  370.0, 270.0, -270.0,0.1,10000.0);
-        }
-        // Calculate The Aspect Ratio Of The Window
+    setupViewport(width, height);
+//        glViewport(0, 0, width, height);
+//        glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
+//        glLoadIdentity();							// Reset The Projection Matrix
+//        if(perspective)
+//        {
+//            gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,10000.0f);
+//        }
+//        else
+//        {
+//            glOrtho(-370.0,  370.0, 270.0, -270.0,0.1,10000.0);
+//        }
+//        // Calculate The Aspect Ratio Of The Window
 
 
-        glMatrixMode(GL_MODELVIEW);						// Select The Modelview Matrix
-        glLoadIdentity();							// Reset The Modelview Matrix
+//        glMatrixMode(GL_MODELVIEW);						// Select The Modelview Matrix
+//        glLoadIdentity();							// Reset The Modelview Matrix
     return;
 }
 

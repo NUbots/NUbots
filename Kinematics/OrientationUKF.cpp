@@ -11,7 +11,7 @@
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
-OrientationUKF::OrientationUKF(): UKF(numStates), m_initialised(false)
+OrientationUKF::OrientationUKF(): depUKF(numStates), m_initialised(false)
 {
     #ifdef DEBUG_ME
         std::fstream file;

@@ -52,7 +52,8 @@ Matrix::Matrix(const Matrix& a)
 // Destructor
 Matrix::~Matrix()
 {
-	delete [] X; X = 0;
+    //std::cout << ""
+    delete [] X; X = 0;
 }
 
 // Matrix Index Operator
@@ -285,6 +286,21 @@ std::vector<float> Matrix::asVector()
     return result;
 }
 
+bool Matrix::isValid()
+{
+    for(int i=0;i<(*this).getm();i++)
+    {
+        for(int j=0;j<(*this).getn();j++)
+        {
+            if( (*this)[i][j] != (*this)[i][j] )
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 Matrix Matrix4x4fromVector(const std::vector<float>& source)
 {
     Matrix result(4,4,false);
@@ -364,22 +380,27 @@ Matrix cholesky(Matrix P)
 {
     Matrix L = Matrix (P.getm(),P.getn(),false);
     double a=0;
-    for(int i=0;i<P.getm();i++){
-		for(int j=0;j<i;j++){
+    for(int i=0;i<P.getm();i++)
+    {
+        for(int j=0;j<i;j++)
+        {
 			a=P[i][j];
-				for(int k=0;k<j;k++){
-					a=a-L[i][k]*L[j][k];
-				}
-		L[i][j]=a/L[j][j];
+            for(int k=0;k<j;k++)
+            {
+                a=a-L[i][k]*L[j][k];
+            }
+            L[i][j]=a/L[j][j];
 		}
 		a=P[i][i];
-		for(int k=0;k<i;k++){
+        for(int k=0;k<i;k++)
+        {
 			a=a-pow(L[i][k],2);
 		}
 		L[i][i]=sqrt(a);
 	}
     return L;
 }
+
 Matrix HT(Matrix A)
 {
     //Householder Triangularization Algorithm
@@ -498,6 +519,7 @@ Matrix CofactorMatrix(const Matrix& mat)
     return coMat;      
 }
 
+// using adjoint method seen here: http://www.mathwords.com/i/inverse_of_a_matrix.htm
 Matrix InverseMatrix(const Matrix& mat)
 {
       return (CofactorMatrix(mat)).transp()/determinant(mat);
