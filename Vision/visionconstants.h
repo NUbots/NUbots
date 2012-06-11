@@ -72,6 +72,14 @@ public:
     static float BALL_WIDTH;                //! The physical width of the ball in cm
     static float BEACON_WIDTH;              //! The physical width of the beacons in cm
     
+    //! ScanLine options
+    static unsigned int HORIZONTAL_SCANLINE_SPACING;
+    static unsigned int VERTICAL_SCANLINE_SPACING;
+    static unsigned int GREEN_HORIZON_SCAN_SPACING;
+    static unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
+    static float GREEN_HORIZON_LOWER_THRESHOLD_MULT;
+    static float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
+
     // static methods
     static DistanceMethod getDistanceMethodFromName(std::string name);
     static std::string getDistanceMethodName(DistanceMethod method);

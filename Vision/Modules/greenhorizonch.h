@@ -39,12 +39,13 @@ private:
     *   @param  y The pixel y coordinate.
     */
     static bool isPixelGreen(const NUImage& img, int x, int y);
+    static void convertPointTypes(const vector<cv::Point2i>& cvpoints, vector<PointType>& ourpoints);
 
     //! CONSTANTS
-    static const unsigned int VER_SEGMENTS = 30;            //! @variable number of vertical scan segments.
-    static const unsigned int VER_THRESHOLD = 5;            //! @variable number of consecutive green pixels required.
-    static const unsigned int UPPER_THRESHOLD_MULT = 2.5;     //! @variable upper standard deviation multiplier
-    static const unsigned int LOWER_THRESHOLD_MULT = 1;     //! @variable lower standard deviation multiplier
+    //static const unsigned int VER_SEGMENTS = 30;            //! @variable number of vertical scan segments.
+    //static const unsigned int VER_THRESHOLD = 5;            //! @variable number of consecutive green pixels required.
+    //static const unsigned int UPPER_THRESHOLD_MULT = 2.5;     //! @variable upper standard deviation multiplier
+    //static const unsigned int LOWER_THRESHOLD_MULT = 1;     //! @variable lower standard deviation multiplier
 };
 
 #endif // GREENHORIZONCH_H

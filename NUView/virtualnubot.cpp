@@ -17,8 +17,26 @@
 
 #include "../Kinematics/Kinematics.h"
 
+virtualNUbot* this_vn = NULL;
+
+void callBack(vector< Vector2<int> > updatedPoints, GLDisplay::display displayId)
+{
+    if(this_vn != NULL)
+        emit this_vn->emitPoints(updatedPoints, displayId);
+    else
+        debug << "virtualNUbot callBack - this_vn == NULL";
+}
+
+void virtualNUbot::emitPoints(vector< Vector2<int> > updatedPoints, GLDisplay::display displayId)
+{
+    emit pointsDisplayChanged(updatedPoints, displayId);
+}
+
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
+    vision = VisionControlWrapper::getInstance();
+    this_vn = this;
+    vision->wrapper->display_callback = &callBack;
     //! TODO: Load LUT from filename.
     AllObjects = new FieldObjects();
     classificationTable = new unsigned char[LUTTools::LUT_SIZE];
@@ -40,9 +58,6 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 
     sensorsData = new NUSensorsData();
     setSensorData(sensorsData);
-    //debug<<"VirtualNUBot started";
-    //TEST:
-
 }
 
 virtualNUbot::~virtualNUbot()
@@ -53,7 +68,7 @@ virtualNUbot::~virtualNUbot()
 void virtualNUbot::setRawImage(const NUImage* image)
 {
     rawImage = image;
-    vision.setImage(image);
+    vision->setRawImage(image);
     return;
 }
 
@@ -75,51 +90,18 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
     //qDebug() << data.str().c_str() << endl;
 
     sensorsData = newsensorsData;
+    vision->setSensorData(sensorsData);
     vector<float> horizondata;
     bool isOK = sensorsData->getHorizon(horizondata);
     if(isOK)
     {
         horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
-        vision.m_horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
     }
     else
     {
-        //qDebug() << "Invalid Horizon Line Information" << horizondata.size() ;//<< horizondata[0]<< horizondata[1] <<horizondata[2];
-        horizondata.push_back(0);
-        horizondata.push_back(-320);
-        horizondata.push_back(320);
-
-        horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
-        vision.m_horizonLine.setLine((double)horizondata[0],(double)horizondata[1],(double)horizondata[2]);
+        horizonLine.setLineFromPoints(Point(0, 0), Point(320,0));
     }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
-
-    /*Horizon testHorizonLine;
-    float bodyPitch;
-    float bodyRoll;
-    bodyRoll = newsensorsData->BalanceOrientation->Data[0];
-    bodyPitch = newsensorsData->BalanceOrientation->Data[1];
-    float headYaw = 0.0;
-    bool isok = newsensorsData->getJointPosition(NUSensorsData::HeadYaw,headYaw);
-    qDebug() << "Is HeadYaw Ok: " << isok;
-
-    float headPitch = 0.0;
-    isok = newsensorsData->getJointPosition(NUSensorsData::HeadPitch,headPitch);
-    qDebug() << "Is HeadPitch Ok: " << isok;
-
-    headPitch = -0.82 + 0.12; //7degrees in radians
-    int camera = 1;
-
-    float elevation = vision.CalculateElevation(120 - 16);
-    qDebug() << "Elevation: " << elevation;
-        testHorizonLine.Calculate((double)bodyPitch,(double)bodyRoll,(double)headYaw,(double)headPitch,camera);
-
-    qDebug() <<"Body Pitch: " << bodyPitch << "\tBody Roll: " << bodyRoll << "\tHeadPitch:" << headPitch << "\tHeadYaw:" << headYaw;
-    qDebug() << "Test: Horizon Information: " << testHorizonLine.getGradient() << "x + " << testHorizonLine.getYIntercept();
-
-    qDebug() << "Horizon Information: " << horizonLine.getGradient() << "x + " << horizonLine.getYIntercept();
-    qDebug() << horizonLine.getA() << "x + "<< horizonLine.getB() << "y + " << horizonLine.getC();
-    */
 
 }
 
@@ -170,586 +152,95 @@ void virtualNUbot::ProcessPacket(QByteArray* packet)
     classImage.MapBufferToImage(currentPacket->classImage,currentPacket->frameWidth, currentPacket->frameHeight);
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
     processVisionFrame(classImage);
-/*
-    //Update Image:
-    classifiedImage.height = currentPacket->frameHeight;
-    classifiedImage.width = currentPacket->frameWidth;
-    classifiedImage.imageBuffer = currentPacket->classImage;
-    classifiedImage.imageFormat = NUImage::CLASSIFIED;
-    processVisionFrame(classifiedImage);
-    emit classifiedImageChanged(&classifiedImage);
-    */
 }
 
 void virtualNUbot::generateClassifiedImage()
 {
-    vision.classifyImage(classImage);
+    vision->classifyImage(classImage);
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
     return;
 }
 
-//DEBUG
-void virtualNUbot::printPoints(const vector< Vector2<int> >& points, filedesc_t filedesc) const
-{
-    string filename = "../NUView/DebugFiles/";
-    string filename2;
-    switch(filedesc)
-    {
-    case GREEN_HOR_SCAN_POINTS:
-        filename += "HorScanPoints";
-        break;
-    case GREEN_HOR_HULL_POINTS:
-        filename += "HorHullPoints";
-        break;
-    case OBSTACLE_POINTS:
-        filename += "Obstacles";
-        break;
-    default:
-        //invalid descriptor
-        qDebug() << "Invalid file descriptor for printPoints: " << filedesc;
-        return;
-    }
-    ofstream out;
-    filename2 = filename + ".txt";
-    out.open(filename2.c_str());
-    if(out.good()) {
-        for(unsigned int i=0; i<points.size(); i++)
-            out << points.at(i).x << " " << points.at(i).y << "\n";
-    }
-    else {
-        //debug
-        qDebug() << "Error opening " << filename2.c_str() << "\n";
-    }
-    out.close();
-
-    //cumulative
-    filename2 = filename + "_cumulative.txt";
-    out.open(filename2.c_str(), ios::out | ios::app);
-    if(out.good()) {
-        for(unsigned int i=0; i<points.size(); i++)
-            out << points.at(i).x << " " << points.at(i).y << "\n";
-        out << "\n";
-    }
-    else {
-        //debug
-        qDebug() << "Error opening " << filename2.c_str() << "\n";
-    }
-    out.close();
-}
-
-void virtualNUbot::printObjects(const vector<AmbiguousObject>& objects, filedesc_t filedesc) const
-{
-    string filename = "../NUView/DebugFiles/";
-    string filename2;
-    switch(filedesc)
-    {
-    case OBSTACLE_OBJECTS:
-        filename += "ObstObj";
-        break;
-    case AMBIGUOUS_OBJECTS:
-        filename += "AmbObj";
-        break;
-    default:
-        //invalid descriptor
-        qDebug() << "Invalid file descriptor for printObjects: " << filedesc;
-        return;
-    }
-    ofstream out;
-    filename2 = filename + ".txt";
-    out.open(filename2.c_str());
-    if(out.good()) {
-        for(unsigned int i=0; i<objects.size(); i++)
-            out << objects.at(i).toString() << "\n";
-    }
-    else {
-        //debug
-        qDebug() << "Error opening " << filename2.c_str() << "\n";
-    }
-    out.close();
-}
 
 void virtualNUbot::processVisionFrame()
 {
     processVisionFrame(rawImage);
 }
 
-
 void virtualNUbot::processVisionFrame(const NUImage* image)
 {
+    if(image != NULL) {
+        vision->setSensorData(sensorsData);
+        vision->setFieldObjects(AllObjects);
+        vision->setRawImage(image);
 
-    if(!imageAvailable()) return;
-    qDebug() << "Begin Process Frame";
-    std::vector< Vector2<int> > verticalPoints;
-    std::vector< TransitionSegment > verticalsegments;
-    std::vector< TransitionSegment > horizontalsegments;
-    std::vector< TransitionSegment > allsegments;
-    std::vector< ObjectCandidate > candidates;
+        vision->setLUT(classificationTable);
 
-    std::vector< Vector2<int> > horizontalPoints;
-    //std::vector<LSFittedLine> fieldLines;
+        vision->runFrame();
 
-    //OBSTACLE DETECTION
-    std::vector< Vector2<int> > pre_hull_points;
-    std::vector< Vector2<int> > hull_points;
+        generateClassifiedImage();
 
-    int tempNumScanLines = 0;
+        QImage* canvas = new QImage(image->getWidth(), image->getHeight(), QImage::Format_ARGB32);
 
-    std::vector<unsigned char> validColours;
-    Vision::tCLASSIFY_METHOD method;
-    const int ROBOTS = 0;
-    const int BALL   = 1;
-    const int YELLOW_GOALS  = 2;
-    const int BLUE_GOALS  = 3;
+        //Blank canvas - zero alpha (transparent)
+        for (int x = 0; x < canvas->width(); x++)
+            for(int y = 0; y < canvas->height(); y++)
+                canvas->setPixel(x,y,0);
+        emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
 
-    int mode  = ROBOTS;
-    Circle circ;
-    vision.setSensorsData(sensorsData);
-    vision.setFieldObjects(AllObjects);
-    vision.setImage(image);
-    //qDebug() <<  "Image Set" << image->m_timestamp << vision.AllFieldObjects->stationaryFieldObjects.size();
-    vision.AllFieldObjects->preProcess(image->GetTimestamp());
-    //qDebug() << "Image Pre-processed";
-    //int spacings = (int)image->getWidth()/20;
-    int spacings = (int)image->getWidth()/40;
-    //qDebug() << "Scan Spacing calculated";
-    vision.setLUT(classificationTable);
-    //qDebug() << "LUT set";
-    generateClassifiedImage();
-    //qDebug() << "Generate Classified Image: finnished";
+        float datavalue = 0.0;
+        sensorsData->get(NUSensorsData::HeadPitch,datavalue);
+        qDebug() << "Sensors Data: Head Elevation: " << datavalue;
 
-    //! Find the green edges
-    std::vector< Vector2<int> > greenPoints = vision.findGreenBorderPoints(spacings,&horizonLine);
 
-    pre_hull_points = greenPoints;  //make a copy for obstacle detection
-    //printPoints(greenPoints,GREEN_HOR_SCAN_POINTS);
-    emit pointsDisplayChanged(greenPoints,GLDisplay::greenHorizonScanPoints);
-    //qDebug() << "Find Edges: finnished";
+        FieldObjects* field_objects = vision->wrapper->field_objects;
+        //POST PROCESS:
+        qDebug() << image->GetTimestamp() ;
+        emit fieldObjectsChanged(field_objects);
+        emit fieldObjectsDisplayChanged(field_objects,GLDisplay::FieldObjects);
 
-    //! Find the Field border
-    std::vector< Vector2<int> > boarderPoints = vision.getConvexFieldBorders(greenPoints);
-    std::vector< Vector2<int> > interpolatedBoarderPoints = vision.interpolateBorders(boarderPoints,spacings);
-
-    hull_points = interpolatedBoarderPoints;    //make a copy for obstacle detection
-    //printPoints(interpolatedBoarderPoints,GREEN_HOR_HULL_POINTS);
-
-    //! Detect Obstacles
-//START OBSTACLE DETECTION
-    vector<ObjectCandidate> obstacle_candidates = vision.getObstacleCandidates(pre_hull_points, hull_points, Vision::OBSTACLE_HEIGH_THRESH, Vision::OBSTACLE_WIDTH_MIN);
-
-    candidates.insert(candidates.end(),obstacle_candidates.begin(),obstacle_candidates.end());
-
-    vector<AmbiguousObject> obstacle_objects = vision.getObjectsFromCandidates(obstacle_candidates);
-
-    if(DEBUG_ON)
-    {
-        qDebug() << "\nObstacle Detection:";
-        vector< Vector2<int> > obstacle_points;
-        Vector2<int> next_point;
-        for(unsigned int i=0; i<obstacle_candidates.size(); i++)
+        //SUMMARY:
+        qDebug() << "Time: " << vision->wrapper->m_timestamp;
+        for(unsigned int i = 0; i < field_objects->stationaryFieldObjects.size();i++)
         {
-            qDebug() << "Candidate " << i << ":";
-            next_point.x = obstacle_candidates.at(i).getCentreX();
-            next_point.y = obstacle_candidates.at(i).getBottomRight().y;
-            obstacle_points.push_back(next_point);
-            qDebug() << "\tscreen pos (" << next_point.x << ", " << next_point.y << ")";
-            float bearing = vision.CalculateBearing(next_point.x);
-            float elevation = vision.CalculateElevation(next_point.y);
-            float distance = 0;
-            qDebug() << "\tbearing: " << bearing << " elevation: " << elevation << "";
-            //vector<float> ctgvector;
-            vector<float> ctvector;
-            Vector3<float> measured(distance,bearing,elevation);
-
-            bool isOK = vision.getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
-            if(isOK == true) {
-                Matrix cameraTransform = Matrix4x4fromVector(ctvector);
-                measured = Kinematics::TransformPosition(cameraTransform, measured);
-                qDebug() << "\tmeasured: " << measured.x << " " << measured.y << " " << measured.z << "";
-            }
-            /*
-            bool isOK = vision.getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
-            if(isOK == true) {
-                Matrix camera2groundTransform = Matrix4x4fromVector(ctgvector);
-                measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
-                qDebug() << "\tmeasured: " << measured.x << " " << measured.y << " " << measured.z << "";
-            }
-            */
-            else {
-                qDebug() << "\tgetSensorsData fail";
-            }
-        }
-        printPoints(obstacle_points,OBSTACLE_POINTS);
-
-        qDebug() << "Size of obstacle_objects: " << obstacle_objects.size() << "\n";
-        printObjects(obstacle_objects,OBSTACLE_OBJECTS);
-
-        printObjects(obstacle_objects,AMBIGUOUS_OBJECTS);
-    }
-
-    vision.AllFieldObjects->ambiguousFieldObjects.insert(vision.AllFieldObjects->ambiguousFieldObjects.end(), obstacle_objects.begin(), obstacle_objects.end());
-//END OBSTACLE DETECTION
-
-
-    emit pointsDisplayChanged(interpolatedBoarderPoints,GLDisplay::greenHorizonPoints);
-    //qDebug() << "Find Field border: finnished";
-    //! Scan Below Horizon Image
-    ClassifiedSection vertScanArea = vision.verticalScan(interpolatedBoarderPoints,spacings);
-    //! Scan Above the Horizon
-    ClassifiedSection horiScanArea = vision.horizontalScan(interpolatedBoarderPoints,spacings);
-    //qDebug() << "Generate Scanlines: finnished";
-    //! Classify Line Segments
-
-    vision.ClassifyScanArea(&vertScanArea);
-    vision.ClassifyScanArea(&horiScanArea);
-    //qDebug() << "Classify Scanlines: finnished";
-
-
-    std::vector< TransitionSegment > GoalBlueSegments;
-    std::vector< TransitionSegment > GoalYellowSegments;
-    std::vector< TransitionSegment > BallSegments;
-
-    //! Extract and Display Vertical Scan Points:
-    tempNumScanLines = vertScanArea.getNumberOfScanLines();
-    for (int i = 0; i < tempNumScanLines; i++)
-    {
-        ScanLine* tempScanLine = vertScanArea.getScanLine(i);
-        int lengthOfLine = tempScanLine->getLength();
-        Vector2<int> startPoint = tempScanLine->getStart();
-        for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
-        {
-            verticalsegments.push_back((*tempScanLine->getSegment(seg)));
-            allsegments.push_back((*tempScanLine->getSegment(seg)));
-
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::blue || tempScanLine->getSegment(seg)->getColour() == ClassIndex::shadow_blue)
+            if(field_objects->stationaryFieldObjects[i].isObjectVisible() == true)
             {
-                GoalBlueSegments.push_back((*tempScanLine->getSegment(seg)));
+                qDebug() << "Stationary Object: " << i << ":" << QString(field_objects->stationaryFieldObjects[i].getName().c_str())
+                         <<"Seen at "<<  field_objects->stationaryFieldObjects[i].ScreenX()
+                         <<","       <<  field_objects->stationaryFieldObjects[i].ScreenY()
+                        << "\t Distance: " << field_objects->stationaryFieldObjects[i].measuredDistance();
             }
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange)
+        }
+        for(unsigned  int i = 0; i < field_objects->mobileFieldObjects.size();i++)
+        {
+            if(field_objects->mobileFieldObjects[i].isObjectVisible() == true)
             {
-                GoalYellowSegments.push_back((*tempScanLine->getSegment(seg)));
+                qDebug() << "Mobile Object: " << i << ":" << QString(field_objects->mobileFieldObjects[i].getName().c_str())
+                         << "Seen at "   <<  field_objects->mobileFieldObjects[i].ScreenX()
+                         <<","           <<  field_objects->mobileFieldObjects[i].ScreenY()
+                        << "\t Distance: " << field_objects->mobileFieldObjects[i].measuredDistance();
             }
-            if(     tempScanLine->getSegment(seg)->getColour() == ClassIndex::orange || tempScanLine->getSegment(seg)->getColour() == ClassIndex::yellow_orange
-                ||  tempScanLine->getSegment(seg)->getColour() == ClassIndex::pink_orange)
+        }
+
+        for(unsigned int i = 0; i < field_objects->ambiguousFieldObjects.size();i++)
+        {
+            if(field_objects->ambiguousFieldObjects[i].isObjectVisible() == true)
             {
-                BallSegments.push_back((*tempScanLine->getSegment(seg)));
-            }
-        }
-        if(vertScanArea.getDirection() == ScanLine::DOWN)
-        {
-            for(int j = 0;  j < lengthOfLine; j++)
-            {
-                Vector2<int> temp;
-                temp.x = startPoint.x;
-                temp.y = startPoint.y + j;
-                verticalPoints.push_back(temp);
+                qDebug() << "Ambiguous Object: " << i << ":" << field_objects->ambiguousFieldObjects[i].getID()
+                         <<  QString(field_objects->ambiguousFieldObjects[i].getName().c_str())
+                         << "Seen at "          <<  field_objects->ambiguousFieldObjects[i].ScreenX()
+                         << ","                 <<  field_objects->ambiguousFieldObjects[i].ScreenY()
+                         << "\t Distance: " << field_objects->ambiguousFieldObjects[i].measuredDistance();
+
             }
         }
     }
-
-    //! Extract and Display Horizontal Scan Points:
-    tempNumScanLines = horiScanArea.getNumberOfScanLines();
-    for (int i = 0; i < tempNumScanLines; i++)
-    {
-        ScanLine* tempScanLine = horiScanArea.getScanLine(i);
-        int lengthOfLine = tempScanLine->getLength();
-        //qDebug() << "Amount of fill on scanline["<<i<<"] = "<< tempScanLine->getFill();
-        Vector2<int> startPoint = tempScanLine->getStart();
-        for(int seg = 0; seg < tempScanLine->getNumberOfSegments(); seg++)
-        {
-            if(tempScanLine->getSegment(seg)->getColour() == ClassIndex::white) continue;
-            horizontalsegments.push_back((*tempScanLine->getSegment(seg)));
-            allsegments.push_back((*tempScanLine->getSegment(seg)));
-        }
-        if(horiScanArea.getDirection() == ScanLine::RIGHT)
-        {
-            for(int j = 0;  j < lengthOfLine; j++)
-            {
-                Vector2<int> temp;
-                temp.x = startPoint.x + j;
-                temp.y = startPoint.y;
-                horizontalPoints.push_back(temp);
-            }
-        }
-    }
-    //! Form Lines
-
-
-    emit pointsDisplayChanged(horizontalPoints,GLDisplay::horizontalScanPath);
-    emit pointsDisplayChanged(verticalPoints,GLDisplay::verticalScanPath);
-    //qDebug() << "disaplay scanPaths: finnished";
-
-    emit transitionSegmentsDisplayChanged(allsegments,GLDisplay::TransitionSegments);
-    LineDetection LineDetector;
-    vision.DetectLineOrRobotPoints(&vertScanArea,&LineDetector);
-    qDebug() << "Number Of Robot Segments: "<<  LineDetector.robotSegments.size() << "Number Of LinePoints: " << LineDetector.linePoints.size() ;
-
-    //! Identify Field Objects
-    //qDebug() << "PREclassifyCandidates";
-
-    //Prep object candidates for line detection
-    std::vector< ObjectCandidate > HorizontalLineCandidates1;
-    std::vector< ObjectCandidate > HorizontalLineCandidates2;
-    std::vector< ObjectCandidate > HorizontalLineCandidates3;
-    std::vector< ObjectCandidate > HorizontalLineCandidates;
-    std::vector< ObjectCandidate > VerticalLineCandidates;
-    std::vector< TransitionSegment > LeftoverPoints1;
-    std::vector< TransitionSegment > LeftoverPoints2;
-    std::vector< TransitionSegment > LeftoverPoints3;
-
-    std::vector< TransitionSegment > LeftoverPoints;
-    std::vector< ObjectCandidate > LineCandidates;
-    validColours.clear();
-    validColours.push_back(ClassIndex::white);
-    //validColours.push_back(ClassIndex::blue);
-
-    //qDebug() << "PRE-ROBOT";
-    method = Vision::PRIMS;
-
-    HorizontalLineCandidates1 = vision.classifyCandidates(LineDetector.horizontalLineSegments, interpolatedBoarderPoints,validColours, spacings, 0.000001, 10000000, 3, LeftoverPoints1);
-    HorizontalLineCandidates2 = vision.classifyCandidates(LeftoverPoints1, interpolatedBoarderPoints,validColours, spacings*2, 0.000001, 10000000, 3, LeftoverPoints2);
-    HorizontalLineCandidates3 = vision.classifyCandidates(LeftoverPoints2, interpolatedBoarderPoints,validColours, spacings*4, 0.000001, 10000000, 3, LeftoverPoints3);
-    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates1.begin(),HorizontalLineCandidates1.end());
-    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates2.begin(),HorizontalLineCandidates2.end());
-    HorizontalLineCandidates.insert(HorizontalLineCandidates.end(), HorizontalLineCandidates3.begin(),HorizontalLineCandidates3.end());
-    LeftoverPoints.insert(LeftoverPoints.end(),LeftoverPoints3.begin(),LeftoverPoints3.end());
-    VerticalLineCandidates = vision.ClassifyCandidatesAboveTheHorizon(LineDetector.verticalLineSegments,validColours,spacings*3,3,LeftoverPoints);
-    LeftoverPoints.clear();
-    qDebug() << "Horizontal Line Candidates: " << HorizontalLineCandidates.size() << LineDetector.horizontalLineSegments.size();
-    qDebug() << "Vertical Line Candidates: " << VerticalLineCandidates.size() << LineDetector.verticalLineSegments.size();
-    unsigned int no_unused = 0;
-    for(unsigned int i=0; i<LineDetector.horizontalLineSegments.size(); i++) {
-        if(!LineDetector.horizontalLineSegments[i].isUsed)
-            no_unused++;
-    }
-    for(unsigned int i=0; i<LineDetector.verticalLineSegments.size(); i++) {
-        if(!LineDetector.verticalLineSegments[i].isUsed)
-            no_unused++;
-    }
-    qDebug() << "Unused Segments: " << no_unused;
-    candidates.insert(candidates.end(),HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
-    candidates.insert(candidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
-    LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
-    LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
-    //qDebug() << "POST-ROBOT";
-
-
-    std::vector< ObjectCandidate > RobotCandidates;
-    std::vector< ObjectCandidate > BallCandidates;
-    std::vector< ObjectCandidate > BlueGoalCandidates;
-    std::vector< ObjectCandidate > YellowGoalCandidates;
-    std::vector< ObjectCandidate > BlueGoalAboveHorizonCandidates;
-    std::vector< ObjectCandidate > YellowGoalAboveHorizonCandidates;
-    mode = BALL;
-    method = Vision::PRIMS;
-   for (int i = 0; i < 4; i++)
-    {
-
-        switch (i)
-        {
-            case ROBOTS:
-                validColours.clear();
-                validColours.push_back(ClassIndex::white);
-                validColours.push_back(ClassIndex::pink);
-                validColours.push_back(ClassIndex::pink_orange);
-                validColours.push_back(ClassIndex::shadow_blue);
-                //validColours.push_back(ClassIndex::blue);
-
-                //qDebug() << "PRE-ROBOT";
-                RobotCandidates = vision.classifyCandidates(LineDetector.robotSegments, interpolatedBoarderPoints,validColours, spacings, 0.2, 2.0, 12, method);
-                //qDebug() << "POST-ROBOT";
-
-                break;
-            case BALL:
-                validColours.clear();
-                validColours.push_back(ClassIndex::orange);
-                validColours.push_back(ClassIndex::pink_orange);
-                validColours.push_back(ClassIndex::yellow_orange);
-
-                //qDebug() << "PRE-BALL";
-                BallCandidates = vision.classifyCandidates(BallSegments, interpolatedBoarderPoints, validColours, spacings, 0, 3.0, 1, method);
-                //qDebug() << "POST-BALL";
-
-                break;
-            case YELLOW_GOALS:
-                validColours.clear();
-                validColours.push_back(ClassIndex::yellow);
-                //validColours.push_back(ClassIndex::yellow_orange);
-
-                //qDebug() << "PRE-GOALS";
-                YellowGoalCandidates = vision.classifyCandidates(GoalYellowSegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
-                YellowGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
-                //qDebug() << "POST-GOALS" << tempCandidates.size();
-
-                break;
-            case BLUE_GOALS:
-                validColours.clear();
-                validColours.push_back(ClassIndex::blue);
-                //validColours.push_back(ClassIndex::shadow_blue);
-
-                //qDebug() << "PRE-GOALS";
-                BlueGoalCandidates = vision.classifyCandidates(GoalBlueSegments, interpolatedBoarderPoints, validColours, spacings, 0.1, 4.0, 1, method);
-                BlueGoalAboveHorizonCandidates = vision.ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
-                //qDebug() << "POST-GOALS";
-
-                break;
-        }
-
-    }
-    //emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    //qDebug() << "POSTclassifyCandidates";
-    //debug << "POSTclassifyCandidates: " << candidates.size() <<endl;
-
-    //! Find Robots:
-
-    qDebug() << "Robot Candidates: " << RobotCandidates.size();
-    vision.DetectRobots(RobotCandidates);
-    candidates.insert(candidates.end(),RobotCandidates.begin(),RobotCandidates.end());
-    qDebug() << "Robot Candidates: " << RobotCandidates.size() << "Coloured Robots Found: "<<vision.AllFieldObjects->ambiguousFieldObjects.size();
-
-    qDebug() << "Finding YELLOW Goals \t" << YellowGoalCandidates.size() << YellowGoalAboveHorizonCandidates.size();
-    vision.DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
-    candidates.insert(candidates.end(),YellowGoalCandidates.begin(),YellowGoalCandidates.end());
-    qDebug() << "Finding BLUE Goals \t" <<BlueGoalCandidates.size() << BlueGoalAboveHorizonCandidates.size() ;
-    vision.DetectGoals(BlueGoalCandidates, BlueGoalAboveHorizonCandidates,horizontalsegments);
-    candidates.insert(candidates.end(),BlueGoalCandidates.begin(),BlueGoalCandidates.end());
-
-    //TODO: CHECK IF WORKING!
-    qDebug() << "Post Processing Goal Posts: ";
-    vision.PostProcessGoals();
-     qDebug() << "Finding Lines" ;
-
-    //vision.DetectLines(&LineDetector);
-     vision.DetectLines(&LineDetector, LineCandidates, LeftoverPoints);
-     qDebug() << "Linepoint: " << LineDetector.linePoints.size() << " Lines: " << LineDetector.fieldLines.size();
-     for(unsigned int i=0; i<LineDetector.fieldLines.size(); i++) {
-         qDebug() << LineDetector.fieldLines[i].getA() << " " << LineDetector.fieldLines[i].getB() << " " << LineDetector.fieldLines[i].getC();
-     }
-     //AARON
-     //vision.DetectLines(&LineDetector);
-
-
-    //! Extract Detected Line & Corners
-    emit lineDetectionDisplayChanged(LineDetector.fieldLines,GLDisplay::FieldLines);
-    emit linePointsDisplayChanged(LineDetector.linePoints,GLDisplay::FieldLines);
-    //Corner Debugging:
-
-
-    qDebug() << "Updating Corners";
-    emit cornerPointsDisplayChanged(LineDetector.cornerPoints,GLDisplay::FieldLines);
-
-     qDebug() << "Finding Balls" << BallCandidates.size();
-    if(BallCandidates.size() > 0)
-    {
-        circ = vision.DetectBall(BallCandidates);
-        qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd<< endl;
-        candidates.insert(candidates.end(),BallCandidates.begin(),BallCandidates.end());
-    }
-
-
-    QImage* canvas = new QImage(image->getWidth(), image->getHeight(), QImage::Format_ARGB32);
-
-    //Blank canvas - zero alpha (transparent)
-    for (int x = 0; x < canvas->width(); x++)
-        for(int y = 0; y < canvas->height(); y++)
-            canvas->setPixel(x,y,0);
-/*
-    if (RobotCandidates.size() > 0)
-    {
-
-        int x_offs = 0, y_offs = 0;
-        Vector2<int> offs;
-        unsigned int currentPixel = 0;
-        QImage subImage;
-
-        std::vector< ObjectCandidate >::iterator rit;
-        for (rit = RobotCandidates.begin(); rit != RobotCandidates.end(); rit++)
-        {
-            offs = rit->getTopLeft();
-            x_offs = offs.x;
-            y_offs = offs.y;
-
-            subImage = vision.getEdgeFilter(x_offs, y_offs, rit->width(), rit->height());
-
-            for(int x = 0; x < rit->width(); x++)
-                for(int y = 0; y < rit->height(); y++)
-                {
-                    currentPixel = canvas->pixel(x+x_offs,y+y_offs);
-                    currentPixel = currentPixel % 256;
-                    if (currentPixel + (subImage.pixel(x,y)%256) > 255)
-                    {
-                        canvas->setPixel(x,y, 0xffffffff);
-                    }
-                    else
-                    {
-                        canvas->setPixel(x+x_offs,y+y_offs, (currentPixel + subImage.pixel(x,y)%256)* 0x01010101  );
-                    }
-                }
-        }
-
-    }
- */
-
-    emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
-    //emit fftChanged(vision.getFFT(), GLDisplay::FFT);
-
-    float datavalue = 0.0;
-    sensorsData->get(NUSensorsData::HeadPitch,datavalue);
-    qDebug() << "Sensors Data: Head Elevation: " << datavalue;
-
-
-    //POST PROCESS:
-    vision.AllFieldObjects->postProcess(image->GetTimestamp());
-    qDebug() << image->GetTimestamp() ;
-    emit candidatesDisplayChanged(candidates, GLDisplay::ObjectCandidates);
-    emit fieldObjectsChanged(vision.AllFieldObjects);
-    emit fieldObjectsDisplayChanged(vision.AllFieldObjects,GLDisplay::FieldObjects);
-
-    //SUMMARY:
-    qDebug() << "Time: " << vision.m_timestamp;
-    qDebug() 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << vision.classifiedCounter
-                    << "\t Percent of Image: " << vision.classifiedCounter / float(image->getWidth() * image->getHeight()) * 100.00 << "%" << endl;
-    for(unsigned int i = 0; i < vision.AllFieldObjects->stationaryFieldObjects.size();i++)
-    {
-        if(vision.AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
-        {
-            qDebug() << "Stationary Object: " << i << ":" << QString(vision.AllFieldObjects->stationaryFieldObjects[i].getName().c_str())
-                     <<"Seen at "<<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenX()
-                     <<","       <<  vision.AllFieldObjects->stationaryFieldObjects[i].ScreenY()
-                    << "\t Distance: " << vision.AllFieldObjects->stationaryFieldObjects[i].measuredDistance();
-        }
-    }
-    for(unsigned  int i = 0; i < vision.AllFieldObjects->mobileFieldObjects.size();i++)
-    {
-        if(vision.AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
-        {
-            qDebug() << "Mobile Object: " << i << ":" << QString(vision.AllFieldObjects->mobileFieldObjects[i].getName().c_str())
-                     << "Seen at "   <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenX()
-                     <<","           <<  vision.AllFieldObjects->mobileFieldObjects[i].ScreenY()
-                    << "\t Distance: " << vision.AllFieldObjects->mobileFieldObjects[i].measuredDistance();
-        }
-    }
-
-    for(unsigned int i = 0; i < vision.AllFieldObjects->ambiguousFieldObjects.size();i++)
-    {
-        if(vision.AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
-        {
-            qDebug() << "Ambiguous Object: " << i << ":" << vision.AllFieldObjects->ambiguousFieldObjects[i].getID()
-                     <<  QString(vision.AllFieldObjects->ambiguousFieldObjects[i].getName().c_str())
-                     << "Seen at "          <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenX()
-                     << ","                 <<  vision.AllFieldObjects->ambiguousFieldObjects[i].ScreenY()
-                     << "\t Distance: " << vision.AllFieldObjects->ambiguousFieldObjects[i].measuredDistance();
-
-        }
-    }
-
-    return;
 }
 
 void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 {
     return;
 }
-
 
 void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel> indexs)
 {
@@ -776,7 +267,7 @@ void virtualNUbot::updateSelection(ClassIndex::Colour colour, std::vector<Pixel>
     emit updateStatistics(LUTSelectedCounter);
 
     // Create Classifed Image based on lookup table.
-    vision.classifyPreviewImage(previewClassImage,tempLut);
+    vision->classifyPreviewImage(previewClassImage,tempLut);
 
     // Remove selection from temporary lookup table.
     for (unsigned int i = 0; i < indexs.size(); i++)
