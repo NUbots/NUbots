@@ -76,7 +76,7 @@ HeadPanJob::HeadPanJob(const MobileObject& object, float hackfactor) : MotionJob
     float t = object.estimatedBearing();
     float sd = hackfactor*max(object.sdX(), object.sdY());
     
-    m_x_min = d - sd;
+    m_x_min = d - sd -3.25;
     m_x_max = d + sd;
     m_yaw_min = t - atan2(sd,d);
     m_yaw_max = t + atan2(sd,d);
