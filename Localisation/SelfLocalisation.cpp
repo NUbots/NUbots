@@ -581,7 +581,8 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
 //    std::cout << "Robot: x = " << self.wmX() << " y = " << self.wmY() << " heading = " << self.Heading() << std::endl;
 //    std::cout << "Relative ball: x = " << relBallX << " y = " << relBallY << std::endl;
 //    std::cout << "Field ball: x = " << ballFieldLocationX << " y = " << ballFieldLocationY << std::endl;
-
+//    std::cout << "Relative ball velocity: x = " << relBallXVel << " y = " << relBallYVel << std::endl;
+//    std::cout << "Field ball velocity: x = " << ballFieldVelocityX << " y = " << ballFieldVelocityY << std::endl;
 
     if(!ball.isObjectVisible())
     {
