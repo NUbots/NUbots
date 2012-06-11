@@ -30,7 +30,7 @@ Rectangle.cpp
 FieldCalculations.cpp
 FIRFilter.cpp
 Sampling.h
-statistics.h
+Statistics.h
 Statistics.cpp
 Moment.cpp Moment.h
 )

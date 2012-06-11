@@ -1,4 +1,4 @@
-#include "statistics.h"
+#include "Statistics.h"
 #include "Matrix.h"
 #include "General.h"
 #include <cmath>
