@@ -327,7 +327,6 @@ bool DataWrapper::debugPublish(vector<Ball> data) {
     
     BOOST_FOREACH(Ball b, data) {
         circle(img, cv::Point2i(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius(), Scalar(255,255,0), 2);
-        cout << b.getLocationPixels().x << " " << b.getLocationPixels().y << endl;
     }
 
     imshow(window, img);    //refresh this particular debug window
@@ -499,9 +498,9 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 
 
 #if VISION_WRAPPER_VERBOSITY > 2
-    cout << id << endl;
-    cout << colours.front()[0] << "," << colours.front()[1] << "," << colours.front()[2] << "," << colours.front()[3] << "\t";
-    cout << data_points << endl;
+    debug << id << endl;
+    debug << colours.front()[0] << "," << colours.front()[1] << "," << colours.front()[2] << "," << colours.front()[3] << "\t";
+    debug << data_points << endl;
 #endif
     
     switch(id) {

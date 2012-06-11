@@ -161,6 +161,7 @@ class SelfLocalisation: public TimestampedData
 
         double m_timestamp;
         int m_currentFrameNumber;
+        double m_prev_ball_update_time;
 
         // Game state memory
         bool m_previously_incapacitated;
