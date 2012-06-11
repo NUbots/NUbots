@@ -239,7 +239,7 @@ void locwmStreamWidget::readPendingData()
         emit sensorsDataChanged(&sensors);
         */
         buffer.write(reinterpret_cast<char*>(netdata.data() + sizeof(int)), datasize - sizeof(int));
-        buffer >> (*locwm);
+        //buffer >> (*locwm);
         emit locwmDataChanged(locwm);
 
         if(buffer.str().size() - buffer.tellg() > 0)
