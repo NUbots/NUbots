@@ -5,6 +5,7 @@
 
 void BallDetection::detectBall()
 {
+
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
@@ -98,7 +99,7 @@ void BallDetection::detectBall()
 
         // FIND BALL CENTRE (single iteration approach; doesn't deal great with occlusion)
 
-        while (top >= 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
+        while (top > 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
             if (ClassIndex::getColourFromIndex(lut.classifyPixel(img((int)x_pos, top))) != ClassIndex::orange) {
                 not_orange_count++;
             }
@@ -122,7 +123,7 @@ void BallDetection::detectBall()
         bottom -= not_orange_count;
         not_orange_count = 0;
 
-        while (left >= 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
+        while (left > 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
             if (ClassIndex::getColourFromIndex(lut.classifyPixel(img(left, (int)y_pos))) != ClassIndex::orange) {
                 not_orange_count++;
             }
