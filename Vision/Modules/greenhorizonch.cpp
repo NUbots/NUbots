@@ -10,6 +10,7 @@
 #include "Kinematics/Horizon.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
+#include "Vision/visionconstants.h"
 
 void GreenHorizonCH::calculateHorizon()
 {
@@ -26,10 +27,9 @@ void GreenHorizonCH::calculateHorizon()
     #endif
     
     // variable declarations    
-    vector<PointType> horizon_points;
-    vector<PointType> temp;
-    horizon_points.reserve(VER_SEGMENTS);
-    temp.reserve(VER_SEGMENTS);
+    vector<cv::Point2i> horizon_points;
+    vector<cv::Point2i> temp;
+    vector<PointType> result;
 
     const Horizon& kin_hor = vbb->getKinematicsHorizon();
     int kin_hor_y;
@@ -37,10 +37,9 @@ void GreenHorizonCH::calculateHorizon()
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
     #endif
-    
-    unsigned int position;
-    for (unsigned int x = 0; x <= VER_SEGMENTS; x++) {
-        position = min(x*width/VER_SEGMENTS, static_cast<unsigned int>(width-1));
+
+    for (unsigned int x = 0; x < width; x+=VisionConstants::GREEN_HORIZON_SCAN_SPACING) {
+
         unsigned int green_top = 0;
         unsigned int green_count = 0;
 
@@ -50,14 +49,14 @@ void GreenHorizonCH::calculateHorizon()
         kin_hor_y = min(height-1, kin_hor_y);
         
         for (int y = kin_hor_y; y < height; y++) {
-            if (isPixelGreen(img, position, y)) {
+            if (isPixelGreen(img, x, y)) {
                 if (green_count == 0) {
                     green_top = y;
                 }
                 green_count++;
                 // if VER_THRESHOLD green pixels found, add point
-                if (green_count == VER_THRESHOLD) {
-                    horizon_points.push_back(PointType(position, green_top));
+                if (green_count == VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS) {
+                    horizon_points.push_back(cv::Point2i(x, green_top));
                     break;
                 }
             }
@@ -67,7 +66,7 @@ void GreenHorizonCH::calculateHorizon()
             }
             // if no green found, add bottom pixel
             if (y == height-1) {
-                horizon_points.push_back(PointType(position, height-1));
+                horizon_points.push_back(cv::Point2i(x, height-1));
             }
         }
     }
@@ -76,10 +75,10 @@ void GreenHorizonCH::calculateHorizon()
         debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
     #endif
     // provide blackboard the original set of scan points
-    vbb->setHorizonScanPoints(horizon_points);
-    
+    convertPointTypes(horizon_points, result);
+    vbb->setGreenHorizonScanPoints(result);
     // statistical filter for green horizon points
-    for (unsigned int x = 0; x < VER_SEGMENTS; x++) {
+    for (unsigned int x = 0; x < horizon_points.size(); x++) {
         if (horizon_points.at(x).y < height-1)     // if not at bottom of image
             temp.push_back(horizon_points.at(x));
     }
@@ -93,9 +92,9 @@ void GreenHorizonCH::calculateHorizon()
     
     // copy values into format for convexHull function
     temp.push_back(horizon_points.at(0));
-    for (unsigned int x = VER_SEGMENTS-1; x > 0; x--) {
-        if (horizon_points.at(x).y > mean.at<double>(1) - UPPER_THRESHOLD_MULT*std_dev.at<double>(1) &&
-            horizon_points.at(x).y < mean.at<double>(1) + LOWER_THRESHOLD_MULT*std_dev.at<double>(1)) {
+    for (unsigned int x = horizon_points.size()-1; x > 0; x--) {
+        if (horizon_points.at(x).y > mean.at<double>(1) - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev.at<double>(1) &&
+            horizon_points.at(x).y < mean.at<double>(1) + VisionConstants::GREEN_HORIZON_LOWER_THRESHOLD_MULT*std_dev.at<double>(1)) {
             temp.push_back(horizon_points.at(x));
         }
     }
@@ -147,19 +146,19 @@ void GreenHorizonCH::calculateHorizon()
         kin_hor_left_y = min(height-1, kin_hor_left_y);
         kin_hor_right_y = min(height-1, kin_hor_right_y);
         //add new points at edge
-        temp.push_back(PointType(0, kin_hor_left_y));
-        temp.push_back(PointType(width-1, kin_hor_right_y));
+        temp.push_back(cv::Point2i(0, kin_hor_left_y));
+        temp.push_back(cv::Point2i(width-1, kin_hor_right_y));
     }
     else {
         // extend to right edge
-        if (static_cast<unsigned int>(width-1) > temp.at(temp.size()-1).x + width/VER_SEGMENTS) {
+        if (static_cast<unsigned int>(width-1) > temp.at(temp.size()-1).x + VisionConstants::GREEN_HORIZON_SCAN_SPACING) {
 //            temp.push_back(PointType(temp.at(temp.size()-1).x + width/VER_SEGMENTS, height-1));
 //            temp.push_back(PointType(width-1, height-1));
-            temp.push_back(PointType(width-1, height-1));
+            temp.push_back(cv::Point2i(width-1, height-1));
         }
         else {
 //            temp.push_back(PointType(width-1, height-1));
-            temp.push_back(PointType(width-1,temp.at(temp.size()-1).y));
+            temp.push_back(cv::Point2i(width-1,temp.at(temp.size()-1).y));
         }
 
         // extend to left edge
@@ -178,7 +177,8 @@ void GreenHorizonCH::calculateHorizon()
     #endif
 
     // set hull points
-    vbb->setHullPoints(temp);
+    convertPointTypes(temp, result);
+    vbb->setGreenHullPoints(result);
 }
 
 
@@ -186,4 +186,12 @@ bool GreenHorizonCH::isPixelGreen(const NUImage& img, int x, int y)
 {
     const LookUpTable& LUT = VisionBlackboard::getInstance()->getLUT();
     return ClassIndex::getColourFromIndex(LUT.classifyPixel(img(x,y))) == ClassIndex::green;
+}
+
+void GreenHorizonCH::convertPointTypes(const vector<cv::Point2i> &cvpoints, vector<PointType> &ourpoints)
+{
+    ourpoints.clear();
+    for(unsigned int i=0; i<cvpoints.size(); i++) {
+        ourpoints.push_back(PointType(cvpoints.at(i).x, cvpoints.at(i).y));
+    }
 }

@@ -71,6 +71,7 @@ void Object::UpdateVisualObject(const Vector3<float>& newMeasured,
  */
 void Object::postProcess(const float timestamp)
 {
+    std::cout << "Object::postProcess " << timeLastSeen << " " << timestamp << std::endl;
     if (timeLastSeen != timestamp)
     {
         isVisible = false;

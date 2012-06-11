@@ -11,18 +11,10 @@
 #ifndef VISIONCONTROLLER_H
 #define VISIONCONTROLLER_H
 
-#include "Infrastructure/Jobs/JobList.h"
 
 #include "Vision/visionblackboard.h"
 #include "Vision/VisionWrapper/datawrappercurrent.h"
-#include "Vision/VisionTools/lookuptable.h"
-#include "Vision/Modules/greenhorizonch.h"
-#include "Vision/Modules/horizoninterpolate.h"
-#include "Vision/Modules/objectdetectionch.h"
-#include "Vision/Modules/scanlines.h"
 #include "Vision/Modules/segmentfilter.h"
-#include "Vision/Modules/goaldetection.h"
-#include "Vision/Modules/balldetection.h"
 
 class VisionController
 {
