@@ -409,10 +409,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
         PruneModels();
 
         MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
-        if(ball.isObjectVisible())
-        {
-            ballUpdate(ball);
-        }
+        ballUpdate(ball);
 
 #if DEBUG_LOCALISATION_VERBOSITY > 1
         for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
@@ -1377,19 +1374,30 @@ int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, 
 
 bool SelfLocalisation::ballUpdate(const MobileObject& ball)
 {
-    const float distance = ball.measuredDistance() * cos(ball.measuredElevation());
-    const float heading = ball.measuredBearing();
+    const float time_for_new_loc = 1000;
+    if(ball.isObjectVisible())
+    {
+        const float distance = ball.measuredDistance() * cos(ball.measuredElevation());
+        const float heading = ball.measuredBearing();
 
-    Matrix measurement(2,1,false);
-    measurement[0][0] = distance;
-    measurement[1][0] = heading;
+        Matrix measurement(2,1,false);
+        measurement[0][0] = distance;
+        measurement[1][0] = heading;
 
-    Matrix measurementNoise(2,2,false);
-    measurementNoise[0][0] = 5.0*5.0 + c_obj_range_relative_variance * pow(distance,2);
-    measurementNoise[1][1] = 0.01*0.01;
+        Matrix measurementNoise(2,2,false);
+        measurementNoise[0][0] = 5.0*5.0 + c_obj_range_relative_variance * pow(distance,2);
+        measurementNoise[1][1] = 0.01*0.01;
 
-    m_ball_model->measurementUpdate(measurement, measurementNoise);
-
+        m_ball_model->measurementUpdate(measurement, measurementNoise);
+        if((m_timestamp - m_prev_ball_update_time) > time_for_new_loc)
+        {
+            Matrix currMean = m_ball_model->mean();
+            currMean[MobileObjectUKF::x_vel][0] = 0.0;
+            currMean[MobileObjectUKF::y_vel][0] = 0.0;
+            m_ball_model->setMean(currMean);
+        }
+        m_prev_ball_update_time = m_timestamp;
+    }
 }
 
 /*! @brief Prunes the models using a selectable method. This is a interface function to access a variety of methods.
