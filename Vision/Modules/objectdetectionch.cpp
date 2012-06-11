@@ -23,9 +23,9 @@ void ObjectDetectionCH::detectObjects()
 
 
     // REMOVE ME
-    const LookUpTable& lut = vbb->getLUT();
-    cv::Mat cvimg;
-    lut.classifyImage(img, cvimg);
+//    const LookUpTable& lut = vbb->getLUT();
+//    cv::Mat cvimg;
+//    lut.classifyImage(img, cvimg);
 
     vector<PointType> result;
     vector<cv::Point2i> horizon_points,
@@ -84,7 +84,7 @@ void ObjectDetectionCH::detectObjects()
     it = object_points.begin();
     while (it < object_points.end()) {
 //        cout << it->y - green_horizon.getYFromX(it->x) << endl;
-        if (it->y - green_horizon.getYFromX(it->x) < 5) {               // CONSTANT
+        if (it->y - green_horizon.getYFromX(it->x) < VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
             it = object_points.erase(it);
         }
         else {
@@ -110,8 +110,8 @@ void ObjectDetectionCH::detectObjects()
                     bottom = object_points.at(i).y;
             }
             else {
-                if (count > 2) {                                        // CONSTANT
-                    cv::line(cvimg, cv::Point2i(object_points.at(start).x, bottom), cv::Point2i(object_points.at(i-1).x, bottom), cv::Scalar(0,0,255),2);
+                if (count > VisionConstants::MIN_CONSECUTIVE_POINTS) {
+//                    cv::line(cvimg, cv::Point2i(object_points.at(start).x, bottom), cv::Point2i(object_points.at(i-1).x, bottom), cv::Scalar(0,0,255),2);
                     int centre = (object_points.at(i-1).x + object_points.at(start).x)/2;
                     int width = object_points.at(i-1).x - object_points.at(start).x;
                     int NO_HEIGHT = -1; // DOES NOTHING
