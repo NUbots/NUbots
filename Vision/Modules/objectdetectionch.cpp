@@ -7,6 +7,7 @@
 */
 
 #include "objectdetectionch.h"
+#include "Vision/visionconstants.h"
 
 void ObjectDetectionCH::detectObjects()
 {
@@ -17,6 +18,11 @@ void ObjectDetectionCH::detectObjects()
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
     unsigned int height = img.getHeight();
+
+    // REMOVE ME
+    const LookUpTable& lut = vbb->getLUT();
+    Mat cvimg;
+    lut.classifyImage(img, cvimg);
 
     const vector<PointType>& horizon_points = vbb->getHorizonPoints();
     vector<PointType> object_points;
@@ -49,7 +55,7 @@ void ObjectDetectionCH::detectObjects()
                     if (green_count == VER_THRESHOLD) {
                         if (green_top > mean.at<double>(1) + OBJECT_THRESHOLD_MULT*std_dev.at<double>(1) + 1) {
                             //cout << "OBJECT: (" << horizon_points->at(x).x << ", " << y << ")" << endl;
-                            object_points.push_back(PointType(horizon_points.at(x).x, y));
+                            object_points.push_back(PointType(horizon_points.at(x).x, y));                            
                         }
                         break;
                     }
@@ -69,6 +75,16 @@ void ObjectDetectionCH::detectObjects()
 
     // update blackboard with object points
     vbb->setObjectPoints(object_points);
+
+    for (int i = 0; i < object_points.size(); i++) {
+        cv::circle(cvimg, PointType(object_points.at(i).x, object_points.at(i).y), 2, Scalar(0,0,255), 1);
+        cout << i << ": " << PointType(object_points.at(i).x, object_points.at(i).y) << endl;
+        //cout << VisionConstants::
+    }
+
+
+    cv::namedWindow("objectdetect");
+    cv::imshow("objectdetect", cvimg);
 }
 
 
