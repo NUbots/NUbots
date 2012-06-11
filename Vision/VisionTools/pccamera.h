@@ -16,7 +16,7 @@
 
 #define DEBUG_NUCAMERA_VERBOSITY 0
 
-#define CAMERA_DIR "/dev/video0"
+#define CAMERA_DIR "/dev/video1"
 
 class PCCamera
 {
