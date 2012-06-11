@@ -29,9 +29,6 @@ void callBack(vector< Vector2<int> > updatedPoints, GLDisplay::display displayId
 
 void virtualNUbot::emitPoints(vector< Vector2<int> > updatedPoints, GLDisplay::display displayId)
 {
-    for(int i=0; i<updatedPoints.size(); i++)
-        cout << updatedPoints.at(i) << " ";
-    cout << endl;
     emit pointsDisplayChanged(updatedPoints, displayId);
 }
 

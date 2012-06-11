@@ -4,8 +4,6 @@
 #include "Vision/visioncontroller.h"
 #include "Vision/VisionWrapper/datawrappernuview.h"
 
-#include "virtualnubot.h"
-
 class NUSensorsData;
 class NUActionatorsData;
 

@@ -14,7 +14,6 @@ VisionBlackboard* VisionBlackboard::instance = 0;
 //! @brief Private constructor for blackboard.
 VisionBlackboard::VisionBlackboard()
 {
-    cout << "wtf" << endl;
     wrapper = DataWrapper::getInstance();
 
     LUT = wrapper->getLUT();
@@ -549,15 +548,19 @@ void VisionBlackboard::publish() const
     //wrapper->publish(m_vfos);
     unsigned int i;
     for(i=0; i<m_balls.size(); i++) {
+        cout << m_balls.at(i) << endl;
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_balls.at(i)));
     }
     for(i=0; i<m_beacons.size(); i++) {
+        cout << m_beacons.at(i) << endl;
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_beacons.at(i)));
     }
     for(i=0; i<m_goals.size(); i++) {
+        cout << m_goals.at(i) << endl;
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_goals.at(i)));
     }
     for(i=0; i<m_obstacles.size(); i++) {
+        cout << m_obstacles.at(i) << endl;
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_obstacles.at(i)));
     }
     #if VISION_BLACKBOARD_VERBOSITY > 1

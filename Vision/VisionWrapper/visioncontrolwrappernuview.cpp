@@ -23,6 +23,7 @@ VisionControlWrapper::VisionControlWrapper()
 int VisionControlWrapper::runFrame()
 {
     static int frame = 0;
+    int status;
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
     #endif
@@ -34,7 +35,9 @@ int VisionControlWrapper::runFrame()
         #endif
         return -1;  //failure - do not run vision
     }
-    return controller->runFrame(true, true);
+    status = controller->runFrame(true, true);
+    wrapper->postProcess();
+    return status;
 }
 
 void VisionControlWrapper::saveAnImage() const

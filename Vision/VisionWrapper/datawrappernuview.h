@@ -109,6 +109,7 @@ private:
     ~DataWrapper();
     //void startImageFileGroup(string filename);
     bool updateFrame();
+    void postProcess();
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.

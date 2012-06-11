@@ -14,7 +14,6 @@ void BallDetection::detectBall()
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "BallDetection::detectBall() - number of ball transitions: " << transitions.size() << endl;
     #endif
-    cout << "BallDetection::detectBall() - number of ball transitions: " << transitions.size() << endl;
 
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
 

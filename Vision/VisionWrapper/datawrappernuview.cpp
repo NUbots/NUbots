@@ -208,6 +208,7 @@ void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects
 
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
+    cout << m_timestamp << endl;
     visual_object->addToExternalFieldObjects(field_objects, m_timestamp);
 }
 
@@ -312,9 +313,9 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
         return false;
     }
 #if VISION_WRAPPER_VERBOSITY > 2
-    cout << id << endl;
-    cout << colours.front()[0] << "," << colours.front()[1] << "," << colours.front()[2] << "," << colours.front()[3] << "\t";
-    cout << data_points << endl;
+    debug << id << endl;
+    debug << colours.front()[0] << "," << colours.front()[1] << "," << colours.front()[2] << "," << colours.front()[3] << "\t";
+    debug << data_points << endl;
 #endif
 
     switch(id) {
@@ -364,7 +365,19 @@ bool DataWrapper::updateFrame()
         }
         return false;
     }
+    m_timestamp = m_current_image->GetTimestamp();
+    cout << "pre: " << m_current_image->GetTimestamp() << endl;
+    field_objects->preProcess(m_current_image->GetTimestamp());
     return true;
+}
+
+void DataWrapper::postProcess()
+{
+    if (m_current_image != NULL && field_objects != NULL)
+    {
+        cout << "post: " << m_current_image->GetTimestamp() << endl;
+        field_objects->postProcess(m_current_image->GetTimestamp());
+    }
 }
 
 /**

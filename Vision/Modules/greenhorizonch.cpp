@@ -77,7 +77,6 @@ void GreenHorizonCH::calculateHorizon()
     // provide blackboard the original set of scan points
     convertPointTypes(horizon_points, result);
     vbb->setGreenHorizonScanPoints(result);
-    cout << result << endl;
     // statistical filter for green horizon points
     for (unsigned int x = 0; x < horizon_points.size(); x++) {
         if (horizon_points.at(x).y < height-1)     // if not at bottom of image
