@@ -336,7 +336,7 @@ void NUHead::calculateBallAndLocalisationPan()
 void NUHead::calculateLocalisationPan()
 {
     if (m_pan_default_values)
-        calculateGenericPan(120, 1e10, m_yaw_limits[0], m_yaw_limits[1], m_pan_localisation_speed);
+        calculateGenericPan(80, 1e10, m_yaw_limits[0], m_yaw_limits[1], m_pan_localisation_speed);
     else
         calculateGenericPan(m_x_min, m_x_max, m_yaw_min, m_yaw_max, m_pan_localisation_speed);
 }
@@ -574,7 +574,7 @@ void NUHead::calculateBallAndLocalisationNod()
 
 void NUHead::calculateLocalisationNod()
 {
-    calculateGenericNod(120, 1e10, m_pan_localisation_speed);
+    calculateGenericNod(80, 1e10, m_pan_localisation_speed);
 }
 
 /*! @brief Calculates a nod between mindistance and maxdistance (cm) at nodspeed (cm/s). 

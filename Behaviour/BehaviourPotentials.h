@@ -230,7 +230,7 @@ public:
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
                 
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.6*bearing;
+                position_rotation = 0.8*bearing;
                 
                 //speed up if we're too slow at shuffling
                 if (fabs(bearing) > 0.8f and position_speed < 0.3) {
