@@ -1,4 +1,5 @@
 #include "balldetection.h"
+#include "Vision/visionconstants.h"
 
 void BallDetection::detectBall()
 {
@@ -211,11 +212,25 @@ void BallDetection::detectBall()
             center = PointType((right+left)/2,(top+bottom)/2);
         }
 
-        if (!(center.x ==1 and center.y==1)) {
-            //Ball newball(top_pt, bottom_pt, left_pt, right_pt);
-            Ball newball(center, max((right-left+1), (bottom-top+1))*0.5);
-            //Ball newball(top, bottom, left, right);
-            vbb->addBall(newball);
+        if (!(center.x ==1 and center.y==1) && bottom-top > 0 && right-left > 0) {
+
+            // CHECK FOR PIXEL DENSITY
+            int count = 0;
+            for (int i = left; i < right; i++) {
+                for (int j = top; j < bottom; j++) {
+                    if (ClassIndex::getColourFromIndex(lut.classifyPixel(img(i, j))) == ClassIndex::orange)
+                        count++;
+                }
+            }
+            if (float(count)/((right-left)*(bottom-top)) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
+                Ball newball(center, max((right-left), (bottom-top))*0.5);
+                vbb->addBall(newball);
+            }
+            else {
+                #if VISION_FIELDOBJECT_VERBOSITY > 1
+                    debug << "BallDetection::detectBall - ball thrown out on percentage contained orange" << endl;
+                #endif
+            }
         }
         else {
             #if VISION_FIELDOBJECT_VERBOSITY > 1

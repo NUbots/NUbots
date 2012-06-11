@@ -47,6 +47,11 @@ VisionConstants::DistanceMethod VisionConstants::BEACON_DISTANCE_METHOD;
 //Field-object detection constants
 int VisionConstants::BALL_EDGE_THRESHOLD;
 int VisionConstants::BALL_ORANGE_TOLERANCE;
+float VisionConstants::BALL_MIN_PERCENT_ORANGE;
+float VisionConstants::GOAL_MIN_PERCENT_YELLOW;
+float VisionConstants::GOAL_MIN_PERCENT_BLUE;
+float VisionConstants::BEACON_MIN_PERCENT_YELLOW;
+float VisionConstants::BEACON_MIN_PERCENT_BLUE;
 // Field dimension constants
 float VisionConstants::GOAL_WIDTH;
 float VisionConstants::DISTANCE_BETWEEN_POSTS;
@@ -186,6 +191,26 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> ival;
             BALL_ORANGE_TOLERANCE = ival;
         }
+        else if(name.compare("BALL_MIN_PERCENT_ORANGE") == 0) {
+            in >> fval;
+            BALL_MIN_PERCENT_ORANGE = fval;
+        }
+        else if(name.compare("GOAL_MIN_PERCENT_YELLOW") == 0) {
+            in >> fval;
+            GOAL_MIN_PERCENT_YELLOW = fval;
+        }
+        else if(name.compare("GOAL_MIN_PERCENT_BLUE") == 0) {
+            in >> fval;
+            GOAL_MIN_PERCENT_BLUE = fval;
+        }
+        else if(name.compare("BEACON_MIN_PERCENT_YELLOW") == 0) {
+            in >> fval;
+            BEACON_MIN_PERCENT_YELLOW = fval;
+        }
+        else if(name.compare("BEACON_MIN_PERCENT_BLUE") == 0) {
+            in >> fval;
+            BEACON_MIN_PERCENT_BLUE = fval;
+        }
         else if(name.compare("GOAL_WIDTH") == 0) {
             in >> fval;
             GOAL_WIDTH = fval;
@@ -277,6 +302,11 @@ void VisionConstants::loadFromFile(std::string filename)
 
     debug << "\tBALL_EDGE_THRESHOLD: " << BALL_EDGE_THRESHOLD << std::endl;
     debug << "\tBALL_ORANGE_TOLERANCE: " << BALL_ORANGE_TOLERANCE << std::endl;
+    debug << "\tBALL_MIN_PERCENT_ORANGE: " << BALL_MIN_PERCENT_ORANGE << std::endl;
+    debug << "\tGOAL_MIN_PERCENT_YELLOW: " << GOAL_MIN_PERCENT_YELLOW << std::endl;
+    debug << "\tGOAL_MIN_PERCENT_BLUE: " << GOAL_MIN_PERCENT_BLUE << std::endl;
+    debug << "\tBEACON_MIN_PERCENT_YELLOW: " << BEACON_MIN_PERCENT_YELLOW << std::endl;
+    debug << "\tBEACON_MIN_PERCENT_BLUE: " << BEACON_MIN_PERCENT_BLUE << std::endl;
 
     debug << "\tGOAL_WIDTH: " << GOAL_WIDTH << std::endl;
     debug << "\tDISTANCE_BETWEEN_POSTS: " << DISTANCE_BETWEEN_POSTS << std::endl;

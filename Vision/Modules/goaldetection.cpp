@@ -1,4 +1,5 @@
 #include "goaldetection.h"
+#include "Vision/visionconstants.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 
@@ -7,6 +8,9 @@
 void GoalDetection::detectGoals()
 {    
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
+    NUImage img = vbb->getOriginalImage();
+    const LookUpTable& lut = vbb->getLUT();
+
     vector<Quad> blue_candidates, yellow_candidates, blue_posts, yellow_posts, blue_beacons, yellow_beacons, unknown_beacons;
 
     detectGoal(ClassIndex::blue, &blue_candidates);
@@ -26,9 +30,22 @@ void GoalDetection::detectGoals()
     ratioCheck(&blue_beacons);
     ratioCheck(&unknown_beacons);
 
-    //Overlap check
+    // OVERLAP CHECK
     overlapCheck(&blue_posts);
     overlapCheck(&yellow_posts);
+
+    // DENSITY CHECK
+
+    // yellow
+    DensityCheck(true, &yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
+    DensityCheck(true, &yellow_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_YELLOW);
+    DensityCheck(true, &unknown_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_YELLOW);
+
+    // blue
+    DensityCheck(false, &blue_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_BLUE);
+    DensityCheck(false, &blue_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_BLUE);
+    DensityCheck(false, &unknown_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_BLUE);
+
     
     //ADD TO BLACKBOARD
     // BLUE BEACONS
@@ -93,6 +110,43 @@ void GoalDetection::detectGoals()
         }
     }
 }
+
+void GoalDetection::DensityCheck(bool yellow, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
+{
+    ClassIndex::Colour colour;
+    if (yellow)
+        colour = ClassIndex::yellow;
+    else
+        colour = ClassIndex::blue;
+
+    vector<Quad>::iterator it = posts->begin();
+    while (it < posts->end()) {
+        Quad candidate = *it;
+        int left, right, top, bottom;
+        left = candidate.getBottomLeft().x;
+        right = candidate.getTopRight().x;
+        top = candidate.getTopRight().y;
+        bottom = candidate.getBottomLeft().y;
+
+        int count = 0;
+
+        for (int i = left; i < right; i++) {
+            for (int j = top; j < bottom; j++) {
+                if (ClassIndex::getColourFromIndex(lut->classifyPixel((*img)(i, j))) == colour)
+                    count++;
+            }
+        }
+        if (((double)count)/((right-left)*(bottom-top)) < PERCENT_REQUIRED)
+            it = posts->erase(it);
+        else {
+            #if VISION_FIELDOBJECT_VERBOSITY > 1
+                debug << "GoalDetection::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
+            #endif
+            it++;
+        }
+    }
+}
+
 
 void GoalDetection::ratioCheck(vector<Quad>* posts)
 {
@@ -405,7 +459,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
 
             // throw out if no vertical segments contained
             //if (contains_vertical)
-                candidates->push_back(Quad(start_min, bot_min, end_max, top_max));
+
+            candidates->push_back(Quad(start_min, bot_min, end_max, top_max));
                 //cout << start_min << " " << bot_min << " " << end_max << " " << top_max << endl;
         }
     }
