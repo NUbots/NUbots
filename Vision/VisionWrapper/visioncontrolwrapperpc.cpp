@@ -29,5 +29,5 @@ int VisionControlWrapper::runFrame()
         #endif
         return -1;  //failure - do not run vision
     }
-    return controller->runFrame();
+    return controller->runFrame(true, true);
 }

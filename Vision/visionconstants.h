@@ -60,6 +60,12 @@ public:
     //! Field-object detection constants
     static int BALL_EDGE_THRESHOLD;         //! Dave?
     static int BALL_ORANGE_TOLERANCE;       //! Dave?
+    static float BALL_MIN_PERCENT_ORANGE;   //! Dave?
+    static float GOAL_MIN_PERCENT_YELLOW;   //! Dave?
+    static float GOAL_MIN_PERCENT_BLUE;     //! Dave?
+    static float BEACON_MIN_PERCENT_YELLOW; //! Dave?
+    static float BEACON_MIN_PERCENT_BLUE;   //! Dave?
+
     //! Field dimension constants
     static float GOAL_WIDTH;                //! The physical width of the goal posts in cm
     static float DISTANCE_BETWEEN_POSTS;    //! The physical distance between the posts in cm

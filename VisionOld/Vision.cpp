@@ -33,6 +33,10 @@
 #include "VisionOld/Threads/SaveImagesThread.h"
 #include <iostream>
 
+#ifdef VISION_PROFILE
+    #include "Tools/Profiling/Profiler.h"
+#endif
+
 //#include <QDebug>
 
 using namespace mathGeneral;
@@ -114,6 +118,11 @@ void Vision::process(JobList* jobs)
 
 void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects)
 {
+    #ifdef VISION_PROFILE
+        Profiler prof = Profiler("Vision");
+        prof.start();
+    #endif
+    
     #if DEBUG_VISION_VERBOSITY > 4
         debug << "Vision::ProcessFrame()." << endl;
     #endif
@@ -204,6 +213,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     //qDebug() << "Generate Classified Image: finnished";
     //setImage(&image);
     //! Find the green edges
+#ifdef VISION_PROFILE
+    prof.split("Find the green edges");
+#endif    
+
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "Begin Scanning: " << endl;
     #endif
@@ -216,6 +229,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
     //! Find the Field border:
+#ifdef VISION_PROFILE
+    prof.split("Find the Field border");
+#endif    
+
     points = getConvexFieldBorders(green_border_points);
     points = interpolateBorders(points,spacings);
 
@@ -244,6 +261,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 //END OBSTACLE DETECTION
 
     //! Scan Below Horizon Image:
+#ifdef VISION_PROFILE
+    prof.split("Scan Below the Horizon");
+#endif    
+
     ClassifiedSection vertScanArea = verticalScan(points,spacings);
 
     #if DEBUG_VISION_VERBOSITY > 5
@@ -252,6 +273,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
     //! Scan Above the Horizon
+#ifdef VISION_PROFILE
+    prof.split("Scan Above the Horizon");
+#endif    
+
     ClassifiedSection horiScanArea = horizontalScan(points,spacings);
 
     #if DEBUG_VISION_VERBOSITY > 5
@@ -260,6 +285,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     
 
     //! Classify Scan Lines to find Segments
+#ifdef VISION_PROFILE
+    prof.split("Classify Scan Lines to find Segments");
+#endif    
+
     ClassifyScanArea(&vertScanArea);
     ClassifyScanArea(&horiScanArea);
 
@@ -275,6 +304,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     std::vector< TransitionSegment > horizontalsegments;
 
     //! Extract and Display Vertical Scan Points:
+#ifdef VISION_PROFILE
+    prof.split("Extract and Display Vertical Scan Points");
+#endif    
+
     tempNumScanLines = vertScanArea.getNumberOfScanLines();
     for (int i = 0; i < tempNumScanLines; i++)
     {
@@ -298,6 +331,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     }
 
     //! Extract and Display Horizontal Scan Points:
+#ifdef VISION_PROFILE
+    prof.split("Extract and Display Horizontal Scan Points");
+#endif    
+
     tempNumScanLines = horiScanArea.getNumberOfScanLines();
     for (int i = 0; i < tempNumScanLines; i++)
     {
@@ -309,6 +346,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     }
 
     //! Find Line or Robot Points:
+#ifdef VISION_PROFILE
+    prof.split("Find Line or Robot Points");
+#endif    
+
     #if DEBUG_VISION_VERBOSITY > 5
         debug << "Finding Line or Robot Segments: with " << horizontalsegments.size()<< "horizontalsegments"<<endl;
     #endif
@@ -320,6 +361,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         debug << "Line or Robot Segments: " << " Vertical Line Segments: "<<LineDetector.verticalLineSegments.size() << "Horizontal Line Segments: " << LineDetector.horizontalLineSegments.size()<< " Robot Segments: "<< LineDetector.robotSegments.size()<< endl;
     #endif
     //! Identify Field Objects
+#ifdef VISION_PROFILE
+    prof.split("Identify Field Objects");
+#endif    
+
 
 
     std::vector< ObjectCandidate > HorizontalLineCandidates1;
@@ -468,6 +513,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
 
     //! Find Robots:
+#ifdef VISION_PROFILE
+    prof.split("Find Robots");
+#endif    
+
 
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPre-Robot Formation: " <<endl;
@@ -480,6 +529,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #endif
 
     //! Find Goals:
+#ifdef VISION_PROFILE
+    prof.split("Find Goals");
+#endif    
+
 
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPre-GOALPost Recognition: " <<endl;
@@ -496,6 +549,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
     //! Form Lines
+#ifdef VISION_PROFILE
+    prof.split("Form Lines");
+#endif    
+
 
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPre-Line Formation: with " << LineCandidates.size() << " candidates"<<endl;
@@ -512,6 +569,10 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #endif
 
     //! Form Ball
+#ifdef VISION_PROFILE
+    prof.split("Form Ball");
+#endif    
+
 
         #if DEBUG_VISION_VERBOSITY > 5
             debug << "\tPre-Ball Recognition: " <<endl;
@@ -668,6 +729,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         #if DEBUG_VISION_VERBOSITY > 1
             debug << "Visible Objects:\n" << AllFieldObjects->toString(true) << endl;
         #endif
+            
+            
+#ifdef VISION_PROFILE
+    prof.split("End Vision");
+    debug << prof;
+#endif    
+            
 }
 
 void Vision::SaveAnImage()

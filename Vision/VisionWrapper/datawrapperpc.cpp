@@ -75,10 +75,10 @@ DataWrapper::DataWrapper()
     case CAMERA:
         m_camera = new PCCamera();
         m_current_image = m_camera->grabNewImage();
-        LUTname = string(getenv("HOME")) +  string("/_nubot/default.lut");
+        LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
         break;
     case STREAM:
-        streamname = string(getenv("HOME")) +  string("/_nubot/image.strm");
+        streamname = string(getenv("HOME")) +  string("/nubot/image.strm");
         imagestrm.open(streamname.c_str());
         m_current_image = new NUImage();
         if(imagestrm.is_open()) {
@@ -87,7 +87,7 @@ DataWrapper::DataWrapper()
         else {
             errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
         }
-        LUTname = string(getenv("HOME")) +  string("/_nubot/default.lut");
+        LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
         break;
     case FILE:
         m_camera = NULL;
@@ -102,7 +102,7 @@ DataWrapper::DataWrapper()
         *capture >> m_current_image_cv;
 
         generateImageFromMat(m_current_image_cv);
-        loadLUTFromFile(string(getenv("HOME")) +  string("/_nubot/default.lut"));
+        loadLUTFromFile(string(getenv("HOME")) +  string("/nubot/default.lut"));
 
         break;
     }

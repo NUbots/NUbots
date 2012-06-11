@@ -26,6 +26,8 @@
 #include <fstream>
 //#include <QImage>
 
+#define VISION_PROFILE 1    //Turn profiling on
+
 class NUSensorsData;
 class NUActionatorsData;
 class SaveImagesThread;

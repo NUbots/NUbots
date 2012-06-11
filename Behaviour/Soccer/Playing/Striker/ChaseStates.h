@@ -96,7 +96,9 @@ protected:
         
         if (not m_pan_started and not iskicking)
         {   
-            if (ball.estimatedDistance() < 120. and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
+            if (ball.estimatedDistance() < 120. and
+                (ball.estimatedDistance() > 30. or ball.estimatedDistance() <= 30. and m_data->CurrentTime - m_pan_end_time > 9000)
+                and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
             {   
                 //Blackboard->lookForBall = false;
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
@@ -191,7 +193,7 @@ protected:
                 }
             }
         }
-        float targetKickDistance = 12.;
+        float targetKickDistance = 12.5;
         
         
         if((ball.estimatedDistance() < targetKickDistance) && 

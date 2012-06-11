@@ -13,7 +13,7 @@ Quad::Quad(const Quad& other)
     m_top = other.m_top;
 }
 
-Quad::Quad(int left, int bottom, int right, int top)
+Quad::Quad(int left, int top, int right, int bottom)
 {
     m_left = left;
     m_right = right;
