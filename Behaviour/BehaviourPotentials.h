@@ -267,14 +267,12 @@ public:
                     position_rotation = 0.5*bearing;
                 }
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                //position_rotation = 0.05*bearing;
             }
             
             // calculate the component to go around the ball to face the heading
             float around_speed;
             float around_direction;
             float around_rotation;
-            //float goalbearing = getBearingToOpponentGoal(Blackboard->Objects,Blackboard->GameInfo);
             if (distance < 0.75*stoppingdistance)
             {   // if we are close enough to worry about the heading
                 const float heading_gain = 0.7;
@@ -288,7 +286,7 @@ public:
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
                 //around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // previous value for NAO
-                around_rotation = -mathGeneral::sign(around_direction)*around_speed*1/distance;        // 11 is rough speed in cm/s
+                around_rotation = -mathGeneral::sign(around_direction)*around_speed*3./distance;        // 11 is rough speed in cm/s
             }
             else
             {
@@ -299,17 +297,13 @@ public:
             
             vector<float> speed(3,0);
             
-            if () {
-                speed[0] = max(position_speed, around_speed);
-                float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
-                float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
-                speed[1] = atan2(ysum, xsum);
-                speed[2] = position_rotation + around_rotation;
-            } else {
-                speed[0] = position_speed;
-                speed[1] = position_direction;
-                speed[2] = position_rotation;
-            }
+            
+            speed[0] = max(position_speed, around_speed);
+            float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
+            float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
+            speed[1] = atan2(ysum, xsum);
+            speed[2] = position_rotation + around_rotation;
+            
             //cout << speed[0] << ", " << speed[1] << ", " << speed[2] << ", " << ball.measuredBearing() << ", " << ball.estimatedBearing() << endl;
             return speed;
         }
