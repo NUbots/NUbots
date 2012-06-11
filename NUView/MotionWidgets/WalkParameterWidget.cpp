@@ -34,7 +34,7 @@
 #include "debug.h"
 #include "nubotdataconfig.h"			// need this to set the default position for the filedialog
 
-WalkParameterWidget::WalkParameterWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
+WalkParameterWidget::WalkParameterWidget(QWidget *parent): QWidget(parent)
 {
     setObjectName(tr("Walk"));
     setWindowTitle(tr("Walk"));

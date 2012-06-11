@@ -6,57 +6,56 @@
 
 
 frameInformationWidget::frameInformationWidget(QWidget *parent) :
-    QWidget(parent)
+    QTextBrowser(parent)
 {
     setWindowTitle(tr("Frame Information"));
     setObjectName(tr("Frame Information"));
-    m_widgetLayout = new QGridLayout();
+    QString defaultDisplay = "N/A";
 
-    m_sourceLabel = new QLabel(tr("Source: "));
-    m_sourceValueLabel = new QLabel(tr("N/A"));
-
-    m_imageResolutionLabel = new QLabel(tr("Image Resolution: "));
-    m_imageResolutionValueLabel = new QLabel(tr("N/A"));
-
-    m_timeStampLabel = new QLabel(tr("Timestamp: "));
-    m_timeStampValueLabel = new QLabel(tr("N/A"));
-
-    m_widgetLayout->addWidget(m_sourceLabel,0,0,Qt::AlignRight);
-    m_widgetLayout->addWidget(m_sourceValueLabel,0,1,Qt::AlignLeft);
-
-    m_widgetLayout->addWidget(m_imageResolutionLabel,1,0,Qt::AlignRight);
-    m_widgetLayout->addWidget(m_imageResolutionValueLabel,1,1,Qt::AlignLeft);
-
-    m_widgetLayout->addWidget(m_timeStampLabel,2,0,Qt::AlignRight);
-    m_widgetLayout->addWidget(m_timeStampValueLabel,2,1,Qt::AlignLeft);
-    setLayout(m_widgetLayout);
+    m_image_width = m_image_height = m_timestamp = m_source = defaultDisplay;
+    updateDisplay();
+    setMinimumSize(200,100);
 }
 
 frameInformationWidget::~frameInformationWidget()
 {
-    delete m_widgetLayout;
+}
+
+QSize frameInformationWidget::sizeHint() const
+{
+    return QSize(200, 100);
+}
+
+void frameInformationWidget::updateDisplay()
+{
+    const QString formatting = "Source: %1\nResolution: %2x%3\nTimestamp: %4 milliseconds";
+    QString displayString = formatting.arg(m_source).arg(m_image_width).arg(m_image_height).arg(m_timestamp);
+    setText(displayString);
 }
 
 void frameInformationWidget::setFrameSource(QString sourceName)
 {
-    m_sourceValueLabel->setText(sourceName);
+    m_source = sourceName;
+    updateDisplay();
 }
-
 
 void frameInformationWidget::setRawImage(const NUImage* image)
 {
-    setImageResolution(image->getWidth(), image->getHeight());
-    setTimestamp(image->GetTimestamp());
+    m_image_width.setNum(image->getWidth());
+    m_image_height.setNum(image->getHeight());
+    m_timestamp.setNum(image->GetTimestamp());
+    updateDisplay();
 }
 
 void frameInformationWidget::setImageResolution(int imageWidth, int imageHeight)
 {
-    QString resolutionMessage(tr("%1x%2 pixels"));
-    m_imageResolutionValueLabel->setText(resolutionMessage.arg(imageWidth).arg(imageHeight));
+    m_image_width.setNum(imageWidth);
+    m_image_height.setNum(imageHeight);
+    updateDisplay();
 }
 
 void frameInformationWidget::setTimestamp(double timestamp)
 {
-    QString timestampMessage(tr("%1 milliseconds"));
-    m_timeStampValueLabel->setText(timestampMessage.arg(timestamp));
+    m_timestamp.setNum(timestamp);
+    updateDisplay();
 }

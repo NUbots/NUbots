@@ -22,7 +22,7 @@ class visionStreamWidget : public QWidget
 {
     Q_OBJECT
 public:
-    visionStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent = 0);
+    visionStreamWidget(QWidget *parent = 0);
     ~visionStreamWidget();
 
 public slots:

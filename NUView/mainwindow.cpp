@@ -37,19 +37,22 @@
 
 #include "Kinematics/Kinematics.h"
 
+#include "debug.h"
+
 using namespace std;
-ofstream debug;
-ofstream errorlog;
+ofstream debug("debug.log");
+ofstream errorlog("error.log");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    qDebug() << "NUView is starting in: MainWindow.cpp";
-    debug.open("debug.log");
-    errorlog.open("error.log");
     m_previous_log_path = "";
+    qDebug() << "NUView is starting in: MainWindow.cpp";
+    //debug.open;
+    //errorlog.open;
 
     //initialise a static int to count image saves
     GLDisplay::imageCount = 0;
+    setColourTheme(DefaultColours);
 
     m_platform = new NUPlatform();                      // you could make the arguement that NUView should have its own platform, for now we just use a 'blank' one
     m_blackboard = new NUBlackboard();
@@ -64,63 +67,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     
     m_nuview_io = new NUViewIO();
 
+#ifndef WIN32
+    m_connection_manager = new ConnectionManager(this);
+#endif
+
     // create mdi workspace
     mdiArea = new QMdiArea(this);
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    createActions();
-    createMenus();
-    createContextMenu();
-    createToolBars();
-    createStatusBar();
-
     // Sensor Widget
     sensorDisplay = new SensorDisplayWidget(this);
-    QDockWidget* sensorDock = new QDockWidget("Sensor Values");
-    sensorDock->setObjectName("Sensor Values");
-    sensorDock->setWidget(sensorDisplay);
-    sensorDock->setShown(false);
-    addDockWidget(Qt::RightDockWidgetArea,sensorDock);
+    addAsDockable(sensorDisplay, "Sensor Values");
 
     // Object Widget
     objectDisplay = new ObjectDisplayWidget(this);
-    QDockWidget* objectDock = new QDockWidget("Field Objects");
-    objectDock->setObjectName("Field Objects");
-    objectDock->setWidget(objectDisplay);
-    objectDock->setShown(false);
-    addDockWidget(Qt::RightDockWidgetArea,objectDock);
+    addAsDockable(objectDisplay, "Field Objects");
 
     // Game Info Widget
     gameInfoDisplay = new GameInformationDisplayWidget(this);
-    QDockWidget* gameInfoDock = new QDockWidget("Game Information");
-    gameInfoDock->setObjectName("GameInformation");
-    gameInfoDock->setWidget(gameInfoDisplay);
-    gameInfoDock->setShown(false);
-    addDockWidget(Qt::RightDockWidgetArea,gameInfoDock);
+    addAsDockable(gameInfoDisplay, "Game Information");
 
     // Team Info Widget
     teamInfoDisplay = new TeamInformationDisplayWidget(this);
-    QDockWidget* teamInfoDock = new QDockWidget("Team Information");
-    teamInfoDock->setObjectName("Team Information");
-    teamInfoDock->setWidget(teamInfoDisplay);
-    teamInfoDock->setShown(false);
-    addDockWidget(Qt::RightDockWidgetArea,teamInfoDock);
+    addAsDockable(teamInfoDisplay, "Team Information");
 
     // Localisation info display
     locInfoDisplay = new QTextBrowser(this);
-    QDockWidget* locInfoDock = new QDockWidget("Localisation Information");
-    locInfoDock->setObjectName("Localisation Information");
-    locInfoDock->setWidget(locInfoDisplay);
-    locInfoDock->setShown(false);
-    addDockWidget(Qt::RightDockWidgetArea,locInfoDock);
+    addAsDockable(locInfoDisplay, "Localisation Information");
 
+    // New self localisation display
     selflocInfoDisplay = new QTextBrowser(this);
-    QDockWidget* selflocInfoDock = new QDockWidget("Self Localisation Information");
-    selflocInfoDock->setObjectName("Self Localisation Information");
-    selflocInfoDock->setWidget(selflocInfoDisplay);
-    selflocInfoDock->setShown(false);
-    addDockWidget(Qt::RightDockWidgetArea,selflocInfoDock);
+    addAsDockable(selflocInfoDisplay, "Self Localisation Information");
 
     // Add localisation widget
     localisation = new LocalisationWidget(this);
@@ -128,104 +106,77 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     localisation->setVisible(false);
 
     // Add Vision Widgets to Tab then Dock them on Screen
-    visionTabs = new QTabWidget(this);
+    QTabWidget* visionTabs = new QTabWidget(this);
     layerSelection = new LayerSelectionWidget(mdiArea,this);
     visionTabs->addTab(layerSelection,layerSelection->objectName());
     classification = new ClassificationWidget(this);
     visionTabs->addTab(classification,classification->objectName());
-    visionTabDock = new QDockWidget("Vision");
-    visionTabDock->setWidget(visionTabs);
-    visionTabDock->setObjectName(tr("visionTab"));
-    addDockWidget(Qt::RightDockWidgetArea, visionTabDock);
+    addAsDockable(visionTabs, "Vision tools");
+
     
     // Add Network widgets to Tabs then dock them on Screen
-    networkTabs = new QTabWidget(this);
+    QTabWidget* networkTabs = new QTabWidget(this);
     connection = new ConnectionWidget(this);
     networkTabs->addTab(connection, connection->objectName());
-    walkParameter = new WalkParameterWidget(mdiArea, this);
-    kick = new KickWidget(mdiArea, this);
+    walkParameter = new WalkParameterWidget(this);
+    kick = new KickWidget(this);
     networkTabs->addTab(walkParameter, walkParameter->objectName());
     networkTabs->addTab(kick, kick->objectName());
-    VisionStreamer = new visionStreamWidget(mdiArea, this);
-    LocWmStreamer = new locwmStreamWidget(mdiArea, this);
+    VisionStreamer = new visionStreamWidget(this);
+    LocWmStreamer = new locwmStreamWidget(this);
     networkTabs->addTab(VisionStreamer, VisionStreamer->objectName());
     networkTabs->addTab(LocWmStreamer, LocWmStreamer->objectName());
-    cameraSetting = new cameraSettingsWidget(mdiArea, this);
-    networkTabs->addTab(cameraSetting, cameraSetting->objectName());
-    //addDockWidget(Qt::RightDockWidgetArea,cameraSetting);
-
     //networkTabs->addTab(kick, kick->objectName());
-    networkTabDock = new QDockWidget("Network");
-    networkTabDock->setWidget(networkTabs);
-    networkTabDock->setObjectName(tr("networkTab"));
-    addDockWidget(Qt::RightDockWidgetArea, networkTabDock);
+    addAsDockable(networkTabs, "Network");
+
+
+    // Add the camera settings as a seperate window, since it is so large compared to the other
+    // Network windows.
+    cameraSetting = new cameraSettingsWidget(this);
+    addAsDockable(cameraSetting, "Camera Settings");
 
     frameInfo = new frameInformationWidget(this);
-    QDockWidget* temp = new QDockWidget(this);
-    temp->setWidget(frameInfo);
-    temp->setObjectName("Frame Information Dock");
-    temp->setWindowTitle(frameInfo->windowTitle());
-    addDockWidget(Qt::RightDockWidgetArea,temp);
+    addAsDockable(frameInfo, "Frame Information");
 
-    //offlinelocDialog = new OfflineLocalisationDialog(LogReader, this);
     offlinelocDialog = new OfflineLocalisationDialog(LogReader,this);
     offlinelocDialog->hide();
 
+    createActions();
+    createMenus();
+    createContextMenu();
+    createToolBars();
     createConnections();
     setCentralWidget(mdiArea);
-    qDebug() << "Main Window Starting";
+
+    // Initialise status bar
+    statusBar()->showMessage("Welcome to NUView!",10000);
+
     setWindowTitle(QString("NUView"));
     glManager.clearAllDisplays();
-    qDebug() << "Display Cleared";
     readSettings();
-    qDebug() << "Main Window Started";
 
-    //glManager.writeWMBallToDisplay(100,100,30,GLDisplay::CalGrid);
     glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
-    //
-    //glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
-    //
-    Kinematics test;
-    test.LoadModel();
 }
+
 
 MainWindow::~MainWindow()
 {
-// Delete widgets and displays
-    delete statusBar;
-    delete classification;
-    delete connection;
-    delete localisation;
-    delete layerSelection;
-    delete walkParameter;
-    delete kick;
-    delete mdiArea;
-    delete visionTabs;
-    delete networkTabs;
-    delete frameInfo;
-
-// Delete Actions
-    delete openAction;
-    delete copyAction;
-    delete saveAction;
-    delete undoAction;
-    delete exitAction;
-    delete firstFrameAction;
-    delete previousFrameAction;
-    delete selectFrameAction;
-    delete nextFrameAction;
-    delete lastFrameAction;
-    delete cascadeAction;
-    delete tileAction;
-    delete nativeAspectAction;
-    delete newVisionDisplayAction;
-    delete newLocWMDisplayAction;
-    delete doBonjourTestAction;
-    
+    // NOTE: QObjects with parents do not need to be deleted.
+    // They are delete when their parents are.
     delete m_nuview_io;
     delete m_blackboard;
     delete m_platform;
     return;
+}
+
+void MainWindow::addAsDockable(QWidget* widget, const QString& name)
+{
+    QDockWidget* dockable = new QDockWidget(name);
+    dockable->setObjectName(name);
+    dockable->setWidget(widget);
+    dockable->setShown(false);
+    addDockWidget(Qt::RightDockWidgetArea,dockable);
+    m_dockable_windows.push_back(dockable);
 }
 
 void MainWindow::createActions()
@@ -348,14 +299,14 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
     // File Menu
-    fileMenu = menuBar()->addMenu(tr("&File"));
+    QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openAction);
     fileMenu->addAction(LUT_Action);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
     // Edit Menu
-    editMenu = menuBar()->addMenu(tr("&Edit"));
+    QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(undoAction);
     editMenu->addSeparator();
     editMenu->addAction(copyAction);
@@ -363,7 +314,7 @@ void MainWindow::createMenus()
     editMenu->addAction(saveAction);
 
     // Navigation Menu
-    navigationMenu = menuBar()->addMenu(tr("&Navigation"));
+    QMenu* navigationMenu = menuBar()->addMenu(tr("&Navigation"));
     navigationMenu->addAction(firstFrameAction);
     navigationMenu->addAction(previousFrameAction);
     navigationMenu->addAction(selectFrameAction);
@@ -371,26 +322,36 @@ void MainWindow::createMenus()
     navigationMenu->addAction(lastFrameAction);
 
     // Test Menu
-    testMenu = menuBar()->addMenu(tr("&Testing"));
+    QMenu* testMenu = menuBar()->addMenu(tr("&Testing"));
     testMenu->addAction(doBonjourTestAction);
 
     // Tools Menu
-    toolsMenu = menuBar()->addMenu(tr("T&ools"));
+    QMenu* toolsMenu = menuBar()->addMenu(tr("T&ools"));
     toolsMenu->addAction(runOfflineLocalisatonAction);
 
     // Window Menu
-    windowMenu = menuBar()->addMenu(tr("&Window"));
+    QMenu* windowMenu = menuBar()->addMenu(tr("&Window"));
 
-    visionWindowMenu = windowMenu->addMenu(tr("&Vision"));
+    QMenu* visionWindowMenu = windowMenu->addMenu(tr("&Vision"));
     visionWindowMenu->addAction(newVisionDisplayAction);
 
-    localisationWindowMenu = windowMenu->addMenu(tr("&Localisation"));
+    QMenu* localisationWindowMenu = windowMenu->addMenu(tr("&Localisation"));
     localisationWindowMenu->addAction(newLocWMDisplayAction);
 
-    LUTWindowMenu = windowMenu->addMenu(tr("&Look Up Table"));
+    QMenu* LUTWindowMenu = windowMenu->addMenu(tr("&Look Up Table"));
     LUTWindowMenu->addAction(newLUTDisplayAction);
 
-    networkWindowMenu = windowMenu->addMenu(tr("&Network"));
+    QMenu* networkWindowMenu = windowMenu->addMenu(tr("&Network"));
+
+    windowMenu->addSeparator();
+    // Add the actions for the dockable windows
+    QList<QAction*> dockableActions;
+    for(QList<QDockWidget*>::iterator dockable = m_dockable_windows.begin(); dockable != m_dockable_windows.end(); ++dockable)
+    {
+        dockableActions.push_back((*dockable)->toggleViewAction());
+    }
+    windowMenu->addActions(dockableActions);
+
     windowMenu->addSeparator();
     windowMenu->addAction(cascadeAction);
     windowMenu->addAction(tileAction);
@@ -421,21 +382,13 @@ void MainWindow::createToolBars()
     #ifndef WIN32
     // Connection Toolbar
     connectionToolBar = addToolBar("Connection");
-    connectionToolBar->addWidget(new ConnectionManager(this));
+    connectionToolBar->addWidget(m_connection_manager);
     connectionToolBar->setObjectName("connectionToolbar");
     #endif
 }
 
-void MainWindow::createStatusBar()
-{
-        statusBar = new QStatusBar;
-        this->setStatusBar(statusBar);
-        this->statusBar->showMessage("Welcome to NUView!",10000);
-}
-
 void MainWindow::createConnections()
 {
-    qDebug() <<"Start Connecting Widgets";
     // Connect to log file reader
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
@@ -496,7 +449,7 @@ void MainWindow::createConnections()
     connect(classification,SIGNAL(selectionChanged()), this, SLOT(updateSelection()));
     connect(classification,SIGNAL(openLookupTableFile(QString)), &virtualRobot, SLOT(loadLookupTableFile(QString)));
     connect(classification,SIGNAL(saveLookupTableFile(QString)), &virtualRobot, SLOT(saveLookupTableFile(QString)));
-    connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar, SLOT(showMessage(QString,int)));
+    connect(classification,SIGNAL(displayStatusBarMessage(QString,int)), statusBar(), SLOT(showMessage(QString,int)));
 
     connect(classification,SIGNAL(autoSoftColourChanged(bool)),&virtualRobot, SLOT(setAutoSoftColour(bool)));
 
@@ -511,7 +464,24 @@ void MainWindow::createConnections()
     connect(offlinelocDialog,SIGNAL(LocalisationInfoChanged(QString)),locInfoDisplay, SLOT(setText(QString)));
     connect(offlinelocDialog,SIGNAL(SelfLocalisationInfoChanged(QString)),selflocInfoDisplay, SLOT(setText(QString)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
-    qDebug() <<"Finnished Connecting Widgets";
+}
+
+void MainWindow::setColourTheme(ColourScheme newColors)
+{
+    QString style;
+    currentColourScheme = newColors;
+    switch(newColors)
+    {
+        case StevenColours:
+            style = "QTextBrowser {background: #3F3F3F; color: #dcdccc}";
+            break;
+        default:
+            currentColourScheme = DefaultColours;
+            style = "QTextBrowser {background: white; color: black}";
+            break;
+    }
+    this->setStyleSheet(style);
+    return;
 }
 
 void MainWindow::RunOfflineLocalisation()
@@ -548,56 +518,7 @@ void MainWindow::openLog(const QString& fileName)
     if (!fileName.isEmpty()){
         LogReader->openFile(fileName);
         LogReader->firstFrame();
-
-//        std::ofstream object_out("/Users/steven/object.csv", ios::trunc);
-//        while(LogReader->nextFrameAvailable())
-//        {
-//            LogReader->nextFrame();
-//            FieldObjects* objectData = LogReader->GetObjectData();
-//            object_out << objectData->self.wmX() << "," << objectData->self.wmY() << "," << objectData->self.Heading();
-//            object_out << "," << objectData->self.sdX() << "," << objectData->self.sdY() << "," << objectData->self.sdHeading();
-//            object_out << "," << objectData->mobileFieldObjects[FieldObjects::FO_BALL].X() << "," << objectData->mobileFieldObjects[FieldObjects::FO_BALL].Y();
-//            object_out << "," << objectData->mobileFieldObjects[FieldObjects::FO_BALL].sdX() << "," << objectData->mobileFieldObjects[FieldObjects::FO_BALL].sdY() <<std::endl;
-//        }
-//        object_out.close();
     }
-    /*
-    if (!fileName.isEmpty()){
-        this->fileName = fileName;
-        setWindowTitle(QString("NUView - ") + fileName);
-        glManager.clearAllDisplays();
-        totalFrameNumber = virtualRobot.openFile(fileName);
-        QString message = "Opening File: ";
-        message.append(fileName);
-        qDebug() << message;
-        this->statusBar->showMessage(message,10000);
-        firstFrame();
-        if(virtualRobot.fileType == QString("nul"))
-        {
-            firstFrameAction->setEnabled(true);
-            previousFrameAction->setEnabled(false);
-            selectFrameAction->setEnabled(false);
-            nextFrameAction->setEnabled(true);
-            lastFrameAction->setEnabled(false);
-        }
-        else if(virtualRobot.fileType == QString("nif"))
-        {
-            firstFrameAction->setEnabled(true);
-            previousFrameAction->setEnabled(true);
-            selectFrameAction->setEnabled(true);
-            nextFrameAction->setEnabled(true);
-            lastFrameAction->setEnabled(true);
-        }
-        else
-        {
-            firstFrameAction->setEnabled(false);
-            previousFrameAction->setEnabled(false);
-            selectFrameAction->setEnabled(false);
-            nextFrameAction->setEnabled(false);
-            lastFrameAction->setEnabled(false);
-        }
-    }
-    */
 }
 
 void MainWindow::copy()
@@ -694,11 +615,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::readSettings()
 {
     QSettings settings("NUbots", "NUView");
-    qDebug() <<"Start Reading Settings";
     // Restore the main window.
     settings.beginGroup("mainWindow");
     restoreGeometry(settings.value("geometry").toByteArray());  // Set previous position/size
     restoreState(settings.value("state").toByteArray());    // restore the other main widgets layout.
+    setColourTheme(ColourScheme(settings.value("ColorScheme").toUInt()));
 //    openFile(settings.value("logFile").toString());
     settings.endGroup();
 
@@ -743,6 +664,7 @@ void MainWindow::writeSettings()
     settings.setValue("geometry", saveGeometry()); // Save the position and size.
     settings.setValue("state", saveState()); // Save the main widget layouts.
 //    settings.setValue("logFile",fileName);
+    settings.setValue("ColorScheme", currentColourScheme);
     settings.endGroup();
 
     // Save the individual mdi views
@@ -822,7 +744,7 @@ void MainWindow::imageFrameChanged(int currFrame, int totalFrames)
     message.append(QString::number(currFrame));
     message.append("/");
     message.append(QString::number(totalFrames));
-    this->statusBar->showMessage(message, 10000);
+    statusBar()->showMessage(message, 10000);
 }
 
 void MainWindow::selectFrame()
@@ -908,7 +830,7 @@ void MainWindow::SelectColourAtPixel(int x, int y)
         message.append(",");
         message.append(QString::number(y));
         message.append(")");
-        this->statusBar->showMessage(message, 10000);
+        statusBar()->showMessage(message, 10000);
         classification->setColour(tempPixel);
     }
 }

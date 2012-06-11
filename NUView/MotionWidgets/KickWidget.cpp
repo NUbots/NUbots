@@ -25,7 +25,7 @@
 #include "../NUViewIO/NUViewIO.h"
 #include "debug.h"
 
-KickWidget::KickWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
+KickWidget::KickWidget(QWidget *parent): QWidget(parent)
 {
     setObjectName(tr("Kick"));
     setWindowTitle(tr("Kick"));

@@ -37,7 +37,7 @@ class cameraSettingsWidget : public QWidget
     Q_OBJECT
 
 public:
-    cameraSettingsWidget(QMdiArea* parentMdiWidget, QWidget *parent = 0);
+    cameraSettingsWidget(QWidget *parent = 0);
     ~cameraSettingsWidget();
 
 private slots:

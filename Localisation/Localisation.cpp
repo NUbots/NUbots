@@ -533,21 +533,21 @@ void Localisation::WriteModelToObjects(const KF &model, FieldObjects* fieldObjec
 //    std::cout << "Relative: x = " << wmRelBallPos.x << " y = " << wmRelBallPos.y << std::endl;
 
 
-    std::cout << wmRelBallPos.x << "," << wmRelBallPos.y;
+//    std::cout << wmRelBallPos.x << "," << wmRelBallPos.y;
 
-    float ballMeasureRelX = ball.measuredDistance() * cos(ball.measuredElevation()) * cos(ball.measuredBearing());
-    float ballMeasureRelY = ball.measuredDistance() * cos(ball.measuredElevation()) * sin(ball.measuredBearing());
-    if(true || ball.isObjectVisible())
-    {
-        std::cout << "," << ballMeasureRelX << "," << ballMeasureRelY;
-    }
-    else
-    {
-        std::cout << ",0,0";
-    }
+//    float ballMeasureRelX = ball.measuredDistance() * cos(ball.measuredElevation()) * cos(ball.measuredBearing());
+//    float ballMeasureRelY = ball.measuredDistance() * cos(ball.measuredElevation()) * sin(ball.measuredBearing());
+//    if(true || ball.isObjectVisible())
+//    {
+//        std::cout << "," << ballMeasureRelX << "," << ballMeasureRelY;
+//    }
+//    else
+//    {
+//        std::cout << ",0,0";
+//    }
 
-    std::cout << "," << robot.wmX() << "," << robot.wmY() << "," << robot.Heading();
-    std::cout << "," << ball.velX() << "," <<  ball.velY() << std::endl;
+//    std::cout << "," << robot.wmX() << "," << robot.wmY() << "," << robot.Heading();
+//    std::cout << "," << ball.velX() << "," <<  ball.velY() << std::endl;
 
 }
 

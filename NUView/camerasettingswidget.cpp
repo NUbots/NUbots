@@ -31,7 +31,7 @@
 #include "debug.h"
 
 
-cameraSettingsWidget::cameraSettingsWidget(QMdiArea* parentMdiWidget, QWidget *parent): QWidget(parent)
+cameraSettingsWidget::cameraSettingsWidget(QWidget *parent): QWidget(parent)
 {
     setObjectName(tr("Camera"));
     setWindowTitle(tr("Camera"));

@@ -23,6 +23,7 @@
 #include "VisionTypes/VisionFieldObjects/goal.h"
 #include "VisionTypes/VisionFieldObjects/beacon.h"
 #include "VisionTypes/VisionFieldObjects/obstacle.h"
+#include "VisionTypes/greenhorizon.h"
 
 #ifndef VISIONBLACKBOARD_H
 #define VISIONBLACKBOARD_H
@@ -40,8 +41,8 @@ public:
     static VisionBlackboard* getInstance();
 
     //MUTATORS
-    void setHullPoints(const vector<PointType>& points);
-    void setHorizonScanPoints(const vector<PointType>& points);
+    void setGreenHullPoints(const vector<PointType>& points);
+    void setGreenHorizonScanPoints(const vector<PointType>& points);
 
     void setHorizontalScanlines(const vector<unsigned int>& scanlines);
     void setHorizontalSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
@@ -66,8 +67,8 @@ public:
 //    const Mat* getOriginalImageMat() const;
     const NUImage& getOriginalImage() const;
 
-    const vector<PointType>& getHorizonPoints() const;
-    const vector<PointType>& getHorizonScanPoints() const;
+    const GreenHorizon& getGreenHorizon() const;
+    const vector<PointType>& getGreenHorizonScanPoints() const;
 
     const vector<unsigned int>& getHorizontalScanlines() const;
     
@@ -97,6 +98,8 @@ public:
 
     const LookUpTable& getLUT() const;
     
+    
+    Vector2<float> correctDistortion(const Vector2<float>& pt);
     double calculateBearing(double x) const;
     double calculateElevation(double y) const; 
 
@@ -117,7 +120,7 @@ private:
     void publish() const;
     void debugPublish() const;
     
-    void checkHorizon();
+    void checkKinematicsHorizon();
 
 
     CameraSettings getCameraSettings() const;
@@ -132,7 +135,7 @@ private:
     DataWrapper* wrapper;
 //    Mat* original_image_cv;                 //! @variable Opencv mat for storing the original image 3 channels.
 //    Mat* original_image_cv_4ch;             //! @variable Opencv mat for storing the original image 4 channels.
-    NUImage* original_image;                  //! @variable Image for storing the original image.
+    const NUImage* original_image;                  //! @variable Image for storing the original image.
     
     NUCameraData m_camera_specs;
     
@@ -144,8 +147,9 @@ private:
     //vector<VFieldObject*> VFO_list;   //! @variable Vector of Vision Field Objects    
     
     //! Green Horizon data
-    vector<PointType> horizon_points;      //! @variable Vector of points forming the green horizon.
-    vector<PointType> horizon_scan_points; //! @variable Vector of points used in green horizon scanning.
+    //vector<PointType> green_horizon_points;      //! @variable Vector of points forming the green horizon.
+    GreenHorizon green_horizon;                  //! @variable The green horizon.
+    vector<PointType> green_horizon_scan_points; //! @variable Vector of points used in green horizon scanning.
     
     //! Object data
     vector<PointType> object_points;   //! @variable Vector of points indicating potential objects.
@@ -163,7 +167,7 @@ private:
     float body_pitch;           //! @variable The body pitch angle.
     bool body_pitch_valid;      //! @variable Whether the body pitch is valid.
 
-    //! Scanline/Segmentation data    
+    //! Scanline/Segmentation data
     vector<unsigned int> horizontal_scanlines;         //! @variable Vector of unsigned ints representing heights of horizontal scan lines.
     SegmentedRegion horizontal_segmented_scanlines;     //! @variable The segmented horizontal scanlines.
     SegmentedRegion vertical_segmented_scanlines;       //! @variable The segmented vertical scanlines.

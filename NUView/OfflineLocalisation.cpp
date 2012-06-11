@@ -25,7 +25,6 @@ OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent)
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_merge);
     m_running = false;
-    RunTests();
 }
 
 /*! @brief Class destructor

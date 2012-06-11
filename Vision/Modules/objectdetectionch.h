@@ -32,6 +32,8 @@ private:
     *   @note   STUB - CURRENTLY USES YCC THRESHOLDS (replace with LUT method).
     */
     static bool isPixelGreen(const NUImage& img, int x, int y);
+    static void convertPointTypes(const vector<cv::Point2i>& cvpoints, vector<PointType>& ourpoints);
+    static void convertPointTypes(const vector<PointType> &ourpoints, vector<cv::Point2i>& cvpoints);
 
     //! CONSTANTS
     static const unsigned int VER_THRESHOLD = 2;                //! @variable number of consecutive green pixels required.

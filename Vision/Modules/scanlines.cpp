@@ -7,6 +7,7 @@
 */
 #include "scanlines.h"
 #include "debug.h"
+#include "Vision/visionconstants.h"
 
 void ScanLines::generateScanLines()
 {
@@ -14,8 +15,8 @@ void ScanLines::generateScanLines()
         debug << "ScanLines::generateScanLines() - Begin" << endl;
     #endif
     VisionBlackboard *vbb = VisionBlackboard::getInstance();
-    const vector<PointType>& horizon_points = vbb->getHorizonPoints();
     vector<unsigned int> horizontal_scan_lines;
+    const vector<PointType>& horizon_points = vbb->getGreenHorizon().getInterpolatedPoints();   //need this to get the left and right
 
     PointType left = horizon_points.front();
     PointType right = horizon_points.back();
@@ -31,7 +32,7 @@ void ScanLines::generateScanLines()
     if(static_cast<int>(bottom_horizontal_scan) >= vbb->getImageHeight())
         errorlog << "cast avg: " << static_cast<int>(bottom_horizontal_scan) << " avg: " << bottom_horizontal_scan << endl;
 
-    for (int y = static_cast<int>(bottom_horizontal_scan); y >= 0; y -= VERTICAL_SCANLINE_SKIP) {
+    for (int y = static_cast<int>(bottom_horizontal_scan); y >= 0; y -= VisionConstants::HORIZONTAL_SCANLINE_SPACING) {
         if(static_cast<unsigned int>(y) >= vbb->getImageHeight())
             errorlog << "sy: " << static_cast<unsigned int>(y) << " y: " << y << endl;
         horizontal_scan_lines.push_back(static_cast<unsigned int>(y));
@@ -64,7 +65,7 @@ void ScanLines::classifyVerticalScanLines()
     #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
-    const vector<PointType>& vertical_start_points = vbb->getHorizonPoints();
+    const vector<PointType>& vertical_start_points = vbb->getGreenHorizon().getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
     vector< vector<ColourSegment> > classifications;
 
     for(unsigned int i=0; i<vertical_start_points.size(); i++) {
@@ -86,7 +87,7 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& 
     ColourSegment segment;
     vector<ColourSegment> result;
 
-    for(x = 0; x < img.getWidth(); x += HORIZONTAL_SKIP) {
+    for(x = 0; x < img.getWidth(); x++) {
         current_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(x,y)));
         if(current_colour != start_colour) {
             //start of new segment
@@ -126,7 +127,7 @@ vector<ColourSegment> ScanLines::classifyVerticalScan(const VisionBlackboard& vb
             x = start.x,
             y;
             
-    for(y = start.y; y < img.getHeight(); y += VERTICAL_SKIP) {
+    for(y = start.y; y < img.getHeight(); y++) {
         current_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(x,y)));
         if(current_colour != start_colour) {
             //start of new segment

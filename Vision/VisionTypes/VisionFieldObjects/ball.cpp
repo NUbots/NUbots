@@ -28,13 +28,13 @@ Ball::Ball(PointType centre, float radius)
     Vector2<float> right_pt = Vector2<float>(right, (bottom-top)*0.5);
     Vector2<float> left_pt = Vector2<float>(left, (bottom-top)*0.5);
     Vector2<float> centre_pt = Vector2<float>(centre.x, centre.y);
-    if(VisionConstants::DO_RADIAL_CORRECTION) {
-        top_pt = correctDistortion(top_pt);
-        bottom_pt = correctDistortion(bottom_pt);
-        right_pt = correctDistortion(right_pt);
-        left_pt = correctDistortion(left_pt);
-        centre_pt = correctDistortion(centre_pt);
-    }
+//    if(VisionConstants::DO_RADIAL_CORRECTION) {
+//        top_pt = correctDistortion(top_pt);
+//        bottom_pt = correctDistortion(bottom_pt);
+//        right_pt = correctDistortion(right_pt);
+//        left_pt = correctDistortion(left_pt);
+//        centre_pt = correctDistortion(centre_pt);
+//    }
         
     m_radius = max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x)*0.5;
     m_location_pixels.x = mathGeneral::roundNumberToInt(centre_pt.x);
@@ -60,6 +60,7 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         debug << "Ball::addToExternalFieldObjects:" << endl;
         debug << *this << endl;
     #endif
+        cout << "Ball::addToExternalFieldObjects - " << m_location_pixels.x << " " << m_location_pixels.y << " radius: " << m_radius << endl;
     if(valid) {
         //add ball to mobileFieldObjects
         //cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << endl;

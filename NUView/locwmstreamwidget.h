@@ -23,7 +23,7 @@ class locwmStreamWidget : public QWidget
 {
     Q_OBJECT
 public:
-    locwmStreamWidget(QMdiArea* parentMdiWidget, QWidget *parent = 0);
+    locwmStreamWidget(QWidget *parent = 0);
 
 
 public slots:

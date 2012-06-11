@@ -1,6 +1,7 @@
 #include "segmentfilter.h"
 
 #include "debug.h"
+#include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
 
 #include <fstream>
@@ -28,10 +29,14 @@ void SegmentFilter::run() const
         preFilter(v_segments, v_filtered);
         vbb->setHorizontalFilteredSegments(h_filtered.m_segmented_scans);
         vbb->setVerticalFilteredSegments(v_filtered.m_segmented_scans);
-    }
 
-    filter(h_segments, h_result);
-    filter(v_segments, v_result);
+        filter(h_filtered, h_result);
+        filter(v_filtered, v_result);
+    }
+    else {
+        filter(h_segments, h_result);
+        filter(v_segments, v_result);
+    }
     
 #if VISION_FILTER_VERBOSITY > 1
     ofstream outfile("1.txt");
@@ -62,6 +67,8 @@ void SegmentFilter::preFilter(const SegmentedRegion &scans, SegmentedRegion &res
     vector<ColourSegment>::const_iterator before_it, middle_it, after_it;
     ScanDirection dir = scans.getDirection();
     
+    result.m_direction = dir;
+
     final_segments.clear();
     
     //loop through each scan
