@@ -548,19 +548,15 @@ void VisionBlackboard::publish() const
     //wrapper->publish(m_vfos);
     unsigned int i;
     for(i=0; i<m_balls.size(); i++) {
-        cout << m_balls.at(i) << endl;
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_balls.at(i)));
     }
     for(i=0; i<m_beacons.size(); i++) {
-        cout << m_beacons.at(i) << endl;
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_beacons.at(i)));
     }
     for(i=0; i<m_goals.size(); i++) {
-        cout << m_goals.at(i) << endl;
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_goals.at(i)));
     }
     for(i=0; i<m_obstacles.size(); i++) {
-        cout << m_obstacles.at(i) << endl;
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_obstacles.at(i)));
     }
     #if VISION_BLACKBOARD_VERBOSITY > 1
@@ -692,18 +688,25 @@ void VisionBlackboard::checkKinematicsHorizon()
             kinematics_horizon.setLineFromPoints(Point(0, 0), Point(width, 0));
         }
         else {
-            if(kinematics_horizon.findYFromX(0) < 0 || kinematics_horizon.findYFromX(0) > height) {
-                //left point off screen
+            //check the base points are below the horizon
+            if(kinematics_horizon.IsBelowHorizon(0, height) && kinematics_horizon.IsBelowHorizon(width, height)) {
                 #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::checkHorizon() - Left kinematics horizon point off screen." << endl;
+                    debug << "VisionBlackboard::checkHorizon() - Image bottom corners are not below horizon - clamping to top." << endl;
                 #endif
+                kinematics_horizon.setLineFromPoints(Point(0, 0), Point(width, 0));
             }
-            if(kinematics_horizon.findYFromX(width) < 0 || kinematics_horizon.findYFromX(width) > height) {
-                //right point off screen
-                #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::checkHorizon() - Right kinematics horizon point off screen." << endl;
-                #endif
-            }
+//            if(kinematics_horizon.findYFromX(0) < 0 || kinematics_horizon.findYFromX(0) > height) {
+//                //left point off screen
+//                #if VISION_BLACKBOARD_VERBOSITY > 1
+//                    debug << "VisionBlackboard::checkHorizon() - Left kinematics horizon point off screen." << endl;
+//                #endif
+//            }
+//            if(kinematics_horizon.findYFromX(width) < 0 || kinematics_horizon.findYFromX(width) > height) {
+//                //right point off screen
+//                #if VISION_BLACKBOARD_VERBOSITY > 1
+//                    debug << "VisionBlackboard::checkHorizon() - Right kinematics horizon point off screen." << endl;
+//                #endif
+//            }
         }
     }
     else {

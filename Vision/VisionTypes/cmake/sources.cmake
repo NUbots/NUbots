@@ -21,6 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
+greenhorizon.cpp
 colourreplacementrule.cpp
 coloursegment.cpp
 colourtransitionrule.cpp

@@ -22,7 +22,6 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
 greenhorizonch.cpp
-horizoninterpolate.cpp
 objectdetectionch.cpp
 scanlines.cpp
 segmentfilter.cpp

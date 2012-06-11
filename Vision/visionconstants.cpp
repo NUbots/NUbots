@@ -76,6 +76,10 @@ void VisionConstants::loadFromFile(std::string filename)
 {
     HORIZONTAL_SCANLINE_SPACING = 5; //defaults in case of bad file
     VERTICAL_SCANLINE_SPACING = 5;
+    GREEN_HORIZON_SCAN_SPACING = 11;
+    GREEN_HORIZON_MIN_GREEN_PIXELS = 5;
+    GREEN_HORIZON_LOWER_THRESHOLD_MULT = 1;
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = 2.5;
     std::ifstream in(filename.c_str());
     std::string name;
     int         ival;

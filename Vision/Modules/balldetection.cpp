@@ -34,7 +34,6 @@ void BallDetection::detectBall()
     }
 
     if (transitions.size() > 0) {
-
         // Arithmetic mean
         int x_mean = 0,
             y_mean = 0;
@@ -84,7 +83,6 @@ void BallDetection::detectBall()
             y_pos = img.getHeight()-1;
         if (x_pos >= img.getWidth())
             x_pos = img.getWidth()-1;
-
 
         // Find ball centre (not occluded)        
         int top = y_pos,

@@ -55,7 +55,7 @@ int GreenHorizon::getYFromX(int x) const
 
 bool GreenHorizon::isBelowHorizon(PointType pt) const
 {
-    return pt.y < interpolated_points.at(pt.x).y;
+    return pt.y > interpolated_points.at(pt.x).y;
 }
 
 const vector<PointType>& GreenHorizon::getOriginalPoints() const
