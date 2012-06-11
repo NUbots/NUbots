@@ -7,8 +7,8 @@
 */
 
 #include "objectdetectionch.h"
-
 #include "Vision/visionconstants.h"
+#include "Vision/VisionTypes/greenhorizon.h"
 
 void ObjectDetectionCH::detectObjects()
 {
@@ -19,6 +19,13 @@ void ObjectDetectionCH::detectObjects()
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
     unsigned int height = img.getHeight();
+    const GreenHorizon& green_horizon = vbb->getGreenHorizon();
+
+
+    // REMOVE ME
+//    const LookUpTable& lut = vbb->getLUT();
+//    cv::Mat cvimg;
+//    lut.classifyImage(img, cvimg);
 
     vector<PointType> result;
     vector<cv::Point2i> horizon_points,
@@ -72,7 +79,55 @@ void ObjectDetectionCH::detectObjects()
         }
     }
 
+    // ignore transitions very close to horizon
+    vector<cv::Point2i>::iterator it;
+    it = object_points.begin();
+    while (it < object_points.end()) {
+//        cout << it->y - green_horizon.getYFromX(it->x) << endl;
+        if (it->y - green_horizon.getYFromX(it->x) < VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
+            it = object_points.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
+
     // update blackboard with object points
+    int start = 0, count = 0, bottom = 0;
+    bool scanning = false;
+
+    for (int i = 0; i < object_points.size(); i++) {
+        if (!scanning) {
+            start = i;
+            scanning = true;
+            count = 0;
+            bottom = 0;
+        }
+        else {
+            if (object_points.at(i).x - object_points.at(i-1).x == VisionConstants::VERTICAL_SCANLINE_SPACING && (i < object_points.size()-1)) {
+                count++;
+                if (object_points.at(i).y > bottom)
+                    bottom = object_points.at(i).y;
+            }
+            else {
+                if (count > VisionConstants::MIN_CONSECUTIVE_POINTS) {
+//                    cv::line(cvimg, cv::Point2i(object_points.at(start).x, bottom), cv::Point2i(object_points.at(i-1).x, bottom), cv::Scalar(0,0,255),2);
+                    int centre = (object_points.at(i-1).x + object_points.at(start).x)/2;
+                    int width = object_points.at(i-1).x - object_points.at(start).x;
+                    int NO_HEIGHT = -1; // DOES NOTHING
+
+                    // push to blackboard
+                    Obstacle newObstacle(PointType(centre, bottom), width, NO_HEIGHT);
+                    vbb->addObstacle(newObstacle);
+                }
+                scanning = false;
+            }
+        }
+    }
+
+//    cv::namedWindow("objectdetect", CV_WINDOW_KEEPRATIO);
+//    cv::imshow("objectdetect", cvimg);
+
     convertPointTypes(object_points, result);
     vbb->setObjectPoints(result);
 }

@@ -52,6 +52,9 @@ float VisionConstants::GOAL_MIN_PERCENT_YELLOW;
 float VisionConstants::GOAL_MIN_PERCENT_BLUE;
 float VisionConstants::BEACON_MIN_PERCENT_YELLOW;
 float VisionConstants::BEACON_MIN_PERCENT_BLUE;
+// Obstacle detection constants
+int VisionConstants::MIN_DISTANCE_FROM_HORIZON;
+int VisionConstants::MIN_CONSECUTIVE_POINTS;
 // Field dimension constants
 float VisionConstants::GOAL_WIDTH;
 float VisionConstants::DISTANCE_BETWEEN_POSTS;
@@ -224,6 +227,14 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> fval;
             BEACON_MIN_PERCENT_BLUE = fval;
         }
+        else if(name.compare("MIN_DISTANCE_FROM_HORIZON") == 0) {
+            in >> ival;
+            MIN_DISTANCE_FROM_HORIZON = ival;
+        }
+        else if(name.compare("MIN_CONSECUTIVE_POINTS") == 0) {
+            in >> ival;
+            MIN_CONSECUTIVE_POINTS = ival;
+        }
         else if(name.compare("GOAL_WIDTH") == 0) {
             in >> fval;
             GOAL_WIDTH = fval;
@@ -344,6 +355,9 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tGOAL_MIN_PERCENT_BLUE: " << GOAL_MIN_PERCENT_BLUE << std::endl;
     debug << "\tBEACON_MIN_PERCENT_YELLOW: " << BEACON_MIN_PERCENT_YELLOW << std::endl;
     debug << "\tBEACON_MIN_PERCENT_BLUE: " << BEACON_MIN_PERCENT_BLUE << std::endl;
+
+    debug << "\tMIN_DISTANCE_FROM_HORIZON: " << MIN_DISTANCE_FROM_HORIZON << std::endl;
+    debug << "\tMIN_CONSECUTIVE_POINTS: " << MIN_CONSECUTIVE_POINTS << std::endl;
 
     debug << "\tGOAL_WIDTH: " << GOAL_WIDTH << std::endl;
     debug << "\tDISTANCE_BETWEEN_POSTS: " << DISTANCE_BETWEEN_POSTS << std::endl;
