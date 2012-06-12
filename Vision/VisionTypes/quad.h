@@ -12,7 +12,7 @@ public:
     
     Quad();
     Quad(const Quad& other);
-    Quad(int left, int bottom, int right, int top);
+    Quad(int left, int top, int right, int bottom);
     
     Vector2<int> getBottomCentre() const;
     Vector2<int> getCentre() const;
