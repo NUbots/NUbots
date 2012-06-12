@@ -164,11 +164,11 @@ protected:
         if (m_pan_started and not m_pan_finished)       
             ball.updateTimeLastSeen(m_data->CurrentTime - 750);
         
-        if (m_data->CurrentTime >= m_pan_end_time+200) {
+        /*if (m_data->CurrentTime >= m_pan_end_time+200) {
             Blackboard->lookForBall = true;
         } else if (m_data->CurrentTime <= m_pan_end_time and not m_pan_finished) {
             Blackboard->lookForBall = false;
-        }
+        }*/
         
         if (not m_pan_started or m_pan_finished)
         {
@@ -181,7 +181,7 @@ protected:
             else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 40)
+                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 70)
                 {
                     #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                         debug << m_data->CurrentTime << ": Tracking ball" << endl;
@@ -193,10 +193,16 @@ protected:
                 }
             }
         }
-        float targetKickDistance = 10.5;
+        float targetKickDistance = 12.f;
+        float balldistance = ball.estimatedDistance();
+        float ballbearing = ball.estimatedBearing();
         
+        if (ball.isObjectVisible() and ball.TimeSeen() > 500.) {
+                ballbearing = ball.measuredBearing();
+                balldistance = ball.measuredDistance();//*cos(ball.measuredElevation();
+        }
         
-        if((ball.estimatedDistance() < targetKickDistance) )//&& 
+        if((balldistance < targetKickDistance) and fabs(ballbearing) < 1.1 )//&& 
             //( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) ))// && //XXX: fix goal lineup to use side kicks too
               //fabs(ball.estimatedBearing()) > 0.25 && //ball is not "between" our feet
               //fabs(ball.estimatedBearing()) < 0.75) //ball is not "outside" our feet
@@ -205,19 +211,21 @@ protected:
             //m_jobs->addMotionJob(new WalkJob(0, 0, 0));
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
-            kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
-            kickPosition[1] = ball.estimatedDistance() * sin(ball.estimatedBearing());
-            targetPosition[0] = kickPosition[0] + 1000.0f;
-            targetPosition[1] = kickPosition[1];
+            kickPosition[0] = balldistance * cos(ballbearing);
+            kickPosition[1] = balldistance * sin(ballbearing);
+            float goalbearing = BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info);
+            float goaldistance = BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info).estimatedDistance();
+            targetPosition[0] = goaldistance * cos(goalbearing);
+            targetPosition[1] = goalbearing * sin(goalbearing);
             KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
             m_jobs->addMotionJob(kjob);
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
-                debug << m_data->CurrentTime << ": Kicking Ball at distance " << ball.estimatedDistance() << endl;
+                debug << m_data->CurrentTime << ": Kicking Ball at distance " << balldistance << endl;
             #endif
         } else if(not iskicking)
         {
             
-            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance,42.);
+            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
             vector<float> result;
             // decide whether we need to dodge or not
             vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
@@ -236,7 +244,7 @@ protected:
             #endif
         }
         
-        
+        //cout << balldistance << "\t" << ballbearing << endl;
         
         #if DEBUG_BEHAVIOUR_VERBOSITY > 2
             debug << m_data->CurrentTime << ": pan_started: " << m_pan_started << " pan_finished: " << m_pan_finished << " pan end time: " << m_pan_end_time << endl; 

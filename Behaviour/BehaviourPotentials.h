@@ -170,7 +170,7 @@ public:
         }
         else
         {
-            float distance = ball.estimatedDistance()*cos(ball.estimatedElevation());
+            float distance = ball.estimatedDistance(); //*cos(ball.estimatedElevation());
             float bearing = ball.estimatedBearing();
             
             
@@ -185,10 +185,10 @@ public:
             
             float offsetDistance = 3.0f;
             
-            /*if (ball.isObjectVisible() and ball.timeSeen() > 500.) {
+            if (ball.isObjectVisible() and ball.TimeSeen() > 500.) {
                 bearing = ball.measuredBearing();
-                distance = ball.measuredDistance()*cos(ball.measuredElevation();
-            }*/
+                distance = ball.measuredDistance();//*cos(ball.measuredElevation();
+            }
             
             
             float left_foot_x = x + offsetDistance * cos(heading - mathGeneral::PI/2);
@@ -227,12 +227,17 @@ public:
             float position_rotation;
             if (distance < kickingdistance)
             {   // if we are too close to the ball then we need to go backwards
-                position_speed = (kickingdistance - distance)/(kickingdistance);
+                position_speed = 0.1;//(kickingdistance - distance)/(kickingdistance);
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
                 
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.6*bearing;
-                
+                if (bearing < mathGeneral::PI/8.) {
+                    position_rotation = mathGeneral::sign(heading)*0.3;
+                } else if (bearing > mathGeneral::PI/3.) {
+                    position_rotation = mathGeneral::sign(bearing)*0.3;
+                } else {
+                    position_rotation = 0.;//mathGeneral::sign(bearing)*0.3;
+                }
                 //speed up if we're too slow at shuffling
                 /*if (fabs(bearing) > 0.8f and position_speed < 0.3 and fabs() ) {
                     position_speed += 0.1;
@@ -244,14 +249,14 @@ public:
             else if (distance < stoppingdistance)
             {   // if we are close enough to slow down
                 
-                position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
+                position_speed = (distance - kickingdistance+3.)/(stoppingdistance - kickingdistance+3.);
                 position_direction = bearing;
                 //position_rotation = 0.5*bearing; //previous value for NAO
                 position_rotation = 0.7*bearing;
                 
                 //added this to boost sidestepping ability when lining up
                 if (position_speed < 0.3 and fabs(bearing) < mathGeneral::PI/3.) {
-                    position_speed += 0.1;
+                    position_speed += 0.13;
                 }
                 
             }
@@ -262,8 +267,8 @@ public:
                     position_direction = bearing*0.6;
                     position_rotation = 0.;//6*bearing;
                 } else {
-                    position_speed = 0.05;
-                    position_direction = bearing;
+                    position_speed = 0.2;
+                    position_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
                     position_rotation = 0.5*bearing;
                 }
                 //position_rotation = 0.5*bearing; //previous value for NAO
@@ -305,14 +310,15 @@ public:
             speed[0] = max(position_speed, around_speed);
             //float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
             //float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
-            speed[1] = (position_speed*position_direction + around_speed*around_direction)/(1.+around_speed);//atan2(ysum, xsum);
+            speed[1] = (position_speed*position_direction + around_speed*around_direction)/(max(position_speed,0.3f)+around_speed);//atan2(ysum, xsum);
             speed[2] = (position_speed*position_rotation + around_speed*around_rotation)/(position_speed+around_speed);
+            speed[2] = min(fabs(speed[2]),.3f)*mathGeneral::sign(speed[2]);
             
-            cout << endl;
-            cout << "Goal Heading: " << heading << endl;
+            /*cout << endl;
+            cout << "Goal Heading: " << heading << "\tBall Distance: " << distance << endl;
             cout << "Goto Speed:   " << position_speed << "\t" << position_direction << "\t" << position_rotation << "\t" << endl;
             cout << "Around Speed: " << around_speed << "\t" << around_direction << "\t" << around_rotation << "\t" << endl;
-            cout << "Final Speed:  " << speed[0] << "\t" << speed[1] << "\t" << speed[2] << "\t" << endl;
+            cout << "Final Speed:  " << speed[0] << "\t" << speed[1] << "\t" << speed[2] << "\t" << endl;*/
             return speed;
         }
     }
