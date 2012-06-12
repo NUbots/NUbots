@@ -217,17 +217,31 @@ void BallDetection::detectBall()
 
             // CHECK FOR PIXEL DENSITY
             int count = 0;
-            for (int i = left; i < right; i++) {
-                for (int j = top; j < bottom; j++) {
+
+            int min = std::min(right-left, bottom-top);
+            min /= 2;
+
+            int box_left = std::max(center.x - min, 0);
+            int box_right = std::min(center.x + min, img.getWidth()-1);
+            int box_top = std::max(center.y - min, 0);
+            int box_bottom = std::min(center.y + min, img.getHeight()-1);
+
+            //cout << box_left << ", " << box_right << ", " << box_top << ", " << box_bottom << endl;
+
+            for (int i = box_left; i < box_right; i++) {
+                for (int j = box_top; j < box_bottom; j++) {
                     if (ClassIndex::getColourFromIndex(lut.classifyPixel(img(i, j))) == ClassIndex::orange)
                         count++;
                 }
             }
-            if (float(count)/((right-left)*(bottom-top)) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
-                Ball newball(center, max((right-left), (bottom-top))*0.5);
-                vbb->addBall(newball);
+            //cout << "PERCENT ORANGE: " << float(count)/((min*2)*(min*2)) << endl;
+
+            if (float(count)/((min*2)*(min*2)) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
+                Ball newball(center, max((right-left), (bottom-top))*0.5);                
+                vbb->addBall(newball);                
             }
             else {
+                //cout << "BALL THROWN OUT ON RATIO" << endl;
                 #if VISION_FIELDOBJECT_VERBOSITY > 1
                     debug << "BallDetection::detectBall - ball thrown out on percentage contained orange" << endl;
                 #endif
