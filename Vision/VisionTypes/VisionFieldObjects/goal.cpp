@@ -31,8 +31,8 @@ Goal::Goal(GoalID id, const Quad &corners)
     m_bottom_centre = corners.getBottomCentre();
     m_location_pixels = corners.getCentre();
     //CALCULATE DISTANCE AND BEARING VALS
-    calculatePositions();
-    valid = check();
+    valid = calculatePositions();
+    valid = valid && check();
 }
 
 const Quad& Goal::getQuad() const
@@ -148,6 +148,14 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
 bool Goal::check() const
 {
     //various throwouts here
+
+    if(!distance_valid) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::check - Goal thrown out: distance invalid" << endl;
+        #endif
+        return false;
+    }
+
     //throwout for base below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS and
        not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y)) {
@@ -187,10 +195,11 @@ bool Goal::check() const
 *   This method uses the camera transform and as such if it was not valid when retrieved from the wrapper
 *   this will leave m_transformed_spherical_position at all zeros.
 */
-void Goal::calculatePositions()
+bool Goal::calculatePositions()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
+    bool transform_valid;
     float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
     float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
     
@@ -212,15 +221,22 @@ void Goal::calculatePositions()
     if(vbb->isCameraToGroundValid()) {        
         Matrix cameraToGroundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
         m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,m_spherical_position);
+        transform_valid = true;
     }
     else {
+        transform_valid = false;
         m_transformed_spherical_pos = Vector3<float>(0,0,0);
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::calculatePositions: Kinematics CTG transform invalid - will not push goal" << endl;
+        #endif
     }
     
     #if VISION_FIELDOBJECT_VERBOSITY > 2
         debug << "Goal::calculatePositions: ";
         debug << d2p << " " << width_dist << " " << distance << " " << m_transformed_spherical_pos.x << endl;
     #endif
+
+    return transform_valid;
 }
 
 /*!
@@ -262,17 +278,20 @@ float Goal::distanceToGoal(float bearing, float elevation) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Combo" << endl;
         #endif
+        distance_valid = d2pvalid;
         return d2p;
     case VisionConstants::Width:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Width" << endl;
         #endif
+        distance_valid = true;
         return width_dist;
     case VisionConstants::Average:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Average" << endl;
         #endif
         //average distances
+        distance_valid = true;
         if(d2pvalid)
             return (d2p + width_dist) * 0.5;
         else
@@ -281,6 +300,7 @@ float Goal::distanceToGoal(float bearing, float elevation) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Least" << endl;
         #endif
+        distance_valid = true;
         if(d2pvalid)
             return min(d2p, width_dist);
         else

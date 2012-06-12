@@ -27,8 +27,9 @@ Beacon::Beacon(BeaconID id, const Quad &corners)
     m_bottom_centre = corners.getBottomCentre();
     m_location_pixels = corners.getCentre();
     //CALCULATE DISTANCE AND BEARING VALS
-    calculatePositions();
-    valid = check(); //this must be last
+    valid = calculatePositions();
+
+    valid = valid && check(); //this must be last
 }
 
 const Quad& Beacon::getQuad() const
@@ -53,77 +54,115 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
         debug << "    " << *this << endl;
     #endif
         
-        if(valid) {
+    if(valid) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::addToExternalFieldObjects - valid" << endl;
+        #endif
+        AmbiguousObject newAmbObj;
+        FieldObjects::StationaryFieldObjectID stat_id;
+        bool stationary = false;
+
+        switch(m_id) {
+        case YellowBeacon:
+            stat_id = FieldObjects::FO_YELLOW_BEACON;
+            stationary = true;
+            break;
+        case BlueBeacon:
+            stat_id = FieldObjects::FO_BLUE_BEACON;
+            stationary = true;
+            break;
+        case UnknownBeacon:
+            newAmbObj = AmbiguousObject(FieldObjects::FO_BEACON_UNKNOWN, "Unknown Beacon");
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_BEACON);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_BEACON);
+            stationary = false;
+            break;
+        default:
+            //invalid object - do not push to fieldobjects
+            errorlog << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
             #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "Beacon::addToExternalFieldObjects - valid" << endl;
-            #endif
-            AmbiguousObject newAmbObj;
-            FieldObjects::StationaryFieldObjectID stat_id;
-            bool stationary = false;
-    
-            switch(m_id) {
-            case YellowBeacon:
-                stat_id = FieldObjects::FO_YELLOW_BEACON;
-                stationary = true;
-                break;
-            case BlueBeacon:
-                stat_id = FieldObjects::FO_BLUE_BEACON;
-                stationary = true;
-                break;
-            case UnknownBeacon:
-                newAmbObj = AmbiguousObject(FieldObjects::FO_BEACON_UNKNOWN, "Unknown Beacon");
-                newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_BEACON);
-                newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_BEACON);
-                stationary = false;
-                break;
-            default:
-                //invalid object - do not push to fieldobjects
-                errorlog << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
-                #if VISION_FIELDOBJECT_VERBOSITY > 1
-                    debug << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
-                #endif
-                return false;
-            }
-    
-            if(stationary) {
-                //add Beacon to stationaryFieldObjects
-                fieldobjects->stationaryFieldObjects[stat_id].UpdateVisualObject(m_transformed_spherical_pos,
-                                                                                m_spherical_error,
-                                                                                m_location_angular,
-                                                                                m_location_pixels,
-                                                                                m_size_on_screen,
-                                                                                timestamp);
-            }
-            else {
-                //update ambiguous Beacon and add it to ambiguousFieldObjects
-                newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
-                                             m_spherical_error,
-                                             m_location_angular,
-                                             m_location_pixels,
-                                             m_size_on_screen,
-                                             timestamp);
-                fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
-            }
-    
-            return true;
-        }
-        else {
-            #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "Beacon::addToExternalFieldObjects - invalid" << endl;
+                debug << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
             #endif
             return false;
         }
+
+        if(stationary) {
+            //add Beacon to stationaryFieldObjects
+            fieldobjects->stationaryFieldObjects[stat_id].UpdateVisualObject(m_transformed_spherical_pos,
+                                                                            m_spherical_error,
+                                                                            m_location_angular,
+                                                                            m_location_pixels,
+                                                                            m_size_on_screen,
+                                                                            timestamp);
+        }
+        else {
+            //update ambiguous Beacon and add it to ambiguousFieldObjects
+            newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
+                                         m_spherical_error,
+                                         m_location_angular,
+                                         m_location_pixels,
+                                         m_size_on_screen,
+                                         timestamp);
+            fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
+        }
+
+        return true;
+    }
+    else {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::addToExternalFieldObjects - invalid" << endl;
+        #endif
+        return false;
+    }
 }
 
 bool Beacon::check() const
 {
+    if(!distance_valid) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::check - Beacon thrown out: distance invalid" << endl;
+        #endif
+        return false;
+    }
 
+    //throwout for base below horizon
+    if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS and
+       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y)) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::check - Beacon thrown out: base above kinematics horizon" << endl;
+        #endif
+        return false;
+    }
+
+    //Distance discrepency throwout - if width method says Beacon is a lot closer than d2p (by specified value) then discard
+    if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS and
+            width_dist + VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS < d2p) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        debug << "Beacon::check - Beacon thrown out: width distance too much smaller than d2p" << endl;
+            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS << endl;
+        #endif
+        return false;
+    }
+
+    //throw out if Beacon is too far away
+    if(VisionConstants::THROWOUT_DISTANT_BEACONS and
+        m_transformed_spherical_pos.x > VisionConstants::MAX_BEACON_DISTANCE) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::check - Beacon thrown out: too far away" << endl;
+            debug << "\td2p: " << m_transformed_spherical_pos.x << " MAX_BEACON_DISTANCE: " << VisionConstants::MAX_BEACON_DISTANCE << endl;
+        #endif
+        return false;
+    }
+
+    //all checks passed
+    return true;
 }
 
-void Beacon::calculatePositions()
+bool Beacon::calculatePositions()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
+    bool transform_valid;
     float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
     float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
     
@@ -145,15 +184,22 @@ void Beacon::calculatePositions()
     if(vbb->isCameraToGroundValid()) {        
         Matrix cameraToGroundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
         m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,m_spherical_position);
+        transform_valid = true;
     }
     else {
+        transform_valid = false;
         m_transformed_spherical_pos = Vector3<float>(0,0,0);
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Beacon::calculatePositions: Kinematics CTG transform invalid - will not push beacon" << endl;
+        #endif
     }
     
     #if VISION_FIELDOBJECT_VERBOSITY > 2
         debug << "Beacon::calculatePositions: ";
         debug << d2p << " " << width_dist << " " << distance << " " << m_transformed_spherical_pos.x << endl;
     #endif
+
+    return transform_valid;
 }
 
 /*!
@@ -195,17 +241,20 @@ float Beacon::distanceToBeacon(float bearing, float elevation) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Beacon::distanceToBeacon: Method: Combo" << endl;
         #endif
+        distance_valid = d2pvalid;
         return d2p;
     case VisionConstants::Width:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Beacon::distanceToBeacon: Method: Width" << endl;
         #endif
+        distance_valid = true;
         return width_dist;
     case VisionConstants::Average:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Beacon::distanceToBeacon: Method: Average" << endl;
         #endif
         //average distances
+        distance_valid = true;
         if(d2pvalid)
             return (d2p + width_dist) * 0.5;
         else
@@ -214,6 +263,7 @@ float Beacon::distanceToBeacon(float bearing, float elevation) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Beacon::distanceToBeacon: Method: Least" << endl;
         #endif
+        distance_valid = true;
         if(d2pvalid)
             return min(d2p, width_dist);
         else

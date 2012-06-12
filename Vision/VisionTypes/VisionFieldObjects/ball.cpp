@@ -13,8 +13,8 @@ Ball::Ball()
     m_radius = 0;
     m_location_pixels.x = 0;
     m_location_pixels.y = 0;
-    calculatePositions();
-    valid = check();
+    valid = calculatePositions();
+    valid = valid && check();
 }
 
 Ball::Ball(PointType centre, float radius)
@@ -40,8 +40,8 @@ Ball::Ball(PointType centre, float radius)
     m_location_pixels.x = mathGeneral::roundNumberToInt(centre_pt.x);
     m_location_pixels.y = mathGeneral::roundNumberToInt(centre_pt.y);
     m_size_on_screen = Vector2<int>(m_radius*2, m_radius*2);
-    calculatePositions();
-    valid = check();
+    valid = calculatePositions();
+    valid = valid && check();
 }
 
 float Ball::getRadius() const
@@ -85,6 +85,14 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
 bool Ball::check() const
 {
     //various throwouts here
+
+    if(!distance_valid) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::check - Ball thrown out: distance invalid" << endl;
+        #endif
+        return false;
+    }
+
     //throwout for below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL and
        not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
@@ -129,10 +137,11 @@ bool Ball::check() const
     return true;
 }
 
-void Ball::calculatePositions()
+bool Ball::calculatePositions()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
+    bool transform_valid;
     float elevation;
     float bearing = (float)vbb->calculateBearing(m_location_pixels.x);
     if(VisionConstants::BALL_DISTANCE_POSITION_BOTTOM) {
@@ -153,32 +162,25 @@ void Ball::calculatePositions()
     m_spherical_position[2] = elevation; //elevation
     
     m_location_angular = Vector2<float>(bearing, elevation);
-    //m_spherical_error - not calculated
-    
-//    if(vbb->isCameraTransformValid()) {        
-//        Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
-//        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
-//    }
-    if(vbb->isCameraToGroundValid()) {        
+
+    if(vbb->isCameraToGroundValid()) {
+        transform_valid = true;
         Matrix cameraToGroundTransform = Matrix4x4fromVector(vbb->getCameraToGroundVector());
-        
-        //debugging
-//        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,Vector3<float>(d2p, bearing, elevation));
-//        cout << " " << m_transformed_spherical_pos.x;
-//        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,Vector3<float>(width_dist, bearing, elevation));
-//        cout << " " << m_transformed_spherical_pos.x << endl;
-        
-        //real
         m_transformed_spherical_pos = Kinematics::TransformPosition(cameraToGroundTransform,m_spherical_position);
-        
     }
     else {
+        transform_valid = false;
         m_transformed_spherical_pos = Vector3<float>(0,0,0);
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::calculatePositions: Kinematics CTG transform invalid - will not push ball" << endl;
+        #endif
     }
     #if VISION_FIELDOBJECT_VERBOSITY > 2
         debug << "Ball::calculatePositions: ";
         debug << d2p << " " << width_dist << " " << distance << " " << m_transformed_spherical_pos.x << endl;
     #endif
+
+    return transform_valid;
 }
 
 
@@ -221,17 +223,20 @@ float Ball::distanceToBall(float bearing, float elevation) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::distanceToBall: Method: Combo" << endl;
         #endif
+        distance_valid = d2pvalid;
         return d2p;
     case VisionConstants::Width:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::distanceToBall: Method: Width" << endl;
         #endif
+        distance_valid = true;
         return width_dist;
     case VisionConstants::Average:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::distanceToBall: Method: Average" << endl;
         #endif
         //average distances
+        distance_valid = true;
         if(d2pvalid) {
             return (d2p + width_dist) * 0.5;
         }
@@ -242,6 +247,7 @@ float Ball::distanceToBall(float bearing, float elevation) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::distanceToBall: Method: Least" << endl;
         #endif
+        distance_valid = true;
         if(d2pvalid) {
             return min(d2p, width_dist);
         }
