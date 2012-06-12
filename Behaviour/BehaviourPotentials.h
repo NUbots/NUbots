@@ -225,7 +225,7 @@ public:
             float position_speed;
             float position_direction;
             float position_rotation;
-            if (distance < kickingdistance + dist_hysteresis/2.)
+            if (distance < kickingdistance)
             {   // if we are too close to the ball then we need to go backwards
                 position_speed = (kickingdistance - distance)/(kickingdistance);
                 position_direction = mathGeneral::normaliseAngle(bearing + mathGeneral::PI);
@@ -247,10 +247,10 @@ public:
                 position_speed = (distance - kickingdistance)/(stoppingdistance - kickingdistance);
                 position_direction = bearing;
                 //position_rotation = 0.5*bearing; //previous value for NAO
-                position_rotation = 0.6*bearing;
+                position_rotation = 0.7*bearing;
                 
                 //added this to boost sidestepping ability when lining up
-                if (fabs(bearing) > mathGeneral::PI/6. and position_speed < 0.3 and fabs(bearing) < mathGeneral::PI/3.) {
+                if (position_speed < 0.3 and fabs(bearing) < mathGeneral::PI/3.) {
                     position_speed += 0.1;
                 }
                 
@@ -270,12 +270,16 @@ public:
             }
             
             // calculate the component to go around the ball to face the heading
+            vector<float> speed(3,0);
             float around_speed;
             float around_direction;
             float around_rotation;
-            if (distance < 0.75*stoppingdistance)
+            if (distance < stoppingdistance and distance > 1.5*kickingdistance or distance < 1.15*kickingdistance)
             {   // if we are close enough to worry about the heading
-                const float heading_gain = 0.7;
+                float heading_gain = 0.5;
+                if (distance < 1.25*kickingdistance) {
+                    heading_gain = 0.2;
+                    }
                 const float heading_threshold = mathGeneral::PI/3;
                 if (fabs(heading) < heading_threshold)
                     around_speed = (heading_gain/heading_threshold)*fabs(heading);
@@ -286,7 +290,7 @@ public:
                 else
                     around_direction = mathGeneral::normaliseAngle(bearing - mathGeneral::sign(heading)*mathGeneral::PI/2);
                 //around_rotation = -mathGeneral::sign(around_direction)*around_speed*12/distance;        // previous value for NAO
-                around_rotation = -mathGeneral::sign(around_direction)*around_speed*3./distance;        // 11 is rough speed in cm/s
+                around_rotation = -mathGeneral::sign(around_direction)*around_speed/distance/2.;        // 11 is rough speed in cm/s
             }
             else
             {
@@ -295,16 +299,20 @@ public:
                 around_rotation = 0;
             }
             
-            vector<float> speed(3,0);
+            //vector<float> speed(3,0);
             
             
             speed[0] = max(position_speed, around_speed);
-            float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
-            float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
-            speed[1] = atan2(ysum, xsum);
-            speed[2] = position_rotation + around_rotation;
+            //float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
+            //float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
+            speed[1] = (position_speed*position_direction + around_speed*around_direction)/(1.+around_speed);//atan2(ysum, xsum);
+            speed[2] = (position_speed*position_rotation + around_speed*around_rotation)/(position_speed+around_speed);
             
-            //cout << speed[0] << ", " << speed[1] << ", " << speed[2] << ", " << ball.measuredBearing() << ", " << ball.estimatedBearing() << endl;
+            cout << endl;
+            cout << "Goal Heading: " << heading << endl;
+            cout << "Goto Speed:   " << position_speed << "\t" << position_direction << "\t" << position_rotation << "\t" << endl;
+            cout << "Around Speed: " << around_speed << "\t" << around_direction << "\t" << around_rotation << "\t" << endl;
+            cout << "Final Speed:  " << speed[0] << "\t" << speed[1] << "\t" << speed[2] << "\t" << endl;
             return speed;
         }
     }

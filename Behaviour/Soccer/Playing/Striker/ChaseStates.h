@@ -164,11 +164,11 @@ protected:
         if (m_pan_started and not m_pan_finished)       
             ball.updateTimeLastSeen(m_data->CurrentTime - 750);
         
-        /*if (m_data->CurrentTime >= m_pan_end_time+200) {
+        if (m_data->CurrentTime >= m_pan_end_time+200) {
             Blackboard->lookForBall = true;
         } else if (m_data->CurrentTime <= m_pan_end_time and not m_pan_finished) {
             Blackboard->lookForBall = false;
-        }*/
+        }
         
         if (not m_pan_started or m_pan_finished)
         {
@@ -193,13 +193,13 @@ protected:
                 }
             }
         }
-        float targetKickDistance = 12.5;
+        float targetKickDistance = 10.5;
         
         
-        if((ball.estimatedDistance() < targetKickDistance) && 
-            ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) ) && 
-              fabs(ball.estimatedBearing()) > 0.25 && //ball is not "between" our feet
-              fabs(ball.estimatedBearing()) < 0.75) //ball is not "outside" our feet
+        if((ball.estimatedDistance() < targetKickDistance) )//&& 
+            //( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) ))// && //XXX: fix goal lineup to use side kicks too
+              //fabs(ball.estimatedBearing()) > 0.25 && //ball is not "between" our feet
+              //fabs(ball.estimatedBearing()) < 0.75) //ball is not "outside" our feet
               // && ball.TimeSeen() > 0 && m_pan_finished)
         {
             //m_jobs->addMotionJob(new WalkJob(0, 0, 0));
