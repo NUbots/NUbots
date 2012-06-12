@@ -35,6 +35,8 @@ win32 {
     }
 }
 
+DEFINES += TARGET_IS_NUVIEW
+
 # Opencv library
 # INCLUDEPATH += "C:\Program Files\OpenCV\cv\include" "C:\Program Files\OpenCV\cvaux\include" "C:\Program Files\OpenCV\cxcore\include" "C:\Program Files\OpenCV\otherlibs\highgui"
 # LIBS += -L"C:\Program Files\OpenCV\lib" -lcv -lcvaux -lhighgui -lcxcore

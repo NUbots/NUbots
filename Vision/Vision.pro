@@ -10,6 +10,7 @@ PLATFORM = pc
 
 contains(PLATFORM, "darwin") {
     message("Compiling for Darwin")
+    DEFINES += TARGET_IS_DARWIN
 
     #ROBOCUP_DIR = ${HOME}/robocup/            #change to darwin directory later
     ROBOCUP_DIR = /home/shannon/robocup/
@@ -31,6 +32,7 @@ contains(PLATFORM, "darwin") {
 
 contains(PLATFORM, "pc") {
      message("Compiling for PC")
+    DEFINES += TARGET_IS_PC
 
     #ROBOCUP_DIR = ${HOME}/robocup/
     ROBOCUP_DIR = /home/shannon/robocup/
