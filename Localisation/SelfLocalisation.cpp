@@ -570,9 +570,9 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     ball.updateEstimatedRelativeVariables(ballDistance, ballHeading, 0.0f);
     ball.updateSharedCovariance(m_ball_model->covariance());
 
+    float lost_ball_sd = 150.0f;
     float max_sd = 2 * std::max(relBallSdX, relBallSdY);
-    std::cout << "BAll Max SD" << max_sd << std::endl;
-    bool ballIsLost = max_sd > 50.0;
+    bool ballIsLost = max_sd > lost_ball_sd;
     ball.updateIsLost(ballIsLost, m_timestamp);
 
     // Get the visual information
