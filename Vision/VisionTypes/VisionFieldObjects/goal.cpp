@@ -276,7 +276,7 @@ float Goal::distanceToGoal(float bearing, float elevation) {
     switch(VisionConstants::GOAL_DISTANCE_METHOD) {
     case VisionConstants::D2P:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Goal::distanceToGoal: Method: Combo" << endl;
+            debug << "Goal::distanceToGoal: Method: D2P" << endl;
         #endif
         distance_valid = d2pvalid;
         return d2p;
