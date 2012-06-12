@@ -239,7 +239,7 @@ float Beacon::distanceToBeacon(float bearing, float elevation) {
     switch(VisionConstants::BEACON_DISTANCE_METHOD) {
     case VisionConstants::D2P:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Beacon::distanceToBeacon: Method: Combo" << endl;
+            debug << "Beacon::distanceToBeacon: Method: D2P" << endl;
         #endif
         distance_valid = d2pvalid;
         return d2p;

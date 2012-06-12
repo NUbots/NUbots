@@ -106,19 +106,19 @@ bool TestKeeperProvider::doSave(float maxInterceptTime,float interceptErrorFract
     
     //transform from worldspace to robot space
     Vector2<float> relativeBallPosition;
-    relativeBallPosition.x = (ballPosition.x-self.wmX())*cos(self.Heading())+(ballPosition.y-self.wmY())*sin(self.Heading());
+    relativeBallPosition.x = (ballPosition.x-self.wmX())*cos(self.Heading())-(ballPosition.y-self.wmY())*sin(self.Heading());
     relativeBallPosition.y = (ballPosition.x-self.wmX())*sin(self.Heading())+(ballPosition.y-self.wmY())*cos(self.Heading());
 
     Vector2<float> relativeBallVelocity;
-    relativeBallVelocity.x = ballVelocity.x*cos(self.Heading())+ballVelocity.y*sin(self.Heading());
+    relativeBallVelocity.x = ballVelocity.x*cos(self.Heading())-ballVelocity.y*sin(self.Heading());
     relativeBallVelocity.y = ballVelocity.x*sin(self.Heading())+ballVelocity.y*cos(self.Heading());
     
-    //cout << "Relative X pos: " << relativeBallPosition.x << ", Relative X vel: " << relativeBallVelocity.x << endl;
+    cout << "Relative X pos: " << relativeBallPosition.x << ", Relative X vel: " << relativeBallVelocity.x << endl;
     //cout << velocityErrorMagnitude << " position:" << positionErrorMagnitude << endl;
     
     
     //check the ball is heading towards us
-    if (relativeBallPosition.x > 0. and relativeBallVelocity.x < 0. and ball.TimeSeen() > 500) {
+    if (relativeBallPosition.x > 0. and relativeBallVelocity.x < -15. and ball.TimeSeen() > 800) {
         
         //calculate intercept time
         float interceptTime = relativeBallPosition.x/(-relativeBallVelocity.x);
@@ -128,15 +128,19 @@ bool TestKeeperProvider::doSave(float maxInterceptTime,float interceptErrorFract
         
         //cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << endl;
         
+        //cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << endl;
+        
         //XXX: parameterize defensive area size - this is set to goalsize (*errorFraction for uncertainty)
         float defensiveArea = 150.;
-        if (interceptTime < maxInterceptTime and interceptTime > 2.5 and fabs(interceptY) < defensiveArea*(1.+interceptErrorFraction)/2.) {
+        if (interceptTime < maxInterceptTime and interceptTime > 0.2 and fabs(interceptY) < defensiveArea*(1.+interceptErrorFraction)/2.) {
             
             //we have decided we should intercept, now check what move to use
             float standingBlockHalfSize = 12.5; //width of the robot on the half it is defending
             float standingSideBlockHalfSize = 18.; //width of the robot on the half it is defending
 
             cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << endl;
+            cout << "Relative X pos: " << relativeBallPosition.x << ", Relative X vel: " << relativeBallVelocity.x << endl;
+            cout << velocityErrorMagnitude << " position:" << positionErrorMagnitude << " time ball seen: " << ball.TimeSeen() << endl;
             
             string blockSide;
             if (interceptY > 0) {
@@ -154,7 +158,7 @@ bool TestKeeperProvider::doSave(float maxInterceptTime,float interceptErrorFract
                 blockType = "DiveBlock";
             }
             
-            //cout << "Saving!" << endl;
+            cout << "Saving!" << endl;
             ScriptJob* currentSave = new ScriptJob(m_data->CurrentTime+10, "Save"+blockSide); //blockType+blockSide);
             //m_script.play(m_data,m_actions);
             m_jobs->addMotionJob(currentSave);
