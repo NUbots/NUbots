@@ -11,13 +11,30 @@ void GoalDetection::detectGoals()
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
 
+    // REMOVE ME
+//    cv::Mat cvimg;
+//    lut.classifyImage(img, cvimg);
+
+
     vector<Quad> blue_candidates, yellow_candidates, blue_posts, yellow_posts, blue_beacons, yellow_beacons, unknown_beacons;
 
     detectGoal(ClassIndex::blue, &blue_candidates);
     detectGoal(ClassIndex::yellow, &yellow_candidates);
 
+
+//    for (unsigned int i = 0; i < blue_candidates.size(); i++) {
+//        //cout << blue_candidates.at(i).getAsScalar().val[0] << endl;
+//        cv::rectangle(cvimg, cv::Point(blue_candidates.at(i).getAsScalar().val[0], blue_candidates.at(i).getAsScalar().val[1]), cv::Point(blue_candidates.at(i).getAsScalar().val[2], blue_candidates.at(i).getAsScalar().val[3]), cv::Scalar(0,255,255), 2);
+//    }
+//    for (unsigned int i = 0; i < yellow_candidates.size(); i++) {
+//        cv::rectangle(cvimg, cv::Point(yellow_candidates.at(i).getAsScalar().val[0], yellow_candidates.at(i).getAsScalar().val[1]), cv::Point(yellow_candidates.at(i).getAsScalar().val[2], yellow_candidates.at(i).getAsScalar().val[3]), cv::Scalar(255,0,0), 2);
+//    }
+
     // SPLIT INTO OBJECTS
     splitIntoObjects(&blue_candidates, &yellow_candidates, &blue_posts, &yellow_posts, &blue_beacons, &yellow_beacons, &unknown_beacons);
+
+    //cout << "BLUE BEACONS: " << blue_beacons.size() << endl;
+    //cout << "YELLOW BEACONS: " << yellow_beacons.size() << endl;
 
     // WIDTH CHECK
     widthCheck(&blue_posts);
@@ -34,26 +51,143 @@ void GoalDetection::detectGoals()
     overlapCheck(&blue_posts);
     overlapCheck(&yellow_posts);
 
+    // ROBOCUP HACKS -----------------------------------------------------------------------------------------------
+
+    // MULTIPLE BEACONS (best performance for now; fix later)
+    if (blue_beacons.size() > 1) {
+        if (blue_beacons.size() == 2) {
+            int left = std::min(blue_beacons.at(0).getAsScalar().val[0], blue_beacons.at(1).getAsScalar().val[0]);
+            int right = std::max(blue_beacons.at(0).getAsScalar().val[2], blue_beacons.at(1).getAsScalar().val[2]);
+            int top = std::min(blue_beacons.at(0).getAsScalar().val[1], blue_beacons.at(1).getAsScalar().val[1]);
+            int bottom = std::max(blue_beacons.at(0).getAsScalar().val[3], blue_beacons.at(1).getAsScalar().val[3]);
+
+            blue_beacons.clear();
+            blue_beacons.push_back(Quad(left, top, right, bottom));
+        }
+        else
+            blue_beacons.clear();   // way too many beacons!
+    }
+    if (yellow_beacons.size() > 1) {
+        if (yellow_beacons.size() == 2) {
+            int left = std::min(yellow_beacons.at(0).getAsScalar().val[0], yellow_beacons.at(1).getAsScalar().val[0]);
+            int right = std::max(yellow_beacons.at(0).getAsScalar().val[2], yellow_beacons.at(1).getAsScalar().val[2]);
+            int top = std::min(yellow_beacons.at(0).getAsScalar().val[1], yellow_beacons.at(1).getAsScalar().val[1]);
+            int bottom = std::max(yellow_beacons.at(0).getAsScalar().val[3], yellow_beacons.at(1).getAsScalar().val[3]);
+
+            yellow_beacons.clear();
+            yellow_beacons.push_back(Quad(left, top, right, bottom));
+        }
+        else
+            yellow_beacons.clear();   // way too many beacons!
+    }
+
+    vector<Quad>::iterator it;
+    it = blue_posts.begin();
+    while (it < blue_posts.end()) {
+        bool done = false;
+        int left = it->getAsScalar().val[0];
+        int right = it->getAsScalar().val[2];
+
+        for (unsigned int i = 0; i < blue_beacons.size(); i++) {
+            int beacon_left = blue_beacons.at(i).getAsScalar().val[0];
+            int beacon_right = blue_beacons.at(i).getAsScalar().val[2];
+            if (beacon_left > beacon_right) {
+                int temp = beacon_left;
+                beacon_left = beacon_right;
+                beacon_right = temp;
+            }
+            if ((left >= beacon_left && left <= beacon_right) || (right >= beacon_left && right <= beacon_right)) {
+                it = blue_posts.erase(it);
+                //cout << "BLUE POST INSIDE BLUE BEACON - REMOVE" << endl;
+                done = true;
+                break;
+            }
+        }
+        if (done) continue;
+        for (unsigned int i = 0; i < yellow_beacons.size(); i++) {
+            int beacon_left = yellow_beacons.at(i).getAsScalar().val[0];
+            int beacon_right = yellow_beacons.at(i).getAsScalar().val[2];
+            if (beacon_left > beacon_right) {
+                int temp = beacon_left;
+                beacon_left = beacon_right;
+                beacon_right = temp;
+            }
+            if ((left >= beacon_left && left <= beacon_right) || (right >= beacon_left && right <= beacon_right)) {
+                it = blue_posts.erase(it);
+                //cout << "BLUE POST INSIDE YELLOW BEACON - REMOVE" << endl;
+                done = true;
+                break;
+            }
+        }
+        if (done) continue;
+        it++;
+    }
+
+    it = yellow_posts.begin();
+    while (it < yellow_posts.end()) {
+        bool done = false;
+        int left = it->getAsScalar().val[0];
+        int right = it->getAsScalar().val[2];
+
+        for (unsigned int i = 0; i < blue_beacons.size(); i++) {
+            int beacon_left = blue_beacons.at(i).getAsScalar().val[0];
+            int beacon_right = blue_beacons.at(i).getAsScalar().val[2];
+            if (beacon_left > beacon_right) {
+                int temp = beacon_left;
+                beacon_left = beacon_right;
+                beacon_right = temp;
+            }
+            if ((left >= beacon_left && left <= beacon_right) || (right >= beacon_left && right <= beacon_right)) {
+                it = yellow_posts.erase(it);
+                //cout << "YELLOW POST INSIDE BLUE BEACON - REMOVE" << endl;
+                done = true;
+                break;
+            }
+        }
+        if (done) continue;
+        for (unsigned int i = 0; i < yellow_beacons.size(); i++) {
+            int beacon_left = yellow_beacons.at(i).getAsScalar().val[0];
+            int beacon_right = yellow_beacons.at(i).getAsScalar().val[2];
+            if (beacon_left > beacon_right) {
+                int temp = beacon_left;
+                beacon_left = beacon_right;
+                beacon_right = temp;
+            }
+            if ((left >= beacon_left && left <= beacon_right) || (right >= beacon_left && right <= beacon_right)) {
+                it = yellow_posts.erase(it);
+                //cout << "YELLOW POST INSIDE YELLOW BEACON - REMOVE" << endl;
+                done = true;
+                break;
+            }
+        }
+        if (done) continue;
+        it++;
+    }
+
+    // ROBOCUP HACKS -----------------------------------------------------------------------------------------------
+
     // DENSITY CHECK
 
     // yellow
-    DensityCheck(true, &yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
-    DensityCheck(true, &yellow_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_YELLOW);
-    DensityCheck(true, &unknown_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_YELLOW);
+    DensityCheck(true, false, &yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
+    DensityCheck(true, true, &yellow_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_YELLOW);
+    DensityCheck(true, true, &unknown_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_YELLOW);
 
     // blue
-    DensityCheck(false, &blue_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_BLUE);
-    DensityCheck(false, &blue_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_BLUE);
-    DensityCheck(false, &unknown_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_BLUE);
+    DensityCheck(false, false, &blue_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_BLUE);
+    DensityCheck(false, true, &blue_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_BLUE);
+    DensityCheck(false, true, &unknown_beacons, &img, &lut, VisionConstants::BEACON_MIN_PERCENT_BLUE);
 
     
     //ADD TO BLACKBOARD
     // BLUE BEACONS
+    //cout << "BLUE BEACONS (AFTER): " << blue_beacons.size() << endl;
     for (unsigned int i = 0; i < blue_beacons.size(); i++) {
         Beacon beacon(Beacon::BlueBeacon, blue_beacons.at(i));
         vbb->addBeacon(beacon);
     }
     // YELLOW BEACONS
+    //cout << "YELLOW BEACONS (AFTER): " << yellow_beacons.size() << endl;
     for (unsigned int i = 0; i < yellow_beacons.size(); i++) {
         Beacon beacon(Beacon::YellowBeacon, yellow_beacons.at(i));
         vbb->addBeacon(beacon);
@@ -109,15 +243,26 @@ void GoalDetection::detectGoals()
             vbb->addGoal(post_right);
         }
     }
+
+
+
+//        cv::namedWindow("beacondetect", CV_WINDOW_KEEPRATIO);
+//        cv::imshow("beacondetect", cvimg);
 }
 
-void GoalDetection::DensityCheck(bool yellow, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
+void GoalDetection::DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
 {
-    ClassIndex::Colour colour;
-    if (yellow)
+    ClassIndex::Colour colour, other_colour;
+    if (yellow) {
         colour = ClassIndex::yellow;
-    else
+        other_colour = ClassIndex::blue;
+    }
+    else {
         colour = ClassIndex::blue;
+        other_colour = ClassIndex::yellow;
+    }
+
+    //cout << "PERCENT_REQUIRED: " << PERCENT_REQUIRED << endl;
 
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
@@ -128,20 +273,41 @@ void GoalDetection::DensityCheck(bool yellow, vector<Quad>* posts, NUImage* img,
         top = candidate.getTopRight().y;
         bottom = candidate.getBottomLeft().y;
 
+        //cout << "LEFT: " << left << "\tRIGHT: " << right << "\tTOP: " << top << "\tBOTTOM: " << bottom << endl;
+
+        // should probably fix the cause of this at some point...
+        if (left > right) {
+            int temp = left;
+            left = right;
+            right = temp;
+        }
+        if (top > bottom) {
+            int temp = top;
+            top = bottom;
+            bottom = temp;
+        }
+
         int count = 0;
+        int other_count = 0;
 
         for (int i = left; i < right; i++) {
             for (int j = top; j < bottom; j++) {
                 if (ClassIndex::getColourFromIndex(lut->classifyPixel((*img)(i, j))) == colour)
                     count++;
+                else if (ClassIndex::getColourFromIndex(lut->classifyPixel((*img)(i, j))) == other_colour)
+                    other_count++;
             }
         }
-        if (((double)count)/((right-left)*(bottom-top)) < PERCENT_REQUIRED)
+        if (((double)count)/((right-left)*(bottom-top)) < PERCENT_REQUIRED) {
             it = posts->erase(it);
-        else {
             #if VISION_FIELDOBJECT_VERBOSITY > 1
                 debug << "GoalDetection::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
             #endif
+        }
+        else if (other_count > 0 && !beacon) {
+            it = posts->erase(it);
+        }
+        else {
             it++;
         }
     }
@@ -159,7 +325,9 @@ void GoalDetection::ratioCheck(vector<Quad>* posts)
         int width = candidate.getWidth();
 //        int height = candidate.val[3] - candidate.val[1],
 //            width = candidate.val[2] - candidate.val[0];
-        if (height/width < HEIGHT_TO_WIDTH_RATIO_LOW || height/width > HEIGHT_TO_WIDTH_RATIO_HIGH)
+        if (width == 0)
+            it = posts->erase(it);
+        else if (height/width < HEIGHT_TO_WIDTH_RATIO_LOW || height/width > HEIGHT_TO_WIDTH_RATIO_HIGH)
             it = posts->erase(it);
         else
             it++;
@@ -225,12 +393,32 @@ void GoalDetection::splitIntoObjects(vector<Quad>* blue_candidates, vector<Quad>
                 int y_bottom = (int)yellow.val[1];
                 int b_top = (int)blue.val[3];
                 int b_bottom = (int)blue.val[1];
-                if (y_top >= b_top && y_bottom <= b_bottom)
-                    yellow_beacons->push_back(Quad(min(b_start, y_start), y_bottom, max(b_end, y_end), y_top));
-                else if (b_top >= y_top && b_bottom <= y_bottom)
+
+                // this is bullshit...
+//                if (b_start > b_end) {
+//                    int temp = b_start;
+//                    b_start = b_end;
+//                    b_end = temp;
+//                }
+//                if (y_start > y_end) {
+//                    int temp = y_start;
+//                    y_start = y_end;
+//                    y_end = temp;
+//                }
+
+
+                if (y_top >= b_top && y_bottom <= b_bottom) {
+                    //cout << "YELLOW BEACON:\tLEFT: " <<  min(b_start, y_start) << "\tTOP: " << y_bottom << "\tRIGHT: " << max(b_end, y_end) << "\tBOTTOM:" << y_top << endl;
                     blue_beacons->push_back(Quad(min(b_start, y_start), b_bottom, max(b_end, y_end), b_top));
-                else
+                }
+                else if (b_top >= y_top && b_bottom <= y_bottom) {
+                    //cout << "BLUE BEACON" << endl;
+                    yellow_beacons->push_back(Quad(min(b_start, y_start), y_bottom, max(b_end, y_end), y_top));
+                }
+                else {
+                    //cout << "UNKNOWN BEACON" << endl;
                     unknown_beacons->push_back(Quad(min(b_start, y_start), min(b_bottom, y_bottom), max(b_end, y_end), max(b_top, y_top)));
+                }
                 is_beacon = true;
                 yellow_candidates->erase(y_it);
                 break;
@@ -268,7 +456,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     const int BINS = 20;
     const int WIDTH = VisionBlackboard::getInstance()->getImageWidth();
     const int BIN_WIDTH = WIDTH/BINS;
-    const int MIN_THRESHOLD = 5;
+    const int MIN_THRESHOLD = 1;
     const float SDEV_THRESHOLD = 0.75;
 
     int histogram[2][BINS], peaks[2][MAX_OBJECTS], peak_widths[2][MAX_OBJECTS];

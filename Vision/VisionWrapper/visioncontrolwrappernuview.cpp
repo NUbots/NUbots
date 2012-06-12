@@ -22,12 +22,12 @@ VisionControlWrapper::VisionControlWrapper()
 
 int VisionControlWrapper::runFrame()
 {
-    static int frame = 0;
+    static unsigned int frame = 0;
     int status;
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
     #endif
-    frame++;
+    frame = (frame + 1) % 10000;
     
     if(!wrapper->updateFrame()) {
         #if VISION_WRAPPER_VERBOSITY > 1
