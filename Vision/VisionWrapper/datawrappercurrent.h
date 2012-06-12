@@ -1,8 +1,6 @@
 #ifndef DATAWRAPPERCURRENT_H
 #define DATAWRAPPERCURRENT_H
 
-//#define PC_WRAPPER 1
-
 #ifdef TARGET_IS_PC
     #include "Vision/VisionWrapper/datawrapperpc.h"
 #elif TARGET_IS_NUVIEW

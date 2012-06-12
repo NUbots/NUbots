@@ -13,7 +13,7 @@ contains(PLATFORM, "darwin") {
     DEFINES += TARGET_IS_DARWIN
 
     #ROBOCUP_DIR = ${HOME}/robocup/            #change to darwin directory later
-    ROBOCUP_DIR = /home/shannon/robocup/
+    ROBOCUP_DIR = /home/david/robocup/
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Autoconfig/
     
@@ -35,7 +35,7 @@ contains(PLATFORM, "pc") {
     DEFINES += TARGET_IS_PC
 
     #ROBOCUP_DIR = ${HOME}/robocup/
-    ROBOCUP_DIR = /home/shannon/robocup/
+    ROBOCUP_DIR = /home/david/robocup/
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
   

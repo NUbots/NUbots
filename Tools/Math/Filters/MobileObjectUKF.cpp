@@ -4,7 +4,7 @@
 
 MobileObjectUKF::MobileObjectUKF(): UKF(total_states)
 {
-    m_velocity_decay = 0.98;    // Randomly guessed decay -- may not represent the real world.
+    m_velocity_decay = 0.96;    // Randomly guessed decay -- may not represent the real world.
 }
 
 MobileObjectUKF::~MobileObjectUKF()
