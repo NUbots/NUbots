@@ -11,7 +11,7 @@ macx {
     UI_DIR = "../Build/NUView/.ui"
     #Macports include directory
     INCLUDEPATH += '/opt/local/include'
-    LIBS += /opt/local/lib/libopencv_core.dylib /opt/local/lib/libopencv_highgui.dylib
+    LIBS +=  -lopencv_core -lopencv_highgui -lopencv_imgproc
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
