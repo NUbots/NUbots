@@ -70,6 +70,8 @@ DataWrapper::DataWrapper()
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
     Blackboard->lookForBall = true; //initialise
     Blackboard->lookForLandmarks = true; //initialise
+    isSavingImages = false;
+    isSavingImagesWithVaryingSettings = false;
 }
 
 DataWrapper::~DataWrapper()
@@ -328,8 +330,6 @@ bool DataWrapper::updateFrame()
     actions = Blackboard->Actions;
     sensor_data = Blackboard->Sensors;
     field_objects = Blackboard->Objects;
-    
-    
     
     if (current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
         numFramesDropped++;
