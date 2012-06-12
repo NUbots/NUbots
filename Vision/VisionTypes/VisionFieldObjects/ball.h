@@ -20,7 +20,7 @@ public:
     friend ostream& operator<< (ostream& output, const vector<Ball>& b);
     
 private:
-    void calculatePositions();
+    bool calculatePositions();
     float distanceToBall(float bearing, float elevation);
     
 private:

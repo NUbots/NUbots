@@ -34,7 +34,7 @@ public:
     friend ostream& operator<< (ostream& output, const vector<Goal>& g);    
     
 private:
-    void calculatePositions();
+    bool calculatePositions();
     float distanceToGoal(float bearing, float elevation);
     
 private:    

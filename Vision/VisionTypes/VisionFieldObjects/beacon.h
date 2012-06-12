@@ -29,7 +29,7 @@ public:
     friend ostream& operator<< (ostream& output, const vector<Beacon>& b);
     
 private:
-    void calculatePositions();
+    bool calculatePositions();
     float distanceToBeacon(float bearing, float elevation);
     
 private:

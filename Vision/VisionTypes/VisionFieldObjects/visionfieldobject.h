@@ -54,6 +54,7 @@ protected:
     Vector3<float> m_spherical_error;
     Vector3 <float> m_transformed_spherical_pos;
     bool valid;
+    bool distance_valid;
 };
 
 #endif // VISIONFIELDOBJECT_H

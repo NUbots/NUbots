@@ -18,10 +18,12 @@ public:
     friend ostream& operator<< (ostream& output, const vector<Obstacle>& o);
     
 private:
-    void calculatePositions();
+    bool calculatePositions();
+    float distanceToObstacle(float bearing, float elevation);
     
-private:    
+private:
     Vector2<int> m_bottom_centre;
+    float d2p;
 };
 
 #endif // OBSTACLE_H
