@@ -88,6 +88,41 @@ DarwinSensors::~DarwinSensors()
     delete cm730;
 }
 
+std::string DarwinSensors::error2Description(unsigned int errorValue)
+{
+    std::string error_description;
+    if(errorValue == 0x0000) return "No Errors";
+    if(errorValue & 0x0001)
+    {
+        error_description.append("Input Voltage Error; ");
+    }
+    if(errorValue & 0x0002)
+    {
+        error_description.append("Angle Limit Error; ");
+    }
+    if(errorValue & 0x0004)
+    {
+        error_description.append("OverHeating Error; ");
+    }
+    if(errorValue & 0x0008)
+    {
+        error_description.append("Range Error; ");
+    }
+    if(errorValue & 0x0010)
+    {
+        error_description.append("Checksum Error; ");
+    }
+    if(errorValue & 0x0020)
+    {
+        error_description.append("Overload Error; ");
+    }
+    if(errorValue & 0x0040)
+    {
+        error_description.append("Instruction Error; ");
+    }
+    return error_description;
+}
+
 /*! @brief Copys the sensors data from the hardware communication module to the NUSensorsData container
  */
 void DarwinSensors::copyFromHardwareCommunications()
@@ -120,9 +155,9 @@ void DarwinSensors::copyFromHardwareCommunications()
 
         for(int i=0; i<NUM_MOTORS; i++) {
             #if DEBUG_NUSENSORS_VERBOSITY > 0
-                debug << "ID: " << error_fields[i][0] << " err: " << error_fields[i][1] << endl;
+                debug << "ID: " << error_fields[i][0] << " err: " << error2Description(error_fields[i][1]) << endl;
             #endif
-            errorlog << "ID: " << error_fields[i][0] << " err: " << error_fields[i][1] << endl;
+            errorlog << "ID: " << error_fields[i][0] << " err: " << error2Description(error_fields[i][1]) << endl;
         }
 
 //        cm730->DXLPowerOff();
@@ -189,7 +224,7 @@ void DarwinSensors::copyFromJoints()
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
 
         //error fields
-        error_fields[i][0] = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(int(Robot::MX28::P_ID));
+        error_fields[i][0] = int(platform->m_servo_IDs[i]);
         error_fields[i][1] = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].error;
         if(error_fields[i][1] != 0)
             motor_error = true;

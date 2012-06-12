@@ -59,6 +59,7 @@ protected:
 
     vector<vector<int> > error_fields;      //! A vector of motor id/error field pairs
     bool motor_error;                       //! A flag to indicate a motor indicated an error
+    std::string error2Description(unsigned int errorValue);
 
 private:
     static const unsigned int NUM_MOTORS=20;
