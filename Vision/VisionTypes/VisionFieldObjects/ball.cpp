@@ -221,7 +221,7 @@ float Ball::distanceToBall(float bearing, float elevation) {
     switch(VisionConstants::BALL_DISTANCE_METHOD) {
     case VisionConstants::D2P:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Ball::distanceToBall: Method: Combo" << endl;
+            debug << "Ball::distanceToBall: Method: D2P" << endl;
         #endif
         distance_valid = d2pvalid;
         return d2p;
