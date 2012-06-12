@@ -441,26 +441,59 @@ double VisionBlackboard::getCameraDistanceInPixels() const
 
 bool VisionBlackboard::distanceToPoint(float bearing, float elevation, float& distance) const
 {
+    #if VISION_BLACKBOARD_VERBOSITY > 1
+        debug << "VisionBlackboard::distanceToPoint: called with bearing: " << bearing << " elevation: " << elevation << " VisionConstants::D2P_ANGLE_CORRECTION: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
+    #endif
     float theta = 0;
     if(camera_height_valid && camera_pitch_valid) {
         //resultant angle inclusive of body pitch, camera pitch, pixel elevation and angle correction factor
-        theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;    
+        theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
+        #if VISION_BLACKBOARD_VERBOSITY > 2
+            debug << "VisionBlackboard::distanceToPoint: theta: " << theta << endl;
+        #endif
         if(VisionConstants::D2P_INCLUDE_BODY_PITCH) {
+            #if VISION_BLACKBOARD_VERBOSITY > 1
+                debug << "VisionBlackboard::distanceToPoint: include body pitch" << endl;
+            #endif
             if(body_pitch_valid) {
+                #if VISION_BLACKBOARD_VERBOSITY > 1
+                    debug << "VisionBlackboard::distanceToPoint: body pitch valid: " << body_pitch << endl;
+                #endif
                 distance = camera_height / cos(theta - body_pitch) / cos(bearing);
+                #if VISION_BLACKBOARD_VERBOSITY > 1
+                    debug << "VisionBlackboard::distanceToPoint: distance: " << distance << endl;
+                #endif
                 return true;
             }
             else {
+                #if VISION_BLACKBOARD_VERBOSITY > 1
+                    debug << "VisionBlackboard::distanceToPoint: body pitch invalid" << endl;
+                #endif
                 distance = 0;
                 return false;
             }
         }
         else {
+            #if VISION_BLACKBOARD_VERBOSITY > 1
+                debug << "VisionBlackboard::distanceToPoint: don't include body pitch" << endl;
+            #endif
             distance = camera_height / cos(theta) / cos(bearing);
+            #if VISION_BLACKBOARD_VERBOSITY > 1
+                debug << "VisionBlackboard::distanceToPoint: distance: " << distance << endl;
+            #endif
             return true;
         }
     }
     else {
+        #if VISION_BLACKBOARD_VERBOSITY > 1
+            debug << "VisionBlackboard::distanceToPoint: ";
+            if(!camera_height_valid)
+                 debug << "camera height invalid ";
+            if(!camera_pitch_valid)
+                debug << "camera height invalid ";
+            debug << endl;
+        #endif
+        distance = 0;
         return false;
     }
 }
