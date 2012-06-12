@@ -93,6 +93,7 @@ protected:
         void drawObjects();
         void drawOverlays();
 
+        void drawTriColourBeacon(const QColor& bottomColour, const QColor& middleColour, const QColor& topColour, float x, float y);
         void drawGoal(QColor colour, float x, float y, float facing);
         void drawBall(QColor colour, float x, float y);
         void drawBallMarker(QColor markerColour, float x, float y);

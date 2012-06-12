@@ -480,15 +480,62 @@ void locWmGlDisplay::drawField()
     glDisable(GL_BLEND);            // Turn Blending Off
     glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
 
-    drawGoal(QColor(0,0,255,255),-300,0.0,0.0);
-    drawGoal(QColor(255,255,0,255),300,0.0,180.0);
+    drawGoal(Qt::blue,-300,0.0,0.0);
+    drawGoal(Qt::yellow,300,0.0,180.0);
+    drawTriColourBeacon(Qt::yellow, Qt::blue, Qt::yellow, 0.f, 240.f);
+    drawTriColourBeacon(Qt::blue, Qt::yellow, Qt::blue, 0.f, -240.f);
+    glPopMatrix();
+}
+
+void locWmGlDisplay::drawTriColourBeacon(const QColor& bottomColour, const QColor& middleColour, const QColor& topColour, float x, float y)
+{
+    const float postRadius  = 5.f;
+    const float segmentHeight = 15.f;
+    const int slices = 64;
+    const int stacks = 64;
+    const int loops = 64;
+
+    glPushMatrix();
+    GLfloat currentColour[4];
+
+    glShadeModel(GL_SMOOTH);    		// Enable Smooth Shading
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+
+    GLUquadric* quad = gluNewQuadric();
+    gluQuadricDrawStyle(quad, GLU_FILL);
+    gluQuadricNormals(quad, GLU_SMOOTH);	// Create Smooth Normals
+
+    glTranslatef(x,y,0.0f);    // Move to centre of beacon.
+    qSetColor(currentColour, bottomColour);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, currentColour);
+    gluCylinder(quad,postRadius,postRadius,segmentHeight,slices,stacks);	// Draw lower segment
+
+    glTranslatef(0,0,segmentHeight);    // Move up to next segment.
+    qSetColor(currentColour, middleColour);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, currentColour);
+    gluCylinder(quad,postRadius,postRadius,segmentHeight,slices,stacks);	// Draw middle segment
+
+    glTranslatef(0,0,segmentHeight);    // Move up to next segment.
+    qSetColor(currentColour, topColour);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, currentColour);
+    gluCylinder(quad,postRadius,postRadius,segmentHeight,slices,stacks);	// Draw top segment
+
+    // Draw to top cap
+    glTranslatef(0,0,segmentHeight);
+    gluDisk(quad, 0.0, postRadius, slices, loops);
+
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     glPopMatrix();
 }
 
 void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
 {
-    float postRadius = 5;
-    float crossBarRadius = 2.5;
+    const float postRadius = 5.f;
+    const float crossBarRadius = 2.5f;
+    const float postHeight = 80.f;
+    const int slices = 64;
+    const int stacks = 64;
+    const int loops = 64;
     glPushMatrix();
     GLfloat goalColour[4];
     qSetColor(goalColour, colour);
@@ -509,7 +556,10 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
     glRotatef(facing,0.0f,0.0f,1.0f);				// Rotate The Pyramid On It's Y Axis
 
     glTranslatef(0.0f,70.0f,0.0f);    // Move to right post.
-    gluCylinder(quad,postRadius,postRadius,80.0f,128,128);	// Draw right post
+    gluCylinder(quad,postRadius,postRadius,postHeight,slices,stacks);	// Draw right post
+    glTranslatef(0.0f,0.0f,postHeight);    // Move to top of post.
+    gluDisk(quad,0.f,postRadius,slices,loops);	// Draw cap
+    glTranslatef(0.0f,0.0f,-postHeight);    // Move back down
 
 
     // Draw right post triangle.
@@ -523,7 +573,10 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
 
     glTranslatef(0.0f,-2*70.0f,0.0f);    // Move to left post.
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, goalColour);
-    gluCylinder(quad,postRadius,postRadius,80.0f,128,128);	// Draw left post
+    gluCylinder(quad,postRadius,postRadius,postHeight,slices,stacks);	// Draw left post
+    glTranslatef(0.0f,0.0f,postHeight);    // Move to top of post.
+    gluDisk(quad,0.f,postRadius,slices,loops);	// Draw cap
+    glTranslatef(0.0f,0.0f,-postHeight);    // Move back down.
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
     glBegin(GL_TRIANGLES);				// Drawing Using Triangles
@@ -532,10 +585,10 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
         glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);	// Bottom Left
     glEnd();						// Finished Drawing The Triangle
 
-    glTranslatef(0.0f,-postRadius,80.0f - crossBarRadius);    // Move to top of left post.
+    glTranslatef(0.0f,0.f, postHeight - crossBarRadius - 1);    // Move to top of left post.
     glRotatef(-90.0,1.0f,0.0f,0.0f);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, goalColour);
-    gluCylinder(quad,crossBarRadius,crossBarRadius,140.0f+2.0f*postRadius,128,128);	// Draw cross bar
+    gluCylinder(quad,crossBarRadius,crossBarRadius,140.0f,slices,stacks);	// Draw cross bar
 
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     glPopMatrix();
