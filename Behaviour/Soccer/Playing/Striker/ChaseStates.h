@@ -181,14 +181,16 @@ protected:
             else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 70)
+                if (ball.isObjectVisible())
                 {
                     #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                         debug << m_data->CurrentTime << ": Tracking ball" << endl;
                     #endif
                     //cout << m_data->CurrentTime << ": Tracking ball" << endl;
                     m_jobs->addMotionJob(new HeadTrackJob(ball));
-                } else {
+                }
+                else if (ball.TimeSinceLastSeen() < 70)
+                {
                     m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
                 }
             }
