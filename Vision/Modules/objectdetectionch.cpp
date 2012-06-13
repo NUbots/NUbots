@@ -96,7 +96,7 @@ void ObjectDetectionCH::detectObjects()
     int start = 0, count = 0, bottom = 0;
     bool scanning = false;
 
-    for (int i = 0; i < object_points.size(); i++) {
+    for (unsigned int i = 0; i < object_points.size(); i++) {
         if (!scanning) {
             start = i;
             scanning = true;
@@ -104,7 +104,7 @@ void ObjectDetectionCH::detectObjects()
             bottom = 0;
         }
         else {
-            if (object_points.at(i).x - object_points.at(i-1).x == VisionConstants::VERTICAL_SCANLINE_SPACING && (i < object_points.size()-1)) {
+            if (object_points.at(i).x - object_points.at(i-1).x == static_cast<int>(VisionConstants::VERTICAL_SCANLINE_SPACING) && (i < object_points.size()-1)) {
                 count++;
                 if (object_points.at(i).y > bottom)
                     bottom = object_points.at(i).y;

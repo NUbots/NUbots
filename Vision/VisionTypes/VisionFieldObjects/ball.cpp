@@ -105,7 +105,7 @@ bool Ball::check() const
     
     //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
     if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL and
-            width_dist + VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL < d2p) {
+            abs(width_dist - d2p) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Ball::check - Ball thrown out: width distance too much smaller than d2p" << endl;
             debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << endl;
@@ -210,7 +210,7 @@ float Ball::distanceToBall(float bearing, float elevation) {
     #endif
         
     //get distance from width
-    width_dist = VisionConstants::BALL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
+    width_dist = VisionConstants::BALL_WIDTH*vbb->getCameraDistanceInPixels()/(m_size_on_screen.x);
 
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Ball::distanceToBall: bearing: " << bearing << " elevation: " << elevation << endl;

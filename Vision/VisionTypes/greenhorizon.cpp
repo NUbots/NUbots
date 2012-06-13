@@ -29,7 +29,7 @@ void GreenHorizon::set(const vector<PointType> &initial_points)
     vector<PointType>::const_iterator it_start, it_end;
     it_start = original_points.begin();
     it_end = it_start + 1;
-    for (unsigned int i = 0; i < width; i++) {
+    for (int i = 0; i < width; i++) {
         // consider hull points either side of current x value
         while (i > it_end->x) {
             it_start++;
