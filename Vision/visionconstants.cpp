@@ -374,13 +374,13 @@ void VisionConstants::loadFromFile(std::string filename)
 
 VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)
 {
-    if(name.compare("Width") == 0)
+    if(name.compare("WIDTH") == 0)
         return Width;
     else if(name.compare("D2P") == 0)
         return D2P;
-    else if(name.compare("Least") == 0)
+    else if(name.compare("LEAST") == 0)
         return Least;
-    else if(name.compare("Average") == 0)
+    else if(name.compare("AVERAGE") == 0)
         return Average;
 
     //no match - return default
@@ -393,9 +393,9 @@ VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::
 std::string VisionConstants::getDistanceMethodName(VisionConstants::DistanceMethod method)
 {
     switch(method) {
-    case Width:     return "Width";
+    case Width:     return "WIDTH";
     case D2P:       return "D2P";
-    case Average:   return "Average";
-    case Least:     return "Least";
+    case Average:   return "AVERAGE";
+    case Least:     return "LEAST";
     }
 }
