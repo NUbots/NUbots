@@ -67,6 +67,7 @@ class SelfLocalisation: public TimestampedData
         unsigned int getNumActiveModels();
         unsigned int getNumFreeModels();
         const SelfModel* getBestModel() const;
+        const MobileObjectUKF* getBallModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
 
@@ -129,6 +130,26 @@ class SelfLocalisation: public TimestampedData
 
         // Implementation of virtual function from TimestampedData class.
         double GetTimestamp() const {return m_timestamp;}
+
+        static char header(){return 's';}
+
+        bool operator ==(const SelfLocalisation& b) const;
+        bool operator !=(const SelfLocalisation& b) const
+        {return (!((*this) == b));}
+
+        /*!
+        @brief Outputs a binary representation of the Self Localisation system.
+        @param output The output stream.
+        @return The output stream.
+        */
+        std::ostream& writeStreamBinary (std::ostream& output) const;
+
+        /*!
+        @brief Reads in a Self localisation system from the input stream.
+        @param input The input stream.
+        @return The input stream.
+        */
+        std::istream& readStreamBinary (std::istream& input);
 
         /*!
         @brief Output streaming operation.

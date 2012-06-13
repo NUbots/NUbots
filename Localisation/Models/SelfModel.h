@@ -77,6 +77,10 @@ public:
 
     bool clipState(int stateIndex, double minValue, double maxValue);
 
+    bool operator ==(const SelfModel& b) const;
+    bool operator !=(const SelfModel& b) const
+    {return (!((*this) == b));}
+
     /*!
     @brief Outputs a binary representation of the UKF object to a stream.
     @param output The output stream.

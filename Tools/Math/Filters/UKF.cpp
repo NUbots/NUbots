@@ -196,12 +196,36 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
     return true;
 }
 
+bool UKF::operator ==(const UKF& b) const
+{
+    // Check Moment portions are equal
+    const Moment* this_moment = this;
+    const Moment* other_moment = &b;
+    if(*this_moment != *other_moment)
+    {
+        return false;
+    }
+
+    // Check UnscentedTransform portions are equal
+    const UnscentedTransform* this_ut = this;
+    const UnscentedTransform* other_ut = &b;
+    if(*this_ut != *other_ut)
+    {
+        return false;
+    }
+
+    // Check other memebr variables.
+   if(m_mean_weights != b.m_mean_weights) return false;
+   if(m_covariance_weights != b.m_covariance_weights) return false;
+   if(m_sigma_points != b.m_sigma_points) return false;
+   if(m_sigma_mean != b.m_sigma_mean) return false;
+    return true;
+}
+
 std::ostream& UKF::writeStreamBinary (std::ostream& output) const
 {
     UnscentedTransform::writeStreamBinary(output);
     Moment::writeStreamBinary(output);
-    WriteMatrix(output, m_mean_weights);
-    WriteMatrix(output, m_covariance_weights);
     WriteMatrix(output, m_sigma_points);
     return output;
 }
@@ -210,9 +234,13 @@ std::istream& UKF::readStreamBinary (std::istream& input)
 {
     UnscentedTransform::readStreamBinary(input);
     Moment::readStreamBinary(input);
-    m_mean_weights = ReadMatrix(input);
-    m_covariance_weights = ReadMatrix(input);
+    CalculateWeights();
+
     m_sigma_points = ReadMatrix(input);
-    m_sigma_mean = CalculateMeanFromSigmas(m_sigma_points);
+    // make sure that the sigma points are not empty
+    if((m_sigma_points.getm() > 0) and (m_sigma_points.getn() > 0))
+    {
+        m_sigma_mean = CalculateMeanFromSigmas(m_sigma_points);
+    }
     return input;
 }

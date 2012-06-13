@@ -9,12 +9,14 @@
 #include <QHostAddress>
 #include <sstream>
 #include "Localisation/Localisation.h"
+#include "Localisation/SelfLocalisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
 locwmStreamWidget::locwmStreamWidget(QWidget *parent): QWidget(parent)
 {
 
     locwm = new Localisation();
+    selfLoc = new SelfLocalisation();
     objects = new FieldObjects();
     robotName = QString("");
     setWindowTitle(tr("Localisation"));
@@ -205,7 +207,7 @@ void locwmStreamWidget::readPendingData()
         datasize = imageSize + sensorsSize; // height*width*4+buffer.tellg()+sizeof(double)+ sizeof(NUSensorsData);
         */
         datasize = *(reinterpret_cast<const int*>(netdata.data())) + sizeof(datasize);
-        qDebug() << "Data size " << datasize;
+//        qDebug() << "Data size " << datasize;
         if(datasize < netdata.size())
         {
             qDebug() << "Throwing out data, Size is " << netdata.size() << "reported as" << datasize;
@@ -224,7 +226,7 @@ void locwmStreamWidget::readPendingData()
         netdata.append(tcpSocket->readAll());
     //}
     }
-    qDebug() << "Current Size" << netdata.size() << "out of" << datasize;
+//    qDebug() << "Current Size" << netdata.size() << "out of" << datasize;
     //emit PacketReady(&datagram);
     if(datasize == netdata.size())
     {
@@ -239,10 +241,35 @@ void locwmStreamWidget::readPendingData()
         emit sensorsDataChanged(&sensors);
         */
         buffer.write(reinterpret_cast<char*>(netdata.data() + sizeof(int)), datasize - sizeof(int));
-        //buffer >> (*locwm);
-        emit locwmDataChanged(locwm);
+        char header = buffer.peek();
+//        qDebug() << "Header: " << header;
 
-        if(buffer.str().size() - buffer.tellg() > 0)
+
+        bool packet_ok = false;
+        if(header == selfLoc->header())
+        {
+            qDebug() << "SelfLocalisation Packet received";
+            selfLoc->readStreamBinary(buffer);
+            packet_ok = true;
+            emit selfLocwmDataChanged(selfLoc);
+        }
+        else
+        {
+            qDebug() << "Bad Localisation packet received..";
+//            try{
+////            qDebug() << "Localisation Packet received";
+//            buffer >> (*locwm);
+//            }
+//            catch( char * str )
+//            {
+//                qDebug() << "Bad Localisation packet received..";
+//                return;
+//            }
+//            emit locwmDataChanged(locwm);
+        }
+
+
+        if( (packet_ok == true) and (buffer.str().size() - buffer.tellg() > 0) )
         {
             buffer >> (*objects);
             emit fieldObjectDataChanged(objects);
