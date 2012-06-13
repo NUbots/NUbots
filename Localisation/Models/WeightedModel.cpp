@@ -55,7 +55,7 @@ unsigned int WeightedModel::history(unsigned int steps_back) const
 {
     unsigned int result = 0;
     unsigned int index = m_parent_history_buffer.size() - steps_back;    // Oldest value is at [0], newest at [size - 1]
-    if((index < m_parent_history_buffer.size()) and (index >= 0))
+    if(index < m_parent_history_buffer.size())
     {
         result = m_parent_history_buffer.at(index);
     }

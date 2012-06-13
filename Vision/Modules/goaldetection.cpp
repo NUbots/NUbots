@@ -565,7 +565,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             counter = 0;
             for (unsigned int j = 0; j < start_trans.size(); j++)
                 if (start_trans.at(j).getLocation().x >= start_pos && start_trans.at(j).getLocation().x <= end_pos) {
-                    sdev += pow(start_trans.at(j).getLocation().x - mean, 2);
+                    sdev += pow(static_cast<float>(start_trans.at(j).getLocation().x - mean), 2);
                     counter++;
                 }
             sdev = sqrt(sdev/counter);
@@ -596,7 +596,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             counter = 0;
             for (unsigned int j = 0; j < start_trans.size(); j++)
                 if (end_trans.at(j).getLocation().x >= start_pos && end_trans.at(j).getLocation().x <= end_pos) {
-                    sdev += pow(end_trans.at(j).getLocation().x - mean, 2);
+                    sdev += pow(static_cast<float>(end_trans.at(j).getLocation().x - mean), 2);
                     counter++;
                 }
             sdev = sqrt(sdev/counter);

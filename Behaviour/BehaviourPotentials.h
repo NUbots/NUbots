@@ -145,7 +145,157 @@ public:
             return result;
         }
     }
-    
+
+    /*! @brief Returns a vector to go to a ball
+     */
+    static vector<float> goToBallDirectWithSidewardsKick(MobileObject& ball, Self& self, float heading, float kickingdistance = 15.0, float stoppingdistance = 65)
+    {
+        std::vector<float> speed(3, 0.0f);  // [Magnitude, Direction, Rotation]
+
+        float ballx, bally;
+        ballx = ball.X();
+        bally = ball.Y();
+
+        // Get the target goal (x,y) position.
+        float goalx, goaly;
+        if (Blackboard->GameInfo->getTeamColour() == GameInformation::RedTeam)
+        {
+            StationaryObject& leftpost = Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+            StationaryObject& rightpost = Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+            goalx = (leftpost.X() + rightpost.X()) / 2.0f;
+            goaly = (leftpost.Y() + rightpost.Y()) / 2.0f;
+        }
+        else
+        {
+            StationaryObject& leftpost = Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+            StationaryObject& rightpost = Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+            goalx = (leftpost.X() + rightpost.X()) / 2.0f;
+            goaly = (leftpost.Y() + rightpost.Y()) / 2.0f;
+        }
+
+        // Calculate the three possible kicking positions.
+        float A[2], B[2], C[2];
+        float distance_between_legs_on_2 = 10.0f / 2.0f;
+
+        A[0] = goalx;
+        A[1] = goaly;
+
+        B[0] = ballx;
+        B[1] = bally;
+
+        // Forward Kick
+        mathGeneral::ProjectFromAtoB(A, B, 1, C);
+
+        float x_diff = C[0] - B[0];
+        float y_diff = C[1] - B[1];
+
+        float fwd_angle = atan2(-y_diff, -x_diff);
+
+        float ball_bearing;
+        if(ball.isObjectVisible())
+        {
+            ball_bearing = ball.measuredBearing();
+        }
+        else
+        {
+            ball_bearing = ball.estimatedBearing();
+        }
+        bool offset_sign = mathGeneral::sign(ball_bearing);
+
+        float fwd_x = C[0] + x_diff * kickingdistance;
+        float fwd_y = C[1] + y_diff * kickingdistance;
+
+
+        fwd_x += -offset_sign * y_diff * distance_between_legs_on_2;
+        fwd_y += offset_sign * x_diff * distance_between_legs_on_2;
+
+        // Left side Kick (facing goal)
+        float left_side_x = ballx - y_diff * kickingdistance - x_diff * distance_between_legs_on_2 * 0.5;
+        float left_side_y = bally + x_diff * kickingdistance - y_diff * distance_between_legs_on_2 * 0.5;
+
+        // Right side Kick (facing goal)
+        float right_side_x = ballx + y_diff * kickingdistance - x_diff * distance_between_legs_on_2 * 0.5;
+        float right_side_y = bally - x_diff * kickingdistance - y_diff * distance_between_legs_on_2 * 0.5;
+
+        // Now get the closest kicking position
+
+        float my_x = self.wmX();
+        float my_y = self.wmY();
+        float my_heading = self.Heading();
+
+        float fwd_pos_distance_metric = fabs(my_x - fwd_x) + fabs(my_y - fwd_y);
+        float left_pos_distance_metric = fabs(my_x - left_side_x) + fabs(my_y - left_side_y);
+        float right_pos_distance_metric = fabs(my_x - right_side_y) + fabs(my_y - right_side_y);
+
+        float best_kicking_pos_x;
+        float best_kicking_pos_y;
+        float best_kicking_orientation;
+        // Forwards best
+        if( (fwd_pos_distance_metric < left_pos_distance_metric) and (fwd_pos_distance_metric < right_pos_distance_metric) )
+        {
+            best_kicking_pos_x = fwd_x;
+            best_kicking_pos_y = fwd_y;
+            best_kicking_orientation = fwd_angle;
+        }
+        // Left best
+        else if( (left_pos_distance_metric < fwd_pos_distance_metric) and (left_pos_distance_metric < right_pos_distance_metric) )
+        {
+            best_kicking_pos_x = left_side_x;
+            best_kicking_pos_y = left_side_y;
+            best_kicking_orientation = fwd_angle - 0.5*mathGeneral::PI;
+        }
+        // Right best
+        else if( (right_pos_distance_metric < fwd_pos_distance_metric) and (right_pos_distance_metric < left_pos_distance_metric) )
+        {
+            best_kicking_pos_x = right_side_x;
+            best_kicking_pos_y = right_side_y;
+            best_kicking_orientation = fwd_angle + 0.5*mathGeneral::PI;
+        }
+
+        x_diff = best_kicking_pos_x - my_x;
+        y_diff = best_kicking_pos_y - my_y;
+        float dist_to_kick_pos = sqrt(pow(x_diff,2) + pow(y_diff, 2));
+        float angle_to_kick_pos = mathGeneral::normaliseAngle(-atan2(y_diff, x_diff) - my_heading);
+
+        static bool turning = false;
+        float target_heading = (dist_to_kick_pos > stoppingdistance) ? angle_to_kick_pos : ball_bearing;
+
+
+
+        if(turning and fabs(target_heading) < 0.1)
+        {
+            turning = false;
+        }
+        else if (not turning and fabs(target_heading) > 0.5)
+        {
+            turning = true;
+        }
+
+        if(turning)
+        {
+            speed[0] = 0.1f; // 25% speed
+            speed[1] = (fabs(target_heading) < 0.5*mathGeneral::PI) ? 0 : mathGeneral::PI;
+            speed[2] = -0.6*target_heading;
+
+//            std::cout << "Calculated heading: " << -atan2(y_diff, x_diff) << std::endl;
+//            std::cout << "My heading: " << my_heading << std::endl;
+//            std::cout << "Heading to Ball: " << ball_bearing << std::endl;
+//            std::cout << "Ball Position: (" << ballx << ", " << bally << ")" << std::endl;
+//            std::cout << "Kick Position: (" << best_kicking_pos_x << ", " << best_kicking_pos_y << ")" << std::endl;
+//            std::cout << angle_to_kick_pos << std::endl;
+//            std::cout << "Turning." << std::endl;
+        }
+        else if(dist_to_kick_pos > stoppingdistance)
+        {
+            // Full speed ahead!
+            speed[0] = 1.0f; // 100% speed.
+            speed[1] = 0.0f;    // Straight
+            speed[2] = 0.0f;    // Straight
+//            std::cout << "Walking." << std::endl;
+        }
+        return speed;
+    }
+
     /*! @brief Returns a vector to go to a ball
      */
     static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 15.0, float stoppingdistance = 65)
@@ -173,9 +323,9 @@ public:
             float distance = ball.estimatedDistance(); //*cos(ball.estimatedElevation());
             float bearing = ball.estimatedBearing();
             
-            
-            
-            
+
+
+
 
             float x = distance * cos(bearing);
             float y = distance * sin(bearing);

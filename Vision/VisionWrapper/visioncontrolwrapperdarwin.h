@@ -2,7 +2,7 @@
 #define CONTROLWRAPPER_H
 
 #include "Infrastructure/Jobs/JobList.h"
-
+#include "Vision/Threads/SaveImagesThread.h"
 #include "Vision/visioncontroller.h"
 #include "Vision/VisionWrapper/datawrappercurrent.h"
 

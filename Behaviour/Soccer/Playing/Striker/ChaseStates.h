@@ -181,14 +181,16 @@ protected:
             else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 70)
+                if (ball.isObjectVisible())
                 {
                     #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                         debug << m_data->CurrentTime << ": Tracking ball" << endl;
                     #endif
                     //cout << m_data->CurrentTime << ": Tracking ball" << endl;
                     m_jobs->addMotionJob(new HeadTrackJob(ball));
-                } else {
+                }
+                else if (ball.TimeSinceLastSeen() < 70)
+                {
                     m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
                 }
             }
@@ -224,8 +226,8 @@ protected:
             #endif
         } else if(not iskicking)
         {
-            
             vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
+            //vector<float> speed = BehaviourPotentials::goToBallDirectWithSidewardsKick(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
             vector<float> result;
             // decide whether we need to dodge or not
             vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
