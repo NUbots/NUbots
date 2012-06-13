@@ -175,7 +175,7 @@ public:
 
         // Calculate the three possible kicking positions.
         float A[2], B[2], C[2];
-        float distance_between_legs_on_2 = 10.0f / 2.0f;
+        float distance_between_legs_on_2 = 15.0f / 2.0f;
 
         A[0] = goalx;
         A[1] = goaly;
@@ -255,14 +255,16 @@ public:
         x_diff = best_kicking_pos_x - my_x;
         y_diff = best_kicking_pos_y - my_y;
         float dist_to_kick_pos = sqrt(pow(x_diff,2) + pow(y_diff, 2));
-        float angle_to_kick_pos = mathGeneral::normaliseAngle(-atan2(y_diff, x_diff) - my_heading);
+        float angle_to_kick_pos = mathGeneral::normaliseAngle(atan2(y_diff, x_diff) - my_heading);
 
         static bool turning = false;
         float target_heading = (dist_to_kick_pos > stoppingdistance) ? angle_to_kick_pos : ball_bearing;
 
 
 
-        if(turning and fabs(target_heading) < 0.1)
+        if(turning and 
+            (fabs(target_heading) < 0.3 or 
+            fabs(target_heading) < 0.1 and dist_to_kick_pos < stoppingdistance))
         {
             turning = false;
         }
@@ -273,7 +275,7 @@ public:
 
         if(turning)
         {
-            speed[0] = 0.1f; // 25% speed
+            speed[0] = 0.1f; // 10% speed
             speed[1] = (fabs(target_heading) < 0.5*mathGeneral::PI) ? 0 : mathGeneral::PI;
             speed[2] = -0.6*target_heading;
 
@@ -292,6 +294,11 @@ public:
             speed[1] = 0.0f;    // Straight
             speed[2] = 0.0f;    // Straight
 //            std::cout << "Walking." << std::endl;
+        } else {
+            speed[0] = 0.5f; // 50% speed.
+            speed[1] = 0.0f;    // Straight
+            speed[2] = 0.0f;    // Straight
+        
         }
         return speed;
     }
