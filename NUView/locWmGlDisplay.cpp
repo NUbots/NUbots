@@ -364,6 +364,10 @@ void locWmGlDisplay::drawObjects()
     {
         DrawLocalisationObjects(*localLocalisation, m_localColour);
     }
+    if(m_self_loc)
+    {
+        DrawLocalisationObjects(*m_self_loc, m_selfColour);
+    }
 }
 
 void locWmGlDisplay::drawOverlays()
@@ -771,9 +775,7 @@ void locWmGlDisplay::DrawBallSigma(QColor colour, float x, float y)
 void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
 {
     QColor drawColor(modelColor);
-    int alpha = 255*model.alpha();
-    if(alpha < 25) alpha = 25;
-    drawColor.setAlpha(alpha);
+    int alpha = drawColor.alpha();
     drawRobot(drawColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
     if(drawSigmaPoints)
     {
@@ -784,6 +786,16 @@ void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
         }
     }
     drawBall(QColor(255,165,0,alpha), model.state(KF::ballX), model.state(KF::ballY));
+}
+
+void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const MobileObjectUKF& ball_model, const QColor& modelColor)
+{
+    QColor drawColor(modelColor);
+    int alpha = drawColor.alpha();
+    drawRobot(drawColor, model.mean(SelfModel::states_x), model.mean(SelfModel::states_y), model.mean(SelfModel::states_heading));
+
+    FieldPose ball_pose = calculateBallPosition(model, ball_model);
+    drawBall(QColor(255,165,0,alpha), ball_pose.x, ball_pose.y);
 }
 
 void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor)
@@ -800,7 +812,38 @@ void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, c
             const KF model = localisation.getModel(modelID);
             if(model.active())
             {
-                DrawModelObjects(model, modelColor);
+                QColor drawColor(modelColor);
+                int alpha = 255*model.alpha();
+                if(alpha < 25) alpha = 25;
+                drawColor.setAlpha(alpha);
+                DrawModelObjects(model, drawColor);
+            }
+        }
+    }
+}
+
+void locWmGlDisplay::DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor)
+{
+    const MobileObjectUKF* ball_model = localisation.getBallModel();
+    if(drawBestModelOnly)
+    {
+        const SelfModel* model = localisation.getBestModel();
+        DrawModelObjects(*model, *ball_model, modelColor);
+    }
+    else
+    {
+        ModelContainer models = localisation.allModels();
+
+        for(ModelContainer::iterator model = models.begin(); model != models.end(); ++model)
+        {
+            const SelfModel* currModel = (*model);
+            if(currModel->active())
+            {
+                QColor drawColor(modelColor);
+                int alpha = 255*currModel->alpha();
+                if(alpha < 25) alpha = 25;
+                drawColor.setAlpha(alpha);
+                DrawModelObjects(*currModel, *ball_model, drawColor);
             }
         }
     }
@@ -899,11 +942,16 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
 {
     QColor drawColor(modelColor);
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
+
+    const MobileObjectUKF* ball_model = localisation.getBallModel();
+
     if(drawBestModelOnly)
     {
         drawColor.setAlpha(255);
         const SelfModel* model = localisation.getBestModel();
         DrawModelMarkers(model, drawColor);
+        FieldPose ball_pose = calculateBallPosition(*model, *ball_model);
+        drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
     }
     else
     {
@@ -916,11 +964,35 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
                 int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->alpha()));
                 drawColor.setAlpha(alpha);
                 DrawModelMarkers((*model_it), drawColor);
+                FieldPose ball_pose = calculateBallPosition(*(*model_it), *ball_model);
+                drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
             }
         }
     }
 
+}
 
+FieldPose locWmGlDisplay::calculateBallPosition(const SelfModel& robot_model, const MobileObjectUKF& ball_model)
+{
+    FieldPose result;
+    float selfX = robot_model.mean(SelfModel::states_x);
+    float selfY = robot_model.mean(SelfModel::states_y);
+    float selfHeading = robot_model.mean(SelfModel::states_heading);
+
+    // pre-calculate the trig.
+    float hcos = cos(selfHeading);
+    float hsin = sin(selfHeading);
+
+    float relBallX = ball_model.mean(MobileObjectUKF::x_pos);
+    float relBallY = ball_model.mean(MobileObjectUKF::y_pos);
+    // Rotate the relative ball postion to alight with the forward looking robot on the field.
+    float rotatedX = relBallX * hcos + relBallY * hsin;
+    float rotatedY = -relBallX * hsin + relBallY * hcos;
+
+    // Calculate the Ball location in field coordinates.
+    result.x = selfX + rotatedX;
+    result.y = selfY + rotatedY;
+    return result;
 }
 
 FieldPose locWmGlDisplay::CalculateErrorElipse(float xx, float xy, float yy)
