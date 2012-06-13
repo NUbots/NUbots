@@ -221,13 +221,14 @@ protected:
             targetPosition[1] = goalbearing * sin(goalbearing);
             KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
             m_jobs->addMotionJob(kjob);
+            cout << "Kick!" << endl;
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << m_data->CurrentTime << ": Kicking Ball at distance " << balldistance << endl;
             #endif
         } else if(not iskicking)
         {
             //vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
-            vector<float> speed = BehaviourPotentials::goToBallDirectWithSidewardsKick(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
+            vector<float> speed = BehaviourPotentials::goToBallDirectWithSidewardsKick(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,52.);
             vector<float> result;
             // decide whether we need to dodge or not
             vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
