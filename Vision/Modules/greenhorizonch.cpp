@@ -38,7 +38,7 @@ void GreenHorizonCH::calculateHorizon()
         debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
     #endif
 
-    for (unsigned int x = 0; x < width; x+=VisionConstants::GREEN_HORIZON_SCAN_SPACING) {
+    for (int x = 0; x < width; x+=VisionConstants::GREEN_HORIZON_SCAN_SPACING) {
 
         unsigned int green_top = 0;
         unsigned int green_count = 0;
