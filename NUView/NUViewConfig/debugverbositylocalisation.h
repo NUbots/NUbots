@@ -9,7 +9,7 @@
 #ifndef DEBUGVERBOSITYLOCALISATION_H
 #define DEBUGVERBOSITYLOCALISATION_H
 
-#define DEBUG_LOCALISATION_VERBOSITY 5    //!< Controls debug verbosity of the localisation module
+#define DEBUG_LOCALISATION_VERBOSITY 0    //!< Controls debug verbosity of the localisation module
 
 #endif // !VERBOSITY_H
 

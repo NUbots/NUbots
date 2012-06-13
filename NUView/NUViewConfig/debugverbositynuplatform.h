@@ -9,7 +9,7 @@
 #ifndef DEBUGVERBOSITYNUPLATFORM_H 
 #define DEBUGVERBOSITYNUPLATFORM_H 
 
-#define DEBUG_NUPLATFORM_VERBOSITY 5        //!< Controls debug verbosity of the nuplatform module
+#define DEBUG_NUPLATFORM_VERBOSITY 0        //!< Controls debug verbosity of the nuplatform module
 
 #endif // !VERBOSITY_H
 

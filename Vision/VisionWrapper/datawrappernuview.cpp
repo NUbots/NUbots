@@ -352,7 +352,8 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const Mat &img)
 
 bool DataWrapper::updateFrame()
 {
-    if (m_current_image == NULL || sensor_data == NULL || actions == NULL || field_objects == NULL)
+    //should check actions but for some reason it keeps coming in as null
+    if (m_current_image == NULL || sensor_data == NULL || field_objects == NULL)
     {
         #if VISION_WRAPPER_VERBOSITY > 1
             debug << "DataWrapper::updateFrame(): null reference from BB" << endl;
