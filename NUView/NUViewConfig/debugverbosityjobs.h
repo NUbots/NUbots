@@ -9,7 +9,7 @@
 #ifndef DEBUGVERBOSITYJOBS_H
 #define DEBUGVERBOSITYJOBS_H
 
-#define DEBUG_JOBS_VERBOSITY 5          //!< Controls debug verbosity of the behaviour module
+#define DEBUG_JOBS_VERBOSITY 0          //!< Controls debug verbosity of the behaviour module
 
 #endif // !VERBOSITY_H
 

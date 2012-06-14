@@ -20,11 +20,11 @@
 #endif
 
 #ifndef WIN32
-    #define DATA_DIR (std::string(getenv("HOME")) + std::string("/nubot/"))
+    #define DATA_DIR (std::string(getenv("HOME")) + std::string("/robocup/"))
 #endif
 
 #ifdef WIN32
-    #define DATA_DIR (std::string(getenv("HOMEPATH")) + std::string("/nubot/"))
+    #define DATA_DIR (std::string(getenv("HOMEPATH")) + std::string("/robocup/"))
 #endif
 
 

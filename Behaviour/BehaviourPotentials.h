@@ -176,6 +176,7 @@ public:
         // Calculate the three possible kicking positions.
         float A[2], B[2], C[2];
         float distance_between_legs_on_2 = 10.0f / 2.0f;
+        float robot_foot_size_on_2 = 0.f; //10.f/2.f;
 
         A[0] = goalx;
         A[1] = goaly;
@@ -189,19 +190,23 @@ public:
         float x_diff = C[0] - B[0];
         float y_diff = C[1] - B[1];
 
-        float fwd_angle = atan2(-y_diff, -x_diff);
+        float fwd_angle = 0.5*mathGeneral::PI+atan2(-y_diff, -x_diff);
 
         float ball_bearing;
+        float ball_distance;
         if(ball.isObjectVisible())
         {
             ball_bearing = ball.measuredBearing();
+            ball_distance = ball.measuredDistance();
         }
         else
         {
             ball_bearing = ball.estimatedBearing();
+            ball_distance = ball.estimatedDistance();
         }
         bool offset_sign = mathGeneral::sign(ball_bearing);
-
+        
+        kickingdistance = kickingdistance - robot_foot_size_on_2;
         float fwd_x = C[0] + x_diff * kickingdistance;
         float fwd_y = C[1] + y_diff * kickingdistance;
 
@@ -255,14 +260,29 @@ public:
         x_diff = best_kicking_pos_x - my_x;
         y_diff = best_kicking_pos_y - my_y;
         float dist_to_kick_pos = sqrt(pow(x_diff,2) + pow(y_diff, 2));
-        float angle_to_kick_pos = mathGeneral::normaliseAngle(-atan2(y_diff, x_diff) - my_heading);
+        float angle_to_kick_pos = mathGeneral::normaliseAngle(atan2(y_diff, x_diff) + my_heading);
+        float angle_to_aim_pos = mathGeneral::normaliseAngle(best_kicking_orientation - my_heading);
+        //cout << "Approach angle: " << angle_to_kick_pos << "\tKick angle: " << angle_to_aim_pos << "\tHeading: " << my_heading << endl;
+        //cout << "Ball RelX: " << x_diff << "\tBall RelY: " << y_diff << "\tBall Heading: " << atan2(y_diff, x_diff) << endl;
+        //cout << "Ball Goal Bearing: " << fwd_angle << "\tkick orientation: " << best_kicking_orientation << endl;
+        //cout << "Goal RelX: " << goalx-my_x << "\tGoal RelY: " << goaly-my_y << "\tBall Distance: " << ball_distance << endl;
 
         static bool turning = false;
-        float target_heading = (dist_to_kick_pos > stoppingdistance) ? angle_to_kick_pos : ball_bearing;
+        static bool turningLeft = false;
+        float target_heading = (ball_distance > stoppingdistance) ? angle_to_kick_pos : ball_bearing; //angle_to_aim_pos;
+        
+        //hysteresis for 180 degrees out of phase
+        if (target_heading > 0.f and target_heading < 3.f) {
+            turningLeft = true;
+        } else if (target_heading < 0.f and target_heading > -3.f) {
+            turningLeft = false;
+        }
+        if (turningLeft and target_heading < 0. or (not turningLeft) and target_heading > 0.) {
+            target_heading *= -1.f;
+        }
 
-
-
-        if(turning and fabs(target_heading) < 0.1)
+        if(turning and 
+            (fabs(target_heading) < 0.25 or fabs(target_heading) < 0.15 and ball_distance > stoppingdistance/2.))
         {
             turning = false;
         }
@@ -273,10 +293,13 @@ public:
 
         if(turning)
         {
-            speed[0] = 0.1f; // 25% speed
-            speed[1] = (fabs(target_heading) < 0.5*mathGeneral::PI) ? 0 : mathGeneral::PI;
-            speed[2] = -0.6*target_heading;
-
+            speed[0] = 0.03f; // 10% speed
+            speed[1] = -mathGeneral::sign(target_heading)*3.1;
+            speed[2] = 0.5*target_heading;
+            if (ball_distance < kickingdistance * 1.5) {
+                speed[2] = 0.3*target_heading;
+            }
+            
 //            std::cout << "Calculated heading: " << -atan2(y_diff, x_diff) << std::endl;
 //            std::cout << "My heading: " << my_heading << std::endl;
 //            std::cout << "Heading to Ball: " << ball_bearing << std::endl;
@@ -285,14 +308,20 @@ public:
 //            std::cout << angle_to_kick_pos << std::endl;
 //            std::cout << "Turning." << std::endl;
         }
-        else if(dist_to_kick_pos > stoppingdistance)
+        else if(ball_distance > stoppingdistance)
         {
             // Full speed ahead!
             speed[0] = 1.0f; // 100% speed.
             speed[1] = 0.0f;    // Straight
             speed[2] = 0.0f;    // Straight
 //            std::cout << "Walking." << std::endl;
+        } else if (ball_distance > kickingdistance) {
+            speed[0] = 0.5f; // 100% speed.
+            speed[1] = angle_to_kick_pos;    // Straight
+            speed[2] = 0.0f;    // Straight
+        
         }
+        //cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
         return speed;
     }
 

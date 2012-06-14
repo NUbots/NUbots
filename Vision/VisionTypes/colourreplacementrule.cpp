@@ -8,21 +8,28 @@ ColourReplacementRule::ColourReplacementRule()
 
 bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, ScanDirection dir) const
 {
-    int multiplier;
-    switch(dir) {
-    case HORIZONTAL:
-        multiplier = VisionBlackboard::getInstance()->getImageWidth();
-        break;
-    case VERTICAL:
-        multiplier = VisionBlackboard::getInstance()->getImageHeight();
-        break;
-    }
-    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-    if(!(m_middle_min*multiplier <= middle.getLengthPixels() && m_middle_max*multiplier >= middle.getLengthPixels() &&
-         m_before_min*multiplier <= before.getLengthPixels() && m_before_max*multiplier >= before.getLengthPixels() &&
-         m_after_min*multiplier <= after.getLengthPixels() && m_after_max*multiplier >= after.getLengthPixels()))
-    {
-        return false;   //did not match size requirements
+//    int multiplier;
+//    switch(dir) {
+//    case HORIZONTAL:
+//        multiplier = VisionBlackboard::getInstance()->getImageWidth();
+//        break;
+//    case VERTICAL:
+//        multiplier = VisionBlackboard::getInstance()->getImageHeight();
+//        break;
+//    }
+//    if(!(m_middle_min*multiplier <= middle.getLengthPixels() && m_middle_max*multiplier >= middle.getLengthPixels() &&
+//         m_before_min*multiplier <= before.getLengthPixels() && m_before_max*multiplier >= before.getLengthPixels() &&
+//         m_after_min*multiplier <= after.getLengthPixels() && m_after_max*multiplier >= after.getLengthPixels()))
+//    {
+//        return false;   //did not match size requirements
+//    }
+
+//check lengths first to save iterating over colour vectors pointlessly as this method is majority false
+    if(!(m_middle_min <= middle.getLengthPixels() && m_middle_max >= middle.getLengthPixels() &&
+         m_before_min <= before.getLengthPixels() && m_before_max >= before.getLengthPixels() &&
+         m_after_min <= after.getLengthPixels() && m_after_max >= after.getLengthPixels())) {
+        //did not match size requirements
+        return false;
     }
 
     bool valid;

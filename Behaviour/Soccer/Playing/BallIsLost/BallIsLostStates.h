@@ -180,7 +180,7 @@ protected:
         else
             m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::BallAndLocalisation, m_spin_speed));
         
-        m_jobs->addMotionJob(new WalkJob(0, 0, m_spin_speed));
+        m_jobs->addMotionJob(new WalkJob(-0.12, 0, m_spin_speed));
     }
 private:
     const float m_ROTATIONAL_SPEED;

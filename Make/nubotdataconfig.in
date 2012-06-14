@@ -17,7 +17,7 @@
 
 #define DATA_DIR (std::string(getenv("${HOME_ENV_VAR}")) + std::string("/nubot/"))
 #define CONFIG_DIR (DATA_DIR + std::string("/Config/${TARGET_ROBOT_NAME}/"))
-#define RULE_DIR (DATA_DIR + std::string("Rules/"))
+#define RULE_DIR (CONFIG_DIR + std::string("Rules/"))
 
 #endif // !NUBOTCONFIG_H
 
