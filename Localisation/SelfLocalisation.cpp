@@ -543,8 +543,8 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     float relBallSdYVel = m_ball_model->sd(MobileObjectUKF::y_vel);
 
     // Rotate the relative ball postion to alight with the forward looking robot on the field.
-    float rotatedX = relBallX * hcos + relBallY * hsin;
-    float rotatedY = -relBallX * hsin + relBallY * hcos;
+    float rotatedX = relBallX * hcos - relBallY * hsin;
+    float rotatedY = relBallX * hsin + relBallY * hcos;
 
     // Calculate the Ball location in field coordinates.
     float ballFieldLocationX = self.wmX() + rotatedX;
@@ -1057,6 +1057,11 @@ bool SelfLocalisation::clipActiveModelsToField()
 
 bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double timeIncrement)
 {
+    const float c_turn_multiplier = 0.6f;
+    odomTurn *= c_turn_multiplier;
+
+    odomTurn -= odomForward * 0.008;
+
     // put values into odometry measurement matrix
     Matrix odometry(3,1,false);
     odometry[0][0] = odomForward;
