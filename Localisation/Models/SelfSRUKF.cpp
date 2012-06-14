@@ -175,7 +175,13 @@ SelfSRUKF::updateResult SelfSRUKF::TimeUpdate(const std::vector<float>& odometry
         Mx.setCol(i, sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newMean));      // Error matrix
     }
 
-    Matrix new_sqrt_covariance = HT(horzcat(Mx, sqrtOfProcessNoise));
+    const float odomPercentage = 0.1;
+    Matrix odometryNoise(states_total, states_total, false);
+    odometryNoise[states_x][states_x] = odomPercentage * x;
+    odometryNoise[states_y][states_y] = odomPercentage * y;
+    odometryNoise[states_heading][states_heading] = odomPercentage * heading;
+
+    Matrix new_sqrt_covariance = HT(horzcat(Mx, sqrtOfProcessNoise+odometryNoise));
     Matrix new_mean = newMean;
 
     setSqrtCovariance(new_sqrt_covariance);
@@ -354,133 +360,6 @@ SelfModel::updateResult SelfSRUKF::MeasurementUpdate(const StationaryObject& obj
     return RESULT_OK;
 }
 
-
-/*!
-    @brief  Perform update for Probabalistic Data Association Method
-    The Probabalistic Data Association Method performs an single update performed by
-    calculating a weighted sum of the correction, combining all possible options.
-
-    @param object The ambiguous object containing the measruement to the object.
-    @param possible_objects The possible stationary objects containing the potential
-    positions of the observed object.
-
-    @return Matrix containing the sigma points for the current model.
-*/
-SelfModel::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error)
-{
-    const float c_threshold2 = 15.0f;
-    // Calculate update uncertainties - S_obj_rel & R_obj_rel
-    Matrix S_obj_rel = Matrix(2,2,false);
-    S_obj_rel[0][0] = sqrt(error.distance());
-    S_obj_rel[1][1] = sqrt(error.heading());
-
-    Matrix R_obj_rel = S_obj_rel * S_obj_rel.transp(); // R = S^2
-
-    // Unscented KF Stuff.
-    Matrix yBar;                                  	//reset
-    Matrix Py;
-    Matrix Pxy; //  = Matrix(7, 2, false);                   //Pxy=[0;0;0];
-    Matrix scriptX = CalculateSigmaPoints();
-    const unsigned int numSigmaPoints = scriptX.getn();
-
-    Matrix scriptY = Matrix(2, numSigmaPoints, false);
-    Matrix temp = Matrix(2, 1, false);
-
-    Matrix y = Matrix(2,1,false); // Measurement. (Distance, heading).
-    y[0][0] = object.measuredDistance() * cos(object.measuredElevation());
-    y[1][0] = object.measuredBearing();
-
-    Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
-    Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
-
-    Matrix innovation;
-    std::vector<Matrix> innovations;
-    std::vector<Matrix> kf_gains;
-    std::vector<float> mvdists;
-    float mv_sum = 0.0f;
-
-    const float Pd = 0.95;  // Target detection probability
-    const float Pg = 0.95;  // Gate probability (the probability that the gate contains the true measurement if detected)
-
-    Matrix M1 = sqrtOfTestWeightings;
-
-    for (std::vector<StationaryObject*>::const_iterator obj_it = possible_objects.begin(); obj_it != possible_objects.end(); ++obj_it)
-    {
-        StationaryObject* object = (*obj_it);
-        // Calculate the expected measurement based on the current state.
-        for(unsigned int i = 0; i < numSigmaPoints; i++)
-        {
-            const double dX = object->X() - scriptX[0][i];
-            const double dY = object->Y() - scriptX[1][i];
-            temp[0][0] = sqrt(dX*dX + dY*dY);
-            temp[1][0] = mathGeneral::normaliseAngle(atan2(dY,dX) - scriptX[2][i]);
-            scriptY.setCol(i, temp.getCol(0));
-        }
-
-
-        for(unsigned int i = 0; i < numSigmaPoints; i++)
-        {
-            Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
-            My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
-        }
-
-        Matrix M1 = sqrtOfTestWeightings;
-        yBar = My * M1.transp(); // Predicted Measurement.
-        Py = (My - yBar * M1) * (My - yBar * M1).transp();
-        Pxy = (Mx - m_mean * M1) * (My - yBar * M1).transp();
-
-        Matrix Sk = Py + R_obj_rel;
-
-        // Calculate the Kalman filter gain.
-        Matrix K = Pxy * Invert22(Sk); // K = Kalman filter gain.
-        // Calculate the innovation.
-        innovation = yBar - y;
-
-        // Calculate Association Probability
-        float mv = MultiVariateNormalDistribution(Sk, y, yBar);
-        mv_sum += mv;
-        mvdists.push_back(mv);
-        innovations.push_back(innovation);
-        kf_gains.push_back(K);
-
-//        //end of standard ukf stuff
-//        //RHM: 20/06/08 Outlier rejection.
-//        double innovation2 = convDble((yBar - y).transp() * Invert22(Py + R_obj_rel) * (yBar - y));
-
-//        // Update Alpha
-//        double innovation2measError = convDble((yBar - y).transp() * Invert22(R_obj_rel) * (yBar - y));
-//        m_alpha *= 1 / (1 + innovation2measError);
-//        //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
-
-//        if (innovation2 > c_threshold2)
-//        {
-//            return RESULT_OUTLIER;
-//        }
-    }
-
-
-    // Combine the weighted innovations.
-    float weight_mult = 1 / (1-Pd*Pg + mv_sum);
-    float none_correct_weight = (1-Pd*Pg) * weight_mult;
-    Matrix combined_innovation(y.getm(), y.getn(), false);
-    Matrix kf_gain(kf_gains[0].getm(), kf_gains[0].getn(), false);
-
-    for(unsigned int index = 0; index < innovations.size(); ++index)
-    {
-        float weight = mvdists[index] * weight_mult;
-        combined_innovation = combined_innovation + weight * innovations[index];
-        kf_gain = kf_gain + weight*kf_gains[index];
-    }
-
-
-    // Update the model.
-    Matrix new_sqrtCovariance = HT( horzcat(Mx - m_mean*M1 - kf_gain*My + kf_gain*yBar*M1, kf_gain*S_obj_rel) );
-    setSqrtCovariance(new_sqrtCovariance);
-    Matrix new_mean = m_mean - kf_gain*combined_innovation;
-    setMean(new_mean);
-    return RESULT_OK;
-}
-
 SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double angle_variance)
 {
     const float c_threshold2 = 15.0f;
@@ -539,8 +418,7 @@ SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, d
     {
         return RESULT_OUTLIER;
     }
-
-    Matrix newSqrtCov = HT( horzcat(Mx - m_sqrt_covariance*M1 - K*My + K*yBar*M1, K*angle_variance) );
+    Matrix newSqrtCov = HT( horzcat(Mx - m_mean*M1 - K*My + K*yBar*M1, K*sqrt(angle_variance)) );
     setSqrtCovariance(newSqrtCov);
     Matrix newMean = m_mean - K*(yBar - y);
     setMean(newMean);
