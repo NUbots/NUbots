@@ -71,21 +71,22 @@ public:
         Self self = Blackboard->Objects->self;
         vector<float> result(3,0);
         
-        if (bearing > 0.3 or bearing > m_HYSTERESIS and m_previous_turning and distance > stoppeddistance*1.5) { //turn with hysteresis
+        if (fabs(bearing) > 0.4 or (fabs(bearing) > m_HYSTERESIS and m_previous_turning and distance > stoppeddistance*1.5)) { //turn with hysteresis
             m_previous_turning = true;
-            if (bearing > 0. and bearing < 2.9) {
-                result[2] = bearing;
+            if (bearing > 0. and bearing < 2.6) {
+                result[2] = bearing*0.5;
                 m_turning_left = true;
-            } else if (bearing <= 0. and bearing > -2.9) {
-                result[2] = bearing;
+            } else if (bearing <= 0. and bearing > -2.6) {
+                result[2] = bearing*0.5;
                 m_turning_left = false;
             } else if (distance < stoppeddistance) {
-                result[2] = heading;
+                result[2] = heading*0.5;
             } else if (m_turning_left) {
                 result[2] = 1.f;
             } else if (not m_turning_left) {
                 result[2] = -1.f;
             }
+            result[0] = -0.1f;
         } else { //run forward
             m_previous_turning = false;
             if (distance > stoppingdistance) {
@@ -95,11 +96,12 @@ public:
             } else if (distance > stoppeddistance) {
                 result[0] = 0.25;
             } else {
-                result[2] = heading;
+                result[2] = heading*0.5;
             }
         }
         
         cout << result[0] << ", " << result[1] << ", " << result[2] << endl;
+        cout << distance << ", " << bearing << ", " << heading << endl;
        /* if (Blackboard->Sensors->CurrentTime - m_previous_time > 500)
         {
             m_previous_turning = false;
