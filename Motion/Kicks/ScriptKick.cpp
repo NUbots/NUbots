@@ -25,8 +25,10 @@ void ScriptKick::loadKickParameters()
 {
     float xMin = 5.0f;
     float xMax = 20.0f;
-    float yMin = .5f;
-    float yMax = 7.0f;
+    
+    //HACK: invert Y so we kick on the right side
+    float yMin = -0.5f;
+    float yMax = -7.0f;
 
     m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
     m_left_kick_area = Rectangle(xMin, xMax, yMin, yMax);
@@ -174,8 +176,8 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         kick_begin = true;
         m_kicking_leg = leftLeg;
         
-        if(theta < angle_margin) {
-            m_current_script = m_side_left_kick_script;
+        if(theta < -angle_margin) {
+            m_current_script = m_side_right_kick_script;
         } else {
             m_current_script = m_left_kick_script;
         }
@@ -187,7 +189,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         //m_current_script = m_right_kick_script;
         
         if(theta > angle_margin) {
-            m_current_script = m_side_right_kick_script;
+            m_current_script = m_side_left_kick_script;
         } else {
             m_current_script = m_right_kick_script;
         }
