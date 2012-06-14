@@ -28,6 +28,8 @@ public:
 protected:
     MotionScript* m_left_kick_script;
     MotionScript* m_right_kick_script;
+    MotionScript* m_side_left_kick_script;
+    MotionScript* m_side_right_kick_script;
     double m_script_start_time;
     MotionScript* m_current_script;
 
