@@ -434,6 +434,11 @@ int VisionBlackboard::getImageHeight() const
     return original_image->getHeight();
 }
 
+Vector2<double> VisionBlackboard::getFOV() const
+{
+    return m_FOV;
+}
+
 double VisionBlackboard::getCameraDistanceInPixels() const
 {
     return effective_camera_dist_pixels;
@@ -448,7 +453,7 @@ bool VisionBlackboard::distanceToPoint(float bearing, float elevation, float& di
     if(camera_height_valid && camera_pitch_valid) {
         //resultant angle inclusive of body pitch, camera pitch, pixel elevation and angle correction factor
         theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
-        #if VISION_BLACKBOARD_VERBOSITY > 2
+        #if VISION_BLACKBOARD_VERBOSITY > 1
             debug << "VisionBlackboard::distanceToPoint: theta: " << theta << endl;
         #endif
         if(VisionConstants::D2P_INCLUDE_BODY_PITCH) {
