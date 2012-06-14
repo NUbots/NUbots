@@ -21,6 +21,7 @@
 
 #include "TeamInformation.h"
 #include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -130,9 +131,26 @@ void TeamInformation::updateTeamPacket()
 float TeamInformation::getTimeToBall()
 {
     float time = 600;
-    
     Self& self = m_objects->self;
     MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+    
+    //avoidance for our own penalty box
+    bool inPenaltyBox = false;
+    float distance_from_centre_to_goal = fabs(m_objects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].X());
+    float ballDirection = -1.f;
+    if (Blackboard->GameInfo->getTeamColour() == GameInformation::BlueTeam) {
+        ballDirection = 1.f;
+    }
+    if (fabs(ball.Y()) < fabs(m_objects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].Y()) and ball.X()*ballDirection > distance_from_centre_to_goal) {
+        inPenaltyBox = true;
+        if (m_player_number == 1) {
+            return time/10.f;
+        } else {
+            return time*2.f;
+        }
+    }
+    
+    
     float balldistance = ball.estimatedDistance();
     float ballbearing = ball.estimatedBearing();
     if (m_data->isIncapacitated())                                   // if we are incapacitated then we can't chase a ball

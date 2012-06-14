@@ -275,6 +275,16 @@ float Goal::distanceToGoal(float bearing, float elevation) {
     //get distance from width
     width_dist = VisionConstants::GOAL_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
 
+    float HACKWIDTH = 50;
+    float HACKPIXELS = 3;
+    //HACK FOR GOALS AT BASE OF IMAGE
+    if(m_size_on_screen.x > HACKWIDTH and (vbb->getImageHeight() - m_location_pixels.y) < HACKPIXELS) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::distanceToGoal: Goal wide and cutoff at bottom so used width_dist" << endl;
+        #endif
+        return width_dist;
+    }
+
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
         debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
