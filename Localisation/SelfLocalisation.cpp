@@ -1351,10 +1351,10 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
 int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
     // do the special update
-    float angle_beween = fabs(landmark1.measuredBearing() - landmark2.measuredBearing());
+    float angle_beween_objects = mathGeneral::normaliseAngle(landmark1.measuredBearing() - landmark2.measuredBearing());
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
-        (*model_it)->updateAngleBetween(angle_beween, landmark1.X(), landmark1.Y(), landmark2.X(), landmark2.Y(), c_twoObjectAngleVariance);
+        (*model_it)->updateAngleBetween(angle_beween_objects, landmark1.X(), landmark1.Y(), landmark2.X(), landmark2.Y(), c_twoObjectAngleVariance);
     }
 
 
