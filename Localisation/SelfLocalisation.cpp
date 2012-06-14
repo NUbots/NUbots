@@ -52,7 +52,7 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
-const float SelfLocalisation::c_obj_theta_variance = 0.1f*0.1f;        // (0.01 rad)^2
+const float SelfLocalisation::c_obj_theta_variance = 0.05f*0.05f;        // (0.01 rad)^2
 const float SelfLocalisation::c_obj_range_offset_variance = 10.0f*10.0f;     // (10cm)^2
 const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
 
@@ -706,6 +706,9 @@ void SelfLocalisation::initBallModel(MobileObjectUKF* ball_model)
     MobileObjectUKF::State state;
     Matrix mean(ball_model->totalStates(), 1, false);
     Matrix covariance(ball_model->totalStates(), ball_model->totalStates(), false);
+
+    mean[MobileObjectUKF::x_pos][0] = 100.f;
+    mean[MobileObjectUKF::y_pos][0] = 100.f;
 
     // Assign initial covariance
     const double initial_pos_cov = 100*100;
