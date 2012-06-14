@@ -274,6 +274,7 @@ void locWmGlDisplay::paintEvent(QPaintEvent *event)
     drawField();        // Draw the Standard Field Layout.
     drawMarkers();
     drawObjects();
+    drawFieldObjects();
     drawOverlays();
 
     glShadeModel(GL_FLAT);
@@ -469,7 +470,12 @@ void locWmGlDisplay::drawField()
         glEnd();
     glDisable(GL_BLEND);            // Turn Blending Off
     glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glPopMatrix();
+}
 
+void locWmGlDisplay::drawFieldObjects()
+{
+    glPushMatrix();
     drawGoal(Qt::blue,-300,0.0,0.0);
     drawGoal(Qt::yellow,300,0.0,180.0);
     drawTriColourBeacon(Qt::yellow, Qt::blue, Qt::yellow, 0.f, 240.f);
@@ -986,8 +992,8 @@ FieldPose locWmGlDisplay::calculateBallPosition(const SelfModel& robot_model, co
     float relBallX = ball_model.mean(MobileObjectUKF::x_pos);
     float relBallY = ball_model.mean(MobileObjectUKF::y_pos);
     // Rotate the relative ball postion to alight with the forward looking robot on the field.
-    float rotatedX = relBallX * hcos + relBallY * hsin;
-    float rotatedY = -relBallX * hsin + relBallY * hcos;
+    float rotatedX = relBallX * hcos - relBallY * hsin;
+    float rotatedY = relBallX * hsin + relBallY * hcos;
 
     // Calculate the Ball location in field coordinates.
     result.x = selfX + rotatedX;

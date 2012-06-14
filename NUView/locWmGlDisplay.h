@@ -86,6 +86,7 @@ protected:
 
 
         void drawField();
+        void drawFieldObjects();
 
         bool loadTexture(QString fileName, GLuint* textureId);
 
