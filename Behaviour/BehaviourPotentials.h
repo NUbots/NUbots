@@ -82,19 +82,20 @@ public:
                 result[0] = 1;
             
             // calculate the translational direction
-            result[1] = bearing;
+            //result[1] = bearing;
             
             // calculate the rotational speed
-            if (distance < turningdistance or (m_previous_turning and distance < (1+m_HYSTERESIS)*turningdistance))
+            if (bearing > 0.1 or (m_previous_turning and bearing < .1+m_HYSTERESIS))
             {   // We use a bit of hysteresis in the turning point, once the turn has started its best to stick with it
                 if (fabs(heading) > 3)
                     heading = fabs(heading);
                 result[2] = 0.5*heading;
+                result[0] = 0.;
                 m_previous_turning = true;
             }
             else
             {
-                result[2] = 0.5*bearing;
+                result[2] = 0.f;//5*bearing;
                 m_previous_turning = false;
             }
         }
@@ -190,7 +191,7 @@ public:
         float x_diff = C[0] - B[0];
         float y_diff = C[1] - B[1];
 
-        float fwd_angle = 0.5*mathGeneral::PI+atan2(-y_diff, -x_diff);
+        float fwd_angle = atan2(-y_diff, -x_diff);
 
         float ball_bearing;
         float ball_distance;
@@ -260,7 +261,7 @@ public:
         x_diff = best_kicking_pos_x - my_x;
         y_diff = best_kicking_pos_y - my_y;
         float dist_to_kick_pos = sqrt(pow(x_diff,2) + pow(y_diff, 2));
-        float angle_to_kick_pos = mathGeneral::normaliseAngle(atan2(y_diff, x_diff) + my_heading);
+        float angle_to_kick_pos = mathGeneral::normaliseAngle(atan2(y_diff, x_diff) - my_heading);
         float angle_to_aim_pos = mathGeneral::normaliseAngle(best_kicking_orientation - my_heading);
         //cout << "Approach angle: " << angle_to_kick_pos << "\tKick angle: " << angle_to_aim_pos << "\tHeading: " << my_heading << endl;
         //cout << "Ball RelX: " << x_diff << "\tBall RelY: " << y_diff << "\tBall Heading: " << atan2(y_diff, x_diff) << endl;
