@@ -1209,14 +1209,19 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
 //                kf_return = m_models[modelID].fieldObjectmeas(flatObjectDistance, (*currStat)->measuredBearing(),(*currStat)->X(), (*currStat)->Y(),
 //                                R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
+
+                kf_return = (*model_it)->MeasurementUpdate(*(*currStat), temp_error);
                 #if LOC_SUMMARY > 0
                 m_frame_log << "Individual Update: " <<  (*currStat)->getName() << " Result: " << ((kf_return==Model::RESULT_OK)?"Successful":"Outlier") << std::endl;
                 m_frame_log << "Following individual object updates: " << (*model_it)->summary(false);
                 #endif
-//                if(kf_return == Model::RESULT_OUTLIER)
-//                {
-//                    m_modelObjectErrors[modelID][(*currStat)->getID()] += 1.0;
-//                }
+                if(kf_return == Model::RESULT_OUTLIER)
+                {
+                    Matrix cov = (*model_it)->covariance();
+                    Matrix added_noise = covariance_matrix(10,10,0.01);
+                    cov = cov + added_noise;
+                    (*model_it)->setCovariance(cov);
+                }
             }
         }
     #if LOC_SUMMARY > 0
