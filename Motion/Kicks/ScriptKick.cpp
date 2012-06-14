@@ -23,11 +23,11 @@ ScriptKick::~ScriptKick()
 
 void ScriptKick::loadKickParameters()
 {
-    float xMin = 5.0f;
-    float xMax = 20.0f;
+    float xMin = 3.0f;
+    float xMax = 18.0f;
     
     //HACK: invert Y so we kick on the right side
-    float yMin = 0.5f;
+    float yMin = -1.5f;
     float yMax = 7.0f;
 
     m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
