@@ -204,7 +204,7 @@ protected:
                 balldistance = ball.measuredDistance();//*cos(ball.measuredElevation();
         }
         
-        if((balldistance < targetKickDistance) and fabs(ballbearing) < 1.1 )//&& 
+        if((balldistance < targetKickDistance) and fabs(ballbearing) < 1.1 and not ball.lost())//&& 
             //( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) ))// && //XXX: fix goal lineup to use side kicks too
               //fabs(ball.estimatedBearing()) > 0.25 && //ball is not "between" our feet
               //fabs(ball.estimatedBearing()) < 0.75) //ball is not "outside" our feet
