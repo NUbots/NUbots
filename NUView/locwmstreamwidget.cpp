@@ -248,7 +248,7 @@ void locwmStreamWidget::readPendingData()
         bool packet_ok = false;
         if(header == selfLoc->header())
         {
-            qDebug() << "SelfLocalisation Packet received";
+//            qDebug() << "SelfLocalisation Packet received";
             selfLoc->readStreamBinary(buffer);
             packet_ok = true;
             emit selfLocwmDataChanged(selfLoc);
