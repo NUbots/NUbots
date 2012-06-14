@@ -109,8 +109,8 @@ void SelfSRUKF::InitialiseCachedValues()
     }
 
     sqrtOfProcessNoise = Matrix(3,3,true);
-    sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
-    sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
+    sqrtOfProcessNoise[0][0] = 0.5; // Robot X coord.
+    sqrtOfProcessNoise[1][1] = 0.5; // Robot Y coord.
     sqrtOfProcessNoise[2][2] = 0.005; // Robot Theta. 0.00001
 
     return;
@@ -197,7 +197,7 @@ Performs a simultaneous update for N landmarks.
 SelfModel::updateResult SelfSRUKF::MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement)
 {
     unsigned int numObs = measurements.getm();
-    const float c_threshold2 = 15.0f;
+    const float c_threshold2 = 20.0f;
     Matrix R_obj_rel(R_Measurement);        // R = S^2
     Matrix S_obj_rel(cholesky(R_obj_rel)); // R = S^2
 
@@ -481,6 +481,72 @@ SelfModel::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& obje
     return RESULT_OK;
 }
 
+SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double sd_angle)
+{
+    const float c_threshold2 = 15.0f;
+        // Method to take the angle between two objects, that is,
+        // angle between object 1 (with fixed field coords (x1,y1))
+        // and object 2 (with fixed field coords (x2,y2) ) and perform an update.
+        // Note: as distinct from almost all other updates, the actual robot orientation
+        // doesn't matter for this update, and so 'cropping' etc. of the sigma points is not requied.
+
+        double R_angle;
+
+    // Unscented KF Stuff.
+    double yBar;                                  	//reset
+    double Py;
+    Matrix Pxy = Matrix(7, 1, false);                    //Pxy=[0;0;0];
+    Matrix scriptX = CalculateSigmaPoints();
+    const unsigned int numSigmaPoints = scriptX.getn();
+    //----------------------------------------------------------------
+    Matrix scriptY = Matrix(1, numSigmaPoints, false);
+
+    double angleToObj1;
+    double angleToObj2;
+
+    for (int i = 0; i < numSigmaPoints; i++)
+    {
+        angleToObj1 = atan2 ( y1 - scriptX[1][i], x1 - scriptX[0][i] );
+        angleToObj2 = atan2 ( y2 - scriptX[1][i], x2 - scriptX[0][i] );
+        scriptY[0][i] = mathGeneral::normaliseAngle(angleToObj1 - angleToObj2);
+    }
+
+    Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
+    Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
+    for (int i = 0; i < numSigmaPoints; i++)
+    {
+        Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
+        My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
+    }
+
+    Matrix M1 = sqrtOfTestWeightings;
+    yBar = convDble ( My * M1.transp() ); // Predicted Measurement.
+    Py = convDble ((My - yBar * M1) * (My - yBar * M1).transp());
+    Pxy = (Mx - m_mean * M1) * (My - yBar * M1).transp();
+
+    R_angle  = sd_angle * sd_angle;
+
+    Matrix K = Pxy /( Py + R_angle ); // K = Kalman filter gain.
+
+    double y = angle;    //end of standard ukf stuff
+    //Outlier rejection.
+    double innovation2 = (yBar - y) * (yBar - y ) / ( Py + R_angle );
+
+    // Update Alpha (used in multiple model)
+    double innovation2measError = (yBar - y) * (yBar - y ) / R_angle ;
+    m_alpha *= 1 / (1 + innovation2measError);
+
+    if (innovation2 > c_threshold2)
+    {
+        return RESULT_OUTLIER;
+    }
+
+    Matrix newSqrtCov = HT( horzcat(Mx - m_sqrt_covariance*M1 - K*My + K*yBar*M1, K*sd_angle) );
+    setSqrtCovariance(newSqrtCov);
+    Matrix newMean = m_mean - K*(yBar - y);
+    setMean(newMean);
+    return RESULT_OK;
+}
 
 /*! @brief  Calculation of sigma points
 Calculates the sigma points for the current model state.
