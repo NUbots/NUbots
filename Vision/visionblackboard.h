@@ -105,6 +105,7 @@ public:
 
     int getImageWidth() const;
     int getImageHeight() const;
+    Vector2<double> getFOV() const;
     
     double getCameraDistanceInPixels() const;
     bool distanceToPoint(float bearing, float elevation, float& distance) const;
