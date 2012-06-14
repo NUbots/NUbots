@@ -1,5 +1,6 @@
 #include "obstacle.h"
 #include "Vision/visionblackboard.h"
+#include "Vision/visionconstants.h"
 
 #include "debug.h"
 #include "debugverbosityvision.h"
@@ -11,6 +12,15 @@ Obstacle::Obstacle(const PointType &position, int width, int height)
 {
     m_size_on_screen = Vector2<int>(width, height);
     m_bottom_centre = Vector2<int>(position.x, position.y);
+//    if(VisionConstants::DO_RADIAL_CORRECTION) {
+//        VisionBlackboard* vbb = VisionBlackboard::getInstance();
+//        Vector2<float> bottomcentre = Vector2<float>(position.x, position.y);
+
+//        bottomcentre = vbb->correctDistortion(bottomcentre);
+
+//        m_bottom_centre = Vector2<int>(bottomcentre.x, bottomcentre.y);
+//    }
+
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
     valid = valid && check();

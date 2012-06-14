@@ -26,9 +26,17 @@ Goal::Goal(GoalID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
-    
+
     m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
     m_bottom_centre = corners.getBottomCentre();
+
+//    if(VisionConstants::DO_RADIAL_CORRECTION) {
+//        VisionBlackboard* vbb = VisionBlackboard::getInstance();
+//        Vector2<float> corr_bottom_centre = vbb->correctDistortion(Vector2<float>(m_bottom_centre.x, m_bottom_centre.y));
+//        m_bottom_centre.x = mathGeneral::roundNumberToInt(corr_bottom_centre.x);
+//        m_bottom_centre.y = mathGeneral::roundNumberToInt(corr_bottom_centre.y);
+//    }
+
     m_location_pixels = corners.getCentre();
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
