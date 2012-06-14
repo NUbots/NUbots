@@ -46,6 +46,10 @@ public:
 
     std::string summary(bool brief=true) const;
 
+    bool operator ==(const WeightedModel& b) const;
+    bool operator !=(const WeightedModel& b) const
+    {return (!((*this) == b));}
+
     /*!
     @brief Outputs a binary representation of the UKF object to a stream.
     @param output The output stream.

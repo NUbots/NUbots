@@ -530,6 +530,43 @@ float SelfSRUKF::CalculateAlphaWeighting(const Matrix& innovation, const Matrix&
     return notOutlierLikelyhood * fracRes * expRes + outlierLikelyhood;
 }
 
+
+bool SelfSRUKF::operator ==(const SelfSRUKF& b) const
+{
+    // Check SelfModel portions are equal
+    const SelfModel* this_model = this;
+    const SelfModel* other_model = &b;
+    if(this_model != other_model) return false;
+
+    // Check other memebr variables.
+//    Matrix sqrtOfTestWeightings; // Square root of W (Constant)
+//    Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
+//    static const float c_Kappa;
+//    Matrix m_sqrt_covariance;
+    return true;
+}
+
+/*!
+@brief Outputs a binary representation of the UKF object to a stream.
+@param output The output stream.
+@return The output stream.
+*/
+std::ostream& SelfSRUKF::writeStreamBinary (std::ostream& output) const
+{
+    SelfModel::writeStreamBinary(output);
+}
+
+/*!
+@brief Reads in a UKF object from the input stream.
+@param input The input stream.
+@return The input stream.
+*/
+std::istream& SelfSRUKF::readStreamBinary (std::istream& input)
+{
+    SelfModel::readStreamBinary(input);
+    setCovariance(covariance());    // need to initialise the sqrt covariance.
+}
+
 std::ostream& operator<< (std::ostream& output, const SelfSRUKF& p_model)
 {
     const SelfModel* model = static_cast<const SelfModel*>(&p_model);

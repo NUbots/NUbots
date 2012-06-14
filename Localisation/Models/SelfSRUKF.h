@@ -33,6 +33,24 @@ public:
     Matrix CalculateSigmaPoints() const;
     float CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const;
 
+    bool operator ==(const SelfSRUKF& b) const;
+    bool operator !=(const SelfSRUKF& b) const
+    {return (!((*this) == b));}
+
+    /*!
+    @brief Outputs a binary representation of the UKF object to a stream.
+    @param output The output stream.
+    @return The output stream.
+    */
+    std::ostream& writeStreamBinary (std::ostream& output) const;
+
+    /*!
+    @brief Reads in a UKF object from the input stream.
+    @param input The input stream.
+    @return The input stream.
+    */
+    std::istream& readStreamBinary (std::istream& input);
+
     /*!
     @brief Output streaming operation.
     @param output The output stream.

@@ -74,6 +74,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings&
     m_amILost = true;
     m_lostCount = 100;
     m_timeSinceFieldObjectSeen = 0;
+    m_gps.resize(2,0.0f);
 
     //m_models.reserve(c_MAX_MODELS);
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
@@ -105,6 +106,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     m_amILost = true;
     m_lostCount = 100;
     m_timeSinceFieldObjectSeen = 0;
+    m_gps.resize(2,0.0f);
 
     m_models.clear();
 
@@ -541,8 +543,8 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     float relBallSdYVel = m_ball_model->sd(MobileObjectUKF::y_vel);
 
     // Rotate the relative ball postion to alight with the forward looking robot on the field.
-    float rotatedX = relBallX * hcos + relBallY * hsin;
-    float rotatedY = -relBallX * hsin + relBallY * hcos;
+    float rotatedX = relBallX * hcos - relBallY * hsin;
+    float rotatedY = relBallX * hsin + relBallY * hcos;
 
     // Calculate the Ball location in field coordinates.
     float ballFieldLocationX = self.wmX() + rotatedX;
@@ -1055,6 +1057,11 @@ bool SelfLocalisation::clipActiveModelsToField()
 
 bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double timeIncrement)
 {
+    const float c_turn_multiplier = 0.6f;
+    odomTurn *= c_turn_multiplier;
+
+    odomTurn -= odomForward * 0.008;
+
     // put values into odometry measurement matrix
     Matrix odometry(3,1,false);
     odometry[0][0] = odomForward;
@@ -1207,14 +1214,19 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
 //                kf_return = m_models[modelID].fieldObjectmeas(flatObjectDistance, (*currStat)->measuredBearing(),(*currStat)->X(), (*currStat)->Y(),
 //                                R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
+
+                kf_return = (*model_it)->MeasurementUpdate(*(*currStat), temp_error);
                 #if LOC_SUMMARY > 0
                 m_frame_log << "Individual Update: " <<  (*currStat)->getName() << " Result: " << ((kf_return==Model::RESULT_OK)?"Successful":"Outlier") << std::endl;
                 m_frame_log << "Following individual object updates: " << (*model_it)->summary(false);
                 #endif
-//                if(kf_return == Model::RESULT_OUTLIER)
-//                {
-//                    m_modelObjectErrors[modelID][(*currStat)->getID()] += 1.0;
-//                }
+                if(kf_return == Model::RESULT_OUTLIER)
+                {
+                    Matrix cov = (*model_it)->covariance();
+                    Matrix added_noise = covariance_matrix(10,10,0.01);
+                    cov = cov + added_noise;
+                    (*model_it)->setCovariance(cov);
+                }
             }
         }
     #if LOC_SUMMARY > 0
@@ -1843,6 +1855,11 @@ const SelfModel* SelfLocalisation::getBestModel() const
     return result;
 }
 
+const MobileObjectUKF* SelfLocalisation::getBallModel() const
+{
+    return m_ball_model;
+}
+
 /*! @brief Normalises the alphas of all exisiting models.
     The alphas of all existing models are normalised so that the total probablility of the set sums to 1.0.
 */
@@ -1983,6 +2000,110 @@ double SelfLocalisation::MergeMetric(const SelfModel *modelA, const SelfModel *m
         dij+=(xdif[i][0]*xdif[i][0]) / (p1[i][i]+p2[i][i]);
     }
     return dij*( (modelA->alpha()*modelB->alpha()) / (modelA->alpha()+modelB->alpha()) );
+}
+
+bool SelfLocalisation::operator ==(const SelfLocalisation& b) const
+{
+    if(m_timestamp != b.m_timestamp) return false;
+    if(m_currentFrameNumber != b.m_currentFrameNumber) return false;
+    if(m_previously_incapacitated != b.m_previously_incapacitated) return false;
+    if(m_previous_game_state != b.m_previous_game_state) return false;
+    if(m_hasGps != b.m_hasGps) return false;
+    if(m_hasGps)
+    {
+        if(m_compass != b.m_compass) return false;
+        if(m_gps[0] != b.m_gps[0]) return false;
+        if(m_gps[1] != b.m_gps[1]) return false;
+    }
+    if(*m_ball_model != *b.m_ball_model) return false;
+
+    unsigned int num_models = m_models.size();
+    if(num_models != b.m_models.size()) return false;
+    ModelContainer::const_iterator local_model = m_models.begin();
+    ModelContainer::const_iterator b_model = b.m_models.begin();
+    for (unsigned int i=0; i < num_models; ++i)
+    {
+        if(*(*local_model) != *(*b_model)) return false;
+        ++local_model;
+        ++b_model;
+    }
+    return true;
+}
+
+/*!
+@brief Outputs a binary representation of the Self Localisation system.
+@param output The output stream.
+@return The output stream.
+*/
+std::ostream& SelfLocalisation::writeStreamBinary (std::ostream& output) const
+{
+    char head = header();
+    output.write(&head, sizeof(head));
+    output.write(reinterpret_cast<const char*>(&m_timestamp), sizeof(m_timestamp));
+    output.write(reinterpret_cast<const char*>(&m_currentFrameNumber), sizeof(m_currentFrameNumber));
+    output.write(reinterpret_cast<const char*>(&m_previously_incapacitated), sizeof(m_previously_incapacitated));
+    output.write(reinterpret_cast<const char*>(&m_previous_game_state), sizeof(m_previous_game_state));
+    output.write(reinterpret_cast<const char*>(&m_hasGps), sizeof(m_hasGps));
+    if(m_hasGps)
+    {
+        output.write(reinterpret_cast<const char*>(&m_compass), sizeof(m_compass));
+        output.write(reinterpret_cast<const char*>(&m_gps[0]), sizeof(m_gps[0]));
+        output.write(reinterpret_cast<const char*>(&m_gps[1]), sizeof(m_gps[1]));
+    }
+
+    output.write(reinterpret_cast<const char*>(&m_settings), sizeof(m_settings));
+
+    // Write the ball model
+    m_ball_model->writeStreamBinary(output);
+
+    // Write the slef localisation models.
+    unsigned int num_models = m_models.size();
+    output.write(reinterpret_cast<const char*>(&num_models), sizeof(num_models));
+    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+    {
+        SelfModel* currModel = (*model_it);
+        currModel->writeStreamBinary(output);
+    }
+    return output;
+}
+
+/*!
+@brief Reads in a Self localisation system from the input stream.
+@param input The input stream.
+@return The input stream.
+*/
+std::istream& SelfLocalisation::readStreamBinary (std::istream& input)
+{
+    char header;
+    input.read(&header, sizeof(header));
+    input.read(reinterpret_cast<char*>(&m_timestamp), sizeof(m_timestamp));
+    input.read(reinterpret_cast<char*>(&m_currentFrameNumber), sizeof(m_currentFrameNumber));
+    input.read(reinterpret_cast<char*>(&m_previously_incapacitated), sizeof(m_previously_incapacitated));
+    input.read(reinterpret_cast<char*>(&m_previous_game_state), sizeof(m_previous_game_state));
+    input.read(reinterpret_cast<char*>(&m_hasGps), sizeof(m_hasGps));
+    if(m_hasGps)
+    {
+        input.read(reinterpret_cast<char*>(&m_compass), sizeof(m_compass));
+        input.read(reinterpret_cast<char*>(&m_gps[0]), sizeof(m_gps[0]));
+        input.read(reinterpret_cast<char*>(&m_gps[1]), sizeof(m_gps[1]));
+    }
+
+    input.read(reinterpret_cast<char*>(&m_settings), sizeof(m_settings));
+
+    // Read the ball model
+    m_ball_model->readStreamBinary(input);
+
+    // Write the slef localisation models.
+    unsigned int num_models;
+    input.read(reinterpret_cast<char*>(&num_models), sizeof(num_models));
+    clearModels();
+    for (unsigned int i = 0; i < num_models; ++i)
+    {
+        SelfModel* currModel = new Model(0.0f);
+        currModel->readStreamBinary(input);
+        m_models.push_back(currModel);
+    }
+    return input;
 }
 
 /*! @brief output stream

@@ -203,7 +203,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Filters/UKF.h \
     ../Tools/Math/Filters/MobileObjectUKF.h \
     ../Localisation/Models/WeightedModel.h \
-    ../Tools/Math/depUKF.h
+    ../Tools/Math/depUKF.h \
+    ../Localisation/iotests.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -342,7 +343,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Filters/UKF.cpp \
     ../Tools/Math/Filters/MobileObjectUKF.cpp \
     ../Localisation/Models/WeightedModel.cpp \
-    ../Tools/Math/depUKF.cpp
+    ../Tools/Math/depUKF.cpp \
+    ../Localisation/iotests.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

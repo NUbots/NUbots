@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Object.h"
 #include <vector>
 using namespace std;

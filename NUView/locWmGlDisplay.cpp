@@ -274,6 +274,7 @@ void locWmGlDisplay::paintEvent(QPaintEvent *event)
     drawField();        // Draw the Standard Field Layout.
     drawMarkers();
     drawObjects();
+    drawFieldObjects();
     drawOverlays();
 
     glShadeModel(GL_FLAT);
@@ -364,6 +365,10 @@ void locWmGlDisplay::drawObjects()
     {
         DrawLocalisationObjects(*localLocalisation, m_localColour);
     }
+    if(m_self_loc)
+    {
+        DrawLocalisationObjects(*m_self_loc, m_selfColour);
+    }
 }
 
 void locWmGlDisplay::drawOverlays()
@@ -434,25 +439,11 @@ void locWmGlDisplay::drawField()
         }
         glEnd();
 
-//    glBegin(GL_QUADS);
-//        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-//        glTexCoord2f(0.0f, 0.0f); glVertex3f(-370.0f,  270.0f,  0.0f);      // Bottom Left Of The Texture and Quad
-//        glTexCoord2f(7.4f, 0.0f); glVertex3f( 370.0f,  270.0f,  0.0f);    // Bottom Right Of The Texture and Quad
-//        glTexCoord2f(7.4f, 5.4f); glVertex3f( 370.0f, -270.0f,  0.0f);     // Top Right Of The Texture and Quad
-//        glTexCoord2f(0.0f, 5.4f); glVertex3f(-370.0f, -270.0f,  0.0f);       // Top Left Of The Texture and Quad
-//    glEnd();
-
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, faceColor);
     glBindTexture(GL_TEXTURE_2D, fieldLineTexture);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);    // Turn off filtering of textures
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);    // Turn off filtering of textures
-//    glBegin(GL_QUADS);
-//        glNormal3f(0.0f,0.0f,1.0f);	// Set The Normal
-//        glTexCoord2f(0.0f, 0.0f); glVertex3f(-370.0f,  270.0f,  0.0f);      // Bottom Left Of The Texture and Quad
-//        glTexCoord2f(1.0f, 0.0f); glVertex3f( 370.0f,  270.0f,  0.0f);    // Bottom Right Of The Texture and Quad
-//        glTexCoord2f(1.0f, 1.0f); glVertex3f( 370.0f, -270.0f,  0.0f);     // Top Right Of The Texture and Quad
-//        glTexCoord2f(0.0f, 1.0f); glVertex3f(-370.0f, -270.0f,  0.0f);       // Top Left Of The Texture and Quad
-//    glEnd();
+
         glBegin(GL_QUADS);
         // Draw texture using 10x10 grids for shading.
         for (int x = -370; x < 370; x += x_size)
@@ -479,16 +470,68 @@ void locWmGlDisplay::drawField()
         glEnd();
     glDisable(GL_BLEND);            // Turn Blending Off
     glDisable(GL_TEXTURE_2D);       // Disable Texture Mapping
+    glPopMatrix();
+}
 
-    drawGoal(QColor(0,0,255,255),-300,0.0,0.0);
-    drawGoal(QColor(255,255,0,255),300,0.0,180.0);
+void locWmGlDisplay::drawFieldObjects()
+{
+    glPushMatrix();
+    drawGoal(Qt::blue,-300,0.0,0.0);
+    drawGoal(Qt::yellow,300,0.0,180.0);
+    drawTriColourBeacon(Qt::yellow, Qt::blue, Qt::yellow, 0.f, 240.f);
+    drawTriColourBeacon(Qt::blue, Qt::yellow, Qt::blue, 0.f, -240.f);
+    glPopMatrix();
+}
+
+void locWmGlDisplay::drawTriColourBeacon(const QColor& bottomColour, const QColor& middleColour, const QColor& topColour, float x, float y)
+{
+    const float postRadius  = 5.f;
+    const float segmentHeight = 15.f;
+    const int slices = 64;
+    const int stacks = 64;
+    const int loops = 64;
+
+    glPushMatrix();
+    GLfloat currentColour[4];
+
+    glShadeModel(GL_SMOOTH);    		// Enable Smooth Shading
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+
+    GLUquadric* quad = gluNewQuadric();
+    gluQuadricDrawStyle(quad, GLU_FILL);
+    gluQuadricNormals(quad, GLU_SMOOTH);	// Create Smooth Normals
+
+    glTranslatef(x,y,0.0f);    // Move to centre of beacon.
+    qSetColor(currentColour, bottomColour);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, currentColour);
+    gluCylinder(quad,postRadius,postRadius,segmentHeight,slices,stacks);	// Draw lower segment
+
+    glTranslatef(0,0,segmentHeight);    // Move up to next segment.
+    qSetColor(currentColour, middleColour);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, currentColour);
+    gluCylinder(quad,postRadius,postRadius,segmentHeight,slices,stacks);	// Draw middle segment
+
+    glTranslatef(0,0,segmentHeight);    // Move up to next segment.
+    qSetColor(currentColour, topColour);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, currentColour);
+    gluCylinder(quad,postRadius,postRadius,segmentHeight,slices,stacks);	// Draw top segment
+
+    // Draw to top cap
+    glTranslatef(0,0,segmentHeight);
+    gluDisk(quad, 0.0, postRadius, slices, loops);
+
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     glPopMatrix();
 }
 
 void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
 {
-    float postRadius = 5;
-    float crossBarRadius = 2.5;
+    const float postRadius = 5.f;
+    const float crossBarRadius = 2.5f;
+    const float postHeight = 80.f;
+    const int slices = 64;
+    const int stacks = 64;
+    const int loops = 64;
     glPushMatrix();
     GLfloat goalColour[4];
     qSetColor(goalColour, colour);
@@ -509,7 +552,10 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
     glRotatef(facing,0.0f,0.0f,1.0f);				// Rotate The Pyramid On It's Y Axis
 
     glTranslatef(0.0f,70.0f,0.0f);    // Move to right post.
-    gluCylinder(quad,postRadius,postRadius,80.0f,128,128);	// Draw right post
+    gluCylinder(quad,postRadius,postRadius,postHeight,slices,stacks);	// Draw right post
+    glTranslatef(0.0f,0.0f,postHeight);    // Move to top of post.
+    gluDisk(quad,0.f,postRadius,slices,loops);	// Draw cap
+    glTranslatef(0.0f,0.0f,-postHeight);    // Move back down
 
 
     // Draw right post triangle.
@@ -523,7 +569,10 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
 
     glTranslatef(0.0f,-2*70.0f,0.0f);    // Move to left post.
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, goalColour);
-    gluCylinder(quad,postRadius,postRadius,80.0f,128,128);	// Draw left post
+    gluCylinder(quad,postRadius,postRadius,postHeight,slices,stacks);	// Draw left post
+    glTranslatef(0.0f,0.0f,postHeight);    // Move to top of post.
+    gluDisk(quad,0.f,postRadius,slices,loops);	// Draw cap
+    glTranslatef(0.0f,0.0f,-postHeight);    // Move back down.
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
     glBegin(GL_TRIANGLES);				// Drawing Using Triangles
@@ -532,10 +581,10 @@ void locWmGlDisplay::drawGoal(QColor colour, float x, float y, float facing)
         glVertex3f(-postRadius - 40.0f,0.0f, 0.0f);	// Bottom Left
     glEnd();						// Finished Drawing The Triangle
 
-    glTranslatef(0.0f,-postRadius,80.0f - crossBarRadius);    // Move to top of left post.
+    glTranslatef(0.0f,0.f, postHeight - crossBarRadius - 1);    // Move to top of left post.
     glRotatef(-90.0,1.0f,0.0f,0.0f);
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, goalColour);
-    gluCylinder(quad,crossBarRadius,crossBarRadius,140.0f+2.0f*postRadius,128,128);	// Draw cross bar
+    gluCylinder(quad,crossBarRadius,crossBarRadius,140.0f,slices,stacks);	// Draw cross bar
 
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     glPopMatrix();
@@ -732,9 +781,7 @@ void locWmGlDisplay::DrawBallSigma(QColor colour, float x, float y)
 void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
 {
     QColor drawColor(modelColor);
-    int alpha = 255*model.alpha();
-    if(alpha < 25) alpha = 25;
-    drawColor.setAlpha(alpha);
+    int alpha = drawColor.alpha();
     drawRobot(drawColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
     if(drawSigmaPoints)
     {
@@ -745,6 +792,16 @@ void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
         }
     }
     drawBall(QColor(255,165,0,alpha), model.state(KF::ballX), model.state(KF::ballY));
+}
+
+void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const MobileObjectUKF& ball_model, const QColor& modelColor)
+{
+    QColor drawColor(modelColor);
+    int alpha = drawColor.alpha();
+    drawRobot(drawColor, model.mean(SelfModel::states_x), model.mean(SelfModel::states_y), model.mean(SelfModel::states_heading));
+
+    FieldPose ball_pose = calculateBallPosition(model, ball_model);
+    drawBall(QColor(255,165,0,alpha), ball_pose.x, ball_pose.y);
 }
 
 void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor)
@@ -761,7 +818,38 @@ void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, c
             const KF model = localisation.getModel(modelID);
             if(model.active())
             {
-                DrawModelObjects(model, modelColor);
+                QColor drawColor(modelColor);
+                int alpha = 255*model.alpha();
+                if(alpha < 25) alpha = 25;
+                drawColor.setAlpha(alpha);
+                DrawModelObjects(model, drawColor);
+            }
+        }
+    }
+}
+
+void locWmGlDisplay::DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor)
+{
+    const MobileObjectUKF* ball_model = localisation.getBallModel();
+    if(drawBestModelOnly)
+    {
+        const SelfModel* model = localisation.getBestModel();
+        DrawModelObjects(*model, *ball_model, modelColor);
+    }
+    else
+    {
+        ModelContainer models = localisation.allModels();
+
+        for(ModelContainer::iterator model = models.begin(); model != models.end(); ++model)
+        {
+            const SelfModel* currModel = (*model);
+            if(currModel->active())
+            {
+                QColor drawColor(modelColor);
+                int alpha = 255*currModel->alpha();
+                if(alpha < 25) alpha = 25;
+                drawColor.setAlpha(alpha);
+                DrawModelObjects(*currModel, *ball_model, drawColor);
             }
         }
     }
@@ -860,11 +948,16 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
 {
     QColor drawColor(modelColor);
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
+
+    const MobileObjectUKF* ball_model = localisation.getBallModel();
+
     if(drawBestModelOnly)
     {
         drawColor.setAlpha(255);
         const SelfModel* model = localisation.getBestModel();
         DrawModelMarkers(model, drawColor);
+        FieldPose ball_pose = calculateBallPosition(*model, *ball_model);
+        drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
     }
     else
     {
@@ -877,11 +970,35 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
                 int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->alpha()));
                 drawColor.setAlpha(alpha);
                 DrawModelMarkers((*model_it), drawColor);
+                FieldPose ball_pose = calculateBallPosition(*(*model_it), *ball_model);
+                drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
             }
         }
     }
 
+}
 
+FieldPose locWmGlDisplay::calculateBallPosition(const SelfModel& robot_model, const MobileObjectUKF& ball_model)
+{
+    FieldPose result;
+    float selfX = robot_model.mean(SelfModel::states_x);
+    float selfY = robot_model.mean(SelfModel::states_y);
+    float selfHeading = robot_model.mean(SelfModel::states_heading);
+
+    // pre-calculate the trig.
+    float hcos = cos(selfHeading);
+    float hsin = sin(selfHeading);
+
+    float relBallX = ball_model.mean(MobileObjectUKF::x_pos);
+    float relBallY = ball_model.mean(MobileObjectUKF::y_pos);
+    // Rotate the relative ball postion to alight with the forward looking robot on the field.
+    float rotatedX = relBallX * hcos - relBallY * hsin;
+    float rotatedY = relBallX * hsin + relBallY * hcos;
+
+    // Calculate the Ball location in field coordinates.
+    result.x = selfX + rotatedX;
+    result.y = selfY + rotatedY;
+    return result;
 }
 
 FieldPose locWmGlDisplay::CalculateErrorElipse(float xx, float xy, float yy)

@@ -156,11 +156,35 @@ bool SelfModel::clipState(int stateIndex, double minValue, double maxValue){
     return clipped;
 }
 
+bool SelfModel::operator ==(const SelfModel& b) const
+{
+    // Check Moment portions are equal
+    const Moment* this_moment = this;
+    const Moment* other_moment = &b;
+    if(*this_moment != *other_moment) return false;
+
+    // Check WeightedModel portions are equal
+    const WeightedModel* this_wm = this;
+    const WeightedModel* other_wm = &b;
+    if(*other_wm != *other_wm) return false;
+
+    // Check other memebr variables.
+   if(m_split_option != b.m_split_option) return false;
+
+    return true;
+}
+
 std::ostream& SelfModel::writeStreamBinary (std::ostream& output) const
 {
     WeightedModel::writeStreamBinary(output);
     Moment::writeStreamBinary(output);
     output.write(reinterpret_cast<const char*>(&m_split_option), sizeof(m_split_option));
+//    unsigned int size = m_previous_decisions.size();
+//    output.write(reinterpret_cast<const char*>(&size), sizeof(size));
+//    for(unsigned int i = 0; i < size; ++i)
+//    {
+//        output.write(reinterpret_cast<const char*>(&m_previous_decisions.at(i)), sizeof(m_previous_decisions.at(i)));
+//    }
     return output;
 }
 
@@ -169,6 +193,13 @@ std::istream& SelfModel::readStreamBinary (std::istream& input)
     WeightedModel::readStreamBinary(input);
     Moment::readStreamBinary(input);
     input.read(reinterpret_cast<char*>(&m_split_option), sizeof(m_split_option));
+//    unsigned int size;
+//    input.read(reinterpret_cast<char*>(&size), sizeof(size));
+//    m_previous_decisions.resize(size, 0);
+//    for(unsigned int i = 0; i < size; ++i)
+//    {
+//        input.read(reinterpret_cast<char*>(&m_previous_decisions.at(i)), sizeof(m_previous_decisions.at(i)));
+//    }
     return input;
 }
 
