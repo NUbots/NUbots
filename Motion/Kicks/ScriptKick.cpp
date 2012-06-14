@@ -7,6 +7,8 @@ ScriptKick::ScriptKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* act
 {
     m_left_kick_script = new MotionScript("KickLeft");
     m_right_kick_script = new MotionScript("KickRight");
+    m_side_left_kick_script = new MotionScript("SideKickLeft");
+    m_side_right_kick_script = new MotionScript("SideKickRight");
     m_current_script = NULL;
     m_script_start_time = -1;
     loadKickParameters();
@@ -21,10 +23,12 @@ ScriptKick::~ScriptKick()
 
 void ScriptKick::loadKickParameters()
 {
-    float xMin = 8.0f;
-    float xMax = 25.0f;
-    float yMin = 1.5f;
-    float yMax = 9.0f;
+    float xMin = 3.0f;
+    float xMax = 18.0f;
+    
+    //HACK: invert Y so we kick on the right side
+    float yMin = -1.5f;
+    float yMax = 7.0f;
 
     m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
     m_left_kick_area = Rectangle(xMin, xMax, yMin, yMax);
@@ -160,24 +164,36 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
 
     float angle_margin = mathGeneral::PI / 4.0f;
 
-    if(fabs(theta) > angle_margin)
+    /*if(fabs(theta) > angle_margin)
     {
         //std::cout << "Angle Too Large: " << theta << std::endl;
         return;
-    }
+    }*/
 
     // Ball is in position for left kick.
-    if(m_left_kick_script->isValid() and m_left_kick_area.PointInside(ball_x, ball_y))
+    if(m_left_kick_script->isValid() and m_left_kick_area.PointInside(ball_x, ball_y) and theta >= -angle_margin)
     {
         kick_begin = true;
         m_kicking_leg = leftLeg;
-        m_current_script = m_left_kick_script;
+        
+        
+        if(theta > angle_margin) {
+            m_current_script = m_side_left_kick_script;
+        } else {
+            m_current_script = m_left_kick_script;
+        }
     }
-    else if(m_right_kick_script->isValid() and m_right_kick_area.PointInside(ball_x, ball_y))
+    else if(m_right_kick_script->isValid() and m_right_kick_area.PointInside(ball_x, ball_y) and theta <= angle_margin)
     {
         kick_begin = true;
         m_kicking_leg = rightLeg;
-        m_current_script = m_right_kick_script;
+        //m_current_script = m_right_kick_script;
+        
+        if(theta < -angle_margin) {
+            m_current_script = m_side_right_kick_script;
+        } else {
+            m_current_script = m_right_kick_script;
+        }
     }
     else
     {

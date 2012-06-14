@@ -221,7 +221,7 @@ protected:
             targetPosition[1] = goalbearing * sin(goalbearing);
             KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
             m_jobs->addMotionJob(kjob);
-            cout << "Kick!" << endl;
+            cout << "Kick! " << ballbearing << endl;
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << m_data->CurrentTime << ": Kicking Ball at distance " << balldistance << endl;
             #endif

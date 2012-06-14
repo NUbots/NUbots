@@ -136,7 +136,7 @@ protected:
             m_time_in_state += m_data->CurrentTime - m_previous_time;
         m_previous_time = m_data->CurrentTime;
         
-        m_jobs->addMotionJob(new WalkJob(0, 0, m_ROTATIONAL_SPEED));
+        m_jobs->addMotionJob(new WalkJob(-0.12, 0, m_ROTATIONAL_SPEED));
         m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::Localisation, m_ROTATIONAL_SPEED));
     }
 private:
