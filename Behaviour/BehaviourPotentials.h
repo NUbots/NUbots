@@ -293,7 +293,7 @@ public:
 
         if(turning)
         {
-            speed[0] = 0.1f; // 10% speed
+            speed[0] = 0.03f; // 10% speed
             speed[1] = -mathGeneral::sign(target_heading)*3.1;
             speed[2] = 0.5*target_heading;
             if (ball_distance < kickingdistance * 1.5) {
@@ -321,7 +321,7 @@ public:
             speed[2] = 0.0f;    // Straight
         
         }
-        cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
+        //cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
         return speed;
     }
 
