@@ -43,6 +43,7 @@ class ChaseState;
 class PositioningState;
 class BallIsLostState;
 class ImLostState;
+class GoalKeeperState;
 
 #include <vector>
 using namespace std;
@@ -60,6 +61,7 @@ protected:
     PositioningState* m_positioning_state;
     BallIsLostState* m_ball_is_lost_state;
     ImLostState* m_im_lost_state;
+    GoalKeeperState* m_goalkeeper_state;
 private:
     vector<float> m_led_on;
     vector<float> m_led_off;

@@ -47,7 +47,7 @@ public:
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    static vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 0, float stoppingdistance = 30, float turningdistance = 70)
+    static vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 4.f, float stoppingdistance = 30, float turningdistance = 70)
     {
         vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
         return goToPoint(relativestate[0], relativestate[1], relativestate[2], stoppeddistance, stoppingdistance, turningdistance);
@@ -61,18 +61,52 @@ public:
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    static vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 0, float stoppingdistance = 50, float turningdistance = 70)
+    static vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 4.f, float stoppingdistance = 50, float turningdistance = 70)
     {
-        static const float m_HYSTERESIS = 0.2;      // the fraction of hysteresis in the turning point toward the desired heading
+        static const float m_HYSTERESIS = 0.15;      // the fraction of hysteresis in the turning point toward the desired heading
         static double m_previous_time = 0;          // the previous time in ms
         static bool m_previous_turning = false;     // the previous turning state; used to implement hysteresis in the decision to turn around.
+        static bool m_turning_left = false; 
         
-        if (Blackboard->Sensors->CurrentTime - m_previous_time > 500)
+        Self self = Blackboard->Objects->self;
+        vector<float> result(3,0);
+        
+        if (fabs(bearing) > 0.4 or (fabs(bearing) > m_HYSTERESIS and m_previous_turning and distance > stoppeddistance*1.5)) { //turn with hysteresis
+            m_previous_turning = true;
+            if (bearing > 0. and bearing < 2.6) {
+                result[2] = bearing*0.5;
+                m_turning_left = true;
+            } else if (bearing <= 0. and bearing > -2.6) {
+                result[2] = bearing*0.5;
+                m_turning_left = false;
+            } else if (distance < stoppeddistance) {
+                result[2] = heading*0.5;
+            } else if (m_turning_left) {
+                result[2] = 1.f;
+            } else if (not m_turning_left) {
+                result[2] = -1.f;
+            }
+            result[0] = -0.1f;
+        } else { //run forward
+            m_previous_turning = false;
+            if (distance > stoppingdistance) {
+                result[0] = 1.0;
+            } else if (distance > stoppingdistance/2.f) {
+                result[0] = 0.65;
+            } else if (distance > stoppeddistance) {
+                result[0] = 0.25;
+            } else {
+                result[2] = heading*0.5;
+            }
+        }
+        
+        cout << result[0] << ", " << result[1] << ", " << result[2] << endl;
+        cout << distance << ", " << bearing << ", " << heading << endl;
+       /* if (Blackboard->Sensors->CurrentTime - m_previous_time > 500)
         {
             m_previous_turning = false;
         }
         
-        vector<float> result(3,0);
         if (distance > stoppeddistance or fabs(heading) > 0.05)
         {
             // calculate the translational speed
@@ -82,23 +116,24 @@ public:
                 result[0] = 1;
             
             // calculate the translational direction
-            result[1] = bearing;
+            //result[1] = bearing;
             
             // calculate the rotational speed
-            if (distance < turningdistance or (m_previous_turning and distance < (1+m_HYSTERESIS)*turningdistance))
+            if (bearing > 0.1 or (m_previous_turning and bearing < .1+m_HYSTERESIS))
             {   // We use a bit of hysteresis in the turning point, once the turn has started its best to stick with it
                 if (fabs(heading) > 3)
                     heading = fabs(heading);
                 result[2] = 0.5*heading;
+                result[0] = 0.;
                 m_previous_turning = true;
             }
             else
             {
-                result[2] = 0.5*bearing;
+                result[2] = 0.f;//5*bearing;
                 m_previous_turning = false;
             }
         }
-        m_previous_time = Blackboard->Sensors->CurrentTime;
+        m_previous_time = Blackboard->Sensors->CurrentTime;*/
         return result;
     }
     
@@ -190,7 +225,7 @@ public:
         float x_diff = C[0] - B[0];
         float y_diff = C[1] - B[1];
 
-        float fwd_angle = 0.5*mathGeneral::PI+atan2(-y_diff, -x_diff);
+        float fwd_angle = atan2(-y_diff, -x_diff);
 
         float ball_bearing;
         float ball_distance;
@@ -260,7 +295,7 @@ public:
         x_diff = best_kicking_pos_x - my_x;
         y_diff = best_kicking_pos_y - my_y;
         float dist_to_kick_pos = sqrt(pow(x_diff,2) + pow(y_diff, 2));
-        float angle_to_kick_pos = mathGeneral::normaliseAngle(atan2(y_diff, x_diff) + my_heading);
+        float angle_to_kick_pos = mathGeneral::normaliseAngle(atan2(y_diff, x_diff) - my_heading);
         float angle_to_aim_pos = mathGeneral::normaliseAngle(best_kicking_orientation - my_heading);
         //cout << "Approach angle: " << angle_to_kick_pos << "\tKick angle: " << angle_to_aim_pos << "\tHeading: " << my_heading << endl;
         //cout << "Ball RelX: " << x_diff << "\tBall RelY: " << y_diff << "\tBall Heading: " << atan2(y_diff, x_diff) << endl;
@@ -300,13 +335,13 @@ public:
                 speed[2] = 0.3*target_heading;
             }
             
-//            std::cout << "Calculated heading: " << -atan2(y_diff, x_diff) << std::endl;
-//            std::cout << "My heading: " << my_heading << std::endl;
-//            std::cout << "Heading to Ball: " << ball_bearing << std::endl;
-//            std::cout << "Ball Position: (" << ballx << ", " << bally << ")" << std::endl;
-//            std::cout << "Kick Position: (" << best_kicking_pos_x << ", " << best_kicking_pos_y << ")" << std::endl;
-//            std::cout << angle_to_kick_pos << std::endl;
-//            std::cout << "Turning." << std::endl;
+            std::cout << "Calculated heading: " << -atan2(y_diff, x_diff) << std::endl;
+            std::cout << "My heading: " << my_heading << std::endl;
+            std::cout << "Heading to Ball: " << ball_bearing << std::endl;
+            std::cout << "Ball Position: (" << ballx << ", " << bally << ")" << std::endl;
+            std::cout << "Kick Position: (" << best_kicking_pos_x << ", " << best_kicking_pos_y << ")" << std::endl;
+            std::cout << angle_to_kick_pos << std::endl;
+            std::cout << "Turning." << std::endl;
         }
         else if(ball_distance > stoppingdistance)
         {
@@ -317,11 +352,11 @@ public:
 //            std::cout << "Walking." << std::endl;
         } else if (ball_distance > kickingdistance) {
             speed[0] = 0.5f; // 100% speed.
-            speed[1] = angle_to_kick_pos;    // Straight
+            speed[1] = 0.2*ball_bearing;    // Straight
             speed[2] = 0.0f;    // Straight
         
         }
-        //cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
+        cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
         return speed;
     }
 

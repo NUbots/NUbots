@@ -12,6 +12,7 @@ class NUSensorsData;
 #include "debug.h"
 #include "debugverbositylocalisation.h"
 #include "Tools/FileFormats/TimestampedData.h"
+#include "Tools/Math/Vector2.h"
 #include <fstream>
 #include <sstream>
 #include <list>
@@ -169,6 +170,7 @@ class SelfLocalisation: public TimestampedData
 
     protected:
         MeasurementError calculateError(const Object& theObject);
+        Vector2<float> TriangulateTwoObject(const StationaryObject& object1, const StationaryObject& object2);
 
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
@@ -206,7 +208,7 @@ class SelfLocalisation: public TimestampedData
         static const float c_obj_range_offset_variance;
         static const float c_obj_range_relative_variance;
         static const float c_centre_circle_heading_variance;
-        static const float sdTwoObjectAngle;
+        static const float c_twoObjectAngleVariance;
 };
 
 #endif
