@@ -52,13 +52,13 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
-const float SelfLocalisation::c_obj_theta_variance = 0.1f*0.1f;        // (0.01 rad)^2
+const float SelfLocalisation::c_obj_theta_variance = 0.05f*0.05f;        // (0.01 rad)^2
 const float SelfLocalisation::c_obj_range_offset_variance = 10.0f*10.0f;     // (10cm)^2
 const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
 
 const float SelfLocalisation::c_centre_circle_heading_variance = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
-const float SelfLocalisation::sdTwoObjectAngle = 0.05f; //Small! error in angle difference is normally very small
+const float SelfLocalisation::c_twoObjectAngleVariance = 0.05f*0.05f; //Small! error in angle difference is normally very small
 
 /*! @brief Constructor
     @param playerNumber The player number of the current robot/system. This assists in choosing reset positions.
@@ -338,6 +338,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
+
     // Proccess the Stationary Known Field Objects
     StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
     StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
@@ -364,23 +365,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     numUpdates+=objectsAdded;
     usefulObjectCount+=objectsAdded;
 
-    // Two Object update
-#if TWO_OBJECT_UPDATE_ON
-    if( fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible()
-        && fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible())
-        {
-            doTwoObjectUpdate(fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST],
-                              fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST]);
-        }
-    if( fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible()
-        && fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible())
-        {
-            doTwoObjectUpdate(fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST],
-                              fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST]);
-        }
-#endif
-
-        NormaliseAlphas();
+    NormaliseAlphas();
 
 #if MULTIPLE_MODELS_ON
         bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
@@ -408,6 +393,27 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             PruneModels();
         }
 #endif // MULTIPLE_MODELS_ON
+
+        // Two Object update
+    //#if TWO_OBJECT_UPDATE_ON
+        StationaryObject& leftBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+        StationaryObject& rightBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+        StationaryObject& leftYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+        StationaryObject& rightYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+
+        if( leftBlue.isObjectVisible() and rightBlue.isObjectVisible())
+        {
+            doTwoObjectUpdate(leftBlue, rightBlue);
+        }
+        if( leftYellow.isObjectVisible() and rightYellow.isObjectVisible())
+        {
+            doTwoObjectUpdate(leftYellow, rightYellow);
+        }
+    //#endif
+
+        NormaliseAlphas();
+
+
         PruneModels();
 
         MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -1223,7 +1229,7 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
                 if(kf_return == Model::RESULT_OUTLIER)
                 {
                     Matrix cov = (*model_it)->covariance();
-                    Matrix added_noise = covariance_matrix(10,10,0.01);
+                    Matrix added_noise = covariance_matrix(1,1,0.0001);
                     cov = cov + added_noise;
                     (*model_it)->setCovariance(cov);
                 }
@@ -1344,24 +1350,39 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
 
 int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
-/*
-#if LOC_SUMMARY > 0
-    m_frame_log << std::endl << "Two object landmark update: " << landmark1.getName() << " & " << landmark2.getName() << std::endl;
-#endif
-    float totalAngle = landmark1.measuredBearing() - landmark2.measuredBearing();
-
-    #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out << "Two Object Update:" << endl;
-    debug_out << landmark1.getName() << " - Bearing = " << landmark1.measuredBearing() << endl;
-    debug_out << landmark2.getName() << " - Bearing = " << landmark2.measuredBearing() << endl;
-    #endif
-    for (int currID = 0; currID < c_MAX_MODELS; currID++){
-        if(m_models[currID]->active())
-        {
-            m_models[currID].updateAngleBetween(totalAngle,landmark1.X(),landmark1.Y(),landmark2.X(),landmark2.Y(),sdTwoObjectAngle);
-        }
+    // do the special update
+    float angle_beween = fabs(landmark1.measuredBearing() - landmark2.measuredBearing());
+    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+    {
+        (*model_it)->updateAngleBetween(angle_beween, landmark1.X(), landmark1.Y(), landmark2.X(), landmark2.Y(), c_twoObjectAngleVariance);
     }
-    */
+
+
+    Vector2<float> position = TriangulateTwoObject(landmark1, landmark2);
+
+    float avg_x = (landmark1.X() + landmark2.X()) / 2.f;
+    float avg_y = (landmark1.Y() + landmark2.Y()) / 2.f;
+
+    float avg_heading = (landmark1.measuredBearing() + landmark2.measuredBearing()) / 2.f;
+
+    float best_heading = atan2(avg_y - position.y, avg_x - position.x) - avg_heading;
+
+    if(position.abs() == 0.0f)
+    {
+        return 0;
+    }
+
+    Matrix mean = mean_matrix(position.x, position.y, best_heading);
+    Matrix cov = covariance_matrix(20, 50, 0.01);
+    float alpha = getBestModel()->alpha() * 0.001f;
+
+    Model* temp = new Model(GetTimestamp());
+    temp->setMean(mean);
+    temp->setCovariance(cov);
+    temp->setAlpha(alpha);
+    temp->setActive();
+    m_models.push_back(temp);
+
     return 1;
 }
 
@@ -2310,4 +2331,50 @@ MeasurementError SelfLocalisation::calculateError(const Object& theObject)
     error.setDistance(c_obj_range_offset_variance + c_obj_range_relative_variance * pow(theObject.measuredDistance() * cos(theObject.measuredElevation()),2));
     error.setHeading(c_obj_theta_variance);
     return error;
+}
+
+Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& object1, const StationaryObject& object2)
+{
+    // Algorithm from http://local.wasp.uwa.edu.au/~pbourke/geometry/2circle/
+    Vector2<float> p0, p1, p2, p3a, p3b, p3;
+    p0.x = object1.X();
+    p0.y = object1.Y();
+
+    p1.x = object2.X();
+    p1.y = object2.Y();
+
+    float r0 = object1.measuredDistance();
+    float r1 = object2.measuredDistance();
+
+    float d = sqrt(pow(p0.x - p1.x,2) + pow(p0.y - p1.y, 2));
+
+    if(d > r0 + r1 )
+    {
+        return p3;
+    }
+    else if(d < abs(r0 - r1))
+    {
+        return p3;
+    }
+
+
+    float a = (r0*r0 - r1*r1 + d*d) / (2 * d);
+
+    float h = sqrt(r0*r0 - a*a);
+
+    p2.x = p0.x + a * (p1.x - p0.x) / d;
+    p2.y = p0.y + a * (p1.y - p0.y) / d;
+
+    p3a.x = p2.x + h * (p1.y - p0.y) / d;
+    p3a.y = p2.y + h * (p1.x - p0.x) / d;
+
+    p3b.x = p2.x - h * (p1.y - p0.y) / d;
+    p3b.y = p2.y - h * (p1.x - p0.x) / d;
+
+    if(p3a.abs() < p3b.abs())
+        p3 = p3a;
+    else
+        p3 = p3b;
+
+    return p3;
 }
