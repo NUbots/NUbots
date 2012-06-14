@@ -24,7 +24,7 @@ public:
     updateResult MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement);
     updateResult MeasurementUpdate(const StationaryObject& object, const MeasurementError& error);
     updateResult MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error);
-    updateResult updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double sd_angle);
+    updateResult updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double angle_variance);
 
     void setCovariance(const Matrix& newCovariance);
     void setSqrtCovariance(const Matrix& newSqrtCovariance);

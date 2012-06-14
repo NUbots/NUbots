@@ -481,7 +481,7 @@ SelfModel::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& obje
     return RESULT_OK;
 }
 
-SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double sd_angle)
+SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double angle_variance)
 {
     const float c_threshold2 = 15.0f;
         // Method to take the angle between two objects, that is,
@@ -524,16 +524,15 @@ SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, d
     Py = convDble ((My - yBar * M1) * (My - yBar * M1).transp());
     Pxy = (Mx - m_mean * M1) * (My - yBar * M1).transp();
 
-    R_angle  = sd_angle * sd_angle;
 
-    Matrix K = Pxy /( Py + R_angle ); // K = Kalman filter gain.
+    Matrix K = Pxy /( Py + angle_variance ); // K = Kalman filter gain.
 
     double y = angle;    //end of standard ukf stuff
     //Outlier rejection.
-    double innovation2 = (yBar - y) * (yBar - y ) / ( Py + R_angle );
+    double innovation2 = (yBar - y) * (yBar - y ) / ( Py + angle_variance );
 
     // Update Alpha (used in multiple model)
-    double innovation2measError = (yBar - y) * (yBar - y ) / R_angle ;
+    double innovation2measError = (yBar - y) * (yBar - y ) / angle_variance ;
     m_alpha *= 1 / (1 + innovation2measError);
 
     if (innovation2 > c_threshold2)
@@ -541,7 +540,7 @@ SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, d
         return RESULT_OUTLIER;
     }
 
-    Matrix newSqrtCov = HT( horzcat(Mx - m_sqrt_covariance*M1 - K*My + K*yBar*M1, K*sd_angle) );
+    Matrix newSqrtCov = HT( horzcat(Mx - m_sqrt_covariance*M1 - K*My + K*yBar*M1, K*angle_variance) );
     setSqrtCovariance(newSqrtCov);
     Matrix newMean = m_mean - K*(yBar - y);
     setMean(newMean);
