@@ -42,6 +42,7 @@ if(valid) {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Obstacle::addToExternalFieldObjects - valid" << endl;
     #endif
+    VisionBlackboard* vbb = VisionBlackboard::getInstance();
     AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Obstacle");
     //newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_ROBOT_UNKNOWN);
     newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
@@ -50,6 +51,7 @@ if(valid) {
                                  m_bottom_centre,
                                  m_size_on_screen,
                                  timestamp);
+    newAmbObj.arc_width = m_size_on_screen.x * vbb->getFOV().x / vbb->getImageWidth();
     fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
     return true;
 }
