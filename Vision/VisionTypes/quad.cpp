@@ -2,20 +2,21 @@
 
 Quad::Quad()
 {
-    m_left = m_right = m_bottom = m_top = 0;
-    recalculate();
+    set(0,0,0,0);
 }
 
 Quad::Quad(const Quad& other)
 {
-    m_left = other.m_left;
-    m_right = other.m_right;
-    m_bottom = other.m_bottom;
-    m_top = other.m_top;
-    recalculate();
+    set(other.m_left, other.m_top, other.m_right, other.m_bottom);
+
 }
 
 Quad::Quad(int left, int top, int right, int bottom)
+{
+    set(left, top, right, bottom);
+}
+
+void Quad::set(int left, int top, int right, int bottom)
 {
     m_left = left;
     m_right = right;

@@ -6,19 +6,6 @@
 
 #include "Tools/Math/General.h"
 
-//PointType Transition::correctDistortion(const PointType& pt)
-//{
-//    PointType from_centre = pt - PointType(160,120);
-//    from_centre.x /= 60;
-//    from_centre.y /= 46;
-//    float r2 = from_centre.x*from_centre.x + from_centre.y*from_centre.y;
-//    float corr_factor = 1 - VisionConstants::RADIAL_CORRECTION_COEFFICIENT*r2;
-//    from_centre *= corr_factor;
-//    from_centre.x *= 60;
-//    from_centre.y *= 46;
-//    return from_centre + PointType(160,120);
-//}
-
 Transition::Transition()
 {
 }
@@ -35,14 +22,7 @@ Transition::Transition(ColourSegment before, ColourSegment after, ScanDirection 
 
 void Transition::set(const PointType &location, ClassIndex::Colour before_colour, ClassIndex::Colour after_colour, ScanDirection &direction)
 {
-    if(VisionConstants::DO_RADIAL_CORRECTION) {
-        Vector2<float> result = VisionBlackboard::getInstance()->correctDistortion(Vector2<float>(location.x, location.y));
-        m_location.x = mathGeneral::roundNumberToInt(result.x);
-        m_location.y = mathGeneral::roundNumberToInt(result.y);
-    }
-    else {
-        m_location = location;
-    }
+    m_location = location;
     m_before_colour = before_colour;
     m_after_colour = after_colour;
     m_direction = direction;
