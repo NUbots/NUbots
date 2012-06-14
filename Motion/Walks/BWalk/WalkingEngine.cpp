@@ -1034,12 +1034,21 @@ void WalkingEngine::generateOutput(/*WalkingEngineOutput& walkingEngineOutput*/)
 //  walkingEngineOutput.executedWalk.kickType = kickPlayer.isActive() ? kickPlayer.getType() : WalkRequest::none;
 //  (JointRequest&)walkingEngineOutput = jointRequest;
 
+    float default_arm_stifness = 30.0f;
     // Set the arm positions.
-    m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, 50);
-    m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, 50);
+    m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, default_arm_stifness);
+    m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, default_arm_stifness);
+
+    float default_leg_stifness = 75.0f;
+
+    // Reduce stiffness if we are standing.
+    if(currentMotionType == stand)
+    {
+        default_leg_stifness = 65.0f;
+    }
 
     // Set the leg positions.
-    std::vector<float> legstiffness(m_actions->getSize(NUActionatorsData::LLeg), 75.0f);
+    std::vector<float> legstiffness(m_actions->getSize(NUActionatorsData::LLeg), default_leg_stifness);
     legstiffness[5] = p.standHardnessAnkleRoll;
     legstiffness[6] = p.standHardnessAnklePitch;
 

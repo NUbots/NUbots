@@ -32,6 +32,9 @@ public:
     unsigned int totalStates() const  {return m_numStates;}
 
     Moment& operator= (const Moment & source);
+    bool operator ==(const Moment& b) const;
+    bool operator !=(const Moment& b) const
+    {return (!((*this) == b));}
 
     /*!
     @brief Outputs a binary representation of the Moment object to a stream.

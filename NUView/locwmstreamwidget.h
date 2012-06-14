@@ -12,6 +12,7 @@
 
 class FieldObjects;
 class Localisation;
+class SelfLocalisation;
 class QLabel;
 class QLineEdit;
 class QPushButton;
@@ -63,6 +64,7 @@ signals:
       */
     void PacketReady(QByteArray* datagram);
     void locwmDataChanged(const Localisation*);
+    void selfLocwmDataChanged(const SelfLocalisation*);
     void fieldObjectDataChanged(const FieldObjects*);
 
 private:
@@ -94,6 +96,7 @@ private:
     QTimer time;
     QTime timeToRecievePacket;
     Localisation* locwm;
+    SelfLocalisation* selfLoc;
     FieldObjects* objects;
 };
 
