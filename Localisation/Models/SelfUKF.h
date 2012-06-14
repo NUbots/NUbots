@@ -2,6 +2,7 @@
 #define SELFUKF_H
 #include "Infrastructure/FieldObjects/StationaryObject.h"
 #include "Infrastructure/FieldObjects/AmbiguousObject.h"
+#include "Infrastructure/FieldObjects/Self.h"
 #include "Localisation/odometryMotionModel.h"
 #include "Localisation/MeasurementError.h"
 #include "Tools/Math/Filters/UKF.h"
@@ -29,21 +30,35 @@ public:
     Matrix processEquation(const Matrix& sigma_point, double deltaT, const Matrix& measurement);
     Matrix measurementEquation(const Matrix& sigma_point, const Matrix& measurementArgs);
 
+    void setMean(const Matrix& newMean);
+
+    bool MeasurementUpdate(const StationaryObject& object, const MeasurementError& error);
     bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs = Matrix());
+    bool measurementUpdateAngleBetweenTwoObjects(double angle, double x1, double y1, double x2, double y2, double angle_variance);
+
+    Self GenerateSelfState() const;
+    bool isLost() const;
+    // Model and decision tracking stuff
+    unsigned int splitOption() const {return m_split_option;}
+    unsigned int previousSplitOption(const AmbiguousObject& theObject) const;
 
     /*!
-    @brief Output streaming operation.
+    @brief Outputs a binary representation of the UKF object to a stream.
     @param output The output stream.
-    @param p_kf The source kalman filter to be streamed.
+    @return The output stream.
     */
-    friend std::ostream& operator<< (std::ostream& output, const SelfUKF& p_model);
+    std::ostream& writeStreamBinary (std::ostream& output) const;
 
     /*!
-    @brief Input streaming operation.
+    @brief Reads in a UKF object from the input stream.
     @param input The input stream.
-    @param p_kf The destination kalman filter to be streamed to.
+    @return The input stream.
     */
-    friend std::istream& operator>> (std::istream& input, SelfUKF& p_model);
+    std::istream& readStreamBinary (std::istream& input);
+
+private:
+    unsigned int m_split_option;    //!< Most recent option used for split from parent.
+    std::vector<unsigned int> m_previous_decisions; //!< Stores the last decision for each of the ambiguous object types.
 
 };
 
