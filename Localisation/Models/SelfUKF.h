@@ -19,13 +19,6 @@ public:
         states_total
     };
 
-    enum updateResult
-    {
-        RESULT_OK,
-        RESULT_OUTLIER,
-        RESULT_FAILED
-    };
-
     // Constructors
     SelfUKF();
     SelfUKF(double time);
@@ -35,6 +28,8 @@ public:
     bool clipState(int stateIndex, double minValue, double maxValue);
     Matrix processEquation(const Matrix& sigma_point, double deltaT, const Matrix& measurement);
     Matrix measurementEquation(const Matrix& sigma_point, const Matrix& measurementArgs);
+
+    bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs = Matrix());
 
     /*!
     @brief Output streaming operation.

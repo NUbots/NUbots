@@ -116,3 +116,70 @@ Matrix SelfUKF::measurementEquation(const Matrix& sigma_point, const Matrix& mea
 
     return expected_measurement;
 }
+
+/*!
+ * @brief Performs the measurement update of the filter.
+ * @param measurement The measurement to be used for the update.
+ * @param measurementNoise The linear measurement noise that will be added.
+ * @param measurementArgs Any additional information about the measurement, if required.
+ * @return True if the measurement update was performed successfully. False if it was not.
+ */
+bool SelfUKF::measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs)
+{
+    const unsigned int totalPoints = totalSigmaPoints();
+    const unsigned int numStates = totalStates();
+    const unsigned int totalMeasurements = measurement.getm();
+    Matrix currentPoint; // temporary storage.
+
+    Matrix Yprop(totalMeasurements, totalPoints);
+
+    // First step is to calculate the expected measurmenent for each sigma point.
+    for (unsigned int i = 0; i < totalPoints; ++i)
+    {
+        currentPoint = m_sigma_points.getCol(i);    // Get the sigma point.
+        Yprop.setCol(i, measurementEquation(currentPoint, measurementArgs));
+    }
+
+    // Now calculate the mean of these measurement sigmas.
+    Matrix Ymean = CalculateMeanFromSigmas(Yprop);
+
+    Matrix Pyy(measurementNoise);   // measurement noise is added, so just use as the beginning value of the sum.
+    Matrix Pxy(numStates, totalMeasurements, false);
+
+    // Calculate the Pyy and Pxy variance matrices.
+    for(unsigned int i = 0; i < totalPoints; ++i)
+    {
+        double weight = m_covariance_weights[0][i];
+        // store difference between prediction and measurement.
+        currentPoint = Yprop.getCol(i) - Ymean;
+        // Innovation covariance - Add Measurement noise
+        Pyy = Pyy + weight * currentPoint * currentPoint.transp();
+        // Cross correlation matrix
+        Pxy = Pxy + weight * (m_sigma_points.getCol(i) - m_sigma_mean) * currentPoint.transp();    // Important: Use mean from estimate, not current mean.
+    }
+
+
+    // This is the new part for calculating the new model weighting.
+//    double innovation2 = convDble((yBar - y).transp() * Invert22(Py + R_obj_rel) * (yBar - y));
+//    float new_alpha = alpha() * 1 / (1 + innovation2);
+//    setAlpha(new_alpha);
+
+    // Calculate the Kalman filter gain
+    Matrix K;
+    // If we have a 2 dimensional measurement, use the faster shortcut function.
+    if(totalMeasurements == 2)
+    {
+        K = Pxy * Invert22(Pyy);
+    }
+    else
+    {
+        K = Pxy * InverseMatrix(Pyy);
+    }
+
+    Matrix newMean = mean() + K * (measurement - Ymean);
+    Matrix newCovariance = covariance() - K*Pyy*K.transp();
+
+    setMean(newMean);
+    setCovariance(newCovariance);
+    return true;
+}
