@@ -260,8 +260,10 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
         stringstream buffer;
         buffer << p_locwm;
         buffer << p_objects;
-        netdata.data = (char*) buffer.str().c_str();
-        netdata.size = buffer.str().size();
+
+        std::string string = buffer.str();
+        netdata.data = (char*) string.c_str();
+        netdata.size = string.size();
 
         int totalsize = netdata.size;
         sizedata.data = reinterpret_cast<char*>(&totalsize);
