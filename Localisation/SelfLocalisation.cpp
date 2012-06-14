@@ -707,9 +707,6 @@ void SelfLocalisation::initBallModel(MobileObjectUKF* ball_model)
     Matrix mean(ball_model->totalStates(), 1, false);
     Matrix covariance(ball_model->totalStates(), ball_model->totalStates(), false);
 
-    mean[MobileObjectUKF::x_pos][0] = 100.f;
-    mean[MobileObjectUKF::y_pos][0] = 100.f;
-
     // Assign initial covariance
     const double initial_pos_cov = 100*100;
     const double initial_vel_cov = 10*10;
