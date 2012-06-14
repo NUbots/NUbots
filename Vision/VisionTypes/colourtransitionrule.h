@@ -42,10 +42,10 @@ private:
 
     vector<ClassIndex::Colour>  m_before,
                                 m_after;
-    float   m_before_min,
-            m_before_max,
-            m_after_min,
-            m_after_max;
+    int m_before_min,
+        m_before_max,
+        m_after_min,
+        m_after_max;
 };
 
 #endif // COLOURTRANSITIONRULE_H

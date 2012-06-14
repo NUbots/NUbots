@@ -16,16 +16,22 @@ public:
     
     Vector2<int> getBottomCentre() const;
     Vector2<int> getCentre() const;
-    PointType getBottomLeft() const;
-    PointType getTopRight() const;
+    Vector2<int> getBottomLeft() const;
+    Vector2<int> getTopRight() const;
     int getWidth() const;
     int getHeight() const;
     
     cv::Scalar getAsScalar() const;
     
 private:
+    void recalculate();
+
     int m_left, m_right, m_top, m_bottom;
     cv::Scalar vals;
+    Vector2<int> m_centre,
+                 m_bottom_centre,
+                 m_bottom_left,
+                 m_top_right;
 };
 
 #endif // QUAD_H
