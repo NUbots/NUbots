@@ -116,7 +116,12 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     // Set default settings
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_viterbi);
-//    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
+    //    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
+//  Changed to viterbi, since we are now introducing a lot of possible 'rubbish' models
+//  to try out resetting conditions. Merging these seems to be bad, as they can gang up
+//  merge together and overpower to good, more accurate models. Works well in the simulations
+//  at least.
+
 
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
@@ -1357,6 +1362,10 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
     return numSuccessfulUpdates;
 }
 
+
+/*! @brief Do all of the fancy stuff we only get to do when we have two good reliable objects.
+    @return 1 if happy, 0 if sad.
+*/
 int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
     // do the special update
