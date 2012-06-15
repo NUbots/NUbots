@@ -289,9 +289,6 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
     m_current_time = m_data->CurrentTime;
     updateMotionSensors();
     
-    if (m_kick->isActive() and m_kick != m_current_leg_provider) {
-        m_kick->kill();
-    }
     
     if (m_killed)
         return;

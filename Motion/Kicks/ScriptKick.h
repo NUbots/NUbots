@@ -13,7 +13,9 @@ public:
     ~ScriptKick();
     void doKick();
     void kickToPoint(const vector<float>& position, const vector<float>& target);
-
+    
+    virtual void stop();
+    virtual void kill();
     bool isActive();
     bool isUsingHead();
     bool isUsingArms();
