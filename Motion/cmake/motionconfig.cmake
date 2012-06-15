@@ -65,11 +65,11 @@ SET( NUBOT_USE_MOTION_SAVE
 	CACHE BOOL
     "Set to ON to use save, set to OFF to not have any saves")
 SET( NUBOT_USE_MOTION_SCRIPT
-	OFF 
+	ON 
 	CACHE BOOL
     "Set to ON to use script, set to OFF to not have any scripts")
 SET( NUBOT_USE_MOTION_GETUP
-	OFF
+	ON
 	CACHE BOOL
 	"Set to ON to use getups, set to OFF to stay on the ground")
 SET( NUBOT_USE_MOTION_FALL_PROTECTION
