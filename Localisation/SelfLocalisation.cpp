@@ -53,6 +53,9 @@ const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
 const float SelfLocalisation::c_obj_theta_variance = 0.05f*0.05f;        // (0.01 rad)^2
+//const float SelfLocalisation::c_obj_range_offset_variance = 25.0f*25.0f;     // (10cm)^2
+//const float SelfLocalisation::c_obj_range_relative_variance = 0.10f*0.10f;   // 20% of range added
+
 const float SelfLocalisation::c_obj_range_offset_variance = 10.0f*10.0f;     // (10cm)^2
 const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
 
@@ -112,7 +115,8 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
 
     // Set default settings
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
-    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
+    m_settings.setPruneMethod(LocalisationSettings::prune_viterbi);
+//    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
 
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
@@ -750,6 +754,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     // Model 2: On right sideline facing in, 1/3 from half way
     // Model 3: On right sideline facing in, 2/3 from half way
     // Model 4: In centre of own half facing opponents goal
+    // Model 5: In goal keeper position facing opponents goal
 	 
     float left_y = 200.0;
     float left_heading = -PI/2;
@@ -793,6 +798,10 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     // Postition 5
     temp.setCovariance(covariance_matrix(100.0f*100.0f, 150.0f*150.0f, PI/2.0f*PI/2.0f));
     temp.setMean(mean_matrix(centre_x, 0.0f, centre_heading));
+    positions.push_back(temp);
+
+    // Postition 6
+    temp.setMean(mean_matrix(2*centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
     InitialiseModels(positions);
@@ -1351,10 +1360,10 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
 int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
     // do the special update
-    float angle_beween = fabs(landmark1.measuredBearing() - landmark2.measuredBearing());
+    float angle_beween_objects = mathGeneral::normaliseAngle(landmark1.measuredBearing() - landmark2.measuredBearing());
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
-        (*model_it)->updateAngleBetween(angle_beween, landmark1.X(), landmark1.Y(), landmark2.X(), landmark2.Y(), c_twoObjectAngleVariance);
+        (*model_it)->updateAngleBetween(angle_beween_objects, landmark1.X(), landmark1.Y(), landmark2.X(), landmark2.Y(), c_twoObjectAngleVariance);
     }
 
 
@@ -1455,7 +1464,7 @@ int SelfLocalisation::PruneModels()
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
     {
-        PruneViterbi(4);
+        PruneViterbi(6);
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_nscan)
     {
