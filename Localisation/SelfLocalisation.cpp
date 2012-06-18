@@ -81,11 +81,9 @@ SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings&
 
     //m_models.reserve(c_MAX_MODELS);
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
+    m_ball_model = new MobileObjectUKF();
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
-    m_ball_model = new MobileObjectUKF();
-    initBallModel(m_ball_model);
-    return;
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
         std::stringstream debugLogName;
@@ -570,8 +568,8 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     float ballFieldSdY = relBallSdY;
 
     // Calculate the Ball velocity in field coordinates.
-    float ballFieldVelocityX = relBallXVel * hcos + relBallYVel * hsin;
-    float ballFieldVelocityY = -relBallXVel * hsin + relBallYVel * hcos;
+    float ballFieldVelocityX = relBallXVel * hcos - relBallYVel * hsin;
+    float ballFieldVelocityY = relBallXVel * hsin + relBallYVel * hcos;
 
     // Calculate the ball velocity SD in field coordinates. - Not yet implemented
     float ballFieldVelocitySdX = relBallSdXVel;
@@ -708,10 +706,12 @@ void SelfLocalisation::initSingleModel(float x, float y, float heading)
     temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*PI*2*PI));
     positions.push_back(temp);
     InitialiseModels(positions);
+    initBallModel(m_ball_model);
 }
 
 void SelfLocalisation::initBallModel(MobileObjectUKF* ball_model)
 {
+    if(ball_model == NULL) return;
     MobileObjectUKF::State state;
     Matrix mean(ball_model->totalStates(), 1, false);
     Matrix covariance(ball_model->totalStates(), ball_model->totalStates(), false);
@@ -736,6 +736,7 @@ void SelfLocalisation::doSingleInitialReset(GameInformation::TeamColour team_col
 {
     float initial_heading = 0 + (team_colour==GameInformation::RedTeam?mathGeneral::PI:0);
     initSingleModel(0,0,initial_heading);
+    initBallModel(m_ball_model);
 }
 
 void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
@@ -810,6 +811,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     positions.push_back(temp);
 
     InitialiseModels(positions);
+    initBallModel(m_ball_model);
     return;
 }
 
@@ -895,6 +897,7 @@ void SelfLocalisation::doSetReset(GameInformation::TeamColour team_colour, int p
     
     // Add the models.
     InitialiseModels(positions);
+    initBallModel(m_ball_model);
     return;
 }
 
@@ -923,6 +926,7 @@ void SelfLocalisation::doPenaltyReset()
     positions.push_back(temp);
 
     InitialiseModels(positions);
+    initBallModel(m_ball_model);
     return;
 }
 
@@ -942,6 +946,8 @@ void SelfLocalisation::doFallenReset()
         temp[2][2] += 0.707;     // Robot heading
         (*model_it)->setCovariance(temp);
     }
+    addToBallVariance(50*50, 50*50, 0.f, 0.f);
+    return;
 }
 
 void SelfLocalisation::doReset()
@@ -976,14 +982,15 @@ void SelfLocalisation::doReset()
     newPositions.push_back(temp);
 
     InitialiseModels(newPositions);
+    initBallModel(m_ball_model);
     return;
 }
 
 void SelfLocalisation::doBallOutReset()
 {
-//#if DEBUG_LOCALISATION_VERBOSITY > 0
-//    debug_out  << "Performing ball out reset." << endl;
-//#endif // DEBUG_LOCALISATION_VERBOSITY > 0
+#if DEBUG_LOCALISATION_VERBOSITY > 0
+    debug_out  << "Performing ball out reset." << endl;
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
 //    // Increase uncertainty of ball position if it has gone out.. Cause it has probably been moved.
 //    for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
 //        if(m_models[modelNumber].active() == false) continue;
@@ -992,6 +999,7 @@ void SelfLocalisation::doBallOutReset()
 //        m_models[modelNumber].stateStandardDeviations[5][5] += 10.0;   // 10 cm/s
 //        m_models[modelNumber].stateStandardDeviations[6][6] += 10.0;   // 10 cm/s
 //    }
+    addToBallVariance(100*100, 60*60, 0.0f, 0.0f);
     return;
 }
 
@@ -2259,6 +2267,34 @@ void SelfLocalisation::setModels(ModelContainer& newModels)
     clearModels();
     m_models = newModels;
     return;
+}
+
+void SelfLocalisation::addToBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var)
+{
+    Matrix cov = m_ball_model->covariance();
+
+    // Create a matrix for the addative noise.
+    Matrix additiveNoise(MobileObjectUKF::total_states, MobileObjectUKF::total_states, false);
+    additiveNoise[MobileObjectUKF::x_pos][MobileObjectUKF::x_pos] = x_pos_var;
+    additiveNoise[MobileObjectUKF::y_pos][MobileObjectUKF::y_pos] = y_pos_var;
+    additiveNoise[MobileObjectUKF::x_vel][MobileObjectUKF::x_vel] = x_vel_var;
+    additiveNoise[MobileObjectUKF::y_vel][MobileObjectUKF::y_vel] = y_vel_var;
+
+    // Add the extra variance
+    cov = cov + additiveNoise;
+
+    m_ball_model->setCovariance(cov);
+}
+
+void SelfLocalisation::setBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var)
+{
+    // Create a matrix for the addative noise.
+    Matrix cov(MobileObjectUKF::total_states, MobileObjectUKF::total_states, false);
+    cov[MobileObjectUKF::x_pos][MobileObjectUKF::x_pos] = x_pos_var;
+    cov[MobileObjectUKF::y_pos][MobileObjectUKF::y_pos] = y_pos_var;
+    cov[MobileObjectUKF::x_vel][MobileObjectUKF::x_vel] = x_vel_var;
+    cov[MobileObjectUKF::y_vel][MobileObjectUKF::y_vel] = y_vel_var;
+    m_ball_model->setCovariance(cov);
 }
 
 /*! @brief Create a 3x1 mean matrix with value as defiend by the parameters.
