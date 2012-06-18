@@ -14,6 +14,31 @@ ScriptKick::ScriptKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* act
     loadKickParameters();
 }
 
+/*! @brief Kills the kick module
+ */
+void ScriptKick::kill()
+{
+    m_current_script = NULL;
+    m_script_start_time = -1;
+    m_kick_ready = false;
+    m_kick_enabled = false;
+    setArmEnabled(false, false);
+    setHeadEnabled(false);
+    m_kicking_leg = noLeg;
+}
+
+void ScriptKick::stop()
+{
+    #if DEBUG_NUMOTION_VERBOSITY > 3
+    debug << "Kick stop called. Finishing Kick." << endl;
+    #endif
+    //stopHead();
+    //stopArms();
+    //stopLegs();
+    //m_kick_enabled = false;
+    //m_current_script = NULL;
+}
+
 ScriptKick::~ScriptKick()
 {
     delete m_left_kick_script;
@@ -126,6 +151,7 @@ void ScriptKick::doKick()
             m_current_script->play(m_data, m_actions);
             m_script_start_time = m_data->CurrentTime;
         }
+        
     }
     #if DEBUG_NUMOTION_VERBOSITY > 3
     debug << "Current Time: " << m_data->CurrentTime << endl;
