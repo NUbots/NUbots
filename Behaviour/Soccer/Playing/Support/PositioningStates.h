@@ -54,6 +54,10 @@ protected:
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "GoToPosition" << endl;
         #endif
+        static bool m_close_approach = false;
+        if (m_previous_time < m_data->CurrentTime-2000.) {
+            m_close_approach = false;
+        }
         
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -71,10 +75,19 @@ protected:
         
         float distance = sqrt(position[0]*position[0] + position[1]*position[1]);
         float bearing = atan2(position[1], position[0]);
-
-        vector<float> speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
-        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
-        m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
+        
+        
+        vector<float> speed;
+        if (m_team_info->getPlayerNumber() == 1 and (distance < 30. or m_close_approach and distance < 190.)
+            or m_team_info->getPlayerNumber() != 1 and ( distance < 20. or m_close_approach and distance < 60. )) {
+            speed = BehaviourPotentials::goToPointBackwards(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
+            m_close_approach = true;
+        } else {
+            speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
+            m_close_approach = false;
+        }
+        //vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
+        m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
         
         if (ball.TimeSinceLastSeen() > 15000)
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));

@@ -52,7 +52,7 @@ public:
     NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
     ~NUKick();
 
-    void stop();
+    virtual void stop();
     void stopHead();
     void stopArms();
     void stopLegs();
