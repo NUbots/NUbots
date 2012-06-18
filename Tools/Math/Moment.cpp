@@ -1,6 +1,7 @@
 #include "Moment.h"
 #include <assert.h>
 #include <sstream>
+#include <iostream>
 
 /*! @brief Default constructor
 
@@ -41,6 +42,23 @@ Moment& Moment::operator=(const Moment& source)
     }
     // by convention, always return *this
     return *this;
+}
+
+bool Moment::operator ==(const Moment& b) const
+{
+    if( m_numStates != b.m_numStates)
+    {
+        return false;
+    }
+    if( m_mean != b.m_mean)
+    {
+        return false;
+    }
+    if( m_covariance != b.m_covariance)
+    {
+        return false;
+    }
+    return true;
 }
 
 /*! @brief Returns the mean of the specified state.
@@ -169,34 +187,16 @@ void Moment::writeData(std::ostream& output) const
 std::ostream& Moment::writeStreamBinary (std::ostream& output) const
 {
     output.write(reinterpret_cast<const char*>(&m_numStates), sizeof(m_numStates));
-    for (unsigned int i = 0; i < m_numStates; ++i)
-    {
-        output.write(reinterpret_cast<const char*>(&m_mean[i][0]), sizeof(m_mean[i][0]));
-    }
-    for (unsigned int i = 0; i < m_numStates; ++i)
-    {
-        for (unsigned int j = 0; j < m_numStates; ++j)
-        {
-        output.write(reinterpret_cast<const char*>(&m_covariance[i][j]), sizeof(m_covariance[i][j]));
-        }
-    }
+    WriteMatrix(output, m_mean);
+    WriteMatrix(output, m_covariance);
     return output;
 }
 
 std::istream& Moment::readStreamBinary (std::istream& input)
 {
     input.read(reinterpret_cast<char*>(&m_numStates), sizeof(m_numStates));
-    for (unsigned int i = 0; i < m_numStates; ++i)
-    {
-        input.read(reinterpret_cast<char*>(&m_mean[i][0]), sizeof(m_mean[i][0]));
-    }
-    for (unsigned int i = 0; i < m_numStates; ++i)
-    {
-        for (unsigned int j = 0; j < m_numStates; ++j)
-        {
-        input.read(reinterpret_cast<char*>(&m_covariance[i][j]), sizeof(m_covariance[i][j]));
-        }
-    }
+    m_mean = ReadMatrix(input);
+    m_covariance = ReadMatrix(input);
     return input;
 }
 

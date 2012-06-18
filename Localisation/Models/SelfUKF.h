@@ -1,59 +1,66 @@
 #ifndef SELFUKF_H
 #define SELFUKF_H
-#include "SelfModel.h"
 #include "Infrastructure/FieldObjects/StationaryObject.h"
+#include "Infrastructure/FieldObjects/AmbiguousObject.h"
+#include "Infrastructure/FieldObjects/Self.h"
 #include "Localisation/odometryMotionModel.h"
 #include "Localisation/MeasurementError.h"
+#include "Tools/Math/Filters/UKF.h"
+#include "WeightedModel.h"
 
-class SelfUKF: public SelfModel
+class SelfUKF: public UKF, public WeightedModel
 {
 public:
+
+    enum state
+    {
+        states_x,
+        states_y,
+        states_heading,
+        states_total
+    };
+
     // Constructors
     SelfUKF();
     SelfUKF(double time);
-    SelfUKF(const SelfModel& source);
-    SelfUKF(const SelfModel& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time);
-
-    void InitialiseCachedValues();
-    Matrix CalculateWeights(unsigned int num_states, bool covariance);
-    // Update functions
-    updateResult TimeUpdate(const std::vector<float>& odometry, OdometryMotionModel& motion_model, float deltaTime);
-    updateResult MeasurementUpdate(const StationaryObject& object, const MeasurementError& error);
-    updateResult MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement);
-    updateResult MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error);
-
-
-
-    Matrix CalculateSigmaPoints(Matrix mean, Matrix covariance) const;
-    float CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const;
+    SelfUKF(const SelfUKF& source);
+    SelfUKF(const SelfUKF& parent, const AmbiguousObject& object, const StationaryObject& splitOption, const MeasurementError& error, float time);
 
     bool clipState(int stateIndex, double minValue, double maxValue);
+    Matrix processEquation(const Matrix& sigma_point, double deltaT, const Matrix& measurement);
+    Matrix measurementEquation(const Matrix& sigma_point, const Matrix& measurementArgs);
+
+    void setMean(const Matrix& newMean);
+
+    bool MeasurementUpdate(const StationaryObject& object, const MeasurementError& error);
+    bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs = Matrix());
+    bool measurementUpdateAngleBetweenTwoObjects(double angle, double x1, double y1, double x2, double y2, double angle_variance);
+
+    Self GenerateSelfState() const;
+    bool isLost() const;
+    // Model and decision tracking stuff
+    unsigned int splitOption() const {return m_split_option;}
+    unsigned int previousSplitOption(const AmbiguousObject& theObject) const;
 
     /*!
-    @brief Output streaming operation.
+    @brief Outputs a binary representation of the UKF object to a stream.
     @param output The output stream.
-    @param p_kf The source kalman filter to be streamed.
+    @return The output stream.
     */
-    friend std::ostream& operator<< (std::ostream& output, const SelfUKF& p_model);
+    std::ostream& writeStreamBinary (std::ostream& output) const;
 
     /*!
-    @brief Input streaming operation.
+    @brief Reads in a UKF object from the input stream.
     @param input The input stream.
-    @param p_kf The destination kalman filter to be streamed to.
+    @return The input stream.
     */
-    friend std::istream& operator>> (std::istream& input, SelfUKF& p_model);
+    std::istream& readStreamBinary (std::istream& input);
 
-protected:
-    Matrix m_process_noise; // Square root of Process Noise (Q matrix). (Constant)
-    Matrix m_mean_weights;
-    Matrix m_covariance_weights;
-    static const float c_Kappa;
-    double m_alpha_2;
-    double m_beta;
-    double m_x;
+private:
+    unsigned int m_split_option;    //!< Most recent option used for split from parent.
+    std::vector<unsigned int> m_previous_decisions; //!< Stores the last decision for each of the ambiguous object types.
 
 };
-
 
 
 #endif // SELFUKF_H

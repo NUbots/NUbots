@@ -181,43 +181,54 @@ protected:
             else
             {
                 //cout << m_data->CurrentTime << ": Ball Pan" << endl;
-                if (ball.isObjectVisible() or ball.TimeSinceLastSeen() < 40)
+                if (ball.isObjectVisible())
                 {
                     #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                         debug << m_data->CurrentTime << ": Tracking ball" << endl;
                     #endif
                     //cout << m_data->CurrentTime << ": Tracking ball" << endl;
                     m_jobs->addMotionJob(new HeadTrackJob(ball));
-                } else {
+                }
+                else if (ball.TimeSinceLastSeen() < 70)
+                {
                     m_jobs->addMotionJob(new HeadPanJob(ball, 0.1));
                 }
             }
         }
-        float targetKickDistance = 12.5;
+        float targetKickDistance = 12.f;
+        float balldistance = ball.estimatedDistance();
+        float ballbearing = ball.estimatedBearing();
         
+        if (ball.isObjectVisible() and ball.TimeSeen() > 500.) {
+                ballbearing = ball.measuredBearing();
+                balldistance = ball.measuredDistance();//*cos(ball.measuredElevation();
+        }
         
-        if((ball.estimatedDistance() < targetKickDistance) && 
-            ( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) ) && 
-              fabs(ball.estimatedBearing()) > 0.25 && //ball is not "between" our feet
-              fabs(ball.estimatedBearing()) < 0.75) //ball is not "outside" our feet
+        if((balldistance < targetKickDistance) and fabs(ballbearing) < 1.1 and not ball.lost())//&& 
+            //( BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info) ))// && //XXX: fix goal lineup to use side kicks too
+              //fabs(ball.estimatedBearing()) > 0.25 && //ball is not "between" our feet
+              //fabs(ball.estimatedBearing()) < 0.75) //ball is not "outside" our feet
               // && ball.TimeSeen() > 0 && m_pan_finished)
         {
             //m_jobs->addMotionJob(new WalkJob(0, 0, 0));
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
-            kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
-            kickPosition[1] = ball.estimatedDistance() * sin(ball.estimatedBearing());
-            targetPosition[0] = kickPosition[0] + 1000.0f;
-            targetPosition[1] = kickPosition[1];
+            kickPosition[0] = balldistance * cos(ballbearing);
+            kickPosition[1] = balldistance * sin(ballbearing);
+            float goalbearing = BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info);
+            float goaldistance = BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info).estimatedDistance();
+            targetPosition[0] = goaldistance * cos(goalbearing);
+            targetPosition[1] = goalbearing * sin(goalbearing);
             KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
             m_jobs->addMotionJob(kjob);
+            cout << "Kick! " << ballbearing << endl;
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
-                debug << m_data->CurrentTime << ": Kicking Ball at distance " << ball.estimatedDistance() << endl;
+                debug << m_data->CurrentTime << ": Kicking Ball at distance " << balldistance << endl;
             #endif
         } else if(not iskicking)
         {
-            
-            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance,42.);
+            //vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
+            vector<float> speed = BehaviourPotentials::goToBallDirectWithSidewardsKick(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,52.);
             vector<float> result;
             // decide whether we need to dodge or not
             vector<float> obstacles = BehaviourPotentials::getObstacleDistances(m_data);
@@ -227,7 +238,7 @@ protected:
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
             result = speed;
             
-            if ((m_pan_started and not m_pan_finished or not m_pan_started) and ball.estimatedDistance() < targetKickDistance-1. and BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info))
+            if ((m_pan_started and not m_pan_finished or not m_pan_started) and ball.estimatedDistance() < targetKickDistance and BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info))
                 result = vector<float>(3,0);
             
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
@@ -236,7 +247,7 @@ protected:
             #endif
         }
         
-        
+        //cout << balldistance << "\t" << ballbearing << endl;
         
         #if DEBUG_BEHAVIOUR_VERBOSITY > 2
             debug << m_data->CurrentTime << ": pan_started: " << m_pan_started << " pan_finished: " << m_pan_finished << " pan end time: " << m_pan_end_time << endl; 

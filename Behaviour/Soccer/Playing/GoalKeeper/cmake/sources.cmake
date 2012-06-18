@@ -21,6 +21,9 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  
+    GoalKeeperState.h
+    GoalKeeperStates.h
+    GoalKeeperState.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

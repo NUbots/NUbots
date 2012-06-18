@@ -160,7 +160,8 @@ private:
     cameraSettingsWidget* cameraSetting;
     frameInformationWidget* frameInfo;
     SensorDisplayWidget* sensorDisplay;
-    ObjectDisplayWidget* objectDisplay;
+    ObjectDisplayWidget* objectDisplayVision;
+    ObjectDisplayWidget* objectDisplayLog;
     GameInformationDisplayWidget* gameInfoDisplay;
     TeamInformationDisplayWidget* teamInfoDisplay;
     QTextBrowser* locInfoDisplay;

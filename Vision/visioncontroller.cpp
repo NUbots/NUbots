@@ -3,6 +3,15 @@
 #include "debugverbosityvision.h"
 #include <time.h>
 
+//#include "Infrastructure/Jobs/JobList.h"
+
+#include "Vision/VisionTools/lookuptable.h"
+#include "Vision/Modules/greenhorizonch.h"
+#include "Vision/Modules/objectdetectionch.h"
+#include "Vision/Modules/scanlines.h"
+#include "Vision/Modules/goaldetection.h"
+#include "Vision/Modules/balldetection.h"
+
 VisionController* VisionController::instance = 0;
 
 VisionController::VisionController()
@@ -39,10 +48,8 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 #if VISION_CONTROLLER_VERBOSITY > 2
     debug << "VisionController::runFrame() - calculateHorizon done" << endl;
 #endif
-    HorizonInterpolate::interpolate(ScanLines::HORIZONTAL_SCANLINES);
-#if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - interpolate done" << endl;
-#endif
+    //HorizonInterpolate::interpolate(ScanLines::HORIZONTAL_SCANLINES);
+
     ObjectDetectionCH::detectObjects();
 #if VISION_CONTROLLER_VERBOSITY > 2
     debug << "VisionController::runFrame() - detectObjects done" << endl;
@@ -66,12 +73,18 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     if(lookForLandmarks)
         GoalDetection::detectGoals();
 #if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - goal detection done - lookForLandmarks: " << lookForLandmarks << endl;
+    if(lookForLandmarks)
+        debug << "VisionController::runFrame() - goal detection done - looking for landmarks" << endl;
+    else
+        debug << "VisionController::runFrame() - goal detection done - not looking for landmarks" << endl;
 #endif
     if(lookForBall)
         BallDetection::detectBall();
 #if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - ball detection done - lookForBall: " << lookForBall << endl;
+    if(lookForBall)
+        debug << "VisionController::runFrame() - ball detection done - looking for ball" << endl;
+    else
+        debug << "VisionController::runFrame() - ball detection done - not looking for ball" << endl;
 #endif
     
     #if VISION_CONTROLLER_VERBOSITY > 1

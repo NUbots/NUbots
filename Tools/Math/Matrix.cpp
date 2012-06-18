@@ -301,6 +301,29 @@ bool Matrix::isValid()
     return true;
 }
 
+bool Matrix::operator ==(const Matrix& b) const
+{
+    float local_m = getm();
+    float local_n = getn();
+
+    // first compare dimensions
+    if(local_m != b.getm()) return false;
+    if(local_n != b.getn()) return false;
+
+    // now compare each value.
+    for(unsigned int i=0;i<local_m;++i)
+    {
+        for(unsigned int j=0;j<local_n;j++)
+        {
+            if( (*this)[i][j] != b[i][j])
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 Matrix Matrix4x4fromVector(const std::vector<float>& source)
 {
     Matrix result(4,4,false);
@@ -571,6 +594,8 @@ Matrix ReadMatrix(std::istream& in)
     double element;
     in.read(reinterpret_cast<char*>(&m),sizeof(m));
     in.read(reinterpret_cast<char*>(&n),sizeof(n));
+    if(m == 0 or n == 0)
+        return Matrix();
     Matrix result(m,n,false);
     for(int i=0; i<m; i++)
     {

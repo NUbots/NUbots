@@ -23,8 +23,7 @@ public:
     updateResult TimeUpdate(const std::vector<float>& odometry, OdometryMotionModel& motion_model, float deltaTime);
     updateResult MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement);
     updateResult MeasurementUpdate(const StationaryObject& object, const MeasurementError& error);
-    updateResult MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error);
-
+    updateResult updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double angle_variance);
 
     void setCovariance(const Matrix& newCovariance);
     void setSqrtCovariance(const Matrix& newSqrtCovariance);
@@ -32,6 +31,24 @@ public:
 
     Matrix CalculateSigmaPoints() const;
     float CalculateAlphaWeighting(const Matrix& innovation, const Matrix& innovationVariance, float outlierLikelyhood) const;
+
+    bool operator ==(const SelfSRUKF& b) const;
+    bool operator !=(const SelfSRUKF& b) const
+    {return (!((*this) == b));}
+
+    /*!
+    @brief Outputs a binary representation of the UKF object to a stream.
+    @param output The output stream.
+    @return The output stream.
+    */
+    std::ostream& writeStreamBinary (std::ostream& output) const;
+
+    /*!
+    @brief Reads in a UKF object from the input stream.
+    @param input The input stream.
+    @return The input stream.
+    */
+    std::istream& readStreamBinary (std::istream& input);
 
     /*!
     @brief Output streaming operation.

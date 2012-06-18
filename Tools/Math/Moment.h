@@ -24,7 +24,7 @@ public:
     Matrix covariance() const;
     float covariance(unsigned int row, unsigned int col) const;
     float variance(unsigned int stateNumber) const;
-    void setMean(const Matrix& newMean);
+    virtual void setMean(const Matrix& newMean);
     virtual void setCovariance(const Matrix& newCovariance);
     bool isNull() const;
     std::string string() const;
@@ -32,6 +32,9 @@ public:
     unsigned int totalStates() const  {return m_numStates;}
 
     Moment& operator= (const Moment & source);
+    bool operator ==(const Moment& b) const;
+    bool operator !=(const Moment& b) const
+    {return (!((*this) == b));}
 
     /*!
     @brief Outputs a binary representation of the Moment object to a stream.

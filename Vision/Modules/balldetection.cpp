@@ -1,8 +1,11 @@
 #include "balldetection.h"
 #include "Vision/visionconstants.h"
+#include "debug.h"
+#include "debugverbosityvision.h"
 
 void BallDetection::detectBall()
 {
+
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
@@ -10,29 +13,28 @@ void BallDetection::detectBall()
 
     vector<Transition> transitions = vbb->getVerticalTransitions(VisionFieldObject::BALL);    
 
-    const vector<PointType>& horizon = vbb->getHorizonPoints();
+    #if VISION_FIELDOBJECT_VERBOSITY > 1
+        debug << "BallDetection::detectBall() - number of ball transitions: " << transitions.size() << endl;
+    #endif
+
+    const GreenHorizon& green_horizon = vbb->getGreenHorizon();
 
     // Throw out points above the horizon
     vector<Transition>::iterator it;
     it = transitions.begin();
     while (it < transitions.end()) {
-        bool flag = 0;
-        for (unsigned int i = 0; i < horizon.size(); i++) {
-            //if (horizon.at(i).y >= it->getLocation().y) {
-            if (horizon.at(i).x >= it->getLocation().x) {   // inefficient; use math to calculate exact index.
-                if (horizon.at(i).y >= it->getLocation().y) {
-                    it = transitions.erase(it);
-                    flag = 1;
-                }
-                break;
-            }
+        if(green_horizon.isBelowHorizon(it->getLocation())) {
+            it++;   //move to next transitions
         }
-        if (!flag)
-            it++;
+        else {
+            #if VISION_FIELDOBJECT_VERBOSITY > 2
+                debug << "BallDetection::detectBall() - transition thrown out, above GH: " << *it << endl;
+            #endif
+            it = transitions.erase(it);
+        }
     }
 
     if (transitions.size() > 0) {
-
         // Arithmetic mean
         int x_mean = 0,
             y_mean = 0;
@@ -83,7 +85,6 @@ void BallDetection::detectBall()
         if (x_pos >= img.getWidth())
             x_pos = img.getWidth()-1;
 
-
         // Find ball centre (not occluded)        
         int top = y_pos,
             bottom = y_pos,
@@ -98,7 +99,7 @@ void BallDetection::detectBall()
 
         // FIND BALL CENTRE (single iteration approach; doesn't deal great with occlusion)
 
-        while (top >= 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
+        while (top > 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
             if (ClassIndex::getColourFromIndex(lut.classifyPixel(img((int)x_pos, top))) != ClassIndex::orange) {
                 not_orange_count++;
             }
@@ -122,7 +123,7 @@ void BallDetection::detectBall()
         bottom -= not_orange_count;
         not_orange_count = 0;
 
-        while (left >= 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
+        while (left > 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
             if (ClassIndex::getColourFromIndex(lut.classifyPixel(img(left, (int)y_pos))) != ClassIndex::orange) {
                 not_orange_count++;
             }
@@ -216,17 +217,31 @@ void BallDetection::detectBall()
 
             // CHECK FOR PIXEL DENSITY
             int count = 0;
-            for (int i = left; i < right; i++) {
-                for (int j = top; j < bottom; j++) {
+
+            int min = std::min(right-left, bottom-top);
+            min /= 2;
+
+            int box_left = std::max(center.x - min, 0);
+            int box_right = std::min(center.x + min, img.getWidth()-1);
+            int box_top = std::max(center.y - min, 0);
+            int box_bottom = std::min(center.y + min, img.getHeight()-1);
+
+            //cout << box_left << ", " << box_right << ", " << box_top << ", " << box_bottom << endl;
+
+            for (int i = box_left; i < box_right; i++) {
+                for (int j = box_top; j < box_bottom; j++) {
                     if (ClassIndex::getColourFromIndex(lut.classifyPixel(img(i, j))) == ClassIndex::orange)
                         count++;
                 }
             }
-            if (float(count)/((right-left)*(bottom-top)) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
-                Ball newball(center, max((right-left), (bottom-top))*0.5);
-                vbb->addBall(newball);
+            //cout << "PERCENT ORANGE: " << float(count)/((min*2)*(min*2)) << endl;
+
+            if (float(count)/((min*2)*(min*2)) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
+                Ball newball(center, max((right-left), (bottom-top))*0.5);                
+                vbb->addBall(newball);                
             }
             else {
+                //cout << "BALL THROWN OUT ON RATIO" << endl;
                 #if VISION_FIELDOBJECT_VERBOSITY > 1
                     debug << "BallDetection::detectBall - ball thrown out on percentage contained orange" << endl;
                 #endif

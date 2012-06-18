@@ -66,12 +66,24 @@ public:
     static float BEACON_MIN_PERCENT_YELLOW; //! Dave?
     static float BEACON_MIN_PERCENT_BLUE;   //! Dave?
 
+    //! Obstacle detection constants
+    static int MIN_DISTANCE_FROM_HORIZON;   //! Dave?
+    static int MIN_CONSECUTIVE_POINTS;      //! Dave?
+
     //! Field dimension constants
     static float GOAL_WIDTH;                //! The physical width of the goal posts in cm
     static float DISTANCE_BETWEEN_POSTS;    //! The physical distance between the posts in cm
     static float BALL_WIDTH;                //! The physical width of the ball in cm
     static float BEACON_WIDTH;              //! The physical width of the beacons in cm
     
+    //! ScanLine options
+    static unsigned int HORIZONTAL_SCANLINE_SPACING;
+    static unsigned int VERTICAL_SCANLINE_SPACING;
+    static unsigned int GREEN_HORIZON_SCAN_SPACING;
+    static unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
+    static float GREEN_HORIZON_LOWER_THRESHOLD_MULT;
+    static float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
+
     // static methods
     static DistanceMethod getDistanceMethodFromName(std::string name);
     static std::string getDistanceMethodName(DistanceMethod method);

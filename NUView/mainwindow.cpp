@@ -37,15 +37,18 @@
 
 #include "Kinematics/Kinematics.h"
 
+#include "debug.h"
+
 using namespace std;
-ofstream debug;
-ofstream errorlog;
+ofstream debug("debug.log");
+ofstream errorlog("error.log");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-    debug.open("debug.log");
-    errorlog.open("error.log");
     m_previous_log_path = "";
+    qDebug() << "NUView is starting in: MainWindow.cpp";
+    //debug.open;
+    //errorlog.open;
 
     //initialise a static int to count image saves
     GLDisplay::imageCount = 0;
@@ -78,8 +81,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     addAsDockable(sensorDisplay, "Sensor Values");
 
     // Object Widget
-    objectDisplay = new ObjectDisplayWidget(this);
-    addAsDockable(objectDisplay, "Field Objects");
+    objectDisplayVision = new ObjectDisplayWidget(this);
+    addAsDockable(objectDisplayVision, "Field Objects (Vision)");
+
+    // Object Widget
+    objectDisplayLog = new ObjectDisplayWidget(this);
+    addAsDockable(objectDisplayLog, "Field Objects (Log)");
 
     // Game Info Widget
     gameInfoDisplay = new GameInformationDisplayWidget(this);
@@ -391,7 +398,7 @@ void MainWindow::createConnections()
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),&virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),offlinelocDialog,SLOT(SetFrame(int,int)));
-    connect(LogReader,SIGNAL(ObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
+    connect(LogReader,SIGNAL(ObjectDataChanged(const FieldObjects*)),objectDisplayLog, SLOT(setObjectData(const FieldObjects*)));
     connect(LogReader,SIGNAL(GameInfoChanged(const GameInformation*)),gameInfoDisplay, SLOT(setGameInfo(const GameInformation*)));
     connect(LogReader,SIGNAL(TeamInfoChanged(const TeamInformation*)),teamInfoDisplay, SLOT(setTeamInfo(const TeamInformation*)));
 
@@ -436,7 +443,7 @@ void MainWindow::createConnections()
     connect(&virtualRobot,SIGNAL(cornerPointsDisplayChanged(std::vector< CornerPoint >,GLDisplay::display)),&glManager,SLOT(writeCornersToDisplay(std::vector< CornerPoint >,GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(edgeFilterChanged(QImage, GLDisplay::display)),&glManager,SLOT(stub(QImage, GLDisplay::display)));
     connect(&virtualRobot,SIGNAL(fftChanged(QImage, GLDisplay::display)),&glManager,SLOT(stub(QImage, GLDisplay::display)));
-    connect(&virtualRobot,SIGNAL(fieldObjectsChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
+    connect(&virtualRobot,SIGNAL(fieldObjectsChanged(const FieldObjects*)),objectDisplayVision, SLOT(setObjectData(const FieldObjects*)));
 
     // Connect Statistics for Classification
     connect(&virtualRobot,SIGNAL(updateStatistics(float *)),classification,SLOT(updateStatistics(float *)));
@@ -460,7 +467,7 @@ void MainWindow::createConnections()
 
     connect(offlinelocDialog,SIGNAL(LocalisationInfoChanged(QString)),locInfoDisplay, SLOT(setText(QString)));
     connect(offlinelocDialog,SIGNAL(SelfLocalisationInfoChanged(QString)),selflocInfoDisplay, SLOT(setText(QString)));
-    connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),objectDisplay, SLOT(setObjectData(const FieldObjects*)));
+    connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),objectDisplayLog, SLOT(setObjectData(const FieldObjects*)));
 }
 
 void MainWindow::setColourTheme(ColourScheme newColors)
@@ -792,6 +799,7 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),temp, SLOT(setSensorData(NUSensorsData*)));
     connect(LogReader, SIGNAL(ObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
     connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
+    connect(LocWmStreamer, SIGNAL(selfLocwmDataChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
     connect(offlinelocDialog, SIGNAL(LocalisationChanged(const Localisation*)),temp, SLOT(SetLocalLocalisation(const Localisation*)));
     connect(offlinelocDialog, SIGNAL(SelfLocalisationChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));

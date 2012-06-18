@@ -109,8 +109,8 @@ void SelfSRUKF::InitialiseCachedValues()
     }
 
     sqrtOfProcessNoise = Matrix(3,3,true);
-    sqrtOfProcessNoise[0][0] = 0.2; // Robot X coord.
-    sqrtOfProcessNoise[1][1] = 0.2; // Robot Y coord.
+    sqrtOfProcessNoise[0][0] = 0.5; // Robot X coord.
+    sqrtOfProcessNoise[1][1] = 0.5; // Robot Y coord.
     sqrtOfProcessNoise[2][2] = 0.005; // Robot Theta. 0.00001
 
     return;
@@ -175,7 +175,13 @@ SelfSRUKF::updateResult SelfSRUKF::TimeUpdate(const std::vector<float>& odometry
         Mx.setCol(i, sqrtOfTestWeightings[0][i] * (sigmaPoints.getCol(i) - newMean));      // Error matrix
     }
 
-    Matrix new_sqrt_covariance = HT(horzcat(Mx, sqrtOfProcessNoise));
+    const float odomPercentage = 0.1;
+    Matrix odometryNoise(states_total, states_total, false);
+    odometryNoise[states_x][states_x] = odomPercentage * x;
+    odometryNoise[states_y][states_y] = odomPercentage * y;
+    odometryNoise[states_heading][states_heading] = odomPercentage * heading;
+
+    Matrix new_sqrt_covariance = HT(horzcat(Mx, sqrtOfProcessNoise+odometryNoise));
     Matrix new_mean = newMean;
 
     setSqrtCovariance(new_sqrt_covariance);
@@ -197,7 +203,7 @@ Performs a simultaneous update for N landmarks.
 SelfModel::updateResult SelfSRUKF::MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement)
 {
     unsigned int numObs = measurements.getm();
-    const float c_threshold2 = 15.0f;
+    const float c_threshold2 = 20.0f;
     Matrix R_obj_rel(R_Measurement);        // R = S^2
     Matrix S_obj_rel(cholesky(R_obj_rel)); // R = S^2
 
@@ -354,133 +360,70 @@ SelfModel::updateResult SelfSRUKF::MeasurementUpdate(const StationaryObject& obj
     return RESULT_OK;
 }
 
-
-/*!
-    @brief  Perform update for Probabalistic Data Association Method
-    The Probabalistic Data Association Method performs an single update performed by
-    calculating a weighted sum of the correction, combining all possible options.
-
-    @param object The ambiguous object containing the measruement to the object.
-    @param possible_objects The possible stationary objects containing the potential
-    positions of the observed object.
-
-    @return Matrix containing the sigma points for the current model.
-*/
-SelfModel::updateResult SelfSRUKF::MeasurementUpdate(const AmbiguousObject& object, const std::vector<StationaryObject*>& possible_objects, const MeasurementError& error)
+SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double angle_variance)
 {
     const float c_threshold2 = 15.0f;
-    // Calculate update uncertainties - S_obj_rel & R_obj_rel
-    Matrix S_obj_rel = Matrix(2,2,false);
-    S_obj_rel[0][0] = sqrt(error.distance());
-    S_obj_rel[1][1] = sqrt(error.heading());
+        // Method to take the angle between two objects, that is,
+        // angle between object 1 (with fixed field coords (x1,y1))
+        // and object 2 (with fixed field coords (x2,y2) ) and perform an update.
+        // Note: as distinct from almost all other updates, the actual robot orientation
+        // doesn't matter for this update, and so 'cropping' etc. of the sigma points is not requied.
 
-    Matrix R_obj_rel = S_obj_rel * S_obj_rel.transp(); // R = S^2
+        double R_angle;
 
     // Unscented KF Stuff.
-    Matrix yBar;                                  	//reset
-    Matrix Py;
-    Matrix Pxy; //  = Matrix(7, 2, false);                   //Pxy=[0;0;0];
+    double yBar;                                  	//reset
+    double Py;
+    Matrix Pxy = Matrix(7, 1, false);                    //Pxy=[0;0;0];
     Matrix scriptX = CalculateSigmaPoints();
     const unsigned int numSigmaPoints = scriptX.getn();
+    //----------------------------------------------------------------
+    Matrix scriptY = Matrix(1, numSigmaPoints, false);
 
-    Matrix scriptY = Matrix(2, numSigmaPoints, false);
-    Matrix temp = Matrix(2, 1, false);
+    double angleToObj1;
+    double angleToObj2;
 
-    Matrix y = Matrix(2,1,false); // Measurement. (Distance, heading).
-    y[0][0] = object.measuredDistance() * cos(object.measuredElevation());
-    y[1][0] = object.measuredBearing();
+    for (int i = 0; i < numSigmaPoints; i++)
+    {
+        angleToObj1 = atan2 ( y1 - scriptX[1][i], x1 - scriptX[0][i] );
+        angleToObj2 = atan2 ( y2 - scriptX[1][i], x2 - scriptX[0][i] );
+        scriptY[0][i] = mathGeneral::normaliseAngle(angleToObj1 - angleToObj2);
+    }
 
     Matrix Mx = Matrix(scriptX.getm(), numSigmaPoints, false);
     Matrix My = Matrix(scriptY.getm(), numSigmaPoints, false);
-
-    Matrix innovation;
-    std::vector<Matrix> innovations;
-    std::vector<Matrix> kf_gains;
-    std::vector<float> mvdists;
-    float mv_sum = 0.0f;
-
-    const float Pd = 0.95;  // Target detection probability
-    const float Pg = 0.95;  // Gate probability (the probability that the gate contains the true measurement if detected)
+    for (int i = 0; i < numSigmaPoints; i++)
+    {
+        Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
+        My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
+    }
 
     Matrix M1 = sqrtOfTestWeightings;
+    yBar = convDble ( My * M1.transp() ); // Predicted Measurement.
+    Py = convDble ((My - yBar * M1) * (My - yBar * M1).transp());
+    Pxy = (Mx - m_mean * M1) * (My - yBar * M1).transp();
 
-    for (std::vector<StationaryObject*>::const_iterator obj_it = possible_objects.begin(); obj_it != possible_objects.end(); ++obj_it)
+
+    Matrix K = Pxy /( Py + angle_variance ); // K = Kalman filter gain.
+
+    double y = angle;    //end of standard ukf stuff
+    //Outlier rejection.
+    double innovation2 = (yBar - y) * (yBar - y ) / ( Py + angle_variance );
+
+    // Update Alpha (used in multiple model)
+    double innovation2measError = (yBar - y) * (yBar - y ) / angle_variance ;
+    m_alpha *= 1 / (1 + innovation2measError);
+
+    if (innovation2 > c_threshold2)
     {
-        StationaryObject* object = (*obj_it);
-        // Calculate the expected measurement based on the current state.
-        for(unsigned int i = 0; i < numSigmaPoints; i++)
-        {
-            const double dX = object->X() - scriptX[0][i];
-            const double dY = object->Y() - scriptX[1][i];
-            temp[0][0] = sqrt(dX*dX + dY*dY);
-            temp[1][0] = mathGeneral::normaliseAngle(atan2(dY,dX) - scriptX[2][i]);
-            scriptY.setCol(i, temp.getCol(0));
-        }
-
-
-        for(unsigned int i = 0; i < numSigmaPoints; i++)
-        {
-            Mx.setCol(i, sqrtOfTestWeightings[0][i] * scriptX.getCol(i));
-            My.setCol(i, sqrtOfTestWeightings[0][i] * scriptY.getCol(i));
-        }
-
-        Matrix M1 = sqrtOfTestWeightings;
-        yBar = My * M1.transp(); // Predicted Measurement.
-        Py = (My - yBar * M1) * (My - yBar * M1).transp();
-        Pxy = (Mx - m_mean * M1) * (My - yBar * M1).transp();
-
-        Matrix Sk = Py + R_obj_rel;
-
-        // Calculate the Kalman filter gain.
-        Matrix K = Pxy * Invert22(Sk); // K = Kalman filter gain.
-        // Calculate the innovation.
-        innovation = yBar - y;
-
-        // Calculate Association Probability
-        float mv = MultiVariateNormalDistribution(Sk, y, yBar);
-        mv_sum += mv;
-        mvdists.push_back(mv);
-        innovations.push_back(innovation);
-        kf_gains.push_back(K);
-
-//        //end of standard ukf stuff
-//        //RHM: 20/06/08 Outlier rejection.
-//        double innovation2 = convDble((yBar - y).transp() * Invert22(Py + R_obj_rel) * (yBar - y));
-
-//        // Update Alpha
-//        double innovation2measError = convDble((yBar - y).transp() * Invert22(R_obj_rel) * (yBar - y));
-//        m_alpha *= 1 / (1 + innovation2measError);
-//        //alpha *= CalculateAlphaWeighting(yBar - y,Py+R_obj_rel,c_outlierLikelyhood);
-
-//        if (innovation2 > c_threshold2)
-//        {
-//            return RESULT_OUTLIER;
-//        }
+        return RESULT_OUTLIER;
     }
-
-
-    // Combine the weighted innovations.
-    float weight_mult = 1 / (1-Pd*Pg + mv_sum);
-    float none_correct_weight = (1-Pd*Pg) * weight_mult;
-    Matrix combined_innovation(y.getm(), y.getn(), false);
-    Matrix kf_gain(kf_gains[0].getm(), kf_gains[0].getn(), false);
-
-    for(unsigned int index = 0; index < innovations.size(); ++index)
-    {
-        float weight = mvdists[index] * weight_mult;
-        combined_innovation = combined_innovation + weight * innovations[index];
-        kf_gain = kf_gain + weight*kf_gains[index];
-    }
-
-
-    // Update the model.
-    Matrix new_sqrtCovariance = HT( horzcat(Mx - m_mean*M1 - kf_gain*My + kf_gain*yBar*M1, kf_gain*S_obj_rel) );
-    setSqrtCovariance(new_sqrtCovariance);
-    Matrix new_mean = m_mean - kf_gain*combined_innovation;
-    setMean(new_mean);
+    Matrix newSqrtCov = HT( horzcat(Mx - m_mean*M1 - K*My + K*yBar*M1, K*sqrt(angle_variance)) );
+    setSqrtCovariance(newSqrtCov);
+    Matrix newMean = m_mean - K*(yBar - y);
+    setMean(newMean);
     return RESULT_OK;
 }
-
 
 /*! @brief  Calculation of sigma points
 Calculates the sigma points for the current model state.
@@ -528,6 +471,43 @@ float SelfSRUKF::CalculateAlphaWeighting(const Matrix& innovation, const Matrix&
     float expRes = exp(-0.5*convDble(innovation.transp()*Invert22(innovationVariance)*innovation));
     float fracRes = 1.0 / ( sqrt( pow(2*mathGeneral::PI,numMeas)*determinant(innovationVariance) ) );
     return notOutlierLikelyhood * fracRes * expRes + outlierLikelyhood;
+}
+
+
+bool SelfSRUKF::operator ==(const SelfSRUKF& b) const
+{
+    // Check SelfModel portions are equal
+    const SelfModel* this_model = this;
+    const SelfModel* other_model = &b;
+    if(this_model != other_model) return false;
+
+    // Check other memebr variables.
+//    Matrix sqrtOfTestWeightings; // Square root of W (Constant)
+//    Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
+//    static const float c_Kappa;
+//    Matrix m_sqrt_covariance;
+    return true;
+}
+
+/*!
+@brief Outputs a binary representation of the UKF object to a stream.
+@param output The output stream.
+@return The output stream.
+*/
+std::ostream& SelfSRUKF::writeStreamBinary (std::ostream& output) const
+{
+    SelfModel::writeStreamBinary(output);
+}
+
+/*!
+@brief Reads in a UKF object from the input stream.
+@param input The input stream.
+@return The input stream.
+*/
+std::istream& SelfSRUKF::readStreamBinary (std::istream& input)
+{
+    SelfModel::readStreamBinary(input);
+    setCovariance(covariance());    // need to initialise the sqrt covariance.
 }
 
 std::ostream& operator<< (std::ostream& output, const SelfSRUKF& p_model)

@@ -52,11 +52,21 @@ float VisionConstants::GOAL_MIN_PERCENT_YELLOW;
 float VisionConstants::GOAL_MIN_PERCENT_BLUE;
 float VisionConstants::BEACON_MIN_PERCENT_YELLOW;
 float VisionConstants::BEACON_MIN_PERCENT_BLUE;
+// Obstacle detection constants
+int VisionConstants::MIN_DISTANCE_FROM_HORIZON;
+int VisionConstants::MIN_CONSECUTIVE_POINTS;
 // Field dimension constants
 float VisionConstants::GOAL_WIDTH;
 float VisionConstants::DISTANCE_BETWEEN_POSTS;
 float VisionConstants::BALL_WIDTH;
 float VisionConstants::BEACON_WIDTH;
+// ScanLine options
+unsigned int VisionConstants::HORIZONTAL_SCANLINE_SPACING;
+unsigned int VisionConstants::VERTICAL_SCANLINE_SPACING;
+unsigned int VisionConstants::GREEN_HORIZON_SCAN_SPACING;
+unsigned int VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS;
+float VisionConstants::GREEN_HORIZON_LOWER_THRESHOLD_MULT;
+float VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT;
 
 VisionConstants::VisionConstants()
 {
@@ -67,6 +77,12 @@ VisionConstants::VisionConstants()
   */
 void VisionConstants::loadFromFile(std::string filename) 
 {
+    HORIZONTAL_SCANLINE_SPACING = 5; //defaults in case of bad file
+    VERTICAL_SCANLINE_SPACING = 5;
+    GREEN_HORIZON_SCAN_SPACING = 11;
+    GREEN_HORIZON_MIN_GREEN_PIXELS = 5;
+    GREEN_HORIZON_LOWER_THRESHOLD_MULT = 1;
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = 2.5;
     std::ifstream in(filename.c_str());
     std::string name;
     int         ival;
@@ -211,6 +227,14 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> fval;
             BEACON_MIN_PERCENT_BLUE = fval;
         }
+        else if(name.compare("MIN_DISTANCE_FROM_HORIZON") == 0) {
+            in >> ival;
+            MIN_DISTANCE_FROM_HORIZON = ival;
+        }
+        else if(name.compare("MIN_CONSECUTIVE_POINTS") == 0) {
+            in >> ival;
+            MIN_CONSECUTIVE_POINTS = ival;
+        }
         else if(name.compare("GOAL_WIDTH") == 0) {
             in >> fval;
             GOAL_WIDTH = fval;
@@ -250,6 +274,30 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL") == 0) {
             in >> ival;
             MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL = ival;
+        }
+        else if(name.compare("HORIZONTAL_SCANLINE_SPACING") == 0) {
+            in >> ival;
+            HORIZONTAL_SCANLINE_SPACING = ival;
+        }
+        else if(name.compare("VERTICAL_SCANLINE_SPACING") == 0) {
+            in >> ival;
+            VERTICAL_SCANLINE_SPACING = ival;
+        }
+        else if(name.compare("GREEN_HORIZON_SCAN_SPACING") == 0) {
+            in >> ival;
+            GREEN_HORIZON_SCAN_SPACING = ival;
+        }
+        else if(name.compare("GREEN_HORIZON_MIN_GREEN_PIXELS") == 0) {
+            in >> ival;
+            GREEN_HORIZON_MIN_GREEN_PIXELS = ival;
+        }
+        else if(name.compare("GREEN_HORIZON_LOWER_THRESHOLD_MULT") == 0) {
+            in >> fval;
+            GREEN_HORIZON_LOWER_THRESHOLD_MULT = fval;
+        }
+        else if(name.compare("GREEN_HORIZON_UPPER_THRESHOLD_MULT") == 0) {
+            in >> fval;
+            GREEN_HORIZON_UPPER_THRESHOLD_MULT = fval;
         }
         else {
             errorlog << "VisionConstants::loadFromFile - unknown constant: " << name << std::endl;
@@ -308,21 +356,31 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tBEACON_MIN_PERCENT_YELLOW: " << BEACON_MIN_PERCENT_YELLOW << std::endl;
     debug << "\tBEACON_MIN_PERCENT_BLUE: " << BEACON_MIN_PERCENT_BLUE << std::endl;
 
+    debug << "\tMIN_DISTANCE_FROM_HORIZON: " << MIN_DISTANCE_FROM_HORIZON << std::endl;
+    debug << "\tMIN_CONSECUTIVE_POINTS: " << MIN_CONSECUTIVE_POINTS << std::endl;
+
     debug << "\tGOAL_WIDTH: " << GOAL_WIDTH << std::endl;
     debug << "\tDISTANCE_BETWEEN_POSTS: " << DISTANCE_BETWEEN_POSTS << std::endl;
     debug << "\tBALL_WIDTH: " << BALL_WIDTH << std::endl;
     debug << "\tBEACON_WIDTH: " << BEACON_WIDTH << std::endl;
+
+    debug << "\tHORIZONTAL_SCANLINE_SPACING: " << HORIZONTAL_SCANLINE_SPACING << std::endl;
+    debug << "\tVERTICAL_SCANLINE_SPACING: " << VERTICAL_SCANLINE_SPACING << std::endl;
+    debug << "\tGREEN_HORIZON_SCAN_SPACING: " << GREEN_HORIZON_SCAN_SPACING << std::endl;
+    debug << "\tGREEN_HORIZON_MIN_GREEN_PIXELS: " << GREEN_HORIZON_MIN_GREEN_PIXELS << std::endl;
+    debug << "\tGREEN_HORIZON_LOWER_THRESHOLD_MULT: " << GREEN_HORIZON_LOWER_THRESHOLD_MULT << std::endl;
+    debug << "\tGREEN_HORIZON_UPPER_THRESHOLD_MULT: " << GREEN_HORIZON_UPPER_THRESHOLD_MULT << std::endl;
 }
 
 VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)
 {
-    if(name.compare("Width") == 0)
+    if(name.compare("WIDTH") == 0)
         return Width;
     else if(name.compare("D2P") == 0)
         return D2P;
-    else if(name.compare("Least") == 0)
+    else if(name.compare("LEAST") == 0)
         return Least;
-    else if(name.compare("Average") == 0)
+    else if(name.compare("AVERAGE") == 0)
         return Average;
 
     //no match - return default
@@ -335,9 +393,9 @@ VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::
 std::string VisionConstants::getDistanceMethodName(VisionConstants::DistanceMethod method)
 {
     switch(method) {
-    case Width:     return "Width";
+    case Width:     return "WIDTH";
     case D2P:       return "D2P";
-    case Average:   return "Average";
-    case Least:     return "Least";
+    case Average:   return "AVERAGE";
+    case Least:     return "LEAST";
     }
 }

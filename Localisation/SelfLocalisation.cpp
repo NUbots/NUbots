@@ -52,13 +52,16 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
-const float SelfLocalisation::c_obj_theta_variance = 0.1f*0.1f;        // (0.01 rad)^2
+const float SelfLocalisation::c_obj_theta_variance = 0.05f*0.05f;        // (0.01 rad)^2
+//const float SelfLocalisation::c_obj_range_offset_variance = 25.0f*25.0f;     // (10cm)^2
+//const float SelfLocalisation::c_obj_range_relative_variance = 0.10f*0.10f;   // 20% of range added
+
 const float SelfLocalisation::c_obj_range_offset_variance = 10.0f*10.0f;     // (10cm)^2
 const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
 
 const float SelfLocalisation::c_centre_circle_heading_variance = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
 
-const float SelfLocalisation::sdTwoObjectAngle = 0.05f; //Small! error in angle difference is normally very small
+const float SelfLocalisation::c_twoObjectAngleVariance = 0.05f*0.05f; //Small! error in angle difference is normally very small
 
 /*! @brief Constructor
     @param playerNumber The player number of the current robot/system. This assists in choosing reset positions.
@@ -74,6 +77,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings&
     m_amILost = true;
     m_lostCount = 100;
     m_timeSinceFieldObjectSeen = 0;
+    m_gps.resize(2,0.0f);
 
     //m_models.reserve(c_MAX_MODELS);
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
@@ -105,12 +109,14 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     m_amILost = true;
     m_lostCount = 100;
     m_timeSinceFieldObjectSeen = 0;
+    m_gps.resize(2,0.0f);
 
     m_models.clear();
 
     // Set default settings
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
-    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
+    m_settings.setPruneMethod(LocalisationSettings::prune_viterbi);
+//    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
 
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
@@ -336,6 +342,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
+
     // Proccess the Stationary Known Field Objects
     StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
     StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
@@ -362,23 +369,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     numUpdates+=objectsAdded;
     usefulObjectCount+=objectsAdded;
 
-    // Two Object update
-#if TWO_OBJECT_UPDATE_ON
-    if( fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible()
-        && fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible())
-        {
-            doTwoObjectUpdate(fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST],
-                              fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST]);
-        }
-    if( fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible()
-        && fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible())
-        {
-            doTwoObjectUpdate(fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST],
-                              fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST]);
-        }
-#endif
-
-        NormaliseAlphas();
+    NormaliseAlphas();
 
 #if MULTIPLE_MODELS_ON
         bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
@@ -406,13 +397,31 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             PruneModels();
         }
 #endif // MULTIPLE_MODELS_ON
+
+        // Two Object update
+    //#if TWO_OBJECT_UPDATE_ON
+        StationaryObject& leftBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+        StationaryObject& rightBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+        StationaryObject& leftYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+        StationaryObject& rightYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+
+        if( leftBlue.isObjectVisible() and rightBlue.isObjectVisible())
+        {
+            doTwoObjectUpdate(leftBlue, rightBlue);
+        }
+        if( leftYellow.isObjectVisible() and rightYellow.isObjectVisible())
+        {
+            doTwoObjectUpdate(leftYellow, rightYellow);
+        }
+    //#endif
+
+        NormaliseAlphas();
+
+
         PruneModels();
 
         MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
-        if(ball.isObjectVisible())
-        {
-            ballUpdate(ball);
-        }
+        ballUpdate(ball);
 
 #if DEBUG_LOCALISATION_VERBOSITY > 1
         for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
@@ -544,8 +553,8 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     float relBallSdYVel = m_ball_model->sd(MobileObjectUKF::y_vel);
 
     // Rotate the relative ball postion to alight with the forward looking robot on the field.
-    float rotatedX = relBallX * hcos + relBallY * hsin;
-    float rotatedY = -relBallX * hsin + relBallY * hcos;
+    float rotatedX = relBallX * hcos - relBallY * hsin;
+    float rotatedY = relBallX * hsin + relBallY * hcos;
 
     // Calculate the Ball location in field coordinates.
     float ballFieldLocationX = self.wmX() + rotatedX;
@@ -573,6 +582,10 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     ball.updateEstimatedRelativeVariables(ballDistance, ballHeading, 0.0f);
     ball.updateSharedCovariance(m_ball_model->covariance());
 
+    float lost_ball_sd = 150.0f;
+    float max_sd = 2 * std::max(relBallSdX, relBallSdY);
+    bool ballIsLost = max_sd > lost_ball_sd;
+    ball.updateIsLost(ballIsLost, m_timestamp);
 
     // Get the visual information
     // Note: THIS IS FOR DEBUGGING PURPOSES - REMOVE LATER>
@@ -584,7 +597,8 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
 //    std::cout << "Robot: x = " << self.wmX() << " y = " << self.wmY() << " heading = " << self.Heading() << std::endl;
 //    std::cout << "Relative ball: x = " << relBallX << " y = " << relBallY << std::endl;
 //    std::cout << "Field ball: x = " << ballFieldLocationX << " y = " << ballFieldLocationY << std::endl;
-
+//    std::cout << "Relative ball velocity: x = " << relBallXVel << " y = " << relBallYVel << std::endl;
+//    std::cout << "Field ball velocity: x = " << ballFieldVelocityX << " y = " << ballFieldVelocityY << std::endl;
 
     if(!ball.isObjectVisible())
     {
@@ -740,6 +754,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     // Model 2: On right sideline facing in, 1/3 from half way
     // Model 3: On right sideline facing in, 2/3 from half way
     // Model 4: In centre of own half facing opponents goal
+    // Model 5: In goal keeper position facing opponents goal
 	 
     float left_y = 200.0;
     float left_heading = -PI/2;
@@ -783,6 +798,10 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     // Postition 5
     temp.setCovariance(covariance_matrix(100.0f*100.0f, 150.0f*150.0f, PI/2.0f*PI/2.0f));
     temp.setMean(mean_matrix(centre_x, 0.0f, centre_heading));
+    positions.push_back(temp);
+
+    // Postition 6
+    temp.setMean(mean_matrix(2*centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
     InitialiseModels(positions);
@@ -1053,6 +1072,11 @@ bool SelfLocalisation::clipActiveModelsToField()
 
 bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double timeIncrement)
 {
+    const float c_turn_multiplier = 0.6f;
+    odomTurn *= c_turn_multiplier;
+
+    odomTurn -= odomForward * 0.008;
+
     // put values into odometry measurement matrix
     Matrix odometry(3,1,false);
     odometry[0][0] = odomForward;
@@ -1205,14 +1229,19 @@ int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& lan
 //                kf_return = m_models[modelID].fieldObjectmeas(flatObjectDistance, (*currStat)->measuredBearing(),(*currStat)->X(), (*currStat)->Y(),
 //                                R_obj_range_offset, R_obj_range_relative, R_obj_theta);
 
+
+                kf_return = (*model_it)->MeasurementUpdate(*(*currStat), temp_error);
                 #if LOC_SUMMARY > 0
                 m_frame_log << "Individual Update: " <<  (*currStat)->getName() << " Result: " << ((kf_return==Model::RESULT_OK)?"Successful":"Outlier") << std::endl;
                 m_frame_log << "Following individual object updates: " << (*model_it)->summary(false);
                 #endif
-//                if(kf_return == Model::RESULT_OUTLIER)
-//                {
-//                    m_modelObjectErrors[modelID][(*currStat)->getID()] += 1.0;
-//                }
+                if(kf_return == Model::RESULT_OUTLIER)
+                {
+                    Matrix cov = (*model_it)->covariance();
+                    Matrix added_noise = covariance_matrix(1,1,0.0001);
+                    cov = cov + added_noise;
+                    (*model_it)->setCovariance(cov);
+                }
             }
         }
     #if LOC_SUMMARY > 0
@@ -1330,24 +1359,39 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
 
 int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
-/*
-#if LOC_SUMMARY > 0
-    m_frame_log << std::endl << "Two object landmark update: " << landmark1.getName() << " & " << landmark2.getName() << std::endl;
-#endif
-    float totalAngle = landmark1.measuredBearing() - landmark2.measuredBearing();
-
-    #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out << "Two Object Update:" << endl;
-    debug_out << landmark1.getName() << " - Bearing = " << landmark1.measuredBearing() << endl;
-    debug_out << landmark2.getName() << " - Bearing = " << landmark2.measuredBearing() << endl;
-    #endif
-    for (int currID = 0; currID < c_MAX_MODELS; currID++){
-        if(m_models[currID]->active())
-        {
-            m_models[currID].updateAngleBetween(totalAngle,landmark1.X(),landmark1.Y(),landmark2.X(),landmark2.Y(),sdTwoObjectAngle);
-        }
+    // do the special update
+    float angle_beween_objects = mathGeneral::normaliseAngle(landmark1.measuredBearing() - landmark2.measuredBearing());
+    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+    {
+        (*model_it)->updateAngleBetween(angle_beween_objects, landmark1.X(), landmark1.Y(), landmark2.X(), landmark2.Y(), c_twoObjectAngleVariance);
     }
-    */
+
+
+    Vector2<float> position = TriangulateTwoObject(landmark1, landmark2);
+
+    float avg_x = (landmark1.X() + landmark2.X()) / 2.f;
+    float avg_y = (landmark1.Y() + landmark2.Y()) / 2.f;
+
+    float avg_heading = (landmark1.measuredBearing() + landmark2.measuredBearing()) / 2.f;
+
+    float best_heading = atan2(avg_y - position.y, avg_x - position.x) - avg_heading;
+
+    if(position.abs() == 0.0f)
+    {
+        return 0;
+    }
+
+    Matrix mean = mean_matrix(position.x, position.y, best_heading);
+    Matrix cov = covariance_matrix(20, 50, 0.01);
+    float alpha = getBestModel()->alpha() * 0.001f;
+
+    Model* temp = new Model(GetTimestamp());
+    temp->setMean(mean);
+    temp->setCovariance(cov);
+    temp->setAlpha(alpha);
+    temp->setActive();
+    m_models.push_back(temp);
+
     return 1;
 }
 
@@ -1377,19 +1421,30 @@ int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, 
 
 bool SelfLocalisation::ballUpdate(const MobileObject& ball)
 {
-    const float distance = ball.measuredDistance() * cos(ball.measuredElevation());
-    const float heading = ball.measuredBearing();
+    const float time_for_new_loc = 1000;
+    if(ball.isObjectVisible())
+    {
+        const float distance = ball.measuredDistance() * cos(ball.measuredElevation());
+        const float heading = ball.measuredBearing();
 
-    Matrix measurement(2,1,false);
-    measurement[0][0] = distance;
-    measurement[1][0] = heading;
+        Matrix measurement(2,1,false);
+        measurement[0][0] = distance;
+        measurement[1][0] = heading;
 
-    Matrix measurementNoise(2,2,false);
-    measurementNoise[0][0] = 5.0*5.0 + c_obj_range_relative_variance * pow(distance,2);
-    measurementNoise[1][1] = 0.01*0.01;
+        Matrix measurementNoise(2,2,false);
+        measurementNoise[0][0] = 5.0*5.0 + c_obj_range_relative_variance * pow(distance,2);
+        measurementNoise[1][1] = 0.01*0.01;
 
-    m_ball_model->measurementUpdate(measurement, measurementNoise);
-
+        m_ball_model->measurementUpdate(measurement, measurementNoise);
+        if((m_timestamp - m_prev_ball_update_time) > time_for_new_loc)
+        {
+            Matrix currMean = m_ball_model->mean();
+            currMean[MobileObjectUKF::x_vel][0] = 0.0;
+            currMean[MobileObjectUKF::y_vel][0] = 0.0;
+            m_ball_model->setMean(currMean);
+        }
+        m_prev_ball_update_time = m_timestamp;
+    }
 }
 
 /*! @brief Prunes the models using a selectable method. This is a interface function to access a variety of methods.
@@ -1409,7 +1464,7 @@ int SelfLocalisation::PruneModels()
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
     {
-        PruneViterbi(4);
+        PruneViterbi(6);
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_nscan)
     {
@@ -1830,6 +1885,11 @@ const SelfModel* SelfLocalisation::getBestModel() const
     return result;
 }
 
+const MobileObjectUKF* SelfLocalisation::getBallModel() const
+{
+    return m_ball_model;
+}
+
 /*! @brief Normalises the alphas of all exisiting models.
     The alphas of all existing models are normalised so that the total probablility of the set sums to 1.0.
 */
@@ -1970,6 +2030,110 @@ double SelfLocalisation::MergeMetric(const SelfModel *modelA, const SelfModel *m
         dij+=(xdif[i][0]*xdif[i][0]) / (p1[i][i]+p2[i][i]);
     }
     return dij*( (modelA->alpha()*modelB->alpha()) / (modelA->alpha()+modelB->alpha()) );
+}
+
+bool SelfLocalisation::operator ==(const SelfLocalisation& b) const
+{
+    if(m_timestamp != b.m_timestamp) return false;
+    if(m_currentFrameNumber != b.m_currentFrameNumber) return false;
+    if(m_previously_incapacitated != b.m_previously_incapacitated) return false;
+    if(m_previous_game_state != b.m_previous_game_state) return false;
+    if(m_hasGps != b.m_hasGps) return false;
+    if(m_hasGps)
+    {
+        if(m_compass != b.m_compass) return false;
+        if(m_gps[0] != b.m_gps[0]) return false;
+        if(m_gps[1] != b.m_gps[1]) return false;
+    }
+    if(*m_ball_model != *b.m_ball_model) return false;
+
+    unsigned int num_models = m_models.size();
+    if(num_models != b.m_models.size()) return false;
+    ModelContainer::const_iterator local_model = m_models.begin();
+    ModelContainer::const_iterator b_model = b.m_models.begin();
+    for (unsigned int i=0; i < num_models; ++i)
+    {
+        if(*(*local_model) != *(*b_model)) return false;
+        ++local_model;
+        ++b_model;
+    }
+    return true;
+}
+
+/*!
+@brief Outputs a binary representation of the Self Localisation system.
+@param output The output stream.
+@return The output stream.
+*/
+std::ostream& SelfLocalisation::writeStreamBinary (std::ostream& output) const
+{
+    char head = header();
+    output.write(&head, sizeof(head));
+    output.write(reinterpret_cast<const char*>(&m_timestamp), sizeof(m_timestamp));
+    output.write(reinterpret_cast<const char*>(&m_currentFrameNumber), sizeof(m_currentFrameNumber));
+    output.write(reinterpret_cast<const char*>(&m_previously_incapacitated), sizeof(m_previously_incapacitated));
+    output.write(reinterpret_cast<const char*>(&m_previous_game_state), sizeof(m_previous_game_state));
+    output.write(reinterpret_cast<const char*>(&m_hasGps), sizeof(m_hasGps));
+    if(m_hasGps)
+    {
+        output.write(reinterpret_cast<const char*>(&m_compass), sizeof(m_compass));
+        output.write(reinterpret_cast<const char*>(&m_gps[0]), sizeof(m_gps[0]));
+        output.write(reinterpret_cast<const char*>(&m_gps[1]), sizeof(m_gps[1]));
+    }
+
+    output.write(reinterpret_cast<const char*>(&m_settings), sizeof(m_settings));
+
+    // Write the ball model
+    m_ball_model->writeStreamBinary(output);
+
+    // Write the slef localisation models.
+    unsigned int num_models = m_models.size();
+    output.write(reinterpret_cast<const char*>(&num_models), sizeof(num_models));
+    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+    {
+        SelfModel* currModel = (*model_it);
+        currModel->writeStreamBinary(output);
+    }
+    return output;
+}
+
+/*!
+@brief Reads in a Self localisation system from the input stream.
+@param input The input stream.
+@return The input stream.
+*/
+std::istream& SelfLocalisation::readStreamBinary (std::istream& input)
+{
+    char header;
+    input.read(&header, sizeof(header));
+    input.read(reinterpret_cast<char*>(&m_timestamp), sizeof(m_timestamp));
+    input.read(reinterpret_cast<char*>(&m_currentFrameNumber), sizeof(m_currentFrameNumber));
+    input.read(reinterpret_cast<char*>(&m_previously_incapacitated), sizeof(m_previously_incapacitated));
+    input.read(reinterpret_cast<char*>(&m_previous_game_state), sizeof(m_previous_game_state));
+    input.read(reinterpret_cast<char*>(&m_hasGps), sizeof(m_hasGps));
+    if(m_hasGps)
+    {
+        input.read(reinterpret_cast<char*>(&m_compass), sizeof(m_compass));
+        input.read(reinterpret_cast<char*>(&m_gps[0]), sizeof(m_gps[0]));
+        input.read(reinterpret_cast<char*>(&m_gps[1]), sizeof(m_gps[1]));
+    }
+
+    input.read(reinterpret_cast<char*>(&m_settings), sizeof(m_settings));
+
+    // Read the ball model
+    m_ball_model->readStreamBinary(input);
+
+    // Write the slef localisation models.
+    unsigned int num_models;
+    input.read(reinterpret_cast<char*>(&num_models), sizeof(num_models));
+    clearModels();
+    for (unsigned int i = 0; i < num_models; ++i)
+    {
+        SelfModel* currModel = new Model(0.0f);
+        currModel->readStreamBinary(input);
+        m_models.push_back(currModel);
+    }
+    return input;
 }
 
 /*! @brief output stream
@@ -2176,4 +2340,50 @@ MeasurementError SelfLocalisation::calculateError(const Object& theObject)
     error.setDistance(c_obj_range_offset_variance + c_obj_range_relative_variance * pow(theObject.measuredDistance() * cos(theObject.measuredElevation()),2));
     error.setHeading(c_obj_theta_variance);
     return error;
+}
+
+Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& object1, const StationaryObject& object2)
+{
+    // Algorithm from http://local.wasp.uwa.edu.au/~pbourke/geometry/2circle/
+    Vector2<float> p0, p1, p2, p3a, p3b, p3;
+    p0.x = object1.X();
+    p0.y = object1.Y();
+
+    p1.x = object2.X();
+    p1.y = object2.Y();
+
+    float r0 = object1.measuredDistance();
+    float r1 = object2.measuredDistance();
+
+    float d = sqrt(pow(p0.x - p1.x,2) + pow(p0.y - p1.y, 2));
+
+    if(d > r0 + r1 )
+    {
+        return p3;
+    }
+    else if(d < abs(r0 - r1))
+    {
+        return p3;
+    }
+
+
+    float a = (r0*r0 - r1*r1 + d*d) / (2 * d);
+
+    float h = sqrt(r0*r0 - a*a);
+
+    p2.x = p0.x + a * (p1.x - p0.x) / d;
+    p2.y = p0.y + a * (p1.y - p0.y) / d;
+
+    p3a.x = p2.x + h * (p1.y - p0.y) / d;
+    p3a.y = p2.y + h * (p1.x - p0.x) / d;
+
+    p3b.x = p2.x - h * (p1.y - p0.y) / d;
+    p3b.y = p2.y - h * (p1.x - p0.x) / d;
+
+    if(p3a.abs() < p3b.abs())
+        p3 = p3a;
+    else
+        p3 = p3b;
+
+    return p3;
 }

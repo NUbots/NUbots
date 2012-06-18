@@ -70,6 +70,8 @@ DataWrapper::DataWrapper()
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
     Blackboard->lookForBall = true; //initialise
     Blackboard->lookForLandmarks = true; //initialise
+    isSavingImages = false;
+    isSavingImagesWithVaryingSettings = false;
 }
 
 DataWrapper::~DataWrapper()
@@ -329,13 +331,10 @@ bool DataWrapper::updateFrame()
     sensor_data = Blackboard->Sensors;
     field_objects = Blackboard->Objects;
     
-    
-    
     if (current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
         numFramesDropped++;
     numFramesProcessed++;
     current_frame = Blackboard->Image;
-    m_timestamp = Blackboard->Image->GetTimestamp();
     
     if (current_frame == NULL || sensor_data == NULL || actions == NULL || field_objects == NULL)
     {
@@ -350,8 +349,9 @@ bool DataWrapper::updateFrame()
         }
         return false;
     }
+    m_timestamp = current_frame->GetTimestamp();
     //succesful
-    field_objects->preProcess(current_frame->GetTimestamp());
+    field_objects->preProcess(m_timestamp);
     return true;
 }
 
@@ -360,7 +360,10 @@ bool DataWrapper::updateFrame()
 */
 void DataWrapper::postProcess()
 {
-    field_objects->postProcess(current_frame->GetTimestamp());
+    if (current_frame != NULL && field_objects != NULL)
+    {
+        field_objects->postProcess(current_frame->GetTimestamp());
+    }
 }
 
 /**

@@ -43,6 +43,10 @@ public:
     virtual bool timeUpdate(double deltaT, const Matrix& measurment, const Matrix& linearProcessNoise, const Matrix& measurementNoise);
     virtual bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs = Matrix());
 
+    bool operator ==(const UKF& b) const;
+    bool operator !=(const UKF& b) const
+    {return (!((*this) == b));}
+
     /*!
     @brief Outputs a binary representation of the UKF object to a stream.
     @param output The output stream.

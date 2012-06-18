@@ -145,6 +145,17 @@ public:
         return L() + lambda();
     }
 
+    bool operator ==(const UnscentedTransform& b) const
+    {
+        if(m_L != b.m_L) return false;
+        if(m_alpha != b.m_alpha) return false;
+        if(m_kappa != b.m_kappa) return false;
+        if(m_beta != b.m_beta) return false;
+        return true;
+    }
+    bool operator !=(const UnscentedTransform& b) const
+    {return (!((*this) == b));}
+
     /*!
     @brief Outputs a binary representation of the Unscented transform object to a stream.
     @param output The output stream.

@@ -23,9 +23,11 @@
 #include "Striker/ChaseState.h"
 #include "Support/PositioningState.h"
 #include "BallIsLost/BallIsLostState.h"
+#include "GoalKeeper/GoalKeeperState.h"
 #include "ImLost/ImLostState.h"
 
 #include "../SoccerProvider.h"
+#include "Tools/Math/General.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
@@ -39,6 +41,7 @@ PlayingState::PlayingState(SoccerProvider* provider) : SoccerFSMState(provider)
     m_positioning_state = new PositioningState(this);
     m_ball_is_lost_state = new BallIsLostState(this);
     m_im_lost_state = new ImLostState(this);
+    m_goalkeeper_state = new GoalKeeperState(this);
     
     m_state = m_chase_state;
     
@@ -82,7 +85,7 @@ void PlayingState::doStateCommons()
 
 BehaviourFSMState* PlayingState::nextStateCommons()
 {   // do state transitions in playing state machine
-    if (true) { //striker state transitions
+    if (true or m_team_info->getPlayerNumber() != 1) { //striker state transitions
         if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost()) {
             Blackboard->lookForBall = true;
             return m_ball_is_lost_state;
@@ -96,18 +99,34 @@ BehaviourFSMState* PlayingState::nextStateCommons()
             return m_positioning_state;
             }
             
-    } /*else { //goalkeeper state transitions
+    } else { //goalkeeper state transitions
+        m_team_info->setPlayerNumber(1);
+        //calculate distance to my own goal position
+        float goal_diff_x;
+        float goal_diff_y;
+        float distance_from_centre_to_goal = fabs(m_field_objects->stationaryFieldObjects[FieldObjects::FO_CORNER_YELLOW_PEN_LEFT].X());
+        float heading = mathGeneral::normaliseAngle(3.14-m_field_objects->self.Heading());
+        
+        if (Blackboard->GameInfo->getTeamColour() == GameInformation::BlueTeam) {
+            distance_from_centre_to_goal *= -1.f;
+            heading = mathGeneral::normaliseAngle(0.f-m_field_objects->self.Heading());
+        }
+        
+        goal_diff_x = distance_from_centre_to_goal - m_field_objects->self.wmX(); //X value
+        goal_diff_y = 0.f - m_field_objects->self.wmY(); //difference from centre
+        float distsqr = goal_diff_x * goal_diff_x + goal_diff_y * goal_diff_y;
+        
         if (m_field_objects->self.lost())
             return m_im_lost_state;
-        else if (m_team_info->amIClosestToBall())
-            return m_chase_state;
-        else if () //distance to where I should be is too large
+        //else if (m_team_info->amIClosestToBall())
+        //    return m_chase_state;
+        else if (distsqr > 10.f*10.f or fabs(heading) > 0.15) //distance to where I should be is too large
             return m_positioning_state;
-        else //if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost())
-            return m_ball_is_lost_state;
-        //else //goalie save state
-        //    return m_goalkeeper_state;
-    }*/
+        //else //if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost())
+        //    return m_ball_is_lost_state;
+        else //goalie save state
+            return m_goalkeeper_state;
+    }
 }
 
 BehaviourFSMState* PlayingState::nextState()

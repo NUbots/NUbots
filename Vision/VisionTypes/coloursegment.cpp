@@ -7,7 +7,7 @@ unsigned int dist(const PointType &x1, const PointType &x2)
     else if(x1.y == x2.y)
         return std::abs(x1.x - x2.x);
     else
-        return cv::norm(x1 - x2);
+        return (x1 - x2).abs();
 }
 
 void ColourSegment::set(const PointType &start, const PointType &end, ClassIndex::Colour colour)

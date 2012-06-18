@@ -2,43 +2,47 @@
 
 Quad::Quad()
 {
-    m_left = m_right = m_bottom = m_top = 0;
+    set(0,0,0,0);
 }
 
 Quad::Quad(const Quad& other)
 {
-    m_left = other.m_left;
-    m_right = other.m_right;
-    m_bottom = other.m_bottom;
-    m_top = other.m_top;
+    set(other.m_left, other.m_top, other.m_right, other.m_bottom);
+
 }
 
 Quad::Quad(int left, int top, int right, int bottom)
+{
+    set(left, top, right, bottom);
+}
+
+void Quad::set(int left, int top, int right, int bottom)
 {
     m_left = left;
     m_right = right;
     m_bottom = bottom;
     m_top = top;
+    recalculate();
 }
 
 Vector2<int> Quad::getBottomCentre() const
 {
-    return Vector2<int>((m_right+m_left)*0.5, m_bottom);
+    return m_bottom_centre;
 }
 
 Vector2<int> Quad::getCentre() const
 {
-    return Vector2<int>((m_right+m_left)*0.5, (m_bottom+m_top)*0.5);
+    return m_centre;
 }
 
-PointType Quad::getBottomLeft() const
+Vector2<int> Quad::getBottomLeft() const
 {
-    return PointType(m_left, m_bottom);
+    return m_bottom_left;
 }
 
-PointType Quad::getTopRight() const
+Vector2<int> Quad::getTopRight() const
 {
-    return PointType(m_right, m_top);
+    return m_top_right;
 }
 
 int Quad::getWidth() const
@@ -54,4 +58,12 @@ int Quad::getHeight() const
 cv::Scalar Quad::getAsScalar() const
 {
     return cv::Scalar(m_left, m_bottom, m_right, m_top);
+}
+
+void Quad::recalculate()
+{
+    m_centre = Vector2<int>((m_left + m_right)*0.5, (m_bottom + m_top)*0.5);
+    m_bottom_centre = Vector2<int>((m_left + m_right)*0.5, std::max(m_bottom, m_top));
+    m_bottom_left = Vector2<int>(std::min(m_left, m_right), std::max(m_bottom, m_top));
+    m_top_right = Vector2<int>(std::max(m_left, m_right), std::min(m_bottom, m_top));
 }

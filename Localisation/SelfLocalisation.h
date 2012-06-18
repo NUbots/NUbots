@@ -12,6 +12,7 @@ class NUSensorsData;
 #include "debug.h"
 #include "debugverbositylocalisation.h"
 #include "Tools/FileFormats/TimestampedData.h"
+#include "Tools/Math/Vector2.h"
 #include <fstream>
 #include <sstream>
 #include <list>
@@ -67,6 +68,7 @@ class SelfLocalisation: public TimestampedData
         unsigned int getNumActiveModels();
         unsigned int getNumFreeModels();
         const SelfModel* getBestModel() const;
+        const MobileObjectUKF* getBallModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
 
@@ -130,6 +132,26 @@ class SelfLocalisation: public TimestampedData
         // Implementation of virtual function from TimestampedData class.
         double GetTimestamp() const {return m_timestamp;}
 
+        static char header(){return 's';}
+
+        bool operator ==(const SelfLocalisation& b) const;
+        bool operator !=(const SelfLocalisation& b) const
+        {return (!((*this) == b));}
+
+        /*!
+        @brief Outputs a binary representation of the Self Localisation system.
+        @param output The output stream.
+        @return The output stream.
+        */
+        std::ostream& writeStreamBinary (std::ostream& output) const;
+
+        /*!
+        @brief Reads in a Self localisation system from the input stream.
+        @param input The input stream.
+        @return The input stream.
+        */
+        std::istream& readStreamBinary (std::istream& input);
+
         /*!
         @brief Output streaming operation.
         @param output The output stream.
@@ -148,6 +170,7 @@ class SelfLocalisation: public TimestampedData
 
     protected:
         MeasurementError calculateError(const Object& theObject);
+        Vector2<float> TriangulateTwoObject(const StationaryObject& object1, const StationaryObject& object2);
 
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
@@ -161,6 +184,7 @@ class SelfLocalisation: public TimestampedData
 
         double m_timestamp;
         int m_currentFrameNumber;
+        double m_prev_ball_update_time;
 
         // Game state memory
         bool m_previously_incapacitated;
@@ -184,7 +208,7 @@ class SelfLocalisation: public TimestampedData
         static const float c_obj_range_offset_variance;
         static const float c_obj_range_relative_variance;
         static const float c_centre_circle_heading_variance;
-        static const float sdTwoObjectAngle;
+        static const float c_twoObjectAngleVariance;
 };
 
 #endif

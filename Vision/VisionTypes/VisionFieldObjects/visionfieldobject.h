@@ -35,8 +35,6 @@ public:
     static string getVFOName(VFO_ID id);
     static VFO_ID getVFOFromName(const string& name);
     
-    static Vector2<float> correctDistortion(const Vector2<float>& pt);
-    
 public:
     VisionFieldObject();
     
@@ -56,6 +54,7 @@ protected:
     Vector3<float> m_spherical_error;
     Vector3 <float> m_transformed_spherical_pos;
     bool valid;
+    bool distance_valid;
 };
 
 #endif // VISIONFIELDOBJECT_H

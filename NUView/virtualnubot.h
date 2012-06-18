@@ -10,7 +10,6 @@
 #include "Kinematics/Horizon.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "GLDisplay.h"
-#include "VisionOld/Vision.h"
 #include "Tools/Math/LSFittedLine.h"
 #include "VisionOld/CornerPoint.h"
 #include "VisionOld/Circle.h"
@@ -18,6 +17,12 @@
 #include <fstream>
 #include "FileAccess/LogFileReader.h"
 #include "debugverbositynetwork.h"
+
+//#include "VisionOld/Vision.h"
+
+#include "VisionOld/TransitionSegment.h"
+#include "VisionOld/ObjectCandidate.h"
+#include "Vision/VisionWrapper/visioncontrolwrappernuview.h"
 
 class NUBlackboard;
 
@@ -53,6 +58,8 @@ public:
     }
     unsigned char* getLUT() {return classificationTable;}
     QString fileType;
+
+    void emitPoints(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
 public slots:
     /** Processes a Classified Image Packet, to be displayed in program
     *  @param datagram The classified image packet that is recieved, and to be processed by program for visualisation and further vision processing
@@ -125,7 +132,7 @@ private:
     const NUImage* rawImage;
 
     ClassifiedImage classImage, previewClassImage;
-    Vision vision;
+    VisionControlWrapper* vision;
     FieldObjects* AllObjects;
     int cameraNumber;
     Horizon horizonLine;

@@ -10,9 +10,12 @@ PLATFORM = pc
 
 contains(PLATFORM, "darwin") {
     message("Compiling for Darwin")
+    DEFINES += TARGET_IS_DARWIN
 
-    #ROBOCUP_DIR = ${HOME}/robocup/            #change to darwin directory later
-    ROBOCUP_DIR = /home/david/robocup/
+    ROBOCUP_DIR = ${HOME}/robocup/            #change to darwin directory later
+    #ROBOCUP_DIR = /home/shannon/robocup/
+    #ROBOCUP_DIR = /home/david/robocup/
+
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Autoconfig/
     
@@ -31,9 +34,12 @@ contains(PLATFORM, "darwin") {
 
 contains(PLATFORM, "pc") {
      message("Compiling for PC")
+    DEFINES += TARGET_IS_PC
 
-    #ROBOCUP_DIR = ${HOME}/robocup/
-    ROBOCUP_DIR = /home/david/robocup/
+    ROBOCUP_DIR = ${HOME}/robocup/
+    #ROBOCUP_DIR = /home/shannon/robocup/
+    #ROBOCUP_DIR = /home/david/robocup/
+
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
   
@@ -59,8 +65,9 @@ HEADERS += \
     VisionTypes/colourreplacementrule.h \
     VisionTypes/transition.h \
     VisionTypes/segmentedregion.h \
-    VisionTypes/objectcandidate.h \
+    #VisionTypes/objectcandidate.h \
     VisionTypes/quad.h \
+    VisionTypes/greenhorizon.h \
     VisionTypes/VisionFieldObjects/visionfieldobject.h \
     VisionTypes/VisionFieldObjects/ball.h \
     VisionTypes/VisionFieldObjects/goal.h \
@@ -71,17 +78,17 @@ HEADERS += \
     VisionTools/GTAssert.h \
     VisionTools/classificationcolours.h \
     Modules/greenhorizonch.h \
-    Modules/horizoninterpolate.h \
     Modules/objectdetectionch.h \
     Modules/scanlines.h \
     Modules/segmentfilter.h \
     Modules/goaldetection.h \
+    Modules/balldetection.h \
     basicvisiontypes.h \
     valgorithm.h \
     visionblackboard.h \
     visioncontroller.h \ 
     visionconstants.h \
-    Modules/balldetection.h
+    #Threads/SaveImagesThread.h
 
 SOURCES += \
     VisionTypes/coloursegment.cpp \
@@ -89,8 +96,9 @@ SOURCES += \
     VisionTypes/colourreplacementrule.cpp \
     VisionTypes/transition.cpp \
     VisionTypes/segmentedregion.cpp \
-    VisionTypes/objectcandidate.cpp \
+    #VisionTypes/objectcandidate.cpp \
     VisionTypes/quad.cpp \
+    VisionTypes/greenhorizon.cpp \
     VisionTypes/VisionFieldObjects/visionfieldobject.cpp \
     VisionTypes/VisionFieldObjects/ball.cpp \
     VisionTypes/VisionFieldObjects/goal.cpp \
@@ -98,16 +106,16 @@ SOURCES += \
     VisionTypes/VisionFieldObjects/obstacle.cpp \
     VisionTools/lookuptable.cpp \
     Modules/greenhorizonch.cpp \
-    Modules/horizoninterpolate.cpp \
     Modules/objectdetectionch.cpp \
     Modules/scanlines.cpp \
     Modules/segmentfilter.cpp \
     Modules/goaldetection.cpp \
+    Modules/balldetection.cpp \
     visionblackboard.cpp \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
-    Modules/balldetection.cpp
+    #Threads/SaveImagesThread.cpp
 
 ##robocup
 HEADERS += \

@@ -67,6 +67,11 @@ public:
         assert(false);
         return RESULT_FAILED;
     }
+    virtual updateResult updateAngleBetween(double angle, double x1, double y1, double x2, double y2, double sd_angle)
+    {
+        assert(false);
+        return RESULT_FAILED;
+    }
 
     bool isLost() const;
     Self GenerateSelfState() const;
@@ -76,6 +81,10 @@ public:
     unsigned int previousSplitOption(const AmbiguousObject& theObject) const;
 
     bool clipState(int stateIndex, double minValue, double maxValue);
+
+    bool operator ==(const SelfModel& b) const;
+    bool operator !=(const SelfModel& b) const
+    {return (!((*this) == b));}
 
     /*!
     @brief Outputs a binary representation of the UKF object to a stream.

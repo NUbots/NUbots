@@ -70,9 +70,9 @@ public:
 private:
     string m_name;
     
-    float m_middle_min, m_middle_max,
-          m_before_min, m_before_max,
-          m_after_min,  m_after_max;
+    int m_middle_min, m_middle_max,
+        m_before_min, m_before_max,
+        m_after_min,  m_after_max;
     
     vector<ClassIndex::Colour>  m_before, 
                                 m_middle, 

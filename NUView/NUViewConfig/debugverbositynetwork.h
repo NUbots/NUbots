@@ -9,7 +9,7 @@
 #ifndef DEBUGVERBOSITYNETWORK_H
 #define DEBUGVERBOSITYNETWORK_H
 
-#define DEBUG_NETWORK_VERBOSITY 5              //!< Controls debug verbosity of the network module
+#define DEBUG_NETWORK_VERBOSITY 0              //!< Controls debug verbosity of the network module
 
 #endif // !VERBOSITY_H
 

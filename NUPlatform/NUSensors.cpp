@@ -589,7 +589,7 @@ void NUSensors::calculateKinematics()
     
     bool leftSupport = false;
     bool rightSupport = false;
-    if(validsupportdata)    // if the support data was successfully retrieved.
+    if(false and validsupportdata)    // if the support data was successfully retrieved.
     {
         leftSupport = leftFootSupport;
         rightSupport = rightFootSupport;

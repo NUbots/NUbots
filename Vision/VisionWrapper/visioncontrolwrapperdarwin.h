@@ -2,12 +2,13 @@
 #define CONTROLWRAPPER_H
 
 #include "Infrastructure/Jobs/JobList.h"
-
+#include "Vision/Threads/SaveImagesThread.h"
 #include "Vision/visioncontroller.h"
 #include "Vision/VisionWrapper/datawrappercurrent.h"
 
 class VisionControlWrapper
 {
+    friend class SaveImagesThread;
 public:
     static VisionControlWrapper* getInstance();
     
@@ -29,6 +30,7 @@ private:
     
     VisionController* controller;
     DataWrapper* data_wrapper;
+    SaveImagesThread* m_saveimages_thread;      //!< an external thread to do saving images in parallel with vision processing
 };
 
 #endif // CONTROLWRAPPER_H

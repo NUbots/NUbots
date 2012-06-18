@@ -22,7 +22,7 @@ public:
     static void detectGoals();
 private:
     static void detectGoal(ClassIndex::Colour colour, vector<Quad>* candidates);
-    static void DensityCheck(bool yellow, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED);
+    static void DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED);
     static void ratioCheck(vector<Quad>* posts);
     static void widthCheck(vector<Quad>* posts);
     static void splitIntoObjects(vector<Quad>* blue_candidates, vector<Quad>* yellow_candidates, vector<Quad>* blue_posts,

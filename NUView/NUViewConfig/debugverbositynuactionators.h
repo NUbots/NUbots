@@ -9,7 +9,7 @@
 #ifndef DEBUGVERBOSITYNUACTIONATORS_H
 #define DEBUGVERBOSITYNUACTIONATORS_H
 
-#define DEBUG_NUACTIONATORS_VERBOSITY 4  //!< Controls debug verbosity of the nuactionators module
+#define DEBUG_NUACTIONATORS_VERBOSITY 0  //!< Controls debug verbosity of the nuactionators module
 
 #endif // !VERBOSITY_H
 
