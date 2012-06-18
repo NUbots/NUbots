@@ -165,7 +165,8 @@ void BehaviourProvider::updateButtonValues()
     }
     
     // A double chest click always starts saving images not matter which behaviour
-    if (doubleChestClick())
+    //if (doubleChestClick())
+    if(singleLeftBumperClick())
     {
         m_saving_images = not m_saving_images;
         m_jobs->addVisionJob(new SaveImagesJob(m_saving_images, false));

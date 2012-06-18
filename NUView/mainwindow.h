@@ -119,7 +119,7 @@ private:
     };
 
     //! Virtual robot, does data storage and robot based processing.
-    virtualNUbot virtualRobot;
+    virtualNUbot* virtualRobot;
     NUPlatform* m_platform;
     NUBlackboard* m_blackboard;
     NUViewIO* m_nuview_io;
