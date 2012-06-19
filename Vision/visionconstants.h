@@ -26,6 +26,9 @@ public:
     static float MAX_GOAL_DISTANCE;
     static bool THROWOUT_INSIGNIFICANT_GOALS;
     static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;
+    static bool THROWOUT_NARROW_GOALS;
+    static int MIN_GOAL_WIDTH;
+    static float GOAL_EDGE_RATIO;
 
     //! Beacon filtering constants
     static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;
@@ -65,6 +68,7 @@ public:
     static float GOAL_MIN_PERCENT_BLUE;     //! Dave?
     static float BEACON_MIN_PERCENT_YELLOW; //! Dave?
     static float BEACON_MIN_PERCENT_BLUE;   //! Dave?
+    static int MIN_GOAL_SEPARATION;
 
     //! Obstacle detection constants
     static int MIN_DISTANCE_FROM_HORIZON;   //! Dave?

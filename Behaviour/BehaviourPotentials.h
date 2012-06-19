@@ -158,6 +158,10 @@ public:
         Self self = Blackboard->Objects->self;
         vector<float> result(3,0);
         
+        //XXX: Modify bearing based on objects in the way
+        
+        
+        
         if (fabs(bearing) > 0.4 or (fabs(bearing) > m_HYSTERESIS and m_previous_turning and distance > stoppeddistance*1.5)) { //turn with hysteresis
             m_previous_turning = true;
             if (bearing > 0. and bearing < 2.6) {
@@ -184,6 +188,8 @@ public:
                 result[0] = 0.25;
             } else {
                 result[2] = heading*0.5;
+                result[1] = mathGeneral::PI/2.f*mathGeneral::sign(-heading);
+                result[0] = 0.1;
             }
         }
         
@@ -421,14 +427,14 @@ public:
             if (ball_distance < kickingdistance * 1.5) {
                 speed[2] = 0.3*target_heading;
             }
-            
+            /*
             std::cout << "Calculated heading: " << -atan2(y_diff, x_diff) << std::endl;
             std::cout << "My heading: " << my_heading << std::endl;
             std::cout << "Heading to Ball: " << ball_bearing << std::endl;
             std::cout << "Ball Position: (" << ballx << ", " << bally << ")" << std::endl;
             std::cout << "Kick Position: (" << best_kicking_pos_x << ", " << best_kicking_pos_y << ")" << std::endl;
             std::cout << angle_to_kick_pos << std::endl;
-            std::cout << "Turning." << std::endl;
+            std::cout << "Turning." << std::endl;*/
         }
         else if(ball_distance > stoppingdistance)
         {
@@ -443,7 +449,7 @@ public:
             speed[2] = 0.0f;    // Straight
         
         }
-        cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
+        //cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
         return speed;
     }
 
@@ -825,6 +831,7 @@ public:
     static float getBearingToOpponentGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
         vector<float> position = getOpponentGoalPosition(fieldobjects, gameinfo);
+        
         return position[1];
     }
     

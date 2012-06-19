@@ -4,6 +4,9 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/GameInformation/GameInformation.h"
+
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 
@@ -18,6 +21,9 @@ bool VisionConstants::THROWOUT_DISTANT_GOALS;
 float VisionConstants::MAX_GOAL_DISTANCE;
 bool VisionConstants::THROWOUT_INSIGNIFICANT_GOALS;
 int VisionConstants::MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;
+bool VisionConstants::THROWOUT_NARROW_GOALS;
+int VisionConstants::MIN_GOAL_WIDTH;
+float VisionConstants::GOAL_EDGE_RATIO;
 // Beacon filtering constants
 bool VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;
 bool VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;
@@ -52,6 +58,7 @@ float VisionConstants::GOAL_MIN_PERCENT_YELLOW;
 float VisionConstants::GOAL_MIN_PERCENT_BLUE;
 float VisionConstants::BEACON_MIN_PERCENT_YELLOW;
 float VisionConstants::BEACON_MIN_PERCENT_BLUE;
+int VisionConstants::MIN_GOAL_SEPARATION;
 // Obstacle detection constants
 int VisionConstants::MIN_DISTANCE_FROM_HORIZON;
 int VisionConstants::MIN_CONSECUTIVE_POINTS;
@@ -174,8 +181,12 @@ void VisionConstants::loadFromFile(std::string filename)
             D2P_INCLUDE_BODY_PITCH = bval;
         }
         else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
-            in >> fval;
-            D2P_ANGLE_CORRECTION = fval;
+            int config_player;
+            in >> config_player;
+            if(config_player == Blackboard->GameInfo->getPlayerNumber()) {
+                in >> fval;
+                D2P_ANGLE_CORRECTION = fval;
+            }
         }
         else if(name.compare("BALL_DISTANCE_POSITION_BOTTOM") == 0) {
             in >> bval;
@@ -299,6 +310,22 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> fval;
             GREEN_HORIZON_UPPER_THRESHOLD_MULT = fval;
         }
+        else if(name.compare("THROWOUT_NARROW_GOALS") == 0) {
+            in >> bval;
+            THROWOUT_NARROW_GOALS = bval;
+        }
+        else if(name.compare("MIN_GOAL_WIDTH") == 0) {
+            in >> ival;
+            MIN_GOAL_WIDTH = ival;
+        }
+        else if(name.compare("GOAL_EDGE_RATIO") == 0) {
+            in >> fval;
+            GOAL_EDGE_RATIO = fval;
+        }
+        else if(name.compare("MIN_GOAL_SEPARATION") == 0) {
+            in >> ival;
+            MIN_GOAL_SEPARATION = ival;
+        }
         else {
             errorlog << "VisionConstants::loadFromFile - unknown constant: " << name << std::endl;
         }
@@ -323,6 +350,9 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tMAX_GOAL_DISTANCE: " << MAX_GOAL_DISTANCE << std::endl;
     debug << "\tTHROWOUT_INSIGNIFICANT_GOALS: " << THROWOUT_INSIGNIFICANT_GOALS << std::endl;
     debug << "\tMIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS: " << MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS << std::endl;
+    debug << "\tTHROWOUT_NARROW_GOALS: " << THROWOUT_NARROW_GOALS << std::endl;
+    debug << "\tMIN_GOAL_WIDTH: " << MIN_GOAL_WIDTH << std::endl;
+    debug << "\tGOAL_EDGE_RATIO: " << GOAL_EDGE_RATIO << std::endl;
 
     debug << "\tTHROWOUT_ON_ABOVE_KIN_HOR_BEACONS: " << THROWOUT_ON_ABOVE_KIN_HOR_BEACONS << std::endl;
     debug << "\tTHROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS << std::endl;
@@ -355,6 +385,7 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tGOAL_MIN_PERCENT_BLUE: " << GOAL_MIN_PERCENT_BLUE << std::endl;
     debug << "\tBEACON_MIN_PERCENT_YELLOW: " << BEACON_MIN_PERCENT_YELLOW << std::endl;
     debug << "\tBEACON_MIN_PERCENT_BLUE: " << BEACON_MIN_PERCENT_BLUE << std::endl;
+    debug << "\tMIN_GOAL_SEPARATION: " << MIN_GOAL_SEPARATION << std::endl;
 
     debug << "\tMIN_DISTANCE_FROM_HORIZON: " << MIN_DISTANCE_FROM_HORIZON << std::endl;
     debug << "\tMIN_CONSECUTIVE_POINTS: " << MIN_CONSECUTIVE_POINTS << std::endl;
@@ -370,6 +401,7 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tGREEN_HORIZON_MIN_GREEN_PIXELS: " << GREEN_HORIZON_MIN_GREEN_PIXELS << std::endl;
     debug << "\tGREEN_HORIZON_LOWER_THRESHOLD_MULT: " << GREEN_HORIZON_LOWER_THRESHOLD_MULT << std::endl;
     debug << "\tGREEN_HORIZON_UPPER_THRESHOLD_MULT: " << GREEN_HORIZON_UPPER_THRESHOLD_MULT << std::endl;
+
 }
 
 VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)

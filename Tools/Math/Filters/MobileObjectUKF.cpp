@@ -48,9 +48,9 @@ Matrix MobileObjectUKF::processEquation(const Matrix& sigma_point, double deltaT
 
     // Now we have to re-orientate the position due to the motion of the observer.
     // Start with turn
-    // Apply to position - turing clockwise (+ve angle) means that the object should move counter-clockwise relatively.
-    tempx = result[x_pos][0] *  cosTheta - result[y_pos][0] * sinTheta;
-    tempy = result[x_pos][0] *  sinTheta + result[y_pos][0] * cosTheta;
+    // Apply to position - turing counter clockwise (+ve angle) means that the object should move clockwise relatively.
+    tempx = result[x_pos][0] *  cosTheta + result[y_pos][0] * sinTheta;
+    tempy = -result[x_pos][0] *  sinTheta + result[y_pos][0] * cosTheta;
 
     result[x_pos][0] = tempx;
     result[y_pos][0] = tempy;

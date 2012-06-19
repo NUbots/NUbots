@@ -907,15 +907,6 @@ void locWmGlDisplay::DrawModelMarkers(const SelfModel* model, const QColor& mode
     QColor fill(modelColor);
     fill.setAlpha(std::max((int)(100 * model->alpha()), c_min_display_alpha));
     DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
-    if(drawSigmaPoints)
-    {
-        //! TODO: FIX THIS DISPLAY ISSUE
-//        Matrix sigmaPoints = model->CalculateSigmaPoints();
-//        for (int i=1; i < sigmaPoints.getn(); i++)
-//        {
-//            DrawSigmaPoint(modelColor, sigmaPoints[Model::states_x][i], sigmaPoints[Model::states_y][i], sigmaPoints[Model::states_heading][i]);
-//        }
-    }
 }
 
 void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, const QColor& modelColor)
@@ -951,6 +942,14 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
 
     const MobileObjectUKF* ball_model = localisation.getBallModel();
 
+    Matrix cov = ball_model->covariance();
+    float xx = cov[MobileObjectUKF::x_pos][MobileObjectUKF::x_pos];
+    float xy = cov[MobileObjectUKF::x_pos][MobileObjectUKF::y_pos];
+    float yy = cov[MobileObjectUKF::y_pos][MobileObjectUKF::y_pos];
+    FieldPose ball_ellipse = CalculateErrorElipse(xx,xy,yy);
+
+    QColor fill(modelColor);
+
     if(drawBestModelOnly)
     {
         drawColor.setAlpha(255);
@@ -958,6 +957,8 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
         DrawModelMarkers(model, drawColor);
         FieldPose ball_pose = calculateBallPosition(*model, *ball_model);
         drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
+        fill.setAlpha(std::max((int)(100), c_min_display_alpha));
+        DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
     }
     else
     {
@@ -972,6 +973,8 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
                 DrawModelMarkers((*model_it), drawColor);
                 FieldPose ball_pose = calculateBallPosition(*(*model_it), *ball_model);
                 drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
+                fill.setAlpha(std::max((int)(100), c_min_display_alpha));
+                DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
             }
         }
     }

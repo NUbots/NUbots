@@ -120,6 +120,9 @@ class SelfLocalisation: public TimestampedData
         void InitialiseModels(const std::vector<Moment>& positions);
         void setModels(ModelContainer& newModels);
 
+        void addToBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var);
+        void setBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var);
+
         void clearModels();
 
         std::vector<TeamPacket::SharedBall> FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls);

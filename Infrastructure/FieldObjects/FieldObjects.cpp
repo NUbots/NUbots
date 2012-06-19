@@ -557,7 +557,22 @@ std::string FieldObjects::toString(bool visibleOnly) const
     printCount = 0;
     for(unsigned int i=0; i < ambiguousFieldObjects.size(); i++)
     {
-        result << ambiguousFieldObjects[i].toString() << std::endl;
+        result << ambiguousFieldObjects[i].toString();
+        result << "Possible Objects: ";
+        std::vector<int> poss_ids = ambiguousFieldObjects[i].getPossibleObjectIDs();
+        for(std::vector<int>::iterator id_it = poss_ids.begin(); id_it != poss_ids.end(); ++id_it)
+        {
+            int id = *id_it;
+            result << stationaryFieldObjects[id].getName() << "; ";
+        }
+        if(poss_ids.size() < 1)
+        {
+            result << "None" << std::endl << std::endl;
+        }
+        else
+        {
+            result << std::endl << std::endl;
+        }
         ++printCount;
     }
     if(printCount <= 0) result << "None" << std::endl;

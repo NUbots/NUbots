@@ -164,6 +164,91 @@ void GoalDetection::detectGoals()
         it++;
     }
 
+    //Width throwouts
+    if(VisionConstants::THROWOUT_NARROW_GOALS) {
+        it = blue_posts.begin();
+        while (it < blue_posts.end()) {
+            if (it->getWidth() < VisionConstants::MIN_GOAL_WIDTH)
+                it = blue_posts.erase(it);
+            else
+                it++;
+        }
+        it = yellow_posts.begin();
+        while (it < yellow_posts.end()) {
+            if (it->getWidth() < VisionConstants::MIN_GOAL_WIDTH)
+                it = yellow_posts.erase(it);
+            else
+                it++;
+        }
+    }
+
+    bool merge = false;
+    //Merging close goals
+    if (blue_posts.size() > 2)
+        blue_posts.clear();
+    else if (blue_posts.size() == 2) {
+        //int pos1 = blue_posts.at(0).getCentre().x;
+        //int pos2 = blue_posts.at(1).getCentre().x;
+
+        Quad post1 = blue_posts.at(0);
+        Quad post2 = blue_posts.at(1);
+        if((post1.getBottomCentre().y == img.getHeight()) && (post2.getBottomCentre().y == img.getHeight())) {
+            merge = true;
+        }
+        //int pos1 = post1.getCentre().x;
+        int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);
+        //int pos2 = post2.getCentre().x;
+        int pos2 = std::max(post2.getBottomLeft().x, post2.getBottomLeft().x);
+
+        if (std::max(pos2-pos1, pos1-pos2) < VisionConstants::MIN_GOAL_SEPARATION) {
+            merge = true;
+        }
+        if(merge) {
+            blue_posts.clear();
+            int left = std::min(post1.getBottomLeft().x, post2.getBottomLeft().x);
+            int right = std::max(post1.getTopRight().x, post2.getTopRight().x);
+            int top = std::min(post1.getTopRight().y, post2.getTopRight().y);
+            int bottom = std::max(post1.getBottomLeft().y, post2.getBottomLeft().y);
+            blue_posts.push_back(Quad(left, top, right, bottom));
+        }
+    }
+
+
+
+    merge = false;
+    if (yellow_posts.size() > 2)
+        yellow_posts.clear();
+    else if (yellow_posts.size() == 2) {
+        //int pos1 = blue_posts.at(0).getCentre().x;
+        //int pos2 = blue_posts.at(1).getCentre().x;
+
+        Quad post1 = yellow_posts.at(0);
+        Quad post2 = yellow_posts.at(1);
+
+        if(post1.getBottomCentre().y == img.getHeight()-1 && post2.getBottomCentre().y == img.getHeight()-1) {
+            merge = true;
+        }
+        //int pos1 = post1.getCentre().x;
+        int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);
+        //int pos2 = post2.getCentre().x;
+        int pos2 = std::max(post2.getBottomLeft().x, post2.getBottomLeft().x);
+
+        if (std::max(pos2-pos1, pos1-pos2) < VisionConstants::MIN_GOAL_SEPARATION) {
+            merge = true;
+        }
+
+        if(merge) {
+            yellow_posts.clear();
+            int left = std::min(post1.getBottomLeft().x, post2.getBottomLeft().x);
+            int right = std::max(post1.getTopRight().x, post2.getTopRight().x);
+            int top = std::min(post1.getTopRight().y, post2.getTopRight().y);
+            int bottom = std::max(post1.getBottomLeft().y, post2.getBottomLeft().y);
+            yellow_posts.push_back(Quad(left, top, right, bottom));
+        }
+    }
+
+
+
     // ROBOCUP HACKS -----------------------------------------------------------------------------------------------
 
     // DENSITY CHECK
@@ -458,10 +543,12 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     const int BIN_WIDTH = WIDTH/BINS;
     const int MIN_THRESHOLD = 1;
     const float SDEV_THRESHOLD = 0.75;
+    const int MAX_WIDTH = BINS;
 
-    int histogram[2][BINS], peaks[2][MAX_OBJECTS], peak_widths[2][MAX_OBJECTS];
-    int merged_peaks[MAX_OBJECTS][2];
-    int MAX_WIDTH = 3;
+    int histogram[2][BINS],
+        peaks[2][MAX_OBJECTS],
+        peak_widths[2][MAX_OBJECTS],
+        merged_peaks[MAX_OBJECTS][2];
 
     // REPEAT TWICE; ONCE FOR START TRANSITIONS, ONCE FOR END TRANSITIONS
     for (int repeats = 0; repeats < 2; repeats++) {
@@ -512,6 +599,13 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             if (histogram[repeats][peaks[repeats][i]] < MIN_THRESHOLD)
                 peaks[repeats][i] = -1;
 
+//        for(int z=0; z<2; z++) {
+//            for(int i=0; i<BINS; i++) {
+//                cout << histogram[z][i] << " ";
+//            }
+//            cout << endl;
+//        }
+
         // merge adjacent histogram bins (if both peaks)
         for (int i = 0; i < MAX_OBJECTS; i++) {
             int peak = peaks[repeats][i];
@@ -522,9 +616,19 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
                     peak_widths[repeats][i] ++;
                     span ++;
                     peaks[repeats][j] = -1;
+                    //update histogram
+                    //histogram[repeats][peaks[repeats][i]] += histogram[repeats][peaks[repeats][j]];
+                    //histogram[repeats][peaks[repeats][j]] = 0;
                 }
             }
         }
+
+//        for(int z=0; z<2; z++) {
+//            for(int i=0; i<BINS; i++) {
+//                cout << histogram[z][i] << " ";
+//            }
+//            cout << endl;
+//        }
     }
 
 
@@ -533,14 +637,32 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         merged_peaks[i][0] = merged_peaks[i][1] = -1;
 
     // merge start transitions and end transitions
-    for (int i = 0; i < MAX_OBJECTS; i++)
-        for (int j = 0; j < MAX_OBJECTS; j++)
-            for (int k = 0; k < MAX_WIDTH; k++)
-                if (peaks[0][i] == peaks[1][j]-k) {
+
+//    //Shannon's replacement merge code - ASSUMES PEAKS IS SORTED IN 2ND DIMENSION
+//    for (int i = 0; i < MAX_OBJECTS; i++) {
+//        for (int j = 0; j < MAX_OBJECTS; j++) {
+//            for (int k = 0; k < MAX_WIDTH; k++) {
+//                if (peaks[0][i] == peaks[1][j]-k && peaks[0][i] >= 0 && peaks[1][j]-k >= 0) {
+//                    merged_peaks[i][0] = peaks[0][i];
+//                    merged_peaks[i][1] = peaks[1][j];
+//                    break;
+//                }
+//            }
+//        }
+//    }
+
+    //Dave's original code
+    for (int i = 0; i < MAX_OBJECTS; i++) {
+        for (int j = 0; j < MAX_OBJECTS; j++) {
+            for (int k = 0; k < MAX_WIDTH; k++) {
+                if (peaks[0][i] == peaks[1][j]-k && peaks[0][i] >= 0 && peaks[1][j]-k >= 0) {
                     merged_peaks[i][0] = peaks[0][i];
                     merged_peaks[i][1] = peaks[1][j];
                     break;
                 }
+            }
+        }
+    }
 
     // Calculate bounding boxes for posts
     for (int i = 0; i < MAX_OBJECTS; i++) {
@@ -584,9 +706,9 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
                 }
 
             }
-            mean = sdev = counter = 0;
 
             // FIND RIGHT EDGE
+            mean = sdev = counter = 0;
             for (unsigned int j = 0; j < end_trans.size(); j++)
                 if (end_trans.at(j).getLocation().x >= start_pos && end_trans.at(j).getLocation().x <= end_pos) {
                     mean +=  end_trans.at(j).getLocation().x;
@@ -606,13 +728,42 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
                        y_pos = end_trans.at(j).getLocation().y;
                 if (x_pos >= start_pos && x_pos <= end_pos) {
                     if (x_pos > end_max && x_pos <= mean + SDEV_THRESHOLD*sdev)
-                    end_max = x_pos;
+                        end_max = x_pos;
                     if(y_pos < bot_min)
                         bot_min = y_pos;
                     else if (y_pos > top_max)
                         top_max = y_pos;
                 }
             }
+
+            //Get average of included transitions
+            int left_average = 0,
+                right_average = 0;
+            counter = 0;
+            for (unsigned int j = 0; j < start_trans.size(); j++) {
+                int x_pos = start_trans.at(j).getLocation().x;
+                if (x_pos >= start_min && x_pos <= end_max) {
+                    left_average += x_pos;
+                    counter++;
+                }
+            }
+            if(counter > 0)
+                left_average /= counter;
+            else
+                left_average = start_min;
+
+            counter = 0;
+            for (unsigned int j = 0; j < end_trans.size(); j++) {
+                int x_pos = end_trans.at(j).getLocation().x;
+                if (x_pos >= start_min && x_pos <= end_max) {
+                    right_average += x_pos;
+                    counter++;
+                }
+            }
+            if(counter > 0)
+                right_average /= counter;
+            else
+                right_average = end_max;
 
             bool contains_vertical = false;
 
@@ -648,7 +799,9 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             // throw out if no vertical segments contained
             //if (contains_vertical)
 
-            candidates->push_back(Quad(start_min, bot_min, end_max, top_max));
+            candidates->push_back(Quad(left_average, bot_min, right_average, top_max));  //average sides
+            //candidates->push_back(Quad(start_min, bot_min, end_max, top_max)); //bounding box
+
                 //cout << start_min << " " << bot_min << " " << end_max << " " << top_max << endl;
         }
     }

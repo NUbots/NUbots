@@ -1,4 +1,6 @@
 #include "ScriptKick.h"
+#include "debug.h"
+#include "debugverbositynumotion.h"
 #include "Motion/Tools/MotionScript.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Motion/NUWalk.h"
@@ -32,6 +34,9 @@ void ScriptKick::stop()
     #if DEBUG_NUMOTION_VERBOSITY > 3
     debug << "Kick stop called. Finishing Kick." << endl;
     #endif
+    if(m_script_start_time == -1 || m_current_script == NULL) {
+        kill();
+    }
     //stopHead();
     //stopArms();
     //stopLegs();
@@ -52,7 +57,7 @@ void ScriptKick::loadKickParameters()
     float xMax = 18.0f;
     
     //HACK: invert Y so we kick on the right side
-    float yMin = -1.5f;
+    float yMin = 0.0f;
     float yMax = 7.0f;
 
     m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
@@ -195,7 +200,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         //std::cout << "Angle Too Large: " << theta << std::endl;
         return;
     }*/
-
+    cout << theta << endl;
     // Ball is in position for left kick.
     if(m_left_kick_script->isValid() and m_left_kick_area.PointInside(ball_x, ball_y) and theta >= -angle_margin)
     {
@@ -205,8 +210,14 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         
         if(theta > angle_margin) {
             m_current_script = m_side_left_kick_script;
+            #if DEBUG_NUMOTION_VERBOSITY > 3
+            debug << "leftside kick: " << theta << endl;
+            #endif
         } else {
             m_current_script = m_left_kick_script;
+            #if DEBUG_NUMOTION_VERBOSITY > 3
+            debug << "leftfront: " << theta << endl;
+            #endif
         }
     }
     else if(m_right_kick_script->isValid() and m_right_kick_area.PointInside(ball_x, ball_y) and theta <= angle_margin)
@@ -217,8 +228,14 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         
         if(theta < -angle_margin) {
             m_current_script = m_side_right_kick_script;
+            #if DEBUG_NUMOTION_VERBOSITY > 3
+            debug << "rightside: " << theta << endl;
+            #endif
         } else {
             m_current_script = m_right_kick_script;
+            #if DEBUG_NUMOTION_VERBOSITY > 3
+            debug << "rightfront: " << theta << endl;
+            #endif
         }
     }
     else

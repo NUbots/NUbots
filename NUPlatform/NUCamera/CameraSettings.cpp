@@ -61,7 +61,7 @@ CameraSettings::CameraSettings(const std::vector<float> parameters)
     p_autoExposure.set(parameters[9], 0, 0, "permanently off");
     p_autoGain.set(parameters[10], 0, 0, "permanently off");
     p_powerLineFrequency.set(parameters[11], 0, 2, "off, 50Hz and 60Hz");
-    p_whiteBalanceTemperature.set(parameters[12], 0, 10000, "");
+    p_whiteBalanceTemperature.set(parameters[12], 0, 10000, "WKelvin value for colour temperature");
     p_sharpness.set(parameters[13], 0, 255, "");
     p_exposureAuto.set(parameters[14], 1, 1, "permanently off");
     p_exposureAbsolute.set(parameters[15], 0, 10000, "total amount of light allowed to fall on the photographic medium");
@@ -156,7 +156,7 @@ void CameraSettings::SetDefaults()
     p_autoExposure.set(0, 0, 0, "permanently off");
     p_autoGain.set(0, 0, 0, "permanently off");
     p_powerLineFrequency.set(1, 0, 2, "off, 50Hz and 60Hz");
-    p_whiteBalanceTemperature.set(0, 0, 10000, "");
+    p_whiteBalanceTemperature.set(0, 0, 10000, "Kelvin value for colour temperature");
     p_sharpness.set(0, 0, 255, "");
     p_exposureAuto.set(1, 1, 1, "permanently off");
     p_exposureAbsolute.set(0, 0, 10000, "total amount of light allowed to fall on the photographic medium");
