@@ -123,10 +123,9 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
 
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
+    m_ball_model = new MobileObjectUKF();
     initSingleModel(67.5f, 0, mathGeneral::PI);
 
-    m_ball_model = new MobileObjectUKF();
-    initBallModel(m_ball_model);
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
         std::stringstream debugLogName;
@@ -2160,26 +2159,8 @@ std::istream& SelfLocalisation::readStreamBinary (std::istream& input)
     @return The ouput stream
 */
 std::ostream& operator<< (std::ostream& output, const SelfLocalisation& p_loc)
-{    
-    output.write(reinterpret_cast<const char*>(&p_loc.m_timestamp), sizeof(p_loc.m_timestamp));
-    output.write(reinterpret_cast<const char*>(&p_loc.m_currentFrameNumber), sizeof(p_loc.m_currentFrameNumber));
-    output.write(reinterpret_cast<const char*>(&p_loc.m_previously_incapacitated), sizeof(p_loc.m_previously_incapacitated));
-    output.write(reinterpret_cast<const char*>(&p_loc.m_previous_game_state), sizeof(p_loc.m_previous_game_state));
-    output.write(reinterpret_cast<const char*>(&p_loc.m_hasGps), sizeof(p_loc.m_hasGps));
-    if(p_loc.m_hasGps)
-    {
-        output.write(reinterpret_cast<const char*>(&p_loc.m_compass), sizeof(p_loc.m_compass));
-        output.write(reinterpret_cast<const char*>(&p_loc.m_gps[0]), sizeof(p_loc.m_gps[0]));
-        output.write(reinterpret_cast<const char*>(&p_loc.m_gps[1]), sizeof(p_loc.m_gps[1]));
-    }
-
-    unsigned int num_models = p_loc.m_models.size();
-    output.write(reinterpret_cast<const char*>(&num_models), sizeof(num_models));
-    for (ModelContainer::const_iterator model_it = p_loc.m_models.begin(); model_it != p_loc.m_models.end(); ++model_it)
-    {
-        output << *(*model_it);
-    }
-
+{
+    p_loc.writeStreamBinary(output);
     return output;
 }
 
@@ -2191,29 +2172,7 @@ std::ostream& operator<< (std::ostream& output, const SelfLocalisation& p_loc)
 */
 std::istream& operator>> (std::istream& input, SelfLocalisation& p_loc)
 {
-    input.read(reinterpret_cast<char*>(&p_loc.m_timestamp), sizeof(p_loc.m_timestamp));
-    input.read(reinterpret_cast<char*>(&p_loc.m_currentFrameNumber), sizeof(p_loc.m_currentFrameNumber));
-    input.read(reinterpret_cast<char*>(&p_loc.m_previously_incapacitated), sizeof(p_loc.m_previously_incapacitated));
-    input.read(reinterpret_cast<char*>(&p_loc.m_previous_game_state), sizeof(p_loc.m_previous_game_state));
-    input.read(reinterpret_cast<char*>(&p_loc.m_hasGps), sizeof(p_loc.m_hasGps));
-    if(p_loc.m_hasGps)
-    {
-        input.read(reinterpret_cast<char*>(&p_loc.m_compass), sizeof(p_loc.m_compass));
-        input.read(reinterpret_cast<char*>(&p_loc.m_gps[0]), sizeof(p_loc.m_gps[0]));
-        input.read(reinterpret_cast<char*>(&p_loc.m_gps[1]), sizeof(p_loc.m_gps[1]));
-    }
-
-    p_loc.clearModels();
-
-    unsigned int num_models;
-    input.read(reinterpret_cast<char*>(&num_models), sizeof(num_models));
-    p_loc.m_models.resize(num_models);
-
-    for (ModelContainer::iterator model_it = p_loc.m_models.begin(); model_it != p_loc.m_models.end(); ++model_it)
-    {
-        (*model_it) = new Model(p_loc.m_timestamp);
-        input >> *(*model_it);
-    }
+    p_loc.readStreamBinary(input);
     return input;
 }
 

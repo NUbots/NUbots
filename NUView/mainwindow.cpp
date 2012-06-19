@@ -796,6 +796,7 @@ QMdiSubWindow* MainWindow::createLocWmGlDisplay()
 {
     locWmGlDisplay* temp = new locWmGlDisplay(this);
     connect(LogReader,SIGNAL(LocalisationDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
+    connect(LogReader,SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),temp, SLOT(setSensorData(NUSensorsData*)));
     connect(LogReader, SIGNAL(ObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
     connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
