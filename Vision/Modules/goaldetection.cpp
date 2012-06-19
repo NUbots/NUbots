@@ -192,8 +192,10 @@ void GoalDetection::detectGoals()
         Quad post1 = blue_posts.at(0);
         Quad post2 = blue_posts.at(1);
 
-        int pos1 = post1.getCentre().x;
-        int pos2 = post2.getCentre().x;
+        //int pos1 = post1.getCentre().x;
+        int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);
+        //int pos2 = post2.getCentre().x;
+        int pos2 = std::max(post2.getBottomLeft().x, post2.getBottomLeft().x);
 
         if (std::max(pos2-pos1, pos1-pos2) < VisionConstants::MIN_GOAL_SEPARATION) {
             blue_posts.clear();
@@ -213,8 +215,10 @@ void GoalDetection::detectGoals()
         Quad post1 = yellow_posts.at(0);
         Quad post2 = yellow_posts.at(1);
 
-        int pos1 = post1.getCentre().x;
-        int pos2 = post2.getCentre().x;
+        //int pos1 = post1.getCentre().x;
+        int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);
+        //int pos2 = post2.getCentre().x;
+        int pos2 = std::max(post2.getBottomLeft().x, post2.getBottomLeft().x);
 
         if (std::max(pos2-pos1, pos1-pos2) < VisionConstants::MIN_GOAL_SEPARATION) {
             yellow_posts.clear();
@@ -523,9 +527,11 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     const int MIN_THRESHOLD = 1;
     const float SDEV_THRESHOLD = 0.75;
 
-    int histogram[2][BINS], peaks[2][MAX_OBJECTS], peak_widths[2][MAX_OBJECTS];
-    int merged_peaks[MAX_OBJECTS][2];
-    int MAX_WIDTH = 3;
+    int histogram[2][BINS],
+        peaks[2][MAX_OBJECTS],
+        peak_widths[2][MAX_OBJECTS],
+        merged_peaks[MAX_OBJECTS][2];
+    int MAX_WIDTH = 10;
 
     // REPEAT TWICE; ONCE FOR START TRANSITIONS, ONCE FOR END TRANSITIONS
     for (int repeats = 0; repeats < 2; repeats++) {
@@ -600,7 +606,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     for (int i = 0; i < MAX_OBJECTS; i++)
         for (int j = 0; j < MAX_OBJECTS; j++)
             for (int k = 0; k < MAX_WIDTH; k++)
-                if (peaks[0][i] == peaks[1][j]-k) {
+                if (peaks[0][i] == peaks[1][j]-k && peaks[0][i] >= 0 && peaks[1][j]-k >= 0) {
                     merged_peaks[i][0] = peaks[0][i];
                     merged_peaks[i][1] = peaks[1][j];
                     break;
