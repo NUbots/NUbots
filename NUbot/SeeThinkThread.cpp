@@ -77,8 +77,8 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
         debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
     #endif
     m_nubot = nubot;
-#ifdef LOGGING_ENABLED
     m_logrecorder = new LogRecorder(m_nubot->m_blackboard->GameInfo->getPlayerNumber());
+#ifdef LOGGING_ENABLED
     m_logrecorder->SetLogging("sensor",true);
     m_logrecorder->SetLogging("gameinfo",true);
     m_logrecorder->SetLogging("teaminfo",true);
