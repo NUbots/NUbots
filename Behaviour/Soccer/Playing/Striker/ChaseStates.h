@@ -199,7 +199,7 @@ protected:
         float balldistance = ball.estimatedDistance();
         float ballbearing = ball.estimatedBearing();
         
-        if (ball.isObjectVisible() and ball.TimeSeen() > 500.) {
+        if (ball.isObjectVisible()) {
                 ballbearing = ball.measuredBearing();
                 balldistance = ball.measuredDistance();//*cos(ball.measuredElevation();
         }
@@ -213,15 +213,16 @@ protected:
             //m_jobs->addMotionJob(new WalkJob(0, 0, 0));
             vector<float> kickPosition(2,0);
             vector<float> targetPosition(2,0);
+            vector<float> goalPosition(3,0);
+            goalPosition = self.CalculateDifferenceFromGoal(BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info));
             kickPosition[0] = balldistance * cos(ballbearing);
             kickPosition[1] = balldistance * sin(ballbearing);
-            float goalbearing = BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info);
-            float goaldistance = BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info).estimatedDistance();
-            targetPosition[0] = goaldistance * cos(goalbearing);
-            targetPosition[1] = goalbearing * sin(goalbearing);
+            targetPosition[0] = goalPosition[0] * cos(goalPosition[1]);
+            targetPosition[1] = goalPosition[0] * sin(goalPosition[1]);
             KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
             m_jobs->addMotionJob(kjob);
-            cout << "Kick! " << ballbearing << endl;
+            cout << "Kick! " << ballbearing << "; " << goalPosition[1] << endl;
+            cout << "GoalRel: " << targetPosition[0] << ", " << targetPosition[1] << endl;
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << m_data->CurrentTime << ": Kicking Ball at distance " << balldistance << endl;
             #endif
