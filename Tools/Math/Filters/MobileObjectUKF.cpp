@@ -95,3 +95,59 @@ Matrix MobileObjectUKF::measurementEquation(const Matrix& sigma_point, const Mat
 
     return expected_measurement;
 }
+
+bool MobileObjectUKF::directUpdate(const Matrix& position, const Matrix& cov)
+{
+    const unsigned int totalPoints = totalSigmaPoints();
+    const unsigned int numStates = totalStates();
+    const unsigned int totalMeasurements = position.getm();
+    Matrix currentPoint; // temporary storage.
+    Matrix prop_y(totalMeasurements,1);
+    Matrix Yprop(totalMeasurements, totalPoints);
+
+    // First step is to calculate the expected measurmenent for each sigma point.
+    for (unsigned int i = 0; i < totalPoints; ++i)
+    {
+        currentPoint = m_sigma_points.getCol(i);    // Get the sigma point.
+        prop_y[0][0] = currentPoint[0][0];
+        prop_y[1][0] = currentPoint[1][0];
+        Yprop.setCol(i, prop_y);
+    }
+
+    // Now calculate the mean of these measurement sigmas.
+    Matrix Ymean = CalculateMeanFromSigmas(Yprop);
+
+    Matrix Pyy(cov);   // measurement noise is added, so just use as the beginning value of the sum.
+    Matrix Pxy(numStates, totalMeasurements, false);
+
+    // Calculate the Pyy and Pxy variance matrices.
+    for(unsigned int i = 0; i < totalPoints; ++i)
+    {
+        double weight = m_covariance_weights[0][i];
+        // store difference between prediction and measurement.
+        currentPoint = Yprop.getCol(i) - Ymean;
+        // Innovation covariance - Add Measurement noise
+        Pyy = Pyy + weight * currentPoint * currentPoint.transp();
+        // Cross correlation matrix
+        Pxy = Pxy + weight * (m_sigma_points.getCol(i) - m_sigma_mean) * currentPoint.transp();    // Important: Use mean from estimate, not current mean.
+    }
+
+    // Calculate the Kalman filter gain
+    Matrix K;
+    // If we have a 2 dimensional measurement, use the faster shortcut function.
+    if(totalMeasurements == 2)
+    {
+        K = Pxy * Invert22(Pyy);
+    }
+    else
+    {
+        K = Pxy * InverseMatrix(Pyy);
+    }
+
+    Matrix newMean = mean() + K * (position - Ymean);
+    Matrix newCovariance = covariance() - K*Pyy*K.transp();
+
+    setMean(newMean);
+    setCovariance(newCovariance);
+    return true;
+}
