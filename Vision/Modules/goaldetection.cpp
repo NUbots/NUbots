@@ -41,11 +41,11 @@ void GoalDetection::detectGoals()
     widthCheck(&yellow_posts);
 
     // RATIO CHECK
-    ratioCheck(&yellow_posts);
-    ratioCheck(&yellow_beacons);
-    ratioCheck(&blue_posts);
-    ratioCheck(&blue_beacons);
-    ratioCheck(&unknown_beacons);
+//    ratioCheck(&yellow_posts);
+//    ratioCheck(&yellow_beacons);
+//    ratioCheck(&blue_posts);
+//    ratioCheck(&blue_beacons);
+//    ratioCheck(&unknown_beacons);
 
     // OVERLAP CHECK
     overlapCheck(&blue_posts);
@@ -540,8 +540,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     const int MAX_OBJECTS = 8;
     const int BINS = 20;
     const int WIDTH = VisionBlackboard::getInstance()->getImageWidth();
-    const int BIN_WIDTH = WIDTH/BINS;
-    const int MIN_THRESHOLD = 5;
+    const float BIN_WIDTH = WIDTH/(float)BINS;
+    const int MIN_THRESHOLD = 1;
     const float SDEV_THRESHOLD = 0.75;
     const int MAX_WIDTH = BINS;
 
@@ -618,13 +618,13 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
                 }
             }
         }
-//        cout << "premerge " << repeats << endl;
-//        for(int i=0; i<BINS; i++)
-//            cout << histogram[repeats][i] << " ";
-//        cout << endl;
-//        for(int i=0; i<MAX_OBJECTS; i++)
-//            cout << peaks[repeats][i] << " ";
-//        cout << endl;
+        cout << "premerge " << repeats << endl;
+        for(int i=0; i<BINS; i++)
+            cout << histogram[repeats][i] << " ";
+        cout << endl;
+        for(int i=0; i<MAX_OBJECTS; i++)
+            cout << peaks[repeats][i] << " ";
+        cout << endl;
 
         // merge adjacent histogram bins (if both peaks)
         for (int i = 0; i < MAX_OBJECTS; i++) {
@@ -632,27 +632,54 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             if(peak < 0)
                 break;
             int span = 0;
+//            for (int j = i+1; j < MAX_OBJECTS; j++) {
+//                //if (i == j) continue;
+//                if (peaks[repeats][j] - peak <= 1+span && peaks[repeats][j] - peak > 0) {
+//                    //update histogram
+//                    histogram[repeats][peak] += histogram[repeats][peaks[repeats][j]];
+//                    histogram[repeats][peaks[repeats][j]] = 0;
+//                    //update peak_widths
+//                    peak_widths[repeats][i] ++;
+//                    span ++;
+//                    peaks[repeats][j] = -1;
+//                }
+//            }
             for (int j = i+1; j < MAX_OBJECTS; j++) {
                 //if (i == j) continue;
                 if (peaks[repeats][j] - peak <= 1+span && peaks[repeats][j] - peak > 0) {
-                    //update histogram
-                    histogram[repeats][peak] += histogram[repeats][peaks[repeats][j]];
-                    histogram[repeats][peaks[repeats][j]] = 0;
-                    //update peak_widths
-                    peak_widths[repeats][i] ++;
-                    span ++;
-                    peaks[repeats][j] = -1;
+                    if(repeats == 0) {
+                        //update histogram
+                        histogram[repeats][peak] += histogram[repeats][peaks[repeats][j]];
+                        histogram[repeats][peaks[repeats][j]] = 0;
+                        //update peak_widths
+                        peak_widths[repeats][i] ++;
+                        span ++;
+                        peaks[repeats][j] = -1;
+                    }
+                    else {
+                        histogram[repeats][peaks[repeats][j]] += histogram[repeats][peak];
+                        histogram[repeats][peak] = 0;
+                        //update peak_widths
+                        peak_widths[repeats][j] ++;
+                        span ++;
+                        peaks[repeats][i] = -1;
+                    }
                 }
             }
         }
 
-//        cout << "postmerge " << repeats << endl;
-//        for(int i=0; i<BINS; i++)
-//            cout << histogram[repeats][i] << " ";
-//        cout << endl;
-//        for(int i=0; i<MAX_OBJECTS; i++)
-//            cout << peaks[repeats][i] << " ";
-//        cout << endl;
+
+        cout << "postmerge " << repeats << endl;
+        for(int i=0; i<BINS; i++)
+            cout << histogram[repeats][i] << " ";
+        cout << endl;
+        for(int i=0; i<MAX_OBJECTS; i++)
+            cout << peaks[repeats][i] << " ";
+        cout << endl;
+        cout << "peakwidths" << endl;
+        for(int i=0; i<MAX_OBJECTS; i++)
+            cout << peak_widths[repeats][i] << " ";
+        cout << endl;
     }
 
 
@@ -674,26 +701,58 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
 //            }
 //        }
 //    }
-
     //Dave's original code
+//    for (int i = 0; i < MAX_OBJECTS; i++) {
+//        for (int j = 0; j < MAX_OBJECTS; j++) {
+//            for (int k = 0; k < MAX_WIDTH; k++) {
+//                if (peaks[0][i] == peaks[1][j]-k && peaks[0][i] >= 0 && peaks[1][j]-k >= 0) {
+//                    merged_peaks[i][0] = peaks[0][i];
+//                    merged_peaks[i][1] = peaks[1][j];
+//                    break;
+//                }
+//            }
+//        }
+//    }
+
+    //New code
     for (int i = 0; i < MAX_OBJECTS; i++) {
         for (int j = 0; j < MAX_OBJECTS; j++) {
             for (int k = 0; k < MAX_WIDTH; k++) {
                 if (peaks[0][i] == peaks[1][j]-k && peaks[0][i] >= 0 && peaks[1][j]-k >= 0) {
-                    merged_peaks[i][0] = peaks[0][i];
-                    merged_peaks[i][1] = peaks[1][j];
-                    break;
+                    //there is a pair of left and right peaks
+                    //check ratio
+                    float larger_peak = max(histogram[0][peaks[0][i]], histogram[1][peaks[1][j]]),
+                          smaller_peak = min(histogram[0][peaks[0][i]], histogram[1][peaks[1][j]]);
+                    cout << larger_peak << " " << larger_peak*VisionConstants::GOAL_EDGE_RATIO << " "<< smaller_peak << endl;
+                    if(larger_peak*VisionConstants::GOAL_EDGE_RATIO <= smaller_peak) {
+
+                        //peaks are within ratio merge
+                        merged_peaks[i][0] = peaks[0][i];
+                        merged_peaks[i][1] = peaks[1][j];
+                        peaks[0][i] = -1;
+                        peaks[1][j] = -1;
+                        break;
+                    }
                 }
             }
         }
     }
 
+    cout << "merged" << endl;
+    for (int i = 0; i < MAX_OBJECTS; i++)
+        cout << merged_peaks[i][0] << " ";
+    cout << endl;
+    for (int i = 0; i < MAX_OBJECTS; i++)
+        cout << merged_peaks[i][1] << " ";
+    cout << endl;
+
     // Calculate bounding boxes for posts
     for (int i = 0; i < MAX_OBJECTS; i++) {
         if (merged_peaks[i][0] >= 0 && merged_peaks[i][1] >= 0) {
             // find bounding box
-            int    start_pos = std::max(0, merged_peaks[i][0] * BIN_WIDTH),
-                   end_pos = min(WIDTH, (merged_peaks[i][1] + 1) * BIN_WIDTH),
+            int    start_pos = std::max(0.f, merged_peaks[i][0] * BIN_WIDTH),
+                   end_pos = min((float)WIDTH, (merged_peaks[i][1] + 1) * BIN_WIDTH),
+                    //end_pos = min(WIDTH, (merged_peaks[i][1] + peak_widths[1][i] + 1) * BIN_WIDTH),
                    start_min = std::numeric_limits<int>::max(),
                    end_max = 0,
                    bot_min = std::numeric_limits<int>::max(),
@@ -766,7 +825,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             counter = 0;
             for (unsigned int j = 0; j < start_trans.size(); j++) {
                 int x_pos = start_trans.at(j).getLocation().x;
-                if (x_pos >= start_min && x_pos <= end_max) {
+                //if (x_pos >= start_min && x_pos <= end_max) {
+                if (x_pos >= start_min && x_pos <= start_min + 0.1*(end_max - start_min)) {
                     left_average += x_pos;
                     counter++;
                 }
@@ -779,7 +839,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             counter = 0;
             for (unsigned int j = 0; j < end_trans.size(); j++) {
                 int x_pos = end_trans.at(j).getLocation().x;
-                if (x_pos >= start_min && x_pos <= end_max) {
+                //if (x_pos >= start_min && x_pos <= end_max) {
+                if (x_pos >= end_max-0.1*(end_max - start_min) && x_pos <= end_max) {
                     right_average += x_pos;
                     counter++;
                 }
