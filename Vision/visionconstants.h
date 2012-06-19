@@ -28,6 +28,7 @@ public:
     static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;
     static bool THROWOUT_NARROW_GOALS;
     static int MIN_GOAL_WIDTH;
+    static float GOAL_EDGE_RATIO;
 
     //! Beacon filtering constants
     static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;

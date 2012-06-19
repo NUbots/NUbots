@@ -218,6 +218,10 @@ bool Goal::calculatePositions()
         m_spherical_position = Vector3<float>(0,0,0);//distance
         m_location_angular = Vector2<float>(0,0);
         m_transformed_spherical_pos = Vector3<float>(0,0,0);
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::calculateDistances - Goal thrown out: negative distance" << endl;
+            debug << "\td2p: " << distance << endl;
+        #endif
         return false;
     }
 

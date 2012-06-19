@@ -23,6 +23,7 @@ bool VisionConstants::THROWOUT_INSIGNIFICANT_GOALS;
 int VisionConstants::MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;
 bool VisionConstants::THROWOUT_NARROW_GOALS;
 int VisionConstants::MIN_GOAL_WIDTH;
+float VisionConstants::GOAL_EDGE_RATIO;
 // Beacon filtering constants
 bool VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;
 bool VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;
@@ -317,6 +318,10 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> ival;
             MIN_GOAL_WIDTH = ival;
         }
+        else if(name.compare("GOAL_EDGE_RATIO") == 0) {
+            in >> fval;
+            GOAL_EDGE_RATIO = fval;
+        }
         else if(name.compare("MIN_GOAL_SEPARATION") == 0) {
             in >> ival;
             MIN_GOAL_SEPARATION = ival;
@@ -347,6 +352,7 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tMIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS: " << MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS << std::endl;
     debug << "\tTHROWOUT_NARROW_GOALS: " << THROWOUT_NARROW_GOALS << std::endl;
     debug << "\tMIN_GOAL_WIDTH: " << MIN_GOAL_WIDTH << std::endl;
+    debug << "\tGOAL_EDGE_RATIO: " << GOAL_EDGE_RATIO << std::endl;
 
     debug << "\tTHROWOUT_ON_ABOVE_KIN_HOR_BEACONS: " << THROWOUT_ON_ABOVE_KIN_HOR_BEACONS << std::endl;
     debug << "\tTHROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS << std::endl;

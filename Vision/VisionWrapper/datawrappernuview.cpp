@@ -246,7 +246,6 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
 
     #if VISION_WRAPPER_VERBOSITY > 2
         debug << id << endl;
-        debug << colour[0] << "," << colour[1] << "," << colour[2] << "," << colour[3] << "\t";
         debug << data_points << endl;
     #endif
 
