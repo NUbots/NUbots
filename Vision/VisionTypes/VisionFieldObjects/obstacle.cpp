@@ -87,6 +87,13 @@ bool Obstacle::calculatePositions()
 
     float distance = distanceToObstacle(bearing, elevation);
 
+    if(distance <= 0) {
+        //object behind us - ignore it
+        m_spherical_position = Vector3<float>(0,0,0);//distance
+        m_location_angular = Vector2<float>(0,0);
+        m_transformed_spherical_pos = Vector3<float>(0,0,0);
+        return false;
+    }
     //Camera to Ground to calculate distance
     
     m_spherical_position[0] = distance;//distance

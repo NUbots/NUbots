@@ -34,7 +34,6 @@ void ScriptKick::stop()
     #if DEBUG_NUMOTION_VERBOSITY > 3
     debug << "Kick stop called. Finishing Kick." << endl;
     #endif
-    
     if(m_script_start_time == -1 || m_current_script == NULL) {
         kill();
     }

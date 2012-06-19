@@ -155,6 +155,14 @@ bool Ball::calculatePositions()
     
     float distance = distanceToBall(bearing, elevation);
     
+    if(distance <= 0) {
+        //object behind us - ignore it
+        m_spherical_position = Vector3<float>(0,0,0);//distance
+        m_location_angular = Vector2<float>(0,0);
+        m_transformed_spherical_pos = Vector3<float>(0,0,0);
+        return false;
+    }
+
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         debug << "Ball::calculatePositions() distance: " << distance << endl;
     #endif
