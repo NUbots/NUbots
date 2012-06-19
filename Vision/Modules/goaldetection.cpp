@@ -531,7 +531,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         peaks[2][MAX_OBJECTS],
         peak_widths[2][MAX_OBJECTS],
         merged_peaks[MAX_OBJECTS][2];
-    int MAX_WIDTH = 10;
+    int MAX_WIDTH = 3;
 
     // REPEAT TWICE; ONCE FOR START TRANSITIONS, ONCE FOR END TRANSITIONS
     for (int repeats = 0; repeats < 2; repeats++) {
