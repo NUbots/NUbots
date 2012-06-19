@@ -44,7 +44,7 @@
 #define __STRICT_ANSI__
 */
 #undef __STRICT_ANSI__
-#include <linux/videodev.h>
+#include <linux/videodev2.h>
 #include <linux/version.h>
 //#include <linux/i2c-dev.h>
 #define __STRICT_ANSI__
@@ -351,6 +351,7 @@ void DarwinCamera::readCameraSettings()
 {
     m_settings.exposureAuto               = readSetting(V4L2_CID_EXPOSURE_AUTO);
     m_settings.autoWhiteBalance           = readSetting(V4L2_CID_AUTO_WHITE_BALANCE);
+    m_settings.whiteBalanceTemperature    = readSetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE);
     m_settings.exposureAutoPriority       = readSetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY);
     m_settings.brightness                 = readSetting(V4L2_CID_BRIGHTNESS);
     m_settings.contrast                   = readSetting(V4L2_CID_CONTRAST);
@@ -362,6 +363,7 @@ void DarwinCamera::readCameraSettings()
 
     m_settings.p_exposureAuto.set(m_settings.exposureAuto);
     m_settings.p_autoWhiteBalance.set(m_settings.autoWhiteBalance);
+    m_settings.p_whiteBalanceTemperature.set(m_settings.whiteBalanceTemperature);
     m_settings.p_exposureAutoPriority.set(m_settings.exposureAutoPriority);
     m_settings.p_brightness.set(m_settings.brightness);
     m_settings.p_contrast.set(m_settings.contrast);
@@ -375,6 +377,7 @@ void DarwinCamera::readCameraSettings()
     debug << "DarwinCamera::readCameraSettings()" << endl;
     debug << "\texposureAuto " << m_settings.exposureAuto  << endl;
     debug << "autoWhiteBalance " << m_settings.autoWhiteBalance  << endl;
+    debug << "whiteBalanceTemperature " << m_settings.whiteBalanceTemperature  << endl;
     debug << "exposureAutoPriority " << m_settings.exposureAutoPriority  << endl;
     debug << "brightness " << m_settings.brightness  << endl;
     debug << "contrast " << m_settings.contrast  << endl;
@@ -445,6 +448,11 @@ void DarwinCamera::applySettings(const CameraSettings& newset)
         m_settings.p_autoWhiteBalance.set(newset.p_autoWhiteBalance.get());
         applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (m_settings.p_autoWhiteBalance.get()));
     }
+    if(newset.p_whiteBalanceTemperature.get() != m_settings.p_whiteBalanceTemperature.get())
+    {
+        m_settings.p_whiteBalanceTemperature.set(newset.p_whiteBalanceTemperature.get());
+        applySetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE, (m_settings.p_whiteBalanceTemperature.get()));
+    }
     if(newset.p_exposureAutoPriority.get() != m_settings.p_exposureAutoPriority.get())
     {
         m_settings.p_exposureAutoPriority.set(newset.p_exposureAutoPriority.get());
@@ -499,6 +507,7 @@ void DarwinCamera::forceApplySettings(const CameraSettings& newset)
     //Copying the new Paramters into m_settings
     debug << "p_exposureAuto" << newset.p_exposureAuto.get() << endl;
     debug << "p_autoWhiteBalance" << newset.p_autoWhiteBalance.get() << endl;
+    debug << "p_whiteBalanceTemperature" << newset.p_whiteBalanceTemperature.get() << endl;
     debug << "p_exposureAutoPriority" << newset.p_exposureAutoPriority.get() << endl;
     debug << "p_brightness" << newset.p_brightness.get() << endl;
     debug << "p_contrast" << newset.p_contrast.get() << endl;
@@ -514,6 +523,7 @@ void DarwinCamera::forceApplySettings(const CameraSettings& newset)
     // Auto Controls
     applySetting(V4L2_CID_EXPOSURE_AUTO, (m_settings.p_exposureAuto.get()));
     applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (m_settings.p_autoWhiteBalance.get()));
+    applySetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE, (m_settings.p_whiteBalanceTemperature.get()));
     applySetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY, (m_settings.p_exposureAutoPriority.get()));
     //Other controls
     applySetting(V4L2_CID_BRIGHTNESS, (m_settings.p_brightness.get()));
