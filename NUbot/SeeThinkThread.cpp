@@ -113,7 +113,7 @@ void SeeThinkThread::run()
         Profiler prof = Profiler("SeeThinkThread");
     #endif
 #ifdef LOGGING_ENABLED
-    ofstream locfile((string(DATA_DIR) + string("locwm.strm")).c_str(), ios_base::trunc);
+    ofstream locfile((string(DATA_DIR) + string("selflocwm.strm")).c_str(), ios_base::trunc);
 #endif
     int err = 0;
     while (err == 0 && errno != EINTR)
