@@ -541,7 +541,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     const int BINS = 20;
     const int WIDTH = VisionBlackboard::getInstance()->getImageWidth();
     const int BIN_WIDTH = WIDTH/BINS;
-    const int MIN_THRESHOLD = 1;
+    const int MIN_THRESHOLD = 5;
     const float SDEV_THRESHOLD = 0.75;
     const int MAX_WIDTH = BINS;
 
@@ -580,7 +580,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         // find MAX_OBJECT peaks
         for (int i = 0; i < MAX_OBJECTS; i++) {
             int max = 0;
-            peaks[repeats][i] = 0;
+            //peaks[repeats][i] = 0;
+            peaks[repeats][i] = -1;
             for (int j = 0; j < BINS; j++)
                 if (histogram[repeats][j] > max) {
                     peaks[repeats][i] = j;
@@ -595,40 +596,63 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
                 histogram[repeats][i] *= -1;
 
         // remove below threshold
-        for (int i = 0; i < MAX_OBJECTS; i++)
-            if (histogram[repeats][peaks[repeats][i]] < MIN_THRESHOLD)
+        for (int i = 0; i < MAX_OBJECTS; i++) {
+            if (histogram[repeats][peaks[repeats][i]] < MIN_THRESHOLD) {
+                histogram[repeats][peaks[repeats][i]] = 0;
                 peaks[repeats][i] = -1;
+            }
+        }
 
-//        for(int z=0; z<2; z++) {
-//            for(int i=0; i<BINS; i++) {
-//                cout << histogram[z][i] << " ";
-//            }
-//            cout << endl;
-//        }
+        //bubble sort peak index array
+        for(int i=0; i<MAX_OBJECTS; i++) {
+            int temp = 0;
+            if(peaks[repeats][i] < 0)
+                break;
+            for(int k=i+1; k<MAX_OBJECTS; k++) {
+                if(peaks[repeats][k] < 0)
+                    break;
+                if(peaks[repeats][i] > peaks[repeats][k]) {
+                    temp = peaks[repeats][i];
+                    peaks[repeats][i] = peaks[repeats][k];
+                    peaks[repeats][k] = temp;
+                }
+            }
+        }
+//        cout << "premerge " << repeats << endl;
+//        for(int i=0; i<BINS; i++)
+//            cout << histogram[repeats][i] << " ";
+//        cout << endl;
+//        for(int i=0; i<MAX_OBJECTS; i++)
+//            cout << peaks[repeats][i] << " ";
+//        cout << endl;
 
         // merge adjacent histogram bins (if both peaks)
         for (int i = 0; i < MAX_OBJECTS; i++) {
             int peak = peaks[repeats][i];
+            if(peak < 0)
+                break;
             int span = 0;
-            for (int j = i; j < MAX_OBJECTS; j++) {
-                if (i == j) continue;
-                else if (peak - peaks[repeats][j] <= 1+span && peak - peaks[repeats][j] > 0) {
+            for (int j = i+1; j < MAX_OBJECTS; j++) {
+                //if (i == j) continue;
+                if (peaks[repeats][j] - peak <= 1+span && peaks[repeats][j] - peak > 0) {
+                    //update histogram
+                    histogram[repeats][peak] += histogram[repeats][peaks[repeats][j]];
+                    histogram[repeats][peaks[repeats][j]] = 0;
+                    //update peak_widths
                     peak_widths[repeats][i] ++;
                     span ++;
                     peaks[repeats][j] = -1;
-                    //update histogram
-                    //histogram[repeats][peaks[repeats][i]] += histogram[repeats][peaks[repeats][j]];
-                    //histogram[repeats][peaks[repeats][j]] = 0;
                 }
             }
         }
 
-//        for(int z=0; z<2; z++) {
-//            for(int i=0; i<BINS; i++) {
-//                cout << histogram[z][i] << " ";
-//            }
-//            cout << endl;
-//        }
+//        cout << "postmerge " << repeats << endl;
+//        for(int i=0; i<BINS; i++)
+//            cout << histogram[repeats][i] << " ";
+//        cout << endl;
+//        for(int i=0; i<MAX_OBJECTS; i++)
+//            cout << peaks[repeats][i] << " ";
+//        cout << endl;
     }
 
 
