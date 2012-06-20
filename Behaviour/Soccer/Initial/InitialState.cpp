@@ -30,6 +30,7 @@
 
 #include "Infrastructure/Jobs/MotionJobs/MotionKillJob.h"
 #include "Infrastructure/Jobs/MotionJobs/HeadJob.h"
+#include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 
 InitialState::InitialState(SoccerProvider* provider) : SoccerState(provider)
 {
@@ -50,9 +51,10 @@ void InitialState::doState()
     if (m_provider->stateChanged() or m_firstrun)
     {   // play a sound, and stop moving
         m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::INITIAL);
-        m_jobs->addMotionJob(new MotionKillJob());
+        //m_jobs->addMotionJob(new MotionKillJob());
         m_firstrun = false;
     }
+    m_jobs->addMotionJob(new WalkJob(0.f,0.f,0.f));
     // In inital the chest led should be off
     m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, vector<float>(3,0));
     
