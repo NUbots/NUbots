@@ -156,6 +156,7 @@ void NUKick::stopLegs()
     debug << "Legs stop called." << endl;
     #endif
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
+    stop();
 }
 
 /*! @brief Sets whether each of the arms can be used by the kick
