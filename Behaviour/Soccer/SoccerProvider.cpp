@@ -110,6 +110,7 @@ void SoccerProvider::doBehaviourCommons()
          m_actions->add(NUActionatorsData::LFootLed, m_current_time, m_led_off);
     }
 
+    /*
     // set the right eyes to indicate lost states
     bool balllost = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost();
     bool selflost = m_field_objects->self.lost();
@@ -156,6 +157,7 @@ void SoccerProvider::doBehaviourCommons()
         Platform->add(NUPlatform::Led7, m_actions->CurrentTime, m_led_blue);
     else
         Platform->add(NUPlatform::Led7, m_actions->CurrentTime, m_led_off);
+        */
 }
 
 /*! @brief Checks for state transitions that are common to all states in this behaviour provider
