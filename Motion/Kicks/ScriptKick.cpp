@@ -200,7 +200,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         //std::cout << "Angle Too Large: " << theta << std::endl;
         return;
     }*/
-    cout << theta << endl;
+    //cout << "Ballpos: " << ball_x << ", " << ball_y << ", " << theta << endl;
     // Ball is in position for left kick.
     if(m_left_kick_script->isValid() and m_left_kick_area.PointInside(ball_x, ball_y) and theta >= -angle_margin)
     {

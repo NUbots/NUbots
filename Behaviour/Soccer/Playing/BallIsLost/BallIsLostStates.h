@@ -60,7 +60,7 @@ protected:
 class BallIsLostPan : public BallIsLostSubState
 {
 public:
-    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.1)
+    BallIsLostPan(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.6)
     {
         m_spin_speed = 0;
         m_time_in_state = 0;
@@ -110,10 +110,8 @@ protected:
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
-        else
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
         
-        m_jobs->addMotionJob(new WalkJob(0, 0, 0.01));
+        m_jobs->addMotionJob(new WalkJob(0, 0, 0));
     }
 private:
     void reset()
@@ -141,7 +139,7 @@ private:
 class BallIsLostSpin : public BallIsLostSubState
 {
 public:
-    BallIsLostSpin(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.4)
+    BallIsLostSpin(BallIsLostState* parent) : BallIsLostSubState(parent), m_ROTATIONAL_SPEED(0.6)
     {
         m_spin_speed = m_ROTATIONAL_SPEED;
         m_time_in_state = 0;
@@ -151,7 +149,7 @@ public:
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
-        if (m_time_in_state > 1000*(1.5*6.28/m_ROTATIONAL_SPEED))
+        if (m_time_in_state > 5*(1.5*6.28/m_ROTATIONAL_SPEED))
             return m_lost_machine->m_lost_move;
         else
             return this;
@@ -170,6 +168,7 @@ protected:
                 m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
             else
                 m_spin_speed = mathGeneral::sign(ball.estimatedBearing())*m_ROTATIONAL_SPEED;
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 10, 2000, -1.5, 1.5));
         }
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
@@ -177,10 +176,8 @@ protected:
         
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
-        else
-            m_jobs->addMotionJob(new HeadNodJob(HeadNodJob::BallAndLocalisation, m_spin_speed));
         
-        m_jobs->addMotionJob(new WalkJob(-0.12, 0, m_spin_speed));
+        m_jobs->addMotionJob(new WalkJob(0.12, 0, m_spin_speed*2.f));
     }
 private:
     const float m_ROTATIONAL_SPEED;
@@ -246,11 +243,11 @@ protected:
         vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         
-        float pan_width = 1.1;
+        float pan_width = 1.5;
         if (ball.isObjectVisible())
             m_jobs->addMotionJob(new HeadTrackJob(ball));
         else
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation, 50, 9000, -pan_width, pan_width));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 50, 9000, -pan_width, pan_width));
     }
 private:
     vector<float> m_position;       // the target location in field coordinates
