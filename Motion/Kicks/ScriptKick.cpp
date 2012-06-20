@@ -34,7 +34,8 @@ void ScriptKick::stop()
     #if DEBUG_NUMOTION_VERBOSITY > 3
     debug << "Kick stop called. Finishing Kick." << endl;
     #endif
-    if(m_script_start_time == -1 || m_current_script == NULL) {
+    if(m_script_start_time == -1 or m_current_script == NULL or
+        m_data->CurrentTime > m_current_script->timeFinished()) {
         kill();
     }
     //stopHead();
@@ -69,7 +70,22 @@ void ScriptKick::loadKickParameters()
 
 bool ScriptKick::isActive()
 {
+    /*std::cout << "m_kick_ready: " << m_kick_ready << std::endl;
+    std::cout << "m_kick_enabled: " << m_kick_enabled << std::endl;
+    std::cout << "m_kicking_leg: " << m_kicking_leg << std::endl;
+    std::cout << "m_current_script: " << m_current_script << std::endl;
+    std::cout << "m_script_start_time: " << m_script_start_time << std::endl;
+    if(m_current_script != NULL)
+    {
+        std::cout << "m_data->CurrentTime: " << m_data->CurrentTime << std::endl;
+        std::cout << "m_current_script->timeFinished(): " << m_current_script->timeFinished() << std::endl;    
+    }*/
+    //double check the weird conditions
+    if (m_kick_enabled and m_current_script == NULL)
+        kill();
+    
     return m_kick_enabled;
+    
 }
 
 bool ScriptKick::isUsingHead()
@@ -88,7 +104,7 @@ bool ScriptKick::isUsingArms()
 {
     if(m_current_script != NULL)
     {
-        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLArm(),m_current_script->timeFinishedWithRArm());
+        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLArm(),m_current_script->timeFinishedWithRArm()+100);
     }
     else
     {
@@ -101,7 +117,7 @@ bool ScriptKick::isUsingLegs()
 {
     if(m_current_script != NULL)
     {
-        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLLeg(),m_current_script->timeFinishedWithRLeg());
+        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLLeg(),m_current_script->timeFinishedWithRLeg()+100);
     }
     else
     {
@@ -147,7 +163,7 @@ bool ScriptKick::requiresLegs()
 
 void ScriptKick::doKick()
 {
-
+    //cout << "dokick is called" << endl;
     if(m_current_script and m_kick_enabled and m_kick_ready and (m_script_start_time == -1))    // Check if there is a script ready, that has not been started.
     {
         if(m_walk == NULL or !m_walk->isActive())   // Either we have no walk, or we want it to be inactive.
