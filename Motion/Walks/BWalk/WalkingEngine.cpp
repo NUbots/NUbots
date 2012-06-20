@@ -81,7 +81,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   //p.standComPosition = Vector3<>(/*20.5f*/ 3.5f /*0.f*/, 50.f, /*259.f*/ /*261.5f*/ 258.0f);
   //p.standComPosition = Vector3<>(3.5f, 50.f,258.0f);
   p.standComPosition = Vector3<>(3.5f, 50.f, 160.0f);
-  p.standBodyTilt = 0.02f; //01f;
+  p.standBodyTilt = 0.03f; //01f;
   p.standArmJointAngles = Vector2<>(0.2f, 0.f);
 
   p.standHardnessAnklePitch = 75;
