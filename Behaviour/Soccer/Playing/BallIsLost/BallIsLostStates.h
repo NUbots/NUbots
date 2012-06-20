@@ -84,9 +84,11 @@ protected:
             debug << m_data->CurrentTime << ": BallIsLostPan" << endl;
         #endif
         // keep track of the time in this state
-        bool kickIsActive = false;
+        bool kickIsActive, walkIsActive = false;
         
         m_data->get(NUSensorsData::MotionKickActive, kickIsActive);
+        //m_data->get(NUSensorsData::MotionWalkActive, walkIsActive);
+        kickIsActive = kickIsActive and not walkIsActive;
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
             debug << "Kick Active: " << kickIsActive << " State Changed: " << m_parent->stateChanged() << " Time delta: " << m_data->CurrentTime - m_previous_time << endl;
         #endif

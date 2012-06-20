@@ -82,8 +82,10 @@ protected:
         
         Self& self = Blackboard->Objects->self;
         MobileObject& ball = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL];
-        bool iskicking;
+        bool iskicking, iswalking = false;
         m_data->get(NUSensorsData::MotionKickActive, iskicking);
+        //m_data->get(NUSensorsData::MotionWalkActive, iswalking);
+        iskicking = iskicking and not iswalking;
         
         // if (pan not run)
         //      if (pan start condition)
