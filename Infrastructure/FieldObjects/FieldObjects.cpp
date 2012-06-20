@@ -210,12 +210,12 @@ void FieldObjects::InitStationaryFieldObjects()
                     break;
                 case FO_BLUE_BEACON:
                     x = 0.0f;
-                    y = -200.f; // NOTE: This is not to field spec - should be 240
+                    y = -240.f; // NOTE: This is not to field spec - should be 240
                     objectName = "Blue Beacon";
                     break;
                 case FO_YELLOW_BEACON:
                     x = 0.0f;
-                    y = 200.0f; // NOTE: This is not to field spec - should be 240
+                    y = 240.0f; // NOTE: This is not to field spec - should be 240
                     objectName = "Yellow Beacon";
                     break;
                 default:
