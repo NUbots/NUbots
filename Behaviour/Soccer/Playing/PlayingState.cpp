@@ -66,6 +66,7 @@ PlayingState::~PlayingState()
 
 void PlayingState::doStateCommons()
 {
+    m_actions->add(NUActionatorsData::RFootLed, m_actions->CurrentTime, vector<float>(3,0));
     if (m_provider->stateChanged())
     {   // play a sound when we enter the playing state, turn the kick off light off
         m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::PLAYING);
