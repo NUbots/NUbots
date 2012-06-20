@@ -903,9 +903,10 @@ void locWmGlDisplay::DrawModelMarkers(const SelfModel* model, const QColor& mode
     FieldPose pose = CalculateErrorElipse(xx,xy,yy);
 
     QColor outline(modelColor);
-    outline.setAlphaF(std::max(model->alpha(), c_min_display_alpha / 255.0f));
+    float model_draw_alpha = modelColor.alphaF();
+    outline.setAlphaF(std::max(model_draw_alpha, c_min_display_alpha / 255.0f));
     QColor fill(modelColor);
-    fill.setAlpha(std::max((int)(100 * model->alpha()), c_min_display_alpha));
+    fill.setAlpha(std::max((int)(100 * model_draw_alpha), c_min_display_alpha));
     DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
 }
 

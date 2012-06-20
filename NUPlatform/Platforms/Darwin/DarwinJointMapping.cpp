@@ -71,7 +71,8 @@ DarwinJointMapping::DarwinJointMapping()
 
 
     // [0]  HEAD_PITCH
-    m_limits.push_back(defaultLimit);
+    temp.setLimits(-0.2, 1.f);
+    m_limits.push_back(temp);
 
     // [1]  HEAD_YAW
     temp.setLimits(mathGeneral::deg2rad(-100.0f), mathGeneral::deg2rad(100.0f));
@@ -84,7 +85,8 @@ DarwinJointMapping::DarwinJointMapping()
     m_limits.push_back(defaultLimit);
 
     // [4]  L_ELBOW
-    m_limits.push_back(defaultLimit);
+    temp.setLimits(-2.7, 0.f);
+    m_limits.push_back(temp);
 
     // [5]  R_SHOULDER_ROLL
     m_limits.push_back(defaultLimit);
@@ -93,7 +95,8 @@ DarwinJointMapping::DarwinJointMapping()
     m_limits.push_back(defaultLimit);
 
     // [7]  R_ELBOW
-    m_limits.push_back(defaultLimit);
+    temp.setLimits(-2.7, 0.f);
+    m_limits.push_back(temp);
 
     // [8]  L_HIP_ROLL
     m_limits.push_back(defaultLimit);

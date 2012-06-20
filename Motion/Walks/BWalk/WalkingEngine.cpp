@@ -81,7 +81,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   //p.standComPosition = Vector3<>(/*20.5f*/ 3.5f /*0.f*/, 50.f, /*259.f*/ /*261.5f*/ 258.0f);
   //p.standComPosition = Vector3<>(3.5f, 50.f,258.0f);
   p.standComPosition = Vector3<>(3.5f, 50.f, 160.0f);
-  p.standBodyTilt = 0.0f; //01f;
+  p.standBodyTilt = 0.03f; //01f;
   p.standArmJointAngles = Vector2<>(0.2f, 0.f);
 
   p.standHardnessAnklePitch = 75;
@@ -223,22 +223,26 @@ void WalkingEngine::init()
 
   Matrix leftTarget(4,4,true);
 
-  leftTarget[0][3] = p.standStandbyRefX;
-  leftTarget[1][3] = p.standComPosition.y;
-  leftTarget[2][3] = -p.standComPosition.z + 30.0f;
-  Matrix rightTarget(4,4,true);
-  rightTarget[0][3] = p.standStandbyRefX;
-  rightTarget[1][3] = -p.standComPosition.y;
-  rightTarget[2][3] = -p.standComPosition.z + 30.0f;
-  m_ik->calculateLegJoints(leftTarget, rightTarget, joints);
+//  leftTarget[0][3] = p.standStandbyRefX+10;
+//  leftTarget[1][3] = p.standComPosition.y;
+//  leftTarget[2][3] = -p.standComPosition.z + 30.0f;
+//  Matrix rightTarget(4,4,true);
+//  rightTarget[0][3] = p.standStandbyRefX+10;
+//  rightTarget[1][3] = -p.standComPosition.y;
+//  rightTarget[2][3] = -p.standComPosition.z + 30.0f;
+//  m_ik->calculateLegJoints(leftTarget, rightTarget, joints);
 
-  std::vector<float>::iterator l_leg_start = joints.begin() + m_actions->getSize(NUActionatorsData::Head) + m_actions->getSize(NUActionatorsData::LArm) + m_actions->getSize(NUActionatorsData::RArm);
-  std::vector<float>::iterator l_leg_end = l_leg_start + m_actions->getSize(NUActionatorsData::LLeg);
-  std::vector<float>::iterator r_leg_start = l_leg_end;
-  std::vector<float>::iterator r_leg_end = r_leg_start + m_actions->getSize(NUActionatorsData::RLeg);
+//  std::vector<float>::iterator l_leg_start = joints.begin() + m_actions->getSize(NUActionatorsData::Head) + m_actions->getSize(NUActionatorsData::LArm) + m_actions->getSize(NUActionatorsData::RArm);
+//  std::vector<float>::iterator l_leg_end = l_leg_start + m_actions->getSize(NUActionatorsData::LLeg);
+//  std::vector<float>::iterator r_leg_start = l_leg_end;
+//  std::vector<float>::iterator r_leg_end = r_leg_start + m_actions->getSize(NUActionatorsData::RLeg);
 
-  m_initial_lleg.assign(l_leg_start,l_leg_end);
-  m_initial_rleg.assign(r_leg_start,r_leg_end);
+  m_initial_lleg.resize(m_actions->getSize(NUActionatorsData::LLeg),0.f);
+  m_initial_lleg[1] = -0.5;
+  m_initial_lleg[3] = 1.2;
+  m_initial_lleg[5] = -0.7;
+
+  m_initial_rleg = m_initial_lleg;
 
   nu_nextLeftArmJoints.resize(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
   nu_nextRightArmJoints.resize(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
@@ -1044,7 +1048,7 @@ void WalkingEngine::generateOutput(/*WalkingEngineOutput& walkingEngineOutput*/)
     // Reduce stiffness if we are standing.
     if(currentMotionType == stand)
     {
-        default_leg_stifness = 65.0f;
+        default_leg_stifness = 75.0f;
     }
 
     // Set the leg positions.

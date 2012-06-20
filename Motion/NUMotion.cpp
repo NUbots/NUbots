@@ -192,10 +192,17 @@ void NUMotion::kill()
     #if defined(USE_BLOCK) or defined(USE_SAVE)
         m_save->kill();
     #endif
-    
-    float safelegpositions[] = {0, -0.85, -0.15, 2.16, 0, -1.22};
-    float safelarmpositions[] = {0, 1.41, -1.1, -0.65};
-    float saferarmpositions[] = {0, 1.41, 1.1, 0.65};
+
+// NAO positions
+//    float safelegpositions[] = {0, -0.85, -0.15, 2.16, 0, -1.22};
+//    float safelarmpositions[] = {0, 1.41, -1.1, -0.65};
+//    float saferarmpositions[] = {0, 1.41, 1.1, 0.65};
+
+// DARWIN positions
+    float safelegpositions[] = {0.f, -0.9, 0.f, 2.2f, 0, -1.2};
+    float safelarmpositions[] = {0.2, 1.5, 0.f};
+    float saferarmpositions[] = {-0.2, 1.5, 0.f};
+
     vector<float> legpositions(safelegpositions, safelegpositions + sizeof(safelegpositions)/sizeof(*safelegpositions));
     vector<float> larmpositions(safelarmpositions, safelarmpositions + sizeof(safelarmpositions)/sizeof(*safelarmpositions));
     vector<float> rarmpositions(saferarmpositions, saferarmpositions + sizeof(saferarmpositions)/sizeof(*saferarmpositions));
