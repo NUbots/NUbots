@@ -78,14 +78,14 @@ protected:
         
         
         vector<float> speed;
-        if (m_team_info->getPlayerNumber() == 1 and (distance < 30. or m_close_approach and distance < 190.)
+        /*if (m_team_info->getPlayerNumber() == 1 and (distance < 30. or m_close_approach and distance < 120.)
             or m_team_info->getPlayerNumber() != 1 and ( distance < 20. or m_close_approach and distance < 60. )) {
             speed = BehaviourPotentials::goToPointBackwards(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
             m_close_approach = true;
-        } else {
+        } else {*/
             speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
             m_close_approach = false;
-        }
+        //}
         //vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
         
