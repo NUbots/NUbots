@@ -60,13 +60,18 @@ public:
         Self self = Blackboard->Objects->self;
         vector<float> result(3,0);
         
-        //if (fabs(heading) > 0.4 or (fabs(heading) > m_HYSTERESIS and m_previous_turning)) { //turn with hysteresis
+        
+    
+        
+        
+        
+        if (fabs(bearing) > 0.4 or (fabs(bearing) > m_HYSTERESIS and m_previous_turning)) { //turn with hysteresis
             m_previous_turning = true;
-            if (heading > 0. and heading < 2.6) {
-                result[2] = heading*0.5;
+            if (bearing > 0. and bearing < 2.6) {
+                result[2] = bearing*1.0;
                 m_turning_left = true;
-            } else if (heading <= 0. and heading > -2.6) {
-                result[2] = heading*0.5;
+            } else if (bearing <= 0. and bearing > -2.6) {
+                result[2] = bearing*0.8;
                 m_turning_left = false;
             } else if (distance < stoppeddistance) {
                 result[2] = heading*0.5;
@@ -76,19 +81,21 @@ public:
                 result[2] = -1.f;
             }
             result[0] = -0.01f;
-        //} else { //run forward
+        } else { //run forward
             m_previous_turning = false;
             if (distance > stoppingdistance) {
-                result[0] = -0.5;
+                result[0] = 1.0;
             } else if (distance > stoppingdistance/2.f) {
-                result[0] = -0.5;
+                result[0] = 0.7;
             } else if (distance > stoppeddistance) {
-                result[0] = -0.25;
-            } // else {
-            //    result[2] = heading*0.5;
-            //}
-            result[1] = bearing;
-        //}
+                result[0] = 0.25;
+            } else {
+                result[2] = heading*0.5;
+            }
+            /*if (distance < stoppingdistance) {
+                result[1] = bearing;
+                }*/
+        }
         
         //cout << result[0] << ", " << result[1] << ", " << result[2] << endl;
         //cout << distance << ", " << bearing << ", " << heading << endl;
@@ -150,7 +157,7 @@ public:
      */
     static vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 4.f, float stoppingdistance = 50, float turningdistance = 70)
     {
-        static const float m_HYSTERESIS = 0.15;      // the fraction of hysteresis in the turning point toward the desired heading
+        static const float m_HYSTERESIS = 0.1;      // the fraction of hysteresis in the turning point toward the desired heading
         static double m_previous_time = 0;          // the previous time in ms
         static bool m_previous_turning = false;     // the previous turning state; used to implement hysteresis in the decision to turn around.
         static bool m_turning_left = false; 
@@ -158,11 +165,23 @@ public:
         Self self = Blackboard->Objects->self;
         vector<float> result(3,0);
         
-        //XXX: Modify bearing based on objects in the way
+        //Modify bearing based on objects in the way
+        vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
+        float goaldistance = 80.f;
+
+        for(unsigned int i=0; i<objects.size(); i++) { //for each object
+            if (objects[i].isObjectAPossibility(FieldObjects::FO_OBSTACLE) and objects[i].measuredDistance() < goaldistance) { //if we are an obstacle
+                if (objects[i].measuredBearing() > bearing and objects[i].measuredBearing()-objects[i].arc_width < bearing) { //if we are on the right and occluding
+                    bearing = objects[i].measuredBearing()-objects[i].arc_width;
+                } else if (objects[i].measuredBearing() < bearing and objects[i].measuredBearing()+objects[i].arc_width > bearing) { //if we are on the left and occluding
+                    bearing = objects[i].measuredBearing()+objects[i].arc_width;
+                }
+            }
+        }
         
         
         
-        if (fabs(bearing) > 0.4 or (fabs(bearing) > m_HYSTERESIS and m_previous_turning and distance > stoppeddistance*1.5)) { //turn with hysteresis
+        if (fabs(bearing) > 0.3 or (fabs(bearing) > m_HYSTERESIS and m_previous_turning and distance > stoppeddistance*1.5)) { //turn with hysteresis
             m_previous_turning = true;
             if (bearing > 0. and bearing < 2.6) {
                 result[2] = bearing*0.5;
@@ -399,6 +418,19 @@ public:
         static bool turningLeft = false;
         float target_heading = (ball_distance > stoppingdistance) ? angle_to_kick_pos : ball_bearing; //angle_to_aim_pos;
         
+        //Bearing Alteration
+        vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
+
+        for(unsigned int i=0; i<objects.size(); i++) { //for each object
+            if (objects[i].isObjectAPossibility(FieldObjects::FO_OBSTACLE) and objects[i].measuredDistance() > ball_distance) { //if we are an obstacle
+                if (objects[i].measuredBearing() > target_heading and objects[i].measuredBearing()-objects[i].arc_width < target_heading) { //if we are on the right and occluding
+                    target_heading = objects[i].measuredBearing()-objects[i].arc_width;
+                } else if (objects[i].measuredBearing() < target_heading and objects[i].measuredBearing()+objects[i].arc_width > target_heading) { //if we are on the left and occluding
+                    target_heading = objects[i].measuredBearing()+objects[i].arc_width;
+                }
+            }
+        }
+        
         //hysteresis for 180 degrees out of phase
         if (target_heading > 0.f and target_heading < 3.f) {
             turningLeft = true;
@@ -410,7 +442,7 @@ public:
         }
 
         if(turning and 
-            (fabs(target_heading) < 0.25 or fabs(target_heading) < 0.15 and ball_distance > stoppingdistance/2.))
+            (fabs(target_heading) < 0.1 or fabs(target_heading) < 0.3 and ball_distance > stoppingdistance/2.))
         {
             turning = false;
         }
@@ -423,7 +455,7 @@ public:
         {
             speed[0] = 0.03f; // 10% speed
             speed[1] = -mathGeneral::sign(target_heading)*3.1;
-            speed[2] = 0.5*target_heading;
+            speed[2] = 0.6*target_heading;
             if (ball_distance < kickingdistance * 1.5) {
                 speed[2] = 0.3*target_heading;
             }
