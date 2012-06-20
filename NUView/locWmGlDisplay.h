@@ -51,6 +51,7 @@ public slots:
     void setSelfLocalisation(const SelfLocalisation* newSelfLoc)
     {
         m_self_loc = newSelfLoc;
+        update();
     }
 
     void setFieldObjects(const FieldObjects* newFieldObjects)

@@ -4,6 +4,7 @@
 #include "StreamFileReader.h"
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Localisation/Localisation.h"
+#include "Localisation/SelfLocalisation.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUSensorsData/NULocalisationSensors.h"
 #include "Localisation/LocWmFrame.h"
@@ -23,7 +24,7 @@ public:
 
     int openFile(const QString& filename);
     bool closeFile();
-    bool fileGood(){return m_fileGood;};
+    bool fileGood(){return m_fileGood;}
 
     const NUImage* GetImageData();
     const NUSensorsData* GetSensorData();
@@ -59,6 +60,7 @@ protected:
     StreamFileReader<NUSensorsData> sensorReader;
     StreamFileReader<NULocalisationSensors> locsensorReader;
     StreamFileReader<Localisation> locwmReader;
+    StreamFileReader<SelfLocalisation> selflocwmReader;
     StreamFileReader<FieldObjects> objectReader;
     StreamFileReader<LocWmFrame> locmframeReader;
     StreamFileReader<GameInformation> gameinfoReader;

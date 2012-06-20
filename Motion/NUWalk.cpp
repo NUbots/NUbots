@@ -283,7 +283,7 @@ void NUWalk::process(WalkJob* job, bool currentprovider)
     t = job->getTranslationSpeed();
     d = job->getDirection();
     y = job->getRotationSpeed();
-    if (not m_walk_enabled and (t != 0 or y != 0))
+    if (not m_walk_enabled /*and (t != 0 or y != 0)*/)
         enableWalk();
     setTargetSpeed(t, d, y);
 }
@@ -488,7 +488,8 @@ bool NUWalk::inInitialPosition()
  */
 void NUWalk::moveToInitialPosition()
 {
-    static const float movespeed = 0.8;
+//    static const float movespeed = 0.8;
+    static const float movespeed = 0.6;
     static double movecompletiontime = -100;
     if (movecompletiontime >= m_current_time)                // if there is already a move happening let it finish
         return; 
@@ -520,16 +521,19 @@ void NUWalk::moveToInitialPosition()
         // set the move complettion to be the maximum of each limb
         movecompletiontime = m_current_time + std::max(std::max(time_larm, time_rarm), std::max(time_lleg, time_rleg)) + 100;
         
+        const float c_leg_stiffness = 50.f;
+        const float c_arm_stiffness = 20.f;
+
         // give the command to the actionators
-        m_actions->add(NUActionatorsData::LArm, m_current_time + 100, sensor_larm, 40);
-        m_actions->add(NUActionatorsData::RArm, m_current_time + 100, sensor_rarm, 40);
-        m_actions->add(NUActionatorsData::LLeg, m_current_time + 100, sensor_lleg, 75);
-        m_actions->add(NUActionatorsData::RLeg, m_current_time + 100, sensor_rleg, 75);
+        m_actions->add(NUActionatorsData::LArm, m_current_time + 100, sensor_larm, c_arm_stiffness);
+        m_actions->add(NUActionatorsData::RArm, m_current_time + 100, sensor_rarm, c_arm_stiffness);
+        m_actions->add(NUActionatorsData::LLeg, m_current_time + 100, sensor_lleg, c_leg_stiffness);
+        m_actions->add(NUActionatorsData::RLeg, m_current_time + 100, sensor_rleg, c_leg_stiffness);
         
-        m_actions->add(NUActionatorsData::LArm, m_current_time + time_larm, m_initial_larm, 40);
-        m_actions->add(NUActionatorsData::RArm, m_current_time + time_rarm, m_initial_rarm, 40);
-        m_actions->add(NUActionatorsData::LLeg, m_current_time + time_lleg, m_initial_lleg, 75);
-        m_actions->add(NUActionatorsData::RLeg, m_current_time + time_rleg, m_initial_rleg, 75);
+        m_actions->add(NUActionatorsData::LArm, m_current_time + time_larm, m_initial_larm, c_arm_stiffness);
+        m_actions->add(NUActionatorsData::RArm, m_current_time + time_rarm, m_initial_rarm, c_arm_stiffness);
+        m_actions->add(NUActionatorsData::LLeg, m_current_time + time_lleg, m_initial_lleg, c_leg_stiffness);
+        m_actions->add(NUActionatorsData::RLeg, m_current_time + time_rleg, m_initial_rleg, c_leg_stiffness);
     }
 }
 

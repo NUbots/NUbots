@@ -84,12 +84,13 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
     m_dataIsSynced = true;
     m_extension = ".strm";
     m_knownDataTypes.clear();
-    m_knownDataTypes << "image" << "sensor" << "locsensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
+    m_knownDataTypes << "image" << "sensor" << "locsensor" << "selflocwm" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
 
-    // Add the file readers.
+    // Add the file readers. (in the same order!)
     m_fileReaders.push_back(&imageReader);
     m_fileReaders.push_back(&sensorReader);
     m_fileReaders.push_back(&locsensorReader);
+    m_fileReaders.push_back(&selflocwmReader);
     m_fileReaders.push_back(&locwmReader);
     m_fileReaders.push_back(&objectReader);
     m_fileReaders.push_back(&locmframeReader);
@@ -101,7 +102,7 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
 {
     const QString extension = ".strm";
     QStringList knownDataTypes;
-    knownDataTypes << "image" << "sensor" << "locsensor" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
+    knownDataTypes << "image" << "sensor" << "locsensor" << "selflocwm" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
     std::vector<QFileInfo> fileLocations;
 
     qDebug("Searching Path: %s", qPrintable(directory.path()));
@@ -171,7 +172,6 @@ int SplitStreamFileFormatReader::openFile(const QString& filename)
             else success_msg = "Failed!";
 
             qDebug("Opening %s - %s", qPrintable((*fileIt).filePath()), qPrintable(success_msg));
-
             if((totalFrames == 0) || (totalFrames > m_fileReaders[index]->TotalFrames()))
             {
                 totalFrames = m_fileReaders[index]->TotalFrames();
@@ -281,6 +281,11 @@ int SplitStreamFileFormatReader::setFrame(int frameNumber)
         {
             emit LocalisationDataChanged(locwmReader.ReadFrameNumber(frameNumber));
             m_currentFrameIndex = locwmReader.CurrentFrameSequenceNumber();
+        }
+        if(selflocwmReader.IsValid())
+        {
+            emit SelfLocalisationDataChanged(selflocwmReader.ReadFrameNumber(frameNumber));
+            m_currentFrameIndex = selflocwmReader.CurrentFrameSequenceNumber();
         }
         if(objectReader.IsValid())
         {
