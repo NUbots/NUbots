@@ -56,7 +56,7 @@ GameInformation::TeamColour GameInformation::getTeamColour() const
 {
     const TeamInfo* team = getMyTeamInfo();
     if (team)
-        return static_cast<TeamColour>(team->teamColour);
+        return static_cast<TeamColour>(team->goalColour);
     else
         return BlueTeam;
 }
