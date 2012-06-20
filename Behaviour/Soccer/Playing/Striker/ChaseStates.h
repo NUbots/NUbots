@@ -98,8 +98,8 @@ protected:
         
         if (not m_pan_started and not iskicking)
         {   
-            if (ball.estimatedDistance() < 120. and
-                (ball.estimatedDistance() > 30. or ball.estimatedDistance() <= 30. and m_data->CurrentTime - m_pan_end_time > 9000)
+            if (ball.estimatedDistance() < 150. and
+                (ball.estimatedDistance() > 30. or ball.estimatedDistance() <= 30. and m_data->CurrentTime - m_pan_end_time > 5000)
                 and fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000)
             {   
                 //Blackboard->lookForBall = false;
@@ -111,7 +111,7 @@ protected:
                 float timesinceyellowgoalseen = min(yellow_left.TimeSinceLastSeen(), yellow_right.TimeSinceLastSeen());
                 float timesincebluegoalseen = min(blue_left.TimeSinceLastSeen(), blue_right.TimeSinceLastSeen());
                 float timesincegoalseen = min(timesinceyellowgoalseen, timesincebluegoalseen);
-                float hackfactor = ball.estimatedDistance()/20.; //(9.0/35000.0)*timesincegoalseen + 1;
+                float hackfactor = 20.f; //(9.0/35000.0)*timesincegoalseen + 1;
                 
                 float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
                 float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
