@@ -204,7 +204,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Filters/MobileObjectUKF.h \
     ../Localisation/Models/WeightedModel.h \
     ../Tools/Math/depUKF.h \
-    ../Localisation/iotests.h
+    ../Localisation/iotests.h \
+    NUViewConfig/*.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
