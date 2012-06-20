@@ -37,6 +37,8 @@ protected:
 
     Rectangle m_left_kick_area;
     Rectangle m_right_kick_area;
+    Rectangle m_side_left_kick_area;
+    Rectangle m_side_right_kick_area;
 
 };
 

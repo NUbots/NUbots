@@ -53,15 +53,15 @@ ScriptKick::~ScriptKick()
 
 void ScriptKick::loadKickParameters()
 {
-    float xMin = 3.0f;
-    float xMax = 18.0f;
-    
-    //HACK: invert Y so we kick on the right side
-    float yMin = 0.0f;
-    float yMax = 7.0f;
+    float xMin = 5.0f;
+    float xMax = 12.0f;
+    float yMin = 3.2f;
+    float yMax = 9.5f;
 
     m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
     m_left_kick_area = Rectangle(xMin, xMax, yMin, yMax);
+    m_side_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax+3.0f); //HACK: kick box less wide for side kicks
+    m_side_left_kick_area = Rectangle(xMin, xMax, yMin, yMax-3.0f);
     //std::cout << "Parameters loaded." << std::endl;
     return;
 }
@@ -200,7 +200,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         //std::cout << "Angle Too Large: " << theta << std::endl;
         return;
     }*/
-    //cout << "Ballpos: " << ball_x << ", " << ball_y << ", " << theta << endl;
+    cout << theta << endl;
     // Ball is in position for left kick.
     if(m_left_kick_script->isValid() and m_left_kick_area.PointInside(ball_x, ball_y) and theta >= -angle_margin)
     {
@@ -208,12 +208,12 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         m_kicking_leg = leftLeg;
         
         
-        if(theta > angle_margin) {
+        if(theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y)) {
             m_current_script = m_side_left_kick_script;
             #if DEBUG_NUMOTION_VERBOSITY > 3
             debug << "leftside kick: " << theta << endl;
             #endif
-        } else {
+        } else if(theta <= angle_margin) {
             m_current_script = m_left_kick_script;
             #if DEBUG_NUMOTION_VERBOSITY > 3
             debug << "leftfront: " << theta << endl;
@@ -226,12 +226,12 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         m_kicking_leg = rightLeg;
         //m_current_script = m_right_kick_script;
         
-        if(theta < -angle_margin) {
+        if(theta < -angle_margin and m_side_right_kick_area.PointInside(ball_x, ball_y)) {
             m_current_script = m_side_right_kick_script;
             #if DEBUG_NUMOTION_VERBOSITY > 3
             debug << "rightside: " << theta << endl;
             #endif
-        } else {
+        } else if(theta >= angle_margin) {
             m_current_script = m_right_kick_script;
             #if DEBUG_NUMOTION_VERBOSITY > 3
             debug << "rightfront: " << theta << endl;
