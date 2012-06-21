@@ -304,7 +304,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
 
 
     MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
-    if(ball.lost() and ball.TimeLastSeen() > 2000)
+    if(ball.lost() and ball.TimeLastSeen() > 3000)
     {
         std::vector<TeamPacket::SharedBall> shared_balls = FindNewSharedBalls(teamInfo->getSharedBalls());
         sharedBallUpdate(shared_balls);
@@ -589,11 +589,29 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     float ballDistance = sqrt(relBallX*relBallX + relBallY*relBallY);
     float ballHeading = atan2(relBallY, relBallX);
 
+    // Calculate the rotation matrix for the ball covariance.
+    Matrix rotMatrix(2,2,false);
+    rotMatrix[0][0] = hcos;
+    rotMatrix[0][1] = hsin;
+    rotMatrix[1][0] = -hsin;
+    rotMatrix[1][1] = hcos;
+
+    // Retrieve the robots positional variance.
+    Matrix selfPositionVariance(2,2,false);
+    selfPositionVariance[0][0] = model->covariance(0,0);
+    selfPositionVariance[0][1] = model->covariance(0,1);
+    selfPositionVariance[1][0] = model->covariance(1,0);
+    selfPositionVariance[1][1] = model->covariance(1,1);
+
+    // calculate the field variance of the ball R^-1 * Sigma * R + SelfVariance
+    // We are assuming that the variances are independant.
+    Matrix fieldBallVariance = InverseMatrix(rotMatrix) * m_ball_model->covariance() * rotMatrix + selfPositionVariance;
+
     // Write the results to the ball object.
     ball.updateObjectLocation(ballFieldLocationX, ballFieldLocationY, ballFieldSdX, ballFieldSdY);
     ball.updateObjectVelocities(ballFieldVelocityX,ballFieldVelocityY,ballFieldVelocitySdX, ballFieldVelocitySdY);
     ball.updateEstimatedRelativeVariables(ballDistance, ballHeading, 0.0f);
-    ball.updateSharedCovariance(m_ball_model->covariance());
+    ball.updateSharedCovariance(fieldBallVariance);
 
     float lost_ball_sd = 150.0f;
     float max_sd = 2 * std::max(relBallSdX, relBallSdY);
