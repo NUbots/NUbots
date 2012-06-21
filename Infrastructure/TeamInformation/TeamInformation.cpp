@@ -65,8 +65,7 @@ bool TeamInformation::amIClosestToBall()
         MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (not m_received_packets[i].empty())
         { //check if I'm clsoest to the ball *I can see*
-            if ((m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < m_TIMEOUT) and (m_packet.TimeToBall > m_received_packets[i].back().TimeToBall)
-                and fabs(m_received_packets[i].back().Ball.X - ball.X())+fabs(m_received_packets[i].back().Ball.Y - ball.Y()) < 100)
+            if ((m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < m_TIMEOUT) and (m_packet.TimeToBall > m_received_packets[i].back().TimeToBall))
                 return false;
         }
     }
