@@ -13,6 +13,7 @@ ScriptKick::ScriptKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* act
     m_side_right_kick_script = new MotionScript("SideKickRight");
     m_current_script = NULL;
     m_script_start_time = -1;
+    m_kick_enable_time = 0;
     loadKickParameters();
 }
 
@@ -84,6 +85,9 @@ bool ScriptKick::isActive()
     //double check the weird conditions
     if (m_kick_enabled and m_current_script == NULL)
         kill();
+
+    if(m_data->CurrentTime - m_kick_enable_time  > 10000)
+        stop();
     
     return m_kick_enabled;
     
@@ -275,6 +279,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         m_kick_enabled = true;
         setArmEnabled(true, true);
         setHeadEnabled(true);
+        m_kick_enable_time = m_data->CurrentTime;
         //std::cout << "Starting kick: " << toString(m_kicking_leg) << std::endl;
     }
     return;

@@ -161,7 +161,7 @@ float TeamInformation::getTimeToBall()
         return time;
     else if (m_player_number == 1 and balldistance > 150)            // goal keeper is a special case, don't chase balls too far away
         return time;
-    else if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 5000)
+    else if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost())
     {   // if neither the ball or self are lost or if we can see the ball then we can chase.
         vector<float> walkspeed, maxspeed;
         bool walk_speed_good = m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed);
