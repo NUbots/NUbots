@@ -13,6 +13,7 @@ ScriptKick::ScriptKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* act
     m_side_right_kick_script = new MotionScript("SideKickRight");
     m_current_script = NULL;
     m_script_start_time = -1;
+    m_kick_enable_time = 0;
     loadKickParameters();
 }
 
@@ -55,13 +56,13 @@ ScriptKick::~ScriptKick()
 void ScriptKick::loadKickParameters()
 {
     float xMin = 5.0f;
-    float xMax = 12.0f;
-    //float xMax = 10.0f;
+    //float xMax = 12.0f;
+    float xMax = 11.0f;
     float yMin = 3.2f;
     float yMax = 9.5f;
 
     m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
-    m_left_kick_area = Rectangle(xMin, xMax, yMin+3.0f, yMax+3.0f); //HACK: move right kick box three cm to right
+    m_left_kick_area = Rectangle(xMin, xMax, yMin, yMax); //HACK: move right kick box three cm to right
     m_side_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax+3.0f); //HACK: kick box less wide for side kicks
     m_side_left_kick_area = Rectangle(xMin, xMax, yMin, yMax-3.0f);
     //std::cout << "Parameters loaded." << std::endl;
@@ -84,6 +85,9 @@ bool ScriptKick::isActive()
     //double check the weird conditions
     if (m_kick_enabled and m_current_script == NULL)
         kill();
+
+    if(m_data->CurrentTime - m_kick_enable_time  > 10000)
+        stop();
     
     return m_kick_enabled;
     
@@ -275,6 +279,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         m_kick_enabled = true;
         setArmEnabled(true, true);
         setHeadEnabled(true);
+        m_kick_enable_time = m_data->CurrentTime;
         //std::cout << "Starting kick: " << toString(m_kicking_leg) << std::endl;
     }
     return;
