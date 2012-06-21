@@ -210,50 +210,57 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
 
     double theta = atan2(target_y - ball_y, target_x - ball_x);
 
-    float angle_margin = mathGeneral::PI / 4.0f;
+    //float angle_margin = mathGeneral::PI / 4.0f; //triggers sidekick too often with -45 deg to 45 deg front kick zone
+
+    float angle_margin = mathGeneral::PI / 8.0f + mathGeneral::PI / 4.0f; //trigger front kick from -67.5 deg to 67.5 deg
 
     /*if(fabs(theta) > angle_margin)
     {
         //std::cout << "Angle Too Large: " << theta << std::endl;
         return;
     }*/
-    cout << theta << endl;
+    //cout << theta << endl; //angle for debugging kick boxes / kick triggering
     // Ball is in position for left kick.
-    if(m_left_kick_script->isValid() and m_left_kick_area.PointInside(ball_x, ball_y) and theta >= -angle_margin)
-    {
-        kick_begin = true;
-        m_kicking_leg = leftLeg;
-        
-        
-        if(theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y)) {
-            m_current_script = m_side_left_kick_script;
-            #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "leftside kick: " << theta << endl;
-            #endif
-        } else if(theta <= angle_margin) {
-            m_current_script = m_left_kick_script;
-            #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "leftfront: " << theta << endl;
-            #endif
-        }
-    }
-    else if(m_right_kick_script->isValid() and m_right_kick_area.PointInside(ball_x, ball_y) and theta <= angle_margin)
+
+    if(theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y) and
+       m_side_left_kick_script->isValid())
     {
         kick_begin = true;
         m_kicking_leg = rightLeg;
-        //m_current_script = m_right_kick_script;
-        
-        if(theta < -angle_margin and m_side_right_kick_area.PointInside(ball_x, ball_y)) {
-            m_current_script = m_side_right_kick_script;
-            #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "rightside: " << theta << endl;
-            #endif
-        } else if(theta >= angle_margin) {
-            m_current_script = m_right_kick_script;
-            #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "rightfront: " << theta << endl;
-            #endif
-        }
+        m_current_script = m_side_left_kick_script;
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "leftside kick: " << theta << endl;
+        #endif
+    }
+    else if(theta <= angle_margin and theta >= -angle_margin and
+            m_left_kick_area.PointInside(ball_x, ball_y) and m_left_kick_script->isValid())
+    {
+        kick_begin = true;
+        m_kicking_leg = leftLeg;
+        m_current_script = m_left_kick_script;
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "leftfront: " << theta << endl;
+        #endif
+    }
+    else if(theta < -angle_margin and m_side_right_kick_area.PointInside(ball_x, ball_y) and
+            m_side_right_kick_script->isValid())
+    {
+        kick_begin = true;
+        m_kicking_leg = leftLeg;
+        m_current_script = m_side_right_kick_script;
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "rightside: " << theta << endl;
+        #endif
+    }
+    else if(theta >= -angle_margin and theta <= angle_margin
+            and m_right_kick_area.PointInside(ball_x, ball_y) and m_right_kick_script->isValid())
+    {
+        kick_begin = true;
+        m_kicking_leg = rightLeg;
+        m_current_script = m_right_kick_script;
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "rightfront: " << theta << endl;
+        #endif
     }
     else
     {
