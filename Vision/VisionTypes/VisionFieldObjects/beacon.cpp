@@ -165,6 +165,11 @@ bool Beacon::check() const
     return true;
 }
 
+void Beacon::setUnknown()
+{
+    m_id = UnknownBeacon;
+}
+
 bool Beacon::calculatePositions()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();

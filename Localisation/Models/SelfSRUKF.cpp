@@ -203,7 +203,7 @@ Performs a simultaneous update for N landmarks.
 SelfModel::updateResult SelfSRUKF::MultipleObjectUpdate(const Matrix& locations, const Matrix& measurements, const Matrix& R_Measurement)
 {
     unsigned int numObs = measurements.getm();
-    const float c_threshold2 = 20.0f;
+    const float c_threshold2 = 15.0f;
     Matrix R_obj_rel(R_Measurement);        // R = S^2
     Matrix S_obj_rel(cholesky(R_obj_rel)); // R = S^2
 
@@ -243,7 +243,8 @@ SelfModel::updateResult SelfSRUKF::MultipleObjectUpdate(const Matrix& locations,
     Py = (My - yBar * M1) * (My - yBar * M1).transp();
     Pxy = (Mx - m_mean * M1) * (My - yBar * M1).transp();
 
-    Matrix invPyRObj = InverseMatrix(Py + R_obj_rel);
+    Matrix PyRObj = Py + R_obj_rel;
+    Matrix invPyRObj = InverseMatrix(PyRObj);
 
     Matrix K = Pxy * invPyRObj; // K = Kalman filter gain.
 

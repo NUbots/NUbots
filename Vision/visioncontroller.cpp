@@ -11,6 +11,9 @@
 #include "Vision/Modules/scanlines.h"
 #include "Vision/Modules/goaldetection.h"
 #include "Vision/Modules/balldetection.h"
+//robocup hacks
+#include "Vision/Modules/robocuphacks.h"
+
 
 VisionController* VisionController::instance = 0;
 
@@ -90,6 +93,10 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     #if VISION_CONTROLLER_VERBOSITY > 1
         debug << "VisionController::runFrame() - Publish Results" << endl;
     #endif
+
+    RobocupHacks::beaconGoalHack();
+    RobocupHacks::ballGoalHack();
+
     //force blackboard to publish results through wrapper
     m_blackboard->publish();
     //publish debug information as well

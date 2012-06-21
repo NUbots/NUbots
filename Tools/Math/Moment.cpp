@@ -122,7 +122,13 @@ float Moment::variance(unsigned int stateNumber) const
 void Moment::setMean(const Matrix& newMean)
 {
     assert(((unsigned int)newMean.getm() == m_numStates) && (newMean.getn() == 1));
-    m_mean = newMean;
+
+    bool isCorrectSize = ((unsigned int)newMean.getm() == m_numStates) && (newMean.getn() == 1);
+    assert(isCorrectSize and newMean.isValid());
+    if(isCorrectSize and newMean.isValid())
+    {
+        m_mean = newMean;
+    }
     return;
 }
 
@@ -134,8 +140,12 @@ void Moment::setMean(const Matrix& newMean)
  */
 void Moment::setCovariance(const Matrix& newCovariance)
 {
-    assert((newCovariance.getm() == m_numStates) && (newCovariance.getn() == m_numStates));
-    m_covariance = newCovariance;
+    bool isCorrectSize = (newCovariance.getm() == m_numStates) && (newCovariance.getn() == m_numStates);
+    assert(isCorrectSize and newCovariance.isValid());
+    if(isCorrectSize and newCovariance.isValid())
+    {
+        m_covariance = newCovariance;
+    }
     return;
 }
 

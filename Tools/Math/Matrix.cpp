@@ -286,8 +286,10 @@ std::vector<float> Matrix::asVector()
     return result;
 }
 
-bool Matrix::isValid()
+bool Matrix::isValid() const
 {
+    if((*this).getm() == 0 or (*this).getn() == 0)
+        return false;
     for(int i=0;i<(*this).getm();i++)
     {
         for(int j=0;j<(*this).getn();j++)
@@ -472,7 +474,9 @@ Matrix HT(Matrix A)
 
 double determinant(const Matrix& mat)
 {
-    if(mat.getm()==2)
+    if(mat.getm()==1)
+        return mat[0][0];
+    else if(mat.getm()==2)
         return (mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0]);                                              
     
     double det = 0;
@@ -529,7 +533,7 @@ Matrix CofactorMatrix(const Matrix& mat)
                 {
                     if(m==j)
                         n++;
-                    (*minMat)[k][m]=mat[l][n];   
+                    (*minMat)[k][m]=mat[l][n];
                 }
             }
             if((i+j)%2==0)
@@ -545,7 +549,16 @@ Matrix CofactorMatrix(const Matrix& mat)
 // using adjoint method seen here: http://www.mathwords.com/i/inverse_of_a_matrix.htm
 Matrix InverseMatrix(const Matrix& mat)
 {
-      return (CofactorMatrix(mat)).transp()/determinant(mat);
+    if(mat.getm() == 1)
+    {
+        Matrix result(1,1,false);
+        result[0][0] = 1.f / mat[0][0];
+        return result;
+    }
+    if(mat.getm() == 2)
+        return Invert22(mat);
+    else
+        return (CofactorMatrix(mat)).transp()/determinant(mat);
 }
 
 ostream& operator <<(ostream& out, const Matrix &mat)

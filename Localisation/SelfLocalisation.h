@@ -53,6 +53,7 @@ class SelfLocalisation: public TimestampedData
         int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
         int landmarkUpdate(StationaryObject &landmark);
         bool ballUpdate(const MobileObject& ball);
+        bool sharedBallUpdate(const std::vector<TeamPacket::SharedBall>& sharedBalls);
 
         // Ambiguous object updates.
         // Main function.
@@ -202,6 +203,7 @@ class SelfLocalisation: public TimestampedData
         LocalisationSettings m_settings;
 
         std::vector<AmbiguousObject> m_pastAmbiguous;
+        std::vector<TeamPacket::SharedBall> m_prevSharedBalls;
 
         // Outlier tuning Constants -- Values assigned in SelfLocalisation.cpp
         static const float c_LargeAngleSD;

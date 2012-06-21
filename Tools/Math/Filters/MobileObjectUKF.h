@@ -43,8 +43,10 @@ public:
 
     MobileObjectUKF();
     ~MobileObjectUKF();
+    bool directUpdate(const Matrix& position, const Matrix& covariance);
 protected:
     Matrix processEquation(const Matrix& sigma_point, double deltaT, const Matrix& measurement);
     Matrix measurementEquation(const Matrix& sigma_point, const Matrix& measurementArgs);
+
     float m_velocity_decay; //! The velocity decay rate, should be <1 and >0. Velocity becomes m_velocity_decay*current velocity.
 };

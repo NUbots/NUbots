@@ -56,6 +56,7 @@ void ScriptKick::loadKickParameters()
 {
     float xMin = 5.0f;
     float xMax = 12.0f;
+    //float xMax = 10.0f;
     float yMin = 3.2f;
     float yMax = 9.5f;
 
