@@ -168,9 +168,9 @@ protected:
         {   // decided which direction to spin based on the estimated bearing when we enter this state or the current walk speed if we are still walking
             m_time_in_state = 0;
             vector<float> walkspeed;
-            if (m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed) and walkspeed[2] != 0)        
-                m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
-            else
+            //if (m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed) and walkspeed[2] != 0)        
+            //    m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
+            //else
                 m_spin_speed = mathGeneral::sign(ball.estimatedBearing())*m_ROTATIONAL_SPEED;
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 1, 2000, -1.7, 1.7));
         }
@@ -224,13 +224,13 @@ protected:
     
         if (m_parent->stateChanged())
         {   // decided which location on the field to go to
-            if (m_game_info->getPlayerNumber() == 1)
+            if (m_game_info->getPlayerNumber() == 2)
             {   // goal keeper goes back to his goal
                 m_position[0] = owngoal.X() - 25*mathGeneral::sign(owngoal.X());
                 m_position[1] = 0;
                 m_position[2] = 0;
             }
-            else if (m_game_info->getPlayerNumber() == 2)
+            else if (m_game_info->getPlayerNumber() == 3)
             {   // player two goes to centre circle
                 m_position[0] = 0;
                 m_position[1] = 0;
