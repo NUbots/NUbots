@@ -89,20 +89,28 @@ SoccerProvider::~SoccerProvider()
  */
 void SoccerProvider::doBehaviourCommons()
 {
-    // In every state the left foot led must display the team colour
-    if (m_game_info->getTeamColour() == GameInformation::BlueTeam)
+    if(m_state != m_playing)
     {
-        vector<float> blue(3,1);
-        blue[0] = 0;
-        m_actions->add(NUActionatorsData::LFootLed, m_current_time, blue);
+        // In every state the left foot led must display the team colour
+        if (m_game_info->getTeamColour() == GameInformation::BlueTeam)
+        {
+            vector<float> blue(3,1);
+            blue[0] = 0;
+            m_actions->add(NUActionatorsData::LFootLed, m_current_time, blue);
+        }
+        else
+        {
+            vector<float> pink(3,1);
+            pink[1] = 0;
+            m_actions->add(NUActionatorsData::LFootLed, m_current_time, pink);
+        }
     }
     else
     {
-        vector<float> pink(3,1);
-        pink[1] = 0;
-        m_actions->add(NUActionatorsData::LFootLed, m_current_time, pink);
+         m_actions->add(NUActionatorsData::LFootLed, m_current_time, m_led_off);
     }
-    
+
+    /*
     // set the right eyes to indicate lost states
     bool balllost = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost();
     bool selflost = m_field_objects->self.lost();
@@ -114,7 +122,7 @@ void SoccerProvider::doBehaviourCommons()
         Platform->add(NUPlatform::Led6, m_actions->CurrentTime, m_led_green);
     else
         Platform->add(NUPlatform::Led6, m_actions->CurrentTime, m_led_off);
-    
+
     // set the right eyes to indicate the ball visibility
     if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         Platform->add(NUPlatform::Led4, m_actions->CurrentTime, m_led_orange);
@@ -149,6 +157,7 @@ void SoccerProvider::doBehaviourCommons()
         Platform->add(NUPlatform::Led7, m_actions->CurrentTime, m_led_blue);
     else
         Platform->add(NUPlatform::Led7, m_actions->CurrentTime, m_led_off);
+        */
 }
 
 /*! @brief Checks for state transitions that are common to all states in this behaviour provider

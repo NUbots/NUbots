@@ -556,6 +556,19 @@ public:
                 x += approachOffset-dist_hysteresis;
             }*/
             
+            //change bearing to align to ball
+            vector<float> goalPosition(3,0);
+            float bearingLineUpSide = 0.3;
+            float bearingLineUpFront = 0.45;
+            goalPosition = self.CalculateDifferenceFromGoal(getOpponentGoal(Blackboard->Objects, Blackboard->GameInfo));
+            if (goalPosition[1] > mathGeneral::PI/4.f) { //to our left > 45 degrees
+                bearing -= bearingLineUpSide*(kickingdistance-2.)/distance;
+            } else if (goalPosition[1] < -mathGeneral::PI/4.f) { //to our right > 45 degrees
+                bearing += bearingLineUpSide*(kickingdistance-2.)/distance;
+            } else {
+                bearing += mathGeneral::sign(bearing)*bearingLineUpFront*(kickingdistance-2.)/distance;
+            }
+            
 
             distance = sqrt(x*x + y*y);
             bearing = atan2(y,x);
