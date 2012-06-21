@@ -134,6 +134,14 @@ bool Ball::check() const
         #endif
         return false;
     }
+
+    //size check - large balls thrown out
+    if(m_radius > 72) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Ball::check - Ball thrown out: too large. Max size is " << 72 << "pix (max ball 60 + 20% leeway)" << endl;
+        #endif
+        return false;
+    }
     
     //all checks passed, keep ball
     return true;
