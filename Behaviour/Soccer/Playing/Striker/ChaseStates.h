@@ -111,7 +111,7 @@ protected:
                 float timesinceyellowgoalseen = min(yellow_left.TimeSinceLastSeen(), yellow_right.TimeSinceLastSeen());
                 float timesincebluegoalseen = min(blue_left.TimeSinceLastSeen(), blue_right.TimeSinceLastSeen());
                 float timesincegoalseen = min(timesinceyellowgoalseen, timesincebluegoalseen);
-                float hackfactor = 20.f; //(9.0/35000.0)*timesincegoalseen + 1;
+                float hackfactor = ball.estimatedDistance()/20.; //(9.0/35000.0)*timesincegoalseen + 1;
                 
                 float bearing_to_yellow = self.CalculateBearingToStationaryObject(yellow_left);
                 float bearing_to_blue = self.CalculateBearingToStationaryObject(blue_right);
