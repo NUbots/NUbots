@@ -51,6 +51,13 @@ NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
 
     m_currentTimestamp = 0;
     m_previousTimestamp = 0;
+
+    m_kick_ready = false;
+    m_kick_enabled = false;
+    m_head_enabled = false;
+    m_larm_enabled = false;
+    m_rarm_enabled = false;
+
     m_walk = walk;
     loadKickParameters();
 }
