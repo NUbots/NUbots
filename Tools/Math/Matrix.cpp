@@ -472,7 +472,9 @@ Matrix HT(Matrix A)
 
 double determinant(const Matrix& mat)
 {
-    if(mat.getm()==2)
+    if(mat.getm()==1)
+        return mat[0][0];
+    else if(mat.getm()==2)
         return (mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0]);                                              
     
     double det = 0;
@@ -545,6 +547,12 @@ Matrix CofactorMatrix(const Matrix& mat)
 // using adjoint method seen here: http://www.mathwords.com/i/inverse_of_a_matrix.htm
 Matrix InverseMatrix(const Matrix& mat)
 {
+    if(mat.getm() == 1)
+    {
+        Matrix result(1,1,false);
+        result[0][0] = 1.f / mat[0][0];
+        return result;
+    }
     if(mat.getm() == 2)
         return Invert22(mat);
     else
