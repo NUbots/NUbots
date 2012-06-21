@@ -375,7 +375,7 @@ public:
         float my_y = self.wmY();
         float my_heading = self.Heading();
 
-        float fwd_pos_distance_metric = fabs(my_x - fwd_x) + fabs(my_y - fwd_y)*0.95;
+        float fwd_pos_distance_metric = fabs(my_x - fwd_x) + fabs(my_y - fwd_y)-2.;
         float left_pos_distance_metric = fabs(my_x - left_side_x) + fabs(my_y - left_side_y);
         float right_pos_distance_metric = fabs(my_x - right_side_y) + fabs(my_y - right_side_y);
 
