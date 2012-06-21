@@ -251,7 +251,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         debug << "rightside: " << theta << endl;
         #endif
     }
-    else if(theta >= -angle_margin and theta <= -angle_margin
+    else if(theta >= -angle_margin and theta <= angle_margin
             and m_right_kick_area.PointInside(ball_x, ball_y) and m_right_kick_script->isValid())
     {
         kick_begin = true;
