@@ -94,6 +94,11 @@ public:
     bool isBodyPitchValid() const;
     float getBodyPitch() const;
 
+    vector<Ball>& getBalls();
+    vector<Goal>& getGoals();
+    vector<Beacon>& getBeacons();
+    vector<Obstacle>& getObstacles();
+
     const vector<PointType>& getObjectPoints() const;
 
     const LookUpTable& getLUT() const;

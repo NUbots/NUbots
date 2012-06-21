@@ -386,6 +386,7 @@ HEADERS += \
     ../Vision/visionblackboard.h \
     ../Vision/visioncontroller.h \
     ../Vision/visionconstants.h \
+    ../Vision/Modules/robocuphacks.h \
 
 SOURCES += \
     ../Vision/VisionTypes/coloursegment.cpp \
@@ -413,6 +414,7 @@ SOURCES += \
     ../Vision/visionconstants.cpp \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.cpp \
     ../Vision/VisionWrapper/datawrappernuview.cpp \
+    ../Vision/Modules/robocuphacks.cpp \
 
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
 FORMS += \

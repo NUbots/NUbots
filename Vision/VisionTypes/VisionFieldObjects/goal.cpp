@@ -157,6 +157,20 @@ bool Goal::check() const
 {
     //various throwouts here
 
+    if(abs(m_corners.getBottomLeft().y - m_corners.getTopRight().y) <= 25) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
+        #endif
+        return false;
+    }
+
+    if(abs(m_corners.getBottomLeft().x - m_corners.getTopRight().x) <= 5) {
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+            debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
+        #endif
+        return false;
+    }
+
     if(!distance_valid) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: distance invalid" << endl;

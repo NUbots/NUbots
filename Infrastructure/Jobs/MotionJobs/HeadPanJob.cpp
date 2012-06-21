@@ -111,7 +111,7 @@ HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects, float hackfactor
     m_pan_type = BallAndLocalisation;
     m_use_default = false;
     
-    m_x_min = 9000;
+    m_x_min = 90;
     m_x_max = 9000;
     m_yaw_min = 3.141;
     m_yaw_max = -3.141;

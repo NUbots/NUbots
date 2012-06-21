@@ -314,6 +314,26 @@ float VisionBlackboard::getBodyPitch() const
     return body_pitch;
 }
 
+vector<Ball>& VisionBlackboard::getBalls()
+{
+    return m_balls;
+}
+
+vector<Goal>& VisionBlackboard::getGoals()
+{
+    return m_goals;
+}
+
+vector<Beacon>& VisionBlackboard::getBeacons()
+{
+    return m_beacons;
+}
+
+vector<Obstacle>& VisionBlackboard::getObstacles()
+{
+    return m_obstacles;
+}
+
 /**
 *   @brief returns the set of heights for horizontal scan lines.
 *   @return horizontal_scanlines A vector of unsigned ints defining horizontal scanlines.

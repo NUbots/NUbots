@@ -34,7 +34,8 @@ void ScriptKick::stop()
     #if DEBUG_NUMOTION_VERBOSITY > 3
     debug << "Kick stop called. Finishing Kick." << endl;
     #endif
-    if(m_script_start_time == -1 || m_current_script == NULL) {
+    if(m_script_start_time == -1 or m_current_script == NULL or
+        m_data->CurrentTime > m_current_script->timeFinished()) {
         kill();
     }
     //stopHead();
@@ -55,6 +56,7 @@ void ScriptKick::loadKickParameters()
 {
     float xMin = 5.0f;
     float xMax = 12.0f;
+    //float xMax = 10.0f;
     float yMin = 3.2f;
     float yMax = 9.5f;
 
@@ -69,7 +71,22 @@ void ScriptKick::loadKickParameters()
 
 bool ScriptKick::isActive()
 {
+    /*std::cout << "m_kick_ready: " << m_kick_ready << std::endl;
+    std::cout << "m_kick_enabled: " << m_kick_enabled << std::endl;
+    std::cout << "m_kicking_leg: " << m_kicking_leg << std::endl;
+    std::cout << "m_current_script: " << m_current_script << std::endl;
+    std::cout << "m_script_start_time: " << m_script_start_time << std::endl;
+    if(m_current_script != NULL)
+    {
+        std::cout << "m_data->CurrentTime: " << m_data->CurrentTime << std::endl;
+        std::cout << "m_current_script->timeFinished(): " << m_current_script->timeFinished() << std::endl;    
+    }*/
+    //double check the weird conditions
+    if (m_kick_enabled and m_current_script == NULL)
+        kill();
+    
     return m_kick_enabled;
+    
 }
 
 bool ScriptKick::isUsingHead()
@@ -88,7 +105,7 @@ bool ScriptKick::isUsingArms()
 {
     if(m_current_script != NULL)
     {
-        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLArm(),m_current_script->timeFinishedWithRArm());
+        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLArm(),m_current_script->timeFinishedWithRArm()+100);
     }
     else
     {
@@ -101,7 +118,7 @@ bool ScriptKick::isUsingLegs()
 {
     if(m_current_script != NULL)
     {
-        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLLeg(),m_current_script->timeFinishedWithRLeg());
+        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLLeg(),m_current_script->timeFinishedWithRLeg()+100);
     }
     else
     {
@@ -147,7 +164,7 @@ bool ScriptKick::requiresLegs()
 
 void ScriptKick::doKick()
 {
-
+    //cout << "dokick is called" << endl;
     if(m_current_script and m_kick_enabled and m_kick_ready and (m_script_start_time == -1))    // Check if there is a script ready, that has not been started.
     {
         if(m_walk == NULL or !m_walk->isActive())   // Either we have no walk, or we want it to be inactive.
@@ -193,50 +210,57 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
 
     double theta = atan2(target_y - ball_y, target_x - ball_x);
 
-    float angle_margin = mathGeneral::PI / 4.0f;
+    //float angle_margin = mathGeneral::PI / 4.0f; //triggers sidekick too often with -45 deg to 45 deg front kick zone
+
+    float angle_margin = mathGeneral::PI / 8.0f + mathGeneral::PI / 4.0f; //trigger front kick from -67.5 deg to 67.5 deg
 
     /*if(fabs(theta) > angle_margin)
     {
         //std::cout << "Angle Too Large: " << theta << std::endl;
         return;
     }*/
-    cout << theta << endl;
+    //cout << theta << endl; //angle for debugging kick boxes / kick triggering
     // Ball is in position for left kick.
-    if(m_left_kick_script->isValid() and m_left_kick_area.PointInside(ball_x, ball_y) and theta >= -angle_margin)
-    {
-        kick_begin = true;
-        m_kicking_leg = leftLeg;
-        
-        
-        if(theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y)) {
-            m_current_script = m_side_left_kick_script;
-            #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "leftside kick: " << theta << endl;
-            #endif
-        } else if(theta <= angle_margin) {
-            m_current_script = m_left_kick_script;
-            #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "leftfront: " << theta << endl;
-            #endif
-        }
-    }
-    else if(m_right_kick_script->isValid() and m_right_kick_area.PointInside(ball_x, ball_y) and theta <= angle_margin)
+
+    if(theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y) and
+       m_side_left_kick_script->isValid())
     {
         kick_begin = true;
         m_kicking_leg = rightLeg;
-        //m_current_script = m_right_kick_script;
-        
-        if(theta < -angle_margin and m_side_right_kick_area.PointInside(ball_x, ball_y)) {
-            m_current_script = m_side_right_kick_script;
-            #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "rightside: " << theta << endl;
-            #endif
-        } else if(theta >= angle_margin) {
-            m_current_script = m_right_kick_script;
-            #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "rightfront: " << theta << endl;
-            #endif
-        }
+        m_current_script = m_side_left_kick_script;
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "leftside kick: " << theta << endl;
+        #endif
+    }
+    else if(theta <= angle_margin and theta >= -angle_margin and
+            m_left_kick_area.PointInside(ball_x, ball_y) and m_left_kick_script->isValid())
+    {
+        kick_begin = true;
+        m_kicking_leg = leftLeg;
+        m_current_script = m_left_kick_script;
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "leftfront: " << theta << endl;
+        #endif
+    }
+    else if(theta < -angle_margin and m_side_right_kick_area.PointInside(ball_x, ball_y) and
+            m_side_right_kick_script->isValid())
+    {
+        kick_begin = true;
+        m_kicking_leg = leftLeg;
+        m_current_script = m_side_right_kick_script;
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "rightside: " << theta << endl;
+        #endif
+    }
+    else if(theta >= -angle_margin and theta <= angle_margin
+            and m_right_kick_area.PointInside(ball_x, ball_y) and m_right_kick_script->isValid())
+    {
+        kick_begin = true;
+        m_kicking_leg = rightLeg;
+        m_current_script = m_right_kick_script;
+        #if DEBUG_NUMOTION_VERBOSITY > 3
+        debug << "rightfront: " << theta << endl;
+        #endif
     }
     else
     {
