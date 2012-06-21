@@ -304,11 +304,13 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
 
 
     MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
-    if(ball.lost() and ball.TimeLastSeen() > 3000)
-    {
-        std::vector<TeamPacket::SharedBall> shared_balls = FindNewSharedBalls(teamInfo->getSharedBalls());
-        sharedBallUpdate(shared_balls);
-    }
+
+    // Shared ball stuff
+//    if(ball.lost() and ball.TimeLastSeen() > 3000)
+//    {
+//        std::vector<TeamPacket::SharedBall> shared_balls = FindNewSharedBalls(teamInfo->getSharedBalls());
+//        sharedBallUpdate(shared_balls);
+//    }
 
     // clip models back on to field.
     clipActiveModelsToField();
