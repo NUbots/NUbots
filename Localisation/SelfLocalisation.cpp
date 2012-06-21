@@ -612,7 +612,11 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     ball.updateObjectLocation(ballFieldLocationX, ballFieldLocationY, ballFieldSdX, ballFieldSdY);
     ball.updateObjectVelocities(ballFieldVelocityX,ballFieldVelocityY,ballFieldVelocitySdX, ballFieldVelocitySdY);
     ball.updateEstimatedRelativeVariables(ballDistance, ballHeading, 0.0f);
-    ball.updateSharedCovariance(fieldBallVariance);
+
+    if(fieldBallVariance.isValid())
+    {
+        ball.updateSharedCovariance(fieldBallVariance);
+    }
 
     float lost_ball_sd = 150.0f;
     float max_sd = 2 * std::max(relBallSdX, relBallSdY);
