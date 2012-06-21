@@ -681,10 +681,8 @@ bool SelfLocalisation::CheckGameState(bool currently_incapacitated, const GameIn
     {   // if we are playing. If previously penalised do a reset. Also reset if fallen over
         if (m_previous_game_state == GameInformation::PenalisedState)
             doPenaltyReset();
-        /*
         else if (m_previously_incapacitated and not currently_incapacitated)
             doFallenReset();
-            */
     }
     
     m_previously_incapacitated = currently_incapacitated;
@@ -940,9 +938,7 @@ void SelfLocalisation::doFallenReset()
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {   // Increase heading uncertainty if fallen
         Matrix temp = (*model_it)->covariance();
-        temp[0][0] += 5;        // Robot x
-        temp[1][1] += 5;        // Robot y
-        temp[2][2] += 0.707;     // Robot heading
+        temp[SelfModel::states_heading][SelfModel::states_heading] += 0.707*0.707;     // Robot heading
         (*model_it)->setCovariance(temp);
     }
     addToBallVariance(50*50, 50*50, 0.f, 0.f);
