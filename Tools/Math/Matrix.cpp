@@ -529,7 +529,7 @@ Matrix CofactorMatrix(const Matrix& mat)
                 {
                     if(m==j)
                         n++;
-                    (*minMat)[k][m]=mat[l][n];   
+                    (*minMat)[k][m]=mat[l][n];
                 }
             }
             if((i+j)%2==0)
@@ -545,7 +545,10 @@ Matrix CofactorMatrix(const Matrix& mat)
 // using adjoint method seen here: http://www.mathwords.com/i/inverse_of_a_matrix.htm
 Matrix InverseMatrix(const Matrix& mat)
 {
-      return (CofactorMatrix(mat)).transp()/determinant(mat);
+    if(mat.getm() == 2)
+        return Invert22(mat);
+    else
+        return (CofactorMatrix(mat)).transp()/determinant(mat);
 }
 
 ostream& operator <<(ostream& out, const Matrix &mat)
