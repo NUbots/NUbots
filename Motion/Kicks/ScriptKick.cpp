@@ -86,7 +86,7 @@ bool ScriptKick::isActive()
     if (m_kick_enabled and m_current_script == NULL)
         kill();
 
-    if(m_data->CurrentTime - m_kick_enable_time  > 10000)
+    if(m_data->CurrentTime - m_kick_enable_time  > 16000)
         stop();
     
     return m_kick_enabled;
