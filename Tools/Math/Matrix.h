@@ -35,7 +35,7 @@ public:
 	
 	void print(); // print values
         std::vector<float> asVector();
-        bool isValid();
+        bool isValid() const;
         bool operator ==(const Matrix& b) const;
         bool operator !=(const Matrix& b) const
         {return (!((*this) == b));}

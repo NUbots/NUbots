@@ -286,8 +286,10 @@ std::vector<float> Matrix::asVector()
     return result;
 }
 
-bool Matrix::isValid()
+bool Matrix::isValid() const
 {
+    if((*this).getm() == 0 or (*this).getn() == 0)
+        return false;
     for(int i=0;i<(*this).getm();i++)
     {
         for(int j=0;j<(*this).getn();j++)
