@@ -36,7 +36,7 @@ BallIsLostState::BallIsLostState(SoccerFSMState* parent) : SoccerFSMState(parent
     m_lost_spin = new BallIsLostSpin(this);
     m_lost_move = new BallIsLostMove(this);
     
-    m_state = m_lost_spin;
+    m_state = m_lost_pan;
 }
 
 BallIsLostState::~BallIsLostState()
@@ -56,7 +56,7 @@ void BallIsLostState::doStateCommons()
 BehaviourState* BallIsLostState::nextStateCommons()
 {   // do state transitions in the ball is lost state machine
     if (m_parent->stateChanged())       // State changed in the playing state machine indicates we have just entered ball is lost
-        return m_lost_spin;
+        return m_lost_pan;
     else
         return m_state;
 }
