@@ -56,13 +56,13 @@ ScriptKick::~ScriptKick()
 void ScriptKick::loadKickParameters()
 {
     float xMin = 5.0f;
-    float xMax = 12.0f;
-    //float xMax = 10.0f;
+    //float xMax = 12.0f;
+    float xMax = 11.0f;
     float yMin = 3.2f;
     float yMax = 9.5f;
 
     m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
-    m_left_kick_area = Rectangle(xMin, xMax, yMin+3.0f, yMax+3.0f); //HACK: move right kick box three cm to right
+    m_left_kick_area = Rectangle(xMin, xMax, yMin, yMax); //HACK: move right kick box three cm to right
     m_side_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax+3.0f); //HACK: kick box less wide for side kicks
     m_side_left_kick_area = Rectangle(xMin, xMax, yMin, yMax-3.0f);
     //std::cout << "Parameters loaded." << std::endl;
