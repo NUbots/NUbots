@@ -82,6 +82,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings&
     //m_models.reserve(c_MAX_MODELS);
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
     m_ball_model = new MobileObjectUKF();
+    m_prevSharedBalls.clear();
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
 
@@ -124,6 +125,8 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
 
     m_ball_model = new MobileObjectUKF();
+    m_prevSharedBalls.clear();
+
     initSingleModel(67.5f, 0, mathGeneral::PI);
 
 
@@ -298,6 +301,16 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
     #endif
     ProcessObjects(fobs, time_increment);
+
+
+    MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
+
+    // Shared ball stuff
+//    if(ball.lost() and ball.TimeLastSeen() > 3000)
+//    {
+//        std::vector<TeamPacket::SharedBall> shared_balls = FindNewSharedBalls(teamInfo->getSharedBalls());
+//        sharedBallUpdate(shared_balls);
+//    }
 
     // clip models back on to field.
     clipActiveModelsToField();
@@ -577,11 +590,29 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     float ballDistance = sqrt(relBallX*relBallX + relBallY*relBallY);
     float ballHeading = atan2(relBallY, relBallX);
 
+    // Calculate the rotation matrix for the ball covariance.
+    Matrix rotMatrix(2,2,false);
+    rotMatrix[0][0] = hcos;
+    rotMatrix[0][1] = hsin;
+    rotMatrix[1][0] = -hsin;
+    rotMatrix[1][1] = hcos;
+
+    // Retrieve the robots positional variance.
+    Matrix selfPositionVariance(2,2,false);
+    selfPositionVariance[0][0] = model->covariance(0,0);
+    selfPositionVariance[0][1] = model->covariance(0,1);
+    selfPositionVariance[1][0] = model->covariance(1,0);
+    selfPositionVariance[1][1] = model->covariance(1,1);
+
+    // calculate the field variance of the ball R^-1 * Sigma * R + SelfVariance
+    // We are assuming that the variances are independant.
+    Matrix fieldBallVariance = InverseMatrix(rotMatrix) * m_ball_model->covariance() * rotMatrix + selfPositionVariance;
+
     // Write the results to the ball object.
     ball.updateObjectLocation(ballFieldLocationX, ballFieldLocationY, ballFieldSdX, ballFieldSdY);
     ball.updateObjectVelocities(ballFieldVelocityX,ballFieldVelocityY,ballFieldVelocitySdX, ballFieldVelocitySdY);
     ball.updateEstimatedRelativeVariables(ballDistance, ballHeading, 0.0f);
-    ball.updateSharedCovariance(m_ball_model->covariance());
+    ball.updateSharedCovariance(fieldBallVariance);
 
     float lost_ball_sd = 150.0f;
     float max_sd = 2 * std::max(relBallSdX, relBallSdY);
@@ -2385,4 +2416,74 @@ Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& ob
         p3 = p3b;
 
     return p3;
+}
+
+bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall>& sharedBalls)
+{
+    std::vector<TeamPacket::SharedBall>::const_iterator their_ball = sharedBalls.begin();
+
+    const SelfModel& best_model = (*getBestModel());
+    float robotx = best_model.mean(SelfModel::states_x);
+    float roboty = best_model.mean(SelfModel::states_y);
+    float robotheading = best_model.mean(SelfModel::states_heading);
+
+    float sinheading = sin(robotheading);
+    float cosheading = cos(robotheading);
+
+    Matrix relativePosition(2,1,false);
+
+    while(their_ball != sharedBalls.end())
+    {
+        const TeamPacket::SharedBall& sharedball = *their_ball;
+
+        // skip ones that are too old
+        if(sharedball.TimeSinceLastSeen > 300.f) continue;
+
+        float fieldx = sharedball.X;
+        float fieldy = sharedball.Y;
+
+        relativePosition[0][0] = (fieldx - robotx) * cosheading + (fieldy - roboty) * sinheading;
+        relativePosition[1][0] = -(fieldx - robotx) * sinheading + (fieldy - roboty) * cosheading;
+
+        Matrix covariance(2,2,false);
+        covariance[0][0] = sharedball.SRXX;
+        covariance[0][1] = sharedball.SRXY;
+        covariance[1][0] = sharedball.SRXY;
+        covariance[1][1] = sharedball.SRYY;
+
+        m_ball_model->directUpdate(relativePosition, covariance);
+
+        ++their_ball;
+    }
+}
+
+std::vector<TeamPacket::SharedBall> SelfLocalisation::FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls)
+{
+    std::vector<TeamPacket::SharedBall> updateBalls;
+    updateBalls.reserve(allSharedBalls.size());
+
+    for(unsigned int b = 0; b < allSharedBalls.size(); b++)
+    {
+        std::vector<TeamPacket::SharedBall>::iterator b_it = m_prevSharedBalls.begin();
+        std::vector<TeamPacket::SharedBall>::const_iterator end_it = m_prevSharedBalls.end();
+        bool previouslyUsed = false;
+        while(b_it != end_it)
+        {
+            if((allSharedBalls[b].TimeSinceLastSeen == b_it->TimeSinceLastSeen)
+               and (allSharedBalls[b].X == b_it->X)
+               and (allSharedBalls[b].Y == b_it->Y)
+               and (allSharedBalls[b].SRXX == b_it->SRXX)
+               and (allSharedBalls[b].SRXY == b_it->SRXY)
+               and (allSharedBalls[b].SRYY == b_it->SRYY))
+            {
+                previouslyUsed = true;
+                break;
+            }
+            ++b_it;
+        }
+        if(!previouslyUsed)
+            updateBalls.push_back(allSharedBalls[b]);
+    }
+    m_prevSharedBalls = allSharedBalls;
+    return updateBalls;
 }
