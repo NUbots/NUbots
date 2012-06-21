@@ -309,7 +309,6 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
 
 
     #if LOC_SUMMARY > 0
-    m_frame_log << "num Models: " << num_models << " num reset: " << num_reset << std::endl;
     m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
     #endif
 #endif
