@@ -61,7 +61,7 @@ void ScriptKick::loadKickParameters()
     float yMax = 9.5f;
 
     m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
-    m_left_kick_area = Rectangle(xMin, xMax, yMin, yMax);
+    m_left_kick_area = Rectangle(xMin, xMax, yMin+3.0f, yMax+3.0f); //HACK: move right kick box three cm to right
     m_side_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax+3.0f); //HACK: kick box less wide for side kicks
     m_side_left_kick_area = Rectangle(xMin, xMax, yMin, yMax-3.0f);
     //std::cout << "Parameters loaded." << std::endl;
@@ -210,9 +210,9 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
 
     double theta = atan2(target_y - ball_y, target_x - ball_x);
 
-    //float angle_margin = mathGeneral::PI / 4.0f; //triggers sidekick too often with -45 deg to 45 deg front kick zone
+    float angle_margin = mathGeneral::PI / 4.0f; //triggers sidekick too often with -45 deg to 45 deg front kick zone
 
-    float angle_margin = mathGeneral::PI / 8.0f + mathGeneral::PI / 4.0f; //trigger front kick from -67.5 deg to 67.5 deg
+    //float angle_margin = mathGeneral::PI / 8.0f + mathGeneral::PI / 4.0f; //trigger front kick from -67.5 deg to 67.5 deg
 
     /*if(fabs(theta) > angle_margin)
     {
