@@ -431,6 +431,21 @@ public:
             }
         }
         
+        //change bearing to align to ball
+        if (fabs(ball_bearing) < 0.3) {
+            vector<float> goalPosition(3,0);
+            float bearingLineUpSide = 0.3;
+            float bearingLineUpFront = 0.45;
+            goalPosition = self.CalculateDifferenceFromGoal(getOpponentGoal(Blackboard->Objects, Blackboard->GameInfo));
+            if (goalPosition[1] > mathGeneral::PI/4.f) { //to our left > 45 degrees
+                ball_bearing -= bearingLineUpSide*(kickingdistance-2.)/ball_distance;
+            } else if (goalPosition[1] < -mathGeneral::PI/4.f) { //to our right > 45 degrees
+                ball_bearing += bearingLineUpSide*(kickingdistance-2.)/ball_distance;
+            } else {
+                ball_bearing += mathGeneral::sign(ball_bearing)*bearingLineUpFront*(kickingdistance-2.)/ball_distance;
+            }
+        }
+        
         //hysteresis for 180 degrees out of phase
         if (target_heading > 0.f and target_heading < 3.f) {
             turningLeft = true;
@@ -556,18 +571,7 @@ public:
                 x += approachOffset-dist_hysteresis;
             }*/
             
-            //change bearing to align to ball
-            vector<float> goalPosition(3,0);
-            float bearingLineUpSide = 0.3;
-            float bearingLineUpFront = 0.45;
-            goalPosition = self.CalculateDifferenceFromGoal(getOpponentGoal(Blackboard->Objects, Blackboard->GameInfo));
-            if (goalPosition[1] > mathGeneral::PI/4.f) { //to our left > 45 degrees
-                bearing -= bearingLineUpSide*(kickingdistance-2.)/distance;
-            } else if (goalPosition[1] < -mathGeneral::PI/4.f) { //to our right > 45 degrees
-                bearing += bearingLineUpSide*(kickingdistance-2.)/distance;
-            } else {
-                bearing += mathGeneral::sign(bearing)*bearingLineUpFront*(kickingdistance-2.)/distance;
-            }
+            
             
 
             distance = sqrt(x*x + y*y);
