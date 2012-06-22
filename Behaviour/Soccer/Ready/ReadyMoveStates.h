@@ -129,7 +129,7 @@ private:
             }
             else
             {
-                position[0] = 140.0;
+                position[0] = 100.0;
                 position[1] = 0.0;
             }
         }
@@ -157,6 +157,19 @@ private:
             {
                 position[0] = 140.0;
                 position[1] = -90.0;
+            }
+        }
+        else if(m_team_info->getPlayerNumber() == 5)
+        {
+            if(m_game_info->haveKickoff())
+            {
+                position[0] = 90.0;
+                position[1] = 0.0;
+            }
+            else
+            {
+                position[0] = 150.0;
+                position[1] = 0.0;
             }
         }
         if(m_game_info->getTeamColour() == TEAM_BLUE)
