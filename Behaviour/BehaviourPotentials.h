@@ -353,21 +353,26 @@ public:
         }
         bool offset_sign = mathGeneral::sign(ball_bearing);
         
+        //set a lineup point for us to aim at so we approach the ball correctly
+        float lineup_offset_distance = kickingdistance*2.f;
+        
         kickingdistance = kickingdistance - robot_foot_size_on_2;
-        float fwd_x = C[0] + x_diff * kickingdistance;
-        float fwd_y = C[1] + y_diff * kickingdistance;
+        float fwd_x = C[0] + x_diff * lineup_offset_distance;
+        float fwd_y = C[1] + y_diff * lineup_offset_distance;
 
 
         fwd_x += -offset_sign * y_diff * distance_between_legs_on_2;
         fwd_y += offset_sign * x_diff * distance_between_legs_on_2;
+        
+        
 
         // Left side Kick (facing goal)
-        float left_side_x = ballx - y_diff * kickingdistance - x_diff * distance_between_legs_on_2 * 0.5;
-        float left_side_y = bally + x_diff * kickingdistance - y_diff * distance_between_legs_on_2 * 0.5;
+        float left_side_x = ballx - y_diff * lineup_offset_distance - x_diff * distance_between_legs_on_2 * 0.5;
+        float left_side_y = bally + x_diff * lineup_offset_distance - y_diff * distance_between_legs_on_2 * 0.5;
 
         // Right side Kick (facing goal)
-        float right_side_x = ballx + y_diff * kickingdistance - x_diff * distance_between_legs_on_2 * 0.5;
-        float right_side_y = bally - x_diff * kickingdistance - y_diff * distance_between_legs_on_2 * 0.5;
+        float right_side_x = ballx + y_diff * lineup_offset_distance - x_diff * distance_between_legs_on_2 * 0.5;
+        float right_side_y = bally - x_diff * lineup_offset_distance - y_diff * distance_between_legs_on_2 * 0.5;
 
         // Now get the closest kicking position
 
