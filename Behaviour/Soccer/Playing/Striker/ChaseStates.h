@@ -61,6 +61,7 @@ public:
         m_pan_end_time = 0;
         m_pan_started = false;
         m_previous_time = 0;
+        m_has_fallen = false;
     }
     ~GoToBall() {};
 protected:
@@ -160,12 +161,20 @@ protected:
         
         //VISION
         //-----------------------------------------------------------------------------------------------
+        static bool getting_up = false;
+        static double getup_timer = 0.f;
+        bool amichanging = getting_up;
+        m_data->get(NUSensorsData::MotionGetupActive, getting_up);
+        if (getting_up == false and amichanging == true) {
+            getup_timer = m_data->CurrentTime;
+        }
         
-        if (not m_pan_started and not iskicking and fabs(speed[2]) > 0.01)
+        if (not m_pan_started and not iskicking and fabs(speed[2]) > 0.01 or m_has_fallen and not Blackboard->Sensors->isFallen() and getup_timer-m_data->CurrentTime > 500.)
         {   
+            
             if ((m_data->CurrentTime - m_pan_end_time > 5000) and
                 //fabs(BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info)) < 1.3 and ball.TimeSeen() > 1000 and
-                not ball.estimatedDistance() < 20.f)
+                (not ball.estimatedDistance() < 20.f or m_has_fallen))
             {   
                 //Blackboard->lookForBall = false;
                 StationaryObject& yellow_left = m_field_objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
@@ -192,11 +201,16 @@ protected:
                     posts.push_back(blue_left);
                     posts.push_back(blue_right);
                 }
-                m_jobs->addMotionJob(new HeadPanJob(posts, hackfactor));
+                if (not m_has_fallen) {
+                    m_jobs->addMotionJob(new HeadPanJob(posts, hackfactor));
+                } else {
+                    m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
+                }
                 m_pan_started = true;
                 m_pan_end_time = m_data->CurrentTime + 800;
                 m_pan_time_captured = false;
                 m_pan_finished = false;
+                m_has_fallen = false;
                 #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                     debug << m_data->CurrentTime << ": Goal Post Pan Started" << endl;
                 #endif
@@ -207,6 +221,10 @@ protected:
         {
             m_pan_started = false;
             m_pan_finished = false;
+        }
+        
+        if (not m_pan_started and Blackboard->Sensors->isFallen()) {
+            m_has_fallen = true;
         }
         
         // this is a hack to get the pan end time right given the delay in the update of the motion sensors
@@ -272,6 +290,7 @@ private:
     float m_pan_end_time;
     bool m_pan_started, m_pan_time_captured, m_pan_finished;
     float m_previous_time;
+    bool m_has_fallen;
 };
 
 class FindTarget : public ChaseSubState
