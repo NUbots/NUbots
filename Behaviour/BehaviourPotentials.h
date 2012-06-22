@@ -50,7 +50,7 @@ public:
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    static vector<float> goToPointBackwards(float distance, float bearing, float heading, float stoppeddistance = 4.f, float stoppingdistance = 50, float turningdistance = 70)
+    static vector<float> goToPointBackwards(float distance, float bearing, float heading, float stoppeddistance = 10.f, float stoppingdistance = 50, float turningdistance = 70)
     {
         static const float m_HYSTERESIS = 0.15;      // the fraction of hysteresis in the turning point toward the desired heading
         static double m_previous_time = 0;          // the previous time in ms
@@ -67,14 +67,14 @@ public:
         
         if (fabs(bearing) > 0.4 or (fabs(bearing) > m_HYSTERESIS and m_previous_turning)) { //turn with hysteresis
             m_previous_turning = true;
-            if (bearing > 0. and bearing < 2.6) {
+            if (bearing > 0. and bearing < 2.6 and distance > stoppeddistance) {
                 result[2] = bearing*1.0;
                 m_turning_left = true;
-            } else if (bearing <= 0. and bearing > -2.6) {
+            } else if (bearing <= 0. and bearing > -2.6 and distance > stoppeddistance) {
                 result[2] = bearing*0.8;
                 m_turning_left = false;
             } else if (distance < stoppeddistance) {
-                result[2] = heading*0.5;
+                result[2] = heading*0.6;
             } else if (m_turning_left) {
                 result[2] = 1.f;
             } else if (not m_turning_left) {
@@ -431,6 +431,21 @@ public:
             }
         }
         
+        //change bearing to align to ball
+        if (fabs(ball_bearing) < 0.3) {
+            vector<float> goalPosition(3,0);
+            float bearingLineUpSide = 0.4;
+            float bearingLineUpFront = 0.45;
+            goalPosition = self.CalculateDifferenceFromGoal(getOpponentGoal(Blackboard->Objects, Blackboard->GameInfo));
+            if (goalPosition[1] > mathGeneral::PI/4.f) { //to our left > 45 degrees
+                ball_bearing -= bearingLineUpSide*(kickingdistance-2.)/ball_distance;
+            } else if (goalPosition[1] < -mathGeneral::PI/4.f) { //to our right > 45 degrees
+                ball_bearing += bearingLineUpSide*(kickingdistance-2.)/ball_distance;
+            } else {
+                ball_bearing += mathGeneral::sign(ball_bearing)*bearingLineUpFront*(kickingdistance-2.)/ball_distance;
+            }
+        }
+        
         //hysteresis for 180 degrees out of phase
         if (target_heading > 0.f and target_heading < 3.f) {
             turningLeft = true;
@@ -480,6 +495,8 @@ public:
             speed[1] = 0.2*ball_bearing;    // Straight
             speed[2] = 0.0f;    // Straight
         
+        } else {
+            speed[2] = 0.2*ball_bearing;
         }
         //cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
         return speed;
@@ -556,18 +573,7 @@ public:
                 x += approachOffset-dist_hysteresis;
             }*/
             
-            //change bearing to align to ball
-            vector<float> goalPosition(3,0);
-            float bearingLineUpSide = 0.3;
-            float bearingLineUpFront = 0.45;
-            goalPosition = self.CalculateDifferenceFromGoal(getOpponentGoal(Blackboard->Objects, Blackboard->GameInfo));
-            if (goalPosition[1] > mathGeneral::PI/4.f) { //to our left > 45 degrees
-                bearing -= bearingLineUpSide*(kickingdistance-2.)/distance;
-            } else if (goalPosition[1] < -mathGeneral::PI/4.f) { //to our right > 45 degrees
-                bearing += bearingLineUpSide*(kickingdistance-2.)/distance;
-            } else {
-                bearing += mathGeneral::sign(bearing)*bearingLineUpFront*(kickingdistance-2.)/distance;
-            }
+            
             
 
             distance = sqrt(x*x + y*y);
