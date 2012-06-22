@@ -163,7 +163,6 @@ void ScriptKick::loadKickParameters()
     m_left_kick_area = Rectangle(x_min_left_forward, x_max_left_forward, y_min_left_forward, y_max_left_forward); //HACK: move right kick box three cm to right
     m_side_right_kick_area = Rectangle(x_min_right_side, x_max_right_side, y_min_right_side, y_max_right_side); //HACK: kick box less wide for side kicks
     m_side_left_kick_area = Rectangle(x_min_left_side, x_max_left_side, y_min_left_side, y_max_left_side);
-
     return;
 }
 
@@ -266,37 +265,173 @@ bool ScriptKick::requiresLegs()
 
 void ScriptKick::doKick()
 {
-    //cout << "dokick is called" << endl;
-    if(m_current_script and m_kick_enabled and m_kick_ready and (m_script_start_time == -1))    // Check if there is a script ready, that has not been started.
+    if(m_current_script and m_kick_enabled and m_kick_ready)
     {
-        if(m_walk == NULL or !m_walk->isActive())   // Either we have no walk, or we want it to be inactive.
-        {
-            //std::cout << "Kick Beginning." << std::endl;
-            m_current_script->play(m_data, m_actions);
-            m_script_start_time = m_data->CurrentTime;
-            m_script_end_time = m_current_script->timeFinished();
-        }
-        
-    }
-    #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Current Time: " << m_data->CurrentTime << endl;
-    debug << "Walk: " << m_walk->isActive()<< endl;
-    debug << "Script will finish at: " << m_current_script->timeFinished() << endl;
-    #endif
+        static vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
+        static vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
+        static vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
+        static vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
+        static vector<float> nu_nextHeadJoints(m_actions->getSize(NUActionatorsData::Head), 0.0f);  // Right Leg
 
-    if((m_script_end_time != -1) and (m_data->CurrentTime > m_script_end_time))
-    {
-        //std::cout << "Kick Complete. " << m_data->CurrentTime << ", " << m_current_script->timeFinished() << ", " << m_script_start_time << std::endl;
-        // Kick has finished
-        m_current_script = NULL;
-        m_script_start_time = -1;
-        m_kick_ready = false;
-        m_kick_enabled = false;
-        setArmEnabled(false, false);
-        setHeadEnabled(false);
-        m_kicking_leg = noLeg;
-        m_script_end_time = -1;
+        static vector<float> nu_nextLeftArmGains(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
+        static vector<float> nu_nextRightArmGains(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
+        static vector<float> nu_nextLeftLegGains(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
+        static vector<float> nu_nextRightLegGains(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
+        static vector<float> nu_nextHeadGains(m_actions->getSize(NUActionatorsData::Head), 0.0f);  // Right Leg
+        if((m_walk == NULL or !m_walk->isActive()) and (m_script_start_time == -1))   // Either we have no walk, or we want it to be inactive.
+        {
+            m_current_index = 0;
+            m_script_start_time = m_data->CurrentTime;
+            m_script_end_time = m_data->CurrentTime + m_current_script->m_times.back().back();
+
+            m_joints = std::vector<std::vector<float> > (m_current_script->m_times.back().size(), vector<float>());
+            m_gains = std::vector<std::vector<float> > (m_current_script->m_times.back().size(), vector<float>());
+
+            unsigned int totalJoints = m_current_script->m_positions.size();
+            unsigned int totalFrames = m_current_script->m_times.back().size();
+
+            for(unsigned int j = 0; j < totalFrames; ++j)
+            {
+                for(unsigned int i = 0; i < totalJoints; ++i)
+                {
+                    if(m_current_script->m_positions.at(i).empty())
+                    {
+                        m_joints[j].push_back(0.0f);
+                        m_gains[j].push_back(50.0f);
+                    }
+                    else
+                    {
+                        m_joints[j].push_back(m_current_script->m_positions.at(i).at(j));
+                        m_gains[j].push_back(m_current_script->m_gains.at(i).at(j));
+                    }
+                }
+            }
+
+            std::vector<float> joints = m_joints.at(m_current_index);
+            std::vector<float> gains = m_gains.at(m_current_index);
+
+            float targetTime = m_script_start_time + m_current_script->m_times.back().at(m_current_index);
+
+            if(m_current_script->usesHead())
+            {
+                nu_nextHeadJoints.assign(joints.begin(), joints.begin()+2);
+                nu_nextHeadGains.assign(gains.begin(), gains.begin()+2);
+                m_actions->add(NUActionatorsData::Head, targetTime, nu_nextHeadJoints, nu_nextHeadGains);
+            }
+            if(m_current_script->usesLArm())
+            {
+                nu_nextLeftArmJoints.assign(joints.begin()+2, joints.begin()+5);
+                nu_nextLeftArmGains.assign(gains.begin()+2, gains.begin()+5);
+                m_actions->add(NUActionatorsData::LArm, targetTime, nu_nextLeftArmJoints, nu_nextLeftArmGains);
+            }
+            if(m_current_script->usesRArm())
+            {
+                nu_nextRightArmJoints.assign(joints.begin()+5, joints.begin()+8);
+                nu_nextRightArmGains.assign(gains.begin()+5, gains.begin()+8);
+                m_actions->add(NUActionatorsData::RArm, targetTime, nu_nextRightArmJoints, nu_nextRightArmGains);
+            }
+            if(m_current_script->usesLLeg())
+            {
+                nu_nextLeftLegJoints.assign(joints.begin()+8, joints.begin()+14);
+                nu_nextLeftLegGains.assign(gains.begin()+8, gains.begin()+14);
+                m_actions->add(NUActionatorsData::LLeg, targetTime, nu_nextLeftLegJoints, nu_nextLeftLegGains);
+            }
+            if(m_current_script->usesRLeg())
+            {
+                nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
+                nu_nextRightLegGains.assign(gains.begin()+14, gains.begin()+20);
+                m_actions->add(NUActionatorsData::RLeg, targetTime, nu_nextRightLegJoints, nu_nextRightLegGains);
+            }
+
+        }
+        else if(m_current_index < m_current_script->m_times.back().size()-1)
+        {
+            double currentScriptTime = m_data->CurrentTime - m_script_start_time;
+            double nextTime = m_current_script->m_times.back().at(m_current_index);
+            if(nextTime <= currentScriptTime)
+            {
+                ++m_current_index;
+                std::vector<float> joints = m_joints.at(m_current_index);
+                std::vector<float> gains = m_gains.at(m_current_index);
+
+                float targetTime = m_script_start_time + m_current_script->m_times.back().at(m_current_index);
+
+                if(m_current_script->usesHead())
+                {
+                    nu_nextHeadJoints.assign(joints.begin(), joints.begin()+2);
+                    nu_nextHeadGains.assign(gains.begin(), gains.begin()+2);
+                    m_actions->add(NUActionatorsData::Head, targetTime, nu_nextHeadJoints, nu_nextHeadGains);
+                }
+                if(m_current_script->usesLArm())
+                {
+                    nu_nextLeftArmJoints.assign(joints.begin()+2, joints.begin()+5);
+                    nu_nextLeftArmGains.assign(gains.begin()+2, gains.begin()+5);
+                    m_actions->add(NUActionatorsData::LArm, targetTime, nu_nextLeftArmJoints, nu_nextLeftArmGains);
+                }
+                if(m_current_script->usesRArm())
+                {
+                    nu_nextRightArmJoints.assign(joints.begin()+5, joints.begin()+8);
+                    nu_nextRightArmGains.assign(gains.begin()+5, gains.begin()+8);
+                    m_actions->add(NUActionatorsData::RArm, targetTime, nu_nextRightArmJoints, nu_nextRightArmGains);
+                }
+                if(m_current_script->usesLLeg())
+                {
+                    nu_nextLeftLegJoints.assign(joints.begin()+8, joints.begin()+14);
+                    nu_nextLeftLegGains.assign(gains.begin()+8, gains.begin()+14);
+                    m_actions->add(NUActionatorsData::LLeg, targetTime, nu_nextLeftLegJoints, nu_nextLeftLegGains);
+                }
+                if(m_current_script->usesRLeg())
+                {
+                    nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
+                    nu_nextRightLegGains.assign(gains.begin()+14, gains.begin()+20);
+                    m_actions->add(NUActionatorsData::RLeg, targetTime, nu_nextRightLegJoints, nu_nextRightLegGains);
+                }
+
+            }
+        }
+        else
+        {
+            m_current_script = NULL;
+            m_script_start_time = -1;
+            m_kick_ready = false;
+            m_kick_enabled = false;
+            setArmEnabled(false, false);
+            setHeadEnabled(false);
+            m_kicking_leg = noLeg;
+            m_script_end_time = -1;
+        }
     }
+    //cout << "dokick is called" << endl;
+//    if(m_current_script and m_kick_enabled and m_kick_ready and (m_script_start_time == -1))    // Check if there is a script ready, that has not been started.
+//    {
+//        if(m_walk == NULL or !m_walk->isActive())   // Either we have no walk, or we want it to be inactive.
+//        {
+//            //std::cout << "Kick Beginning." << std::endl;
+//            m_current_script->play(m_data, m_actions);
+//            m_script_start_time = m_data->CurrentTime;
+//            m_script_end_time = m_current_script->timeFinished();
+//        }
+        
+//    }
+//    #if DEBUG_NUMOTION_VERBOSITY > 3
+//    debug << "Current Time: " << m_data->CurrentTime << endl;
+//    debug << "Walk: " << m_walk->isActive()<< endl;
+//    debug << "Script will finish at: " << m_current_script->timeFinished() << endl;
+//    #endif
+
+//    if((m_script_end_time != -1) and (m_data->CurrentTime > m_script_end_time))
+//    {
+//        //std::cout << "Kick Complete. " << m_data->CurrentTime << ", " << m_current_script->timeFinished() << ", " << m_script_start_time << std::endl;
+//        // Kick has finished
+//        m_current_script = NULL;
+//        m_script_start_time = -1;
+//        m_kick_ready = false;
+//        m_kick_enabled = false;
+//        setArmEnabled(false, false);
+//        setHeadEnabled(false);
+//        m_kicking_leg = noLeg;
+//        m_script_end_time = -1;
+//    }
     return;
 }
 
@@ -326,14 +461,13 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
     //cout << theta << endl; //angle for debugging kick boxes / kick triggering
     // Ball is in position for left kick.
 
-    if(theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y) and
+    if((true or theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y)) and
        m_side_left_kick_script->isValid())
     {
         kick_begin = true;
         m_kicking_leg = rightLeg;
         m_current_script = m_side_left_kick_script;
         #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "leftside kick: " << theta << endl;
         #endif
     }
     else if(theta <= angle_margin and theta >= -angle_margin and
