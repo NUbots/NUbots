@@ -83,7 +83,7 @@ protected:
             speed = BehaviourPotentials::goToPointBackwards(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
             m_close_approach = true;
         } else {*/
-            speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
+            speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 20, 100, 200);
             m_close_approach = false;
         //}
         //vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);

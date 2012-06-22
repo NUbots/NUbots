@@ -41,6 +41,7 @@ protected:
     Rectangle m_right_kick_area;
     Rectangle m_side_left_kick_area;
     Rectangle m_side_right_kick_area;
+    float m_kick_enable_time;
 
 };
 

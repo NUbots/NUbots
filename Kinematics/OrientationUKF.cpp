@@ -189,7 +189,7 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
     Matrix S_Obs(numMeasurements,numMeasurements,true);
     double accelVectorMag = sqrt(observation[0][0]*observation[0][0] + observation[1][0]*observation[1][0] + observation[2][0]*observation[2][0]);
     double errorFromIdealGravity = fabs(accelVectorMag - m_scale*g);
-    double accelNoise = pow(50.0 + 10*errorFromIdealGravity, 2);
+    double accelNoise = pow(5.0 + errorFromIdealGravity, 2);
 
     S_Obs[0][0] = accelNoise;
     S_Obs[1][1] = accelNoise;

@@ -73,7 +73,7 @@ protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
         // we transition to the spin state when the pan is completed.
-        if (m_pan_started and m_pan_end_time < m_data->CurrentTime and not m_parent->stateChanged())
+        if (m_pan_started and m_pan_end_time < m_data->CurrentTime and not m_parent->stateChanged() or m_time_in_state > 3000.)
             return m_lost_machine->m_lost_spin;
         else
             return this;
@@ -102,6 +102,7 @@ protected:
         // grab the pan end time
         if (not m_pan_started and m_time_in_state > 200)
         {
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 1.f, 75.f, -1.7, 1.7));
             if (m_data->get(NUSensorsData::MotionHeadCompletionTime, m_pan_end_time))
                 m_pan_started = true;
         }
@@ -136,7 +137,7 @@ private:
 };
 
 // ----------------------------------------------------------------------------------------------------------------------- BallIsLostPan
-/*! @class BallIsLostPan
+/*! @class BallIsSpinPan
     In this state we spin on the spot and do the nod. After 1 revolution we go into the move state
  */
 class BallIsLostSpin : public BallIsLostSubState
@@ -167,11 +168,11 @@ protected:
         {   // decided which direction to spin based on the estimated bearing when we enter this state or the current walk speed if we are still walking
             m_time_in_state = 0;
             vector<float> walkspeed;
-            if (m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed) and walkspeed[2] != 0)        
-                m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
-            else
+            //if (m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed) and walkspeed[2] != 0)        
+            //    m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
+            //else
                 m_spin_speed = mathGeneral::sign(ball.estimatedBearing())*m_ROTATIONAL_SPEED;
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 10, 2000, -1.5, 1.5));
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 1, 2000, -1.7, 1.7));
         }
         else
             m_time_in_state += m_data->CurrentTime - m_previous_time;
@@ -223,13 +224,13 @@ protected:
     
         if (m_parent->stateChanged())
         {   // decided which location on the field to go to
-            if (m_game_info->getPlayerNumber() == 1)
+            if (m_game_info->getPlayerNumber() == 2)
             {   // goal keeper goes back to his goal
                 m_position[0] = owngoal.X() - 25*mathGeneral::sign(owngoal.X());
                 m_position[1] = 0;
                 m_position[2] = 0;
             }
-            else if (m_game_info->getPlayerNumber() == 2)
+            else if (m_game_info->getPlayerNumber() == 3)
             {   // player two goes to centre circle
                 m_position[0] = 0;
                 m_position[1] = 0;

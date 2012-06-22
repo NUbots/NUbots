@@ -87,6 +87,8 @@ void PlayingState::doStateCommons()
 BehaviourFSMState* PlayingState::nextStateCommons()
 {   // do state transitions in playing state machine
     if (true or m_team_info->getPlayerNumber() != 1) { //striker state transitions
+        //bool kickIsActive = false;
+        //m_data->get(NUSensorsData::MotionKickActive, kickIsActive);
         if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost()) {
             Blackboard->lookForBall = true;
             return m_ball_is_lost_state;
