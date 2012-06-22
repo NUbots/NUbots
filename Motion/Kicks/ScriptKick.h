@@ -34,9 +34,11 @@ protected:
     MotionScript* m_side_left_kick_script;
     MotionScript* m_side_right_kick_script;
     double m_script_start_time;
+    unsigned int m_current_index;
     double m_script_end_time;
     MotionScript* m_current_script;
-
+    vector<vector<float> > m_joints;
+    vector<vector<float> > m_gains;
     Rectangle m_left_kick_area;
     Rectangle m_right_kick_area;
     Rectangle m_side_left_kick_area;
