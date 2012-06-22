@@ -103,21 +103,38 @@ public:
     
     void doState()
     {
-        if(m_provider->singleLeftBumperClick())
+
+        // left
+        if(true)
         {
-            m_kickPos[0] = 15.0;
+            m_kickPos[0] = 10.0;
             m_kickPos[1] = 5.0;
-            m_kickTarget[0] = 1.0;
-            m_kickTarget[1] = 1.0;
-            m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::SET);
+            m_kickTarget[0] = 100.0;
+            m_kickTarget[1] = 5.0;
         }
-        else if(m_provider->singleRightBumperClick())
+        // right
+        else if(true)
         {
-            m_kickPos[0] = 15.0;
+            m_kickPos[0] = 10.0;
             m_kickPos[1] = -5.0;
-            m_kickTarget[0] = -1.0;
-            m_kickTarget[1] = -1.0;
-            m_actions->add(NUActionatorsData::Sound, m_actions->CurrentTime, NUSounds::SET);
+            m_kickTarget[0] = 100.0;
+            m_kickTarget[1] = -5.0;
+        }
+        // left side
+        else if(true)
+        {
+            m_kickPos[0] = 10.0;
+            m_kickPos[1] = 5.0;
+            m_kickTarget[0] = 10.0;
+            m_kickTarget[1] = 100.0;
+        }
+        // right side
+        else if(true)
+        {
+            m_kickPos[0] = 10.0;
+            m_kickPos[1] = -5.0;
+            m_kickTarget[0] = 10.0;
+            m_kickTarget[1] = -100.0;
         }
 
         KickJob* kick = new KickJob(0,m_kickPos,m_kickTarget);
