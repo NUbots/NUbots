@@ -72,6 +72,9 @@ public:
     friend ostream& operator<< (ostream& output, const MotionScript* p_script);
     friend istream& operator>> (istream& input, MotionScript& p_script);
     friend istream& operator>> (istream& input, MotionScript* p_script);
+    vector<vector<double> > m_times;     		//!< the times read in from the script file
+    vector<vector<float> > m_positions;  		//!< the positions read in from the script file
+    vector<vector<float> > m_gains;      		//!< the gains read in from the script file
 protected:
     bool load();
     void setUses();
@@ -116,9 +119,6 @@ protected:
     vector<string> m_labels;             		//!< the labels for each row
     float m_smoothness;                  		//!< the smoothness loaded from the script file
     bool m_return_to_start;              		//!< a flag to specify whether the script should return to the position when the script started playing
-    vector<vector<double> > m_times;     		//!< the times read in from the script file
-    vector<vector<float> > m_positions;  		//!< the positions read in from the script file
-    vector<vector<float> > m_gains;      		//!< the gains read in from the script file
     
     // smoothed script data
     vector<vector<double> > m_curvetimes;		//!< the times to be given to the actionators
