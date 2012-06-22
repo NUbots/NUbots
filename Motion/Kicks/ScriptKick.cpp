@@ -5,6 +5,10 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Motion/NUWalk.h"
 
+//for configs
+#include "nubotdataconfig.h"
+#include <boost/algorithm/string.hpp>
+
 ScriptKick::ScriptKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions): NUKick(walk, data, actions)
 {
     m_left_kick_script = new MotionScript("KickLeft");
@@ -13,6 +17,7 @@ ScriptKick::ScriptKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* act
     m_side_right_kick_script = new MotionScript("SideKickRight");
     m_current_script = NULL;
     m_script_start_time = -1;
+    m_script_end_time = -1;
     loadKickParameters();
 }
 
@@ -27,6 +32,7 @@ void ScriptKick::kill()
     setArmEnabled(false, false);
     setHeadEnabled(false);
     m_kicking_leg = noLeg;
+    m_script_end_time = -1;
 }
 
 void ScriptKick::stop()
@@ -54,17 +60,109 @@ ScriptKick::~ScriptKick()
 
 void ScriptKick::loadKickParameters()
 {
-    float xMin = 5.0f;
-    //float xMax = 12.0f;
-    float xMax = 11.0f;
-    float yMin = 3.2f;
-    float yMax = 9.5f;
+    //defaults to guarantee at least old performance in case of bad file
+    float x_min_right_forward = 5.0f;
+    float x_max_right_forward = 11.0f;
+    float y_min_right_forward = -3.2f;
+    float y_max_right_forward = -9.5f;
 
-    m_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax);
-    m_left_kick_area = Rectangle(xMin, xMax, yMin, yMax); //HACK: move right kick box three cm to right
-    m_side_right_kick_area = Rectangle(xMin, xMax, -yMin, -yMax+3.0f); //HACK: kick box less wide for side kicks
-    m_side_left_kick_area = Rectangle(xMin, xMax, yMin, yMax-3.0f);
-    //std::cout << "Parameters loaded." << std::endl;
+    float x_min_left_forward = 5.0f;
+    float x_max_left_forward = 11.0f;
+    float y_min_left_forward = 3.2f;
+    float y_max_left_forward = 9.5f;
+
+    float x_min_right_side = 5.0f;
+    float x_max_right_side = 11.0f;
+    float y_min_right_side = -3.2f;
+    float y_max_right_side = -6.5f;
+
+    float x_min_left_side= 5.0f;
+    float x_max_left_side = 11.0f;
+    float y_min_left_side = 3.2f;
+    float y_max_left_side = 6.5f;
+
+    string filename = CONFIG_DIR + string("kickboxes.cfg");
+    ifstream input(filename.c_str());
+    string id_str;
+    if(input.good()) {
+        float xmin, xmax, ymin, ymax;
+        while(input.good()) {
+            // read in the rule name
+            getline(input, id_str, ':');
+            boost::trim(id_str);
+            boost::to_lower(id_str);
+
+            input.ignore(30, '(');
+            input >> xmin;
+            input.ignore(10, ',');
+            input >> xmax;
+            input.ignore(10, ',');
+            input >> ymin;
+            input.ignore(10, ',');
+            input >> ymax;
+            input.ignore(10, ')');
+
+            // ignore the rest of the line
+            input.ignore(128, '\n');
+            input.peek();               //trigger eofbit being set in the case of this being the last rule
+
+            if(id_str.compare("rightforward") == 0) {
+                x_min_right_forward = xmin;
+                x_max_right_forward = xmax;
+                y_min_right_forward = ymin;
+                y_max_right_forward = ymax;
+            }
+            else if(id_str.compare("leftforward") == 0) {
+                x_min_left_forward = xmin;
+                x_max_left_forward = xmax;
+                y_min_left_forward = ymin;
+                y_max_left_forward = ymax;
+            }
+            else if(id_str.compare("rightside") == 0) {
+                x_min_right_side = xmin;
+                x_max_right_side = xmax;
+                y_min_right_side = ymin;
+                y_max_right_side = ymax;
+            }
+            else if(id_str.compare("leftside") == 0) {
+                x_min_left_side= xmin;
+                x_max_left_side = xmax;
+                y_min_left_side = ymin;
+                y_max_left_side = ymax;
+            }
+            else
+                errorlog << "ScriptKick::loadKickParameters - invalid kick name: " << id_str << endl;
+        }
+    }
+    else {
+        errorlog << "ScriptKick::loadKickParameters - failed to load kickboxes.cfg" << endl;
+    }
+
+    cout << " x_min_right_forward = " << x_min_right_forward << endl;
+    cout << " x_max_right_forward = " << x_max_right_forward << endl;
+    cout << " y_min_right_forward = " << y_min_right_forward << endl;
+    cout << " y_max_right_forward = " << y_max_right_forward << endl;
+
+    cout << " x_min_left_forward = " << x_min_left_forward << endl;
+    cout << " x_max_left_forward = " << x_max_left_forward << endl;
+    cout << " y_min_left_forward = " << y_min_left_forward << endl;
+    cout << " y_max_left_forward = " << y_max_left_forward << endl;
+
+    cout << " x_min_right_side = " << x_min_right_side << endl;
+    cout << " x_max_right_side = " << x_max_right_side << endl;
+    cout << " y_min_right_side = " << y_min_right_side << endl;
+    cout << " y_max_right_side = " << y_max_right_side << endl;
+
+    cout << " x_min_left_side = " << x_min_left_side << endl;
+    cout << " x_max_left_side = " << x_max_left_side << endl;
+    cout << " y_min_left_side = " << y_min_left_side << endl;
+    cout << " y_max_left_side = " << y_max_left_side << endl;
+
+    m_right_kick_area = Rectangle(x_min_right_forward, x_max_right_forward, y_min_right_forward, y_max_right_forward);
+    m_left_kick_area = Rectangle(x_min_left_forward, x_max_left_forward, y_min_left_forward, y_max_left_forward); //HACK: move right kick box three cm to right
+    m_side_right_kick_area = Rectangle(x_min_right_side, x_max_right_side, y_min_right_side, y_max_right_side); //HACK: kick box less wide for side kicks
+    m_side_left_kick_area = Rectangle(x_min_left_side, x_max_left_side, y_min_left_side, y_max_left_side);
+
     return;
 }
 
@@ -172,6 +270,7 @@ void ScriptKick::doKick()
             //std::cout << "Kick Beginning." << std::endl;
             m_current_script->play(m_data, m_actions);
             m_script_start_time = m_data->CurrentTime;
+            m_script_end_time = m_current_script->timeFinished();
         }
         
     }
@@ -181,7 +280,7 @@ void ScriptKick::doKick()
     debug << "Script will finish at: " << m_current_script->timeFinished() << endl;
     #endif
 
-    if(m_data->CurrentTime > m_current_script->timeFinished())
+    if((m_script_end_time != -1) and (m_data->CurrentTime > m_script_end_time))
     {
         //std::cout << "Kick Complete. " << m_data->CurrentTime << ", " << m_current_script->timeFinished() << ", " << m_script_start_time << std::endl;
         // Kick has finished
@@ -192,6 +291,7 @@ void ScriptKick::doKick()
         setArmEnabled(false, false);
         setHeadEnabled(false);
         m_kicking_leg = noLeg;
+        m_script_end_time = -1;
     }
     return;
 }

@@ -40,6 +40,7 @@ MotionScript::MotionScript()
 {
     m_is_valid = false;
     setUses();
+    m_play_start_time = 0;
 }
 
 MotionScript::MotionScript(string filename)

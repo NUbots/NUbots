@@ -25,6 +25,7 @@ public:
     bool requiresArms();
     bool requiresLegs();
 
+private:
     void loadKickParameters();
 
 protected:
@@ -33,6 +34,7 @@ protected:
     MotionScript* m_side_left_kick_script;
     MotionScript* m_side_right_kick_script;
     double m_script_start_time;
+    double m_script_end_time;
     MotionScript* m_current_script;
 
     Rectangle m_left_kick_area;

@@ -164,6 +164,38 @@ void GoalDetection::detectGoals()
         it++;
     }
 
+    int MIN_GOAL_SEP = 20;
+
+    if (yellow_posts.size() > 2) {
+        yellow_posts.clear();
+    }
+    else {
+        if (yellow_posts.size() == 2) {
+            Quad post1 = yellow_posts.at(0);
+            Quad post2 = yellow_posts.at(1);
+
+            int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);      // inside right
+            int pos2 = std::max(post1.getBottomLeft().x, post2.getBottomLeft().x);  // inside left
+            if (std::abs(pos2 - pos1) < MIN_GOAL_SEP)
+                yellow_posts.clear();
+        }
+    }
+
+    if (blue_posts.size() > 2) {
+        blue_posts.clear();
+    }
+    else {
+        if (blue_posts.size() == 2) {
+            Quad post1 = blue_posts.at(0);
+            Quad post2 = blue_posts.at(1);
+
+            int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);      // inside right
+            int pos2 = std::max(post1.getBottomLeft().x, post2.getBottomLeft().x);  // inside left
+            if (std::abs(pos2 - pos1) < MIN_GOAL_SEP)
+                blue_posts.clear();
+        }
+    }
+
     // ROBOCUP HACKS -----------------------------------------------------------------------------------------------
 
     // DENSITY CHECK
