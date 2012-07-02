@@ -110,7 +110,7 @@ Circle CircleFitting::FitCircleLMF(std::vector < Vector2<int> > points)
          fittedPoints.push_back(tempPoint);
     }
 
-    if (numFittedPoints > 5)
+    if (numFittedPoints > 3)
     {
         Circle algebraicCircle = AlgebraicCircleFit(); // Generates an approximate centre using an algebraic approximation to the centre of the circle
 

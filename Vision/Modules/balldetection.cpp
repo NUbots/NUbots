@@ -2,6 +2,7 @@
 #include "Vision/visionconstants.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
+#include "VisionOld/CircleFitting.h"
 
 void BallDetection::detectBall()
 {
@@ -145,6 +146,33 @@ void BallDetection::detectBall()
             right ++;
         }
         right -= not_orange_count;
+        
+        //RUNNING POINT FOR OLD BALL FITTING CODE
+        if (false) {
+            CircleFitting fitter = CircleFitting();
+            
+            //make a vector of edge points
+            std::vector< Vector2<int> > edge_points;
+            Vector2<int> pt_top,pt_bottom,pt_left,pt_right;
+            pt_left.y = pt_right.y = y_pos;
+            pt_left.x = left;
+            pt_right.x = right;
+            pt_top.x = pt_bottom.x = x_pos;
+            pt_top.y = top;
+            pt_bottom.y = bottom;
+            edge_points.push_back(pt_top);
+            edge_points.push_back(pt_bottom);
+            edge_points.push_back(pt_left);
+            edge_points.push_back(pt_right);
+            
+            //fit circle and recover data
+            Circle fitted_ball = fitter.FitCircleLMF(edge_points);
+            if (fitted_ball.isDefined) {
+                PointType centre = PointType((int)fitted_ball.centreX,(int)fitted_ball.centreY);
+                Ball newball(centre, (float)fitted_ball.radius);                
+                vbb->addBall(newball);
+            }
+        }
 
         // CHECK IF POINT IS ON EDGE OF BALL (OR OCCLUDED)
         // OCCLUSION CHECK / COMPENSATION
