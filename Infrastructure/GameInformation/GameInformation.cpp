@@ -23,6 +23,9 @@ GameInformation::GameInformation(int playerNumber, int teamNumber): TimestampedD
     // Initialise the game controller packet (this will only be used if no game control packet is actually received)
     m_currentControlData = new RoboCupGameControlData();
     m_currentControlData->teams[TEAM_BLUE].teamNumber = m_team_number;
+    // Need to set the goal colours now, or they will both start as blue.
+    m_currentControlData->teams[TEAM_BLUE].goalColour == TEAM_BLUE;
+    m_currentControlData->teams[TEAM_RED].goalColour == TEAM_RED;
     m_last_packet_time = 0;
     
     // Initialise the game controller return packet (this tells the game controller of manual penalties)
