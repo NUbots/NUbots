@@ -16,6 +16,9 @@ std::string LocalisationSettings::branchMethodString(BranchMethod method) const
     std::string result;
     switch(method)
     {
+    case branch_none:
+        result = "none";
+        break;
     case branch_exhaustive:
         result = "exhaustive";
         break;
@@ -41,6 +44,9 @@ std::string LocalisationSettings::pruneMethodString(PruneMethod method) const
 
     switch(method)
     {
+    case prune_none:
+        result = "none";
+        break;
     case prune_merge:
         result = "merge";
         break;
