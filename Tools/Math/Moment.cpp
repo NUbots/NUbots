@@ -124,7 +124,8 @@ void Moment::setMean(const Matrix& newMean)
     assert(((unsigned int)newMean.getm() == m_numStates) && (newMean.getn() == 1));
 
     bool isCorrectSize = ((unsigned int)newMean.getm() == m_numStates) && (newMean.getn() == 1);
-    assert(isCorrectSize and newMean.isValid());
+    assert(isCorrectSize);
+    assert(newMean.isValid());
     if(isCorrectSize and newMean.isValid())
     {
         m_mean = newMean;
