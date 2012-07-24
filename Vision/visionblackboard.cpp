@@ -83,24 +83,40 @@ void VisionBlackboard::setObjectPoints(const vector<PointType>& points)
     object_points = points;
 }
 
+/**
+  * Adds a goal to the list of results.
+  * @param newgoal The goal to add.
+  */
 void VisionBlackboard::addGoal(const Goal& newgoal) 
 {
     m_goals.push_back(newgoal);
     //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_goals.back())));
 }
 
+/**
+  * Adds a beacon to the list of results.
+  * @param newbeacon The beacon to add.
+  */
 void VisionBlackboard::addBeacon(const Beacon& newbeacon)
 {
     m_beacons.push_back(newbeacon);
     //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_beacons.back())));
 }
 
+/**
+  * Adds a ball to the list of results.
+  * @param newball The ball to add.
+  */
 void VisionBlackboard::addBall(const Ball& newball)
 {
     m_balls.push_back(newball);
     //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_balls.back())));
 }
 
+/**
+  * Adds an obstacle to the list of results.
+  * @param newobstacle The obstacle to add.
+  */
 void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
 {
     m_obstacles.push_back(newobstacle);
@@ -227,6 +243,10 @@ const LookUpTable& VisionBlackboard::getLUT() const
     return LUT;
 }
 
+/**
+  * Applies radial distortion correction to the given pixel location.
+  * @param pt The pixel location to correct.
+  */
 Vector2<float> VisionBlackboard::correctDistortion(const Vector2<float>& pt)
 {
     float width_offset = original_image->getWidth()*0.5;
@@ -246,11 +266,20 @@ Vector2<float> VisionBlackboard::correctDistortion(const Vector2<float>& pt)
     return Vector2<float>(result.x, result.y) + Vector2<float>(width_offset,height_offset);  
 }
 
+/**
+  * Calculates the angle between the image centre and the provided horizontal position in
+  * the xy plane.
+  * @param x The horizontal pixel location.
+  */
 double VisionBlackboard::calculateBearing(double x) const {
     return atan( (original_image->getWidth()*0.5-x)  * (tan(m_FOV.x*0.5)) / (original_image->getWidth()*0.5) );
 }
 
-
+/**
+  * Calculates the angle between the image centre and the provided vertical position in
+  * the xz plane.
+  * @param y The vertical pixel location.
+  */
 double VisionBlackboard::calculateElevation(double y) const {
     return atan( (original_image->getHeight()*0.5-y) * (tan(m_FOV.y*0.5)) / (original_image->getHeight()*0.5) );
 }
@@ -264,71 +293,85 @@ const Horizon& VisionBlackboard::getKinematicsHorizon() const
     return kinematics_horizon;
 }
 
+//! Returns whether the camera to ground transform vector is valid.
 bool VisionBlackboard::isCameraToGroundValid() const
 {
     return ctgvalid;
 }
 
+//! Returns the camera to ground transform vector.
 const vector<float>& VisionBlackboard::getCameraToGroundVector() const
 {
     return ctgvector;
 }
 
+//! Returns whether the camera transform vector is valid.
 bool VisionBlackboard::isCameraTransformValid() const
 {
     return ctvalid;
 }
 
+//! Returns the camera transform vector.
 const vector<float>& VisionBlackboard::getCameraTransformVector() const
 {
     return ctvector;
 }
 
+//! Returns whether the camera pitch is valid.
 bool VisionBlackboard::isCameraPitchValid() const
 {
     return camera_pitch_valid;
 }
 
+//! Returns the camera pitch.
 float VisionBlackboard::getCameraPitch() const 
 {
     return camera_pitch;
 }
 
+//! Returns whether the camera height is valid.
 bool VisionBlackboard::isCameraHeightValid() const
 {
     return camera_height_valid;
 }
 
+//! Returns the camera height.
 float VisionBlackboard::getCameraHeight() const
 {
     return camera_height;
 }
 
+//! Returns whether the body pitch is valid.
 bool VisionBlackboard::isBodyPitchValid() const
 {
     return body_pitch_valid;
 }
 
+//! Returns the body pitch.
 float VisionBlackboard::getBodyPitch() const 
 {
     return body_pitch;
 }
 
+//! Returns the list of found balls.
 vector<Ball>& VisionBlackboard::getBalls()
 {
     return m_balls;
 }
 
+//! Returns the list of found goals.
 vector<Goal>& VisionBlackboard::getGoals()
 {
     return m_goals;
 }
 
+//! Returns the list of found beacons.
 vector<Beacon>& VisionBlackboard::getBeacons()
 {
     return m_beacons;
 }
 
+//! Returns the list of found obstacles.
 vector<Obstacle>& VisionBlackboard::getObstacles()
 {
     return m_obstacles;
@@ -454,16 +497,28 @@ int VisionBlackboard::getImageHeight() const
     return original_image->getHeight();
 }
 
+//! @brief returns the field of view of the camera.
 Vector2<double> VisionBlackboard::getFOV() const
 {
     return m_FOV;
 }
 
+//! @brief returns the effective camera distance in pixels.
 double VisionBlackboard::getCameraDistanceInPixels() const
 {
     return effective_camera_dist_pixels;
 }
 
+/**
+  * Calculates the distance to an object at a given point assuming the object is only the same
+  * plane as the robots feet. This is useful as the point of contact with the ground for all field
+  * objects can easily be identified visually.
+  * @param bearing The angle between the image centre and point of interest in the xy plane.
+  * @param elevation The angle between the image centre and point of interest in the xz plane.
+  * @param distance A reference parameter to return the distance via.
+  * @return Whether the distance calculated is valid. Some of the transforms require kinematics
+  *     data that may not be available.
+  */
 bool VisionBlackboard::distanceToPoint(float bearing, float elevation, float& distance) const
 {
     #if VISION_BLACKBOARD_VERBOSITY > 1
@@ -539,6 +594,7 @@ void VisionBlackboard::updateLUT()
     LUT = wrapper->getLUT();
 }
 
+//! Calculate the field of view and effective camera distance in pixels.
 void VisionBlackboard::calculateFOVAndCamDist()
 {
     #if VISION_BLACKBOARD_VERBOSITY > 1
@@ -729,6 +785,7 @@ void VisionBlackboard::debugPublish() const
     wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
 }
 
+//! Checks the kinematics horizon is within the image bounds and resets it if not.
 void VisionBlackboard::checkKinematicsHorizon()
 {
     #if VISION_BLACKBOARD_VERBOSITY > 1
