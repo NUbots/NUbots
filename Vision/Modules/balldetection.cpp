@@ -12,58 +12,64 @@ void BallDetection::detectBall()
     const LookUpTable& lut = vbb->getLUT();
     // BEGIN BALL DETECTION -----------------------------------------------------------------
 
-    vector<Transition> transitions = vbb->getVerticalTransitions(VisionFieldObject::BALL);    
+    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::BALL);
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::BALL);
+    vector<PointType> edges;
+
+    appendEdgesFromSegments(h_segments, edges);
+    appendEdgesFromSegments(v_segments, edges);
 
     #if VISION_FIELDOBJECT_VERBOSITY > 1
-        debug << "BallDetection::detectBall() - number of ball transitions: " << transitions.size() << endl;
+        debug << "BallDetection::detectBall() - number of vertical ball segments: " << v_segments.size() << endl;
+        debug << "BallDetection::detectBall() - number of horizontal ball segments: " << h_segments.size() << endl;
     #endif
 
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
 
     // Throw out points above the horizon
-    vector<Transition>::iterator it;
-    it = transitions.begin();
-    while (it < transitions.end()) {
-        if(green_horizon.isBelowHorizon(it->getLocation())) {
-            it++;   //move to next transitions
+    vector<PointType>::iterator it;
+    it = edges.begin();
+    while (it < edges.end()) {
+        if(green_horizon.isBelowHorizon(*it)) {
+            it++;   //move to next edge
         }
         else {
             #if VISION_FIELDOBJECT_VERBOSITY > 2
-                debug << "BallDetection::detectBall() - transition thrown out, above GH: " << *it << endl;
+                debug << "BallDetection::detectBall() - edge thrown out, above GH: " << *it << endl;
             #endif
-            it = transitions.erase(it);
+            it = edges.erase(it);
         }
     }
 
-    if (transitions.size() > 0) {
+    if (edges.size() > 0) {
         // Arithmetic mean
         int x_mean = 0,
             y_mean = 0;
-        for (unsigned int i = 0; i < transitions.size(); i++) {
-            x_mean += transitions.at(i).getLocation().x;
-            y_mean += transitions.at(i).getLocation().y;
+        for (unsigned int i = 0; i < edges.size(); i++) {
+            x_mean += edges.at(i).x;
+            y_mean += edges.at(i).y;
         }
-        x_mean /= transitions.size();
-        y_mean /= transitions.size();
+        x_mean /= edges.size();
+        y_mean /= edges.size();
 
         // Standard deviation
         int x_dev = 0,
             y_dev = 0;
-        for (unsigned int i = 0; i < transitions.size(); i++) {
-            x_dev += abs(transitions.at(i).getLocation().x - x_mean);
-            y_dev += abs(transitions.at(i).getLocation().y - y_mean);
+        for (unsigned int i = 0; i < edges.size(); i++) {
+            x_dev += abs(edges.at(i).x - x_mean);
+            y_dev += abs(edges.at(i).y - y_mean);
         }
-        x_dev /= transitions.size();
-        y_dev /= transitions.size();
+        x_dev /= edges.size();
+        y_dev /= edges.size();
 
-        //cout << transitions.size() << endl;
+        //cout << edges.size() << endl;
 
 
         // Statistical throw-out
-        it = transitions.begin();
-        while (it < transitions.end()) {
-            if (abs(it->getLocation().x - x_mean) > x_dev || abs(it->getLocation().y - y_mean) > y_dev)
-                it = transitions.erase(it);
+        it = edges.begin();
+        while (it < edges.end()) {
+            if (abs(it->x - x_mean) > x_dev || abs(it->y - y_mean) > y_dev)
+                it = edges.erase(it);
             else
                 it++;
         }
@@ -71,15 +77,15 @@ void BallDetection::detectBall()
         // Geometric mean
         long double x_pos = 1,
                y_pos = 1;
-        for (unsigned int i = 0; i < transitions.size(); i++) {
-            int x = transitions.at(i).getLocation().x,
-                y = transitions.at(i).getLocation().y;
+        for (unsigned int i = 0; i < edges.size(); i++) {
+            int x = edges.at(i).x,
+                y = edges.at(i).y;
 
-            x_pos *= pow(x, 1.0/transitions.size());
-            y_pos *= pow(y, 1.0/transitions.size());
+            x_pos *= pow(x, 1.0/edges.size());
+            y_pos *= pow(y, 1.0/edges.size());
         }
-        //x_pos = pow(x_pos, 1.0/transitions.size());
-        //y_pos = pow(y_pos, 1.0/transitions.size());        
+        //x_pos = pow(x_pos, 1.0/edges.size());
+        //y_pos = pow(y_pos, 1.0/edges.size());
 
         if (y_pos >= img.getHeight())
             y_pos = img.getHeight()-1;
@@ -281,5 +287,14 @@ void BallDetection::detectBall()
             #endif
         }
 
+    }
+}
+
+void BallDetection::appendEdgesFromSegments(const vector<ColourSegment> &segments, vector<PointType> &pointlist)
+{
+    vector<ColourSegment>::const_iterator it;
+    for(it = segments.begin(); it < segments.end(); it++) {
+        pointlist.push_back(it->getStart());
+        pointlist.push_back(it->getEnd());
     }
 }

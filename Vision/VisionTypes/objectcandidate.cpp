@@ -31,29 +31,29 @@ ObjectCandidate::ObjectCandidate(const PointType& top_left, const PointType& bot
     recalculate();
 }
 
-ObjectCandidate::ObjectCandidate(const PointType& top_left, const PointType& bottom_right, ClassIndex::Colour colour, const vector<Transition>& candidate_segments): colour(colour)
+ObjectCandidate::ObjectCandidate(const PointType& top_left, const PointType& bottom_right, ClassIndex::Colour colour, const vector<ColourSegment>& candidate_segments): colour(colour)
 {
     topLeft = top_left;
     bottomRight = bottom_right;    
     recalculate();
     
-    transitions = candidate_segments;
+    segments = candidate_segments;
 }
 
-const vector<Transition>& ObjectCandidate::getTransitions() const
+const vector<ColourSegment>& ObjectCandidate::getSegments() const
 {
-    return transitions;
+    return segments;
 }
 
-void ObjectCandidate::addTransitions(const vector<Transition>& new_transitions)
+void ObjectCandidate::addColourSegments(const vector<ColourSegment> &new_segments)
 {
-    transitions.insert(transitions.end(), new_transitions.begin(), new_transitions.end());
+    segments.insert(segments.end(), new_segments.begin(), new_segments.end());
     return;
 }
 
-void ObjectCandidate::addTransition(const Transition& new_transition)
+void ObjectCandidate::addColourSegment(const ColourSegment &new_segment)
 {
-    transitions.push_back(new_transition);
+    segments.push_back(new_segment);
     return;
 }
 

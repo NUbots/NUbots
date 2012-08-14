@@ -11,13 +11,13 @@ void LineDetector::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
 
-    vector<Transition> v_trans = vbb->getVerticalTransitions(VisionFieldObject::LINE);  //get transitions associated with lines
-    vector<Transition> h_trans = vbb->getHorizontalTransitions(VisionFieldObject::LINE);
+    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE);  //get transitions associated with lines
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE);
     vector<LSFittedLine*> lines;
     vector<LSFittedLine> result;
     vector<LinePoint*> points;
 
-    points = getPointsFromTransitions(h_trans, v_trans);
+    points = getPointsFromSegments(h_segments, v_segments);
 
     points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
 
@@ -32,47 +32,14 @@ void LineDetector::run()
     vbb->addLines(result);
 }
 
-vector<LinePoint*> LineDetector::getPointsFromTransitions(const vector<Transition>& h_trans, const vector<Transition>& v_trans)
+vector<LinePoint*> LineDetector::getPointsFromSegments(const vector<ColourSegment> &h_segments, const vector<ColourSegment> &v_segments)
 {
     vector<LinePoint*> points;
-    //Old, just uses transitions
-//    BOOST_FOREACH(Transition t, h_trans) {
-//        points.push_back(new LinePoint(t.getLocation().x, t.getLocation().y));
-//    }
-//    BOOST_FOREACH(Transition t, v_trans) {
-//        points.push_back(new LinePoint(t.getLocation().x, t.getLocation().y));
-//    }
-
-    //new - finds pairs of transitions and finds their centrepoints
-    // a bit of a hack, assumes there are always pairs and that the transitions are in order.
-    int av_x, av_y;
-    vector<Transition>::const_iterator t_it;
-    if(h_trans.size()%2 == 0) {
-        t_it = h_trans.begin();
-        while(t_it < h_trans.end()) {
-            av_x = (t_it->getLocation().x + (t_it+1)->getLocation().x)*0.5;
-            av_y = (t_it->getLocation().y + (t_it+1)->getLocation().y)*0.5;
-            cout << "(" << t_it->getLocation().x << "," << t_it->getLocation().y << ") (" << (t_it+1)->getLocation().x << "," << (t_it+1)->getLocation().y << ") (" << av_x << "," << av_y << ")" << std::endl;
-            points.push_back(new LinePoint(av_x ,av_y));
-            t_it += 2;
-        }
+    BOOST_FOREACH(ColourSegment s, h_segments) {
+        points.push_back(new LinePoint(s.getCentre().x, s.getCentre().y));
     }
-    else {
-        errorlog << "LineDetector::getPointsFromTransitions: unpaired horizontal line transitions!" << std::endl;
-    }
-    cout << "V\n";
-    if(v_trans.size()%2 == 0) {
-        t_it = v_trans.begin();
-        while(t_it < v_trans.end()) {
-            av_x = (t_it->getLocation().x + (t_it+1)->getLocation().x)*0.5;
-            av_y = (t_it->getLocation().y + (t_it+1)->getLocation().y)*0.5;
-            cout << "(" << t_it->getLocation().x << "," << t_it->getLocation().y << ") (" << (t_it+1)->getLocation().x << "," << (t_it+1)->getLocation().y << ") (" << av_x << "," << av_y << ")" << std::endl;
-            points.push_back(new LinePoint(av_x ,av_y));
-            t_it += 2;
-        }
-    }
-    else {
-        errorlog << "LineDetector::getPointsFromTransitions: unpaired vertical line transitions!" << std::endl;
+    BOOST_FOREACH(ColourSegment s, v_segments) {
+        points.push_back(new LinePoint(s.getCentre().x, s.getCentre().y));
     }
 
     return points;

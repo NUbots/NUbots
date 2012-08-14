@@ -6,7 +6,6 @@
 
 #include "Vision/VisionTypes/colourreplacementrule.h"
 #include "Vision/VisionTypes/colourtransitionrule.h"
-#include "Vision/VisionTypes/transition.h"
 #include "Vision/VisionTypes/segmentedregion.h"
 
 class SegmentFilter
@@ -34,7 +33,7 @@ private:
       @param scans the lists of segments - smoothed or unsmoothed.
       @param result vectors of transition rule matches and the field object ids they map to.
       */
-    void filter(const SegmentedRegion& scans, map<VisionFieldObject::VFO_ID, vector<Transition> >& result) const;
+    void filter(const SegmentedRegion& scans, map<VisionFieldObject::VFO_ID, vector<ColourSegment> >& result) const;
     
     /**
       @brief Applies a single rule to a segmented region.
@@ -42,7 +41,7 @@ private:
       @param rule The transition rule to apply.
       @param matches the resulting list of transitions.
       */
-    void checkRuleAgainstRegion(const SegmentedRegion& scans, const ColourTransitionRule& rule, vector<Transition>& matches) const;
+    void checkRuleAgainstRegion(const SegmentedRegion& scans, const ColourTransitionRule& rule, vector<ColourSegment>& matches) const;
     /**
       @brief Applies a replacement rule to a triplet of segments.
       @param before the first segment.

@@ -8,27 +8,11 @@ ColourTransitionRule::ColourTransitionRule()
 {
 }
 
-bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegment &after, ScanDirection dir) const
+bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegment& middle, const ColourSegment &after) const
 {
-//    int multiplier;
-//    switch(dir) {
-//    case HORIZONTAL:
-//        multiplier = VisionBlackboard::getInstance()->getImageWidth();
-//        break;
-//    case VERTICAL:
-//        multiplier = VisionBlackboard::getInstance()->getImageHeight();
-//        break;
-//    }
-    
-//    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-//    if(!(m_before_min*multiplier <= before.getLengthPixels() && m_before_max*multiplier >= before.getLengthPixels() &&
-//         m_after_min*multiplier <= after.getLengthPixels() && m_after_max*multiplier >= after.getLengthPixels()))
-//    {
-//        return false;   //did not match size requirements
-//    }
-
     //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-    if(!(m_before_min <= before.getLengthPixels() && m_before_max >= before.getLengthPixels() &&
+    if(!(m_min <= middle.getLengthPixels() && m_max >= middle.getLengthPixels() &&
+         m_before_min <= before.getLengthPixels() && m_before_max >= before.getLengthPixels() &&
          m_after_min <= after.getLengthPixels() && m_after_max >= after.getLengthPixels())) {
         //did not match size requirements
         return false;
@@ -36,6 +20,18 @@ bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegmen
 
     bool valid;
     vector<ClassIndex::Colour>::const_iterator it;
+
+    if(!m_middle.empty()) {
+        if(middle.getColour() == ClassIndex::invalid)
+            return false;   //there is a before set, but no before colour
+        valid = false;
+        for(it = m_middle.begin(); it != m_middle.end(); it++) {
+            if(*it == middle.getColour())
+                valid = true;   //a match has been found
+        }
+        if(!valid)
+            return false;   //did not match before set
+    }
 
     if(!m_before.empty()) {
         if(before.getColour() == ClassIndex::invalid)
@@ -82,6 +78,13 @@ ostream& operator<< (ostream& output, const ColourTransitionRule& c)
     //before
     output << "before: (" << c.m_before_min << ", " << c.m_before_max << ") [";
     for(it = c.m_before.begin(); it != c.m_before.end(); it++) {
+        output << ClassIndex::getColourNameFromIndex(*it) << ", ";
+    }
+    output << "]\t// (min, max) [colourlist]\n";
+
+    //this
+    output << "middle: (" << c.m_min << ", " << c.m_max << ") [";
+    for(it = c.m_middle.begin(); it != c.m_middle.end(); it++) {
         output << ClassIndex::getColourNameFromIndex(*it) << ", ";
     }
     output << "]\t// (min, max) [colourlist]\n";
@@ -141,6 +144,29 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
         while(colour_stream.good()) {
             getline(colour_stream, next, ',');
             c.m_before.push_back(ClassIndex::getColourFromName(next));
+        }
+    }
+
+    //MIDDLE
+    //reset colour list
+    c.m_middle.clear();
+    // read in the before: (min, max)
+    input.ignore(30, '(');
+    input >> c.m_min;
+    input.ignore(10, ',');
+    input >> c.m_max;
+    input.ignore(10, ')');
+
+    input.ignore(10, '[');
+
+    //get colour list
+    getline(input, colour_str, ']');
+    colour_str.erase(remove(colour_str.begin(), colour_str.end(), ' '), colour_str.end());  //remove whitespace
+    if(!colour_str.empty()) {
+        colour_stream.str(colour_str);
+        while(colour_stream.good()) {
+            getline(colour_stream, next, ',');
+            c.m_middle.push_back(ClassIndex::getColourFromName(next));
         }
     }
 

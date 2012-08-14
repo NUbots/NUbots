@@ -23,6 +23,9 @@ public:
       and close classification at the pixel level combined with occlusion detection for classifying.
     */
     static void detectBall();
+
+private:
+    static void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<PointType>& pointlist);
 };
 
 #endif // BALLDETECTION_H

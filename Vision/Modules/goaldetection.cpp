@@ -471,18 +471,14 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     else
         goal = VisionFieldObject::GOAL_Y;
 
-    const vector<Transition>& hor_trans = VisionBlackboard::getInstance()->getHorizontalTransitions(goal);
-    const vector<Transition>& ver_trans = VisionBlackboard::getInstance()->getVerticalTransitions(goal);
+    const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(goal);
+    const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(goal);
 
-    vector<Transition> start_trans, end_trans;
+    vector<PointType> start_trans, end_trans, vert_trans;
 
     // separate into start and end transitions
-    for (unsigned int i = 0; i < hor_trans.size(); i++) {
-        if (hor_trans.at(i).getAfter() == colour)
-            start_trans.push_back(hor_trans.at(i));
-        else
-            end_trans.push_back(hor_trans.at(i));
-    }
+    sortEdgesFromSegments(h_segments, start_trans, end_trans);
+    appendEdgesFromSegments(v_segments, vert_trans);
 
     const int MAX_OBJECTS = 8;
     const int BINS = 20;
@@ -508,7 +504,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         if (repeats == 0) {
             for (unsigned int i = 0; i < start_trans.size(); i++)
                 for (int j = 0; j < BINS; j++)
-                    if (start_trans.at(i).getLocation().x < (j+1)*BIN_WIDTH) {
+                    if (start_trans.at(i).x < (j+1)*BIN_WIDTH) {
                         histogram[repeats][j]++;
                         break;
                     }
@@ -516,7 +512,7 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         else {
             for (unsigned int i = 0; i < end_trans.size(); i++)
                 for (int j = 0; j < BINS; j++)
-                    if (end_trans.at(i).getLocation().x < (j+1)*BIN_WIDTH) {
+                    if (end_trans.at(i).x < (j+1)*BIN_WIDTH) {
                         histogram[repeats][j]++;
                         break;
                     }
@@ -589,22 +585,22 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             int mean = 0, sdev = 0, counter = 0;
 
             for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (start_trans.at(j).getLocation().x >= start_pos && start_trans.at(j).getLocation().x <= end_pos) {
-                    mean +=  start_trans.at(j).getLocation().x;
+                if (start_trans.at(j).x >= start_pos && start_trans.at(j).x <= end_pos) {
+                    mean +=  start_trans.at(j).x;
                     counter++;
                 }
             mean /= counter;
             counter = 0;
             for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (start_trans.at(j).getLocation().x >= start_pos && start_trans.at(j).getLocation().x <= end_pos) {
-                    sdev += pow(static_cast<float>(start_trans.at(j).getLocation().x - mean), 2);
+                if (start_trans.at(j).x >= start_pos && start_trans.at(j).x <= end_pos) {
+                    sdev += pow(static_cast<float>(start_trans.at(j).x - mean), 2);
                     counter++;
                 }
             sdev = sqrt(sdev/counter);
 
             for (unsigned int j = 0; j < start_trans.size(); j++) {
-                int    x_pos = start_trans.at(j).getLocation().x,
-                       y_pos = start_trans.at(j).getLocation().y;
+                int    x_pos = start_trans.at(j).x,
+                       y_pos = start_trans.at(j).y;
                 if (x_pos >= start_pos && x_pos <= end_pos) {
                     if(x_pos < start_min && x_pos >= mean - SDEV_THRESHOLD*sdev) {
                         start_min = x_pos;
@@ -620,22 +616,22 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
 
             // FIND RIGHT EDGE
             for (unsigned int j = 0; j < end_trans.size(); j++)
-                if (end_trans.at(j).getLocation().x >= start_pos && end_trans.at(j).getLocation().x <= end_pos) {
-                    mean +=  end_trans.at(j).getLocation().x;
+                if (end_trans.at(j).x >= start_pos && end_trans.at(j).x <= end_pos) {
+                    mean +=  end_trans.at(j).x;
                     counter++;
                 }
             mean /= counter;
             counter = 0;
             for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (end_trans.at(j).getLocation().x >= start_pos && end_trans.at(j).getLocation().x <= end_pos) {
-                    sdev += pow(static_cast<float>(end_trans.at(j).getLocation().x - mean), 2);
+                if (end_trans.at(j).x >= start_pos && end_trans.at(j).x <= end_pos) {
+                    sdev += pow(static_cast<float>(end_trans.at(j).x - mean), 2);
                     counter++;
                 }
             sdev = sqrt(sdev/counter);
 
             for (unsigned int j = 0; j < end_trans.size(); j++) {
-                int    x_pos = end_trans.at(j).getLocation().x,
-                       y_pos = end_trans.at(j).getLocation().y;
+                int    x_pos = end_trans.at(j).x,
+                       y_pos = end_trans.at(j).y;
                 if (x_pos >= start_pos && x_pos <= end_pos) {
                     if (x_pos > end_max && x_pos <= mean + SDEV_THRESHOLD*sdev)
                     end_max = x_pos;
@@ -651,10 +647,10 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             //unsigned int    vert_max = 0,
             //                vert_min = std::numeric_limits<int>::max();
 
-            for (unsigned int j = 0; j < ver_trans.size(); j++) {
+            for (unsigned int j = 0; j < vert_trans.size(); j++) {
                 // extend with vertical segments (increase height)
-                int x_pos = ver_trans.at(j).getLocation().x;
-                int y_pos = ver_trans.at(j).getLocation().y;
+                int x_pos = vert_trans.at(j).x;
+                int y_pos = vert_trans.at(j).y;
                 if (x_pos >= start_min && x_pos <= end_max) {
                     contains_vertical = true;
                     if (y_pos < bot_min)
@@ -686,3 +682,42 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     }
 }
 
+void GoalDetection::sortEdgesFromSegments(const vector<ColourSegment> &segments, vector<PointType> &startedges, vector<PointType> &endedges)
+{
+    vector<ColourSegment>::const_iterator it;
+    for(it = segments.begin(); it < segments.end(); it++) {
+        if(it->getStart().x < it->getEnd().x) {
+            startedges.push_back(it->getStart());
+            endedges.push_back(it->getEnd());
+        }
+        else if(it->getStart().x > it->getEnd().x){
+            startedges.push_back(it->getEnd());
+            endedges.push_back(it->getStart());
+        }
+        else {
+            if(it->getStart().y < it->getEnd().y) {
+                startedges.push_back(it->getStart());
+                endedges.push_back(it->getEnd());
+            }
+            else if(it->getStart().y > it->getEnd().y){
+                startedges.push_back(it->getEnd());
+                endedges.push_back(it->getStart());
+            }
+            else {
+                startedges.push_back(it->getStart());
+                startedges.push_back(it->getEnd());
+                endedges.push_back(it->getStart());
+                endedges.push_back(it->getEnd());
+            }
+        }
+    }
+}
+
+void GoalDetection::appendEdgesFromSegments(const vector<ColourSegment> &segments, vector<PointType> &pointlist)
+{
+    vector<ColourSegment>::const_iterator it;
+    for(it = segments.begin(); it < segments.end(); it++) {
+        pointlist.push_back(it->getStart());
+        pointlist.push_back(it->getEnd());
+    }
+}

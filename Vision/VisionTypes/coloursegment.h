@@ -33,6 +33,9 @@ public:
     const PointType& getStart() const {return m_start;}
     //! Returns the end location of the segment in pixel coordinates.
     const PointType& getEnd() const {return m_end;}
+    //! Returns the end location of the segment in pixel coordinates.
+    const PointType& getCentre() const {return (m_start + m_end)*0.5;}
+
 
     /**
       * Sets the parameters for the segment.

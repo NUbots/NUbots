@@ -22,7 +22,7 @@ void SegmentFilter::run() const
     const SegmentedRegion& h_segments = vbb->getHorizontalSegmentedRegion();
     const SegmentedRegion& v_segments = vbb->getVerticalSegmentedRegion();
     SegmentedRegion h_filtered, v_filtered;
-    map<VisionFieldObject::VFO_ID, vector<Transition> > h_result, v_result;
+    map<VisionFieldObject::VFO_ID, vector<ColourSegment> > h_result, v_result;
     
     if(PREFILTER_ON) {
         preFilter(h_segments, h_filtered);
@@ -96,19 +96,19 @@ void SegmentFilter::preFilter(const SegmentedRegion &scans, SegmentedRegion &res
     }
 }
 
-void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::VFO_ID, vector<Transition> > &result) const
+void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::VFO_ID, vector<ColourSegment> > &result) const
 {
     switch(scans.getDirection()) {
-    case VERTICAL:
+    case VisionID::VERTICAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_v) {
-            vector<Transition>& result_trans = result[rule.getVFO_ID()];
-            checkRuleAgainstRegion(scans, rule, result_trans);
+            vector<ColourSegment>& segments = result[rule.getVFO_ID()];
+            checkRuleAgainstRegion(scans, rule, segments);
         }
         break;
-    case HORIZONTAL:
+    case VisionID::HORIZONTAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_h) {
-            vector<Transition>& result_trans = result[rule.getVFO_ID()];
-            checkRuleAgainstRegion(scans, rule, result_trans);
+            vector<ColourSegment>& segments = result[rule.getVFO_ID()];
+            checkRuleAgainstRegion(scans, rule, segments);
         }
         break;
     default:
@@ -117,34 +117,29 @@ void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::
     }   
 }
 
-void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const ColourTransitionRule &rule, vector<Transition> &matches) const
+void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const ColourTransitionRule &rule, vector<ColourSegment> &matches) const
 {
     const vector<vector<ColourSegment> >& segments = scans.getSegments();
-    vector<ColourSegment>::const_iterator before_it, after_it;
-    Transition next_transition;
-    ScanDirection dir = scans.getDirection();
+    vector<ColourSegment>::const_iterator it;
     
     //loop through each scan
     BOOST_FOREACH(const vector<ColourSegment> vs, segments) {
         //move down segments in scan pairwise
-        before_it = vs.begin();
-        //first check start segment alone
-        if(rule.match(ColourTransitionRule::nomatch, *before_it, dir)) {
-            next_transition.set(before_it->getStart(), ClassIndex::invalid, before_it->getColour(), dir);
-            matches.push_back(next_transition);
+        it = vs.begin();
+        //first check start pair alone
+        if(rule.match(ColourTransitionRule::nomatch, *it, *(it+1))) {
+            matches.push_back(*it);
         }
-        //then check the rest pairwise
-        for(after_it = before_it+1; after_it < vs.end(); after_it++) {
-            if(rule.match(*before_it, *after_it, dir)) {
-                next_transition.set(*before_it, *after_it, dir);
-                matches.push_back(next_transition);
+        //then check the rest in triplets
+        while(it < vs.end()-1) {
+            if(rule.match(*(it-1), *it, *(it+1))) {
+                matches.push_back(*it);
             }
-            before_it = after_it;
+            it++;
         }
-        //lastly check final segment alone - final segment is before_it
-        if(rule.match(*before_it, ColourTransitionRule::nomatch, dir)) {
-            next_transition.set(before_it->getEnd(), before_it->getColour(), ClassIndex::invalid, dir);
-            matches.push_back(next_transition);
+        //lastly check final pair alone
+        if(rule.match(*it, *(it+1), ColourTransitionRule::nomatch)) {
+            matches.push_back(*(it+1));
         }
     }
 }
@@ -155,11 +150,11 @@ void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourS
     ColourSegment temp_seg;
     
     switch(dir) {
-    case VERTICAL:
+    case VisionID::VERTICAL:
         begin = replacement_rules_v.begin();
         end = replacement_rules_v.end();
         break;
-    case HORIZONTAL:
+    case VisionID::HORIZONTAL:
         begin = replacement_rules_h.begin();
         end = replacement_rules_h.end();
         break;

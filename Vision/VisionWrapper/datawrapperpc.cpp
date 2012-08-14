@@ -29,8 +29,8 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_V_SCANS";
     case DBID_SEGMENTS:
         return "DBID_SEGMENTS";
-    case DBID_TRANSITIONS:
-        return "DBID_TRANSITIONS";
+    case DBID_MATCHED_SEGMENTS:
+        return "DBID_MATCHED_SEGMENTS";
     case DBID_HORIZON:
         return "DBID_HORIZON";
     case DBID_GREENHORIZON_SCANS:
@@ -129,7 +129,7 @@ DataWrapper::DataWrapper()
     debug_map[DBID_H_SCANS]             = &debug_windows[0];
     debug_map[DBID_V_SCANS]             = &debug_windows[0];
     debug_map[DBID_SEGMENTS]            = &debug_windows[0];
-    debug_map[DBID_TRANSITIONS]         = &debug_windows[0];
+    debug_map[DBID_MATCHED_SEGMENTS]    = &debug_windows[0];
     debug_map[DBID_HORIZON]             = &debug_windows[0];
     debug_map[DBID_GREENHORIZON_SCANS]  = &debug_windows[0];
     debug_map[DBID_GREENHORIZON_FINAL]  = &debug_windows[0];
@@ -453,7 +453,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
             cv::line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), cv::Scalar(127,127,127), 1);
         }
         break;
-    case DBID_TRANSITIONS:
+    case DBID_MATCHED_SEGMENTS:
         BOOST_FOREACH(const PointType& pt, data_points) {
             cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,255,0), 4);
         }

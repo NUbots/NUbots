@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "Vision/VisionTypes/transition.h"
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/coloursegment.h"
 
 using namespace std;
 
@@ -23,14 +23,14 @@ public:
     int getHeight() const;
     float getAspect() const;
     ClassIndex::Colour getColour()  const;
-    const vector<Transition>& getTransitions() const;
-    void addTransitions(const vector<Transition>& new_segments);
-    void addTransition(const Transition& new_segment);
+    const vector<ColourSegment>& getSegments() const;
+    void addColourSegments(const vector<ColourSegment>& new_segments);
+    void addColourSegment(const ColourSegment& new_segment);
 
     ObjectCandidate();
     ObjectCandidate(const PointType& top_left, const PointType& bottom_right);
     ObjectCandidate(const PointType& top_left, const PointType& bottom_right, ClassIndex::Colour colour);
-    ObjectCandidate(const PointType& top_left, const PointType& bottom_right, ClassIndex::Colour colour, const vector<Transition>& candidate_segments);
+    ObjectCandidate(const PointType& top_left, const PointType& bottom_right, ClassIndex::Colour colour, const vector<ColourSegment>& candidate_segments);
     ~ObjectCandidate();
 
 
@@ -43,7 +43,7 @@ protected:
     int width;
     int height;
     float aspect;
-    vector<Transition> transitions;
+    vector<ColourSegment> segments;
     ClassIndex::Colour colour;
 
 

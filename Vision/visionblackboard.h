@@ -17,7 +17,7 @@
 #include "basicvisiontypes.h"
 #include "VisionTypes/coloursegment.h"
 #include "VisionTypes/segmentedregion.h"
-#include "VisionTypes/transition.h"
+//#include "VisionTypes/transition.h"
 #include "VisionTypes/VisionFieldObjects/visionfieldobject.h"
 #include "VisionTypes/VisionFieldObjects/ball.h"
 #include "VisionTypes/VisionFieldObjects/goal.h"
@@ -51,10 +51,10 @@ public:
     void setHorizontalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
     void setVerticalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
 
-    void setHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id, const vector<Transition>& transitions);
-    void setVerticalTransitions(VisionFieldObject::VFO_ID vfo_id, const vector<Transition>& transitions);
-    void setHorizontalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<Transition> >& t_map);
-    void setVerticalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<Transition> >& t_map);
+    void setHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id, const vector<ColourSegment>& transitions);
+    void setVerticalTransitions(VisionFieldObject::VFO_ID vfo_id, const vector<ColourSegment>& transitions);
+    void setHorizontalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<ColourSegment> >& t_map);
+    void setVerticalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<ColourSegment> >& t_map);
 
     void setObjectPoints(const vector<PointType>& points);
     
@@ -79,10 +79,10 @@ public:
     const SegmentedRegion& getHorizontalFilteredRegion() const;
     const SegmentedRegion& getVerticalFilteredRegion() const;
 
-    const vector<Transition>& getHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id);
-    const vector<Transition>& getVerticalTransitions(VisionFieldObject::VFO_ID vfo_id);
-    const map<VisionFieldObject::VFO_ID, vector<Transition> >& getHorizontalTransitionsMap() const;
-    const map<VisionFieldObject::VFO_ID, vector<Transition> >& getVerticalTransitionsMap() const;
+    const vector<ColourSegment>& getHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id);
+    const vector<ColourSegment>& getVerticalTransitions(VisionFieldObject::VFO_ID vfo_id);
+    const map<VisionFieldObject::VFO_ID, vector<ColourSegment> >& getHorizontalTransitionsMap() const;
+    const map<VisionFieldObject::VFO_ID, vector<ColourSegment> >& getVerticalTransitionsMap() const;
     
     const Horizon& getKinematicsHorizon() const;
     bool isCameraToGroundValid() const;
@@ -184,8 +184,8 @@ private:
     SegmentedRegion vertical_filtered_segments;       //! @variable The filtered segmented vertical scanlines.
 
     //! Transitions
-    map<VisionFieldObject::VFO_ID, vector<Transition> > mapped_horizontal_transitions;
-    map<VisionFieldObject::VFO_ID, vector<Transition> > mapped_vertical_transitions;
+    map<VisionFieldObject::VFO_ID, vector<ColourSegment> > matched_horizontal_segments;
+    map<VisionFieldObject::VFO_ID, vector<ColourSegment> > matched_vertical_segments;
     //vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments.
     //vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments.
     
