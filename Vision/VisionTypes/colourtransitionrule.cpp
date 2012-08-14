@@ -10,54 +10,7 @@ ColourTransitionRule::ColourTransitionRule()
 
 bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegment& middle, const ColourSegment &after) const
 {
-    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-    if(!(m_min <= middle.getLengthPixels() && m_max >= middle.getLengthPixels() &&
-         m_before_min <= before.getLengthPixels() && m_before_max >= before.getLengthPixels() &&
-         m_after_min <= after.getLengthPixels() && m_after_max >= after.getLengthPixels())) {
-        //did not match size requirements
-        return false;
-    }
-
-    bool valid;
-    vector<ClassIndex::Colour>::const_iterator it;
-
-    if(!m_middle.empty()) {
-        if(middle.getColour() == ClassIndex::invalid)
-            return false;   //there is a before set, but no before colour
-        valid = false;
-        for(it = m_middle.begin(); it != m_middle.end(); it++) {
-            if(*it == middle.getColour())
-                valid = true;   //a match has been found
-        }
-        if(!valid)
-            return false;   //did not match before set
-    }
-
-    if(!m_before.empty()) {
-        if(before.getColour() == ClassIndex::invalid)
-            return false;   //there is a before set, but no before colour
-        valid = false;
-        for(it = m_before.begin(); it != m_before.end(); it++) {
-            if(*it == before.getColour())
-                valid = true;   //a match has been found
-        }
-        if(!valid)
-            return false;   //did not match before set
-    }
-    
-    if(!m_after.empty()) {
-        if(after.getColour() == ClassIndex::invalid)
-            return false;   //there is an after set, but no after colour
-        valid = false;
-        for(it = m_after.begin(); it != m_after.end(); it++) {
-            if(*it == after.getColour())
-                valid = true;   //a match has been found
-        }
-        if(!valid)
-            return false;   //did not match after set
-    }
-    
-    return true;    //passed all checks
+    return oneWayMatch(before, middle, after) || oneWayMatch(after, middle, before); //test both directions
 }
 
 //! @brief Returns the ID of the VFO this rule is related to.
@@ -220,4 +173,56 @@ istream& operator>> (istream& input, vector<ColourTransitionRule>& v)
     }
 
     return input;
+}
+
+bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const ColourSegment &middle, const ColourSegment &after) const
+{
+    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
+    if(!(m_min <= middle.getLengthPixels() && m_max >= middle.getLengthPixels() &&
+         m_before_min <= before.getLengthPixels() && m_before_max >= before.getLengthPixels() &&
+         m_after_min <= after.getLengthPixels() && m_after_max >= after.getLengthPixels())) {
+        //did not match size requirements
+        return false;
+    }
+
+    bool valid;
+    vector<ClassIndex::Colour>::const_iterator it;
+
+    if(!m_middle.empty()) {
+        if(middle.getColour() == ClassIndex::invalid)
+            return false;   //there is a before set, but no before colour
+        valid = false;
+        for(it = m_middle.begin(); it != m_middle.end(); it++) {
+            if(*it == middle.getColour())
+                valid = true;   //a match has been found
+        }
+        if(!valid)
+            return false;   //did not match before set
+    }
+
+    if(!m_before.empty()) {
+        if(before.getColour() == ClassIndex::invalid)
+            return false;   //there is a before set, but no before colour
+        valid = false;
+        for(it = m_before.begin(); it != m_before.end(); it++) {
+            if(*it == before.getColour())
+                valid = true;   //a match has been found
+        }
+        if(!valid)
+            return false;   //did not match before set
+    }
+
+    if(!m_after.empty()) {
+        if(after.getColour() == ClassIndex::invalid)
+            return false;   //there is an after set, but no after colour
+        valid = false;
+        for(it = m_after.begin(); it != m_after.end(); it++) {
+            if(*it == after.getColour())
+                valid = true;   //a match has been found
+        }
+        if(!valid)
+            return false;   //did not match after set
+    }
+
+    return true;    //passed all checks
 }

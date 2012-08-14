@@ -99,7 +99,7 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& 
             start_pos = x;
         }
     }
-    segment.set(PointType(start_pos, y), PointType(x, y), start_colour);
+    segment.set(PointType(start_pos, y), PointType(x-1, y), start_colour);
     result.push_back(segment);
     
     #if VISION_SCAN_VERBOSITY > 1

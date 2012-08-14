@@ -26,7 +26,7 @@ public:
     ColourSegment(const PointType& start, const PointType& end, const ClassIndex::Colour& colour) {set(start, end, colour);}
 
     //! Returns the length of the segment in pixels.
-    unsigned int getLengthPixels() const {return m_length_pixels;}
+    unsigned int getLength() const {return m_length_pixels;}
     //! Returns the colour of the segment.
     ClassIndex::Colour getColour() const {return m_colour;}
     //! Returns the start location of the segment in pixel coordinates.

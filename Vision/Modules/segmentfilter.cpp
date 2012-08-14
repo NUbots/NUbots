@@ -138,8 +138,8 @@ void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const C
             it++;
         }
         //lastly check final pair alone
-        if(rule.match(*it, *(it+1), ColourTransitionRule::nomatch)) {
-            matches.push_back(*(it+1));
+        if(rule.match(*(it-1), *it, ColourTransitionRule::nomatch)) {
+            matches.push_back(*it);
         }
     }
 }

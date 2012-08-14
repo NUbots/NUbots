@@ -28,11 +28,11 @@ public:
 
     ColourTransitionRule();
     /*!
-      Checks if the given segment pair matches this rule.
-      @param before the first segment.
-      @param after the second segment.
-      @param dir The scan direction (vertical or horizontal).
-      @return Whether it is a match.
+      Checks if the given segment pair matches this rule (forward and reverse).
+      @param before the preceeding segment.
+      @param middle the middle segment.
+      @param after the following segment.
+      @return Whether it is a match in either direction.
       */
     bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
     //! Returns the ID of the field object that this rule is for.
@@ -62,6 +62,15 @@ private:
         m_max,          //! @variable the maximum length of the segment for a match.
         m_after_min,    //! @variable the minimum length of the following segment for a match.
         m_after_max;    //! @variable the maximum length of the following segment for a match.
+
+    /*!
+      Checks if the given segment triplet matches this rule in one direction.
+      @param before the preceeding segment.
+      @param middle the middle segment.
+      @param after the following segment.
+      @return Whether it is a match.
+      */
+    bool oneWayMatch(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
 };
 
 #endif // COLOURTRANSITIONRULE_H

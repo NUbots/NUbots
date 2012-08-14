@@ -475,9 +475,10 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(goal);
 
     vector<PointType> start_trans, end_trans, vert_trans;
+    vector<int> start_lengths, end_lengths;
 
     // separate into start and end transitions
-    sortEdgesFromSegments(h_segments, start_trans, end_trans);
+    sortEdgesFromSegments(h_segments, start_trans, end_trans, start_lengths, end_lengths);
     appendEdgesFromSegments(v_segments, vert_trans);
 
     const int MAX_OBJECTS = 8;
@@ -505,7 +506,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             for (unsigned int i = 0; i < start_trans.size(); i++)
                 for (int j = 0; j < BINS; j++)
                     if (start_trans.at(i).x < (j+1)*BIN_WIDTH) {
-                        histogram[repeats][j]++;
+                        //histogram[repeats][j]++;
+                        histogram[repeats][j] += start_lengths.at(i);
                         break;
                     }
         }
@@ -513,7 +515,8 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             for (unsigned int i = 0; i < end_trans.size(); i++)
                 for (int j = 0; j < BINS; j++)
                     if (end_trans.at(i).x < (j+1)*BIN_WIDTH) {
-                        histogram[repeats][j]++;
+                        //histogram[repeats][j]++;
+                        histogram[repeats][j] += end_lengths.at(i);
                         break;
                     }
         }
@@ -682,32 +685,44 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     }
 }
 
-void GoalDetection::sortEdgesFromSegments(const vector<ColourSegment> &segments, vector<PointType> &startedges, vector<PointType> &endedges)
+void GoalDetection::sortEdgesFromSegments(const vector<ColourSegment> &segments, vector<PointType> &startedges, vector<PointType> &endedges, vector<int> &startlengths, vector<int> &endlengths)
 {
     vector<ColourSegment>::const_iterator it;
     for(it = segments.begin(); it < segments.end(); it++) {
         if(it->getStart().x < it->getEnd().x) {
             startedges.push_back(it->getStart());
             endedges.push_back(it->getEnd());
+            startlengths.push_back(it->getLength());
+            endlengths.push_back(it->getLength());
         }
         else if(it->getStart().x > it->getEnd().x){
             startedges.push_back(it->getEnd());
             endedges.push_back(it->getStart());
+            startlengths.push_back(it->getLength());
+            endlengths.push_back(it->getLength());
         }
         else {
             if(it->getStart().y < it->getEnd().y) {
                 startedges.push_back(it->getStart());
                 endedges.push_back(it->getEnd());
+                startlengths.push_back(it->getLength());
+                endlengths.push_back(it->getLength());
             }
             else if(it->getStart().y > it->getEnd().y){
                 startedges.push_back(it->getEnd());
                 endedges.push_back(it->getStart());
+                startlengths.push_back(it->getLength());
+                endlengths.push_back(it->getLength());
             }
             else {
                 startedges.push_back(it->getStart());
                 startedges.push_back(it->getEnd());
                 endedges.push_back(it->getStart());
                 endedges.push_back(it->getEnd());
+                startlengths.push_back(it->getLength());
+                endlengths.push_back(it->getLength());
+                startlengths.push_back(it->getLength());
+                endlengths.push_back(it->getLength());
             }
         }
     }
