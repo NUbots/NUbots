@@ -73,8 +73,10 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 #if VISION_CONTROLLER_VERBOSITY > 2
     debug << "VisionController::runFrame() - segment filter done" << endl;
 #endif
-    if(lookForLandmarks)
+    if(lookForLandmarks) {
         GoalDetection::detectGoals();
+        m_line_detector.run();
+    }
 #if VISION_CONTROLLER_VERBOSITY > 2
     if(lookForLandmarks)
         debug << "VisionController::runFrame() - goal detection done - looking for landmarks" << endl;

@@ -88,6 +88,28 @@ public:
     static float GREEN_HORIZON_LOWER_THRESHOLD_MULT;    //! Dave?
     static float GREEN_HORIZON_UPPER_THRESHOLD_MULT;    //! Dave?
 
+    //! Split and Merge constants
+    //maximum field objects rules
+    static unsigned int SAM_MAX_POINTS; //500
+    static unsigned int SAM_MAX_LINES; //15
+    //splitting rules
+    static float SAM_SPLIT_DISTANCE; //1.0
+    static unsigned int SAM_MIN_POINTS_OVER; //2
+    static unsigned int SAM_MIN_POINTS_TO_LINE; //3
+    //Noise splitting rules
+    static unsigned int SAM_SPLIT_NOISE_ITERATIONS; //1
+    //merging rules
+    static float SAM_MAX_END_POINT_DIFF; //5.0
+    static float SAM_MAX_ANGLE_DIFF; //
+    //Line keeping rules
+    static unsigned int SAM_MIN_POINTS_TO_LINE_FINAL; //5
+    static float SAM_MIN_LINE_R2_FIT; //0.90
+    static float SAM_MAX_LINE_MSD; //50 set at constructor
+    //clearing options
+    static bool SAM_CLEAR_SMALL;
+    static bool SAM_CLEAR_DIRTY;
+
+
     // static methods
     static DistanceMethod getDistanceMethodFromName(std::string name);  //! Converts a string to a distance method.
     static std::string getDistanceMethodName(DistanceMethod method);    //! Converts a distance method to a string name.

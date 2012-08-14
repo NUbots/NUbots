@@ -257,6 +257,9 @@ void SegmentFilter::loadTransitionRules(string filename)
     debug << "rules_h (" << rules_h.size() << ")\n" << rules_h;
     debug << "rules_v (" << rules_v.size() << ")\n" << rules_v;
 #endif
+    cout << "SegmentFilter::loadTransitionRules()" << endl;
+    cout << "rules_h (" << rules_h.size() << ")\n" << rules_h;
+    cout << "rules_v (" << rules_v.size() << ")\n" << rules_v;
 }
 
 void SegmentFilter::loadReplacementRules(string filename)

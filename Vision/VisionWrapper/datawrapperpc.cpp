@@ -54,7 +54,7 @@ string DataWrapper::getIDName(DEBUG_ID id) {
     }
 }
 
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<Scalar>& colours, vector<PointType>& pts)
+void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<cv::Scalar>& colours, vector<PointType>& pts)
 {
     unsigned char r, g, b;
     
@@ -63,7 +63,7 @@ void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segm
             ClassIndex::getColourAsRGB(seg.getColour(), r, g, b);
             pts.push_back(seg.getStart());
             pts.push_back(seg.getEnd());
-            colours.push_back(Scalar(b,g,r));
+            colours.push_back(cv::Scalar(b,g,r));
         }
     }
 }
@@ -116,7 +116,7 @@ DataWrapper::DataWrapper()
 
     //create debug windows
     debug_window_num = 2;
-    debug_windows = new pair<string, Mat>[debug_window_num];
+    debug_windows = new pair<string, cv::Mat>[debug_window_num];
     debug_windows[0].first = "Debug1";
     debug_windows[1].first = "Debug2";
     for(int i=0; i<debug_window_num; i++) {
@@ -152,7 +152,7 @@ DataWrapper::~DataWrapper()
 {
 }
 
-void DataWrapper::generateImageFromMat(Mat& frame)
+void DataWrapper::generateImageFromMat(cv::Mat& frame)
 {
     int size = frame.rows*frame.cols;
     if (frame.rows != m_current_image->getHeight() or frame.cols != m_current_image->getWidth())
@@ -243,7 +243,7 @@ bool DataWrapper::getBodyPitch(float& pitch)
     return false;
 }
 
-//! @brief Returns spoofed kinematics horizon.
+//! @brief Returns spoofed kinecv::Matics horizon.
 const Horizon& DataWrapper::getKinematicsHorizon()
 { 
     return kinematics_horizon;
@@ -280,7 +280,7 @@ const LookUpTable& DataWrapper::getLUT() const
 }
 
 //! Outputs supply data to the appropriate external interface
-void DataWrapper::publish(DATA_ID id, const Mat &img)
+void DataWrapper::publish(DATA_ID id, const cv::Mat &img)
 {
     switch(id) {
     case DID_IMAGE:
@@ -307,14 +307,14 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
 void DataWrapper::debugRefresh()
 {
     for(int i=0; i<debug_window_num; i++) {
-        debug_windows[i].second = Scalar(0,0,0);
+        debug_windows[i].second = cv::Scalar(0,0,0);
     }
     
     LUT.classifyImage(*m_current_image, results_img);
     imshow(results_window_name, results_img);
 }
 
-bool DataWrapper::debugPublish(vector<Ball> data) {
+bool DataWrapper::debugPublish(const vector<Ball>& data) {
     #if VISION_WRAPPER_VERBOSITY > 1
         if(data.empty()) {
             debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BALLS) << endl;
@@ -322,18 +322,18 @@ bool DataWrapper::debugPublish(vector<Ball> data) {
         }
     #endif
     
-    Mat& img = results_img;    //get image from pair
+    cv::Mat& img = results_img;    //get image from pair
     string& window = results_window_name; //get window name from pair
     
     BOOST_FOREACH(Ball b, data) {
-        circle(img, cv::Point2i(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius(), Scalar(255,255,0), 2);
+        cv::circle(img, cv::Point2i(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius(), cv::Scalar(255,255,0), 2);
     }
 
     imshow(window, img);    //refresh this particular debug window
     return true;
 }
 
-bool DataWrapper::debugPublish(vector<Beacon> data) {
+bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
@@ -342,7 +342,7 @@ bool DataWrapper::debugPublish(vector<Beacon> data) {
     }
 #endif
     
-    Mat& img = results_img;    //get image from pair
+    cv::Mat& img = results_img;    //get image from pair
     string& window = results_window_name; //get window name from pair
     PointType bl, tr;
 
@@ -350,18 +350,18 @@ bool DataWrapper::debugPublish(vector<Beacon> data) {
         bl = b.getQuad().getBottomLeft();
         tr = b.getQuad().getTopRight();
         if(b.getID() == Beacon::BlueBeacon)
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(255,0,255), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,0,255), 2, 8, 0);
         else if(b.getID() == Beacon::YellowBeacon)
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(255,255,0), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,255,0), 2, 8, 0);
         else
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(255,255,255), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,255,255), 2, 8, 0);
     }
     
     imshow(window, img);    //refresh this particular debug window
     return true;
 }
 
-bool DataWrapper::debugPublish(vector<Goal> data) {
+bool DataWrapper::debugPublish(const vector<Goal>& data) {
 
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
@@ -370,7 +370,7 @@ bool DataWrapper::debugPublish(vector<Goal> data) {
     }
 #endif
     
-    Mat& img = results_img;    //get image from pair
+    cv::Mat& img = results_img;    //get image from pair
     string& window = results_window_name; //get window name from pair
     
     PointType bl, tr;
@@ -379,23 +379,43 @@ bool DataWrapper::debugPublish(vector<Goal> data) {
         bl = post.getQuad().getBottomLeft();
         tr = post.getQuad().getTopRight();
         if(post.getID() == Goal::BlueLeftGoal || post.getID() == Goal::BlueRightGoal || post.getID() == Goal::BlueUnknownGoal)
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(0,255,255), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(0,255,255), 2, 8, 0);
         else
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), Scalar(255,0,0), 2, 8, 0);
+            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,0,0), 2, 8, 0);
     }
     
     imshow(window, img);    //refresh this particular debug window
     return true;
 }
 
-bool DataWrapper::debugPublish(vector<Obstacle> data) {
-    
+bool DataWrapper::debugPublish(const vector<Obstacle>& data)
+{
     return false;
+}
+
+bool DataWrapper::debugPublish(const vector<LSFittedLine>& data)
+{
+#if VISION_WRAPPER_VERBOSITY > 1
+    if(data.empty()) {
+        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_LINES) << endl;
+        return false;
+    }
+#endif
+
+    cv::Mat& img = results_img;    //get image from pair
+    string& window = results_window_name; //get window name from pair
+
+    BOOST_FOREACH(LSFittedLine l, data) {
+        cv::line(img, cv::Point2i(l.getXIntercept(), 0), cv::Point2i(0, l.getYIntercept()), cv::Scalar(0,0,255), 5);
+    }
+
+    imshow(window, img);    //refresh this particular debug window
+    return true;
 }
 
 bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
 {
-    map<DEBUG_ID, pair<string, Mat>* >::iterator map_it;
+    map<DEBUG_ID, pair<string, cv::Mat>* >::iterator map_it;
     vector<PointType>::const_iterator it;
 
 #if VISION_WRAPPER_VERBOSITY > 1
@@ -412,7 +432,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
         return false;
     }
 
-    Mat& img = map_it->second->second;    //get image from pair
+    cv::Mat& img = map_it->second->second;    //get image from pair
     string& window = map_it->second->first; //get window name from pair
 
 
@@ -425,39 +445,39 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
     switch(id) {
     case DBID_H_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, cv::Point2i(0, pt.y), cv::Point2i(img.cols, pt.y), Scalar(127,127,127), 1);
+            cv::line(img, cv::Point2i(0, pt.y), cv::Point2i(img.cols, pt.y), cv::Scalar(127,127,127), 1);
         }
         break;
     case DBID_V_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), Scalar(127,127,127), 1);
+            cv::line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), cv::Scalar(127,127,127), 1);
         }
         break;
     case DBID_TRANSITIONS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(255,255,0), 4);
+            cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,255,0), 4);
         }
         break;
     case DBID_HORIZON:
-        line(img, cv::Point2i(data_points.front().x, data_points.front().y), cv::Point2i(data_points.back().x, data_points.back().y), Scalar(0,255,255), 1);
+        line(img, cv::Point2i(data_points.front().x, data_points.front().y), cv::Point2i(data_points.back().x, data_points.back().y), cv::Scalar(0,255,255), 1);
         break;
     case DBID_GREENHORIZON_SCANS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            line(img, cv::Point2i(pt.x, 0), cv::Point2i(pt.x, img.rows), Scalar(127,127,127), 1);
-            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(127,127,127), 2);
+            line(img, cv::Point2i(pt.x, 0), cv::Point2i(pt.x, img.rows), cv::Scalar(127,127,127), 1);
+            cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(127,127,127), 2);
         }
         break;
     case DBID_GREENHORIZON_FINAL:
         for(it=data_points.begin(); it<data_points.end(); it++) {
             if (it > data_points.begin()) {
-                line(img, cv::Point2i((it-1)->x, (it-1)->y), cv::Point2i(it->x, it->y), Scalar(255,0,255), 1);
+                line(img, cv::Point2i((it-1)->x, (it-1)->y), cv::Point2i(it->x, it->y), cv::Scalar(255,0,255), 1);
             }
-            circle(img, cv::Point2i(it->x, it->y), 1, Scalar(255,0,255), 2);
+            cv::circle(img, cv::Point2i(it->x, it->y), 1, cv::Scalar(255,0,255), 2);
         }
         break;
     case DBID_OBJECT_POINTS:
         BOOST_FOREACH(const PointType& pt, data_points) {
-            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(0,0,255), 4);
+            cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(0,0,255), 4);
         }
         break;
     default:
@@ -474,10 +494,10 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
 bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     vector<PointType> data_points;
-    vector<Scalar> colours;
-    map<DEBUG_ID, pair<string, Mat>* >::iterator map_it;
+    vector<cv::Scalar> colours;
+    map<DEBUG_ID, pair<string, cv::Mat>* >::iterator map_it;
     vector<PointType>::const_iterator it;
-    vector<Scalar>::const_iterator c_it;
+    vector<cv::Scalar>::const_iterator c_it;
 
     getPointsAndColoursFromSegments(region.getSegments(), colours, data_points);
     
@@ -493,7 +513,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
         return false;
     }
 
-    Mat& img = map_it->second->second;    //get image from pair
+    cv::Mat& img = map_it->second->second;    //get image from pair
     string& window = map_it->second->first; //get window name from pair
 
 
@@ -530,9 +550,9 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const Mat &img)
+bool DataWrapper::debugPublish(DEBUG_ID id, const cv::Mat &img)
 {
-    map<DEBUG_ID, pair<string, Mat>* >::iterator map_it;
+    map<DEBUG_ID, pair<string, cv::Mat>* >::iterator map_it;
 
     //Get window assigned to id
     //map_it = debug_map.find(id);
@@ -541,7 +561,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const Mat &img)
         return false;
     }
 
-    Mat& img_map = map_it->second->second;    //get image from pair
+    cv::Mat& img_map = map_it->second->second;    //get image from pair
     string& window = map_it->second->first; //get window name from pair
 
     switch(id) {
@@ -604,11 +624,11 @@ bool DataWrapper::loadLUTFromFile(const string& fileName)
     return LUT.loadLUTFromFile(fileName);
 }
 
-void DataWrapper::ycrcb2ycbcr(Mat *img_ycrcb)
+void DataWrapper::ycrcb2ycbcr(cv::Mat *img_ycrcb)
 {
-    vector<Mat> planes;
+    vector<cv::Mat> planes;
     split(*img_ycrcb, planes);
-    Mat temp = planes[0];
+    cv::Mat temp = planes[0];
     planes[0] = planes[2];
     planes[2] = temp;
     merge(planes, *img_ycrcb);

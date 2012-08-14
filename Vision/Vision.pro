@@ -40,16 +40,16 @@ contains(PLATFORM, "pc") {
     #ROBOCUP_DIR = /home/shannon/robocup/
     #ROBOCUP_DIR = /home/david/robocup/
 
-    INCLUDEPATH += $$ROBOCUP_DIR
+    INCLUDEPATH += $$ROBOCUP_DIR/
     INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
   
     HEADERS += \
         VisionTools/pccamera.h \
         VisionWrapper/datawrapperpc.h \
         VisionWrapper/visioncontrolwrapperpc.h \
-        debugverbosityvision.h \
-        debug.h \
-        nubotdataconfig.h \
+        $$ROBOCUP_DIR/Vision/Debug/debugverbosityvision.h \
+        $$ROBOCUP_DIR/Vision/Debug/debug.h \
+        $$ROBOCUP_DIR/Vision/Debug/nubotdataconfig.h \
     
     SOURCES += \
         VisionTools/pccamera.cpp \
@@ -60,57 +60,27 @@ contains(PLATFORM, "pc") {
 
 #this
 HEADERS += \
-    VisionTypes/coloursegment.h \
-    VisionTypes/colourtransitionrule.h \
-    VisionTypes/colourreplacementrule.h \
-    VisionTypes/transition.h \
-    VisionTypes/segmentedregion.h \
-    #VisionTypes/objectcandidate.h \
-    VisionTypes/quad.h \
-    VisionTypes/greenhorizon.h \
-    VisionTypes/VisionFieldObjects/visionfieldobject.h \
-    VisionTypes/VisionFieldObjects/ball.h \
-    VisionTypes/VisionFieldObjects/goal.h \
-    VisionTypes/VisionFieldObjects/beacon.h \
-    VisionTypes/VisionFieldObjects/obstacle.h \
+    ../Vision/VisionTypes/*.h \
+    ../Vision/VisionTypes/VisionFieldObjects/*.h \
     VisionWrapper/datawrappercurrent.h \
-    VisionTools/lookuptable.h \
-    VisionTools/GTAssert.h \
     VisionTools/classificationcolours.h \
-    Modules/greenhorizonch.h \
-    Modules/objectdetectionch.h \
-    Modules/scanlines.h \
-    Modules/segmentfilter.h \
-    Modules/goaldetection.h \
-    Modules/balldetection.h \
+    VisionTools/GTAssert.h \
+    VisionTools/lookuptable.h \
+    ../Vision/Modules/*.h \
+    ../Vision/Modules/LineDetectionAlgorithms/*.h \
     basicvisiontypes.h \
     valgorithm.h \
     visionblackboard.h \
     visioncontroller.h \ 
-    visionconstants.h \
+    visionconstants.h
     #Threads/SaveImagesThread.h
 
 SOURCES += \
-    VisionTypes/coloursegment.cpp \
-    VisionTypes/colourtransitionrule.cpp \
-    VisionTypes/colourreplacementrule.cpp \
-    VisionTypes/transition.cpp \
-    VisionTypes/segmentedregion.cpp \
-    #VisionTypes/objectcandidate.cpp \
-    VisionTypes/quad.cpp \
-    VisionTypes/greenhorizon.cpp \
-    VisionTypes/VisionFieldObjects/visionfieldobject.cpp \
-    VisionTypes/VisionFieldObjects/ball.cpp \
-    VisionTypes/VisionFieldObjects/goal.cpp \
-    VisionTypes/VisionFieldObjects/beacon.cpp \
-    VisionTypes/VisionFieldObjects/obstacle.cpp \
+    ../Vision/VisionTypes/*.cpp \
+    ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
     VisionTools/lookuptable.cpp \
-    Modules/greenhorizonch.cpp \
-    Modules/objectdetectionch.cpp \
-    Modules/scanlines.cpp \
-    Modules/segmentfilter.cpp \
-    Modules/goaldetection.cpp \
-    Modules/balldetection.cpp \
+    ../Vision/Modules/*.cpp \
+    ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     visionblackboard.cpp \
     visioncontroller.cpp \
     visionconstants.cpp \
@@ -122,6 +92,7 @@ HEADERS += \
     $$ROBOCUP_DIR/Tools/FileFormats/LUTTools.h \
     $$ROBOCUP_DIR/Tools/Optimisation/Parameter.h \
     $$ROBOCUP_DIR/Tools/Math/Line.h \
+    $$ROBOCUP_DIR/Tools/Math/LSFittedLine.h \
     $$ROBOCUP_DIR/Tools/Math/Matrix.h \
     $$ROBOCUP_DIR/Tools/Math/TransformMatrices.h \
     $$ROBOCUP_DIR/Infrastructure/NUImage/NUImage.h \
@@ -141,6 +112,7 @@ SOURCES += \
     $$ROBOCUP_DIR/Tools/FileFormats/LUTTools.cpp \
     $$ROBOCUP_DIR/Tools/Optimisation/Parameter.cpp \
     $$ROBOCUP_DIR/Tools/Math/Line.cpp \
+    $$ROBOCUP_DIR/Tools/Math/LSFittedLine.cpp \
     $$ROBOCUP_DIR/Tools/Math/Matrix.cpp \
     $$ROBOCUP_DIR/Tools/Math/TransformMatrices.cpp \
     $$ROBOCUP_DIR/Infrastructure/NUImage/NUImage.cpp \

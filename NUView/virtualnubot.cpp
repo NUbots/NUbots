@@ -2,7 +2,7 @@
 #include "Tools/FileFormats/LUTTools.h"
 #include <QDebug>
 #include <zlib.h>
-#include "VisionOld/LineDetection.h"
+//#include "VisionOld/LineDetection.h"
 #include <QDebug>
 #include <QStringList>
 #include <iostream>

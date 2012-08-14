@@ -21,3 +21,11 @@ after: (0, 320) []
 BALL:
 before: (0, 320) []
 after: (3, 320) [orange]
+
+LINE:
+before: (0,320) []
+after: (3,320) [white]
+
+LINE:
+before: (3,320) [white]
+after: (0,320) []

@@ -12,6 +12,7 @@ class LinePoint: public Point{
 		bool inUse;
 		int width;
 		LinePoint();
+        LinePoint(double in_x, double in_y);
 		void clear();
 };
 
@@ -28,9 +29,10 @@ class LSFittedLine : public Line
     double getMSD() const;
     double getr2tls() const;
     Point leftPoint, rightPoint;
-    Point transLeftPoint, transRightPoint;
+    //Point transLeftPoint, transRightPoint;
     void clearPoints();
-    std::vector<LinePoint*> getPoints();
+    const std::vector<LinePoint*>& getPoints();
+    //std::vector<LinePoint*> getTransformedEndPoints();
     int numPoints;
 private:
     void calcLine();

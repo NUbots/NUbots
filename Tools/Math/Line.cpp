@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
+#include "Tools/Math/General.h"
 
 
 bool operator < (const Point& point1, const Point& point2) {
@@ -194,12 +195,44 @@ double Line::getSignedLinePointDistance(Point point) const
   return distance;
 }
 
-double Line::getRho() const {
+double Line::getAngleBetween(Line other) const
+{
+    double m1 = getGradient(),
+           m2 = other.getGradient();
+    if(isVertical()) {
+        return atan(abs(1.0/m2));       // atan(|1/m|) (other line)
+    }
+    else if(other.isVertical()) {
+        return atan(abs(1.0/m1));       // atan(|1/m|) (this line)
+    }
+    else if(m1*m2 == -1){
+        return mathGeneral::PI*0.5;     //perpendicular
+    }
+    else {
+        return atan((m1-m2)/(1-m1*m2)); // standard formula
+    }
+}
+
+double Line::getRho() const
+{
     return Rho;
 }
 
-double Line::getPhi() const {
+double Line::getPhi() const
+{
     return Phi;
+}
+
+Point Line::projectOnto(Point pt) const
+{
+    if(isVertical()) {
+        return Point(-m_C/m_A, 0);
+    }
+    else {
+        Point shifted(pt.x, pt.y - m_C);
+        double norm = shifted.dot(Point(m_A,-m_B))/(m_A*m_A+m_B*m_B);
+        return Point(m_A*norm, m_C - m_B*norm);
+    }
 }
 
 bool operator ==(const Line& line1, const Line& line2)

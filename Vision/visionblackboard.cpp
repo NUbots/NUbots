@@ -124,6 +124,17 @@ void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
 }
 
 /**
+  * Adds a set of lines to the current set.
+  * @param newlines The lines to add.
+  */
+void VisionBlackboard::addLines(const vector<LSFittedLine> &newlines)
+{
+    BOOST_FOREACH(LSFittedLine l, newlines) {
+        m_lines.push_back(l);
+    }
+}
+
+/**
 *   @brief sets the horizontal scan lines.
 *   @param horizontal_scanlines A vector of unsigned ints defining horizontal scanlines.
 *
@@ -375,6 +386,12 @@ vector<Beacon>& VisionBlackboard::getBeacons()
 vector<Obstacle>& VisionBlackboard::getObstacles()
 {
     return m_obstacles;
+}
+
+//! Returns the list of found lines.
+vector<LSFittedLine>& VisionBlackboard::getLines()
+{
+    return m_lines;
 }
 
 /**
@@ -648,6 +665,7 @@ void VisionBlackboard::update()
     m_beacons.clear();
     m_goals.clear();
     m_obstacles.clear();
+    m_lines.clear();
     m_vfos.clear();
 }
 
@@ -741,6 +759,7 @@ void VisionBlackboard::debugPublish() const
     wrapper->debugPublish(m_beacons);
     wrapper->debugPublish(m_balls);
     wrapper->debugPublish(m_obstacles);
+    wrapper->debugPublish(m_lines);
     
     //horizontal scans
     pts.clear();

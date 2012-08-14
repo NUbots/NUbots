@@ -263,10 +263,10 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
 //        }
         return false;
     case DBID_TRANSITIONS:
-        errorlog << "DataWrapper::debugPublish - DBID_TRANSITIONS printing not implemented" << endl;
-//        BOOST_FOREACH(const PointType& pt, data_points) {
-//            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(255,255,0), 4);
-//        }
+        if(display_callback != NULL)
+            (*display_callback)(data_points, GLDisplay::TransitionSegments);
+        else
+            errorlog << "DataWrapper::debugPublish - null callback pointer" << endl;
         return false;
     case DBID_HORIZON:
         errorlog << "DataWrapper::debugPublish - DBID_HORIZON printing not implemented" << endl;

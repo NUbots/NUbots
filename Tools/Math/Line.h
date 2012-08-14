@@ -26,6 +26,7 @@ class Point
     double x; //!< The points x value.
     double y; //!< The points y value.
     //double distance(const Point& p1) const { return sqrt((x-p1.x)*(x-p1.x) + (y-p1.y)*(y-p1.y)); }
+    double dot(Point pt) {return x*pt.x + y*pt.y;}
 
     // Overloaded functions
     /*!
@@ -161,6 +162,12 @@ class Line
       */
     double getSignedLinePointDistance(Point point) const;
     /*!
+      @brief Find the smallest angle between this and the given line.
+      @param other The other line.
+      @return The acute angle between the lines.
+      */
+    double getAngleBetween(Line other) const;
+    /*!
       @brief Retrieve the Rho value of the line equation (normal form)
       @return Rho.
       */
@@ -170,6 +177,11 @@ class Line
       @return Phi.
       */
     double getPhi() const;
+    /*!
+      @brief Retrieve the Phi value of the line equation (normal form)
+      @return Phi.
+      */
+    Point projectOnto(Point pt) const;
     /*Added by Shannon*/
 
 // Overloaded functions
