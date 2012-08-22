@@ -295,12 +295,12 @@ void DataWrapper::publish(DATA_ID id, const cv::Mat &img)
 
 void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
 {
-
+    cout << visual_objects.size() << " visual objects seen" << std::endl;
 }
 
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
-    
+    cout << "Visual object seen at " << visual_object->getLocationPixels() << std::endl;
 }
 
 //! Outputs debug data to the appropriate external interface
@@ -390,6 +390,7 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
 
 bool DataWrapper::debugPublish(const vector<Obstacle>& data)
 {
+    cout << data.size() << " Obstacles seen" << std::endl;
     return false;
 }
 
@@ -406,7 +407,28 @@ bool DataWrapper::debugPublish(const vector<LSFittedLine>& data)
     string& window = results_window_name; //get window name from pair
 
     BOOST_FOREACH(LSFittedLine l, data) {
-        cv::line(img, cv::Point2i(l.getXIntercept(), 0), cv::Point2i(0, l.getYIntercept()), cv::Scalar(0,0,255), 5);
+        double x_int = l.getXIntercept(),
+               y_int = l.getYIntercept();
+        int width = results_img.cols,
+            height = results_img.rows;
+        if(x_int < 0) {
+            if(y_int < 0) {
+                cv::line(img, cv::Point2i(l.findXFromY(height), height), cv::Point2i(width, l.findYFromX(width)), cv::Scalar(0,0,255), 5);
+            }
+            else {
+                cv::line(img, cv::Point2i(l.findXFromY(height), height), cv::Point2i(0, y_int), cv::Scalar(0,0,255), 5);
+            }
+        }
+        else {
+            if(y_int < 0) {
+                cv::line(img, cv::Point2i(x_int, 0), cv::Point2i(width, l.findYFromX(width)), cv::Scalar(0,0,255), 5);
+            }
+            else {
+                cv::line(img, cv::Point2i(x_int, 0), cv::Point2i(0, y_int), cv::Scalar(0,0,255), 5);
+            }
+        }
+
+        cout << cv::Point2i(l.getXIntercept(), 0) << " " << cv::Point2i(0, l.getYIntercept()) << std::endl;
     }
 
     imshow(window, img);    //refresh this particular debug window

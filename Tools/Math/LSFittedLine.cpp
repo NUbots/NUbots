@@ -222,13 +222,11 @@ void LinePoint::clear()
 	y = 0;
 }
 
-LinePoint::LinePoint(double in_x, double in_y)
+LinePoint::LinePoint(double in_x, double in_y) : Point(in_x, in_y)
 {
     ID = 0;
     inUse = false;
     width = 0;
-    x = in_x;
-    y = in_y;
 }
 
 /*

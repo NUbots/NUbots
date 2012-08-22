@@ -79,6 +79,7 @@ vector<LSFittedLine*> SplitAndMerge::run(vector<LinePoint*>& points, bool noise)
     MIN_POINTS_OVER = VisionConstants::SAM_MIN_POINTS_OVER;
     MAX_END_POINT_DIFF = VisionConstants::SAM_MAX_END_POINT_DIFF;
     MAX_ANGLE_DIFF = VisionConstants::SAM_MAX_ANGLE_DIFF;
+    MAX_INTERCEPT_DIFF = VisionConstants::SAM_MAX_INTERCEPT_DIFF;
     MIN_POINTS_TO_LINE = VisionConstants::SAM_MIN_POINTS_TO_LINE;
     MIN_POINTS_TO_LINE_FINAL = VisionConstants::SAM_MIN_POINTS_TO_LINE_FINAL;
     MIN_LINE_R2_FIT = VisionConstants::SAM_MIN_LINE_R2_FIT;
@@ -88,21 +89,6 @@ vector<LSFittedLine*> SplitAndMerge::run(vector<LinePoint*>& points, bool noise)
     SPLIT_NOISE_ITERATIONS = VisionConstants::SAM_SPLIT_NOISE_ITERATIONS;
     CLEAR_SMALL = VisionConstants::SAM_CLEAR_SMALL;
     CLEAR_DIRTY = VisionConstants::SAM_CLEAR_DIRTY;
-
-    cout << "SplitAndMerge::SplitAndMerge()" << endl;
-    cout << "SPLIT_DISTANCE: " << SPLIT_DISTANCE << std::endl;
-    cout << "MIN_POINTS_OVER: " << MIN_POINTS_OVER << std::endl;
-    cout << "MAX_END_POINT_DIFF: " << MAX_END_POINT_DIFF << std::endl;
-    cout << "MAX_ANGLE_DIFF: " << MAX_ANGLE_DIFF << std::endl;
-    cout << "MIN_POINTS_TO_LINE: " << MIN_POINTS_TO_LINE << std::endl;
-    cout << "MIN_POINTS_TO_LINE_FINAL: " << MIN_POINTS_TO_LINE_FINAL << std::endl;
-    cout << "MIN_LINE_R2_FIT: " << MIN_LINE_R2_FIT << std::endl;
-    cout << "MAX_LINE_MSD: " << MAX_LINE_MSD << std::endl;
-    cout << "MAX_POINTS: " << MAX_POINTS << std::endl;
-    cout << "MAX_LINES: " << MAX_LINES << std::endl;
-    cout << "SPLIT_NOISE_ITERATIONS: " << SPLIT_NOISE_ITERATIONS << std::endl;
-    cout << "CLEAR_SMALL: " << CLEAR_SMALL << std::endl;
-    cout << "CLEAR_DIRTY: " << CLEAR_DIRTY << std::endl;
 
     vector<LSFittedLine*> lines;
     noisePoints.clear();
@@ -540,6 +526,7 @@ void SplitAndMerge::merge(vector<LSFittedLine*>& lines) {
         //go through all lines and find any that should be merged - merge them
         while(it < lines.end()) {
             if(shouldMergeLines(*current, **it)) {
+                //cout << *current << " & " << **it << " should merge: true" << std::endl;
                 //join the lines
                 current->joinLine(**it);
                 //remove the considered line and update line list
@@ -547,6 +534,7 @@ void SplitAndMerge::merge(vector<LSFittedLine*>& lines) {
                 it = lines.erase(it);
             }
             else {
+                //cout << *current << " & " << **it << " should merge: false" << std::endl;
                 it++;
             }
         }
@@ -608,7 +596,7 @@ void SplitAndMerge::clearDirtyLines(vector<LSFittedLine*>& lines) {
     vector<LSFittedLine*>::iterator it = lines.begin();
 
     while(it < lines.end()) {
-        if((*it)->getr2tls() < MIN_LINE_R2_FIT) {
+        if((*it)->getr2tls() < MIN_LINE_R2_FIT || (*it)->getMSD() > MAX_LINE_MSD) {
             delete *it;
             it = lines.erase(it);
         }
@@ -620,7 +608,21 @@ void SplitAndMerge::clearDirtyLines(vector<LSFittedLine*>& lines) {
 
 bool SplitAndMerge::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2){
     //check lines have similar gradients by checking the angle between them (linear with rotation).
-    if(!line1.getAngleBetween(line2) > MAX_ANGLE_DIFF)
+//    cout << "angle between: " << line1.getAngleBetween(line2) << std::endl;
+//    cout << "line1 angle: " << abs(line1.getAngle()) << "  > pi/4? " << (abs(line1.getAngle()) > mathGeneral::PI*0.25) << std::endl;
+//    cout << "x intercepts : " << line1.getXIntercept() << " - " << line2.getXIntercept() << std::endl;
+//    cout << "y intercepts : " << line1.getYIntercept() << " - " << line2.getYIntercept() << std::endl;
+//    cout << "if ^ > pi/4: x-int diff: " << abs(line1.getXIntercept() - line2.getXIntercept()) << std::endl;
+//    cout << "if ^ <= pi/4: y-int diff: " << abs(line1.getYIntercept() - line2.getYIntercept()) << std::endl;
+//    cout << "comb R2TLS: " << line1.combinedR2TLSandMSD(line2).x << std::endl;
+//    cout << "comb MSD: " << line1.combinedR2TLSandMSD(line2).y << std::endl;
+
+//    cout << "MAX_ANGLE_DIFF: " << MAX_ANGLE_DIFF << std::endl;
+//    cout << "MIN_LINE_R2_FIT " << MIN_LINE_R2_FIT << std::endl;
+//    cout << "MAX_INTERCEPT_DIFF:" << MAX_INTERCEPT_DIFF << std::endl;
+//    cout << "MAX_LINE_MSD:" << MAX_LINE_MSD << std::endl;
+
+    if(line1.getAngleBetween(line2) > MAX_ANGLE_DIFF)
         return false;
     //check for x intercepts of nearly vertical lines
     if(abs(line1.getAngle()) > mathGeneral::PI*0.25 && abs(line1.getXIntercept() - line2.getXIntercept()) > MAX_INTERCEPT_DIFF)
@@ -628,8 +630,13 @@ bool SplitAndMerge::shouldMergeLines(const LSFittedLine& line1, const LSFittedLi
     //check for y intercepts of mostly horizontal lines
     if(abs(line1.getAngle()) <= mathGeneral::PI*0.25 && abs(line1.getYIntercept() - line2.getYIntercept()) > MAX_INTERCEPT_DIFF)
         return false;
+
+    Vector2<double> r2andmsd = line1.combinedR2TLSandMSD(line2);
     //ensure the line won't just be thrown out later as dirty
-    if(line1.combinedR2TLSandMSD(line2).x < MIN_LINE_R2_FIT)
-        return false;
+//    if(r2andmsd.x < MIN_LINE_R2_FIT)
+//        return false;//ensure the line won't just be thrown out later as dirty
+//    if(r2andmsd.y > MAX_LINE_MSD)
+//        return false;
+
     return true; //checks passed
 }

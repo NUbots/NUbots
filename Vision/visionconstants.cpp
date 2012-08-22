@@ -83,6 +83,7 @@ unsigned int VisionConstants::SAM_MIN_POINTS_TO_LINE;
 unsigned int VisionConstants::SAM_SPLIT_NOISE_ITERATIONS;
 float VisionConstants::SAM_MAX_END_POINT_DIFF;
 float VisionConstants::SAM_MAX_ANGLE_DIFF;
+float VisionConstants::SAM_MAX_INTERCEPT_DIFF;
 unsigned int VisionConstants::SAM_MIN_POINTS_TO_LINE_FINAL;
 float VisionConstants::SAM_MIN_LINE_R2_FIT;
 float VisionConstants::SAM_MAX_LINE_MSD;
@@ -113,17 +114,15 @@ void VisionConstants::loadFromFile(std::string filename)
     SAM_MAX_END_POINT_DIFF = 5.0;
     SAM_MAX_END_POINT_DIFF = 0.1;
     SAM_MAX_ANGLE_DIFF = 0.1;
+    SAM_MAX_INTERCEPT_DIFF = 10;
     SAM_MIN_POINTS_TO_LINE_FINAL = 5;
-    SAM_MIN_LINE_R2_FIT = 0.90;
-    SAM_MAX_LINE_MSD = 50;
+    SAM_MIN_LINE_R2_FIT = 0.95;
+    SAM_MAX_LINE_MSD = 1;
     SAM_CLEAR_SMALL = true;
     SAM_CLEAR_DIRTY = true;
 
     std::ifstream in(filename.c_str());
     std::string name;
-    int         ival;
-    float       fval;
-    bool        bval;
     std::string sval;
     while(in.good()) {
         getline(in, name, ':');
@@ -192,9 +191,9 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
             int config_player;
             in >> config_player;
-            #ifdef TARGET_IS_PC
-                in >> fval;
-                D2P_ANGLE_CORRECTION = 0;
+            #if (defined TARGET_IS_PC || defined TARGET_IS_TRAINING)
+                in >> D2P_ANGLE_CORRECTION;
+                D2P_ANGLE_CORRECTION = 0;   //discard the value
             #else
                 if(config_player == Blackboard->GameInfo->getPlayerNumber()) {
                     in >> D2P_ANGLE_CORRECTION;
@@ -330,6 +329,9 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("SAM_MAX_ANGLE_DIFF") == 0) {
             in >> SAM_MAX_ANGLE_DIFF;
         }
+        else if(name.compare("SAM_MAX_INTERCEPT_DIFF") == 0) {
+            in >> SAM_MAX_INTERCEPT_DIFF;
+        }
         else if(name.compare("SAM_MIN_POINTS_TO_LINE_FINAL") == 0) {
             in >> SAM_MIN_POINTS_TO_LINE_FINAL;
         }
@@ -428,6 +430,7 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tSAM_SPLIT_NOISE_ITERATIONS: " << SAM_SPLIT_NOISE_ITERATIONS << std::endl;
     debug << "\tSAM_MAX_END_POINT_DIFF: " << SAM_MAX_END_POINT_DIFF << std::endl;
     debug << "\tSAM_MAX_ANGLE_DIFF: " << SAM_MAX_ANGLE_DIFF << std::endl;
+    debug << "\tSAM_MAX_INTERCEPT_DIFF: " << SAM_MAX_INTERCEPT_DIFF << std::endl;
     debug << "\tSAM_MIN_POINTS_TO_LINE_FINAL: " << SAM_MIN_POINTS_TO_LINE_FINAL << std::endl;
     debug << "\tSAM_MIN_LINE_R2_FIT: " << SAM_MIN_LINE_R2_FIT << std::endl;
     debug << "\tSAM_MAX_LINE_MSD: " << SAM_MAX_LINE_MSD << std::endl;

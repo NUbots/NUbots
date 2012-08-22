@@ -7,7 +7,7 @@
 #ifndef LINE_H_DEFINED
 #define LINE_H_DEFINED
 
-
+#include <iostream>
 
 /*!
   @brief Class representing a 2 dimensional (x,y) position.
@@ -201,6 +201,10 @@ class Line
             line1 y-int > line2 y-int. False otherwise.
       */
     friend bool operator > (const Line& line1, const Line& line2);
+    /*!
+      @brief Output stream operator
+      */
+    friend std::ostream& operator<< (std::ostream& output, const Line& l);
     
   private:
     double m_A; //! The lines A value.

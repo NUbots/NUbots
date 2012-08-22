@@ -1,6 +1,5 @@
 #include "Line.h"
 #include <cmath>
-#include <iostream>
 #include <cstdlib>
 #include "Tools/Math/General.h"
 
@@ -251,6 +250,11 @@ bool operator >(const Line& line1, const Line& line2)
         return line1.getYIntercept() > line2.getYIntercept();
     else
         return line1.getGradient() > line2.getGradient();
+}
+
+std::ostream& operator<< (std::ostream& output, const Line& l)
+{
+    output << l.m_A << "x + " << l.m_B << "y = " << l.m_C;
 }
 
 // isValid(float A, float B, float C): Check if the given values create a valid line.

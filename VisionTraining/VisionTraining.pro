@@ -6,86 +6,49 @@ INCLUDEPATH += /usr/include/boost/
 
 LIBS += -lopencv_core -lopencv_highgui
 
-PLATFORM = pc
+DEFINES += TARGET_IS_TRAINING
 
-contains(PLATFORM, "darwin") {
-    message("Compiling for Darwin")
-    DEFINES += TARGET_IS_DARWIN
+INCLUDEPATH += ${HOME}/robocup/
+INCLUDEPATH += ${HOME}/robocup/Vision/Debug/
 
-    ROBOCUP_DIR = ${HOME}/robocup/            #change to darwin directory later
-    #ROBOCUP_DIR = /home/shannon/robocup/
-    #ROBOCUP_DIR = /home/david/robocup/
+HEADERS += \
+    ../Vision/VisionTools/pccamera.h \
+    ../Vision/VisionWrapper/datawrappertraining.h \
+    ../Vision/VisionWrapper/visioncontrolwrappertraining.h \
+    ../Vision/Debug/debugverbosityvision.h \
+    ../Vision/Debug/debug.h \
+    ../Vision/Debug/nubotdataconfig.h \
 
-    INCLUDEPATH += $$ROBOCUP_DIR
-    INCLUDEPATH += $$ROBOCUP_DIR/Autoconfig/
-    
-    HEADERS += \
-        NUPlatform/Platforms/Darwin/DarwinCamera.h \
-        VisionWrapper/datawrapperdarwin.h \
-        ../Autoconfig/debug.h \
-        ../Autoconfig/nubotdataconfig.h \
-        VisionWrapper/visioncontrolwrapperdarwin.h \
-    
-    SOURCES += \
-        ../NUPlatform/Platforms/Darwin/DarwinCamera.cpp \
-        VisionWrapper/datawrapperdarwin.cpp \
-        VisionWrapper/visioncontrolwrapperdarwin.cpp \
-}
-
-contains(PLATFORM, "pc") {
-     message("Compiling for PC")
-    DEFINES += TARGET_IS_PC
-
-    ROBOCUP_DIR = ${HOME}/robocup/
-    #ROBOCUP_DIR = /home/shannon/robocup/
-    #ROBOCUP_DIR = /home/david/robocup/
-
-    INCLUDEPATH += $$ROBOCUP_DIR/
-    INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
-  
-    HEADERS += \
-        VisionTools/pccamera.h \
-        VisionWrapper/datawrapperpc.h \
-        VisionWrapper/visioncontrolwrapperpc.h \
-        ../Vision/Debug/debugverbosityvision.h \
-        ../Vision/Debug/debug.h \
-        ../Vision/Debug/nubotdataconfig.h \
-    
-    SOURCES += \
-        VisionTools/pccamera.cpp \
-        VisionWrapper/datawrapperpc.cpp \
-        VisionWrapper/visioncontrolwrapperpc.cpp\
-}
+SOURCES += \
+    ../Vision/VisionTools/pccamera.cpp \
+    ../Vision/VisionWrapper/datawrappertraining.cpp \
+    ../Vision/VisionWrapper/visioncontrolwrappertraining.cpp\
 
 
-#this
 HEADERS += \
     ../Vision/VisionTypes/*.h \
     ../Vision/VisionTypes/VisionFieldObjects/*.h \
-    VisionWrapper/datawrappercurrent.h \
-    VisionTools/classificationcolours.h \
-    VisionTools/GTAssert.h \
-    VisionTools/lookuptable.h \
+    ../Vision/VisionWrapper/datawrappercurrent.h \
+    ../Vision/VisionTools/classificationcolours.h \
+    ../Vision/VisionTools/GTAssert.h \
+    ../Vision/VisionTools/lookuptable.h \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
-    basicvisiontypes.h \
-    valgorithm.h \
-    visionblackboard.h \
-    visioncontroller.h \ 
-    visionconstants.h \
-    #Threads/SaveImagesThread.h
+    ../Vision/basicvisiontypes.h \
+    ../Vision/Visionblackboard.h \
+    ../Vision/Visioncontroller.h \
+    ../Vision/Visionconstants.h \
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
-    VisionTools/lookuptable.cpp \
+    ../Vision/VisionTools/lookuptable.cpp \
     ../Vision/Modules/*.cpp \
     ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
-    visionblackboard.cpp \
-    visioncontroller.cpp \
-    visionconstants.cpp \
+    ../Vision/Visionblackboard.cpp \
+    ../Vision/Visioncontroller.cpp \
+    ../Vision/Visionconstants.cpp \
     main.cpp \
-    #Threads/SaveImagesThread.cpp
 
 ##robocup
 HEADERS += \

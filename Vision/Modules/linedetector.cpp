@@ -5,6 +5,12 @@
 
 LineDetector::LineDetector()
 {
+    m_method = SAM;
+}
+
+LineDetector::LineDetector(METHOD method)
+{
+    m_method = method;
 }
 
 void LineDetector::run()
@@ -21,10 +27,16 @@ void LineDetector::run()
 
     points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
 
-    lines = m_SAM.run(points, true);
+    switch(m_method) {
+        case SAM:
+            lines = m_SAM.run(points, true);
+            break;
+        case RANSAC:
+            break;
+    }
 
     BOOST_FOREACH(LSFittedLine* l, lines) {
-        cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints;
+        //cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints << std::endl;
 
         result.push_back(*l);
     }

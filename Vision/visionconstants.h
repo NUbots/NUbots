@@ -101,6 +101,7 @@ public:
     //merging rules
     static float SAM_MAX_END_POINT_DIFF; //5.0
     static float SAM_MAX_ANGLE_DIFF; //
+    static float SAM_MAX_INTERCEPT_DIFF; //
     //Line keeping rules
     static unsigned int SAM_MIN_POINTS_TO_LINE_FINAL; //5
     static float SAM_MIN_LINE_R2_FIT; //0.90

@@ -31,7 +31,7 @@ Autoconfig/*
 *parameters.wp
 
 # ignore Qt builds
-Vision-build*/*
+Vision*-build*/*
 /Vision/Vision.pro.user
 NUView-build*/*
 /NUView/debug/*

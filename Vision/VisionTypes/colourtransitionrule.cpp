@@ -178,9 +178,9 @@ istream& operator>> (istream& input, vector<ColourTransitionRule>& v)
 bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const ColourSegment &middle, const ColourSegment &after) const
 {
     //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-    if(!(m_min <= middle.getLengthPixels() && m_max >= middle.getLengthPixels() &&
-         m_before_min <= before.getLengthPixels() && m_before_max >= before.getLengthPixels() &&
-         m_after_min <= after.getLengthPixels() && m_after_max >= after.getLengthPixels())) {
+    if(!(m_min <= middle.getLength() && m_max >= middle.getLength() &&
+         m_before_min <= before.getLength() && m_before_max >= before.getLength() &&
+         m_after_min <= after.getLength() && m_after_max >= after.getLength())) {
         //did not match size requirements
         return false;
     }
