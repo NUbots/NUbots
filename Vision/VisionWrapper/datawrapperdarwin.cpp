@@ -329,6 +329,8 @@ bool DataWrapper::updateFrame()
     //! @todo Finish implementing & Comment
     actions = Blackboard->Actions;
     sensor_data = Blackboard->Sensors;
+    if(isSavingImages)
+        sensor_data_copy = *sensor_data;
     field_objects = Blackboard->Objects;
     
     if (current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
@@ -451,7 +453,8 @@ void DataWrapper::saveAnImage()
     {
         if(sensorfile.is_open())
         {
-            sensorfile << (*sensor_data) << flush;
+            //sensorfile << (*sensor_data) << flush;
+            sensorfile << sensor_data_copy << flush;
         }
         NUImage buffer;
         buffer.cloneExisting(*current_frame);

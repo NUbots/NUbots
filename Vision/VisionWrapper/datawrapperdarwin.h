@@ -128,6 +128,7 @@ private:
     //! Shared data objects
     NUImage* current_frame;
     NUSensorsData* sensor_data;             //! pointer to shared sensor data
+    NUSensorsData sensor_data_copy;
     NUActionatorsData* actions;             //! pointer to shared actionators data
     FieldObjects* field_objects;            //! pointer to shared fieldobject data
 };

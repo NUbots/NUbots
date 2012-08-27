@@ -19,7 +19,8 @@ HEADERS += \
     ../Vision/Debug/debugverbositynusensors.h \
     ../Vision/Debug/debug.h \
     ../Vision/Debug/nubotdataconfig.h \
-    ../Vision/Debug/debugverbositynusensors.h
+    ../Vision/Debug/debugverbositynusensors.h \
+    ../Vision/Debug/debugverbositynuactionators.h
 
 SOURCES += \
     ../Vision/VisionTools/pccamera.cpp \
@@ -70,6 +71,10 @@ HEADERS += \
     ../Infrastructure/FieldObjects/MobileObject.h \
     ../Infrastructure/FieldObjects/StationaryObject.h \
     ../Infrastructure/NUSensorsData/NUSensorsData.h \
+    ../Infrastructure/NUSensorsData/Sensor.h \
+    ../Infrastructure/NUSensorsData/NULocalisationSensors.h \
+    ../Infrastructure/NUData.h \
+    ../Tools/FileFormats/TimestampedData.h \
     ../Kinematics/Kinematics.h \
     ../Kinematics/EndEffector.h \
     ../Kinematics/Link.h \
@@ -91,6 +96,9 @@ SOURCES += \
     ../Infrastructure/FieldObjects/MobileObject.cpp \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
     ../Infrastructure/NUSensorsData/NUSensorsData.cpp \
+    ../Infrastructure/NUSensorsData/Sensor.cpp \
+    ../Infrastructure/NUSensorsData/NULocalisationSensors.cpp \
+    ../Infrastructure/NUData.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Kinematics/EndEffector.cpp \
     ../Kinematics/Link.cpp \
