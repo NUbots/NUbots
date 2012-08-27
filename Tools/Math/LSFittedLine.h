@@ -23,7 +23,7 @@ class LSFittedLine : public Line
     bool valid;
     
     void addPoint(LinePoint &point);
-    void addPoints(vector<LinePoint*>& pointlist);
+    void addPoints(vector<LinePoint>& pointlist);
     void joinLine(LSFittedLine &sourceLine);
     Vector2<double> combinedR2TLSandMSD(const LSFittedLine &sourceLine) const;
     double getMSD() const;
@@ -31,14 +31,14 @@ class LSFittedLine : public Line
     Point leftPoint, rightPoint;
     //Point transLeftPoint, transRightPoint;
     void clearPoints();
-    const std::vector<LinePoint*>& getPoints();
+    const std::vector<LinePoint>& getPoints();
     //std::vector<LinePoint*> getTransformedEndPoints();
     int numPoints;
 private:
     void calcLine();
     double sumX, sumY, sumX2, sumY2, sumXY;
     double MSD, r2tls;
-    std::vector<LinePoint*> points;
+    std::vector<LinePoint> points;
     
 };
 

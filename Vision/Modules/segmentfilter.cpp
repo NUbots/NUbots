@@ -166,7 +166,7 @@ void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourS
     temp_seg = middle;
     
     for(rules_it = begin; rules_it < end; rules_it++) {
-        if(rules_it->match(before, middle, after, dir)) {
+        if(rules_it->match(before, middle, after)) {
             //replace middle using replacement method
             switch(rules_it->getMethod()) {
             case ColourReplacementRule::BEFORE:

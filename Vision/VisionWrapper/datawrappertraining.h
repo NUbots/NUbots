@@ -6,6 +6,7 @@
 #include <opencv2/core/core.hpp>
 
 #include "Kinematics/Horizon.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 #include "Vision/basicvisiontypes.h"
 #include "Vision/VisionTypes/segmentedregion.h"
@@ -111,8 +112,10 @@ private:
     Horizon kinematics_horizon;
 
     //! Used when reading from strm
-    string streamname;
+    string image_stream_name;
     ifstream imagestrm;
+    string sensor_stream_name;
+    ifstream sensorstrm;
 
     //! Used for debugging
     int debug_window_num;
@@ -143,7 +146,7 @@ private:
     //vector<VisionFieldObject*> detections;
     //vector< vector<VisionFieldObject*> > detection_history;
 
-    //NUSensorsData* m_sensor_data;
+    NUSensorsData* m_sensor_data;
 };
 
 #endif // DATAWRAPPERTRAINING_H

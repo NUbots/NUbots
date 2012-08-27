@@ -464,13 +464,13 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
             /*qDebug()    << int(fieldLines[i].leftPoint.x) << "," << int(fieldLines[i].leftPoint.y) <<"\t"
                         << int(fieldLines[i].rightPoint.x)<< "," << int(fieldLines[i].rightPoint.y);*/
 
-            std::vector<LinePoint*> linePoints = fieldLines[i].getPoints();
+            std::vector<LinePoint> linePoints = fieldLines[i].getPoints();
             glBegin(GL_TRIANGLES);
             for (unsigned int j =0; j < linePoints.size(); j++)
             {
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y),0.0);
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y-1),0.0);
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+1),0.0);
+                glVertex3f(int(linePoints[j].x),int(linePoints[j].y),0.0);
+                glVertex3f(int(linePoints[j].x),int(linePoints[j].y-1),0.0);
+                glVertex3f(int(linePoints[j].x),int(linePoints[j].y+1),0.0);
             }
             glEnd();
         }

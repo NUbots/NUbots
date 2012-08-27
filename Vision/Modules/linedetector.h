@@ -25,8 +25,8 @@ private:
     SplitAndMerge m_SAM;
     METHOD m_method;
 
-    vector<LinePoint*> getPointsFromSegments(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
-    vector<LinePoint*> pointsUnderGreenHorizon(const vector<LinePoint*> points, const GreenHorizon& gh);
+    vector<LinePoint> getPointsFromSegments(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
+    vector<LinePoint> pointsUnderGreenHorizon(const vector<LinePoint>& points, const GreenHorizon& gh);
 
 };
 

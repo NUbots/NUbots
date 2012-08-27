@@ -44,7 +44,7 @@ public:
     ~SplitAndMerge();
 
     //LEAST-SQUARES FITTING
-    vector<LSFittedLine*> run(vector<LinePoint*>& points, bool noise=true);
+    vector<LSFittedLine> run(vector<LinePoint>& points, bool noise=true);
 
 private:
     //RULES
@@ -69,24 +69,24 @@ private:
     bool CLEAR_SMALL;
     bool CLEAR_DIRTY;
 
-    vector<LinePoint*> noisePoints;
+    vector<LinePoint> noisePoints;
 
     //LEAST-SQUARES FITTING
-    void split(vector<LSFittedLine*>& lines, vector<LinePoint*>& points);
-    void splitIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& points);
-    void splitNoise(vector<LSFittedLine*>& lines);
-    void merge(vector<LSFittedLine*>& lines);
-    void generateLine(LSFittedLine& line, vector<LinePoint*>& points);
-    bool separate(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePoint* split_point, LSFittedLine& line);
+    void split(vector<LSFittedLine>& lines, vector<LinePoint>& points);
+    void splitIterative(vector<LSFittedLine>& lines, vector<LinePoint>& points);
+    void splitNoise(vector<LSFittedLine>& lines);
+    void merge(vector<LSFittedLine>& lines);
+    void generateLine(LSFittedLine& line, vector<LinePoint>& points);
+    bool separate(vector<LinePoint>& left, vector<LinePoint>& right, LinePoint& split_point, LSFittedLine& line);
     //static void sortLinesLS(vector<LSFittedLine*>& lines);
 
 
     //GENERIC
     void findPointsOver(LSFittedLine& line, unsigned int &points_over, int& furthest_point);
-    void addToNoise(LinePoint* point);
-    void addToNoise(const vector<LinePoint*>& points);
-    void clearSmallLines(vector<LSFittedLine*>& lines);
-    void clearDirtyLines(vector<LSFittedLine*>& lines);
+    void addToNoise(const LinePoint& point);
+    void addToNoise(const vector<LinePoint>& points);
+    void clearSmallLines(vector<LSFittedLine>& lines);
+    void clearDirtyLines(vector<LSFittedLine>& lines);
     bool shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2);
 
 };

@@ -34,6 +34,11 @@ class Point
       @return True of the two points are equal. False if they are not.
       */
     friend bool operator ==(const Point& point1, const Point& point2) {return (point1.x==point2.x)&&(point1.y==point2.y);}
+    /*!
+      @brief Inquality operator
+      @return True of the two points are not equal. False if they are.
+      */
+    friend bool operator !=(const Point& point1, const Point& point2) {return (point1.x!=point2.x)||(point1.y!=point2.y);}
 
 };
 
@@ -87,6 +92,7 @@ class Line
       @return The C value of the line equation.
       */
     double getC() const;
+
 // Check properties.
     /*!
       @brief Find if the line is horizontal.
@@ -156,6 +162,11 @@ class Line
     double getLinePointDistance(Point point) const;
     /*Added by Shannon*/
     /*!
+      @brief retreive the normaliser for the coefficients of the line equation - sqrt(A^2 + B^2).
+      @return sqrt(A^2 + B^2).
+      */
+    double getNormaliser() const;
+    /*!
       @brief Find the signed distance between the the line and the point.
       @param point The point to find the distance to.
       @return The signed distance from the line to the point.
@@ -212,6 +223,7 @@ class Line
     double m_C; //! The lines C value.
     double Rho;
     double Phi;
+    double normaliser;
     /*!
       @brief Determine if the line represented by the given equation is valid.
       @param A The A value of the line equation.

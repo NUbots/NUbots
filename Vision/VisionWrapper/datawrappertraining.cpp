@@ -56,12 +56,17 @@ string DataWrapper::getIDName(DEBUG_ID id) {
 DataWrapper::DataWrapper()
 {
     //defaults for stream and LUT info
-    streamname = string(getenv("HOME")) +  string("/nubot/image.strm");
+    image_stream_name = string(getenv("HOME")) +  string("/nubot/image.strm");
+    sensor_stream_name = string(getenv("HOME")) + string("/nubot/sensor.strm");
     LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
-    imagestrm.open(streamname.c_str());
+    imagestrm.open(image_stream_name.c_str());
+    sensorstrm.open(sensor_stream_name.c_str());
     m_current_image = new NUImage();
+    m_sensor_data = new NUSensorsData();
     if(!imagestrm.is_open())
-        errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load image stream: " << image_stream_name << endl;
+    if(!sensorstrm.is_open())
+        errorlog << "DataWrapper::DataWrapper() - failed to load sensor stream: " << sensor_stream_name << endl;
     if(!loadLUTFromFile(LUTname)){
         errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
     }
@@ -148,7 +153,7 @@ const Horizon& DataWrapper::getKinematicsHorizon()
 //! @brief Returns camera settings.
 CameraSettings DataWrapper::getCameraSettings()
 {
-    return CameraSettings();
+    return m_current_image->getCameraSettings();
 }
 
 const LookUpTable& DataWrapper::getLUT() const
@@ -170,26 +175,31 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
 bool DataWrapper::debugPublish(const vector<Ball>& data)
 {
     ball_detections.insert(ball_detections.end(), data.begin(), data.end());
+    return true;
 }
 
 bool DataWrapper::debugPublish(const vector<Beacon>& data)
 {
     beacon_detections.insert(beacon_detections.end(), data.begin(), data.end());
+    return true;
 }
 
 bool DataWrapper::debugPublish(const vector<Goal>& data)
 {
     goal_detections.insert(goal_detections.end(), data.begin(), data.end());
+    return true;
 }
 
 bool DataWrapper::debugPublish(const vector<Obstacle>& data)
 {
     obstacle_detections.insert(obstacle_detections.end(), data.begin(), data.end());
+    return true;
 }
 
 bool DataWrapper::debugPublish(const vector<LSFittedLine>& data)
 {
     line_detections.insert(line_detections.end(), data.begin(), data.end());
+    return true;
 }
 
 bool DataWrapper::updateFrame()
@@ -212,18 +222,17 @@ bool DataWrapper::updateFrame()
     }
     numFramesProcessed++;
     imagestrm.peek();
-    if(imagestrm.is_open()) {
-        if(imagestrm.good()) {
-            imagestrm >> *m_current_image;
-            return true;
-        }
-        else {
-            return false;
-        }
+    bool image_good = false,
+         sensors_good = false;
+    if(imagestrm.is_open() && imagestrm.good()) {
+        imagestrm >> *m_current_image;
+        image_good = true;
     }
-    else {
-        return false;
+    if(sensorstrm.is_open() && sensorstrm.good()) {
+        sensorstrm >> *m_sensor_data;
+        sensors_good = true;
     }
+    return image_good && sensors_good;
 }
 
 void DataWrapper::resetHistory()
@@ -279,11 +288,11 @@ bool DataWrapper::loadLUTFromFile(const string& fileName)
 */
 bool DataWrapper::setStream(const string &filename)
 {
-    streamname = filename;
-    imagestrm.open(streamname.c_str());
+    image_stream_name = filename;
+    imagestrm.open(image_stream_name.c_str());
     numFramesDropped = numFramesProcessed = 0;
     if(!imagestrm.is_open()) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << image_stream_name << endl;
         return false;
     }
     return true;

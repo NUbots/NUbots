@@ -6,7 +6,7 @@ ColourReplacementRule::ColourReplacementRule()
 {
 }
 
-bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, ScanDirection dir) const
+bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const
 {
 //    int multiplier;
 //    switch(dir) {

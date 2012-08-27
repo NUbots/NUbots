@@ -16,8 +16,10 @@ HEADERS += \
     ../Vision/VisionWrapper/datawrappertraining.h \
     ../Vision/VisionWrapper/visioncontrolwrappertraining.h \
     ../Vision/Debug/debugverbosityvision.h \
+    ../Vision/Debug/debugverbositynusensors.h \
     ../Vision/Debug/debug.h \
     ../Vision/Debug/nubotdataconfig.h \
+    ../Vision/Debug/debugverbositynusensors.h
 
 SOURCES += \
     ../Vision/VisionTools/pccamera.cpp \
@@ -67,6 +69,7 @@ HEADERS += \
     ../Infrastructure/FieldObjects/AmbiguousObject.h \
     ../Infrastructure/FieldObjects/MobileObject.h \
     ../Infrastructure/FieldObjects/StationaryObject.h \
+    ../Infrastructure/NUSensorsData/NUSensorsData.h \
     ../Kinematics/Kinematics.h \
     ../Kinematics/EndEffector.h \
     ../Kinematics/Link.h \
@@ -87,6 +90,7 @@ SOURCES += \
     ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
     ../Infrastructure/FieldObjects/MobileObject.cpp \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
+    ../Infrastructure/NUSensorsData/NUSensorsData.cpp \
     ../Kinematics/Kinematics.cpp \
     ../Kinematics/EndEffector.cpp \
     ../Kinematics/Link.cpp \

@@ -16,7 +16,7 @@ SplitAndMerge::~SplitAndMerge()
 }
 
 //CLUSTERS
-//void SplitAndMerge::splitAndmergeClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, Vision* vision, LineDetection* linedetector, bool clearsmall, bool cleardirty, bool noise) {
+//void SplitAndMerge::splitAndmergeClusters(vector<LSFittedLine>& lines, vector< vector<LinePoint> >& clusters, vector<LinePoint> leftover, Vision* vision, LineDetection* linedetector, bool clearsmall, bool cleardirty, bool noise) {
 //    //Performs split-and-merge algorithm with input consisting of a set of point clusters
 //    // and a set of unclustered points, putting the resulting lines into a reference
 //    // passed vector
@@ -70,7 +70,7 @@ SplitAndMerge::~SplitAndMerge()
 //    noisePoints.clear();
 //}
 
-vector<LSFittedLine*> SplitAndMerge::run(vector<LinePoint*>& points, bool noise) {
+vector<LSFittedLine> SplitAndMerge::run(vector<LinePoint>& points, bool noise) {
     //Performs split-and-merge algorithm with input consisting of a set of point clusters
     // and a set of unclustered points, putting the resulting lines into a reference
     // passed vector
@@ -90,7 +90,7 @@ vector<LSFittedLine*> SplitAndMerge::run(vector<LinePoint*>& points, bool noise)
     CLEAR_SMALL = VisionConstants::SAM_CLEAR_SMALL;
     CLEAR_DIRTY = VisionConstants::SAM_CLEAR_DIRTY;
 
-    vector<LSFittedLine*> lines;
+    vector<LSFittedLine> lines;
     noisePoints.clear();
 
     //splitIterative(lines, points);
@@ -120,7 +120,7 @@ vector<LSFittedLine*> SplitAndMerge::run(vector<LinePoint*>& points, bool noise)
 
 
 
-void SplitAndMerge::split(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
+void SplitAndMerge::split(vector<LSFittedLine>& lines, vector<LinePoint>& points) {
     // Recursive split algorithm - not used
 
     //Assumes:
@@ -143,25 +143,25 @@ void SplitAndMerge::split(vector<LSFittedLine*>& lines, vector<LinePoint*>& poin
     int greatest_point = 0; //which point in vector is the furthest
 
     //generate new LSFittedLine
-    LSFittedLine* line = new LSFittedLine();
-    line->addPoints(points);
+    LSFittedLine line;
+    line.addPoints(points);
 
     //check for points over threshold
-    findPointsOver(*line, points_over, greatest_point);
+    findPointsOver(line, points_over, greatest_point);
 
     //if num points over threshold > limit -> split at greatest distance point.
     if(points_over >= MIN_POINTS_OVER) {
         //there are enough points distant to justify a split
-        vector<LinePoint*> left;    //holder vectors
-        vector<LinePoint*> right;
-        if(separate(left, right, points[greatest_point], *line)) {
+        vector<LinePoint> left;    //holder vectors
+        vector<LinePoint> right;
+        if(separate(left, right, points[greatest_point], line)) {
             //split was valid - recursively split new lines
             split(lines, left);
             split(lines, right);
         }
         else {
             //remove furthest point and retry
-            vector<LinePoint*> newlist = points;
+            vector<LinePoint> newlist = points;
             addToNoise(newlist[greatest_point]);
             newlist.erase(newlist.begin() + greatest_point);
             split(lines, newlist);
@@ -172,23 +172,20 @@ void SplitAndMerge::split(vector<LSFittedLine*>& lines, vector<LinePoint*>& poin
         //not enough points over to split so remove point as noisy, and regen line
         if(points.size() > MIN_POINTS_TO_LINE_FINAL) {
             //removal of a point will still leave enough to form a reasonable line
-            vector<LinePoint*> newlist = points;
+            vector<LinePoint> newlist = points;
             addToNoise(newlist[greatest_point]);
             for(unsigned int i=greatest_point; i<newlist.size()-1; i++) {
                 newlist[i] = newlist[i+1];
             }
-            newlist[newlist.size()-1] = 0;
             newlist.pop_back();
-            delete line; //clear memory of old line
-            line = new LSFittedLine();
-            generateLine(*line, newlist);
+            line.clearPoints();
+            generateLine(line, newlist);
             lines.push_back(line);
         }
         else {
             //NOT SURE ??
             //Add points to noise and delete line
             addToNoise(points);
-            delete line;
         }
     }
     else {
@@ -197,7 +194,7 @@ void SplitAndMerge::split(vector<LSFittedLine*>& lines, vector<LinePoint*>& poin
     }
 }
 
-//void SplitAndMerge::splitIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& points) {
+//void SplitAndMerge::splitIterative(vector<LSFittedLine>& lines, vector<LinePoint>& points) {
 //    //Iterative split algorithm, uses a stack of lines and iterates over it, splitting
 //    //each line or adding it to a final list.
 
@@ -213,11 +210,11 @@ void SplitAndMerge::split(vector<LSFittedLine*>& lines, vector<LinePoint*>& poin
 //    }
 
 //    //Locals
-//    vector<LSFittedLine*> stack;
+//    vector<LSFittedLine> stack;
 //    stack.clear();
 //    int furthest_point;
 //    int points_over;
-//    vector<LinePoint*> left, right;
+//    vector<LinePoint> left, right;
 
 //    LSFittedLine* tempLine = new LSFittedLine();
 //    //generate first line
@@ -329,7 +326,7 @@ void SplitAndMerge::split(vector<LSFittedLine*>& lines, vector<LinePoint*>& poin
 //            else {
 //                //Separation didn't work
 //                //remove furthest point and push new line
-//                vector<LinePoint*> newlist = tempLine->getPoints();
+//                vector<LinePoint> newlist = tempLine->getPoints();
 //                //remove noisy point and update points list
 //                addToNoise(newlist[furthest_point]);
 //                newlist[furthest_point] = newlist[newlist.size() - 1];
@@ -348,7 +345,7 @@ void SplitAndMerge::split(vector<LSFittedLine*>& lines, vector<LinePoint*>& poin
 //            if(tempLine->getPoints().size() > MIN_POINTS_TO_LINE_FINAL) {
 //                //i.e. removal of a point will still leave enough to form a reasonable line
 //                //remove noisy point and regen line
-//                vector<LinePoint*> newlist = tempLine->getPoints();
+//                vector<LinePoint> newlist = tempLine->getPoints();
 //                //remove noisy point and update points list
 //                addToNoise(newlist[furthest_point]);
 //                newlist[furthest_point] = newlist[newlist.size() - 1];
@@ -401,11 +398,11 @@ void SplitAndMerge::findPointsOver(LSFittedLine& line, unsigned int& points_over
     unsigned int current_point = 0;
     points_over = 0;
     furthest_point = -1;
-    vector<LinePoint*> points = line.getPoints();
+    vector<LinePoint> points = line.getPoints();
 
     //check points for perp distance over threshold
     for(current_point = 0; current_point < points.size(); current_point++) {
-        distance = line.getLinePointDistance(*points[current_point]);
+        distance = line.getLinePointDistance(points[current_point]);
         //qDebug() <<current_point <<distance;
 
         if(distance > SPLIT_DISTANCE) {
@@ -422,13 +419,13 @@ void SplitAndMerge::findPointsOver(LSFittedLine& line, unsigned int& points_over
     //qDebug() <<furthest_point <<greatest_distance;
 }
 
-void SplitAndMerge::splitNoise(vector<LSFittedLine*>& lines) {
+void SplitAndMerge::splitNoise(vector<LSFittedLine>& lines) {
     //this method creates a copy of the noisePoints vector,
     //clears the current noisePoints vector and runs
     //the split algorithm on the copy
 
     if(noisePoints.size() >= MIN_POINTS_TO_LINE_FINAL) {
-        vector<LinePoint*> noiseCopy;
+        vector<LinePoint> noiseCopy;
 
         noiseCopy = noisePoints;
         noisePoints.clear();
@@ -437,7 +434,7 @@ void SplitAndMerge::splitNoise(vector<LSFittedLine*>& lines) {
     }
 }
 
-bool SplitAndMerge::separate(vector<LinePoint*>& left, vector<LinePoint*>& right, LinePoint* split_point, LSFittedLine& line) {
+bool SplitAndMerge::separate(vector<LinePoint>& left, vector<LinePoint>& right, LinePoint& split_point, LSFittedLine& line) {
     /*splits a section of points around a splitting point by rotating and translating onto the line about the splitting point
      *Pre: left and right should be empty vectors
      *		points contains all the points to be split
@@ -449,17 +446,17 @@ bool SplitAndMerge::separate(vector<LinePoint*>& left, vector<LinePoint*>& right
     */
 
     //temp holder vars
-    double x_split = split_point->x;
-    double y_split = split_point->y;
-    vector<LinePoint*> points = line.getPoints();
+    double x_split = split_point.x;
+    double y_split = split_point.y;
+    vector<LinePoint> points = line.getPoints();
 
     left.push_back(split_point);    //splitting point should be included in both groups
     right.push_back(split_point);
     if(line.isHorizontal()) {
         //horizontal line - no rotation
-        BOOST_FOREACH(LinePoint* pt, points) {
+        BOOST_FOREACH(LinePoint pt, points) {
             if(pt != split_point) {
-                if(pt->x < x_split) //point is to the left
+                if(pt.x < x_split) //point is to the left
                     left.push_back(pt);
                 else
                     right.push_back(pt);
@@ -468,9 +465,9 @@ bool SplitAndMerge::separate(vector<LinePoint*>& left, vector<LinePoint*>& right
     }
     else if(line.isVertical()) {
         //vertical line - 90 degree rotation
-        BOOST_FOREACH(LinePoint* pt, points) {
+        BOOST_FOREACH(LinePoint pt, points) {
             if(pt != split_point) {
-                if(pt->y < y_split) //point is to the left
+                if(pt.y < y_split) //point is to the left
                     left.push_back(pt);
                 else
                     right.push_back(pt);
@@ -478,12 +475,12 @@ bool SplitAndMerge::separate(vector<LinePoint*>& left, vector<LinePoint*>& right
         }
     }
     else {
-        double xsplit = line.projectOnto(*split_point).x;
-        BOOST_FOREACH(LinePoint* pt, points) {
+        double xsplit = line.projectOnto(split_point).x;
+        BOOST_FOREACH(LinePoint pt, points) {
             //check all points, calculate translated x coord
             //and place in appropriate vector
             if(pt != split_point) {
-                if(line.projectOnto(*pt).x < xsplit) {
+                if(line.projectOnto(pt).x < xsplit) {
                     //point is to the left
                     left.push_back(pt);
                 }
@@ -508,13 +505,13 @@ bool SplitAndMerge::separate(vector<LinePoint*>& left, vector<LinePoint*>& right
 }
 
 
-void SplitAndMerge::merge(vector<LSFittedLine*>& lines) {
+void SplitAndMerge::merge(vector<LSFittedLine>& lines) {
     //O(l^2)  -  l=number of lines (max 15)
     // Compares all lines and merges based on the return value of
     // shouldMergeLines(Line, Line) - edit that method not this one
 
-    vector<LSFittedLine*> finals; // this vector contains lines that have been merged or did not need to be.
-    LSFittedLine* current; // line currently being compared with the rest.
+    vector<LSFittedLine> finals; // this vector contains lines that have been merged or did not need to be.
+    LSFittedLine current; // line currently being compared with the rest.
 
 
     while(!lines.empty()) {
@@ -522,15 +519,14 @@ void SplitAndMerge::merge(vector<LSFittedLine*>& lines) {
         current = lines.back();
         lines.pop_back();
 
-        vector<LSFittedLine*>::iterator it = lines.begin();
+        vector<LSFittedLine>::iterator it = lines.begin();
         //go through all lines and find any that should be merged - merge them
         while(it < lines.end()) {
-            if(shouldMergeLines(*current, **it)) {
+            if(shouldMergeLines(current, *it)) {
                 //cout << *current << " & " << **it << " should merge: true" << std::endl;
                 //join the lines
-                current->joinLine(**it);
+                current.joinLine(*it);
                 //remove the considered line and update line list
-                delete *it;
                 it = lines.erase(it);
             }
             else {
@@ -546,7 +542,7 @@ void SplitAndMerge::merge(vector<LSFittedLine*>& lines) {
     lines = finals;
 }
 
-void SplitAndMerge::generateLine(LSFittedLine& line, vector<LinePoint*>& points) {
+void SplitAndMerge::generateLine(LSFittedLine& line, vector<LinePoint>& points) {
     //creates a Least Squared Fitted line
 
     line.clearPoints();
@@ -555,32 +551,31 @@ void SplitAndMerge::generateLine(LSFittedLine& line, vector<LinePoint*>& points)
 
 //GENERIC
 
-void SplitAndMerge::addToNoise(LinePoint* point) {
+void SplitAndMerge::addToNoise(const LinePoint& point) {
     //NOT EFFICIENT
     //O(M) for every insertion - where M is the size of noisePoints
-    BOOST_FOREACH(LinePoint* pt, noisePoints) {
-        if(*pt == *point)
+    BOOST_FOREACH(LinePoint pt, noisePoints) {
+        if(pt == point)
             return;
     }
     //only occurs if there are not copies of the point in the noise list
     noisePoints.push_back(point);
 }
 
-void SplitAndMerge::addToNoise(const vector<LinePoint *> &points) {
-    BOOST_FOREACH(LinePoint* pt, points) {
+void SplitAndMerge::addToNoise(const vector<LinePoint > &points) {
+    BOOST_FOREACH(LinePoint pt, points) {
         addToNoise(pt);
     }
 }
 
-void SplitAndMerge::clearSmallLines(vector<LSFittedLine*>& lines) {
+void SplitAndMerge::clearSmallLines(vector<LSFittedLine>& lines) {
     //removes any lines from the vector whose vector of
     //member points is too small
 
-    vector<LSFittedLine*>::iterator it = lines.begin();
+    vector<LSFittedLine>::iterator it = lines.begin();
 
     while(it < lines.end()) {
-        if((*it)->numPoints < MIN_POINTS_TO_LINE_FINAL) {
-            delete *it;
+        if(it->numPoints < MIN_POINTS_TO_LINE_FINAL) {
             it = lines.erase(it);
         }
         else {
@@ -590,14 +585,13 @@ void SplitAndMerge::clearSmallLines(vector<LSFittedLine*>& lines) {
 }
 
 
-void SplitAndMerge::clearDirtyLines(vector<LSFittedLine*>& lines) {
+void SplitAndMerge::clearDirtyLines(vector<LSFittedLine>& lines) {
     //removes any lines from the vector whose R^2 value is
     //less than MIN_LINE_R2_FIT
-    vector<LSFittedLine*>::iterator it = lines.begin();
+    vector<LSFittedLine>::iterator it = lines.begin();
 
     while(it < lines.end()) {
-        if((*it)->getr2tls() < MIN_LINE_R2_FIT || (*it)->getMSD() > MAX_LINE_MSD) {
-            delete *it;
+        if(it->getr2tls() < MIN_LINE_R2_FIT || it->getMSD() > MAX_LINE_MSD) {
             it = lines.erase(it);
         }
         else {

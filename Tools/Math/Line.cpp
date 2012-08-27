@@ -23,8 +23,9 @@ Line::Line(){
   m_A = 0.0;
   m_B = 0.0;
   m_C = 0.0;
-  Rho = 0;
-  Phi = 0;
+  Rho = 0.0;
+  Phi = 0.0;
+  normaliser = 0.0;
   return;
 }
 
@@ -50,9 +51,9 @@ bool Line::setLine(double A, double B, double C)
       m_A = A/B;
       m_B = 1;
       m_C = C/B;
-      double denom = sqrt(m_A*m_A + m_B*m_B);
-      Phi = acos(m_A/denom);
-      Rho = m_C/denom;
+      normaliser = sqrt(m_A*m_A + m_B*m_B);
+      Phi = acos(m_A/normaliser);
+      Rho = m_C/normaliser;
   }
   else {
       //B==0 means vertical
@@ -61,6 +62,7 @@ bool Line::setLine(double A, double B, double C)
       m_C = C/A;
       Phi = 0.0;
       Rho = m_C;
+      normaliser = m_A;
   }
   return (isValid()); // Just to double check.
 }
@@ -180,17 +182,19 @@ double Line::getYIntercept() const
 
 double Line::getLinePointDistance(Point point) const
 {
-  double distance;
-  if(isValid() == false) return 0.0;
-  distance = fabs(m_A * point.x + m_B * point.y - m_C) / (sqrt(m_A*m_A + m_B*m_B));
-  return distance;
+  if(!isValid()) return 0.0;
+  return fabs(m_A * point.x + m_B * point.y - m_C) / normaliser;
 }
 
+double Line::getNormaliser() const
+{
+    return normaliser;
+}
 double Line::getSignedLinePointDistance(Point point) const
 {
   double distance;
   if(isValid() == false) return 0.0;
-  distance = (m_A * point.x + m_B * point.y - m_C) / (sqrt(m_A*m_A + m_B*m_B));
+  distance = (m_A * point.x + m_B * point.y - m_C) / normaliser;
   return distance;
 }
 
@@ -260,6 +264,5 @@ std::ostream& operator<< (std::ostream& output, const Line& l)
 // isValid(float A, float B, float C): Check if the given values create a valid line.
 bool Line::isValid(double A, double B, double C) const
 {
-  if((A == 0.0) && (B == 0.0)) return false; // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
-  return true;
+  return !((A == 0.0) && (B == 0.0)); // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
 }

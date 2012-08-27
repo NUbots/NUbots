@@ -19,9 +19,8 @@ void LineDetector::run()
 
     vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE);  //get transitions associated with lines
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE);
-    vector<LSFittedLine*> lines;
-    vector<LSFittedLine> result;
-    vector<LinePoint*> points;
+    vector<LSFittedLine> lines;
+    vector<LinePoint> points;
 
     points = getPointsFromSegments(h_segments, v_segments);
 
@@ -35,33 +34,36 @@ void LineDetector::run()
             break;
     }
 
-    BOOST_FOREACH(LSFittedLine* l, lines) {
-        //cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints << std::endl;
+//    BOOST_FOREACH(LSFittedLine l, lines) {
+//        cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints << std::endl;
+//    }
 
-        result.push_back(*l);
-    }
-
-    vbb->addLines(result);
+    vbb->addLines(lines);
 }
 
-vector<LinePoint*> LineDetector::getPointsFromSegments(const vector<ColourSegment> &h_segments, const vector<ColourSegment> &v_segments)
+vector<LinePoint> LineDetector::getPointsFromSegments(const vector<ColourSegment> &h_segments, const vector<ColourSegment> &v_segments)
 {
-    vector<LinePoint*> points;
+    vector<LinePoint> points;
+    LinePoint pt;
     BOOST_FOREACH(ColourSegment s, h_segments) {
-        points.push_back(new LinePoint(s.getCentre().x, s.getCentre().y));
+        pt.x = s.getCentre().x;
+        pt.y = s.getCentre().y;
+        points.push_back(pt);
     }
     BOOST_FOREACH(ColourSegment s, v_segments) {
-        points.push_back(new LinePoint(s.getCentre().x, s.getCentre().y));
+        pt.x = s.getCentre().x;
+        pt.y = s.getCentre().y;
+        points.push_back(pt);
     }
 
     return points;
 }
 
-vector<LinePoint*> LineDetector::pointsUnderGreenHorizon(const vector<LinePoint*> points, const GreenHorizon& gh)
+vector<LinePoint> LineDetector::pointsUnderGreenHorizon(const vector<LinePoint>& points, const GreenHorizon& gh)
 {
-    vector<LinePoint*> under;
-    BOOST_FOREACH(LinePoint* p, points) {
-        if(gh.isBelowHorizon(PointType(p->x, p->y))) {
+    vector<LinePoint> under;
+    BOOST_FOREACH(LinePoint p, points) {
+        if(gh.isBelowHorizon(PointType(p.x, p.y))) {
             under.push_back(p);
         }
     }
