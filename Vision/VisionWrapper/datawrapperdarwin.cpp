@@ -37,8 +37,8 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_V_SCANS";
     case DBID_SEGMENTS:
         return "DBID_SEGMENTS";
-    case DBID_TRANSITIONS:
-        return "DBID_TRANSITIONS";
+    case DBID_MATCHED_SEGMENTS:
+        return "DBID_MATCHED_SEGMENTS";
     case DBID_HORIZON:
         return "DBID_HORIZON";
     case DBID_GREENHORIZON_SCANS:
@@ -264,6 +264,20 @@ bool DataWrapper::debugPublish(vector<Obstacle> data) {
     return true;  
 }
 
+bool DataWrapper::debugPublish(const vector<LSFittedLine> &data)
+{
+    #if VISION_WRAPPER_VERBOSITY > 1
+        if(data.empty()) {
+            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_LINES) << endl;
+            return false;
+        }
+        BOOST_FOREACH(LSFittedLine l, data) {
+            debug << "DataWrapper::debugPublish - Line = " << l << endl;
+        }
+    #endif
+    return true;
+}
+
 bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
 {
     //! @todo better debug printing + Comment
@@ -329,8 +343,8 @@ bool DataWrapper::updateFrame()
     //! @todo Finish implementing & Comment
     actions = Blackboard->Actions;
     sensor_data = Blackboard->Sensors;
-    if(isSavingImages)
-        sensor_data_copy = *sensor_data;
+//    if(isSavingImages)
+//        sensor_data_copy = *sensor_data;
     field_objects = Blackboard->Objects;
     
     if (current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
@@ -354,6 +368,7 @@ bool DataWrapper::updateFrame()
     m_timestamp = current_frame->GetTimestamp();
     //succesful
     field_objects->preProcess(m_timestamp);
+    cout << "Frames dropped: " << numFramesDropped << endl;
     return true;
 }
 
@@ -453,8 +468,8 @@ void DataWrapper::saveAnImage()
     {
         if(sensorfile.is_open())
         {
-            //sensorfile << (*sensor_data) << flush;
-            sensorfile << sensor_data_copy << flush;
+            sensorfile << (*sensor_data) << flush;
+            //sensorfile << sensor_data_copy << flush;
         }
         NUImage buffer;
         buffer.cloneExisting(*current_frame);

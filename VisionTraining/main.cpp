@@ -14,8 +14,8 @@ vector<double> checkSensorStream(string name);
 
 int main()
 {
-    vector<double> imagetimes = checkImageStream(string(getenv("HOME")) + string("/Images/JoWedNight/image.strm"));
-    vector<double> sensortimes = checkSensorStream(string(getenv("HOME")) + string("/Images/JoWedNight/sensor.strm"));
+    vector<double> imagetimes = checkImageStream(string(getenv("HOME")) + string("/Images/lagtest/image.strm"));
+    vector<double> sensortimes = checkSensorStream(string(getenv("HOME")) + string("/Images/lagtest/sensor.strm"));
     cout << imagetimes << endl;
     cout << sensortimes << endl;
     double max_diff = 0.0;
@@ -31,7 +31,7 @@ int main()
         sum += diff;
         geo_mean *= pow(diff, 1.0/frames);
     }
-    cout << "max difference: " << max_diff << " average: " << sum/frames << " geo mean: " << geo_mean << endl;
+    cout << "between sensors and images max difference: " << max_diff << " average: " << sum/frames << " geo mean: " << geo_mean << endl;
     max_diff = 0.0;
     sum = 0.0;
     geo_mean = 1.0;
@@ -41,7 +41,7 @@ int main()
         sum += diff;
         geo_mean *= pow(diff, 1.0/(imagetimes.size()-1));
     }
-    cout << "max difference: " << max_diff << " average: " << sum/(imagetimes.size()-1) << " geo mean: " << geo_mean << endl;
+    cout << "images max difference: " << max_diff << " average: " << sum/(imagetimes.size()-1) << " geo mean: " << geo_mean << endl;
     max_diff = 0.0;
     sum = 0.0;
     geo_mean = 1.0;
@@ -51,7 +51,7 @@ int main()
         sum += diff;
         geo_mean *= pow(diff, 1.0/(sensortimes.size()-1));
     }
-    cout << "max difference: " << max_diff << " average: " << sum/(sensortimes.size()-1) << " geo mean: " << geo_mean << endl;
+    cout << "stream max difference: " << max_diff << " average: " << sum/(sensortimes.size()-1) << " geo mean: " << geo_mean << endl;
     //return runDave();
     //return runDefault();
 }

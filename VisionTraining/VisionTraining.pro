@@ -38,9 +38,9 @@ HEADERS += \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
     ../Vision/basicvisiontypes.h \
-    ../Vision/Visionblackboard.h \
-    ../Vision/Visioncontroller.h \
-    ../Vision/Visionconstants.h \
+    ../Vision/visionblackboard.h \
+    ../Vision/visioncontroller.h \
+    ../Vision/visionconstants.h \
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -48,9 +48,9 @@ SOURCES += \
     ../Vision/VisionTools/lookuptable.cpp \
     ../Vision/Modules/*.cpp \
     ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
-    ../Vision/Visionblackboard.cpp \
-    ../Vision/Visioncontroller.cpp \
-    ../Vision/Visionconstants.cpp \
+    ../Vision/visionblackboard.cpp \
+    ../Vision/visioncontroller.cpp \
+    ../Vision/visionconstants.cpp \
     main.cpp \
 
 ##robocup

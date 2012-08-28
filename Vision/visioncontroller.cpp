@@ -46,7 +46,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     #if VISION_CONTROLLER_VERBOSITY > 1
         debug << "VisionController::runFrame() - Run Modules" << endl;
     #endif
-    //run modules    
+    //run modules
     GreenHorizonCH::calculateHorizon();
 #if VISION_CONTROLLER_VERBOSITY > 2
     debug << "VisionController::runFrame() - calculateHorizon done" << endl;

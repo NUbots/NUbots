@@ -14,10 +14,19 @@ public:
 
     int runFrame();
     bool setLUT(const string& filename);
-    bool setStream(const string& filename);
+    bool setImageStream(const string& filename);
+    bool setSensorStream(const string& filename);
     void restartStream();
     void resetHistory();
-    void writeDetections(ostream& out);
+
+    //batch outputs
+    void writeBatchDetections(ostream& out);
+    void writeBatchResults(ostream& out);
+    void writeBatchGroundTruth(ostream& out);
+
+    void generateLabels(const string& directory);
+
+    float evaluateFrame();
 
 private:
     VisionControlWrapper();
