@@ -183,10 +183,15 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
             int config_player;
             in >> config_player;
-            if(config_player == Blackboard->GameInfo->getPlayerNumber()) {
+            #ifdef TARGET_IS_PC
                 in >> fval;
-                D2P_ANGLE_CORRECTION = fval;
-            }
+                D2P_ANGLE_CORRECTION = 0;
+            #else
+                if(config_player == Blackboard->GameInfo->getPlayerNumber()) {
+                    in >> fval;
+                    D2P_ANGLE_CORRECTION = fval;
+                }
+            #endif
         }
         else if(name.compare("BALL_DISTANCE_POSITION_BOTTOM") == 0) {
             in >> bval;

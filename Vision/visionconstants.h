@@ -15,40 +15,40 @@ public:
     };
 
     //! Distortion Correction
-    static bool DO_RADIAL_CORRECTION;
-    static float RADIAL_CORRECTION_COEFFICIENT;
+    static bool DO_RADIAL_CORRECTION;           //! Whether to perform radial distortion correction.
+    static float RADIAL_CORRECTION_COEFFICIENT; //! The radial distortion correction coefficient.
     
     //! Goal filtering constants
-    static bool THROWOUT_ON_ABOVE_KIN_HOR_GOALS;
-    static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS;
-    static float MAX_DISTANCE_METHOD_DISCREPENCY_GOALS; //! The maximum allowed discrepency between the d2p and width distance measures for goal posts
-    static bool THROWOUT_DISTANT_GOALS;
-    static float MAX_GOAL_DISTANCE;
-    static bool THROWOUT_INSIGNIFICANT_GOALS;
-    static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;
-    static bool THROWOUT_NARROW_GOALS;
-    static int MIN_GOAL_WIDTH;
-    static float GOAL_EDGE_RATIO;
+    static bool THROWOUT_ON_ABOVE_KIN_HOR_GOALS;    //! Whether to throw out goals whose base is above the kinematics horizon.
+    static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS;  //! Whether to throw out goals when the distance methods disagree.
+    static float MAX_DISTANCE_METHOD_DISCREPENCY_GOALS;         //! The maximum allowed discrepency between the d2p and width distance measures for goal posts
+    static bool THROWOUT_DISTANT_GOALS; //! Whether to throw out goals too far away.
+    static float MAX_GOAL_DISTANCE;     //! How far away a goal has to been to be ignored.
+    static bool THROWOUT_INSIGNIFICANT_GOALS;           //! Whether to throw out goals with too few transitions.
+    static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;  //! The minimum number of transitions to keep a goal.
+    static bool THROWOUT_NARROW_GOALS;  //! Whether to throw out goals that are too narrow.
+    static int MIN_GOAL_WIDTH;          //! The minimum width of a goal.
+    static float GOAL_EDGE_RATIO;       //! Dave?
 
     //! Beacon filtering constants
-    static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;
-    static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;
-    static float MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS; //! The maximum allowed discrepency between the d2p and width distance measures for beacons
-    static bool THROWOUT_DISTANT_BEACONS;
-    static float MAX_BEACON_DISTANCE;
-    static bool THROWOUT_INSIGNIFICANT_BEACONS;
-    static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS;
+    static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;  //! Whether to throw out beacons whose base is above the kinematics horizon.
+    static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;    //! Whether to throw out beacons when the distance methods disagree.
+    static float MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS;           //! The maximum allowed discrepency between the d2p and width distance measures for beacons
+    static bool THROWOUT_DISTANT_BEACONS;   //! Whether to throw out beacons too far away.
+    static float MAX_BEACON_DISTANCE;       //! How far away a beacon has to been to be ignored.
+    static bool THROWOUT_INSIGNIFICANT_BEACONS; //! Whether to throw out beacons with too few transitions.
+    static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS;    //! The minimum number of transitions to keep a beacon.
 
     //! Ball filtering constants
-    static bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
-    static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;
-    static float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;  //! The maximum allowed discrepency between the d2p and width distance measures for the ball
-    static bool THROWOUT_SMALL_BALLS;
-    static float MIN_BALL_DIAMETER_PIXELS;
-    static bool THROWOUT_INSIGNIFICANT_BALLS;
-    static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL;
-    static bool THROWOUT_DISTANT_BALLS;
-    static float MAX_BALL_DISTANCE;
+    static bool THROWOUT_ON_ABOVE_KIN_HOR_BALL; //! Whether to throw out a ball whose base is above the kinematics horizon.
+    static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;   //! Whether to throw out a ball when the distance methods disagree.
+    static float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;          //! The maximum allowed discrepency between the d2p and width distance measures for the ball
+    static bool THROWOUT_SMALL_BALLS;       //! Whether to throw out balls that are too small.
+    static float MIN_BALL_DIAMETER_PIXELS;  //! Minimum size for a ball.
+    static bool THROWOUT_INSIGNIFICANT_BALLS;           //! Whether to throw out ball with too few transitions.
+    static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL;   //! The minimum number of transitions to keep a ball.
+    static bool THROWOUT_DISTANT_BALLS; //! Whether to throw out balls that are too far away.
+    static float MAX_BALL_DISTANCE;     //! The maximum distance for a ball.
 
     //! Distance calculation options
     static bool D2P_INCLUDE_BODY_PITCH;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
@@ -56,9 +56,9 @@ public:
     static bool BALL_DISTANCE_POSITION_BOTTOM;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
 
     //! Distance method options
-    static DistanceMethod BALL_DISTANCE_METHOD;
-    static DistanceMethod GOAL_DISTANCE_METHOD;
-    static DistanceMethod BEACON_DISTANCE_METHOD;
+    static DistanceMethod BALL_DISTANCE_METHOD;     //! The preferred method for calculating the distance to the ball
+    static DistanceMethod GOAL_DISTANCE_METHOD;     //! The preferred method for calculating the distance to the goals
+    static DistanceMethod BEACON_DISTANCE_METHOD;   //! The preferred method for calculating the distance to the beacons
     
     //! Field-object detection constants
     static int BALL_EDGE_THRESHOLD;         //! Dave?
@@ -81,18 +81,18 @@ public:
     static float BEACON_WIDTH;              //! The physical width of the beacons in cm
     
     //! ScanLine options
-    static unsigned int HORIZONTAL_SCANLINE_SPACING;
-    static unsigned int VERTICAL_SCANLINE_SPACING;
-    static unsigned int GREEN_HORIZON_SCAN_SPACING;
-    static unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
-    static float GREEN_HORIZON_LOWER_THRESHOLD_MULT;
-    static float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
+    static unsigned int HORIZONTAL_SCANLINE_SPACING;    //! The spacing between horizontal scans.
+    static unsigned int VERTICAL_SCANLINE_SPACING;      //! The spacing between vertical scans.
+    static unsigned int GREEN_HORIZON_SCAN_SPACING;     //! The spacing between scans used to locate the GH.
+    static unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS; //! Dave?
+    static float GREEN_HORIZON_LOWER_THRESHOLD_MULT;    //! Dave?
+    static float GREEN_HORIZON_UPPER_THRESHOLD_MULT;    //! Dave?
 
     // static methods
-    static DistanceMethod getDistanceMethodFromName(std::string name);
-    static std::string getDistanceMethodName(DistanceMethod method);
+    static DistanceMethod getDistanceMethodFromName(std::string name);  //! Converts a string to a distance method.
+    static std::string getDistanceMethodName(DistanceMethod method);    //! Converts a distance method to a string name.
 
-    static void loadFromFile(std::string filename);
+    static void loadFromFile(std::string filename); //! Loads the constants from a file
     
 private:
     VisionConstants();  //so noone can make an object of this type

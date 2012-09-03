@@ -17,7 +17,13 @@ int main(void)
     while(c!=27 && error==0) {
         //visiondata->updateFrame();
         error = vision->runFrame();
-        c = waitKey();
+        c = waitKey(1);
+        if(c==32) {
+            c=0;
+            while(c!=32 && c!=27) {
+                c=waitKey();
+            }
+        }
     }
     if(error != 0)
         cout << "Error: " << error << endl;

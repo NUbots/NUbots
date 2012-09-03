@@ -24,13 +24,30 @@ using namespace std;
 class ScanLines
 {
 public:
+    /**
+    *   @brief  generates the horizontal scanline heights.
+    *   This uses the average y positions of the horizon end points and an equal spacing from there
+    *   to the top of the image.
+    */
     static void generateScanLines();
     
+    /**
+    *   @brief  classifies each horizontal scanline into blocks of continuous colour.
+    */
     static void classifyHorizontalScanLines();
+    /**
+    *   @brief  classifies each vertical scanline into blocks of continuous colour.
+    */
     static void classifyVerticalScanLines();
     
 private:
+    /**
+    *   @brief  classifies a single horizontal scanline.
+    */
     static vector<ColourSegment> classifyHorizontalScan(const VisionBlackboard& vbb, const NUImage& img, unsigned int y);
+    /**
+    *   @brief  classifies a single vertical scanline.
+    */
     static vector<ColourSegment> classifyVerticalScan(const VisionBlackboard& vbb, const NUImage& img, const PointType& start);
     
     

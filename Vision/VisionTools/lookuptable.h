@@ -24,6 +24,10 @@ public:
     LookUpTable();
     LookUpTable(unsigned char* vals);
 
+    /*!
+      @brief sets a LUT given an array of values
+      @param vals the array of values.
+      */
     void set(unsigned char* vals);
 
     /*!
@@ -50,6 +54,11 @@ public:
         }
     }
 
+    /*!
+      @brief classifies and entire image into an opencv Mat
+      @param src the image to classify.
+      @param dest the resulting classified image.
+      */
     void classifyImage(const NUImage& src, cv::Mat& dest) const;
 
 private:
