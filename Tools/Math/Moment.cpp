@@ -142,7 +142,8 @@ void Moment::setMean(const Matrix& newMean)
 void Moment::setCovariance(const Matrix& newCovariance)
 {
     bool isCorrectSize = (newCovariance.getm() == m_numStates) && (newCovariance.getn() == m_numStates);
-    assert(isCorrectSize and newCovariance.isValid());
+    assert(isCorrectSize);
+    assert(newCovariance.isValid());
     if(isCorrectSize and newCovariance.isValid())
     {
         m_covariance = newCovariance;
