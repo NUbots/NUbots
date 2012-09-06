@@ -111,7 +111,7 @@ void SelfSRUKF::InitialiseCachedValues()
     sqrtOfProcessNoise = Matrix(3,3,true);
     sqrtOfProcessNoise[0][0] = 0.5; // Robot X coord.
     sqrtOfProcessNoise[1][1] = 0.5; // Robot Y coord.
-    sqrtOfProcessNoise[2][2] = 0.005; // Robot Theta. 0.00001
+    sqrtOfProcessNoise[2][2] = 0.0001; // Robot Theta. 0.00001
 
     return;
 }
