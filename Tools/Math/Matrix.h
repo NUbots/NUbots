@@ -29,6 +29,8 @@ public:
         Matrix getCol(int index) const; // Get Column
 	void setRow(int index, Matrix in); // Set Row
 	void setCol(int index, Matrix in); // Set Column
+
+    void swapRows(unsigned int index1, unsigned int index2);
 	Matrix&	operator =  (const Matrix& a); // Overloaded Operator
 	inline double* operator []	(int i)	const {return &X[i*N];};
 	inline double& operator() (int i, int j){return X[i*N+j];};
@@ -71,6 +73,10 @@ inline	 double*	Matrix::getx() const { return X; }
 double determinant(const Matrix& mat);
 Matrix CofactorMatrix(const Matrix& mat);
 Matrix InverseMatrix(const Matrix& mat);
+
+Matrix CramersRuleInverse(const Matrix& mat);
+Matrix GaussJordanInverse(const Matrix& mat);
+
 
 std::ostream& operator <<(std::ostream& out, const Matrix &mat);
 
