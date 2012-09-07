@@ -139,6 +139,10 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
     {
         result.setPruneMethod((LocalisationSettings::prune_nscan));
     }
+    else if (prune_text.compare("none", Qt::CaseInsensitive) == 0)
+    {
+        result.setPruneMethod((LocalisationSettings::prune_none));
+    }
     else
     {
         result.setPruneMethod((LocalisationSettings::prune_unknown));
@@ -159,6 +163,10 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
     else if(branch_text.compare("probabalistic", Qt::CaseInsensitive) == 0)
     {
         result.setBranchMethod(LocalisationSettings::branch_probDataAssoc);
+    }
+    else if (prune_text.compare("none", Qt::CaseInsensitive) == 0)
+    {
+        result.setBranchMethod((LocalisationSettings::branch_none));
     }
     else
     {
