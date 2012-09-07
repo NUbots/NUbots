@@ -370,8 +370,6 @@ SelfModel::updateResult SelfSRUKF::updateAngleBetween(double angle, double x1, d
         // Note: as distinct from almost all other updates, the actual robot orientation
         // doesn't matter for this update, and so 'cropping' etc. of the sigma points is not requied.
 
-        double R_angle;
-
     // Unscented KF Stuff.
     double yBar;                                  	//reset
     double Py;
@@ -498,6 +496,7 @@ bool SelfSRUKF::operator ==(const SelfSRUKF& b) const
 std::ostream& SelfSRUKF::writeStreamBinary (std::ostream& output) const
 {
     SelfModel::writeStreamBinary(output);
+    return output;
 }
 
 /*!
@@ -509,6 +508,7 @@ std::istream& SelfSRUKF::readStreamBinary (std::istream& input)
 {
     SelfModel::readStreamBinary(input);
     setCovariance(covariance());    // need to initialise the sqrt covariance.
+    return input;
 }
 
 std::ostream& operator<< (std::ostream& output, const SelfSRUKF& p_model)
