@@ -151,3 +151,12 @@ bool MobileObjectUKF::directUpdate(const Matrix& position, const Matrix& cov)
     setCovariance(newCovariance);
     return true;
 }
+
+void MobileObjectUKF::initialiseModel(const Matrix& mean, const Matrix& covariance)
+{
+    setMean(mean);
+    setCovariance(covariance);
+    m_sigma_points = GenerateSigmaPoints();
+    m_sigma_mean = CalculateMeanFromSigmas(m_sigma_points);
+    return;
+}
