@@ -133,7 +133,6 @@ void FieldObjects::InitStationaryFieldObjects()
                     x = 0.0f;
                     y = 200.0f;
                     objectName = "Left Half-Way T Intersect";
-                    y = 0.0f;
                     break;
 		case FO_CORNER_CENTRE_T_RIGHT:
                     x = 0.0f;
@@ -160,9 +159,9 @@ void FieldObjects::InitStationaryFieldObjects()
 		case FO_CORNER_BLUE_FIELD_RIGHT:
                     x = -300.0f;
                     y = 200.0f;
-                    objectName = "Left Blue Field Corner";
+                    objectName = "Right Blue Field Corner";
                     break;
-		// Yellow Penalty Box
+        // Blue Penalty Box
 		case FO_CORNER_BLUE_PEN_LEFT:
                     x = -237.5f;
                     y = -150.0f;
@@ -453,12 +452,13 @@ int FieldObjects::getClosestStationaryOption(const Self& location, const Ambiguo
 vector<StationaryObject*> FieldObjects::filterToVisible(const Self& location, const AmbiguousObject& amb_object, float headPan, float fovX)
 {
     const float c_view_direction = location.Heading() + headPan;
-    const float c_view_range = fovX + location.sdHeading();
+    const float c_view_range = fovX + 2 * location.sdHeading();
     const float c_minHeading =  c_view_direction - c_view_range;
     const float c_maxHeading =  c_view_direction + c_view_range;
 
     vector<int> poss_ids = amb_object.getPossibleObjectIDs();
     vector<StationaryObject*> result;
+    result.reserve(poss_ids.size());
 
 //    std::cout << "Ambiguous object: " << amb_object.getName() << std::endl;
 //    std::cout << "View direction: " << c_view_direction << " heading: " << location.Heading() << " pan: " << headPan << std::endl;
@@ -618,6 +618,11 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
             throw FileFormatException(error_msg.str());
         }
         input >> p_fob.stationaryFieldObjects[i];
+        if(i == FieldObjects::FO_CORNER_CENTRE_T_LEFT)
+        {
+            p_fob.stationaryFieldObjects[i].fieldLocation.x = 0;
+            p_fob.stationaryFieldObjects[i].fieldLocation.y = 200;
+        }
     }
 
     input.read(reinterpret_cast<char*>(&size), sizeof(size));

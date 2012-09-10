@@ -10,13 +10,13 @@
 class StationaryObject: public Object{
 	private:
                 int ID;
-                Vector2<float> fieldLocation;
 
 	public:
                 StationaryObject(const Vector2<float>& initialFieldLocation, int id = -1, const std::string& initName = "Unknown");
                 StationaryObject(float x = 0, float y = 0, int id = -1, const std::string& initName = "Unknown");
                 StationaryObject(const StationaryObject& otherObject);
 		~StationaryObject();
+                Vector2<float> fieldLocation;
 
 
 		//Access:
