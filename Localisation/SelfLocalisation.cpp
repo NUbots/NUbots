@@ -66,13 +66,13 @@ const float SelfLocalisation::c_twoObjectAngleVariance = 0.05f*0.05f; //Small! e
 /*! @brief Constructor
     @param playerNumber The player number of the current robot/system. This assists in choosing reset positions.
  */
-
 SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings& settings): m_timestamp(0), m_settings(settings)
 {
     m_hasGps = false;
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
     m_currentFrameNumber = 0;
+    total_bad_known_objects = 0;
 
     m_amILost = true;
     m_lostCount = 100;
@@ -104,6 +104,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
     m_currentFrameNumber = 0;
+    total_bad_known_objects = 0;
 	
     m_amILost = true;
     m_lostCount = 100;
@@ -300,8 +301,8 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     m_frame_log << "Mobile Objects: " << objseen << std::endl;
     m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
     #endif
-    ProcessObjects(fobs, time_increment);
 
+    ProcessObjects(fobs, time_increment);
 
     MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
 
@@ -324,8 +325,117 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     #if LOC_SUMMARY > 0
     m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
     #endif
+
 #endif
 }
+
+void SelfLocalisation::IndividualStationaryObjectUpdate(FieldObjects* fobs, float time_increment)
+{
+    int numUpdates = 0;
+    int updateResult;
+    int usefulObjectCount = 0;
+
+    // Proccess the Stationary Known Field Objects
+    StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
+    StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
+
+    // all objects at once.
+    unsigned int objectsAdded = 0;
+    unsigned int totalSuccessfulUpdates = 0;
+    for(; currStat != endStat; ++currStat)
+    {
+        if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
+#if CENTER_CIRCLE_ON
+        totalSuccessfulUpdates += landmarkUpdate(*currStat);
+        objectsAdded++;
+#else
+        if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
+        {
+            totalSuccessfulUpdates += landmarkUpdate(*currStat);
+            objectsAdded++;
+        }
+#endif
+    }
+
+
+    if(objectsAdded > 0 and totalSuccessfulUpdates < 1)
+    {
+        total_bad_known_objects += objectsAdded;
+    }
+    else
+    {
+        total_bad_known_objects = 0;
+    }
+
+    if(total_bad_known_objects > 3)
+    {
+        // reset
+        if(m_settings.pruneMethod() != LocalisationSettings::branch_none and m_settings.pruneMethod() != LocalisationSettings::branch_unknown)
+        {
+            doReset();
+        }
+        else
+        {
+            doSingleReset();
+        }
+        // reapply the updates.
+        currStat = fobs->stationaryFieldObjects.begin();
+        endStat = fobs->stationaryFieldObjects.end();
+        for(; currStat != endStat; ++currStat)
+        {
+            if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
+    #if CENTER_CIRCLE_ON
+            totalSuccessfulUpdates += landmarkUpdate(*currStat);
+            objectsAdded++;
+    #else
+            if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
+            {
+                totalSuccessfulUpdates += landmarkUpdate(*currStat);
+                objectsAdded++;
+            }
+    #endif
+        }
+    }
+
+    numUpdates+=objectsAdded;
+    usefulObjectCount+=objectsAdded;
+
+    NormaliseAlphas();
+    return;
+}
+
+void SelfLocalisation::ParallellStationaryObjectUpdate(FieldObjects* fobs, float time_increment)
+{
+    int updateResult;
+
+    // Proccess the Stationary Known Field Objects
+    StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
+    StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
+
+    // all objects at once.
+    std::vector<StationaryObject*> update_objects;
+    unsigned int objectsAdded = 0;
+    unsigned int totalSuccessfulUpdates = 0;
+    for(; currStat != endStat; ++currStat)
+    {
+        if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
+#if CENTER_CIRCLE_ON
+        update_objects.push_back(&(*currStat));
+        objectsAdded++;
+#else
+        if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
+        {
+            update_objects.push_back(&(*currStat));
+            objectsAdded++;
+        }
+#endif
+    }
+
+    updateResult = multipleLandmarkUpdate(update_objects);
+    NormaliseAlphas();
+    return;
+}
+
 
 /*! @brief Process objects
     Processes the field objects and perfroms the correction updates required from the observations.
@@ -356,34 +466,82 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
+    ParallellStationaryObjectUpdate(fobs, time_increment);
+    //IndividualStationaryObjectUpdate(fobs, time_increment);
 
-    // Proccess the Stationary Known Field Objects
-    StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
-    StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
+//    // Proccess the Stationary Known Field Objects
+//    StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
+//    StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
 
-    // all objects at once.
-    std::vector<StationaryObject*> update_objects;
-    unsigned int objectsAdded = 0;
-    for(; currStat != endStat; ++currStat)
-    {
-        if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
-#if CENTER_CIRCLE_ON
-		update_objects.push_back(&(*currStat));
-		objectsAdded++;
-#else
-		if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
-		{
-			update_objects.push_back(&(*currStat));
-			objectsAdded++;
-		}
-#endif
-    }
+//    // all objects at once.
+//    std::vector<StationaryObject*> update_objects;
+//    unsigned int objectsAdded = 0;
+//    unsigned int totalSuccessfulUpdates = 0;
+//    for(; currStat != endStat; ++currStat)
+//    {
+//        if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
+//#if CENTER_CIRCLE_ON
+////        update_objects.push_back(&(*currStat));
+//        totalSuccessfulUpdates += landmarkUpdate(*currStat);
+//        objectsAdded++;
+//#else
+//        if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
+//        {
+////            update_objects.push_back(&(*currStat));
+//            totalSuccessfulUpdates += landmarkUpdate(*currStat);
+//            objectsAdded++;
+//        }
+//#endif
+//    }
 
-    updateResult = multipleLandmarkUpdate(update_objects);
-    numUpdates+=objectsAdded;
-    usefulObjectCount+=objectsAdded;
 
-    NormaliseAlphas();
+//    if(objectsAdded > 0 and totalSuccessfulUpdates < 1)
+//    {
+//        total_bad_known_objects += objectsAdded;
+//    }
+//    else
+//    {
+//        total_bad_known_objects = 0;
+//    }
+
+//    if(total_bad_known_objects > 3)
+//    {
+//        // reset
+//        if(m_settings.pruneMethod() != LocalisationSettings::branch_none and m_settings.pruneMethod() != LocalisationSettings::branch_unknown)
+//        {
+//            doReset();
+//        }
+//        else
+//        {
+//            doSingleReset();
+//        }
+//        // reapply the updates.
+//        currStat = fobs->stationaryFieldObjects.begin();
+//        endStat = fobs->stationaryFieldObjects.end();
+//        for(; currStat != endStat; ++currStat)
+//        {
+//            if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
+//    #if CENTER_CIRCLE_ON
+//    //        update_objects.push_back(&(*currStat));
+//            totalSuccessfulUpdates += landmarkUpdate(*currStat);
+//            objectsAdded++;
+//    #else
+//            if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
+//            {
+//    //            update_objects.push_back(&(*currStat));
+//                totalSuccessfulUpdates += landmarkUpdate(*currStat);
+//                objectsAdded++;
+//            }
+//    #endif
+//        }
+//    }
+
+
+////    updateResult = multipleLandmarkUpdate(update_objects);
+//    numUpdates+=objectsAdded;
+//    usefulObjectCount+=objectsAdded;
+
+//    NormaliseAlphas();
 
 #if MULTIPLE_MODELS_ON
         bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
@@ -412,26 +570,27 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
         }
 #endif // MULTIPLE_MODELS_ON
 
-        // Two Object update
-    //#if TWO_OBJECT_UPDATE_ON
-        StationaryObject& leftBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
-        StationaryObject& rightBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
-        StationaryObject& leftYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
-        StationaryObject& rightYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+        if(m_settings.pruneMethod() != LocalisationSettings::branch_none and m_settings.pruneMethod() != LocalisationSettings::branch_unknown)
+        {
+            // Two Object update
+        //#if TWO_OBJECT_UPDATE_ON
+            StationaryObject& leftBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+            StationaryObject& rightBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+            StationaryObject& leftYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+            StationaryObject& rightYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
 
-        if( leftBlue.isObjectVisible() and rightBlue.isObjectVisible())
-        {
-            doTwoObjectUpdate(leftBlue, rightBlue);
-        }
-        if( leftYellow.isObjectVisible() and rightYellow.isObjectVisible())
-        {
-            doTwoObjectUpdate(leftYellow, rightYellow);
+            if( leftBlue.isObjectVisible() and rightBlue.isObjectVisible())
+            {
+                doTwoObjectUpdate(leftBlue, rightBlue);
+            }
+            if( leftYellow.isObjectVisible() and rightYellow.isObjectVisible())
+            {
+                doTwoObjectUpdate(leftYellow, rightYellow);
+            }
         }
     //#endif
 
         NormaliseAlphas();
-
-
         PruneModels();
 
         MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -473,6 +632,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             debug_out  << " Robot Theta: " << bestModel->mean(Model::states_heading) << endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2	
+
 }
 
 /*! @brief Remove ambiguous pairs
@@ -673,7 +833,8 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
  */
 bool SelfLocalisation::CheckGameState(bool currently_incapacitated, const GameInformation* game_info)
 {
-    GameInformation::TeamColour team_colour = game_info->getTeamColour();
+    //GameInformation::TeamColour team_colour = game_info->getTeamColour();
+    GameInformation::TeamColour team_colour = GameInformation::RedTeam;
     GameInformation::RobotState current_state = game_info->getCurrentState();
     /*
     if (currently_incapacitated)
@@ -734,7 +895,7 @@ void SelfLocalisation::initSingleModel(float x, float y, float heading)
     positions.reserve(1);
     Moment temp(Model::states_total);
     temp.setMean(mean_matrix(x,y,heading));
-    temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*PI*2*PI));
+    temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*2*PI*2*PI));
     positions.push_back(temp);
     InitialiseModels(positions);
     initBallModel(m_ball_model);
@@ -759,14 +920,20 @@ void SelfLocalisation::initBallModel(MobileObjectUKF* ball_model)
     state = MobileObjectUKF::y_vel;
     covariance[state][state] = initial_vel_cov;
 
-    ball_model->setMean(mean);
-    ball_model->setCovariance(covariance);
+    ball_model->initialiseModel(mean, covariance);
 }
 
 void SelfLocalisation::doSingleInitialReset(GameInformation::TeamColour team_colour)
 {
     float initial_heading = 0 + (team_colour==GameInformation::RedTeam?mathGeneral::PI:0);
     initSingleModel(0,0,initial_heading);
+    initBallModel(m_ball_model);
+}
+
+void SelfLocalisation::doSingleReset()
+{
+    clearModels();
+    initSingleModel(0,0,0);
     initBallModel(m_ball_model);
 }
 
@@ -780,8 +947,10 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     // For the probabalistic data association technique we only want a single model present.
-    if(m_settings.branchMethod() == LocalisationSettings::branch_probDataAssoc)
+    if(m_settings.pruneMethod() == LocalisationSettings::prune_unknown || m_settings.pruneMethod() == LocalisationSettings::prune_none || m_settings.pruneMethod() == LocalisationSettings::prune_max_likelyhood)
+    {
         return doSingleInitialReset(team_colour);
+    }
 
     clearModels();
     
@@ -802,15 +971,20 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     float centre_x = -300.0/2.0f;
     float centre_heading = 0;
     float back_x = -300*(3.0f/4.0f);
+    float goal_line_x = -300;
     if (team_colour == GameInformation::RedTeam)
     {   // flip the invert the x for the red team and set the heading to PI
         front_x = -front_x;
         centre_x = -centre_x;
         centre_heading = PI;
         back_x = -back_x;
+        goal_line_x = -goal_line_x;
     }
     
-    Matrix cov_matrix = covariance_matrix(50.0f*50.0f, 15.0f*15.0f, 0.2f*0.2f);
+    float cov_x = pow(70.f,2);
+    float cov_y = pow(50.f,2);
+    float cov_head = pow(4.f,2);
+    Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
     Moment temp(Model::states_total);
     temp.setCovariance(cov_matrix);
     std::vector<Moment> positions;
@@ -1114,11 +1288,10 @@ bool SelfLocalisation::clipActiveModelsToField()
 
 bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double timeIncrement)
 {
-    const float c_turn_multiplier = 0.6f;
-    odomTurn *= c_turn_multiplier;
+//    const float c_turn_multiplier = 0.6f;
+//    odomTurn *= c_turn_multiplier;
 
-    odomTurn -= odomForward * 0.008;
-
+//    odomTurn -= odomForward * 0.008;
     // put values into odometry measurement matrix
     Matrix odometry(3,1,false);
     odometry[0][0] = odomForward;
@@ -1192,7 +1365,6 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
         m_lostCount++;
     else
         m_lostCount = 0;
-
     return result;
 }
 
@@ -1395,6 +1567,13 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
         m_frame_log << ((kf_return==Model::RESULT_OUTLIER)?"Outlier":"Success") << std::endl;
     #endif
         if(kf_return == SelfModel::RESULT_OK) numSuccessfulUpdates++;
+        if(kf_return == Model::RESULT_OUTLIER)
+        {
+            Matrix cov = (*model_it)->covariance();
+            Matrix added_noise = covariance_matrix(1,1,0.0001);
+            cov = cov + added_noise;
+            (*model_it)->setCovariance(cov);
+        }
     }
     return numSuccessfulUpdates;
 }
@@ -1405,6 +1584,7 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
 */
 int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
+    //return 0;
     // do the special update
     float angle_beween_objects = mathGeneral::normaliseAngle(landmark1.measuredBearing() - landmark2.measuredBearing());
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
@@ -1428,16 +1608,20 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
     }
 
     Matrix mean = mean_matrix(position.x, position.y, best_heading);
-    Matrix cov = covariance_matrix(20, 50, 0.01);
-    float alpha = getBestModel()->alpha() * 0.001f;
+    Matrix cov = covariance_matrix(pow(20.f,2), pow(50.f,2), pow(0.01,2));
+    float alpha = getBestModel()->alpha() * 0.0001f;
 
     Model* temp = new Model(GetTimestamp());
+
     temp->setMean(mean);
     temp->setCovariance(cov);
     temp->setAlpha(alpha);
     temp->setActive();
     m_models.push_back(temp);
 
+#if LOC_SUMMARY > 0
+    m_frame_log << "Reset Model Added: " << std::endl << temp->summary(true) << std::endl;
+#endif
     return 1;
 }
 
@@ -1446,6 +1630,21 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
 */
 int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
+
+    if(possibleObjects.size() < 1)
+    {
+#if LOC_SUMMARY > 0
+        m_frame_log << "Ignoring Ambiguous Object - " << ambiguousObject.getName() << std::endl;
+#endif
+        return 0;
+    }
+
+#if LOC_SUMMARY > 0
+    float measured_distance = ambiguousObject.measuredDistance();
+    float measured_heading = ambiguousObject.measuredBearing();
+    m_frame_log << "Ambiguous object: " << ambiguousObject.getName() << " at (" << measured_distance << "," << measured_heading << ")" << std::endl;
+#endif
+
     if(m_settings.branchMethod() == LocalisationSettings::branch_exhaustive)
     {
         return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
@@ -1456,7 +1655,7 @@ int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, 
     }
     else if (m_settings.branchMethod() == LocalisationSettings::branch_constraint)
     {
-        return ambiguousLandmarkUpdateConstraint(ambiguousObject);
+        return ambiguousLandmarkUpdateConstraint(ambiguousObject, possibleObjects);
     }
     else if (m_settings.branchMethod() == LocalisationSettings::branch_probDataAssoc)
     {
@@ -1506,10 +1705,12 @@ int SelfLocalisation::PruneModels()
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_max_likelyhood)
     {
+        removeSimilarModels();
         PruneMaxLikelyhood();
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
     {
+        removeSimilarModels();
         PruneViterbi(6);
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_nscan)
@@ -1541,6 +1742,7 @@ struct model_ptr_cmp{
 */
 int SelfLocalisation::PruneViterbi(unsigned int order)
 {
+    removeInactiveModels();
     if(m_models.size() <= order) return 0;                      // No pruning required if not above maximum.
     m_models.sort(model_ptr_cmp());                             // Sort, results in order smallest to largest.
     unsigned int num_to_remove = m_models.size() - order;       // Number of models that need to be removed.
@@ -1571,6 +1773,7 @@ int SelfLocalisation::PruneNScan(unsigned int N)
     // Sum the alphas of sibling branches from a common parent at branch K-N
     for (ModelContainer::iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
+        if((*model_it)->active() == false) continue;
         unsigned int parent_id = (*model_it)->history(N);
         float alpha = (*model_it)->alpha();
         bool added = false;
@@ -1602,6 +1805,7 @@ int SelfLocalisation::PruneNScan(unsigned int N)
         // Remove all siblings not created from the best branch.
         for (ModelContainer::iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
         {
+            if((*model_it)->history(N) == 0) continue;  // was not involved with this branch.
             if((*model_it)->history(N) != bestParentId)
             {
                 (*model_it)->setActive(false);
@@ -1618,13 +1822,13 @@ int SelfLocalisation::PruneNScan(unsigned int N)
 int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
 
-    const float outlier_factor = 0.0001;
+    const float outlier_factor = 0.1;
     ModelContainer new_models;
     SelfModel* temp_mod;
 
     MeasurementError error = calculateError(ambiguousObject);
 
-    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+    for (ModelContainer::iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
         if((*model_it)->inactive()) continue;
         unsigned int models_added = 0;
@@ -1632,13 +1836,22 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
         {
             temp_mod = new Model(*(*model_it), ambiguousObject, *(*obj_it), error, GetTimestamp());
             new_models.push_back(temp_mod);
+
+            if(temp_mod->active())
+                models_added++;
+
 #if LOC_SUMMARY > 0
+
+            const double dX = (*obj_it)->X() - (*model_it)->mean(0);
+            const double dY = (*obj_it)->Y() - (*model_it)->mean(1);
+
+            float expected_distance = sqrt(dX*dX + dY*dY);;
+            float expected_heading = mathGeneral::normaliseAngle(atan2(dY,dX) - (*model_it)->mean(2));
             m_frame_log << "Model [" << (*model_it)->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
-            m_frame_log << "  Result: " << (temp_mod->active() ? "Valid update" : "Outlier");
+            m_frame_log << " exp (" << expected_distance << ", " << expected_heading << ")  Result: " << (temp_mod->active() ? "Valid update" : "Outlier");
             if(temp_mod->active())
             {
                 m_frame_log << "Valid update (Alpha = " << temp_mod->alpha() << ")";
-                models_added++;
             }
             else
             {
@@ -1662,6 +1875,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
         m_models.insert(m_models.end(), new_models.begin(), new_models.end());
         new_models.clear();
     }
+    removeInactiveModels();
     return SelfModel::RESULT_OUTLIER;
 }
 
@@ -1669,31 +1883,33 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
     This method uses only options that should be visible.
     @return Returns RESULT_OK if measurment updates were sucessfully performed, RESULT_OUTLIER if they were not.
 */
-int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject)
+int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
-
     const float outlier_factor = 0.0001;
     ModelContainer new_models;
     SelfModel* temp_mod, *curr_model;
 
     MeasurementError error = calculateError(ambiguousObject);
 
-    for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+    for (ModelContainer::iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {
         curr_model = (*model_it);
         if(curr_model->inactive()) continue;
-        vector<StationaryObject*> poss_objects;
         unsigned int models_added = 0;
+        vector<StationaryObject*> poss_objects;
+
         Self position = curr_model->GenerateSelfState();
         float headYaw;
         Blackboard->Sensors->getPosition(NUSensorsData::HeadYaw, headYaw);
         //! TODO: The FOV of the camera should NOT be hard-coded!
-        poss_objects = Blackboard->Objects->filterToVisible(position, ambiguousObject, headYaw, 0.81f);
+        poss_objects = filterToVisible(position, possibleObjects, headYaw, 0.81f);
 
         for(std::vector<StationaryObject*>::const_iterator obj_it = poss_objects.begin(); obj_it != poss_objects.end(); ++obj_it)
         {
             temp_mod = new Model(*curr_model, ambiguousObject, *(*obj_it), error, GetTimestamp());
             new_models.push_back(temp_mod);
+            if(temp_mod->active())
+                models_added++;
 
 #if LOC_SUMMARY > 0
             m_frame_log << "Model [" << curr_model->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
@@ -1701,7 +1917,6 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
             if(temp_mod->active())
             {
                 m_frame_log << "Valid update (Alpha = " << temp_mod->alpha() << ")";
-                models_added++;
             }
             else
             {
@@ -1713,11 +1928,11 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
         removeInactiveModels(new_models);
         if(models_added)
         {
-            (*model_it)->setActive(false);
+            curr_model->setActive(false);
         }
-        else
+        else // outlier
         {
-            (*model_it)->setAlpha(outlier_factor * (*model_it)->alpha());
+            curr_model->setAlpha(outlier_factor * (*model_it)->alpha());
         }
     }
     if(new_models.size() > 0)
@@ -1725,6 +1940,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
         m_models.insert(m_models.end(), new_models.begin(), new_models.end());
         new_models.clear();
     }
+    removeInactiveModels();
     return SelfModel::RESULT_OUTLIER;
 }
 
@@ -1760,7 +1976,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
             ModelContainer new_models;
             SelfModel* temp_model = NULL;
 
-            for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
+            for (ModelContainer::iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
             {
                 // Get the id of the object to use for the update.
                 unsigned int object_id = (*model_it)->previousSplitOption(ambiguousObject);
@@ -1808,6 +2024,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
         // Use the regular splitting method.
         return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
     }
+    removeInactiveModels();
     return SelfModel::RESULT_OUTLIER;
 }
 
@@ -1816,6 +2033,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambi
     MeasurementError error = calculateError(ambiguousObject);
     SelfModel::updateResult result = SelfModel::RESULT_FAILED;
     //result = m_models.front()->MeasurementUpdate(ambiguousObject, possibleObjects, error);
+    removeInactiveModels();
     return result;
 }
 
@@ -2218,6 +2436,56 @@ void SelfLocalisation::clearModels()
     }
 }
 
+
+float translation_distance(SelfModel* a, SelfModel* b)
+{
+    float diff_x = a->mean(Model::states_x) - b->mean(Model::states_x);
+    float diff_y = a->mean(Model::states_y) - b->mean(Model::states_y);
+    return sqrt(diff_x * diff_x + diff_y * diff_y);
+}
+
+float heading_distance(SelfModel* a, SelfModel* b)
+{
+    float diff_head = a->mean(Model::states_heading) - b->mean(Model::states_heading);
+    return diff_head;
+}
+
+void SelfLocalisation::removeSimilarModels()
+{
+    const float min_trans_dist = 5;
+    const float min_head_dist = 0.01;
+
+    for(ModelContainer::iterator iter1 = m_models.begin(); iter1 != m_models.end(); ++iter1)
+    {
+        if(!(*iter1)->active()) continue;
+        for(ModelContainer::iterator iter2 = m_models.begin(); iter2 != m_models.end(); ++iter2)
+        {
+            if(!(*iter2)->active()) continue;
+            if(iter1 == iter2) continue;    // don't compare the same models.
+            float trans_dist = translation_distance(*iter1, *iter2);
+            float head_dist = heading_distance(*iter1, *iter2);
+            if( (trans_dist < min_trans_dist) and (head_dist < min_head_dist))
+            {
+                float total_alpha = (*iter1)->alpha() + (*iter2)->alpha();
+                if((*iter1)->alpha() < (*iter2)->alpha())
+                {
+                    (*iter1)->setActive(false);
+                    (*iter2)->setAlpha(total_alpha);
+                }
+                else
+                {
+                    (*iter1)->setAlpha(total_alpha);
+                    (*iter2)->setActive(false);
+                }
+            }
+        }
+    }
+    removeInactiveModels();
+    NormaliseAlphas();
+    return;
+}
+
+
 /*! @brief Initialises all of the models desribed in the vector and weights them evenly.
 
     @param positions A vector containing any number of moments (measurements) of position.
@@ -2490,4 +2758,27 @@ std::vector<TeamPacket::SharedBall> SelfLocalisation::FindNewSharedBalls(const s
     }
     m_prevSharedBalls = allSharedBalls;
     return updateBalls;
+}
+
+vector<StationaryObject*> SelfLocalisation::filterToVisible(const Self& location, const vector<StationaryObject*>& possibleObjects, float headPan, float fovX)
+{
+    const float c_view_direction = location.Heading() + headPan;
+    const float c_view_range = fovX + 2 * location.sdHeading();
+
+    vector<StationaryObject*> result;
+    result.reserve(possibleObjects.size());
+
+    for(vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
+    {
+        float obj_heading = location.CalculateBearingToStationaryObject(*(*obj_it));
+        // Calculate the distance from the viewing direction to the object.
+        float delta_angle = mathGeneral::normaliseAngle(obj_heading - c_view_direction);
+
+        // If the distance to the object heading is within the viewing range the object may be seen,
+        if(fabs(delta_angle) < c_view_range)
+        {
+            result.push_back(*obj_it);
+        }
+    }
+    return result;
 }

@@ -25,7 +25,7 @@ class NUSensorsData;
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
 
-//#define LOC_SUMMARY 3
+#define LOC_SUMMARY 3
 
 typedef SelfSRUKF Model;
 //typedef SelfUKF Model;
@@ -50,6 +50,9 @@ class SelfLocalisation: public TimestampedData
         bool clipModelToField(SelfModel* theModel);
         bool clipActiveModelsToField();
 
+        void IndividualStationaryObjectUpdate(FieldObjects* fobs, float time_increment);
+        void ParallellStationaryObjectUpdate(FieldObjects* fobs, float time_increment);
+
         int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
         int landmarkUpdate(StationaryObject &landmark);
         bool ballUpdate(const MobileObject& ball);
@@ -62,7 +65,7 @@ class SelfLocalisation: public TimestampedData
         int ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int ambiguousLandmarkUpdateSelective(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
-        int ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject);
+        int ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects);
 
 
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
@@ -108,6 +111,7 @@ class SelfLocalisation: public TimestampedData
         bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
         void doInitialReset(GameInformation::TeamColour team_colour);
         void doSingleInitialReset(GameInformation::TeamColour team_colour);
+        void doSingleReset();
         void doSetReset(GameInformation::TeamColour team_colour, int player_number, bool have_kickoff);
         void doPenaltyReset();
         void doBallOutReset();
@@ -125,6 +129,7 @@ class SelfLocalisation: public TimestampedData
         void setBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var);
 
         void clearModels();
+        void removeSimilarModels();
 
         std::vector<TeamPacket::SharedBall> FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls);
 
@@ -175,11 +180,13 @@ class SelfLocalisation: public TimestampedData
     protected:
         MeasurementError calculateError(const Object& theObject);
         Vector2<float> TriangulateTwoObject(const StationaryObject& object1, const StationaryObject& object2);
+        vector<StationaryObject*> filterToVisible(const Self& location, const vector<StationaryObject*>& possibleObjects, float headPan, float fovX);
 
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
         ModelContainer m_models;
+
         MobileObjectUKF* m_ball_model;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
@@ -204,6 +211,7 @@ class SelfLocalisation: public TimestampedData
 
         std::vector<AmbiguousObject> m_pastAmbiguous;
         std::vector<TeamPacket::SharedBall> m_prevSharedBalls;
+        unsigned int total_bad_known_objects;
 
         // Outlier tuning Constants -- Values assigned in SelfLocalisation.cpp
         static const float c_LargeAngleSD;
