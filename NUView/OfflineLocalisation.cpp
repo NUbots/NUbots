@@ -10,6 +10,7 @@
 #include <QElapsedTimer>
 #include "Tools/Math/General.h"
 #include "Tools/Math/Vector3.h"
+#include <sys/time.h>
 
 /*! @brief Default Constructor
  */
@@ -25,6 +26,7 @@ OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent)
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_merge);
     m_running = false;
+    m_use_old_localisation = false;
 }
 
 /*! @brief Class destructor
@@ -96,7 +98,8 @@ bool OfflineLocalisation::OpenLogs(const std::string& initialLogPath)
 bool OfflineLocalisation::IsInitialised()
 {
     bool filesOpenOk = (m_log_reader->numFrames() > 0);
-    bool internalDataOk = (m_workingLoc != NULL) && (m_localisation_frame_buffer.size() >= 0);
+    bool internalDataOk = (m_workingLoc != NULL) && (!m_use_old_localisation or m_localisation_frame_buffer.size() >= 0);
+    internalDataOk = internalDataOk and (m_workingSelfLoc != NULL) and (m_self_loc_frame_buffer.size() >= 0);
     QStringList availableData = m_log_reader->AvailableData();
     bool all_data_available = HasRequiredData(availableData);
 
@@ -155,6 +158,12 @@ void OfflineLocalisation::run()
     int totalFrames = m_log_reader->numFrames();
     m_log_reader->firstFrame();
 
+    m_performance.reserve(totalFrames);
+    m_localisation_frame_buffer.reserve(totalFrames);
+    m_self_loc_frame_buffer.reserve(totalFrames);
+    m_frame_info.reserve(totalFrames);
+    m_self_frame_info.reserve(totalFrames);
+
     emit updateProgress(framesProcessed+1,totalFrames);
 
     bool save_signal = m_log_reader->blockSignals(true); // Block signals
@@ -176,7 +185,9 @@ void OfflineLocalisation::run()
         {
             break;
         }
+
         AddFrame(tempSensor, tempObjects, tempTeamInfo, tempGameInfo);
+
         if(m_log_reader->nextFrameAvailable())
         {
             m_log_reader->nextFrame();
@@ -192,9 +203,19 @@ void OfflineLocalisation::run()
     }
     float exp_time = experimentTimer.elapsed() / 1000.0f;
     float total_time = 0.0f;
+    float max_time = 0;
+    unsigned int max_frame = 0;
+    unsigned int curr_frame = 0;
+    float temp_time;
+
     for(std::vector<LocalisationPerformanceMeasure>::iterator it = m_performance.begin(); it != m_performance.end(); ++it)
     {
-        total_time += it->processingTime();
+        temp_time = it->processingTime();
+        total_time += temp_time;
+        max_time = max(max_time, temp_time);
+        if(max_time == temp_time)
+            max_frame = curr_frame;
+        ++curr_frame;
     }
 
     Model test;
@@ -203,6 +224,8 @@ void OfflineLocalisation::run()
     std::cout << "Number of models created: " << m_num_models_created << std::endl;
     std::cout << "Total Processing time: " << total_time * 1000 << " ms" <<std::endl;
     std::cout << "Experiment time: " << m_experiment_run_time << " ms" << std::endl;
+    std::cout << "Max frame time: " << max_time << " ms - frame: " << max_frame << std::endl;
+
 
     m_log_reader->setFrame(save_frame);
     m_log_reader->blockSignals(save_signal);
@@ -218,22 +241,46 @@ void OfflineLocalisation::run()
  */
 void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects* objectData, const TeamInformation* teamInfo, const GameInformation* gameInfo)
 {
+    timeval t1, t2;
+    double elapsedTime;
+
     // Need to make copies, since source is const
-    NUSensorsData tempSensors = (*sensorData);
+
     NUSensorsData tempSensors2 = (*sensorData);
     QElapsedTimer timer;
     long int ms_elapsed;
 
-    m_workingLoc->process(&tempSensors,objectData,gameInfo,teamInfo);
+    if(m_use_old_localisation)
+    {
+        NUSensorsData tempSensors = (*sensorData);
+        m_workingLoc->process(&tempSensors,objectData,gameInfo,teamInfo);
+    }
+
+    // start timer
+    gettimeofday(&t1, NULL);
 
     timer.start();
     m_workingSelfLoc->process(&tempSensors2,objectData,gameInfo,teamInfo);
     ms_elapsed = timer.elapsed();
-    Localisation* temp = new Localisation((*m_workingLoc));
+
+    // stop timer
+    gettimeofday(&t2, NULL);
+    elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
+    elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+
+    if(m_use_old_localisation)
+    {
+        Localisation* temp = new Localisation((*m_workingLoc));
+        m_localisation_frame_buffer.push_back(temp);
+        QString info(m_workingLoc->frameLog().c_str());
+        m_frame_info.push_back(info);
+    }
+
     SelfLocalisation* self_temp = new SelfLocalisation(*m_workingSelfLoc);
 
     LocalisationPerformanceMeasure performance_measure;
-    performance_measure.setProcessingTime(ms_elapsed / 1000.0f);
+//    performance_measure.setProcessingTime(ms_elapsed / 1000.0f);
+    performance_measure.setProcessingTime(elapsedTime);
     vector<float> gps;
     float compass;
     if(tempSensors2.getGps(gps) and tempSensors2.getCompass(compass))
@@ -245,10 +292,7 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
         performance_measure.setError(err_x, err_y, err_head);
     }
     m_performance.push_back(performance_measure);
-    m_localisation_frame_buffer.push_back(temp);
     m_self_loc_frame_buffer.push_back(self_temp);
-    QString info(m_workingLoc->frameLog().c_str());
-    m_frame_info.push_back(info);
     QString self_info(m_workingSelfLoc->frameLog().c_str());
     m_self_frame_info.push_back(self_info);
 }
@@ -260,11 +304,12 @@ int OfflineLocalisation::NumberOfLogFrames()
 
 int OfflineLocalisation::NumberOfFrames()
 {
-    return m_localisation_frame_buffer.size();
+    return m_self_loc_frame_buffer.size();
 }
 
 const Localisation* OfflineLocalisation::GetFrame(int frameNumber)
 {
+    if(!m_use_old_localisation) return 0;
     int index = frameNumber-1;
     if( (index < 0) || (index >= NumberOfFrames()))
         return NULL;
@@ -286,6 +331,7 @@ const SelfLocalisation* OfflineLocalisation::GetSelfFrame(int frameNumber)
 
 QString OfflineLocalisation::GetFrameInfo(int frameNumber)
 {
+    if(!m_use_old_localisation) return QString();
     int index = frameNumber-1;
     if( (index < 0) || (index >= NumberOfFrames()))
         return NULL;
@@ -592,38 +638,39 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             FieldObjects* tempObjects = m_log_reader->GetObjectData();
 
             // Add the stationary objects.
-            output_file << Tabbing(tab_depth++) << BeginTag("stationary_objects") << std::endl;
+//            output_file << Tabbing(tab_depth++) << BeginTag("stationary_objects") << std::endl;
             for(std::vector<StationaryObject>::const_iterator object = tempObjects->stationaryFieldObjects.begin(); object != tempObjects->stationaryFieldObjects.end(); ++object)
             {
-                output_file << Tabbing(tab_depth++) << BeginTag("object") << std::endl;
+                output_file << Tabbing(tab_depth++) << BeginTag("stationary_object") << std::endl;
 
                 output_file << Tabbing(tab_depth) << BeginTag("id") << object->getID() << EndTag("id") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("name") << object->getName() << EndTag("name") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("count") << stationary_object_count[object->getID()] << EndTag("count") << std::endl;
 
-                output_file << Tabbing(--tab_depth) << EndTag("object") << std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("stationary_object") << std::endl;
             }
-            output_file << Tabbing(--tab_depth) << EndTag("stationary_objects") << std::endl;
+//            output_file << Tabbing(--tab_depth) << EndTag("stationary_objects") << std::endl;
 
             // Add the ambiguous objects.
-            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_objects") << std::endl;
+//            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_objects") << std::endl;
             for(unsigned int id = 0; id < FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS; ++id)
             {
-                output_file << Tabbing(tab_depth++) << BeginTag("object") << std::endl;
+                output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_object") << std::endl;
 
                 output_file << Tabbing(tab_depth) << BeginTag("id") << id << EndTag("id") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("name") << FieldObjects::ambiguousName(id) << EndTag("name") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("count") << ambiguous_object_count[id] << EndTag("count") << std::endl;
 
-                output_file << Tabbing(--tab_depth) << EndTag("object") << std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("ambiguous_object") << std::endl;
             }
-            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_objects") << std::endl;
+//            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_objects") << std::endl;
 
             // Add observations
-            output_file << Tabbing(tab_depth++) << BeginTag("observations") << std::endl;
+//            output_file << Tabbing(tab_depth++) << BeginTag("observations") << std::endl;
             for (unsigned int i = 0; i < obs_frames.size(); ++i)
             {
-                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth++) << BeginTag("observation") << std::endl;
+//                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("frame") << obs_frames[i] << EndTag("frame") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("id") << obs_ids[i] << EndTag("id") <<std::endl;
 
@@ -637,15 +684,17 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                 output_file << Tabbing(tab_depth) << BeginTag("heading") << exp_heading[i] << EndTag("heading") <<std::endl;
                 output_file << Tabbing(--tab_depth) << EndTag("expected") << std::endl;
 
-                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+//                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+                  output_file << Tabbing(--tab_depth) << EndTag("observation") << std::endl;
             }
-            output_file << Tabbing(--tab_depth) << EndTag("observations") << std::endl;
+//            output_file << Tabbing(--tab_depth) << EndTag("observations") << std::endl;
 
             // Add ambiguous observations
-            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_observations") << std::endl;
+//            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_observations") << std::endl;
             for (unsigned int i = 0; i < obs_frames.size(); ++i)
             {
-                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+//                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_observation") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("frame") << amb_obs_frames[i] << EndTag("frame") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("id") << amb_obs_ids[i] << EndTag("id") <<std::endl;
 
@@ -660,35 +709,40 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                 output_file << Tabbing(tab_depth) << BeginTag("heading") << amb_exp_heading[i] << EndTag("heading") << std::endl;
                 output_file << Tabbing(--tab_depth) << EndTag("expected") << std::endl;
 
-                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+//                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("ambiguous_observation") << std::endl;
             }
-            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_observations") << std::endl;
+//            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_observations") << std::endl;
 
             // Add odometry information
-            output_file << Tabbing(tab_depth++) << BeginTag("odometry") << std::endl;
+//            output_file << Tabbing(tab_depth++) << BeginTag("odometry") << std::endl;
             for(std::vector<std::vector<float> >::iterator odom_it = odom.begin(); odom_it != odom.end(); ++odom_it)
             {
-                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+//                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth++) << BeginTag("odometry") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("frame") << (*odom_it)[3] << EndTag("frame") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("x") << (*odom_it)[0] << EndTag("x") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("y") << (*odom_it)[1] << EndTag("y") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("turn") << (*odom_it)[2] << EndTag("turn") <<std::endl;
-                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+//                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("odometry") << std::endl;
             }
-            output_file << Tabbing(--tab_depth) << EndTag("odometry") << std::endl;
+//            output_file << Tabbing(--tab_depth) << EndTag("odometry") << std::endl;
 
             // Add measured position data
-            output_file << Tabbing(tab_depth++) << BeginTag("measured_position") << std::endl;
+//            output_file << Tabbing(tab_depth++) << BeginTag("measured_position") << std::endl;
             for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
             {
-                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+//                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth++) << BeginTag("measured_position") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("frame") << frame_id << EndTag("frame") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("x") << measured_positions[frame_id].x << EndTag("x") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("y") << measured_positions[frame_id].y << EndTag("y") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("heading") << measured_positions[frame_id].z << EndTag("heading") <<std::endl;
-                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+//                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("measured_position") << std::endl;
             }
-            output_file << Tabbing(--tab_depth) << EndTag("measured_position") << std::endl;
+//            output_file << Tabbing(--tab_depth) << EndTag("measured_position") << std::endl;
 
             output_file << Tabbing(--tab_depth) << EndTag("experiment") << std::endl;
 
@@ -702,26 +756,31 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             output_file << Tabbing(tab_depth) << BeginTag("total_models") << m_num_models_created << EndTag("total_models") << std::endl;
             output_file << Tabbing(tab_depth) << BeginTag("runtime") << m_experiment_run_time << EndTag("runtime") << std::endl;
 
-            output_file << Tabbing(tab_depth++) << BeginTag("estimated_position") << std::endl;
+//            output_file << Tabbing(tab_depth++) << BeginTag("estimated_position") << std::endl;
             for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
             {
-                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+//                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth++) << BeginTag("estimated_position") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("frame") << frame_id << EndTag("frame") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("processing_time") << m_performance[frame_id].processingTime() << EndTag("processing_time") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("x") << estimated_positions[frame_id].x << EndTag("x") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("y") << estimated_positions[frame_id].y << EndTag("y") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("heading") << estimated_positions[frame_id].z << EndTag("heading") <<std::endl;
-                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("estimated_position") << std::endl;
+//                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
             }
-            output_file << Tabbing(--tab_depth) << EndTag("estimated_position") << std::endl;
+//            output_file << Tabbing(--tab_depth) << EndTag("estimated_position") << std::endl;
 
-            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_decision") << std::endl;
+//            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_decision") << std::endl;
             for (std::vector<unsigned int>::iterator dec_it = amb_decision_id.begin(); dec_it != amb_decision_id.end(); ++dec_it)
             {
-                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+//                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
+                output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_decision") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("id") << (*dec_it) << EndTag("id") <<std::endl;
-                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
+                output_file << Tabbing(--tab_depth) << EndTag("ambiguous_decision") << std::endl;
+//                output_file << Tabbing(--tab_depth) << EndTag("item") << std::endl;
             }
-            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_decision") << std::endl;
+//            output_file << Tabbing(--tab_depth) << EndTag("ambiguous_decision") << std::endl;
 
             output_file << Tabbing(--tab_depth) << EndTag("results") << std::endl;
             output_file << Tabbing(--tab_depth) << EndTag("report") << std::endl;
