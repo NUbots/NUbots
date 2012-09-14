@@ -58,7 +58,6 @@ Circle Ball::FindBall(std::vector <ObjectCandidate> FO_Candidates, FieldObjects*
 
         if(sizeOfCandidate > sizeOfLargestCandidate)
         {
-
             sizeOfLargestCandidate = sizeOfCandidate;
             largestCandidate = PossibleBall;
         }
@@ -431,12 +430,12 @@ bool Ball::isCorrectCheckRatio(const ObjectCandidate &PossibleBall,int height, i
     //debug << "Checking Ratio: " << PossibleBall.aspect();
 
     //! Check if at Edge of Screen, if so continue with other checks, otherwise, look at ratio and check if in thresshold
-    int boarder = 10; //! Boarder of pixels
+    int border = 10; //! Boarder of pixels
     if (( PossibleBall.getBottomRight().y - PossibleBall.getTopLeft().y) <= 3) return false;
-    if (PossibleBall.getBottomRight().x <= width-boarder &&
-        PossibleBall.getBottomRight().y <= height-boarder &&
-        PossibleBall.getTopLeft().x >=0+boarder  &&
-        PossibleBall.getTopLeft().y >=0+boarder  )
+    if (PossibleBall.getBottomRight().x <= width-border &&
+        PossibleBall.getBottomRight().y <= height-border &&
+        PossibleBall.getTopLeft().x >=0+border  &&
+        PossibleBall.getTopLeft().y >=0+border  )
     {
         //POSSIBLE BALLS ARE:
         //      Objects which have grouped segments,

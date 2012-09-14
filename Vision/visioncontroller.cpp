@@ -94,8 +94,8 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         debug << "VisionController::runFrame() - Publish Results" << endl;
     #endif
 
-    RobocupHacks::beaconGoalHack();
-    RobocupHacks::ballGoalHack();
+    //RobocupHacks::beaconGoalHack();
+    //RobocupHacks::ballGoalHack();
 
     //force blackboard to publish results through wrapper
     m_blackboard->publish();

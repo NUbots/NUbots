@@ -19,6 +19,9 @@ using namespace std;
 class BallDetection
 {
 public:
+    /*! @brief A static function to detect a single ball from orange transitions using a geometric mean for locating
+      and close classification at the pixel level combined with occlusion detection for classifying.
+    */
     static void detectBall();
 };
 

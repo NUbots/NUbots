@@ -19,6 +19,8 @@ using namespace std;
 class GoalDetection
 {
 public:
+    /*! @brief A static function to detect goals and transitions from yellow and blue transitions using a 1D histogram.
+    */
     static void detectGoals();
 private:
     static void detectGoal(ClassIndex::Colour colour, vector<Quad>* candidates);
