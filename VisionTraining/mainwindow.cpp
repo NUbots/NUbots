@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include <string>
 #include <QFileDialog>
+#include "labeleditor.h"
+#include "labelgenerator.h"
 
 using namespace std;
 
@@ -34,12 +36,14 @@ void MainWindow::getDirectory()
 
 void MainWindow::generateLabels()
 {
-    
+    LabelGenerator lg;
+    lg.run(ui->dirEdit->text().toStdString());    
 }
 
 void MainWindow::modifyLabels()
 {
-    
+    LabelEditor le;
+    le.run(ui->dirEdit->text().toStdString());
 }
 
 void MainWindow::viewStream()

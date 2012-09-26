@@ -7,6 +7,9 @@
 #include "../Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "../Infrastructure/NUImage/NUImage.h"
 
+#include "mainwindow.h"
+#include <QApplication>
+
 int runDave();
 int runDefault();
 vector<double> checkImageStream(string name);
@@ -14,44 +17,10 @@ vector<double> checkSensorStream(string name);
 
 int main()
 {
-    vector<double> imagetimes = checkImageStream(string(getenv("HOME")) + string("/Images/lagtest/image.strm"));
-    vector<double> sensortimes = checkSensorStream(string(getenv("HOME")) + string("/Images/lagtest/sensor.strm"));
-    cout << imagetimes << endl;
-    cout << sensortimes << endl;
-    double max_diff = 0.0;
-    double sum = 0.0;
-    double geo_mean = 1.0;
-    double diff;
-    int frames = min(imagetimes.size(), sensortimes.size());
-    for(int i = 0; i<frames; i++) {
-        diff = abs(imagetimes[i] - sensortimes[i]);
-        max_diff = max(diff, max_diff);
-        if(diff > 100)
-            cout << "im: " << imagetimes[i] << " sen: " << sensortimes[i] << " diff: " << diff << endl;
-        sum += diff;
-        geo_mean *= pow(diff, 1.0/frames);
-    }
-    cout << "between sensors and images max difference: " << max_diff << " average: " << sum/frames << " geo mean: " << geo_mean << endl;
-    max_diff = 0.0;
-    sum = 0.0;
-    geo_mean = 1.0;
-    for(unsigned int i = 0; i<imagetimes.size()-1; i++) {
-        diff = abs(imagetimes[i] - imagetimes[i+1]);
-        max_diff = max(diff, max_diff);
-        sum += diff;
-        geo_mean *= pow(diff, 1.0/(imagetimes.size()-1));
-    }
-    cout << "images max difference: " << max_diff << " average: " << sum/(imagetimes.size()-1) << " geo mean: " << geo_mean << endl;
-    max_diff = 0.0;
-    sum = 0.0;
-    geo_mean = 1.0;
-    for(unsigned int i = 0; i<sensortimes.size()-1; i++) {
-        diff = abs(sensortimes[i] - sensortimes[i+1]);
-        max_diff = max(diff, max_diff);
-        sum += diff;
-        geo_mean *= pow(diff, 1.0/(sensortimes.size()-1));
-    }
-    cout << "stream max difference: " << max_diff << " average: " << sum/(sensortimes.size()-1) << " geo mean: " << geo_mean << endl;
+    QApplication app(NULL);
+    MainWindow mw;
+    mw.show();
+    return app.exec();
     //return runDave();
     //return runDefault();
 }

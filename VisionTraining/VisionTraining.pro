@@ -4,6 +4,7 @@ INCLUDEPATH += /usr/include/boost/
 LIBS += -lopencv_core -lopencv_highgui
 
 DEFINES += TARGET_IS_TRAINING
+DEFINES += QT_NO_DEBUG_STREAM
 
 INCLUDEPATH += ${HOME}/robocup/
 INCLUDEPATH += ${HOME}/robocup/Vision/Debug/
@@ -11,11 +12,13 @@ INCLUDEPATH += ${HOME}/robocup/Vision/Debug/
 HEADERS += \
     mainwindow.h \
     labelgenerator.h \
-    ../Vision/VisionTypes/VisionFieldObjects/fieldline.h
+    ../Vision/VisionTypes/VisionFieldObjects/fieldline.h \
+    labeleditor.h
 
 SOURCES += \
     mainwindow.cpp \
-    labelgenerator.cpp
+    labelgenerator.cpp \
+    labeleditor.cpp
 
 HEADERS += \
     ../Vision/VisionTools/pccamera.h \
@@ -113,4 +116,5 @@ SOURCES += \
 
 FORMS += \
     mainwindow.ui \
-    labelgenerator.ui
+    labelgenerator.ui \
+    labeleditor.ui
