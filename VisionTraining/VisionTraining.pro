@@ -67,6 +67,8 @@ HEADERS += \
     ../Tools/Math/LSFittedLine.h \
     ../Tools/Math/Matrix.h \
     ../Tools/Math/TransformMatrices.h \
+    ../Tools/Math/Vector2.h \
+    ../Tools/Math/Vector3.h \
     ../Infrastructure/NUImage/NUImage.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../NUPlatform/NUCamera/NUCameraData.h \

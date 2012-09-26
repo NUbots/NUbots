@@ -104,9 +104,9 @@ float VisionControlWrapper::evaluateFrame()
     //average distance error 3D for now
 }
 
-void VisionControlWrapper::generateLabels(const string& directory)
+void VisionControlWrapper::printLabels(ostream& out)
 {
-    //setImageStream(directory + string("/image.strm"));
+    data_wrapper->printLabels(out);
 }
 
 void VisionControlWrapper::resetHistory()

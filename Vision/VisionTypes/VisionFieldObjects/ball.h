@@ -30,8 +30,8 @@ public:
     bool check() const;
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) {out << getVFOName(BALL) << " " << m_location_pixels << " " << m_diameter << endl;}
-
+    void printLabel(ostream& out) const {out << getVFOName(BALL) << " " << m_location_pixels << " " << m_diameter;}
+    
     //! @brief output stream operator
     friend ostream& operator<< (ostream& output, const Ball& b);
     //! @brief output stream operator for a vector of balls

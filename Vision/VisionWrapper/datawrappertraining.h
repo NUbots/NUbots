@@ -102,6 +102,8 @@ private:
     bool loadLUTFromFile(const string& filename);
     void resetStream();
     
+    void printLabels(ostream& out) const;
+    
     
 
 private:
@@ -146,7 +148,7 @@ private:
     vector<vector<Obstacle> > obstacle_detection_history;
     vector<vector<LSFittedLine> > line_detection_history;
 
-    //vector<VisionFieldObject*> detections;
+    vector<const VisionFieldObject*> detections;
     //vector< vector<VisionFieldObject*> > detection_history;
 
     NUSensorsData* m_sensor_data;

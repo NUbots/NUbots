@@ -28,7 +28,7 @@ public:
     void setUnknown();
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) {out << getVFOName(m_id) << " " << m_location_pixels << " " << m_size_on_screen << endl;}
+    void printLabel(ostream& out) const {out << getVFOName(m_id) << " " << m_location_pixels << " " << m_size_on_screen;}
 
     //! @brief output stream operator
     friend ostream& operator<< (ostream& output, const Beacon& b);

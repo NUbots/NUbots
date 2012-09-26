@@ -24,7 +24,7 @@ public:
     void writeBatchResults(ostream& out);
     void writeBatchGroundTruth(ostream& out);
 
-    void generateLabels(const string& directory);
+    void printLabels(ostream& out);
 
     float evaluateFrame();
 

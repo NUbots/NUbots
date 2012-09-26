@@ -19,9 +19,13 @@ public:
     ~LabelGenerator();
     
     bool run(const string& dir);
+    
+private slots:
+    void setCancelled() {cancelled = true;}
 
 private:
     Ui::LabelGenerator *ui;
+    bool cancelled;
 };
 
 #endif // LABELGENERATOR_H

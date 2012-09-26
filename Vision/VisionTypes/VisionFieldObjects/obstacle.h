@@ -8,7 +8,7 @@
 class Obstacle : public VisionFieldObject
 {
 public:
-    Obstacle(const PointType& position, int width, int height);
+    Obstacle(const PointType& position=PointType(0,0), int width=0, int height=0);
 
     //! @brief returns the field position relative to the robot.
     Vector3<float> getRelativeFieldCoords() const;
@@ -23,7 +23,7 @@ public:
     bool check() const;
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) {out << getVFOName(OBSTACLE) << " " << m_location_pixels << " " << m_size_on_screen << endl;}
+    void printLabel(ostream& out) const {out << getVFOName(OBSTACLE) << " " << m_location_pixels << " " << m_size_on_screen;}
 
     //! @brief output stream operator.
     friend ostream& operator<< (ostream& output, const Obstacle& o);

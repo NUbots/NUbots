@@ -163,12 +163,12 @@ const LookUpTable& DataWrapper::getLUT() const
 
 void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
 {
-    //detections.insert(detections.end(), visual_objects.begin(), visual_objects.end());    //add onto detections list - invalid
+    detections.insert(detections.end(), visual_objects.begin(), visual_objects.end());    //add onto detections list - invalid
 }
 
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
-    //detections.push_back(visual_object);    //add onto detections list - invalid
+    detections.push_back(visual_object);    //add onto detections list - invalid
 }
 
 
@@ -218,7 +218,7 @@ bool DataWrapper::updateFrame()
         line_detections.clear();
 
         //detection_history.push_back(detections);
-        //detections.clear();
+        detections.clear();
     }
     numFramesProcessed++;
     imagestrm.peek();
@@ -317,4 +317,13 @@ void DataWrapper::resetStream()
     numFramesDropped = numFramesProcessed = 0;
     imagestrm.clear();
     imagestrm.seekg(0, ios::beg);
+}
+
+void DataWrapper::printLabels(ostream& out) const
+{
+    out << detections.size() << endl;
+    for(unsigned int i=0; i<detections.size(); i++) {
+        detections.at(i)->printLabel(out);
+        cout << endl;
+    }
 }
