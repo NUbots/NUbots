@@ -18,7 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->viewPB, SIGNAL(clicked()), this, SLOT(viewStream()));
     QObject::connect(ui->optPB, SIGNAL(clicked()), this, SLOT(runOptimiser()));
     QObject::connect(ui->exitPB, SIGNAL(clicked()), this, SLOT(close()));
-    QObject::connect(ui->dirEdit, SIGNAL(clicked()), this, SLOT(getDirectory()));
+    QObject::connect(ui->browsePB, SIGNAL(clicked()), this, SLOT(getDirectory()));
+
+    ui->dirEdit->setText(QString(getenv("HOME")) + QString("/Images/FYP/Final100/"));
 }
 
 MainWindow::~MainWindow()
@@ -37,12 +39,14 @@ void MainWindow::getDirectory()
 void MainWindow::generateLabels()
 {
     LabelGenerator lg;
+    lg.show();
     lg.run(ui->dirEdit->text().toStdString());    
 }
 
 void MainWindow::modifyLabels()
 {
     LabelEditor le;
+    le.show();
     le.run(ui->dirEdit->text().toStdString());
 }
 

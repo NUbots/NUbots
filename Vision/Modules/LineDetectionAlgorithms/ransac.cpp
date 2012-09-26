@@ -86,7 +86,7 @@ bool RANSAC::findLine(const std::vector<LinePoint>& points, Line& result, std::v
     variance = variance/(points.size()*m_e);
 
     if (minerr < std::numeric_limits<float>::max()) {
-        for(int i=0; i<points.size(); i++) {
+        for(unsigned int i=0; i<points.size(); i++) {
             if(best_concensus[i])
                 consensus.push_back(points.at(i));
             else {

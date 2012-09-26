@@ -99,14 +99,19 @@ void VisionControlWrapper::writeBatchGroundTruth(ostream& out)
 
 }
 
+void VisionControlWrapper::printLabels(ostream& out) const
+{
+    data_wrapper->printLabels(out);
+}
+
+bool VisionControlWrapper::readLabels(istream& in, vector<VisionFieldObject*>& labels) const
+{
+    return data_wrapper->readLabels(in, labels);
+}
+
 float VisionControlWrapper::evaluateFrame()
 {
     //average distance error 3D for now
-}
-
-void VisionControlWrapper::printLabels(ostream& out)
-{
-    data_wrapper->printLabels(out);
 }
 
 void VisionControlWrapper::resetHistory()

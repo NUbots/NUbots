@@ -127,11 +127,9 @@ void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
   * Adds a set of lines to the current set.
   * @param newlines The lines to add.
   */
-void VisionBlackboard::addLines(const vector<LSFittedLine> &newlines)
+void VisionBlackboard::addLine(const FieldLine& newline)
 {
-    BOOST_FOREACH(LSFittedLine l, newlines) {
-        m_lines.push_back(l);
-    }
+    m_lines.push_back(newline);
 }
 
 /**
@@ -389,7 +387,7 @@ vector<Obstacle>& VisionBlackboard::getObstacles()
 }
 
 //! Returns the list of found lines.
-vector<LSFittedLine>& VisionBlackboard::getLines()
+vector<FieldLine>& VisionBlackboard::getLines()
 {
     return m_lines;
 }

@@ -23,8 +23,8 @@
 #include "VisionTypes/VisionFieldObjects/goal.h"
 #include "VisionTypes/VisionFieldObjects/beacon.h"
 #include "VisionTypes/VisionFieldObjects/obstacle.h"
+#include "VisionTypes/VisionFieldObjects/fieldline.h"
 #include "VisionTypes/greenhorizon.h"
-#include "Tools/Math/LSFittedLine.h"
 
 #ifndef VISIONBLACKBOARD_H
 #define VISIONBLACKBOARD_H
@@ -62,7 +62,7 @@ public:
     void addBeacon(const Beacon& newbeacon);
     void addBall(const Ball& newball);
     void addObstacle(const Obstacle& newobstacle);
-    void addLines(const vector<LSFittedLine>& newlines);
+    void addLine(const FieldLine &newline);
 
 
     //ACCESSORS
@@ -100,7 +100,7 @@ public:
     vector<Goal>& getGoals();
     vector<Beacon>& getBeacons();
     vector<Obstacle>& getObstacles();
-    vector<LSFittedLine>& getLines();
+    vector<FieldLine>& getLines();
 
     const vector<PointType>& getObjectPoints() const;
 
@@ -194,7 +194,7 @@ private:
     vector<Beacon> m_beacons;
     vector<Ball> m_balls;
     vector<Obstacle> m_obstacles;
-    vector<LSFittedLine> m_lines;
+    vector<FieldLine> m_lines;
     
 };
 

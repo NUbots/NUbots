@@ -37,8 +37,6 @@ string VisionFieldObject::getVFOName(VFO_ID id)
     case BEACON_B:      return "BEACON_B";
     case BEACON_U:      return "BEACON_U";
     case FIELDLINE:     return "FIELDLINE";
-    case CORNER:        return "CORNER";
-    case CENTRE_CIRCLE: return "CENTRE_CIRCLE";
     case OBSTACLE:      return "OBSTACLE";
     case INVALID:       return "INVALID";
     }
@@ -68,14 +66,28 @@ VisionFieldObject::VFO_ID VisionFieldObject::getVFOFromName(const string &name)
         return BEACON_U;
     else if(name.compare("FIELDLINE") == 0)
         return FIELDLINE;
-    else if(name.compare("CORNER") == 0)
-        return CORNER;
-    else if(name.compare("CENTRE_CIRCLE") == 0)
-        return CENTRE_CIRCLE;
     else if(name.compare("OBSTACLE") == 0)
         return OBSTACLE;
     else
         return INVALID;
+}
+
+VisionFieldObject::VFO_ID VisionFieldObject::getVFOFromNum(int n) {
+    switch(n) {
+    case 0: return BALL;
+    case 1: return GOAL_Y_L;
+    case 2: return GOAL_Y_R;
+    case 3: return GOAL_Y_U;
+    case 4: return GOAL_B_L;
+    case 5: return GOAL_B_R;
+    case 6: return GOAL_B_U;
+    case 7: return BEACON_Y;
+    case 8: return BEACON_B;
+    case 9: return BEACON_U;
+    case 10: return FIELDLINE;
+    case 11: return OBSTACLE;
+    default: return INVALID;
+    }
 }
 
 string VisionFieldObject::getColourClassName(COLOUR_CLASS id)

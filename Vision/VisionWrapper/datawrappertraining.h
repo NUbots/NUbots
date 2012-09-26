@@ -16,6 +16,7 @@
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
+#include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 #include "Tools/Math/LSFittedLine.h"
 
 #define GROUP_NAME "/home/shannon/Images/paper"
@@ -82,7 +83,7 @@ public:
     bool debugPublish(const vector<Beacon>& data);
     bool debugPublish(const vector<Goal>& data);
     bool debugPublish(const vector<Obstacle>& data);
-    bool debugPublish(const vector<LSFittedLine>& data);
+    bool debugPublish(const vector<FieldLine>& data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points) {return id<NUMBER_OF_IDS && !data_points.empty();}
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region) {return id<NUMBER_OF_IDS && !region.empty();}
     bool debugPublish(DEBUG_ID id, const cv::Mat& img) {return id<NUMBER_OF_IDS && !img.empty();}
@@ -103,6 +104,7 @@ private:
     void resetStream();
     
     void printLabels(ostream& out) const;
+    bool readLabels(istream& in, vector<VisionFieldObject*>& labels) const;
     
     
 
@@ -141,12 +143,12 @@ private:
     vector<Goal> goal_detections;
     vector<Beacon> beacon_detections;
     vector<Obstacle> obstacle_detections;
-    vector<LSFittedLine> line_detections;
+    vector<FieldLine> line_detections;
     vector<vector<Ball> > ball_detection_history;
     vector<vector<Goal> > goal_detection_history;
     vector<vector<Beacon> > beacon_detection_history;
     vector<vector<Obstacle> > obstacle_detection_history;
-    vector<vector<LSFittedLine> > line_detection_history;
+    vector<vector<FieldLine> > line_detection_history;
 
     vector<const VisionFieldObject*> detections;
     //vector< vector<VisionFieldObject*> > detection_history;

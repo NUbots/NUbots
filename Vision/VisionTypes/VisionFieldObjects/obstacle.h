@@ -25,6 +25,8 @@ public:
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << getVFOName(OBSTACLE) << " " << m_location_pixels << " " << m_size_on_screen;}
 
+    void render(cv::Mat& mat) const;
+
     //! @brief output stream operator.
     friend ostream& operator<< (ostream& output, const Obstacle& o);
     //! @brief output stream operator for a vector of obstacles.

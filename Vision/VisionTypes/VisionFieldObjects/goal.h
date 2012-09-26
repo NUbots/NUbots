@@ -30,6 +30,8 @@ public:
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << getVFOName(m_id) << " " << m_location_pixels << " " << m_size_on_screen;}
 
+    void render(cv::Mat& mat) const;
+
     //! @brief output stream operator.
     friend ostream& operator<< (ostream& output, const Goal& g);
     //! @brief output stream operator for a vector of goals.

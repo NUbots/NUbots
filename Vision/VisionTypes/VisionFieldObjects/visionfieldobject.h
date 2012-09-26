@@ -34,8 +34,6 @@ public:
         BEACON_B,
         BEACON_U,
         FIELDLINE,
-        CORNER,
-        CENTRE_CIRCLE,
         OBSTACLE,
         INVALID
     };
@@ -52,6 +50,8 @@ public:
     static string getVFOName(VFO_ID id);
     //! @brief converts a string into a VisionFieldObject Id.
     static VFO_ID getVFOFromName(const string& name);
+    //! @brief returns the first VisionFieldObject Id.
+    static VFO_ID getVFOFromNum(int n);
     
     //! @brief converts a colour class into a string.
     static string getColourClassName(COLOUR_CLASS id);
@@ -66,12 +66,15 @@ public:
 public:
     VisionFieldObject();
 
-    VFO_ID getID() {return m_id;}
+    VFO_ID getID() const {return m_id;}
+    string getName() const {return getVFOName(m_id);}
     
     //! @brief returns the screen location in pixels (relative to the top left).
     const Vector2<int>& getLocationPixels() const;
     //! @brief returns the angular screen location (relative to the image centre) in radians.
     const Vector2<float>& getLocationAngular() const;
+    //! @brief returns the screen size in pixels.
+    const Vector2<int>& getScreenSize() const { return m_size_on_screen; }
     //! @brief returns the field position relative to the robot.
     virtual Vector3<float> getRelativeFieldCoords() const = 0;
     /*!
@@ -90,17 +93,20 @@ public:
     //! @brief Calculation of error for optimisation
     virtual double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location_pixels.x - measured.x,2) + pow(m_location_pixels.y - measured.y,2));}
     
+    virtual void render(cv::Mat& mat) const = 0;
+
     friend istream& operator >>(istream& in, VisionFieldObject* vfo);
     
+public:
+    Vector2<int> m_location_pixels;         //! @variable The pixel location of the object on the screen.
+    Vector2<int> m_size_on_screen;          //! @variable The width and height on screen in pixels.
+
 protected:
     VFO_ID m_id;
-    
-    Vector2<int> m_location_pixels;         //! @variable The pixel location of the object on the screen.
     Vector2<float> m_location_angular;      //! @variable The angular location of the object relative to the screen centre.
     Vector3<float> m_spherical_position;    //! @variable The position (distance, bearing, elevation) of the object relative to the robots camera.
     float m_confidence;   //! unused
     float m_error;        //! unused
-    Vector2<int> m_size_on_screen;          //! @variable The width and height on screen in pixels.
     Vector3<float> m_spherical_error;       //! @variable The error in each of the spherical dimensions.
     Vector3 <float> m_transformed_spherical_pos;    //! @variable The transformed location (relative to the centre of the feet) in cm.
     bool valid;                             //! @variable Whether the object is valid.

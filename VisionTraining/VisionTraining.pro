@@ -1,7 +1,7 @@
 INCLUDEPATH += /usr/local/include/opencv2/
 INCLUDEPATH += /usr/include/boost/
 
-LIBS += -lopencv_core -lopencv_highgui
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
 
 DEFINES += TARGET_IS_TRAINING
 DEFINES += QT_NO_DEBUG_STREAM
@@ -34,7 +34,7 @@ HEADERS += \
 SOURCES += \
     ../Vision/VisionTools/pccamera.cpp \
     ../Vision/VisionWrapper/datawrappertraining.cpp \
-    ../Vision/VisionWrapper/visioncontrolwrappertraining.cpp\
+    ../Vision/VisionWrapper/visioncontrolwrappertraining.cpp \
 
 
 HEADERS += \

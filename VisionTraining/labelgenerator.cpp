@@ -22,8 +22,9 @@ bool LabelGenerator::run(const string &dir)
     int num_images=0,
         cur_image=0;
     NUImage temp;
-    ifstream infile((dir + string("/image.strm")).c_str());
-    ofstream outfile((dir + string("/labels.strm")).c_str());
+    ifstream infile((dir + string("image.strm")).c_str());
+    ofstream outfile((dir + string("labels.strm")).c_str());
+
     cancelled = false;
     while(!cancelled && infile.good()) {
         infile >> temp;
@@ -50,6 +51,7 @@ bool LabelGenerator::run(const string &dir)
         QApplication::processEvents();
         cur_image++;
     }
-    
+
+    close();
     return cancelled;
 }

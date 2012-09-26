@@ -196,7 +196,7 @@ bool DataWrapper::debugPublish(const vector<Obstacle>& data)
     return true;
 }
 
-bool DataWrapper::debugPublish(const vector<LSFittedLine>& data)
+bool DataWrapper::debugPublish(const vector<FieldLine>& data)
 {
     line_detections.insert(line_detections.end(), data.begin(), data.end());
     return true;
@@ -258,8 +258,8 @@ void DataWrapper::printHistory(ostream& out)
     BOOST_FOREACH(vector<Obstacle> vo, obstacle_detection_history) {
         out << vo;
     }
-    BOOST_FOREACH(vector<LSFittedLine> vl, line_detection_history) {
-        BOOST_FOREACH(LSFittedLine l, vl) {
+    BOOST_FOREACH(vector<FieldLine> vl, line_detection_history) {
+        BOOST_FOREACH(FieldLine l, vl) {
             out << l;
         }
     }
@@ -326,4 +326,14 @@ void DataWrapper::printLabels(ostream& out) const
         detections.at(i)->printLabel(out);
         cout << endl;
     }
+}
+
+bool DataWrapper::readLabels(istream& in, vector<VisionFieldObject*>& labels) const
+{
+    VisionFieldObject* next;
+    while(in.good()) {
+        in >> next;
+        labels.push_back(next);
+    }
+    return labels.size() > 0;
 }

@@ -10,6 +10,7 @@
 
 Obstacle::Obstacle(const PointType &position, int width, int height)
 {
+    m_id = OBSTACLE;
     m_size_on_screen = Vector2<int>(width, height);
     m_bottom_centre = Vector2<int>(position.x, position.y);
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
@@ -144,6 +145,14 @@ float Obstacle::distanceToObstacle(float bearing, float elevation) {
         debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
     #endif
     return d2p;
+}
+
+void Obstacle::render(cv::Mat &mat) const
+{
+    Vector2<int> half = m_size_on_screen/2;
+    cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y-half.x), cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y+half.x), cv::Scalar(255, 255, 255));
+    cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y+half.x), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y+half.x), cv::Scalar(255, 255, 255));
+    cv::line(mat, cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y+half.x), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y-half.x), cv::Scalar(255, 255, 255));
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.

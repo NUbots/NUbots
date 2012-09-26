@@ -26,7 +26,15 @@ public:
     
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << getVFOName(FIELDLINE) << " " << m_rho << " " << m_phi;}
+
+    void render(cv::Mat& mat) const;
     
+
+    //! @brief output stream operator
+    friend ostream& operator<< (ostream& output, const FieldLine& l);
+    //! @brief output stream operator for a vector of FieldLines
+    friend ostream& operator<< (ostream& output, const vector<FieldLine>& v);
+
     double m_rho,
            m_phi;
 };

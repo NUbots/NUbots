@@ -21,6 +21,7 @@ void LineDetector::run()
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE_COLOUR);
     vector<LSFittedLine> lines;
     vector<LinePoint> points;
+    vector<LSFittedLine>::iterator l_it;
 
     points = getPointsFromSegments(h_segments, v_segments);
 
@@ -38,7 +39,11 @@ void LineDetector::run()
 //        cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints << std::endl;
 //    }
 
-    vbb->addLines(lines);
+
+    for(l_it = lines.begin(); l_it<lines.end(); l_it++) {
+        FieldLine l(*l_it);
+        vbb->addLine(l);
+    }
 }
 
 vector<LinePoint> LineDetector::getPointsFromSegments(const vector<ColourSegment> &h_segments, const vector<ColourSegment> &v_segments)

@@ -11,6 +11,7 @@
 
 Ball::Ball()
 {
+    m_id = BALL;
     m_diameter = 0;
     m_location_pixels.x = 0;
     m_location_pixels.y = 0;
@@ -20,6 +21,7 @@ Ball::Ball()
 
 Ball::Ball(PointType centre, int diameter)
 {
+    m_id = BALL;
     int top = centre.y - diameter*0.5,
         bottom = centre.y + diameter*0.5,
         left = centre.x - diameter*0.5,
@@ -268,9 +270,11 @@ float Ball::distanceToBall(float bearing, float elevation) {
     }
 }
 
-/*! @brief Stream insertion operator for a single ColourSegment.
- *      The segment is terminated by a newline.
- */
+void Ball::render(cv::Mat &mat) const
+{
+    cv::circle(mat, cv::Point2i(m_location_pixels.x, m_location_pixels.y), m_diameter*0.5, cv::Scalar(0, 125, 255));
+}
+
 ostream& operator<< (ostream& output, const Ball& b)
 {
     output << "Ball " << endl;
@@ -283,10 +287,6 @@ ostream& operator<< (ostream& output, const Ball& b)
     return output;
 }
 
-/*! @brief Stream insertion operator for a vector of ColourSegments.
- *      Each segment is terminated by a newline.
- *  @relates ColourSegment
- */
 ostream& operator<< (ostream& output, const vector<Ball>& b)
 {
     for (size_t i=0; i<b.size(); i++)

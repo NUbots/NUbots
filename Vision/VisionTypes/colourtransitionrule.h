@@ -56,7 +56,7 @@ private:
                                 m_middle,   //! @variable The colour that this segment must be
                                 m_after;    //! @variable The colour that the following segment must be.
 
-    int m_before_min,   //! @variable the minimum length of the previous segment for a match.
+    unsigned int m_before_min,   //! @variable the minimum length of the previous segment for a match.
         m_before_max,   //! @variable the maximum length of the previous segment for a match.
         m_min,          //! @variable the minimum length of the segment for a match.
         m_max,          //! @variable the maximum length of the segment for a match.

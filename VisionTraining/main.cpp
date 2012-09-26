@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <opencv/highgui.h>
+#include <opencv2/highgui/highgui.hpp>
 
 #include "../Vision/VisionWrapper/visioncontrolwrappertraining.h"
 #include "../Infrastructure/NUSensorsData/NUSensorsData.h"
