@@ -8,21 +8,7 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-string Goal::getIDName(GoalID id)
-{
-    switch(id) {
-    case YellowLeftGoal:        return "YellowLeftGoal";
-    case YellowRightGoal:       return "YellowRightGoal";
-    case YellowUnknownGoal:     return "YellowUnknownGoal";
-    case BlueLeftGoal:          return "BlueLeftGoal";
-    case BlueRightGoal:         return "BlueRightGoal";
-    case BlueUnknownGoal:       return "BlueUnknownGoal";
-    case InvalidGoal:           return "InvalidGoal";
-    default:                    return "InvalidGoal";
-    }
-}
-
-Goal::Goal(GoalID id, const Quad &corners)
+Goal::Goal(VFO_ID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
@@ -46,11 +32,6 @@ Goal::Goal(GoalID id, const Quad &corners)
 const Quad& Goal::getQuad() const
 {
     return m_corners;
-}
-
-Goal::GoalID Goal::getID() const
-{
-    return m_id;
 }
 
 /*!
@@ -86,29 +67,29 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         bool stationary = false;
 
         switch(m_id) {
-        case YellowLeftGoal:
+        case GOAL_Y_L:
             stat_id = FieldObjects::FO_YELLOW_LEFT_GOALPOST;
             stationary = true;
             break;
-        case YellowRightGoal:
+        case GOAL_Y_R:
             stat_id = FieldObjects::FO_YELLOW_RIGHT_GOALPOST;
             stationary = true;
             break;
-        case BlueLeftGoal:
+        case GOAL_B_L:
             stat_id = FieldObjects::FO_BLUE_LEFT_GOALPOST;
             stationary = true;
             break;
-        case BlueRightGoal:
+        case GOAL_B_R:
             stat_id = FieldObjects::FO_BLUE_RIGHT_GOALPOST;
             stationary = true;
             break;
-        case YellowUnknownGoal:
+        case GOAL_Y_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
             stationary = false;
             break;
-        case BlueUnknownGoal:
+        case GOAL_B_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
@@ -116,9 +97,9 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
             break;
         default:
             //invalid object - do not push to fieldobjects
-            errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object" << endl;
+            errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;
             #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object" << endl;
+                debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;
             #endif
             return false;
         }
@@ -157,18 +138,22 @@ bool Goal::check() const
 {
     //various throwouts here
 
-    if(abs(m_corners.getBottomLeft().y - m_corners.getTopRight().y) <= 25) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
-        #endif
-        return false;
+    if(VisionConstants::THROWOUT_SHORT_GOALS) {
+        if(abs(m_corners.getBottomLeft().y - m_corners.getTopRight().y) <= VisionConstants::MIN_GOAL_HEIGHT) {
+            #if VISION_FIELDOBJECT_VERBOSITY > 1
+                debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
+            #endif
+            return false;
+        }
     }
-
-    if(abs(m_corners.getBottomLeft().x - m_corners.getTopRight().x) <= 5) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
-        #endif
-        return false;
+    
+    if(VisionConstants::THROWOUT_NARROW_GOALS) {
+        if(abs(m_corners.getBottomLeft().x - m_corners.getTopRight().x) <= VisionConstants::MIN_GOAL_WIDTH) {
+            #if VISION_FIELDOBJECT_VERBOSITY > 1
+                debug << "Goal::check - Goal thrown out: less than " << VisionConstants::MIN_GOAL_WIDTH << "pix high" << endl;
+            #endif
+            return false;
+        }
     }
 
     if(!distance_valid) {
@@ -357,7 +342,7 @@ float Goal::distanceToGoal(float bearing, float elevation) {
  */
 ostream& operator<< (ostream& output, const Goal& g)
 {
-    output << "Goal - " << Goal::getIDName(g.m_id) << endl;
+    output << "Goal - " << VisionFieldObject::getVFOName(g.m_id) << endl;
     output << "\tpixelloc: [" << g.m_location_pixels.x << ", " << g.m_location_pixels.y << "]" << endl;
     output << " angularloc: [" << g.m_location_angular.x << ", " << g.m_location_angular.y << "]" << endl;
     output << "\trelative field coords: [" << g.m_spherical_position.x << ", " << g.m_spherical_position.y << ", " << g.m_spherical_position.z << "]" << endl;

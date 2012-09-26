@@ -7,22 +7,23 @@
 
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
+#include "Tools/Math/General.h"
 
 Ball::Ball()
 {
-    m_radius = 0;
+    m_diameter = 0;
     m_location_pixels.x = 0;
     m_location_pixels.y = 0;
     valid = calculatePositions();
     valid = valid && check();
 }
 
-Ball::Ball(PointType centre, float radius)
+Ball::Ball(PointType centre, int diameter)
 {
-    int top = centre.y - radius,
-        bottom = centre.y + radius,
-        left = centre.x - radius,
-        right = centre.x + radius;
+    int top = centre.y - diameter*0.5,
+        bottom = centre.y + diameter*0.5,
+        left = centre.x - diameter*0.5,
+        right = centre.x + diameter*0.5;
     Vector2<float> top_pt = Vector2<float>((right-left)*0.5, top);
     Vector2<float> bottom_pt = Vector2<float>((right-left)*0.5, bottom);
     Vector2<float> right_pt = Vector2<float>(right, (bottom-top)*0.5);
@@ -38,17 +39,17 @@ Ball::Ball(PointType centre, float radius)
     //        centre_pt = vbb->correctDistortion(centre_pt);
     //    }
         
-    m_radius = max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x)*0.5;
+    m_diameter = mathGeneral::roundNumberToInt(max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x));
     m_location_pixels.x = mathGeneral::roundNumberToInt(centre_pt.x);
     m_location_pixels.y = mathGeneral::roundNumberToInt(centre_pt.y);
-    m_size_on_screen = Vector2<int>(m_radius*2, m_radius*2);
+    m_size_on_screen = Vector2<int>(m_diameter, m_diameter);
     valid = calculatePositions();
     valid = valid && check();
 }
 
 float Ball::getRadius() const
 {
-    return m_radius;
+    return m_diameter*0.5;
 }
 
 Vector3<float> Ball::getRelativeFieldCoords() const
@@ -117,10 +118,10 @@ bool Ball::check() const
 
     //throw out if ball is too small
     if(VisionConstants::THROWOUT_SMALL_BALLS and 
-        m_radius*2 < VisionConstants::MIN_BALL_DIAMETER_PIXELS) {
+        m_diameter < VisionConstants::MIN_BALL_DIAMETER_PIXELS) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: too small" << endl;
-            debug << "\tdiameter: " << m_radius*2 << " MIN_BALL_DIAMETER_PIXELS: " << VisionConstants::MIN_BALL_DIAMETER_PIXELS << endl;
+            debug << "\tdiameter: " << m_diameter << " MIN_BALL_DIAMETER_PIXELS: " << VisionConstants::MIN_BALL_DIAMETER_PIXELS << endl;
         #endif
         return false;
     }
@@ -131,14 +132,6 @@ bool Ball::check() const
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: too far away" << endl;
             debug << "\td2p: " << m_transformed_spherical_pos.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << endl;
-        #endif
-        return false;
-    }
-
-    //size check - large balls thrown out
-    if(m_radius > 36) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Ball::check - Ball thrown out: too large. Max radius is " << 36 << "pix (max ball 30 + 20% leeway)" << endl;
         #endif
         return false;
     }
@@ -155,7 +148,7 @@ bool Ball::calculatePositions()
     float elevation;
     float bearing = (float)vbb->calculateBearing(m_location_pixels.x);
     if(VisionConstants::BALL_DISTANCE_POSITION_BOTTOM) {
-        elevation = (float)vbb->calculateElevation(m_location_pixels.y + m_radius);
+        elevation = (float)vbb->calculateElevation(m_location_pixels.y + m_diameter*0.5);
     }
     else {
         elevation = (float)vbb->calculateElevation(m_location_pixels.y);

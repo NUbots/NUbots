@@ -36,7 +36,7 @@ public:
       */
     bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
     //! Returns the ID of the field object that this rule is for.
-    VisionFieldObject::VFO_ID getVFO_ID() const;
+    VisionFieldObject::COLOUR_CLASS getColourClass() const;
 
     //! output stream operator.
     friend ostream& operator<< (ostream& output, const ColourTransitionRule& c);
@@ -49,8 +49,8 @@ public:
     friend istream& operator>> (istream& input, vector<ColourTransitionRule>& v);
 
 private:
-    //vector<VisionFieldObject::VFO_ID> m_potential_vfo_list;
-    VisionFieldObject::VFO_ID m_vfo_id;     //! @variable The ID of the field object that this rule is for.
+    //vector<VisionFieldObject::COLOUR_CLASS> m_potential_vfo_list;
+    VisionFieldObject::COLOUR_CLASS m_colour_class;     //! @variable The ID of the field object that this rule is for.
 
     vector<ClassIndex::Colour>  m_before,   //! @variable The colour that the previous segment must be.
                                 m_middle,   //! @variable The colour that this segment must be

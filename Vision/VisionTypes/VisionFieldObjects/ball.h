@@ -8,7 +8,7 @@ class Ball : public VisionFieldObject
 public:
     
     Ball();
-    Ball(PointType centre, float radius);
+    Ball(PointType centre, int diameter);
     
     /*!
       @brief returns the radius.
@@ -28,6 +28,9 @@ public:
 
     //! @brief applies a series of checks to decide if the ball is valid.
     bool check() const;
+    
+    //! @brief Stream output for labelling purposes
+    void printLabel(ostream& out) {out << getVFOName(BALL) << " " << m_location_pixels << " " << m_diameter << endl;}
 
     //! @brief output stream operator
     friend ostream& operator<< (ostream& output, const Ball& b);
@@ -48,9 +51,10 @@ private:
       */
     float distanceToBall(float bearing, float elevation);
     
-private:
-    float m_radius;     //! @variable the radius of the ball in pixels
+public:
+    int m_diameter;     //! @variable the radius of the ball in pixels
     
+private:
     float d2p;          //! @variable the distance of the ball in cm as found by the distance to point method
     float width_dist;   //! @variable the distance of the ball in cm as found by the width method.
 };

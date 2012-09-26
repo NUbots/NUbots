@@ -1,6 +1,3 @@
-QT -= gui
-QT -= core
-
 INCLUDEPATH += /usr/local/include/opencv2/
 INCLUDEPATH += /usr/include/boost/
 
@@ -10,6 +7,15 @@ DEFINES += TARGET_IS_TRAINING
 
 INCLUDEPATH += ${HOME}/robocup/
 INCLUDEPATH += ${HOME}/robocup/Vision/Debug/
+
+HEADERS += \
+    mainwindow.h \
+    labelgenerator.h \
+    ../Vision/VisionTypes/VisionFieldObjects/fieldline.h
+
+SOURCES += \
+    mainwindow.cpp \
+    labelgenerator.cpp
 
 HEADERS += \
     ../Vision/VisionTools/pccamera.h \
@@ -102,3 +108,7 @@ SOURCES += \
     ../Kinematics/Kinematics.cpp \
     ../Kinematics/EndEffector.cpp \
     ../Kinematics/Link.cpp \
+
+FORMS += \
+    mainwindow.ui \
+    labelgenerator.ui

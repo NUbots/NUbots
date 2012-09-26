@@ -23,13 +23,28 @@ public:
     //! VFO_ID enum and associated string conversion methods
     enum VFO_ID {
         BALL,
-        GOAL_Y,
-        GOAL_B,
-        LINE,
+        GOAL_Y_L,
+        GOAL_Y_R,
+        GOAL_Y_U,
+        GOAL_B_L,
+        GOAL_B_R,
+        GOAL_B_U,
+        BEACON_Y,
+        BEACON_B,
+        BEACON_U,
+        FIELDLINE,
         CORNER,
         CENTRE_CIRCLE,
         OBSTACLE,
-        UNKNOWN
+        INVALID
+    };
+    
+    enum COLOUR_CLASS {
+        BALL_COLOUR,
+        GOAL_Y_COLOUR,
+        GOAL_B_COLOUR,
+        LINE_COLOUR,
+        UNKNOWN_COLOUR
     };
 
     //! @brief converts a VisionFieldObject Id into a string.
@@ -37,9 +52,21 @@ public:
     //! @brief converts a string into a VisionFieldObject Id.
     static VFO_ID getVFOFromName(const string& name);
     
+    //! @brief converts a colour class into a string.
+    static string getColourClassName(COLOUR_CLASS id);
+    //! @brief converts a string into a colour class.
+    static COLOUR_CLASS getColourClassFromName(const string& name);
+    
+    static bool isGoal(VFO_ID id) { return id >= VisionFieldObject::GOAL_Y_L && id <= VisionFieldObject::GOAL_B_U;}
+    static bool isBlueGoal(VFO_ID id) {return id >= VisionFieldObject::GOAL_B_L && id <= VisionFieldObject::GOAL_B_U;}
+    static bool isYellowGoal(VFO_ID id) {return id >= VisionFieldObject::GOAL_Y_L && id <= VisionFieldObject::GOAL_Y_U;}
+    static bool isBeacon(VFO_ID id) {return id >= VisionFieldObject::BEACON_Y && id <= VisionFieldObject::BEACON_U;}
+    
 public:
     VisionFieldObject();
 
+    VFO_ID getID() {return m_id;}
+    
     //! @brief returns the screen location in pixels (relative to the top left).
     const Vector2<int>& getLocationPixels() const;
     //! @brief returns the angular screen location (relative to the image centre) in radians.
@@ -55,8 +82,13 @@ public:
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const = 0;
     //! @brief applies a series of checks to decide if the object is valid.
     virtual bool check() const = 0;
-
+    
+    //! @brief Stream output for labelling purposes
+    virtual void printLabel(ostream& out) = 0;
+    
 protected:
+    VFO_ID m_id;
+    
     Vector2<int> m_location_pixels;         //! @variable The pixel location of the object on the screen.
     Vector2<float> m_location_angular;      //! @variable The angular location of the object relative to the screen centre.
     Vector3<float> m_spherical_position;    //! @variable The position (distance, bearing, elevation) of the object relative to the robots camera.

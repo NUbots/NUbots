@@ -215,39 +215,39 @@ void GoalDetection::detectGoals()
     // BLUE BEACONS
     //cout << "BLUE BEACONS (AFTER): " << blue_beacons.size() << endl;
     for (unsigned int i = 0; i < blue_beacons.size(); i++) {
-        Beacon beacon(Beacon::BlueBeacon, blue_beacons.at(i));
+        Beacon beacon(VisionFieldObject::BEACON_B, blue_beacons.at(i));
         vbb->addBeacon(beacon);
     }
     // YELLOW BEACONS
     //cout << "YELLOW BEACONS (AFTER): " << yellow_beacons.size() << endl;
     for (unsigned int i = 0; i < yellow_beacons.size(); i++) {
-        Beacon beacon(Beacon::YellowBeacon, yellow_beacons.at(i));
+        Beacon beacon(VisionFieldObject::BEACON_Y, yellow_beacons.at(i));
         vbb->addBeacon(beacon);
     }
     // AMBIGUOUS BEACONS
     for (unsigned int i = 0; i < unknown_beacons.size(); i++) {
-        Beacon beacon(Beacon::UnknownBeacon, unknown_beacons.at(i));
+        Beacon beacon(VisionFieldObject::BEACON_U, unknown_beacons.at(i));
         vbb->addBeacon(beacon);
     }
     
     // BLUE POSTS
     if (blue_posts.size() != 2)
         for (unsigned int i = 0; i < blue_posts.size(); i++) {
-            Goal post(Goal::BlueUnknownGoal, blue_posts.at(i));
+            Goal post(VisionFieldObject::GOAL_B_U, blue_posts.at(i));
             vbb->addGoal(post);
         }
     else {
         Quad post1 = blue_posts.at(0),
              post2 = blue_posts.at(1);
         if (post1.getCentre().x < post2.getCentre().x) {
-            Goal post_left(Goal::BlueLeftGoal, post1);
-            Goal post_right(Goal::BlueRightGoal, post2);
+            Goal post_left(VisionFieldObject::GOAL_B_L, post1);
+            Goal post_right(VisionFieldObject::GOAL_B_U, post2);
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
         }
         else {
-            Goal post_left(Goal::BlueLeftGoal, post2);
-            Goal post_right(Goal::BlueRightGoal, post1);
+            Goal post_left(VisionFieldObject::GOAL_B_L, post2);
+            Goal post_right(VisionFieldObject::GOAL_B_R, post1);
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
         }
@@ -256,21 +256,21 @@ void GoalDetection::detectGoals()
     // YELLOW POSTS
     if (yellow_posts.size() != 2)
         for (unsigned int i = 0; i < yellow_posts.size(); i++) {
-            Goal post(Goal::YellowUnknownGoal, yellow_posts.at(i));
+            Goal post(VisionFieldObject::GOAL_Y_U, yellow_posts.at(i));
             vbb->addGoal(post);
         }
     else {
         Quad post1 = yellow_posts.at(0),
              post2 = yellow_posts.at(1);
         if (post1.getCentre().x < post2.getCentre().x) {
-            Goal post_left(Goal::YellowLeftGoal, post1);
-            Goal post_right(Goal::YellowRightGoal, post2);
+            Goal post_left(VisionFieldObject::GOAL_Y_L, post1);
+            Goal post_right(VisionFieldObject::GOAL_Y_R, post2);
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
         }
         else {
-            Goal post_left(Goal::YellowLeftGoal, post2);
-            Goal post_right(Goal::YellowRightGoal, post1);
+            Goal post_left(VisionFieldObject::GOAL_Y_L, post2);
+            Goal post_right(VisionFieldObject::GOAL_Y_R, post1);
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
         }
@@ -465,11 +465,11 @@ void GoalDetection::splitIntoObjects(vector<Quad>* blue_candidates, vector<Quad>
 
 void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidates)
 {
-    VisionFieldObject::VFO_ID goal;
+    VisionFieldObject::COLOUR_CLASS goal;
     if (colour == ClassIndex::blue)
-        goal = VisionFieldObject::GOAL_B;
+        goal = VisionFieldObject::GOAL_B_COLOUR;
     else
-        goal = VisionFieldObject::GOAL_Y;
+        goal = VisionFieldObject::GOAL_Y_COLOUR;
 
     const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(goal);
     const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(goal);

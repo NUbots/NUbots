@@ -21,6 +21,9 @@ public:
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
     //! @brief applies a series of checks to decide if the obstacle is valid.
     bool check() const;
+    
+    //! @brief Stream output for labelling purposes
+    void printLabel(ostream& out) {out << getVFOName(OBSTACLE) << " " << m_location_pixels << " " << m_size_on_screen << endl;}
 
     //! @brief output stream operator.
     friend ostream& operator<< (ostream& output, const Obstacle& o);

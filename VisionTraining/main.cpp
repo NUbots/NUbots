@@ -35,7 +35,7 @@ int main()
     max_diff = 0.0;
     sum = 0.0;
     geo_mean = 1.0;
-    for(int i = 0; i<imagetimes.size()-1; i++) {
+    for(unsigned int i = 0; i<imagetimes.size()-1; i++) {
         diff = abs(imagetimes[i] - imagetimes[i+1]);
         max_diff = max(diff, max_diff);
         sum += diff;
@@ -45,7 +45,7 @@ int main()
     max_diff = 0.0;
     sum = 0.0;
     geo_mean = 1.0;
-    for(int i = 0; i<sensortimes.size()-1; i++) {
+    for(unsigned int i = 0; i<sensortimes.size()-1; i++) {
         diff = abs(sensortimes[i] - sensortimes[i+1]);
         max_diff = max(diff, max_diff);
         sum += diff;
@@ -98,7 +98,7 @@ vector<double> checkSensorStream(string name)
             duplicates++;
         if(last_time == -1) {
             sensors.getAccelerometer(data);
-                for(int i=0; i<data.size(); i++) {
+                for(unsigned int i=0; i<data.size(); i++) {
                     cout << data.at(i) << endl;
                 }
         }
@@ -132,7 +132,7 @@ int runDave()
             while(vision->runFrame() == 0);
             outfilename = oss.str() + string(".txt");
             out.open(outfilename.c_str());
-            vision->writeDetections(out);
+            vision->writeBatchDetections(out);
             out.close();
         }
     }

@@ -14,9 +14,9 @@ bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegmen
 }
 
 //! @brief Returns the ID of the VFO this rule is related to.
-VisionFieldObject::VFO_ID ColourTransitionRule::getVFO_ID() const
+VisionFieldObject::COLOUR_CLASS ColourTransitionRule::getColourClass() const
 {
-    return m_vfo_id;
+    return m_colour_class;
 }
 
 
@@ -26,7 +26,7 @@ ostream& operator<< (ostream& output, const ColourTransitionRule& c)
 {
     vector<ClassIndex::Colour>::const_iterator it;
 
-    output << VisionFieldObject::getVFOName(c.m_vfo_id) << ":\n";
+    output << VisionFieldObject::getColourClassName(c.m_colour_class) << ":\n";
 
     //before
     output << "before: (" << c.m_before_min << ", " << c.m_before_max << ") [";
@@ -74,7 +74,7 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
     // read in the rule name
     getline(input, id_str, ':');
     boost::trim(id_str);
-    c.m_vfo_id = VisionFieldObject::getVFOFromName(id_str);
+    c.m_colour_class = VisionFieldObject::getColourClassFromName(id_str);
 //! DO MORE HERE
 
     //BEFORE
@@ -164,11 +164,11 @@ istream& operator>> (istream& input, vector<ColourTransitionRule>& v)
     while(input.good())
     {
         input >> temp;
-        if(temp.getVFO_ID() != VisionFieldObject::UNKNOWN) {
+        if(temp.getColourClass() != VisionFieldObject::UNKNOWN_COLOUR) {
             v.push_back(temp);
         }
         else {
-            errorlog << "ColourTransitionRule istream operator: UNKOWN match ignored." << endl;
+            errorlog << "ColourTransitionRule istream operator: UNKOWN_COLOUR match ignored." << endl;
         }
     }
 

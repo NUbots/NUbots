@@ -12,8 +12,8 @@ void BallDetection::detectBall()
     const LookUpTable& lut = vbb->getLUT();
     // BEGIN BALL DETECTION -----------------------------------------------------------------
 
-    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::BALL);
-    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::BALL);
+    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::BALL_COLOUR);
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::BALL_COLOUR);
     vector<PointType> edges;
 
     appendEdgesFromSegments(h_segments, edges);

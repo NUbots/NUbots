@@ -22,7 +22,7 @@ void SegmentFilter::run() const
     const SegmentedRegion& h_segments = vbb->getHorizontalSegmentedRegion();
     const SegmentedRegion& v_segments = vbb->getVerticalSegmentedRegion();
     SegmentedRegion h_filtered, v_filtered;
-    map<VisionFieldObject::VFO_ID, vector<ColourSegment> > h_result, v_result;
+    map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > h_result, v_result;
     
     if(PREFILTER_ON) {
         preFilter(h_segments, h_filtered);
@@ -96,18 +96,18 @@ void SegmentFilter::preFilter(const SegmentedRegion &scans, SegmentedRegion &res
     }
 }
 
-void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::VFO_ID, vector<ColourSegment> > &result) const
+void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &result) const
 {
     switch(scans.getDirection()) {
     case VisionID::VERTICAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_v) {
-            vector<ColourSegment>& segments = result[rule.getVFO_ID()];
+            vector<ColourSegment>& segments = result[rule.getColourClass()];
             checkRuleAgainstRegion(scans, rule, segments);
         }
         break;
     case VisionID::HORIZONTAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_h) {
-            vector<ColourSegment>& segments = result[rule.getVFO_ID()];
+            vector<ColourSegment>& segments = result[rule.getColourClass()];
             checkRuleAgainstRegion(scans, rule, segments);
         }
         break;

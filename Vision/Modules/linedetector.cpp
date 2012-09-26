@@ -17,8 +17,8 @@ void LineDetector::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
 
-    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE);  //get transitions associated with lines
-    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE);
+    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE_COLOUR);  //get transitions associated with lines
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE_COLOUR);
     vector<LSFittedLine> lines;
     vector<LinePoint> points;
 

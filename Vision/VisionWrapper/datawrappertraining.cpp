@@ -72,7 +72,7 @@ DataWrapper::DataWrapper()
     }
 
     //set up fake horizon
-    kinematics_horizon.setLine(0, 1, 50);
+    kinematics_horizon.setLineFromPoints(Point(0,0), Point(319,0));
     numFramesDropped = numFramesProcessed = 0;
 }
 
@@ -222,17 +222,17 @@ bool DataWrapper::updateFrame()
     }
     numFramesProcessed++;
     imagestrm.peek();
-    bool image_good = false,
-         sensors_good = false;
+    bool image_good = false;
     if(imagestrm.is_open() && imagestrm.good()) {
         imagestrm >> *m_current_image;
         image_good = true;
+        debug << "DataWrapper::updateFrame - failed to load image stream: " << image_stream_name << endl;
     }
     if(sensorstrm.is_open() && sensorstrm.good()) {
         sensorstrm >> *m_sensor_data;
-        sensors_good = true;
+        debug << "DataWrapper::updateFrame - failed to load sensor stream: " << sensor_stream_name << endl;
     }
-    return image_good && sensors_good;
+    return image_good;
 }
 
 void DataWrapper::resetHistory()
@@ -270,29 +270,43 @@ void DataWrapper::printHistory(ostream& out)
 *   @param filename The filename for the LUT stored on disk.
 *   @return The success of the operation.
 */
-bool DataWrapper::loadLUTFromFile(const string& fileName)
+bool DataWrapper::loadLUTFromFile(const string& filename)
 {
-    if(LUT.loadLUTFromFile(fileName)) {
-        return true;
-    }
-    else {
-        //LUT.zero();
-        return false;
-    }
+    return LUT.loadLUTFromFile(filename);
 }
 
 /**
-*   @brief Sets the stream to read from.
+*   @brief Sets the image stream to read from.
 *   @param filename The filename for the stream stored on disk.
 *   @return The success of the operation.
 */
-bool DataWrapper::setStream(const string &filename)
+bool DataWrapper::setImageStream(const string &filename)
 {
     image_stream_name = filename;
     imagestrm.open(image_stream_name.c_str());
     numFramesDropped = numFramesProcessed = 0;
     if(!imagestrm.is_open()) {
         errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << image_stream_name << endl;
+        return false;
+    }
+    return true;
+}
+
+/**
+*   @brief Sets the sensor stream to read from.
+*   @param filename The filename for the stream stored on disk.
+*   @return The success of the operation.
+*/
+bool DataWrapper::setSensorStream(const string &filename)
+{
+    sensor_stream_name = filename;
+    sensorstrm.open(sensor_stream_name.c_str());
+    if(!sensorstrm.is_open()) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << sensor_stream_name << endl;
+        return false;
+    }
+    if(numFramesProcessed > 0) {
+        errorlog << "DataWrapper::DataWrapper() - attempted to set sensor stream midway through reading image stream: " << sensor_stream_name << endl;
         return false;
     }
     return true;

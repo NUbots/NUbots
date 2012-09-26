@@ -97,9 +97,12 @@ private:
 
     void resetHistory();
     void printHistory(ostream& out);
-    bool setStream(const string& filename);
-    bool loadLUTFromFile(const string& fileName);
+    bool setImageStream(const string& filename);
+    bool setSensorStream(const string& filename);
+    bool loadLUTFromFile(const string& filename);
     void resetStream();
+    
+    
 
 private:
     static DataWrapper* instance;

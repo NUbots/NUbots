@@ -28,6 +28,8 @@ public:
     static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;  //! The minimum number of transitions to keep a goal.
     static bool THROWOUT_NARROW_GOALS;  //! Whether to throw out goals that are too narrow.
     static int MIN_GOAL_WIDTH;          //! The minimum width of a goal.
+    static bool THROWOUT_SHORT_GOALS;  //! Whether to throw out goals that are too short.
+    static int MIN_GOAL_HEIGHT;          //! The minimum height of a goal.
     static float GOAL_EDGE_RATIO;       //! Dave?
 
     //! Beacon filtering constants

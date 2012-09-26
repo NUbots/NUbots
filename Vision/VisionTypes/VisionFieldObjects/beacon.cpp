@@ -8,17 +8,7 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-string Beacon::getIDName(BeaconID id)
-{
-    switch(id) {
-    case YellowBeacon:    return "YellowBeacon";
-    case BlueBeacon:      return "BlueBeacon";
-    case UnknownBeacon:   return "UnknownBeacon";
-    case InvalidBeacon:   return "InvalidBeacon";
-    }
-}
-
-Beacon::Beacon(BeaconID id, const Quad &corners)
+Beacon::Beacon(VFO_ID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
@@ -44,11 +34,6 @@ const Quad& Beacon::getQuad() const
     return m_corners;
 }
 
-Beacon::BeaconID Beacon::getID() const
-{
-    return m_id;
-}
-
 Vector3<float> Beacon::getRelativeFieldCoords() const
 {
     return m_spherical_position;
@@ -57,7 +42,7 @@ Vector3<float> Beacon::getRelativeFieldCoords() const
 bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
-        debug << "Beacon::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
+        debug << "Beacon::addToExternalFieldObjects - m_id: " << getVFOName(m_id) << endl;
         debug << "    " << *this << endl;
     #endif
         
@@ -70,15 +55,15 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
         bool stationary = false;
 
         switch(m_id) {
-        case YellowBeacon:
+        case BEACON_Y:
             stat_id = FieldObjects::FO_YELLOW_BEACON;
             stationary = true;
             break;
-        case BlueBeacon:
+        case BEACON_B:
             stat_id = FieldObjects::FO_BLUE_BEACON;
             stationary = true;
             break;
-        case UnknownBeacon:
+        case BEACON_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_BEACON_UNKNOWN, "Unknown Beacon");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_BEACON);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_BEACON);
@@ -167,7 +152,7 @@ bool Beacon::check() const
 
 void Beacon::setUnknown()
 {
-    m_id = UnknownBeacon;
+    m_id = BEACON_U;
 }
 
 bool Beacon::calculatePositions()

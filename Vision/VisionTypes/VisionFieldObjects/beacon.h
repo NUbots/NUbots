@@ -6,22 +6,11 @@
 
 class Beacon : public VisionFieldObject
 {
-public:
-    enum BeaconID {
-        YellowBeacon,
-        BlueBeacon,
-        UnknownBeacon,
-        InvalidBeacon
-    };
-    
-    static string getIDName(BeaconID id);
-    
-    Beacon(BeaconID id = InvalidBeacon, const Quad& corners = Quad(0,0,0,0));
+public:    
+    Beacon(VFO_ID id = INVALID, const Quad& corners = Quad(0,0,0,0));
     
     //! @brief reutns the pixel locations of the corners.
     const Quad& getQuad() const;
-    //! @brief returns the beacon id - blue, yellow or unknown.
-    BeaconID getID() const;
 
     //! @brief returns the field position relative to the robot.
     Vector3<float> getRelativeFieldCoords() const;
@@ -37,6 +26,9 @@ public:
 
     //! @brief sets the beacon to be an unkown beacon
     void setUnknown();
+    
+    //! @brief Stream output for labelling purposes
+    void printLabel(ostream& out) {out << getVFOName(m_id) << " " << m_location_pixels << " " << m_size_on_screen << endl;}
 
     //! @brief output stream operator
     friend ostream& operator<< (ostream& output, const Beacon& b);
@@ -58,7 +50,6 @@ private:
     float distanceToBeacon(float bearing, float elevation);
     
 private:
-    BeaconID m_id;                  //! @variable the beacon id - blue, yellow or unknown
     Quad m_corners;                 //! @variable pixel locations of the corners
     Vector2<int> m_bottom_centre;   //! @variable pixel location of the bottom centre
     

@@ -186,9 +186,9 @@ void VisionBlackboard::setVerticalFilteredSegments(const vector<vector<ColourSeg
 *   @param vfo_if The identifier of the field object
 *   @param transitions A vector of transitions that matched the horizontal rules.
 */
-void VisionBlackboard::setHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id, const vector<ColourSegment> &transitions)
+void VisionBlackboard::setHorizontalTransitions(VisionFieldObject::COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
 {
-    matched_horizontal_segments[vfo_id] = transitions;
+    matched_horizontal_segments[colour_class] = transitions;
 }
 
 /**
@@ -196,25 +196,25 @@ void VisionBlackboard::setHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id
 *   @param vfo_if The identifier of the field object
 *   @param transitions A vector of transitions that matched the vertical rules.
 */
-void VisionBlackboard::setVerticalTransitions(VisionFieldObject::VFO_ID vfo_id, const vector<ColourSegment> &transitions)
+void VisionBlackboard::setVerticalTransitions(VisionFieldObject::COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
 {
-    matched_vertical_segments[vfo_id] = transitions;
+    matched_vertical_segments[colour_class] = transitions;
 }
 
 /**
 *   @brief sets the horizontal transition rule matches for all vision field objects.
-*   @param t_map A map from VFO_IDs to transitions that matched the horizontal rules.
+*   @param t_map A map from COLOUR_CLASSs to transitions that matched the horizontal rules.
 */
-void VisionBlackboard::setHorizontalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<ColourSegment> > &t_map)
+void VisionBlackboard::setHorizontalTransitionsMap(const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &t_map)
 {
     matched_horizontal_segments = t_map;
 }
 
 /**
 *   @brief sets the vertical transition rule matches for all vision field objects.
-*   @param t_map A map from VFO_IDs to transitions that matched the vertical rules.
+*   @param t_map A map from COLOUR_CLASSs to transitions that matched the vertical rules.
 */
-void VisionBlackboard::setVerticalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<ColourSegment> > &t_map)
+void VisionBlackboard::setVerticalTransitionsMap(const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &t_map)
 {
     matched_vertical_segments = t_map;
 }
@@ -449,9 +449,9 @@ const SegmentedRegion& VisionBlackboard::getVerticalFilteredRegion() const
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
 */
-const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id)
+const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(VisionFieldObject::COLOUR_CLASS colour_class)
 {
-    return matched_horizontal_segments[vfo_id];
+    return matched_horizontal_segments[colour_class];
 }
 
 /**
@@ -464,16 +464,16 @@ const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(VisionFi
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
 */
-const vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(VisionFieldObject::VFO_ID vfo_id)
+const vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(VisionFieldObject::COLOUR_CLASS colour_class)
 {
-    return matched_vertical_segments[vfo_id];
+    return matched_vertical_segments[colour_class];
 }
 
 /**
 *   @brief returns the horizontal transition rule matches for all VFOs
 *   @return horizontal_segments The horizontal transition rule matches for all VFOs
 */
-const map<VisionFieldObject::VFO_ID, vector<ColourSegment> > &VisionBlackboard::getHorizontalTransitionsMap() const
+const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getHorizontalTransitionsMap() const
 {
     return matched_horizontal_segments;
 }
@@ -482,7 +482,7 @@ const map<VisionFieldObject::VFO_ID, vector<ColourSegment> > &VisionBlackboard::
 *   @brief returns the vertical transition rule matches for all VFOs
 *   @return vertical_segments The vertical transition rule matches for all VFOs
 */
-const map<VisionFieldObject::VFO_ID, vector<ColourSegment> > &VisionBlackboard::getVerticalTransitionsMap() const
+const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getVerticalTransitionsMap() const
 {
     return matched_vertical_segments;
 }
@@ -705,7 +705,7 @@ void VisionBlackboard::debugPublish() const
         debug << "VisionBlackboard::debugPublish() - Begin" << endl;
     #endif
     vector<PointType> pts;
-    map<VisionFieldObject::VFO_ID, vector<ColourSegment> >::const_iterator it;
+    map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> >::const_iterator it;
     vector<ColourSegment> v_s;
 
 #if VISION_BLACKBOARD_VERBOSITY > 1

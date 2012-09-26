@@ -54,8 +54,8 @@ void VisionControlWrapper::writeBatchDetections(ostream &out)
         out << !data_wrapper->ball_detection_history.at(i).empty() << " ";
         int y = 0, b = 0;
         BOOST_FOREACH(Goal g, data_wrapper->goal_detection_history.at(i)) {
-            b += g.getID() == Goal::BlueLeftGoal || g.getID() == Goal::BlueRightGoal || g.getID() == Goal::BlueUnknownGoal;
-            y += g.getID() == Goal::YellowLeftGoal || g.getID() == Goal::YellowRightGoal || g.getID() == Goal::YellowUnknownGoal;
+            b += VisionFieldObject::isBlueGoal(g.getID());
+            y += VisionFieldObject::isYellowGoal(g.getID());
         }
         out << (y == 1) << " ";
         out << (y > 1) << " ";
@@ -63,8 +63,8 @@ void VisionControlWrapper::writeBatchDetections(ostream &out)
         out << (b > 1) << " ";
         b = 0; y = 0;
         BOOST_FOREACH(Beacon be, data_wrapper->beacon_detection_history.at(i)) {
-            b += be.getID() == Beacon::BlueBeacon;
-            y += be.getID() == Beacon::YellowBeacon;
+            b += be.getID() == VisionFieldObject::BEACON_B;
+            y += be.getID() == VisionFieldObject::BEACON_Y;
         }
         out << (y == 1) << " ";
         out << (b == 1) << endl;
@@ -77,8 +77,8 @@ void VisionControlWrapper::writeBatchResults(ostream& out)
         out << !data_wrapper->ball_detection_history.at(i).empty() << " ";
         int y = 0, b = 0;
         BOOST_FOREACH(Goal g, data_wrapper->goal_detection_history.at(i)) {
-            b += g.getID() == Goal::BlueLeftGoal || g.getID() == Goal::BlueRightGoal || g.getID() == Goal::BlueUnknownGoal;
-            y += g.getID() == Goal::YellowLeftGoal || g.getID() == Goal::YellowRightGoal || g.getID() == Goal::YellowUnknownGoal;
+            b += VisionFieldObject::isBlueGoal(g.getID());
+            y += VisionFieldObject::isYellowGoal(g.getID());
         }
         out << (y == 1) << " ";
         out << (y > 1) << " ";
@@ -86,8 +86,8 @@ void VisionControlWrapper::writeBatchResults(ostream& out)
         out << (b > 1) << " ";
         b = 0; y = 0;
         BOOST_FOREACH(Beacon be, data_wrapper->beacon_detection_history.at(i)) {
-            b += be.getID() == Beacon::BlueBeacon;
-            y += be.getID() == Beacon::YellowBeacon;
+            b += be.getID() == VisionFieldObject::BEACON_B;
+            y += be.getID() == VisionFieldObject::BEACON_Y;
         }
         out << (y == 1) << " ";
         out << (b == 1) << endl;
@@ -102,12 +102,11 @@ void VisionControlWrapper::writeBatchGroundTruth(ostream& out)
 float VisionControlWrapper::evaluateFrame()
 {
     //average distance error 3D for now
-
 }
 
 void VisionControlWrapper::generateLabels(const string& directory)
 {
-    setStream(directory + string("/image.strm"));
+    //setImageStream(directory + string("/image.strm"));
 }
 
 void VisionControlWrapper::resetHistory()
