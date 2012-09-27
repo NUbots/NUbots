@@ -27,4 +27,5 @@ VisionOptimiser::VisionOptimiser(OPT_ID id, QWidget *parent) :
 VisionOptimiser::~VisionOptimiser()
 {
     delete ui;
+    delete m_optimiser;
 }

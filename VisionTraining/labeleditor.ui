@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>717</width>
+    <height>565</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,23 +65,10 @@
      <string>Next Frame</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="discardPB">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>40</y>
-      <width>121</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Discard Frame</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="exitPB">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>510</x>
       <y>40</y>
       <width>121</width>
       <height>27</height>
@@ -159,7 +146,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>717</width>
      <height>25</height>
     </rect>
    </property>

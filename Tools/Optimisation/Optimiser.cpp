@@ -21,7 +21,12 @@
 
 #include "Optimiser.h"
 #include "Parameter.h"
-#include "NUPlatform/NUPlatform.h"
+
+#ifdef TARGET_IS_TRAINING
+    #include <boost/date_time/posix_time/posix_time.hpp>
+#else
+    #include "NUPlatform/NUPlatform.h"
+#endif
 
 #include <boost/random.hpp>
 
@@ -37,7 +42,7 @@ Optimiser::Optimiser(std::string name, vector<Parameter> parameters)
     m_name = name;
     m_initial_parameters = parameters;
 
-    srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
+    srand(static_cast<unsigned int> (1e6*getRealTime()*getRealTime()*getRealTime()));
 }
 
 /*! @brief Destructor for the abstract optimiser */
@@ -142,7 +147,7 @@ void Optimiser::load()
  */
 float Optimiser::normalDistribution(float mean, float sigma)
 {
-    static unsigned int seed = 1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime();          // I am hoping that at least one of the three calls is different for each process
+    static unsigned int seed = 1e6*getRealTime()*getRealTime()*getRealTime();          // I am hoping that at least one of the three calls is different for each process
     static boost::mt19937 generator(seed);                       // you need to seed it here with an unsigned int!
     static boost::normal_distribution<float> distribution(0,1);
     static boost::variate_generator<boost::mt19937, boost::normal_distribution<float> > standardnorm(generator, distribution);
@@ -162,4 +167,13 @@ float Optimiser::uniformDistribution(float min, float max)
 {
 	// We can't use boost's uniform distribution because it is buggy.
 	return (max - min)*rand()/RAND_MAX + min;
+}
+
+double Optimiser::getRealTime()
+{
+    #ifdef TARGET_IS_TRAINING
+        return (boost::posix_time::microsec_clock::universal_time() - boost::posix_time::from_time_t(0)).total_nanoseconds()/1e6;
+    #else
+        return Platform->getRealTime();
+    #endif
 }

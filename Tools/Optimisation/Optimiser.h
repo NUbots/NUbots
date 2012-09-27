@@ -54,8 +54,10 @@ public:
 protected:
     float normalDistribution(float mean, float sigma);
     float uniformDistribution(float min, float max);
+    double getRealTime();
     virtual void toStream(ostream& o) const = 0;
     virtual void fromStream(istream& i) = 0;
+
 protected:
     string m_name;
     vector<Parameter> m_initial_parameters;

@@ -324,7 +324,7 @@ void DataWrapper::printLabels(ostream& out) const
     out << detections.size() << endl;
     for(unsigned int i=0; i<detections.size(); i++) {
         detections.at(i)->printLabel(out);
-        cout << endl;
+        out << endl;
     }
 }
 

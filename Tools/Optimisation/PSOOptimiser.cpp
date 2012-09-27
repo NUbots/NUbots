@@ -22,13 +22,14 @@
 #include "PSOOptimiser.h"
 #include "Parameter.h"
 
-#include "NUPlatform/NUPlatform.h"
 #include "Tools/Math/StlVector.h"
 
 #include "debug.h"
 #include "nubotdataconfig.h"
 
 #include <cstdlib>
+
+
 
 /*! @brief Constructor for abstract optimiser
  	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
@@ -45,8 +46,9 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
     m_num_particles = 30;
 
     m_num_dimensions = parameters.size();
-    
-    srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
+
+    srand(static_cast<unsigned int> (1e6*getRealTime()*getRealTime()*getRealTime()));
+
     load();
     if (m_swarm_position.empty())
     	initSwarm();

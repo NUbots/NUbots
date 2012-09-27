@@ -689,6 +689,9 @@ void VisionBlackboard::publish() const
     for(i=0; i<m_obstacles.size(); i++) {
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_obstacles.at(i)));
     }
+    for(i=0; i<m_lines.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_lines.at(i)));
+    }
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::publish() - End" << endl;
     #endif
