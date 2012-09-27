@@ -171,7 +171,6 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
     detections.push_back(visual_object);    //add onto detections list - invalid
 }
 
-
 bool DataWrapper::debugPublish(const vector<Ball>& data)
 {
     ball_detections.insert(ball_detections.end(), data.begin(), data.end());
@@ -283,6 +282,7 @@ bool DataWrapper::loadLUTFromFile(const string& filename)
 bool DataWrapper::setImageStream(const string &filename)
 {
     image_stream_name = filename;
+    imagestrm.close();
     imagestrm.open(image_stream_name.c_str());
     numFramesDropped = numFramesProcessed = 0;
     if(!imagestrm.is_open()) {
@@ -300,6 +300,7 @@ bool DataWrapper::setImageStream(const string &filename)
 bool DataWrapper::setSensorStream(const string &filename)
 {
     sensor_stream_name = filename;
+    sensorstrm.close();
     sensorstrm.open(sensor_stream_name.c_str());
     if(!sensorstrm.is_open()) {
         errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << sensor_stream_name << endl;
@@ -337,10 +338,43 @@ bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& 
         in >> n;
         next_vec.clear();
         for(int i=0; i<n; i++) {
-            in >> next;
+            string name;
+            VisionFieldObject::VFO_ID id;
+            in >> name;
+            id = VisionFieldObject::getVFOFromName(name);
+            if(VisionFieldObject::isBeacon(id)) {
+                Beacon* b = new Beacon(id);
+                in >> b->m_location_pixels >> b->m_size_on_screen;
+                next = dynamic_cast<VisionFieldObject*>(b);
+            }
+            else if(VisionFieldObject::isGoal(id)) {
+                Goal* g = new Goal(id);
+                in >> g->m_location_pixels >> g->m_size_on_screen;
+                next = dynamic_cast<VisionFieldObject*>(g);
+            }
+            else if(id == VisionFieldObject::BALL) {
+                Ball* b = new Ball();
+                in >> b->m_location_pixels >> b->m_diameter;
+                next = dynamic_cast<VisionFieldObject*>(b);
+            }
+            else if(id == VisionFieldObject::OBSTACLE) {
+                Obstacle* o = new Obstacle();
+                in >> o->m_location_pixels >> o->m_size_on_screen;\
+                next = dynamic_cast<VisionFieldObject*>(o);
+            }
+            else if(id == VisionFieldObject::FIELDLINE) {
+                FieldLine* l = new FieldLine();
+                in >> l->m_rho >> l->m_phi;
+                next = dynamic_cast<VisionFieldObject*>(l);
+            }
+            else {
+                return false;
+            }
             next_vec.push_back(next);
         }
         labels.push_back(next_vec);
+        in.ignore(2,'\n');
+        in.peek();
     }
     return labels.size() > 0;
 }

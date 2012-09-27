@@ -1,19 +1,19 @@
-GOAL_Y:
+GOAL_Y_COLOUR:
 before: (0, 240)) []
 middle: (3, 240)) [yellow]
 after: (0, 240)) []
 
-GOAL_B:
+GOAL_B_COLOUR:
 before: (0, 240)) []
 middle: (3, 240)) [blue]
 after: (0, 240)) []
 
-BALL:
+BALL_COLOUR:
 before: (0, 240)) []
 middle: (3, 240)) [orange]
 after: (0, 240)) []
 
-LINE:
+LINE_COLOUR:
 before: (0, 240)) []
 middle: (3, 240)) [white]
 after: (0, 240)) []

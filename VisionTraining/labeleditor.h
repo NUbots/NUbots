@@ -30,8 +30,8 @@ public:
 private:
     void display(const NUImage& frame, const LookUpTable& lut);
     void renderFrame(const NUImage& frame, cv::Mat& mat);
-    void setInts(vector< pair<string,int> > vals);
-    void setDoubles(vector< pair<string,double> > vals);
+    void setInts(vector< pair<string, Vector3<int> > > vals);
+    void setDoubles(vector<pair<string, Vector3<double> > > vals);
     void updateCombo();
     void updateControls();
 
@@ -41,6 +41,8 @@ private slots:
     void addObject();
     void removeObject();
     void changeObject(int i);
+    void updateCallbackI(int i) {updateValues();}
+    void updateCallbackD(double i) {updateValues();}
     void updateValues();
     
 private:

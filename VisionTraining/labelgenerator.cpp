@@ -48,6 +48,7 @@ bool LabelGenerator::run(const string &dir)
         QMessageBox::warning(this, "Error", QString("Failed to read lookup table: ") + QString((dir+string("default.lut")).c_str()));
         return false;
     }
+
     //vision->setSensorStream(dir + string("sensor.strm"));
     
     ui->progressBar->setMaximum(num_images);

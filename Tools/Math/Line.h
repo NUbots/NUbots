@@ -52,6 +52,8 @@ class Line
     Line();
     //! Constructor with intialising points. A line is created through these 2 points.
     Line(Point p1, Point p2);
+    //! Constructor with intialising values.
+    Line(double rho, double phi);
     //! Destructor
     ~Line();
 // Make line. Form: Ax + By = C
@@ -63,6 +65,14 @@ class Line
       @return True if a valid line was assigned using the equation. False otherwise.
       */
     bool setLine(double A, double B, double C);
+
+    /*!
+      @brief Assign the line by giving the equation in the Hesse standard form.
+      @param rho The length of the normal.
+      @param phi The angle the normal makes with the x_axis.
+      @return True if a valid line was assigned using the equation. False otherwise.
+      */
+    bool setLine(double rho, double phi);
     /*!
       @brief Assign the line by giving two points through wich to form the line.
       @param p1 The first point.
@@ -189,10 +199,18 @@ class Line
       */
     double getPhi() const;
     /*!
-      @brief Retrieve the Phi value of the line equation (normal form)
-      @return Phi.
+      @brief Projects the point onto the line.
+      @param pt The point to project.
+      @return The projected point.
       */
     Point projectOnto(Point pt) const;
+    /*!
+      @brief Finds the intersection of the two lines.
+      @param other The other line.
+      @param pt The resulting point.
+      @return Whether the lines intersect.
+      */
+    bool getIntersection(const Line& other, Point& pt) const;
     /*Added by Shannon*/
 
 // Overloaded functions
@@ -221,9 +239,9 @@ class Line
     double m_A; //! The lines A value.
     double m_B; //! The lines B value.
     double m_C; //! The lines C value.
-    double Rho;
-    double Phi;
-    double normaliser;
+    double m_rho;
+    double m_phi;
+    double m_normaliser;
     /*!
       @brief Determine if the line represented by the given equation is valid.
       @param A The A value of the line equation.

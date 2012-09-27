@@ -14,7 +14,7 @@ Goal::Goal(VFO_ID id, const Quad &corners)
     m_corners = corners;
 
     m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
-    m_bottom_centre = corners.getBottomCentre();
+    m_location_pixels = corners.getBottomCentre();
 
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -23,7 +23,6 @@ Goal::Goal(VFO_ID id, const Quad &corners)
 //        m_bottom_centre.y = mathGeneral::roundNumberToInt(corr_bottom_centre.y);
 //    }
 
-    m_location_pixels = corners.getCentre();
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
     valid = valid && check();
@@ -165,7 +164,7 @@ bool Goal::check() const
 
     //throwout for base below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS and
-       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y)) {
+       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: base above kinematics horizon" << endl;
         #endif
@@ -207,8 +206,8 @@ bool Goal::calculatePositions()
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
     bool transform_valid;
-    float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
-    float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
+    float bearing = (float)vbb->calculateBearing(m_location_pixels.x);
+    float elevation = (float)vbb->calculateElevation(m_location_pixels.y);
     
     float distance = distanceToGoal(bearing, elevation);
 
@@ -340,9 +339,9 @@ float Goal::distanceToGoal(float bearing, float elevation) {
 void Goal::render(cv::Mat &mat) const
 {
     if(m_id <= GOAL_Y_U)
-        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(255, 255, 0), 0);
+        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(0, 255, 255), -1);
     else
-        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(255, 0, 0), 0);
+        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(255, 0, 0), -1);
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.

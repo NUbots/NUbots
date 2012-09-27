@@ -53,7 +53,6 @@ private:
     
 private:
     Quad m_corners;                 //! @variable pixel locations of the corners
-    Vector2<int> m_bottom_centre;   //! @variable pixel location of the bottom centre
     
     float d2p;          //! @variable the distance of the beacon in cm as found by the distance to point method
     float width_dist;   //! @variable the distance of the beacon in cm as found by the width method.

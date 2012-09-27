@@ -94,8 +94,6 @@ public:
     virtual double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location_pixels.x - measured.x,2) + pow(m_location_pixels.y - measured.y,2));}
     
     virtual void render(cv::Mat& mat) const = 0;
-
-    friend istream& operator >>(istream& in, VisionFieldObject* vfo);
     
 public:
     Vector2<int> m_location_pixels;         //! @variable The pixel location of the object on the screen.

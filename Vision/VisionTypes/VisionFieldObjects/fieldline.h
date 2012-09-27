@@ -8,6 +8,9 @@ class FieldLine : public VisionFieldObject
 {
 public:
     FieldLine(const Line& line = Line());
+    FieldLine(double rho, double phi);
+
+    void set(double rho, double phi);
         
     //! @brief returns the field position relative to the robot.
     Vector3<float> getRelativeFieldCoords() const {return Vector3<float>(0,0,0);}

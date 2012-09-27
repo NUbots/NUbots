@@ -4,6 +4,7 @@
 #include <QInputDialog>
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
+#include "Tools/Math/General.h"
 
 LabelEditor::LabelEditor(QWidget *parent) :
     QMainWindow(parent),
@@ -22,7 +23,8 @@ LabelEditor::LabelEditor(QWidget *parent) :
         QSlider* slider = new QSlider(ui->groupBox);
         label->setGeometry(10, y, 50, 20);
         slider->setGeometry(80, y, 160, 20);
-        dspin->setGeometry(80, y, 60, 20);
+        slider->setOrientation(Qt::Horizontal);
+        dspin->setGeometry(80, y, 80, 20);
         ispin->setGeometry(250, y, 50, 20);
         label->hide();
         slider->hide();
@@ -34,11 +36,15 @@ LabelEditor::LabelEditor(QWidget *parent) :
         m_sliders.push_back(slider);
         QObject::connect(slider, SIGNAL(valueChanged(int)), ispin, SLOT(setValue(int)));
         QObject::connect(ispin, SIGNAL(valueChanged(int)), slider, SLOT(setValue(int)));
-        QObject::connect(slider, SIGNAL(sliderReleased()), this, SLOT(updateValues()));
-        QObject::connect(ispin, SIGNAL(editingFinished()), this, SLOT(updateValues()));
-        QObject::connect(dspin, SIGNAL(editingFinished()), this, SLOT(updateValues()));
+        QObject::connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(updateCallbackI(int)));
+        QObject::connect(ispin, SIGNAL(valueChanged(int)), this, SLOT(updateCallbackI(int)));
+        QObject::connect(dspin, SIGNAL(valueChanged(double)), this, SLOT(updateCallbackD(double)));
         y+=40;
     }
+
+    //hack
+    m_d_spins.at(0)->setSingleStep(5);
+    m_d_spins.at(1)->setSingleStep(0.05);
     
     QObject::connect(ui->exitPB, SIGNAL(clicked()), this, SLOT(halt()));
     QObject::connect(ui->nextPB, SIGNAL(clicked()), this, SLOT(next()));
@@ -67,19 +73,25 @@ int LabelEditor::run(string dir)
     }
     m_total_frames = m_ground_truth_full.size();
     m_frame_no = 0;
-
-    updateCombo();
-    updateControls();
     m_image_updated = true;
 
     while(!m_halted && m_frame_no < m_total_frames) {
-        QApplication::processEvents();
+        m_next = false;
+        m_ground_truth = m_ground_truth_full.at(m_frame_no);
+        updateCombo();
+        updateControls();
+        image_file >> frame;
         while(!m_halted && !m_next) {
+            QApplication::processEvents();
             if(m_image_updated) {
                 display(frame, lut);
                 m_image_updated = false;
             }
         }
+
+        //write out
+
+        m_frame_no++;
     }
     close();
     return 0;
@@ -94,11 +106,16 @@ void LabelEditor::display(const NUImage& frame, const LookUpTable& lut)
 
     //display to actual frames
     //clear old display
-    m_plain_scene.removeItem(m_plain_scene.items().first());
-    m_classified_scene.removeItem(m_classified_scene.items().first());
+    if(!m_plain_scene.items().empty())
+        m_plain_scene.removeItem(m_plain_scene.items().first());
+    if(!m_classified_scene.items().empty())
+        m_classified_scene.removeItem(m_classified_scene.items().first());
 
     QImage q_plain((uchar*) plain.data, plain.cols, plain.rows, plain.step, QImage::Format_RGB888);
     QImage q_classified((uchar*) classified.data, classified.cols, classified.rows, classified.step, QImage::Format_RGB888);
+
+    q_plain = q_plain.rgbSwapped();
+    q_classified = q_classified.rgbSwapped();
 
     m_plain_pixmap.setPixmap(QPixmap::fromImage(q_plain));
     m_classified_pixmap.setPixmap(QPixmap::fromImage(q_classified));
@@ -144,19 +161,19 @@ void LabelEditor::addObject()
     if(ok) {
         new_id = VisionFieldObject::getVFOFromName(new_object_name.toStdString());
         if(VisionFieldObject::isGoal(new_id)) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Goal(new_id));
+            new_object = dynamic_cast<VisionFieldObject*>(new Goal(new_id, Quad(50,50,50,50)));
         }
         else if(VisionFieldObject::isBeacon(new_id)) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Beacon(new_id));
+            new_object = dynamic_cast<VisionFieldObject*>(new Beacon(new_id, Quad(50,50,20,50)));
         }
         else if(new_id == VisionFieldObject::BALL) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Ball());
+            new_object = dynamic_cast<VisionFieldObject*>(new Ball(PointType(50,50), 20));
         }
         else if(new_id == VisionFieldObject::OBSTACLE) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Obstacle());
+            new_object = dynamic_cast<VisionFieldObject*>(new Obstacle(PointType(50,50), 20, 30));
         }
         else if(new_id == VisionFieldObject::FIELDLINE) {
-            new_object = dynamic_cast<VisionFieldObject*>(new FieldLine());
+            new_object = dynamic_cast<VisionFieldObject*>(new FieldLine(150, 0));
         }
 
         if(new_object != NULL) {
@@ -210,44 +227,44 @@ void LabelEditor::updateControls()
 {
     if(!m_ground_truth.empty()) {
         VisionFieldObject* vfo = m_ground_truth.at(m_current_object);
-        vector< pair<string, int> > vi;
-        pair<string, int> pi;
-        vector< pair<string, double> > vd;
-        pair<string, double> pd;
+        vector< pair<string, Vector3<int> > > vi;
+        pair<string, Vector3<int> > pi;
+        vector< pair<string, Vector3<double> > > vd;
+        pair<string, Vector3<double> > pd;
         VisionFieldObject::VFO_ID id = vfo->getID();
         if(VisionFieldObject::isGoal(id) || VisionFieldObject::isBeacon(id) || id==VisionFieldObject::OBSTACLE) {
             pi.first = "x";
-            pi.second = vfo->getLocationPixels().x;
+            pi.second = Vector3<int>(vfo->getLocationPixels().x, 0, 319);
             vi.push_back(pi);
             pi.first = "y";
-            pi.second = vfo->getLocationPixels().y;
+            pi.second = Vector3<int>(vfo->getLocationPixels().y, 0, 239);
             vi.push_back(pi);
             pi.first = "width";
-            pi.second = vfo->getScreenSize().x;
+            pi.second = Vector3<int>(vfo->getScreenSize().x, 1, 320);
             vi.push_back(pi);
             pi.first = "height";
-            pi.second = vfo->getScreenSize().y;
+            pi.second = Vector3<int>(vfo->getScreenSize().y, 1, 240);
             vi.push_back(pi);
             setInts(vi);
         }
         else if(id==VisionFieldObject::BALL) {
             pi.first = "x";
-            pi.second = vfo->getLocationPixels().x;
+            pi.second = Vector3<int>(vfo->getLocationPixels().x, 0, 319);
             vi.push_back(pi);
             pi.first = "y";
-            pi.second = vfo->getLocationPixels().y;
+            pi.second = Vector3<int>(vfo->getLocationPixels().y, 0, 239);
             vi.push_back(pi);
             pi.first = "diameter";
-            pi.second = dynamic_cast<Ball*>(vfo)->m_diameter;
+            pi.second = Vector3<int>(dynamic_cast<Ball*>(vfo)->m_diameter, 1, 320);
             vi.push_back(pi);
             setInts(vi);
         }
         else if(id==VisionFieldObject::FIELDLINE) {
             pd.first = "rho";
-            pd.second = dynamic_cast<FieldLine*>(vfo)->m_rho;
+            pd.second = Vector3<double>(dynamic_cast<FieldLine*>(vfo)->m_rho, -sqrt(319*319+239*239), sqrt(319*319+239*239));
             vd.push_back(pd);
             pd.first = "phi";
-            pd.second = dynamic_cast<FieldLine*>(vfo)->m_phi;
+            pd.second = Vector3<double>(dynamic_cast<FieldLine*>(vfo)->m_phi, -mathGeneral::PI, mathGeneral::PI);
             vd.push_back(pd);
             setDoubles(vd);
         }
@@ -262,7 +279,7 @@ void LabelEditor::updateControls()
     }
 }
 
-void LabelEditor::setInts(vector< pair<string,int> > vals)
+void LabelEditor::setInts(vector< pair<string, Vector3<int> > > vals)
 {
     for(int i=0; i<m_text_labels.size(); i++) {
         m_text_labels[i]->hide();
@@ -274,14 +291,18 @@ void LabelEditor::setInts(vector< pair<string,int> > vals)
         m_text_labels[i]->show();
         m_text_labels[i]->setText(vals[i].first.c_str());
         m_sliders[i]->show();
-        m_sliders[i]->setValue(vals[i].second);
+        m_sliders[i]->setMinimum(vals[i].second.y);
+        m_sliders[i]->setMaximum(vals[i].second.z);
+        m_sliders[i]->setValue(vals[i].second.x);
         m_i_spins[i]->show();
-        m_i_spins[i]->setValue(vals[i].second);
+        m_i_spins[i]->setMinimum(vals[i].second.y);
+        m_i_spins[i]->setMaximum(vals[i].second.z);
+        m_i_spins[i]->setValue(vals[i].second.x);
     }
 
 }
 
-void LabelEditor::setDoubles(vector<pair<string, double> > vals)
+void LabelEditor::setDoubles(vector<pair<string, Vector3<double> > > vals)
 {
     for(int i=0; i<m_text_labels.size(); i++) {
         m_text_labels[i]->hide();
@@ -293,7 +314,9 @@ void LabelEditor::setDoubles(vector<pair<string, double> > vals)
         m_text_labels[i]->show();
         m_text_labels[i]->setText(vals[i].first.c_str());
         m_d_spins[i]->show();
-        m_d_spins[i]->setValue(vals[i].second);
+        m_d_spins[i]->setMinimum(vals[i].second.y);
+        m_d_spins[i]->setMaximum(vals[i].second.z);
+        m_d_spins[i]->setValue(vals[i].second.x);
     }
 }
 
@@ -301,10 +324,6 @@ void LabelEditor::updateValues()
 {
     if(!m_ground_truth.empty()) {
         VisionFieldObject* vfo = m_ground_truth.at(m_current_object);
-        vector< pair<string, int> > vi;
-        pair<string, int> pi;
-        vector< pair<string, double> > vd;
-        pair<string, double> pd;
         VisionFieldObject::VFO_ID id = vfo->getID();
         if(VisionFieldObject::isGoal(id) || VisionFieldObject::isBeacon(id) || id==VisionFieldObject::OBSTACLE) {
             vfo->m_location_pixels.x = m_i_spins[0]->value();

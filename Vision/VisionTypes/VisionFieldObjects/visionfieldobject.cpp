@@ -128,39 +128,3 @@ const Vector2<float>& VisionFieldObject::getLocationAngular() const
 {
     return m_location_angular;
 }
-
-istream& operator >> (istream& in, VisionFieldObject* vfo)
-{
-    string name;
-    VisionFieldObject::VFO_ID id;
-    in >> name;
-    id = VisionFieldObject::getVFOFromName(name);
-    if(VisionFieldObject::isBeacon(id)) {
-        Beacon* b = new Beacon(id);
-        in >> b->m_location_pixels >> b->m_size_on_screen;        
-        vfo = b;
-    }
-    else if(VisionFieldObject::isGoal(id)) {
-        Goal* g = new Goal(id);
-        in >> g->m_location_pixels >> g->m_size_on_screen;        
-        vfo = g;
-    }
-    else if(id == VisionFieldObject::BALL) {
-        Ball* b = new Ball();
-        in >> b->m_location_pixels >> b->m_diameter;
-        vfo = b;
-    }
-    else if(id == VisionFieldObject::OBSTACLE) {
-        Obstacle* o = new Obstacle();
-        in >> o->m_location_pixels >> o->m_size_on_screen;\
-        vfo = o;
-    }
-    else if(id == VisionFieldObject::FIELDLINE) {
-        FieldLine* l = new FieldLine();
-        in >> l->m_rho >> l->m_phi;
-    }
-    else {
-        throw "invalid VisionFieldObject id";
-    }
-    return in;
-}

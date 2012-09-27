@@ -21,8 +21,7 @@ Beacon::Beacon(VFO_ID id, const Quad &corners)
     //    }
 
     m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
-    m_bottom_centre = corners.getBottomCentre();
-    m_location_pixels = corners.getCentre();
+    m_location_pixels = corners.getBottomCentre();
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
 
@@ -119,7 +118,7 @@ bool Beacon::check() const
 
     //throwout for base below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS and
-       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y)) {
+       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Beacon::check - Beacon thrown out: base above kinematics horizon" << endl;
         #endif
@@ -160,8 +159,8 @@ bool Beacon::calculatePositions()
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
     bool transform_valid;
-    float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
-    float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
+    float bearing = (float)vbb->calculateBearing(m_location_pixels.x);
+    float elevation = (float)vbb->calculateElevation(m_location_pixels.y);
     
     float distance = distanceToBeacon(bearing, elevation);
 
@@ -279,7 +278,7 @@ void Beacon::render(cv::Mat &mat) const
 {
     switch(m_id) {
     case BEACON_Y:
-        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(255, 255, 0));
+        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(0, 255, 255));
         break;
     case BEACON_B:
         cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(255, 0, 0));

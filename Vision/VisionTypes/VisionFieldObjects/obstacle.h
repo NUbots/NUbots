@@ -47,7 +47,6 @@ private:
     float distanceToObstacle(float bearing, float elevation);
     
 private:
-    Vector2<int> m_bottom_centre;   //! @variable pixel location of the bottom centre
     float d2p;                      //! @variable the distance of the obstacle in cm as found by the distance to point method
 };
 
