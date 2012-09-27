@@ -8,7 +8,7 @@ LabelGenerator::LabelGenerator(QWidget *parent) :
     ui(new Ui::LabelGenerator)
 {
     ui->setupUi(this);
-    QObject::connect(ui->cancelPB, SIGNAL(clicked()), this, SLOT(setCancelled()));
+    QObject::connect(ui->cancelPB, SIGNAL(clicked()), this, SLOT(cancel()));
 }
 
 LabelGenerator::~LabelGenerator()

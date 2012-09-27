@@ -6,6 +6,7 @@
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
+#include "Tools/Math/General.h"
 
 #include <fstream>
 #include <boost/algorithm/string.hpp>
@@ -25,7 +26,8 @@ bool VisionConstants::THROWOUT_NARROW_GOALS;
 int VisionConstants::MIN_GOAL_WIDTH;
 bool VisionConstants::THROWOUT_SHORT_GOALS;
 int VisionConstants::MIN_GOAL_HEIGHT;
-float VisionConstants::GOAL_EDGE_RATIO;
+float VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_LOW;
+float VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH;
 //! Beacon filtering constants
 bool VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;
 bool VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;
@@ -83,9 +85,8 @@ float VisionConstants::SAM_SPLIT_DISTANCE;
 unsigned int VisionConstants::SAM_MIN_POINTS_OVER;
 unsigned int VisionConstants::SAM_MIN_POINTS_TO_LINE;
 unsigned int VisionConstants::SAM_SPLIT_NOISE_ITERATIONS;
-float VisionConstants::SAM_MAX_END_POINT_DIFF;
-float VisionConstants::SAM_MAX_ANGLE_DIFF;
-float VisionConstants::SAM_MAX_INTERCEPT_DIFF;
+float VisionConstants::SAM_MAX_ANGLE_DIFF_TO_MERGE;
+float VisionConstants::SAM_MAX_DISTANCE_TO_MERGE;
 unsigned int VisionConstants::SAM_MIN_POINTS_TO_LINE_FINAL;
 float VisionConstants::SAM_MIN_LINE_R2_FIT;
 float VisionConstants::SAM_MAX_LINE_MSD;
@@ -107,16 +108,17 @@ void VisionConstants::loadFromFile(std::string filename)
     GREEN_HORIZON_MIN_GREEN_PIXELS = 5;
     GREEN_HORIZON_LOWER_THRESHOLD_MULT = 1;
     GREEN_HORIZON_UPPER_THRESHOLD_MULT = 2.5;
+    GOAL_HEIGHT_TO_WIDTH_RATIO_LOW = 3,
+    GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH = 15;
+    MIN_GOAL_SEPARATION = 20;
     SAM_MAX_POINTS = 500;
     SAM_MAX_LINES = 15;
     SAM_SPLIT_DISTANCE = 1.0;
     SAM_MIN_POINTS_OVER = 2;
     SAM_MIN_POINTS_TO_LINE = 3;
-    SAM_SPLIT_NOISE_ITERATIONS = 1;
-    SAM_MAX_END_POINT_DIFF = 5.0;
-    SAM_MAX_END_POINT_DIFF = 0.1;
-    SAM_MAX_ANGLE_DIFF = 0.1;
-    SAM_MAX_INTERCEPT_DIFF = 10;
+    SAM_SPLIT_NOISE_ITERATIONS = 2;
+    SAM_MAX_ANGLE_DIFF_TO_MERGE = 0.1;
+    SAM_MAX_DISTANCE_TO_MERGE = 10;
     SAM_MIN_POINTS_TO_LINE_FINAL = 5;
     SAM_MIN_LINE_R2_FIT = 0.95;
     SAM_MAX_LINE_MSD = 1;
@@ -310,8 +312,11 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("MIN_GOAL_HEIGHT") == 0) {
             in >> MIN_GOAL_HEIGHT;
         }
-        else if(name.compare("GOAL_EDGE_RATIO") == 0) {
-            in >> GOAL_EDGE_RATIO;
+        else if(name.compare("GOAL_HEIGHT_TO_WIDTH_RATIO_LOW") == 0) {
+            in >> GOAL_HEIGHT_TO_WIDTH_RATIO_LOW;
+        }
+        else if(name.compare("GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH") == 0) {
+            in >> GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH;
         }
         else if(name.compare("MIN_GOAL_SEPARATION") == 0) {
             in >> MIN_GOAL_SEPARATION;
@@ -331,14 +336,11 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("SAM_SPLIT_NOISE_ITERATIONS") == 0) {
             in >> SAM_SPLIT_NOISE_ITERATIONS;
         }
-        else if(name.compare("SAM_MAX_END_POINT_DIFF") == 0) {
-            in >> SAM_MAX_END_POINT_DIFF;
+        else if(name.compare("SAM_MAX_ANGLE_DIFF_TO_MERGE") == 0) {
+            in >> SAM_MAX_ANGLE_DIFF_TO_MERGE;
         }
-        else if(name.compare("SAM_MAX_ANGLE_DIFF") == 0) {
-            in >> SAM_MAX_ANGLE_DIFF;
-        }
-        else if(name.compare("SAM_MAX_INTERCEPT_DIFF") == 0) {
-            in >> SAM_MAX_INTERCEPT_DIFF;
+        else if(name.compare("SAM_MAX_INTERCEPT_DIFF_TO_MERGE") == 0) {
+            in >> SAM_MAX_DISTANCE_TO_MERGE;
         }
         else if(name.compare("SAM_MIN_POINTS_TO_LINE_FINAL") == 0) {
             in >> SAM_MIN_POINTS_TO_LINE_FINAL;
@@ -382,8 +384,8 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tMIN_GOAL_WIDTH: " << MIN_GOAL_WIDTH << std::endl;
     debug << "\tTHROWOUT_SHORT_GOALS: " << THROWOUT_SHORT_GOALS << std::endl;
     debug << "\tMIN_GOAL_HEIGHT: " << MIN_GOAL_HEIGHT << std::endl;
-    debug << "\tGOAL_EDGE_RATIO: " << GOAL_EDGE_RATIO << std::endl;
-
+    debug << "\tGOAL_HEIGHT_TO_WIDTH_RATIO_LOW: " << GOAL_HEIGHT_TO_WIDTH_RATIO_LOW << std::endl;
+    debug << "\tGOAL_HEIGHT_TO_WIDTH_RATIO_HIGH: " << GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH << std::endl;
     debug << "\tTHROWOUT_ON_ABOVE_KIN_HOR_BEACONS: " << THROWOUT_ON_ABOVE_KIN_HOR_BEACONS << std::endl;
     debug << "\tTHROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS << std::endl;
     debug << "\tMAX_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS << std::endl;
@@ -438,15 +440,87 @@ void VisionConstants::loadFromFile(std::string filename)
     debug << "\tSAM_MIN_POINTS_OVER: " << SAM_MIN_POINTS_OVER << std::endl;
     debug << "\tSAM_MIN_POINTS_TO_LINE: " << SAM_MIN_POINTS_TO_LINE << std::endl;
     debug << "\tSAM_SPLIT_NOISE_ITERATIONS: " << SAM_SPLIT_NOISE_ITERATIONS << std::endl;
-    debug << "\tSAM_MAX_END_POINT_DIFF: " << SAM_MAX_END_POINT_DIFF << std::endl;
-    debug << "\tSAM_MAX_ANGLE_DIFF: " << SAM_MAX_ANGLE_DIFF << std::endl;
-    debug << "\tSAM_MAX_INTERCEPT_DIFF: " << SAM_MAX_INTERCEPT_DIFF << std::endl;
+    debug << "\tSAM_MAX_ANGLE_DIFF_TO_MERGE: " << SAM_MAX_ANGLE_DIFF_TO_MERGE << std::endl;
+    debug << "\tSAM_MAX_DISTANCE_TO_MERGE: " << SAM_MAX_DISTANCE_TO_MERGE << std::endl;
     debug << "\tSAM_MIN_POINTS_TO_LINE_FINAL: " << SAM_MIN_POINTS_TO_LINE_FINAL << std::endl;
     debug << "\tSAM_MIN_LINE_R2_FIT: " << SAM_MIN_LINE_R2_FIT << std::endl;
     debug << "\tSAM_MAX_LINE_MSD: " << SAM_MAX_LINE_MSD << std::endl;
     debug << "\tSAM_CLEAR_SMALL: " << SAM_CLEAR_SMALL << std::endl;
     debug << "\tSAM_CLEAR_DIRTY: " << SAM_CLEAR_DIRTY << std::endl;
 
+}
+
+void VisionConstants::setFlags(bool val)
+{
+    DO_RADIAL_CORRECTION = val;
+    THROWOUT_ON_ABOVE_KIN_HOR_GOALS = val;
+    THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS = val;
+    THROWOUT_DISTANT_GOALS = val;
+    THROWOUT_INSIGNIFICANT_GOALS = val;
+    THROWOUT_NARROW_GOALS = val;
+    THROWOUT_SHORT_GOALS = val;
+
+    THROWOUT_ON_ABOVE_KIN_HOR_BEACONS = val;
+    THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS = val;
+    THROWOUT_DISTANT_BEACONS = val;
+    THROWOUT_INSIGNIFICANT_BEACONS = val;
+
+    THROWOUT_ON_ABOVE_KIN_HOR_BALL = val;
+    THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = val;
+    THROWOUT_SMALL_BALLS = val;
+    THROWOUT_INSIGNIFICANT_BALLS = val;
+    THROWOUT_DISTANT_BALLS = val;
+
+    D2P_INCLUDE_BODY_PITCH = val;
+
+    SAM_CLEAR_SMALL = val;
+    SAM_CLEAR_DIRTY = val;
+
+}
+
+vector<Parameter> VisionConstants::getAllOptimisable()
+{
+    vector<Parameter> params;
+    //! Goal filtering constants
+    params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS", MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS, 1, 500));
+    params.push_back(Parameter("MIN_GOAL_WIDTH", MIN_GOAL_WIDTH, 0, 320));
+    params.push_back(Parameter("MIN_GOAL_HEIGHT", MIN_GOAL_HEIGHT, 0, 240));
+
+    params.push_back(Parameter("GOAL_HEIGHT_TO_WIDTH_RATIO_LOW", GOAL_HEIGHT_TO_WIDTH_RATIO_LOW, 0, 240));
+    params.push_back(Parameter("GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH", GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH, 0, 240));
+    //! Beacon filtering constants
+    params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS", MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS, 1, 500));
+    //! Ball filtering constants
+    params.push_back(Parameter("MIN_BALL_DIAMETER_PIXELS", MIN_BALL_DIAMETER_PIXELS, 1, 320));
+    params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL", MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL, 1, 500));
+    //! Field-object detection constants
+    params.push_back(Parameter("BALL_EDGE_THRESHOLD", BALL_EDGE_THRESHOLD, 0, 50));
+    params.push_back(Parameter("BALL_ORANGE_TOLERANCE", BALL_ORANGE_TOLERANCE, 0, 50));
+    params.push_back(Parameter("BALL_MIN_PERCENT_ORANGE", BALL_MIN_PERCENT_ORANGE, 0, 1));
+    params.push_back(Parameter("GOAL_MIN_PERCENT_YELLOW", GOAL_MIN_PERCENT_YELLOW, 0, 1));
+    params.push_back(Parameter("GOAL_MIN_PERCENT_BLUE", GOAL_MIN_PERCENT_BLUE, 0, 1));
+    params.push_back(Parameter("BEACON_MIN_PERCENT_YELLOW", BEACON_MIN_PERCENT_YELLOW, 0, 1));
+    params.push_back(Parameter("BEACON_MIN_PERCENT_BLUE", BEACON_MIN_PERCENT_BLUE, 0, 1));
+    params.push_back(Parameter("MIN_GOAL_SEPARATION", MIN_GOAL_SEPARATION, 0, 320));
+    //! Obstacle detection constants
+    params.push_back(Parameter("MIN_DISTANCE_FROM_HORIZON", MIN_DISTANCE_FROM_HORIZON, 0, 240));
+    params.push_back(Parameter("MIN_CONSECUTIVE_POINTS", MIN_CONSECUTIVE_POINTS, 0, 50));
+    //! ScanLine options
+    //params.push_back(Parameter(HORIZONTAL_SCANLINE_SPACING;
+    //params.push_back(Parameter(VERTICAL_SCANLINE_SPACING;
+    //params.push_back(Parameter(GREEN_HORIZON_SCAN_SPACING;
+    params.push_back(Parameter("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50));
+    params.push_back(Parameter("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20));
+    params.push_back(Parameter("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20));
+    //! Split and Merge constants
+    params.push_back(Parameter("SAM_SPLIT_DISTANCE", SAM_SPLIT_DISTANCE, 0, 320));
+    params.push_back(Parameter("SAM_MIN_POINTS_OVER", SAM_MIN_POINTS_OVER, 1, 500));
+    params.push_back(Parameter("SAM_MIN_POINTS_TO_LINE", SAM_MIN_POINTS_TO_LINE, 2, 50));
+    params.push_back(Parameter("SAM_MAX_ANGLE_DIFF_TO_MERGE", SAM_MAX_ANGLE_DIFF_TO_MERGE, 0, mathGeneral::PI*0.25));
+    params.push_back(Parameter("SAM_MAX_DISTANCE_TO_MERGE", SAM_MAX_DISTANCE_TO_MERGE, 0, 150));
+    params.push_back(Parameter("SAM_MIN_POINTS_TO_LINE_FINAL", SAM_MIN_POINTS_TO_LINE_FINAL, 2, 50));
+    params.push_back(Parameter("SAM_MIN_LINE_R2_FIT", SAM_MIN_LINE_R2_FIT, 0, 1));
+    params.push_back(Parameter("SAM_MAX_LINE_MSD", SAM_MAX_LINE_MSD, 0, 150));
 }
 
 VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)

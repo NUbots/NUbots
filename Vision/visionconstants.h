@@ -2,6 +2,7 @@
 #define VISIONCONSTANTS_H
 
 #include <string>
+#include "Tools/Optimisation/Parameter.h"
 
 class VisionConstants
 {
@@ -30,7 +31,8 @@ public:
     static int MIN_GOAL_WIDTH;          //! The minimum width of a goal.
     static bool THROWOUT_SHORT_GOALS;  //! Whether to throw out goals that are too short.
     static int MIN_GOAL_HEIGHT;          //! The minimum height of a goal.
-    static float GOAL_EDGE_RATIO;       //! Dave?
+    static float GOAL_HEIGHT_TO_WIDTH_RATIO_LOW;
+    static float GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH;
 
     //! Beacon filtering constants
     static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;  //! Whether to throw out beacons whose base is above the kinematics horizon.
@@ -101,9 +103,8 @@ public:
     //Noise splitting rules
     static unsigned int SAM_SPLIT_NOISE_ITERATIONS; //1
     //merging rules
-    static float SAM_MAX_END_POINT_DIFF; //5.0
-    static float SAM_MAX_ANGLE_DIFF; //
-    static float SAM_MAX_INTERCEPT_DIFF; //
+    static float SAM_MAX_ANGLE_DIFF_TO_MERGE; //
+    static float SAM_MAX_DISTANCE_TO_MERGE; //
     //Line keeping rules
     static unsigned int SAM_MIN_POINTS_TO_LINE_FINAL; //5
     static float SAM_MIN_LINE_R2_FIT; //0.90
@@ -118,6 +119,10 @@ public:
     static std::string getDistanceMethodName(DistanceMethod method);    //! Converts a distance method to a string name.
 
     static void loadFromFile(std::string filename); //! Loads the constants from a file
+
+    static void setFlags(bool val=true);
+
+    static vector<Parameter> getAllOptimisable();
     
 private:
     VisionConstants();  //so noone can make an object of this type

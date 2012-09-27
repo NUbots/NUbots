@@ -104,7 +104,7 @@ void VisionControlWrapper::printLabels(ostream& out) const
     data_wrapper->printLabels(out);
 }
 
-bool VisionControlWrapper::readLabels(istream& in, vector<VisionFieldObject*>& labels) const
+bool VisionControlWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const
 {
     return data_wrapper->readLabels(in, labels);
 }

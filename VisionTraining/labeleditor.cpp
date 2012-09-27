@@ -10,8 +10,8 @@ LabelEditor::LabelEditor(QWidget *parent) :
     ui(new Ui::LabelEditor)
 {
     ui->setupUi(this);
-    halted = false;
-    m_current_object = 0;
+    m_halted = m_image_updated = false;
+    m_current_object = m_frame_no = m_total_frames = 0;
     
     //generate interface
     int y=40;
@@ -41,6 +41,7 @@ LabelEditor::LabelEditor(QWidget *parent) :
     }
     
     QObject::connect(ui->exitPB, SIGNAL(clicked()), this, SLOT(halt()));
+    QObject::connect(ui->nextPB, SIGNAL(clicked()), this, SLOT(next()));
     QObject::connect(ui->addPB, SIGNAL(clicked()), this, SLOT(addObject()));
     QObject::connect(ui->removePB, SIGNAL(clicked()), this, SLOT(removeObject()));
     QObject::connect(ui->comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeObject(int)));
@@ -60,14 +61,25 @@ int LabelEditor::run(string dir)
     LookUpTable lut;
     lut.loadLUTFromFile(dir + string("default.lut"));
 
-    if(!vision->readLabels(label_file, m_ground_truth)) {
+    if(!vision->readLabels(label_file, m_ground_truth_full)) {
         QMessageBox::warning(this, "Failed read!", QString("Failed to read ") + QString(dir.c_str()) + QString("labels.strm"));
-        //return -1;  //code for failed label read
+        return -1;  //code for failed label read
     }
+    m_total_frames = m_ground_truth_full.size();
+    m_frame_no = 0;
 
-    while(!halted) {
+    updateCombo();
+    updateControls();
+    m_image_updated = true;
+
+    while(!m_halted && m_frame_no < m_total_frames) {
         QApplication::processEvents();
-        display(frame, lut);
+        while(!m_halted && !m_next) {
+            if(m_image_updated) {
+                display(frame, lut);
+                m_image_updated = false;
+            }
+        }
     }
     close();
     return 0;
@@ -81,6 +93,20 @@ void LabelEditor::display(const NUImage& frame, const LookUpTable& lut)
     lut.classifyImage(frame, classified);
 
     //display to actual frames
+    //clear old display
+    m_plain_scene.removeItem(m_plain_scene.items().first());
+    m_classified_scene.removeItem(m_classified_scene.items().first());
+
+    QImage q_plain((uchar*) plain.data, plain.cols, plain.rows, plain.step, QImage::Format_RGB888);
+    QImage q_classified((uchar*) classified.data, classified.cols, classified.rows, classified.step, QImage::Format_RGB888);
+
+    m_plain_pixmap.setPixmap(QPixmap::fromImage(q_plain));
+    m_classified_pixmap.setPixmap(QPixmap::fromImage(q_classified));
+    m_plain_scene.addItem(&m_plain_pixmap);
+    m_classified_scene.addItem(&m_classified_pixmap);
+
+    ui->imageView->setScene(&m_plain_scene);
+    ui->imageView_2->setScene(&m_classified_scene);
 }
 
 void LabelEditor::renderFrame(const NUImage& frame, cv::Mat& mat)
@@ -135,7 +161,9 @@ void LabelEditor::addObject()
 
         if(new_object != NULL) {
             m_ground_truth.push_back(new_object);
+            updateCombo();
             updateControls();
+            m_image_updated = true;
         }
         else {
             QMessageBox::warning(this, "Invalid object!", QString("Failed to add ") + new_object_name);
@@ -155,7 +183,9 @@ void LabelEditor::removeObject()
     else if(!m_ground_truth.empty()){
         QMessageBox::warning(this, "Internal Error!", "Out of bounds access in removeObject()");
     }
+    updateCombo();
     updateControls();
+    m_image_updated = true;
 }
 
 void LabelEditor::changeObject(int i)
@@ -163,18 +193,21 @@ void LabelEditor::changeObject(int i)
     if(i >= 0 && i<m_ground_truth.size()) {
         m_current_object = i;
         updateControls();
+        m_image_updated = true;
     }
 }
 
-void LabelEditor::updateControls()
-{
+void LabelEditor::updateCombo() {
     ui->comboBox->clear();
     for(unsigned int i=0; i<m_ground_truth.size(); i++) {
         cout << m_ground_truth.at(i)->getName() << endl;
         ui->comboBox->addItem(QString(m_ground_truth.at(i)->getName().c_str()));
     }
     ui->comboBox->setCurrentIndex(m_current_object);
+}
 
+void LabelEditor::updateControls()
+{
     if(!m_ground_truth.empty()) {
         VisionFieldObject* vfo = m_ground_truth.at(m_current_object);
         vector< pair<string, int> > vi;
@@ -288,5 +321,6 @@ void LabelEditor::updateValues()
             dynamic_cast<FieldLine*>(vfo)->m_rho = m_d_spins[0]->value();
             dynamic_cast<FieldLine*>(vfo)->m_phi = m_d_spins[1]->value();
         }
+        m_image_updated = true;
     }
 }

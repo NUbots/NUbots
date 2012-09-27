@@ -25,7 +25,7 @@ public:
     void writeBatchGroundTruth(ostream& out);
 
     void printLabels(ostream& out) const;
-    bool readLabels(istream& in, vector<VisionFieldObject*>& labels) const;
+    bool readLabels(istream& in, vector<vector<VisionFieldObject*> >& labels) const;
 
     float evaluateFrame();
 

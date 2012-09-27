@@ -13,12 +13,14 @@ HEADERS += \
     mainwindow.h \
     labelgenerator.h \
     ../Vision/VisionTypes/VisionFieldObjects/fieldline.h \
-    labeleditor.h
+    labeleditor.h \
+    visionoptimiser.h
 
 SOURCES += \
     mainwindow.cpp \
     labelgenerator.cpp \
-    labeleditor.cpp
+    labeleditor.cpp \
+    visionoptimiser.cpp
 
 HEADERS += \
     ../Vision/VisionTools/pccamera.h \
@@ -72,6 +74,10 @@ HEADERS += \
     ../Tools/Math/TransformMatrices.h \
     ../Tools/Math/Vector2.h \
     ../Tools/Math/Vector3.h \
+    ../Tools/Optimisation/Optimiser.h \
+    ../Tools/Optimisation/EHCLSOptimiser.h \
+    ../Tools/Optimisation/PGRLOptimiser.h \
+    ../Tools/Optimisation/PSOOptimiser.h \
     ../Infrastructure/NUImage/NUImage.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
@@ -97,6 +103,10 @@ SOURCES += \
     ../Tools/Math/LSFittedLine.cpp \
     ../Tools/Math/Matrix.cpp \
     ../Tools/Math/TransformMatrices.cpp \
+    ../Tools/Optimisation/Optimiser.cpp \
+    ../Tools/Optimisation/EHCLSOptimiser.cpp \
+    ../Tools/Optimisation/PGRLOptimiser.cpp \
+    ../Tools/Optimisation/PSOOptimiser.cpp \
     ../Infrastructure/NUImage/NUImage.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
@@ -117,4 +127,5 @@ SOURCES += \
 FORMS += \
     mainwindow.ui \
     labelgenerator.ui \
-    labeleditor.ui
+    labeleditor.ui \
+    visionoptimiser.ui

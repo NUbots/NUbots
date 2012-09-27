@@ -58,9 +58,8 @@ private:
     //Noise splitting rules
     unsigned int SPLIT_NOISE_ITERATIONS; //1
     //merging rules
-    double MAX_END_POINT_DIFF; //5.0
-    double MAX_ANGLE_DIFF;
-    double MAX_INTERCEPT_DIFF;
+    double MAX_ANGLE_DIFF_TO_MERGE;
+    double MAX_DISTANCE_TO_MERGE;
     //Line keeping rules
     unsigned int MIN_POINTS_TO_LINE_FINAL; //5
     double MIN_LINE_R2_FIT; //0.90

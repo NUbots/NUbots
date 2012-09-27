@@ -77,9 +77,8 @@ vector<LSFittedLine> SplitAndMerge::run(vector<LinePoint>& points, bool noise) {
     //Import parameters from constants file
     SPLIT_DISTANCE = VisionConstants::SAM_SPLIT_DISTANCE;
     MIN_POINTS_OVER = VisionConstants::SAM_MIN_POINTS_OVER;
-    MAX_END_POINT_DIFF = VisionConstants::SAM_MAX_END_POINT_DIFF;
-    MAX_ANGLE_DIFF = VisionConstants::SAM_MAX_ANGLE_DIFF;
-    MAX_INTERCEPT_DIFF = VisionConstants::SAM_MAX_INTERCEPT_DIFF;
+    MAX_ANGLE_DIFF_TO_MERGE = VisionConstants::SAM_MAX_ANGLE_DIFF_TO_MERGE;
+    MAX_DISTANCE_TO_MERGE = VisionConstants::SAM_MAX_DISTANCE_TO_MERGE;
     MIN_POINTS_TO_LINE = VisionConstants::SAM_MIN_POINTS_TO_LINE;
     MIN_POINTS_TO_LINE_FINAL = VisionConstants::SAM_MIN_POINTS_TO_LINE_FINAL;
     MIN_LINE_R2_FIT = VisionConstants::SAM_MIN_LINE_R2_FIT;
@@ -616,14 +615,19 @@ bool SplitAndMerge::shouldMergeLines(const LSFittedLine& line1, const LSFittedLi
 //    cout << "MAX_INTERCEPT_DIFF:" << MAX_INTERCEPT_DIFF << std::endl;
 //    cout << "MAX_LINE_MSD:" << MAX_LINE_MSD << std::endl;
 
-    if(line1.getAngleBetween(line2) > MAX_ANGLE_DIFF)
+    if(line1.getAngleBetween(line2) > MAX_ANGLE_DIFF_TO_MERGE)
         return false;
-    //check for x intercepts of nearly vertical lines
-    if(abs(line1.getAngle()) > mathGeneral::PI*0.25 && abs(line1.getXIntercept() - line2.getXIntercept()) > MAX_INTERCEPT_DIFF)
+
+    if(abs(line1.getRho() - line2.getRho()) > MAX_DISTANCE_TO_MERGE)
         return false;
-    //check for y intercepts of mostly horizontal lines
-    if(abs(line1.getAngle()) <= mathGeneral::PI*0.25 && abs(line1.getYIntercept() - line2.getYIntercept()) > MAX_INTERCEPT_DIFF)
-        return false;
+
+
+//    //check for x intercepts of nearly vertical lines
+//    if(abs(line1.getAngle()) > mathGeneral::PI*0.25 && abs(line1.getXIntercept() - line2.getXIntercept()) > MAX_INTERCEPT_DIFF)
+//        return false;
+//    //check for y intercepts of mostly horizontal lines
+//    if(abs(line1.getAngle()) <= mathGeneral::PI*0.25 && abs(line1.getYIntercept() - line2.getYIntercept()) > MAX_INTERCEPT_DIFF)
+//        return false;
 
     Vector2<double> r2andmsd = line1.combinedR2TLSandMSD(line2);
     //ensure the line won't just be thrown out later as dirty

@@ -28,6 +28,8 @@
 #include "debug.h"
 #include "nubotdataconfig.h"
 
+#include <cstdlib>
+
 /*! @brief Constructor for abstract optimiser
  	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
  	@param parameters the initial seed for the optimisation

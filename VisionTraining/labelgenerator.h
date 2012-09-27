@@ -21,7 +21,7 @@ public:
     bool run(const string& dir);
     
 private slots:
-    void setCancelled() {cancelled = true;}
+    void cancel() {cancelled = true;}
 
 private:
     Ui::LabelGenerator *ui;

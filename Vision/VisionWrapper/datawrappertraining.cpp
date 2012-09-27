@@ -328,12 +328,19 @@ void DataWrapper::printLabels(ostream& out) const
     }
 }
 
-bool DataWrapper::readLabels(istream& in, vector<VisionFieldObject*>& labels) const
+bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const
 {
     VisionFieldObject* next;
+    vector<VisionFieldObject*> next_vec;
+    int n;
     while(in.good()) {
-        in >> next;
-        labels.push_back(next);
+        in >> n;
+        next_vec.clear();
+        for(int i=0; i<n; i++) {
+            in >> next;
+            next_vec.push_back(next);
+        }
+        labels.push_back(next_vec);
     }
     return labels.size() > 0;
 }

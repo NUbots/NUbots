@@ -164,8 +164,6 @@ void GoalDetection::detectGoals()
         it++;
     }
 
-    int MIN_GOAL_SEP = 20;
-
     if (yellow_posts.size() > 2) {
         yellow_posts.clear();
     }
@@ -176,7 +174,7 @@ void GoalDetection::detectGoals()
 
             int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);      // inside right
             int pos2 = std::max(post1.getBottomLeft().x, post2.getBottomLeft().x);  // inside left
-            if (std::abs(pos2 - pos1) < MIN_GOAL_SEP)
+            if (std::abs(pos2 - pos1) < VisionConstants::MIN_GOAL_SEPARATION)
                 yellow_posts.clear();
         }
     }
@@ -191,7 +189,7 @@ void GoalDetection::detectGoals()
 
             int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);      // inside right
             int pos2 = std::max(post1.getBottomLeft().x, post2.getBottomLeft().x);  // inside left
-            if (std::abs(pos2 - pos1) < MIN_GOAL_SEP)
+            if (std::abs(pos2 - pos1) < VisionConstants::MIN_GOAL_SEPARATION)
                 blue_posts.clear();
         }
     }
@@ -348,8 +346,6 @@ void GoalDetection::DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, 
 
 void GoalDetection::ratioCheck(vector<Quad>* posts)
 {
-    const int   HEIGHT_TO_WIDTH_RATIO_LOW = 3,
-                HEIGHT_TO_WIDTH_RATIO_HIGH = 15;
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
         Quad candidate = *it;
@@ -359,7 +355,7 @@ void GoalDetection::ratioCheck(vector<Quad>* posts)
 //            width = candidate.val[2] - candidate.val[0];
         if (width == 0)
             it = posts->erase(it);
-        else if (height/width < HEIGHT_TO_WIDTH_RATIO_LOW || height/width > HEIGHT_TO_WIDTH_RATIO_HIGH)
+        else if (height/width < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_LOW || height/width > VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH)
             it = posts->erase(it);
         else
             it++;
@@ -368,11 +364,9 @@ void GoalDetection::ratioCheck(vector<Quad>* posts)
 
 void GoalDetection::widthCheck(vector<Quad>* posts)
 {
-    const int WIDTH_MIN = 2;
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
-        Quad candidate = *it;
-        if (candidate.getWidth() < WIDTH_MIN)
+        if (it->getWidth() < VisionConstants::MIN_GOAL_WIDTH)
             it = posts->erase(it);
         else
             it++;

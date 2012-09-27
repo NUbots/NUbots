@@ -104,7 +104,7 @@ private:
     void resetStream();
     
     void printLabels(ostream& out) const;
-    bool readLabels(istream& in, vector<VisionFieldObject*>& labels) const;
+    bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
     
     
 
