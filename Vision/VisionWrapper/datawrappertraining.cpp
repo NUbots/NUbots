@@ -378,3 +378,25 @@ bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& 
     }
     return labels.size() > 0;
 }
+
+bool DataWrapper::readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const
+{
+    pair<VisionFieldObject::VFO_ID, Vector2<double> > next;
+    vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > next_vec;
+    int n;
+    while(in.good()) {
+        in >> n;
+        next_vec.clear();
+        for(int i=0; i<n; i++) {
+            string name;
+            VisionFieldObject::VFO_ID id;
+            in >> name >> next.second;
+            next.first = VisionFieldObject::getVFOFromName(name);
+            next_vec.push_back(next);
+        }
+        labels.push_back(next_vec);
+        in.ignore(2,'\n');
+        in.peek();
+    }
+    return labels.size() > 0;
+}

@@ -23,19 +23,19 @@ class VisionFieldObject
 public:
     //! VFO_ID enum and associated string conversion methods
     enum VFO_ID {
-        BALL,
-        GOAL_Y_L,
-        GOAL_Y_R,
-        GOAL_Y_U,
-        GOAL_B_L,
-        GOAL_B_R,
-        GOAL_B_U,
-        BEACON_Y,
-        BEACON_B,
-        BEACON_U,
-        FIELDLINE,
-        OBSTACLE,
-        INVALID
+        BALL = 0,
+        GOAL_Y_L=1,
+        GOAL_Y_R=2,
+        GOAL_Y_U=3,
+        GOAL_B_L=4,
+        GOAL_B_R=5,
+        GOAL_B_U=6,
+        BEACON_Y=7,
+        BEACON_B=8,
+        BEACON_U=9,
+        FIELDLINE=10,
+        OBSTACLE=11,
+        INVALID=12
     };
     
     enum COLOUR_CLASS {

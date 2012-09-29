@@ -105,8 +105,7 @@ private:
     
     void printLabels(ostream& out) const;
     bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
-    
-    
+    bool readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const;
 
 private:
     static DataWrapper* instance;

@@ -25,6 +25,7 @@ LabelEditor::LabelEditor(QWidget *parent) :
         slider->setGeometry(80, y, 160, 20);
         slider->setOrientation(Qt::Horizontal);
         dspin->setGeometry(80, y, 80, 20);
+        dspin->setDecimals(3);
         ispin->setGeometry(250, y, 50, 20);
         label->hide();
         slider->hide();
@@ -43,8 +44,8 @@ LabelEditor::LabelEditor(QWidget *parent) :
     }
 
     //hack
-    m_d_spins.at(0)->setSingleStep(5);
-    m_d_spins.at(1)->setSingleStep(0.05);
+    m_d_spins.at(0)->setSingleStep(1);
+    m_d_spins.at(1)->setSingleStep(0.01);
     
     QObject::connect(ui->exitPB, SIGNAL(clicked()), this, SLOT(halt()));
     QObject::connect(ui->nextPB, SIGNAL(clicked()), this, SLOT(next()));
@@ -64,6 +65,7 @@ int LabelEditor::run(string dir)
     NUImage frame;
     ifstream label_file((dir + string("labels.strm")).c_str()),
             image_file((dir + string("image.strm")).c_str());
+    ofstream label_out((dir + string("opt_labels.strm")).c_str());
     LookUpTable lut;
     lut.loadLUTFromFile(dir + string("default.lut"));
 
@@ -73,11 +75,12 @@ int LabelEditor::run(string dir)
     }
     m_total_frames = m_ground_truth_full.size();
     m_frame_no = 0;
-    m_image_updated = true;
 
     while(!m_halted && m_frame_no < m_total_frames) {
         m_next = false;
+        m_image_updated = true;
         m_ground_truth = m_ground_truth_full.at(m_frame_no);
+        m_current_object = 0;
         updateCombo();
         updateControls();
         image_file >> frame;
@@ -90,9 +93,20 @@ int LabelEditor::run(string dir)
         }
 
         //write out
-
+        if(!m_halted) {
+            label_out << m_ground_truth.size() << endl;
+            for(unsigned int i=0; i<m_ground_truth.size(); i++) {
+                m_ground_truth.at(i)->printLabel(label_out);
+                label_out << endl;
+            }
+        }
         m_frame_no++;
     }
+    if(!m_halted)
+        QMessageBox::information(this, "Finished", "End of Stream reached, exitting label editor");
+    label_file.close();
+    label_out.close();
+
     close();
     return 0;
 }
@@ -161,16 +175,16 @@ void LabelEditor::addObject()
     if(ok) {
         new_id = VisionFieldObject::getVFOFromName(new_object_name.toStdString());
         if(VisionFieldObject::isGoal(new_id)) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Goal(new_id, Quad(50,50,50,50)));
+            new_object = dynamic_cast<VisionFieldObject*>(new Goal(new_id, Quad(150,150,165,200)));
         }
         else if(VisionFieldObject::isBeacon(new_id)) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Beacon(new_id, Quad(50,50,20,50)));
+            new_object = dynamic_cast<VisionFieldObject*>(new Beacon(new_id, Quad(150,150,165,200)));
         }
         else if(new_id == VisionFieldObject::BALL) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Ball(PointType(50,50), 20));
+            new_object = dynamic_cast<VisionFieldObject*>(new Ball(PointType(150,150), 15));
         }
         else if(new_id == VisionFieldObject::OBSTACLE) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Obstacle(PointType(50,50), 20, 30));
+            new_object = dynamic_cast<VisionFieldObject*>(new Obstacle(PointType(150,150), 15, 30));
         }
         else if(new_id == VisionFieldObject::FIELDLINE) {
             new_object = dynamic_cast<VisionFieldObject*>(new FieldLine(150, 0));
@@ -178,6 +192,7 @@ void LabelEditor::addObject()
 
         if(new_object != NULL) {
             m_ground_truth.push_back(new_object);
+            m_current_object = m_ground_truth.size()-1;
             updateCombo();
             updateControls();
             m_image_updated = true;
@@ -215,11 +230,13 @@ void LabelEditor::changeObject(int i)
 }
 
 void LabelEditor::updateCombo() {
+    int cur = m_current_object;
     ui->comboBox->clear();
     for(unsigned int i=0; i<m_ground_truth.size(); i++) {
         cout << m_ground_truth.at(i)->getName() << endl;
         ui->comboBox->addItem(QString(m_ground_truth.at(i)->getName().c_str()));
     }
+    m_current_object = cur;
     ui->comboBox->setCurrentIndex(m_current_object);
 }
 
@@ -249,10 +266,10 @@ void LabelEditor::updateControls()
         }
         else if(id==VisionFieldObject::BALL) {
             pi.first = "x";
-            pi.second = Vector3<int>(vfo->getLocationPixels().x, 0, 319);
+            pi.second = Vector3<int>(vfo->getLocationPixels().x, -50, 450);
             vi.push_back(pi);
             pi.first = "y";
-            pi.second = Vector3<int>(vfo->getLocationPixels().y, 0, 239);
+            pi.second = Vector3<int>(vfo->getLocationPixels().y, -50, 300);
             vi.push_back(pi);
             pi.first = "diameter";
             pi.second = Vector3<int>(dynamic_cast<Ball*>(vfo)->m_diameter, 1, 320);

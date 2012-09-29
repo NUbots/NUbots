@@ -276,17 +276,19 @@ float Beacon::distanceToBeacon(float bearing, float elevation) {
 
 void Beacon::render(cv::Mat &mat) const
 {
+    cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
     switch(m_id) {
     case BEACON_Y:
-        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(0, 255, 255));
+        cv::rectangle(mat, r, cv::Scalar(0, 255, 255));
         break;
     case BEACON_B:
-        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(255, 0, 0));
+        cv::rectangle(mat, r, cv::Scalar(255, 0, 0));
         break;
     case BEACON_U:
-        cv::rectangle(mat, cv::Rect(m_location_pixels.x, m_location_pixels.y, m_size_on_screen.x, m_size_on_screen.y), cv::Scalar(255, 255, 255));
+        cv::rectangle(mat, r, cv::Scalar(255, 255, 255));
         break;
     }
+
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.

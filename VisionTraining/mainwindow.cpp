@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <string>
 #include <QFileDialog>
+#include <QInputDialog>
 #include "labeleditor.h"
 #include "labelgenerator.h"
 
@@ -57,5 +58,5 @@ void MainWindow::viewStream()
 
 void MainWindow::runOptimiser()
 {
-    
+    QInputDialog::getItem()
 }

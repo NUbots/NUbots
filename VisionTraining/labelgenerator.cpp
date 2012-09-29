@@ -24,7 +24,7 @@ bool LabelGenerator::run(const string &dir)
         cur_image=0;
     NUImage temp;
     ifstream infile((dir + string("image.strm")).c_str());
-    ofstream outfile((dir + string("labels.strm")).c_str());
+    ofstream outfile((dir + string("auto_labels.strm")).c_str());
 
     cancelled = false;
     while(!cancelled && infile.good()) {

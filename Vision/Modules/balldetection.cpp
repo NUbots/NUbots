@@ -271,7 +271,7 @@ void BallDetection::detectBall()
             //cout << "PERCENT ORANGE: " << float(count)/((min*2)*(min*2)) << endl;
 
             if (float(count)/((min*2)*(min*2)) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
-                Ball newball(center, max((right-left), (bottom-top))*0.5);                
+                Ball newball(center, max((right-left), (bottom-top)));
                 vbb->addBall(newball);                
             }
             else {

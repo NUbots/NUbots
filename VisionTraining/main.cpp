@@ -17,12 +17,16 @@ vector<double> checkSensorStream(string name);
 
 int main()
 {
+//    ifstream in("/home/shannon/Images/FYP/Final100/opt_labels.strm");
+//    vector<vector<VisionFieldObject*> > labels;
+//    VisionControlWrapper* vision = VisionControlWrapper::getInstance();
+//    vision->readLabels(in, labels);
+//    cout << labels.size() << endl;
+
     QApplication app(NULL);
     MainWindow mw;
     mw.show();
     return app.exec();
-    //return runDave();
-    //return runDefault();
 }
 
 

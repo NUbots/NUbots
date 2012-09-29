@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QProgressBar" name="progressBar">
+   <widget class="QProgressBar" name="progressBar_opt">
     <property name="geometry">
      <rect>
       <x>100</x>
@@ -27,7 +27,7 @@
      <number>24</number>
     </property>
    </widget>
-   <widget class="QProgressBar" name="progressBar_2">
+   <widget class="QProgressBar" name="progressBar_strm">
     <property name="geometry">
      <rect>
       <x>100</x>

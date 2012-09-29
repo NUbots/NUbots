@@ -22,15 +22,17 @@ public:
     //batch outputs
     void writeBatchDetections(ostream& out);
     void writeBatchResults(ostream& out);
-    void writeBatchGroundTruth(ostream& out);
 
     void printLabels(ostream& out) const;
-    bool readLabels(istream& in, vector<vector<VisionFieldObject*> >& labels) const;
+    bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
+    bool readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const;
 
-    float evaluateFrame();
+    map<VisionFieldObject::VFO_ID, float> evaluateFrame(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth, float false_pos_cost, float false_neg_cost);
 
 private:
     VisionControlWrapper();
+
+    bool objectTypesMatch(VisionFieldObject::VFO_ID id0, VisionFieldObject::VFO_ID id1) const;
 
     static VisionControlWrapper* instance;
 

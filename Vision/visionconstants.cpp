@@ -505,10 +505,6 @@ vector<Parameter> VisionConstants::getAllOptimisable()
     //! Obstacle detection constants
     params.push_back(Parameter("MIN_DISTANCE_FROM_HORIZON", MIN_DISTANCE_FROM_HORIZON, 0, 240));
     params.push_back(Parameter("MIN_CONSECUTIVE_POINTS", MIN_CONSECUTIVE_POINTS, 0, 50));
-    //! ScanLine options
-    //params.push_back(Parameter(HORIZONTAL_SCANLINE_SPACING;
-    //params.push_back(Parameter(VERTICAL_SCANLINE_SPACING;
-    //params.push_back(Parameter(GREEN_HORIZON_SCAN_SPACING;
     params.push_back(Parameter("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50));
     params.push_back(Parameter("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20));
     params.push_back(Parameter("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20));
@@ -521,6 +517,48 @@ vector<Parameter> VisionConstants::getAllOptimisable()
     params.push_back(Parameter("SAM_MIN_POINTS_TO_LINE_FINAL", SAM_MIN_POINTS_TO_LINE_FINAL, 2, 50));
     params.push_back(Parameter("SAM_MIN_LINE_R2_FIT", SAM_MIN_LINE_R2_FIT, 0, 1));
     params.push_back(Parameter("SAM_MAX_LINE_MSD", SAM_MAX_LINE_MSD, 0, 150));
+    //! ScanLine options
+    //params.push_back(Parameter(HORIZONTAL_SCANLINE_SPACING;
+    //params.push_back(Parameter(VERTICAL_SCANLINE_SPACING;
+    //params.push_back(Parameter(GREEN_HORIZON_SCAN_SPACING;
+}
+
+bool VisionConstants::setAllOptimisable(const vector<float>& params)
+{
+    if(params.size() != 29)
+        return false; //not a valid size
+    MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS = params.at(0);
+    MIN_GOAL_WIDTH = params.at(1);
+    MIN_GOAL_HEIGHT = params.at(2);
+    GOAL_HEIGHT_TO_WIDTH_RATIO_LOW = params.at(3);
+    GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH = params.at(4);
+    MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS = params.at(5);
+    MIN_BALL_DIAMETER_PIXELS = params.at(6);
+    MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL = params.at(7);
+    BALL_EDGE_THRESHOLD = params.at(8);
+    BALL_ORANGE_TOLERANCE = params.at(9);
+    BALL_MIN_PERCENT_ORANGE = params.at(10);
+    GOAL_MIN_PERCENT_YELLOW = params.at(11);
+    GOAL_MIN_PERCENT_BLUE = params.at(12);
+    BEACON_MIN_PERCENT_YELLOW = params.at(13);
+    BEACON_MIN_PERCENT_BLUE = params.at(14);
+    MIN_GOAL_SEPARATION = params.at(15);
+    MIN_DISTANCE_FROM_HORIZON = params.at(16);
+    MIN_CONSECUTIVE_POINTS = params.at(17);
+    GREEN_HORIZON_MIN_GREEN_PIXELS = params.at(18);
+    GREEN_HORIZON_LOWER_THRESHOLD_MULT = params.at(19);
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(20);
+    SAM_SPLIT_DISTANCE = params.at(21);
+    SAM_MIN_POINTS_OVER = params.at(22);
+    SAM_MIN_POINTS_TO_LINE = params.at(23);
+    SAM_MAX_ANGLE_DIFF_TO_MERGE = params.at(24);
+    SAM_MAX_DISTANCE_TO_MERGE = params.at(25);
+    SAM_MIN_POINTS_TO_LINE_FINAL = params.at(26);
+    SAM_MIN_LINE_R2_FIT = params.at(27);
+    SAM_MAX_LINE_MSD = params.at(28);
+    //HORIZONTAL_SCANLINE_SPACING;
+    //VERTICAL_SCANLINE_SPACING;
+    //GREEN_HORIZON_SCAN_SPACING;
 }
 
 VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)

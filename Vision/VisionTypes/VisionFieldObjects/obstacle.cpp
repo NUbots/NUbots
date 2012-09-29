@@ -150,9 +150,9 @@ float Obstacle::distanceToObstacle(float bearing, float elevation) {
 void Obstacle::render(cv::Mat &mat) const
 {
     Vector2<int> half = m_size_on_screen/2;
-    cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y-half.x), cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y+half.x), cv::Scalar(255, 255, 0));
-    cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y+half.x), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y+half.x), cv::Scalar(255, 255, 0));
-    cv::line(mat, cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y+half.x), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y-half.x), cv::Scalar(255, 255, 0));
+    cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y-m_size_on_screen.y), cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y), cv::Scalar(255, 255, 0));
+    cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y), cv::Scalar(255, 255, 0));
+    cv::line(mat, cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y-m_size_on_screen.y), cv::Scalar(255, 255, 0));
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.

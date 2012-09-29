@@ -74,8 +74,8 @@ bool Line::setLine(double rho, double phi)
 {
     m_rho = rho;
     m_phi = phi;
-    m_A = sin(phi);
-    m_B = cos(phi);
+    m_A = cos(phi);
+    m_B = sin(phi);
     m_C = rho;
     m_normaliser = sqrt(m_A*m_A + m_B*m_B);
     return true; // lines in this form are always valid.

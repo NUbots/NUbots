@@ -123,6 +123,7 @@ public:
     static void setFlags(bool val=true);
 
     static vector<Parameter> getAllOptimisable();
+    static bool setAllOptimisable(const vector<float>& params);
     
 private:
     VisionConstants();  //so noone can make an object of this type
