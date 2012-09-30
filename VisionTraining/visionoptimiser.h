@@ -28,6 +28,7 @@ public:
     void run(string directory, int total_iterations);
 private:
     int runOptimisationStep(int iteration, bool individual = false);
+    void setupVisionConstants();
 
 private slots:
     void halt() {m_halted = true;}

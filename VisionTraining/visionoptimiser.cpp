@@ -73,6 +73,9 @@ void VisionOptimiser::run(string directory, int total_iterations)
     vision->setImageStream(directory+string("image.strm"));
     vision->setLUT(directory+string("default.lut"));
 
+    //set the options we need
+    setupVisionConstants();
+
     while(iteration < total_iterations && !m_halted && err_code == 0) {
         //update gui
         ui->progressBar_opt->setValue(iteration);
@@ -155,4 +158,36 @@ int VisionOptimiser::runOptimisationStep(int iteration, bool individual)
     }
 
     return vision_code;
+}
+
+void VisionOptimiser::setupVisionConstants()
+{
+    VisionConstants::DO_RADIAL_CORRECTION = false;
+    //! Goal filtering constants
+    VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS = false;
+    VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS = false;
+    VisionConstants::THROWOUT_DISTANT_GOALS = false;
+    VisionConstants::THROWOUT_INSIGNIFICANT_GOALS = true;
+    VisionConstants::THROWOUT_NARROW_GOALS = true;
+    VisionConstants::THROWOUT_SHORT_GOALS = true;
+    //! Beacon filtering constants
+    VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS = false;
+    VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS = false;
+    VisionConstants::THROWOUT_DISTANT_BEACONS = false;
+    VisionConstants::THROWOUT_INSIGNIFICANT_BEACONS = true;
+    //! Ball filtering constants
+    VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL = false;
+    VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = false;
+    VisionConstants::THROWOUT_SMALL_BALLS = true;
+    VisionConstants::THROWOUT_INSIGNIFICANT_BALLS = true;
+    VisionConstants::THROWOUT_DISTANT_BALLS = false;
+    //! ScanLine options
+    VisionConstants::HORIZONTAL_SCANLINE_SPACING = 3;
+    VisionConstants::VERTICAL_SCANLINE_SPACING = 3;
+    VisionConstants::GREEN_HORIZON_SCAN_SPACING = 6;
+    //! Split and Merge constants
+    VisionConstants::SAM_MAX_POINTS = 1000;
+    VisionConstants::SAM_MAX_LINES = 25;
+    VisionConstants::SAM_CLEAR_SMALL = true;
+    VisionConstants::SAM_CLEAR_DIRTY = true;
 }
