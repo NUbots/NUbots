@@ -225,12 +225,16 @@ bool DataWrapper::updateFrame()
     if(imagestrm.is_open() && imagestrm.good()) {
         imagestrm >> *m_current_image;
         image_good = true;
-        debug << "DataWrapper::updateFrame - failed to load image stream: " << image_stream_name << endl;
     }
-    if(sensorstrm.is_open() && sensorstrm.good()) {
-        sensorstrm >> *m_sensor_data;
-        debug << "DataWrapper::updateFrame - failed to load sensor stream: " << sensor_stream_name << endl;
+    else {
+        debug << "DataWrapper::updateFrame - failed to read image stream: " << image_stream_name << endl;
     }
+//    if(sensorstrm.is_open() && sensorstrm.good()) {
+//        sensorstrm >> *m_sensor_data;
+//    }
+//    else {
+//        debug << "DataWrapper::updateFrame - failed to read sensor stream: " << sensor_stream_name << endl;
+//    }
     return image_good;
 }
 

@@ -90,6 +90,29 @@ VisionFieldObject::VFO_ID VisionFieldObject::getVFOFromNum(int n) {
     }
 }
 
+int VisionFieldObject::getVFONum(VFO_ID id) {
+    switch(id) {
+    case BALL:          return 0;
+    case GOAL_Y_L:      return 1;
+    case GOAL_Y_R:      return 2;
+    case GOAL_Y_U:      return 3;
+    case GOAL_B_L:      return 4;
+    case GOAL_B_R:      return 5;
+    case GOAL_B_U:      return 6;
+    case BEACON_Y:      return 7;
+    case BEACON_B:      return 8;
+    case BEACON_U:      return 9;
+    case FIELDLINE:     return 10;
+    case OBSTACLE:      return 11;
+    case INVALID:       return -1;
+    }
+}
+
+bool operator <(VisionFieldObject::VFO_ID id0, VisionFieldObject::VFO_ID id1)
+{
+    return VisionFieldObject::getVFONum(id0) < VisionFieldObject::getVFONum(id1);
+}
+
 string VisionFieldObject::getColourClassName(COLOUR_CLASS id)
 {
     switch(id) {

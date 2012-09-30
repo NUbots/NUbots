@@ -157,8 +157,7 @@ map<VisionFieldObject::VFO_ID, float> VisionControlWrapper::evaluateFrame(const 
         }
     }
 
-    //ball - simple
-
+    return errors;
 }
 
 bool VisionControlWrapper::objectTypesMatch(VisionFieldObject::VFO_ID id0, VisionFieldObject::VFO_ID id1) const

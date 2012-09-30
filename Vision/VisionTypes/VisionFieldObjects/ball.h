@@ -31,6 +31,8 @@ public:
     
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << getVFOName(BALL) << " " << m_location_pixels << " " << m_diameter;}
+    //! @brief Brief stream output for labelling purposes
+    void printLabelBrief(ostream& out) const {out << getVFOName(BALL) << " " << m_location_pixels;}
 
     void render(cv::Mat& mat) const;
     

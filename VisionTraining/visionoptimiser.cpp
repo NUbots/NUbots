@@ -54,8 +54,9 @@ void VisionOptimiser::run(string directory, int total_iterations)
     ifstream label_file((directory + string("opt_labels.strm")).c_str());
 
     //set up logs
-    m_progress_log.open((directory + m_optimiser->getName() + string("_progress.log")).c_str()),
-    m_performance_log.open((directory + m_optimiser->getName() + string("_performance.log")).c_str()),
+    m_progress_log.open((directory + m_optimiser->getName() + string("_progress.log")).c_str());
+    m_performance_log.open((directory + m_optimiser->getName() + string("_performance.log")).c_str());
+    m_performance_log.setf(ios_base::fixed);
     m_optimiser_log.open((directory + m_optimiser->getName() + string(".log")).c_str());
 
     if(!vision->readLabels(label_file, m_ground_truth_full)) {
@@ -80,6 +81,8 @@ void VisionOptimiser::run(string directory, int total_iterations)
         //run batch
         err_code = runOptimisationStep(iteration);
 
+        vision->restartStream();
+
         iteration++;
     }
     if(!m_halted && err_code==0) {
@@ -103,7 +106,7 @@ int VisionOptimiser::runOptimisationStep(int iteration, bool individual)
           frame_error,
           batch_error = 0,
           fitness;
-    unsigned int frame_no = 0;
+    unsigned int frame_no = 1;
     int vision_code;
 
     //get new params
@@ -120,7 +123,7 @@ int VisionOptimiser::runOptimisationStep(int iteration, bool individual)
         //get errors
         map<VisionFieldObject::VFO_ID, float> frame_errors = vision->evaluateFrame(m_ground_truth_full[frame_no], FALSE_POS_COST, FALSE_NEG_COST);
         for(int i=0; i<VisionFieldObject::INVALID; i++) {
-            frame_error += frame_errors[VisionFieldObject::getVFOFromNum(i)];
+            frame_error += frame_errors.at(VisionFieldObject::getVFOFromNum(i));
         }
         batch_error += frame_error;
 

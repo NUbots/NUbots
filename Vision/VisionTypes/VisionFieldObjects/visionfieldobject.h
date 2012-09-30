@@ -50,8 +50,10 @@ public:
     static string getVFOName(VFO_ID id);
     //! @brief converts a string into a VisionFieldObject Id.
     static VFO_ID getVFOFromName(const string& name);
-    //! @brief returns the first VisionFieldObject Id.
+    //! @brief converts an int into a VisionFieldObject Id.
     static VFO_ID getVFOFromNum(int n);
+    //! @brief converts a VisionFieldObject Id into an int.
+    static int getVFONum(VFO_ID id);
     
     //! @brief converts a colour class into a string.
     static string getColourClassName(COLOUR_CLASS id);
@@ -89,7 +91,9 @@ public:
     
     //! @brief Stream output for labelling purposes
     virtual void printLabel(ostream& out) const = 0;
-    
+    //! @brief Brief stream output for labelling purposes
+    virtual void printLabelBrief(ostream& out) const = 0;
+
     //! @brief Calculation of error for optimisation
     virtual double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location_pixels.x - measured.x,2) + pow(m_location_pixels.y - measured.y,2));}
     
@@ -110,5 +114,9 @@ protected:
     bool valid;                             //! @variable Whether the object is valid.
     bool distance_valid;                    //! @variable Whether the distance is valid.
 };
+
+
+//! @brief Less than operator for VisionFieldObject IDs.
+bool operator< (VisionFieldObject::VFO_ID id0, VisionFieldObject::VFO_ID id1);
 
 #endif // VISIONFIELDOBJECT_H
