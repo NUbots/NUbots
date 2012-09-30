@@ -11,6 +11,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 
+void splitSamples();
 void convertLabels();
 int runDave();
 int runDefault();
@@ -23,6 +24,43 @@ int main()
     MainWindow mw;
     mw.show();
     return app.exec();
+}
+
+void splitSamples()
+{
+    ifstream in_labels("/home/shannon/Images/FYP/Final100/opt_labels.strm");
+    ifstream in_image("/home/shannon/Images/FYP/Final100/image.strm");
+    ofstream test_labels("/home/shannon/Images/FYP/Final100/test_labels.strm");
+    ofstream test_image("/home/shannon/Images/FYP/Final100/test_image.strm");
+    ofstream train_labels("/home/shannon/Images/FYP/Final100/train_labels.strm");
+    ofstream train_image("/home/shannon/Images/FYP/Final100/train_image.strm");
+    vector<vector<pair<VisionFieldObject::VFO_ID,Vector2<double> > > > labels;
+    VisionControlWrapper::getInstance()->readLabels(in_labels, labels);
+
+    for(int i=0; i<labels.size() && in_image.good(); i++) {
+        NUImage img;
+        in_image >> img;
+        if(i%2==0) {
+            test_image << img;
+            test_labels << labels[i].size() << endl;
+            for(int k=0; k<labels[i].size(); k++) {
+                test_labels << VisionFieldObject::getVFOName(labels[i][k].first) << " " << labels[i][k].second << endl;
+            }
+        }
+        else {
+            train_image << img;
+            train_labels << labels[i].size() << endl;
+            for(int k=0; k<labels[i].size(); k++) {
+                train_labels << VisionFieldObject::getVFOName(labels[i][k].first) << " " << labels[i][k].second << endl;
+            }
+        }
+    }
+    in_labels.close();
+    in_image.close();
+    test_labels.close();
+    test_image.close();
+    train_labels.close();
+    train_image.close();
 }
 
 void convertLabels()

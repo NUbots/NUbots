@@ -27,7 +27,8 @@ public:
 
     void run(string directory, int total_iterations);
 private:
-    int runOptimisationStep(int iteration, bool individual = false);
+    int runTrainingStep(int iteration, bool individual = false);
+    int runEvaluationStep(int iteration, bool individual = false);
     void setupVisionConstants();
 
 private slots:
@@ -37,12 +38,16 @@ private:
     Ui::VisionOptimiser *ui;
     Optimiser* m_optimiser;
     VisionControlWrapper* vision;
-    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_full;
+    string m_train_image_name,
+            m_test_image_name;
+    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_training;
+    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_test;
     bool m_halted;
     //! LOGS
     ofstream m_progress_log,
-             m_performance_log,
-             m_optimiser_log;
+             m_optimiser_log,
+             m_training_performance_log,
+             m_test_performance_log;
 };
 
 #endif // VISIONOPTIMISER_H
