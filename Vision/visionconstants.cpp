@@ -521,6 +521,8 @@ vector<Parameter> VisionConstants::getAllOptimisable()
     //params.push_back(Parameter(HORIZONTAL_SCANLINE_SPACING;
     //params.push_back(Parameter(VERTICAL_SCANLINE_SPACING;
     //params.push_back(Parameter(GREEN_HORIZON_SCAN_SPACING;
+
+    return params;
 }
 
 bool VisionConstants::setAllOptimisable(const vector<float>& params)

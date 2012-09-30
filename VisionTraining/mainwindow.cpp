@@ -5,6 +5,7 @@
 #include <QInputDialog>
 #include "labeleditor.h"
 #include "labelgenerator.h"
+#include "visionoptimiser.h"
 
 using namespace std;
 
@@ -39,14 +40,14 @@ void MainWindow::getDirectory()
 
 void MainWindow::generateLabels()
 {
-    LabelGenerator lg;
+    LabelGenerator lg(this);
     lg.show();
     lg.run(ui->dirEdit->text().toStdString());    
 }
 
 void MainWindow::modifyLabels()
 {
-    LabelEditor le;
+    LabelEditor le(this);
     le.show();
     le.run(ui->dirEdit->text().toStdString());
 }
@@ -58,5 +59,19 @@ void MainWindow::viewStream()
 
 void MainWindow::runOptimiser()
 {
-    QInputDialog::getItem()
+    bool ok;
+    QStringList l;
+    l.append("PSO");
+    l.append("PGRL");
+    l.append("EHCLS");
+    QString s = QInputDialog::getItem(this, "Select Optimiser", "Select the preferred optimiser", l, 0, false, &ok);
+    if(ok) {
+        int iterations = QInputDialog::getInt(this, "Iterations", "Select the number of optimiser iterations.", 100, 1, 1000000, 1, &ok);
+        if(ok) {
+            VisionOptimiser opt(this, VisionOptimiser::getChoiceFromQString(s));
+            opt.show();
+
+            opt.run(ui->dirEdit->text().toStdString(), iterations);
+        }
+    }
 }

@@ -20,7 +20,9 @@ public:
         PSO
     };
 
-    explicit VisionOptimiser(OPT_ID id = PSO, QWidget *parent = 0);
+    static OPT_ID getChoiceFromQString(QString str);
+
+    explicit VisionOptimiser(QWidget *parent = 0, OPT_ID id = PSO);
     ~VisionOptimiser();
 
     void run(string directory, int total_iterations);

@@ -5,8 +5,22 @@
 #include "Tools/Optimisation/PGRLOptimiser.h"
 #include "Tools/Optimisation/PSOOptimiser.h"
 #include "Vision/visionconstants.h"
+#include <QMessageBox>
 
-VisionOptimiser::VisionOptimiser(OPT_ID id, QWidget *parent) :
+VisionOptimiser::OPT_ID VisionOptimiser::getChoiceFromQString(QString str)
+{
+    if(str.compare("PGRL") == 0) {
+        return PGRL;
+    }
+    else if(str.compare("EHCLS") == 0) {
+        return EHCLS;
+    }
+    else {
+        return PSO;
+    }
+}
+
+VisionOptimiser::VisionOptimiser(QWidget *parent, OPT_ID id) :
     QMainWindow(parent),
     ui(new Ui::VisionOptimiser)
 {
@@ -37,14 +51,17 @@ void VisionOptimiser::run(string directory, int total_iterations)
     int err_code = 0;
     m_halted = false;
     //read labels
-    ifstream label_file((directory + string("opt_label.strm")).c_str());
+    ifstream label_file((directory + string("opt_labels.strm")).c_str());
 
     //set up logs
     m_progress_log.open((directory + m_optimiser->getName() + string("_progress.log")).c_str()),
     m_performance_log.open((directory + m_optimiser->getName() + string("_performance.log")).c_str()),
     m_optimiser_log.open((directory + m_optimiser->getName() + string(".log")).c_str());
 
-    vision->readLabels(label_file, m_ground_truth_full);
+    if(!vision->readLabels(label_file, m_ground_truth_full)) {
+        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("opt_label.strm")).c_str()));
+        return;
+    }
 
     //init gui
     ui->progressBar_strm->setMaximum(m_ground_truth_full.size());
@@ -68,6 +85,13 @@ void VisionOptimiser::run(string directory, int total_iterations)
     if(!m_halted && err_code==0) {
         //record results
         m_optimiser_log << m_optimiser << endl;
+        QMessageBox::information(this, "Complete", "Optimisation completed successfully");
+    }
+    else if(!m_halted) {
+        QMessageBox::warning(this, "Error", "Vision frame failed");
+    }
+    else {
+        QMessageBox::information(this, "Cancelled", "Optimisation cancelled before completion.");
     }
 
 }
