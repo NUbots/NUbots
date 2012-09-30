@@ -11,6 +11,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 
+void convertLabels();
 int runDave();
 int runDefault();
 vector<double> checkImageStream(string name);
@@ -18,46 +19,28 @@ vector<double> checkSensorStream(string name);
 
 int main()
 {
-    ifstream performance_log(("/home/shannon/Images/FYP/Final100/VisionPSO_performance.log"));
-    int garbage;
-    float val;
-    vector<float> perf;
-    while(performance_log.good()) {
-        performance_log >> garbage >> val;
-        perf.push_back(val);
-        performance_log.ignore(2, '\n');
-        performance_log.peek();
-    }
-    performance_log.close();
-    cout << perf.size();
-
-    ofstream plog("/home/shannon/Images/FYP/Final100/VisionPSO_performance.log");
-    plog.setf(ios_base::fixed);
-    for(unsigned int i=0; i<perf.size(); i++) {
-        plog << i << " " << perf[i] << endl;
-    }
-    plog.close();
-
-//    ifstream in("/home/shannon/Images/FYP/Final100/opt_labels.strm");
-//    ofstream out("/home/shannon/Images/FYP/Final100/opt_labels_short.strm");
-//    vector<vector<VisionFieldObject*> > labels;
-//    VisionControlWrapper* vision = VisionControlWrapper::getInstance();
-//    vision->readLabels(in, labels);
-//    cout << labels.size() << endl;
-//    BOOST_FOREACH(vector<VisionFieldObject*> v, labels) {
-//        out << v.size() << endl;
-//        BOOST_FOREACH(VisionFieldObject* vfo, v) {
-//            vfo->printLabelBrief(out);
-//            out << endl;
-//        }
-//    }
-
-//    QApplication app(NULL);
-//    MainWindow mw;
-//    mw.show();
-//    return app.exec();
+    QApplication app(NULL);
+    MainWindow mw;
+    mw.show();
+    return app.exec();
 }
 
+void convertLabels()
+{
+    ifstream in("/home/shannon/Images/FYP/Final100/opt_labels.strm");
+    ofstream out("/home/shannon/Images/FYP/Final100/opt_labels_short.strm");
+    vector<vector<VisionFieldObject*> > labels;
+    VisionControlWrapper* vision = VisionControlWrapper::getInstance();
+    vision->readLabels(in, labels);
+    cout << labels.size() << endl;
+    BOOST_FOREACH(vector<VisionFieldObject*> v, labels) {
+        out << v.size() << endl;
+        BOOST_FOREACH(VisionFieldObject* vfo, v) {
+            vfo->printLabelBrief(out);
+            out << endl;
+        }
+    }
+}
 
 vector<double> checkImageStream(string name)
 {
