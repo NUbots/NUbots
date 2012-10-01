@@ -19,7 +19,7 @@ private slots:
     void getDirectory();
     void generateLabels();
     void modifyLabels();
-    void viewStream();
+    void compareParams();
     void runOptimiser();
 
 private:

@@ -13,11 +13,14 @@ public:
     static VisionControlWrapper* getInstance();
 
     int runFrame();
+    int runFrame(NUImage& img);
     bool setLUT(const string& filename);
     bool setImageStream(const string& filename);
     bool setSensorStream(const string& filename);
     void restartStream();
     void resetHistory();
+
+    bool renderFrame(cv::Mat& mat);
 
     //batch outputs
     void writeBatchDetections(ostream& out);

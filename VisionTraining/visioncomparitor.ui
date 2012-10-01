@@ -1,51 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>VisionComparitor</class>
+ <widget class="QMainWindow" name="VisionComparitor">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
-    <height>182</height>
+    <width>688</width>
+    <height>447</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="autoPB">
+   <widget class="QGraphicsView" name="imageView_2">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>150</y>
+      <width>320</width>
+      <height>240</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="imageView">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>10</y>
-      <width>121</width>
-      <height>27</height>
+      <y>150</y>
+      <width>320</width>
+      <height>240</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Generate Labels</string>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>0</number>
     </property>
    </widget>
-   <widget class="QPushButton" name="modPB">
+   <widget class="QPushButton" name="nextPB">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>230</x>
       <y>10</y>
-      <width>121</width>
+      <width>98</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>Modify Labels</string>
+     <string>Next</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="prevPB">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>10</y>
+      <width>98</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Previous</string>
     </property>
    </widget>
    <widget class="QPushButton" name="exitPB">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>340</x>
       <y>10</y>
-      <width>121</width>
+      <width>98</width>
       <height>27</height>
      </rect>
     </property>
@@ -53,66 +91,30 @@
      <string>Exit</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="compPB">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>50</y>
-      <width>161</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Compare Parameters</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="optPB">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>50</y>
-      <width>121</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Run Optimiser</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>90</y>
-      <width>62</width>
+      <y>130</y>
+      <width>321</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>Directory</string>
+     <string>TextLabel</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="dirEdit">
+   <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>90</y>
-      <width>211</width>
-      <height>25</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="browsePB">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>90</y>
-      <width>91</width>
-      <height>27</height>
+      <x>350</x>
+      <y>130</y>
+      <width>321</width>
+      <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>Browse</string>
+     <string>TextLabel</string>
     </property>
    </widget>
   </widget>
@@ -121,7 +123,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>410</width>
+     <width>688</width>
      <height>25</height>
     </rect>
    </property>

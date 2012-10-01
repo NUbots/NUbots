@@ -26,6 +26,13 @@ int VisionControlWrapper::runFrame()
     return controller->runFrame(true, true);
 }
 
+int VisionControlWrapper::runFrame(NUImage& img)
+{
+    frame_no++;
+    data_wrapper->updateFrame(img);
+    return controller->runFrame(true, true);
+}
+
 bool VisionControlWrapper::setLUT(const string& filename)
 {
     return data_wrapper->loadLUTFromFile(filename);
@@ -196,4 +203,9 @@ bool VisionControlWrapper::objectTypesMatch(VisionFieldObject::VFO_ID id0, Visio
 void VisionControlWrapper::resetHistory()
 {
     data_wrapper->resetHistory();
+}
+
+bool VisionControlWrapper::renderFrame(cv::Mat &mat)
+{
+    return data_wrapper->renderFrame(mat);
 }

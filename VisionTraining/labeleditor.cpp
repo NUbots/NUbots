@@ -43,7 +43,7 @@ LabelEditor::LabelEditor(QWidget *parent) :
         y+=40;
     }
 
-    //hack
+    //hack for lines
     m_d_spins.at(0)->setSingleStep(1);
     m_d_spins.at(1)->setSingleStep(0.01);
     

@@ -6,6 +6,7 @@
 #include "labeleditor.h"
 #include "labelgenerator.h"
 #include "visionoptimiser.h"
+#include "visioncomparitor.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     
     QObject::connect(ui->autoPB, SIGNAL(clicked()), this, SLOT(generateLabels()));
     QObject::connect(ui->modPB, SIGNAL(clicked()), this, SLOT(modifyLabels()));
-    QObject::connect(ui->viewPB, SIGNAL(clicked()), this, SLOT(viewStream()));
+    QObject::connect(ui->compPB, SIGNAL(clicked()), this, SLOT(compareParams()));
     QObject::connect(ui->optPB, SIGNAL(clicked()), this, SLOT(runOptimiser()));
     QObject::connect(ui->exitPB, SIGNAL(clicked()), this, SLOT(close()));
     QObject::connect(ui->browsePB, SIGNAL(clicked()), this, SLOT(getDirectory()));
@@ -52,9 +53,20 @@ void MainWindow::modifyLabels()
     le.run(ui->dirEdit->text().toStdString());
 }
 
-void MainWindow::viewStream()
+void MainWindow::compareParams()
 {
-    
+    QString config0 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
+    if(!config0.isNull()) {
+        QString config1 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
+        if(!config1.isNull()) {
+            string image = ui->dirEdit->text().toStdString() + string("image.strm");
+            string lut = ui->dirEdit->text().toStdString() + string("default.lut");
+
+            VisionComparitor comp;
+            comp.show();
+            comp.run(image, lut, config0.toStdString(), config1.toStdString());
+        }
+    }
 }
 
 void MainWindow::runOptimiser()

@@ -4,6 +4,7 @@
 #include "nubotdataconfig.h"
 
 #include "Vision/VisionTypes/coloursegment.h"
+#include "Infrastructure/NUImage/ColorModelConversions.h"
 
 DataWrapper* DataWrapper::instance = 0;
 
@@ -238,6 +239,28 @@ bool DataWrapper::updateFrame()
     return image_good;
 }
 
+void DataWrapper::updateFrame(NUImage& img)
+{
+    if(numFramesProcessed > 0) {
+        //add old detections to history and start new log
+        ball_detection_history.push_back(ball_detections);
+        ball_detections.clear();
+        goal_detection_history.push_back(goal_detections);
+        goal_detections.clear();
+        beacon_detection_history.push_back(beacon_detections);
+        beacon_detections.clear();
+        obstacle_detection_history.push_back(obstacle_detections);
+        obstacle_detections.clear();
+        line_detection_history.push_back(line_detections);
+        line_detections.clear();
+
+        //detection_history.push_back(detections);
+        detections.clear();
+    }
+    numFramesProcessed++;
+    m_current_image = &img;
+}
+
 void DataWrapper::resetHistory()
 {
     ball_detection_history.clear();
@@ -403,4 +426,30 @@ bool DataWrapper::readLabels(istream& in, vector< vector< pair<VisionFieldObject
         in.peek();
     }
     return labels.size() > 0;
+}
+
+bool DataWrapper::renderFrame(cv::Mat &mat)
+{
+    if(numFramesProcessed == 0) {
+        return false;
+    }
+    unsigned char* ptr,
+            r, g, b;
+    vector<const VisionFieldObject*>::const_iterator it;
+
+    mat.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
+
+    for(int y=0; y<m_current_image->getHeight(); y++) {
+        ptr = mat.ptr<unsigned char>(y);
+        for(int x=0; x<m_current_image->getWidth(); x++) {
+            ColorModelConversions::fromYCbCrToRGB((*m_current_image)(x,y).y, (*m_current_image)(x,y).cb, (*m_current_image)(x,y).cr, r, g, b);
+            ptr[3*x]   = b;
+            ptr[3*x+1] = g;
+            ptr[3*x+2] = r;
+        }
+    }
+
+    for(it=detections.begin(); it<detections.end(); it++)
+        (*it)->render(mat);
+    return true;
 }

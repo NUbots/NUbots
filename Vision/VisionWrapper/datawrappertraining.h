@@ -93,6 +93,7 @@ private:
     DataWrapper();
     ~DataWrapper();
     bool updateFrame();
+    void updateFrame(NUImage& img);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
 
@@ -107,6 +108,7 @@ private:
     bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
     bool readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const;
 
+    bool renderFrame(cv::Mat &mat);
 private:
     static DataWrapper* instance;
 
