@@ -138,7 +138,7 @@ bool Goal::check() const
     //various throwouts here
 
     if(VisionConstants::THROWOUT_SHORT_GOALS) {
-        if(abs(m_corners.getBottomLeft().y - m_corners.getTopRight().y) <= VisionConstants::MIN_GOAL_HEIGHT) {
+        if(m_corners.getHeight() <= VisionConstants::MIN_GOAL_HEIGHT) {
             #if VISION_FIELDOBJECT_VERBOSITY > 1
                 debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
             #endif
@@ -147,7 +147,7 @@ bool Goal::check() const
     }
     
     if(VisionConstants::THROWOUT_NARROW_GOALS) {
-        if(abs(m_corners.getBottomLeft().x - m_corners.getTopRight().x) <= VisionConstants::MIN_GOAL_WIDTH) {
+        if(m_corners.getWidth() <= VisionConstants::MIN_GOAL_WIDTH) {
             #if VISION_FIELDOBJECT_VERBOSITY > 1
                 debug << "Goal::check - Goal thrown out: less than " << VisionConstants::MIN_GOAL_WIDTH << "pix high" << endl;
             #endif

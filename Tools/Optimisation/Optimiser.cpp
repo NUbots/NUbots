@@ -22,12 +22,6 @@
 #include "Optimiser.h"
 #include "Parameter.h"
 
-#ifdef TARGET_IS_TRAINING
-    #include <boost/date_time/posix_time/posix_time.hpp>
-#else
-    #include "NUPlatform/NUPlatform.h"
-#endif
-
 #include <boost/random.hpp>
 
 #include "debug.h"
@@ -41,6 +35,10 @@ Optimiser::Optimiser(std::string name, vector<Parameter> parameters)
 {
     m_name = name;
     m_initial_parameters = parameters;
+
+    #ifdef TARGET_IS_TRAINING
+        m_microsec_starttime = boost::posix_time::microsec_clock::local_time();
+    #endif
 
     srand(static_cast<unsigned int> (1e6*getRealTime()*getRealTime()*getRealTime()));
 }
@@ -172,7 +170,13 @@ float Optimiser::uniformDistribution(float min, float max)
 double Optimiser::getRealTime()
 {
     #ifdef TARGET_IS_TRAINING
-        return (boost::posix_time::microsec_clock::universal_time() - boost::posix_time::from_time_t(0)).total_nanoseconds()/1e6;
+        double timeinmilliseconds;
+        boost::posix_time::ptime timenow;
+        timenow = boost::posix_time::microsec_clock::local_time();
+        timeinmilliseconds = (timenow - m_microsec_starttime).total_nanoseconds()/1e6;
+
+        return timeinmilliseconds;
+        //return (boost::posix_time::microsec_clock::universal_time() - boost::posix_time::from_time_t(0)).total_nanoseconds()/1e6;
     #else
         return Platform->getRealTime();
     #endif

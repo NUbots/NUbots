@@ -30,6 +30,13 @@ class Parameter;
 #include <string>
 #include <vector>
 #include <iostream>
+
+#ifdef TARGET_IS_TRAINING
+    #include <boost/date_time/posix_time/posix_time.hpp>
+#else
+    #include "NUPlatform/NUPlatform.h"
+#endif
+
 using namespace std;
 
 class Optimiser
@@ -51,6 +58,9 @@ public:
     void save();
     void saveAs(string name);
     void load();
+
+    virtual vector<Parameter> getBest() const = 0;
+
 protected:
     float normalDistribution(float mean, float sigma);
     float uniformDistribution(float min, float max);
@@ -61,6 +71,9 @@ protected:
 protected:
     string m_name;
     vector<Parameter> m_initial_parameters;
+    #ifdef TARGET_IS_TRAINING
+        boost::posix_time::ptime m_microsec_starttime;  //!< the program's start time according to boost::posix_time
+    #endif
 };
 
 #endif

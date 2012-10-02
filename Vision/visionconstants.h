@@ -119,11 +119,24 @@ public:
     static std::string getDistanceMethodName(DistanceMethod method);    //! Converts a distance method to a string name.
 
     static void loadFromFile(std::string filename); //! Loads the constants from a file
+    static void print(ostream& out);
 
     static void setFlags(bool val=true);
 
     static vector<Parameter> getAllOptimisable();
+    static vector<Parameter> getBallParams();
+    static vector<Parameter> getGoalBeaconParams();
+    static vector<Parameter> getObstacleParams();
+    static vector<Parameter> getLineParams();
+    static vector<Parameter> getGeneralParams();
+
+
     static bool setAllOptimisable(const vector<float>& params);
+    static bool setBallParams(const vector<float>& params);
+    static bool setGoalBeaconParams(const vector<float>& params);
+    static bool setObstacleParams(const vector<float>& params);
+    static bool setLineParams(const vector<float>& params);
+    static bool setGeneralParams(const vector<float>& params);
     
 private:
     VisionConstants();  //so noone can make an object of this type

@@ -36,14 +36,16 @@ void MainWindow::getDirectory()
 {
     QString dir = QFileDialog::getExistingDirectory(this, "Select Directory", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
     if(!dir.isNull())
-        ui->dirEdit->setText(dir);        
+        ui->dirEdit->setText(dir);
+    setFocus();
 }
 
 void MainWindow::generateLabels()
 {
     LabelGenerator lg(this);
     lg.show();
-    lg.run(ui->dirEdit->text().toStdString());    
+    lg.run(ui->dirEdit->text().toStdString());
+    setFocus();
 }
 
 void MainWindow::modifyLabels()
@@ -51,6 +53,7 @@ void MainWindow::modifyLabels()
     LabelEditor le(this);
     le.show();
     le.run(ui->dirEdit->text().toStdString());
+    setFocus();
 }
 
 void MainWindow::compareParams()
@@ -67,6 +70,7 @@ void MainWindow::compareParams()
             comp.run(image, lut, config0.toStdString(), config1.toStdString());
         }
     }
+    setFocus();
 }
 
 void MainWindow::runOptimiser()
@@ -86,4 +90,5 @@ void MainWindow::runOptimiser()
             opt.run(ui->dirEdit->text().toStdString(), iterations);
         }
     }
+    setFocus();
 }

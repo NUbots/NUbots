@@ -119,9 +119,10 @@ bool VisionControlWrapper::readLabels(istream& in, vector< vector< pair<VisionFi
 map<VisionFieldObject::VFO_ID, float> VisionControlWrapper::evaluateFrame(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth, float false_pos_cost, float false_neg_cost)
 {
     //average distance error 3D for now
-    vector<bool> matched_detections(false, data_wrapper->detections.size());
+    vector<bool> matched_detections(data_wrapper->detections.size(), false);
     //initi
     map<VisionFieldObject::VFO_ID, float> errors;
+    vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >::const_iterator gt;
 
     errors[VisionFieldObject::BALL] = 0;
     errors[VisionFieldObject::GOAL_Y_L] = 0;
@@ -136,12 +137,13 @@ map<VisionFieldObject::VFO_ID, float> VisionControlWrapper::evaluateFrame(const 
     errors[VisionFieldObject::FIELDLINE] = 0;
     errors[VisionFieldObject::OBSTACLE] = 0;
 
-    for(unsigned int gt=0; gt<ground_truth.size(); gt++) {
+    for(gt=ground_truth.begin(); gt!=ground_truth.end(); gt++) {
         int d_num = 0;
         pair<int,float> best_match = pair<int,float>(-1,numeric_limits<float>::max());
         BOOST_FOREACH(const VisionFieldObject* d_vfo, data_wrapper->detections) {
-            if(objectTypesMatch(d_vfo->getID(), ground_truth[gt].first)) {
-                float err = d_vfo->findError(ground_truth[gt].second);
+            //if the object is a match and the detection has not already been matched
+            if(objectTypesMatch(d_vfo->getID(), gt->first) && !matched_detections[d_num]) {
+                float err = d_vfo->findError(gt->second);
                 if(err < best_match.second) {
                     best_match = pair<int, float>(d_num, err);
                 }
@@ -150,11 +152,11 @@ map<VisionFieldObject::VFO_ID, float> VisionControlWrapper::evaluateFrame(const 
         }
         if(best_match.first == -1) {
             //no detection for gt item - false negative
-            errors[ground_truth[gt].first] += false_neg_cost;
+            errors[gt->first] += false_neg_cost;
         }
         else {
-            errors[ground_truth[gt].first] += best_match.second;
-            matched_detections[best_match.first] = true;
+            errors[gt->first] += best_match.second;
+            matched_detections.at(best_match.first) = true;
         }
     }
     for(unsigned int d=0; d<matched_detections.size(); d++) {

@@ -43,6 +43,7 @@ void VisionComparitor::run(string image_name, string lut_name, string config0, s
             NUImage img;
             image_file >> img;
             m_frames.push_back(img);
+            image_file.peek();
         }
     }
     catch(exception e) {
@@ -58,7 +59,6 @@ void VisionComparitor::run(string image_name, string lut_name, string config0, s
 
     m_halted = false;
     m_frame_no = 0;
-    m_frames.clear();
 
     while(!m_halted) {
         m_next = m_prev = false;
@@ -70,6 +70,8 @@ void VisionComparitor::run(string image_name, string lut_name, string config0, s
         VisionConstants::loadFromFile(config1);
         vision->runFrame(m_frames[m_frame_no]);
         vision->renderFrame(mat1);
+
+        display(mat0, mat1);
 
         while(!m_halted && !m_next && !m_prev) {
             QApplication::processEvents();
