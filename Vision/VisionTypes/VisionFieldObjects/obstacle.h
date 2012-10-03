@@ -25,7 +25,8 @@ public:
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << getVFOName(OBSTACLE) << " " << m_location_pixels << " " << m_size_on_screen;}
     //! @brief Brief stream output for labelling purposes
-    void printLabelBrief(ostream& out) const {out << getVFOName(OBSTACLE) << " " << m_location_pixels;}
+    //void printLabelBrief(ostream& out) const {out << getVFOName(OBSTACLE) << " " << m_location_pixels;}
+    virtual Vector2<double> getShortLabel() const {return Vector2<double>(m_location_pixels.x, m_location_pixels.y);}
 
     void render(cv::Mat& mat) const;
 

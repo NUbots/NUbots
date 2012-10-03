@@ -34,7 +34,7 @@ void splitSamples()
     ofstream test_image("/home/shannon/Images/FYP/Final100/test_image.strm");
     ofstream train_labels("/home/shannon/Images/FYP/Final100/train_labels.strm");
     ofstream train_image("/home/shannon/Images/FYP/Final100/train_image.strm");
-    vector<vector<pair<VisionFieldObject::VFO_ID,Vector2<double> > > > labels;
+    vector<vector<VisionFieldObject* > > labels;
     VisionControlWrapper::getInstance()->readLabels(in_labels, labels);
 
     for(int i=0; i<labels.size() && in_image.good(); i++) {
@@ -44,14 +44,16 @@ void splitSamples()
             test_image << img;
             test_labels << labels[i].size() << endl;
             for(int k=0; k<labels[i].size(); k++) {
-                test_labels << VisionFieldObject::getVFOName(labels[i][k].first) << " " << labels[i][k].second << endl;
+                labels[i][k]->printLabel(test_labels);
+                test_labels << endl;
             }
         }
         else {
             train_image << img;
             train_labels << labels[i].size() << endl;
             for(int k=0; k<labels[i].size(); k++) {
-                train_labels << VisionFieldObject::getVFOName(labels[i][k].first) << " " << labels[i][k].second << endl;
+                labels[i][k]->printLabel(train_labels);
+                train_labels << endl;
             }
         }
     }
@@ -61,23 +63,6 @@ void splitSamples()
     test_image.close();
     train_labels.close();
     train_image.close();
-}
-
-void convertLabels()
-{
-    ifstream in("/home/shannon/Images/FYP/Final100/opt_labels.strm");
-    ofstream out("/home/shannon/Images/FYP/Final100/opt_labels_short.strm");
-    vector<vector<VisionFieldObject*> > labels;
-    VisionControlWrapper* vision = VisionControlWrapper::getInstance();
-    vision->readLabels(in, labels);
-    cout << labels.size() << endl;
-    BOOST_FOREACH(vector<VisionFieldObject*> v, labels) {
-        out << v.size() << endl;
-        BOOST_FOREACH(VisionFieldObject* vfo, v) {
-            vfo->printLabelBrief(out);
-            out << endl;
-        }
-    }
 }
 
 vector<double> checkImageStream(string name)

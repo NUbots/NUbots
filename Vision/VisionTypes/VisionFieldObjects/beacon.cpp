@@ -25,7 +25,8 @@ Beacon::Beacon(VFO_ID id, const Quad &corners)
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
 
-    valid = valid && check(); //this must be last
+    //valid = valid && check(); //this must be last
+    valid = check();
 }
 
 const Quad& Beacon::getQuad() const
@@ -109,12 +110,12 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
 
 bool Beacon::check() const
 {
-    if(!distance_valid) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Beacon::check - Beacon thrown out: distance invalid" << endl;
-        #endif
-        return false;
-    }
+//    if(!distance_valid) {
+//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//            debug << "Beacon::check - Beacon thrown out: distance invalid" << endl;
+//        #endif
+//        return false;
+//    }
 
     //throwout for base below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS and

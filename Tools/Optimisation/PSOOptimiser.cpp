@@ -37,8 +37,6 @@
  */
 PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
-    m_c1 = 1.50;             // tune this: the literature says that these are usually set equal, and from my grid search setting them different does not have a great effect   
-    m_c2 = 0.80;             // tune this:
     m_inertia = 0.60;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
 
     m_reset_limit = 10;
@@ -179,7 +177,7 @@ void PSOOptimiser::summaryTo(ostream& stream)
 
 void PSOOptimiser::toStream(ostream& o) const
 {
-    o << m_c1 << " " << m_c2 << " " << m_inertia << " " << m_reset_limit << " " << m_reset_fraction << " " << m_num_particles << " " << m_num_dimensions << endl;
+    o << m_inertia << " " << m_reset_limit << " " << m_reset_fraction << " " << m_num_particles << " " << m_num_dimensions << endl;
     
     o << m_swarm_position << endl;
     o << m_swarm_velocity << endl;
@@ -194,7 +192,7 @@ void PSOOptimiser::toStream(ostream& o) const
 
 void PSOOptimiser::fromStream(istream& i)
 {
-    i >> m_c1 >> m_c2 >> m_inertia >> m_reset_limit >> m_reset_fraction >> m_num_particles >> m_num_dimensions;
+    i >> m_inertia >> m_reset_limit >> m_reset_fraction >> m_num_particles >> m_num_dimensions;
     
     i >> m_swarm_position;
     i >> m_swarm_velocity;

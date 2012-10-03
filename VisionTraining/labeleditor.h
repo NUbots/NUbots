@@ -25,7 +25,7 @@ public:
     explicit LabelEditor(QWidget *parent = 0);
     ~LabelEditor();
     
-    int run(string dir);
+    int run(string dir, string label_name, string image_name);
 
 private:
     void display(const NUImage& frame, const LookUpTable& lut);

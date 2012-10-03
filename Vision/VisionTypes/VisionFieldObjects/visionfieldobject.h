@@ -92,7 +92,8 @@ public:
     //! @brief Stream output for labelling purposes
     virtual void printLabel(ostream& out) const = 0;
     //! @brief Brief stream output for labelling purposes
-    virtual void printLabelBrief(ostream& out) const = 0;
+    //virtual void printLabelBrief(ostream& out) const = 0;
+    virtual Vector2<double> getShortLabel() const = 0;
 
     //! @brief Calculation of error for optimisation
     virtual double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location_pixels.x - measured.x,2) + pow(m_location_pixels.y - measured.y,2));}

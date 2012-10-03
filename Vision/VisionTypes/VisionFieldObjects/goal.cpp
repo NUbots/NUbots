@@ -25,7 +25,8 @@ Goal::Goal(VFO_ID id, const Quad &corners)
 
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
-    valid = valid && check();
+    //valid = valid && check();
+    valid = check();
 }
 
 const Quad& Goal::getQuad() const
@@ -137,6 +138,13 @@ bool Goal::check() const
 {
     //various throwouts here
 
+//    if(!distance_valid) {
+//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//            debug << "Goal::check - Goal thrown out: distance invalid" << endl;
+//        #endif
+//        return false;
+//    }
+
     if(VisionConstants::THROWOUT_SHORT_GOALS) {
         if(m_corners.getHeight() <= VisionConstants::MIN_GOAL_HEIGHT) {
             #if VISION_FIELDOBJECT_VERBOSITY > 1
@@ -153,13 +161,6 @@ bool Goal::check() const
             #endif
             return false;
         }
-    }
-
-    if(!distance_valid) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: distance invalid" << endl;
-        #endif
-        return false;
     }
 
     //throwout for base below horizon

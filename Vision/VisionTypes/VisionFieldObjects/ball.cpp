@@ -46,7 +46,8 @@ Ball::Ball(PointType centre, int diameter)
     m_location_pixels.y = mathGeneral::roundNumberToInt(centre_pt.y);
     m_size_on_screen = Vector2<int>(m_diameter, m_diameter);
     valid = calculatePositions();
-    valid = valid && check();
+    //valid = valid && check();
+    valid = check();
 }
 
 float Ball::getRadius() const

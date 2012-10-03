@@ -59,22 +59,25 @@ LabelEditor::~LabelEditor()
     delete ui;
 }
 
-int LabelEditor::run(string dir)
+int LabelEditor::run(string dir, string label_name, string image_name)
 {
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();
     NUImage frame;
-    ifstream label_file((dir + string("labels.strm")).c_str()),
-            image_file((dir + string("image.strm")).c_str());
-    ofstream label_out((dir + string("opt_labels.strm")).c_str());
+//    ifstream label_file((dir + string("labels.strm")).c_str()),
+//            image_file((dir + string("image.strm")).c_str());
+    ifstream label_file(label_name.c_str()),
+            image_file(image_name.c_str());
     LookUpTable lut;
     lut.loadLUTFromFile(dir + string("default.lut"));
 
     if(!vision->readLabels(label_file, m_ground_truth_full)) {
-        QMessageBox::warning(this, "Failed read!", QString("Failed to read ") + QString(dir.c_str()) + QString("labels.strm"));
+        QMessageBox::warning(this, "Failed read!", QString("Failed to read ") + QString(label_name.c_str()));
         return -1;  //code for failed label read
     }
     m_total_frames = m_ground_truth_full.size();
     m_frame_no = 0;
+
+    ofstream label_out((dir + string("opt_label.strm")).c_str());
 
     while(!m_halted && m_frame_no < m_total_frames) {
         m_next = false;

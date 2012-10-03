@@ -386,12 +386,15 @@ bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& 
             }
             else if(id == VisionFieldObject::OBSTACLE) {
                 Obstacle* o = new Obstacle();
-                in >> o->m_location_pixels >> o->m_size_on_screen;\
+                in >> o->m_location_pixels >> o->m_size_on_screen;
                 next = dynamic_cast<VisionFieldObject*>(o);
             }
             else if(id == VisionFieldObject::FIELDLINE) {
                 FieldLine* l = new FieldLine();
-                in >> l->m_rho >> l->m_phi;
+                Vector2<double> vals;
+                in >> vals;
+                l->m_rho = vals.x;
+                l->m_phi = vals.y;
                 next = dynamic_cast<VisionFieldObject*>(l);
             }
             else {
@@ -410,21 +413,19 @@ bool DataWrapper::readLabels(istream& in, vector< vector< pair<VisionFieldObject
 {
     pair<VisionFieldObject::VFO_ID, Vector2<double> > next;
     vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > next_vec;
-    int n;
-    while(in.good()) {
-        in >> n;
+    vector< vector<VisionFieldObject* > > objects;
+
+    readLabels(in, objects);
+    BOOST_FOREACH(vector<VisionFieldObject*> vec, objects) {
         next_vec.clear();
-        for(int i=0; i<n; i++) {
-            string name;
-            VisionFieldObject::VFO_ID id;
-            in >> name >> next.second;
-            next.first = VisionFieldObject::getVFOFromName(name);
+        BOOST_FOREACH(VisionFieldObject* vfo, vec) {
+            next.first = vfo->getID();
+            next.second = vfo->getShortLabel();
             next_vec.push_back(next);
         }
         labels.push_back(next_vec);
-        in.ignore(2,'\n');
-        in.peek();
     }
+
     return labels.size() > 0;
 }
 

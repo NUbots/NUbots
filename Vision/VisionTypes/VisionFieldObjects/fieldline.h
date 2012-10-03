@@ -29,9 +29,10 @@ public:
     double findError(const Vector2<double>& measured) const {return sqrt( pow((m_rho - measured.x)*140/mathGeneral::PI,2) + pow(m_phi - measured.y,2));}
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const {out << getVFOName(FIELDLINE) << " " << m_rho << " " << m_phi;}
+    void printLabel(ostream& out) const {out << getVFOName(FIELDLINE) << " " << Vector2<double>(m_rho, m_phi);}
     //! @brief Brief stream output for labelling purposes
-    void printLabelBrief(ostream& out) const {out << getVFOName(FIELDLINE) << " " << Vector2<double>(m_rho, m_phi);}
+    //void printLabelBrief(ostream& out) const {out << getVFOName(FIELDLINE) << " " << }
+    virtual Vector2<double> getShortLabel() const {return Vector2<double>(m_rho, m_phi);}
 
     void render(cv::Mat& mat) const;
     

@@ -299,10 +299,16 @@ int VisionOptimiser::runTrainingStep(int iteration, bool individual)
 int VisionOptimiser::runEvaluationStep(int iteration, bool individual)
 {
     float FALSE_POS_COST = 200,
-          FALSE_NEG_COST = 20,
-          frame_error,
-          batch_error = 0,
-          fitness;
+          FALSE_NEG_COST = 200;
+
+    map<OPT_ID, float> batch_errors,
+                       fitnesses;
+    batch_errors[BALL_OPT] = 0;
+    batch_errors[GOAL_BEACON_OPT] = 0;
+    batch_errors[OBSTACLE_OPT] = 0;
+    batch_errors[LINE_OPT] = 0;
+    batch_errors[GENERAL_OPT] = 0;
+
     unsigned int frame_no = 1;
     int vision_code;
 
@@ -314,13 +320,26 @@ int VisionOptimiser::runEvaluationStep(int iteration, bool individual)
 
     vision_code = vision->runFrame();
     while(vision_code == 0 && frame_no < m_ground_truth_test.size() && !m_halted) {
-        frame_error = 0;
+        map<OPT_ID, float> frame_error_sums;
+        frame_error_sums[BALL_OPT] = 0;
+        frame_error_sums[GOAL_BEACON_OPT] = 0;
+        frame_error_sums[OBSTACLE_OPT] = 0;
+        frame_error_sums[LINE_OPT] = 0;
+        frame_error_sums[GENERAL_OPT] = 0;
         //get errors
         map<VisionFieldObject::VFO_ID, float> frame_errors = vision->evaluateFrame(m_ground_truth_test[frame_no], FALSE_POS_COST, FALSE_NEG_COST);
         for(int i=0; i<VisionFieldObject::INVALID; i++) {
-            frame_error += frame_errors.at(VisionFieldObject::getVFOFromNum(i));
+            VisionFieldObject::VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
+            //frame_error += frame_errors.at(vfo_id);
+            vector<OPT_ID>::const_iterator it;
+            for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
+                frame_error_sums.at(*it) += frame_errors.at(vfo_id);
+            }
         }
-        batch_error += frame_error;
+//        batch_error += frame_error;
+        for(int i=0; i<=GENERAL_OPT; i++) {
+            batch_errors.at(getIDFromInt(i)) += frame_error_sums.at(getIDFromInt(i));
+        }
 
         //update gui
         ui->progressBar_strm->setValue(frame_no);
@@ -337,12 +356,17 @@ int VisionOptimiser::runEvaluationStep(int iteration, bool individual)
 
         }
         else {
-            if(batch_error == 0)
-                fitness = numeric_limits<float>::max(); //not likely
-            else
-                fitness = 1.0/batch_error;
+            for(int i=0; i<=GENERAL_OPT; i++) {
+                OPT_ID id = getIDFromInt(i);
+                if(batch_errors[id] == 0)
+                    fitnesses[id] = numeric_limits<float>::max(); //not likely
+                else
+                    fitnesses[id] = 1.0/batch_errors[id];
+            }
+            //m_optimiser->setParametersResult(fitness);
+
             //write results
-            m_test_performance_log << iteration << " " << fitness << endl;
+            m_test_performance_log << iteration << " " << fitnesses[BALL_OPT]<< " " << fitnesses[GOAL_BEACON_OPT]<< " " << fitnesses[OBSTACLE_OPT] << " " << fitnesses[LINE_OPT] << " " << fitnesses[GENERAL_OPT] << " " << endl;
         }
     }
 

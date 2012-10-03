@@ -24,7 +24,8 @@ Obstacle::Obstacle(const PointType &position, int width, int height)
 
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
-    valid = valid && check();
+    //valid = valid && check();
+    valid = check();
 }
 
 
@@ -67,12 +68,12 @@ else {
 bool Obstacle::check() const
 {
     //! @todo Do a check based on width and d2p consistency
-    if(!distance_valid) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Obstacle::check - Obstacle thrown out: distance invalid" << endl;
-        #endif
-        return false;
-    }
+//    if(!distance_valid) {
+//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//            debug << "Obstacle::check - Obstacle thrown out: distance invalid" << endl;
+//        #endif
+//        return false;
+//    }
 
     //all checks passed
     return true;

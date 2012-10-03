@@ -50,10 +50,16 @@ void MainWindow::generateLabels()
 
 void MainWindow::modifyLabels()
 {
-    LabelEditor le(this);
-    le.show();
-    le.run(ui->dirEdit->text().toStdString());
-    setFocus();
+    QString imagename = QFileDialog::getOpenFileName(this, "Select Image Stream", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
+    if(!imagename.isNull()) {
+        QString labelname = QFileDialog::getOpenFileName(this, "Select Labels File", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
+        if(!labelname.isNull()) {
+            LabelEditor le(this);
+            le.show();
+            le.run(ui->dirEdit->text().toStdString(), labelname.toStdString(), imagename.toStdString());
+            setFocus();
+        }
+    }
 }
 
 void MainWindow::compareParams()
