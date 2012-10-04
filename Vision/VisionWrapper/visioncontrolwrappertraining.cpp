@@ -116,7 +116,9 @@ bool VisionControlWrapper::readLabels(istream& in, vector< vector< pair<VisionFi
     return data_wrapper->readLabels(in, labels);
 }
 
-map<VisionFieldObject::VFO_ID, float> VisionControlWrapper::evaluateFrame(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth, float false_pos_cost, float false_neg_cost)
+map<VisionFieldObject::VFO_ID, float> VisionControlWrapper::evaluateFrame(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth,
+                                                                          const map<VisionFieldObject::VFO_ID, float>& false_pos_costs,
+                                                                          const map<VisionFieldObject::VFO_ID, float>& false_neg_costs)
 {
     //average distance error 3D for now
     vector<bool> matched_detections(data_wrapper->detections.size(), false);
@@ -142,7 +144,7 @@ map<VisionFieldObject::VFO_ID, float> VisionControlWrapper::evaluateFrame(const 
         pair<int,float> best_match = pair<int,float>(-1,numeric_limits<float>::max());
         BOOST_FOREACH(const VisionFieldObject* d_vfo, data_wrapper->detections) {
             //if the object is a match and the detection has not already been matched
-            if(objectTypesMatch(d_vfo->getID(), gt->first) && !matched_detections[d_num]) {
+            if(objectTypesMatch(d_vfo->getID(), gt->first) && !matched_detections.at(d_num)) {
                 float err = d_vfo->findError(gt->second);
                 if(err < best_match.second) {
                     best_match = pair<int, float>(d_num, err);
@@ -152,35 +154,36 @@ map<VisionFieldObject::VFO_ID, float> VisionControlWrapper::evaluateFrame(const 
         }
         if(best_match.first == -1) {
             //no detection for gt item - false negative
-            errors[gt->first] += false_neg_cost;
+            errors.at(gt->first) += false_neg_costs.at(gt->first);
             //errors[gt->first] += pow(false_neg_cost,2);
         }
         else {
-            errors[gt->first] += best_match.second;
+            errors.at(gt->first) += best_match.second;
             //errors[gt->first] += pow(best_match.second,2);
             matched_detections.at(best_match.first) = true;
         }
     }
     for(unsigned int d=0; d<matched_detections.size(); d++) {
-        if(!matched_detections[d]) {
+        if(!matched_detections.at(d)) {
             //false positive
-            errors[data_wrapper->detections[d]->getID()] += false_pos_cost;
+            VisionFieldObject::VFO_ID id = data_wrapper->detections.at(d)->getID();
+            errors.at(id) += false_pos_costs.at(id);
             //errors[data_wrapper->detections[d]->getID()] += pow(false_pos_cost,2);
         }
     }
 
-    errors[VisionFieldObject::BALL] = sqrt(errors[VisionFieldObject::BALL]);
-    errors[VisionFieldObject::GOAL_Y_L] = sqrt(errors[VisionFieldObject::GOAL_Y_L]);
-    errors[VisionFieldObject::GOAL_Y_R] = sqrt(errors[VisionFieldObject::GOAL_Y_R]);
-    errors[VisionFieldObject::GOAL_Y_U] = sqrt(errors[VisionFieldObject::GOAL_Y_U]);
-    errors[VisionFieldObject::GOAL_B_L] = sqrt(errors[VisionFieldObject::GOAL_B_L]);
-    errors[VisionFieldObject::GOAL_B_R] = sqrt(errors[VisionFieldObject::GOAL_B_R]);
-    errors[VisionFieldObject::GOAL_B_U] = sqrt(errors[VisionFieldObject::GOAL_B_U]);
-    errors[VisionFieldObject::BEACON_Y] = sqrt(errors[VisionFieldObject::BEACON_Y]);
-    errors[VisionFieldObject::BEACON_B] = sqrt(errors[VisionFieldObject::BEACON_B]);
-    errors[VisionFieldObject::BEACON_U] = sqrt(errors[VisionFieldObject::BEACON_U]);
-    errors[VisionFieldObject::FIELDLINE] = sqrt(errors[VisionFieldObject::FIELDLINE]);
-    errors[VisionFieldObject::OBSTACLE] = sqrt(errors[VisionFieldObject::OBSTACLE]);
+    errors.at(VisionFieldObject::BALL) = sqrt(errors.at(VisionFieldObject::BALL));
+    errors.at(VisionFieldObject::GOAL_Y_L) = sqrt(errors.at(VisionFieldObject::GOAL_Y_L));
+    errors.at(VisionFieldObject::GOAL_Y_R) = sqrt(errors.at(VisionFieldObject::GOAL_Y_R));
+    errors.at(VisionFieldObject::GOAL_Y_U) = sqrt(errors.at(VisionFieldObject::GOAL_Y_U));
+    errors.at(VisionFieldObject::GOAL_B_L) = sqrt(errors.at(VisionFieldObject::GOAL_B_L));
+    errors.at(VisionFieldObject::GOAL_B_R) = sqrt(errors.at(VisionFieldObject::GOAL_B_R));
+    errors.at(VisionFieldObject::GOAL_B_U) = sqrt(errors.at(VisionFieldObject::GOAL_B_U));
+    errors.at(VisionFieldObject::BEACON_Y) = sqrt(errors.at(VisionFieldObject::BEACON_Y));
+    errors.at(VisionFieldObject::BEACON_B) = sqrt(errors.at(VisionFieldObject::BEACON_B));
+    errors.at(VisionFieldObject::BEACON_U) = sqrt(errors.at(VisionFieldObject::BEACON_U));
+    errors.at(VisionFieldObject::FIELDLINE) = sqrt(errors.at(VisionFieldObject::FIELDLINE));
+    errors.at(VisionFieldObject::OBSTACLE) = sqrt(errors.at(VisionFieldObject::OBSTACLE));
 
     return errors;
 }

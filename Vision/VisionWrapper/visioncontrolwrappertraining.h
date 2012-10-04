@@ -30,7 +30,9 @@ public:
     bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
     bool readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const;
 
-    map<VisionFieldObject::VFO_ID, float> evaluateFrame(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth, float false_pos_cost, float false_neg_cost);
+    map<VisionFieldObject::VFO_ID, float> evaluateFrame(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth,
+                                                        const map<VisionFieldObject::VFO_ID, float>& false_pos_costs,
+                                                        const map<VisionFieldObject::VFO_ID, float>& false_neg_costs);
 
 private:
     VisionControlWrapper();

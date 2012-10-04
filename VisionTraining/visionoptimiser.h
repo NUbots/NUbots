@@ -36,9 +36,9 @@ public:
 
     void run(string directory, int total_iterations);
 private:
-    int runTrainingStep(int iteration, bool individual = false);
-    int runEvaluationStep(int iteration, bool individual = false);
+    int step(int iteration, bool training);
     void setupVisionConstants();
+    void setupCosts();
 
 private slots:
     void halt() {m_halted = true;}
@@ -48,6 +48,8 @@ private:
     //vector<Optimiser*> m_optimiser_list;
 
     map<OPT_ID, Optimiser*> m_optimisers;
+    map<VisionFieldObject::VFO_ID, float> m_false_positive_costs;
+    map<VisionFieldObject::VFO_ID, float> m_false_negative_costs;
     map<VisionFieldObject::VFO_ID, vector<OPT_ID> > m_vfo_optimiser_map;
     //Optimiser* m_optimiser;
     VisionControlWrapper* vision;
@@ -64,7 +66,7 @@ private:
     map<OPT_ID, ofstream*> m_optimiser_logs;
     map<OPT_ID, ofstream*> m_individual_progress_logs;
 
-    string opt_name;
+    string m_opt_name;
 };
 
 #endif // VISIONOPTIMISER_H

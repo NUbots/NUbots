@@ -37,11 +37,16 @@
  */
 PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
-    m_inertia = 0.60;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
+    //m_inertia = 0.60;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
+    //m_inertia = 0.40;
+    m_inertia = 0.20;
 
     m_reset_limit = 10;
-    m_reset_fraction = 0.05;
-    m_num_particles = 30;
+    //m_reset_fraction = 0.05;
+    m_reset_fraction = 0.10;
+
+    //m_num_particles = 30;
+    m_num_particles = 150;
 
     m_num_dimensions = parameters.size();
 
