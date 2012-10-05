@@ -21,8 +21,11 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  HeadBehaviour.h 
-                NavigationPotentials.h 
-                NavigationBehaviour.h
+		HeadBehaviour.cpp
+		HeadLogic.h
+		HeadLogic.cpp
+                 
+                
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

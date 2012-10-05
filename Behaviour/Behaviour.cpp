@@ -41,6 +41,11 @@
 #include "GoalKeeperTest/TestKeeperProvider.h"
 #include "FootSlipTest/SlipTestProvider.h"
 
+//Test HeadLogic by importing:
+#include "Common/HeadLogic.h"
+#include "Common/HeadBehaviour.h"
+
+
 #include "CameraCalibration/CameraCalibrationProvider.h"
 #include "EnvironmentalEmotions/EnvironmentalEmotionsProvider.h"
 

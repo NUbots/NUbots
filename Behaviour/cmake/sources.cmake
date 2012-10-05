@@ -42,6 +42,7 @@ SET (YOUR_DIRS  Soccer
                 EnvironmentalEmotions
                 GoalKeeperTest
                 FootSlipTest
+				Common
 )
 IF(${TARGET_ROBOT} STREQUAL BEAR)
     LIST(APPEND YOUR_DIRS BearMode)
