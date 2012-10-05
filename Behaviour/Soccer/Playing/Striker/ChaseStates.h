@@ -32,6 +32,7 @@ class SoccerFSMState;       // ChaseState is a SoccerFSMState
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
+#include "Behaviour/Common/HeadBehaviour.h"
 
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Infrastructure/Jobs/MotionJobs/KickJob.h"
@@ -157,9 +158,13 @@ protected:
         } 
         
         
+        /*NEW VISION
+        //-----------------------------------------------------------------------------------------------*/
+        HeadBehaviour* head_behaviour = HeadBehaviour::getInstance();
+        head_behaviour->makeVisionChoice(HeadBehaviour::TimeVSCostPriority);
+
         
-        
-        //VISION
+        /*OLD VISION
         //-----------------------------------------------------------------------------------------------
         static bool getting_up = false;
         static double getup_timer = 0.f;
@@ -284,7 +289,15 @@ protected:
             debug << " kicking: " << iskicking << endl;
         #endif
         m_previous_time = m_data->CurrentTime;
+
+        */
+
     }
+
+
+
+
+
     
 private:
     float m_pan_end_time;

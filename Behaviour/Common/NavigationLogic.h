@@ -56,7 +56,7 @@ public:
         
         return result;
     }
-    
+
     /*! @brief Returns a vector of (x,y,0) for the centre of the opponent goal.
      */
     static vector<float> getOpponentGoalPosition() {
