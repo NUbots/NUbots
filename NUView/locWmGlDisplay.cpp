@@ -32,6 +32,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(QGLFormat(QGL::Sample
     drawRobotModel = false;
     drawSigmaPoints = false;
     drawBestModelOnly = false;
+    m_showBall = true;
     setFont(QFont("Helvetica",12,QFont::Bold,false));
     currentLocalisation = 0;
     currentObjects = 0;
@@ -116,6 +117,10 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
 {
     switch (e->key())
     {
+        case Qt::Key_B:
+            m_showBall = !m_showBall;
+            update();
+            break;
         case Qt::Key_L:
             light = !light;
             if (!light)				// If Not Light
@@ -163,7 +168,7 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
             drawRobotModel = !drawRobotModel;
             update();
             break;
-        case Qt::Key_B:
+        case Qt::Key_M:
             drawBestModelOnly = !drawBestModelOnly;
             update();
             break;
@@ -236,7 +241,6 @@ void locWmGlDisplay::initializeGL()
 
 void locWmGlDisplay::paintEvent(QPaintEvent *event)
 {
-    QColor qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
     makeCurrent();
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -791,7 +795,10 @@ void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
             DrawSigmaPoint(drawColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
-    drawBall(QColor(255,165,0,alpha), model.state(KF::ballX), model.state(KF::ballY));
+    if(m_showBall)
+    {
+        drawBall(QColor(255,165,0,alpha), model.state(KF::ballX), model.state(KF::ballY));
+    }
 }
 
 void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const MobileObjectUKF& ball_model, const QColor& modelColor)
@@ -800,8 +807,11 @@ void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const MobileObject
     int alpha = drawColor.alpha();
     drawRobot(drawColor, model.mean(SelfModel::states_x), model.mean(SelfModel::states_y), model.mean(SelfModel::states_heading));
 
-    FieldPose ball_pose = calculateBallPosition(model, ball_model);
-    drawBall(QColor(255,165,0,alpha), ball_pose.x, ball_pose.y);
+    if(m_showBall)
+    {
+        FieldPose ball_pose = calculateBallPosition(model, ball_model);
+        drawBall(QColor(255,165,0,alpha), ball_pose.x, ball_pose.y);
+    }
 }
 
 void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor)
@@ -881,11 +891,17 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, const QColor& modelColor)
         Matrix sigmaPoints = model.CalculateSigmaPoints();
         for (int i=1; i < sigmaPoints.getn(); i++)
         {
-            DrawBallSigma(modelColor, sigmaPoints[KF::ballX][i], sigmaPoints[KF::ballY][i]);
+            if(m_showBall)
+            {
+                DrawBallSigma(modelColor, sigmaPoints[KF::ballX][i], sigmaPoints[KF::ballY][i]);
+            }
             DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
         }
     }
-    drawBallMarker(modelColor, model.state(KF::ballX), model.state(KF::ballY));
+    if(m_showBall)
+    {
+        drawBallMarker(modelColor, model.state(KF::ballX), model.state(KF::ballY));
+    }
 }
 
 void locWmGlDisplay::DrawModelMarkers(const SelfModel* model, const QColor& modelColor)
@@ -957,9 +973,12 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
         const SelfModel* model = localisation.getBestModel();
         DrawModelMarkers(model, drawColor);
         FieldPose ball_pose = calculateBallPosition(*model, *ball_model);
-        drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
-        fill.setAlpha(std::max((int)(100), c_min_display_alpha));
-        DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
+        if(m_showBall)
+        {
+            drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
+            fill.setAlpha(std::max((int)(100), c_min_display_alpha));
+            DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
+        }
     }
     else
     {
@@ -972,10 +991,13 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
                 int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->alpha()));
                 drawColor.setAlpha(alpha);
                 DrawModelMarkers((*model_it), drawColor);
-                FieldPose ball_pose = calculateBallPosition(*(*model_it), *ball_model);
-                drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
-                fill.setAlpha(std::max((int)(100), c_min_display_alpha));
-                DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
+                if(m_showBall)
+                {
+                    FieldPose ball_pose = calculateBallPosition(*(*model_it), *ball_model);
+                    drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
+                    fill.setAlpha(std::max((int)(100), c_min_display_alpha));
+                    DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
+                }
             }
         }
     }

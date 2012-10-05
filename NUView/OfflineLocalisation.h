@@ -63,6 +63,7 @@ private:
     unsigned int m_num_models_created;
     float m_experiment_run_time;
     bool m_running;
+    bool m_use_old_localisation;
 
 signals:
     void SimDataChanged(bool);

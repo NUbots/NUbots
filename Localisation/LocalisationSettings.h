@@ -12,6 +12,7 @@ public:
     enum PruneMethod
     {
         prune_unknown,
+        prune_none,
         prune_merge,
         prune_max_likelyhood,
         prune_viterbi,
@@ -21,6 +22,7 @@ public:
     enum BranchMethod
     {
         branch_unknown,
+        branch_none,
         branch_exhaustive,
         branch_selective,
         branch_constraint,

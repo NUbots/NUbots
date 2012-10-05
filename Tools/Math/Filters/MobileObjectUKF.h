@@ -44,6 +44,7 @@ public:
     MobileObjectUKF();
     ~MobileObjectUKF();
     bool directUpdate(const Matrix& position, const Matrix& covariance);
+    void initialiseModel(const Matrix& mean, const Matrix& covariance);
 protected:
     Matrix processEquation(const Matrix& sigma_point, double deltaT, const Matrix& measurement);
     Matrix measurementEquation(const Matrix& sigma_point, const Matrix& measurementArgs);

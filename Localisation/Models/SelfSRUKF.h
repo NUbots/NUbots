@@ -70,7 +70,6 @@ protected:
     Matrix sqrtOfProcessNoise; // Square root of Process Noise (Q matrix). (Constant)
     static const float c_Kappa;
     Matrix m_sqrt_covariance;
-
 };
 
 
