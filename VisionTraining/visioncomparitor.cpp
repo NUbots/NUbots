@@ -59,8 +59,10 @@ void VisionComparitor::run(string image_name, string lut_name, string config0, s
 
     m_halted = false;
     m_frame_no = 0;
+    ui->totalLCD->display(m_frames.size());
 
     while(!m_halted) {
+        ui->frameLCD->display(m_frame_no+1);
         m_next = m_prev = false;
 
         VisionConstants::loadFromFile(config0);

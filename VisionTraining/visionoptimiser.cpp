@@ -131,6 +131,9 @@ void VisionOptimiser::run(string directory, int total_iterations)
     m_test_performance_log.open((directory + m_opt_name + string("_test_performance.log")).c_str());
     m_test_performance_log.setf(ios_base::fixed);
 
+    m_training_performance_log << "Ball GoalBeacon Obstacle Line General" << endl;
+    m_test_performance_log << "Ball GoalBeacon Obstacle Line General" << endl;
+
     //read in the training and testing labels
     if(!vision->readLabels(train_label_file, m_ground_truth_training)) {
         QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("train_label.strm")).c_str()));
@@ -196,19 +199,21 @@ void VisionOptimiser::run(string directory, int total_iterations)
 
 int VisionOptimiser::step(int iteration, bool training)
 {
-    map<OPT_ID, float> batch_errors,
-                       fitnesses;
-    batch_errors[BALL_OPT] = 0;
-    batch_errors[GOAL_BEACON_OPT] = 0;
-    batch_errors[OBSTACLE_OPT] = 0;
-    batch_errors[LINE_OPT] = 0;
-    batch_errors[GENERAL_OPT] = 0;
+    map<OPT_ID, pair<float, int> > batch_errors;
+    map<OPT_ID, float> fitnesses;
     unsigned int frame_no = 0;
     int vision_code;
     //conditional references (differ between training and testing
     vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth = (training ? m_ground_truth_training : m_ground_truth_test);
     string& stream_name = (training ? m_train_image_name : m_test_image_name);
     ostream& performance_log = (training ? m_training_performance_log : m_test_performance_log);
+
+    //initialise batch errors
+    batch_errors[BALL_OPT] = pair<float, int>(0,0);
+    batch_errors[GOAL_BEACON_OPT] = pair<float, int>(0,0);
+    batch_errors[OBSTACLE_OPT] = pair<float, int>(0,0);
+    batch_errors[LINE_OPT] = pair<float, int>(0,0);
+    batch_errors[GENERAL_OPT] = pair<float, int>(0,0);
 
     //init gui
     ui->progressBar_strm->setMaximum(ground_truth.size());
@@ -226,16 +231,23 @@ int VisionOptimiser::step(int iteration, bool training)
 
     vision_code = vision->runFrame();
     while(vision_code == 0 && frame_no < ground_truth.size()-1 && !m_halted) {
-        map<OPT_ID, float> frame_error_sums;
-        frame_error_sums[BALL_OPT] = 0;
-        frame_error_sums[GOAL_BEACON_OPT] = 0;
-        frame_error_sums[OBSTACLE_OPT] = 0;
-        frame_error_sums[LINE_OPT] = 0;
-        frame_error_sums[GENERAL_OPT] = 0;
+        map<OPT_ID, pair<float, int> > frame_error_sums;
+        frame_error_sums[BALL_OPT] = pair<float, int>(0,0);
+        frame_error_sums[GOAL_BEACON_OPT] = pair<float, int>(0,0);
+        frame_error_sums[OBSTACLE_OPT] = pair<float, int>(0,0);
+        frame_error_sums[LINE_OPT] = pair<float, int>(0,0);
+        frame_error_sums[GENERAL_OPT] = pair<float, int>(0,0);
         //frame_error = 0;
 
         //get errors
-        map<VisionFieldObject::VFO_ID, float> frame_errors = vision->evaluateFrame(ground_truth[frame_no], m_false_positive_costs, m_false_negative_costs);
+        map<VisionFieldObject::VFO_ID, pair<float, int> > frame_errors = vision->evaluateFrame(ground_truth[frame_no], m_false_positive_costs, m_false_negative_costs);
+
+        //debugging
+        for(int i=0; i<VisionFieldObject::INVALID; i++) {
+            VisionFieldObject::VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
+            //frame_error += frame_errors.at(vfo_id);
+            cout << VisionFieldObject::getVFOName(vfo_id) << " " << frame_errors[vfo_id].first << " " << frame_errors[vfo_id].second << endl;
+        }
 
         //accumulate errors
         for(int i=0; i<VisionFieldObject::INVALID; i++) {
@@ -243,12 +255,20 @@ int VisionOptimiser::step(int iteration, bool training)
             //frame_error += frame_errors.at(vfo_id);
             vector<OPT_ID>::const_iterator it;
             for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
-                frame_error_sums.at(*it) += frame_errors.at(vfo_id);
+                frame_error_sums.at(*it).first += frame_errors.at(vfo_id).first;
+                frame_error_sums.at(*it).second += frame_errors.at(vfo_id).second;
             }
         }
 
+        //debugging
         for(int i=0; i<=GENERAL_OPT; i++) {
-            batch_errors.at(getIDFromInt(i)) += frame_error_sums.at(getIDFromInt(i));
+            cout << frame_error_sums.at(getIDFromInt(i)).first << " ";
+            cout << frame_error_sums.at(getIDFromInt(i)).second << endl;
+        }
+
+        for(int i=0; i<=GENERAL_OPT; i++) {
+            batch_errors.at(getIDFromInt(i)).first += frame_error_sums.at(getIDFromInt(i)).first;
+            batch_errors.at(getIDFromInt(i)).second += frame_error_sums.at(getIDFromInt(i)).second;
         }
 
         //update gui
@@ -264,10 +284,10 @@ int VisionOptimiser::step(int iteration, bool training)
         //update optimiser
         for(int i=0; i<=GENERAL_OPT; i++) {
             OPT_ID id = getIDFromInt(i);
-            if(batch_errors[id] == 0)
+            if(batch_errors[id].first == 0)
                 fitnesses[id] = numeric_limits<float>::max(); //not likely
             else
-                fitnesses[id] = 1.0/batch_errors[id];
+                fitnesses[id] = batch_errors[id].second/batch_errors[id].first;
             if(training) {
                 m_optimisers[id]->setParametersResult(fitnesses[id]);
             }
