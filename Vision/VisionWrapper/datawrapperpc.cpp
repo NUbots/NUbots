@@ -6,6 +6,8 @@
 
 #include "Vision/VisionTypes/coloursegment.h"
 
+#include <QFileDialog>
+
 DataWrapper* DataWrapper::instance = 0;
 
 string DataWrapper::getIDName(DATA_ID id) {
@@ -78,7 +80,8 @@ DataWrapper::DataWrapper()
         LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
         break;
     case STREAM:
-        streamname = string(getenv("HOME")) +  string("/nubot/image.strm");
+        streamname = QFileDialog::getOpenFileName(NULL, "Select image stream", getenv("HOME"),  "Stream Files (*.strm)").toStdString();
+        LUTname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", getenv("HOME"),  "LUT Files (*.lut)").toStdString();
         imagestrm.open(streamname.c_str());
         m_current_image = new NUImage();
         if(imagestrm.is_open()) {
@@ -87,7 +90,6 @@ DataWrapper::DataWrapper()
         else {
             errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
         }
-        LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
         break;
     case FILE:
         m_camera = NULL;
@@ -125,14 +127,14 @@ DataWrapper::DataWrapper()
     }
 
     //create map into images
-    debug_map[DBID_IMAGE]               = &debug_windows[0];
+    debug_map[DBID_IMAGE]               = &debug_windows[1];
     debug_map[DBID_H_SCANS]             = &debug_windows[0];
     debug_map[DBID_V_SCANS]             = &debug_windows[0];
     debug_map[DBID_SEGMENTS]            = &debug_windows[0];
     debug_map[DBID_MATCHED_SEGMENTS]    = &debug_windows[0];
     debug_map[DBID_HORIZON]             = &debug_windows[0];
     debug_map[DBID_GREENHORIZON_SCANS]  = &debug_windows[0];
-    debug_map[DBID_GREENHORIZON_FINAL]  = &debug_windows[0];
+    debug_map[DBID_GREENHORIZON_FINAL]  = &debug_windows[1];
     debug_map[DBID_OBJECT_POINTS]       = &debug_windows[0];
     debug_map[DBID_FILTERED_SEGMENTS]   = &debug_windows[1];
     debug_map[DBID_GOALS]               = &debug_windows[0];
@@ -349,9 +351,9 @@ bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     BOOST_FOREACH(Beacon b, data) {
         bl = b.getQuad().getBottomLeft();
         tr = b.getQuad().getTopRight();
-        if(b.getID() == Beacon::BlueBeacon)
+        if(b.getID() == VisionFieldObject::BEACON_B)
             rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,0,255), 2, 8, 0);
-        else if(b.getID() == Beacon::YellowBeacon)
+        else if(b.getID() == VisionFieldObject::BEACON_Y)
             rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,255,0), 2, 8, 0);
         else
             rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,255,255), 2, 8, 0);
@@ -378,10 +380,12 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
     BOOST_FOREACH(Goal post, data) {
         bl = post.getQuad().getBottomLeft();
         tr = post.getQuad().getTopRight();
-        if(post.getID() == Goal::BlueLeftGoal || post.getID() == Goal::BlueRightGoal || post.getID() == Goal::BlueUnknownGoal)
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(0,255,255), 2, 8, 0);
+        cv::Scalar colour;
+        if(VisionFieldObject::isBlueGoal(post.getID()))
+            colour = cv::Scalar(0,255,255);
         else
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,0,0), 2, 8, 0);
+            colour = cv::Scalar(255,0,0);
+        rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), colour, 2, 8, 0);
     }
     
     imshow(window, img);    //refresh this particular debug window
@@ -394,7 +398,7 @@ bool DataWrapper::debugPublish(const vector<Obstacle>& data)
     return false;
 }
 
-bool DataWrapper::debugPublish(const vector<LSFittedLine>& data)
+bool DataWrapper::debugPublish(const vector<FieldLine> &data)
 {
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
@@ -406,29 +410,8 @@ bool DataWrapper::debugPublish(const vector<LSFittedLine>& data)
     cv::Mat& img = results_img;    //get image from pair
     string& window = results_window_name; //get window name from pair
 
-    BOOST_FOREACH(LSFittedLine l, data) {
-        double x_int = l.getXIntercept(),
-               y_int = l.getYIntercept();
-        int width = results_img.cols,
-            height = results_img.rows;
-        if(x_int < 0) {
-            if(y_int < 0) {
-                cv::line(img, cv::Point2i(l.findXFromY(height), height), cv::Point2i(width, l.findYFromX(width)), cv::Scalar(0,0,255), 5);
-            }
-            else {
-                cv::line(img, cv::Point2i(l.findXFromY(height), height), cv::Point2i(0, y_int), cv::Scalar(0,0,255), 5);
-            }
-        }
-        else {
-            if(y_int < 0) {
-                cv::line(img, cv::Point2i(x_int, 0), cv::Point2i(width, l.findYFromX(width)), cv::Scalar(0,0,255), 5);
-            }
-            else {
-                cv::line(img, cv::Point2i(x_int, 0), cv::Point2i(0, y_int), cv::Scalar(0,0,255), 5);
-            }
-        }
-
-        cout << cv::Point2i(l.getXIntercept(), 0) << " " << cv::Point2i(0, l.getYIntercept()) << std::endl;
+    BOOST_FOREACH(FieldLine l, data) {
+        l.render(img);
     }
 
     imshow(window, img);    //refresh this particular debug window
@@ -572,12 +555,15 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const cv::Mat &img)
+bool DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
 {
     map<DEBUG_ID, pair<string, cv::Mat>* >::iterator map_it;
-
+    if(id != DBID_IMAGE) {
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        return false;
+    }
     //Get window assigned to id
-    //map_it = debug_map.find(id);
+    map_it = debug_map.find(id);
     if(map_it == debug_map.end()) {
         errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(id) << endl;
         return false;
@@ -586,52 +572,56 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const cv::Mat &img)
     cv::Mat& img_map = map_it->second->second;    //get image from pair
     string& window = map_it->second->first; //get window name from pair
 
-    switch(id) {
-    case DBID_IMAGE:
-        img_map = img;
-        imshow(window, img_map);
-        return true;
-    default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
-        return false;
-    }
+    unsigned char* ptr,
+            r, g, b;
 
+    for(int y=0; y<m_current_image->getHeight(); y++) {
+        ptr = img_map.ptr<unsigned char>(y);
+        for(int x=0; x<m_current_image->getWidth(); x++) {
+            ColorModelConversions::fromYCbCrToRGB((*img)(x,y).y, (*img)(x,y).cb, (*img)(x,y).cr, r, g, b);
+            ptr[3*x]   = b;
+            ptr[3*x+1] = g;
+            ptr[3*x+2] = r;
+        }
+    }
+    imshow(window, img_map);
+    return true;
 }
 
 bool DataWrapper::updateFrame()
 {
-    numFramesProcessed++;
-    
     switch(METHOD) {
     case CAMERA:
         m_current_image = m_camera->grabNewImage();   //force get new frame
         break;
     case STREAM:
+        if(!imagestrm.is_open()) {
+            errorlog << "No image stream" << endl;
+            return false;
+        }
         try {
             imagestrm >> *m_current_image;
         }
         catch(std::exception& e){
             cout << "Stream error - resetting: " << e.what() << endl;
             imagestrm.clear() ;
-            imagestrm.seekg(0, ios::beg) ;
+            imagestrm.seekg(0, ios::beg);
             imagestrm >> *m_current_image;
         }
         break;
     case FILE:
-        char c = cv::waitKey(10);
-        if(c > 0) {
-            cur_image = (cur_image+1)%num_images;
-            stringstream strm;
-            strm << GROUP_NAME << cur_image << GROUP_EXT;
-            capture->open(strm.str());
-            *capture >> m_current_image_cv;
+        cur_image = (cur_image+1)%num_images;
+        stringstream strm;
+        strm << GROUP_NAME << cur_image << GROUP_EXT;
+        capture->open(strm.str());
+        *capture >> m_current_image_cv;
 
-            imshow("test - DataWrapperPC::line28", m_current_image_cv);
+        imshow("test - DataWrapperPC::line28", m_current_image_cv);
 
-            generateImageFromMat(m_current_image_cv);
-        }
+        generateImageFromMat(m_current_image_cv);
         break;
     }
+    numFramesProcessed++;
     
     return true;
 }

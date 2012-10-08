@@ -1,10 +1,9 @@
-QT -= gui
-QT -= core
-
 INCLUDEPATH += /usr/local/include/opencv2/
 INCLUDEPATH += /usr/include/boost/
 
-LIBS += -lopencv_core -lopencv_highgui
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+
+DEFINES += QT_NO_DEBUG_STREAM
 
 PLATFORM = pc
 

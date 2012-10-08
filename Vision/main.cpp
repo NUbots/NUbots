@@ -5,17 +5,21 @@
 
 #include "VisionWrapper/visioncontrolwrapperpc.h"
 
+#include <QApplication>
+
 using namespace std;
 using namespace cv;
 
 int main(void)
 {
+    QApplication app(NULL);
     char ESC_KEY            = 27,
          STEP_KEY           = ' ',
          STEP_TOGGLE_KEY    = 's';
 
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();
     //DataWrapper* visiondata = DataWrapper::getInstance();
+
     char c=0;
     int error=0;
     bool stepping = true;
@@ -37,4 +41,5 @@ int main(void)
     }
     if(error != 0)
         cout << "Error: " << error << endl;
+
 }

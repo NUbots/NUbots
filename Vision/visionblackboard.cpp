@@ -732,7 +732,7 @@ void VisionBlackboard::debugPublish() const
 #endif
 
     wrapper->debugRefresh();
-//    wrapper->debugPublish(DataWrapper::DBID_IMAGE, *original_image_cv_4ch);
+    wrapper->debugPublish(DataWrapper::DBID_IMAGE, original_image);
     
     //horizon
     pts.clear();
@@ -789,7 +789,13 @@ void VisionBlackboard::debugPublish() const
     for(it=matched_horizontal_segments.begin(); it!=matched_horizontal_segments.end(); it++) {
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
-            pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+            if(s.getColour() == ClassIndex::white) {
+                pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+            }
+            else {
+                pts.push_back(PointType(s.getStart().x, s.getStart().y));
+                pts.push_back(PointType(s.getEnd().x, s.getEnd().y));
+            }
         }
     }
     wrapper->debugPublish(DataWrapper::DBID_MATCHED_SEGMENTS, pts);
@@ -799,7 +805,13 @@ void VisionBlackboard::debugPublish() const
     for(it=matched_vertical_segments.begin(); it!=matched_vertical_segments.end(); it++) {
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
-            pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+            if(s.getColour() == ClassIndex::white) {
+                pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+            }
+            else {
+                pts.push_back(PointType(s.getStart().x, s.getStart().y));
+                pts.push_back(PointType(s.getEnd().x, s.getEnd().y));
+            }
         }
     }
     wrapper->debugPublish(DataWrapper::DBID_MATCHED_SEGMENTS, pts);

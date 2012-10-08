@@ -17,7 +17,7 @@
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
-#include "Tools/Math/LSFittedLine.h"
+#include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 
 #define GROUP_NAME "/home/shannon/Images/paper"
 #define GROUP_EXT ".png"
@@ -92,10 +92,10 @@ public:
     bool debugPublish(const vector<Beacon>& data);
     bool debugPublish(const vector<Goal>& data);
     bool debugPublish(const vector<Obstacle>& data);
-    bool debugPublish(const vector<LSFittedLine>& data);
+    bool debugPublish(const vector<FieldLine>& data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
-    bool debugPublish(DEBUG_ID id, const Mat& img);
+    bool debugPublish(DEBUG_ID id, const NUImage *const img);
     
     
 private:

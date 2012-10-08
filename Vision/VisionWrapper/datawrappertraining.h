@@ -86,7 +86,7 @@ public:
     bool debugPublish(const vector<FieldLine>& data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points) {return id<NUMBER_OF_IDS && !data_points.empty();}
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region) {return id<NUMBER_OF_IDS && !region.empty();}
-    bool debugPublish(DEBUG_ID id, const cv::Mat& img) {return id<NUMBER_OF_IDS && !img.empty();}
+    bool debugPublish(DEBUG_ID id, const NUImage* const img) {return id<NUMBER_OF_IDS;}
 
 
 private:
