@@ -158,6 +158,7 @@ protected:
         bool drawRobotModel;
         bool drawSigmaPoints;
         bool drawBestModelOnly;
+        bool m_showBall;
 
 };
 

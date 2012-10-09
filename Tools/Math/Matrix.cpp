@@ -56,6 +56,15 @@ Matrix::~Matrix()
     delete [] X; X = 0;
 }
 
+void Matrix::swapRows(unsigned int index1, unsigned int index2)
+{
+    if(index1 == index2) return;
+    Matrix temp = getRow(index1);
+    setRow(index1, getRow(index2));
+    setRow(index2, temp);
+    return;
+}
+
 // Matrix Index Operator
 // Returns a pointer to the ith row in the matrix
 
@@ -546,7 +555,6 @@ Matrix CofactorMatrix(const Matrix& mat)
     return coMat;      
 }
 
-// using adjoint method seen here: http://www.mathwords.com/i/inverse_of_a_matrix.htm
 Matrix InverseMatrix(const Matrix& mat)
 {
     if(mat.getm() == 1)
@@ -555,10 +563,10 @@ Matrix InverseMatrix(const Matrix& mat)
         result[0][0] = 1.f / mat[0][0];
         return result;
     }
-    if(mat.getm() == 2)
+    else if(mat.getm() == 2)
         return Invert22(mat);
     else
-        return (CofactorMatrix(mat)).transp()/determinant(mat);
+        return GaussJordanInverse(mat);
 }
 
 ostream& operator <<(ostream& out, const Matrix &mat)
@@ -582,6 +590,66 @@ double dot(const Matrix& mat1, const Matrix& mat2)
          ret+=mat1[i][0]*mat2[i][0]; 
      return ret;        
           
+}
+
+Matrix CramersRuleInverse(const Matrix& mat)
+{
+    return (CofactorMatrix(mat)).transp()/determinant(mat);
+}
+
+Matrix GaussJordanInverse(const Matrix& mat)
+{
+    // Augment matrix with I - [mat | I]
+    Matrix A = horzcat(mat, Matrix(mat.getm(), mat.getn(), true));
+
+    int i,j;
+    unsigned int i_max = 0;
+    int k = 0;
+    double C;
+    for (k = 0; k < A.getm(); ++k)
+    {
+        // find max pivot.
+        i_max = k;
+        for (i = k; i < A.getm(); ++i)
+        {
+            if(fabs(A[i_max][k]) < fabs(A[i][k]))
+                i_max = i;
+        }
+
+        // Check if singular
+        if(A[i_max][k] == 0)
+            std::cout << "Matrix is singular" << std::endl;
+
+        A.swapRows(k, i_max);
+        for(i = k+1; i < A.getm(); ++i)
+        {
+            C = A[i][k] / A[k][k];
+            for(j = k+1; j < A.getn(); ++j)
+            {
+                A[i][j] -= A[k][j] * C;
+            }
+            A[i][k] = 0;
+        }
+    }
+    // Back substitution
+    for(k = A.getm()-1; k >= 0; --k)
+    {
+        C = A[k][k];
+        for(i=0; i < k; ++i)
+        {
+            for(j=A.getn()-1; j > k-1; --j)
+            {
+                A[i][j] -= A[k][j] * A[i][k] / C;
+            }
+        }
+        A.setRow(k, A.getRow(k) / C);
+    }
+
+    // Un-Augment matrix from I - [I | result]
+    Matrix result(mat.getm(), mat.getn(), false);
+    for(i=0; i < mat.getn(); ++i)
+        result.setCol(i, A.getCol(i + mat.getn()));
+    return result;
 }
 
 void WriteMatrix(std::ostream& out, const Matrix &mat)
