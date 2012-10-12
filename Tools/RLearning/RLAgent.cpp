@@ -30,7 +30,16 @@ void RLAgent::giveReward(float reward){
 }
 
 int RLAgent::getAction(vector<float> observations){
-    return FunctionApproximator.getValues(observations);
+    vector<float> Qvalues = FunctionApproximator.getValues(observations);
+    int BestAction = 0;
+    int BestReward = 0;
+    for(int i = 0; i<Qvalues.size();i++){
+        if (BestReward<Qvalues[i]){
+            BestReward=Qvalues[i];
+            BestAction=i;
+        }
+    }
+    return BestAction
 }
 
 void RLAgent::doLearning(){

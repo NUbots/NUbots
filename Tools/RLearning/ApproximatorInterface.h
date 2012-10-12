@@ -13,7 +13,7 @@ class ApproximatorInterface {
     
     virtual void doLearningEpisode(vector<vector<float>> const& observations, vector<float> const& rewards, float stepSize=0.1, int iterations=1);
     
-    virtual int getValues(vector<float> const& observations);
+    virtual vector<float> getValues(vector<float> const& observations);
     
     virtual void saveApproximator(string agentName);
     
