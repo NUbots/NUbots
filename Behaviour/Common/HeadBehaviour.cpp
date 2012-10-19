@@ -49,6 +49,11 @@
 	        maximumSearchTime = 2500.;
 	        actionObjectID = -1;
 
+            vector<float> inputs= head_logic->getTimeSinceLastSeenSummary();
+            vector<float> other_inputs = head_logic->getCostList(1,1);
+
+            Mrlagent();
+            Mrlagent.initialiseAgent(inputs.size()+other_inputs.size(),head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size(),10);
 	    }
 
 	    void HeadBehaviour::doPriorityListPolicy() {
@@ -116,7 +121,6 @@
 
 
 
-//public:
 
         HeadBehaviour* HeadBehaviour::getInstance() {
 	        //if (!Instance) {
@@ -180,11 +184,34 @@
                 case TimeVSCostPriority:
                     doTimeVSCostPriorityPolicy();
                 case RLAgent:
+                    doRLagentPolicy();
                     break;
                     //Get instructions from RL agent.
 	        }
 	    }
 
+
+        void HeadBehaviour::doRLAgentPolicy(){
+            //If the input vectors are changed, the RLagent input size must be changed.
+            vector<float> inputs= head_logic->getTimeSinceLastSeenSummary();
+            vector<float> other_inputs = head_logic->getCostList(1,1);
+
+            //Combines inputs to one vector to feed to RLagent
+            inputs.insert(inputs.end(), other_inputs.begin(), other_inputs.end());
+
+
+            int action = Mrlagent.getAction(inputs);//Should output integer from 0 to outputs-1
+            Mrlagent.giveMotivationReward();
+
+            if (action < head_logic->relevantObjects[0].size()/*i.e. Stationary Object*/){
+                dispatchHeadJob((StationaryObject*)head_logic->getObject(action));
+            } else if (action < head_logic->relevantObjects[1].size()/*i.e. Mobile Object*/){
+                dispatchHeadJob((MobileObject*)head_logic->getObject(action));
+            } else {
+                dispatchHeadJob((AmbiguousObject*)head_logic->getObject(action));
+            }
+
+        }
 
         void HeadBehaviour::dispatchHeadJob(StationaryObject* ObjectToTrack) {
             //initiate a new pan job using the robots estimated standard deviation of heading as the pan width

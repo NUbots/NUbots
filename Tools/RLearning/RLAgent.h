@@ -9,10 +9,11 @@
 class RLAgent: public RLearningInterface
 {
 public:
+
     RLAgent();
 
 private:
-    ApproximatorInterface FuntionApproximator;
+    ApproximatorInterface FunctionApproximator;
     float alpha;
     float beta;
     float gamma;
