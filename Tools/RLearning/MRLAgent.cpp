@@ -1,10 +1,15 @@
 #include "MRLAgent.h"
+
 #include <math.h>
 
 MRLAgent::MRLAgent():RLAgent()
 {
-
+    DictionaryApproximator DA();
+    FunctionApproximator = DA;
 }
+
+
+
 /*! @brief
         Initialises agent by initialising function approximator
 */
@@ -13,6 +18,9 @@ void MRLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numb
     //FunctionApproximator = FuncApprox;
     FunctionApproximator.initialiseApproximator(numberOfInputs, numberOfOutputs, numberOfHiddens);
 }
+
+
+
 /*! @brief
         Main feature of the MRL agent. The novelty of the latest observation is calculated by taking the Euclidean norm
     metric of the previous observation vectors with the latest.The motivation reward is then calculated by taking the Wundt function
@@ -34,8 +42,10 @@ float MRLAgent::giveMotivationReward(){
     giveReward(motivation);
 }
 
+
+
 /*! @brief
-        The wundt function is a linear combination of two
+        The wundt function is a linear combination of two sigmoids. It is similar to a decapitated gaussian distribution.
 */
 float MLRAgent::wundtFunction(float N){
     float N1 = 1;//Location of max positive gradient

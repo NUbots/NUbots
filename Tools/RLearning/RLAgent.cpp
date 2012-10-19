@@ -45,6 +45,8 @@ void RLAgent::setParameters(float alpha, float beta, float gamma, float lambda,i
         Gives a reward to the agent. The reward is stored in a vector until learning is called.
 */
 void RLAgent::giveReward(float reward){
+    vector<float> value();
+
     rewards.push_back(reward);
 }
 /*! @brief
@@ -61,14 +63,17 @@ int RLAgent::getAction(vector<float> observation){
             BestAction=i;
         }
     }
+    lastAction = BestAction;
     return BestAction;
 }
 /*! @brief
         Performs learning by modifying the function approximator to reflect rewards and observations
 */
 void RLAgent::doLearning(){
+
+
     for (int i =0;i<learningIterations;i++){
-        FunctionApproximator.doLearningEpisode(observations, rewards);
+        FunctionApproximator.doLearningEpisode(observations, values);
     }
 
 }
