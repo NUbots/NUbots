@@ -1,13 +1,24 @@
 
 
 
-#ifndef APPROXIMATORINTERFACE_H
-#define APPROXIMATORINTERFACE_H
+#ifndef DICTAPPROXIMATOR_H
+#define DICTAPPROXIMATOR_H
+
+#include < map >
+#include <string>
+using namespace std;
 
 
+class DictionaryApproximator {
 
-class ApproximatorInterface {
+private:
+    int tileMultiplier,numInputs,numOutputs;
+    map<string,float> approximator;
+    float getValue(vector<float> const& observations,int action);
+    float setValue(vector<float> const& observations,int action,float value)
+    string getRepresentation(vector<float> const& observations,int action)
     
+public:
     
     virtual void initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens);
     
