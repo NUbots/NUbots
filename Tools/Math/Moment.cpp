@@ -32,6 +32,18 @@ Moment::Moment(const Moment& source): m_numStates(source.m_numStates)
     m_covariance = source.m_covariance;
 }
 
+Moment::Moment(const Matrix& mean, const Matrix& covariance)
+{
+    const unsigned int size = mean.getm();
+    assert(size == covariance.getn());
+    assert(size == covariance.getm());
+
+    m_numStates = size;
+    setMean(mean);
+    setCovariance(covariance);
+    return;
+}
+
 Moment& Moment::operator=(const Moment& source)
 {
     if (this != &source) // protect against invalid self-assignment
@@ -121,8 +133,6 @@ float Moment::variance(unsigned int stateNumber) const
  */
 void Moment::setMean(const Matrix& newMean)
 {
-    assert(((unsigned int)newMean.getm() == m_numStates) && (newMean.getn() == 1));
-
     bool isCorrectSize = ((unsigned int)newMean.getm() == m_numStates) && (newMean.getn() == 1);
     assert(isCorrectSize);
     assert(newMean.isValid());
