@@ -205,7 +205,13 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/Models/WeightedModel.h \
     ../Tools/Math/depUKF.h \
     ../Localisation/iotests.h \
-    NUViewConfig/*.h
+    NUViewConfig/*.h \
+    ../Tools/Math/Filters/IKalmanFilter.h \
+    ../Tools/Math/Filters/SeqUKF.h \
+    ../Tools/Math/Filters/IKFModel.h \
+    ../Tools/Math/Filters/MobileObjectModel.h \
+    ../Tools/Math/Filters/RobotModel.h \
+    ../Tools/Math/Filters/KFBuilder.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -345,7 +351,11 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Filters/MobileObjectUKF.cpp \
     ../Localisation/Models/WeightedModel.cpp \
     ../Tools/Math/depUKF.cpp \
-    ../Localisation/iotests.cpp
+    ../Localisation/iotests.cpp \
+    ../Tools/Math/Filters/SeqUKF.cpp \
+    ../Tools/Math/Filters/MobileObjectModel.cpp \
+    ../Tools/Math/Filters/RobotModel.cpp \
+    ../Tools/Math/Filters/KFBuilder.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

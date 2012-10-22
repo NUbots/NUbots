@@ -14,6 +14,11 @@
 #include "nubotdataconfig.h"
 #include "nubotconfig.h"
 
+#include "Tools/Math/Filters/IKalmanFilter.h"
+#include "Tools/Math/Filters/KFBuilder.h"
+#include "Tools/Math/Filters/IKFModel.h"
+#include "Tools/Math/Filters/MobileObjectModel.h"
+
 #include <assert.h>
 
 
@@ -68,78 +73,18 @@ const float SelfLocalisation::c_twoObjectAngleVariance = 0.05f*0.05f; //Small! e
  */
 SelfLocalisation::SelfLocalisation(int playerNumber, const LocalisationSettings& settings): m_timestamp(0), m_settings(settings)
 {
-    m_hasGps = false;
-    m_previously_incapacitated = true;
-    m_previous_game_state = GameInformation::InitialState;
-    m_currentFrameNumber = 0;
-    total_bad_known_objects = 0;
-
-    m_amILost = true;
-    m_lostCount = 100;
-    m_timeSinceFieldObjectSeen = 0;
-    m_gps.resize(2,0.0f);
-
-    //m_models.reserve(c_MAX_MODELS);
-    m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
-    m_ball_model = new MobileObjectUKF();
-    m_prevSharedBalls.clear();
-
-    initSingleModel(67.5f, 0, mathGeneral::PI);
-
-    #if DEBUG_LOCALISATION_VERBOSITY > 0
-        std::stringstream debugLogName;
-        debugLogName << DATA_DIR;
-        if(playerNumber) debugLogName << playerNumber;
-        debugLogName << "Localisation.log";
-        debug_file.open(debugLogName.str().c_str());
-        debug_file.clear();
-        debug_file << "Localisation" << std::endl;
-    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
+    init();
     return;
 }
 
 SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
 {
-    m_hasGps = false;
-    m_previously_incapacitated = true;
-    m_previous_game_state = GameInformation::InitialState;
-    m_currentFrameNumber = 0;
-    total_bad_known_objects = 0;
-	
-    m_amILost = true;
-    m_lostCount = 100;
-    m_timeSinceFieldObjectSeen = 0;
-    m_gps.resize(2,0.0f);
-
-    m_models.clear();
+    init();
 
     // Set default settings
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_viterbi);
-    //    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
-//  Changed to viterbi, since we are now introducing a lot of possible 'rubbish' models
-//  to try out resetting conditions. Merging these seems to be bad, as they can gang up
-//  merge together and overpower to good, more accurate models. Works well in the simulations
-//  at least.
 
-
-    m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
-
-    m_ball_model = new MobileObjectUKF();
-    m_prevSharedBalls.clear();
-
-    initSingleModel(67.5f, 0, mathGeneral::PI);
-
-
-    #if DEBUG_LOCALISATION_VERBOSITY > 0
-        std::stringstream debugLogName;
-        debugLogName << DATA_DIR;
-        if(playerNumber) debugLogName << playerNumber;
-        debugLogName << "Localisation.log";
-        debug_file.open(debugLogName.str().c_str());
-        debug_file.clear();
-        debug_file << "Localisation" << std::endl;
-    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     return;
 }
 
@@ -148,7 +93,8 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
  */
 SelfLocalisation::SelfLocalisation(const SelfLocalisation& source): TimestampedData(), m_settings(source.m_settings)
 {
-    m_ball_model = NULL;
+    //m_ball_model = new MobileObjectUKF();
+    m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf, KFBuilder::kmobile_object);
     *this = source;
 }
 
@@ -177,11 +123,48 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
         {
             m_models.push_back(new Model(*(*model_it)));
         }
-        if (m_ball_model!=NULL) delete m_ball_model;
-        m_ball_model = new MobileObjectUKF(*source.m_ball_model);
+
+        if (m_ball_filter!=NULL) delete m_ball_filter;
+
+        m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf, KFBuilder::kmobile_object);
+        Moment est = source.m_ball_filter->estimate();
+        m_ball_filter->initialiseEstimate(est);
     }
     // by convention, always return *this
     return *this;
+}
+
+void SelfLocalisation::init()
+{
+    m_hasGps = false;
+    m_previously_incapacitated = true;
+    m_previous_game_state = GameInformation::InitialState;
+    m_currentFrameNumber = 0;
+    total_bad_known_objects = 0;
+
+    m_amILost = true;
+    m_lostCount = 100;
+    m_timeSinceFieldObjectSeen = 0;
+    m_gps.resize(2,0.0f);
+
+    //m_models.reserve(c_MAX_MODELS);
+    m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
+    //m_ball_model = new MobileObjectUKF();
+    m_prevSharedBalls.clear();
+
+    m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf, KFBuilder::kmobile_object);
+
+    initSingleModel(67.5f, 0, mathGeneral::PI);
+
+    #if DEBUG_LOCALISATION_VERBOSITY > 0
+        std::stringstream debugLogName;
+        debugLogName << DATA_DIR;
+        if(playerNumber) debugLogName << playerNumber;
+        debugLogName << "Localisation.log";
+        debug_file.open(debugLogName.str().c_str());
+        debug_file.clear();
+        debug_file << "Localisation" << std::endl;
+    #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 }
 
 /*! @brief Destructor
@@ -189,7 +172,7 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
 SelfLocalisation::~SelfLocalisation()
 {
     clearModels();
-    if (m_ball_model!=NULL) delete m_ball_model;
+    if (m_ball_filter!=NULL) delete m_ball_filter;
     #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_file.close();
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -716,15 +699,17 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     float hcos = cos(self.Heading());
     float hsin = sin(self.Heading());
 
+    Moment ball_estimate = m_ball_filter->estimate();
+
     // Retrieve the ball model values.
-    float relBallX = m_ball_model->mean(MobileObjectUKF::x_pos);
-    float relBallY = m_ball_model->mean(MobileObjectUKF::y_pos);
-    float relBallSdX = m_ball_model->sd(MobileObjectUKF::x_pos);
-    float relBallSdY = m_ball_model->sd(MobileObjectUKF::y_pos);
-    float relBallXVel = m_ball_model->mean(MobileObjectUKF::x_vel);
-    float relBallYVel = m_ball_model->mean(MobileObjectUKF::y_vel);
-    float relBallSdXVel = m_ball_model->sd(MobileObjectUKF::x_vel);
-    float relBallSdYVel = m_ball_model->sd(MobileObjectUKF::y_vel);
+    float relBallX = ball_estimate.mean(MobileObjectModel::states_x_pos);
+    float relBallY = ball_estimate.mean(MobileObjectModel::states_y_pos);
+    float relBallSdX = ball_estimate.sd(MobileObjectModel::states_x_pos);
+    float relBallSdY = ball_estimate.sd(MobileObjectModel::states_y_pos);
+    float relBallXVel = ball_estimate.mean(MobileObjectModel::states_x_vel);
+    float relBallYVel = ball_estimate.mean(MobileObjectModel::states_y_vel);
+    float relBallSdXVel = ball_estimate.sd(MobileObjectModel::states_x_vel);
+    float relBallSdYVel = ball_estimate.sd(MobileObjectModel::states_y_vel);
 
     // Rotate the relative ball postion to alight with the forward looking robot on the field.
     float rotatedX = relBallX * hcos - relBallY * hsin;
@@ -766,7 +751,7 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
 
     // calculate the field variance of the ball R^-1 * Sigma * R + SelfVariance
     // We are assuming that the variances are independant.
-    Matrix fieldBallVariance = InverseMatrix(rotMatrix) * m_ball_model->covariance() * rotMatrix + selfPositionVariance;
+    Matrix fieldBallVariance = InverseMatrix(rotMatrix) * ball_estimate.covariance() * rotMatrix + selfPositionVariance;
 
     // Write the results to the ball object.
     ball.updateObjectLocation(ballFieldLocationX, ballFieldLocationY, ballFieldSdX, ballFieldSdY);
@@ -898,43 +883,48 @@ void SelfLocalisation::initSingleModel(float x, float y, float heading)
     temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*2*PI*2*PI));
     positions.push_back(temp);
     InitialiseModels(positions);
-    initBallModel(m_ball_model);
+    initBallModel(m_ball_filter);
 }
 
-void SelfLocalisation::initBallModel(MobileObjectUKF* ball_model)
+void SelfLocalisation::initBallModel(IKalmanFilter* ball_model)
 {
+    const unsigned int total_states = ball_model->model()->totalStates();
     if(ball_model == NULL) return;
-    MobileObjectUKF::State state;
-    Matrix mean(ball_model->totalStates(), 1, false);
-    Matrix covariance(ball_model->totalStates(), ball_model->totalStates(), false);
+    MobileObjectModel::State state;
+    Matrix mean(total_states, 1, false);
+    Matrix covariance(total_states, total_states, false);
 
     // Assign initial covariance
     const double initial_pos_cov = 100*100;
     const double initial_vel_cov = 10*10;
-    state = MobileObjectUKF::x_pos;
+    state = MobileObjectModel::states_x_pos;
     covariance[state][state] = initial_pos_cov;
-    state = MobileObjectUKF::y_pos;
+    state = MobileObjectModel::states_y_pos;
     covariance[state][state] = initial_pos_cov;
-    state = MobileObjectUKF::x_vel;
+    state = MobileObjectModel::states_x_vel;
     covariance[state][state] = initial_vel_cov;
-    state = MobileObjectUKF::y_vel;
+    state = MobileObjectModel::states_y_vel;
     covariance[state][state] = initial_vel_cov;
 
-    ball_model->initialiseModel(mean, covariance);
+
+    //ball_model->initialiseModel(mean, covariance);
+
+    Moment estimate(mean, covariance);
+    ball_model->initialiseEstimate(estimate);
 }
 
 void SelfLocalisation::doSingleInitialReset(GameInformation::TeamColour team_colour)
 {
     float initial_heading = 0 + (team_colour==GameInformation::RedTeam?mathGeneral::PI:0);
     initSingleModel(0,0,initial_heading);
-    initBallModel(m_ball_model);
+    initBallModel(m_ball_filter);
 }
 
 void SelfLocalisation::doSingleReset()
 {
     clearModels();
     initSingleModel(0,0,0);
-    initBallModel(m_ball_model);
+    initBallModel(m_ball_filter);
 }
 
 void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
@@ -1016,7 +1006,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     positions.push_back(temp);
 
     InitialiseModels(positions);
-    initBallModel(m_ball_model);
+    initBallModel(m_ball_filter);
     return;
 }
 
@@ -1102,7 +1092,7 @@ void SelfLocalisation::doSetReset(GameInformation::TeamColour team_colour, int p
     
     // Add the models.
     InitialiseModels(positions);
-    initBallModel(m_ball_model);
+    initBallModel(m_ball_filter);
     return;
 }
 
@@ -1131,7 +1121,7 @@ void SelfLocalisation::doPenaltyReset()
     positions.push_back(temp);
 
     InitialiseModels(positions);
-    initBallModel(m_ball_model);
+    initBallModel(m_ball_filter);
     return;
 }
 
@@ -1185,7 +1175,7 @@ void SelfLocalisation::doReset()
     newPositions.push_back(temp);
 
     InitialiseModels(newPositions);
-    initBallModel(m_ball_model);
+    initBallModel(m_ball_filter);
     return;
 }
 
@@ -1305,18 +1295,26 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
     measurementNoise[2][2] = 0.005*0.005; // Robot Theta. 0.00001
 
     // calculate the linear process noise.
+//    Matrix processNoise = Matrix(4,4,true);
+//    processNoise[0][0] = 20*20;
+//    processNoise[1][1] = 20*20;
+//    processNoise[2][2] = 40*40;
+//    processNoise[3][3] = 40*40;
+
     Matrix processNoise = Matrix(4,4,true);
-    processNoise[0][0] = 20*20;
-    processNoise[1][1] = 20*20;
-    processNoise[2][2] = 40*40;
-    processNoise[3][3] = 40*40;
+    processNoise[0][0] = 2*2;
+    processNoise[1][1] = 2*2;
+    processNoise[2][2] = 4*4;
+    processNoise[3][3] = 4*4;
 
     double deltaTimeSeconds = timeIncrement * 1e-3; // Convert from milliseconds to seconds.
 
     processNoise = deltaTimeSeconds * processNoise;
 
     // perform time update on the ball model.
-    m_ball_model->timeUpdate(deltaTimeSeconds, odometry, processNoise, measurementNoise);
+//    m_ball_model->timeUpdate(deltaTimeSeconds, odometry, processNoise, measurementNoise);
+
+    m_ball_filter->timeUpdate(deltaTimeSeconds, odometry, processNoise, measurementNoise);
 
     // Put measurement in the vector format.
     std::vector<float> odom(3,0.0f);
@@ -1669,6 +1667,7 @@ bool SelfLocalisation::ballUpdate(const MobileObject& ball)
     const float time_for_new_loc = 1000;
     if(ball.isObjectVisible())
     {
+        std::cout << "Ball mesurement update." << std::endl;
         const float distance = ball.measuredDistance() * cos(ball.measuredElevation());
         const float heading = ball.measuredBearing();
 
@@ -1680,13 +1679,22 @@ bool SelfLocalisation::ballUpdate(const MobileObject& ball)
         measurementNoise[0][0] = 5.0*5.0 + c_obj_range_relative_variance * pow(distance,2);
         measurementNoise[1][1] = 0.01*0.01;
 
-        m_ball_model->measurementUpdate(measurement, measurementNoise);
+//        m_ball_model->measurementUpdate(measurement, measurementNoise);
+        m_ball_filter->measurementUpdate(measurement, measurementNoise, Matrix(), 0);
         if((m_timestamp - m_prev_ball_update_time) > time_for_new_loc)
         {
-            Matrix currMean = m_ball_model->mean();
-            currMean[MobileObjectUKF::x_vel][0] = 0.0;
-            currMean[MobileObjectUKF::y_vel][0] = 0.0;
-            m_ball_model->setMean(currMean);
+//            Matrix currMean = m_ball_model->mean();
+//            currMean[MobileObjectUKF::x_vel][0] = 0.0;
+//            currMean[MobileObjectUKF::y_vel][0] = 0.0;
+//            m_ball_model->setMean(currMean);
+
+
+            Moment est = m_ball_filter->estimate();
+            Matrix filter_mean = est.mean();
+            filter_mean[2][0] = 0.0;
+            filter_mean[3][0] = 0.0;
+            est.setMean(filter_mean);
+            m_ball_filter->initialiseEstimate(est);
         }
         m_prev_ball_update_time = m_timestamp;
     }
@@ -2149,9 +2157,9 @@ const SelfModel* SelfLocalisation::getBestModel() const
     return result;
 }
 
-const MobileObjectUKF* SelfLocalisation::getBallModel() const
+const IKalmanFilter* SelfLocalisation::getBallModel() const
 {
-    return m_ball_model;
+    return m_ball_filter;
 }
 
 /*! @brief Normalises the alphas of all exisiting models.
@@ -2309,7 +2317,7 @@ bool SelfLocalisation::operator ==(const SelfLocalisation& b) const
         if(m_gps[0] != b.m_gps[0]) return false;
         if(m_gps[1] != b.m_gps[1]) return false;
     }
-    if(*m_ball_model != *b.m_ball_model) return false;
+    if(*m_ball_filter != *b.m_ball_filter) return false;
 
     unsigned int num_models = m_models.size();
     if(num_models != b.m_models.size()) return false;
@@ -2348,7 +2356,7 @@ std::ostream& SelfLocalisation::writeStreamBinary (std::ostream& output) const
     output.write(reinterpret_cast<const char*>(&m_settings), sizeof(m_settings));
 
     // Write the ball model
-    m_ball_model->writeStreamBinary(output);
+    m_ball_filter->writeStreamBinary(output);
 
     // Write the slef localisation models.
     unsigned int num_models = m_models.size();
@@ -2385,7 +2393,7 @@ std::istream& SelfLocalisation::readStreamBinary (std::istream& input)
     input.read(reinterpret_cast<char*>(&m_settings), sizeof(m_settings));
 
     // Read the ball model
-    m_ball_model->readStreamBinary(input);
+    m_ball_filter->readStreamBinary(input);
 
     // Write the slef localisation models.
     unsigned int num_models;
@@ -2528,30 +2536,41 @@ void SelfLocalisation::setModels(ModelContainer& newModels)
 
 void SelfLocalisation::addToBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var)
 {
-    Matrix cov = m_ball_model->covariance();
+    Matrix cov = m_ball_filter->estimate().covariance();
+    const unsigned int total_states = m_ball_filter->model()->totalStates();
 
     // Create a matrix for the addative noise.
-    Matrix additiveNoise(MobileObjectUKF::total_states, MobileObjectUKF::total_states, false);
-    additiveNoise[MobileObjectUKF::x_pos][MobileObjectUKF::x_pos] = x_pos_var;
-    additiveNoise[MobileObjectUKF::y_pos][MobileObjectUKF::y_pos] = y_pos_var;
-    additiveNoise[MobileObjectUKF::x_vel][MobileObjectUKF::x_vel] = x_vel_var;
-    additiveNoise[MobileObjectUKF::y_vel][MobileObjectUKF::y_vel] = y_vel_var;
+    Matrix additiveNoise(total_states, total_states, false);
+    additiveNoise[MobileObjectModel::states_x_pos][MobileObjectModel::states_x_pos] = x_pos_var;
+    additiveNoise[MobileObjectModel::states_y_pos][MobileObjectModel::states_y_pos] = y_pos_var;
+    additiveNoise[MobileObjectModel::states_x_vel][MobileObjectModel::states_x_vel] = x_vel_var;
+    additiveNoise[MobileObjectModel::states_y_vel][MobileObjectModel::states_y_vel] = y_vel_var;
 
     // Add the extra variance
     cov = cov + additiveNoise;
 
-    m_ball_model->setCovariance(cov);
+    Moment est = m_ball_filter->estimate();
+    cov = est.covariance();
+    cov = cov + additiveNoise;
+    est.setCovariance(cov);
+    m_ball_filter->initialiseEstimate(est);
+    return;
 }
 
 void SelfLocalisation::setBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var)
 {
+    const unsigned int total_states = m_ball_filter->model()->totalStates();
     // Create a matrix for the addative noise.
-    Matrix cov(MobileObjectUKF::total_states, MobileObjectUKF::total_states, false);
-    cov[MobileObjectUKF::x_pos][MobileObjectUKF::x_pos] = x_pos_var;
-    cov[MobileObjectUKF::y_pos][MobileObjectUKF::y_pos] = y_pos_var;
-    cov[MobileObjectUKF::x_vel][MobileObjectUKF::x_vel] = x_vel_var;
-    cov[MobileObjectUKF::y_vel][MobileObjectUKF::y_vel] = y_vel_var;
-    m_ball_model->setCovariance(cov);
+    Matrix cov(total_states, total_states, false);
+    cov[MobileObjectModel::states_x_pos][MobileObjectModel::states_x_pos] = x_pos_var;
+    cov[MobileObjectModel::states_y_pos][MobileObjectModel::states_y_pos] = y_pos_var;
+    cov[MobileObjectModel::states_x_vel][MobileObjectModel::states_x_vel] = x_vel_var;
+    cov[MobileObjectModel::states_y_vel][MobileObjectModel::states_y_vel] = y_vel_var;
+
+    Moment est = m_ball_filter->estimate();
+    est.setCovariance(cov);
+    m_ball_filter->initialiseEstimate(est);
+    return;
 }
 
 /*! @brief Create a 3x1 mean matrix with value as defiend by the parameters.
@@ -2692,6 +2711,7 @@ Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& ob
 
 bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall>& sharedBalls)
 {
+    return false;
     std::vector<TeamPacket::SharedBall>::const_iterator their_ball = sharedBalls.begin();
 
     const SelfModel& best_model = (*getBestModel());
@@ -2723,7 +2743,8 @@ bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall
         covariance[1][0] = sharedball.SRXY;
         covariance[1][1] = sharedball.SRYY;
 
-        m_ball_model->directUpdate(relativePosition, covariance);
+        // TODO: Do somehting that does the update.
+        //m_ball_model->directUpdate(relativePosition, covariance);
 
         ++their_ball;
     }

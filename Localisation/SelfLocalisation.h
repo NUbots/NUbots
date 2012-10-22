@@ -2,7 +2,7 @@
 #define SELF_LOCWM_H_DEFINED
 #include "Models/SelfSRUKF.h"
 #include "Models/SelfUKF.h"
-#include "Tools/Math/Filters/MobileObjectUKF.h"
+//#include "Tools/Math/Filters/MobileObjectUKF.h"
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -32,6 +32,9 @@ typedef SelfSRUKF Model;
 typedef std::list<SelfModel*> ModelContainer;
 typedef std::pair<unsigned int, float> ParentSum;
 #include "LocalisationSettings.h"
+
+class IKalmanFilter;
+class KFBuilder;
 
 class SelfLocalisation: public TimestampedData
 {
@@ -72,7 +75,7 @@ class SelfLocalisation: public TimestampedData
         unsigned int getNumActiveModels();
         unsigned int getNumFreeModels();
         const SelfModel* getBestModel() const;
-        const MobileObjectUKF* getBallModel() const;
+        const IKalmanFilter* getBallModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
 
@@ -107,7 +110,7 @@ class SelfLocalisation: public TimestampedData
 
         // Model Reset Functions
         void initSingleModel(float x, float y, float heading);
-        void initBallModel(MobileObjectUKF* ball_model);
+        void initBallModel(IKalmanFilter* ball_model);
         bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
         void doInitialReset(GameInformation::TeamColour team_colour);
         void doSingleInitialReset(GameInformation::TeamColour team_colour);
@@ -181,13 +184,16 @@ class SelfLocalisation: public TimestampedData
         MeasurementError calculateError(const Object& theObject);
         Vector2<float> TriangulateTwoObject(const StationaryObject& object1, const StationaryObject& object2);
         vector<StationaryObject*> filterToVisible(const Self& location, const vector<StationaryObject*>& possibleObjects, float headPan, float fovX);
+        void init();
 
         // Multiple Models Stuff
         static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
         ModelContainer m_models;
 
-        MobileObjectUKF* m_ball_model;
+        //MobileObjectUKF* m_ball_model;
+
+        IKalmanFilter* m_ball_filter;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
         ofstream debug_file; // Logging file

@@ -10,6 +10,9 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Tools/Math/Limit.h"
 
+#include "Tools/Math/Filters/MobileObjectModel.h"
+#include "Tools/Math/Filters/IKalmanFilter.h"
+
 // Apple has to be different...
 #if defined(__APPLE__) || defined(MACOSX)
   #include <glu.h>
@@ -801,7 +804,7 @@ void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
     }
 }
 
-void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const MobileObjectUKF& ball_model, const QColor& modelColor)
+void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const IKalmanFilter& ball_model, const QColor& modelColor)
 {
     QColor drawColor(modelColor);
     int alpha = drawColor.alpha();
@@ -809,7 +812,7 @@ void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const MobileObject
 
     if(m_showBall)
     {
-        FieldPose ball_pose = calculateBallPosition(model, ball_model);
+        FieldPose ball_pose = calculateBallPosition(model, ball_model.estimate());
         drawBall(QColor(255,165,0,alpha), ball_pose.x, ball_pose.y);
     }
 }
@@ -840,7 +843,7 @@ void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, c
 
 void locWmGlDisplay::DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor)
 {
-    const MobileObjectUKF* ball_model = localisation.getBallModel();
+    const IKalmanFilter* ball_model = localisation.getBallModel();
     if(drawBestModelOnly)
     {
         const SelfModel* model = localisation.getBestModel();
@@ -957,12 +960,13 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     QColor drawColor(modelColor);
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
 
-    const MobileObjectUKF* ball_model = localisation.getBallModel();
+    const IKalmanFilter* ball_model = localisation.getBallModel();
+    Moment ball_estimate = ball_model->estimate();
 
-    Matrix cov = ball_model->covariance();
-    float xx = cov[MobileObjectUKF::x_pos][MobileObjectUKF::x_pos];
-    float xy = cov[MobileObjectUKF::x_pos][MobileObjectUKF::y_pos];
-    float yy = cov[MobileObjectUKF::y_pos][MobileObjectUKF::y_pos];
+    Matrix cov = ball_estimate.covariance();
+    float xx = cov[MobileObjectModel::states_x_pos][MobileObjectModel::states_x_pos];
+    float xy = cov[MobileObjectModel::states_x_pos][MobileObjectModel::states_y_pos];
+    float yy = cov[MobileObjectModel::states_y_pos][MobileObjectModel::states_y_pos];
     FieldPose ball_ellipse = CalculateErrorElipse(xx,xy,yy);
 
     QColor fill(modelColor);
@@ -972,7 +976,7 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
         drawColor.setAlpha(255);
         const SelfModel* model = localisation.getBestModel();
         DrawModelMarkers(model, drawColor);
-        FieldPose ball_pose = calculateBallPosition(*model, *ball_model);
+        FieldPose ball_pose = calculateBallPosition(*model, ball_estimate);
         if(m_showBall)
         {
             drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
@@ -993,7 +997,7 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
                 DrawModelMarkers((*model_it), drawColor);
                 if(m_showBall)
                 {
-                    FieldPose ball_pose = calculateBallPosition(*(*model_it), *ball_model);
+                    FieldPose ball_pose = calculateBallPosition(*(*model_it), ball_estimate);
                     drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
                     fill.setAlpha(std::max((int)(100), c_min_display_alpha));
                     DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
@@ -1004,7 +1008,7 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
 
 }
 
-FieldPose locWmGlDisplay::calculateBallPosition(const SelfModel& robot_model, const MobileObjectUKF& ball_model)
+FieldPose locWmGlDisplay::calculateBallPosition(const SelfModel& robot_model, const Moment &ball_estimate)
 {
     FieldPose result;
     float selfX = robot_model.mean(SelfModel::states_x);
@@ -1015,8 +1019,8 @@ FieldPose locWmGlDisplay::calculateBallPosition(const SelfModel& robot_model, co
     float hcos = cos(selfHeading);
     float hsin = sin(selfHeading);
 
-    float relBallX = ball_model.mean(MobileObjectUKF::x_pos);
-    float relBallY = ball_model.mean(MobileObjectUKF::y_pos);
+    float relBallX = ball_estimate.mean(MobileObjectModel::states_x_pos);
+    float relBallY = ball_estimate.mean(MobileObjectModel::states_y_pos);
     // Rotate the relative ball postion to alight with the forward looking robot on the field.
     float rotatedX = relBallX * hcos - relBallY * hsin;
     float rotatedY = relBallX * hsin + relBallY * hcos;
