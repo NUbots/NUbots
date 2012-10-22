@@ -11,7 +11,6 @@ MobileObjectUKF::~MobileObjectUKF()
 {
 }
 
-
 /*!
  * @brief The process equation is used to update the systems state using the process euquations of the system.
  * @param sigma_point The sigma point representing a system state.
@@ -150,13 +149,4 @@ bool MobileObjectUKF::directUpdate(const Matrix& position, const Matrix& cov)
     setMean(newMean);
     setCovariance(newCovariance);
     return true;
-}
-
-void MobileObjectUKF::initialiseModel(const Matrix& mean, const Matrix& covariance)
-{
-    setMean(mean);
-    setCovariance(covariance);
-    m_sigma_points = GenerateSigmaPoints();
-    m_sigma_mean = CalculateMeanFromSigmas(m_sigma_points);
-    return;
 }
