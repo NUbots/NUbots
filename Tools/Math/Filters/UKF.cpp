@@ -1,5 +1,6 @@
 #include "UKF.h"
 #include "debug.h"
+#include "Tools/Math/General.h"
 
 using namespace std;
 
@@ -33,12 +34,14 @@ void UKF::CalculateWeights()
     // initialise to correct sizes. These are row vectors.
     m_mean_weights = Matrix(1, totalWeights, false);
     m_covariance_weights = Matrix(1, totalWeights, false);
+    m_sqrt_covariance_weights = Matrix(1, totalWeights, false);
 
     // Calculate the weights.
     for (unsigned int i = 0; i < totalWeights; ++i)
     {
         m_mean_weights[0][i] = Wm(i);
         m_covariance_weights[0][i] = Wc(i);
+        m_sqrt_covariance_weights[0][i] = sqrt(fabs(m_covariance_weights[0][i]));
     }
     return;
 }
@@ -132,6 +135,9 @@ bool UKF::timeUpdate(double deltaT, const Matrix& measurement, const Matrix& lin
     // Redraw sigma point to include process noise.
     m_sigma_points = GenerateSigmaPoints();
 
+    // Initialise the variables for sequential measurement updates.
+    m_C = Matrix(totalPoints, totalPoints, true);
+    m_d = Matrix(totalPoints, 1, false);
     return true;
 }
 
@@ -161,39 +167,39 @@ bool UKF::measurementUpdate(const Matrix& measurement, const Matrix& measurement
     // Now calculate the mean of these measurement sigmas.
     Matrix Ymean = CalculateMeanFromSigmas(Yprop);
 
-    Matrix Pyy(measurementNoise);   // measurement noise is added, so just use as the beginning value of the sum.
-    Matrix Pxy(numStates, totalMeasurements, false);
+    Matrix Y(totalMeasurements,totalPoints,false);
+    Matrix X(numStates, totalPoints, false);
 
-    // Calculate the Pyy and Pxy variance matrices.
+    // Calculate the Y and X vectors.
     for(unsigned int i = 0; i < totalPoints; ++i)
     {
-        double weight = m_covariance_weights[0][i];
-        // store difference between prediction and measurement.
-        currentPoint = Yprop.getCol(i) - Ymean;
-        // Innovation covariance - Add Measurement noise
-        Pyy = Pyy + weight * currentPoint * currentPoint.transp();
-        // Cross correlation matrix
-        Pxy = Pxy + weight * (m_sigma_points.getCol(i) - m_sigma_mean) * currentPoint.transp();    // Important: Use mean from estimate, not current mean.
+        double weight = m_sqrt_covariance_weights[0][i];
+        Y.setCol(i, weight*(Yprop.getCol(i) - Ymean));
+        X.setCol(i, weight*(m_sigma_points.getCol(i) - m_sigma_mean));
     }
 
-    // Calculate the Kalman filter gain
-    Matrix K;
-    // If we have a 2 dimensional measurement, use the faster shortcut function.
-    if(totalMeasurements == 2)
-    {
-        K = Pxy * Invert22(Pyy);
-    }
-    else
-    {
-        K = Pxy * InverseMatrix(Pyy);
-    }
+    // Calculate the new C and d values.
+    Matrix Yaug = Y;
+    Yaug.setCol(0, mathGeneral::sign(m_covariance_weights[0][0]) * Yaug.getCol(0));
+    Matrix Ytransp = Yaug.transp();
+    m_C = m_C - m_C * Ytransp * InverseMatrix(measurementNoise+Y*m_C*Ytransp) * Y * m_C;
+    m_d = m_d + Ytransp * InverseMatrix(measurementNoise) * (measurement - Ymean);
 
-    Matrix newMean = mean() + K * (measurement - Ymean);
-    Matrix newCovariance = covariance() - K*Pyy*K.transp();
+    Matrix newMean = m_sigma_mean + X * m_C * m_d;
+    Matrix newCovariance = X * m_C * X.transp();
 
     setMean(newMean);
     setCovariance(newCovariance);
     return true;
+}
+
+void UKF::initialiseModel(const Matrix& mean, const Matrix& covariance)
+{
+    setMean(mean);
+    setCovariance(covariance);
+    m_sigma_points = GenerateSigmaPoints();
+    m_sigma_mean = CalculateMeanFromSigmas(m_sigma_points);
+    return;
 }
 
 bool UKF::operator ==(const UKF& b) const
