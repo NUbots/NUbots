@@ -4,18 +4,26 @@
 
 SeqUKF::SeqUKF(IKFModel* model): IKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
 {
-    CalculateWeights();
-    initialiseEstimate(m_estimate);
+    init();
 }
 
 SeqUKF::SeqUKF(const SeqUKF& source): IKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
-    CalculateWeights();
-    initialiseEstimate(m_estimate);
+    init();
 }
 
 SeqUKF::~SeqUKF()
 {
+}
+
+void SeqUKF::init()
+{
+    CalculateWeights();
+    initialiseEstimate(m_estimate);
+    m_outlier_filtering_enabled = false;
+    m_weighting_enabled = false;
+    m_outlier_threshold = 15.f;
+    m_filter_weight = 1.f;
 }
 
 /*!
@@ -169,8 +177,14 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     Yaug.setCol(0, mathGeneral::sign(m_covariance_weights[0][0]) * Yaug.getCol(0));
     Matrix Ytransp = Yaug.transp();
 
+    Matrix innovation = measurement - Ymean;
+
+    // Check for oultier, if outlier return without updating estimate.
+    if(!evaluateMeasurement(innovation, Y * Ytransp, noise)) // Y * Y^T is the estimate variance, by definition.
+        return false;
+
     m_C = m_C - m_C * Ytransp * InverseMatrix(noise + Y*m_C*Ytransp) * Y * m_C;
-    m_d = m_d + Ytransp * InverseMatrix(noise) * (measurement - Ymean);
+    m_d = m_d + Ytransp * InverseMatrix(noise) * innovation;
 
     // Update mean and covariance.
     Matrix updated_mean = m_sigma_mean + m_X * m_C * m_d;
@@ -213,6 +227,28 @@ void SeqUKF::initialiseEstimate(const Moment& estimate)
 const Moment& SeqUKF::estimate() const
 {
     return m_estimate;
+}
+
+bool SeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance)
+{
+    if(!m_outlier_filtering_enabled and !m_weighting_enabled) return true;
+
+    Matrix innov_transp = innovation.transp();
+    Matrix sum_variance = estimate_variance + measurement_variance;
+
+    if(m_outlier_filtering_enabled)
+    {
+        float innovation_2 = convDble(innov_transp * InverseMatrix(sum_variance) * innovation);
+        if(m_outlier_threshold > 0 and innovation_2 > m_outlier_threshold)
+            return false;
+    }
+
+    if(m_weighting_enabled)
+    {
+        m_filter_weight *= 1 / ( 1 + convDble(innov_transp * InverseMatrix(measurement_variance) * innovation));
+    }
+
+    return true;
 }
 
 std::ostream& SeqUKF::writeStreamBinary (std::ostream& output) const

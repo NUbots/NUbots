@@ -191,8 +191,6 @@ class SelfLocalisation: public TimestampedData
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
         ModelContainer m_models;
 
-        //MobileObjectUKF* m_ball_model;
-
         IKalmanFilter* m_ball_filter;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0

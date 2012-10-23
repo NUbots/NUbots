@@ -94,7 +94,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
 SelfLocalisation::SelfLocalisation(const SelfLocalisation& source): TimestampedData(), m_settings(source.m_settings)
 {
     //m_ball_model = new MobileObjectUKF();
-    m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf, KFBuilder::kmobile_object);
+    m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::kmobile_object_model);
     *this = source;
 }
 
@@ -123,10 +123,8 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
         {
             m_models.push_back(new Model(*(*model_it)));
         }
-
         if (m_ball_filter!=NULL) delete m_ball_filter;
-
-        m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf, KFBuilder::kmobile_object);
+        m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::kmobile_object_model);
         Moment est = source.m_ball_filter->estimate();
         m_ball_filter->initialiseEstimate(est);
     }
@@ -152,7 +150,7 @@ void SelfLocalisation::init()
     //m_ball_model = new MobileObjectUKF();
     m_prevSharedBalls.clear();
 
-    m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf, KFBuilder::kmobile_object);
+    m_ball_filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::kmobile_object_model);
 
     initSingleModel(67.5f, 0, mathGeneral::PI);
 
@@ -1667,7 +1665,6 @@ bool SelfLocalisation::ballUpdate(const MobileObject& ball)
     const float time_for_new_loc = 1000;
     if(ball.isObjectVisible())
     {
-        std::cout << "Ball mesurement update." << std::endl;
         const float distance = ball.measuredDistance() * cos(ball.measuredElevation());
         const float heading = ball.measuredBearing();
 

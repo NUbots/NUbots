@@ -72,6 +72,17 @@ public:
     */
     virtual const Moment& estimate() const = 0;
 
+    // Weighting functions.
+    virtual void enableWeighting(bool enabled = true) = 0;
+    virtual bool getFilterWeight() const = 0;
+    virtual void setFilterWeight(float weight) = 0;
+
+    // Outlier filtering settings.
+    virtual void enableOutlierFiltering(bool enabled = true) = 0;
+    virtual void setOutlierThreshold(float new_threshold) = 0;
+    virtual bool outlierFiltering() const = 0;
+    virtual float outlierThreshold() const = 0;
+
     IKFModel* model() {return m_model;}
 
     bool operator ==(const IKalmanFilter& b) const

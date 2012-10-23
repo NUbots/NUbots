@@ -89,8 +89,23 @@ public:
     @return The input stream.
     */
     std::istream& readStreamBinary (std::istream& input);
-private:
 
+    // Weighting functions.
+    void enableWeighting(bool enabled = true) {m_weighting_enabled = enabled;}
+    bool getFilterWeight() const {return m_filter_weight;}
+    void setFilterWeight(float weight) {m_filter_weight = weight;}
+
+    // Outlier filtering settings.
+    void enableOutlierFiltering(bool enabled = true) {m_outlier_filtering_enabled = enabled;}
+    void setOutlierThreshold(float new_threshold){m_outlier_threshold = new_threshold;}
+    bool outlierFiltering() const {return m_outlier_filtering_enabled;}
+    float outlierThreshold() const {return m_outlier_threshold;}
+
+private:
+    bool m_outlier_filtering_enabled;
+    float m_outlier_threshold;
+    bool m_weighting_enabled;
+    float m_filter_weight;
     Moment m_estimate;
     Matrix m_mean_weights;
     Matrix m_covariance_weights;
@@ -102,6 +117,9 @@ private:
     Matrix m_X;
 
     UnscentedTransform m_unscented_transform;
+
+    void init();
+    bool evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance);
 
     // Functions for performing steps of the UKF algorithm.
     void CalculateWeights();

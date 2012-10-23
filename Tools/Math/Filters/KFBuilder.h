@@ -7,16 +7,16 @@ class KFBuilder
 public:
     enum Model
     {
-        kmobile_object,
-        krobot,
+        kmobile_object_model,
+        krobot_model,
         ktotal_models
     };
     enum Filter
     {
-        kseq_ukf,
-        ksr_seq_ukf,
-        kukf,
-        ksr_ukf,
+        kseq_ukf_filter,
+        ksr_seq_ukf_filter,
+        kukf_filter,
+        ksr_ukf_filter,
         ktotal_filters
     };
     KFBuilder();

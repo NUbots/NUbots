@@ -20,10 +20,10 @@ IKalmanFilter* KFBuilder::getNewFilter(Filter filter_type, Model model_type)
     // First get the correct model to use for our filter.
     switch (model_type)
     {
-        case kmobile_object:
+        case kmobile_object_model:
             model = new MobileObjectModel();
             break;
-        case krobot:
+        case krobot_model:
             model = new RobotModel();
             break;
         default:
@@ -36,17 +36,30 @@ IKalmanFilter* KFBuilder::getNewFilter(Filter filter_type, Model model_type)
     // Now make the filter type we want using the model.
     switch (filter_type)
     {
-        case kukf:
+        case kukf_filter:
             break;
-        case ksr_ukf:
+        case ksr_ukf_filter:
             break;
-        case kseq_ukf:
+        case kseq_ukf_filter:
             filter = new SeqUKF(model);
             break;
-        case ksr_seq_ukf:
+        case ksr_seq_ukf_filter:
             break;
         default:
             filter = NULL;
+    }
+
+    // Set the filter for the model.
+    switch (model_type)
+    {
+        case kmobile_object_model:
+            break;
+        case krobot_model:
+            filter->enableOutlierFiltering();
+            filter->enableWeighting();
+            break;
+        default:
+            break;
     }
 
     // If the correct filter was not created, delete the model since it cannot be used.
