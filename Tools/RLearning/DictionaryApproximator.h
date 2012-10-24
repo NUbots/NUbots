@@ -1,4 +1,4 @@
-
+z
 
 
 #ifndef DICTAPPROXIMATOR_H

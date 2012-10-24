@@ -11,9 +11,11 @@ void DictionaryApproximator::initialiseApproximator(int numberOfInputs, int numb
 void DictionaryApproximator::doLearningEpisode(vector< vector<float> > const& observations, vector< vector<float> > const& values, float stepSize, int iterations) {
     string tmp;
     for (int i = 0; i < observations.size(); i++) {
+       //for each observation
         for (int j = 0; j < numOutputs; j++) {
+          //for each possible action
             tmp = getValue(observations[i],j);
-            map[tmp] = values[i][j];
+            map[tmp] = values[i][j];//Assign the value function to be the input values.
         }
     }
 }
@@ -28,6 +30,7 @@ vector<float> DictionaryApproximator::getValues(vector<float> const& observation
     
 void DictionaryApproximator::saveApproximator(string agentName) {
     ifstream save_file;
+    string file_name = agentName+"_approximator";//Added by Jake
     save_file.open(file_name,ios_base::in);
     string tempstr;
     
@@ -41,6 +44,7 @@ void DictionaryApproximator::saveApproximator(string agentName) {
     
 void DictionaryApproximator::loadApproximator(string agentName) {
     ifstream save_file;
+    string file_name = agentName+"_approximator";//Added by Jake
     save_file.open(file_name,ios_base::in);
     string tempstr;
     float tempval;

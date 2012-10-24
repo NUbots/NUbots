@@ -49,11 +49,10 @@
 	        maximumSearchTime = 2500.;
 	        actionObjectID = -1;
 
-            vector<float> inputs= head_logic->getTimeSinceLastSeenSummary();
-            vector<float> other_inputs = head_logic->getCostList(1,1);
+            vector<float> inputs = getPercept();
 
             Mrlagent();
-            Mrlagent.initialiseAgent(inputs.size()+other_inputs.size(),head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size(),10);
+            Mrlagent.initialiseAgent(inputs.size(),head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size(),10/*Size of grading in look up table?*/);
 	    }
 
 	    void HeadBehaviour::doPriorityListPolicy() {
@@ -192,12 +191,8 @@
 
 
         void HeadBehaviour::doRLAgentPolicy(){
-            //If the input vectors are changed, the RLagent input size must be changed.
-            vector<float> inputs= head_logic->getTimeSinceLastSeenSummary();
-            vector<float> other_inputs = head_logic->getCostList(1,1);
 
-            //Combines inputs to one vector to feed to RLagent
-            inputs.insert(inputs.end(), other_inputs.begin(), other_inputs.end());
+            vector<float> inputs = getPercept();
 
 
             int action = Mrlagent.getAction(inputs);//Should output integer from 0 to outputs-1
@@ -211,6 +206,16 @@
                 dispatchHeadJob((AmbiguousObject*)head_logic->getObject(action));
             }
 
+        }
+
+        vector<float> HeadBehaviour::getPercept(){
+            //If the input vectors are changed, the RLagent input size must be changed.
+            vector<float> inputs= head_logic->getTimeSinceLastSeenSummary();
+            vector<float> other_inputs = head_logic->getCostList(1,1);
+
+            //Combines inputs to one vector to feed to RLagent
+            inputs.insert(inputs.end(), other_inputs.begin(), other_inputs.end());
+            return inputs;
         }
 
         void HeadBehaviour::dispatchHeadJob(StationaryObject* ObjectToTrack) {

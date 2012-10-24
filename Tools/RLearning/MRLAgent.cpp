@@ -17,6 +17,10 @@ void MRLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numb
     //MRLFunctionApprox FuncApprox(numberOfInputs, numberOfOutputs, numberOfHiddens);
     //FunctionApproximator = FuncApprox;
     FunctionApproximator.initialiseApproximator(numberOfInputs, numberOfOutputs, numberOfHiddens);
+    num_inputs = numberOfInputs;
+    num_outputs = numberOfOutputs;
+    num_hidden = numberOfHiddens;
+    setParameters();
 }
 
 
@@ -34,9 +38,10 @@ float MRLAgent::giveMotivationReward(){
 
             novelty+= memory_constant*(observations[i][j]-observations[observations.size()-1][j])*(observations[i][j]-observations[observations.size()-1][j]);
             memory_constant*=memory_constant;
-            count++;
+
             //novelty = sum of squared differences of current percept from all previous percepts, with time distant percepts decreasing in importance exponentially
         }
+        count++;
     }
     float motivation = wundtFunction(novelty/count);
     giveReward(motivation);
