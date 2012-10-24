@@ -90,13 +90,14 @@ public:
 
     std::vector<std::vector<float> > getObLocSummary();
 
+    //Vector of all relevant object vectors, indexed via the enum types.
+    std::vector<std::vector<int> > relevantObjects;
 
 private:
 
 
 
-    //Vector of all above relevant object vectors, indexed via the enum types.
-    std::vector<std::vector<int> > relevantObjects;
+
     //Camera field of view constants
     float m_CAMERA_FOV_X;//rad
     float m_CAMERA_FOV_Y;

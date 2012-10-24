@@ -1,29 +1,52 @@
 #include "MRLAgent.h"
+
 #include <math.h>
+
 MRLAgent::MRLAgent():RLAgent()
 {
-    FunctionApproximator();
-
+    DictionaryApproximator DA();
+    FunctionApproximator = DA;
 }
 
+
+
+/*! @brief
+        Initialises agent by initialising function approximator
+*/
 void MRLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens){
     //MRLFunctionApprox FuncApprox(numberOfInputs, numberOfOutputs, numberOfHiddens);
     //FunctionApproximator = FuncApprox;
     FunctionApproximator.initialiseApproximator(numberOfInputs, numberOfOutputs, numberOfHiddens);
 }
 
+
+
+/*! @brief
+        Main feature of the MRL agent. The novelty of the latest observation is calculated by taking the Euclidean norm
+    metric of the previous observation vectors with the latest.The motivation reward is then calculated by taking the Wundt function
+    of the novelty.*/
 float MRLAgent::giveMotivationReward(){
     float novelty=0;
+    float memory_constant = 0.9;
+    int count = 0;//used to normalise the novelty
     for (int i=0; i<observations.size()-1;i++){
         for (int j=0; j<observations[i].size();j++){
-            novelty+= exp(-i*0.01)*(observations[i][j]-observations[observations.size()-1][j])*(observations[i][j]-observations[observations.size()-1][j]);
+
+            novelty+= memory_constant*(observations[i][j]-observations[observations.size()-1][j])*(observations[i][j]-observations[observations.size()-1][j]);
+            memory_constant*=memory_constant;
+            count++;
             //novelty = sum of squared differences of current percept from all previous percepts, with time distant percepts decreasing in importance exponentially
         }
     }
-    float motivation = wundtFunction(novelty);
+    float motivation = wundtFunction(novelty/count);
     giveReward(motivation);
 }
 
+
+
+/*! @brief
+        The wundt function is a linear combination of two sigmoids. It is similar to a decapitated gaussian distribution.
+*/
 float MLRAgent::wundtFunction(float N){
     float N1 = 1;//Location of max positive gradient
     float N2 = 2;//Location of max negative gradient

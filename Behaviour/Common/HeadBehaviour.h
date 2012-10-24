@@ -31,6 +31,8 @@
 #include "Tools/Math/General.h"
 #include "Infrastructure/NUBlackboard.h"
 
+#include "Tools/RLearning/MRLAgent.h"
+
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Infrastructure/Jobs/MotionJobs/KickJob.h"
 #include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
@@ -40,7 +42,8 @@
 class HeadBehaviour {
 
 private:
-    //static HeadBehaviour* Instance;
+    //MRLAgent:
+    MRLAgent Mrlagent;
     
     //These are the camera margins objects must be inside (as a percentage) when the robot looks at them.
     float cameraMarginX;
@@ -71,6 +74,7 @@ private:
     HeadLogic* head_logic;
     void doPriorityListPolicy();
     void doTimeVSCostPriorityPolicy();
+    void doRLAgentPolicy();
 
 public:
 

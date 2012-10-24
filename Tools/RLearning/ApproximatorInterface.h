@@ -1,6 +1,4 @@
 
-
-
 #ifndef APPROXIMATORINTERFACE_H
 #define APPROXIMATORINTERFACE_H
 
@@ -23,3 +21,6 @@ class ApproximatorInterface {
 };
 
 #endif
+
+
+

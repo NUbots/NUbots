@@ -15,8 +15,8 @@ private:
     int tileMultiplier,numInputs,numOutputs;
     map<string,float> approximator;
     float getValue(vector<float> const& observations,int action);
-    float setValue(vector<float> const& observations,int action,float value)
-    string getRepresentation(vector<float> const& observations,int action)
+    float setValue(vector<float> const& observations,int action,float value);
+    string getRepresentation(vector<float> const& observations,int action);
     
 public:
     
