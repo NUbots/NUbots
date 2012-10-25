@@ -15,14 +15,16 @@ HEADERS += \
     ../Vision/VisionTypes/VisionFieldObjects/fieldline.h \
     labeleditor.h \
     visionoptimiser.h \
-    visioncomparitor.h
+    visioncomparitor.h \
+    optimiserselectwindow.h
 
 SOURCES += \
     mainwindow.cpp \
     labelgenerator.cpp \
     labeleditor.cpp \
     visionoptimiser.cpp \
-    visioncomparitor.cpp
+    visioncomparitor.cpp \
+    optimiserselectwindow.cpp
 
 HEADERS += \
     ../Vision/VisionTools/pccamera.h \
@@ -80,6 +82,7 @@ HEADERS += \
     ../Tools/Optimisation/EHCLSOptimiser.h \
     ../Tools/Optimisation/PGRLOptimiser.h \
     ../Tools/Optimisation/PSOOptimiser.h \
+    ../Tools/Optimisation/PGAOptimiser.h \
     ../Infrastructure/NUImage/NUImage.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
@@ -109,6 +112,7 @@ SOURCES += \
     ../Tools/Optimisation/EHCLSOptimiser.cpp \
     ../Tools/Optimisation/PGRLOptimiser.cpp \
     ../Tools/Optimisation/PSOOptimiser.cpp \
+    ../Tools/Optimisation/PGAOptimiser.cpp \
     ../Infrastructure/NUImage/NUImage.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
@@ -131,4 +135,5 @@ FORMS += \
     labelgenerator.ui \
     labeleditor.ui \
     visionoptimiser.ui \
-    visioncomparitor.ui
+    visioncomparitor.ui \
+    optimiserselectwindow.ui

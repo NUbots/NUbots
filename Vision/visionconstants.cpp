@@ -84,7 +84,6 @@ unsigned int VisionConstants::SAM_MAX_LINES;
 float VisionConstants::SAM_SPLIT_DISTANCE;
 unsigned int VisionConstants::SAM_MIN_POINTS_OVER;
 unsigned int VisionConstants::SAM_MIN_POINTS_TO_LINE;
-unsigned int VisionConstants::SAM_SPLIT_NOISE_ITERATIONS;
 float VisionConstants::SAM_MAX_ANGLE_DIFF_TO_MERGE;
 float VisionConstants::SAM_MAX_DISTANCE_TO_MERGE;
 unsigned int VisionConstants::SAM_MIN_POINTS_TO_LINE_FINAL;
@@ -112,11 +111,10 @@ void VisionConstants::loadFromFile(std::string filename)
     GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH = 15;
     MIN_GOAL_SEPARATION = 20;
     SAM_MAX_POINTS = 500;
-    SAM_MAX_LINES = 15;
+    SAM_MAX_LINES = 100;
     SAM_SPLIT_DISTANCE = 1.0;
     SAM_MIN_POINTS_OVER = 2;
     SAM_MIN_POINTS_TO_LINE = 3;
-    SAM_SPLIT_NOISE_ITERATIONS = 2;
     SAM_MAX_ANGLE_DIFF_TO_MERGE = 0.1;
     SAM_MAX_DISTANCE_TO_MERGE = 10;
     SAM_MIN_POINTS_TO_LINE_FINAL = 5;
@@ -333,9 +331,6 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("SAM_MIN_POINTS_TO_LINE") == 0) {
             in >> SAM_MIN_POINTS_TO_LINE;
         }
-        else if(name.compare("SAM_SPLIT_NOISE_ITERATIONS") == 0) {
-            in >> SAM_SPLIT_NOISE_ITERATIONS;
-        }
         else if(name.compare("SAM_MAX_ANGLE_DIFF_TO_MERGE") == 0) {
             in >> SAM_MAX_ANGLE_DIFF_TO_MERGE;
         }
@@ -368,8 +363,8 @@ void VisionConstants::loadFromFile(std::string filename)
     }
     in.close();
     
-    debug << "VisionConstants::loadFromFile-" << std::endl;
-    print(debug);
+    //debug << "VisionConstants::loadFromFile-" << std::endl;
+    //print(debug);
 }
 
 void VisionConstants::print(ostream& out)
@@ -443,7 +438,6 @@ void VisionConstants::print(ostream& out)
     out << "SAM_SPLIT_DISTANCE: " << SAM_SPLIT_DISTANCE << std::endl;
     out << "SAM_MIN_POINTS_OVER: " << SAM_MIN_POINTS_OVER << std::endl;
     out << "SAM_MIN_POINTS_TO_LINE: " << SAM_MIN_POINTS_TO_LINE << std::endl;
-    out << "SAM_SPLIT_NOISE_ITERATIONS: " << SAM_SPLIT_NOISE_ITERATIONS << std::endl;
     out << "SAM_MAX_ANGLE_DIFF_TO_MERGE: " << SAM_MAX_ANGLE_DIFF_TO_MERGE << std::endl;
     out << "SAM_MAX_DISTANCE_TO_MERGE: " << SAM_MAX_DISTANCE_TO_MERGE << std::endl;
     out << "SAM_MIN_POINTS_TO_LINE_FINAL: " << SAM_MIN_POINTS_TO_LINE_FINAL << std::endl;

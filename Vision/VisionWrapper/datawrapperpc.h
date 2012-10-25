@@ -37,32 +37,27 @@ class DataWrapper
 
 public:
     
-    enum DATA_ID {
-        DID_IMAGE,
-        DID_CLASSED_IMAGE
-    };
-    
     enum DEBUG_ID {
-        DBID_IMAGE=0,
-        DBID_H_SCANS=1,
-        DBID_V_SCANS=2,
-        DBID_SEGMENTS=3,
-        DBID_MATCHED_SEGMENTS=4,
-        DBID_HORIZON=5,
-        DBID_GREENHORIZON_SCANS=6,
-        DBID_GREENHORIZON_FINAL=7,
-        DBID_OBJECT_POINTS=8,
-        DBID_FILTERED_SEGMENTS=9,
-        DBID_GOALS=10,
-        DBID_BEACONS=11,
-        DBID_BALLS=12,
-        DBID_OBSTACLES=13,
-        DBID_LINES=14,
-        NUMBER_OF_IDS=15
+        DBID_IMAGE              = 0,
+        DBID_CLASSED_IMAGE       = 1,
+        DBID_H_SCANS            = 2,
+        DBID_V_SCANS            = 3,
+        DBID_SEGMENTS           = 4,
+        DBID_MATCHED_SEGMENTS   = 5,
+        DBID_HORIZON            = 6,
+        DBID_GREENHORIZON_SCANS = 7,
+        DBID_GREENHORIZON_FINAL = 8,
+        DBID_OBJECT_POINTS      = 9,
+        DBID_FILTERED_SEGMENTS  = 10,
+        DBID_GOALS              = 11,
+        DBID_BEACONS            = 12,
+        DBID_BALLS              = 13,
+        DBID_OBSTACLES          = 14,
+        DBID_LINES              = 15,
+        NUMBER_OF_IDS           = 16
     };
 
     static string getIDName(DEBUG_ID id);
-    static string getIDName(DATA_ID id);
 
     static DataWrapper* getInstance();
 
@@ -83,7 +78,6 @@ public:
     const LookUpTable& getLUT() const;
         
     //! PUBLISH METHODS
-    void publish(DATA_ID id, const Mat& img);
     void publish(const vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
@@ -95,6 +89,7 @@ public:
     bool debugPublish(const vector<FieldLine>& data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
+    bool debugPublish(DEBUG_ID id);
     bool debugPublish(DEBUG_ID id, const NUImage *const img);
     
     
@@ -124,6 +119,8 @@ private:
 
     NUImage* m_current_image;
 
+    string configname;
+
     string LUTname;
     LookUpTable LUT;
 
@@ -143,7 +140,7 @@ private:
     
     //! Used for debugging
     int debug_window_num;
-    map<DEBUG_ID, pair<string, Mat>* > debug_map;
+    map<DEBUG_ID, vector<pair<string, Mat>* > > debug_map;
     pair<string, Mat>* debug_windows;
 
 //    int id_window_map[NUMBER_OF_IDS];

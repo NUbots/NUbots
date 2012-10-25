@@ -1,5 +1,5 @@
-/*! @file PGRLOptimiser.cpp
-    @brief Implemenation of PGRLOptimiser class
+/*! @file PGAOptimiser.cpp
+    @brief Implemenation of PGAOptimiser class
  
     @author Jason Kulk
  
@@ -19,7 +19,7 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "PGRLOptimiser.h"
+#include "PGAOptimiser.h"
 #include "Parameter.h"
 
 #include "NUPlatform/NUPlatform.h"
@@ -36,7 +36,7 @@ using namespace boost::accumulators;
  	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
  	@param parameters the initial seed for the optimisation
  */
-PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
+PGAOptimiser::PGAOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
     m_step_size = 0.01;        	   // Tune this
     m_epsilon = 0.03;              // Tune this
@@ -57,11 +57,11 @@ PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : O
 }
 
 /*! @brief Destructor for the abstract optimiser */
-PGRLOptimiser::~PGRLOptimiser()
+PGAOptimiser::~PGAOptimiser()
 {
 }
 
-void PGRLOptimiser::setParametersResult(const vector<float>& fitness)
+void PGAOptimiser::setParametersResult(const vector<float>& fitness)
 {
 	float selectedfitness = fitness[m_selected_fitness];
 	setParametersResult(selectedfitness);
@@ -80,77 +80,67 @@ void PGRLOptimiser::setParametersResult(const vector<float>& fitness)
 		m_stall_count = 0;
 		m_selected_fitness = (m_selected_fitness+1)%fitness.size();
 	}
-	debug << "PGRLOptimiser::setParametersResult(" << fitness << "). Using fitness " << m_selected_fitness << ". Stalled for " << m_stall_count << endl;
+	debug << "PGAOptimiser::setParametersResult(" << fitness << "). Using fitness " << m_selected_fitness << ". Stalled for " << m_stall_count << endl;
 }
 
-void PGRLOptimiser::setParametersResult(float fitness)
+void PGAOptimiser::setParametersResult(float fitness)
 {
-    m_fitnesses.push_back(fitness);
+    m_fitnesses.push_back(-1.0*fitness);
     m_random_policies_index++;
     if ((unsigned int) m_random_policies_index == m_random_policies.size())
     {
         m_current_parameters += calculateStep();
         generatePolicies();
     }
-    debug << "PGRLOptimiser::setParametersResult fitness: " << fitness << endl;
+    debug << "PGAOptimiser::setParametersResult fitness: " << fitness << endl;
 }
 
-vector<float> PGRLOptimiser::getNextParameters()
+vector<float> PGAOptimiser::getNextParameters()
 {
     return m_random_policies[m_random_policies_index];
 }
 
 /*! @brief Generates a set of policies from the seed to estimate the gradient
  */
-void PGRLOptimiser::generatePolicies()
+void PGAOptimiser::generatePolicies()
 {
-    //generateShuffledPolices(m_current_parameters);
-    generateRandomPolices(m_current_parameters);
+	generateShuffledPolices(m_current_parameters);
 }
 
-/*! @brief Calculates a step in the direction of the gradient estimated through the polices selected
+/*! @brief Calculates a probability weighted movement in the direction of the gradient estimated through the polices selected
  *	@return the step (ie. the new parameters should be parameters += step)
  */
-vector<float> PGRLOptimiser::calculateStep()
+vector<float> PGAOptimiser::calculateStep()
 {
     int num_dim = m_current_parameters.size();
     vector<float> A(num_dim);
-
-    // calculate the averages for negative, zero, and positive epsilons
-    for (int i=0; i<num_dim; i++)
+    vector<float> deltas(m_random_policies.size());
+    float minfit = 1000000.f,maxfit = -1000000.f;
+    
+    //get fitness min and max
+    for (int j=0; j<m_random_policies.size(); j++)
     {
-        float average_minus = 0;
-        float average_zero = 0;
-        float average_plus = 0;
-        accumulator_set<float, stats<tag::mean> > accum_minus(0);
-        accumulator_set<float, stats<tag::mean> > accum_zero(0);
-        accumulator_set<float, stats<tag::mean> > accum_plus(0);
-        for (int j=0; j<m_random_policies.size(); j++)
-        {
-            if (m_random_policies[j][i] < m_current_parameters[i].get())
-                accum_minus(m_fitnesses[j]);
-            else if (m_random_policies[j][i] > m_current_parameters[i].get())
-                accum_plus(m_fitnesses[j]);
-            else
-                accum_zero(m_fitnesses[j]);
-        }
-
-        if (extract::count(accum_minus) == 0 or extract::count(accum_zero) == 0 or extract::count(accum_plus) == 0)
-        {	// if by chance we get a set where one of the three possibilities has no entries, take no step in that dimension
-            A[i] = 0;
-        }
-        else
-        {
-            average_minus = mean(accum_minus);
-            average_zero = mean(accum_zero);
-            average_plus = mean(accum_plus);
-
-            if (average_zero > average_plus and average_zero > average_minus)
-                A[i] = 0;
-            else
-                A[i] = m_step_size*tanh(average_plus - average_minus)*(m_current_parameters[i].max() - m_current_parameters[i].min());
+        minfit = std::min(minfit,m_fitnesses[j]);
+        maxfit = std::max(maxfit,m_fitnesses[j]);
+    }
+    
+    //calculate probability contributions
+    for (int j=0; j<m_random_policies.size(); j++)\
+        deltas[j] = exp( -10.f*(m_fitnesses[j]-minfit)/(maxfit-minfit+0.00000001) );
+    float delta_sum;
+    for (int j=0; j<m_random_policies.size(); j++)
+        delta_sum += deltas[j];
+    for (int j=0; j<m_random_policies.size(); j++)
+        deltas[j] /= delta_sum;
+        
+    // calculate the averages epsilons
+    for (int i = 0; i < num_dim; i++) {
+        A[i] = 0.f;
+        for (int j=0; j<m_random_policies.size(); j++) {
+            A[i] += (m_random_policies[j][i]-m_current_parameters[i].get())*deltas[j];
         }
     }
+    
     return A;
 }
 
@@ -159,7 +149,7 @@ vector<float> PGRLOptimiser::calculateStep()
 /*! @brief Generates m_num_particles random policies from the seed.
  	@param seed the seed set of parameters used to generate the random policies
  */
-void PGRLOptimiser::generateRandomPolices(const vector<Parameter>& seed)
+void PGAOptimiser::generateRandomPolices(const vector<Parameter>& seed)
 {
     m_random_policies_index = 0;
     m_fitnesses.clear();
@@ -174,7 +164,7 @@ void PGRLOptimiser::generateRandomPolices(const vector<Parameter>& seed)
 /*! @brief Generates a single random policy from the seed, and returns it
  	@param seed the random policy seed
  */
-vector<float> PGRLOptimiser::generateRandomPolicy(const vector<Parameter>& seed)
+vector<float> PGAOptimiser::generateRandomPolicy(const vector<Parameter>& seed)
 {
     vector<float> newpolicy;
     newpolicy.reserve(seed.size());
@@ -193,7 +183,7 @@ vector<float> PGRLOptimiser::generateRandomPolicy(const vector<Parameter>& seed)
 
 /*! @brief Returns -1,0,1 to be used as the random multiplier of epsilon to give random directions
  */
-int PGRLOptimiser::getRandomDirection()
+int PGAOptimiser::getRandomDirection()
 {
     return rand()%3 - 1;
 }
@@ -203,7 +193,7 @@ int PGRLOptimiser::getRandomDirection()
 /*! @brief Generates a set of random policies from the seed
  *	@param seed the set of parameters which is used as a base to generate the random policies
  */
-void PGRLOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
+void PGAOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
 {
 	m_random_policies_index = 0;
 	m_fitnesses.clear();
@@ -218,14 +208,14 @@ void PGRLOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
 		vector<float> temp = generateSigns();
 		float epsilon = m_epsilon*(seed[i].max() - seed[i].min());
         for (size_t j=0; j<temp.size(); j++) {
-             //m_random_policies[j][i] += epsilon*temp[j];
-            //added by shannon
-            float value = m_random_policies[j][i] + epsilon*temp[j];
-            if (value < seed[i].min())
-                value = seed[i].min();
-            else if (value > seed[i].max())
-                value = seed[i].max();
-            m_random_policies[j][i] = value;
+            //m_random_policies[j][i] += epsilon*temp[j];
+           //added by shannon
+           float value = m_random_policies[j][i] + epsilon*temp[j];
+           if (value < seed[i].min())
+               value = seed[i].min();
+           else if (value > seed[i].max())
+               value = seed[i].max();
+           m_random_policies[j][i] = value;
         }
 	}
 
@@ -240,7 +230,7 @@ void PGRLOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
  *         are given epsilon's with one of the signs.
  *  @return the vector
  */
-vector<float> PGRLOptimiser::generateSigns()
+vector<float> PGAOptimiser::generateSigns()
 {
 	int num_of_each = m_num_particles/3;
 	size_t size = 3*num_of_each;				// round the number of particles to multiple of 3
@@ -260,7 +250,7 @@ vector<float> PGRLOptimiser::generateSigns()
 /*! @brief Generates m_num_particles random policies from the seed.
  	@param seed the seed set of parameters used to generate the random policies
  */
-void PGRLOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
+void PGAOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
 {
     m_random_policies_index = 0;
     m_fitnesses.clear();
@@ -283,7 +273,7 @@ void PGRLOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
  * 	@param policy the first policy near seed
  * 	@param opponent the 'opposite' policy near seed (ie this has the epsilon of opposite sign to policy)
  */
-void PGRLOptimiser::generateOpponents(const vector<Parameter>& seed, vector<float>& policy, vector<float>& opponent)
+void PGAOptimiser::generateOpponents(const vector<Parameter>& seed, vector<float>& policy, vector<float>& opponent)
 {
 	policy.clear();
 	opponent.clear();
@@ -296,11 +286,11 @@ void PGRLOptimiser::generateOpponents(const vector<Parameter>& seed, vector<floa
 	}
 }
 
-void PGRLOptimiser::summaryTo(ostream& stream)
+void PGAOptimiser::summaryTo(ostream& stream)
 {
 }
 
-void PGRLOptimiser::toStream(ostream& o) const
+void PGAOptimiser::toStream(ostream& o) const
 {
     o << m_step_size << " " << m_epsilon << " " << m_num_particles << " " << m_stalled_threshold << endl;
     
@@ -312,7 +302,7 @@ void PGRLOptimiser::toStream(ostream& o) const
     o << m_selected_fitness << " " << m_best_fitness << " " << m_stall_count << endl;
 }
 
-void PGRLOptimiser::fromStream(istream& i)
+void PGAOptimiser::fromStream(istream& i)
 {
     i >> m_step_size;
     i >> m_epsilon;

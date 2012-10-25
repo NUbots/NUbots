@@ -26,7 +26,7 @@ public:
     bool check() const {return true;}
     
     //! @brief Calculation of error for optimisation - assumed measured = (rho, phi)
-    double findError(const Vector2<double>& measured) const {return sqrt( pow((m_rho - measured.x)*140/mathGeneral::PI,2) + pow(m_phi - measured.y,2));}
+    double findError(const Vector2<double>& measured) const;
     
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << getVFOName(FIELDLINE) << " " << Vector2<double>(m_rho, m_phi);}
@@ -35,7 +35,6 @@ public:
     virtual Vector2<double> getShortLabel() const {return Vector2<double>(m_rho, m_phi);}
 
     void render(cv::Mat& mat) const;
-    
 
     //! @brief output stream operator
     friend ostream& operator<< (ostream& output, const FieldLine& l);

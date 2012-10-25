@@ -100,8 +100,6 @@ public:
     static float SAM_SPLIT_DISTANCE; //1.0
     static unsigned int SAM_MIN_POINTS_OVER; //2
     static unsigned int SAM_MIN_POINTS_TO_LINE; //3
-    //Noise splitting rules
-    static unsigned int SAM_SPLIT_NOISE_ITERATIONS; //1
     //merging rules
     static float SAM_MAX_ANGLE_DIFF_TO_MERGE; //
     static float SAM_MAX_DISTANCE_TO_MERGE; //

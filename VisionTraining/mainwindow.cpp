@@ -86,11 +86,12 @@ void MainWindow::runOptimiser()
     l.append("PSO");
     l.append("PGRL");
     l.append("EHCLS");
+    l.append("PGA");
     QString s = QInputDialog::getItem(this, "Select Optimiser", "Select the preferred optimiser", l, 0, false, &ok);
     if(ok) {
         int iterations = QInputDialog::getInt(this, "Iterations", "Select the number of optimiser iterations.", 100, 1, 1000000, 1, &ok);
         if(ok) {
-            VisionOptimiser opt(this, VisionOptimiser::getChoiceFromQString(s));
+            VisionOptimiser opt(this, VisionOptimiser::getChoiceFromString(s.toStdString()));
             opt.show();
 
             opt.run(ui->dirEdit->text().toStdString(), iterations);

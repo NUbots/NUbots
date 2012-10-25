@@ -55,7 +55,7 @@ Vector3<float> Goal::getRelativeFieldCoords() const
 bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
-        debug << "Goal::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
+        debug << "Goal::addToExternalFieldObjects - m_id: " << VisionFieldObject::getVFOName(m_id) << endl;
         debug << "    " << *this << endl;
     #endif
     if(valid) {

@@ -273,7 +273,7 @@ float Ball::distanceToBall(float bearing, float elevation) {
 
 void Ball::render(cv::Mat &mat) const
 {
-    cv::circle(mat, cv::Point2i(m_location_pixels.x, m_location_pixels.y), m_diameter*0.5, cv::Scalar(0, 125, 255));
+    cv::circle(mat, cv::Point2i(m_location_pixels.x, m_location_pixels.y), m_diameter*0.5, cv::Scalar(0, 125, 255), 2);
 }
 
 ostream& operator<< (ostream& output, const Ball& b)

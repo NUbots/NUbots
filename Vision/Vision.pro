@@ -95,6 +95,7 @@ HEADERS += \
     ../Tools/Math/Matrix.h \
     ../Tools/Math/TransformMatrices.h \
     ../Infrastructure/NUImage/NUImage.h \
+    ../Infrastructure/NUImage/ColorModelConversions.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
     ../Kinematics/Horizon.h \

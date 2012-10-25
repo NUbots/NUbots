@@ -235,7 +235,7 @@ bool DataWrapper::debugPublish(vector<Obstacle> data) {
     return false;
 }
 
-bool DataWrapper::debugPublish(const vector<LSFittedLine>& data)
+bool DataWrapper::debugPublish(const vector<FieldLine>& data)
 {
     return false;
 }
@@ -349,7 +349,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const Mat &img)
+bool DataWrapper::debugPublish(DEBUG_ID id, const NUImage* const img)
 {
     return false;
 }

@@ -49,14 +49,12 @@ public:
 private:
     //RULES
     //maximum field objects rules
-    unsigned int MAX_POINTS; //500
+    //unsigned int MAX_POINTS; //500
     unsigned int MAX_LINES; //15
     //splitting rules
     double SPLIT_DISTANCE; //1.0
     unsigned int MIN_POINTS_OVER; //2
     unsigned int MIN_POINTS_TO_LINE; //3
-    //Noise splitting rules
-    unsigned int SPLIT_NOISE_ITERATIONS; //1
     //merging rules
     double MAX_ANGLE_DIFF_TO_MERGE;
     double MAX_DISTANCE_TO_MERGE;

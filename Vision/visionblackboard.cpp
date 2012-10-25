@@ -736,10 +736,9 @@ void VisionBlackboard::debugPublish() const
     
     //horizon
     pts.clear();
-    float A = kinematics_horizon.getA(), B = kinematics_horizon.getB(), C = kinematics_horizon.getC();
-    if(B!=0) {
-        pts.push_back(PointType(0, -1*C/B));
-        pts.push_back(PointType(original_image->getHeight(), -1*A/B*original_image->getWidth() - C/B));
+    if(!kinematics_horizon.isVertical()) {
+        pts.push_back(PointType(0, kinematics_horizon.findYFromX(0)));
+        pts.push_back(PointType(original_image->getWidth(), kinematics_horizon.findYFromX(original_image->getWidth())));
         wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts);
     }
     else {

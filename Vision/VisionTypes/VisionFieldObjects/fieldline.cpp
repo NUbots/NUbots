@@ -18,6 +18,10 @@ void FieldLine::set(double rho, double phi)
     m_phi = phi;
 }
 
+double FieldLine::findError(const Vector2<double>& measured) const
+{
+    return sqrt( pow(m_rho - measured.x,2) + pow((m_phi - measured.y)*140/mathGeneral::PI,2));
+}
 
 ostream& operator<< (ostream& output, const FieldLine& l)
 {
@@ -94,5 +98,5 @@ void FieldLine::render(cv::Mat &mat) const
         }
     }
 
-    cv::line(mat, cv::Point2i(render_pt1.x, render_pt1.y), cv::Point2i(render_pt2.x, render_pt2.y), cv::Scalar(0,0,255));
+    cv::line(mat, cv::Point2i(render_pt1.x, render_pt1.y), cv::Point2i(render_pt2.x, render_pt2.y), cv::Scalar(0,0,255), 2);
 }

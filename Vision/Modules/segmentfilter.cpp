@@ -7,10 +7,30 @@
 #include <fstream>
 #include <boost/foreach.hpp>
 
+
 SegmentFilter::SegmentFilter()
 {
     loadReplacementRules(RULE_DIR + "ReplacementRules");
     loadTransitionRules(RULE_DIR + "TransitionRules");
+}
+
+double averageLength(const SegmentedRegion& scans,ClassIndex::Colour colour) {
+    const vector<vector<ColourSegment> >& segments = scans.getSegments();
+    vector<vector<ColourSegment> >::const_iterator line_it;
+    vector<ColourSegment>::const_iterator seg_it;
+    double sum = 0,
+           num = 0;
+    //loop through each scan
+    for(line_it = segments.begin(); line_it < segments.end(); line_it++) {
+        //move down segments in triplets replacing the middle if necessary
+        for(seg_it = line_it->begin(); seg_it < line_it->end(); seg_it++) {
+            if(seg_it->getColour() == colour) {
+                sum += seg_it->getLength();
+                num++;
+            }
+        }
+    }
+    return sum/num;
 }
 
 void SegmentFilter::run() const
@@ -25,6 +45,7 @@ void SegmentFilter::run() const
     map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > h_result, v_result;
     
     if(PREFILTER_ON) {
+
         preFilter(h_segments, h_filtered);
         preFilter(v_segments, v_filtered);
         vbb->setHorizontalFilteredSegments(h_filtered.m_segmented_scans);
@@ -32,6 +53,16 @@ void SegmentFilter::run() const
 
         filter(h_filtered, h_result);
         filter(v_filtered, v_result);
+
+        //count segment length
+//        cout << averageLength(h_segments, ClassIndex::yellow) << " ";
+//        cout << averageLength(v_segments, ClassIndex::yellow) << " ";
+//        cout << averageLength(h_filtered, ClassIndex::yellow) << " ";
+//        cout << averageLength(v_filtered, ClassIndex::yellow) << endl;
+//        cout << averageLength(h_segments, ClassIndex::green) << " ";
+//        cout << averageLength(v_segments, ClassIndex::green) << " ";
+//        cout << averageLength(h_filtered, ClassIndex::green) << " ";
+//        cout << averageLength(v_filtered, ClassIndex::green) << endl;
     }
     else {
         filter(h_segments, h_result);

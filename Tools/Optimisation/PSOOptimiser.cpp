@@ -46,7 +46,7 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
     //m_reset_fraction = 0.10;
 
     //m_num_particles = 30;
-    m_num_particles = 150;
+    m_num_particles = 80;
 
     m_num_dimensions = parameters.size();
 

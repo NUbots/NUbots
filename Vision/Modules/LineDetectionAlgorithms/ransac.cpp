@@ -6,10 +6,10 @@
 
 RANSAC::RANSAC()
 {
-    m_n = 35;
-    m_k = 40;
-    m_e = 8.0;
-    m_max_iterations = 25;
+    m_n = 35;               //min pts to line essentially
+    m_k = 40;               //number of iterations per fitting attempt
+    m_e = 8.0;              //consensus margin
+    m_max_iterations = 25;  //hard limit on number of fitting attempts
 }
 
 std::vector<LSFittedLine> RANSAC::run(const std::vector<LinePoint>& line_points)
@@ -21,15 +21,19 @@ std::vector<LSFittedLine> RANSAC::run(const std::vector<LinePoint>& line_points)
     std::vector<LinePoint> consensus;
     std::vector<LinePoint> remainder;
 
-    bool line_found;
-    do {
-        line_found = findLine(line_points, line, consensus, remainder, variance);
-
+    //run first iterations
+    bool line_found = findLine(line_points, line, consensus, remainder, variance);
+    int i=0;
+    while(line_found && i<m_max_iterations) { //arbitrary limit so far
+        fitted_line.clearPoints();
+        fitted_line.addPoints(consensus);
+        results.push_back(fitted_line);
+        line_found = findLine(remainder, line, consensus, remainder, variance);
+        i++;
     }
-    while(false);
 }
 
-bool RANSAC::findLine(const std::vector<LinePoint>& points, Line& result, std::vector<LinePoint>& consensus, std::vector<LinePoint>& remainder, float& variance)
+bool RANSAC::findLine(std::vector<LinePoint> points, Line& result, std::vector<LinePoint>& consensus, std::vector<LinePoint>& remainder, float& variance)
 {
     if (points.size() < m_n) {
         return false;
@@ -84,6 +88,9 @@ bool RANSAC::findLine(const std::vector<LinePoint>& points, Line& result, std::v
         }
     }
     variance = variance/(points.size()*m_e);
+
+    consensus.clear();
+    remainder.clear();
 
     if (minerr < std::numeric_limits<float>::max()) {
         for(unsigned int i=0; i<points.size(); i++) {

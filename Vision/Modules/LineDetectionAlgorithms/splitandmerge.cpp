@@ -3,7 +3,6 @@
 #include "debug.h"
 #include "Vision/visionconstants.h"
 #include "Tools/Math/General.h"
-//#include <QDebug>
 
 #include <boost/foreach.hpp>
 
@@ -14,61 +13,6 @@ SplitAndMerge::SplitAndMerge()
 SplitAndMerge::~SplitAndMerge()
 {
 }
-
-//CLUSTERS
-//void SplitAndMerge::splitAndmergeClusters(vector<LSFittedLine>& lines, vector< vector<LinePoint> >& clusters, vector<LinePoint> leftover, Vision* vision, LineDetection* linedetector, bool clearsmall, bool cleardirty, bool noise) {
-//    //Performs split-and-merge algorithm with input consisting of a set of point clusters
-//    // and a set of unclustered points, putting the resulting lines into a reference
-//    // passed vector
-
-//    //Profiler prof("SplitAndMerge");
-//    noFieldLines = 0;
-//    noisePoints.clear();
-
-//    //For each cluster..
-
-//    //prof.start();
-//    for(unsigned int i=0; i<clusters.size(); i++) {
-//        //perform split - splitLS() checks for appropriate size, so that need not be done here
-//        //noisePoints.clear();
-//        noisePoints1.clear();
-//        noisePoints2.clear();
-//        splitIterative(lines, clusters[i]);
-//        splitNoiseLS12(lines);
-//    }
-//    //prof.split("Split Clusters");
-
-//    //Then split leftover
-//    splitIterative(lines, leftover);
-//    //prof.split("Leftover");
-
-//    //Then noise
-//    if(noise) {
-//        splitNoiseLS(lines);
-//    }
-//    //prof.split("Noise");
-
-//    //Do Centre Circle fitting before merge - To do later
-
-//    //Then Merge
-//    convertLinesEndPoints(lines, vision, linedetector);
-
-//    merge(lines, linedetector, vision);
-//    //prof.split("Merge");
-
-//    //Then clear unwanted lines
-//    if(clearsmall) {
-//        clearSmallLines(lines);
-//    }
-//    if(cleardirty) {
-//        clearDirtyLines(lines);
-//    }
-//    //prof.split("Clear Unwanted");
-//    //debug << prof;
-
-
-//    noisePoints.clear();
-//}
 
 vector<LSFittedLine> SplitAndMerge::run(vector<LinePoint>& points, bool noise) {
     //Performs split-and-merge algorithm with input consisting of a set of point clusters
@@ -83,9 +27,9 @@ vector<LSFittedLine> SplitAndMerge::run(vector<LinePoint>& points, bool noise) {
     MIN_POINTS_TO_LINE_FINAL = VisionConstants::SAM_MIN_POINTS_TO_LINE_FINAL;
     MIN_LINE_R2_FIT = VisionConstants::SAM_MIN_LINE_R2_FIT;
     MAX_LINE_MSD = VisionConstants::SAM_MAX_LINE_MSD;
-    MAX_POINTS = VisionConstants::SAM_MAX_POINTS;
-    MAX_LINES = VisionConstants::SAM_MAX_LINES;
-    SPLIT_NOISE_ITERATIONS = VisionConstants::SAM_SPLIT_NOISE_ITERATIONS;
+    //MAX_POINTS = VisionConstants::SAM_MAX_POINTS;
+    //MAX_LINES = VisionConstants::SAM_MAX_LINES;
+    MAX_LINES = 100;
     CLEAR_SMALL = VisionConstants::SAM_CLEAR_SMALL;
     CLEAR_DIRTY = VisionConstants::SAM_CLEAR_DIRTY;
 
