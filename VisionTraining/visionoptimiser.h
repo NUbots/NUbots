@@ -39,7 +39,9 @@ public:
 
     void run(string directory, int total_iterations);
 private:
-    int step(int iteration, bool training, const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, ostream &performance_log, const string &stream_name);
+    bool trainingStep(int iteration, const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, ostream &performance_log, const string &stream_name);
+    map<OPT_ID, float> evaluateBatch(const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, const string& stream_name) const;
+    void printResults(int iteration, map<OPT_ID, float> fitnesses, ostream& performance_log) const;
     void setupVisionConstants();
     void setupCosts();
 
@@ -60,7 +62,7 @@ private:
     map<VisionFieldObject::VFO_ID, float> m_false_positive_costs;
     map<VisionFieldObject::VFO_ID, float> m_false_negative_costs;
     VisionControlWrapper* vision;
-    string m_train_image_name,
+    string m_training_image_name,
             m_test_image_name;
     vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_training;
     vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_test;

@@ -130,13 +130,56 @@ VisionOptimiser::~VisionOptimiser()
 #endif
 }
 
+void VisionOptimiser::gridSearch(string directory, int grids_per_side)
+{
+    int err_code = 0;
+    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > gt;
+    string image_name = directory + string("train_image.strm");
+    ifstream train_label_file((directory + string("train_labels.strm")).c_str());
+
+    Parameter p1("BALL_EDGE_THRESHOLD", BALL_EDGE_THRESHOLD, 0, 50),
+            p2("BALL_ORANGE_TOLERANCE", BALL_ORANGE_TOLERANCE, 0, 50);
+    //("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50);
+    //("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20);
+    //("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20);
+
+    //("SAM_SPLIT_DISTANCE", SAM_SPLIT_DISTANCE, 0, 320);
+    //("SAM_MIN_POINTS_OVER", SAM_MIN_POINTS_OVER, 1, 500);
+    //("SAM_MAX_ANGLE_DIFF_TO_MERGE", SAM_MAX_ANGLE_DIFF_TO_MERGE, 0, mathGeneral::PI*0.25);
+    //("SAM_MAX_DISTANCE_TO_MERGE", SAM_MAX_DISTANCE_TO_MERGE, 0, 150);
+    //("HORIZONTAL_SCANLINE_SPACING", HORIZONTAL_SCANLINE_SPACING, 1, 50);
+    //("VERTICAL_SCANLINE_SPACING", VERTICAL_SCANLINE_SPACING, 1, 50);
+    //("GREEN_HORIZON_SCAN_SPACING", GREEN_HORIZON_SCAN_SPACING, 1, 50);
+
+    //read in the labels
+    if(!vision->readLabels(train_label_file, gt)) {
+        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("train_label.strm")).c_str()));
+        return;
+    }
+
+    //initialise vision system
+    vision->setLUT(directory+string("default.lut"));
+
+    //set the options we need
+    setupVisionConstants();
+
+    for(int x = p1.min(); x<p1.max(); x+= (p1.max() - p1.max())/grids_per_side) {
+        for(int y = p2.min(); y<p2.max(); y+= (p2.max() - p2.max())/grids_per_side) {
+            //change parameters
+
+            printResults(0, evaluateBatch(m_ground_truth_training, m_training_image_name), m_training_performance_log);
+            printResults(0, evaluateBatch(m_ground_truth_test, m_test_image_name), m_test_performance_log);
+        }
+    }
+}
+
 void VisionOptimiser::run(string directory, int total_iterations)
 {
     int iteration = 0;
     int err_code = 0;
     m_halted = false;
     //image streams
-    m_train_image_name = directory + string("train_image.strm");
+    m_training_image_name = directory + string("train_image.strm");
     m_test_image_name = directory + string("test_image.strm");
 
     //read labels
@@ -168,8 +211,13 @@ void VisionOptimiser::run(string directory, int total_iterations)
     m_test_performance_log.open((directory + m_opt_name + string("_test_performance.log")).c_str());
     m_test_performance_log.setf(ios_base::fixed);
 
+#ifdef MULTI_OPT
     m_training_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << endl;
     m_test_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << endl;
+#else
+    m_training_performance_log << "Iteration Fitness" << endl;
+    m_test_performance_log << "Iteration Fitness" << endl;
+#endif
 
     //read in the training and testing labels
     if(!vision->readLabels(train_label_file, m_ground_truth_training)) {
@@ -192,21 +240,23 @@ void VisionOptimiser::run(string directory, int total_iterations)
     setupVisionConstants();
 
     //get initial evaluation
-    step(-1, false, m_ground_truth_training, m_training_performance_log, m_train_image_name);
-    step(-1, false, m_ground_truth_test, m_test_performance_log, m_test_image_name);
+    printResults(0, evaluateBatch(m_ground_truth_training, m_training_image_name), m_training_performance_log);
+    printResults(0, evaluateBatch(m_ground_truth_test, m_test_image_name), m_test_performance_log);
 
+    iteration = 2;
     while(iteration < total_iterations && !m_halted && err_code == 0) {
         //update gui
         ui->progressBar_opt->setValue(iteration);
         QApplication::processEvents();
 
         //run batch
-        bool training = (iteration%2==0);
-        err_code = step(iteration/2, training,
-                        (training ? m_ground_truth_training : m_ground_truth_test),
-                        (training ? m_training_performance_log : m_test_performance_log),
-                        (training ? m_train_image_name : m_test_image_name));   //modulo 2 gives alternating training and testing runs
-
+        bool training = (iteration%2==0);   //modulo 2 gives alternating training and testing runs
+        if(training) {
+            err_code = trainingStep(iteration/2, m_ground_truth_training, m_training_performance_log, m_training_image_name);
+        }
+        else {
+            printResults(iteration/2, evaluateBatch(m_ground_truth_test, m_test_image_name), m_test_performance_log);
+        }
         iteration++;
     }
     if(!m_halted && err_code==0) {
@@ -249,31 +299,13 @@ void VisionOptimiser::run(string directory, int total_iterations)
 
 }
 
-int VisionOptimiser::step(int iteration, bool training,
-                          const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth,
-                          ostream& performance_log,
-                          const string& stream_name)
+bool VisionOptimiser::trainingStep(int iteration,
+                                   const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth,
+                                   ostream& performance_log,
+                                   const string& stream_name)
 {
-#ifdef MULTI_OPT
-    map<OPT_ID, pair<float, int> > batch_errors;
     map<OPT_ID, float> fitnesses;
-    //initialise batch errors
-    batch_errors[BALL_OPT] = pair<float, int>(0,0);
-    batch_errors[GOAL_BEACON_OPT] = pair<float, int>(0,0);
-    batch_errors[OBSTACLE_OPT] = pair<float, int>(0,0);
-    batch_errors[LINE_OPT] = pair<float, int>(0,0);
-    batch_errors[GENERAL_OPT] = pair<float, int>(0,0);
-#else
-    pair<float, int> batch_error;
-    float fitness;
-#endif
-    unsigned int frame_no = 0;
-    int vision_code;
-    //conditional references (differ between training and testing
-    //vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth = (training ? m_ground_truth_training : m_ground_truth_test);
-    //ostream& performance_log = (training ? m_training_performance_log : m_test_performance_log)
-    //string& stream_name = (training ? m_train_image_name : m_test_image_name);
-
+    bool batch_success;
 
     //init gui
     ui->progressBar_strm->setMaximum(ground_truth.size());
@@ -281,65 +313,80 @@ int VisionOptimiser::step(int iteration, bool training,
     vision->setImageStream(stream_name);
 
     //get new params
-    if(training) {
 #ifdef MULTI_OPT
-        VisionConstants::setBallParams(m_optimisers[BALL_OPT]->getNextParameters());
-        VisionConstants::setGoalBeaconParams(m_optimisers[GOAL_BEACON_OPT]->getNextParameters());
-        VisionConstants::setObstacleParams(m_optimisers[OBSTACLE_OPT]->getNextParameters());
-        VisionConstants::setLineParams(m_optimisers[LINE_OPT]->getNextParameters());
-        VisionConstants::setGeneralParams(m_optimisers[GENERAL_OPT]->getNextParameters());
+    VisionConstants::setBallParams(m_optimisers[BALL_OPT]->getNextParameters());
+    VisionConstants::setGoalBeaconParams(m_optimisers[GOAL_BEACON_OPT]->getNextParameters());
+    VisionConstants::setObstacleParams(m_optimisers[OBSTACLE_OPT]->getNextParameters());
+    VisionConstants::setLineParams(m_optimisers[LINE_OPT]->getNextParameters());
+    VisionConstants::setGeneralParams(m_optimisers[GENERAL_OPT]->getNextParameters());
 #else
-        VisionConstants::setAllOptimisable(m_optimiser->getNextParameters());
+    VisionConstants::setAllOptimisable(m_optimiser->getNextParameters());
 #endif
+
+    fitnesses = evaluateBatch(ground_truth, stream_name);
+
+    if(!fitnesses.empty() && !m_halted) {
+        //update optimiser(s)
+#ifdef MULTI_OPT
+        for(int i=0; i<=GENERAL_OPT; i++) {
+            OPT_ID id = getIDFromInt(i);
+            m_optimisers[id]->setParametersResult(fitnesses[id]);
+        }
+#else
+        float fitness = 0;
+        for(int i=0; i<=GENERAL_OPT; i++)
+            fitness += fitnesses[getIDFromInt(i)];
+        m_optimiser->setParametersResult(fitness);
+#endif
+
+        //write results
+#ifdef MULTI_OPT
+        *(m_individual_progress_logs[BALL_OPT]) << VisionConstants::getBallParams() << endl;
+        *(m_individual_progress_logs[GOAL_BEACON_OPT]) << VisionConstants::getGoalBeaconParams() << endl;
+        *(m_individual_progress_logs[OBSTACLE_OPT]) << VisionConstants::getObstacleParams() << endl;
+        *(m_individual_progress_logs[LINE_OPT]) << VisionConstants::getLineParams() << endl;
+        *(m_individual_progress_logs[GENERAL_OPT]) << VisionConstants::getGeneralParams() << endl;
+#else
+        m_progress_log << VisionConstants::getAllOptimisable() << endl;
+#endif
+        printResults(iteration, fitnesses, performance_log);
+        return true;
     }
+    else {
+        return false;
+    }
+}
+
+map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, const string& stream_name) const
+{
+    //initialise batch errors
+    map<OPT_ID, float> fitnesses;
+    map<OPT_ID, pair<float, int> > batch_errors;
+    for(int i=0; i<=GENERAL_OPT; i++)
+        batch_errors[getIDFromInt(i)] = pair<float, int>(0,0);
+    unsigned int frame_no = 0;
+    int vision_code;
+
+    //init gui
+    ui->progressBar_strm->setMaximum(ground_truth.size());
+    //initialise vision stream
+    vision->setImageStream(stream_name);
 
     vision_code = vision->runFrame();
     while(vision_code == 0 && frame_no < ground_truth.size()-1 && !m_halted) {
-#ifdef MULTI_OPT
-        map<OPT_ID, pair<float, int> > frame_error_sums;
-        frame_error_sums[BALL_OPT] = pair<float, int>(0,0);
-        frame_error_sums[GOAL_BEACON_OPT] = pair<float, int>(0,0);
-        frame_error_sums[OBSTACLE_OPT] = pair<float, int>(0,0);
-        frame_error_sums[LINE_OPT] = pair<float, int>(0,0);
-        frame_error_sums[GENERAL_OPT] = pair<float, int>(0,0);
-#else
-        pair<float, int> frame_error_sum(0,0);
-#endif
-
         //get errors
         map<VisionFieldObject::VFO_ID, pair<float, int> > frame_errors = vision->evaluateFrame(ground_truth[frame_no], m_false_positive_costs, m_false_negative_costs);
-
-        //debugging
-//        for(int i=0; i<VisionFieldObject::INVALID; i++) {
-//            VisionFieldObject::VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
-//            frame_error += frame_errors.at(vfo_id);
-//            cout << VisionFieldObject::getVFOName(vfo_id) << " " << frame_errors[vfo_id].first << " " << frame_errors[vfo_id].second << endl;
-//        }
 
         //accumulate errors
         for(int i=0; i<VisionFieldObject::INVALID; i++) {
             VisionFieldObject::VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
-#ifdef MULTI_OPT
             vector<OPT_ID>::const_iterator it;
+            //cout << VisionFieldObject::getVFOName(vfo_id) << " " << frame_errors[vfo_id].first << " " << frame_errors[vfo_id].second << endl;
             for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
-                frame_error_sums.at(*it).first += frame_errors.at(vfo_id).first;
-                frame_error_sums.at(*it).second += frame_errors.at(vfo_id).second;
+                batch_errors.at(*it).first += frame_errors.at(vfo_id).first;
+                batch_errors.at(*it).second += frame_errors.at(vfo_id).second;
             }
-#else
-            frame_error_sum.first += frame_errors.at(vfo_id).first;
-            frame_error_sum.second += frame_errors.at(vfo_id).second;
-#endif
         }
-
-#ifdef MULTI_OPT
-        for(int i=0; i<=GENERAL_OPT; i++) {
-            batch_errors.at(getIDFromInt(i)).first += frame_error_sums.at(getIDFromInt(i)).first;
-            batch_errors.at(getIDFromInt(i)).second += frame_error_sums.at(getIDFromInt(i)).second;
-        }
-#else
-        batch_error.first += frame_error_sum.first;
-        batch_error.second += frame_error_sum.second;
-#endif
 
         //update gui
         ui->progressBar_strm->setValue(frame_no);
@@ -350,49 +397,28 @@ int VisionOptimiser::step(int iteration, bool training,
         frame_no++;
     }
 
-    if(vision_code == 0 && !m_halted) {
-        //update optimiser
-#ifdef MULTI_OPT
+    //generate fitnesses from errors
+    if(vision_code==0 && !m_halted) {
         for(int i=0; i<=GENERAL_OPT; i++) {
             OPT_ID id = getIDFromInt(i);
-            if(batch_errors[id].first == 0)
-                fitnesses[id] = numeric_limits<float>::max(); //not likely
+            if(batch_errors[id].first == 0) //not likely but just in case
+                fitnesses[id] = numeric_limits<float>::max();
             else
                 fitnesses[id] = batch_errors[id].second/batch_errors[id].first;
-            if(training) {
-                m_optimisers[id]->setParametersResult(fitnesses[id]);
-            }
         }
-#else
-        if(batch_error.second == 0)
-            fitness = numeric_limits<float>::max(); //not likely
-        else
-            fitness = batch_error.second/batch_error.first;
-        if(training) {
-            m_optimiser->setParametersResult(fitness);
-        }
-#endif
-
-        //write results
-        if(training) {
-#ifdef MULTI_OPT
-            *(m_individual_progress_logs[BALL_OPT]) << VisionConstants::getBallParams() << endl;
-            *(m_individual_progress_logs[GOAL_BEACON_OPT]) << VisionConstants::getGoalBeaconParams() << endl;
-            *(m_individual_progress_logs[OBSTACLE_OPT]) << VisionConstants::getObstacleParams() << endl;
-            *(m_individual_progress_logs[LINE_OPT]) << VisionConstants::getLineParams() << endl;
-            *(m_individual_progress_logs[GENERAL_OPT]) << VisionConstants::getGeneralParams() << endl;
-#else
-            m_progress_log << VisionConstants::getAllOptimisable() << endl;
-#endif
-         }
-#ifdef MULTI_OPT
-        performance_log << iteration << " " << fitnesses[BALL_OPT]<< " " << fitnesses[GOAL_BEACON_OPT]<< " " << fitnesses[OBSTACLE_OPT] << " " << fitnesses[LINE_OPT] << " " << fitnesses[GENERAL_OPT] << " " << endl;
-#else
-        performance_log << iteration << " " << fitness << endl;
-#endif
     }
+    return fitnesses;
+}
 
-    return vision_code;
+void VisionOptimiser::printResults(int iteration, map<OPT_ID, float> fitnesses, ostream& performance_log) const
+{
+    if(!fitnesses.empty()) {
+        #ifdef MULTI_OPT
+            performance_log << iteration << " " << fitnesses[BALL_OPT]<< " " << fitnesses[GOAL_BEACON_OPT]<< " " << fitnesses[OBSTACLE_OPT] << " " << fitnesses[LINE_OPT] << " " << fitnesses[GENERAL_OPT] << " " << endl;
+        #else
+            performance_log << iteration << " " << fitness << endl;
+        #endif
+    }
 }
 
 void VisionOptimiser::setupVisionConstants()
@@ -422,7 +448,7 @@ void VisionOptimiser::setupVisionConstants()
     VisionConstants::GREEN_HORIZON_SCAN_SPACING = 11;
     //! Split and Merge constants
     VisionConstants::SAM_MAX_POINTS = 1000;
-    VisionConstants::SAM_MAX_LINES = 25;
+    VisionConstants::SAM_MAX_LINES = 150;
     VisionConstants::SAM_CLEAR_SMALL = true;
     VisionConstants::SAM_CLEAR_DIRTY = true;
 }
