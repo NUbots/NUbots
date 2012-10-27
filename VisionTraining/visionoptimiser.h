@@ -5,7 +5,7 @@
 #include "Tools/Optimisation/Optimiser.h"
 #include "Vision/VisionWrapper/visioncontrolwrappertraining.h"
 
-#define MULTI_OPT
+//#define MULTI_OPT
 
 namespace Ui {
 class VisionOptimiser;
@@ -38,6 +38,7 @@ public:
     ~VisionOptimiser();
 
     void run(string directory, int total_iterations);
+    void gridSearch(string directory, int grids_per_side);
 private:
     bool trainingStep(int iteration, const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, ostream &performance_log, const string &stream_name);
     map<OPT_ID, float> evaluateBatch(const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, const string& stream_name) const;
@@ -54,11 +55,11 @@ private:
 #ifdef MULTI_OPT
     vector<Optimiser*> m_optimiser_list;
     map<OPT_ID, Optimiser*> m_optimisers;
-    map<VisionFieldObject::VFO_ID, vector<OPT_ID> > m_vfo_optimiser_map;
 #else
     Optimiser* m_optimiser;
 #endif
 
+    map<VisionFieldObject::VFO_ID, vector<OPT_ID> > m_vfo_optimiser_map;
     map<VisionFieldObject::VFO_ID, float> m_false_positive_costs;
     map<VisionFieldObject::VFO_ID, float> m_false_negative_costs;
     VisionControlWrapper* vision;

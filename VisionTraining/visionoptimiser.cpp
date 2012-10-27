@@ -97,8 +97,6 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
         break;
     }
 
-
-#ifdef MULTI_OPT
     m_vfo_optimiser_map[VisionFieldObject::BALL].push_back(BALL_OPT); m_vfo_optimiser_map[VisionFieldObject::BALL].push_back(GENERAL_OPT);
     m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_L].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_L].push_back(GENERAL_OPT);
     m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_R].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_R].push_back(GENERAL_OPT);
@@ -111,7 +109,6 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
     m_vfo_optimiser_map[VisionFieldObject::BEACON_U].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::BEACON_U].push_back(GENERAL_OPT);
     m_vfo_optimiser_map[VisionFieldObject::OBSTACLE].push_back(OBSTACLE_OPT); m_vfo_optimiser_map[VisionFieldObject::OBSTACLE].push_back(GENERAL_OPT);
     m_vfo_optimiser_map[VisionFieldObject::FIELDLINE].push_back(LINE_OPT); m_vfo_optimiser_map[VisionFieldObject::FIELDLINE].push_back(GENERAL_OPT);
-#endif
 
     vision = VisionControlWrapper::getInstance();
 }
@@ -132,28 +129,30 @@ VisionOptimiser::~VisionOptimiser()
 
 void VisionOptimiser::gridSearch(string directory, int grids_per_side)
 {
-    int err_code = 0;
     vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > gt;
-    string image_name = directory + string("train_image.strm");
-    ifstream train_label_file((directory + string("train_labels.strm")).c_str());
+    map<OPT_ID, float> fitnesses;
+    string image_name = directory + string("image.strm");
+    ifstream train_label_file((directory + string("labels.strm")).c_str());
+    ofstream grid_log((directory + string("grid.txt")).c_str());
 
-    Parameter p1("BALL_EDGE_THRESHOLD", BALL_EDGE_THRESHOLD, 0, 50),
-            p2("BALL_ORANGE_TOLERANCE", BALL_ORANGE_TOLERANCE, 0, 50);
-    //("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50);
-    //("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20);
-    //("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20);
+//    Parameter p1("BALL_EDGE_THRESHOLD", 0, 0, 50),
+//            p2("BALL_ORANGE_TOLERANCE", 0, 0, 50);
+//    Parameter p1("GREEN_HORIZON_MIN_GREEN_PIXELS", 1, 1, 50),
+//              p2("GREEN_HORIZON_LOWER_THRESHOLD_MULT", 0, 0, 20);
+//    Parameter p1("GREEN_HORIZON_LOWER_THRESHOLD_MULT", 0, 0, 20),
+//              p2("GREEN_HORIZON_UPPER_THRESHOLD_MULT", 0, 0, 20);
 
-    //("SAM_SPLIT_DISTANCE", SAM_SPLIT_DISTANCE, 0, 320);
-    //("SAM_MIN_POINTS_OVER", SAM_MIN_POINTS_OVER, 1, 500);
-    //("SAM_MAX_ANGLE_DIFF_TO_MERGE", SAM_MAX_ANGLE_DIFF_TO_MERGE, 0, mathGeneral::PI*0.25);
-    //("SAM_MAX_DISTANCE_TO_MERGE", SAM_MAX_DISTANCE_TO_MERGE, 0, 150);
-    //("HORIZONTAL_SCANLINE_SPACING", HORIZONTAL_SCANLINE_SPACING, 1, 50);
-    //("VERTICAL_SCANLINE_SPACING", VERTICAL_SCANLINE_SPACING, 1, 50);
-    //("GREEN_HORIZON_SCAN_SPACING", GREEN_HORIZON_SCAN_SPACING, 1, 50);
+    Parameter p1("SAM_SPLIT_DISTANCE", 0, 0, 320);
+    Parameter p2("SAM_MIN_POINTS_OVER", 1, 1, 500);
+    //("SAM_MAX_ANGLE_DIFF_TO_MERGE", 0, 0, mathGeneral::PI*0.25);
+    //("SAM_MAX_DISTANCE_TO_MERGE", 0, 0, 150);
+//    Parameter p1("HORIZONTAL_SCANLINE_SPACING", 1, 1, 50);
+//    Parameter p2("VERTICAL_SCANLINE_SPACING", 1, 1, 50);
+    //("GREEN_HORIZON_SCAN_SPACING", 1, 1, 50);
 
     //read in the labels
     if(!vision->readLabels(train_label_file, gt)) {
-        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("train_label.strm")).c_str()));
+        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("label.strm")).c_str()));
         return;
     }
 
@@ -163,14 +162,40 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
     //set the options we need
     setupVisionConstants();
 
-    for(int x = p1.min(); x<p1.max(); x+= (p1.max() - p1.max())/grids_per_side) {
-        for(int y = p2.min(); y<p2.max(); y+= (p2.max() - p2.max())/grids_per_side) {
+    bool halt = false;
+    grid_log << "x : " << p1.name() << " y : " << p2.name() << endl;
+    for(float x = p1.min(); x<p1.max() && !halt; x+= (p1.max() - p1.min())/grids_per_side) {
+        for(float y = p2.min(); y<p2.max() && !halt; y+= (p2.max() - p2.min())/grids_per_side) {
             //change parameters
-
-            printResults(0, evaluateBatch(m_ground_truth_training, m_training_image_name), m_training_performance_log);
-            printResults(0, evaluateBatch(m_ground_truth_test, m_test_image_name), m_test_performance_log);
+            if(!VisionConstants::setParameter(p1.name(), x)) {
+                cout << "error setting p1" << endl;
+                halt = true;
+                break;
+            }
+            if(!VisionConstants::setParameter(p2.name(), (unsigned int)y)) {
+                cout << "error setting p2" << endl;
+                halt = true;
+                break;
+            }
+            fitnesses = evaluateBatch(gt, image_name);
+            if(!fitnesses.empty()) {
+                //grid_log << fitnesses[GENERAL_OPT] << " ";
+                grid_log << fitnesses[GENERAL_OPT] << " ";
+                cout << fitnesses[OBSTACLE_OPT] << " ";
+                cout << fitnesses[BALL_OPT] << " ";
+                cout << fitnesses[GOAL_BEACON_OPT] << " ";
+                cout << fitnesses[LINE_OPT] << " ";
+                cout << fitnesses[GENERAL_OPT] << endl;
+            }
+            else {
+                cout << "failed" << endl;
+                break;
+            }
         }
+        grid_log << endl;
+        cout << 100*x/(p1.max()-p1.min()) << "%" << endl;
     }
+    cout << "100%" << endl;
 }
 
 void VisionOptimiser::run(string directory, int total_iterations)
@@ -305,7 +330,6 @@ bool VisionOptimiser::trainingStep(int iteration,
                                    const string& stream_name)
 {
     map<OPT_ID, float> fitnesses;
-    bool batch_success;
 
     //init gui
     ui->progressBar_strm->setMaximum(ground_truth.size());
@@ -333,10 +357,7 @@ bool VisionOptimiser::trainingStep(int iteration,
             m_optimisers[id]->setParametersResult(fitnesses[id]);
         }
 #else
-        float fitness = 0;
-        for(int i=0; i<=GENERAL_OPT; i++)
-            fitness += fitnesses[getIDFromInt(i)];
-        m_optimiser->setParametersResult(fitness);
+        m_optimiser->setParametersResult(fitnesses[GENERAL_OPT]);
 #endif
 
         //write results
@@ -416,7 +437,7 @@ void VisionOptimiser::printResults(int iteration, map<OPT_ID, float> fitnesses, 
         #ifdef MULTI_OPT
             performance_log << iteration << " " << fitnesses[BALL_OPT]<< " " << fitnesses[GOAL_BEACON_OPT]<< " " << fitnesses[OBSTACLE_OPT] << " " << fitnesses[LINE_OPT] << " " << fitnesses[GENERAL_OPT] << " " << endl;
         #else
-            performance_log << iteration << " " << fitness << endl;
+            performance_log << iteration << " " << fitnesses[GENERAL_OPT] << endl;
         #endif
     }
 }

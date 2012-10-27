@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
+    <width>450</width>
     <height>182</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
    <widget class="QPushButton" name="modPB">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>160</x>
       <y>10</y>
       <width>121</width>
       <height>27</height>
@@ -43,7 +43,7 @@
    <widget class="QPushButton" name="exitPB">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>300</x>
       <y>10</y>
       <width>121</width>
       <height>27</height>
@@ -115,13 +115,26 @@
      <string>Browse</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="gridPB">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>50</y>
+      <width>98</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Grid Search</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>410</width>
+     <width>450</width>
      <height>25</height>
     </rect>
    </property>

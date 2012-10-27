@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->optPB, SIGNAL(clicked()), this, SLOT(runOptimiser()));
     QObject::connect(ui->exitPB, SIGNAL(clicked()), this, SLOT(close()));
     QObject::connect(ui->browsePB, SIGNAL(clicked()), this, SLOT(getDirectory()));
+    QObject::connect(ui->gridPB, SIGNAL(clicked()), this, SLOT(gridSearch()));
 
     ui->dirEdit->setText(QString(getenv("HOME")) + QString("/Images/FYP/Final100/"));
 }
@@ -98,4 +99,10 @@ void MainWindow::runOptimiser()
         }
     }
     setFocus();
+}
+
+void MainWindow::gridSearch()
+{
+    VisionOptimiser opt;
+    opt.gridSearch("/home/shannon/gridsearch/" , 20);
 }

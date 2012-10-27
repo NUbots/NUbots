@@ -21,6 +21,7 @@ private slots:
     void modifyLabels();
     void compareParams();
     void runOptimiser();
+    void gridSearch();
 
 private:
     Ui::MainWindow *ui;

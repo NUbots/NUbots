@@ -367,6 +367,251 @@ void VisionConstants::loadFromFile(std::string filename)
     //print(debug);
 }
 
+bool VisionConstants::setParameter(string name, bool val)
+{
+    if(name.compare("DO_RADIAL_CORRECTION") == 0) {
+        DO_RADIAL_CORRECTION = val;
+    }
+    else if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_GOALS") == 0) {
+        THROWOUT_ON_ABOVE_KIN_HOR_GOALS = val;
+    }
+    else if(name.compare("THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS") == 0) {
+        THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS = val;
+    }
+    else if(name.compare("THROWOUT_DISTANT_GOALS") == 0) {
+        THROWOUT_DISTANT_GOALS = val;
+    }
+    else if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_BEACONS") == 0) {
+        THROWOUT_ON_ABOVE_KIN_HOR_BEACONS = val;
+    }
+    else if(name.compare("THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS") == 0) {
+        THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS = val;
+    }
+    else if(name.compare("THROWOUT_DISTANT_BEACONS") == 0) {
+        THROWOUT_DISTANT_BEACONS = val;
+    }
+    else if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_BALL") == 0) {
+        THROWOUT_ON_ABOVE_KIN_HOR_BALL = val;
+    }
+    else if(name.compare("THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL") == 0) {
+        THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = val;
+    }
+    else if(name.compare("THROWOUT_SMALL_BALLS") == 0) {
+        THROWOUT_SMALL_BALLS = val;
+    }
+    else if(name.compare("THROWOUT_DISTANT_BALLS") == 0) {
+        THROWOUT_DISTANT_BALLS = val;
+    }
+    else if(name.compare("D2P_INCLUDE_BODY_PITCH") == 0) {
+        D2P_INCLUDE_BODY_PITCH = val;
+    }
+    else if(name.compare("THROWOUT_INSIGNIFICANT_GOALS") == 0) {
+        THROWOUT_INSIGNIFICANT_GOALS = val;
+    }
+    else if(name.compare("THROWOUT_INSIGNIFICANT_BEACONS") == 0) {
+        THROWOUT_INSIGNIFICANT_BEACONS = val;
+    }
+    else if(name.compare("THROWOUT_INSIGNIFICANT_BALLS") == 0) {
+        THROWOUT_INSIGNIFICANT_BALLS = val;
+    }
+    else if(name.compare("THROWOUT_NARROW_GOALS") == 0) {
+        THROWOUT_NARROW_GOALS = val;
+    }
+    else if(name.compare("THROWOUT_SHORT_GOALS") == 0) {
+        THROWOUT_SHORT_GOALS = val;
+    }
+    else if(name.compare("SAM_CLEAR_SMALL") == 0) {
+        SAM_CLEAR_SMALL = val;
+    }
+    else if(name.compare("SAM_CLEAR_DIRTY") == 0) {
+        SAM_CLEAR_DIRTY = val;
+    }
+    else if(name.compare("BALL_DISTANCE_POSITION_BOTTOM") == 0) {
+        BALL_DISTANCE_POSITION_BOTTOM = val;
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
+bool VisionConstants::setParameter(string name, int val)
+{
+    if(name.compare("BALL_EDGE_THRESHOLD") == 0) {
+        BALL_EDGE_THRESHOLD = val;
+    }
+    else if(name.compare("BALL_ORANGE_TOLERANCE") == 0) {
+        BALL_ORANGE_TOLERANCE = val;
+    }
+    else if(name.compare("MIN_DISTANCE_FROM_HORIZON") == 0) {
+        MIN_DISTANCE_FROM_HORIZON = val;
+    }
+    else if(name.compare("MIN_CONSECUTIVE_POINTS") == 0) {
+        MIN_CONSECUTIVE_POINTS = val;
+    }
+    else if(name.compare("MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS") == 0) {
+        MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS = val;
+    }
+    else if(name.compare("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS") == 0) {
+        MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS = val;
+    }
+    else if(name.compare("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL") == 0) {
+        MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL = val;
+    }
+    else if(name.compare("MIN_GOAL_WIDTH") == 0) {
+        MIN_GOAL_WIDTH = val;
+    }
+    else if(name.compare("MIN_GOAL_HEIGHT") == 0) {
+        MIN_GOAL_HEIGHT = val;
+    }
+    else if(name.compare("MIN_GOAL_SEPARATION") == 0) {
+        MIN_GOAL_SEPARATION = val;
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
+
+bool VisionConstants::setParameter(string name, unsigned int val)
+{
+    if(name.compare("HORIZONTAL_SCANLINE_SPACING") == 0) {
+        HORIZONTAL_SCANLINE_SPACING = val;
+    }
+    else if(name.compare("VERTICAL_SCANLINE_SPACING") == 0) {
+        VERTICAL_SCANLINE_SPACING = val;
+    }
+    else if(name.compare("GREEN_HORIZON_SCAN_SPACING") == 0) {
+        GREEN_HORIZON_SCAN_SPACING = val;
+    }
+    else if(name.compare("GREEN_HORIZON_MIN_GREEN_PIXELS") == 0) {
+        GREEN_HORIZON_MIN_GREEN_PIXELS = val;
+    }
+    else if(name.compare("SAM_MAX_LINES") == 0) {
+        SAM_MAX_POINTS = val;
+    }
+    else if(name.compare("SAM_MIN_POINTS_OVER") == 0) {
+        SAM_MIN_POINTS_OVER = val;
+    }
+    else if(name.compare("SAM_MIN_POINTS_TO_LINE") == 0) {
+        SAM_MIN_POINTS_TO_LINE = val;
+    }
+    else if(name.compare("SAM_MIN_POINTS_TO_LINE_FINAL") == 0) {
+        SAM_MIN_POINTS_TO_LINE_FINAL = val;
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
+bool VisionConstants::setParameter(string name, float val)
+{
+    if(name.compare("RADIAL_CORRECTION_COEFFICIENT") == 0) {
+        RADIAL_CORRECTION_COEFFICIENT = val;
+    }
+    else if(name.compare("MAX_DISTANCE_METHOD_DISCREPENCY_GOALS") == 0) {
+        MAX_DISTANCE_METHOD_DISCREPENCY_GOALS = val;
+    }
+    else if(name.compare("MAX_GOAL_DISTANCE") == 0) {
+        MAX_GOAL_DISTANCE = val;
+    }
+    else if(name.compare("MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS") == 0) {
+        MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS = val;
+    }
+    else if(name.compare("MAX_BEACON_DISTANCE") == 0) {
+        MAX_BEACON_DISTANCE = val;
+    }
+    else if(name.compare("MAX_DISTANCE_METHOD_DISCREPENCY_BALL") == 0) {
+        MAX_DISTANCE_METHOD_DISCREPENCY_BALL = val;
+    }
+    else if(name.compare("MIN_BALL_DIAMETER_PIXELS") == 0) {
+        MIN_BALL_DIAMETER_PIXELS = val;
+    }
+    else if(name.compare("MAX_BALL_DISTANCE") == 0) {
+        MAX_BALL_DISTANCE = val;
+    }
+    else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
+        D2P_ANGLE_CORRECTION = val;
+    }
+    else if(name.compare("BALL_MIN_PERCENT_ORANGE") == 0) {
+        BALL_MIN_PERCENT_ORANGE = val;
+    }
+    else if(name.compare("GOAL_MIN_PERCENT_YELLOW") == 0) {
+        GOAL_MIN_PERCENT_YELLOW = val;
+    }
+    else if(name.compare("GOAL_MIN_PERCENT_BLUE") == 0) {
+        GOAL_MIN_PERCENT_BLUE = val;
+    }
+    else if(name.compare("BEACON_MIN_PERCENT_YELLOW") == 0) {
+        BEACON_MIN_PERCENT_YELLOW = val;
+    }
+    else if(name.compare("BEACON_MIN_PERCENT_BLUE") == 0) {
+        BEACON_MIN_PERCENT_BLUE = val;
+    }
+    else if(name.compare("GOAL_WIDTH") == 0) {
+        GOAL_WIDTH = val;
+    }
+    else if(name.compare("BALL_WIDTH") == 0) {
+        BALL_WIDTH = val;
+    }
+    else if(name.compare("BEACON_WIDTH") == 0) {
+        BEACON_WIDTH = val;
+    }
+    else if(name.compare("DISTANCE_BETWEEN_POSTS") == 0) {
+        DISTANCE_BETWEEN_POSTS = val;
+    }
+    else if(name.compare("GREEN_HORIZON_LOWER_THRESHOLD_MULT") == 0) {
+        GREEN_HORIZON_LOWER_THRESHOLD_MULT = val;
+    }
+    else if(name.compare("GREEN_HORIZON_UPPER_THRESHOLD_MULT") == 0) {
+        GREEN_HORIZON_UPPER_THRESHOLD_MULT = val;
+    }
+    else if(name.compare("GOAL_HEIGHT_TO_WIDTH_RATIO_LOW") == 0) {
+        GOAL_HEIGHT_TO_WIDTH_RATIO_LOW = val;
+    }
+    else if(name.compare("GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH") == 0) {
+        GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH = val;
+    }
+    else if(name.compare("SAM_SPLIT_DISTANCE") == 0) {
+        SAM_SPLIT_DISTANCE = val;
+    }
+    else if(name.compare("SAM_MAX_ANGLE_DIFF_TO_MERGE") == 0) {
+        SAM_MAX_ANGLE_DIFF_TO_MERGE = val;
+    }
+    else if(name.compare("SAM_MAX_INTERCEPT_DIFF_TO_MERGE") == 0) {
+        SAM_MAX_DISTANCE_TO_MERGE = val;
+    }
+    else if(name.compare("SAM_MIN_LINE_R2_FIT") == 0) {
+        SAM_MIN_LINE_R2_FIT = val;
+    }
+    else if(name.compare("SAM_MAX_LINE_MSD") == 0) {
+        SAM_MAX_LINE_MSD = val;
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
+bool VisionConstants::setParameter(string name, DistanceMethod val)
+{
+    if(name.compare("BALL_DISTANCE_METHOD") == 0) {
+        BALL_DISTANCE_METHOD = val;
+    }
+    else if(name.compare("GOAL_DISTANCE_METHOD") == 0) {
+        GOAL_DISTANCE_METHOD = val;
+    }
+    else if(name.compare("BEACON_DISTANCE_METHOD") == 0) {
+        BEACON_DISTANCE_METHOD = val;
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
 void VisionConstants::print(ostream& out)
 {
     out << "DO_RADIAL_CORRECTION: " << DO_RADIAL_CORRECTION << std::endl;

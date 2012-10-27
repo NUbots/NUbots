@@ -119,6 +119,12 @@ public:
     static void loadFromFile(std::string filename); //! Loads the constants from a file
     static void print(ostream& out);
 
+    static bool setParameter(string name, bool val);
+    static bool setParameter(string name, int val);
+    static bool setParameter(string name, unsigned int val);
+    static bool setParameter(string name, float val);
+    static bool setParameter(string name, DistanceMethod val);
+
     static void setFlags(bool val=true);
 
     static vector<Parameter> getAllOptimisable();
