@@ -395,6 +395,7 @@ bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& 
                 in >> vals;
                 l->m_rho = vals.x;
                 l->m_phi = vals.y;
+                //in >> l->m_rho >> l->m_phi;
                 next = dynamic_cast<VisionFieldObject*>(l);
             }
             else {

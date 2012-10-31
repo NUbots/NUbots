@@ -7,6 +7,7 @@
 #include "../Vision/VisionWrapper/visioncontrolwrappertraining.h"
 #include "../Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "../Infrastructure/NUImage/NUImage.h"
+#include "../Vision/visionconstants.h"
 
 #include "mainwindow.h"
 #include <QApplication>
@@ -15,6 +16,8 @@ void splitSamples();
 void convertLabels();
 int runDave();
 int runDefault();
+void printBest();
+pair<float, vector<Parameter> > getBest(istream &params_stream, istream &performance_stream);
 vector<double> checkImageStream(string name);
 vector<double> checkSensorStream(string name);
 
@@ -24,6 +27,65 @@ int main()
     MainWindow mw;
     mw.show();
     return app.exec();
+    //printBest();
+}
+
+void printBest()
+{
+    ifstream para("/home/shannon/Images/VisionPGA_progress.log");
+    ifstream perf("/home/shannon/Images/VisionPGA_training_performance.log");
+    pair<float, vector<Parameter> > best = getBest(para, perf);
+    cout << best.first << endl;
+    cout << best.second << endl;
+
+    VisionConstants::DO_RADIAL_CORRECTION = false;
+    //! Goal filtering constants
+    VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS = false;
+    VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS = false;
+    VisionConstants::THROWOUT_DISTANT_GOALS = false;
+    VisionConstants::THROWOUT_INSIGNIFICANT_GOALS = true;
+    VisionConstants::THROWOUT_NARROW_GOALS = true;
+    VisionConstants::THROWOUT_SHORT_GOALS = true;
+    //! Beacon filtering constants
+    VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS = false;
+    VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS = false;
+    VisionConstants::THROWOUT_DISTANT_BEACONS = false;
+    VisionConstants::THROWOUT_INSIGNIFICANT_BEACONS = true;
+    //! Ball filtering constants
+    VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL = false;
+    VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = false;
+    VisionConstants::THROWOUT_SMALL_BALLS = true;
+    VisionConstants::THROWOUT_INSIGNIFICANT_BALLS = true;
+    VisionConstants::THROWOUT_DISTANT_BALLS = false;
+    //! ScanLine options
+    VisionConstants::HORIZONTAL_SCANLINE_SPACING = 3;
+    VisionConstants::VERTICAL_SCANLINE_SPACING = 3;
+    VisionConstants::GREEN_HORIZON_SCAN_SPACING = 11;
+    //! Split and Merge constants
+    VisionConstants::SAM_MAX_POINTS = 1000;
+    VisionConstants::SAM_MAX_LINES = 150;
+    VisionConstants::SAM_CLEAR_SMALL = true;
+    VisionConstants::SAM_CLEAR_DIRTY = true;
+
+    VisionConstants::setAllOptimisable(Parameter::getAsVector(best.second));
+    VisionConstants::print(cout);
+}
+
+pair<float, vector<Parameter> > getBest(istream& params_stream, istream& performance_stream)
+{
+    vector<Parameter> cur, best;
+    float f_cur, f_best = 0;
+    int garbage;
+    performance_stream.ignore(200, '\n');
+    while(params_stream.good() && performance_stream.good()) {
+        params_stream >> cur;
+        performance_stream >> garbage >> f_cur;
+        if(f_cur > f_best) {
+            f_best = f_cur;
+            best = cur;
+        }
+    }
+    return pair<float, vector<Parameter> >(f_best, best);
 }
 
 void splitSamples()

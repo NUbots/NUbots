@@ -22,6 +22,7 @@ private slots:
     void compareParams();
     void runOptimiser();
     void gridSearch();
+    void evaluate();
 
 private:
     Ui::MainWindow *ui;

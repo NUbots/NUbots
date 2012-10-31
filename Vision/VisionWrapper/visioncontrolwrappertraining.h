@@ -34,6 +34,9 @@ public:
                                                                     const map<VisionFieldObject::VFO_ID, float>& false_pos_costs,
                                                                     const map<VisionFieldObject::VFO_ID, float>& false_neg_costs);
 
+    map<VisionFieldObject::VFO_ID, Vector3<double> > precisionRecall(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth);
+
+
 private:
     VisionControlWrapper();
 

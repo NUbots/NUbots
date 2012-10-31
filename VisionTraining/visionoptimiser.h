@@ -33,15 +33,28 @@ public:
 
     static OPT_TYPE getChoiceFromString(string str);
     static OPT_ID getIDFromInt(int i);
+    static string getIDName(OPT_ID id);
 
     explicit VisionOptimiser(QWidget *parent = 0, OPT_TYPE id=PSO);
     ~VisionOptimiser();
 
     void run(string directory, int total_iterations);
     void gridSearch(string directory, int grids_per_side);
+    void errorPandRevaluation(string directory);
+
 private:
-    bool trainingStep(int iteration, const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, ostream &performance_log, const string &stream_name);
-    map<OPT_ID, float> evaluateBatch(const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, const string& stream_name) const;
+    bool trainingStep(int iteration,
+                      const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth,
+                      ostream &performance_log, const string &stream_name);
+
+    map<OPT_ID, float> evaluateBatch(const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth,
+                                     const string& stream_name,
+                                     map<VisionFieldObject::VFO_ID, float>& false_pos_costs,
+                                     map<VisionFieldObject::VFO_ID, float>& false_neg_costs) const;
+
+    map<OPT_ID, pair<double, double> > evaluateBatchPR(const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth,
+                                                       const string& stream_name) const;
+
     void printResults(int iteration, map<OPT_ID, float> fitnesses, ostream& performance_log) const;
     void setupVisionConstants();
     void setupCosts();

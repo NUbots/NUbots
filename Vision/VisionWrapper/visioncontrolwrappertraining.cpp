@@ -154,8 +154,11 @@ map<VisionFieldObject::VFO_ID, pair<float, int> > VisionControlWrapper::evaluate
         }
         if(best_match.first == -1) {
             //no detection for gt item - false negative
-            errors.at(gt->first).first += false_neg_costs.at(gt->first);
-            errors.at(gt->first).second++;
+            //only apply if costs have been provided
+            if(!false_neg_costs.empty()) {
+                errors.at(gt->first).first += false_neg_costs.at(gt->first);
+                errors.at(gt->first).second++;
+            }
             //errors[gt->first] += pow(false_neg_cost,2);
         }
         else {
@@ -168,9 +171,12 @@ map<VisionFieldObject::VFO_ID, pair<float, int> > VisionControlWrapper::evaluate
     for(unsigned int d=0; d<matched_detections.size(); d++) {
         if(!matched_detections.at(d)) {
             //false positive
-            VisionFieldObject::VFO_ID id = data_wrapper->detections.at(d)->getID();
-            errors.at(id).first += false_pos_costs.at(id);
-            errors.at(id).second++;
+            //only apply if costs have been provided
+            if(!false_pos_costs.empty()) {
+                VisionFieldObject::VFO_ID id = data_wrapper->detections.at(d)->getID();
+                errors.at(id).first += false_pos_costs.at(id);
+                errors.at(id).second++;
+            }
             //errors[data_wrapper->detections[d]->getID()] += pow(false_pos_cost,2);
         }
     }
@@ -189,6 +195,64 @@ map<VisionFieldObject::VFO_ID, pair<float, int> > VisionControlWrapper::evaluate
 //    errors.at(VisionFieldObject::OBSTACLE) = sqrt(errors.at(VisionFieldObject::OBSTACLE));
 
     return errors;
+}
+
+map<VisionFieldObject::VFO_ID, Vector3<double> > VisionControlWrapper::precisionRecall(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth)
+{
+    //average distance error 3D for now
+    vector<bool> matched_detections(data_wrapper->detections.size(), false);
+    map<VisionFieldObject::VFO_ID, Vector3<double> > result;
+    map<VisionFieldObject::VFO_ID, double> matches;
+    map<VisionFieldObject::VFO_ID, double> false_pos;
+    map<VisionFieldObject::VFO_ID, double> false_neg;
+    vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >::const_iterator gt;
+
+    for(int i=0; i<VisionFieldObject::INVALID; i++) {
+        VisionFieldObject::VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
+        matches[vfo_id] = 0;
+        false_pos[vfo_id] = 0;
+        false_neg[vfo_id] = 0;
+    }
+
+    for(gt=ground_truth.begin(); gt!=ground_truth.end(); gt++) {
+        int d_num = 0;
+        pair<int,float> best_match = pair<int,float>(-1,numeric_limits<float>::max());
+        BOOST_FOREACH(const VisionFieldObject* d_vfo, data_wrapper->detections) {
+            //if the object is a match and the detection has not already been matched
+            if(objectTypesMatch(d_vfo->getID(), gt->first) && !matched_detections.at(d_num)) {
+                float err = d_vfo->findError(gt->second);
+                if(err < best_match.second) {
+                    best_match = pair<int, float>(d_num, err);
+                }
+            }
+            d_num++;
+        }
+        if(best_match.first == -1) {
+            //no detection for gt item - false negative
+            false_neg.at(gt->first)++;
+        }
+        else {
+            matches.at(gt->first)++;
+            matched_detections.at(best_match.first) = true;
+        }
+    }
+    for(unsigned int d=0; d<matched_detections.size(); d++) {
+        if(!matched_detections.at(d)) {
+            //false positive
+            VisionFieldObject::VFO_ID id = data_wrapper->detections.at(d)->getID();
+            false_pos.at(id)++;
+        }
+    }
+
+    //accumulate errors
+    for(int i=0; i<VisionFieldObject::INVALID; i++) {
+        VisionFieldObject::VFO_ID id = VisionFieldObject::getVFOFromNum(i);
+        result[id].x = matches[id];
+        result[id].y = false_pos[id];
+        result[id].z = false_neg[id];
+    }
+
+    return result;
 }
 
 bool VisionControlWrapper::objectTypesMatch(VisionFieldObject::VFO_ID id0, VisionFieldObject::VFO_ID id1) const

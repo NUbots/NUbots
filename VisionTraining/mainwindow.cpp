@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->exitPB, SIGNAL(clicked()), this, SLOT(close()));
     QObject::connect(ui->browsePB, SIGNAL(clicked()), this, SLOT(getDirectory()));
     QObject::connect(ui->gridPB, SIGNAL(clicked()), this, SLOT(gridSearch()));
+    QObject::connect(ui->evalPB, SIGNAL(clicked()), this, SLOT(evaluate()));
 
     ui->dirEdit->setText(QString(getenv("HOME")) + QString("/Images/FYP/Final100/"));
 }
@@ -105,4 +106,10 @@ void MainWindow::gridSearch()
 {
     VisionOptimiser opt;
     opt.gridSearch("/home/shannon/gridsearch/" , 20);
+}
+
+void MainWindow::evaluate()
+{
+    VisionOptimiser opt;
+    opt.errorPandRevaluation(ui->dirEdit->text().toStdString());
 }
