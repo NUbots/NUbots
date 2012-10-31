@@ -5,6 +5,7 @@
 #include "Tools/Optimisation/Optimiser.h"
 #include "Vision/VisionWrapper/visioncontrolwrappertraining.h"
 
+//uncomment this for multiple optimisers
 //#define MULTI_OPT
 
 namespace Ui {
@@ -16,6 +17,7 @@ class VisionOptimiser : public QMainWindow
     Q_OBJECT
     
 public:
+    //! Represents the type of optimiser chosen
     enum OPT_TYPE {
         EHCLS,
         PGRL,
@@ -23,6 +25,7 @@ public:
         PGA
     };
 
+    //! Represents broad classes of field object
     enum OPT_ID {
         BALL_OPT        = 0,
         GOAL_BEACON_OPT = 1,
@@ -58,41 +61,46 @@ private:
     void printResults(int iteration, map<OPT_ID, float> fitnesses, ostream& performance_log) const;
     void setupVisionConstants();
     void setupCosts();
+    void openLogFiles(string directory);
 
 private slots:
     void halt() {m_halted = true;}
 
 private:
-    Ui::VisionOptimiser *ui;
+    Ui::VisionOptimiser *ui;                //! @var UI pointer
 
 #ifdef MULTI_OPT
-    vector<Optimiser*> m_optimiser_list;
-    map<OPT_ID, Optimiser*> m_optimisers;
+    vector<Optimiser*> m_optimiser_list;    //! @var list of optimiser pointers
+    map<OPT_ID, Optimiser*> m_optimisers;   //! @var map between object class and optimiser
 #else
-    Optimiser* m_optimiser;
+    Optimiser* m_optimiser;                 //! @var optimiser pointer
 #endif
 
-    map<VisionFieldObject::VFO_ID, vector<OPT_ID> > m_vfo_optimiser_map;
-    map<VisionFieldObject::VFO_ID, float> m_false_positive_costs;
-    map<VisionFieldObject::VFO_ID, float> m_false_negative_costs;
-    VisionControlWrapper* vision;
-    string m_training_image_name,
-            m_test_image_name;
-    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_training;
-    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_test;
-    bool m_halted;
+    map<VisionFieldObject::VFO_ID, vector<OPT_ID> > m_vfo_optimiser_map;    //! @var map between exact field object type and broad class.
+    map<VisionFieldObject::VFO_ID, float> m_false_positive_costs;           //! @var map between field object type and false positive cost.
+    map<VisionFieldObject::VFO_ID, float> m_false_negative_costs;           //! @var map between field object type and false negative cost.
+
+    VisionControlWrapper* vision;   //! @var The vision training wrapper.
+    string m_training_image_name,   //! @var The file name for the training batch.
+            m_test_image_name;      //! @var The file name for the test batch.
+
+    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_training;    //! @var labels for the training batch
+    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > m_ground_truth_test;        //! @var labels for the test batch
+
+    bool m_halted;                  //! @var A flag for the user opting to halt.
     //! LOGS
 #ifdef MULTI_OPT
-    map<OPT_ID, ofstream*> m_optimiser_logs;
-    map<OPT_ID, ofstream*> m_individual_progress_logs;
+    map<OPT_ID, ofstream*> m_optimiser_logs;            //! @var map between object class and optimiser state log
+    map<OPT_ID, ofstream*> m_individual_progress_logs;  //! @var map between object class and parameter log
 #else
-    ofstream m_progress_log,
-             m_optimiser_log;
-#endif
-    ofstream m_training_performance_log,
-             m_test_performance_log;
+    ofstream m_optimiser_log,               //! @var optimiser state log
+             m_progress_log;                //! @var parameter log
 
-    string m_opt_name;
+#endif
+    ofstream m_training_performance_log,    //! @var training fitness log
+             m_test_performance_log;        //! @var test fitness log
+
+    string m_opt_name;                      //! @var optimiser name
 };
 
 #endif // VISIONOPTIMISER_H

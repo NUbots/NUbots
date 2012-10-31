@@ -33,7 +33,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
+/**
+  * @brief Retrieves and stores a directory selection from the user.
+  */
 void MainWindow::getDirectory()
 {
     QString dir = QFileDialog::getExistingDirectory(this, "Select Directory", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
@@ -42,6 +44,9 @@ void MainWindow::getDirectory()
     setFocus();
 }
 
+/**
+  * @brief Runs the auto label generation.
+  */
 void MainWindow::generateLabels()
 {
     LabelGenerator lg(this);
@@ -50,10 +55,15 @@ void MainWindow::generateLabels()
     setFocus();
 }
 
+/**
+  * @brief Runs the label modifier.
+  */
 void MainWindow::modifyLabels()
 {
+    //get the image file
     QString imagename = QFileDialog::getOpenFileName(this, "Select Image Stream", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
     if(!imagename.isNull()) {
+        //get the label file
         QString labelname = QFileDialog::getOpenFileName(this, "Select Labels File", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
         if(!labelname.isNull()) {
             LabelEditor le(this);
@@ -64,10 +74,15 @@ void MainWindow::modifyLabels()
     }
 }
 
+/**
+  * @brief Runs the parameter comparison utility.
+  */
 void MainWindow::compareParams()
 {
+    //get the first parameter file
     QString config0 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
     if(!config0.isNull()) {
+        //get the second parameter file
         QString config1 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
         if(!config1.isNull()) {
             string image = ui->dirEdit->text().toStdString() + string("image.strm");
@@ -81,6 +96,9 @@ void MainWindow::compareParams()
     setFocus();
 }
 
+/**
+  * @brief Runs the optimisation utility.
+  */
 void MainWindow::runOptimiser()
 {
     bool ok;
@@ -89,8 +107,10 @@ void MainWindow::runOptimiser()
     l.append("PGRL");
     l.append("EHCLS");
     l.append("PGA");
+    //get the optimiser choice from the user
     QString s = QInputDialog::getItem(this, "Select Optimiser", "Select the preferred optimiser", l, 0, false, &ok);
     if(ok) {
+        //get the number of iterations from the user
         int iterations = QInputDialog::getInt(this, "Iterations", "Select the number of optimiser iterations.", 100, 1, 1000000, 1, &ok);
         if(ok) {
             VisionOptimiser opt(this, VisionOptimiser::getChoiceFromString(s.toStdString()));
@@ -102,12 +122,18 @@ void MainWindow::runOptimiser()
     setFocus();
 }
 
+/**
+  * @brief Runs the grid search utility.
+  */
 void MainWindow::gridSearch()
 {
     VisionOptimiser opt;
     opt.gridSearch("/home/shannon/gridsearch/" , 20);
 }
 
+/**
+  * @brief Runs the evaluation utility.
+  */
 void MainWindow::evaluate()
 {
     VisionOptimiser opt;

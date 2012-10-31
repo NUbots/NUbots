@@ -30,16 +30,16 @@ private slots:
     void prev() {m_prev=true;}
 
 private:
-    Ui::VisionComparitor *ui;
+    Ui::VisionComparitor *ui;   //! @var User interface pointer
 
-    pair<QGraphicsScene,QGraphicsScene> m_scenes;
-    pair<QGraphicsPixmapItem,QGraphicsPixmapItem> m_pixmaps;
+    pair<QGraphicsScene,QGraphicsScene> m_scenes;               //! @var The two scenes
+    pair<QGraphicsPixmapItem,QGraphicsPixmapItem> m_pixmaps;    //! @var The two pixmaps
 
-    unsigned int m_frame_no;
-    vector<NUImage> m_frames;
-    bool m_halted,
-         m_next,
-         m_prev;
+    unsigned int m_frame_no;    //! @var The current frame index
+    vector<NUImage> m_frames;   //! @var The frames read in from file
+    bool m_halted,              //! @var Flag for user selecting to exit
+         m_next,                //! @var Flag for user selecting to go to next frame
+         m_prev;                //! @var Flag for user selecting to go to prev frame
 };
 
 #endif // VISIONCOMPARITOR_H

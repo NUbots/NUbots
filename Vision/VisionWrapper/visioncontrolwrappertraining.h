@@ -16,16 +16,10 @@ public:
     int runFrame(NUImage& img);
     bool setLUT(const string& filename);
     bool setImageStream(const string& filename);
-    bool setSensorStream(const string& filename);
     void restartStream();
     void resetHistory();
-
     bool renderFrame(cv::Mat& mat);
-
-    //batch outputs
     void writeBatchDetections(ostream& out);
-    void writeBatchResults(ostream& out);
-
     void printLabels(ostream& out) const;
     bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
     bool readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const;
@@ -42,11 +36,10 @@ private:
 
     bool objectTypesMatch(VisionFieldObject::VFO_ID id0, VisionFieldObject::VFO_ID id1) const;
 
-    static VisionControlWrapper* instance;
+    static VisionControlWrapper* instance;  //! @var static singleton instance
 
-    VisionController* controller;
-    DataWrapper* data_wrapper;
-    int frame_no;
+    VisionController* controller;           //! @var the system controller
+    DataWrapper* data_wrapper;              //! @var the data wrapper
 };
 
 #endif // CONTROLWRAPPERTRAINING_H

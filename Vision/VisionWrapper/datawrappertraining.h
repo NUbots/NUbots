@@ -29,32 +29,28 @@ class DataWrapper
 
 public:
 
-    enum DATA_ID {
-        DID_IMAGE,
-        DID_CLASSED_IMAGE
-    };
-
+    //! Represents types of debugging information
     enum DEBUG_ID {
-        DBID_IMAGE=0,
-        DBID_H_SCANS=1,
-        DBID_V_SCANS=2,
-        DBID_SEGMENTS=3,
-        DBID_MATCHED_SEGMENTS=4,
-        DBID_HORIZON=5,
-        DBID_GREENHORIZON_SCANS=6,
-        DBID_GREENHORIZON_FINAL=7,
-        DBID_OBJECT_POINTS=8,
-        DBID_FILTERED_SEGMENTS=9,
-        DBID_GOALS=10,
-        DBID_BEACONS=11,
-        DBID_BALLS=12,
-        DBID_OBSTACLES=13,
-        DBID_LINES=14,
-        NUMBER_OF_IDS=15
+        DBID_IMAGE              =0,
+        DID_CLASSED_IMAGE       =1,
+        DBID_H_SCANS            =2,
+        DBID_V_SCANS            =3,
+        DBID_SEGMENTS           =4,
+        DBID_MATCHED_SEGMENTS   =5,
+        DBID_HORIZON            =6,
+        DBID_GREENHORIZON_SCANS =7,
+        DBID_GREENHORIZON_FINAL =8,
+        DBID_OBJECT_POINTS      =9,
+        DBID_FILTERED_SEGMENTS  =10,
+        DBID_GOALS              =11,
+        DBID_BEACONS            =12,
+        DBID_BALLS              =13,
+        DBID_OBSTACLES          =14,
+        DBID_LINES              =15,
+        NUMBER_OF_IDS           =16
     };
 
     static string getIDName(DEBUG_ID id);
-    static string getIDName(DATA_ID id);
 
     static DataWrapper* getInstance();
 
@@ -94,13 +90,12 @@ private:
     ~DataWrapper();
     bool updateFrame();
     void updateFrame(NUImage& img);
-    int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
 
     void resetHistory();
+    void resetDetections();
     void printHistory(ostream& out);
     bool setImageStream(const string& filename);
-    bool setSensorStream(const string& filename);
     bool loadLUTFromFile(const string& filename);
     void resetStream();
     
@@ -110,51 +105,34 @@ private:
 
     bool renderFrame(cv::Mat &mat);
 private:
-    static DataWrapper* instance;
+    static DataWrapper* instance;   //! @var static singleton instance
 
-    NUImage* m_current_image;
+    NUImage* m_current_image;       //! @var The current image pointer
 
-    string LUTname;
-    LookUpTable LUT;
+    string LUTname;                 //! @var look up table filename
+    LookUpTable LUT;                //! @var look up table
 
-    Horizon kinematics_horizon;
+    Horizon kinematics_horizon;     //! @var the kinematics horizon - represents "level"
 
-    //! Used when reading from strm
-    string image_stream_name;
-    ifstream imagestrm;
-    string sensor_stream_name;
-    ifstream sensorstrm;
+    string image_stream_name;       //! @var filename for the image stream
+    ifstream imagestrm;             //! @var image stream
 
-    //! Used for debugging
-    int debug_window_num;
-    map<DEBUG_ID, pair<string, cv::Mat>* > debug_map;
-    pair<string, cv::Mat>* debug_windows;
-
-    //! Used for displaying results
-    string results_window_name;
-    cv::Mat results_img;
-
-    //! Frame info
-    double m_timestamp;
-    int numFramesDropped;
-    int numFramesProcessed;
+    int numFramesProcessed;         //! @var the number of frames processed so far
 
     //! Detection info
-    vector<Ball> ball_detections;
-    vector<Goal> goal_detections;
-    vector<Beacon> beacon_detections;
-    vector<Obstacle> obstacle_detections;
-    vector<FieldLine> line_detections;
-    vector<vector<Ball> > ball_detection_history;
-    vector<vector<Goal> > goal_detection_history;
-    vector<vector<Beacon> > beacon_detection_history;
-    vector<vector<Obstacle> > obstacle_detection_history;
-    vector<vector<FieldLine> > line_detection_history;
+    vector<Ball> ball_detections;           //! @var balls detected in this frame
+    vector<Goal> goal_detections;           //! @var goals
+    vector<Beacon> beacon_detections;       //! @var beacons
+    vector<Obstacle> obstacle_detections;   //! @var obstacles
+    vector<FieldLine> line_detections;      //! @var lines
 
-    vector<const VisionFieldObject*> detections;
-    //vector< vector<VisionFieldObject*> > detection_history;
+    vector<vector<Ball> > ball_detection_history;           //! @var balls detected in each frame so far
+    vector<vector<Goal> > goal_detection_history;           //! @var goals
+    vector<vector<Beacon> > beacon_detection_history;       //! @var beacons
+    vector<vector<Obstacle> > obstacle_detection_history;   //! @var obstacles
+    vector<vector<FieldLine> > line_detection_history;      //! @var lines
 
-    NUSensorsData* m_sensor_data;
+    vector<const VisionFieldObject*> detections;    //! @var all field objects detected in this frame
 };
 
 #endif // DATAWRAPPERTRAINING_H

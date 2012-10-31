@@ -17,6 +17,10 @@ LabelGenerator::~LabelGenerator()
     delete ui;
 }
 
+/** @brief runs the automatic label generator application.
+*   @param dir Directory for input and output files
+*   @return Integer return code.
+*/
 bool LabelGenerator::run(const string &dir)
 {
     //find number of images
@@ -53,8 +57,9 @@ bool LabelGenerator::run(const string &dir)
     
     ui->progressBar->setMaximum(num_images);
     
+    //whilever the vision processes frames and the user hasn't cancelled the process
     while(!cancelled && vision->runFrame()==0) {
-        vision->printLabels(outfile);
+        vision->printLabels(outfile);            //use the wrappers to print the labels
         ui->progressBar->setValue(cur_image);
         QApplication::processEvents();
         cur_image++;

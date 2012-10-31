@@ -15,16 +15,14 @@ HEADERS += \
     ../Vision/VisionTypes/VisionFieldObjects/fieldline.h \
     labeleditor.h \
     visionoptimiser.h \
-    visioncomparitor.h \
-    optimiserselectwindow.h
+    visioncomparitor.h
 
 SOURCES += \
     mainwindow.cpp \
     labelgenerator.cpp \
     labeleditor.cpp \
     visionoptimiser.cpp \
-    visioncomparitor.cpp \
-    optimiserselectwindow.cpp
+    visioncomparitor.cpp
 
 HEADERS += \
     ../Vision/VisionTools/pccamera.h \
@@ -135,5 +133,4 @@ FORMS += \
     labelgenerator.ui \
     labeleditor.ui \
     visionoptimiser.ui \
-    visioncomparitor.ui \
-    optimiserselectwindow.ui
+    visioncomparitor.ui

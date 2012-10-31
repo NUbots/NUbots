@@ -29,7 +29,7 @@ public:
 
 private:
     void display(const NUImage& frame, const LookUpTable& lut);
-    void renderFrame(const NUImage& frame, cv::Mat& mat);
+    void renderFrame(const NUImage& frame, cv::Mat& mat, vector<VisionFieldObject*>& gt) const;
     void setInts(vector< pair<string, Vector3<int> > > vals);
     void setDoubles(vector<pair<string, Vector3<double> > > vals);
     void updateCombo();
@@ -46,24 +46,25 @@ private slots:
     void updateValues();
     
 private:
-    Ui::LabelEditor *ui;
-    vector<QLabel*> m_text_labels;
-    vector<QSlider*> m_sliders;
-    vector<QSpinBox*> m_i_spins;
-    vector<QDoubleSpinBox*> m_d_spins;
-    vector<VisionFieldObject*> m_ground_truth;
-    vector< vector<VisionFieldObject*> > m_ground_truth_full;
-    QGraphicsScene m_plain_scene;
-    QGraphicsScene m_classified_scene;
-    QGraphicsPixmapItem m_plain_pixmap;
-    QGraphicsPixmapItem m_classified_pixmap;
+    Ui::LabelEditor *ui;                        //! @var The GUI pointer.
+    vector<QLabel*> m_text_labels;              //! @var The dynamic labels.
+    vector<QSlider*> m_sliders;                 //! @var The dynamic integer sliders.
+    vector<QSpinBox*> m_i_spins;                //! @var The dynamic integer inputs.
+    vector<QDoubleSpinBox*> m_d_spins;          //! @var The dynamic decimal inputs.
+    vector<VisionFieldObject*> m_ground_truth;  //! @var The current labels.
+    vector< vector<VisionFieldObject*> > m_ground_truth_full;   //! @var All labels.
+    QGraphicsScene m_plain_scene;               //! @var The scene for displaying the labelled image.
+    QGraphicsScene m_classified_scene;          //! @var The scene for displayying the classified image.
+    QGraphicsPixmapItem m_plain_pixmap;         //! @var The labelled image pixmap.
+    QGraphicsPixmapItem m_classified_pixmap;    //! @var The classified image pixmap.
 
-    unsigned int m_current_object,
-                 m_frame_no,
-                 m_total_frames;
-    bool m_halted,
-         m_image_updated,
-         m_next;
+    unsigned int m_current_object,  //! @var The index of the current label.
+                 m_frame_no,        //! @var The index of the current image.
+                 m_total_frames;    //! @var The total number of images.
+
+    bool m_halted,          //! @var Whether the user has halted the labelling.
+         m_image_updated,   //! @var Whether the image needs to be re-rendered.
+         m_next;            //! @var Whether to progress to the next image.
 };
 
 #endif // LABELEDITOR_H

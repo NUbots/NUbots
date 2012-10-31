@@ -24,8 +24,8 @@ private slots:
     void cancel() {cancelled = true;}
 
 private:
-    Ui::LabelGenerator *ui;
-    bool cancelled;
+    Ui::LabelGenerator *ui; //! @var The GUI pointer.
+    bool cancelled;         //! @var Whether the user hit cancel.
 };
 
 #endif // LABELGENERATOR_H

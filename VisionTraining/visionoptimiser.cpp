@@ -6,9 +6,10 @@
 #include "Tools/Optimisation/PSOOptimiser.h"
 #include "Tools/Optimisation/PGAOptimiser.h"
 #include "Vision/visionconstants.h"
-#include "optimiserselectwindow.h"
 #include <QMessageBox>
 
+/** @brief String to enum converter for the OPT_TYPE enum.
+*/
 VisionOptimiser::OPT_TYPE VisionOptimiser::getChoiceFromString(string str)
 {
     if(str.compare("PGRL") == 0) {
@@ -25,6 +26,8 @@ VisionOptimiser::OPT_TYPE VisionOptimiser::getChoiceFromString(string str)
     }
 }
 
+/** @brief String to enum converter for the OPT_ID enum.
+*/
 VisionOptimiser::OPT_ID VisionOptimiser::getIDFromInt(int i)
 {
     switch(i) {
@@ -36,6 +39,8 @@ VisionOptimiser::OPT_ID VisionOptimiser::getIDFromInt(int i)
     }
 }
 
+/** @brief Enum to string converter for the OPT_ID enum.
+*/
 string VisionOptimiser::getIDName(VisionOptimiser::OPT_ID id)
 {
     switch(id) {
@@ -55,9 +60,9 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
     ui->setupUi(this);
     QObject::connect(ui->haltPB, SIGNAL(clicked()), this, SLOT(halt()));
 
-    //put dialog here for selecting multi/single and which single opts
-    setupCosts();
+    setupCosts(); // load the false negative and positive costs for each object type
 
+    //generate the single or multiple optimisers
     switch(id) {
     case EHCLS:
         m_opt_name = "VisionEHCLS";
@@ -109,6 +114,7 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
         break;
     }
 
+    //generate a map between VFO_IDs and OPT_IDs
     m_vfo_optimiser_map[VisionFieldObject::BALL].push_back(BALL_OPT); m_vfo_optimiser_map[VisionFieldObject::BALL].push_back(GENERAL_OPT);
     m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_L].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_L].push_back(GENERAL_OPT);
     m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_R].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_R].push_back(GENERAL_OPT);
@@ -139,14 +145,20 @@ VisionOptimiser::~VisionOptimiser()
 #endif
 }
 
+/** @brief Calculates fitness, precision and recall for all object types.
+*   @param directory Location of image stream, LUT and parameter set.
+*   @note This method uses default names for each file.
+*/
 void VisionOptimiser::errorPandRevaluation(string directory)
 {
-    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > gt;
-    map<OPT_ID, float> fitnesses;
-    map<OPT_ID, pair<double, double> > PR;
-    string image_name = directory + string("/image.strm");
-    ifstream label_file((directory + string("/labels.strm")).c_str());
-    map<VisionFieldObject::VFO_ID, float> zero_costs; //empty removes consideration of false positives and negatives
+    vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > gt; //ground truth
+    map<OPT_ID, float> fitnesses;                                           //result fitnesses
+    map<OPT_ID, pair<double, double> > PR;                                  //results P and R
+    string image_name = directory + string("/image.strm");                  //image filename
+    ifstream label_file((directory + string("/labels.strm")).c_str());      //label file
+    map<VisionFieldObject::VFO_ID, float> zero_costs;                       //empty costs map removes consideration of false positives and negatives
+
+    //load parameter file from directory
     VisionConstants::loadFromFile(directory + string("/VisionOptions.cfg"));
 
     //read in the labels
@@ -161,15 +173,21 @@ void VisionOptimiser::errorPandRevaluation(string directory)
     //set the options we need
     setupVisionConstants();
 
+    //calculate the fitness P and R
     fitnesses = evaluateBatch(gt, image_name, zero_costs, zero_costs);
     PR = evaluateBatchPR(gt, image_name);
 
+    //print to stdout
     for(int i=0; i<=GENERAL_OPT; i++) {
         OPT_ID id = getIDFromInt(i);
         cout << getIDName(id) << " f: " << fitnesses[id] << " P: " << PR[id].first << " R: " << PR[id].second << endl;
     }
 }
 
+/** @brief Runs a grid search over a pair of parameters.
+*   @param directory The directory for all input files.
+*   @param grids_per_side The number of divisions for the grid search
+*/
 void VisionOptimiser::gridSearch(string directory, int grids_per_side)
 {
     vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > gt;
@@ -178,20 +196,9 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
     ifstream train_label_file((directory + string("labels.strm")).c_str());
     ofstream grid_log((directory + string("grid.txt")).c_str());
 
-//    Parameter p1("BALL_EDGE_THRESHOLD", 0, 0, 50),
-//            p2("BALL_ORANGE_TOLERANCE", 0, 0, 50);
-//    Parameter p1("GREEN_HORIZON_MIN_GREEN_PIXELS", 1, 1, 50),
-//              p2("GREEN_HORIZON_LOWER_THRESHOLD_MULT", 0, 0, 20);
-//    Parameter p1("GREEN_HORIZON_LOWER_THRESHOLD_MULT", 0, 0, 20),
-//              p2("GREEN_HORIZON_UPPER_THRESHOLD_MULT", 0, 0, 20);
-
-    Parameter p1("SAM_SPLIT_DISTANCE", 0, 0, 320);
-    Parameter p2("SAM_MIN_POINTS_OVER", 1, 1, 500);
-    //("SAM_MAX_ANGLE_DIFF_TO_MERGE", 0, 0, mathGeneral::PI*0.25);
-    //("SAM_MAX_DISTANCE_TO_MERGE", 0, 0, 150);
-//    Parameter p1("HORIZONTAL_SCANLINE_SPACING", 1, 1, 50);
-//    Parameter p2("VERTICAL_SCANLINE_SPACING", 1, 1, 50);
-    //("GREEN_HORIZON_SCAN_SPACING", 1, 1, 50);
+    //parameters to search over
+    Parameter p1("GREEN_HORIZON_MIN_GREEN_PIXELS", 1, 1, 50),
+              p2("GREEN_HORIZON_LOWER_THRESHOLD_MULT", 0, 0, 20);
 
     //read in the labels
     if(!vision->readLabels(train_label_file, gt)) {
@@ -207,6 +214,7 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
 
     bool halt = false;
     grid_log << "x : " << p1.name() << " y : " << p2.name() << endl;
+    //search over set number of grids
     for(float x = p1.min(); x<p1.max() && !halt; x+= (p1.max() - p1.min())/grids_per_side) {
         for(float y = p2.min(); y<p2.max() && !halt; y+= (p2.max() - p2.min())/grids_per_side) {
             //change parameters
@@ -222,8 +230,9 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
             }
             fitnesses = evaluateBatch(gt, image_name, m_false_positive_costs, m_false_negative_costs);
             if(!fitnesses.empty()) {
-                //grid_log << fitnesses[GENERAL_OPT] << " ";
+                //log the general fitness
                 grid_log << fitnesses[GENERAL_OPT] << " ";
+                //print the others to stdout
                 cout << fitnesses[OBSTACLE_OPT] << " ";
                 cout << fitnesses[BALL_OPT] << " ";
                 cout << fitnesses[GOAL_BEACON_OPT] << " ";
@@ -241,10 +250,16 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
     cout << "100%" << endl;
 }
 
+/** @brief runs the label editor application.
+*   @param dir Directory for input and output files
+*   @param total_iterations Number of samples to run for.
+*/
 void VisionOptimiser::run(string directory, int total_iterations)
 {
-    int iteration = 0;
-    bool success = true;
+    int iteration = 0;      //sample counter
+    bool success = true;    //flag for failures
+
+    //initialise
     m_halted = false;
     //image streams
     m_training_image_name = directory + string("train_image.strm");
@@ -257,35 +272,7 @@ void VisionOptimiser::run(string directory, int total_iterations)
     total_iterations*=2; //double since we are running once each for training and testing
 
     //set up logs
-#ifdef MULTI_OPT
-    m_optimiser_logs[BALL_OPT] = new ofstream((directory + m_opt_name + string("_ball.log")).c_str());
-    m_optimiser_logs[GOAL_BEACON_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon.log")).c_str());
-    m_optimiser_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + string("_obstacle.log")).c_str());
-    m_optimiser_logs[LINE_OPT] = new ofstream((directory + m_opt_name + string("_line.log")).c_str());
-    m_optimiser_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + string("_general.log")).c_str());
-
-    m_individual_progress_logs[BALL_OPT] = new ofstream((directory + m_opt_name + string("_ball_progress.log")).c_str());
-    m_individual_progress_logs[GOAL_BEACON_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon_progress.log")).c_str());
-    m_individual_progress_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + string("_obstacle_progress.log")).c_str());
-    m_individual_progress_logs[LINE_OPT] = new ofstream((directory + m_opt_name + string("_line_progress.log")).c_str());
-    m_individual_progress_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + string("_general_progress.log")).c_str());
-#else
-    m_progress_log.open((directory + m_opt_name + string("_progress.log")).c_str());
-    m_optimiser_log.open((directory + m_opt_name + string(".log")).c_str());
-#endif
-
-    m_training_performance_log.open((directory + m_opt_name + string("_training_performance.log")).c_str());
-    m_training_performance_log.setf(ios_base::fixed);
-    m_test_performance_log.open((directory + m_opt_name + string("_test_performance.log")).c_str());
-    m_test_performance_log.setf(ios_base::fixed);
-
-#ifdef MULTI_OPT
-    m_training_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << endl;
-    m_test_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << endl;
-#else
-    m_training_performance_log << "Iteration Fitness" << endl;
-    m_test_performance_log << "Iteration Fitness" << endl;
-#endif
+    openLogFiles(directory);
 
     //read in the training and testing labels
     if(!vision->readLabels(train_label_file, m_ground_truth_training)) {
@@ -320,9 +307,11 @@ void VisionOptimiser::run(string directory, int total_iterations)
         //run batch
         bool training = (iteration%2==0);   //modulo 2 gives alternating training and testing runs
         if(training) {
+            //run a training step - i.e. update the optimisers
             success = trainingStep(iteration/2, m_ground_truth_training, m_training_performance_log, m_training_image_name);
         }
         else {
+            //run over the test set, no optimiser update
             printResults(iteration/2, evaluateBatch(m_ground_truth_test, m_test_image_name, m_false_positive_costs, m_false_negative_costs), m_test_performance_log);
         }
         iteration++;
@@ -367,12 +356,18 @@ void VisionOptimiser::run(string directory, int total_iterations)
 
 }
 
+/** @brief Runs a training step over the batch, updating the optimiser(s).
+*   @param iteration The current optimisation sample number.
+*   @param ground_truth The labels to use.
+*   @param performance_log A log to print the resulting fitness to.
+*   @param stream_name The image stream to use.
+*/
 bool VisionOptimiser::trainingStep(int iteration,
                                    const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth,
                                    ostream& performance_log,
                                    const string& stream_name)
 {
-    map<OPT_ID, float> fitnesses;
+    map<OPT_ID, float> fitnesses;   //a map between fitnesses and optimiser ID
 
     //init gui
     ui->progressBar_strm->setMaximum(ground_truth.size());
@@ -395,6 +390,7 @@ bool VisionOptimiser::trainingStep(int iteration,
         return false;
     }
 
+    //evaluate the batch
     fitnesses = evaluateBatch(ground_truth, stream_name, m_false_positive_costs, m_false_negative_costs);
 
     vision->resetHistory();
@@ -410,7 +406,7 @@ bool VisionOptimiser::trainingStep(int iteration,
         m_optimiser->setParametersResult(fitnesses[GENERAL_OPT]);
 #endif
 
-        //write results
+        //write results to logs
 #ifdef MULTI_OPT
         *(m_individual_progress_logs[BALL_OPT]) << VisionConstants::getBallParams() << endl;
         *(m_individual_progress_logs[GOAL_BEACON_OPT]) << VisionConstants::getGoalBeaconParams() << endl;
@@ -428,6 +424,15 @@ bool VisionOptimiser::trainingStep(int iteration,
     }
 }
 
+/** @brief Evaluates a frame batch for mean fitness.
+*   @param ground_truth The labels to use.
+*   @param stream_name The image stream to use.
+*   @param false_pos_costs A map between field objects and false positive costs.
+*   @param false_neg_costs A map between field objects and false negative costs.
+*   @return A map of optimiser IDs to fitnesses.
+*
+*   @note If an empty map for false pos or neg costs is given then no accounting is made for them.
+*/
 map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth,
                                                                    const string& stream_name,
                                                                    map<VisionFieldObject::VFO_ID, float>& false_pos_costs,
@@ -484,6 +489,11 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
     return fitnesses;
 }
 
+/** @brief Evaluates a frame batch for precision and recall.
+*   @param ground_truth The labels to use.
+*   @param stream_name The image stream to use.
+*   @return A map of optimiser IDs to P&R pairs
+*/
 map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBatchPR(const vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& ground_truth, const string& stream_name) const
 {
     //initialise batch errors
@@ -536,6 +546,11 @@ map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBat
     return PR;
 }
 
+/** @brief Prints fitness results to file.
+*   @param iteration The current iteration.
+*   @param fitnesses A map between optimiser ID and fitnesses.
+*   @param performance_log The stream to print to.
+*/
 void VisionOptimiser::printResults(int iteration, map<OPT_ID, float> fitnesses, ostream& performance_log) const
 {
     if(!fitnesses.empty()) {
@@ -547,40 +562,45 @@ void VisionOptimiser::printResults(int iteration, map<OPT_ID, float> fitnesses, 
     }
 }
 
+/** @brief Initialises constants that aren't to be optimised.
+*/
 void VisionOptimiser::setupVisionConstants()
 {
     VisionConstants::DO_RADIAL_CORRECTION = false;
-    //! Goal filtering constants
+    // Goal filtering constants
     VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS = false;
     VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS = false;
     VisionConstants::THROWOUT_DISTANT_GOALS = false;
     VisionConstants::THROWOUT_INSIGNIFICANT_GOALS = true;
     VisionConstants::THROWOUT_NARROW_GOALS = true;
     VisionConstants::THROWOUT_SHORT_GOALS = true;
-    //! Beacon filtering constants
+    // Beacon filtering constants
     VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS = false;
     VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS = false;
     VisionConstants::THROWOUT_DISTANT_BEACONS = false;
     VisionConstants::THROWOUT_INSIGNIFICANT_BEACONS = true;
-    //! Ball filtering constants
+    // Ball filtering constants
     VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL = false;
     VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = false;
     VisionConstants::THROWOUT_SMALL_BALLS = true;
     VisionConstants::THROWOUT_INSIGNIFICANT_BALLS = true;
     VisionConstants::THROWOUT_DISTANT_BALLS = false;
-    //! ScanLine options
+    // ScanLine options
     VisionConstants::HORIZONTAL_SCANLINE_SPACING = 3;
     VisionConstants::VERTICAL_SCANLINE_SPACING = 3;
     VisionConstants::GREEN_HORIZON_SCAN_SPACING = 11;
-    //! Split and Merge constants
+    // Split and Merge constants
     VisionConstants::SAM_MAX_POINTS = 1000;
     VisionConstants::SAM_MAX_LINES = 150;
     VisionConstants::SAM_CLEAR_SMALL = true;
     VisionConstants::SAM_CLEAR_DIRTY = true;
 }
 
+/** @brief Initialises a map of costs for each field object
+*/
 void VisionOptimiser::setupCosts()
 {
+    //at present they are all set the same
     m_false_positive_costs[VisionFieldObject::BALL] = 200;
     m_false_positive_costs[VisionFieldObject::GOAL_Y_L] = 200;
     m_false_positive_costs[VisionFieldObject::GOAL_Y_R] = 200;
@@ -604,11 +624,49 @@ void VisionOptimiser::setupCosts()
     m_false_negative_costs[VisionFieldObject::BEACON_Y] = 200;
     m_false_negative_costs[VisionFieldObject::BEACON_B] = 200;
     m_false_negative_costs[VisionFieldObject::BEACON_U] = 200;
+    m_false_negative_costs[VisionFieldObject::OBSTACLE] = 200;
+    m_false_negative_costs[VisionFieldObject::FIELDLINE] = 200;
+}
+
+/** @brief Opens and initialises the various log files.
+*   @param directory Directory for files.
+*/
+void VisionOptimiser::openLogFiles(string directory)
+{
+    //log(s) to save the optimiser state(s)
 #ifdef MULTI_OPT
-    m_false_negative_costs[VisionFieldObject::OBSTACLE] = 100;  //diff
-    m_false_negative_costs[VisionFieldObject::FIELDLINE] = 20;  //diff
+    m_optimiser_logs[BALL_OPT] = new ofstream((directory + m_opt_name + string("_ball.log")).c_str());
+    m_optimiser_logs[GOAL_BEACON_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon.log")).c_str());
+    m_optimiser_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + string("_obstacle.log")).c_str());
+    m_optimiser_logs[LINE_OPT] = new ofstream((directory + m_opt_name + string("_line.log")).c_str());
+    m_optimiser_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + string("_general.log")).c_str());
 #else
-    m_false_negative_costs[VisionFieldObject::OBSTACLE] = 200;  //diff
-    m_false_negative_costs[VisionFieldObject::FIELDLINE] = 200;  //diff
+    m_optimiser_log.open((directory + m_opt_name + string(".log")).c_str());
+#endif
+
+    //log(s) to save the parameter sets trialed
+#ifdef MULTI_OPT
+    m_individual_progress_logs[BALL_OPT] = new ofstream((directory + m_opt_name + string("_ball_progress.log")).c_str());
+    m_individual_progress_logs[GOAL_BEACON_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon_progress.log")).c_str());
+    m_individual_progress_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + string("_obstacle_progress.log")).c_str());
+    m_individual_progress_logs[LINE_OPT] = new ofstream((directory + m_opt_name + string("_line_progress.log")).c_str());
+    m_individual_progress_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + string("_general_progress.log")).c_str());
+#else
+    m_progress_log.open((directory + m_opt_name + string("_progress.log")).c_str());
+#endif
+
+    //logs to record the training and test performance
+    m_training_performance_log.open((directory + m_opt_name + string("_training_performance.log")).c_str());
+    m_training_performance_log.setf(ios_base::fixed);
+    m_test_performance_log.open((directory + m_opt_name + string("_test_performance.log")).c_str());
+    m_test_performance_log.setf(ios_base::fixed);
+
+    //print headers to the performance logs
+#ifdef MULTI_OPT
+    m_training_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << endl;
+    m_test_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << endl;
+#else
+    m_training_performance_log << "Iteration Fitness" << endl;
+    m_test_performance_log << "Iteration Fitness" << endl;
 #endif
 }
