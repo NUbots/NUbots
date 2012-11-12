@@ -19,9 +19,6 @@
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 
-#define GROUP_NAME "/home/shannon/Images/paper"
-#define GROUP_EXT ".png"
-
 using namespace std;
 //using namespace cv;
 using cv::Mat;
@@ -39,7 +36,7 @@ public:
     
     enum DEBUG_ID {
         DBID_IMAGE              = 0,
-        DBID_CLASSED_IMAGE       = 1,
+        DBID_CLASSED_IMAGE      = 1,
         DBID_H_SCANS            = 2,
         DBID_V_SCANS            = 3,
         DBID_SEGMENTS           = 4,
@@ -59,7 +56,7 @@ public:
 
     static string getIDName(DEBUG_ID id);
 
-    static DataWrapper* getInstance();
+    static DataWrapper* getInstance(bool disp_on=false);
 
     //! RETRIEVAL METHODS
     NUImage* getFrame();
@@ -93,30 +90,32 @@ public:
     bool debugPublish(DEBUG_ID id, const NUImage *const img);
     
     
-private:
-    DataWrapper();
+private:private:
+    enum INPUT_METHOD {
+        CAMERA,
+        STREAM
+    };
+
+
+    DataWrapper(bool disp_on=false);
     ~DataWrapper();
     //void startImageFileGroup(string filename);
     bool updateFrame();
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
-    
-    void ycrcb2ycbcr(Mat* img_ycrcb);
-    void generateImageFromMat(Mat& frame);
 
 private:
-    enum INPUT_METHOD {
-        CAMERA,
-        STREAM
-    };
-    
-private:
     static const INPUT_METHOD METHOD = STREAM;  //CAMERA, STREAM, FILE
+
+    string streamname;
+    ifstream imagestrm;
 
     static DataWrapper* instance;
 
     NUImage* m_current_image;
+
+    bool m_display_on;
 
     string configname;
 
@@ -127,26 +126,6 @@ private:
 
     PCCamera* m_camera;          //! Used when streaming from camera
 
-    //! Used when reading from strm
-    string streamname;
-    ifstream imagestrm;
-
-    //! Used when reading from file
-    unsigned char* m_yuyv_buffer;
-    VideoCapture* capture;
-    Mat m_current_image_cv;
-    int num_images, cur_image;
-
-    //! Used for debugging
-    int debug_window_num;
-    map<DEBUG_ID, vector<pair<string, Mat>* > > debug_map;
-    pair<string, Mat>* debug_windows;
-
-//    int id_window_map[NUMBER_OF_IDS];
-//
-//    string* debug_window_name;  //for array
-//    Mat* debug_img;             //for array
-
     //! Used for displaying results
     string results_window_name;
     Mat results_img;
@@ -155,13 +134,6 @@ private:
     double m_timestamp;
     int numFramesDropped;
     int numFramesProcessed;
-
-    
-    //NUSensorsData* m_sensor_data;
-
-//! ONLY FOR DEBUGGING - DO NOT RELY ON THE FOLLOWING METHODS OR VARIABLES BEING PRESENT
-public:
-    void show(Mat* img);
 };
 
 #endif // DATAWRAPPERPC_H

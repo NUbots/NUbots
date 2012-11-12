@@ -1,28 +1,30 @@
-#include "visioncontrolwrapperpc.h"
+#include "visioncontrolwrapperrpi.h"
 
 VisionControlWrapper* VisionControlWrapper::instance = 0;
 
-VisionControlWrapper* VisionControlWrapper::getInstance()
+VisionControlWrapper* VisionControlWrapper::getInstance(bool disp_on)
 {
     if(!instance)
-        instance = new VisionControlWrapper();
+        instance = new VisionControlWrapper(disp_on);
+    else
+        instance->wrapper = DataWrapper::getInstance(disp_on);
     return instance;
 }
 
-VisionControlWrapper::VisionControlWrapper()
+VisionControlWrapper::VisionControlWrapper(bool disp_on)
 {
     controller = VisionController::getInstance();
-    wrapper = DataWrapper::getInstance();
+    wrapper = DataWrapper::getInstance(disp_on);
 }
 
 int VisionControlWrapper::runFrame()
 {
     static int frame = 0;
-    frame++;
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
-        debug << "frame: " << frame << endl;
     #endif
+    frame++;
+    cout << "frame: " << frame << endl;
     if(!wrapper->updateFrame()) {
         #if VISION_WRAPPER_VERBOSITY > 1
             debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;

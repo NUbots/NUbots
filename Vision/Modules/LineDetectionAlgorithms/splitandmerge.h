@@ -33,20 +33,23 @@
 #include "Tools/Math/LSFittedLine.h"
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/Vector3.h"
+#include "Vision/Modules/linedetector.h"
 
 using std::vector;
 
-class SplitAndMerge
+class SplitAndMerge : public LineDetector
 {
 public:
     //GENERIC
     SplitAndMerge();
     ~SplitAndMerge();
 
+    void run();
+
     //LEAST-SQUARES FITTING
-    vector<LSFittedLine> run(vector<LinePoint>& points, bool noise=true);
 
 private:
+    vector<LSFittedLine> fitLines(vector<LinePoint>& points, bool noise=true);
     //RULES
     //maximum field objects rules
     //unsigned int MAX_POINTS; //500

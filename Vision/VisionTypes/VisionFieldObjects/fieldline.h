@@ -24,15 +24,16 @@ public:
     bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const {return false;}
     //! @brief applies a series of checks to decide if the object is valid.
     bool check() const {return true;}
-    
-    //! @brief Calculation of error for optimisation - assumed measured = (rho, phi)
-    double findError(const Vector2<double>& measured) const;
+
     
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << getVFOName(FIELDLINE) << " " << Vector2<double>(m_rho, m_phi);}
     //! @brief Brief stream output for labelling purposes
     //void printLabelBrief(ostream& out) const {out << getVFOName(FIELDLINE) << " " << }
-    virtual Vector2<double> getShortLabel() const {return Vector2<double>(m_rho, m_phi);}
+    Vector2<double> getShortLabel() const {return Vector2<double>(m_rho, m_phi);}
+
+    //! @brief Calculation of error for optimisation - assumed measured = (rho, phi)
+    double findError(const Vector2<double>& measured) const;
 
     void render(cv::Mat& mat) const;
 

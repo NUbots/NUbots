@@ -15,6 +15,11 @@ public:
         Least
     };
 
+    enum LineDetectionMethod {
+        SAM,
+        RANSAC
+    };
+
     //! Distortion Correction
     static bool DO_RADIAL_CORRECTION;           //! Whether to perform radial distortion correction.
     static float RADIAL_CORRECTION_COEFFICIENT; //! The radial distortion correction coefficient.
@@ -64,6 +69,7 @@ public:
     static DistanceMethod GOAL_DISTANCE_METHOD;     //! The preferred method for calculating the distance to the goals
     static DistanceMethod BEACON_DISTANCE_METHOD;   //! The preferred method for calculating the distance to the beacons
     
+    static LineDetectionMethod LINE_METHOD;
     //! Field-object detection constants
     static int BALL_EDGE_THRESHOLD;         //! Dave?
     static int BALL_ORANGE_TOLERANCE;       //! Dave?

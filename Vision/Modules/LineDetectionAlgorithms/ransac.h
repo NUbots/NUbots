@@ -3,14 +3,16 @@
 
 #include <vector>
 #include "Tools/Math/LSFittedLine.h"
+#include "Vision/Modules/linedetector.h"
 
-class RANSAC
+class RANSAC : public LineDetector
 {
 public:
     RANSAC();
-    std::vector<LSFittedLine> run(const std::vector<LinePoint>& line_points);
+    void run();
 
 private:
+    std::vector<LSFittedLine> fitLines(const std::vector<LinePoint>& line_points);
     bool findLine(std::vector<LinePoint> points, Line& result, std::vector<LinePoint>& consensus, std::vector<LinePoint>& remainder, float& variance);
     Line generateRandomLine(const std::vector<LinePoint>& points) const;
     LSFittedLine fitLine(const std::vector<LinePoint>& points) const;

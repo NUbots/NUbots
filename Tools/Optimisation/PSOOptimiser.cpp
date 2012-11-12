@@ -62,7 +62,7 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
 void PSOOptimiser::initSwarm()
 {
     // we want to start the swarm around initial_parameters
-    debug << "Initial Swarm: " << endl;
+    //debug << "Initial Swarm: " << endl;
     for (int i=0; i<m_num_particles; i++)
     {
     	m_swarm_best.push_back(m_initial_parameters);
@@ -78,8 +78,8 @@ void PSOOptimiser::initSwarm()
 			particle[j].set(uniformDistribution(min, max));
 			velocity[j] = normalDistribution(0, (max-min)/8);        // initial velocity between +/- range
         }
-        debug << i << ": " << Parameter::getAsVector(particle) << endl;
-        debug << i << ": " << velocity << endl;
+        //debug << i << ": " << Parameter::getAsVector(particle) << endl;
+        //debug << i << ": " << velocity << endl;
         m_swarm_position.push_back(particle);
         m_swarm_velocity.push_back(velocity);
     }

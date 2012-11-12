@@ -12,8 +12,6 @@ contains(PLATFORM, "darwin") {
     DEFINES += TARGET_IS_DARWIN
 
     ROBOCUP_DIR = ${HOME}/robocup/            #change to darwin directory later
-    #ROBOCUP_DIR = /home/shannon/robocup/
-    #ROBOCUP_DIR = /home/david/robocup/
 
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Autoconfig/
@@ -36,8 +34,6 @@ contains(PLATFORM, "pc") {
     DEFINES += TARGET_IS_PC
 
     ROBOCUP_DIR = ${HOME}/robocup/
-    #ROBOCUP_DIR = /home/shannon/robocup/
-    #ROBOCUP_DIR = /home/david/robocup/
 
     INCLUDEPATH += $$ROBOCUP_DIR/
     INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
@@ -49,11 +45,34 @@ contains(PLATFORM, "pc") {
         ../Vision/Debug/debugverbosityvision.h \
         ../Vision/Debug/debug.h \
         ../Vision/Debug/nubotdataconfig.h \
-    
+
     SOURCES += \
         VisionTools/pccamera.cpp \
         VisionWrapper/datawrapperpc.cpp \
         VisionWrapper/visioncontrolwrapperpc.cpp\
+}
+
+contains(PLATFORM, "rpi") {
+     message("Compiling for RPi")
+    DEFINES += TARGET_IS_RPI
+
+    ROBOCUP_DIR = ${HOME}/robocup/
+
+    INCLUDEPATH += $$ROBOCUP_DIR/
+    INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
+
+    HEADERS += \
+        VisionTools/pccamera.h \
+        VisionWrapper/datawrapperrpi.h \
+        VisionWrapper/visioncontrolwrapperrpi.h \
+        ../Vision/Debug/debugverbosityvision.h \
+        ../Vision/Debug/debug.h \
+        ../Vision/Debug/nubotdataconfig.h \
+
+    SOURCES += \
+        VisionTools/pccamera.cpp \
+        VisionWrapper/datawrapperrpi.cpp \
+        VisionWrapper/visioncontrolwrapperrpi.cpp\
 }
 
 

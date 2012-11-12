@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->gridPB, SIGNAL(clicked()), this, SLOT(gridSearch()));
     QObject::connect(ui->evalPB, SIGNAL(clicked()), this, SLOT(evaluate()));
 
-    ui->dirEdit->setText(QString(getenv("HOME")) + QString("/Images/FYP/Final100/"));
+    ui->dirEdit->setText(QString(getenv("HOME")) + QString("/nubot/"));
 }
 
 MainWindow::~MainWindow()
@@ -137,5 +137,6 @@ void MainWindow::gridSearch()
 void MainWindow::evaluate()
 {
     VisionOptimiser opt;
-    opt.errorPandRevaluation(ui->dirEdit->text().toStdString());
+    for(int i=0; i<100; i++)
+        opt.errorPandRevaluation(ui->dirEdit->text().toStdString());
 }

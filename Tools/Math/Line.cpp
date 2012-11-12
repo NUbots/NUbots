@@ -67,6 +67,9 @@ bool Line::setLine(double A, double B, double C)
       m_rho = m_C;
       m_normaliser = m_A;
   }
+
+  normaliseRhoPhi();
+
   return (isValid()); // Just to double check.
 }
 
@@ -78,7 +81,24 @@ bool Line::setLine(double rho, double phi)
     m_B = sin(phi);
     m_C = rho;
     m_normaliser = sqrt(m_A*m_A + m_B*m_B);
+    normaliseRhoPhi();
     return true; // lines in this form are always valid.
+}
+
+void Line::normaliseRhoPhi()
+{
+    //force rho into [0, inf)
+    if(m_rho < 0) {
+        m_rho = -m_rho;
+        m_phi = -m_phi; //compensate angle
+    }
+
+    //force phi into [0, 2*pi)
+    m_phi = m_phi - 2*mathGeneral::PI * floor( m_phi / (2*mathGeneral::PI) );
+//    while(m_phi < 0)
+//        m_phi -= 2*mathGeneral::PI;
+//    while(m_phi > 2*mathGeneral::PI)
+//        m_phi -= 2*mathGeneral::PI;
 }
 
 // setLineFromPoints(Point p1, Point p2): Generate the line that passes through the two given points.
@@ -214,20 +234,12 @@ double Line::getSignedLinePointDistance(Point point) const
 
 double Line::getAngleBetween(Line other) const
 {
-    double m1 = getGradient(),
-           m2 = other.getGradient();
-    if(isVertical()) {
-        return atan(abs(1.0/m2));       // atan(|1/m|) (other line)
-    }
-    else if(other.isVertical()) {
-        return atan(abs(1.0/m1));       // atan(|1/m|) (this line)
-    }
-    else if(m1*m2 == -1){
-        return mathGeneral::PI*0.5;     //perpendicular
-    }
-    else {
-        return atan((m1-m2)/(1-m1*m2)); // standard formula
-    }
+    double d_phi = abs(m_phi - other.m_phi);
+
+    if(d_phi > mathGeneral::PI*0.5)
+        d_phi = mathGeneral::PI - d_phi;
+
+    return d_phi;
 }
 
 double Line::getRho() const

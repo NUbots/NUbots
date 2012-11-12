@@ -122,8 +122,9 @@ void Optimiser::saveAs(string name)
         file << this;
         file.close();
     }
-    else
-        debug << "Optimiser::saveAs(): Failed to open file " << name + ".log" << endl;
+    else {
+        //debug << "Optimiser::saveAs(): Failed to open file " << name + ".log" << endl;
+    }
 }
 
 /*! @brief Loads the optimiser from a file called "m_name.log". If no file is found, the optimiser continues to use the current configuration. */

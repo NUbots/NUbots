@@ -178,10 +178,12 @@ void VisionOptimiser::errorPandRevaluation(string directory)
     PR = evaluateBatchPR(gt, image_name);
 
     //print to stdout
-    for(int i=0; i<=GENERAL_OPT; i++) {
-        OPT_ID id = getIDFromInt(i);
-        cout << getIDName(id) << " f: " << fitnesses[id] << " P: " << PR[id].first << " R: " << PR[id].second << endl;
-    }
+//    for(int i=0; i<=GENERAL_OPT; i++) {
+//        OPT_ID id = getIDFromInt(i);
+//        cout << getIDName(id) << " f: " << fitnesses[id] << " P: " << PR[id].first << " R: " << PR[id].second << endl;
+//    }
+
+    cout << getIDName(LINE_OPT) << " f: " << fitnesses[LINE_OPT] << " P: " << PR[LINE_OPT].first << " R: " << PR[LINE_OPT].second << endl;
 }
 
 /** @brief Runs a grid search over a pair of parameters.

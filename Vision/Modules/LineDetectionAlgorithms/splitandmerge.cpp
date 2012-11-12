@@ -3,6 +3,8 @@
 #include "debug.h"
 #include "Vision/visionconstants.h"
 #include "Tools/Math/General.h"
+#include "Vision/visionblackboard.h"
+#include "Vision/visionconstants.h"
 
 #include <boost/foreach.hpp>
 
@@ -10,11 +12,34 @@ SplitAndMerge::SplitAndMerge()
 {
 }
 
-SplitAndMerge::~SplitAndMerge()
+void SplitAndMerge::run()
 {
+    VisionBlackboard* vbb = VisionBlackboard::getInstance();
+
+    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE_COLOUR);  //get transitions associated with lines
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE_COLOUR);
+    vector<LSFittedLine> lines;
+    vector<LinePoint> points;
+    vector<LSFittedLine>::iterator l_it;
+
+    points = getPointsFromSegments(h_segments, v_segments);
+
+    points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
+
+
+    lines = fitLines(points, true);
+
+    //    BOOST_FOREACH(LSFittedLine l, lines) {
+    //        cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints << std::endl;
+    //    }
+
+    for(l_it = lines.begin(); l_it<lines.end(); l_it++) {
+        FieldLine l(*l_it);
+        vbb->addLine(l);
+    }
 }
 
-vector<LSFittedLine> SplitAndMerge::run(vector<LinePoint>& points, bool noise) {
+vector<LSFittedLine> SplitAndMerge::fitLines(vector<LinePoint>& points, bool noise) {
     //Performs split-and-merge algorithm with input consisting of a set of point clusters
     // and a set of unclustered points, putting the resulting lines into a reference
     // passed vector

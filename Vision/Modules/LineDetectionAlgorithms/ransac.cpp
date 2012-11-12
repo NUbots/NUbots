@@ -1,4 +1,6 @@
 #include "ransac.h"
+#include "Vision/visionblackboard.h"
+#include "Vision/visionconstants.h"
 
 #include <limits>
 #include <stdlib.h>
@@ -6,13 +8,39 @@
 
 RANSAC::RANSAC()
 {
-    m_n = 35;               //min pts to line essentially
+    m_n = 15;               //min pts to line essentially
     m_k = 40;               //number of iterations per fitting attempt
-    m_e = 8.0;              //consensus margin
+    m_e = 2.0;              //consensus margin
     m_max_iterations = 25;  //hard limit on number of fitting attempts
 }
 
-std::vector<LSFittedLine> RANSAC::run(const std::vector<LinePoint>& line_points)
+void RANSAC::run()
+{
+    VisionBlackboard* vbb = VisionBlackboard::getInstance();
+
+    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE_COLOUR);  //get transitions associated with lines
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE_COLOUR);
+    vector<LSFittedLine> lines;
+    vector<LinePoint> points;
+    vector<LSFittedLine>::iterator l_it;
+
+    points = getPointsFromSegments(h_segments, v_segments);
+
+    points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
+
+    lines = fitLines(points);
+
+    //    BOOST_FOREACH(LSFittedLine l, lines) {
+    //        cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints << std::endl;
+    //    }
+
+    for(l_it = lines.begin(); l_it<lines.end(); l_it++) {
+        FieldLine l(*l_it);
+        vbb->addLine(l);
+    }
+}
+
+std::vector<LSFittedLine> RANSAC::fitLines(const std::vector<LinePoint>& line_points)
 {
     float variance;
     Line line;
@@ -31,6 +59,8 @@ std::vector<LSFittedLine> RANSAC::run(const std::vector<LinePoint>& line_points)
         line_found = findLine(remainder, line, consensus, remainder, variance);
         i++;
     }
+
+    return results;
 }
 
 bool RANSAC::findLine(std::vector<LinePoint> points, Line& result, std::vector<LinePoint>& consensus, std::vector<LinePoint>& remainder, float& variance)

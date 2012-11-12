@@ -2,6 +2,7 @@
 #include "datawrapperpc.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
 #include "debug.h"
+#include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
 
 #include "Vision/VisionTypes/coloursegment.h"
@@ -131,22 +132,6 @@ DataWrapper::DataWrapper()
             errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
         }
         break;
-    case FILE:
-        m_camera = NULL;
-
-        m_current_image = new NUImage();
-        m_yuyv_buffer = 0;
-
-        num_images = 2;
-        cur_image = 0;
-        stringstream strm;
-        capture = new VideoCapture(strm.str());
-        *capture >> m_current_image_cv;
-
-        generateImageFromMat(m_current_image_cv);
-        loadLUTFromFile(string(getenv("HOME")) +  string("/nubot/default.lut"));
-
-        break;
     }
 
     //set up fake horizon
@@ -176,7 +161,6 @@ DataWrapper::DataWrapper()
     debug_map[DBID_V_SCANS].push_back(              &debug_windows[0]);
     debug_map[DBID_SEGMENTS].push_back(             &debug_windows[0]);
     debug_map[DBID_MATCHED_SEGMENTS].push_back(     &debug_windows[1]);
-    debug_map[DBID_MATCHED_SEGMENTS].push_back(     &debug_windows[3]);
 
     debug_map[DBID_HORIZON].push_back(              &debug_windows[0]);
     debug_map[DBID_GREENHORIZON_SCANS].push_back(   &debug_windows[0]);
@@ -185,11 +169,12 @@ DataWrapper::DataWrapper()
 
     debug_map[DBID_OBJECT_POINTS].push_back(        &debug_windows[0]);
     debug_map[DBID_FILTERED_SEGMENTS] .push_back(   &debug_windows[0]);
-    debug_map[DBID_GOALS].push_back(                &debug_windows[0]);
-    debug_map[DBID_BEACONS].push_back(              &debug_windows[0]);
-    debug_map[DBID_BALLS].push_back(                &debug_windows[0]);
-    debug_map[DBID_OBSTACLES].push_back(            &debug_windows[0]);
-    debug_map[DBID_LINES].push_back(                &debug_windows[0]);
+
+    debug_map[DBID_GOALS].push_back(                &debug_windows[3]);
+    debug_map[DBID_BEACONS].push_back(              &debug_windows[3]);
+    debug_map[DBID_BALLS].push_back(                &debug_windows[3]);
+    debug_map[DBID_OBSTACLES].push_back(            &debug_windows[3]);
+    debug_map[DBID_LINES].push_back(                &debug_windows[3]);
     
     results_window_name = "Results";
     namedWindow(results_window_name, CV_WINDOW_KEEPRATIO);
@@ -320,8 +305,6 @@ CameraSettings DataWrapper::getCameraSettings()
         return m_camera->getSettings();
     case STREAM:
         return CameraSettings();
-    case FILE:
-        return CameraSettings();
     }
 }
 
@@ -338,8 +321,10 @@ void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
     //cout << "Visual object seen at " << visual_object->getLocationPixels() << std::endl;
+    #if VISION_WRAPPER_VERBOSITY > 0
     visual_object->printLabel(debug);
     debug << endl;
+    #endif
 }
 
 //! Outputs debug data to the appropriate external interface
@@ -393,7 +378,7 @@ bool DataWrapper::debugPublish(const vector<Ball>& data) {
     string& window = results_window_name; //get window name from pair
     
     BOOST_FOREACH(Ball b, data) {
-        cv::circle(img, cv::Point2i(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius(), cv::Scalar(255,255,0), 2);
+        b.render(img);
     }
 
     imshow(window, img);    //refresh this particular debug window
@@ -411,17 +396,9 @@ bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     
     cv::Mat& img = results_img;    //get image from pair
     string& window = results_window_name; //get window name from pair
-    PointType bl, tr;
 
     BOOST_FOREACH(Beacon b, data) {
-        bl = b.getQuad().getBottomLeft();
-        tr = b.getQuad().getTopRight();
-        if(b.getID() == VisionFieldObject::BEACON_B)
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,0,255), 2, 8, 0);
-        else if(b.getID() == VisionFieldObject::BEACON_Y)
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,255,0), 2, 8, 0);
-        else
-            rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), cv::Scalar(255,255,255), 2, 8, 0);
+        b.render(img);
     }
     
     imshow(window, img);    //refresh this particular debug window
@@ -440,17 +417,8 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
     cv::Mat& img = results_img;    //get image from pair
     string& window = results_window_name; //get window name from pair
 
-    PointType bl, tr;
-
     BOOST_FOREACH(Goal post, data) {
-        bl = post.getQuad().getBottomLeft();
-        tr = post.getQuad().getTopRight();
-        cv::Scalar colour;
-        if(VisionFieldObject::isBlueGoal(post.getID()))
-            colour = cv::Scalar(0,255,255);
-        else
-            colour = cv::Scalar(255,0,0);
-        rectangle(img, cv::Point2i(bl.x, bl.y), cv::Point2i(tr.x, tr.y), colour, 2, 8, 0);
+        post.render(img);
     }
     
     imshow(window, img);    //refresh this particular debug window
@@ -459,8 +427,23 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
 
 bool DataWrapper::debugPublish(const vector<Obstacle>& data)
 {
-    cout << data.size() << " Obstacles seen" << std::endl;
-    return false;
+
+#if VISION_WRAPPER_VERBOSITY > 1
+    if(data.empty()) {
+        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        return false;
+    }
+#endif
+
+    cv::Mat& img = results_img;    //get image from pair
+    string& window = results_window_name; //get window name from pair
+
+    BOOST_FOREACH(Obstacle o, data) {
+        o.render(img);
+    }
+
+    imshow(window, img);    //refresh this particular debug window
+    return true;
 }
 
 bool DataWrapper::debugPublish(const vector<FieldLine> &data)
@@ -691,22 +674,11 @@ bool DataWrapper::updateFrame()
             //doGaussian(m_current_image);
         }
         catch(std::exception& e){
-            cout << "Stream error - resetting: " << e.what() << endl;
+            errorlog << "Stream error - resetting: " << e.what() << endl;
             imagestrm.clear() ;
             imagestrm.seekg(0, ios::beg);
             imagestrm >> *m_current_image;
         }
-        break;
-    case FILE:
-        cur_image = (cur_image+1)%num_images;
-        stringstream strm;
-        strm << GROUP_NAME << cur_image << GROUP_EXT;
-        capture->open(strm.str());
-        *capture >> m_current_image_cv;
-
-        imshow("test - DataWrapperPC::line28", m_current_image_cv);
-
-        generateImageFromMat(m_current_image_cv);
         break;
     }
     numFramesProcessed++;

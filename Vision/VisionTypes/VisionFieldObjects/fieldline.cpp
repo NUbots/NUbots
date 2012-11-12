@@ -14,13 +14,25 @@ FieldLine::FieldLine(double rho, double phi)
 void FieldLine::set(double rho, double phi)
 {
     m_id = FIELDLINE;
-    m_rho = rho;
-    m_phi = phi;
+    //force rho into [0, inf)
+    if(rho < 0) {
+        m_rho = -rho;
+        m_phi = -phi;   //compensate angle
+    }
+
+    //force phi into [0, 2*pi)
+    m_phi = m_phi - 2*mathGeneral::PI * floor( m_phi / (2*mathGeneral::PI) );
 }
 
 double FieldLine::findError(const Vector2<double>& measured) const
 {
-    return sqrt( pow(m_rho - measured.x,2) + pow((m_phi - measured.y)*140/mathGeneral::PI,2));
+    double d_rho = abs(m_rho - measured.x),
+           d_phi = abs(m_phi - measured.y);
+
+    if(d_phi > mathGeneral::PI*0.5)
+        d_phi = mathGeneral::PI - d_phi;
+
+    return sqrt( pow(d_rho,2) + pow(d_phi*140/mathGeneral::PI,2));
 }
 
 ostream& operator<< (ostream& output, const FieldLine& l)

@@ -54,6 +54,7 @@ bool VisionConstants::BALL_DISTANCE_POSITION_BOTTOM;
 VisionConstants::DistanceMethod VisionConstants::BALL_DISTANCE_METHOD;
 VisionConstants::DistanceMethod VisionConstants::GOAL_DISTANCE_METHOD;
 VisionConstants::DistanceMethod VisionConstants::BEACON_DISTANCE_METHOD;
+VisionConstants::LineDetectionMethod VisionConstants::LINE_METHOD;
 //! Field-object detection constants
 int VisionConstants::BALL_EDGE_THRESHOLD;
 int VisionConstants::BALL_ORANGE_TOLERANCE;
@@ -122,6 +123,7 @@ void VisionConstants::loadFromFile(std::string filename)
     SAM_MAX_LINE_MSD = 1;
     SAM_CLEAR_SMALL = true;
     SAM_CLEAR_DIRTY = true;
+    LINE_METHOD = SAM;
 
     std::ifstream in(filename.c_str());
     std::string name;
@@ -193,7 +195,7 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
             int config_player;
             in >> config_player;
-            #if (defined TARGET_IS_PC || defined TARGET_IS_TRAINING)
+            #if (defined TARGET_IS_PC || defined TARGET_IS_TRAINING || defined TARGET_IS_RPI)
                 in >> D2P_ANGLE_CORRECTION;
                 D2P_ANGLE_CORRECTION = 0;   //discard the value
             #else

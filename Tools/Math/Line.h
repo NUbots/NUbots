@@ -81,6 +81,10 @@ class Line
       */
     bool setLineFromPoints(Point p1, Point p2);
     /*!
+      @brief Normalises the rho/phi values.
+      */
+    void normaliseRhoPhi();
+    /*!
       @brief Copy the contents of another line to assign the equation for this line.
       @param source The source from which to copy the equation data.
       @return True if a valid line was assigned from the existing line. False otherwise.

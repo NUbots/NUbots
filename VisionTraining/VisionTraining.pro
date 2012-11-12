@@ -76,6 +76,7 @@ HEADERS += \
     ../Tools/Math/TransformMatrices.h \
     ../Tools/Math/Vector2.h \
     ../Tools/Math/Vector3.h \
+    ../Tools/Math/General.h \
     ../Tools/Optimisation/Optimiser.h \
     ../Tools/Optimisation/EHCLSOptimiser.h \
     ../Tools/Optimisation/PGRLOptimiser.h \
