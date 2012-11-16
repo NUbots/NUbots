@@ -49,10 +49,13 @@
 	        maximumSearchTime = 2500.;
 	        actionObjectID = -1;
 
+       /*Reinforcement learning agent mechanism to be properly implemented soon
             vector<float> inputs = getPercept();
 
+
             Mrlagent();
-            Mrlagent.initialiseAgent(inputs.size(),head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size(),10/*Size of grading in look up table?*/);
+            Mrlagent.initialiseAgent(inputs.size(),head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size(),10/*Size of grading in look up table?*//*);
+            */
 	    }
 
 	    void HeadBehaviour::doPriorityListPolicy() {
@@ -183,13 +186,13 @@
                 case TimeVSCostPriority:
                     doTimeVSCostPriorityPolicy();
                 case RLAgent:
-                    doRLagentPolicy();
+                    //doRLagentPolicy();
                     break;
                     //Get instructions from RL agent.
 	        }
 	    }
 
-
+/*
         void HeadBehaviour::doRLAgentPolicy(){
 
             vector<float> inputs = getPercept();
@@ -198,9 +201,9 @@
             int action = Mrlagent.getAction(inputs);//Should output integer from 0 to outputs-1
             Mrlagent.giveMotivationReward();
 
-            if (action < head_logic->relevantObjects[0].size()/*i.e. Stationary Object*/){
+            if (action < head_logic->relevantObjects[0].size()){    //i.e. Stationary Object
                 dispatchHeadJob((StationaryObject*)head_logic->getObject(action));
-            } else if (action < head_logic->relevantObjects[1].size()/*i.e. Mobile Object*/){
+            } else if (action < head_logic->relevantObjects[1].size()){ //i.e. Mobile Object
                 dispatchHeadJob((MobileObject*)head_logic->getObject(action));
             } else {
                 dispatchHeadJob((AmbiguousObject*)head_logic->getObject(action));
@@ -217,7 +220,7 @@
             inputs.insert(inputs.end(), other_inputs.begin(), other_inputs.end());
             return inputs;
         }
-
+*/
         void HeadBehaviour::dispatchHeadJob(StationaryObject* ObjectToTrack) {
             //initiate a new pan job using the robots estimated standard deviation of heading as the pan width
 

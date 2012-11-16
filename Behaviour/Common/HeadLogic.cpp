@@ -1,5 +1,6 @@
 /*! @file HeadLogic.cpp
-    @brief maths and logic for head behaviours.
+    @b
+ maths and logic for head behaviours.
 
     @author Jake Fountain
 

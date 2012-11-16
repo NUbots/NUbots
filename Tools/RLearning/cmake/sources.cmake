@@ -20,17 +20,20 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  
+SET (YOUR_SRCS
+ApproximatorInterface.h
+DictionaryApproximator.h
+MRLAgent.h
+RLAgent.h
+DictionaryApproximator.cpp
+MRLAgent.cpp
+RLAgent.cpp
+RLearningInterface.h
+
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-Math
-FileFormats
-Profiling
-Threading
-Optimisation
-
 )
 ####################################################################################
 

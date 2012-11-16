@@ -1,6 +1,7 @@
 #include "DictionaryApproximator.h"
 #include <sstream>
 #include <fstream>
+#include <vector>
 
 void DictionaryApproximator::initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens) {
     numInputs = numberOfInputs;

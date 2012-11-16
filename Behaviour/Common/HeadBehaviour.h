@@ -31,7 +31,9 @@
 #include "Tools/Math/General.h"
 #include "Infrastructure/NUBlackboard.h"
 
+/*RLAgent import
 #include "Tools/RLearning/MRLAgent.h"
+*/
 
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Infrastructure/Jobs/MotionJobs/KickJob.h"
@@ -42,9 +44,9 @@
 class HeadBehaviour {
 
 private:
-    //MRLAgent:
+    /*MRLAgent:
     MRLAgent Mrlagent;
-    
+    */
     //These are the camera margins objects must be inside (as a percentage) when the robot looks at them.
     float cameraMarginX;
     float cameraMarginY;
