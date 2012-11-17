@@ -79,20 +79,27 @@ void MainWindow::modifyLabels()
   */
 void MainWindow::compareParams()
 {
-    //get the first parameter file
-    QString config0 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
-    if(!config0.isNull()) {
-        //get the second parameter file
-        QString config1 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
-        if(!config1.isNull()) {
-            string image = ui->dirEdit->text().toStdString() + string("image.strm");
-            string lut = ui->dirEdit->text().toStdString() + string("default.lut");
-
-            VisionComparitor comp;
-            comp.show();
-            comp.run(image, lut, config0.toStdString(), config1.toStdString());
+    //get the stream file
+    QString image = QFileDialog::getOpenFileName(this, "Select Image Stream", (string(getenv("HOME")) + string("/nubot/")).c_str(), "stream Files (*.strm)");
+    if(!image.isNull()) {
+        //get the LUT file
+        QString lut = QFileDialog::getOpenFileName(this, "Select LUT", (string(getenv("HOME")) + string("/nubot/")).c_str(), "LUT Files (*.lut)");
+        if(!lut.isNull()) {
+            //get the first parameter file
+            QString config0 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/nubot/Config/")).c_str(), "config Files (*.cfg)");
+            if(!config0.isNull()) {
+                //get the second parameter file
+                QString config1 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/nubot/Config/")).c_str(), "config Files (*.cfg)");
+                if(!config1.isNull()) {
+                    VisionComparitor comp;
+                    comp.show();
+                    comp.run(image.toStdString(), lut.toStdString(), config0.toStdString(), config1.toStdString());
+                }
+            }
         }
     }
+
+
     setFocus();
 }
 
@@ -116,7 +123,7 @@ void MainWindow::runOptimiser()
             VisionOptimiser opt(this, VisionOptimiser::getChoiceFromString(s.toStdString()));
             opt.show();
 
-            opt.run(ui->dirEdit->text().toStdString(), iterations);
+            opt.run(ui->dirEdit->text().toStdString() + string("/"), iterations);
         }
     }
     setFocus();

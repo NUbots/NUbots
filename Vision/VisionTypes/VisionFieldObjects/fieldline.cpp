@@ -15,19 +15,26 @@ void FieldLine::set(double rho, double phi)
 {
     m_id = FIELDLINE;
     //force rho into [0, inf)
-    if(rho < 0) {
-        m_rho = -rho;
-        m_phi = -phi;   //compensate angle
-    }
+//    if(rho < 0) {
+//        m_rho = -rho;
+//        m_phi = phi + mathGeneral::PI;   //compensate angle
+//    }
+    m_rho = rho;
+    m_phi = phi;
 
-    //force phi into [0, 2*pi)
+//    //force phi into [0, 2*pi)
     m_phi = m_phi - 2*mathGeneral::PI * floor( m_phi / (2*mathGeneral::PI) );
 }
 
 double FieldLine::findError(const Vector2<double>& measured) const
 {
-    double d_rho = abs(m_rho - measured.x),
-           d_phi = abs(m_phi - measured.y);
+    return findError(FieldLine(measured.x, measured.y));
+}
+
+double FieldLine::findError(const FieldLine& measured) const
+{
+    double d_rho = abs(m_rho - measured.m_rho),
+           d_phi = abs(m_phi - measured.m_phi);
 
     if(d_phi > mathGeneral::PI*0.5)
         d_phi = mathGeneral::PI - d_phi;

@@ -129,6 +129,14 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
     m_vfo_optimiser_map[VisionFieldObject::FIELDLINE].push_back(LINE_OPT); m_vfo_optimiser_map[VisionFieldObject::FIELDLINE].push_back(GENERAL_OPT);
 
     vision = VisionControlWrapper::getInstance();
+
+#ifdef MULTI_OPT
+    for(int i=0; i<=GENERAL_OPT; i++) {
+        m_best_fitnesses[getIDFromInt(i)] = -numeric_limits<float>::max();
+    }
+#else
+    m_best_fitness = -numeric_limits<float>::max();
+#endif
 }
 
 VisionOptimiser::~VisionOptimiser()
@@ -328,19 +336,20 @@ void VisionOptimiser::run(string directory, int total_iterations)
 #else
         m_optimiser_log << m_optimiser << endl;
 #endif
-        ofstream final((directory + string("best.cfg")).c_str());
+        ofstream final((directory + m_opt_name + string("best.cfg")).c_str());
 
         //print out the best combined parameter set
 #ifdef MULTI_OPT
-        if(VisionConstants::setBallParams(Parameter::getAsVector(m_optimisers[BALL_OPT]->getBest())) &&
-                VisionConstants::setGoalBeaconParams(Parameter::getAsVector(m_optimisers[GOAL_BEACON_OPT]->getBest())) &&
-                VisionConstants::setObstacleParams(Parameter::getAsVector(m_optimisers[OBSTACLE_OPT]->getBest())) &&
-                VisionConstants::setLineParams(Parameter::getAsVector(m_optimisers[LINE_OPT]->getBest())) &&
-                VisionConstants::setGeneralParams(Parameter::getAsVector(m_optimisers[GENERAL_OPT]->getBest()))) {
+        if(VisionConstants::setBallParams(Parameter::getAsVector(m_best_params[BALL_OPT])) &&
+                VisionConstants::setGoalBeaconParams(Parameter::getAsVector(m_best_params[GOAL_BEACON_OPT])) &&
+                VisionConstants::setObstacleParams(Parameter::getAsVector(m_best_params[OBSTACLE_OPT])) &&
+                VisionConstants::setLineParams(Parameter::getAsVector(m_best_params[LINE_OPT])) &&
+                VisionConstants::setGeneralParams(Parameter::getAsVector(m_best_params[GENERAL_OPT]))) {
             VisionConstants::print(final);
         }
+
 #else
-        if(VisionConstants::setAllOptimisable(Parameter::getAsVector(m_optimiser->getBest()))) {
+        if(VisionConstants::setAllOptimisable(Parameter::getAsVector(m_best_params))) {
             VisionConstants::print(final);
         }
 #endif
@@ -403,9 +412,18 @@ bool VisionOptimiser::trainingStep(int iteration,
         for(int i=0; i<=GENERAL_OPT; i++) {
             OPT_ID id = getIDFromInt(i);
             m_optimisers[id]->setParametersResult(fitnesses[id]);
+
+            if(fitnesses[id] > m_best_fitnesses[id]) {
+                m_best_fitnesses[id] = fitnesses[id];
+                m_best_params[id] = getParams(id);
+            }
         }
 #else
         m_optimiser->setParametersResult(fitnesses[GENERAL_OPT]);
+        if(fitnesses[GENERAL_OPT] > m_best_fitness) {
+            m_best_fitness = fitnesses[GENERAL_OPT];
+            m_best_params = VisionConstants::getAllOptimisable();
+        }
 #endif
 
         //write results to logs
@@ -592,10 +610,10 @@ void VisionOptimiser::setupVisionConstants()
     VisionConstants::VERTICAL_SCANLINE_SPACING = 3;
     VisionConstants::GREEN_HORIZON_SCAN_SPACING = 11;
     // Split and Merge constants
-    VisionConstants::SAM_MAX_POINTS = 1000;
     VisionConstants::SAM_MAX_LINES = 150;
     VisionConstants::SAM_CLEAR_SMALL = true;
     VisionConstants::SAM_CLEAR_DIRTY = true;
+    VisionConstants::LINE_METHOD = VisionConstants::SAM;
 }
 
 /** @brief Initialises a map of costs for each field object
@@ -671,4 +689,18 @@ void VisionOptimiser::openLogFiles(string directory)
     m_training_performance_log << "Iteration Fitness" << endl;
     m_test_performance_log << "Iteration Fitness" << endl;
 #endif
+}
+
+/** @brief Retrieves the parameters associated with the optimiser id
+*   @param id The optimiser identifier.
+*/
+vector<Parameter> VisionOptimiser::getParams(OPT_ID id)
+{
+    switch(id) {
+    case BALL_OPT: return VisionConstants::getBallParams();
+    case GOAL_BEACON_OPT: return VisionConstants::getGoalBeaconParams();
+    case OBSTACLE_OPT: return VisionConstants::getObstacleParams();
+    case LINE_OPT: return VisionConstants::getLineParams();
+    case GENERAL_OPT: return VisionConstants::getGeneralParams();
+    }
 }

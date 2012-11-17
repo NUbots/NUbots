@@ -38,6 +38,10 @@ public:
     static int MIN_GOAL_HEIGHT;          //! The minimum height of a goal.
     static float GOAL_HEIGHT_TO_WIDTH_RATIO_LOW;
     static float GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH;
+    static int GOAL_MAX_OBJECTS;
+    static int GOAL_BINS;
+    static int GOAL_MIN_THRESHOLD;
+    static float GOAL_SDEV_THRESHOLD;
 
     //! Beacon filtering constants
     static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;  //! Whether to throw out beacons whose base is above the kinematics horizon.
@@ -100,7 +104,6 @@ public:
 
     //! Split and Merge constants
     //maximum field objects rules
-    static unsigned int SAM_MAX_POINTS; //500
     static unsigned int SAM_MAX_LINES; //15
     //splitting rules
     static float SAM_SPLIT_DISTANCE; //1.0
@@ -121,6 +124,10 @@ public:
     // static methods
     static DistanceMethod getDistanceMethodFromName(std::string name);  //! Converts a string to a distance method.
     static std::string getDistanceMethodName(DistanceMethod method);    //! Converts a distance method to a string name.
+
+    // static methods
+    static LineDetectionMethod getLineMethodFromName(std::string name);  //! Converts a string to a line detection method.
+    static std::string getLineMethodName(LineDetectionMethod method);    //! Converts a line detection method to a string name.
 
     static void loadFromFile(std::string filename); //! Loads the constants from a file
     static void print(ostream& out);

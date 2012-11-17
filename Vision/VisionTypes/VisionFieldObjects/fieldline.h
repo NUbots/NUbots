@@ -34,6 +34,7 @@ public:
 
     //! @brief Calculation of error for optimisation - assumed measured = (rho, phi)
     double findError(const Vector2<double>& measured) const;
+    double findError(const FieldLine& measured) const;
 
     void render(cv::Mat& mat) const;
 

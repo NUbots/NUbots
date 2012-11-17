@@ -98,12 +98,14 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         //PROFILING
         #ifdef VISION_PROFILER_ON
         static Profiler prof("lines");
+        ofstream lines(VisionConstants::getLineMethodName(VisionConstants::LINE_METHOD).c_str(), ios_base::app);
         prof.start();
         #endif
         m_line_detector->run();
         #ifdef VISION_PROFILER_ON
         prof.stop();
-        debug << prof << endl;
+        lines << prof << endl;
+        lines.close();
         #endif
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - line detection done" << endl;

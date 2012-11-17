@@ -54,6 +54,13 @@ public:
         NUMBER_OF_IDS           = 16
     };
 
+    enum PIN_MAP {
+        GPIO_BALL =   17,
+        GPIO_YGOAL =  18,
+        GPIO_BGOAL =  22,
+        GPIO_BEACON = 23
+    };
+
     static string getIDName(DEBUG_ID id);
 
     static DataWrapper* getInstance(bool disp_on=false);
@@ -134,6 +141,8 @@ private:
     double m_timestamp;
     int numFramesDropped;
     int numFramesProcessed;
+
+    bool m_gpio;
 };
 
 #endif // DATAWRAPPERPC_H

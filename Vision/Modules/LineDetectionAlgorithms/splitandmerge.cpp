@@ -53,8 +53,7 @@ vector<LSFittedLine> SplitAndMerge::fitLines(vector<LinePoint>& points, bool noi
     MIN_LINE_R2_FIT = VisionConstants::SAM_MIN_LINE_R2_FIT;
     MAX_LINE_MSD = VisionConstants::SAM_MAX_LINE_MSD;
     //MAX_POINTS = VisionConstants::SAM_MAX_POINTS;
-    //MAX_LINES = VisionConstants::SAM_MAX_LINES;
-    MAX_LINES = 100;
+    MAX_LINES = VisionConstants::SAM_MAX_LINES;
     CLEAR_SMALL = VisionConstants::SAM_CLEAR_SMALL;
     CLEAR_DIRTY = VisionConstants::SAM_CLEAR_DIRTY;
 

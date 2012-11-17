@@ -88,10 +88,10 @@ bool Line::setLine(double rho, double phi)
 void Line::normaliseRhoPhi()
 {
     //force rho into [0, inf)
-    if(m_rho < 0) {
-        m_rho = -m_rho;
-        m_phi = -m_phi; //compensate angle
-    }
+//    if(m_rho < 0) {
+//        m_rho = -m_rho;
+//        m_phi = m_phi + mathGeneral::PI;   //compensate angle
+//    }
 
     //force phi into [0, 2*pi)
     m_phi = m_phi - 2*mathGeneral::PI * floor( m_phi / (2*mathGeneral::PI) );
@@ -235,6 +235,9 @@ double Line::getSignedLinePointDistance(Point point) const
 double Line::getAngleBetween(Line other) const
 {
     double d_phi = abs(m_phi - other.m_phi);
+
+    //force d_phi into [0, 2*pi)
+    d_phi = d_phi - 2*mathGeneral::PI * floor( d_phi / (2*mathGeneral::PI) );
 
     if(d_phi > mathGeneral::PI*0.5)
         d_phi = mathGeneral::PI - d_phi;

@@ -7,6 +7,9 @@
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/visionconstants.h"
 
+//for controlling GPIO pins
+#include <wiringPi.h>
+
 DataWrapper* DataWrapper::instance = 0;
 
 string DataWrapper::getIDName(DEBUG_ID id) {
@@ -105,6 +108,21 @@ DataWrapper::DataWrapper(bool disp_on)
     
     numFramesDropped = numFramesProcessed = 0;
 
+    m_gpio = (wiringPiSetupSys() != -1);
+    if(m_gpio) {
+        system("gpio -g mode 17 out");
+        system("gpio -g mode 18 out");
+        system("gpio -g mode 22 out");
+        system("gpio -g mode 23 out");
+        system("gpio export 17 out");
+        system("gpio export 18 out");
+        system("gpio export 22 out");
+        system("gpio export 23 out");
+//        pinMode(17,OUTPUT);
+//        pinMode(18,OUTPUT);
+//        pinMode(22,OUTPUT);
+//        pinMode(23,OUTPUT);
+    }
 }
 
 DataWrapper::~DataWrapper()
@@ -270,6 +288,9 @@ bool DataWrapper::debugPublish(const vector<Ball>& data) {
             return false;
         }
     #endif
+
+    if(m_gpio && !data.empty())
+        digitalWrite(GPIO_BALL, 1);
     
     if(m_display_on) {
         cv::Mat& img = results_img;    //get image from pair
@@ -294,6 +315,9 @@ bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     }
 #endif
 
+    if(m_gpio && !data.empty())
+        digitalWrite(GPIO_BEACON, 1);
+
     if(m_display_on) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
@@ -316,7 +340,18 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
         return false;
     }
 #endif
-    
+
+    if(m_gpio && !data.empty()) {
+        BOOST_FOREACH(Goal post, data) {
+            if(VisionFieldObject::isBlueGoal(post.getID())) {
+                digitalWrite(GPIO_BGOAL, 1);
+            }
+            else {
+                digitalWrite(GPIO_YGOAL, 1);
+            }
+        }
+    }
+
     if(m_display_on) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
@@ -339,6 +374,10 @@ bool DataWrapper::debugPublish(const vector<Obstacle>& data)
         return false;
     }
 #endif
+
+//    if(m_gpio && !data.empty())
+//        digitalWrite(GPIO_OBSTACLE, 1);
+
     if(m_display_on) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
@@ -361,6 +400,9 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
         return false;
     }
 #endif
+
+//    if(m_gpio && !data.empty())
+//        digitalWrite(GPIO_LINE, 1);
 
     if(m_display_on) {
         cv::Mat& img = results_img;    //get image from pair
@@ -528,6 +570,13 @@ bool DataWrapper::updateFrame()
         }
         break;
     }
+    if(m_gpio) {
+        digitalWrite(GPIO_BALL, 0);
+        digitalWrite(GPIO_YGOAL, 0);
+        digitalWrite(GPIO_BGOAL, 0);
+        digitalWrite(GPIO_BEACON, 0);
+    }
+
     numFramesProcessed++;
     return true;
 }

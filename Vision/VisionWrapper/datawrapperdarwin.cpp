@@ -264,15 +264,17 @@ bool DataWrapper::debugPublish(vector<Obstacle> data) {
     return true;  
 }
 
-bool DataWrapper::debugPublish(const vector<LSFittedLine> &data)
+bool DataWrapper::debugPublish(const vector<FieldLine> &data)
 {
     #if VISION_WRAPPER_VERBOSITY > 1
         if(data.empty()) {
             debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_LINES) << endl;
             return false;
         }
-        BOOST_FOREACH(LSFittedLine l, data) {
-            debug << "DataWrapper::debugPublish - Line = " << l << endl;
+        BOOST_FOREACH(FieldLine l, data) {
+            debug << "DataWrapper::debugPublish - Line = ";
+            l.printLabel(debug);
+            debug << endl;
         }
     #endif
     return true;
@@ -323,11 +325,6 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     #endif
 
     return true;
-}
-
-bool DataWrapper::debugPublish(DEBUG_ID id, const cv::Mat& img)
-{
-    //! @todo better debug printing + Comment
 }
 
 /*! @brief Updates the held information ready for a new frame.

@@ -79,9 +79,11 @@ int pc()
 
     char c=0;
     int error=0;
-    bool stepping = false;
+    bool stepping = true;
+    int frame = 0;
     while(c!=ESC_KEY && error==0) {
         //visiondata->updateFrame();
+        cout << "frame: " << ++frame << endl;
         error = vision->runFrame();
         if(stepping) {
             c=0;
@@ -90,7 +92,7 @@ int pc()
             }
         }
         else {
-            c = waitKey(1);
+            c = waitKey(1000);
         }
         if(c==STEP_TOGGLE_KEY) {
             stepping = !stepping;

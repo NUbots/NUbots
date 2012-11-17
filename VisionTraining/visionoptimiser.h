@@ -62,6 +62,7 @@ private:
     void setupVisionConstants();
     void setupCosts();
     void openLogFiles(string directory);
+    vector<Parameter> getParams(OPT_ID id);
 
 private slots:
     void halt() {m_halted = true;}
@@ -70,10 +71,14 @@ private:
     Ui::VisionOptimiser *ui;                //! @var UI pointer
 
 #ifdef MULTI_OPT
-    vector<Optimiser*> m_optimiser_list;    //! @var list of optimiser pointers
-    map<OPT_ID, Optimiser*> m_optimisers;   //! @var map between object class and optimiser
+    vector<Optimiser*> m_optimiser_list;        //! @var list of optimiser pointers
+    map<OPT_ID, Optimiser*> m_optimisers;       //! @var map between object class and optimiser
+    map<OPT_ID, float> m_best_fitnesses;             //! @var list of best fitnesses seen
+    map<OPT_ID, vector<Parameter> > m_best_params;   //! @var list of best params seen
 #else
-    Optimiser* m_optimiser;                 //! @var optimiser pointer
+    Optimiser* m_optimiser;             //! @var optimiser pointer
+    float m_best_fitness;               //! @var best fitness seen
+    vector<Parameter> m_best_params;    //! @var best params seen
 #endif
 
     map<VisionFieldObject::VFO_ID, vector<OPT_ID> > m_vfo_optimiser_map;    //! @var map between exact field object type and broad class.

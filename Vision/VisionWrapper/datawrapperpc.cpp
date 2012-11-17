@@ -135,7 +135,7 @@ DataWrapper::DataWrapper()
     }
 
     //set up fake horizon
-    kinematics_horizon.setLine(0, 1, 50);
+    kinematics_horizon.setLine(0, 1, 0);
 
     if(!loadLUTFromFile(LUTname)){
         errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
@@ -155,11 +155,11 @@ DataWrapper::DataWrapper()
 
     //create map into images
     debug_map[DBID_IMAGE].push_back(                &debug_windows[1]);
-//    debug_map[DBID_IMAGE].push_back(                &debug_windows[2]);
-    debug_map[DBID_CLASSED_IMAGE].push_back(        &debug_windows[3]);
+    debug_map[DBID_IMAGE].push_back(                &debug_windows[3]);
+    debug_map[DBID_CLASSED_IMAGE].push_back(        &debug_windows[0]);
     debug_map[DBID_H_SCANS].push_back(              &debug_windows[0]);
     debug_map[DBID_V_SCANS].push_back(              &debug_windows[0]);
-    debug_map[DBID_SEGMENTS].push_back(             &debug_windows[0]);
+    debug_map[DBID_SEGMENTS].push_back(             &debug_windows[2]);
     debug_map[DBID_MATCHED_SEGMENTS].push_back(     &debug_windows[1]);
 
     debug_map[DBID_HORIZON].push_back(              &debug_windows[0]);
@@ -374,14 +374,24 @@ bool DataWrapper::debugPublish(const vector<Ball>& data) {
         }
     #endif
     
-    cv::Mat& img = results_img;    //get image from pair
-    string& window = results_window_name; //get window name from pair
-    
-    BOOST_FOREACH(Ball b, data) {
-        b.render(img);
+    //Get window assigned to id
+    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(DBID_BALLS);
+    if(map_it == debug_map.end()) {
+        errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(DBID_BALLS) << endl;
+        return false;
     }
 
-    imshow(window, img);    //refresh this particular debug window
+    //for all images
+    for(int i=0; i<map_it->second.size(); i++) {
+        string& window = map_it->second[i]->first; //get window name from pair
+        cv::Mat& img = map_it->second[i]->second; //get window name from pair
+
+        BOOST_FOREACH(Ball b, data) {
+            b.render(img);
+        }
+
+        imshow(window, img);
+    }
     return true;
 }
 
@@ -389,19 +399,29 @@ bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
-        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
         return false;
     }
 #endif
     
-    cv::Mat& img = results_img;    //get image from pair
-    string& window = results_window_name; //get window name from pair
-
-    BOOST_FOREACH(Beacon b, data) {
-        b.render(img);
+    //Get window assigned to id
+    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(DBID_BEACONS);
+    if(map_it == debug_map.end()) {
+        errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
+        return false;
     }
-    
-    imshow(window, img);    //refresh this particular debug window
+
+    //for all images
+    for(int i=0; i<map_it->second.size(); i++) {
+        string& window = map_it->second[i]->first; //get window name from pair
+        cv::Mat& img = map_it->second[i]->second; //get window name from pair
+
+        BOOST_FOREACH(Beacon b, data) {
+            b.render(img);
+        }
+
+        imshow(window, img);
+    }
     return true;
 }
 
@@ -414,14 +434,24 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
     }
 #endif
     
-    cv::Mat& img = results_img;    //get image from pair
-    string& window = results_window_name; //get window name from pair
-
-    BOOST_FOREACH(Goal post, data) {
-        post.render(img);
+    //Get window assigned to id
+    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(DBID_GOALS);
+    if(map_it == debug_map.end()) {
+        errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        return false;
     }
-    
-    imshow(window, img);    //refresh this particular debug window
+
+    //for all images
+    for(int i=0; i<map_it->second.size(); i++) {
+        string& window = map_it->second[i]->first; //get window name from pair
+        cv::Mat& img = map_it->second[i]->second; //get window name from pair
+
+        BOOST_FOREACH(Goal post, data) {
+            post.render(img);
+        }
+
+        imshow(window, img);
+    }
     return true;
 }
 
@@ -430,19 +460,28 @@ bool DataWrapper::debugPublish(const vector<Obstacle>& data)
 
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
-        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_OBSTACLES) << endl;
         return false;
     }
 #endif
-
-    cv::Mat& img = results_img;    //get image from pair
-    string& window = results_window_name; //get window name from pair
-
-    BOOST_FOREACH(Obstacle o, data) {
-        o.render(img);
+    //Get window assigned to id
+    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(DBID_OBSTACLES);
+    if(map_it == debug_map.end()) {
+        errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(DBID_OBSTACLES) << endl;
+        return false;
     }
 
-    imshow(window, img);    //refresh this particular debug window
+    //for all images
+    for(int i=0; i<map_it->second.size(); i++) {
+        string& window = map_it->second[i]->first; //get window name from pair
+        cv::Mat& img = map_it->second[i]->second; //get window name from pair
+
+        BOOST_FOREACH(Obstacle o, data) {
+            o.render(img);
+        }
+
+        imshow(window, img);
+    }
     return true;
 }
 
@@ -464,14 +503,14 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
 
     //for all images
     for(int i=0; i<map_it->second.size(); i++) {
-        cv::Mat& img = map_it->second[i]->second;    //get image from pair
         string& window = map_it->second[i]->first; //get window name from pair
+        cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
         BOOST_FOREACH(FieldLine l, data) {
             l.render(img);
         }
 
-        imshow(window, img);    //refresh this particular debug window
+        imshow(window, img);
     }
     return true;
 }
