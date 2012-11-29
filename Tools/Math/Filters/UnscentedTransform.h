@@ -38,8 +38,8 @@ public:
      * @param kappa the kappa variable. This is the secondary scaling parameter, usually set to 0 or 3-L.
      * @param beta the beta variable. This is used to incorporate prior knowledge of the distribution. For gaussian distributions 2 is optimal.
      */
-    UnscentedTransform(unsigned int L, double alpha=0.001f, double kappa=0.f, double beta=2.f): m_L(L), m_alpha(alpha), m_kappa(kappa), m_beta(beta)
-    {}
+    UnscentedTransform(unsigned int L, double alpha=1e-3, double kappa=0.f, double beta=2.f): m_L(L), m_alpha(alpha), m_kappa(kappa), m_beta(beta)
+    {m_lambda = lambda();}
 
     
     /*!
@@ -59,6 +59,7 @@ public:
         m_alpha = alpha;
         m_kappa = kappa;
         m_beta = beta;
+        m_lambda = lambda();
     }
 
     /*!
@@ -97,7 +98,7 @@ public:
 
     unsigned int totalSigmaPoints() const
     {
-        return 2 * L() + 1;
+        return 2 * m_L + 1;
     }
 
     /*!
@@ -107,14 +108,14 @@ public:
      */
     double Wm(unsigned int index) const
     {
-        double weight = 0.0f;
+        double weight = 0.0;
         switch(index)
         {
             case 0:
-                weight = lambda() / (L() + lambda());
+                weight = m_lambda / (m_L + m_lambda);
                 break;
             default:
-                weight = 1.0f / (2.0f * (L() + lambda()));
+                weight = 1.0 / (2.0 * (m_L + m_lambda));
                 break;
         }
         return weight;
@@ -127,14 +128,14 @@ public:
      */
     double Wc(unsigned int index) const
     {
-        double weight = 0.0f;
+        double weight = 0.0;
         switch(index)
         {
             case 0:
-                weight = lambda() / (L() + lambda()) + (1.0f - alpha()*alpha() + beta());
+                weight = m_lambda / (m_L + m_lambda) + (1.0 - pow(m_alpha,2) + m_beta);
                 break;
             default:
-                weight = 1.0f / (2.0f * (L() + lambda()));
+                weight = 1.0 / (2.0 * (m_L + m_lambda));
                 break;
         }
         return weight;
@@ -142,7 +143,7 @@ public:
 
     double covarianceSigmaWeight() const
     {
-        return L() + lambda();
+        return m_L + m_lambda;
     }
 
     bool operator ==(const UnscentedTransform& b) const
@@ -189,4 +190,5 @@ private:
     double m_alpha;
     double m_kappa;
     double m_beta;
+    double m_lambda;
 };
