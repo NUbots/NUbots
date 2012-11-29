@@ -77,7 +77,6 @@ void SelfUKF::setMean(const Matrix& newMean)
 Matrix SelfUKF::processEquation(const Matrix& sigma_point, double deltaT, const Matrix& measurement)
 {
     Matrix result(sigma_point); // Start at original state.
-    double tempx, tempy;
 
     assert(measurement.getm()==3); // Check the correct number of measurements have been given.
 
