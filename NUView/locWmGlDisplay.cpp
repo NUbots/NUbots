@@ -12,6 +12,7 @@
 
 #include "Tools/Math/Filters/MobileObjectModel.h"
 #include "Tools/Math/Filters/IKalmanFilter.h"
+#include "Tools/Math/Filters/RobotModel.h"
 
 // Apple has to be different...
 #if defined(__APPLE__) || defined(MACOSX)
@@ -804,15 +805,15 @@ void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
     }
 }
 
-void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const IKalmanFilter& ball_model, const QColor& modelColor)
+void locWmGlDisplay::DrawModelObjects(const Moment& model, const Moment& ball_model, const QColor& modelColor)
 {
     QColor drawColor(modelColor);
     int alpha = drawColor.alpha();
-    drawRobot(drawColor, model.mean(SelfModel::states_x), model.mean(SelfModel::states_y), model.mean(SelfModel::states_heading));
+    drawRobot(drawColor, model.mean(RobotModel::kstates_x), model.mean(RobotModel::kstates_y), model.mean(RobotModel::kstates_heading));
 
     if(m_showBall)
     {
-        FieldPose ball_pose = calculateBallPosition(model, ball_model.estimate());
+        FieldPose ball_pose = calculateBallPosition(model, ball_model);
         drawBall(QColor(255,165,0,alpha), ball_pose.x, ball_pose.y);
     }
 }
@@ -846,23 +847,24 @@ void locWmGlDisplay::DrawLocalisationObjects(const SelfLocalisation& localisatio
     const IKalmanFilter* ball_model = localisation.getBallModel();
     if(drawBestModelOnly)
     {
-        const SelfModel* model = localisation.getBestModel();
-        DrawModelObjects(*model, *ball_model, modelColor);
+        const IKalmanFilter* model = localisation.getBestModel();
+        DrawModelObjects(model->estimate(), ball_model->estimate(), modelColor);
+        std::cout << model->getFilterWeight() << std::endl;
     }
     else
     {
-        ModelContainer models = localisation.allModels();
+        std::list<IKalmanFilter*> models = localisation.allModels();
 
-        for(ModelContainer::iterator model = models.begin(); model != models.end(); ++model)
+        for(std::list<IKalmanFilter*>::iterator model = models.begin(); model != models.end(); ++model)
         {
-            const SelfModel* currModel = (*model);
+            const IKalmanFilter* currModel = (*model);
             if(currModel->active())
             {
                 QColor drawColor(modelColor);
-                int alpha = 255*currModel->alpha();
+                int alpha = 255*currModel->getFilterWeight();
                 if(alpha < 25) alpha = 25;
                 drawColor.setAlpha(alpha);
-                DrawModelObjects(*currModel, *ball_model, drawColor);
+                DrawModelObjects(currModel->estimate(), ball_model->estimate(), drawColor);
             }
         }
     }
@@ -907,18 +909,18 @@ void locWmGlDisplay::DrawModelMarkers(const KF& model, const QColor& modelColor)
     }
 }
 
-void locWmGlDisplay::DrawModelMarkers(const SelfModel* model, const QColor& modelColor)
+void locWmGlDisplay::DrawModelMarkers(const Moment& model, const QColor& modelColor)
 {
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
-    float mean_x = model->mean(Model::states_x);
-    float mean_y = model->mean(Model::states_y);
-    float mean_angle = model->mean(Model::states_heading);
+    float mean_x = model.mean(RobotModel::kstates_x);
+    float mean_y = model.mean(RobotModel::kstates_y);
+    float mean_angle = model.mean(RobotModel::kstates_heading);
     drawRobotMarker(modelColor, mean_x, mean_y, mean_angle);
 
-    Matrix cov = model->covariance();
-    float xx = cov[Model::states_x][Model::states_x];
-    float xy = cov[Model::states_x][Model::states_y];
-    float yy = cov[Model::states_y][Model::states_y];
+    Matrix cov = model.covariance();
+    float xx = cov[RobotModel::kstates_x][RobotModel::kstates_x];
+    float xy = cov[RobotModel::kstates_x][RobotModel::kstates_y];
+    float yy = cov[RobotModel::kstates_y][RobotModel::kstates_y];
     FieldPose pose = CalculateErrorElipse(xx,xy,yy);
 
     QColor outline(modelColor);
@@ -964,9 +966,9 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     Moment ball_estimate = ball_model->estimate();
 
     Matrix cov = ball_estimate.covariance();
-    float xx = cov[MobileObjectModel::states_x_pos][MobileObjectModel::states_x_pos];
-    float xy = cov[MobileObjectModel::states_x_pos][MobileObjectModel::states_y_pos];
-    float yy = cov[MobileObjectModel::states_y_pos][MobileObjectModel::states_y_pos];
+    float xx = cov[MobileObjectModel::kstates_x_pos][MobileObjectModel::kstates_x_pos];
+    float xy = cov[MobileObjectModel::kstates_x_pos][MobileObjectModel::kstates_y_pos];
+    float yy = cov[MobileObjectModel::kstates_y_pos][MobileObjectModel::kstates_y_pos];
     FieldPose ball_ellipse = CalculateErrorElipse(xx,xy,yy);
 
     QColor fill(modelColor);
@@ -974,9 +976,9 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     if(drawBestModelOnly)
     {
         drawColor.setAlpha(255);
-        const SelfModel* model = localisation.getBestModel();
-        DrawModelMarkers(model, drawColor);
-        FieldPose ball_pose = calculateBallPosition(*model, ball_estimate);
+        const IKalmanFilter* model = localisation.getBestModel();
+        DrawModelMarkers(model->estimate(), drawColor);
+        FieldPose ball_pose = calculateBallPosition(model->estimate(), ball_estimate);
         if(m_showBall)
         {
             drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
@@ -987,17 +989,17 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     else
     {
         QString displayString("Model %1 (%2%)");
-        ModelContainer models = localisation.allModels();
-        for(ModelContainer::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
+        std::list<IKalmanFilter*> models = localisation.allModels();
+        for(std::list<IKalmanFilter*>::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
         {
             if((*model_it)->active())
             {
-                int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->alpha()));
+                int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->getFilterWeight()));
                 drawColor.setAlpha(alpha);
-                DrawModelMarkers((*model_it), drawColor);
+                DrawModelMarkers((*model_it)->estimate(), drawColor);
                 if(m_showBall)
                 {
-                    FieldPose ball_pose = calculateBallPosition(*(*model_it), ball_estimate);
+                    FieldPose ball_pose = calculateBallPosition((*model_it)->estimate(), ball_estimate);
                     drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
                     fill.setAlpha(std::max((int)(100), c_min_display_alpha));
                     DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
@@ -1008,19 +1010,19 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
 
 }
 
-FieldPose locWmGlDisplay::calculateBallPosition(const SelfModel& robot_model, const Moment &ball_estimate)
+FieldPose locWmGlDisplay::calculateBallPosition(const Moment &robot_estimate, const Moment &ball_estimate)
 {
     FieldPose result;
-    float selfX = robot_model.mean(SelfModel::states_x);
-    float selfY = robot_model.mean(SelfModel::states_y);
-    float selfHeading = robot_model.mean(SelfModel::states_heading);
+    float selfX = robot_estimate.mean(RobotModel::kstates_x);
+    float selfY = robot_estimate.mean(RobotModel::kstates_y);
+    float selfHeading = robot_estimate.mean(RobotModel::kstates_heading);
 
     // pre-calculate the trig.
     float hcos = cos(selfHeading);
     float hsin = sin(selfHeading);
 
-    float relBallX = ball_estimate.mean(MobileObjectModel::states_x_pos);
-    float relBallY = ball_estimate.mean(MobileObjectModel::states_y_pos);
+    float relBallX = ball_estimate.mean(MobileObjectModel::kstates_x_pos);
+    float relBallY = ball_estimate.mean(MobileObjectModel::kstates_y_pos);
     // Rotate the relative ball postion to alight with the forward looking robot on the field.
     float rotatedX = relBallX * hcos - relBallY * hsin;
     float rotatedY = relBallX * hsin + relBallY * hcos;

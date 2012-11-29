@@ -111,12 +111,12 @@ protected:
         void DrawElipse(const QPoint& location, const QPoint& size, float angle, const QColor& lineColour, const QColor& fillColour);
 
         void DrawModelObjects(const KF& model, const QColor& modelColor);
-        void DrawModelObjects(const SelfModel& model, const IKalmanFilter& ball_model, const QColor& modelColor);
+        void DrawModelObjects(const Moment& model, const Moment& ball_model, const QColor& modelColor);
         void DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor);
         void DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor);
 
         void DrawModelMarkers(const KF& model,const QColor& modelColor);
-        void DrawModelMarkers(const SelfModel* model, const QColor& modelColor);
+        void DrawModelMarkers(const Moment& model, const QColor& modelColor);
         void DrawLocalisationMarkers(const Localisation& localisation, const QColor& modelColor);
         void drawLocalisationMarkers(const SelfLocalisation& localisation, const QColor& modelColor);
 
@@ -127,7 +127,7 @@ protected:
 
         void drawLegend(QPainter* painter);
 
-        FieldPose calculateBallPosition(const SelfModel& robot_model, const Moment& ball_estimate);
+        FieldPose calculateBallPosition(const Moment& robot_model, const Moment& ball_estimate);
 
         GLuint robotAuraTexture;
         GLuint fieldLineTexture;
