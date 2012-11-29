@@ -6,11 +6,12 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Localisation/SelfLocalisation.h"
 #include "Localisation/Localisation.h"
-#include "Localisation/SelfLocalisationTests.h"
 #include <QElapsedTimer>
 #include "Tools/Math/General.h"
 #include "Tools/Math/Vector3.h"
 #include <sys/time.h>
+#include "Tools/Math/Filters/KFBuilder.h"
+#include "Tools/Math/Filters/RobotModel.h"
 
 /*! @brief Default Constructor
  */
@@ -88,6 +89,7 @@ bool OfflineLocalisation::OpenLogs(const std::string& initialLogPath)
 
     // Check if it worked ok.
     bool success = (m_log_reader->numFrames() > 0);
+    if(success and m_log_reader) m_log_reader->firstFrame();
     return success;
 }
 
@@ -218,8 +220,8 @@ void OfflineLocalisation::run()
         ++curr_frame;
     }
 
-    Model test;
-    m_num_models_created = test.id() - initial_model_id;
+    IKalmanFilter* test = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
+    m_num_models_created = test->id() - initial_model_id;
     m_experiment_run_time = exp_time * 1000;
     std::cout << "Number of models created: " << m_num_models_created << std::endl;
     std::cout << "Total Processing time: " << total_time * 1000 << " ms" <<std::endl;
@@ -286,9 +288,10 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
     if(tempSensors2.getGps(gps) and tempSensors2.getCompass(compass))
     {
         float err_x, err_y, err_head;
-        err_x = m_workingSelfLoc->getBestModel()->mean(Model::states_x) - gps[0];
-        err_y = m_workingSelfLoc->getBestModel()->mean(Model::states_y) - gps[1];
-        err_head = mathGeneral::normaliseAngle(m_workingSelfLoc->getBestModel()->mean(Model::states_heading) - compass);
+        const Moment best_estimate = m_workingSelfLoc->getBestModel()->estimate();
+        err_x = best_estimate.mean(RobotModel::kstates_x) - gps[0];
+        err_y = best_estimate.mean(RobotModel::kstates_y) - gps[1];
+        err_head = mathGeneral::normaliseAngle(best_estimate.mean(RobotModel::kstates_heading) - compass);
         performance_measure.setError(err_x, err_y, err_head);
     }
     m_performance.push_back(performance_measure);
@@ -553,10 +556,11 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             temp_loc = GetSelfFrame(frame+1);
             assert(temp_loc);
             Vector3<float> estimate(0,0,0);
-            const SelfModel* best_model = temp_loc->getBestModel();
-            estimate.x = best_model->mean(Model::states_x);
-            estimate.y = best_model->mean(Model::states_y);
-            estimate.z = best_model->mean(Model::states_heading);
+            const IKalmanFilter* best_model = temp_loc->getBestModel();
+            const Moment best_estimate = best_model->estimate();
+            estimate.x = best_estimate.mean(RobotModel::kstates_x);
+            estimate.y = best_estimate.mean(RobotModel::kstates_y);
+            estimate.z = best_estimate.mean(RobotModel::kstates_heading);
             estimated_positions[frame] = estimate;
 
 
