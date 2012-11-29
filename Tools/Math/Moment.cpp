@@ -173,7 +173,7 @@ bool Moment::isNull() const
 std::string Moment::string() const
 {
     std::stringstream result;
-    result << "Mean: " << std::endl << mean() << std::endl;
+    result << "Mean: " << mean().transp();
     result << "Covariance: " << std::endl;
     result << covariance();
     return result.str();
