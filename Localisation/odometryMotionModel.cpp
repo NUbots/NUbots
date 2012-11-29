@@ -198,9 +198,9 @@ double* OdometryMotionModel::getNextSigma(Pose2D diffOdom, Pose2D oldSigma)
     double varY = muYy*fabs(diffOdom.Y) + muXy*fabs(diffOdom.X);
     double varTheta = muTt*fabs(diffOdom.Theta) + muXt*fabs(diffOdom.X) + muYt*fabs(diffOdom.Y);
 
-    double tempX = d_myProb.normalDistribution( 0.0 , varX);
-    double tempY = d_myProb.normalDistribution( 0.0 , varY);
-    double tempTheta = d_myProb.normalDistribution( 0.0 , varTheta); 
+//    double tempX = d_myProb.normalDistribution( 0.0 , varX);
+//    double tempY = d_myProb.normalDistribution( 0.0 , varY);
+//    double tempTheta = d_myProb.normalDistribution( 0.0 , varTheta);
 
 //    newPose[0] = oldSigma.X + diffOdom.X*cos(oldSigma.Theta + (diffOdom.Theta/2)) - diffOdom.Y*sin(oldSigma.Theta + (diffOdom.Theta/2)) + tempX;
 //    newPose[1] = oldSigma.Y + diffOdom.X*sin(oldSigma.Theta + (diffOdom.Theta/2)) + diffOdom.Y*cos(oldSigma.Theta + (diffOdom.Theta/2)) + tempY;
