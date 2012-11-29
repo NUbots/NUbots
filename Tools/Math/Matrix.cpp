@@ -576,7 +576,7 @@ ostream& operator <<(ostream& out, const Matrix &mat)
         out << "[ ";
         for(int j=0; j<mat.getn(); j++)
         {
-            out << std::setw(12) << std::setprecision(4) << mat[i][j];        
+            out << std::setw(12) << std::setprecision(4) << mat[i][j];
         }
         out << "]\n";
     }
@@ -649,6 +649,99 @@ Matrix GaussJordanInverse(const Matrix& mat)
     Matrix result(mat.getm(), mat.getn(), false);
     for(i=0; i < mat.getn(); ++i)
         result.setCol(i, A.getCol(i + mat.getn()));
+    return result;
+}
+
+Matrix CholeskyUpdate(Matrix S, Matrix U, float v)
+{
+    const unsigned int size = U.getm();
+    const unsigned int cols = U.getn();
+    const int sign = v >= 0.f ? 1 : -1;
+    // Do each of the collumns.
+    U = sqrt(fabs(v)) * U;
+    for(unsigned int col = 0; col < cols; ++col)
+    {
+        for(unsigned int k = 0; k < size; ++k)
+        {
+            const double r = sqrt(pow(S[k][k],2) + sign * pow(U[k][col],2));
+            const double c = r / S[k][k];
+            const double s = U[k][col] / S[k][k];
+            S[k][k] = r;
+            for(unsigned int j = k+1; j < size; ++j)
+            {
+                S[k][j] = (S[k][j] + sign * s * U[j][col]) / c;
+                U[j][col] = c * U[j][col] - s * S[k][j];
+            }
+        }
+    }
+    return S;
+}
+
+Matrix QR_Householder(const Matrix& A)
+{
+    Matrix input = A.getm() >= A.getn() ? A : A.transp();
+    const unsigned int rows = input.getm();
+    const unsigned int cols = input.getn();
+    const unsigned int size = std::min(rows-1, cols);
+
+    Matrix V(rows, 1, false);
+    double a_norm, temp, beta;
+
+    for(unsigned int k = 0; k < size; ++k)
+    {
+        // Equivalent of HOUSEHOLDER function.
+        temp = 0.0;
+        for(unsigned int i = k; i < rows; ++i)
+        {
+            temp += input[i][k] * input[i][k];
+        }
+        a_norm = sqrt(temp);
+        beta = input[k][k] >= 0 ? input[k][k] + a_norm :  input[k][k] - a_norm;
+        V[k][0] = 1.0;
+        for(unsigned int i = k+1; i < rows; ++i)
+        {
+            V[i][0] = 1 / beta * input[i][k];
+        }
+
+        // Equivalent of HOUSEHOLDER_MULT function
+        // 	A(k:n,k:m) = HOUSEHOLDER_MULT(A(k:n,k:m),v(k:n,1));
+        double vv = 0.0;
+        for(unsigned int i = k; i < rows; ++i)
+        {
+            vv += V[i][0] * V[i][0];
+        }
+        beta = -2 / vv;
+        Matrix w(1, rows, false);
+        for(unsigned int col = k; col < cols; ++col)
+        {
+            for(unsigned int row = k; row < rows; ++row)
+            {
+                w[0][col] += V[row][0] * input[row][col];
+            }
+        }
+
+        for(unsigned int col = k; col < cols; ++col)
+        {
+            for(unsigned int row = k; row < rows; ++row)
+            {
+                input[row][col] = input[row][col] + beta * V[row][0] * w[0][col];
+            }
+        }
+
+        for(unsigned int row = k+1; row < rows; ++row)
+        {
+            input[row][k] = V[row][0];
+        }
+    }
+    Matrix result(size,size, false);
+    for(unsigned int k = 0; k < size; ++k)
+    {
+        for(unsigned int l = k; l < size; ++l)
+        {
+            result[k][l] = input[k][l];
+        }
+    }
+
     return result;
 }
 
