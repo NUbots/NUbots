@@ -7,6 +7,9 @@
 
 // Include different filters.
 #include "SeqUKF.h"
+#include "BasicUKF.h"
+#include "SrSeqUKF.h"
+#include "SrBasicUKF.h"
 
 KFBuilder::KFBuilder()
 {
@@ -36,14 +39,17 @@ IKalmanFilter* KFBuilder::getNewFilter(Filter filter_type, Model model_type)
     // Now make the filter type we want using the model.
     switch (filter_type)
     {
-        case kukf_filter:
+        case kbasic_ukf_filter:
+            filter = new BasicUKF(model);
             break;
-        case ksr_ukf_filter:
+        case ksr_basic_ukf_filter:
+            filter = new SrBasicUKF(model);
             break;
         case kseq_ukf_filter:
             filter = new SeqUKF(model);
             break;
         case ksr_seq_ukf_filter:
+            filter = new SrSeqUKF(model);
             break;
         default:
             filter = NULL;

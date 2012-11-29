@@ -15,8 +15,8 @@ public:
     {
         kseq_ukf_filter,
         ksr_seq_ukf_filter,
-        kukf_filter,
-        ksr_ukf_filter,
+        kbasic_ukf_filter,
+        ksr_basic_ukf_filter,
         ktotal_filters
     };
     KFBuilder();
