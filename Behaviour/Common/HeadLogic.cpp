@@ -50,20 +50,20 @@ HeadLogic::HeadLogic(){
     relevantSOb.push_back(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
     relevantSOb.push_back(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
     relevantSOb.push_back(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-    relevantSOb.push_back(FieldObjects::FO_BLUE_BEACON);
-    relevantSOb.push_back(FieldObjects::FO_YELLOW_BEACON);
+    /*relevantSOb.push_back(FieldObjects::FO_BLUE_BEACON);
+    relevantSOb.push_back(FieldObjects::FO_YELLOW_BEACON);*/
 
 	relevantMOb.push_back(FieldObjects::FO_BALL);
-	relevantMOb.push_back(FieldObjects::FO_BLUE_ROBOT_1);
+    /*relevantMOb.push_back(FieldObjects::FO_BLUE_ROBOT_1);
 	relevantMOb.push_back(FieldObjects::FO_BLUE_ROBOT_2);
 	relevantMOb.push_back(FieldObjects::FO_BLUE_ROBOT_3);
 	relevantMOb.push_back(FieldObjects::FO_BLUE_ROBOT_4);
 	relevantMOb.push_back(FieldObjects::FO_PINK_ROBOT_1);
     relevantMOb.push_back(FieldObjects::FO_PINK_ROBOT_2);
     relevantMOb.push_back(FieldObjects::FO_PINK_ROBOT_3);
-    relevantMOb.push_back(FieldObjects::FO_PINK_ROBOT_4);
+    relevantMOb.push_back(FieldObjects::FO_PINK_ROBOT_4);*/
 
-    relevantAOb.push_back(0);
+    //relevantAOb.push_back(0);
     //relevantAOb.push_back(1);
     //relevantAOb.push_back(2);
     //relevantAOb.push_back(3);
@@ -111,13 +111,11 @@ Object* HeadLogic::getObject(int object_type, int object_enum_value){
     }
 }
 /*! @brief
-     * Gets the type of the ith object from the list of interesting objects.
+     * Gets the type of the ith object from the list of interesting objects. Self not gettable.
      * */
 int HeadLogic::getObjectType(int index){
 
     std::vector<std::vector<int> > objects_of_interest;
-    std::vector<int> self_marker(1,0);
-    objects_of_interest.push_back(self_marker);
     std::vector<int> object_marker(2,0);
         //Interesting objects:
     for (int object_type = 0; object_type<3;object_type++){
@@ -128,22 +126,18 @@ int HeadLogic::getObjectType(int index){
             objects_of_interest.push_back(object_marker);
         }
     }
-    if (objects_of_interest[index] == self_marker){
-        return 0;
-    } else{
-        return objects_of_interest[index][0];
-    }
+
+    return objects_of_interest[index][0];
+
 
 
 }
 
 /*! @brief
-     * Gets the ith object from the list of interesting objects.
+     * Gets the ith object from the list of interesting objects. Self not gettable.
      * */
 Object* HeadLogic::getObject(int index){
     std::vector<std::vector<int> > objects_of_interest;
-    std::vector<int> self_marker(1,0);
-	objects_of_interest.push_back(self_marker);
     std::vector<int> object_marker(2,0);
 	    //Interesting objects:
 	for (int object_type = 0; object_type<3;object_type++){
@@ -154,24 +148,12 @@ Object* HeadLogic::getObject(int index){
 	    	objects_of_interest.push_back(object_marker);
 	    }
 	}
-	if (objects_of_interest[index] == self_marker){
-/*Get self gets ball!-
--
------
+    return getObject(objects_of_interest[index][0],objects_of_interest[index][1]);
 
-----
----
-------
-
-*/
-        return &(Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]);
-	} else{
-		return getObject(objects_of_interest[index][0],objects_of_interest[index][1]);
-	}
 }
 
 
-/*! @brief Returns a vector (x,y) of the relative location of a stationary object.
+/*! @brief Returns a vector (x,y) of the relative location of a stationary object. Self not localised here.
   Eg. getObjectLocation(HeadLogic::STATIONARY_OBJECT,FieldObjects::FO_BLUE_LEFT_GOALPOST);
 */
 std::vector<float> HeadLogic::getObjectLocation(int object_type,int object_enum_value){
@@ -186,7 +168,7 @@ std::vector<float> HeadLogic::getObjectLocation(int object_type,int object_enum_
 
 }
 
-/*! @brief Returns a vector (x,y) of the relative location of a mobile object.
+/*! @brief Returns a vector (x,y) of the relative location of a field object.
 */
 
 std::vector<float> HeadLogic::calculateObjectLocation(Object &ob){
@@ -238,7 +220,12 @@ std::vector<float> HeadLogic::getSelfLocation(){
 
 }
 
-
+/*! @brief Gets a list of costs to look at each object of interest.
+    @param scale_x is the horizontal size of the box which the object must be placed in on the vision field
+    before it is counted as "seen".
+           scale_y is the vertical size of the box.
+            Both parameters are specified as proportions of the vision field size.
+*/
 std::vector<float> HeadLogic::getCostList(float scale_x,float scale_y){
     std::vector<float> self_location = getSelfLocation();
     std::vector<float> costs;
@@ -252,7 +239,7 @@ std::vector<float> HeadLogic::getCostList(float scale_x,float scale_y){
 }
 
 /*! @brief Get the object with cheapest head movement to place the object inside the box of size
-    (scale_x*vision_width) by (scale_y*vision_height), centred on the centre of the screen.
+    (scale_x*vision_width) by (scale_y*vision_height), centred on the centre of the vision field.
  If scale_x = scale_y = 0 then returns the cheapest object to centre vision on.
  Returns vector of ints: [cheapest_object_type, cheapest_object].
 */

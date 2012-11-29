@@ -52,6 +52,7 @@ public:
     virtual ~ChaseSubState() {};
 protected:
     ChaseState* m_parent_machine;
+
 };
 
 class GoToBall : public ChaseSubState
@@ -63,9 +64,11 @@ public:
         m_pan_started = false;
         m_previous_time = 0;
         m_has_fallen = false;
+        head_behaviour = HeadBehaviour::getInstance();
     }
-    ~GoToBall() {};
+    ~GoToBall() {}
 protected:
+    HeadBehaviour* head_behaviour;
     BehaviourState* nextState()
     {   // do state transitions in the chase state machine
         return this;
@@ -158,13 +161,13 @@ protected:
         } 
         
         
-        /*NEW VISION
+        //NEW VISION
         //-----------------------------------------------------------------------------------------------*/
-        HeadBehaviour* head_behaviour = HeadBehaviour::getInstance();
-        head_behaviour->makeVisionChoice(HeadBehaviour::TimeVSCostPriority);
+
+        //head_behaviour->makeVisionChoice(HeadBehaviour::TimeVSCostPriority);//or pass HeadBehaviour::RLAgent
 
         
-        /*OLD VISION
+       // OLD VISION
         //-----------------------------------------------------------------------------------------------
         static bool getting_up = false;
         static double getup_timer = 0.f;
@@ -290,7 +293,7 @@ protected:
         #endif
         m_previous_time = m_data->CurrentTime;
 
-        */
+//END OLD VISION
 
     }
 

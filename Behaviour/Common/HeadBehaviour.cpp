@@ -1,9 +1,9 @@
 /*! @file HeadBehaviour.cpp
     @brief Head behaviour implementation for simpler behaviour control.
 
-    @author J
+    @author Josiah Walker and Jake Fountain
 
- Copyright (c) 2012 J
+ Copyright (c) 2012
 
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 	        else return false;
 	    }
 
-	    HeadBehaviour::HeadBehaviour() {
+        HeadBehaviour::HeadBehaviour():Mrlagent(){
 	        NUCameraData cameraSpecs(string(CONFIG_DIR) + "CameraSpecs.cfg");
 	        m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
 	        m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
@@ -49,14 +49,27 @@
 	        maximumSearchTime = 2500.;
 	        actionObjectID = -1;
 
-       /*Reinforcement learning agent mechanism to be properly implemented soon
+            //MRL Agent
             vector<float> inputs = getPercept();
 
 
-            Mrlagent();
-            Mrlagent.initialiseAgent(inputs.size(),head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size(),10/*Size of grading in look up table?*//*);
-            */
-	    }
+            //Mrlagent();
+            Mrlagent.initialiseAgent(inputs.size()
+                                     //Calculate output size = sum of the number of stationary, mobile and ambiguous objects.
+                                     ,head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size()
+                                     /*Size of grading in look up table?*/
+                                     ,10);
+            try{
+                Mrlagent.loadAgent("");//Currently string parameter does not affect save file name.
+            } catch (ios_base::failure){
+                Mrlagent.log("Agent did not load properly. ios_base exception");
+            }
+        }
+
+        HeadBehaviour::~HeadBehaviour(){
+            delete head_logic;
+
+        }
 
 	    void HeadBehaviour::doPriorityListPolicy() {
         /*
@@ -80,14 +93,14 @@
 	    }
 
         void HeadBehaviour::doTimeVSCostPriorityPolicy(){
-            //Do longest seen of HeadLogic's interesting objects.
+            //Do highest priority of HeadLogic's interesting objects. Priority = (time since last seen)/cost
 
             vector<float> times = head_logic->getTimeSinceLastSeenSummary();
             vector<float> costs = head_logic->getCostList((float)1.0,(float)1.0);//Look at whole screen.
             vector<float> priorities(0);
             if(times.size()==costs.size()){
                 for (int i = 0; i<times.size(); i++ ){
-                    if(costs[i]==(float)0){
+                    if(costs[i]==0.0){
                         priorities.push_back((float)0);//Don't look at something already in vision.
                     } else {
                         priorities.push_back((float)times[i]/costs[i]);
@@ -96,8 +109,8 @@
             }
 
 
-            float bestPriority;
-            int bestObject;
+            float bestPriority = 0;
+            int bestObject = 1;
             //Find index of best priority Object
             for (int i = 0; i< priorities.size();i++){
                 if (bestPriority>priorities[i]){
@@ -134,6 +147,7 @@
 	    //main function that drives choosing what to look at depending on the desired policy
 	    void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
 
+            /*
 	        //If we are still moving to look at something else, don't make a new decision
 	        if (Blackboard->Sensors->GetTimestamp() < actionStartTime+maximumSearchTime &&
 	            fieldVisionPolicy == lastVisionPolicy &&
@@ -143,7 +157,7 @@
 	            return;
 	        }
 
-
+//Is this needed?
             //if we didn't see the object, we may need to relocalise
             if (actionObjectID >= 0 and ObjectNotSeen() and fieldVisionPolicy == lastVisionPolicy) {
 				Blackboard->Jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
@@ -152,6 +166,8 @@
 				//cout << "objects lost, searching" << endl;
                 return;
 			}
+
+            */
 
 			//cout << "looking for something now" << endl;
 			lastVisionPolicy = fieldVisionPolicy;
@@ -186,13 +202,13 @@
                 case TimeVSCostPriority:
                     doTimeVSCostPriorityPolicy();
                 case RLAgent:
-                    //doRLagentPolicy();
+                    doRLAgentPolicy();
                     break;
                     //Get instructions from RL agent.
 	        }
 	    }
 
-/*
+
         void HeadBehaviour::doRLAgentPolicy(){
 
             vector<float> inputs = getPercept();
@@ -203,7 +219,7 @@
 
             if (action < head_logic->relevantObjects[0].size()){    //i.e. Stationary Object
                 dispatchHeadJob((StationaryObject*)head_logic->getObject(action));
-            } else if (action < head_logic->relevantObjects[1].size()){ //i.e. Mobile Object
+            } else if (action < head_logic->relevantObjects[1].size()+head_logic->relevantObjects[0].size()){ //i.e. Mobile Object
                 dispatchHeadJob((MobileObject*)head_logic->getObject(action));
             } else {
                 dispatchHeadJob((AmbiguousObject*)head_logic->getObject(action));
@@ -220,7 +236,7 @@
             inputs.insert(inputs.end(), other_inputs.begin(), other_inputs.end());
             return inputs;
         }
-*/
+
         void HeadBehaviour::dispatchHeadJob(StationaryObject* ObjectToTrack) {
             //initiate a new pan job using the robots estimated standard deviation of heading as the pan width
 

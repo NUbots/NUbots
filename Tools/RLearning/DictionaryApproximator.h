@@ -1,11 +1,35 @@
-z
+/*! @file DictionaryApproximator.h
+    @brief Uses a discretised lookup table derived from the continuous input vectors. Used in: MRLAgent.
+
+    @author Josiah Walker
+
+ Copyright (c) 2012 Josiah Walker
+
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 
 #ifndef DICTAPPROXIMATOR_H
 #define DICTAPPROXIMATOR_H
 
-#include < map >
+#include <sstream>
+#include <fstream>
+#include <vector>
+
+#include <map>
 #include <string>
+#include <vector>
 using namespace std;
 
 

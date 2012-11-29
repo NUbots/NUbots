@@ -31,9 +31,9 @@
 #include "Tools/Math/General.h"
 #include "Infrastructure/NUBlackboard.h"
 
-/*RLAgent import
+//RLAgent import
 #include "Tools/RLearning/MRLAgent.h"
-*/
+
 
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Infrastructure/Jobs/MotionJobs/KickJob.h"
@@ -44,9 +44,14 @@
 class HeadBehaviour {
 
 private:
-    /*MRLAgent:
+    /*MRLAgent:*/
     MRLAgent Mrlagent;
+
+    /*! @brief Gets data from HeadLogic and compiles it into a single vector for feeding to reinforcement learning agent.
     */
+    vector<float> getPercept();
+
+
     //These are the camera margins objects must be inside (as a percentage) when the robot looks at them.
     float cameraMarginX;
     float cameraMarginY;
@@ -68,14 +73,25 @@ private:
     int lastVisionPolicy;
     
 
-    
+    /*! @brief
+    */
     bool ObjectNotSeen();
     HeadBehaviour();
     ~HeadBehaviour();
 
     HeadLogic* head_logic;
+
+
+    /*! @brief Perform a simple list policy for directing head behaviour.
+    */
     void doPriorityListPolicy();
+
+    /*! @brief Perform a policy which choice maximises time since last seen and minimises head movement cost.
+    */
     void doTimeVSCostPriorityPolicy();
+
+    /*! @brief Use the motivated reinforcement learning agent to make policy decisions.
+    */
     void doRLAgentPolicy();
 
 public:
@@ -87,19 +103,21 @@ public:
         RobotLostVisionPolicy = 3,
         BallOnlyVisionPolicy = 4,
         LandmarkOnlyVisionPolicy = 5,
-        TimeVSCostPriority = 6,
-        RLAgent = 7
+        TimeVSCostPriority = 6,//See above
+        RLAgent = 7//See above
     };
     
     static HeadBehaviour* getInstance();
 
-    //main function that drives choosing what to look at depending on the desired policy
+    /*! @brief Method to call when making vision choice. Makes choice depending on policy chosen from those enumerated above.
+    */
     void makeVisionChoice(VisionPolicyID fieldVisionPolicy);
 
-
+    /*! @brief dispatchHeadJob methods. There are three, one for each object type.
+    */
     void dispatchHeadJob(MobileObject *ObjectToTrack);
     
-   void dispatchHeadJob(StationaryObject* ObjectToTrack);
+    void dispatchHeadJob(StationaryObject* ObjectToTrack);
 
     void dispatchHeadJob(AmbiguousObject* ObjectToTrack);
     

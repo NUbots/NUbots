@@ -1,7 +1,25 @@
+/*! @file DictionaryApproximator.cpp
+    @brief Uses a discrete lookup table derived from the continuous input vectors. Used in: MRLAgent.
+
+    @author Josiah Walker
+
+ Copyright (c) 2012 Josiah Walker
+
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "DictionaryApproximator.h"
-#include <sstream>
-#include <fstream>
-#include <vector>
 
 void DictionaryApproximator::initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens) {
     numInputs = numberOfInputs;
@@ -9,14 +27,14 @@ void DictionaryApproximator::initialiseApproximator(int numberOfInputs, int numb
     tileMultiplier = numberOfHiddens;
 }
     
-void DictionaryApproximator::doLearningEpisode(vector< vector<float> > const& observations, vector< vector<float> > const& values, float stepSize, int iterations) {
+void DictionaryApproximator::doLearningEpisode(vector<vector<float> > const& observations, vector< vector<float> > const& values, float stepSize, int iterations) {
     string tmp;
     for (int i = 0; i < observations.size(); i++) {
        //for each observation
         for (int j = 0; j < numOutputs; j++) {
           //for each possible action
             tmp = getValue(observations[i],j);
-            map[tmp] = values[i][j];//Assign the value function to be the input values.
+            approximator[tmp] = values[i][j];//Assign the value function to be the input values.
         }
     }
 }
@@ -30,23 +48,25 @@ vector<float> DictionaryApproximator::getValues(vector<float> const& observation
 }
     
 void DictionaryApproximator::saveApproximator(string agentName) {
-    ifstream save_file;
-    string file_name = agentName+"_approximator";//Added by Jake
-    save_file.open(file_name,ios_base::in);
+    fstream save_file;
+    string file_name =agentName+"_approximator";//Added by Jake
+    save_file.open("DictApprox",ios_base::in);
     string tempstr;
     
     save_file << approximator.size();
     
     for (map<string,float>::iterator iter = approximator.begin(); iter != approximator.end(); iter++) {
-        save_file << "\n" << iter.first << " " << iter.second;
+        save_file << "\n" << iter->first << " " << iter->second;
     }
+
+    save_file.close();
     
 }
     
 void DictionaryApproximator::loadApproximator(string agentName) {
-    ifstream save_file;
-    string file_name = agentName+"_approximator";//Added by Jake
-    save_file.open(file_name,ios_base::in);
+    fstream save_file;
+    string file_name = agentName+"_approximator";//Changed by Jake
+    save_file.open("DictApprox",ios_base::out);
     string tempstr;
     float tempval;
     int numvals;
@@ -57,8 +77,10 @@ void DictionaryApproximator::loadApproximator(string agentName) {
     for (int i = 0; i < numvals; i++) {
         save_file >> tempstr;
         save_file >> tempval;
-        approximator[tempval] = tempstr;
+        approximator[tempstr] = tempval;
     }
+
+    save_file.close();
 }
 
 

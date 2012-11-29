@@ -1,31 +1,44 @@
+/*! @file MRLAgent.h
+    @brief Motivated reinforcement learning agent. Provides its own reward structure for self motivation based on novelty.
+    Uses a dictionary approximator to store the learnt expected reward "value" function.
+
+    @author Jake Fountain
+
+ Copyright (c) 2012 Jake Fountain
+
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef MRLAGENT_H
 #define MRLAGENT_H
+#include <vector>
 
 #include "ApproximatorInterface.h"
 #include "RLearningInterface.h"
 #include "DictionaryApproximator.h"
 #include "RLAgent.h"
 
-#include <vector>
+
 
 class MRLAgent: public RLAgent
 {
 public:
-    virtual void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens);
+    MRLAgent();
+    void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens);
 
-    virtual void setParameters(float alpha=0.1f, float beta=0.5, float gamma=0.9f, float lambda=0.9f,int learningIterations=1);
-
-    virtual int getAction(vector<float> observations);//Must return integer between 0 and numberOfOutputs-1
-
-    virtual void giveReward(float reward);
-
-    virtual void doLearning();
-
-    virtual void saveAgent(string agentName);
-
-    virtual void loadAgent(string agentName);
     float giveMotivationReward();
-    float wundtFunction();
+    float wundtFunction(float N);
 
 };
 

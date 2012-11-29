@@ -1,3 +1,23 @@
+/*! @file RLAgent.h
+    @brief Standard implementation of reinforcement learning agent.
+
+    @author Jake Fountain
+
+ Copyright (c) 2012 Jake Fountain
+
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef RLAGENT_H
 #define RLAGENT_H
 
@@ -5,6 +25,9 @@
 #include "RLearningInterface.h"
 
 #include <vector>
+#include <sstream>
+#include <fstream>
+#include <cstdlib>
 
 class RLAgent: public RLearningInterface
 {
@@ -23,10 +46,13 @@ public:
 
     virtual void loadAgent(string agentName);
 
-    RLAgent();
+    virtual void log(string text);
 
-private:
-    ApproximatorInterface FunctionApproximator;
+    RLAgent();
+    ~RLAgent();
+
+protected:
+    ApproximatorInterface* FunctionApproximator;
     float alpha;
     float beta;
     float gamma;
@@ -39,7 +65,7 @@ private:
     int num_hidden;
 
     int last_action;
-    vector<int> last_values;
+    vector<float> last_values;
 
     vector<vector<float> > values;
     vector<vector<float> > observations;

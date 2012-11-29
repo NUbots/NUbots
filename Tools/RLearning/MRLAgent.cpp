@@ -1,11 +1,32 @@
+/*! @file MRLAgent.cpp
+    @brief Motivated reinforcement learning agent. Provides its own reward structure for self motivation based on novelty.
+    Uses a dictionary approximator to store the learnt expected reward "value" function.
+
+    @author Jake Fountain
+
+ Copyright (c) 2012 Jake Fountain
+
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "MRLAgent.h"
 
 #include <math.h>
 
 MRLAgent::MRLAgent():RLAgent()
 {
-    DictionaryApproximator DA();
-    FunctionApproximator = DA;
+    FunctionApproximator = (ApproximatorInterface*)(new DictionaryApproximator());
 }
 
 
@@ -16,34 +37,36 @@ MRLAgent::MRLAgent():RLAgent()
 void MRLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens){
     //MRLFunctionApprox FuncApprox(numberOfInputs, numberOfOutputs, numberOfHiddens);
     //FunctionApproximator = FuncApprox;
-    FunctionApproximator.initialiseApproximator(numberOfInputs, numberOfOutputs, numberOfHiddens);
+    FunctionApproximator->initialiseApproximator(numberOfInputs, numberOfOutputs, numberOfHiddens);
     num_inputs = numberOfInputs;
     num_outputs = numberOfOutputs;
     num_hidden = numberOfHiddens;
-    setParameters();
+
 }
 
 
 
 /*! @brief
-        Main feature of the MRL agent. The novelty of the latest observation is calculated by taking the Euclidean norm
-    metric of the previous observation vectors with the latest.The motivation reward is then calculated by taking the Wundt function
+    Main feature of the MRL agent. The novelty of the latest observation is calculated by taking the Euclidean norm
+    square of the previous observation vectors with the latest.The motivation reward is then calculated by taking the Wundt function
     of the novelty.*/
 float MRLAgent::giveMotivationReward(){
     float novelty=0;
-    float memory_constant = 0.9;
+    float memory_decay_factor= 0.9;
     int count = 0;//used to normalise the novelty
     for (int i=0; i<observations.size()-1;i++){
         for (int j=0; j<observations[i].size();j++){
 
-            novelty+= memory_constant*(observations[i][j]-observations[observations.size()-1][j])*(observations[i][j]-observations[observations.size()-1][j]);
-            memory_constant*=memory_constant;
+            novelty+= memory_decay_factor*(observations[i][j]-observations[observations.size()-1][j])*(observations[i][j]-observations[observations.size()-1][j]);
 
             //novelty = sum of squared differences of current percept from all previous percepts, with time distant percepts decreasing in importance exponentially
         }
+        memory_decay_factor*=memory_decay_factor;
+
         count++;
     }
     float motivation = wundtFunction(novelty/count);
+
     giveReward(motivation);
 }
 
@@ -52,7 +75,7 @@ float MRLAgent::giveMotivationReward(){
 /*! @brief
         The wundt function is a linear combination of two sigmoids. It is similar to a decapitated gaussian distribution.
 */
-float MLRAgent::wundtFunction(float N){
+float MRLAgent::wundtFunction(float N){
     float N1 = 1;//Location of max positive gradient
     float N2 = 2;//Location of max negative gradient
 
