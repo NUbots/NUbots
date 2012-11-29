@@ -29,7 +29,9 @@ This contains the basic functions that all implementations can and must use.
 #include <iostream>
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/Moment.h"
-class IKFModel;
+#include "IKFModel.h"
+#include <boost/circular_buffer.hpp>
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
 class IKalmanFilter
 {
@@ -72,9 +74,14 @@ public:
     */
     virtual const Moment& estimate() const = 0;
 
+    // Active controld
+    virtual bool active() const {return m_active;}
+    virtual void setActive(bool active = true) {m_active = active;}
+    virtual unsigned int id() const {return m_id;}
+
     // Weighting functions.
     virtual void enableWeighting(bool enabled = true) = 0;
-    virtual bool getFilterWeight() const = 0;
+    virtual float getFilterWeight() const = 0;
     virtual void setFilterWeight(float weight) = 0;
 
     // Outlier filtering settings.
@@ -112,7 +119,49 @@ public:
     */
     virtual std::istream& readStreamBinary (std::istream& input) = 0;
 
+    virtual std::string summary(bool detailed) const = 0;
+
+// Multipl model stuff
+    /*! @brief Get the previous decision path when this ambiguous object was last encountered.
+        @param theObject The ambiguous object.
+        @return The object id of the unique object that was last chosen.
+    */
+    unsigned int previousSplitOption(const AmbiguousObject& theObject) const
+    {
+        unsigned int result;
+        unsigned int objectIndex = theObject.getID();
+        assert(objectIndex < FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
+        result = m_previous_decisions[objectIndex];
+        return result;
+    }
+
+    void setModel(IKFModel* newModel) {m_model = newModel;}
+
+    double creationTime() const {return m_creation_time;}
+
+    // Multiple model stuff
+    unsigned int m_split_option;    //!< Most recent option used for split from parent.
+    std::vector<unsigned int> m_previous_decisions; //!< Stores the last decision for each of the ambiguous object types.
+    unsigned int m_parent_id;       //!< Unique id of the parent model.
+    double m_creation_time;         //!< Time at which model was created.
+    boost::circular_buffer<unsigned int> m_parent_history_buffer;
+
 protected:
     IKFModel* m_model;
-    IKalmanFilter(IKFModel* model): m_model(model){}
+
+    // Multiple Model stuff
+    bool m_active;
+    unsigned int m_id;
+    IKalmanFilter(IKFModel* model): m_model(model)
+    {
+        m_previous_decisions.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS, FieldObjects::NUM_STAT_FIELD_OBJECTS);
+        m_parent_history_buffer.resize(5,0);
+        m_id = GenerateId();
+    }
+
+    static unsigned int GenerateId()
+    {
+        static unsigned int id = 0;
+        return id++;
+    }
 };
