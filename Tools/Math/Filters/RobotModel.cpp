@@ -5,13 +5,13 @@ RobotModel::RobotModel()
 {
     m_time_process_matrix = Matrix(3,3,false);
 
-    m_time_process_matrix[states_x][states_x] = 0.5;
+    m_time_process_matrix[kstates_x][kstates_x] = 0.5;
 
-    m_time_process_matrix[states_y][states_y] = 0.5;
+    m_time_process_matrix[kstates_y][kstates_y] = 0.5;
 
-    m_time_process_matrix[states_heading][states_x] = 0.003;
-    m_time_process_matrix[states_heading][states_y] = 0.003;
-    m_time_process_matrix[states_heading][states_heading] = 0.5;
+    m_time_process_matrix[kstates_heading][kstates_x] = 0.003;
+    m_time_process_matrix[kstates_heading][kstates_y] = 0.003;
+    m_time_process_matrix[kstates_heading][kstates_heading] = 0.5;
 }
 
 /*!
@@ -25,14 +25,14 @@ Matrix RobotModel::processEquation(const Matrix& state, double deltaT, const Mat
 {
     Matrix result(state); // Start at original state.
 
-    double interp_heading = state[states_heading][0] + 0.5 * measurement[states_heading][0];
+    double interp_heading = state[kstates_heading][0] + 0.5 * measurement[kstates_heading][0];
 
     double cos_theta = cos(interp_heading);
     double sin_theta = sin(interp_heading);
 
-    result[states_x][0] += measurement[states_x][0]*cos_theta - measurement[states_y][0]*sin_theta;
-    result[states_y][0] +=  measurement[states_x][0]*sin_theta + measurement[states_y][0]*cos_theta;
-    result[states_heading][0] += measurement[states_heading][0];
+    result[kstates_x][0] += measurement[kstates_x][0]*cos_theta - measurement[kstates_y][0]*sin_theta;
+    result[kstates_y][0] +=  measurement[kstates_x][0]*sin_theta + measurement[kstates_y][0]*cos_theta;
+    result[kstates_heading][0] += measurement[kstates_heading][0];
 
     return result;
 }
@@ -43,7 +43,22 @@ Matrix RobotModel::processEquation(const Matrix& state, double deltaT, const Mat
  * @param measurementArgs Additional arguments used to calculate the measurement. In this implementation it contain the vector [x,y]^T location of the object observed.
  * @return The expected measurement for the given states.
  */
-Matrix RobotModel::measurementEquation(const Matrix& state, const Matrix& measurementArgs)
+Matrix RobotModel::measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type)
+{
+    Matrix result;
+    switch(type)
+    {
+        case klandmark_measurement:
+            result = landmarkMeasurementEquation(state, measurementArgs);
+            break;
+        case kangle_between_landmark_measurement:
+            result = angleBetweenLandmarkMeasurementEquation(state, measurementArgs);
+            break;
+    };
+    return result;
+}
+
+Matrix RobotModel::landmarkMeasurementEquation(const Matrix& state, const Matrix& measurementArgs)
 {
     // measurementArgs contain the vector [x,y]^T location of the object observed.
     // Measurement is returned in polar coordinates [distance, theta]^T.
@@ -58,10 +73,10 @@ Matrix RobotModel::measurementEquation(const Matrix& state, const Matrix& measur
 
     for (unsigned int object_number = 0; object_number < total_objects; ++object_number)
     {
-        dx = measurementArgs[0][0] - state[states_x][0];
-        dy = measurementArgs[1][0] - state[states_y][0];
+        dx = measurementArgs[0][0] - state[kstates_x][0];
+        dy = measurementArgs[1][0] - state[kstates_y][0];
         distance = sqrt(dx*dx + dy*dy);
-        angle = mathGeneral::normaliseAngle(atan2(dy,dx) - state[states_heading][0]);
+        angle = mathGeneral::normaliseAngle(atan2(dy,dx) - state[kstates_heading][0]);
 
         // 2 measurements per object
         current_index = 2*object_number;
@@ -72,6 +87,30 @@ Matrix RobotModel::measurementEquation(const Matrix& state, const Matrix& measur
     }
 
     return expected_measurement;
+}
+
+Matrix RobotModel::angleBetweenLandmarkMeasurementEquation(const Matrix& state, const Matrix& measurementArgs)
+{
+    // measurementArgs contain the vector [x,y]^T location of the object observed.
+    // Measurement is returned in polar coordinates [distance, theta]^T.
+
+    Matrix result(1,1,false);
+
+    // variables required.
+    const float x1 = measurementArgs[0][0];
+    const float y1 = measurementArgs[0][1];
+    const float x2 = measurementArgs[1][0];
+    const float y2 = measurementArgs[1][1];
+
+    const float robot_x = state[kstates_x][0];
+    const float robot_y = state[kstates_y][0];
+
+    const float angleToObj1 = atan2 ( y1 - robot_y, x1 - robot_x );
+    const float angleToObj2 = atan2 ( y2 - robot_y, x2 - robot_x );
+
+    result[0][0] = mathGeneral::normaliseAngle(angleToObj1 - angleToObj2);
+
+    return result;
 }
 
 /*!

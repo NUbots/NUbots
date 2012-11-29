@@ -5,12 +5,19 @@
 class RobotModel : public IKFModel
 {
 public:
-    enum state
+    enum State
     {
-        states_x,
-        states_y,
-        states_heading,
-        states_total
+        kstates_x,
+        kstates_y,
+        kstates_heading,
+        kstates_total
+    };
+
+    enum MeasurementType
+    {
+        klandmark_measurement,
+        kangle_between_landmark_measurement,
+        ktotal_measurement_types
     };
 
     RobotModel();
@@ -28,11 +35,11 @@ public:
       @param measurementArgs Additional information about the measurement.
       @return The expected measurment for the given conditions.
     */
-    Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs);
+    Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type);
 
     unsigned int totalStates() const
     {
-        return states_total;
+        return kstates_total;
     }
 
     /*!
@@ -50,5 +57,7 @@ public:
     std::istream& readStreamBinary (std::istream& input);
 
 protected:
+    Matrix landmarkMeasurementEquation(const Matrix& state, const Matrix& measurementArgs);
+    Matrix angleBetweenLandmarkMeasurementEquation(const Matrix& state, const Matrix& measurementArgs);
     Matrix m_time_process_matrix;
 };
