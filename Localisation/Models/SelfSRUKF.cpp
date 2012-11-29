@@ -166,7 +166,6 @@ SelfSRUKF::updateResult SelfSRUKF::TimeUpdate(const std::vector<float>& odometry
     //-----------------------------------------------------------------------------------------------
 
     // Step 5: Calculate measurement error and then find new srukfSx
-    Matrix newSrukfSx(m_covariance.getm(),m_covariance.getn(), false);
     Matrix Mx(sigmaPoints.getm(),sigmaPoints.getn(), false);
 
     for(unsigned int i=0; i < numSigmaPoints; i++)
