@@ -8,11 +8,11 @@ public:
 
     enum State
     {
-        states_x_pos,
-        states_y_pos,
-        states_x_vel,
-        states_y_vel,
-        states_total
+        kstates_x_pos,
+        kstates_y_pos,
+        kstates_x_vel,
+        kstates_y_vel,
+        kstates_total
     };
 
     MobileObjectModel();
@@ -30,11 +30,11 @@ public:
       @param measurementArgs Additional information about the measurement.
       @return The expected measurment for the given conditions.
     */
-    Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs);
+    Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type);
 
     unsigned int totalStates() const
     {
-        return states_total;
+        return kstates_total;
     }
 
     /*!

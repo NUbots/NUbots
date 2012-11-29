@@ -46,7 +46,7 @@ public:
       @param measurementArgs Additional information about the measurement.
       @return The expected measurment for the given conditions.
     */
-    virtual Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs) = 0;
+    virtual Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type) = 0;
 
     virtual unsigned int totalStates() const = 0;
 

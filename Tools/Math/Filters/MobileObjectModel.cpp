@@ -27,39 +27,39 @@ Matrix MobileObjectModel::processEquation(const Matrix& sigma_point, double delt
     double deltaTheta = measurement[2][0];
 
     // First we have the change in the object position due to the object velocity.
-    result[states_x_pos][0] += delta_t * sigma_point[states_x_vel][0];
-    result[states_y_pos][0] += delta_t * sigma_point[states_y_vel][0];
+    result[kstates_x_pos][0] += delta_t * sigma_point[kstates_x_vel][0];
+    result[kstates_y_pos][0] += delta_t * sigma_point[kstates_y_vel][0];
 
     // Next add a little bit of decay due to friction.
-    result[states_x_vel][0] *= m_velocity_decay;
-    result[states_y_vel][0] *= m_velocity_decay;
+    result[kstates_x_vel][0] *= m_velocity_decay;
+    result[kstates_y_vel][0] *= m_velocity_decay;
 
     // pre-calculate these since they are used more than once.
     const double cosTheta = cos(deltaTheta);
     const double sinTheta = sin(deltaTheta);
 
-    tempx = result[states_x_pos][0];
-    tempy = result[states_y_pos][0];
+    tempx = result[kstates_x_pos][0];
+    tempy = result[kstates_y_pos][0];
 
     // Now we have to re-orientate the position due to the motion of the observer.
     // Start with turn
     // Apply to position - turning counter clockwise (+ve angle) means that the object should move clockwise relatively.
-    tempx = result[states_x_pos][0] *  cosTheta + result[states_y_pos][0] * sinTheta;
-    tempy = -result[states_x_pos][0] *  sinTheta + result[states_y_pos][0] * cosTheta;
+    tempx = result[kstates_x_pos][0] *  cosTheta + result[kstates_y_pos][0] * sinTheta;
+    tempy = -result[kstates_x_pos][0] *  sinTheta + result[kstates_y_pos][0] * cosTheta;
 
-    result[states_x_pos][0] = tempx;
-    result[states_y_pos][0] = tempy;
+    result[kstates_x_pos][0] = tempx;
+    result[kstates_y_pos][0] = tempy;
 
     // Apply to velocity
-    tempx = result[states_x_vel][0] *  cosTheta - result[states_y_vel][0] * sinTheta;
-    tempy = result[states_x_vel][0] *  sinTheta + result[states_y_vel][0] * cosTheta;
+    tempx = result[kstates_x_vel][0] *  cosTheta - result[kstates_y_vel][0] * sinTheta;
+    tempy = result[kstates_x_vel][0] *  sinTheta + result[kstates_y_vel][0] * cosTheta;
 
-    result[states_x_vel][0] = tempx;
-    result[states_y_vel][0] = tempy;
+    result[kstates_x_vel][0] = tempx;
+    result[kstates_y_vel][0] = tempy;
 
     // Now add observer translation
-    result[states_x_pos][0] -= deltaX;  // moving forward brings you closer, so decreases relative position.
-    result[states_y_pos][0] -= deltaY;
+    result[kstates_x_pos][0] -= deltaX;  // moving forward brings you closer, so decreases relative position.
+    result[kstates_y_pos][0] -= deltaY;
 
     return result;
 }
@@ -70,7 +70,7 @@ Matrix MobileObjectModel::processEquation(const Matrix& sigma_point, double delt
  * @param measurementArgs Additional arguments used to calculate the measurement. In this implementation it is unused.
  * @return The expected measurement for the given states.
  */
-Matrix MobileObjectModel::measurementEquation(const Matrix& state, const Matrix& measurementArgs)
+Matrix MobileObjectModel::measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type)
 {
     // measurementArgs not required, since the measurements are only reliant on the current state.
     // Measurement is to be in polar coordinates (distance, theta).
@@ -79,8 +79,8 @@ Matrix MobileObjectModel::measurementEquation(const Matrix& state, const Matrix&
     // Measurement is to be in polar coordinates (distance, theta).
 
     // Get position from sigma point.
-    const double x = state[states_x_pos][0];
-    const double y = state[states_y_pos][0];
+    const double x = state[kstates_x_pos][0];
+    const double y = state[kstates_y_pos][0];
 
     // Convert from cartesian to polar coordinates.
     double distance = sqrt(x*x + y*y);
