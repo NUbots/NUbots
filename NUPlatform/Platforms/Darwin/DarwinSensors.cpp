@@ -145,10 +145,10 @@ void DarwinSensors::copyFromHardwareCommunications()
     copyFromFeet();
 
     //READ FROM JOINTS and CONTROL BOARD:
-    result = cm730->BulkReadLight();
-    // For new firmware
-    //result = cm730->BulkRead();
-
+    result = cm730->BulkRead();
+    //OLD FIRMWARE
+    //result = cm730->BulkReadLight();
+      
     if(motor_error) {
         #if DEBUG_NUSENSORS_VERBOSITY > 0
             debug << "DarwinSensors::copyFromHardwareCommunications\nMotor error: " <<endl;
@@ -184,9 +184,11 @@ void DarwinSensors::copyFromHardwareCommunications()
             debug << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
         #endif
         errorlog << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
-        result = cm730->BulkReadLight();
-        // For new firmware
-        //result = cm730->BulkRead();
+        
+        //OLD FIRMWARE
+        //result = cm730->BulkReadLight();
+        
+        result = cm730->BulkRead();
         num_tries++;
     }
     return;
