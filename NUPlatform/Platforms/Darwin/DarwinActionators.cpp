@@ -121,6 +121,8 @@ void DarwinActionators::copyToServos()
         platform->setMotorGoalPosition(i,positions[i]);
         platform->setMotorStiffness(i,gains[i]);
 		
+	//Old code, above functions (setMotorStiffness and setMotorGoalPosition) complete these tasks separately.
+	//Check before deleting!
         //cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
     	//cm730->WriteWord(m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
         /*
