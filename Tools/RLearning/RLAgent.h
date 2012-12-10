@@ -28,6 +28,9 @@
 #include <sstream>
 #include <fstream>
 #include <cstdlib>
+#include <iostream>
+#include <ctime>
+#include <algorithm>
 
 class RLAgent: public RLearningInterface
 {
@@ -48,6 +51,10 @@ public:
 
     virtual void log(string text);
 
+
+    vector<float> getValues(vector<float> v);
+    int checkAction(vector<float> obs);
+
     RLAgent();
     ~RLAgent();
 
@@ -64,6 +71,7 @@ protected:
     int num_outputs;
     int num_hidden;
 
+    int second_last_action;
     int last_action;
     vector<float> last_values;
 

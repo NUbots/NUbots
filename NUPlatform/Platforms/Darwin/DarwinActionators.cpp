@@ -121,6 +121,8 @@ void DarwinActionators::copyToServos()
         platform->setMotorGoalPosition(i,positions[i]);
         platform->setMotorStiffness(i,gains[i]);
 		
+	//Old code, above functions (setMotorStiffness and setMotorGoalPosition) complete these tasks separately.
+	//Check before deleting!
         //cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
     	//cm730->WriteWord(m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
         /*
@@ -142,23 +144,26 @@ void DarwinActionators::copyToServos()
             int value = m_joint_mapping->joint2rawClipped(i, positions[i]);
             param[n++] = platform->m_servo_IDs[i];
             //param[n++] = P_GAIN;
-            param[n++] = gains[i] / 128 * 100;
-            param[n++] = I_GAIN;
-            param[n++] = D_GAIN;
+            
+            //OLD FIRMWARE
+            //param[n++] = gains[i] / 128 * 100;
+            //param[n++] = I_GAIN;
+            //param[n++] = D_GAIN;
 
-            // For new firmware
-//            param[n++] = D_GAIN;
-//            param[n++] = I_GAIN;
-//            param[n++] = gains[i] / 128 * 100;
+	    param[n++] = D_GAIN;
+            param[n++] = I_GAIN;
+            param[n++] = gains[i] / 128 * 100;
+            
             param[n++] = 0;
             param[n++] = Robot::CM730::GetLowByte(value);
             param[n++] = Robot::CM730::GetHighByte(value);
             joint_num++;
         }
     }
-    // For new firmware
-    //int result = cm730->SyncWrite(Robot::MX28::P_D_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
-    int result = cm730->SyncWrite(Robot::MX28::P_P_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
+    int result = cm730->SyncWrite(Robot::MX28::P_D_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
+    
+    //OLD FIRMWARE
+    //int result = cm730->SyncWrite(Robot::MX28::P_P_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
 }
 
 void DarwinActionators::copyToLeds()

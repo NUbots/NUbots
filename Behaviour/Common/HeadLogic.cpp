@@ -35,6 +35,7 @@ HeadLogic* HeadLogic::getInstance(){
 }
 
 HeadLogic::HeadLogic(){
+    cout<<"Head logic constructor start"<<endl;
     NUCameraData cameraSpecs(string(/*CONFIG_DIR*/ "Config/Darwin") + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
     m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
@@ -95,6 +96,7 @@ HeadLogic::HeadLogic(){
     relevantObjects.push_back(relevantSOb);
     relevantObjects.push_back(relevantMOb);
     relevantObjects.push_back(relevantAOb);
+    cout<<"Head logic constructor end"<<endl;
 }
 HeadLogic::~HeadLogic(){}
 
@@ -403,6 +405,7 @@ float HeadLogic::innerProd(std::vector<float> x1, std::vector<float> x2){
   Object order matches with the objects returned by the location summary methods.
 */
 std::vector<float> HeadLogic::getTimeSinceLastSeenSummary(){
+     //cout<<"Head logic timesumm start"<<endl;
     std::vector<float> result;
     //Convention for time last seen of self always set to 0. This is to match up indices with the location summary vector.
     result.push_back(0);
@@ -414,6 +417,7 @@ std::vector<float> HeadLogic::getTimeSinceLastSeenSummary(){
         }
     }
     return result;
+    //cout<<"Head logic timesumm end"<<endl;
 }
 
 

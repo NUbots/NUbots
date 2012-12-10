@@ -164,9 +164,9 @@ protected:
         //NEW VISION
         //-----------------------------------------------------------------------------------------------*/
 
-        //head_behaviour->makeVisionChoice(HeadBehaviour::TimeVSCostPriority);//or pass HeadBehaviour::RLAgent
+       // head_behaviour->makeVisionChoice(HeadBehaviour::TimeVSCostPriority);//or pass HeadBehaviour::RLAgent
 
-        
+
        // OLD VISION
         //-----------------------------------------------------------------------------------------------
         static bool getting_up = false;

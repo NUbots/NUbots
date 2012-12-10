@@ -20,7 +20,7 @@
  */
 #include "HeadBehaviour.h"
 
-#include "nubotdataconfig.h"
+
 
 #include <vector>
 #include <cmath>
@@ -39,10 +39,13 @@
 	    }
 
         HeadBehaviour::HeadBehaviour():Mrlagent(){
+            cout<<"head behaviour init started"<<endl;
+
 	        NUCameraData cameraSpecs(string(CONFIG_DIR) + "CameraSpecs.cfg");
 	        m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
 	        m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
             head_logic = HeadLogic::getInstance();
+            cout<<"head logic initialised"<<endl;
 	        landmarkSeenFrequency = 1200;
 	        ballSeenFrequency = 800;
 	        lastVisionPolicy = -1;
@@ -51,19 +54,23 @@
 
             //MRL Agent
             vector<float> inputs = getPercept();
-
+            cout<<"Initialising MRLAgent..."<<endl;
 
             //Mrlagent();
             Mrlagent.initialiseAgent(inputs.size()
                                      //Calculate output size = sum of the number of stationary, mobile and ambiguous objects.
                                      ,head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size()
-                                     /*Size of grading in look up table?*/
+                                     /*Size of grading in look up table. Higher number means higher resolution.*/
                                      ,10);
+            Mrlagent.setParameters(0.5,0.1,0.1,1.0,1,15);
+            /*
             try{
                 Mrlagent.loadAgent("");//Currently string parameter does not affect save file name.
             } catch (ios_base::failure){
                 Mrlagent.log("Agent did not load properly. ios_base exception");
             }
+            */
+           cout<<"Mrlagent initialised in head_behaviour: head behaviour init finished"<<endl;
         }
 
         HeadBehaviour::~HeadBehaviour(){
@@ -214,15 +221,15 @@
             vector<float> inputs = getPercept();
 
 
-            int action = Mrlagent.getAction(inputs);//Should output integer from 0 to outputs-1
-            Mrlagent.giveMotivationReward();
+            int action = Mrlagent.getActionAndLearn(inputs);//Should output integer from 0 to outputs-1
+
 
             if (action < head_logic->relevantObjects[0].size()){    //i.e. Stationary Object
-                dispatchHeadJob((StationaryObject*)head_logic->getObject(action));
+                dispatchHeadJob((StationaryObject*)(head_logic->getObject(action)));
             } else if (action < head_logic->relevantObjects[1].size()+head_logic->relevantObjects[0].size()){ //i.e. Mobile Object
-                dispatchHeadJob((MobileObject*)head_logic->getObject(action));
+                dispatchHeadJob((MobileObject*)(head_logic->getObject(action)));
             } else {
-                dispatchHeadJob((AmbiguousObject*)head_logic->getObject(action));
+                dispatchHeadJob((AmbiguousObject*)(head_logic->getObject(action)));
             }
 
         }
@@ -230,7 +237,7 @@
         vector<float> HeadBehaviour::getPercept(){
             //If the input vectors are changed, the RLagent input size must be changed.
             vector<float> inputs= head_logic->getTimeSinceLastSeenSummary();
-            vector<float> other_inputs = head_logic->getCostList(1,1);
+            vector<float> other_inputs = head_logic->getCostList(0,0);
 
             //Combines inputs to one vector to feed to RLagent
             inputs.insert(inputs.end(), other_inputs.begin(), other_inputs.end());

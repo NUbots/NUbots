@@ -30,6 +30,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <iostream>
 using namespace std;
 
 
@@ -43,7 +44,9 @@ private:
     string getRepresentation(vector<float> const& observations,int action);
     
 public:
-    
+    /*! @brief numberOfHiddens represents the tileMultiplier variable. This variable controls the resolution of the discretisation of the lookup table.
+      Higher numberOfHiddens gives a higher resolution.
+    */
     virtual void initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens);
     
     virtual void doLearningEpisode(vector< vector<float> > const& observations, vector< vector<float> > const& values, float stepSize=0.1, int iterations=1);
@@ -54,6 +57,7 @@ public:
     
     virtual void loadApproximator(string agentName);
     
+    map<string,float>* getMap();
     
 };
 

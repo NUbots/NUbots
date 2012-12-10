@@ -30,6 +30,7 @@
 #include "NUPlatform/NUCamera/NUCameraData.h"
 #include "Tools/Math/General.h"
 #include "Infrastructure/NUBlackboard.h"
+#include "nubotdataconfig.h"
 
 //RLAgent import
 #include "Tools/RLearning/MRLAgent.h"

@@ -1,7 +1,19 @@
 /*! @file MRLAgent.h
     @brief Motivated reinforcement learning agent. Provides its own reward structure for self motivation based on novelty.
     Uses a dictionary approximator to store the learnt expected reward "value" function.
+    ---------------------------------------------------
+    Make your own MRLAgent:Follow the template below to implement a Motivated reinforcement agent.
 
+
+    MRLAgent mrlagent;
+    mrlagent.setParameters(0.1,0.5,0.5,1.0,1,5);
+    mrlagent.initialiseAgent(2,5,1);
+
+    for (number of iterations){
+        int action = mrlagent.getActionAndLearn(observation);
+        updateWorld(action);
+    }
+    ---------------------------------------------------
     @author Jake Fountain
 
  Copyright (c) 2012 Jake Fountain
@@ -23,6 +35,7 @@
 #ifndef MRLAGENT_H
 #define MRLAGENT_H
 #include <vector>
+#include <algorithm>
 
 #include "ApproximatorInterface.h"
 #include "RLearningInterface.h"
@@ -35,11 +48,17 @@ class MRLAgent: public RLAgent
 {
 public:
     MRLAgent();
+    ~MRLAgent();
     void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens);
 
-    float giveMotivationReward();
+    void giveMotivationReward();
     float wundtFunction(float N);
+    int getActionAndLearn(vector<float> observations);
+    void saveMRLAgent();
+    void loadMRLAgent();
 
+    map<string,float>* getMap();
+    ApproximatorInterface* expectation_map;
 };
 
 #endif // MRLAGENT_H

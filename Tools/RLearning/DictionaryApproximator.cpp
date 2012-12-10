@@ -25,6 +25,7 @@ void DictionaryApproximator::initialiseApproximator(int numberOfInputs, int numb
     numInputs = numberOfInputs;
     numOutputs = numberOfOutputs;
     tileMultiplier = numberOfHiddens;
+   //Debug: cout<<"Approx init"<<endl;
 }
     
 void DictionaryApproximator::doLearningEpisode(vector<vector<float> > const& observations, vector< vector<float> > const& values, float stepSize, int iterations) {
@@ -33,7 +34,7 @@ void DictionaryApproximator::doLearningEpisode(vector<vector<float> > const& obs
        //for each observation
         for (int j = 0; j < numOutputs; j++) {
           //for each possible action
-            tmp = getValue(observations[i],j);
+            tmp = getRepresentation(observations[i],j);
             approximator[tmp] = values[i][j];//Assign the value function to be the input values.
         }
     }
@@ -42,31 +43,44 @@ void DictionaryApproximator::doLearningEpisode(vector<vector<float> > const& obs
 vector<float> DictionaryApproximator::getValues(vector<float> const& observations) {
     vector<float> result;
     
-    for (int i = 0; i < numOutputs; i++) {
+    for (int i = 0; i < numOutputs; i++) {//For expectation_function from MRLAgent, i represents the ith entry of the predicted state.
         result.push_back(getValue(observations,i));
     }
+    return result;
 }
-    
+
 void DictionaryApproximator::saveApproximator(string agentName) {
-    fstream save_file;
-    string file_name =agentName+"_approximator";//Added by Jake
-    save_file.open("DictApprox",ios_base::in);
+    ofstream save_file;
+    if((int)agentName.size()==0){
+       save_file.open("DictionaryApprox.txt",ios_base::out);
+    } else {
+       save_file.open("ExpectationFunction.txt",ios_base::out);
+    }
     string tempstr;
     
     save_file << approximator.size();
     
     for (map<string,float>::iterator iter = approximator.begin(); iter != approximator.end(); iter++) {
         save_file << "\n" << iter->first << " " << iter->second;
+        //cout<< "Saved ("<< iter->first << "," << iter->second<<")"<<endl;
     }
 
     save_file.close();
     
 }
+
+map<string,float>* DictionaryApproximator::getMap(){
+    return (&approximator);
+}
+
     
 void DictionaryApproximator::loadApproximator(string agentName) {
-    fstream save_file;
-    string file_name = agentName+"_approximator";//Changed by Jake
-    save_file.open("DictApprox",ios_base::out);
+    ifstream save_file;
+    if((int)agentName.size()==0){
+       save_file.open("DictionaryApprox.txt",ios_base::in);
+    } else {
+       save_file.open("ExpectationFunction.txt",ios_base::in);
+    }
     string tempstr;
     float tempval;
     int numvals;
@@ -78,6 +92,8 @@ void DictionaryApproximator::loadApproximator(string agentName) {
         save_file >> tempstr;
         save_file >> tempval;
         approximator[tempstr] = tempval;
+        //Debug
+        //cout<<"Loading: (s,a) = "<<tempstr<<", v = "<< tempval<<endl;
     }
 
     save_file.close();
@@ -88,16 +104,17 @@ string DictionaryApproximator::getRepresentation(vector<float> const& observatio
     stringstream result;
     
     for (int i = 0; i < observations.size(); i++) {
-        result << (int)(observations[i]*tileMultiplier) << " ";
+        result << (int)(observations[i]*tileMultiplier) << "_";//Changed seperator to underscore to avoid interfering with the save feature.
     }
     result << action;
     return result.str();
 }
 
 float DictionaryApproximator::getValue(vector<float> const& observations,int action) {
-    
+
     string val = getRepresentation(observations,action);
     float result = approximator[val];
+
     return result;
 }
 
