@@ -7,6 +7,80 @@
 #include "Tools/Math/Filters/KFBuilder.h"
 #include "Tools/Math/Filters/RobotModel.h"
 
+IKalmanFilter* robotFilter()
+{
+    return KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
+}
+
+IKalmanFilter* newRobotModel()
+{
+    IKalmanFilter* filter = robotFilter();
+
+    // set initial settings.
+    filter->enableOutlierFiltering();
+    filter->setOutlierThreshold(15.f);
+    filter->enableWeighting();
+    filter->setActive();
+    return filter;
+}
+
+IKalmanFilter* newRobotModel(IKalmanFilter* filter)
+{
+    IKalmanFilter* new_filter = robotFilter();
+
+    // This should be fixed in a different way. The default copy copies the pointer value and would otherwise lose the model.
+    IKFModel* temp_model = new_filter->model();
+    *new_filter = *filter;
+    new_filter->setModel(temp_model);
+
+    // set initial settings.
+    new_filter->enableOutlierFiltering();
+    new_filter->setOutlierThreshold(15.f);
+    new_filter->enableWeighting();
+
+    new_filter->initialiseEstimate(filter->estimate());
+    new_filter->setFilterWeight(filter->getFilterWeight());
+
+    return new_filter;
+}
+
+IKalmanFilter* newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError &error, double timestamp)
+{
+    Matrix meas_noise = error.errorCovariance();
+
+    IKalmanFilter* new_filter = robotFilter();
+    // set initial settings.
+    new_filter->enableOutlierFiltering();
+    new_filter->setOutlierThreshold(15.f);
+    new_filter->enableWeighting();
+
+    new_filter->initialiseEstimate(filter->estimate());
+    new_filter->setFilterWeight(filter->getFilterWeight());
+
+    Matrix meas(2,1,false);
+    meas[0][0] = measured_object.measuredDistance() * cos(measured_object.measuredElevation());
+    meas[1][0] = measured_object.measuredBearing();
+
+    Matrix args(2,1,false);
+    args[0][0] = measured_object.X();
+    args[1][0] = measured_object.Y();
+
+    bool success = new_filter->measurementUpdate(meas, meas_noise, args, RobotModel::klandmark_measurement);
+    new_filter->setActive(success);
+
+    if(new_filter->active())
+    {
+        new_filter->m_creation_time = timestamp;
+        new_filter->m_parent_history_buffer = filter->m_parent_history_buffer;
+        new_filter->m_parent_history_buffer.push_back(filter->id());
+        new_filter->m_parent_id = filter->id();
+        new_filter->m_split_option = measured_object.getID();
+        //new_filter->m_previous_decisions[object.getID()] = measured_object.getID();
+    }
+
+    return new_filter;
+}
+
 bool RunTests()
 {
     bool maxLikely, viterbi, merge, nscan;
@@ -23,7 +97,7 @@ bool RunTests()
 
 bool timingTest()
 {
-    IKalmanFilter *theModel = SelfLocalisation::newRobotModel();
+    IKalmanFilter *theModel = newRobotModel();
     bool success = true;
     const unsigned int total_updates = 100000;
 
@@ -136,13 +210,13 @@ bool MergingTest()
 
     // Create the models.
 
-    IKalmanFilter *temp = SelfLocalisation::newRobotModel();
+    IKalmanFilter *temp = newRobotModel();
     temp->setFilterWeight(0.5);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(99.5f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.5);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(100.0f, 1.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
@@ -161,13 +235,13 @@ bool MergingTest()
     models.clear();
 
     // Add models
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.5);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(100.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.5);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(-100.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
@@ -195,7 +269,7 @@ bool MaxLikelyhoodTest()
     // Create the models.
     IKalmanFilter* temp;
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.5);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(300.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
@@ -203,13 +277,13 @@ bool MaxLikelyhoodTest()
 
     unsigned int model_to_remain = temp->id();
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.2);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(200.0f, 40.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.3);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(100.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
@@ -239,7 +313,7 @@ bool ViterbiTest()
     // Create the models.
     IKalmanFilter* temp;
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.2);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(300.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
@@ -247,31 +321,31 @@ bool ViterbiTest()
 
     unsigned int model_to_remain = temp->id();
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.1);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(200.0f, 40.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.1);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(100.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.3);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.14);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(-100.0f, 30.0f, -0.6f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
-    temp = SelfLocalisation::newRobotModel();
+    temp = newRobotModel();
     temp->setFilterWeight(0.16);
     temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(-50.0f, 30.0f, -1.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
@@ -365,12 +439,12 @@ bool NscanTest()
     // Make the first two models
     std::list<IKalmanFilter*> example_tree;
     // N=2
-    IKalmanFilter* model0 = SelfLocalisation::newRobotModel();
+    IKalmanFilter* model0 = newRobotModel();
     model0->setFilterWeight(0.5);
     model0->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     model0->setActive();
 
-    IKalmanFilter* model1 = SelfLocalisation::newRobotModel();
+    IKalmanFilter* model1 = newRobotModel();
     model1->setFilterWeight(0.5);
     model0->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     model1->setActive();
@@ -380,48 +454,48 @@ bool NscanTest()
     rightGoal->CopyObject(ambPost);
 
     // N=1
-    IKalmanFilter* model2 = SelfLocalisation::newRobotModel(model0, *leftGoal, error, 100);
-    IKalmanFilter* model3 = SelfLocalisation::newRobotModel(model0, *rightGoal, error, 100);
-    IKalmanFilter* model4 = SelfLocalisation::newRobotModel(model1, *leftGoal, error, 100);
-    IKalmanFilter* model5 = SelfLocalisation::newRobotModel(model1, *rightGoal, error, 100);
+    IKalmanFilter* model2 = newRobotModel(model0, *leftGoal, error, 100);
+    IKalmanFilter* model3 = newRobotModel(model0, *rightGoal, error, 100);
+    IKalmanFilter* model4 = newRobotModel(model1, *leftGoal, error, 100);
+    IKalmanFilter* model5 = newRobotModel(model1, *rightGoal, error, 100);
 
     // N=0
-    IKalmanFilter* model6 = SelfLocalisation::newRobotModel(model2, *leftGoal, error, 200);
+    IKalmanFilter* model6 = newRobotModel(model2, *leftGoal, error, 200);
     model6->setActive();
     model6->setFilterWeight(0.1f);
     example_tree.push_back(model6);
 
-    IKalmanFilter* model7 = SelfLocalisation::newRobotModel(model2, *rightGoal, error, 200);
+    IKalmanFilter* model7 = newRobotModel(model2, *rightGoal, error, 200);
     model7->setActive();
     model7->setFilterWeight(0.2f);
     example_tree.push_back(model7);
 
-    IKalmanFilter* model8 = SelfLocalisation::newRobotModel(model3, *leftGoal, error, 200);
+    IKalmanFilter* model8 = newRobotModel(model3, *leftGoal, error, 200);
     model8->setActive();
     model8->setFilterWeight(0.05f);
     example_tree.push_back(model8);
 
-    IKalmanFilter* model9 = SelfLocalisation::newRobotModel(model3, *rightGoal, error, 200);
+    IKalmanFilter* model9 = newRobotModel(model3, *rightGoal, error, 200);
     model9->setActive();
     model9->setFilterWeight(0.1f);
     example_tree.push_back(model9);
 
-    IKalmanFilter* model10 = SelfLocalisation::newRobotModel(model4, *leftGoal, error, 200);
+    IKalmanFilter* model10 = newRobotModel(model4, *leftGoal, error, 200);
     model10->setActive();
     model10->setFilterWeight(0.12f);
     example_tree.push_back(model10);
 
-    IKalmanFilter* model11 = SelfLocalisation::newRobotModel(model4, *rightGoal, error, 200);
+    IKalmanFilter* model11 = newRobotModel(model4, *rightGoal, error, 200);
     model11->setActive();
     model11->setFilterWeight(0.13f);
     example_tree.push_back(model11);
 
-    IKalmanFilter* model12 = SelfLocalisation::newRobotModel(model5, *leftGoal, error, 200);
+    IKalmanFilter* model12 = newRobotModel(model5, *leftGoal, error, 200);
     model12->setActive();
     model12->setFilterWeight(0.17f);
     example_tree.push_back(model12);
 
-    IKalmanFilter* model13 = SelfLocalisation::newRobotModel(model2, *rightGoal, error, 200);
+    IKalmanFilter* model13 = newRobotModel(model2, *rightGoal, error, 200);
     model13->setActive();
     model13->setFilterWeight(0.13f);
     example_tree.push_back(model13);
