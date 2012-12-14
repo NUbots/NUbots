@@ -23,4 +23,6 @@ public:
     static IKalmanFilter* getNewFilter(Filter filter_type, Model model_type);
 };
 
+std::string FilterTypeString(KFBuilder::Filter filter_type);
+
 #endif // KFBUILDER_H

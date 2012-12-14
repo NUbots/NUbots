@@ -78,3 +78,26 @@ IKalmanFilter* KFBuilder::getNewFilter(Filter filter_type, Model model_type)
     // Return the new filter.
     return filter;
 }
+
+std::string FilterTypeString(KFBuilder::Filter filter_type)
+{
+    std::string name = "unknown";
+    switch (filter_type)
+    {
+        case KFBuilder::kseq_ukf_filter:
+            name = "Sequential UKF";
+            break;
+        case KFBuilder::ksr_seq_ukf_filter:
+            name = "Square root sequential UKF";
+            break;
+        case KFBuilder::kbasic_ukf_filter:
+            name = "Basic UKF";
+            break;
+        case KFBuilder::ksr_basic_ukf_filter:
+            name = "Square root basic UKF";
+            break;
+        default:
+            name = "Unknown";
+    }
+    return name;
+}
