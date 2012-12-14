@@ -1,8 +1,9 @@
 #include "SeqUKF.h"
 #include "Tools/Math/General.h"
 #include "IKFModel.h"
+#include <sstream>
 
-SeqUKF::SeqUKF(IKFModel* model): IKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
+SeqUKF::SeqUKF(IKFModel *model): IKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
 {
     init();
 }
@@ -10,6 +11,7 @@ SeqUKF::SeqUKF(IKFModel* model): IKalmanFilter(model), m_estimate(model->totalSt
 SeqUKF::SeqUKF(const SeqUKF& source): IKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
     init();
+    m_filter_weight = source.m_filter_weight;
 }
 
 SeqUKF::~SeqUKF()
@@ -36,17 +38,16 @@ void SeqUKF::CalculateWeights()
     // initialise to correct sizes. These are row vectors.
     m_mean_weights = Matrix(1, totalWeights, false);
     m_covariance_weights = Matrix(1, totalWeights, false);
-    m_sqrt_covariance_weights = Matrix(1, totalWeights, false);
 
     // Calculate the weights.
     for (unsigned int i = 0; i < totalWeights; ++i)
     {
         m_mean_weights[0][i] = m_unscented_transform.Wm(i);
         m_covariance_weights[0][i] = m_unscented_transform.Wc(i);
-        m_sqrt_covariance_weights[0][i] = sqrt(fabs(m_covariance_weights[0][i]));
     }
     return;
 }
+
 /*!
  * @brief Calculates the sigma points from the current mean an covariance of the filter.
  * @return The sigma points that describe the current mean and covariance.
@@ -134,7 +135,6 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
     new_estimate.setMean(predictedMean);
     new_estimate.setCovariance(predictedCovariance);
     initialiseEstimate(new_estimate);
-
     return true;
 }
 
@@ -157,7 +157,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     for (unsigned int i = 0; i < total_points; ++i)
     {
         current_point = m_sigma_points.getCol(i);    // Get the sigma point.
-        Yprop.setCol(i, m_model->measurementEquation(current_point, args));
+        Yprop.setCol(i, m_model->measurementEquation(current_point, args, type));
     }
 
     // Now calculate the mean of these measurement sigmas.
@@ -168,19 +168,18 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     // Calculate the Y vector.
     for(unsigned int i = 0; i < total_points; ++i)
     {
-        double weight = m_sqrt_covariance_weights[0][i];
-        Y.setCol(i, weight*(Yprop.getCol(i) - Ymean));
+        Y.setCol(i, (Yprop.getCol(i) - Ymean));
     }
 
     // Calculate the new C and d values.
     Matrix Yaug = Y;
-    Yaug.setCol(0, mathGeneral::sign(m_covariance_weights[0][0]) * Yaug.getCol(0));
+    //Yaug.setCol(0, mathGeneral::sign(m_covariance_weights[0][0]) * Yaug.getCol(0));
     Matrix Ytransp = Yaug.transp();
 
-    Matrix innovation = measurement - Ymean;
+    const Matrix innovation = measurement - Ymean;
 
-    // Check for oultier, if outlier return without updating estimate.
-    if(!evaluateMeasurement(innovation, Y * Ytransp, noise)) // Y * Y^T is the estimate variance, by definition.
+    // Check for outlier, if outlier return without updating estimate.
+    if(evaluateMeasurement(innovation, Y * Ytransp, noise) == false) // Y * Y^T is the estimate variance, by definition.
         return false;
 
     m_C = m_C - m_C * Ytransp * InverseMatrix(noise + Y*m_C*Ytransp) * Y * m_C;
@@ -210,15 +209,15 @@ void SeqUKF::initialiseEstimate(const Moment& estimate)
     m_sigma_points = GenerateSigmaPoints();
 
     // Initialise the variables for sequential measurement updates.
-    m_C = Matrix(total_points, total_points, true);
+    //m_C = Matrix(total_points, total_points, true);
+    m_C = diag(m_covariance_weights);
     m_d = Matrix(total_points, 1, false);
 
     // Calculate X vector.
     m_X = Matrix(num_states, total_points, false);
     for(unsigned int i = 0; i < total_points; ++i)
     {
-        double weight = m_sqrt_covariance_weights[0][i];
-        m_X.setCol(i, weight*(m_sigma_points.getCol(i) - m_sigma_mean));
+        m_X.setCol(i, (m_sigma_points.getCol(i) - m_sigma_mean));
     }
 
     return;
@@ -249,6 +248,14 @@ bool SeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimat
     }
 
     return true;
+}
+
+std::string SeqUKF::summary(bool detailed) const
+{
+    std::stringstream str_strm;
+    str_strm << "ID: " << m_id <<  " Weight: " << m_filter_weight << std::endl;
+    str_strm << m_estimate.string() << std::endl;
+    return str_strm.str();
 }
 
 std::ostream& SeqUKF::writeStreamBinary (std::ostream& output) const

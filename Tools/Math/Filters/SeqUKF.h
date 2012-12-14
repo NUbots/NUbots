@@ -76,6 +76,8 @@ public:
     */
     const Moment& estimate() const;
 
+    std::string summary(bool detailed) const;
+
     /*!
     @brief Outputs a binary representation of the UKF object to a stream.
     @param output The output stream.
@@ -92,7 +94,7 @@ public:
 
     // Weighting functions.
     void enableWeighting(bool enabled = true) {m_weighting_enabled = enabled;}
-    bool getFilterWeight() const {return m_filter_weight;}
+    float getFilterWeight() const {return m_filter_weight;}
     void setFilterWeight(float weight) {m_filter_weight = weight;}
 
     // Outlier filtering settings.
@@ -109,7 +111,6 @@ private:
     Moment m_estimate;
     Matrix m_mean_weights;
     Matrix m_covariance_weights;
-    Matrix m_sqrt_covariance_weights;
     Matrix m_sigma_points;
     Matrix m_sigma_mean;
     Matrix m_C;
