@@ -7,6 +7,7 @@
 #include "Localisation/SelfLocalisation.h"
 #include "Localisation/Localisation.h"
 #include <QElapsedTimer>
+#include <QDir>
 #include "Tools/Math/General.h"
 #include "Tools/Math/Vector3.h"
 #include <sys/time.h>
@@ -480,7 +481,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
         // whole process a lot neater.
         unsigned int total_frames  = m_self_loc_frame_buffer.size();
         temp = m_log_reader->path().toStdString();
-        std::string path = temp.erase(temp.rfind('/')+1);   // unix/linux based path
+        std::string path = temp.erase(temp.rfind(QDir::separator().toAscii())+1);
 
         unsigned int num_frames = NumberOfFrames();
 
