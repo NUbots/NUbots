@@ -14,6 +14,9 @@ class Localisation;
 class SelfLocalisation;
 class LogFileReader;
 class OfflineLocBatch;
+class QLineEdit;
+class QLabel;
+class QComboBox;
 
 class OfflineLocalisationDialog : public QDialog
 {
@@ -28,7 +31,7 @@ signals:
     void SelfLocalisationChanged(const SelfLocalisation*);
     void LocalisationInfoChanged(const QString&);
     void SelfLocalisationInfoChanged(const QString&);
-    void PostBatchJob(const QStringList&);
+    void PostBatchJob(const QStringList&, const QString&, const QString&);
 
 public slots:
     void OpenLogFiles();
@@ -55,6 +58,34 @@ private:
     bool m_external_reader;
     LogFileReader* m_reader;
     OfflineLocBatch* m_batch_processsor;
+};
+
+
+class BatchSelectDialog : public QDialog
+{
+    Q_OBJECT
+public slots:
+    void selectSourcePath();
+    void selectResultPath();
+    void verifySourcePath(QString text);
+    void verifyResultPath(QString text);
+
+public:
+    explicit BatchSelectDialog(QWidget *parent = 0);
+    ~BatchSelectDialog();
+    QString sourcePath();
+    QString resultPath();
+    QString experimentType();
+
+private:
+    bool verifyAndDisplay(QString text, QLabel* label);
+    void makeLayout();
+    QComboBox* m_experiment_select;
+    QLineEdit* m_source_path_edit;
+    QLineEdit* m_result_path_edit;
+    QLabel* m_source_path_verified;
+    QLabel* m_result_path_verified;
+private:
 };
 
 #endif // OFFLINELOCALISATIONDIALOG_H
