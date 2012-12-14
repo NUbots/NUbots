@@ -745,6 +745,30 @@ Matrix QR_Householder(const Matrix& A)
     return result;
 }
 
+Matrix diag(const Matrix& A)
+{
+    Matrix result;
+    if(A.getm() == 1)
+    {
+        unsigned int size = A.getn();
+        result = Matrix(size, size, false);
+        for(unsigned int i = 0; i < size; ++i)
+        {
+            result[i][i] = A[0][i];
+        }
+    }
+    else if(A.getn() == 1)
+    {
+        unsigned int size = A.getn();
+        result = Matrix(size, size, false);
+        for(unsigned int i = 0; i < size; ++i)
+        {
+            result[i][i] = A[i][0];
+        }
+    }
+    return result;
+}
+
 void WriteMatrix(std::ostream& out, const Matrix &mat)
 {
     int m = mat.getm(), n = mat.getn();

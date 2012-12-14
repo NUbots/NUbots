@@ -64,6 +64,7 @@ Matrix diagcat(Matrix a, Matrix b);
 Matrix cholesky(Matrix P);
 Matrix HT(Matrix A);
 Matrix QR_Householder(const Matrix& A);
+Matrix diag(const Matrix& A);
 
 inline double convDble(const Matrix& a) { return a[0][0]; } // Convert 1x1 matrix to Double
 
