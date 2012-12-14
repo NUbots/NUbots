@@ -131,11 +131,11 @@ class SelfLocalisation: public TimestampedData
         void resetSdMatrix(int modelNumber);
         void swapFieldStateTeam(float& x, float& y, float& heading);
 
-        static IKalmanFilter* newBallModel();
-        static IKalmanFilter* robotFilter();
-        static IKalmanFilter* newRobotModel();
-        static IKalmanFilter* newRobotModel(IKalmanFilter* filter);
-        static IKalmanFilter* newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError&  error, double timestamp);
+        IKalmanFilter* newBallModel();
+        IKalmanFilter* robotFilter();
+        IKalmanFilter* newRobotModel();
+        IKalmanFilter* newRobotModel(IKalmanFilter* filter);
+        IKalmanFilter* newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError&  error, double timestamp);
         static Matrix mean_matrix(float x, float y, float heading);
         static Matrix covariance_matrix(float x_var, float y_var, float heading_var);
         void InitialiseModels(const std::vector<Moment>& positions);

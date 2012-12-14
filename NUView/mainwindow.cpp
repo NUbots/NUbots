@@ -162,7 +162,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     readSettings();
 
     glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
+
+
+    Matrix Y(2,7);
+    Matrix C(7,7, true);
+    Matrix R(2,2,true);
+    QTime timer;
+    int total_ms;
+
+    timer.start();
+    for (unsigned int i = 0; i < 1e6; ++i)
+    {
+        C = C + Y.transp() * InverseMatrix(R) * Y;
+        InverseMatrix(C);
+    }
+    total_ms = timer.elapsed();
+    qDebug() << "Inversion version: " << total_ms;
+
+    timer.start();
+    for (unsigned int i = 0; i < 1e6; ++i)
+    {
+        C = C - C * Y.transp() * InverseMatrix(R + Y * C * Y.transp()) * Y * C;
+    }
+    total_ms = timer.elapsed();
+    qDebug() << "non-inversion version: " << total_ms;
 }
+
+
+
 
 
 MainWindow::~MainWindow()

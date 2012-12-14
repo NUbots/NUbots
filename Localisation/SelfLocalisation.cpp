@@ -90,6 +90,11 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     // Set default settings
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_viterbi);
+    m_settings.setBallLocFilter(KFBuilder::ksr_basic_ukf_filter);
+    m_settings.setBallLocModel(KFBuilder::kmobile_object_model);
+
+    m_settings.setSelfLocFilter(KFBuilder::kseq_ukf_filter);
+    m_settings.setSelfLocModel(KFBuilder::krobot_model);
     return;
 }
 
@@ -147,10 +152,6 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
 
 void SelfLocalisation::init()
 {
-    KFBuilder::Filter filter = KFBuilder::kseq_ukf_filter;
-    m_settings.setBallLocFilter(filter);
-    m_settings.setSelfLocFilter(filter);
-
     m_hasGps = false;
     m_previously_incapacitated = true;
     m_previous_game_state = GameInformation::InitialState;
@@ -196,7 +197,8 @@ SelfLocalisation::~SelfLocalisation()
 
 IKalmanFilter* SelfLocalisation::newBallModel()
 {
-    IKalmanFilter* filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::kmobile_object_model);
+    IKalmanFilter* filter = KFBuilder::getNewFilter(m_settings.ballLocFilter(), m_settings.ballLocModel());
+    //IKalmanFilter* filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::kmobile_object_model);
     filter->enableOutlierFiltering(false);  // disable
     filter->enableWeighting(false);         // disable
     filter->setActive();
@@ -205,8 +207,9 @@ IKalmanFilter* SelfLocalisation::newBallModel()
 
 IKalmanFilter* SelfLocalisation::robotFilter()
 {
+    return KFBuilder::getNewFilter(m_settings.selfLocFilter(), m_settings.selfLocModel());
     //return KFBuilder::getNewFilter(KFBuilder::kbasic_ukf_filter, KFBuilder::krobot_model);
-    return KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
+    //return KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
     //return KFBuilder::getNewFilter(KFBuilder::ksr_basic_ukf_filter, KFBuilder::krobot_model);
 }
 
@@ -1649,6 +1652,7 @@ bool AlphaSumPredicate( const ParentSum& a, const ParentSum& b )
 */
 int SelfLocalisation::PruneNScan(unsigned int N)
 {
+    return PruneViterbi(1);
 //    std::vector<ParentSum> results;
 //    // Sum the alphas of sibling branches from a common parent at branch K-N
 //    for (std::list<IKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
