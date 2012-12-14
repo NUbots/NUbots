@@ -37,7 +37,7 @@ void ReportWriterThread::WriteReport(OfflineLocalisation* offline_loc, const QSt
 OfflineLocBatch::OfflineLocBatch(QObject *parent) :
     QObject(parent), m_running(false)
 {
-    GenerateSettings();
+    GenerateBranchMergeBatchSettings();
     m_log_reader = new LogFileReader(this);
     m_offline_loc = new OfflineLocalisation(m_log_reader, this);
     m_log_loader = new LogLoaderThread();
@@ -66,16 +66,17 @@ OfflineLocBatch::~OfflineLocBatch()
 }
 
 
-void OfflineLocBatch::GenerateSettings()
+std::vector<LocalisationSettings*> OfflineLocBatch::GenerateBranchMergeBatchSettings()
 {
-    // Delete list of settings
-    while(!m_simulation_settings.empty())
-    {
-        delete m_simulation_settings.back();    // delete object
-        m_simulation_settings.pop_back();       // remove pointer
-    }
+    std::vector<LocalisationSettings*> simulation_settings;
 
     LocalisationSettings* loc = new LocalisationSettings();
+
+    loc->setBallLocFilter(KFBuilder::kbasic_ukf_filter);
+    loc->setBallLocModel(KFBuilder::kmobile_object_model);
+
+    loc->setSelfLocFilter(KFBuilder::kbasic_ukf_filter);
+    loc->setSelfLocModel(KFBuilder::krobot_model);
 
     // make vector of branch methods.
     std::vector<LocalisationSettings::BranchMethod> branch_methods;
@@ -99,7 +100,7 @@ void OfflineLocBatch::GenerateSettings()
         for (;prune_it != prune_methods.end(); ++prune_it)
         {
             loc->setPruneMethod(*prune_it);
-            m_simulation_settings.push_back(new LocalisationSettings(*loc));
+            simulation_settings.push_back(new LocalisationSettings(*loc));
         }
     }
 
@@ -111,18 +112,70 @@ void OfflineLocBatch::GenerateSettings()
     // add no ambiguous models.
     loc->setBranchMethod(LocalisationSettings::branch_none);
     loc->setPruneMethod(LocalisationSettings::prune_none);
-    m_simulation_settings.push_back(new LocalisationSettings(*loc));
+    simulation_settings.push_back(new LocalisationSettings(*loc));
     delete loc;
+    return simulation_settings;
+}
+
+std::vector<LocalisationSettings*> OfflineLocBatch::GenerateFilterExperimentBatchSettings()
+{
+    // Delete list of settings
+    std::vector<LocalisationSettings*> simulation_settings;
+
+    LocalisationSettings* loc = new LocalisationSettings();
+    loc->setBranchMethod(LocalisationSettings::branch_exhaustive);
+    loc->setPruneMethod(LocalisationSettings::prune_merge);
+
+    KFBuilder::Filter filter = KFBuilder::kbasic_ukf_filter;
+    loc->setBallLocFilter(filter);
+    loc->setSelfLocFilter(filter);
+    simulation_settings.push_back(new LocalisationSettings(*loc));
+
+    filter = KFBuilder::kseq_ukf_filter;
+    loc->setBallLocFilter(filter);
+    loc->setSelfLocFilter(filter);
+    simulation_settings.push_back(new LocalisationSettings(*loc));
+
+    delete loc;
+    return simulation_settings;
 }
 
 
-void OfflineLocBatch::ProcessFiles(const QStringList& files)
+void OfflineLocBatch::ProcessFiles(const QStringList& source_files, const QString& report_path, const QString &batch_type)
 {
+    // Delete previous list of settings
+    while(!m_simulation_settings.empty())
+    {
+        delete m_simulation_settings.back();    // delete object
+        m_simulation_settings.pop_back();       // remove pointer
+    }
+
+    m_current_batch_type = batch_type;
+    if(batch_type == "Multiple Model Methods")
+    {
+        m_simulation_settings = GenerateBranchMergeBatchSettings();
+    }
+    else if(batch_type == "Filter Type Comparison")
+    {
+        m_simulation_settings = GenerateFilterExperimentBatchSettings();
+    }
+    else
+    {
+        return;
+    }
+
+    m_result_path = report_path;
+    m_common_source_path = FindCommonPath(source_files);
+
     m_running = true;
-    m_file_list = files;
+    m_file_list = source_files;
     m_current_file = m_file_list.begin();
     m_current_sim_settings = m_simulation_settings.begin();
 
+    if(!m_result_path.endsWith(QDir::separator()))
+    {
+        m_result_path.append(QDir::separator());
+    }
 
     m_offline_loc->setSettings(*(*m_current_sim_settings));
     //connect(m_offline_loc, SIGNAL(finished()), this, SLOT(ExperimentComplete()), Qt::UniqueConnection);
@@ -152,18 +205,34 @@ void OfflineLocBatch::writeReport()
     QString currentFile = *m_current_file;
     QFileInfo info(currentFile);
 
-    QString log_name = ReportName(**m_current_sim_settings, info.baseName());
+    QString report_path = currentFile.remove(m_common_source_path);
+    if(report_path.startsWith(QDir::separator()))
+    {
+        report_path.remove(0,1);
+    }
+    report_path.prepend(m_result_path);
+    QString filename = ReportName(**m_current_sim_settings, info.baseName());
     emit ProgressChanged(0,0);
-    emit StatusChanged(message.arg(log_name));
-    QString log_path = info.absoluteDir().filePath(log_name);
-    m_report_writer->WriteReport(m_offline_loc, log_path);
+    emit StatusChanged(message.arg(filename));
+    report_path = QFileInfo(report_path).absoluteDir().filePath(filename);
+    QDir new_path;
+    new_path.mkpath(QFileInfo(report_path).absoluteDir().path());
+    m_report_writer->WriteReport(m_offline_loc, report_path);
 }
 
 QString OfflineLocBatch::ReportName(const LocalisationSettings& settings, const QString& log_name)
 {
     const QString extension = ".xml";
-    // Report format: 'log name'_'Split method'_'merge method'
-    QString report_name = log_name + '_' + QString(settings.branchMethodString().c_str()).replace(' ','_') + '_' + QString(settings.pruneMethodString().c_str()).replace(' ','_');
+    QString report_name;
+    if(m_current_batch_type == "Multiple Model Methods")
+    {
+        // Report format: 'log name'_'Split method'_'merge method'
+        report_name = log_name + '_' + QString(settings.branchMethodString().c_str()).replace(' ','_') + '_' + QString(settings.pruneMethodString().c_str()).replace(' ','_');
+    }
+    else if (m_current_batch_type == "Filter Type Comparison")
+    {
+        report_name = log_name + '_' + QString(FilterTypeString((*m_current_sim_settings)->selfLocFilter()).c_str()).replace(' ','_');
+    }
     return report_name.append(extension);
 }
 
@@ -189,6 +258,7 @@ void OfflineLocBatch::ExperimentComplete()
 
     if(!complete)
     {
+        qDebug() << "New Setting:\n" << FilterTypeString((*m_current_sim_settings)->selfLocFilter()).c_str();
         qDebug("Running next experiment.");
         m_offline_loc->setSettings(*(*m_current_sim_settings));
         if(new_file) LoadLog(*m_current_file);
@@ -202,7 +272,6 @@ void OfflineLocBatch::ExperimentComplete()
         emit ProcessingComplete();
         disconnect(m_offline_loc, SIGNAL(finished()), this, SLOT(writeReport()));
         disconnect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SIGNAL(ProgressChanged(int,int)));
-
     }
 }
 
@@ -227,6 +296,27 @@ void OfflineLocBatch::LogLoadComplete()
 
 QString OfflineLocBatch::statusMessage()
 {
-    QString status_message = "Experiment %1 of %2\nCurrent File: %3\n branch method: %4\nprune method: %5";
-    return status_message.arg(currentExperimentNumber()).arg(totalExperiments()).arg(*m_current_file, QString((*m_current_sim_settings)->branchMethodString().c_str()), QString((*m_current_sim_settings)->pruneMethodString().c_str()));
+    QString status_message = "Experiment %1 of %2\nCurrent File: %3\n branch method: %4\nprune method: %5\nModel Type: %6";
+    return status_message.arg(currentExperimentNumber()).arg(totalExperiments()).arg(*m_current_file,
+        QString((*m_current_sim_settings)->branchMethodString().c_str()), QString((*m_current_sim_settings)->pruneMethodString().c_str()),
+        QString(FilterTypeString((*m_current_sim_settings)->selfLocFilter()).c_str()));
+}
+
+QString OfflineLocBatch::FindCommonPath(const QStringList& paths)
+{
+    QString common_path = *paths.begin();
+    for(QStringList::ConstIterator ifile = paths.begin(); ifile != paths.end(); ++ifile)
+    {
+        QString file = *ifile;
+        while(not file.contains(common_path))
+        {
+            common_path.truncate(common_path.lastIndexOf(QDir::separator()));
+        }
+    }
+    if(not common_path.endsWith(QDir::separator()))
+    {
+        common_path.append(QDir::separator());
+    }
+
+    return common_path;
 }
