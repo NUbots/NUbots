@@ -55,15 +55,15 @@ public:
     };
 
     enum PIN_MAP {
-        GPIO_BALL =   17,
-        GPIO_YGOAL =  18,
-        GPIO_BGOAL =  22,
-        GPIO_BEACON = 23
+        GPIO_BALL  = 23,
+        GPIO_BGOAL = 18,
+        GPIO_YGOAL = 22,
+        GPIO_LINE  = 17
     };
 
     static string getIDName(DEBUG_ID id);
 
-    static DataWrapper* getInstance(bool disp_on=false);
+    static DataWrapper* getInstance(bool disp_on=false, bool cam=true);
 
     //! RETRIEVAL METHODS
     NUImage* getFrame();
@@ -104,7 +104,7 @@ private:private:
     };
 
 
-    DataWrapper(bool disp_on=false);
+    DataWrapper(bool disp_on=false, bool cam=true);
     ~DataWrapper();
     //void startImageFileGroup(string filename);
     bool updateFrame();
@@ -113,7 +113,10 @@ private:private:
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
 
 private:
-    static const INPUT_METHOD METHOD = STREAM;  //CAMERA, STREAM, FILE
+    INPUT_METHOD m_input_method;
+
+    bool m_writing;
+    ofstream out_stream;
 
     string streamname;
     ifstream imagestrm;

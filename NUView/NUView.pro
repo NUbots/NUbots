@@ -359,7 +359,8 @@ HEADERS += \
     ../Vision/VisionWrapper/datawrappercurrent.h \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.h \
     ../Vision/VisionWrapper/datawrappernuview.h \
-    ../Vision/VisionTools/*.h \
+    ../Vision/VisionTools/pccamera.h \
+    ../Vision/VisionTools/lookuptable.h \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
     ../Vision/*.h \
@@ -367,7 +368,8 @@ HEADERS += \
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
-    ../Vision/VisionTools/*.cpp \
+    ../Vision/VisionTools/pccamera.cpp \
+    ../Vision/VisionTools/lookuptable.cpp \
     ../Vision/Modules/*.cpp \
     ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     ../Vision/visionblackboard.cpp \

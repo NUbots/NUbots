@@ -103,7 +103,7 @@ private:
     bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
     bool readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const;
 
-    bool renderFrame(cv::Mat &mat);
+    bool renderFrame(cv::Mat &mat, bool lines_only=false);
 private:
     static DataWrapper* instance;   //! @var static singleton instance
 

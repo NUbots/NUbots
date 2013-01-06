@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>688</width>
-    <height>447</height>
+    <width>1040</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <widget class="QGraphicsView" name="imageView_2">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>360</x>
       <y>150</y>
       <width>320</width>
       <height>240</height>
@@ -107,7 +107,7 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>360</x>
       <y>130</y>
       <width>321</width>
       <height>17</height>
@@ -163,13 +163,45 @@
      <string># Frames:</string>
     </property>
    </widget>
+   <widget class="QGraphicsView" name="imageView_3">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>150</y>
+      <width>320</width>
+      <height>240</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>130</y>
+      <width>321</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Classified Image</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>688</width>
+     <width>1040</width>
      <height>25</height>
     </rect>
    </property>

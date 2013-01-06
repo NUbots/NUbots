@@ -18,7 +18,7 @@ public:
     bool setImageStream(const string& filename);
     void restartStream();
     void resetHistory();
-    bool renderFrame(cv::Mat& mat);
+    bool renderFrame(cv::Mat& mat, bool lines_only=false);
     void writeBatchDetections(ostream& out);
     void printLabels(ostream& out) const;
     bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;

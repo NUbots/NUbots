@@ -62,7 +62,8 @@ private:
     DataWrapper* m_data_wrapper;               //! @variable Reference to singleton Wrapper for vision system
     VisionBlackboard* m_blackboard;     //! @variable Reference to singleton Blackboard for vision system
     SegmentFilter m_segment_filter;       //! @variable Segment filter object for pre-classification filtering
-    LineDetector* m_line_detector;
+    LineDetector* m_line_detector_sam;
+    LineDetector* m_line_detector_ransac;
 };
 
 #endif // VISIONCONTROLLER_H

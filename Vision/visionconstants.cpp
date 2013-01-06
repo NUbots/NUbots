@@ -199,12 +199,12 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> D2P_INCLUDE_BODY_PITCH;
         }
         else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
-            int config_player;
-            in >> config_player;
             #if (defined TARGET_IS_PC || defined TARGET_IS_TRAINING || defined TARGET_IS_RPI)
                 in >> D2P_ANGLE_CORRECTION;
                 D2P_ANGLE_CORRECTION = 0;   //discard the value
             #else
+                int config_player;
+                in >> config_player;
                 if(config_player == Blackboard->GameInfo->getPlayerNumber()) {
                     in >> D2P_ANGLE_CORRECTION;
                 }
@@ -989,7 +989,7 @@ bool VisionConstants::setBallParams(const vector<float>& params)
 
 bool VisionConstants::setGoalBeaconParams(const vector<float>& params)
 {
-    if(params.size() != 11) {
+    if(params.size() != 15) {
         return false; //not a valid size
     }
     MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS = params.at(0);

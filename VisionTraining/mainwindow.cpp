@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->gridPB, SIGNAL(clicked()), this, SLOT(gridSearch()));
     QObject::connect(ui->evalPB, SIGNAL(clicked()), this, SLOT(evaluate()));
 
-    ui->dirEdit->setText(QString(getenv("HOME")) + QString("/nubot/"));
+    ui->dirEdit->setText(QString(getenv("HOME")) + QString("/Images/FYP/Final100/"));
 }
 
 MainWindow::~MainWindow()
@@ -40,7 +40,7 @@ void MainWindow::getDirectory()
 {
     QString dir = QFileDialog::getExistingDirectory(this, "Select Directory", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
     if(!dir.isNull())
-        ui->dirEdit->setText(dir);
+        ui->dirEdit->setText(dir + QString("/"));
     setFocus();
 }
 
@@ -61,10 +61,10 @@ void MainWindow::generateLabels()
 void MainWindow::modifyLabels()
 {
     //get the image file
-    QString imagename = QFileDialog::getOpenFileName(this, "Select Image Stream", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
+    QString imagename = QFileDialog::getOpenFileName(this, "Select Image Stream", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str(), "stream Files (*.strm)");
     if(!imagename.isNull()) {
         //get the label file
-        QString labelname = QFileDialog::getOpenFileName(this, "Select Labels File", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str());
+        QString labelname = QFileDialog::getOpenFileName(this, "Select Labels File", (string(getenv("HOME")) + string("/Images/FYP/Final100/")).c_str(), "label Files (*.lbl)");
         if(!labelname.isNull()) {
             LabelEditor le(this);
             le.show();

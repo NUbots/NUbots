@@ -22,7 +22,7 @@ public:
     void run(string image_name, string lut_name, string config0, string config1);
 
 private:
-    void display(const cv::Mat& mat0, const cv::Mat& mat1);
+    void display(const cv::Mat& mat0, const cv::Mat& mat1, const cv::Mat& mat_c);
 
 private slots:
     void halt() {m_halted=true;}
@@ -32,8 +32,10 @@ private slots:
 private:
     Ui::VisionComparitor *ui;   //! @var User interface pointer
 
-    pair<QGraphicsScene,QGraphicsScene> m_scenes;               //! @var The two scenes
+    pair<QGraphicsScene,QGraphicsScene> m_scenes;               //! @var The two scene
+    QGraphicsScene m_class_scene;
     pair<QGraphicsPixmapItem,QGraphicsPixmapItem> m_pixmaps;    //! @var The two pixmaps
+    QGraphicsPixmapItem m_class_pixmap;
 
     unsigned int m_frame_no;    //! @var The current frame index
     vector<NUImage> m_frames;   //! @var The frames read in from file

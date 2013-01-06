@@ -428,7 +428,7 @@ bool DataWrapper::readLabels(istream& in, vector< vector< pair<VisionFieldObject
 *   @param mat The cv::Mat to render to (output parameter).
 *   @return The success of the operation.
 */
-bool DataWrapper::renderFrame(cv::Mat &mat)
+bool DataWrapper::renderFrame(cv::Mat &mat, bool lines_only)
 {
     //cannot render frames not processed
     if(numFramesProcessed == 0) {
@@ -455,7 +455,15 @@ bool DataWrapper::renderFrame(cv::Mat &mat)
     }
 
     //render the detected object
-    for(it=detections.begin(); it<detections.end(); it++)
-        (*it)->render(mat);
+    for(it=detections.begin(); it<detections.end(); it++) {
+        if(lines_only) {
+            if((*it)->getID() == VisionFieldObject::FIELDLINE) {
+                (*it)->render(mat);
+            }
+        }
+        else {
+            (*it)->render(mat);
+        }
+    }
     return true;
 }

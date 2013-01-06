@@ -28,7 +28,7 @@ bool LabelGenerator::run(const string &dir)
         cur_image=0;
     NUImage temp;
     ifstream infile((dir + string("image.strm")).c_str());
-    ofstream outfile((dir + string("auto_labels.strm")).c_str());
+    ofstream outfile((dir + string("auto_labels.lbl")).c_str());
 
     cancelled = false;
     while(!cancelled && infile.good()) {
@@ -39,8 +39,10 @@ bool LabelGenerator::run(const string &dir)
     infile.close();
     
     //exit if input failed
-    if(num_images == 0)
+    if(num_images == 0) {
+        QMessageBox::warning(this, "Error", QString("Failed to read image stream: ") + QString((dir+string("image.strm")).c_str()));
         return false;
+    }
             
     //setup vision system
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();

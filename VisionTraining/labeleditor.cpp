@@ -85,7 +85,7 @@ int LabelEditor::run(string dir, string label_name, string image_name)
     m_frame_no = 0;
 
     //file for output labels
-    ofstream label_out((dir + string("opt_label.strm")).c_str());
+    ofstream label_out((dir + string("opt_label.lbl")).c_str());
 
     //run over entire batch
     while(!m_halted && m_frame_no < m_total_frames) {
@@ -108,17 +108,29 @@ int LabelEditor::run(string dir, string label_name, string image_name)
         }
 
         //write out labels
-        if(!m_halted) {
+        label_out << m_ground_truth.size() << endl;
+        for(unsigned int i=0; i<m_ground_truth.size(); i++) {
+            m_ground_truth.at(i)->printLabel(label_out);
+            label_out << endl;
+        }
+        m_frame_no++;
+    }
+    if(!m_halted) {
+        QMessageBox::information(this, "Finished", QString("End of Stream reached, exitting label editor.\nResults in ") + QString(dir.c_str()) + QString("opt_label.lbl"));
+    }
+    else {
+        for(int k = m_frame_no; k < m_total_frames; k++) {
+            m_ground_truth = m_ground_truth_full.at(k);
+
+            //write out labels
             label_out << m_ground_truth.size() << endl;
             for(unsigned int i=0; i<m_ground_truth.size(); i++) {
                 m_ground_truth.at(i)->printLabel(label_out);
                 label_out << endl;
             }
         }
-        m_frame_no++;
+        QMessageBox::information(this, "Finished", QString("Results in ") + QString(dir.c_str()) + QString("opt_label.lbl"));
     }
-    if(!m_halted)
-        QMessageBox::information(this, "Finished", "End of Stream reached, exitting label editor");
     label_file.close();
     label_out.close();
 

@@ -25,19 +25,14 @@ VisionController::VisionController()
 {
     m_blackboard = VisionBlackboard::getInstance();
     m_data_wrapper = DataWrapper::getInstance();
-    switch(VisionConstants::LINE_METHOD) {
-    case VisionConstants::RANSAC:
-        m_line_detector = new RANSAC();
-        break;
-    case VisionConstants::SAM:
-        m_line_detector = new SplitAndMerge();
-        break;
-    }
+    m_line_detector_ransac = new RANSAC();
+    m_line_detector_sam = new SplitAndMerge();
 }
 
 VisionController::~VisionController()
 {
-    delete m_line_detector;
+    delete m_line_detector_ransac;
+    delete m_line_detector_sam;
 }
 
 VisionController* VisionController::getInstance()
@@ -90,7 +85,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     //! DETECTION MODULES
 
     if(lookForLandmarks) {
-        GoalDetection::detectGoals();
+        GoalDetection::detectGoals();   //POSTS
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - goal detection done" << endl;
         #endif
@@ -101,7 +96,16 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         ofstream lines(VisionConstants::getLineMethodName(VisionConstants::LINE_METHOD).c_str(), ios_base::app);
         prof.start();
         #endif
-        m_line_detector->run();
+        //LINES
+        switch(VisionConstants::LINE_METHOD) {
+        case VisionConstants::RANSAC:
+            m_line_detector_ransac->run();
+            break;
+        case VisionConstants::SAM:
+            m_line_detector_sam->run();
+            break;
+        }
+
         #ifdef VISION_PROFILER_ON
         prof.stop();
         lines << prof << endl;
@@ -118,7 +122,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     }
 
     if(lookForBall) {
-        BallDetection::detectBall();
+        BallDetection::detectBall();    //BALL
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - ball detection done" << endl;
         #endif
@@ -129,13 +133,10 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         #endif
     }
 
-    ObjectDetectionCH::detectObjects();
+    ObjectDetectionCH::detectObjects(); //OBSTACLES
     #if VISION_CONTROLLER_VERBOSITY > 2
         debug << "VisionController::runFrame() - detectObjects done" << endl;
     #endif
-
-    //RobocupHacks::beaconGoalHack();
-    //RobocupHacks::ballGoalHack();
 
     //force blackboard to publish results through wrapper
     m_blackboard->publish();

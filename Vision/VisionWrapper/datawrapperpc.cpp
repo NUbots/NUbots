@@ -113,10 +113,10 @@ DataWrapper::DataWrapper()
         LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
         break;
     case STREAM:
-        if(false) {
-            streamname = QFileDialog::getOpenFileName(NULL, "Select image stream", getenv("HOME"),  "Stream Files (*.strm)").toStdString();
-            LUTname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", getenv("HOME"),  "LUT Files (*.lut)").toStdString();
-            configname = QFileDialog::getOpenFileName(NULL, "Select Configuration File", getenv("HOME"), "config Files (*.cfg)").toStdString();
+        if(true) {
+            streamname = QFileDialog::getOpenFileName(NULL, "Select image stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
+            LUTname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
+            configname = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/"), "config Files (*.cfg)").toStdString();
         }
         else {
             streamname = string(getenv("HOME")) + string("/nubot/image.strm");
@@ -142,42 +142,50 @@ DataWrapper::DataWrapper()
     }
 
     //create debug windows
-    debug_window_num = 4;
+    debug_window_num = 7;
     debug_windows = new pair<string, cv::Mat>[debug_window_num];
-    debug_windows[0].first = "Debug1";
-    debug_windows[1].first = "Debug2";
-    debug_windows[2].first = "Debug3";
-    debug_windows[3].first = "Classified";
+    debug_windows[0].first = "Scans";
+    debug_windows[1].first = "Classified";
+    debug_windows[2].first = "Green Horizon and Obstacle Detection";
+    debug_windows[3].first = "Scanlines";
+    debug_windows[4].first = "Transitions";
+    debug_windows[5].first = "Final Results";
+    debug_windows[6].first = "Filtered Scanlines";
     for(int i=0; i<debug_window_num; i++) {
         namedWindow(debug_windows[i].first, CV_WINDOW_KEEPRATIO);
         debug_windows[i].second.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
     }
 
     //create map into images
-    debug_map[DBID_IMAGE].push_back(                &debug_windows[1]);
-    debug_map[DBID_IMAGE].push_back(                &debug_windows[3]);
-    debug_map[DBID_CLASSED_IMAGE].push_back(        &debug_windows[0]);
+    debug_map[DBID_IMAGE].push_back(                &debug_windows[0]);
+    debug_map[DBID_IMAGE].push_back(                &debug_windows[2]);
+    //debug_map[DBID_IMAGE].push_back(                &debug_windows[3]);
+    debug_map[DBID_IMAGE].push_back(                &debug_windows[4]);
+    debug_map[DBID_IMAGE].push_back(                &debug_windows[5]);
+
+    debug_map[DBID_CLASSED_IMAGE].push_back(        &debug_windows[1]);
+
     debug_map[DBID_H_SCANS].push_back(              &debug_windows[0]);
     debug_map[DBID_V_SCANS].push_back(              &debug_windows[0]);
-    debug_map[DBID_SEGMENTS].push_back(             &debug_windows[2]);
-    debug_map[DBID_MATCHED_SEGMENTS].push_back(     &debug_windows[1]);
+
+    debug_map[DBID_SEGMENTS].push_back(             &debug_windows[3]);
+    debug_map[DBID_MATCHED_SEGMENTS].push_back(     &debug_windows[4]);
 
     debug_map[DBID_HORIZON].push_back(              &debug_windows[0]);
     debug_map[DBID_GREENHORIZON_SCANS].push_back(   &debug_windows[0]);
-    debug_map[DBID_GREENHORIZON_FINAL].push_back(   &debug_windows[1]);
-    debug_map[DBID_GREENHORIZON_FINAL].push_back(   &debug_windows[3]);
+    debug_map[DBID_GREENHORIZON_FINAL].push_back(   &debug_windows[2]);
+    debug_map[DBID_GREENHORIZON_FINAL].push_back(   &debug_windows[2]);
 
-    debug_map[DBID_OBJECT_POINTS].push_back(        &debug_windows[0]);
-    debug_map[DBID_FILTERED_SEGMENTS] .push_back(   &debug_windows[0]);
+    debug_map[DBID_OBJECT_POINTS].push_back(        &debug_windows[2]);
 
-    debug_map[DBID_GOALS].push_back(                &debug_windows[3]);
-    debug_map[DBID_BEACONS].push_back(              &debug_windows[3]);
-    debug_map[DBID_BALLS].push_back(                &debug_windows[3]);
-    debug_map[DBID_OBSTACLES].push_back(            &debug_windows[3]);
-    debug_map[DBID_LINES].push_back(                &debug_windows[3]);
-    
-    results_window_name = "Results";
-    namedWindow(results_window_name, CV_WINDOW_KEEPRATIO);
+    debug_map[DBID_FILTERED_SEGMENTS] .push_back(   &debug_windows[6]);
+
+    debug_map[DBID_GOALS].push_back(                &debug_windows[5]);
+    debug_map[DBID_BEACONS].push_back(              &debug_windows[5]);
+    debug_map[DBID_BALLS].push_back(                &debug_windows[5]);
+    debug_map[DBID_OBSTACLES].push_back(            &debug_windows[5]);
+    //debug_map[DBID_LINES].push_back(                &debug_windows[3]);
+
     results_img.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
     
     numFramesDropped = numFramesProcessed = 0;
@@ -334,8 +342,6 @@ void DataWrapper::debugRefresh()
         debug_windows[i].second = cv::Scalar(0,0,0);
     }
 
-    LUT.classifyImage(*m_current_image, results_img);
-    imshow(results_window_name, results_img);
     debugPublish(DBID_CLASSED_IMAGE);
 }
 

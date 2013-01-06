@@ -163,7 +163,7 @@ void VisionOptimiser::errorPandRevaluation(string directory)
     map<OPT_ID, float> fitnesses;                                           //result fitnesses
     map<OPT_ID, pair<double, double> > PR;                                  //results P and R
     string image_name = directory + string("/image.strm");                  //image filename
-    ifstream label_file((directory + string("/labels.strm")).c_str());      //label file
+    ifstream label_file((directory + string("/labels.lbl")).c_str());      //label file
     map<VisionFieldObject::VFO_ID, float> zero_costs;                       //empty costs map removes consideration of false positives and negatives
 
     //load parameter file from directory
@@ -171,7 +171,7 @@ void VisionOptimiser::errorPandRevaluation(string directory)
 
     //read in the labels
     if(!vision->readLabels(label_file, gt)) {
-        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("label.strm")).c_str()));
+        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("label.lbl")).c_str()));
         return;
     }
 
@@ -203,7 +203,7 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
     vector<vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > > > gt;
     map<OPT_ID, float> fitnesses;
     string image_name = directory + string("image.strm");
-    ifstream train_label_file((directory + string("labels.strm")).c_str());
+    ifstream train_label_file((directory + string("labels.lbl")).c_str());
     ofstream grid_log((directory + string("grid.txt")).c_str());
 
     //parameters to search over
@@ -212,7 +212,7 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
 
     //read in the labels
     if(!vision->readLabels(train_label_file, gt)) {
-        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("label.strm")).c_str()));
+        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("label.lbl")).c_str()));
         return;
     }
 
@@ -276,8 +276,8 @@ void VisionOptimiser::run(string directory, int total_iterations)
     m_test_image_name = directory + string("test_image.strm");
 
     //read labels
-    ifstream train_label_file((directory + string("train_labels.strm")).c_str());
-    ifstream test_label_file((directory + string("test_labels.strm")).c_str());
+    ifstream train_label_file((directory + string("train_labels.lbl")).c_str());
+    ifstream test_label_file((directory + string("test_labels.lbl")).c_str());
 
     total_iterations*=2; //double since we are running once each for training and testing
 
@@ -286,16 +286,17 @@ void VisionOptimiser::run(string directory, int total_iterations)
 
     //read in the training and testing labels
     if(!vision->readLabels(train_label_file, m_ground_truth_training)) {
-        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("train_label.strm")).c_str()));
+        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("train_label.lbl")).c_str()));
         return;
     }
     if(!vision->readLabels(test_label_file, m_ground_truth_test)) {
-        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("test_label.strm")).c_str()));
+        QMessageBox::warning(this, "Failure", QString("Failed to read label stream: ") + QString((directory + string("test_label.lbl")).c_str()));
         return;
     }
 
     //init gui
     ui->progressBar_opt->setMaximum(total_iterations*2);
+    ui->progressBar_opt->setValue(0);
     QApplication::processEvents();
 
     //initialise vision system
@@ -305,8 +306,8 @@ void VisionOptimiser::run(string directory, int total_iterations)
     setupVisionConstants();
 
     //get initial evaluation
-    printResults(0, evaluateBatch(m_ground_truth_training, m_training_image_name, m_false_positive_costs, m_false_negative_costs), m_training_performance_log);
-    printResults(0, evaluateBatch(m_ground_truth_test, m_test_image_name, m_false_positive_costs, m_false_negative_costs), m_test_performance_log);
+//    printResults(0, evaluateBatch(m_ground_truth_training, m_training_image_name, m_false_positive_costs, m_false_negative_costs), m_training_performance_log);
+//    printResults(0, evaluateBatch(m_ground_truth_test, m_test_image_name, m_false_positive_costs, m_false_negative_costs), m_test_performance_log);
 
     iteration = 2;
     while(iteration < total_iterations && !m_halted && success) {
@@ -382,6 +383,7 @@ bool VisionOptimiser::trainingStep(int iteration,
 
     //init gui
     ui->progressBar_strm->setMaximum(ground_truth.size());
+    ui->progressBar_strm->setValue(0);
     //initialise vision stream
     vision->setImageStream(stream_name);
 
@@ -468,6 +470,7 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
 
     //init gui
     ui->progressBar_strm->setMaximum(ground_truth.size());
+    ui->progressBar_strm->setValue(0);
     //initialise vision stream
     vision->setImageStream(stream_name);
 
@@ -503,7 +506,7 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
             if(batch_errors[id].first == 0) //not likely but just in case
                 fitnesses[id] = numeric_limits<float>::max();
             else
-                fitnesses[id] = batch_errors[id].second/batch_errors[id].first;
+                fitnesses[id] = batch_errors[id].second/batch_errors[id].first; // #instances / sum(error)
         }
     }
     return fitnesses;

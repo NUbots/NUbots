@@ -10,12 +10,12 @@ class NUActionatorsData;
 class VisionControlWrapper
 {
 public:
-    static VisionControlWrapper* getInstance(bool disp_on=false);
+    static VisionControlWrapper* getInstance(bool disp_on=false, bool cam=true);
     
     int runFrame();
     
 private:
-    VisionControlWrapper(bool disp_on=false);
+    VisionControlWrapper(bool disp_on=false, bool cam=true);
     
     static VisionControlWrapper* instance;
     

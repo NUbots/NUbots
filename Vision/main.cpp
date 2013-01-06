@@ -15,18 +15,29 @@
     #include "Vision/VisionWrapper/visioncontrolwrapperdarwin.h"
 #endif
 
-//#include <QApplication>
+#ifndef TARGET_IS_RPI
+#include <QApplication>
+#endif
 
 using namespace std;
 using namespace cv;
 
 int pc();
-int rpi(bool disp_on);
+int rpi(bool disp_on, bool cam);
 
 int main(int argc, char** argv)
 {
     #ifdef TARGET_IS_RPI
-    return rpi((argc > 1 ? argv[1] : false));   //run with user option if given or display off by default
+    //run with user option if given or display off by default
+    switch(argc) {
+    case 2:
+        return rpi(string(argv[1]).compare("1") == 0, true);
+    case 3:
+        return rpi(string(argv[1]).compare("1") == 0, string(argv[2]).compare("1"));
+    default:
+        return rpi(false, true);
+    }
+
     #elif TARGET_IS_PC
     return pc();
     #else
@@ -35,18 +46,21 @@ int main(int argc, char** argv)
     #endif
 }
 
-int rpi(bool disp_on)
+int rpi(bool disp_on, bool cam)
 {
 #ifdef TARGET_IS_RPI
     char ESC_KEY            = 27,
          STEP_KEY           = ' ',
          STEP_TOGGLE_KEY    = 's';
 
-    VisionControlWrapper* vision = VisionControlWrapper::getInstance(disp_on);
+    VisionControlWrapper* vision = VisionControlWrapper::getInstance(disp_on, cam);
+
+    if(disp_on)
+        cout << "Running with display on" << endl;
 
     char c=0;
     int error=0;
-    bool stepping = true;
+    bool stepping = disp_on;
     while(c!=ESC_KEY && error==0) {
         //visiondata->updateFrame();
         error = vision->runFrame();
@@ -65,12 +79,15 @@ int rpi(bool disp_on)
     }
     if(error != 0)
         cout << "Error: " << error << endl;
+    return 0;
 #endif
 }
 
 int pc()
 {
-    //QApplication app(NULL);
+#ifndef TARGET_IS_RPI
+    QApplication app(NULL);
+#endif
     char ESC_KEY            = 27,
          STEP_KEY           = ' ',
          STEP_TOGGLE_KEY    = 's';
@@ -100,4 +117,5 @@ int pc()
     }
     if(error != 0)
         cout << "Error: " << error << endl;
+    return 0;
 }

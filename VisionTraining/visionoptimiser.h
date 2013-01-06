@@ -6,7 +6,7 @@
 #include "Vision/VisionWrapper/visioncontrolwrappertraining.h"
 
 //uncomment this for multiple optimisers
-//#define MULTI_OPT
+#define MULTI_OPT
 
 namespace Ui {
 class VisionOptimiser;

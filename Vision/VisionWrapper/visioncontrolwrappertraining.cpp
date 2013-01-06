@@ -142,18 +142,8 @@ map<VisionFieldObject::VFO_ID, pair<float, int> > VisionControlWrapper::evaluate
     vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >::const_iterator gt;
 
     //initialise errors map
-    errors[VisionFieldObject::BALL] = pair<float, int>(0,0);
-    errors[VisionFieldObject::GOAL_Y_L] = pair<float, int>(0,0);
-    errors[VisionFieldObject::GOAL_Y_R] = pair<float, int>(0,0);
-    errors[VisionFieldObject::GOAL_Y_U] = pair<float, int>(0,0);
-    errors[VisionFieldObject::GOAL_B_L] = pair<float, int>(0,0);
-    errors[VisionFieldObject::GOAL_B_R] = pair<float, int>(0,0);
-    errors[VisionFieldObject::GOAL_B_U] = pair<float, int>(0,0);
-    errors[VisionFieldObject::BEACON_Y] = pair<float, int>(0,0);
-    errors[VisionFieldObject::BEACON_B] = pair<float, int>(0,0);
-    errors[VisionFieldObject::BEACON_U] = pair<float, int>(0,0);
-    errors[VisionFieldObject::FIELDLINE] = pair<float, int>(0,0);
-    errors[VisionFieldObject::OBSTACLE] = pair<float, int>(0,0);
+    for(int i=0; i<VisionFieldObject::INVALID; i++)
+        errors[VisionFieldObject::getVFOFromNum(i)] = pair<float, int>(0,0);
 
     //for each label
     for(gt=ground_truth.begin(); gt!=ground_truth.end(); gt++) {
@@ -322,7 +312,7 @@ void VisionControlWrapper::resetHistory()
   * @param mat The cv::Mat to render to.
   * @return success
   */
-bool VisionControlWrapper::renderFrame(cv::Mat &mat)
+bool VisionControlWrapper::renderFrame(cv::Mat& mat, bool lines_only)
 {
-    return data_wrapper->renderFrame(mat);
+    return data_wrapper->renderFrame(mat, lines_only);
 }

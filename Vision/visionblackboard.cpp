@@ -789,7 +789,7 @@ void VisionBlackboard::debugPublish() const
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
             if(s.getColour() == ClassIndex::white) {
-                pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+                //pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
             }
             else {
                 pts.push_back(PointType(s.getStart().x, s.getStart().y));
@@ -805,7 +805,7 @@ void VisionBlackboard::debugPublish() const
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
             if(s.getColour() == ClassIndex::white) {
-                pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+                //pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
             }
             else {
                 pts.push_back(PointType(s.getStart().x, s.getStart().y));

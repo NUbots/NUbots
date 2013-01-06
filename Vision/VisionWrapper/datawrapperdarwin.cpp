@@ -57,6 +57,8 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_BALLS";
     case DBID_OBSTACLES:
         return "DBID_OBSTACLES";
+    case DBID_LINES:
+        return "DBID_LINES";
     default:
         return "NOT VALID";
     }

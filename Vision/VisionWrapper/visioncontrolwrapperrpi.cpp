@@ -2,19 +2,19 @@
 
 VisionControlWrapper* VisionControlWrapper::instance = 0;
 
-VisionControlWrapper* VisionControlWrapper::getInstance(bool disp_on)
+VisionControlWrapper* VisionControlWrapper::getInstance(bool disp_on, bool cam)
 {
     if(!instance)
-        instance = new VisionControlWrapper(disp_on);
+        instance = new VisionControlWrapper(disp_on, cam);
     else
-        instance->wrapper = DataWrapper::getInstance(disp_on);
+        instance->wrapper = DataWrapper::getInstance(disp_on, cam);
     return instance;
 }
 
-VisionControlWrapper::VisionControlWrapper(bool disp_on)
+VisionControlWrapper::VisionControlWrapper(bool disp_on, bool cam)
 {
     controller = VisionController::getInstance();
-    wrapper = DataWrapper::getInstance(disp_on);
+    wrapper = DataWrapper::getInstance(disp_on, cam);
 }
 
 int VisionControlWrapper::runFrame()

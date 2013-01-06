@@ -61,11 +61,15 @@ void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segm
     }
 }
 
-DataWrapper::DataWrapper(bool disp_on)
+DataWrapper::DataWrapper(bool disp_on, bool cam)
 {
     m_display_on = disp_on;
+    if(cam)
+        m_input_method = CAMERA;  //CAMERA, STREAM
+    else
+        m_input_method = STREAM;
     //frame grab methods
-    switch(METHOD) {
+    switch(m_input_method) {
     case STREAM:
         streamname = string(getenv("HOME")) + string("/nubot/image.strm");
         LUTname = string(getenv("HOME")) + string("/nubot/default.lut");
@@ -90,6 +94,10 @@ DataWrapper::DataWrapper(bool disp_on)
         LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
         break;
     }
+
+    m_writing = true;
+    if(m_writing)
+        out_stream.open("/home/pi/image.strm");
 
     LUT.loadLUTFromFile(LUTname);
 
@@ -127,15 +135,19 @@ DataWrapper::DataWrapper(bool disp_on)
 
 DataWrapper::~DataWrapper()
 {
+    if(m_writing)
+        out_stream.close();
     delete m_camera;
 }
 
-DataWrapper* DataWrapper::getInstance(bool disp_on)
+DataWrapper* DataWrapper::getInstance(bool disp_on, bool cam)
 {
     if(!instance)
-        instance = new DataWrapper(disp_on);
-    else
+        instance = new DataWrapper(disp_on, cam);
+    else {
         instance->m_display_on = disp_on;
+    }
+
     return instance;
 }
 
@@ -254,7 +266,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id)
 
 bool DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
 {
-    if(m_display_on) {
+    if(m_display_on && false) {
         if(id != DBID_IMAGE) {
             errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
             return false;
@@ -291,8 +303,10 @@ bool DataWrapper::debugPublish(const vector<Ball>& data) {
 
     if(m_gpio && !data.empty())
         digitalWrite(GPIO_BALL, 1);
+    else
+        digitalWrite(GPIO_BALL, 0);
     
-    if(m_display_on) {
+    if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
 
@@ -315,10 +329,12 @@ bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     }
 #endif
 
-    if(m_gpio && !data.empty())
-        digitalWrite(GPIO_BEACON, 1);
+//    if(m_gpio && !data.empty())
+//        digitalWrite(GPIO_BEACON, 1);
+//    else
+//        digitalWrite(GPIO_BEACON, 0);
 
-    if(m_display_on) {
+    if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
 
@@ -341,6 +357,8 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
     }
 #endif
 
+    digitalWrite(GPIO_BGOAL, 0);
+    digitalWrite(GPIO_YGOAL, 0);
     if(m_gpio && !data.empty()) {
         BOOST_FOREACH(Goal post, data) {
             if(VisionFieldObject::isBlueGoal(post.getID())) {
@@ -352,7 +370,7 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
         }
     }
 
-    if(m_display_on) {
+    if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
 
@@ -378,7 +396,7 @@ bool DataWrapper::debugPublish(const vector<Obstacle>& data)
 //    if(m_gpio && !data.empty())
 //        digitalWrite(GPIO_OBSTACLE, 1);
 
-    if(m_display_on) {
+    if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
 
@@ -401,10 +419,12 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
     }
 #endif
 
-//    if(m_gpio && !data.empty())
-//        digitalWrite(GPIO_LINE, 1);
+    if(m_gpio && !data.empty())
+        digitalWrite(GPIO_LINE, 1);
+    else
+        digitalWrite(GPIO_LINE, 0);
 
-    if(m_display_on) {
+    if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
 
@@ -429,7 +449,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
     }
 #endif
 
-    if(m_display_on) {
+    if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
         string& window = results_window_name; //get window name from pair
 
@@ -494,7 +514,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
 //! Outputs debug data to the appropriate external interface
 bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
-    if(m_display_on) {
+    if(m_display_on && false) {
         vector<PointType> data_points;
         vector<cv::Scalar> colours;
         vector<PointType>::const_iterator it;
@@ -548,9 +568,11 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 
 bool DataWrapper::updateFrame()
 {
-    switch(METHOD) {
+    switch(m_input_method) {
     case CAMERA:
         m_current_image = m_camera->grabNewImage();   //force get new frame
+        if(m_writing)
+            out_stream << m_current_image << std::flush;
         break;
     case STREAM:
         VisionConstants::loadFromFile(configname);
@@ -569,12 +591,6 @@ bool DataWrapper::updateFrame()
             imagestrm >> *m_current_image;
         }
         break;
-    }
-    if(m_gpio) {
-        digitalWrite(GPIO_BALL, 0);
-        digitalWrite(GPIO_YGOAL, 0);
-        digitalWrite(GPIO_BGOAL, 0);
-        digitalWrite(GPIO_BEACON, 0);
     }
 
     numFramesProcessed++;
