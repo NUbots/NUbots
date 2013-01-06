@@ -22,11 +22,14 @@
 #include "PSOOptimiser.h"
 #include "Parameter.h"
 
-#include "NUPlatform/NUPlatform.h"
 #include "Tools/Math/StlVector.h"
 
 #include "debug.h"
 #include "nubotdataconfig.h"
+
+#include <cstdlib>
+
+
 
 /*! @brief Constructor for abstract optimiser
  	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
@@ -34,17 +37,22 @@
  */
 PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
-    m_c1 = 1.50;             // tune this: the literature says that these are usually set equal, and from my grid search setting them different does not have a great effect   
-    m_c2 = 0.80;             // tune this:
+    //doesn't do anything
     m_inertia = 0.60;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
+    //m_inertia = 0.40;
+    //m_inertia = 0.20;
 
     m_reset_limit = 10;
     m_reset_fraction = 0.05;
-    m_num_particles = 30;
+    //m_reset_fraction = 0.10;
+
+    //m_num_particles = 30;
+    m_num_particles = 60;
 
     m_num_dimensions = parameters.size();
-    
-    srand(static_cast<unsigned int> (1e6*Platform->getRealTime()*Platform->getRealTime()*Platform->getRealTime()));
+
+    srand(static_cast<unsigned int> (1e6*getRealTime()*getRealTime()*getRealTime()));
+
     load();
     if (m_swarm_position.empty())
     	initSwarm();
@@ -54,7 +62,7 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
 void PSOOptimiser::initSwarm()
 {
     // we want to start the swarm around initial_parameters
-    debug << "Initial Swarm: " << endl;
+    //debug << "Initial Swarm: " << endl;
     for (int i=0; i<m_num_particles; i++)
     {
     	m_swarm_best.push_back(m_initial_parameters);
@@ -70,8 +78,8 @@ void PSOOptimiser::initSwarm()
 			particle[j].set(uniformDistribution(min, max));
 			velocity[j] = normalDistribution(0, (max-min)/8);        // initial velocity between +/- range
         }
-        debug << i << ": " << Parameter::getAsVector(particle) << endl;
-        debug << i << ": " << velocity << endl;
+        //debug << i << ": " << Parameter::getAsVector(particle) << endl;
+        //debug << i << ": " << velocity << endl;
         m_swarm_position.push_back(particle);
         m_swarm_velocity.push_back(velocity);
     }
@@ -175,7 +183,7 @@ void PSOOptimiser::summaryTo(ostream& stream)
 
 void PSOOptimiser::toStream(ostream& o) const
 {
-    o << m_c1 << " " << m_c2 << " " << m_inertia << " " << m_reset_limit << " " << m_reset_fraction << " " << m_num_particles << " " << m_num_dimensions << endl;
+    o << m_inertia << " " << m_reset_limit << " " << m_reset_fraction << " " << m_num_particles << " " << m_num_dimensions << endl;
     
     o << m_swarm_position << endl;
     o << m_swarm_velocity << endl;
@@ -190,7 +198,7 @@ void PSOOptimiser::toStream(ostream& o) const
 
 void PSOOptimiser::fromStream(istream& i)
 {
-    i >> m_c1 >> m_c2 >> m_inertia >> m_reset_limit >> m_reset_fraction >> m_num_particles >> m_num_dimensions;
+    i >> m_inertia >> m_reset_limit >> m_reset_fraction >> m_num_particles >> m_num_dimensions;
     
     i >> m_swarm_position;
     i >> m_swarm_velocity;

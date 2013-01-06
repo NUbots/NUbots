@@ -28,15 +28,15 @@ public:
 
     ColourTransitionRule();
     /*!
-      Checks if the given segment pair matches this rule.
-      @param before the first segment.
-      @param after the second segment.
-      @param dir The scan direction (vertical or horizontal).
-      @return Whether it is a match.
+      Checks if the given segment pair matches this rule (forward and reverse).
+      @param before the preceeding segment.
+      @param middle the middle segment.
+      @param after the following segment.
+      @return Whether it is a match in either direction.
       */
-    bool match(const ColourSegment& before, const ColourSegment& after, ScanDirection dir) const;
+    bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
     //! Returns the ID of the field object that this rule is for.
-    VisionFieldObject::VFO_ID getVFO_ID() const;
+    VisionFieldObject::COLOUR_CLASS getColourClass() const;
 
     //! output stream operator.
     friend ostream& operator<< (ostream& output, const ColourTransitionRule& c);
@@ -49,16 +49,28 @@ public:
     friend istream& operator>> (istream& input, vector<ColourTransitionRule>& v);
 
 private:
-    //vector<VisionFieldObject::VFO_ID> m_potential_vfo_list;
-    VisionFieldObject::VFO_ID m_vfo_id;     //! @variable The ID of the field object that this rule is for.
+    //vector<VisionFieldObject::COLOUR_CLASS> m_potential_vfo_list;
+    VisionFieldObject::COLOUR_CLASS m_colour_class;     //! @variable The ID of the field object that this rule is for.
 
-    vector<ClassIndex::Colour>  m_before,   //! @variable The colour that the first segment must be.
-                                m_after;    //! @variable The colour that the second segment must be.
+    vector<ClassIndex::Colour>  m_before,   //! @variable The colour that the previous segment must be.
+                                m_middle,   //! @variable The colour that this segment must be
+                                m_after;    //! @variable The colour that the following segment must be.
 
-    int m_before_min,   //! @variable the minimum length of the first segment for a match.
-        m_before_max,   //! @variable the maximum length of the first segment for a match.
-        m_after_min,    //! @variable the minimum length of the second segment for a match.
-        m_after_max;    //! @variable the maximum length of the second segment for a match.
+    unsigned int m_before_min,   //! @variable the minimum length of the previous segment for a match.
+        m_before_max,   //! @variable the maximum length of the previous segment for a match.
+        m_min,          //! @variable the minimum length of the segment for a match.
+        m_max,          //! @variable the maximum length of the segment for a match.
+        m_after_min,    //! @variable the minimum length of the following segment for a match.
+        m_after_max;    //! @variable the maximum length of the following segment for a match.
+
+    /*!
+      Checks if the given segment triplet matches this rule in one direction.
+      @param before the preceeding segment.
+      @param middle the middle segment.
+      @param after the following segment.
+      @return Whether it is a match.
+      */
+    bool oneWayMatch(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
 };
 
 #endif // COLOURTRANSITIONRULE_H

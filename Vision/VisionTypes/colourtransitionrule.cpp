@@ -8,66 +8,15 @@ ColourTransitionRule::ColourTransitionRule()
 {
 }
 
-bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegment &after, ScanDirection dir) const
+bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegment& middle, const ColourSegment &after) const
 {
-//    int multiplier;
-//    switch(dir) {
-//    case HORIZONTAL:
-//        multiplier = VisionBlackboard::getInstance()->getImageWidth();
-//        break;
-//    case VERTICAL:
-//        multiplier = VisionBlackboard::getInstance()->getImageHeight();
-//        break;
-//    }
-    
-//    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-//    if(!(m_before_min*multiplier <= before.getLengthPixels() && m_before_max*multiplier >= before.getLengthPixels() &&
-//         m_after_min*multiplier <= after.getLengthPixels() && m_after_max*multiplier >= after.getLengthPixels()))
-//    {
-//        return false;   //did not match size requirements
-//    }
-
-    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-    if(!(m_before_min <= before.getLengthPixels() && m_before_max >= before.getLengthPixels() &&
-         m_after_min <= after.getLengthPixels() && m_after_max >= after.getLengthPixels())) {
-        //did not match size requirements
-        return false;
-    }
-
-    bool valid;
-    vector<ClassIndex::Colour>::const_iterator it;
-
-    if(!m_before.empty()) {
-        if(before.getColour() == ClassIndex::invalid)
-            return false;   //there is a before set, but no before colour
-        valid = false;
-        for(it = m_before.begin(); it != m_before.end(); it++) {
-            if(*it == before.getColour())
-                valid = true;   //a match has been found
-        }
-        if(!valid)
-            return false;   //did not match before set
-    }
-    
-    if(!m_after.empty()) {
-        if(after.getColour() == ClassIndex::invalid)
-            return false;   //there is an after set, but no after colour
-        valid = false;
-        for(it = m_after.begin(); it != m_after.end(); it++) {
-            if(*it == after.getColour())
-                valid = true;   //a match has been found
-        }
-        if(!valid)
-            return false;   //did not match after set
-    }
-    
-    return true;    //passed all checks
+    return oneWayMatch(before, middle, after) || oneWayMatch(after, middle, before); //test both directions
 }
 
 //! @brief Returns the ID of the VFO this rule is related to.
-VisionFieldObject::VFO_ID ColourTransitionRule::getVFO_ID() const
+VisionFieldObject::COLOUR_CLASS ColourTransitionRule::getColourClass() const
 {
-    return m_vfo_id;
+    return m_colour_class;
 }
 
 
@@ -77,11 +26,18 @@ ostream& operator<< (ostream& output, const ColourTransitionRule& c)
 {
     vector<ClassIndex::Colour>::const_iterator it;
 
-    output << VisionFieldObject::getVFOName(c.m_vfo_id) << ":\n";
+    output << VisionFieldObject::getColourClassName(c.m_colour_class) << ":\n";
 
     //before
     output << "before: (" << c.m_before_min << ", " << c.m_before_max << ") [";
     for(it = c.m_before.begin(); it != c.m_before.end(); it++) {
+        output << ClassIndex::getColourNameFromIndex(*it) << ", ";
+    }
+    output << "]\t// (min, max) [colourlist]\n";
+
+    //this
+    output << "middle: (" << c.m_min << ", " << c.m_max << ") [";
+    for(it = c.m_middle.begin(); it != c.m_middle.end(); it++) {
         output << ClassIndex::getColourNameFromIndex(*it) << ", ";
     }
     output << "]\t// (min, max) [colourlist]\n";
@@ -118,7 +74,7 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
     // read in the rule name
     getline(input, id_str, ':');
     boost::trim(id_str);
-    c.m_vfo_id = VisionFieldObject::getVFOFromName(id_str);
+    c.m_colour_class = VisionFieldObject::getColourClassFromName(id_str);
 //! DO MORE HERE
 
     //BEFORE
@@ -141,6 +97,29 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
         while(colour_stream.good()) {
             getline(colour_stream, next, ',');
             c.m_before.push_back(ClassIndex::getColourFromName(next));
+        }
+    }
+
+    //MIDDLE
+    //reset colour list
+    c.m_middle.clear();
+    // read in the before: (min, max)
+    input.ignore(30, '(');
+    input >> c.m_min;
+    input.ignore(10, ',');
+    input >> c.m_max;
+    input.ignore(10, ')');
+
+    input.ignore(10, '[');
+
+    //get colour list
+    getline(input, colour_str, ']');
+    colour_str.erase(remove(colour_str.begin(), colour_str.end(), ' '), colour_str.end());  //remove whitespace
+    if(!colour_str.empty()) {
+        colour_stream.str(colour_str);
+        while(colour_stream.good()) {
+            getline(colour_stream, next, ',');
+            c.m_middle.push_back(ClassIndex::getColourFromName(next));
         }
     }
 
@@ -185,13 +164,65 @@ istream& operator>> (istream& input, vector<ColourTransitionRule>& v)
     while(input.good())
     {
         input >> temp;
-        if(temp.getVFO_ID() != VisionFieldObject::UNKNOWN) {
+        if(temp.getColourClass() != VisionFieldObject::UNKNOWN_COLOUR) {
             v.push_back(temp);
         }
         else {
-            errorlog << "ColourTransitionRule istream operator: UNKOWN match ignored." << endl;
+            errorlog << "ColourTransitionRule istream operator: UNKOWN_COLOUR match ignored." << endl;
         }
     }
 
     return input;
+}
+
+bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const ColourSegment &middle, const ColourSegment &after) const
+{
+    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
+    if(!(m_min <= middle.getLength() && m_max >= middle.getLength() &&
+         m_before_min <= before.getLength() && m_before_max >= before.getLength() &&
+         m_after_min <= after.getLength() && m_after_max >= after.getLength())) {
+        //did not match size requirements
+        return false;
+    }
+
+    bool valid;
+    vector<ClassIndex::Colour>::const_iterator it;
+
+    if(!m_middle.empty()) {
+        if(middle.getColour() == ClassIndex::invalid)
+            return false;   //there is a before set, but no before colour
+        valid = false;
+        for(it = m_middle.begin(); it != m_middle.end(); it++) {
+            if(*it == middle.getColour())
+                valid = true;   //a match has been found
+        }
+        if(!valid)
+            return false;   //did not match before set
+    }
+
+    if(!m_before.empty()) {
+        if(before.getColour() == ClassIndex::invalid)
+            return false;   //there is a before set, but no before colour
+        valid = false;
+        for(it = m_before.begin(); it != m_before.end(); it++) {
+            if(*it == before.getColour())
+                valid = true;   //a match has been found
+        }
+        if(!valid)
+            return false;   //did not match before set
+    }
+
+    if(!m_after.empty()) {
+        if(after.getColour() == ClassIndex::invalid)
+            return false;   //there is an after set, but no after colour
+        valid = false;
+        for(it = m_after.begin(); it != m_after.end(); it++) {
+            if(*it == after.getColour())
+                valid = true;   //a match has been found
+        }
+        if(!valid)
+            return false;   //did not match after set
+    }
+
+    return true;    //passed all checks
 }

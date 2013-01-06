@@ -169,6 +169,17 @@ public:
         return getWidth()*getHeight();
     }
 
+    void setPixel(unsigned int x, unsigned int y, Pixel px) {
+        if(flipped)
+        {
+            m_image[getHeight() - y - 1][getWidth() - x - 1] = px;
+        }
+        else
+        {
+            m_image[y][x] = px;
+        }
+    }
+
     /*!
     @brief Image access operator, access the pixel at the desired position of the image.
 

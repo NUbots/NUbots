@@ -146,8 +146,11 @@ void GreenHorizonCH::calculateHorizon()
         kin_hor_left_y = min(height-1, kin_hor_left_y);
         kin_hor_right_y = min(height-1, kin_hor_right_y);
         //add new points at edge
+
         temp.push_back(cv::Point2i(0, kin_hor_left_y));
         temp.push_back(cv::Point2i(width-1, kin_hor_right_y));
+//        temp.push_back(cv::Point2i(0, height-1));
+//        temp.push_back(cv::Point2i(width-1, height-1));
     }
     else {
         // extend to right edge

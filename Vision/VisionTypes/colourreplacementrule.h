@@ -65,7 +65,7 @@ public:
       @param dir The scan direction (vertical or horizontal).
       @return Whether it is a match.
       */
-    bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, ScanDirection dir) const;
+    bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
     
     /*!
       Returns the replacement method (before, after or split) for this rule.
@@ -89,12 +89,12 @@ public:
 private:
     string m_name;  //! @variable the name of the rule.
     
-    int m_middle_min,   //! @variable the minimum length of the middle segment for a match.
-        m_middle_max,   //! @variable the maximum length of the middle segment for a match.
-        m_before_min,   //! @variable the minimum length of the first segment for a match.
-        m_before_max,   //! @variable the maximum length of the first segment for a match.
-        m_after_min,    //! @variable the minimum length of the last segment for a match.
-        m_after_max;    //! @variable the maximum length of the last segment for a match.
+    unsigned int m_middle_min,   //! @variable the minimum length of the middle segment for a match.
+                 m_middle_max,   //! @variable the maximum length of the middle segment for a match.
+                 m_before_min,   //! @variable the minimum length of the first segment for a match.
+                 m_before_max,   //! @variable the maximum length of the first segment for a match.
+                 m_after_min,    //! @variable the minimum length of the last segment for a match.
+                 m_after_max;    //! @variable the maximum length of the last segment for a match.
     
     vector<ClassIndex::Colour>  m_before,   //! @variable The colour that the first segment must be.
                                 m_middle,   //! @variable The colour that the middle segment must be.

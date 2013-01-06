@@ -27,7 +27,8 @@ void ScanLines::generateScanLines()
     if(right.y >= vbb->getImageHeight())
         errorlog << "right: " << right.y << endl;
     
-    unsigned int bottom_horizontal_scan = (left.y + right.y) / 2;
+    //unsigned int bottom_horizontal_scan = (left.y + right.y) / 2;
+    unsigned int bottom_horizontal_scan = vbb->getImageHeight() - 1;    //we need h-scans under the GH for field lines
 
     if(static_cast<int>(bottom_horizontal_scan) >= vbb->getImageHeight())
         errorlog << "cast avg: " << static_cast<int>(bottom_horizontal_scan) << " avg: " << bottom_horizontal_scan << endl;
@@ -99,7 +100,7 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& 
             start_pos = x;
         }
     }
-    segment.set(PointType(start_pos, y), PointType(x, y), start_colour);
+    segment.set(PointType(start_pos, y), PointType(x-1, y), start_colour);
     result.push_back(segment);
     
     #if VISION_SCAN_VERBOSITY > 1

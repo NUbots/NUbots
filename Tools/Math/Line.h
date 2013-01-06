@@ -7,7 +7,7 @@
 #ifndef LINE_H_DEFINED
 #define LINE_H_DEFINED
 
-
+#include <iostream>
 
 /*!
   @brief Class representing a 2 dimensional (x,y) position.
@@ -26,6 +26,7 @@ class Point
     double x; //!< The points x value.
     double y; //!< The points y value.
     //double distance(const Point& p1) const { return sqrt((x-p1.x)*(x-p1.x) + (y-p1.y)*(y-p1.y)); }
+    double dot(Point pt) {return x*pt.x + y*pt.y;}
 
     // Overloaded functions
     /*!
@@ -33,6 +34,11 @@ class Point
       @return True of the two points are equal. False if they are not.
       */
     friend bool operator ==(const Point& point1, const Point& point2) {return (point1.x==point2.x)&&(point1.y==point2.y);}
+    /*!
+      @brief Inquality operator
+      @return True of the two points are not equal. False if they are.
+      */
+    friend bool operator !=(const Point& point1, const Point& point2) {return (point1.x!=point2.x)||(point1.y!=point2.y);}
 
 };
 
@@ -46,6 +52,8 @@ class Line
     Line();
     //! Constructor with intialising points. A line is created through these 2 points.
     Line(Point p1, Point p2);
+    //! Constructor with intialising values.
+    Line(double rho, double phi);
     //! Destructor
     ~Line();
 // Make line. Form: Ax + By = C
@@ -57,6 +65,14 @@ class Line
       @return True if a valid line was assigned using the equation. False otherwise.
       */
     bool setLine(double A, double B, double C);
+
+    /*!
+      @brief Assign the line by giving the equation in the Hesse standard form.
+      @param rho The length of the normal.
+      @param phi The angle the normal makes with the x_axis.
+      @return True if a valid line was assigned using the equation. False otherwise.
+      */
+    bool setLine(double rho, double phi);
     /*!
       @brief Assign the line by giving two points through wich to form the line.
       @param p1 The first point.
@@ -64,6 +80,10 @@ class Line
       @return True if a valid line was assigned using the points. False otherwise.
       */
     bool setLineFromPoints(Point p1, Point p2);
+    /*!
+      @brief Normalises the rho/phi values.
+      */
+    void normaliseRhoPhi();
     /*!
       @brief Copy the contents of another line to assign the equation for this line.
       @param source The source from which to copy the equation data.
@@ -86,6 +106,7 @@ class Line
       @return The C value of the line equation.
       */
     double getC() const;
+
 // Check properties.
     /*!
       @brief Find if the line is horizontal.
@@ -155,11 +176,22 @@ class Line
     double getLinePointDistance(Point point) const;
     /*Added by Shannon*/
     /*!
+      @brief retreive the normaliser for the coefficients of the line equation - sqrt(A^2 + B^2).
+      @return sqrt(A^2 + B^2).
+      */
+    double getNormaliser() const;
+    /*!
       @brief Find the signed distance between the the line and the point.
       @param point The point to find the distance to.
       @return The signed distance from the line to the point.
       */
     double getSignedLinePointDistance(Point point) const;
+    /*!
+      @brief Find the smallest angle between this and the given line.
+      @param other The other line.
+      @return The acute angle between the lines.
+      */
+    double getAngleBetween(Line other) const;
     /*!
       @brief Retrieve the Rho value of the line equation (normal form)
       @return Rho.
@@ -170,6 +202,19 @@ class Line
       @return Phi.
       */
     double getPhi() const;
+    /*!
+      @brief Projects the point onto the line.
+      @param pt The point to project.
+      @return The projected point.
+      */
+    Point projectOnto(Point pt) const;
+    /*!
+      @brief Finds the intersection of the two lines.
+      @param other The other line.
+      @param pt The resulting point.
+      @return Whether the lines intersect.
+      */
+    bool getIntersection(const Line& other, Point& pt) const;
     /*Added by Shannon*/
 
 // Overloaded functions
@@ -189,13 +234,18 @@ class Line
             line1 y-int > line2 y-int. False otherwise.
       */
     friend bool operator > (const Line& line1, const Line& line2);
+    /*!
+      @brief Output stream operator
+      */
+    friend std::ostream& operator<< (std::ostream& output, const Line& l);
     
   private:
     double m_A; //! The lines A value.
     double m_B; //! The lines B value.
     double m_C; //! The lines C value.
-    double Rho;
-    double Phi;
+    double m_rho;
+    double m_phi;
+    double m_normaliser;
     /*!
       @brief Determine if the line represented by the given equation is valid.
       @param A The A value of the line equation.

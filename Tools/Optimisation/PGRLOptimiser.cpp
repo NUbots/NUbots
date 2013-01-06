@@ -39,8 +39,8 @@ using namespace boost::accumulators;
 PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
 {
     m_step_size = 0.01;        	   // Tune this
-    m_epsilon = 0.01;              // Tune this
-    m_num_particles = 12;      	   // Tune this
+    m_epsilon = 0.03;              // Tune this
+    m_num_particles = 6;      	   // Tune this
     m_stalled_threshold = 25;	   // Might need to tune this
 
     m_selected_fitness = 1;
@@ -92,6 +92,7 @@ void PGRLOptimiser::setParametersResult(float fitness)
         m_current_parameters += calculateStep();
         generatePolicies();
     }
+    debug << "PGRLOptimiser::setParametersResult fitness: " << fitness << endl;
 }
 
 vector<float> PGRLOptimiser::getNextParameters()
@@ -103,7 +104,8 @@ vector<float> PGRLOptimiser::getNextParameters()
  */
 void PGRLOptimiser::generatePolicies()
 {
-	generateShuffledPolices(m_current_parameters);
+    //generateShuffledPolices(m_current_parameters);
+    generateRandomPolices(m_current_parameters);
 }
 
 /*! @brief Calculates a step in the direction of the gradient estimated through the polices selected
@@ -215,8 +217,16 @@ void PGRLOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
 	{
 		vector<float> temp = generateSigns();
 		float epsilon = m_epsilon*(seed[i].max() - seed[i].min());
-		for (size_t j=0; j<temp.size(); j++)
-			m_random_policies[j][i] += epsilon*temp[j];
+        for (size_t j=0; j<temp.size(); j++) {
+             //m_random_policies[j][i] += epsilon*temp[j];
+            //added by shannon
+            float value = m_random_policies[j][i] + epsilon*temp[j];
+            if (value < seed[i].min())
+                value = seed[i].min();
+            else if (value > seed[i].max())
+                value = seed[i].max();
+            m_random_policies[j][i] = value;
+        }
 	}
 
 	for (size_t i=0; i<m_random_policies.size(); i++)

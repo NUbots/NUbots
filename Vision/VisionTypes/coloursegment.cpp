@@ -16,6 +16,9 @@ void ColourSegment::set(const PointType &start, const PointType &end, ClassIndex
     m_start = start;
     m_end = end;
     m_length_pixels = dist(start, end);
+    m_centre.x = 0.5*(m_start.x + m_end.x);
+    m_centre.y = 0.5*(m_start.y + m_end.y);
+
 }
 
 void ColourSegment::setColour(ClassIndex::Colour colour)

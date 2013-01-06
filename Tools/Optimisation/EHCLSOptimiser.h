@@ -37,6 +37,8 @@ public:
     void setParametersResult(float fitness);
     
     void summaryTo(ostream& stream);
+
+    vector<Parameter> getBest() const { return m_real_best_parameters;}
 private:
     void mutateBestParameters(vector<Parameter>& parameters);
     void mutateParameters(vector<Parameter>& base_parameters, vector<float>& basedelta_parameters, vector<Parameter>& parameters);

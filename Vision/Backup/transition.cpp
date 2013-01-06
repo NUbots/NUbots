@@ -50,29 +50,29 @@ const PointType& Transition::getLocation() const
     return m_location;
 }
 
-/*! @brief Returns the colour of the before segment.
-*
-*/
-ClassIndex::Colour Transition::getBefore() const
-{
-    return m_before_colour;
-}
+///*! @brief Returns the colour of the before segment.
+//*
+//*/
+//ClassIndex::Colour Transition::getBefore() const
+//{
+//    return m_before_colour;
+//}
 
-/*! @brief Returns the colour of the after segment.
-*
-*/
-ClassIndex::Colour Transition::getAfter() const
-{
-    return m_after_colour;
-}
+///*! @brief Returns the colour of the after segment.
+//*
+//*/
+//ClassIndex::Colour Transition::getAfter() const
+//{
+//    return m_after_colour;
+//}
 
-/*! @brief Returns the direction of the scan.
-*
-*/
-ScanDirection Transition::getDirection() const
-{
-    return m_direction;
-}
+///*! @brief Returns the direction of the scan.
+//*
+//*/
+//ScanDirection Transition::getDirection() const
+//{
+//    return m_direction;
+//}
 
 /*! @brief Less than operator for a pair of Transitions.
  *  @relates Transition

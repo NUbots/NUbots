@@ -2,6 +2,7 @@
 #define VISIONCONSTANTS_H
 
 #include <string>
+#include "Tools/Optimisation/Parameter.h"
 
 class VisionConstants
 {
@@ -12,6 +13,11 @@ public:
         D2P,
         Average,
         Least
+    };
+
+    enum LineDetectionMethod {
+        SAM,
+        RANSAC
     };
 
     //! Distortion Correction
@@ -28,7 +34,14 @@ public:
     static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;  //! The minimum number of transitions to keep a goal.
     static bool THROWOUT_NARROW_GOALS;  //! Whether to throw out goals that are too narrow.
     static int MIN_GOAL_WIDTH;          //! The minimum width of a goal.
-    static float GOAL_EDGE_RATIO;       //! Dave?
+    static bool THROWOUT_SHORT_GOALS;  //! Whether to throw out goals that are too short.
+    static int MIN_GOAL_HEIGHT;          //! The minimum height of a goal.
+    static float GOAL_HEIGHT_TO_WIDTH_RATIO_LOW;
+    static float GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH;
+    static int GOAL_MAX_OBJECTS;
+    static int GOAL_BINS;
+    static int GOAL_MIN_THRESHOLD;
+    static float GOAL_SDEV_THRESHOLD;
 
     //! Beacon filtering constants
     static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;  //! Whether to throw out beacons whose base is above the kinematics horizon.
@@ -60,6 +73,7 @@ public:
     static DistanceMethod GOAL_DISTANCE_METHOD;     //! The preferred method for calculating the distance to the goals
     static DistanceMethod BEACON_DISTANCE_METHOD;   //! The preferred method for calculating the distance to the beacons
     
+    static LineDetectionMethod LINE_METHOD;
     //! Field-object detection constants
     static int BALL_EDGE_THRESHOLD;         //! Dave?
     static int BALL_ORANGE_TOLERANCE;       //! Dave?
@@ -88,11 +102,58 @@ public:
     static float GREEN_HORIZON_LOWER_THRESHOLD_MULT;    //! Dave?
     static float GREEN_HORIZON_UPPER_THRESHOLD_MULT;    //! Dave?
 
+    //! Split and Merge constants
+    //maximum field objects rules
+    static unsigned int SAM_MAX_LINES; //15
+    //splitting rules
+    static float SAM_SPLIT_DISTANCE; //1.0
+    static unsigned int SAM_MIN_POINTS_OVER; //2
+    static unsigned int SAM_MIN_POINTS_TO_LINE; //3
+    //merging rules
+    static float SAM_MAX_ANGLE_DIFF_TO_MERGE; //
+    static float SAM_MAX_DISTANCE_TO_MERGE; //
+    //Line keeping rules
+    static unsigned int SAM_MIN_POINTS_TO_LINE_FINAL; //5
+    static float SAM_MIN_LINE_R2_FIT; //0.90
+    static float SAM_MAX_LINE_MSD; //50 set at constructor
+    //clearing options
+    static bool SAM_CLEAR_SMALL;
+    static bool SAM_CLEAR_DIRTY;
+
+
     // static methods
     static DistanceMethod getDistanceMethodFromName(std::string name);  //! Converts a string to a distance method.
     static std::string getDistanceMethodName(DistanceMethod method);    //! Converts a distance method to a string name.
 
+    // static methods
+    static LineDetectionMethod getLineMethodFromName(std::string name);  //! Converts a string to a line detection method.
+    static std::string getLineMethodName(LineDetectionMethod method);    //! Converts a line detection method to a string name.
+
     static void loadFromFile(std::string filename); //! Loads the constants from a file
+    static void print(ostream& out);
+
+    static bool setParameter(string name, bool val);
+    static bool setParameter(string name, int val);
+    static bool setParameter(string name, unsigned int val);
+    static bool setParameter(string name, float val);
+    static bool setParameter(string name, DistanceMethod val);
+
+    static void setFlags(bool val=true);
+
+    static vector<Parameter> getAllOptimisable();
+    static vector<Parameter> getBallParams();
+    static vector<Parameter> getGoalBeaconParams();
+    static vector<Parameter> getObstacleParams();
+    static vector<Parameter> getLineParams();
+    static vector<Parameter> getGeneralParams();
+
+
+    static bool setAllOptimisable(const vector<float>& params);
+    static bool setBallParams(const vector<float>& params);
+    static bool setGoalBeaconParams(const vector<float>& params);
+    static bool setObstacleParams(const vector<float>& params);
+    static bool setLineParams(const vector<float>& params);
+    static bool setGeneralParams(const vector<float>& params);
     
 private:
     VisionConstants();  //so noone can make an object of this type

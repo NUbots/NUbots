@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+
 using namespace std;
 
 class PSOOptimiser : public Optimiser
@@ -42,6 +43,9 @@ public:
     void setParametersResult(float fitness);
     
     void summaryTo(ostream& stream);
+
+    vector<Parameter> getBest() const { return m_best;}
+
 private:
     void initSwarm();
     void updateSwarm();
@@ -59,9 +63,7 @@ private:
     vector<float> m_swarm_failures;
     vector<Parameter> m_best;
     float m_best_fitness;
-    
-    float m_c1;
-    float m_c2;
+
     float m_inertia;
     float m_reset_limit;
     float m_reset_fraction;

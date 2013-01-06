@@ -24,6 +24,8 @@ public:
       * @param direction The alignment of the segments in this region (vertical or horizontal).
       */
     void set(const vector<vector<ColourSegment> >& segmented_scans, ScanDirection direction);
+
+    bool empty() const {return m_segmented_scans.empty();}
     
     //consider removing later and replacing with iterator
     //! Returns a const reference to the segments.

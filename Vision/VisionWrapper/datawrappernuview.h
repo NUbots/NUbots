@@ -22,6 +22,7 @@
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
+#include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 
 //for virtualNUbot/Qt
@@ -55,7 +56,7 @@ public:
         DBID_H_SCANS=1,
         DBID_V_SCANS=2,
         DBID_SEGMENTS=3,
-        DBID_TRANSITIONS=4,
+        DBID_MATCHED_SEGMENTS=4,
         DBID_HORIZON=5,
         DBID_GREENHORIZON_SCANS=6,
         DBID_GREENHORIZON_FINAL=7,
@@ -65,7 +66,8 @@ public:
         DBID_BEACONS=11,
         DBID_BALLS=12,
         DBID_OBSTACLES=13,
-        NUMBER_OF_IDS=14
+        DBID_LINES=14,
+        NUMBER_OF_IDS=15
     };
 
     static string getIDName(DEBUG_ID id);
@@ -99,9 +101,10 @@ public:
     bool debugPublish(vector<Beacon> data);
     bool debugPublish(vector<Goal> data);
     bool debugPublish(vector<Obstacle> data);
+    bool debugPublish(const vector<FieldLine>& data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
-    bool debugPublish(DEBUG_ID id, const Mat& img);
+    bool debugPublish(DEBUG_ID id, const NUImage *const img);
     
     
 private:
