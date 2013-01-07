@@ -1,0 +1,33 @@
+{
+	"arbitrary_vis_constant":
+	{
+		"value": "I love coffee",
+		"type": "string",
+		"rules":
+		{
+			"range":
+			{
+				"upper": "upper_bound",
+				"lower": "lower_bound"
+			},
+			"possiblevalues": 
+			[
+				{
+					"value": "I hate coffee"
+				},
+				{
+					"value": "I don't mind coffee"
+				},
+				{
+					"value": "Coffee is a pretty cool guy"
+				}
+			],
+			"updates":
+			[
+				{
+					"update": "blaaahhh.path"
+				}
+			]
+		}
+	}
+}

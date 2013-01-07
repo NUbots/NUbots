@@ -1,0 +1,27 @@
+{
+    "arbitrary_comms_constant":
+    {
+        "value": "I love computers",
+        "type": "string",
+        "rules":
+        {
+            "range":
+            {
+                "upper": "upper_bound",
+                "lower": "lower_bound"
+            },
+            "possiblevalues":
+            [
+                {
+                    "value": "I hate the air con in here"
+                },
+                {
+                    "value": "I want to go to the beach"
+                },
+                {
+                    "value": "Swimming is fun"
+                }
+            ]
+        }
+    }
+}

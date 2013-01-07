@@ -1,0 +1,27 @@
+{
+    "arbitrary_local_constant":
+    {
+        "value": "2378470.7",
+        "type": "float",
+        "rules":
+        {
+            "range":
+            {
+                "upper": "upper_bound",
+                "lower": "lower_bound"
+            },
+            "possiblevalues":
+            [
+                {
+                    "value": "389405.908"
+                },
+                {
+                    "value": "2938402.3475"
+                },
+                {
+                    "value": "2999299939.0293"
+                }
+            ]
+        }
+    }
+}
