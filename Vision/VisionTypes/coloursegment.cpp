@@ -13,8 +13,28 @@ unsigned int dist(const PointType &x1, const PointType &x2)
 void ColourSegment::set(const PointType &start, const PointType &end, ClassIndex::Colour colour)
 {
     m_colour = colour;
-    m_start = start;
-    m_end = end;
+    bool flip;
+
+    //check if the points are in correct order
+    if(start.x < end.x) {
+        flip = false;
+    }
+    else if(start.x > end.x) {
+        flip = true;
+    }
+    else {
+        flip = start.y > end.y;
+    }
+
+    //swap them if not
+    if(flip) {
+        m_start = end;
+        m_end = start;
+    }
+    else {
+        m_start = start;
+        m_end = end;
+    }
     m_length_pixels = dist(start, end);
     m_centre.x = 0.5*(m_start.x + m_end.x);
     m_centre.y = 0.5*(m_start.y + m_end.y);

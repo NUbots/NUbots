@@ -23,16 +23,10 @@ public:
     */
     static void detectGoals();
 private:
-    static void detectGoal(ClassIndex::Colour colour, vector<Quad>* candidates);
+    static void detectGoal(vector<Quad>* candidates);
     static void DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED);
-    static void ratioCheck(vector<Quad>* posts);
-    static void widthCheck(vector<Quad>* posts);
-    static void splitIntoObjects(vector<Quad>* blue_candidates, vector<Quad>* yellow_candidates, vector<Quad>* blue_posts,
-                                         vector<Quad>* yellow_posts, vector<Quad>* blue_beacons, vector<Quad>* yellow_beacons,
-                                         vector<Quad>* unknown_beacons);
+    static void removeInvalidPosts(vector<Quad>* posts);
     static void overlapCheck(vector<Quad>* posts);
-    static void sortEdgesFromSegments(const vector<ColourSegment>& segments, vector<PointType>& startedges, vector<PointType>& endedges, vector<int> &startlengths, vector<int> &endlengths);
-    static void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<PointType>& pointlist);
 };
 
 #endif // GOALDETECTION_H

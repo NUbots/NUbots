@@ -92,6 +92,7 @@ HEADERS += \
     visioncontroller.h \ 
     visionconstants.h \
     #Threads/SaveImagesThread.h
+    VisionTypes/histogram1.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \

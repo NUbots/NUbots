@@ -1,0 +1,77 @@
+#include "histogram1.h"
+#include <queue>
+
+class IndexComparison
+{
+private:
+    const Histogram1& m_h;
+public:
+  IndexComparison(const Histogram1& h) {m_h = h;}
+  bool operator() (const int& l, const int&r) const
+  {
+    return (m_h.at(l) >= m_h.at(r));
+  }
+};
+
+template<typename T>
+Histogram1::Histogram1(int num_bins, int bin_width)
+{
+    m_bins = vector<T>(num_bins, pair<T, int>(0, bin_width));    //not strictly great, but works for our purposes
+}
+
+template<typename T>
+Histogram1::Histogram1(vector<int> bin_widths)
+{
+    for(int i=0; i<bin_widths.size(); i++) {
+        m_bins.push_back( pair<T, int>(0, bin_widths.at(i)) );
+    }
+}
+
+template<typename T>
+T Histogram1::getBinVal(int bin_no)
+{
+    //returns the size of the selected bin - will throw out_of_range if invalid bin selected
+    return m_bins.at(bin_no);
+}
+
+template<typename T>
+bool Histogram1::addToBin(int pos, T val)
+{
+    //adds the given element to the matching bin - if out_of_range will return false without modifying the histogram
+    if(pos < 0) {
+        return false;
+    }
+
+    int cur_right = 0;   //keep track of current far edge
+    bool found = false;
+    for(int i=0; i<m_bins.size(); i++) {
+        pair<T, int> bin = m_bins.at(i);
+        cur_right += bin.second;
+        if(pos < cur_right) {
+            found = true;
+            bin.first += val;
+        }
+    }
+    return found;
+}
+
+template<typename T>
+vector<int> Histogram1::getLargestBins(int n)
+{
+    //O(nk)
+    if(n < 0 || n >= m_bins.size()) {
+        throw std::out_of_range;
+    }
+    else {
+        std::priority_queue<int, vector<int>, IndexComparison(*this)> cur_largest;
+        for(int k=0; k<n; k++) {
+            cur_largest.push(-1);
+        }
+        for(int i=0; i<m_bins.size(); i++) {
+            if(m_bins.at(i) > m_bins.at(cur_largest.top())) {
+                cur_largest.pop();
+                cur_largest.push(i);
+            }
+        }
+    }
+}
