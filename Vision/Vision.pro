@@ -91,8 +91,9 @@ HEADERS += \
     visionblackboard.h \
     visioncontroller.h \ 
     visionconstants.h \
+    VisionTypes/histogram1D.h \
+    Modules/GoalDetectionAlgorithms/transitionhistogramming1d.h
     #Threads/SaveImagesThread.h
-    VisionTypes/histogram1.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -104,6 +105,7 @@ SOURCES += \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
+    Modules/GoalDetectionAlgorithms/transitionhistogramming1d.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup

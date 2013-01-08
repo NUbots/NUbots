@@ -1,15 +1,15 @@
-#include "goaldetection.h"
+#include "transitionhistogramming1d.h"
+#include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
-#include "Vision/VisionTypes/histogram1.h"
 
 #include <limits>
 
 #include <boost/foreach.hpp>
 
-void GoalDetection::detectGoals()
-{    
+void TransitionHistogramming1D::detectGoals()
+{
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
@@ -62,7 +62,7 @@ void GoalDetection::detectGoals()
     }
 }
 
-void GoalDetection::DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
+void TransitionHistogramming1D::DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
 {
     //fix later: use segment lengths and quad area to calculate rather than
     //                  re-accessing the image
@@ -115,7 +115,7 @@ void GoalDetection::DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, 
         if (((double)count)/((right-left)*(bottom-top)) < PERCENT_REQUIRED) {
             it = posts->erase(it);
             #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "GoalDetection::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
+                debug << "TransitionHistogramming1D::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
             #endif
         }
         else if (other_count > 0 && !beacon) {
@@ -128,7 +128,7 @@ void GoalDetection::DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, 
 }
 
 
-void GoalDetection::removeInvalidPosts(vector<Quad>* posts)
+void TransitionHistogramming1D::removeInvalidPosts(vector<Quad>* posts)
 {
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
@@ -148,7 +148,7 @@ void GoalDetection::removeInvalidPosts(vector<Quad>* posts)
     }
 }
 
-void GoalDetection::overlapCheck(vector<Quad>* posts)
+void TransitionHistogramming1D::overlapCheck(vector<Quad>* posts)
 {
     //REPLACE THIS WITH SOMETHING THAT MERGES OVERLAPPING POSTS - OR SHOULD WE NOT EVEN GET OVERLAPPING POSTS
     for (unsigned int i = 0; i < posts->size(); i++) {
@@ -162,7 +162,7 @@ void GoalDetection::overlapCheck(vector<Quad>* posts)
     }
 }
 
-void GoalDetection::detectGoal(vector<Quad>* candidates)
+void TransitionHistogramming1D::detectGoal(vector<Quad>* candidates)
 {
     const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
     const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
@@ -170,7 +170,7 @@ void GoalDetection::detectGoal(vector<Quad>* candidates)
     //vector<PointType> start_trans, end_trans, vert_trans;
     //vector<int> start_lengths, end_lengths;
 
-    const int MAX_OBJECTS = 8;
+    const int MAX_PEAKS = 8;
     const int BINS = 20;
     const int WIDTH = VisionBlackboard::getInstance()->getImageWidth();
     const int BIN_WIDTH = WIDTH/BINS;
@@ -178,76 +178,22 @@ void GoalDetection::detectGoal(vector<Quad>* candidates)
     const float SDEV_THRESHOLD = 0.75;
 
     //int histogram[2][BINS], peaks[2][MAX_OBJECTS], peak_widths[2][MAX_OBJECTS];
-    Histogram1 h_start<int>(BINS, BIN_WIDTH),
-               h_end<int>(BINS, BIN_WIDTH);
+    Histogram1D h_start(BINS, BIN_WIDTH),
+                h_end(BINS, BIN_WIDTH);
 
-    int merged_peaks[MAX_OBJECTS][2];
     int MAX_WIDTH = 3;
 
-    // REPEAT TWICE; ONCE FOR START TRANSITIONS, ONCE FOR END TRANSITIONS
-    for (int repeats = 0; repeats < 2; repeats++) {
-
-        // initialise histograms
-        for (int i = 0; i < MAX_OBJECTS; i++)
-            peak_widths[repeats][i] = 1;
-
-        // fill histogram bins
-        BOOST_FOREACH(ColourSegment seg, h_segments) {
-            h_start.addToBin(seg.getStart().x, seg.getLength());
-            h_end.addToBin(seg.getEnd().x, seg.getLength());
-        }
-
-        // find MAX_OBJECT peaks
-        for (int i = 0; i < MAX_OBJECTS; i++) {
-            int max = 0;
-            peaks[repeats][i] = 0;
-            for (int j = 0; j < BINS; j++)
-                if (histogram[repeats][j] > max) {
-                    peaks[repeats][i] = j;
-                    max = histogram[repeats][j];
-                }
-            histogram[repeats][peaks[repeats][i]] *= -1;    // prevents from further consideration
-        }
-
-        // restore histogram values
-        for (int i = 0; i < BINS; i++)
-            if (histogram[repeats][i] < 0)
-                histogram[repeats][i] *= -1;
-
-        // remove below threshold
-        for (int i = 0; i < MAX_OBJECTS; i++)
-            if (histogram[repeats][peaks[repeats][i]] < MIN_THRESHOLD)
-                peaks[repeats][i] = -1;
-
-        // merge adjacent histogram bins (if both peaks)
-        for (int i = 0; i < MAX_OBJECTS; i++) {
-            int peak = peaks[repeats][i];
-            int span = 0;
-            for (int j = i; j < MAX_OBJECTS; j++) {
-                if (i == j) continue;
-                else if (peak - peaks[repeats][j] <= 1+span && peak - peaks[repeats][j] > 0) {
-                    peak_widths[repeats][i] ++;
-                    span ++;
-                    peaks[repeats][j] = -1;
-                }
-            }
-        }
+    // fill histogram bins
+    BOOST_FOREACH(ColourSegment seg, h_segments) {
+        h_start.addToBin(seg.getStart().x, seg.getLength());
+        h_end.addToBin(seg.getEnd().x, seg.getLength());
     }
 
+    Histogram1D h_start_merged = mergePeaks(h_start, MIN_THRESHOLD);
+    Histogram1D h_end_merged = mergePeaks(h_end, MIN_THRESHOLD);
 
-    // initialise
-    for (int i = 0; i < MAX_OBJECTS; i++)
-        merged_peaks[i][0] = merged_peaks[i][1] = -1;
-
-    // merge start transitions and end transitions
-    for (int i = 0; i < MAX_OBJECTS; i++)
-        for (int j = 0; j < MAX_OBJECTS; j++)
-            for (int k = 0; k < MAX_WIDTH; k++)
-                if (peaks[0][i] == peaks[1][j]-k) {
-                    merged_peaks[i][0] = peaks[0][i];
-                    merged_peaks[i][1] = peaks[1][j];
-                    break;
-                }
+    // pair start transitions and end transitions
+    //COME BACK HERE
 
     // Calculate bounding boxes for posts
     for (int i = 0; i < MAX_OBJECTS; i++) {
@@ -359,4 +305,10 @@ void GoalDetection::detectGoal(vector<Quad>* candidates)
                 //cout << start_min << " " << bot_min << " " << end_max << " " << top_max << endl;
         }
     }
+}
+
+Histogram1D TransitionHistogramming1D::mergePeaks(Histogram1D hist, int minimum_size)
+{
+    hist.mergeAdjacentPeaks(minimum_size);
+    return hist;
 }

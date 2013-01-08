@@ -11,12 +11,13 @@
 #include "Vision/Modules/greenhorizonch.h"
 #include "Vision/Modules/objectdetectionch.h"
 #include "Vision/Modules/scanlines.h"
-#include "Vision/Modules/goaldetection.h"
+#include "Vision/Modules/goaldetector.h"
 #include "Vision/Modules/balldetection.h"
 //robocup hacks
 #include "Vision/visionconstants.h"
 #include "Vision/Modules/LineDetectionAlgorithms/splitandmerge.h"
 #include "Vision/Modules/LineDetectionAlgorithms/ransac.h"
+#include "Vision/Modules/GoalDetectionAlgorithms/transitionhistogramming1d.h"
 
 
 VisionController* VisionController::instance = 0;
@@ -27,6 +28,7 @@ VisionController::VisionController()
     m_data_wrapper = DataWrapper::getInstance();
     m_line_detector_ransac = new RANSAC();
     m_line_detector_sam = new SplitAndMerge();
+    m_goal_detector_hist = new TransitionHistogramming1D();
 }
 
 VisionController::~VisionController()
@@ -85,7 +87,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     //! DETECTION MODULES
 
     if(lookForLandmarks) {
-        GoalDetection::detectGoals();   //POSTS
+        m_goal_detector_hist->detectGoals();   //POSTS
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - goal detection done" << endl;
         #endif
