@@ -1,6 +1,6 @@
 /*! 
 	@file 	ConfigEnforcer.template
-    @brief 	This is the template file for the enforcer of the configuration system for the NUbots. 
+    @brief 	This is the template file for the enforcer of the ConfigSystem system for the NUbots. 
     		This file contains template implementations of functions.
  
     @class 	ConfigEnforcer
@@ -33,7 +33,7 @@
 #include "ConfigStorageManager.h"
 #include "ConfigEnforcer.h"
 
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 	template<typename Item>
 	bool ConfigEnforcer::checkRangeValue(parameters<Item> proposed_change)

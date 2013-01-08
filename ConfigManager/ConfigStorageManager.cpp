@@ -37,9 +37,9 @@
 #include "ConfigStorageManager.h"
 
 using boost::property_tree::ptree;
-using CONFIGURATION::ConfigStorageManager;
+using ConfigSystem::ConfigStorageManager;
 
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 	//Constructor
 	ConfigStorageManager::ConfigStorageManager()
@@ -209,7 +209,7 @@ namespace CONFIGURATION
 		bool status = false;
 		//std::ostringstream convert;
 		std::string new_path; 
-	
+		
 		try
 		{
 			//Don't try to edit arrays using this because it won't work. Predefined values will be 
@@ -231,17 +231,17 @@ namespace CONFIGURATION
 			
 			new_path = path + "rules.conflicts";
 			
-			//Puts new conflict information into the tree.
-			BOOST_FOREACH(const std::pair< std::string, CONFIGURATION::conflict_limits<std::string> > 
-						&iter, new_entry.rules.conflicts)
-			{
-				//Want to store conflicts info from the new_entry into the property tree.
-				data->put(new_path + "..path", iter.first);
+			// // //Puts new conflict information into the tree.
+			// BOOST_FOREACH(const std::pair< std::string, ConfigSystem::conflict_limits<std::string> > &iter,
+			// 	      new_entry.rules.conflicts)
+			// {
+			// 	//Want to store conflicts info from the new_entry into the property tree.
+			// 	data->put(new_path + "..path", iter.first);
 				
-				//Store "modify" and "modified" flags for each conflict.
-				data->put(new_path + "..modify", iter.second.modify);
-				data->put(new_path + "..modified", iter.second.modified);
-			}
+			// 	//Store "modify" and "modified" flags for each conflict.
+			// 	data->put(new_path + "..modify", iter.second.modify);
+			// 	data->put(new_path + "..modified", iter.second.modified);
+			// }
 			
 			status = true;
 		}
@@ -254,12 +254,13 @@ namespace CONFIGURATION
 		
 		return status;
 	}
+
 	
 	//Accesses the specified variable and it's type, returns as parameters struct.
 	parameters<std::string> ConfigStorageManager::accessEntry(std::string path)
 	{
 		parameters<std::string> retrieved_data;	
-		std::pair<std::string, CONFIGURATION::conflict_limits<std::string> retrieved_conflict;
+		// std::pair<std::string, ConfigSystem::conflict_limits<std::string> retrieved_conflict;
 		std::string new_path;
 		
 		try
@@ -288,10 +289,10 @@ namespace CONFIGURATION
 			BOOST_FOREACH(const ptree::value_type &child, data->get_child(new_path))
 			{
 				//Need to push_back pairs of strings and conflict_limits to retrieved_data.rules.conflicts
-				retrieved_conflict.first = child.second.get<std::string>("")
+				// retrieved_conflict.first = child.second.get<std::string>("")
 			
 				//Iterating through conflicts vector to store items
-				/*BOOST_FOREACH(const std::pair< std::string, CONFIGURATION::conflict_limits<std::string> > 
+				/*BOOST_FOREACH(const std::pair< std::string, ConfigSystem::conflict_limits<std::string> > 
 						&iter, retrieved_data.rules.conflicts)
 				{
 					//Retrieve string path of conflict.

@@ -28,7 +28,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-
+#include <boost/lexical_cast.hpp>
+    
 #include "ConfigStorageManager.h"
 
 #include <string>
@@ -42,7 +43,7 @@ using std::string;
 //     }
 // };
 
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 
     class ConfigManager
@@ -66,11 +67,11 @@ namespace CONFIGURATION
          *  @param data variable in which to store the data retrieved.
          *  @return Whether the operation was successful.
          */
-        bool readIntParam    (const string paramPath, int    &data); // throw(ConfigException);
-        bool readLongParam   (const string paramPath, long   &data); // throw(ConfigException);
-        bool readFloatParam  (const string paramPath, float  &data); // throw(ConfigException);
-        bool readDoubleParam (const string paramPath, double &data); // throw(ConfigException);
-        bool readStringParam (const string paramPath, string &data); // throw(ConfigException);
+        bool readIntParam    (const string &paramPath, const string &paramName, int    &data); // throw(ConfigException);
+        bool readLongParam   (const string &paramPath, const string &paramName, long   &data); // throw(ConfigException);
+        bool readFloatParam  (const string &paramPath, const string &paramName, float  &data); // throw(ConfigException);
+        bool readDoubleParam (const string &paramPath, const string &paramName, double &data); // throw(ConfigException);
+        bool readStringParam (const string &paramPath, const string &paramName, string &data); // throw(ConfigException);
 
 
         /*! @brief Stores the given integer in the current configuration at the given path.
@@ -81,11 +82,11 @@ namespace CONFIGURATION
          *  @param data The data to store.
          *  @return Whether the operation was successful.
          */
-        bool storeIntParam    (const string paramPath, int    data); // throw(ConfigException);
-        bool storeLongParam   (const string paramPath, long   data); // throw(ConfigException);
-        bool storeFloatParam  (const string paramPath, float  data); // throw(ConfigException);
-        bool storeDoubleParam (const string paramPath, double data); // throw(ConfigException);
-        bool storeStringParam (const string paramPath, string data); // throw(ConfigException);
+        bool storeIntParam    (const string &paramPath, const string &paramName, int    data); // throw(ConfigException);
+        bool storeLongParam   (const string &paramPath, const string &paramName, long   data); // throw(ConfigException);
+        bool storeFloatParam  (const string &paramPath, const string &paramName, float  data); // throw(ConfigException);
+        bool storeDoubleParam (const string &paramPath, const string &paramName, double data); // throw(ConfigException);
+        bool storeStringParam (const string &paramPath, const string &paramName, string data); // throw(ConfigException);
 
     private:
 
@@ -95,6 +96,75 @@ namespace CONFIGURATION
          */
          //change to ptr?
         ConfigStorageManager storageManager;
+
+
+        template <typename T>
+        bool readParam (const string &paramPath, const string &paramName, T &data, const char* typeStr)
+        {
+            string fullParamPath = paramPath + "." + paramName;
+
+            // Get the parameter information from the pTree
+            parameters<string> pStruct = storageManager.accessEntry(fullParamPath);
+            
+            // Aliases for parameter strings
+            string &value = pStruct.value;
+            string &type  = pStruct.type;
+
+            if(!type.compare(typeStr))
+                return false; // type mismatch error. (throw ConfigTypeMismatchException?)
+
+            T result;
+
+            try
+            {
+                result = boost::lexical_cast<T>(value); // perform conversion from string
+            }
+            catch (const boost::bad_lexical_cast &blcExc) // conversion failed
+            {
+                // throw error?
+                //set default value
+                // result = 0;
+                // log reason for the error
+                return false;
+            }
+
+            data = result; // assign to &data to output
+            return true; // return success
+        };
+
+        template <typename T>
+        bool storeParam (const string paramPath, const string &paramName, T data, const char* typeStr) // throw(ConfigException)
+        {
+            string fullParamPath = paramPath + "." + paramName;
+
+            // convert data to a string
+            string dataStr;
+            try
+            {
+                dataStr = boost::lexical_cast<string>(data);
+            }
+            catch (const boost::bad_lexical_cast &blcExc) // conversion to string failed
+            {
+                // throw an error?
+                // log reason for the error
+                return false;
+            }
+
+            // Get this parameter's current entry:
+            parameters<string> pStruct = storageManager.accessEntry(fullParamPath);
+
+            // Check the type of the parameter
+            if (pStruct.type.compare(typeStr) != 0) return false;
+
+            // Change the parameter
+            pStruct.value = dataStr;
+
+            // Store the new parameter data into the config system.
+            bool success = storageManager.editEntry(paramPath, pStruct);
+            // bool success = storageManager.editEntry(paramPath, dataStr, std::string(typeStr));
+
+            return success;
+        };
     };
 }
 #endif

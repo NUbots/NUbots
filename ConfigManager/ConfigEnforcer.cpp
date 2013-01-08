@@ -31,7 +31,7 @@
 #include "ConfigStorageManager.h"
 #include "ConfigEnforcer.h"
 
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 	ConfigEnforcer::ConfigEnforcer()
 	{

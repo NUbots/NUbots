@@ -2,9 +2,8 @@
 #include "ConfigStorageManager.h"
 
 #include <iostream>
-#include <boost/lexical_cast.hpp>
 
-using CONFIGURATION::ConfigStorageManager;
+using ConfigSystem::ConfigStorageManager;
 
 /*main(int argc, const char** args)
 {
@@ -20,7 +19,7 @@ using CONFIGURATION::ConfigStorageManager;
 }*/
 
 
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 	//constructor
 	ConfigManager::ConfigManager(std::string filename_arr[])
@@ -51,285 +50,85 @@ namespace CONFIGURATION
 	}
 	
 	
-	
-	
-
-	bool ConfigManager::readIntParam    (const std::string paramPath, int    &data) // throw(ConfigException);
-	{
-		// Get the parameter information from the pTree
-		parameters<std::string> pStruct = storageManager.accessEntry(paramPath);
-		int result;
-		
-		// Aliases for parameter strings
-		std::string &value = pStruct.value;
-		std::string &type  = pStruct.type;
-		
-		
-		if(type.compare("int") != 0)
-		{
-			std::cout << "type not int" << "\n";
-			return false; // type mismatch error. (throw ConfigTypeMismatchException?)
-		}
-
-		try
-		{
-			result = boost::lexical_cast<int>(value); // perform conversion from string
-		}
-		catch (const boost::bad_lexical_cast &blcExc) // conversion failed
-		{
-			// throw error?
-			//set default value
-			result = 0;
-		}
-
-		data = result; // assign to &data to output
-		return true; // return success
-	}
-
-	bool ConfigManager::readLongParam   (const std::string paramPath, long   &data) // throw(ConfigException);
-	{
-		// Get the parameter information from the pTree
-		parameters<std::string> pStruct = storageManager.accessEntry(paramPath);
-		
-		// Aliases for parameter strings
-		std::string &value = pStruct.value;
-		std::string &type  = pStruct.type;
-
-		if(type.compare("long") != 0)
-			return false; // type mismatch error. (throw ConfigTypeMismatchException?)
-
-		long result;
-
-		try
-		{
-			result = boost::lexical_cast<long>(value); // perform conversion from string
-		}
-		catch (const boost::bad_lexical_cast &blcExc) // conversion failed
-		{
-			// throw error?
-			//set default value
-			result = 0;
-		}
-
-		data = result; // assign to &data to output
-		return true; // return success
-	}
-
-	bool ConfigManager::readFloatParam  (const std::string paramPath, float  &data) // throw(ConfigException);
-	{
-		// Get the parameter information from the pTree
-		parameters<std::string> pStruct = storageManager.accessEntry(paramPath);
-		
-		// Aliases for parameter strings
-		std::string &value = pStruct.value;
-		std::string &type  = pStruct.type;
-
-		if(type.compare("float") != 0)
-			return false; // type mismatch error. (throw ConfigTypeMismatchException?)
-
-		float result;
-
-		try
-		{
-			result = boost::lexical_cast<float>(value); // perform conversion from string
-		}
-		catch (const boost::bad_lexical_cast &blcExc) // conversion failed
-		{
-			// throw error?
-			//set default value
-			result = 0;
-		}
-
-		data = result; // assign to &data to output
-		return true; // return success
-	}
-
-	bool ConfigManager::readDoubleParam (const std::string paramPath, double &data) // throw(ConfigException);
-	{
-		// Get the parameter information from the pTree
-		parameters<std::string> pStruct = storageManager.accessEntry(paramPath);
-		
-		// Aliases for parameter strings
-		std::string &value = pStruct.value;
-		std::string &type  = pStruct.type;
-
-		if(type.compare("double") != 0)
-			return false; // type mismatch error. (throw ConfigTypeMismatchException?)
-
-		double result;
-
-		try
-		{
-			result = boost::lexical_cast<double>(value); // perform conversion from string
-		}
-		catch (const boost::bad_lexical_cast &blcExc) // conversion failed
-		{
-			// throw error?
-			//set default value
-			result = 0;
-		}
-
-		data = result; // assign to &data to output
-		return true; // return success
-	}
-
-	bool ConfigManager::readStringParam (const std::string paramPath, std::string &data) // throw(ConfigException);
-	{
-		// Get the parameter information from the pTree
-		parameters<std::string> pStruct = storageManager.accessEntry(paramPath);
-		
-		// Aliases for parameter strings
-		std::string &value = pStruct.value;
-		std::string &type  = pStruct.type;
-
-		if(type.compare("string") != 0)
-			return false; // type mismatch error. (throw ConfigTypeMismatchException?)
-
-		std::string result;
-
-		result = value;
-		// try
-		// {
-		// 	result = boost::lexical_cast<string>(value); // perform conversion from string
-		// }
-		// catch (const boost::bad_lexical_cast &blcExc) // conversion failed
-		// {
-		// 	// throw error?
-		// 	//set default value
-		// 	result = 0;
-		// }
-
-		data = result; // assign to &data to output
-		return true; // return success
-	}
-
-
-
-
-	bool ConfigManager::storeIntParam    (const std::string paramPath, int    data) // throw(ConfigException)
-	{
-		//May need to retrieve rules such as "update_paths", etc to rewrite into struct object? Maybe a 
-   		//better way? :S
-		parameters<std::string> storing_data; 
-		// convert data to a string
-		std::string dataStr;
-		
-		try
-		{
-			dataStr = boost::lexical_cast<std::string>(data);
-		}
-		catch (const boost::bad_lexical_cast &blcExc) // conversion to string failed
-		{
-			// throw an error?
-			return false;
-		}
-		
-		storing_data.value = dataStr;
-		storing_data.type = "int";
-		
-		bool success = storageManager.editEntry(paramPath, storing_data);
-		
-		return success;
-	}
-
-    bool ConfigManager::storeLongParam   (const std::string paramPath, long   data) // throw(ConfigException)
+	/*! @brief Reads an int     from the given path in the config system. */    
+    bool ConfigManager::readIntParam    (const string &paramPath,
+                                         const string &paramName,
+                                         int    &data) // throw(ConfigException)
     {
-   		//May need to retrieve rules such as "update_paths", etc to rewrite into struct object? Maybe a 
-   		//better way? :S
-		parameters<std::string> storing_data; 
-    	// convert data to a string
-    	std::string dataStr;
-    	try
-    	{
-    		dataStr = boost::lexical_cast<std::string>(data);
-    	}
-    	catch (const boost::bad_lexical_cast &blcExc) // conversion to string failed
-    	{
-    		// throw an error?
-    		return false;
-    	}
-    	
-    	storing_data.value = dataStr;
-    	storing_data.type = "long";
-
-    	bool success = storageManager.editEntry(paramPath, storing_data);
-    	
-    	return success;
+        return readParam<int    >(paramPath, paramName, data, "int"    );
     }
 
-    bool ConfigManager::storeFloatParam  (const std::string paramPath, float  data) // throw(ConfigException)
+    /*! @brief Reads a  long    from the given path in the config system. */
+    bool ConfigManager::readLongParam   (const string &paramPath,
+                                         const string &paramName,
+                                         long   &data) // throw(ConfigException)
     {
-    	//May need to retrieve rules such as "update_paths", etc to rewrite into struct object? Maybe a 
-   		//better way? :S
-		parameters<std::string> storing_data; 
-    	// convert data to a string
-    	std::string dataStr;
-    	try
-    	{
-    		dataStr = boost::lexical_cast<std::string>(data);
-    	}
-    	catch (const boost::bad_lexical_cast &blcExc) // conversion to string failed
-    	{
-    		// throw an error?
-    		return false;
-    	}
-    	
-    	storing_data.value = dataStr;
-    	storing_data.type = "float";
-
-    	bool success = storageManager.editEntry(paramPath, storing_data);
-    	
-    	return success;
+        return readParam<long   >(paramPath, paramName, data, "long"   );
     }
 
-    bool ConfigManager::storeDoubleParam (const std::string paramPath, double data) // throw(ConfigException)
+    /*! @brief Reads a  float   from the given path in the config system. */
+    bool ConfigManager::readFloatParam  (const string &paramPath,
+                                         const string &paramName,
+                                         float  &data) // throw(ConfigException)
     {
-    	//May need to retrieve rules such as "update_paths", etc to rewrite into struct object? Maybe a 
-   		//better way? :S
-		parameters<std::string> storing_data; 
-    	// convert data to a string
-    	std::string dataStr;
-    	try
-    	{
-    		dataStr = boost::lexical_cast<std::string>(data);
-    	}
-    	catch (const boost::bad_lexical_cast &blcExc) // conversion to string failed
-    	{
-    		// throw an error?
-    		return false;
-    	}
-    	
-    	storing_data.value = dataStr;
-    	storing_data.type = "double";
-
-    	bool success = storageManager.editEntry(paramPath, storing_data);
-    	
-    	return success;
+        return readParam<float  >(paramPath, paramName, data, "float"  );
     }
 
-    bool ConfigManager::storeStringParam (const std::string paramPath, std::string data) // throw(ConfigException)
+    /*! @brief Reads a  double  from the given path in the config system. */
+    bool ConfigManager::readDoubleParam (const string &paramPath,
+                                         const string &paramName,
+                                         double &data) // throw(ConfigException)
     {
-    	//May need to retrieve rules such as "update_paths", etc to rewrite into struct object? Maybe a 
-   		//better way? :S
-		parameters<std::string> storing_data; 
-    	// convert data to a string
-    	std::string dataStr;
-    	try
-    	{
-    		dataStr = boost::lexical_cast<std::string>(data);
-    	}
-    	catch (const boost::bad_lexical_cast &blcExc) // conversion to string failed
-    	{
-    		// throw an error?
-    		return false;
-    	}
-    	
-    	storing_data.value = dataStr;
-    	storing_data.type = "string";
+        return readParam<double >(paramPath, paramName, data, "double" );
+    }
 
-    	bool success = storageManager.editEntry(paramPath, storing_data);
-    	
-    	return success;
+    /*! @brief Reads a  string  from the given path in the config system. */
+    bool ConfigManager::readStringParam (const string &paramPath,
+                                         const string &paramName,
+                                         string &data) // throw(ConfigException)
+    {
+        return readParam<string >(paramPath, paramName, data, "string" );
+    }
+
+
+    /*! @brief Stores the given int     data value into the config system at the given path. */
+    bool ConfigManager::storeIntParam    (const string &paramPath,
+                                          const string &paramName,
+                                          int    data) // throw(ConfigException)
+    {
+        return storeParam<int   >(paramPath, paramName, data, "int"    );
+    }
+
+    /*! @brief Stores the given long    data value into the config system at the given path. */
+    bool ConfigManager::storeLongParam   (const string &paramPath,
+                                          const string &paramName,
+                                          long   data) // throw(ConfigException)
+    {
+        return storeParam<long  >(paramPath, paramName, data, "long"   );
+    }
+
+    /*! @brief Stores the given float   data value into the config system at the given path. */
+    bool ConfigManager::storeFloatParam  (const string &paramPath,
+                                          const string &paramName,
+                                          float  data) // throw(ConfigException)
+    {
+        return storeParam<float >(paramPath, paramName, data, "float"  );
+    }
+
+    /*! @brief Stores the given double  data value into the config system at the given path. */
+    bool ConfigManager::storeDoubleParam (const string &paramPath,
+                                          const string &paramName,
+                                          double data) // throw(ConfigException)
+    {
+        return storeParam<double>(paramPath, paramName, data, "double" );
+    }
+
+    /*! @brief Stores the given string  data value into the config system at the given path. */
+    bool ConfigManager::storeStringParam (const string &paramPath,
+                                          const string &paramName,
+                                          string data) // throw(ConfigException)
+    {
+        return storeParam<string>(paramPath, paramName, data, "string" );
     }
 
 }

@@ -21,7 +21,7 @@ on and for new people later. :P
 		2.1. CODE:
 				All code must be commented such that it can be doxygenned and easily read and interpreted
 			by a human being. 
-				Everything is found in the CONFIGURATION namespace. Please include macro guards and 
+				Everything is found in the ConfigSystem namespace. Please include macro guards and 
 			namespaces where appropriate.
 		2.2. JSON:
 				Arrays containing the preset possible values are not to be edited by programs. These are

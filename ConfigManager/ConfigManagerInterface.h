@@ -30,7 +30,7 @@
 
 #include "ConfigManager.h"
 
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 
 	//This struct stores the name of the parameter to be edited as well as the parameter information.
@@ -39,7 +39,7 @@ namespace CONFIGURATION
 	struct named_parameters
 	{
 		std::string name;
-		CONFIGURATION::parameters<Item> data_information;
+		ConfigSystem::parameters<Item> data_information;
 	};
 	
 	
@@ -60,7 +60,7 @@ namespace CONFIGURATION
 				@return Returns the desired parameter stored in the parameter struct
 	 		*/
 	 		template<typename Item>
-			CONFIGURATION::named_parameters<Item> readParametersFromModule(std::string path, 
+			ConfigSystem::named_parameters<Item> readParametersFromModule(std::string path, 
 										std::string parameter_name);
 		
 			/*! @brief Writes the desired parameter to the desired module.
@@ -72,7 +72,7 @@ namespace CONFIGURATION
 	 		*/														
 			template<typename Item>
 			bool writeParametersToModule(std::string path, 
-										CONFIGURATION::named_parameters<Item> new_parameter);
+										ConfigSystem::named_parameters<Item> new_parameter);
 		
 		
 		
@@ -86,7 +86,7 @@ namespace CONFIGURATION
 	 		*/	
 			template<typename Item>
 			bool writeParametersToTree(std::string desired_path, 
-										CONFIGURATION::named_parameters<Item> new_parameter);
+										ConfigSystem::named_parameters<Item> new_parameter);
 		
 			/*! @brief Reads and returns a parameter from the tree with the path specified.
 	 
@@ -94,7 +94,7 @@ namespace CONFIGURATION
 				@return Returns the desired parameter by "named_parameters<Item>".
 	 		*/
 			template<typename Item>
-			CONFIGURATION::named_parameters<Item> readParametersFromTree(std::string path);
+			ConfigSystem::named_parameters<Item> readParametersFromTree(std::string path);
 		 
 	};
 }

@@ -31,7 +31,7 @@
 
 
 	
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 	template<typename Item>	
 	class ConfigParameters

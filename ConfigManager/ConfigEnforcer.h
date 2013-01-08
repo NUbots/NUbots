@@ -35,9 +35,9 @@
 
 #include "ConfigStorageManager.h"
 
-using CONFIGURATION::ConfigStorageManager;
+using ConfigSystem::ConfigStorageManager;
 
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 	class ConfigEnforcer
 	{

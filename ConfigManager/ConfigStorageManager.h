@@ -43,7 +43,7 @@
 
 using boost::property_tree::ptree;
 
-namespace CONFIGURATION
+namespace ConfigSystem
 {
 	//Used to store the conflict limits 
 	//FOLLOWING IS FOR COMPLICATED CONFLICTS ONLY, TO BE IMPLEMENTED LATER.
@@ -67,7 +67,7 @@ namespace CONFIGURATION
 	struct parameters
 	{
 		Item value;
-		std:vector<Item>* vector_value;
+		std::vector<Item>* vector_value;
 		std::string type;
 
 		Item upper_bound;
@@ -82,7 +82,7 @@ namespace CONFIGURATION
 		
 		//FOLLOWING IS FOR COMPLICATED CONFLICTS ONLY, TO BE IMPLEMENTED LATER).
 		//vector of pairs, consisting of a string path and conflict_limits struct 
-		//std::vector< std::pair< std::string, CONFIGURATION::conflict_limits<Item> > > conflicts;
+		//std::vector< std::pair< std::string, ConfigSystem::conflict_limits<Item> > > conflicts;
 	};
 
 	class ConfigStorageManager

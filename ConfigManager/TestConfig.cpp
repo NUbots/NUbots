@@ -30,9 +30,9 @@
 #include "ConfigEnforcer.h"
 #include "ConfigManager.h"
 
-using CONFIGURATION::ConfigStorageManager;
-using CONFIGURATION::ConfigEnforcer;
-using CONFIGURATION::ConfigManager;
+using ConfigSystem::ConfigStorageManager;
+using ConfigSystem::ConfigEnforcer;
+using ConfigSystem::ConfigManager;
 
 int main(void)
 {
@@ -59,7 +59,7 @@ int main(void)
 	//Read all config files. 
 	ConfigManager *config = new ConfigManager(filename);
 	
-	intsuccess = config->readIntParam("root.behaviour.arbitrary_behave_constant", convertstuff);
+	intsuccess = config->readIntParam("root.behaviour", "arbitrary_behave_constant", convertstuff);
 	
 	if(intsuccess) 	std::cout << "EPIC WINNING" << "\n";
 	else			std::cout << "nope.avi" << "\n";
@@ -69,7 +69,7 @@ int main(void)
 	std::cout << "changing to: " <<  50000 << "\n";
 	
 	//Can also change the type of variables. Have another class to safe proof this?
-	intwritesuccess = config->storeIntParam("root.behaviour.arbitrary_behave_constant", 50000);
+	intwritesuccess = config->storeIntParam("root.behaviour", "arbitrary_behave_constant", 50000);
 	
 	config->printAll();
 	
@@ -100,7 +100,7 @@ int main(void)
 	//esuccess = config->editEntry("root.vision.arbitrary_vis_constant", "fffffaaa", "some awful type");
 
 	//accessing a value and printing:
-	/*CONFIGURATION::parameters<std::string> value_found;
+	/*ConfigSystem::parameters<std::string> value_found;
 	value_found = config->accessEntry("root.vision.arbitrary_vis_constant");
 	std::cout << "VALUE: " << value_found.value << "\nTYPE: " << value_found.type << "\nUBOUND: " <<
 				value_found.upper_bound << "\nLBOUND: " << value_found.lower_bound << "\n";
@@ -113,7 +113,7 @@ int main(void)
 	
 	
 	//Seeing if edited_values can be edited:
-	CONFIGURATION::parameters<int> edited_values;
+	ConfigSystem::parameters<int> edited_values;
 	edited_values.value = 50;
 	edited_values.type = "int";
 	edited_values.upper_bound = 50;
