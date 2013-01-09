@@ -158,7 +158,7 @@ void PCCamera::setStreaming(bool streaming_on)
 
 void PCCamera::initialiseCamera()
 {
-    int returnValue;
+    //int returnValue;
 
     //set default parameters
 //    struct v4l2_control control;
@@ -181,7 +181,8 @@ void PCCamera::initialiseCamera()
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
 
-    returnValue = ioctl(fd, VIDIOC_S_FMT, &fmt);
+    //returnValue = ioctl(fd, VIDIOC_S_FMT, &fmt);
+    ioctl(fd, VIDIOC_S_FMT, &fmt);
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(returnValue)
     {

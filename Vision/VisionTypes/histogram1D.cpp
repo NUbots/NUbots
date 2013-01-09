@@ -13,15 +13,6 @@ public:
   }
 };
 
-Bin Histogram1D::emptyBin(int start, int width)
-{
-    Bin b;
-    b.start = start;
-    b.width = width;
-    b.value = 0;
-    return b;
-}
-
 Histogram1D::Histogram1D(int num_bins, int bin_width)
 {
     m_bins.clear();
@@ -39,6 +30,15 @@ Histogram1D::Histogram1D(vector<int> bin_widths)
         m_bins.push_back(emptyBin(cur_pos, bin_widths.at(i)));
         cur_pos += bin_widths.at(i);
     }
+}
+
+Bin Histogram1D::emptyBin(int start, int width)
+{
+    Bin b;
+    b.start = start;
+    b.width = width;
+    b.value = 0;
+    return b;
 }
 
 Bin Histogram1D::getBin(int pos) {

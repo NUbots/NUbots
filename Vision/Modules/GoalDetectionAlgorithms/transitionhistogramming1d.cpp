@@ -8,15 +8,17 @@
 
 #include <boost/foreach.hpp>
 
+TransitionHistogramming1D::TransitionHistogramming1D()
+{
+}
+
 void TransitionHistogramming1D::detectGoals()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
 
-    vector<Quad> yellow_posts;
-
-    detectGoal(&yellow_posts);
+    vector<Quad> yellow_posts = detectGoal();
 
     removeInvalidPosts(&yellow_posts);
 
@@ -162,7 +164,7 @@ void TransitionHistogramming1D::overlapCheck(vector<Quad>* posts)
     }
 }
 
-void TransitionHistogramming1D::detectGoal(vector<Quad>* candidates)
+vector<Quad> TransitionHistogramming1D::detectGoal()
 {
     const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
     const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
@@ -176,6 +178,8 @@ void TransitionHistogramming1D::detectGoal(vector<Quad>* candidates)
     const int BIN_WIDTH = WIDTH/BINS;
     const int MIN_THRESHOLD = 1;
     const float SDEV_THRESHOLD = 0.75;
+    const int PEAK_THRESHOLD = 10;
+    const float ALLOWED_DISSIMILARITY = 0.05;
 
     //int histogram[2][BINS], peaks[2][MAX_OBJECTS], peak_widths[2][MAX_OBJECTS];
     Histogram1D h_start(BINS, BIN_WIDTH),
@@ -192,119 +196,7 @@ void TransitionHistogramming1D::detectGoal(vector<Quad>* candidates)
     Histogram1D h_start_merged = mergePeaks(h_start, MIN_THRESHOLD);
     Histogram1D h_end_merged = mergePeaks(h_end, MIN_THRESHOLD);
 
-    // pair start transitions and end transitions
-    //COME BACK HERE
-
-    // Calculate bounding boxes for posts
-    for (int i = 0; i < MAX_OBJECTS; i++) {
-        if (merged_peaks[i][0] >= 0 && merged_peaks[i][1] >= 0) {
-            // find bounding box
-            int    start_pos = std::max(0, merged_peaks[i][0] * BIN_WIDTH),
-                   end_pos = min(WIDTH, (merged_peaks[i][1] + 1) * BIN_WIDTH),
-                   start_min = std::numeric_limits<int>::max(),
-                   end_max = 0,
-                   bot_min = std::numeric_limits<int>::max(),
-                   top_max = 0;
-
-            // FIND LEFT EDGE
-            int mean = 0, sdev = 0, counter = 0;
-
-            for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (start_trans.at(j).x >= start_pos && start_trans.at(j).x <= end_pos) {
-                    mean +=  start_trans.at(j).x;
-                    counter++;
-                }
-            mean /= counter;
-            counter = 0;
-            for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (start_trans.at(j).x >= start_pos && start_trans.at(j).x <= end_pos) {
-                    sdev += pow(static_cast<float>(start_trans.at(j).x - mean), 2);
-                    counter++;
-                }
-            sdev = sqrt(sdev/counter);
-
-            for (unsigned int j = 0; j < start_trans.size(); j++) {
-                int    x_pos = start_trans.at(j).x,
-                       y_pos = start_trans.at(j).y;
-                if (x_pos >= start_pos && x_pos <= end_pos) {
-                    if(x_pos < start_min && x_pos >= mean - SDEV_THRESHOLD*sdev) {
-                        start_min = x_pos;
-                    }
-                    if(y_pos < bot_min)
-                        bot_min = y_pos;
-                    else if (y_pos > top_max)
-                        top_max = y_pos;
-                }
-
-            }
-            mean = sdev = counter = 0;
-
-            // FIND RIGHT EDGE
-            for (unsigned int j = 0; j < end_trans.size(); j++)
-                if (end_trans.at(j).x >= start_pos && end_trans.at(j).x <= end_pos) {
-                    mean +=  end_trans.at(j).x;
-                    counter++;
-                }
-            mean /= counter;
-            counter = 0;
-            for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (end_trans.at(j).x >= start_pos && end_trans.at(j).x <= end_pos) {
-                    sdev += pow(static_cast<float>(end_trans.at(j).x - mean), 2);
-                    counter++;
-                }
-            sdev = sqrt(sdev/counter);
-
-            for (unsigned int j = 0; j < end_trans.size(); j++) {
-                int    x_pos = end_trans.at(j).x,
-                       y_pos = end_trans.at(j).y;
-                if (x_pos >= start_pos && x_pos <= end_pos) {
-                    if (x_pos > end_max && x_pos <= mean + SDEV_THRESHOLD*sdev)
-                    end_max = x_pos;
-                    if(y_pos < bot_min)
-                        bot_min = y_pos;
-                    else if (y_pos > top_max)
-                        top_max = y_pos;
-                }
-            }
-
-            bool contains_vertical = false;
-
-            //unsigned int    vert_max = 0,
-            //                vert_min = std::numeric_limits<int>::max();
-
-            for (unsigned int j = 0; j < vert_trans.size(); j++) {
-                // extend with vertical segments (increase height)
-                int x_pos = vert_trans.at(j).x;
-                int y_pos = vert_trans.at(j).y;
-                if (x_pos >= start_min && x_pos <= end_max) {
-                    contains_vertical = true;
-                    if (y_pos < bot_min)
-                        bot_min = y_pos;
-                    else if (y_pos > top_max)
-                        top_max = y_pos;
-                //if (x_pos < vert_min) {
-                //    vert_min = x_pos;
-                //    cout << "ln356:" << x_pos;
-                //}
-                //else if (x_pos > vert_max)
-                //    vert_max = x_pos;
-                }
-            }
-
-            // force width to be no greater than that given by vertical segments (inc. SLACK)
-//            unsigned int SLACK = 2;
-//            if (vert_min - SLACK > start_min)   //THIS SHOULDN'T HAPPEN WHEN THERE ARE NO VERTICAL TRANSITIONS, BUT IT DOES
-//                start_min = vert_min - SLACK;
-//            if (vert_max + SLACK < end_max)
-//                end_max = vert_max + SLACK;
-
-            // throw out if no vertical segments contained
-            //if (contains_vertical)
-
-            candidates->push_back(Quad(start_min, bot_min, end_max, top_max));
-                //cout << start_min << " " << bot_min << " " << end_max << " " << top_max << endl;
-        }
-    }
+    return generateCandidates(h_start_merged, h_end_merged, h_segments, v_segments, PEAK_THRESHOLD, ALLOWED_DISSIMILARITY);
 }
 
 Histogram1D TransitionHistogramming1D::mergePeaks(Histogram1D hist, int minimum_size)
@@ -312,3 +204,119 @@ Histogram1D TransitionHistogramming1D::mergePeaks(Histogram1D hist, int minimum_
     hist.mergeAdjacentPeaks(minimum_size);
     return hist;
 }
+
+vector<Quad> TransitionHistogramming1D::generateCandidates(const Histogram1D& start, const Histogram1D& end,
+                                                           const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments,
+                                                           int peak_threshold, float allowed_dissimilarity)
+{
+    vector<Quad> candidates;
+
+    // pair start transitions and end transitions
+    vector<Bin>::const_iterator s_it = start.begin(),
+                                e_it = end.begin(),
+                                e_holder;
+
+    while (s_it != start.end() && e_it != end.end()) {
+        if(s_it->value >= peak_threshold) {
+            //consider this peak
+            //move the end transition iterator up to the start transition iterator
+            //note that the histograms may not line up exactly
+            while(e_it->start < s_it->start && e_it != end.end()) {
+                e_it++;
+            }
+
+            e_holder = e_it; //keep track of where the iterator was
+
+            //now move along the end histogram using e_it until reaching the end or found a bin within allowed_dissimilarity of
+            //the current start bin size
+            while(e_it != end.end() && !checkBinSimilarity(*e_it, *s_it, allowed_dissimilarity)) {
+                e_it++;
+            }
+
+            if(e_it != end.end()) {
+                //we found a matching bin - generate candidate
+                candidates.push_back(generateCandidate(*s_it, *e_it, h_segments, v_segments));
+
+                //move the start iterator until after the end iterator
+                while(s_it != start.end() && s_it->start < e_it->start + e_it->width) {
+                    s_it++;
+                }
+            }
+            else {
+                //no match - move to next start bin
+                s_it++;
+            }
+            e_it = e_holder; //put e_it back to its previous location
+        }
+        else {
+            s_it++;
+        }
+    }
+
+
+
+
+    return candidates;
+}
+
+
+bool TransitionHistogramming1D::checkBinSimilarity(Bin b1, Bin b2, float allowed_dissimilarity)
+{
+    return b1.value*(1+allowed_dissimilarity) >= b2.value && b1.value*(1-allowed_dissimilarity) <= b2.value;
+}
+
+Quad TransitionHistogramming1D::generateCandidate(Bin start, Bin end, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
+{
+    // find bounding box from histogram
+    int    left = start.start,
+           right = end.start + end.width,
+           h_min = std::numeric_limits<int>::max(),
+           h_max = 0,
+           v_min = std::numeric_limits<int>::max(),
+           v_max = 0;
+
+    //just use pure bounding box for now, later use stddev thresholding
+
+    //find left and right
+    BOOST_FOREACH(ColourSegment seg, h_segments) {
+        //check start
+        int s_x = seg.getStart().x,
+            e_x = seg.getEnd().x;
+        if(s_x >= left && s_x <= right) {
+            //segment's left edge is withing the bounding box
+            if(s_x < h_min)
+                h_min = s_x; //segment is leftmost, keep track
+        }
+        if(e_x >= left && e_x <= right) {
+            //segment's right edge is withing the bounding box
+            if(e_x > h_max)
+                h_max = e_x; //segment is rightmost, keep track
+        }
+    }
+
+    //find top and bottom
+    BOOST_FOREACH(ColourSegment seg, v_segments) {
+        //check start
+        int s_x = seg.getStart().x,
+            s_y = seg.getStart().y,
+            e_x = seg.getEnd().x,
+            e_y = seg.getEnd().y;
+        if(s_x >= left && s_x <= right) {
+            //segment's left edge is withing the bounding box
+            if(s_y < v_min)
+                v_min = s_y; //segment is bottommost, keep track
+            else if(s_y > v_max)
+                v_max = s_y; //segment is uppermost, keep track
+        }
+        if(e_x >= left && e_x <= right) {
+            //segment's left edge is withing the bounding box
+            if(e_y < v_min)
+                v_min = e_y; //segment is bottommost, keep track
+            else if(e_y > v_max)
+                v_max = e_y; //segment is uppermost, keep track
+        }
+    }
+
+    return Quad(h_min, v_min, h_max, v_max);
+}
+

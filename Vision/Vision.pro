@@ -91,8 +91,7 @@ HEADERS += \
     visionblackboard.h \
     visioncontroller.h \ 
     visionconstants.h \
-    VisionTypes/histogram1D.h \
-    Modules/GoalDetectionAlgorithms/transitionhistogramming1d.h
+    Modules/GoalDetectionAlgorithms/transitionhistogramming1d.h \
     #Threads/SaveImagesThread.h
 
 SOURCES += \

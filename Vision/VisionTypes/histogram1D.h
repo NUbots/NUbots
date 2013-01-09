@@ -6,6 +6,8 @@
 using std::vector;
 using std::pair;
 
+//! @todo Make this a templated class and keep a track of objects for later use
+
 struct Bin
 {
     int value;
@@ -16,15 +18,17 @@ struct Bin
 class Histogram1D
 {
 public:
-    static Bin emptyBin(int start, int width);
-
     Histogram1D(int num_bins, int bin_width);
     Histogram1D(vector<int> bin_widths);
+
+    static Bin emptyBin(int start, int width);
 
     //accessors
     Bin getBin(int pos);
     unsigned int getBinIndex(int pos);
     vector<Bin> getLargestBins(unsigned int n);
+    vector<Bin>::const_iterator begin() const {return m_bins.begin();}
+    vector<Bin>::const_iterator end() const {return m_bins.end();}
 
     //mutators
     void addToBin(int pos, int val);

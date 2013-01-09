@@ -349,17 +349,18 @@ void DataWrapper::debugRefresh()
 bool DataWrapper::debugPublish(DEBUG_ID id)
 {
     //warning if called after another publish method for the same window it will overwrite the window
+    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it;
     switch(id) {
     case DBID_CLASSED_IMAGE:
         //Get window assigned to id
-        map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(id);
+        map_it = debug_map.find(id);
         if(map_it == debug_map.end()) {
             errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(id) << endl;
             return false;
         }
 
         //for all images
-        for(int i=0; i<map_it->second.size(); i++) {
+        for(unsigned int i=0; i<map_it->second.size(); i++) {
             string& window = map_it->second[i]->first; //get window name from pair
             cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
@@ -368,6 +369,8 @@ bool DataWrapper::debugPublish(DEBUG_ID id)
             imshow(window, img);
         }
         break;
+    default:
+        errorlog << "DataWrapper::debugPublish called with invalid DEBIG_ID: " << getIDName(id) << endl;
     }
     return true;
 }
@@ -388,7 +391,7 @@ bool DataWrapper::debugPublish(const vector<Ball>& data) {
     }
 
     //for all images
-    for(int i=0; i<map_it->second.size(); i++) {
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
         string& window = map_it->second[i]->first; //get window name from pair
         cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
@@ -418,7 +421,7 @@ bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     }
 
     //for all images
-    for(int i=0; i<map_it->second.size(); i++) {
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
         string& window = map_it->second[i]->first; //get window name from pair
         cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
@@ -448,7 +451,7 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
     }
 
     //for all images
-    for(int i=0; i<map_it->second.size(); i++) {
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
         string& window = map_it->second[i]->first; //get window name from pair
         cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
@@ -478,7 +481,7 @@ bool DataWrapper::debugPublish(const vector<Obstacle>& data)
     }
 
     //for all images
-    for(int i=0; i<map_it->second.size(); i++) {
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
         string& window = map_it->second[i]->first; //get window name from pair
         cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
@@ -508,7 +511,7 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
     }
 
     //for all images
-    for(int i=0; i<map_it->second.size(); i++) {
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
         string& window = map_it->second[i]->first; //get window name from pair
         cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
@@ -542,7 +545,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
 
 
     //for all images
-    for(int i=0; i<map_it->second.size(); i++) {
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
         cv::Mat& img = map_it->second[i]->second;    //get image from pair
         string& window = map_it->second[i]->first; //get window name from pair
 
@@ -627,7 +630,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     }
 
     //for all images
-    for(int i=0; i<map_it->second.size(); i++) {
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
         cv::Mat& img = map_it->second[i]->second;    //get image from pair
         string& window = map_it->second[i]->first; //get window name from pair
 
@@ -681,7 +684,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
     }
 
     //for all images
-    for(int i=0; i<map_it->second.size(); i++) {
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
         cv::Mat& img_map = map_it->second[i]->second;    //get image from pair
         string& window = map_it->second[i]->first; //get window name from pair
 
