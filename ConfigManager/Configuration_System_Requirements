@@ -1,6 +1,14 @@
 Configuration System Requirements
 =================================
 
+
+Update (10/01/13, 3:50pm): 
+  - There shall only be one 'rule': range limits (to be handled by the ConfigRange<T> class)
+  - ConfigParameter is superclass of ConfigIntParameter, ConfigStringParameter, etc...
+  - The ConfigStorageManager class will store a tree of ConfigParameters
+
+
+
 Purpose of the system:
   - Central storage and communication hub for the robot.
 
