@@ -184,7 +184,7 @@ DataWrapper::DataWrapper()
     debug_map[DBID_BEACONS].push_back(              &debug_windows[5]);
     debug_map[DBID_BALLS].push_back(                &debug_windows[5]);
     debug_map[DBID_OBSTACLES].push_back(            &debug_windows[5]);
-    //debug_map[DBID_LINES].push_back(                &debug_windows[3]);
+    debug_map[DBID_LINES].push_back(                &debug_windows[5]);
 
     results_img.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
     

@@ -18,10 +18,22 @@ Quad::Quad(int left, int top, int right, int bottom)
 
 void Quad::set(int left, int top, int right, int bottom)
 {
-    m_left = left;
-    m_right = right;
-    m_bottom = bottom;
-    m_top = top;
+    if(left < right) {
+        m_left = left;
+        m_right = right;
+    }
+    else {
+        m_left = right;
+        m_right = left;
+    }
+    if(top < bottom) {
+        m_top = top;
+        m_bottom = bottom;
+    }
+    else {
+        m_top = bottom;
+        m_bottom = top;
+    }
     recalculate();
 }
 
@@ -47,18 +59,18 @@ Vector2<int> Quad::getTopRight() const
 
 int Quad::getWidth() const
 {
-    return abs(m_right - m_left);
+    return abs(m_right - m_left + 1);
 }
 
 int Quad::getHeight() const
 {
-    return abs(m_bottom - m_top);
+    return abs(m_bottom - m_top + 1);
 }
 
-cv::Scalar Quad::getAsScalar() const
-{
-    return cv::Scalar(m_left, m_bottom, m_right, m_top);
-}
+//cv::Scalar Quad::getAsScalar() const
+//{
+//    return cv::Scalar(m_left, m_bottom, m_right, m_top);
+//}
 
 void Quad::recalculate()
 {

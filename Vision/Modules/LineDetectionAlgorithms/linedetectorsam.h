@@ -25,8 +25,8 @@
             by initRules()
  */
 
-#ifndef SAM_H_SHANNON
-#define SAM_H_SHANNON
+#ifndef LINEDETECTORSAM_H
+#define LINEDETECTORSAM_H
 
 #include <vector>
 #include <math.h>
@@ -37,16 +37,13 @@
 
 using std::vector;
 
-class SplitAndMerge : public LineDetector
+class LineDetectorSAM : public LineDetector
 {
 public:
-    //GENERIC
-    SplitAndMerge();
-    ~SplitAndMerge();
+    LineDetectorSAM();
+    ~LineDetectorSAM();
 
     void run();
-
-    //LEAST-SQUARES FITTING
 
 private:
     vector<LSFittedLine> fitLines(vector<LinePoint>& points, bool noise=true);
@@ -91,4 +88,4 @@ private:
 
 };
 
-#endif // SAM_H_SHANNON
+#endif // LINEDETECTORSAM_H
