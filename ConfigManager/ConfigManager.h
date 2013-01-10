@@ -73,7 +73,6 @@ namespace ConfigSystem
         bool readDoubleParam (const string &paramPath, const string &paramName, double &data); // throw(ConfigException);
         bool readStringParam (const string &paramPath, const string &paramName, string &data); // throw(ConfigException);
 
-
         /*! @brief Stores the given integer in the current configuration at the given path.
          *
          *  
@@ -104,7 +103,7 @@ namespace ConfigSystem
             string fullParamPath = paramPath + "." + paramName;
 
             // Get the parameter information from the pTree
-            parameters<string> pStruct = storageManager.accessEntry(fullParamPath);
+            parameter<string> pStruct = storageManager.accessEntry(fullParamPath);
             
             // Aliases for parameter strings
             string &value = pStruct.value;
@@ -151,7 +150,7 @@ namespace ConfigSystem
             }
 
             // Get this parameter's current entry:
-            parameters<string> pStruct = storageManager.accessEntry(fullParamPath);
+            parameter<string> pStruct = storageManager.accessEntry(fullParamPath);
 
             // Check the type of the parameter
             if (pStruct.type.compare(typeStr) != 0) return false;

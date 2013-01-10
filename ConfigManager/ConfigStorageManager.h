@@ -62,9 +62,9 @@ namespace ConfigSystem
 		std::vector<Item> values;
 	};*/
 
-	//Used to store parameters read in from JSON files.
+	//Used to store parameter read in from JSON files.
 	template<typename Item>
-	struct parameters
+	struct parameter
 	{
 		Item value;
 		std::vector<Item>* vector_value;
@@ -170,14 +170,14 @@ namespace ConfigSystem
    			@param "type" stores data type (MUST ALWAYS BE SPECIFIED).
     		@return Returns true if success, false otherwise.
  			*/
-			bool editEntry(std::string path, parameters<std::string> new_entry);
+			bool editEntry(std::string path, parameter<std::string> new_entry);
 		
-			/*! @brief Accesses the entry specified by the string path and returns as parameters struct.
+			/*! @brief Accesses the entry specified by the string path and returns as parameter struct.
  	
    			@param "path" stores the path to the value to be edited. 
     		@return Returns the value stored at the specified path. 
  			*/
-			parameters<std::string> accessEntry(std::string path);
+			parameter<std::string> accessEntry(std::string path);
 	
 		
 		private:
