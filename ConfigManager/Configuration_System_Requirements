@@ -1,0 +1,120 @@
+Configuration System Requirements
+=================================
+
+Purpose of the system:
+  - Central storage and communication hub for the robot.
+
+Definitions and requirements:
+  1. Manage robot's 'configuration':
+    1.1. A 'configuration' is a set of robot 'parameters' with given values.
+    
+    1.2. A 'parameter' is an atomic variable whose value can affect the function of the robot.
+    
+    1.3. There are 'rules' that govern the values that parameters may hold.
+
+    1.4. Rules may affect the value of a lone parameter, or of a collection of parameters at once.
+
+    1.5. If a parameter value does not satisfy a given rule, it is said to create a 'rule conflict'
+
+    1.6. A configuration that is free of rule conflicts is said to be a 'valid configuation' (else, it is an invalid configuration).
+
+  2. The system must ensure that the robot always remains in a valid configuration
+
+  3. Configurations must be 'persistant', and should remain unchanged between runs (it must not be possible for a configuration to become corrupt due to an untimely shutdown, etc.).
+    
+    3.1. Configurations should be stored on the robot's filesystem in a human-readable file format. JSON is the preferred format.
+
+  4. The system must be able to communicate with the other 'modules' at all times (using a strongly typed 'interface').
+
+    4.1. 'Changes' to parameter values may be 'requested'
+    
+    4.2. Changes will only be allowed if they would not cause the robot's configuration to become invalid
+
+    4.3. Changes should be tracked (or at least, parameters should be flagged as 'modified' if they are changed).
+
+  5. Parameters of a large variety of types must be allowed.
+    5.1. All simple types (standard primitive types + string)
+
+    5.2. Ordered sets of simple types
+
+  6. It must be possible to easily change the current configuration to a different configuration.
+
+  7. Configuration parameters should be stored in a tree structure, and accessed using paths and names into that tree structure.
+
+
+--------------------
+Important terms:
+a. Configuration
+b. Parameter
+c. Rule
+d. Rule Conflict
+e. Valid Configuration
+f. persistant (store)
+g. module
+h. interface
+i. change request
+j. change validation
+k. modified flag (change tracking)
+l. configuration switch
+m. Tree structure
+
+---------------------
+
+Responsibilities:
+  - Configuration
+  	- represents an entire configuration
+  	- can be saved and loaded to and from the disk
+    - contains all of the configuration's rules and parameters in some structure
+    - also contains a name and general info about the configuration (incl. storage path)
+    - only one configuration may be loaded at any time
+
+
+  - Parameter
+    - represents a single named parameter, containing all necessary data
+    - could be of vector type
+
+  - Rule
+    - represents a rule that affects one or more parameters
+    - stores references to the parameters it affects and other data necessary to enforce the rule
+    - many types of rules should be supported
+    - must be flexible + be able to add new rule types
+    - can detect whether the rule is being obeyed, or is broken
+
+  - Tree/DataStore
+    - stores the config data/parameters during runtime (wraps + abstracts whichever library is used to )
+    - can access parameters using paths
+    - allows saving/loading of configurations to/from the disk
+
+  - Request
+    - represents some request to the system
+    - could be to retrieve parameter data
+    - could be to modify a parameter
+    - could be to add a parameter
+    - could change the type of a parameter
+    - could change the accessibility of a parameter
+    - add/remove/modify rules relating to a parameter
+    - must contain the necessary data to describe the request in full
+
+  - Response
+    - a response sent to a module to answer a request
+  
+  - Update
+    - sent to a module to notify of changes when a change occurs
+    - must contain all sufficient data to represent the changes
+
+  - Module
+    - the modules reside outside the config system
+    - modules must call methods from the interface to the config system
+    - modules must implement some interface to allow the config system to send them updates/change notifications
+
+  - Interface
+    - offers commication between a module and the config system
+
+
+
+NOTES:
+  - A change to a parameter can only conflict with rules that reference that parameter
+  - A change to a set of parameters can only affect rules that contain at least one parameter in the set
+
+
+
