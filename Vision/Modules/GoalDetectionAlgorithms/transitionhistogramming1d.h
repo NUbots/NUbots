@@ -21,7 +21,7 @@ public:
     TransitionHistogramming1D();
     virtual void detectGoals();
 private:
-    vector<Quad> detectGoal();
+    vector<Quad> detectPosts();
     Histogram1D mergePeaks(Histogram1D hist, int minimum_threshold);
     vector<Quad> generateCandidates(const Histogram1D& start, const Histogram1D& end,
                                     const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments,

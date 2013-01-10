@@ -18,7 +18,7 @@ void TransitionHistogramming1D::detectGoals()
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
 
-    vector<Quad> yellow_posts = detectGoal();
+    vector<Quad> yellow_posts = detectPosts();
 
     removeInvalidPosts(&yellow_posts);
 
@@ -164,7 +164,7 @@ void TransitionHistogramming1D::overlapCheck(vector<Quad>* posts)
     }
 }
 
-vector<Quad> TransitionHistogramming1D::detectGoal()
+vector<Quad> TransitionHistogramming1D::detectPosts()
 {
     const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
     const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
@@ -172,16 +172,14 @@ vector<Quad> TransitionHistogramming1D::detectGoal()
     //vector<PointType> start_trans, end_trans, vert_trans;
     //vector<int> start_lengths, end_lengths;
 
-    const int MAX_PEAKS = 8;
     const int BINS = 20;
     const int WIDTH = VisionBlackboard::getInstance()->getImageWidth();
     const int BIN_WIDTH = WIDTH/BINS;
     const int MIN_THRESHOLD = 1;
     const float SDEV_THRESHOLD = 0.75;
     const int PEAK_THRESHOLD = 10;
-    const float ALLOWED_DISSIMILARITY = 0.05;
+    const float ALLOWED_DISSIMILARITY = 0.5;
 
-    //int histogram[2][BINS], peaks[2][MAX_OBJECTS], peak_widths[2][MAX_OBJECTS];
     Histogram1D h_start(BINS, BIN_WIDTH),
                 h_end(BINS, BIN_WIDTH);
 
@@ -281,16 +279,26 @@ Quad TransitionHistogramming1D::generateCandidate(Bin start, Bin end, const vect
     BOOST_FOREACH(ColourSegment seg, h_segments) {
         //check start
         int s_x = seg.getStart().x,
-            e_x = seg.getEnd().x;
+            s_y = seg.getStart().y,
+            e_x = seg.getEnd().x,
+            e_y = seg.getEnd().y;
         if(s_x >= left && s_x <= right) {
             //segment's left edge is withing the bounding box
             if(s_x < h_min)
-                h_min = s_x; //segment is leftmost, keep track
+                h_min = s_x; //segment h-pos is leftmost, keep track
+            if(s_y < v_min)
+                v_min = s_y; //segment v-pos is uppermost, keep track
+            if(s_y > v_max)
+                v_max = s_y; //segment v-pos is lowermost, keep track
         }
         if(e_x >= left && e_x <= right) {
             //segment's right edge is withing the bounding box
             if(e_x > h_max)
-                h_max = e_x; //segment is rightmost, keep track
+                h_max = e_x; //segment h-pos is rightmost, keep track
+            if(s_y < v_min)
+                v_min = s_y; //segment v-pos is uppermost, keep track
+            if(s_y > v_max)
+                v_max = s_y; //segment v-pos is lowermost, keep track
         }
     }
 
