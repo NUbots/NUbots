@@ -1,4 +1,4 @@
-#include "transitionhistogramming1d.h"
+#include "goaldetectorhistogram.h"
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
@@ -8,36 +8,37 @@
 
 #include <boost/foreach.hpp>
 
-TransitionHistogramming1D::TransitionHistogramming1D()
+GoalDetectorHistogram::GoalDetectorHistogram()
 {
 }
 
-void TransitionHistogramming1D::detectGoals()
+void GoalDetectorHistogram::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
 
-    vector<Quad> yellow_posts = detectPosts();
+    vector<Quad> yellow_posts = detectQuads();
 
-    removeInvalidPosts(&yellow_posts);
+    removeInvalidPosts(yellow_posts);
 
     // OVERLAP CHECK
-    overlapCheck(&yellow_posts);
+    overlapCheck(yellow_posts);
 
-    // DENSITY CHECK - fix later: use segment lengths and quad area to calculate rather than
-    //                  re-accessing the image
-    DensityCheck(true, false, &yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
+    // DENSITY CHECK - fix later: use segment lengths and scanline spacing to estimate rather than
+    //                 re-accessing the image to calculate fully
+    DensityCheck(&yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
 
-    // YELLOW POSTS
+    // CREATE POST OBJECTS
     if (yellow_posts.size() != 2) {
+        //unable to identify which post is which
+        //setting all to unknown
         BOOST_FOREACH(Quad q, yellow_posts) {
-//            Goal post(VisionFieldObject::GOAL_Y_U, q);
-//            vbb->addGoal(post);
             vbb->addGoal(Goal(VisionFieldObject::GOAL_Y_U, q));
         }
     }
     else {
+        //there are exactly two posts, identify each as left or right
         Quad post1 = yellow_posts.at(0),
              post2 = yellow_posts.at(1);
 
@@ -64,64 +65,33 @@ void TransitionHistogramming1D::detectGoals()
     }
 }
 
-void TransitionHistogramming1D::DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
+void GoalDetectorHistogram::DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
 {
-    //fix later: use segment lengths and quad area to calculate rather than
-    //                  re-accessing the image
-    ClassIndex::Colour colour, other_colour;
-    if (yellow) {
-        colour = ClassIndex::yellow;
-        other_colour = ClassIndex::blue;
-    }
-    else {
-        colour = ClassIndex::blue;
-        other_colour = ClassIndex::yellow;
-    }
-
     //cout << "PERCENT_REQUIRED: " << PERCENT_REQUIRED << endl;
 
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
         Quad candidate = *it;
-        int left, right, top, bottom;
-        left = candidate.getBottomLeft().x;
-        right = candidate.getTopRight().x;
-        top = candidate.getTopRight().y;
-        bottom = candidate.getBottomLeft().y;
+        int left = candidate.getBottomLeft().x,
+            right = candidate.getTopRight().x,
+            top = candidate.getTopRight().y,
+            bottom = candidate.getBottomLeft().y;
 
         //cout << "LEFT: " << left << "\tRIGHT: " << right << "\tTOP: " << top << "\tBOTTOM: " << bottom << endl;
 
-        // should probably fix the cause of this at some point...
-        if (left > right) {
-            int temp = left;
-            left = right;
-            right = temp;
-        }
-        if (top > bottom) {
-            int temp = top;
-            top = bottom;
-            bottom = temp;
-        }
-
         int count = 0;
-        int other_count = 0;
 
-        for (int i = left; i < right; i++) {
-            for (int j = top; j < bottom; j++) {
-                if (ClassIndex::getColourFromIndex(lut->classifyPixel((*img)(i, j))) == colour)
+        for (int x = left; x < right; x++) {
+            for (int y = top; y < bottom; y++) {
+                if (ClassIndex::getColourFromIndex(lut->classifyPixel((*img)(x, y))) == ClassIndex::yellow)
                     count++;
-                else if (ClassIndex::getColourFromIndex(lut->classifyPixel((*img)(i, j))) == other_colour)
-                    other_count++;
             }
         }
         if (((double)count)/((right-left)*(bottom-top)) < PERCENT_REQUIRED) {
             it = posts->erase(it);
             #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "TransitionHistogramming1D::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
+                debug << "GoalDetectorHistogram::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
             #endif
-        }
-        else if (other_count > 0 && !beacon) {
-            it = posts->erase(it);
         }
         else {
             it++;
@@ -130,41 +100,45 @@ void TransitionHistogramming1D::DensityCheck(bool yellow, bool beacon, vector<Qu
 }
 
 
-void TransitionHistogramming1D::removeInvalidPosts(vector<Quad>* posts)
+void GoalDetectorHistogram::removeInvalidPosts(vector<Quad>& posts)
 {
-    vector<Quad>::iterator it = posts->begin();
-    while (it < posts->end()) {
+    vector<Quad>::iterator it = posts.begin();
+    while (it != posts.end()) {
         Quad candidate = *it;
-        int height = candidate.getHeight();
-        int width = candidate.getWidth();
-//        int height = candidate.val[3] - candidate.val[1],
-//            width = candidate.val[2] - candidate.val[0];
-        if (width == 0)
-            it = posts->erase(it);
-        else if (it->getWidth() < VisionConstants::MIN_GOAL_WIDTH)
-            it = posts->erase(it);
+        double height = candidate.getHeight();
+        double width = candidate.getWidth();
+        if (width < VisionConstants::MIN_GOAL_WIDTH)
+            it = posts.erase(it);
         else if (height/width < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_LOW || height/width > VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH)
-            it = posts->erase(it);
+            it = posts.erase(it);
         else
             it++;
     }
 }
 
-void TransitionHistogramming1D::overlapCheck(vector<Quad>* posts)
+void GoalDetectorHistogram::overlapCheck(vector<Quad>& posts)
 {
     //REPLACE THIS WITH SOMETHING THAT MERGES OVERLAPPING POSTS - OR SHOULD WE NOT EVEN GET OVERLAPPING POSTS
-    for (unsigned int i = 0; i < posts->size(); i++) {
-        cv::Scalar left = posts->at(i).getAsScalar();
-        for (unsigned int j = i+1; j < posts->size(); j++) {
-            vector<Quad>::iterator it = posts->begin()+j;
-            cv::Scalar right = it->getAsScalar();
-            if (left.val[2] >= right.val[0] && left.val[0] <= right.val[2])
-                posts->erase(it);
+    vector<Quad>::iterator it_a = posts.begin(),
+                           it_b;
+    while(it_a != posts.end()) {
+        it_b = it_a + 1;
+        while(it_b != posts.end()) {
+            int a_l = it_a->getLeft(),
+                a_r = it_a->getRight(),
+                b_l = it_b->getLeft(),
+                b_r = it_b->getRight();
+            //if either of the second posts edges are within the first post remove it
+            if( (a_l >= b_l && a_l <= b_r) || (a_r >= b_l && a_r <= b_r) )
+                it_b = posts.erase(it_b);
+            else
+                it_b++;
         }
+        it_a++;
     }
 }
 
-vector<Quad> TransitionHistogramming1D::detectPosts()
+vector<Quad> GoalDetectorHistogram::detectQuads()
 {
     const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
     const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
@@ -173,17 +147,14 @@ vector<Quad> TransitionHistogramming1D::detectPosts()
     //vector<int> start_lengths, end_lengths;
 
     const int BINS = 20;
-    const int WIDTH = VisionBlackboard::getInstance()->getImageWidth();
-    const int BIN_WIDTH = WIDTH/BINS;
-    const int MIN_THRESHOLD = 1;
+    const int BIN_WIDTH = VisionBlackboard::getInstance()->getImageWidth()/(double)BINS;
+    const int MERGE_THRESHOLD = 50;
     const float SDEV_THRESHOLD = 0.75;
-    const int PEAK_THRESHOLD = 10;
+    const int CANDIDATE_THRESHOLD = 100;
     const float ALLOWED_DISSIMILARITY = 0.5;
 
     Histogram1D h_start(BINS, BIN_WIDTH),
                 h_end(BINS, BIN_WIDTH);
-
-    int MAX_WIDTH = 3;
 
     // fill histogram bins
     BOOST_FOREACH(ColourSegment seg, h_segments) {
@@ -191,19 +162,19 @@ vector<Quad> TransitionHistogramming1D::detectPosts()
         h_end.addToBin(seg.getEnd().x, seg.getLength());
     }
 
-    Histogram1D h_start_merged = mergePeaks(h_start, MIN_THRESHOLD);
-    Histogram1D h_end_merged = mergePeaks(h_end, MIN_THRESHOLD);
+    Histogram1D h_start_merged = mergePeaks(h_start, MERGE_THRESHOLD);
+    Histogram1D h_end_merged = mergePeaks(h_end, MERGE_THRESHOLD);
 
-    return generateCandidates(h_start_merged, h_end_merged, h_segments, v_segments, PEAK_THRESHOLD, ALLOWED_DISSIMILARITY);
+    return generateCandidates(h_start_merged, h_end_merged, h_segments, v_segments, CANDIDATE_THRESHOLD, ALLOWED_DISSIMILARITY);
 }
 
-Histogram1D TransitionHistogramming1D::mergePeaks(Histogram1D hist, int minimum_size)
+Histogram1D GoalDetectorHistogram::mergePeaks(Histogram1D hist, int minimum_size)
 {
     hist.mergeAdjacentPeaks(minimum_size);
     return hist;
 }
 
-vector<Quad> TransitionHistogramming1D::generateCandidates(const Histogram1D& start, const Histogram1D& end,
+vector<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& start, const Histogram1D& end,
                                                            const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments,
                                                            int peak_threshold, float allowed_dissimilarity)
 {
@@ -233,7 +204,7 @@ vector<Quad> TransitionHistogramming1D::generateCandidates(const Histogram1D& st
 
             if(e_it != end.end()) {
                 //we found a matching bin - generate candidate
-                candidates.push_back(generateCandidate(*s_it, *e_it, h_segments, v_segments));
+                candidates.push_back(makeQuad(*s_it, *e_it, h_segments, v_segments));
 
                 //move the start iterator until after the end iterator
                 while(s_it != start.end() && s_it->start < e_it->start + e_it->width) {
@@ -251,19 +222,16 @@ vector<Quad> TransitionHistogramming1D::generateCandidates(const Histogram1D& st
         }
     }
 
-
-
-
     return candidates;
 }
 
 
-bool TransitionHistogramming1D::checkBinSimilarity(Bin b1, Bin b2, float allowed_dissimilarity)
+bool GoalDetectorHistogram::checkBinSimilarity(Bin b1, Bin b2, float allowed_dissimilarity)
 {
     return b1.value*(1+allowed_dissimilarity) >= b2.value && b1.value*(1-allowed_dissimilarity) <= b2.value;
 }
 
-Quad TransitionHistogramming1D::generateCandidate(Bin start, Bin end, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
+Quad GoalDetectorHistogram::makeQuad(Bin start, Bin end, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
 {
     // find bounding box from histogram
     int    left = start.start,
@@ -295,10 +263,10 @@ Quad TransitionHistogramming1D::generateCandidate(Bin start, Bin end, const vect
             //segment's right edge is withing the bounding box
             if(e_x > h_max)
                 h_max = e_x; //segment h-pos is rightmost, keep track
-            if(s_y < v_min)
-                v_min = s_y; //segment v-pos is uppermost, keep track
-            if(s_y > v_max)
-                v_max = s_y; //segment v-pos is lowermost, keep track
+            if(e_y < v_min)
+                v_min = e_y; //segment v-pos is uppermost, keep track
+            if(e_y > v_max)
+                v_max = e_y; //segment v-pos is lowermost, keep track
         }
     }
 

@@ -30,10 +30,17 @@ public:
 
     Vector2<int> getBottomLeft() const;     //! Returns the bottom left pixel location  of the quad.
     Vector2<int> getTopRight() const;       //! Returns the top right pixel location  of the quad.
+
+    int getLeft() const {return m_left;}
+    int getRight() const {return m_right;}
+    int getTop() const {return m_top;}
+    int getBottom() const {return m_bottom;}
+
+
     int getWidth() const;                   //! Returns the width of the quad in pixels.
     int getHeight() const;                  //! Returns the height of the quad in pixels.
     
-    cv::Scalar getAsScalar() const;         //! Returns the quad as an OpenCV scalar
+    //cv::Scalar getAsScalar() const;         //! Returns the quad as an OpenCV scalar
     
 private:
     /**

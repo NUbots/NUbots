@@ -15,9 +15,10 @@
 #include "Vision/Modules/balldetection.h"
 //robocup hacks
 #include "Vision/visionconstants.h"
-#include "Vision/Modules/LineDetectionAlgorithms/splitandmerge.h"
-#include "Vision/Modules/LineDetectionAlgorithms/ransac.h"
-#include "Vision/Modules/GoalDetectionAlgorithms/transitionhistogramming1d.h"
+#include "Vision/Modules/LineDetectionAlgorithms/linedetectorsam.h"
+#include "Vision/Modules/LineDetectionAlgorithms/linedetectorransac.h"
+#include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h"
+#include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorransac.h"
 
 
 VisionController* VisionController::instance = 0;
@@ -26,9 +27,9 @@ VisionController::VisionController()
 {
     m_blackboard = VisionBlackboard::getInstance();
     m_data_wrapper = DataWrapper::getInstance();
-    m_line_detector_ransac = new RANSAC();
-    m_line_detector_sam = new SplitAndMerge();
-    m_goal_detector_hist = new TransitionHistogramming1D();
+    m_line_detector_ransac = new LineDetectorRANSAC();
+    m_line_detector_sam = new LineDetectorSAM();
+    m_goal_detector_hist = new GoalDetectorHistogram();
 }
 
 VisionController::~VisionController()
@@ -87,7 +88,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     //! DETECTION MODULES
 
     if(lookForLandmarks) {
-        m_goal_detector_hist->detectGoals();   //POSTS
+        m_goal_detector_hist->run();   //POSTS
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - goal detection done" << endl;
         #endif

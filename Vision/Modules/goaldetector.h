@@ -11,7 +11,7 @@ class GoalDetector
 public:
     GoalDetector();
 
-    virtual void detectGoals() = 0;
+    virtual void run() = 0;
 };
 
 #endif // GOALDETECTOR_H

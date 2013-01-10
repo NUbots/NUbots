@@ -1,4 +1,4 @@
-#include "splitandmerge.h"
+#include "linedetectorsam.h"
 //#include "Tools/Profiling/Profiler.h"
 #include "debug.h"
 #include "Vision/visionconstants.h"
@@ -8,11 +8,11 @@
 
 #include <boost/foreach.hpp>
 
-SplitAndMerge::SplitAndMerge()
+LineDetectorSAM::LineDetectorSAM()
 {
 }
 
-void SplitAndMerge::run()
+void LineDetectorSAM::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
 
@@ -39,7 +39,7 @@ void SplitAndMerge::run()
     }
 }
 
-vector<LSFittedLine> SplitAndMerge::fitLines(vector<LinePoint>& points, bool noise) {
+vector<LSFittedLine> LineDetectorSAM::fitLines(vector<LinePoint>& points, bool noise) {
     //Performs split-and-merge algorithm with input consisting of a set of point clusters
     // and a set of unclustered points, putting the resulting lines into a reference
     // passed vector
@@ -87,7 +87,7 @@ vector<LSFittedLine> SplitAndMerge::fitLines(vector<LinePoint>& points, bool noi
 
 
 
-void SplitAndMerge::split(vector<LSFittedLine>& lines, vector<LinePoint>& points) {
+void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& points) {
     // Recursive split algorithm - not used
 
     //Assumes:
@@ -161,7 +161,7 @@ void SplitAndMerge::split(vector<LSFittedLine>& lines, vector<LinePoint>& points
     }
 }
 
-//void SplitAndMerge::splitIterative(vector<LSFittedLine>& lines, vector<LinePoint>& points) {
+//void LineDetectorSAM::splitIterative(vector<LSFittedLine>& lines, vector<LinePoint>& points) {
 //    //Iterative split algorithm, uses a stack of lines and iterates over it, splitting
 //    //each line or adding it to a final list.
 
@@ -354,7 +354,7 @@ void SplitAndMerge::split(vector<LSFittedLine>& lines, vector<LinePoint>& points
 //    }
 //}
 
-void SplitAndMerge::findPointsOver(LSFittedLine& line, unsigned int& points_over, int& furthest_point) {
+void LineDetectorSAM::findPointsOver(LSFittedLine& line, unsigned int& points_over, int& furthest_point) {
     //this method finds the furthest point from a line and returns (via parameters)
     //the number of points over the SPLIT_DISTANCE threshold and the index of
     //the furthest point
@@ -386,7 +386,7 @@ void SplitAndMerge::findPointsOver(LSFittedLine& line, unsigned int& points_over
     //qDebug() <<furthest_point <<greatest_distance;
 }
 
-void SplitAndMerge::splitNoise(vector<LSFittedLine>& lines) {
+void LineDetectorSAM::splitNoise(vector<LSFittedLine>& lines) {
     //this method creates a copy of the noisePoints vector,
     //clears the current noisePoints vector and runs
     //the split algorithm on the copy
@@ -401,7 +401,7 @@ void SplitAndMerge::splitNoise(vector<LSFittedLine>& lines) {
     }
 }
 
-bool SplitAndMerge::separate(vector<LinePoint>& left, vector<LinePoint>& right, LinePoint& split_point, LSFittedLine& line) {
+bool LineDetectorSAM::separate(vector<LinePoint>& left, vector<LinePoint>& right, LinePoint& split_point, LSFittedLine& line) {
     /*splits a section of points around a splitting point by rotating and translating onto the line about the splitting point
      *Pre: left and right should be empty vectors
      *		points contains all the points to be split
@@ -472,7 +472,7 @@ bool SplitAndMerge::separate(vector<LinePoint>& left, vector<LinePoint>& right, 
 }
 
 
-void SplitAndMerge::merge(vector<LSFittedLine>& lines) {
+void LineDetectorSAM::merge(vector<LSFittedLine>& lines) {
     //O(l^2)  -  l=number of lines (max 15)
     // Compares all lines and merges based on the return value of
     // shouldMergeLines(Line, Line) - edit that method not this one
@@ -509,7 +509,7 @@ void SplitAndMerge::merge(vector<LSFittedLine>& lines) {
     lines = finals;
 }
 
-void SplitAndMerge::generateLine(LSFittedLine& line, vector<LinePoint>& points) {
+void LineDetectorSAM::generateLine(LSFittedLine& line, vector<LinePoint>& points) {
     //creates a Least Squared Fitted line
 
     line.clearPoints();
@@ -518,7 +518,7 @@ void SplitAndMerge::generateLine(LSFittedLine& line, vector<LinePoint>& points) 
 
 //GENERIC
 
-void SplitAndMerge::addToNoise(const LinePoint& point) {
+void LineDetectorSAM::addToNoise(const LinePoint& point) {
     //NOT EFFICIENT
     //O(M) for every insertion - where M is the size of noisePoints
     BOOST_FOREACH(LinePoint pt, noisePoints) {
@@ -529,13 +529,13 @@ void SplitAndMerge::addToNoise(const LinePoint& point) {
     noisePoints.push_back(point);
 }
 
-void SplitAndMerge::addToNoise(const vector<LinePoint > &points) {
+void LineDetectorSAM::addToNoise(const vector<LinePoint > &points) {
     BOOST_FOREACH(LinePoint pt, points) {
         addToNoise(pt);
     }
 }
 
-void SplitAndMerge::clearSmallLines(vector<LSFittedLine>& lines) {
+void LineDetectorSAM::clearSmallLines(vector<LSFittedLine>& lines) {
     //removes any lines from the vector whose vector of
     //member points is too small
 
@@ -552,7 +552,7 @@ void SplitAndMerge::clearSmallLines(vector<LSFittedLine>& lines) {
 }
 
 
-void SplitAndMerge::clearDirtyLines(vector<LSFittedLine>& lines) {
+void LineDetectorSAM::clearDirtyLines(vector<LSFittedLine>& lines) {
     //removes any lines from the vector whose R^2 value is
     //less than MIN_LINE_R2_FIT
     vector<LSFittedLine>::iterator it = lines.begin();
@@ -567,7 +567,7 @@ void SplitAndMerge::clearDirtyLines(vector<LSFittedLine>& lines) {
     }
 }
 
-bool SplitAndMerge::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2){
+bool LineDetectorSAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2){
     //check lines have similar gradients by checking the angle between them (linear with rotation).
 //    cout << "angle between: " << line1.getAngleBetween(line2) << std::endl;
 //    cout << "line1 angle: " << abs(line1.getAngle()) << "  > pi/4? " << (abs(line1.getAngle()) > mathGeneral::PI*0.25) << std::endl;
