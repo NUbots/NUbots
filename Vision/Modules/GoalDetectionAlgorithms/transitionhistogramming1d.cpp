@@ -20,15 +20,14 @@ void TransitionHistogramming1D::detectGoals()
 
     vector<Quad> yellow_posts = detectGoal();
 
-    removeInvalidPosts(&yellow_posts);
+    //removeInvalidPosts(&yellow_posts);
 
     // OVERLAP CHECK
-    overlapCheck(&yellow_posts);
+    //overlapCheck(&yellow_posts);
 
     // DENSITY CHECK - fix later: use segment lengths and quad area to calculate rather than
     //                  re-accessing the image
-    DensityCheck(true, false, &yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
-
+    //DensityCheck(true, false, &yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
     // YELLOW POSTS
     if (yellow_posts.size() != 2) {
         BOOST_FOREACH(Quad q, yellow_posts) {
@@ -78,7 +77,7 @@ void TransitionHistogramming1D::DensityCheck(bool yellow, bool beacon, vector<Qu
         other_colour = ClassIndex::yellow;
     }
 
-    //cout << "PERCENT_REQUIRED: " << PERCENT_REQUIRED << endl;
+    //<< "PERCENT_REQUIRED: " << PERCENT_REQUIRED << endl;
 
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
@@ -179,7 +178,7 @@ vector<Quad> TransitionHistogramming1D::detectGoal()
     const int MIN_THRESHOLD = 1;
     const float SDEV_THRESHOLD = 0.75;
     const int PEAK_THRESHOLD = 10;
-    const float ALLOWED_DISSIMILARITY = 0.05;
+    const float ALLOWED_DISSIMILARITY = 0.50;
 
     //int histogram[2][BINS], peaks[2][MAX_OBJECTS], peak_widths[2][MAX_OBJECTS];
     Histogram1D h_start(BINS, BIN_WIDTH),
@@ -252,9 +251,6 @@ vector<Quad> TransitionHistogramming1D::generateCandidates(const Histogram1D& st
             s_it++;
         }
     }
-
-
-
 
     return candidates;
 }
