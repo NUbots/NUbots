@@ -30,12 +30,15 @@ VisionController::VisionController()
     m_line_detector_ransac = new LineDetectorRANSAC();
     m_line_detector_sam = new LineDetectorSAM();
     m_goal_detector_hist = new GoalDetectorHistogram();
+    m_goal_detector_ransac = new GoalDetectorRANSAC();
 }
 
 VisionController::~VisionController()
 {
     delete m_line_detector_ransac;
     delete m_line_detector_sam;
+    delete m_goal_detector_hist;
+    delete m_goal_detector_ransac;
 }
 
 VisionController* VisionController::getInstance()
@@ -89,6 +92,10 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 
     if(lookForLandmarks) {
         m_goal_detector_hist->run();   //POSTS
+
+        //testing ransac for goals
+        m_goal_detector_ransac->run();
+
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - goal detection done" << endl;
         #endif

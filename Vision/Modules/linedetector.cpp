@@ -9,16 +9,11 @@ LineDetector::LineDetector()
 vector<LinePoint> LineDetector::getPointsFromSegments(const vector<ColourSegment> &h_segments, const vector<ColourSegment> &v_segments)
 {
     vector<LinePoint> points;
-    LinePoint pt;
     BOOST_FOREACH(ColourSegment s, h_segments) {
-        pt.x = s.getCentre().x;
-        pt.y = s.getCentre().y;
-        points.push_back(pt);
+        points.push_back(LinePoint(s.getCentre().x,s.getCentre().y));
     }
     BOOST_FOREACH(ColourSegment s, v_segments) {
-        pt.x = s.getCentre().x;
-        pt.y = s.getCentre().y;
-        points.push_back(pt);
+        points.push_back(LinePoint(s.getCentre().x,s.getCentre().y));
     }
 
     return points;
