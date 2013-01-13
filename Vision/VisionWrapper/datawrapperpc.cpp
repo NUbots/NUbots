@@ -691,9 +691,9 @@ bool DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
         unsigned char* ptr,
                 r, g, b;
 
-        for(int y=0; y<m_current_image->getHeight(); y++) {
+        for(int y=0; y<img->getHeight(); y++) {
             ptr = img_map.ptr<unsigned char>(y);
-            for(int x=0; x<m_current_image->getWidth(); x++) {
+            for(int x=0; x<img->getWidth(); x++) {
                 ColorModelConversions::fromYCbCrToRGB((*img)(x,y).y, (*img)(x,y).cb, (*img)(x,y).cr, r, g, b);
                 ptr[3*x]   = b;
                 ptr[3*x+1] = g;

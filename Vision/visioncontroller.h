@@ -67,6 +67,7 @@ private:
     LineDetector* m_line_detector_sam;
     LineDetector* m_line_detector_ransac;
     GoalDetector* m_goal_detector_hist;
+    GoalDetector* m_goal_detector_ransac;
 };
 
 #endif // VISIONCONTROLLER_H
