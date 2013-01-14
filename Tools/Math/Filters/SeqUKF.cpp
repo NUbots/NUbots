@@ -150,7 +150,6 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
     const unsigned int totalMeasurements = measurement.getm();
     Matrix current_point; // temporary storage.
-
     Matrix Yprop(totalMeasurements, total_points);
 
     // First step is to calculate the expected measurmenent for each sigma point.
@@ -168,7 +167,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     // Calculate the Y vector.
     for(unsigned int i = 0; i < total_points; ++i)
     {
-        Y.setCol(i, (Yprop.getCol(i) - Ymean));
+        Y.setCol(i, Yprop.getCol(i) - Ymean);
     }
 
     // Calculate the new C and d values.
@@ -176,7 +175,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     //Yaug.setCol(0, mathGeneral::sign(m_covariance_weights[0][0]) * Yaug.getCol(0));
     Matrix Ytransp = Yaug.transp();
 
-    const Matrix innovation = measurement - Ymean;
+    const Matrix innovation = m_model->measurementDistance(measurement, Ymean, type);
 
     // Check for outlier, if outlier return without updating estimate.
     if(evaluateMeasurement(innovation, Y * Ytransp, noise) == false) // Y * Y^T is the estimate variance, by definition.

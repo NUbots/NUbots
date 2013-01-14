@@ -94,6 +94,13 @@ Matrix MobileObjectModel::measurementEquation(const Matrix& state, const Matrix&
     return expected_measurement;
 }
 
+Matrix MobileObjectModel::measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type)
+{
+    Matrix result = measurement1 - measurement2;
+    result[1][0] = mathGeneral::normaliseAngle(result[1][0]);
+    return result;
+}
+
 /*!
 @brief Outputs a binary representation of the UKF object to a stream.
 @param output The output stream.

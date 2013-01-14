@@ -48,6 +48,9 @@ public:
     */
     virtual Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type) = 0;
 
+    virtual Matrix measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type) = 0;
+
+
     virtual unsigned int totalStates() const = 0;
 
     /*!

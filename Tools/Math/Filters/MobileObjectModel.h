@@ -32,6 +32,8 @@ public:
     */
     Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type);
 
+    Matrix measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type);
+
     unsigned int totalStates() const
     {
         return kstates_total;

@@ -179,7 +179,7 @@ bool BasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise,
         Pxy = Pxy + weight * (sigma_points.getCol(i) - sigma_mean) * current_point.transp();    // Important: Use mean from estimate, not current mean.
     }
 
-    const Matrix innovation = measurement - Ymean;
+    const Matrix innovation = m_model->measurementDistance(measurement, Ymean, type);
 
     // Check for outlier, if outlier return without updating estimate.
     if(evaluateMeasurement(innovation, Pyy, noise) == false) // Y * Y^T is the estimate variance, by definition.

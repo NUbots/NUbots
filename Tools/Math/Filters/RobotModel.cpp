@@ -58,6 +58,23 @@ Matrix RobotModel::measurementEquation(const Matrix& state, const Matrix& measur
     return result;
 }
 
+Matrix RobotModel::measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type)
+{
+    Matrix result;
+    switch(type)
+    {
+        case klandmark_measurement:
+            result = measurement1 - measurement2;
+            result[1][0] = mathGeneral::normaliseAngle(result[1][0]);
+            break;
+        case kangle_between_landmark_measurement:
+            result = measurement1 - measurement2;
+            result[0][0] = mathGeneral::normaliseAngle(result[0][0]);
+            break;
+    };
+    return result;
+}
+
 Matrix RobotModel::landmarkMeasurementEquation(const Matrix& state, const Matrix& measurementArgs)
 {
     // measurementArgs contain the vector [x,y]^T location of the object observed.
@@ -108,7 +125,8 @@ Matrix RobotModel::angleBetweenLandmarkMeasurementEquation(const Matrix& state, 
     const float angleToObj1 = atan2 ( y1 - robot_y, x1 - robot_x );
     const float angleToObj2 = atan2 ( y2 - robot_y, x2 - robot_x );
 
-    result[0][0] = mathGeneral::normaliseAngle(angleToObj1 - angleToObj2);
+    //result[0][0] = mathGeneral::normaliseAngle(angleToObj1 - angleToObj2); Normalising seemed to break this part.
+    result[0][0] = angleToObj1 - angleToObj2;
 
     return result;
 }
