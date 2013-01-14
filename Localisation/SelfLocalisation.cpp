@@ -92,7 +92,6 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     m_settings.setPruneMethod(LocalisationSettings::prune_viterbi);
     m_settings.setBallLocFilter(KFBuilder::ksr_basic_ukf_filter);
     m_settings.setBallLocModel(KFBuilder::kmobile_object_model);
-
     m_settings.setSelfLocFilter(KFBuilder::kseq_ukf_filter);
     m_settings.setSelfLocModel(KFBuilder::krobot_model);
     return;
@@ -198,7 +197,6 @@ SelfLocalisation::~SelfLocalisation()
 IKalmanFilter* SelfLocalisation::newBallModel()
 {
     IKalmanFilter* filter = KFBuilder::getNewFilter(m_settings.ballLocFilter(), m_settings.ballLocModel());
-    //IKalmanFilter* filter = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::kmobile_object_model);
     filter->enableOutlierFiltering(false);  // disable
     filter->enableWeighting(false);         // disable
     filter->setActive();
@@ -208,9 +206,6 @@ IKalmanFilter* SelfLocalisation::newBallModel()
 IKalmanFilter* SelfLocalisation::robotFilter()
 {
     return KFBuilder::getNewFilter(m_settings.selfLocFilter(), m_settings.selfLocModel());
-    //return KFBuilder::getNewFilter(KFBuilder::kbasic_ukf_filter, KFBuilder::krobot_model);
-    //return KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
-    //return KFBuilder::getNewFilter(KFBuilder::ksr_basic_ukf_filter, KFBuilder::krobot_model);
 }
 
 IKalmanFilter* SelfLocalisation::newRobotModel()
@@ -1307,13 +1302,14 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
     processNoise = Matrix(3,3,false);
     processNoise[0][0] = pow(0.5,2);
     processNoise[1][1] = pow(0.5,2);
-    processNoise[2][2] = pow(0.0001, 2);
+    processNoise[2][2] = pow(0.01, 2);
 
     for (std::list<IKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
     {
         if(not (*model_it)->active()) continue; // Skip Inactive models.
         result = true;
         (*model_it)->timeUpdate(deltaTimeSeconds, odometry, processNoise, measurementNoise);
+
     }
     
     if(m_amILost)
@@ -1380,8 +1376,6 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
             continue;
         }
         kf_return = 1;
-
-
         kf_return = (*model_it)->measurementUpdate(measurement, temp_error.errorCovariance(), args, RobotModel::klandmark_measurement);
 
 
