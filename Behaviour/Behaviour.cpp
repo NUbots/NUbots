@@ -40,10 +40,8 @@
 #include "RoboPedestrian/RoboPedestrianProvider.h"
 #include "GoalKeeperTest/TestKeeperProvider.h"
 #include "FootSlipTest/SlipTestProvider.h"
+#include "HeadBehaviourTester/HBTProvider.h"
 
-//Test HeadLogic by importing:
-#include "Common/HeadLogic.h"
-#include "Common/HeadBehaviour.h"
 
 
 #include "CameraCalibration/CameraCalibrationProvider.h"
@@ -74,8 +72,9 @@ Behaviour::Behaviour()
         m_behaviour = new QuietStanceProvider(this);
     #else
         //m_behaviour = new ScriptedPoseProvider(this);
-        m_behaviour = new SoccerProvider(this);
+        //m_behaviour = new SoccerProvider(this);
         //m_behaviour = new ZombieProvider(this);
+        m_behaviour = new HBTProvider(this);
         //m_behaviour = new ChaseBallProvider(this);
         //m_behaviour = new WalkOptimisationProvider(this);
         //m_behaviour = new ForwardWalkProvider(this);

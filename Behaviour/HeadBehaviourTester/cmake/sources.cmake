@@ -2,7 +2,7 @@
 #   - add your source files to YOUR_SRCS
 #   - to include subdirectories either
 #       - put each source file in YOUR_SRCS including a *relative* path
-#       - include another source.cmake for each subdirectory
+#       - include add each subdirectory to YOUR_DIRS and put a cmake/sources.cmake in each
 #
 #    Copyright (c) 2009 Jason Kulk
 #    This file is free software: you can redistribute it and/or modify
@@ -20,31 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS
-ApproximatorInterface.h
-DictionaryApproximator.h
-MRLAgent.h
-RLAgent.h
-DictionaryApproximator.cpp
-MRLAgent.cpp
-RLAgent.cpp
-
-RLearningInterface.h
-
-FourierApproximator.h
-FourierFunction.h
-LinearApproximator.h
-DictionaryRLAgent.h
-
-FourierApproximator.cpp
-FourierFunction.cpp
-LinearApproximator.cpp
-DictionaryRLAgent.cpp
-
+SET (YOUR_SRCS  HBTProvider.cpp HBTProvider.h
+                HBTStates.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS
+SET (YOUR_DIRS  
 )
 ####################################################################################
 

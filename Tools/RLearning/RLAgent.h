@@ -24,6 +24,7 @@
 #include "ApproximatorInterface.h"
 #include "RLearningInterface.h"
 
+
 #include <vector>
 #include <sstream>
 #include <fstream>
@@ -31,13 +32,14 @@
 #include <iostream>
 #include <ctime>
 #include <algorithm>
+#include <cmath>
 
 class RLAgent: public RLearningInterface
 {
 public:
-    virtual void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens);
+    virtual void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range = 10);
 
-    virtual void setParameters(float alpha=0.1f, float beta=0.5, float gamma=0.9f, float lambda=0.9f,int learningIterations=1, int memory_length = 10);
+    virtual void setParameters(float alpha=0.1f, float beta=0.5, float gamma=0.9f, float lambda=0.9f,int learningIterations=1, int memory_length = 10, bool use_soft_max = false);
 
     virtual int getAction(vector<float> observations);//Must return integer between 0 and numberOfOutputs-1
 
@@ -71,8 +73,7 @@ protected:
     int num_outputs;
     int num_hidden;
 
-    int second_last_action;
-    int last_action;
+    vector<int> actions;
     vector<float> last_values;
 
     vector<vector<float> > values;
@@ -80,6 +81,10 @@ protected:
     vector<float> rewards;
 
     float max(vector<float> x);
+
+    int getSoftMaxAction(vector<float> values);
+
+    bool use_soft_max;
 
 };
 

@@ -21,7 +21,7 @@
 
 #include "DictionaryApproximator.h"
 
-void DictionaryApproximator::initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens) {
+void DictionaryApproximator::initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range) {
     numInputs = numberOfInputs;
     numOutputs = numberOfOutputs;
     tileMultiplier = numberOfHiddens;
@@ -51,11 +51,10 @@ vector<float> DictionaryApproximator::getValues(vector<float> const& observation
 
 void DictionaryApproximator::saveApproximator(string agentName) {
     ofstream save_file;
-    if((int)agentName.size()==0){
-       save_file.open("DictionaryApprox.txt",ios_base::out);
-    } else {
-       save_file.open("ExpectationFunction.txt",ios_base::out);
-    }
+    stringstream file_name;
+    file_name<<"nubot/"<<agentName;
+    save_file.open(file_name.str().c_str(),fstream::out);
+
     string tempstr;
     
     save_file << approximator.size();
@@ -76,10 +75,11 @@ map<string,float>* DictionaryApproximator::getMap(){
     
 void DictionaryApproximator::loadApproximator(string agentName) {
     ifstream save_file;
-    if((int)agentName.size()==0){
-       save_file.open("DictionaryApprox.txt",ios_base::in);
-    } else {
-       save_file.open("ExpectationFunction.txt",ios_base::in);
+    stringstream file_name;
+    file_name<<"nubot/"<<agentName;
+    save_file.open(file_name.str().c_str(),fstream::out);
+    if(!save_file.good()) {
+        throw string("DictionaryApproximator::loadApproximator - file not found: ") + file_name.str();
     }
     string tempstr;
     float tempval;

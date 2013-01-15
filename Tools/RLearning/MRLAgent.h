@@ -41,7 +41,7 @@
 #include "RLearningInterface.h"
 #include "DictionaryApproximator.h"
 #include "RLAgent.h"
-
+#include "FourierApproximator.h"
 
 
 class MRLAgent: public RLAgent
@@ -49,13 +49,13 @@ class MRLAgent: public RLAgent
 public:
     MRLAgent();
     ~MRLAgent();
-    void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens);
+    void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range = 10);
 
     void giveMotivationReward();
     float wundtFunction(float N);
     int getActionAndLearn(vector<float> observations);
-    void saveMRLAgent();
-    void loadMRLAgent();
+    void saveMRLAgent(string agentName);
+    void loadMRLAgent(string agentName);
 
     map<string,float>* getMap();
     ApproximatorInterface* expectation_map;
