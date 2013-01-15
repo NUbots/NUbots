@@ -1,12 +1,13 @@
 /*! 
-	@file ConfigStorageManager.h
-    @brief This is the header file for the storage manager of the configuration system for the NUbots.
+	@file 	ConfigStorageManager.h
+    @brief 	This is the header file for the storage manager of the configuration system for the NUbots.
  
-    @class ConfigStorageManager
-    @brief This class uses the Boost property tree to read and store JSON configuration files.
+    @class 	ConfigStorageManager
+    @brief 	This class uses the Boost property tree to read and store JSON configuration files.
  
     All JSON is parsed to the ptree as strings. Conversion occurs elsewhere; this file is just to store
-    the values in the tree. Will read each file individually and store it in the universal ptree.
+    the values in the tree. Will read each file individually and store it in the ptree (only storing
+    strings).
 
     @author Sophie Calland
  
@@ -33,11 +34,9 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 #include <string>
-//#include <set>
 //#include <exception>
 //#include <iostream>
 
-#include "ConfigParameters.h"
 
 //The number of components (.json files used).
 #define ARR_SIZE 6
@@ -45,51 +44,22 @@
 using boost::property_tree::ptree;
 
 namespace ConfigSystem
-{
-	//Used to store the conflict limits 
-	//FOLLOWING IS FOR COMPLICATED CONFLICTS ONLY, TO BE IMPLEMENTED LATER.
-	/*template<typename Item>
-	struct conflict_limits
-	{
-		bool modify;
-		bool modified;
-	
-		
-		//boundaries of values which aren't allowed.
-		Item upper_bound;
-		Item lower_bound;
-		
-		//array of specific values which are not allowed.
-		std::vector<Item> values;
-	};*/
-
-	// //Used to store parameter read in from JSON files.
-	// template<typename Item>
-	// struct parameter
-	// {
-	// 	Item value;
-	// 	std::vector<Item>* vector_value;
-	// 	std::string type;
-
-	// 	Item upper_bound;
-	// 	Item lower_bound;
-		
-	// 	bool modified;
-	// 	bool locked;
-
-	// 	std::vector<Item> possible_values;
-		
-	// 	std::vector<std::string> conflicts;
-		
-	// 	//FOLLOWING IS FOR COMPLICATED CONFLICTS ONLY, TO BE IMPLEMENTED LATER).
-	// 	//vector of pairs, consisting of a string path and conflict_limits struct 
-	// 	//std::vector< std::pair< std::string, ConfigSystem::conflict_limits<Item> > > conflicts;
-	// };
-
+{	
 	class ConfigStorageManager
 	{
 		public:
+			/*! @brief Constructor. 
+ 
+   			@param N/A.
+    		@return Creates a new ConfigStorageManager object.
+ 			*/
 			ConfigStorageManager();
+			
+			/*! @brief Destructor. 
+ 
+   			@param N/A.
+    		@return Deletes a ConfigStorageManager object.
+ 			*/
 			~ConfigStorageManager();
 			
 			
@@ -163,24 +133,18 @@ namespace ConfigSystem
 			
 			
 			
-			
-			/*! @brief Edits the entry specified by the string path.
- 			
-   			@param "path" stores the path to the value to be edited. 
-   			@param "new_value" is the edited value as a string. 
-   			@param "type" stores data type (MUST ALWAYS BE SPECIFIED).
+		
+			/*! @brief 	Stores a single entry in a specified path. Will overwrite path if already exists.
+ 	
+   			@param "path" stores the path the value is to be placed in.
+   			@param "store" is the new ConfigParameter to be stored.
     		@return Returns true if success, false otherwise.
  			*/
-			bool editEntry(std::string path, ConfigParameter *new_entry);
+			bool objectSingleStore(const string &path, const ConfigParameter &store)
 			
-			/*! @brief Accesses the entry specified by the string path and returns as parameter struct.
- 			
-   			@param "path" stores the path to the value to be edited. 
-    		@return Returns the value stored at the specified path. 
- 			*/
-			ConfigParameter *accessEntry(std::string path);
-			 
 			
+	
+		
 		private:
 			/*! @brief Reads the JSON file and stores it in the property tree, or writes current 
 					configuration to the specified JSON file.

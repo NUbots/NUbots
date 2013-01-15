@@ -31,11 +31,8 @@
 #include <boost/foreach.hpp>
 #include <string>
 #include <exception>
-//#include <set>
-//#include <iostream>
 
 #include "ConfigStorageManager.h"
-#include "ConfigParameters.h"
 
 using boost::property_tree::ptree;
 using ConfigSystem::ConfigStorageManager;
@@ -62,7 +59,7 @@ namespace ConfigSystem
 	bool ConfigStorageManager::fileReadAll(std::string filename_arr[])
 	{
 		bool success = false;
-				
+		
 		//Read each file
 		for(int i = 0; i != ARR_SIZE; i++)
 		{
@@ -201,129 +198,57 @@ namespace ConfigSystem
 	}
 	
 	
-	
-	
-	
-	//Edits the value at the path specified to the new value and type.
-	bool ConfigStorageManager::editEntry(std::string path, ConfigParameter *new_entry)
+	//Store a single ConfigParameter object in the tree.
+	bool ConfigStorageManager::objectSingleStore(const string &path, ConfigParameter &store)
 	{
-		bool status = false;
-		//std::ostringstream convert;
-		std::string new_path; 
+		//Retrieves type.
+		ConfigSystem::value_type type = store.getType();
+		//"overwrite" stores the converted string version of "store".
+		ConfigParameter &overwrite = store;
 		
-		try
+		if(type != vt_string)
 		{
-			// //Don't try to edit arrays using this because it won't work. Predefined values will be 
-			// //arrays and should be edited and documented manually (see readme.txt).
-			// data->put(path + ".value", new_entry.value);
-			// data->put(path + ".type", new_entry.type);
+			//perform type conversion, allow overwrite to store the new type
+			//life would be a lot easier with a template! :/
 			
-			// data->put(path + ".rules.range.upper", new_entry.upper_bound);
-			// data->put(path + ".rules.range.upper", new_entry.upper_bound);
 			
-			// new_path = path + ".rules.possiblevalues";
-			
-			// //loops through possible values in new_entry and stores in the edit entry
-			// BOOST_FOREACH(const std::string &possible, new_entry.possible_values)
-			// {
-			// 	//want to store the data in new_entry array (possiblevalues) into data.
-			// 	data->put(new_path + "..value", possible);
-			// }
-			
-			// new_path = path + "rules.conflicts";
-			
-			// // // //Puts new conflict information into the tree.
-			// // BOOST_FOREACH(const std::pair< std::string, ConfigSystem::conflict_limits<std::string> > &iter,
-			// // 	      new_entry.rules.conflicts)
-			// // {
-			// // 	//Want to store conflicts info from the new_entry into the property tree.
-			// // 	data->put(new_path + "..path", iter.first);
-				
-			// // 	//Store "modify" and "modified" flags for each conflict.
-			// // 	data->put(new_path + "..modify", iter.second.modify);
-			// // 	data->put(new_path + "..modified", iter.second.modified);
-			// // }
-			
-			status = true;
-		}
-		catch(std::exception &e)
-		{
-			//DEBUG
-			std::cout << "ERROR: " << e.what() << "\n";
-			status = false;
+			//if conversion fails
+			return false;
 		}
 		
-		return status;
+		//after type conversion, overwrite should contain the "store" data in string form:
+		//checks if types are vectors or not
+		if(type.compare("1d_vector") == 0) 
+		{ 
+			/* Store in 1d vector variable */ 
+		}
+		else if(type.compare("2d_vector") == 0) 
+		{ 
+			/* Store in 2d vector variable */ 
+		}
+		else if(type.compare("3d_vector") == 0) 
+		{ 
+			/* Store in 3d vector variable */ 
+		}
+		else
+		{
+			/* Store in single variable */
+			data->put(path + ".value", overwrite.getValue());
+		}
+		
+		//Type
+		data->put(path + ".type", type);
+		
+		//Ranges
+		data->put(path + ".range.lower", overwrite.getLower());
+		data->put(path + ".range.upper", overwrite.getUpper());
+		
+		//Whatever else needs to be put in ...
+		return true;
 	}
-
 	
-	//Accesses the specified variable and it's type, returns as parameters struct.
-	ConfigParameter *ConfigStorageManager::accessEntry(std::string path)
-	{
-		ConfigParameter *cParam;
-		// parameters<std::string> retrieved_data;	
-		// std::pair<std::string, ConfigSystem::conflict_limits<std::string> retrieved_conflict;
-		std::string new_path;
-		
-		try
-		{
-			// retrieved_data.value = data->get<std::string>(path + ".value");
-			// retrieved_data.type = data->get<std::string>(path + ".type");
-			
-			// retrieved_data.upper_bound = data->get<std::string>(path + ".rules.range.upper");
-			// retrieved_data.lower_bound = data->get<std::string>(path + ".rules.range.lower");
-			
-			
-			// //Retrieves path of possible values
-			// new_path = path + ".rules.possiblevalues";
-			// //Stores "possiblevalues" JSON array in the possible_values vector of struct.
-			// BOOST_FOREACH(const ptree::value_type &child, data->get_child(new_path))
-			// {
-			// 	retrieved_data.possible_values.push_back(child.second.get<std::string>("value"));
-			// }
-			
-			// //THIS IS FOR READING THE CONFLICT MANAGEMENT STUFF:
-			
-			// //retrieves path to conflicts.
-			// new_path = path + ".rules.conflicts";
-			// //Stores "conflicts" JSON array in the conflicts pair vector of struct.
-			// //iterates through children of conflicts
-			// BOOST_FOREACH(const ptree::value_type &child, data->get_child(new_path))
-			// {
-			// 	//Need to push_back pairs of strings and conflict_limits to retrieved_data.rules.conflicts
-			// 	// retrieved_conflict.first = child.second.get<std::string>("")
-			
-			// 	//Iterating through conflicts vector to store items
-			// 	/*BOOST_FOREACH(const std::pair< std::string, ConfigSystem::conflict_limits<std::string> > 
-			// 			&iter, retrieved_data.rules.conflicts)
-			// 	{
-			// 		//Retrieve string path of conflict.
-			// 		iter.first(child.second.get<std::string>("path"));
-					
-			// 		//Retrieve conflict_limits of conflict.
-			// 		iter.second(child.second.get<std::string>("path"));
-			// 	}*/
-			// }
-			
-			std::cout << "THIS IS THE PATH TO THE UPDATES: " << new_path << "\n";
-		}
-		catch(std::exception &e)
-		{
-			// //DEBUG
-			// std::cout << "ERROR: " << e.what() << "\n";
-			// retrieved_data.value = "";
-			// retrieved_data.type = "";
-			
-			// retrieved_data.upper_bound = "";
-			// retrieved_data.lower_bound = "";
-			
-			// //Clears the possible_values vector
-			// retrieved_data.possible_values.clear();
-		}
-		
-		
-		return cParam;
-	}
+	
+	
 	
 	
 	//PRIVATE MEMBER FUNCTIONS:
