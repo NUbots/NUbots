@@ -1,8 +1,33 @@
-#include <boost/foreach.hpp>
-#include <vector>
+/*! 
+	@file 	ConfigRange.h
+    @brief 	Header file for the ConfigRange class. 
+ 
+    @class 	ConfigRange
+    @brief 	Templated class used for storing ranges.
+
+    @author Sophie Calland, Mitchell Metcalfe 
+ 
+  Copyright (c) 2012 Sophie Calland, Mitchell Metcalfe 
+ 
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef CONFIG_RANGE_H
 #define CONFIG_RANGE_H
+
+#include <boost/foreach.hpp>
+#include <vector>
 
 namespace ConfigSystem
 {
@@ -19,113 +44,42 @@ namespace ConfigSystem
     template <typename T>
     class ConfigRange
     {
-    private:
-        //! Minimum and maximum values in the range
-        T _min, _max;
+		public:
+		    // ConfigRange();
+		    // ConfigRange(T min, T max);
+		    // ConfigRange(T min, T max, BoundType lBound, BoundType uBound );
+		    ConfigRange(T min = 0, T max = 1, bool outside = false);
 
-        //! Type of the lower and upper bounds (closed (<=), open (<), or none)
-        BoundType _lBound, _uBound;
+		    ConfigRange(T min, T max, bool outside, BoundType lBound, BoundType uBound);
 
-        //! If true, test() will pass iff the value is not 
-        //! between _min and _max.
-        //! Ex. _outside = false; ==> [_min, _max]
-        //! Ex. _outside = true ; ==> (-inf, _min] U [_max, +inf)
-        bool _outside;
-        
-    public:
-        // ConfigRange();
-        // ConfigRange(T min, T max);
-        // ConfigRange(T min, T max, BoundType lBound, BoundType uBound );
-        ConfigRange(
-            T min = 0, 
-            T max = 1, 
-            bool outside = false
-            )
-        {
-            _min     = min    ;
-            _max     = max    ;
-            _outside = outside;
-            _lBound  = CLOSED ;
-            _uBound  = CLOSED ;
-        };
+			//destructor:
+			~ConfigRange();
 
-        ConfigRange(
-            T min, 
-            T max, 
-            bool outside,
-            BoundType lBound,
-            BoundType uBound
-            )
-        {
-            _min     = min    ;
-            _max     = max    ;
-            _outside = outside;
-            _lBound  = lBound ;
-            _uBound  = uBound ;
-        };
 
-        bool test(std::vector<T> values)
-        {
-            BOOST_FOREACH(T &val, values)
-            {
-                if(!test(val)) return false;
-            }
 
-            return true;
-        };
 
-        //! Returns whether the given value satisfies the constraints specified
-        //! by this range object.
-        bool test(T value)
-        {
-            // Comparisons (unnecessary comparisons, etc. will hopefully be 
-            // optimised away by the compiler).
+		    bool test(std::vector<T> values);
 
-            bool valLU  = value <  _max;
-            bool valLEU = value <= _max;
-            bool valGU  = !valLEU      ;
-            bool valGEU = !valLU       ;
-            bool valLL  = value <  _min;
-            bool valLEL = value <= _min;
-            bool valGL  = !valLEL      ;
-            bool valGEL = !valLL       ;
+		    //! Returns whether the given value satisfies the constraints specified
+		    //! by this range object.
+		    bool test(T value);
+		    
+		    
+		private:
+		    //! Minimum and maximum values in the range
+		    T _min, _max;
 
-            bool lbO = _lBound == OPEN  ;
-            bool lbC = _lBound == CLOSED;
-            bool lbN = _lBound == NONE  ;
-            bool ubO = _uBound == OPEN  ;
-            bool ubC = _uBound == CLOSED;
-            bool ubN = _uBound == NONE  ;
+		    //! Type of the lower and upper bounds (closed (<=), open (<), or none)
+		    BoundType _lBound, _uBound;
 
-            // The following tests could be optimised a little.
-            if(!_outside) // [...] || (...)
-            {
-                // If value must be less than max and greater than min
-
-                if(valLEL && lbO) return false; //  x <= (...
-                if(valGEU && ubO) return false; //  ...) >= x
-                if(valLL  && lbC) return false; // x < [...
-                if(valGU  && ubC) return false; // ...] < x
-            }
-            else // ...) (... || ...] [...
-            {
-                // If value must be either greater than max or less than min
-
-                if(lbO   && valGL  && valLU) return false; // ...) >  x <  ?...
-                if(lbO   && valGEL && valLU) return false; // ...) >= x <  ?...
-                if(lbC   && valGL  && valLU) return false; // ...] >  x <  ?...
-                if(lbC   && valGEL && valLU) return false; // ...] >= x <  ?...
-                
-                if(valGL && valLU  && ubO  ) return false; // ...? >  x <  )...
-                if(valGL && valLEU && ubO  ) return false; // ...? >  x <= )...
-                if(valGL && valLU  && ubC  ) return false; // ...? >  x <  ]...
-                if(valGL && valLEU && ubC  ) return false; // ...? >  x <= ]...
-            }
-
-            return true;
-        };
+		    //! If true, test() will pass iff the value is not 
+		    //! between _min and _max.
+		    //! Ex. _outside = false; ==> [_min, _max]
+		    //! Ex. _outside = true ; ==> (-inf, _min] U [_max, +inf)
+		    bool _outside;
     };
 }
 
+#include "ConfigRange.template"
 #endif
 

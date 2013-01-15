@@ -1,14 +1,14 @@
 /*! 
-    @file 	ConfigParameter.cpp
-    @brief 	This is the implementation file for the ConfigParameters objects of the configuration 
-    		system for the NUbots.
+    @file ConfigParameters.cpp
+    @brief This is the implementation file for the ConfigParameters objects of the 
+    configuration system for the NUbots.
     
-    @class 	ConfigParameter
-    @brief 	This class serves as an object for use when transferring parameters.
+    @class ConfigParameters
+    @brief This class serves as an object for use when transferring parameters.
     
     @author Sophie Calland, Mitchell Metcalfe
     
-  	Copyright (c) 2012 Sophie Calland, Mitchell Metcalfe
+  Copyright (c) 2012 Sophie Calland, Mitchell Metcalfe
   
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,160 +28,194 @@
 
 namespace ConfigSystem
 {
-	//Retrieves name.
+	//Getting/setting string and general info stuff. 
+	
     std::string ConfigParameter::getName() 
     {	
     	return _name; 
     }
     
-    //Retrieves path (minus .name)
     std::string ConfigParameter::getPath() 
     {	
     	return _path; 
     }
     
-    //Retrieves description
     std::string ConfigParameter::getDescription() 
     {	
     	return _desc; 
     }
     
-    //Retrieves type
     value_type ConfigParameter::getType() 
-    {
+    { 
     	return param_value.val_type; 
     }
     
-    
-    
-    
-    
-    void ConfigParameter::setName(std::string name) 
+    void ConfigParameter::setName(std::string new_name) 
     { 
-    	_name = name; 
+    	_name = new_name; 
     }
     
-    void ConfigParameter::setPath(std::string path) 
+    void ConfigParameter::setPath(std::string new_path) 
     { 
-    	_path = path; 
+    	_path = new_path; 
     }
     
-    void ConfigParameter::setDescription(std::string desc) 
+    void ConfigParameter::setDescription(std::string new_desc) 
     { 
-    	_desc = desc; 
+    	_desc = new_desc; 
     }
     
-    void ConfigParameter::setType(value_type val_type) 
+    void ConfigParameter::setType(value_type new_val_type) 
     {
-        param_value.val_type = val_type;
+        param_value.val_type = new_val_type;
     }
-    
-    
-    
-    bool ConfigParameter::getValue_bool(bool &value)
+
+
+
+	//Getting/setting general value stuff
+	
+    bool ConfigParameter::getRange_long(ConfigRange<long> &range)
     {
-        if(param_value.val_type != vt_bool) return false;
-        
-        value = *param_value.val_bool;
+        if(param_value.val_type != vt_long) return false;
+
+        delete param_value.range_long;
+        param_value.range_long = new ConfigRange<long>(range);
         
         return true;
     }
+
+    bool ConfigParameter::getRange_double(ConfigRange<double> &range)
+    {
+        if(param_value.val_type != vt_double) return false;
+        
+        delete param_value.range_double;
+        param_value.range_double = new ConfigRange<double>(range);
+        
+        return true;
+    }
+
+
+    bool ConfigParameter::setRange_long(ConfigRange<long> &range)
+    {
+        if(param_value.val_type != vt_long) return false;
+        *param_value.range_long = range;
+        return true;
+    }
     
+    bool ConfigParameter::setRange_double(ConfigRange<double> &range)
+    {
+        if(param_value.val_type != vt_double) return false;
+        *param_value.range_double = range;
+        return true;
+    }
+
+
+
+    bool ConfigParameter::getValue_bool(bool &value)
+    {
+        if(param_value.val_type != vt_bool) return false;
+        //Need to put brackets when dereferencing a ptr in cpp.
+        value = *(param_value.val_bool);
+        return true;
+    }
+
     bool ConfigParameter::getValue_long(long &value)
     {
         if(param_value.val_type != vt_long) return false;
-        
-        value = *param_value.val_long;
-        
+        value = *(param_value.val_long);
         return true;
     }
 
     bool ConfigParameter::getValue_double(double &value)
     {
         if(param_value.val_type != vt_double) return false;
-        
-        value = *param_value.val_double;
-        
+        value = *(param_value.val_double);
         return true;
     }
 
     bool ConfigParameter::getValue_string(std::string &value)
     {
         if(param_value.val_type != vt_string) return false;
-        
-        value = *param_value.val_string;
-        
+        value = *(param_value.val_string);
         return true;
     }
 
-    bool ConfigParameter::getValue_1dvector_long(std::vector<long> &value)
+    bool ConfigParameter::getValue_vector_long(std::vector<long> &value)
     {
         if(param_value.val_type != vt_1dvector_long) return false;
-        
-        value = *param_value.val_1dvector_long;
-        
+        value = *(param_value.val_1dvector_long);
         return true;
     }
 
-    bool ConfigParameter::getValue_1dvector_double(std::vector<double> &value)
+    bool ConfigParameter::getValue_vector_double(std::vector<double> &value)
     {
         if(param_value.val_type != vt_1dvector_double) return false;
-        
-        value = *param_value.val_1dvector_double;
-        
+        value = *(param_value.val_1dvector_double);
         return true;
     }
 
     bool ConfigParameter::setValue_bool(bool &value)
     {
-        if(param_value.val_type != vt_bool) return false;
+        if( param_value.val_type != vt_bool) return false;
+        // if(!param_value.range_bool->test(value)) return false;
         
-        *param_value.val_bool = value;
+        delete param_value.val_bool;
+        param_value.val_bool = new bool(value);
         
         return true;
     }
 
     bool ConfigParameter::setValue_long(long &value)
     {
-        if(param_value.val_type != vt_long) return false;
+        if( param_value.val_type != vt_long) return false;
+        if(!param_value.range_long->test(value)) return false;
         
-        *param_value.val_long = value;
+        delete param_value.val_long;
+        param_value.val_long = new long(value);
         
         return true;
     }
 
     bool ConfigParameter::setValue_double(double &value)
     {
-        if(param_value.val_type != vt_double) return false;
+        if( param_value.val_type != vt_double) return false;
+        if(!param_value.range_double->test(value)) return false;
         
-        *param_value.val_double = value;
+        delete param_value.val_double;
+        param_value.val_double = new double(value);
         
         return true;
     }
 
     bool ConfigParameter::setValue_string(std::string &value)
     {
-        if(param_value.val_type != vt_string) return false;
+        if( param_value.val_type != vt_string) return false;
+        // if(!param_value.range_string->test(value)) return false;
         
-        *param_value.val_string = value;
-        
-        return true;
-    }
-
-    bool ConfigParameter::setValue_1dvector_long(std::vector<long> &value)
-    {
-        if(param_value.val_type != vt_1dvector_long) return false;
-        
-        *param_value.val_1dvector_long = value;
+        delete param_value.val_string;
+        param_value.val_string = new std::string(value);
         
         return true;
     }
 
-    bool ConfigParameter::setValue_1dvector_double(std::vector<double> &value)
+    bool ConfigParameter::setValue_vector_long(std::vector<long> &value)
     {
-        if(param_value.val_type != vt_1dvector_double) return false;
+        if( param_value.val_type != vt_1dvector_long) return false;
+        if(!param_value.range_long->test(value)) return false;
         
-        *param_value.val_1dvector_double = value;
+        delete param_value.val_1dvector_long;
+        param_value.val_1dvector_long = new std::vector<long> (value);
+        
+        return true;
+    }
+
+    bool ConfigParameter::setValue_vector_double(std::vector<double> &value)
+    {
+        if( param_value.val_type != vt_1dvector_double) return false;
+        if(!param_value.range_double->test(value)) return false;
+        
+        delete param_value.val_1dvector_double;
+        param_value.val_1dvector_double = new std::vector<double> (value);
         
         return true;
     }

@@ -1,0 +1,132 @@
+/*! 
+	@file 	ConfigRange.template
+    @brief 	Template implementation file for the ConfigRange class. 
+ 
+    @class 	ConfigRange
+    @brief 	Templated class used for storing ranges.
+
+    @author Sophie Calland, Mitchell Metcalfe 
+ 
+  Copyright (c) 2012 Sophie Calland, Mitchell Metcalfe 
+ 
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <boost/foreach.hpp>
+#include <vector>
+
+#include "ConfigRange.h"
+
+using std::string;
+
+namespace ConfigSystem
+{
+	//Constructor
+	template<typename T>
+	ConfigRange::ConfigRange(T new_min = 0, T new_max = 1, bool new_outside = false)
+	{
+		_min     = new_min;
+		_max     = new_max;
+        _outside = new_outside;
+        _lBound  = CLOSED;
+        _uBound  = CLOSED;
+	}
+	
+	//Constructor
+	template<typename T>
+	ConfigRange::ConfigRange(T new_min, T new_max, bool new_outside, BoundType new_lBound, 
+							BoundType new_uBound)
+	{
+		_min     = new_min    ;
+        _max     = new_max    ;
+        _outside = new_outside;
+        _lBound  = new_lBound ;
+        _uBound  = new_uBound ;
+	}
+	
+	//Destructor
+	template<typename T>
+	ConfigRange::~ConfigRange()
+	{
+		// ?
+		delete _min;
+		delete _max;
+	}
+	
+	
+	
+	
+	//(values as reference?)	
+	template<typename T>
+	bool ConfigRange::test(std::vector<T> values)
+    {
+        BOOST_FOREACH(T &val, values)
+        {
+            if(!test(val)) return false;
+        }
+
+        return true;
+    }
+    
+    //! Returns whether the given value satisfies the constraints specified
+    //! by this range object. (value as reference?)
+    bool ConfigRange::test(T value)
+    {
+        // Comparisons (unnecessary comparisons, etc. will hopefully be 
+        // optimised away by the compiler).
+
+        bool valLU  = value <  _max;
+        bool valLEU = value <= _max;
+        bool valGU  = !valLEU      ;
+        bool valGEU = !valLU       ;
+        bool valLL  = value <  _min;
+        bool valLEL = value <= _min;
+        bool valGL  = !valLEL      ;
+        bool valGEL = !valLL       ;
+
+        bool lbO = _lBound == OPEN  ;
+        bool lbC = _lBound == CLOSED;
+        bool lbN = _lBound == NONE  ;
+        bool ubO = _uBound == OPEN  ;
+        bool ubC = _uBound == CLOSED;
+        bool ubN = _uBound == NONE  ;
+
+        // The following tests could be optimised a little.
+        if(!_outside) // [...] || (...)
+        {
+            // If value must be less than max and greater than min
+
+            if(valLEL && lbO) return false; //  x <= (...
+            if(valGEU && ubO) return false; //  ...) >= x
+            if(valLL  && lbC) return false; // x < [...
+            if(valGU  && ubC) return false; // ...] < x
+        }
+        else // ...) (... || ...] [...
+        {
+            // If value must be either greater than max or less than min
+
+            if(lbO   && valGL  && valLU) return false; // ...) >  x <  ?...
+            if(lbO   && valGEL && valLU) return false; // ...) >= x <  ?...
+            if(lbC   && valGL  && valLU) return false; // ...] >  x <  ?...
+            if(lbC   && valGEL && valLU) return false; // ...] >= x <  ?...
+            
+            if(valGL && valLU  && ubO  ) return false; // ...? >  x <  )...
+            if(valGL && valLEU && ubO  ) return false; // ...? >  x <= )...
+            if(valGL && valLU  && ubC  ) return false; // ...? >  x <  ]...
+            if(valGL && valLEU && ubC  ) return false; // ...? >  x <= ]...
+        }
+
+        return true;
+    }
+}

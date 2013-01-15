@@ -201,25 +201,79 @@ namespace ConfigSystem
 	//Store a single ConfigParameter object in the tree.
 	bool ConfigStorageManager::objectSingleStore(const string &path, ConfigParameter &store)
 	{
+		bool status = false;
 		//Retrieves type.
 		ConfigSystem::value_type type = store.getType();
-		//"overwrite" stores the converted string version of "store".
-		ConfigParameter &overwrite = store;
+		
 		
 		if(type != vt_string)
 		{
-			//perform type conversion, allow overwrite to store the new type
-			//life would be a lot easier with a template! :/
+			//perform type conversion from "type" to string. Allow overwrite to store the string type.
 			if(type == vt_bool)
 			{
+				bool convert;
+				status = store.getValue_bool(convert);
+				
+				//Stores the type as a boolean.
+				data->put(path + ".type", "bool");
+				
+				//if successful read, converts boolean to string.
+				if(status)
+				{
+					if(convert) data->put(path + ".value", "true");
+					else if(!convert) data->put(path + ".value", "false");
+				}
+				else
+				{
+					return false;
+				}
 			}
 			else if(type == vt_long)
+			{
+				/* WORKING HERE LAST */
+				long convert;
+				ConfigRange<long> range_convert;
+				string value;
+				string upper;
+				string lower;
+				
+				status = store.getValue_long(convert);
+				
+				if(status && store.getRange_long(range_convert))
+				{
+					//convert long to string, convert range to string also.
+					try
+					{
+						value = boost::lexical_cast<std::string>(convert);
+					}
+					catch(const boost::bad_lexical_cast &blcExc)
+					{
+						//throw specific exception?
+						return false;
+					}
+				}
+				else
+				{
+					return false;
+				}
+				
+			}
 			else if(type == vt_double)
-			else if(type == vt_vector_long)
+			{
+			}
+			else if(type == vt_1dvector_long)
+			{
+			}
+			else if(type == vt_1dvector_double)
+			{
+			}
+			else
+			{
+				//type not specified
+				return false;
+			}
 			
-			
-			//if conversion fails
-			return false;
+			overwrite.setType(type);
 		}
 		
 		//after type conversion, overwrite should contain the "store" data in string form:
