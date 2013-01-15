@@ -1,4 +1,5 @@
-
+#include <boost/foreach.hpp>
+#include <vector>
 
 #ifndef CONFIG_RANGE_H
 #define CONFIG_RANGE_H
@@ -10,7 +11,7 @@ namespace ConfigSystem
     // closed <==> [_min, _max] <==> _min <= x >= _max
     // none   <==> (-inf, +inf) <==> unrestricted x
     enum BoundType { NONE, OPEN, CLOSED };
-    
+
     /*! 
      * This class represents a range, and provides 
      * methods to check whether a value falls within it.
@@ -30,7 +31,7 @@ namespace ConfigSystem
         //! Ex. _outside = false; ==> [_min, _max]
         //! Ex. _outside = true ; ==> (-inf, _min] U [_max, +inf)
         bool _outside;
-
+        
     public:
         // ConfigRange();
         // ConfigRange(T min, T max);
@@ -61,6 +62,16 @@ namespace ConfigSystem
             _outside = outside;
             _lBound  = lBound ;
             _uBound  = uBound ;
+        };
+
+        bool test(std::vector<T> values)
+        {
+            BOOST_FOREACH(T &val, values)
+            {
+                if(!test(val)) return false;
+            }
+
+            return true;
         };
 
         //! Returns whether the given value satisfies the constraints specified

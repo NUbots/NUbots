@@ -46,36 +46,6 @@ namespace ConfigSystem
         vt_1dvector_long, vt_1dvector_double
     };
     
-    /*!
-     * 
-     */
-     
-	// Following are a variety of variables intended to represent this 
-    // node's value.
-    // Supported types should (minimally) be:
-    //   - bool
-    //   - long   (int, char, unsiged types?)
-    //   - double (float)
-    //   - string
-    //   - vector<long>/long[]
-    //   - vector<double>/double[]
-    
-    /*** We want some more for multidimensional vectors. ***/
-    struct ParameterValue
-    {
-        /// The type of this parameter's value
-        value_type val_type;
-        
-        union 
-        {
-            bool *val_bool;
-            long *val_long;
-            double *val_double;
-            std::string *val_string;
-            std::vector<long> *val_vector_long;
-            std::vector<double> *val_vector_double;
-        };
-    }
         
     class ConfigParameter
     {
@@ -148,10 +118,40 @@ namespace ConfigSystem
 		    //! If this parameter's value type is vector<double>, set the value.
 		    bool setValue_1dvector_double(std::vector<double> &value); 
 		    
+		    
+		    
 		private:
-		    std::string name; //! This parameter's name.
+			 
+			// Following are a variety of variables intended to represent this 
+			// node's value.
+			// Supported types should (minimally) be:
+			//   - bool
+			//   - long   (int, char, unsiged types?)
+			//   - double (float)
+			//   - string
+			//   - vector<long>/long[]
+			//   - vector<double>/double[]
+		
+			/*** We want some more for multidimensional vectors. ***/
+			struct ParameterValue
+			{
+				/// The type of this parameter's value
+				value_type val_type;
+				
+				union 
+				{
+				    bool *val_bool;
+				    long *val_long;
+				    double *val_double;
+				    std::string *val_string;
+				    std::vector<long> *val_1dvector_long;
+				    std::vector<double> *val_1dvector_double;
+				};
+			}
+			
+			std::string name; //! This parameter's name.
 		    std::string path; //! This parameter's path in the config system (not including '.<name>').
-		    std::string desc; //! A description of this parameter.
+		    std::string desc; //! A description of this parameter.		    
 		    
 		    ParameterValue param_value;
     };

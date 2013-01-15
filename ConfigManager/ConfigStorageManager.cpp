@@ -210,6 +210,12 @@ namespace ConfigSystem
 		{
 			//perform type conversion, allow overwrite to store the new type
 			//life would be a lot easier with a template! :/
+			if(type == vt_bool)
+			{
+			}
+			else if(type == vt_long)
+			else if(type == vt_double)
+			else if(type == vt_vector_long)
 			
 			
 			//if conversion fails
