@@ -199,24 +199,25 @@
             float main_button_state;
             Blackboard->Sensors->getButton(NUSensorsData::LeftButton,main_button_state);
             float current_time = Blackboard->Sensors->GetTimestamp();
+            /*Save button implementation:
             if((fieldVisionPolicy == RLAgentPolicy or fieldVisionPolicy == MRLAgentPolicy) and main_button_state >0 and buttonPressTime+2500.< current_time){
                 Mrlagent.saveMRLAgent("HeadBehaviourRL");
                 buttonPressTime = current_time;
-            }
+            }*/
 
 	        //If we are still moving to look at something else, don't make a new decision
             if (current_time < actionStartTime+maximumSearchTime &&
-	            fieldVisionPolicy == lastVisionPolicy &&
-	            ObjectNotSeen()) {
+                fieldVisionPolicy == lastVisionPolicy and
+                ObjectNotSeen()) {
 	            //XXX: add a new head dispatch when things are standardised
-                //cout << "HeadBehaviour::makeVisionChoice  - Blocking on vision" << endl;
+                cout << "HeadBehaviour::makeVisionChoice  - Blocking on vision" << endl;
 	            return;
 	        }
 
-
+/*
 
             //if we didn't see the object, we may need to relocalise
-            if (fieldVisionPolicy!=TimeVSCostPriority and actionObjectID >= 0 and ObjectNotSeen() and fieldVisionPolicy == lastVisionPolicy and calculateReward()<-1000 and false){
+            if (fieldVisionPolicy!=TimeVSCostPriority and actionObjectID >= 0 and ObjectNotSeen() and fieldVisionPolicy == lastVisionPolicy and calculateReward()<-1000){
 				Blackboard->Jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
 				actionStartTime = Blackboard->Sensors->GetTimestamp()+4000;
 				actionObjectID = -1;
@@ -224,7 +225,7 @@
 
                 cout << "objects lost, searching" << endl;
                 return;
-			}
+            }*/
 
 
 
@@ -269,9 +270,6 @@
                     break;
 
 	        }
-
-
-
 	    }
 
 
@@ -357,8 +355,8 @@
         }
 
         vector<float> HeadBehaviour::getPercept(){
-           /*OLD INPUTS START:
-
+           //OLD INPUTS START:
+/*
             //Note for future use: If the percept vectors are changed, the RLagent input size must be changed.
             vector<float> inputs= head_logic->getTimeSinceLastSeenSummary();
             //Scaling inputs:
@@ -381,22 +379,31 @@
             //Combines inputs to one vector to feed to RLagent
             inputs.insert(inputs.end(), other_inputs.begin(), other_inputs.end());
             inputs.insert(inputs.end(), locations.begin(), locations.end());
-            OLD INPUTS END
-            */
+            //OLD INPUTS END
+*/
+
             vector<float> inputs= head_logic->getTimeSinceLastSeenSummary();
             vector<float> costs = head_logic->getCostList(0,0);
             for(int i = 0;i<inputs.size();i++){
                 inputs[i]=inputs[i]*(1+exp(-(costs[i]-8)/4));//Divide times by sigmoided costs to get priorities.
             }
+
             for (int i = 0; i<inputs.size(); i++){
-                inputs[i] = MAX_PERCEPT_RANGESIZE*(1-exp(-inputs[i]/200));
+                inputs[i] = MAX_PERCEPT_RANGESIZE*(1-exp(-inputs[i]/200.));
             }
             vector<float> self_location = head_logic->getSelfLocation();
-            vector<float> ball_location = head_logic->getObjectLocation(HeadLogic::MOBILE_OBJECT,FieldObjects::FO_BALL);
+            vector<float> ball_location(2,0);
+
+            ball_location[0] = Blackboard->Objects->mobileFieldObjects[0].X();
+            ball_location[1] = Blackboard->Objects->mobileFieldObjects[0].Y();
+
             for (int i = 0; i<self_location.size(); i++){
-                self_location[i] =  (MAX_PERCEPT_RANGESIZE/(1+exp(-self_location[i]/100))-MAX_PERCEPT_RANGESIZE/2.);
-                ball_location[i] =(MAX_PERCEPT_RANGESIZE/(1+exp(-ball_location[i]/100))-MAX_PERCEPT_RANGESIZE/2.);
+                self_location[i] =  (MAX_PERCEPT_RANGESIZE/(1+exp(-self_location[i]/100.))-MAX_PERCEPT_RANGESIZE/2.);
+                ball_location[i] =(MAX_PERCEPT_RANGESIZE/(1+exp(-ball_location[i]/100.))-MAX_PERCEPT_RANGESIZE/2.);
             }
+
+            float h = Blackboard->Objects->self.Heading();
+            inputs.push_back(MAX_PERCEPT_RANGESIZE*(1-exp(-h*h/6.)));
             inputs.insert(inputs.end(), self_location.begin(), self_location.end());
             inputs.insert(inputs.end(), ball_location.begin(), ball_location.end());
 
@@ -405,8 +412,8 @@
             float errh = Blackboard->Objects->self.sdHeading();
 
             Vector2<float> berr = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].getEstimatedFieldLocationError();
-            float ball_err = (MAX_PERCEPT_RANGESIZE*(1-exp(-(berr.x*berr.x+berr.y*berr.y)/500)));
-            float self_err= (MAX_PERCEPT_RANGESIZE*(1-exp(-(errx*errx+erry*erry+errh*errh)/500)));
+            float ball_err = (MAX_PERCEPT_RANGESIZE*(1-exp(-(berr.x*berr.x+berr.y*berr.y)/500.)));
+            float self_err= (MAX_PERCEPT_RANGESIZE*(1-exp(-(errx*errx+erry*erry+errh*errh)/500.)));
             inputs.push_back(self_err);
             inputs.push_back(ball_err);
             return inputs;

@@ -167,10 +167,10 @@ protected:
         //NEW Head behaviour
         //-----------------------------------------------------------------------------------------------*/
 
-        head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy HeadBehaviour::TimeVSCostPriority
+      //  head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy HeadBehaviour::TimeVSCostPriority
 
-/*
-       // Head behaviour
+
+       //OLD Head behaviour
         //-----------------------------------------------------------------------------------------------
         static bool getting_up = false;
         static double getup_timer = 0.f;
@@ -297,7 +297,7 @@ protected:
         m_previous_time = m_data->CurrentTime;
 
 //END Head behaviour
-*/
+
     }
 
 
