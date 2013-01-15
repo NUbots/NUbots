@@ -136,7 +136,7 @@ namespace ConfigSystem
         bool setRange_long  (ConfigRange<long  > &range);
         //! Sets double range if val_type is a double.
         bool setRange_double(ConfigRange<double> &range);
-
+        
 
         //! If this parameter's value type is bool          , return the value.
         bool getValue_bool         (bool                &value);

@@ -19,14 +19,20 @@ namespace ConfigSystem
     bool ConfigParameter::getRange_long  (ConfigRange<long  > &range)
     {
         if(_paramValue.val_type != vt_long  ) return false;
-        range = *_paramValue.range_long  ;
+
+        delete _paramValue.range_long;
+        _paramValue.range_long = new ConfigRange<long  >(range);
+        
         return true;
     }
 
     bool ConfigParameter::getRange_double(ConfigRange<double> &range)
     {
         if(_paramValue.val_type != vt_double) return false;
-        range = *_paramValue.range_double;
+        
+        delete _paramValue.range_double;
+        _paramValue.range_double = new ConfigRange<double>(range);
+        
         return true;
     }
 
@@ -37,7 +43,7 @@ namespace ConfigSystem
         *_paramValue.range_long   = range;
         return true;
     }
-
+    
     bool ConfigParameter::setRange_double(ConfigRange<double> &range)
     {
         if(_paramValue.val_type != vt_double) return false;
@@ -93,7 +99,10 @@ namespace ConfigSystem
     {
         if( _paramValue.val_type != vt_bool         ) return false;
         // if(!_paramValue.range_bool  ->test(value)) return false;
-        *_paramValue.val_bool          = value;
+        
+        delete _paramValue.val_bool  ;
+        _paramValue.val_bool          = new bool                (value);
+        
         return true;
     }
 
@@ -101,7 +110,10 @@ namespace ConfigSystem
     {
         if( _paramValue.val_type != vt_long         ) return false;
         if(!_paramValue.range_long  ->test(value)) return false;
-        *_paramValue.val_long          = value;
+        
+        delete _paramValue.val_long  ;
+        _paramValue.val_long          = new long                (value);
+        
         return true;
     }
 
@@ -109,7 +121,10 @@ namespace ConfigSystem
     {
         if( _paramValue.val_type != vt_double       ) return false;
         if(!_paramValue.range_double->test(value)) return false;
-        *_paramValue.val_double        = value;
+        
+        delete _paramValue.val_double;
+        _paramValue.val_double        = new double              (value);
+        
         return true;
     }
 
@@ -117,7 +132,10 @@ namespace ConfigSystem
     {
         if( _paramValue.val_type != vt_string       ) return false;
         // if(!_paramValue.range_string->test(value)) return false;
-        *_paramValue.val_string        = value;
+        
+        delete _paramValue.val_string;
+        _paramValue.val_string        = new std::string         (value);
+        
         return true;
     }
 
@@ -125,7 +143,10 @@ namespace ConfigSystem
     {
         if( _paramValue.val_type != vt_vector_long  ) return false;
         if(!_paramValue.range_long  ->test(value)) return false;
-        *_paramValue.val_vector_long   = value;
+        
+        delete _paramValue.val_vector_long;
+        _paramValue.val_vector_long   = new std::vector<long  > (value);
+        
         return true;
     }
 
@@ -133,7 +154,10 @@ namespace ConfigSystem
     {
         if( _paramValue.val_type != vt_vector_double) return false;
         if(!_paramValue.range_double->test(value)) return false;
-        *_paramValue.val_vector_double = value;
+        
+        delete _paramValue.val_vector_double;
+        _paramValue.val_vector_double = new std::vector<double> (value);
+        
         return true;
     }
 
