@@ -1,7 +1,7 @@
 /*! 
     @file ConfigParameters.h
-    @brief This is the header file for the ConfigParameters objects of the configuration system for the 
-    NUbots.
+    @brief This is the header file for the ConfigParameters objects of the 
+    configuration system for the NUbots.
     
     @class ConfigParameters
     @brief This class serves as an object for use when transferring parameters.
@@ -79,6 +79,11 @@ namespace ConfigSystem
                 std::vector<long  > *val_vector_long  ;
                 std::vector<double> *val_vector_double;
             };
+            union 
+            {
+                ConfigRange<long  > *range_long  ;
+                ConfigRange<double> *range_double;
+            };
         } _paramValue;
         
     public:
@@ -113,7 +118,7 @@ namespace ConfigSystem
         //! Set an enum value representing the type of this parameter's value.
         void setType(value_type val_type);
 
-        
+
         //! If this parameter's value type is bool          , return the value.
         bool getValue_bool         (bool                &value);
         //! If this parameter's value type is long          , return the value.
