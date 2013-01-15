@@ -34,6 +34,7 @@ void SegmentFilter::run() const
         filter(v_filtered, v_result);
     }
     else {
+        //Vision problem should occur in here:
         filter(h_segments, h_result);
         filter(v_segments, v_result);
     }
@@ -100,13 +101,13 @@ void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::
 {
     switch(scans.getDirection()) {
     case VERTICAL:
-        BOOST_FOREACH(const ColourTransitionRule& rule, rules_v) {
+        BOOST_FOREACH(const ColourTransitionRule& rule, rules_v){
             vector<Transition>& result_trans = result[rule.getVFO_ID()];
             checkRuleAgainstRegion(scans, rule, result_trans);
         }
         break;
     case HORIZONTAL:
-        BOOST_FOREACH(const ColourTransitionRule& rule, rules_h) {
+        BOOST_FOREACH(const ColourTransitionRule& rule, rules_h){
             vector<Transition>& result_trans = result[rule.getVFO_ID()];
             checkRuleAgainstRegion(scans, rule, result_trans);
         }
@@ -250,13 +251,15 @@ void SegmentFilter::loadTransitionRules(string filename)
         debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << endl;
     }
     input.close();
-    
-    //DEBUG
-#if VISION_FILTER_VERBOSITY > 0
-    debug << "SegmentFilter::loadTransitionRules()" << endl;
-    debug << "rules_h (" << rules_h.size() << ")\n" << rules_h;
-    debug << "rules_v (" << rules_v.size() << ")\n" << rules_v;
-#endif
+    if(rules_h.size()  == 0 || rules_v.size() == 0){
+        cout <<"=========================WARNING=========================\n"<< "SegmentFilter::loadTransitionRules - "<< filename <<"_v.txt or _h.txt empty!\n \n"<<"The robot may exhibit blindness."<<"=========================WARNING=========================\n" <<endl;
+    }
+        //DEBUG
+    #if VISION_FILTER_VERBOSITY > 0
+        debug << "SegmentFilter::loadTransitionRules()" << endl;
+        debug << "rules_h (" << rules_h.size() << ")\n" << rules_h;
+        debug << "rules_v (" << rules_v.size() << ")\n" << rules_v;
+    #endif
 }
 
 void SegmentFilter::loadReplacementRules(string filename)

@@ -240,6 +240,7 @@ void NUSensors::calculateOrientation()
     
     if (m_data->get(NUSensorsData::OrientationHardware, orientationhardware))
     {
+        cout << "NUSensors::calculateOrientation() NUSensorsData failed orientation hardware "<<endl;
         m_data->set(NUSensorsData::Orientation, m_current_time, orientationhardware);
     }
     else if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
@@ -252,9 +253,13 @@ void NUSensors::calculateOrientation()
 
         validKinematics = validKinematics && (fabs(acceleration[2]) > 2*fabs(acceleration[1]) && fabs(acceleration[2]) > 2*fabs(acceleration[0]));
 
-        if(!m_orientationFilter->Initialised())
+        if(!m_orientationFilter->Initialised()){
+            #if DEBUG_NUSENSORS_VERBOSITY > 4
+                debug << "NUSensors::calculateOrientation() NUSensorsData failed to initialise." << endl;
+            #endif
             m_orientationFilter->initialise(m_current_time,gyros,acceleration,validKinematics,orientation);
-        else
+
+        } else
         {
             m_orientationFilter->TimeUpdate(gyros, m_current_time);
             m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
@@ -262,7 +267,9 @@ void NUSensors::calculateOrientation()
             orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
             orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
             orientation[2] = 0.0f;
+
             m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
+
             // Set gyro offset values
             gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
             gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
