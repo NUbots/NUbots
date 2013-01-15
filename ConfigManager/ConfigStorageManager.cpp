@@ -35,6 +35,7 @@
 //#include <iostream>
 
 #include "ConfigStorageManager.h"
+#include "ConfigParameters.h"
 
 using boost::property_tree::ptree;
 using ConfigSystem::ConfigStorageManager;
@@ -204,7 +205,7 @@ namespace ConfigSystem
 	
 	
 	//Edits the value at the path specified to the new value and type.
-	bool ConfigStorageManager::editEntry(std::string path, parameters<std::string> new_entry)
+	bool ConfigStorageManager::editEntry(std::string path, ConfigParameter *new_entry)
 	{
 		bool status = false;
 		//std::ostringstream convert;
@@ -212,36 +213,36 @@ namespace ConfigSystem
 		
 		try
 		{
-			//Don't try to edit arrays using this because it won't work. Predefined values will be 
-			//arrays and should be edited and documented manually (see readme.txt).
-			data->put(path + ".value", new_entry.value);
-			data->put(path + ".type", new_entry.type);
+			// //Don't try to edit arrays using this because it won't work. Predefined values will be 
+			// //arrays and should be edited and documented manually (see readme.txt).
+			// data->put(path + ".value", new_entry.value);
+			// data->put(path + ".type", new_entry.type);
 			
-			data->put(path + ".rules.range.upper", new_entry.upper_bound);
-			data->put(path + ".rules.range.upper", new_entry.upper_bound);
+			// data->put(path + ".rules.range.upper", new_entry.upper_bound);
+			// data->put(path + ".rules.range.upper", new_entry.upper_bound);
 			
-			new_path = path + ".rules.possiblevalues";
+			// new_path = path + ".rules.possiblevalues";
 			
-			//loops through possible values in new_entry and stores in the edit entry
-			BOOST_FOREACH(const std::string &possible, new_entry.possible_values)
-			{
-				//want to store the data in new_entry array (possiblevalues) into data.
-				data->put(new_path + "..value", possible);
-			}
-			
-			new_path = path + "rules.conflicts";
-			
-			// // //Puts new conflict information into the tree.
-			// BOOST_FOREACH(const std::pair< std::string, ConfigSystem::conflict_limits<std::string> > &iter,
-			// 	      new_entry.rules.conflicts)
+			// //loops through possible values in new_entry and stores in the edit entry
+			// BOOST_FOREACH(const std::string &possible, new_entry.possible_values)
 			// {
-			// 	//Want to store conflicts info from the new_entry into the property tree.
-			// 	data->put(new_path + "..path", iter.first);
-				
-			// 	//Store "modify" and "modified" flags for each conflict.
-			// 	data->put(new_path + "..modify", iter.second.modify);
-			// 	data->put(new_path + "..modified", iter.second.modified);
+			// 	//want to store the data in new_entry array (possiblevalues) into data.
+			// 	data->put(new_path + "..value", possible);
 			// }
+			
+			// new_path = path + "rules.conflicts";
+			
+			// // // //Puts new conflict information into the tree.
+			// // BOOST_FOREACH(const std::pair< std::string, ConfigSystem::conflict_limits<std::string> > &iter,
+			// // 	      new_entry.rules.conflicts)
+			// // {
+			// // 	//Want to store conflicts info from the new_entry into the property tree.
+			// // 	data->put(new_path + "..path", iter.first);
+				
+			// // 	//Store "modify" and "modified" flags for each conflict.
+			// // 	data->put(new_path + "..modify", iter.second.modify);
+			// // 	data->put(new_path + "..modified", iter.second.modified);
+			// // }
 			
 			status = true;
 		}
@@ -257,70 +258,71 @@ namespace ConfigSystem
 
 	
 	//Accesses the specified variable and it's type, returns as parameters struct.
-	parameters<std::string> ConfigStorageManager::accessEntry(std::string path)
+	ConfigParameter *ConfigStorageManager::accessEntry(std::string path)
 	{
-		parameters<std::string> retrieved_data;	
+		ConfigParameter *cParam;
+		// parameters<std::string> retrieved_data;	
 		// std::pair<std::string, ConfigSystem::conflict_limits<std::string> retrieved_conflict;
 		std::string new_path;
 		
 		try
 		{
-			retrieved_data.value = data->get<std::string>(path + ".value");
-			retrieved_data.type = data->get<std::string>(path + ".type");
+			// retrieved_data.value = data->get<std::string>(path + ".value");
+			// retrieved_data.type = data->get<std::string>(path + ".type");
 			
-			retrieved_data.upper_bound = data->get<std::string>(path + ".rules.range.upper");
-			retrieved_data.lower_bound = data->get<std::string>(path + ".rules.range.lower");
+			// retrieved_data.upper_bound = data->get<std::string>(path + ".rules.range.upper");
+			// retrieved_data.lower_bound = data->get<std::string>(path + ".rules.range.lower");
 			
 			
-			//Retrieves path of possible values
-			new_path = path + ".rules.possiblevalues";
-			//Stores "possiblevalues" JSON array in the possible_values vector of struct.
-			BOOST_FOREACH(const ptree::value_type &child, data->get_child(new_path))
-			{
-				retrieved_data.possible_values.push_back(child.second.get<std::string>("value"));
-			}
+			// //Retrieves path of possible values
+			// new_path = path + ".rules.possiblevalues";
+			// //Stores "possiblevalues" JSON array in the possible_values vector of struct.
+			// BOOST_FOREACH(const ptree::value_type &child, data->get_child(new_path))
+			// {
+			// 	retrieved_data.possible_values.push_back(child.second.get<std::string>("value"));
+			// }
 			
-			//THIS IS FOR READING THE CONFLICT MANAGEMENT STUFF:
+			// //THIS IS FOR READING THE CONFLICT MANAGEMENT STUFF:
 			
-			//retrieves path to conflicts.
-			new_path = path + ".rules.conflicts";
-			//Stores "conflicts" JSON array in the conflicts pair vector of struct.
-			//iterates through children of conflicts
-			BOOST_FOREACH(const ptree::value_type &child, data->get_child(new_path))
-			{
-				//Need to push_back pairs of strings and conflict_limits to retrieved_data.rules.conflicts
-				// retrieved_conflict.first = child.second.get<std::string>("")
+			// //retrieves path to conflicts.
+			// new_path = path + ".rules.conflicts";
+			// //Stores "conflicts" JSON array in the conflicts pair vector of struct.
+			// //iterates through children of conflicts
+			// BOOST_FOREACH(const ptree::value_type &child, data->get_child(new_path))
+			// {
+			// 	//Need to push_back pairs of strings and conflict_limits to retrieved_data.rules.conflicts
+			// 	// retrieved_conflict.first = child.second.get<std::string>("")
 			
-				//Iterating through conflicts vector to store items
-				/*BOOST_FOREACH(const std::pair< std::string, ConfigSystem::conflict_limits<std::string> > 
-						&iter, retrieved_data.rules.conflicts)
-				{
-					//Retrieve string path of conflict.
-					iter.first(child.second.get<std::string>("path"));
+			// 	//Iterating through conflicts vector to store items
+			// 	/*BOOST_FOREACH(const std::pair< std::string, ConfigSystem::conflict_limits<std::string> > 
+			// 			&iter, retrieved_data.rules.conflicts)
+			// 	{
+			// 		//Retrieve string path of conflict.
+			// 		iter.first(child.second.get<std::string>("path"));
 					
-					//Retrieve conflict_limits of conflict.
-					iter.second(child.second.get<std::string>("path"));
-				}*/
-			}
+			// 		//Retrieve conflict_limits of conflict.
+			// 		iter.second(child.second.get<std::string>("path"));
+			// 	}*/
+			// }
 			
 			std::cout << "THIS IS THE PATH TO THE UPDATES: " << new_path << "\n";
 		}
 		catch(std::exception &e)
 		{
-			//DEBUG
-			std::cout << "ERROR: " << e.what() << "\n";
-			retrieved_data.value = "";
-			retrieved_data.type = "";
+			// //DEBUG
+			// std::cout << "ERROR: " << e.what() << "\n";
+			// retrieved_data.value = "";
+			// retrieved_data.type = "";
 			
-			retrieved_data.upper_bound = "";
-			retrieved_data.lower_bound = "";
+			// retrieved_data.upper_bound = "";
+			// retrieved_data.lower_bound = "";
 			
-			//Clears the possible_values vector
-			retrieved_data.possible_values.clear();
+			// //Clears the possible_values vector
+			// retrieved_data.possible_values.clear();
 		}
 		
 		
-		return retrieved_data;
+		return cParam;
 	}
 	
 	

@@ -27,54 +27,54 @@
 #include <exception>
 
 //#include "ConfigStorageManager.h"
-#include "ConfigEnforcer.h"
+// #include "ConfigEnforcer.h"
 #include "ConfigManager.h"
 
 using ConfigSystem::ConfigStorageManager;
-using ConfigSystem::ConfigEnforcer;
+// using ConfigSystem::ConfigEnforcer;
 using ConfigSystem::ConfigManager;
 
 int main(void)
 {
 	//ConfigStorageManager *config = new ConfigStorageManager();
-	ConfigEnforcer *check = new ConfigEnforcer();
+	// ConfigEnforcer *check = new ConfigEnforcer();
 	
-	std::string filename[ARR_SIZE];
+	// std::string filename[ARR_SIZE];
 	
-	bool wsuccess = false, rsuccess = false, wasuccess = false, esuccess = false;
-	bool editcheck1 = false, editcheck2 = false;
+	// bool wsuccess = false, rsuccess = false, wasuccess = false, esuccess = false;
+	// bool editcheck1 = false, editcheck2 = false;
 	
-	bool intsuccess = false, intwritesuccess = false;
+	// bool intsuccess = false, intwritesuccess = false;
 	
-	int convertstuff = 0;
+	// int convertstuff = 0;
 	
 	
-	filename[0] = "ConfigurationFiles/behaviour.json";
-	filename[1] = "ConfigurationFiles/communication.json";
-	filename[2] = "ConfigurationFiles/configuration.json";
-	filename[3] = "ConfigurationFiles/localisation.json";
-	filename[4] = "ConfigurationFiles/locomotion.json";
-	filename[5] = "ConfigurationFiles/vision.json";
+	// filename[0] = "ConfigurationFiles/behaviour.json";
+	// filename[1] = "ConfigurationFiles/communication.json";
+	// filename[2] = "ConfigurationFiles/configuration.json";
+	// filename[3] = "ConfigurationFiles/localisation.json";
+	// filename[4] = "ConfigurationFiles/locomotion.json";
+	// filename[5] = "ConfigurationFiles/vision.json";
 	
-	//Read all config files. 
-	ConfigManager *config = new ConfigManager(filename);
+	// //Read all config files. 
+	// ConfigManager *config = new ConfigManager(filename);
 	
-	intsuccess = config->readIntParam("root.behaviour", "arbitrary_behave_constant", convertstuff);
+	// intsuccess = config->readIntParam("root.behaviour", "arbitrary_behave_constant", convertstuff);
 	
-	if(intsuccess) 	std::cout << "EPIC WINNING" << "\n";
-	else			std::cout << "nope.avi" << "\n";
+	// if(intsuccess) 	std::cout << "EPIC WINNING" << "\n";
+	// else			std::cout << "nope.avi" << "\n";
 	
-	std::cout << "string converted: " << convertstuff << "\n";
+	// std::cout << "string converted: " << convertstuff << "\n";
 	
-	std::cout << "changing to: " <<  50000 << "\n";
+	// std::cout << "changing to: " <<  50000 << "\n";
 	
-	//Can also change the type of variables. Have another class to safe proof this?
-	intwritesuccess = config->storeIntParam("root.behaviour", "arbitrary_behave_constant", 50000);
+	// //Can also change the type of variables. Have another class to safe proof this?
+	// intwritesuccess = config->storeIntParam("root.behaviour", "arbitrary_behave_constant", 50000);
 	
-	config->printAll();
+	// config->printAll();
 	
-	if(intwritesuccess) std::cout << "SUCCESSFUL WRITE TO FILE" << "\n";
-	else				std::cout  << "YOU LOSE" << "\n";
+	// if(intwritesuccess) std::cout << "SUCCESSFUL WRITE TO FILE" << "\n";
+	// else				std::cout  << "YOU LOSE" << "\n";
 	
 	
 	

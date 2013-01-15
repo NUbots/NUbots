@@ -1,6 +1,9 @@
 Configuration System Requirements
 =================================
 
+Update (14/01/13, 3:40pm): 
+  - Not using subclasses/polymorphism for ConfigParameter.  ConfigParameter will be (at least initially) implemented simply as a set of variables with a validity/type specifier.
+  
 
 Update (10/01/13, 3:50pm): 
   - There shall only be one 'rule': range limits (to be handled by the ConfigRange<T> class)

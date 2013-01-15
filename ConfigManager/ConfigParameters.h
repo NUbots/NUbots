@@ -2,24 +2,24 @@
     @file ConfigParameters.h
     @brief This is the header file for the ConfigParameters objects of the configuration system for the 
     NUbots.
- 
+    
     @class ConfigParameters
     @brief This class serves as an object for use when transferring parameters.
-
+    
     @author Sophie Calland
- 
+    
   Copyright (c) 2012 Sophie Calland
- 
+  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
+    
     This file is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
+    
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -27,174 +27,119 @@
 #ifndef ConfigParameters_def
 #define ConfigParameters_def
 
-// #include "ConfigConflicts.h"
-#include <string>
+#include "ConfigRange.h"
 
-    
+#include <iostream>
+#include <string>
+#include <vector>
+// #include <boost/static_assert.hpp>
+
+
+
+
 namespace ConfigSystem
 {
+    /// Used to identify the type of a ConfigParameter's value.
+    enum value_type 
+    {
+        vt_bool, vt_long, vt_double, vt_string,
+        vt_vector_long, vt_vector_double
+    };
+    
     /*!
      * 
      */
     class ConfigParameter
     {
-    protected:
-        std::string _type; //! This type of this parameter's value. 
+    private:
         std::string _name; //! This parameter's name.
         std::string _path; //! This parameter's path in the config system (not including '.<name>').
-        std::string _desc; //! A descriptoin of this parameter.
-    
+        std::string _desc; //! A description of this parameter.
+
+        // Following are a variety of variables intended to represent this 
+        // node's value.
+        // Supported types should (minimally) be:
+        //   - bool
+        //   - long   (int, char, unsiged types?)
+        //   - double (float)
+        //   - string
+        //   - vector<long>/long[]
+        //   - vector<double>/double[]
+        
+        struct ParameterValue
+        {
+            /// The type of this parameter's value
+            value_type val_type;
+            union 
+            {
+                bool                *val_bool         ;
+                long                *val_long         ;
+                double              *val_double       ;
+                std::string         *val_string       ;
+                std::vector<long  > *val_vector_long  ;
+                std::vector<double> *val_vector_double;
+            };
+        } _paramValue;
+        
     public:
-    	std::string getType       ();
-    	std::string getName       ();
-    	std::string getPath       ();
-    	std::string getDescription();
-    	void   setType       (std::string type);
-    	void   setName       (std::string name);
-    	void   setPath       (std::string path);
-    	void   setDescription(std::string desc);
+        ConfigParameter();
+        ConfigParameter(
+            std::string name,
+            std::string path,
+            value_type val_type
+            );
 
-    	bool isType(std::string type);
-
-
-    	// Below are default implementations of the virtual methods (which simply return failure).
-
-    	virtual bool getValue(bool   &value) 
-    	{
-    	    /*
-    	    std::cout << ConfigParameter::getValue(bool  &): "
-    	              << "Incorrect type for parameter value."
-    	              << std::endl;
-    	    */
-    	    return false; 
-    	};
-
-    	virtual bool getValue(char   &value) 
-    	{
-    	    /*
-    	    std::cout << ConfigParameter::getValue(char  &): "
-    	              << "Incorrect type for parameter value."
-    	              << std::endl;
-    	    */
-    	    return false; 
-    	};
-
-    	virtual bool getValue(int    &value) 
-    	{
-    	    /*
-    	    std::cout << ConfigParameter::getValue(int   &): "
-    	              << "Incorrect type for parameter value."
-    	              << std::endl;
-    	    */
-    	    return false; 
-    	};
-
-    	virtual bool getValue(long   &value) 
-    	{
-    	    /*
-    	    std::cout << ConfigParameter::getValue(long  &): "
-    	              << "Incorrect type for parameter value."
-    	              << std::endl;
-    	    */
-    	    return false; 
-    	};
-
-    	virtual bool getValue(float  &value) 
-    	{
-    	    /*
-    	    std::cout << ConfigParameter::getValue(float &): "
-    	              << "Incorrect type for parameter value."
-    	              << std::endl;
-    	    */
-    	    return false; 
-    	};
-
-    	virtual bool getValue(double &value) 
-    	{
-    	    /*
-    	    std::cout << ConfigParameter::getValue(double&): "
-    	              << "Incorrect type for parameter value."
-    	              << std::endl;
-    	    */
-    	    return false; 
-    	};
-
-    	virtual bool getValue(std::string &value) 
-    	{
-    	    /*
-    	    std::cout << ConfigParameter::getValue(string&): "
-    	              << "Incorrect type for parameter value."
-    	              << std::endl;
-    	    */
-    	    return false; 
-    	};
-    };
-
-
-    class ConfigIntParameter : ConfigParameter
-    {
-    private:
-    	int _value;
-	public:
-    	bool getValue(int &value);
-    };
-    
-    class ConfigStringParameter : ConfigParameter
-    {
-    private:
-    	std::string _value;
-	public:
-    	bool getValue(std::string &value);
-    };
-
-
-    // template<typename Item>    
-    // class ConfigParameters
-    // {
-    //     public:
-    //         ConfigParameters();
-    //         ConfigParameters(const Item &value_init, const std::string &type_init, const Item &upper_init,
-    //                         const Item &lower_init, const vector<Item> &possible_values_init,
-    //                         const ConfigConflicts &conflicts_init);
-    //         ~ConfigParameters();
-            
-            
-            
-            
-    //         void setValue(const Item);
-    //         void setType(const std::string&);
-            
-    //         void setUpperBound(const Item);
-    //         void setLowerBound(const Item);
-            
-    //         void setPossibleValues(const vector<Item>);
-    //         void setConflicts(const ConfigConflicts &);
-            
-            
-            
-            
-            
-    //         Item getValue();
-    //         std::string getType();
-            
-    //         Item getUpperBound();
-    //         Item getLowerBound();
-            
-    //         vector<Item> getPossibleValues();
-    //         ConfigConflict* getConflicts();
-    //         const ConfigConflict* getConflicts();
-            
-    //     private:
-    //         Item value;
-    //         std::string type;
+        //! Returns this parameter's name.
+        std::string getName       ();
         
-    //         Item upper_bound;
-    //         Item lower_bound;
+        //! Returns the path to this parameter in the ConfigTree (not including the final '.<name>').
+        std::string getPath       ();
         
-    //         std::vector<Item> possible_values;
-            
-    //         //ConfigConflicts *conflicts; //object stores paths etc.
-    // };
+        //! Returns a meaningful description of this parameter's purpose.
+        std::string getDescription();
+        
+        //! Return an enum value representing the type of this parameter's value.
+        value_type getType();
+        
+        //! Sets the name of this parameter in the ConfigTree.
+        void   setName       (std::string name);
+        
+        //! Sets the path of this parameter in the ConfigTree
+        void   setPath       (std::string path);
+        
+        //! Sets the description of this ConfigParameter.
+        void   setDescription(std::string desc);
+
+        //! Set an enum value representing the type of this parameter's value.
+        void setType(value_type val_type);
+
+        
+        //! If this parameter's value type is bool          , return the value.
+        bool getValue_bool         (bool                &value);
+        //! If this parameter's value type is long          , return the value.
+        bool getValue_long         (long                &value);
+        //! If this parameter's value type is double        , return the value.
+        bool getValue_double       (double              &value);
+        //! If this parameter's value type is string        , return the value.
+        bool getValue_string       (std::string         &value);
+        //! If this parameter's value type is vector<long  >, return the value.
+        bool getValue_vector_long  (std::vector<long  > &value);
+        //! If this parameter's value type is vector<double>, return the value.
+        bool getValue_vector_double(std::vector<double> &value); 
+
+        //! If this parameter's value type is bool          , set the value.
+        bool setValue_bool         (bool                &value);
+        //! If this parameter's value type is long          , set the value.
+        bool setValue_long         (long                &value);
+        //! If this parameter's value type is double        , set the value.
+        bool setValue_double       (double              &value);
+        //! If this parameter's value type is string        , set the value.
+        bool setValue_string       (std::string         &value);
+        //! If this parameter's value type is vector<long  >, set the value.
+        bool setValue_vector_long  (std::vector<long  > &value);
+        //! If this parameter's value type is vector<double>, set the value.
+        bool setValue_vector_double(std::vector<double> &value); 
+    };
 }
 
 #endif

@@ -37,6 +37,7 @@
 //#include <exception>
 //#include <iostream>
 
+#include "ConfigParameters.h"
 
 //The number of components (.json files used).
 #define ARR_SIZE 6
@@ -62,28 +63,28 @@ namespace ConfigSystem
 		std::vector<Item> values;
 	};*/
 
-	//Used to store parameter read in from JSON files.
-	template<typename Item>
-	struct parameter
-	{
-		Item value;
-		std::vector<Item>* vector_value;
-		std::string type;
+	// //Used to store parameter read in from JSON files.
+	// template<typename Item>
+	// struct parameter
+	// {
+	// 	Item value;
+	// 	std::vector<Item>* vector_value;
+	// 	std::string type;
 
-		Item upper_bound;
-		Item lower_bound;
+	// 	Item upper_bound;
+	// 	Item lower_bound;
 		
-		bool modified;
-		bool locked;
+	// 	bool modified;
+	// 	bool locked;
 
-		std::vector<Item> possible_values;
+	// 	std::vector<Item> possible_values;
 		
-		std::vector<std::string> conflicts;
+	// 	std::vector<std::string> conflicts;
 		
-		//FOLLOWING IS FOR COMPLICATED CONFLICTS ONLY, TO BE IMPLEMENTED LATER).
-		//vector of pairs, consisting of a string path and conflict_limits struct 
-		//std::vector< std::pair< std::string, ConfigSystem::conflict_limits<Item> > > conflicts;
-	};
+	// 	//FOLLOWING IS FOR COMPLICATED CONFLICTS ONLY, TO BE IMPLEMENTED LATER).
+	// 	//vector of pairs, consisting of a string path and conflict_limits struct 
+	// 	//std::vector< std::pair< std::string, ConfigSystem::conflict_limits<Item> > > conflicts;
+	// };
 
 	class ConfigStorageManager
 	{
@@ -162,24 +163,24 @@ namespace ConfigSystem
 			
 			
 			
-		
+			
 			/*! @brief Edits the entry specified by the string path.
- 	
+ 			
    			@param "path" stores the path to the value to be edited. 
    			@param "new_value" is the edited value as a string. 
    			@param "type" stores data type (MUST ALWAYS BE SPECIFIED).
     		@return Returns true if success, false otherwise.
  			*/
-			bool editEntry(std::string path, parameter<std::string> new_entry);
-		
+			bool editEntry(std::string path, ConfigParameter *new_entry);
+			
 			/*! @brief Accesses the entry specified by the string path and returns as parameter struct.
- 	
+ 			
    			@param "path" stores the path to the value to be edited. 
     		@return Returns the value stored at the specified path. 
  			*/
-			parameter<std::string> accessEntry(std::string path);
-	
-		
+			ConfigParameter *accessEntry(std::string path);
+			 
+			
 		private:
 			/*! @brief Reads the JSON file and stores it in the property tree, or writes current 
 					configuration to the specified JSON file.
