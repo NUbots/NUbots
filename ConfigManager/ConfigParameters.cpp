@@ -16,6 +16,36 @@ namespace ConfigSystem
     }
 
 
+    bool ConfigParameter::getRange_long  (ConfigRange<long  > &range)
+    {
+        if(_paramValue.val_type != vt_long  ) return false;
+        range = *_paramValue.range_long  ;
+        return true;
+    }
+
+    bool ConfigParameter::getRange_double(ConfigRange<double> &range)
+    {
+        if(_paramValue.val_type != vt_double) return false;
+        range = *_paramValue.range_double;
+        return true;
+    }
+
+
+    bool ConfigParameter::setRange_long  (ConfigRange<long  > &range)
+    {
+        if(_paramValue.val_type != vt_long  ) return false;
+        *_paramValue.range_long   = range;
+        return true;
+    }
+
+    bool ConfigParameter::setRange_double(ConfigRange<double> &range)
+    {
+        if(_paramValue.val_type != vt_double) return false;
+        *_paramValue.range_double = range;
+        return true;
+    }
+
+
 
     bool ConfigParameter::getValue_bool         (bool                &value)
     {
@@ -90,7 +120,7 @@ namespace ConfigSystem
         *_paramValue.val_string        = value;
         return true;
     }
-    
+
     bool ConfigParameter::setValue_vector_long  (std::vector<long  > &value)
     {
         if( _paramValue.val_type != vt_vector_long  ) return false;

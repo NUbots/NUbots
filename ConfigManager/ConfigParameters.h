@@ -52,9 +52,15 @@ namespace ConfigSystem
     class ConfigParameter
     {
     private:
-        std::string _name; //! This parameter's name.
-        std::string _path; //! This parameter's path in the config system (not including '.<name>').
-        std::string _desc; //! A description of this parameter.
+        //! This parameter's name.
+        std::string _name;
+
+        //! This parameter's path in the config system 
+        //! (not including '.<name>').
+        std::string _path;
+
+        //! A description of this parameter.
+        std::string _desc;
 
         // Following are a variety of variables intended to represent this 
         // node's value.
@@ -97,13 +103,15 @@ namespace ConfigSystem
         //! Returns this parameter's name.
         std::string getName       ();
         
-        //! Returns the path to this parameter in the ConfigTree (not including the final '.<name>').
+        //! Returns the path to this parameter in the ConfigTree 
+        //! (not including the final '.<name>').
         std::string getPath       ();
         
         //! Returns a meaningful description of this parameter's purpose.
         std::string getDescription();
         
-        //! Return an enum value representing the type of this parameter's value.
+        //! Return an enum value representing the type of this
+        //! parameter's value.
         value_type getType();
         
         //! Sets the name of this parameter in the ConfigTree.
@@ -117,6 +125,17 @@ namespace ConfigSystem
 
         //! Set an enum value representing the type of this parameter's value.
         void setType(value_type val_type);
+
+
+        //! Returns long   range if val_type is a long.
+        bool getRange_long  (ConfigRange<long  > &range);
+        //! Returns double range if val_type is a double.
+        bool getRange_double(ConfigRange<double> &range);
+
+        //! Sets long   range if val_type is a long.
+        bool setRange_long  (ConfigRange<long  > &range);
+        //! Sets double range if val_type is a double.
+        bool setRange_double(ConfigRange<double> &range);
 
 
         //! If this parameter's value type is bool          , return the value.
