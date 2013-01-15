@@ -17,7 +17,9 @@
 
 #ifndef TARGET_IS_RPI
 #include <QApplication>
+#include <QFileDialog>
 #endif
+
 
 using namespace std;
 using namespace cv;
@@ -79,8 +81,8 @@ int rpi(bool disp_on, bool cam)
     }
     if(error != 0)
         cout << "Error: " << error << endl;
-    return 0;
 #endif
+    return 0;
 }
 
 int pc()

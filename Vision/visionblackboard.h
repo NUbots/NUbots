@@ -59,7 +59,7 @@ public:
     void setObjectPoints(const vector<PointType>& points);
     
     void addGoal(const Goal& newgoal);
-    void addBeacon(const Beacon& newbeacon);
+    //void addBeacon(const Beacon& newbeacon);
     void addBall(const Ball& newball);
     void addObstacle(const Obstacle& newobstacle);
     void addLine(const FieldLine &newline);
@@ -98,7 +98,7 @@ public:
 
     vector<Ball>& getBalls();
     vector<Goal>& getGoals();
-    vector<Beacon>& getBeacons();
+    //vector<Beacon>& getBeacons();
     vector<Obstacle>& getObstacles();
     vector<FieldLine>& getLines();
 
@@ -191,7 +191,7 @@ private:
     
     vector<const VisionFieldObject*> m_vfos;
     vector<Goal> m_goals;
-    vector<Beacon> m_beacons;
+    //vector<Beacon> m_beacons;
     vector<Ball> m_balls;
     vector<Obstacle> m_obstacles;
     vector<FieldLine> m_lines;

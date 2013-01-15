@@ -299,6 +299,7 @@ bool operator >(const Line& line1, const Line& line2)
 std::ostream& operator<< (std::ostream& output, const Line& l)
 {
     output << l.m_A << "x + " << l.m_B << "y = " << l.m_C;
+    return output;
 }
 
 // isValid(float A, float B, float C): Check if the given values create a valid line.

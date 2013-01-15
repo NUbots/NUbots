@@ -140,8 +140,8 @@ void GoalDetectorHistogram::overlapCheck(vector<Quad>& posts)
 
 vector<Quad> GoalDetectorHistogram::detectQuads()
 {
-    const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
-    const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
+    const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_COLOUR);
+    const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_COLOUR);
 
     //vector<PointType> start_trans, end_trans, vert_trans;
     //vector<int> start_lengths, end_lengths;

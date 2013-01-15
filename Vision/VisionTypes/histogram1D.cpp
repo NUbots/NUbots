@@ -26,7 +26,7 @@ Histogram1D::Histogram1D(vector<int> bin_widths)
 {
     int cur_pos = 0;
     m_bins.clear();
-    for(int i=0; i<bin_widths.size(); i++) {
+    for(unsigned int i=0; i<bin_widths.size(); i++) {
         m_bins.push_back(emptyBin(cur_pos, bin_widths.at(i)));
         cur_pos += bin_widths.at(i);
     }
@@ -114,12 +114,10 @@ void Histogram1D::addToBin(int pos, int val)
         throw std::out_of_range("Histogram1D::addToBin called with negative position.");
     }
 
-    bool found = false;
     BOOST_FOREACH(Bin& bin, m_bins) {
         if(pos < bin.start + bin.width) {
-            found = true;
             bin.value += val;
-            return;
+            return; //found so return
         }
     }
 

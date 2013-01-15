@@ -9,13 +9,11 @@
 class RobocupHacks
 {
 public:
-    static void beaconGoalHack();
     static void ballGoalHack();
 
 private:
     RobocupHacks();
 
-    static bool beaconAndGoalClose(const Beacon& beacon, const Goal& goal);
     static bool ballInQuad(const Ball& ball, const Quad& quad);
 };
 

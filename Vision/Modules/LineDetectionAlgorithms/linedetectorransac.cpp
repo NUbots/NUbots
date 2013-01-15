@@ -11,8 +11,8 @@ LineDetectorRANSAC::LineDetectorRANSAC()
 {
     m_n = 15;               //min pts to line essentially
     m_k = 40;               //number of iterations per fitting attempt
-    m_e = 8.0;              //consensus margin
-    m_max_iterations = 25;  //hard limit on number of fitting attempts
+    m_e = 4.0;              //consensus margin
+    m_max_iterations = 10;  //hard limit on number of lines
 }
 
 void LineDetectorRANSAC::run()

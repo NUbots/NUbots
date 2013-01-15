@@ -75,26 +75,26 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
             stat_id = FieldObjects::FO_YELLOW_RIGHT_GOALPOST;
             stationary = true;
             break;
-        case GOAL_B_L:
-            stat_id = FieldObjects::FO_BLUE_LEFT_GOALPOST;
-            stationary = true;
-            break;
-        case GOAL_B_R:
-            stat_id = FieldObjects::FO_BLUE_RIGHT_GOALPOST;
-            stationary = true;
-            break;
         case GOAL_Y_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
             stationary = false;
             break;
-        case GOAL_B_U:
-            newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
-            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
-            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
-            stationary = false;
-            break;
+//        case GOAL_B_L:
+//            stat_id = FieldObjects::FO_BLUE_LEFT_GOALPOST;
+//            stationary = true;
+//            break;
+//        case GOAL_B_R:
+//            stat_id = FieldObjects::FO_BLUE_RIGHT_GOALPOST;
+//            stationary = true;
+//            break;
+//        case GOAL_B_U:
+//            newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
+//            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
+//            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+//            stationary = false;
+//            break;
         default:
             //invalid object - do not push to fieldobjects
             errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;

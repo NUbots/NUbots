@@ -36,7 +36,7 @@ class DataWrapper
     friend class VisionControlWrapper;
 
 public:
-    
+
     enum DEBUG_ID {
         DBID_IMAGE              = 0,
         DBID_CLASSED_IMAGE       = 1,
@@ -54,7 +54,9 @@ public:
         DBID_BALLS              = 13,
         DBID_OBSTACLES          = 14,
         DBID_LINES              = 15,
-        NUMBER_OF_IDS           = 16
+        DBID_GOAL_LINES_START   = 16,
+        DBID_GOAL_LINES_END     = 17,
+        NUMBER_OF_IDS           = 18
     };
 
     static string getIDName(DEBUG_ID id);
@@ -83,7 +85,7 @@ public:
 
     void debugRefresh();
     bool debugPublish(const vector<Ball>& data);
-    bool debugPublish(const vector<Beacon>& data);
+//    bool debugPublish(const vector<Beacon>& data);
     bool debugPublish(const vector<Goal>& data);
     bool debugPublish(const vector<Obstacle>& data);
     bool debugPublish(const vector<FieldLine>& data);
@@ -91,6 +93,7 @@ public:
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id);
     bool debugPublish(DEBUG_ID id, const NUImage *const img);
+    bool debugPublish(DEBUG_ID id, const vector<FieldLine>& data);
     
     
 private:

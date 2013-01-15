@@ -93,15 +93,15 @@ void VisionBlackboard::addGoal(const Goal& newgoal)
     //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_goals.back())));
 }
 
-/**
-  * Adds a beacon to the list of results.
-  * @param newbeacon The beacon to add.
-  */
-void VisionBlackboard::addBeacon(const Beacon& newbeacon)
-{
-    m_beacons.push_back(newbeacon);
-    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_beacons.back())));
-}
+///**
+//  * Adds a beacon to the list of results.
+//  * @param newbeacon The beacon to add.
+//  */
+//void VisionBlackboard::addBeacon(const Beacon& newbeacon)
+//{
+//    m_beacons.push_back(newbeacon);
+//    //m_vfos.push_back(static_cast<const VisionFieldObject*>(&(m_beacons.back())));
+//}
 
 /**
   * Adds a ball to the list of results.
@@ -374,11 +374,11 @@ vector<Goal>& VisionBlackboard::getGoals()
     return m_goals;
 }
 
-//! Returns the list of found beacons.
-vector<Beacon>& VisionBlackboard::getBeacons()
-{
-    return m_beacons;
-}
+////! Returns the list of found beacons.
+//vector<Beacon>& VisionBlackboard::getBeacons()
+//{
+//    return m_beacons;
+//}
 
 //! Returns the list of found obstacles.
 vector<Obstacle>& VisionBlackboard::getObstacles()
@@ -660,7 +660,7 @@ void VisionBlackboard::update()
 
     //clear out result vectors
     m_balls.clear();
-    m_beacons.clear();
+    //m_beacons.clear();
     m_goals.clear();
     m_obstacles.clear();
     m_lines.clear();
@@ -680,9 +680,9 @@ void VisionBlackboard::publish() const
     for(i=0; i<m_balls.size(); i++) {
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_balls.at(i)));
     }
-    for(i=0; i<m_beacons.size(); i++) {
-        wrapper->publish(static_cast<const VisionFieldObject*>(&m_beacons.at(i)));
-    }
+//    for(i=0; i<m_beacons.size(); i++) {
+//        wrapper->publish(static_cast<const VisionFieldObject*>(&m_beacons.at(i)));
+//    }
     for(i=0; i<m_goals.size(); i++) {
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_goals.at(i)));
     }
@@ -756,7 +756,7 @@ void VisionBlackboard::debugPublish() const
     
     //field objects
     wrapper->debugPublish(m_goals);
-    wrapper->debugPublish(m_beacons);
+    //wrapper->debugPublish(m_beacons);
     wrapper->debugPublish(m_balls);
     wrapper->debugPublish(m_obstacles);
     wrapper->debugPublish(m_lines);

@@ -274,7 +274,7 @@ std::ostream& operator<< (std::ostream& output, const NUImage& p_image)
 std::istream& operator>> (std::istream& input, NUImage& p_image)
 {
     int width, height;
-    std::streampos start = input.tellg();
+    //std::streampos start = input.tellg();
     NUImage::Header header;
     NUImage::Version image_version = NUImage::VERSION_UNKNOWN;
     input.read(reinterpret_cast<char*>(&header), sizeof(header));

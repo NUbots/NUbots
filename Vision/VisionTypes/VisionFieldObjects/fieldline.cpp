@@ -19,11 +19,11 @@ void FieldLine::set(double rho, double phi)
 //        m_rho = -rho;
 //        m_phi = phi + mathGeneral::PI;   //compensate angle
 //    }
-    m_rho = rho;
-    m_phi = phi;
 
 //    //force phi into [0, 2*pi)
-    m_phi = m_phi - 2*mathGeneral::PI * floor( m_phi / (2*mathGeneral::PI) );
+    phi = phi - 2*mathGeneral::PI * floor( phi / (2*mathGeneral::PI) );
+
+    m_screen_line.setLine(rho, phi);
 }
 
 double FieldLine::findError(const Vector2<double>& measured) const
@@ -33,8 +33,8 @@ double FieldLine::findError(const Vector2<double>& measured) const
 
 double FieldLine::findError(const FieldLine& measured) const
 {
-    double d_rho = abs(m_rho - measured.m_rho),
-           d_phi = abs(m_phi - measured.m_phi);
+    double d_rho = abs(m_screen_line.getRho() - measured.m_screen_line.getRho()),
+           d_phi = abs(m_screen_line.getPhi() - measured.m_screen_line.getPhi());
 
     if(d_phi > mathGeneral::PI*0.5)
         d_phi = mathGeneral::PI - d_phi;
@@ -45,6 +45,8 @@ double FieldLine::findError(const FieldLine& measured) const
 ostream& operator<< (ostream& output, const FieldLine& l)
 {
     output << "FieldLine " << endl;
+    output << "Equation: " << l.m_screen_line << endl;
+    output << "Field Equation: " << l.m_field_mapped_line << endl;
     output << "\tpixelloc: [" << l.m_location_pixels.x << ", " << l.m_location_pixels.y << "]" << endl;
     output << " angularloc: [" << l.m_location_angular.x << ", " << l.m_location_angular.y << "]" << endl;
     output << "\trelative field coords: [" << l.m_spherical_position.x << ", " << l.m_spherical_position.y << ", " << l.m_spherical_position.z << "]" << endl;
@@ -63,18 +65,22 @@ ostream& operator<< (ostream& output, const vector<FieldLine>& v)
 
 void FieldLine::render(cv::Mat &mat) const
 {
+    render(mat, cv::Scalar(0,0,255));
+}
+
+void FieldLine::render(cv::Mat &mat, cv::Scalar colour) const
+{
     int width = mat.cols,
         height = mat.rows;
     Point p0(0,0), p1(width,0), p2(width,height), p3(0, height);
     Line l0(p0,p1), l1(p1,p2), l2(p2,p3), l3(p3, p0);
-    Line line(m_rho, m_phi);
 
     Point left_i, right_i, top_i, bottom_i;
 
-    bool left = line.getIntersection(l3, left_i),
-        right = line.getIntersection(l1, right_i),
-        top = line.getIntersection(l0, top_i),
-        bottom = line.getIntersection(l2, bottom_i);
+    bool left = m_screen_line.getIntersection(l3, left_i),
+        right = m_screen_line.getIntersection(l1, right_i),
+        top = m_screen_line.getIntersection(l0, top_i),
+        bottom = m_screen_line.getIntersection(l2, bottom_i);
 
     Point render_pt1, render_pt2;
     if(left && left_i.y >= 0 && left_i.y <= height) {
@@ -117,5 +123,5 @@ void FieldLine::render(cv::Mat &mat) const
         }
     }
 
-    cv::line(mat, cv::Point2i(render_pt1.x, render_pt1.y), cv::Point2i(render_pt2.x, render_pt2.y), cv::Scalar(0,0,255), 2);
+    cv::line(mat, cv::Point2i(render_pt1.x, render_pt1.y), cv::Point2i(render_pt2.x, render_pt2.y), colour, 2);
 }

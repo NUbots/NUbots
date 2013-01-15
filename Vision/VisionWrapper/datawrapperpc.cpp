@@ -42,6 +42,10 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_BALLS";
     case DBID_OBSTACLES:
         return "DBID_OBSTACLES";
+    case DBID_GOAL_LINES_START:
+        return "DBID_GOAL_LINES_START";
+    case DBID_GOAL_LINES_END:
+        return "DBID_GOAL_LINES_END";
     default:
         return "NOT VALID";
     }
@@ -63,7 +67,7 @@ void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segm
 
 void doGaussian(NUImage* img) {
     unsigned char* ptr;
-            //r, g, b,
+            //r, g, b,QFileDialog::getOpenFileName(NULL, "Select image stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
             //Y, cb, cr;
     vector<const VisionFieldObject*>::const_iterator it;
     cv::Mat mat(img->getHeight(), img->getWidth(), CV_8UC3);
@@ -116,7 +120,7 @@ DataWrapper::DataWrapper()
         if(true) {
             streamname = QFileDialog::getOpenFileName(NULL, "Select image stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
             LUTname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
-            configname = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/"), "config Files (*.cfg)").toStdString();
+            configname = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
         }
         else {
             streamname = string(getenv("HOME")) + string("/nubot/image.strm");
@@ -142,7 +146,7 @@ DataWrapper::DataWrapper()
     }
 
     //create debug windows
-    debug_window_num = 7;
+    debug_window_num = 8;
     debug_windows = new pair<string, cv::Mat>[debug_window_num];
     debug_windows[0].first = "Scans";
     debug_windows[1].first = "Classified";
@@ -151,6 +155,7 @@ DataWrapper::DataWrapper()
     debug_windows[4].first = "Transitions";
     debug_windows[5].first = "Final Results";
     debug_windows[6].first = "Filtered Scanlines";
+    debug_windows[7].first = "Goal Processing";
     for(int i=0; i<debug_window_num; i++) {
         namedWindow(debug_windows[i].first, CV_WINDOW_KEEPRATIO);
         debug_windows[i].second.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
@@ -162,6 +167,7 @@ DataWrapper::DataWrapper()
     //debug_map[DBID_IMAGE].push_back(                &debug_windows[3]);
     debug_map[DBID_IMAGE].push_back(                &debug_windows[4]);
     debug_map[DBID_IMAGE].push_back(                &debug_windows[5]);
+    debug_map[DBID_IMAGE].push_back(                &debug_windows[7]);
 
     debug_map[DBID_CLASSED_IMAGE].push_back(        &debug_windows[1]);
 
@@ -185,6 +191,10 @@ DataWrapper::DataWrapper()
     debug_map[DBID_BALLS].push_back(                &debug_windows[5]);
     debug_map[DBID_OBSTACLES].push_back(            &debug_windows[5]);
     debug_map[DBID_LINES].push_back(                &debug_windows[5]);
+
+
+    debug_map[DBID_GOAL_LINES_START].push_back(     &debug_windows[7]);
+    debug_map[DBID_GOAL_LINES_END].push_back(       &debug_windows[7]);
 
     results_img.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
     
@@ -404,35 +414,35 @@ bool DataWrapper::debugPublish(const vector<Ball>& data) {
     return true;
 }
 
-bool DataWrapper::debugPublish(const vector<Beacon>& data) {
+//bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     
-#if VISION_WRAPPER_VERBOSITY > 1
-    if(data.empty()) {
-        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
-        return false;
-    }
-#endif
+//#if VISION_WRAPPER_VERBOSITY > 1
+//    if(data.empty()) {
+//        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
+//        return false;
+//    }
+//#endif
     
-    //Get window assigned to id
-    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(DBID_BEACONS);
-    if(map_it == debug_map.end()) {
-        errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
-        return false;
-    }
+//    //Get window assigned to id
+//    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(DBID_BEACONS);
+//    if(map_it == debug_map.end()) {
+//        errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
+//        return false;
+//    }
 
-    //for all images
-    for(unsigned int i=0; i<map_it->second.size(); i++) {
-        string& window = map_it->second[i]->first; //get window name from pair
-        cv::Mat& img = map_it->second[i]->second; //get window name from pair
+//    //for all images
+//    for(unsigned int i=0; i<map_it->second.size(); i++) {
+//        string& window = map_it->second[i]->first; //get window name from pair
+//        cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
-        BOOST_FOREACH(Beacon b, data) {
-            b.render(img);
-        }
+//        BOOST_FOREACH(Beacon b, data) {
+//            b.render(img);
+//        }
 
-        imshow(window, img);
-    }
-    return true;
-}
+//        imshow(window, img);
+//    }
+//    return true;
+//}
 
 bool DataWrapper::debugPublish(const vector<Goal>& data) {
 
@@ -702,6 +712,50 @@ bool DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
         }
         imshow(window, img_map);
     }
+    return true;
+}
+
+bool DataWrapper::debugPublish(DEBUG_ID id, const vector<FieldLine>& data)
+{
+#if VISION_WRAPPER_VERBOSITY > 1
+    if(data.empty()) {
+        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_LINES) << endl;
+        return false;
+    }
+#endif
+
+    //Get window assigned to id
+    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(id);
+    if(map_it == debug_map.end()) {
+        errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(id) << endl;
+        return false;
+    }
+
+    //for all images
+    for(unsigned int i=0; i<map_it->second.size(); i++) {
+        string& window = map_it->second[i]->first; //get window name from pair
+        cv::Mat& img = map_it->second[i]->second; //get window name from pair
+        cv::Scalar colour;
+
+        switch(id) {
+        case DBID_GOAL_LINES_START:
+            colour = cv::Scalar(255,255,0);
+            break;
+        case DBID_GOAL_LINES_END:
+            colour = cv::Scalar(255,0,255);
+            break;
+        default:
+            errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+            return false;
+        }
+
+        BOOST_FOREACH(FieldLine l, data) {
+            l.render(img, colour);
+        }
+
+        imshow(window, img);
+    }
+
     return true;
 }
 

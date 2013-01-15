@@ -125,7 +125,7 @@ void VisionConstants::loadFromFile(std::string filename)
     SAM_MAX_LINE_MSD = 1;
     SAM_CLEAR_SMALL = true;
     SAM_CLEAR_DIRTY = true;
-    LINE_METHOD = SAM;
+    LINE_METHOD = RANSAC;
     GOAL_MAX_OBJECTS = 8;
     GOAL_BINS = 20;
     GOAL_MIN_THRESHOLD = 1;
@@ -937,6 +937,9 @@ bool VisionConstants::setAllOptimisable(const vector<float>& params)
     HORIZONTAL_SCANLINE_SPACING = params.at(33);
     VERTICAL_SCANLINE_SPACING = params.at(34);
     GREEN_HORIZON_SCAN_SPACING = params.at(35);
+
+    return true;
+
 //    if(params.size() != 32) {
 //        return false; //not a valid size
 //    }
@@ -1085,6 +1088,7 @@ std::string VisionConstants::getDistanceMethodName(VisionConstants::DistanceMeth
     case D2P:       return "D2P";
     case Average:   return "AVERAGE";
     case Least:     return "LEAST";
+    default:        return "UNKOWN";
     }
 }
 
@@ -1108,5 +1112,6 @@ std::string VisionConstants::getLineMethodName(VisionConstants::LineDetectionMet
     switch(method) {
     case SAM:       return "SAM";
     case RANSAC:    return "RANSAC";
+    default:        return "INVALID";
     }
 }
