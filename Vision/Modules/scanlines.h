@@ -48,7 +48,7 @@ private:
     /**
     *   @brief  classifies a single vertical scanline.
     */
-    static vector<ColourSegment> classifyVerticalScan(const VisionBlackboard& vbb, const NUImage& img, const PointType& start);
+    static vector<ColourSegment> classifyVerticalScan(const VisionBlackboard& vbb, const NUImage& img, const Vector2<double>& start);
     
     
 };

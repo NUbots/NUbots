@@ -4,9 +4,6 @@
 #include <opencv2/core/core.hpp>
 #include "Tools/Math/Vector2.h"
 
-//typedef cv::Point2i PointType;      //! Use opencv points.
-typedef Vector2<int> PointType;
-
 namespace VisionID {
     enum ScanDirection {
         VERTICAL,

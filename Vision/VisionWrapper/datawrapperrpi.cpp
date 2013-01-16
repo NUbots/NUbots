@@ -438,7 +438,7 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
     return false;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
+bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data_points)
 {
     vector<PointType>::const_iterator it;
 

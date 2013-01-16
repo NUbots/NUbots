@@ -27,7 +27,7 @@ void ObjectDetectionCH::detectObjects()
 //    cv::Mat cvimg;
 //    lut.classifyImage(img, cvimg);
 
-    vector<PointType> result;
+    vector<Vector2<double> > result;
     vector<cv::Point2i> horizon_points,
                         object_points;
     convertPointTypes(vbb->getGreenHorizon().getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING), horizon_points);
@@ -117,7 +117,7 @@ void ObjectDetectionCH::detectObjects()
                     int NO_HEIGHT = -1; // DOES NOTHING
 
                     // push to blackboard
-                    Obstacle newObstacle(PointType(centre, bottom), width, NO_HEIGHT);
+                    Obstacle newObstacle(Vector2<double>(centre, bottom), width, NO_HEIGHT);
                     vbb->addObstacle(newObstacle);
                 }
                 scanning = false;
@@ -139,15 +139,15 @@ bool ObjectDetectionCH::isPixelGreen(const NUImage& img, int x, int y)
     return ClassIndex::getColourFromIndex(LUT.classifyPixel(img(x,y))) == ClassIndex::green;
 }
 
-void ObjectDetectionCH::convertPointTypes(const vector<cv::Point2i> &cvpoints, vector<PointType> &ourpoints)
+void ObjectDetectionCH::convertPointTypes(const vector<cv::Point2i> &cvpoints, vector<Vector2<double> > &ourpoints)
 {
     ourpoints.clear();
     for(unsigned int i=0; i<cvpoints.size(); i++) {
-        ourpoints.push_back(PointType(cvpoints.at(i).x, cvpoints.at(i).y));
+        ourpoints.push_back(Vector2<double>(cvpoints.at(i).x, cvpoints.at(i).y));
     }
 }
 
-void ObjectDetectionCH::convertPointTypes(const vector<PointType> &ourpoints, vector<cv::Point2i>& cvpoints)
+void ObjectDetectionCH::convertPointTypes(const vector<Vector2<double> > &ourpoints, vector<cv::Point2i>& cvpoints)
 {
     cvpoints.clear();
     for(unsigned int i=0; i<ourpoints.size(); i++) {

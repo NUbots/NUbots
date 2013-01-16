@@ -1,6 +1,6 @@
 #include "coloursegment.h"
 
-unsigned int dist(const PointType &x1, const PointType &x2)
+unsigned int dist(const Vector2<double>& x1, const Vector2<double>& x2)
 {
     if(x1.x == x2.x)
         return std::abs(x1.y - x2.y);
@@ -10,7 +10,7 @@ unsigned int dist(const PointType &x1, const PointType &x2)
         return (x1 - x2).abs();
 }
 
-void ColourSegment::set(const PointType &start, const PointType &end, ClassIndex::Colour colour)
+void ColourSegment::set(const Vector2<double>& start, const Vector2<double>& end, ClassIndex::Colour colour)
 {
     m_colour = colour;
     bool flip;

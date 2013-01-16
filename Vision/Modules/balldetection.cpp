@@ -14,7 +14,7 @@ void BallDetection::detectBall()
 
     vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::BALL_COLOUR);
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::BALL_COLOUR);
-    vector<PointType> edges;
+    vector<Vector2<double> > edges;
 
     appendEdgesFromSegments(h_segments, edges);
     appendEdgesFromSegments(v_segments, edges);
@@ -27,7 +27,7 @@ void BallDetection::detectBall()
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
 
     // Throw out points above the horizon
-    vector<PointType>::iterator it;
+    vector<Vector2<double> >::iterator it;
     it = edges.begin();
     while (it < edges.end()) {
         if(green_horizon.isBelowHorizon(*it)) {
@@ -217,34 +217,34 @@ void BallDetection::detectBall()
         }
         top_edge = true;
 
-        PointType center;
+        Vector2<double> center;
         if (left_edge == true && right_edge == true && top_edge == true && bottom_edge == true) {
-            center = PointType((right+left)/2,(top+bottom)/2);
+            center = Vector2<double>((right+left)/2,(top+bottom)/2);
         }
         else if (left_edge == true && right_edge == true) {
             if (top_edge == true && bottom_edge == false) {
-                center = PointType((right+left)/2, min((top+(top+right-left))/2, img.getHeight()-1));                
+                center = Vector2<double>((right+left)/2, min((top+(top+right-left))/2, img.getHeight()-1));
             }
             else if (top_edge == false && bottom_edge == true) {
-                center = PointType((right+left)/2, max((bottom+(bottom-right+left))/2, 0));
+                center = Vector2<double>((right+left)/2, max((bottom+(bottom-right+left))/2, 0));
             }
             else {
-                center = PointType((right+left)/2,(top+bottom)/2);
+                center = Vector2<double>((right+left)/2,(top+bottom)/2);
             }
         }
         else if (top_edge == true && bottom_edge == true) {
             if (left_edge == true && right_edge == false) {
-                center = PointType(min((left+(left+bottom-top))/2, img.getWidth()-1),(top+bottom)/2);
+                center = Vector2<double>(min((left+(left+bottom-top))/2, img.getWidth()-1),(top+bottom)/2);
             }
             else if (left_edge == false && right_edge == true) {
-                center = PointType(max((right+(right-bottom+top))/2, 0),(top+bottom)/2);
+                center = Vector2<double>(max((right+(right-bottom+top))/2, 0),(top+bottom)/2);
             }
             else {
-                center = PointType((right+left)/2,(top+bottom)/2);
+                center = Vector2<double>((right+left)/2,(top+bottom)/2);
             }
         }
         else {
-            center = PointType((right+left)/2,(top+bottom)/2);
+            center = Vector2<double>((right+left)/2,(top+bottom)/2);
         }
 
         if (!(center.x ==1 and center.y==1) && bottom-top > 0 && right-left > 0) {
@@ -255,10 +255,10 @@ void BallDetection::detectBall()
             int min = std::min(right-left, bottom-top);
             min /= 2;
 
-            int box_left = std::max(center.x - min, 0);
-            int box_right = std::min(center.x + min, img.getWidth()-1);
-            int box_top = std::max(center.y - min, 0);
-            int box_bottom = std::min(center.y + min, img.getHeight()-1);
+            int box_left = std::max(center.x - min, 0.0);
+            int box_right = std::min(center.x + min, img.getWidth()-1.0);
+            int box_top = std::max(center.y - min, 0.0);
+            int box_bottom = std::min(center.y + min, img.getHeight()-1.0);
 
             //cout << box_left << ", " << box_right << ", " << box_top << ", " << box_bottom << endl;
 
@@ -290,7 +290,7 @@ void BallDetection::detectBall()
     }
 }
 
-void BallDetection::appendEdgesFromSegments(const vector<ColourSegment> &segments, vector<PointType> &pointlist)
+void BallDetection::appendEdgesFromSegments(const vector<ColourSegment> &segments, vector<Vector2<double> > &pointlist)
 {
     vector<ColourSegment>::const_iterator it;
     for(it = segments.begin(); it < segments.end(); it++) {

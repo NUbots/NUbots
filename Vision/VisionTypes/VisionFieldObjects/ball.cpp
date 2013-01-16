@@ -19,7 +19,7 @@ Ball::Ball()
     valid = valid && check();
 }
 
-Ball::Ball(PointType centre, float diameter)
+Ball::Ball(Vector2<double> centre, float diameter)
 {
     m_id = BALL;
     int top = centre.y - diameter*0.5,

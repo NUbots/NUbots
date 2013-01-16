@@ -8,7 +8,7 @@
 class Obstacle : public VisionFieldObject
 {
 public:
-    Obstacle(const PointType& position=PointType(0,0), float width=0, float height=0);
+    Obstacle(const Vector2<double>& position=Vector2<double>(0,0), double width=0, double height=0);
 
     //! @brief returns the field position relative to the robot.
     Vector3<float> getRelativeFieldCoords() const;

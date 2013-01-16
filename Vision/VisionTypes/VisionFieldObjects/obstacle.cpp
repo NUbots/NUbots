@@ -8,7 +8,7 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-Obstacle::Obstacle(const PointType &position, float width, float height)
+Obstacle::Obstacle(const Vector2<double>& position, double width, double height)
 {
     m_id = OBSTACLE;
     m_size_on_screen = Vector2<float>(width, height);

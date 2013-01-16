@@ -23,7 +23,7 @@ vector<Point> LineDetector::pointsUnderGreenHorizon(const vector<Point>& points,
 {
     vector<Point> under;
     BOOST_FOREACH(Point p, points) {
-        if(gh.isBelowHorizon(PointType(p.x, p.y))) {
+        if(gh.isBelowHorizon(p)) {
             under.push_back(p);
         }
     }

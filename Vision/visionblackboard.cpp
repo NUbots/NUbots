@@ -56,7 +56,7 @@ VisionBlackboard* VisionBlackboard::getInstance()
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setGreenHullPoints(const vector<PointType>& points)
+void VisionBlackboard::setGreenHullPoints(const vector<Vector2<double> >& points)
 {
     green_horizon.set(points);
 }
@@ -67,7 +67,7 @@ void VisionBlackboard::setGreenHullPoints(const vector<PointType>& points)
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setGreenHorizonScanPoints(const vector<PointType>& points)
+void VisionBlackboard::setGreenHorizonScanPoints(const vector<Vector2<double> >& points)
 {
     green_horizon_scan_points = points;
 }
@@ -78,7 +78,7 @@ void VisionBlackboard::setGreenHorizonScanPoints(const vector<PointType>& points
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setObjectPoints(const vector<PointType>& points)
+void VisionBlackboard::setObjectPoints(const vector<Vector2<double> >& points)
 {
     object_points = points;
 }
@@ -229,7 +229,7 @@ const GreenHorizon& VisionBlackboard::getGreenHorizon() const
 *   @brief returns the green horizon scan point set.
 *   @return points A vector of pixel locations for the green horizon scan.
 */
-const vector<PointType>& VisionBlackboard::getGreenHorizonScanPoints() const
+const vector<Vector2<double> >& VisionBlackboard::getGreenHorizonScanPoints() const
 {
     return green_horizon_scan_points;
 }
@@ -238,7 +238,7 @@ const vector<PointType>& VisionBlackboard::getGreenHorizonScanPoints() const
 *   @brief returns the object point set.
 *   @return points A vector of pixel locations for objects.
 */
-const vector<PointType>& VisionBlackboard::getObjectPoints() const
+const vector<Vector2<double> >& VisionBlackboard::getObjectPoints() const
 {
     return object_points;
 }
@@ -705,7 +705,7 @@ void VisionBlackboard::debugPublish() const
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::debugPublish() - Begin" << endl;
     #endif
-    vector<PointType> pts;
+    vector<Vector2<double> > pts;
     map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> >::const_iterator it;
     vector<ColourSegment> v_s;
 
@@ -737,8 +737,8 @@ void VisionBlackboard::debugPublish() const
     //horizon
     pts.clear();
     if(!kinematics_horizon.isVertical()) {
-        pts.push_back(PointType(0, kinematics_horizon.findYFromX(0)));
-        pts.push_back(PointType(original_image->getWidth(), kinematics_horizon.findYFromX(original_image->getWidth())));
+        pts.push_back(Vector2<double>(0, kinematics_horizon.findYFromX(0)));
+        pts.push_back(Vector2<double>(original_image->getWidth(), kinematics_horizon.findYFromX(original_image->getWidth())));
         wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts);
     }
     else {
@@ -764,7 +764,7 @@ void VisionBlackboard::debugPublish() const
     //horizontal scans
     pts.clear();
     for(unsigned int i=0; i<horizontal_scanlines.size(); i++) {
-        pts.push_back(PointType(0, horizontal_scanlines.at(i)));
+        pts.push_back(Vector2<double>(0, horizontal_scanlines.at(i)));
     }
     wrapper->debugPublish(DataWrapper::DBID_H_SCANS, pts);
     
@@ -789,11 +789,11 @@ void VisionBlackboard::debugPublish() const
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
             if(s.getColour() == ClassIndex::white) {
-                pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+                pts.push_back(Vector2<double>(s.getCentre().x, s.getCentre().y));
             }
             else {
-                pts.push_back(PointType(s.getStart().x, s.getStart().y));
-                pts.push_back(PointType(s.getEnd().x, s.getEnd().y));
+                pts.push_back(Vector2<double>(s.getStart().x, s.getStart().y));
+                pts.push_back(Vector2<double>(s.getEnd().x, s.getEnd().y));
             }
         }
     }
@@ -805,11 +805,11 @@ void VisionBlackboard::debugPublish() const
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
             if(s.getColour() == ClassIndex::white) {
-                pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+                pts.push_back(Vector2<double>(s.getCentre().x, s.getCentre().y));
             }
             else {
-                pts.push_back(PointType(s.getStart().x, s.getStart().y));
-                pts.push_back(PointType(s.getEnd().x, s.getEnd().y));
+                pts.push_back(Vector2<double>(s.getStart().x, s.getStart().y));
+                pts.push_back(Vector2<double>(s.getEnd().x, s.getEnd().y));
             }
         }
     }

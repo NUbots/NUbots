@@ -7,12 +7,12 @@ GreenHorizon::GreenHorizon()
 {
 }
 
-GreenHorizon::GreenHorizon(const vector<PointType>& initial_points)
+GreenHorizon::GreenHorizon(const vector<Vector2<double> >& initial_points)
 {
     set(initial_points);
 }
 
-void GreenHorizon::set(const vector<PointType> &initial_points)
+void GreenHorizon::set(const vector<Vector2<double> > &initial_points)
 {
     #if VISION_HORIZON_VERBOSITY > 1
         debug << "GreenHorizon::GreenHorizon - Begin" << endl;
@@ -26,7 +26,7 @@ void GreenHorizon::set(const vector<PointType> &initial_points)
 
     //unsigned int position, y_new;
     int y_new;
-    vector<PointType>::const_iterator it_start, it_end;
+    vector<Vector2<double> >::const_iterator it_start, it_end;
     it_start = original_points.begin();
     it_end = it_start + 1;
     for (int i = 0; i < width; i++) {
@@ -44,7 +44,7 @@ void GreenHorizon::set(const vector<PointType> &initial_points)
 
         if(y_new >= height)
             errorlog << "GreenHorizon::set: " << y_new << " it_start: " << *it_start << " it_end: " << *it_end << endl;
-        interpolated_points.push_back(PointType(i, y_new));
+        interpolated_points.push_back(Vector2<double>(i, y_new));
     }
 }
 
@@ -53,24 +53,24 @@ int GreenHorizon::getYFromX(int x) const
     return interpolated_points.at(x).y;
 }
 
-bool GreenHorizon::isBelowHorizon(PointType pt) const
+bool GreenHorizon::isBelowHorizon(Vector2<double> pt) const
 {
     return pt.y > interpolated_points.at(pt.x).y;
 }
 
-const vector<PointType>& GreenHorizon::getOriginalPoints() const
+const vector<Vector2<double> >& GreenHorizon::getOriginalPoints() const
 {
     return original_points;
 }
 
-const vector<PointType>& GreenHorizon::getInterpolatedPoints() const
+const vector<Vector2<double> >& GreenHorizon::getInterpolatedPoints() const
 {
     return interpolated_points;
 }
 
-vector<PointType> GreenHorizon::getInterpolatedSubset(unsigned int spacing) const
+vector<Vector2<double> > GreenHorizon::getInterpolatedSubset(unsigned int spacing) const
 {
-    vector<PointType> subset;
+    vector<Vector2<double> > subset;
     for(unsigned int i=0; i<interpolated_points.size(); i+=spacing) {
         subset.push_back(interpolated_points.at(i));
     }

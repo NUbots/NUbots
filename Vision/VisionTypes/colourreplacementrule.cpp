@@ -1,6 +1,6 @@
 #include "colourreplacementrule.h"
 
-ColourSegment ColourReplacementRule::nomatch(PointType(0,0), PointType(0,0), ClassIndex::invalid);
+ColourSegment ColourReplacementRule::nomatch(Vector2<double>(0,0), Vector2<double>(0,0), ClassIndex::invalid);
 
 ColourReplacementRule::ColourReplacementRule()
 {

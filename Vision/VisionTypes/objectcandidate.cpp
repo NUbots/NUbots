@@ -16,22 +16,22 @@
 
 ObjectCandidate::ObjectCandidate()
 {
-    ObjectCandidate(PointType(0,0), PointType(0,0));
+    ObjectCandidate(Vector2<double>(0,0), Vector2<double>(0,0));
 }
 
-ObjectCandidate::ObjectCandidate(const PointType& top_left, const PointType& bottom_right)
+ObjectCandidate::ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right)
 {
     ObjectCandidate(top_left, bottom_right, ClassIndex::unclassified);
 }
 
-ObjectCandidate::ObjectCandidate(const PointType& top_left, const PointType& bottom_right, ClassIndex::Colour colour): colour(colour)
+ObjectCandidate::ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, ClassIndex::Colour colour): colour(colour)
 {
     topLeft = top_left;
     bottomRight = bottom_right;
     recalculate();
 }
 
-ObjectCandidate::ObjectCandidate(const PointType& top_left, const PointType& bottom_right, ClassIndex::Colour colour, const vector<ColourSegment>& candidate_segments): colour(colour)
+ObjectCandidate::ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, ClassIndex::Colour colour, const vector<ColourSegment>& candidate_segments): colour(colour)
 {
     topLeft = top_left;
     bottomRight = bottom_right;    
@@ -62,12 +62,12 @@ ObjectCandidate::~ObjectCandidate()
     return;
 }
 
-const PointType& ObjectCandidate::getTopLeft() const
+const Vector2<double>& ObjectCandidate::getTopLeft() const
 {
     return topLeft;
 }
 
-const PointType& ObjectCandidate::getBottomRight() const
+const Vector2<double>& ObjectCandidate::getBottomRight() const
 {
     return bottomRight;
 }
@@ -96,19 +96,19 @@ void ObjectCandidate::setColour(ClassIndex::Colour c)
 {
     colour = c;
 }
-void ObjectCandidate::setTopLeft(const PointType& point)
+void ObjectCandidate::setTopLeft(const Vector2<double>& point)
 {
     topLeft = point;
     recalculate();
 }
 
-void ObjectCandidate::setBottomRight(const PointType& point)
+void ObjectCandidate::setBottomRight(const Vector2<double>& point)
 {
     bottomRight = point;
     recalculate();
 }
 
-const PointType& ObjectCandidate::getCentre() const
+const Vector2<double>& ObjectCandidate::getCentre() const
 {
     return centre;
 }

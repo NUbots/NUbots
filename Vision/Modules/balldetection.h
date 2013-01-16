@@ -25,7 +25,7 @@ public:
     static void detectBall();
 
 private:
-    static void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<PointType>& pointlist);
+    static void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<Vector2<double> >& pointlist);
 };
 
 #endif // BALLDETECTION_H

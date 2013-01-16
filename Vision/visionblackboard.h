@@ -42,8 +42,8 @@ public:
     static VisionBlackboard* getInstance();
 
     //MUTATORS
-    void setGreenHullPoints(const vector<PointType>& points);
-    void setGreenHorizonScanPoints(const vector<PointType>& points);
+    void setGreenHullPoints(const vector<Vector2<double> >& points);
+    void setGreenHorizonScanPoints(const vector<Vector2<double> >& points);
 
     void setHorizontalScanlines(const vector<unsigned int>& scanlines);
     void setHorizontalSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
@@ -56,7 +56,7 @@ public:
     void setHorizontalTransitionsMap(const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> >& t_map);
     void setVerticalTransitionsMap(const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> >& t_map);
 
-    void setObjectPoints(const vector<PointType>& points);
+    void setObjectPoints(const vector<Vector2<double> >& points);
     
     void addGoal(const Goal& newgoal);
     //void addBeacon(const Beacon& newbeacon);
@@ -70,7 +70,7 @@ public:
     const NUImage& getOriginalImage() const;
 
     const GreenHorizon& getGreenHorizon() const;
-    const vector<PointType>& getGreenHorizonScanPoints() const;
+    const vector<Vector2<double> >& getGreenHorizonScanPoints() const;
 
     const vector<unsigned int>& getHorizontalScanlines() const;
     
@@ -102,7 +102,7 @@ public:
     vector<Obstacle>& getObstacles();
     vector<FieldLine>& getLines();
 
-    const vector<PointType>& getObjectPoints() const;
+    const vector<Vector2<double> >& getObjectPoints() const;
 
     const LookUpTable& getLUT() const;
     
@@ -156,12 +156,12 @@ private:
     //vector<VFieldObject*> VFO_list;   //! @variable Vector of Vision Field Objects    
     
     //! Green Horizon data
-    //vector<PointType> green_horizon_points;      //! @variable Vector of points forming the green horizon.
+    //vector<Vector2<double> > green_horizon_points;      //! @variable Vector of points forming the green horizon.
     GreenHorizon green_horizon;                  //! @variable The green horizon.
-    vector<PointType> green_horizon_scan_points; //! @variable Vector of points used in green horizon scanning.
+    vector<Vector2<double> > green_horizon_scan_points; //! @variable Vector of points used in green horizon scanning.
     
     //! Object data
-    vector<PointType> object_points;   //! @variable Vector of points indicating potential objects.
+    vector<Vector2<double> > object_points;   //! @variable Vector of points indicating potential objects.
     
     //! Kinematics Data
     Horizon kinematics_horizon; //! @variable Line defining kinematics horizon.

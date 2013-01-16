@@ -46,7 +46,7 @@ private:
     *   @param  cvpoints a reference to a vector of cv::points to be converted.
     *   @param  outpoints a reference to a vector of PointType to be filled.
     */
-    static void convertPointTypes(const vector<cv::Point2i>& cvpoints, vector<PointType>& ourpoints);
+    static void convertPointTypes(const vector<cv::Point2i>& cvpoints, vector<Vector2<double> >& ourpoints);
 
     //! CONSTANTS
     //static const unsigned int VER_SEGMENTS = 30;            //! @variable number of vertical scan segments.

@@ -54,6 +54,13 @@ void GoalDetectorRANSAC::run()
 
 vector<Quad> GoalDetectorRANSAC::buildGoalsFromLines(const vector<LSFittedLine> &start_lines, const vector<LSFittedLine> &end_lines)
 {
+    vector<LSFittedLine>::const_iterator s_it = start_lines.begin(),
+                                         e_it = end_lines.begin();
+
+    while(s_it != start_lines.end()) {
+
+    }
+
     return vector<Quad>();
 }
 

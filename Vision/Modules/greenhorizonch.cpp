@@ -29,7 +29,7 @@ void GreenHorizonCH::calculateHorizon()
     // variable declarations    
     vector<cv::Point2i> horizon_points;
     vector<cv::Point2i> temp;
-    vector<PointType> result;
+    vector<Vector2<double> > result;
 
     const Horizon& kin_hor = vbb->getKinematicsHorizon();
     int kin_hor_y;
@@ -191,10 +191,10 @@ bool GreenHorizonCH::isPixelGreen(const NUImage& img, int x, int y)
     return ClassIndex::getColourFromIndex(LUT.classifyPixel(img(x,y))) == ClassIndex::green;
 }
 
-void GreenHorizonCH::convertPointTypes(const vector<cv::Point2i> &cvpoints, vector<PointType> &ourpoints)
+void GreenHorizonCH::convertPointTypes(const vector<cv::Point2i>& cvpoints, vector<Vector2<double> >& ourpoints)
 {
     ourpoints.clear();
     for(unsigned int i=0; i<cvpoints.size(); i++) {
-        ourpoints.push_back(PointType(cvpoints.at(i).x, cvpoints.at(i).y));
+        ourpoints.push_back(Vector2<double>(cvpoints.at(i).x, cvpoints.at(i).y));
     }
 }
