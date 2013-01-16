@@ -402,8 +402,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     // Get the best model to use.
     WriteModelToObjects(getBestModel(), fobs);
 
-
-    #if LOC_SUMMARY_LEVEL > 0
+#if LOC_SUMMARY_LEVEL > 0
     m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
     #endif
 
@@ -926,9 +925,9 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
         goal_line_x = -goal_line_x;
     }
     
-    float cov_x = pow(70.f,2);
-    float cov_y = pow(50.f,2);
-    float cov_head = pow(4.f,2);
+    float cov_x = pow(150.f,2);
+    float cov_y = pow(100.f,2);
+    float cov_head = pow(6.f,2);
     Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
     Moment temp(3);
     temp.setCovariance(cov_matrix);
@@ -951,8 +950,16 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     temp.setMean(mean_matrix(back_x, left_y, left_heading));
     positions.push_back(temp);
 
+    // Postition 7
+    temp.setMean(mean_matrix(2*centre_x, 95.0f, centre_heading));
+    positions.push_back(temp);
+
+    // Postition 8
+    temp.setMean(mean_matrix(2*centre_x, -95.0f, centre_heading));
+    positions.push_back(temp);
+
     // Postition 5
-    temp.setCovariance(covariance_matrix(100.0f*100.0f, 150.0f*150.0f, PI/2.0f*PI/2.0f));
+    temp.setCovariance(covariance_matrix(pow(300.0f,2), pow(200.0f,2), pow(12.f,2)));
     temp.setMean(mean_matrix(centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
@@ -1308,7 +1315,19 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
     {
         if(not (*model_it)->active()) continue; // Skip Inactive models.
         result = true;
-        (*model_it)->timeUpdate(deltaTimeSeconds, odometry, processNoise, measurementNoise);
+        // proportianl odometry nosie
+        Matrix prop_odom_noise(3,3,false);
+        float theta = (*model_it)->estimate().mean(2);
+        float ctheta  = cos(theta);
+        float stheta  = sin(theta);
+
+        float xnoise = 0.1 * (odometry[0][0] * ctheta - odometry[1][0] * stheta);
+        float ynoise = 0.1 * (odometry[0][0] * stheta + odometry[1][0] * ctheta);
+        float tnoise = 0.1 * odometry[2][0] + 0.0001 * (fabs(odometry[0][0]) + fabs(odometry[1][0]));
+        prop_odom_noise[0][0] = pow(xnoise, 2);
+        prop_odom_noise[1][1] = pow(ynoise, 2);
+        prop_odom_noise[2][2] = pow(tnoise, 2);
+        (*model_it)->timeUpdate(deltaTimeSeconds, odometry, processNoise+prop_odom_noise, measurementNoise);
 
     }
     
@@ -1484,7 +1503,7 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
     }
 
     Matrix mean = mean_matrix(position.x, position.y, best_heading);
-    Matrix cov = covariance_matrix(pow(20.f,2), pow(50.f,2), pow(0.01,2));
+    Matrix cov = covariance_matrix(pow(20.f,2), pow(50.f,2), pow(0.5,2));
     float alpha = getBestModel()->getFilterWeight() * 0.0001f;
 
     IKalmanFilter* temp = newRobotModel();
@@ -1699,7 +1718,7 @@ int SelfLocalisation::PruneNScan(unsigned int N)
 */
 int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
-    const float outlier_factor = 0.1;
+    const float outlier_factor = 0.01;
     std::list<IKalmanFilter*> new_models;
     IKalmanFilter* temp_mod;
     StationaryObject temp_object;
@@ -1733,7 +1752,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
             float expected_distance = sqrt(dX*dX + dY*dY);;
             float expected_heading = mathGeneral::normaliseAngle(atan2(dY,dX) - est.mean(2));
             m_frame_log << "Model [" << (*model_it)->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
-            m_frame_log << " exp (" << expected_distance << ", " << expected_heading << ")  Result: " << (temp_mod->active() ? "Valid update" : "Outlier");
+            m_frame_log << " exp (" << expected_distance << ", " << expected_heading << ")  Result: ";
             if(temp_mod->active())
             {
                 m_frame_log << "Valid update (Alpha = " << temp_mod->getFilterWeight() << ")";
