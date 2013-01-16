@@ -33,6 +33,7 @@
 class IKFModel
 {
 public:
+    virtual IKFModel* Clone() = 0;
     /*! The process equation, this describes the transition of the estimate due to time and inputs applied.
       @param state The state determined frim the previous estimate.
       @param deltaT The elapsed time since the previous update was performed.

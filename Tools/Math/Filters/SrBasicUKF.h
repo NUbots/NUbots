@@ -13,6 +13,11 @@ public:
     SrBasicUKF(const SrBasicUKF& source);
     ~SrBasicUKF();
 
+    IKalmanFilter* Clone()
+    {
+        return new SrBasicUKF(*this);
+    }
+
     /*!
     @brief Time update function
     The time update function predicts the new state of the system.

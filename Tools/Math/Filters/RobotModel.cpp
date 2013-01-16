@@ -14,6 +14,11 @@ RobotModel::RobotModel()
     m_time_process_matrix[kstates_heading][kstates_heading] = 0.5;
 }
 
+RobotModel::RobotModel(const RobotModel& source)
+{
+    *this = source;
+}
+
 /*!
  * @brief The process equation is used to update the systems state using the process euquations of the system.
  * @param sigma_point The sigma point representing a system state.

@@ -7,6 +7,11 @@ MobileObjectModel::MobileObjectModel()
     m_velocity_decay = 0.96;    // Randomly guessed decay -- may not represent the real world.
 }
 
+MobileObjectModel::MobileObjectModel(const MobileObjectModel& source)
+{
+    *this = source;
+}
+
 /*!
  * @brief The process equation is used to update the systems state using the process euquations of the system.
  * @param sigma_point The sigma point representing a system state.

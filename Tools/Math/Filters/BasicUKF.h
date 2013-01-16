@@ -10,8 +10,12 @@ class BasicUKF: public IKalmanFilter
 {
 public:
     BasicUKF(IKFModel* model);
-    BasicUKF(const BasicUKF& source);
     ~BasicUKF();
+
+    IKalmanFilter* Clone()
+    {
+        return new BasicUKF(*this);
+    }
 
     /*!
     @brief Time update function
@@ -76,7 +80,11 @@ public:
     bool outlierFiltering() const {return m_outlier_filtering_enabled;}
     float outlierThreshold() const {return m_outlier_threshold;}
 
-private:
+
+
+protected:
+    BasicUKF(const BasicUKF& source);
+
     bool m_outlier_filtering_enabled;
     float m_outlier_threshold;
     bool m_weighting_enabled;

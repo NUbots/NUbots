@@ -38,6 +38,8 @@ class IKalmanFilter
 public:
     ~IKalmanFilter(){delete m_model;}
 
+    virtual IKalmanFilter* Clone() = 0;
+
     /*!
     @brief Time update function
     The time update function predicts the new state of the system.
@@ -78,6 +80,7 @@ public:
     virtual bool active() const {return m_active;}
     virtual void setActive(bool active = true) {m_active = active;}
     virtual unsigned int id() const {return m_id;}
+    virtual void AssignNewId() {m_id = GenerateId();}
 
     // Weighting functions.
     virtual void enableWeighting(bool enabled = true) = 0;
@@ -157,6 +160,16 @@ protected:
         m_previous_decisions.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS, FieldObjects::NUM_STAT_FIELD_OBJECTS);
         m_parent_history_buffer.resize(5,0);
         m_id = GenerateId();
+    }
+
+    IKalmanFilter(const IKalmanFilter& source)
+    {
+        m_model = source.m_model->Clone();
+        m_previous_decisions = source.m_previous_decisions;
+        m_parent_history_buffer = source.m_parent_history_buffer;
+        m_parent_id = source.id();
+        m_active = source.m_active;
+        m_id = m_id;
     }
 
     static unsigned int GenerateId()

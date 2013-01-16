@@ -17,6 +17,11 @@ public:
 
     MobileObjectModel();
 
+    IKFModel* Clone()
+    {
+        return new MobileObjectModel(*this);
+    }
+
     /*! The process equation, this describes the transition of the estimate due to time and inputs applied.
       @param state The state determined frim the previous estimate.
       @param delta_t The elapsed time since the previous update was performed.
@@ -55,4 +60,5 @@ public:
 
 protected:
     float m_velocity_decay; //! The velocity decay rate, should be <1 and >0. Velocity becomes m_velocity_decay*current velocity.
+    MobileObjectModel(const MobileObjectModel& source);
 };

@@ -8,10 +8,14 @@ BasicUKF::BasicUKF(IKFModel *model): IKalmanFilter(model), m_estimate(model->tot
     init();
 }
 
-BasicUKF::BasicUKF(const BasicUKF& source): IKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
+BasicUKF::BasicUKF(const BasicUKF& source): IKalmanFilter(source), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
-    init();
+    m_outlier_filtering_enabled = source.m_outlier_filtering_enabled;
+    m_outlier_threshold = source.m_outlier_threshold;
+    m_weighting_enabled = source.m_weighting_enabled;
     m_filter_weight = source.m_filter_weight;
+    m_mean_weights = source.m_mean_weights;
+    m_covariance_weights = source.m_covariance_weights;
 }
 
 BasicUKF::~BasicUKF()

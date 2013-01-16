@@ -21,6 +21,10 @@ public:
     };
 
     RobotModel();
+    IKFModel* Clone()
+    {
+        return new RobotModel(*this);
+    }
 
     /*! The process equation, this describes the transition of the estimate due to time and inputs applied.
       @param state The state determined frim the previous estimate.
@@ -59,6 +63,7 @@ public:
     std::istream& readStreamBinary (std::istream& input);
 
 protected:
+    RobotModel(const RobotModel& source);
     Matrix landmarkMeasurementEquation(const Matrix& state, const Matrix& measurementArgs);
     Matrix angleBetweenLandmarkMeasurementEquation(const Matrix& state, const Matrix& measurementArgs);
     Matrix m_time_process_matrix;
