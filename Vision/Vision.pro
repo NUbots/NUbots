@@ -94,7 +94,8 @@ HEADERS += \
     #Threads/SaveImagesThread.h
     GenericAlgorithms/ransac.h \
     Modules/GoalDetectionAlgorithms/goaldetectorransac.h \
-    Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h
+    Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h \
+    VisionTypes/quad.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -119,6 +120,8 @@ HEADERS += \
     ../Tools/Math/LSFittedLine.h \
     ../Tools/Math/Matrix.h \
     ../Tools/Math/TransformMatrices.h \
+    ../Tools/Math/Vector2.h \
+    ../Tools/Math/Vector3.h \
     ../Infrastructure/NUImage/NUImage.h \
     ../Infrastructure/NUImage/ColorModelConversions.h \
     ../NUPlatform/NUCamera/CameraSettings.h \

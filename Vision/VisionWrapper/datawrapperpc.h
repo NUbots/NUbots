@@ -18,6 +18,7 @@
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
+#include "Tools/Math/LSFittedLine.h"
 
 #define GROUP_NAME "/home/shannon/Images/paper"
 #define GROUP_EXT ".png"
@@ -93,7 +94,7 @@ public:
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id);
     bool debugPublish(DEBUG_ID id, const NUImage *const img);
-    bool debugPublish(DEBUG_ID id, const vector<FieldLine>& data);
+    bool debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
     
     
 private:

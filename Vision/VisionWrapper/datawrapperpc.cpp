@@ -715,7 +715,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
     return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<FieldLine>& data)
+bool DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
 {
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
@@ -749,8 +749,9 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<FieldLine>& data)
             return false;
         }
 
-        BOOST_FOREACH(FieldLine l, data) {
-            l.render(img, colour);
+        BOOST_FOREACH(LSFittedLine l, data) {
+            FieldLine(l).render(img, colour);
+            //l.render(img, colour);
         }
 
         imshow(window, img);

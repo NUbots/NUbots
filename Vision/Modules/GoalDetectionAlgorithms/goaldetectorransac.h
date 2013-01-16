@@ -2,6 +2,7 @@
 #define GOALDETECTORRANSAC_H
 
 #include "Vision/VisionTypes/coloursegment.h"
+#include "Vision/VisionTypes/quad.h"
 #include "Vision/Modules/goaldetector.h"
 #include "Tools/Math/LSFittedLine.h"
 #include <vector>
@@ -16,6 +17,8 @@ public:
 
 private:
     vector<LinePoint> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
+
+    vector<Quad> buildGoalsFromLines(const vector<LSFittedLine>& start_lines, const vector<LSFittedLine>& end_lines);
 
 /*    unsigned*/ int m_n,
                  m_k,

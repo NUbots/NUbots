@@ -23,19 +23,25 @@ class VisionFieldObject
 public:
     //! VFO_ID enum and associated string conversion methods
     enum VFO_ID {
-        BALL = 0,
-        GOAL_Y_L=1,
-        GOAL_Y_R=2,
-        GOAL_Y_U=3,
+        BALL        = 0,
+        GOAL_L      = 1,
+        GOAL_R      = 2,
+        GOAL_U      = 3,
+        FIELDLINE   = 4,
+        OBSTACLE    = 11,
+        INVALID     = 12
+//        GOAL_Y_L=1,
+//        GOAL_Y_R=2,
+//        GOAL_Y_U=3,
 //        GOAL_B_L=4,
 //        GOAL_B_R=5,
 //        GOAL_B_U=6,
 //        BEACON_Y=7,
 //        BEACON_B=8,
 //        BEACON_U=9,
-        FIELDLINE=10,
-        OBSTACLE=11,
-        INVALID=12
+//        FIELDLINE=10,
+//        OBSTACLE=11,
+//        INVALID=12
     };
     
     enum COLOUR_CLASS {
@@ -61,10 +67,9 @@ public:
     //! @brief converts a string into a colour class.
     static COLOUR_CLASS getColourClassFromName(const string& name);
     
-    //static bool isGoal(VFO_ID id) { return id >= VisionFieldObject::GOAL_Y_L && id <= VisionFieldObject::GOAL_B_U;}
-    static bool isGoal(VFO_ID id) { return isYellowGoal(id);}
+    static bool isGoal(VFO_ID id) { return id >= VisionFieldObject::GOAL_L && id <= VisionFieldObject::GOAL_U;}
     //static bool isBlueGoal(VFO_ID id) {return id >= VisionFieldObject::GOAL_B_L && id <= VisionFieldObject::GOAL_B_U;}
-    static bool isYellowGoal(VFO_ID id) {return id >= VisionFieldObject::GOAL_Y_L && id <= VisionFieldObject::GOAL_Y_U;}
+    //static bool isYellowGoal(VFO_ID id) {return id >= VisionFieldObject::GOAL_Y_L && id <= VisionFieldObject::GOAL_Y_U;}
     //static bool isBeacon(VFO_ID id) {return id >= VisionFieldObject::BEACON_Y && id <= VisionFieldObject::BEACON_U;}
     
 public:

@@ -7,8 +7,7 @@ Quad::Quad()
 
 Quad::Quad(const Quad& other)
 {
-    set(other.m_left, other.m_top, other.m_right, other.m_bottom);
-
+    set(other.m_bottom_left, other.m_top_left, other.m_top_right, other.m_bottom_right);
 }
 
 Quad::Quad(int left, int top, int right, int bottom)
@@ -16,35 +15,46 @@ Quad::Quad(int left, int top, int right, int bottom)
     set(left, top, right, bottom);
 }
 
+Quad::Quad(Vector2<int> bottom_left, Vector2<int> top_left, Vector2<int> top_right, Vector2<int> bottom_right)
+{
+    set(bottom_left, top_left, top_right, bottom_right);
+}
+
 void Quad::set(int left, int top, int right, int bottom)
 {
     if(left < right) {
-        m_left = left;
-        m_right = right;
-    }
-    else {
-        m_left = right;
-        m_right = left;
+        int temp = left;
+        left = right;
+        right = temp;
     }
     if(top < bottom) {
-        m_top = top;
-        m_bottom = bottom;
+        int temp = top;
+        top = bottom;
+        bottom = temp;
     }
-    else {
-        m_top = bottom;
-        m_bottom = top;
-    }
-    recalculate();
+
+    m_bottom_left = Vector2<int>(left, bottom);
+    m_top_left = Vector2<int>(left, top);
+    m_top_right = Vector2<int>(right, top);
+    m_bottom_right = Vector2<int>(right, bottom);
+}
+
+void Quad::set(Vector2<int> bottom_left, Vector2<int> top_left, Vector2<int> top_right, Vector2<int> bottom_right)
+{
+    m_bottom_left = bottom_left;
+    m_top_left = top_left;
+    m_top_right = top_right;
+    m_bottom_right = bottom_right;
 }
 
 Vector2<int> Quad::getBottomCentre() const
 {
-    return m_bottom_centre;
+    return (m_bottom_left + m_bottom_right)*0.5;
 }
 
 Vector2<int> Quad::getCentre() const
 {
-    return m_centre;
+    return (m_bottom_left + m_top_left + m_top_right + m_bottom_right)*0.25;
 }
 
 Vector2<int> Quad::getBottomLeft() const
@@ -57,25 +67,34 @@ Vector2<int> Quad::getTopRight() const
     return m_top_right;
 }
 
-int Quad::getWidth() const
+int Quad::getBaseWidth() const
 {
-    return abs(m_right - m_left + 1);
+    return abs(m_bottom_right.x - m_bottom_left.x + 1);
 }
 
-int Quad::getHeight() const
+int Quad::getTopWidth() const
 {
-    return abs(m_bottom - m_top + 1);
+    return abs(m_top_right.x - m_top_left.x + 1);
 }
 
-//cv::Scalar Quad::getAsScalar() const
-//{
-//    return cv::Scalar(m_left, m_bottom, m_right, m_top);
-//}
-
-void Quad::recalculate()
+float Quad::getAverageWidth() const
 {
-    m_centre = Vector2<int>((m_left + m_right)*0.5, (m_bottom + m_top)*0.5);
-    m_bottom_centre = Vector2<int>((m_left + m_right)*0.5, std::max(m_bottom, m_top));
-    m_bottom_left = Vector2<int>(std::min(m_left, m_right), std::max(m_bottom, m_top));
-    m_top_right = Vector2<int>(std::max(m_left, m_right), std::min(m_bottom, m_top));
+    return 0.5*(getBaseWidth() + getTopWidth());
 }
+
+int Quad::getLeftHeight() const
+{
+    return abs(m_bottom_left.y - m_top_left.y + 1);
+}
+
+int Quad::getRightHeight() const
+{
+    return abs(m_bottom_right.y - m_top_right.y + 1);
+}
+
+float Quad::getAverageHeight() const
+{
+    return 0.5*(getLeftHeight() + getRightHeight());
+}
+
+

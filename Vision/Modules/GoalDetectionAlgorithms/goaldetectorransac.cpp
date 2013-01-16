@@ -30,11 +30,11 @@ void GoalDetectorRANSAC::run()
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
 
     //get transitions associated with goals
-    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::GOAL_COLOUR),
-                          h_segments = vbb->getHorizontalTransitions(VisionFieldObject::GOAL_COLOUR);
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::GOAL_COLOUR);
+    //vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::GOAL_COLOUR);
     vector<LinePoint> start_points, end_points;
     vector<LSFittedLine> start_lines, end_lines;
-    vector<LSFittedLine>::iterator l_it;
+    vector<Quad> candidates;
 
     BOOST_FOREACH(ColourSegment s, h_segments) {
         start_points.push_back(LinePoint(s.getStart().x, s.getStart().y));
@@ -48,20 +48,16 @@ void GoalDetectorRANSAC::run()
     start_lines = RANSAC::findMultipleLines(start_points, m_e, m_n, m_k, m_max_iterations);
     end_lines = RANSAC::findMultipleLines(end_points, m_e, m_n, m_k, m_max_iterations);
 
-    //debugging
-    vector<FieldLine> s_l, e_l;
-    BOOST_FOREACH(LSFittedLine l, start_lines) {
-        s_l.push_back(FieldLine(l));
-    }
-    BOOST_FOREACH(LSFittedLine l, end_lines) {
-        e_l.push_back(FieldLine(l));
-    }
+    DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_START, start_lines);
+    DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_END, end_lines);
 
-    DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_START, s_l);
-    DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_END, e_l);
+    //MAKE QUADS FROM LINES
+    candidates = buildGoalsFromLines(start_lines, end_lines);
+}
 
-    //MAKE GOALS FROM LINES
-
+vector<Quad> GoalDetectorRANSAC::buildGoalsFromLines(const vector<LSFittedLine> &start_lines, const vector<LSFittedLine> &end_lines)
+{
+    return vector<Quad>();
 }
 
 vector<LinePoint> GoalDetectorRANSAC::getEdgePointsFromSegments(const vector<ColourSegment> &segments)

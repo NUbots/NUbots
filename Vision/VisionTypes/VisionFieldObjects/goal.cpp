@@ -13,7 +13,7 @@ Goal::Goal(VFO_ID id, const Quad &corners)
     m_id = id;
     m_corners = corners;
 
-    m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
+    m_size_on_screen = Vector2<int>(corners.getAverageWidth(), corners.getAverageHeight());
     m_location_pixels = corners.getBottomCentre();
 
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
@@ -67,20 +67,34 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         bool stationary = false;
 
         switch(m_id) {
-        case GOAL_Y_L:
+        case GOAL_L:
             stat_id = FieldObjects::FO_YELLOW_LEFT_GOALPOST;
             stationary = true;
             break;
-        case GOAL_Y_R:
+        case GOAL_R:
             stat_id = FieldObjects::FO_YELLOW_RIGHT_GOALPOST;
             stationary = true;
             break;
-        case GOAL_Y_U:
+        case GOAL_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
             stationary = false;
             break;
+//        case GOAL_Y_L:
+//            stat_id = FieldObjects::FO_YELLOW_LEFT_GOALPOST;
+//            stationary = true;
+//            break;
+//        case GOAL_Y_R:
+//            stat_id = FieldObjects::FO_YELLOW_RIGHT_GOALPOST;
+//            stationary = true;
+//            break;
+//        case GOAL_Y_U:
+//            newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
+//            newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+//            newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+//            stationary = false;
+//            break;
 //        case GOAL_B_L:
 //            stat_id = FieldObjects::FO_BLUE_LEFT_GOALPOST;
 //            stationary = true;
@@ -146,7 +160,7 @@ bool Goal::check() const
 //    }
 
     if(VisionConstants::THROWOUT_SHORT_GOALS) {
-        if(m_corners.getHeight() <= VisionConstants::MIN_GOAL_HEIGHT) {
+        if(m_corners.getAverageHeight() <= VisionConstants::MIN_GOAL_HEIGHT) {
             #if VISION_FIELDOBJECT_VERBOSITY > 1
                 debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
             #endif
@@ -155,7 +169,7 @@ bool Goal::check() const
     }
     
     if(VisionConstants::THROWOUT_NARROW_GOALS) {
-        if(m_corners.getWidth() <= VisionConstants::MIN_GOAL_WIDTH) {
+        if(m_corners.getAverageWidth() <= VisionConstants::MIN_GOAL_WIDTH) {
             #if VISION_FIELDOBJECT_VERBOSITY > 1
                 debug << "Goal::check - Goal thrown out: less than " << VisionConstants::MIN_GOAL_WIDTH << "pix high" << endl;
             #endif
@@ -340,7 +354,7 @@ float Goal::distanceToGoal(float bearing, float elevation) {
 void Goal::render(cv::Mat &mat) const
 {
     cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
-    if(m_id <= GOAL_Y_U)
+    if(m_id <= GOAL_U)
         cv::rectangle(mat, r, cv::Scalar(0, 255, 255), -1);
     else
         cv::rectangle(mat, r, cv::Scalar(255, 0, 0), -1);

@@ -18,29 +18,29 @@ void GoalDetectorHistogram::run()
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
 
-    vector<Quad> yellow_posts = detectQuads();
+    vector<Quad> posts = detectQuads();
 
-    removeInvalidPosts(yellow_posts);
+    removeInvalidPosts(posts);
 
     // OVERLAP CHECK
-    overlapCheck(yellow_posts);
+    overlapCheck(posts);
 
     // DENSITY CHECK - fix later: use segment lengths and scanline spacing to estimate rather than
     //                 re-accessing the image to calculate fully
-    DensityCheck(&yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
+    //DensityCheck(&posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
 
     // CREATE POST OBJECTS
-    if (yellow_posts.size() != 2) {
+    if (posts.size() != 2) {
         //unable to identify which post is which
         //setting all to unknown
-        BOOST_FOREACH(Quad q, yellow_posts) {
-            vbb->addGoal(Goal(VisionFieldObject::GOAL_Y_U, q));
+        BOOST_FOREACH(Quad q, posts) {
+            vbb->addGoal(Goal(VisionFieldObject::GOAL_U, q));
         }
     }
     else {
         //there are exactly two posts, identify each as left or right
-        Quad post1 = yellow_posts.at(0),
-             post2 = yellow_posts.at(1);
+        Quad post1 = posts.at(0),
+             post2 = posts.at(1);
 
         //calculate separation between posts
         int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);      // inside right
@@ -56,8 +56,8 @@ void GoalDetectorHistogram::run()
             }
 
             //create left and right goals
-            Goal post_left(VisionFieldObject::GOAL_Y_L, post1);
-            Goal post_right(VisionFieldObject::GOAL_Y_R, post2);
+            Goal post_left(VisionFieldObject::GOAL_L, post1);
+            Goal post_right(VisionFieldObject::GOAL_R, post2);
             //add them to the vision blackboard
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
@@ -105,8 +105,8 @@ void GoalDetectorHistogram::removeInvalidPosts(vector<Quad>& posts)
     vector<Quad>::iterator it = posts.begin();
     while (it != posts.end()) {
         Quad candidate = *it;
-        double height = candidate.getHeight();
-        double width = candidate.getWidth();
+        double height = candidate.getAverageHeight();
+        double width = candidate.getAverageWidth();
         if (width < VisionConstants::MIN_GOAL_WIDTH)
             it = posts.erase(it);
         else if (height/width < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_LOW || height/width > VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH)
