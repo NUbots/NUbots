@@ -8,10 +8,19 @@ SeqUKF::SeqUKF(IKFModel *model): IKalmanFilter(model), m_estimate(model->totalSt
     init();
 }
 
-SeqUKF::SeqUKF(const SeqUKF& source): IKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
+SeqUKF::SeqUKF(const SeqUKF& source): IKalmanFilter(source), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
-    init();
+    m_outlier_filtering_enabled = source.m_outlier_filtering_enabled;
+    m_outlier_threshold = source.m_outlier_threshold;
+    m_weighting_enabled = source.m_weighting_enabled;
     m_filter_weight = source.m_filter_weight;
+    m_mean_weights = source.m_mean_weights;
+    m_covariance_weights = source.m_covariance_weights;
+    m_sigma_points = source.m_sigma_points;
+    m_sigma_mean = source.m_sigma_mean;
+    m_C = source.m_C;
+    m_d = source.m_d;
+    m_X = source.m_X;
 }
 
 SeqUKF::~SeqUKF()
@@ -60,7 +69,12 @@ Matrix SeqUKF::GenerateSigmaPoints() const
     Matrix points(num_states, numPoints, false);
 
     points.setCol(0, current_mean); // First sigma point is the current mean with no deviation
-    Matrix sqtCovariance = cholesky(m_unscented_transform.covarianceSigmaWeight() * m_estimate.covariance());
+    Matrix weightedCov = m_unscented_transform.covarianceSigmaWeight() * m_estimate.covariance();
+    Matrix sqtCovariance = cholesky(weightedCov);
+    if(not sqtCovariance.isValid())
+    {
+        sqtCovariance = cholesky(weightedCov.transp());
+    }
     Matrix deviation;
 
     for(unsigned int i = 1; i < num_states + 1; i++){
@@ -132,6 +146,16 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
     // Set the new mean and covariance values.
     Moment new_estimate = m_estimate;
 
+    if(not predictedCovariance.isValid())
+    {
+        std::cout << this->getFilterWeight() << std::endl;
+        std::cout << this->active() << std::endl;
+        std::cout << "Mean:\n" << m_estimate.mean() << std::endl;
+        std::cout << "Covariance:\n" << m_estimate.covariance() << std::endl;
+        std::cout << "Sqrt Covariance:\n" << cholesky(m_estimate.covariance()) << std::endl;
+        std::cout << "m_sigma_points:\n" << m_sigma_points << std::endl;
+    }
+
     new_estimate.setMean(predictedMean);
     new_estimate.setCovariance(predictedCovariance);
     initialiseEstimate(new_estimate);
@@ -187,6 +211,22 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     // Update mean and covariance.
     Matrix updated_mean = m_sigma_mean + m_X * m_C * m_d;
     Matrix updated_covariance = m_X * m_C * m_X.transp();
+
+    if(not updated_covariance.isValid())
+    {
+        std::cout << "ID: " << id() << std::endl;
+        std::cout << "measurement: " << measurement << std::endl;
+        std::cout << "noise: " << noise << std::endl;
+        std::cout << "args: " << args << std::endl;
+        std::cout << "type: " << type << std::endl;
+        std::cout << "m_sigma_points: " << m_sigma_points << std::endl;
+        std::cout << "innovation: " << innovation << std::endl;
+        std::cout << "m_C After: " << m_C << std::endl;
+        std::cout << "m_d after: " << m_d << std::endl;
+        std::cout << "New mean: " << updated_mean << std::endl;
+        std::cout << "New covariance: " << updated_covariance << std::endl;
+    }
+
     m_estimate.setMean(updated_mean);
     m_estimate.setCovariance(updated_covariance);
     return true;

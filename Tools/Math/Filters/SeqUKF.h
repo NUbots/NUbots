@@ -37,8 +37,11 @@ class SeqUKF: public IKalmanFilter
 {
 public:
     SeqUKF(IKFModel* model);
-    SeqUKF(const SeqUKF& source);
     ~SeqUKF();
+    IKalmanFilter* Clone()
+    {
+        return new SeqUKF(*this);
+    }
 
     /*!
     @brief Time update function
@@ -103,7 +106,10 @@ public:
     bool outlierFiltering() const {return m_outlier_filtering_enabled;}
     float outlierThreshold() const {return m_outlier_threshold;}
 
-private:
+protected:
+
+    SeqUKF(const SeqUKF& source);
+
     bool m_outlier_filtering_enabled;
     float m_outlier_threshold;
     bool m_weighting_enabled;
