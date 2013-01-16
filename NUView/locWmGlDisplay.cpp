@@ -37,6 +37,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(QGLFormat(QGL::Sample
     drawSigmaPoints = false;
     drawBestModelOnly = false;
     m_showBall = true;
+    m_displayEnabled = true;
     setFont(QFont("Helvetica",12,QFont::Bold,false));
     currentLocalisation = 0;
     currentObjects = 0;
@@ -280,10 +281,18 @@ void locWmGlDisplay::paintEvent(QPaintEvent *event)
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
 
     drawField();        // Draw the Standard Field Layout.
-    drawMarkers();
-    drawObjects();
+    if(m_displayEnabled)
+    {
+        drawMarkers();
+        drawObjects();
+    }
+
     drawFieldObjects();
-    drawOverlays();
+
+    if(m_displayEnabled)
+    {
+        drawOverlays();
+    }
 
     glShadeModel(GL_FLAT);
     //glDisable(GL_CULL_FACE);

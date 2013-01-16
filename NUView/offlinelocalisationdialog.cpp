@@ -228,6 +228,7 @@ void OfflineLocalisationDialog::BeginBatch()
                 m_progressBar->setValue(0);
                 m_progressBar->setAutoClose(false);
                 m_progressBar->reset();
+                ProcessingStateChanged(true);
                 emit PostBatchJob(log_paths, result_dir, experiment);
             }
         }
@@ -279,13 +280,14 @@ void OfflineLocalisationDialog::BeginSimulation()
 //    connect(m_progressBar, SIGNAL(canceled()), this, SLOT(CancelProgress()));
 
     //m_offline_loc->Run();
+    emit ProcessingStateChanged(true);
     m_offline_loc->start();
 }
 
 void OfflineLocalisationDialog::CompleteSimulation()
 {
     m_progressBar->close();
-
+    emit ProcessingStateChanged(false);
 //    disconnect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
 //    disconnect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
     //delete m_progressBar;

@@ -32,6 +32,7 @@ signals:
     void LocalisationInfoChanged(const QString&);
     void SelfLocalisationInfoChanged(const QString&);
     void PostBatchJob(const QStringList&, const QString&, const QString&);
+    void ProcessingStateChanged(bool isProcessing);
 
 public slots:
     void OpenLogFiles();

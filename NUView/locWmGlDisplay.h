@@ -69,6 +69,17 @@ public slots:
       @brief Copy the current image displayed to the system clipboard.
       */
     void snapshotToClipboard();
+    void setDisplayDisabled(bool isDisabled = true)
+    {
+        m_displayEnabled = not isDisabled;
+        if(m_displayEnabled) update();
+    }
+
+    void setDisplayEnabled(bool isEnabled = true)
+    {
+        m_displayEnabled = isEnabled;
+        if(m_displayEnabled) update();
+    }
 
 public slots:
     void setXRotation(int angle);
@@ -160,6 +171,7 @@ protected:
         bool drawSigmaPoints;
         bool drawBestModelOnly;
         bool m_showBall;
+        bool m_displayEnabled;
 
 };
 
