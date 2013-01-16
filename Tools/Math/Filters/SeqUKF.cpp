@@ -116,7 +116,6 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
 
     // Calculate the current sigma points, and write to member variable.
     m_sigma_points = GenerateSigmaPoints();
-
     Matrix currentPoint; // temporary storage.
 
     // update each sigma point.
@@ -132,6 +131,7 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
 
     // Set the new mean and covariance values.
     Moment new_estimate = m_estimate;
+
     new_estimate.setMean(predictedMean);
     new_estimate.setCovariance(predictedCovariance);
     initialiseEstimate(new_estimate);
@@ -187,7 +187,6 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     // Update mean and covariance.
     Matrix updated_mean = m_sigma_mean + m_X * m_C * m_d;
     Matrix updated_covariance = m_X * m_C * m_X.transp();
-
     m_estimate.setMean(updated_mean);
     m_estimate.setCovariance(updated_covariance);
     return true;
@@ -238,7 +237,10 @@ bool SeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimat
     {
         float innovation_2 = convDble(innov_transp * InverseMatrix(sum_variance) * innovation);
         if(m_outlier_threshold > 0 and innovation_2 > m_outlier_threshold)
+        {
+            m_filter_weight *= 0.0005;
             return false;
+        }
     }
 
     if(m_weighting_enabled)

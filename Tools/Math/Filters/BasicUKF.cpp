@@ -220,7 +220,10 @@ bool BasicUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estim
     {
         float innovation_2 = convDble(innov_transp * InverseMatrix(sum_variance) * innovation);
         if(m_outlier_threshold > 0 and innovation_2 > m_outlier_threshold)
+        {
+            m_filter_weight *= 0.0005;
             return false;
+        }
     }
 
     if(m_weighting_enabled)
