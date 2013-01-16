@@ -245,6 +245,10 @@ namespace ConfigSystem
 					try
 					{
 						value = boost::lexical_cast<std::string>(convert);
+						if(range_convert.getBoundType() != NONE)
+						{
+							upper = boost::lexical_cast<std::string>(range_convert);
+						}
 					}
 					catch(const boost::bad_lexical_cast &blcExc)
 					{

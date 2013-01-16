@@ -56,7 +56,50 @@ namespace ConfigSystem
 			~ConfigRange();
 
 
+			
+			/*! @brief Retrieves the "_max" private member variable.
+ 
+   			@param N/A.
+    		@return Returns a pointer to the "_max" private member variable.
+ 			*/
+			T* getMax();
 
+			/*! @brief Retrieves the "_max" private member variable.
+ 
+   			@param N/A.
+    		@return Returns a const pointer to the "_max" private member variable.
+ 			*/
+			const T* getMax() const;
+			
+			/*! @brief Retrieves the "_min" private member variable.
+ 
+   			@param N/A.
+    		@return Returns a pointer to the "_min" private member variable.
+ 			*/
+			T* getMin();
+			
+			/*! @brief Retrieves the "_min" private member variable.
+ 
+   			@param N/A.
+    		@return Returns a const pointer to the "_min" private member variable.
+ 			*/
+			const T* getMin() const;
+			
+			/*! @brief Retrieves the upper bound type of the range.
+ 
+   			@param N/A.
+    		@return Returns the BoundType corresponding to the upper bound of the ConfigRange object.
+ 			*/
+			BoundType getUpperBoundType();
+			
+			/*! @brief Retrieves the lower bound type of the range.
+ 
+   			@param N/A.
+    		@return Returns the BoundType corresponding to the lower bound of the ConfigRange object.
+ 			*/
+			BoundType getLowerBoundType();
+			
+			
 
 		    bool test(std::vector<T> values);
 
