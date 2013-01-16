@@ -13,7 +13,7 @@ public:
   }
 };
 
-Histogram1D::Histogram1D(int num_bins, int bin_width)
+Histogram1D::Histogram1D(int num_bins, float bin_width)
 {
     m_bins.clear();
     for(int i=0; i<num_bins; i++) {
@@ -22,9 +22,9 @@ Histogram1D::Histogram1D(int num_bins, int bin_width)
 }
 
 
-Histogram1D::Histogram1D(vector<int> bin_widths)
+Histogram1D::Histogram1D(vector<float> bin_widths)
 {
-    int cur_pos = 0;
+    float cur_pos = 0;
     m_bins.clear();
     for(int i=0; i<bin_widths.size(); i++) {
         m_bins.push_back(emptyBin(cur_pos, bin_widths.at(i)));
@@ -32,7 +32,7 @@ Histogram1D::Histogram1D(vector<int> bin_widths)
     }
 }
 
-Bin Histogram1D::emptyBin(int start, int width)
+Bin Histogram1D::emptyBin(float start, float width)
 {
     Bin b;
     b.start = start;
@@ -41,11 +41,11 @@ Bin Histogram1D::emptyBin(int start, int width)
     return b;
 }
 
-Bin Histogram1D::getBin(int pos) {
+Bin Histogram1D::getBin(float pos) {
     return m_bins.at(getBinIndex(pos));
 }
 
-unsigned int Histogram1D::getBinIndex(int pos)
+unsigned int Histogram1D::getBinIndex(float pos)
 {
     //adds the given element to the matching bin unless out of range, throws std::out_of_range
     if(pos < 0) {
@@ -94,7 +94,7 @@ vector<Bin> Histogram1D::getLargestBins(unsigned int n)
     }
 }
 
-void Histogram1D::mergeAdjacentPeaks(int minimum_size)
+void Histogram1D::mergeAdjacentPeaks(float minimum_size)
 {
     vector<Bin>::iterator it = m_bins.begin();
     while(it + 1 != m_bins.end()) {
@@ -107,7 +107,7 @@ void Histogram1D::mergeAdjacentPeaks(int minimum_size)
     }
 }
 
-void Histogram1D::addToBin(int pos, int val)
+void Histogram1D::addToBin(float pos, float val)
 {
     //adds the given element to the matching bin - if out_of_range will return false without modifying the histogram
     if(pos < 0) {

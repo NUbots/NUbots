@@ -1,33 +1,44 @@
-#include "goaldetectorhistogram.h"
+#include "goaldetectorhistogram2.h"
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+using namespace boost::accumulators;
 
 #include <limits>
 
 #include <boost/foreach.hpp>
 
-GoalDetectorHistogram::GoalDetectorHistogram()
+GoalDetectorHistogram2::GoalDetectorHistogram2()
 {
 }
 
-void GoalDetectorHistogram::run()
+void GoalDetectorHistogram2::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
+    const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
+    const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
 
-    vector<Quad> yellow_posts = detectQuads();
+    vector<Quad> yellow_posts = detectQuads(h_segments, v_segments);
+
+    cout << "candidates: " << yellow_posts.size() << endl;
 
     removeInvalidPosts(yellow_posts);
+    cout << "after invalid: " << yellow_posts.size() << endl;
 
     // OVERLAP CHECK
     overlapCheck(yellow_posts);
+    cout << "after overlap: " << yellow_posts.size() << endl;
 
     // DENSITY CHECK - fix later: use segment lengths and scanline spacing to estimate rather than
     //                 re-accessing the image to calculate fully
-    DensityCheck(&yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
+    //DensityCheck(&yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
 
     // CREATE POST OBJECTS
     if (yellow_posts.size() != 2) {
@@ -65,7 +76,7 @@ void GoalDetectorHistogram::run()
     }
 }
 
-void GoalDetectorHistogram::DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
+void GoalDetectorHistogram2::DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
 {
     //cout << "PERCENT_REQUIRED: " << PERCENT_REQUIRED << endl;
 
@@ -90,7 +101,7 @@ void GoalDetectorHistogram::DensityCheck(vector<Quad>* posts, NUImage* img, cons
         if (((double)count)/((right-left)*(bottom-top)) < PERCENT_REQUIRED) {
             it = posts->erase(it);
             #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "GoalDetectorHistogram::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
+                debug << "GoalDetectorHistogram2::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
             #endif
         }
         else {
@@ -100,7 +111,7 @@ void GoalDetectorHistogram::DensityCheck(vector<Quad>* posts, NUImage* img, cons
 }
 
 
-void GoalDetectorHistogram::removeInvalidPosts(vector<Quad>& posts)
+void GoalDetectorHistogram2::removeInvalidPosts(vector<Quad>& posts)
 {
     vector<Quad>::iterator it = posts.begin();
     while (it != posts.end()) {
@@ -116,7 +127,7 @@ void GoalDetectorHistogram::removeInvalidPosts(vector<Quad>& posts)
     }
 }
 
-void GoalDetectorHistogram::overlapCheck(vector<Quad>& posts)
+void GoalDetectorHistogram2::overlapCheck(vector<Quad>& posts)
 {
     //REPLACE THIS WITH SOMETHING THAT MERGES OVERLAPPING POSTS - OR SHOULD WE NOT EVEN GET OVERLAPPING POSTS
     vector<Quad>::iterator it_a = posts.begin(),
@@ -138,86 +149,51 @@ void GoalDetectorHistogram::overlapCheck(vector<Quad>& posts)
     }
 }
 
-vector<Quad> GoalDetectorHistogram::detectQuads()
+vector<Quad> GoalDetectorHistogram2::detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
 {
-    const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
-    const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_Y_COLOUR);
-
-    //vector<PointType> start_trans, end_trans, vert_trans;
-    //vector<int> start_lengths, end_lengths;
-
     const int BINS = 20;
-    const float BIN_WIDTH = VisionBlackboard::getInstance()->getImageWidth()/(double)BINS;
     const int MERGE_THRESHOLD = 50;
-    const int CANDIDATE_THRESHOLD = 100;
-    const float ALLOWED_DISSIMILARITY = 0.5;
+    const float STDDEV_THRESHOLD = 1.5;
+    const int CANDIDATE_THRESHOLD = 200;
 
-    Histogram1D h_start(BINS, BIN_WIDTH),
-                h_end(BINS, BIN_WIDTH);
+    Histogram1D hist(BINS, VisionBlackboard::getInstance()->getImageWidth()/(double)BINS);
+
+    Vector2<float> h_length_stats = calculateSegmentLengthStatistics(h_segments);
 
     // fill histogram bins
     BOOST_FOREACH(ColourSegment seg, h_segments) {
-        h_start.addToBin(seg.getStart().x, seg.getLength());
-        h_end.addToBin(seg.getEnd().x, seg.getLength());
+        //use stddev throwout to remove topbar segments
+        if(seg.getLength() <= h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y)
+            hist.addToBin(seg.getCentre().x, seg.getLength());
     }
 
-    Histogram1D h_start_merged = mergePeaks(h_start, MERGE_THRESHOLD);
-    Histogram1D h_end_merged = mergePeaks(h_end, MERGE_THRESHOLD);
+    // use vertical segments as well
+    BOOST_FOREACH(ColourSegment seg, v_segments) {
+        hist.addToBin(seg.getCentre().x, seg.getLength());
+    }
 
-    return generateCandidates(h_start_merged, h_end_merged, h_segments, v_segments, CANDIDATE_THRESHOLD, ALLOWED_DISSIMILARITY);
+    Histogram1D h_merged = mergePeaks(hist, MERGE_THRESHOLD);
+
+    return generateCandidates(h_merged, h_segments, v_segments, CANDIDATE_THRESHOLD);
 }
 
-Histogram1D GoalDetectorHistogram::mergePeaks(Histogram1D hist, int minimum_size)
+Histogram1D GoalDetectorHistogram2::mergePeaks(Histogram1D hist, int minimum_size)
 {
     hist.mergeAdjacentPeaks(minimum_size);
     return hist;
 }
 
-vector<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& start, const Histogram1D& end,
+vector<Quad> GoalDetectorHistogram2::generateCandidates(const Histogram1D& hist,
                                                            const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments,
-                                                           int peak_threshold, float allowed_dissimilarity)
+                                                           int peak_threshold)
 {
     vector<Quad> candidates;
+    vector<Bin>::const_iterator b_it;
 
-    // pair start transitions and end transitions
-    vector<Bin>::const_iterator s_it = start.begin(),
-                                e_it = end.begin(),
-                                e_holder;
-
-    while (s_it != start.end() && e_it != end.end()) {
-        if(s_it->value >= peak_threshold) {
-            //consider this peak
-            //move the end transition iterator up to the start transition iterator
-            //note that the histograms may not line up exactly
-            while(e_it->start < s_it->start && e_it != end.end()) {
-                e_it++;
-            }
-
-            e_holder = e_it; //keep track of where the iterator was
-
-            //now move along the end histogram using e_it until reaching the end or found a bin within allowed_dissimilarity of
-            //the current start bin size
-            while(e_it != end.end() && !checkBinSimilarity(*e_it, *s_it, allowed_dissimilarity)) {
-                e_it++;
-            }
-
-            if(e_it != end.end()) {
-                //we found a matching bin - generate candidate
-                candidates.push_back(makeQuad(*s_it, *e_it, h_segments, v_segments));
-
-                //move the start iterator until after the end iterator
-                while(s_it != start.end() && s_it->start < e_it->start + e_it->width) {
-                    s_it++;
-                }
-            }
-            else {
-                //no match - move to next start bin
-                s_it++;
-            }
-            e_it = e_holder; //put e_it back to its previous location
-        }
-        else {
-            s_it++;
+    for (b_it = hist.begin(); b_it != hist.end(); b_it++) {
+        if(b_it->value >= peak_threshold) {
+            //consider this peak - generate candidate
+            candidates.push_back(makeQuad(*b_it, h_segments, v_segments));
         }
     }
 
@@ -225,16 +201,16 @@ vector<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& start,
 }
 
 
-bool GoalDetectorHistogram::checkBinSimilarity(Bin b1, Bin b2, float allowed_dissimilarity)
+bool GoalDetectorHistogram2::checkBinSimilarity(Bin b1, Bin b2, float allowed_dissimilarity)
 {
     return b1.value*(1+allowed_dissimilarity) >= b2.value && b1.value*(1-allowed_dissimilarity) <= b2.value;
 }
 
-Quad GoalDetectorHistogram::makeQuad(Bin start, Bin end, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
+Quad GoalDetectorHistogram2::makeQuad(Bin bin, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
 {
     // find bounding box from histogram
-    int    left = start.start,
-           right = end.start + end.width,
+    int    left = bin.start,
+           right = left + bin.width,
            h_min = std::numeric_limits<int>::max(),
            h_max = 0,
            v_min = std::numeric_limits<int>::max(),
@@ -244,50 +220,36 @@ Quad GoalDetectorHistogram::makeQuad(Bin start, Bin end, const vector<ColourSegm
 
     //find left and right
     BOOST_FOREACH(ColourSegment seg, h_segments) {
-        //check start
-        int s_x = seg.getStart().x,
-            s_y = seg.getStart().y,
-            e_x = seg.getEnd().x,
-            e_y = seg.getEnd().y;
-        if(s_x >= left && s_x <= right) {
-            //segment's left edge is withing the bounding box
+        //check segment centre is within bin
+        if(seg.getCentre().x >= left && seg.getCentre().x <= right) {
+            int s_x = seg.getStart().x,
+                e_x = seg.getEnd().x,
+                y = seg.getCentre().y;
+            //check segment's left edge
             if(s_x < h_min)
                 h_min = s_x; //segment h-pos is leftmost, keep track
-            if(s_y < v_min)
-                v_min = s_y; //segment v-pos is uppermost, keep track
-            if(s_y > v_max)
-                v_max = s_y; //segment v-pos is lowermost, keep track
-        }
-        if(e_x >= left && e_x <= right) {
-            //segment's right edge is withing the bounding box
+            //check segment's right edge
             if(e_x > h_max)
                 h_max = e_x; //segment h-pos is rightmost, keep track
-            if(e_y < v_min)
-                v_min = e_y; //segment v-pos is uppermost, keep track
-            if(e_y > v_max)
-                v_max = e_y; //segment v-pos is lowermost, keep track
+            //check vertical
+            if(y < v_min)
+                v_min = y; //segment v-pos is uppermost, keep track
+            if(y > v_max)
+                v_max = y; //segment v-pos is lowermost, keep track
         }
     }
 
     //find top and bottom
     BOOST_FOREACH(ColourSegment seg, v_segments) {
-        //check start
-        int s_x = seg.getStart().x,
-            s_y = seg.getStart().y,
-            e_x = seg.getEnd().x,
-            e_y = seg.getEnd().y;
-        if(s_x >= left && s_x <= right) {
-            //segment's left edge is withing the bounding box
+        //check segment centre is within bin
+        if(seg.getCentre().x >= left && seg.getCentre().x <= right) {
+            //check start
+            int s_y = seg.getStart().y,
+                e_y = seg.getEnd().y;
+
             if(s_y < v_min)
                 v_min = s_y; //segment is bottommost, keep track
-            else if(s_y > v_max)
-                v_max = s_y; //segment is uppermost, keep track
-        }
-        if(e_x >= left && e_x <= right) {
-            //segment's left edge is withing the bounding box
-            if(e_y < v_min)
-                v_min = e_y; //segment is bottommost, keep track
-            else if(e_y > v_max)
+            if(e_y > v_max)
                 v_max = e_y; //segment is uppermost, keep track
         }
     }
@@ -295,3 +257,13 @@ Quad GoalDetectorHistogram::makeQuad(Bin start, Bin end, const vector<ColourSegm
     return Quad(h_min, v_min, h_max, v_max);
 }
 
+Vector2<float> GoalDetectorHistogram2::calculateSegmentLengthStatistics(const vector<ColourSegment> segments)
+{
+    accumulator_set<float, stats<tag::mean, tag::variance> > acc;
+
+    BOOST_FOREACH(ColourSegment seg, segments) {
+        acc(seg.getLength());
+    }
+
+    return Vector2<float>(mean(acc), sqrt(variance(acc)));
+}
