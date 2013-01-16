@@ -125,7 +125,6 @@ Matrix RobotModel::angleBetweenLandmarkMeasurementEquation(const Matrix& state, 
     const float angleToObj1 = atan2 ( y1 - robot_y, x1 - robot_x );
     const float angleToObj2 = atan2 ( y2 - robot_y, x2 - robot_x );
 
-    //result[0][0] = mathGeneral::normaliseAngle(angleToObj1 - angleToObj2); Normalising seemed to break this part.
     result[0][0] = angleToObj1 - angleToObj2;
 
     return result;
