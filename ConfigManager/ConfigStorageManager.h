@@ -37,6 +37,8 @@
 //#include <exception>
 //#include <iostream>
 
+#include "ConfigParameter.h"
+
 
 //The number of components (.json files used).
 #define ARR_SIZE 6

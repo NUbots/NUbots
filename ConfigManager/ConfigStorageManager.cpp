@@ -33,6 +33,7 @@
 #include <exception>
 
 #include "ConfigStorageManager.h"
+#include "ConfigParameter.h"
 
 using boost::property_tree::ptree;
 using ConfigSystem::ConfigStorageManager;
@@ -199,7 +200,7 @@ namespace ConfigSystem
 	
 	
 	//Store a single ConfigParameter object in the tree.
-	bool ConfigStorageManager::objectSingleStore(const string &path, ConfigParameter &store)
+	/*bool ConfigStorageManager::objectSingleStore(const string &path, ConfigParameter &store)
 	{
 		bool status = false;
 		//Retrieves type.
@@ -211,51 +212,53 @@ namespace ConfigSystem
 			//perform type conversion from "type" to string. Allow overwrite to store the string type.
 			if(type == vt_bool)
 			{
-				bool convert;
-				status = store.getValue_bool(convert);
+				//Converts boolean to string and stores in tree.
+				status = convertBoolToStr(store);
 				
-				//Stores the type as a boolean.
-				data->put(path + ".type", "bool");
-				
-				//if successful read, converts boolean to string.
-				if(status)
-				{
-					if(convert) data->put(path + ".value", "true");
-					else if(!convert) data->put(path + ".value", "false");
-				}
-				else
-				{
-					return false;
-				}
+				if(!status) return false;
 			}
 			else if(type == vt_long)
 			{
-				/* WORKING HERE LAST */
 				long convert;
 				ConfigRange<long> range_convert;
-				string value;
-				string upper;
-				string lower;
+				
+				
+				string value, upper, lower, u_bound_type, l_bound_type;
 				
 				status = store.getValue_long(convert);
 				
+				//Stores the type as a long.
+				data->put(path + ".type", "long");
+				
 				if(status && store.getRange_long(range_convert))
 				{
-					//convert long to string, convert range to string also.
-					try
-					{
-						value = boost::lexical_cast<std::string>(convert);
-						if(range_convert.getBoundType() != NONE)
-						{
-							upper = boost::lexical_cast<std::string>(range_convert);
-						}
-					}
-					catch(const boost::bad_lexical_cast &blcExc)
-					{
-						//throw specific exception?
-						return false;
-					}
+					storeNumber<long>(convert, range_convert);
+				
+					bool ubound_success, lbound_success;
+					
+					//Convert value.
+					value = numberToString(convert);
+					
+					//Convert upper bound.
+					ubound_success = getBound(range_convert.getUpperBoundType(), *(range_convert.getMax),
+											&u_bound_type, &upper);
+					//Convert lower bound.						
+					lbound_success = getBound(range_convert.getLowerBoundType(), *(range_convert.getMin),
+											&l_bound_type, &lower);
+					
+					if( !(ubound_success && lbound_success) ) return false;
+					
+					
+					//Successful conversion, store strings in tree:
+					data->put(path ".value", value);
+					
+					data->put(path ".range.upper..type", u_bound_type);
+					data->put(path ".range.upper..bound", upper);
+					
+					data->put(path ".range.lower..type", l_bound_type);
+					data->put(path ".range.lower..bound", lower);
 				}
+				//Errors with retrieving range and/or value, returns false.
 				else
 				{
 					return false;
@@ -285,37 +288,176 @@ namespace ConfigSystem
 		if(type.compare("1d_vector") == 0) 
 		{ 
 			/* Store in 1d vector variable */ 
-		}
-		else if(type.compare("2d_vector") == 0) 
-		{ 
+		//}
+		//else if(type.compare("2d_vector") == 0) 
+		//{ 
 			/* Store in 2d vector variable */ 
-		}
-		else if(type.compare("3d_vector") == 0) 
-		{ 
+		//}
+		//else if(type.compare("3d_vector") == 0) 
+		//{ 
 			/* Store in 3d vector variable */ 
-		}
-		else
-		{
+		//}
+		//else
+		//{
 			/* Store in single variable */
-			data->put(path + ".value", overwrite.getValue());
-		}
+			//data->put(path + ".value", overwrite.getValue());
+		//}
 		
 		//Type
-		data->put(path + ".type", type);
+		//data->put(path + ".type", type);
 		
 		//Ranges
-		data->put(path + ".range.lower", overwrite.getLower());
+		/*data->put(path + ".range.lower", overwrite.getLower());
 		data->put(path + ".range.upper", overwrite.getUpper());
 		
 		//Whatever else needs to be put in ...
 		return true;
-	}
+	}*/
 	
 	
 	
 	
 	
 	//PRIVATE MEMBER FUNCTIONS:
+	//Converts from a string and stores in a ConfigParameter object.
+	bool stringToCP(const string path, ConfigParameter &config_store)
+	{
+		/* WORKING HERE TOMORROW */
+		string variable_name, variable_path, variable_description;
+		value_type variable_type;
+		
+		//Retrieves variable name and path from the given path and returns false if error.
+		if( !(getNameFromPath(path, &variable_path, &variable_name)) ) return false; /*Invalid path exc?*/
+		
+		config_store.setName(variable_name);
+		config_store.setPath(variable_path);
+		config_store.setDesc(data->get<std::string>(path + ".desc"));
+		
+		
+		
+		
+	}
+	
+	//Determines the type and converts to a value_type enum.
+	bool findTypeFromTree(const string variable_type, value_type &return_type)
+	{
+		if(variable_type.compare("string") == 0) return_type = vt_string;
+		else if(variable_type.compare("double") == 0) return_type = vt_double;
+		else if(variable_type.compare("long") == 0) return_type = vt_long;
+		else if(variable_type.compare("bool") == 0) return_type = vt_bool;
+		else if(variable_type.compare("1dv_double") == 0) return_type = vt_1dvector_double;
+		else if(variable_type.compare("1dv_long") == 0) return_type = vt_1dvector_long;
+		else return false;
+		
+		return true;
+	}
+	
+	//Gets the variable name from a path containing the name.
+	bool getNameFromPath(const string path, string &return_path, string &return_name)
+	{
+		string variable_name, variable_path;
+		boost::char_separator<char> delim(".");
+		boost::tokenizer< boost::char_separator<char> > tokens(path, delim);
+		
+		tokenizer::iterator tok_iter_behind;
+		
+		//Retrieves the name of the variable
+		for(tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter)
+		{
+			if(tok_iter != tokens.begin()) 
+			{
+				variable_path += *(tok_iter_behind) + ".";
+			}
+			variable_name = *(tok_iter);
+		
+			tok_iter_behind = tok_iter;
+		}
+		
+		return_path = variable_path;
+		return_name = variable_name;
+		
+		return true;
+	}
+	
+	//Converts string to bounds:
+	template<typename T>
+	bool stringToBounds(const string path, ConfigRange<typename T> &converted_bounds)
+	{
+		T ub_num, lb_num;
+		string ub, lb, ub_type, lb_type;
+		
+		ub_type = data->get<std::string>(path + ".range.uBound");
+		lb_type = data->get<std::string>(path + ".range.lBound");
+		
+		if(ub_type.compare("NONE") != 0)
+		{
+			if(ub_type.compare("OPEN") == 0) converted_bounds.setUpperBoundType(OPEN);
+			else if(ub_type.compare("CLOSED") == 0) converted_bounds.setUpperBoundType(CLOSED);
+			else return false;
+			
+			ub = data->get<std::string>(path + ".range.max");
+			if( !(stringToNumber(ub, &ub_num)) ) return false;
+			
+			converted_bounds.setMax(ub_num);
+		}
+		else
+		{
+			converted_bounds.setUpperBoundType(NONE);
+		}
+		
+		if(lb_type.compare("NONE") != 0)
+		{
+			if(lb_type.compare("OPEN") == 0) converted_bounds.setLowerBoundType(OPEN);
+			else if(lb_type.compare("CLOSED") == 0) converted_bounds.setLowerBoundType(CLOSED);
+			else return false;
+			
+			lb = data->get<std::string>(path + ".range.min");
+			if( !(stringToNumber(lb, &lb_num)) ) return false;
+			
+			converted_bounds.setMin(lb_num);
+		}
+		else
+		{
+			converted_bounds.setUpperBoundType(NONE);
+		}
+		
+		return true;
+	}
+	
+	//Converts string to double, long, etc.
+	template<typename T>
+	bool stringToNumber(const string number_str, typename T &result)
+	{
+		stringstream stream(number_str);
+		
+		if( !(stream >> result) ) return false;
+		
+		return true;
+	}
+	
+	//Converts a boolean to a string
+	bool ConfigStorageManager::convertBoolToStr(ConfigParameter &store)
+	{
+		bool convert;
+		status = store.getValue_bool(convert);
+		
+		//Stores the type as a boolean.
+		data->put(path + ".type", "bool");
+		
+		//if successful read, converts boolean to string.
+		if(status)
+		{
+			if(convert) data->put(path + ".value", "true");
+			else if(!convert) data->put(path + ".value", "false");
+		}
+		else
+		{
+			return false;
+		}
+		
+		return status;
+	}
+	
 	//Reads the JSON file specified, stores in specified ptree.
 	bool ConfigStorageManager::fileReadWrite(ptree *tree, std::string filename, bool read_write)
 	{

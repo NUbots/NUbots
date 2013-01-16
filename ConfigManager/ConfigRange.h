@@ -102,12 +102,7 @@ namespace ConfigSystem
 			
 			
 
-=======
-            
-            
-            
-            
->>>>>>> 9bba4a0c29c3bd2838db5047bba3e00f910cb6f9
+
 		    bool test(std::vector<T> values);
             
 		    //! Returns whether the given value satisfies the constraints specified
