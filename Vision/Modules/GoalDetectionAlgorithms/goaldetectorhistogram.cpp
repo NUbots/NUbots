@@ -147,9 +147,8 @@ vector<Quad> GoalDetectorHistogram::detectQuads()
     //vector<int> start_lengths, end_lengths;
 
     const int BINS = 20;
-    const int BIN_WIDTH = VisionBlackboard::getInstance()->getImageWidth()/(double)BINS;
+    const float BIN_WIDTH = VisionBlackboard::getInstance()->getImageWidth()/(double)BINS;
     const int MERGE_THRESHOLD = 50;
-    const float SDEV_THRESHOLD = 0.75;
     const int CANDIDATE_THRESHOLD = 100;
     const float ALLOWED_DISSIMILARITY = 0.5;
 

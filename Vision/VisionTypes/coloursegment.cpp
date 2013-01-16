@@ -60,6 +60,7 @@ bool ColourSegment::join(const ColourSegment &other)
         return false;   //there are no matching endpoints
     }
     m_length_pixels = dist(m_start, m_end);
+    m_centre.x = 0.5*(m_start.x + m_end.x);
 
     return true;
 }

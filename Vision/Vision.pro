@@ -95,7 +95,7 @@ HEADERS += \
     GenericAlgorithms/ransac.h \
     Modules/GoalDetectionAlgorithms/goaldetectorransac.h \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h \
-    VisionTypes/quad.h
+    Modules/GoalDetectionAlgorithms/goaldetectorhistogram2.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -109,7 +109,8 @@ SOURCES += \
     main.cpp \
     GenericAlgorithms/ransac.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp
+    Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorhistogram2.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup
