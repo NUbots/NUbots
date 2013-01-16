@@ -48,8 +48,11 @@ std::istream& operator>> (std::istream& input, StationaryObject& p_stat)
 {
     input >> *static_cast<Object*>(&p_stat);
 
-    input.read(reinterpret_cast<char*>(&p_stat.fieldLocation.x), sizeof(p_stat.fieldLocation.x));
-    input.read(reinterpret_cast<char*>(&p_stat.fieldLocation.y), sizeof(p_stat.fieldLocation.y));
+    float temp;
+    input.read(reinterpret_cast<char*>(&temp), sizeof(temp));
+    input.read(reinterpret_cast<char*>(&temp), sizeof(temp));
+//    input.read(reinterpret_cast<char*>(&p_stat.fieldLocation.x), sizeof(p_stat.fieldLocation.x));
+//    input.read(reinterpret_cast<char*>(&p_stat.fieldLocation.y), sizeof(p_stat.fieldLocation.y));
 
     return input;
 }

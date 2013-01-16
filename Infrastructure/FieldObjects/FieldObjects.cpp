@@ -104,12 +104,12 @@ void FieldObjects::InitStationaryFieldObjects()
                     break;
 		case FO_CORNER_YELLOW_T_LEFT:
                     x = 300.0f;
-                    y = 150.0f;
+                    y = 110.0f;
                     objectName = "Left Yellow T Intersect";
                     break;
 		case FO_CORNER_YELLOW_T_RIGHT:
                     x = 300.0f;
-                    y = -150.0f;
+                    y = -110.0f;
                     objectName = "Right Yellow T Intersect";
                     break;
 		case FO_CORNER_YELLOW_FIELD_RIGHT:
@@ -119,13 +119,13 @@ void FieldObjects::InitStationaryFieldObjects()
                     break;
 		// Yellow Penalty Box
 		case FO_CORNER_YELLOW_PEN_LEFT:
-                    x = 237.5f;
-                    y = 150.0f;
+                    x = 240.f;
+                    y = 110.0f;
                     objectName = "Left Yellow Penalty Box Corner";
                     break;
 		case FO_CORNER_YELLOW_PEN_RIGHT:
-                    x = 237.5f;
-                    y = -150.0f;
+                    x = 240.f;
+                    y = -110.0f;
                     objectName = "Right Yellow Penalty Box Corner";
                     break;
 		// Half-Way Line
@@ -148,12 +148,12 @@ void FieldObjects::InitStationaryFieldObjects()
                     break;
 		case FO_CORNER_BLUE_T_LEFT:
                     x = -300.0f;
-                    y = -150.0f;
+                    y = -110.0f;
                     objectName = "Left Blue T intersect";
                     break;
 		case FO_CORNER_BLUE_T_RIGHT:
                     x = -300.0f;
-                    y = 150.0f;
+                    y = 110.0f;
                     objectName = "Right Blue T intersect";
                     break;
 		case FO_CORNER_BLUE_FIELD_RIGHT:
@@ -163,13 +163,13 @@ void FieldObjects::InitStationaryFieldObjects()
                     break;
         // Blue Penalty Box
 		case FO_CORNER_BLUE_PEN_LEFT:
-                    x = -237.5f;
-                    y = -150.0f;
+                    x = -240.f;
+                    y = -110.0f;
                     objectName = "Left Blue Penalty Box Corner";
                     break;
 		case FO_CORNER_BLUE_PEN_RIGHT:
-                    x = -237.5f;
-                    y = 150.0f;
+                    x = -240.f;
+                    y = 110.0f;
                     objectName = "Right Blue Penalty Box Corner";
                     break;
                 case FO_PENALTY_BLUE:
@@ -618,11 +618,11 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
             throw FileFormatException(error_msg.str());
         }
         input >> p_fob.stationaryFieldObjects[i];
-        if(i == FieldObjects::FO_CORNER_CENTRE_T_LEFT)
-        {
-            p_fob.stationaryFieldObjects[i].fieldLocation.x = 0;
-            p_fob.stationaryFieldObjects[i].fieldLocation.y = 200;
-        }
+//        if(i == FieldObjects::FO_CORNER_CENTRE_T_LEFT)
+//        {
+//            p_fob.stationaryFieldObjects[i].fieldLocation.x = 0;
+//            p_fob.stationaryFieldObjects[i].fieldLocation.y = 200;
+//        }
     }
 
     input.read(reinterpret_cast<char*>(&size), sizeof(size));
@@ -649,5 +649,6 @@ std::istream& operator>> (std::istream& input, FieldObjects& p_fob)
         }
         input >> p_fob.ambiguousFieldObjects[i];
     }
+    //std::cout << p_fob.toString();
     return input;
 }
