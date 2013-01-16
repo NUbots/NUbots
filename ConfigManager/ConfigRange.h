@@ -36,7 +36,7 @@ namespace ConfigSystem
     // closed <==> [_min, _max] <==> _min <= x >= _max
     // none   <==> (-inf, +inf) <==> unrestricted x
     enum BoundType { NONE, OPEN, CLOSED };
-
+    
     /*! 
      * This class represents a range, and provides 
      * methods to check whether a value falls within it.
@@ -49,17 +49,17 @@ namespace ConfigSystem
 		    // ConfigRange(T min, T max);
 		    // ConfigRange(T min, T max, BoundType lBound, BoundType uBound );
 		    ConfigRange(T min = 0, T max = 1, bool outside = false);
-
+            
 		    ConfigRange(T min, T max, bool outside, BoundType lBound, BoundType uBound);
-
+            
 			//destructor:
 			~ConfigRange();
-
-
-
-
+            
+            
+            
+            
 		    bool test(std::vector<T> values);
-
+            
 		    //! Returns whether the given value satisfies the constraints specified
 		    //! by this range object.
 		    bool test(T value);
