@@ -69,7 +69,7 @@ namespace ConfigSystem
 	
 	//Retrieves "_max" member variable
 	template<typename T>
-	T* ConfigRange::getMax()
+	T* ConfigRange<T>::getMax()
 	{
 		T *max_ptr = &(_max);
 		
@@ -78,7 +78,7 @@ namespace ConfigSystem
 
 	//Retrieves "_max" member variable
 	template<typename T>
-	const T* ConfigRange::getMax() const
+	const T* ConfigRange<T>::getMax() const
 	{
 		const T *max_ptr = &(_max);
 		
@@ -87,7 +87,7 @@ namespace ConfigSystem
 	
 	//Retrieves "_min" member variable
 	template<typename T>
-	T* ConfigRange::getMin()
+	T* ConfigRange<T>::getMin()
 	{
 		T *min_ptr = &(_min);
 		
@@ -96,7 +96,7 @@ namespace ConfigSystem
 	
 	//Retrieves "_min" member variable
 	template<typename T>
-	const T* ConfigRange::getMin() const
+	const T* ConfigRange<T>::getMin() const
 	{
 		T *min_ptr = &(_min);
 		
@@ -105,14 +105,14 @@ namespace ConfigSystem
 	
 	//Retrieves the upper bound type of the range.
 	template<typename T>
-	BoundType ConfigRange::getUpperBoundType()
+	BoundType ConfigRange<T>::getUpperBoundType()
 	{
 		return _uBound;
 	}
 	
 	//Retrieves the lower bound type of the range.
 	template<typename T>
-	BoundType ConfigRange::getLowerBoundType()
+	BoundType ConfigRange<T>::getLowerBoundType()
 	{
 		return _lBound;
 	}

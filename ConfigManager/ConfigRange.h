@@ -54,7 +54,7 @@ namespace ConfigSystem
             
 			//destructor:
 			~ConfigRange();
-<<<<<<< HEAD
+
 
 
 			
