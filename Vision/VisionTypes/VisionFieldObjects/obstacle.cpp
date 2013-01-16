@@ -8,11 +8,11 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-Obstacle::Obstacle(const PointType &position, int width, int height)
+Obstacle::Obstacle(const PointType &position, float width, float height)
 {
     m_id = OBSTACLE;
-    m_size_on_screen = Vector2<int>(width, height);
-    m_location_pixels = Vector2<int>(position.x, position.y);
+    m_size_on_screen = Vector2<float>(width, height);
+    m_location_pixels = Vector2<float>(position.x, position.y);
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
 //        Vector2<float> bottomcentre = Vector2<float>(position.x, position.y);
@@ -50,8 +50,8 @@ if(valid) {
     newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
                                  m_spherical_error,
                                  m_location_angular,
-                                 m_location_pixels,
-                                 m_size_on_screen,
+                                 Vector2<int>(m_location_pixels.x,m_location_pixels.y),
+                                 Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                  timestamp);
     newAmbObj.arc_width = m_size_on_screen.x * vbb->getFOV().x / vbb->getImageWidth();
     fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
@@ -150,7 +150,7 @@ float Obstacle::distanceToObstacle(float bearing, float elevation) {
 
 void Obstacle::render(cv::Mat &mat) const
 {
-    Vector2<int> half = m_size_on_screen/2;
+    Vector2<float> half = m_size_on_screen*0.5;
     cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y-m_size_on_screen.y), cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y), cv::Scalar(255, 255, 0));
     cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y), cv::Scalar(255, 255, 0));
     cv::line(mat, cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y-m_size_on_screen.y), cv::Scalar(255, 255, 0));

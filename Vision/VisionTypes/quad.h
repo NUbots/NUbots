@@ -13,7 +13,7 @@ public:
     Quad();
     Quad(const Quad& other);
     Quad(int left, int top, int right, int bottom);
-    Quad(Vector2<int> bottom_left, Vector2<int> top_left, Vector2<int> top_right, Vector2<int> bottom_right);
+    Quad(Vector2<float> bottom_left, Vector2<float> top_left, Vector2<float> top_right, Vector2<float> bottom_right);
 
     /**
       * Sets the Quad as a screen aligned rectangle given the specified positions.
@@ -31,15 +31,15 @@ public:
       * @param top_right    The top right corner.
       * @param bottom_right The bottom right corner.
       */
-    void set(Vector2<int> bottom_left, Vector2<int> top_left, Vector2<int> top_right, Vector2<int> bottom_right);
+    void set(Vector2<float> bottom_left, Vector2<float> top_left, Vector2<float> top_right, Vector2<float> bottom_right);
     
 
-    Vector2<int> getBottomCentre() const;   //! Returns the bottom centre pixel location of the Quad.
+    Vector2<float> getBottomCentre() const;   //! Returns the bottom centre pixel location of the Quad.
 
-    Vector2<int> getCentre() const;         //! Returns the centre pixel location  of the Quad.
+    Vector2<float> getCentre() const;         //! Returns the centre pixel location  of the Quad.
 
-    Vector2<int> getBottomLeft() const;     //! Returns the bottom left pixel location  of the Quad.
-    Vector2<int> getTopRight() const;       //! Returns the top right pixel location  of the Quad.
+    Vector2<float> getBottomLeft() const;     //! Returns the bottom left pixel location  of the Quad.
+    Vector2<float> getTopRight() const;       //! Returns the top right pixel location  of the Quad.
 
     float getLeft() const {return 0.5*(m_bottom_left.x + m_top_left.x);}
     float getRight() const {return 0.5*(m_bottom_right.x + m_top_right.x);}
@@ -57,10 +57,10 @@ public:
 
 private:
 
-    Vector2<int> m_bottom_left,     //! @variable The left of the Quad.
-                 m_bottom_right,    //! @variable The right of the Quad.
-                 m_top_right,       //! @variable The top of the Quad.
-                 m_top_left;        //! @variable The bottom of the Quad.
+    Vector2<float> m_bottom_left,     //! @variable The left of the Quad.
+                   m_bottom_right,    //! @variable The right of the Quad.
+                   m_top_right,       //! @variable The top of the Quad.
+                   m_top_left;        //! @variable The bottom of the Quad.
 };
 
 #endif // QUAD_H

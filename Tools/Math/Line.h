@@ -8,43 +8,14 @@
 #define LINE_H_DEFINED
 
 #include <iostream>
-
-/*!
-  @brief Class representing a 2 dimensional (x,y) position.
-  */
-class Point
-{
-  public:
-    /*!
-      @brief Default constructor.
-      */
-    Point() {Point(0.0,0.0); return;};
-    /*!
-      @brief Constructor with initialisers.
-      */
-    Point(double in_x, double in_y) {x = in_x; y = in_y; return;};
-    double x; //!< The points x value.
-    double y; //!< The points y value.
-    //double distance(const Point& p1) const { return sqrt((x-p1.x)*(x-p1.x) + (y-p1.y)*(y-p1.y)); }
-    double dot(Point pt) {return x*pt.x + y*pt.y;}
-
-    // Overloaded functions
-    /*!
-      @brief Equality operator
-      @return True of the two points are equal. False if they are not.
-      */
-    friend bool operator ==(const Point& point1, const Point& point2) {return (point1.x==point2.x)&&(point1.y==point2.y);}
-    /*!
-      @brief Inquality operator
-      @return True of the two points are not equal. False if they are.
-      */
-    friend bool operator !=(const Point& point1, const Point& point2) {return (point1.x!=point2.x)||(point1.y!=point2.y);}
-
-};
+#include "Tools/Math/Vector2.h"
 
 /*!
   @brief Class representing a 2 dimensional line in the form Ax + By = C.
   */
+
+typedef Vector2<double> Point;
+
 class Line
 {
   public:
@@ -239,7 +210,7 @@ class Line
       */
     friend std::ostream& operator<< (std::ostream& output, const Line& l);
     
-  private:
+  protected:
     double m_A; //! The lines A value.
     double m_B; //! The lines B value.
     double m_C; //! The lines C value.

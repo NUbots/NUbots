@@ -6,15 +6,15 @@
 
 using std::vector;
 
-class LinePoint: public Point{
-	public:
-		int ID;
-		bool inUse;
-		int width;
-		LinePoint();
-        LinePoint(double in_x, double in_y);
-		void clear();
-};
+//class LinePoint: public Point{
+//	public:
+//		int ID;
+//		bool inUse;
+//		int width;
+//		LinePoint();
+//        LinePoint(double in_x, double in_y);
+//		void clear();
+//};
 
 class LSFittedLine : public Line
 {
@@ -22,23 +22,22 @@ class LSFittedLine : public Line
     LSFittedLine();
     bool valid;
     
-    void addPoint(LinePoint &point);
-    void addPoints(vector<LinePoint>& pointlist);
+    void addPoint(Point &point);
+    void addPoints(vector<Point>& pointlist);
     void joinLine(LSFittedLine &sourceLine);
     Vector2<double> combinedR2TLSandMSD(const LSFittedLine &sourceLine) const;
     double getMSD() const;
     double getr2tls() const;
-    Point leftPoint, rightPoint;
-    //Point transLeftPoint, transRightPoint;
     void clearPoints();
-    const std::vector<LinePoint>& getPoints();
-    //std::vector<LinePoint*> getTransformedEndPoints();
+    const std::vector<Point>& getPoints();
+    Point getLeftPoint() const;
+    Point getRightPoint() const;
     int numPoints;
 private:
     void calcLine();
     double sumX, sumY, sumX2, sumY2, sumXY;
     double MSD, r2tls;
-    std::vector<LinePoint> points;
+    std::vector<Point> points;
     
 };
 

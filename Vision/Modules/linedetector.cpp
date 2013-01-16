@@ -6,23 +6,23 @@ LineDetector::LineDetector()
 {
 }
 
-vector<LinePoint> LineDetector::getPointsFromSegments(const vector<ColourSegment> &h_segments, const vector<ColourSegment> &v_segments)
+vector<Point> LineDetector::getPointsFromSegments(const vector<ColourSegment> &h_segments, const vector<ColourSegment> &v_segments)
 {
-    vector<LinePoint> points;
+    vector<Point> points;
     BOOST_FOREACH(ColourSegment s, h_segments) {
-        points.push_back(LinePoint(s.getCentre().x,s.getCentre().y));
+        points.push_back(Point(s.getCentre().x,s.getCentre().y));
     }
     BOOST_FOREACH(ColourSegment s, v_segments) {
-        points.push_back(LinePoint(s.getCentre().x,s.getCentre().y));
+        points.push_back(Point(s.getCentre().x,s.getCentre().y));
     }
 
     return points;
 }
 
-vector<LinePoint> LineDetector::pointsUnderGreenHorizon(const vector<LinePoint>& points, const GreenHorizon& gh)
+vector<Point> LineDetector::pointsUnderGreenHorizon(const vector<Point>& points, const GreenHorizon& gh)
 {
-    vector<LinePoint> under;
-    BOOST_FOREACH(LinePoint p, points) {
+    vector<Point> under;
+    BOOST_FOREACH(Point p, points) {
         if(gh.isBelowHorizon(PointType(p.x, p.y))) {
             under.push_back(p);
         }

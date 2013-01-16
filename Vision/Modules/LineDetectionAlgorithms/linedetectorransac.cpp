@@ -22,7 +22,7 @@ void LineDetectorRANSAC::run()
     vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE_COLOUR);  //get transitions associated with lines
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE_COLOUR);
     vector<LSFittedLine> lines;
-    vector<LinePoint> points;
+    vector<Point> points;
     vector<LSFittedLine>::iterator l_it;
 
     points = getPointsFromSegments(h_segments, v_segments);

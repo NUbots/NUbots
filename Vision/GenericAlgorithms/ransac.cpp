@@ -5,15 +5,15 @@
 
 namespace RANSAC
 {
-    std::vector<LSFittedLine> findMultipleLines(const std::vector<LinePoint>& line_points, float e, unsigned int n, unsigned int k, unsigned int max_iterations)
+    std::vector<LSFittedLine> findMultipleLines(const std::vector<Point>& line_points, float e, unsigned int n, unsigned int k, unsigned int max_iterations)
     {
         float variance;
         bool line_found;
         Line line;
         LSFittedLine fitted_line;
         std::vector<LSFittedLine> results;
-        std::vector<LinePoint> consensus;
-        std::vector<LinePoint> remainder;
+        std::vector<Point> consensus;
+        std::vector<Point> remainder;
 
         //run first iterations
 
@@ -31,7 +31,7 @@ namespace RANSAC
         return results;
     }
 
-    //        bool findLineFit(std::vector<LinePoint> points, Line& result, std::vector<LinePoint>& consensus, std::vector<LinePoint>& remainder, float& variance, float e, unsigned int n, unsigned int k)
+    //        bool findLineFit(std::vector<Point> points, Line& result, std::vector<Point>& consensus, std::vector<Point>& remainder, float& variance, float e, unsigned int n, unsigned int k)
     //        {
     //            if (points.size() < n) {
     //                return false;
@@ -105,7 +105,7 @@ namespace RANSAC
     //            }
     //        }
 
-    bool findLine(std::vector<LinePoint> points, Line& result, std::vector<LinePoint>& consensus, std::vector<LinePoint>& remainder, float& variance, float e, unsigned int n, unsigned int k)
+    bool findLine(std::vector<Point> points, Line& result, std::vector<Point>& consensus, std::vector<Point>& remainder, float& variance, float e, unsigned int n, unsigned int k)
     {
         if (points.size() < n || n<2) {
             return false;
@@ -174,10 +174,10 @@ namespace RANSAC
         }
     }
 
-    Line generateRandomLine(const std::vector<LinePoint>& points)
+    Line generateRandomLine(const std::vector<Point>& points)
     {
         if(points.size() > 1) {
-            LinePoint p1, p2;
+            Point p1, p2;
             p1 = points.at(rand() % points.size());
             do {
                 p2 = points.at(rand() % points.size());

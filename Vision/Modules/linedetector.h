@@ -16,8 +16,8 @@ public:
     virtual void run() = 0;
 
 protected:
-    vector<LinePoint> getPointsFromSegments(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
-    vector<LinePoint> pointsUnderGreenHorizon(const vector<LinePoint>& points, const GreenHorizon& gh);
+    vector<Point> getPointsFromSegments(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
+    vector<Point> pointsUnderGreenHorizon(const vector<Point>& points, const GreenHorizon& gh);
 
 };
 

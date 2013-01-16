@@ -13,7 +13,7 @@ Goal::Goal(VFO_ID id, const Quad &corners)
     m_id = id;
     m_corners = corners;
 
-    m_size_on_screen = Vector2<int>(corners.getAverageWidth(), corners.getAverageHeight());
+    m_size_on_screen = Vector2<float>(corners.getAverageWidth(), corners.getAverageHeight());
     m_location_pixels = corners.getBottomCentre();
 
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
@@ -123,8 +123,8 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
             fieldobjects->stationaryFieldObjects[stat_id].UpdateVisualObject(m_transformed_spherical_pos,
                                                                             m_spherical_error,
                                                                             m_location_angular,
-                                                                            m_location_pixels,
-                                                                            m_size_on_screen,
+                                                                            Vector2<int>(m_location_pixels.x,m_location_pixels.y),
+                                                                            Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                                                             timestamp);
         }
         else {
@@ -132,8 +132,8 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
             newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
                                          m_spherical_error,
                                          m_location_angular,
-                                         m_location_pixels,
-                                         m_size_on_screen,
+                                         Vector2<int>(m_location_pixels.x,m_location_pixels.y),
+                                         Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                          timestamp);
             fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
         }

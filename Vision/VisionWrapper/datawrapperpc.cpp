@@ -167,7 +167,7 @@ DataWrapper::DataWrapper()
     //debug_map[DBID_IMAGE].push_back(                &debug_windows[3]);
     debug_map[DBID_IMAGE].push_back(                &debug_windows[4]);
     debug_map[DBID_IMAGE].push_back(                &debug_windows[5]);
-    debug_map[DBID_IMAGE].push_back(                &debug_windows[7]);
+    //debug_map[DBID_IMAGE].push_back(                &debug_windows[7]);
 
     debug_map[DBID_CLASSED_IMAGE].push_back(        &debug_windows[1]);
 
@@ -750,7 +750,25 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
         }
 
         BOOST_FOREACH(LSFittedLine l, data) {
-            FieldLine(l).render(img, colour);
+            FieldLine ln(l);
+            ln.render(img, colour);
+            BOOST_FOREACH(Point pt, l.getPoints()) {
+                cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,255,255) - colour);
+            }
+
+            Point p1 = l.getLeftPoint(),
+                  p2 = l.getRightPoint();
+            cout << "(" << p1.x << ", " << p1.y << ") (" << p2.x << ", " << p2.y << ")" << endl;
+            cv::circle(img, cv::Point2i(p1.x, p1.y), 1, cv::Scalar(0,255,255));
+            cv::circle(img, cv::Point2i(p2.x, p2.y), 1, cv::Scalar(0,255,255));
+
+            Point t1 = l.projectOnto(p1),
+                  t2 = l.projectOnto(p2);
+
+            cout << "(" << t1.x << ", " << t1.y << ") (" << t2.x << ", " << t2.y << ")" << endl;
+
+            cv::circle(img, cv::Point2i(t1.x, t1.y), 3, cv::Scalar(0,0,255));
+            cv::circle(img, cv::Point2i(t2.x, t2.y), 3, cv::Scalar(0,0,255));
             //l.render(img, colour);
         }
 

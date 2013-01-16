@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <cstdlib>
+#include <limits>
 using namespace std;
 
 LSFittedLine::LSFittedLine(){
@@ -16,21 +17,17 @@ void LSFittedLine::clearPoints(){
 	sumY2 = 0;
 	sumXY = 0;
     numPoints = 0;
-	leftPoint.x = 0;
-	leftPoint.y = 0;
-	rightPoint.x = 0;
-    rightPoint.y = 0;
 	MSD = 0;
     r2tls = 0;
 	points.clear();
 }
 
-const std::vector<LinePoint>& LSFittedLine::getPoints()
+const std::vector<Point>& LSFittedLine::getPoints()
 {
 	return points;
 }
 
-void LSFittedLine::addPoint(LinePoint &point){
+void LSFittedLine::addPoint(Point &point){
 	sumX += point.x;
 	sumY += point.y;
 	sumX2 += point.x * point.x;
@@ -38,41 +35,19 @@ void LSFittedLine::addPoint(LinePoint &point){
 	sumXY += point.x * point.y;
 	numPoints ++;
     points.push_back(point);
-	point.inUse = true;
 	if (numPoints < 2)
 	{
-		valid = false;
-		leftPoint = point;
-		rightPoint = point;
+        valid = false;
 	}
 	else
 	{
 		valid = true;
-		calcLine();
-		//CHECK if new point is a start or end point
-		if (point.x < leftPoint.x)
-			leftPoint = point;
-		else if (point.x > rightPoint.x)
-			rightPoint = point;
-		
-		//SPECIAL CONDITION FOR VERITCAL LINES
-		//**************************************
-		else if (rightPoint.x == leftPoint.x)
-		{
-			if(point.y < leftPoint.y)
-				leftPoint = point;
-			else if(point.y > rightPoint.y)
-				rightPoint = point;
-		}
+        calcLine();
 	}
 }
 
-void LSFittedLine::addPoints(vector<LinePoint>& pointlist){
+void LSFittedLine::addPoints(vector<Point>& pointlist){
     if(!pointlist.empty()) {
-        if(numPoints < 1) {
-            leftPoint = pointlist[0];
-            rightPoint = pointlist[0];
-        }
         for(unsigned int i=0; i<pointlist.size(); i++) {
             sumX += pointlist[i].x;
             sumY += pointlist[i].y;
@@ -81,25 +56,6 @@ void LSFittedLine::addPoints(vector<LinePoint>& pointlist){
             sumXY += pointlist[i].x * pointlist[i].y;
             numPoints++;
             points.push_back(pointlist[i]);
-            pointlist[i].inUse = true;
-
-            //CHECK if point is a start or end point
-            if(pointlist[i].x == leftPoint.x){
-                if(pointlist[i].y < leftPoint.y){
-                    leftPoint = pointlist[i];
-                }
-            }
-            else if (pointlist[i].x < leftPoint.x) {
-                leftPoint = pointlist[i];
-            }
-            if(pointlist[i].x == rightPoint.x) {
-                if(pointlist[i].y > rightPoint.y) {
-                    rightPoint = pointlist[i];
-                }
-            }
-            else if (pointlist[i].x > rightPoint.x) {
-                rightPoint = pointlist[i];
-            }
         }
         if (numPoints < 2)
         {
@@ -125,27 +81,11 @@ void LSFittedLine::joinLine(LSFittedLine &sourceLine)
 		points.push_back(sourceLine.points[p]);
 	}
     if (numPoints < 2 && sourceLine.numPoints > 0) {
-		valid = false;		
-		leftPoint = sourceLine.leftPoint;
-		rightPoint = sourceLine.rightPoint;
+        valid = false;
 	}
     else {
 		valid = true;
-		calcLine();
-		//CHECK if new point is a start or end point
-		if (sourceLine.leftPoint.x < leftPoint.x)
-			leftPoint = sourceLine.leftPoint;
-        if (sourceLine.rightPoint.x > rightPoint.x)
-			rightPoint = sourceLine.rightPoint;
-		
-		//SPECIAL CONDITION FOR VERITCAL LINES
-		//**************************************
-        if (rightPoint.x == leftPoint.x) {
-			if(sourceLine.leftPoint.y < leftPoint.y)
-				leftPoint = sourceLine.leftPoint;
-            if(sourceLine.rightPoint.y > rightPoint.y)
-				rightPoint = sourceLine.rightPoint;
-		}
+        calcLine();
 	}
 }
 
@@ -182,13 +122,13 @@ void LSFittedLine::calcLine(){
 	double sxx, syy, sxy, Sigma;
 	double A = 0, B = 0, C = 0;
 
-        sxx = sumX2 - sumX*sumX/numPoints;
-        syy = sumY2 - sumY*sumY/numPoints;
-        sxy = sumXY - sumX*sumY/numPoints;
-        Sigma = (sxx+syy-sqrt((sxx-syy)*(sxx-syy)+4*sxy*sxy))/2;
-        //cout << "Sigma: "<< Sigma << endl;
-        MSD = Sigma/numPoints;
-        r2tls = 1.0-(4.0*Sigma*Sigma/((sxx+syy)*(sxx+syy)+(sxx-syy)*(sxx-syy)+4.0*sxy*sxy));
+    sxx = sumX2 - sumX*sumX/numPoints;
+    syy = sumY2 - sumY*sumY/numPoints;
+    sxy = sumXY - sumX*sumY/numPoints;
+    Sigma = (sxx+syy-sqrt((sxx-syy)*(sxx-syy)+4*sxy*sxy))/2;
+    //cout << "Sigma: "<< Sigma << endl;
+    MSD = Sigma/numPoints;
+    r2tls = 1.0-(4.0*Sigma*Sigma/((sxx+syy)*(sxx+syy)+(sxx-syy)*(sxx-syy)+4.0*sxy*sxy));
 
 
 	if (sxx > syy){
@@ -204,26 +144,54 @@ void LSFittedLine::calcLine(){
 	setLine(A, B, C);
 }
 
-LinePoint::LinePoint()
+Point LSFittedLine::getLeftPoint() const
 {
-    ID = 0;
-	clear();
+    float min = std::numeric_limits<float>::max();
+    vector<Point>::const_iterator p, p_min;
+    for(p = points.begin(), p_min = p; p!=points.end(); p++) {
+        float trans_x = -m_B*p->x - m_A*p->y;
+        if(trans_x < min) {
+            p_min = p;
+            min = trans_x;
+        }
+    }
+    return *p_min;
 }
 
-void LinePoint::clear()
+Point LSFittedLine::getRightPoint() const
 {
-	inUse = false;
-	width = 0;
-	x = 0;
-	y = 0;
+    float max = -std::numeric_limits<float>::max();
+    vector<Point>::const_iterator p, p_max;
+    for(p = points.begin(), p_max = p; p!=points.end(); p++) {
+        float trans_x = -m_B*p->x - m_A*p->y;
+        if(trans_x > max) {
+            p_max = p;
+            max = trans_x;
+        }
+    }
+    return *p_max;
 }
 
-LinePoint::LinePoint(double in_x, double in_y) : Point(in_x, in_y)
-{
-    ID = 0;
-    inUse = false;
-    width = 0;
-}
+//LinePoint::LinePoint()
+//{
+//    ID = 0;
+//	clear();
+//}
+
+//void LinePoint::clear()
+//{
+//	inUse = false;
+//	width = 0;
+//	x = 0;
+//	y = 0;
+//}
+
+//LinePoint::LinePoint(double in_x, double in_y) : Point(in_x, in_y)
+//{
+//    ID = 0;
+//    inUse = false;
+//    width = 0;
+//}
 
 /*
 void test(LinePoint p1, LinePoint p2, LinePoint p3)

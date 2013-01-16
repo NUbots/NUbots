@@ -6,20 +6,20 @@ using std::vector;
 namespace RANSAC
 {
 
-    vector<LSFittedLine> findMultipleLines(const vector<LinePoint>& line_points,
+    vector<LSFittedLine> findMultipleLines(const vector<Point>& line_points,
                                            float e,                     //typical:
                                            unsigned int n,              //typical:
                                            unsigned int k,              //typical:
                                            unsigned int max_iterations);
 
-    bool findLine(std::vector<LinePoint> points,
+    bool findLine(std::vector<Point> points,
                   Line& result,
-                  vector<LinePoint>& consensus,
-                  vector<LinePoint>& remainder,
+                  vector<Point>& consensus,
+                  vector<Point>& remainder,
                   float& variance,
                   float e,
                   unsigned int n,
                   unsigned int k);
 
-    Line generateRandomLine(const vector<LinePoint>& points);
+    Line generateRandomLine(const vector<Point>& points);
 };

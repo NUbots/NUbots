@@ -32,19 +32,16 @@ void GoalDetectorRANSAC::run()
     //get transitions associated with goals
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::GOAL_COLOUR);
     //vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::GOAL_COLOUR);
-    vector<LinePoint> start_points, end_points;
+    vector<Point> start_points, end_points;
     vector<LSFittedLine> start_lines, end_lines;
     vector<Quad> candidates;
 
     BOOST_FOREACH(ColourSegment s, h_segments) {
-        start_points.push_back(LinePoint(s.getStart().x, s.getStart().y));
-        end_points.push_back(LinePoint(s.getEnd().x, s.getEnd().y));
+        start_points.push_back(Point(s.getStart().x, s.getStart().y));
+        end_points.push_back(Point(s.getEnd().x, s.getEnd().y));
     }
 
-    //use generic ransac implementation to fine lines
-//        lines = RANSAC::findMultipleLines(h_points, m_e, m_n, m_k, m_max_iterations);
-
-    //h_points.insert(h_points.end(), v_points.begin(), v_points.end());
+    //use generic ransac implementation to find lines
     start_lines = RANSAC::findMultipleLines(start_points, m_e, m_n, m_k, m_max_iterations);
     end_lines = RANSAC::findMultipleLines(end_points, m_e, m_n, m_k, m_max_iterations);
 
@@ -60,12 +57,12 @@ vector<Quad> GoalDetectorRANSAC::buildGoalsFromLines(const vector<LSFittedLine> 
     return vector<Quad>();
 }
 
-vector<LinePoint> GoalDetectorRANSAC::getEdgePointsFromSegments(const vector<ColourSegment> &segments)
+vector<Point> GoalDetectorRANSAC::getEdgePointsFromSegments(const vector<ColourSegment> &segments)
 {
-    vector<LinePoint> points;
+    vector<Point> points;
     BOOST_FOREACH(ColourSegment s, segments) {
-        points.push_back(LinePoint(s.getStart().x, s.getStart().y));
-        points.push_back(LinePoint(s.getEnd().x, s.getEnd().y));
+        points.push_back(Point(s.getStart().x, s.getStart().y));
+        points.push_back(Point(s.getEnd().x, s.getEnd().y));
     }
 
     return points;

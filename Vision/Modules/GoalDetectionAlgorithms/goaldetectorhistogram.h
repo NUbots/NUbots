@@ -1,6 +1,3 @@
-/*! @brief Detects goals from yellow transitions using a 1D histogram.
-*/
-
 #ifndef GOALDETECTORHISTOGRAM_H
 #define GOALDETECTORHISTOGRAM_H
 
@@ -21,12 +18,14 @@ public:
     GoalDetectorHistogram();
     virtual void run();
 private:
-    vector<Quad> detectQuads();
+    vector<Quad> detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
     Histogram1D mergePeaks(Histogram1D hist, int minimum_threshold);
-    vector<Quad> generateCandidates(const Histogram1D& start, const Histogram1D& end,
+    vector<Quad> generateCandidates(const Histogram1D& hist,
                                     const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments,
-                                    int peak_threshold, float similarity_threshold);
-    Quad makeQuad(Bin start, Bin end, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
+                                    int peak_threshold);
+    Quad makeQuad(Bin bin, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
+
+    Vector2<float> calculateSegmentLengthStatistics(const vector<ColourSegment> segments);
 
     //checks
     void DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED);

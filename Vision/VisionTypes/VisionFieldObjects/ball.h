@@ -8,7 +8,7 @@ class Ball : public VisionFieldObject
 public:
     
     Ball();
-    Ball(PointType centre, int diameter);
+    Ball(PointType centre, float diameter);
     
     /*!
       @brief returns the radius.

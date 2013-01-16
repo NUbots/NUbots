@@ -19,7 +19,7 @@ void LineDetectorSAM::run()
     vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE_COLOUR);  //get transitions associated with lines
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE_COLOUR);
     vector<LSFittedLine> lines;
-    vector<LinePoint> points;
+    vector<Point> points;
     vector<LSFittedLine>::iterator l_it;
 
     points = getPointsFromSegments(h_segments, v_segments);
@@ -39,7 +39,7 @@ void LineDetectorSAM::run()
     }
 }
 
-vector<LSFittedLine> LineDetectorSAM::fitLines(vector<LinePoint>& points, bool noise) {
+vector<LSFittedLine> LineDetectorSAM::fitLines(vector<Point>& points, bool noise) {
     //Performs split-and-merge algorithm with input consisting of a set of point clusters
     // and a set of unclustered points, putting the resulting lines into a reference
     // passed vector
@@ -87,7 +87,7 @@ vector<LSFittedLine> LineDetectorSAM::fitLines(vector<LinePoint>& points, bool n
 
 
 
-void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& points) {
+void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<Point>& points) {
     // Recursive split algorithm - not used
 
     //Assumes:
@@ -119,8 +119,8 @@ void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& poin
     //if num points over threshold > limit -> split at greatest distance point.
     if(points_over >= MIN_POINTS_OVER) {
         //there are enough points distant to justify a split
-        vector<LinePoint> left;    //holder vectors
-        vector<LinePoint> right;
+        vector<Point> left;    //holder vectors
+        vector<Point> right;
         if(separate(left, right, points[greatest_point], line)) {
             //split was valid - recursively split new lines
             split(lines, left);
@@ -128,7 +128,7 @@ void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& poin
         }
         else {
             //remove furthest point and retry
-            vector<LinePoint> newlist = points;
+            vector<Point> newlist = points;
             addToNoise(newlist[greatest_point]);
             newlist.erase(newlist.begin() + greatest_point);
             split(lines, newlist);
@@ -139,7 +139,7 @@ void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& poin
         //not enough points over to split so remove point as noisy, and regen line
         if(points.size() > MIN_POINTS_TO_LINE_FINAL) {
             //removal of a point will still leave enough to form a reasonable line
-            vector<LinePoint> newlist = points;
+            vector<Point> newlist = points;
             addToNoise(newlist[greatest_point]);
             for(unsigned int i=greatest_point; i<newlist.size()-1; i++) {
                 newlist[i] = newlist[i+1];
@@ -161,7 +161,7 @@ void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& poin
     }
 }
 
-//void LineDetectorSAM::splitIterative(vector<LSFittedLine>& lines, vector<LinePoint>& points) {
+//void LineDetectorSAM::splitIterative(vector<LSFittedLine>& lines, vector<Point>& points) {
 //    //Iterative split algorithm, uses a stack of lines and iterates over it, splitting
 //    //each line or adding it to a final list.
 
@@ -181,7 +181,7 @@ void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& poin
 //    stack.clear();
 //    int furthest_point;
 //    int points_over;
-//    vector<LinePoint> left, right;
+//    vector<Point> left, right;
 
 //    LSFittedLine* tempLine = new LSFittedLine();
 //    //generate first line
@@ -293,7 +293,7 @@ void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& poin
 //            else {
 //                //Separation didn't work
 //                //remove furthest point and push new line
-//                vector<LinePoint> newlist = tempLine->getPoints();
+//                vector<Point> newlist = tempLine->getPoints();
 //                //remove noisy point and update points list
 //                addToNoise(newlist[furthest_point]);
 //                newlist[furthest_point] = newlist[newlist.size() - 1];
@@ -312,7 +312,7 @@ void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<LinePoint>& poin
 //            if(tempLine->getPoints().size() > MIN_POINTS_TO_LINE_FINAL) {
 //                //i.e. removal of a point will still leave enough to form a reasonable line
 //                //remove noisy point and regen line
-//                vector<LinePoint> newlist = tempLine->getPoints();
+//                vector<Point> newlist = tempLine->getPoints();
 //                //remove noisy point and update points list
 //                addToNoise(newlist[furthest_point]);
 //                newlist[furthest_point] = newlist[newlist.size() - 1];
@@ -360,12 +360,12 @@ void LineDetectorSAM::findPointsOver(LSFittedLine& line, unsigned int& points_ov
     //the furthest point
 
     //temp variables
-    double distance; 	//holder for calculated LinePointDistance
+    double distance; 	//holder for calculated PointDistance
     double greatest_distance = 0.0; //saves recalculation of greatest point distance
     unsigned int current_point = 0;
     points_over = 0;
     furthest_point = -1;
-    vector<LinePoint> points = line.getPoints();
+    vector<Point> points = line.getPoints();
 
     //check points for perp distance over threshold
     for(current_point = 0; current_point < points.size(); current_point++) {
@@ -392,7 +392,7 @@ void LineDetectorSAM::splitNoise(vector<LSFittedLine>& lines) {
     //the split algorithm on the copy
 
     if(noisePoints.size() >= MIN_POINTS_TO_LINE_FINAL) {
-        vector<LinePoint> noiseCopy;
+        vector<Point> noiseCopy;
 
         noiseCopy = noisePoints;
         noisePoints.clear();
@@ -401,7 +401,7 @@ void LineDetectorSAM::splitNoise(vector<LSFittedLine>& lines) {
     }
 }
 
-bool LineDetectorSAM::separate(vector<LinePoint>& left, vector<LinePoint>& right, LinePoint& split_point, LSFittedLine& line) {
+bool LineDetectorSAM::separate(vector<Point>& left, vector<Point>& right, Point& split_point, LSFittedLine& line) {
     /*splits a section of points around a splitting point by rotating and translating onto the line about the splitting point
      *Pre: left and right should be empty vectors
      *		points contains all the points to be split
@@ -415,13 +415,13 @@ bool LineDetectorSAM::separate(vector<LinePoint>& left, vector<LinePoint>& right
     //temp holder vars
     double x_split = split_point.x;
     double y_split = split_point.y;
-    vector<LinePoint> points = line.getPoints();
+    vector<Point> points = line.getPoints();
 
     left.push_back(split_point);    //splitting point should be included in both groups
     right.push_back(split_point);
     if(line.isHorizontal()) {
         //horizontal line - no rotation
-        BOOST_FOREACH(LinePoint pt, points) {
+        BOOST_FOREACH(Point pt, points) {
             if(pt != split_point) {
                 if(pt.x < x_split) //point is to the left
                     left.push_back(pt);
@@ -432,7 +432,7 @@ bool LineDetectorSAM::separate(vector<LinePoint>& left, vector<LinePoint>& right
     }
     else if(line.isVertical()) {
         //vertical line - 90 degree rotation
-        BOOST_FOREACH(LinePoint pt, points) {
+        BOOST_FOREACH(Point pt, points) {
             if(pt != split_point) {
                 if(pt.y < y_split) //point is to the left
                     left.push_back(pt);
@@ -443,7 +443,7 @@ bool LineDetectorSAM::separate(vector<LinePoint>& left, vector<LinePoint>& right
     }
     else {
         double xsplit = line.projectOnto(split_point).x;
-        BOOST_FOREACH(LinePoint pt, points) {
+        BOOST_FOREACH(Point pt, points) {
             //check all points, calculate translated x coord
             //and place in appropriate vector
             if(pt != split_point) {
@@ -509,7 +509,7 @@ void LineDetectorSAM::merge(vector<LSFittedLine>& lines) {
     lines = finals;
 }
 
-void LineDetectorSAM::generateLine(LSFittedLine& line, vector<LinePoint>& points) {
+void LineDetectorSAM::generateLine(LSFittedLine& line, vector<Point>& points) {
     //creates a Least Squared Fitted line
 
     line.clearPoints();
@@ -518,10 +518,10 @@ void LineDetectorSAM::generateLine(LSFittedLine& line, vector<LinePoint>& points
 
 //GENERIC
 
-void LineDetectorSAM::addToNoise(const LinePoint& point) {
+void LineDetectorSAM::addToNoise(const Point& point) {
     //NOT EFFICIENT
     //O(M) for every insertion - where M is the size of noisePoints
-    BOOST_FOREACH(LinePoint pt, noisePoints) {
+    BOOST_FOREACH(Point pt, noisePoints) {
         if(pt == point)
             return;
     }
@@ -529,8 +529,8 @@ void LineDetectorSAM::addToNoise(const LinePoint& point) {
     noisePoints.push_back(point);
 }
 
-void LineDetectorSAM::addToNoise(const vector<LinePoint > &points) {
-    BOOST_FOREACH(LinePoint pt, points) {
+void LineDetectorSAM::addToNoise(const vector<Point > &points) {
+    BOOST_FOREACH(Point pt, points) {
         addToNoise(pt);
     }
 }

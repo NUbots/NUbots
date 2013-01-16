@@ -46,7 +46,7 @@ public:
     void run();
 
 private:
-    vector<LSFittedLine> fitLines(vector<LinePoint>& points, bool noise=true);
+    vector<LSFittedLine> fitLines(vector<Point>& points, bool noise=true);
     //RULES
     //maximum field objects rules
     //unsigned int MAX_POINTS; //500
@@ -66,22 +66,22 @@ private:
     bool CLEAR_SMALL;
     bool CLEAR_DIRTY;
 
-    vector<LinePoint> noisePoints;
+    vector<Point> noisePoints;
 
     //LEAST-SQUARES FITTING
-    void split(vector<LSFittedLine>& lines, vector<LinePoint>& points);
-    void splitIterative(vector<LSFittedLine>& lines, vector<LinePoint>& points);
+    void split(vector<LSFittedLine>& lines, vector<Point>& points);
+    void splitIterative(vector<LSFittedLine>& lines, vector<Point>& points);
     void splitNoise(vector<LSFittedLine>& lines);
     void merge(vector<LSFittedLine>& lines);
-    void generateLine(LSFittedLine& line, vector<LinePoint>& points);
-    bool separate(vector<LinePoint>& left, vector<LinePoint>& right, LinePoint& split_point, LSFittedLine& line);
+    void generateLine(LSFittedLine& line, vector<Point>& points);
+    bool separate(vector<Point>& left, vector<Point>& right, Point& split_point, LSFittedLine& line);
     //static void sortLinesLS(vector<LSFittedLine*>& lines);
 
 
     //GENERIC
     void findPointsOver(LSFittedLine& line, unsigned int &points_over, int& furthest_point);
-    void addToNoise(const LinePoint& point);
-    void addToNoise(const vector<LinePoint>& points);
+    void addToNoise(const Point& point);
+    void addToNoise(const vector<Point>& points);
     void clearSmallLines(vector<LSFittedLine>& lines);
     void clearDirtyLines(vector<LSFittedLine>& lines);
     bool shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2);

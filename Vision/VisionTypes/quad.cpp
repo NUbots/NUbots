@@ -15,31 +15,31 @@ Quad::Quad(int left, int top, int right, int bottom)
     set(left, top, right, bottom);
 }
 
-Quad::Quad(Vector2<int> bottom_left, Vector2<int> top_left, Vector2<int> top_right, Vector2<int> bottom_right)
+Quad::Quad(Vector2<float> bottom_left, Vector2<float> top_left, Vector2<float> top_right, Vector2<float> bottom_right)
 {
     set(bottom_left, top_left, top_right, bottom_right);
 }
 
 void Quad::set(int left, int top, int right, int bottom)
 {
-    if(left < right) {
+    if(left > right) {
         int temp = left;
         left = right;
         right = temp;
     }
-    if(top < bottom) {
+    if(top > bottom) {
         int temp = top;
         top = bottom;
         bottom = temp;
     }
 
-    m_bottom_left = Vector2<int>(left, bottom);
-    m_top_left = Vector2<int>(left, top);
-    m_top_right = Vector2<int>(right, top);
-    m_bottom_right = Vector2<int>(right, bottom);
+    m_bottom_left = Vector2<float>(left, bottom);
+    m_top_left = Vector2<float>(left, top);
+    m_top_right = Vector2<float>(right, top);
+    m_bottom_right = Vector2<float>(right, bottom);
 }
 
-void Quad::set(Vector2<int> bottom_left, Vector2<int> top_left, Vector2<int> top_right, Vector2<int> bottom_right)
+void Quad::set(Vector2<float> bottom_left, Vector2<float> top_left, Vector2<float> top_right, Vector2<float> bottom_right)
 {
     m_bottom_left = bottom_left;
     m_top_left = top_left;
@@ -47,22 +47,22 @@ void Quad::set(Vector2<int> bottom_left, Vector2<int> top_left, Vector2<int> top
     m_bottom_right = bottom_right;
 }
 
-Vector2<int> Quad::getBottomCentre() const
+Vector2<float> Quad::getBottomCentre() const
 {
     return (m_bottom_left + m_bottom_right)*0.5;
 }
 
-Vector2<int> Quad::getCentre() const
+Vector2<float> Quad::getCentre() const
 {
     return (m_bottom_left + m_top_left + m_top_right + m_bottom_right)*0.25;
 }
 
-Vector2<int> Quad::getBottomLeft() const
+Vector2<float> Quad::getBottomLeft() const
 {
     return m_bottom_left;
 }
 
-Vector2<int> Quad::getTopRight() const
+Vector2<float> Quad::getTopRight() const
 {
     return m_top_right;
 }

@@ -16,7 +16,7 @@ public:
     void run();
 
 private:
-    vector<LinePoint> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
+    vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
 
     vector<Quad> buildGoalsFromLines(const vector<LSFittedLine>& start_lines, const vector<LSFittedLine>& end_lines);
 

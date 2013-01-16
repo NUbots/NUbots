@@ -79,11 +79,11 @@ public:
     string getName() const {return getVFOName(m_id);}
     
     //! @brief returns the screen location in pixels (relative to the top left).
-    const Vector2<int>& getLocationPixels() const;
+    const Vector2<float>& getLocationPixels() const;
     //! @brief returns the angular screen location (relative to the image centre) in radians.
     const Vector2<float>& getLocationAngular() const;
     //! @brief returns the screen size in pixels.
-    const Vector2<int>& getScreenSize() const { return m_size_on_screen; }
+    const Vector2<float>& getScreenSize() const { return m_size_on_screen; }
     //! @brief returns the field position relative to the robot.
     virtual Vector3<float> getRelativeFieldCoords() const = 0;
     /*!
@@ -108,8 +108,8 @@ public:
     virtual void render(cv::Mat& mat) const = 0;
     
 public:
-    Vector2<int> m_location_pixels;         //! @variable The pixel location of the object on the screen.
-    Vector2<int> m_size_on_screen;          //! @variable The width and height on screen in pixels.
+    Vector2<float> m_location_pixels;         //! @variable The pixel location of the object on the screen.
+    Vector2<float> m_size_on_screen;          //! @variable The width and height on screen in pixels.
 
 protected:
     VFO_ID m_id;

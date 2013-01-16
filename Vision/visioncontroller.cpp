@@ -17,8 +17,7 @@
 #include "Vision/visionconstants.h"
 #include "Vision/Modules/LineDetectionAlgorithms/linedetectorsam.h"
 #include "Vision/Modules/LineDetectionAlgorithms/linedetectorransac.h"
-//#include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h"
-#include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorhistogram2.h"
+#include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h"
 #include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorransac.h"
 
 
@@ -30,7 +29,7 @@ VisionController::VisionController()
     m_data_wrapper = DataWrapper::getInstance();
     m_line_detector_ransac = new LineDetectorRANSAC();
     m_line_detector_sam = new LineDetectorSAM();
-    m_goal_detector_hist = new GoalDetectorHistogram2();
+    m_goal_detector_hist = new GoalDetectorHistogram();
     m_goal_detector_ransac = new GoalDetectorRANSAC();
 }
 

@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "Tools/Math/General.h"
+#include "Tools/Math/Vector2.h"
 
 
 bool operator < (const Point& point1, const Point& point2) {
@@ -261,9 +262,16 @@ Point Line::projectOnto(Point pt) const
         return Point(-m_C/m_A, 0);
     }
     else {
-        Point shifted(pt.x, pt.y - m_C);
-        double norm = shifted.dot(Point(m_A,-m_B))/(m_A*m_A+m_B*m_B);
-        return Point(m_A*norm, m_C - m_B*norm);
+//        float trans_x = -m_B*pt.x - m_A*pt.y + m_C;
+//        return Point(trans_x, findYFromX(trans_x));
+
+        cout << m_A << "x + " << m_B << "y = " << m_C << endl;
+        Vector2<double> shift(0, m_C);
+        Vector2<double> norm(m_B, -m_A);
+        Vector2<double> result = norm*((Vector2<double>(pt.x,pt.y)-shift)*norm/(norm*norm)) + shift;
+        return Point(result.x, result.y);
+//        double norm = shifted.dot(Point(m_A,-m_B))/(m_A*m_A+m_B*m_B);
+//        return Point(m_A*norm, m_C - m_B*norm);
     }
 }
 

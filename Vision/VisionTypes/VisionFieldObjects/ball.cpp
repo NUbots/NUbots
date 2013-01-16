@@ -19,7 +19,7 @@ Ball::Ball()
     valid = valid && check();
 }
 
-Ball::Ball(PointType centre, int diameter)
+Ball::Ball(PointType centre, float diameter)
 {
     m_id = BALL;
     int top = centre.y - diameter*0.5,
@@ -44,7 +44,7 @@ Ball::Ball(PointType centre, int diameter)
     m_diameter = mathGeneral::roundNumberToInt(max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x));
     m_location_pixels.x = mathGeneral::roundNumberToInt(centre_pt.x);
     m_location_pixels.y = mathGeneral::roundNumberToInt(centre_pt.y);
-    m_size_on_screen = Vector2<int>(m_diameter, m_diameter);
+    m_size_on_screen = Vector2<float>(m_diameter, m_diameter);
     valid = calculatePositions();
     //valid = valid && check();
     valid = check();
@@ -72,8 +72,8 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(m_transformed_spherical_pos,
                                                                         m_spherical_error,
                                                                         m_location_angular,
-                                                                        m_location_pixels,
-                                                                        m_size_on_screen,
+                                                                        Vector2<int>(m_location_pixels.x,m_location_pixels.y),
+                                                                        Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                                                         timestamp);
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Ball::addToExternalFieldObjects: valid" << endl;
