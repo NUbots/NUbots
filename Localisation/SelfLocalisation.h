@@ -133,8 +133,8 @@ class SelfLocalisation: public TimestampedData
 
         IKalmanFilter* newBallModel();
         IKalmanFilter* robotFilter();
+
         IKalmanFilter* newRobotModel();
-        IKalmanFilter* newRobotModel(IKalmanFilter* filter);
         IKalmanFilter* newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError&  error, double timestamp);
         static Matrix mean_matrix(float x, float y, float heading);
         static Matrix covariance_matrix(float x_var, float y_var, float heading_var);

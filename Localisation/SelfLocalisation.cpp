@@ -137,7 +137,7 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
         IKalmanFilter* filter;
         for (std::list<IKalmanFilter*>::const_iterator filter_it = source.m_robot_filters.begin(); filter_it != source.m_robot_filters.end(); ++filter_it)
         {
-            filter = newRobotModel(*filter_it);
+            filter = (*filter_it)->Clone();
             m_robot_filters.push_back(filter);
         }
 
@@ -220,38 +220,16 @@ IKalmanFilter* SelfLocalisation::newRobotModel()
     return filter;
 }
 
-IKalmanFilter* SelfLocalisation::newRobotModel(IKalmanFilter* filter)
-{
-    IKalmanFilter* new_filter = robotFilter();
-
-    // This should be fixed in a different way. The default copy copies the pointer value and would otherwise lose the model.
-    IKFModel* temp_model = new_filter->model();
-    *new_filter = *filter;
-    new_filter->setModel(temp_model);
-
-    // set initial settings.
-    new_filter->enableOutlierFiltering();
-    new_filter->setOutlierThreshold(15.f);
-    new_filter->enableWeighting();
-
-    new_filter->initialiseEstimate(filter->estimate());
-    new_filter->setFilterWeight(filter->getFilterWeight());
-
-    return new_filter;
-}
-
 IKalmanFilter* SelfLocalisation::newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError &error, double timestamp)
 {
     Matrix meas_noise = error.errorCovariance();
 
-    IKalmanFilter* new_filter = robotFilter();
-    // set initial settings.
-    new_filter->enableOutlierFiltering();
-    new_filter->setOutlierThreshold(15.f);
-    new_filter->enableWeighting();
+    IKalmanFilter* new_filter = filter->Clone();
+    new_filter->AssignNewId();
 
-    new_filter->initialiseEstimate(filter->estimate());
-    new_filter->setFilterWeight(filter->getFilterWeight());
+    //std::cout << "New filter " << new_filter->id() << " from " << filter->id() << std::endl;
+
+    // set initial settings.
 
     Matrix meas(2,1,false);
     meas[0][0] = measured_object.measuredDistance() * cos(measured_object.measuredElevation());
@@ -515,6 +493,25 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
 
     IndividualStationaryObjectUpdate(fobs, time_increment);
 
+    if(m_settings.pruneMethod() != LocalisationSettings::prune_none and m_settings.pruneMethod() != LocalisationSettings::branch_unknown)
+    {
+        // Two Object update
+    //#if TWO_OBJECT_UPDATE_ON
+        StationaryObject& leftBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+        StationaryObject& rightBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+        StationaryObject& leftYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+        StationaryObject& rightYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+
+        if( leftBlue.isObjectVisible() and rightBlue.isObjectVisible())
+        {
+            doTwoObjectUpdate(leftBlue, rightBlue);
+        }
+        if( leftYellow.isObjectVisible() and rightYellow.isObjectVisible())
+        {
+            doTwoObjectUpdate(leftYellow, rightYellow);
+        }
+    }
+
 #if MULTIPLE_MODELS_ON
         bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
         bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
@@ -535,31 +532,12 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
 
             updateResult = ambiguousLandmarkUpdate((*currAmb), poss_obj);
             NormaliseAlphas();
+            PruneModels();
             numUpdates++;
             if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN or currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
                 usefulObjectCount++;
-            PruneModels();
         }
 #endif // MULTIPLE_MODELS_ON
-
-        if(m_settings.pruneMethod() != LocalisationSettings::prune_none and m_settings.pruneMethod() != LocalisationSettings::branch_unknown)
-        {
-            // Two Object update
-        //#if TWO_OBJECT_UPDATE_ON
-            StationaryObject& leftBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
-            StationaryObject& rightBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
-            StationaryObject& leftYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
-            StationaryObject& rightYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
-
-            if( leftBlue.isObjectVisible() and rightBlue.isObjectVisible())
-            {
-                doTwoObjectUpdate(leftBlue, rightBlue);
-            }
-            if( leftYellow.isObjectVisible() and rightYellow.isObjectVisible())
-            {
-                doTwoObjectUpdate(leftYellow, rightYellow);
-            }
-        }
     //#endif
 
         NormaliseAlphas();
@@ -1718,7 +1696,7 @@ int SelfLocalisation::PruneNScan(unsigned int N)
 */
 int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
-    const float outlier_factor = 0.01;
+    const float outlier_factor = 0.001;
     std::list<IKalmanFilter*> new_models;
     IKalmanFilter* temp_mod;
     StationaryObject temp_object;
@@ -2007,6 +1985,14 @@ bool SelfLocalisation::MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* mod
     // Copy merged value to first model
     model_a->setFilterWeight(alphaMerged);
 
+//    std::cout <<"[" << m_timestamp << "]: Merge Between model[" << model_a->id() << "] and model[" << model_b->id() << "]" << endl;
+//    std::cout << "pa:\n" << estimate_a.covariance() << std::endl;
+//    std::cout << "sqrt pa:\n" << cholesky(estimate_a.covariance()) << std::endl;
+//    std::cout << "pb:\n" << estimate_b.covariance() << std::endl;
+//    std::cout << "sqrt pb:\n" << cholesky(estimate_b.covariance()) << std::endl;
+//    std::cout << "pMerged:\n" << pMerged << std::endl;
+//    std::cout << "sqrt pMerged:\n" << cholesky(pMerged) << std::endl;
+
     estimate_a.setMean(xMerged);
     estimate_b.setCovariance(pMerged);
 
@@ -2124,16 +2110,15 @@ void SelfLocalisation::NormaliseAlphas()
 void SelfLocalisation::MergeModels(int maxAfterMerge)
 {
     MergeModelsBelowThreshold(0.001);
-    MergeModelsBelowThreshold(0.01);
   
 //  double threshold=0.04;
-    double threshold=0.05;
+    double threshold=0.01;
 
     while (getNumActiveModels()>maxAfterMerge)
     {
         MergeModelsBelowThreshold(threshold);
 //      threshold*=5.0;
-        threshold+=0.05;
+        threshold+=0.01;
     }
     removeInactiveModels();
     return;
