@@ -75,7 +75,6 @@ void RLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numbe
 void RLAgent::saveAgent(string agentName){
     FunctionApproximator->saveApproximator(agentName+"_func_approx");
     //cout<<"funapp saved"<<endl;
-
     ofstream save_file;
     stringstream file_name;
     file_name<<"nubot/"<<agentName<<"_agent";
@@ -147,7 +146,6 @@ void RLAgent::saveAgent(string agentName){
 void RLAgent::loadAgent(string agentName){
 
     FunctionApproximator->loadApproximator(agentName+"_func_approx");
-    return;
     ifstream load_file;
     stringstream file_name;
     file_name<<"nubot/"<<agentName<<"_agent";
@@ -212,6 +210,12 @@ void RLAgent::loadAgent(string agentName){
     }
 
     cout<<"RLAgent loaded successfully.";
+    if(num_inputs == 0 or
+        num_outputs == 0 or
+        num_hidden == 0 )  {
+        throw string("RLAgent::loadAgent - warning: num_inputs,outputs or hiddens are zero") + file_name.str();
+    }
+    load_file.close();
 }
 
 
@@ -260,9 +264,12 @@ void RLAgent::giveReward(float reward){
         By default this method stores data for learning: observations.
 */
 int RLAgent::getAction(vector<float> observation){
+
+
     int BestAction = 0;
     //Store observation for learning later on:
     observations.push_back(observation);
+
     //Logging:
     stringstream text;
     text << "Observation: ";
@@ -279,11 +286,19 @@ int RLAgent::getAction(vector<float> observation){
 
     //Beta-greedy or softmax action choice:
     if (beta*RAND_MAX>rand() or use_soft_max){
+
         //randomly select action with probability beta
         if (use_soft_max){
+
             BestAction = getSoftMaxAction(last_values);
+
         }else{
-            BestAction = rand()%num_outputs;
+
+            if (num_outputs!=0)
+                BestAction = rand()%num_outputs;
+            else
+
+                throw string("RLAgent::getAction - warning: num_outputs is zero. Attempted rand()%num_outputs");
         }
 
         actions.push_back(BestAction);
@@ -317,8 +332,10 @@ int RLAgent::getAction(vector<float> observation){
     }
 
     if (allEqual/*Return random selection*/){
-        BestAction = rand()%num_outputs;\
-
+        if (num_outputs!=0)
+            BestAction = rand()%num_outputs;
+        else
+            throw string("RLAgent::getAction - warning: num_outputs is zero. Attempted rand()%num_outputs");
 
         actions.push_back(BestAction);
         //Logging:
@@ -347,6 +364,7 @@ int RLAgent::getAction(vector<float> observation){
         Performs learning by modifying the function approximator to reflect rewards and observations
 */
 void RLAgent::doLearning(){
+
     bool learning_done = false;
         for(int observation_num = 0; observation_num<observations.size()-1;observation_num++){
 
@@ -372,6 +390,7 @@ void RLAgent::doLearning(){
 
 
     }
+    ;
 
 }
 
@@ -412,9 +431,11 @@ vector<float> RLAgent::getValues(vector<float> v){
 
 /*! @brief
        Checks the policy at state obs WITHOUT recording the action, reward, value, observation for learning.
+        Will not choose with epsilon-greedy but will choose with softmax if set use_soft_max == true.
 */
 int RLAgent::checkAction(vector<float> obs){
     vector<float> values = FunctionApproximator->getValues(obs);
+    if (use_soft_max) return getSoftMaxAction(values);
     int BestAction = 0;
     float BestReward = values[0];
     //Check if all values equal:
@@ -430,6 +451,7 @@ int RLAgent::checkAction(vector<float> obs){
 }
 
 int  RLAgent::getSoftMaxAction(vector<float> values){
+
     vector<float> probabilities;
     //calculate non-normalised probabilities
     float total_non_normalised =0;
@@ -446,11 +468,11 @@ int  RLAgent::getSoftMaxAction(vector<float> values){
     }
 
     //randomly choose from each action with probability as given above
-    float rnd = rand()/(float)RAND_MAX;
+    float rnd = rand();
     int action = 0;
-    float p = probabilities[action];
+    float p = probabilities[action]*RAND_MAX;
     while(rnd > p){
-        p+=probabilities[++action];
+        p+=probabilities[++action]*RAND_MAX;
     }
     return action;
 
