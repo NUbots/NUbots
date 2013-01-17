@@ -38,8 +38,17 @@ public:
      * @param kappa the kappa variable. This is the secondary scaling parameter, usually set to 0 or 3-L.
      * @param beta the beta variable. This is used to incorporate prior knowledge of the distribution. For gaussian distributions 2 is optimal.
      */
-    UnscentedTransform(unsigned int L, double alpha=1e-3, double kappa=0.f, double beta=2.f): m_L(L), m_alpha(alpha), m_kappa(kappa), m_beta(beta)
+    UnscentedTransform(unsigned int L, double alpha=1e-2, double kappa=0.f, double beta=2.f): m_L(L), m_alpha(alpha), m_kappa(kappa), m_beta(beta)
     {m_lambda = lambda();}
+
+    UnscentedTransform(const UnscentedTransform& source)
+    {
+        m_L = source.m_L;
+        m_alpha = source.m_alpha;
+        m_kappa = source.m_kappa;
+        m_beta = source.m_beta;
+        m_lambda = source.m_lambda;
+    }
 
     
     /*!
