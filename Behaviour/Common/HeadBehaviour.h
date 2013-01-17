@@ -30,6 +30,8 @@
 #include "NUPlatform/NUCamera/NUCameraData.h"
 #include "Tools/Math/General.h"
 #include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "nubotdataconfig.h"
 
 //RLAgent import
 #include "Tools/RLearning/MRLAgent.h"
@@ -40,16 +42,23 @@
 #include "Infrastructure/Jobs/MotionJobs/HeadTrackJob.h"
 #include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 #include "HeadLogic.h"
+#include <cstdlib>
 
 class HeadBehaviour {
 
 private:
+    int MAX_PERCEPT_RANGESIZE;
+
     /*MRLAgent:*/
     MRLAgent Mrlagent;
 
     /*! @brief Gets data from HeadLogic and compiles it into a single vector for feeding to reinforcement learning agent.
     */
     vector<float> getPercept();
+
+    /*! @brief Calculates reward of current state.
+    */
+    float calculateReward();
 
 
     //These are the camera margins objects must be inside (as a percentage) when the robot looks at them.
@@ -62,13 +71,15 @@ private:
     float ballSeenFrequency;
     float landmarkSeenFrequency;
     float maximumSearchTime;
+    float CONFIRMATION_TIME;
     float ballFocusBias;
     
     //sets the time the action will finish so a new one can be chosen
     float actionStartTime;
     float actionEndTime;
     int actionObjectID;
-    
+    float buttonPressTime;
+    float time_since_last_localisation;
     //holds the last vision policy used
     int lastVisionPolicy;
     
@@ -92,7 +103,10 @@ private:
 
     /*! @brief Use the motivated reinforcement learning agent to make policy decisions.
     */
+    void doMRLAgentPolicy();
     void doRLAgentPolicy();
+
+
 
 public:
 
@@ -104,7 +118,8 @@ public:
         BallOnlyVisionPolicy = 4,
         LandmarkOnlyVisionPolicy = 5,
         TimeVSCostPriority = 6,//See above
-        RLAgent = 7//See above
+        RLAgentPolicy = 7,
+        MRLAgentPolicy = 8//See above
     };
     
     static HeadBehaviour* getInstance();

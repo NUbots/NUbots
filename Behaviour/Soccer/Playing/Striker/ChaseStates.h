@@ -64,6 +64,7 @@ public:
         m_pan_started = false;
         m_previous_time = 0;
         m_has_fallen = false;
+
         head_behaviour = HeadBehaviour::getInstance();
     }
     ~GoToBall() {}
@@ -119,8 +120,10 @@ protected:
         vector<float> speed;
         if(not iskicking)
         {
-            //vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
-            speed = BehaviourPotentials::goToBallDirectWithSidewardsKick(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance,37.);
+            /*Attempt to fix kick (jake):
+              swapped from goToBallDirectWithSidewardsKick to goToBall*/
+            speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
+           // speed = BehaviourPotentials::goToBallDirectWithSidewardsKick(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance,37.);
             vector<float> result;
 
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
@@ -154,20 +157,20 @@ protected:
             KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
             m_jobs->addMotionJob(kjob);
             //cout << "Kick! " << ballbearing << "; " << goalPosition[1] << endl;
-            //cout << "GoalRel: " << targetPosition[0] << ", " << targetPosition[1] << endl;
+           // cout << "GoalRel: " << targetPosition[0] << ", " << targetPosition[1] << endl;
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
                 debug << m_data->CurrentTime << ": Kicking Ball at distance " << balldistance << endl;
             #endif
         } 
         
         
-        //NEW VISION
+        //NEW Head behaviour
         //-----------------------------------------------------------------------------------------------*/
 
-        //head_behaviour->makeVisionChoice(HeadBehaviour::TimeVSCostPriority);//or pass HeadBehaviour::RLAgent
+      //  head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy HeadBehaviour::TimeVSCostPriority
 
-        
-       // OLD VISION
+
+       //OLD Head behaviour
         //-----------------------------------------------------------------------------------------------
         static bool getting_up = false;
         static double getup_timer = 0.f;
@@ -293,7 +296,7 @@ protected:
         #endif
         m_previous_time = m_data->CurrentTime;
 
-//END OLD VISION
+//END Head behaviour
 
     }
 

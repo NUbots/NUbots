@@ -28,7 +28,18 @@ RLAgent.h
 DictionaryApproximator.cpp
 MRLAgent.cpp
 RLAgent.cpp
+
 RLearningInterface.h
+
+FourierApproximator.h
+FourierFunction.h
+LinearApproximator.h
+DictionaryRLAgent.h
+
+FourierApproximator.cpp
+FourierFunction.cpp
+LinearApproximator.cpp
+DictionaryRLAgent.cpp
 
 )
 ####################################################################################
