@@ -148,8 +148,8 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
 
     if(not predictedCovariance.isValid())
     {
-        std::cout << this->getFilterWeight() << std::endl;
-        std::cout << this->active() << std::endl;
+        std::cout << "ID: " << id() << " " ;
+        std::cout << "Weight: " << this->getFilterWeight() << " ";
         std::cout << "Mean:\n" << m_estimate.mean() << std::endl;
         std::cout << "Covariance:\n" << m_estimate.covariance() << std::endl;
         std::cout << "Sqrt Covariance:\n" << cholesky(m_estimate.covariance()) << std::endl;
@@ -187,11 +187,13 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     Matrix Ymean = CalculateMeanFromSigmas(Yprop);
 
     Matrix Y(totalMeasurements, total_points,false);
-
+    Matrix Pyy(noise);
     // Calculate the Y vector.
     for(unsigned int i = 0; i < total_points; ++i)
     {
-        Y.setCol(i, Yprop.getCol(i) - Ymean);
+        Matrix point = Yprop.getCol(i) - Ymean;
+        Y.setCol(i, point);
+        Pyy = Pyy + m_covariance_weights[0][i] * point * point.transp();
     }
 
     // Calculate the new C and d values.
@@ -202,7 +204,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     const Matrix innovation = m_model->measurementDistance(measurement, Ymean, type);
 
     // Check for outlier, if outlier return without updating estimate.
-    if(evaluateMeasurement(innovation, Y * Ytransp, noise) == false) // Y * Y^T is the estimate variance, by definition.
+    if(evaluateMeasurement(innovation, Pyy - noise, noise) == false)
         return false;
 
     m_C = m_C - m_C * Ytransp * InverseMatrix(noise + Y*m_C*Ytransp) * Y * m_C;
@@ -215,16 +217,17 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     if(not updated_covariance.isValid())
     {
         std::cout << "ID: " << id() << std::endl;
-        std::cout << "measurement: " << measurement << std::endl;
-        std::cout << "noise: " << noise << std::endl;
-        std::cout << "args: " << args << std::endl;
-        std::cout << "type: " << type << std::endl;
-        std::cout << "m_sigma_points: " << m_sigma_points << std::endl;
-        std::cout << "innovation: " << innovation << std::endl;
-        std::cout << "m_C After: " << m_C << std::endl;
-        std::cout << "m_d after: " << m_d << std::endl;
-        std::cout << "New mean: " << updated_mean << std::endl;
-        std::cout << "New covariance: " << updated_covariance << std::endl;
+        std::cout << "Sigma mean:\n" << m_X << std::endl;
+        std::cout << "measurement:\n" << measurement << std::endl;
+        std::cout << "noise:\n" << noise << std::endl;
+        std::cout << "args:\n" << args << std::endl;
+        std::cout << "type:n" << type << std::endl;
+        std::cout << "m_sigma_points:\n" << m_sigma_points << std::endl;
+        std::cout << "innovation:\n" << innovation << std::endl;
+        std::cout << "m_C After:\n" << m_C << std::endl;
+        std::cout << "m_d after:\n" << m_d << std::endl;
+        std::cout << "New mean:\n" << updated_mean << std::endl;
+        std::cout << "New covariance:\n" << updated_covariance << std::endl;
     }
 
     m_estimate.setMean(updated_mean);
