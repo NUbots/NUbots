@@ -304,7 +304,10 @@ void locWmGlDisplay::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    drawLegend(&painter);
+    if(m_displayEnabled)
+    {
+        drawLegend(&painter);
+    }
     painter.end();
     return;
 }
