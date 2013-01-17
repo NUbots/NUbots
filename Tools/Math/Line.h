@@ -121,7 +121,7 @@ class Line
     /*!
       @brief Find the angle of the line in radians.
 
-      The angle given is the angle from the x axis to the line.
+      The angle given is the angle from the x axis to the line in an anticlockwise direction.
       @return The angle of the line in radians.
       */
     double getAngle() const;

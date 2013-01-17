@@ -35,28 +35,13 @@ void LSFittedLine::addPoint(Point &point){
 	sumXY += point.x * point.y;
 	numPoints ++;
     points.push_back(point);
-	if (numPoints < 2)
-	{
-        valid = false;
-	}
-	else
-	{
-		valid = true;
+    valid = numPoints >= 2;
+    if(valid)
         calcLine();
-	}
 }
 
 void LSFittedLine::addPoints(vector<Point>& pointlist){
     if(!pointlist.empty()) {
-        for(unsigned int i=0; i<pointlist.size(); i++) {
-            sumX += pointlist[i].x;
-            sumY += pointlist[i].y;
-            sumX2 += pointlist[i].x * pointlist[i].x;
-            sumY2 += pointlist[i].y * pointlist[i].y;
-            sumXY += pointlist[i].x * pointlist[i].y;
-            numPoints++;
-            points.push_back(pointlist[i]);
-        }
         if (numPoints < 2)
         {
                 valid = false;
@@ -66,6 +51,18 @@ void LSFittedLine::addPoints(vector<Point>& pointlist){
                 valid = true;
                 calcLine();
         }
+        for(unsigned int i=0; i<pointlist.size(); i++) {
+            sumX += pointlist[i].x;
+            sumY += pointlist[i].y;
+            sumX2 += pointlist[i].x * pointlist[i].x;
+            sumY2 += pointlist[i].y * pointlist[i].y;
+            sumXY += pointlist[i].x * pointlist[i].y;
+            numPoints++;
+            points.push_back(pointlist[i]);
+        }
+        valid = numPoints >= 2;
+        if(valid)
+            calcLine();
     }
 }
 
@@ -79,14 +76,10 @@ void LSFittedLine::joinLine(LSFittedLine &sourceLine)
 	numPoints += sourceLine.numPoints;
     for(unsigned int p = 0; p < sourceLine.points.size(); p++) {
 		points.push_back(sourceLine.points[p]);
-	}
-    if (numPoints < 2 && sourceLine.numPoints > 0) {
-        valid = false;
-	}
-    else {
-		valid = true;
+    }
+    valid = numPoints >= 2;
+    if(valid)
         calcLine();
-	}
 }
 
 Vector2<double> LSFittedLine::combinedR2TLSandMSD(const LSFittedLine &sourceLine) const{

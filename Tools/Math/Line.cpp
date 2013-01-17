@@ -188,15 +188,14 @@ double Line::findYFromX(double x) const
 double Line::getGradient() const
 {
   double gradient;
-  if(isValid() == false) return 0.0;
-  if(isVertical() == true)
-  {
-    gradient = 1e9; // Big number to represent infinity.
-  }
+
+  if( !isValid() )
+      gradient = 0.0;
+  else if( isVertical() )
+      gradient = 1e9; // Big number to represent infinity.
   else
-  {
-    gradient = -(m_A / m_B); // rearrange equation --> y = C/B - A/B*x
-  }
+      gradient = -(m_A / m_B); // rearrange equation --> y = C/B - A/B*x
+
   return gradient;
 }
 
@@ -235,15 +234,12 @@ double Line::getSignedLinePointDistance(Point point) const
 
 double Line::getAngleBetween(Line other) const
 {
-    double d_phi = abs(m_phi - other.m_phi);
+    double angle = abs(getAngle() - other.getAngle());
 
-    //force d_phi into [0, 2*pi)
-    d_phi = d_phi - 2*mathGeneral::PI * floor( d_phi / (2*mathGeneral::PI) );
+    if(angle > mathGeneral::PI*0.5)
+        angle = mathGeneral::PI - angle;
 
-    if(d_phi > mathGeneral::PI*0.5)
-        d_phi = mathGeneral::PI - d_phi;
-
-    return d_phi;
+    return angle;
 }
 
 double Line::getRho() const
@@ -258,20 +254,17 @@ double Line::getPhi() const
 
 Point Line::projectOnto(Point pt) const
 {
-    if(isVertical()) {
+    if(!isValid()) {
+        //prevent division by zero with norm.norm
+        return pt;
+    }
+    else if(isVertical()) {
         return Point(-m_C/m_A, 0);
     }
     else {
-//        float trans_x = -m_B*pt.x - m_A*pt.y + m_C;
-//        return Point(trans_x, findYFromX(trans_x));
-
-        cout << m_A << "x + " << m_B << "y = " << m_C << endl;
-        Vector2<double> shift(0, m_C);
-        Vector2<double> norm(m_B, -m_A);
-        Vector2<double> result = norm*((Vector2<double>(pt.x,pt.y)-shift)*norm/(norm*norm)) + shift;
-        return Point(result.x, result.y);
-//        double norm = shifted.dot(Point(m_A,-m_B))/(m_A*m_A+m_B*m_B);
-//        return Point(m_A*norm, m_C - m_B*norm);
+        Point shift(0, m_C);
+        Point norm(m_B, -m_A);
+        return norm*((Vector2<double>(pt.x,pt.y)-shift)*norm/(norm*norm)) + shift;
     }
 }
 
