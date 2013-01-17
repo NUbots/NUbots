@@ -225,11 +225,7 @@ IKalmanFilter* SelfLocalisation::newRobotModel(IKalmanFilter* filter, const Stat
     Matrix meas_noise = error.errorCovariance();
 
     IKalmanFilter* new_filter = filter->Clone();
-    new_filter->AssignNewId();
-
-    //std::cout << "New filter " << new_filter->id() << " from " << filter->id() << std::endl;
-
-    // set initial settings.
+    new_filter->AssignNewId();  // update with a new ID.
 
     Matrix meas(2,1,false);
     meas[0][0] = measured_object.measuredDistance() * cos(measured_object.measuredElevation());
@@ -903,9 +899,9 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
         goal_line_x = -goal_line_x;
     }
     
-    float cov_x = pow(150.f,2);
-    float cov_y = pow(100.f,2);
-    float cov_head = pow(6.f,2);
+    float cov_x = pow(100.f,2);
+    float cov_y = pow(75.f,2);
+    float cov_head = pow(4.f,2);
     Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
     Moment temp(3);
     temp.setCovariance(cov_matrix);
@@ -937,7 +933,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     positions.push_back(temp);
 
     // Postition 5
-    temp.setCovariance(covariance_matrix(pow(300.0f,2), pow(200.0f,2), pow(12.f,2)));
+    temp.setCovariance(covariance_matrix(pow(200.0f,2), pow(150.0f,2), pow(4.f,2)));
     temp.setMean(mean_matrix(centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
@@ -1444,6 +1440,14 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
 */
 int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2)
 {
+
+#if LOC_SUMMARY_LEVEL > 0
+    m_frame_log << "Performing 2 object update on objects:\n";
+    m_frame_log << "Object 1 -\n";
+    m_frame_log << landmark1.toString() << std::endl;
+    m_frame_log << "Object 2 -\n";
+    m_frame_log << landmark2.toString() << std::endl;
+#endif
     // do the special update
     float angle_beween_objects = mathGeneral::normaliseAngle(landmark1.measuredBearing() - landmark2.measuredBearing());
 
@@ -1464,6 +1468,15 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
     for (std::list<IKalmanFilter*>::const_iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
     {
         (*model_it)->measurementUpdate(measurement, noise, args, RobotModel::kangle_between_landmark_measurement);
+
+    #if LOC_SUMMARY_LEVEL > 0
+        Moment est = (*model_it)->estimate();
+        m_frame_log << "Model " << (*model_it)->id() << " updated using " << landmark1.getName() << " + " << landmark2.getName() << " combined measurment." << std::endl;
+        m_frame_log << "Measurement: Angle = " << angle_beween_objects <<std::endl;
+        m_frame_log << "Position1: X = " << landmark1.X() << ", Y = " << landmark1.Y() <<std::endl;
+        m_frame_log << "Position2: X = " << landmark2.X() << ", Y = " << landmark2.Y() <<std::endl;
+        m_frame_log << "Current State: " << est.mean(0) << ", " << est.mean(1) << ", " << est.mean(2) << std::endl;
+    #endif
 //        (*model_it)->updateAngleBetween(angle_beween_objects, landmark1.X(), landmark1.Y(), landmark2.X(), landmark2.Y(), c_twoObjectAngleVariance);
     }
 
