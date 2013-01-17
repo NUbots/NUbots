@@ -186,7 +186,7 @@ bool BasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise,
     const Matrix innovation = m_model->measurementDistance(measurement, Ymean, type);
 
     // Check for outlier, if outlier return without updating estimate.
-    if(evaluateMeasurement(innovation, Pyy, noise) == false) // Y * Y^T is the estimate variance, by definition.
+    if(evaluateMeasurement(innovation, Pyy-noise, noise) == false)
         return false;
 
     // Calculate the Kalman filter gain
