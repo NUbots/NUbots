@@ -120,6 +120,10 @@ public:
     static bool SAM_CLEAR_SMALL;
     static bool SAM_CLEAR_DIRTY;
 
+    //! RANSAC constants
+    static float RANSAC_MAX_ANGLE_DIFF_TO_MERGE; //
+    static float RANSAC_MAX_DISTANCE_TO_MERGE; //
+
 
     // static methods
     static DistanceMethod getDistanceMethodFromName(std::string name);  //! Converts a string to a distance method.

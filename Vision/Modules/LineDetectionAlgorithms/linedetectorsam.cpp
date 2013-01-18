@@ -72,7 +72,7 @@ vector<LSFittedLine> LineDetectorSAM::fitLines(vector<Point>& points, bool noise
 
     //Then Merge
     //convertLinesEndPoints(lines, vision, linedetector);
-    merge(lines);
+    lines = mergeColinear(lines, MAX_ANGLE_DIFF_TO_MERGE, MAX_DISTANCE_TO_MERGE);
 
     //Then clear unwanted lines
     if(CLEAR_SMALL) {
@@ -471,44 +471,6 @@ bool LineDetectorSAM::separate(vector<Point>& left, vector<Point>& right, Point&
     return (left.size() < points.size() && right.size() < points.size());
 }
 
-
-void LineDetectorSAM::merge(vector<LSFittedLine>& lines) {
-    //O(l^2)  -  l=number of lines (max 15)
-    // Compares all lines and merges based on the return value of
-    // shouldMergeLines(Line, Line) - edit that method not this one
-
-    vector<LSFittedLine> finals; // this vector contains lines that have been merged or did not need to be.
-    LSFittedLine current; // line currently being compared with the rest.
-
-
-    while(!lines.empty()) {
-        //get next line
-        current = lines.back();
-        lines.pop_back();
-
-        vector<LSFittedLine>::iterator it = lines.begin();
-        //go through all lines and find any that should be merged - merge them
-        while(it < lines.end()) {
-            if(shouldMergeLines(current, *it)) {
-                //cout << *current << " & " << **it << " should merge: true" << std::endl;
-                //join the lines
-                current.joinLine(*it);
-                //remove the considered line and update line list
-                it = lines.erase(it);
-            }
-            else {
-                //cout << *current << " & " << **it << " should merge: false" << std::endl;
-                it++;
-            }
-        }
-        //Now current should have been merged with any valid lines
-        //push current to finals
-        finals.push_back(current);
-    }
-
-    lines = finals;
-}
-
 void LineDetectorSAM::generateLine(LSFittedLine& line, vector<Point>& points) {
     //creates a Least Squared Fitted line
 
@@ -542,12 +504,10 @@ void LineDetectorSAM::clearSmallLines(vector<LSFittedLine>& lines) {
     vector<LSFittedLine>::iterator it = lines.begin();
 
     while(it < lines.end()) {
-        if(it->numPoints < MIN_POINTS_TO_LINE_FINAL) {
+        if(it->getNumPoints() < MIN_POINTS_TO_LINE_FINAL)
             it = lines.erase(it);
-        }
-        else {
+        else
             it++;
-        }
     }
 }
 
@@ -565,44 +525,4 @@ void LineDetectorSAM::clearDirtyLines(vector<LSFittedLine>& lines) {
             it++;
         }
     }
-}
-
-bool LineDetectorSAM::shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2){
-    //check lines have similar gradients by checking the angle between them (linear with rotation).
-//    cout << "angle between: " << line1.getAngleBetween(line2) << std::endl;
-//    cout << "line1 angle: " << abs(line1.getAngle()) << "  > pi/4? " << (abs(line1.getAngle()) > mathGeneral::PI*0.25) << std::endl;
-//    cout << "x intercepts : " << line1.getXIntercept() << " - " << line2.getXIntercept() << std::endl;
-//    cout << "y intercepts : " << line1.getYIntercept() << " - " << line2.getYIntercept() << std::endl;
-//    cout << "if ^ > pi/4: x-int diff: " << abs(line1.getXIntercept() - line2.getXIntercept()) << std::endl;
-//    cout << "if ^ <= pi/4: y-int diff: " << abs(line1.getYIntercept() - line2.getYIntercept()) << std::endl;
-//    cout << "comb R2TLS: " << line1.combinedR2TLSandMSD(line2).x << std::endl;
-//    cout << "comb MSD: " << line1.combinedR2TLSandMSD(line2).y << std::endl;
-
-//    cout << "MAX_ANGLE_DIFF: " << MAX_ANGLE_DIFF << std::endl;
-//    cout << "MIN_LINE_R2_FIT " << MIN_LINE_R2_FIT << std::endl;
-//    cout << "MAX_INTERCEPT_DIFF:" << MAX_INTERCEPT_DIFF << std::endl;
-//    cout << "MAX_LINE_MSD:" << MAX_LINE_MSD << std::endl;
-
-    if(line1.getAngleBetween(line2) > MAX_ANGLE_DIFF_TO_MERGE)
-        return false;
-
-    if(abs(line1.getRho() - line2.getRho()) > MAX_DISTANCE_TO_MERGE)
-        return false;
-
-
-//    //check for x intercepts of nearly vertical lines
-//    if(abs(line1.getAngle()) > mathGeneral::PI*0.25 && abs(line1.getXIntercept() - line2.getXIntercept()) > MAX_INTERCEPT_DIFF)
-//        return false;
-//    //check for y intercepts of mostly horizontal lines
-//    if(abs(line1.getAngle()) <= mathGeneral::PI*0.25 && abs(line1.getYIntercept() - line2.getYIntercept()) > MAX_INTERCEPT_DIFF)
-//        return false;
-
-    Vector2<double> r2andmsd = line1.combinedR2TLSandMSD(line2);
-    //ensure the line won't just be thrown out later as dirty
-//    if(r2andmsd.x < MIN_LINE_R2_FIT)
-//        return false;//ensure the line won't just be thrown out later as dirty
-//    if(r2andmsd.y > MAX_LINE_MSD)
-//        return false;
-
-    return true; //checks passed
 }

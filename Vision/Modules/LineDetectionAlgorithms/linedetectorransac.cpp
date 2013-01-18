@@ -32,6 +32,8 @@ void LineDetectorRANSAC::run()
     //use generic ransac implementation to fine lines
     lines = RANSAC::findMultipleLines(points, m_e, m_n, m_k, m_max_iterations);
 
+    lines = mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE);
+
     for(l_it = lines.begin(); l_it<lines.end(); l_it++) {
         FieldLine l(*l_it);
         vbb->addLine(l);

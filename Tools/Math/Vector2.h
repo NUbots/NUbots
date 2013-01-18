@@ -124,7 +124,7 @@ template <class V = float> class Vector2{
   *\return A new object that contains the result of the calculation.
   */
   Vector2<V> operator*(const V& factor) const
-    {return Vector2<V>(*this) *= factor;}
+    {return Vector2<V>(*this) *= (double)factor;}
 
   /** Division of this vector by a factor.
   *

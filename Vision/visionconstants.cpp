@@ -95,6 +95,9 @@ float VisionConstants::SAM_MIN_LINE_R2_FIT;
 float VisionConstants::SAM_MAX_LINE_MSD;
 bool VisionConstants::SAM_CLEAR_SMALL;
 bool VisionConstants::SAM_CLEAR_DIRTY;
+//! RANSAC constants
+float VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE; //
+float VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE; //
 
 VisionConstants::VisionConstants()
 {
@@ -130,6 +133,8 @@ void VisionConstants::loadFromFile(std::string filename)
     GOAL_BINS = 20;
     GOAL_MIN_THRESHOLD = 1;
     GOAL_SDEV_THRESHOLD = 0.75;
+    RANSAC_MAX_ANGLE_DIFF_TO_MERGE = SAM_MAX_ANGLE_DIFF_TO_MERGE; //
+    RANSAC_MAX_DISTANCE_TO_MERGE = SAM_MAX_DISTANCE_TO_MERGE; //
 
     std::ifstream in(filename.c_str());
     std::string name;
@@ -365,6 +370,12 @@ void VisionConstants::loadFromFile(std::string filename)
         }
         else if(name.compare("SAM_CLEAR_DIRTY") == 0) {
             in >> SAM_CLEAR_DIRTY;
+        }
+        else if(name.compare("RANSAC_MAX_ANGLE_DIFF_TO_MERGE") == 0) {
+            in >> RANSAC_MAX_ANGLE_DIFF_TO_MERGE;
+        }
+        else if(name.compare("RANSAC_MAX_DISTANCE_TO_MERGE") == 0) {
+            in >> RANSAC_MAX_DISTANCE_TO_MERGE;
         }
         else if(name.compare("GOAL_MAX_OBJECTS") == 0) {
             in >> GOAL_MAX_OBJECTS;
@@ -615,7 +626,7 @@ bool VisionConstants::setParameter(string name, float val)
     else if(name.compare("SAM_MAX_ANGLE_DIFF_TO_MERGE") == 0) {
         SAM_MAX_ANGLE_DIFF_TO_MERGE = val;
     }
-    else if(name.compare("SAM_MAX_INTERCEPT_DIFF_TO_MERGE") == 0) {
+    else if(name.compare("SAM_MAX_DISTANCE_TO_MERGE") == 0) {
         SAM_MAX_DISTANCE_TO_MERGE = val;
     }
     else if(name.compare("SAM_MIN_LINE_R2_FIT") == 0) {
@@ -623,6 +634,12 @@ bool VisionConstants::setParameter(string name, float val)
     }
     else if(name.compare("SAM_MAX_LINE_MSD") == 0) {
         SAM_MAX_LINE_MSD = val;
+    }
+    else if(name.compare("RANSAC_MAX_ANGLE_DIFF_TO_MERGE") == 0) {
+        RANSAC_MAX_ANGLE_DIFF_TO_MERGE = val;
+    }
+    else if(name.compare("RANSAC_MAX_DISTANCE_TO_MERGE") == 0) {
+        RANSAC_MAX_DISTANCE_TO_MERGE = val;
     }
     else if(name.compare("GOAL_SDEV_THRESHOLD") == 0) {
         GOAL_SDEV_THRESHOLD = val;
@@ -733,6 +750,10 @@ void VisionConstants::print(ostream& out)
     out << "SAM_MAX_LINE_MSD: " << SAM_MAX_LINE_MSD << std::endl;
     out << "SAM_CLEAR_SMALL: " << SAM_CLEAR_SMALL << std::endl;
     out << "SAM_CLEAR_DIRTY: " << SAM_CLEAR_DIRTY << std::endl;
+
+    out << "RANSAC_MAX_ANGLE_DIFF_TO_MERGE: " << RANSAC_MAX_ANGLE_DIFF_TO_MERGE << std::endl;
+    out << "RANSAC_MAX_DISTANCE_TO_MERGE: " << RANSAC_MAX_DISTANCE_TO_MERGE << std::endl;
+
 }
 
 void VisionConstants::setFlags(bool val)

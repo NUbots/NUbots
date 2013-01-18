@@ -165,6 +165,24 @@ Point LSFittedLine::getRightPoint() const
     return *p_max;
 }
 
+double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
+{
+    if(valid && other.valid) {
+        Point p11 = projectOnto(getLeftPoint()),
+              p12 = projectOnto(getRightPoint()),
+              p21 = other.projectOnto(other.getLeftPoint()),
+              p22 = other.projectOnto(other.getRightPoint());
+
+        //determine distances from the two possible pairings
+        double d1 = 0.5*( (p11-p21).abs() + (p12-p22).abs() ),
+               d2 = 0.5*( (p12-p21).abs() + (p11-p22).abs() );
+        return min(d1, d2); //return best pairing
+    }
+    else {
+        return -1.0;    //test for this - distances should always be positive
+    }
+}
+
 //LinePoint::LinePoint()
 //{
 //    ID = 0;

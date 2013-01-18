@@ -84,7 +84,6 @@ private:
     void addToNoise(const vector<Point>& points);
     void clearSmallLines(vector<LSFittedLine>& lines);
     void clearDirtyLines(vector<LSFittedLine>& lines);
-    bool shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2);
 
 };
 

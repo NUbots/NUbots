@@ -29,14 +29,16 @@ class LSFittedLine : public Line
     double getMSD() const;
     double getr2tls() const;
     void clearPoints();
+    int getNumPoints() const {return numPoints;}
     const std::vector<Point>& getPoints();
     Point getLeftPoint() const;
     Point getRightPoint() const;
-    int numPoints;
+    double averageDistanceBetween(const LSFittedLine& other) const;
 private:
     void calcLine();
     double sumX, sumY, sumX2, sumY2, sumXY;
     double MSD, r2tls;
+    int numPoints;
     std::vector<Point> points;
     
 };
