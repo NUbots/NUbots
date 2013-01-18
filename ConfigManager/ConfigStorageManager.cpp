@@ -29,14 +29,18 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
 #include <string>
 #include <exception>
 
 #include "ConfigStorageManager.h"
 #include "ConfigParameter.h"
+#include "ConfigRange.h"
 
 using boost::property_tree::ptree;
 using ConfigSystem::ConfigStorageManager;
+using std::string;
+using std::stringstream;
 
 namespace ConfigSystem
 {
@@ -199,189 +203,273 @@ namespace ConfigSystem
 	}
 	
 	
-	//Store a single ConfigParameter object in the tree.
-	/*bool ConfigStorageManager::objectSingleStore(const string &path, ConfigParameter &store)
+	
+	//Stores a single ConfigParameter object in the tree using path specified in ConfigParameter object.
+	template<typename T>
+	bool ConfigStorageManager::storeCP(const ConfigParameter &config_store)
 	{
-		bool status = false;
-		//Retrieves type.
-		ConfigSystem::value_type type = store.getType();
+		string full_path, str_type, ret_desc;
+		value_type ret_type;
+		T ret_value;
+		ConfigRange<T> ret_bounds;
+		BoundType bt_upper, bt_lower;
 		
+		full_path = config_store.getName() + config_store.getPath();
+		ret_type = config_store.getType();
 		
-		if(type != vt_string)
+		//Find type in string form, place in tree at stored path.
+		if( !(findTypeFromString(str_type, ret_type)) ) return false;
+		data->put(full_path + ".type", str_type);
+		
+		//If the data isn't a vector
+		if( !((ret_type == vt_1dvector_long) || (ret_type == vt_1dvector_double)) )
 		{
-			//perform type conversion from "type" to string. Allow overwrite to store the string type.
-			if(type == vt_bool)
+			if( !(retrieveGenericValue(config_store, &ret_value, &ret_bounds)) ) return false;
+			
+			data->put(full_path + ".value", ret_value);
+			data->put(full_path + ".range.max", ret_bounds.getMax());
+			data->put(full_path + ".range.min", ret_bounds.getMin());
+			
+			//Check and store upper and lower bound types
+			if( (storeBoundType(full_path, ret_bounds.getUpperBoundType())) && 
+						(storeBoundType(full_path, ret_bounds.getLowerBoundType())))
 			{
-				//Converts boolean to string and stores in tree.
-				status = convertBoolToStr(store);
-				
-				if(!status) return false;
-			}
-			else if(type == vt_long)
-			{
-				long convert;
-				ConfigRange<long> range_convert;
-				
-				
-				string value, upper, lower, u_bound_type, l_bound_type;
-				
-				status = store.getValue_long(convert);
-				
-				//Stores the type as a long.
-				data->put(path + ".type", "long");
-				
-				if(status && store.getRange_long(range_convert))
-				{
-					storeNumber<long>(convert, range_convert);
-				
-					bool ubound_success, lbound_success;
-					
-					//Convert value.
-					value = numberToString(convert);
-					
-					//Convert upper bound.
-					ubound_success = getBound(range_convert.getUpperBoundType(), *(range_convert.getMax),
-											&u_bound_type, &upper);
-					//Convert lower bound.						
-					lbound_success = getBound(range_convert.getLowerBoundType(), *(range_convert.getMin),
-											&l_bound_type, &lower);
-					
-					if( !(ubound_success && lbound_success) ) return false;
-					
-					
-					//Successful conversion, store strings in tree:
-					data->put(path ".value", value);
-					
-					data->put(path ".range.upper..type", u_bound_type);
-					data->put(path ".range.upper..bound", upper);
-					
-					data->put(path ".range.lower..type", l_bound_type);
-					data->put(path ".range.lower..bound", lower);
-				}
-				//Errors with retrieving range and/or value, returns false.
-				else
-				{
-					return false;
-				}
-				
-			}
-			else if(type == vt_double)
-			{
-			}
-			else if(type == vt_1dvector_long)
-			{
-			}
-			else if(type == vt_1dvector_double)
-			{
-			}
-			else
-			{
-				//type not specified
 				return false;
 			}
-			
-			overwrite.setType(type);
 		}
+		//if the data is a vector
+		else
+		{
+			//Write stuff here for vectors when we do it.
+		}
+	}
+	
+	
+	
+	//Converts from a string and stores in a single ConfigParameter object.
+	template<typename T>
+	bool ConfigStorageManager::stringToCP(const std::string path, ConfigParameter &config_return)
+	{
+		string variable_name, variable_path, variable_description;
+		value_type variable_type;
+		string retrieved_type;
 		
-		//after type conversion, overwrite should contain the "store" data in string form:
-		//checks if types are vectors or not
-		if(type.compare("1d_vector") == 0) 
-		{ 
-			/* Store in 1d vector variable */ 
-		//}
-		//else if(type.compare("2d_vector") == 0) 
-		//{ 
-			/* Store in 2d vector variable */ 
-		//}
-		//else if(type.compare("3d_vector") == 0) 
-		//{ 
-			/* Store in 3d vector variable */ 
-		//}
-		//else
-		//{
-			/* Store in single variable */
-			//data->put(path + ".value", overwrite.getValue());
-		//}
+		//Retrieves variable name and path from the given path and returns false if error.
+		if( !(getNameFromPath(path, variable_path, variable_name)) ) return false; /*Invalid path exc?*/
+		//Sets name, path and description.
+		config_return.setName(variable_name);
+		config_return.setPath(variable_path);
+		config_return.setDescription(data->get<std::string>(path + ".desc"));
 		
-		//Type
-		//data->put(path + ".type", type);
 		
-		//Ranges
-		/*data->put(path + ".range.lower", overwrite.getLower());
-		data->put(path + ".range.upper", overwrite.getUpper());
 		
-		//Whatever else needs to be put in ...
+		//Checks for different types, converts accordingly.
+		retrieved_type = data->get<std::string>(path + ".type");
+		if( !(findTypeFromString(retrieved_type, variable_type)) ) return false;
+		config_return.setType(variable_type);
+				
+		//Converts and stores "value" in config_return
+		if( !(convertStoreValue<T>(path, variable_type, config_return)) ) return false;
+		
+		//if no errors.
 		return true;
-	}*/
+	}
+	
+	
+	
+	
+	
+	
 	
 	
 	
 	
 	
 	//PRIVATE MEMBER FUNCTIONS:
-	//Converts from a string and stores in a ConfigParameter object.
-	bool stringToCP(const string path, ConfigParameter &config_store)
+	//FOLLOWING ARE USED BY storeCP
+	//Stores a bound type in teh tree as strings
+	bool ConfigStorageManager::storeBoundType(const string path, const BoundType store_me)
 	{
-		/* WORKING HERE TOMORROW */
-		string variable_name, variable_path, variable_description;
-		value_type variable_type;
-		
-		//Retrieves variable name and path from the given path and returns false if error.
-		if( !(getNameFromPath(path, &variable_path, &variable_name)) ) return false; /*Invalid path exc?*/
-		
-		config_store.setName(variable_name);
-		config_store.setPath(variable_path);
-		config_store.setDesc(data->get<std::string>(path + ".desc"));
-		
-		
-		
-		
-	}
-	
-	//Determines the type and converts to a value_type enum.
-	bool findTypeFromTree(const string variable_type, value_type &return_type)
-	{
-		if(variable_type.compare("string") == 0) return_type = vt_string;
-		else if(variable_type.compare("double") == 0) return_type = vt_double;
-		else if(variable_type.compare("long") == 0) return_type = vt_long;
-		else if(variable_type.compare("bool") == 0) return_type = vt_bool;
-		else if(variable_type.compare("1dv_double") == 0) return_type = vt_1dvector_double;
-		else if(variable_type.compare("1dv_long") == 0) return_type = vt_1dvector_long;
-		else return false;
-		
-		return true;
-	}
-	
-	//Gets the variable name from a path containing the name.
-	bool getNameFromPath(const string path, string &return_path, string &return_name)
-	{
-		string variable_name, variable_path;
-		boost::char_separator<char> delim(".");
-		boost::tokenizer< boost::char_separator<char> > tokens(path, delim);
-		
-		tokenizer::iterator tok_iter_behind;
-		
-		//Retrieves the name of the variable
-		for(tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter)
+		//store as strings
+		switch(store_me)
 		{
-			if(tok_iter != tokens.begin()) 
-			{
-				variable_path += *(tok_iter_behind) + ".";
-			}
-			variable_name = *(tok_iter);
-		
-			tok_iter_behind = tok_iter;
+			case CLOSED:
+				data->put(path + ".range.max_type", "CLOSED");
+				break;
+			
+			case OPEN:
+				data->put(path + ".range.max_type", "OPEN");
+				break;
+			
+			case NONE:
+				data->put(path + ".range.max_type", "NONE");
+				break;
+			
+			default:
+				return false;
+				break;
 		}
 		
-		return_path = variable_path;
-		return_name = variable_name;
-		
 		return true;
+	}
+	
+	//Retrieves a generic value from the ConfigParameter object 
+	template<typename T>
+	bool ConfigStorageManager::retrieveGenericValue(const ConfigParameter &config_store, 
+							T &value_data, ConfigRange<T> &range_data)
+	{
+		value_type ret_type = config_store.getType();
+		
+		switch(ret_type)
+		{
+			case vt_bool:
+				if( !(config_store.getValue_bool(value_data)) ) return false;
+				
+				range_data.setUpperBoundType(NONE);
+				range_data.setLowerBoundType(NONE);
+				range_data.setMax(false);
+				range_data.setMin(false);
+				break;
+				
+			case vt_long:
+				if( !(config_store.getValue_long(value_data)) ) return false;
+				if( !(config_store.getRange_long(range_data)) ) return false;
+				break;
+				
+			case vt_double:
+				if( !(config_store.getValue_double(value_data)) ) return false;
+				if( !(config_store.getRange_double(range_data)) ) return false;
+				break;
+				
+			case vt_string:
+				if( !(config_store.getValue_string(value_data)) ) return false;
+				
+				range_data.setUpperBoundType(NONE);
+				range_data.setLowerBoundType(NONE);
+				range_data.setMax("");
+				range_data.setMin("");
+				break;
+				
+			case vt_1dvector_long:
+				break;
+				
+			case vt_1dvector_double:
+				break;
+				
+			default:
+				return false;
+				break;
+		}
+	}
+	
+	
+	
+	
+	//FOLLOWING ARE USED BY stringToCP
+	//Converts and stores values into the tree.
+	template<typename T>
+	bool ConfigStorageManager::convertStoreValue(const string &path, const value_type &variable_type, 
+							ConfigParameter &config_return)
+	{
+		string retrieved_value = data->get<std::string>(path + ".value");
+		T variable_value;
+		ConfigRange<T> variable_range;
+		
+		if( !(convertType(path, variable_type, retrieved_value, &variable_value, &variable_range)) )
+		{
+			return false;
+		}
+		
+		switch(variable_type)
+		{
+			case vt_bool:
+				config_return.setValue_bool(variable_value);
+				break;
+				
+			case vt_long:
+				config_return.setValue_long(variable_value);
+				config_return.setRange_long(variable_value);
+				break;
+				
+			case vt_double:
+				config_return.setValue_double(variable_value);
+				config_return.setRange_double(variable_value);
+				break;
+				
+			case vt_string:
+				config_return.setValue_string(variable_value);
+				break;
+				
+			case vt_1dvector_long:
+				break;
+				
+			case vt_1dvector_double:
+				break;
+				
+			default:
+				return false;
+				break;
+		}
+	
+		return true;	
+	}
+	
+	
+	//Converts types based on what is input
+	template<typename T>
+	bool ConfigStorageManager::convertType(const string path, const value_type variable_type, 
+					const string retrieved_value, T &variable_value, 
+					ConfigRange<T> &variable_range)
+	{
+		if(variable_type == vt_bool)
+		{
+			//Convert from str to bool.
+			if(retrieved_value.compare("true")) variable_value = true;
+			else if(retrieved_value.compare("false")) variable_value = false;
+			else return false;
+			
+			//Sets range to NONE.
+			variable_range.setUpperBoundType(NONE);
+			variable_range.setLowerBoundType(NONE);	
+			
+			//Might need something else?
+			return true;		
+		}
+		else if( (variable_type == vt_long) || (variable_type == vt_double) )
+		{
+			//Convert value.
+			if( !(stringToNumber(retrieved_value, &variable_value)) ) return false;
+			
+			//Convert range.
+			if( !(stringToBounds(path, &variable_range)) ) return false;
+			
+			return true;
+		}
+		else if(variable_type == vt_string)
+		{
+			variable_value = retrieved_value;
+			
+			variable_range.setUpperBoundType(NONE);
+			variable_range.setLowerBoundType(NONE);	
+			
+			return true;
+		}
+		else if( (variable_type == vt_1dvector_long) || (variable_type == vt_1dvector_long) )
+		{
+			//Have a retrieved_value string array? Move these to variable_value? Work out later ...
+			
+			return true;
+		}
+		else
+		{
+			return false;
+		}		
 	}
 	
 	//Converts string to bounds:
 	template<typename T>
-	bool stringToBounds(const string path, ConfigRange<typename T> &converted_bounds)
+	bool ConfigStorageManager::stringToBounds(const string path, 
+									ConfigRange<T> &converted_bounds)
 	{
 		T ub_num, lb_num;
 		string ub, lb, ub_type, lb_type;
@@ -426,7 +514,7 @@ namespace ConfigSystem
 	
 	//Converts string to double, long, etc.
 	template<typename T>
-	bool stringToNumber(const string number_str, typename T &result)
+	bool ConfigStorageManager::stringToNumber(const string number_str, T &result)
 	{
 		stringstream stream(number_str);
 		
@@ -435,27 +523,80 @@ namespace ConfigSystem
 		return true;
 	}
 	
-	//Converts a boolean to a string
-	bool ConfigStorageManager::convertBoolToStr(ConfigParameter &store)
+	
+	
+	//Determines the type based on string or value_type. Returns both as specified type.
+	bool ConfigStorageManager::findTypeFromString(string &str_type, value_type &val_type)
 	{
-		bool convert;
-		status = store.getValue_bool(convert);
-		
-		//Stores the type as a boolean.
-		data->put(path + ".type", "bool");
-		
-		//if successful read, converts boolean to string.
-		if(status)
+		if( (str_type.compare("string") == 0) || (val_type == vt_string) ) 
 		{
-			if(convert) data->put(path + ".value", "true");
-			else if(!convert) data->put(path + ".value", "false");
-		}
-		else
-		{
-			return false;
+			val_type = vt_string;
+			str_type = "string";
 		}
 		
-		return status;
+		else if( (str_type.compare("double") == 0) || (val_type == vt_double) ) 
+		{
+			val_type = vt_double;
+			str_type = "double";
+		}
+		
+		else if( (str_type.compare("long") == 0) || (val_type == vt_long) ) 
+		{
+			val_type = vt_long;
+			str_type = "long";
+		}
+		
+		else if( (str_type.compare("bool") == 0) || (val_type == vt_bool) ) 
+		{
+			val_type = vt_bool;
+			str_type = "bool";
+		}
+		
+		else if( (str_type.compare("1dv_double") == 0) || (val_type == vt_1dvector_double) ) 
+		{
+			val_type = vt_1dvector_double;
+			str_type = "1dv_double";
+		}
+		
+		else if( (str_type.compare("1dv_long") == 0) || (val_type == vt_1dvector_long) ) 
+		{
+			val_type = vt_1dvector_long;
+			str_type = "1dv_long";
+		}
+		
+		else return false;
+		
+		return true;
+	}
+	
+	//Gets the variable name from a path containing the name.
+	bool ConfigStorageManager::getNameFromPath(const string path, string &return_path, 
+								string &return_name)
+	{
+		typedef boost::tokenizer< boost::char_separator<char> > tokenizer;
+	
+		string variable_name, variable_path;
+		boost::char_separator<char> delim(".");
+		tokenizer tokens(path, delim);
+		
+		tokenizer::iterator tok_iter_behind;
+		
+		//Retrieves the name of the variable
+		for(tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter)
+		{
+			if(tok_iter != tokens.begin()) 
+			{
+				variable_path += *(tok_iter_behind) + ".";
+			}
+			variable_name = *(tok_iter);
+		
+			tok_iter_behind = tok_iter;
+		}
+		
+		return_path = variable_path;
+		return_name = variable_name;
+		
+		return true;
 	}
 	
 	//Reads the JSON file specified, stores in specified ptree.

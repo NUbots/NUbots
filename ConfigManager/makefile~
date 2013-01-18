@@ -1,0 +1,8 @@
+
+OBJECTS = ConfigStorageManager.o
+
+ConfigSystemTest: $(OBJECTS)
+	g++ $^ -o $@
+
+clean: 
+	rm *.o ConfigSystemTest
