@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <boost/foreach.hpp>
 
-
-
 GoalDetectorRANSAC::GoalDetectorRANSAC()
 {
     m_n = 10;               //min pts to line essentially
@@ -52,6 +50,7 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine> 
 
     while(s_it != start_lines.end() && e_it != end_lines.end()) {
         //move through until end line is after start line
+        //get the end points of each line
         Point sp1 = s_it->getLeftPoint(),
               sp2 = s_it->getRightPoint(),
               ep1 = e_it->getLeftPoint(),
@@ -64,18 +63,26 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine> 
 
         if(d1 > d2) {
             //sp1 should be paired with ep2
-
+            Point c(ep1); ep1=ep2; ep2=c;   //swap ep1 and ep2
         }
 
-
         //check if terminal points of start are left of terminal points of end
-        if(sp1.x < ep1.x && sp1.x < ep2.x && sp2.x < ep1.x && sp2.x < ep2.x) {
+        //if(sp1.x < ep1.x && sp1.x < ep2.x && sp2.x < ep1.x && sp2.x < ep2.x) {
+
+        if(sp1.x < ep1.x && sp2.x < ep2.x) {
             if(s_it->getIntersection(*e_it, intersection)) {
                 //check if intersection point is below end points, otherwise don't consider
+                if(intersection.y > sp1.y && intersection.y > ep1.y &&
+                   intersection.y > sp2.y && intersection.y > ep2.y) {
+                    //consider
 
+                }
+                else {
+                    e_it++;
+                }
             }
             else {
-                //parallel lines
+                //perfectly parallel lines - consider
             }
         }
         else {
