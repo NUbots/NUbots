@@ -70,6 +70,20 @@ namespace ConfigSystem
     bool ConfigParameter::getRange_long(ConfigRange<long> &range)
     {
         if(param_value.val_type != vt_long) return false;
+        range = *(param_value.range_long);
+        return true;
+    }
+    
+    bool ConfigParameter::getRange_double(ConfigRange<double> &range)
+    {
+        if(param_value.val_type != vt_double) return false;
+        range = *(param_value.range_double);
+        return true;
+    }
+
+    bool ConfigParameter::setRange_long(ConfigRange<long> &range)
+    {
+        if(param_value.val_type != vt_long) return false;
 
         delete param_value.range_long;
         param_value.range_long = new ConfigRange<long>(range);
@@ -77,28 +91,13 @@ namespace ConfigSystem
         return true;
     }
 
-    bool ConfigParameter::getRange_double(ConfigRange<double> &range)
+    bool ConfigParameter::setRange_double(ConfigRange<double> &range)
     {
         if(param_value.val_type != vt_double) return false;
         
         delete param_value.range_double;
         param_value.range_double = new ConfigRange<double>(range);
         
-        return true;
-    }
-
-
-    bool ConfigParameter::setRange_long(ConfigRange<long> &range)
-    {
-        if(param_value.val_type != vt_long) return false;
-        *param_value.range_long = range;
-        return true;
-    }
-    
-    bool ConfigParameter::setRange_double(ConfigRange<double> &range)
-    {
-        if(param_value.val_type != vt_double) return false;
-        *param_value.range_double = range;
         return true;
     }
 

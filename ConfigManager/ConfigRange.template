@@ -55,15 +55,15 @@ namespace ConfigSystem
         _uBound  = new_uBound ;
 	}
 	
-	// //Destructor
-	// template<typename T>
-	// ConfigRange::~ConfigRange()
-	// {
-	// 	// T is not intended to be a pointer type, so variables of type T
-    //  // should not be deleted.
-	// 	delete _min;
-	// 	delete _max;
-	// }
+	//Destructor
+	template<typename T>
+	ConfigRange<T>::~ConfigRange()
+	{
+		// // T is not intended to be a pointer type, so variables of type T
+        // // should not be deleted.
+		// delete _min;
+		// delete _max;
+	}
 	
 	
 	
