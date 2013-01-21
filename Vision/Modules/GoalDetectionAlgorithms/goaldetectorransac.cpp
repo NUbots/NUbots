@@ -17,14 +17,6 @@ GoalDetectorRANSAC::GoalDetectorRANSAC()
     m_max_iterations = 3;  //hard limit on number of fitting attempts
 }
 
-//for debugging only
-#include "Infrastructure/NUImage/ColorModelConversions.h"
-
-float test_e;
-void updateE(int big_e, void * object) {
-    test_e = big_e/20.0;
-}
-
 void GoalDetectorRANSAC::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -49,10 +41,10 @@ void GoalDetectorRANSAC::run()
     DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_END, end_lines);
 
     //MAKE QUADS FROM LINES
-    candidates = buildGoalsFromLines(start_lines, end_lines);
+    //candidates = buildQuadsFromLines(start_lines, end_lines);
 }
 
-vector<Quad> GoalDetectorRANSAC::buildGoalsFromLines(const vector<LSFittedLine> &start_lines, const vector<LSFittedLine> &end_lines)
+vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine> &start_lines, const vector<LSFittedLine> &end_lines)
 {
     vector<LSFittedLine>::const_iterator s_it = start_lines.begin(),
                                          e_it = end_lines.begin(),
@@ -63,7 +55,34 @@ vector<Quad> GoalDetectorRANSAC::buildGoalsFromLines(const vector<LSFittedLine> 
         Point sp1 = s_it->getLeftPoint(),
               sp2 = s_it->getRightPoint(),
               ep1 = e_it->getLeftPoint(),
-              ep2 = e_it->getRightPoint();
+              ep2 = e_it->getRightPoint(),
+              intersection;
+
+        //sort the points
+        double d1 = 0.5*( (sp1-ep1).abs() + (sp2-ep2).abs() ),
+               d2 = 0.5*( (sp2-ep1).abs() + (sp1-ep2).abs() );
+
+        if(d1 > d2) {
+            //sp1 should be paired with ep2
+
+        }
+
+
+        //check if terminal points of start are left of terminal points of end
+        if(sp1.x < ep1.x && sp1.x < ep2.x && sp2.x < ep1.x && sp2.x < ep2.x) {
+            if(s_it->getIntersection(*e_it, intersection)) {
+                //check if intersection point is below end points, otherwise don't consider
+
+            }
+            else {
+                //parallel lines
+            }
+        }
+        else {
+            e_it++;
+        }
+
+
 
 
 

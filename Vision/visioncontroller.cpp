@@ -109,7 +109,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         //LINES
         switch(VisionConstants::LINE_METHOD) {
         case VisionConstants::RANSAC:
-            m_line_detector_ransac->run();
+            //m_line_detector_ransac->run();
             break;
         case VisionConstants::SAM:
             m_line_detector_sam->run();

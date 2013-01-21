@@ -20,6 +20,7 @@ class LSFittedLine : public Line
 {
   public:
     LSFittedLine();
+    ~LSFittedLine();
     bool valid;
     
     void addPoint(Point &point);

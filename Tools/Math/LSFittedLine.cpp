@@ -9,6 +9,10 @@ LSFittedLine::LSFittedLine(){
 	clearPoints();
 }
 
+LSFittedLine::~LSFittedLine(){
+    points.clear();
+}
+
 void LSFittedLine::clearPoints(){
 	valid = false;
 	sumX = 0;
