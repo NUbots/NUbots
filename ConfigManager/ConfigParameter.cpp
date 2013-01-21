@@ -30,26 +30,19 @@ namespace ConfigSystem
 {
 	//Getting/setting string and general info stuff. 
 	
-    std::string ConfigParameter::getName() 
-    {	
-    	return _name; 
-    }
+    std::string ConfigParameter::getName() { return _name; }
+    std::string ConfigParameter::getName() const { return _name; }
     
-    std::string ConfigParameter::getPath() 
-    {	
-    	return _path; 
-    }
+    std::string ConfigParameter::getPath() { return _path; }
+    std::string ConfigParameter::getPath() const { return _path; }
+
+    std::string ConfigParameter::getDescription() { return _desc; }
+    std::string ConfigParameter::getDescription() const { return _desc; }
     
-    std::string ConfigParameter::getDescription() 
-    {	
-    	return _desc; 
-    }
+    value_type ConfigParameter::getType() { return param_value.val_type; }
+    value_type ConfigParameter::getType() const { return param_value.val_type; }
     
-    value_type ConfigParameter::getType() 
-    { 
-    	return param_value.val_type; 
-    }
-    
+
     void ConfigParameter::setName(std::string new_name) 
     { 
     	_name = new_name; 

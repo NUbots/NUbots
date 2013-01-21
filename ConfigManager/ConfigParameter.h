@@ -57,17 +57,21 @@ namespace ConfigSystem
 
 		    //! Returns this parameter's name.
 		    std::string getName();
+		    std::string getName() const;
 		    
 		    //! Returns the path to this parameter in the ConfigTree 
 		    //! (not including the final '.<name>').
 		    std::string getPath();
+		    std::string getPath() const;
 		    
 		    //! Returns a meaningful description of this parameter's purpose.
 		    std::string getDescription();
+		    std::string getDescription() const;
 		    
 		    //! Return an enum value representing the type of this
 		    //! parameter's value.
 		    value_type getType();
+		    value_type getType() const;
 		    
 		    //! Sets the name of this parameter in the ConfigTree.
 		    void setName(std::string new_name);
