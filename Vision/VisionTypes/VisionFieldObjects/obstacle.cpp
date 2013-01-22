@@ -8,11 +8,11 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-Obstacle::Obstacle(const Vector2<double>& position, double width, double height)
+Obstacle::Obstacle(const Point& position, double width, double height)
 {
     m_id = OBSTACLE;
-    m_size_on_screen = Vector2<float>(width, height);
-    m_location_pixels = Vector2<float>(position.x, position.y);
+    m_location_pixels = position;
+    m_size_on_screen = Vector2<double>(width, height);
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
 //        Vector2<float> bottomcentre = Vector2<float>(position.x, position.y);
@@ -150,7 +150,7 @@ float Obstacle::distanceToObstacle(float bearing, float elevation) {
 
 void Obstacle::render(cv::Mat &mat) const
 {
-    Vector2<float> half = m_size_on_screen*0.5;
+    Vector2<double> half = m_size_on_screen*0.5;
     cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y-m_size_on_screen.y), cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y), cv::Scalar(255, 255, 0));
     cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y), cv::Scalar(255, 255, 0));
     cv::line(mat, cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y-m_size_on_screen.y), cv::Scalar(255, 255, 0));

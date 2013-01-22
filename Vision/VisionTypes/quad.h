@@ -13,7 +13,7 @@ public:
     Quad();
     Quad(const Quad& other);
     Quad(int left, int top, int right, int bottom);
-    Quad(Vector2<float> bottom_left, Vector2<float> top_left, Vector2<float> top_right, Vector2<float> bottom_right);
+    Quad(Vector2<double> bottom_left, Vector2<double> top_left, Vector2<double> top_right, Vector2<double> bottom_right);
 
     /**
       * Sets the Quad as a screen aligned rectangle given the specified positions.
@@ -31,15 +31,15 @@ public:
       * @param top_right    The top right corner.
       * @param bottom_right The bottom right corner.
       */
-    void set(Vector2<float> bottom_left, Vector2<float> top_left, Vector2<float> top_right, Vector2<float> bottom_right);
+    void set(Vector2<double> bottom_left, Vector2<double> top_left, Vector2<double> top_right, Vector2<double> bottom_right);
     
 
-    Vector2<float> getBottomCentre() const;   //! Returns the bottom centre pixel location of the Quad.
+    Vector2<double> getBottomCentre() const;   //! Returns the bottom centre pixel location of the Quad.
 
-    Vector2<float> getCentre() const;         //! Returns the centre pixel location  of the Quad.
+    Vector2<double> getCentre() const;         //! Returns the centre pixel location  of the Quad.
 
-    Vector2<float> getBottomLeft() const;     //! Returns the bottom left pixel location  of the Quad.
-    Vector2<float> getTopRight() const;       //! Returns the top right pixel location  of the Quad.
+    Vector2<double> getBottomLeft() const;     //! Returns the bottom left pixel location  of the Quad.
+    Vector2<double> getTopRight() const;       //! Returns the top right pixel location  of the Quad.
 
     float getLeft() const {return 0.5*(m_bottom_left.x + m_top_left.x);}
     float getRight() const {return 0.5*(m_bottom_right.x + m_top_right.x);}
@@ -55,12 +55,15 @@ public:
     float getAverageWidth() const;                //! Returns the average width of the Quad in pixels.
     float getAverageHeight() const;               //! Returns the average height of the Quad in pixels.
 
+
+    void render(cv::Mat& mat, cv::Scalar colour, bool filled = true) const;
+
 private:
 
-    Vector2<float> m_bottom_left,     //! @variable The left of the Quad.
-                   m_bottom_right,    //! @variable The right of the Quad.
-                   m_top_right,       //! @variable The top of the Quad.
-                   m_top_left;        //! @variable The bottom of the Quad.
+    Vector2<double> m_bottom_left,     //! @variable The left of the Quad.
+                    m_bottom_right,    //! @variable The right of the Quad.
+                    m_top_right,       //! @variable The top of the Quad.
+                    m_top_left;        //! @variable The bottom of the Quad.
 };
 
 #endif // QUAD_H

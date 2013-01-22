@@ -165,7 +165,7 @@ VisionFieldObject::VisionFieldObject()
     
 }
 
-const Vector2<float>& VisionFieldObject::getLocationPixels() const
+const Point &VisionFieldObject::getLocationPixels() const
 {
     return m_location_pixels;
 }

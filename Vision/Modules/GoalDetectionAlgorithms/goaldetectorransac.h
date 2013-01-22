@@ -18,7 +18,9 @@ public:
 private:
     vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
 
-    vector<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines, const vector<LSFittedLine>& end_lines);
+    vector<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines,
+                                     const vector<LSFittedLine>& end_lines,
+                                     double tolerance);
 
 /*    unsigned*/ int m_n,
                  m_k,

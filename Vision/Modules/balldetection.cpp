@@ -272,7 +272,7 @@ void BallDetection::detectBall()
 
             if (float(count)/((min*2)*(min*2)) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
                 Ball newball(center, max((right-left), (bottom-top)));
-                vbb->addBall(newball);                
+                vbb->addBall(newball);
             }
             else {
                 //cout << "BALL THROWN OUT ON RATIO" << endl;
@@ -286,7 +286,6 @@ void BallDetection::detectBall()
                 debug << "BallDetection::detectBall - (1,1) ball thrown out" << endl;
             #endif
         }
-
     }
 }
 

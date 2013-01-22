@@ -20,14 +20,15 @@ win32{
 DEFINES += QT_NO_DEBUG_STREAM
 
 INCLUDEPATH += ../
-INCLUDEPATH += ../Autoconfig/
 
-PLATFORM = win
+PLATFORM = pc
 
 contains(PLATFORM, "darwin") {
     message("Compiling for Darwin")
     DEFINES += TARGET_IS_DARWIN
-    
+
+    INCLUDEPATH += ../Autoconfig/
+
     HEADERS += \
         NUPlatform/Platforms/Darwin/DarwinCamera.h \
         VisionWrapper/datawrapperdarwin.h \
@@ -44,6 +45,8 @@ contains(PLATFORM, "darwin") {
 contains(PLATFORM, "pc") {
      message("Compiling for PC")
     DEFINES += TARGET_IS_PC
+
+    INCLUDEPATH += ../Vision/Debug/
 
     HEADERS += \
         VisionTools/pccamera.h \
@@ -63,6 +66,8 @@ contains(PLATFORM, "win") {
      message("Compiling for Windows")
     DEFINES += TARGET_IS_PC
 
+    INCLUDEPATH += ../Vision/Debug/
+
     HEADERS += \
         VisionWrapper/datawrapperpc.h \
         VisionWrapper/visioncontrolwrapperpc.h \
@@ -79,6 +84,8 @@ contains(PLATFORM, "win") {
 contains(PLATFORM, "rpi") {
      message("Compiling for RPi")
     DEFINES += TARGET_IS_RPI
+
+    INCLUDEPATH += ../Vision/Debug/
 
     HEADERS += \
         VisionTools/pccamera.h \

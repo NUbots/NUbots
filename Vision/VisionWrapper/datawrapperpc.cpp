@@ -75,10 +75,6 @@ void doGaussian(NUImage* img) {
     for(int y=0; y<img->getHeight(); y++) {
         ptr = mat.ptr<unsigned char>(y);
         for(int x=0; x<img->getWidth(); x++) {
-//            ColorModelConversions::fromYCbCrToRGB((*img)(x,y).y, (*img)(x,y).cb, (*img)(x,y).cr, r, g, b);
-//            ptr[3*x]   = b;
-//            ptr[3*x+1] = g;
-//            ptr[3*x+2] = r;
             ptr[3*x]   = (*img)(x,y).y;
             ptr[3*x+1] = (*img)(x,y).cb;
             ptr[3*x+2] = (*img)(x,y).cr;
@@ -90,13 +86,6 @@ void doGaussian(NUImage* img) {
     for(int y=0; y<img->getHeight(); y++) {
         ptr = mat.ptr<unsigned char>(y);
         for(int x=0; x<img->getWidth(); x++) {
-//            ColorModelConversions::fromRGBToYCbCr(ptr[3*x+2], ptr[3*x+1], ptr[3*x], Y, cb, cr);
-//            Pixel px;
-//            px.yCbCrPadding = Y;
-//            px.cb = cb;
-//            px.y = Y;
-//            px.cr = cr;
-//            img->setPixel(x, y, px);
             Pixel px;
             px.yCbCrPadding = ptr[3*x];
             px.cb = ptr[3*x+1];

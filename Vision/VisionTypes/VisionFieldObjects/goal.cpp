@@ -13,8 +13,8 @@ Goal::Goal(VFO_ID id, const Quad &corners)
     m_id = id;
     m_corners = corners;
 
-    m_size_on_screen = Vector2<float>(corners.getAverageWidth(), corners.getAverageHeight());
     m_location_pixels = corners.getBottomCentre();
+    m_size_on_screen = Vector2<double>(corners.getAverageWidth(), corners.getAverageHeight());
 
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -353,11 +353,13 @@ float Goal::distanceToGoal(float bearing, float elevation) {
 
 void Goal::render(cv::Mat &mat) const
 {
-    cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
-    if(m_id <= GOAL_U)
-        cv::rectangle(mat, r, cv::Scalar(0, 255, 255), -1);
-    else
-        cv::rectangle(mat, r, cv::Scalar(255, 0, 0), -1);
+//    cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
+//    if(isYellowGoal(m_id))
+//        cv::rectangle(mat, r, cv::Scalar(0, 255, 255), -1);
+//    else
+//        cv::rectangle(mat, r, cv::Scalar(255, 0, 0), -1);
+    m_corners.render(mat, cv::Scalar(0,255,255), m_id != GOAL_U);   //render filled if know goal, border otherwise
+    cv::circle(mat, cv::Point(m_location_pixels.x, m_location_pixels.y), 4, cv::Scalar(255,255,0), -1, 4);
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.
