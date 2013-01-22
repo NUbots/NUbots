@@ -28,7 +28,33 @@
 
 namespace ConfigSystem
 {
-	//Getting/setting string and general info stuff. 
+	// Constructors
+    // ConfigParameter::ConfigParameter()
+    // {
+    //     param_value.val_type = vt_none;
+    //     param_value.val_bool = NULL;
+    // }
+
+
+    ConfigParameter::ConfigParameter(value_type val_type)
+    {
+        // Set the value type to the type specified
+        param_value.val_type = val_type;
+
+        // Set the relevant pointer to NULL initially.
+        // (in theory it doesn't matter which...)
+        switch(val_type)
+        {
+        case vt_bool           : param_value.val_bool            = NULL; break;
+        case vt_long           : param_value.val_long            = NULL; break;
+        case vt_double         : param_value.val_double          = NULL; break;
+        case vt_string         : param_value.val_string          = NULL; break;
+        case vt_1dvector_long  : param_value.val_1dvector_long   = NULL; break;
+        case vt_1dvector_double: param_value.val_1dvector_double = NULL; break;
+        }
+    }
+
+    //Getting/setting string and general info stuff. 
 	
     std::string ConfigParameter::getName() { return _name; }
     std::string ConfigParameter::getName() const { return _name; }
@@ -58,10 +84,10 @@ namespace ConfigSystem
     	_desc = new_desc; 
     }
     
-    void ConfigParameter::setType(value_type new_val_type) 
-    {
-        param_value.val_type = new_val_type;
-    }
+    // void ConfigParameter::setType(value_type new_val_type) 
+    // {
+    //     param_value.val_type = new_val_type;
+    // }
 
 
 
@@ -106,11 +132,10 @@ namespace ConfigSystem
     bool ConfigParameter::getValue_bool(bool &value)
     {
         if(param_value.val_type != vt_bool) return false;
-        //Need to put brackets when dereferencing a ptr in cpp.
         value = *(param_value.val_bool);
         return true;
     }
-
+    
     bool ConfigParameter::getValue_long(long &value)
     {
         if(param_value.val_type != vt_long) return false;

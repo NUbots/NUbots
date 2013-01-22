@@ -1,0 +1,122 @@
+{"Camera": {
+    "Sharpness": {
+        "desc": "sharpness",
+        "range": {
+            "min": "0",
+            "max": "255",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "150",
+        "type": "float"
+    },
+    "AutoWhiteBalance": {
+        "desc": "Automatic white balance",
+        "range": {
+            "min": "0",
+            "max": "1",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "1",
+        "type": "float"
+    },
+    "Gain": {
+        "desc": "ISO sensitivity",
+        "range": {
+            "min": "0",
+            "max": "255",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "100",
+        "type": "float"
+    },
+    "Brightness": {
+        "desc": "an attribute of visual perception in which a source appears to be radiating or reflecting light",
+        "range": {
+            "min": "0",
+            "max": "255",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "185",
+        "type": "float"
+    },
+    "PowerLineFrequency": {
+        "desc": "off, 50Hz and 60Hz",
+        "range": {
+            "min": "0",
+            "max": "2",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "1",
+        "type": "float"
+    },
+    "ExposureAbsolute": {
+        "desc": "total amount of light allowed to fall on the photographic medium",
+        "range": {
+            "min": "0",
+            "max": "10000",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "800",
+        "type": "float"
+    },
+    "Contrast": {
+        "desc": "the difference in color and light between parts of an image",
+        "range": {
+            "min": "0",
+            "max": "127",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "75",
+        "type": "float"
+    },
+    "ExposureAutoPriority": {
+        "desc": "permanently off",
+        "range": {
+            "min": "0",
+            "max": "0",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "0",
+        "type": "float"
+    },
+    "ExposureAuto": {
+        "desc": "permanently off",
+        "range": {
+            "min": "1",
+            "max": "1",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "1",
+        "type": "float"
+    },
+    "Saturation": {
+        "desc": "the difference between a color against gray",
+        "range": {
+            "min": "0",
+            "max": "255",
+            "lBound": "CLOSED",
+            "outside": "false",
+            "uBound": "CLOSED"
+        },
+        "value": "150",
+        "type": "float"
+    }
+}}

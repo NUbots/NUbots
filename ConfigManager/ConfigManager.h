@@ -2,9 +2,9 @@
     @brief Defines the main ConfigManager class and the exceptions it throws.
     
     @class ConfigManager
-    @brief 
+    @brief The interface between the configuration system and the other modules.
     
-    @author Mitchell Metcalfe
+    @author Mitchell Metcalfe, Sophie Calland
     
   Copyright (c) 2012 Mitchell Metcalfe
     
@@ -29,149 +29,75 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/lexical_cast.hpp>
-    
+
 #include "ConfigStorageManager.h"
+#include "ConfigTree.h"
 
 #include <string>
 using std::string;
 
-// class ConfigException : exception
-// {
-//     virtual const char* what()
-//     {
-//         return "ConfigException occured.";
-//     }
-// };
-
 namespace ConfigSystem
 {
-
     class ConfigManager
     {
-
     public:
-    	//!constructor
-    	ConfigManager(std::string filename_arr[]);
-    	//!destructor
+    	/*!
+         *  @brief Creates a configManager and loads the initial configuration
+         *         specified.
+         *  @param configName The name of the initial configuration to load.  
+         *  @return 
+         */
+    	ConfigManager(std::string configName);
+        
+    	/*!    
+         *  @brief Destroys this ConfigManager and deletes it's ConfigStore
+         *         and current ConfigTree.
+         */
     	~ConfigManager();
+        
+        
+        /*! @brief  Loads a configuration with the given name.
+         *  @param  The name of the configuration to load.
+         *  @return Returns whether or not the load succeeded.
+         */
+        bool loadConfiguration(std::string configName);
+        
+        /*! @brief  Saves the current configuration.
+         *  @param  The name to give the saved configuration.
+         *  @return Returns whether or not the save succeeded.
+         */
+        bool saveConfiguration(std::string configName);
     	
-    	//debug
-    	void printAll();
-    	
-        
-        
-        bool readIntParam     (const string &paramPath, 
-                               const string &paramName,
-                               int    &data);
-        bool storeIntParam    (const string &paramPath,
-                               const string &paramName,
-                               int    data);
-        
+
         /*! @brief Reads an integer stored at the given path in the current configuration.
-         *
-         *  <long description>
-         *
          *  @param paramPath Path to the desired parameter.
          *  @param data variable in which to store the data retrieved.
          *  @return Whether the operation was successful.
          */
-        // bool readIntParam    (const string &paramPath, const string &paramName, int    &data); // throw(ConfigException);
-        bool readLongParam   (const string &paramPath, const string &paramName, long   &data); // throw(ConfigException);
-        bool readFloatParam  (const string &paramPath, const string &paramName, float  &data); // throw(ConfigException);
-        bool readDoubleParam (const string &paramPath, const string &paramName, double &data); // throw(ConfigException);
-        bool readStringParam (const string &paramPath, const string &paramName, string &data); // throw(ConfigException);
+        bool readIntValue    (const string &paramPath, const string &paramName, int    &data);
+        bool readLongValue   (const string &paramPath, const string &paramName, long   &data);
+        bool readFloatValue  (const string &paramPath, const string &paramName, float  &data);
+        bool readDoubleValue (const string &paramPath, const string &paramName, double &data);
+        bool readStringValue (const string &paramPath, const string &paramName, string &data);
 
         /*! @brief Stores the given integer in the current configuration at the given path.
-         *
-         *  
-         *
          *  @param paramPath Path at which to store the parameter.
          *  @param data The data to store.
          *  @return Whether the operation was successful.
          */
-        // bool storeIntParam    (const string &paramPath, const string &paramName, int    data); // throw(ConfigException);
-        bool storeLongParam   (const string &paramPath, const string &paramName, long   data); // throw(ConfigException);
-        bool storeFloatParam  (const string &paramPath, const string &paramName, float  data); // throw(ConfigException);
-        bool storeDoubleParam (const string &paramPath, const string &paramName, double data); // throw(ConfigException);
-        bool storeStringParam (const string &paramPath, const string &paramName, string data); // throw(ConfigException);
+        bool storeIntValue    (const string &paramPath, const string &paramName, int    data);
+        bool storeLongValue   (const string &paramPath, const string &paramName, long   data);
+        bool storeFloatValue  (const string &paramPath, const string &paramName, float  data);
+        bool storeDoubleValue (const string &paramPath, const string &paramName, double data);
+        bool storeStringValue (const string &paramPath, const string &paramName, string data);
 
     private:
+        //! The Configuration System's storage manager.
+        ConfigStorageManager    *_configStore   ;
 
-        /*! @brief The Configuration System's storage manager.
-         *  
-         *  Used to access, modify and save config data.
-         */
-         //change to ptr?
-        ConfigStorageManager storageManager;
-
-
-        // template <typename T>
-        // bool readParam (const string &paramPath, const string &paramName, T &data, const char* typeStr)
-        // {
-        //     string fullParamPath = paramPath + "." + paramName;
-
-        //     // Get the parameter information from the pTree
-        //     parameter<string> pStruct = storageManager.accessEntry(fullParamPath);
-            
-        //     // Aliases for parameter strings
-        //     string &value = pStruct.value;
-        //     string &type  = pStruct.type;
-
-        //     if(!type.compare(typeStr))
-        //         return false; // type mismatch error. (throw ConfigTypeMismatchException?)
-
-        //     T result;
-
-        //     try
-        //     {
-        //         result = boost::lexical_cast<T>(value); // perform conversion from string
-        //     }
-        //     catch (const boost::bad_lexical_cast &blcExc) // conversion failed
-        //     {
-        //         // throw error?
-        //         //set default value
-        //         // result = 0;
-        //         // log reason for the error
-        //         return false;
-        //     }
-
-        //     data = result; // assign to &data to output
-        //     return true; // return success
-        // };
-        
-        // template <typename T>
-        // bool storeParam (const string paramPath, const string &paramName, T data, const char* typeStr) // throw(ConfigException)
-        // {
-        //     string fullParamPath = paramPath + "." + paramName;
-
-        //     // convert data to a string
-        //     string dataStr;
-        //     try
-        //     {
-        //         dataStr = boost::lexical_cast<string>(data);
-        //     }
-        //     catch (const boost::bad_lexical_cast &blcExc) // conversion to string failed
-        //     {
-        //         // throw an error?
-        //         // log reason for the error
-        //         return false;
-        //     }
-
-        //     // Get this parameter's current entry:
-        //     parameter<string> pStruct = storageManager.accessEntry(fullParamPath);
-
-        //     // Check the type of the parameter
-        //     if (pStruct.type.compare(typeStr) != 0) return false;
-
-        //     // Change the parameter
-        //     pStruct.value = dataStr;
-
-        //     // Store the new parameter data into the config system.
-        //     bool success = storageManager.editEntry(paramPath, pStruct);
-        //     // bool success = storageManager.editEntry(paramPath, dataStr, std::string(typeStr));
-
-        //     return success;
-        // };
+        //! The config tree that stores the configuration system's current
+        //! configuration.
+        ConfigTree              *_currConfigTree;
     };
 }
 #endif

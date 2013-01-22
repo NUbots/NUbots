@@ -4,7 +4,7 @@
     configuration system for the NUbots.
     
     @class ConfigParameters
-    @brief This class serves as an object for use when transferring parameters.
+    @brief This class represents a generic configuration parameter object.
     
     @author Sophie Calland, Mitchell Metcalfe
     
@@ -24,6 +24,8 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define CONFIGSYS_DEBUG_CALLS std::cout << "DEBUG> " << __PRETTY_FUNCTION__ << std::endl;
+
 #ifndef ConfigParameter_def
 #define ConfigParameter_def
 
@@ -42,6 +44,7 @@ namespace ConfigSystem
     /// Used to identify the type of a ConfigParameter's value.
     enum value_type 
     {
+        vt_none,
         vt_bool, vt_long, vt_double, vt_string,
         vt_1dvector_long, vt_1dvector_double
     };
@@ -52,8 +55,13 @@ namespace ConfigSystem
     class ConfigParameter
     {
 		public:
-		    ConfigParameter();
-		    ConfigParameter(std::string name, std::string path, value_type val_type);
+
+		// // Note: Can't have a constructor that doesn't specify type.
+		//     ConfigParameter();
+
+
+
+		    ConfigParameter(value_type val_type);
 
 		    //! Returns this parameter's name.
 		    std::string getName();
@@ -82,8 +90,9 @@ namespace ConfigSystem
 		    //! Sets the description of this ConfigParameter.
 		    void setDescription(std::string new_desc);
 
-		    //! Set an enum value representing the type of this parameter's value.
-		    void setType(value_type new_val_type);
+		    // NOTE: Changing the type of a ConfigParameter is dangerous
+		    // //! Set an enum value representing the type of this parameter's value.
+		    // void setType(value_type new_val_type);
 
 
 		    //! Returns long   range if val_type is a long.

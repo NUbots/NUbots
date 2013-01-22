@@ -1,13 +1,16 @@
 /*! 
-	@file 	ConfigTree.h
-    @brief 	Header file for the ConfigTree class. 
- 
-    @class 	ConfigTree
-    @brief 	Stores and converts the strings stored in the ConfigStorageManager tree to ConfigParameter
-    		Objects and stores in its own property tree. 
+    @file     ConfigTree.h
+    @brief     Header file for the ConfigTree class. 
+    
+    @class  ConfigTree
+    @brief  Stores configuration data in a tree structure, allowing it to be 
+            easily accessed using dot separated paths. The ConfigStorageManager
+            saves and loads ConfigTrees from disk. The ConfigManager's 
+            interface to the configuration system simply wraps access to a 
+            ConfigTree containing the current configuration.
+    
+    @author Sophie Calland, Mitchell Metcalfe
 
-    @author Sophie Calland
- 
   Copyright (c) 2012 Sophie Calland
  
     This file is free software: you can redistribute it and/or modify
@@ -33,111 +36,87 @@
 #include <string>
 #include <exception>
 
+#include "ConfigParameter.h"
 #include "ConfigStorageManager.h"
 
-using std::string;
-using ConfigSystem::ConfigStorageManager;
+// using ConfigSystem::ConfigStorageManager;
+using boost::property_tree::ptree;
 
 namespace ConfigSystem
 {
-	class ConfigTree
-	{
-		public:
-			/*! @brief 	Constructor.
- 
-   			@param		N/A
-    		@return 	Creates a new ConfigTree object.
- 			*/
-			ConfigTree();
-		
-			/*! @brief 	Constructor.
- 
-   			@param		String array "filename_arr" stores the config filenames to be read from.
-    		@return 	Creates a new ConfigTree object and retrieves data from the filenames.
- 			*/
-			ConfigTree(const string &filename_arr[]);
-			
-			/*! @brief 	Destructor. 
- 
-   			@param		N/A
-    		@return 	Deletes a ConfigTree object.
- 			*/
-			~ConfigTree();
-			
-			
-			
-			
-			
-						
-			/*! @brief 	Retrieves a parameter stored in the data_access tree. 
- 
-   			@param		String "path" defines what path the parameter is going to be retrieved from
-    		@return 	Returns a pointer of ConfigParameter type if the operation was a success, 
-    					else if not found returns a NULL pointer.
- 			*/
-			ConfigParameter* retrieveParameter(const string &path);
-			
-			/*! @brief 	Retrieves a parameter stored in the data_access tree. 
- 
-   			@param		String "path" defines what path the parameter is going to be retrieved from
-    		@return 	Returns a pointer of ConfigParameter type if the operation was a success, 
-    					else if not found returns a NULL pointer.
- 			*/
-			const ConfigParameter* retrieveParameter(const string &path) const;
-			
-			/*! @brief 	Edits a parameter stored in the data_access tree. 
- 
-   			@param		String "path" defines what path the parameter is going to be retrieved from.
-   						ConfigParameter "new_parameter" is the new/edited parameter to replace the one
-   						currently stored.
-    		@return 	Returns true upon success, false otherwise.
- 			*/
-			bool editParameter(const string &path, ConfigParameter &new_parameter);
-			
-			
-			
-			/*! @brief 	Writes the current configuration to file. 
- 
-   			@param		N/A
-    		@return 	Returns true upon success, false otherwise.
- 			*/
-			bool writeCurrentToFile();
+    class ConfigTree
+    {
+    private:
+        //! 
+        ptree _treeRoot; // could be a pointer, but probably doesn't matter?
+        
+        //! 
+        std::string configName;
 
-			/*! @brief 	Reads a specified configuration from file. 
- 
-   			@param		String array "filename_arr" stores the paths to the files to be read into the 
-   						data_store.
-    		@return 	Returns true upon success, false otherwise.
- 			*/
-			bool readFromFile(const string &filename_arr[]);
-			
-			
-			
-			
-			
-			/*! @brief 	Adds a new parameter to the data_access tree (won't be used at the moment, 
-						maybe later). 
- 
-   			@param		String "path" defines what path the parameter is going to be added.
-   						ConfigParameter "new_parameter" is the new parameter to be added. 
-    		@return 	True if the operation was a success, false otherwise.
- 			*/
-			//bool addNewParameter(string path, ConfigParameter &new_parameter);
-			
-			/*! @brief 	Removes a parameter from the data_access tree (won't be used at the moment, 
-						maybe later). 
- 
-   			@param		String "path" defines what path the parameter is going to be removed
-    		@return 	True if the operation was a success, false otherwise.
- 			*/
-			//bool removeExistingParameter(string path);
-			
-		private:
-			//Tree to store ConfigParameter objects.
-			ptree *data_access;
-			//CSM object
-			ConfigStorageManager *data_store;
-	};
+        /*! 
+         *  @brief  Converts a property tree (with the appropriate structure)
+         *          into a parameter object.
+         *  @param fromPtree    The ptree to convert into a parameter.
+         *  @param toParam      The resulting parameter object.
+         *  @return Returns whether the conversion succeeded (i.e. if the
+         *          minimum set of required fields/keys were not present).
+         */
+        bool paramFromPtree(ptree fromPtree, ConfigParameter &toParam);
+
+        /*! 
+         *  @brief  Converts a parameter object into a property tree that fully
+         *          represents the parameter.
+         *  @param fromParam  The  parameter object to convert into a ptree.
+         *  @param toPtree    The resulting ptree.
+         *  @return Returns whether the conversion succeeded (i.e. if the
+         *          minimum set of required fields/keys were not present).
+         */
+        bool ptreeFromParam(ConfigParameter fromParam, ptree &toPtree);
+
+        /*! 
+         *  @brief  Converts a 'conceptual' path and name into the config 
+        *          tree into a full path that refers to the intended data.
+         *  @param paramPath    The path to the variable.
+         *  @param paramName    The variable's name
+         *  @return A string containing the full path.
+         */
+        std::string makeFullPath(
+            const std::string paramPath,
+            const std::string paramName
+            );
+
+    public:
+        ConfigTree(ptree root);
+        ~ConfigTree();
+
+        /*! 
+         *  @brief  Gets a parameter from the ConfigTree
+         *  @param paramPath The base path of the parameter.
+         *  @param paramName The parameter's name.
+         *  @param data The parameter to get.
+         *  @return Returns whether the operation was successful.
+         */
+        bool getParam (
+            const std::string paramPath,
+            const std::string paramName,
+            ConfigParameter &data
+            );
+
+        /*! 
+         *  @brief  Stores a parameter into the ConfigTree
+         *  @param paramPath The base path of the parameter.
+         *  @param paramName The parameter's name.
+         *  @param data The parameter to store.
+         *  @return Returns whether the operation was successful.
+         */
+        bool storeParam (
+            const std::string paramPath, 
+            const std::string paramName, 
+            ConfigParameter data
+            );
+
+        ptree getRoot();
+    };
 }
 
-#endif ConfigTree_def
+#endif

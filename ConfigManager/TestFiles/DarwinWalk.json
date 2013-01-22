@@ -1,0 +1,302 @@
+{
+    "DarwinWalkDefault":
+    {
+        "MaxSpeeds": 
+        {
+            "value": ["15", "15", "0.4"],
+            "type": "vector_float",
+            "range":
+            {
+                "min": "0",
+                "max": "0",
+                "lBound": "NONE",
+                "uBound": "NONE",
+                "outside": "false"
+            },
+            "desc": "(x cm/s, y cm/s, yaw rad/s)"
+        },
+
+        "MaxAccelerations": 
+        {
+            "value": ["50", "50", "3.6"],
+            "type": "vector_float",
+            "range":
+            {
+                "min": "0",
+                "max": "0",
+                "lBound": "NONE",
+                "uBound": "NONE",
+                "outside": "false"
+            },
+            "desc": "(x cm/s/s, y cm/s/s, yaw rad/s/s)"
+        },
+
+        "StepFrequency": 
+        {
+            "value": "1.2",
+            "type": "float",
+            "range":
+            {
+                "min": "0.8",
+                "max": "3.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The step frequency in Hz"
+        },
+
+        "StepHeight": 
+        {
+            "value": "2.0",
+            "type": "float",
+            "range":
+            {
+                "min": "1.0",
+                "max": "4.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The step height in cm"
+        },
+
+        "SwingLeftRight": 
+        {
+            "value": "2.7",
+            "type": "float",
+            "range":
+            {
+                "min": "1.0",
+                "max": "4.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The amount the torso moves left to right (ie transfer weight) in cm"
+        },
+
+        "SwingTopDown": 
+        {
+            "value": "0.3",
+            "type": "float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "0.8",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The amount the torso moves up and down in cm"
+        },
+
+        "x_offset": 
+        {
+            "value": "-0.5",
+            "range":
+            {
+                "min": "-1.0",
+                "max": "0.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The offset of the CoM in the forward/backward direction in cm"
+        },
+
+        "z_offset": 
+        {
+            "value": "2.0",
+            "type": "float",
+            "range":
+            {
+                "min": "0.5",
+                "max": "5.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The reduction in length of the legs (controls the height of the CoM) in cm"
+        },
+
+        "pitch_offset": 
+        {
+            "value": "-1.0",
+            "range":
+            {
+                "min": "-10.0",
+                "max": "10.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The body orientation relative to the ground about the ANKLE (degrees)"
+        },
+
+        "hip_pitch_offset": 
+        {
+            "value": "13.0",
+            "type": "float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "25.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The torso orientation about the HIP (degrees)"
+        },
+
+        "dsp_ratio": 
+        {
+            "value": "0.2",
+            "type": "float",
+            "range":
+            {
+                "min": "0.1",
+                "max": "0.5",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The fraction of the period spent in double support"
+        },
+
+        "pelvis_offset": 
+        {
+            "value": "3.0",
+            "type": "float",
+            "range":
+            {
+                "min": "-10.0",
+                "max": "10.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "The angle relative to the torso in the y direction the swing leg moves to when swinging in degrees"
+        },
+
+        "step_forward_back_ratio": 
+        {
+            "value": "0.2",
+            "type": "float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "1.0",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "?"
+        },
+
+        "balance_knee_gain": 
+        {
+            "value": "0.3",
+            "type": "float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "1.5",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "Balance control gain on the knee (based on gyro)"
+        },
+
+        "balance_ankle_pitch_gain": 
+        {
+            "value": "0.8",
+            "type": "float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "1.5",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "Balance control gain on the ankle pitch (based on gyro)"
+        },
+
+        "balance_hip_roll_gain": 
+        {
+            "value": "0.4",
+            "type": "float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "1.5",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "Balance control gain on the hip roll (based on gyro)"
+        },
+
+        "balance_ankle_roll_gain": 
+        {
+            "value": "0.8",
+            "type": "float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "1.5",
+                "lBound": "CLOSED",
+                "uBound": "CLOSED",
+                "outside": "false"
+            },
+            "desc": "Balance control gain on the ankle roll (based on gyro)"
+        },
+
+        "ArmGains": 
+        {
+            "value": [["30", "30", "30"]],
+            "type": "vector_vector_float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "0.0",
+                "lBound": "NONE",
+                "uBound": "NONE",
+                "outside": "false"
+            },
+            "desc": "(%)"
+        },
+
+        "TorsoGains": 
+        {
+            "value": [],
+            "type": "vector_vector_float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "0.0",
+                "lBound": "NONE",
+                "uBound": "NONE",
+                "outside": "false"
+            },
+            "desc": "(%)"
+        },
+
+        "LegGains": 
+        {
+            "value": [["65", "80", "80", "65", "65", "65"]],
+            "type": "vector_vector_float",
+            "range":
+            {
+                "min": "0.0",
+                "max": "0.0",
+                "lBound": "NONE",
+                "uBound": "NONE",
+                "outside": "false"
+            },
+            "desc": "(%)"
+        },
+    }
+}

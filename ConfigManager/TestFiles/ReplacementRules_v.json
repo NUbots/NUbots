@@ -1,0 +1,149 @@
+{"ReplacementRules_v": {
+    "fieldnoise_v_large": {
+        "after": {
+            "classes": ["green"],
+            "min": "12",
+            "desc": "12 pix min",
+            "max": "240"
+        },
+        "replacement": "before",
+        "before": {
+            "classes": ["green"],
+            "min": "12",
+            "desc": "12 pix min",
+            "max": "240"
+        },
+        "middle": {
+            "classes": ["unclassified"],
+            "min": "0",
+            "desc": "4 pix max",
+            "max": "4"
+        }
+    },
+    "fieldnoise_v_small": {
+        "after": {
+            "classes": ["green"],
+            "min": "3",
+            "desc": "3 pix min",
+            "max": "240"
+        },
+        "replacement": "before",
+        "before": {
+            "classes": ["green"],
+            "min": "3",
+            "desc": "3 pix min",
+            "max": "240"
+        },
+        "middle": {
+            "classes": ["unclassified"],
+            "min": "0",
+            "desc": "1 pix max",
+            "max": "1"
+        }
+    },
+    "yellowgoal1": {
+        "after": {
+            "classes": ["yellow"],
+            "min": "5",
+            "desc": "5 pix min",
+            "max": "240"
+        },
+        "replacement": "after",
+        "before": {
+            "classes": [],
+            "min": "0",
+            "desc": " pix min",
+            "max": "240"
+        },
+        "middle": {
+            "classes": ["orange"],
+            "min": "0",
+            "desc": "1 pix max",
+            "max": "1"
+        }
+    },
+    "yellowgoal2": {
+        "after": {
+            "classes": [],
+            "min": "0",
+            "desc": "",
+            "max": "240"
+        },
+        "replacement": "before",
+        "before": {
+            "classes": ["yellow"],
+            "min": "5",
+            "desc": "5 pix min",
+            "max": "240"
+        },
+        "middle": {
+            "classes": ["orange"],
+            "min": "0",
+            "desc": "1 pix max",
+            "max": "1"
+        }
+    },
+    "fieldnoise_v_oneway_2": {
+        "after": {
+            "classes": ["green"],
+            "min": "1",
+            "desc": "1 pix min",
+            "max": "240"
+        },
+        "replacement": "before",
+        "before": {
+            "classes": ["green"],
+            "min": "12",
+            "desc": "12 pix min",
+            "max": "240"
+        },
+        "middle": {
+            "classes": ["unclassified"],
+            "min": "0",
+            "desc": "4 pix max",
+            "max": "4"
+        }
+    },
+    "fieldnoise_v_med": {
+        "after": {
+            "classes": ["green"],
+            "min": "6",
+            "desc": "6 pix min",
+            "max": "240"
+        },
+        "replacement": "before",
+        "before": {
+            "classes": ["green"],
+            "min": "6",
+            "desc": "6 pix min",
+            "max": "240"
+        },
+        "middle": {
+            "classes": ["unclassified"],
+            "min": "0",
+            "desc": "2 pix max",
+            "max": "2"
+        }
+    },
+    "fieldnoise_v_oneway_1": {
+        "after": {
+            "classes": ["green"],
+            "min": "12",
+            "desc": "12 pix min",
+            "max": "240"
+        },
+        "replacement": "before",
+        "before": {
+            "classes": ["green"],
+            "min": "1",
+            "desc": "1 pix min",
+            "max": "240"
+        },
+        "middle": {
+            "classes": ["unclassified"],
+            "min": "0",
+            "desc": "4 pix max",
+            "max": "4"
+        }
+    }
+}}
