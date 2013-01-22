@@ -55,9 +55,9 @@ void FourierApproximator::loadApproximator(string agentName)
             function_data << data << " ";
             save_file >> data;
 
-            if (!save_file.good()){
-                cout<<"File Corrupt."<<endl;
-                break;
+            if(!save_file.good()) {
+                //throw string("FourierApproximator::loadApproximator - file corrupt ") + file_name.str();
+                cout<<"FourierApproximator::loadApproximator - file corrupt " << file_name.str()<<endl;
             }
         }
         FourierFunction f;

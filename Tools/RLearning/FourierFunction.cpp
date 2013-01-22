@@ -38,9 +38,7 @@ void FourierFunction::loadSaveData(string save_data_)
 {
     stringstream save_data(save_data_.c_str());
     save_data >> order_k;
-    cout<<"Loaded order = "<< order_k<<endl;
     save_data >> num_inputs_m;
-    cout<<"Loaded input size"<< num_inputs_m<<endl;
     save_data >> max_period;
 
     int fc;

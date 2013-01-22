@@ -41,7 +41,7 @@ public:
 
     virtual void setParameters(float alpha=0.1f, float beta=0.5, float gamma=0.9f, float lambda=0.9f,int learningIterations=1, int memory_length = 10, bool use_soft_max = false);
 
-    virtual int getAction(vector<float> observations);//Must return integer between 0 and numberOfOutputs-1
+    virtual int getAction(vector<float> observations,vector<int> valid_actions);//Must return integer between 0 and numberOfOutputs-1
 
     virtual void giveReward(float reward);
 
@@ -55,7 +55,7 @@ public:
 
 
     vector<float> getValues(vector<float> v);
-    int checkAction(vector<float> obs);
+    int checkAction(vector<float> obs, vector<int> valid_actions);
 
     RLAgent();
     ~RLAgent();
@@ -75,14 +75,15 @@ protected:
 
     vector<int> actions;
     vector<float> last_values;
+    vector<vector<int> > action_validities;
 
     vector<vector<float> > values;
     vector<vector<float> > observations;
     vector<float> rewards;
 
-    float max(vector<float> x);
+    float max(vector<float> x, vector<int> valid_actions);
 
-    int getSoftMaxAction(vector<float> values);
+    int getSoftMaxAction(vector<float> values, vector<int> valid_actions);
 
     bool use_soft_max;
 

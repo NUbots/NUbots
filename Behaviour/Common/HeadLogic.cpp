@@ -234,33 +234,18 @@ std::vector<float> HeadLogic::calculateAmbiguousObjectLocation(AmbiguousObject o
 */
 
 std::vector<float> HeadLogic::calculateStationaryPolarObjectLocation(StationaryObject* ob){
-    std::vector<float> loc;
-    loc.push_back(ob->X());
-    loc.push_back(ob->Y());
-    //cout<<"Object Num "<<ob->getID()<< "Absolute Location ="<<loc[0]<<loc[1]<<endl;
-
-    vector<float> selfLoc = getSelfLocation();
-
-    vector<float> relLoc;
-    relLoc.push_back(loc[0]-selfLoc[0]);
-    relLoc.push_back(loc[1]-selfLoc[1]);
-
-    vector<float> polar;
-    polar.push_back(sqrt(relLoc[0]*relLoc[0]+relLoc[1]*relLoc[1]));
-    if(polar[0] !=0){
-        polar.push_back(asin(relLoc[1]/polar[0]));
-    }else{
-        polar.push_back(0);
-    }
     Self* self =&(Blackboard->Objects->self);
-    float self_heading = self-> Heading();
-    polar[1]=self_heading-polar[1];
+    float bearing = self->CalculateBearingToStationaryObject(*ob);
+    float distance = self->CalculateDistanceToStationaryObject(*ob);
+    vector<float> polar;
+    polar.push_back(distance);
+    polar.push_back(bearing);
     //cout<< "HeadLogic::calculateStationaryPolarObjectLocation : Location (r,theta) = ["<<polar[0]<<", "<<polar[1]<<"]"<<endl;
     return polar;
 }
 std::vector<float> HeadLogic::calculateMobilePolarObjectLocation(MobileObject* ob){
     std::vector<float> loc;
-    if(ob->isObjectVisible()){
+    if(!ob->isObjectVisible()){
         //Get location from vision
         loc.push_back(ob->measuredDistance());
         loc.push_back(ob->measuredBearing());
@@ -276,7 +261,7 @@ std::vector<float> HeadLogic::calculateMobilePolarObjectLocation(MobileObject* o
 }
 std::vector<float> HeadLogic::calculateAmbiguousPolarObjectLocation(AmbiguousObject* ob){
     std::vector<float> loc;
-    if(ob->isObjectVisible()){
+    if(!ob->isObjectVisible()){
         //Get location from vision
         loc.push_back(ob->measuredDistance());
         loc.push_back(ob->measuredBearing());
@@ -595,6 +580,35 @@ std::vector<std::vector<float> > HeadLogic::getObLocSummary(){
     return result;
 }
 
+
+std::vector<int> HeadLogic::getValidObjectsToLookAt()
+{
+    std::vector<float> bearings;
+
+    int object_type = 0;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+        bearings.push_back(calculateStationaryPolarObjectLocation((StationaryObject*)getObject(object_type,relevantObjects[object_type][i]))[1]);
+    }
+    object_type++;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+        bearings.push_back(calculateMobilePolarObjectLocation((MobileObject*)getObject(object_type,relevantObjects[object_type][i]))[1]);
+    }
+    object_type++;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+        bearings.push_back(calculateAmbiguousPolarObjectLocation((AmbiguousObject*)getObject(object_type,relevantObjects[object_type][i]))[1]);
+    }
+    vector<int> validities;
+
+    for(int i = 0;i<bearings.size();i++){
+        if(bearings[i]*bearings[i] <= 2.46/*(pi/2)^2*/)
+            validities.push_back(1);
+        else
+            validities.push_back(0);
+    }
+
+    return validities;
+
+}
 
 
 

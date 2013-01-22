@@ -45,7 +45,6 @@ MRLAgent::MRLAgent():RLAgent()
 
 MRLAgent::~MRLAgent(){
     delete expectation_map;
-
 }
 
 
@@ -54,14 +53,15 @@ MRLAgent::~MRLAgent(){
 */
 void MRLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range){
     FunctionApproximator->initialiseApproximator(numberOfInputs, numberOfOutputs, numberOfHiddens,max_parameter_range);
-    expectation_map->initialiseApproximator(numberOfInputs+1, numberOfInputs,numberOfHiddens);
+    expectation_map->initialiseApproximator(numberOfInputs+1, numberOfInputs,numberOfHiddens,1.0);
     num_inputs = numberOfInputs;
     num_outputs = numberOfOutputs;
     num_hidden = numberOfHiddens;
 
     //Perform initial observations, values and rewards list setups. Required to offset learning updates.
     vector<float> dummy_observation(numberOfInputs,0);
-    getAction(dummy_observation);
+    vector<int> vect(num_outputs,1);
+    getAction(dummy_observation,vect);
     giveMotivationReward();
 }
 
@@ -129,12 +129,12 @@ void MRLAgent::giveMotivationReward(){
         novelty+= diff*diff;
     }
 
-
+    cout<<"Novelty = "<<novelty<<endl;
     //Do learning for expectation_map
     expectation_map->doLearningEpisode(obs,val,1.0,1);
 
     float motivation = wundtFunction(novelty);
-    cout<<"MRLAGENT:: giveMotivationReward - novelty = "<<novelty<<endl;
+    cout<<"MRLAGENT:: giveMotivationReward - novelty = "<<novelty<< " Reward = "<< motivation<<endl;
     giveReward(motivation);
 
    /*OLD NOVELTY
@@ -168,16 +168,17 @@ void MRLAgent::giveMotivationReward(){
         The most important parameters are N1 and N2, which give the rise and fall points of the distribution respectively.
 */
 float MRLAgent::wundtFunction(float N){
-    float N1 = 1;//Location of max positive gradient
-    float N2 = 2;//Location of max negative gradient
+    //Set for the robot motivation headbehaviour learner.
+    float N1 = 100;//Location of max positive gradient
+    float N2 = 200;//Location of max negative gradient
 
     float M1 = 1;//Maximum motivation offset (eg: M1=2, M2 = 0, baseline = -1 gives range -1 to 1)
     float M2 = 0;//Minimum motivation offset
     float baseline = 0;
     float M3 = M2-M1;//maximum negative reward
 
-    float p1 = 1;//Max pos gradient
-    float p2 = 1;//Max negative gradient
+    float p1 = 0.05;//Max pos gradient
+    float p2 = 0.05;//Max negative gradient
 
     //Positive reward
     float F1 = M1/(1+exp(-p1*(N-N1)));
@@ -196,8 +197,8 @@ float MRLAgent::wundtFunction(float N){
 
  /*! @brief Main loop for MRLAgent. Returns the agents decision as an integer as to which action to take. Also performs the learning for the secand last state-action pair.
   */
- int MRLAgent::getActionAndLearn(vector<float> observations){
-     int action = getAction(observations);
+ int MRLAgent::getActionAndLearn(vector<float> observations, vector<int> valid_actions){
+     int action = getAction(observations,valid_actions);
      giveMotivationReward();
      doLearning();
      return action;

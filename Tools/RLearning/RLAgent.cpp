@@ -58,7 +58,8 @@ void RLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numbe
 
     //Perform initreturnial observations, values and rewards list setups. Required to offset learning updates.
     vector<float> dummy_observation(numberOfInputs,0);
-    getAction(dummy_observation);    
+    vector<int> vect(num_outputs,1);
+    getAction(dummy_observation,vect);
     giveReward(0);
 
 }
@@ -128,8 +129,14 @@ void RLAgent::saveAgent(string agentName){
     for(int i = 0; i<memory_size; i++){
          save_file<<actions[i]<<" ";
     }
-
-
+    save_file <<"\n";
+    //save action validities
+    for(int i =0; i< memory_size;i++){
+        for (int j=0;j<action_validities[i].size();j++){
+            save_file<<action_validities[i][j]<<" ";
+        }
+        save_file <<"\n";
+    }
     cout<<"RLAgent Saved Successfully"<<endl;
     save_file.close();
 
@@ -209,12 +216,23 @@ void RLAgent::loadAgent(string agentName){
         load_file >> actions[i];
     }
 
-    cout<<"RLAgent loaded successfully.";
+    vector<vector<int> > validities(memory_size, vector<int> (num_outputs,1));
+    action_validities = validities;
+    //Load validities
+    for(int i =0; i< memory_size;i++){
+        for (int j=0;j<action_validities[i].size();j++){
+            load_file>>action_validities[i][j];
+            //cout<<"Values: " << values[i][j]<< endl;
+        }
+    }
+
     if(num_inputs == 0 or
         num_outputs == 0 or
         num_hidden == 0 )  {
         throw string("RLAgent::loadAgent - warning: num_inputs,outputs or hiddens are zero") + file_name.str();
     }
+    cout<<"RLAgent loaded successfully.";
+
     load_file.close();
 }
 
@@ -263,12 +281,20 @@ void RLAgent::giveReward(float reward){
         Picks the action that will maximise reward based on the function approximator. Returns an int between 0 and num_outputs-1.
         By default this method stores data for learning: observations.
 */
-int RLAgent::getAction(vector<float> observation){
+int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
 
-
+    if(valid_actions.size()!=num_outputs)
+        throw string("RLAgent::getAction - valid actions list is incorrect length.");
     int BestAction = 0;
-    //Store observation for learning later on:
+    //Store observation and validities for learning later on:
     observations.push_back(observation);
+    action_validities.push_back(valid_actions);
+    //Count the number of valid actions:
+    int num_valid_actions = 0;
+    for (int i = 0; i<valid_actions.size();i++){
+        num_valid_actions+=valid_actions.size();
+    }
+
 
     //Logging:
     stringstream text;
@@ -283,27 +309,37 @@ int RLAgent::getAction(vector<float> observation){
 
     //Store last values
     last_values = FunctionApproximator->getValues(observation);
-
     //Beta-greedy or softmax action choice:
     if (beta*RAND_MAX>rand() or use_soft_max){
-
         //randomly select action with probability beta
         if (use_soft_max){
-
-            BestAction = getSoftMaxAction(last_values);
-
+            BestAction = getSoftMaxAction(last_values, valid_actions);
         }else{
+            if (num_valid_actions!=0){
+                //Choose random action number
+                int action_num = rand()%(num_valid_actions)+1;
+                //count through valid actions until action_num counted
+                int counted_valid_actions = 0;
+                for(int i = 0; i<valid_actions.size();i++){
+                    counted_valid_actions+=valid_actions[i];
+                    if(counted_valid_actions == action_num){
+                        BestAction = i;
+                        break;
+                    }
 
-            if (num_outputs!=0)
-                BestAction = rand()%num_outputs;
+                }
+            }
             else
+            {
+                cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<endl;
+                BestAction = rand()%(num_outputs);
+            }
+                //throw string("RLAgent::getAction - warning: num_valid_actions is zero. Attempted rand()%num_outputs");
 
-                throw string("RLAgent::getAction - warning: num_outputs is zero. Attempted rand()%num_outputs");
         }
 
         actions.push_back(BestAction);
 
-        (BestAction);
         //Logging:
         stringstream text2;
         text2 << "Action Taken: "<<BestAction<<" \n";
@@ -322,7 +358,7 @@ int RLAgent::getAction(vector<float> observation){
     bool allEqual = true;
     //Search for best action by finding largest value:
     for(int i = 0; i<last_values.size();i++){
-        if (BestReward<last_values[i]){
+        if (BestReward<last_values[i] and valid_actions[i]!=0){
             BestReward=last_values[i];
             BestAction=i;
             allEqual=false;
@@ -332,10 +368,24 @@ int RLAgent::getAction(vector<float> observation){
     }
 
     if (allEqual/*Return random selection*/){
-        if (num_outputs!=0)
-            BestAction = rand()%num_outputs;
-        else
-            throw string("RLAgent::getAction - warning: num_outputs is zero. Attempted rand()%num_outputs");
+        if (num_valid_actions!=0){
+            //Choose random action number
+            int action_num = rand()%(num_valid_actions)+1;
+            //count through valid actions until action_num counted
+            int counted_valid_actions = 0;
+            for(int i = 0; i<valid_actions.size();i++){
+                counted_valid_actions+=valid_actions[i];
+                if(counted_valid_actions == action_num){
+                    BestAction = i;
+                    break;
+                }
+
+            }
+        }
+        else{
+            cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<endl;
+            BestAction = rand()%(num_outputs);
+        }
 
         actions.push_back(BestAction);
         //Logging:
@@ -373,7 +423,7 @@ void RLAgent::doLearning(){
            // cout<< "value for observation "<< observation_num<< ", action "<< second_last_action<<" of "<<actions.size()<<" updated from: " <<values[observation_num][second_last_action];
 
             //Q-learning:
-            values[observation_num][second_last_action] += alpha*(rewards[observation_num+1]+gamma*max(values[observation_num+1])-values[observation_num][second_last_action]);//Page 55 of MoRL book Merrick+Maher
+            values[observation_num][second_last_action] += alpha*(rewards[observation_num+1]+gamma*max(values[observation_num+1],action_validities[observation_num+1])-values[observation_num][second_last_action]);//Page 55 of MoRL book Merrick+Maher
             //cout<<" to: " <<values[observation_num][second_last_action]<<"\n"<<endl;
             learning_done = true;
 
@@ -387,10 +437,10 @@ void RLAgent::doLearning(){
         values.erase(values.begin(),values.end()-1);
         rewards.erase(rewards.begin(),rewards.end()-1);
         actions.erase(actions.begin(),actions.end()-1);
-
+        action_validities.erase(action_validities.begin(),action_validities.end()-1);
 
     }
-    ;
+
 
 }
 
@@ -398,10 +448,13 @@ void RLAgent::doLearning(){
         Returns the maximum value of the floats in a vector<float>.
 */
 
-float RLAgent::max(vector<float> x){
-    float best_value = x[0];
-    for(int i=1; i<x.size();i++){
-        if (best_value<x[i]) best_value=x[i];
+float RLAgent::max(vector<float> x, vector<int> valid_actions){
+    //Randomly choose start vector
+    int ran = rand()%num_outputs;
+    //choose best valid action value
+    float best_value = x[ran];
+    for(int i=0; i<x.size();i++){
+        if (best_value<x[i] and valid_actions[i]!=0) best_value=x[i];
     }
     return best_value;
 }
@@ -433,30 +486,30 @@ vector<float> RLAgent::getValues(vector<float> v){
        Checks the policy at state obs WITHOUT recording the action, reward, value, observation for learning.
         Will not choose with epsilon-greedy but will choose with softmax if set use_soft_max == true.
 */
-int RLAgent::checkAction(vector<float> obs){
+int RLAgent::checkAction(vector<float> obs, vector<int> valid_actions){
+    if(valid_actions.size()!=num_outputs)
+        throw string("RLAgent::getAction - valid actions list is incorrect length.");
     vector<float> values = FunctionApproximator->getValues(obs);
-    if (use_soft_max) return getSoftMaxAction(values);
+    if (use_soft_max) return getSoftMaxAction(values,valid_actions);
     int BestAction = 0;
     float BestReward = values[0];
     //Check if all values equal:
-
     for(int i = 0; i<values.size();i++){
-        if (BestReward<values[i]){
+        if (BestReward<values[i] and valid_actions[i]!=0){
             BestReward=values[i];
             BestAction=i;
-
         }
     }
     return BestAction;
 }
 
-int  RLAgent::getSoftMaxAction(vector<float> values){
+int  RLAgent::getSoftMaxAction(vector<float> values, vector<int> valid_actions){
 
     vector<float> probabilities;
     //calculate non-normalised probabilities
     float total_non_normalised =0;
     for(int i = 0; i<values.size();i++){
-        float prob = exp(values[i]/beta);
+        float prob = valid_actions[i]*exp(values[i]/beta);
         probabilities.push_back(prob);
         total_non_normalised +=prob;
 

@@ -53,7 +53,7 @@ public:
 
     void giveMotivationReward();
     float wundtFunction(float N);
-    int getActionAndLearn(vector<float> observations);
+    int getActionAndLearn(vector<float> observations, vector<int> valid_actions);
     void saveMRLAgent(string agentName);
     void loadMRLAgent(string agentName);
 
