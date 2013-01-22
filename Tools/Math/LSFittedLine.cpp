@@ -180,7 +180,7 @@ double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
         //determine distances from the two possible pairings
         double d1 = 0.5*( (p11-p21).abs() + (p12-p22).abs() ),
                d2 = 0.5*( (p12-p21).abs() + (p11-p22).abs() );
-        return min(d1, d2); //return best pairing
+        return min(d1, d2); //best pairing results in minimum distance
     }
     else {
         return -1.0;    //test for this - distances should always be positive
