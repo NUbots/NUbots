@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <boost/foreach.hpp>
 
-
-
 GoalDetectorRANSAC::GoalDetectorRANSAC()
 {
     m_n = 10;               //min pts to line essentially

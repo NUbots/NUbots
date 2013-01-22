@@ -1,20 +1,32 @@
-INCLUDEPATH += /usr/local/include/opencv2/
-INCLUDEPATH += /usr/include/boost/
 
-LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+win32{
+    INCLUDEPATH += 'C:\Program Files\Boost\boost_1_52_0'
+    INCLUDEPATH += 'C:\Program Files\OpenCV\include\opencv2'
+    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\core\include'
+    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\highgui\include'
+    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\imgproc\include'
+    DEFINES += TARGET_OS_IS_WINDOWS
+}
+
+!macx{
+    !win32{
+        INCLUDEPATH += /usr/local/include/opencv2/
+        INCLUDEPATH += /usr/include/boost/
+
+        LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+    }
+}
 
 DEFINES += QT_NO_DEBUG_STREAM
 
-PLATFORM = pc
+INCLUDEPATH += ../
+INCLUDEPATH += ../Autoconfig/
+
+PLATFORM = win
 
 contains(PLATFORM, "darwin") {
     message("Compiling for Darwin")
     DEFINES += TARGET_IS_DARWIN
-
-    ROBOCUP_DIR = ${HOME}/robocup/            #change to darwin directory later
-
-    INCLUDEPATH += $$ROBOCUP_DIR
-    INCLUDEPATH += $$ROBOCUP_DIR/Autoconfig/
     
     HEADERS += \
         NUPlatform/Platforms/Darwin/DarwinCamera.h \
@@ -33,11 +45,6 @@ contains(PLATFORM, "pc") {
      message("Compiling for PC")
     DEFINES += TARGET_IS_PC
 
-    ROBOCUP_DIR = ${HOME}/robocup/
-
-    INCLUDEPATH += $$ROBOCUP_DIR/
-    INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
-  
     HEADERS += \
         VisionTools/pccamera.h \
         VisionWrapper/datawrapperpc.h \
@@ -52,14 +59,26 @@ contains(PLATFORM, "pc") {
         VisionWrapper/visioncontrolwrapperpc.cpp\
 }
 
+contains(PLATFORM, "win") {
+     message("Compiling for Windows")
+    DEFINES += TARGET_IS_PC
+
+    HEADERS += \
+        VisionWrapper/datawrapperpc.h \
+        VisionWrapper/visioncontrolwrapperpc.h \
+        ../Vision/Debug/debugverbosityvision.h \
+        ../Vision/Debug/debug.h \
+        ../Vision/Debug/nubotdataconfig.h \
+
+    SOURCES += \
+        VisionWrapper/datawrapperpc.cpp \
+        VisionWrapper/visioncontrolwrapperpc.cpp\
+}
+
+
 contains(PLATFORM, "rpi") {
      message("Compiling for RPi")
     DEFINES += TARGET_IS_RPI
-
-    ROBOCUP_DIR = ${HOME}/robocup/
-
-    INCLUDEPATH += $$ROBOCUP_DIR/
-    INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
 
     HEADERS += \
         VisionTools/pccamera.h \
