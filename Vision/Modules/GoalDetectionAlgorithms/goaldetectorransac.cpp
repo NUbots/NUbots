@@ -58,6 +58,8 @@ void GoalDetectorRANSAC::run()
         //MAKE QUADS FROM LINES
         candidates = buildQuadsFromLines(start_lines, end_lines, TOL);
 
+        cout << endl;
+
         BOOST_FOREACH(Quad q, candidates) {
             q.render(mat, cv::Scalar(255, 255, 0), true);
         }
@@ -142,57 +144,94 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine>&
 
     vector<Quad> quads;
     vector<bool> used(end_lines.size(), false);
+    vector<bool> tried(end_lines.size(), false);
 
     BOOST_FOREACH(const LSFittedLine& s, start_lines) {
+        vector<bool> tried(used);   //consider all used lines tried
+        vector<LSFittedLine>::const_iterator e_it;
         vector<bool>::iterator u = used.begin();
-        BOOST_FOREACH(const LSFittedLine& e, end_lines) {
-            //check if the end line has already been used
-            if(!(*u)) {
-                //check angles
-                if(s.getAngleBetween(e) < tolerance*mathGeneral::PI*0.5) { //dodgy way (linear with angle between)
-                //if(min(a1/a2, a2/a1) <= (1-tolerance)) {
-                    //get the end points of each line
-                    Point sp1 = s.getLeftPoint(),
-                          sp2 = s.getRightPoint(),
-                          ep1 = e.getLeftPoint(),
-                          ep2 = e.getRightPoint();
-                    //find lengths of line segments
-                    double l1 = (sp1 - sp2).abs(),
-                           l2 = (ep1 - ep2).abs();
-                    //check lengths
-                    if(min(l1/l2, l2/l1) >= (1-tolerance)) {
-                        //get num points
-                        double n1 = s.getNumPoints(),
-                               n2 = e.getNumPoints();
-                        if(min(n1/n2, n2/n1) >= (1-tolerance)) {
-                            //success
-                            //order points
-                            if(sp1.y < sp2.y) {
-                                swap(sp1, sp2);
-                            }
-                            if(ep1.y < ep2.y) {
-                                swap(ep1, ep2);
-                            }
-                            quads.push_back(Quad(sp1, sp2, ep2, ep1));  //generate candidate
-                            *u = true;  //remove end line from consideration
-                            cout << "success " << sp1 << sp2 << ep2 << ep1 << endl;
-                            break;  //do not consider any more lines
 
+        //try end lines in order of closeness
+        for(e_it = getClosestUntriedLine(s, end_lines, tried);
+            e_it != end_lines.end();
+            e_it = getClosestUntriedLine(s, end_lines, tried), u++) {
+
+            const LSFittedLine& e = *e_it;
+            //check if the end line has already been used
+            cout << s.getLeftPoint().x << " " << e.getLeftPoint().x << endl;
+
+            //check angles
+            if(s.getAngleBetween(e) < tolerance*mathGeneral::PI*0.5) { //dodgy way (linear with angle between)
+            //if(min(a1/a2, a2/a1) <= (1-tolerance)) {
+                //get the end points of each line
+                Point sp1 = s.getLeftPoint(),
+                      sp2 = s.getRightPoint(),
+                      ep1 = e.getLeftPoint(),
+                      ep2 = e.getRightPoint();
+                //find lengths of line segments
+                double l1 = (sp1 - sp2).abs(),
+                       l2 = (ep1 - ep2).abs();
+                //check lengths
+                if(min(l1/l2, l2/l1) >= (1-tolerance)) {
+                    //get num points
+                    double n1 = s.getNumPoints(),
+                           n2 = e.getNumPoints();
+                    if(min(n1/n2, n2/n1) >= (1-tolerance)) {
+                        //success
+                        //order points
+                        if(sp1.y < sp2.y) {
+                            swap(sp1, sp2);
                         }
-                        else
-                            cout << "num points fail: " << n1 << " " << n2 << endl;
+                        if(ep1.y < ep2.y) {
+                            swap(ep1, ep2);
+                        }
+                        quads.push_back(Quad(sp1, sp2, ep2, ep1));  //generate candidate
+                        *u = true;  //remove end line from consideration
+                        cout << "success " << sp1 << sp2 << ep2 << ep1 << endl;
+                        break;  //do not consider any more lines
+
                     }
                     else
-                        cout << "length fail: " << l1 << " " << l2 << endl;
+                        cout << "num points fail: " << n1 << " " << n2 << endl;
                 }
                 else
-                    cout << "angle fail: " << s.getAngleBetween(e) << " > " << tolerance*mathGeneral::PI*0.5 << endl;
+                    cout << "length fail: " << l1 << " " << l2 << endl;
             }
-            u++;
+            else
+                cout << "angle fail: " << s.getAngleBetween(e) << " > " << tolerance*mathGeneral::PI*0.5 << endl;
         }
     }
 
     return quads;
+}
+
+vector<LSFittedLine>::const_iterator GoalDetectorRANSAC::getClosestUntriedLine(const LSFittedLine& start, const vector<LSFittedLine>& end_lines, vector<bool>& tried)
+{
+    if(end_lines.size() != tried.size())
+        throw "GoalDetectorRANSAC::getClosestUntriedLine - 'end_lines' must match 'tried' in size";
+
+    vector<LSFittedLine>::const_iterator it,
+                                         best = end_lines.end();    //so if none is found
+    vector<bool>::iterator t, t_best;
+    double d_best = std::numeric_limits<double>::max();
+
+    for(it = end_lines.begin(), t=tried.begin(); it != end_lines.end(); it++, t++) {
+        //check if tried yet
+        if(!(*t)) {
+            //check if distance is smallest
+            double d = start.averageDistanceBetween(*it);
+            if(d < d_best) {
+                t_best = t;
+                best = it;
+                d_best = d;
+            }
+        }
+    }
+
+    if(best != end_lines.end())
+        *t_best = true; //mark as used
+
+    return best;
 }
 
 vector<Point> GoalDetectorRANSAC::getEdgePointsFromSegments(const vector<ColourSegment> &segments)

@@ -16,11 +16,16 @@ public:
     void run();
 
 private:
-    vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
-
     vector<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines,
                                      const vector<LSFittedLine>& end_lines,
                                      double tolerance);
+
+    vector<LSFittedLine>::const_iterator getClosestUntriedLine(const LSFittedLine& start,
+                                                               const vector<LSFittedLine>& end_lines,
+                                                               vector<bool>& tried);
+
+    vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
+
 
 /*    unsigned*/ int m_n,
                  m_k,
