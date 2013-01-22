@@ -236,12 +236,8 @@ double Line::getAngleBetween(Line other) const
 {
     double angle = abs(getAngle() - other.getAngle());
 
-    cout << "angles: " << getAngle() << " " << other.getAngle() << " " << angle;
-
     if(angle > mathGeneral::PI*0.5)
         angle = mathGeneral::PI - angle;
-
-    cout << " " << angle << endl;
 
     return angle;
 }

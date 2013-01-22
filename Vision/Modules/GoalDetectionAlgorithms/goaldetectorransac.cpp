@@ -52,13 +52,14 @@ void GoalDetectorRANSAC::run()
     char c = 0;
     cv::namedWindow("blah");
     cv::createTrackbar("tolerance [0, 1]", "blah", 0, PRECIS, set);
+    cv::Mat mat(vbb->getOriginalImage().getHeight(), vbb->getOriginalImage().getWidth(), CV_8U);
     while(c != 27) {
-        cv::Mat mat(vbb->getOriginalImage().getHeight(), vbb->getOriginalImage().getWidth(), CV_8U);
+        mat = cv::Scalar(0,0,0);
 
+        cout << endl;
         //MAKE QUADS FROM LINES
         candidates = buildQuadsFromLines(start_lines, end_lines, TOL);
 
-        cout << endl;
 
         BOOST_FOREACH(Quad q, candidates) {
             q.render(mat, cv::Scalar(255, 255, 0), true);
@@ -144,21 +145,18 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine>&
 
     vector<Quad> quads;
     vector<bool> used(end_lines.size(), false);
-    vector<bool> tried(end_lines.size(), false);
 
     BOOST_FOREACH(const LSFittedLine& s, start_lines) {
         vector<bool> tried(used);   //consider all used lines tried
         vector<LSFittedLine>::const_iterator e_it;
-        vector<bool>::iterator u = used.begin();
 
         //try end lines in order of closeness
-        for(e_it = getClosestUntriedLine(s, end_lines, tried);
-            e_it != end_lines.end();
-            e_it = getClosestUntriedLine(s, end_lines, tried), u++) {
+        for(unsigned int i = getClosestUntriedLine(s, end_lines, tried);
+            i < end_lines.size();
+            i = getClosestUntriedLine(s, end_lines, tried)) {
 
-            const LSFittedLine& e = *e_it;
-            //check if the end line has already been used
-            cout << s.getLeftPoint().x << " " << e.getLeftPoint().x << endl;
+            const LSFittedLine& e = end_lines.at(i);
+            cout << 0.5*(s.getLeftPoint().x + s.getRightPoint().x) << " " << 0.5*(e.getLeftPoint().x + e.getRightPoint().x) << endl;
 
             //check angles
             if(s.getAngleBetween(e) < tolerance*mathGeneral::PI*0.5) { //dodgy way (linear with angle between)
@@ -177,19 +175,23 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine>&
                     double n1 = s.getNumPoints(),
                            n2 = e.getNumPoints();
                     if(min(n1/n2, n2/n1) >= (1-tolerance)) {
-                        //success
-                        //order points
-                        if(sp1.y < sp2.y) {
-                            swap(sp1, sp2);
+                        //check start is to left of end
+                        if(0.5*(sp1.x + sp2.x) < 0.5*(ep1.x + ep2.x)) {
+                            //success
+                            //order points
+                            if(sp1.y < sp2.y) {
+                                swap(sp1, sp2);
+                            }
+                            if(ep1.y < ep2.y) {
+                                swap(ep1, ep2);
+                            }
+                            quads.push_back(Quad(sp1, sp2, ep2, ep1));  //generate candidate
+                            used.at(i) = true;  //remove end line from consideration
+                            cout << "success " << sp1 << sp2 << ep2 << ep1 << endl;
+                            break;  //do not consider any more lines
                         }
-                        if(ep1.y < ep2.y) {
-                            swap(ep1, ep2);
-                        }
-                        quads.push_back(Quad(sp1, sp2, ep2, ep1));  //generate candidate
-                        *u = true;  //remove end line from consideration
-                        cout << "success " << sp1 << sp2 << ep2 << ep1 << endl;
-                        break;  //do not consider any more lines
-
+                        else
+                            cout << "line ordering fail: " << 0.5*(sp1.x + sp2.x) << " " << 0.5*(ep1.x + ep2.x) << endl;
                     }
                     else
                         cout << "num points fail: " << n1 << " " << n2 << endl;
@@ -205,31 +207,28 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine>&
     return quads;
 }
 
-vector<LSFittedLine>::const_iterator GoalDetectorRANSAC::getClosestUntriedLine(const LSFittedLine& start, const vector<LSFittedLine>& end_lines, vector<bool>& tried)
+unsigned int GoalDetectorRANSAC::getClosestUntriedLine(const LSFittedLine& start, const vector<LSFittedLine>& end_lines, vector<bool>& tried)
 {
     if(end_lines.size() != tried.size())
         throw "GoalDetectorRANSAC::getClosestUntriedLine - 'end_lines' must match 'tried' in size";
 
-    vector<LSFittedLine>::const_iterator it,
-                                         best = end_lines.end();    //so if none is found
-    vector<bool>::iterator t, t_best;
+    unsigned int best = end_lines.size();   //for if all have been tried
     double d_best = std::numeric_limits<double>::max();
 
-    for(it = end_lines.begin(), t=tried.begin(); it != end_lines.end(); it++, t++) {
+    for(unsigned int i = 0; i < end_lines.size(); i++) {
         //check if tried yet
-        if(!(*t)) {
+        if(!tried[i]) {
             //check if distance is smallest
-            double d = start.averageDistanceBetween(*it);
+            double d = start.averageDistanceBetween(end_lines[i]);
             if(d < d_best) {
-                t_best = t;
-                best = it;
+                best = i;
                 d_best = d;
             }
         }
     }
 
-    if(best != end_lines.end())
-        *t_best = true; //mark as used
+    if(best < end_lines.end())
+        tried[best] = true; //mark as used
 
     return best;
 }

@@ -20,9 +20,9 @@ private:
                                      const vector<LSFittedLine>& end_lines,
                                      double tolerance);
 
-    vector<LSFittedLine>::const_iterator getClosestUntriedLine(const LSFittedLine& start,
-                                                               const vector<LSFittedLine>& end_lines,
-                                                               vector<bool>& tried);
+    unsigned int getClosestUntriedLine(const LSFittedLine& start,
+                                       const vector<LSFittedLine>& end_lines,
+                                       vector<bool>& tried);
 
     vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
 
