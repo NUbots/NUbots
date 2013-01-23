@@ -82,7 +82,7 @@ namespace ConfigSystem
             //! Sets the description of this ConfigParameter.
             void setDescription(std::string new_desc);
 
-            // NOTE: Changing the type of a ConfigParameter is dangerous
+            // NOTE: Changing the type of a ConfigParameter is dangerous.
             // //! Set an enum value representing the type of this parameter's value.
             // void setType(value_type new_val_type);
 
@@ -134,7 +134,7 @@ namespace ConfigSystem
             bool setValue(std::string         &value);
             bool setValue(std::vector<long>   &value);
             bool setValue(std::vector<double> &value);
-            
+
             bool getValue(bool                &value);
             bool getValue(long                &value);
             bool getValue(double              &value);

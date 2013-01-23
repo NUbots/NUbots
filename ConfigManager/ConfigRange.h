@@ -101,15 +101,15 @@ namespace ConfigSystem
 			BoundType getLowerBoundType();
 			
 			
-
-
+            //! Returns whether the given value satisfies the constraints specified
+            //! by this range object.
+            bool test(T value);
 		    bool test(std::vector<T> values);
-            
-		    //! Returns whether the given value satisfies the constraints specified
-		    //! by this range object.
-		    bool test(T value);
 		    
 		    
+            bool clip(T &value);
+            bool clip(std::vector<T> &values);
+
 		private:
 		    //! Minimum and maximum values in the range
 		    T _min, _max;

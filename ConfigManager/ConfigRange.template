@@ -118,13 +118,9 @@ namespace ConfigSystem
 	}
 	
 	
-	
-	
-	
-	
 	//(values as reference?)
 	template<typename T>
-	bool ConfigRange<T>::test(std::vector<T> values)
+    bool ConfigRange<T>::test(std::vector<T> values)
     {
         BOOST_FOREACH(T &val, values)
         {
@@ -133,6 +129,18 @@ namespace ConfigSystem
 
         return true;
     }
+
+    template<typename T>
+    bool ConfigRange<T>::clip(std::vector<T> &values)
+    {
+        BOOST_FOREACH(T &val, values)
+        {
+            if(!clip(val)) return false;
+        }
+
+        return true;
+    }
+
     
     //! Returns whether the given value satisfies the constraints specified
     //! by this range object. (value as reference?)
@@ -177,12 +185,75 @@ namespace ConfigSystem
             if(lbC   && valGL  && valLU) return false; // ...] >  x <  ?...
             if(lbC   && valGEL && valLU) return false; // ...] >= x <  ?...
             
-            if(valGL && valLU  && ubO  ) return false; // ...? >  x <  )...
-            if(valGL && valLEU && ubO  ) return false; // ...? >  x <= )...
-            if(valGL && valLU  && ubC  ) return false; // ...? >  x <  ]...
-            if(valGL && valLEU && ubC  ) return false; // ...? >  x <= ]...
+            if(valGL && valLU  && ubO  ) return false; // ...? >  x <  (...
+            if(valGL && valLEU && ubO  ) return false; // ...? >  x <= (...
+            if(valGL && valLU  && ubC  ) return false; // ...? >  x <  [...
+            if(valGL && valLEU && ubC  ) return false; // ...? >  x <= [...
         }
 
         return true;
+    }
+
+
+    //! clips the given value (against active bounds, which are assumed
+    //! to be CLOSED) to lie within it's allowable range.
+    //! returns whether or not the value was clipped.
+    template<typename T>
+    bool ConfigRange<T>::clip(T &value)
+    {
+        // Comparisons (unnecessary comparisons, etc. will hopefully be 
+        // optimised away by the compiler).
+
+        bool valLU  = value <  _max;
+        bool valGU  = value >  _max;
+        bool valLL  = value <  _min;
+        bool valGL  = value >  _min;
+
+        bool lbN = (_lBound == NONE  );
+        bool ubN = (_uBound == NONE  );
+        bool lbA = !lbN; // A <==> 'active'
+        bool ubA = !ubN;
+
+        if(!_outside) // [...]
+        {
+            // If value must be less than max and greater than min
+
+            if(valLL  && lbA) // x < [...
+            {
+                value = _min;
+                return true;
+            }
+
+            if(valGU  && ubA) // ...] < x
+            {
+                value = _max;
+                return true;
+            }
+        }
+        else // ...] [...
+        {
+            // If value must be either greater than max or less than min
+            T avg = (_max + _min) / 2.0;
+
+            if(lbA && ubA && valGL  && valLU) // ...] >  x <  [...
+            {
+                value = (value < avg)? _min : _max;
+                return true;
+            }
+
+            if(lbA && !ubA && valGL) // ...] >  x
+            {
+                value = _min;
+                return true;
+            }
+            
+            if(valLU  && !lbA && ubA  ) // x <  [...
+            {
+                value = _max;
+                return true;
+            }
+        }
+
+        return false;
     }
 }

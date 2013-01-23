@@ -192,7 +192,7 @@ namespace ConfigSystem
         
         return true;
     }
-
+    
     bool ConfigParameter::setValue_double(double &value)
     {
         if( param_value.val_type != vt_double) return false;
@@ -203,7 +203,7 @@ namespace ConfigSystem
         
         return true;
     }
-
+    
     bool ConfigParameter::setValue_string(std::string &value)
     {
         if( param_value.val_type != vt_string) return false;
@@ -214,7 +214,7 @@ namespace ConfigSystem
         
         return true;
     }
-
+    
     bool ConfigParameter::setValue_vector_long(std::vector<long> &value)
     {
         if( param_value.val_type != vt_1dvector_long) return false;
@@ -225,7 +225,7 @@ namespace ConfigSystem
         
         return true;
     }
-
+    
     bool ConfigParameter::setValue_vector_double(std::vector<double> &value)
     {
         if( param_value.val_type != vt_1dvector_double) return false;
@@ -236,7 +236,7 @@ namespace ConfigSystem
         
         return true;
     }
-
+    
     // Overloaded getters and setters
     bool ConfigParameter::setValue(bool                &value)
     { 
