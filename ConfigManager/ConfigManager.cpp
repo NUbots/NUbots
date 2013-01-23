@@ -178,7 +178,7 @@ namespace ConfigSystem
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
-    
+
     /*! @brief Stores the given string  data value into the config system at the given path. */
     bool ConfigManager::storeStringValue (const string &paramPath,
                                           const string &paramName,
@@ -193,4 +193,51 @@ namespace ConfigSystem
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
 
+
+    
+    bool ConfigManager::readDoubleRange(const string &paramPath, 
+                                        const string &paramName, 
+                            ConfigRange<double> &range)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        return cp.getRange(range);
+    }
+    bool ConfigManager::readLongRange  (const string &paramPath, 
+                                        const string &paramName, 
+                                        ConfigRange<long> &range)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        return cp.getRange(range);
+    }
+
+    bool ConfigManager::storeDoubleRange(const string &paramPath, 
+                                        const string &paramName, 
+                                        ConfigRange<double> &range)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        cp.setRange(range); //!< Set the new value
+        //! Store the modified parameter back into the tree
+        return _currConfigTree->storeParam(paramPath, paramName, cp);
+    }
+    bool ConfigManager::storeLongRange (const string &paramPath, 
+                                        const string &paramName, 
+                                        ConfigRange<long> &range)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        cp.setRange(range); //!< Set the new value
+        //! Store the modified parameter back into the tree
+        return _currConfigTree->storeParam(paramPath, paramName, cp);
+    }
 }
