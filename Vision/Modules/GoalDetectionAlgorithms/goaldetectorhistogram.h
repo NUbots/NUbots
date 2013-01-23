@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "Vision/Modules/goaldetector.h"
-#include "Vision/VisionTypes/quad.h"
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/VisionTypes/histogram1D.h"

@@ -1,8 +1,6 @@
 #include "goaldetectorhistogram.h"
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
-#include "Vision/VisionTypes/VisionFieldObjects/goal.h"
-#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 
 #include <limits>
 
@@ -41,40 +39,8 @@ void GoalDetectorHistogram::run()
     //                 re-accessing the image to calculate fully
     //DensityCheck(&yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
 
-    // CREATE POST OBJECTS
-    if (posts.size() != 2) {
-        //unable to identify which post is which
-        //setting all to unknown
-        BOOST_FOREACH(Quad q, posts) {
-            vbb->addGoal(Goal(VisionFieldObject::GOAL_U, q));
-        }
-    }
-    else {
-        //there are exactly two posts, identify each as left or right
-        Quad post1 = posts.at(0),
-             post2 = posts.at(1);
+    vbb->addGoals(assignGoals(posts));
 
-        //calculate separation between posts
-        int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);      // inside right
-        int pos2 = std::max(post1.getBottomLeft().x, post2.getBottomLeft().x);  // inside left
-
-        //only publish if the posts are far enough apart
-        if(std::abs(pos2 - pos1) >= VisionConstants::MIN_GOAL_SEPARATION) {
-            //flip if necessary
-            if (post1.getCentre().x > post2.getCentre().x) {
-                Quad temp = post2;
-                post2 = post1;
-                post1 = temp;
-            }
-
-            //create left and right goals
-            Goal post_left(VisionFieldObject::GOAL_L, post1);
-            Goal post_right(VisionFieldObject::GOAL_R, post2);
-            //add them to the vision blackboard
-            vbb->addGoal(post_left);
-            vbb->addGoal(post_right);
-        }
-    }
 }
 
 void GoalDetectorHistogram::DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)

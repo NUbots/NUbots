@@ -62,7 +62,13 @@ public:
     //void addBeacon(const Beacon& newbeacon);
     void addBall(const Ball& newball);
     void addObstacle(const Obstacle& newobstacle);
-    void addLine(const FieldLine &newline);
+    void addLine(const FieldLine& newline);
+
+    void addGoals(const vector<Goal>& newgoals);
+    //void addBeacons(const vector<Beacon>& newbeacons);
+    void addBalls(const vector<Ball>& newballs);
+    void addObstacles(const vector<Obstacle>& newobstacles);
+    void addLines(const vector<FieldLine>& newlines);
 
 
     //ACCESSORS

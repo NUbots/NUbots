@@ -16,15 +16,6 @@ GoalDetectorRANSAC::GoalDetectorRANSAC()
     m_max_iterations = 3;  //hard limit on number of fitting attempts
 }
 
-#include <opencv2/highgui/highgui.hpp>
-int PRECIS = 100;
-double TOL;
-
-void set(int v, void* p) {
-    TOL = v/(double)PRECIS;
-}
-
-
 void GoalDetectorRANSAC::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -32,46 +23,46 @@ void GoalDetectorRANSAC::run()
     //get transitions associated with goals
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::GOAL_COLOUR);
     //vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::GOAL_COLOUR);
-    vector<Point> start_points, end_points;
-    vector<LSFittedLine> start_lines, end_lines;
+
     vector<Quad> candidates;
 
-    BOOST_FOREACH(ColourSegment s, h_segments) {
-        start_points.push_back(Point(s.getStart().x, s.getStart().y));
-        end_points.push_back(Point(s.getEnd().x, s.getEnd().y));
-    }
+    bool edges = false;
 
-    //use generic ransac implementation to find lines
-    start_lines = RANSAC::findMultipleLines(start_points, m_e, m_n, m_k, m_max_iterations);
-    end_lines = RANSAC::findMultipleLines(end_points, m_e, m_n, m_k, m_max_iterations);
+    if(edges) {
+        //finds the edge lines and constructs goals from that
+        vector<Point> start_points, end_points;
+        vector<LSFittedLine> start_lines, end_lines;
 
-    DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_START, start_lines);
-    DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_END, end_lines);
-
-    //debugging {
-    char c = 0;
-    cv::namedWindow("blah");
-    cv::createTrackbar("tolerance [0, 1]", "blah", 0, PRECIS, set);
-    cv::Mat mat(vbb->getOriginalImage().getHeight(), vbb->getOriginalImage().getWidth(), CV_8U);
-    while(c != 27) {
-        mat = cv::Scalar(0,0,0);
-
-        cout << endl;
-        //MAKE QUADS FROM LINES
-        candidates = buildQuadsFromLines(start_lines, end_lines, TOL);
-
-
-        BOOST_FOREACH(Quad q, candidates) {
-            q.render(mat, cv::Scalar(255, 255, 0), true);
+        //get edge points
+        BOOST_FOREACH(ColourSegment s, h_segments) {
+            start_points.push_back(s.getStart());
+            end_points.push_back(s.getEnd());
         }
 
-        cv::imshow("blah", mat);
+        //use generic ransac implementation to find lines
+        start_lines = RANSAC::findMultipleLines(start_points, m_e, m_n, m_k, m_max_iterations);
+        end_lines = RANSAC::findMultipleLines(end_points, m_e, m_n, m_k, m_max_iterations);
 
-        c = cv::waitKey();
+        DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_START, start_lines);
+        DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_END, end_lines);
+
+        //Build candidates out of lines
+        candidates = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
     }
+    else {
+        vector<Point> points;
+        vector<LSFittedLine> lines;
 
-    // } debugging
+        start_lines = RANSAC::findMultipleLines(start_points, m_e, m_n, m_k, m_max_iterations);
 
+        //get edge points
+        BOOST_FOREACH(ColourSegment s, h_segments) {
+            points.push_back(s.getCentre());
+        }
+    }
+    //PUT SOMETHING IN HERE TO FIND BOTTOM CENTRE USING VERT TRANS
+
+    vbb->addGoals(assignGoals(candidates));
 }
 
 //vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine> &start_lines, const vector<LSFittedLine> &end_lines)
@@ -227,7 +218,7 @@ unsigned int GoalDetectorRANSAC::getClosestUntriedLine(const LSFittedLine& start
         }
     }
 
-    if(best < end_lines.end())
+    if(best < end_lines.size())
         tried[best] = true; //mark as used
 
     return best;

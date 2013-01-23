@@ -4,6 +4,8 @@
 #include <opencv2/core/core.hpp>
 #include "Tools/Math/Vector2.h"
 
+typedef Vector2<double> Point;
+
 namespace VisionID {
     enum ScanDirection {
         VERTICAL,

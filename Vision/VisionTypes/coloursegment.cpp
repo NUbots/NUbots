@@ -1,6 +1,6 @@
 #include "coloursegment.h"
 
-unsigned int dist(const Vector2<double>& x1, const Vector2<double>& x2)
+unsigned int dist(const Point& x1, const Point& x2)
 {
     if(x1.x == x2.x)
         return std::abs(x1.y - x2.y);
@@ -10,21 +10,18 @@ unsigned int dist(const Vector2<double>& x1, const Vector2<double>& x2)
         return (x1 - x2).abs();
 }
 
-void ColourSegment::set(const Vector2<double>& start, const Vector2<double>& end, ClassIndex::Colour colour)
+void ColourSegment::set(const Point& start, const Point& end, ClassIndex::Colour colour)
 {
     m_colour = colour;
     bool flip;
 
     //check if the points are in correct order
-    if(start.x < end.x) {
+    if(start.x < end.x)
         flip = false;
-    }
-    else if(start.x > end.x) {
+    else if(start.x > end.x)
         flip = true;
-    }
-    else {
+    else
         flip = start.y > end.y;
-    }
 
     //swap them if not
     if(flip) {
