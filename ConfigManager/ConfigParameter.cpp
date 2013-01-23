@@ -53,7 +53,7 @@ namespace ConfigSystem
         case vt_1dvector_double: param_value.val_1dvector_double = NULL; break;
         }
     }
-
+    
     //Getting/setting string and general info stuff. 
 	
     std::string ConfigParameter::getName() { return _name; }
@@ -174,7 +174,7 @@ namespace ConfigSystem
     bool ConfigParameter::setValue_bool(bool &value)
     {
         if( param_value.val_type != vt_bool) return false;
-        // if(!param_value.range_bool->test(value)) return false;
+        // if(!param_value.range_bool->apply(value)) return false;
         
         delete param_value.val_bool;
         param_value.val_bool = new bool(value);
@@ -185,7 +185,7 @@ namespace ConfigSystem
     bool ConfigParameter::setValue_long(long &value)
     {
         if( param_value.val_type != vt_long) return false;
-        if(!param_value.range_long->test(value)) return false;
+        if(!param_value.range_long->apply(value)) return false;
         
         delete param_value.val_long;
         param_value.val_long = new long(value);
@@ -196,7 +196,7 @@ namespace ConfigSystem
     bool ConfigParameter::setValue_double(double &value)
     {
         if( param_value.val_type != vt_double) return false;
-        if(!param_value.range_double->test(value)) return false;
+        if(!param_value.range_double->apply(value)) return false;
         
         delete param_value.val_double;
         param_value.val_double = new double(value);
@@ -207,7 +207,7 @@ namespace ConfigSystem
     bool ConfigParameter::setValue_string(std::string &value)
     {
         if( param_value.val_type != vt_string) return false;
-        // if(!param_value.range_string->test(value)) return false;
+        // if(!param_value.range_string->apply(value)) return false;
         
         delete param_value.val_string;
         param_value.val_string = new std::string(value);
@@ -218,7 +218,7 @@ namespace ConfigSystem
     bool ConfigParameter::setValue_vector_long(std::vector<long> &value)
     {
         if( param_value.val_type != vt_1dvector_long) return false;
-        if(!param_value.range_long->test(value)) return false;
+        if(!param_value.range_long->apply(value)) return false;
         
         delete param_value.val_1dvector_long;
         param_value.val_1dvector_long = new std::vector<long> (value);
@@ -229,7 +229,7 @@ namespace ConfigSystem
     bool ConfigParameter::setValue_vector_double(std::vector<double> &value)
     {
         if( param_value.val_type != vt_1dvector_double) return false;
-        if(!param_value.range_double->test(value)) return false;
+        if(!param_value.range_double->apply(value)) return false;
         
         delete param_value.val_1dvector_double;
         param_value.val_1dvector_double = new std::vector<double> (value);

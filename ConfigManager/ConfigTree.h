@@ -72,7 +72,7 @@ namespace ConfigSystem
          *          minimum set of required fields/keys were not present).
          */
         bool ptreeFromParam(ConfigParameter fromParam, ptree &toPtree);
-
+        
         /*! 
          *  @brief  Converts a 'conceptual' path and name into the config 
         *          tree into a full path that refers to the intended data.
@@ -84,11 +84,11 @@ namespace ConfigSystem
             const std::string paramPath,
             const std::string paramName
             );
-
+        
     public:
         ConfigTree(ptree root);
         ~ConfigTree();
-
+        
         /*! 
          *  @brief  Gets a parameter from the ConfigTree
          *  @param paramPath The base path of the parameter.
@@ -101,7 +101,7 @@ namespace ConfigSystem
             const std::string paramName,
             ConfigParameter &data
             );
-
+        
         /*! 
          *  @brief  Stores a parameter into the ConfigTree
          *  @param paramPath The base path of the parameter.
@@ -114,7 +114,7 @@ namespace ConfigSystem
             const std::string paramName, 
             ConfigParameter data
             );
-
+        
         ptree getRoot();
     };
 }

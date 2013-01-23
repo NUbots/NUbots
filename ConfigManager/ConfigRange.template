@@ -1,9 +1,9 @@
 /*! 
-	@file 	ConfigRange.template
-    @brief 	Template implementation file for the ConfigRange class. 
+    @file     ConfigRange.template
+    @brief     Template implementation file for the ConfigRange class. 
  
-    @class 	ConfigRange
-    @brief 	Templated class used for storing ranges.
+    @class     ConfigRange
+    @brief     Templated class used for storing ranges.
 
     @author Sophie Calland, Mitchell Metcalfe 
  
@@ -32,94 +32,107 @@ using std::string;
 
 namespace ConfigSystem
 {
-	//Constructor
-	template<typename T>
-	ConfigRange<T>::ConfigRange(T new_min, T new_max, bool new_outside)
-	{
-		_min     = new_min;
-		_max     = new_max;
-        _outside = new_outside;
-        _lBound  = CLOSED;
-        _uBound  = CLOSED;
-	}
-	
-	//Constructor
-	template<typename T>
-	ConfigRange<T>::ConfigRange(T new_min, T new_max, bool new_outside, BoundType new_lBound, 
-							BoundType new_uBound)
-	{
-		_min     = new_min    ;
-        _max     = new_max    ;
-        _outside = new_outside;
-        _lBound  = new_lBound ;
-        _uBound  = new_uBound ;
-	}
-	
-	//Destructor
-	template<typename T>
-	ConfigRange<T>::~ConfigRange()
-	{
-		// // T is not intended to be a pointer type, so variables of type T
+    //Constructor
+    template<typename T>
+    ConfigRange<T>::ConfigRange(
+        T min, 
+        T max,
+        bool outside, 
+        bool autoClip
+        )
+    {
+        _min      = min     ;
+        _max      = max     ;
+        _outside  = outside ;
+        _autoClip = autoClip;
+        _lBound   = CLOSED  ;
+        _uBound   = CLOSED  ;
+    }
+    
+    //Constructor
+    template<typename T>
+    ConfigRange<T>::ConfigRange(
+        T min, 
+        T max, 
+        bool outside,
+        bool autoClip,
+        BoundType lBound,
+        BoundType uBound
+        )
+    {
+        _min     = min    ;
+        _max     = max    ;
+        _outside = outside;
+        _autoClip = autoClip;
+        _lBound  = lBound ;
+        _uBound  = uBound ;
+    }
+    
+    //Destructor
+    template<typename T>
+    ConfigRange<T>::~ConfigRange()
+    {
+        // // T is not intended to be a pointer type, so variables of type T
         // // should not be deleted.
-		// delete _min;
-		// delete _max;
-	}
-	
-	
-	
-	//Retrieves "_max" member variable
-	template<typename T>
-	T* ConfigRange<T>::getMax()
-	{
-		T *max_ptr = &(_max);
-		
-		return max_ptr;
-	}
+        // delete _min;
+        // delete _max;
+    }
+    
+    
+    
+    //Retrieves "_max" member variable
+    template<typename T>
+    T* ConfigRange<T>::getMax()
+    {
+        T *max_ptr = &(_max);
+        
+        return max_ptr;
+    }
 
-	//Retrieves "_max" member variable
-	template<typename T>
-	const T* ConfigRange<T>::getMax() const
-	{
-		const T *max_ptr = &(_max);
-		
-		return max_ptr;
-	}	
-	
-	//Retrieves "_min" member variable
-	template<typename T>
-	T* ConfigRange<T>::getMin()
-	{
-		T *min_ptr = &(_min);
-		
-		return min_ptr;
-	}	
-	
-	//Retrieves "_min" member variable
-	template<typename T>
-	const T* ConfigRange<T>::getMin() const
-	{
-		T *min_ptr = &(_min);
-		
-		return min_ptr;
-	}	
-	
-	//Retrieves the upper bound type of the range.
-	template<typename T>
-	BoundType ConfigRange<T>::getUpperBoundType()
-	{
-		return _uBound;
-	}
-	
-	//Retrieves the lower bound type of the range.
-	template<typename T>
-	BoundType ConfigRange<T>::getLowerBoundType()
-	{
-		return _lBound;
-	}
-	
-	
-	//(values as reference?)
-	template<typename T>
+    //Retrieves "_max" member variable
+    template<typename T>
+    const T* ConfigRange<T>::getMax() const
+    {
+        const T *max_ptr = &(_max);
+        
+        return max_ptr;
+    }    
+    
+    //Retrieves "_min" member variable
+    template<typename T>
+    T* ConfigRange<T>::getMin()
+    {
+        T *min_ptr = &(_min);
+        
+        return min_ptr;
+    }    
+    
+    //Retrieves "_min" member variable
+    template<typename T>
+    const T* ConfigRange<T>::getMin() const
+    {
+        T *min_ptr = &(_min);
+        
+        return min_ptr;
+    }    
+    
+    //Retrieves the upper bound type of the range.
+    template<typename T>
+    BoundType ConfigRange<T>::getUpperBoundType()
+    {
+        return _uBound;
+    }
+    
+    //Retrieves the lower bound type of the range.
+    template<typename T>
+    BoundType ConfigRange<T>::getLowerBoundType()
+    {
+        return _lBound;
+    }
+    
+    
+    //(values as reference?)
+    template<typename T>
     bool ConfigRange<T>::test(std::vector<T> values)
     {
         BOOST_FOREACH(T &val, values)
@@ -141,6 +154,27 @@ namespace ConfigSystem
         return true;
     }
 
+    template<typename T>
+    bool ConfigRange<T>::apply(std::vector<T> &values)
+    {
+        BOOST_FOREACH(T &val, values)
+        {
+            if(!apply(val)) return false;
+        }
+
+        return true;
+    }
+
+    template<typename T>
+    bool ConfigRange<T>::apply(T &value)
+    {
+        if(_autoClip)
+        {
+            clip(value);
+            return true;
+        }
+        else return test(value);
+    }
     
     //! Returns whether the given value satisfies the constraints specified
     //! by this range object. (value as reference?)

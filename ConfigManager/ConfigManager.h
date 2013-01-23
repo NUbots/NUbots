@@ -68,7 +68,7 @@ namespace ConfigSystem
          */
         bool saveConfiguration(std::string configName);
     	
-
+        
         /*! @brief Reads an integer stored at the given path in the current configuration.
          *  @param paramPath Path to the desired parameter.
          *  @param data variable in which to store the data retrieved.
@@ -79,7 +79,7 @@ namespace ConfigSystem
         bool readFloatValue  (const string &paramPath, const string &paramName, float  &data);
         bool readDoubleValue (const string &paramPath, const string &paramName, double &data);
         bool readStringValue (const string &paramPath, const string &paramName, string &data);
-
+        
         /*! @brief Stores the given integer in the current configuration at the given path.
          *  @param paramPath Path at which to store the parameter.
          *  @param data The data to store.
@@ -90,7 +90,7 @@ namespace ConfigSystem
         bool storeFloatValue  (const string &paramPath, const string &paramName, float  data);
         bool storeDoubleValue (const string &paramPath, const string &paramName, double data);
         bool storeStringValue (const string &paramPath, const string &paramName, string data);
-
+        
         bool storeDoubleRange  (const string &paramPath, 
                                 const string &paramName, 
                                 ConfigRange<double> &range);
@@ -103,7 +103,7 @@ namespace ConfigSystem
         bool readLongRange     (const string &paramPath, 
                                 const string &paramName, 
                                 ConfigRange<long> &range);
-
+        
     private:
         //! The Configuration System's storage manager.
         ConfigStorageManager    *_configStore   ;
