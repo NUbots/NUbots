@@ -40,7 +40,14 @@ namespace ConfigSystem
     {
         // Set the value type to the type specified
         param_value.val_type = val_type;
-
+        
+        // Set default values
+        _name     = "_name";
+        _path     = "_path";
+        _desc     = ""   ;
+        _modified = false;
+        _locked   = false;
+        
         // Set the relevant pointer to NULL initially.
         // (in theory it doesn't matter which...)
         switch(val_type)
@@ -89,7 +96,7 @@ namespace ConfigSystem
     //     param_value.val_type = new_val_type;
     // }
 
-    
+
     bool ConfigParameter::isModified()
     {
         return _modified;
@@ -126,6 +133,7 @@ namespace ConfigSystem
 
     bool ConfigParameter::setRange_long(ConfigRange<long> &range)
     {
+        if(_locked) return false;
         if(param_value.val_type != vt_long) return false;
 
         delete param_value.range_long;
@@ -136,6 +144,7 @@ namespace ConfigSystem
 
     bool ConfigParameter::setRange_double(ConfigRange<double> &range)
     {
+        if(_locked) return false;
         if(param_value.val_type != vt_double) return false;
         
         delete param_value.range_double;
@@ -190,6 +199,7 @@ namespace ConfigSystem
 
     bool ConfigParameter::setValue_bool(bool &value)
     {
+        if(_locked) return false;
         if( param_value.val_type != vt_bool) return false;
         // if(!param_value.range_bool->apply(value)) return false;
         
@@ -201,6 +211,7 @@ namespace ConfigSystem
 
     bool ConfigParameter::setValue_long(long &value)
     {
+        if(_locked) return false;
         if( param_value.val_type != vt_long) return false;
         if(!param_value.range_long->apply(value)) return false;
         
@@ -212,6 +223,7 @@ namespace ConfigSystem
 
     bool ConfigParameter::setValue_double(double &value)
     {
+        if(_locked) return false;
         if( param_value.val_type != vt_double) return false;
         if(!param_value.range_double->apply(value)) return false;
         
@@ -223,6 +235,7 @@ namespace ConfigSystem
 
     bool ConfigParameter::setValue_string(std::string &value)
     {
+        if(_locked) return false;
         if( param_value.val_type != vt_string) return false;
         // if(!param_value.range_string->apply(value)) return false;
         
@@ -234,6 +247,7 @@ namespace ConfigSystem
 
     bool ConfigParameter::setValue_vector_long(std::vector<long> &value)
     {
+        if(_locked) return false;
         if( param_value.val_type != vt_1dvector_long) return false;
         if(!param_value.range_long->apply(value)) return false;
         
@@ -242,9 +256,10 @@ namespace ConfigSystem
         
         return true;
     }
-
+    
     bool ConfigParameter::setValue_vector_double(std::vector<double> &value)
     {
+        if(_locked) return false;
         if( param_value.val_type != vt_1dvector_double) return false;
         if(!param_value.range_double->apply(value)) return false;
         

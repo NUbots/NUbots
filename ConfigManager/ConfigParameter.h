@@ -167,14 +167,14 @@ namespace ConfigSystem
         private:
             //! This parameter's name.
             std::string _name;
-
+            
             //! This parameter's path in the config system 
             //! (not including '.<name>').
             std::string _path;
 
             //! A description of this parameter.
             std::string _desc;
-
+            
             //! Has this parameter been modified (since this flag was last reset).
             bool _modified	;
             //! Is this parameter 'locked'? (i.e. have changes been disallowed)
