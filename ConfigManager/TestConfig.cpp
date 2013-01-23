@@ -51,7 +51,8 @@ int main(void)
     ConfigManager config("defaultConfig");
 
     double sharpness;
-    config.readDoubleValue("vision.Camera", "Sharpness", sharpness);
+    bool read = config.readDoubleValue("vision.Camera", "Sharpness", sharpness);
+    std::cout << "Successfully read: " << read << std::endl;
     std::cout << "Read: vision.Camera.Sharpness = " << sharpness << std::endl;
     
     sharpness += 5;

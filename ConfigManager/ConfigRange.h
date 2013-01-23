@@ -35,7 +35,7 @@ namespace ConfigSystem
     // open   <==> (_min, _max) <==> _min <  x >  _max
     // closed <==> [_min, _max] <==> _min <= x >= _max
     // none   <==> (-inf, +inf) <==> unrestricted x
-    enum BoundType { NONE, OPEN, CLOSED };
+    enum BoundType { bt_none, bt_open, bt_closed, bt_unknown };
     
     /*! 
      * This class represents a range, and provides 
@@ -45,11 +45,11 @@ namespace ConfigSystem
     class ConfigRange
     {
         public:
-            // ConfigRange();
+            ConfigRange();
             // ConfigRange(T min, T max);
             // ConfigRange(T min, T max, BoundType lBound, BoundType uBound );
-            ConfigRange(T min = 0, 
-                        T max = 1, 
+            ConfigRange(T min, 
+                        T max, 
                         bool outside  = false, 
                         bool autoClip = false
                         );
@@ -71,28 +71,28 @@ namespace ConfigSystem
                @param N/A.
             @return Returns a pointer to the "_max" private member variable.
              */
-            T* getMax();
+            T getMax();
 
             /*! @brief Retrieves the "_max" private member variable.
  
                @param N/A.
             @return Returns a const pointer to the "_max" private member variable.
              */
-            const T* getMax() const;
+            const T getMax() const;
             
             /*! @brief Retrieves the "_min" private member variable.
  
                @param N/A.
             @return Returns a pointer to the "_min" private member variable.
              */
-            T* getMin();
+            T getMin();
             
             /*! @brief Retrieves the "_min" private member variable.
  
                @param N/A.
             @return Returns a const pointer to the "_min" private member variable.
              */
-            const T* getMin() const;
+            const T getMin() const;
             
             /*! @brief Retrieves the upper bound type of the range.
  
@@ -107,6 +107,10 @@ namespace ConfigSystem
             @return Returns the BoundType corresponding to the lower bound of the ConfigRange object.
              */
             BoundType getLowerBoundType();
+
+
+            bool getAutoClip();
+            bool getOutside();
             
             //! 'Applies' this range to the given value:
             //!    - clips silently, returning true, if auto-clip is enabled.

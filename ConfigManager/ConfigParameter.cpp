@@ -28,13 +28,59 @@
 
 namespace ConfigSystem
 {
-	// Constructors
+	const char* makeValueTypeString(value_type vt)
+    {
+        switch(vt)
+        {
+        // case vt_none           : return "none"         ;
+        case vt_bool           : return "bool"         ;
+        case vt_long           : return "long"         ;
+        case vt_double         : return "double"       ;
+        case vt_string         : return "string"       ;
+        case vt_1dvector_long  : return "vector_long"  ;
+        case vt_1dvector_double: return "vector_double";
+        default                : return "none"         ;
+        }
+    }
+
+    value_type stringToValueType  (std::string typStr)
+    {
+             if(typStr.compare("bool"         ) == 0) return vt_bool           ;
+        else if(typStr.compare("long"         ) == 0) return vt_long           ;
+        else if(typStr.compare("double"       ) == 0) return vt_double         ;
+        else if(typStr.compare("string"       ) == 0) return vt_string         ;
+        else if(typStr.compare("vector_double") == 0) return vt_1dvector_long  ;
+        else if(typStr.compare("vector_double") == 0) return vt_1dvector_double;
+        // else if(typStr.compare("none"         ) == 0) return vt_none           ;
+        else return vt_none;
+    }
+
+    const char* makeBoundTypeString(BoundType vt)
+    {
+        switch(vt)
+        {
+        case bt_none   : return "none"     ;
+        case bt_open   : return "open"     ;
+        case bt_closed : return "closed"   ;
+        default        : return "unknown"  ;
+        }
+    }
+
+    BoundType   stringToBoundType    (std::string typStr)
+    {
+             if(typStr.compare("none"   ) == 0) return bt_none  ;
+        else if(typStr.compare("open"   ) == 0) return bt_open  ;
+        else if(typStr.compare("closed" ) == 0) return bt_closed;
+        else return bt_unknown;
+    }
+
+
+    // Constructors
     // ConfigParameter::ConfigParameter()
     // {
     //     param_value.val_type = vt_none;
     //     param_value.val_bool = NULL;
     // }
-
 
     ConfigParameter::ConfigParameter(value_type val_type)
     {
@@ -58,7 +104,26 @@ namespace ConfigSystem
         case vt_string         : param_value.val_string          = NULL; break;
         case vt_1dvector_long  : param_value.val_1dvector_long   = NULL; break;
         case vt_1dvector_double: param_value.val_1dvector_double = NULL; break;
+        default: 
+            param_value.val_long   = NULL;
+            break;
         }
+        switch(val_type)
+        {
+        case vt_double         :
+        case vt_1dvector_double:
+            param_value.range_double = new ConfigRange<double>();
+            break;
+        case vt_bool         :
+        case vt_long         :
+        case vt_1dvector_long:
+            param_value.range_long = new ConfigRange<long>();
+            break;
+        default: 
+            param_value.range_long   = NULL;
+            break;
+        }
+
     }
 
     //Getting/setting string and general info stuff. 
@@ -105,6 +170,10 @@ namespace ConfigSystem
     {
         _modified = false;    
     }
+    void ConfigParameter::setModified(bool modVal)
+    {
+        _modified = modVal;    
+    }
     bool ConfigParameter::isLocked()
     {
         return _locked;
@@ -146,7 +215,7 @@ namespace ConfigSystem
     {
         if(_locked) return false;
         if(param_value.val_type != vt_double) return false;
-        
+
         delete param_value.range_double;
         param_value.range_double = new ConfigRange<double>(range);
         
@@ -226,7 +295,7 @@ namespace ConfigSystem
         if(_locked) return false;
         if( param_value.val_type != vt_double) return false;
         if(!param_value.range_double->apply(value)) return false;
-        
+
         delete param_value.val_double;
         param_value.val_double = new double(value);
         
@@ -256,7 +325,7 @@ namespace ConfigSystem
         
         return true;
     }
-    
+
     bool ConfigParameter::setValue_vector_double(std::vector<double> &value)
     {
         if(_locked) return false;

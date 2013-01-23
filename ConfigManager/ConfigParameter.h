@@ -47,6 +47,12 @@ namespace ConfigSystem
         vt_1dvector_long, vt_1dvector_double
     };
     
+    const char* makeValueTypeString   (value_type vt);
+    value_type stringToValueType  (std::string typStr);
+
+    const char* makeBoundTypeString  (BoundType vt)      ;
+    BoundType   stringToBoundType    (std::string typStr);
+
     /*!
      * 
      */
@@ -88,6 +94,7 @@ namespace ConfigSystem
             bool isModified();
             //! Resets the 'modified' flag to false.
             void resetModified();
+            void setModified(bool modVal);
 
             //! Returns whether or not the value of this parameter has been
             //! locked.
@@ -167,20 +174,20 @@ namespace ConfigSystem
         private:
             //! This parameter's name.
             std::string _name;
-            
+
             //! This parameter's path in the config system 
             //! (not including '.<name>').
             std::string _path;
 
             //! A description of this parameter.
             std::string _desc;
-            
+
             //! Has this parameter been modified (since this flag was last reset).
-            bool _modified	;
+            bool _modified    ;
             //! Is this parameter 'locked'? (i.e. have changes been disallowed)
             //! The mutator methods of a locked ConfigParameter will all fail
             //! (i.e. return false).
-            bool _locked  	;
+            bool _locked      ;
 
             // Following are a variety of variables intended to represent this 
             // node's value.
@@ -206,7 +213,7 @@ namespace ConfigSystem
                     double              *val_double       ;
                     std::string         *val_string       ;
                     
-                    std::vector<long> *val_1dvector_long  ;
+                    std::vector<long>   *val_1dvector_long  ;
                     std::vector<double> *val_1dvector_double;
                 };
                 

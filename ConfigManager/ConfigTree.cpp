@@ -66,7 +66,7 @@ namespace ConfigSystem
             )
 	{
 		CONFIGSYS_DEBUG_CALLS;
-        
+
         // Indicates successful retrieval
         bool success = false;
 
@@ -132,10 +132,47 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
 
-        toParam = ConfigParameter(vt_double);
+        std::string typStr = fromPtree.get<std::string>("type");
+        value_type vt = stringToValueType(typStr);
+        
+        toParam = ConfigParameter(vt);
 
         double v = fromPtree.get<double>("value");
         toParam.setValue_double(v);
+
+        toParam.setDescription(fromPtree.get("desc", ""));
+
+        std::string modStr = fromPtree.get("modified", "false");
+        toParam.setModified(modStr.compare("true") == 0);
+
+        std::string lockStr = fromPtree.get("locked", "false");
+        toParam.setLocked(lockStr.compare("true") == 0);
+
+        double range_min = fromPtree.get<double>("range.min");
+        double range_max = fromPtree.get<double>("range.max");
+
+        std::string lBStr = fromPtree.get<std::string>("range.lBound");
+        std::string uBStr = fromPtree.get<std::string>("range.uBound");
+        BoundType range_lBound = stringToBoundType(lBStr);
+        BoundType range_uBound = stringToBoundType(uBStr);
+
+        std::string outsideStr = fromPtree.get("range.outside", "false");
+        bool range_outside  = (outsideStr.compare("true") == 0);
+
+        std::string autoClipStr = fromPtree.get("range.autoClip", "false");
+        bool range_autoClip  = (autoClipStr.compare("true") == 0);
+
+        ConfigRange<double> cr
+            (
+                range_min,
+                range_max,
+                range_outside,
+                range_autoClip,
+                range_lBound,
+                range_uBound
+            );
+
+        toParam.setRange(cr);
 
         return true;
     }
@@ -144,14 +181,59 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
 
+        toPtree = ptree();
+
+        toPtree.put("desc", fromParam.getDescription());
+        
+        std::string modStr = (fromParam.isModified())? "true" : "false";
+        toPtree.put("modified", modStr);
+
+        std::string lockStr = (fromParam.isLocked())? "true" : "false";
+        toPtree.put("locked", lockStr);
+
+        std::string typStr = makeValueTypeString(fromParam.getType());
+        toPtree.put("type", typStr);
+        
+        
         double v;
         fromParam.getValue_double(v);
-
-        toPtree = ptree();
         toPtree.put("value", v);
+
+        ConfigRange<double> r;
+        if(fromParam.getRange_double(r))
+        {
+            toPtree.put("range.min"     , r.getMin());
+            toPtree.put("range.max"     , r.getMax());
+
+            std::string lBStr = makeBoundTypeString(r.getLowerBoundType());
+            std::string uBStr = makeBoundTypeString(r.getUpperBoundType());
+            toPtree.put("range.lBound"  , lBStr);
+            toPtree.put("range.uBound"  , uBStr);
+            
+            std::string outsideStr = (r.getOutside())? "true" : "false";
+            toPtree.put("range.outside" , outsideStr);
+
+            std::string autoClipStr = (r.getAutoClip())? "true" : "false";
+            toPtree.put("range.autoClip", autoClipStr);
+        }
 
         return true;
     }
+
+// "Camera": {
+//     "Sharpness": {
+//         "desc": "sharpness",
+//         "range": {
+//             "min": "0",
+//             "max": "255",
+//             "lBound": "CLOSED",
+//             "outside": "false",
+//             "uBound": "CLOSED"
+//         },
+//         "value": "150",
+//         "type": "float"
+//     },
+
     
     ptree ConfigTree::getRoot()
     {
