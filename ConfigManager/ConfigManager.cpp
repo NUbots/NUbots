@@ -70,9 +70,9 @@ namespace ConfigSystem
     // {
     //     CONFIGSYS_DEBUG_CALLS;
 
-    //     ConfigParameter cp(vt_int);
+    //     ConfigParameter cp(vt_none);
     //     if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-    //     return cp.getValue_int(data);
+    //     return cp.getValue(data);
     // }
 
     /*! @brief Reads a  long    from the given path in the config system. */
@@ -82,9 +82,9 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
 
-        ConfigParameter cp(vt_long);
+        ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getValue_long(data);
+        return cp.getValue(data);
     }
     // /*! @brief Reads a  float   from the given path in the config system. */
     // bool ConfigManager::readFloatParam  (const std::string &paramPath,
@@ -93,9 +93,9 @@ namespace ConfigSystem
     // {
     //     CONFIGSYS_DEBUG_CALLS;
 
-    //     ConfigParameter cp(vt_float);
+    //     ConfigParameter cp(vt_none);
     //     if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-    //     return cp.getValue_float(data);
+    //     return cp.getValue(data);
     // }
 
  //    /*! @brief Reads a  double  from the given path in the config system. */
@@ -105,9 +105,9 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
 
-        ConfigParameter cp(vt_double);
+        ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getValue_double(data);
+        return cp.getValue(data);
     }
 
     /*! @brief Reads a  string  from the given path in the config system. */
@@ -117,9 +117,9 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
 
-        ConfigParameter cp(vt_string);
+        ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getValue_string(data);
+        return cp.getValue(data);
     }
 
 
@@ -130,9 +130,9 @@ namespace ConfigSystem
     // {
     //     CONFIGSYS_DEBUG_CALLS;
     //     //! Get the relevant parameter from the ConfigTree
-    //     ConfigParameter cp(vt_int);
+    //     ConfigParameter cp(vt_none);
     //     if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-    //     cp.setValue_int(data); //!< Set the new value
+    //     cp.setValue(data); //!< Set the new value
     //     //! Store the modified parameter back into the tree
     //     return _currConfigTree->storeParam(paramPath, paramName, cp);
     // }
@@ -144,9 +144,9 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
         //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_long);
+        ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        cp.setValue_long(data); //!< Set the new value
+        cp.setValue(data); //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
@@ -158,9 +158,9 @@ namespace ConfigSystem
    // {
    //      CONFIGSYS_DEBUG_CALLS;
    //      //! Get the relevant parameter from the ConfigTree
-   //      ConfigParameter cp(vt_float);
+   //      ConfigParameter cp(vt_none);
    //      if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-   //      cp.setValue_float(data); //!< Set the new value
+   //      cp.setValue(data); //!< Set the new value
    //      //! Store the modified parameter back into the tree
    //      return _currConfigTree->storeParam(paramPath, paramName, cp);
    //  }
@@ -172,13 +172,13 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
         //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_double);
+        ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        cp.setValue_double(data); //!< Set the new value
+        cp.setValue(data); //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
-
+    
     /*! @brief Stores the given string  data value into the config system at the given path. */
     bool ConfigManager::storeStringValue (const string &paramPath,
                                           const string &paramName,
@@ -186,9 +186,9 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
         //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_string);
+        ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        cp.setValue_string(data); //!< Set the new value
+        cp.setValue(data); //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }

@@ -53,7 +53,7 @@ namespace ConfigSystem
          * @brief  Constructs a new ConfigStorageManager
          */
         ConfigStorageManager();
-
+        
         /*! @brief  Loads a configuration with a given name.
          *  @param  The tree into which the configuration will be loaded.
          *  @param  The name of the configuration to load.

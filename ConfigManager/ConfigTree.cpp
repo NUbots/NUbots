@@ -66,7 +66,7 @@ namespace ConfigSystem
             )
 	{
 		CONFIGSYS_DEBUG_CALLS;
-
+        
         // Indicates successful retrieval
         bool success = false;
 

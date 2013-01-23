@@ -91,6 +91,8 @@ namespace ConfigSystem
         bool storeDoubleValue (const string &paramPath, const string &paramName, double data);
         bool storeStringValue (const string &paramPath, const string &paramName, string data);
 
+        // bool readDoubleValue (const string &paramPath, const string &paramName, double &data);
+        
     private:
         //! The Configuration System's storage manager.
         ConfigStorageManager    *_configStore   ;

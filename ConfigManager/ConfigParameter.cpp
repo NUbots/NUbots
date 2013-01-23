@@ -237,7 +237,73 @@ namespace ConfigSystem
         return true;
     }
 
+    // Overloaded getters and setters
+    bool ConfigParameter::setValue(bool                &value)
+    { 
+        setValue_bool         (value);
+    }
+    bool ConfigParameter::setValue(long                &value)
+    { 
+        setValue_long         (value);
+    }
+    bool ConfigParameter::setValue(double              &value)
+    { 
+        setValue_double       (value);
+    }
+    bool ConfigParameter::setValue(std::string         &value)
+    { 
+        setValue_string       (value);
+    }
+    bool ConfigParameter::setValue(std::vector<long>   &value)
+    { 
+        setValue_vector_long  (value);
+    }
+    bool ConfigParameter::setValue(std::vector<double> &value)
+    { 
+        setValue_vector_double(value);
+    }
 
+    bool ConfigParameter::getValue(bool                &value)
+    { 
+        return getValue_bool         (value);
+    }
+    bool ConfigParameter::getValue(long                &value)
+    { 
+        return getValue_long         (value);
+    }
+    bool ConfigParameter::getValue(double              &value)
+    { 
+        return getValue_double       (value);
+    }
+    bool ConfigParameter::getValue(std::string         &value)
+    { 
+        return getValue_string       (value);
+    }
+    bool ConfigParameter::getValue(std::vector<long>   &value)
+    { 
+        return getValue_vector_long  (value);
+    }
+    bool ConfigParameter::getValue(std::vector<double> &value)
+    {
+        return getValue_vector_double(value);
+    }
 
+    bool ConfigParameter::getRange(ConfigRange<long>   &range)
+    {
+        return getRange_long  (range);
+    }
+    bool ConfigParameter::getRange(ConfigRange<double> &range)
+    {
+        return getRange_double(range);
+    }
+
+    bool ConfigParameter::setRange(ConfigRange<long>   &range)
+    {
+        setRange_long  (range);
+    }
+    bool ConfigParameter::setRange(ConfigRange<double> &range)
+    {
+        setRange_double(range);
+    }
 }
 

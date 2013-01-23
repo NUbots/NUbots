@@ -37,8 +37,6 @@
 // #include <boost/static_assert.hpp>
 
 
-
-
 namespace ConfigSystem
 {
     /// Used to identify the type of a ConfigParameter's value.
@@ -54,142 +52,148 @@ namespace ConfigSystem
      */
     class ConfigParameter
     {
-		public:
+        public:
 
-		// // Note: Can't have a constructor that doesn't specify type.
-		//     ConfigParameter();
+        // Note: If constructor doesn't specify type,
+        //       type must be set to vt_none.
+        //   ConfigParameter();
 
+            ConfigParameter(value_type val_type);
 
+            //! Returns this parameter's name.
+            std::string getName();
+            std::string getName() const;
+            //! Returns the path to this parameter in the ConfigTree 
+            //! (not including the final '.<name>').
+            std::string getPath();
+            std::string getPath() const;
+            //! Returns a meaningful description of this parameter's purpose.
+            std::string getDescription();
+            std::string getDescription() const;
+            //! Return an enum value representing the type of this
+            //! parameter's value.
+            value_type getType();
+            value_type getType() const;
+            
+            //! Sets the name of this parameter in the ConfigTree.
+            void setName(std::string new_name);
+            //! Sets the path of this parameter in the ConfigTree
+            void setPath(std::string new_path);
+            //! Sets the description of this ConfigParameter.
+            void setDescription(std::string new_desc);
 
-		    ConfigParameter(value_type val_type);
-
-		    //! Returns this parameter's name.
-		    std::string getName();
-		    std::string getName() const;
-		    
-		    //! Returns the path to this parameter in the ConfigTree 
-		    //! (not including the final '.<name>').
-		    std::string getPath();
-		    std::string getPath() const;
-		    
-		    //! Returns a meaningful description of this parameter's purpose.
-		    std::string getDescription();
-		    std::string getDescription() const;
-		    
-		    //! Return an enum value representing the type of this
-		    //! parameter's value.
-		    value_type getType();
-		    value_type getType() const;
-		    
-		    //! Sets the name of this parameter in the ConfigTree.
-		    void setName(std::string new_name);
-		    
-		    //! Sets the path of this parameter in the ConfigTree
-		    void setPath(std::string new_path);
-		    
-		    //! Sets the description of this ConfigParameter.
-		    void setDescription(std::string new_desc);
-
-		    // NOTE: Changing the type of a ConfigParameter is dangerous
-		    // //! Set an enum value representing the type of this parameter's value.
-		    // void setType(value_type new_val_type);
+            // NOTE: Changing the type of a ConfigParameter is dangerous
+            // //! Set an enum value representing the type of this parameter's value.
+            // void setType(value_type new_val_type);
 
 
-		    //! Returns long   range if val_type is a long.
-		    bool getRange_long(ConfigRange<long> &range);
-		    
-		    //! Returns double range if val_type is a double.
-		    bool getRange_double(ConfigRange<double> &range);
+            //! Returns long   range if val_type is a long.
+            bool getRange_long(ConfigRange<long> &range);
+            //! Returns double range if val_type is a double.
+            bool getRange_double(ConfigRange<double> &range);
+            //! Sets long   range if val_type is a long.
+            bool setRange_long(ConfigRange<long> &range);
+            //! Sets double range if val_type is a double.
+            bool setRange_double(ConfigRange<double> &range);
+            
 
-		    //! Sets long   range if val_type is a long.
-		    bool setRange_long(ConfigRange<long> &range);
-		    
-		    //! Sets double range if val_type is a double.
-		    bool setRange_double(ConfigRange<double> &range);
-		    
+            //! If this parameter's value type is bool          , return the value.
+            bool getValue_bool(bool &value);
+            //! If this parameter's value type is long          , return the value.
+            bool getValue_long(long &value);
+            //! If this parameter's value type is double        , return the value.
+            bool getValue_double(double &value);
+            //! If this parameter's value type is string        , return the value.
+            bool getValue_string(std::string &value);
+            //! If this parameter's value type is vector<long  >, return the value.
+            bool getValue_vector_long(std::vector<long> &value);
+            //! If this parameter's value type is vector<double>, return the value.
+            bool getValue_vector_double(std::vector<double> &value); 
 
-		    //! If this parameter's value type is bool          , return the value.
-		    bool getValue_bool(bool &value);
-		    
-		    //! If this parameter's value type is long          , return the value.
-		    bool getValue_long(long &value);
-		    
-		    //! If this parameter's value type is double        , return the value.
-		    bool getValue_double(double &value);
-		    
-		    //! If this parameter's value type is string        , return the value.
-		    bool getValue_string(std::string &value);
-		    
-		    //! If this parameter's value type is vector<long  >, return the value.
-		    bool getValue_vector_long(std::vector<long> &value);
-		    
-		    //! If this parameter's value type is vector<double>, return the value.
-		    bool getValue_vector_double(std::vector<double> &value); 
+            //! If this parameter's value type is bool          , set the value.
+            bool setValue_bool(bool &value);
+            //! If this parameter's value type is long          , set the value.
+            bool setValue_long(long &value);
+            //! If this parameter's value type is double        , set the value.
+            bool setValue_double(double &value);
+            //! If this parameter's value type is string        , set the value.
+            bool setValue_string (std::string &value);
+            //! If this parameter's value type is vector<long  >, set the value.
+            bool setValue_vector_long(std::vector<long> &value);
+            //! If this parameter's value type is vector<double>, set the value.
+            bool setValue_vector_double(std::vector<double> &value); 
+            
 
-		    //! If this parameter's value type is bool          , set the value.
-		    bool setValue_bool(bool &value);
-		    
-		    
-		    
-		    //! If this parameter's value type is long          , set the value.
-		    bool setValue_long(long &value);
-		    
-		    //! If this parameter's value type is double        , set the value.
-		    bool setValue_double(double &value);
-		    
-		    //! If this parameter's value type is string        , set the value.
-		    bool setValue_string (std::string &value);
-		    
-		    //! If this parameter's value type is vector<long  >, set the value.
-		    bool setValue_vector_long(std::vector<long> &value);
-		    
-		    //! If this parameter's value type is vector<double>, set the value.
-		    bool setValue_vector_double(std::vector<double> &value); 
-		    
-		    
-		    
-		private:
-		    //! This parameter's name.
-		    std::string _name;
+            // Overloaded getters and setters:
+            // These simply call the appropriate getter/setter from above.
+            // (these could instead be implemented using 
+            //  templates + specializations)
+            bool setValue(bool                &value);
+            bool setValue(long                &value);
+            bool setValue(double              &value);
+            bool setValue(std::string         &value);
+            bool setValue(std::vector<long>   &value);
+            bool setValue(std::vector<double> &value);
+            
+            bool getValue(bool                &value);
+            bool getValue(long                &value);
+            bool getValue(double              &value);
+            bool getValue(std::string         &value);
+            bool getValue(std::vector<long>   &value);
+            bool getValue(std::vector<double> &value);
 
-		    //! This parameter's path in the config system 
-		    //! (not including '.<name>').
-		    std::string _path;
+            bool getRange(ConfigRange<long>   &range);
+            bool getRange(ConfigRange<double> &range);
 
-		    //! A description of this parameter.
-		    std::string _desc;
+            bool setRange(ConfigRange<long>   &range);
+            bool setRange(ConfigRange<double> &range);
+            
+            
+        private:
+            //! This parameter's name.
+            std::string _name;
 
-		    // Following are a variety of variables intended to represent this 
-		    // node's value.
-		    // Supported types should (minimally) be:
-		    //   - bool
-		    //   - long   (int, char, unsiged types?)
-		    //   - double (float)
-		    //   - string
-		    //   - vector<long>/long[]
-		    //   - vector<double>/double[]
-		    
-		    struct ParameterValue
-		    {
-		        /// The type of this parameter's value
-		        value_type val_type;
-		        union 
-		        {
-		            bool                *val_bool         ;
-		            long                *val_long         ;
-		            double              *val_double       ;
-		            std::string         *val_string       ;
-		            
-		            std::vector<long> *val_1dvector_long  ;
-		            std::vector<double> *val_1dvector_double;
-		        };
-		        
-		        union 
-		        {
-		            ConfigRange<long> *range_long  ;
-		            ConfigRange<double> *range_double;
-		        };
-		    } param_value;
+            //! This parameter's path in the config system 
+            //! (not including '.<name>').
+            std::string _path;
+
+            //! A description of this parameter.
+            std::string _desc;
+
+            // Following are a variety of variables intended to represent this 
+            // node's value.
+            // Supported types should (minimally) be:
+            //   - bool
+            //   - long   (int, char, unsiged types?)
+            //   - double (float)
+            //   - string
+            //   - vector<long>/long[]
+            //   - vector<double>/double[]
+            
+            struct ParameterValue
+            {
+                /// The type of this parameter's value
+                value_type val_type;
+                
+                /// union containing a pointer to the parameter's value
+                union 
+                {
+                    bool                *val_bool         ;
+                    long                *val_long         ;
+                    double              *val_double       ;
+                    std::string         *val_string       ;
+                    
+                    std::vector<long> *val_1dvector_long  ;
+                    std::vector<double> *val_1dvector_double;
+                };
+                
+                /// union containing a pointer to the parameter's range
+                union 
+                {
+                    ConfigRange<long>   *range_long  ;
+                    ConfigRange<double> *range_double;
+                };
+            } param_value;
     };
 }
 
