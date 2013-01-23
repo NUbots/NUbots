@@ -82,6 +82,21 @@ namespace ConfigSystem
             //! Sets the description of this ConfigParameter.
             void setDescription(std::string new_desc);
 
+            //! Indicates whether this ConfigParameter has been modified since
+            //! this flag was last reset...
+            //! (automatically updated by 'set' methods...?)
+            bool isModified();
+            //! Resets the 'modified' flag to false.
+            void resetModified();
+
+            //! Returns whether or not the value of this parameter has been
+            //! locked.
+            bool isLocked();
+            //! Sets whether or not the value of this parameter has been
+            //! locked.
+            void setLocked(bool lockVal);
+
+
             // NOTE: Changing the type of a ConfigParameter is dangerous.
             // //! Set an enum value representing the type of this parameter's value.
             // void setType(value_type new_val_type);
@@ -160,6 +175,13 @@ namespace ConfigSystem
             //! A description of this parameter.
             std::string _desc;
 
+            //! Has this parameter been modified (since this flag was last reset).
+            bool _modified	;
+            //! Is this parameter 'locked'? (i.e. have changes been disallowed)
+            //! The mutator methods of a locked ConfigParameter will all fail
+            //! (i.e. return false).
+            bool _locked  	;
+
             // Following are a variety of variables intended to represent this 
             // node's value.
             // Supported types should (minimally) be:
@@ -170,6 +192,7 @@ namespace ConfigSystem
             //   - vector<long>/long[]
             //   - vector<double>/double[]
             
+            // Note: this really does't need to (i.e. shouldn't) be a struct...
             struct ParameterValue
             {
                 /// The type of this parameter's value

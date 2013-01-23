@@ -53,7 +53,7 @@ namespace ConfigSystem
         case vt_1dvector_double: param_value.val_1dvector_double = NULL; break;
         }
     }
-    
+
     //Getting/setting string and general info stuff. 
 	
     std::string ConfigParameter::getName() { return _name; }
@@ -89,6 +89,23 @@ namespace ConfigSystem
     //     param_value.val_type = new_val_type;
     // }
 
+    
+    bool ConfigParameter::isModified()
+    {
+        return _modified;
+    }
+    void ConfigParameter::resetModified()
+    {
+        _modified = false;    
+    }
+    bool ConfigParameter::isLocked()
+    {
+        return _locked;
+    }
+    void ConfigParameter::setLocked(bool lockVal)
+    {
+        _locked = lockVal;
+    }
 
 
 	//Getting/setting general value stuff
@@ -192,7 +209,7 @@ namespace ConfigSystem
         
         return true;
     }
-    
+
     bool ConfigParameter::setValue_double(double &value)
     {
         if( param_value.val_type != vt_double) return false;
@@ -203,7 +220,7 @@ namespace ConfigSystem
         
         return true;
     }
-    
+
     bool ConfigParameter::setValue_string(std::string &value)
     {
         if( param_value.val_type != vt_string) return false;
@@ -214,7 +231,7 @@ namespace ConfigSystem
         
         return true;
     }
-    
+
     bool ConfigParameter::setValue_vector_long(std::vector<long> &value)
     {
         if( param_value.val_type != vt_1dvector_long) return false;
@@ -225,7 +242,7 @@ namespace ConfigSystem
         
         return true;
     }
-    
+
     bool ConfigParameter::setValue_vector_double(std::vector<double> &value)
     {
         if( param_value.val_type != vt_1dvector_double) return false;
@@ -236,7 +253,7 @@ namespace ConfigSystem
         
         return true;
     }
-    
+
     // Overloaded getters and setters
     bool ConfigParameter::setValue(bool                &value)
     { 
