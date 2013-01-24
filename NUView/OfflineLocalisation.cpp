@@ -588,6 +588,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                     if(object->getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN) continue;
                     if(object->getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
                     if(object->getID() == FieldObjects::FO_ROBOT_UNKNOWN) continue;
+                    if(object->getID() == FieldObjects::FO_OBSTACLE) continue;
 
                     total_amb_obj++;
                     ambiguous_object_count[object->getID()]++;
@@ -598,7 +599,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
 
                     // Determine most likely option and use it to get expected measurements
                     int likely_id = tempObjects->getClosestStationaryOption(gps_location, *object);
-                    //assert(likely_id >= 0);
+                    assert(likely_id >= 0);
                     amb_exp_id.push_back(likely_id);
                     amb_exp_distance.push_back(gps_location.CalculateDistanceToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
                     amb_exp_heading.push_back(gps_location.CalculateBearingToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
@@ -696,7 +697,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
 
             // Add ambiguous observations
 //            output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_observations") << std::endl;
-            for (unsigned int i = 0; i < obs_frames.size(); ++i)
+            for (unsigned int i = 0; i < amb_obs_frames.size(); ++i)
             {
 //                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
                 output_file << Tabbing(tab_depth++) << BeginTag("ambiguous_observation") << std::endl;
