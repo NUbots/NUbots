@@ -5,8 +5,6 @@
 #include <iostream>
 
 #include "Vision/Modules/goaldetector.h"
-#include "Vision/VisionTypes/coloursegment.h"
-#include "Vision/VisionTools/lookuptable.h"
 #include "Vision/VisionTypes/histogram1D.h"
 
 using namespace std;
@@ -24,12 +22,6 @@ private:
                                     int peak_threshold);
     Quad makeQuad(Bin bin, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
 
-    Vector2<float> calculateSegmentLengthStatistics(const vector<ColourSegment> segments);
-
-    //checks
-    void DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED);
-    void removeInvalidPosts(vector<Quad> &posts);
-    void overlapCheck(vector<Quad> &posts);
 
     //minor methods
     bool checkBinSimilarity(Bin b1, Bin b2, float allowed_dissimilarity);

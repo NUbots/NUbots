@@ -1,7 +1,6 @@
 #ifndef GOALDETECTORRANSAC_H
 #define GOALDETECTORRANSAC_H
 
-#include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/Modules/goaldetector.h"
 #include "Tools/Math/LSFittedLine.h"
 #include <vector>

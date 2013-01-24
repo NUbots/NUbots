@@ -120,7 +120,8 @@ HEADERS += \
     #Threads/SaveImagesThread.h
     GenericAlgorithms/ransac.h \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h \
-    Modules/GoalDetectionAlgorithms/goaldetectorransac.h
+    Modules/GoalDetectionAlgorithms/goaldetectorransac.h \
+    Modules/cornerdetector.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \

@@ -130,7 +130,9 @@ void Histogram1D::mergeBins(Bin first, Bin second)
         second_index = getBinIndex(second.start);
 
     if(first_index > second_index) {
-        debug << "Histogram1D::mergeBins called with out of order positions, reordering and merging anyway." << std::endl;
+        #if VISION_FIELDOBJECT_VERBOSITY > 2
+            debug << "Histogram1D::mergeBins called with out of order positions, reordering and merging anyway." << std::endl;
+        #endif
         int temp = second_index;
         second_index = first_index;
         first_index = temp;

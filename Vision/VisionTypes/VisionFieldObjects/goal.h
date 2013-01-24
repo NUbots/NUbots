@@ -12,6 +12,8 @@ public:
        
     Goal(VFO_ID id=INVALID, const Quad& corners=Quad(0,0,0,0));
 
+    void setBase(Point base) {m_location_pixels = base;}
+
     //! @brief reutns the pixel locations of the corners.
     const Quad& getQuad() const;
 

@@ -4,15 +4,8 @@
 
 #include <limits>
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
 #include <boost/foreach.hpp>
 
-
-
-using namespace boost::accumulators;
 
 GoalDetectorHistogram::GoalDetectorHistogram()
 {
@@ -26,14 +19,10 @@ void GoalDetectorHistogram::run()
 
     vector<Quad> posts = detectQuads(h_segments, v_segments);
 
-    cout << "candidates: " << posts.size() << endl;
-
     removeInvalidPosts(posts);
-    cout << "after invalid: " << posts.size() << endl;
 
     // OVERLAP CHECK
     overlapCheck(posts);
-    cout << "after overlap: " << posts.size() << endl;
 
     // DENSITY CHECK - fix later: use segment lengths and scanline spacing to estimate rather than
     //                 re-accessing the image to calculate fully
@@ -41,79 +30,6 @@ void GoalDetectorHistogram::run()
 
     vbb->addGoals(assignGoals(posts));
 
-}
-
-void GoalDetectorHistogram::DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpTable* lut, const float PERCENT_REQUIRED)
-{
-    //cout << "PERCENT_REQUIRED: " << PERCENT_REQUIRED << endl;
-
-    vector<Quad>::iterator it = posts->begin();
-    while (it < posts->end()) {
-        Quad candidate = *it;
-        int left = candidate.getBottomLeft().x,
-            right = candidate.getTopRight().x,
-            top = candidate.getTopRight().y,
-            bottom = candidate.getBottomLeft().y;
-
-        //cout << "LEFT: " << left << "\tRIGHT: " << right << "\tTOP: " << top << "\tBOTTOM: " << bottom << endl;
-
-        int count = 0;
-
-        for (int x = left; x < right; x++) {
-            for (int y = top; y < bottom; y++) {
-                if (ClassIndex::getColourFromIndex(lut->classifyPixel((*img)(x, y))) == ClassIndex::yellow)
-                    count++;
-            }
-        }
-        if (((double)count)/((right-left)*(bottom-top)) < PERCENT_REQUIRED) {
-            it = posts->erase(it);
-            #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "GoalDetectorHistogram::yellowDensityCheck - goal thrown out on percentage contained yellow" << endl;
-            #endif
-        }
-        else {
-            it++;
-        }
-    }
-}
-
-
-void GoalDetectorHistogram::removeInvalidPosts(vector<Quad>& posts)
-{
-    vector<Quad>::iterator it = posts.begin();
-    while (it != posts.end()) {
-        Quad candidate = *it;
-        double height = candidate.getAverageHeight();
-        double width = candidate.getAverageWidth();
-        if (width < VisionConstants::MIN_GOAL_WIDTH)
-            it = posts.erase(it);
-        else if (height/width < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_LOW || height/width > VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH)
-            it = posts.erase(it);
-        else
-            it++;
-    }
-}
-
-void GoalDetectorHistogram::overlapCheck(vector<Quad>& posts)
-{
-    //REPLACE THIS WITH SOMETHING THAT MERGES OVERLAPPING POSTS - OR SHOULD WE NOT EVEN GET OVERLAPPING POSTS
-    vector<Quad>::iterator it_a = posts.begin(),
-                           it_b;
-    while(it_a != posts.end()) {
-        it_b = it_a + 1;
-        while(it_b != posts.end()) {
-            int a_l = it_a->getLeft(),
-                a_r = it_a->getRight(),
-                b_l = it_b->getLeft(),
-                b_r = it_b->getRight();
-            //if either of the second posts edges are within the first post remove it
-            if( (a_l >= b_l && a_l <= b_r) || (a_r >= b_l && a_r <= b_r) )
-                it_b = posts.erase(it_b);
-            else
-                it_b++;
-        }
-        it_a++;
-    }
 }
 
 vector<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
@@ -222,15 +138,4 @@ Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_seg
     }
 
     return Quad(h_min, v_min, h_max, v_max);
-}
-
-Vector2<float> GoalDetectorHistogram::calculateSegmentLengthStatistics(const vector<ColourSegment> segments)
-{
-    accumulator_set<float, stats<tag::mean, tag::variance> > acc;
-
-    BOOST_FOREACH(ColourSegment seg, segments) {
-        acc(seg.getLength());
-    }
-
-    return Vector2<float>(mean(acc), sqrt(variance(acc)));
 }
