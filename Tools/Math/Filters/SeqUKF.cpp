@@ -71,10 +71,10 @@ Matrix SeqUKF::GenerateSigmaPoints() const
     points.setCol(0, current_mean); // First sigma point is the current mean with no deviation
     Matrix weightedCov = m_unscented_transform.covarianceSigmaWeight() * m_estimate.covariance();
     Matrix sqtCovariance = cholesky(weightedCov);
-    if(not sqtCovariance.isValid())
-    {
-        sqtCovariance = cholesky(weightedCov.transp());
-    }
+//    if(not sqtCovariance.isValid())
+//    {
+//        sqtCovariance = cholesky(weightedCov.transp());
+//    }
     Matrix deviation;
 
     for(unsigned int i = 1; i < num_states + 1; i++){
@@ -207,7 +207,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     if(evaluateMeasurement(innovation, Pyy - noise, noise) == false)
         return false;
 
-    m_C = m_C - m_C * Ytransp * InverseMatrix(noise + Y*m_C*Ytransp) * Y * m_C;
+    m_C = m_C - m_C.transp() * Ytransp * InverseMatrix(noise + Y*m_C*Ytransp) * Y * m_C;
     m_d = m_d + Ytransp * InverseMatrix(noise) * innovation;
 
     // Update mean and covariance.
@@ -274,11 +274,11 @@ bool SeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimat
     if(!m_outlier_filtering_enabled and !m_weighting_enabled) return true;
 
     Matrix innov_transp = innovation.transp();
-    Matrix sum_variance = estimate_variance + measurement_variance;
+    Matrix innov_variance = estimate_variance + measurement_variance;
 
     if(m_outlier_filtering_enabled)
     {
-        float innovation_2 = convDble(innov_transp * InverseMatrix(sum_variance) * innovation);
+        float innovation_2 = convDble(innov_transp * InverseMatrix(innov_variance) * innovation);
         if(m_outlier_threshold > 0 and innovation_2 > m_outlier_threshold)
         {
             m_filter_weight *= 0.0005;
@@ -286,10 +286,19 @@ bool SeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimat
         }
     }
 
+//    if(m_weighting_enabled)
+//    {
+//        m_filter_weight *= 1 / ( 1 + convDble(innov_transp * InverseMatrix(measurement_variance) * innovation));
+//    }
+
     if(m_weighting_enabled)
     {
-        m_filter_weight *= 1 / ( 1 + convDble(innov_transp * InverseMatrix(measurement_variance) * innovation));
-    }
+        int measurement_dimensions = measurement_variance.getm();
+        const float outlier_probability = 0.05;
+        double exp_term = -0.5 * convDble(innovation.transp() * InverseMatrix(innov_variance) *  innovation);
+        double fract = 1 / sqrt( pow(2 * mathGeneral::PI, measurement_dimensions) * determinant(innov_variance));
+        m_filter_weight *= (1.f - outlier_probability) * fract * exp(exp_term) + outlier_probability;
+     }
 
     return true;
 }

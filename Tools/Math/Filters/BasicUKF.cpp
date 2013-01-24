@@ -218,11 +218,11 @@ bool BasicUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estim
     if(!m_outlier_filtering_enabled and !m_weighting_enabled) return true;
 
     const Matrix innov_transp = innovation.transp();
-    const Matrix sum_variance = estimate_variance + measurement_variance;
+    const Matrix innov_variance = estimate_variance + measurement_variance;
 
     if(m_outlier_filtering_enabled)
     {
-        float innovation_2 = convDble(innov_transp * InverseMatrix(sum_variance) * innovation);
+        float innovation_2 = convDble(innov_transp * InverseMatrix(innov_variance) * innovation);
         if(m_outlier_threshold > 0 and innovation_2 > m_outlier_threshold)
         {
             m_filter_weight *= 0.0005;
@@ -230,10 +230,19 @@ bool BasicUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estim
         }
     }
 
+//    if(m_weighting_enabled)
+//    {
+//        m_filter_weight *= 1 / ( 1 + convDble(innov_transp * InverseMatrix(measurement_variance) * innovation));
+//    }
+
     if(m_weighting_enabled)
     {
-        m_filter_weight *= 1 / ( 1 + convDble(innov_transp * InverseMatrix(measurement_variance) * innovation));
-    }
+        int measurement_dimensions = measurement_variance.getm();
+        const float outlier_probability = 0.05;
+        double exp_term = -0.5 * convDble(innovation.transp() * InverseMatrix(innov_variance) *  innovation);
+        double fract = 1 / sqrt( pow(2 * mathGeneral::PI, measurement_dimensions) * determinant(innov_variance));
+        m_filter_weight *= (1.f - outlier_probability) * fract * exp(exp_term) + outlier_probability;
+     }
 
     return true;
 }
