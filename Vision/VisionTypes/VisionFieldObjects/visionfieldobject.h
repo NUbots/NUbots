@@ -35,7 +35,7 @@ public:
     
     //! @brief returns the screen location in pixels (relative to the top left).
     const Point& getLocationPixels() const;
-    //! @brief returns the angular screen location (relative to the image centre) in radians.
+    //! @brief returns the angular screen location (relative to the camera) in radians.
     const Vector2<float>& getLocationAngular() const;
     //! @brief returns the screen size in pixels.
     const Vector2<double>& getScreenSize() const { return m_size_on_screen; }

@@ -291,7 +291,9 @@ float Goal::distanceToGoal(float bearing, float elevation) {
 //        Vector3<float> result = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 //        d2p = result[0];
 //    }
-    d2pvalid = vbb->distanceToPoint(bearing, elevation, d2p);
+    d2pvalid = vbb->isDistanceToPointValid();
+    if(d2pvalid)
+        d2p = vbb->distanceToPoint(bearing, elevation);
 
     #if VISION_FIELDOBJECT_VERBOSITY > 1
         if(!d2pvalid)

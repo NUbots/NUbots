@@ -125,7 +125,8 @@ HEADERS += \
     Modules/cornerdetector.h \
     VisionTypes/VisionFieldObjects/cornerpoint.h \
     VisionTypes/Interfaces/optimisable.h \
-    VisionTypes/Interfaces/renderable.h
+    VisionTypes/Interfaces/renderable.h \
+    VisionTools/transformer.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -140,7 +141,8 @@ SOURCES += \
     GenericAlgorithms/ransac.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp \
-    basicvisiontypes.cpp
+    basicvisiontypes.cpp \
+    VisionTools/transformer.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup

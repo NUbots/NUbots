@@ -250,15 +250,6 @@ const GreenHorizon& VisionBlackboard::getGreenHorizon() const
 }
 
 /**
-*   @brief returns the green horizon scan point set.
-*   @return points A vector of pixel locations for the green horizon scan.
-*/
-const vector<Vector2<double> >& VisionBlackboard::getGreenHorizonScanPoints() const
-{
-    return green_horizon_scan_points;
-}
-
-/**
 *   @brief returns the object point set.
 *   @return points A vector of pixel locations for objects.
 */
@@ -318,7 +309,66 @@ double VisionBlackboard::calculateElevation(double y) const {
 }
 
 /**
-*   @brief returns the kinematics horizon line.
+  * Calculates the radial position from the pixel position.
+  * @param pt The pixel location.
+  */
+Point VisionBlackboard::screenToRadial2D(Point pt) const {
+    Point result;
+    result.x = calculateBearing(pt.x);
+    result.y = calculateElevation(pt.y);
+    return result;
+}
+
+/**
+  * Calculates the radial position from the pixel position for a set of pixels.
+  * @param pts The list of pixels.
+  */
+vector<Point> VisionBlackboard::screenToRadial2D(const vector<Point>& pts) const {
+    //reimplemented for speed
+    Vector2<double> halfsize(original_image->getWidth()*0.5, original_image->getHeight()*0.5);
+    Vector2<double> tanhalfangle(tan(m_FOV.x*0.5), tan(m_FOV.y*0.5));
+    vector<Point> result;
+    BOOST_FOREACH(const Point& p, pts) {
+        result.push_back(Point( atan( (halfsize.x - p.x)*tanhalfangle.x/halfsize.x),
+                                atan( (halfsize.y - p.y)*tanhalfangle.y/halfsize.y)));
+    }
+    return result;
+}
+
+//! @brief Whether the screen to ground vector calculation will give valid information.
+bool VisionBlackboard::isScreenToGroundValid() const {
+    return isDistanceToPointValid();
+}
+
+/** Calculates the radial position from the pixel position.
+  * @param pt The pixel location.
+  */
+Vector3<double> VisionBlackboard::screenToGround(Point pt) const {
+    Vector3<double> result;
+    result.x = calculateBearing(pt.x);
+    result.y = calculateElevation(pt.y);
+    result.z = distanceToPoint(result.x, result.y);
+    return result;
+}
+
+/** Calculates the radial position from the pixel position for a set of pixels.
+  * @param pts The list of pixels.
+  */
+vector<Vector3<double> > VisionBlackboard::screenToGround(const vector<Point>& pts) const {
+    //reimplemented for speed
+    //Vector2<double> halfsize(original_image->getWidth()*0.5, original_image->getHeight()*0.5);
+    //Vector2<double> tanhalfangle(tan(m_FOV.x*0.5), tan(m_FOV.y*0.5));
+    vector<Vector3<double> > result;
+    BOOST_FOREACH(const Point& p, pts) {
+        //result.push_back(Point( atan( (halfsize.x - p.x)*tanhalfangle.x/halfsize.x),
+        //                        atan( (halfsize.y - p.y)*tanhalfangle.y/halfsize.y)));
+        //for lack of a better idea
+        result.push_back(screenToGround(p));
+    }
+    return result;
+}
+
+/** @brief returns the kinematics horizon line.
 *   @return kinematics_horizon A Line defining the kinematics horizon.
 */
 const Horizon& VisionBlackboard::getKinematicsHorizon() const
@@ -558,65 +608,47 @@ double VisionBlackboard::getCameraDistanceInPixels() const
   * @return Whether the distance calculated is valid. Some of the transforms require kinematics
   *     data that may not be available.
   */
-bool VisionBlackboard::distanceToPoint(float bearing, float elevation, float& distance) const
+double VisionBlackboard::distanceToPoint(float bearing, float elevation) const
 {
-    #if VISION_BLACKBOARD_VERBOSITY > 1
-        debug << "VisionBlackboard::distanceToPoint: called with bearing: " << bearing << " elevation: " << elevation << " VisionConstants::D2P_ANGLE_CORRECTION: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
-    #endif
-    float theta = 0;
-    if(camera_height_valid && camera_pitch_valid) {
-        //resultant angle inclusive of body pitch, camera pitch, pixel elevation and angle correction factor
-        theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
-        #if VISION_BLACKBOARD_VERBOSITY > 1
-            debug << "VisionBlackboard::distanceToPoint: theta: " << theta << endl;
-        #endif
-        if(VisionConstants::D2P_INCLUDE_BODY_PITCH) {
-            #if VISION_BLACKBOARD_VERBOSITY > 1
-                debug << "VisionBlackboard::distanceToPoint: include body pitch" << endl;
-            #endif
-            if(body_pitch_valid) {
-                #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::distanceToPoint: body pitch valid: " << body_pitch << endl;
-                #endif
-                distance = camera_height / cos(theta - body_pitch) / cos(bearing);
-                #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::distanceToPoint: distance: " << distance << endl;
-                #endif
-                return true;
-            }
-            else {
-                #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::distanceToPoint: body pitch invalid" << endl;
-                #endif
-                distance = 0;
-                return false;
-            }
-        }
-        else {
-            #if VISION_BLACKBOARD_VERBOSITY > 1
-                debug << "VisionBlackboard::distanceToPoint: don't include body pitch" << endl;
-            #endif
-            distance = camera_height / cos(theta) / cos(bearing);
-            #if VISION_BLACKBOARD_VERBOSITY > 1
-                debug << "VisionBlackboard::distanceToPoint: distance: " << distance << endl;
-            #endif
-            return true;
-        }
-    }
-    else {
-        #if VISION_BLACKBOARD_VERBOSITY > 1
-            debug << "VisionBlackboard::distanceToPoint: ";
-            if(!camera_height_valid)
-                 debug << "camera height invalid ";
-            if(!camera_pitch_valid)
-                debug << "camera height invalid ";
-            debug << endl;
-        #endif
+#if VISION_BLACKBOARD_VERBOSITY > 1
+    debug << "VisionBlackboard::distanceToPoint: \n";
+    debug << "\tcalled with bearing: " << bearing << " elevation: " << elevation << " angle correction: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
+    debug << "\tbody pitch: include:" << VisionConstants::D2P_INCLUDE_BODY_PITCH << " valid: " << body_pitch_valid << " value: " << body_pitch << endl;
+    debug << "\tcamera height valid: " << camera_height_valid << " value: " << camera_height << endl;
+    debug << "\tcamera pitch valid: " << camera_pitch_valid << " value: " << camera_pitch << endl;
+#endif
+    double theta,
+           distance,
+           cos_theta;
+
+    //resultant angle inclusive of camera pitch, pixel elevation and angle correction factor
+    theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
+
+    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
+        theta -= body_pitch;
+
+    cos_theta = cos(theta);
+    if(cos_theta == 0)
         distance = 0;
-        return false;
-    }
+    else
+        distance = camera_height / cos(theta) / cos(bearing);
+
+#if VISION_BLACKBOARD_VERBOSITY > 1
+    debug << "\ttheta: " << theta << " distance: " << distance << " valid: " << valid << endl;
+#endif
+
+    return distance;
 }
 
+Point VisionBlackboard::transformToGround(Point pt) const
+{
+
+}
+
+vector<Point> VisionBlackboard::transformToGround(const vector<Point>& pts) const
+{
+
+}
 /*! @brief Retrieves camera settings from the wrapper and returns them.
 *   @return camera settings
 */
@@ -736,7 +768,7 @@ void VisionBlackboard::debugPublish() const
 #if VISION_BLACKBOARD_VERBOSITY > 1
     debug << "VisionBlackboard::debugPublish - " << endl;
     debug << "kinematics_horizon: " << kinematics_horizon.getA() << " " << kinematics_horizon.getB() << " " << kinematics_horizon.getC() << endl;
-    debug << "horizon_scan_points: " << green_horizon_scan_points.size() << endl;
+    debug << "horizon_scan_points: " << m_green_horizon.getOriginalPoints().size() << endl;
     debug << "object_points: " << object_points.size() << endl;
     debug << "horizontal_scanlines: " << horizontal_scanlines.size() << endl;
     debug << "horizontal_segmented_scanlines: " << horizontal_segmented_scanlines.getSegments().size() << endl;

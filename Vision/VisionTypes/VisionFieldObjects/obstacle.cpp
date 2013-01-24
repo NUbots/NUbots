@@ -81,11 +81,11 @@ bool Obstacle::check() const
 
 bool Obstacle::calculatePositions()
 {
-    VisionBlackboard* vbb = VisionBlackboard::getInstance();
+    const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
     //To the bottom of the Goal Post.
     bool transform_valid;
-    float bearing = (float)vbb->calculateBearing(m_location_pixels.x);
-    float elevation = (float)vbb->calculateElevation(m_location_pixels.y);
+    double bearing = transformer.calculateBearing(m_location_pixels.x);
+    double elevation = transformer.calculateElevation(m_location_pixels.y);
 
     float distance = distanceToObstacle(bearing, elevation);
 
@@ -106,8 +106,8 @@ bool Obstacle::calculatePositions()
     //m_spherical_error - not calculated
     
     //Camera Transform to transform position
-    if(vbb->isCameraTransformValid())
-    {        
+    if(transformer.isCameraTransformValid())
+    {
         Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
         m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
         transform_valid = true;
@@ -136,15 +136,17 @@ bool Obstacle::calculatePositions()
 float Obstacle::distanceToObstacle(float bearing, float elevation) {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //reset distance values
-    d2p = 0;
-    distance_valid = vbb->distanceToPoint(bearing, elevation, d2p);
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
-        if(!distance_valid)
-            debug << "Obstacle::distanceToGoal: d2p invalid - will not push obstacle" << endl;
-        debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
-        debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
-    #endif
+    distance_valid = vbb->isDistanceToPointValid();
+    if(distance_valid)
+        d2p = vbb->distanceToPoint(bearing, elevation);
+
+#if VISION_FIELDOBJECT_VERBOSITY > 1
+    if(!distance_valid)
+        debug << "Obstacle::distanceToGoal: d2p invalid - will not push obstacle" << endl;
+    debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
+    debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
+#endif
     return d2p;
 }
 

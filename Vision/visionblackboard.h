@@ -14,6 +14,7 @@
 
 #include "VisionWrapper/datawrappercurrent.h"
 #include "VisionTools/lookuptable.h"
+#include "VisionTools/transformer.h"
 #include "basicvisiontypes.h"
 #include "VisionTypes/coloursegment.h"
 #include "VisionTypes/segmentedregion.h"
@@ -91,16 +92,14 @@ public:
     const map<COLOUR_CLASS, vector<ColourSegment> >& getVerticalTransitionsMap() const;
     
     const Horizon& getKinematicsHorizon() const;
-    bool isCameraToGroundValid() const;
-    const vector<float>& getCameraToGroundVector() const;
-    bool isCameraTransformValid() const;
-    const vector<float>& getCameraTransformVector() const;
-    bool isCameraPitchValid() const;
-    float getCameraPitch() const;
-    bool isCameraHeightValid() const;
-    float getCameraHeight() const;
-    bool isBodyPitchValid() const;
-    float getBodyPitch() const;
+    const Transformer& getTransformer() const;
+
+//    bool isCameraPitchValid() const;
+//    float getCameraPitch() const;
+//    bool isCameraHeightValid() const;
+//    float getCameraHeight() const;
+//    bool isBodyPitchValid() const;
+//    float getBodyPitch() const;
 
     vector<Ball>& getBalls();
     vector<Goal>& getGoals();
@@ -111,18 +110,12 @@ public:
     const vector<Vector2<double> >& getObjectPoints() const;
 
     const LookUpTable& getLUT() const;
-    
-    
-    Vector2<float> correctDistortion(const Vector2<float>& pt);
-    double calculateBearing(double x) const;
-    double calculateElevation(double y) const; 
 
     int getImageWidth() const;
     int getImageHeight() const;
     Vector2<double> getFOV() const;
     
     double getCameraDistanceInPixels() const;
-    bool distanceToPoint(float bearing, float elevation, float& distance) const;
 
 private:
     VisionBlackboard();
@@ -135,7 +128,6 @@ private:
     void debugPublish() const;
     
     void checkKinematicsHorizon();
-
 
     CameraSettings getCameraSettings() const;
 
@@ -153,33 +145,21 @@ private:
     
     NUCameraData m_camera_specs;
     
-    Vector2<double> m_FOV;
-    double effective_camera_dist_pixels;
+    Vector2<float> m_FOV;
+    float effective_camera_dist_pixels;
     
     LookUpTable LUT;
-
-    //vector<VFieldObject*> VFO_list;   //! @variable Vector of Vision Field Objects    
     
     //! Green Horizon data
-    //vector<Vector2<double> > green_horizon_points;      //! @variable Vector of points forming the green horizon.
-    GreenHorizon green_horizon;                  //! @variable The green horizon.
-    vector<Vector2<double> > green_horizon_scan_points; //! @variable Vector of points used in green horizon scanning.
+    GreenHorizon m_green_horizon;                  //! @variable The green horizon.
     
+    Transformer m_transformer;
+
     //! Object data
-    vector<Vector2<double> > object_points;   //! @variable Vector of points indicating potential objects.
+    //vector<Vector2<double> > object_points;   //! @variable Vector of points indicating potential objects.
     
     //! Kinematics Data
     Horizon kinematics_horizon; //! @variable Line defining kinematics horizon.
-    vector<float> ctgvector;    //! @variable The camera to ground vector (for d2p).
-    bool ctgvalid;              //! @variable Whether the ctgvector is valid.
-    vector<float> ctvector;     //! @variable The camera transform vector.
-    bool ctvalid;               //! @variable Whether the ctvector is valid.
-    float camera_pitch;         //! @variable The camera pitch angle.
-    bool camera_pitch_valid;    //! @variable Whether the camera pitch is valid.
-    float camera_height;        //! @variable The height of the camera from the ground.
-    bool camera_height_valid;   //! @variable Whether the camera height is valid.
-    float body_pitch;           //! @variable The body pitch angle.
-    bool body_pitch_valid;      //! @variable Whether the body pitch is valid.
 
     //! Scanline/Segmentation data
     vector<unsigned int> horizontal_scanlines;         //! @variable Vector of unsigned ints representing heights of horizontal scan lines.
