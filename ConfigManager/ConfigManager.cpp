@@ -104,7 +104,7 @@ namespace ConfigSystem
                                          double &data)
     {
         CONFIGSYS_DEBUG_CALLS;
-
+        
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         return cp.getValue(data);
@@ -132,7 +132,7 @@ namespace ConfigSystem
     //     //! Get the relevant parameter from the ConfigTree
     //     ConfigParameter cp(vt_none);
     //     if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-    //     cp.setValue(data); //!< Set the new value
+    //     if(!cp.setValue(data)) return false; //!< Set the new value
     //     //! Store the modified parameter back into the tree
     //     return _currConfigTree->storeParam(paramPath, paramName, cp);
     // }
@@ -146,7 +146,7 @@ namespace ConfigSystem
         //! Get the relevant parameter from the ConfigTree
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        cp.setValue(data); //!< Set the new value
+        if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
@@ -160,7 +160,7 @@ namespace ConfigSystem
    //      //! Get the relevant parameter from the ConfigTree
    //      ConfigParameter cp(vt_none);
    //      if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-   //      cp.setValue(data); //!< Set the new value
+   //      if(!cp.setValue(data)) return false; //!< Set the new value
    //      //! Store the modified parameter back into the tree
    //      return _currConfigTree->storeParam(paramPath, paramName, cp);
    //  }
@@ -174,11 +174,11 @@ namespace ConfigSystem
         //! Get the relevant parameter from the ConfigTree
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        cp.setValue(data); //!< Set the new value
+        if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
-
+    
     /*! @brief Stores the given string  data value into the config system at the given path. */
     bool ConfigManager::storeStringValue (const string &paramPath,
                                           const string &paramName,
@@ -188,7 +188,7 @@ namespace ConfigSystem
         //! Get the relevant parameter from the ConfigTree
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        cp.setValue(data); //!< Set the new value
+        if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }

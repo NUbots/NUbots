@@ -84,6 +84,78 @@ namespace ConfigSystem
             const std::string paramPath,
             const std::string paramName
             );
+
+
+        bool addPtreeValueandRangeToParam(ptree fromPtree, ConfigParameter &toParam);
+        template<typename T>
+        bool addValueToParam(ptree fromPtree, ConfigParameter &toParam)
+        {
+            T v = fromPtree.get<T>("value");
+            if(!toParam.setValue(v)) return false;
+            return true;
+        }
+        template<typename T>
+        bool addRangeToParam(ptree fromPtree, ConfigParameter &toParam)
+        {
+            // Read range
+            std::string lBStr = fromPtree.get("range.lBound", "none");
+            std::string uBStr = fromPtree.get("range.uBound", "none");
+            BoundType range_lBound = stringToBoundType(lBStr);
+            BoundType range_uBound = stringToBoundType(uBStr);
+
+            std::string outsideStr = fromPtree.get("range.outside", "false");
+            bool range_outside  = (outsideStr.compare("true") == 0);
+
+            std::string autoClipStr = fromPtree.get("range.autoClip", "false");
+            bool range_autoClip  = (autoClipStr.compare("true") == 0);
+
+            T range_min = fromPtree.get("range.min", 0.0);
+            T range_max = fromPtree.get("range.max", 0.0);
+            ConfigRange<T> cr
+            (
+                range_min,
+                range_max,
+                range_outside,
+                range_autoClip,
+                range_lBound,
+                range_uBound
+            );
+            toParam.setRange(cr);
+        }
+
+
+        bool addParamValueandRangeToPtree(ConfigParameter fromParam, ptree &toPtree);
+        // Note: should explicitly specify template params + put implementations in .cpp
+        template<typename T>
+        bool addValueToPtree(ConfigParameter fromParam, ptree &toPtree)
+        {
+            T v; 
+            if(!fromParam.getValue(v)) return false;
+            toPtree.put("value", v);
+            return true;
+        }
+        template<typename T>
+        bool addRangeToPtree(ConfigParameter fromParam, ptree &toPtree)
+        {
+            ConfigRange<T> r;
+            if(!fromParam.getRange(r)) return false;
+
+            toPtree.put("range.min"     , r.getMin());
+            toPtree.put("range.max"     , r.getMax());
+
+            std::string lBStr = makeBoundTypeString(r.getLowerBoundType());
+            std::string uBStr = makeBoundTypeString(r.getUpperBoundType());
+            toPtree.put("range.lBound"  , lBStr);
+            toPtree.put("range.uBound"  , uBStr);
+            
+            std::string outsideStr = (r.getOutside())? "true" : "false";
+            toPtree.put("range.outside" , outsideStr);
+
+            std::string autoClipStr = (r.getAutoClip())? "true" : "false";
+            toPtree.put("range.autoClip", autoClipStr);
+
+            return true;
+        }
         
     public:
         ConfigTree(ptree root);

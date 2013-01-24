@@ -137,9 +137,6 @@ namespace ConfigSystem
         
         toParam = ConfigParameter(vt);
 
-        double v = fromPtree.get<double>("value");
-        toParam.setValue_double(v);
-
         toParam.setDescription(fromPtree.get("desc", ""));
 
         std::string modStr = fromPtree.get("modified", "false");
@@ -148,31 +145,7 @@ namespace ConfigSystem
         std::string lockStr = fromPtree.get("locked", "false");
         toParam.setLocked(lockStr.compare("true") == 0);
 
-        double range_min = fromPtree.get<double>("range.min");
-        double range_max = fromPtree.get<double>("range.max");
-
-        std::string lBStr = fromPtree.get<std::string>("range.lBound");
-        std::string uBStr = fromPtree.get<std::string>("range.uBound");
-        BoundType range_lBound = stringToBoundType(lBStr);
-        BoundType range_uBound = stringToBoundType(uBStr);
-
-        std::string outsideStr = fromPtree.get("range.outside", "false");
-        bool range_outside  = (outsideStr.compare("true") == 0);
-
-        std::string autoClipStr = fromPtree.get("range.autoClip", "false");
-        bool range_autoClip  = (autoClipStr.compare("true") == 0);
-
-        ConfigRange<double> cr
-            (
-                range_min,
-                range_max,
-                range_outside,
-                range_autoClip,
-                range_lBound,
-                range_uBound
-            );
-
-        toParam.setRange(cr);
+        addPtreeValueandRangeToParam(fromPtree, toParam);
 
         return true;
     }
@@ -191,33 +164,88 @@ namespace ConfigSystem
         std::string lockStr = (fromParam.isLocked())? "true" : "false";
         toPtree.put("locked", lockStr);
 
-        std::string typStr = makeValueTypeString(fromParam.getType());
+
+        value_type vt = fromParam.getType();
+        std::string typStr = makeValueTypeString(vt);
         toPtree.put("type", typStr);
         
-        
-        double v;
-        fromParam.getValue_double(v);
-        toPtree.put("value", v);
-
-        ConfigRange<double> r;
-        if(fromParam.getRange_double(r))
-        {
-            toPtree.put("range.min"     , r.getMin());
-            toPtree.put("range.max"     , r.getMax());
-
-            std::string lBStr = makeBoundTypeString(r.getLowerBoundType());
-            std::string uBStr = makeBoundTypeString(r.getUpperBoundType());
-            toPtree.put("range.lBound"  , lBStr);
-            toPtree.put("range.uBound"  , uBStr);
-            
-            std::string outsideStr = (r.getOutside())? "true" : "false";
-            toPtree.put("range.outside" , outsideStr);
-
-            std::string autoClipStr = (r.getAutoClip())? "true" : "false";
-            toPtree.put("range.autoClip", autoClipStr);
-        }
+        addParamValueandRangeToPtree(fromParam, toPtree);
 
         return true;
+    }
+
+    bool ConfigTree::addPtreeValueandRangeToParam(ptree fromPtree, ConfigParameter &toParam)
+    {
+        std::string typStr = fromPtree.get<std::string>("type");
+        value_type vt = stringToValueType(typStr);
+
+        switch(vt)
+        {
+        case vt_string         : addValueToParam<std::string>(fromPtree, toParam); break;
+        case vt_double         : addValueToParam<double>(fromPtree, toParam); break;
+        // case vt_1dvector_double:
+        case vt_bool           : addValueToParam<bool>(fromPtree, toParam); break;
+        case vt_long           : addValueToParam<long>(fromPtree, toParam); break;
+        // case vt_1dvector_long  :
+        break;
+        }
+ 
+        switch(vt)
+        {
+        case vt_double         :
+        case vt_1dvector_double: {
+            addRangeToParam<double>(fromPtree, toParam);
+            } break;
+        case vt_bool         :
+        case vt_long         :
+        case vt_1dvector_long: {
+            addRangeToParam<long>(fromPtree, toParam);
+            } break;
+        }
+    }
+
+    bool ConfigTree::addParamValueandRangeToPtree(
+        ConfigParameter fromParam, 
+        ptree &toPtree)
+    {
+        value_type vt = fromParam.getType();
+        
+        // Add value
+        switch(vt)
+        {
+        case vt_string         : 
+            addValueToPtree<std::string   > (fromParam, toPtree); 
+            break;
+        case vt_double         : 
+            addValueToPtree<double        > (fromParam, toPtree); 
+            break;
+        // case vt_1dvector_double: 
+        //     addValueToPtree<std::vector<double> > (fromParam, toPtree); 
+        //     break;
+        case vt_bool           : 
+            addValueToPtree<bool          > (fromParam, toPtree); 
+            break;
+        case vt_long           : 
+            addValueToPtree<long          > (fromParam, toPtree); 
+            break;
+        // case vt_1dvector_long  : 
+        //     addValueToPtree<std::vector<long> > (fromParam, toPtree); 
+        //     break;
+        }
+
+        // Add range
+        switch(vt)
+        {
+        case vt_double         :
+        case vt_1dvector_double:
+            addRangeToPtree<double>(fromParam, toPtree);
+            break;
+        case vt_bool         :
+        case vt_long         :
+        case vt_1dvector_long:
+            addRangeToPtree<long>(fromParam, toPtree);
+            break;
+        }
     }
 
 // "Camera": {

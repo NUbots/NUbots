@@ -24,7 +24,7 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define CONFIGSYS_DEBUG_CALLS std::cout << "DEBUG> " << __PRETTY_FUNCTION__ << std::endl;
+#define CONFIGSYS_DEBUG_CALLS /* std::cout << "DEBUG> " << __PRETTY_FUNCTION__ << std::endl; */
 
 #ifndef ConfigParameter_def
 #define ConfigParameter_def

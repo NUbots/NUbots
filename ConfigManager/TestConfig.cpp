@@ -52,17 +52,18 @@ int main(void)
 
     double sharpness;
     bool read = config.readDoubleValue("vision.Camera", "Sharpness", sharpness);
-    std::cout << "Successfully read: " << read << std::endl;
-    std::cout << "Read: vision.Camera.Sharpness = " << sharpness << std::endl;
     
+    // long awb;
+    // read = config.readLongValue("vision.Camera", "AutoWhiteBalance", awb);
+
+    // awb = 5;
     sharpness += 5;
     
     bool stored = config.storeDoubleValue("vision.Camera", "Sharpness", sharpness);
-
-    std::cout << "Successfully stored: " << stored << std::endl;
-
-    std::cout << "Exit program." << std::endl;
-
+    std::cout << "storeDoubleValue = " << (stored? "success!" : "FAILED.") << std::endl;
+    stored = config.storeLongValue("vision.Camera", "AutoWhiteBalance", 0);
+    std::cout << "storeLongValue = " << (stored? "success!" : "FAILED.") << std::endl;
+    
     config.saveConfiguration("newConfig");
 
     // // A property tree that holds ConfigParameter objects

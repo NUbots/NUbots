@@ -341,27 +341,27 @@ namespace ConfigSystem
     // Overloaded getters and setters
     bool ConfigParameter::setValue(bool                &value)
     { 
-        setValue_bool         (value);
+        return setValue_bool         (value);
     }
     bool ConfigParameter::setValue(long                &value)
     { 
-        setValue_long         (value);
+        return setValue_long         (value);
     }
     bool ConfigParameter::setValue(double              &value)
     { 
-        setValue_double       (value);
+        return setValue_double       (value);
     }
     bool ConfigParameter::setValue(std::string         &value)
     { 
-        setValue_string       (value);
+        return setValue_string       (value);
     }
     bool ConfigParameter::setValue(std::vector<long>   &value)
     { 
-        setValue_vector_long  (value);
+        return setValue_vector_long  (value);
     }
     bool ConfigParameter::setValue(std::vector<double> &value)
     { 
-        setValue_vector_double(value);
+        return setValue_vector_double(value);
     }
 
     bool ConfigParameter::getValue(bool                &value)
@@ -400,11 +400,11 @@ namespace ConfigSystem
 
     bool ConfigParameter::setRange(ConfigRange<long>   &range)
     {
-        setRange_long  (range);
+        return setRange_long  (range);
     }
     bool ConfigParameter::setRange(ConfigRange<double> &range)
     {
-        setRange_double(range);
+        return setRange_double(range);
     }
 }
 
