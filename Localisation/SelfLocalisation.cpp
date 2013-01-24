@@ -217,10 +217,12 @@ IKalmanFilter* SelfLocalisation::newRobotModel()
     filter->setOutlierThreshold(15.f);
     filter->enableWeighting();
     filter->setActive();
+    filter->m_creation_time = GetTimestamp();
     return filter;
 }
 
-IKalmanFilter* SelfLocalisation::newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError &error, double timestamp)
+IKalmanFilter* SelfLocalisation::newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError &error,
+                                               int ambiguous_id, double timestamp)
 {
     Matrix meas_noise = error.errorCovariance();
 
@@ -245,7 +247,8 @@ IKalmanFilter* SelfLocalisation::newRobotModel(IKalmanFilter* filter, const Stat
         new_filter->m_parent_history_buffer.push_back(filter->id());
         new_filter->m_parent_id = filter->id();
         new_filter->m_split_option = measured_object.getID();
-        //new_filter->m_previous_decisions[object.getID()] = measured_object.getID();
+        new_filter->m_previous_decisions = filter->m_previous_decisions;
+        new_filter->m_previous_decisions[ambiguous_id] = measured_object.getID();
     }
 
     return new_filter;
@@ -901,7 +904,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     
     float cov_x = pow(100.f,2);
     float cov_y = pow(75.f,2);
-    float cov_head = pow(4.f,2);
+    float cov_head = pow(6.f,2);
     Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
     Moment temp(3);
     temp.setCovariance(cov_matrix);
@@ -933,7 +936,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     positions.push_back(temp);
 
     // Postition 5
-    temp.setCovariance(covariance_matrix(pow(200.0f,2), pow(150.0f,2), pow(4.f,2)));
+    temp.setCovariance(covariance_matrix(pow(200.0f,2), pow(150.0f,2), pow(6.f,2)));
     temp.setMean(mean_matrix(centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
@@ -1725,7 +1728,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
             temp_object = *(*obj_it);
             temp_object.CopyObject(ambiguousObject);
             //temp_mod = new Model(*(*model_it), ambiguousObject, *(*obj_it), error, GetTimestamp());
-            temp_mod = newRobotModel(*model_it, temp_object, error, GetTimestamp());
+            temp_mod = newRobotModel(*model_it, temp_object, error, ambiguousObject.getID(), GetTimestamp());
 
             if(temp_mod->active())
             {
@@ -1810,7 +1813,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
             temp_object.CopyObject(ambiguousObject);
 
 //            temp_mod = new Model(*curr_model, ambiguousObject, *(*obj_it), error, GetTimestamp());
-            temp_mod = newRobotModel(curr_model, temp_object, error, GetTimestamp());
+            temp_mod = newRobotModel(curr_model, temp_object, error, ambiguousObject.getID(), GetTimestamp());
             new_models.push_back(temp_mod);
             if(temp_mod->active())
                 models_added++;
@@ -1892,7 +1895,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
                         // Perform the update
                         StationaryObject update_object(*(*obj_it));
                         update_object.CopyMeasurement(ambiguousObject);
-                        temp_model = newRobotModel((*model_it), update_object, error, GetTimestamp());
+                        temp_model = newRobotModel((*model_it), update_object, error, ambiguousObject.getID(), GetTimestamp());
                         new_models.push_back(temp_model);  // Copy the new model and add it to the new list.
                         (*model_it)->setActive(false); // disable the old model.
                     }
@@ -1906,7 +1909,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
                     {
                         StationaryObject update_object(*(*option_it));
                         update_object.CopyMeasurement(ambiguousObject);
-                        temp_model = newRobotModel((*model_it), update_object, error, GetTimestamp());
+                        temp_model = newRobotModel((*model_it), update_object, error, ambiguousObject.getID(), GetTimestamp());
                         if(temp_model->active())
                         {
                             new_models.push_back(temp_model);
@@ -1958,6 +1961,7 @@ bool SelfLocalisation::MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* mod
     }
 
     // Merge alphas
+    double newest_creation_time = model_a->creationTime() > model_b->creationTime() ? model_a->creationTime() : model_b->creationTime();
     double alphaMerged = model_a->getFilterWeight() + model_b->getFilterWeight();
     double alphaA = model_a->getFilterWeight() / alphaMerged;
     double alphaB = model_b->getFilterWeight() / alphaMerged;
@@ -1997,6 +2001,7 @@ bool SelfLocalisation::MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* mod
 
     // Copy merged value to first model
     model_a->setFilterWeight(alphaMerged);
+    model_a->m_creation_time = newest_creation_time;
 
 //    std::cout <<"[" << m_timestamp << "]: Merge Between model[" << model_a->id() << "] and model[" << model_b->id() << "]" << endl;
 //    std::cout << "pa:\n" << estimate_a.covariance() << std::endl;
