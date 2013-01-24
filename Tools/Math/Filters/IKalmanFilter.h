@@ -170,6 +170,7 @@ protected:
         m_parent_id = source.id();
         m_active = source.m_active;
         m_id = m_id;
+        m_creation_time = source.m_creation_time;
     }
 
     static unsigned int GenerateId()
