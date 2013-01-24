@@ -55,7 +55,7 @@ Vector3<float> Goal::getRelativeFieldCoords() const
 bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
-        debug << "Goal::addToExternalFieldObjects - m_id: " << VisionFieldObject::getVFOName(m_id) << endl;
+        debug << "Goal::addToExternalFieldObjects - m_id: " << getVFOName(m_id) << endl;
         debug << "    " << *this << endl;
     #endif
     if(valid) {
@@ -367,7 +367,7 @@ void Goal::render(cv::Mat &mat) const
  */
 ostream& operator<< (ostream& output, const Goal& g)
 {
-    output << "Goal - " << VisionFieldObject::getVFOName(g.m_id) << endl;
+    output << "Goal - " << getVFOName(g.m_id) << endl;
     output << "\tpixelloc: [" << g.m_location_pixels.x << ", " << g.m_location_pixels.y << "]" << endl;
     output << " angularloc: [" << g.m_location_angular.x << ", " << g.m_location_angular.y << "]" << endl;
     output << "\trelative field coords: [" << g.m_spherical_position.x << ", " << g.m_spherical_position.y << ", " << g.m_spherical_position.z << "]" << endl;

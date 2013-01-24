@@ -141,45 +141,40 @@ void LSFittedLine::calcLine(){
 	setLine(A, B, C);
 }
 
-Point LSFittedLine::getLeftPoint() const
+Vector2<Point> LSFittedLine::getEndPoints() const
 {
     float min = std::numeric_limits<float>::max();
-    vector<Point>::const_iterator p, p_min;
-    for(p = points.begin(), p_min = p; p!=points.end(); p++) {
+    float max = -std::numeric_limits<float>::max();
+    vector<Point>::const_iterator p, p_min, p_max;
+    for(p = points.begin(), p_max = p; p!=points.end(); p++) {
         float trans_x = -m_B*p->x - m_A*p->y;
         if(trans_x < min) {
             p_min = p;
             min = trans_x;
         }
-    }
-    return *p_min;
-}
-
-Point LSFittedLine::getRightPoint() const
-{
-    float max = -std::numeric_limits<float>::max();
-    vector<Point>::const_iterator p, p_max;
-    for(p = points.begin(), p_max = p; p!=points.end(); p++) {
-        float trans_x = -m_B*p->x - m_A*p->y;
-        if(trans_x > max) {
+        else if(trans_x > max) {
             p_max = p;
             max = trans_x;
         }
     }
-    return *p_max;
+    return Vector2<Point>(*p_min, *p_max);
 }
 
 double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
 {
     if(valid && other.valid) {
-        Point p11 = projectOnto(getLeftPoint()),
-              p12 = projectOnto(getRightPoint()),
-              p21 = other.projectOnto(other.getLeftPoint()),
-              p22 = other.projectOnto(other.getRightPoint());
+        Vector2<Point> ep1 = getEndPoints();
+        Vector2<Point> ep2 = other.getEndPoints();
+
+        //project onto respective lines
+        ep1.x = projectOnto(ep1.x);
+        ep1.y = projectOnto(ep1.y);
+        ep2.x = other.projectOnto(ep2.x);
+        ep2.y = other.projectOnto(ep2.y);
 
         //determine distances from the two possible pairings
-        double d1 = 0.5*( (p11-p21).abs() + (p12-p22).abs() ),
-               d2 = 0.5*( (p12-p21).abs() + (p11-p22).abs() );
+        double d1 = 0.5*( (ep1.x-ep2.x).abs() + (ep1.y-ep2.y).abs() ),
+               d2 = 0.5*( (ep1.y-ep2.x).abs() + (ep1.x-ep2.y).abs() );
         return min(d1, d2); //best pairing results in minimum distance
     }
     else {

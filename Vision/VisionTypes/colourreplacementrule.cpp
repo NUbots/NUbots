@@ -1,6 +1,6 @@
 #include "colourreplacementrule.h"
 
-ColourSegment ColourReplacementRule::nomatch(Vector2<double>(0,0), Vector2<double>(0,0), ClassIndex::invalid);
+ColourSegment ColourReplacementRule::nomatch(Vector2<double>(0,0), Vector2<double>(0,0), invalid);
 
 ColourReplacementRule::ColourReplacementRule()
 {
@@ -33,7 +33,7 @@ bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegme
     }
 
     bool valid;
-    vector<ClassIndex::Colour>::const_iterator it;
+    vector<Colour>::const_iterator it;
     if(!m_middle.empty()) {
         valid = false;
         for(it = m_middle.begin(); it != m_middle.end(); it++) {
@@ -47,7 +47,7 @@ bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegme
         return false;	//if middle is empty the rule matches nothing
 
     if(!m_before.empty()) {
-        if(before.getColour() == ClassIndex::invalid)
+        if(before.getColour() == invalid)
             return false;   //there is a before set, but no before colour
         valid = false;
         for(it = m_before.begin(); it != m_before.end(); it++) {
@@ -59,7 +59,7 @@ bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegme
     }
 
     if(!m_after.empty()) {
-        if(after.getColour() == ClassIndex::invalid)
+        if(after.getColour() == invalid)
             return false;   //there is an after set, but no after colour
         valid = false;
         for(it = m_after.begin(); it != m_after.end(); it++) {
@@ -82,28 +82,28 @@ ColourReplacementRule::ReplacementMethod ColourReplacementRule::getMethod() cons
  */
 ostream& operator<< (ostream& output, const ColourReplacementRule& c)
 {
-    vector<ClassIndex::Colour>::const_iterator it;
+    vector<Colour>::const_iterator it;
 
     output << c.m_name << ":" << endl;
 
     //before
     output << "\tbefore: (" << c.m_before_min << ", " << c.m_before_max << ") [";
     for(it = c.m_before.begin(); it != c.m_before.end(); it++) {
-        output << ClassIndex::getColourNameFromIndex(*it) << ", ";
+        output << getColourNameFromIndex(*it) << ", ";
     }
     output << "]\t\t// (min, max) [colourlist]" << endl;
 
     //middle
     output << "\tmiddle: (" << c.m_middle_min << ", " << c.m_middle_max << ") [";
     for(it = c.m_middle.begin(); it != c.m_middle.end(); it++) {
-        output << ClassIndex::getColourNameFromIndex(*it) << ", ";
+        output << getColourNameFromIndex(*it) << ", ";
     }
     output << "]\t\t// (min, max) [colourlist]" << endl;
 
     //after
     output << "\tafter(" << c.m_after_min << ", " << c.m_after_max << ") [";
     for(it = c.m_after.begin(); it != c.m_after.end(); it++) {
-        output << ClassIndex::getColourNameFromIndex(*it) << ", ";
+        output << getColourNameFromIndex(*it) << ", ";
     }
     output << "]\t\t// (min, max) [colourlist]" << endl;
 
@@ -153,7 +153,7 @@ istream& operator>> (istream& input, ColourReplacementRule& c)
         colour_stream.str(colour_str);
         while(colour_stream.good()) {
             getline(colour_stream, next, ',');
-            c.m_before.push_back(ClassIndex::getColourFromName(next));
+            c.m_before.push_back(getColourFromName(next));
         }
     }
 
@@ -180,7 +180,7 @@ istream& operator>> (istream& input, ColourReplacementRule& c)
         colour_stream.str(colour_str);
         while(colour_stream.good()) {
             getline(colour_stream, next, ',');
-            c.m_middle.push_back(ClassIndex::getColourFromName(next));
+            c.m_middle.push_back(getColourFromName(next));
         }
     }
     // ignore the rest of the line
@@ -206,7 +206,7 @@ istream& operator>> (istream& input, ColourReplacementRule& c)
         colour_stream.str(colour_str);
         while(colour_stream.good()) {
             getline(colour_stream, next, ',');
-            c.m_after.push_back(ClassIndex::getColourFromName(next));
+            c.m_after.push_back(getColourFromName(next));
         }
     }
 

@@ -5,7 +5,6 @@ using std::vector;
 
 namespace RANSAC
 {
-
     vector<LSFittedLine> findMultipleLines(const vector<Point>& line_points,
                                            float e,                     //typical:
                                            unsigned int n,              //typical:

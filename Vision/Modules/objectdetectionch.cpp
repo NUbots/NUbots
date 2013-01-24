@@ -136,7 +136,7 @@ void ObjectDetectionCH::detectObjects()
 bool ObjectDetectionCH::isPixelGreen(const NUImage& img, int x, int y)
 {
     const LookUpTable& LUT = VisionBlackboard::getInstance()->getLUT();
-    return ClassIndex::getColourFromIndex(LUT.classifyPixel(img(x,y))) == ClassIndex::green;
+    return getColourFromIndex(LUT.classifyPixel(img(x,y))) == green;
 }
 
 void ObjectDetectionCH::convertPointTypes(const vector<cv::Point2i> &cvpoints, vector<Vector2<double> > &ourpoints)

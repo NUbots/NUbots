@@ -14,7 +14,7 @@ using namespace std;
 class GoalDetector
 {
 public:
-    virtual void run() = 0;
+    virtual vector<Goal> run() = 0;
 
 protected:
     //creation of goals from quads

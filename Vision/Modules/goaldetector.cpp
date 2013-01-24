@@ -24,12 +24,12 @@ vector<Goal> GoalDetector::assignGoals(const vector<Quad>& candidates) const
         if(std::abs(pos2 - pos1) >= VisionConstants::MIN_GOAL_SEPARATION) {
             //flip if necessary
             if (post1.getCentre().x > post2.getCentre().x) {
-                goals.push_back(Goal(VisionFieldObject::GOAL_L, post2));
-                goals.push_back(Goal(VisionFieldObject::GOAL_R, post1));
+                goals.push_back(Goal(GOAL_L, post2));
+                goals.push_back(Goal(GOAL_R, post1));
             }
             else {
-                goals.push_back(Goal(VisionFieldObject::GOAL_L, post1));
-                goals.push_back(Goal(VisionFieldObject::GOAL_R, post2));
+                goals.push_back(Goal(GOAL_L, post1));
+                goals.push_back(Goal(GOAL_R, post2));
             }
         }
     }
@@ -37,7 +37,7 @@ vector<Goal> GoalDetector::assignGoals(const vector<Quad>& candidates) const
         //unable to identify which post is which
         //setting all to unknown
         BOOST_FOREACH(Quad q, candidates) {
-            goals.push_back(Goal(VisionFieldObject::GOAL_U, q));
+            goals.push_back(Goal(GOAL_U, q));
         }
     }
     return goals;
@@ -77,7 +77,7 @@ void GoalDetector::DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpT
 
         for (int x = left; x < right; x++) {
             for (int y = top; y < bottom; y++) {
-                if (ClassIndex::getColourFromIndex(lut.classifyPixel((*img)(x, y))) == ClassIndex::yellow)
+                if (getColourFromIndex(lut.classifyPixel((*img)(x, y))) == yellow)
                     count++;
             }
         }

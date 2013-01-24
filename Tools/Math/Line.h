@@ -1,6 +1,7 @@
 /*!
   @file Line.h
   @author Steven Nicklin
+  @author Shannon Fenn (modified)
   @brief Definition of the Point and Line class.
 */
 
@@ -8,12 +9,14 @@
 #define LINE_H_DEFINED
 
 #include <iostream>
+#include <vector>
 #include "Tools/Math/Vector2.h"
 
 /*!
   @brief Class representing a 2 dimensional line in the form Ax + By = C.
   */
 
+using std::vector;
 typedef Vector2<double> Point;
 
 class Line
@@ -179,6 +182,12 @@ class Line
       @return The projected point.
       */
     Point projectOnto(Point pt) const;
+    /*!
+      @brief Projects multiple points onto the line.
+      @param pts A vector of points to project.
+      @return The vector of projected points.
+      */
+    vector<Point> projectOnto(const vector<Point>& pts) const;
     /*!
       @brief Finds the intersection of the two lines.
       @param other The other line.

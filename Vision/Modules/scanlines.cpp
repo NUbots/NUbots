@@ -79,17 +79,17 @@ void ScanLines::classifyVerticalScanLines()
 vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& vbb, const NUImage& img, unsigned int y)
 {
     //simple and nasty first
-    //ClassIndex::Colour previous, current, next
+    //Colour previous, current, next
     int     start_pos = 0,
             x;
     const LookUpTable& lut = vbb.getLUT();
-    ClassIndex::Colour start_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(0,y))),
+    Colour start_colour = getColourFromIndex(lut.classifyPixel(img(0,y))),
                         current_colour;
     ColourSegment segment;
     vector<ColourSegment> result;
 
     for(x = 0; x < img.getWidth(); x++) {
-        current_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(x,y)));
+        current_colour = getColourFromIndex(lut.classifyPixel(img(x,y)));
         if(current_colour != start_colour) {
             //start of new segment
             //make new segment and push onto vector
@@ -118,9 +118,9 @@ vector<ColourSegment> ScanLines::classifyVerticalScan(const VisionBlackboard& vb
     if(start.y >= img.getHeight() || start.x > img.getWidth())
         errorlog << start << endl;
     //simple and nasty first
-    //ClassIndex::Colour previous, current, next
+    //Colour previous, current, next
     const LookUpTable& lut = vbb.getLUT();
-    ClassIndex::Colour start_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(start.x,start.y))),
+    Colour start_colour = getColourFromIndex(lut.classifyPixel(img(start.x,start.y))),
                         current_colour;
     ColourSegment segment;
     vector<ColourSegment> result;
@@ -129,7 +129,7 @@ vector<ColourSegment> ScanLines::classifyVerticalScan(const VisionBlackboard& vb
             y;
             
     for(y = start.y; y < img.getHeight(); y++) {
-        current_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(x,y)));
+        current_colour = getColourFromIndex(lut.classifyPixel(img(x,y)));
         if(current_colour != start_colour) {
             //start of new segment
             //make new segment and push onto vector

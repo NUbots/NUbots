@@ -57,7 +57,7 @@ void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segm
     
     BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
         BOOST_FOREACH(const ColourSegment& seg, line) {
-            ClassIndex::getColourAsRGB(seg.getColour(), r, g, b);
+            getColourAsRGB(seg.getColour(), r, g, b);
             pts.push_back(seg.getStart());
             pts.push_back(seg.getEnd());
             colours.push_back(cv::Scalar(b,g,r));
@@ -745,16 +745,15 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
                 cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,255,255) - colour);
             }
 
-            Point p1 = l.getLeftPoint(),
-                  p2 = l.getRightPoint();
-            cout << "(" << p1.x << ", " << p1.y << ") (" << p2.x << ", " << p2.y << ")" << endl;
-            cv::circle(img, cv::Point2i(p1.x, p1.y), 1, cv::Scalar(0,255,255));
-            cv::circle(img, cv::Point2i(p2.x, p2.y), 1, cv::Scalar(0,255,255));
+            Vector2<Point> pts = l.getEndPoints();
+            cout << pts << endl;
+            cv::circle(img, cv::Point2i(pts[0].x, pts[0].y), 1, cv::Scalar(0,255,255));
+            cv::circle(img, cv::Point2i(pts[1].x, pts[1].y), 1, cv::Scalar(0,255,255));
 
-            Point t1 = l.projectOnto(p1),
-                  t2 = l.projectOnto(p2);
+            Point t1 = l.projectOnto(pts[0]),
+                  t2 = l.projectOnto(pts[1]);
 
-            cout << "(" << t1.x << ", " << t1.y << ") (" << t2.x << ", " << t2.y << ")" << endl;
+            cout << t1 << " " << t2 << endl;
 
             cv::circle(img, cv::Point2i(t1.x, t1.y), 3, cv::Scalar(0,0,255));
             cv::circle(img, cv::Point2i(t2.x, t2.y), 3, cv::Scalar(0,0,255));

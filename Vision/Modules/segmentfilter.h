@@ -33,7 +33,7 @@ private:
       @param scans the lists of segments - smoothed or unsmoothed.
       @param result vectors of transition rule matches and the field object ids they map to.
       */
-    void filter(const SegmentedRegion& scans, map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> >& result) const;
+    void filter(const SegmentedRegion& scans, map<COLOUR_CLASS, vector<ColourSegment> >& result) const;
     
     /**
       @brief Applies a single rule to a segmented region.

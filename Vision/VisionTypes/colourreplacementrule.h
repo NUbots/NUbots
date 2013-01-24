@@ -96,9 +96,9 @@ private:
                  m_after_min,    //! @variable the minimum length of the last segment for a match.
                  m_after_max;    //! @variable the maximum length of the last segment for a match.
     
-    vector<ClassIndex::Colour>  m_before,   //! @variable The colour that the first segment must be.
-                                m_middle,   //! @variable The colour that the middle segment must be.
-                                m_after;    //! @variable The colour that the last segment must be.
+    vector<Colour>  m_before,   //! @variable The colour that the first segment must be.
+                    m_middle,   //! @variable The colour that the middle segment must be.
+                    m_after;    //! @variable The colour that the last segment must be.
     
     ReplacementMethod m_method;  //! @variable The replacement method for this rule.
 };

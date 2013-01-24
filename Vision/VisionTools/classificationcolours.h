@@ -26,9 +26,8 @@
 #include <string>
 #include <iostream>
 
-class ClassIndex
+namespace Vision
 {
-public:
     /*!
       @enum Colour Classified colour indicies used to identify the colour category of the
       pixels in the image.
@@ -75,16 +74,6 @@ public:
     }
 
     /*!
-      Gets the name of the colour represented by the given index.
-      @param index The index of the colour name desired.
-      @return The name of the colour at the given index.
-      */
-    static const char* getColourNameFromIndex(int index)
-    {
-        return getColourName(getColourFromIndex(index));
-    }
-
-    /*!
       Gets the name of the given colour.
       @param colour The colour name desired.
       @return The name of the colour.
@@ -106,6 +95,16 @@ public:
             case shadow_blue:   return "shadow blue";
             default:            return "unknown colour!";
         };
+    }
+
+    /*!
+      Gets the name of the colour represented by the given index.
+      @param index The index of the colour name desired.
+      @return The name of the colour at the given index.
+      */
+    static const char* getColourNameFromIndex(int index)
+    {
+        return getColourName(getColourFromIndex(index));
     }
 
     /*!
@@ -143,18 +142,6 @@ public:
 
     /*!
       Gets the RGB representation of the colour represented by the given index.
-      @param index The index of the colour RGB desired.
-      @param r the target R value to which the result will be written.
-      @param g the target G value to which the result will be written.
-      @param b the target B value to which the result will be written.
-      */
-    static void getColourIndexAsRGB(int index, unsigned char &r, unsigned char &g, unsigned char &b)
-    {
-        return getColourAsRGB(getColourFromIndex(index), r, g, b);
-    }
-
-    /*!
-      Gets the RGB representation of the colour represented by the given index.
       @param colour The colour whos RGB is required.
       @param r the target R value to which the result will be written.
       @param g the target G value to which the result will be written.
@@ -180,12 +167,18 @@ public:
         };
         #undef RGB
     }
-private:
-    /*!
-      Class constructor is private so that an instance of this class cannot be created.
-      */
-    ClassIndex();
 
+    /*!
+      Gets the RGB representation of the colour represented by the given index.
+      @param index The index of the colour RGB desired.
+      @param r the target R value to which the result will be written.
+      @param g the target G value to which the result will be written.
+      @param b the target B value to which the result will be written.
+      */
+    static void getColourIndexAsRGB(int index, unsigned char &r, unsigned char &g, unsigned char &b)
+    {
+        return getColourAsRGB(getColourFromIndex(index), r, g, b);
+    }
 };
 
 #endif // CLASSIFICATIONCOLOURS_H

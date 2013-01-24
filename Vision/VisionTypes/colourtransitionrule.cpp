@@ -2,7 +2,7 @@
 #include <boost/algorithm/string.hpp>
 #include "debug.h"
 
-ColourSegment ColourTransitionRule::nomatch(Vector2<double>(0,0), Vector2<double>(0,0), ClassIndex::invalid);
+ColourSegment ColourTransitionRule::nomatch(Vector2<double>(0,0), Vector2<double>(0,0), invalid);
 
 ColourTransitionRule::ColourTransitionRule()
 {
@@ -14,7 +14,7 @@ bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegmen
 }
 
 //! @brief Returns the ID of the VFO this rule is related to.
-VisionFieldObject::COLOUR_CLASS ColourTransitionRule::getColourClass() const
+COLOUR_CLASS ColourTransitionRule::getColourClass() const
 {
     return m_colour_class;
 }
@@ -24,28 +24,28 @@ VisionFieldObject::COLOUR_CLASS ColourTransitionRule::getColourClass() const
  */
 ostream& operator<< (ostream& output, const ColourTransitionRule& c)
 {
-    vector<ClassIndex::Colour>::const_iterator it;
+    vector<Colour>::const_iterator it;
 
-    output << VisionFieldObject::getColourClassName(c.m_colour_class) << ":\n";
+    output << getColourClassName(c.m_colour_class) << ":\n";
 
     //before
     output << "before: (" << c.m_before_min << ", " << c.m_before_max << ") [";
     for(it = c.m_before.begin(); it != c.m_before.end(); it++) {
-        output << ClassIndex::getColourNameFromIndex(*it) << ", ";
+        output << getColourNameFromIndex(*it) << ", ";
     }
     output << "]\t// (min, max) [colourlist]\n";
 
     //this
     output << "middle: (" << c.m_min << ", " << c.m_max << ") [";
     for(it = c.m_middle.begin(); it != c.m_middle.end(); it++) {
-        output << ClassIndex::getColourNameFromIndex(*it) << ", ";
+        output << getColourNameFromIndex(*it) << ", ";
     }
     output << "]\t// (min, max) [colourlist]\n";
 
     //after
     output << "after: (" << c.m_after_min << ", " << c.m_after_max << ") [";
     for(it = c.m_after.begin(); it != c.m_after.end(); it++) {
-        output << ClassIndex::getColourNameFromIndex(*it) << ", ";
+        output << getColourNameFromIndex(*it) << ", ";
     }
     output << "]\t// (min, max) [colourlist]" << endl;
 
@@ -74,7 +74,7 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
     // read in the rule name
     getline(input, id_str, ':');
     boost::trim(id_str);
-    c.m_colour_class = VisionFieldObject::getColourClassFromName(id_str);
+    c.m_colour_class = getColourClassFromName(id_str);
 //! DO MORE HERE
 
     //BEFORE
@@ -96,7 +96,7 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
         colour_stream.str(colour_str);
         while(colour_stream.good()) {
             getline(colour_stream, next, ',');
-            c.m_before.push_back(ClassIndex::getColourFromName(next));
+            c.m_before.push_back(getColourFromName(next));
         }
     }
 
@@ -119,7 +119,7 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
         colour_stream.str(colour_str);
         while(colour_stream.good()) {
             getline(colour_stream, next, ',');
-            c.m_middle.push_back(ClassIndex::getColourFromName(next));
+            c.m_middle.push_back(getColourFromName(next));
         }
     }
 
@@ -143,7 +143,7 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
         colour_stream.str(colour_str);
         while(colour_stream.good()) {
             getline(colour_stream, next, ',');
-            c.m_after.push_back(ClassIndex::getColourFromName(next));
+            c.m_after.push_back(getColourFromName(next));
         }
     }
 
@@ -164,7 +164,7 @@ istream& operator>> (istream& input, vector<ColourTransitionRule>& v)
     while(input.good())
     {
         input >> temp;
-        if(temp.getColourClass() != VisionFieldObject::UNKNOWN_COLOUR) {
+        if(temp.getColourClass() != UNKNOWN_COLOUR) {
             v.push_back(temp);
         }
         else {
@@ -186,10 +186,10 @@ bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const Colour
     }
 
     bool valid;
-    vector<ClassIndex::Colour>::const_iterator it;
+    vector<Colour>::const_iterator it;
 
     if(!m_middle.empty()) {
-        if(middle.getColour() == ClassIndex::invalid)
+        if(middle.getColour() == invalid)
             return false;   //there is a before set, but no before colour
         valid = false;
         for(it = m_middle.begin(); it != m_middle.end(); it++) {
@@ -201,7 +201,7 @@ bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const Colour
     }
 
     if(!m_before.empty()) {
-        if(before.getColour() == ClassIndex::invalid)
+        if(before.getColour() == invalid)
             return false;   //there is a before set, but no before colour
         valid = false;
         for(it = m_before.begin(); it != m_before.end(); it++) {
@@ -213,7 +213,7 @@ bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const Colour
     }
 
     if(!m_after.empty()) {
-        if(after.getColour() == ClassIndex::invalid)
+        if(after.getColour() == invalid)
             return false;   //there is an after set, but no after colour
         valid = false;
         for(it = m_after.begin(); it != m_after.end(); it++) {

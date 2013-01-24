@@ -11,11 +11,11 @@ GoalDetectorHistogram::GoalDetectorHistogram()
 {
 }
 
-void GoalDetectorHistogram::run()
+vector<Goal> GoalDetectorHistogram::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(VisionFieldObject::GOAL_COLOUR);
-    const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(VisionFieldObject::GOAL_COLOUR);
+    const vector<ColourSegment>& h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR);
+    const vector<ColourSegment>& v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
 
     vector<Quad> posts = detectQuads(h_segments, v_segments);
 
@@ -28,8 +28,7 @@ void GoalDetectorHistogram::run()
     //                 re-accessing the image to calculate fully
     //DensityCheck(&yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
 
-    vbb->addGoals(assignGoals(posts));
-
+    return assignGoals(posts);
 }
 
 vector<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)

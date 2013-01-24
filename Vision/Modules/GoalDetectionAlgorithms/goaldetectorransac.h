@@ -11,7 +11,7 @@ class GoalDetectorRANSAC : public GoalDetector
 {
 public:
     GoalDetectorRANSAC();
-    void run();
+    virtual vector<Goal> run();
 
 private:
     vector<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines,

@@ -12,31 +12,24 @@ LineDetectorSAM::LineDetectorSAM()
 {
 }
 
-void LineDetectorSAM::run()
+vector<LSFittedLine> LineDetectorSAM::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
 
-    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE_COLOUR);  //get transitions associated with lines
-    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE_COLOUR);
-    vector<LSFittedLine> lines;
+    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(LINE_COLOUR);  //get transitions associated with lines
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(LINE_COLOUR);
     vector<Point> points;
-    vector<LSFittedLine>::iterator l_it;
 
     points = getPointsFromSegments(h_segments, v_segments);
 
     points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
 
 
-    lines = fitLines(points, true);
+    return fitLines(points, true);
 
     //    BOOST_FOREACH(LSFittedLine l, lines) {
     //        cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints << std::endl;
     //    }
-
-    for(l_it = lines.begin(); l_it<lines.end(); l_it++) {
-        FieldLine l(*l_it);
-        vbb->addLine(l);
-    }
 }
 
 vector<LSFittedLine> LineDetectorSAM::fitLines(vector<Point>& points, bool noise) {

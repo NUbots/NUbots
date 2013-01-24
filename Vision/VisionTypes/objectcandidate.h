@@ -13,7 +13,7 @@ class ObjectCandidate
 public:
     void setTopLeft(const Vector2<double>& point);
     void setBottomRight(const Vector2<double>& point);
-    void setColour(ClassIndex::Colour c);
+    void setColour(Colour c);
     
     
     const Vector2<double>& getTopLeft() const;
@@ -22,15 +22,15 @@ public:
     int getWidth() const;
     int getHeight() const;
     float getAspect() const;
-    ClassIndex::Colour getColour()  const;
+    Colour getColour()  const;
     const vector<ColourSegment>& getSegments() const;
     void addColourSegments(const vector<ColourSegment>& new_segments);
     void addColourSegment(const ColourSegment& new_segment);
 
     ObjectCandidate();
     ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right);
-    ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, ClassIndex::Colour colour);
-    ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, ClassIndex::Colour colour, const vector<ColourSegment>& candidate_segments);
+    ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, Colour colour);
+    ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, Colour colour, const vector<ColourSegment>& candidate_segments);
     ~ObjectCandidate();
 
 
@@ -44,7 +44,7 @@ protected:
     int height;
     float aspect;
     vector<ColourSegment> segments;
-    ClassIndex::Colour colour;
+    Colour colour;
 
 
 };

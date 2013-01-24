@@ -13,7 +13,7 @@ class GoalDetectorHistogram : public GoalDetector
 {
 public:
     GoalDetectorHistogram();
-    virtual void run();
+    virtual vector<Goal> run();
 private:
     vector<Quad> detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);
     Histogram1D mergePeaks(Histogram1D hist, int minimum_threshold);

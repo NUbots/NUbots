@@ -106,6 +106,7 @@ contains(PLATFORM, "rpi") {
 HEADERS += \
     ../Vision/VisionTypes/*.h \
     ../Vision/VisionTypes/VisionFieldObjects/*.h \
+    ../Vision/VisionTypes/Interfaces/*.h \
     VisionWrapper/datawrappercurrent.h \
     VisionTools/classificationcolours.h \
     VisionTools/GTAssert.h \
@@ -121,7 +122,10 @@ HEADERS += \
     GenericAlgorithms/ransac.h \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h \
     Modules/GoalDetectionAlgorithms/goaldetectorransac.h \
-    Modules/cornerdetector.h
+    Modules/cornerdetector.h \
+    VisionTypes/VisionFieldObjects/cornerpoint.h \
+    VisionTypes/Interfaces/optimisable.h \
+    VisionTypes/Interfaces/renderable.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -135,7 +139,8 @@ SOURCES += \
     main.cpp \
     GenericAlgorithms/ransac.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp
+    Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp \
+    basicvisiontypes.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup

@@ -15,15 +15,14 @@ LineDetectorRANSAC::LineDetectorRANSAC()
     m_max_iterations = 10;  //hard limit on number of lines
 }
 
-void LineDetectorRANSAC::run()
+vector<LSFittedLine> LineDetectorRANSAC::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
 
-    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(VisionFieldObject::LINE_COLOUR);  //get transitions associated with lines
-    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(VisionFieldObject::LINE_COLOUR);
+    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(LINE_COLOUR);  //get transitions associated with lines
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(LINE_COLOUR);
     vector<LSFittedLine> lines;
     vector<Point> points;
-    vector<LSFittedLine>::iterator l_it;
 
     points = getPointsFromSegments(h_segments, v_segments);
 
@@ -32,10 +31,5 @@ void LineDetectorRANSAC::run()
     //use generic ransac implementation to fine lines
     lines = RANSAC::findMultipleLines(points, m_e, m_n, m_k, m_max_iterations);
 
-    lines = mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE);
-
-    for(l_it = lines.begin(); l_it<lines.end(); l_it++) {
-        FieldLine l(*l_it);
-        vbb->addLine(l);
-    }
+    return mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE);
 }
