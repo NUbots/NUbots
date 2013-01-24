@@ -5,21 +5,57 @@
         {
             "Sharpness":
             {
-                "value": "155"
+                "desc": "sharpness",
+                "modified": "false",
+                "locked": "false",
+                "type": "double",
+                "value": "155",
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "unknown",
+                    "uBound": "unknown",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
             },
             "AutoWhiteBalance":
             {
                 "desc": "Automatic white balance",
+                "modified": "false",
+                "locked": "false",
+                "type": "long",
+                "value": "0",
                 "range":
                 {
                     "min": "0",
                     "max": "1",
+                    "lBound": "unknown",
+                    "uBound": "unknown",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "DummyVector":
+            {
+                "desc": "Test parameter for 1d long vectors.",
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
                     "lBound": "CLOSED",
                     "outside": "false",
                     "uBound": "CLOSED"
                 },
-                "value": "1",
-                "type": "float"
+                "value":
+                [
+                    "200",
+                    "150",
+                    "46",
+                    "250"
+                ],
+                "type": "1d_vector_long"
             },
             "Gain":
             {

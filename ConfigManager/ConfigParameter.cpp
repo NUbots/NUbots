@@ -37,8 +37,8 @@ namespace ConfigSystem
         case vt_long           : return "long"         ;
         case vt_double         : return "double"       ;
         case vt_string         : return "string"       ;
-        case vt_1dvector_long  : return "vector_long"  ;
-        case vt_1dvector_double: return "vector_double";
+        case vt_1dvector_long  : return "1d_vector_long"  ;
+        case vt_1dvector_double: return "1d_vector_double";
         default                : return "none"         ;
         }
     }
@@ -49,8 +49,8 @@ namespace ConfigSystem
         else if(typStr.compare("long"         ) == 0) return vt_long           ;
         else if(typStr.compare("double"       ) == 0) return vt_double         ;
         else if(typStr.compare("string"       ) == 0) return vt_string         ;
-        else if(typStr.compare("vector_double") == 0) return vt_1dvector_long  ;
-        else if(typStr.compare("vector_double") == 0) return vt_1dvector_double;
+        else if(typStr.compare("1d_vector_long") == 0) return vt_1dvector_long  ;
+        else if(typStr.compare("1d_vector_double") == 0) return vt_1dvector_double;
         // else if(typStr.compare("none"         ) == 0) return vt_none           ;
         else return vt_none;
     }

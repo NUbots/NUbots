@@ -47,6 +47,7 @@ namespace ConfigSystem
         vt_1dvector_long, vt_1dvector_double
     };
     
+    //Should these be in a class or better here?
     const char* makeValueTypeString   (value_type vt);
     value_type stringToValueType  (std::string typStr);
 

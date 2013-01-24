@@ -192,6 +192,25 @@ namespace ConfigSystem
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
+    
+    
+    //VECTOR STUFF:
+    /*bool storeLongVectorValue1D(const string &paramPath, const string &paramName, 
+        							std::vector<long> data);
+    {
+    	CONFIGSYS_DEBUG_CALLS;
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        if(!cp.setValue(data)) return false; //!< Set the new value
+        //! Store the modified parameter back into the tree
+        return _currConfigTree->storeParam(paramPath, paramName, cp);
+    }*/
+    
+    
+    
+    
+    
 
 
     

@@ -50,14 +50,10 @@ namespace ConfigSystem
     }
 
 
-    std::string ConfigTree::makeFullPath(
-            const std::string paramPath,
-            const std::string paramName
-            )
+    std::string ConfigTree::makeFullPath(const std::string paramPath, const std::string paramName)
     {
         return paramPath + "." + paramName;
     }
-
 
 	bool ConfigTree::getParam (
             const std::string paramPath, 
@@ -178,29 +174,52 @@ namespace ConfigSystem
     {
         std::string typStr = fromPtree.get<std::string>("type");
         value_type vt = stringToValueType(typStr);
+        std::cout << vt << std::endl;
 
         switch(vt)
         {
-        case vt_string         : addValueToParam<std::string>(fromPtree, toParam); break;
-        case vt_double         : addValueToParam<double>(fromPtree, toParam); break;
-        // case vt_1dvector_double:
-        case vt_bool           : addValueToParam<bool>(fromPtree, toParam); break;
-        case vt_long           : addValueToParam<long>(fromPtree, toParam); break;
-        // case vt_1dvector_long  :
-        break;
+		    case vt_string: 
+		    	addValueToParam<std::string>(fromPtree, toParam); 
+		    	break;
+		    	
+		    case vt_double: 
+		    	addValueToParam<double>(fromPtree, toParam); 
+		    	break;
+		    
+		    case vt_1dvector_double:
+		    	addVectorValueToParam1D<double>(fromPtree, toParam);
+		    	break;
+		    
+		    case vt_bool: 
+		    	addValueToParam<bool>(fromPtree, toParam); 
+		    	break;
+		    	
+		    case vt_long: 
+		    	addValueToParam<long>(fromPtree, toParam); 
+		    	break;
+		    
+		    case vt_1dvector_long:
+		    	addVectorValueToParam1D<long>(fromPtree, toParam);
+		    	break;
+		    
+		    break;
         }
  
         switch(vt)
         {
-        case vt_double         :
-        case vt_1dvector_double: {
-            addRangeToParam<double>(fromPtree, toParam);
-            } break;
-        case vt_bool         :
-        case vt_long         :
-        case vt_1dvector_long: {
-            addRangeToParam<long>(fromPtree, toParam);
-            } break;
+		    case vt_double         :
+		    
+		    case vt_1dvector_double: 
+		        addRangeToParam<double>(fromPtree, toParam);
+		        break;
+		        
+		    case vt_bool         :
+		    
+		    case vt_long         :
+		    
+		    case vt_1dvector_long: 
+		        addRangeToParam<long>(fromPtree, toParam);
+		        break;
         }
     }
 

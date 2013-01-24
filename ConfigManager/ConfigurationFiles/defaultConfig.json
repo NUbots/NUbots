@@ -1,9 +1,13 @@
 {
-	"vision": {
-		"Camera": {
-		    "Sharpness": {
+	"vision": 
+	{
+		"Camera": 
+		{
+		    "Sharpness": 
+		    {
 		        "desc": "sharpness",
-		        "range": {
+		        "range": 
+		        {
 		            "min": "0",
 		            "max": "255",
 		            "lBound": "CLOSED",
@@ -11,11 +15,14 @@
 		            "uBound": "CLOSED"
 		        },
 		        "value": "150",
-		        "type": "float"
+		        "type": "double"
 		    },
-		    "AutoWhiteBalance": {
+		    
+		    "AutoWhiteBalance": 
+		    {
 		        "desc": "Automatic white balance",
-		        "range": {
+		        "range": 
+		        {
 		            "min": "0",
 		            "max": "1",
 		            "lBound": "CLOSED",
@@ -23,11 +30,35 @@
 		            "uBound": "CLOSED"
 		        },
 		        "value": "1",
-		        "type": "float"
+		        "type": "long"
 		    },
-		    "Gain": {
+		    
+		    "DummyVector": 
+		    {
+		        "desc": "Test parameter for 1d long vectors.",
+		        "range": 
+		        {
+		            "min": "0",
+		            "max": "255",
+		            "lBound": "CLOSED",
+		            "outside": "false",
+		            "uBound": "CLOSED"
+		        },
+		        "value": 
+		        [
+		        	"200",
+		        	"150",
+		        	"46",
+		        	"250"
+		        ],
+		        "type": "1d_vector_long"
+		    },
+		    
+		    "Gain": 
+		    {
 		        "desc": "ISO sensitivity",
-		        "range": {
+		        "range": 
+		        {
 		            "min": "0",
 		            "max": "255",
 		            "lBound": "CLOSED",
@@ -37,6 +68,7 @@
 		        "value": "100",
 		        "type": "float"
 		    },
+		    
 		    "Brightness": {
 		        "desc": "an attribute of visual perception in which a source appears to be radiating or reflecting light",
 		        "range": {

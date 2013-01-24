@@ -53,6 +53,11 @@ int main(void)
     double sharpness;
     bool read = config.readDoubleValue("vision.Camera", "Sharpness", sharpness);
     
+    //VECTOR TESTING:
+    //1d long
+    //std::vector<long> dummy_vector;
+    
+    
     // long awb;
     // read = config.readLongValue("vision.Camera", "AutoWhiteBalance", awb);
 

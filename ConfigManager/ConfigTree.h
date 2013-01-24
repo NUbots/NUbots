@@ -87,6 +87,7 @@ namespace ConfigSystem
 
 
         bool addPtreeValueandRangeToParam(ptree fromPtree, ConfigParameter &toParam);
+        
         template<typename T>
         bool addValueToParam(ptree fromPtree, ConfigParameter &toParam)
         {
@@ -94,6 +95,32 @@ namespace ConfigSystem
             if(!toParam.setValue(v)) return false;
             return true;
         }
+        
+        template<typename T>
+        bool addVectorValueToParam1D(ptree from_ptree, ConfigParameter &to_param)
+        {
+        	std::vector<T> vector_value;
+        	
+        	try
+		    {
+		    	//Retrieve values of type T from vector in tree and place in vector.
+		    	BOOST_FOREACH(ptree::value_type &child, from_ptree.get_child("value"))
+		    	{
+		    		vector_value.push_back(child.second.get<T>(""));
+		    	}
+		    	
+		    	//Sets the value in the ConfigParameter object
+		    	to_param.setValue(vector_value);
+        	}
+        	catch(std::exception &e)
+        	{
+        		return false;
+        		std::cout << "ERROR: " << e.what() << std::endl;
+        	}
+        	
+        	return true;
+        }
+        
         template<typename T>
         bool addRangeToParam(ptree fromPtree, ConfigParameter &toParam)
         {
@@ -125,6 +152,7 @@ namespace ConfigSystem
 
 
         bool addParamValueandRangeToPtree(ConfigParameter fromParam, ptree &toPtree);
+        
         // Note: should explicitly specify template params + put implementations in .cpp
         template<typename T>
         bool addValueToPtree(ConfigParameter fromParam, ptree &toPtree)
@@ -186,6 +214,19 @@ namespace ConfigSystem
             const std::string paramName, 
             ConfigParameter data
             );
+            
+            
+        /*! 
+         *  @brief  Gets a 1 dimensional vector from the ConfigTree
+         *  @param	"param_path" Base path of parameter.
+         *  @param 	"param_name" The parameter's name.
+         *  @param 	"data" The retrieved parameter.
+         *  @return Returns whether the operation was successful.
+         */
+        bool getVectorParam1D(const std::string param_path, const std::string param_name, 
+        						ConfigParameter &data);
+        						
+        						
         
         ptree getRoot();
     };

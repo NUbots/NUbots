@@ -50,16 +50,12 @@ namespace ConfigSystem
 		CONFIGSYS_DEBUG_CALLS;
 	}
 
-    bool ConfigStorageManager::loadConfig(
-        ConfigTree *&loadTree, 
-        std::string configName
-        )
+    bool ConfigStorageManager::loadConfig(ConfigTree *&loadTree, std::string configName)
     {
         CONFIGSYS_DEBUG_CALLS;
 
         // get the path to load from
         std::string loadPath = "ConfigurationFiles/" + configName + ".json";
-
         // load tree from file(s) as ptree<string>
         ptree rawTree;
         try
@@ -86,10 +82,7 @@ namespace ConfigSystem
         return true;
     }
 
-    bool ConfigStorageManager::saveConfig(
-        ConfigTree *saveTree, 
-        std::string configName
-        )
+    bool ConfigStorageManager::saveConfig(ConfigTree *saveTree, std::string configName)
     {
         CONFIGSYS_DEBUG_CALLS;
 
