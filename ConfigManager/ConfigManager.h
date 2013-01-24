@@ -89,12 +89,9 @@ namespace ConfigSystem
          *  @param 	"data" Variable in which to store the data retrieved.
          *  @return Whether the operation was successful.
          */
-        bool readIntVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<int> &data);
         bool readLongVectorValue1D(const string &param_path, const string &param_name, 
         							std::vector<long> &data);
-        bool readFloatVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<float> &data);
+        							
         bool readDoubleVectorValue1D(const string &param_path, const string &param_name, 
         							std::vector<double> &data);
         							

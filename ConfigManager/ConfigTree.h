@@ -162,6 +162,37 @@ namespace ConfigSystem
             toPtree.put("value", v);
             return true;
         }
+        
+        template<typename T>
+        bool addVectorValueToPtree1D(ConfigParameter from_param, ptree &to_ptree)
+        {
+        	ptree children;
+        	ptree child;
+        	std::vector<T> retrieved_vector;
+        	//Retrieve vector from the CP object
+        	if( !from_param.getValue(retrieved_vector) ) return false;
+        	
+        	try
+        	{
+		    	BOOST_FOREACH(const T &value, retrieved_vector)
+				{
+					child.put("", value);
+					children.push_back(std::make_pair("", child));
+				}
+			
+				to_ptree.add_child("value", children);
+			}
+			catch(std::exception &e)
+			{
+				std::cout << "ERROR: " << e.what() << std::endl;
+				
+				return false;
+			}
+			
+			return true;
+        }
+        
+        
         template<typename T>
         bool addRangeToPtree(ConfigParameter fromParam, ptree &toPtree)
         {

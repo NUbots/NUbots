@@ -207,63 +207,65 @@ namespace ConfigSystem
  
         switch(vt)
         {
+        	//cases fall through as they use the same - change later if necessary.
 		    case vt_double         :
-		    
 		    case vt_1dvector_double: 
 		        addRangeToParam<double>(fromPtree, toParam);
 		        break;
 		        
 		    case vt_bool         :
-		    
-		    case vt_long         :
-		    
+		    case vt_long         :		    
 		    case vt_1dvector_long: 
 		        addRangeToParam<long>(fromPtree, toParam);
 		        break;
         }
     }
 
-    bool ConfigTree::addParamValueandRangeToPtree(
-        ConfigParameter fromParam, 
-        ptree &toPtree)
+    bool ConfigTree::addParamValueandRangeToPtree(ConfigParameter fromParam, ptree &toPtree)
     {
         value_type vt = fromParam.getType();
         
         // Add value
         switch(vt)
         {
-        case vt_string         : 
-            addValueToPtree<std::string   > (fromParam, toPtree); 
-            break;
-        case vt_double         : 
-            addValueToPtree<double        > (fromParam, toPtree); 
-            break;
-        // case vt_1dvector_double: 
-        //     addValueToPtree<std::vector<double> > (fromParam, toPtree); 
-        //     break;
-        case vt_bool           : 
-            addValueToPtree<bool          > (fromParam, toPtree); 
-            break;
-        case vt_long           : 
-            addValueToPtree<long          > (fromParam, toPtree); 
-            break;
-        // case vt_1dvector_long  : 
-        //     addValueToPtree<std::vector<long> > (fromParam, toPtree); 
-        //     break;
+		    case vt_string: 
+		        addValueToPtree<std::string> (fromParam, toPtree); 
+		        break;
+		        
+		    case vt_double: 
+		        addValueToPtree<double> (fromParam, toPtree); 
+		        break;
+		        
+		    case vt_1dvector_double:
+		        addVectorValueToPtree1D<double>(fromParam, toPtree); 
+		        break;
+		        
+		    case vt_bool           : 
+		        addValueToPtree<bool> (fromParam, toPtree); 
+		        break;
+		        
+		    case vt_long           : 
+		        addValueToPtree<long> (fromParam, toPtree); 
+		        break;
+		        
+		    case vt_1dvector_long  : 
+		        addVectorValueToPtree1D<long>(fromParam, toPtree); 
+		        break;
         }
 
         // Add range
         switch(vt)
         {
-        case vt_double         :
-        case vt_1dvector_double:
-            addRangeToPtree<double>(fromParam, toPtree);
-            break;
-        case vt_bool         :
-        case vt_long         :
-        case vt_1dvector_long:
-            addRangeToPtree<long>(fromParam, toPtree);
-            break;
+		    case vt_double         :
+		    case vt_1dvector_double:
+		        addRangeToPtree<double>(fromParam, toPtree);
+		        break;
+		    case vt_bool         :
+		    case vt_long         :
+		    case vt_1dvector_long:
+		    	std::cout << "IN HERE" << std::endl;
+		        addRangeToPtree<long>(fromParam, toPtree);
+		        break;
         }
     }
 

@@ -14,8 +14,8 @@
                 {
                     "min": "0",
                     "max": "255",
-                    "lBound": "unknown",
-                    "uBound": "unknown",
+                    "lBound": "closed",
+                    "uBound": "closed",
                     "outside": "false",
                     "autoClip": "false"
                 }
@@ -31,8 +31,8 @@
                 {
                     "min": "0",
                     "max": "1",
-                    "lBound": "unknown",
-                    "uBound": "unknown",
+                    "lBound": "closed",
+                    "uBound": "closed",
                     "outside": "false",
                     "autoClip": "false"
                 }
@@ -44,9 +44,9 @@
                 {
                     "min": "0",
                     "max": "255",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value":
                 [
@@ -64,9 +64,9 @@
                 {
                     "min": "0",
                     "max": "255",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value": "100",
                 "type": "float"
@@ -78,9 +78,9 @@
                 {
                     "min": "0",
                     "max": "255",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value": "185",
                 "type": "float"
@@ -92,9 +92,9 @@
                 {
                     "min": "0",
                     "max": "2",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value": "1",
                 "type": "float"
@@ -106,9 +106,9 @@
                 {
                     "min": "0",
                     "max": "10000",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value": "800",
                 "type": "float"
@@ -120,9 +120,9 @@
                 {
                     "min": "0",
                     "max": "127",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value": "75",
                 "type": "float"
@@ -134,9 +134,9 @@
                 {
                     "min": "0",
                     "max": "0",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value": "0",
                 "type": "float"
@@ -148,9 +148,9 @@
                 {
                     "min": "1",
                     "max": "1",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value": "1",
                 "type": "float"
@@ -162,9 +162,9 @@
                 {
                     "min": "0",
                     "max": "255",
-                    "lBound": "CLOSED",
+                    "lBound": "closed",
                     "outside": "false",
-                    "uBound": "CLOSED"
+                    "uBound": "closed"
                 },
                 "value": "150",
                 "type": "float"

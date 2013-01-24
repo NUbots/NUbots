@@ -202,8 +202,10 @@ namespace ConfigSystem
 
     bool ConfigParameter::setRange_long(ConfigRange<long> &range)
     {
+    	value_type vt = param_value.val_type;
+    
         if(_locked) return false;
-        if(param_value.val_type != vt_long) return false;
+        if( (vt != vt_long) && (vt != vt_1dvector_long) ) return false;
 
         delete param_value.range_long;
         param_value.range_long = new ConfigRange<long>(range);
@@ -213,8 +215,10 @@ namespace ConfigSystem
 
     bool ConfigParameter::setRange_double(ConfigRange<double> &range)
     {
+    	value_type vt = param_value.val_type;
+    	
         if(_locked) return false;
-        if(param_value.val_type != vt_double) return false;
+        if( (vt != vt_double) && (vt != vt_1dvector_double) ) return false;
 
         delete param_value.range_double;
         param_value.range_double = new ConfigRange<double>(range);

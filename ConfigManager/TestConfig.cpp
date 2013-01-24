@@ -55,7 +55,8 @@ int main(void)
     
     //VECTOR TESTING:
     //1d long
-    //std::vector<long> dummy_vector;
+    std::vector<long> dummy_vector;
+    bool vread = config.readLongVectorValue1D("vision.Camera", "DummyVector", dummy_vector);
     
     
     // long awb;
@@ -65,7 +66,25 @@ int main(void)
     sharpness += 5;
     
     bool stored = config.storeDoubleValue("vision.Camera", "Sharpness", sharpness);
+    
+    std::cout << "readVectorLongValue = " << (vread? "success!" : "FAILED.") << std::endl;
+    
+    BOOST_FOREACH(const long &value, dummy_vector)
+    {
+    	std::cout << "value: " << value << std::endl;
+    }
+    
+    BOOST_FOREACH(long &value, dummy_vector)
+    {
+    	value += 50;
+    }
+    
     std::cout << "storeDoubleValue = " << (stored? "success!" : "FAILED.") << std::endl;
+    
+    stored = config.storeLongVectorValue1D("vision.Camera", "DummyVector", dummy_vector);
+    
+    std::cout << "storeLongVectorValue = " << (stored? "success!" : "FAILED.") << std::endl;
+    
     stored = config.storeLongValue("vision.Camera", "AutoWhiteBalance", 0);
     std::cout << "storeLongValue = " << (stored? "success!" : "FAILED.") << std::endl;
     
