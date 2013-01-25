@@ -118,15 +118,21 @@ namespace ConfigSystem
             //!      allowed range.
             bool apply(T &value);
             bool apply(std::vector<T> &values);
+            bool apply(std::vector< std::vector<T> > &values);
+            bool apply(std::vector< std::vector< std::vector<T> > > &values);
 
             //! Returns whether the given value satisfies the constraints specified
             //! by this range object.
             bool test(T value);
             bool test(std::vector<T> values);
+            bool test(std::vector< std::vector<T> > values);
+            bool test(std::vector< std::vector< std::vector<T> > > values);
             
             
             bool clip(T &value);
             bool clip(std::vector<T> &values);
+            bool clip(std::vector< std::vector<T> > &values);
+			bool clip(std::vector< std::vector< std::vector<T> > > &values);            
             
         private:
             //! Minimum and maximum values in the range

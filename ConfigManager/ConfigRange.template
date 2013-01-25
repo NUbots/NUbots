@@ -146,6 +146,8 @@ namespace ConfigSystem
 
 
     //(values as reference?)
+    //Vector stuff can probably be done recursively with specifying a dimension?
+    //1d vector test
     template<typename T>
     bool ConfigRange<T>::test(std::vector<T> values)
     {
@@ -156,7 +158,32 @@ namespace ConfigSystem
 
         return true;
     }
+    
+    //2d vector test
+    template<typename T>
+    bool ConfigRange<T>::test(std::vector< std::vector<T> > values)
+    {
+    	BOOST_FOREACH(const std::vector<T> &val, values)
+    	{
+    		if(!(test(val))) return false;
+    	}
+    	
+    	return true;
+    }
+    
+    //3d vector test
+    template<typename T>
+    bool ConfigRange<T>::test(std::vector< std::vector< std::vector<T> > > values)
+    {
+    	BOOST_FOREACH(const std::vector< std::vector<T> > &val, values)
+    	{
+    		if(!(test(val))) return false;
+    	}
+    	
+    	return true;
+    }
 
+	//1d vector clip
     template<typename T>
     bool ConfigRange<T>::clip(std::vector<T> &values)
     {
@@ -168,12 +195,59 @@ namespace ConfigSystem
         return true;
     }
 
+	//2d vector clip
+    template<typename T>
+    bool ConfigRange<T>::clip(std::vector< std::vector<T> > &values)
+    {
+        BOOST_FOREACH(const std::vector<T> &val, values)
+        {
+            if(!clip(val)) return false;
+        }
+
+        return true;
+    }
+    
+    //3d vector clip
+    template<typename T>
+    bool ConfigRange<T>::clip(std::vector< std::vector< std::vector<T> > > &values)
+    {
+        BOOST_FOREACH(const std::vector< std::vector<T> > &val, values)
+        {
+            if(!clip(val)) return false;
+        }
+
+        return true;
+    }
+
+	//1d vector apply.
     template<typename T>
     bool ConfigRange<T>::apply(std::vector<T> &values)
-    { 
-		int i =0; 
-    
+    {
         BOOST_FOREACH(T &val, values)
+        {
+            if(!apply(val)) return false;
+        }
+
+        return true;
+    }
+    
+    //2d vector apply.
+    template<typename T>
+    bool ConfigRange<T>::apply(std::vector< std::vector<T> > &values)
+    {
+        BOOST_FOREACH(const std::vector<T> &val, values)
+        {
+            if(!apply(val)) return false;
+        }
+
+        return true;
+    }
+    
+    //3d vector apply.
+    template<typename T>
+    bool ConfigRange<T>::apply(std::vector< std::vector< std::vector<T> > > &values)
+    {
+        BOOST_FOREACH(const std::vector< std::vector<T> > &val, values)
         {
             if(!apply(val)) return false;
         }

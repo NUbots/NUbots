@@ -74,10 +74,10 @@ int main(void)
     	std::cout << "value: " << value << std::endl;
     }
     
-    BOOST_FOREACH(long &value, dummy_vector)
+    /*BOOST_FOREACH(long &value, dummy_vector)
     {
-    	value += 50;
-    }
+    	value += 55;
+    }*/
     
     std::cout << "storeDoubleValue = " << (stored? "success!" : "FAILED.") << std::endl;
     
