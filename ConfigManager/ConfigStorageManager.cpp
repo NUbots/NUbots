@@ -58,6 +58,7 @@ namespace ConfigSystem
         std::string loadPath = "ConfigurationFiles/" + configName + ".json";
         // load tree from file(s) as ptree<string>
         ptree rawTree;
+        
         try
         {
             read_json(loadPath, rawTree);

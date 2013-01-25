@@ -186,14 +186,18 @@ namespace ConfigSystem
 	
     bool ConfigParameter::getRange_long(ConfigRange<long> &range)
     {
-        if(param_value.val_type != vt_long) return false;
+    	value_type vt = param_value.val_type;
+    	
+        if( (vt != vt_long) && (vt != vt_1dvector_long) ) return false;
         range = *(param_value.range_long);
         return true;
     }
     
     bool ConfigParameter::getRange_double(ConfigRange<double> &range)
     {
-        if(param_value.val_type != vt_double) return false;
+    	value_type vt = param_value.val_type;
+    
+        if( (vt != vt_double) && (vt != vt_1dvector_double) ) return false;
         range = *(param_value.range_double);
         return true;
     }
@@ -318,19 +322,22 @@ namespace ConfigSystem
 
     bool ConfigParameter::setValue_vector_long(std::vector<long> &value)
     {
-        std::cout << "setValue_vector_long(...): locked" << std::endl;
+        std::cout << "ConfigParameter::setValue_vector_long(...): locked" << std::endl;
         if(_locked) return false;
 
-        std::cout << "setValue_vector_long(...): type" << std::endl;
+        std::cout << "ConfigParameter::setValue_vector_long(...): type" << std::endl;
         if( param_value.val_type != vt_1dvector_long) return false;
 
-        std::cout << "setValue_vector_long(...): range" << std::endl;
+        std::cout << "ConfigParameter::setValue_vector_long(...): range" << std::endl;
+        //FAILING HERE
         if(!param_value.range_long->apply(value)) return false;
 
-        std::cout << "setValue_vector_long(...): set" << std::endl;
+        std::cout << "ConfigParameter::setValue_vector_long(...): set" << std::endl;
         
         delete param_value.val_1dvector_long;
         param_value.val_1dvector_long = new std::vector<long> (value);
+        
+        std::cout << "ConfigParameter::setValue_vector_long(...): SUCCESS" << std::endl;
         
         return true;
     }

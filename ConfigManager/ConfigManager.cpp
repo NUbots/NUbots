@@ -231,9 +231,13 @@ namespace ConfigSystem
         							           std::vector<long> data)
     {
     	CONFIGSYS_DEBUG_CALLS;
+    	
+    	std::cout << "IN storeLongVectorValue1D" << std::endl;
+    	
         //! Get the relevant parameter from the ConfigTree
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        
         std::cout << "storeLongVectorValue1D: setVal" << std::endl;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree

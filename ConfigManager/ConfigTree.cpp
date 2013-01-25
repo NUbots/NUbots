@@ -62,6 +62,8 @@ namespace ConfigSystem
             )
     {
         CONFIGSYS_DEBUG_CALLS;
+        
+        std::cout << "IN getParam" << std::endl;
 
         // Indicates successful retrieval
         bool success = false;
@@ -255,7 +257,7 @@ namespace ConfigSystem
                 success_v = addVectorValueToPtree1D<long>(fromParam, toPtree); 
                 break;
         }
-        
+        std::cout << __PRETTY_FUNCTION__ << ( (success_v)? "success" : "failed" ) << std::endl;
         // Add range
         switch(vt)
         {
@@ -270,6 +272,8 @@ namespace ConfigSystem
                 success_r = addRangeToPtree<long>(fromParam, toPtree);
                 break;
         }
+        
+        std::cout << __PRETTY_FUNCTION__ << ( (success_r)? "success" : "failed" ) << std::endl;
 
         return success_v && success_r;
     }

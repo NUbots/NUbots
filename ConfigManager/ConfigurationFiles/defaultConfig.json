@@ -49,7 +49,28 @@
 		        	"200",
 		        	"150",
 		        	"46",
-		        	"250"
+		        	"20"
+		        ],
+		        "type": "1d_vector_long"
+		    },
+		    
+		    "DummyVector2D": 
+		    {
+		        "desc": "Test parameter for 1d long vectors.",
+		        "range": 
+		        {
+		            "min": "0",
+		            "max": "255",
+		            "lBound": "closed",
+		            "outside": "false",
+		            "uBound": "closed"
+		        },
+		        "value": 
+		        [
+		        	["200", "50"],
+		        	["150", "100"],
+		        	["46", "20"],
+		        	["250", "23"]
 		        ],
 		        "type": "1d_vector_long"
 		    },

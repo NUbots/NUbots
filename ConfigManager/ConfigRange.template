@@ -170,7 +170,9 @@ namespace ConfigSystem
 
     template<typename T>
     bool ConfigRange<T>::apply(std::vector<T> &values)
-    {
+    { 
+		int i =0; 
+    
         BOOST_FOREACH(T &val, values)
         {
             if(!apply(val)) return false;
