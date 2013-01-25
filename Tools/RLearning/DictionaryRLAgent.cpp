@@ -44,5 +44,5 @@
 
 DictionaryRLAgent::DictionaryRLAgent():RLAgent()
 {
-    FunctionApproximator = (ApproximatorInterface*)(new FourierApproximator(true,(float)0.01));
+    FunctionApproximator = (ApproximatorInterface*)(new DictionaryRLAgent());
 }

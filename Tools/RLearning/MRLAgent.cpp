@@ -1,8 +1,8 @@
 /*! @file MRLAgent.h
     @brief Motivated reinforcement learning agent. Provides its own reward structure for self motivation based on novelty.
-    Uses a dictionary approximator to store the learnt expected reward "value" function.
+    Uses a fourier approximator to store the learnt expected reward "value" function.
     ---------------------------------------------------
-    Make your own MRLAgent:
+    Make your own MRLAgent:(WARNING: The motivation wundt function has been tuned for use in head-behaviour, do not change.)
     Follow the template below to implement a Motivated reinforcement learning agent.
 
 
@@ -39,7 +39,7 @@
 
 MRLAgent::MRLAgent():RLAgent()
 {
-    FunctionApproximator = (ApproximatorInterface*)(new FourierApproximator(true, (float)0.01));
+    FunctionApproximator = (ApproximatorInterface*)(new FourierApproximator(false, (float)0.01));
     expectation_map = (ApproximatorInterface*)(new FourierApproximator(false, (float)0.01));
 }
 
@@ -129,12 +129,12 @@ void MRLAgent::giveMotivationReward(){
         novelty+= diff*diff;
     }
 
-    cout<<"Novelty = "<<novelty<<endl;
+    //cout<<"Novelty = "<<novelty<<endl;
     //Do learning for expectation_map
     expectation_map->doLearningEpisode(obs,val,1.0,1);
 
     float motivation = wundtFunction(novelty);
-    cout<<"MRLAGENT:: giveMotivationReward - novelty = "<<novelty<< " Reward = "<< motivation<<endl;
+    //cout<<"MRLAGENT:: giveMotivationReward - novelty = "<<novelty<< " Reward = "<< motivation<<endl;
     giveReward(motivation);
 
    /*OLD NOVELTY

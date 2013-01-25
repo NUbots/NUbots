@@ -1,7 +1,33 @@
 /*! @file RLAgent.cpp
-    @brief Standard implementation of reinforcement learning agent. Needs to be implemented in subclass by adding
+    @brief Standard implementation of reinforcement learning agent.
+    Needs to be implemented in subclass by adding constructor to create function approximators of your choosing.
     @author Jake Fountain
+    ---------------------------------------------------
+    Make your own RLAgent:
+    1. Implement an RLAgent subclass. All that is required is the addition of a constructor initialising the function approximator.
+    for example see DictionaryRLAgent.
+    2. Follow the template below to implement a Motivated reinforcement learning agent in your code to explore a state space and make decisions.
 
+
+    RLAgent rlagent;
+    try{
+        loadAgent(Filename);
+    }catch (string s){
+        rlagent.setParameters(0.1,0.5,0.5,1.0,1,5);//example parameters
+        rlagent.initialiseAgent(observation_size,number_of_actions,resolution_of_FunctionApproximator);
+    }
+
+    for (number of iterations){
+        int action = rlagent.getAction(observation);
+
+        rlagent.giveReward(getRewardFromWorld());
+
+        updateWorld(action);
+
+        if(number of iterations has passed)
+            rlagent.doLearning();
+    }
+    ---------------------------------------------------
 
 
  Copyright (c) 2012 Jake Fountain
@@ -26,7 +52,7 @@
         Sets parameters to standard values and calls constructor of function approximator.
 */
 
-RLAgent::RLAgent()
+RLAgent::RLAgent():RLearningInterface()
 {
    setParameters(0.1,0.1,0.1,1.0,1,10);
    //Don't initialise function approximator. Must be done in subclass.
@@ -40,8 +66,6 @@ RLAgent::RLAgent()
 RLAgent::~RLAgent(){
     delete FunctionApproximator;
 }
-
-
 
 /*! @brief  Agent initialiser
     Initialises function approximator by calling initialiseApproximator
@@ -78,7 +102,7 @@ void RLAgent::saveAgent(string agentName){
     //cout<<"funapp saved"<<endl;
     ofstream save_file;
     stringstream file_name;
-    file_name<<"nubot/"<<agentName<<"_agent";
+    file_name<<save_location<<agentName<<"_agent";
     save_file.open(file_name.str().c_str(),fstream::out);
 
     save_file << alpha<<" ";
@@ -155,7 +179,7 @@ void RLAgent::loadAgent(string agentName){
     FunctionApproximator->loadApproximator(agentName+"_func_approx");
     ifstream load_file;
     stringstream file_name;
-    file_name<<"nubot/"<<agentName<<"_agent";
+    file_name<<save_location<<agentName<<"_agent";
     load_file.open(file_name.str().c_str(),fstream::in);
     if(!load_file.good()) {
         throw string("RLAgent::loadAgent - file not found ") + file_name.str();
@@ -231,7 +255,7 @@ void RLAgent::loadAgent(string agentName){
         num_hidden == 0 )  {
         throw string("RLAgent::loadAgent - warning: num_inputs,outputs or hiddens are zero") + file_name.str();
     }
-    cout<<"RLAgent loaded successfully.";
+    cout<<"RLAgent::loadAgent - RLAgent loaded successfully.";
 
     load_file.close();
 }
@@ -242,11 +266,12 @@ void RLAgent::loadAgent(string agentName){
         Sets the parameters for the learning algorithm.
         @param
         alpha : learning rate/stepsize
-        beta : probability of random action selection (0 to 1.0) or if using softmax, this is the temperature.
+        beta : probability of random action selection (0 to 1.0) or if using softmax, this is the temperature(high temp gives more random selection).
         gamma : look-ahead learning stepsize
         lambda : Variable free for use in subclass RLAgents. EG Used in MRLAgent as learning stepsize for expectation_map.
         learningIterations : number of learning iterations when RLAgent::doLearning() called.
         memory_length : The number of observations, rewards and values to keep in memory when saving. Should be at least 2
+        use_soft_max : when true the agent uses softmax with temperature beta to select actions. Otherwise the agent uses epsilon-greedy with probability of random choice beta.
 */
 void RLAgent::setParameters(float alpha, float beta, float gamma, float lambda,int learningIterations, int memory_length, bool use_soft_max){
     this->alpha = alpha;//see doLearning() method
@@ -283,18 +308,20 @@ void RLAgent::giveReward(float reward){
 */
 int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
 
-    if(valid_actions.size()!=num_outputs)
+    if(valid_actions.size()!=num_outputs){
+        cout<<"Throwing string RLAgent::getAction(..) ..."<<endl;
         throw string("RLAgent::getAction - valid actions list is incorrect length.");
-    int BestAction = 0;
+    }
+    int BestAction = rand()%num_outputs;
     //Store observation and validities for learning later on:
     observations.push_back(observation);
     action_validities.push_back(valid_actions);
+
     //Count the number of valid actions:
     int num_valid_actions = 0;
     for (int i = 0; i<valid_actions.size();i++){
         num_valid_actions+=valid_actions.size();
     }
-
 
     //Logging:
     stringstream text;
@@ -303,18 +330,19 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
         text<<observation[i]<<" ";
     }
     text << " \n";
-
     string text_ = text.str();
     log(text_);
 
     //Store last values
     last_values = FunctionApproximator->getValues(observation);
+
     //Beta-greedy or softmax action choice:
     if (beta*RAND_MAX>rand() or use_soft_max){
         //randomly select action with probability beta
         if (use_soft_max){
             BestAction = getSoftMaxAction(last_values, valid_actions);
         }else{
+            //Choose randomly from the valid actions
             if (num_valid_actions!=0){
                 //Choose random action number
                 int action_num = rand()%(num_valid_actions)+1;
@@ -334,11 +362,9 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
                 cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<endl;
                 BestAction = rand()%(num_outputs);
             }
-                //throw string("RLAgent::getAction - warning: num_valid_actions is zero. Attempted rand()%num_outputs");
-
         }
-
-        actions.push_back(BestAction);
+        //Store action for learning later
+        actions.push_back(BestAction);        
 
         //Logging:
         stringstream text2;
@@ -346,6 +372,7 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
         text_ = text2.str();
         log(text_);
 
+        //Leave function
         return BestAction;
     }
 
@@ -411,7 +438,8 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
 
 
 /*! @brief
-        Performs learning by modifying the function approximator to reflect rewards and observations
+        Performs learning by modifying the function approximator to reflect stored rewards and observations.
+        Deletes stored past information after learning.
 */
 void RLAgent::doLearning(){
 
@@ -465,8 +493,9 @@ float RLAgent::max(vector<float> x, vector<int> valid_actions){
 */
 void RLAgent::log(string text){
     ofstream log_file;
-
-    log_file.open("nubot/RLearning.log",ios_base::out);
+    stringstream s;
+    s<<save_location<<"RLearning.log";
+    log_file.open((s.str()).c_str(),ios_base::app);
 
     log_file << text;
     //cout<<"Logging: "<<text<<endl;

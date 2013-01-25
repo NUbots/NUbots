@@ -96,7 +96,7 @@ HeadLogic::HeadLogic(){
     relevantObjects.push_back(relevantSOb);
     relevantObjects.push_back(relevantMOb);
     relevantObjects.push_back(relevantAOb);
-    cout<<"Head logic constructor end"<<endl;
+
 }
 HeadLogic::~HeadLogic(){}
 

@@ -32,13 +32,14 @@ void GreenHorizonCH::calculateHorizon()
     vector<PointType> result;
 
     const Horizon& kin_hor = vbb->getKinematicsHorizon();
-    #if VISION_HORIZON_VERBOSITY > 3
+    #if VISION_HORIZON_VERBOSITY > 2
         debug<<"GreenHorizonCH::calculateHorizon(): kinematics horizon line eq: "<<kin_hor.getA()<<"x + "<< kin_hor.getB()<< "y = "<<kin_hor.getC()<<endl;
     #endif
     int kin_hor_y;
 
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
+        debug<< "GreenHorizonCH::calculateHorizon() - Checking camera...(if seg fault occurs camera or camera cable may be faulty)"<<endl;
     #endif
 
     for (int x = 0; x < width; x+=VisionConstants::GREEN_HORIZON_SCAN_SPACING) {
@@ -78,8 +79,9 @@ void GreenHorizonCH::calculateHorizon()
         }
 
     }
-    
+
     #if VISION_HORIZON_VERBOSITY > 2
+        debug <<"GreenHorizonCH::calculateHorizon() - Camera fine. Note: a better indicator for faulty camera needs to be implemented."<<endl;
         debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
     #endif
     // provide blackboard the original set of scan points

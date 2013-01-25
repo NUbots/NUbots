@@ -1,17 +1,43 @@
+/*! @file FourierApproximator.cpp
+    @brief Class to implement fourier approximator/network.
+        Works by taking a weighted linear combination of a number of cosine functions for each output.
+        Learning done by a gradient descent rule.
+    Number of basis functions = num_outputs*(k+1)^num_inputs if coupled
+                              = num_outputs*num_inputs*(k+1) otherwise
+
+
+    @author Jake Fountain
+
+ Copyright (c) 2013 Jake Fountain
+
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "FourierApproximator.h"
 
-FourierApproximator::FourierApproximator(bool fully_coupled, float learning_rate)
+FourierApproximator::FourierApproximator(bool fully_coupled, float learning_rate):ApproximatorInterface()
 {
     this->fully_coupled = fully_coupled;
     this->learning_rate = learning_rate;
 }
 
-
+/*! @brief Saves approximator to config folder.
+*/
 void FourierApproximator::saveApproximator(string agentName)
 {
     ofstream save_file;
     stringstream file_name;
-    file_name<<"nubot/"<<agentName;
+    file_name<<save_location<<agentName;
     save_file.open(file_name.str().c_str(),fstream::out);
 
     save_file << num_inputs << "\n";
@@ -26,13 +52,14 @@ void FourierApproximator::saveApproximator(string agentName)
 
     save_file.close();
 }
-
+/*! @brief loads approximator from nubot folder
+*/
 void FourierApproximator::loadApproximator(string agentName)
 {
 
     ifstream save_file;
     stringstream file_name;
-    file_name<<"nubot/"<<agentName;
+    file_name<<save_location<<agentName;
     save_file.open(file_name.str().c_str(),fstream::in);
     if(!save_file.good()) {
         throw string("FourierApproximator::loadApproximator - file not found: ") + file_name.str();
@@ -56,8 +83,8 @@ void FourierApproximator::loadApproximator(string agentName)
             save_file >> data;
 
             if(!save_file.good()) {
-                //throw string("FourierApproximator::loadApproximator - file corrupt ") + file_name.str();
-                cout<<"FourierApproximator::loadApproximator - file corrupt " << file_name.str()<<endl;
+                throw string("FourierApproximator::loadApproximator - file corrupt ") + file_name.str();
+              //cout<<"FourierApproximator::loadApproximator - file corrupt " << file_name.str()<<endl;
             }
         }
         FourierFunction f;
@@ -69,7 +96,8 @@ void FourierApproximator::loadApproximator(string agentName)
 }
 
 
-
+/*! @brief Initialises approximator: call iff approx not loaded.
+*/
 void FourierApproximator::initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range)
 {
     num_inputs = numberOfInputs;
@@ -82,7 +110,8 @@ void FourierApproximator::initialiseApproximator(int numberOfInputs, int numberO
     }
 
 }
-
+/*! @brief Does learning for each output fourier function
+*/
 void FourierApproximator::doLearningEpisode(vector<vector<float> > const& observations, vector< vector<float> > const& values, float stepSize, int iterations)
 {
 
@@ -93,7 +122,8 @@ void FourierApproximator::doLearningEpisode(vector<vector<float> > const& observ
     }
 
 }
-
+/*! @brief Evaluates each output function
+*/
 vector<float> FourierApproximator::getValues(vector<float> const& observations)
 {
     vector<float> result;

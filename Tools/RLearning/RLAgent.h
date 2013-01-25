@@ -3,6 +3,32 @@
 
     @author Jake Fountain
 
+    Make your own RLAgent:
+    1. Implement an RLAgent subclass. All that is required is the addition of a constructor initialising the function approximator.
+    for example see DictionaryRLAgent.
+    2. Follow the template below to implement a Motivated reinforcement learning agent in your code to explore a state space and make decisions.
+
+
+    RLAgent rlagent;
+    try{
+        loadAgent(Filename);
+    }catch (string s){
+        rlagent.setParameters(0.1,0.5,0.5,1.0,1,5);//example parameters
+        rlagent.initialiseAgent(observation_size,number_of_actions,resolution_of_FunctionApproximator);
+    }
+
+    for (number of iterations){
+        int action = rlagent.getAction(observation);
+
+        rlagent.giveReward(getRewardFromWorld());
+
+        updateWorld(action);
+
+        if(number of iterations has passed)
+            rlagent.doLearning();
+    }
+    ---------------------------------------------------
+
  Copyright (c) 2012 Jake Fountain
 
  This file is free software: you can redistribute it and/or modify
