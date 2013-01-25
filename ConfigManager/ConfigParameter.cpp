@@ -32,26 +32,24 @@ namespace ConfigSystem
     {
         switch(vt)
         {
-        // case vt_none           : return "none"         ;
-        case vt_bool           : return "bool"         ;
-        case vt_long           : return "long"         ;
-        case vt_double         : return "double"       ;
-        case vt_string         : return "string"       ;
+        case vt_bool           : return "bool"            ;
+        case vt_long           : return "long"            ;
+        case vt_double         : return "double"          ;
+        case vt_string         : return "string"          ;
         case vt_1dvector_long  : return "1d_vector_long"  ;
         case vt_1dvector_double: return "1d_vector_double";
-        default                : return "none"         ;
+        default                : return "none"            ;
         }
     }
 
     value_type stringToValueType  (std::string typStr)
     {
-             if(typStr.compare("bool"         ) == 0) return vt_bool           ;
-        else if(typStr.compare("long"         ) == 0) return vt_long           ;
-        else if(typStr.compare("double"       ) == 0) return vt_double         ;
-        else if(typStr.compare("string"       ) == 0) return vt_string         ;
-        else if(typStr.compare("1d_vector_long") == 0) return vt_1dvector_long  ;
+             if(typStr.compare("bool"            ) == 0) return vt_bool           ;
+        else if(typStr.compare("long"            ) == 0) return vt_long           ;
+        else if(typStr.compare("double"          ) == 0) return vt_double         ;
+        else if(typStr.compare("string"          ) == 0) return vt_string         ;
+        else if(typStr.compare("1d_vector_long"  ) == 0) return vt_1dvector_long  ;
         else if(typStr.compare("1d_vector_double") == 0) return vt_1dvector_double;
-        // else if(typStr.compare("none"         ) == 0) return vt_none           ;
         else return vt_none;
     }
 
@@ -320,9 +318,16 @@ namespace ConfigSystem
 
     bool ConfigParameter::setValue_vector_long(std::vector<long> &value)
     {
+        std::cout << "setValue_vector_long(...): locked" << std::endl;
         if(_locked) return false;
+
+        std::cout << "setValue_vector_long(...): type" << std::endl;
         if( param_value.val_type != vt_1dvector_long) return false;
+
+        std::cout << "setValue_vector_long(...): range" << std::endl;
         if(!param_value.range_long->apply(value)) return false;
+
+        std::cout << "setValue_vector_long(...): set" << std::endl;
         
         delete param_value.val_1dvector_long;
         param_value.val_1dvector_long = new std::vector<long> (value);

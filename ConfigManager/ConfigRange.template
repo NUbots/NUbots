@@ -25,7 +25,7 @@
 
 #include <boost/foreach.hpp>
 #include <vector>
-
+#include <iostream>
 #include "ConfigRange.h"
 
 using std::string;
@@ -213,6 +213,9 @@ namespace ConfigSystem
         bool ubO = _uBound == bt_open  ;
         bool ubC = _uBound == bt_closed;
         bool ubN = _uBound == bt_none  ;
+
+        std::cout << __PRETTY_FUNCTION__ << ": "  << _min <<" < "
+                                        << value << " < " << _max << std::endl; 
 
         // The following tests could be optimised a little.
         if(!_outside) // [...] || (...)

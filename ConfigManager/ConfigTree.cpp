@@ -1,6 +1,6 @@
 /*! 
-	@file 	ConfigTree.cpp
-    @brief 	Implementation file for the ConfigTree class. 
+    @file     ConfigTree.cpp
+    @brief     Implementation file for the ConfigTree class. 
     
     @author Sophie Calland, Mitchell Metcalfe
     
@@ -37,7 +37,7 @@ using boost::property_tree::ptree;
 
 namespace ConfigSystem
 {
-	ConfigTree::ConfigTree(ptree root)
+    ConfigTree::ConfigTree(ptree root)
     {
         CONFIGSYS_DEBUG_CALLS;
 
@@ -55,13 +55,13 @@ namespace ConfigSystem
         return paramPath + "." + paramName;
     }
 
-	bool ConfigTree::getParam (
+    bool ConfigTree::getParam (
             const std::string paramPath, 
             const std::string paramName, 
             ConfigParameter &data
             )
-	{
-		CONFIGSYS_DEBUG_CALLS;
+    {
+        CONFIGSYS_DEBUG_CALLS;
 
         // Indicates successful retrieval
         bool success = false;
@@ -69,24 +69,24 @@ namespace ConfigSystem
         // Create the full path to the desired parameter
         std::string fullPath = makeFullPath(paramPath, paramName);
 
-		try
-		{
+        try
+        {
             // Get the subtree representing the desired parameter.
             ptree paramSubtree = _treeRoot.get_child(fullPath);
 
             // Convert the parameter subtree into a parameter object.
             success = paramFromPtree(paramSubtree, data);
-		}
-		catch (boost::property_tree::ptree_error e)
-		{
-			std::cout   << "ConfigTree::getParam(...): ACCESS ERROR:" 
+        }
+        catch (boost::property_tree::ptree_error e)
+        {
+            std::cout   << "ConfigTree::getParam(...): ACCESS ERROR:" 
                         << e.what() 
                         << std::endl;
             return false;
-		}
+        }
 
-		return success;
-	}
+        return success;
+    }
 
     bool ConfigTree::storeParam (
             const std::string paramPath, 
@@ -141,9 +141,7 @@ namespace ConfigSystem
         std::string lockStr = fromPtree.get("locked", "false");
         toParam.setLocked(lockStr.compare("true") == 0);
 
-        addPtreeValueandRangeToParam(fromPtree, toParam);
-
-        return true;
+        return addPtreeValueandRangeToParam(fromPtree, toParam);
     }
 
     bool ConfigTree::ptreeFromParam(ConfigParameter fromParam, ptree &toPtree)
@@ -165,108 +163,115 @@ namespace ConfigSystem
         std::string typStr = makeValueTypeString(vt);
         toPtree.put("type", typStr);
         
-        addParamValueandRangeToPtree(fromParam, toPtree);
-
-        return true;
+        return addParamValueandRangeToPtree(fromParam, toPtree);
     }
 
     bool ConfigTree::addPtreeValueandRangeToParam(ptree fromPtree, ConfigParameter &toParam)
     {
         std::string typStr = fromPtree.get<std::string>("type");
         value_type vt = stringToValueType(typStr);
-        std::cout << vt << std::endl;
+        std::cout << "ConfigTree::addPtreeValueandRangeToParam(...): vt = " 
+                  << makeValueTypeString(vt) << std::endl;
+
+        bool success_v = false;
+        bool success_r = true ;
 
         switch(vt)
         {
-		    case vt_string: 
-		    	addValueToParam<std::string>(fromPtree, toParam); 
-		    	break;
-		    	
-		    case vt_double: 
-		    	addValueToParam<double>(fromPtree, toParam); 
-		    	break;
-		    
-		    case vt_1dvector_double:
-		    	addVectorValueToParam1D<double>(fromPtree, toParam);
-		    	break;
-		    
-		    case vt_bool: 
-		    	addValueToParam<bool>(fromPtree, toParam); 
-		    	break;
-		    	
-		    case vt_long: 
-		    	addValueToParam<long>(fromPtree, toParam); 
-		    	break;
-		    
-		    case vt_1dvector_long:
-		    	addVectorValueToParam1D<long>(fromPtree, toParam);
-		    	break;
-		    
-		    break;
+            case vt_string: 
+                success_v = addValueToParam<std::string>(fromPtree, toParam); 
+                break;
+                
+            case vt_double: 
+                success_v = addValueToParam<double>(fromPtree, toParam); 
+                break;
+            
+            case vt_1dvector_double:
+                success_v = addVectorValueToParam1D<double>(fromPtree, toParam);
+                break;
+            
+            case vt_bool: 
+                success_v = addValueToParam<bool>(fromPtree, toParam); 
+                break;
+                
+            case vt_long: 
+                success_v = addValueToParam<long>(fromPtree, toParam); 
+                break;
+            
+            case vt_1dvector_long:
+                success_v = addVectorValueToParam1D<long>(fromPtree, toParam);
+                break;
         }
- 
+        
         switch(vt)
         {
-        	//cases fall through as they use the same - change later if necessary.
-		    case vt_double         :
-		    case vt_1dvector_double: 
-		        addRangeToParam<double>(fromPtree, toParam);
-		        break;
-		        
-		    case vt_bool         :
-		    case vt_long         :		    
-		    case vt_1dvector_long: 
-		        addRangeToParam<long>(fromPtree, toParam);
-		        break;
+            //cases fall through as they use the same - change later if necessary.
+            case vt_double         :
+            case vt_1dvector_double: 
+                success_r = addRangeToParam<double>(fromPtree, toParam);
+                break;
+                
+            case vt_bool         :
+            case vt_long         :            
+            case vt_1dvector_long: 
+                success_r = addRangeToParam<long>(fromPtree, toParam);
+                break;
         }
+
+        return success_v && success_r;
     }
 
     bool ConfigTree::addParamValueandRangeToPtree(ConfigParameter fromParam, ptree &toPtree)
     {
+        bool success_v = false;
+        bool success_r = true ;
+
         value_type vt = fromParam.getType();
         
         // Add value
         switch(vt)
         {
-		    case vt_string: 
-		        addValueToPtree<std::string> (fromParam, toPtree); 
-		        break;
-		        
-		    case vt_double: 
-		        addValueToPtree<double> (fromParam, toPtree); 
-		        break;
-		        
-		    case vt_1dvector_double:
-		        addVectorValueToPtree1D<double>(fromParam, toPtree); 
-		        break;
-		        
-		    case vt_bool           : 
-		        addValueToPtree<bool> (fromParam, toPtree); 
-		        break;
-		        
-		    case vt_long           : 
-		        addValueToPtree<long> (fromParam, toPtree); 
-		        break;
-		        
-		    case vt_1dvector_long  : 
-		        addVectorValueToPtree1D<long>(fromParam, toPtree); 
-		        break;
+            case vt_string         : 
+                success_v = addValueToPtree<std::string> (fromParam, toPtree); 
+                break;
+                
+            case vt_double         : 
+                success_v = addValueToPtree<double> (fromParam, toPtree); 
+                break;
+                
+            case vt_1dvector_double:
+                success_v = addVectorValueToPtree1D<double>(fromParam, toPtree); 
+                break;
+                
+            case vt_bool           : 
+                success_v = addValueToPtree<bool> (fromParam, toPtree); 
+                break;
+                
+            case vt_long           : 
+                success_v = addValueToPtree<long> (fromParam, toPtree); 
+                break;
+                
+            case vt_1dvector_long  : 
+                success_v = addVectorValueToPtree1D<long>(fromParam, toPtree); 
+                break;
         }
-
+        
         // Add range
         switch(vt)
         {
-		    case vt_double         :
-		    case vt_1dvector_double:
-		        addRangeToPtree<double>(fromParam, toPtree);
-		        break;
-		    case vt_bool         :
-		    case vt_long         :
-		    case vt_1dvector_long:
-		    	std::cout << "IN HERE" << std::endl;
-		        addRangeToPtree<long>(fromParam, toPtree);
-		        break;
+            case vt_double         :
+            case vt_1dvector_double:
+                success_r = addRangeToPtree<double>(fromParam, toPtree);
+                break;
+            case vt_bool         :
+            case vt_long         :
+            case vt_1dvector_long:
+                std::cout << "ConfigTree::addParamValueandRangeToPtree(...): IN HERE" << std::endl;
+                success_r = addRangeToPtree<long>(fromParam, toPtree);
+                break;
         }
+
+        return success_v && success_r;
     }
 
 // "Camera": {

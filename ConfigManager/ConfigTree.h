@@ -114,8 +114,8 @@ namespace ConfigSystem
         	}
         	catch(std::exception &e)
         	{
-        		return false;
         		std::cout << "ERROR: " << e.what() << std::endl;
+                return false;
         	}
         	
         	return true;
@@ -185,7 +185,6 @@ namespace ConfigSystem
 			catch(std::exception &e)
 			{
 				std::cout << "ERROR: " << e.what() << std::endl;
-				
 				return false;
 			}
 			
