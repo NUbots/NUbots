@@ -8,17 +8,7 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-string Beacon::getIDName(BeaconID id)
-{
-    switch(id) {
-    case YellowBeacon:    return "YellowBeacon";
-    case BlueBeacon:      return "BlueBeacon";
-    case UnknownBeacon:   return "UnknownBeacon";
-    case InvalidBeacon:   return "InvalidBeacon";
-    }
-}
-
-Beacon::Beacon(BeaconID id, const Quad &corners)
+Beacon::Beacon(VFO_ID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
@@ -31,22 +21,17 @@ Beacon::Beacon(BeaconID id, const Quad &corners)
     //    }
 
     m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
-    m_bottom_centre = corners.getBottomCentre();
-    m_location_pixels = corners.getCentre();
+    m_location_pixels = corners.getBottomCentre();
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
 
-    valid = valid && check(); //this must be last
+    //valid = valid && check(); //this must be last
+    valid = check();
 }
 
 const Quad& Beacon::getQuad() const
 {
     return m_corners;
-}
-
-Beacon::BeaconID Beacon::getID() const
-{
-    return m_id;
 }
 
 Vector3<float> Beacon::getRelativeFieldCoords() const
@@ -57,7 +42,7 @@ Vector3<float> Beacon::getRelativeFieldCoords() const
 bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
-        debug << "Beacon::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
+        debug << "Beacon::addToExternalFieldObjects - m_id: " << getVFOName(m_id) << endl;
         debug << "    " << *this << endl;
     #endif
         
@@ -70,15 +55,15 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
         bool stationary = false;
 
         switch(m_id) {
-        case YellowBeacon:
+        case BEACON_Y:
             stat_id = FieldObjects::FO_YELLOW_BEACON;
             stationary = true;
             break;
-        case BlueBeacon:
+        case BEACON_B:
             stat_id = FieldObjects::FO_BLUE_BEACON;
             stationary = true;
             break;
-        case UnknownBeacon:
+        case BEACON_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_BEACON_UNKNOWN, "Unknown Beacon");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_BEACON);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_BEACON);
@@ -125,16 +110,16 @@ bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timesta
 
 bool Beacon::check() const
 {
-    if(!distance_valid) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Beacon::check - Beacon thrown out: distance invalid" << endl;
-        #endif
-        return false;
-    }
+//    if(!distance_valid) {
+//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//            debug << "Beacon::check - Beacon thrown out: distance invalid" << endl;
+//        #endif
+//        return false;
+//    }
 
     //throwout for base below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS and
-       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y)) {
+       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Beacon::check - Beacon thrown out: base above kinematics horizon" << endl;
         #endif
@@ -167,7 +152,7 @@ bool Beacon::check() const
 
 void Beacon::setUnknown()
 {
-    m_id = UnknownBeacon;
+    m_id = BEACON_U;
 }
 
 bool Beacon::calculatePositions()
@@ -175,8 +160,8 @@ bool Beacon::calculatePositions()
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
     bool transform_valid;
-    float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
-    float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
+    float bearing = (float)vbb->calculateBearing(m_location_pixels.x);
+    float elevation = (float)vbb->calculateElevation(m_location_pixels.y);
     
     float distance = distanceToBeacon(bearing, elevation);
 
@@ -288,6 +273,23 @@ float Beacon::distanceToBeacon(float bearing, float elevation) {
         else
             return width_dist;
     }
+}
+
+void Beacon::render(cv::Mat &mat) const
+{
+    cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
+    switch(m_id) {
+    case BEACON_Y:
+        cv::rectangle(mat, r, cv::Scalar(0, 255, 255));
+        break;
+    case BEACON_B:
+        cv::rectangle(mat, r, cv::Scalar(255, 0, 0));
+        break;
+    case BEACON_U:
+        cv::rectangle(mat, r, cv::Scalar(255, 255, 255));
+        break;
+    }
+
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.

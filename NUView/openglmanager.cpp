@@ -198,79 +198,80 @@ void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, 
     return;
 }
 
-void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId)
-{
-    makeCurrent();
-    // If there is an old list stored, delete it first.
-    if(displayStored[displayId])
-    {
-        glDeleteLists(displays[displayId],1);
-    }
+//void OpenglManager::writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId)
+//{
+//    makeCurrent();
+//    // If there is an old list stored, delete it first.
+//    if(displayStored[displayId])
+//    {
+//        glDeleteLists(displays[displayId],1);
+//    }
 
-    displays[displayId] = glGenLists(1);
-    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
-    glDisable(GL_TEXTURE_2D);
-    glLineWidth(2.0);       // Line width
-    std::vector<TransitionSegment>::const_iterator i;
-    unsigned char r,g,b;
-    for(i = newsegments.begin(); i != newsegments.end(); i++)
-    {
-        Vector2<int> start = i->getStartPoint();
-        Vector2<int> end =i->getEndPoint();
-        ClassIndex::getColourIndexAsRGB(i->getColour(),r,g,b);
-        glColor3ub(r,g,b);
+//    displays[displayId] = glGenLists(1);
+//    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+//    glDisable(GL_TEXTURE_2D);
+//    glLineWidth(2.0);       // Line width
+//    std::vector<TransitionSegment>::const_iterator i;
+//    unsigned char r,g,b;
+//    for(i = newsegments.begin(); i != newsegments.end(); i++)
+//    {
+//        Vector2<int> start = i->getStartPoint();
+//        Vector2<int> end =i->getEndPoint();
+//        ClassIndex::getColourIndexAsRGB(i->getColour(),r,g,b);
+//        glColor3ub(r,g,b);
 
-        glBegin(GL_LINES);                              // Start Lines
-        glVertex2i( start.x, start.y);                 // Starting point
-        glVertex2i( end.x, end.y);                 // Starting point
-        glEnd();                                        // End Lines
-    }
-    glEnable(GL_TEXTURE_2D);
-    glEndList();                                    // END OF LIST
+//        glBegin(GL_LINES);                              // Start Lines
+//        glVertex2i( start.x, start.y);                 // Starting point
+//        glVertex2i( end.x, end.y);                 // Starting point
+//        glEnd();                                        // End Lines
+//    }
+//    glEnable(GL_TEXTURE_2D);
+//    glEndList();                                    // END OF LIST
 
-    displayStored[displayId] = true;
+//    displayStored[displayId] = true;
 
-    emit updatedDisplay(displayId, displays[displayId], width, height);
-}
+//    emit updatedDisplay(displayId, displays[displayId], width, height);
+//}
 
-void OpenglManager::writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId)
-{
-    makeCurrent();
-    // If there is an old list stored, delete it first.
-    if(displayStored[displayId])
-    {
-        glDeleteLists(displays[displayId],1);
-    }
+//void OpenglManager::writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId)
+//{
+//    makeCurrent();
+//    // If there is an old list stored, delete it first.
+//    if(displayStored[displayId])
+//    {
+//        glDeleteLists(displays[displayId],1);
+//    }
 
-    displays[displayId] = glGenLists(1);
-    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
-    glDisable(GL_TEXTURE_2D);
-    glLineWidth(2.0);       // Line width
-    std::vector<ObjectCandidate>::const_iterator i = candidates.begin();
-    unsigned char r,g,b;
-    for(; i != candidates.end(); i++)
-    {
-        ClassIndex::getColourIndexAsRGB(i->getColour(),r,g,b);
-        Vector2<int> topLeft = i->getTopLeft();
-        Vector2<int> bottomRight = i->getBottomRight();
-        glColor3ub(r,g,b);
+//    displays[displayId] = glGenLists(1);
+//    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+//    glDisable(GL_TEXTURE_2D);
+//    glLineWidth(2.0);       // Line width
+//    std::vector<ObjectCandidate>::const_iterator i = candidates.begin();
+//    unsigned char r,g,b;
+//    for(; i != candidates.end(); i++)
+//    {
+//        ClassIndex::getColourIndexAsRGB(i->getColour(),r,g,b);
+//        Vector2<int> topLeft = i->getTopLeft();
+//        Vector2<int> bottomRight = i->getBottomRight();
+//        glColor3ub(r,g,b);
 
-        glBegin(GL_LINE_STRIP);                              // Start Lines
-            glVertex2i( topLeft.x, topLeft.y);
-            glVertex2i( topLeft.x, bottomRight.y);
-            glVertex2i( bottomRight.x, bottomRight.y);
-            glVertex2i( bottomRight.x, topLeft.y);
-        glEnd();                                        // End Lines
+//        glBegin(GL_LINE_STRIP);                              // Start Lines
+//            glVertex2i( topLeft.x, topLeft.y);
+//            glVertex2i( topLeft.x, bottomRight.y);
+//            glVertex2i( bottomRight.x, bottomRight.y);
+//            glVertex2i( bottomRight.x, topLeft.y);
+//        glEnd();                                        // End Lines
 
-    }
-    glEnable(GL_TEXTURE_2D);
-    glEndList();                                    // END OF LIST
+//    }
+//    glEnable(GL_TEXTURE_2D);
+//    glEndList();                                    // END OF LIST
 
-    displayStored[displayId] = true;
+//    displayStored[displayId] = true;
 
-    emit updatedDisplay(displayId, displays[displayId], width, height);
+//    emit updatedDisplay(displayId, displays[displayId], width, height);
 
-}
+//}
+
 void OpenglManager::writeWMLineToDisplay(WMLine* newWMLine, int numLines,GLDisplay::display displayId)
 {
     makeCurrent();
@@ -463,13 +464,13 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
             /*qDebug()    << int(fieldLines[i].leftPoint.x) << "," << int(fieldLines[i].leftPoint.y) <<"\t"
                         << int(fieldLines[i].rightPoint.x)<< "," << int(fieldLines[i].rightPoint.y);*/
 
-            std::vector<LinePoint*> linePoints = fieldLines[i].getPoints();
+            std::vector<LinePoint> linePoints = fieldLines[i].getPoints();
             glBegin(GL_TRIANGLES);
             for (unsigned int j =0; j < linePoints.size(); j++)
             {
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y),0.0);
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y-1),0.0);
-                glVertex3f(int(linePoints[j]->x),int(linePoints[j]->y+1),0.0);
+                glVertex3f(int(linePoints[j].x),int(linePoints[j].y),0.0);
+                glVertex3f(int(linePoints[j].x),int(linePoints[j].y-1),0.0);
+                glVertex3f(int(linePoints[j].x),int(linePoints[j].y+1),0.0);
             }
             glEnd();
         }
@@ -493,31 +494,31 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
    // emit updatedDisplay(displayId, displays[displayId], width, height);
 
 }
-void OpenglManager::writeCornersToDisplay(std::vector< CornerPoint > corners, GLDisplay::display displayId)
-{
-    makeCurrent();
-    glDisable(GL_TEXTURE_2D);
-    glLineWidth(4.0);
-    glColor3ub(255,0,255);
-    for(unsigned int i = 0; i < corners.size(); i++)
-    {
-        glBegin(GL_LINES);                              // Start Lines
-        glVertex2i( int(corners[i].PosX-4), int(corners[i].PosY+4));                 // Starting point
-        glVertex2i( int(corners[i].PosX+4), int(corners[i].PosY-4));               // Ending point
-        glEnd();  // End Lines
-        glBegin(GL_LINES);                              // Start Lines
-        glVertex2i( int(corners[i].PosX+4), int(corners[i].PosY+4));                 // Starting point
-        glVertex2i( int(corners[i].PosX-4), int(corners[i].PosY-4));               // Ending point
-        glEnd();  // End Lines
-    }
-    glEnable(GL_TEXTURE_2D);
-    glEndList();                                    // END OF LIST
+//void OpenglManager::writeCornersToDisplay(std::vector< CornerPoint > corners, GLDisplay::display displayId)
+//{
+//    makeCurrent();
+//    glDisable(GL_TEXTURE_2D);
+//    glLineWidth(4.0);
+//    glColor3ub(255,0,255);
+//    for(unsigned int i = 0; i < corners.size(); i++)
+//    {
+//        glBegin(GL_LINES);                              // Start Lines
+//        glVertex2i( int(corners[i].PosX-4), int(corners[i].PosY+4));                 // Starting point
+//        glVertex2i( int(corners[i].PosX+4), int(corners[i].PosY-4));               // Ending point
+//        glEnd();  // End Lines
+//        glBegin(GL_LINES);                              // Start Lines
+//        glVertex2i( int(corners[i].PosX+4), int(corners[i].PosY+4));                 // Starting point
+//        glVertex2i( int(corners[i].PosX-4), int(corners[i].PosY-4));               // Ending point
+//        glEnd();  // End Lines
+//    }
+//    glEnable(GL_TEXTURE_2D);
+//    glEndList();                                    // END OF LIST
 
-    displayStored[displayId] = true;
+//    displayStored[displayId] = true;
 
-    qDebug() << "Updating Corner:" << corners.size();
-    emit updatedDisplay(displayId, displays[displayId], width, height);
-}
+//    qDebug() << "Updating Corner:" << corners.size();
+//    emit updatedDisplay(displayId, displays[displayId], width, height);
+//}
 
 void OpenglManager::stub(QImage image, GLDisplay::display displayId)
 {

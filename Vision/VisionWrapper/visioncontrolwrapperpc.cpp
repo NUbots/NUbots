@@ -18,11 +18,11 @@ VisionControlWrapper::VisionControlWrapper()
 int VisionControlWrapper::runFrame()
 {
     static int frame = 0;
+    frame++;
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
+        debug << "frame: " << frame << endl;
     #endif
-    frame++;
-    cout << "frame: " << frame << endl;
     if(!wrapper->updateFrame()) {
         #if VISION_WRAPPER_VERBOSITY > 1
             debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;

@@ -301,6 +301,9 @@ OPTION( NUBOT_THREAD_SEETHINK_PROFILER
 OPTION( NUBOT_THREAD_SENSEMOVE_PROFILER
         "Set to ON to monitor the computation time of the motion thread"
         OFF)
+OPTION( NUBOT_VISION_PROFILER
+        "Set to ON to monitor the computation breakdown of the vision system"
+        OFF)
 
 MARK_AS_ADVANCED(
 	NUBOT_THREAD_SEETHINK_PRIORITY

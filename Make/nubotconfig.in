@@ -31,6 +31,9 @@
     #undef THREAD_SEETHINK_PROFILE
 #endif
 
+// Time profiling and monitoring options
+#define VISION_PROFILER_${NUBOT_VISION_PROFILER}
+
 #define THREAD_SENSEMOVE_PROFILER_${NUBOT_THREAD_SENSEMOVE_PROFILER}
 #ifdef THREAD_SENSEMOVE_PROFILER_ON
     #define THREAD_SENSEMOVE_PROFILE                                  //!< This will be defined if motion thread time monitoring was selected

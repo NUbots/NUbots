@@ -27,12 +27,13 @@ scanlines.cpp
 segmentfilter.cpp
 goaldetection.cpp
 balldetection.cpp
+linedetector.cpp
 robocuphacks.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-
+LineDetectionAlgorithms
 )
 ####################################################################################
 

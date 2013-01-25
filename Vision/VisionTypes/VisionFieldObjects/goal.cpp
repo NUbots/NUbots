@@ -8,27 +8,13 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-string Goal::getIDName(GoalID id)
-{
-    switch(id) {
-    case YellowLeftGoal:        return "YellowLeftGoal";
-    case YellowRightGoal:       return "YellowRightGoal";
-    case YellowUnknownGoal:     return "YellowUnknownGoal";
-    case BlueLeftGoal:          return "BlueLeftGoal";
-    case BlueRightGoal:         return "BlueRightGoal";
-    case BlueUnknownGoal:       return "BlueUnknownGoal";
-    case InvalidGoal:           return "InvalidGoal";
-    default:                    return "InvalidGoal";
-    }
-}
-
-Goal::Goal(GoalID id, const Quad &corners)
+Goal::Goal(VFO_ID id, const Quad &corners)
 {
     m_id = id;
     m_corners = corners;
 
     m_size_on_screen = Vector2<int>(corners.getWidth(), corners.getHeight());
-    m_bottom_centre = corners.getBottomCentre();
+    m_location_pixels = corners.getBottomCentre();
 
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -37,20 +23,15 @@ Goal::Goal(GoalID id, const Quad &corners)
 //        m_bottom_centre.y = mathGeneral::roundNumberToInt(corr_bottom_centre.y);
 //    }
 
-    m_location_pixels = corners.getCentre();
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
-    valid = valid && check();
+    //valid = valid && check();
+    valid = check();
 }
 
 const Quad& Goal::getQuad() const
 {
     return m_corners;
-}
-
-Goal::GoalID Goal::getID() const
-{
-    return m_id;
 }
 
 /*!
@@ -74,7 +55,7 @@ Vector3<float> Goal::getRelativeFieldCoords() const
 bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_FIELDOBJECT_VERBOSITY > 1
-        debug << "Goal::addToExternalFieldObjects - m_id: " << getIDName(m_id) << endl;
+        debug << "Goal::addToExternalFieldObjects - m_id: " << VisionFieldObject::getVFOName(m_id) << endl;
         debug << "    " << *this << endl;
     #endif
     if(valid) {
@@ -86,29 +67,29 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         bool stationary = false;
 
         switch(m_id) {
-        case YellowLeftGoal:
+        case GOAL_Y_L:
             stat_id = FieldObjects::FO_YELLOW_LEFT_GOALPOST;
             stationary = true;
             break;
-        case YellowRightGoal:
+        case GOAL_Y_R:
             stat_id = FieldObjects::FO_YELLOW_RIGHT_GOALPOST;
             stationary = true;
             break;
-        case BlueLeftGoal:
+        case GOAL_B_L:
             stat_id = FieldObjects::FO_BLUE_LEFT_GOALPOST;
             stationary = true;
             break;
-        case BlueRightGoal:
+        case GOAL_B_R:
             stat_id = FieldObjects::FO_BLUE_RIGHT_GOALPOST;
             stationary = true;
             break;
-        case YellowUnknownGoal:
+        case GOAL_Y_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
             stationary = false;
             break;
-        case BlueUnknownGoal:
+        case GOAL_B_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
@@ -116,9 +97,9 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
             break;
         default:
             //invalid object - do not push to fieldobjects
-            errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object" << endl;
+            errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;
             #if VISION_FIELDOBJECT_VERBOSITY > 1
-                debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object" << endl;
+                debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;
             #endif
             return false;
         }
@@ -157,30 +138,34 @@ bool Goal::check() const
 {
     //various throwouts here
 
-    if(abs(m_corners.getBottomLeft().y - m_corners.getTopRight().y) <= 25) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
-        #endif
-        return false;
-    }
+//    if(!distance_valid) {
+//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//            debug << "Goal::check - Goal thrown out: distance invalid" << endl;
+//        #endif
+//        return false;
+//    }
 
-    if(abs(m_corners.getBottomLeft().x - m_corners.getTopRight().x) <= 5) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
-        #endif
-        return false;
+    if(VisionConstants::THROWOUT_SHORT_GOALS) {
+        if(m_corners.getHeight() <= VisionConstants::MIN_GOAL_HEIGHT) {
+            #if VISION_FIELDOBJECT_VERBOSITY > 1
+                debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
+            #endif
+            return false;
+        }
     }
-
-    if(!distance_valid) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: distance invalid" << endl;
-        #endif
-        return false;
+    
+    if(VisionConstants::THROWOUT_NARROW_GOALS) {
+        if(m_corners.getWidth() <= VisionConstants::MIN_GOAL_WIDTH) {
+            #if VISION_FIELDOBJECT_VERBOSITY > 1
+                debug << "Goal::check - Goal thrown out: less than " << VisionConstants::MIN_GOAL_WIDTH << "pix high" << endl;
+            #endif
+            return false;
+        }
     }
 
     //throwout for base below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS and
-       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_bottom_centre.x, m_bottom_centre.y)) {
+       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: base above kinematics horizon" << endl;
         #endif
@@ -222,8 +207,8 @@ bool Goal::calculatePositions()
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
     bool transform_valid;
-    float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
-    float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
+    float bearing = (float)vbb->calculateBearing(m_location_pixels.x);
+    float elevation = (float)vbb->calculateElevation(m_location_pixels.y);
     
     float distance = distanceToGoal(bearing, elevation);
 
@@ -352,12 +337,21 @@ float Goal::distanceToGoal(float bearing, float elevation) {
     }
 }
 
+void Goal::render(cv::Mat &mat) const
+{
+    cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
+    if(m_id <= GOAL_Y_U)
+        cv::rectangle(mat, r, cv::Scalar(0, 255, 255), -1);
+    else
+        cv::rectangle(mat, r, cv::Scalar(255, 0, 0), -1);
+}
+
 /*! @brief Stream insertion operator for a single ColourSegment.
  *      The segment is terminated by a newline.
  */
 ostream& operator<< (ostream& output, const Goal& g)
 {
-    output << "Goal - " << Goal::getIDName(g.m_id) << endl;
+    output << "Goal - " << VisionFieldObject::getVFOName(g.m_id) << endl;
     output << "\tpixelloc: [" << g.m_location_pixels.x << ", " << g.m_location_pixels.y << "]" << endl;
     output << " angularloc: [" << g.m_location_angular.x << ", " << g.m_location_angular.y << "]" << endl;
     output << "\trelative field coords: [" << g.m_spherical_position.x << ", " << g.m_spherical_position.y << ", " << g.m_spherical_position.z << "]" << endl;

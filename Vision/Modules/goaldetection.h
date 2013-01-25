@@ -31,6 +31,8 @@ private:
                                          vector<Quad>* yellow_posts, vector<Quad>* blue_beacons, vector<Quad>* yellow_beacons,
                                          vector<Quad>* unknown_beacons);
     static void overlapCheck(vector<Quad>* posts);
+    static void sortEdgesFromSegments(const vector<ColourSegment>& segments, vector<PointType>& startedges, vector<PointType>& endedges, vector<int> &startlengths, vector<int> &endlengths);
+    static void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<PointType>& pointlist);
 };
 
 #endif // GOALDETECTION_H

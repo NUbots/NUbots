@@ -39,12 +39,12 @@
 #include <QGLWidget>
 #include "GLDisplay.h"
 #include "Tools/Math/Vector2.h"
-#include "VisionOld//TransitionSegment.h"
+//#include "VisionOld//TransitionSegment.h"
 #include "Tools/Math/LSFittedLine.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "localisationwidget.h"
-#include "VisionOld//ObjectCandidate.h"
-#include "VisionOld//CornerPoint.h"
+//#include "VisionOld//ObjectCandidate.h"
+//#include "VisionOld//CornerPoint.h"
 
 class NUImage;
 class ClassifiedImage;
@@ -113,14 +113,14 @@ public:
           @param newsegments The new tansition segments.
           @param displayId The id of the display layer to write to.
           */
-        void writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId);
+        //void writeTransitionSegmentsToDisplay(std::vector< TransitionSegment > newsegments, GLDisplay::display displayId);
 
         /*!
           @brief Accepts new object candidate vector and maps it to display.
           @param candidates The new Object Candidates to display.
           @param displayId The id of the display layer to write to.
           */
-        void writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId);
+        //void writeCandidatesToDisplay(std::vector< ObjectCandidate > candidates, GLDisplay::display displayId);
 
         /*!
           @brief Accepts array of new world model lines and maps them to display instructions.
@@ -173,7 +173,7 @@ public:
           @param corners The new Corner to display.
           @param displayId The id of the display layer to write to.
         */
-        void writeCornersToDisplay(std::vector< CornerPoint > Corners, GLDisplay::display displayId);
+        //void writeCornersToDisplay(std::vector< CornerPoint > Corners, GLDisplay::display displayId);
         /*!
           @brief Accepts Field Objects and maps it to display instructions.
           @param FieldObjects The new fieldObjects to display.

@@ -284,7 +284,8 @@ std::istream& operator>> (std::istream& input, NUImage& p_image)
     }
     else
     {
-        input.seekg(start);
+        throw std::exception();
+        //input.seekg(start);
     }
 
     input.read(reinterpret_cast<char*>(&width), sizeof(width));

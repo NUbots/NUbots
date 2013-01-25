@@ -31,7 +31,7 @@ Autoconfig/*
 *parameters.wp
 
 # ignore Qt builds
-Vision-build*/*
+Vision*-build*/*
 /Vision/Vision.pro.user
 NUView-build*/*
 /NUView/debug/*
@@ -47,7 +47,7 @@ NUView-build*/*
 /NUView/qrc_textures.cpp
 /NUView/diagona/*.*
 /NUView/NUView
-/NUView-build-desktop/*
+/*-build-desktop*/*
 /Extracted/*
 /NUView/debug/*
 /NUView/release/*
@@ -55,7 +55,7 @@ NUView-build*/*
 /NUView/NUView.pro.user
 
 /Vision-build-desktop*/*
-/Vision/Vision.pro.user
+*.pro.user
 /BWalkMaker-build*/*
 /BWalkMaker/BWalkMaker.pro.user
 

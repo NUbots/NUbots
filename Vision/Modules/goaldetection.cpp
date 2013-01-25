@@ -164,8 +164,6 @@ void GoalDetection::detectGoals()
         it++;
     }
 
-    int MIN_GOAL_SEP = 20;
-
     if (yellow_posts.size() > 2) {
         yellow_posts.clear();
     }
@@ -176,7 +174,7 @@ void GoalDetection::detectGoals()
 
             int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);      // inside right
             int pos2 = std::max(post1.getBottomLeft().x, post2.getBottomLeft().x);  // inside left
-            if (std::abs(pos2 - pos1) < MIN_GOAL_SEP)
+            if (std::abs(pos2 - pos1) < VisionConstants::MIN_GOAL_SEPARATION)
                 yellow_posts.clear();
         }
     }
@@ -191,7 +189,7 @@ void GoalDetection::detectGoals()
 
             int pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x);      // inside right
             int pos2 = std::max(post1.getBottomLeft().x, post2.getBottomLeft().x);  // inside left
-            if (std::abs(pos2 - pos1) < MIN_GOAL_SEP)
+            if (std::abs(pos2 - pos1) < VisionConstants::MIN_GOAL_SEPARATION)
                 blue_posts.clear();
         }
     }
@@ -215,39 +213,39 @@ void GoalDetection::detectGoals()
     // BLUE BEACONS
     //cout << "BLUE BEACONS (AFTER): " << blue_beacons.size() << endl;
     for (unsigned int i = 0; i < blue_beacons.size(); i++) {
-        Beacon beacon(Beacon::BlueBeacon, blue_beacons.at(i));
+        Beacon beacon(VisionFieldObject::BEACON_B, blue_beacons.at(i));
         vbb->addBeacon(beacon);
     }
     // YELLOW BEACONS
     //cout << "YELLOW BEACONS (AFTER): " << yellow_beacons.size() << endl;
     for (unsigned int i = 0; i < yellow_beacons.size(); i++) {
-        Beacon beacon(Beacon::YellowBeacon, yellow_beacons.at(i));
+        Beacon beacon(VisionFieldObject::BEACON_Y, yellow_beacons.at(i));
         vbb->addBeacon(beacon);
     }
     // AMBIGUOUS BEACONS
     for (unsigned int i = 0; i < unknown_beacons.size(); i++) {
-        Beacon beacon(Beacon::UnknownBeacon, unknown_beacons.at(i));
+        Beacon beacon(VisionFieldObject::BEACON_U, unknown_beacons.at(i));
         vbb->addBeacon(beacon);
     }
     
     // BLUE POSTS
     if (blue_posts.size() != 2)
         for (unsigned int i = 0; i < blue_posts.size(); i++) {
-            Goal post(Goal::BlueUnknownGoal, blue_posts.at(i));
+            Goal post(VisionFieldObject::GOAL_B_U, blue_posts.at(i));
             vbb->addGoal(post);
         }
     else {
         Quad post1 = blue_posts.at(0),
              post2 = blue_posts.at(1);
         if (post1.getCentre().x < post2.getCentre().x) {
-            Goal post_left(Goal::BlueLeftGoal, post1);
-            Goal post_right(Goal::BlueRightGoal, post2);
+            Goal post_left(VisionFieldObject::GOAL_B_L, post1);
+            Goal post_right(VisionFieldObject::GOAL_B_U, post2);
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
         }
         else {
-            Goal post_left(Goal::BlueLeftGoal, post2);
-            Goal post_right(Goal::BlueRightGoal, post1);
+            Goal post_left(VisionFieldObject::GOAL_B_L, post2);
+            Goal post_right(VisionFieldObject::GOAL_B_R, post1);
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
         }
@@ -256,21 +254,21 @@ void GoalDetection::detectGoals()
     // YELLOW POSTS
     if (yellow_posts.size() != 2)
         for (unsigned int i = 0; i < yellow_posts.size(); i++) {
-            Goal post(Goal::YellowUnknownGoal, yellow_posts.at(i));
+            Goal post(VisionFieldObject::GOAL_Y_U, yellow_posts.at(i));
             vbb->addGoal(post);
         }
     else {
         Quad post1 = yellow_posts.at(0),
              post2 = yellow_posts.at(1);
         if (post1.getCentre().x < post2.getCentre().x) {
-            Goal post_left(Goal::YellowLeftGoal, post1);
-            Goal post_right(Goal::YellowRightGoal, post2);
+            Goal post_left(VisionFieldObject::GOAL_Y_L, post1);
+            Goal post_right(VisionFieldObject::GOAL_Y_R, post2);
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
         }
         else {
-            Goal post_left(Goal::YellowLeftGoal, post2);
-            Goal post_right(Goal::YellowRightGoal, post1);
+            Goal post_left(VisionFieldObject::GOAL_Y_L, post2);
+            Goal post_right(VisionFieldObject::GOAL_Y_R, post1);
             vbb->addGoal(post_left);
             vbb->addGoal(post_right);
         }
@@ -348,8 +346,6 @@ void GoalDetection::DensityCheck(bool yellow, bool beacon, vector<Quad>* posts, 
 
 void GoalDetection::ratioCheck(vector<Quad>* posts)
 {
-    const int   HEIGHT_TO_WIDTH_RATIO_LOW = 3,
-                HEIGHT_TO_WIDTH_RATIO_HIGH = 15;
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
         Quad candidate = *it;
@@ -359,7 +355,7 @@ void GoalDetection::ratioCheck(vector<Quad>* posts)
 //            width = candidate.val[2] - candidate.val[0];
         if (width == 0)
             it = posts->erase(it);
-        else if (height/width < HEIGHT_TO_WIDTH_RATIO_LOW || height/width > HEIGHT_TO_WIDTH_RATIO_HIGH)
+        else if (height/width < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_LOW || height/width > VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH)
             it = posts->erase(it);
         else
             it++;
@@ -368,11 +364,9 @@ void GoalDetection::ratioCheck(vector<Quad>* posts)
 
 void GoalDetection::widthCheck(vector<Quad>* posts)
 {
-    const int WIDTH_MIN = 2;
     vector<Quad>::iterator it = posts->begin();
     while (it < posts->end()) {
-        Quad candidate = *it;
-        if (candidate.getWidth() < WIDTH_MIN)
+        if (it->getWidth() < VisionConstants::MIN_GOAL_WIDTH)
             it = posts->erase(it);
         else
             it++;
@@ -465,24 +459,21 @@ void GoalDetection::splitIntoObjects(vector<Quad>* blue_candidates, vector<Quad>
 
 void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidates)
 {
-    VisionFieldObject::VFO_ID goal;
+    VisionFieldObject::COLOUR_CLASS goal;
     if (colour == ClassIndex::blue)
-        goal = VisionFieldObject::GOAL_B;
+        goal = VisionFieldObject::GOAL_B_COLOUR;
     else
-        goal = VisionFieldObject::GOAL_Y;
+        goal = VisionFieldObject::GOAL_Y_COLOUR;
 
-    const vector<Transition>& hor_trans = VisionBlackboard::getInstance()->getHorizontalTransitions(goal);
-    const vector<Transition>& ver_trans = VisionBlackboard::getInstance()->getVerticalTransitions(goal);
+    const vector<ColourSegment>& h_segments = VisionBlackboard::getInstance()->getHorizontalTransitions(goal);
+    const vector<ColourSegment>& v_segments = VisionBlackboard::getInstance()->getVerticalTransitions(goal);
 
-    vector<Transition> start_trans, end_trans;
+    vector<PointType> start_trans, end_trans, vert_trans;
+    vector<int> start_lengths, end_lengths;
 
     // separate into start and end transitions
-    for (unsigned int i = 0; i < hor_trans.size(); i++) {
-        if (hor_trans.at(i).getAfter() == colour)
-            start_trans.push_back(hor_trans.at(i));
-        else
-            end_trans.push_back(hor_trans.at(i));
-    }
+    sortEdgesFromSegments(h_segments, start_trans, end_trans, start_lengths, end_lengths);
+    appendEdgesFromSegments(v_segments, vert_trans);
 
     const int MAX_OBJECTS = 8;
     const int BINS = 20;
@@ -508,16 +499,18 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
         if (repeats == 0) {
             for (unsigned int i = 0; i < start_trans.size(); i++)
                 for (int j = 0; j < BINS; j++)
-                    if (start_trans.at(i).getLocation().x < (j+1)*BIN_WIDTH) {
-                        histogram[repeats][j]++;
+                    if (start_trans.at(i).x < (j+1)*BIN_WIDTH) {
+                        //histogram[repeats][j]++;
+                        histogram[repeats][j] += start_lengths.at(i);
                         break;
                     }
         }
         else {
             for (unsigned int i = 0; i < end_trans.size(); i++)
                 for (int j = 0; j < BINS; j++)
-                    if (end_trans.at(i).getLocation().x < (j+1)*BIN_WIDTH) {
-                        histogram[repeats][j]++;
+                    if (end_trans.at(i).x < (j+1)*BIN_WIDTH) {
+                        //histogram[repeats][j]++;
+                        histogram[repeats][j] += end_lengths.at(i);
                         break;
                     }
         }
@@ -589,22 +582,22 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             int mean = 0, sdev = 0, counter = 0;
 
             for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (start_trans.at(j).getLocation().x >= start_pos && start_trans.at(j).getLocation().x <= end_pos) {
-                    mean +=  start_trans.at(j).getLocation().x;
+                if (start_trans.at(j).x >= start_pos && start_trans.at(j).x <= end_pos) {
+                    mean +=  start_trans.at(j).x;
                     counter++;
                 }
             mean /= counter;
             counter = 0;
             for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (start_trans.at(j).getLocation().x >= start_pos && start_trans.at(j).getLocation().x <= end_pos) {
-                    sdev += pow(static_cast<float>(start_trans.at(j).getLocation().x - mean), 2);
+                if (start_trans.at(j).x >= start_pos && start_trans.at(j).x <= end_pos) {
+                    sdev += pow(static_cast<float>(start_trans.at(j).x - mean), 2);
                     counter++;
                 }
             sdev = sqrt(sdev/counter);
 
             for (unsigned int j = 0; j < start_trans.size(); j++) {
-                int    x_pos = start_trans.at(j).getLocation().x,
-                       y_pos = start_trans.at(j).getLocation().y;
+                int    x_pos = start_trans.at(j).x,
+                       y_pos = start_trans.at(j).y;
                 if (x_pos >= start_pos && x_pos <= end_pos) {
                     if(x_pos < start_min && x_pos >= mean - SDEV_THRESHOLD*sdev) {
                         start_min = x_pos;
@@ -620,22 +613,22 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
 
             // FIND RIGHT EDGE
             for (unsigned int j = 0; j < end_trans.size(); j++)
-                if (end_trans.at(j).getLocation().x >= start_pos && end_trans.at(j).getLocation().x <= end_pos) {
-                    mean +=  end_trans.at(j).getLocation().x;
+                if (end_trans.at(j).x >= start_pos && end_trans.at(j).x <= end_pos) {
+                    mean +=  end_trans.at(j).x;
                     counter++;
                 }
             mean /= counter;
             counter = 0;
             for (unsigned int j = 0; j < start_trans.size(); j++)
-                if (end_trans.at(j).getLocation().x >= start_pos && end_trans.at(j).getLocation().x <= end_pos) {
-                    sdev += pow(static_cast<float>(end_trans.at(j).getLocation().x - mean), 2);
+                if (end_trans.at(j).x >= start_pos && end_trans.at(j).x <= end_pos) {
+                    sdev += pow(static_cast<float>(end_trans.at(j).x - mean), 2);
                     counter++;
                 }
             sdev = sqrt(sdev/counter);
 
             for (unsigned int j = 0; j < end_trans.size(); j++) {
-                int    x_pos = end_trans.at(j).getLocation().x,
-                       y_pos = end_trans.at(j).getLocation().y;
+                int    x_pos = end_trans.at(j).x,
+                       y_pos = end_trans.at(j).y;
                 if (x_pos >= start_pos && x_pos <= end_pos) {
                     if (x_pos > end_max && x_pos <= mean + SDEV_THRESHOLD*sdev)
                     end_max = x_pos;
@@ -651,10 +644,10 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
             //unsigned int    vert_max = 0,
             //                vert_min = std::numeric_limits<int>::max();
 
-            for (unsigned int j = 0; j < ver_trans.size(); j++) {
+            for (unsigned int j = 0; j < vert_trans.size(); j++) {
                 // extend with vertical segments (increase height)
-                int x_pos = ver_trans.at(j).getLocation().x;
-                int y_pos = ver_trans.at(j).getLocation().y;
+                int x_pos = vert_trans.at(j).x;
+                int y_pos = vert_trans.at(j).y;
                 if (x_pos >= start_min && x_pos <= end_max) {
                     contains_vertical = true;
                     if (y_pos < bot_min)
@@ -686,3 +679,54 @@ void GoalDetection::detectGoal(ClassIndex::Colour colour, vector<Quad>* candidat
     }
 }
 
+void GoalDetection::sortEdgesFromSegments(const vector<ColourSegment> &segments, vector<PointType> &startedges, vector<PointType> &endedges, vector<int> &startlengths, vector<int> &endlengths)
+{
+    vector<ColourSegment>::const_iterator it;
+    for(it = segments.begin(); it < segments.end(); it++) {
+        if(it->getStart().x < it->getEnd().x) {
+            startedges.push_back(it->getStart());
+            endedges.push_back(it->getEnd());
+            startlengths.push_back(it->getLength());
+            endlengths.push_back(it->getLength());
+        }
+        else if(it->getStart().x > it->getEnd().x){
+            startedges.push_back(it->getEnd());
+            endedges.push_back(it->getStart());
+            startlengths.push_back(it->getLength());
+            endlengths.push_back(it->getLength());
+        }
+        else {
+            if(it->getStart().y < it->getEnd().y) {
+                startedges.push_back(it->getStart());
+                endedges.push_back(it->getEnd());
+                startlengths.push_back(it->getLength());
+                endlengths.push_back(it->getLength());
+            }
+            else if(it->getStart().y > it->getEnd().y){
+                startedges.push_back(it->getEnd());
+                endedges.push_back(it->getStart());
+                startlengths.push_back(it->getLength());
+                endlengths.push_back(it->getLength());
+            }
+            else {
+                startedges.push_back(it->getStart());
+                startedges.push_back(it->getEnd());
+                endedges.push_back(it->getStart());
+                endedges.push_back(it->getEnd());
+                startlengths.push_back(it->getLength());
+                endlengths.push_back(it->getLength());
+                startlengths.push_back(it->getLength());
+                endlengths.push_back(it->getLength());
+            }
+        }
+    }
+}
+
+void GoalDetection::appendEdgesFromSegments(const vector<ColourSegment> &segments, vector<PointType> &pointlist)
+{
+    vector<ColourSegment>::const_iterator it;
+    for(it = segments.begin(); it < segments.end(); it++) {
+        pointlist.push_back(it->getStart());
+        pointlist.push_back(it->getEnd());
+    }
+}

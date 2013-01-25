@@ -17,6 +17,7 @@
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
+#include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 
 #define GROUP_NAME "/home/shannon/Images/paper"
 #define GROUP_EXT ".png"
@@ -36,31 +37,27 @@ class DataWrapper
 
 public:
     
-    enum DATA_ID {
-        DID_IMAGE,
-        DID_CLASSED_IMAGE
-    };
-    
     enum DEBUG_ID {
-        DBID_IMAGE=0,
-        DBID_H_SCANS=1,
-        DBID_V_SCANS=2,
-        DBID_SEGMENTS=3,
-        DBID_TRANSITIONS=4,
-        DBID_HORIZON=5,
-        DBID_GREENHORIZON_SCANS=6,
-        DBID_GREENHORIZON_FINAL=7,
-        DBID_OBJECT_POINTS=8,
-        DBID_FILTERED_SEGMENTS=9,
-        DBID_GOALS=10,
-        DBID_BEACONS=11,
-        DBID_BALLS=12,
-        DBID_OBSTACLES=13,
-        NUMBER_OF_IDS=14
+        DBID_IMAGE              = 0,
+        DBID_CLASSED_IMAGE       = 1,
+        DBID_H_SCANS            = 2,
+        DBID_V_SCANS            = 3,
+        DBID_SEGMENTS           = 4,
+        DBID_MATCHED_SEGMENTS   = 5,
+        DBID_HORIZON            = 6,
+        DBID_GREENHORIZON_SCANS = 7,
+        DBID_GREENHORIZON_FINAL = 8,
+        DBID_OBJECT_POINTS      = 9,
+        DBID_FILTERED_SEGMENTS  = 10,
+        DBID_GOALS              = 11,
+        DBID_BEACONS            = 12,
+        DBID_BALLS              = 13,
+        DBID_OBSTACLES          = 14,
+        DBID_LINES              = 15,
+        NUMBER_OF_IDS           = 16
     };
 
     static string getIDName(DEBUG_ID id);
-    static string getIDName(DATA_ID id);
 
     static DataWrapper* getInstance();
 
@@ -81,18 +78,19 @@ public:
     const LookUpTable& getLUT() const;
         
     //! PUBLISH METHODS
-    void publish(DATA_ID id, const Mat& img);
     void publish(const vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
     void debugRefresh();
-    bool debugPublish(vector<Ball> data);
-    bool debugPublish(vector<Beacon> data);
-    bool debugPublish(vector<Goal> data);
-    bool debugPublish(vector<Obstacle> data);
+    bool debugPublish(const vector<Ball>& data);
+    bool debugPublish(const vector<Beacon>& data);
+    bool debugPublish(const vector<Goal>& data);
+    bool debugPublish(const vector<Obstacle>& data);
+    bool debugPublish(const vector<FieldLine>& data);
     bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
-    bool debugPublish(DEBUG_ID id, const Mat& img);
+    bool debugPublish(DEBUG_ID id);
+    bool debugPublish(DEBUG_ID id, const NUImage *const img);
     
     
 private:
@@ -110,8 +108,7 @@ private:
 private:
     enum INPUT_METHOD {
         CAMERA,
-        STREAM,
-        FILE
+        STREAM
     };
     
 private:
@@ -120,6 +117,8 @@ private:
     static DataWrapper* instance;
 
     NUImage* m_current_image;
+
+    string configname;
 
     string LUTname;
     LookUpTable LUT;
@@ -137,17 +136,17 @@ private:
     VideoCapture* capture;
     Mat m_current_image_cv;
     int num_images, cur_image;
-    
+
     //! Used for debugging
     int debug_window_num;
-    map<DEBUG_ID, pair<string, Mat>* > debug_map;
+    map<DEBUG_ID, vector<pair<string, Mat>* > > debug_map;
     pair<string, Mat>* debug_windows;
 
 //    int id_window_map[NUMBER_OF_IDS];
 //
 //    string* debug_window_name;  //for array
 //    Mat* debug_img;             //for array
-    
+
     //! Used for displaying results
     string results_window_name;
     Mat results_img;

@@ -6,7 +6,7 @@ ColourReplacementRule::ColourReplacementRule()
 {
 }
 
-bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, ScanDirection dir) const
+bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const
 {
 //    int multiplier;
 //    switch(dir) {
@@ -25,9 +25,9 @@ bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegme
 //    }
 
 //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-    if(!(m_middle_min <= middle.getLengthPixels() && m_middle_max >= middle.getLengthPixels() &&
-         m_before_min <= before.getLengthPixels() && m_before_max >= before.getLengthPixels() &&
-         m_after_min <= after.getLengthPixels() && m_after_max >= after.getLengthPixels())) {
+    if(!(m_middle_min <= middle.getLength() && m_middle_max >= middle.getLength() &&
+         m_before_min <= before.getLength() && m_before_max >= before.getLength() &&
+         m_after_min <= after.getLength() && m_after_max >= after.getLength())) {
         //did not match size requirements
         return false;
     }

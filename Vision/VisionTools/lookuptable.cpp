@@ -71,3 +71,10 @@ void LookUpTable::classifyImage(const NUImage& src, cv::Mat& dest) const
         }
     }
 }
+
+void LookUpTable::zero()
+{
+    for(int i=0; i<LUTTools::LUT_SIZE; i++)
+        LUTbuffer[i] = ClassIndex::unclassified;
+    LUT = LUTbuffer;
+}

@@ -247,6 +247,45 @@ template <class V = float> class Vector2{
       output << "(" << v.x << "," << v.y << ")";
       return output;
   }
+  
+//  /**
+//  * @brief input stream operator for the form (x,y)
+//  */
+//  friend std::istream& operator>> (std::istream& input, const Vector2<V>& v)
+//  {
+//      input.ignore(2,'(');
+//      input >> (double)v.x;
+//      input.ignore(2,',');
+//      input >> (double)v.y;
+//      input.ignore(2,')');
+//      input.peek();
+//      return input;
+//  }
+//  std::istream& operator>> (std::istream& input)
+//  {
+//      input.ignore(2,'(');
+//      input >> x;
+//      input.ignore(2,',');
+//      input >> y;
+//      input.ignore(2,')');
+//      input.peek();
+//      return input;
+//  }
+
 };
+
+/**
+* @brief input stream operator for the form (x,y)
+*/
+template <class V> std::istream& operator>>(std::istream& stream, Vector2<V>& vector2)
+{
+    stream.ignore(2,'(');
+    stream >> vector2.x;
+    stream.ignore(2,',');
+    stream >> vector2.y;
+    stream.ignore(2,')');
+    stream.peek();
+    return stream;
+}
 
 #endif // __Vector2_h__

@@ -16,6 +16,7 @@
 
 #include "Vision/basicvisiontypes.h"
 #include "Vision/VisionTools/classificationcolours.h"
+#include "Tools/Math/Vector2.h"
 
 using namespace std;
 
@@ -26,13 +27,16 @@ public:
     ColourSegment(const PointType& start, const PointType& end, const ClassIndex::Colour& colour) {set(start, end, colour);}
 
     //! Returns the length of the segment in pixels.
-    unsigned int getLengthPixels() const {return m_length_pixels;}
+    unsigned int getLength() const {return m_length_pixels;}
     //! Returns the colour of the segment.
     ClassIndex::Colour getColour() const {return m_colour;}
     //! Returns the start location of the segment in pixel coordinates.
     const PointType& getStart() const {return m_start;}
     //! Returns the end location of the segment in pixel coordinates.
     const PointType& getEnd() const {return m_end;}
+    //! Returns the end location of the segment in pixel coordinates.
+    const Vector2<float>& getCentre() const {return m_centre;}
+
 
     /**
       * Sets the parameters for the segment.
@@ -66,6 +70,7 @@ private:
     unsigned int m_length_pixels;   //! @variable The length of the segment in pixels.
     PointType m_start,              //! @variable The start screen location.
               m_end;                //! @variable The end  screenlocation.
+    Vector2<float> m_centre;             //! @variable The centre screenlocation.
 };
 
 #endif // COLOURSEGMENT_H
