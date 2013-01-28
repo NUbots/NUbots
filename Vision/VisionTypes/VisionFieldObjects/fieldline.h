@@ -15,7 +15,10 @@ public:
 
     void set(double rho, double phi, const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points);
 
-    Line getLineEquation() const;
+    Line getScreenLineEquation() const {return m_screen_line;}
+    Line getRelativeLineEquation() const {return m_relative_line;}
+    Vector2<Point> getScreenEndPoints() const {return m_screen_end_points;}
+    Vector2<Point> getRelativeEndPoints() const {return m_relative_end_points;}
     
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << getVFOName(FIELDLINE) << " " << getShortLabel();}

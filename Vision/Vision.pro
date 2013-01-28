@@ -142,7 +142,8 @@ SOURCES += \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp \
     basicvisiontypes.cpp \
-    VisionTools/transformer.cpp
+    VisionTools/transformer.cpp \
+    VisionTools/classificationcolours.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup
@@ -165,9 +166,6 @@ HEADERS += \
     ../Infrastructure/FieldObjects/AmbiguousObject.h \
     ../Infrastructure/FieldObjects/MobileObject.h \
     ../Infrastructure/FieldObjects/StationaryObject.h \
-    ../Kinematics/Kinematics.h \
-    ../Kinematics/EndEffector.h \
-    ../Kinematics/Link.h \
 
 SOURCES += \
     ../Tools/FileFormats/LUTTools.cpp \
@@ -185,6 +183,3 @@ SOURCES += \
     ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
     ../Infrastructure/FieldObjects/MobileObject.cpp \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
-    ../Kinematics/Kinematics.cpp \
-    ../Kinematics/EndEffector.cpp \
-    ../Kinematics/Link.cpp \

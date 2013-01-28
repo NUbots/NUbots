@@ -31,21 +31,21 @@ ostream& operator<< (ostream& output, const ColourTransitionRule& c)
     //before
     output << "before: (" << c.m_before_min << ", " << c.m_before_max << ") [";
     for(it = c.m_before.begin(); it != c.m_before.end(); it++) {
-        output << getColourNameFromIndex(*it) << ", ";
+        output << getColourName(*it) << ", ";
     }
     output << "]\t// (min, max) [colourlist]\n";
 
     //this
     output << "middle: (" << c.m_min << ", " << c.m_max << ") [";
     for(it = c.m_middle.begin(); it != c.m_middle.end(); it++) {
-        output << getColourNameFromIndex(*it) << ", ";
+        output << getColourName(*it) << ", ";
     }
     output << "]\t// (min, max) [colourlist]\n";
 
     //after
     output << "after: (" << c.m_after_min << ", " << c.m_after_max << ") [";
     for(it = c.m_after.begin(); it != c.m_after.end(); it++) {
-        output << getColourNameFromIndex(*it) << ", ";
+        output << getColourName(*it) << ", ";
     }
     output << "]\t// (min, max) [colourlist]" << endl;
 

@@ -7,9 +7,8 @@
 #include <boost/foreach.hpp>
 
 
-GoalDetectorHistogram::GoalDetectorHistogram()
-{
-}
+GoalDetectorHistogram::GoalDetectorHistogram() {}
+GoalDetectorHistogram::~GoalDetectorHistogram() {}
 
 vector<Goal> GoalDetectorHistogram::run()
 {
@@ -40,7 +39,7 @@ vector<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_s
 
     Histogram1D hist(BINS, VisionBlackboard::getInstance()->getImageWidth()/(double)BINS);
 
-    Vector2<float> h_length_stats = calculateSegmentLengthStatistics(h_segments);
+    Vector2<double> h_length_stats = calculateSegmentLengthStatistics(h_segments);
 
     // fill histogram bins
     BOOST_FOREACH(ColourSegment seg, h_segments) {

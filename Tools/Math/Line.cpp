@@ -282,6 +282,8 @@ vector<Point> Line::projectOnto(const vector<Point>& pts) const
         //Point shift(0, m_C);
         //Point norm(m_B, -m_A);
         //return norm*((pt-shift)*norm/(norm*norm)) + shift;
+
+        return result;
     }
 }
 

@@ -19,8 +19,7 @@ void LSFittedLine::clearPoints(){
 	sumY = 0;
 	sumX2 = 0;
 	sumY2 = 0;
-	sumXY = 0;
-    numPoints = 0;
+    sumXY = 0;
 	MSD = 0;
     r2tls = 0;
 	points.clear();
@@ -36,35 +35,24 @@ void LSFittedLine::addPoint(Point &point){
 	sumY += point.y;
 	sumX2 += point.x * point.x;
 	sumY2 += point.y * point.y;
-	sumXY += point.x * point.y;
-	numPoints ++;
+    sumXY += point.x * point.y;
     points.push_back(point);
-    valid = numPoints >= 2;
+    valid = points.size() >= 2;
     if(valid)
         calcLine();
 }
 
 void LSFittedLine::addPoints(vector<Point>& pointlist){
     if(!pointlist.empty()) {
-        if (numPoints < 2)
-        {
-                valid = false;
-        }
-        else
-        {
-                valid = true;
-                calcLine();
-        }
         for(unsigned int i=0; i<pointlist.size(); i++) {
             sumX += pointlist[i].x;
             sumY += pointlist[i].y;
             sumX2 += pointlist[i].x * pointlist[i].x;
             sumY2 += pointlist[i].y * pointlist[i].y;
             sumXY += pointlist[i].x * pointlist[i].y;
-            numPoints++;
             points.push_back(pointlist[i]);
         }
-        valid = numPoints >= 2;
+        valid = points.size() >= 2;
         if(valid)
             calcLine();
     }
@@ -76,12 +64,11 @@ void LSFittedLine::joinLine(LSFittedLine &sourceLine)
 	sumY += sourceLine.sumY;
 	sumX2 += sourceLine.sumX2;
 	sumY2 += sourceLine.sumY2;
-	sumXY += sourceLine.sumXY;
-	numPoints += sourceLine.numPoints;
+    sumXY += sourceLine.sumXY;
     for(unsigned int p = 0; p < sourceLine.points.size(); p++) {
 		points.push_back(sourceLine.points[p]);
     }
-    valid = numPoints >= 2;
+    valid = points.size() >= 2;
     if(valid)
         calcLine();
 }
@@ -94,7 +81,7 @@ Vector2<double> LSFittedLine::combinedR2TLSandMSD(const LSFittedLine &sourceLine
     TsumX2 = sumX2 + sourceLine.sumX2;
     TsumY2 = sumY2 + sourceLine.sumY2;
     TsumXY = sumXY + sourceLine.sumXY;
-    TnumPoints = numPoints + sourceLine.numPoints;
+    TnumPoints = points.size() + sourceLine.points.size();
     Vector2<double> results;
 
     sxx = TsumX2 - TsumX*TsumX/TnumPoints;
@@ -118,6 +105,7 @@ double LSFittedLine::getr2tls () const
 void LSFittedLine::calcLine(){
 	double sxx, syy, sxy, Sigma;
 	double A = 0, B = 0, C = 0;
+    unsigned int numPoints = points.size();
 
     sxx = sumX2 - sumX*sumX/numPoints;
     syy = sumY2 - sumY*sumY/numPoints;

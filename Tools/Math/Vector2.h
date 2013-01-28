@@ -239,6 +239,15 @@ template <class V = float> class Vector2{
 
   //! MODIFIED BEYOND THIS POINT BY SHANNON FENN 10/06/12
 
+  Vector2<V> elemMult(Vector2<V> other)
+  {
+      return Vector2<V>(x*other.x, y*other.y);
+  }
+
+  Vector2<V> elemDiv(Vector2<V> other)
+  {
+      return Vector2<V>(x/other.x, y/other.y);
+  }
   /**
   * @brief output stream operator result of the form (x,y)
   */

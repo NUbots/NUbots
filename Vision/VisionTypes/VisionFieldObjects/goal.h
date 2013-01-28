@@ -17,8 +17,6 @@ public:
     //! @brief reutns the pixel locations of the corners.
     const Quad& getQuad() const;
 
-    //! @brief returns the field position relative to the robot.
-    Vector3<float> getRelativeFieldCoords() const;
     /*!
       @brief pushes the goal to the external field objects.
       @param fieldobjects a pointer to the global list of field objects.
@@ -56,13 +54,12 @@ private:
       @param elevation the angle between the goal and the image centre in the xz plane.
       @return the distance to the goal in cm.
       */
-    float distanceToGoal(float bearing, float elevation);
+    double distanceToGoal(double bearing, double elevation);
     
 private:
     Quad m_corners;                 //! @variable pixel locations of the corners
-
-    float d2p;          //! @variable the distance of the goal in cm as found by the distance to point method
-    float width_dist;   //! @variable the distance of the goal in cm as found by the width method.
+    double width_dist,
+           d2p;
 };
 
 #endif // GOAL_H

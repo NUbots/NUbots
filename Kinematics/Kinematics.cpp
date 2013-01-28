@@ -263,55 +263,55 @@ Vector3<float> Kinematics::calculateCentreOfMass()
     return com_position;
 }
 
-Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY)
-{
-    const double nearDistance = 10;     // 10 cm
-    const double farDistance = 3000;   // 3,000 cm (30 metres)
+//Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY)
+//{
+//    const double nearDistance = 10;     // 10 cm
+//    const double farDistance = 3000;   // 3,000 cm (30 metres)
 
-    std::vector<float> resultCartesian(3, 0.0f);
+//    std::vector<float> resultCartesian(3, 0.0f);
 
-    // pre-calculate required trig values.
-    double xcos = cos(angleFromCameraCentreX);
-    double xsin = sin(angleFromCameraCentreX);
-    double ycos = cos(angleFromCameraCentreY);
-    double ysin = sin(angleFromCameraCentreY);
+//    // pre-calculate required trig values.
+//    double xcos = cos(angleFromCameraCentreX);
+//    double xsin = sin(angleFromCameraCentreX);
+//    double ycos = cos(angleFromCameraCentreY);
+//    double ysin = sin(angleFromCameraCentreY);
 
-    // Build the near measurement vector
-    Matrix nearCartCol(4,1);
-    nearCartCol[0][0] = nearDistance * xcos * ycos;
-    nearCartCol[1][0] = nearDistance * xsin * ycos;
-    nearCartCol[2][0] = nearDistance * ysin;
-    nearCartCol[3][0] = 1.0;
+//    // Build the near measurement vector
+//    Matrix nearCartCol(4,1);
+//    nearCartCol[0][0] = nearDistance * xcos * ycos;
+//    nearCartCol[1][0] = nearDistance * xsin * ycos;
+//    nearCartCol[2][0] = nearDistance * ysin;
+//    nearCartCol[3][0] = 1.0;
 
-    // Build the far measurement vector
-    Matrix farCartCol(4,1);
-    farCartCol[0][0] = farDistance * xcos * ycos;
-    farCartCol[1][0] = farDistance * xsin * ycos;
-    farCartCol[2][0] = farDistance * ysin;
-    farCartCol[3][0] = 1.0;
+//    // Build the far measurement vector
+//    Matrix farCartCol(4,1);
+//    farCartCol[0][0] = farDistance * xcos * ycos;
+//    farCartCol[1][0] = farDistance * xsin * ycos;
+//    farCartCol[2][0] = farDistance * ysin;
+//    farCartCol[3][0] = 1.0;
 
-    // Caluculate The Transformed positions of both the near and far values.
-    Matrix nearResult = Camera2GroundTransform * nearCartCol;
-    Matrix farResult = Camera2GroundTransform * farCartCol;
+//    // Caluculate The Transformed positions of both the near and far values.
+//    Matrix nearResult = Camera2GroundTransform * nearCartCol;
+//    Matrix farResult = Camera2GroundTransform * farCartCol;
 
-    // Interpolate between near and far values to find the point at which z = 0 (the ground)
-    double zScaleFactor = nearResult[2][0] / (nearResult[2][0] - farResult[2][0]);
-    resultCartesian[0] = nearResult[0][0] + (farResult[0][0] - nearResult[0][0]) * zScaleFactor;
-    resultCartesian[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
-    resultCartesian[2] = 0.0;
+//    // Interpolate between near and far values to find the point at which z = 0 (the ground)
+//    double zScaleFactor = nearResult[2][0] / (nearResult[2][0] - farResult[2][0]);
+//    resultCartesian[0] = nearResult[0][0] + (farResult[0][0] - nearResult[0][0]) * zScaleFactor;
+//    resultCartesian[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
+//    resultCartesian[2] = 0.0;
 
-    // Convert back to polar coodinates.
-    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
+//    // Convert back to polar coodinates.
+//    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
 
-    Vector3<float> result;
-    result[0] = resultSpherical[0];
-    result[1] = resultSpherical[1];
-    result[2] = resultSpherical[2];
+//    Vector3<float> result;
+//    result[0] = resultSpherical[0];
+//    result[1] = resultSpherical[1];
+//    result[2] = resultSpherical[2];
 
-    //! TODO: Get the right thing to output, what do we want from this function??
-    return result;
+//    //! TODO: Get the right thing to output, what do we want from this function??
+//    return result;
 
-}
+//}
 
 Matrix Kinematics::CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2CameraTransform)
 {

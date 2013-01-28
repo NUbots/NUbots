@@ -13,6 +13,7 @@ class GoalDetectorHistogram : public GoalDetector
 {
 public:
     GoalDetectorHistogram();
+    ~GoalDetectorHistogram();
     virtual vector<Goal> run();
 private:
     vector<Quad> detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments);

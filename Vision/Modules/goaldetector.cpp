@@ -8,6 +8,9 @@
 
 using namespace boost::accumulators;
 
+GoalDetector::GoalDetector() {}
+GoalDetector::~GoalDetector() {}
+
 vector<Goal> GoalDetector::assignGoals(const vector<Quad>& candidates) const
 {
     vector<Goal> goals;
@@ -115,13 +118,13 @@ void GoalDetector::overlapCheck(vector<Quad>& posts)
     }
 }
 
-Vector2<float> GoalDetector::calculateSegmentLengthStatistics(const vector<ColourSegment> segments)
+Vector2<double> GoalDetector::calculateSegmentLengthStatistics(const vector<ColourSegment> segments)
 {
-    accumulator_set<float, stats<tag::mean, tag::variance> > acc;
+    accumulator_set<double, stats<tag::mean, tag::variance> > acc;
 
     BOOST_FOREACH(ColourSegment seg, segments) {
         acc(seg.getLength());
     }
 
-    return Vector2<float>(mean(acc), sqrt(variance(acc)));
+    return Vector2<double>(mean(acc), sqrt(variance(acc)));
 }

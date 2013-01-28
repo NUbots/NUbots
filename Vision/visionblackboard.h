@@ -44,9 +44,9 @@ public:
 
     //MUTATORS
     void setGreenHullPoints(const vector<Vector2<double> >& points);
-    void setGreenHorizonScanPoints(const vector<Vector2<double> >& points);
+    void setGreenHorizonScanPoints(const vector<Point> &points);
 
-    void setHorizontalScanlines(const vector<unsigned int>& scanlines);
+    void setHorizontalScanlines(const vector<int> &scanlines);
     void setHorizontalSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
     void setVerticalSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
     void setHorizontalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
@@ -57,7 +57,7 @@ public:
     void setHorizontalTransitionsMap(const map<COLOUR_CLASS, vector<ColourSegment> >& t_map);
     void setVerticalTransitionsMap(const map<COLOUR_CLASS, vector<ColourSegment> >& t_map);
 
-    void setObjectPoints(const vector<Vector2<double> >& points);
+    void setObstaclePoints(const vector<Point> &points);
     
     void addGoal(const Goal& newgoal);
     //void addBeacon(const Beacon& newbeacon);
@@ -79,7 +79,7 @@ public:
     const GreenHorizon& getGreenHorizon() const;
     const vector<Vector2<double> >& getGreenHorizonScanPoints() const;
 
-    const vector<unsigned int>& getHorizontalScanlines() const;
+    const vector<int> &getHorizontalScanlines() const;
     
     const SegmentedRegion& getHorizontalSegmentedRegion() const;
     const SegmentedRegion& getVerticalSegmentedRegion() const;
@@ -107,7 +107,7 @@ public:
     vector<Obstacle>& getObstacles();
     vector<FieldLine>& getLines();
 
-    const vector<Vector2<double> >& getObjectPoints() const;
+    const vector<Vector2<double> >& getObstaclePoints() const;
 
     const LookUpTable& getLUT() const;
 
@@ -144,15 +144,14 @@ private:
     const NUImage* original_image;                  //! @variable Image for storing the original image.
     
     NUCameraData m_camera_specs;
-    
-    Vector2<float> m_FOV;
-    float effective_camera_dist_pixels;
-    
+
     LookUpTable LUT;
     
     //! Green Horizon data
-    GreenHorizon m_green_horizon;                  //! @variable The green horizon.
-    
+    GreenHorizon m_green_horizon;   //! @variable The green horizon.
+    vector<Point> gh_scan_points;   //! @variable The location of initial green (used to form GH and find obstacles)
+    vector<Point> obstacle_points;    //! @variable The list of points used by obstacle detection
+
     Transformer m_transformer;
 
     //! Object data
@@ -162,11 +161,11 @@ private:
     Horizon kinematics_horizon; //! @variable Line defining kinematics horizon.
 
     //! Scanline/Segmentation data
-    vector<unsigned int> horizontal_scanlines;         //! @variable Vector of unsigned ints representing heights of horizontal scan lines.
+    vector<int> horizontal_scanlines;                   //! @variable Vector of unsigned ints representing heights of horizontal scan lines.
     SegmentedRegion horizontal_segmented_scanlines;     //! @variable The segmented horizontal scanlines.
     SegmentedRegion vertical_segmented_scanlines;       //! @variable The segmented vertical scanlines.
-    SegmentedRegion horizontal_filtered_segments;     //! @variable The filtered segmented horizontal scanlines.
-    SegmentedRegion vertical_filtered_segments;       //! @variable The filtered segmented vertical scanlines.
+    SegmentedRegion horizontal_filtered_segments;       //! @variable The filtered segmented horizontal scanlines.
+    SegmentedRegion vertical_filtered_segments;         //! @variable The filtered segmented vertical scanlines.
 
     //! Transitions
     map<COLOUR_CLASS, vector<ColourSegment> > matched_horizontal_segments;

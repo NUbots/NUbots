@@ -89,21 +89,21 @@ ostream& operator<< (ostream& output, const ColourReplacementRule& c)
     //before
     output << "\tbefore: (" << c.m_before_min << ", " << c.m_before_max << ") [";
     for(it = c.m_before.begin(); it != c.m_before.end(); it++) {
-        output << getColourNameFromIndex(*it) << ", ";
+        output << getColourName(*it) << ", ";
     }
     output << "]\t\t// (min, max) [colourlist]" << endl;
 
     //middle
     output << "\tmiddle: (" << c.m_middle_min << ", " << c.m_middle_max << ") [";
     for(it = c.m_middle.begin(); it != c.m_middle.end(); it++) {
-        output << getColourNameFromIndex(*it) << ", ";
+        output << getColourName(*it) << ", ";
     }
     output << "]\t\t// (min, max) [colourlist]" << endl;
 
     //after
     output << "\tafter(" << c.m_after_min << ", " << c.m_after_max << ") [";
     for(it = c.m_after.begin(); it != c.m_after.end(); it++) {
-        output << getColourNameFromIndex(*it) << ", ";
+        output << getColourName(*it) << ", ";
     }
     output << "]\t\t// (min, max) [colourlist]" << endl;
 

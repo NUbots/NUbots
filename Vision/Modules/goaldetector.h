@@ -14,6 +14,8 @@ using namespace std;
 class GoalDetector
 {
 public:
+    GoalDetector();
+    virtual ~GoalDetector();
     virtual vector<Goal> run() = 0;
 
 protected:
@@ -26,7 +28,7 @@ protected:
     void overlapCheck(vector<Quad> &posts);
 
     //generic
-    Vector2<float> calculateSegmentLengthStatistics(const vector<ColourSegment> segments);
+    Vector2<double> calculateSegmentLengthStatistics(const vector<ColourSegment> segments);
 };
 
 #endif // GOALDETECTOR_H

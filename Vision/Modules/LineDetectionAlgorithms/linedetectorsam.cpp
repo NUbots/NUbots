@@ -8,8 +8,10 @@
 
 #include <boost/foreach.hpp>
 
-LineDetectorSAM::LineDetectorSAM()
+LineDetectorSAM::LineDetectorSAM() {}
+LineDetectorSAM::~LineDetectorSAM()
 {
+    noisePoints.clear();
 }
 
 vector<LSFittedLine> LineDetectorSAM::run()

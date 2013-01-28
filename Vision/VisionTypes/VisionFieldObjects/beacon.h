@@ -12,8 +12,6 @@
 //    //! @brief reutns the pixel locations of the corners.
 //    const Quad& getQuad() const;
 
-//    //! @brief returns the field position relative to the robot.
-//    Vector3<float> getRelativeFieldCoords() const;
 //    /*!
 //      @brief pushes the beacon to the external field objects.
 //      @param fieldobjects a pointer to the global list of field objects.

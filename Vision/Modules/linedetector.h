@@ -12,6 +12,7 @@ class LineDetector
 {
 public:
     LineDetector();
+    virtual ~LineDetector();
 
     virtual vector<LSFittedLine> run() = 0;
 

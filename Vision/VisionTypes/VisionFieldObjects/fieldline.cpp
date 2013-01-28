@@ -18,6 +18,7 @@ void FieldLine::set(double rho, double phi, const Vector2<Point>& screen_end_poi
     phi = phi - 2*mathGeneral::PI * floor( phi / (2*mathGeneral::PI) );
 
     m_screen_line.setLine(rho, phi);
+    m_relative_line.setLineFromPoints(relative_end_points.x, relative_end_points.y);
     m_screen_end_points = screen_end_points;
     m_relative_end_points = relative_end_points;
 }
@@ -46,7 +47,6 @@ ostream& operator<< (ostream& output, const FieldLine& l)
     output << "\tpixelloc: [" << l.m_location_pixels.x << ", " << l.m_location_pixels.y << "]" << endl;
     output << " angularloc: [" << l.m_location_angular.x << ", " << l.m_location_angular.y << "]" << endl;
     output << "\trelative field coords: [" << l.m_spherical_position.x << ", " << l.m_spherical_position.y << ", " << l.m_spherical_position.z << "]" << endl;
-    output << "\ttransformed field coords: [" << l.m_transformed_spherical_pos.x << ", " << l.m_transformed_spherical_pos.y << ", " << l.m_transformed_spherical_pos.z << "]" << endl;
     output << "\tspherical error: [" << l.m_spherical_error.x << ", " << l.m_spherical_error.y << "]" << endl;
     output << "\tsize on screen: [" << l.m_size_on_screen.x << ", " << l.m_size_on_screen.y << "]";
     return output;

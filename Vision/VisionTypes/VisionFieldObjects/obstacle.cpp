@@ -28,12 +28,6 @@ Obstacle::Obstacle(const Point& position, double width, double height)
     valid = check();
 }
 
-
-Vector3<float> Obstacle::getRelativeFieldCoords() const
-{
-    return m_spherical_position;
-}
-
 bool Obstacle::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
 #if VISION_FIELDOBJECT_VERBOSITY > 1
@@ -47,7 +41,7 @@ if(valid) {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Obstacle");
     //newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_ROBOT_UNKNOWN);
-    newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
+    newAmbObj.UpdateVisualObject(m_spherical_position,
                                  m_spherical_error,
                                  m_location_angular,
                                  Vector2<int>(m_location_pixels.x,m_location_pixels.y),
@@ -83,71 +77,24 @@ bool Obstacle::calculatePositions()
 {
     const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
     //To the bottom of the Goal Post.
-    bool transform_valid;
-    double bearing = transformer.calculateBearing(m_location_pixels.x);
-    double elevation = transformer.calculateElevation(m_location_pixels.y);
+    Point radial = transformer.screenToRadial2D(m_location_pixels);
 
-    float distance = distanceToObstacle(bearing, elevation);
-
-    if(distance <= 0) {
-        //object behind us - ignore it
-        m_spherical_position = Vector3<float>(0,0,0);//distance
-        m_location_angular = Vector2<float>(0,0);
-        m_transformed_spherical_pos = Vector3<float>(0,0,0);
-        return false;
-    }
-    //Camera to Ground to calculate distance
+    distance_valid = transformer.isDistanceToPointValid();
+    if(distance_valid)
+        d2p = transformer.distanceToPoint(radial.x, radial.y);
     
-    m_spherical_position[0] = distance;//distance
-    m_spherical_position[1] = bearing;
-    m_spherical_position[2] = elevation;
+    m_spherical_position.x = d2p;       //distance
+    m_spherical_position.y = radial.x;  //bearing
+    m_spherical_position.z = radial.y;  //elevation
     
-    m_location_angular = Vector2<float>(bearing, elevation);
+    m_location_angular = Vector2<float>(radial.x, radial.y);
     //m_spherical_error - not calculated
-    
-    //Camera Transform to transform position
-    if(transformer.isCameraTransformValid())
-    {
-        Matrix cameraTransform = Matrix4x4fromVector(vbb->getCameraTransformVector());
-        m_transformed_spherical_pos = Kinematics::TransformPosition(cameraTransform,m_spherical_position);
-        transform_valid = true;
-    }
-    else {
-        transform_valid = false;
-        m_transformed_spherical_pos = Vector3<float>(0,0,0);
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Obstacle::calculatePositions: Kinematics CTG transform invalid - will not push obstacle" << endl;
-        #endif
-    }
 
     #if VISION_FIELDOBJECT_VERBOSITY > 2
-        debug << "Obstacle::calculatePositions: ";
-        debug << d2p << " " << distance << " " << m_transformed_spherical_pos.x << endl;
+        debug << "Obstacle::calculatePositions: " << m_spherical_position << endl;
     #endif
 
-    return transform_valid;
-}
-
-/*!
-*   @brief Calculates the distance using the set METHOD and the provided coordinate angles.
-*   @param bearing The angle about the z axis.
-*   @param elevation The angle about the y axis.
-*/
-float Obstacle::distanceToObstacle(float bearing, float elevation) {
-    VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    //reset distance values
-
-    distance_valid = vbb->isDistanceToPointValid();
-    if(distance_valid)
-        d2p = vbb->distanceToPoint(bearing, elevation);
-
-#if VISION_FIELDOBJECT_VERBOSITY > 1
-    if(!distance_valid)
-        debug << "Obstacle::distanceToGoal: d2p invalid - will not push obstacle" << endl;
-    debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
-    debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
-#endif
-    return d2p;
+    return distance_valid && d2p > 0;
 }
 
 void Obstacle::render(cv::Mat &mat) const
