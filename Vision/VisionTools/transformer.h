@@ -6,29 +6,26 @@ class Transformer
 public:
     Transformer();
 
-    // 3D Basis transforms - Polar
-    bool isCamToGroundValid() const { return ctgvalid; }
-    Vector3<float> camToGround(const Vector3<float>& cam_relative) const;
-    bool isCamTransformValid() const { return ctvalid; }
-    Vector3<float> camTransform(const Vector3<float>& cam_relative) const;
-
     //2D distortion transform
     Vector2<float> correctDistortion(const Vector2<float>& pt);
 
+    // 3D Basis transforms - Polar
+
     //2D - 3D screen to polar transforms
-    float calculateBearing(float x) const;
-    float calculateElevation(float y) const;
     Point screenToRadial2D(Point pt) const;
     vector<Point> screenToRadial2D(const vector<Point>& pts) const;
 
-    //2D - 3D screen to polar - assumes point is on the ground
-    bool isScreenToGroundValid() const;
-    Vector3<float> screenToGround(Point pt) const;
-    vector<Vector3<float> > screenToGround(const vector<Point>& pts) const;
+    //Distance to point - returns the distance of the camera from a point on the
+    //                    ground which would be visible at the given screen location.
     bool isDistanceToPointValid() const;
     float distanceToPoint(float bearing, float elevation) const;
 
-    //2D - 3D screen to cartesian + basis transforms
+    //2D pixel - 3D polar (feet relative) - assumes point is on the ground
+    bool isScreenToGroundValid() const;
+    Vector3<float> screenToGround(Point pt) const;
+    vector<Vector3<float> > screenToGround(const vector<Point>& pts) const;
+
+    //2D pixel - 3D cartesian (feet relative) - assumes point is on the ground
     Point transformToGround(Point pt) const;
     vector<Point> transformToGround(const vector<Point>& pts) const;
 

@@ -5,11 +5,15 @@ Transformer::Transformer()
 }
 
 // 3D Basis transforms - Polar
-Vector3<float> Transformer::camToGround(const Vector3<float>& cam_relative) const;
-Vector3<float> Transformer::camTransform(const Vector3<float>& cam_relative) const
-{
-    m_transformed_spherical_pos = Kinematics::TransformPosition(Matrix4x4fromVector(m_ctvector), cam_relative);
-}
+//Vector3<float> Transformer::camToGround(const Vector3<float>& cam_relative) const
+//{
+
+//}
+
+//Vector3<float> Transformer::camTransform(const Vector3<float>& cam_relative) const
+//{
+//    m_transformed_spherical_pos = Kinematics::TransformPosition(Matrix4x4fromVector(m_ctvector), cam_relative);
+//}
 
 //2D distortion transform
 Vector2<float> Transformer::correctDistortion(const Vector2<float>& pt);
