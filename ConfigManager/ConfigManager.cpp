@@ -134,11 +134,9 @@ namespace ConfigSystem
         return cp.getValue(data);
     }
     
-    //Reads an std::vector<double> from the given path in the config system.
-    bool ConfigManager::readDoubleVectorValue1D(
-        const string &param_path, 
-        const string &param_name, 
-        std::vector<double> &data)
+    //Reads an std::vector<long> from the given path in the config system.
+    bool ConfigManager::readLongVectorValue2D(const string &param_path, const string &param_name, 
+        							std::vector< std::vector<long> > &data)
     {
     	CONFIGSYS_DEBUG_CALLS;
 
@@ -148,10 +146,19 @@ namespace ConfigSystem
     }
     
     //Reads an std::vector<double> from the given path in the config system.
-    bool ConfigManager::readDoubleVectorValue2D(
-        const string &param_path, 
-        const string &param_name, 
-        std::vector<std::vector<double> > &data)
+    bool ConfigManager::readDoubleVectorValue1D(const string &param_path, const string &param_name, 
+        							std::vector<double> &data)
+    {
+    	CONFIGSYS_DEBUG_CALLS;
+
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
+        return cp.getValue(data);
+    }
+    
+    //Reads an std::vector<double> from the given path in the config system.
+    bool ConfigManager::readDoubleVectorValue2D(const string &param_path, const string &param_name, 
+        							std::vector<std::vector<double> > &data)
     {
         CONFIGSYS_DEBUG_CALLS;
 
@@ -240,6 +247,20 @@ namespace ConfigSystem
     bool ConfigManager::storeLongVectorValue1D(const string &paramPath, 
                                                const string &paramName, 
         							           std::vector<long> data)
+    {
+    	CONFIGSYS_DEBUG_CALLS;
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        if(!cp.setValue(data)) return false; //!< Set the new value
+        //! Store the modified parameter back into the tree
+        return _currConfigTree->storeParam(paramPath, paramName, cp);
+    }
+
+	//Stores the given std::vector< std::vector<long> > into the config system at the given path.
+    bool ConfigManager::storeLongVectorValue2D(const string &paramPath, 
+                                               const string &paramName, 
+        							           std::vector< std::vector<long> > data)
     {
     	CONFIGSYS_DEBUG_CALLS;
         //! Get the relevant parameter from the ConfigTree

@@ -91,6 +91,8 @@ namespace ConfigSystem
          */
         bool readLongVectorValue1D(const string &param_path, const string &param_name, 
                                     std::vector<long> &data);
+        bool readLongVectorValue2D(const string &param_path, const string &param_name, 
+        							std::vector< std::vector<long> > &data);
                                     
         bool readDoubleVectorValue1D(
             const string &param_path, 
@@ -128,8 +130,8 @@ namespace ConfigSystem
         bool storeLongVectorValue1D(const string &param_path, const string &param_name, 
                                     std::vector<long> data);
                                     
-        bool storeStringVectorValue1D(const string &param_path, const string &param_name, 
-                                    std::vector<std::string> data);
+		bool storeLongVectorValue2D(const string &param_path, const string &param_name, 
+                                    std::vector< std::vector<long> > data);                             
                                     
         bool storeDoubleVectorValue1D(
             const string &param_path, 
