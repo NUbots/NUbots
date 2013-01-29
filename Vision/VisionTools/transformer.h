@@ -45,7 +45,8 @@ private:
     //! Calculate the field of view and effective camera distance in pixels.
     void setKinematicParams(bool cam_pitch_valid, double cam_pitch,
                             bool cam_height_valid, double cam_height,
-                            bool b_pitch_valid, double b_pitch);
+                            bool b_pitch_valid, double b_pitch,
+                            bool ctg_valid, vector<float> ctg_vector);
     void setCamParams(Vector2<double> imagesize,
                       Vector2<double> fov);
 
@@ -53,8 +54,8 @@ private:
     Vector2<double> FOV;
     double effective_camera_dist_pixels;
 
-//    vector<float> ctgvector;    //! @variable The camera to ground vector (for d2p).
-//    bool ctgvalid;              //! @variable Whether the ctgvector is valid.
+    vector<float> m_ctg_vector;    //! @variable The camera to ground vector (for d2p).
+    bool m_ctg_valid;              //! @variable Whether the ctgvector is valid.
 //    vector<float> ctvector;     //! @variable The camera transform vector.
 //    bool ctvalid;               //! @variable Whether the ctvector is valid.
 

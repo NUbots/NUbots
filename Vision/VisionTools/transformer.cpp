@@ -150,6 +150,18 @@ Point Transformer::screenToGroundCartesian(Point pt) const
 {
     Vector2<double> angles = screenToRadial2D(pt);
     double r = distanceToPoint(angles.x, angles.y);
+
+    double bearingcos = cos(sphericalCoordinates[1]);
+    double bearingsin = sin(sphericalCoordinates[1]);
+    double elevationcos = cos(sphericalCoordinates[2]);
+    double elevationsin = sin(sphericalCoordinates[2]);
+
+    std::vector<float> result(3,0.0f);
+    result[0] = distance * bearingcos * elevationcos;
+    result[1] = distance * bearingsin * elevationcos;
+    result[2] = distance * elevationsin;
+    return result;
+
     return Point(r*cos(angles.x), r*cos(angles.y));
 }
 
@@ -164,7 +176,8 @@ vector<Point> Transformer::screenToGroundCartesian(const vector<Point>& pts) con
 
 void Transformer::setKinematicParams(bool cam_pitch_valid, double cam_pitch,
                                      bool cam_height_valid, double cam_height,
-                                     bool b_pitch_valid, double b_pitch)
+                                     bool b_pitch_valid, double b_pitch,
+                                     bool ctg_valid, vector<float> ctg_vector)
 {
     camera_pitch_valid = cam_pitch_valid;
     camera_pitch = cam_pitch;
@@ -172,6 +185,8 @@ void Transformer::setKinematicParams(bool cam_pitch_valid, double cam_pitch,
     camera_height = cam_height;
     body_pitch_valid = b_pitch_valid;
     body_pitch = b_pitch;
+    m_ctg_valid = ctg_valid;
+    m_ctg_vector = ctg_vector;
 }
 
 void Transformer::setCamParams(Vector2<double> imagesize, Vector2<double> fov)

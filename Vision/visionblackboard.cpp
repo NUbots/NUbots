@@ -477,10 +477,16 @@ void VisionBlackboard::update()
     camera_height_valid = wrapper->getCameraHeight(camera_height);
     body_pitch_valid = wrapper->getBodyPitch(body_pitch);
 
+    bool ctg_valid;
+    vector<float> ctg_vector;
+
+    ctg_valid = wrapper->getCTGVector(ctg_vector);
+
     //setup transformer
     m_transformer.setKinematicParams(camera_pitch_valid, camera_pitch,
                                      camera_height_valid, camera_height,
-                                     body_pitch_valid, body_pitch);
+                                     body_pitch_valid, body_pitch,
+                                     ctg_valid, ctg_vector);
     m_transformer.setCamParams(Vector2<double>(original_image->getWidth(), original_image->getHeight()),
                                Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov));
 
