@@ -158,6 +158,10 @@ HEADERS += \
     ../Tools/Math/Vector3.h \
     ../Infrastructure/NUImage/NUImage.h \
     ../Infrastructure/NUImage/ColorModelConversions.h \
+    ../Infrastructure/NUSensorsData/NUData.h \
+    ../Infrastructure/NUSensorsData/NUSensorsData.h \
+    ../Infrastructure/NUSensorsData/NULocalisationSensors.h \
+    ../Infrastructure/Sensor.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
     ../Kinematics/Horizon.h \
@@ -175,6 +179,10 @@ SOURCES += \
     ../Tools/Math/Matrix.cpp \
     ../Tools/Math/TransformMatrices.cpp \
     ../Infrastructure/NUImage/NUImage.cpp \
+    ../Infrastructure/NUData.cpp \
+    ../Infrastructure/NUSensorsData/NUSensorsData.cpp \
+    ../Infrastructure/NUSensorsData/NULocalisationSensors.cpp \
+    ../Infrastructure/NUSensorsData/Sensor.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
     ../Kinematics/Horizon.cpp \

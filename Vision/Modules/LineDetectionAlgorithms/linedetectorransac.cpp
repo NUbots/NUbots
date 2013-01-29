@@ -28,8 +28,29 @@ vector<LSFittedLine> LineDetectorRANSAC::run()
 
     points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
 
+    //debugging
+    ofstream o((string(getenv("HOME")) + string("/testpoints")).c_str());
+    o << "pre" << endl;
+    o << points << endl;
+    lines = RANSAC::findMultipleLines(points, m_e, m_n, m_k, m_max_iterations);
+    o << "lines" << endl;
+    o << lines << endl;
+    o << "colinear" << endl;
+    o << mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE) << endl;
+
+    if(vbb->getTransformer().isScreenToGroundValid())
+        points = vbb->getTransformer().screenToGroundCartesian(points);
+    o << "post" << endl;
+    o << points << endl;
+
     //use generic ransac implementation to fine lines
     lines = RANSAC::findMultipleLines(points, m_e, m_n, m_k, m_max_iterations);
+
+    o << "lines" << endl;
+    o << lines << endl;
+    o << "colinear" << mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE) << endl;
+
+    o.close();
 
     return mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE);
 }

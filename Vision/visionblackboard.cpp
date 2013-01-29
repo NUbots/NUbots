@@ -134,7 +134,8 @@ void VisionBlackboard::addLine(const FieldLine& newline)
 
 void VisionBlackboard::addGoals(const vector<Goal>& newgoals)
 {
-    m_goals.insert(m_goals.end(), newgoals.begin(), newgoals.end());
+    if(!newgoals.empty())
+        m_goals.insert(m_goals.end(), newgoals.begin(), newgoals.end());
 }
 
 //void VisionBlackboard::addBeacons(const vector<Beacon>& newbeacons)
@@ -144,16 +145,19 @@ void VisionBlackboard::addGoals(const vector<Goal>& newgoals)
 
 void VisionBlackboard::addBalls(const vector<Ball>& newballs)
 {
-    m_balls.insert(m_balls.end(), newballs.begin(), newballs.end());
+    if(!newballs.empty())
+        m_balls.insert(m_balls.end(), newballs.begin(), newballs.end());
 }
 void VisionBlackboard::addObstacles(const vector<Obstacle>& newobstacles)
 {
-    m_obstacles.insert(m_obstacles.end(), newobstacles.begin(), newobstacles.end());
+    if(!newobstacles.empty())
+        m_obstacles.insert(m_obstacles.end(), newobstacles.begin(), newobstacles.end());
 }
 
 void VisionBlackboard::addLines(const vector<FieldLine>& newlines)
 {
-    m_lines.insert(m_lines.end(), newlines.begin(), newlines.end());
+    if(!newlines.empty())
+        m_lines.insert(m_lines.end(), newlines.begin(), newlines.end());
 }
 
 /**

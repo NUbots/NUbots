@@ -79,7 +79,7 @@ double Transformer::distanceToPoint(Point pixel_loc) const
   */
 double Transformer::distanceToPoint(double bearing, double elevation) const
 {
-#if VISION_BLACKBOARD_VERBOSITY > 1
+#if VISION_BLACKBOARD_VERBOSITY > 2
     debug << "VisionBlackboard::distanceToPoint: \n";
     debug << "\t(bearing, elevation): (" << bearing << ", " <<elevation << ")" << endl;
     debug << "\tcalled with point: " << screen_loc << " angle correction: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
@@ -101,7 +101,7 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
     if(cos_theta == 0)
         distance = 0;
     else
-        distance = camera_height / cos(theta) / cos(bearing);
+        distance = camera_height * cos(bearing) / cos(theta);
 
 #if VISION_BLACKBOARD_VERBOSITY > 1
     debug << "\ttheta: " << theta << " distance: " << distance << " valid: " << valid << endl;

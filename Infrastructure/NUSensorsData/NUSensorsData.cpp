@@ -1202,7 +1202,7 @@ ostream& operator<< (ostream& output, const NUSensorsData& p_data)
     output << p_data.m_available_ids << endl;
     output << p_data.size() << " ";
     for (int i=0; i<p_data.size(); i++)
-        output << p_data.m_sensors[i];
+        output << p_data.m_sensors[i] << endl;
     return output;
 }
 
@@ -1229,6 +1229,9 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
         if(tempSensor.Time > lastUpdateTime) lastUpdateTime = tempSensor.Time;
     }
     p_data.CurrentTime = lastUpdateTime;
+    //force eofbit
+    input.ignore(128, '\n');
+    input.peek();
     return input;
 }
 

@@ -9,6 +9,8 @@
 #include "Vision/visionconstants.h"
 
 #include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
 
 DataWrapper* DataWrapper::instance = 0;
 
@@ -51,7 +53,7 @@ string DataWrapper::getIDName(DEBUG_ID id) {
     }
 }
 
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<cv::Scalar>& colours, vector<Vector2<double> >& pts)
+void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<cv::Scalar>& colours, vector<Point >& pts)
 {
     unsigned char r, g, b;
     
@@ -99,29 +101,53 @@ void doGaussian(NUImage* img) {
 DataWrapper::DataWrapper()
 {
     //frame grab methods
-    switch(METHOD) {
+    QString camoption("Camera"),
+            strmoption("Image stream");
+    QStringList l;
+    l.append(camoption);
+    l.append(strmoption);
+    //get the input choice from the user
+    QString s = QInputDialog::getItem(NULL, "Select Input Method", "Select input method", l, 0, false);
+    if(s.compare(camoption) == 0)
+        m_method = CAMERA;
+    else if(s.compare(strmoption) == 0)
+        m_method = STREAM;
+    else
+        m_method = STREAM;
+
+    switch(m_method) {
     case CAMERA:
         m_camera = new PCCamera();
-        m_current_image = m_camera->grabNewImage();
+        m_current_image = *(m_camera->grabNewImage());
         LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
         break;
     case STREAM:
-        if(true) {
+        using_sensors = (QMessageBox::question(NULL, "", "Use sensor log?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
+
+        if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
             streamname = QFileDialog::getOpenFileName(NULL, "Select image stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
+            if(using_sensors)
+                sensorstreamname = QFileDialog::getOpenFileName(NULL, "Select sensor stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
             LUTname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
             configname = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
         }
         else {
             streamname = string(getenv("HOME")) + string("/nubot/image.strm");
+            if(using_sensors)
+                sensorstreamname = string(getenv("HOME")) + string("/nubot/sensor.strm");
             LUTname = string(getenv("HOME")) + string("/nubot/default.lut");
             configname = string(getenv("HOME")) + string("/nubot/") + string("VisionOptions.cfg");
         }
         imagestrm.open(streamname.c_str());
-        m_current_image = new NUImage();
-        if(imagestrm.is_open()) {
-            imagestrm >> *m_current_image;
+        if(using_sensors)
+            sensorstrm.open(sensorstreamname.c_str());
+
+        if(!sensorstrm.is_open()) {
+            QMessageBox::warning(NULL, "Error", QString("Failed to read sensors from: ") + QString(sensorstreamname.c_str()) + QString(" defaulting to sensors off."));
+            using_sensors = false;
         }
-        else {
+
+        if(!imagestrm.is_open()) {
             errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
         }
         break;
@@ -129,6 +155,8 @@ DataWrapper::DataWrapper()
 
     //set up fake horizon
     kinematics_horizon.setLine(0, 1, 0);
+
+    updateFrame();
 
     if(!loadLUTFromFile(LUTname)){
         errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
@@ -147,7 +175,7 @@ DataWrapper::DataWrapper()
     debug_windows[7].first = "Goal Processing";
     for(int i=0; i<debug_window_num; i++) {
         namedWindow(debug_windows[i].first, CV_WINDOW_KEEPRATIO);
-        debug_windows[i].second.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
+        debug_windows[i].second.create(m_current_image.getHeight(), m_current_image.getWidth(), CV_8UC3);
     }
 
     //create map into images
@@ -185,7 +213,7 @@ DataWrapper::DataWrapper()
     debug_map[DBID_GOAL_LINES_START].push_back(     &debug_windows[7]);
     debug_map[DBID_GOAL_LINES_END].push_back(       &debug_windows[7]);
 
-    results_img.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
+    results_img.create(m_current_image.getHeight(), m_current_image.getWidth(), CV_8UC3);
     
     numFramesDropped = numFramesProcessed = 0;
 
@@ -193,34 +221,35 @@ DataWrapper::DataWrapper()
 
 DataWrapper::~DataWrapper()
 {
+    delete[] debug_windows;
 }
 
-void DataWrapper::generateImageFromMat(cv::Mat& frame)
-{
-    int size = frame.rows*frame.cols;
-    if (frame.rows != m_current_image->getHeight() or frame.cols != m_current_image->getWidth())
-    {
-        if(m_yuyv_buffer)
-            delete m_yuyv_buffer;
-        m_yuyv_buffer = new unsigned char[size*2];
-        m_current_image->MapYUV422BufferToImage(m_yuyv_buffer, frame.cols, frame.rows);
-    }
+//void DataWrapper::generateImageFromMat(cv::Mat& frame)
+//{
+//    int size = frame.rows*frame.cols;
+//    if (frame.rows != m_current_image.getHeight() or frame.cols != m_current_image.getWidth())
+//    {
+//        if(m_yuyv_buffer)
+//            delete m_yuyv_buffer;
+//        m_yuyv_buffer = new unsigned char[size*2];
+//        m_current_image.MapYUV422BufferToImage(m_yuyv_buffer, frame.cols, frame.rows);
+//    }
 
-    int i_YUV = 0;			// the index into the yuyv_buffer
-    unsigned char y1,u1,v1,y2,u2,v2;
-    for (int i=0; i<frame.rows; i++)
-    {
-        for (int j=frame.cols/2; j>0; j--)		// count down to flip the image around
-        {
-            ColorModelConversions::fromRGBToYCbCr(frame.at<Vec3b>(i,j<<1)[2], frame.at<Vec3b>(i,j<<1)[1], frame.at<Vec3b>(i,j<<1)[0], y1, u1, v1);
-            ColorModelConversions::fromRGBToYCbCr(frame.at<Vec3b>(i,(j<<1)-1)[2], frame.at<Vec3b>(i,(j<<1)-1)[1], frame.at<Vec3b>(i,(j<<1)-1)[0], y2, u2, v2);
-            m_yuyv_buffer[i_YUV++] = y1;
-            m_yuyv_buffer[i_YUV++] = (u1+u2)>>1;
-            m_yuyv_buffer[i_YUV++] = y2;
-            m_yuyv_buffer[i_YUV++] = (v1+v2)>>1;
-        }
-    }
-}
+//    int i_YUV = 0;			// the index into the yuyv_buffer
+//    unsigned char y1,u1,v1,y2,u2,v2;
+//    for (int i=0; i<frame.rows; i++)
+//    {
+//        for (int j=frame.cols/2; j>0; j--)		// count down to flip the image around
+//        {
+//            ColorModelConversions::fromRGBToYCbCr(frame.at<Vec3b>(i,j<<1)[2], frame.at<Vec3b>(i,j<<1)[1], frame.at<Vec3b>(i,j<<1)[0], y1, u1, v1);
+//            ColorModelConversions::fromRGBToYCbCr(frame.at<Vec3b>(i,(j<<1)-1)[2], frame.at<Vec3b>(i,(j<<1)-1)[1], frame.at<Vec3b>(i,(j<<1)-1)[0], y2, u2, v2);
+//            m_yuyv_buffer[i_YUV++] = y1;
+//            m_yuyv_buffer[i_YUV++] = (u1+u2)>>1;
+//            m_yuyv_buffer[i_YUV++] = y2;
+//            m_yuyv_buffer[i_YUV++] = (v1+v2)>>1;
+//        }
+//    }
+//}
 
 DataWrapper* DataWrapper::getInstance()
 {
@@ -234,55 +263,64 @@ DataWrapper* DataWrapper::getInstance()
 */
 NUImage* DataWrapper::getFrame()
 {
-    return m_current_image;
+    return &m_current_image;
 }
 
 //! @brief Generates spoofed camera transform vector.
 bool DataWrapper::getCTGVector(vector<float> &ctgvector)
 {
-    //bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
-    //return isOK;
-    ctgvector.clear();
-    ctgvector.push_back(0);
-    ctgvector.push_back(0);
-    ctgvector.push_back(0);
-    ctgvector.push_back(0);
-    return false;
+    if(using_sensors) {
+        return m_sensor_data.get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    }
+    else {
+        ctgvector.assign(4, 0);
+        return false;
+    }
 }
 
 //! @brief Generates spoofed camera transform vector.
 bool DataWrapper::getCTVector(vector<float> &ctvector)
 {
-    //bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
-    //return isOK;
-    ctvector.clear();
-    ctvector.push_back(0);
-    ctvector.push_back(0);
-    ctvector.push_back(0);
-    ctvector.push_back(0);
-    return false;
+    if(using_sensors) {
+        return m_sensor_data.get(NUSensorsData::CameraTransform, ctvector);
+    }
+    else {
+        ctvector.assign(4, 0);
+        return false;
+    }
 }
 
 
 //! @brief Generates spoofed camera height.
 bool DataWrapper::getCameraHeight(float& height)
 {
-    height = 0;
-    return false;
+    if(using_sensors)
+        return m_sensor_data.getCameraHeight(height);
+    else
+        return false;
 }
 
 
 //! @brief Generates spoofed camera pitch.
 bool DataWrapper::getCameraPitch(float& pitch)
 {
-    pitch = 0;
-    return false;
+    if(using_sensors)
+        return m_sensor_data.getPosition(NUSensorsData::HeadPitch, pitch);
+    else
+        return false;
 }
 
 //! @brief Generates spoofed body pitch.
 bool DataWrapper::getBodyPitch(float& pitch)
 {
-    pitch = 0;
+    if(using_sensors) {
+        vector<float> orientation;
+        bool valid = m_sensor_data.get(NUSensorsData::Orientation, orientation);
+        if(valid && orientation.size() > 2) {
+            pitch = orientation.at(1);
+            return true;
+        }
+    }
     return false;
 }
 
@@ -307,7 +345,7 @@ const Horizon& DataWrapper::getKinematicsHorizon()
 //! @brief Returns camera settings.
 CameraSettings DataWrapper::getCameraSettings()
 {
-    switch(METHOD) {
+    switch(m_method) {
     case CAMERA:
         return m_camera->getSettings();
     case STREAM:
@@ -363,7 +401,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id)
             string& window = map_it->second[i]->first; //get window name from pair
             cv::Mat& img = map_it->second[i]->second; //get window name from pair
 
-            LUT.classifyImage(*m_current_image, img);
+            LUT.classifyImage(m_current_image, img);
 
             imshow(window, img);
         }
@@ -523,10 +561,10 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
     return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data_points)
+bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
 {
     map<DEBUG_ID, vector<pair<string, cv::Mat>* > >::iterator map_it;
-    vector<Vector2<double> >::const_iterator it;
+    vector<Point >::const_iterator it;
 
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data_points.empty()) {
@@ -557,17 +595,17 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
 
         switch(id) {
         case DBID_H_SCANS:
-            BOOST_FOREACH(const Vector2<double>& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 cv::line(img, cv::Point2i(0, pt.y), cv::Point2i(img.cols, pt.y), cv::Scalar(127,127,127), 1);
             }
             break;
         case DBID_V_SCANS:
-            BOOST_FOREACH(const Vector2<double>& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 cv::line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), cv::Scalar(127,127,127), 1);
             }
             break;
         case DBID_MATCHED_SEGMENTS:
-            BOOST_FOREACH(const Vector2<double>& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,255,0), 4);
             }
             break;
@@ -575,7 +613,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
             line(img, cv::Point2i(data_points.front().x, data_points.front().y), cv::Point2i(data_points.back().x, data_points.back().y), cv::Scalar(255,255,0), 1);
             break;
         case DBID_GREENHORIZON_SCANS:
-            BOOST_FOREACH(const Vector2<double>& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 line(img, cv::Point2i(pt.x, kinematics_horizon.findYFromX(pt.x)), cv::Point2i(pt.x, img.rows), cv::Scalar(127,127,127), 1);
                 //cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(127,127,127), 2);
                 cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,0,255), 2);
@@ -590,7 +628,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
             }
             break;
         case DBID_OBJECT_POINTS:
-            BOOST_FOREACH(const Vector2<double>& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(0,0,255), 4);
             }
             break;
@@ -608,10 +646,10 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
 //! Outputs debug data to the appropriate external interface
 bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
-    vector<Vector2<double> > data_points;
+    vector<Point > data_points;
     vector<cv::Scalar> colours;
     map<DEBUG_ID, vector<pair<string, cv::Mat>* > >::iterator map_it;
-    vector<Vector2<double> >::const_iterator it;
+    vector<Point >::const_iterator it;
     vector<cv::Scalar>::const_iterator c_it;
 
     getPointsAndColoursFromSegments(region.getSegments(), colours, data_points);
@@ -768,30 +806,52 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
 
 bool DataWrapper::updateFrame()
 {
-    switch(METHOD) {
+    switch(m_method) {
     case CAMERA:
-        m_current_image = m_camera->grabNewImage();   //force get new frame
+        m_current_image = *(m_camera->grabNewImage());   //force get new frame
         break;
     case STREAM:
         VisionConstants::loadFromFile(configname);
         if(!imagestrm.is_open()) {
-            errorlog << "No image stream" << endl;
+            errorlog << "No image stream - " << streamname << endl;
+            return false;
+        }
+        if(using_sensors && !sensorstrm.is_open()) {
+            errorlog << "No sensor stream - " << sensorstreamname << endl;
             return false;
         }
         try {
-            imagestrm >> *m_current_image;
-            //doGaussian(m_current_image);
+            imagestrm >> m_current_image;
         }
-        catch(std::exception& e){
-            errorlog << "Stream error - resetting: " << e.what() << endl;
+        catch(std::exception& e) {
+            errorlog << "Image stream error - resetting: " << e.what() << endl;
             imagestrm.clear() ;
             imagestrm.seekg(0, ios::beg);
-            imagestrm >> *m_current_image;
+            imagestrm >> m_current_image;
+            if(using_sensors) {
+                sensorstrm.clear() ;
+                sensorstrm.seekg(0, ios::beg);
+            }
+        }
+        if(using_sensors) {
+            try {
+                sensorstrm >> m_sensor_data;
+            }
+            catch(std::exception& e){
+                errorlog << "Sensor stream error: " << e.what() << endl;
+            }
         }
         break;
     }
+
+    //overwrite sensor horizon if using sensors
+    vector<float> hor_data;
+    if(using_sensors && m_sensor_data.getHorizon(hor_data)) {
+        kinematics_horizon.setLine(hor_data.at(0), hor_data.at(1), hor_data.at(2));
+    }
+
     numFramesProcessed++;
-    
+
     return true;
 }
 
