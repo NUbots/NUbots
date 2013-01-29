@@ -63,7 +63,7 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
         
-        std::cout << "IN getParam" << std::endl;
+        // std::cout << "IN getParam" << std::endl;
 
         // Indicates successful retrieval
         bool success = false;
@@ -109,8 +109,14 @@ namespace ConfigSystem
             // Convert the parameter object into a parameter subtree.
             ptree paramSubtree;
             success = ptreeFromParam(data, paramSubtree);
-            if(!success) return false;
-            
+            if(!success)
+            {
+                std::cout << "ConfigTree::getParam(...): "
+                          << "Could not convert the given parameter into a property tree"
+                          << " (the parameter may be invalid)." 
+                          << std::endl;
+                return false;
+            }
             // Put the subtree representing the converted parameter into the
             // config tree.
             _treeRoot.put_child(fullPath, paramSubtree);
@@ -170,10 +176,13 @@ namespace ConfigSystem
 
     bool ConfigTree::addPtreeValueandRangeToParam(ptree fromPtree, ConfigParameter &toParam)
     {
+        CONFIGSYS_DEBUG_CALLS;
+
         std::string typStr = fromPtree.get<std::string>("type");
         value_type vt = stringToValueType(typStr);
-        std::cout << "ConfigTree::addPtreeValueandRangeToParam(...): vt = " 
-                  << makeValueTypeString(vt) << std::endl;
+
+        // std::cout << "ConfigTree::addPtreeValueandRangeToParam(...): vt = " 
+        //           << makeValueTypeString(vt) << std::endl;
 
         bool success_v = false;
         bool success_r = true ;
@@ -188,10 +197,6 @@ namespace ConfigSystem
                 success_v = addValueToParam<double>(fromPtree, toParam); 
                 break;
             
-            case vt_1dvector_double:
-                success_v = addVectorValueToParam1D<double>(fromPtree, toParam);
-                break;
-            
             case vt_bool: 
                 success_v = addValueToParam<bool>(fromPtree, toParam); 
                 break;
@@ -200,8 +205,30 @@ namespace ConfigSystem
                 success_v = addValueToParam<long>(fromPtree, toParam); 
                 break;
             
+            case vt_1dvector_double:
+                success_v = addVectorValueToParam1D<double>(fromPtree, toParam);
+                break;
+            case vt_2dvector_double:
+                success_v = addVectorValueToParam2D<double>(fromPtree, toParam);
+                break;
+            case vt_3dvector_double:
+                success_v = addVectorValueToParam3D<double>(fromPtree, toParam);
+                break;
+            
             case vt_1dvector_long:
                 success_v = addVectorValueToParam1D<long>(fromPtree, toParam);
+                break;
+            case vt_2dvector_long:
+                success_v = addVectorValueToParam2D<long>(fromPtree, toParam);
+                break;
+            case vt_3dvector_long:
+                success_v = addVectorValueToParam3D<long>(fromPtree, toParam);
+                break;
+            default: 
+                std::cerr << __PRETTY_FUNCTION__ 
+                         << ": Invalid val_type" 
+                         << makeValueTypeString(vt) << "'"
+                         << "'" << std::endl;
                 break;
         }
         
@@ -210,13 +237,23 @@ namespace ConfigSystem
             //cases fall through as they use the same - change later if necessary.
             case vt_double         :
             case vt_1dvector_double: 
+            case vt_2dvector_double: 
+            case vt_3dvector_double: 
                 success_r = addRangeToParam<double>(fromPtree, toParam);
                 break;
                 
             case vt_bool         :
             case vt_long         :            
             case vt_1dvector_long: 
+            case vt_2dvector_long: 
+            case vt_3dvector_long: 
                 success_r = addRangeToParam<long>(fromPtree, toParam);
+                break;
+            default: 
+                std::cerr << __PRETTY_FUNCTION__ 
+                         << ": Invalid val_type" 
+                         << makeValueTypeString(vt)
+                         << std::endl;
                 break;
         }
 
@@ -225,10 +262,14 @@ namespace ConfigSystem
 
     bool ConfigTree::addParamValueandRangeToPtree(ConfigParameter fromParam, ptree &toPtree)
     {
+        CONFIGSYS_DEBUG_CALLS;
+
         bool success_v = false;
         bool success_r = true ;
 
         value_type vt = fromParam.getType();
+        
+        // std::cout << __PRETTY_FUNCTION__ << ": vt = " << makeValueTypeString(vt) << std::endl;
         
         // Add value
         switch(vt)
@@ -241,10 +282,6 @@ namespace ConfigSystem
                 success_v = addValueToPtree<double> (fromParam, toPtree); 
                 break;
                 
-            case vt_1dvector_double:
-                success_v = addVectorValueToPtree1D<double>(fromParam, toPtree); 
-                break;
-                
             case vt_bool           : 
                 success_v = addValueToPtree<bool> (fromParam, toPtree); 
                 break;
@@ -253,28 +290,63 @@ namespace ConfigSystem
                 success_v = addValueToPtree<long> (fromParam, toPtree); 
                 break;
                 
+            case vt_1dvector_double:
+                success_v = addVectorValueToPtree1D<double>(fromParam, toPtree); 
+                break;
+             case vt_2dvector_double:
+                success_v = addVectorValueToPtree2D<double>(fromParam, toPtree); 
+                break;
+             case vt_3dvector_double:
+                success_v = addVectorValueToPtree3D<double>(fromParam, toPtree); 
+                break;
+                
             case vt_1dvector_long  : 
                 success_v = addVectorValueToPtree1D<long>(fromParam, toPtree); 
                 break;
+            case vt_2dvector_long  : 
+                success_v = addVectorValueToPtree2D<long>(fromParam, toPtree); 
+                break;
+            case vt_3dvector_long  : 
+                success_v = addVectorValueToPtree3D<long>(fromParam, toPtree); 
+                break;
+            default: 
+                std::cerr << __PRETTY_FUNCTION__ 
+                         << ": Invalid val_type" 
+                         << makeValueTypeString(vt)
+                         << std::endl;
+                success_v = false;
+                break;
         }
-        std::cout << __PRETTY_FUNCTION__ << ( (success_v)? "success" : "failed" ) << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << ( (success_v)? "success" : "failed" ) << std::endl;
         // Add range
         switch(vt)
         {
             case vt_double         :
             case vt_1dvector_double:
+            case vt_2dvector_double:
+            case vt_3dvector_double:
                 success_r = addRangeToPtree<double>(fromParam, toPtree);
                 break;
             case vt_bool         :
             case vt_long         :
             case vt_1dvector_long:
-                std::cout << "ConfigTree::addParamValueandRangeToPtree(...): IN HERE" << std::endl;
+            case vt_2dvector_long:
+            case vt_3dvector_long:
+                // std::cout << "ConfigTree::addParamValueandRangeToPtree(...): IN HERE" << std::endl;
                 success_r = addRangeToPtree<long>(fromParam, toPtree);
+                break;
+            default: 
+                std::cerr << __PRETTY_FUNCTION__ 
+                         << ": Invalid val_type" 
+                         << makeValueTypeString(vt)
+                         << std::endl;
+                success_r = false;
                 break;
         }
         
-        std::cout << __PRETTY_FUNCTION__ << ( (success_r)? "success" : "failed" ) << std::endl;
-
+        // std::cout << __PRETTY_FUNCTION__ << ": success_v = " << success_v << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << ": success_r = " << success_r << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << ( (success_r)? "success" : "failed" ) << std::endl;
         return success_v && success_r;
     }
 

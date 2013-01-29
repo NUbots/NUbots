@@ -24,7 +24,7 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define CONFIGSYS_DEBUG_CALLS /* std::cout << "DEBUG> " << __PRETTY_FUNCTION__ << std::endl; */
+#define CONFIGSYS_DEBUG_CALLS /*std::cout << "DEBUG> " << __PRETTY_FUNCTION__ << std::endl; */
 
 #ifndef ConfigParameter_def
 #define ConfigParameter_def
@@ -43,8 +43,16 @@ namespace ConfigSystem
     enum value_type 
     {
         vt_none,
-        vt_bool, vt_long, vt_double, vt_string,
-        vt_1dvector_long, vt_1dvector_double
+        vt_bool, 
+        vt_long, 
+        vt_double, 
+        vt_string,
+        vt_1dvector_long, 
+        vt_2dvector_long, 
+        vt_3dvector_long, 
+        vt_1dvector_double,
+        vt_2dvector_double,
+        vt_3dvector_double
     };
     
     //Should these be in a class or better here?
@@ -129,9 +137,17 @@ namespace ConfigSystem
             //! If this parameter's value type is string        , return the value.
             bool getValue_string(std::string &value);
             //! If this parameter's value type is vector<long  >, return the value.
-            bool getValue_vector_long(std::vector<long> &value);
+            bool getValue_vector1d_long(std::vector<long> &value);
+            //! If this parameter's value type is vector<std::vector<long>  >, return the value.
+            bool getValue_vector2d_long(std::vector<std::vector<long> > &value);
+            //! If this parameter's value type is vector<std::vector<std::vector<long> >  >, return the value.
+            bool getValue_vector3d_long(std::vector<std::vector<std::vector<long> > > &value);
             //! If this parameter's value type is vector<double>, return the value.
-            bool getValue_vector_double(std::vector<double> &value); 
+            bool getValue_vector1d_double(std::vector<double> &value); 
+            //! If this parameter's value type is vector<std::vector<double> >, return the value.
+            bool getValue_vector2d_double(std::vector<std::vector<double> > &value); 
+            //! If this parameter's value type is vector<std::vector<std::vector<double> > >, return the value.
+            bool getValue_vector3d_double(std::vector<std::vector<std::vector<double> > > &value); 
 
             //! If this parameter's value type is bool          , set the value.
             bool setValue_bool(bool &value);
@@ -141,10 +157,18 @@ namespace ConfigSystem
             bool setValue_double(double &value);
             //! If this parameter's value type is string        , set the value.
             bool setValue_string (std::string &value);
-            //! If this parameter's value type is vector<long  >, set the value.
-            bool setValue_vector_long(std::vector<long> &value);
+            //! If this parameter's value type is vector<long>, set the value.
+            bool setValue_vector1d_long(std::vector<long> &value); 
+            //! If this parameter's value type is vector<std::vector<long> >, set the value.
+            bool setValue_vector2d_long(std::vector<std::vector<long> > &value); 
+            //! If this parameter's value type is vector<std::vector<std::vector<long> > >, set the value.
+            bool setValue_vector3d_long(std::vector<std::vector<std::vector<long> > > &value); 
             //! If this parameter's value type is vector<double>, set the value.
-            bool setValue_vector_double(std::vector<double> &value); 
+            bool setValue_vector1d_double(std::vector<double> &value); 
+            //! If this parameter's value type is vector<std::vector<double> >, set the value.
+            bool setValue_vector2d_double(std::vector<std::vector<double> > &value); 
+            //! If this parameter's value type is vector<std::vector<std::vector<double> > >, set the value.
+            bool setValue_vector3d_double(std::vector<std::vector<std::vector<double> > > &value); 
             
 
             // Overloaded getters and setters:
@@ -156,14 +180,22 @@ namespace ConfigSystem
             bool setValue(double              &value);
             bool setValue(std::string         &value);
             bool setValue(std::vector<long>   &value);
+            bool setValue(std::vector<std::vector<long> >   &value);
+            bool setValue(std::vector<std::vector<std::vector<long> > >   &value);
             bool setValue(std::vector<double> &value);
+            bool setValue(std::vector<std::vector<double> > &value);
+            bool setValue(std::vector<std::vector<std::vector<double> > > &value);
 
             bool getValue(bool                &value);
             bool getValue(long                &value);
             bool getValue(double              &value);
             bool getValue(std::string         &value);
             bool getValue(std::vector<long>   &value);
+            bool getValue(std::vector<std::vector<long> >   &value);
+            bool getValue(std::vector<std::vector<std::vector<long> > >   &value);
             bool getValue(std::vector<double> &value);
+            bool getValue(std::vector<std::vector<double> > &value);
+            bool getValue(std::vector<std::vector<std::vector<double> > > &value);
 
             bool getRange(ConfigRange<long>   &range);
             bool getRange(ConfigRange<double> &range);
@@ -215,7 +247,11 @@ namespace ConfigSystem
                     std::string         *val_string       ;
                     
                     std::vector<long>   *val_1dvector_long  ;
+                    std::vector<std::vector<long> >   *val_2dvector_long  ;
+                    std::vector<std::vector<std::vector<long> > >   *val_3dvector_long  ;
                     std::vector<double> *val_1dvector_double;
+                    std::vector<std::vector<double> > *val_2dvector_double;
+                    std::vector<std::vector<std::vector<double> > > *val_3dvector_double;
                 };
                 
                 /// union containing a pointer to the parameter's range

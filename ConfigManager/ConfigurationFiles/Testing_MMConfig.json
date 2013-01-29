@@ -9,15 +9,15 @@
                 "modified": "false",
                 "locked": "false",
                 "type": "double",
-                "value": "0.4983505634590983",
+                "value": "0.8789540086872876",
                 "range":
                 {
-                    "min": "5",
-                    "max": "10",
+                    "min": "0",
+                    "max": "255",
                     "lBound": "closed",
                     "uBound": "closed",
                     "outside": "false",
-                    "autoClip": "true"
+                    "autoClip": "false"
                 }
             },
             "param_long":
@@ -26,7 +26,7 @@
                 "modified": "false",
                 "locked": "false",
                 "type": "long",
-                "value": "3",
+                "value": "1",
                 "range":
                 {
                     "min": "0",
@@ -45,13 +45,10 @@
                 "type": "1d_vector_double",
                 "value":
                 [
-                    "0.6776404192205518",
-                    "0.7468670248053968",
-                    "0.6784640697296709",
-                    "0.02067525358870625",
-                    "0.7253722241148353",
-                    "0.3359294447582215",
-                    "0.3174626978579909"
+                    "200",
+                    "150",
+                    "46",
+                    "250"
                 ],
                 "range":
                 {
@@ -71,20 +68,17 @@
                 "type": "2d_vector_double",
                 "value":
                 [
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    ""
+                    ["200"],
+                    ["150"],
+                    ["46"],
+                    ["250"]
                 ],
                 "range":
                 {
                     "min": "0",
-                    "max": "0",
-                    "lBound": "none",
-                    "uBound": "none",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
                     "outside": "false",
                     "autoClip": "false"
                 }

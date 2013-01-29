@@ -99,28 +99,110 @@ namespace ConfigSystem
         template<typename T>
         bool addVectorValueToParam1D(ptree from_ptree, ConfigParameter &to_param)
         {
-        	std::vector<T> vector_value;
-        	
-        	try
-		    {
-		    	//Retrieve values of type T from vector in tree and place in vector.
-		    	BOOST_FOREACH(ptree::value_type &child, from_ptree.get_child("value"))
-		    	{
-		    		vector_value.push_back(child.second.get<T>(""));
-		    	}
-		    	
-		    	//Sets the value in the ConfigParameter object
-		    	to_param.setValue(vector_value);
-        	}
-        	catch(std::exception &e)
-        	{
-        		std::cout << "ERROR: " << e.what() << std::endl;
+            std::vector<T> vector_value;
+            
+            try
+            {
+                //Retrieve values of type T from vector in tree and place in vector.
+                BOOST_FOREACH(ptree::value_type &child, from_ptree.get_child("value"))
+                {
+                    vector_value.push_back(child.second.get<T>(""));
+                }
+                
+                //Sets the value in the ConfigParameter object
+                to_param.setValue(vector_value);
+            }
+            catch(std::exception &e)
+            {
+                std::cout << "ERROR: " << e.what() << std::endl;
                 return false;
-        	}
-        	
-        	return true;
+            }
+            
+            return true;
+        }
+        template<typename T>
+        bool addVectorValueToParam2D(ptree from_ptree, ConfigParameter &to_param)
+        {
+            std::vector< std::vector<T> > vector_value;
+            std::vector<T> column_value;
+            
+            try
+            {
+                //Retrieve values of type T from vector in tree and place in vector.
+                BOOST_FOREACH(const ptree::value_type &child, from_ptree.get_child("value"))
+                {
+                    column_value = std::vector<T>();
+                    
+                    // ensure child is an array
+                    if(child.second.empty()) 
+                    {
+                        // allow empty arrays
+                        if(child.first != "") return false;
+                    }
+                    else
+                    {
+                        BOOST_FOREACH(const ptree::value_type &grandchild, child.second)
+                        {
+                            column_value.push_back(grandchild.second.get<T>(""));
+                        }
+                    }
+
+                    vector_value.push_back(column_value);
+                }
+                
+                //Sets the value in the ConfigParameter object
+                to_param.setValue(vector_value);
+            }
+            catch(std::exception &e)
+            {
+                std::cout << "ERROR: " << e.what() << std::endl;
+                return false;
+            }
+            
+            return true;
+        }
+        template<typename T>
+        bool addVectorValueToParam3D(ptree from_ptree, ConfigParameter &to_param)
+        {
+            std::vector< std::vector< std::vector<T> > > vector_value;        
+            std::vector< std::vector<T> > column_vector;
+            std::vector<T> column_value;
+            
+            try
+            {
+                //Retrieve values of type T from vector in tree and place in vector.
+                BOOST_FOREACH(const ptree::value_type &child, from_ptree.get_child("value"))
+                {
+                    column_vector = std::vector<std::vector<T> >();
+                    
+                    BOOST_FOREACH(const ptree::value_type &grandchild, child.second)
+                    {
+                        column_value = std::vector<T>();
+                        
+                        BOOST_FOREACH(const ptree::value_type &greatgrandchild, grandchild.second)
+                        {
+                            column_value.push_back(grandchild.second.get<T>(""));
+                        }
+                        
+                        column_vector.push_back(column_value);
+                    }
+                    
+                    vector_value.push_back(column_vector);
+                }
+                
+                //Sets the value in the ConfigParameter object
+                to_param.setValue(vector_value);
+            }
+            catch(std::exception &e)
+            {
+                std::cout << "ERROR: " << e.what() << std::endl;
+                return false;
+            }
+            
+            return true;
         }
         
+
         template<typename T>
         bool addRangeToParam(ptree fromPtree, ConfigParameter &toParam)
         {
@@ -166,29 +248,76 @@ namespace ConfigSystem
         template<typename T>
         bool addVectorValueToPtree1D(ConfigParameter from_param, ptree &to_ptree)
         {
-        	ptree children;
-        	ptree child;
-        	std::vector<T> retrieved_vector;
-        	//Retrieve vector from the CP object
-        	if( !from_param.getValue(retrieved_vector) ) return false;
-        	
-        	try
-        	{
-		    	BOOST_FOREACH(const T &value, retrieved_vector)
-				{
-					child.put("", value);
-					children.push_back(std::make_pair("", child));
-				}
-			
-				to_ptree.add_child("value", children);
-			}
-			catch(std::exception &e)
-			{
-				std::cout << "ERROR: " << e.what() << std::endl;
-				return false;
-			}
-			
-			return true;
+            ptree children;
+            ptree child;
+            std::vector<T> retrieved_vector;
+            //Retrieve vector from the CP object
+            if( !from_param.getValue(retrieved_vector) ) return false;
+            
+            try
+            {
+                BOOST_FOREACH(const T &value, retrieved_vector)
+                {
+                    child.put("", value);
+                    children.push_back(std::make_pair("", child));
+                }
+            
+                to_ptree.add_child("value", children);
+            }
+            catch(std::exception &e)
+            {
+                std::cout << "ERROR: " << e.what() << std::endl;
+                return false;
+            }
+            
+            return true;
+        }
+        template<typename T>
+        bool addVectorValueToPtree2D(ConfigParameter from_param, ptree &to_ptree)
+        {
+            ptree child;
+            ptree grandchild;
+            ptree greatgrandchild;
+            std::vector< std::vector<T> > retrieved_vector;
+            
+            //Retrieve vector from the CP object
+            if(!from_param.getValue(retrieved_vector))
+            {
+                std::cout << "addVectorValueToPtree2D(...): No 2d vector in this ConfigParameter."
+                          << std::endl;
+                return false;
+            }
+
+            try
+            {
+                BOOST_FOREACH(const std::vector<T> &column, retrieved_vector)
+                {
+                    grandchild = ptree();
+                    greatgrandchild = ptree();
+                    
+                    BOOST_FOREACH(const T &value, column)
+                    {
+                        greatgrandchild.put("", value);
+                        grandchild.push_back(std::make_pair("", greatgrandchild));
+                    }
+                    
+                    child.push_back(std::make_pair("", grandchild));
+                }
+            
+                to_ptree.add_child("value", child);
+            }
+            catch(std::exception &e)
+            {
+                std::cout << "ERROR: " << e.what() << std::endl;
+                return false;
+            }
+            
+            return true;
+        }
+        template<typename T>
+        bool addVectorValueToPtree3D(ConfigParameter from_param, ptree &to_ptree)
+        {
+            return false;
         }
         
         
@@ -253,8 +382,8 @@ namespace ConfigSystem
          *  @param 	"data" The retrieved parameter.
          *  @return Returns whether the operation was successful.
          */
-        bool getVectorParam1D(const std::string param_path, const std::string param_name, 
-        						ConfigParameter &data);
+        // bool getVectorParam1D(const std::string param_path, const std::string param_name, 
+        // 						ConfigParameter &data);
         						
         						
         

@@ -131,23 +131,34 @@ namespace ConfigSystem
 
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
-        
         return cp.getValue(data);
     }
     
     //Reads an std::vector<double> from the given path in the config system.
-    bool ConfigManager::readDoubleVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<double> &data)
+    bool ConfigManager::readDoubleVectorValue1D(
+        const string &param_path, 
+        const string &param_name, 
+        std::vector<double> &data)
     {
     	CONFIGSYS_DEBUG_CALLS;
 
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
-        
         return cp.getValue(data);
     }
     
-    
+    //Reads an std::vector<double> from the given path in the config system.
+    bool ConfigManager::readDoubleVectorValue2D(
+        const string &param_path, 
+        const string &param_name, 
+        std::vector<std::vector<double> > &data)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
+        return cp.getValue(data);
+    }
     
     
     
@@ -231,17 +242,11 @@ namespace ConfigSystem
         							           std::vector<long> data)
     {
     	CONFIGSYS_DEBUG_CALLS;
-    	
-    	std::cout << "IN storeLongVectorValue1D" << std::endl;
-    	
         //! Get the relevant parameter from the ConfigTree
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        
-        std::cout << "storeLongVectorValue1D: setVal" << std::endl;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        std::cout << "storeLongVectorValue1D: store" << std::endl;
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
     
@@ -259,13 +264,26 @@ namespace ConfigSystem
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
     
-    
-    
+    //Stores the given std::vector<double> into the config system at the given path.
+    bool ConfigManager::storeDoubleVectorValue2D(
+        const string &paramPath, 
+        const string &paramName, 
+        std::vector<std::vector<double> > data)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        std::cout << "get" << std::endl;
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        std::cout << "set" << std::endl;
+        if(!cp.setValue(data)) return false; //!< Set the new value
+        //! Store the modified parameter back into the tree
+        std::cout << "store" << std::endl;
+        return _currConfigTree->storeParam(paramPath, paramName, cp);
+    }
     
     
 
-
-    
     bool ConfigManager::readDoubleRange(const string &paramPath, 
                                         const string &paramName, 
                             ConfigRange<double> &range)
@@ -295,7 +313,7 @@ namespace ConfigSystem
         //! Get the relevant parameter from the ConfigTree
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        cp.setRange(range); //!< Set the new value
+        if(!cp.setRange(range)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
@@ -307,7 +325,7 @@ namespace ConfigSystem
         //! Get the relevant parameter from the ConfigTree
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        cp.setRange(range); //!< Set the new value
+        if(!cp.setRange(range)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }

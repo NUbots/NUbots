@@ -163,7 +163,7 @@ namespace ConfigSystem
     template<typename T>
     bool ConfigRange<T>::test(std::vector< std::vector<T> > values)
     {
-    	BOOST_FOREACH(const std::vector<T> &val, values)
+    	BOOST_FOREACH(std::vector<T> &val, values)
     	{
     		if(!(test(val))) return false;
     	}
@@ -175,7 +175,7 @@ namespace ConfigSystem
     template<typename T>
     bool ConfigRange<T>::test(std::vector< std::vector< std::vector<T> > > values)
     {
-    	BOOST_FOREACH(const std::vector< std::vector<T> > &val, values)
+    	BOOST_FOREACH(std::vector< std::vector<T> > &val, values)
     	{
     		if(!(test(val))) return false;
     	}
@@ -199,7 +199,7 @@ namespace ConfigSystem
     template<typename T>
     bool ConfigRange<T>::clip(std::vector< std::vector<T> > &values)
     {
-        BOOST_FOREACH(const std::vector<T> &val, values)
+        BOOST_FOREACH(std::vector<T> &val, values)
         {
             if(!clip(val)) return false;
         }
@@ -211,7 +211,7 @@ namespace ConfigSystem
     template<typename T>
     bool ConfigRange<T>::clip(std::vector< std::vector< std::vector<T> > > &values)
     {
-        BOOST_FOREACH(const std::vector< std::vector<T> > &val, values)
+        BOOST_FOREACH(std::vector< std::vector<T> > &val, values)
         {
             if(!clip(val)) return false;
         }
@@ -235,7 +235,7 @@ namespace ConfigSystem
     template<typename T>
     bool ConfigRange<T>::apply(std::vector< std::vector<T> > &values)
     {
-        BOOST_FOREACH(const std::vector<T> &val, values)
+        BOOST_FOREACH(std::vector<T> &val, values)
         {
             if(!apply(val)) return false;
         }
@@ -247,7 +247,7 @@ namespace ConfigSystem
     template<typename T>
     bool ConfigRange<T>::apply(std::vector< std::vector< std::vector<T> > > &values)
     {
-        BOOST_FOREACH(const std::vector< std::vector<T> > &val, values)
+        BOOST_FOREACH(std::vector< std::vector<T> > &val, values)
         {
             if(!apply(val)) return false;
         }
@@ -263,7 +263,10 @@ namespace ConfigSystem
             clip(value);
             return true;
         }
-        else return test(value);
+        else 
+        {
+            return test(value);
+        }
     }
     
     //! Returns whether the given value satisfies the constraints specified
@@ -290,8 +293,8 @@ namespace ConfigSystem
         bool ubC = _uBound == bt_closed;
         bool ubN = _uBound == bt_none  ;
 
-        std::cout << __PRETTY_FUNCTION__ << ": "  << _min <<" < "
-                                        << value << " < " << _max << std::endl; 
+        // std::cout << __PRETTY_FUNCTION__ << ": "  << _min <<" < "
+        //                                 << value << " < " << _max << std::endl; 
 
         // The following tests could be optimised a little.
         if(!_outside) // [...] || (...)

@@ -41,19 +41,19 @@ namespace ConfigSystem
     class ConfigManager
     {
     public:
-    	/*!
+        /*!
          *  @brief Creates a configManager and loads the initial configuration
          *         specified.
          *  @param configName The name of the initial configuration to load.  
          *  @return 
          */
-    	ConfigManager(std::string configName);
+        ConfigManager(std::string configName);
         
-    	/*!    
+        /*!    
          *  @brief Destroys this ConfigManager and deletes it's ConfigStore
          *         and current ConfigTree.
          */
-    	~ConfigManager();
+        ~ConfigManager();
         
         
         /*! @brief  Loads a configuration with the given name.
@@ -67,7 +67,7 @@ namespace ConfigSystem
          *  @return Returns whether or not the save succeeded.
          */
         bool saveConfiguration(std::string configName);
-    	
+        
         
         /*! @brief Reads an integer stored at the given path in the current configuration.
          *  @param paramPath Path to the desired parameter.
@@ -83,18 +83,25 @@ namespace ConfigSystem
         
         
         //1D VECTORS (any other vector types, like string?)
-        /*! @brief 	Reads a vector stored at the given path in the current configuration.
-         *  @param 	"param_path" Path to the desired parameter.
-         * 	@param 	"param_name" Name of the desired parameter.
-         *  @param 	"data" Variable in which to store the data retrieved.
+        /*! @brief     Reads a vector stored at the given path in the current configuration.
+         *  @param     "param_path" Path to the desired parameter.
+         *     @param     "param_name" Name of the desired parameter.
+         *  @param     "data" Variable in which to store the data retrieved.
          *  @return Whether the operation was successful.
          */
         bool readLongVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<long> &data);
-        							
-        bool readDoubleVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<double> &data);
-        							
+                                    std::vector<long> &data);
+                                    
+        bool readDoubleVectorValue1D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<double> &data
+            );
+        bool readDoubleVectorValue2D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<std::vector<double> > &data
+            );                     
         
         
         /*! @brief Stores the given integer in the current configuration at the given path.
@@ -110,35 +117,42 @@ namespace ConfigSystem
         
         
         //1D VECTORS (any other vector types, like string?)
-        /*! @brief 	Stores the given vector in the current configuration at the given path.
+        /*! @brief     Stores the given vector in the current configuration at the given path.
 
-         *  @param 	"param_path" Path at which to store the parameter.
-         *  @param 	"param_name" Name of the parameter to be stored.
-         *  @param 	"data" The data to store.
+         *  @param     "param_path" Path at which to store the parameter.
+         *  @param     "param_name" Name of the parameter to be stored.
+         *  @param     "data" The data to store.
          *  @return Whether the operation was successful.
          */
-        							
+                                    
         bool storeLongVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<long> data);
-        							
+                                    std::vector<long> data);
+                                    
         bool storeStringVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<std::string> data);
-        							
-        bool storeDoubleVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<double> data);
-        							
-        
-        
+                                    std::vector<std::string> data);
+                                    
+        bool storeDoubleVectorValue1D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<double> data
+            );
+
+        bool storeDoubleVectorValue2D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<std::vector<double> > data
+            );
+
         
         /* Ranges of vector types shouldn't change from what we currently have? Unless people want 
         multiple ranges for different values in the vector I suppose ... just an idea. Leaving it 
         for now. :P */
         
         
-        /*! @brief 	Stores the ranges in the current configuration at the given path.
-         *  @param 	"param_path" Path at which to store the parameter.
-         *  @param 	"param_name" Name of the parameter to be stored.
-         *  @param 	"range" The data to store.
+        /*! @brief     Stores the ranges in the current configuration at the given path.
+         *  @param     "param_path" Path at which to store the parameter.
+         *  @param     "param_name" Name of the parameter to be stored.
+         *  @param     "range" The data to store.
          *  @return Whether the operation was successful.
          */
         bool storeDoubleRange  (const string &paramPath, 
@@ -149,10 +163,10 @@ namespace ConfigSystem
                                 ConfigRange<long> &range);
                                 
                                 
-        /*! @brief 	Reads the ranges in the current configuration at the given path.
-         *  @param 	"param_path" Path at which to store the parameter.
-         *  @param 	"param_name" Name of the parameter to be stored.
-         *  @param 	"range" The data to store.
+        /*! @brief     Reads the ranges in the current configuration at the given path.
+         *  @param     "param_path" Path at which to store the parameter.
+         *  @param     "param_name" Name of the parameter to be stored.
+         *  @param     "range" The data to store.
          *  @return Whether the operation was successful.
          */                        
         bool readDoubleRange   (const string &paramPath, 
