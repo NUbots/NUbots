@@ -175,18 +175,35 @@ namespace ConfigSystem
                 {
                     column_vector = std::vector<std::vector<T> >();
                     
-                    BOOST_FOREACH(const ptree::value_type &grandchild, child.second)
+                    // ensure child is an array
+                    if(child.second.empty()) 
                     {
-                        column_value = std::vector<T>();
-                        
-                        BOOST_FOREACH(const ptree::value_type &greatgrandchild, grandchild.second)
-                        {
-                            column_value.push_back(grandchild.second.get<T>(""));
-                        }
-                        
-                        column_vector.push_back(column_value);
+                        // allow empty arrays
+                        if(child.first != "") return false;
                     }
-                    
+                    else
+                    {
+                        BOOST_FOREACH(const ptree::value_type &grandchild, child.second)
+                        {
+                            column_value = std::vector<T>();
+                            
+                            // ensure child is an array
+                            if(grandchild.second.empty()) 
+                            {
+                                // allow empty arrays
+                                if(grandchild.first != "") return false;
+                            }
+                            else
+                            {
+                                BOOST_FOREACH(const ptree::value_type &greatgrandchild, grandchild.second)
+                                {
+                                    column_value.push_back(greatgrandchild.second.get<T>(""));
+                                }
+                            }
+                            
+                            column_vector.push_back(column_value);
+                        }
+                    }
                     vector_value.push_back(column_vector);
                 }
                 
@@ -317,7 +334,49 @@ namespace ConfigSystem
         template<typename T>
         bool addVectorValueToPtree3D(ConfigParameter from_param, ptree &to_ptree)
         {
-            return false;
+            ptree parent;
+            ptree child;
+            ptree grandchild;
+            ptree greatgrandchild;
+            std::vector< std::vector< std::vector<T> > > retrieved_vector;
+            
+            //Retrieve vector from the CP object
+            if( !from_param.getValue(retrieved_vector) ) return false;
+            
+            try
+            {
+                BOOST_FOREACH(const std::vector< std::vector<T> > &column, retrieved_vector)
+                {
+                    child = ptree();
+                    grandchild = ptree();
+                    greatgrandchild = ptree();
+                    
+                    BOOST_FOREACH(const std::vector<T> &column2, column)
+                    {
+                        grandchild = ptree();
+                        greatgrandchild = ptree();
+                        
+                        BOOST_FOREACH(const T &value, column2)
+                        {
+                            greatgrandchild.put("", value);
+                            grandchild.push_back(std::make_pair("", greatgrandchild));
+                        }
+                        
+                        child.push_back(std::make_pair("", grandchild));
+                    }
+                    
+                    parent.push_back(std::make_pair("", child));
+                }
+            
+                to_ptree.add_child("value", parent);
+            }
+            catch(std::exception &e)
+            {
+                std::cout << "ERROR: " << e.what() << std::endl;
+                return false;
+            }
+            
+            return true;
         }
         
         

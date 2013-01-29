@@ -239,22 +239,32 @@ namespace ConfigSystem
                 value_type val_type;
                 
                 /// union containing a pointer to the parameter's value
+                // NOTE: A union is used instead of a void* so that the
+                //       individual variables can have meaningful names
+                //       (avoiding casts everywhere) and so that the 'union'
+                //       keyword (and braces) can simply be commented out 
+                //       to convert the union into a simple set of variable
+                //       declarations
+                //       (which is a valid, safe implementation that has the 
+                //       drawback of using a fair bit more memory.
+                //       It could be useful for debugging).
                 union 
                 {
-                    bool                *val_bool         ;
-                    long                *val_long         ;
-                    double              *val_double       ;
-                    std::string         *val_string       ;
+                    bool                              *val_bool           ;
+                    long                              *val_long           ;
+                    double                            *val_double         ;
+                    std::string                       *val_string         ;
                     
-                    std::vector<long>   *val_1dvector_long  ;
+                    std::vector<long>                 *val_1dvector_long  ;
                     std::vector<std::vector<long> >   *val_2dvector_long  ;
                     std::vector<std::vector<std::vector<long> > >   *val_3dvector_long  ;
-                    std::vector<double> *val_1dvector_double;
+                    std::vector<double>               *val_1dvector_double;
                     std::vector<std::vector<double> > *val_2dvector_double;
                     std::vector<std::vector<std::vector<double> > > *val_3dvector_double;
                 };
                 
                 /// union containing a pointer to the parameter's range
+                // See the note on the union above.
                 union 
                 {
                     ConfigRange<long>   *range_long  ;

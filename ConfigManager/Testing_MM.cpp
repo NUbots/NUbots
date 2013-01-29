@@ -255,7 +255,7 @@ int main(void)
     store_2dv_d = std::vector<std::vector<double> >();
     for(int i = 0; i < vec2d_s1; i++)
     {
-        int  vec2d_s2 = 0;//5 + (randInt() % 5);
+        int  vec2d_s2 = 0 + (randInt() % 10);
         std::vector<double> v = std::vector<double>();
         for(int i = 0; i < vec2d_s2; i++)
         {
@@ -303,27 +303,99 @@ int main(void)
     std::cout << std::endl;
 
 
-    // LONG:
 
-    // Store a long:
+    // Store a vector<vector<vector<double> > >:
     // pass: If stored successfully.
     // FAIL: If not stored.
-    store_l = randInt();
+    std::cout << " Create test vectors" << std::endl;
+    int  vec3d_s1 = 3 + (randInt() % 2);
+    store_3dv_d = std::vector<std::vector<std::vector<double> > >();
+    for(int i = 0; i < vec3d_s1; i++)
+    {
+        int  vec3d_s2 = 0 + (randInt() % 5);
+        std::vector<std::vector<double> > v2 = std::vector<std::vector<double> >();
+        for(int i = 0; i < vec3d_s2; i++)
+        {
+            int  vec3d_s3 = 0 + (randInt() % 5);
+            std::vector<double> v1 = std::vector<double>();
+            for(int i = 0; i < vec3d_s3; i++)
+            {
+                v1.push_back(randReal());
+            }
+            v2.push_back(v1);
+        }
+        store_3dv_d.push_back(v2);
+    }
     startTimedTest();
-    result = config.storeLongValue("Testing.MM", "param_long", store_l);
+    result = config.storeDoubleVectorValue3D("Testing.MM", "param_vector3d_double", store_3dv_d);
+    std::cout << (result? "T":"F" ) << std::endl;
     endTimedTest();
 
-    // Read a long:
+
+    // Read a vector<vector<vector<double> > >:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result = config.readLongValue("Testing.MM", "param_long", read_l);
+    result = config.readDoubleVectorValue3D("Testing.MM", "param_vector3d_double", read_3dv_d);
     endTimedTest();
 
-    result = (store_l == read_l);
-    printTestResult("storeLong", result);
-    printTestResult("readLong", result);
+    std::cout << "    Sizes: " << store_3dv_d.size() 
+              << " , "         << read_3dv_d .size() 
+              << std::endl;
+
+              std::cout << " Compare" << std::endl;
+    result = true;
+    for(int i = 0; i < store_3dv_d.size(); i++)
+    {
+        if(!(i < read_3dv_d.size())) { result = false; break; }
+        std::cout << "  Sizes: "   << store_3dv_d[i].size() 
+                  << " , "         << read_3dv_d [i].size()
+                  << std::endl;
+
+        for(int j = 0; j < store_3dv_d[i].size(); j++)
+        {
+            if(!(j < read_3dv_d.size())) { result = false; break; }
+            std::cout << "    Sizes: "   << store_3dv_d[i][j].size() 
+                      << " , "         << read_3dv_d [i][j].size()
+                      << std::endl;
+
+            for(int k = 0; k < store_3dv_d[i][j].size(); k++)
+            {
+                if(!(k < read_3dv_d[i][j].size())) { result = false; break; }
+
+                std::cout << "          " << (float)store_3dv_d[i][j][k] 
+                          << " | "      << (float)read_3dv_d [i][j][k] 
+                          << std::endl;
+                result &= (((float)store_3dv_d[i][j][k]) == ((float)read_3dv_d[i][j][k])); // ignore rounding errors by comparig as floats
+            }
+        }
+    }
+    printTestResult("storeDoubleVectorValue3D", result);
+    printTestResult("readDoubleVectorValue3D" , result);
     std::cout << std::endl;
+
+
+    // // LONG:
+
+    // // Store a long:
+    // // pass: If stored successfully.
+    // // FAIL: If not stored.
+    // store_l = randInt();
+    // startTimedTest();
+    // result = config.storeLongValue("Testing.MM", "param_long", store_l);
+    // endTimedTest();
+
+    // // Read a long:
+    // // pass: If read successfully.
+    // // FAIL: If not read.
+    // startTimedTest();
+    // result = config.readLongValue("Testing.MM", "param_long", read_l);
+    // endTimedTest();
+
+    // result = (store_l == read_l);
+    // printTestResult("storeLong", result);
+    // printTestResult("readLong", result);
+    // std::cout << std::endl;
 
 
 

@@ -82,6 +82,33 @@
                     "outside": "false",
                     "autoClip": "false"
                 }
+            },
+            "param_vector3d_double":
+            {
+                "desc": "Test parameter for 1d double vectors.",
+                "modified": "false",
+                "locked": "false",
+                "type": "3d_vector_double",
+                "value":
+                [
+                    [
+                        ["0"],
+                        ["0"]
+                    ],
+                    [
+                        ["0"],
+                        ["0"]
+                    ]
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
             }
         }
     }

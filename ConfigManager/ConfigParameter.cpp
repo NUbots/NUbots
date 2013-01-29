@@ -110,11 +110,23 @@ namespace ConfigSystem
         case vt_double         : param_value.val_double          = NULL; break;
         case vt_string         : param_value.val_string          = NULL; break;
         case vt_1dvector_long  : param_value.val_1dvector_long   = NULL; break;
+        case vt_2dvector_long  : param_value.val_2dvector_long   = NULL; break;
+        case vt_3dvector_long  : param_value.val_3dvector_long   = NULL; break;
         case vt_1dvector_double: param_value.val_1dvector_double = NULL; break;
+        case vt_2dvector_double: param_value.val_2dvector_double = NULL; break;
+        case vt_3dvector_double: param_value.val_3dvector_double = NULL; break;
+        
+        case vt_none         : param_value.val_long   = NULL; break;
+        
         default: 
+            std::cerr << __PRETTY_FUNCTION__ 
+                      << ": Invalid val_type '" 
+                      << makeValueTypeString(val_type) 
+                      << "'" << std::endl;
             param_value.val_long   = NULL;
             break;
         }
+
         switch(val_type)
         {
         case vt_double         :
@@ -130,6 +142,9 @@ namespace ConfigSystem
         case vt_3dvector_long:
             param_value.range_long = new ConfigRange<long>();
             break;
+
+        case vt_none         : param_value.range_long   = NULL; break;
+
         default: 
             std::cerr << __PRETTY_FUNCTION__ 
                       << ": Invalid val_type '" 

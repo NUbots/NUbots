@@ -89,10 +89,21 @@ namespace ConfigSystem
          *  @param     "data" Variable in which to store the data retrieved.
          *  @return Whether the operation was successful.
          */
-        bool readLongVectorValue1D(const string &param_path, const string &param_name, 
-                                    std::vector<long> &data);
-        bool readLongVectorValue2D(const string &param_path, const string &param_name, 
-        							std::vector< std::vector<long> > &data);
+        bool readLongVectorValue1D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<long> &data
+            );
+        bool readLongVectorValue2D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<std::vector<long> > &data
+            ); 
+        bool readLongVectorValue3D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<std::vector<std::vector<long> > > &data
+            );   
                                     
         bool readDoubleVectorValue1D(
             const string &param_path, 
@@ -103,7 +114,12 @@ namespace ConfigSystem
             const string &param_path, 
             const string &param_name, 
             std::vector<std::vector<double> > &data
-            );                     
+            ); 
+        bool readDoubleVectorValue3D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<std::vector<std::vector<double> > > &data
+            );                   
         
         
         /*! @brief Stores the given integer in the current configuration at the given path.
@@ -127,22 +143,36 @@ namespace ConfigSystem
          *  @return Whether the operation was successful.
          */
                                     
-        bool storeLongVectorValue1D(const string &param_path, const string &param_name, 
-                                    std::vector<long> data);
-                                    
-		bool storeLongVectorValue2D(const string &param_path, const string &param_name, 
-                                    std::vector< std::vector<long> > data);                             
-                                    
+        bool storeLongVectorValue1D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<long> data
+            );
+        bool storeLongVectorValue2D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<std::vector<long> > data
+            );
+        bool storeLongVectorValue3D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<std::vector<std::vector<long> > > data
+            );                            
+        
         bool storeDoubleVectorValue1D(
             const string &param_path, 
             const string &param_name, 
             std::vector<double> data
             );
-
         bool storeDoubleVectorValue2D(
             const string &param_path, 
             const string &param_name, 
             std::vector<std::vector<double> > data
+            );
+        bool storeDoubleVectorValue3D(
+            const string &param_path, 
+            const string &param_name, 
+            std::vector<std::vector<std::vector<double> > > data
             );
 
         
