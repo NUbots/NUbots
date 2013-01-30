@@ -56,7 +56,6 @@ namespace ConfigSystem
          */
         ~ConfigManager();
         
-        
         /*! @brief  Loads a configuration with the given name.
          *  @param  The name of the configuration to load.
          *  @return Returns whether or not the load succeeded.
@@ -70,6 +69,17 @@ namespace ConfigSystem
          */
         bool saveConfiguration(std::string configName);
         
+        /*!
+         *  @brief Propogates changes made to parameters in the config system
+         *         since the last call to 'updateConfiguration()' to the
+         *         configObjects that depend on those parameters by calling
+         *         their 'Configurable::updateConfig(...)' methods.
+         * 
+         *         This method should be called once on each iteration of the
+         *         main loop See-Think thread.
+         */
+        void updateConfiguration();
+        
 
         /*! @brief  Sets the set of objects that the ConfigManager will
          *          auto-update, and calls each of their 
@@ -80,50 +90,37 @@ namespace ConfigSystem
         bool setConfigObjects(std::vector<Configurable*> configObjects);
         
 
-        /*! @brief Reads an integer stored at the given path in the current 
+        /*! @brief Reads a value stored at the given path in the current 
          *         configuration.
          *  @param paramPath Path to the desired parameter.
          *  @param data variable in which to store the data retrieved.
          *  @return Whether the operation was successful.
          */
-        bool readIntValue    (
-            const std::string &paramPath, 
-            const std::string &paramName, 
-            int    &data
+        template<typename T>
+        bool readValue (
+            const std::string &paramPath,
+            const std::string &paramName,
+            T &data
             );
 
+
+        // Old (explicitly named) interface.
+        // This should probably be removed soon?
         bool readLongValue   (
             const std::string &paramPath, 
             const std::string &paramName, 
             long   &data
             );
-
-        bool readFloatValue  (
-            const std::string &paramPath, 
-            const std::string &paramName, 
-            float  &data
-            );
-
         bool readDoubleValue (
             const std::string &paramPath, 
             const std::string &paramName, 
             double &data
             );
-
         bool readStringValue (
             const std::string &paramPath, 
             const std::string &paramName, 
             string &data
             );
-
-        
-        /*! @brief     Reads a vector stored at the given path in the
-         *             current configuration.
-         *  @param     "param_path" Path to the desired parameter.
-         *  @param     "param_name" Name of the desired parameter.
-         *  @param     "data" Variable in which to store the data retrieved.
-         *  @return Whether the operation was successful.
-         */
         bool readLongVectorValue1D(
             const std::string &param_path, 
             const std::string &param_name, 
@@ -138,8 +135,7 @@ namespace ConfigSystem
             const std::string &param_path, 
             const std::string &param_name, 
             std::vector<std::vector<std::vector<long> > > &data
-            );   
-                                    
+            );    
         bool readDoubleVectorValue1D(
             const std::string &param_path, 
             const std::string &param_name, 
@@ -156,80 +152,67 @@ namespace ConfigSystem
             std::vector<std::vector<std::vector<double> > > &data
             );                   
         
-    
-        /*! @brief Stores the given integer in the current configuration 
+        
+        /*! @brief Stores the given value in the current configuration 
          *         at the given path.
-         *  @param paramPath Path at which to store the parameter.
-         *  @param data The data to store.
+         *  @param  paramPath Path at which to store the parameter.
+         *  @param  paramName Name of the parameter to be stored.
+         *  @param  data The data to store.
          *  @return Whether the operation was successful.
          */
-        bool storeIntValue    (
+        template<typename T>
+        bool storeValue(
             const std::string &paramPath,
             const std::string &paramName,
-            int    data
+            T data
             );
 
+
+        // Old (explicitly named) interface.
+        // This should probably be removed soon?
         bool storeLongValue   (
             const std::string &paramPath,
             const std::string &paramName,
             long   data
             );
-
-        bool storeFloatValue  (
-            const std::string &paramPath,
-            const std::string &paramName,
-            float  data
-            );
-
         bool storeDoubleValue (
             const std::string &paramPath,
             const std::string &paramName,
             double data
             );
-
         bool storeStringValue (
             const std::string &paramPath,
             const std::string &paramName,
             string data
-            );
-
-
-        /*! @brief     Stores the given vector in the current configuration 
-         *             at the given path.
-         *  @param     "param_path" Path at which to store the parameter.
-         *  @param     "param_name" Name of the parameter to be stored.
-         *  @param     "data" The data to store.
-         *  @return Whether the operation was successful.
-         */                         
+            );             
         bool storeLongVectorValue1D(
-            const std::string &param_path, 
-            const std::string &param_name, 
+            const std::string &paramPath, 
+            const std::string &paramName, 
             std::vector<long> data
             );
         bool storeLongVectorValue2D(
-            const std::string &param_path, 
-            const std::string &param_name, 
+            const std::string &paramPath, 
+            const std::string &paramName, 
             std::vector<std::vector<long> > data
             );
         bool storeLongVectorValue3D(
-            const std::string &param_path, 
-            const std::string &param_name, 
+            const std::string &paramPath, 
+            const std::string &paramName, 
             std::vector<std::vector<std::vector<long> > > data
             );                            
-        
         bool storeDoubleVectorValue1D(
-            const std::string &param_path, 
-            const std::string &param_name, 
+            const std::string &paramPath, 
+            const std::string &paramName, 
             std::vector<double> data
             );
         bool storeDoubleVectorValue2D(
-            const std::string &param_path, 
-            const std::string &param_name, 
+            const std::string &paramPath, 
+            const std::string &paramName, 
             std::vector<std::vector<double> > data
             );
         bool storeDoubleVectorValue3D(
-            const std::string &param_path, 
-            const std::string &param_name, 
+            const std::string &paramPath, 
+            const std::string &paramName, 
             std::vector<std::vector<std::vector<double> > > data
             );
         
@@ -300,6 +283,11 @@ namespace ConfigSystem
             const std::string &paramPath,
             const std::string &paramName
             );
+
+        /*! @brief Reconfigures the configObjects by calling 'loadConfig()'
+         *         on each of them.
+         */  
+        void reconfigureConfigObjects();
     };
 }
 #endif

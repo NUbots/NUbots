@@ -49,8 +49,9 @@ namespace ConfigSystem
         }
         else
         {
-            // Update the configObjects
-            #warning ConfigObjects are not currently updated within ConfigManager::loadConfiguration(...).
+            // Send the new configuration to the configObjects
+            #warning Should occur within updateConfiguration()
+            reconfigureConfigObjects();
         }
 
         return loaded;
@@ -72,10 +73,28 @@ namespace ConfigSystem
         return saved;
     }
 
+
+    void ConfigManager::updateConfiguration()
+    {
+        // update all parameters that are scheduled
+        reconfigureConfigObjects();
+    }
+
+
     bool ConfigManager::setConfigObjects(std::vector<Configurable*> configObjects)
     {
         _configObjects = configObjects;
+        reconfigureConfigObjects();
         return true;
+    }
+
+    void ConfigManager::reconfigureConfigObjects()
+    {
+        BOOST_FOREACH(Configurable* c, _configObjects)
+        {
+            if(c == NULL) continue;
+            c->loadConfig();
+        }
     }
 
     void ConfigManager::updateConfigObjects(
@@ -88,157 +107,114 @@ namespace ConfigSystem
         // ConfigManager::setConfigObjects(...))
         BOOST_FOREACH(Configurable* c, _configObjects)
         {
-            if(boost::starts_with(paramPath, c->_basePath))
+            if(c == NULL) continue;
+            if(boost::starts_with(paramPath, c->_configBasePath))
                 c->updateConfig(paramPath, paramName);
         }
     }
     
-    
-    // /*! @brief Reads an int     from the given path in the config system. */    
-    // bool ConfigManager::readIntValue   (const std::string &paramPath,
-    //                                     const std::string &paramName,
-    //                                     int &data)
-    // {
-    //     CONFIGSYS_DEBUG_CALLS;
 
-    //     ConfigParameter cp(vt_none);
-    //     if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-    //     return cp.getValue(data);
-    // }
 
-    /*! @brief Reads a  long    from the given path in the config system. */
-    bool ConfigManager::readLongValue   (const std::string &paramPath,
-                                         const std::string &paramName,
-                                         long &data)
+
+    template<typename T>
+    bool ConfigManager::readValue (
+        const std::string &paramPath,
+        const std::string &paramName,
+        T &data
+        )
     {
         CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getValue(data);
-    }
-    // /*! @brief Reads a  float   from the given path in the config system. */
-    // bool ConfigManager::readFloatParam  (const std::string &paramPath,
-    //                                      const std::string &paramName,
-    //                                      float  &data) // throw(ConfigException)
-    // {
-    //     CONFIGSYS_DEBUG_CALLS;
-
-    //     ConfigParameter cp(vt_none);
-    //     if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-    //     return cp.getValue(data);
-    // }
-
- //    /*! @brief Reads a  double  from the given path in the config system. */
-    bool ConfigManager::readDoubleValue (const std::string &paramPath,
-                                         const std::string &paramName,
-                                         double &data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-        
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         return cp.getValue(data);
     }
 
-    /*! @brief Reads a  string  from the given path in the config system. */
-    bool ConfigManager::readStringValue (const std::string &paramPath,
-                                         const std::string &paramName,
-                                         std::string &data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
 
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getValue(data);
-    }
-    
-    //VECTOR STUFF:
-    //Reads an std::vector<long> from the given path in the config system.
-    bool ConfigManager::readLongVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<long> &data)
-    {
-    	CONFIGSYS_DEBUG_CALLS;
+    // New interface (using explicit template instantiations).
+    template bool ConfigManager::readValue<long> (
+        const std::string &paramPath, const std::string &paramName,
+        long &data
+        );
+    template bool ConfigManager::readValue<double> (
+        const std::string &paramPath, const std::string &paramName,
+        double &data
+        );
+    template bool ConfigManager::readValue<std::string> (
+        const std::string &paramPath, const std::string &paramName,
+        std::string &data
+        );
+    template bool ConfigManager::readValue<std::vector<long> > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<long> &data
+        );
+    template bool ConfigManager::readValue<std::vector<std::vector<long> > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<long> > &data
+        );
+    template bool ConfigManager::readValue<std::vector<std::vector<std::vector<long> > > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<std::vector<long> > > &data
+        );
+    template bool ConfigManager::readValue<std::vector<double> > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<double>  &data
+        );
+    template bool ConfigManager::readValue<std::vector<std::vector<double> > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<double> >  &data
+        );
+    template bool ConfigManager::readValue<std::vector<std::vector<std::vector<double> > > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<std::vector<double> > > &data
+        );
 
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
-        return cp.getValue(data);
-    }
-    //Reads an std::vector<std::vector<long> > from the given path in the config system.
-    bool ConfigManager::readLongVectorValue2D(const string &param_path, const string &param_name, 
-        							std::vector< std::vector<long> > &data)
-    {
-    	CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
-        return cp.getValue(data);
-    }
-    //Reads an std::vector<std::vector<std::vector<long> > > from the given path in the config system.
-    bool ConfigManager::readLongVectorValue3D(const string &param_path, const string &param_name, 
-                                    std::vector< std::vector<std::vector<long> > > &data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
-        return cp.getValue(data);
-    }
-    
-    //Reads an std::vector<double> from the given path in the config system.
-    bool ConfigManager::readDoubleVectorValue1D(const string &param_path, const string &param_name, 
-        							std::vector<double> &data)
-    {
-    	CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
-        return cp.getValue(data);
-    }
-    
-    //Reads an std::vector<double> from the given path in the config system.
-    bool ConfigManager::readDoubleVectorValue2D(const string &param_path, const string &param_name, 
-        							std::vector<std::vector<double> > &data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
-        return cp.getValue(data);
-    }
-    //Reads an std::vector<std::vector<std::vector<double> > > from the given path in the config system.
+    // Old (explicitly named) interface.
+    // This should probably be removed soon?
+    bool ConfigManager::readLongValue   (
+        const std::string &paramPath,  const std::string &paramName,
+        long   &data
+        ) { return readValue(paramPath, paramName, data); }
+    bool ConfigManager::readDoubleValue (
+        const std::string &paramPath,  const std::string &paramName,
+        double &data
+        ) { return readValue(paramPath, paramName, data); }
+    bool ConfigManager::readStringValue (
+        const std::string &paramPath,  const std::string &paramName,
+        std::string &data
+        ) { return readValue(paramPath, paramName, data); }
+    bool ConfigManager::readLongVectorValue1D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<long> &data
+        ) { return readValue(paramPath, paramName, data); }
+    bool ConfigManager::readLongVectorValue2D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<std::vector<long> > &data
+        ) { return readValue(paramPath, paramName, data); }
+    bool ConfigManager::readLongVectorValue3D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<std::vector<std::vector<long> > > &data
+        ) { return readValue(paramPath, paramName, data); }
+    bool ConfigManager::readDoubleVectorValue1D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<double> &data
+        ) { return readValue(paramPath, paramName, data); }
+    bool ConfigManager::readDoubleVectorValue2D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<std::vector<double> > &data
+        ) { return readValue(paramPath, paramName, data); }
     bool ConfigManager::readDoubleVectorValue3D(
-        const string &param_path, 
-        const string &param_name, 
-        std::vector<std::vector<std::vector<double> > > &data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(param_path, param_name, cp)) return false;
-        return cp.getValue(data);
-    }
-    
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<std::vector<std::vector<double> > > &data
+        ) { return readValue(paramPath, paramName, data); }
 
 
-    // /*! @brief Stores the given int     data value into the config system at the given path. */
-    // bool ConfigManager::storeIntValue    (const std::string &paramPath,
-    //                                       const std::string &paramName,
-    //                                       long data)
-    // {
-    //     CONFIGSYS_DEBUG_CALLS;
-    //     //! Get the relevant parameter from the ConfigTree
-    //     ConfigParameter cp(vt_none);
-    //     if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-    //     if(!cp.setValue(data)) return false; //!< Set the new value
-    //     //! Store the modified parameter back into the tree
-    //     return _currConfigTree->storeParam(paramPath, paramName, cp);
-    // }
 
-    /*! @brief Stores the given long  data value into the config system at the given path. */
-    bool ConfigManager::storeLongValue   (const std::string &paramPath,
-                                          const std::string &paramName,
-                                          long data)
+
+    template<typename T>
+    bool ConfigManager::storeValue(
+       const std::string &paramPath,
+       const std::string &paramName,
+       T data)
     {
         CONFIGSYS_DEBUG_CALLS;
         //! Get the relevant parameter from the ConfigTree
@@ -251,149 +227,85 @@ namespace ConfigSystem
         return success;
     }
 
-   //  /*! @brief Stores the given float   data value into the config system at the given path. */
-   //  bool ConfigManager::storeFloatParam  (const std::string &paramPath,
-   //                                        const std::string &paramName,
-   //                                        float  data) // throw(ConfigException)
-   // {
-   //      CONFIGSYS_DEBUG_CALLS;
-   //      //! Get the relevant parameter from the ConfigTree
-   //      ConfigParameter cp(vt_none);
-   //      if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-   //      if(!cp.setValue(data)) return false; //!< Set the new value
-   //      //! Store the modified parameter back into the tree
-   //      return _currConfigTree->storeParam(paramPath, paramName, cp);
-   //  }
+    // New interface (using explicit template instantiations).
+    template bool ConfigManager::storeValue<long> (
+        const std::string &paramPath, const std::string &paramName,
+        long data
+        );
+    template bool ConfigManager::storeValue<double> (
+        const std::string &paramPath, const std::string &paramName,
+        double data
+        );
+    template bool ConfigManager::storeValue<std::string> (
+        const std::string &paramPath, const std::string &paramName,
+        std::string data
+        );
+    template bool ConfigManager::storeValue<std::vector<long> > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<long> data
+        );
+    template bool ConfigManager::storeValue<std::vector<std::vector<long> > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<long> > data
+        );
+    template bool ConfigManager::storeValue<std::vector<std::vector<std::vector<long> > > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<std::vector<long> > > data
+        );
+    template bool ConfigManager::storeValue<std::vector<double> > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<double>  data
+        );
+    template bool ConfigManager::storeValue<std::vector<std::vector<double> > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<double> >  data
+        );
+    template bool ConfigManager::storeValue<std::vector<std::vector<std::vector<double> > > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<std::vector<double> > > data
+        );
 
-    /*! @brief Stores the given double  data value into the config system at the given path. */
-    bool ConfigManager::storeDoubleValue (const string &paramPath,
-                                          const string &paramName,
-                                          double data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-        //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
-        //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
-    
-    /*! @brief Stores the given string  data value into the config system at the given path. */
-    bool ConfigManager::storeStringValue (const string &paramPath,
-                                          const string &paramName,
-                                          std::string data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-        //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
-        //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
-    
-    
-    //VECTOR STUFF:
-    //Stores the given std::vector<long> into the config system at the given path.
-    bool ConfigManager::storeLongVectorValue1D(const string &paramPath, 
-                                               const string &paramName, 
-        							           std::vector<long> data)
-    {
-    	CONFIGSYS_DEBUG_CALLS;
-        //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
-        //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
-	//Stores the given std::vector< std::vector<long> > into the config system at the given path.
-    bool ConfigManager::storeLongVectorValue2D(const string &paramPath, 
-                                               const string &paramName, 
-                                               std::vector< std::vector<long> > data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-        //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
-        //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
-    //Stores the given std::vector< std::vector<std::vector<long> > > into the config system at the given path.
-    bool ConfigManager::storeLongVectorValue3D(const string &paramPath, 
-                                               const string &paramName, 
-                                               std::vector< std::vector<std::vector<long> > > data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-        //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
-        //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
-    
-    //Stores the given std::vector<double> into the config system at the given path.
-    bool ConfigManager::storeDoubleVectorValue1D(const string &paramPath, 
-                                                 const string &paramName, 
-        							             std::vector<double> data)
-    {
-    	CONFIGSYS_DEBUG_CALLS;
-        //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
-        //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
-    
-    //Stores the given std::vector<std::vector<double> > into the config system at the given path.
+    // Old (explicitly named) interface.
+    // This should probably be removed soon?
+    bool ConfigManager::storeLongValue   (
+        const std::string &paramPath,  const std::string &paramName,
+        long   data
+        ) { return storeValue(paramPath, paramName, data); }
+    bool ConfigManager::storeDoubleValue (
+        const std::string &paramPath,  const std::string &paramName,
+        double data
+        ) { return storeValue(paramPath, paramName, data); }
+    bool ConfigManager::storeStringValue (
+        const std::string &paramPath,  const std::string &paramName,
+        std::string data
+        ) { return storeValue(paramPath, paramName, data); }
+    bool ConfigManager::storeLongVectorValue1D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<long> data
+        ) { return storeValue(paramPath, paramName, data); }
+    bool ConfigManager::storeLongVectorValue2D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<std::vector<long> > data
+        ) { return storeValue(paramPath, paramName, data); }
+    bool ConfigManager::storeLongVectorValue3D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<std::vector<std::vector<long> > > data
+        ) { return storeValue(paramPath, paramName, data); }
+    bool ConfigManager::storeDoubleVectorValue1D(
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<double> data
+        ) { return storeValue(paramPath, paramName, data); }
     bool ConfigManager::storeDoubleVectorValue2D(
-        const string &paramPath, 
-        const string &paramName, 
-        std::vector<std::vector<double> > data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-        //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
-        //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
-    //Stores the given std::vector<std::vector<std::vector<double> > > into the config system at the given path.
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<std::vector<double> > data
+        ) { return storeValue(paramPath, paramName, data); }
     bool ConfigManager::storeDoubleVectorValue3D(
-        const string &paramPath, 
-        const string &paramName, 
-        std::vector<std::vector<std::vector<double> > > data)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-        //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
-        //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
-    
+        const std::string &paramPath,  const std::string &paramName, 
+        std::vector<std::vector<std::vector<double> > > data
+        ) { return storeValue(paramPath, paramName, data); }
+
+
+
 
     bool ConfigManager::readDoubleRange(const string &paramPath, 
                                         const string &paramName, 

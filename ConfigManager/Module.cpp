@@ -9,8 +9,9 @@
 
 void Module::loadConfig()
 {
-
-
+    double read_d;
+    config->readDoubleValue("Testing.MM", "param_double", read_d);
+    doubleParam1 = read_d;
 }
 
 void Module::updateConfig(
@@ -18,7 +19,7 @@ void Module::updateConfig(
     const std::string& paramName
     )
 {
-    
+
     loadConfig();
 }
 

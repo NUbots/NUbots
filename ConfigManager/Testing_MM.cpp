@@ -37,7 +37,11 @@
 #include "ConfigRange.h"
 //#include "ConfigStorageManager.h"
 
+#include "Module.h"
+
 using namespace ConfigSystem;
+
+ConfigManager* config;
 
 void printTestResult(std::string testName, bool result)
 {
@@ -96,7 +100,8 @@ int main(void)
 
     // Create config system, loading 'defaultConfig'.
     startTimedTest();
-    ConfigManager config("Testing_MMConfig");
+    // ConfigManager config("Testing_MMConfig");
+    config = new ConfigManager("Testing_MMConfig");
     endTimedTest();
     std::cout << "Load configuration." << std::endl;
     std::cout << std::endl;
@@ -115,8 +120,11 @@ int main(void)
     ConfigRange<long>                               store_r_l  , read_r_l  ;
 
     // Tests:
-
-
+    // MODULE:
+    
+    
+    
+    
     // DOUBLE:
 
     // Store a double:
@@ -124,14 +132,14 @@ int main(void)
     // FAIL: If not stored.
     store_d = randReal();
     startTimedTest();
-    result = config.storeDoubleValue("Testing.MM", "param_double", store_d);
+    result = config->storeDoubleValue("Testing.MM", "param_double", store_d);
     endTimedTest();
 
     // Read a double:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result &= config.readDoubleValue("Testing.MM", "param_double", read_d);
+    result &= config->readDoubleValue("Testing.MM", "param_double", read_d);
     endTimedTest();
 
     result &= (((float)store_d) == ((float)read_d)); // ignore rounding errors by comparig as floats
@@ -146,7 +154,7 @@ int main(void)
     // pass: If not stored (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    result = config.storeLongValue("Testing.MM", "param_double", store_l);
+    result = config->storeLongValue("Testing.MM", "param_double", store_l);
     endTimedTest();
     printTestResult("storeDoubleAsLong", !result);
 
@@ -154,7 +162,7 @@ int main(void)
     // pass: If not read (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    result = config.readLongValue("Testing.MM", "param_double", read_l);
+    result = config->readLongValue("Testing.MM", "param_double", read_l);
     endTimedTest();
     printTestResult("readDoubleAslong", !result);
     std::cout << std::endl;
@@ -169,14 +177,14 @@ int main(void)
     // NOTE: Should generate a random range.
     store_r_d = ConfigRange<double>(5, 10, false, true, bt_closed, bt_closed);
     startTimedTest();
-    result = config.storeDoubleRange("Testing.MM", "param_double", store_r_d);
+    result = config->storeDoubleRange("Testing.MM", "param_double", store_r_d);
     endTimedTest();
 
     // Read a range<double>:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result &= config.readDoubleRange("Testing.MM", "param_double", read_r_d);
+    result &= config->readDoubleRange("Testing.MM", "param_double", read_r_d);
     endTimedTest();
 
     result &= (store_r_d.getMin()            == read_r_d.getMin() &&
@@ -195,7 +203,7 @@ int main(void)
     // pass: If not stored (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    result = config.storeLongRange("Testing.MM", "param_double", store_r_l);
+    result = config->storeLongRange("Testing.MM", "param_double", store_r_l);
     endTimedTest();
     printTestResult("storeDoubleRangeAsLongRange", !result);
     
@@ -203,7 +211,7 @@ int main(void)
     // pass: If not read (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    result = config.readLongRange("Testing.MM", "param_double", read_r_l);
+    result = config->readLongRange("Testing.MM", "param_double", read_r_l);
     endTimedTest();
     printTestResult("readDoubleRangeAsLongRange", !result);
     std::cout << std::endl;
@@ -225,14 +233,14 @@ int main(void)
         store_1dv_d.push_back(randReal());
     }
     startTimedTest();
-    result = config.storeDoubleVectorValue1D("Testing.MM", "param_vector1d_double", store_1dv_d);
+    result = config->storeDoubleVectorValue1D("Testing.MM", "param_vector1d_double", store_1dv_d);
     endTimedTest();
 
     // Read a vector<double>:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result &= config.readDoubleVectorValue1D("Testing.MM", "param_vector1d_double", read_1dv_d);
+    result &= config->readDoubleVectorValue1D("Testing.MM", "param_vector1d_double", read_1dv_d);
     endTimedTest();
 
     // std::cout << "    (stored '" << store_d 
@@ -273,7 +281,7 @@ int main(void)
         store_2dv_d.push_back(v);
     }
     startTimedTest();
-    result = config.storeDoubleVectorValue2D("Testing.MM", "param_vector2d_double", store_2dv_d);
+    result = config->storeDoubleVectorValue2D("Testing.MM", "param_vector2d_double", store_2dv_d);
     std::cout << (result? "T":"F" ) << std::endl;
     endTimedTest();
 
@@ -281,7 +289,7 @@ int main(void)
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result &= config.readDoubleVectorValue2D("Testing.MM", "param_vector2d_double", read_2dv_d);
+    result &= config->readDoubleVectorValue2D("Testing.MM", "param_vector2d_double", read_2dv_d);
     std::cout << (result? "T":"F" ) << std::endl;
     endTimedTest();
 
@@ -290,7 +298,7 @@ int main(void)
     std::cout << "  Sizes: " << store_2dv_d.size() 
               << " , "       << read_2dv_d .size() 
               << std::endl;
-    
+
     result &= true;
     for(int i = 0; i < store_2dv_d.size(); i++)
     {
@@ -338,7 +346,7 @@ int main(void)
         store_3dv_d.push_back(v2);
     }
     startTimedTest();
-    result = config.storeDoubleVectorValue3D("Testing.MM", "param_vector3d_double", store_3dv_d);
+    result = config->storeDoubleVectorValue3D("Testing.MM", "param_vector3d_double", store_3dv_d);
     endTimedTest();
     std::cout << (result? "T":"F" ) << std::endl;
 
@@ -347,7 +355,7 @@ int main(void)
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result &= config.readDoubleVectorValue3D("Testing.MM", "param_vector3d_double", read_3dv_d);
+    result &= config->readDoubleVectorValue3D("Testing.MM", "param_vector3d_double", read_3dv_d);
     endTimedTest();
 
     std::cout << "Compare" << std::endl;
@@ -394,14 +402,14 @@ int main(void)
     // // FAIL: If not stored.
     // store_l = randInt();
     // startTimedTest();
-    // result = config.storeLongValue("Testing.MM", "param_long", store_l);
+    // result = config->storeLongValue("Testing.MM", "param_long", store_l);
     // endTimedTest();
 
     // // Read a long:
     // // pass: If read successfully.
     // // FAIL: If not read.
     // startTimedTest();
-    // result = config.readLongValue("Testing.MM", "param_long", read_l);
+    // result = config->readLongValue("Testing.MM", "param_long", read_l);
     // endTimedTest();
 
     // result = (store_l == read_l);
@@ -415,7 +423,7 @@ int main(void)
 
     // Save configuration as 'newConfig'.
     startTimedTest();
-    config.saveConfiguration("newConfig");
+    config->saveConfiguration("newConfig");
     endTimedTest();
     std::cout << "Save configuration." << std::endl;
     std::cout << std::endl;
@@ -428,6 +436,9 @@ int main(void)
 
 
     // } // repeat all tests...
+
+
+    delete config; config = NULL;
 
     return 0;
 }

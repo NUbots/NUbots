@@ -8,15 +8,17 @@
 #define Module_H
 
 #include "Configurable.h"
+#include "ConfigManager.h"
+extern ConfigSystem::ConfigManager* config;
 
 class Module : Configurable
 {
 private:
     // some example parameters:
-    int         intParam1;
-    float       floatParam1;
+    long        longParam1;
+    double      doubleParam1;
     std::string stringParam1;
-
+    
     void loadConfig();
     void updateConfig(
         const std::string& paramPath,

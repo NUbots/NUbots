@@ -201,7 +201,7 @@ namespace ConfigSystem
     }
     void ConfigParameter::setModified(bool modVal)
     {
-        _modified = modVal;    
+        _modified = modVal;
     }
     bool ConfigParameter::isLocked()
     {
@@ -343,7 +343,7 @@ namespace ConfigSystem
         
         delete param_value.val_bool;
         param_value.val_bool = new bool(value);
-        
+        setModified(true);
         return true;
     }
 
@@ -355,7 +355,7 @@ namespace ConfigSystem
         
         delete param_value.val_long;
         param_value.val_long = new long(value);
-        
+        setModified(true);
         return true;
     }
 
@@ -367,7 +367,7 @@ namespace ConfigSystem
 
         delete param_value.val_double;
         param_value.val_double = new double(value);
-        
+        setModified(true);
         return true;
     }
 
@@ -379,7 +379,7 @@ namespace ConfigSystem
         
         delete param_value.val_string;
         param_value.val_string = new std::string(value);
-        
+        setModified(true);
         return true;
     }
 
@@ -391,7 +391,7 @@ namespace ConfigSystem
         
         delete param_value.val_1dvector_long;
         param_value.val_1dvector_long = new std::vector<long> (value);
-                
+        setModified(true);
         return true;
     }
     bool ConfigParameter::setValue_vector2d_long(std::vector<std::vector<long> > &value)
@@ -402,7 +402,7 @@ namespace ConfigSystem
         
         delete param_value.val_2dvector_long;
         param_value.val_2dvector_long = new std::vector<std::vector<long> > (value);
-                
+        setModified(true);
         return true;
     }
     bool ConfigParameter::setValue_vector3d_long(std::vector<std::vector<std::vector<long> > > &value)
@@ -413,7 +413,7 @@ namespace ConfigSystem
         
         delete param_value.val_3dvector_long;
         param_value.val_3dvector_long = new std::vector<std::vector<std::vector<long> > > (value);
-                
+        setModified(true);
         return true;
     }
 
@@ -425,7 +425,7 @@ namespace ConfigSystem
         
         delete param_value.val_1dvector_double;
         param_value.val_1dvector_double = new std::vector<double> (value);
-        
+        setModified(true);
         return true;
     }
     bool ConfigParameter::setValue_vector2d_double(std::vector<std::vector<double> > &value)
@@ -436,7 +436,7 @@ namespace ConfigSystem
         
         delete param_value.val_2dvector_double;
         param_value.val_2dvector_double = new std::vector<std::vector<double> > (value);
-        
+        setModified(true);
         return true;
     }
     bool ConfigParameter::setValue_vector3d_double(std::vector<std::vector<std::vector<double> > > &value)
@@ -447,7 +447,7 @@ namespace ConfigSystem
         
         delete param_value.val_3dvector_double;
         param_value.val_3dvector_double = new std::vector<std::vector<std::vector<double> > > (value);
-        
+        setModified(true);
         return true;
     }
 

@@ -68,7 +68,7 @@ public:
     //! The base path of this configurable object.
     //! Changes made on this path within the config system will cause this object's
     //! updateConfig method to be called.
-    std::string _basePath;
+    std::string _configBasePath;
 };
 
 #endif
