@@ -1,5 +1,7 @@
 
-OBJECTS = ConfigParameter.o ConfigTree.o ConfigStorageManager.o ConfigManager.o
+OBJECTS = ConfigParameter.o      ConfigTree.o    \
+          ConfigStorageManager.o ConfigManager.o \
+          Module.o 
 
 ConfigSystemTest: $(OBJECTS) TestConfig.o
 	g++ $^ -o $@

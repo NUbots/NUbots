@@ -290,7 +290,7 @@ int main(void)
     std::cout << "  Sizes: " << store_2dv_d.size() 
               << " , "       << read_2dv_d .size() 
               << std::endl;
-
+    
     result &= true;
     for(int i = 0; i < store_2dv_d.size(); i++)
     {
@@ -302,7 +302,7 @@ int main(void)
         for(int j = 0; j < store_2dv_d[i].size(); j++)
         {
             if(!(j < read_2dv_d[i].size())) { result = false; break; }
-            
+
             std::cout << "      " << (float)store_2dv_d[i][j] 
                       << " | "    << (float)read_2dv_d [i][j] 
                       << std::endl;

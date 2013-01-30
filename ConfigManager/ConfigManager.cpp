@@ -1,7 +1,11 @@
 #include "ConfigManager.h"
 #include "ConfigStorageManager.h"
+#include "Configurable.h"
 
 #include <iostream>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/foreach.hpp>
+#include <vector>
 
 using ConfigSystem::ConfigStorageManager;
 
@@ -16,6 +20,7 @@ namespace ConfigSystem
         // set initial values
         _configStore    = NULL;
         _currConfigTree = NULL;
+        _configObjects  = std::vector<Configurable*>();
 
         _configStore = new ConfigStorageManager();
     	loadConfiguration(configName);
@@ -42,6 +47,11 @@ namespace ConfigSystem
                       << configName << "'."
                       << std::endl;
         }
+        else
+        {
+            // Update the configObjects
+            #warning ConfigObjects are not currently updated within ConfigManager::loadConfiguration(...).
+        }
 
         return loaded;
     }
@@ -60,6 +70,27 @@ namespace ConfigSystem
         }
 
         return saved;
+    }
+
+    bool ConfigManager::setConfigObjects(std::vector<Configurable*> configObjects)
+    {
+        _configObjects = configObjects;
+        return true;
+    }
+
+    void ConfigManager::updateConfigObjects(
+        const std::string &paramPath,
+        const std::string &paramName
+        )
+    {
+        // Should use some clever data structure to speed this up.
+        // (such a data structure would be initialised within 
+        // ConfigManager::setConfigObjects(...))
+        BOOST_FOREACH(Configurable* c, _configObjects)
+        {
+            if(boost::starts_with(paramPath, c->_basePath))
+                c->updateConfig(paramPath, paramName);
+        }
     }
     
     
@@ -215,7 +246,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
 
    //  /*! @brief Stores the given float   data value into the config system at the given path. */
@@ -243,7 +276,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
     
     /*! @brief Stores the given string  data value into the config system at the given path. */
@@ -257,7 +292,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
     
     
@@ -273,7 +310,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
 	//Stores the given std::vector< std::vector<long> > into the config system at the given path.
     bool ConfigManager::storeLongVectorValue2D(const string &paramPath, 
@@ -286,7 +325,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
     //Stores the given std::vector< std::vector<std::vector<long> > > into the config system at the given path.
     bool ConfigManager::storeLongVectorValue3D(const string &paramPath, 
@@ -299,7 +340,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
     
     //Stores the given std::vector<double> into the config system at the given path.
@@ -313,7 +356,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
     
     //Stores the given std::vector<std::vector<double> > into the config system at the given path.
@@ -328,7 +373,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
     //Stores the given std::vector<std::vector<std::vector<double> > > into the config system at the given path.
     bool ConfigManager::storeDoubleVectorValue3D(
@@ -342,7 +389,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         if(!cp.setValue(data)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
-        return _currConfigTree->storeParam(paramPath, paramName, cp);
+        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
+        if(success) updateConfigObjects(paramPath, paramName);
+        return success;
     }
     
 
