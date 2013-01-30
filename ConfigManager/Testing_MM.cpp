@@ -90,6 +90,9 @@ int main(void)
     boost::uniform_int<> distI(0, 255);
     boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
 
+    // // Repeat all tests this many times
+    // for(int num_test_repeats = 100; num_test_repeats > 0; num_test_repeats--)
+    // {
 
     // Create config system, loading 'defaultConfig'.
     startTimedTest();
@@ -128,10 +131,10 @@ int main(void)
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result = config.readDoubleValue("Testing.MM", "param_double", read_d);
+    result &= config.readDoubleValue("Testing.MM", "param_double", read_d);
     endTimedTest();
 
-    result = (((float)store_d) == ((float)read_d)); // ignore rounding errors by comparig as floats
+    result &= (((float)store_d) == ((float)read_d)); // ignore rounding errors by comparig as floats
     printTestResult("storeDouble", result);
     printTestResult("readDouble" , result);
     std::cout << "    (stored '" << store_d 
@@ -173,10 +176,10 @@ int main(void)
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result = config.readDoubleRange("Testing.MM", "param_double", read_r_d);
+    result &= config.readDoubleRange("Testing.MM", "param_double", read_r_d);
     endTimedTest();
 
-    result = (store_r_d.getMin()            == read_r_d.getMin() &&
+    result &= (store_r_d.getMin()            == read_r_d.getMin() &&
               store_r_d.getMax()            == read_r_d.getMax() &&
               store_r_d.getUpperBoundType() == read_r_d.getUpperBoundType() &&
               store_r_d.getLowerBoundType() == read_r_d.getLowerBoundType() &&
@@ -206,6 +209,12 @@ int main(void)
     std::cout << std::endl;
 
 
+
+    // Tests for range violations
+    #warning Must add range tests
+
+
+
     // Store a vector<double>:
     // pass: If stored successfully.
     // FAIL: If not stored.
@@ -223,7 +232,7 @@ int main(void)
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result = config.readDoubleVectorValue1D("Testing.MM", "param_vector1d_double", read_1dv_d);
+    result &= config.readDoubleVectorValue1D("Testing.MM", "param_vector1d_double", read_1dv_d);
     endTimedTest();
 
     // std::cout << "    (stored '" << store_d 
@@ -231,7 +240,7 @@ int main(void)
     //           << "')" << std::endl;
     std::cout << "    Sizes: " << store_1dv_d.size() << " , " << read_1dv_d.size() << std::endl;
 
-    result = true;
+    result &= true;
     for(int i = 0; i < store_1dv_d.size(); i++)
     {
         if(i < read_1dv_d.size())
@@ -251,11 +260,11 @@ int main(void)
     // pass: If stored successfully.
     // FAIL: If not stored.
     std::cout << " Create test vectors" << std::endl;
-    int  vec2d_s1 = 5 + (randInt() % 5);
+    int  vec2d_s1 = 3 + (randInt() % 3);
     store_2dv_d = std::vector<std::vector<double> >();
     for(int i = 0; i < vec2d_s1; i++)
     {
-        int  vec2d_s2 = 0 + (randInt() % 10);
+        int  vec2d_s2 = 0 + (randInt() % 5);
         std::vector<double> v = std::vector<double>();
         for(int i = 0; i < vec2d_s2; i++)
         {
@@ -272,28 +281,30 @@ int main(void)
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result = config.readDoubleVectorValue2D("Testing.MM", "param_vector2d_double", read_2dv_d);
+    result &= config.readDoubleVectorValue2D("Testing.MM", "param_vector2d_double", read_2dv_d);
+    std::cout << (result? "T":"F" ) << std::endl;
     endTimedTest();
 
-    std::cout << "    Sizes: " << store_2dv_d.size() 
-              << " , "         << read_2dv_d .size() 
+    std::cout << " Compare" << std::endl;
+    
+    std::cout << "  Sizes: " << store_2dv_d.size() 
+              << " , "       << read_2dv_d .size() 
               << std::endl;
 
-              std::cout << " Compare" << std::endl;
-    result = true;
+    result &= true;
     for(int i = 0; i < store_2dv_d.size(); i++)
     {
         if(!(i < read_2dv_d.size())) { result = false; break; }
-        std::cout << "  Sizes: "   << store_2dv_d[i].size() 
+        std::cout << "    Sizes: " << store_2dv_d[i].size() 
                   << " , "         << read_2dv_d [i].size()
                   << std::endl;
 
         for(int j = 0; j < store_2dv_d[i].size(); j++)
         {
             if(!(j < read_2dv_d[i].size())) { result = false; break; }
-
-            std::cout << "        " << (float)store_2dv_d[i][j] 
-                      << " | "      << (float)read_2dv_d [i][j] 
+            
+            std::cout << "      " << (float)store_2dv_d[i][j] 
+                      << " | "    << (float)read_2dv_d [i][j] 
                       << std::endl;
             result &= (((float)store_2dv_d[i][j]) == ((float)read_2dv_d[i][j])); // ignore rounding errors by comparig as floats
         }
@@ -328,42 +339,43 @@ int main(void)
     }
     startTimedTest();
     result = config.storeDoubleVectorValue3D("Testing.MM", "param_vector3d_double", store_3dv_d);
-    std::cout << (result? "T":"F" ) << std::endl;
     endTimedTest();
+    std::cout << (result? "T":"F" ) << std::endl;
 
 
     // Read a vector<vector<vector<double> > >:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result = config.readDoubleVectorValue3D("Testing.MM", "param_vector3d_double", read_3dv_d);
+    result &= config.readDoubleVectorValue3D("Testing.MM", "param_vector3d_double", read_3dv_d);
     endTimedTest();
 
-    std::cout << "    Sizes: " << store_3dv_d.size() 
+    std::cout << "Compare" << std::endl;
+    
+    std::cout << "  Sizes: " << store_3dv_d.size() 
               << " , "         << read_3dv_d .size() 
               << std::endl;
 
-              std::cout << " Compare" << std::endl;
-    result = true;
+    result &= true;
     for(int i = 0; i < store_3dv_d.size(); i++)
     {
         if(!(i < read_3dv_d.size())) { result = false; break; }
-        std::cout << "  Sizes: "   << store_3dv_d[i].size() 
-                  << " , "         << read_3dv_d [i].size()
+        std::cout << "    Sizes: "   << store_3dv_d[i].size() 
+                  << " , "           << read_3dv_d [i].size()
                   << std::endl;
 
         for(int j = 0; j < store_3dv_d[i].size(); j++)
         {
-            if(!(j < read_3dv_d.size())) { result = false; break; }
-            std::cout << "    Sizes: "   << store_3dv_d[i][j].size() 
-                      << " , "         << read_3dv_d [i][j].size()
+            if(!(j < read_3dv_d[i].size())) { result = false; break; }
+            std::cout << "      Sizes: "   << store_3dv_d[i][j].size() 
+                      << " , "             << read_3dv_d [i][j].size()
                       << std::endl;
 
             for(int k = 0; k < store_3dv_d[i][j].size(); k++)
             {
                 if(!(k < read_3dv_d[i][j].size())) { result = false; break; }
 
-                std::cout << "          " << (float)store_3dv_d[i][j][k] 
+                std::cout << "        " << (float)store_3dv_d[i][j][k] 
                           << " | "      << (float)read_3dv_d [i][j][k] 
                           << std::endl;
                 result &= (((float)store_3dv_d[i][j][k]) == ((float)read_3dv_d[i][j][k])); // ignore rounding errors by comparig as floats
@@ -407,11 +419,15 @@ int main(void)
     endTimedTest();
     std::cout << "Save configuration." << std::endl;
     std::cout << std::endl;
+    
     // // A property tree that holds ConfigParameter objects
     // boost::property_tree::basic_ptree<std::string, ConfigParameter, std::less<std::string> >
     //  cpTree;
     // ConfigParameter newCP(vt_double);
     // cpTree.put("root", newCP);
+
+
+    // } // repeat all tests...
 
     return 0;
 }
