@@ -18,12 +18,13 @@ private:
     long        longParam1;
     double      doubleParam1;
     std::string stringParam1;
-    
+
     void loadConfig();
-    void updateConfig(
-        const std::string& paramPath,
-        const std::string& paramName
-        );
+    void updateConfig();
+    // void updateConfig(
+    //     const std::string& paramPath,
+    //     const std::string& paramName
+    //     );
 };
 
 #endif

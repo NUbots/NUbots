@@ -56,7 +56,7 @@ namespace ConfigSystem
 
         return loaded;
     }
-
+    
     bool ConfigManager::saveConfiguration(std::string configName)
     {
         bool saved = _configStore->saveConfig(_currConfigTree, configName);
@@ -76,8 +76,8 @@ namespace ConfigSystem
 
     void ConfigManager::updateConfiguration()
     {
-        // update all parameters that are scheduled
-        reconfigureConfigObjects();
+        // Update all ConfigObjects whose configurations have been outdated.
+        updateConfigObjects();
     }
 
 
@@ -94,13 +94,15 @@ namespace ConfigSystem
         {
             if(c == NULL) continue;
             c->loadConfig();
+            c->_configModified = false;
         }
     }
 
-    void ConfigManager::updateConfigObjects(
-        const std::string &paramPath,
-        const std::string &paramName
-        )
+    // void ConfigManager::updateConfigObjects(
+    //     const std::string &paramPath,
+    //     const std::string &paramName
+    //     )
+    void ConfigManager::updateConfigObjects()
     {
         // Should use some clever data structure to speed this up.
         // (such a data structure would be initialised within 
@@ -108,12 +110,34 @@ namespace ConfigSystem
         BOOST_FOREACH(Configurable* c, _configObjects)
         {
             if(c == NULL) continue;
-            if(boost::starts_with(paramPath, c->_configBasePath))
-                c->updateConfig(paramPath, paramName);
+            // if(boost::starts_with(paramPath, c->_configBasePath))
+            //     c->updateConfig(paramPath, paramName);
+
+            if(c->_configModified)
+            {
+                c->updateConfig();
+                c->_configModified = false;
+            }
         }
     }
     
+    void ConfigManager::markConfigObjects(
+            const std::string &paramPath,
+            const std::string &paramName
+            )
+    {
+        BOOST_FOREACH(Configurable* c, _configObjects)
+        {
+            if(c == NULL) continue;
 
+            //! skip string comparison if already marked
+            if(c->_configModified) continue;
+
+            //! Check whether the given path is on c's base path
+            if(boost::starts_with(paramPath, c->_configBasePath))
+                c->_configModified = true;
+        }
+    }
 
 
     template<typename T>
@@ -220,13 +244,19 @@ namespace ConfigSystem
         //! Get the relevant parameter from the ConfigTree
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        if(!cp.setValue(data)) return false; //!< Set the new value
+        
+        //! Set the new value
+        if(!cp.setValue(data)) return false; 
+        
         //! Store the modified parameter back into the tree
-        bool success = _currConfigTree->storeParam(paramPath, paramName, cp);
-        if(success) updateConfigObjects(paramPath, paramName);
-        return success;
-    }
+        if(!_currConfigTree->storeParam(paramPath, paramName, cp)) return false;
+        
+        //! Request update of configObjects that depend on this parameter
+        markConfigObjects(paramPath, paramName);
 
+        return true;
+    }
+    
     // New interface (using explicit template instantiations).
     template bool ConfigManager::storeValue<long> (
         const std::string &paramPath, const std::string &paramName,

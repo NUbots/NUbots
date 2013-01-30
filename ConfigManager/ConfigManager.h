@@ -276,10 +276,21 @@ namespace ConfigSystem
 
         /*! @brief     Update all configObjects that depend on the given 
          *             parameter.
-         *  @param     "param_path" Path to check.
+         *  @param     paramPath Path to check.
          *  @return Whether the operation was successful.
          */  
-        void updateConfigObjects(
+        void updateConfigObjects();
+        // void updateConfigObjects(
+        //     const std::string &paramPath,
+        //     const std::string &paramName
+        //     );
+
+        /*! @brief     Marks all configObjects whose base path contains the
+         *             given path as having had their configurations modified.
+         *  @param     paramPath Path to check.
+         *  @return Whether the operation was successful.
+         */  
+        void markConfigObjects(
             const std::string &paramPath,
             const std::string &paramName
             );

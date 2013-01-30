@@ -14,12 +14,16 @@ void Module::loadConfig()
     doubleParam1 = read_d;
 }
 
-void Module::updateConfig(
-    const std::string& paramPath,
-    const std::string& paramName
-    )
+void Module::updateConfig()
 {
-
     loadConfig();
 }
+// void Module::updateConfig(
+//     const std::string& paramPath,
+//     const std::string& paramName
+//     )
+// {
+
+//     loadConfig();
+// }
 

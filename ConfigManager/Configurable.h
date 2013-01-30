@@ -57,10 +57,11 @@ public:
      *  @param paramName The name of the variable that changed.
      *  @return No return value.
      */
-    virtual void updateConfig(
-        const std::string& paramPath,
-        const std::string& paramName
-        ) = 0;
+    virtual void updateConfig() = 0;
+    // virtual void updateConfig(
+    //     const std::string& paramPath,
+    //     const std::string& paramName
+    //     ) = 0;
 
 
 // protected:
@@ -69,6 +70,12 @@ public:
     //! Changes made on this path within the config system will cause this object's
     //! updateConfig method to be called.
     std::string _configBasePath;
+    #warning Configurable::_configBasePath and Configurable::_configModified are never initialised!!
+
+    //! Indicates whether this Configurable's configuration has been modified
+    //! in the config system since last being loaded.
+    //! (i.e. Is set to true when this object's configuration becomes outdated.)
+    bool _configModified;
 };
 
 #endif
