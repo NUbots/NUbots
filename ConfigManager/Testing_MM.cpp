@@ -118,13 +118,28 @@ int main(void)
     std::vector<std::vector<std::vector<long> > >   store_3dv_l, read_3dv_l;
     ConfigRange<double>                             store_r_d  , read_r_d  ;
     ConfigRange<long>                               store_r_l  , read_r_l  ;
-
+    
     // Tests:
     // MODULE:
-    
-    
-    
-    
+    std::vector<Configurable*> cfObjs;
+
+    Module m;
+
+    cfObjs.push_back(&m);
+    config->setConfigObjects(cfObjs);
+
+    m.doubleParam1 = -1;
+    std::cout << "Module.doubleParam1 = " << m.doubleParam1 << std::endl; 
+    store_d = 5;
+    std::cout << "Module.doubleParam1 = " << m.doubleParam1 << std::endl; 
+    std::cout << "config->storeDoubleValue(...)" << std::endl; 
+    result = config->storeDoubleValue("Testing.MM", "param_double", store_d);
+    std::cout << "Module.doubleParam1 = " << m.doubleParam1 << std::endl; 
+    std::cout << "config->updateConfiguration(...)" << std::endl; 
+    config->updateConfiguration();
+    std::cout << "Module.doubleParam1 = " << m.doubleParam1 << std::endl; 
+
+
     // DOUBLE:
 
     // Store a double:

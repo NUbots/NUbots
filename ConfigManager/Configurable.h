@@ -33,6 +33,10 @@
 class Configurable
 {
 public: 
+    
+    // Initialise member variables upon construction.
+    Configurable() : _configBasePath(""), _configModified(false) {}
+    
     /*! @brief Configures all of this class's parameters.
      *
      *  Retrieves relevant data from the Configuration System,

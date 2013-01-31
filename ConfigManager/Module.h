@@ -11,9 +11,9 @@
 #include "ConfigManager.h"
 extern ConfigSystem::ConfigManager* config;
 
-class Module : Configurable
+class Module : public Configurable
 {
-private:
+public:
     // some example parameters:
     long        longParam1;
     double      doubleParam1;

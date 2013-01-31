@@ -103,7 +103,7 @@ namespace ConfigSystem
             T &data
             );
 
-
+        
         // Old (explicitly named) interface.
         // This should probably be removed soon?
         bool readLongValue   (
