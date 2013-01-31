@@ -8,6 +8,7 @@ ConfigSystemTest: $(OBJECTS) TestConfig.o
 
 Testing_MM: $(OBJECTS) Testing_MM.o
 	g++ $^ -lrt -o $@
+	# -lrt is for realtime extensions (for clock_gettime)
 
 profileTests: $(OBJECTS) Testing_MM.o
 	# profile with Valgrind
