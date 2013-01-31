@@ -82,12 +82,6 @@ namespace ConfigSystem
     }
 
 
-    // Constructors
-    // ConfigParameter::ConfigParameter()
-    // {
-    //     _val_type = vt_none;
-    //     _val_bool = NULL;
-    // }
 
     ConfigParameter::ConfigParameter(value_type val_type)
     {
@@ -95,8 +89,8 @@ namespace ConfigSystem
         _val_type = val_type;
         
         // Set default values
-        _name     = "_name";
-        _path     = "_path";
+        // _name     = "_name";
+        // _path     = "_path";
         _desc     = ""   ;
         _modified = false;
         _locked   = false;
@@ -157,11 +151,11 @@ namespace ConfigSystem
 
     //Getting/setting string and general info stuff. 
 	
-    std::string ConfigParameter::getName() { return _name; }
-    std::string ConfigParameter::getName() const { return _name; }
+    // std::string ConfigParameter::getName() { return _name; }
+    // std::string ConfigParameter::getName() const { return _name; }
     
-    std::string ConfigParameter::getPath() { return _path; }
-    std::string ConfigParameter::getPath() const { return _path; }
+    // std::string ConfigParameter::getPath() { return _path; }
+    // std::string ConfigParameter::getPath() const { return _path; }
 
     std::string ConfigParameter::getDescription() { return _desc; }
     std::string ConfigParameter::getDescription() const { return _desc; }
@@ -169,16 +163,16 @@ namespace ConfigSystem
     value_type ConfigParameter::getType() { return _val_type; }
     value_type ConfigParameter::getType() const { return _val_type; }
     
-
-    void ConfigParameter::setName(std::string new_name) 
-    { 
-    	_name = new_name; 
-    }
     
-    void ConfigParameter::setPath(std::string new_path) 
-    { 
-    	_path = new_path; 
-    }
+    // void ConfigParameter::setName(std::string new_name) 
+    // { 
+    // 	_name = new_name; 
+    // }
+    
+    // void ConfigParameter::setPath(std::string new_path) 
+    // { 
+    // 	_path = new_path; 
+    // }
     
     void ConfigParameter::setDescription(std::string new_desc) 
     { 

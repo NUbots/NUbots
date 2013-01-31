@@ -132,19 +132,19 @@ int main(void)
     cfObjs.push_back(&m2);
     config->setConfigObjects(cfObjs);
 
-
+    
     m1.doubleParam1 = -1;
     m2.doubleParam1 = -2;
     m1.setConfigBasePath("Testing.MM");
     m2.setConfigBasePath("dfhfgh");
-
+    
     std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
     std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     store_d = 5;
     std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
     std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     std::cout << "config->storeDoubleValue(...)" << std::endl; 
-    result = config->storeDoubleValue("Testing.MM", "param_double", store_d);
+    result = config->storeValue<double>("Testing.MM", "param_double", store_d);
     std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
     std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     std::cout << "config->updateConfiguration(...)" << std::endl; 

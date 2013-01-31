@@ -111,6 +111,27 @@ namespace ConfigSystem
         bool addConfigObject(Configurable* configObject);
         
 
+        /*! @brief Locks the named parameter stored at the given path.
+         *  @param paramPath Path to the parameter to lock.
+         *  @param paramName Name of the parameter to lock.
+         *  @return Whether the operation was successful.
+         */
+        bool lockParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            );
+
+        /*! @brief Unlocks the named parameter stored at the given path.
+         *  @param paramPath Path to the parameter to unlock.
+         *  @param paramName Name of the parameter to unlock.
+         *  @return Whether the operation was successful.
+         */
+        bool unlockParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            );
+
+
         /*! @brief Reads a value stored at the given path in the current 
          *         configuration.
          *  @param paramPath Path to the desired parameter.
@@ -126,7 +147,8 @@ namespace ConfigSystem
 
         
         // Old (explicitly named) interface.
-        // This should probably be removed soon?
+        // Remain here mostly for testing
+        // These should probably be removed soon?
         bool readLongValue   (
             const std::string &paramPath, 
             const std::string &paramName, 
@@ -190,7 +212,8 @@ namespace ConfigSystem
 
 
         // Old (explicitly named) interface.
-        // This should probably be removed soon?
+        // Remain here mostly for testing
+        // These should probably be removed soon?
         bool storeLongValue   (
             const std::string &paramPath,
             const std::string &paramName,

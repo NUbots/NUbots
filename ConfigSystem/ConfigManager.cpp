@@ -72,8 +72,8 @@ namespace ConfigSystem
 
         return saved;
     }
-    
-    
+
+
     void ConfigManager::updateConfiguration()
     {
         // Update all ConfigObjects whose configurations have been outdated.
@@ -146,6 +146,51 @@ namespace ConfigSystem
             if(boost::starts_with(paramPath, c->getConfigBasePath()))
                 c->setConfigAsOutdated();
         }
+    }
+
+
+    bool ConfigManager::lockParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            )
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        
+        // The parameter is already locked
+        if(cp.isLocked()) return true;
+        
+        //! Lock the parameter
+        cp.setLocked(true);
+        
+        //! Store the modified parameter back into the tree
+        if(!_currConfigTree->storeParam(paramPath, paramName, cp)) return false;
+
+        return true;
+    }
+
+    bool ConfigManager::unlockParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            )
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        
+        // The parameter is not locked
+        if(!cp.isLocked()) return true;
+        
+        //! Unlock the parameter
+        cp.setLocked(false);
+        
+        //! Store the modified parameter back into the tree
+        if(!_currConfigTree->storeParam(paramPath, paramName, cp)) return false;
+
+        return true;
     }
 
 

@@ -75,13 +75,13 @@ namespace ConfigSystem
 
             ConfigParameter(value_type val_type);
 
-            //! Returns this parameter's name.
-            std::string getName();
-            std::string getName() const;
-            //! Returns the path to this parameter in the ConfigTree 
-            //! (not including the final '.<name>').
-            std::string getPath();
-            std::string getPath() const;
+            // //! Returns this parameter's name.
+            // std::string getName();
+            // std::string getName() const;
+            // //! Returns the path to this parameter in the ConfigTree 
+            // //! (not including the final '.<name>').
+            // std::string getPath();
+            // std::string getPath() const;
             //! Returns a meaningful description of this parameter's purpose.
             std::string getDescription();
             std::string getDescription() const;
@@ -205,12 +205,12 @@ namespace ConfigSystem
             
             
         private:
-            //! This parameter's name.
-            std::string _name;
+            // //! This parameter's name.
+            // std::string _name;
 
-            //! This parameter's path in the config system 
-            //! (not including '.<name>').
-            std::string _path;
+            // //! This parameter's path in the config system 
+            // //! (not including '.<name>').
+            // std::string _path;
 
             //! A description of this parameter.
             std::string _desc;
