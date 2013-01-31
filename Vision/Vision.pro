@@ -126,7 +126,9 @@ HEADERS += \
     VisionTypes/VisionFieldObjects/cornerpoint.h \
     VisionTypes/Interfaces/optimisable.h \
     VisionTypes/Interfaces/renderable.h \
-    VisionTools/transformer.h
+    VisionTools/transformer.h \
+    VisionTypes/Interfaces/ransacmodel.h \
+    VisionTypes/visionline.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -138,12 +140,12 @@ SOURCES += \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
-    GenericAlgorithms/ransac.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp \
     basicvisiontypes.cpp \
     VisionTools/transformer.cpp \
-    VisionTools/classificationcolours.cpp
+    VisionTools/classificationcolours.cpp \
+    GenericAlgorithms/ransac.template
     #Threads/SaveImagesThread.cpp
 
 ##robocup
@@ -165,6 +167,9 @@ HEADERS += \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
     ../Kinematics/Horizon.h \
+    ../Kinematics/Kinematics.h \
+    ../Kinematics/EndEffector.h \
+    ../Kinematics/Link.h \
     ../NUPlatform/NUCamera.h \
     ../Infrastructure/FieldObjects/Object.h \
     ../Infrastructure/FieldObjects/AmbiguousObject.h \
@@ -186,6 +191,9 @@ SOURCES += \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
     ../Kinematics/Horizon.cpp \
+    ../Kinematics/Kinematics.cpp \
+    ../Kinematics/EndEffector.cpp \
+    ../Kinematics/Link.cpp \
     ../NUPlatform/NUCamera.cpp \
     ../Infrastructure/FieldObjects/Object.cpp \
     ../Infrastructure/FieldObjects/AmbiguousObject.cpp \

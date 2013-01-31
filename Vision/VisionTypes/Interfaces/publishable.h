@@ -4,8 +4,8 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
 class Publishable {
-
-protected:
+public:
+    virtual ~Publishable() {}
     /*!
       @brief pushes the object to the external field objects.
       @param fieldobjects a pointer to the global list of field objects.

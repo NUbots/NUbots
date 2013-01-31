@@ -12,6 +12,7 @@
 
 
 #include <math.h>
+#include <iostream>
 
 /** This class represents a 3-vector */
 template <class V = float> class Vector3
@@ -218,8 +219,16 @@ public:
     {
         return Vector3<V>(-x, -y, -z);
     }
-};
 
+    /**
+    * @brief output stream operator result of the form (x,y,z)
+    */
+    friend std::ostream& operator<< (std::ostream& output, const Vector3<V>& v)
+    {
+        output << "(" << v.x << "," << v.y << "," << v.z << ")";
+        return output;
+    }
+};
 /**
 * Streaming operator that reads a Vector3<V> from a stream.
 * @param stream The stream from which is read.

@@ -2,9 +2,8 @@
 #define OPTIMISABLE_H
 
 class Optimisable {
-
-protected:
-
+public:
+    virtual ~Optimisable() {}
     //! @brief Stream output for labelling purposes
     virtual void printLabel(ostream& out) const = 0;
     //! @brief Brief stream output for labelling purposes

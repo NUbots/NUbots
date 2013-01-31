@@ -2,6 +2,7 @@
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
 #include "Vision/GenericAlgorithms/ransac.h"
+#include "Vision/VisionTypes/visionline.h"
 #include "Tools/Math/General.h"
 
 #include <limits>
@@ -27,7 +28,10 @@ vector<Goal> GoalDetectorRANSAC::run()
 
     //finds the edge lines and constructs goals from that
     vector<Point> start_points, end_points;
+    vector<pair<VisionLine, vector<Point> > > ransac_results;
     vector<LSFittedLine> start_lines, end_lines;
+
+
 
     //get edge points
     BOOST_FOREACH(ColourSegment s, h_segments) {
@@ -36,8 +40,15 @@ vector<Goal> GoalDetectorRANSAC::run()
     }
 
     //use generic ransac implementation to find lines
-    start_lines = RANSAC::findMultipleLines(start_points, m_e, m_n, m_k, m_max_iterations);
-    end_lines = RANSAC::findMultipleLines(end_points, m_e, m_n, m_k, m_max_iterations);
+    ransac_results = RANSAC::findMultipleModels<VisionLine, Point>(start_points, m_e, m_n, m_k, m_max_iterations);
+    for(unsigned int i=0; i<ransac_results.size(); i++) {
+        start_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    }
+
+    ransac_results = RANSAC::findMultipleModels<VisionLine, Point>(end_points, m_e, m_n, m_k, m_max_iterations);
+    for(unsigned int i=0; i<ransac_results.size(); i++) {
+        end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    }
 
     DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_START, start_lines);
     DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_END, end_lines);

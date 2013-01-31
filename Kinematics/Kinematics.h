@@ -106,19 +106,18 @@ public:
     */
     static Matrix CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2Camera);
 
-//removed due to incorrect results
-//    /*!
-//    * @brief Calculates the position of an object in sperical coordinates centred at the robot origin, given the position in an image.
-//    *
-//    * The distance to point calculation takes a position in the camera image and projects this point until it intercepts the ground plane.
-//    * The sperical position in terms of distance, heading and elevation are calculated for this intercept point.
-//    *
-//    * @param Camera2GroundTransform The transform matrix from the camera space to the ground space.
-//    * @param angleFromCameraCentreX The angle of the point from the centre of the image along the images horizontal x-axis.
-//    * @param angleFromCameraCentreY The angle of the point from the centre of the image along the images vertical y-axis.
-//    * @return A vector containing the three elements, distance, heading and elevation to the point.
-//    */
-//    static Vector3<float> DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY);
+    /*!
+    * @brief Calculates the position of an object in sperical coordinates centred at the robot origin, given the position in an image.
+    *
+    * The distance to point calculation takes a position in the camera image and projects this point until it intercepts the ground plane.
+    * The sperical position in terms of distance, heading and elevation are calculated for this intercept point.
+    *
+    * @param Camera2GroundTransform The transform matrix from the camera space to the ground space.
+    * @param angleFromCameraCentreX The angle of the point from the centre of the image along the images horizontal x-axis.
+    * @param angleFromCameraCentreY The angle of the point from the centre of the image along the images vertical y-axis.
+    * @return A vector containing the three elements, distance, heading and elevation to the point.
+    */
+    static Vector3<float> DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY);
 
     /*!
     * @brief Converts a position from the camera space to the origin space. The position is described in spherical coordinates.

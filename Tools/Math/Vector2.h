@@ -12,7 +12,7 @@
 #define __Vector2_h__
 
 #include <math.h>
-#include <fstream>
+#include <iostream>
 
 /** This class represents a 2-vector */
 template <class V = float> class Vector2{

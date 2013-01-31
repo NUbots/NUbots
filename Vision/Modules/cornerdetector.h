@@ -10,6 +10,8 @@ public:
 
     vector<CornerPoint> run() const;
 
+private:
+    CornerPoint::TYPE findCorner(Vector2<Point> ep1, Vector2<Point> ep2, Point intersection, double tolerance) const;
 };
 
 #endif // CORNERDETECTOR_H

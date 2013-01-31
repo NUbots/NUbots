@@ -4,7 +4,8 @@
 #include <opencv2/core/core.hpp>
 
 class Renderable {
-
+public:
+    virtual ~Renderable() {}
     virtual void render(cv::Mat& mat) const = 0;
 };
 

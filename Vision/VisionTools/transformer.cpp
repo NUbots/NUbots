@@ -2,9 +2,28 @@
 #include <boost/foreach.hpp>
 #include "visionconstants.h"
 #include "Tools/Math/General.h"
+#include "Kinematics/Kinematics.h"
 
 Transformer::Transformer()
 {
+    FOV = Vector2<double>(0,0);
+    effective_camera_dist_pixels = 0;
+
+    m_ctg_vector = vector<float>(3,0);
+    m_ctg_valid = false;
+//    ctvector = vector<float>(3,0);
+//    ctvalid = false;
+
+    image_size = Point(0,0);
+    image_centre = Point(0,0);
+    tan_half_FOV = Vector2<double>(0,0);
+    screen_to_radial_factor = Vector2<double>(0,0);
+    camera_pitch = 0;
+    camera_pitch_valid = false;
+    camera_height = 0;
+    camera_height_valid = false;
+    body_pitch = 0;
+    body_pitch_valid = false;
 }
 
 /**
@@ -101,7 +120,7 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
     if(cos_theta == 0)
         distance = 0;
     else
-        distance = camera_height * cos(bearing) / cos(theta);
+        distance = camera_height * cos(bearing) / cos_theta;
 
 #if VISION_BLACKBOARD_VERBOSITY > 1
     debug << "\ttheta: " << theta << " distance: " << distance << " valid: " << valid << endl;
@@ -148,21 +167,42 @@ bool Transformer::isScreenToGroundValid() const {
 
 Point Transformer::screenToGroundCartesian(Point pt) const
 {
-    Vector2<double> angles = screenToRadial2D(pt);
-    double r = distanceToPoint(angles.x, angles.y);
+    Vector2<double> cam_angles = screenToRadial2D(pt);
 
-    double bearingcos = cos(sphericalCoordinates[1]);
-    double bearingsin = sin(sphericalCoordinates[1]);
-    double elevationcos = cos(sphericalCoordinates[2]);
-    double elevationsin = sin(sphericalCoordinates[2]);
+    double r = distanceToPoint(cam_angles.x, cam_angles.y);
 
-    std::vector<float> result(3,0.0f);
-    result[0] = distance * bearingcos * elevationcos;
-    result[1] = distance * bearingsin * elevationcos;
-    result[2] = distance * elevationsin;
-    return result;
+    Matrix ctgtransform = Matrix4x4fromVector(m_ctg_vector);
 
-    return Point(r*cos(angles.x), r*cos(angles.y));
+    Vector3<float> spherical = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
+
+    Vector3<float> t = Kinematics::TransformPosition(ctgtransform,spherical);
+
+//    return Point(t.x*cos(t.y)*sin(t.z),
+//                 t.x*sin(t.y)*cos(t.z));
+
+//    double r;
+
+    double theta = mathGeneral::PI*0.5 - camera_pitch + cam_angles.y + VisionConstants::D2P_ANGLE_CORRECTION;
+
+    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
+        theta -= body_pitch;
+
+//    //double bearingcos = cos(sphericalCoordinates[1]);
+//    //double bearingsin = sin(sphericalCoordinates[1]);
+//    //double elevationcos = cos(sphericalCoordinates[2]);
+//    //double elevationsin = sin(sphericalCoordinates[2]);
+
+////    std::vector<float> result(3,0.0f);
+////    result[0] = distance * bearingcos * elevationcos;
+////    result[1] = distance * bearingsin * elevationcos;
+////    result[2] = distance * elevationsin;
+//    //return result;
+
+//    return Point(r*cos(cam_angles.x)*sin(theta),
+//                 r*cos(theta)*sin(cam_angles.x));
+    return Point(r*cos(cam_angles.x)*cos(theta),
+                 r*sin(cam_angles.x)*cos(theta));
+
 }
 
 vector<Point> Transformer::screenToGroundCartesian(const vector<Point>& pts) const

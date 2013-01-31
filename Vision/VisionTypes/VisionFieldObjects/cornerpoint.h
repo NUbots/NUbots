@@ -9,7 +9,8 @@ public:
     enum TYPE {
         L,
         T,
-        CROSS
+        CROSS,
+        INVALID
     };
 
 public:

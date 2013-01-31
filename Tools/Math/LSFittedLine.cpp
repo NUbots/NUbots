@@ -9,6 +9,12 @@ LSFittedLine::LSFittedLine(){
 	clearPoints();
 }
 
+
+LSFittedLine::LSFittedLine(vector<Point> &pointlist) {
+    clearPoints();
+    addPoints(pointlist);
+}
+
 LSFittedLine::~LSFittedLine(){
     points.clear();
 }

@@ -20,6 +20,7 @@ class LSFittedLine : public Line
 {
   public:
     LSFittedLine();
+    LSFittedLine(vector<Point>& pointlist);
     ~LSFittedLine();
     bool valid;
     
