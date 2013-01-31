@@ -94,7 +94,7 @@ namespace ConfigSystem
         {
             if(c == NULL) continue;
             c->loadConfig();
-            c->_configModified = false;
+            c->setConfigAsRecent();
         }
     }
 
@@ -113,10 +113,10 @@ namespace ConfigSystem
             // if(boost::starts_with(paramPath, c->_configBasePath))
             //     c->updateConfig(paramPath, paramName);
 
-            if(c->_configModified)
+            if(c->isConfigOutdated())
             {
                 c->updateConfig();
-                c->_configModified = false;
+                c->setConfigAsRecent();
             }
         }
     }
@@ -131,11 +131,11 @@ namespace ConfigSystem
             if(c == NULL) continue;
 
             //! skip string comparison if already marked
-            if(c->_configModified) continue;
+            if(c->isConfigOutdated()) continue;
 
             //! Check whether the given path is on c's base path
-            if(boost::starts_with(paramPath, c->_configBasePath))
-                c->_configModified = true;
+            if(boost::starts_with(paramPath, c->getConfigBasePath()))
+                c->setConfigAsOutdated();
         }
     }
 

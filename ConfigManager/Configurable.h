@@ -36,7 +36,7 @@ public:
     
     // Initialise member variables upon construction.
     Configurable() : _configBasePath(""), _configModified(false) {}
-    
+
     /*! @brief Configures all of this class's parameters.
      *
      *  Retrieves relevant data from the Configuration System,
@@ -67,14 +67,38 @@ public:
     //     const std::string& paramName
     //     ) = 0;
 
+    //! Sets this Configurable's base path.
+    void setConfigBasePath(std::string configBasePath);
+    //! Returns this Configurable's base path.
+    std::string getConfigBasePath();
 
-// protected:
+    /*!
+     * @brief Returns whether this Configurable's configuration has changed in
+     *        the config system since this instance was last updated.
+     *        (i.e. checks the _configModified flag)
+     */
+    bool isConfigOutdated();
+
+    /*!
+     * @brief Indicates to this Configurable that its config is recent and does
+     *        not need to be updated.
+     *        (i.e. sets the _configModified flag to false)
+     */
+    void setConfigAsRecent();
+
+    /*!
+     * @brief Indicates to this Configurable that its config is outdated and
+     *        needs to be updated.
+     *        (i.e. sets the _configModified flag to true)
+     */
+    void setConfigAsOutdated();
+
+protected:
 
     //! The base path of this configurable object.
     //! Changes made on this path within the config system will cause this object's
     //! updateConfig method to be called.
     std::string _configBasePath;
-    #warning Configurable::_configBasePath and Configurable::_configModified are never initialised!!
 
     //! Indicates whether this Configurable's configuration has been modified
     //! in the config system since last being loaded.

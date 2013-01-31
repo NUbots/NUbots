@@ -118,26 +118,39 @@ int main(void)
     std::vector<std::vector<std::vector<long> > >   store_3dv_l, read_3dv_l;
     ConfigRange<double>                             store_r_d  , read_r_d  ;
     ConfigRange<long>                               store_r_l  , read_r_l  ;
-    
+
     // Tests:
     // MODULE:
     std::vector<Configurable*> cfObjs;
 
-    Module m;
+    // Create config objects
+    Module m1;
+    Module m2;
 
-    cfObjs.push_back(&m);
+    // Set Config Objects
+    cfObjs.push_back(&m1);
+    cfObjs.push_back(&m2);
     config->setConfigObjects(cfObjs);
 
-    m.doubleParam1 = -1;
-    std::cout << "Module.doubleParam1 = " << m.doubleParam1 << std::endl; 
+
+    m1.doubleParam1 = -1;
+    m2.doubleParam1 = -2;
+    m1.setConfigBasePath("Testing.MM");
+    m2.setConfigBasePath("dfhfgh");
+
+    std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
+    std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     store_d = 5;
-    std::cout << "Module.doubleParam1 = " << m.doubleParam1 << std::endl; 
+    std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
+    std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     std::cout << "config->storeDoubleValue(...)" << std::endl; 
     result = config->storeDoubleValue("Testing.MM", "param_double", store_d);
-    std::cout << "Module.doubleParam1 = " << m.doubleParam1 << std::endl; 
+    std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
+    std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     std::cout << "config->updateConfiguration(...)" << std::endl; 
     config->updateConfiguration();
-    std::cout << "Module.doubleParam1 = " << m.doubleParam1 << std::endl; 
+    std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
+    std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
 
 
     // DOUBLE:
@@ -268,8 +281,11 @@ int main(void)
     {
         if(i < read_1dv_d.size())
         {
-            std::cout <<"    "<< (float)store_1dv_d[i] << " | " << (float)read_1dv_d[i] << std::endl;
-            result &= (((float)store_1dv_d[i]) == ((float)read_1dv_d[i])); // ignore rounding errors by comparig as floats
+            bool cmp = (((float)store_1dv_d[i]) == ((float)read_1dv_d[i])); // ignore rounding errors by comparig as floats
+            result &= cmp;
+            std::cout << "    " << (float)store_1dv_d[i] 
+                      << " | "  << (float)read_1dv_d [i]
+                      << (!cmp? " *" : "" ) << std::endl;
         }
         else result = false;
     }
@@ -326,10 +342,11 @@ int main(void)
         {
             if(!(j < read_2dv_d[i].size())) { result = false; break; }
 
+            bool cmp = (((float)store_2dv_d[i][j]) == ((float)read_2dv_d[i][j])); // ignore rounding errors by comparig as floats
+            result &= cmp;
             std::cout << "      " << (float)store_2dv_d[i][j] 
-                      << " | "    << (float)read_2dv_d [i][j] 
-                      << std::endl;
-            result &= (((float)store_2dv_d[i][j]) == ((float)read_2dv_d[i][j])); // ignore rounding errors by comparig as floats
+                      << " | "    << (float) read_2dv_d[i][j]
+                      << (!cmp? " *" : "" ) << std::endl;
         }
     }
     printTestResult("storeDoubleVectorValue2D", result);
@@ -398,10 +415,11 @@ int main(void)
             {
                 if(!(k < read_3dv_d[i][j].size())) { result = false; break; }
 
+                bool cmp = (((float)store_3dv_d[i][j][k]) == ((float)read_3dv_d[i][j][k])); // ignore rounding errors by comparig as floats
+                result &= cmp;
                 std::cout << "        " << (float)store_3dv_d[i][j][k] 
-                          << " | "      << (float)read_3dv_d [i][j][k] 
-                          << std::endl;
-                result &= (((float)store_3dv_d[i][j][k]) == ((float)read_3dv_d[i][j][k])); // ignore rounding errors by comparig as floats
+                          << " | "      << (float) read_3dv_d[i][j][k]
+                          << (!cmp? " *" : "" ) << std::endl;
             }
         }
     }
