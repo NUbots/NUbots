@@ -50,10 +50,10 @@ namespace ConfigSystem
         else
         {
             // Send the new configuration to the configObjects
-            #warning Should occur within updateConfiguration()
+            // #warning Should occur within updateConfiguration()
             reconfigureConfigObjects();
         }
-
+        
         return loaded;
     }
     
@@ -87,7 +87,7 @@ namespace ConfigSystem
         reconfigureConfigObjects();
         return true;
     }
-
+    
     void ConfigManager::reconfigureConfigObjects()
     {
         BOOST_FOREACH(Configurable* c, _configObjects)

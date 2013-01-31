@@ -216,17 +216,17 @@ int main(void)
     endTimedTest();
 
     result &= (store_r_d.getMin()            == read_r_d.getMin() &&
-              store_r_d.getMax()            == read_r_d.getMax() &&
-              store_r_d.getUpperBoundType() == read_r_d.getUpperBoundType() &&
-              store_r_d.getLowerBoundType() == read_r_d.getLowerBoundType() &&
-              store_r_d.getAutoClip()       == read_r_d.getAutoClip() &&
-              store_r_d.getOutside()        == read_r_d.getOutside()
-              );
+               store_r_d.getMax()            == read_r_d.getMax() &&
+               store_r_d.getUpperBoundType() == read_r_d.getUpperBoundType() &&
+               store_r_d.getLowerBoundType() == read_r_d.getLowerBoundType() &&
+               store_r_d.getAutoClip()       == read_r_d.getAutoClip() &&
+               store_r_d.getOutside()        == read_r_d.getOutside()
+               );
     printTestResult("storeDoubleRange", result);
     printTestResult("readDoubleRange" , result);
     std::cout << std::endl;
-
-
+    
+    
     // Attempt to store a range<double> as a range<long>:
     // pass: If not stored (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).

@@ -1,0 +1,146 @@
+{
+    "Testing":
+    {
+        "MM":
+        {
+            "param_double":
+            {
+                "desc": "param_double description",
+                "modified": "true",
+                "locked": "false",
+                "type": "double",
+                "value": "0.8305675794836134",
+                "range":
+                {
+                    "min": "5",
+                    "max": "10",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "true"
+                }
+            },
+            "param_long":
+            {
+                "desc": "param_long description",
+                "modified": "false",
+                "locked": "false",
+                "type": "long",
+                "value": "1",
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_vector1d_double":
+            {
+                "desc": "Test parameter for 1d double vectors.",
+                "modified": "true",
+                "locked": "false",
+                "type": "1d_vector_double",
+                "value":
+                [
+                    "0.6498039152938873",
+                    "0.5019492385908961",
+                    "0.4521128467749804",
+                    "0.6415416954550892",
+                    "0.2279748767614365",
+                    "0.5960332644172013",
+                    "0.3970565472263843",
+                    "0.4642382268793881",
+                    "0.08497136714868248"
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_vector2d_double":
+            {
+                "desc": "Test parameter for 1d double vectors.",
+                "modified": "true",
+                "locked": "false",
+                "type": "2d_vector_double",
+                "value":
+                [
+                    [
+                        "0.3323706130031496",
+                        "0.2394193958025426"
+                    ],
+                    [
+                        "0.4312126573640853",
+                        "0.7517361738719046",
+                        "0.9071744659449905",
+                        "0.5633730948902667"
+                    ],
+                    [
+                        "0.04050029581412673",
+                        "0.598401689901948"
+                    ]
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "0",
+                    "lBound": "none",
+                    "uBound": "none",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_vector3d_double":
+            {
+                "desc": "Test parameter for 1d double vectors.",
+                "modified": "true",
+                "locked": "false",
+                "type": "3d_vector_double",
+                "value":
+                [
+                    [
+                        [
+                            "0.2087348860222846",
+                            "0.9757315639872104",
+                            "0.535637195687741",
+                            "0.07827339041978121"
+                        ],
+                        ""
+                    ],
+                    [
+                        [
+                            "0.3870241402182728"
+                        ]
+                    ],
+                    [
+                        [
+                            "0.6677066835109144",
+                            "0.5256325975060463"
+                        ],
+                        ""
+                    ],
+                    [
+                        ""
+                    ]
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "0",
+                    "lBound": "none",
+                    "uBound": "none",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            }
+        }
+    }
+}
