@@ -47,7 +47,7 @@ namespace ConfigSystem
          *         specified.
          *  @param configName The name of the initial configuration to load.  
          */
-        ConfigManager(std::string configName);
+        ConfigManager(std::string configName = "defaultConfig");
         
 
         /*!    

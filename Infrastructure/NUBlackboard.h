@@ -34,6 +34,9 @@
 #ifndef NUBLACKBOARD_H
 #define NUBLACKBOARD_H
 
+#include "ConfigSystem/ConfigManager.h"
+using ConfigSystem::ConfigManager;
+
 class NUSensorsData;
 class NUActionatorsData;
 class NUImage;
@@ -42,6 +45,7 @@ class JobList;
 class GameInformation;
 class TeamInformation;
 class NUPlatform;
+// class ConfigManager;
 
 class NUBlackboard
 {
@@ -56,6 +60,7 @@ public:
     void add(JobList* joblist);
     void add(GameInformation* gameinfo);
     void add(TeamInformation* teaminfo);
+    void add(ConfigManager* config);
     
 public:
     NUSensorsData* Sensors;
@@ -65,6 +70,7 @@ public:
     JobList* Jobs;
     GameInformation* GameInfo;
     TeamInformation* TeamInfo;
+    ConfigManager* Config;
     bool lookForBall;
     bool lookForLandmarks;
 };
