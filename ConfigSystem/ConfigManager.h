@@ -1,5 +1,5 @@
 /*! @file ConfigManager.h
-    @brief Defines the main ConfigManager class and the exceptions it throws.
+    @brief Defines the main ConfigManager class.
     
     @class ConfigManager
     @brief The interface between the configuration system and the other modules.

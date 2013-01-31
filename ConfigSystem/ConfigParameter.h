@@ -233,44 +233,43 @@ namespace ConfigSystem
             //   - vector<double>/double[]
             
             // Note: this really does't need to (i.e. shouldn't) be a struct...
-            struct ParameterValue
-            {
+            // struct ParameterValue
+            // {
                 /// The type of this parameter's value
-                value_type val_type;
+                value_type _val_type;
                 
                 /// union containing a pointer to the parameter's value
-                // NOTE: A union is used instead of a void* so that the
-                //       individual variables can have meaningful names
+                // NOTE: A union is used instead of a void* to allow the
+                //       individual variables to have meaningful names
                 //       (avoiding casts everywhere) and so that the 'union'
                 //       keyword (and braces) can simply be commented out 
-                //       to convert the union into a simple set of variable
-                //       declarations
+                //       to convert the union into a simple set of variables
                 //       (which is a valid, safe implementation that has the 
                 //       drawback of using a fair bit more memory.
                 //       It could be useful for debugging).
                 union 
                 {
-                    bool                              *val_bool           ;
-                    long                              *val_long           ;
-                    double                            *val_double         ;
-                    std::string                       *val_string         ;
+                    bool                              *_val_bool           ;
+                    long                              *_val_long           ;
+                    double                            *_val_double         ;
+                    std::string                       *_val_string         ;
                     
-                    std::vector<long>                 *val_1dvector_long  ;
-                    std::vector<std::vector<long> >   *val_2dvector_long  ;
-                    std::vector<std::vector<std::vector<long> > >   *val_3dvector_long  ;
-                    std::vector<double>               *val_1dvector_double;
-                    std::vector<std::vector<double> > *val_2dvector_double;
-                    std::vector<std::vector<std::vector<double> > > *val_3dvector_double;
+                    std::vector<long>                 *_val_1dvector_long  ;
+                    std::vector<std::vector<long> >   *_val_2dvector_long  ;
+                    std::vector<std::vector<std::vector<long> > >   *_val_3dvector_long  ;
+                    std::vector<double>               *_val_1dvector_double;
+                    std::vector<std::vector<double> > *_val_2dvector_double;
+                    std::vector<std::vector<std::vector<double> > > *_val_3dvector_double;
                 };
                 
                 /// union containing a pointer to the parameter's range
                 // See the note on the union above.
                 union 
                 {
-                    ConfigRange<long>   *range_long  ;
-                    ConfigRange<double> *range_double;
+                    ConfigRange<long>   *_range_long  ;
+                    ConfigRange<double> *_range_double;
                 };
-            } param_value;
+            // } param_value;
     };
 }
 
