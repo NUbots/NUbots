@@ -124,6 +124,10 @@ void SeeThinkThread::run()
                 wait();
             #endif
             
+            // ---- Update the configuration system ----
+            Blackboard->Config->updateConfiguration();
+            // -----------------------------------------
+
             #ifdef THREAD_SEETHINK_PROFILE
                 prof.start();
             #endif

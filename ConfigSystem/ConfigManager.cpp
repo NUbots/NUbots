@@ -72,8 +72,8 @@ namespace ConfigSystem
 
         return saved;
     }
-
-
+    
+    
     void ConfigManager::updateConfiguration()
     {
         // Update all ConfigObjects whose configurations have been outdated.
