@@ -87,6 +87,15 @@ namespace ConfigSystem
         reconfigureConfigObjects();
         return true;
     }
+
+    bool ConfigManager::addConfigObject(Configurable* configObject)
+    {
+        if(configObject == NULL) return false;
+        _configObjects.push_back(configObject);
+        configObject->loadConfig();
+        configObject->setConfigAsRecent();
+        return true;
+    }
     
     void ConfigManager::reconfigureConfigObjects()
     {

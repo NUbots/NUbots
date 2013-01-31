@@ -4,6 +4,18 @@
     @class ConfigManager
     @brief The interface between the configuration system and the other modules.
     
+    A single ConfigManager instance resides on the NUBlackboard.
+    It is through this instance that any other system component is intended to
+    access/modify its configuration.
+    Any object can access the config system, but if an object is to be notified
+    of changes made to parameters in the config system that could affect its
+    configuration, it should inherit from 'ConfigSystem::Configurable', and use
+    'ConfigManager::addConfigObject(Configurable*)' to add itself to the list
+    of objects that the ConfigManager 'manages'.
+    The ConfigManager updates the objects it manages on every iteration of the
+    see-think thread (updating only those that need updating).
+    
+
     @author Mitchell Metcalfe, Sophie Calland
     
   Copyright (c) 2012 Mitchell Metcalfe
@@ -88,6 +100,15 @@ namespace ConfigSystem
          *  @return Returns whether or not the operation succeeded.
          */
         bool setConfigObjects(std::vector<Configurable*> configObjects);
+
+        /*! @brief  Adds the given configurable object to the set of objects
+         *          that the ConfigManager will auto-update, and calls its 
+         *          'Configurable::loadConfig()' method.
+         *  @param  configObject The object to add.
+         *  @return Returns whether or not the operation succeeded.
+         *          (returns false if configObject is NULL)
+         */
+        bool addConfigObject(Configurable* configObject);
         
 
         /*! @brief Reads a value stored at the given path in the current 
