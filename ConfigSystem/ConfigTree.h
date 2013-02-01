@@ -8,6 +8,22 @@
             saves and loads ConfigTrees from disk. The ConfigManager's 
             interface to the configuration system simply wraps access to a 
             ConfigTree containing the current configuration.
+
+
+    Currently, boost::property_tree's defaulf 'ptree' is used to store the
+    config data.
+    Ideally, a basic_ptree with ConfigParameters as its value_type would
+    be used instead:
+    'boost::property_tree::basic_ptree<std::string, ConfigParameter, std::less<std::string> >'
+    Which would allow all conversion of values to be poerformed on loading the 
+    tree from disk (instead of converting from/to string with every 
+    access/modify).
+    Note: It's likely that property tree will eventually have to be replaced
+          with something faster.  It looks like ptree's slow string lookups
+          using std::vectors<std::string> + std::less<std::string> will be the 
+          bottleneck, and replacing it with a faster implementation 
+          (using maps + hashing) will be necessary if the config system is to 
+          be accessed/updated often.
     
     @author Sophie Calland, Mitchell Metcalfe
 
@@ -73,14 +89,23 @@ namespace ConfigSystem
          */
         bool ptreeFromParam(ConfigParameter fromParam, ptree &toPtree);
         
+        /*!
+         *  @brief  Converts a 'conceptual' path into the config 
+         *          tree into an actual path that refers to the intended data.
+         *  @param paramPath    A path into the config tree.
+         *  @return A string containing the full path.
+         */
+        std::string makeFullPath(
+            const std::string paramPath
+            );
         /*! 
          *  @brief  Converts a 'conceptual' path and name into the config 
-        *          tree into a full path that refers to the intended data.
+         *          tree into an actual path that refers to the intended data.
          *  @param paramPath    The path to the variable.
          *  @param paramName    The variable's name
          *  @return A string containing the full path.
          */
-        std::string makeFullPath(
+        std::string makeFullParamPath(
             const std::string paramPath,
             const std::string paramName
             );
@@ -432,7 +457,16 @@ namespace ConfigSystem
             const std::string paramName, 
             ConfigParameter data
             );
-            
+        
+        /*! @brief Deletes the named parameter stored at the given path.
+         *  @param paramPath Path to the parameter to delete.
+         *  @param paramName Name of the parameter to delete.
+         *  @return Whether the operation was successful.
+         */
+        bool deleteParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            );
             
         /*! 
          *  @brief  Gets a 1 dimensional vector from the ConfigTree

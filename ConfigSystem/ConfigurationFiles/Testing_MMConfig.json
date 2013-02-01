@@ -109,6 +109,79 @@
                     "outside": "false",
                     "autoClip": "false"
                 }
+            },
+            "param_vector1d_long":
+            {
+                "desc": "Test parameter for 1d long vectors.",
+                "modified": "false",
+                "locked": "false",
+                "type": "1d_vector_long",
+                "value":
+                [
+                    "200",
+                    "150",
+                    "46",
+                    "250"
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_vector2d_long":
+            {
+                "desc": "Test parameter for 1d long vectors.",
+                "modified": "false",
+                "locked": "false",
+                "type": "2d_vector_long",
+                "value":
+                [
+                    ["200"],
+                    ["150"],
+                    ["46"],
+                    ["250"]
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_vector3d_long":
+            {
+                "desc": "Test parameter for 1d long vectors.",
+                "modified": "false",
+                "locked": "false",
+                "type": "3d_vector_long",
+                "value":
+                [
+                    [
+                        ["0"],
+                        ["0"]
+                    ],
+                    [
+                        ["0"],
+                        ["0"]
+                    ]
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
             }
         }
     }

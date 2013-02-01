@@ -149,6 +149,95 @@ namespace ConfigSystem
     }
 
 
+    template<typename T>
+    bool ConfigManager::createParam(
+        const std::string &paramPath,
+        const std::string &paramName,
+        T initialValue
+        )
+    {
+        CONFIGSYS_DEBUG_CALLS;
+
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        if(_currConfigTree->getParam(paramPath, paramName, cp))
+        {
+            std::cout << "ConfigManager::createParam(...): "
+                      << paramPath << "." << paramName << " already exists."
+                      << std::endl;
+            return false;
+        }
+
+        //! Create the new ConfigParameter
+        cp = ConfigParameter(initialValue);
+        
+        //! Store the new parameter back into
+        if(!_currConfigTree->storeParam(paramPath, paramName, cp)) return false;
+        
+        //! Request update of configObjects that depend on this parameter
+        //! (these actually might exist)
+        markConfigObjects(paramPath, paramName);
+
+        return true;
+    }
+    // Define allowed template parameters (using explicit template instantiations).
+    template bool ConfigManager::createParam<long> (
+        const std::string &paramPath, const std::string &paramName,
+        long initialValue
+        );
+    template bool ConfigManager::createParam<double> (
+        const std::string &paramPath, const std::string &paramName,
+        double initialValue
+        );
+    template bool ConfigManager::createParam<std::string> (
+        const std::string &paramPath, const std::string &paramName,
+        std::string initialValue
+        );
+    template bool ConfigManager::createParam<std::vector<long> > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<long> initialValue
+        );
+    template bool ConfigManager::createParam<std::vector<std::vector<long> > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<long> > initialValue
+        );
+    template bool ConfigManager::createParam<std::vector<std::vector<std::vector<long> > > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<std::vector<long> > > initialValue
+        );
+    template bool ConfigManager::createParam<std::vector<double> > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<double>  initialValue
+        );
+    template bool ConfigManager::createParam<std::vector<std::vector<double> > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<double> >  initialValue
+        );
+    template bool ConfigManager::createParam<std::vector<std::vector<std::vector<double> > > > (
+        const std::string &paramPath, const std::string &paramName,
+        std::vector<std::vector<std::vector<double> > > initialValue
+        );
+
+
+
+    bool ConfigManager::deleteParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            )
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        else if(cp.isLocked()) return false;
+
+        if(!_currConfigTree->deleteParam(paramPath, paramName)) return false;
+
+        return true;
+    }
+
+
+
     bool ConfigManager::lockParam(
             const std::string &paramPath,
             const std::string &paramName

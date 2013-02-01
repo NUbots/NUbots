@@ -50,9 +50,14 @@ namespace ConfigSystem
     }
 
 
-    std::string ConfigTree::makeFullPath(const std::string paramPath, const std::string paramName)
+    std::string ConfigTree::makeFullParamPath(const std::string paramPath, const std::string paramName)
     {
         return paramPath + "." + paramName;
+    }
+    
+    std::string ConfigTree::makeFullPath(const std::string paramPath)
+    {
+        return paramPath;
     }
 
     bool ConfigTree::getParam (
@@ -69,8 +74,8 @@ namespace ConfigSystem
         bool success = false;
 
         // Create the full path to the desired parameter
-        std::string fullPath = makeFullPath(paramPath, paramName);
-
+        std::string fullPath = makeFullParamPath(paramPath, paramName);
+        
         try
         {
             // Get the subtree representing the desired parameter.
@@ -102,7 +107,7 @@ namespace ConfigSystem
         bool success = false;
 
         // Create the full path to the desired parameter
-        std::string fullPath = makeFullPath(paramPath, paramName);
+        std::string fullPath = makeFullParamPath(paramPath, paramName);
 
         try
         {
@@ -131,6 +136,46 @@ namespace ConfigSystem
 
         return success;
     }
+
+
+    bool ConfigTree::deleteParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            )
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        
+        std::string fullPath = makeFullPath(paramPath);
+
+        try
+        {
+            // get the parent node
+            ptree paramParent = _treeRoot.get_child(fullPath);
+
+            // delete the parameter
+            int del_n = paramParent.erase(paramName);
+            if(del_n == 0)
+            {
+                std::cout   << "ConfigTree::deleteParam(...): Nothing to erase."
+                            << std::endl;
+                return false; // return failure if nothing was erased
+            }
+            
+            // put back the modified parent node
+            _treeRoot.put_child(fullPath, paramParent);
+
+        }
+        catch (boost::property_tree::ptree_error e)
+        {
+            std::cout   << "ConfigTree::deleteParam(...): ACCESS ERROR:" 
+                        << e.what() 
+                        << std::endl;
+            return false;
+        }
+
+        return true;
+    }
+
 
     bool ConfigTree::paramFromPtree(ptree fromPtree, ConfigParameter &toParam)
     {

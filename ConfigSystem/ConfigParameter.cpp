@@ -81,7 +81,96 @@ namespace ConfigSystem
         else return bt_unknown;
     }
 
-
+    ConfigParameter::ConfigParameter(bool                                            value)
+    {
+        _val_type = vt_bool;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_bool = new bool(value);
+        _range_long = new ConfigRange<long>();
+    }
+    ConfigParameter::ConfigParameter(long                                            value)
+    {
+        _val_type = vt_long;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_long = new long(value);
+        _range_long = new ConfigRange<long>();
+    }
+    ConfigParameter::ConfigParameter(double                                          value)
+    {
+        _val_type = vt_double;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_double = new double(value);
+        _range_double = new ConfigRange<double>();
+    }
+    ConfigParameter::ConfigParameter(std::string                                     value)
+    {
+        _val_type = vt_string;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_string = new std::string(value);
+        _range_long = NULL;
+    }
+    ConfigParameter::ConfigParameter(std::vector<long>                               value)
+    {
+        _val_type = vt_1dvector_long;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_1dvector_long = new std::vector<long>(value);
+        _range_long = new ConfigRange<long>();
+    }
+    ConfigParameter::ConfigParameter(std::vector<std::vector<long> >                 value)
+    {
+        _val_type = vt_2dvector_long;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_2dvector_long = new std::vector<std::vector<long> >(value);
+        _range_long = new ConfigRange<long>();
+    }
+    ConfigParameter::ConfigParameter(std::vector<std::vector<std::vector<long> > >   value)
+    {
+        _val_type = vt_3dvector_long;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_3dvector_long = new std::vector<std::vector<std::vector<long> > >(value);
+        _range_long = NULL;
+    }
+    ConfigParameter::ConfigParameter(std::vector<double>                             value)
+    {
+        _val_type = vt_1dvector_double;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_1dvector_double = new std::vector<double>(value);
+        _range_double = new ConfigRange<double>();
+    }
+    ConfigParameter::ConfigParameter(std::vector<std::vector<double> >               value)
+    {
+        _val_type = vt_2dvector_double;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_2dvector_double = new std::vector<std::vector<double> >(value);
+        _range_double = new ConfigRange<double>();
+    }
+    ConfigParameter::ConfigParameter(std::vector<std::vector<std::vector<double> > > value)
+    {
+        _val_type = vt_3dvector_double;
+        _desc = "";
+        _modified = false;
+        _locked   = false;
+        _val_3dvector_double = new std::vector<std::vector<std::vector<double> > >(value);
+        _range_double = new ConfigRange<double>();
+    }
 
     ConfigParameter::ConfigParameter(value_type val_type)
     {

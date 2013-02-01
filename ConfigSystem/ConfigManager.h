@@ -15,7 +15,10 @@
     The ConfigManager updates the objects it manages on every iteration of the
     see-think thread (updating only those that need updating).
     
-
+    Note: Creating more that one ConfigManager will cause errors in the
+          config system's persistant store (i.e. not all changes
+          config parameters will be saved).
+    
     @author Mitchell Metcalfe, Sophie Calland
     
   Copyright (c) 2012 Mitchell Metcalfe
@@ -87,8 +90,8 @@ namespace ConfigSystem
          *         configObjects that depend on those parameters by calling
          *         their 'Configurable::updateConfig(...)' methods.
          * 
-         *         This method should be called once on each iteration of the
-         *         main loop See-Think thread.
+         *         This method is called once in every iteration of the main 
+         *         loop in the run() method of the See-Think thread.
          */
         void updateConfiguration();
         
@@ -110,8 +113,35 @@ namespace ConfigSystem
          */
         bool addConfigObject(Configurable* configObject);
         
-
+        
+        
+        /*! @brief Creates a new parameter with the given name, stored at the 
+         *         given path, and having the given initial value.
+         *         (An attempt to 'create' an existing parameter will fail)
+         *  @param paramPath Path to the parameter to create.
+         *  @param paramName Name of the parameter to create.
+         *  @return Whether the operation was successful.
+         */
+        template<typename T>
+        bool createParam(
+            const std::string &paramPath,
+            const std::string &paramName,
+            T initialValue
+            );
+        
+        /*! @brief Deletes the named parameter stored at the given path.
+         *         (An attempt to delete a locked parameter will fail)
+         *  @param paramPath Path to the parameter to delete.
+         *  @param paramName Name of the parameter to delete.
+         *  @return Whether the operation was successful.
+         */
+        bool deleteParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            );
+        
         /*! @brief Locks the named parameter stored at the given path.
+         *         Attempts to modify or delete locked parameters will fail.
          *  @param paramPath Path to the parameter to lock.
          *  @param paramName Name of the parameter to lock.
          *  @return Whether the operation was successful.
@@ -122,6 +152,7 @@ namespace ConfigSystem
             );
 
         /*! @brief Unlocks the named parameter stored at the given path.
+         *         Attempts to modify locked parameters will fail.
          *  @param paramPath Path to the parameter to unlock.
          *  @param paramName Name of the parameter to unlock.
          *  @return Whether the operation was successful.
@@ -279,8 +310,8 @@ namespace ConfigSystem
             const std::string &paramName, 
             ConfigRange<long> &range
             );
-                                
-                                
+        
+        
         /*! @brief     Reads the ranges in the current configuration 
          *             at the given path.
          *  @param     "param_path" Path at which to store the parameter.

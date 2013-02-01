@@ -2,6 +2,15 @@
     @file TestConfig.cpp
     @brief Tests for the Config System.
   
+    Things to test: (for a parameter of type T, not of type U)
+      - Storing a value of type T to a parameter of type T
+      - Reading a value of type T from a parameter of type T
+      - Attempting to store type T in a param of type U
+      - Attempting to read a value of type T from a param of type U
+      - Attempt to read from a path+name that doesn't exist
+      - 
+
+
     @author Mitchell Metcalfe
  
   Copyright (c) 2012 Mitchell Metcalfe
@@ -82,6 +91,238 @@ void endTimedTest()
     std::cout << "  time = " << tt << " ms (" << tt_Hz << " Hz)." << std::endl;
 }
 
+
+template <typename T>
+void test1DVector(const std::string &paramName)
+{
+    timeval t;
+    gettimeofday(&t,NULL);
+    boost::mt19937 seed( (int)t.tv_sec );
+
+    boost::uniform_real<> distR(0, 1);
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
+    
+    boost::uniform_int<> distI(0, 255);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
+
+    std::vector<T> store_1dv_t, read_1dv_t;
+
+    // Store a vector<T>:
+    // pass: If stored successfully.
+    // FAIL: If not stored.
+    int  vecS = 5 + (randInt() % 5);
+    store_1dv_t = std::vector<T>();
+    for(int i = 0; i < vecS; i++)
+    {
+        store_1dv_t.push_back((T)(randReal() * 100));
+    }
+    startTimedTest();
+    bool res_s = config->storeValue("Testing.MM", paramName, store_1dv_t);
+    endTimedTest();
+
+    // Read a vector<T>:
+    // pass: If read successfully.
+    // FAIL: If not read.
+    startTimedTest();
+    bool res_r = config->readValue("Testing.MM", paramName, read_1dv_t);
+    endTimedTest();
+
+    // std::cout << "    (stored '" << store_d 
+    //           << "', read '"     << read_d 
+    //           << "')" << std::endl;
+    std::cout << "    Sizes: " << store_1dv_t.size() << " , " << read_1dv_t.size() << std::endl;
+
+    bool res_c = true;
+    for(int i = 0; i < store_1dv_t.size(); i++)
+    {
+        if(i < read_1dv_t.size())
+        {
+            bool cmp = (((float)store_1dv_t[i]) == ((float)read_1dv_t[i])); // ignore rounding errors by comparig as floats
+            res_c &= cmp;
+            std::cout << "    " << (float)store_1dv_t[i] 
+                      << " | "  << (float)read_1dv_t [i]
+                      << (!cmp? " *" : "" ) << std::endl;
+        }
+        else res_c = false;
+    }
+
+    bool result = res_s && res_r && res_c;
+    printTestResult("storeVectorValue1D", result);
+    printTestResult("readVectorValue1D" , result);
+    std::cout << std::endl;
+}
+
+
+template <typename T>
+void test2DVector(const std::string &paramName)
+{
+    timeval t;
+    gettimeofday(&t,NULL);
+    boost::mt19937 seed( (int)t.tv_sec );
+
+    boost::uniform_real<> distR(0, 1);
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
+    
+    boost::uniform_int<> distI(0, 255);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
+
+    std::vector<std::vector<T> > read_2dv_t, store_2dv_t;
+
+    // Store a vector<vector<T> >:
+    // pass: If stored successfully.
+    // FAIL: If not stored.
+    std::cout << " Create test vectors" << std::endl;
+    int  vec2d_s1 = 3 + (randInt() % 3);
+    store_2dv_t = std::vector<std::vector<T> >();
+    for(int i = 0; i < vec2d_s1; i++)
+    {
+        int  vec2d_s2 = 0 + (randInt() % 5);
+        std::vector<T> v = std::vector<T>();
+        for(int i = 0; i < vec2d_s2; i++)
+        {
+            v.push_back((T)(randReal() * 100));
+        }
+        store_2dv_t.push_back(v);
+    }
+    startTimedTest();
+    bool res_s = config->storeValue("Testing.MM", paramName, store_2dv_t);
+    std::cout << (res_s? "T":"F" ) << std::endl;
+    endTimedTest();
+
+    // Read a vector<vector<T> >:
+    // pass: If read successfully.
+    // FAIL: If not read.
+    startTimedTest();
+    bool res_r = config->readValue("Testing.MM", paramName, read_2dv_t);
+    std::cout << (res_r? "T":"F" ) << std::endl;
+    endTimedTest();
+
+    std::cout << " Compare" << std::endl;
+    
+    std::cout << "  Sizes: " << store_2dv_t.size() 
+              << " , "       << read_2dv_t .size() 
+              << std::endl;
+
+    bool res_c = true;
+    for(int i = 0; i < store_2dv_t.size(); i++)
+    {
+        if(!(i < read_2dv_t.size())) { res_c = false; break; }
+        std::cout << "    Sizes: " << store_2dv_t[i].size() 
+                  << " , "         << read_2dv_t [i].size()
+                  << std::endl;
+
+        for(int j = 0; j < store_2dv_t[i].size(); j++)
+        {
+            if(!(j < read_2dv_t[i].size())) { res_c = false; break; }
+
+            bool cmp = (((float)store_2dv_t[i][j]) == ((float)read_2dv_t[i][j])); // ignore rounding errors by comparig as floats
+            res_c &= cmp;
+            std::cout << "      " << (float)store_2dv_t[i][j] 
+                      << " | "    << (float) read_2dv_t[i][j]
+                      << (!cmp? " *" : "" ) << std::endl;
+        }
+    }
+
+    bool result = res_s && res_r && res_c;
+    printTestResult("storeVectorValue2D", result);
+    printTestResult("readVectorValue2D" , result);
+    std::cout << std::endl;
+}
+
+
+template <typename T>
+void test3DVector(const std::string &paramName)
+{
+    timeval t;
+    gettimeofday(&t,NULL);
+    boost::mt19937 seed( (int)t.tv_sec );
+
+    boost::uniform_real<> distR(0, 1);
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
+    
+    boost::uniform_int<> distI(0, 255);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
+
+    std::vector<std::vector<std::vector<T> > > read_3dv_t, store_3dv_t;
+
+    // Store a vector<vector<vector<T> > >:
+    // pass: If stored successfully.
+    // FAIL: If not stored.
+    std::cout << " Create test vectors" << std::endl;
+    int  vec3d_s1 = 3 + (randInt() % 2);
+    store_3dv_t = std::vector<std::vector<std::vector<T> > >();
+    for(int i = 0; i < vec3d_s1; i++)
+    {
+        int  vec3d_s2 = 0 + (randInt() % 5);
+        std::vector<std::vector<T> > v2 = std::vector<std::vector<T> >();
+        for(int i = 0; i < vec3d_s2; i++)
+        {
+            int  vec3d_s3 = 0 + (randInt() % 5);
+            std::vector<T> v1 = std::vector<T>();
+            for(int i = 0; i < vec3d_s3; i++)
+            {
+                v1.push_back((T)(randReal()*100));
+            }
+            v2.push_back(v1);
+        }
+        store_3dv_t.push_back(v2);
+    }
+    startTimedTest();
+    bool res_s = config->storeValue("Testing.MM", paramName, store_3dv_t);
+    endTimedTest();
+    std::cout << (res_s? "T":"F" ) << std::endl;
+
+
+    // Read a vector<vector<vector<T> > >:
+    // pass: If read successfully.
+    // FAIL: If not read.
+    startTimedTest();
+    bool res_r = config->readValue("Testing.MM", paramName, read_3dv_t);
+    endTimedTest();
+    std::cout << (res_r? "T":"F" ) << std::endl;
+
+    std::cout << "Compare" << std::endl;
+    
+    std::cout << "  Sizes: " << store_3dv_t.size() 
+              << " , "       << read_3dv_t .size() 
+              << std::endl;
+
+    bool res_c = true;
+    for(int i = 0; i < store_3dv_t.size(); i++)
+    {
+        if(!(i < read_3dv_t.size())) { res_c = false; break; }
+        std::cout << "    Sizes: "   << store_3dv_t[i].size() 
+                  << " , "           << read_3dv_t [i].size()
+                  << std::endl;
+
+        for(int j = 0; j < store_3dv_t[i].size(); j++)
+        {
+            if(!(j < read_3dv_t[i].size())) { res_c = false; break; }
+            std::cout << "      Sizes: "   << store_3dv_t[i][j].size() 
+                      << " , "             << read_3dv_t [i][j].size()
+                      << std::endl;
+
+            for(int k = 0; k < store_3dv_t[i][j].size(); k++)
+            {
+                if(!(k < read_3dv_t[i][j].size())) { res_c = false; break; }
+
+                bool cmp = (((float)store_3dv_t[i][j][k]) == ((float)read_3dv_t[i][j][k])); // ignore rounding errors by comparig as floats
+                res_c &= cmp;
+                std::cout << "        " << (float)store_3dv_t[i][j][k] 
+                          << " | "      << (float) read_3dv_t[i][j][k]
+                          << (!cmp? " *" : "" ) << std::endl;
+            }
+        }
+    }
+
+    bool result = res_s && res_r && res_c;
+    printTestResult("storeVectorValue3D", result);
+    printTestResult("readeVectorValue3D" , result);
+    std::cout << std::endl;
+}
+
+
+
 int main(void)
 {
     timeval t;
@@ -145,10 +386,12 @@ int main(void)
     std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     std::cout << "config->storeDoubleValue(...)" << std::endl; 
     result = config->storeValue<double>("Testing.MM", "param_double", store_d);
+    // m1.doubleParam1 should not equal 5 here
     std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
     std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     std::cout << "config->updateConfiguration(...)" << std::endl; 
     config->updateConfiguration();
+    // m1.doubleParam1 should equal 5 here
     std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
     std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
 
@@ -215,12 +458,12 @@ int main(void)
     result &= config->readDoubleRange("Testing.MM", "param_double", read_r_d);
     endTimedTest();
 
-    result &= (store_r_d.getMin()            == read_r_d.getMin() &&
-               store_r_d.getMax()            == read_r_d.getMax() &&
+    result &= (store_r_d.getMin()            == read_r_d.getMin()            &&
+               store_r_d.getMax()            == read_r_d.getMax()            &&
                store_r_d.getUpperBoundType() == read_r_d.getUpperBoundType() &&
                store_r_d.getLowerBoundType() == read_r_d.getLowerBoundType() &&
-               store_r_d.getAutoClip()       == read_r_d.getAutoClip() &&
-               store_r_d.getOutside()        == read_r_d.getOutside()
+               store_r_d.getAutoClip()       == read_r_d.getAutoClip()       &&
+               store_r_d.getOutside()        == read_r_d.getOutside()        
                );
     printTestResult("storeDoubleRange", result);
     printTestResult("readDoubleRange" , result);
@@ -247,212 +490,48 @@ int main(void)
 
 
     // Tests for range violations
-    #warning Must add range tests
+    #warning Must add range tests (already tested by Sophie?)
 
 
+    // Easy templated std::vector<...> tests!
+    //
+    // Desc: Each test generates a random value, writes it, then reads it,
+    //       Then compares what was written to what was read (at a lower 
+    //       resolution, to avoid failure due to rounding errors).
+    //
+    // Pass: passes only if both the read and write return success and the 
+    //       written and read values are identical.
 
-    // Store a vector<double>:
-    // pass: If stored successfully.
-    // FAIL: If not stored.
-    int  vecS = 5 + (randInt() % 5);
-    store_1dv_d = std::vector<double>();
-    for(int i = 0; i < vecS; i++)
-    {
-        store_1dv_d.push_back(randReal());
-    }
-    startTimedTest();
-    result = config->storeDoubleVectorValue1D("Testing.MM", "param_vector1d_double", store_1dv_d);
-    endTimedTest();
-
-    // Read a vector<double>:
-    // pass: If read successfully.
-    // FAIL: If not read.
-    startTimedTest();
-    result &= config->readDoubleVectorValue1D("Testing.MM", "param_vector1d_double", read_1dv_d);
-    endTimedTest();
-
-    // std::cout << "    (stored '" << store_d 
-    //           << "', read '"     << read_d 
-    //           << "')" << std::endl;
-    std::cout << "    Sizes: " << store_1dv_d.size() << " , " << read_1dv_d.size() << std::endl;
-
-    result &= true;
-    for(int i = 0; i < store_1dv_d.size(); i++)
-    {
-        if(i < read_1dv_d.size())
-        {
-            bool cmp = (((float)store_1dv_d[i]) == ((float)read_1dv_d[i])); // ignore rounding errors by comparig as floats
-            result &= cmp;
-            std::cout << "    " << (float)store_1dv_d[i] 
-                      << " | "  << (float)read_1dv_d [i]
-                      << (!cmp? " *" : "" ) << std::endl;
-        }
-        else result = false;
-    }
-    printTestResult("storeDoubleVectorValue1D", result);
-    printTestResult("readDoubleVectorValue1D" , result);
-    std::cout << std::endl;
+    std::cout << std::endl << "TEST: std::vector<double>" << std::endl;
+    test1DVector<double>("param_vector1d_double");
+    std::cout << std::endl << "TEST: std::vector<long>" << std::endl;
+    test1DVector<long>("param_vector1d_long");
 
 
-
-    // Store a vector<vector<double> >:
-    // pass: If stored successfully.
-    // FAIL: If not stored.
-    std::cout << " Create test vectors" << std::endl;
-    int  vec2d_s1 = 3 + (randInt() % 3);
-    store_2dv_d = std::vector<std::vector<double> >();
-    for(int i = 0; i < vec2d_s1; i++)
-    {
-        int  vec2d_s2 = 0 + (randInt() % 5);
-        std::vector<double> v = std::vector<double>();
-        for(int i = 0; i < vec2d_s2; i++)
-        {
-            v.push_back(randReal());
-        }
-        store_2dv_d.push_back(v);
-    }
-    startTimedTest();
-    result = config->storeDoubleVectorValue2D("Testing.MM", "param_vector2d_double", store_2dv_d);
-    std::cout << (result? "T":"F" ) << std::endl;
-    endTimedTest();
-
-    // Read a vector<vector<double> >:
-    // pass: If read successfully.
-    // FAIL: If not read.
-    startTimedTest();
-    result &= config->readDoubleVectorValue2D("Testing.MM", "param_vector2d_double", read_2dv_d);
-    std::cout << (result? "T":"F" ) << std::endl;
-    endTimedTest();
-
-    std::cout << " Compare" << std::endl;
+    std::cout << std::endl << "TEST: std::vector<std::vector<double> >" << std::endl;
+    test2DVector<double>("param_vector2d_double");
+    std::cout << std::endl << "TEST: std::vector<std::vector<long> >" << std::endl;
+    test2DVector<long>("param_vector2d_long");
     
-    std::cout << "  Sizes: " << store_2dv_d.size() 
-              << " , "       << read_2dv_d .size() 
+
+    std::cout << std::endl << "TEST: std::vector<std::vector<std::vector<double> > >" << std::endl;
+    test3DVector<double>("param_vector3d_double");
+    std::cout << std::endl << "TEST: std::vector<std::vector<std::vector<long> > >" << std::endl;
+    test3DVector<long>("param_vector3d_long");
+
+
+    bool res_del = config->deleteParam("Testing.MM", "param_double");
+    std::cout << std::endl 
+              << "TEST: deleteParam(...): " 
+              << (res_del? "T" : "F") 
               << std::endl;
-
-    result &= true;
-    for(int i = 0; i < store_2dv_d.size(); i++)
-    {
-        if(!(i < read_2dv_d.size())) { result = false; break; }
-        std::cout << "    Sizes: " << store_2dv_d[i].size() 
-                  << " , "         << read_2dv_d [i].size()
-                  << std::endl;
-
-        for(int j = 0; j < store_2dv_d[i].size(); j++)
-        {
-            if(!(j < read_2dv_d[i].size())) { result = false; break; }
-
-            bool cmp = (((float)store_2dv_d[i][j]) == ((float)read_2dv_d[i][j])); // ignore rounding errors by comparig as floats
-            result &= cmp;
-            std::cout << "      " << (float)store_2dv_d[i][j] 
-                      << " | "    << (float) read_2dv_d[i][j]
-                      << (!cmp? " *" : "" ) << std::endl;
-        }
-    }
-    printTestResult("storeDoubleVectorValue2D", result);
-    printTestResult("readDoubleVectorValue2D" , result);
-    std::cout << std::endl;
-
-
-
-    // Store a vector<vector<vector<double> > >:
-    // pass: If stored successfully.
-    // FAIL: If not stored.
-    std::cout << " Create test vectors" << std::endl;
-    int  vec3d_s1 = 3 + (randInt() % 2);
-    store_3dv_d = std::vector<std::vector<std::vector<double> > >();
-    for(int i = 0; i < vec3d_s1; i++)
-    {
-        int  vec3d_s2 = 0 + (randInt() % 5);
-        std::vector<std::vector<double> > v2 = std::vector<std::vector<double> >();
-        for(int i = 0; i < vec3d_s2; i++)
-        {
-            int  vec3d_s3 = 0 + (randInt() % 5);
-            std::vector<double> v1 = std::vector<double>();
-            for(int i = 0; i < vec3d_s3; i++)
-            {
-                v1.push_back(randReal());
-            }
-            v2.push_back(v1);
-        }
-        store_3dv_d.push_back(v2);
-    }
-    startTimedTest();
-    result = config->storeDoubleVectorValue3D("Testing.MM", "param_vector3d_double", store_3dv_d);
-    endTimedTest();
-    std::cout << (result? "T":"F" ) << std::endl;
-
-
-    // Read a vector<vector<vector<double> > >:
-    // pass: If read successfully.
-    // FAIL: If not read.
-    startTimedTest();
-    result &= config->readDoubleVectorValue3D("Testing.MM", "param_vector3d_double", read_3dv_d);
-    endTimedTest();
-
-    std::cout << "Compare" << std::endl;
+    res_del = config->deleteParam("Testing.MM", "param_double");
+    std::cout << std::endl 
+              << "TEST: deleteParam(...): " 
+              << (res_del? "T" : "F") 
+              << std::endl;
     
-    std::cout << "  Sizes: " << store_3dv_d.size() 
-              << " , "         << read_3dv_d .size() 
-              << std::endl;
-
-    result &= true;
-    for(int i = 0; i < store_3dv_d.size(); i++)
-    {
-        if(!(i < read_3dv_d.size())) { result = false; break; }
-        std::cout << "    Sizes: "   << store_3dv_d[i].size() 
-                  << " , "           << read_3dv_d [i].size()
-                  << std::endl;
-
-        for(int j = 0; j < store_3dv_d[i].size(); j++)
-        {
-            if(!(j < read_3dv_d[i].size())) { result = false; break; }
-            std::cout << "      Sizes: "   << store_3dv_d[i][j].size() 
-                      << " , "             << read_3dv_d [i][j].size()
-                      << std::endl;
-
-            for(int k = 0; k < store_3dv_d[i][j].size(); k++)
-            {
-                if(!(k < read_3dv_d[i][j].size())) { result = false; break; }
-
-                bool cmp = (((float)store_3dv_d[i][j][k]) == ((float)read_3dv_d[i][j][k])); // ignore rounding errors by comparig as floats
-                result &= cmp;
-                std::cout << "        " << (float)store_3dv_d[i][j][k] 
-                          << " | "      << (float) read_3dv_d[i][j][k]
-                          << (!cmp? " *" : "" ) << std::endl;
-            }
-        }
-    }
-    printTestResult("storeDoubleVectorValue3D", result);
-    printTestResult("readDoubleVectorValue3D" , result);
-    std::cout << std::endl;
-
-
-    // // LONG:
-
-    // // Store a long:
-    // // pass: If stored successfully.
-    // // FAIL: If not stored.
-    // store_l = randInt();
-    // startTimedTest();
-    // result = config->storeLongValue("Testing.MM", "param_long", store_l);
-    // endTimedTest();
-
-    // // Read a long:
-    // // pass: If read successfully.
-    // // FAIL: If not read.
-    // startTimedTest();
-    // result = config->readLongValue("Testing.MM", "param_long", read_l);
-    // endTimedTest();
-
-    // result = (store_l == read_l);
-    // printTestResult("storeLong", result);
-    // printTestResult("readLong", result);
-    // std::cout << std::endl;
-
-
-
-
+    config->createParam<double>("Testing.MM", "param_double", 10);
 
     // Save configuration as 'newConfig'.
     startTimedTest();

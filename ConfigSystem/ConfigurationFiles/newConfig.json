@@ -3,23 +3,6 @@
     {
         "MM":
         {
-            "param_double":
-            {
-                "desc": "param_double description",
-                "modified": "true",
-                "locked": "false",
-                "type": "double",
-                "value": "0.5444197580218315",
-                "range":
-                {
-                    "min": "5",
-                    "max": "10",
-                    "lBound": "closed",
-                    "uBound": "closed",
-                    "outside": "false",
-                    "autoClip": "true"
-                }
-            },
             "param_long":
             {
                 "desc": "param_long description",
@@ -45,15 +28,11 @@
                 "type": "1d_vector_double",
                 "value":
                 [
-                    "0.5683475832920521",
-                    "0.7750617808196694",
-                    "0.3377522747032344",
-                    "0.3060108623467386",
-                    "0.7799946065060794",
-                    "0.04823969677090645",
-                    "0.8952302585821599",
-                    "0.3050523274578154",
-                    "0.2625696915201843"
+                    "35.31961876433343",
+                    "45.33909137826413",
+                    "30.36169039551169",
+                    "72.67226388212293",
+                    "80.12419457081705"
                 ],
                 "range":
                 {
@@ -73,22 +52,12 @@
                 "type": "2d_vector_double",
                 "value":
                 [
+                    "",
                     [
-                        "0.1301589377690107"
+                        "30.36169039551169"
                     ],
                     [
-                        "0.4516265611164272",
-                        "0.2900458741933107",
-                        "0.3457355715800077"
-                    ],
-                    [
-                        "0.7650697305798531",
-                        "0.7527918023988605"
-                    ],
-                    [
-                        "0.3292502528056502",
-                        "0.1977992777246982",
-                        "0.3182026571594179"
+                        "80.12419457081705"
                     ]
                 ],
                 "range":
@@ -109,45 +78,26 @@
                 "type": "3d_vector_double",
                 "value":
                 [
+                    "",
                     [
                         [
-                            "0.6060491127427667",
-                            "0.10211012349464",
-                            "0.2273348451126367",
-                            "0.7085439872462302"
+                            "72.67226388212293",
+                            "80.12419457081705"
                         ]
                     ],
                     [
-                        [
-                            "0.9573992029763758",
-                            "0.275327738840133",
-                            "0.3145371188875288",
-                            "0.01846973528154194"
-                        ],
-                        [
-                            "0.1993244949262589",
-                            "0.1882208310998976",
-                            "0.4246717966161668",
-                            "0.9511795383878052"
-                        ]
+                        ""
                     ],
                     [
                         [
-                            "0.2942247816827148"
+                            "27.63004323933274",
+                            "27.68158528488129"
                         ],
                         [
-                            "0.6317952130921185"
-                        ],
-                        [
-                            "0.4970119628123939"
-                        ],
-                        [
-                            "0.770817959215492",
-                            "0.9671488883905113",
-                            "0.2847155176568776"
+                            "33.8576345006004",
+                            "46.66444023605436"
                         ]
-                    ],
-                    ""
+                    ]
                 ],
                 "range":
                 {
@@ -155,6 +105,112 @@
                     "max": "255",
                     "lBound": "closed",
                     "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_vector1d_long":
+            {
+                "desc": "Test parameter for 1d long vectors.",
+                "modified": "true",
+                "locked": "false",
+                "type": "1d_vector_long",
+                "value":
+                [
+                    "35",
+                    "45",
+                    "30",
+                    "72",
+                    "80"
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_vector2d_long":
+            {
+                "desc": "Test parameter for 1d long vectors.",
+                "modified": "true",
+                "locked": "false",
+                "type": "2d_vector_long",
+                "value":
+                [
+                    "",
+                    [
+                        "30"
+                    ],
+                    [
+                        "80"
+                    ]
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_vector3d_long":
+            {
+                "desc": "Test parameter for 1d long vectors.",
+                "modified": "true",
+                "locked": "false",
+                "type": "3d_vector_long",
+                "value":
+                [
+                    "",
+                    [
+                        [
+                            "72",
+                            "80"
+                        ]
+                    ],
+                    [
+                        ""
+                    ],
+                    [
+                        [
+                            "27",
+                            "27"
+                        ],
+                        [
+                            "33",
+                            "46"
+                        ]
+                    ]
+                ],
+                "range":
+                {
+                    "min": "0",
+                    "max": "255",
+                    "lBound": "closed",
+                    "uBound": "closed",
+                    "outside": "false",
+                    "autoClip": "false"
+                }
+            },
+            "param_double":
+            {
+                "desc": "",
+                "modified": "false",
+                "locked": "false",
+                "type": "double",
+                "value": "10",
+                "range":
+                {
+                    "min": "0",
+                    "max": "0",
+                    "lBound": "none",
+                    "uBound": "none",
                     "outside": "false",
                     "autoClip": "false"
                 }

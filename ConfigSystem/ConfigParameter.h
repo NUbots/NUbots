@@ -72,6 +72,17 @@ namespace ConfigSystem
         // Note: If constructor doesn't specify type,
         //       type must be set to vt_none.
         //   ConfigParameter();
+            
+            ConfigParameter(bool                                            value);
+            ConfigParameter(long                                            value);
+            ConfigParameter(double                                          value);
+            ConfigParameter(std::string                                     value);
+            ConfigParameter(std::vector<long>                               value);
+            ConfigParameter(std::vector<std::vector<long> >                 value);
+            ConfigParameter(std::vector<std::vector<std::vector<long> > >   value);
+            ConfigParameter(std::vector<double>                             value);
+            ConfigParameter(std::vector<std::vector<double> >               value);
+            ConfigParameter(std::vector<std::vector<std::vector<double> > > value);
 
             ConfigParameter(value_type val_type);
 
