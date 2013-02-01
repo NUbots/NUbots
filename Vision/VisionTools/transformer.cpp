@@ -108,7 +108,8 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
 #endif
     double theta,
            distance,
-           cos_theta;
+           //cos_theta;
+            tan_theta;
 
     //resultant angle inclusive of camera pitch, pixel elevation and angle correction factor
     theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
@@ -116,11 +117,16 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
     if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
         theta -= body_pitch;
 
-    cos_theta = cos(theta);
-    if(cos_theta == 0)
+//    cos_theta = cos(theta);
+//    if(cos_theta == 0)
+//        distance = 0;
+//    else
+//        distance = camera_height / cos_theta / cos(bearing);
+    tan_theta = tan(theta);
+    if(tan_theta == 0)
         distance = 0;
     else
-        distance = camera_height * cos(bearing) / cos_theta;
+        distance = camera_height / tan_theta / cos(bearing);
 
 #if VISION_BLACKBOARD_VERBOSITY > 1
     debug << "\ttheta: " << theta << " distance: " << distance << " valid: " << valid << endl;
@@ -171,21 +177,20 @@ Point Transformer::screenToGroundCartesian(Point pt) const
 
     double r = distanceToPoint(cam_angles.x, cam_angles.y);
 
-    Matrix ctgtransform = Matrix4x4fromVector(m_ctg_vector);
+    return Point(r*cos(cam_angles.x), r*sin(cam_angles.y));
+//    Matrix ctgtransform = Matrix4x4fromVector(m_ctg_vector);
 
-    Vector3<float> spherical = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
+//    Vector3<float> spherical = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
 
-    Vector3<float> t = Kinematics::TransformPosition(ctgtransform,spherical);
+//    Vector3<float> t = Kinematics::TransformPosition(ctgtransform,spherical);
 
-//    return Point(t.x*cos(t.y)*sin(t.z),
+//    return Point(t.x*cos(t.y)*cos(t.z),
 //                 t.x*sin(t.y)*cos(t.z));
 
-//    double r;
+//    double theta = mathGeneral::PI*0.5 - camera_pitch + cam_angles.y + VisionConstants::D2P_ANGLE_CORRECTION;
 
-    double theta = mathGeneral::PI*0.5 - camera_pitch + cam_angles.y + VisionConstants::D2P_ANGLE_CORRECTION;
-
-    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
-        theta -= body_pitch;
+//    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
+//        theta -= body_pitch;
 
 //    //double bearingcos = cos(sphericalCoordinates[1]);
 //    //double bearingsin = sin(sphericalCoordinates[1]);
@@ -200,8 +205,8 @@ Point Transformer::screenToGroundCartesian(Point pt) const
 
 //    return Point(r*cos(cam_angles.x)*sin(theta),
 //                 r*cos(theta)*sin(cam_angles.x));
-    return Point(r*cos(cam_angles.x)*cos(theta),
-                 r*sin(cam_angles.x)*cos(theta));
+//    return Point(r*cos(cam_angles.x)*cos(theta),
+//                 r*sin(cam_angles.x)*cos(theta));
 
 }
 

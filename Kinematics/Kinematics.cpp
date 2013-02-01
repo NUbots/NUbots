@@ -300,13 +300,18 @@ Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform,
     resultCartesian[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
     resultCartesian[2] = 0.0;
 
-    // Convert back to polar coodinates.
-    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
+//    // Convert back to polar coodinates.
+//    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
+
+//    Vector3<float> result;
+//    result[0] = resultSpherical[0];
+//    result[1] = resultSpherical[1];
+//    result[2] = resultSpherical[2];
 
     Vector3<float> result;
-    result[0] = resultSpherical[0];
-    result[1] = resultSpherical[1];
-    result[2] = resultSpherical[2];
+    result[0] = resultCartesian[0];
+    result[1] = resultCartesian[1];
+    result[2] = resultCartesian[2];
 
     //! TODO: Get the right thing to output, what do we want from this function??
     return result;

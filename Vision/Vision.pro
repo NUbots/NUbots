@@ -17,6 +17,8 @@ win32{
     }
 }
 
+CONFIG += qwt
+
 DEFINES += QT_NO_DEBUG_STREAM
 
 INCLUDEPATH += ../
