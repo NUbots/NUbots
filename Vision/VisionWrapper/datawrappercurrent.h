@@ -4,7 +4,8 @@
 #ifdef TARGET_IS_RPI
     #include "Vision/VisionWrapper/datawrapperrpi.h"
 #elif TARGET_IS_PC
-    #include "Vision/VisionWrapper/datawrapperpc.h"
+    //#include "Vision/VisionWrapper/datawrapperpc.h"
+    #include "Vision/VisionWrapper/datawrapperqt.h"
 #elif TARGET_IS_NUVIEW
     #include "Vision/VisionWrapper/datawrappernuview.h"
 #elif TARGET_IS_TRAINING

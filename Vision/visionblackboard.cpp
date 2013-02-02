@@ -575,27 +575,27 @@ void VisionBlackboard::debugPublish() const
 #endif
 
     wrapper->debugRefresh();
-    wrapper->debugPublish(DataWrapper::DBID_IMAGE, original_image);
+    wrapper->debugPublish(DBID_IMAGE, original_image);
     
     //horizon
     pts.clear();
     if(!kinematics_horizon.isVertical()) {
         pts.push_back(Vector2<double>(0, kinematics_horizon.findYFromX(0)));
         pts.push_back(Vector2<double>(original_image->getWidth(), kinematics_horizon.findYFromX(original_image->getWidth())));
-        wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts);
+        wrapper->debugPublish(DBID_HORIZON, pts);
     }
     else {
         errorlog << "VisionBlackboard::publishDebug - vertical horizon!" << endl;
     }
     
     //horizon scans
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_SCANS, gh_scan_points);
+    wrapper->debugPublish(DBID_GREENHORIZON_SCANS, gh_scan_points);
     
     //horizon points
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_FINAL, m_green_horizon.getInterpolatedPoints());
+    wrapper->debugPublish(DBID_GREENHORIZON_FINAL, m_green_horizon);
     
     //object points
-    wrapper->debugPublish(DataWrapper::DBID_OBJECT_POINTS, obstacle_points);
+    wrapper->debugPublish(DBID_OBJECT_POINTS, obstacle_points);
     
     //field objects
     wrapper->debugPublish(m_goals);
@@ -609,22 +609,22 @@ void VisionBlackboard::debugPublish() const
     for(unsigned int i=0; i<horizontal_scanlines.size(); i++) {
         pts.push_back(Vector2<double>(0, horizontal_scanlines.at(i)));
     }
-    wrapper->debugPublish(DataWrapper::DBID_H_SCANS, pts);
+    wrapper->debugPublish(DBID_H_SCANS, pts);
     
     //vertical scans
-    wrapper->debugPublish(DataWrapper::DBID_V_SCANS, m_green_horizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING));
+    wrapper->debugPublish(DBID_V_SCANS, m_green_horizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING));
     
     //horizontal segments
-    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, horizontal_segmented_scanlines);
+    wrapper->debugPublish(DBID_SEGMENTS, horizontal_segmented_scanlines);
     
     //vertical segments
-    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, vertical_segmented_scanlines);
+    wrapper->debugPublish(DBID_SEGMENTS, vertical_segmented_scanlines);
     
     //horizontal filtered segments
-    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, horizontal_filtered_segments);
+    wrapper->debugPublish(DBID_FILTERED_SEGMENTS, horizontal_filtered_segments);
     
     //vertical filtered segments
-    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, vertical_filtered_segments);
+    wrapper->debugPublish(DBID_FILTERED_SEGMENTS, vertical_filtered_segments);
     
     //horizontal transitions
     pts.clear();
@@ -640,7 +640,7 @@ void VisionBlackboard::debugPublish() const
             }
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_MATCHED_SEGMENTS, pts);
+    wrapper->debugPublish(DBID_MATCHED_SEGMENTS, pts);
     
     //vertical transitions
     pts.clear();
@@ -656,7 +656,7 @@ void VisionBlackboard::debugPublish() const
             }
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_MATCHED_SEGMENTS, pts);
+    wrapper->debugPublish(DBID_MATCHED_SEGMENTS, pts);
 }
 
 //! Checks the kinematics horizon is within the image bounds and resets it if not.

@@ -50,8 +50,8 @@ vector<Goal> GoalDetectorRANSAC::run()
         end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
     }
 
-    DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_START, start_lines);
-    DataWrapper::getInstance()->debugPublish(DataWrapper::DBID_GOAL_LINES_END, end_lines);
+    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
+    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
 
     //Build candidates out of lines
     candidates = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);

@@ -12,6 +12,7 @@ win32{
     !win32{
         INCLUDEPATH += /usr/local/include/opencv2/
         INCLUDEPATH += /usr/include/boost/
+        INCLUDEPATH += /usr/include/qwt
 
         LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
     }
@@ -60,7 +61,8 @@ contains(PLATFORM, "pc") {
 
     SOURCES += \
         VisionTools/pccamera.cpp \
-        VisionWrapper/datawrapperpc.cpp \
+        #VisionWrapper/datawrapperpc.cpp \
+        VisionWrapper/datawrapperqt.cpp \
         VisionWrapper/visioncontrolwrapperpc.cpp\
 }
 
@@ -130,7 +132,9 @@ HEADERS += \
     VisionTypes/Interfaces/renderable.h \
     VisionTools/transformer.h \
     VisionTypes/Interfaces/ransacmodel.h \
-    VisionTypes/visionline.h
+    VisionTypes/visionline.h \
+    VisionWrapper/datawrapperqt.h \
+    VisionWrapper/mainwindow.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -147,7 +151,9 @@ SOURCES += \
     basicvisiontypes.cpp \
     VisionTools/transformer.cpp \
     VisionTools/classificationcolours.cpp \
-    GenericAlgorithms/ransac.template
+    GenericAlgorithms/ransac.template \
+    VisionWrapper/datawrapperqt.cpp \
+    VisionWrapper/mainwindow.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup
@@ -201,3 +207,6 @@ SOURCES += \
     ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
     ../Infrastructure/FieldObjects/MobileObject.cpp \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
+
+FORMS += \
+    VisionWrapper/mainwindow.ui

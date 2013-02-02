@@ -2,7 +2,8 @@
 #define CONTROLWRAPPER_H
 
 #include "Vision/visioncontroller.h"
-#include "Vision/VisionWrapper/datawrapperpc.h"
+//#include "Vision/VisionWrapper/datawrapperpc.h"
+#include "Vision/VisionWrapper/datawrapperqt.h"
 
 class NUSensorsData;
 class NUActionatorsData;
