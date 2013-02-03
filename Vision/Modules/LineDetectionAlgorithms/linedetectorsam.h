@@ -43,7 +43,7 @@ public:
     LineDetectorSAM();
     ~LineDetectorSAM();
 
-    void run();
+    virtual vector<LSFittedLine> run();
 
 private:
     vector<LSFittedLine> fitLines(vector<Point>& points, bool noise=true);

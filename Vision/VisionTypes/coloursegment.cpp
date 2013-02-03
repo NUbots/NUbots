@@ -1,30 +1,17 @@
 #include "coloursegment.h"
 
-unsigned int dist(const Vector2<double>& x1, const Vector2<double>& x2)
-{
-    if(x1.x == x2.x)
-        return std::abs(x1.y - x2.y);
-    else if(x1.y == x2.y)
-        return std::abs(x1.x - x2.x);
-    else
-        return (x1 - x2).abs();
-}
-
-void ColourSegment::set(const Vector2<double>& start, const Vector2<double>& end, ClassIndex::Colour colour)
+void ColourSegment::set(const Point& start, const Point& end, Colour colour)
 {
     m_colour = colour;
     bool flip;
 
     //check if the points are in correct order
-    if(start.x < end.x) {
+    if(start.x < end.x)
         flip = false;
-    }
-    else if(start.x > end.x) {
+    else if(start.x > end.x)
         flip = true;
-    }
-    else {
+    else
         flip = start.y > end.y;
-    }
 
     //swap them if not
     if(flip) {
@@ -35,13 +22,13 @@ void ColourSegment::set(const Vector2<double>& start, const Vector2<double>& end
         m_start = start;
         m_end = end;
     }
-    m_length_pixels = dist(start, end);
+    m_length_pixels = (start - end).abs();
     m_centre.x = 0.5*(m_start.x + m_end.x);
     m_centre.y = 0.5*(m_start.y + m_end.y);
 
 }
 
-void ColourSegment::setColour(ClassIndex::Colour colour)
+void ColourSegment::setColour(Colour colour)
 {
     m_colour = colour;
 }
@@ -59,7 +46,7 @@ bool ColourSegment::join(const ColourSegment &other)
     else {
         return false;   //there are no matching endpoints
     }
-    m_length_pixels = dist(m_start, m_end);
+    m_length_pixels = (m_start - m_end).abs();
     m_centre.x = 0.5*(m_start.x + m_end.x);
 
     return true;
@@ -70,7 +57,7 @@ bool ColourSegment::join(const ColourSegment &other)
  */
 ostream& operator<< (ostream& output, const ColourSegment& c)
 {
-    output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << ClassIndex::getColourName(c.m_colour) << endl;
+    output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << getColourName(c.m_colour) << std::endl;
     return output;
 }
 

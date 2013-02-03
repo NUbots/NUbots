@@ -32,6 +32,7 @@ int VisionConstants::GOAL_MAX_OBJECTS;
 int VisionConstants::GOAL_BINS;
 int VisionConstants::GOAL_MIN_THRESHOLD;
 float VisionConstants::GOAL_SDEV_THRESHOLD;
+float VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE;
 //! Beacon filtering constants
 bool VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;
 bool VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;
@@ -133,6 +134,7 @@ void VisionConstants::loadFromFile(std::string filename)
     GOAL_BINS = 20;
     GOAL_MIN_THRESHOLD = 1;
     GOAL_SDEV_THRESHOLD = 0.75;
+    GOAL_RANSAC_MATCHING_TOLERANCE = 0.1;
     RANSAC_MAX_ANGLE_DIFF_TO_MERGE = SAM_MAX_ANGLE_DIFF_TO_MERGE; //
     RANSAC_MAX_DISTANCE_TO_MERGE = SAM_MAX_DISTANCE_TO_MERGE; //
 
@@ -389,6 +391,9 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("GOAL_SDEV_THRESHOLD") == 0) {
             in >> GOAL_SDEV_THRESHOLD;
         }
+        else if(name.compare("GOAL_RANSAC_MATCHING_TOLERANCE") == 0) {
+            in >> GOAL_RANSAC_MATCHING_TOLERANCE;
+        }
         else {
             errorlog << "VisionConstants::loadFromFile - unknown constant: " << name << std::endl;
         }
@@ -644,6 +649,9 @@ bool VisionConstants::setParameter(string name, float val)
     else if(name.compare("GOAL_SDEV_THRESHOLD") == 0) {
         GOAL_SDEV_THRESHOLD = val;
     }
+    else if(name.compare("GOAL_RANSAC_MATCHING_TOLERANCE") == 0) {
+        GOAL_RANSAC_MATCHING_TOLERANCE = val;
+    }
     else {
         return false;
     }
@@ -690,6 +698,7 @@ void VisionConstants::print(ostream& out)
     out << "GOAL_BINS: " << GOAL_BINS << std::endl;
     out << "GOAL_MIN_THRESHOLD: " << GOAL_MIN_THRESHOLD << std::endl;
     out << "GOAL_SDEV_THRESHOLD: " << GOAL_SDEV_THRESHOLD << std::endl;
+    out << "GOAL_RANSAC_MATCHING_TOLERANCE: " << GOAL_RANSAC_MATCHING_TOLERANCE << std::endl;
 
     out << "THROWOUT_ON_ABOVE_KIN_HOR_BEACONS: " << THROWOUT_ON_ABOVE_KIN_HOR_BEACONS << std::endl;
     out << "THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS << std::endl;

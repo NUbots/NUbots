@@ -1,8 +1,6 @@
 #ifndef GOALDETECTORRANSAC_H
 #define GOALDETECTORRANSAC_H
 
-#include "Vision/VisionTypes/coloursegment.h"
-#include "Vision/VisionTypes/quad.h"
 #include "Vision/Modules/goaldetector.h"
 #include "Tools/Math/LSFittedLine.h"
 #include <vector>
@@ -13,12 +11,19 @@ class GoalDetectorRANSAC : public GoalDetector
 {
 public:
     GoalDetectorRANSAC();
-    void run();
+    virtual vector<Goal> run();
 
 private:
+    vector<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines,
+                                     const vector<LSFittedLine>& end_lines,
+                                     double tolerance);
+
+    unsigned int getClosestUntriedLine(const LSFittedLine& start,
+                                       const vector<LSFittedLine>& end_lines,
+                                       vector<bool>& tried);
+
     vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
 
-    vector<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines, const vector<LSFittedLine>& end_lines);
 
 /*    unsigned*/ int m_n,
                  m_k,

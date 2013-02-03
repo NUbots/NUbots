@@ -8,16 +8,14 @@ class Ball : public VisionFieldObject
 public:
     
     Ball();
-    Ball(Vector2<double> centre, float diameter);
+    Ball(Point centre, double diameter);
     
     /*!
       @brief returns the radius.
       @return the radius of the ball in pixels.
       */
     float getRadius() const;
-    
-    //! @brief returns the field position relative to the robot.
-    Vector3<float> getRelativeFieldCoords() const;
+
     /*!
       @brief pushes the ball to the external field objects.
       @param fieldobjects a pointer to the global list of field objects.
@@ -56,7 +54,7 @@ private:
       @param elevation the angle between the ball and the image centre in the xz plane.
       @return the distance to the ball in cm.
       */
-    float distanceToBall(float bearing, float elevation);
+    double distanceToBall(double bearing, double elevation);
     
 public:
     int m_diameter;     //! @variable the radius of the ball in pixels

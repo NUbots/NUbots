@@ -34,11 +34,6 @@
 //    return m_corners;
 //}
 
-//Vector3<float> Beacon::getRelativeFieldCoords() const
-//{
-//    return m_spherical_position;
-//}
-
 //bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 //{
 //    #if VISION_FIELDOBJECT_VERBOSITY > 1

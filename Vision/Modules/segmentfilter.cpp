@@ -14,7 +14,7 @@ SegmentFilter::SegmentFilter()
     loadTransitionRules(RULE_DIR + "TransitionRules");
 }
 
-double averageLength(const SegmentedRegion& scans,ClassIndex::Colour colour) {
+double averageLength(const SegmentedRegion& scans,Colour colour) {
     const vector<vector<ColourSegment> >& segments = scans.getSegments();
     vector<vector<ColourSegment> >::const_iterator line_it;
     vector<ColourSegment>::const_iterator seg_it;
@@ -42,7 +42,7 @@ void SegmentFilter::run() const
     const SegmentedRegion& h_segments = vbb->getHorizontalSegmentedRegion();
     const SegmentedRegion& v_segments = vbb->getVerticalSegmentedRegion();
     SegmentedRegion h_filtered, v_filtered;
-    map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > h_result, v_result;
+    map<COLOUR_CLASS, vector<ColourSegment> > h_result, v_result;
     
     if(PREFILTER_ON) {
 
@@ -55,14 +55,14 @@ void SegmentFilter::run() const
         filter(v_filtered, v_result);
 
         //count segment length
-//        cout << averageLength(h_segments, ClassIndex::yellow) << " ";
-//        cout << averageLength(v_segments, ClassIndex::yellow) << " ";
-//        cout << averageLength(h_filtered, ClassIndex::yellow) << " ";
-//        cout << averageLength(v_filtered, ClassIndex::yellow) << endl;
-//        cout << averageLength(h_segments, ClassIndex::green) << " ";
-//        cout << averageLength(v_segments, ClassIndex::green) << " ";
-//        cout << averageLength(h_filtered, ClassIndex::green) << " ";
-//        cout << averageLength(v_filtered, ClassIndex::green) << endl;
+//        cout << averageLength(h_segments, yellow) << " ";
+//        cout << averageLength(v_segments, yellow) << " ";
+//        cout << averageLength(h_filtered, yellow) << " ";
+//        cout << averageLength(v_filtered, yellow) << endl;
+//        cout << averageLength(h_segments, green) << " ";
+//        cout << averageLength(v_segments, green) << " ";
+//        cout << averageLength(h_filtered, green) << " ";
+//        cout << averageLength(v_filtered, green) << endl;
     }
     else {
         filter(h_segments, h_result);
@@ -127,16 +127,16 @@ void SegmentFilter::preFilter(const SegmentedRegion &scans, SegmentedRegion &res
     }
 }
 
-void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &result) const
+void SegmentFilter::filter(const SegmentedRegion &scans, map<COLOUR_CLASS, vector<ColourSegment> > &result) const
 {
     switch(scans.getDirection()) {
-    case VisionID::VERTICAL:
+    case VERTICAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_v) {
             vector<ColourSegment>& segments = result[rule.getColourClass()];
             checkRuleAgainstRegion(scans, rule, segments);
         }
         break;
-    case VisionID::HORIZONTAL:
+    case HORIZONTAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_h) {
             vector<ColourSegment>& segments = result[rule.getColourClass()];
             checkRuleAgainstRegion(scans, rule, segments);
@@ -181,11 +181,11 @@ void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourS
     ColourSegment temp_seg;
     
     switch(dir) {
-    case VisionID::VERTICAL:
+    case VERTICAL:
         begin = replacement_rules_v.begin();
         end = replacement_rules_v.end();
         break;
-    case VisionID::HORIZONTAL:
+    case HORIZONTAL:
         begin = replacement_rules_h.begin();
         end = replacement_rules_h.end();
         break;

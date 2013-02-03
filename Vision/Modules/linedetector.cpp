@@ -2,9 +2,9 @@
 #include "boost/foreach.hpp"
 #include "Tools/Math/LSFittedLine.h"
 
-LineDetector::LineDetector()
-{
-}
+LineDetector::LineDetector() {}
+
+LineDetector::~LineDetector() {}
 
 vector<LSFittedLine> LineDetector::mergeColinear(vector<LSFittedLine> lines, double angle_threshold, double distance_threshold) const
 {

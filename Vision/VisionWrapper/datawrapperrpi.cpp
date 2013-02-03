@@ -53,7 +53,7 @@ void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segm
 
     BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
         BOOST_FOREACH(const ColourSegment& seg, line) {
-            ClassIndex::getColourAsRGB(seg.getColour(), r, g, b);
+            getColourAsRGB(seg.getColour(), r, g, b);
             pts.push_back(seg.getStart());
             pts.push_back(seg.getEnd());
             colours.push_back(cv::Scalar(b,g,r));
@@ -361,12 +361,10 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
     digitalWrite(GPIO_YGOAL, 0);
     if(m_gpio && !data.empty()) {
         BOOST_FOREACH(Goal post, data) {
-            if(VisionFieldObject::isBlueGoal(post.getID())) {
+            if(isBlueGoal(post.getID()))
                 digitalWrite(GPIO_BGOAL, 1);
-            }
-            else {
+            else
                 digitalWrite(GPIO_YGOAL, 1);
-            }
         }
     }
 

@@ -11,14 +11,13 @@
 #include "Vision/Modules/greenhorizonch.h"
 #include "Vision/Modules/objectdetectionch.h"
 #include "Vision/Modules/scanlines.h"
-#include "Vision/Modules/goaldetector.h"
-#include "Vision/Modules/balldetection.h"
-//robocup hacks
 #include "Vision/visionconstants.h"
 #include "Vision/Modules/LineDetectionAlgorithms/linedetectorsam.h"
 #include "Vision/Modules/LineDetectionAlgorithms/linedetectorransac.h"
 #include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h"
 #include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorransac.h"
+
+#include <boost/foreach.hpp>
 
 
 VisionController* VisionController::instance = 0;
@@ -91,10 +90,15 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     //! DETECTION MODULES
 
     if(lookForLandmarks) {
-        m_goal_detector_hist->run();   //POSTS
+        vector<Goal> hist_goals = m_goal_detector_hist->run();   //POSTS
 
         //testing ransac for goals
-        m_goal_detector_ransac->run();
+        vector<Goal> ransac_goals = m_goal_detector_ransac->run();
+
+        if(ransac_goals.size() == 2)
+            m_blackboard->addGoals(ransac_goals);
+        else
+            m_blackboard->addGoals(hist_goals);
 
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - goal detection done" << endl;
@@ -107,13 +111,17 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         prof.start();
         #endif
         //LINES
+        vector<LSFittedLine> lines;
         switch(VisionConstants::LINE_METHOD) {
         case VisionConstants::RANSAC:
-            //m_line_detector_ransac->run();
+            lines = m_line_detector_ransac->run();
             break;
         case VisionConstants::SAM:
-            m_line_detector_sam->run();
+            lines = m_line_detector_sam->run();
             break;
+        }
+        BOOST_FOREACH(LSFittedLine& l, lines) {
+            m_blackboard->addLine(FieldLine(l));
         }
 
         #ifdef VISION_PROFILER_ON
@@ -131,8 +139,9 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         #endif
     }
 
+    //find balls and publish to BB
     if(lookForBall) {
-        BallDetection::detectBall();    //BALL
+        m_blackboard->addBalls(m_ball_detector.run());
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - ball detection done" << endl;
         #endif

@@ -10,6 +10,16 @@
 #include "Vision/visionconstants.h"
 #include "Vision/VisionTypes/greenhorizon.h"
 
+#include <boost/foreach.hpp>
+
+//for stat
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+
+using namespace boost::accumulators;
+
 void ObjectDetectionCH::detectObjects()
 {
     #if VISION_HORIZON_VERBOSITY > 1
@@ -20,25 +30,26 @@ void ObjectDetectionCH::detectObjects()
     const NUImage& img = vbb->getOriginalImage();
     unsigned int height = img.getHeight();
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
+    vector<Obstacle> result;
+    vector<Point> horizon_points,
+                  object_points;
+    double mean_y,
+           std_dev_y;
 
-
-    // REMOVE ME
-//    const LookUpTable& lut = vbb->getLUT();
-//    cv::Mat cvimg;
-//    lut.classifyImage(img, cvimg);
-
-    vector<Vector2<double> > result;
-    vector<cv::Point2i> horizon_points,
-                        object_points;
-    convertPointTypes(vbb->getGreenHorizon().getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING), horizon_points);
-
+    //get scan points from BB
+    horizon_points = green_horizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
 
     object_points.reserve(horizon_points.size());
 
-    cv::Mat mean, std_dev;
-    meanStdDev(cv::Mat(horizon_points), mean, std_dev);
+    //calculate mean and stddev of vertical positions
+    accumulator_set<double, stats<tag::mean, tag::variance> > acc;
 
-    //cout << mean << " " << std_dev << endl;
+    BOOST_FOREACH(Point& p, horizon_points) {
+        acc(p.y);
+    }
+
+    mean_y = mean(acc);
+    std_dev_y = sqrt(variance(acc));
 
     // for each point in interpolated list
     for (unsigned int x = 0; x < horizon_points.size(); x++) {
@@ -47,7 +58,7 @@ void ObjectDetectionCH::detectObjects()
 
         // if bottom of image, assume object
         if (static_cast<unsigned int>(horizon_points.at(x).y) == height-1) {
-            object_points.push_back(cv::Point2i(horizon_points.at(x).x, height-1));
+            object_points.push_back(Point(horizon_points.at(x).x, height-1));
         }
         else {
             // scan from point to bottom of image
@@ -59,9 +70,9 @@ void ObjectDetectionCH::detectObjects()
                     green_count++;
                     // if VER_THRESHOLD green pixels found outside of acceptable range, add point
                     if (green_count == VER_THRESHOLD) {
-                        if (green_top > mean.at<double>(1) + OBJECT_THRESHOLD_MULT*std_dev.at<double>(1) + 1) {
+                        if (green_top > mean_y + OBJECT_THRESHOLD_MULT*std_dev_y + 1) {
                             //cout << "OBJECT: (" << horizon_points->at(x).x << ", " << y << ")" << endl;
-                            object_points.push_back(cv::Point2i(horizon_points.at(x).x, y));
+                            object_points.push_back(Point(horizon_points.at(x).x, y));
                         }
                         break;
                     }
@@ -73,14 +84,14 @@ void ObjectDetectionCH::detectObjects()
 
                 // if bottom reached without green, add bottom point
                 if (y == height - 1) {
-                    object_points.push_back(cv::Point2i(horizon_points.at(x).x, height-1));
+                    object_points.push_back(Point(horizon_points.at(x).x, y));
                 }
             }
         }
     }
 
     // ignore transitions very close to horizon
-    vector<cv::Point2i>::iterator it;
+    vector<Point>::iterator it;
     it = object_points.begin();
     while (it < object_points.end()) {
 //        cout << it->y - green_horizon.getYFromX(it->x) << endl;
@@ -128,29 +139,12 @@ void ObjectDetectionCH::detectObjects()
 //    cv::namedWindow("objectdetect", CV_WINDOW_KEEPRATIO);
 //    cv::imshow("objectdetect", cvimg);
 
-    convertPointTypes(object_points, result);
-    vbb->setObjectPoints(result);
+    vbb->setObstaclePoints(object_points);
 }
 
 
 bool ObjectDetectionCH::isPixelGreen(const NUImage& img, int x, int y)
 {
     const LookUpTable& LUT = VisionBlackboard::getInstance()->getLUT();
-    return ClassIndex::getColourFromIndex(LUT.classifyPixel(img(x,y))) == ClassIndex::green;
-}
-
-void ObjectDetectionCH::convertPointTypes(const vector<cv::Point2i> &cvpoints, vector<Vector2<double> > &ourpoints)
-{
-    ourpoints.clear();
-    for(unsigned int i=0; i<cvpoints.size(); i++) {
-        ourpoints.push_back(Vector2<double>(cvpoints.at(i).x, cvpoints.at(i).y));
-    }
-}
-
-void ObjectDetectionCH::convertPointTypes(const vector<Vector2<double> > &ourpoints, vector<cv::Point2i>& cvpoints)
-{
-    cvpoints.clear();
-    for(unsigned int i=0; i<ourpoints.size(); i++) {
-        cvpoints.push_back(cv::Point2i(ourpoints.at(i).x, ourpoints.at(i).y));
-    }
+    return getColourFromIndex(LUT.classifyPixel(img(x,y))) == green;
 }

@@ -275,7 +275,6 @@ void Sensor::summaryTo(ostream& output) const
             output << MatrixData;
         else if (ValidString)
             output << "\"" << StringData << "\"";
-        output << endl;
     }
 }
 
@@ -297,7 +296,6 @@ ostream& operator<< (ostream& output, const Sensor& p_sensor)
         output << p_sensor.MatrixData;
     else if (p_sensor.ValidString)
         output << p_sensor.StringData;
-    output << endl;
     return output;
 }
 

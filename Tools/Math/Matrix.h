@@ -32,8 +32,8 @@ public:
 
     void swapRows(unsigned int index1, unsigned int index2);
 	Matrix&	operator =  (const Matrix& a); // Overloaded Operator
-	inline double* operator []	(int i)	const {return &X[i*N];};
-	inline double& operator() (int i, int j){return X[i*N+j];};
+    inline double* operator []	(int i)	const {return &X[i*N];};
+    inline double& operator() (int i, int j){return X[i*N+j];};
 	
 	void print(); // print values
         std::vector<float> asVector();

@@ -9,6 +9,12 @@ LSFittedLine::LSFittedLine(){
 	clearPoints();
 }
 
+
+LSFittedLine::LSFittedLine(vector<Point> &pointlist) {
+    clearPoints();
+    addPoints(pointlist);
+}
+
 LSFittedLine::~LSFittedLine(){
     points.clear();
 }
@@ -19,8 +25,7 @@ void LSFittedLine::clearPoints(){
 	sumY = 0;
 	sumX2 = 0;
 	sumY2 = 0;
-	sumXY = 0;
-    numPoints = 0;
+    sumXY = 0;
 	MSD = 0;
     r2tls = 0;
 	points.clear();
@@ -36,35 +41,24 @@ void LSFittedLine::addPoint(Point &point){
 	sumY += point.y;
 	sumX2 += point.x * point.x;
 	sumY2 += point.y * point.y;
-	sumXY += point.x * point.y;
-	numPoints ++;
+    sumXY += point.x * point.y;
     points.push_back(point);
-    valid = numPoints >= 2;
+    valid = points.size() >= 2;
     if(valid)
         calcLine();
 }
 
 void LSFittedLine::addPoints(vector<Point>& pointlist){
     if(!pointlist.empty()) {
-        if (numPoints < 2)
-        {
-                valid = false;
-        }
-        else
-        {
-                valid = true;
-                calcLine();
-        }
         for(unsigned int i=0; i<pointlist.size(); i++) {
             sumX += pointlist[i].x;
             sumY += pointlist[i].y;
             sumX2 += pointlist[i].x * pointlist[i].x;
             sumY2 += pointlist[i].y * pointlist[i].y;
             sumXY += pointlist[i].x * pointlist[i].y;
-            numPoints++;
             points.push_back(pointlist[i]);
         }
-        valid = numPoints >= 2;
+        valid = points.size() >= 2;
         if(valid)
             calcLine();
     }
@@ -76,12 +70,11 @@ void LSFittedLine::joinLine(LSFittedLine &sourceLine)
 	sumY += sourceLine.sumY;
 	sumX2 += sourceLine.sumX2;
 	sumY2 += sourceLine.sumY2;
-	sumXY += sourceLine.sumXY;
-	numPoints += sourceLine.numPoints;
+    sumXY += sourceLine.sumXY;
     for(unsigned int p = 0; p < sourceLine.points.size(); p++) {
 		points.push_back(sourceLine.points[p]);
     }
-    valid = numPoints >= 2;
+    valid = points.size() >= 2;
     if(valid)
         calcLine();
 }
@@ -94,7 +87,7 @@ Vector2<double> LSFittedLine::combinedR2TLSandMSD(const LSFittedLine &sourceLine
     TsumX2 = sumX2 + sourceLine.sumX2;
     TsumY2 = sumY2 + sourceLine.sumY2;
     TsumXY = sumXY + sourceLine.sumXY;
-    TnumPoints = numPoints + sourceLine.numPoints;
+    TnumPoints = points.size() + sourceLine.points.size();
     Vector2<double> results;
 
     sxx = TsumX2 - TsumX*TsumX/TnumPoints;
@@ -118,6 +111,7 @@ double LSFittedLine::getr2tls () const
 void LSFittedLine::calcLine(){
 	double sxx, syy, sxy, Sigma;
 	double A = 0, B = 0, C = 0;
+    unsigned int numPoints = points.size();
 
     sxx = sumX2 - sumX*sumX/numPoints;
     syy = sumY2 - sumY*sumY/numPoints;
@@ -141,46 +135,41 @@ void LSFittedLine::calcLine(){
 	setLine(A, B, C);
 }
 
-Point LSFittedLine::getLeftPoint() const
+Vector2<Point> LSFittedLine::getEndPoints() const
 {
     float min = std::numeric_limits<float>::max();
-    vector<Point>::const_iterator p, p_min;
-    for(p = points.begin(), p_min = p; p!=points.end(); p++) {
+    float max = -std::numeric_limits<float>::max();
+    vector<Point>::const_iterator p, p_min, p_max;
+    for(p = points.begin(), p_max = p; p!=points.end(); p++) {
         float trans_x = -m_B*p->x - m_A*p->y;
         if(trans_x < min) {
             p_min = p;
             min = trans_x;
         }
-    }
-    return *p_min;
-}
-
-Point LSFittedLine::getRightPoint() const
-{
-    float max = -std::numeric_limits<float>::max();
-    vector<Point>::const_iterator p, p_max;
-    for(p = points.begin(), p_max = p; p!=points.end(); p++) {
-        float trans_x = -m_B*p->x - m_A*p->y;
-        if(trans_x > max) {
+        else if(trans_x > max) {
             p_max = p;
             max = trans_x;
         }
     }
-    return *p_max;
+    return Vector2<Point>(*p_min, *p_max);
 }
 
 double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
 {
     if(valid && other.valid) {
-        Point p11 = projectOnto(getLeftPoint()),
-              p12 = projectOnto(getRightPoint()),
-              p21 = other.projectOnto(other.getLeftPoint()),
-              p22 = other.projectOnto(other.getRightPoint());
+        Vector2<Point> ep1 = getEndPoints();
+        Vector2<Point> ep2 = other.getEndPoints();
+
+        //project onto respective lines
+        ep1.x = projectOnto(ep1.x);
+        ep1.y = projectOnto(ep1.y);
+        ep2.x = other.projectOnto(ep2.x);
+        ep2.y = other.projectOnto(ep2.y);
 
         //determine distances from the two possible pairings
-        double d1 = 0.5*( (p11-p21).abs() + (p12-p22).abs() ),
-               d2 = 0.5*( (p12-p21).abs() + (p11-p22).abs() );
-        return min(d1, d2); //return best pairing
+        double d1 = 0.5*( (ep1.x-ep2.x).abs() + (ep1.y-ep2.y).abs() ),
+               d2 = 0.5*( (ep1.y-ep2.x).abs() + (ep1.x-ep2.y).abs() );
+        return min(d1, d2); //best pairing results in minimum distance
     }
     else {
         return -1.0;    //test for this - distances should always be positive

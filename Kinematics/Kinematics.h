@@ -104,7 +104,6 @@ public:
     * @param origin2Camera The transform from the origin to the camera space
     * @return Transform matrix from the camera to the ground space.
     */
-
     static Matrix CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2Camera);
 
     /*!

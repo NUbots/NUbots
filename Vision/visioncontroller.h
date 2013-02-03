@@ -16,7 +16,9 @@
 #include "Vision/VisionWrapper/datawrappercurrent.h"
 #include "Vision/Modules/segmentfilter.h"
 #include "Vision/Modules/linedetector.h"
+#include "Vision/Modules/cornerdetector.h"
 #include "Vision/Modules/goaldetector.h"
+#include "Vision/Modules/balldetector.h"
 
 class VisionController
 {
@@ -64,6 +66,8 @@ private:
     VisionBlackboard* m_blackboard;     //! @variable Reference to singleton Blackboard for vision system
     SegmentFilter m_segment_filter;       //! @variable Segment filter object for pre-classification filtering
 
+    BallDetector m_ball_detector;
+    CornerDetector m_corner_detector;
     LineDetector* m_line_detector_sam;
     LineDetector* m_line_detector_ransac;
     GoalDetector* m_goal_detector_hist;

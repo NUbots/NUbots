@@ -9,7 +9,7 @@ class LineDetectorRANSAC : public LineDetector
 {
 public:
     LineDetectorRANSAC();
-    void run();
+    virtual vector<LSFittedLine> run();
 
 private:
     /*unsigned*/ int m_n,

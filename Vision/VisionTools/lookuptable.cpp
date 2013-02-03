@@ -7,7 +7,7 @@ LookUpTable::LookUpTable()
 {
     LUTbuffer = new unsigned char[LUTTools::LUT_SIZE];
     for(int i=0; i<LUTTools::LUT_SIZE; i++)
-        LUTbuffer[i] = ClassIndex::unclassified;
+        LUTbuffer[i] = Vision::unclassified;
     LUT = LUTbuffer;
 }
 
@@ -64,7 +64,7 @@ void LookUpTable::classifyImage(const NUImage& src, cv::Mat& dest) const
         unsigned char* row = dest.ptr<unsigned char>(y);
         for (int x = 0; x < width; x++)
         {
-            ClassIndex::getColourIndexAsRGB((int)classifyPixel(src(x,y)), r, g, b);
+            Vision::getColourAsRGB(classifyPixel(src(x,y)), r, g, b);
             row[3*x] = b;
             row[3*x+1] = g;
             row[3*x+2] = r;
@@ -75,6 +75,6 @@ void LookUpTable::classifyImage(const NUImage& src, cv::Mat& dest) const
 void LookUpTable::zero()
 {
     for(int i=0; i<LUTTools::LUT_SIZE; i++)
-        LUTbuffer[i] = ClassIndex::unclassified;
+        LUTbuffer[i] = Vision::unclassified;
     LUT = LUTbuffer;
 }

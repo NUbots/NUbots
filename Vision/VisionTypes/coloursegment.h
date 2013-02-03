@@ -18,24 +18,26 @@
 #include "Vision/VisionTools/classificationcolours.h"
 #include "Tools/Math/Vector2.h"
 
-using namespace std;
+using namespace Vision;
+using std::vector;
+using std::ostream;
 
 class ColourSegment
 {
 public:
-    ColourSegment() {set(Vector2<double>(0,0), Vector2<double>(0,0), ClassIndex::invalid);}
-    ColourSegment(const Vector2<double>& start, const Vector2<double>& end, const ClassIndex::Colour& colour) {set(start, end, colour);}
+    ColourSegment() {set(Point(0,0), Point(0,0), invalid);}
+    ColourSegment(const Point& start, const Point& end, const Colour& colour) {set(start, end, colour);}
 
     //! Returns the length of the segment in pixels.
     unsigned int getLength() const {return m_length_pixels;}
     //! Returns the colour of the segment.
-    ClassIndex::Colour getColour() const {return m_colour;}
+    Colour getColour() const {return m_colour;}
     //! Returns the start location of the segment in pixel coordinates.
-    const Vector2<double>& getStart() const {return m_start;}
+    const Point& getStart() const {return m_start;}
     //! Returns the end location of the segment in pixel coordinates.
-    const Vector2<double>& getEnd() const {return m_end;}
+    const Point& getEnd() const {return m_end;}
     //! Returns the end location of the segment in pixel coordinates.
-    const Vector2<double>& getCentre() const {return m_centre;}
+    const Point& getCentre() const {return m_centre;}
 
 
     /**
@@ -44,9 +46,9 @@ public:
       * @param end The end location of the segment.
       * @param colour The colour of the segment.
       */
-    void set(const Vector2<double>& start, const Vector2<double>& end, ClassIndex::Colour colour);
+    void set(const Point& start, const Point& end, Colour colour);
     //! Set the colour of the segment.
-    void setColour(ClassIndex::Colour colour);
+    void setColour(Colour colour);
     /**
       * Joins the given segment to this one. This segment will now be as long as the total
       * length of the two provided the following are true:
@@ -66,9 +68,9 @@ public:
     
 
 private:
-    ClassIndex::Colour m_colour;    //! @variable The colour of the segment.
+    Colour m_colour;    //! @variable The colour of the segment.
     unsigned int m_length_pixels;   //! @variable The length of the segment in pixels.
-    Vector2<double> m_start,              //! @variable The start screen location.
+    Point m_start,              //! @variable The start screen location.
                     m_end,                //! @variable The end  screenlocation.
                     m_centre;       //! @variable The centre screenlocation.
 };

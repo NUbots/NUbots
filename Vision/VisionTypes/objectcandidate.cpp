@@ -21,17 +21,17 @@ ObjectCandidate::ObjectCandidate()
 
 ObjectCandidate::ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right)
 {
-    ObjectCandidate(top_left, bottom_right, ClassIndex::unclassified);
+    ObjectCandidate(top_left, bottom_right, unclassified);
 }
 
-ObjectCandidate::ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, ClassIndex::Colour colour): colour(colour)
+ObjectCandidate::ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, Colour colour): colour(colour)
 {
     topLeft = top_left;
     bottomRight = bottom_right;
     recalculate();
 }
 
-ObjectCandidate::ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, ClassIndex::Colour colour, const vector<ColourSegment>& candidate_segments): colour(colour)
+ObjectCandidate::ObjectCandidate(const Vector2<double>& top_left, const Vector2<double>& bottom_right, Colour colour, const vector<ColourSegment>& candidate_segments): colour(colour)
 {
     topLeft = top_left;
     bottomRight = bottom_right;    
@@ -87,12 +87,12 @@ float ObjectCandidate::getAspect() const
     return aspect;
 }
 
-ClassIndex::Colour ObjectCandidate::getColour() const
+Colour ObjectCandidate::getColour() const
 {
     return colour;
 }
 
-void ObjectCandidate::setColour(ClassIndex::Colour c)
+void ObjectCandidate::setColour(Colour c)
 {
     colour = c;
 }

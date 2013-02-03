@@ -76,7 +76,7 @@ public:
 
     void debugRefresh() {}
     bool debugPublish(const vector<Ball>& data);
-    bool debugPublish(const vector<Beacon>& data);
+    //bool debugPublish(const vector<Beacon>& data);
     bool debugPublish(const vector<Goal>& data);
     bool debugPublish(const vector<Obstacle>& data);
     bool debugPublish(const vector<FieldLine>& data);

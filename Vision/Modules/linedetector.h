@@ -12,8 +12,9 @@ class LineDetector
 {
 public:
     LineDetector();
+    virtual ~LineDetector();
 
-    virtual void run() = 0;
+    virtual vector<LSFittedLine> run() = 0;
 
 protected:
     vector<LSFittedLine> mergeColinear(vector<LSFittedLine> lines, double angle_threshold, double distance_threshold) const;

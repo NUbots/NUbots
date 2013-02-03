@@ -42,6 +42,7 @@ public:
     static int GOAL_BINS;
     static int GOAL_MIN_THRESHOLD;
     static float GOAL_SDEV_THRESHOLD;
+    static float GOAL_RANSAC_MATCHING_TOLERANCE;
 
     //! Beacon filtering constants
     static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;  //! Whether to throw out beacons whose base is above the kinematics horizon.

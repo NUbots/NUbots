@@ -8,6 +8,7 @@
 #include "scanlines.h"
 #include "debug.h"
 #include "Vision/visionconstants.h"
+#include <boost/foreach.hpp>
 
 void ScanLines::generateScanLines()
 {
@@ -15,7 +16,7 @@ void ScanLines::generateScanLines()
         debug << "ScanLines::generateScanLines() - Begin" << endl;
     #endif
     VisionBlackboard *vbb = VisionBlackboard::getInstance();
-    vector<unsigned int> horizontal_scan_lines;
+    vector<int> horizontal_scan_lines;
     const vector<Vector2<double> >& horizon_points = vbb->getGreenHorizon().getInterpolatedPoints();   //need this to get the left and right
 
     Vector2<double> left = horizon_points.front();
@@ -28,15 +29,15 @@ void ScanLines::generateScanLines()
         errorlog << "right: " << right.y << endl;
     
     //unsigned int bottom_horizontal_scan = (left.y + right.y) / 2;
-    unsigned int bottom_horizontal_scan = vbb->getImageHeight() - 1;    //we need h-scans under the GH for field lines
+    int bottom_horizontal_scan = vbb->getImageHeight() - 1;    //we need h-scans under the GH for field lines
 
-    if(static_cast<int>(bottom_horizontal_scan) >= vbb->getImageHeight())
-        errorlog << "cast avg: " << static_cast<int>(bottom_horizontal_scan) << " avg: " << bottom_horizontal_scan << endl;
+    if(bottom_horizontal_scan >= vbb->getImageHeight())
+        errorlog << "avg: " << bottom_horizontal_scan << endl;
 
-    for (int y = static_cast<int>(bottom_horizontal_scan); y >= 0; y -= VisionConstants::HORIZONTAL_SCANLINE_SPACING) {
-        if(static_cast<unsigned int>(y) >= vbb->getImageHeight())
-            errorlog << "sy: " << static_cast<unsigned int>(y) << " y: " << y << endl;
-        horizontal_scan_lines.push_back(static_cast<unsigned int>(y));
+    for (int y = bottom_horizontal_scan; y >= 0; y -= VisionConstants::HORIZONTAL_SCANLINE_SPACING) {
+        if(y >= vbb->getImageHeight())
+            errorlog << " y: " << y << endl;
+        horizontal_scan_lines.push_back(y);
     }
     
     vbb->setHorizontalScanlines(horizontal_scan_lines);
@@ -49,11 +50,11 @@ void ScanLines::classifyHorizontalScanLines()
     #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
-    const vector<unsigned int>& horizontal_scan_lines = vbb->getHorizontalScanlines();
+    const vector<int>& horizontal_scan_lines = vbb->getHorizontalScanlines();
     vector< vector<ColourSegment> > classifications;
 
-    for(unsigned int i=0; i<horizontal_scan_lines.size(); i++) {
-        classifications.push_back(classifyHorizontalScan(*vbb, img, horizontal_scan_lines.at(i)));
+    BOOST_FOREACH(int y, horizontal_scan_lines) {
+        classifications.push_back(classifyHorizontalScan(*vbb, img, y));
     }
     
     vbb->setHorizontalSegments(classifications);
@@ -79,17 +80,17 @@ void ScanLines::classifyVerticalScanLines()
 vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& vbb, const NUImage& img, unsigned int y)
 {
     //simple and nasty first
-    //ClassIndex::Colour previous, current, next
+    //Colour previous, current, next
     int     start_pos = 0,
             x;
     const LookUpTable& lut = vbb.getLUT();
-    ClassIndex::Colour start_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(0,y))),
+    Colour start_colour = getColourFromIndex(lut.classifyPixel(img(0,y))),
                         current_colour;
     ColourSegment segment;
     vector<ColourSegment> result;
 
     for(x = 0; x < img.getWidth(); x++) {
-        current_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(x,y)));
+        current_colour = getColourFromIndex(lut.classifyPixel(img(x,y)));
         if(current_colour != start_colour) {
             //start of new segment
             //make new segment and push onto vector
@@ -118,9 +119,9 @@ vector<ColourSegment> ScanLines::classifyVerticalScan(const VisionBlackboard& vb
     if(start.y >= img.getHeight() || start.x > img.getWidth())
         errorlog << start << endl;
     //simple and nasty first
-    //ClassIndex::Colour previous, current, next
+    //Colour previous, current, next
     const LookUpTable& lut = vbb.getLUT();
-    ClassIndex::Colour start_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(start.x,start.y))),
+    Colour start_colour = getColourFromIndex(lut.classifyPixel(img(start.x,start.y))),
                         current_colour;
     ColourSegment segment;
     vector<ColourSegment> result;
@@ -129,7 +130,7 @@ vector<ColourSegment> ScanLines::classifyVerticalScan(const VisionBlackboard& vb
             y;
             
     for(y = start.y; y < img.getHeight(); y++) {
-        current_colour = ClassIndex::getColourFromIndex(lut.classifyPixel(img(x,y)));
+        current_colour = getColourFromIndex(lut.classifyPixel(img(x,y)));
         if(current_colour != start_colour) {
             //start of new segment
             //make new segment and push onto vector

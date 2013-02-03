@@ -7,7 +7,7 @@
 #include "Vision/basicvisiontypes.h"
 
 using std::vector;
-using VisionID::ScanDirection;
+using Vision::ScanDirection;
 
 class SegmentedRegion
 {

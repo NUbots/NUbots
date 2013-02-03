@@ -4,6 +4,7 @@
 #include "Tools/Math/General.h"
 #include "Tools/Math/Vector2.h"
 
+#include <boost/foreach.hpp>
 
 bool operator < (const Point& point1, const Point& point2) {
     if(point1.x < point2.x) {
@@ -258,13 +259,31 @@ Point Line::projectOnto(Point pt) const
         //prevent division by zero with norm.norm
         return pt;
     }
-    else if(isVertical()) {
-        return Point(-m_C/m_A, 0);
-    }
     else {
         Point shift(0, m_C);
         Point norm(m_B, -m_A);
-        return norm*((Vector2<double>(pt.x,pt.y)-shift)*norm/(norm*norm)) + shift;
+        return norm*((pt-shift)*norm/(norm*norm)) + shift;
+    }
+}
+
+vector<Point> Line::projectOnto(const vector<Point>& pts) const
+{
+    if(!isValid()) {
+        //prevent division by zero with norm.norm
+        return pts;
+    }
+    else {
+        //replace later with more optimised version
+        vector<Point> result;
+        BOOST_FOREACH(const Point& p, pts) {
+            result.push_back(projectOnto(p));
+        }
+
+        //Point shift(0, m_C);
+        //Point norm(m_B, -m_A);
+        //return norm*((pt-shift)*norm/(norm*norm)) + shift;
+
+        return result;
     }
 }
 

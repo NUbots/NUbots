@@ -58,7 +58,7 @@ VisionBlackboard* VisionBlackboard::getInstance()
 */
 void VisionBlackboard::setGreenHullPoints(const vector<Vector2<double> >& points)
 {
-    green_horizon.set(points);
+    m_green_horizon.set(points);
 }
 
 /**
@@ -67,20 +67,20 @@ void VisionBlackboard::setGreenHullPoints(const vector<Vector2<double> >& points
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setGreenHorizonScanPoints(const vector<Vector2<double> >& points)
+void VisionBlackboard::setGreenHorizonScanPoints(const vector<Point>& points)
 {
-    green_horizon_scan_points = points;
+    gh_scan_points = points;
 }
 
 /**
-*   @brief sets the object point set.
-*   @param points A vector of pixel locations for objects.
+*   @brief sets the obstacle point set.
+*   @param points A vector of pixel locations for potential obstacles.
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setObjectPoints(const vector<Vector2<double> >& points)
+void VisionBlackboard::setObstaclePoints(const vector<Point>& points)
 {
-    object_points = points;
+    obstacle_points = points;
 }
 
 /**
@@ -132,13 +132,41 @@ void VisionBlackboard::addLine(const FieldLine& newline)
     m_lines.push_back(newline);
 }
 
+void VisionBlackboard::addGoals(const vector<Goal>& newgoals)
+{
+    if(!newgoals.empty())
+        m_goals.insert(m_goals.end(), newgoals.begin(), newgoals.end());
+}
+
+//void VisionBlackboard::addBeacons(const vector<Beacon>& newbeacons)
+//{
+//    m_beacons.insert(m_beacons.end(), newbeacons.begin(), newbeacons.end());
+//}
+
+void VisionBlackboard::addBalls(const vector<Ball>& newballs)
+{
+    if(!newballs.empty())
+        m_balls.insert(m_balls.end(), newballs.begin(), newballs.end());
+}
+void VisionBlackboard::addObstacles(const vector<Obstacle>& newobstacles)
+{
+    if(!newobstacles.empty())
+        m_obstacles.insert(m_obstacles.end(), newobstacles.begin(), newobstacles.end());
+}
+
+void VisionBlackboard::addLines(const vector<FieldLine>& newlines)
+{
+    if(!newlines.empty())
+        m_lines.insert(m_lines.end(), newlines.begin(), newlines.end());
+}
+
 /**
 *   @brief sets the horizontal scan lines.
 *   @param horizontal_scanlines A vector of unsigned ints defining horizontal scanlines.
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setHorizontalScanlines(const vector<unsigned int>& scanlines)
+void VisionBlackboard::setHorizontalScanlines(const vector<int>& scanlines)
 {
     horizontal_scanlines = scanlines;
 }
@@ -149,7 +177,7 @@ void VisionBlackboard::setHorizontalScanlines(const vector<unsigned int>& scanli
 */
 void VisionBlackboard::setHorizontalSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
 {
-    horizontal_segmented_scanlines.set(segmented_scanlines, VisionID::HORIZONTAL);
+    horizontal_segmented_scanlines.set(segmented_scanlines, HORIZONTAL);
 }
 
 /**
@@ -158,7 +186,7 @@ void VisionBlackboard::setHorizontalSegments(const vector<vector<ColourSegment> 
 */
 void VisionBlackboard::setVerticalSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
 {
-    vertical_segmented_scanlines.set(segmented_scanlines, VisionID::VERTICAL);
+    vertical_segmented_scanlines.set(segmented_scanlines, VERTICAL);
 }
 
 /**
@@ -167,7 +195,7 @@ void VisionBlackboard::setVerticalSegments(const vector<vector<ColourSegment> >&
 */
 void VisionBlackboard::setHorizontalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
 {
-    horizontal_filtered_segments.set(segmented_scanlines, VisionID::HORIZONTAL);
+    horizontal_filtered_segments.set(segmented_scanlines, HORIZONTAL);
 }
 
 /**
@@ -176,7 +204,7 @@ void VisionBlackboard::setHorizontalFilteredSegments(const vector<vector<ColourS
 */
 void VisionBlackboard::setVerticalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
 {
-    vertical_filtered_segments.set(segmented_scanlines, VisionID::VERTICAL);
+    vertical_filtered_segments.set(segmented_scanlines, VERTICAL);
 }
 
 /**
@@ -184,7 +212,7 @@ void VisionBlackboard::setVerticalFilteredSegments(const vector<vector<ColourSeg
 *   @param vfo_if The identifier of the field object
 *   @param transitions A vector of transitions that matched the horizontal rules.
 */
-void VisionBlackboard::setHorizontalTransitions(VisionFieldObject::COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
+void VisionBlackboard::setHorizontalTransitions(COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
 {
     matched_horizontal_segments[colour_class] = transitions;
 }
@@ -194,7 +222,7 @@ void VisionBlackboard::setHorizontalTransitions(VisionFieldObject::COLOUR_CLASS 
 *   @param vfo_if The identifier of the field object
 *   @param transitions A vector of transitions that matched the vertical rules.
 */
-void VisionBlackboard::setVerticalTransitions(VisionFieldObject::COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
+void VisionBlackboard::setVerticalTransitions(COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
 {
     matched_vertical_segments[colour_class] = transitions;
 }
@@ -203,7 +231,7 @@ void VisionBlackboard::setVerticalTransitions(VisionFieldObject::COLOUR_CLASS co
 *   @brief sets the horizontal transition rule matches for all vision field objects.
 *   @param t_map A map from COLOUR_CLASSs to transitions that matched the horizontal rules.
 */
-void VisionBlackboard::setHorizontalTransitionsMap(const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &t_map)
+void VisionBlackboard::setHorizontalTransitionsMap(const map<COLOUR_CLASS, vector<ColourSegment> > &t_map)
 {
     matched_horizontal_segments = t_map;
 }
@@ -212,7 +240,7 @@ void VisionBlackboard::setHorizontalTransitionsMap(const map<VisionFieldObject::
 *   @brief sets the vertical transition rule matches for all vision field objects.
 *   @param t_map A map from COLOUR_CLASSs to transitions that matched the vertical rules.
 */
-void VisionBlackboard::setVerticalTransitionsMap(const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &t_map)
+void VisionBlackboard::setVerticalTransitionsMap(const map<COLOUR_CLASS, vector<ColourSegment> > &t_map)
 {
     matched_vertical_segments = t_map;
 }
@@ -222,144 +250,34 @@ void VisionBlackboard::setVerticalTransitionsMap(const map<VisionFieldObject::CO
 */
 const GreenHorizon& VisionBlackboard::getGreenHorizon() const
 {
-    return green_horizon;
-}
-
-/**
-*   @brief returns the green horizon scan point set.
-*   @return points A vector of pixel locations for the green horizon scan.
-*/
-const vector<Vector2<double> >& VisionBlackboard::getGreenHorizonScanPoints() const
-{
-    return green_horizon_scan_points;
+    return m_green_horizon;
 }
 
 /**
 *   @brief returns the object point set.
 *   @return points A vector of pixel locations for objects.
 */
-const vector<Vector2<double> >& VisionBlackboard::getObjectPoints() const
+const vector<Vector2<double> >& VisionBlackboard::getObstaclePoints() const
 {
-    return object_points;
+    return obstacle_points;
 }
 
-/**
-*   @brief returns a pointer to the Lookup Table.
-*   @return A pointer to the LUT.
-*/
+/// @brief returns a pointer to the Lookup Table.
 const LookUpTable& VisionBlackboard::getLUT() const
 {
     return LUT;
 }
 
-/**
-  * Applies radial distortion correction to the given pixel location.
-  * @param pt The pixel location to correct.
-  */
-Vector2<float> VisionBlackboard::correctDistortion(const Vector2<float>& pt)
-{
-    float width_offset = original_image->getWidth()*0.5;
-    float height_offset = original_image->getHeight()*0.5;
-    //get position relative to centre
-    Vector2<float> centre_relative = pt - Vector2<float>(width_offset,height_offset);
-    //calculate squared distance from centre
-    float r2 = centre_relative.x*centre_relative.x + centre_relative.y*centre_relative.y;
-    //calculate correction factor -> 1+kr^2
-    float corr_factor = 1 + VisionConstants::RADIAL_CORRECTION_COEFFICIENT*r2;
-    //multiply by factor
-    Vector2<float> result = centre_relative* corr_factor;
-    //scale the edges back out to meet again
-    result.x /= (1+VisionConstants::RADIAL_CORRECTION_COEFFICIENT*width_offset*width_offset);
-    result.y /= (1+VisionConstants::RADIAL_CORRECTION_COEFFICIENT*height_offset*height_offset);
-    //get the original position back from the centre relative position
-    return Vector2<float>(result.x, result.y) + Vector2<float>(width_offset,height_offset);  
-}
-
-/**
-  * Calculates the angle between the image centre and the provided horizontal position in
-  * the xy plane.
-  * @param x The horizontal pixel location.
-  */
-double VisionBlackboard::calculateBearing(double x) const {
-    return atan( (original_image->getWidth()*0.5-x)  * (tan(m_FOV.x*0.5)) / (original_image->getWidth()*0.5) );
-}
-
-/**
-  * Calculates the angle between the image centre and the provided vertical position in
-  * the xz plane.
-  * @param y The vertical pixel location.
-  */
-double VisionBlackboard::calculateElevation(double y) const {
-    return atan( (original_image->getHeight()*0.5-y) * (tan(m_FOV.y*0.5)) / (original_image->getHeight()*0.5) );
-}
-
-/**
-*   @brief returns the kinematics horizon line.
-*   @return kinematics_horizon A Line defining the kinematics horizon.
-*/
+/// @brief returns the kinematics horizon line.
 const Horizon& VisionBlackboard::getKinematicsHorizon() const
 {
     return kinematics_horizon;
 }
 
-//! Returns whether the camera to ground transform vector is valid.
-bool VisionBlackboard::isCameraToGroundValid() const
+/// @brief returns the transformations object.
+const Transformer& VisionBlackboard::getTransformer() const
 {
-    return ctgvalid;
-}
-
-//! Returns the camera to ground transform vector.
-const vector<float>& VisionBlackboard::getCameraToGroundVector() const
-{
-    return ctgvector;
-}
-
-//! Returns whether the camera transform vector is valid.
-bool VisionBlackboard::isCameraTransformValid() const
-{
-    return ctvalid;
-}
-
-//! Returns the camera transform vector.
-const vector<float>& VisionBlackboard::getCameraTransformVector() const
-{
-    return ctvector;
-}
-
-//! Returns whether the camera pitch is valid.
-bool VisionBlackboard::isCameraPitchValid() const
-{
-    return camera_pitch_valid;
-}
-
-//! Returns the camera pitch.
-float VisionBlackboard::getCameraPitch() const 
-{
-    return camera_pitch;
-}
-
-//! Returns whether the camera height is valid.
-bool VisionBlackboard::isCameraHeightValid() const
-{
-    return camera_height_valid;
-}
-
-//! Returns the camera height.
-float VisionBlackboard::getCameraHeight() const
-{
-    return camera_height;
-}
-
-//! Returns whether the body pitch is valid.
-bool VisionBlackboard::isBodyPitchValid() const
-{
-    return body_pitch_valid;
-}
-
-//! Returns the body pitch.
-float VisionBlackboard::getBodyPitch() const 
-{
-    return body_pitch;
+    return m_transformer;
 }
 
 //! Returns the list of found balls.
@@ -396,7 +314,7 @@ vector<FieldLine>& VisionBlackboard::getLines()
 *   @brief returns the set of heights for horizontal scan lines.
 *   @return horizontal_scanlines A vector of unsigned ints defining horizontal scanlines.
 */
-const vector<unsigned int>& VisionBlackboard::getHorizontalScanlines() const
+const vector<int>& VisionBlackboard::getHorizontalScanlines() const
 {
     return horizontal_scanlines;
 }
@@ -447,7 +365,7 @@ const SegmentedRegion& VisionBlackboard::getVerticalFilteredRegion() const
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
 */
-const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(VisionFieldObject::COLOUR_CLASS colour_class)
+const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(COLOUR_CLASS colour_class)
 {
     return matched_horizontal_segments[colour_class];
 }
@@ -462,7 +380,7 @@ const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(VisionFi
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
 */
-const vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(VisionFieldObject::COLOUR_CLASS colour_class)
+const vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(COLOUR_CLASS colour_class)
 {
     return matched_vertical_segments[colour_class];
 }
@@ -471,7 +389,7 @@ const vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(VisionFiel
 *   @brief returns the horizontal transition rule matches for all VFOs
 *   @return horizontal_segments The horizontal transition rule matches for all VFOs
 */
-const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getHorizontalTransitionsMap() const
+const map<COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getHorizontalTransitionsMap() const
 {
     return matched_horizontal_segments;
 }
@@ -480,7 +398,7 @@ const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &VisionBlackb
 *   @brief returns the vertical transition rule matches for all VFOs
 *   @return vertical_segments The vertical transition rule matches for all VFOs
 */
-const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getVerticalTransitionsMap() const
+const map<COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getVerticalTransitionsMap() const
 {
     return matched_vertical_segments;
 }
@@ -512,85 +430,10 @@ int VisionBlackboard::getImageHeight() const
     return original_image->getHeight();
 }
 
-//! @brief returns the field of view of the camera.
+/// @brief returns the horizontal and vertical field of view of the camera
 Vector2<double> VisionBlackboard::getFOV() const
 {
-    return m_FOV;
-}
-
-//! @brief returns the effective camera distance in pixels.
-double VisionBlackboard::getCameraDistanceInPixels() const
-{
-    return effective_camera_dist_pixels;
-}
-
-/**
-  * Calculates the distance to an object at a given point assuming the object is only the same
-  * plane as the robots feet. This is useful as the point of contact with the ground for all field
-  * objects can easily be identified visually.
-  * @param bearing The angle between the image centre and point of interest in the xy plane.
-  * @param elevation The angle between the image centre and point of interest in the xz plane.
-  * @param distance A reference parameter to return the distance via.
-  * @return Whether the distance calculated is valid. Some of the transforms require kinematics
-  *     data that may not be available.
-  */
-bool VisionBlackboard::distanceToPoint(float bearing, float elevation, float& distance) const
-{
-    #if VISION_BLACKBOARD_VERBOSITY > 1
-        debug << "VisionBlackboard::distanceToPoint: called with bearing: " << bearing << " elevation: " << elevation << " VisionConstants::D2P_ANGLE_CORRECTION: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
-    #endif
-    float theta = 0;
-    if(camera_height_valid && camera_pitch_valid) {
-        //resultant angle inclusive of body pitch, camera pitch, pixel elevation and angle correction factor
-        theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
-        #if VISION_BLACKBOARD_VERBOSITY > 1
-            debug << "VisionBlackboard::distanceToPoint: theta: " << theta << endl;
-        #endif
-        if(VisionConstants::D2P_INCLUDE_BODY_PITCH) {
-            #if VISION_BLACKBOARD_VERBOSITY > 1
-                debug << "VisionBlackboard::distanceToPoint: include body pitch" << endl;
-            #endif
-            if(body_pitch_valid) {
-                #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::distanceToPoint: body pitch valid: " << body_pitch << endl;
-                #endif
-                distance = camera_height / cos(theta - body_pitch) / cos(bearing);
-                #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::distanceToPoint: distance: " << distance << endl;
-                #endif
-                return true;
-            }
-            else {
-                #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::distanceToPoint: body pitch invalid" << endl;
-                #endif
-                distance = 0;
-                return false;
-            }
-        }
-        else {
-            #if VISION_BLACKBOARD_VERBOSITY > 1
-                debug << "VisionBlackboard::distanceToPoint: don't include body pitch" << endl;
-            #endif
-            distance = camera_height / cos(theta) / cos(bearing);
-            #if VISION_BLACKBOARD_VERBOSITY > 1
-                debug << "VisionBlackboard::distanceToPoint: distance: " << distance << endl;
-            #endif
-            return true;
-        }
-    }
-    else {
-        #if VISION_BLACKBOARD_VERBOSITY > 1
-            debug << "VisionBlackboard::distanceToPoint: ";
-            if(!camera_height_valid)
-                 debug << "camera height invalid ";
-            if(!camera_pitch_valid)
-                debug << "camera height invalid ";
-            debug << endl;
-        #endif
-        distance = 0;
-        return false;
-    }
+    return m_transformer.getFOV();
 }
 
 /*! @brief Retrieves camera settings from the wrapper and returns them.
@@ -609,21 +452,6 @@ void VisionBlackboard::updateLUT()
     LUT = wrapper->getLUT();
 }
 
-//! Calculate the field of view and effective camera distance in pixels.
-void VisionBlackboard::calculateFOVAndCamDist()
-{
-    #if VISION_BLACKBOARD_VERBOSITY > 1
-        debug << "VisionBlackboard::calculateFOVAndCamDist - Begin" << endl;
-    #endif  
-    
-    m_FOV = Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov);
-    effective_camera_dist_pixels = (0.5*original_image->getWidth())/tan(0.5*m_FOV.x);
-    
-    #if VISION_BLACKBOARD_VERBOSITY > 1
-        debug << "VisionBlackboard::calculateFOVAndCamDist - End" << endl;
-    #endif  
-}
-
 /**
 *   @brief Retrieves a new image and sensor data from the wrapper.
 *   This method instructs the wrapper to update itself, then grabs the new information 
@@ -631,28 +459,39 @@ void VisionBlackboard::calculateFOVAndCamDist()
 */
 void VisionBlackboard::update()
 {
-    #if VISION_BLACKBOARD_VERBOSITY > 1
-        debug << "VisionBlackboard::update() - Begin" << endl;
-    #endif
-        
-    //update sensor data copies
-    ctgvalid = wrapper->getCTGVector(ctgvector);
-    ctvalid = wrapper->getCTVector(ctvector);
+#if VISION_BLACKBOARD_VERBOSITY > 1
+    debug << "VisionBlackboard::update() - Begin" << endl;
+#endif
+
+    //get new image pointer
+    original_image = wrapper->getFrame();
+
+//    ctgvalid = wrapper->getCTGVector(ctgvector);
+//    ctvalid = wrapper->getCTVector(ctvector);
+
+    bool camera_pitch_valid, camera_height_valid, body_pitch_valid;
+    float camera_pitch, camera_height, body_pitch;
+
+    //get data copies from wrapper
     camera_pitch_valid = wrapper->getCameraPitch(camera_pitch);
     camera_height_valid = wrapper->getCameraHeight(camera_height);
     body_pitch_valid = wrapper->getBodyPitch(body_pitch);
-    //get new image pointer
-    original_image = wrapper->getFrame();
-    
-    //Get updated kinematics data
+
+    bool ctg_valid;
+    vector<float> ctg_vector;
+
+    ctg_valid = wrapper->getCTGVector(ctg_vector);
+
+    //setup transformer
+    m_transformer.setKinematicParams(camera_pitch_valid, camera_pitch,
+                                     camera_height_valid, camera_height,
+                                     body_pitch_valid, body_pitch,
+                                     ctg_valid, ctg_vector);
+    m_transformer.setCamParams(Vector2<double>(original_image->getWidth(), original_image->getHeight()),
+                               Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov));
+
     kinematics_horizon = wrapper->getKinematicsHorizon();
     checkKinematicsHorizon();
-    
-    //calculate the field of view and effective camera distance
-    calculateFOVAndCamDist();
-    #if VISION_BLACKBOARD_VERBOSITY > 1
-        debug << "VisionBlackboard::update() - Finish" << endl;
-    #endif
         
     //clear intermediates
     matched_horizontal_segments.clear();
@@ -665,6 +504,10 @@ void VisionBlackboard::update()
     m_obstacles.clear();
     m_lines.clear();
     m_vfos.clear();
+
+#if VISION_BLACKBOARD_VERBOSITY > 1
+    debug << "VisionBlackboard::update() - Finish" << endl;
+#endif
 }
 
 /**
@@ -706,13 +549,13 @@ void VisionBlackboard::debugPublish() const
         debug << "VisionBlackboard::debugPublish() - Begin" << endl;
     #endif
     vector<Vector2<double> > pts;
-    map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> >::const_iterator it;
+    map<COLOUR_CLASS, vector<ColourSegment> >::const_iterator it;
     vector<ColourSegment> v_s;
 
 #if VISION_BLACKBOARD_VERBOSITY > 1
     debug << "VisionBlackboard::debugPublish - " << endl;
     debug << "kinematics_horizon: " << kinematics_horizon.getA() << " " << kinematics_horizon.getB() << " " << kinematics_horizon.getC() << endl;
-    debug << "horizon_scan_points: " << green_horizon_scan_points.size() << endl;
+    debug << "horizon_scan_points: " << m_green_horizon.getOriginalPoints().size() << endl;
     debug << "object_points: " << object_points.size() << endl;
     debug << "horizontal_scanlines: " << horizontal_scanlines.size() << endl;
     debug << "horizontal_segmented_scanlines: " << horizontal_segmented_scanlines.getSegments().size() << endl;
@@ -732,27 +575,27 @@ void VisionBlackboard::debugPublish() const
 #endif
 
     wrapper->debugRefresh();
-    wrapper->debugPublish(DataWrapper::DBID_IMAGE, original_image);
+    wrapper->debugPublish(DBID_IMAGE, original_image);
     
     //horizon
     pts.clear();
     if(!kinematics_horizon.isVertical()) {
         pts.push_back(Vector2<double>(0, kinematics_horizon.findYFromX(0)));
         pts.push_back(Vector2<double>(original_image->getWidth(), kinematics_horizon.findYFromX(original_image->getWidth())));
-        wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts);
+        wrapper->debugPublish(DBID_HORIZON, pts);
     }
     else {
         errorlog << "VisionBlackboard::publishDebug - vertical horizon!" << endl;
     }
     
     //horizon scans
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_SCANS, green_horizon_scan_points);
+    wrapper->debugPublish(DBID_GREENHORIZON_SCANS, gh_scan_points);
     
     //horizon points
-    wrapper->debugPublish(DataWrapper::DBID_GREENHORIZON_FINAL, green_horizon.getInterpolatedPoints());
+    wrapper->debugPublish(DBID_GREENHORIZON_FINAL, m_green_horizon);
     
     //object points
-    wrapper->debugPublish(DataWrapper::DBID_OBJECT_POINTS, object_points);
+    wrapper->debugPublish(DBID_OBJECT_POINTS, obstacle_points);
     
     //field objects
     wrapper->debugPublish(m_goals);
@@ -766,29 +609,29 @@ void VisionBlackboard::debugPublish() const
     for(unsigned int i=0; i<horizontal_scanlines.size(); i++) {
         pts.push_back(Vector2<double>(0, horizontal_scanlines.at(i)));
     }
-    wrapper->debugPublish(DataWrapper::DBID_H_SCANS, pts);
+    wrapper->debugPublish(DBID_H_SCANS, pts);
     
     //vertical scans
-    wrapper->debugPublish(DataWrapper::DBID_V_SCANS, green_horizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING));
+    wrapper->debugPublish(DBID_V_SCANS, m_green_horizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING));
     
     //horizontal segments
-    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, horizontal_segmented_scanlines);
+    wrapper->debugPublish(DBID_SEGMENTS, horizontal_segmented_scanlines);
     
     //vertical segments
-    wrapper->debugPublish(DataWrapper::DBID_SEGMENTS, vertical_segmented_scanlines);
+    wrapper->debugPublish(DBID_SEGMENTS, vertical_segmented_scanlines);
     
     //horizontal filtered segments
-    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, horizontal_filtered_segments);
+    wrapper->debugPublish(DBID_FILTERED_SEGMENTS, horizontal_filtered_segments);
     
     //vertical filtered segments
-    wrapper->debugPublish(DataWrapper::DBID_FILTERED_SEGMENTS, vertical_filtered_segments);
+    wrapper->debugPublish(DBID_FILTERED_SEGMENTS, vertical_filtered_segments);
     
     //horizontal transitions
     pts.clear();
     for(it=matched_horizontal_segments.begin(); it!=matched_horizontal_segments.end(); it++) {
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
-            if(s.getColour() == ClassIndex::white) {
+            if(s.getColour() == white) {
                 pts.push_back(Vector2<double>(s.getCentre().x, s.getCentre().y));
             }
             else {
@@ -797,14 +640,14 @@ void VisionBlackboard::debugPublish() const
             }
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_MATCHED_SEGMENTS, pts);
+    wrapper->debugPublish(DBID_MATCHED_SEGMENTS, pts);
     
     //vertical transitions
     pts.clear();
     for(it=matched_vertical_segments.begin(); it!=matched_vertical_segments.end(); it++) {
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
-            if(s.getColour() == ClassIndex::white) {
+            if(s.getColour() == white) {
                 pts.push_back(Vector2<double>(s.getCentre().x, s.getCentre().y));
             }
             else {
@@ -813,7 +656,7 @@ void VisionBlackboard::debugPublish() const
             }
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_MATCHED_SEGMENTS, pts);
+    wrapper->debugPublish(DBID_MATCHED_SEGMENTS, pts);
 }
 
 //! Checks the kinematics horizon is within the image bounds and resets it if not.

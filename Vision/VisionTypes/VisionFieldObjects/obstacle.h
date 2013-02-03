@@ -10,8 +10,6 @@ class Obstacle : public VisionFieldObject
 public:
     Obstacle(const Vector2<double>& position=Vector2<double>(0,0), double width=0, double height=0);
 
-    //! @brief returns the field position relative to the robot.
-    Vector3<float> getRelativeFieldCoords() const;
     /*!
       @brief pushes the obstacle to the external field objects.
       @param fieldobjects a pointer to the global list of field objects.
@@ -43,13 +41,6 @@ private:
       @return whether the obstacle is valid.
       */
     bool calculatePositions();
-    /*!
-      @brief calculates distance to the obstacle based on the global obstacle distance metric.
-      @param bearing the angle between the obstacle and the image centre in the xy plane.
-      @param elevation the angle between the obstacle and the image centre in the xz plane.
-      @return the distance to the obstacle in cm.
-      */
-    float distanceToObstacle(float bearing, float elevation);
     
 private:
     float d2p;                      //! @variable the distance of the obstacle in cm as found by the distance to point method

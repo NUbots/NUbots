@@ -12,22 +12,26 @@ win32{
     !win32{
         INCLUDEPATH += /usr/local/include/opencv2/
         INCLUDEPATH += /usr/include/boost/
+        INCLUDEPATH += /usr/include/qwt
 
         LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
     }
 }
 
+CONFIG += qwt
+
 DEFINES += QT_NO_DEBUG_STREAM
 
 INCLUDEPATH += ../
-INCLUDEPATH += ../Autoconfig/
 
-PLATFORM = win
+PLATFORM = pc
 
 contains(PLATFORM, "darwin") {
     message("Compiling for Darwin")
     DEFINES += TARGET_IS_DARWIN
-    
+
+    INCLUDEPATH += ../Autoconfig/
+
     HEADERS += \
         NUPlatform/Platforms/Darwin/DarwinCamera.h \
         VisionWrapper/datawrapperdarwin.h \
@@ -45,6 +49,8 @@ contains(PLATFORM, "pc") {
      message("Compiling for PC")
     DEFINES += TARGET_IS_PC
 
+    INCLUDEPATH += ../Vision/Debug/
+
     HEADERS += \
         VisionTools/pccamera.h \
         VisionWrapper/datawrapperpc.h \
@@ -55,13 +61,16 @@ contains(PLATFORM, "pc") {
 
     SOURCES += \
         VisionTools/pccamera.cpp \
-        VisionWrapper/datawrapperpc.cpp \
+        #VisionWrapper/datawrapperpc.cpp \
+        VisionWrapper/datawrapperqt.cpp \
         VisionWrapper/visioncontrolwrapperpc.cpp\
 }
 
 contains(PLATFORM, "win") {
      message("Compiling for Windows")
     DEFINES += TARGET_IS_PC
+
+    INCLUDEPATH += ../Vision/Debug/
 
     HEADERS += \
         VisionWrapper/datawrapperpc.h \
@@ -79,6 +88,8 @@ contains(PLATFORM, "win") {
 contains(PLATFORM, "rpi") {
      message("Compiling for RPi")
     DEFINES += TARGET_IS_RPI
+
+    INCLUDEPATH += ../Vision/Debug/
 
     HEADERS += \
         VisionTools/pccamera.h \
@@ -99,6 +110,7 @@ contains(PLATFORM, "rpi") {
 HEADERS += \
     ../Vision/VisionTypes/*.h \
     ../Vision/VisionTypes/VisionFieldObjects/*.h \
+    ../Vision/VisionTypes/Interfaces/*.h \
     VisionWrapper/datawrappercurrent.h \
     VisionTools/classificationcolours.h \
     VisionTools/GTAssert.h \
@@ -113,7 +125,16 @@ HEADERS += \
     #Threads/SaveImagesThread.h
     GenericAlgorithms/ransac.h \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h \
-    Modules/GoalDetectionAlgorithms/goaldetectorransac.h
+    Modules/GoalDetectionAlgorithms/goaldetectorransac.h \
+    Modules/cornerdetector.h \
+    VisionTypes/VisionFieldObjects/cornerpoint.h \
+    VisionTypes/Interfaces/optimisable.h \
+    VisionTypes/Interfaces/renderable.h \
+    VisionTools/transformer.h \
+    VisionTypes/Interfaces/ransacmodel.h \
+    VisionTypes/visionline.h \
+    VisionWrapper/datawrapperqt.h \
+    VisionWrapper/mainwindow.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -125,9 +146,14 @@ SOURCES += \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
-    GenericAlgorithms/ransac.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp
+    Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp \
+    basicvisiontypes.cpp \
+    VisionTools/transformer.cpp \
+    VisionTools/classificationcolours.cpp \
+    GenericAlgorithms/ransac.template \
+    VisionWrapper/datawrapperqt.cpp \
+    VisionWrapper/mainwindow.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup
@@ -142,17 +168,21 @@ HEADERS += \
     ../Tools/Math/Vector3.h \
     ../Infrastructure/NUImage/NUImage.h \
     ../Infrastructure/NUImage/ColorModelConversions.h \
+    ../Infrastructure/NUSensorsData/NUData.h \
+    ../Infrastructure/NUSensorsData/NUSensorsData.h \
+    ../Infrastructure/NUSensorsData/NULocalisationSensors.h \
+    ../Infrastructure/Sensor.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
     ../Kinematics/Horizon.h \
+    ../Kinematics/Kinematics.h \
+    ../Kinematics/EndEffector.h \
+    ../Kinematics/Link.h \
     ../NUPlatform/NUCamera.h \
     ../Infrastructure/FieldObjects/Object.h \
     ../Infrastructure/FieldObjects/AmbiguousObject.h \
     ../Infrastructure/FieldObjects/MobileObject.h \
     ../Infrastructure/FieldObjects/StationaryObject.h \
-    ../Kinematics/Kinematics.h \
-    ../Kinematics/EndEffector.h \
-    ../Kinematics/Link.h \
 
 SOURCES += \
     ../Tools/FileFormats/LUTTools.cpp \
@@ -162,14 +192,21 @@ SOURCES += \
     ../Tools/Math/Matrix.cpp \
     ../Tools/Math/TransformMatrices.cpp \
     ../Infrastructure/NUImage/NUImage.cpp \
+    ../Infrastructure/NUData.cpp \
+    ../Infrastructure/NUSensorsData/NUSensorsData.cpp \
+    ../Infrastructure/NUSensorsData/NULocalisationSensors.cpp \
+    ../Infrastructure/NUSensorsData/Sensor.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
     ../Kinematics/Horizon.cpp \
+    ../Kinematics/Kinematics.cpp \
+    ../Kinematics/EndEffector.cpp \
+    ../Kinematics/Link.cpp \
     ../NUPlatform/NUCamera.cpp \
     ../Infrastructure/FieldObjects/Object.cpp \
     ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
     ../Infrastructure/FieldObjects/MobileObject.cpp \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
-    ../Kinematics/Kinematics.cpp \
-    ../Kinematics/EndEffector.cpp \
-    ../Kinematics/Link.cpp \
+
+FORMS += \
+    VisionWrapper/mainwindow.ui
