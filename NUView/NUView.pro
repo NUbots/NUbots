@@ -20,8 +20,13 @@ win32 {
     INCLUDEPATH += 'C:/Program Files (x86)/boost/boost_1_44'
     INCLUDEPATH += 'C:/Qt/2010.05/qt/src/3rdparty/zlib'
     INCLUDEPATH += 'C:/Program Files/boost/boost_1_44'
+    INCLUDEPATH += 'C:\Program Files\Boost\boost_1_52_0'
     INCLUDEPATH += 'C:/Program Files/boost/'
     INCLUDEPATH += 'C:/Program Files/Bonjour SDK/Include/'
+    INCLUDEPATH += 'C:\Program Files\OpenCV\include\opencv2'
+    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\core\include'
+    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\highgui\include'
+    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\imgproc\include'
     LIBS += -lwsock32
     LIBS += -lpthread
     DEFINES += TARGET_OS_IS_WINDOWS
