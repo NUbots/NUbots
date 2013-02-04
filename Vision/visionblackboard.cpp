@@ -592,7 +592,7 @@ void VisionBlackboard::debugPublish() const
     wrapper->debugPublish(DBID_GREENHORIZON_SCANS, gh_scan_points);
     
     //horizon points
-    wrapper->debugPublish(DBID_GREENHORIZON_FINAL, m_green_horizon);
+    wrapper->debugPublish(DBID_GREENHORIZON_FINAL, m_green_horizon.getOriginalPoints());
     
     //object points
     wrapper->debugPublish(DBID_OBJECT_POINTS, obstacle_points);

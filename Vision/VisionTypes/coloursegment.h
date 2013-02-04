@@ -39,7 +39,6 @@ public:
     //! Returns the end location of the segment in pixel coordinates.
     const Point& getCentre() const {return m_centre;}
 
-
     /**
       * Sets the parameters for the segment.
       * @param start The start location of the segment.

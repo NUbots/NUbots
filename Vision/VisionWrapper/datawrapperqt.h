@@ -75,7 +75,7 @@ public:
 
 
 private:
-    DataWrapper();
+    DataWrapper(MainWindow* ui);
     ~DataWrapper();
     bool updateFrame();
     bool loadLUTFromFile(const string& fileName);
@@ -91,7 +91,9 @@ private:
 private:
     static DataWrapper* instance;
 
-    MainWindow gui;
+    bool ok;
+
+    MainWindow* gui;
 
     INPUT_METHOD m_method;  //CAMERA, STREAM
 

@@ -24,8 +24,8 @@ VisionController* VisionController::instance = 0;
 
 VisionController::VisionController()
 {
-    m_blackboard = VisionBlackboard::getInstance();
     m_data_wrapper = DataWrapper::getInstance();
+    m_blackboard = VisionBlackboard::getInstance();
     m_line_detector_ransac = new LineDetectorRANSAC();
     m_line_detector_sam = new LineDetectorSAM();
     m_goal_detector_hist = new GoalDetectorHistogram();

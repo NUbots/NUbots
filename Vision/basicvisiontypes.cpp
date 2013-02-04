@@ -2,6 +2,52 @@
 
 namespace Vision {
 
+    std::string getDebugIDName(DEBUG_ID id) {
+        switch(id) {
+        case DBID_IMAGE:                return "DBID_IMAGE";
+        case DBID_CLASSED_IMAGE:        return "DBID_CLASSED_IMAGE";
+        case DBID_H_SCANS:              return "DBID_H_SCANS";
+        case DBID_V_SCANS:              return "DBID_V_SCANS";
+        case DBID_SEGMENTS:             return "DBID_SEGMENTS";
+        case DBID_MATCHED_SEGMENTS:     return "DBID_MATCHED_SEGMENTS";
+        case DBID_HORIZON:              return "DBID_HORIZON";
+        case DBID_GREENHORIZON_SCANS:   return "DBID_GREENHORIZON_SCANS";
+        case DBID_GREENHORIZON_FINAL:   return "DBID_GREENHORIZON_FINAL";
+        case DBID_OBJECT_POINTS:        return "DBID_OBJECT_POINTS";
+        case DBID_FILTERED_SEGMENTS:    return "DBID_FILTERED_SEGMENTS";
+        case DBID_GOALS:                return "DBID_GOALS";
+        case DBID_BALLS:                return "DBID_BALLS";
+        case DBID_LINES:                return "DBID_LINES";
+        case DBID_OBSTACLES:            return "DBID_OBSTACLES";
+        case DBID_GOAL_LINES_START:     return "DBID_GOAL_LINES_START";
+        case DBID_GOAL_LINES_END:       return "DBID_GOAL_LINES_END";
+        default:                        return "NOT VALID";
+        }
+    }
+
+    DEBUG_ID getDebugIDFromInt(int id) {
+        switch(id) {
+        case 0: return DBID_IMAGE;
+        case 1: return DBID_CLASSED_IMAGE;
+        case 2: return DBID_H_SCANS;
+        case 3: return DBID_V_SCANS;
+        case 4: return DBID_SEGMENTS;
+        case 5: return DBID_MATCHED_SEGMENTS;
+        case 6: return DBID_HORIZON;
+        case 7: return DBID_GREENHORIZON_SCANS;
+        case 8: return DBID_GREENHORIZON_FINAL;
+        case 9: return DBID_OBJECT_POINTS;
+        case 10: return DBID_FILTERED_SEGMENTS;
+        case 11: return DBID_GOALS;
+        case 12: return DBID_BALLS;
+        case 13: return DBID_OBSTACLES;
+        case 14: return DBID_LINES;
+        case 15: return DBID_GOAL_LINES_START;
+        case 16: return DBID_GOAL_LINES_END;
+        default: return DBID_INVALID;
+        }
+    }
+
     std::string getVFOName(VFO_ID id)
     {
         switch(id) {

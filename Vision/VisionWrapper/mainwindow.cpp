@@ -1,41 +1,84 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <string>
 #include <boost/foreach.hpp>
-#include <QImage>
+#include <QPainter>
+#include <QScrollBar>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    column_num = 1;
+    row_num = 0;
+    m_finished = m_next = false;
     ui->setupUi(this);
-    image = new QImage(QSize(320, 240), QImage::Format_RGB888);
-    base_image = new QImage(QSize(320, 240), QImage::Format_RGB888);
+    canvas = new QImage(QSize(320, 240), QImage::Format_RGB888);
+    canvas->fill(QColor(0,0,0));
+
+    layers_layout = new QVBoxLayout();
+    layers_box = new QWidget(ui->layersScrollArea);
+    layers_box->setLayout(layers_layout);
+    ui->layersScrollArea->setWidget(layers_box);
     //create layers
     int y=0;
     for(int id=0; id<DBID_INVALID; id++) {
-        QCheckBox* newbox = new QCheckBox(getDebugIDName(getDebugIDFromInt(id)).c_str());
+        QCheckBox* newbox = new QCheckBox(getDebugIDName(getDebugIDFromInt(id)).c_str(), ui->layersScrollArea);
         QRect geom = ui->layersScrollArea->geometry();
         geom.setHeight(newbox->height());
-        if(layer_selections.empty()) {
+        if(layer_selections.empty())
             y = geom.y();
-        }
-        else {
+        else
             y += geom.height();
-        }
         geom.setY(y);
         newbox->setGeometry(geom);
+        newbox->show();
+        QObject::connect(newbox, SIGNAL(clicked()), this, SLOT(refresh()));
+        layers_layout->addWidget(newbox);
         layer_selections[getDebugIDFromInt(id)] = newbox;
     }
+
+    ui->windowsScrollArea->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
+
+    windows_box = new QWidget(ui->windowsScrollArea);
+    ui->windowsScrollArea->setWidget(windows_box);
+    windows_layout = new QGridLayout(windows_box);
+    windows_box->setLayout(windows_layout);
+
+    ui->windowsScrollArea->verticalScrollBar()->setSingleStep(240);
+    ui->windowsScrollArea->setFixedWidth(640 + windows_layout->horizontalSpacing()*2 + windows_layout->margin()*2);
+
+    view = new QGraphicsView(ui->windowsScrollArea);
+
+    view->setFixedSize(320,240);
+    view->setContentsMargins(0,0,0,0);
+    view->setFrameShape(QFrame::NoFrame);
+    windows_layout->addWidget(view);
+    scene = new QGraphicsScene;
+    scene->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*canvas)));
+    view->setScene(scene);
+
+
+    QObject::connect(ui->next_pb, SIGNAL(clicked()), this, SLOT(setNext()));
+    QObject::connect(ui->exit_pb, SIGNAL(clicked()), this, SLOT(setFinished()));
 }
 
 MainWindow::~MainWindow()
 {
+    delete scene;
+    delete view;
+    delete canvas;
     delete ui;
-    delete image;
-    delete base_image;
     for(int id=0; id<DBID_INVALID; id++) {
         delete layer_selections[getDebugIDFromInt(id)];
     }
+}
+
+void MainWindow::setFrameNo(int n)
+{
+    std::stringstream s;
+    s << "Frame: " << n;
+    ui->label_frame->setText(s.str().c_str());
 }
 
 void MainWindow::clearLayers()
@@ -53,11 +96,18 @@ void MainWindow::clearLayers()
 
 void MainWindow::refresh()
 {
-    *image = *base_image;
-    QPainter painter(image);
+    qDeleteAll( scene->items() );
+    //reset image
+    canvas->fill(QColor(0,0,0));
+    //draw over image
+    QPainter painter(canvas);
     for(int i=0; i<DBID_INVALID; i++) {
         DEBUG_ID id = getDebugIDFromInt(i);
         if(layer_selections[id]->isChecked()) {
+            for(vector<pair<QImage, float> >::iterator it = images[id].begin(); it<images[id].end(); it++) {
+                painter.setOpacity(it->second);
+                painter.drawImage(QPoint(0,0), it->first);
+            }
             for(vector<pair<QPointF, QColor> >::iterator it = points[id].begin(); it<points[id].end(); it++) {
                 painter.setPen(it->second);
                 painter.drawPoint(it->first);
@@ -85,9 +135,24 @@ void MainWindow::refresh()
             }
         }
     }
+    //render image
 
-    for(map<QString, QwtPlot*>::iterator pit = plots.begin(); pit != plots.end(); pit++)
-        pit->second->show();
+//    QGraphicsPixmapItem* pixmap = new QGraphicsPixmapItem();
+//    pixmap->setPixmap(QPixmap::fromImage(*canvas));
+//    scene->addItem(pixmap);
+    scene->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*canvas)));
+    view->setScene(scene);
+
+    view->show();
+
+    //plots
+    for(map<QString, pair<QwtPlot*, QwtPlotCurve*> >::iterator pit = plots.begin(); pit != plots.end(); pit++)
+        pit->second.second->show();
+}
+
+void MainWindow::addToLayer(DEBUG_ID id, const QImage& img, float alpha)
+{
+    images[id].push_back(pair<QImage, float>(img, alpha));
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const QPointF& item, QColor colour)
@@ -150,17 +215,34 @@ void MainWindow::addToLayer(DEBUG_ID id, const vector<Polygon>& items, QColor co
     }
 }
 
-void MainWindow::setPlot(QString name, QwtPlotCurve curve)
+void MainWindow::setPlot(QString name, QwtPlotCurve* curve)
 {
-    QwtPlot* plot = new QwtPlot(QwtText(name), ui->windowFrame);
+    //delete old curve and plot
+    map<QString, pair<QwtPlot*, QwtPlotCurve*> >::iterator it = plots.find(name);
+
+    if(it != plots.end()) {
+        delete it->second.first;
+        delete it->second.second;
+    }
+
+    QwtPlot* plot = new QwtPlot(QwtText(name), ui->windowsScrollArea);
 
     plot->setAxisAutoScale(QwtPlot::xBottom, true);
     plot->setAxisAutoScale(QwtPlot::yLeft, true);
-    plot->setGeometry(0, 0, 320, 240);
+    plot->setFixedSize(320,240);
 
-    curve.attach(plot);
+    curve->attach(plot);
+
+    windows_layout->addWidget(plot, row_num, column_num);
+    if(column_num == 1) {
+        column_num = 0;
+        row_num++;
+    }
+    else {
+        column_num = 1;
+    }
 
     plot->replot();
 
-    plots[name] = plot;
+    plots[name] = pair<QwtPlot*, QwtPlotCurve*>(plot, curve);
 }

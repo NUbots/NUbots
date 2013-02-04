@@ -25,7 +25,12 @@ DEFINES += QT_NO_DEBUG_STREAM
 
 INCLUDEPATH += ../
 
-PLATFORM = pc
+win {
+    PLATFORM = win
+}
+!win {
+    PLATFORM = pc
+}
 
 contains(PLATFORM, "darwin") {
     message("Compiling for Darwin")
@@ -53,8 +58,10 @@ contains(PLATFORM, "pc") {
     INCLUDEPATH += ../Vision/Debug/
 
     HEADERS += \
-        VisionWrapper/datawrapperpc.h \
-        VisionWrapper/visioncontrolwrapperpc.h \
+        #VisionWrapper/datawrapperpc.h \
+        VisionWrapper/datawrapperqt.h \
+        #VisionWrapper/visioncontrolwrapperpc.h\
+        VisionWrapper/visioncontrolwrapperqt.h\
         ../Vision/Debug/debugverbosityvision.h \
         ../Vision/Debug/debug.h \
         ../Vision/Debug/nubotdataconfig.h \
@@ -62,20 +69,13 @@ contains(PLATFORM, "pc") {
     SOURCES += \
         #VisionWrapper/datawrapperpc.cpp \
         VisionWrapper/datawrapperqt.cpp \
-        VisionWrapper/visioncontrolwrapperpc.cpp\
+        #VisionWrapper/visioncontrolwrapperpc.cpp\
+        VisionWrapper/visioncontrolwrapperqt.cpp\
 
-    win32 {
-        HEADERS += \
-        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h
-        SOURCES += \
-        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp
-    }
-    !win32 {
-        HEADERS += \
+    HEADERS += \
         VisionTools/pccamera.h
-        SOURCES += \
+    SOURCES += \
         VisionTools/pccamera.cpp
-    }
 }
 
 contains(PLATFORM, "win") {
@@ -94,6 +94,11 @@ contains(PLATFORM, "win") {
     SOURCES += \
         VisionWrapper/datawrapperpc.cpp \
         VisionWrapper/visioncontrolwrapperpc.cpp\
+
+    HEADERS += \
+        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h
+    SOURCES += \
+        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp
 }
 
 
@@ -145,7 +150,6 @@ HEADERS += \
     VisionTools/transformer.h \
     VisionTypes/Interfaces/ransacmodel.h \
     VisionTypes/visionline.h \
-    VisionWrapper/datawrapperqt.h \
     VisionWrapper/mainwindow.h
 
 SOURCES += \
@@ -164,7 +168,6 @@ SOURCES += \
     VisionTools/transformer.cpp \
     VisionTools/classificationcolours.cpp \
     GenericAlgorithms/ransac.template \
-    VisionWrapper/datawrapperqt.cpp \
     VisionWrapper/mainwindow.cpp
     #Threads/SaveImagesThread.cpp
 
