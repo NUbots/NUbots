@@ -396,6 +396,24 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
     }
 }
 
+void DataWrapper::plotPoints(const vector<Point>& pts, string name)
+{
+    vector<double> x, y;
+
+    QwtPlotCurve curve(name.c_str());
+    curve.setStyle(QwtPlotCurve::Dots);
+    BOOST_FOREACH(const Point& p, pts)
+    {
+        x.push_back(p.x);
+        y.push_back(p.y);
+    }
+
+    QwtPointArrayData * const data = new QwtPointArrayData(&x[0],&y[0],x.size());
+    curve.setData(data);
+
+    gui.setPlot(QString(name.c_str()), curve);
+}
+
 bool DataWrapper::updateFrame()
 {
     switch(m_method) {
