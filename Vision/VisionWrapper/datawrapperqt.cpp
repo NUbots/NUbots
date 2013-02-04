@@ -14,20 +14,6 @@
 
 DataWrapper* DataWrapper::instance = 0;
 
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<cv::Scalar>& colours, vector<Point >& pts)
-{
-    unsigned char r, g, b;
-
-    BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
-        BOOST_FOREACH(const ColourSegment& seg, line) {
-            getColourAsRGB(seg.getColour(), r, g, b);
-            pts.push_back(seg.getStart());
-            pts.push_back(seg.getEnd());
-            colours.push_back(cv::Scalar(b,g,r));
-        }
-    }
-}
-
 DataWrapper::DataWrapper()
 {
     //frame grab methods
@@ -47,7 +33,11 @@ DataWrapper::DataWrapper()
 
     switch(m_method) {
     case CAMERA:
+        #ifdef TARGET_OS_IS_WINDOWS
+        m_camera = new NUOpenCVCamera();
+        #else
         m_camera = new PCCamera();
+        #endif
         m_current_image = *(m_camera->grabNewImage());
         LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
         break;
@@ -218,33 +208,7 @@ void DataWrapper::debugPublish(const vector<Ball>& data) {
 }
 
 //bool DataWrapper::debugPublish(const vector<Beacon>& data) {
-
-//#if VISION_WRAPPER_VERBOSITY > 1
-//    if(data.empty()) {
-//        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
-//        return false;
-//    }
-//#endif
-
-//    //Get window assigned to id
-//    map<DEBUG_ID, vector< pair<string, cv::Mat>* > >::iterator map_it = debug_map.find(DBID_BEACONS);
-//    if(map_it == debug_map.end()) {
-//        errorlog << "DataWrapper::debugPublish - Missing window definition DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
-//        return false;
-//    }
-
-//    //for all images
-//    for(unsigned int i=0; i<map_it->second.size(); i++) {
-//        string& window = map_it->second[i]->first; //get window name from pair
-//        cv::Mat& img = map_it->second[i]->second; //get window name from pair
-
-//        BOOST_FOREACH(Beacon b, data) {
-//            b.render(img);
-//        }
-
-//        imshow(window, img);
-//    }
-//    return true;
+//
 //}
 
 void DataWrapper::debugPublish(const vector<Goal>& data)
@@ -267,45 +231,41 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
     switch(id) {
     case DBID_H_SCANS:
         BOOST_FOREACH(const Point& pt, data_points) {
-            cv::line(img, cv::Point2i(0, pt.y), cv::Point2i(img.cols, pt.y), cv::Scalar(127,127,127), 1);
+            gui.addToLayer(id, QLineF(0, pt.y, img.cols, pt.y), QColor(127,127,127));
         }
         break;
     case DBID_V_SCANS:
         BOOST_FOREACH(const Point& pt, data_points) {
-            cv::line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), cv::Scalar(127,127,127), 1);
+            gui.addToLayer(id, QLineF(pt.x, pt.y, pt.x, img.rows), QColor(127,127,127));
         }
         break;
     case DBID_MATCHED_SEGMENTS:
         BOOST_FOREACH(const Point& pt, data_points) {
-            cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,255,0), 4);
+            gui.addToLayer(id, QPointF(pt.x, pt.y), QColor(255,255,0));
         }
         break;
     case DBID_HORIZON:
-        line(img, cv::Point2i(data_points.front().x, data_points.front().y), cv::Point2i(data_points.back().x, data_points.back().y), cv::Scalar(255,255,0), 1);
+        gui.addToLayer(id, QLineF(data_points.front().x, data_points.front().y, data_points.back().x, data_points.back().y), QColor(255,255,0));
         break;
     case DBID_GREENHORIZON_SCANS:
         BOOST_FOREACH(const Point& pt, data_points) {
-            cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,0,255), 2);
+            gui.addToLayer(id, QPointF(pt.x, pt.y), QColor(255,0,255));
         }
         break;
     case DBID_GREENHORIZON_FINAL:
         for(it=data_points.begin(); it<data_points.end(); it++) {
             if (it > data_points.begin()) {
-                line(img, cv::Point2i((it-1)->x, (it-1)->y), cv::Point2i(it->x, it->y), cv::Scalar(255,0,255), 2);
+                gui.addToLayer(id, QLineF((it-1)->x, (it-1)->y, it->x, it->y), QColor(255,0,255));
             }
-            //cv::circle(img, cv::Point2i(it->x, it->y), 1, cv::Scalar(255,0,255), 2);
+            //gui.addToLayer(id, QPointF(it->x, it->y), QColor(255,0,255));
         }
         break;
     case DBID_OBJECT_POINTS:
         BOOST_FOREACH(const Point& pt, data_points) {
-            cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(0,0,255), 4);
+            gui.addToLayer(id, QPointF(pt.x, pt.y), QColor(0,0,255));
         }
         break;
-    default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
-        return false;
     }
-    return true;
 }
 
 //! Outputs debug data to the appropriate external interface
@@ -323,44 +283,19 @@ void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 void DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
 {
     //for all images
-    for(unsigned int i=0; i<map_it->second.size(); i++) {
-        cv::Mat& img_map = map_it->second[i]->second;    //get image from pair
-        string& window = map_it->second[i]->first; //get window name from pair
 
-        unsigned char* ptr,
-                r, g, b;
+    QImage qimg(img->getWidth(), img->getHeight(), QImage::Format_RGB888);
+    unsigned char* ptr,
+            r, g, b;
 
-        for(int y=0; y<img->getHeight(); y++) {
-            ptr = img_map.ptr<unsigned char>(y);
-            for(int x=0; x<img->getWidth(); x++) {
-                ColorModelConversions::fromYCbCrToRGB((*img)(x,y).y, (*img)(x,y).cb, (*img)(x,y).cr, r, g, b);
-                ptr[3*x]   = b;
-                ptr[3*x+1] = g;
-                ptr[3*x+2] = r;
-            }
+    for(int y=0; y<img->getHeight(); y++) {
+        ptr = img_map.ptr<unsigned char>(y);
+        for(int x=0; x<img->getWidth(); x++) {
+            ColorModelConversions::fromYCbCrToRGB((*img)(x,y).y, (*img)(x,y).cb, (*img)(x,y).cr, r, g, b);
+            qimg.setPixel(x, y, QRgb(r, g, b));
         }
-        imshow(window, img_map);
     }
-
-    //clear old display
-    if(!m_plain_scene.items().empty())
-        m_plain_scene.removeItem(m_plain_scene.items().first());
-
-    //generate QT display objects
-    QImage q_plain((uchar*) plain.data, plain.cols, plain.rows, plain.step, QImage::Format_RGB888);
-    QImage q_classified((uchar*) classified.data, classified.cols, classified.rows, classified.step, QImage::Format_RGB888);
-
-    q_plain = q_plain.rgbSwapped();
-    q_classified = q_classified.rgbSwapped();
-
-    m_plain_pixmap.setPixmap(QPixmap::fromImage(q_plain));
-    m_classified_pixmap.setPixmap(QPixmap::fromImage(q_classified));
-    m_plain_scene.addItem(&m_plain_pixmap);
-    m_classified_scene.addItem(&m_classified_pixmap);
-
-    //set displays
-    ui->imageView->setScene(&m_plain_scene);
-    ui->imageView_2->setScene(&m_classified_scene);
+    gui.setBaseImage(qimg);
 }
 
 void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
@@ -473,14 +408,4 @@ bool DataWrapper::updateFrame()
 bool DataWrapper::loadLUTFromFile(const string& fileName)
 {
     return LUT.loadLUTFromFile(fileName);
-}
-
-void DataWrapper::ycrcb2ycbcr(cv::Mat *img_ycrcb)
-{
-    vector<cv::Mat> planes;
-    split(*img_ycrcb, planes);
-    cv::Mat temp = planes[0];
-    planes[0] = planes[2];
-    planes[2] = temp;
-    merge(planes, *img_ycrcb);
 }

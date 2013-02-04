@@ -41,46 +41,46 @@
 
 std::string controlName(unsigned int id)
 {
-        std::string name;
-        switch(id)
-        {
-        case V4L2_CID_BRIGHTNESS:
-            name = "Brightness";
-            break;
-        case V4L2_CID_CONTRAST:
-            name = "Contrast";
-            break;
-        case V4L2_CID_SATURATION:
-            name = "Saturation";
-            break;
-        case V4L2_CID_AUTO_WHITE_BALANCE:
-            name = "Auto White Balance";
-            break;
-        case V4L2_CID_POWER_LINE_FREQUENCY:
-            name = "Power Line Frequency";
-            break;
-        case V4L2_CID_WHITE_BALANCE_TEMPERATURE:
-            name = "White Balance Temperature";
-            break;
-        case V4L2_CID_SHARPNESS:
-            name = "Sharpness";
-            break;
-        case V4L2_CID_EXPOSURE_AUTO:
-            name = "Exposure Auto";
-            break;
-        case V4L2_CID_EXPOSURE_ABSOLUTE:
-            name = "Absolute Exposure";
-            break;
-        case V4L2_CID_EXPOSURE_AUTO_PRIORITY:
-            name = "Exposure Auto Priority";
-            break;
-        case V4L2_CID_GAIN:
-            name = "Gain";
-            break;
-        default:
-            name = "Unknown";
-        }
-        return name;
+    std::string name;
+    switch(id)
+    {
+    case V4L2_CID_BRIGHTNESS:
+        name = "Brightness";
+        break;
+    case V4L2_CID_CONTRAST:
+        name = "Contrast";
+        break;
+    case V4L2_CID_SATURATION:
+        name = "Saturation";
+        break;
+    case V4L2_CID_AUTO_WHITE_BALANCE:
+        name = "Auto White Balance";
+        break;
+    case V4L2_CID_POWER_LINE_FREQUENCY:
+        name = "Power Line Frequency";
+        break;
+    case V4L2_CID_WHITE_BALANCE_TEMPERATURE:
+        name = "White Balance Temperature";
+        break;
+    case V4L2_CID_SHARPNESS:
+        name = "Sharpness";
+        break;
+    case V4L2_CID_EXPOSURE_AUTO:
+        name = "Exposure Auto";
+        break;
+    case V4L2_CID_EXPOSURE_ABSOLUTE:
+        name = "Absolute Exposure";
+        break;
+    case V4L2_CID_EXPOSURE_AUTO_PRIORITY:
+        name = "Exposure Auto Priority";
+        break;
+    case V4L2_CID_GAIN:
+        name = "Gain";
+        break;
+    default:
+        name = "Unknown";
+    }
+    return name;
 }
 
 PCCamera::PCCamera() :
