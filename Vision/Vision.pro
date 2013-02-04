@@ -5,6 +5,7 @@ win32{
     INCLUDEPATH += 'C:\Program Files\OpenCV\modules\core\include'
     INCLUDEPATH += 'C:\Program Files\OpenCV\modules\highgui\include'
     INCLUDEPATH += 'C:\Program Files\OpenCV\modules\imgproc\include'
+    INCLUDEPATH += 'C:\Qwt\qwt-6.0.2\src'
     DEFINES += TARGET_OS_IS_WINDOWS
 }
 
@@ -52,7 +53,6 @@ contains(PLATFORM, "pc") {
     INCLUDEPATH += ../Vision/Debug/
 
     HEADERS += \
-        VisionTools/pccamera.h \
         VisionWrapper/datawrapperpc.h \
         VisionWrapper/visioncontrolwrapperpc.h \
         ../Vision/Debug/debugverbosityvision.h \
@@ -60,10 +60,22 @@ contains(PLATFORM, "pc") {
         ../Vision/Debug/nubotdataconfig.h \
 
     SOURCES += \
-        VisionTools/pccamera.cpp \
         #VisionWrapper/datawrapperpc.cpp \
         VisionWrapper/datawrapperqt.cpp \
         VisionWrapper/visioncontrolwrapperpc.cpp\
+
+    win32 {
+        HEADERS += \
+        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h
+        SOURCES += \
+        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp
+    }
+    !win32 {
+        HEADERS += \
+        VisionTools/pccamera.h
+        SOURCES += \
+        VisionTools/pccamera.cpp
+    }
 }
 
 contains(PLATFORM, "win") {

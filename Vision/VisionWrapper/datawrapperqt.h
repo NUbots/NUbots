@@ -6,9 +6,14 @@
 
 #include "Kinematics/Horizon.h"
 
+#ifdef TARGET_OS_IS_WINDOWS
+#include "NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h"
+#else
+#include "Vision/VisionTools/pccamera.h"
+#endif
+
 #include "Vision/basicvisiontypes.h"
 #include "Vision/VisionTypes/segmentedregion.h"
-#include "Vision/VisionTools/pccamera.h"
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/VisionTypes/VisionFieldObjects/ball.h"
 #include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
@@ -98,7 +103,7 @@ private:
 
     Horizon kinematics_horizon;
 
-    PCCamera* m_camera;          //! Used when streaming from camera
+    NUCamera* m_camera;
 
     //! Used when reading from strm
     string streamname;

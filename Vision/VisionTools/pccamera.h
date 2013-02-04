@@ -13,12 +13,13 @@
 
 #include "NUPlatform/NUCamera/CameraSettings.h"
 #include "Infrastructure/NUImage/NUImage.h"
+#include "NUPlatform/NUCamera.h"
 
 #define DEBUG_NUCAMERA_VERBOSITY 0
 
 #define CAMERA_DIR "/dev/video0"
 
-class PCCamera
+class PCCamera : public NUCamera
 {
 public:
     enum
