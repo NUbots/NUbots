@@ -125,7 +125,7 @@ bool Kinematics::LoadModelFromFile(std::ifstream& file)
         Link temp_link = LinkFromText(line);
         links.push_back(temp_link);
     }
-    // Do the last effector, if there where any.
+    // Do the last effector, if there were any.
     if(effector.size())
     {
         m_endEffectors.push_back(EndEffector(startTrans, links, endTrans, effector));
@@ -253,15 +253,15 @@ Matrix Kinematics::CalculateTransform(unsigned int index, const std::vector<floa
     return m_endEffectors[index].CalculateTransform(jointValues);
 }
 
-Vector3<float> Kinematics::calculateCentreOfMass()
-{
-    Vector3<float> com_position; // Position of CoM in 3D space (x,y,z)
-    for (RobotModel::iterator effector = m_endEffectors.begin(); effector != m_endEffectors.end(); ++effector)
-    {
-        // do something.
-    }
-    return com_position;
-}
+//Vector3<float> Kinematics::calculateCentreOfMass()
+//{
+//    Vector3<float> com_position; // Position of CoM in 3D space (x,y,z)
+//    for (RobotModel::iterator effector = m_endEffectors.begin(); effector != m_endEffectors.end(); ++effector)
+//    {
+//        // do something.
+//    }
+//    return com_position;
+//}
 
 Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY)
 {
@@ -300,18 +300,13 @@ Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform,
     resultCartesian[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
     resultCartesian[2] = 0.0;
 
-//    // Convert back to polar coodinates.
-//    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
-
-//    Vector3<float> result;
-//    result[0] = resultSpherical[0];
-//    result[1] = resultSpherical[1];
-//    result[2] = resultSpherical[2];
+    // Convert back to polar coodinates.
+    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
 
     Vector3<float> result;
-    result[0] = resultCartesian[0];
-    result[1] = resultCartesian[1];
-    result[2] = resultCartesian[2];
+    result[0] = resultSpherical[0];
+    result[1] = resultSpherical[1];
+    result[2] = resultSpherical[2];
 
     //! TODO: Get the right thing to output, what do we want from this function??
     return result;
