@@ -1,8 +1,5 @@
 #include <iostream>
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-
 #ifdef TARGET_IS_RPI
     #include "VisionWrapper/visioncontrolwrapperrpi.h"
 #elif TARGET_IS_PC
@@ -20,7 +17,6 @@
 #include <QApplication>
 #include <QFileDialog>
 #endif
-
 
 using namespace std;
 using namespace cv;

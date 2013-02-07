@@ -48,6 +48,34 @@ namespace Vision {
         }
     }
 
+    int getIntFromeDebugID(DEBUG_ID id) {
+        switch(id) {
+        case DBID_IMAGE:                return 0;
+        case DBID_CLASSED_IMAGE:        return 1;
+        case DBID_H_SCANS:              return 2;
+        case DBID_V_SCANS:              return 3;
+        case DBID_SEGMENTS:             return 4;
+        case DBID_MATCHED_SEGMENTS:     return 5;
+        case DBID_HORIZON:              return 6;
+        case DBID_GREENHORIZON_SCANS:   return 7;
+        case DBID_GREENHORIZON_FINAL:   return 8;
+        case DBID_OBJECT_POINTS:        return 9;
+        case DBID_FILTERED_SEGMENTS:    return 10;
+        case DBID_GOALS:                return 11;
+        case DBID_BALLS:                return 12;
+        case DBID_LINES:                return 13;
+        case DBID_OBSTACLES:            return 14;
+        case DBID_GOAL_LINES_START:     return 15;
+        case DBID_GOAL_LINES_END:       return 16;
+        default:                        return 17;
+        }
+    }
+
+    bool operator <(DEBUG_ID idl, DEBUG_ID idr)
+    {
+        return getIntFromeDebugID(idl) < getIntFromeDebugID(idr);
+    }
+
     std::string getVFOName(VFO_ID id)
     {
         switch(id) {

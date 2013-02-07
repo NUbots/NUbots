@@ -84,6 +84,9 @@ bool Transformer::isDistanceToPointValid() const
   */
 double Transformer::distanceToPoint(Point pixel_loc) const
 {
+#if VISION_BLACKBOARD_VERBOSITY > 2
+    debug << "\tcalled with point: " << pixel_loc << " angle correction: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
+#endif
     Point radial = screenToRadial2D(pixel_loc);
     return distanceToPoint(radial.x, radial.y);
 }
@@ -101,8 +104,8 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
 #if VISION_BLACKBOARD_VERBOSITY > 2
     debug << "VisionBlackboard::distanceToPoint: \n";
     debug << "\t(bearing, elevation): (" << bearing << ", " <<elevation << ")" << endl;
-    debug << "\tcalled with point: " << screen_loc << " angle correction: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
     debug << "\tbody pitch: include:" << VisionConstants::D2P_INCLUDE_BODY_PITCH << " valid: " << body_pitch_valid << " value: " << body_pitch << endl;
+    debug << "\tVisionConstants::D2P_ANGLE_CORRECTION: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
     debug << "\tcamera height valid: " << camera_height_valid << " value: " << camera_height << endl;
     debug << "\tcamera pitch valid: " << camera_pitch_valid << " value: " << camera_pitch << endl;
 #endif
@@ -114,7 +117,8 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
     //resultant angle inclusive of camera pitch, pixel elevation and angle correction factor
     theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
 
-    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
+    //if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
+    if(body_pitch_valid)
         theta -= body_pitch;
 
 //    cos_theta = cos(theta);
@@ -123,14 +127,18 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
 //    else
 //        distance = camera_height / cos_theta / cos(bearing);
     tan_theta = tan(theta);
-    if(tan_theta == 0)
+    if(tan_theta == 0) {
         distance = 0;
-    else
+    }
+    else {
         distance = camera_height / tan_theta / cos(bearing);
+        //distance = camera_height * tan_theta / cos(bearing);
+        //distance = camera_height / tan_theta;
+    }
 
-#if VISION_BLACKBOARD_VERBOSITY > 1
-    debug << "\ttheta: " << theta << " distance: " << distance << " valid: " << valid << endl;
-#endif
+//#if VISION_BLACKBOARD_VERBOSITY > 1
+    debug << "\ttheta: " << theta << " distance: " << distance << endl;
+//#endif
 
     return distance;
 }
@@ -175,14 +183,18 @@ Point Transformer::screenToGroundCartesian(Point pt) const
 {
     Vector2<double> cam_angles = screenToRadial2D(pt);
 
-    double r = distanceToPoint(cam_angles.x, cam_angles.y);
+    //double r = distanceToPoint(cam_angles.x, cam_angles.y);
 
-    return Point(r*cos(cam_angles.x), r*sin(cam_angles.y));
-//    Matrix ctgtransform = Matrix4x4fromVector(m_ctg_vector);
+    //return Point(r*sin(cam_angles.x), r*cos(cam_angles.x));
+    Matrix ctgtransform = Matrix4x4fromVector(m_ctg_vector);
 
-//    Vector3<float> spherical = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
+    Vector3<float> spherical = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
 
-//    Vector3<float> t = Kinematics::TransformPosition(ctgtransform,spherical);
+    return Point(spherical.x, spherical.y);
+
+    //Vector3<float> t = Kinematics::TransformPosition(ctgtransform,spherical);
+
+    //return
 
 //    return Point(t.x*cos(t.y)*cos(t.z),
 //                 t.x*sin(t.y)*cos(t.z));
@@ -241,5 +253,7 @@ void Transformer::setCamParams(Vector2<double> imagesize, Vector2<double> fov)
     FOV = fov;
     tan_half_FOV = Vector2<double>(tan(FOV.x*0.5), tan(FOV.y*0.5));
     screen_to_radial_factor = tan_half_FOV.elemDiv(image_centre);
+    //screen_to_radial_factor = (FOV).elemDiv(image_centre);
+
     effective_camera_dist_pixels = image_centre.x/tan_half_FOV.x;
 }

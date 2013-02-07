@@ -75,6 +75,10 @@ namespace Vision {
 
     DEBUG_ID getDebugIDFromInt(int id);
 
+    int getIntFromeDebugID(DEBUG_ID id);
+
+    bool operator <(DEBUG_ID idl, DEBUG_ID idr);
+
     //! @brief returns whether the given id maps to a goal
     inline bool isGoal(VFO_ID id) { return id >= GOAL_L && id <= GOAL_U;}
     //inline bool isBlueGoal(VFO_ID id) {return id >= GOAL_B_L && id <= GOAL_B_U;}

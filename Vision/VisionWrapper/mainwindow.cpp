@@ -9,8 +9,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    column_num = 1;
-    row_num = 0;
     m_finished = m_next = false;
     ui->setupUi(this);
     canvas = new QImage(QSize(320, 240), QImage::Format_RGB888);
@@ -21,32 +19,18 @@ MainWindow::MainWindow(QWidget *parent) :
     layers_box->setLayout(layers_layout);
     ui->layersScrollArea->setWidget(layers_box);
     //create layers
-    int y=0;
-    for(int id=0; id<DBID_INVALID; id++) {
+    for(int i=0; i<DBID_INVALID; i++) {
+        DEBUG_ID id = getDebugIDFromInt(i);
         QCheckBox* newbox = new QCheckBox(getDebugIDName(getDebugIDFromInt(id)).c_str(), ui->layersScrollArea);
-        QRect geom = ui->layersScrollArea->geometry();
-        geom.setHeight(newbox->height());
-        if(layer_selections.empty())
-            y = geom.y();
-        else
-            y += geom.height();
-        geom.setY(y);
-        newbox->setGeometry(geom);
-        newbox->show();
         QObject::connect(newbox, SIGNAL(clicked()), this, SLOT(refresh()));
         layers_layout->addWidget(newbox);
-        layer_selections[getDebugIDFromInt(id)] = newbox;
+        layer_selections[id] = newbox;
     }
-
-    ui->windowsScrollArea->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed));
 
     windows_box = new QWidget(ui->windowsScrollArea);
     ui->windowsScrollArea->setWidget(windows_box);
     windows_layout = new QGridLayout(windows_box);
     windows_box->setLayout(windows_layout);
-
-    ui->windowsScrollArea->verticalScrollBar()->setSingleStep(240);
-    ui->windowsScrollArea->setFixedWidth(640 + windows_layout->horizontalSpacing()*2 + windows_layout->margin()*2);
 
     view = new QGraphicsView(ui->windowsScrollArea);
 
@@ -85,12 +69,23 @@ void MainWindow::clearLayers()
 {
     for(int i=0; i<DBID_INVALID; i++) {
         DEBUG_ID id = getDebugIDFromInt(i);
+
+        images[id].clear();
         points[id].clear();
         lines[id].clear();
         rectangles[id].clear();
         circles[id].clear();
         polygons[id].clear();
+
     }
+
+    //clear out plots
+    for(map<QString, pair<QwtPlot*, QwtPlotCurve*> >::iterator it = plots.begin(); it != plots.end(); it++) {
+        delete it->second.second;
+        delete it->second.first;
+    }
+    plots.clear();
+
     refresh();
 }
 
@@ -135,11 +130,8 @@ void MainWindow::refresh()
             }
         }
     }
-    //render image
 
-//    QGraphicsPixmapItem* pixmap = new QGraphicsPixmapItem();
-//    pixmap->setPixmap(QPixmap::fromImage(*canvas));
-//    scene->addItem(pixmap);
+    //render image
     scene->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*canvas)));
     view->setScene(scene);
 
@@ -147,7 +139,7 @@ void MainWindow::refresh()
 
     //plots
     for(map<QString, pair<QwtPlot*, QwtPlotCurve*> >::iterator pit = plots.begin(); pit != plots.end(); pit++)
-        pit->second.second->show();
+        pit->second.first->show();
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const QImage& img, float alpha)
@@ -221,8 +213,8 @@ void MainWindow::setPlot(QString name, QwtPlotCurve* curve)
     map<QString, pair<QwtPlot*, QwtPlotCurve*> >::iterator it = plots.find(name);
 
     if(it != plots.end()) {
-        delete it->second.first;
         delete it->second.second;
+        delete it->second.first;
     }
 
     QwtPlot* plot = new QwtPlot(QwtText(name), ui->windowsScrollArea);
@@ -233,14 +225,8 @@ void MainWindow::setPlot(QString name, QwtPlotCurve* curve)
 
     curve->attach(plot);
 
-    windows_layout->addWidget(plot, row_num, column_num);
-    if(column_num == 1) {
-        column_num = 0;
-        row_num++;
-    }
-    else {
-        column_num = 1;
-    }
+    //windows_layout->addWidget(plot, row_num, column_num);
+    windows_layout->addWidget(plot);
 
     plot->replot();
 

@@ -15,7 +15,7 @@ win32{
         INCLUDEPATH += /usr/include/boost/
         INCLUDEPATH += /usr/include/qwt
 
-        LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+        LIBS += -lopencv_core -lopencv_imgproc
     }
 }
 

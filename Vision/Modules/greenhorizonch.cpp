@@ -12,6 +12,8 @@
 #include "debugverbosityvision.h"
 #include "Vision/visionconstants.h"
 
+#include <opencv2/imgproc/imgproc.hpp>
+
 void GreenHorizonCH::calculateHorizon()
 {
     #if VISION_HORIZON_VERBOSITY > 1
@@ -105,7 +107,7 @@ void GreenHorizonCH::calculateHorizon()
     horizon_points.clear();
 
     // convex hull
-    convexHull(cv::Mat(temp), horizon_points, false, true);
+    cv::convexHull(cv::Mat(temp), horizon_points, false, true);
 
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;

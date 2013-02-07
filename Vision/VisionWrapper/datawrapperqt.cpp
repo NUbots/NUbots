@@ -16,6 +16,7 @@ DataWrapper* DataWrapper::instance = 0;
 
 DataWrapper::DataWrapper(MainWindow* ui)
 {
+    gui = ui;
     //frame grab methods
     QString camoption("Camera"),
             strmoption("Image stream");
@@ -95,8 +96,6 @@ DataWrapper::DataWrapper(MainWindow* ui)
             ok = false;
         }
         numFramesDropped = numFramesProcessed = 0;
-
-        gui = ui;
     }
 }
 
@@ -366,6 +365,8 @@ void DataWrapper::plotPoints(const vector<Point>& pts, string name)
 bool DataWrapper::updateFrame()
 {
     if(ok) {
+        gui->clearLayers();
+
         switch(m_method) {
         case CAMERA:
             m_current_image = *(m_camera->grabNewImage());   //force get new frame

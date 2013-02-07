@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>912</width>
-    <height>600</height>
+    <width>918</width>
+    <height>613</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,149 +20,116 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QScrollArea" name="windowsScrollArea">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>640</width>
-      <height>531</height>
-     </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents_2">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>638</width>
-       <height>529</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QFrame" name="frame">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>10</y>
-      <width>231</width>
-      <height>401</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>60</y>
-       <width>66</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Layers</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="exit_pb">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>360</y>
-       <width>98</width>
-       <height>27</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Exit</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_frame">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>290</y>
-       <width>71</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Frame: </string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="next_pb">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>320</y>
-       <width>98</width>
-       <height>27</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Next</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="windowComboBox">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>30</y>
-       <width>201</width>
-       <height>27</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>66</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Window</string>
-     </property>
-    </widget>
-    <widget class="QScrollArea" name="layersScrollArea">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>80</y>
-       <width>201</width>
-       <height>201</height>
-      </rect>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>199</width>
-        <height>199</height>
-       </rect>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QScrollArea" name="windowsScrollArea">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>661</width>
+         <height>546</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
-    </widget>
-   </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>231</width>
+        <height>401</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>231</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Window</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="windowComboBox"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Layers</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QScrollArea" name="layersScrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>209</width>
+            <height>358</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_frame">
+         <property name="text">
+          <string>Frame: </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="next_pb">
+         <property name="text">
+          <string>Next</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="exit_pb">
+         <property name="text">
+          <string>Exit</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
    <zorder>frame</zorder>
    <zorder>windowsScrollArea</zorder>
   </widget>
@@ -171,7 +138,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>912</width>
+     <width>918</width>
      <height>25</height>
     </rect>
    </property>

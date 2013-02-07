@@ -89,8 +89,6 @@ private slots:
 private:
     bool m_finished,
          m_next;
-    int column_num,
-        row_num;
 
     Ui::MainWindow* ui;
     QWidgetList windows;

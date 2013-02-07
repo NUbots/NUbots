@@ -30,7 +30,12 @@ vector<LSFittedLine> LineDetectorRANSAC::run()
 
     points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
 
-    DataWrapper::getInstance()->plotPoints(points, "Pre");  // debugging
+    vector<Point> plotpts;
+    BOOST_FOREACH(Point& p, points) {
+        plotpts.push_back(Point(p.x, vbb->getImageHeight()-p.y));
+    }
+
+    DataWrapper::getInstance()->plotPoints(plotpts, "Pre");  // debugging
 
     candidates = RANSAC::findMultipleModels<VisionLine, Point>(points, m_e, m_n, m_k, m_max_iterations);
     for(unsigned int i=0; i<candidates.size(); i++) {
