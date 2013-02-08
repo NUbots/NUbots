@@ -4,7 +4,7 @@
 #include "Tools/Math/LSFittedLine.h"
 #include "Tools/Math/General.h"
 
-#include "basicvisiontypes.h"
+#include "Vision/basicvisiontypes.h"
 #include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
 
 class FieldLine : public VisionFieldObject
@@ -34,9 +34,6 @@ public:
     //! @brief Calculation of error for optimisation - assumed measured = (rho, phi)
     double findError(const Vector2<double>& measured) const;
     double findError(const FieldLine& measured) const;
-
-    void render(cv::Mat& mat) const;
-    void render(cv::Mat& mat, cv::Scalar colour) const;
 
     //! @brief output stream operator
     friend ostream& operator<< (ostream& output, const FieldLine& l);

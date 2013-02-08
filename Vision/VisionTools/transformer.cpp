@@ -1,6 +1,6 @@
 #include "transformer.h"
 #include <boost/foreach.hpp>
-#include "visionconstants.h"
+#include "Vision/visionconstants.h"
 #include "Tools/Math/General.h"
 #include "Kinematics/Kinematics.h"
 

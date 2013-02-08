@@ -48,8 +48,6 @@
 
 class NUImage;
 class ClassifiedImage;
-class Line;
-class LinePoint;
 class Horizon;
 class NUSensorsData;
 class KF;
@@ -106,7 +104,7 @@ public:
           @param newpoints The new points.
           @param displayId The id of the display layer to write to.
           */
-        void writePointsToDisplay(std::vector< Vector2<int> > newpoints, GLDisplay::display displayId);
+        void writePointsToDisplay(vector<Point> newpoints, GLDisplay::display displayId);
 
         /*!
           @brief Accepts new transition segment vector and maps it to display instructions.
@@ -166,7 +164,7 @@ public:
           @param linepoints The new LinePoints to display.
           @param displayId The id of the display layer to write to.
           */
-        void writeLinesPointsToDisplay(std::vector< LinePoint > linepoints, GLDisplay::display displayId);
+        void writeLinesPointsToDisplay(std::vector< Point > linepoints, GLDisplay::display displayId);
 
         /*!
           @brief Accepts new Corner vector and maps it to display instructions.

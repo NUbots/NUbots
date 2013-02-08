@@ -26,6 +26,7 @@
 #include "debugverbositynetwork.h"
 
 #ifndef WIN32
+    #include <unistd.h>
     #include <sys/ioctl.h>
     #include <netdb.h>
     #include <net/if.h>

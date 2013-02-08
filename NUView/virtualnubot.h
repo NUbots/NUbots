@@ -59,15 +59,15 @@ public:
     unsigned char* getLUT() {return classificationTable;}
     QString fileType;
 
-    void emitPoints(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
+    void emitPoints(vector<Point> updatedPoints, GLDisplay::display displayId);
 public slots:
     /** Processes a Classified Image Packet, to be displayed in program
     *  @param datagram The classified image packet that is recieved, and to be processed by program for visualisation and further vision processing
     */
     void ProcessPacket(QByteArray* packet);
     void updateLookupTable(unsigned char* packetBuffer){return;}
-    void updateSelection(ClassIndex::Colour colour, std::vector<Pixel> indexs);
-    void UpdateLUT(ClassIndex::Colour colour, std::vector<Pixel> indexs);
+    void updateSelection(Vision::Colour colour, std::vector<Pixel> indexs);
+    void UpdateLUT(Vision::Colour colour, std::vector<Pixel> indexs);
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
     void loadLookupTableFile(QString fileName);
@@ -84,10 +84,10 @@ signals:
     void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
     //void cornerPointsDisplayChanged(std::vector< CornerPoint> corners, GLDisplay::display displayId );
-    void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
+    void pointsDisplayChanged(std::vector<Point> updatedPoints, GLDisplay::display displayId);
     //void transitionSegmentsDisplayChanged(std::vector< TransitionSegment > updatedTransitionSegments, GLDisplay::display displayId);
     void lineDetectionDisplayChanged(std::vector<LSFittedLine> fieldLines, GLDisplay::display displayId);
-    void linePointsDisplayChanged(std::vector<LinePoint> linepoints, GLDisplay::display displayId);
+    void linePointsDisplayChanged(std::vector<Point> linepoints, GLDisplay::display displayId);
     //void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
     void fieldObjectsDisplayChanged(FieldObjects* AllFieldObjects, GLDisplay::display displayId);
     void fieldObjectsChanged(const FieldObjects* AllFieldObjects);
@@ -123,7 +123,7 @@ private:
     void processVisionFrame(ClassifiedImage& image);
 
     void generateClassifiedImage();
-    ClassIndex::Colour getUpdateColour(ClassIndex::Colour currentColour, ClassIndex::Colour requestedColour);
+    Vision::Colour getUpdateColour(Vision::Colour currentColour, Vision::Colour requestedColour);
 
     unsigned char* classificationTable;
     unsigned char* tempLut;

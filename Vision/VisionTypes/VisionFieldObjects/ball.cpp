@@ -153,7 +153,7 @@ bool Ball::calculatePositions()
 
     #if VISION_FIELDOBJECT_VERBOSITY > 2
         debug << "Goal::calculatePositions: ";
-        debug << d2p << " " << width_dist << " " << distance << " " << m_spherical_position.x << endl;
+        debug << d2p << " " << width_dist << " " << m_spherical_position.x << endl;
     #endif
 
     return distance_valid && dist > 0;
@@ -211,10 +211,10 @@ double Ball::distanceToBall(double bearing, double elevation) {
     }
 }
 
-void Ball::render(cv::Mat &mat) const
-{
-    cv::circle(mat, cv::Point2i(m_location_pixels.x, m_location_pixels.y), m_diameter*0.5, cv::Scalar(0, 125, 255), 2);
-}
+//void Ball::render(cv::Mat &mat) const
+//{
+//    cv::circle(mat, cv::Point2i(m_location_pixels.x, m_location_pixels.y), m_diameter*0.5, cv::Scalar(0, 125, 255), 2);
+//}
 
 ostream& operator<< (ostream& output, const Ball& b)
 {

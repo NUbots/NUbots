@@ -21,8 +21,8 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-linedetectorsam.cpp
-linedetectorransac.cpp
+goaldetectorhistogram.cpp
+goaldetectorransac.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

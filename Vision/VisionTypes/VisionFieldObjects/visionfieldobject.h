@@ -11,7 +11,6 @@
 
 #include "Vision/VisionTypes/Interfaces/publishable.h"
 #include "Vision/VisionTypes/Interfaces/optimisable.h"
-#include "Vision/VisionTypes/Interfaces/renderable.h"
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Tools/Math/Vector3.h"
@@ -24,7 +23,7 @@ using namespace Vision;
 
 typedef Vector2<double> Point;
 
-class VisionFieldObject : public Publishable, public Optimisable, public Renderable
+class VisionFieldObject : public Publishable, public Optimisable
 {
 public:
     VisionFieldObject();

@@ -146,7 +146,6 @@ HEADERS += \
     Modules/cornerdetector.h \
     VisionTypes/VisionFieldObjects/cornerpoint.h \
     VisionTypes/Interfaces/optimisable.h \
-    VisionTypes/Interfaces/renderable.h \
     VisionTools/transformer.h \
     VisionTypes/Interfaces/ransacmodel.h \
     VisionTypes/visionline.h \

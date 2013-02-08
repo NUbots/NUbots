@@ -1,5 +1,5 @@
 #include "cornerdetector.h"
-#include "visionblackboard.h"
+#include "Vision/visionblackboard.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 
 CornerDetector::CornerDetector()

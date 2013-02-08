@@ -25,14 +25,15 @@ greenhorizonch.cpp
 objectdetectionch.cpp
 scanlines.cpp
 segmentfilter.cpp
-goaldetection.cpp
-balldetection.cpp
+goaldetector.cpp
+balldetector.cpp
 linedetector.cpp
 robocuphacks.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
+GoalDetectionAlgorithms
 LineDetectionAlgorithms
 )
 ####################################################################################

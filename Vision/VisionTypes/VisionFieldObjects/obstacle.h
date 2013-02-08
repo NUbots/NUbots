@@ -28,8 +28,6 @@ public:
 
     double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location_pixels.x - measured.x,2) + pow(m_location_pixels.y - measured.y,2));}
 
-    void render(cv::Mat& mat) const;
-
     //! @brief output stream operator.
     friend ostream& operator<< (ostream& output, const Obstacle& o);
     //! @brief output stream operator for a vector of obstacles.

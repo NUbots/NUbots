@@ -22,6 +22,8 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
 lookuptable.cpp
+transformer.cpp
+classificationcolours.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

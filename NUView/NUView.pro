@@ -11,7 +11,6 @@ macx {
     UI_DIR = "../Build/NUView/.ui"
     #Macports include directory
     INCLUDEPATH += '/opt/local/include'
-    LIBS +=  -lopencv_core -lopencv_highgui -lopencv_imgproc
 }
 win32 { 
     INCLUDEPATH += 'C:/Program Files (x86)/boost/'
@@ -23,20 +22,14 @@ win32 {
     INCLUDEPATH += 'C:\Program Files\Boost\boost_1_52_0'
     INCLUDEPATH += 'C:/Program Files/boost/'
     INCLUDEPATH += 'C:/Program Files/Bonjour SDK/Include/'
-    INCLUDEPATH += 'C:\Program Files\OpenCV\include\opencv2'
-    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\core\include'
-    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\highgui\include'
-    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\imgproc\include'
     LIBS += -lwsock32
     LIBS += -lpthread
     DEFINES += TARGET_OS_IS_WINDOWS
 }
 !macx{
     !win32{
-        INCLUDEPATH += /usr/local/include/opencv2/
         INCLUDEPATH += /usr/include/boost/
 
-        LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
         LIBS += -ldns_sd -lGLU
     }
 }
@@ -56,7 +49,6 @@ HEADERS += ui_mainwindow.h \
     connectionwidget.h \
     ColorModelConversions.h \
     classificationwidget.h \
-    ../VisionOld/ClassificationColours.h \
     ../Tools/FileFormats/NUbotImage.h \
     #../VisionOld/Vision.h \
     ../Tools/FileFormats/LUTTools.h \
@@ -366,8 +358,11 @@ HEADERS += \
     ../Vision/VisionWrapper/datawrappernuview.h \
     ../Vision/VisionTools/pccamera.h \
     ../Vision/VisionTools/lookuptable.h \
+    ../Vision/VisionTools/classificationcolours.h \
+    ../Vision/VisionTools/transformer.h \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
+    ../Vision/Modules/GoalDetectionAlgorithms/*.h \
     ../Vision/*.h \
 
 SOURCES += \
@@ -375,11 +370,15 @@ SOURCES += \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
     ../Vision/VisionTools/pccamera.cpp \
     ../Vision/VisionTools/lookuptable.cpp \
+    ../Vision/VisionTools/classificationcolours.cpp \
+    ../Vision/VisionTools/transformer.cpp \
     ../Vision/Modules/*.cpp \
     ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
+    ../Vision/Modules/GoalDetectionAlgorithms/*.cpp \
     ../Vision/visionblackboard.cpp \
     ../Vision/visioncontroller.cpp \
     ../Vision/visionconstants.cpp \
+    ../Vision/basicvisiontypes.cpp \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.cpp \
     ../Vision/VisionWrapper/datawrappernuview.cpp \
 

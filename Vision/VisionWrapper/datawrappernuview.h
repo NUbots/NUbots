@@ -4,9 +4,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 #include "Kinematics/Horizon.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
@@ -19,7 +16,7 @@
 #include "Vision/VisionTools/pccamera.h"
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/VisionTypes/VisionFieldObjects/ball.h"
-#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
+//#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
@@ -27,52 +24,20 @@
 
 //for virtualNUbot/Qt
 #include "GLDisplay.h"
+#include <QObject>
 
 using namespace std;
 //using namespace cv;
-using cv::Mat;
-using cv::VideoCapture;
-using cv::Scalar;
-using cv::namedWindow;
-using cv::Vec3b;
 
 class virtualNUbot;
 
-class DataWrapper
+class DataWrapper : public QObject
 {
     friend class VisionController;
     friend class VisionControlWrapper;
     friend class virtualNUbot;
 
 public:
-    
-    enum DATA_ID {
-        DID_IMAGE,
-        DID_CLASSED_IMAGE
-    };
-    
-    enum DEBUG_ID {
-        DBID_IMAGE=0,
-        DBID_H_SCANS=1,
-        DBID_V_SCANS=2,
-        DBID_SEGMENTS=3,
-        DBID_MATCHED_SEGMENTS=4,
-        DBID_HORIZON=5,
-        DBID_GREENHORIZON_SCANS=6,
-        DBID_GREENHORIZON_FINAL=7,
-        DBID_OBJECT_POINTS=8,
-        DBID_FILTERED_SEGMENTS=9,
-        DBID_GOALS=10,
-        DBID_BEACONS=11,
-        DBID_BALLS=12,
-        DBID_OBSTACLES=13,
-        DBID_LINES=14,
-        NUMBER_OF_IDS=15
-    };
-
-    static string getIDName(DEBUG_ID id);
-    static string getIDName(DATA_ID id);
-
     static DataWrapper* getInstance();
 
     //! RETRIEVAL METHODS
@@ -92,20 +57,21 @@ public:
     const LookUpTable& getLUT() const;
         
     //! PUBLISH METHODS
-    void publish(DATA_ID id, const Mat& img);
     void publish(const vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
     void debugRefresh();
-    bool debugPublish(vector<Ball> data);
-    bool debugPublish(vector<Beacon> data);
-    bool debugPublish(vector<Goal> data);
-    bool debugPublish(vector<Obstacle> data);
-    bool debugPublish(const vector<FieldLine>& data);
-    bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
-    bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
-    bool debugPublish(DEBUG_ID id, const NUImage *const img);
-    
+    void debugPublish(vector<Ball> data);
+    //bool debugPublish(vector<Beacon> data);
+    void debugPublish(vector<Goal> data);
+    void debugPublish(vector<Obstacle> data);
+    void debugPublish(const vector<FieldLine>& data);
+    void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
+    void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
+    void debugPublish(DEBUG_ID id, const NUImage *const img);
+    void debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
+
+    void plotPoints(const vector<Point>& pts, string name);
     
 private:
     DataWrapper();
@@ -126,12 +92,15 @@ private:
     void classifyImage(ClassifiedImage &target) const;
     void classifyPreviewImage(ClassifiedImage &target,unsigned char* temp_vals) const;
     
+signals:
+    void pointsUpdated(vector<Point> pts, GLDisplay::display);
+    void segmentsUpdated(SegmentedRegion region, GLDisplay::display);
+    void linesUpdated(vector<LSFittedLine> lines, GLDisplay::display);
+    void plotUpdated(vector<Point> pts, GLDisplay::display);
     
 private:
 
     static DataWrapper* instance;
-
-    void (*display_callback)(vector< Vector2<int> >, GLDisplay::display);
 
     const NUImage* m_current_image;
 

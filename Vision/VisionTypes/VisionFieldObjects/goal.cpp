@@ -192,7 +192,7 @@ bool Goal::check() const
         m_spherical_position.x > VisionConstants::MAX_GOAL_DISTANCE) {
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: too far away" << endl;
-            debug << "\td2p: " << m_transformed_spherical_pos.x << " MAX_GOAL_DISTANCE: " << VisionConstants::MAX_GOAL_DISTANCE << endl;
+            debug << "\td2p: " << m_spherical_position.x << " MAX_GOAL_DISTANCE: " << VisionConstants::MAX_GOAL_DISTANCE << endl;
         #endif
         return false;
     }
@@ -222,7 +222,7 @@ bool Goal::calculatePositions()
 
     #if VISION_FIELDOBJECT_VERBOSITY > 2
         debug << "Goal::calculatePositions: ";
-        debug << d2p << " " << width_dist << " " << distance << " " << m_spherical_position.x << endl;
+        debug << d2p << " " << width_dist << " " << m_spherical_position.x << endl;
     #endif
 
     return distance_valid && dist > 0;
@@ -307,16 +307,16 @@ double Goal::distanceToGoal(double bearing, double elevation)
     }
 }
 
-void Goal::render(cv::Mat &mat) const
-{
-//    cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
-//    if(isYellowGoal(m_id))
-//        cv::rectangle(mat, r, cv::Scalar(0, 255, 255), -1);
-//    else
-//        cv::rectangle(mat, r, cv::Scalar(255, 0, 0), -1);
-    m_corners.render(mat, cv::Scalar(0,255,255), m_id != GOAL_U);   //render filled if know goal, border otherwise
-    cv::circle(mat, cv::Point(m_location_pixels.x, m_location_pixels.y), 4, cv::Scalar(255,255,0), -1, 4);
-}
+//void Goal::render(cv::Mat &mat) const
+//{
+////    cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
+////    if(isYellowGoal(m_id))
+////        cv::rectangle(mat, r, cv::Scalar(0, 255, 255), -1);
+////    else
+////        cv::rectangle(mat, r, cv::Scalar(255, 0, 0), -1);
+//    m_corners.render(mat, cv::Scalar(0,255,255), m_id != GOAL_U);   //render filled if know goal, border otherwise
+//    cv::circle(mat, cv::Point(m_location_pixels.x, m_location_pixels.y), 4, cv::Scalar(255,255,0), -1, 4);
+//}
 
 /*! @brief Stream insertion operator for a single ColourSegment.
  *      The segment is terminated by a newline.

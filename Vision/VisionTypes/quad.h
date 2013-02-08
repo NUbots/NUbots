@@ -1,7 +1,6 @@
 #ifndef QUAD_H
 #define QUAD_H
 
-#include <opencv2/core/core.hpp>
 #include "Tools/Math/Vector2.h"
 
 #include "Vision/basicvisiontypes.h"
@@ -54,9 +53,6 @@ public:
 
     float getAverageWidth() const;                //! Returns the average width of the Quad in pixels.
     float getAverageHeight() const;               //! Returns the average height of the Quad in pixels.
-
-
-    void render(cv::Mat& mat, cv::Scalar colour, bool filled = true) const;
 
 private:
 

@@ -556,7 +556,7 @@ void VisionBlackboard::debugPublish() const
     debug << "VisionBlackboard::debugPublish - " << endl;
     debug << "kinematics_horizon: " << kinematics_horizon.getA() << " " << kinematics_horizon.getB() << " " << kinematics_horizon.getC() << endl;
     debug << "horizon_scan_points: " << m_green_horizon.getOriginalPoints().size() << endl;
-    debug << "object_points: " << object_points.size() << endl;
+    debug << "object_points: " << obstacle_points.size() << endl;
     debug << "horizontal_scanlines: " << horizontal_scanlines.size() << endl;
     debug << "horizontal_segmented_scanlines: " << horizontal_segmented_scanlines.getSegments().size() << endl;
     debug << "vertical_segmented_scanlines: " << vertical_segmented_scanlines.getSegments().size() << endl;

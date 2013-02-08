@@ -99,6 +99,8 @@ public:
         greenHorizonPoints,
         horizontalScanPath,
         verticalScanPath,
+        Segments,
+        FilteredSegments,
         TransitionSegments,
         FieldLines,
         ObjectCandidates,
@@ -109,6 +111,8 @@ public:
         wmLeftLeg,
         wmBall,
         CalGrid,
+        GoalEdgeLines,
+        Plot,
         numDisplays
     };
 
@@ -154,6 +158,10 @@ public:
                 return QString("Horizontal Scan Path");
             case verticalScanPath:
                 return QString("Vertical Scan Path");
+            case Segments:
+                return QString("Unfiltered Segments");
+            case FilteredSegments:
+                return QString("Filtered Segments");
             case TransitionSegments:
                 return QString("Transition Segment");
             case FieldLines:
@@ -174,6 +182,10 @@ public:
                 return QString("World Model: Ball");
             case CalGrid:
                 return QString("Calibration Grid");
+            case GoalEdgeLines:
+                return QString("Goal Edge Lines");
+            case Plot:
+                return QString("Plot");
             default:
                 return QString("Unknown");
         }

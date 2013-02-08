@@ -30,11 +30,11 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
     QPixmap temp_pixmap(22,22);
     unsigned char tempr, tempg, tempb;
 
-    for (int col = 0; col < ClassIndex::num_colours; col++)
+    for (int col = 0; col < Vision::num_colours; col++)
     {
-        ClassIndex::getColourIndexAsRGB(col, tempr, tempg, tempb);
+        Vision::getColourAsRGB(Vision::getColourFromIndex(col), tempr, tempg, tempb);
         temp_pixmap.fill(QColor(tempr, tempg, tempb));
-        coloursComboBox->addItem(QIcon(temp_pixmap), tr(ClassIndex::getColourNameFromIndex(col)));
+        coloursComboBox->addItem(QIcon(temp_pixmap), tr(Vision::getColourName(Vision::getColourFromIndex(col)).c_str()));
     }
 
     // Colour selection group
@@ -117,9 +117,9 @@ ClassificationWidget::ClassificationWidget(QWidget* parent) : QDockWidget(parent
 
     // Selected Colour statistics:
     StatisticsLayout = new QGridLayout;
-    for (int col = 0; col < ClassIndex::num_colours; col++)
+    for (int col = 0; col < Vision::num_colours; col++)
     {
-        ColourLabel[col] = new QLabel(tr(ClassIndex::getColourNameFromIndex(col)));
+        ColourLabel[col] = new QLabel(tr(Vision::getColourName(Vision::getColourFromIndex(col)).c_str()));
         PercentageSelectedLabel[col] = new QLabel(tr("0 %"));
         PixelSelectedLabelOverlapped[col] = new QLabel(tr("0 Colours"));
         StatisticsLayout->addWidget(ColourLabel[col],col,1);
@@ -316,9 +316,9 @@ std::vector<Pixel> ClassificationWidget::getSelectedColours()
     return result;
 }
 
-ClassIndex::Colour ClassificationWidget::getColourLabel()
+Vision::Colour ClassificationWidget::getColourLabel()
 {
-    return ClassIndex::getColourFromIndex(coloursComboBox->currentIndex());
+    return Vision::getColourFromIndex(coloursComboBox->currentIndex());
 }
 
 // Slots
@@ -436,11 +436,11 @@ void ClassificationWidget::updateStatistics(float* PixelsOverLapped)
 {
     //qDebug() << "Updating Stats:" ;
     float total = 0;
-    for (int col = 0; col < ClassIndex::num_colours; col++)
+    for (int col = 0; col < Vision::num_colours; col++)
     {
         total = total + PixelsOverLapped[col];
     }
-    for (int col = 0; col < ClassIndex::num_colours; col++)
+    for (int col = 0; col < Vision::num_colours; col++)
     {
         QString result;
         QString pixelsOverlapped;
