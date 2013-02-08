@@ -152,18 +152,21 @@ namespace ConfigSystem
             // get the parent node
             ptree paramParent = _treeRoot.get_child(fullPath);
 
-            // delete the parameter
+            // Delete the parameter.
+            // (Note: Only erases 'direct children'.
+            // i.e. paramParent.erase("myname") might erase something,
+            //  but paramParent.erase("my.name") will never erase anything).
             int del_n = paramParent.erase(paramName);
             if(del_n == 0)
             {
-                std::cout   << "ConfigTree::deleteParam(...): Nothing to erase."
+                std::cout   << "ConfigTree::deleteParam(...): Nothing to erase"
+                            << " (there's no '" << paramName << "' at the given path)."
                             << std::endl;
                 return false; // return failure if nothing was erased
             }
             
             // put back the modified parent node
             _treeRoot.put_child(fullPath, paramParent);
-
         }
         catch (boost::property_tree::ptree_error e)
         {
@@ -302,6 +305,10 @@ namespace ConfigSystem
                 break;
         }
 
+
+        // std::cout << __PRETTY_FUNCTION__ << ": success_v = " << success_v << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << ": success_r = " << success_r << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << ( (success_r)? ": success" : ": failed" ) << std::endl;
         return success_v && success_r;
     }
 
@@ -362,7 +369,7 @@ namespace ConfigSystem
                 success_v = false;
                 break;
         }
-        // std::cout << __PRETTY_FUNCTION__ << ( (success_v)? "success" : "failed" ) << std::endl;
+
         // Add range
         switch(vt)
         {
@@ -377,7 +384,6 @@ namespace ConfigSystem
             case vt_1dvector_long:
             case vt_2dvector_long:
             case vt_3dvector_long:
-                // std::cout << "ConfigTree::addParamValueandRangeToPtree(...): IN HERE" << std::endl;
                 success_r = addRangeToPtree<long>(fromParam, toPtree);
                 break;
             default: 
@@ -391,23 +397,9 @@ namespace ConfigSystem
         
         // std::cout << __PRETTY_FUNCTION__ << ": success_v = " << success_v << std::endl;
         // std::cout << __PRETTY_FUNCTION__ << ": success_r = " << success_r << std::endl;
-        // std::cout << __PRETTY_FUNCTION__ << ( (success_r)? "success" : "failed" ) << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << ( (success_r)? ": success" : ": failed" ) << std::endl;
         return success_v && success_r;
     }
-
-// "Camera": {
-//     "Sharpness": {
-//         "desc": "sharpness",
-//         "range": {
-//             "min": "0",
-//             "max": "255",
-//             "lBound": "CLOSED",
-//             "outside": "false",
-//             "uBound": "CLOSED"
-//         },
-//         "value": "150",
-//         "type": "float"
-//     },
 
     
     ptree ConfigTree::getRoot()

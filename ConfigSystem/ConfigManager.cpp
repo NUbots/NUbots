@@ -167,7 +167,7 @@ namespace ConfigSystem
                       << std::endl;
             return false;
         }
-
+        
         //! Create the new ConfigParameter
         cp = ConfigParameter(initialValue);
         

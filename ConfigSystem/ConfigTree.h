@@ -121,21 +121,112 @@ namespace ConfigSystem
             return true;
         }
         
+
         template<typename T>
-        bool addVectorValueToParam1D(ptree from_ptree, ConfigParameter &to_param)
+        bool ptreeToVector1D(
+            ptree from_ptree, 
+            std::vector<T>& to_vector)
         {
-            std::vector<T> vector_value;
-            
             try
             {
                 //Retrieve values of type T from vector in tree and place in vector.
-                BOOST_FOREACH(ptree::value_type &child, from_ptree.get_child("value"))
+                BOOST_FOREACH(ptree::value_type &child, from_ptree)
                 {
-                    vector_value.push_back(child.second.get<T>(""));
+                    T val = child.second.get<T>("");
+                    to_vector.push_back(val);
                 }
+            }
+            catch(std::exception &e)
+            {
+                std::cout << __PRETTY_FUNCTION__ << ": " << e.what() << std::endl;
+                return false;
+            }
+            
+            return true;
+        }
+        template<typename T>
+        bool ptreeToVector2D(
+            ptree from_ptree, 
+            std::vector<std::vector<T> >& to_vector)
+        {
+            try
+            {
+                //Retrieve values of type T from vector in tree and place in vector.
+                BOOST_FOREACH(ptree::value_type &child, from_ptree)
+                {
+                    std::vector<T> vec;
+
+                    // ensure child is an array
+                    if(child.second.empty()) 
+                    {
+                        // allow empty arrays
+                        if(child.first != "") 
+                        {
+                            std::cout << __PRETTY_FUNCTION__ << ": " << child.first << " != \"\".";
+                            return false;
+                        }
+                    }
+                    else ptreeToVector1D(child.second, vec);
+
+                    to_vector.push_back(std::vector<T>(vec));
+                }
+            }
+            catch(std::exception &e)
+            {
+                std::cout << __PRETTY_FUNCTION__ << ": " << e.what() << std::endl;
+                return false;
+            }
+            
+            return true;
+        }
+        template<typename T>
+        bool ptreeToVector3D(
+            ptree from_ptree, 
+            std::vector<std::vector<std::vector<T> > >& to_vector)
+        {
+            try
+            {
+                //Retrieve values of type T from vector in tree and place in vector.
+                BOOST_FOREACH(ptree::value_type &child, from_ptree)
+                {
+                    std::vector<std::vector<T> > vec;
+
+                    // ensure child is an array
+                    if(child.second.empty()) 
+                    {
+                        // allow empty arrays
+                        if(child.first != "") 
+                        {
+                            std::cout << __PRETTY_FUNCTION__ << ": " << child.first << " != \"\".";
+                            return false;
+                        }
+                    }
+                    else ptreeToVector2D(child.second, vec);
+
+                    to_vector.push_back(std::vector<std::vector<T> >(vec));
+                }
+            }
+            catch(std::exception &e)
+            {
+                std::cout << __PRETTY_FUNCTION__ << ": " << e.what() << std::endl;
+                return false;
+            }
+            
+            return true;
+        }
+
+
+        template<typename T>
+        bool addVectorValueToParam1D(ptree from_ptree, ConfigParameter &to_param)
+        {
+            try
+            {
+                //Retrieve values of type T from vector in tree and place in vector.
+                std::vector<T> vector_value;
+                ptreeToVector1D(from_ptree.get_child("value"), vector_value);
                 
                 //Sets the value in the ConfigParameter object
-                to_param.setValue(vector_value);
+                return to_param.setValue(vector_value);
             }
             catch(std::exception &e)
             {
@@ -148,35 +239,14 @@ namespace ConfigSystem
         template<typename T>
         bool addVectorValueToParam2D(ptree from_ptree, ConfigParameter &to_param)
         {
-            std::vector< std::vector<T> > vector_value;
-            std::vector<T> column_value;
-            
             try
             {
                 //Retrieve values of type T from vector in tree and place in vector.
-                BOOST_FOREACH(const ptree::value_type &child, from_ptree.get_child("value"))
-                {
-                    column_value = std::vector<T>();
-                    
-                    // ensure child is an array
-                    if(child.second.empty()) 
-                    {
-                        // allow empty arrays
-                        if(child.first != "") return false;
-                    }
-                    else
-                    {
-                        BOOST_FOREACH(const ptree::value_type &grandchild, child.second)
-                        {
-                            column_value.push_back(grandchild.second.get<T>(""));
-                        }
-                    }
-
-                    vector_value.push_back(column_value);
-                }
+                std::vector< std::vector<T> > vector_value;
+                ptreeToVector2D(from_ptree.get_child("value"), vector_value);
                 
                 //Sets the value in the ConfigParameter object
-                to_param.setValue(vector_value);
+                return to_param.setValue(vector_value);
             }
             catch(std::exception &e)
             {
@@ -189,51 +259,14 @@ namespace ConfigSystem
         template<typename T>
         bool addVectorValueToParam3D(ptree from_ptree, ConfigParameter &to_param)
         {
-            std::vector< std::vector< std::vector<T> > > vector_value;        
-            std::vector< std::vector<T> > column_vector;
-            std::vector<T> column_value;
-            
             try
             {
                 //Retrieve values of type T from vector in tree and place in vector.
-                BOOST_FOREACH(const ptree::value_type &child, from_ptree.get_child("value"))
-                {
-                    column_vector = std::vector<std::vector<T> >();
-                    
-                    // ensure child is an array
-                    if(child.second.empty()) 
-                    {
-                        // allow empty arrays
-                        if(child.first != "") return false;
-                    }
-                    else
-                    {
-                        BOOST_FOREACH(const ptree::value_type &grandchild, child.second)
-                        {
-                            column_value = std::vector<T>();
-                            
-                            // ensure child is an array
-                            if(grandchild.second.empty()) 
-                            {
-                                // allow empty arrays
-                                if(grandchild.first != "") return false;
-                            }
-                            else
-                            {
-                                BOOST_FOREACH(const ptree::value_type &greatgrandchild, grandchild.second)
-                                {
-                                    column_value.push_back(greatgrandchild.second.get<T>(""));
-                                }
-                            }
-                            
-                            column_vector.push_back(column_value);
-                        }
-                    }
-                    vector_value.push_back(column_vector);
-                }
+                std::vector< std::vector< std::vector<T> > > vector_value;
+                ptreeToVector3D(from_ptree.get_child("value"), vector_value);
                 
                 //Sets the value in the ConfigParameter object
-                to_param.setValue(vector_value);
+                return to_param.setValue(vector_value);
             }
             catch(std::exception &e)
             {
@@ -271,7 +304,8 @@ namespace ConfigSystem
                 range_lBound,
                 range_uBound
             );
-            toParam.setRange(cr);
+            
+            return toParam.setRange(cr);
         }
 
 

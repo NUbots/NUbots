@@ -131,6 +131,7 @@ namespace ConfigSystem
         
         /*! @brief Deletes the named parameter stored at the given path.
          *         (An attempt to delete a locked parameter will fail)
+         *         Note: Will delete any path (i.e. not individual parameters).
          *  @param paramPath Path to the parameter to delete.
          *  @param paramName Name of the parameter to delete.
          *  @return Whether the operation was successful.
