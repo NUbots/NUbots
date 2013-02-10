@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <string>
+#include <sstream>
 #include <boost/foreach.hpp>
 #include <QPainter>
 #include <QScrollBar>

@@ -32,7 +32,7 @@ class LSFittedLine : public Line
     double getr2tls() const;
     void clearPoints();
     unsigned int getNumPoints() const {return points.size();}
-    const std::vector<Point>& getPoints();
+    const std::vector<Point>& getPoints() const;
     Vector2<Point> getEndPoints() const;
     double averageDistanceBetween(const LSFittedLine& other) const;
 private:

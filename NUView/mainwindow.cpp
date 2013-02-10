@@ -436,12 +436,13 @@ void MainWindow::createConnections()
     connect(virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
     connect(virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
     connect(virtualRobot,SIGNAL(pointsDisplayChanged(std::vector<Point>, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector<Point>, GLDisplay::display)));
+    connect(virtualRobot, SIGNAL(segmentsDisplayChanged(std::vector<std::vector<ColourSegment> >,GLDisplay::display)), &glManager, SLOT(writeSegmentsToDisplay(std::vector<std::vector<ColourSegment> >,GLDisplay::display)));
     //connect(virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
     //connect(virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
-    connect(virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
+    connect(virtualRobot,SIGNAL(fittedLineDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
     //connect(virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
     connect(virtualRobot,SIGNAL(fieldObjectsDisplayChanged(FieldObjects*,GLDisplay::display)),&glManager,SLOT(writeFieldObjectsToDisplay(FieldObjects*,GLDisplay::display)));
-    connect(virtualRobot,SIGNAL(linePointsDisplayChanged(std::vector< LinePoint >,GLDisplay::display)),&glManager,SLOT(writeLinesPointsToDisplay(std::vector< LinePoint >,GLDisplay::display)));
+    connect(virtualRobot,SIGNAL(linePointsDisplayChanged(std::vector< Point >,GLDisplay::display)),&glManager,SLOT(writeLinesPointsToDisplay(std::vector< Point >,GLDisplay::display)));
     //connect(virtualRobot,SIGNAL(cornerPointsDisplayChanged(std::vector< CornerPoint >,GLDisplay::display)),&glManager,SLOT(writeCornersToDisplay(std::vector< CornerPoint >,GLDisplay::display)));
     connect(virtualRobot,SIGNAL(edgeFilterChanged(QImage, GLDisplay::display)),&glManager,SLOT(stub(QImage, GLDisplay::display)));
     connect(virtualRobot,SIGNAL(fftChanged(QImage, GLDisplay::display)),&glManager,SLOT(stub(QImage, GLDisplay::display)));

@@ -59,7 +59,6 @@ public:
     unsigned char* getLUT() {return classificationTable;}
     QString fileType;
 
-    void emitPoints(vector<Point> updatedPoints, GLDisplay::display displayId);
 public slots:
     /** Processes a Classified Image Packet, to be displayed in program
     *  @param datagram The classified image packet that is recieved, and to be processed by program for visualisation and further vision processing
@@ -85,8 +84,8 @@ signals:
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
     //void cornerPointsDisplayChanged(std::vector< CornerPoint> corners, GLDisplay::display displayId );
     void pointsDisplayChanged(std::vector<Point> updatedPoints, GLDisplay::display displayId);
-    //void transitionSegmentsDisplayChanged(std::vector< TransitionSegment > updatedTransitionSegments, GLDisplay::display displayId);
-    void lineDetectionDisplayChanged(std::vector<LSFittedLine> fieldLines, GLDisplay::display displayId);
+    void segmentsDisplayChanged(std::vector<std::vector<ColourSegment> > updatedSegments, GLDisplay::display displayId);
+    void fittedLineDisplayChanged(std::vector<LSFittedLine> lines, GLDisplay::display displayId);
     void linePointsDisplayChanged(std::vector<Point> linepoints, GLDisplay::display displayId);
     //void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
     void fieldObjectsDisplayChanged(FieldObjects* AllFieldObjects, GLDisplay::display displayId);
@@ -105,19 +104,6 @@ private:
         int index;
         unsigned char colour;
     };
-/**ADDED BY SHANNON**/
-    static const bool DEBUG_ON = false;
-
-    //DEBUG METHODS
-    void printPoints(const vector< Vector2<int> >& points, filedesc_t filedesc) const;
-    void printObjects(const vector<AmbiguousObject>& objects, filedesc_t filedesc) const;
-
-    //OBSTACLE DETECTION METHODS
-    //vector<int> getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const;
-    //vector<ObjectCandidate> getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
-    //                                              int height_thresh, int width_min) const;
-    //AmbiguousObject getObjectFromPosition(Vector2<int> centre, Vector2<int> dim, const int bottom_y, float timestamp) const;
-/**ADDED BY SHANNON**/
 
     void processVisionFrame(const NUImage* image);
     void processVisionFrame(ClassifiedImage& image);

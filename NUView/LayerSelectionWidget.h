@@ -143,8 +143,8 @@ private:
     QColor selectedColour;      //!< Storage of the currently selected colour.
     QList< QPair<GLDisplay*,int> > selectedLayerHistory;
 
-    public:
-        const int quickSelectColoursPerLine;    //!< The maximum number of quick select buttons per row.
+public:
+    const int quickSelectColoursPerLine;    //!< The maximum number of quick select buttons per row.
 
 
 

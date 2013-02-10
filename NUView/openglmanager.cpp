@@ -59,7 +59,6 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     // If there is a texture already stored, delete it.
     if(textureStored[displayId])
     {
-
         glDeleteTextures(1,&textures[displayId]);
         textureStored[displayId] = false;
     }
@@ -188,6 +187,47 @@ void OpenglManager::writePointsToDisplay(std::vector<Point> newpoints, GLDisplay
     for (int pointNum = 0; pointNum < (int)newpoints.size(); pointNum++)
     {
         drawHollowCircle(newpoints[pointNum].x+0.5, newpoints[pointNum].y+0.5, 0.5, 50);
+    }
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
+
+void OpenglManager::writeSegmentsToDisplay(vector<vector<ColourSegment> > updatedSegments, GLDisplay::display displayId)
+{
+    makeCurrent();
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+
+    glLineWidth(1.0);       // Line width
+    for(unsigned int i = 0 ; i < updatedSegments.size(); i++)
+    {
+        vector<ColourSegment>& line = updatedSegments[i];
+        for(unsigned int k = 0 ; k < line.size(); k++) {
+            ColourSegment& segment = line[i];
+            const Point& s = segment.getStart();
+            const Point& e = segment.getEnd();
+            unsigned char r, g, b;
+
+
+            Vision::getColourAsRGB(segment.getColour(), r, g, b);
+            glColor3ub(r,g,b);
+            glBegin(GL_LINES);                              // Start Lines
+            glVertex2i( int(s.x), int(s.y) );                 // Starting point
+            glVertex2i( int(e.x), int(e.y) );               // Ending point
+            glEnd();  // End Lines
+        }
     }
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST
@@ -433,7 +473,7 @@ void OpenglManager::writeLinesPointsToDisplay(vector<Point> linepoints, GLDispla
     //emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
-void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
+void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDisplay::display displayId)
 {
     makeCurrent();
     // If there is an old list stored, delete it first.
@@ -449,25 +489,35 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
     glLineWidth(2.0);       // Line width
     
 
-    for(unsigned int i = 0 ; i < fieldLines.size(); i++)
+    for(unsigned int i = 0 ; i < lines.size(); i++)
     {
-
-        Vector2<Point> endpts = fieldLines[i].getEndPoints();
-        endpts[0] = fieldLines[i].projectOnto(endpts[0]);
-        endpts[1] = fieldLines[i].projectOnto(endpts[1]);
-        if(fieldLines[i].valid == true)
+        const LSFittedLine& line = lines[i];
+        Vector2<Point> endpts = line.getEndPoints();
+        endpts[0] = line.projectOnto(endpts[0]);
+        endpts[1] = line.projectOnto(endpts[1]);
+        if(line.valid == true)
         {
             glLineWidth(3.0);       // Line width
-            glColor3ub(255,0,0);
+
+            switch(displayId) {
+            case GLDisplay::GoalEdgeLinesStart:
+                glColor3ub(0,255,255);  //cyan
+                break;
+            case GLDisplay::GoalEdgeLinesEnd:
+                glColor3ub(255,0,255);    //magenta
+                break;
+            default:
+                glColor3ub(255,0,0);    //red
+            }
+
+
+
             glBegin(GL_LINES);                              // Start Lines
             glVertex2i( int(endpts[0].x), int(endpts[0].y) );                 // Starting point
             glVertex2i( int(endpts[1].x), int(endpts[1].y) );               // Ending point
             glEnd();  // End Lines
 
-            /*qDebug()    << int(fieldLines[i].leftPoint.x) << "," << int(fieldLines[i].leftPoint.y) <<"\t"
-                        << int(fieldLines[i].rightPoint.x)<< "," << int(fieldLines[i].rightPoint.y);*/
-
-            const std::vector<Point>& linePoints = fieldLines[i].getPoints();
+            const std::vector<Point>& linePoints = line.getPoints();
             glBegin(GL_TRIANGLES);
             for (unsigned int j =0; j < linePoints.size(); j++)
             {

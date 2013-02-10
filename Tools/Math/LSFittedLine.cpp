@@ -31,7 +31,7 @@ void LSFittedLine::clearPoints(){
 	points.clear();
 }
 
-const std::vector<Point>& LSFittedLine::getPoints()
+const std::vector<Point>& LSFittedLine::getPoints() const
 {
 	return points;
 }

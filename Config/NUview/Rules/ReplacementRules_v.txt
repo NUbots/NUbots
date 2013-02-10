@@ -39,3 +39,15 @@ before: (5, 240) [yellow]       //5 pix min
 middle: (0 , 1) [orange]     //1 pix max
 after: (0,240) []
 replacement: before                 //before, after, split
+
+line1:
+before: (1, 240) [white]       //3 pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (5,240) [white]
+replacement: before                 //before, after, split
+
+line2:
+before: (5, 240) [white]       //3 pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (1,240) [white]
+replacement: before                 //before, after, split

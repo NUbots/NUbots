@@ -25,6 +25,10 @@
 //#include <boost/geometry/geometries/polygon.hpp>
 //#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
 
+//DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#include <qwt/qwt_symbol.h>
+//DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 using namespace boost::accumulators;
 
 void GreenHorizonCH::calculateHorizon()
@@ -37,28 +41,25 @@ void GreenHorizonCH::calculateHorizon()
     const NUImage& img = vbb->getOriginalImage();
     int width = img.getWidth(),
         height = img.getHeight();
-    #if VISION_HORIZON_VERBOSITY > 2
-        debug << "GreenHorizonCH::calculateHorizon() width: " << width << " height: " << height << endl;
-    #endif
+
+    //makes this fail-safe in the event of improper parameters
+    const int SPACING = max(VisionConstants::GREEN_HORIZON_SCAN_SPACING, 1U);
     
     // variable declarations    
-    vector<Point> horizon_points;
+    vector<Point> horizon_points,
+                  thrown_points;
 
     const Horizon& kin_hor = vbb->getKinematicsHorizon();
     int kin_hor_y;
 
-    #if VISION_HORIZON_VERBOSITY > 2
-        debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
-    #endif
-
-    for (int x = 0; x < width; x+=VisionConstants::GREEN_HORIZON_SCAN_SPACING) {
+    for (int x = 0; x < width; x+=SPACING) {
 
         unsigned int green_top = 0;
         unsigned int green_count = 0;
 
         kin_hor_y = kin_hor.findYFromX(x);
         //clamp green horizon values
-        kin_hor_y = max(0,kin_hor_y);
+        kin_hor_y = max(0, kin_hor_y);
         kin_hor_y = min(height-1, kin_hor_y);
         
         for (int y = kin_hor_y; y < height; y++) {
@@ -89,6 +90,7 @@ void GreenHorizonCH::calculateHorizon()
     #endif
     // provide blackboard the original set of scan points
     vbb->setGreenHorizonScanPoints(horizon_points);
+    DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_SCANS, horizon_points);
 
     // statistical filter for green horizon points
     double mean_y, std_dev_y;
@@ -108,107 +110,29 @@ void GreenHorizonCH::calculateHorizon()
 
     vector<Point>::iterator p = horizon_points.begin();
     while(p < horizon_points.end()) {
-        if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y ||
-            p->y > mean_y + VisionConstants::GREEN_HORIZON_LOWER_THRESHOLD_MULT*std_dev_y) {
+        //changing - I don't see any reason to remove pts that are too low if we are
+        //           doing a convex hull anyway.
+//        if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y ||
+//            p->y > mean_y + VisionConstants::GREEN_HORIZON_LOWER_THRESHOLD_MULT*std_dev_y) {
+        if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y) {
+            thrown_points.push_back(*p);
             p = horizon_points.erase(p);
         }
         else {
             p++;
         }
     }
+
+    DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_THROWN, thrown_points);
+
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << endl;
     #endif
 
-//    // convex hull
-//    typedef boost::tuple<double, double> poly_point;
-//    typedef model::polygon<poly_point> polygon;
-
-//    polygon poly, hull;
-
-//    BOOST_FOREACH(Point& p, horizon_points) {
-//        append(poly, poly_point(p.x, p.y));
-//    }
-
-//    convex_hull(poly, hull);
-
-//    //get points from boost hull
-//    horizon_points.clear();
-//    BOOST_FOREACH(poly_point p, hull) {
-//        horizon_points.push_back(Point(p.x, p.y));
-//    }
     horizon_points = upperConvexHull(horizon_points);
 
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;
-    #endif
-    
-//    // get top half (silly ordering)
-//    temp.clear();
-//    bool start_found = false;   // is LHS point found
-
-//    for (unsigned int x = 0; x < horizon_points.size(); x++) {
-//        // until LHS found, add nothing
-//        if (horizon_points.at(x).x == 0) {
-//            start_found = true;
-//            temp.push_back(horizon_points.at(x));
-//        }
-//        // once found, add remaining points
-//        else if (start_found) {
-//            temp.push_back(horizon_points.at(x));
-//        }
-//    }
-//    // add RHS point
-//    temp.push_back(horizon_points.at(0));
-    
-//    #if VISION_HORIZON_VERBOSITY > 2
-//        debug << "GreenHorizonCH::calculateHorizon() - Convex hull reordering done" << endl;
-//    #endif
-    
-//    // if empty hull
-//    if (temp.size() <= 2) {
-//        temp.clear();
-//        //temp->push_back(PointType(0, height-1));
-//        //temp->push_back(PointType(width-1, height-1));
-//        int kin_hor_left_y = kin_hor.findYFromX(0),
-//            kin_hor_right_y = kin_hor.findYFromX(width-1);
-//        //clamp kinematics horizon values
-//        kin_hor_left_y = max(0,kin_hor_left_y);
-//        kin_hor_right_y = max(0,kin_hor_right_y);
-//        kin_hor_left_y = min(height-1, kin_hor_left_y);
-//        kin_hor_right_y = min(height-1, kin_hor_right_y);
-//        //add new points at edge
-
-//        temp.push_back(cv::Point2i(0, kin_hor_left_y));
-//        temp.push_back(cv::Point2i(width-1, kin_hor_right_y));
-////        temp.push_back(cv::Point2i(0, height-1));
-////        temp.push_back(cv::Point2i(width-1, height-1));
-//    }
-//    else {
-        // extend to right edge
-        if (static_cast<unsigned int>(width-1) > horizon_points.back().x + VisionConstants::GREEN_HORIZON_SCAN_SPACING) {
-//            temp.push_back(PointType(temp.at(temp.size()-1).x + width/VER_SEGMENTS, height-1));
-//            temp.push_back(PointType(width-1, height-1));
-            horizon_points.push_back(Point(width-1, height-1));
-        }
-        else {
-//            temp.push_back(PointType(width-1, height-1));
-            horizon_points.push_back(Point(width-1,horizon_points.back().y));
-        }
-
-        // extend to left edge
-//        if (temp.at(0).y == height-1) {
-//            if (temp.at(1).x > width/static_cast<int>(VER_SEGMENTS)) {
-//                //temp->insert(1, PointType(0, 0));
-//                vector<PointType>::iterator it;
-//                it = temp.begin();
-//                it++;
-//                it = temp.insert (it , PointType(temp.at(1).x - width/VER_SEGMENTS, height-1));
-//            }
-//        }
-//    }
-    #if VISION_HORIZON_VERBOSITY > 2
-        debug << "GreenHorizonCH::calculateHorizon() - Side extension done" << endl;
     #endif
 
     // set hull points
@@ -226,12 +150,13 @@ bool GreenHorizonCH::isPixelGreen(const NUImage& img, int x, int y)
 // Note: Assumes the points are sorted in the x direction.
 vector<Point> GreenHorizonCH::upperConvexHull(const vector<Point>& P)
 {
-        int n = P.size(), k = 0;
-        vector<Point> H(2*n);
+        int n = P.size(),
+            k = 0;
+        vector<Point> H(n);
 
         // Build upper hull
         for (int i = 0; i < n; i++) {
-            while (k >= 2 && cross(H[k-2], H[k-1], P[i]) >= 0)
+            while (k >= 2 && cross(H[k-2], H[k-1], P[i]) <= 0)
                 k--;
             H[k] = P[i];
             k++;

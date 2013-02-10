@@ -12,6 +12,7 @@ namespace Vision {
         case DBID_MATCHED_SEGMENTS:     return "DBID_MATCHED_SEGMENTS";
         case DBID_HORIZON:              return "DBID_HORIZON";
         case DBID_GREENHORIZON_SCANS:   return "DBID_GREENHORIZON_SCANS";
+        case DBID_GREENHORIZON_THROWN:  return "DBID_GREENHORIZON_THROWN";
         case DBID_GREENHORIZON_FINAL:   return "DBID_GREENHORIZON_FINAL";
         case DBID_OBJECT_POINTS:        return "DBID_OBJECT_POINTS";
         case DBID_FILTERED_SEGMENTS:    return "DBID_FILTERED_SEGMENTS";
@@ -35,15 +36,16 @@ namespace Vision {
         case 5: return DBID_MATCHED_SEGMENTS;
         case 6: return DBID_HORIZON;
         case 7: return DBID_GREENHORIZON_SCANS;
-        case 8: return DBID_GREENHORIZON_FINAL;
-        case 9: return DBID_OBJECT_POINTS;
-        case 10: return DBID_FILTERED_SEGMENTS;
-        case 11: return DBID_GOALS;
-        case 12: return DBID_BALLS;
-        case 13: return DBID_OBSTACLES;
-        case 14: return DBID_LINES;
-        case 15: return DBID_GOAL_LINES_START;
-        case 16: return DBID_GOAL_LINES_END;
+        case 8: return DBID_GREENHORIZON_THROWN;
+        case 9: return DBID_GREENHORIZON_FINAL;
+        case 10: return DBID_OBJECT_POINTS;
+        case 11: return DBID_FILTERED_SEGMENTS;
+        case 12: return DBID_GOALS;
+        case 13: return DBID_BALLS;
+        case 14: return DBID_OBSTACLES;
+        case 15: return DBID_LINES;
+        case 16: return DBID_GOAL_LINES_START;
+        case 17: return DBID_GOAL_LINES_END;
         default: return DBID_INVALID;
         }
     }
@@ -58,16 +60,17 @@ namespace Vision {
         case DBID_MATCHED_SEGMENTS:     return 5;
         case DBID_HORIZON:              return 6;
         case DBID_GREENHORIZON_SCANS:   return 7;
-        case DBID_GREENHORIZON_FINAL:   return 8;
-        case DBID_OBJECT_POINTS:        return 9;
-        case DBID_FILTERED_SEGMENTS:    return 10;
-        case DBID_GOALS:                return 11;
-        case DBID_BALLS:                return 12;
-        case DBID_LINES:                return 13;
-        case DBID_OBSTACLES:            return 14;
-        case DBID_GOAL_LINES_START:     return 15;
-        case DBID_GOAL_LINES_END:       return 16;
-        default:                        return 17;
+        case DBID_GREENHORIZON_THROWN:  return 8;
+        case DBID_GREENHORIZON_FINAL:   return 9;
+        case DBID_OBJECT_POINTS:        return 10;
+        case DBID_FILTERED_SEGMENTS:    return 11;
+        case DBID_GOALS:                return 12;
+        case DBID_BALLS:                return 13;
+        case DBID_LINES:                return 14;
+        case DBID_OBSTACLES:            return 15;
+        case DBID_GOAL_LINES_START:     return 16;
+        case DBID_GOAL_LINES_END:       return 17;
+        default:                        return 18;
         }
     }
 

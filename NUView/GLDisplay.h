@@ -90,30 +90,31 @@ public:
     //! List of the display layers
     enum display
     {
-        unknown,
-        rawImage,
-        classifiedImage,
-        classificationSelection,
-        horizonLine,
-        greenHorizonScanPoints,
-        greenHorizonPoints,
-        horizontalScanPath,
-        verticalScanPath,
-        Segments,
-        FilteredSegments,
-        TransitionSegments,
-        FieldLines,
-        ObjectCandidates,
-        FieldObjects,
-        EdgeFilter,
-        FFT,
-        wmRightLeg,
-        wmLeftLeg,
-        wmBall,
-        CalGrid,
-        GoalEdgeLines,
-        Plot,
-        numDisplays
+        unknown                 = 0,
+        rawImage                = 1,
+        classifiedImage         = 2,
+        classificationSelection = 3,
+        horizonLine             = 4,
+        greenHorizonScanPoints  = 5,
+        greenHorizonPoints      = 6,
+        horizontalScanPath      = 7,
+        verticalScanPath        = 8,
+        Segments                = 9,
+        FilteredSegments        = 10,
+        Transitions             = 11,
+        FieldLines              = 12,
+        ObjectCandidates        = 13,
+        FieldObjects            = 14,
+        EdgeFilter              = 15,
+        FFT                     = 16,
+        wmRightLeg              = 17,
+        wmLeftLeg               = 18,
+        wmBall                  = 19,
+        CalGrid                 = 20,
+        GoalEdgeLinesStart      = 21,
+        GoalEdgeLinesEnd        = 22,
+        Plot                    = 23,
+        numDisplays             = 24
     };
 
     //! Returns the minimum desired size for the window
@@ -142,52 +143,54 @@ public:
     {
         switch(displayID)
         {
-            case rawImage:
-                return QString("Raw");
-            case classifiedImage:
-                return QString("Classified");
-            case horizonLine:
-                return QString("Horizon");
-            case classificationSelection:
-                return QString("Classification Selection");
-            case greenHorizonScanPoints:
-                return QString("Green Horizon Scan");
-            case greenHorizonPoints:
-                return QString("Green Horizon");
-            case horizontalScanPath:
-                return QString("Horizontal Scan Path");
-            case verticalScanPath:
-                return QString("Vertical Scan Path");
-            case Segments:
-                return QString("Unfiltered Segments");
-            case FilteredSegments:
-                return QString("Filtered Segments");
-            case TransitionSegments:
-                return QString("Transition Segment");
-            case FieldLines:
-                return QString("Field Lines");
-            case ObjectCandidates:
-                return QString("Field Object Candidates");
-            case FieldObjects:
-                return QString("Field Objects");
-            case EdgeFilter:
-                return QString("Edge Filter");
-            case FFT:
-                return QString("FFT");
-            case wmLeftLeg:
-                return QString("World Model: Left Leg");
-            case wmRightLeg:
-                return QString("World Model: Right Leg");
-            case wmBall:
-                return QString("World Model: Ball");
-            case CalGrid:
-                return QString("Calibration Grid");
-            case GoalEdgeLines:
-                return QString("Goal Edge Lines");
-            case Plot:
-                return QString("Plot");
-            default:
-                return QString("Unknown");
+        case rawImage:
+            return QString("Raw");
+        case classifiedImage:
+            return QString("Classified");
+        case horizonLine:
+            return QString("Horizon");
+        case classificationSelection:
+            return QString("Classification Selection");
+        case greenHorizonScanPoints:
+            return QString("Green Horizon Scan");
+        case greenHorizonPoints:
+            return QString("Green Horizon");
+        case horizontalScanPath:
+            return QString("Horizontal Scan Path");
+        case verticalScanPath:
+            return QString("Vertical Scan Path");
+        case Segments:
+            return QString("Unfiltered Segments");
+        case FilteredSegments:
+            return QString("Filtered Segments");
+        case Transitions:
+            return QString("Transitions");
+        case FieldLines:
+            return QString("Field Lines");
+        case ObjectCandidates:
+            return QString("Field Object Candidates");
+        case FieldObjects:
+            return QString("Field Objects");
+        case EdgeFilter:
+            return QString("Edge Filter");
+        case FFT:
+            return QString("FFT");
+        case wmLeftLeg:
+            return QString("World Model: Left Leg");
+        case wmRightLeg:
+            return QString("World Model: Right Leg");
+        case wmBall:
+            return QString("World Model: Ball");
+        case CalGrid:
+            return QString("Calibration Grid");
+        case GoalEdgeLinesStart:
+            return QString("Goal Edge Lines: Start");
+        case GoalEdgeLinesEnd:
+            return QString("Goal Edge Lines: End");
+        case Plot:
+            return QString("Plot");
+        default:
+            return QString("Unknown");
         }
     }
 
@@ -325,40 +328,48 @@ private:
     {
         switch(displayID)
         {
-            case rawImage:
-                return QColor(255,255,255);
-            case classifiedImage:
-                return QColor(255,255,255);
-            case horizonLine:
-                return QColor(255,0,255);
-            case classificationSelection:
-                return QColor(255,255,255);
-            case greenHorizonScanPoints:
-                return QColor(255,0,0);
-            case greenHorizonPoints:
-                return QColor(0,255,127);
-            case horizontalScanPath:
-                return QColor(255,0,0);
-            case verticalScanPath:
-                return QColor(0,255,127);
-            case TransitionSegments:
-                return QColor(255,255,255);
-            case ObjectCandidates:
-                return QColor(255,128,64);
-            case EdgeFilter:
-                return QColor(255,255,255);
-            case FFT:
-                return QColor(255,255,255);
-            case FieldLines:
-                return QColor(100,100,100);
-            case wmLeftLeg:
-                return QColor(0,0,200);
-            case wmRightLeg:
-                return QColor(200,0,0);
-            case wmBall:
-                return QColor(255,102,0);
-            default:
-                return QColor(255,255,255);
+        case rawImage:
+            return QColor(255,255,255);
+        case classifiedImage:
+            return QColor(255,255,255);
+        case horizonLine:
+            return QColor(255,0,255);
+        case classificationSelection:
+            return QColor(255,255,255);
+        case greenHorizonScanPoints:
+            return QColor(255,0,0);
+        case greenHorizonPoints:
+            return QColor(0,255,127);
+        case horizontalScanPath:
+            return QColor(255,0,0);
+        case verticalScanPath:
+            return QColor(0,255,127);
+        case Segments:
+            return QColor(255,255,255);
+        case FilteredSegments:
+            return QColor(255,255,255);
+        case Transitions:
+            return QColor(255,255,255);
+        case ObjectCandidates:
+            return QColor(255,128,64);
+        case EdgeFilter:
+            return QColor(255,255,255);
+        case FFT:
+            return QColor(255,255,255);
+        case FieldLines:
+            return QColor(100,100,100);
+        case wmLeftLeg:
+            return QColor(0,0,200);
+        case wmRightLeg:
+            return QColor(200,0,0);
+        case wmBall:
+            return QColor(255,102,0);
+        case GoalEdgeLinesStart:
+            return QColor(0,255,255);
+        case GoalEdgeLinesEnd:
+            return QColor(255,0,255);
+        default:
+            return QColor(255,255,255);
         }
     }
 };

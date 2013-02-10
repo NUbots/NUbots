@@ -17,22 +17,14 @@
 
 #include "../Kinematics/Kinematics.h"
 
-virtualNUbot* this_vn = NULL;
-
-void virtualNUbot::emitPoints(vector<Point> updatedPoints, GLDisplay::display displayId)
-{
-    emit pointsDisplayChanged(updatedPoints, displayId);
-}
-
 virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
 {
     vision = VisionControlWrapper::getInstance();
-    this_vn = this;
 
     //make connections
-    QObject::connect(vision->wrapper, SIGNAL(pointsUpdated(vector<Point>,GLDisplay::display)), this, SIGNAL(pointsDisplayChanged(vector<Point>,GLDisplay::display)));
-    //add other connections
-
+    QObject::connect(vision->wrapper, SIGNAL(pointsUpdated(std::vector<Point>,GLDisplay::display)), this, SIGNAL(pointsDisplayChanged(std::vector<Point>,GLDisplay::display)));
+    QObject::connect(vision->wrapper, SIGNAL(linesUpdated(std::vector<LSFittedLine>,GLDisplay::display)), this, SIGNAL(fittedLineDisplayChanged(std::vector<LSFittedLine>,GLDisplay::display)));
+    QObject::connect(vision->wrapper, SIGNAL(segmentsUpdated(std::vector<std::vector<ColourSegment> >,GLDisplay::display)), this, SIGNAL(segmentsDisplayChanged(std::vector<std::vector<ColourSegment> >,GLDisplay::display)));
 
     //! TODO: Load LUT from filename.
     AllObjects = new FieldObjects();
@@ -157,7 +149,6 @@ void virtualNUbot::generateClassifiedImage()
     emit classifiedDisplayChanged(&classImage, GLDisplay::classifiedImage);
     return;
 }
-
 
 void virtualNUbot::processVisionFrame()
 {

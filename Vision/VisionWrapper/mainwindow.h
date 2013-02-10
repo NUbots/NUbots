@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "Vision/basicvisiontypes.h"
-#include "Vision/VisionTypes/Interfaces/renderable.h"
 
 using std::map;
 using std::vector;

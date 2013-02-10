@@ -58,7 +58,7 @@ VisionBlackboard* VisionBlackboard::getInstance()
 */
 void VisionBlackboard::setGreenHullPoints(const vector<Vector2<double> >& points)
 {
-    m_green_horizon.set(points);
+    m_green_horizon.set(points, Point(original_image->getWidth(), original_image->getHeight()));
 }
 
 /**
@@ -587,7 +587,7 @@ void VisionBlackboard::debugPublish() const
     else {
         errorlog << "VisionBlackboard::publishDebug - vertical horizon!" << endl;
     }
-    
+
     //horizon scans
     wrapper->debugPublish(DBID_GREENHORIZON_SCANS, gh_scan_points);
     

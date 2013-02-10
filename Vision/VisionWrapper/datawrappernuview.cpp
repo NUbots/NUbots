@@ -195,22 +195,16 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
 
     switch(id) {
     case DBID_H_SCANS:
-        errorlog << "DataWrapper::debugPublish - DBID_H_SCANS printing not implemented" << endl;
-//        BOOST_FOREACH(const PointType& pt, data_points) {
-//            line(img, cv::Point2i(0, pt.y), cv::Point2i(img.cols, pt.y), Scalar(127,127,127), 1);
-//        }
+        debug << "DataWrapper::debugPublish - DBID_H_SCANS printing not implemented" << endl;
         break;
     case DBID_V_SCANS:
-        errorlog << "DataWrapper::debugPublish - DBID_V_SCANS printing not implemented" << endl;
-//        BOOST_FOREACH(const PointType& pt, data_points) {
-//            line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), Scalar(127,127,127), 1);
-//        }
+        debug << "DataWrapper::debugPublish - DBID_V_SCANS printing not implemented" << endl;
         break;
     case DBID_MATCHED_SEGMENTS:
-        emit pointsUpdated(data_points, GLDisplay::TransitionSegments);
+        emit pointsUpdated(data_points, GLDisplay::Transitions);
         break;
     case DBID_HORIZON:
-        errorlog << "DataWrapper::debugPublish - DBID_HORIZON printing not implemented" << endl;
+        debug << "DataWrapper::debugPublish - DBID_HORIZON printing handled externally to vision" << endl;
         break;
     case DBID_GREENHORIZON_SCANS:
         emit pointsUpdated(data_points, GLDisplay::greenHorizonScanPoints);
@@ -219,10 +213,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
         emit pointsUpdated(data_points, GLDisplay::greenHorizonPoints);
         break;
     case DBID_OBJECT_POINTS:
-        errorlog << "DataWrapper::debugPublish - DBID_OBJECT_POINTS printing not implemented" << endl;
-//        BOOST_FOREACH(const PointType& pt, data_points) {
-//            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(0,0,255), 4);
-//        }
+        debug << "DataWrapper::debugPublish - DBID_OBJECT_POINTS printing not implemented" << endl;
         break;
     default:
         errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
@@ -235,7 +226,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 
     switch(id) {
     case DBID_SEGMENTS:
-        emit segmentsUpdated(region, GLDisplay::Segments);
+        emit segmentsUpdated(region.getSegments(), GLDisplay::Segments);
 //        c_it = colours.begin();
 //        for (it = data_points.begin(); it < data_points.end()-1; it+=2) {
 //            //draws a line between each consecutive pair of points of the corresponding colour
@@ -244,7 +235,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 //        }
         break;
     case DBID_FILTERED_SEGMENTS:
-        emit segmentsUpdated(region, GLDisplay::FilteredSegments);
+        emit segmentsUpdated(region.getSegments(), GLDisplay::FilteredSegments);
 //        c_it = colours.begin();
 //        for (it = data_points.begin(); it < data_points.end()-1; it+=2) {
 //            //draws a line between each consecutive pair of points of the corresponding colour
@@ -264,7 +255,16 @@ void DataWrapper::debugPublish(DEBUG_ID id, const NUImage* const img)
 
 void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
 {
-
+    switch(id) {
+    case DBID_GOAL_LINES_START:
+        emit linesUpdated(data, GLDisplay::GoalEdgeLinesStart);
+        break;
+    case DBID_GOAL_LINES_END:
+        emit linesUpdated(data, GLDisplay::GoalEdgeLinesEnd);
+        break;
+    default:
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+    }
 }
 
 void DataWrapper::plotPoints(const vector<Point> &pts, string name)

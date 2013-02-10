@@ -171,6 +171,7 @@ double Ball::distanceToBall(double bearing, double elevation) {
     bool d2pvalid = false;
     d2p = 0;
     width_dist = 0;
+    double result = 0;
     //get distance to point from base
 
     d2pvalid = tran.isDistanceToPointValid();
@@ -194,27 +195,25 @@ double Ball::distanceToBall(double bearing, double elevation) {
     switch(VisionConstants::BALL_DISTANCE_METHOD) {
     case VisionConstants::D2P:
         distance_valid = d2pvalid && d2p > 0;
-        return d2p;
+        result = d2p;
+        break;
     case VisionConstants::Width:
         distance_valid = true;
-        return width_dist;
+        result = width_dist;
+        break;
     case VisionConstants::Average:
         //average distances
         distance_valid = d2pvalid && d2p > 0;
-        return (d2p + width_dist) * 0.5;
+        result = (d2p + width_dist) * 0.5;
+        break;
     case VisionConstants::Least:
         distance_valid = d2pvalid && d2p > 0;
-        if(distance_valid)
-            return min(d2p, width_dist);
-        else
-            return width_dist;
+        result = (distance_valid ? min(d2p, width_dist) : width_dist);
+        break;
     }
-}
 
-//void Ball::render(cv::Mat &mat) const
-//{
-//    cv::circle(mat, cv::Point2i(m_location_pixels.x, m_location_pixels.y), m_diameter*0.5, cv::Scalar(0, 125, 255), 2);
-//}
+    return result;
+}
 
 ostream& operator<< (ostream& output, const Ball& b)
 {

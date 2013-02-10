@@ -38,4 +38,5 @@ istream& operator>> (istream& input, NULocalisationSensors& p_sensor)
     input >> p_sensor.m_left_foot;
     input >> p_sensor.m_right_foot;
     p_sensor.m_time = p_sensor.m_odometry.Time;
+    return input;
 }

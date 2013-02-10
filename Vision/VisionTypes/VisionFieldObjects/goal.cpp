@@ -238,8 +238,7 @@ double Goal::distanceToGoal(double bearing, double elevation)
     const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
     //reset distance values
     bool d2pvalid = false;
-    d2p = 0;
-    width_dist = 0;
+    double result = d2p = width_dist = 0;
     //get distance to point from base
 //    if(vbb->isCameraToGroundValid())
 //    {
@@ -281,42 +280,34 @@ double Goal::distanceToGoal(double bearing, double elevation)
             debug << "Goal::distanceToGoal: Method: D2P" << endl;
         #endif
         distance_valid = d2pvalid && d2p > 0;
-        return d2p;
+        result = d2p;
+        break;
     case VisionConstants::Width:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Width" << endl;
         #endif
         distance_valid = true;
-        return width_dist;
+        result = width_dist;
+        break;
     case VisionConstants::Average:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Average" << endl;
         #endif
         //average distances
         distance_valid = d2pvalid && d2p > 0;
-        return (d2p + width_dist) * 0.5;
+        result = (d2p + width_dist) * 0.5;
+        break;
     case VisionConstants::Least:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Least" << endl;
         #endif
         distance_valid = d2pvalid && d2p > 0;
-        if(distance_valid)
-            return min(d2p, width_dist);
-        else
-            return width_dist;
+        result = (distance_valid ? min(d2p, width_dist) : width_dist);
+        break;
     }
-}
 
-//void Goal::render(cv::Mat &mat) const
-//{
-////    cv::Rect r(m_location_pixels.x - 0.5*m_size_on_screen.x, m_location_pixels.y-m_size_on_screen.y, m_size_on_screen.x, m_size_on_screen.y);
-////    if(isYellowGoal(m_id))
-////        cv::rectangle(mat, r, cv::Scalar(0, 255, 255), -1);
-////    else
-////        cv::rectangle(mat, r, cv::Scalar(255, 0, 0), -1);
-//    m_corners.render(mat, cv::Scalar(0,255,255), m_id != GOAL_U);   //render filled if know goal, border otherwise
-//    cv::circle(mat, cv::Point(m_location_pixels.x, m_location_pixels.y), 4, cv::Scalar(255,255,0), -1, 4);
-//}
+    return result;
+}
 
 /*! @brief Stream insertion operator for a single ColourSegment.
  *      The segment is terminated by a newline.

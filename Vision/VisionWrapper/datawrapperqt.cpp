@@ -190,6 +190,8 @@ CameraSettings DataWrapper::getCameraSettings()
         return m_camera->getSettings();
     case STREAM:
         return CameraSettings();
+    default:
+        return CameraSettings();
     }
 }
 
@@ -270,6 +272,11 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
             gui->addToLayer(id, QPointF(pt.x, pt.y), QColor(255,0,255));
         }
         break;
+    case DBID_GREENHORIZON_THROWN:
+        BOOST_FOREACH(const Point& pt, data_points) {
+            gui->addToLayer(id, QPointF(pt.x, pt.y), QColor(255,0,0));
+        }
+        break;
     case DBID_GREENHORIZON_FINAL:
         for(vector<Point>::const_iterator it=data_points.begin(); it<data_points.end(); it++) {
             if (it > data_points.begin()) {
@@ -283,6 +290,9 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
             gui->addToLayer(id, QPointF(pt.x, pt.y), QColor(0,0,255));
         }
         break;
+    default:
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        return;
     }
 }
 
