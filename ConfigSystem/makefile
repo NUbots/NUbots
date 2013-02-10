@@ -6,7 +6,7 @@ OBJECTS = ConfigParameter.o      ConfigTree.o    \
 ConfigSystemTest: $(OBJECTS) TestConfig.o
 	g++ $^ -o $@
 
-Testing_MM: $(OBJECTS) Testing_MM.o
+Testing_MM: $(OBJECTS) Testing_MM.o Testing_MM_Utils.o
 	g++ $^ -lrt -o $@
 	# -lrt is for realtime extensions (for clock_gettime)
 

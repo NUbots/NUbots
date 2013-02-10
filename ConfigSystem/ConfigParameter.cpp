@@ -81,6 +81,13 @@ namespace ConfigSystem
         else return bt_unknown;
     }
 
+
+    
+    // Note: These constructors are ugly and ridiculous, but make other methods
+    //       far neater.  They should be refactored ASAP!
+    //       I don't think you can template constructors in a non-template class,
+    //       but a *single* templated method could be called from each
+    //       constructor that initialises all the member variables?
     ConfigParameter::ConfigParameter(bool                                            value)
     {
         _val_type = vt_bool;
@@ -142,7 +149,7 @@ namespace ConfigSystem
         _modified = false;
         _locked   = false;
         _val_3dvector_long = new std::vector<std::vector<std::vector<long> > >(value);
-        _range_long = NULL;
+        _range_long = new ConfigRange<long>();
     }
     ConfigParameter::ConfigParameter(std::vector<double>                             value)
     {
@@ -307,6 +314,13 @@ namespace ConfigSystem
             vt != vt_2dvector_long  &&
             vt != vt_3dvector_long
             ) return false;
+
+        if(_range_long == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_range_long is NULL." << std::endl;
+            return false;
+        }
+
         range = *(_range_long);
         return true;
     }
@@ -320,6 +334,13 @@ namespace ConfigSystem
             vt != vt_2dvector_double  &&
             vt != vt_3dvector_double
             ) return false;
+
+        if(_range_double == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_range_double is NULL." << std::endl;
+            return false;
+        }
+
         range = *(_range_double);
         return true;
     }
@@ -363,6 +384,11 @@ namespace ConfigSystem
     bool ConfigParameter::getValue_bool(bool &value)
     {
         if(_val_type != vt_bool) return false;
+        if(_val_bool == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_bool is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_bool);
         return true;
     }
@@ -370,6 +396,11 @@ namespace ConfigSystem
     bool ConfigParameter::getValue_long(long &value)
     {
         if(_val_type != vt_long) return false;
+        if(_val_long == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_long is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_long);
         return true;
     }
@@ -377,6 +408,11 @@ namespace ConfigSystem
     bool ConfigParameter::getValue_double(double &value)
     {
         if(_val_type != vt_double) return false;
+        if(_val_double == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_double is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_double);
         return true;
     }
@@ -384,6 +420,11 @@ namespace ConfigSystem
     bool ConfigParameter::getValue_string(std::string &value)
     {
         if(_val_type != vt_string) return false;
+        if(_val_string == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_string is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_string);
         return true;
     }
@@ -391,18 +432,33 @@ namespace ConfigSystem
     bool ConfigParameter::getValue_vector1d_long(std::vector<long> &value)
     {
         if(_val_type != vt_1dvector_long) return false;
+        if(_val_1dvector_long == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_1dvector_long is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_1dvector_long);
         return true;
     }
     bool ConfigParameter::getValue_vector2d_long(std::vector<std::vector<long> > &value)
     {
         if(_val_type != vt_2dvector_long) return false;
+        if(_val_2dvector_long == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_2dvector_long is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_2dvector_long);
         return true;
     }
     bool ConfigParameter::getValue_vector3d_long(std::vector<std::vector<std::vector<long> > > &value)
     {
         if(_val_type != vt_3dvector_long) return false;
+        if(_val_3dvector_long == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_3dvector_long is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_3dvector_long);
         return true;
     }
@@ -410,18 +466,33 @@ namespace ConfigSystem
     bool ConfigParameter::getValue_vector1d_double(std::vector<double> &value)
     {
         if(_val_type != vt_1dvector_double) return false;
+        if(_val_1dvector_double == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_1dvector_double is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_1dvector_double);
         return true;
     }
     bool ConfigParameter::getValue_vector2d_double(std::vector<std::vector<double> > &value)
     {
         if(_val_type != vt_2dvector_double) return false;
+        if(_val_2dvector_double == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_2dvector_double is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_2dvector_double);
         return true;
     }
     bool ConfigParameter::getValue_vector3d_double(std::vector<std::vector<std::vector<double> > > &value)
     {
         if(_val_type != vt_3dvector_double) return false;
+        if(_val_3dvector_double == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": " << "_val_3dvector_double is NULL." << std::endl;
+            return false;
+        }
         value = *(_val_3dvector_double);
         return true;
     }

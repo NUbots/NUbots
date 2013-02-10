@@ -159,18 +159,18 @@ namespace ConfigSystem
         CONFIGSYS_DEBUG_CALLS;
 
         //! Get the relevant parameter from the ConfigTree
-        ConfigParameter cp(vt_none);
-        if(_currConfigTree->getParam(paramPath, paramName, cp))
+        if(_currConfigTree->checkParam(paramPath, paramName))
         {
             std::cout << "ConfigManager::createParam(...): "
                       << paramPath << "." << paramName << " already exists."
                       << std::endl;
             return false;
         }
-        
+
         //! Create the new ConfigParameter
+        ConfigParameter cp(vt_none);
         cp = ConfigParameter(initialValue);
-        
+
         //! Store the new parameter back into
         if(!_currConfigTree->storeParam(paramPath, paramName, cp)) return false;
         

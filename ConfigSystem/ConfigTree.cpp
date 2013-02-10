@@ -60,6 +60,36 @@ namespace ConfigSystem
         return paramPath;
     }
 
+    bool ConfigTree::checkParam (
+            const std::string paramPath, 
+            const std::string paramName
+            )
+    {
+        CONFIGSYS_DEBUG_CALLS;
+
+        // Indicates successful retrieval
+        bool success = false;
+
+        // Create the full path to the desired parameter
+        std::string fullPath = makeFullParamPath(paramPath, paramName);
+        
+        try
+        {
+            // Get the subtree representing the desired parameter.
+            ptree paramSubtree = _treeRoot.get_child(fullPath);
+
+            // Convert the parameter subtree into a parameter object.
+            ConfigParameter cp(vt_none);
+            success = paramFromPtree(paramSubtree, cp);
+        }
+        catch (boost::property_tree::ptree_error e)
+        {
+            return false;
+        }
+
+        return success;
+    }
+
     bool ConfigTree::getParam (
             const std::string paramPath, 
             const std::string paramName, 
@@ -68,8 +98,6 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
         
-        // std::cout << "IN getParam" << std::endl;
-
         // Indicates successful retrieval
         bool success = false;
 

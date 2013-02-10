@@ -51,257 +51,11 @@
 
 #include "Module.h"
 
+#include "Testing_MM_Utils.h"
+
 using namespace ConfigSystem;
 
 ConfigManager* config;
-
-
-boost::mt19937 seed(0);
-
-void printTestResult(std::string testName, bool result)
-{
-    std::cout << testName << ": "
-              << (result? "pass." : "FAIL!") 
-              << std::endl;
-}
-
-timespec diff(timespec start, timespec end)
-{
-    timespec temp;
-    if ((end.tv_nsec-start.tv_nsec)<0) {
-        temp.tv_sec = end.tv_sec-start.tv_sec-1;
-        temp.tv_nsec = 1000000000 + end.tv_nsec-start.tv_nsec;
-    } else {
-        temp.tv_sec = end.tv_sec-start.tv_sec;
-        temp.tv_nsec = end.tv_nsec-start.tv_nsec;
-    }
-    return temp;
-}
-
-timespec tt_startTime;
-void startTimedTest()
-{
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tt_startTime);
-}
-
-void endTimedTest()
-{
-    timespec tt_endTime;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tt_endTime);
-
-    double tt = diff(tt_startTime, tt_endTime).tv_nsec / 1000000.0;
-    double tt_Hz = 1.0 / (tt / 1000.0);
-
-    // std::cout << "    time = " << tt << " ms." << std::endl;
-    // std::cout << "    time = " << tt_Hz << " Hz." << std::endl;
-    std::cout << "  time = " << tt << " ms (" << tt_Hz << " Hz)." << std::endl;
-}
-
-template <typename T>
-void create1DTestVector(
-    std::vector<T> &vec_out,
-    int s_min = 0, 
-    int s_max = 5,
-    T v_min = 0,
-    T v_max = 100
-    )
-{
-    // timeval t;
-    // gettimeofday(&t,NULL);
-    // boost::mt19937 seed( (int)t.tv_sec );
-    boost::uniform_real<> distR(v_min, v_max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
-    boost::uniform_int<> distI(s_min, s_max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
-
-    vec_out = std::vector<T>();
-    
-    int  vecS = randInt();
-    for(int i = 0; i < vecS; i++)
-    {
-        T val = (T)randReal();
-        vec_out.push_back(val);
-    }
-}
-template <typename T>
-void create2DTestVector(
-    std::vector<std::vector<T> > &vec_out,
-    int s_min = 0, 
-    int s_max = 10,
-    T v_min = 0,
-    T v_max = 100
-    )
-{
-    // timeval t;
-    // gettimeofday(&t,NULL);
-    // boost::mt19937 seed( (int)t.tv_sec );
-    boost::uniform_real<> distR(v_min, v_max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
-    boost::uniform_int<> distI(s_min, s_max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
-
-    vec_out = std::vector<std::vector<T> >();
-    
-    int  vecS = randInt();
-    for(int i = 0; i < vecS; i++)
-    {
-        std::vector<T> val;
-        create1DTestVector(val, s_min, s_max, v_min, v_max);
-        vec_out.push_back(std::vector<T>(val));
-    }
-}
-template <typename T>
-void create3DTestVector(
-    std::vector<std::vector<std::vector<T> > > &vec_out,
-    int s_min = 0, 
-    int s_max = 5,
-    T v_min = 0,
-    T v_max = 100
-    )
-{
-    // timeval t;
-    // gettimeofday(&t,NULL);
-    // boost::mt19937 seed( (int)t.tv_sec );
-    boost::uniform_real<> distR(v_min, v_max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
-    boost::uniform_int<> distI(s_min, s_max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
-
-    vec_out = std::vector<std::vector<std::vector<T> > >();
-    
-    int  vecS = randInt();
-    for(int i = 0; i < vecS; i++)
-    {
-        std::vector<std::vector<T> > val;
-        create2DTestVector(val, s_min, s_max, v_min, v_max);
-        vec_out.push_back(std::vector<std::vector<T> >(val));
-    }
-}
-
-template <typename T>
-bool compare1DVectors(std::vector<T> u, std::vector<T> v, int indent = 0)
-{
-    std::stringstream ss;
-    for(int i = 0; i < indent; i ++)
-    {
-        ss.width(4);
-        ss << "|";
-    }
-    std::string str_i = ss.str();
-
-    bool res_c = true;
-
-    int su = u.size();
-    int sv = v.size();
-    int s_max = (su > sv) ? su : sv;
-    int s_min = (su < sv) ? su : sv;
-
-    res_c &= (su == sv);
-
-    std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;;
-    for(int i = 0; i < s_max; i++)
-    {
-        std::cout << str_i;
-
-        std::cout.width(8);
-        if(i < su)  std::cout << u[i];
-        else        std::cout << "_";
-        
-        std::cout << ", ";
-
-        std::cout.width(8);
-        if(i < sv)  std::cout << v[i];
-        else        std::cout << "_";
-
-        if(i < s_min)
-        {
-            // bool t_c = ((float)u[i] == (float)v[i]);
-            bool t_c = ((long)(u[i] * 100000) == (long)(v[i] * 100000));
-            res_c &= t_c;
-            if(!t_c) std::cout << " *";
-        }
-
-        std::cout << std::endl;
-    }
-
-    return res_c;
-}
-
-template <typename T>
-bool compare2DVectors(
-    std::vector<std::vector<T> > u,
-    std::vector<std::vector<T> > v,
-    int indent = 0)
-{
-    std::stringstream ss;
-    for(int i = 0; i < indent; i ++)
-    {
-        ss.width(4);
-        ss << "|";
-    }
-    std::string str_i = ss.str();
-
-
-    bool res_c = true;
-
-    int su = u.size();
-    int sv = v.size();
-    int s_max = (su > sv) ? su : sv;
-    int s_min = (su < sv) ? su : sv;
-
-    res_c &= (su == sv);
-
-    std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;
-    for(int i = 0; i < s_max; i++)
-    {
-        std::vector<T> empty;
-        std::cout << str_i << std::endl;
-        if(i >=   su) compare1DVectors(empty, v[i], indent + 1);
-        if(i >=   sv) compare1DVectors(u[i], empty, indent + 1);
-        if(i < s_min) compare1DVectors(u[i], v[i], indent + 1);
-    }
-
-    return res_c;
-}
-
-
-template <typename T>
-bool compare3DVectors(
-    std::vector<std::vector<std::vector<T> > > u,
-    std::vector<std::vector<std::vector<T> > > v,
-    int indent = 0)
-{
-    std::stringstream ss;
-    for(int i = 0; i < indent; i ++)
-    {
-        ss.width(4);
-        ss << "|";
-    }
-    std::string str_i = ss.str();
-
-
-    bool res_c = true;
-
-    int su = u.size();
-    int sv = v.size();
-    int s_max = (su > sv) ? su : sv;
-    int s_min = (su < sv) ? su : sv;
-
-    res_c &= (su == sv);
-
-    std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;;
-    for(int i = 0; i < s_max; i++)
-    {
-        std::vector<std::vector<T> > empty;
-
-        std::cout << str_i << std::endl;
-        if(i >=   su) compare2DVectors(empty, v[i], indent + 1);
-        if(i >=   sv) compare2DVectors(u[i], empty, indent + 1);
-        if(i < s_min) compare2DVectors(u[i], v[i], indent + 1);
-    }
-
-    return res_c;
-}
 
 
 template <typename T>
@@ -310,10 +64,10 @@ bool testValue(const std::string &paramname, const std::string &wrongparamname)
     // timeval t;
     // gettimeofday(&t,NULL);
     // boost::mt19937 seed( (int)t.tv_sec );
-    boost::uniform_real<> distR(0, 1);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
-    boost::uniform_int<> distI(0, 255);
-    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
+    // boost::uniform_real<> distR(0, 1);
+    // boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
+    // boost::uniform_int<> distI(0, 255);
+    // boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
     // std::vector<T> store_1dv_t, read_1dv_t;
 
     T store_t, read_t;
@@ -323,7 +77,7 @@ bool testValue(const std::string &paramname, const std::string &wrongparamname)
     // Store a double:
     // pass: If stored successfully.
     // FAIL: If not stored.
-    store_t = (T)(randReal() * 100);
+    createTestValue<T>(store_t, 0, 100);
     startTimedTest();
     bool res_s = config->storeValue("Testing.MM", paramname, store_t);
     endTimedTest();
@@ -466,22 +220,91 @@ bool test3DVector(const std::string &paramName)
 }
 
 
+bool testSaveLoad()
+{
+    startTimedTest();
+
+    typedef std::vector<std::vector<std::vector<double> > > vec3D_d;
+    typedef std::vector<std::vector<std::vector<long  > > > vec3D_l;
+    typedef std::vector<std::vector<double> > vec2D_d;
+    typedef std::vector<std::vector<long  > > vec2D_l;
+    typedef std::vector<double> vec1D_d;
+    typedef std::vector<long  > vec1D_l;
+    vec3D_d save_3dv_d, load_3dv_d;
+    vec3D_l save_3dv_l, load_3dv_l;
+    vec2D_d save_2dv_d, load_2dv_d;
+    vec2D_l save_2dv_l, load_2dv_l;
+    vec1D_d save_1dv_d, load_1dv_d;
+    vec1D_l save_1dv_l, load_1dv_l;
+    double  save_d    , load_d    ;
+    long    save_l    , load_l    ;
+    std::    cout << "create values:" << std::endl;
+    create3DTestVector(save_3dv_d);
+    create3DTestVector(save_3dv_l);
+    create2DTestVector(save_2dv_d);
+    create2DTestVector(save_2dv_l);
+    create1DTestVector(save_1dv_d);
+    create1DTestVector(save_1dv_l);
+    createTestValue(save_d);
+    createTestValue(save_l);
+    std::cout << "create names:" << std::endl;
+    std::string name_3dv_d = makeRandomName();
+    std::string name_3dv_l = makeRandomName();
+    std::string name_2dv_d = makeRandomName();
+    std::string name_2dv_l = makeRandomName();
+    std::string name_1dv_d = makeRandomName();
+    std::string name_1dv_l = makeRandomName();
+    std::string name_d     = makeRandomName();
+    std::string name_l     = makeRandomName();
+    std::cout << "create parameters:" << std::endl;
+    config->createParam("testSaveLoad", name_3dv_d, save_3dv_d);
+    config->createParam("testSaveLoad", name_3dv_l, save_3dv_l);
+    config->createParam("testSaveLoad", name_2dv_d, save_2dv_d);
+    config->createParam("testSaveLoad", name_2dv_l, save_2dv_l);
+    config->createParam("testSaveLoad", name_1dv_d, save_1dv_d);
+    config->createParam("testSaveLoad", name_1dv_l, save_1dv_l);
+    config->createParam("testSaveLoad", name_d    , save_d    );
+    config->createParam("testSaveLoad", name_l    , save_l    );
+
+    std::cout << "save configuration:" << std::endl;
+    config->saveConfiguration("testSaveLoadConfig");
+    std::cout << "load configuration:" << std::endl;
+    config->loadConfiguration("testSaveLoadConfig");
+
+    std::cout << "read values:" << std::endl;
+    config->readValue("testSaveLoad", name_3dv_d, load_3dv_d);
+    config->readValue("testSaveLoad", name_3dv_l, load_3dv_l);
+    config->readValue("testSaveLoad", name_2dv_d, load_2dv_d);
+    config->readValue("testSaveLoad", name_2dv_l, load_2dv_l);
+    config->readValue("testSaveLoad", name_1dv_d, load_1dv_d);
+    config->readValue("testSaveLoad", name_1dv_l, load_1dv_l);
+    config->readValue("testSaveLoad", name_d    , load_d    );
+    config->readValue("testSaveLoad", name_l    , load_l    );
+    
+    bool result = true;
+
+    std::cout << "compare saved and loaded values:" << std::endl;
+    result &= compare3DVectors(save_3dv_d, load_3dv_d);
+    result &= compare3DVectors(save_3dv_l, load_3dv_l);
+    result &= compare2DVectors(save_2dv_d, load_2dv_d);
+    result &= compare2DVectors(save_2dv_l, load_2dv_l);
+    result &= compare1DVectors(save_1dv_d, load_1dv_d);
+    result &= compare1DVectors(save_1dv_l, load_1dv_l);
+    result &= compareValues(save_d    , load_d    );
+    result &= compareValues(save_l    , load_l    );
+
+
+    endTimedTest();
+    printTestResult("testSaveLoad", result);
+    return result;
+}
+
+
+
 
 int main(void)
 {
-    timeval t;
-    gettimeofday(&t,NULL);
-    seed = boost::mt19937( (int)t.tv_sec );
-
-    boost::uniform_real<> distR(0, 1);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > randReal(seed,distR);
-    
-    boost::uniform_int<> distI(0, 255);
-    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
-
-    // // Repeat all tests this many times
-    // for(int num_test_repeats = 100; num_test_repeats > 0; num_test_repeats--)
-    // {
+    initRandom();
 
     // Create config system, loading 'defaultConfig'.
     startTimedTest();
@@ -497,7 +320,7 @@ int main(void)
     bool res_all = true;
 
     // repeat tests
-    for(int i = 0; i < 500 && res_all; i++)
+    for(int i = 0; i < 2 && res_all; i++)
     {
         // Easy templated value tests
         std::cout << std::endl << "TEST: double" << std::endl;
@@ -529,6 +352,9 @@ int main(void)
         res_all &= test3DVector<double>("param_vector3d_double");
         std::cout << std::endl << "TEST: std::vector<std::vector<std::vector<long> > >" << std::endl;
         res_all &= test3DVector<long>("param_vector3d_long");
+
+        std::cout << std::endl << "TEST: Creating parameters, saving and loading configurations." << std::endl;
+        testSaveLoad();
     }
 
     if(res_all) std::cout << std::endl << "Testing complete: All tests passed." << std::endl;
@@ -542,12 +368,6 @@ int main(void)
     bool result;
     double                                          store_d    , read_d    ;
     long                                            store_l    , read_l    ;
-    // std::vector<double>                             store_1dv_d, read_1dv_d;
-    // std::vector<std::vector<double> >               store_2dv_d, read_2dv_d;
-    // std::vector<std::vector<std::vector<double> > > store_3dv_d, read_3dv_d;
-    // std::vector<long>                               store_1dv_l, read_1dv_l;
-    // std::vector<std::vector<long> >                 store_2dv_l, read_2dv_l;
-    // std::vector<std::vector<std::vector<long> > >   store_3dv_l, read_3dv_l;
     ConfigRange<double>                             store_r_d  , read_r_d  ;
     ConfigRange<long>                               store_r_l  , read_r_l  ;
 

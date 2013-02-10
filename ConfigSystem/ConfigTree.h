@@ -224,7 +224,7 @@ namespace ConfigSystem
                 //Retrieve values of type T from vector in tree and place in vector.
                 std::vector<T> vector_value;
                 ptreeToVector1D(from_ptree.get_child("value"), vector_value);
-                
+
                 //Sets the value in the ConfigParameter object
                 return to_param.setValue(vector_value);
             }
@@ -466,6 +466,18 @@ namespace ConfigSystem
         ConfigTree(ptree root);
         ~ConfigTree();
         
+        /*! 
+         *  @brief  Checks whether the given path and name point to a valid 
+         *          existing parameter.
+         *  @param paramPath The base path of the parameter.
+         *  @param paramName The parameter's name.
+         *  @return Returns whether a valid parameter exists.
+         */
+        bool checkParam (
+            const std::string paramPath,
+            const std::string paramName
+            );
+
         /*! 
          *  @brief  Gets a parameter from the ConfigTree
          *  @param paramPath The base path of the parameter.
