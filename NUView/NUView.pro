@@ -56,6 +56,7 @@ HEADERS += ui_mainwindow.h \
     ../Infrastructure/NUImage/BresenhamLine.h \
     ../Tools/Math/Vector2.h \
     ../Tools/Math/Line.h \
+    ../Tools/Math/Circle.h \
     ../Kinematics/Horizon.h \
     openglmanager.h \
     GLDisplay.h \
@@ -222,6 +223,7 @@ SOURCES += mainwindow.cpp \
     virtualnubot.cpp \
     ../Infrastructure/NUImage/BresenhamLine.cpp \
     ../Tools/Math/Line.cpp \
+    ../Tools/Math/Circle.cpp \
     ../Kinematics/Horizon.cpp \
     openglmanager.cpp \
     GLDisplay.cpp \
@@ -352,6 +354,7 @@ SOURCES += mainwindow.cpp \
     
 HEADERS += \
     ../Vision/VisionTypes/*.h \
+    ../Vision/VisionTypes/RANSACTypes/*.h \
     ../Vision/VisionTypes/VisionFieldObjects/*.h \
     ../Vision/VisionWrapper/datawrappercurrent.h \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.h \
@@ -367,6 +370,7 @@ HEADERS += \
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
+    ../Vision/VisionTypes/RANSACTypes/*.cpp \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
     ../Vision/VisionTools/pccamera.cpp \
     ../Vision/VisionTools/lookuptable.cpp \

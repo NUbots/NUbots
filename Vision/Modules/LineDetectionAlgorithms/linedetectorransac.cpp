@@ -2,7 +2,7 @@
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
 #include "Vision/GenericAlgorithms/ransac.h"
-#include "Vision/VisionTypes/visionline.h"
+#include "Vision/VisionTypes/RANSACTypes/ransacline.h"
 
 #include <limits>
 #include <stdlib.h>
@@ -22,7 +22,7 @@ vector<LSFittedLine> LineDetectorRANSAC::run()
 
     vector<ColourSegment> v_segments = vbb->getVerticalTransitions(LINE_COLOUR);  //get transitions associated with lines
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(LINE_COLOUR);
-    vector< pair<VisionLine, vector<Point> > > candidates;
+    vector< pair<RANSACLine, vector<Point> > > candidates;
     vector<LSFittedLine> lines;
     vector<Point> points;
 
@@ -37,7 +37,7 @@ vector<LSFittedLine> LineDetectorRANSAC::run()
 
     DataWrapper::getInstance()->plotPoints(plotpts, "Pre");  // debugging
 
-    candidates = RANSAC::findMultipleModels<VisionLine, Point>(points, m_e, m_n, m_k, m_max_iterations);
+    candidates = RANSAC::findMultipleModels<RANSACLine, Point>(points, m_e, m_n, m_k, m_max_iterations);
     for(unsigned int i=0; i<candidates.size(); i++) {
         lines.push_back(LSFittedLine(candidates.at(i).second));
     }

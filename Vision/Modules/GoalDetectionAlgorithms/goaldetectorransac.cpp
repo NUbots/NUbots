@@ -1,4 +1,5 @@
 #include "goaldetectorransac.h"
+#include "debugverbosityvision.h"
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
 #include "Vision/GenericAlgorithms/ransac.h"
@@ -82,6 +83,7 @@ GoalDetectorRANSAC::GoalDetectorRANSAC()
 
 vector<Goal> GoalDetectorRANSAC::run()
 {
+    const float STDDEV_THRESHOLD = 1.5;
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //get transitions associated with goals
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
@@ -93,6 +95,18 @@ vector<Goal> GoalDetectorRANSAC::run()
     vector<pair<RANSACGoal, vector<ColourSegment> > > ransac_results;
     vector<RANSACGoal> goal_lines;
     vector<pair<RANSACGoal, vector<ColourSegment> > >::iterator rit;
+
+    Vector2<double> h_length_stats = calculateSegmentLengthStatistics(h_segments);
+
+    // fill histogram bins
+    vector<ColourSegment>::iterator it = h_segments.begin();
+    while(it != h_segments.end()) {
+        //use stddev throwout to remove topbar segments
+        if(it->getLength() > h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y)
+            it = h_segments.erase(it);
+        else
+            it++;
+    }
 
     //use generic ransac implementation to find lines
     ransac_results = RANSAC::findMultipleModels<RANSACGoal, ColourSegment>(h_segments, m_e, m_n, m_k, m_max_iterations);
@@ -107,6 +121,14 @@ vector<Goal> GoalDetectorRANSAC::run()
     /// @todo MERGE COLINEAR / INTERSECTING
 
     cout << "after merge: " << goal_lines.size() << endl;
+
+#if VISION_FIELDOBJECT_VERBOSITY > 1
+    vector<LSFittedLine> debug_lines;
+    BOOST_FOREACH(const RANSACGoal& g, goal_lines) {
+        debug_lines.push_back(g);
+    }
+    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_CENTRE, debug_lines);
+#endif
 
     //Build candidates out of lines
     if(goal_lines.size() > 2) {
@@ -136,7 +158,7 @@ vector<Goal> GoalDetectorRANSAC::run()
         Vector2<Point> endpts = g.getEndPoints();
 
         //get width vector (to right)
-        Point w = (endpts[0] - endpts[1]).normalize(g.getWidth()).rotateLeft();
+        Point w = (endpts[0] - endpts[1]).normalize(g.getWidth()).rotateLeft()*0.5;
 
         if(endpts[0].y < endpts[1].y) {
             // pt0 is top

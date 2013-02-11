@@ -37,8 +37,10 @@ public:
 
     Vector2<double> getCentre() const;         //! Returns the centre pixel location  of the Quad.
 
-    Vector2<double> getBottomLeft() const;     //! Returns the bottom left pixel location  of the Quad.
-    Vector2<double> getTopRight() const;       //! Returns the top right pixel location  of the Quad.
+    Vector2<double> getBottomLeft() const {return m_bottom_left;}     //! Returns the bottom left pixel location  of the Quad.
+    Vector2<double> getBottomRight() const {return m_bottom_right;}     //! Returns the bottom right pixel location  of the Quad.
+    Vector2<double> getTopLeft() const {return m_top_left;}       //! Returns the top left pixel location  of the Quad.
+    Vector2<double> getTopRight() const {return m_top_right;}       //! Returns the top right pixel location  of the Quad.
 
     float getLeft() const {return 0.5*(m_bottom_left.x + m_top_left.x);}
     float getRight() const {return 0.5*(m_bottom_right.x + m_top_right.x);}

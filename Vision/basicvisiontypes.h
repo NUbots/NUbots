@@ -61,8 +61,9 @@ namespace Vision {
         DBID_OBSTACLES              = 14,
         DBID_LINES                  = 15,
         DBID_GOAL_LINES_START       = 16,
-        DBID_GOAL_LINES_END         = 17,
-        DBID_INVALID                = 18
+        DBID_GOAL_LINES_CENTRE      = 17,
+        DBID_GOAL_LINES_END         = 18,
+        DBID_INVALID                = 19
 //        DBID_BEACONS            = 12,
 //        DBID_BALLS              = 13,
 //        DBID_OBSTACLES          = 14,
@@ -77,8 +78,6 @@ namespace Vision {
     DEBUG_ID getDebugIDFromInt(int id);
 
     int getIntFromeDebugID(DEBUG_ID id);
-
-    bool operator <(DEBUG_ID idl, DEBUG_ID idr);
 
     //! @brief returns whether the given id maps to a goal
     inline bool isGoal(VFO_ID id) { return id >= GOAL_L && id <= GOAL_U;}

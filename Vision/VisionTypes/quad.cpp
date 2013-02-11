@@ -58,16 +58,6 @@ Vector2<double> Quad::getCentre() const
     return (m_bottom_left + m_top_left + m_top_right + m_bottom_right)*0.25;
 }
 
-Vector2<double> Quad::getBottomLeft() const
-{
-    return m_bottom_left;
-}
-
-Vector2<double> Quad::getTopRight() const
-{
-    return m_top_right;
-}
-
 int Quad::getBaseWidth() const
 {
     return std::abs(m_bottom_right.x - m_bottom_left.x + 1);

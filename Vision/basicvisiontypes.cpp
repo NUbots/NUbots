@@ -4,24 +4,25 @@ namespace Vision {
 
     std::string getDebugIDName(DEBUG_ID id) {
         switch(id) {
-        case DBID_IMAGE:                return "DBID_IMAGE";
-        case DBID_CLASSED_IMAGE:        return "DBID_CLASSED_IMAGE";
-        case DBID_H_SCANS:              return "DBID_H_SCANS";
-        case DBID_V_SCANS:              return "DBID_V_SCANS";
-        case DBID_SEGMENTS:             return "DBID_SEGMENTS";
-        case DBID_MATCHED_SEGMENTS:     return "DBID_MATCHED_SEGMENTS";
-        case DBID_HORIZON:              return "DBID_HORIZON";
-        case DBID_GREENHORIZON_SCANS:   return "DBID_GREENHORIZON_SCANS";
-        case DBID_GREENHORIZON_THROWN:  return "DBID_GREENHORIZON_THROWN";
-        case DBID_GREENHORIZON_FINAL:   return "DBID_GREENHORIZON_FINAL";
-        case DBID_OBJECT_POINTS:        return "DBID_OBJECT_POINTS";
-        case DBID_FILTERED_SEGMENTS:    return "DBID_FILTERED_SEGMENTS";
-        case DBID_GOALS:                return "DBID_GOALS";
-        case DBID_BALLS:                return "DBID_BALLS";
-        case DBID_LINES:                return "DBID_LINES";
-        case DBID_OBSTACLES:            return "DBID_OBSTACLES";
-        case DBID_GOAL_LINES_START:     return "DBID_GOAL_LINES_START";
-        case DBID_GOAL_LINES_END:       return "DBID_GOAL_LINES_END";
+        case DBID_IMAGE:                return "Image";
+        case DBID_CLASSED_IMAGE:        return "Classified Image";
+        case DBID_H_SCANS:              return "Horizontal Scans";
+        case DBID_V_SCANS:              return "Vertical Scans";
+        case DBID_SEGMENTS:             return "Segments";
+        case DBID_MATCHED_SEGMENTS:     return "Matched Segments (transitions)";
+        case DBID_HORIZON:              return "Kinematic Horizon";
+        case DBID_GREENHORIZON_SCANS:   return "Green Horizon Scans";
+        case DBID_GREENHORIZON_THROWN:  return "Green Horizon Thrown Points";
+        case DBID_GREENHORIZON_FINAL:   return "Green Horizon";
+        case DBID_OBJECT_POINTS:        return "Object Points";
+        case DBID_FILTERED_SEGMENTS:    return "Filtered Segments";
+        case DBID_GOALS:                return "Goals";
+        case DBID_BALLS:                return "Balls";
+        case DBID_LINES:                return "Lines";
+        case DBID_OBSTACLES:            return "Obstacles";
+        case DBID_GOAL_LINES_START:     return "Goal Lines (start)";
+        case DBID_GOAL_LINES_CENTRE:    return "Goal Lines (centre)";
+        case DBID_GOAL_LINES_END:       return "Goal Lines (end)";
         default:                        return "NOT VALID";
         }
     }
@@ -45,7 +46,8 @@ namespace Vision {
         case 14: return DBID_OBSTACLES;
         case 15: return DBID_LINES;
         case 16: return DBID_GOAL_LINES_START;
-        case 17: return DBID_GOAL_LINES_END;
+        case 17: return DBID_GOAL_LINES_CENTRE;
+        case 18: return DBID_GOAL_LINES_END;
         default: return DBID_INVALID;
         }
     }
@@ -69,14 +71,10 @@ namespace Vision {
         case DBID_LINES:                return 14;
         case DBID_OBSTACLES:            return 15;
         case DBID_GOAL_LINES_START:     return 16;
-        case DBID_GOAL_LINES_END:       return 17;
-        default:                        return 18;
+        case DBID_GOAL_LINES_CENTRE:    return 17;
+        case DBID_GOAL_LINES_END:       return 18;
+        default:                        return 19;
         }
-    }
-
-    bool operator <(DEBUG_ID idl, DEBUG_ID idr)
-    {
-        return getIntFromeDebugID(idl) < getIntFromeDebugID(idr);
     }
 
     std::string getVFOName(VFO_ID id)

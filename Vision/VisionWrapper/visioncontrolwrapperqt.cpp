@@ -30,6 +30,7 @@ int VisionControlWrapper::run()
         gui.setFrameNo(frame);
         next = false;
         error = runFrame();
+        gui.refresh();
         while(!next && !finished && error == 0) {
             QApplication::processEvents();
             next = gui.next();
