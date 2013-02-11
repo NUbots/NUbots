@@ -24,8 +24,8 @@ class LSFittedLine : public Line
     ~LSFittedLine();
     bool valid;
     
-    void addPoint(Point &point);
-    void addPoints(vector<Point>& pointlist);
+    void addPoint(const Point &point);
+    void addPoints(const vector<Point>& pointlist);
     void joinLine(LSFittedLine &sourceLine);
     Vector2<double> combinedR2TLSandMSD(const LSFittedLine &sourceLine) const;
     double getMSD() const;

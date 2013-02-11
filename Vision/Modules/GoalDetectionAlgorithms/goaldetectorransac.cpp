@@ -2,7 +2,8 @@
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
 #include "Vision/GenericAlgorithms/ransac.h"
-#include "Vision/VisionTypes/visionline.h"
+#include "Vision/VisionTypes//RANSACTypes/ransacline.h"
+#include "Vision/VisionTypes//RANSACTypes/ransacgoal.h"
 #include "Tools/Math/General.h"
 
 #include <limits>
@@ -17,6 +18,68 @@ GoalDetectorRANSAC::GoalDetectorRANSAC()
     m_max_iterations = 3;  //hard limit on number of fitting attempts
 }
 
+//vector<Goal> GoalDetectorRANSAC::run()
+//{
+//    VisionBlackboard* vbb = VisionBlackboard::getInstance();
+//    //get transitions associated with goals
+//    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
+//                          v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
+//    vector<Quad> candidates;
+//    vector<Goal> posts;
+
+//    //finds the edge lines and constructs goals from that
+//    vector<Point> start_points, end_points;
+//    vector<pair<VisionLine, vector<Point> > > ransac_results;
+//    vector<LSFittedLine> start_lines, end_lines;
+
+
+
+//    //get edge points
+//    BOOST_FOREACH(ColourSegment s, h_segments) {
+//        start_points.push_back(s.getStart());
+//        end_points.push_back(s.getEnd());
+//    }
+
+//    //use generic ransac implementation to find lines
+//    ransac_results = RANSAC::findMultipleModels<VisionLine, Point>(start_points, m_e, m_n, m_k, m_max_iterations);
+//    for(unsigned int i=0; i<ransac_results.size(); i++) {
+//        start_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+//    }
+
+//    ransac_results = RANSAC::findMultipleModels<VisionLine, Point>(end_points, m_e, m_n, m_k, m_max_iterations);
+//    for(unsigned int i=0; i<ransac_results.size(); i++) {
+//        end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+//    }
+
+//    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
+//    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
+
+//    //Build candidates out of lines
+//    candidates = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
+
+//    cout << "candidates: " << candidates.size() << endl;
+
+//    //validity check
+//    removeInvalidPosts(candidates);
+//    cout << "after invalid: " << candidates.size() << endl;
+
+//    //overlap check
+//    overlapCheck(candidates);
+//    cout << "after overlap: " << candidates.size() << endl;
+
+//    posts = assignGoals(candidates);
+
+//    //Improves bottom centre estimate using vertical transitions
+//    BOOST_FOREACH(ColourSegment v, v_segments) {
+//        BOOST_FOREACH(Goal g, posts) {
+//            if(v.getEnd().y > g.getLocationPixels().y)
+//                g.setBase(v.getEnd());
+//        }
+//    }
+
+//    return posts;
+//}
+
 vector<Goal> GoalDetectorRANSAC::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -26,45 +89,73 @@ vector<Goal> GoalDetectorRANSAC::run()
     vector<Quad> candidates;
     vector<Goal> posts;
 
-    //finds the edge lines and constructs goals from that
-    vector<Point> start_points, end_points;
-    vector<pair<VisionLine, vector<Point> > > ransac_results;
-    vector<LSFittedLine> start_lines, end_lines;
-
-
-
-    //get edge points
-    BOOST_FOREACH(ColourSegment s, h_segments) {
-        start_points.push_back(s.getStart());
-        end_points.push_back(s.getEnd());
-    }
+    //finds the centre lines and constructs goals from them
+    vector<pair<RANSACGoal, vector<ColourSegment> > > ransac_results;
+    vector<RANSACGoal> goal_lines;
+    vector<pair<RANSACGoal, vector<ColourSegment> > >::iterator rit;
 
     //use generic ransac implementation to find lines
-    ransac_results = RANSAC::findMultipleModels<VisionLine, Point>(start_points, m_e, m_n, m_k, m_max_iterations);
-    for(unsigned int i=0; i<ransac_results.size(); i++) {
-        start_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    ransac_results = RANSAC::findMultipleModels<RANSACGoal, ColourSegment>(h_segments, m_e, m_n, m_k, m_max_iterations);
+
+    for(rit = ransac_results.begin(); rit != ransac_results.end(); rit++) {
+        rit->first.fit(rit->second);
+        goal_lines.push_back(rit->first);
     }
 
-    ransac_results = RANSAC::findMultipleModels<VisionLine, Point>(end_points, m_e, m_n, m_k, m_max_iterations);
-    for(unsigned int i=0; i<ransac_results.size(); i++) {
-        end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
-    }
+    cout << "lines: " << goal_lines.size() << endl;
 
-    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
-    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
+    /// @todo MERGE COLINEAR / INTERSECTING
+
+    cout << "after merge: " << goal_lines.size() << endl;
 
     //Build candidates out of lines
-    candidates = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
+    if(goal_lines.size() > 2) {
+        //pick best two
+        double min_angle_diff = std::numeric_limits<double>::max();
+        pair<unsigned int, unsigned int> best(0,0);
+        for(unsigned int i = 0; i < goal_lines.size(); i++) {
+            for(unsigned int k = i+1; k < goal_lines.size(); k++) {
+                double a = goal_lines[i].getAngleBetween(goal_lines[k]);
+                if(a < min_angle_diff) {
+                    min_angle_diff = a;
+                    best.first = i;
+                    best.second = k;
+                }
+            }
+        }
+
+        //add these to end and erase all but
+        goal_lines.push_back(goal_lines[best.first]);
+        goal_lines.push_back(goal_lines[best.second]);
+        goal_lines.erase(goal_lines.begin(), goal_lines.end() - 2);
+    }
+
+    cout << "after selection (if more than 2): " << goal_lines.size() << endl;
+
+    BOOST_FOREACH(const RANSACGoal g, goal_lines) {
+        Vector2<Point> endpts = g.getEndPoints();
+
+        //get width vector (to right)
+        Point w = (endpts[0] - endpts[1]).normalize(g.getWidth()).rotateLeft();
+
+        if(endpts[0].y < endpts[1].y) {
+            // pt0 is top
+            candidates.push_back(Quad(endpts[1] - w, endpts[0] - w, endpts[0] + w, endpts[1] + w));
+        }
+        else {
+            candidates.push_back(Quad(endpts[0] - w, endpts[1] - w, endpts[1] + w, endpts[0] + w));
+        }
+    }
 
     cout << "candidates: " << candidates.size() << endl;
 
     //validity check
     removeInvalidPosts(candidates);
-    cout << "after invalid: " << candidates.size() << endl;
+    cout << "after invalid removal: " << candidates.size() << endl;
 
     //overlap check
     overlapCheck(candidates);
-    cout << "after overlap: " << candidates.size() << endl;
+    cout << "after overlap removal: " << candidates.size() << endl;
 
     posts = assignGoals(candidates);
 
@@ -79,62 +170,7 @@ vector<Goal> GoalDetectorRANSAC::run()
     return posts;
 }
 
-//vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine> &start_lines, const vector<LSFittedLine> &end_lines)
-//{
-//    vector<LSFittedLine>::const_iterator s_it = start_lines.begin(),
-//                                         e_it = end_lines.begin(),
-//                                         e_temp;
 
-//    while(s_it != start_lines.end() && e_it != end_lines.end()) {
-//        //move through until end line is after start line
-//        //get the end points of each line
-//        Point sp1 = s_it->getLeftPoint(),
-//              sp2 = s_it->getRightPoint(),
-//              ep1 = e_it->getLeftPoint(),
-//              ep2 = e_it->getRightPoint(),
-//              intersection;
-
-//        //sort the points
-//        double d1 = 0.5*( (sp1-ep1).abs() + (sp2-ep2).abs() ),
-//               d2 = 0.5*( (sp2-ep1).abs() + (sp1-ep2).abs() );
-
-//        if(d1 > d2) {
-//            //sp1 should be paired with ep2
-//            Point c(ep1); ep1=ep2; ep2=c;   //swap ep1 and ep2
-//        }
-
-//        //check if terminal points of start are left of terminal points of end
-//        //if(sp1.x < ep1.x && sp1.x < ep2.x && sp2.x < ep1.x && sp2.x < ep2.x) {
-
-//        if(sp1.x < ep1.x && sp2.x < ep2.x) {
-//            if(s_it->getIntersection(*e_it, intersection)) {
-//                //check if intersection point is below end points, otherwise don't consider
-//                if(intersection.y > sp1.y && intersection.y > ep1.y &&
-//                   intersection.y > sp2.y && intersection.y > ep2.y) {
-//                    //consider
-
-//                }
-//                else {
-//                    e_it++;
-//                }
-//            }
-//            else {
-//                //perfectly parallel lines - consider
-//            }
-//        }
-//        else {
-//            e_it++;
-//        }
-
-
-
-
-
-//        s_it++;
-//    }
-
-//    return vector<Quad>();
-//}
 
 vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine>& start_lines, const vector<LSFittedLine>& end_lines, double tolerance)
 {

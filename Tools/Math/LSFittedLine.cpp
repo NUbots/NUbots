@@ -36,7 +36,7 @@ const std::vector<Point>& LSFittedLine::getPoints() const
 	return points;
 }
 
-void LSFittedLine::addPoint(Point &point){
+void LSFittedLine::addPoint(const Point &point){
 	sumX += point.x;
 	sumY += point.y;
 	sumX2 += point.x * point.x;
@@ -48,7 +48,7 @@ void LSFittedLine::addPoint(Point &point){
         calcLine();
 }
 
-void LSFittedLine::addPoints(vector<Point>& pointlist){
+void LSFittedLine::addPoints(const vector<Point>& pointlist){
     if(!pointlist.empty()) {
         for(unsigned int i=0; i<pointlist.size(); i++) {
             sumX += pointlist[i].x;

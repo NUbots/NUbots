@@ -4,10 +4,10 @@
 #include "Tools/Math/Line.h"
 #include "Vision/VisionTypes/Interfaces/ransacmodel.h"
 
-class VisionLine : public Line
+class RANSACLine : public Line
 {
 public:
-    VisionLine();
+    RANSACLine();
 
     bool regenerate(const vector<Point> &pts);
 
