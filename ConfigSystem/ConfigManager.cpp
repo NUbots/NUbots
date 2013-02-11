@@ -171,7 +171,7 @@ namespace ConfigSystem
         ConfigParameter cp(vt_none);
         cp = ConfigParameter(initialValue);
 
-        //! Store the new parameter back into
+        //! Store the new parameter into the tree
         if(!_currConfigTree->storeParam(paramPath, paramName, cp)) return false;
         
         //! Request update of configObjects that depend on this parameter
@@ -227,8 +227,7 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
         
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        if(!_currConfigTree->checkParam(paramPath, paramName)) return false;
         else if(cp.isLocked()) return false;
 
         if(!_currConfigTree->deleteParam(paramPath, paramName)) return false;
@@ -275,6 +274,32 @@ namespace ConfigSystem
         
         //! Unlock the parameter
         cp.setLocked(false);
+        
+        //! Store the modified parameter back into the tree
+        if(!_currConfigTree->storeParam(paramPath, paramName, cp)) return false;
+
+        return true;
+    }
+
+
+    bool ConfigManager::setParamDescription(
+        const std::string &paramPath,
+        const std::string &paramName,
+        const std::string &paramDesc
+        )
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        //! Get the relevant parameter from the ConfigTree
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        
+        // If the parameter is locked, you can't set the description
+        // (is important that good description aren't accidentally deleted by
+        // people who couldn't/wouldn't replace them)
+        if(cp.isLocked()) return false;
+        
+        //! Unlock the parameter
+        cp.setDescription(paramDesc);
         
         //! Store the modified parameter back into the tree
         if(!_currConfigTree->storeParam(paramPath, paramName, cp)) return false;

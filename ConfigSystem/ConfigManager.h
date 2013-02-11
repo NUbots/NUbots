@@ -151,7 +151,7 @@ namespace ConfigSystem
             const std::string &paramPath,
             const std::string &paramName
             );
-
+        
         /*! @brief Unlocks the named parameter stored at the given path.
          *         Attempts to modify locked parameters will fail.
          *  @param paramPath Path to the parameter to unlock.
@@ -162,8 +162,21 @@ namespace ConfigSystem
             const std::string &paramPath,
             const std::string &paramName
             );
-
-
+        
+        
+        /*! @brief Sets the descriptpo of the named parameter stored at the given path.
+         *         Attempts to modify locked parameters will fail.
+         *  @param paramPath Path to the parameter to have its description set.
+         *  @param paramName Name of the parameter to have its description set.
+         *  @return Whether the operation was successful.
+         */
+        bool ConfigManager::setParamDescription(
+        const std::string &paramPath,
+        const std::string &paramName,
+        const std::string &paramDesc
+        );
+        
+        
         /*! @brief Reads a value stored at the given path in the current 
          *         configuration.
          *  @param paramPath Path to the desired parameter.
