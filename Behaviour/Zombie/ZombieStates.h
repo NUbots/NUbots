@@ -85,16 +85,19 @@ public:
         nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
         
         //HEAD TRACK
-        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
-           m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
-        else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
-            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        //if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+        //   m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
+        //else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
+        //    m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
         //UPDATE HEAD
         m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
 
         //UPDATE ARMS:
-        m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 30);
-        m_actions->add(NUActionatorsData::LArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftArmJoints, 30);
+        //m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 30);
+        //m_actions->add(NUActionatorsData::LArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftArmJoints, 30);
+        //loose
+        m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 0);
+        m_actions->add(NUActionatorsData::LArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftArmJoints, 0);
 
         //UPDATE LEGS:
         m_actions->add(NUActionatorsData::RLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightLegJoints, 65);

@@ -22,7 +22,6 @@
 
 #include "NUSensors.h"
 
-#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUImage/NUImage.h"
 #include "NUPlatform/NUPlatform.h"
@@ -294,9 +293,11 @@ void NUSensors::calculateHorizon()
     bool validKinematics = m_data->get(NUSensorsData::CameraToGroundTransform, cameraToGroundTransformFlat);
     Matrix cameraToGroundTransform = Matrix4x4fromVector(cameraToGroundTransformFlat);
 
-    Vector2<double> camFOV( Blackboard->CameraSpecs->m_horizontalFov, Blackboard->CameraSpecs->m_verticalFov);
+    //Vector2<double> camFOV( Blackboard->CameraSpecs->m_horizontalFov, Blackboard->CameraSpecs->m_verticalFov);
+    Vector2<double> camFOV(1.04719755, 0.802851456);
 
-    Vector2<double> imgDims( Blackboard->Image->getWidth(), Blackboard->Image->getHeight() );
+    //Vector2<double> imgDims( Blackboard->Image->getWidth(), Blackboard->Image->getHeight() );
+    Vector2<double> imgDims(320, 240);
 
     if(validKinematics)
     {
