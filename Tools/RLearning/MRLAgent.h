@@ -1,7 +1,20 @@
 /*! @file MRLAgent.h
     @brief Motivated reinforcement learning agent. Provides its own reward structure for self motivation based on novelty.
-    Uses a dictionary approximator to store the learnt expected reward "value" function.
+    Uses a fourier approximator to store the learnt expected reward "value" function.
+    ---------------------------------------------------
+    Make your own MRLAgent:(WARNING: The motivation wundt function has been tuned for use in head-behaviour, do not change.)
+    Follow the template below to implement a Motivated reinforcement agent.
 
+
+    MRLAgent mrlagent;
+    mrlagent.setParameters(0.1,0.5,0.5,1.0,1,5);
+    mrlagent.initialiseAgent(2,5,1);
+
+    for (number of iterations){
+        int action = mrlagent.getActionAndLearn(observation);
+        updateWorld(action);
+    }
+    ---------------------------------------------------
     @author Jake Fountain
 
  Copyright (c) 2012 Jake Fountain
@@ -23,23 +36,30 @@
 #ifndef MRLAGENT_H
 #define MRLAGENT_H
 #include <vector>
+#include <algorithm>
 
 #include "ApproximatorInterface.h"
 #include "RLearningInterface.h"
 #include "DictionaryApproximator.h"
 #include "RLAgent.h"
-
+#include "FourierApproximator.h"
 
 
 class MRLAgent: public RLAgent
 {
 public:
     MRLAgent();
-    void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens);
+    ~MRLAgent();
+    void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range = 10);
 
-    float giveMotivationReward();
+    void giveMotivationReward();
     float wundtFunction(float N);
+    int getActionAndLearn(vector<float> observations, vector<int> valid_actions);
+    void saveMRLAgent(string agentName);
+    void loadMRLAgent(string agentName);
 
+    map<string,float>* getMap();
+    ApproximatorInterface* expectation_map;
 };
 
 #endif // MRLAGENT_H

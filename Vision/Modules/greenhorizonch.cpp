@@ -32,23 +32,31 @@ void GreenHorizonCH::calculateHorizon()
     vector<PointType> result;
 
     const Horizon& kin_hor = vbb->getKinematicsHorizon();
+    #if VISION_HORIZON_VERBOSITY > 2
+        debug<<"GreenHorizonCH::calculateHorizon(): kinematics horizon line eq: "<<kin_hor.getA()<<"x + "<< kin_hor.getB()<< "y = "<<kin_hor.getC()<<endl;
+    #endif
     int kin_hor_y;
 
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
+        debug<< "GreenHorizonCH::calculateHorizon() - Checking camera...(if seg fault occurs camera or camera cable may be faulty)"<<endl;
     #endif
 
     for (int x = 0; x < width; x+=VisionConstants::GREEN_HORIZON_SCAN_SPACING) {
 
+
         unsigned int green_top = 0;
         unsigned int green_count = 0;
+
 
         kin_hor_y = kin_hor.findYFromX(x);
         //clamp green horizon values
         kin_hor_y = max(0,kin_hor_y);
         kin_hor_y = min(height-1, kin_hor_y);
-        
+
+
         for (int y = kin_hor_y; y < height; y++) {
+
             if (isPixelGreen(img, x, y)) {
                 if (green_count == 0) {
                     green_top = y;
@@ -69,9 +77,11 @@ void GreenHorizonCH::calculateHorizon()
                 horizon_points.push_back(cv::Point2i(x, height-1));
             }
         }
+
     }
-    
+
     #if VISION_HORIZON_VERBOSITY > 2
+        debug <<"GreenHorizonCH::calculateHorizon() - Camera fine. Note: a better indicator for faulty camera needs to be implemented."<<endl;
         debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
     #endif
     // provide blackboard the original set of scan points
@@ -178,8 +188,16 @@ void GreenHorizonCH::calculateHorizon()
     #if VISION_HORIZON_VERBOSITY > 2
         debug << "GreenHorizonCH::calculateHorizon() - Side extension done" << endl;
     #endif
-
+    #if VISION_HORIZON_VERBOSITY > 3
     // set hull points
+    for (int l = 0; l<temp.size(); l++){
+        debug<<"GreenHorizonCH::calculateHorizon(): temp["<<l<< "] ="<<temp[l].x<< ", "<< temp[l].y <<endl;
+    }
+    for (int l = 0; l<result.size(); l++){
+        debug<<"GreenHorizonCH::calculateHorizon(): result["<<l<< "] ="<<result[l].x<< ", "<< result[l].y <<endl;
+    }
+    #endif
+
     convertPointTypes(temp, result);
     vbb->setGreenHullPoints(result);
 }

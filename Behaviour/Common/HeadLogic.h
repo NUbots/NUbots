@@ -69,7 +69,9 @@ public:
     Object* getObject(int index);    
     int getObjectType(int index);
     std::vector<float> getObjectLocation(int object_type,int object_enum_value);
-    std::vector<float> calculateObjectLocation(Object &ob);
+    std::vector<float> calculateStationaryObjectLocation(StationaryObject ob);
+    std::vector<float> calculateMobileObjectLocation(MobileObject ob);
+    std::vector<float> calculateAmbiguousObjectLocation(AmbiguousObject ob);
     float getTimeSinceObjectLastSeen(int object_type, int object_enum_type);
     std::vector<float> getSelfLocation();    
 
@@ -93,6 +95,14 @@ public:
     //Vector of all relevant object vectors, indexed via the enum types.
     std::vector<std::vector<int> > relevantObjects;
 
+
+    std::vector<float> calculateStationaryPolarObjectLocation(StationaryObject* ob);
+    std::vector<float> calculateMobilePolarObjectLocation(MobileObject* ob);
+    std::vector<float> calculateAmbiguousPolarObjectLocation(AmbiguousObject* ob);
+    std::vector<float> getSimplePolarObLocSummary();
+    std::vector<std::vector<float> > getPolarObLocSummary();
+
+    std::vector<int> getValidObjectsToLookAt();
 private:
 
 

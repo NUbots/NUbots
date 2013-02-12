@@ -145,10 +145,10 @@ void DarwinSensors::copyFromHardwareCommunications()
     copyFromFeet();
 
     //READ FROM JOINTS and CONTROL BOARD:
-    result = cm730->BulkReadLight();
-    // For new firmware
-    //result = cm730->BulkRead();
-
+    result = cm730->BulkRead();
+    //OLD FIRMWARE
+    //result = cm730->BulkReadLight();
+      
     if(motor_error) {
         #if DEBUG_NUSENSORS_VERBOSITY > 0
             debug << "DarwinSensors::copyFromHardwareCommunications\nMotor error: " <<endl;
@@ -172,6 +172,8 @@ void DarwinSensors::copyFromHardwareCommunications()
     //delete CMdatatable;
 
 	
+	
+    //DEBUG NEEDED HERE:
     int num_tries = 0;
     while(result != Robot::CM730::SUCCESS)
     {
@@ -184,9 +186,11 @@ void DarwinSensors::copyFromHardwareCommunications()
             debug << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
         #endif
         errorlog << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
-        result = cm730->BulkReadLight();
-        // For new firmware
-        //result = cm730->BulkRead();
+        
+        //OLD FIRMWARE
+        //result = cm730->BulkReadLight();
+        
+        result = cm730->BulkRead();
         num_tries++;
     }
     return;
@@ -308,36 +312,42 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     //<! Assign the robot data to the NUSensor Structure:
     addr = int(Robot::CM730::P_GYRO_X_L);
     //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tGx = data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     data[0] = (data[0]-centrevalue)/VALUETORPS_RATIO;
 	
     addr = int(Robot::CM730::P_GYRO_Y_L);
     //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tGy = data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     data[1] = (data[1]-centrevalue)/VALUETORPS_RATIO;
 
     addr = int(Robot::CM730::P_GYRO_Z_L);
     //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tGz = data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     data[2] = (data[2]-centrevalue)/VALUETORPS_RATIO;
-    //cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
+
+   // cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
+    //cout << "GYRO_RAW: \t(" << tGx << "," << tGy << "," << tGz << ")"<< endl;
+
     m_data->set(NUSensorsData::Gyro,m_current_time, data);
 
     addr = int(Robot::CM730::P_ACCEL_Y_L);
-    data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tAx = data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[0] = -(data[0]-centrevalue)/VALUETOACCEL_RATIO;
 
     addr = int(Robot::CM730::P_ACCEL_X_L);
-    data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tAy = data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[1] = (data[1]-centrevalue)/VALUETOACCEL_RATIO;
 	
     addr = int(Robot::CM730::P_ACCEL_Z_L);
-    data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tAz = data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[2] = -(data[2]-centrevalue)/VALUETOACCEL_RATIO;
 	
+    //cout << "ACCEL: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
+  //  cout << "ACCEL_RAW: \t(" << tAx << "," << tAy << "," << tAz << ")"<< endl;
+
     m_data->set(NUSensorsData::Accelerometer,m_current_time, data);
 }
 

@@ -108,7 +108,10 @@ NUbot* NUbot::m_this = NULL;
  */
 NUbot::NUbot(int argc, const char *argv[])
 {
+
+
     #if DEBUG_NUBOT_VERBOSITY > 0
+        cout<< "DEBUG_NUBOT_VERBOSITY = " <<DEBUG_NUBOT_VERBOSITY<<endl;
         debug << "NUbot::NUbot()." << endl;
     #endif
     NUbot::m_this = this;

@@ -35,6 +35,7 @@ HeadLogic* HeadLogic::getInstance(){
 }
 
 HeadLogic::HeadLogic(){
+    //cout<<"Head logic constructor start"<<endl;
     NUCameraData cameraSpecs(string(/*CONFIG_DIR*/ "Config/Darwin") + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
     m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
@@ -95,6 +96,7 @@ HeadLogic::HeadLogic(){
     relevantObjects.push_back(relevantSOb);
     relevantObjects.push_back(relevantMOb);
     relevantObjects.push_back(relevantAOb);
+
 }
 HeadLogic::~HeadLogic(){}
 
@@ -159,11 +161,11 @@ Object* HeadLogic::getObject(int index){
 std::vector<float> HeadLogic::getObjectLocation(int object_type,int object_enum_value){
     switch (object_type){
         case 0:
-            return calculateObjectLocation(Blackboard->Objects->stationaryFieldObjects[object_enum_value]);
+            return calculateStationaryObjectLocation((StationaryObject)Blackboard->Objects->stationaryFieldObjects[object_enum_value]);
         case 1:
-            return calculateObjectLocation(Blackboard->Objects->mobileFieldObjects[object_enum_value]);
+            return calculateMobileObjectLocation((MobileObject)Blackboard->Objects->mobileFieldObjects[object_enum_value]);
         case 2:
-            return calculateObjectLocation(Blackboard->Objects->ambiguousFieldObjects[object_enum_value]);
+            return calculateAmbiguousObjectLocation((AmbiguousObject)Blackboard->Objects->ambiguousFieldObjects[object_enum_value]);
     }
 
 }
@@ -171,26 +173,153 @@ std::vector<float> HeadLogic::getObjectLocation(int object_type,int object_enum_
 /*! @brief Returns a vector (x,y) of the relative location of a field object.
 */
 
-std::vector<float> HeadLogic::calculateObjectLocation(Object &ob){
+std::vector<float> HeadLogic::calculateStationaryObjectLocation(StationaryObject ob){
     //Initialise location vector:
     std::vector<float> loc(2,0);
     //init polar coords:
     float r,theta;
-    //If visible, remeasure the objects location to maintain accuracy. Otherwise estimate.
-    if(ob.isObjectVisible()){
-        //Get location from vision
-        r= ob.measuredDistance();
-        theta = ob.measuredBearing();
-    } else{
-        //Estimate location
-        r = ob.estimatedDistance();
-        theta = ob.estimatedBearing();
-    }
+    //Get polar location
+    vector<float> polarLoc = calculateStationaryPolarObjectLocation(&ob);
+
+
+    r= polarLoc[0];
+    theta = polarLoc[1];
+
+
     //polar->cartesian
     loc[0] = r*cos(theta);
     loc[1] = r*sin(theta);
     return loc;
 }
+std::vector<float> HeadLogic::calculateMobileObjectLocation(MobileObject ob){
+    //Initialise location vector:
+    std::vector<float> loc(2,0);
+    //init polar coords:
+    float r,theta;
+    //Get polar location
+    vector<float> polarLoc = calculateMobilePolarObjectLocation(&ob);
+
+
+    r= polarLoc[0];
+    theta = polarLoc[1];
+
+
+    //polar->cartesian
+    loc[0] = r*cos(theta);
+    loc[1] = r*sin(theta);
+    return loc;
+}
+
+std::vector<float> HeadLogic::calculateAmbiguousObjectLocation(AmbiguousObject ob){
+    //Initialise location vector:
+    std::vector<float> loc(2,0);
+    //init polar coords:
+    float r,theta;
+    //Get polar location
+    vector<float> polarLoc = calculateAmbiguousPolarObjectLocation(&ob);
+
+
+    r= polarLoc[0];
+    theta = polarLoc[1];
+
+
+    //polar->cartesian
+    loc[0] = r*cos(theta);
+    loc[1] = r*sin(theta);
+    return loc;
+}
+
+
+/*! @brief Returns a vector (r,theta) of the relative location of a field object.
+*/
+
+std::vector<float> HeadLogic::calculateStationaryPolarObjectLocation(StationaryObject* ob){
+    Self* self =&(Blackboard->Objects->self);
+    float bearing = self->CalculateBearingToStationaryObject(*ob);
+    float distance = self->CalculateDistanceToStationaryObject(*ob);
+    vector<float> polar;
+    polar.push_back(distance);
+    polar.push_back(bearing);
+    //cout<< "HeadLogic::calculateStationaryPolarObjectLocation : Location (r,theta) = ["<<polar[0]<<", "<<polar[1]<<"]"<<endl;
+    return polar;
+}
+std::vector<float> HeadLogic::calculateMobilePolarObjectLocation(MobileObject* ob){
+    std::vector<float> loc;
+    if(!ob->isObjectVisible()){
+        //Get location from vision
+        loc.push_back(ob->measuredDistance());
+        loc.push_back(ob->measuredBearing());
+        //cout<< "HeadLogic::calculateMobilePolarObjectLocation : Measured Location (r,theta) = ["<<loc[0]<<", "<<loc[1]<<"]"<<endl;
+    } else{
+        //Estimate location
+        loc.push_back(ob->estimatedDistance());
+        loc.push_back(ob->estimatedBearing());
+        //cout<< "HeadLogic::calculateMobilePolarObjectLocation : Estimated Location (r,theta) = ["<<loc[0]<<", "<<loc[1]<<"]"<<endl;
+    }
+
+    return loc;
+}
+std::vector<float> HeadLogic::calculateAmbiguousPolarObjectLocation(AmbiguousObject* ob){
+    std::vector<float> loc;
+    if(!ob->isObjectVisible()){
+        //Get location from vision
+        loc.push_back(ob->measuredDistance());
+        loc.push_back(ob->measuredBearing());
+        //cout<< "HeadLogic::calculateAmbiguousPolarObjectLocation : Measured Location = ["<<loc[0]<<", "<<loc[1]<<"]"<<endl;
+    } else{
+        //Estimate location
+        loc.push_back(ob->estimatedDistance());
+        loc.push_back(ob->estimatedBearing());
+        //cout<< "HeadLogic::calculateAmbiguousPolarObjectLocation : Estimated Location = ["<<loc[0]<<", "<<loc[1]<<"]"<<endl;
+    }
+
+    return loc;
+}
+
+/*! @brief Returns a simple vector of relevant object locations in the form [self.heading,self.locx,self.locy, r1,theta1,r2,theta2,...,rn,thetan].
+  All locations are relative except self location.
+*/
+std::vector<float> HeadLogic::getSimplePolarObLocSummary(){
+    //Get standard summary:
+    std::vector<std::vector<float> > summary = getPolarObLocSummary();
+
+    //Deconstruct vector elements of the standard summary into simple format:
+    std::vector<float> result;
+    result.push_back(Blackboard->Objects->self.Heading());
+    for (int i = 0; i < summary.size();i++){
+        result.push_back(summary[i][0]);
+        result.push_back(summary[i][1]);
+    }
+    return result;
+}
+
+/*! @brief Returns a vector of relevant object locations in the form [[r1,theta1],[r2,theta2],...,[rn,thetan]].
+  All locations are relative except self location.
+*/
+
+std::vector<std::vector<float> > HeadLogic::getPolarObLocSummary(){
+    std::vector<std::vector<float> > result;
+
+    result.push_back(getSelfLocation());
+
+    int object_type = 0;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+            result.push_back(calculateStationaryPolarObjectLocation((StationaryObject*)getObject(object_type,relevantObjects[object_type][i])));
+    }
+    object_type++;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+            result.push_back(calculateMobilePolarObjectLocation((MobileObject*)getObject(object_type,relevantObjects[object_type][i])));
+    }
+    object_type++;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+            result.push_back(calculateAmbiguousPolarObjectLocation((AmbiguousObject*)getObject(object_type,relevantObjects[object_type][i])));
+    }
+
+    return result;
+}
+
+
+
 
 /*! @brief Returns the time since last seen for object of type object_type (stat,mobile or ambig).
 */
@@ -210,11 +339,11 @@ float HeadLogic::getTimeSinceObjectLastSeen(int object_type, int object_enum_val
 /*! @brief Get absolute location of self.
 */
 std::vector<float> HeadLogic::getSelfLocation(){
-    Self self = Blackboard->Objects->self;
+    Self* self =&(Blackboard->Objects->self);
     std::vector<float> loc(2,0);
 
-    loc[0] = self.wmX();
-    loc[1] = self.wmY();
+    loc[0] = self->wmX();
+    loc[1] = self->wmY();
 
     return loc;
 
@@ -399,21 +528,23 @@ float HeadLogic::innerProd(std::vector<float> x1, std::vector<float> x2){
 }
 
 
-/*! @brief Returns a simple vector of relevant object times since last seen in the form [t1,t2,...,tn].
+/*! @brief Returns a simple vector of relevant object times since last seen in the form [t1,t2,...,tn] in seconds.
   Object order matches with the objects returned by the location summary methods.
 */
 std::vector<float> HeadLogic::getTimeSinceLastSeenSummary(){
+     //cout<<"Head logic timesumm start"<<endl;
     std::vector<float> result;
     //Convention for time last seen of self always set to 0. This is to match up indices with the location summary vector.
-    result.push_back(0);
+    //result.push_back(0);
     //Interesting objects:
     for (int object_type = 0; object_type<3;object_type++){
         //For each object type go through the list of interesting objects and add times to result vector.
         for (int i = 0; i < relevantObjects[object_type].size();i++){
-            result.push_back(getTimeSinceObjectLastSeen(object_type,relevantObjects[object_type][i]));
+            result.push_back(getTimeSinceObjectLastSeen(object_type,relevantObjects[object_type][i])/1000.0/*Convert from msec to sec*/);
         }
     }
     return result;
+    //cout<<"Head logic timesumm end"<<endl;
 }
 
 
@@ -449,6 +580,35 @@ std::vector<std::vector<float> > HeadLogic::getObLocSummary(){
     return result;
 }
 
+
+std::vector<int> HeadLogic::getValidObjectsToLookAt()
+{
+    std::vector<float> bearings;
+
+    int object_type = 0;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+        bearings.push_back(calculateStationaryPolarObjectLocation((StationaryObject*)getObject(object_type,relevantObjects[object_type][i]))[1]);
+    }
+    object_type++;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+        bearings.push_back(calculateMobilePolarObjectLocation((MobileObject*)getObject(object_type,relevantObjects[object_type][i]))[1]);
+    }
+    object_type++;
+    for (int i = 0; i < relevantObjects[object_type].size();i++){
+        bearings.push_back(calculateAmbiguousPolarObjectLocation((AmbiguousObject*)getObject(object_type,relevantObjects[object_type][i]))[1]);
+    }
+    vector<int> validities;
+
+    for(int i = 0;i<bearings.size();i++){
+        if(bearings[i]*bearings[i] <= 2.46/*(pi/2)^2*/)
+            validities.push_back(1);
+        else
+            validities.push_back(0);
+    }
+
+    return validities;
+
+}
 
 
 

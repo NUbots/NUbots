@@ -65,6 +65,7 @@ void SegmentFilter::run() const
 //        cout << averageLength(v_filtered, ClassIndex::green) << endl;
     }
     else {
+        //Vision problem should occur in here:
         filter(h_segments, h_result);
         filter(v_segments, v_result);
     }
@@ -130,6 +131,18 @@ void SegmentFilter::preFilter(const SegmentedRegion &scans, SegmentedRegion &res
 void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &result) const
 {
     switch(scans.getDirection()) {
+<<<<<<< HEAD
+    case VERTICAL:
+        BOOST_FOREACH(const ColourTransitionRule& rule, rules_v){
+            vector<Transition>& result_trans = result[rule.getVFO_ID()];
+            checkRuleAgainstRegion(scans, rule, result_trans);
+        }
+        break;
+    case HORIZONTAL:
+        BOOST_FOREACH(const ColourTransitionRule& rule, rules_h){
+            vector<Transition>& result_trans = result[rule.getVFO_ID()];
+            checkRuleAgainstRegion(scans, rule, result_trans);
+=======
     case VisionID::VERTICAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_v) {
             vector<ColourSegment>& segments = result[rule.getColourClass()];
@@ -140,6 +153,7 @@ void SegmentFilter::filter(const SegmentedRegion &scans, map<VisionFieldObject::
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_h) {
             vector<ColourSegment>& segments = result[rule.getColourClass()];
             checkRuleAgainstRegion(scans, rule, segments);
+>>>>>>> f4696d73a3fe44153c5416c06f0eba3feb6be111
         }
         break;
     default:
@@ -276,6 +290,17 @@ void SegmentFilter::loadTransitionRules(string filename)
         debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << endl;
     }
     input.close();
+<<<<<<< HEAD
+    if(rules_h.size()  == 0 || rules_v.size() == 0){
+        cout <<"=========================WARNING=========================\n"<< "SegmentFilter::loadTransitionRules - "<< filename <<"_v.txt or _h.txt empty!\n \n"<<"The robot may exhibit blindness."<<"=========================WARNING=========================\n" <<endl;
+    }
+        //DEBUG
+    #if VISION_FILTER_VERBOSITY > 0
+        debug << "SegmentFilter::loadTransitionRules()" << endl;
+        debug << "rules_h (" << rules_h.size() << ")\n" << rules_h;
+        debug << "rules_v (" << rules_v.size() << ")\n" << rules_v;
+    #endif
+=======
     
     //DEBUG
 #if VISION_FILTER_VERBOSITY > 0
@@ -286,6 +311,7 @@ void SegmentFilter::loadTransitionRules(string filename)
     cout << "SegmentFilter::loadTransitionRules()" << endl;
     cout << "rules_h (" << rules_h.size() << ")\n" << rules_h;
     cout << "rules_v (" << rules_v.size() << ")\n" << rules_v;
+>>>>>>> f4696d73a3fe44153c5416c06f0eba3feb6be111
 }
 
 void SegmentFilter::loadReplacementRules(string filename)
