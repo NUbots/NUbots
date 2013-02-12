@@ -49,6 +49,22 @@ vector<LSFittedLine> LineDetectorRANSAC::run()
     //debugging
     if(vbb->getTransformer().isScreenToGroundValid())
         points = vbb->getTransformer().screenToGroundCartesian(points);
+    else
+        cout << "Screen to ground invalid" << endl;
+
+    vector<Point>::iterator it = points.begin();
+    int thr = 0;
+    while(it != points.end()) {
+        if(max(abs(it->x), abs(it->y)) > 500) {
+            it = points.erase(it);
+            thr++;
+        }
+        else {
+            it++;
+        }
+    }
+
+    cout << "plotPoints threw out " << thr << " points" << endl;
 
     DataWrapper::getInstance()->plotPoints(points, "Post");  // debugging
 

@@ -52,7 +52,7 @@ vector<float> DictionaryApproximator::getValues(vector<float> const& observation
 void DictionaryApproximator::saveApproximator(string agentName) {
     ofstream save_file;
     stringstream file_name;
-    file_name<<"nubot/"<<agentName;
+    file_name<<save_location<<agentName;
     save_file.open(file_name.str().c_str(),fstream::out);
 
     string tempstr;
@@ -76,7 +76,7 @@ map<string,float>* DictionaryApproximator::getMap(){
 void DictionaryApproximator::loadApproximator(string agentName) {
     ifstream save_file;
     stringstream file_name;
-    file_name<<"nubot/"<<agentName;
+    file_name<<save_location<<agentName;
     save_file.open(file_name.str().c_str(),fstream::out);
     if(!save_file.good()) {
         throw string("DictionaryApproximator::loadApproximator - file not found: ") + file_name.str();

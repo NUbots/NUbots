@@ -33,6 +33,10 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "nubotdataconfig.h"
 
+//#include <boost/date_time/posix_time/posix_time.hpp>
+
+
+
 //RLAgent import
 #include "Tools/RLearning/MRLAgent.h"
 
@@ -43,6 +47,7 @@
 #include "Infrastructure/Jobs/MotionJobs/HeadPanJob.h"
 #include "HeadLogic.h"
 #include <cstdlib>
+#include <ctime>
 
 class HeadBehaviour {
 
@@ -82,6 +87,14 @@ private:
     float time_since_last_localisation;
     //holds the last vision policy used
     int lastVisionPolicy;
+
+    //variables for training
+    int ACTIONS_PER_STATE;
+    int actions_taken_this_state;
+    string rewards_log_pathname;
+    string agent_filename;
+
+    float last_reward;
     
 
     /*! @brief
@@ -105,7 +118,11 @@ private:
     */
     void doMRLAgentPolicy();
     void doRLAgentPolicy();
+    void doCheckAgentPolicy();
 
+    /*! @brief Writes to the HeadRewards.log file in nubot folder
+    */
+    void recordReward(float r);
 
 
 public:
@@ -118,8 +135,11 @@ public:
         BallOnlyVisionPolicy = 4,
         LandmarkOnlyVisionPolicy = 5,
         TimeVSCostPriority = 6,//See above
-        RLAgentPolicy = 7,
-        MRLAgentPolicy = 8//See above
+        RLAgentTrainingPolicy = 7,
+        MRLAgentTrainingPolicy = 8,//See above
+        RLAgentPolicy = 9,
+        MRLAgentPolicy = 10,
+        CheckAgentPolicy = 11 //Checks the Agent's (both RL and MRL) policy without learning.
     };
     
     static HeadBehaviour* getInstance();

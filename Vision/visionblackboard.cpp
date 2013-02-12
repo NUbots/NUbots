@@ -466,6 +466,11 @@ void VisionBlackboard::update()
     //get new image pointer
     original_image = wrapper->getFrame();
 
+    //WARNING The following warning may not be triggered properly
+    if(original_image->getHeight()==0 or original_image->getWidth()==0 ){
+        cout<<"VisionBlackboard::update() - WARNING - Camera Image height or width is zero Camera may be disconnected or faulty."<<endl;
+    }
+
 //    ctgvalid = wrapper->getCTGVector(ctgvector);
 //    ctvalid = wrapper->getCTVector(ctvector);
 

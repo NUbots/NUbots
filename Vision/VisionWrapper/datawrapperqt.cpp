@@ -222,7 +222,7 @@ void DataWrapper::debugRefresh()
 
 void DataWrapper::debugPublish(const vector<Ball>& data) {
     BOOST_FOREACH(const Ball& b, data) {
-        gui->addToLayer(DBID_BALLS, Circle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
+        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
     }
 }
 
@@ -272,16 +272,15 @@ void DataWrapper::debugPublish(const vector<FieldLine> &data)
 
 void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
 {
-    int w, h;
+    int w = m_current_image.getWidth(),
+        h = m_current_image.getHeight();
     switch(id) {
     case DBID_H_SCANS:
-        w = m_current_image.getWidth();
         BOOST_FOREACH(const Point& pt, data_points) {
             gui->addToLayer(id, QLineF(0, pt.y, w, pt.y), QColor(Qt::gray));
         }
         break;
     case DBID_V_SCANS:
-        h = m_current_image.getHeight();
         BOOST_FOREACH(const Point& pt, data_points) {
             gui->addToLayer(id, QLineF(pt.x, pt.y, pt.x, h), QColor(Qt::gray));
         }

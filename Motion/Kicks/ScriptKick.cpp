@@ -461,7 +461,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
     //cout << theta << endl; //angle for debugging kick boxes / kick triggering
     // Ball is in position for left kick.
 
-    if((true or theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y)) and
+    if((/*true or*/ theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y)) and
        m_side_left_kick_script->isValid())
     {
         kick_begin = true;

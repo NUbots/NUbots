@@ -27,11 +27,15 @@
 class RLearningInterface {
     
 public:
+    RLearningInterface(){
+        save_location = "nubot/Config/Darwin/RLearning/";
+    }
+
     virtual void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range = 1)=0;
     
     virtual void setParameters(float alpha=0.1f, float beta=0.5, float gamma=0.9f, float lambda=0.9f,int learningIterations=1, int memory_length = 10, bool use_soft_max = false)=0;
     
-    virtual int getAction(vector<float> observations)=0;//Must return integer between 0 and numberOfOutputs-1
+    virtual int getAction(vector<float> observations, vector<int> valid_actions)=0;//Must return integer between 0 and numberOfOutputs-1
     
     virtual void giveReward(float reward)=0;
     
@@ -40,7 +44,11 @@ public:
     virtual void saveAgent(string agentName)=0;
 
     virtual void loadAgent(string agentName)=0;
-    
+
+protected:
+
+    string save_location;
+
 
 };
 

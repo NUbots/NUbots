@@ -11,5 +11,7 @@ for robot_ip in $robot_ips
 do
     echo Sending config to $robot_ip
     scp -rpC ./Config darwin@$robot_ip:/home/darwin/nubot/
+    # The config must also exist in the following location. (Implemented by symbolic links at the moment)
+    #scp -rpC ./Config darwin@$robot_ip:/home/darwin/nubot/Config/Darwin
 done
 

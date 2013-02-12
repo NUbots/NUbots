@@ -20,15 +20,6 @@
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 
-////for convex hull
-//#include <boost/geometry.hpp>
-//#include <boost/geometry/geometries/polygon.hpp>
-//#include <boost/geometry/geometries/adapted/boost_tuple.hpp>
-
-//DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#include <qwt/qwt_symbol.h>
-//DEBUG +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 using namespace boost::accumulators;
 
 void GreenHorizonCH::calculateHorizon()
@@ -50,19 +41,30 @@ void GreenHorizonCH::calculateHorizon()
                   thrown_points;
 
     const Horizon& kin_hor = vbb->getKinematicsHorizon();
+#if VISION_HORIZON_VERBOSITY > 2
+    debug<<"GreenHorizonCH::calculateHorizon(): kinematics horizon line eq: "<<kin_hor.getA()<<"x + "<< kin_hor.getB()<< "y = "<<kin_hor.getC()<<endl;
+#endif
     int kin_hor_y;
+
+#if VISION_HORIZON_VERBOSITY > 2
+    debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - (if seg fault occurs camera or camera cable may be faulty)" << endl;
+#endif
 
     for (int x = 0; x < width; x+=SPACING) {
 
         unsigned int green_top = 0;
         unsigned int green_count = 0;
 
+
         kin_hor_y = kin_hor.findYFromX(x);
         //clamp green horizon values
         kin_hor_y = max(0, kin_hor_y);
         kin_hor_y = min(height-1, kin_hor_y);
-        
+
+
         for (int y = kin_hor_y; y < height; y++) {
+
             if (isPixelGreen(img, x, y)) {
                 if (green_count == 0) {
                     green_top = y;
@@ -83,11 +85,13 @@ void GreenHorizonCH::calculateHorizon()
                 horizon_points.push_back(Point(x, height-1));
             }
         }
+
     }
-    
-    #if VISION_HORIZON_VERBOSITY > 2
-        debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
-    #endif
+
+#if VISION_HORIZON_VERBOSITY > 2
+    debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
+#endif
+
     // provide blackboard the original set of scan points
     vbb->setGreenHorizonScanPoints(horizon_points);
     DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_SCANS, horizon_points);
@@ -104,9 +108,9 @@ void GreenHorizonCH::calculateHorizon()
     mean_y = mean(acc);
     std_dev_y = sqrt(variance(acc));
     
-    #if VISION_HORIZON_VERBOSITY > 2
+#if VISION_HORIZON_VERBOSITY > 2
     debug << "GreenHorizonCH::calculateHorizon() - Statistical filter prep done. Mean: " << mean_y << " Standard Dev: " << std_dev_y << endl;
-    #endif
+#endif
 
     vector<Point>::iterator p = horizon_points.begin();
     while(p < horizon_points.end()) {
@@ -125,15 +129,15 @@ void GreenHorizonCH::calculateHorizon()
 
     DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_THROWN, thrown_points);
 
-    #if VISION_HORIZON_VERBOSITY > 2
-        debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << endl;
-    #endif
+#if VISION_HORIZON_VERBOSITY > 2
+    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << endl;
+#endif
 
     horizon_points = upperConvexHull(horizon_points);
 
-    #if VISION_HORIZON_VERBOSITY > 2
-        debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;
-    #endif
+#if VISION_HORIZON_VERBOSITY > 2
+    debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;
+#endif
 
     // set hull points
     vbb->setGreenHullPoints(horizon_points);

@@ -1,8 +1,9 @@
 /*! @file MRLAgent.h
     @brief Motivated reinforcement learning agent. Provides its own reward structure for self motivation based on novelty.
-    Uses a dictionary approximator to store the learnt expected reward "value" function.
+    Uses a fourier approximator to store the learnt expected reward "value" function.
     ---------------------------------------------------
-    Make your own MRLAgent:Follow the template below to implement a Motivated reinforcement agent.
+    Make your own MRLAgent:(WARNING: The motivation wundt function has been tuned for use in head-behaviour, do not change.)
+    Follow the template below to implement a Motivated reinforcement agent.
 
 
     MRLAgent mrlagent;
@@ -53,7 +54,7 @@ public:
 
     void giveMotivationReward();
     float wundtFunction(float N);
-    int getActionAndLearn(vector<float> observations);
+    int getActionAndLearn(vector<float> observations, vector<int> valid_actions);
     void saveMRLAgent(string agentName);
     void loadMRLAgent(string agentName);
 

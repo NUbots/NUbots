@@ -11,6 +11,7 @@
 #include <vector>
 #include <iostream>
 #include "Matrix.h"
+#include "Vector3.h"
 using namespace std;
 
 namespace mathGeneral
@@ -90,6 +91,34 @@ inline std::vector<float> Cartesian2Spherical(const std::vector<float>& cartesia
     result[0] = sqrt(x*x + y*y + z*z);
     result[1] = atan2(y,x);
     result[2] = asin(z/(result[0]));
+    return result;
+}
+
+inline Vector3<float> Spherical2Cartesian(const Vector3<float>& sphericalCoordinates)
+{
+    const float distance = sphericalCoordinates.x;
+    const float bearingcos = cos(sphericalCoordinates.y);
+    const float bearingsin = sin(sphericalCoordinates.y);
+    const float elevationcos = cos(sphericalCoordinates.z);
+    const float elevationsin = sin(sphericalCoordinates.z);
+
+    Vector3<float> result;
+    result.x = distance * bearingcos * elevationcos;
+    result.y = distance * bearingsin * elevationcos;
+    result.z = distance * elevationsin;
+    return result;
+}
+
+inline Vector3<float> Cartesian2Spherical(const Vector3<float>& cartesianCoordinates)
+{
+    const float x = cartesianCoordinates.x;
+    const float y = cartesianCoordinates.y;
+    const float z = cartesianCoordinates.z;
+    Vector3<float> result;
+
+    result.x = sqrt(x*x + y*y + z*z);
+    result.y = atan2(y,x);
+    result.z = asin(z/(result[0]));
     return result;
 }
 
