@@ -170,7 +170,7 @@ namespace ConfigSystem
          *  @param paramName Name of the parameter to have its description set.
          *  @return Whether the operation was successful.
          */
-        bool ConfigManager::setParamDescription(
+        bool setParamDescription(
         const std::string &paramPath,
         const std::string &paramName,
         const std::string &paramDesc

@@ -227,9 +227,19 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
         
-        if(!_currConfigTree->checkParam(paramPath, paramName)) return false;
+        ConfigParameter cp(vt_none);
+        
+        //OLD CODE
+        //Checking if parameter exists, locking won't work as cp is not returned from anything (compiler
+        //error). 
+        //if(!_currConfigTree->checkParam(paramPath, paramName)) return false;
+        //else if(cp.isLocked()) return false;
+        
+        //Did you mean getParam? If the parameter doesn't exist, it should return false from that function,
+        //albeit a bit cryptic.
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         else if(cp.isLocked()) return false;
-
+		
         if(!_currConfigTree->deleteParam(paramPath, paramName)) return false;
 
         return true;
