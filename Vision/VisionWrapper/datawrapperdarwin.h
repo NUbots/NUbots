@@ -45,6 +45,7 @@ public:
     bool getCameraHeight(float& height);            //for transforms
     bool getCameraPitch(float& pitch);              //for transforms
     bool getBodyPitch(float& pitch);
+    Vector2<double> getCameraFOV() const {return Vector2<double>(camera_data->m_horizontalFov, camera_data->m_verticalFov);}
     
     //! @brief Returns a reference to the kinematics horizon line.
     const Horizon& getKinematicsHorizon();
@@ -109,6 +110,7 @@ private:
     //! Shared data objects
     NUImage* current_frame;
     NUSensorsData* sensor_data;             //! pointer to shared sensor data
+    NUCameraData* camera_data;
     //NUSensorsData sensor_data_copy;
     NUActionatorsData* actions;             //! pointer to shared actionators data
     FieldObjects* field_objects;            //! pointer to shared fieldobject data

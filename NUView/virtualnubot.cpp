@@ -39,9 +39,9 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     previewClassImage.useInternalBuffer();
     nextUndoIndex = 0;
     rawImage = 0;
-    jointSensors = 0;
-    balanceSensors = 0;
-    touchSensors = 0;
+//    jointSensors = 0;
+//    balanceSensors = 0;
+//    touchSensors = 0;
 
     autoSoftColour = false;
 
@@ -62,18 +62,17 @@ void virtualNUbot::setRawImage(const NUImage* image)
 }
 
 
-void virtualNUbot::setSensorData(const float* joint, const float* balance, const float* touch)
-{
-    jointSensors = joint;
-    balanceSensors = balance;
-    touchSensors = touch;
-    horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],cameraNumber);
-    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+//void virtualNUbot::setSensorData(const float* joint, const float* balance, const float* touch)
+//{
+//    jointSensors = joint;
+//    balanceSensors = balance;
+//    touchSensors = touch;
+//    horizonLine.Calculate(balanceSensors[4],balanceSensors[3],jointSensors[0],jointSensors[1],cameraNumber);
+//    emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
+//}
 
-}
 void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
 {
-
     //std::stringstream data;
     //newsensorsData->summaryTo(data);
     //qDebug() << data.str().c_str() << endl;

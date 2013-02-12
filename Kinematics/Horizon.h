@@ -7,6 +7,7 @@
 #ifndef Horizon_H_DEFINED
 #define Horizon_H_DEFINED
 #include "Tools/Math/Line.h"
+#include "Tools/Math/Matrix.h"
 
 /*!
     @brief Class used to compute and store the horizon line.
@@ -23,17 +24,26 @@ class Horizon : public Line{
     Horizon(); //!< Standard Constructor.
     ~Horizon(); //!< Destructor.
     void Reset();   //!< Resets the horizon information. This then indicates that the line is no longer valid.
+
+//    /*!
+//      @brief Calculates the new values for the horizon line.
+//      @param bodyPitch The angle of the robots body about the Y-axis.
+//      @param bodyRoll The angle of the robots body about the X-axis.
+//      @param headYaw The angle of the robots head about the Z-axis.
+//      @param headPitch The angle of the robots head about the Y-axis.
+//      @param cameraNumber The camera number for which we are claculating the horizon for.
+//      @todo Change the cameraNumber parameter to a camera information object, containg the fov/resolution
+//            data and the transform from the base of the neck for the current camera.
+//      */
+//    void Calculate(double bodyPitch, double bodyRoll, double headYaw, double headPitch, int cameraNumber);
+
     /*!
       @brief Calculates the new values for the horizon line.
-      @param bodyPitch The angle of the robots body about the Y-axis.
-      @param bodyRoll The angle of the robots body about the X-axis.
-      @param headYaw The angle of the robots head about the Z-axis.
-      @param headPitch The angle of the robots head about the Y-axis.
-      @param cameraNumber The camera number for which we are claculating the horizon for.
-      @todo Change the cameraNumber parameter to a camera information object, containg the fov/resolution
-            data and the transform from the base of the neck for the current camera.
+      @param cameraToGroundTransform The camera to ground transform.
+      @param cameraFieldOfView The horizontal and vertical field of view of the camera (radians).
+      @param imageDimensions The horizontal and vertical dimensions of the image (pixels).
       */
-    void Calculate(double bodyPitch, double bodyRoll, double headYaw, double headPitch, int cameraNumber);
+    void Calculate(const Matrix &cameraToGroundTransform, const Vector2<double> &cameraFieldOfView, const Vector2<double> &imageDimensions);
     
     /*!
       @brief Determine if the given pixel is below the current horizon line.

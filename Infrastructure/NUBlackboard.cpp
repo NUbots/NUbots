@@ -39,6 +39,7 @@ NUBlackboard::NUBlackboard()
     Sensors = 0;
     Actions = 0;
     Image = 0;
+    CameraSpecs = 0;
     Objects = 0;
     Jobs = 0;
     GameInfo = 0;
@@ -53,6 +54,8 @@ NUBlackboard::~NUBlackboard()
     Actions = 0;
     delete Image;
     Image = 0;
+    delete CameraSpecs;
+    CameraSpecs = 0;
     delete Objects;
     Objects = 0;
     delete Jobs;
@@ -91,6 +94,13 @@ void NUBlackboard::add(NUImage* image)
     NUImage* oldimage = Image;
     Image = image;
     delete oldimage;
+}
+
+void NUBlackboard::add(NUCameraData *camdata)
+{
+    NUCameraData* olddata = CameraSpecs;
+    CameraSpecs = camdata;
+    delete olddata;
 }
 
 /*! @brief Adds a FieldObjects object to the blackboard. Note that ownership of the object is now with the Blackboard. 

@@ -28,6 +28,8 @@ segmentfilter.cpp
 goaldetector.cpp
 balldetector.cpp
 linedetector.cpp
+cornerdetector.cpp
+centrecircledetector.cpp
 robocuphacks.cpp
 )
 ####################################################################################

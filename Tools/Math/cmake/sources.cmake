@@ -22,6 +22,7 @@ ENDIF()
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
 Line.cpp
+Circle.cpp
 LSFittedLine.cpp
 Matrix.cpp  
 TransformMatrices.cpp

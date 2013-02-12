@@ -21,6 +21,7 @@
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
+#include "NUPlatform/NUCamera/NUCameraData.h"
 
 //for virtualNUbot/Qt
 #include "GLDisplay.h"
@@ -49,6 +50,7 @@ public:
     bool getCameraHeight(float& height);            //for transforms
     bool getCameraPitch(float& pitch);              //for transforms
     bool getBodyPitch(float& pitch);
+    Vector2<double> getCameraFOV() const {return Vector2<double>(camera_data.m_horizontalFov, camera_data.m_verticalFov);}
     
     //! @brief Generates spoofed horizon line.
     const Horizon& getKinematicsHorizon();
@@ -126,6 +128,7 @@ private:
 
     //! Shared data objects
     NUSensorsData* sensor_data;             //! pointer to shared sensor data
+    NUCameraData camera_data;
     NUActionatorsData* actions;             //! pointer to shared actionators data
     FieldObjects* field_objects;            //! pointer to shared fieldobject data
 

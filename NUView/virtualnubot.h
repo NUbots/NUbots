@@ -72,7 +72,6 @@ public slots:
     void loadLookupTableFile(QString fileName);
 
     void setRawImage(const NUImage* image);
-    void setSensorData(const float* joint, const float* balance, const float* touch);
     void setSensorData(NUSensorsData* NUSensorsData);
     void setCamera(int newCamera){cameraNumber = newCamera;};
     void setAutoSoftColour(bool isEnabled){autoSoftColour = isEnabled;};
@@ -124,9 +123,6 @@ private:
     Horizon horizonLine;
     NUBlackboard* m_blackboard;
     NUSensorsData* sensorsData;
-    const float* jointSensors;
-    const float* balanceSensors;
-    const float* touchSensors;
     static const int maxUndoLength = 10;
     int nextUndoIndex;
     std::vector<classEntry> undoHistory[maxUndoLength];

@@ -24,9 +24,9 @@ public:
 	~Matrix();
 	Matrix(const Matrix& a);
 	
-        Matrix transp() const; // Matrix Transpose
-        Matrix getRow(int index) const; // Get Row
-        Matrix getCol(int index) const; // Get Column
+    Matrix transp() const; // Matrix Transpose
+    Matrix getRow(int index) const; // Get Row
+    Matrix getCol(int index) const; // Get Column
 	void setRow(int index, Matrix in); // Set Row
 	void setCol(int index, Matrix in); // Set Column
 
@@ -36,11 +36,10 @@ public:
     inline double& operator() (int i, int j){return X[i*N+j];};
 	
 	void print(); // print values
-        std::vector<float> asVector();
-        bool isValid() const;
-        bool operator ==(const Matrix& b) const;
-        bool operator !=(const Matrix& b) const
-        {return (!((*this) == b));}
+    std::vector<float> asVector();
+    bool isValid() const;
+    bool operator ==(const Matrix& b) const;
+    bool operator !=(const Matrix& b) const {return (!((*this) == b));}
 };
 
 // Overloaded Operators

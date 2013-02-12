@@ -34,6 +34,8 @@
 #ifndef NUBLACKBOARD_H
 #define NUBLACKBOARD_H
 
+#include "NUPlatform/NUCamera/NUCameraData.h"
+
 class NUSensorsData;
 class NUActionatorsData;
 class NUImage;
@@ -52,6 +54,7 @@ public:
     void add(NUSensorsData* sensorsdata);
     void add(NUActionatorsData* actionsdata);
     void add(NUImage* image);
+    void add(NUCameraData* camdata);
     void add(FieldObjects* objects);
     void add(JobList* joblist);
     void add(GameInformation* gameinfo);
@@ -61,6 +64,7 @@ public:
     NUSensorsData* Sensors;
     NUActionatorsData* Actions;
     NUImage* Image;
+    NUCameraData* CameraSpecs;
     FieldObjects* Objects;
     JobList* Jobs;
     GameInformation* GameInfo;

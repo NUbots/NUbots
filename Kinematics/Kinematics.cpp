@@ -360,7 +360,7 @@ Matrix Kinematics::TransformPosition(const Matrix& Camera2GroundTransform, const
 {
     const Matrix cameraCartesian(mathGeneral::Spherical2Cartesian(cameraBasedPosition));
 
-    // Build the far measurement vector
+    // Build the homogenous vector
     Matrix one(1,1);
     one[0][0] = 1.0;
     Matrix cameraCoordCol(4,1);

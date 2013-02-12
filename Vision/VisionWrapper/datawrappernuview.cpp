@@ -25,6 +25,7 @@ void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segm
 
 DataWrapper::DataWrapper()
 {
+    camera_data.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
     numFramesDropped = numFramesProcessed = 0;
 }
 

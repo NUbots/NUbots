@@ -21,18 +21,13 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-visionfieldobject.cpp
-ball.cpp
-beacon.cpp
-goal.cpp
-obstacle.cpp
-fieldline.cpp
-cornerpoint.cpp
+ransaccircle.cpp
+ransacgoal.cpp
+ransacline.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-
 )
 ####################################################################################
 

@@ -142,8 +142,6 @@ private:
 //    Mat* original_image_cv;                 //! @variable Opencv mat for storing the original image 3 channels.
 //    Mat* original_image_cv_4ch;             //! @variable Opencv mat for storing the original image 4 channels.
     const NUImage* original_image;                  //! @variable Image for storing the original image.
-    
-    NUCameraData m_camera_specs;
 
     LookUpTable LUT;
     

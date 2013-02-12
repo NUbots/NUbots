@@ -35,9 +35,9 @@ public:
     bool SetByName(const std::string& parameter, float value);
 
 public:
-        int m_cameraID;               //!< The unique ID that identifies the camera.
-        float m_horizontalFov;        //!< The horizontal field of view of the camera.
-        float m_verticalFov;          //!< The vertical field of view of the camera.
+    int m_cameraID;               //!< The unique ID that identifies the camera.
+    float m_horizontalFov;        //!< The horizontal field of view of the camera.
+    float m_verticalFov;          //!< The vertical field of view of the camera.
 	//!\todo{Add any required camera settings to the image information}
 };
 #endif

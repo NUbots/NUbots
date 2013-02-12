@@ -23,8 +23,6 @@ VisionBlackboard::VisionBlackboard()
 
     //get Camera to ground vector
     //ctgvalid = wrapper->getCTGVector(ctgvector);
-    
-    m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
 
     VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
 }
@@ -493,7 +491,7 @@ void VisionBlackboard::update()
                                      body_pitch_valid, body_pitch,
                                      ctg_valid, ctg_vector);
     m_transformer.setCamParams(Vector2<double>(original_image->getWidth(), original_image->getHeight()),
-                               Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov));
+                               wrapper->getCameraFOV());
 
     kinematics_horizon = wrapper->getKinematicsHorizon();
     checkKinematicsHorizon();

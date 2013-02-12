@@ -272,6 +272,7 @@ bool DataWrapper::updateFrame()
     //! @todo Finish implementing & Comment
     actions = Blackboard->Actions;
     sensor_data = Blackboard->Sensors;
+    camera_data = Blackboard->CameraSpecs;
 //    if(isSavingImages)
 //        sensor_data_copy = *sensor_data;
     field_objects = Blackboard->Objects;

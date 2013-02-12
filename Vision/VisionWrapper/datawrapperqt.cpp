@@ -17,6 +17,7 @@ DataWrapper* DataWrapper::instance = 0;
 DataWrapper::DataWrapper(MainWindow* ui)
 {
     gui = ui;
+    m_camspecs.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
     //frame grab methods
     QString camoption("Camera"),
             strmoption("Image stream");

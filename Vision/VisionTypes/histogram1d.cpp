@@ -1,7 +1,7 @@
 #include <queue>
 #include <stdexcept>
 #include <boost/foreach.hpp>
-#include "histogram1D.h"
+#include "histogram1d.h"
 #include "debug.h"
 
 class BinComparison

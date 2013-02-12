@@ -23,6 +23,7 @@
 #include "Tools/Math/LSFittedLine.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "NUPlatform/NUCamera/NUCameraData.h"
 
 #include "mainwindow.h"
 
@@ -47,6 +48,7 @@ public:
     bool getCameraHeight(float& height);            //for transforms
     bool getCameraPitch(float& pitch);              //for transforms
     bool getBodyPitch(float& pitch);
+    Vector2<double> getCameraFOV() const {return Vector2<double>(m_camspecs.m_horizontalFov, m_camspecs.m_verticalFov);}
 
     //! @brief Generates spoofed horizon line.
     const Horizon& getKinematicsHorizon();
@@ -108,6 +110,7 @@ private:
     Horizon kinematics_horizon;
 
     NUCamera* m_camera;
+    NUCameraData m_camspecs;
 
     //! Used when reading from strm
     string streamname;
