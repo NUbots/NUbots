@@ -14,7 +14,7 @@ SegmentFilter::SegmentFilter()
     loadTransitionRules(RULE_DIR + "TransitionRules");
 }
 
-double averageLength(const SegmentedRegion& scans,Colour colour) {
+double averageLength(const SegmentedRegion& scans, Colour colour) {
     const vector<vector<ColourSegment> >& segments = scans.getSegments();
     vector<vector<ColourSegment> >::const_iterator line_it;
     vector<ColourSegment>::const_iterator seg_it;
@@ -65,6 +65,7 @@ void SegmentFilter::run() const
 //        cout << averageLength(v_filtered, green) << endl;
     }
     else {
+        //Vision problem should occur in here:
         filter(h_segments, h_result);
         filter(v_segments, v_result);
     }
@@ -276,16 +277,19 @@ void SegmentFilter::loadTransitionRules(string filename)
         debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << endl;
     }
     input.close();
-    
+
+    if(rules_h.size()  == 0 || rules_v.size() == 0){
+        cout <<"=========================WARNING=========================\n"
+             << "SegmentFilter::loadTransitionRules - " << filename
+             <<"_v.txt or _h.txt empty!\n \n" << "The robot may exhibit blindness."
+             <<"=========================WARNING=========================\n" << endl;
+    }
     //DEBUG
 #if VISION_FILTER_VERBOSITY > 0
     debug << "SegmentFilter::loadTransitionRules()" << endl;
     debug << "rules_h (" << rules_h.size() << ")\n" << rules_h;
     debug << "rules_v (" << rules_v.size() << ")\n" << rules_v;
 #endif
-    cout << "SegmentFilter::loadTransitionRules()" << endl;
-    cout << "rules_h (" << rules_h.size() << ")\n" << rules_h;
-    cout << "rules_v (" << rules_v.size() << ")\n" << rules_v;
 }
 
 void SegmentFilter::loadReplacementRules(string filename)

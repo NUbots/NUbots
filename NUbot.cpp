@@ -108,7 +108,10 @@ NUbot* NUbot::m_this = NULL;
  */
 NUbot::NUbot(int argc, const char *argv[])
 {
+
+
     #if DEBUG_NUBOT_VERBOSITY > 0
+        cout<< "DEBUG_NUBOT_VERBOSITY = " <<DEBUG_NUBOT_VERBOSITY<<endl;
         debug << "NUbot::NUbot()." << endl;
     #endif
     NUbot::m_this = this;
@@ -217,6 +220,7 @@ void NUbot::createBlackboard()
     m_blackboard->add(new JobList());
     m_blackboard->add(new GameInformation(m_platform->getRobotNumber(), m_platform->getTeamNumber()));
     m_blackboard->add(new TeamInformation(m_platform->getRobotNumber(), m_platform->getTeamNumber()));
+    m_blackboard->add(new NUCameraData((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str()));
 }
 
 /*! @brief Destroys the Blackboard, aka delete the m_blackboard */

@@ -27,6 +27,7 @@ beacon.cpp
 goal.cpp
 obstacle.cpp
 fieldline.cpp
+cornerpoint.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

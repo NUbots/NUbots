@@ -299,7 +299,7 @@ void LUTGlDisplay::DrawLUT(unsigned char* currentLUT)
 
 
             //Do Not Draw Black Points:
-            if(currentLUT[index] == ClassIndex::unclassified)
+            if(currentLUT[index] == Vision::unclassified)
                     continue;
 
             a = 255;
@@ -315,7 +315,7 @@ void LUTGlDisplay::DrawLUT(unsigned char* currentLUT)
             }
             else
             {
-                ClassIndex::getColourIndexAsRGB(currentLUT[index],r,g,b);
+                Vision::getColourAsRGB(Vision::getColourFromIndex(currentLUT[index]),r,g,b);
                 colour.setRed(r);
                 colour.setGreen(g);
                 colour.setBlue(b);

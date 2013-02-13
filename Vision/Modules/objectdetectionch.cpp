@@ -30,7 +30,6 @@ void ObjectDetectionCH::detectObjects()
     const NUImage& img = vbb->getOriginalImage();
     unsigned int height = img.getHeight();
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
-    vector<Obstacle> result;
     vector<Point> horizon_points,
                   object_points;
     double mean_y,

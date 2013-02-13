@@ -23,8 +23,6 @@ VisionBlackboard::VisionBlackboard()
 
     //get Camera to ground vector
     //ctgvalid = wrapper->getCTGVector(ctgvector);
-    
-    m_camera_specs = NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
 
     VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
 }
@@ -58,7 +56,7 @@ VisionBlackboard* VisionBlackboard::getInstance()
 */
 void VisionBlackboard::setGreenHullPoints(const vector<Vector2<double> >& points)
 {
-    m_green_horizon.set(points);
+    m_green_horizon.set(points, Point(original_image->getWidth(), original_image->getHeight()));
 }
 
 /**
@@ -466,6 +464,11 @@ void VisionBlackboard::update()
     //get new image pointer
     original_image = wrapper->getFrame();
 
+    //WARNING The following warning may not be triggered properly
+    if(original_image->getHeight()==0 or original_image->getWidth()==0 ){
+        cout<<"VisionBlackboard::update() - WARNING - Camera Image height or width is zero Camera may be disconnected or faulty."<<endl;
+    }
+
 //    ctgvalid = wrapper->getCTGVector(ctgvector);
 //    ctvalid = wrapper->getCTVector(ctvector);
 
@@ -488,7 +491,7 @@ void VisionBlackboard::update()
                                      body_pitch_valid, body_pitch,
                                      ctg_valid, ctg_vector);
     m_transformer.setCamParams(Vector2<double>(original_image->getWidth(), original_image->getHeight()),
-                               Vector2<double>(m_camera_specs.m_horizontalFov, m_camera_specs.m_verticalFov));
+                               wrapper->getCameraFOV());
 
     kinematics_horizon = wrapper->getKinematicsHorizon();
     checkKinematicsHorizon();
@@ -556,7 +559,7 @@ void VisionBlackboard::debugPublish() const
     debug << "VisionBlackboard::debugPublish - " << endl;
     debug << "kinematics_horizon: " << kinematics_horizon.getA() << " " << kinematics_horizon.getB() << " " << kinematics_horizon.getC() << endl;
     debug << "horizon_scan_points: " << m_green_horizon.getOriginalPoints().size() << endl;
-    debug << "object_points: " << object_points.size() << endl;
+    debug << "object_points: " << obstacle_points.size() << endl;
     debug << "horizontal_scanlines: " << horizontal_scanlines.size() << endl;
     debug << "horizontal_segmented_scanlines: " << horizontal_segmented_scanlines.getSegments().size() << endl;
     debug << "vertical_segmented_scanlines: " << vertical_segmented_scanlines.getSegments().size() << endl;
@@ -587,7 +590,7 @@ void VisionBlackboard::debugPublish() const
     else {
         errorlog << "VisionBlackboard::publishDebug - vertical horizon!" << endl;
     }
-    
+
     //horizon scans
     wrapper->debugPublish(DBID_GREENHORIZON_SCANS, gh_scan_points);
     

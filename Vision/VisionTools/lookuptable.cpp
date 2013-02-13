@@ -51,26 +51,26 @@ bool LookUpTable::loadLUTFromFile(const string& fileName)
     return load_success;
 }
 
-void LookUpTable::classifyImage(const NUImage& src, cv::Mat& dest) const
-{
-    int width = src.getWidth();
-    int height = src.getHeight();
-    unsigned char r, g, b;
+//void LookUpTable::classifyImage(const NUImage& src, cv::Mat& dest) const
+//{
+//    int width = src.getWidth();
+//    int height = src.getHeight();
+//    unsigned char r, g, b;
 
-    dest.create(height, width, CV_8UC3);
+//    dest.create(height, width, CV_8UC3);
 
-    for (int y = 0; y < height; y++)
-    {
-        unsigned char* row = dest.ptr<unsigned char>(y);
-        for (int x = 0; x < width; x++)
-        {
-            Vision::getColourAsRGB(classifyPixel(src(x,y)), r, g, b);
-            row[3*x] = b;
-            row[3*x+1] = g;
-            row[3*x+2] = r;
-        }
-    }
-}
+//    for (int y = 0; y < height; y++)
+//    {
+//        unsigned char* row = dest.ptr<unsigned char>(y);
+//        for (int x = 0; x < width; x++)
+//        {
+//            Vision::getColourAsRGB(classifyPixel(src(x,y)), r, g, b);
+//            row[3*x] = b;
+//            row[3*x+1] = g;
+//            row[3*x+2] = r;
+//        }
+//    }
+//}
 
 void LookUpTable::zero()
 {

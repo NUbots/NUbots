@@ -31,10 +31,11 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "ApproximatorInterface.h"
 using namespace std;
 
 
-class DictionaryApproximator {
+class DictionaryApproximator: public ApproximatorInterface {
 
 private:
     int tileMultiplier,numInputs,numOutputs;
@@ -58,6 +59,8 @@ public:
     virtual void loadApproximator(string agentName);
     
     map<string,float>* getMap();
+
+    DictionaryApproximator():ApproximatorInterface(){}
     
 };
 

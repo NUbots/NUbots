@@ -1,11 +1,6 @@
-GOAL_Y_COLOUR:
+GOAL_COLOUR:
 before: (0, 320) []
 middle: (3, 320) [yellow]
-after: (0, 320) []
-
-GOAL_B_COLOUR:
-before: (0, 320) []
-middle: (3, 320) [blue]
 after: (0, 320) []
 
 BALL_COLOUR:

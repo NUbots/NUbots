@@ -22,8 +22,8 @@
 
 #include "NUSensors.h"
 
-#include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/NUImage/NUImage.h"
 #include "NUPlatform/NUPlatform.h"
 
 #include "NUSensors/EndEffectorTouch.h"
@@ -240,6 +240,7 @@ void NUSensors::calculateOrientation()
     
     if (m_data->get(NUSensorsData::OrientationHardware, orientationhardware))
     {
+        cout << "NUSensors::calculateOrientation() NUSensorsData failed orientation hardware "<<endl;
         m_data->set(NUSensorsData::Orientation, m_current_time, orientationhardware);
     }
     else if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
@@ -252,9 +253,13 @@ void NUSensors::calculateOrientation()
 
         validKinematics = validKinematics && (fabs(acceleration[2]) > 2*fabs(acceleration[1]) && fabs(acceleration[2]) > 2*fabs(acceleration[0]));
 
-        if(!m_orientationFilter->Initialised())
+        if(!m_orientationFilter->Initialised()){
+            #if DEBUG_NUSENSORS_VERBOSITY > 4
+                debug << "NUSensors::calculateOrientation() NUSensorsData failed to initialise." << endl;
+            #endif
             m_orientationFilter->initialise(m_current_time,gyros,acceleration,validKinematics,orientation);
-        else
+
+        } else
         {
             m_orientationFilter->TimeUpdate(gyros, m_current_time);
             m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
@@ -262,7 +267,9 @@ void NUSensors::calculateOrientation()
             orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
             orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
             orientation[2] = 0.0f;
+
             m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
+
             // Set gyro offset values
             gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
             gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
@@ -281,23 +288,20 @@ void NUSensors::calculateHorizon()
     debug << "NUSensors::calculateHorizon()" << endl;
 #endif
     Horizon HorizonLine;
-    vector<float> orientation;
-    float headYaw, headPitch;
+    vector<float> cameraToGroundTransformFlat;
 
-    vector<float> supportLegTransformFlat;
-    bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
-    Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
+    bool validKinematics = m_data->get(NUSensorsData::CameraToGroundTransform, cameraToGroundTransformFlat);
+    Matrix cameraToGroundTransform = Matrix4x4fromVector(cameraToGroundTransformFlat);
+
+    //Vector2<double> camFOV( Blackboard->CameraSpecs->m_horizontalFov, Blackboard->CameraSpecs->m_verticalFov);
+    Vector2<double> camFOV(1.04719755, 0.802851456);
+
+    //Vector2<double> imgDims( Blackboard->Image->getWidth(), Blackboard->Image->getHeight() );
+    Vector2<double> imgDims(320, 240);
+
     if(validKinematics)
-        orientation = Kinematics::OrientationFromTransform(supportLegTransform);
-
-    validKinematics &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
-    validKinematics &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
-    int camera = m_camera_number;
-
-
-    if (validKinematics)
     {
-        HorizonLine.Calculate(orientation[1], orientation[0], headYaw, headPitch, camera);
+        HorizonLine.Calculate(cameraToGroundTransform, camFOV, imgDims);
         vector<float> line;
         line.reserve(3);
         line.push_back(HorizonLine.getA());
@@ -307,6 +311,38 @@ void NUSensors::calculateHorizon()
     }
 }
 
+
+//void NUSensors::calculateHorizon()
+//{
+//#if DEBUG_NUSENSORS_VERBOSITY > 4
+//    debug << "NUSensors::calculateHorizon()" << endl;
+//#endif
+//    Horizon HorizonLine;
+//    vector<float> orientation;
+//    float headYaw, headPitch;
+
+//    vector<float> supportLegTransformFlat;
+//    bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
+//    Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
+//    if(validKinematics)
+//        orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+
+//    validKinematics &= m_data->getPosition(NUSensorsData::HeadYaw, headYaw);
+//    validKinematics &= m_data->getPosition(NUSensorsData::HeadPitch, headPitch);
+//    int camera = m_camera_number;
+
+
+//    if (validKinematics)
+//    {
+//        HorizonLine.Calculate(orientation[1], orientation[0], headYaw, headPitch, camera);
+//        vector<float> line;
+//        line.reserve(3);
+//        line.push_back(HorizonLine.getA());
+//        line.push_back(HorizonLine.getB());
+//        line.push_back(HorizonLine.getC());
+//        m_data->set(NUSensorsData::Horizon, m_current_time, line);
+//    }
+//}
 
 /*! @brief Calculates the duration of the last press on each of the buttons and bumpers
  */

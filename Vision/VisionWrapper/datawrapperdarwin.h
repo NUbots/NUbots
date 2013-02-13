@@ -18,7 +18,7 @@
 #include "Vision/VisionTypes/segmentedregion.h"
 #include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
 #include "Vision/VisionTypes/VisionFieldObjects/ball.h"
-#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
+//#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
@@ -34,32 +34,6 @@ class DataWrapper
     friend class VisionControlWrapper;
     
 public:
-    enum DATA_ID {
-        DID_IMAGE,
-        DID_CLASSED_IMAGE
-    };
-    
-    enum DEBUG_ID {
-        DBID_IMAGE=0,
-        DBID_H_SCANS=1,
-        DBID_V_SCANS=2,
-        DBID_SEGMENTS=3,
-        DBID_MATCHED_SEGMENTS=4,
-        DBID_HORIZON=5,
-        DBID_GREENHORIZON_SCANS=6,
-        DBID_GREENHORIZON_FINAL=7,
-        DBID_OBJECT_POINTS=8,
-        DBID_FILTERED_SEGMENTS=9,
-        DBID_GOALS=10,
-        DBID_BEACONS=11,
-        DBID_BALLS=12,
-        DBID_OBSTACLES=13,
-        DBID_LINES=14,
-        NUMBER_OF_IDS=15
-    };
-
-    static string getIDName(DEBUG_ID id);
-    static string getIDName(DATA_ID id);
     static DataWrapper* getInstance();
 
 public:
@@ -71,6 +45,7 @@ public:
     bool getCameraHeight(float& height);            //for transforms
     bool getCameraPitch(float& pitch);              //for transforms
     bool getBodyPitch(float& pitch);
+    Vector2<double> getCameraFOV() const {return Vector2<double>(camera_data->m_horizontalFov, camera_data->m_verticalFov);}
     
     //! @brief Returns a reference to the kinematics horizon line.
     const Horizon& getKinematicsHorizon();
@@ -83,15 +58,18 @@ public:
     //void publish(DATA_ID id, vector<VisionObject> data);
 
     void debugRefresh();
-    bool debugPublish(vector<Ball> data);
-    bool debugPublish(vector<Beacon> data);
-    bool debugPublish(vector<Goal> data);
-    bool debugPublish(vector<Obstacle> data);
-    bool debugPublish(const vector<FieldLine>& data);
-    bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
-    bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
-    bool debugPublish(DEBUG_ID id) {}
-    bool debugPublish(DEBUG_ID id, const NUImage *const img) {}
+    void debugPublish(vector<Ball> data);
+    //void debugPublish(vector<Beacon> data);
+    void debugPublish(vector<Goal> data);
+    void debugPublish(vector<Obstacle> data);
+    void debugPublish(const vector<FieldLine>& data);
+    void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
+    void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
+    void debugPublish(DEBUG_ID id) {}
+    void debugPublish(DEBUG_ID id, const NUImage *const img) {}
+    void debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
+
+    void plotPoints(const vector<Point>& pts, string name);
 
     //! Control interface       
 private:    
@@ -132,6 +110,7 @@ private:
     //! Shared data objects
     NUImage* current_frame;
     NUSensorsData* sensor_data;             //! pointer to shared sensor data
+    NUCameraData* camera_data;
     //NUSensorsData sensor_data_copy;
     NUActionatorsData* actions;             //! pointer to shared actionators data
     FieldObjects* field_objects;            //! pointer to shared fieldobject data

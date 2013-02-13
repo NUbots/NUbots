@@ -26,7 +26,7 @@
 #include "VisionTypes/VisionFieldObjects/fieldline.h"
 #include "VisionTypes/greenhorizon.h"
 
-#ifndef VISIONBLACKBOARD_H
+#ifndef VISIONBLACKBOARD_H // mapped_horizontal_transitions: [1-9]+
 #define VISIONBLACKBOARD_H
 
 using namespace std;
@@ -142,8 +142,6 @@ private:
 //    Mat* original_image_cv;                 //! @variable Opencv mat for storing the original image 3 channels.
 //    Mat* original_image_cv_4ch;             //! @variable Opencv mat for storing the original image 4 channels.
     const NUImage* original_image;                  //! @variable Image for storing the original image.
-    
-    NUCameraData m_camera_specs;
 
     LookUpTable LUT;
     

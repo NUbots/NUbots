@@ -21,6 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
+basicvisiontypes.cpp
 visionblackboard.cpp
 visioncontroller.cpp
 visionconstants.cpp
@@ -28,6 +29,7 @@ visionconstants.cpp
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
+GenericAlgorithms
 Threads
 Modules
 VisionTools

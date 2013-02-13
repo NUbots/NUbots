@@ -95,10 +95,11 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         //testing ransac for goals
         vector<Goal> ransac_goals = m_goal_detector_ransac->run();
 
-        if(ransac_goals.size() == 2)
-            m_blackboard->addGoals(ransac_goals);
-        else
-            m_blackboard->addGoals(hist_goals);
+        m_blackboard->addGoals(ransac_goals);
+//        if(ransac_goals.size() == 2)
+//            m_blackboard->addGoals(ransac_goals);
+//        else
+//            m_blackboard->addGoals(hist_goals);
 
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "VisionController::runFrame() - goal detection done" << endl;

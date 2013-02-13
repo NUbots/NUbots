@@ -57,7 +57,7 @@ signals:
     void LocalisationFrameChanged(const LocWmFrame*);
     void ObjectDataChanged(const FieldObjects*);
     void rawImageChanged(const NUImage*);
-    void sensorDataChanged(const float*,const float*,const float*);
+    //void sensorDataChanged(const float*,const float*,const float*);
     void sensorDataChanged(NUSensorsData*);
     void GameInfoChanged(const GameInformation*);
     void TeamInfoChanged(const TeamInformation*);

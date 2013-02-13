@@ -12,8 +12,6 @@
 #include <stdio.h>
 #include <iostream>
 
-#include <opencv2/core/core.hpp>
-
 #include "Tools/Math/Line.h"
 
 #include "Vision/visionblackboard.h"
@@ -39,13 +37,14 @@ private:
     */
     static bool isPixelGreen(const NUImage& img, int x, int y);
 
-    /**
-    *   @brief  convert cv::Point2i from opencv functions into our point type.
-    *   @param  cvpoints a reference to a vector of cv::points to be converted.
-    *   @param  outpoints a reference to a vector of PointType to be filled.
-    */
-    static void convertPointTypes(const vector<cv::Point2i>& cvpoints, vector<Vector2<double> >& ourpoints);
+    // 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
+    // Returns a positive value, if OAB makes a counter-clockwise turn,
+    // negative for clockwise turn, and zero if the points are collinear.
+    static double cross(const Point &O, const Point &A, const Point &B) {return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);}
 
+    // Returns a list of points on the convex hull in counter-clockwise order.
+    // Note: the last point in the returned list is the same as the first one.
+    static vector<Point> upperConvexHull(const vector<Point>& points);
     //! CONSTANTS
     //static const unsigned int VER_SEGMENTS = 30;            //! @variable number of vertical scan segments.
     //static const unsigned int VER_THRESHOLD = 5;            //! @variable number of consecutive green pixels required.

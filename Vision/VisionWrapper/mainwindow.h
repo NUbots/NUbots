@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "Vision/basicvisiontypes.h"
-#include "Vision/VisionTypes/Interfaces/renderable.h"
 
 using std::map;
 using std::vector;
@@ -26,9 +25,9 @@ using std::pair;
 using namespace Vision;
 
 namespace Vision {
-class Circle {
+class QCircle {
 public:
-    Circle(QPointF centre, double radius) {m_centre = centre; m_radius = radius;}
+    QCircle(QPointF centre, double radius) {m_centre = centre; m_radius = radius;}
 
     QPointF m_centre;
     double m_radius;
@@ -62,17 +61,17 @@ public:
     void resetFlags() {m_next = m_finished = false;}
     void clearLayers();
     void addToLayer(DEBUG_ID id, const QImage& img, float alpha=1);
-    void addToLayer(DEBUG_ID id, const QPointF& item, QColor colour);
-    void addToLayer(DEBUG_ID id, const QLineF& item, QColor colour);
-    void addToLayer(DEBUG_ID id, const QRectF& item, QColor colour);
-    void addToLayer(DEBUG_ID id, const Circle& item, QColor colour);
-    void addToLayer(DEBUG_ID id, const Polygon& item, QColor colour);
+    void addToLayer(DEBUG_ID id, const QPointF& item, QPen pen);
+    void addToLayer(DEBUG_ID id, const QLineF& item, QPen pen);
+    void addToLayer(DEBUG_ID id, const QRectF& item, QPen pen);
+    void addToLayer(DEBUG_ID id, const QCircle& item, QPen pen);
+    void addToLayer(DEBUG_ID id, const Polygon& item, QPen pen);
 
-    void addToLayer(DEBUG_ID id, const vector<QPointF>& items, QColor colour);
-    void addToLayer(DEBUG_ID id, const vector<QLineF>& items, QColor colour);
-    void addToLayer(DEBUG_ID id, const vector<QRectF>& items, QColor colour);
-    void addToLayer(DEBUG_ID id, const vector<Circle>& items, QColor colour);
-    void addToLayer(DEBUG_ID id, const vector<Polygon>& items, QColor colour);
+    void addToLayer(DEBUG_ID id, const vector<QPointF>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const vector<QLineF>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const vector<QRectF>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const vector<QCircle>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen);
 
     void setPlot(QString name, QwtPlotCurve *curve);
     
@@ -106,11 +105,11 @@ private:
     QImage* canvas;
     map<DEBUG_ID, QCheckBox*> layer_selections;
     map<DEBUG_ID, vector<pair<QImage, float> > > images;
-    map<DEBUG_ID, vector<pair<QPointF, QColor> > > points;
-    map<DEBUG_ID, vector<pair<QLineF, QColor> > > lines;
-    map<DEBUG_ID, vector<pair<QRectF, QColor> > > rectangles;
-    map<DEBUG_ID, vector<pair<Circle, QColor> > > circles;
-    map<DEBUG_ID, vector<pair<Polygon, QColor> > > polygons;
+    map<DEBUG_ID, vector<pair<QPointF, QPen> > > points;
+    map<DEBUG_ID, vector<pair<QLineF, QPen> > > lines;
+    map<DEBUG_ID, vector<pair<QRectF, QPen> > > rectangles;
+    map<DEBUG_ID, vector<pair<QCircle, QPen> > > circles;
+    map<DEBUG_ID, vector<pair<Polygon, QPen> > > polygons;
 
     map<QString, pair<QwtPlot*, QwtPlotCurve*> > plots;
 };

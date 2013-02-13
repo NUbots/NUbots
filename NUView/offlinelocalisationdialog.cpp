@@ -126,7 +126,7 @@ void OfflineLocalisationDialog::OpenLogFiles()
     }
     QString filename = QFileDialog::getOpenFileName(this,
                             tr("Open Replay File"), initial_path,
-                            tr("All NUbot Image Files(*.nul;*.nif;*.nurf;*.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
+                            tr("All NUbot Image Files(*.nul *.nif *.nurf *.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
 
     if (!filename.isEmpty()){
         QFileInfo file_info(filename);  // Get info on teh selected file.

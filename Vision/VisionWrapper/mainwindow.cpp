@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <string>
+#include <sstream>
 #include <boost/foreach.hpp>
 #include <QPainter>
 #include <QScrollBar>
@@ -93,7 +94,7 @@ void MainWindow::refresh()
 {
     qDeleteAll( scene->items() );
     //reset image
-    canvas->fill(QColor(0,0,0));
+    canvas->fill(QColor(Qt::black));
     //draw over image
     QPainter painter(canvas);
     for(int i=0; i<DBID_INVALID; i++) {
@@ -103,23 +104,23 @@ void MainWindow::refresh()
                 painter.setOpacity(it->second);
                 painter.drawImage(QPoint(0,0), it->first);
             }
-            for(vector<pair<QPointF, QColor> >::iterator it = points[id].begin(); it<points[id].end(); it++) {
+            for(vector<pair<QPointF, QPen> >::iterator it = points[id].begin(); it<points[id].end(); it++) {
                 painter.setPen(it->second);
                 painter.drawPoint(it->first);
             }
-            for(vector<pair<QLineF, QColor> >::iterator it = lines[id].begin(); it<lines[id].end(); it++) {
+            for(vector<pair<QLineF, QPen> >::iterator it = lines[id].begin(); it<lines[id].end(); it++) {
                 painter.setPen(it->second);
                 painter.drawLine(it->first);
             }
-            for(vector<pair<QRectF, QColor> >::iterator it = rectangles[id].begin(); it<rectangles[id].end(); it++) {
+            for(vector<pair<QRectF, QPen> >::iterator it = rectangles[id].begin(); it<rectangles[id].end(); it++) {
                 painter.setPen(it->second);
                 painter.drawRect(it->first);
             }
-            for(vector<pair<Circle, QColor> >::iterator it = circles[id].begin(); it<circles[id].end(); it++) {
+            for(vector<pair<QCircle, QPen> >::iterator it = circles[id].begin(); it<circles[id].end(); it++) {
                 painter.setPen(it->second);
                 painter.drawEllipse(it->first.m_centre, it->first.m_radius, it->first.m_radius);
             }
-            for(vector<pair<Polygon, QColor> >::iterator it = polygons[id].begin(); it<polygons[id].end(); it++) {
+            for(vector<pair<Polygon, QPen> >::iterator it = polygons[id].begin(); it<polygons[id].end(); it++) {
                 painter.setPen(it->second);
                 if(it->first.m_filled) {
                     painter.drawPolygon(it->first.m_polygon);
@@ -147,63 +148,63 @@ void MainWindow::addToLayer(DEBUG_ID id, const QImage& img, float alpha)
     images[id].push_back(pair<QImage, float>(img, alpha));
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const QPointF& item, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const QPointF& item, QPen pen)
 {
-    points[id].push_back(pair<QPointF, QColor>(item, colour));
+    points[id].push_back(pair<QPointF, QPen>(item, pen));
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const QLineF& item, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const QLineF& item, QPen pen)
 {
-    lines[id].push_back(pair<QLineF, QColor>(item, colour));
+    lines[id].push_back(pair<QLineF, QPen>(item, pen));
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const QRectF& item, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const QRectF& item, QPen pen)
 {
-    rectangles[id].push_back(pair<QRectF, QColor>(item, colour));
+    rectangles[id].push_back(pair<QRectF, QPen>(item, pen));
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const Circle& item, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const QCircle& item, QPen pen)
 {
-    circles[id].push_back(pair<Circle, QColor>(item, colour));
+    circles[id].push_back(pair<QCircle, QPen>(item, pen));
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const Polygon& item, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const Polygon& item, QPen pen)
 {
-    polygons[id].push_back(pair<Polygon, QColor>(item, colour));
+    polygons[id].push_back(pair<Polygon, QPen>(item, pen));
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<QPointF>& items, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const vector<QPointF>& items, QPen pen)
 {
     BOOST_FOREACH(const QPointF& item, items) {
-        addToLayer(id, item, colour);
+        addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<QLineF>& items, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const vector<QLineF>& items, QPen pen)
 {
     BOOST_FOREACH(const QLineF& item, items) {
-        addToLayer(id, item, colour);
+        addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<QRectF>& items, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const vector<QRectF>& items, QPen pen)
 {
     BOOST_FOREACH(const QRectF& item, items) {
-        addToLayer(id, item, colour);
+        addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<Circle>& items, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const vector<QCircle>& items, QPen pen)
 {
-    BOOST_FOREACH(const Circle& item, items) {
-        addToLayer(id, item, colour);
+    BOOST_FOREACH(const QCircle& item, items) {
+        addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<Polygon>& items, QColor colour)
+void MainWindow::addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen)
 {
     BOOST_FOREACH(const Polygon& item, items) {
-        addToLayer(id, item, colour);
+        addToLayer(id, item, pen);
     }
 }
 

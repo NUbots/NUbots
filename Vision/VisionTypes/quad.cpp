@@ -1,5 +1,5 @@
 #include "quad.h"
-
+#include <cmath>
 
 Quad::Quad()
 {
@@ -58,24 +58,14 @@ Vector2<double> Quad::getCentre() const
     return (m_bottom_left + m_top_left + m_top_right + m_bottom_right)*0.25;
 }
 
-Vector2<double> Quad::getBottomLeft() const
-{
-    return m_bottom_left;
-}
-
-Vector2<double> Quad::getTopRight() const
-{
-    return m_top_right;
-}
-
 int Quad::getBaseWidth() const
 {
-    return abs(m_bottom_right.x - m_bottom_left.x + 1);
+    return std::abs(m_bottom_right.x - m_bottom_left.x + 1);
 }
 
 int Quad::getTopWidth() const
 {
-    return abs(m_top_right.x - m_top_left.x + 1);
+    return std::abs(m_top_right.x - m_top_left.x + 1);
 }
 
 float Quad::getAverageWidth() const
@@ -85,12 +75,12 @@ float Quad::getAverageWidth() const
 
 int Quad::getLeftHeight() const
 {
-    return abs(m_bottom_left.y - m_top_left.y + 1);
+    return std::abs(m_bottom_left.y - m_top_left.y + 1);
 }
 
 int Quad::getRightHeight() const
 {
-    return abs(m_bottom_right.y - m_top_right.y + 1);
+    return std::abs(m_bottom_right.y - m_top_right.y + 1);
 }
 
 float Quad::getAverageHeight() const
@@ -98,18 +88,18 @@ float Quad::getAverageHeight() const
     return 0.5*(getLeftHeight() + getRightHeight());
 }
 
-void Quad::render(cv::Mat &mat, cv::Scalar colour, bool filled) const
-{
-    cv::Point poly[4] = {cv::Point2f(m_bottom_left.x, m_bottom_left.y),
-                         cv::Point2f(m_top_left.x, m_top_left.y),
-                         cv::Point2f(m_top_right.x, m_top_right.y),
-                         cv::Point2f(m_bottom_right.x, m_bottom_right.y)};
-    if(filled) {
-        cv::fillConvexPoly(mat, poly, 4, colour, 4);
-    }
-    else {
-        int num = 4;
-        const cv::Point* p = poly;
-        cv::polylines(mat, &p, &num, 1, true, colour, 2, 4);
-    }
-}
+//void Quad::render(cv::Mat &mat, cv::Scalar colour, bool filled) const
+//{
+//    cv::Point poly[4] = {cv::Point2f(m_bottom_left.x, m_bottom_left.y),
+//                         cv::Point2f(m_top_left.x, m_top_left.y),
+//                         cv::Point2f(m_top_right.x, m_top_right.y),
+//                         cv::Point2f(m_bottom_right.x, m_bottom_right.y)};
+//    if(filled) {
+//        cv::fillConvexPoly(mat, poly, 4, colour, 4);
+//    }
+//    else {
+//        int num = 4;
+//        const cv::Point* p = poly;
+//        cv::polylines(mat, &p, &num, 1, true, colour, 2, 4);
+//    }
+//}

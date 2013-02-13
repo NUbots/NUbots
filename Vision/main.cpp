@@ -19,7 +19,6 @@
 #endif
 
 using namespace std;
-using namespace cv;
 
 int qt();
 int pc();

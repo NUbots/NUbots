@@ -81,7 +81,7 @@ public:
 
     void UpdateEffector(unsigned int index, const std::vector<float>& jointValues);
     Matrix EndEffectorPosition(unsigned int index) const;
-    Vector3<float> calculateCentreOfMass();
+    //Vector3<float> calculateCentreOfMass();
 
 
     /*!
@@ -107,7 +107,7 @@ public:
     static Matrix CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2Camera);
 
     /*!
-    * @brief Calculates the position of an object in sperical coordinates centred at the robot origin, given the position in an image.
+    * @brief Calculates the position of an object in sperical coordinates centred at the robot feet, given the position in an image.
     *
     * The distance to point calculation takes a position in the camera image and projects this point until it intercepts the ground plane.
     * The sperical position in terms of distance, heading and elevation are calculated for this intercept point.

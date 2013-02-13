@@ -1,4 +1,5 @@
 #include "nifVersion1FormatReader.h"
+#include <QMessageBox>
 
 nifVersion1FormatReader::nifVersion1FormatReader(QObject *parent) :
     LogFileFormatReader(parent)
@@ -33,6 +34,7 @@ QStringList nifVersion1FormatReader::AvailableData() const
 
 int nifVersion1FormatReader::openFile(const QString& filename)
 {
+    QMessageBox::warning(NULL, "Unsupported type", "nif files are no longer supported");
     m_fileInformation.setFile(filename);
     closeFile();
     m_totalFrames = nifFileReader.openFile(filename.toAscii().data(), false);
@@ -96,15 +98,15 @@ int nifVersion1FormatReader::setFrame(int frameNumber)
     if( (frameNumber > 0) && (frameNumber <= numFrames()) && fileGood())
     {
         m_currentFrameIndex = frameNumber;
-        uint8 imgbuffer[320*240*2];
-        int robotFrameNumber;
-        NaoCamera camera;
-        nifFileReader.getImageFrame(frameNumber, robotFrameNumber, camera, imgbuffer, jointSensorsBuffer, balanceSensorsBuffer, touchSensorsBuffer);
-        rawImageBuffer.CopyFromYUV422Buffer(imgbuffer,320,240);
-        emit cameraChanged(camera);
-        emit rawImageChanged(&rawImageBuffer);
-        emit sensorDataChanged(jointSensorsBuffer, balanceSensorsBuffer, touchSensorsBuffer);
-        emit frameChanged(currentFrame(),numFrames());
+//        uint8 imgbuffer[320*240*2];
+//        int robotFrameNumber;
+//        NaoCamera camera;
+//        nifFileReader.getImageFrame(frameNumber, robotFrameNumber, camera, imgbuffer, jointSensorsBuffer, balanceSensorsBuffer, touchSensorsBuffer);
+//        rawImageBuffer.CopyFromYUV422Buffer(imgbuffer,320,240);
+//        emit cameraChanged(camera);
+//        emit rawImageChanged(&rawImageBuffer);
+//        emit sensorDataChanged(jointSensorsBuffer, balanceSensorsBuffer, touchSensorsBuffer);
+//        emit frameChanged(currentFrame(),numFrames());
     }
     return currentFrame();
 }

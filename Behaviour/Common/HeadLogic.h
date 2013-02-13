@@ -101,6 +101,8 @@ public:
     std::vector<float> calculateAmbiguousPolarObjectLocation(AmbiguousObject* ob);
     std::vector<float> getSimplePolarObLocSummary();
     std::vector<std::vector<float> > getPolarObLocSummary();
+
+    std::vector<int> getValidObjectsToLookAt();
 private:
 
 

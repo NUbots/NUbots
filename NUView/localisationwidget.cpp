@@ -554,21 +554,21 @@ void LocalisationWidget::angleToPoint(WMPoint point)
 
 }
 
-void LocalisationWidget::setSensorData(const float* jointSensors, const float* balanceSensors ,const float* touchSensors)
-{
-    for(int i=0;i<22;i++)
-    {
-        joints[i] = jointSensors[i] * 57.2957795;;
-    }
+//void LocalisationWidget::setSensorData(const float* jointSensors, const float* balanceSensors ,const float* touchSensors)
+//{
+//    for(int i=0;i<22;i++)
+//    {
+//        joints[i] = jointSensors[i] * 57.2957795;;
+//    }
 
-    double sumLeft = touchSensors[0] + touchSensors[1] + touchSensors[2] + touchSensors[3];
-    double sumRight = touchSensors[6] + touchSensors[7] + touchSensors[8] + touchSensors[9];
+//    double sumLeft = touchSensors[0] + touchSensors[1] + touchSensors[2] + touchSensors[3];
+//    double sumRight = touchSensors[6] + touchSensors[7] + touchSensors[8] + touchSensors[9];
 
-    leftLegOnGround = (sumLeft < 9000);
-    rightLegOnGround = (sumRight < 9000);
-    calculateLines();
-    updateJoints();
-}
+//    leftLegOnGround = (sumLeft < 9000);
+//    rightLegOnGround = (sumRight < 9000);
+//    calculateLines();
+//    updateJoints();
+//}
 
 void LocalisationWidget::angleXChanged(double newAngleX)
 {

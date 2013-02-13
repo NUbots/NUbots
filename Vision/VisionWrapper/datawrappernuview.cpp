@@ -12,70 +12,21 @@
 
 DataWrapper* DataWrapper::instance = 0;
 
-string DataWrapper::getIDName(DATA_ID id) {
-    switch(id) {
-    case DID_IMAGE:
-        return "DID_IMAGE";
-    case DID_CLASSED_IMAGE:
-        return "DID_CLASSED_IMAGE";
-    default:
-        return "NOT VALID";
-    }
-}
-
-string DataWrapper::getIDName(DEBUG_ID id) {
-    switch(id) {
-    case DBID_IMAGE:
-        return "DBID_IMAGE";
-    case DBID_H_SCANS:
-        return "DBID_H_SCANS";
-    case DBID_V_SCANS:
-        return "DBID_V_SCANS";
-    case DBID_SEGMENTS:
-        return "DBID_SEGMENTS";
-    case DBID_MATCHED_SEGMENTS:
-        return "DBID_MATCHED_SEGMENTS";
-    case DBID_HORIZON:
-        return "DBID_HORIZON";
-    case DBID_GREENHORIZON_SCANS:
-        return "DBID_GREENHORIZON_SCANS";
-    case DBID_GREENHORIZON_FINAL:
-        return "DBID_GREENHORIZON_FINAL";
-    case DBID_OBJECT_POINTS:
-        return "DBID_OBJECT_POINTS";
-    case DBID_FILTERED_SEGMENTS:
-        return "DBID_FILTERED_SEGMENTS";
-    case DBID_GOALS:
-        return "DBID_GOALS";
-    case DBID_BEACONS:
-        return "DBID_BEACONS";
-    case DBID_BALLS:
-        return "DBID_BALLS";
-    case DBID_OBSTACLES:
-        return "DBID_OBSTACLES";
-    default:
-        return "NOT VALID";
-    }
-}
-
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<Scalar>& colours, vector<PointType>& pts)
+void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<Colour>& colours, vector<Point>& pts)
 {
-    unsigned char r, g, b;
-    
     BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
         BOOST_FOREACH(const ColourSegment& seg, line) {
-            ClassIndex::getColourAsRGB(seg.getColour(), r, g, b);
             pts.push_back(seg.getStart());
             pts.push_back(seg.getEnd());
-            colours.push_back(Scalar(b,g,r));
+            colours.push_back(seg.getColour());
         }
     }
 }
 
 DataWrapper::DataWrapper()
 {
+    camera_data.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
     numFramesDropped = numFramesProcessed = 0;
-    display_callback = NULL;
 }
 
 DataWrapper::~DataWrapper()
@@ -193,12 +144,6 @@ const LookUpTable& DataWrapper::getLUT() const
     return LUT;
 }
 
-//! Outputs supply data to the appropriate external interface
-void DataWrapper::publish(DATA_ID id, const Mat &img)
-{
-    
-}
-
 void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
 {
     for(int i=0; i<visual_objects.size(); i++) {
@@ -218,37 +163,32 @@ void DataWrapper::debugRefresh()
     
 }
 
-bool DataWrapper::debugPublish(vector<Ball> data) {
-    return false;
-}
-
-bool DataWrapper::debugPublish(vector<Beacon> data) {
-    return false;
-}
-
-bool DataWrapper::debugPublish(vector<Goal> data) {
-    return false;
-}
-
-bool DataWrapper::debugPublish(vector<Obstacle> data) {
-    
-    return false;
-}
-
-bool DataWrapper::debugPublish(const vector<FieldLine>& data)
+void DataWrapper::debugPublish(vector<Ball> data)
 {
-    return false;
+
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
-{
-    #if VISION_WRAPPER_VERBOSITY > 1
-        if(data_points.empty()) {
-            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
-            return false;
-        }
-    #endif
+//bool DataWrapper::debugPublish(vector<Beacon> data) {
+//    return false;
+//}
 
+void DataWrapper::debugPublish(vector<Goal> data)
+{
+
+}
+
+void DataWrapper::debugPublish(vector<Obstacle> data)
+{
+
+}
+
+void DataWrapper::debugPublish(const vector<FieldLine>& data)
+{
+
+}
+
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
+{
     #if VISION_WRAPPER_VERBOSITY > 2
         debug << id << endl;
         debug << data_points << endl;
@@ -256,102 +196,99 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
 
     switch(id) {
     case DBID_H_SCANS:
-        errorlog << "DataWrapper::debugPublish - DBID_H_SCANS printing not implemented" << endl;
-//        BOOST_FOREACH(const PointType& pt, data_points) {
-//            line(img, cv::Point2i(0, pt.y), cv::Point2i(img.cols, pt.y), Scalar(127,127,127), 1);
-//        }
-        return false;
+        debug << "DataWrapper::debugPublish - DBID_H_SCANS printing not implemented" << endl;
+        break;
     case DBID_V_SCANS:
-        errorlog << "DataWrapper::debugPublish - DBID_V_SCANS printing not implemented" << endl;
-//        BOOST_FOREACH(const PointType& pt, data_points) {
-//            line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), Scalar(127,127,127), 1);
-//        }
-        return false;
+        debug << "DataWrapper::debugPublish - DBID_V_SCANS printing not implemented" << endl;
+        break;
     case DBID_MATCHED_SEGMENTS:
-        if(display_callback != NULL)
-            (*display_callback)(data_points, GLDisplay::TransitionSegments);
-        else
-            errorlog << "DataWrapper::debugPublish - null callback pointer" << endl;
-        return false;
+        emit pointsUpdated(data_points, GLDisplay::Transitions);
+        break;
     case DBID_HORIZON:
-        errorlog << "DataWrapper::debugPublish - DBID_HORIZON printing not implemented" << endl;
-        return false;
+        debug << "DataWrapper::debugPublish - DBID_HORIZON printing handled externally to vision" << endl;
+        break;
     case DBID_GREENHORIZON_SCANS:
-        if(display_callback != NULL)
-            (*display_callback)(data_points, GLDisplay::greenHorizonScanPoints);
-        else
-            errorlog << "DataWrapper::debugPublish - null callback pointer" << endl;
+        emit pointsUpdated(data_points, GLDisplay::greenHorizonScanPoints);
         break;
     case DBID_GREENHORIZON_FINAL:
-        if(display_callback != NULL)
-            (*display_callback)(data_points, GLDisplay::greenHorizonPoints);
-        else
-            errorlog << "DataWrapper::debugPublish - null callback pointer" << endl;
+        emit pointsUpdated(data_points, GLDisplay::greenHorizonPoints);
         break;
     case DBID_OBJECT_POINTS:
-        errorlog << "DataWrapper::debugPublish - DBID_OBJECT_POINTS printing not implemented" << endl;
-//        BOOST_FOREACH(const PointType& pt, data_points) {
-//            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(0,0,255), 4);
-//        }
-        return false;
+        debug << "DataWrapper::debugPublish - DBID_OBJECT_POINTS printing not implemented" << endl;
+        break;
     default:
         errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
-        return false;
     }
-
-    return true;
 }
 
 //! Outputs debug data to the appropriate external interface
-bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
+void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
-    vector<PointType> data_points;
-    vector<Scalar> colours;
-    vector<PointType>::const_iterator it;
-    vector<Scalar>::const_iterator c_it;
-
-    getPointsAndColoursFromSegments(region.getSegments(), colours, data_points);
-
-    if(data_points.empty() || colours.empty()) {
-        errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
-        return false;
-    }
-#if VISION_WRAPPER_VERBOSITY > 2
-    debug << id << endl;
-    debug << colours.front()[0] << "," << colours.front()[1] << "," << colours.front()[2] << "," << colours.front()[3] << "\t";
-    debug << data_points << endl;
-#endif
 
     switch(id) {
     case DBID_SEGMENTS:
-        errorlog << "DataWrapper::debugPublish - DBID_SEGMENTS printing not implemented" << endl;
+        emit segmentsUpdated(region.getSegments(), GLDisplay::Segments);
 //        c_it = colours.begin();
 //        for (it = data_points.begin(); it < data_points.end()-1; it+=2) {
 //            //draws a line between each consecutive pair of points of the corresponding colour
 //            line(img, cv::Point2i(it->x, it->y), cv::Point2i((it+1)->x, (it+1)->y), *c_it, 1);
 //            c_it++;
 //        }
-        return false;
+        break;
     case DBID_FILTERED_SEGMENTS:
-        errorlog << "DataWrapper::debugPublish - DBID_FILTERED_SEGMENTS printing not implemented" << endl;
+        emit segmentsUpdated(region.getSegments(), GLDisplay::FilteredSegments);
 //        c_it = colours.begin();
 //        for (it = data_points.begin(); it < data_points.end()-1; it+=2) {
 //            //draws a line between each consecutive pair of points of the corresponding colour
 //            line(img, cv::Point2i(it->x, it->y), cv::Point2i((it+1)->x, (it+1)->y), *c_it, 1);
 //            c_it++;
 //        }
-        return false;
+        break;
     default:
         errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
-        return false;
     }
-
-    return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const NUImage* const img)
+void DataWrapper::debugPublish(DEBUG_ID id, const NUImage* const img)
 {
-    return false;
+
+}
+
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
+{
+    switch(id) {
+    case DBID_GOAL_LINES_START:
+        emit linesUpdated(data, GLDisplay::GoalEdgeLinesStart);
+        break;
+    case DBID_GOAL_LINES_END:
+        emit linesUpdated(data, GLDisplay::GoalEdgeLinesEnd);
+        break;
+    default:
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+    }
+}
+
+void DataWrapper::plot(DEBUG_PLOT_ID id, const vector<Point> &pts, string name)
+{
+    QwtPlotCurve curve(QString(name.c_str()));
+
+    switch(id) {
+    case POINTS_PLOT:
+        curve.setStyle(QwtPlotCurve::NoCurve);
+        break;
+    case LINES_PLOT:
+        curve.setStyle(QwtPlotCurve::Lines);
+        break;
+    }
+
+    QVector<QPointF> qpts;
+    BOOST_FOREACH(const Point& p, pts) {
+        qpts.push_back(QPointF(p.x, p.y));
+    }
+
+    curve.setSamples(qpts);
+
+    emit plotUpdated(&curve, QString(name.c_str()));
 }
 
 bool DataWrapper::updateFrame()

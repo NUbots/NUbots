@@ -43,13 +43,10 @@
 #include "Tools/Math/LSFittedLine.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "localisationwidget.h"
-//#include "VisionOld//ObjectCandidate.h"
-//#include "VisionOld//CornerPoint.h"
+#include "Vision/VisionTypes/coloursegment.h"
 
 class NUImage;
 class ClassifiedImage;
-class Line;
-class LinePoint;
 class Horizon;
 class NUSensorsData;
 class KF;
@@ -82,7 +79,7 @@ public:
           @brief Accepts a new raw image and maps it to the default display layer.
           @param newImage The new raw image.
           */
-        void setRawImage(const NUImage* newImage){writeNUImageToDisplay(newImage, GLDisplay::rawImage);};
+        void setRawImage(const NUImage* newImage){writeNUImageToDisplay(newImage, GLDisplay::rawImage);}
         /*!
           @brief Accepts a new raw image and maps it to display instructions.
           @param newImage The new raw image.
@@ -106,8 +103,14 @@ public:
           @param newpoints The new points.
           @param displayId The id of the display layer to write to.
           */
-        void writePointsToDisplay(std::vector< Vector2<int> > newpoints, GLDisplay::display displayId);
+        void writePointsToDisplay(std::vector<Point> newpoints, GLDisplay::display displayId);
 
+        /*!
+          @brief Accepts new colour segment map and maps it to display instructions.
+          @param newsegments The new segments.
+          @param displayId The id of the display layer to write to.
+          */
+        void writeSegmentsToDisplay(std::vector<std::vector<ColourSegment> > updatedSegments, GLDisplay::display displayId);
         /*!
           @brief Accepts new transition segment vector and maps it to display instructions.
           @param newsegments The new tansition segments.
@@ -159,14 +162,14 @@ public:
           @param fieldLines The new LSFittedLines to display.
           @param displayId The id of the display layer to write to.
           */
-        void writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId);
+        void writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDisplay::display displayId);
 
         /*!
           @brief Accepts new linepoint vector and maps it to display instructions.
           @param linepoints The new LinePoints to display.
           @param displayId The id of the display layer to write to.
           */
-        void writeLinesPointsToDisplay(std::vector< LinePoint > linepoints, GLDisplay::display displayId);
+        void writeLinesPointsToDisplay(std::vector< Point > linepoints, GLDisplay::display displayId);
 
         /*!
           @brief Accepts new Corner vector and maps it to display instructions.
@@ -205,23 +208,23 @@ public:
             @param id The id of the display layer.
             @return True if a valid instruction is available. False if no valid instruction exists.
         */
-        bool hasDisplayCommand(int id) const {return displayStored[id];};
+        bool hasDisplayCommand(int id) const {return displayStored[id];}
         /*!
             @brief Retrieve the display instruction for a display layer.
             @param id The id of the display layer.
             @return The openGL drawing instruction for the specified layer.
         */
-        GLuint getDisplayCommand(int id) const {return displays[id];};
+        GLuint getDisplayCommand(int id) const {return displays[id];}
         /*!
             @brief Retrieve width of the current displays produced
             @return The width of the images produced in pixels.
         */
-        int getWidth() const {return width;};
+        int getWidth() const {return width;}
         /*!
             @brief Retrieve height of the current displays produced
             @return The height of the images produced in pixels.
         */
-        int getHeight() const {return height;};
+        int getHeight() const {return height;}
     private:
         int width;                                  //!< Width of the current image.
         int height;                                 //!< Height of the current image.

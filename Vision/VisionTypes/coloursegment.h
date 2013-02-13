@@ -63,7 +63,10 @@ public:
     //! output stream operator for a vector of segments.
     friend ostream& operator<< (ostream& output, const vector<ColourSegment>& c);
     
-    //ColourSegment& operator= (const ColourSegment& rhs);
+    //! only used for ransac - segments cannot overlap and thus cannot have equal centres
+    friend bool operator== (const ColourSegment& lhs, const ColourSegment& rhs) {
+        return lhs.m_centre == rhs.m_centre;
+    }
     
 
 private:

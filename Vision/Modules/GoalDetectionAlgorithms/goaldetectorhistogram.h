@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "Vision/Modules/goaldetector.h"
-#include "Vision/VisionTypes/histogram1D.h"
+#include "Vision/VisionTypes/histogram1d.h"
 
 using namespace std;
 

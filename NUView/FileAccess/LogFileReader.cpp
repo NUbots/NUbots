@@ -50,8 +50,8 @@ int LogFileReader::openFile(QString fileName)
         {
             connect(currentFileReader,SIGNAL(rawImageChanged(const NUImage*)), this, SIGNAL(rawImageChanged(const NUImage*)));
             connect(currentFileReader,SIGNAL(cameraChanged(int)), this, SIGNAL(cameraChanged(int)));
-            connect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
-                    this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
+            //connect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
+            //        this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
             connect(currentFileReader,SIGNAL(sensorDataChanged( NUSensorsData*)), this, SIGNAL(sensorDataChanged( NUSensorsData*)));
             connect(currentFileReader,SIGNAL(LocalisationDataChanged(const Localisation*)), this, SIGNAL(LocalisationDataChanged(const Localisation*)));
             connect(currentFileReader,SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)), this, SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)));
@@ -78,8 +78,8 @@ bool LogFileReader::closeFile()
     {
         disconnect(currentFileReader,SIGNAL(rawImageChanged(const NUImage*)), this, SIGNAL(rawImageChanged(const NUImage*)));
         disconnect(currentFileReader,SIGNAL(cameraChanged(int)), this, SIGNAL(cameraChanged(int)));
-        disconnect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
-                this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
+        //disconnect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
+        //        this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
         disconnect(currentFileReader,SIGNAL(sensorDataChanged( NUSensorsData*)), this, SIGNAL(sensorDataChanged( NUSensorsData*)));
         disconnect(currentFileReader,SIGNAL(LocalisationDataChanged(const Localisation*)), this, SIGNAL(LocalisationDataChanged(const Localisation*)));
         disconnect(currentFileReader,SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)), this, SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)));

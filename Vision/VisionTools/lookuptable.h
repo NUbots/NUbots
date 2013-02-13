@@ -11,7 +11,6 @@
 #define LOOKUPTABLE_H
 
 #include <string>
-#include <opencv2/core/core.hpp>
 #include "Tools/FileFormats/LUTTools.h"
 #include "Vision/VisionTools/classificationcolours.h"
 #include "Infrastructure/NUImage/NUImage.h"
@@ -55,12 +54,12 @@ public:
         }
     }
 
-    /*!
-      @brief classifies and entire image into an opencv Mat
-      @param src the image to classify.
-      @param dest the resulting classified image.
-      */
-    void classifyImage(const NUImage& src, cv::Mat& dest) const;
+//    /*!
+//      @brief classifies and entire image into an opencv Mat
+//      @param src the image to classify.
+//      @param dest the resulting classified image.
+//      */
+//    void classifyImage(const NUImage& src, cv::Mat& dest) const;
 
     void zero();
 

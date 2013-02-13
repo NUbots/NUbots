@@ -59,7 +59,6 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     // If there is a texture already stored, delete it.
     if(textureStored[displayId])
     {
-
         glDeleteTextures(1,&textures[displayId]);
         textureStored[displayId] = false;
     }
@@ -136,8 +135,8 @@ void OpenglManager::writeClassImageToDisplay(ClassifiedImage* newImage, GLDispla
         {
             alpha = 255;
             tempIndex = newImage->image[y][x];
-            if(tempIndex == ClassIndex::unclassified) alpha = 0;
-            ClassIndex::getColourIndexAsRGB(tempIndex, r, g, b);
+            if(tempIndex == Vision::unclassified) alpha = 0;
+            Vision::getColourAsRGB(Vision::getColourFromIndex(tempIndex), r, g, b);
             imageLine[x] = qRgba(r,g,b,alpha);
         }
     }
@@ -173,7 +172,7 @@ void OpenglManager::writeLineToDisplay(Line* newLine, GLDisplay::display display
     return;
 }
 
-void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, GLDisplay::display displayId)
+void OpenglManager::writePointsToDisplay(std::vector<Point> newpoints, GLDisplay::display displayId)
 {
     makeCurrent();
     // If there is an old list stored, delete it first.
@@ -188,6 +187,47 @@ void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, 
     for (int pointNum = 0; pointNum < (int)newpoints.size(); pointNum++)
     {
         drawHollowCircle(newpoints[pointNum].x+0.5, newpoints[pointNum].y+0.5, 0.5, 50);
+    }
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
+
+    displayStored[displayId] = true;
+
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
+}
+
+void OpenglManager::writeSegmentsToDisplay(vector<vector<ColourSegment> > updatedSegments, GLDisplay::display displayId)
+{
+    makeCurrent();
+    // If there is an old list stored, delete it first.
+    if(displayStored[displayId])
+    {
+        glDeleteLists(displays[displayId],1);
+    }
+
+    displays[displayId] = glGenLists(1);
+    glNewList(displays[displayId],GL_COMPILE);    // START OF LIST
+    glDisable(GL_TEXTURE_2D);
+
+    glLineWidth(1.0);       // Line width
+    for(unsigned int i = 0 ; i < updatedSegments.size(); i++)
+    {
+        vector<ColourSegment>& line = updatedSegments[i];
+        for(unsigned int k = 0 ; k < line.size(); k++) {
+            ColourSegment& segment = line[i];
+            const Point& s = segment.getStart();
+            const Point& e = segment.getEnd();
+            unsigned char r, g, b;
+
+
+            Vision::getColourAsRGB(segment.getColour(), r, g, b);
+            glColor3ub(r,g,b);
+            glBegin(GL_LINES);                              // Start Lines
+            glVertex2i( int(s.x), int(s.y) );                 // Starting point
+            glVertex2i( int(e.x), int(e.y) );               // Ending point
+            glEnd();  // End Lines
+        }
     }
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST
@@ -217,7 +257,7 @@ void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, 
 //    {
 //        Vector2<int> start = i->getStartPoint();
 //        Vector2<int> end =i->getEndPoint();
-//        ClassIndex::getColourIndexAsRGB(i->getColour(),r,g,b);
+//        Vision::getColourIndexAsRGB(i->getColour(),r,g,b);
 //        glColor3ub(r,g,b);
 
 //        glBegin(GL_LINES);                              // Start Lines
@@ -250,7 +290,7 @@ void OpenglManager::writePointsToDisplay(std::vector< Vector2<int> > newpoints, 
 //    unsigned char r,g,b;
 //    for(; i != candidates.end(); i++)
 //    {
-//        ClassIndex::getColourIndexAsRGB(i->getColour(),r,g,b);
+//        Vision::getColourIndexAsRGB(i->getColour(),r,g,b);
 //        Vector2<int> topLeft = i->getTopLeft();
 //        Vector2<int> bottomRight = i->getBottomRight();
 //        glColor3ub(r,g,b);
@@ -406,7 +446,7 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
     }
     glEnd();
 }
-void OpenglManager::writeLinesPointsToDisplay(std::vector< LinePoint > linepoints, GLDisplay::display displayId)
+void OpenglManager::writeLinesPointsToDisplay(vector<Point> linepoints, GLDisplay::display displayId)
 {
     makeCurrent();
     //glDisable(GL_TEXTURE_2D);
@@ -433,7 +473,7 @@ void OpenglManager::writeLinesPointsToDisplay(std::vector< LinePoint > linepoint
     //emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
-void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
+void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDisplay::display displayId)
 {
     makeCurrent();
     // If there is an old list stored, delete it first.
@@ -449,22 +489,35 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
     glLineWidth(2.0);       // Line width
     
 
-    for(unsigned int i = 0 ; i < fieldLines.size(); i++)
+    for(unsigned int i = 0 ; i < lines.size(); i++)
     {
-
-        if(fieldLines[i].valid == true)
+        const LSFittedLine& line = lines[i];
+        Vector2<Point> endpts = line.getEndPoints();
+        endpts[0] = line.projectOnto(endpts[0]);
+        endpts[1] = line.projectOnto(endpts[1]);
+        if(line.valid == true)
         {
             glLineWidth(3.0);       // Line width
-            glColor3ub(255,0,0);
+
+            switch(displayId) {
+            case GLDisplay::GoalEdgeLinesStart:
+                glColor3ub(0,255,255);  //cyan
+                break;
+            case GLDisplay::GoalEdgeLinesEnd:
+                glColor3ub(255,0,255);    //magenta
+                break;
+            default:
+                glColor3ub(255,0,0);    //red
+            }
+
+
+
             glBegin(GL_LINES);                              // Start Lines
-            glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].findYFromX(fieldLines[i].leftPoint.x)));                 // Starting point
-            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].findYFromX(fieldLines[i].rightPoint.x)));               // Ending point
+            glVertex2i( int(endpts[0].x), int(endpts[0].y) );                 // Starting point
+            glVertex2i( int(endpts[1].x), int(endpts[1].y) );               // Ending point
             glEnd();  // End Lines
 
-            /*qDebug()    << int(fieldLines[i].leftPoint.x) << "," << int(fieldLines[i].leftPoint.y) <<"\t"
-                        << int(fieldLines[i].rightPoint.x)<< "," << int(fieldLines[i].rightPoint.y);*/
-
-            std::vector<LinePoint> linePoints = fieldLines[i].getPoints();
+            const std::vector<Point>& linePoints = line.getPoints();
             glBegin(GL_TRIANGLES);
             for (unsigned int j =0; j < linePoints.size(); j++)
             {
@@ -479,8 +532,8 @@ void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLi
             glLineWidth(2.0);       // Line width
             glColor3ub(100,0,50);
             glBegin(GL_LINES);                              // Start Lines
-            glVertex2i( int(fieldLines[i].leftPoint.x), int(fieldLines[i].findYFromX(fieldLines[i].leftPoint.x)));                 // Starting point
-            glVertex2i( int(fieldLines[i].rightPoint.x), int(fieldLines[i].findYFromX(fieldLines[i].rightPoint.x)));               // Ending point
+            glVertex2i( int(endpts[0].x), int(endpts[0].y) );                 // Starting point
+            glVertex2i( int(endpts[1].x), int(endpts[1].y) );               // Ending point
             glEnd();  // End Lines
 
         }
@@ -562,18 +615,18 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
         if(     (*statFOit).getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST  ||
                 (*statFOit).getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST )
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::blue,r,g,b);
+            Vision::getColourAsRGB(Vision::blue,r,g,b);
             glColor3ub(r,g,b);
         }
         else if(     (*statFOit).getID() == FieldObjects::FO_YELLOW_LEFT_GOALPOST ||
                      (*statFOit).getID() == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::yellow,r,g,b);
+            Vision::getColourAsRGB(Vision::yellow,r,g,b);
             glColor3ub(r,g,b);
         }
         else
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::white,r,g,b);
+            Vision::getColourAsRGB(Vision::white,r,g,b);
             glColor3ub(r,g,b);
         }
 
@@ -615,7 +668,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
         //CHECK IF BALL: if so Draw a circle
         if(     (*mobileFOit).getID() == FieldObjects::FO_BALL)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::orange,r,g,b);
+            Vision::getColourAsRGB(Vision::orange,r,g,b);
             glColor3ub(r,g,b);
 
             int cx = (*mobileFOit).ScreenX();
@@ -634,7 +687,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
                 (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_3  ||
                 (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_4  )
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::shadow_blue,r,g,b);
+            Vision::getColourAsRGB(Vision::shadow_blue,r,g,b);
             glColor3ub(r,g,b);
         }
 
@@ -643,7 +696,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
                      (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_3 ||
                      (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_4)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::pink,r,g,b);
+            Vision::getColourAsRGB(Vision::pink,r,g,b);
             glColor3ub(r,g,b);
         }
 
@@ -680,28 +733,28 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
         unsigned char r,g,b;
         if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::shadow_blue,r,g,b);
+            Vision::getColourAsRGB(Vision::shadow_blue,r,g,b);
             glColor3ub(r,g,b);
         }
 
         else if(     (*ambigFOit).getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::pink,r,g,b);
+            Vision::getColourAsRGB(Vision::pink,r,g,b);
             glColor3ub(r,g,b);
         }
         else if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::blue,r,g,b);
+            Vision::getColourAsRGB(Vision::blue,r,g,b);
             glColor3ub(r,g,b);
         }
         else if(     (*ambigFOit).getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::yellow,r,g,b);
+            Vision::getColourAsRGB(Vision::yellow,r,g,b);
             glColor3ub(r,g,b);
         }
         else
         {
-            ClassIndex::getColourIndexAsRGB(ClassIndex::white,r,g,b);
+            Vision::getColourAsRGB(Vision::white,r,g,b);
             glColor3ub(r,g,b);
 
         }

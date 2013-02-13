@@ -21,8 +21,8 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-splitandmerge.cpp
-ransac.cpp
+linedetectorsam.cpp
+linedetectorransac.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

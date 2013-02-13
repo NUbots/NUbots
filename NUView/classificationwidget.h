@@ -59,7 +59,7 @@ public:
       Returns the currently selected colour.
       @return The selected colour.
       */
-    ClassIndex::Colour getColourLabel();
+    Vision::Colour getColourLabel();
     /*!
      Conver a colour space to a YCrCb Pixel.
      @param chan0 First channel of the colour.
@@ -151,9 +151,9 @@ private:
     QLabel* allValuesLabel;
 
     //Stats:
-    QLabel* ColourLabel[ClassIndex::num_colours];
-    QLabel* PercentageSelectedLabel[ClassIndex::num_colours];
-    QLabel* PixelSelectedLabelOverlapped[ClassIndex::num_colours];
+    QLabel* ColourLabel[Vision::num_colours];
+    QLabel* PercentageSelectedLabel[Vision::num_colours];
+    QLabel* PixelSelectedLabelOverlapped[Vision::num_colours];
 
     // selection Controls
     QComboBox* coloursComboBox;

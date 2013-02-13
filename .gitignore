@@ -55,7 +55,7 @@ NUView-build*/*
 /NUView/NUView.pro.user
 
 /Vision-build-desktop*/*
-*.pro.user
+*.pro.user*
 /BWalkMaker-build*/*
 /BWalkMaker/BWalkMaker.pro.user
 

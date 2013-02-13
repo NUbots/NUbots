@@ -206,7 +206,7 @@ int VisionCalibrationProvider::classifyImage()
             NUImage* image = Blackboard->Image;
             Pixel temp = (*image)(x,y);
             unsigned char classifiedPixel = currentLookupTable[LUTTools::getLUTIndex(temp)];
-            if(classifiedPixel  == ClassIndex::unclassified || temp.y < 50)
+            if(classifiedPixel  == Vision::unclassified || temp.y < 50)
             {
                 unclassifiedCounter++;
             }

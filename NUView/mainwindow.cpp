@@ -21,6 +21,10 @@
 #include <typeinfo>
 #include <QFileInfo>
 
+//for plotting
+#include "plotdisplay.h"
+#include <qwt/qwt_plot_curve.h>
+
 #include "NUPlatform/NUPlatform.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
@@ -282,6 +286,11 @@ void MainWindow::createActions()
     newVisionDisplayAction->setStatusTip(tr("Create a new vision display window."));
     connect(newVisionDisplayAction, SIGNAL(triggered()), this, SLOT(createGLDisplay()));
 
+    // New plot display window
+    newPlotDisplayAction = new QAction(tr("&New display"), this);
+    newPlotDisplayAction->setStatusTip(tr("Create a new plot display window."));
+    connect(newPlotDisplayAction, SIGNAL(triggered()), this, SLOT(createPlotDisplay()));
+
     // New LocWM display window
     newLocWMDisplayAction = new QAction(tr("&New display"), this);
     newLocWMDisplayAction->setStatusTip(tr("Create a new Localisation and World Model display window."));
@@ -340,6 +349,9 @@ void MainWindow::createMenus()
 
     QMenu* visionWindowMenu = windowMenu->addMenu(tr("&Vision"));
     visionWindowMenu->addAction(newVisionDisplayAction);
+
+    QMenu* plotWindowMenu = windowMenu->addMenu(tr("&Plot"));
+    plotWindowMenu->addAction(newPlotDisplayAction);
 
     QMenu* localisationWindowMenu = windowMenu->addMenu(tr("&Localisation"));
     localisationWindowMenu->addAction(newLocWMDisplayAction);
@@ -413,7 +425,7 @@ void MainWindow::createConnections()
 
     connect(LogReader,SIGNAL(cameraChanged(int)),virtualRobot, SLOT(setCamera(int)));
     connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)),virtualRobot, SLOT(setRawImage(const NUImage*)));
-    connect(LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
+    //connect(LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),virtualRobot, SLOT(processVisionFrame()));
 
     connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)), this, SLOT(updateSelection()));
@@ -435,13 +447,14 @@ void MainWindow::createConnections()
     connect(virtualRobot,SIGNAL(imageDisplayChanged(const NUImage*,GLDisplay::display)),&glManager, SLOT(writeNUImageToDisplay(const NUImage*,GLDisplay::display)));
     connect(virtualRobot,SIGNAL(lineDisplayChanged(Line*, GLDisplay::display)),&glManager, SLOT(writeLineToDisplay(Line*, GLDisplay::display)));
     connect(virtualRobot,SIGNAL(classifiedDisplayChanged(ClassifiedImage*, GLDisplay::display)),&glManager, SLOT(writeClassImageToDisplay(ClassifiedImage*, GLDisplay::display)));
-    connect(virtualRobot,SIGNAL(pointsDisplayChanged(std::vector< Vector2<int> >, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector< Vector2<int> >, GLDisplay::display)));
+    connect(virtualRobot,SIGNAL(pointsDisplayChanged(std::vector<Point>, GLDisplay::display)),&glManager, SLOT(writePointsToDisplay(std::vector<Point>, GLDisplay::display)));
+    connect(virtualRobot, SIGNAL(segmentsDisplayChanged(std::vector<std::vector<ColourSegment> >,GLDisplay::display)), &glManager, SLOT(writeSegmentsToDisplay(std::vector<std::vector<ColourSegment> >,GLDisplay::display)));
     //connect(virtualRobot,SIGNAL(transitionSegmentsDisplayChanged(std::vector< TransitionSegment >, GLDisplay::display)),&glManager, SLOT(writeTransitionSegmentsToDisplay(std::vector< TransitionSegment >, GLDisplay::display)));
     //connect(virtualRobot,SIGNAL(robotCandidatesDisplayChanged(std::vector< RobotCandidate >, GLDisplay::display)),&glManager, SLOT(writeRobotCandidatesToDisplay(std::vector< RobotCandidate >, GLDisplay::display)));
-    connect(virtualRobot,SIGNAL(lineDetectionDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeFieldLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
+    connect(virtualRobot,SIGNAL(fittedLineDisplayChanged(std::vector< LSFittedLine >, GLDisplay::display)),&glManager, SLOT(writeLinesToDisplay(std::vector< LSFittedLine >, GLDisplay::display)));
     //connect(virtualRobot,SIGNAL(candidatesDisplayChanged(std::vector< ObjectCandidate >, GLDisplay::display)),&glManager, SLOT(writeCandidatesToDisplay(std::vector< ObjectCandidate >, GLDisplay::display)));
     connect(virtualRobot,SIGNAL(fieldObjectsDisplayChanged(FieldObjects*,GLDisplay::display)),&glManager,SLOT(writeFieldObjectsToDisplay(FieldObjects*,GLDisplay::display)));
-    connect(virtualRobot,SIGNAL(linePointsDisplayChanged(std::vector< LinePoint >,GLDisplay::display)),&glManager,SLOT(writeLinesPointsToDisplay(std::vector< LinePoint >,GLDisplay::display)));
+    connect(virtualRobot,SIGNAL(linePointsDisplayChanged(std::vector< Point >,GLDisplay::display)),&glManager,SLOT(writeLinesPointsToDisplay(std::vector< Point >,GLDisplay::display)));
     //connect(virtualRobot,SIGNAL(cornerPointsDisplayChanged(std::vector< CornerPoint >,GLDisplay::display)),&glManager,SLOT(writeCornersToDisplay(std::vector< CornerPoint >,GLDisplay::display)));
     connect(virtualRobot,SIGNAL(edgeFilterChanged(QImage, GLDisplay::display)),&glManager,SLOT(stub(QImage, GLDisplay::display)));
     connect(virtualRobot,SIGNAL(fftChanged(QImage, GLDisplay::display)),&glManager,SLOT(stub(QImage, GLDisplay::display)));
@@ -462,7 +475,7 @@ void MainWindow::createConnections()
     // Connect the virtual robot to the localisation widget and the localisation widget to the opengl manager
     //connect(virtualRobot,SIGNAL(imageDisplayChanged(const double*,bool,const double*)),localisation, SLOT(frameChange(const double*,bool,const double*)));
     connect(LogReader,SIGNAL(cameraChanged(int)),localisation, SLOT(setCamera(int)));
-    connect(LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),localisation, SLOT(setSensorData(const float*, const float*, const float*)));
+    //connect(LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),localisation, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(localisation,SIGNAL(updateLocalisationLine(WMLine*,int,GLDisplay::display)),&glManager,SLOT(writeWMLineToDisplay(WMLine*,int,GLDisplay::display)));
     connect(localisation,SIGNAL(updateLocalisationBall(float, float, float,GLDisplay::display)),&glManager,SLOT(writeWMBallToDisplay(float, float, float,GLDisplay::display)));
     connect(localisation,SIGNAL(removeLocalisationLine(GLDisplay::display)),&glManager,SLOT(clearDisplay(GLDisplay::display)));
@@ -506,7 +519,7 @@ void MainWindow::openLog()
     }
     QString fileName = QFileDialog::getOpenFileName(this,
                             tr("Open Replay File"), intial_directory,
-                            tr("All NUbot Image Files(*.nul;*.nif;*.nurf;*.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
+                            tr("All NUbot Image Files(*.nul *.nif *.nurf *.strm);;NUbot Log Files (*.nul);;NUbot Image Files (*.nif);;NUbot Replay Files (*.nurf);;Stream File(*.strm);;All Files(*.*)"));
     if(!fileName.isEmpty())
     {
         QFileInfo file_info(fileName);
@@ -791,6 +804,18 @@ QMdiSubWindow* MainWindow::createGLDisplay()
     {
         LogReader->setFrame(LogReader->currentFrame());
     }    
+    return window;
+}
+
+QMdiSubWindow* MainWindow::createPlotDisplay()
+{
+    PlotDisplay* temp = new PlotDisplay(this);
+    //connect signals
+    connect(virtualRobot, SIGNAL(curveChanged(const QwtPlotCurve*,QString)), temp, SLOT(updateCurve(const QwtPlotCurve*,QString)));
+    QMdiSubWindow* window = mdiArea->addSubWindow(temp);
+    temp->resize(320, 240);
+    temp->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
+    temp->show();
     return window;
 }
 

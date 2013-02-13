@@ -9,8 +9,6 @@ win32{
     !win32{
         INCLUDEPATH += /usr/include/boost/
         INCLUDEPATH += /usr/include/qwt
-
-        LIBS += -lopencv_core -lopencv_imgproc
     }
 }
 
@@ -141,14 +139,17 @@ HEADERS += \
     Modules/cornerdetector.h \
     VisionTypes/VisionFieldObjects/cornerpoint.h \
     VisionTypes/Interfaces/optimisable.h \
-    VisionTypes/Interfaces/renderable.h \
     VisionTools/transformer.h \
     VisionTypes/Interfaces/ransacmodel.h \
-    VisionTypes/visionline.h \
-    VisionWrapper/mainwindow.h
+    VisionWrapper/mainwindow.h \
+    Modules/centrecircledetector.h \
+    ../Tools/Math/Circle.h \
+    VisionTypes/RANSACTypes/*.h \
+    VisionTypes/RANSACTypes/ransacgoal.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
+    ../Vision/VisionTypes/RANSACTypes/*.cpp \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
     VisionTools/lookuptable.cpp \
     ../Vision/Modules/*.cpp \
@@ -163,7 +164,8 @@ SOURCES += \
     VisionTools/transformer.cpp \
     VisionTools/classificationcolours.cpp \
     GenericAlgorithms/ransac.template \
-    VisionWrapper/mainwindow.cpp
+    VisionWrapper/mainwindow.cpp \
+    ../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup

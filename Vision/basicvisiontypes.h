@@ -44,24 +44,26 @@ namespace Vision {
     };
 
     enum DEBUG_ID {
-        DBID_IMAGE              = 0,
-        DBID_CLASSED_IMAGE      = 1,
-        DBID_H_SCANS            = 2,
-        DBID_V_SCANS            = 3,
-        DBID_SEGMENTS           = 4,
-        DBID_MATCHED_SEGMENTS   = 5,
-        DBID_HORIZON            = 6,
-        DBID_GREENHORIZON_SCANS = 7,
-        DBID_GREENHORIZON_FINAL = 8,
-        DBID_OBJECT_POINTS      = 9,
-        DBID_FILTERED_SEGMENTS  = 10,
-        DBID_GOALS              = 11,
-        DBID_BALLS              = 12,
-        DBID_OBSTACLES          = 13,
-        DBID_LINES              = 14,
-        DBID_GOAL_LINES_START   = 15,
-        DBID_GOAL_LINES_END     = 16,
-        DBID_INVALID           = 17
+        DBID_IMAGE                  = 0,
+        DBID_CLASSED_IMAGE          = 1,
+        DBID_H_SCANS                = 2,
+        DBID_V_SCANS                = 3,
+        DBID_SEGMENTS               = 4,
+        DBID_MATCHED_SEGMENTS       = 5,
+        DBID_HORIZON                = 6,
+        DBID_GREENHORIZON_SCANS     = 7,
+        DBID_GREENHORIZON_THROWN    = 8,
+        DBID_GREENHORIZON_FINAL     = 9,
+        DBID_OBJECT_POINTS          = 10,
+        DBID_FILTERED_SEGMENTS      = 11,
+        DBID_GOALS                  = 12,
+        DBID_BALLS                  = 13,
+        DBID_OBSTACLES              = 14,
+        DBID_LINES                  = 15,
+        DBID_GOAL_LINES_START       = 16,
+        DBID_GOAL_LINES_CENTRE      = 17,
+        DBID_GOAL_LINES_END         = 18,
+        DBID_INVALID                = 19
 //        DBID_BEACONS            = 12,
 //        DBID_BALLS              = 13,
 //        DBID_OBSTACLES          = 14,
@@ -71,13 +73,16 @@ namespace Vision {
 //        NUMBER_OF_IDS           = 18
     };
 
+    enum DEBUG_PLOT_ID {
+        POINTS_PLOT,
+        LINES_PLOT
+    };
+
     std::string getDebugIDName(DEBUG_ID id);
 
     DEBUG_ID getDebugIDFromInt(int id);
 
     int getIntFromeDebugID(DEBUG_ID id);
-
-    bool operator <(DEBUG_ID idl, DEBUG_ID idr);
 
     //! @brief returns whether the given id maps to a goal
     inline bool isGoal(VFO_ID id) { return id >= GOAL_L && id <= GOAL_U;}

@@ -1,11 +1,11 @@
-#include "visionline.h"
+#include "ransacline.h"
 
-VisionLine::VisionLine()
+RANSACLine::RANSACLine()
 {
 
 }
 
-bool VisionLine::regenerate(const vector<Point>& pts)
+bool RANSACLine::regenerate(const vector<Point>& pts)
 {
     if(pts.size() == 2) {
         setLineFromPoints(pts.at(0), pts.at(1));
@@ -16,7 +16,7 @@ bool VisionLine::regenerate(const vector<Point>& pts)
     }
 }
 
-double VisionLine::calculateError(Point p) const
+double RANSACLine::calculateError(Point p) const
 {
     return getLinePointDistance(p);
 }

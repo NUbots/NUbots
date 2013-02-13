@@ -71,17 +71,3 @@ ostream& operator<< (ostream& output, const vector<ColourSegment>& c)
         output << c[i];
     return output;
 }
-
-///*! @brief Assignment operator for a ColourSegment.
-// */
-//ColourSegment& ColourSegment::operator= (const ColourSegment& rhs)
-//{    
-//    // Check for self-assignment!
-//    if (this != &rhs) {
-//        m_colour = rhs.m_colour;
-//        m_start = this->m_start;
-//        m_end = this->m_end;
-//        m_length_pixels = this->m_length_pixels;
-//    }
-//    return *this;
-//}

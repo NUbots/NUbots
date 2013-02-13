@@ -1,6 +1,6 @@
 #include "transformer.h"
 #include <boost/foreach.hpp>
-#include "visionconstants.h"
+#include "Vision/visionconstants.h"
 #include "Tools/Math/General.h"
 #include "Kinematics/Kinematics.h"
 
@@ -111,8 +111,8 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
 #endif
     double theta,
            distance,
-           //cos_theta;
-            tan_theta;
+           cos_theta;
+          //tan_theta;
 
     //resultant angle inclusive of camera pitch, pixel elevation and angle correction factor
     theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
@@ -126,18 +126,28 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
 //        distance = 0;
 //    else
 //        distance = camera_height / cos_theta / cos(bearing);
-    tan_theta = tan(theta);
-    if(tan_theta == 0) {
+//    tan_theta = tan(theta);
+//    if(tan_theta == 0) {
+//        distance = 0;
+//    }
+//    else {
+//        distance = camera_height / tan_theta / cos(bearing);
+//        //distance = camera_height * tan_theta / cos(bearing);
+//        //distance = camera_height / tan_theta;
+//    }
+
+    cos_theta = cos(theta);
+    if(cos_theta == 0) {
         distance = 0;
     }
     else {
-        distance = camera_height / tan_theta / cos(bearing);
+        distance = camera_height / cos_theta / cos(bearing);
         //distance = camera_height * tan_theta / cos(bearing);
         //distance = camera_height / tan_theta;
     }
 
 //#if VISION_BLACKBOARD_VERBOSITY > 1
-    debug << "\ttheta: " << theta << " distance: " << distance << endl;
+    cout << "\ttheta: " << theta << " distance: " << distance << endl;
 //#endif
 
     return distance;
@@ -183,43 +193,19 @@ Point Transformer::screenToGroundCartesian(Point pt) const
 {
     Vector2<double> cam_angles = screenToRadial2D(pt);
 
-    //double r = distanceToPoint(cam_angles.x, cam_angles.y);
+    double r = distanceToPoint(cam_angles.x, cam_angles.y);
 
     //return Point(r*sin(cam_angles.x), r*cos(cam_angles.x));
     Matrix ctgtransform = Matrix4x4fromVector(m_ctg_vector);
 
-    Vector3<float> spherical = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
+    //Vector3<float> spherical_foot_relative = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
+    Vector3<float> spherical_foot_relative = Kinematics::TransformPosition(ctgtransform, Vector3<float>(r, cam_angles.x, cam_angles.y));
 
-    return Point(spherical.x, spherical.y);
+    Vector3<float> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
 
-    //Vector3<float> t = Kinematics::TransformPosition(ctgtransform,spherical);
+    cout << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
 
-    //return
-
-//    return Point(t.x*cos(t.y)*cos(t.z),
-//                 t.x*sin(t.y)*cos(t.z));
-
-//    double theta = mathGeneral::PI*0.5 - camera_pitch + cam_angles.y + VisionConstants::D2P_ANGLE_CORRECTION;
-
-//    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
-//        theta -= body_pitch;
-
-//    //double bearingcos = cos(sphericalCoordinates[1]);
-//    //double bearingsin = sin(sphericalCoordinates[1]);
-//    //double elevationcos = cos(sphericalCoordinates[2]);
-//    //double elevationsin = sin(sphericalCoordinates[2]);
-
-////    std::vector<float> result(3,0.0f);
-////    result[0] = distance * bearingcos * elevationcos;
-////    result[1] = distance * bearingsin * elevationcos;
-////    result[2] = distance * elevationsin;
-//    //return result;
-
-//    return Point(r*cos(cam_angles.x)*sin(theta),
-//                 r*cos(theta)*sin(cam_angles.x));
-//    return Point(r*cos(cam_angles.x)*cos(theta),
-//                 r*sin(cam_angles.x)*cos(theta));
-
+    return Point(cartesian_foot_relative.x, cartesian_foot_relative.y);
 }
 
 vector<Point> Transformer::screenToGroundCartesian(const vector<Point>& pts) const

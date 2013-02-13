@@ -28,11 +28,13 @@ colourtransitionrule.cpp
 objectcandidate.cpp
 segmentedregion.cpp
 quad.cpp
+histogram1d.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
 VisionFieldObjects
+RANSACTypes
 )
 ####################################################################################
 

@@ -29,8 +29,3 @@ double CornerPoint::findError(const Vector2<double>& measured) const
 {
     return (m_location_pixels - measured).abs();
 }
-
-void CornerPoint::render(cv::Mat& mat) const
-{
-    cv::circle(mat, cv::Point(m_location_pixels.x, m_location_pixels.y), 3, cv::Scalar(255,255,0));
-}
