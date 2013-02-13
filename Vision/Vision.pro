@@ -18,10 +18,10 @@ DEFINES += QT_NO_DEBUG_STREAM
 
 INCLUDEPATH += ../
 
-win {
+win32 {
     PLATFORM = win
 }
-!win {
+!win32 {
     PLATFORM = pc
 }
 
@@ -73,19 +73,19 @@ contains(PLATFORM, "pc") {
 
 contains(PLATFORM, "win") {
      message("Compiling for Windows")
-    DEFINES += TARGET_IS_PC
+#    DEFINES += TARGET_IS_PC
 
     INCLUDEPATH += ../Vision/Debug/
 
     HEADERS += \
-        VisionWrapper/datawrapperpc.h \
+        VisionWrapper/datawrapperqt.h \
         VisionWrapper/visioncontrolwrapperpc.h \
         ../Vision/Debug/debugverbosityvision.h \
         ../Vision/Debug/debug.h \
         ../Vision/Debug/nubotdataconfig.h \
 
     SOURCES += \
-        VisionWrapper/datawrapperpc.cpp \
+        VisionWrapper/datawrapperqt.cpp \
         VisionWrapper/visioncontrolwrapperpc.cpp\
 
     HEADERS += \
@@ -130,7 +130,7 @@ HEADERS += \
     basicvisiontypes.h \
     valgorithm.h \
     visionblackboard.h \
-    visioncontroller.h \ 
+    visioncontroller.h \
     visionconstants.h \
     #Threads/SaveImagesThread.h
     GenericAlgorithms/ransac.h \
