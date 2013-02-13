@@ -1,0 +1,118 @@
+//THOSE WISHING TO CHANGE THE METHOD OF MERGING LINES NEED ONLY CHANGE THIS
+    //FUNCTION
+    //returns true if some condition is satisfied, indicating the two lines should
+    //be merged
+
+
+    //END POINT METHOD
+    bool endPointsGood = true;
+    /*
+    //find outermost end points x vals
+    double farLeftX, farRightX;
+    if(line1.transLeftPoint.x <= line2.transLeftPoint.x)
+        farLeftX = line1.transLeftPoint.x;
+    else
+        farLeftX = line2.transLeftPoint.x;
+    if(line1.transRightPoint.x > line2.transRightPoint.x)
+        farRightX = line1.transRightPoint.x;
+    else
+        farRightX = line2.transRightPoint.x;
+    //calc y vals for outer points for both lines
+    double leftY1, leftY2, rightY1, rightY2;
+    //line1
+    leftY1 = line1.findYFromX(farLeftX);
+    rightY1 = line1.findYFromX(farRightX);
+    //line2
+    leftY2 = line2.findYFromX(farLeftX);
+    rightY2 = line2.findYFromX(farRightX);
+    //differences check:
+    endPointsGood = (fabs(leftY1-leftY2) <= MAX_END_POINT_DIFF) && (fabs(rightY1-rightY2) <= MAX_END_POINT_DIFF);
+    */
+
+    bool Gradient_is_ok = (fabs(line1.getGradient() - line2.getGradient()) < 0.25);
+    bool Intercept_is_ok = (fabs(line1.getYIntercept() - line2.getYIntercept()) < MAX_END_POINT_DIFF);
+    endPointsGood =  Gradient_is_ok && Intercept_is_ok;
+    //R2TLS and MSD
+    Vector2<double> results = line1.combinedR2TLSandMSD(line2);
+    bool R2TLS_is_OK = (results.x >= MIN_LINE_R2_FIT);
+    bool MSD_is_OK = (results.y <= MAX_LINE_MSD);
+
+    bool greenFound = false;
+
+    if(endPointsGood && R2TLS_is_OK && MSD_is_OK)
+    {
+        //Check the Line for green in between 2 closest points:
+        float d1 = sqrt((line1.leftPoint.x-line2.rightPoint.x)*(line1.leftPoint.x-line2.rightPoint.x) + (line1.leftPoint.y-line2.rightPoint.y)*(line1.leftPoint.y-line2.rightPoint.y));
+        float d2 = sqrt((line1.rightPoint.x-line2.leftPoint.x)*(line1.rightPoint.x-line2.leftPoint.x) + (line1.rightPoint.y-line2.leftPoint.y)*(line1.rightPoint.y-line2.leftPoint.y));
+        //USE shortest Distance
+
+        //qDebug() << "Checking Green in between line: "<< d1 << d2;
+        if (d1 != 0 && d2 != 0)
+        {
+            if(d1 < d2)
+            {
+                //greenFound = lineDetector->CheckGreenBetweenTwoPoints(line1.leftPoint.x,line1.leftPoint.y,line2.rightPoint.x,line2.rightPoint.y,vision);
+            }
+            else
+            {
+                //greenFound = lineDetector->CheckGreenBetweenTwoPoints(line1.rightPoint.x,line1.rightPoint.y,line2.leftPoint.x,line2.leftPoint.y,vision);
+            }
+        }
+    }
+    //if(endPointsGood && R2TLS_is_OK && MSD_is_OK && !greenFound)
+    //{
+        //qDebug() << "Comparing: \t y = " << line1.getGradient()   <<  "x + " << line1.getYIntercept() << "\t\t CENTER: " << line1.leftPoint.x << "," <<line1.leftPoint.y  << line1.numPoints ;
+        //qDebug() << "to: \t\t y = " << line2.getGradient()   <<  "x + " << line2.getYIntercept() << "\t\t CENTER: " << line2.leftPoint.x << "," <<line2.leftPoint.y << line2.numPoints;
+        //qDebug() << "Line Joining: " <<  "EndPointCheck: "<< endPointsGood << "Fit: "<<R2TLS_is_OK << results.x<< "\tMSD" << MSD_is_OK << results.y << greenFound;
+    //}
+    return endPointsGood && R2TLS_is_OK && MSD_is_OK && !greenFound;
+
+
+    //double angle = fabs(line1.getAngle() - line2.getAngle());
+    //return (angle < 5.0) || (angle > 185.0);
+
+    //RHO/PHI - Not working properly
+    /*
+    if(DEBUG_MERGE) {
+        debugPrint("\ncomparing:");
+        debugPrint(line1);
+        *debug_out << "   Rho: " << line1.getRho() << " Phi: " << line1.getPhi() << "\n";
+        debugPrint(line2);
+        *debug_out << "   Rho: " << line2.getRho() << " Phi: " << line2.getPhi() << "\n";
+        debugPrint("   differences:");
+        *debug_out << "      Rho: " << fabs(line1.getRho() - line2.getRho()) <<
+                " Phi: " << fabs(line1.getPhi() - line2.getPhi()) << "\n";
+    }
+
+
+    //checks if lines should be merged
+    if(fabs(line1.getRho()-line2.getRho()) <= MAX_RHO_DIFF )
+        if(fabs(line1.getPhi() - line2.getPhi()) <= MAX_PHI_DIFF)
+            return true;
+    return false;
+    */
+    //OLD
+    /*
+    if(line1.isVertical() && line2.isVertical()) {
+        if(fabs(line1.getXIntercept() - line2.getXIntercept()) <= MAX_INTERCEPT_DIFF) {
+            //MERGE VERTICAL LINES
+            if(DEBUG_MERGE)
+                debugPrint("Will Merge");
+            return true;
+        }
+    }
+    else if(!line1.isVertical() && !line2.isVertical()) {
+       //both sloped or horiz
+        if(fabs(line1.getGradient() - line2.getGradient()) <= MAX_GRAD_DIFF) {
+            //similar gradients
+            if(fabs(line1.getYIntercept() - line2.getYIntercept()) <= MAX_INTERCEPT_DIFF) {
+                //similar intercepts, same line
+                if(DEBUG_MERGE)
+                    debugPrint("Will Merge");
+                return true;
+            }
+        }
+    }
+    //conditions for merging not satisfied
+    return false;
+    */ 

@@ -28,6 +28,18 @@ middle: (0 , 4) [unclassified]     //4 pix max
 after: (0, 320) [green]                   //1 pix min
 replacement: before                     //before, after, split
 
+fieldnoise_v_oneway_3:
+before: (3, 320) [green]                      //1 pix min
+middle: (0 , 10) [unclassified]    //4 pix max
+after: (20, 320) [green]                    //12 pix min
+replacement: before                         //before, after, split
+
+fieldnoise_v_oneway_4:
+before: (20, 320) [green]                   //12 pix min
+middle: (0 , 10) [unclassified]    //4 pix max
+after: (3, 320) [green]                       //1 pix min
+replacement: before                         //before, after, split
+
 yellowgoal1:
 before: (0, 320) []                   // pix min
 middle: (0 , 1) [orange]     //1 pix max
@@ -38,4 +50,52 @@ yellowgoal2:
 before: (5, 320) [yellow]       //3 pix min
 middle: (0 , 1) [orange]     //1 pix max
 after: (0,320) []
+replacement: before                 //before, after, split
+
+yellowgoal3:
+before: (5, 320) [yellow]                   // pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (1, 320) [yellow]       //5 pix min
+replacement: after                 //before, after, split
+
+yellowgoal4:
+before: (5, 320) [yellow]       //3 pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (1,320) [yellow]
+replacement: before                 //before, after, split
+
+yellowgoal5:
+before: (10, 320) [yellow]                   // pix min
+middle: (0 , 5) [unclassified]     //1 pix max
+after: (1, 320) [yellow]       //5 pix min
+replacement: after                 //before, after, split
+
+yellowgoal6:
+before: (1, 320) [yellow]                   // pix min
+middle: (0 , 5) [unclassified]     //1 pix max
+after: (10, 320) [yellow]       //5 pix min
+replacement: after                 //before, after, split
+
+yellowgoal7:
+before: (15, 320) [yellow]                   // pix min
+middle: (0 , 8) [unclassified]     //1 pix max
+after: (1, 320) [yellow]       //5 pix min
+replacement: after                 //before, after, split
+
+yellowgoal8:
+before: (1, 320) [yellow]                   // pix min
+middle: (0 , 8) [unclassified]     //1 pix max
+after: (15, 320) [yellow]       //5 pix min
+replacement: after                 //before, after, split
+
+line1:
+before: (1, 320) [white]       //3 pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (5,320) [white]
+replacement: before                 //before, after, split
+
+line2:
+before: (5, 320) [white]       //3 pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (1,320) [white]
 replacement: before                 //before, after, split

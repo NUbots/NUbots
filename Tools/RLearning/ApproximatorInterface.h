@@ -29,7 +29,9 @@ using namespace std;
 class ApproximatorInterface {
     
 public:
-    virtual void initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens)=0;
+    ApproximatorInterface(){ save_location = "nubot/Config/Darwin/RLearning/";}
+
+    virtual void initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range = 1)=0;
     
     virtual void doLearningEpisode(vector<vector<float> > const& observations, vector< vector<float> > const& values, float stepSize=0.1, int iterations=1)=0;
     
@@ -39,7 +41,9 @@ public:
     
     virtual void loadApproximator(string agentName)=0;
     
-    
+protected:
+    string save_location;
+
 };
 
 #endif

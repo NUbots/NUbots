@@ -22,10 +22,6 @@ void ObjectDetectionCH::detectObjects()
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
 
 
-    // REMOVE ME
-//    const LookUpTable& lut = vbb->getLUT();
-//    cv::Mat cvimg;
-//    lut.classifyImage(img, cvimg);
 
     vector<PointType> result;
     vector<cv::Point2i> horizon_points,

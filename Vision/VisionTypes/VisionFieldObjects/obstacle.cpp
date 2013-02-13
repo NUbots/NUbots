@@ -10,8 +10,9 @@
 
 Obstacle::Obstacle(const PointType &position, int width, int height)
 {
+    m_id = OBSTACLE;
     m_size_on_screen = Vector2<int>(width, height);
-    m_bottom_centre = Vector2<int>(position.x, position.y);
+    m_location_pixels = Vector2<int>(position.x, position.y);
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
 //        Vector2<float> bottomcentre = Vector2<float>(position.x, position.y);
@@ -23,7 +24,8 @@ Obstacle::Obstacle(const PointType &position, int width, int height)
 
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
-    valid = valid && check();
+    //valid = valid && check();
+    valid = check();
 }
 
 
@@ -48,7 +50,7 @@ if(valid) {
     newAmbObj.UpdateVisualObject(m_transformed_spherical_pos,
                                  m_spherical_error,
                                  m_location_angular,
-                                 m_bottom_centre,
+                                 m_location_pixels,
                                  m_size_on_screen,
                                  timestamp);
     newAmbObj.arc_width = m_size_on_screen.x * vbb->getFOV().x / vbb->getImageWidth();
@@ -66,12 +68,12 @@ else {
 bool Obstacle::check() const
 {
     //! @todo Do a check based on width and d2p consistency
-    if(!distance_valid) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
-            debug << "Obstacle::check - Obstacle thrown out: distance invalid" << endl;
-        #endif
-        return false;
-    }
+//    if(!distance_valid) {
+//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//            debug << "Obstacle::check - Obstacle thrown out: distance invalid" << endl;
+//        #endif
+//        return false;
+//    }
 
     //all checks passed
     return true;
@@ -82,8 +84,8 @@ bool Obstacle::calculatePositions()
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     //To the bottom of the Goal Post.
     bool transform_valid;
-    float bearing = (float)vbb->calculateBearing(m_bottom_centre.x);
-    float elevation = (float)vbb->calculateElevation(m_bottom_centre.y);
+    float bearing = (float)vbb->calculateBearing(m_location_pixels.x);
+    float elevation = (float)vbb->calculateElevation(m_location_pixels.y);
 
     float distance = distanceToObstacle(bearing, elevation);
 
@@ -144,6 +146,14 @@ float Obstacle::distanceToObstacle(float bearing, float elevation) {
         debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
     #endif
     return d2p;
+}
+
+void Obstacle::render(cv::Mat &mat) const
+{
+    Vector2<int> half = m_size_on_screen/2;
+    cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y-m_size_on_screen.y), cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y), cv::Scalar(255, 255, 0));
+    cv::line(mat, cv::Point2i(m_location_pixels.x-half.x, m_location_pixels.y), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y), cv::Scalar(255, 255, 0));
+    cv::line(mat, cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y), cv::Point2i(m_location_pixels.x+half.x, m_location_pixels.y-m_size_on_screen.y), cv::Scalar(255, 255, 0));
 }
 
 /*! @brief Stream insertion operator for a single ColourSegment.

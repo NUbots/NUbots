@@ -48,3 +48,7 @@ FOREACH (loop_var ${NUBOT_DIRS})
     INCLUDE(../${loop_var}/cmake/sources.cmake)
 ENDFOREACH (loop_var ${NUBOT_DIRS})
 
+# Include some libraries!
+#LIST(APPEND NUBOT_LINK_LIBRARIES json)
+#LIST(APPEND NUBOT_LINK_LIBRARIES boost_filesystem-mt)
+#LIST(APPEND NUBOT_LINK_LIBRARIES boost_date_time)

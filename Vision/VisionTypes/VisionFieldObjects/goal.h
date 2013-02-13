@@ -9,24 +9,11 @@
 class Goal : public VisionFieldObject
 {
 public:
-    enum GoalID {
-        YellowLeftGoal,
-        YellowRightGoal,
-        YellowUnknownGoal,
-        BlueLeftGoal,
-        BlueRightGoal,
-        BlueUnknownGoal,
-        InvalidGoal
-    };
-    
-    static string getIDName(GoalID id);
        
-    Goal(GoalID id=InvalidGoal, const Quad& corners=Quad(0,0,0,0));
+    Goal(VFO_ID id=INVALID, const Quad& corners=Quad(0,0,0,0));
 
     //! @brief reutns the pixel locations of the corners.
     const Quad& getQuad() const;
-    //! @brief returns the goal id - blue left, right or unknown and yellow left, right or unknown.
-    GoalID getID() const;
 
     //! @brief returns the field position relative to the robot.
     Vector3<float> getRelativeFieldCoords() const;
@@ -39,6 +26,16 @@ public:
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
     //! @brief applies a series of checks to decide if the goal is valid.
     bool check() const;
+        
+    //! @brief Stream output for labelling purposes
+    void printLabel(ostream& out) const {out << getVFOName(m_id) << " " << m_location_pixels << " " << m_size_on_screen;}
+    //! @brief Brief stream output for labelling purposes
+    //void printLabelBrief(ostream& out) const {out << getVFOName(m_id) << " " << m_location_pixels;}
+    Vector2<double> getShortLabel() const {return Vector2<double>(m_location_pixels.x, m_location_pixels.y);}
+
+    double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location_pixels.x - measured.x,2) + pow(m_location_pixels.y - measured.y,2));}
+
+    void render(cv::Mat& mat) const;
 
     //! @brief output stream operator.
     friend ostream& operator<< (ostream& output, const Goal& g);
@@ -59,10 +56,8 @@ private:
       */
     float distanceToGoal(float bearing, float elevation);
     
-private:    
-    GoalID m_id;                    //! @variable the goal id - blue left, right or unknown and yellow left, right or unknown.
+private:
     Quad m_corners;                 //! @variable pixel locations of the corners
-    Vector2<int> m_bottom_centre;   //! @variable pixel location of the bottom centre
 
     float d2p;          //! @variable the distance of the goal in cm as found by the distance to point method
     float width_dist;   //! @variable the distance of the goal in cm as found by the width method.

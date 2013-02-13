@@ -85,13 +85,14 @@ void PGAOptimiser::setParametersResult(const vector<float>& fitness)
 
 void PGAOptimiser::setParametersResult(float fitness)
 {
-    m_fitnesses.push_back(fitness);
+    m_fitnesses.push_back(-1.0*fitness);
     m_random_policies_index++;
     if ((unsigned int) m_random_policies_index == m_random_policies.size())
     {
         m_current_parameters += calculateStep();
         generatePolicies();
     }
+    debug << "PGAOptimiser::setParametersResult fitness: " << fitness << endl;
 }
 
 vector<float> PGAOptimiser::getNextParameters()
@@ -206,8 +207,22 @@ void PGAOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
 	{
 		vector<float> temp = generateSigns();
 		float epsilon = m_epsilon*(seed[i].max() - seed[i].min());
-		for (size_t j=0; j<temp.size(); j++)
-			m_random_policies[j][i] += epsilon*temp[j];
+
+        //old non-clamping method
+//		for (size_t j=0; j<temp.size(); j++)
+//			m_random_policies[j][i] += epsilon*temp[j];
+
+        //newer method that clamps values to [min, max]
+        for (size_t j=0; j<temp.size(); j++) {
+            //m_random_policies[j][i] += epsilon*temp[j];
+           //added by shannon
+           float value = m_random_policies[j][i] + epsilon*temp[j];
+           if (value < seed[i].min())
+               value = seed[i].min();
+           else if (value > seed[i].max())
+               value = seed[i].max();
+           m_random_policies[j][i] = value;
+        }
 	}
 
 	for (size_t i=0; i<m_random_policies.size(); i++)

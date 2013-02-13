@@ -124,6 +124,15 @@ void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
 }
 
 /**
+  * Adds a set of lines to the current set.
+  * @param newlines The lines to add.
+  */
+void VisionBlackboard::addLine(const FieldLine& newline)
+{
+    m_lines.push_back(newline);
+}
+
+/**
 *   @brief sets the horizontal scan lines.
 *   @param horizontal_scanlines A vector of unsigned ints defining horizontal scanlines.
 *
@@ -140,7 +149,7 @@ void VisionBlackboard::setHorizontalScanlines(const vector<unsigned int>& scanli
 */
 void VisionBlackboard::setHorizontalSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
 {
-    horizontal_segmented_scanlines.set(segmented_scanlines, HORIZONTAL);
+    horizontal_segmented_scanlines.set(segmented_scanlines, VisionID::HORIZONTAL);
 }
 
 /**
@@ -149,7 +158,7 @@ void VisionBlackboard::setHorizontalSegments(const vector<vector<ColourSegment> 
 */
 void VisionBlackboard::setVerticalSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
 {
-    vertical_segmented_scanlines.set(segmented_scanlines, VERTICAL);
+    vertical_segmented_scanlines.set(segmented_scanlines, VisionID::VERTICAL);
 }
 
 /**
@@ -158,7 +167,7 @@ void VisionBlackboard::setVerticalSegments(const vector<vector<ColourSegment> >&
 */
 void VisionBlackboard::setHorizontalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
 {
-    horizontal_filtered_segments.set(segmented_scanlines, HORIZONTAL);
+    horizontal_filtered_segments.set(segmented_scanlines, VisionID::HORIZONTAL);
 }
 
 /**
@@ -167,7 +176,7 @@ void VisionBlackboard::setHorizontalFilteredSegments(const vector<vector<ColourS
 */
 void VisionBlackboard::setVerticalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
 {
-    vertical_filtered_segments.set(segmented_scanlines, VERTICAL);
+    vertical_filtered_segments.set(segmented_scanlines, VisionID::VERTICAL);
 }
 
 /**
@@ -175,9 +184,9 @@ void VisionBlackboard::setVerticalFilteredSegments(const vector<vector<ColourSeg
 *   @param vfo_if The identifier of the field object
 *   @param transitions A vector of transitions that matched the horizontal rules.
 */
-void VisionBlackboard::setHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id, const vector<Transition> &transitions)
+void VisionBlackboard::setHorizontalTransitions(VisionFieldObject::COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
 {
-    mapped_horizontal_transitions[vfo_id] = transitions;
+    matched_horizontal_segments[colour_class] = transitions;
 }
 
 /**
@@ -185,27 +194,27 @@ void VisionBlackboard::setHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id
 *   @param vfo_if The identifier of the field object
 *   @param transitions A vector of transitions that matched the vertical rules.
 */
-void VisionBlackboard::setVerticalTransitions(VisionFieldObject::VFO_ID vfo_id, const vector<Transition> &transitions)
+void VisionBlackboard::setVerticalTransitions(VisionFieldObject::COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
 {
-    mapped_vertical_transitions[vfo_id] = transitions;
+    matched_vertical_segments[colour_class] = transitions;
 }
 
 /**
 *   @brief sets the horizontal transition rule matches for all vision field objects.
-*   @param t_map A map from VFO_IDs to transitions that matched the horizontal rules.
+*   @param t_map A map from COLOUR_CLASSs to transitions that matched the horizontal rules.
 */
-void VisionBlackboard::setHorizontalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<Transition> > &t_map)
+void VisionBlackboard::setHorizontalTransitionsMap(const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &t_map)
 {
-    mapped_horizontal_transitions = t_map;
+    matched_horizontal_segments = t_map;
 }
 
 /**
 *   @brief sets the vertical transition rule matches for all vision field objects.
-*   @param t_map A map from VFO_IDs to transitions that matched the vertical rules.
+*   @param t_map A map from COLOUR_CLASSs to transitions that matched the vertical rules.
 */
-void VisionBlackboard::setVerticalTransitionsMap(const map<VisionFieldObject::VFO_ID, vector<Transition> > &t_map)
+void VisionBlackboard::setVerticalTransitionsMap(const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &t_map)
 {
-    mapped_vertical_transitions = t_map;
+    matched_vertical_segments = t_map;
 }
 
 /**
@@ -377,6 +386,12 @@ vector<Obstacle>& VisionBlackboard::getObstacles()
     return m_obstacles;
 }
 
+//! Returns the list of found lines.
+vector<FieldLine>& VisionBlackboard::getLines()
+{
+    return m_lines;
+}
+
 /**
 *   @brief returns the set of heights for horizontal scan lines.
 *   @return horizontal_scanlines A vector of unsigned ints defining horizontal scanlines.
@@ -425,49 +440,49 @@ const SegmentedRegion& VisionBlackboard::getVerticalFilteredRegion() const
 /**
 *   @brief returns the horizontal transition rule matches for the given VFO
 *   @param vfo_if The identifier of the field object
-*   @return horizontal_transitions The horizontal transition rule matches
+*   @return horizontal_segments The horizontal transition rule matches
 *
 *   @note This method cannot be const as an element is accessed by the [] operator
 *   in the case that this does not find a mapping (using the default constructor). This
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
 */
-const vector<Transition>& VisionBlackboard::getHorizontalTransitions(VisionFieldObject::VFO_ID vfo_id)
+const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(VisionFieldObject::COLOUR_CLASS colour_class)
 {
-    return mapped_horizontal_transitions[vfo_id];
+    return matched_horizontal_segments[colour_class];
 }
 
 /**
 *   @brief returns the vertical transition rule matches for the given VFO
 *   @param vfo_if The identifier of the field object
-*   @return vertical_transitions The vertical transition rule matches
+*   @return vertical_segments The vertical transition rule matches
 *
 *   @note This method cannot be const as an element is accessed by the [] operator
 *   in the case that this does not find a mapping (using the default constructor). This
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
 */
-const vector<Transition>& VisionBlackboard::getVerticalTransitions(VisionFieldObject::VFO_ID vfo_id)
+const vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(VisionFieldObject::COLOUR_CLASS colour_class)
 {
-    return mapped_vertical_transitions[vfo_id];
+    return matched_vertical_segments[colour_class];
 }
 
 /**
 *   @brief returns the horizontal transition rule matches for all VFOs
-*   @return horizontal_transitions The horizontal transition rule matches for all VFOs
+*   @return horizontal_segments The horizontal transition rule matches for all VFOs
 */
-const map<VisionFieldObject::VFO_ID, vector<Transition> >& VisionBlackboard::getHorizontalTransitionsMap() const
+const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getHorizontalTransitionsMap() const
 {
-    return mapped_horizontal_transitions;
+    return matched_horizontal_segments;
 }
 
 /**
 *   @brief returns the vertical transition rule matches for all VFOs
-*   @return vertical_transitions The vertical transition rule matches for all VFOs
+*   @return vertical_segments The vertical transition rule matches for all VFOs
 */
-const map<VisionFieldObject::VFO_ID, vector<Transition> >& VisionBlackboard::getVerticalTransitionsMap() const
+const map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getVerticalTransitionsMap() const
 {
-    return mapped_vertical_transitions;
+    return matched_vertical_segments;
 }
 
 /**
@@ -628,7 +643,12 @@ void VisionBlackboard::update()
     body_pitch_valid = wrapper->getBodyPitch(body_pitch);
     //get new image pointer
     original_image = wrapper->getFrame();
-    
+
+    //WARNING The following warning may not be triggered properly
+    if(original_image->getHeight()==0 or original_image->getWidth()==0 ){
+        cout<<"VisionBlackboard::update() - WARNING - Camera Image height or width is zero Camera may be disconnected or faulty."<<endl;
+    }
+
     //Get updated kinematics data
     kinematics_horizon = wrapper->getKinematicsHorizon();
     checkKinematicsHorizon();
@@ -640,14 +660,15 @@ void VisionBlackboard::update()
     #endif
         
     //clear intermediates
-    mapped_horizontal_transitions.clear();
-    mapped_vertical_transitions.clear();
+    matched_horizontal_segments.clear();
+    matched_vertical_segments.clear();
 
     //clear out result vectors
     m_balls.clear();
     m_beacons.clear();
     m_goals.clear();
     m_obstacles.clear();
+    m_lines.clear();
     m_vfos.clear();
 }
 
@@ -673,6 +694,9 @@ void VisionBlackboard::publish() const
     for(i=0; i<m_obstacles.size(); i++) {
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_obstacles.at(i)));
     }
+    for(i=0; i<m_lines.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_lines.at(i)));
+    }
     #if VISION_BLACKBOARD_VERBOSITY > 1
         debug << "VisionBlackboard::publish() - End" << endl;
     #endif
@@ -687,8 +711,8 @@ void VisionBlackboard::debugPublish() const
         debug << "VisionBlackboard::debugPublish() - Begin" << endl;
     #endif
     vector<PointType> pts;
-    map<VisionFieldObject::VFO_ID, vector<Transition> >::const_iterator it;
-    vector<Transition> v_t;
+    map<VisionFieldObject::COLOUR_CLASS, vector<ColourSegment> >::const_iterator it;
+    vector<ColourSegment> v_s;
 
 #if VISION_BLACKBOARD_VERBOSITY > 1
     debug << "VisionBlackboard::debugPublish - " << endl;
@@ -701,26 +725,25 @@ void VisionBlackboard::debugPublish() const
     debug << "horizontal_filtered_segments: " << horizontal_segmented_scanlines.getSegments().size() << endl;
     debug << "vertical_filtered_segments: " << vertical_segmented_scanlines.getSegments().size() << endl;
     int size=0;
-    for(it=mapped_horizontal_transitions.begin(); it!=mapped_horizontal_transitions.end(); it++) {
+    for(it=matched_horizontal_segments.begin(); it!=matched_horizontal_segments.end(); it++) {
         size += it->second.size();
     }
-    debug << "mapped_horizontal_transitions: " << size << endl;
+    debug << "matched_horizontal_segments: " << size << endl;
     size=0;
-    for(it=mapped_vertical_transitions.begin(); it!=mapped_vertical_transitions.end(); it++) {
+    for(it=matched_vertical_segments.begin(); it!=matched_vertical_segments.end(); it++) {
         size += it->second.size();
     }
-    debug << "mapped_vertical_transitions: " << size << endl;
+    debug << "matched_vertical_segments: " << size << endl;
 #endif
 
     wrapper->debugRefresh();
-//    wrapper->debugPublish(DataWrapper::DBID_IMAGE, *original_image_cv_4ch);
+    wrapper->debugPublish(DataWrapper::DBID_IMAGE, original_image);
     
     //horizon
     pts.clear();
-    float A = kinematics_horizon.getA(), B = kinematics_horizon.getB(), C = kinematics_horizon.getC();
-    if(B!=0) {
-        pts.push_back(PointType(0, -1*C/B));
-        pts.push_back(PointType(original_image->getHeight(), -1*A/B*original_image->getWidth() - C/B));
+    if(!kinematics_horizon.isVertical()) {
+        pts.push_back(PointType(0, kinematics_horizon.findYFromX(0)));
+        pts.push_back(PointType(original_image->getWidth(), kinematics_horizon.findYFromX(original_image->getWidth())));
         wrapper->debugPublish(DataWrapper::DBID_HORIZON, pts);
     }
     else {
@@ -741,6 +764,7 @@ void VisionBlackboard::debugPublish() const
     wrapper->debugPublish(m_beacons);
     wrapper->debugPublish(m_balls);
     wrapper->debugPublish(m_obstacles);
+    wrapper->debugPublish(m_lines);
     
     //horizontal scans
     pts.clear();
@@ -766,23 +790,35 @@ void VisionBlackboard::debugPublish() const
     
     //horizontal transitions
     pts.clear();
-    for(it=mapped_horizontal_transitions.begin(); it!=mapped_horizontal_transitions.end(); it++) {
-        v_t = it->second;
-        BOOST_FOREACH(const Transition& t, v_t) {
-            pts.push_back(t.getLocation());
+    for(it=matched_horizontal_segments.begin(); it!=matched_horizontal_segments.end(); it++) {
+        v_s = it->second;
+        BOOST_FOREACH(const ColourSegment& s, v_s) {
+            if(s.getColour() == ClassIndex::white) {
+                //pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+            }
+            else {
+                pts.push_back(PointType(s.getStart().x, s.getStart().y));
+                pts.push_back(PointType(s.getEnd().x, s.getEnd().y));
+            }
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
+    wrapper->debugPublish(DataWrapper::DBID_MATCHED_SEGMENTS, pts);
     
     //vertical transitions
     pts.clear();
-    for(it=mapped_vertical_transitions.begin(); it!=mapped_vertical_transitions.end(); it++) {
-        v_t = it->second;
-        BOOST_FOREACH(const Transition& t, v_t) {
-            pts.push_back(t.getLocation());
+    for(it=matched_vertical_segments.begin(); it!=matched_vertical_segments.end(); it++) {
+        v_s = it->second;
+        BOOST_FOREACH(const ColourSegment& s, v_s) {
+            if(s.getColour() == ClassIndex::white) {
+                //pts.push_back(PointType(s.getCentre().x, s.getCentre().y));
+            }
+            else {
+                pts.push_back(PointType(s.getStart().x, s.getStart().y));
+                pts.push_back(PointType(s.getEnd().x, s.getEnd().y));
+            }
         }
     }
-    wrapper->debugPublish(DataWrapper::DBID_TRANSITIONS, pts);
+    wrapper->debugPublish(DataWrapper::DBID_MATCHED_SEGMENTS, pts);
 }
 
 //! Checks the kinematics horizon is within the image bounds and resets it if not.

@@ -64,9 +64,9 @@ HEADERS += ui_mainwindow.h \
     GLDisplay.h \
     ../Infrastructure/NUImage/NUImage.h \
     ../Infrastructure/NUImage/ClassifiedImage.h \
-    ../VisionOld/ClassifiedSection.h \
-    ../VisionOld/ScanLine.h \
-    ../VisionOld/TransitionSegment.h \
+    #../VisionOld/ClassifiedSection.h \
+    #../VisionOld/ScanLine.h \
+    #../VisionOld/TransitionSegment.h \
     #../VisionOld/GoalDetection.h \
     LayerSelectionWidget.h \
     locWmGlDisplay.h \
@@ -80,7 +80,7 @@ HEADERS += ui_mainwindow.h \
     ../Infrastructure/FieldObjects/AmbiguousObject.h \
     ../Infrastructure/FieldObjects/FieldObjects.h \
     ../Vision/Threads/SaveImagesThread.h \
-    ../VisionOld/ObjectCandidate.h \
+    #../VisionOld/ObjectCandidate.h \
     ../Localisation/WMPoint.h \
     ../Localisation/WMLine.h \
     ../Localisation/sphere.h \
@@ -89,7 +89,7 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/matrix.h \
     localisationwidget.h \
     #../VisionOld/Ball.h \
-    ../VisionOld/CircleFitting.h \
+    #../VisionOld/CircleFitting.h \
     FileAccess/LogFileFormatReader.h \
     FileAccess/nifVersion1FormatReader.h \
     FileAccess/LogFileReader.h \
@@ -125,46 +125,45 @@ HEADERS += ui_mainwindow.h \
     FileAccess/ImageStreamFileReader.h \
     ../Motion/Tools/MotionScript.h \
     ../Motion/Tools/MotionCurves.h \
-    ../VisionOld/EllipseFit.h \
-    ../VisionOld/EllipseFitting/tnt_version.h \
-    ../VisionOld/EllipseFitting/tnt_vec.h \
-    ../VisionOld/EllipseFitting/tnt_subscript.h \
-    ../VisionOld/EllipseFitting/tnt_stopwatch.h \
-    ../VisionOld/EllipseFitting/tnt_sparse_matrix_csr.h \
-    ../VisionOld/EllipseFitting/tnt_math_utils.h \
-    ../VisionOld/EllipseFitting/tnt_i_refvec.h \
-    ../VisionOld/EllipseFitting/tnt_fortran_array3d_utils.h \
-    ../VisionOld/EllipseFitting/tnt_fortran_array3d.h \
-    ../VisionOld/EllipseFitting/tnt_fortran_array2d_utils.h \
-    ../VisionOld/EllipseFitting/tnt_fortran_array2d.h \
-    ../VisionOld/EllipseFitting/tnt_fortran_array1d_utils.h \
-    ../VisionOld/EllipseFitting/tnt_fortran_array1d.h \
-    ../VisionOld/EllipseFitting/tnt_cmat.h \
-    ../VisionOld/EllipseFitting/tnt_array3d_utils.h \
-    ../VisionOld/EllipseFitting/tnt_array3d.h \
-    ../VisionOld/EllipseFitting/tnt_array2d_utils.h \
-    ../VisionOld/EllipseFitting/tnt_array2d.h \
-    ../VisionOld/EllipseFitting/tnt_array1d_utils.h \
-    ../VisionOld/EllipseFitting/tnt_array1d.h \
-    ../VisionOld/EllipseFitting/tnt.h \
-    ../VisionOld/EllipseFitting/jama_svd.h \
-    ../VisionOld/EllipseFitting/jama_qr.h \
-    ../VisionOld/EllipseFitting/jama_lu.h \
-    ../VisionOld/EllipseFitting/jama_eig.h \
-    ../VisionOld/EllipseFitting/jama_cholesky.h \
+#    ../VisionOld/EllipseFit.h \
+#    ../VisionOld/EllipseFitting/tnt_version.h \
+#    ../VisionOld/EllipseFitting/tnt_vec.h \
+#    ../VisionOld/EllipseFitting/tnt_subscript.h \
+#    ../VisionOld/EllipseFitting/tnt_stopwatch.h \
+#    ../VisionOld/EllipseFitting/tnt_sparse_matrix_csr.h \
+#    ../VisionOld/EllipseFitting/tnt_math_utils.h \
+#    ../VisionOld/EllipseFitting/tnt_i_refvec.h \
+#    ../VisionOld/EllipseFitting/tnt_fortran_array3d_utils.h \
+#    ../VisionOld/EllipseFitting/tnt_fortran_array3d.h \
+#    ../VisionOld/EllipseFitting/tnt_fortran_array2d_utils.h \
+#    ../VisionOld/EllipseFitting/tnt_fortran_array2d.h \
+#    ../VisionOld/EllipseFitting/tnt_fortran_array1d_utils.h \
+#    ../VisionOld/EllipseFitting/tnt_fortran_array1d.h \
+#    ../VisionOld/EllipseFitting/tnt_cmat.h \
+#    ../VisionOld/EllipseFitting/tnt_array3d_utils.h \
+#    ../VisionOld/EllipseFitting/tnt_array3d.h \
+#    ../VisionOld/EllipseFitting/tnt_array2d_utils.h \
+#    ../VisionOld/EllipseFitting/tnt_array2d.h \
+#    ../VisionOld/EllipseFitting/tnt_array1d_utils.h \
+#    ../VisionOld/EllipseFitting/tnt_array1d.h \
+#    ../VisionOld/EllipseFitting/tnt.h \
+#    ../VisionOld/EllipseFitting/jama_svd.h \
+#    ../VisionOld/EllipseFitting/jama_qr.h \
+#    ../VisionOld/EllipseFitting/jama_lu.h \
+#    ../VisionOld/EllipseFitting/jama_eig.h \
+#    ../VisionOld/EllipseFitting/jama_cholesky.h \
     ../Localisation/odometryMotionModel.h \
     ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
     locwmstreamwidget.h \
-    ../VisionOld/EllipseFitting/FittingCalculations.h \
+    #../VisionOld/EllipseFitting/FittingCalculations.h \
     ../Tools/Math/Rectangle.h \
     ../NUPlatform/NUCamera.h \
     #../VisionOld/fitellipsethroughcircle.h \
     ../Localisation/LocWmFrame.h \
     FileAccess/IndexedFileReader.h \
     LUTGlDisplay.h \
-    #../VisionOld/SplitAndMerge/SAM.h \
     ../NUPlatform/NUSensors/EndEffectorTouch.h \
     ../NUPlatform/NUSensors/OdometryEstimator.h \
     ../Tools/Math/StlVector.h \
@@ -231,9 +230,9 @@ SOURCES += mainwindow.cpp \
     GLDisplay.cpp \
     ../Infrastructure/NUImage/NUImage.cpp \
     ../Infrastructure/NUImage/ClassifiedImage.cpp \
-    ../VisionOld/ClassifiedSection.cpp \
-    ../VisionOld/ScanLine.cpp \
-    ../VisionOld/TransitionSegment.cpp \
+    #../VisionOld/ClassifiedSection.cpp \
+    #../VisionOld/ScanLine.cpp \
+    #../VisionOld/TransitionSegment.cpp \
     #../VisionOld/GoalDetection.cpp \
     LayerSelectionWidget.cpp \
     ../Motion/Tools/MotionFileTools.cpp \
@@ -254,7 +253,7 @@ SOURCES += mainwindow.cpp \
     $$files(../Infrastructure/Jobs/VisionJobs/*.cpp) \
     $$files(../Infrastructure/Jobs/MotionJobs/*.cpp) \
     locWmGlDisplay.cpp \
-    ../VisionOld/ObjectCandidate.cpp \
+    #../VisionOld/ObjectCandidate.cpp \
     #../VisionOld/LineDetection.cpp \
     ../Tools/Math/LSFittedLine.cpp \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
@@ -263,7 +262,7 @@ SOURCES += mainwindow.cpp \
     ../Infrastructure/FieldObjects/MobileObject.cpp \
     ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
     ../Infrastructure/FieldObjects/FieldObjects.cpp \
-    ../Vision/Threads/SaveImagesThread.cpp \
+    ../Vision/Threads/*.cpp \
     ../Localisation/WMPoint.cpp \
     ../Localisation/WMLine.cpp \
     ../Localisation/sphere.cpp \
@@ -272,7 +271,7 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/matrix.cpp \
     localisationwidget.cpp \
     #../VisionOld/Ball.cpp \
-    ../VisionOld/CircleFitting.cpp \
+    #../VisionOld/CircleFitting.cpp \
     FileAccess/LogFileFormatReader.cpp \
     FileAccess/nifVersion1FormatReader.cpp \
     FileAccess/LogFileReader.cpp \
@@ -298,20 +297,19 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/OrientationUKF.cpp \
     ../Motion/Tools/MotionScript.cpp \
     ../Motion/Tools/MotionCurves.cpp \
-    ../VisionOld/EllipseFit.cpp \
+    #../VisionOld/EllipseFit.cpp \
     ../Localisation/odometryMotionModel.cpp \
     ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
     locwmstreamwidget.cpp \
-    ../VisionOld/EllipseFitting/FittingCalculations.cpp \
+    #../VisionOld/EllipseFitting/FittingCalculations.cpp \
     ../Tools/Math/Rectangle.cpp \
     ../NUPlatform/NUCamera.cpp \
     #../VisionOld/fitellipsethroughcircle.cpp \
     ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
-    #../VisionOld/SplitAndMerge/SAM.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
     ../Tools/Math/FieldCalculations.cpp \
     ../NUPlatform/NUSensors/OdometryEstimator.cpp \
@@ -356,65 +354,29 @@ SOURCES += mainwindow.cpp \
 }
     
 HEADERS += \
-    ../Vision/VisionTypes/coloursegment.h \
-    ../Vision/VisionTypes/colourtransitionrule.h \
-    ../Vision/VisionTypes/colourreplacementrule.h \
-    ../Vision/VisionTypes/transition.h \
-    ../Vision/VisionTypes/segmentedregion.h \
-    #../Vision/VisionTypes/objectcandidate.h \
-    ../Vision/VisionTypes/quad.h \
-    ../Vision/VisionTypes/greenhorizon.h \
-    ../Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h \
-    ../Vision/VisionTypes/VisionFieldObjects/ball.h \
-    ../Vision/VisionTypes/VisionFieldObjects/goal.h \
-    ../Vision/VisionTypes/VisionFieldObjects/beacon.h \
-    ../Vision/VisionTypes/VisionFieldObjects/obstacle.h \
+    ../Vision/VisionTypes/*.h \
+    ../Vision/VisionTypes/VisionFieldObjects/*.h \
     ../Vision/VisionWrapper/datawrappercurrent.h \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.h \
     ../Vision/VisionWrapper/datawrappernuview.h \
+    ../Vision/VisionTools/pccamera.h \
     ../Vision/VisionTools/lookuptable.h \
-    ../Vision/VisionTools/GTAssert.h \
-    ../Vision/VisionTools/classificationcolours.h \
-    ../Vision/Modules/greenhorizonch.h \
-    ../Vision/Modules/objectdetectionch.h \
-    ../Vision/Modules/scanlines.h \
-    ../Vision/Modules/segmentfilter.h \
-    ../Vision/Modules/goaldetection.h \
-    ../Vision/Modules/balldetection.h \
-    ../Vision/basicvisiontypes.h \
-    ../Vision/valgorithm.h \
-    ../Vision/visionblackboard.h \
-    ../Vision/visioncontroller.h \
-    ../Vision/visionconstants.h \
-    ../Vision/Modules/robocuphacks.h \
+    ../Vision/Modules/*.h \
+    ../Vision/Modules/LineDetectionAlgorithms/*.h \
+    ../Vision/*.h \
 
 SOURCES += \
-    ../Vision/VisionTypes/coloursegment.cpp \
-    ../Vision/VisionTypes/colourtransitionrule.cpp \
-    ../Vision/VisionTypes/colourreplacementrule.cpp \
-    ../Vision/VisionTypes/transition.cpp \
-    ../Vision/VisionTypes/segmentedregion.cpp \
-    #../Vision/VisionTypes/objectcandidate.cpp \
-    ../Vision/VisionTypes/quad.cpp \
-    ../Vision/VisionTypes/greenhorizon.cpp \
-    ../Vision/VisionTypes/VisionFieldObjects/visionfieldobject.cpp \
-    ../Vision/VisionTypes/VisionFieldObjects/ball.cpp \
-    ../Vision/VisionTypes/VisionFieldObjects/goal.cpp \
-    ../Vision/VisionTypes/VisionFieldObjects/beacon.cpp \
-    ../Vision/VisionTypes/VisionFieldObjects/obstacle.cpp \
+    ../Vision/VisionTypes/*.cpp \
+    ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
+    ../Vision/VisionTools/pccamera.cpp \
     ../Vision/VisionTools/lookuptable.cpp \
-    ../Vision/Modules/greenhorizonch.cpp \
-    ../Vision/Modules/objectdetectionch.cpp \
-    ../Vision/Modules/scanlines.cpp \
-    ../Vision/Modules/segmentfilter.cpp \
-    ../Vision/Modules/goaldetection.cpp \
-    ../Vision/Modules/balldetection.cpp \
+    ../Vision/Modules/*.cpp \
+    ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     ../Vision/visionblackboard.cpp \
     ../Vision/visioncontroller.cpp \
     ../Vision/visionconstants.cpp \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.cpp \
     ../Vision/VisionWrapper/datawrappernuview.cpp \
-    ../Vision/Modules/robocuphacks.cpp \
 
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
 FORMS += \

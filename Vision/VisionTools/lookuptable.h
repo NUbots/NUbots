@@ -61,6 +61,8 @@ public:
       */
     void classifyImage(const NUImage& src, cv::Mat& dest) const;
 
+    void zero();
+
 private:
     const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
     unsigned char* LUTbuffer;           //! @variable temp LUT for loading.

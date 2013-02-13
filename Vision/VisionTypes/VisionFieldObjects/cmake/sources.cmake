@@ -26,6 +26,7 @@ ball.cpp
 beacon.cpp
 goal.cpp
 obstacle.cpp
+fieldline.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

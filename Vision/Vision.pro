@@ -1,10 +1,9 @@
-QT -= gui
-QT -= core
-
 INCLUDEPATH += /usr/local/include/opencv2/
 INCLUDEPATH += /usr/include/boost/
 
-LIBS += -lopencv_core -lopencv_highgui
+LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
+
+DEFINES += QT_NO_DEBUG_STREAM
 
 PLATFORM = pc
 
@@ -13,8 +12,6 @@ contains(PLATFORM, "darwin") {
     DEFINES += TARGET_IS_DARWIN
 
     ROBOCUP_DIR = ${HOME}/robocup/            #change to darwin directory later
-    #ROBOCUP_DIR = /home/shannon/robocup/
-    #ROBOCUP_DIR = /home/david/robocup/
 
     INCLUDEPATH += $$ROBOCUP_DIR
     INCLUDEPATH += $$ROBOCUP_DIR/Autoconfig/
@@ -22,12 +19,12 @@ contains(PLATFORM, "darwin") {
     HEADERS += \
         NUPlatform/Platforms/Darwin/DarwinCamera.h \
         VisionWrapper/datawrapperdarwin.h \
-        $$ROBOCUP_DIR/Autoconfig/debug.h \
-        $$ROBOCUP_DIR/Autoconfig/nubotdataconfig.h \
+        ../Autoconfig/debug.h \
+        ../Autoconfig/nubotdataconfig.h \
         VisionWrapper/visioncontrolwrapperdarwin.h \
     
     SOURCES += \
-        $$ROBOCUP_DIR/NUPlatform/Platforms/Darwin/DarwinCamera.cpp \
+        ../NUPlatform/Platforms/Darwin/DarwinCamera.cpp \
         VisionWrapper/datawrapperdarwin.cpp \
         VisionWrapper/visioncontrolwrapperdarwin.cpp \
 }
@@ -37,52 +34,58 @@ contains(PLATFORM, "pc") {
     DEFINES += TARGET_IS_PC
 
     ROBOCUP_DIR = ${HOME}/robocup/
-    #ROBOCUP_DIR = /home/shannon/robocup/
-    #ROBOCUP_DIR = /home/david/robocup/
 
-    INCLUDEPATH += $$ROBOCUP_DIR
+    INCLUDEPATH += $$ROBOCUP_DIR/
     INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
   
     HEADERS += \
         VisionTools/pccamera.h \
         VisionWrapper/datawrapperpc.h \
         VisionWrapper/visioncontrolwrapperpc.h \
-        debugverbosityvision.h \
-        debug.h \
-        nubotdataconfig.h \
-    
+        ../Vision/Debug/debugverbosityvision.h \
+        ../Vision/Debug/debug.h \
+        ../Vision/Debug/nubotdataconfig.h \
+
     SOURCES += \
         VisionTools/pccamera.cpp \
         VisionWrapper/datawrapperpc.cpp \
         VisionWrapper/visioncontrolwrapperpc.cpp\
 }
 
+contains(PLATFORM, "rpi") {
+     message("Compiling for RPi")
+    DEFINES += TARGET_IS_RPI
+
+    ROBOCUP_DIR = ${HOME}/robocup/
+
+    INCLUDEPATH += $$ROBOCUP_DIR/
+    INCLUDEPATH += $$ROBOCUP_DIR/Vision/Debug/
+
+    HEADERS += \
+        VisionTools/pccamera.h \
+        VisionWrapper/datawrapperrpi.h \
+        VisionWrapper/visioncontrolwrapperrpi.h \
+        ../Vision/Debug/debugverbosityvision.h \
+        ../Vision/Debug/debug.h \
+        ../Vision/Debug/nubotdataconfig.h \
+
+    SOURCES += \
+        VisionTools/pccamera.cpp \
+        VisionWrapper/datawrapperrpi.cpp \
+        VisionWrapper/visioncontrolwrapperrpi.cpp\
+}
+
 
 #this
 HEADERS += \
-    VisionTypes/coloursegment.h \
-    VisionTypes/colourtransitionrule.h \
-    VisionTypes/colourreplacementrule.h \
-    VisionTypes/transition.h \
-    VisionTypes/segmentedregion.h \
-    #VisionTypes/objectcandidate.h \
-    VisionTypes/quad.h \
-    VisionTypes/greenhorizon.h \
-    VisionTypes/VisionFieldObjects/visionfieldobject.h \
-    VisionTypes/VisionFieldObjects/ball.h \
-    VisionTypes/VisionFieldObjects/goal.h \
-    VisionTypes/VisionFieldObjects/beacon.h \
-    VisionTypes/VisionFieldObjects/obstacle.h \
+    ../Vision/VisionTypes/*.h \
+    ../Vision/VisionTypes/VisionFieldObjects/*.h \
     VisionWrapper/datawrappercurrent.h \
-    VisionTools/lookuptable.h \
-    VisionTools/GTAssert.h \
     VisionTools/classificationcolours.h \
-    Modules/greenhorizonch.h \
-    Modules/objectdetectionch.h \
-    Modules/scanlines.h \
-    Modules/segmentfilter.h \
-    Modules/goaldetection.h \
-    Modules/balldetection.h \
+    VisionTools/GTAssert.h \
+    VisionTools/lookuptable.h \
+    ../Vision/Modules/*.h \
+    ../Vision/Modules/LineDetectionAlgorithms/*.h \
     basicvisiontypes.h \
     valgorithm.h \
     visionblackboard.h \
@@ -91,26 +94,11 @@ HEADERS += \
     #Threads/SaveImagesThread.h
 
 SOURCES += \
-    VisionTypes/coloursegment.cpp \
-    VisionTypes/colourtransitionrule.cpp \
-    VisionTypes/colourreplacementrule.cpp \
-    VisionTypes/transition.cpp \
-    VisionTypes/segmentedregion.cpp \
-    #VisionTypes/objectcandidate.cpp \
-    VisionTypes/quad.cpp \
-    VisionTypes/greenhorizon.cpp \
-    VisionTypes/VisionFieldObjects/visionfieldobject.cpp \
-    VisionTypes/VisionFieldObjects/ball.cpp \
-    VisionTypes/VisionFieldObjects/goal.cpp \
-    VisionTypes/VisionFieldObjects/beacon.cpp \
-    VisionTypes/VisionFieldObjects/obstacle.cpp \
+    ../Vision/VisionTypes/*.cpp \
+    ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
     VisionTools/lookuptable.cpp \
-    Modules/greenhorizonch.cpp \
-    Modules/objectdetectionch.cpp \
-    Modules/scanlines.cpp \
-    Modules/segmentfilter.cpp \
-    Modules/goaldetection.cpp \
-    Modules/balldetection.cpp \
+    ../Vision/Modules/*.cpp \
+    ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     visionblackboard.cpp \
     visioncontroller.cpp \
     visionconstants.cpp \
@@ -119,39 +107,42 @@ SOURCES += \
 
 ##robocup
 HEADERS += \
-    $$ROBOCUP_DIR/Tools/FileFormats/LUTTools.h \
-    $$ROBOCUP_DIR/Tools/Optimisation/Parameter.h \
-    $$ROBOCUP_DIR/Tools/Math/Line.h \
-    $$ROBOCUP_DIR/Tools/Math/Matrix.h \
-    $$ROBOCUP_DIR/Tools/Math/TransformMatrices.h \
-    $$ROBOCUP_DIR/Infrastructure/NUImage/NUImage.h \
-    $$ROBOCUP_DIR/NUPlatform/NUCamera/CameraSettings.h \
-    $$ROBOCUP_DIR/NUPlatform/NUCamera/NUCameraData.h \
-    $$ROBOCUP_DIR/Kinematics/Horizon.h \
-    $$ROBOCUP_DIR/NUPlatform/NUCamera.h \
-    $$ROBOCUP_DIR/Infrastructure/FieldObjects/Object.h \
-    $$ROBOCUP_DIR/Infrastructure/FieldObjects/AmbiguousObject.h \
-    $$ROBOCUP_DIR/Infrastructure/FieldObjects/MobileObject.h \
-    $$ROBOCUP_DIR/Infrastructure/FieldObjects/StationaryObject.h \
-    $$ROBOCUP_DIR/Kinematics/Kinematics.h \
-    $$ROBOCUP_DIR/Kinematics/EndEffector.h \
-    $$ROBOCUP_DIR/Kinematics/Link.h \
+    ../Tools/FileFormats/LUTTools.h \
+    ../Tools/Optimisation/Parameter.h \
+    ../Tools/Math/Line.h \
+    ../Tools/Math/LSFittedLine.h \
+    ../Tools/Math/Matrix.h \
+    ../Tools/Math/TransformMatrices.h \
+    ../Infrastructure/NUImage/NUImage.h \
+    ../Infrastructure/NUImage/ColorModelConversions.h \
+    ../NUPlatform/NUCamera/CameraSettings.h \
+    ../NUPlatform/NUCamera/NUCameraData.h \
+    ../Kinematics/Horizon.h \
+    ../NUPlatform/NUCamera.h \
+    ../Infrastructure/FieldObjects/Object.h \
+    ../Infrastructure/FieldObjects/AmbiguousObject.h \
+    ../Infrastructure/FieldObjects/MobileObject.h \
+    ../Infrastructure/FieldObjects/StationaryObject.h \
+    ../Kinematics/Kinematics.h \
+    ../Kinematics/EndEffector.h \
+    ../Kinematics/Link.h \
 
 SOURCES += \
-    $$ROBOCUP_DIR/Tools/FileFormats/LUTTools.cpp \
-    $$ROBOCUP_DIR/Tools/Optimisation/Parameter.cpp \
-    $$ROBOCUP_DIR/Tools/Math/Line.cpp \
-    $$ROBOCUP_DIR/Tools/Math/Matrix.cpp \
-    $$ROBOCUP_DIR/Tools/Math/TransformMatrices.cpp \
-    $$ROBOCUP_DIR/Infrastructure/NUImage/NUImage.cpp \
-    $$ROBOCUP_DIR/NUPlatform/NUCamera/CameraSettings.cpp \
-    $$ROBOCUP_DIR/NUPlatform/NUCamera/NUCameraData.cpp \
-    $$ROBOCUP_DIR/Kinematics/Horizon.cpp \
-    $$ROBOCUP_DIR/NUPlatform/NUCamera.cpp \
-    $$ROBOCUP_DIR/Infrastructure/FieldObjects/Object.cpp \
-    $$ROBOCUP_DIR/Infrastructure/FieldObjects/AmbiguousObject.cpp \
-    $$ROBOCUP_DIR/Infrastructure/FieldObjects/MobileObject.cpp \
-    $$ROBOCUP_DIR/Infrastructure/FieldObjects/StationaryObject.cpp \
-    $$ROBOCUP_DIR/Kinematics/Kinematics.cpp \
-    $$ROBOCUP_DIR/Kinematics/EndEffector.cpp \
-    $$ROBOCUP_DIR/Kinematics/Link.cpp \
+    ../Tools/FileFormats/LUTTools.cpp \
+    ../Tools/Optimisation/Parameter.cpp \
+    ../Tools/Math/Line.cpp \
+    ../Tools/Math/LSFittedLine.cpp \
+    ../Tools/Math/Matrix.cpp \
+    ../Tools/Math/TransformMatrices.cpp \
+    ../Infrastructure/NUImage/NUImage.cpp \
+    ../NUPlatform/NUCamera/CameraSettings.cpp \
+    ../NUPlatform/NUCamera/NUCameraData.cpp \
+    ../Kinematics/Horizon.cpp \
+    ../NUPlatform/NUCamera.cpp \
+    ../Infrastructure/FieldObjects/Object.cpp \
+    ../Infrastructure/FieldObjects/AmbiguousObject.cpp \
+    ../Infrastructure/FieldObjects/MobileObject.cpp \
+    ../Infrastructure/FieldObjects/StationaryObject.cpp \
+    ../Kinematics/Kinematics.cpp \
+    ../Kinematics/EndEffector.cpp \
+    ../Kinematics/Link.cpp \

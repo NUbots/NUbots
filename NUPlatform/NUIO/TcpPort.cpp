@@ -1,5 +1,9 @@
 /*! @file TCPPort.cpp
-    @brief Implementation of UdpPort class.
+    @brief Implementation of TcpPort class.
+    
+    Note: This does not support simultaneous connections, and does not close sockets properly.
+    
+    Someone please rewrite me.
 
     @author Aaron Wong, Jason Kulk
  
@@ -62,7 +66,7 @@ TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
     #endif
     if (setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseflag, sizeof(reuseflag)) == -1)
         errorlog << "TcpPort::TcpPort(). Failed to set reuseaddr socket options, errno: " << errno << endl;
-        
+      
     m_address.sin_family = AF_INET;                             // host byte order
     m_address.sin_port = htons(m_port_number);                  // short, network byte order
     m_address.sin_addr.s_addr = htonl(INADDR_ANY);                     // automatically fill with my IP
@@ -118,10 +122,30 @@ void TcpPort::run()
     char localdata[10*1024];
     int localnumBytes = 0;
     listen(m_sockfd,5);     //Start Listening for Clients
+	
+	// a horrible hack to close the last connection.
+	// idealy should be rewritten to properly support multiple
+	// connections and handle edge cases
+	int m_oldClientSockfd = m_clientSockfd;
 
     while(1)
     {
+		m_oldClientSockfd = m_clientSockfd;
+		
         m_clientSockfd = accept(m_sockfd, (struct sockaddr *)&local_their_addr, &local_addr_len);
+		
+		// close the last connection if it exists
+		if (m_oldClientSockfd != -1)
+		{
+			#ifdef WIN32
+				closesocket(m_oldClientSockfd);
+				WSACleanup();
+			#endif
+			#ifndef WIN32
+				close(m_oldClientSockfd);
+			#endif
+		}
+		
         #ifdef WIN32
             localnumBytes = recv(m_clientSockfd, localdata, sizeof(localdata),0);
         #endif
@@ -203,6 +227,7 @@ void TcpPort::sendData(network_data_t netdata)
         if(localnumBytes < 0)
             debug << "TcpPort::sendData(). Sending Error "<< endl;
     #endif
+		
     pthread_mutex_unlock(&m_socket_mutex);
     return;
 }

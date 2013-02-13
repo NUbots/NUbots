@@ -40,6 +40,8 @@
 #include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 
+#include "Behaviour/Common/HeadBehaviour.h"
+
 #include "debug.h"
 
 class ZombieSubState : public BehaviourState
@@ -54,7 +56,10 @@ protected:
 class ZombieState : public ZombieSubState
 {
 public:
-    ZombieState(ZombieProvider* provider) : ZombieSubState(provider) {}
+
+    ZombieState(ZombieProvider* provider) : ZombieSubState(provider) {
+
+    }
     BehaviourState* nextState() {return m_provider->m_state;}
     void doState()
     {
@@ -80,10 +85,10 @@ public:
         nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
         
         //HEAD TRACK
-        //if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
-        //    m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
-        //else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
-        //    m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+        if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
+           m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
+        else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
+            m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
         //UPDATE HEAD
         m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
 
@@ -94,6 +99,8 @@ public:
         //UPDATE LEGS:
         m_actions->add(NUActionatorsData::RLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightLegJoints, 65);
         m_actions->add(NUActionatorsData::LLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftLegJoints, 65);
+
+
     };
 };
 

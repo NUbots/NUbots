@@ -43,6 +43,8 @@ public:
     void setParametersResult(float fitness);
     
     void summaryTo(ostream& stream);
+
+    vector<Parameter> getBest() const { return m_current_parameters;}
 private:
     void generatePolicies();
     vector<float> calculateStep();

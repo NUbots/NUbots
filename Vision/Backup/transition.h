@@ -32,9 +32,9 @@ public:
     void set(const ColourSegment& before, const ColourSegment& after, ScanDirection direction);
     
     const PointType& getLocation() const;   //! Returns the location of the transition in pixel coordinates.
-    ClassIndex::Colour getBefore() const;   //! Returns the colour of the segment before the transition.
-    ClassIndex::Colour getAfter() const;    //! Returns the colour of the segment after the transition.
-    ScanDirection getDirection() const;     //! Returns the alignment of the segments that produce the transition.
+//    ClassIndex::Colour getBefore() const;   //! Returns the colour of the segment before the transition.
+//    ClassIndex::Colour getAfter() const;    //! Returns the colour of the segment after the transition.
+//    ScanDirection getDirection() const;     //! Returns the alignment of the segments that produce the transition.
     
     bool operator< (const Transition& rhs) const;   //! GT operator for a pair of transitions.
     

@@ -1,0 +1,38 @@
+//AARON: Seperation based on whether the line is left or right of the split point
+            /*
+            for(unsigned int pointcounter = 0; pointcounter <points.size(); pointcounter++)
+            {
+
+                Point p;
+                p.x = points[pointcounter]->x;
+                p.y = points[pointcounter]->y;
+
+                if(line.getSignedLinePointDistance(p) < -5)
+                    below.push_back(points[pointcounter]);
+                else if(line.getSignedLinePointDistance(p) > 5)
+                    above.push_back(points[pointcounter]);
+                else
+                    centre.push_back(points[pointcounter]);
+
+
+                //First check gradients: Horizontally sloping compare x values, Vertically sloping compare y values
+
+                //Go through all points to check if they are left of the split point (Left is less then split point)
+
+                if(fabs(line.getGradient()) > 1)
+                {
+                    if(points[pointcounter]->y <= split_point->y)
+                        left.push_back(points[pointcounter]);
+                    else
+                        right.push_back(points[pointcounter]);
+
+                }
+                else
+                {
+                    if(points[pointcounter]->x <= split_point->x)
+                        left.push_back(points[pointcounter]);
+                    else
+                        right.push_back(points[pointcounter]);
+                }
+            }
+            */

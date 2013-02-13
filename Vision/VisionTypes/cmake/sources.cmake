@@ -27,7 +27,6 @@ coloursegment.cpp
 colourtransitionrule.cpp
 objectcandidate.cpp
 segmentedregion.cpp
-transition.cpp
 quad.cpp
 )
 ####################################################################################

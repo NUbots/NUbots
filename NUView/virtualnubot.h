@@ -11,8 +11,8 @@
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "GLDisplay.h"
 #include "Tools/Math/LSFittedLine.h"
-#include "VisionOld/CornerPoint.h"
-#include "VisionOld/Circle.h"
+//#include "VisionOld/CornerPoint.h"
+//#include "VisionOld/Circle.h"
 #include <vector>
 #include <fstream>
 #include "FileAccess/LogFileReader.h"
@@ -20,8 +20,8 @@
 
 //#include "VisionOld/Vision.h"
 
-#include "VisionOld/TransitionSegment.h"
-#include "VisionOld/ObjectCandidate.h"
+//#include "VisionOld/TransitionSegment.h"
+//#include "VisionOld/ObjectCandidate.h"
 #include "Vision/VisionWrapper/visioncontrolwrappernuview.h"
 
 class NUBlackboard;
@@ -83,12 +83,12 @@ signals:
     void imageDisplayChanged(const NUImage* updatedImage, GLDisplay::display displayId);
     void classifiedDisplayChanged(ClassifiedImage* updatedImage, GLDisplay::display displayId);
     void lineDisplayChanged(Line* line, GLDisplay::display displayId);
-    void cornerPointsDisplayChanged(std::vector< CornerPoint> corners, GLDisplay::display displayId );
+    //void cornerPointsDisplayChanged(std::vector< CornerPoint> corners, GLDisplay::display displayId );
     void pointsDisplayChanged(std::vector< Vector2<int> > updatedPoints, GLDisplay::display displayId);
-    void transitionSegmentsDisplayChanged(std::vector< TransitionSegment > updatedTransitionSegments, GLDisplay::display displayId);
+    //void transitionSegmentsDisplayChanged(std::vector< TransitionSegment > updatedTransitionSegments, GLDisplay::display displayId);
     void lineDetectionDisplayChanged(std::vector<LSFittedLine> fieldLines, GLDisplay::display displayId);
     void linePointsDisplayChanged(std::vector<LinePoint> linepoints, GLDisplay::display displayId);
-    void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
+    //void candidatesDisplayChanged(std::vector< ObjectCandidate > updatedCandidates, GLDisplay::display displayId);
     void fieldObjectsDisplayChanged(FieldObjects* AllFieldObjects, GLDisplay::display displayId);
     void fieldObjectsChanged(const FieldObjects* AllFieldObjects);
     void edgeFilterChanged(QImage image, GLDisplay::display displayId);

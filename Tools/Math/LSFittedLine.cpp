@@ -15,25 +15,17 @@ void LSFittedLine::clearPoints(){
 	sumX2 = 0;
 	sumY2 = 0;
 	sumXY = 0;
-        numPoints = 0;
+    numPoints = 0;
 	leftPoint.x = 0;
 	leftPoint.y = 0;
 	rightPoint.x = 0;
-        rightPoint.y = 0;
-        transLeftPoint.x = 0;
-        transLeftPoint.y = 0;
-        transRightPoint.x = 0;
-        transRightPoint.y = 0;
+    rightPoint.y = 0;
 	MSD = 0;
-	r2tls = 0;
-	for (unsigned int p = 0; p < points.size(); p++)
-	{
-		points[p]->inUse = false;
-	}
+    r2tls = 0;
 	points.clear();
 }
 
-std::vector<LinePoint*> LSFittedLine::getPoints()
+const std::vector<LinePoint>& LSFittedLine::getPoints()
 {
 	return points;
 }
@@ -45,7 +37,7 @@ void LSFittedLine::addPoint(LinePoint &point){
 	sumY2 += point.y * point.y;
 	sumXY += point.x * point.y;
 	numPoints ++;
-	points.push_back(&point);
+    points.push_back(point);
 	point.inUse = true;
 	if (numPoints < 2)
 	{
@@ -75,38 +67,38 @@ void LSFittedLine::addPoint(LinePoint &point){
 	}
 }
 
-void LSFittedLine::addPoints(vector<LinePoint*>& pointlist){
+void LSFittedLine::addPoints(vector<LinePoint>& pointlist){
     if(!pointlist.empty()) {
         if(numPoints < 1) {
-            leftPoint = *pointlist[0];
-            rightPoint = *pointlist[0];
+            leftPoint = pointlist[0];
+            rightPoint = pointlist[0];
         }
         for(unsigned int i=0; i<pointlist.size(); i++) {
-            sumX += pointlist[i]->x;
-            sumY += pointlist[i]->y;
-            sumX2 += pointlist[i]->x * pointlist[i]->x;
-            sumY2 += pointlist[i]->y * pointlist[i]->y;
-            sumXY += pointlist[i]->x * pointlist[i]->y;
+            sumX += pointlist[i].x;
+            sumY += pointlist[i].y;
+            sumX2 += pointlist[i].x * pointlist[i].x;
+            sumY2 += pointlist[i].y * pointlist[i].y;
+            sumXY += pointlist[i].x * pointlist[i].y;
             numPoints++;
             points.push_back(pointlist[i]);
-            pointlist[i]->inUse = true;
+            pointlist[i].inUse = true;
 
             //CHECK if point is a start or end point
-            if(pointlist[i]->x == leftPoint.x){
-                if(pointlist[i]->y < leftPoint.y){
-                    leftPoint = *pointlist[i];
+            if(pointlist[i].x == leftPoint.x){
+                if(pointlist[i].y < leftPoint.y){
+                    leftPoint = pointlist[i];
                 }
             }
-            else if (pointlist[i]->x < leftPoint.x) {
-                leftPoint = *pointlist[i];
+            else if (pointlist[i].x < leftPoint.x) {
+                leftPoint = pointlist[i];
             }
-            if(pointlist[i]->x == rightPoint.x) {
-                if(pointlist[i]->y > rightPoint.y) {
-                    rightPoint = *pointlist[i];
+            if(pointlist[i].x == rightPoint.x) {
+                if(pointlist[i].y > rightPoint.y) {
+                    rightPoint = pointlist[i];
                 }
             }
-            else if (pointlist[i]->x > rightPoint.x) {
-                rightPoint = *pointlist[i];
+            else if (pointlist[i].x > rightPoint.x) {
+                rightPoint = pointlist[i];
             }
         }
         if (numPoints < 2)
@@ -129,33 +121,29 @@ void LSFittedLine::joinLine(LSFittedLine &sourceLine)
 	sumY2 += sourceLine.sumY2;
 	sumXY += sourceLine.sumXY;
 	numPoints += sourceLine.numPoints;
-	for(unsigned int p = 0; p < sourceLine.points.size(); p++)
-	{
+    for(unsigned int p = 0; p < sourceLine.points.size(); p++) {
 		points.push_back(sourceLine.points[p]);
 	}
-	if (numPoints < 2 && sourceLine.numPoints > 0)
-	{
+    if (numPoints < 2 && sourceLine.numPoints > 0) {
 		valid = false;		
 		leftPoint = sourceLine.leftPoint;
 		rightPoint = sourceLine.rightPoint;
 	}
-	else
-	{
+    else {
 		valid = true;
 		calcLine();
 		//CHECK if new point is a start or end point
 		if (sourceLine.leftPoint.x < leftPoint.x)
 			leftPoint = sourceLine.leftPoint;
-                if (sourceLine.rightPoint.x > rightPoint.x)
+        if (sourceLine.rightPoint.x > rightPoint.x)
 			rightPoint = sourceLine.rightPoint;
 		
 		//SPECIAL CONDITION FOR VERITCAL LINES
 		//**************************************
-                if (rightPoint.x == leftPoint.x)
-		{
+        if (rightPoint.x == leftPoint.x) {
 			if(sourceLine.leftPoint.y < leftPoint.y)
 				leftPoint = sourceLine.leftPoint;
-                        if(sourceLine.rightPoint.y > rightPoint.y)
+            if(sourceLine.rightPoint.y > rightPoint.y)
 				rightPoint = sourceLine.rightPoint;
 		}
 	}
@@ -218,7 +206,7 @@ void LSFittedLine::calcLine(){
 
 LinePoint::LinePoint()
 {
-        ID = 0;
+    ID = 0;
 	clear();
 }
 
@@ -229,6 +217,14 @@ void LinePoint::clear()
 	x = 0;
 	y = 0;
 }
+
+LinePoint::LinePoint(double in_x, double in_y) : Point(in_x, in_y)
+{
+    ID = 0;
+    inUse = false;
+    width = 0;
+}
+
 /*
 void test(LinePoint p1, LinePoint p2, LinePoint p3)
 {

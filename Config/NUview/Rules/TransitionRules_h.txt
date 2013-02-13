@@ -1,23 +1,31 @@
-GOAL_Y:
+GOAL_Y_COLOUR:
 before: (3, 320) [yellow]
 after: (0, 320) []
 
-GOAL_Y:
+GOAL_Y_COLOUR:
 before: (0, 320) []
 after: (3, 320) [yellow]
 
-GOAL_B:
+GOAL_B_COLOUR:
 before: (3, 320) [blue]
 after: (0, 320) []
 
-GOAL_B:
+GOAL_B_COLOUR:
 before: (0, 320) []
 after: (3, 320) [blue]
 
-BALL:
+BALL_COLOUR:
 before: (3, 320) [orange]
 after: (0, 320) []
 
-BALL:
+BALL_COLOUR:
 before: (0, 320) []
 after: (3, 320) [orange]
+
+LINE_COLOUR:
+before: (0,320) []
+after: (3,320) [white]
+
+LINE_COLOUR:
+before: (3,320) [white]
+after: (0,320) []

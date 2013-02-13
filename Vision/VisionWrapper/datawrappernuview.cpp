@@ -33,8 +33,8 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_V_SCANS";
     case DBID_SEGMENTS:
         return "DBID_SEGMENTS";
-    case DBID_TRANSITIONS:
-        return "DBID_TRANSITIONS";
+    case DBID_MATCHED_SEGMENTS:
+        return "DBID_MATCHED_SEGMENTS";
     case DBID_HORIZON:
         return "DBID_HORIZON";
     case DBID_GREENHORIZON_SCANS:
@@ -235,6 +235,11 @@ bool DataWrapper::debugPublish(vector<Obstacle> data) {
     return false;
 }
 
+bool DataWrapper::debugPublish(const vector<FieldLine>& data)
+{
+    return false;
+}
+
 bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points)
 {
     #if VISION_WRAPPER_VERBOSITY > 1
@@ -262,11 +267,11 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<PointType>& data_points
 //            line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), Scalar(127,127,127), 1);
 //        }
         return false;
-    case DBID_TRANSITIONS:
-        errorlog << "DataWrapper::debugPublish - DBID_TRANSITIONS printing not implemented" << endl;
-//        BOOST_FOREACH(const PointType& pt, data_points) {
-//            circle(img, cv::Point2i(pt.x, pt.y), 1, Scalar(255,255,0), 4);
-//        }
+    case DBID_MATCHED_SEGMENTS:
+        if(display_callback != NULL)
+            (*display_callback)(data_points, GLDisplay::TransitionSegments);
+        else
+            errorlog << "DataWrapper::debugPublish - null callback pointer" << endl;
         return false;
     case DBID_HORIZON:
         errorlog << "DataWrapper::debugPublish - DBID_HORIZON printing not implemented" << endl;
@@ -344,7 +349,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     return true;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const Mat &img)
+bool DataWrapper::debugPublish(DEBUG_ID id, const NUImage* const img)
 {
     return false;
 }
