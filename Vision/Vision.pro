@@ -1,17 +1,12 @@
 
 win32{
     INCLUDEPATH += 'C:\Program Files\Boost\boost_1_52_0'
-    INCLUDEPATH += 'C:\Program Files\OpenCV\include\opencv2'
-    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\core\include'
-    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\highgui\include'
-    INCLUDEPATH += 'C:\Program Files\OpenCV\modules\imgproc\include'
     INCLUDEPATH += 'C:\Qwt\qwt-6.0.2\src'
     DEFINES += TARGET_OS_IS_WINDOWS
 }
 
 !macx{
     !win32{
-        INCLUDEPATH += /usr/local/include/opencv2/
         INCLUDEPATH += /usr/include/boost/
         INCLUDEPATH += /usr/include/qwt
 
