@@ -26,6 +26,7 @@
 //for virtualNUbot/Qt
 #include "GLDisplay.h"
 #include <QObject>
+#include <qwt/qwt_plot_curve.h>
 
 using namespace std;
 //using namespace cv;
@@ -74,7 +75,7 @@ public:
     void debugPublish(DEBUG_ID id, const NUImage *const img);
     void debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
 
-    void plotPoints(const vector<Point>& pts, string name);
+    void plot(DEBUG_PLOT_ID id, const vector<Point>& pts, string name);
     
 private:
     DataWrapper();
@@ -99,7 +100,7 @@ signals:
     void pointsUpdated(std::vector<Point> pts, GLDisplay::display disp);
     void segmentsUpdated(std::vector<std::vector<ColourSegment> > region, GLDisplay::display disp);
     void linesUpdated(std::vector<LSFittedLine> lines, GLDisplay::display disp);
-    void plotUpdated(std::vector<Point> pts, GLDisplay::display disp);
+    void plotUpdated(const QwtPlotCurve* plot, QString name);
     
 private:
 

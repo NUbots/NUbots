@@ -198,8 +198,7 @@ Point Transformer::screenToGroundCartesian(Point pt) const
     //return Point(r*sin(cam_angles.x), r*cos(cam_angles.x));
     Matrix ctgtransform = Matrix4x4fromVector(m_ctg_vector);
 
-    //Vector3<float> spherical = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
-
+    //Vector3<float> spherical_foot_relative = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
     Vector3<float> spherical_foot_relative = Kinematics::TransformPosition(ctgtransform, Vector3<float>(r, cam_angles.x, cam_angles.y));
 
     Vector3<float> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
@@ -207,35 +206,6 @@ Point Transformer::screenToGroundCartesian(Point pt) const
     cout << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
 
     return Point(cartesian_foot_relative.x, cartesian_foot_relative.y);
-
-    //Vector3<float> t = Kinematics::TransformPosition(ctgtransform,spherical);
-
-    //return
-
-//    return Point(t.x*cos(t.y)*cos(t.z),
-//                 t.x*sin(t.y)*cos(t.z));
-
-//    double theta = mathGeneral::PI*0.5 - camera_pitch + cam_angles.y + VisionConstants::D2P_ANGLE_CORRECTION;
-
-//    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
-//        theta -= body_pitch;
-
-//    //double bearingcos = cos(sphericalCoordinates[1]);
-//    //double bearingsin = sin(sphericalCoordinates[1]);
-//    //double elevationcos = cos(sphericalCoordinates[2]);
-//    //double elevationsin = sin(sphericalCoordinates[2]);
-
-////    std::vector<float> result(3,0.0f);
-////    result[0] = distance * bearingcos * elevationcos;
-////    result[1] = distance * bearingsin * elevationcos;
-////    result[2] = distance * elevationsin;
-//    //return result;
-
-//    return Point(r*cos(cam_angles.x)*sin(theta),
-//                 r*cos(theta)*sin(cam_angles.x));
-//    return Point(r*cos(cam_angles.x)*cos(theta),
-//                 r*sin(cam_angles.x)*cos(theta));
-
 }
 
 vector<Point> Transformer::screenToGroundCartesian(const vector<Point>& pts) const

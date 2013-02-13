@@ -93,6 +93,7 @@ signals:
     void fftChanged(QImage image, GLDisplay::display displayId);
     void updateStatistics(float* selectedColourCounters);
     void LUTChanged(unsigned char* classificationTable);
+    void curveChanged(const QwtPlotCurve*, QString);
 
 private:
     class classEntry

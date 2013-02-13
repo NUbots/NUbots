@@ -118,7 +118,7 @@ inline Vector3<float> Cartesian2Spherical(const Vector3<float>& cartesianCoordin
 
     result.x = sqrt(x*x + y*y + z*z);
     result.y = atan2(y,x);
-    result.z = asin(z/(result[0]));
+    result.z = asin(z/(result.x));
     return result;
 }
 

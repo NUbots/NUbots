@@ -3,6 +3,7 @@
 #include "Vision/visionconstants.h"
 #include "Vision/GenericAlgorithms/ransac.h"
 #include "Vision/VisionTypes/RANSACTypes/ransacline.h"
+#include "debugverbosityvision.h"
 
 #include <limits>
 #include <stdlib.h>
@@ -35,7 +36,7 @@ vector<LSFittedLine> LineDetectorRANSAC::run()
         plotpts.push_back(Point(p.x, vbb->getImageHeight()-p.y));
     }
 
-    DataWrapper::getInstance()->plotPoints(plotpts, "Pre");  // debugging
+    DataWrapper::getInstance()->plot(POINTS_PLOT, plotpts, "Pre");  // debugging
 
     candidates = RANSAC::findMultipleModels<RANSACLine, Point>(points, m_e, m_n, m_k, m_max_iterations);
     for(unsigned int i=0; i<candidates.size(); i++) {
@@ -49,24 +50,18 @@ vector<LSFittedLine> LineDetectorRANSAC::run()
     //debugging
     if(vbb->getTransformer().isScreenToGroundValid())
         points = vbb->getTransformer().screenToGroundCartesian(points);
+#if VISION_FIELDOBJECT_VERBOSITY > 0
     else
         cout << "Screen to ground invalid" << endl;
+#endif
 
-    vector<Point>::iterator it = points.begin();
-    int thr = 0;
-    while(it != points.end()) {
-        if(max(abs(it->x), abs(it->y)) > 500) {
-            it = points.erase(it);
-            thr++;
-        }
-        else {
-            it++;
-        }
+    vector<Point> temp;
+    BOOST_FOREACH(Point p, points) {
+        if(p.abs() < 1500)
+            temp.push_back(p);
     }
 
-    cout << "plotPoints threw out " << thr << " points" << endl;
-
-    DataWrapper::getInstance()->plotPoints(points, "Post");  // debugging
+    DataWrapper::getInstance()->plot(POINTS_PLOT, temp, "Post");  // debugging
 
 //    //use generic ransac implementation to fine lines
 //    candidates = RANSAC::findMultipleModels<VisionLine, Point>(points, m_e, m_n, m_k, m_max_iterations);

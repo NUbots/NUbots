@@ -73,7 +73,7 @@ signals:
     void LocalisationDataChanged(const Localisation*);
     void SelfLocalisationDataChanged(const SelfLocalisation*);
     void rawImageChanged(const NUImage*);
-    void sensorDataChanged(const float*, const float*, const float*);
+    //void sensorDataChanged(const float*, const float*, const float*);
     void sensorDataChanged(NUSensorsData*);
     void ObjectDataChanged(const FieldObjects*);
     void TeamInfoChanged(const TeamInformation*);

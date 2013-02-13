@@ -107,6 +107,7 @@ public slots:
     void imageFrameChanged(int currFrame, int totalFrames);
 protected slots:
     QMdiSubWindow* createGLDisplay();
+    QMdiSubWindow* createPlotDisplay();
     QMdiSubWindow* createLocWmGlDisplay();
     QMdiSubWindow* createLUTGlDisplay();
     void PrintConnectionInfo(const QHostInfo &hostInfo, int);
@@ -192,6 +193,7 @@ private:
     QAction *tileAction;            //!< Instance of the tile window action
     QAction *nativeAspectAction;    //!< Instance of the Native Aspect Ratio Action
     QAction *newVisionDisplayAction;//!< Instance of the new vision display action.
+    QAction *newPlotDisplayAction;  //!< Instance of the new plot display action.
     QAction *newLocWMDisplayAction;//!< Instance of the new vision display action.
     QAction *newLUTDisplayAction;   //!< Instance of new look up table display action.
     QAction *runOfflineLocalisatonAction; //!< Instance of the offline localisation action.

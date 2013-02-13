@@ -1,5 +1,8 @@
 QT += network \
     opengl
+
+CONFIG += qwt
+
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
@@ -202,7 +205,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/Models/WeightedModel.h \
     ../Tools/Math/depUKF.h \
     ../Localisation/iotests.h \
-    NUViewConfig/*.h
+    NUViewConfig/*.h \
+    plotdisplay.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -342,7 +346,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Filters/MobileObjectUKF.cpp \
     ../Localisation/Models/WeightedModel.cpp \
     ../Tools/Math/depUKF.cpp \
-    ../Localisation/iotests.cpp
+    ../Localisation/iotests.cpp \
+    plotdisplay.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

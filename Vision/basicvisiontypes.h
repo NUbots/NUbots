@@ -73,6 +73,11 @@ namespace Vision {
 //        NUMBER_OF_IDS           = 18
     };
 
+    enum DEBUG_PLOT_ID {
+        POINTS_PLOT,
+        LINES_PLOT
+    };
+
     std::string getDebugIDName(DEBUG_ID id);
 
     DEBUG_ID getDebugIDFromInt(int id);

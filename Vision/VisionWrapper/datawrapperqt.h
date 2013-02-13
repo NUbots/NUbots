@@ -73,7 +73,7 @@ public:
     void debugPublish(DEBUG_ID id, const NUImage *const img);
     void debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
 
-    void plotPoints(const vector<Point>& pts, string name);
+    void plot(DEBUG_PLOT_ID id, const vector<Point>& pts, string name);
 
 
 private:

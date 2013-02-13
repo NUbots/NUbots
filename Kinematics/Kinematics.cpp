@@ -268,7 +268,7 @@ Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform,
     const double nearDistance = 10;     // 10 cm
     const double farDistance = 3000;   // 3,000 cm (30 metres)
 
-    std::vector<float> resultCartesian(3, 0.0f);
+    Vector3<float> resultCartesian(0,0,0);
 
     // pre-calculate required trig values.
     double xcos = cos(angleFromCameraCentreX);
@@ -296,21 +296,17 @@ Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform,
 
     // Interpolate between near and far values to find the point at which z = 0 (the ground)
     double zScaleFactor = nearResult[2][0] / (nearResult[2][0] - farResult[2][0]);
-    resultCartesian[0] = nearResult[0][0] + (farResult[0][0] - nearResult[0][0]) * zScaleFactor;
-    resultCartesian[1] = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
-    resultCartesian[2] = 0.0;
+    resultCartesian.x = nearResult[0][0] + (farResult[0][0] - nearResult[0][0]) * zScaleFactor;
+    resultCartesian.y = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
+    resultCartesian.z = 0.0;
+
+    cout << nearResult << endl << farResult << endl << resultCartesian << endl;
 
     // Convert back to polar coodinates.
-    std::vector<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
-
-    Vector3<float> result;
-    result[0] = resultSpherical[0];
-    result[1] = resultSpherical[1];
-    result[2] = resultSpherical[2];
+    Vector3<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
 
     //! TODO: Get the right thing to output, what do we want from this function??
-    return result;
-
+    return resultSpherical;
 }
 
 Matrix Kinematics::CalculateCamera2GroundTransform(const Matrix& origin2SupportLegTransform, const Matrix& origin2CameraTransform)

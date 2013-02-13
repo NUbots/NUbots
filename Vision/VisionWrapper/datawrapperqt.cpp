@@ -389,7 +389,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
     }
 }
 
-void DataWrapper::plotPoints(const vector<Point>& pts, string name)
+void DataWrapper::plot(DEBUG_PLOT_ID id, const vector<Point>& pts, string name)
 {
     QVector<QPointF> qpts;
 
