@@ -284,7 +284,7 @@ void SegmentFilter::loadTransitionRules(string filename)
              <<"_v.txt or _h.txt empty!\n \n" << "The robot may exhibit blindness."
              <<"=========================WARNING=========================\n" << endl;
     }
-        //DEBUG
+    //DEBUG
 #if VISION_FILTER_VERBOSITY > 0
     debug << "SegmentFilter::loadTransitionRules()" << endl;
     debug << "rules_h (" << rules_h.size() << ")\n" << rules_h;
