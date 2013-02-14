@@ -56,10 +56,10 @@ bool VisionConstants::D2P_INCLUDE_BODY_PITCH;
 float VisionConstants::D2P_ANGLE_CORRECTION;
 bool VisionConstants::BALL_DISTANCE_POSITION_BOTTOM;
 //! Distance method options
-VisionConstants::DistanceMethod VisionConstants::BALL_DISTANCE_METHOD;
-VisionConstants::DistanceMethod VisionConstants::GOAL_DISTANCE_METHOD;
-VisionConstants::DistanceMethod VisionConstants::BEACON_DISTANCE_METHOD;
-VisionConstants::LineDetectionMethod VisionConstants::LINE_METHOD;
+DistanceMethod VisionConstants::BALL_DISTANCE_METHOD;
+DistanceMethod VisionConstants::GOAL_DISTANCE_METHOD;
+DistanceMethod VisionConstants::BEACON_DISTANCE_METHOD;
+LineDetectionMethod VisionConstants::LINE_METHOD;
 //! Field-object detection constants
 int VisionConstants::BALL_EDGE_THRESHOLD;
 int VisionConstants::BALL_ORANGE_TOLERANCE;
@@ -1091,57 +1091,4 @@ bool VisionConstants::setGeneralParams(const vector<float>& params)
     VERTICAL_SCANLINE_SPACING = params.at(4);
     GREEN_HORIZON_SCAN_SPACING = params.at(5);
     return true;
-}
-
-VisionConstants::DistanceMethod VisionConstants::getDistanceMethodFromName(std::string name)
-{
-    if(name.compare("WIDTH") == 0)
-        return Width;
-    else if(name.compare("D2P") == 0)
-        return D2P;
-    else if(name.compare("LEAST") == 0)
-        return Least;
-    else if(name.compare("AVERAGE") == 0)
-        return Average;
-
-    //no match - return default
-    #ifdef DEBUG_VISION_VERBOSITY_ON
-        debug << "VisionConstants::getDistanceMethodFromName - unmatched method name: " << name << " used D2P instead" << std::endl;
-    #endif
-    return D2P; //default
-}
-
-std::string VisionConstants::getDistanceMethodName(VisionConstants::DistanceMethod method)
-{
-    switch(method) {
-    case Width:     return "WIDTH";
-    case D2P:       return "D2P";
-    case Average:   return "AVERAGE";
-    case Least:     return "LEAST";
-    default:        return "UNKOWN";
-    }
-}
-
-
-VisionConstants::LineDetectionMethod VisionConstants::getLineMethodFromName(std::string name)
-{
-    if(name.compare("SAM") == 0)
-        return SAM;
-    else if(name.compare("RANSAC") == 0)
-        return RANSAC;
-
-    //no match - return default
-    #ifdef DEBUG_VISION_VERBOSITY_ON
-        debug << "VisionConstants::getLineMethodFromName - unmatched method name: " << name << " used RANSAC instead" << std::endl;
-    #endif
-    return RANSAC; //default
-}
-
-std::string VisionConstants::getLineMethodName(VisionConstants::LineDetectionMethod method)
-{
-    switch(method) {
-    case SAM:       return "SAM";
-    case RANSAC:    return "RANSAC";
-    default:        return "INVALID";
-    }
 }

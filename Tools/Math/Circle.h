@@ -12,6 +12,9 @@ public:
 
     bool constructFromPoints(Point p1, Point p2, Point p3, double tolerance = 1.0e-6);
 
+    double getRadius() const {return m_radius;}
+    Point getCentre() const {return m_centre;}
+
 protected:
     Point m_centre;
     double m_radius;

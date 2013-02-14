@@ -14,12 +14,10 @@ public:
     LineDetector();
     virtual ~LineDetector();
 
-    virtual vector<LSFittedLine> run() = 0;
+    virtual vector<LSFittedLine> run(const vector<Point>& points) = 0;
 
 protected:
     vector<LSFittedLine> mergeColinear(vector<LSFittedLine> lines, double angle_threshold, double distance_threshold) const;
-    vector<Point> getPointsFromSegments(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments) const;
-    vector<Point> pointsUnderGreenHorizon(const vector<Point>& points, const GreenHorizon& gh) const;
 
 };
 

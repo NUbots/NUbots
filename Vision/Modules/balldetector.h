@@ -15,13 +15,15 @@ using namespace std;
 class BallDetector
 {
 public:
-    /*! @brief A static function to detect a single ball from orange transitions using a geometric mean for locating
-      and close classification at the pixel level combined with occlusion detection for classifying.
+    BallDetector();
+    virtual ~BallDetector();
+    /*! @brief Detects a single ball from orange transitions using a geometric mean for general location
+      and close classification at the pixel level combined with occlusion detection for refinement.
     */
-    static vector<Ball> run();
+    virtual vector<Ball> run();
 
-private:
-    static void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<Vector2<double> >& pointlist);
+protected:
+    void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<Point>& pointlist);
 };
 
 #endif // BALLDETECTION_H

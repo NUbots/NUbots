@@ -24,6 +24,8 @@
 #include "VisionTypes/VisionFieldObjects/beacon.h"
 #include "VisionTypes/VisionFieldObjects/obstacle.h"
 #include "VisionTypes/VisionFieldObjects/fieldline.h"
+#include "VisionTypes/VisionFieldObjects/centrecircle.h"
+#include "VisionTypes/VisionFieldObjects/cornerpoint.h"
 #include "VisionTypes/greenhorizon.h"
 
 #ifndef VISIONBLACKBOARD_H // mapped_horizontal_transitions: [1-9]+
@@ -64,12 +66,16 @@ public:
     void addBall(const Ball& newball);
     void addObstacle(const Obstacle& newobstacle);
     void addLine(const FieldLine& newline);
+    void addCentreCircle(const CentreCircle& newcircle);
+    void addCornerPoint(const CornerPoint& newcorner);
 
     void addGoals(const vector<Goal>& newgoals);
     //void addBeacons(const vector<Beacon>& newbeacons);
     void addBalls(const vector<Ball>& newballs);
     void addObstacles(const vector<Obstacle>& newobstacles);
     void addLines(const vector<FieldLine>& newlines);
+    void addCentreCircles(const vector<CentreCircle>& newcircles);
+    void addCornerPoints(const vector<CornerPoint>& newcorners);
 
 
     //ACCESSORS
@@ -177,6 +183,8 @@ private:
     vector<Ball> m_balls;
     vector<Obstacle> m_obstacles;
     vector<FieldLine> m_lines;
+    vector<CentreCircle> m_centre_circles;
+    vector<CornerPoint> m_corner_points;
     
 };
 

@@ -275,21 +275,21 @@ double Goal::distanceToGoal(double bearing, double elevation)
         debug << "Goal::distanceToGoal: width_dist: " << width_dist << endl;
     #endif
     switch(VisionConstants::GOAL_DISTANCE_METHOD) {
-    case VisionConstants::D2P:
+    case D2P:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: D2P" << endl;
         #endif
         distance_valid = d2pvalid && d2p > 0;
         result = d2p;
         break;
-    case VisionConstants::Width:
+    case Width:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Width" << endl;
         #endif
         distance_valid = true;
         result = width_dist;
         break;
-    case VisionConstants::Average:
+    case Average:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Average" << endl;
         #endif
@@ -297,7 +297,7 @@ double Goal::distanceToGoal(double bearing, double elevation)
         distance_valid = d2pvalid && d2p > 0;
         result = (d2p + width_dist) * 0.5;
         break;
-    case VisionConstants::Least:
+    case Least:
         #if VISION_FIELDOBJECT_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Least" << endl;
         #endif

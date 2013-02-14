@@ -190,23 +190,23 @@ double Ball::distanceToBall(double bearing, double elevation) {
         debug << "Ball::distanceToGoal: d2p: " << d2p << endl;
         debug << "Ball::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
         debug << "Ball::distanceToGoal: width_dist: " << width_dist << endl;
-        debug << "Ball::distanceToGoal: Method: " << VisionConstants::getDistanceMethodName(VisionConstants::BALL_DISTANCE_METHOD) << endl;
+        debug << "Ball::distanceToGoal: Method: " << getDistanceMethodName(VisionConstants::BALL_DISTANCE_METHOD) << endl;
     #endif
     switch(VisionConstants::BALL_DISTANCE_METHOD) {
-    case VisionConstants::D2P:
+    case D2P:
         distance_valid = d2pvalid && d2p > 0;
         result = d2p;
         break;
-    case VisionConstants::Width:
+    case Width:
         distance_valid = true;
         result = width_dist;
         break;
-    case VisionConstants::Average:
+    case Average:
         //average distances
         distance_valid = d2pvalid && d2p > 0;
         result = (d2p + width_dist) * 0.5;
         break;
-    case VisionConstants::Least:
+    case Least:
         distance_valid = d2pvalid && d2p > 0;
         result = (distance_valid ? min(d2p, width_dist) : width_dist);
         break;

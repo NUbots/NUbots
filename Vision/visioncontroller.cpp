@@ -22,7 +22,7 @@
 
 VisionController* VisionController::instance = 0;
 
-VisionController::VisionController()
+VisionController::VisionController() : m_corner_detector(0.95), m_circle_detector(0.95)
 {
     m_data_wrapper = DataWrapper::getInstance();
     m_blackboard = VisionBlackboard::getInstance();
@@ -30,6 +30,10 @@ VisionController::VisionController()
     m_line_detector_sam = new LineDetectorSAM();
     m_goal_detector_hist = new GoalDetectorHistogram();
     m_goal_detector_ransac = new GoalDetectorRANSAC();
+
+    //requires other detectors
+    m_field_point_detector = new FieldPointDetector(m_line_detector_ransac, &m_circle_detector, &m_corner_detector);
+
 }
 
 VisionController::~VisionController()
@@ -107,31 +111,20 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 
         //PROFILING
         #ifdef VISION_PROFILER_ON
-        static Profiler prof("lines");
-        ofstream lines(VisionConstants::getLineMethodName(VisionConstants::LINE_METHOD).c_str(), ios_base::app);
+        static Profiler prof("field points");
+        static ofstream profiling("Vision Profiling", ios_base::app);
         prof.start();
         #endif
-        //LINES
-        vector<LSFittedLine> lines;
-        switch(VisionConstants::LINE_METHOD) {
-        case VisionConstants::RANSAC:
-            lines = m_line_detector_ransac->run();
-            break;
-        case VisionConstants::SAM:
-            lines = m_line_detector_sam->run();
-            break;
-        }
-        BOOST_FOREACH(LSFittedLine& l, lines) {
-            m_blackboard->addLine(FieldLine(l));
-        }
+        //FIELD POINTS
+
+        m_field_point_detector->run();
 
         #ifdef VISION_PROFILER_ON
         prof.stop();
-        lines << prof << endl;
-        lines.close();
+        profiling << prof << endl;
         #endif
         #if VISION_CONTROLLER_VERBOSITY > 2
-            debug << "VisionController::runFrame() - line detection done" << endl;
+            debug << "VisionController::runFrame() - centre circle, line and corner detection done" << endl;
         #endif
     }
     else {

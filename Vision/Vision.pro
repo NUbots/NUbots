@@ -142,10 +142,12 @@ HEADERS += \
     VisionTools/transformer.h \
     VisionTypes/Interfaces/ransacmodel.h \
     VisionWrapper/mainwindow.h \
-    Modules/centrecircledetector.h \
     ../Tools/Math/Circle.h \
     VisionTypes/RANSACTypes/*.h \
-    VisionTypes/RANSACTypes/ransacgoal.h
+    VisionTypes/RANSACTypes/ransacgoal.h \
+    VisionTypes/VisionFieldObjects/centrecircle.h \
+    Modules/circledetector.h \
+    Modules/fieldpointdetector.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \

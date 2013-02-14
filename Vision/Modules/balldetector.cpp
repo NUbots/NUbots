@@ -3,6 +3,10 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 
+BallDetector::BallDetector() {}
+
+BallDetector::~BallDetector() {}
+
 vector<Ball> BallDetector::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -289,7 +293,7 @@ vector<Ball> BallDetector::run()
     return balls;
 }
 
-void BallDetector::appendEdgesFromSegments(const vector<ColourSegment> &segments, vector<Vector2<double> > &pointlist)
+void BallDetector::appendEdgesFromSegments(const vector<ColourSegment> &segments, vector<Point> &pointlist)
 {
     vector<ColourSegment>::const_iterator it;
     for(it = segments.begin(); it < segments.end(); it++) {

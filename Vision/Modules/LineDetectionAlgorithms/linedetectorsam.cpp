@@ -14,27 +14,12 @@ LineDetectorSAM::~LineDetectorSAM()
     noisePoints.clear();
 }
 
-vector<LSFittedLine> LineDetectorSAM::run()
+vector<LSFittedLine> LineDetectorSAM::run(const vector<Point>& points)
 {
-    VisionBlackboard* vbb = VisionBlackboard::getInstance();
-
-    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(LINE_COLOUR);  //get transitions associated with lines
-    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(LINE_COLOUR);
-    vector<Point> points;
-
-    points = getPointsFromSegments(h_segments, v_segments);
-
-    points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
-
-
     return fitLines(points, true);
-
-    //    BOOST_FOREACH(LSFittedLine l, lines) {
-    //        cout << l->getA() << "x + " << l->getB() << "y = " << l->getC() << " - r2tls: " << l->getr2tls() << " - msd: " << l->getMSD() << " - #points: " << l->numPoints << std::endl;
-    //    }
 }
 
-vector<LSFittedLine> LineDetectorSAM::fitLines(vector<Point>& points, bool noise) {
+vector<LSFittedLine> LineDetectorSAM::fitLines(const vector<Point>& points, bool noise) {
     //Performs split-and-merge algorithm with input consisting of a set of point clusters
     // and a set of unclustered points, putting the resulting lines into a reference
     // passed vector
@@ -82,7 +67,7 @@ vector<LSFittedLine> LineDetectorSAM::fitLines(vector<Point>& points, bool noise
 
 
 
-void LineDetectorSAM::split(vector<LSFittedLine>& lines, vector<Point>& points) {
+void LineDetectorSAM::split(vector<LSFittedLine>& lines, const vector<Point>& points) {
     // Recursive split algorithm - not used
 
     //Assumes:
@@ -396,7 +381,7 @@ void LineDetectorSAM::splitNoise(vector<LSFittedLine>& lines) {
     }
 }
 
-bool LineDetectorSAM::separate(vector<Point>& left, vector<Point>& right, Point& split_point, LSFittedLine& line) {
+bool LineDetectorSAM::separate(vector<Point>& left, vector<Point>& right, Point split_point, LSFittedLine& line) {
     /*splits a section of points around a splitting point by rotating and translating onto the line about the splitting point
      *Pre: left and right should be empty vectors
      *		points contains all the points to be split

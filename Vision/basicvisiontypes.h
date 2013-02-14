@@ -78,6 +78,18 @@ namespace Vision {
         LINES_PLOT
     };
 
+    enum DistanceMethod {
+        Width,
+        D2P,
+        Average,
+        Least
+    };
+
+    enum LineDetectionMethod {
+        SAM,
+        RANSAC
+    };
+
     std::string getDebugIDName(DEBUG_ID id);
 
     DEBUG_ID getDebugIDFromInt(int id);
@@ -114,6 +126,13 @@ namespace Vision {
     //! @brief converts a string into a colour class.
     COLOUR_CLASS getColourClassFromName(const std::string& name);
 
+    DistanceMethod getDistanceMethodFromName(std::string name);
+
+    std::string getDistanceMethodName(DistanceMethod method);
+
+    LineDetectionMethod getLineMethodFromName(std::string name);
+
+    std::string getLineMethodName(LineDetectionMethod method);
 }
 
 #endif // BASICVISIONTYPES_H

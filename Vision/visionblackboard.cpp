@@ -122,12 +122,30 @@ void VisionBlackboard::addObstacle(const Obstacle& newobstacle)
 }
 
 /**
-  * Adds a set of lines to the current set.
-  * @param newlines The lines to add.
+  * Adds a lines to the current set.
+  * @param newline The line to add.
   */
 void VisionBlackboard::addLine(const FieldLine& newline)
 {
     m_lines.push_back(newline);
+}
+
+/**
+  * Adds a centre circle to the current set.
+  * @param newCircle The circle to add.
+  */
+void VisionBlackboard::addCentreCircle(const CentreCircle &newcircle)
+{
+    m_centre_circles.push_back(newcircle);
+}
+
+/**
+  * Adds a corner to the current set.
+  * @param newCorner The corner point to add.
+  */
+void VisionBlackboard::addCornerPoint(const CornerPoint &newcorner)
+{
+    m_corner_points.push_back(newcorner);
 }
 
 void VisionBlackboard::addGoals(const vector<Goal>& newgoals)
@@ -156,6 +174,18 @@ void VisionBlackboard::addLines(const vector<FieldLine>& newlines)
 {
     if(!newlines.empty())
         m_lines.insert(m_lines.end(), newlines.begin(), newlines.end());
+}
+
+void VisionBlackboard::addCentreCircles(const vector<CentreCircle> &newcircles)
+{
+    if(!newcircles.empty())
+        m_centre_circles.insert(m_centre_circles.end(), newcircles.begin(), newcircles.end());
+}
+
+void VisionBlackboard::addCornerPoints(const vector<CornerPoint> &newcorners)
+{
+    if(!newcorners.empty())
+        m_corner_points.insert(m_corner_points.end(), newcorners.begin(), newcorners.end());
 }
 
 /**

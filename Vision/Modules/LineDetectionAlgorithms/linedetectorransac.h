@@ -9,10 +9,10 @@ class LineDetectorRANSAC : public LineDetector
 {
 public:
     LineDetectorRANSAC();
-    virtual vector<LSFittedLine> run();
+    virtual vector<LSFittedLine> run(const vector<Point> &points);
 
 private:
-    /*unsigned*/ int m_n,
+    unsigned int m_n,
                  m_k,
                  m_max_iterations;
     float m_e;

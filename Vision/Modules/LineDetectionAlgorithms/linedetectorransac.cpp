@@ -17,64 +17,15 @@ LineDetectorRANSAC::LineDetectorRANSAC()
     m_max_iterations = 10;  //hard limit on number of lines
 }
 
-vector<LSFittedLine> LineDetectorRANSAC::run()
+vector<LSFittedLine> LineDetectorRANSAC::run(const vector<Point> &points)
 {
-    VisionBlackboard* vbb = VisionBlackboard::getInstance();
-
-    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(LINE_COLOUR);  //get transitions associated with lines
-    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(LINE_COLOUR);
     vector< pair<RANSACLine, vector<Point> > > candidates;
     vector<LSFittedLine> lines;
-    vector<Point> points;
-
-    points = getPointsFromSegments(h_segments, v_segments);
-
-    points = pointsUnderGreenHorizon(points, vbb->getGreenHorizon());
-
-    vector<Point> plotpts;
-    BOOST_FOREACH(Point& p, points) {
-        plotpts.push_back(Point(p.x, vbb->getImageHeight()-p.y));
-    }
-
-    DataWrapper::getInstance()->plot(POINTS_PLOT, plotpts, "Pre");  // debugging
 
     candidates = RANSAC::findMultipleModels<RANSACLine, Point>(points, m_e, m_n, m_k, m_max_iterations);
     for(unsigned int i=0; i<candidates.size(); i++) {
         lines.push_back(LSFittedLine(candidates.at(i).second));
     }
-//    o << "lines" << endl;
-//    o << lines << endl;
-//    o << "colinear" << endl;
-//    o << mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE) << endl;
-
-    //debugging
-    if(vbb->getTransformer().isScreenToGroundValid())
-        points = vbb->getTransformer().screenToGroundCartesian(points);
-#if VISION_FIELDOBJECT_VERBOSITY > 0
-    else
-        cout << "Screen to ground invalid" << endl;
-#endif
-
-    vector<Point> temp;
-    BOOST_FOREACH(Point p, points) {
-        if(p.abs() < 1500)
-            temp.push_back(p);
-    }
-
-    DataWrapper::getInstance()->plot(POINTS_PLOT, temp, "Post");  // debugging
-
-//    //use generic ransac implementation to fine lines
-//    candidates = RANSAC::findMultipleModels<VisionLine, Point>(points, m_e, m_n, m_k, m_max_iterations);
-//    lines.clear();
-//    for(unsigned int i=0; i<candidates.size(); i++) {
-//        lines.push_back(LSFittedLine(candidates.at(i).second));
-//    }
-
-//    o << "lines" << endl;
-//    o << lines << endl;
-//    o << "colinear" << mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE) << endl;
-
-//    o.close();
 
     return mergeColinear(lines, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE);
 }

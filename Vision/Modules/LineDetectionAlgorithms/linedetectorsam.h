@@ -43,10 +43,10 @@ public:
     LineDetectorSAM();
     ~LineDetectorSAM();
 
-    virtual vector<LSFittedLine> run();
+    virtual vector<LSFittedLine> run(const vector<Point> &points);
 
 private:
-    vector<LSFittedLine> fitLines(vector<Point>& points, bool noise=true);
+    vector<LSFittedLine> fitLines(const vector<Point>& points, bool noise=true);
     //RULES
     //maximum field objects rules
     //unsigned int MAX_POINTS; //500
@@ -69,12 +69,12 @@ private:
     vector<Point> noisePoints;
 
     //LEAST-SQUARES FITTING
-    void split(vector<LSFittedLine>& lines, vector<Point>& points);
+    void split(vector<LSFittedLine>& lines, const vector<Point> &points);
     void splitIterative(vector<LSFittedLine>& lines, vector<Point>& points);
     void splitNoise(vector<LSFittedLine>& lines);
     void merge(vector<LSFittedLine>& lines);
     void generateLine(LSFittedLine& line, vector<Point>& points);
-    bool separate(vector<Point>& left, vector<Point>& right, Point& split_point, LSFittedLine& line);
+    bool separate(vector<Point>& left, vector<Point>& right, Point split_point, LSFittedLine& line);
     //static void sortLinesLS(vector<LSFittedLine*>& lines);
 
 

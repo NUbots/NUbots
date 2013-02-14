@@ -7,7 +7,7 @@ using std::pair;
 namespace RANSAC
 {
 //    vector<LSFittedLine> findMultipleLines(const vector<Point>& line_points,
-//                                           float e,                     //typical:
+//                                           double e,                     //typical:
 //                                           unsigned int n,              //typical:
 //                                           unsigned int k,              //typical:
 //                                           unsigned int max_iterations);
@@ -16,8 +16,8 @@ namespace RANSAC
 //                  Line& result,
 //                  vector<Point>& consensus,
 //                  vector<Point>& remainder,
-//                  float& variance,
-//                  float e,
+//                  double& variance,
+//                  double e,
 //                  unsigned int n,
 //                  unsigned int k);
 
@@ -26,7 +26,7 @@ namespace RANSAC
     //Model must provide several features
     template<class Model, typename DataPoint>
     vector<pair<Model, vector<DataPoint> > > findMultipleModels(const vector<DataPoint>& line_points,
-                                                                float e,
+                                                                double e,
                                                                 unsigned int n,
                                                                 unsigned int k,
                                                                 unsigned int max_iterations);
@@ -36,8 +36,8 @@ namespace RANSAC
                    Model& result,
                    vector<DataPoint>& consensus,
                    vector<DataPoint>& remainder,
-                   float& variance,
-                   float e,
+                   double& variance,
+                   double e,
                    unsigned int n,
                    unsigned int k);
 

@@ -3,23 +3,13 @@
 
 #include <string>
 #include "Tools/Optimisation/Parameter.h"
+#include "Vision/basicvisiontypes.h"
+
+using namespace Vision;
 
 class VisionConstants
 {
 public:
-
-    enum DistanceMethod {
-        Width,
-        D2P,
-        Average,
-        Least
-    };
-
-    enum LineDetectionMethod {
-        SAM,
-        RANSAC
-    };
-
     //! Distortion Correction
     static bool DO_RADIAL_CORRECTION;           //! Whether to perform radial distortion correction.
     static float RADIAL_CORRECTION_COEFFICIENT; //! The radial distortion correction coefficient.
@@ -124,15 +114,6 @@ public:
     //! RANSAC constants
     static float RANSAC_MAX_ANGLE_DIFF_TO_MERGE; //
     static float RANSAC_MAX_DISTANCE_TO_MERGE; //
-
-
-    // static methods
-    static DistanceMethod getDistanceMethodFromName(std::string name);  //! Converts a string to a distance method.
-    static std::string getDistanceMethodName(DistanceMethod method);    //! Converts a distance method to a string name.
-
-    // static methods
-    static LineDetectionMethod getLineMethodFromName(std::string name);  //! Converts a string to a line detection method.
-    static std::string getLineMethodName(LineDetectionMethod method);    //! Converts a line detection method to a string name.
 
     static void loadFromFile(std::string filename); //! Loads the constants from a file
     static void print(ostream& out);

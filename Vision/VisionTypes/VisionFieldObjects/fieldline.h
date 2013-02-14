@@ -10,10 +10,10 @@
 class FieldLine : public VisionFieldObject
 {
 public:
-    FieldLine(const LSFittedLine& line);
-    FieldLine(double rho, double phi, const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points);
+    FieldLine(const LSFittedLine& screen_line, const LSFittedLine& relative_line);
+    FieldLine(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points);
 
-    void set(double rho, double phi, const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points);
+    void set(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points);
 
     Line getScreenLineEquation() const {return m_screen_line;}
     Line getRelativeLineEquation() const {return m_relative_line;}
@@ -45,8 +45,6 @@ private:
          m_relative_line;
     Vector2<Point> m_screen_end_points,
                    m_relative_end_points;
-//    double m_rho,
-//           m_phi;
 };
 
 #endif // FIELDLINE_H

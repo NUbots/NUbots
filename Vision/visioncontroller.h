@@ -16,6 +16,7 @@
 #include "Vision/VisionWrapper/datawrappercurrent.h"
 #include "Vision/Modules/segmentfilter.h"
 #include "Vision/Modules/linedetector.h"
+#include "Vision/Modules/fieldpointdetector.h"
 #include "Vision/Modules/cornerdetector.h"
 #include "Vision/Modules/goaldetector.h"
 #include "Vision/Modules/balldetector.h"
@@ -67,11 +68,17 @@ private:
     SegmentFilter m_segment_filter;       //! @variable Segment filter object for pre-classification filtering
 
     BallDetector m_ball_detector;
-    CornerDetector m_corner_detector;
-    LineDetector* m_line_detector_sam;
-    LineDetector* m_line_detector_ransac;
+
+    FieldPointDetector* m_field_point_detector;
+
     GoalDetector* m_goal_detector_hist;
     GoalDetector* m_goal_detector_ransac;
+
+
+    LineDetector* m_line_detector_sam;
+    LineDetector* m_line_detector_ransac;
+    CornerDetector m_corner_detector;
+    CircleDetector m_circle_detector;
 };
 
 #endif // VISIONCONTROLLER_H

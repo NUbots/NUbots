@@ -1,23 +1,21 @@
 #include "fieldline.h"
 #include "debug.h"
 
-FieldLine::FieldLine(const LSFittedLine &line)
+FieldLine::FieldLine(const LSFittedLine &screen_line, const LSFittedLine &relative_line)
 {
-    set(line.getRho(), line.getPhi(), line.getEndPoints(), Vector2<Point>());
+    set(screen_line.getEndPoints(), relative_line.getEndPoints());
 }
 
-FieldLine::FieldLine(double rho, double phi, const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points)
+FieldLine::FieldLine(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points)
 {
-    set(rho, phi, screen_end_points, relative_end_points);
+    set(screen_end_points, relative_end_points);
 }
 
-void FieldLine::set(double rho, double phi, const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points)
+void FieldLine::set(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points)
 {
     m_id = FIELDLINE;
 
-    phi = phi - 2*mathGeneral::PI * floor( phi / (2*mathGeneral::PI) );
-
-    m_screen_line.setLine(rho, phi);
+    m_screen_line.setLineFromPoints(screen_end_points.x, screen_end_points.y);
     m_relative_line.setLineFromPoints(relative_end_points.x, relative_end_points.y);
     m_screen_end_points = screen_end_points;
     m_relative_end_points = relative_end_points;
@@ -25,18 +23,18 @@ void FieldLine::set(double rho, double phi, const Vector2<Point>& screen_end_poi
 
 double FieldLine::findError(const Vector2<double>& measured) const
 {
-    return findError(FieldLine(measured.x, measured.y, Vector2<Point>(), Vector2<Point>()));
-}
-
-double FieldLine::findError(const FieldLine& measured) const
-{
-    double d_rho = abs(m_screen_line.getRho() - measured.m_screen_line.getRho()),
-           d_phi = abs(m_screen_line.getPhi() - measured.m_screen_line.getPhi());
+    double d_rho = abs(m_screen_line.getRho() - measured.x),
+           d_phi = abs(m_screen_line.getPhi() - measured.y);
 
     if(d_phi > mathGeneral::PI*0.5)
         d_phi = mathGeneral::PI - d_phi;
 
     return sqrt( pow(d_rho,2) + pow(d_phi*140/mathGeneral::PI,2));
+}
+
+double FieldLine::findError(const FieldLine& measured) const
+{
+    return findError(Vector2<double>(measured.getScreenLineEquation().getRho(), measured.getScreenLineEquation().getPhi()));
 }
 
 ostream& operator<< (ostream& output, const FieldLine& l)

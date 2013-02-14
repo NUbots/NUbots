@@ -4,9 +4,9 @@
 
 namespace RANSAC
 {
-//    vector<LSFittedLine> findMultipleLines(const vector<Point>& line_points, float e, unsigned int n, unsigned int k, unsigned int max_iterations)
+//    vector<LSFittedLine> findMultipleLines(const vector<Point>& line_points, double e, unsigned int n, unsigned int k, unsigned int max_iterations)
 //    {
-//        float variance;
+//        double variance;
 //        bool line_found;
 //        Line line;
 //        LSFittedLine fitted_line;
@@ -30,14 +30,14 @@ namespace RANSAC
 //        return results;
 //    }
 
-//    //        bool findLineFit(std::vector<Point> points, Line& result, std::vector<Point>& consensus, std::vector<Point>& remainder, float& variance, float e, unsigned int n, unsigned int k)
+//    //        bool findLineFit(std::vector<Point> points, Line& result, std::vector<Point>& consensus, std::vector<Point>& remainder, double& variance, double e, unsigned int n, unsigned int k)
 //    //        {
 //    //            if (points.size() < n) {
 //    //                return false;
 //    //            }
 
 //    //            // error of best line found so far
-//    //            float minerr = std::numeric_limits<float>::max();
+//    //            double minerr = std::numeric_limits<double>::max();
 //    //            // arrays for storing concensus sets
 //    //            bool c1[points.size()];
 //    //            bool c2[points.size()];
@@ -54,9 +54,9 @@ namespace RANSAC
 //    //                // figure out the variance (sum of distances of points from the line)
 //    //                // could use dist() here, but since the denominator is consistent, we
 //    //                // save time and implement it again here.
-//    //        //      float denom = l.getNormaliser();
-//    //        //      float newe = m_e*denom;
-//    //                float newe = e*l.getNormaliser();
+//    //        //      double denom = l.getNormaliser();
+//    //        //      double newe = m_e*denom;
+//    //                double newe = e*l.getNormaliser();
 //    //                unsigned int concensus_size = 0;
 
 //    //                if (c1 == best_concensus)
@@ -65,7 +65,7 @@ namespace RANSAC
 //    //                   cur_concensus = c1;
 
 //    //                for (unsigned int i = 0; i < points.size(); i++) {
-//    //                    float dist = l.getLinePointDistance(points.at(i));
+//    //                    double dist = l.getLinePointDistance(points.at(i));
 //    //                    if (dist < newe) {
 //    //                        variance += dist;
 //    //                        concensus_size++;
@@ -76,7 +76,7 @@ namespace RANSAC
 //    //                    }
 //    //                }
 //    //        //      variance /= denom;
-//    //                static float scaling_factor = 0.2;
+//    //                static double scaling_factor = 0.2;
 //    //                variance = scaling_factor*variance - concensus_size;
 //    //                if (variance < minerr && concensus_size >= n) {
 //    //                    minerr = variance;
@@ -89,7 +89,7 @@ namespace RANSAC
 //    //            consensus.clear();
 //    //            remainder.clear();
 
-//    //            if (minerr < std::numeric_limits<float>::max()) {
+//    //            if (minerr < std::numeric_limits<double>::max()) {
 //    //                for(unsigned int i=0; i<points.size(); i++) {
 //    //                    if(best_concensus[i])
 //    //                        consensus.push_back(points.at(i));
@@ -104,13 +104,13 @@ namespace RANSAC
 //    //            }
 //    //        }
 
-//    bool findLine(vector<Point> points, Line& result, std::vector<Point>& consensus, std::vector<Point>& remainder, float& variance, float e, unsigned int n, unsigned int k)
+//    bool findLine(vector<Point> points, Line& result, std::vector<Point>& consensus, std::vector<Point>& remainder, double& variance, double e, unsigned int n, unsigned int k)
 //    {
 //        if (points.size() < n || n<2) {
 //            return false;
 //        }
 
-//        float minerr = std::numeric_limits<float>::max();
+//        double minerr = std::numeric_limits<double>::max();
 //        // arrays for storing concensus sets
 //        bool c1[points.size()];
 //        bool c2[points.size()];
@@ -118,7 +118,7 @@ namespace RANSAC
 //        bool* best_concensus;
 //        bool* cur_concensus;
 //        best_concensus = c1;
-//        float cur_variance;
+//        double cur_variance;
 //        bool line_found = false;
 
 //        for (unsigned int i = 0; i < k; ++i) {
@@ -132,7 +132,7 @@ namespace RANSAC
 
 //            //determine consensus set
 //            for (unsigned int i = 0; i < points.size(); i++) {
-//                float dist = l.getLinePointDistance(points.at(i));
+//                double dist = l.getLinePointDistance(points.at(i));
 //                if (dist < e) {
 //                    cur_variance += dist;
 //                    concensus_size++;
@@ -190,9 +190,9 @@ namespace RANSAC
 //    }
 
     template<class Model, typename DataPoint>
-    vector<pair<Model, vector<DataPoint> > > findMultipleModels(const vector<DataPoint>& points, float e, unsigned int n, unsigned int k, unsigned int max_iterations)
+    vector<pair<Model, vector<DataPoint> > > findMultipleModels(const vector<DataPoint>& points, double e, unsigned int n, unsigned int k, unsigned int max_iterations)
     {
-        float variance;
+        double variance;
         bool found;
         Model model;
         vector<pair<Model, vector<DataPoint> > > results;
@@ -214,13 +214,13 @@ namespace RANSAC
     }
 
     template<class Model, typename DataPoint>
-    bool findModel(vector<DataPoint> points, Model &result, vector<DataPoint>& consensus, vector<DataPoint>& remainder, float& variance, float e, unsigned int n, unsigned int k)
+    bool findModel(vector<DataPoint> points, Model &result, vector<DataPoint>& consensus, vector<DataPoint>& remainder, double& variance, double e, unsigned int n, unsigned int k)
     {
         if (points.size() < n || n<result.minPointsForFit()) {
             return false;
         }
 
-        float minerr = std::numeric_limits<float>::max();
+        double minerr = std::numeric_limits<double>::max();
         // arrays for storing concensus sets
         bool c1[points.size()];
         bool c2[points.size()];
@@ -228,7 +228,7 @@ namespace RANSAC
         bool* best_concensus;
         bool* cur_concensus;
         best_concensus = c1;
-        float cur_variance;
+        double cur_variance;
         bool found = false;
 
         for (unsigned int i = 0; i < k; ++i) {
@@ -242,7 +242,7 @@ namespace RANSAC
 
             //determine consensus set
             for (unsigned int i = 0; i < points.size(); i++) {
-                float dist = m.calculateError(points.at(i));
+                double dist = m.calculateError(points.at(i));
                 if (dist < e) {
                     cur_variance += dist;
                     concensus_size++;

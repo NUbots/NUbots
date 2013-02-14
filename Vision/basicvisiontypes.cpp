@@ -208,4 +208,56 @@ namespace Vision {
         else
             return UNKNOWN_COLOUR;
     }
+
+    DistanceMethod getDistanceMethodFromName(std::string name)
+    {
+        if(name.compare("WIDTH") == 0)
+            return Width;
+        else if(name.compare("D2P") == 0)
+            return D2P;
+        else if(name.compare("LEAST") == 0)
+            return Least;
+        else if(name.compare("AVERAGE") == 0)
+            return Average;
+
+        //no match - return default
+        #ifdef DEBUG_VISION_VERBOSITY_ON
+            debug << "getDistanceMethodFromName - unmatched method name: " << name << " used D2P instead" << std::endl;
+        #endif
+        return D2P; //default
+    }
+
+    std::string getDistanceMethodName(DistanceMethod method)
+    {
+        switch(method) {
+        case Width:     return "WIDTH";
+        case D2P:       return "D2P";
+        case Average:   return "AVERAGE";
+        case Least:     return "LEAST";
+        default:        return "UNKOWN";
+        }
+    }
+
+    LineDetectionMethod getLineMethodFromName(std::string name)
+    {
+        if(name.compare("SAM") == 0)
+            return SAM;
+        else if(name.compare("RANSAC") == 0)
+            return RANSAC;
+
+        //no match - return default
+        #ifdef DEBUG_VISION_VERBOSITY_ON
+            debug << "VisionConstants::getLineMethodFromName - unmatched method name: " << name << " used RANSAC instead" << std::endl;
+        #endif
+        return RANSAC; //default
+    }
+
+    std::string getLineMethodName(LineDetectionMethod method)
+    {
+        switch(method) {
+        case SAM:       return "SAM";
+        case RANSAC:    return "RANSAC";
+        default:        return "INVALID";
+        }
+    }
 }
