@@ -3,10 +3,23 @@ OBJECTS = ConfigParameter.o      ConfigTree.o    \
           ConfigStorageManager.o ConfigManager.o \
           Module.o Configurable.o
 
+
+TESTOBJECTS =          \
+ConfigManager.o        \
+ConfigParameter.o      \
+ConfigStorageManager.o \
+ConfigTree.o           \
+Configurable.o         \
+Module.o               \
+Testing_MM.o           \
+Testing_MM_globals.o   \
+Testing_MM_Utils.o
+
+
 ConfigSystemTest: $(OBJECTS) TestConfig.o
 	g++ $^ -o $@
 
-Testing_MM: $(OBJECTS) Testing_MM.o Testing_MM_Utils.o Testing_MM_globals.o
+Testing_MM: $(TESTOBJECTS)
 	g++ $^ -lrt -o $@
 	# -lrt is for realtime extensions (for clock_gettime)
 

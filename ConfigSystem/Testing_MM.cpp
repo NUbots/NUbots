@@ -320,39 +320,39 @@ int main(void)
     // repeat tests
     for(int i = 0; i < 5 && res_all; i++)
     {
-        // Easy templated value tests
-        std::cout << std::endl << "TEST: double" << std::endl;
-        res_all &= testValue<double>("param_double", "param_long");
-        std::cout << std::endl << "TEST: long" << std::endl;
-        res_all &= testValue<long>("param_long", "param_double");
+        // // Easy templated value tests
+        // std::cout << std::endl << "TEST: double" << std::endl;
+        // res_all &= testValue<double>("param_double", "param_long");
+        // std::cout << std::endl << "TEST: long" << std::endl;
+        // res_all &= testValue<long>("param_long", "param_double");
 
-        // Easy templated std::vector<...> tests!
-        //
-        // Desc: Each test generates a random value, writes it, then reads it,
-        //       Then compares what was written to what was read (at a lower 
-        //       resolution, to avoid failure due to rounding errors).
-        //
-        // Pass: passes only if both the read and write return success and the 
-        //       written and read values are identical.
-        std::cout << std::endl << "TEST: std::vector<double>" << std::endl;
-        res_all &= test1DVector<double>("param_vector1d_double");
-        std::cout << std::endl << "TEST: std::vector<long>" << std::endl;
-        res_all &= test1DVector<long>("param_vector1d_long");
+        // // Easy templated std::vector<...> tests!
+        // //
+        // // Desc: Each test generates a random value, writes it, then reads it,
+        // //       Then compares what was written to what was read (at a lower 
+        // //       resolution, to avoid failure due to rounding errors).
+        // //
+        // // Pass: passes only if both the read and write return success and the 
+        // //       written and read values are identical.
+        // std::cout << std::endl << "TEST: std::vector<double>" << std::endl;
+        // res_all &= test1DVector<double>("param_vector1d_double");
+        // std::cout << std::endl << "TEST: std::vector<long>" << std::endl;
+        // res_all &= test1DVector<long>("param_vector1d_long");
 
 
-        std::cout << std::endl << "TEST: std::vector<std::vector<double> >" << std::endl;
-        res_all &= test2DVector<double>("param_vector2d_double");
-        std::cout << std::endl << "TEST: std::vector<std::vector<long> >" << std::endl;
-        res_all &= test2DVector<long>("param_vector2d_long");
+        // std::cout << std::endl << "TEST: std::vector<std::vector<double> >" << std::endl;
+        // res_all &= test2DVector<double>("param_vector2d_double");
+        // std::cout << std::endl << "TEST: std::vector<std::vector<long> >" << std::endl;
+        // res_all &= test2DVector<long>("param_vector2d_long");
         
 
-        std::cout << std::endl << "TEST: std::vector<std::vector<std::vector<double> > >" << std::endl;
-        res_all &= test3DVector<double>("param_vector3d_double");
-        std::cout << std::endl << "TEST: std::vector<std::vector<std::vector<long> > >" << std::endl;
-        res_all &= test3DVector<long>("param_vector3d_long");
+        // std::cout << std::endl << "TEST: std::vector<std::vector<std::vector<double> > >" << std::endl;
+        // res_all &= test3DVector<double>("param_vector3d_double");
+        // std::cout << std::endl << "TEST: std::vector<std::vector<std::vector<long> > >" << std::endl;
+        // res_all &= test3DVector<long>("param_vector3d_long");
 
-        std::cout << std::endl << "TEST: Creating parameters, saving and loading configurations." << std::endl;
-        res_all &= testSaveLoad();
+        // std::cout << std::endl << "TEST: Creating parameters, saving and loading configurations." << std::endl;
+        // res_all &= testSaveLoad();
 
         std::cout << std::endl << "TEST: Auto-updating variables." << std::endl;
         res_all &= Module::autoUpdateTest();

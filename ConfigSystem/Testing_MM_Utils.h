@@ -142,8 +142,8 @@ template <typename T>
 bool compare1DVectors(
     std::vector<T> u, 
     std::vector<T> v, 
-    int indent = 0,
-    bool print = true
+    bool print = true,
+    int indent = 0
     )
 {
     // Note: should define a null stream rather than using loads of 
@@ -202,8 +202,8 @@ template <typename T>
 bool compare2DVectors(
     std::vector<std::vector<T> > u,
     std::vector<std::vector<T> > v,
-    int indent = 0,
-    bool print = true
+    bool print = true,
+    int indent = 0
     )
 {
     std::stringstream ss;
@@ -229,9 +229,9 @@ bool compare2DVectors(
     {
         std::vector<T> empty;
         if(print) std::cout << str_i << std::endl;
-        if(i >=   su) compare1DVectors(empty, v[i], indent + 1);
-        if(i >=   sv) compare1DVectors(u[i], empty, indent + 1);
-        if(i < s_min) compare1DVectors(u[i], v[i], indent + 1);
+        if(i >=   su) compare1DVectors(empty, v[i], print, indent + 1);
+        if(i >=   sv) compare1DVectors(u[i], empty, print, indent + 1);
+        if(i < s_min) compare1DVectors(u[i],  v[i], print, indent + 1);
     }
 
     return res_c;
@@ -242,8 +242,8 @@ template <typename T>
 bool compare3DVectors(
     std::vector<std::vector<std::vector<T> > > u,
     std::vector<std::vector<std::vector<T> > > v,
-    int indent = 0,
-    bool print = true
+    bool print = true,
+    int indent = 0
     )
 {
     std::stringstream ss;
@@ -270,9 +270,9 @@ bool compare3DVectors(
         std::vector<std::vector<T> > empty;
 
         if(print) std::cout << str_i << std::endl;
-        if(i >=   su) compare2DVectors(empty, v[i], indent + 1);
-        if(i >=   sv) compare2DVectors(u[i], empty, indent + 1);
-        if(i < s_min) compare2DVectors(u[i], v[i], indent + 1);
+        if(i >=   su) compare2DVectors(empty, v[i], print, indent + 1);
+        if(i >=   sv) compare2DVectors(u[i], empty, print, indent + 1);
+        if(i < s_min) compare2DVectors(u[i],  v[i], print, indent + 1);
     }
 
     return res_c;

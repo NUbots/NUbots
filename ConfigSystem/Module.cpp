@@ -109,6 +109,9 @@ void Module::loadConfig()
         config->readValue(_configBasePath, name_s    , val_s    );
     }
 
+    _shouldUpdate = false;
+    _updateCalled = false;
+
     val_changed_3dv_d = false;
     val_changed_3dv_l = false;
     val_changed_2dv_d = false;
@@ -151,25 +154,57 @@ bool Module::compare()
     bool result = true;
     
     // check all values
-    bool res_3dv_d = compare3DVectors(val_3dv_d, val_3dv_d, false);
-    bool res_3dv_l = compare3DVectors(val_3dv_l, val_3dv_l, false);
-    bool res_2dv_d = compare2DVectors(val_2dv_d, val_2dv_d, false);
-    bool res_2dv_l = compare2DVectors(val_2dv_l, val_2dv_l, false);
-    bool res_1dv_d = compare1DVectors(val_1dv_d, val_1dv_d, false);
-    bool res_1dv_l = compare1DVectors(val_1dv_l, val_1dv_l, false);
-    bool res_d     = compareValues   (val_d    , val_d    );
-    bool res_l     = compareValues   (val_l    , val_l    );
+    bool res_3dv_d = compare3DVectors(val_3dv_d_new, val_3dv_d, false);
+    bool res_3dv_l = compare3DVectors(val_3dv_l_new, val_3dv_l, false);
+    bool res_2dv_d = compare2DVectors(val_2dv_d_new, val_2dv_d, false);
+    bool res_2dv_l = compare2DVectors(val_2dv_l_new, val_2dv_l, false);
+    bool res_1dv_d = compare1DVectors(val_1dv_d_new, val_1dv_d, false);
+    bool res_1dv_l = compare1DVectors(val_1dv_l_new, val_1dv_l, false);
+    bool res_d     = compareValues   (val_d_new, val_d    );
+    bool res_l     = compareValues   (val_l_new, val_l    );
     // should string vals too 
     
     // if tests fail, recompare + print failures
-    if(!res_3dv_d) compare3DVectors(val_3dv_d, val_3dv_d);
-    if(!res_3dv_l) compare3DVectors(val_3dv_l, val_3dv_l);
-    if(!res_2dv_d) compare2DVectors(val_2dv_d, val_2dv_d);
-    if(!res_2dv_l) compare2DVectors(val_2dv_l, val_2dv_l);
-    if(!res_1dv_d) compare1DVectors(val_1dv_d, val_1dv_d);
-    if(!res_1dv_l) compare1DVectors(val_1dv_l, val_1dv_l);
-    if(!res_d    ) compareValues   (val_d    , val_d    );
-    if(!res_l    ) compareValues   (val_l    , val_l    );
+    if(!res_3dv_d)
+    {
+        std::cout << std::endl << "val_3dv_d failed:" << std::endl;
+        compare3DVectors(val_3dv_d_new, val_3dv_d); 
+    }
+    if(!res_3dv_l)
+    {
+        std::cout << std::endl << "val_3dv_l failed:" << std::endl;
+        compare3DVectors(val_3dv_l_new, val_3dv_l); 
+    }
+    if(!res_2dv_d)
+    {
+        std::cout << std::endl << "val_2dv_d failed:" << std::endl;
+        compare2DVectors(val_2dv_d_new, val_2dv_d); 
+    }
+    if(!res_2dv_l)
+    {
+        std::cout << std::endl << "val_2dv_l failed:" << std::endl;
+        compare2DVectors(val_2dv_l_new, val_2dv_l); 
+    }
+    if(!res_1dv_d)
+    {
+        std::cout << std::endl << "val_1dv_d failed:" << std::endl;
+        compare1DVectors(val_1dv_d_new, val_1dv_d); 
+    }
+    if(!res_1dv_l)
+    {
+        std::cout << std::endl << "val_1dv_l failed:" << std::endl;
+        compare1DVectors(val_1dv_l_new, val_1dv_l); 
+    }
+    if(!res_d    )
+    {
+        std::cout << std::endl << "val_d     failed:" << std::endl;
+        compareValues   (val_d_new    , val_d    ); 
+    }
+    if(!res_l    )
+    {
+        std::cout << std::endl << "val_l     failed:" << std::endl;
+        compareValues   (val_l_new    , val_l    ); 
+    }
 
     // combine with result
     result &= res_3dv_d;
@@ -200,10 +235,21 @@ bool Module::compare()
     result &= correctUpdate;
     _shouldUpdate = false;
     _updateCalled = false;
-
+    
+    if(!result)
+    {
+        std::cout << "    val_changed_3dv_d = " << ((val_changed_3dv_d)? "true" : "false") << std::endl;
+        std::cout << "    val_changed_3dv_l = " << ((val_changed_3dv_l)? "true" : "false") << std::endl;
+        std::cout << "    val_changed_2dv_d = " << ((val_changed_2dv_d)? "true" : "false") << std::endl;
+        std::cout << "    val_changed_2dv_l = " << ((val_changed_2dv_l)? "true" : "false") << std::endl;
+        std::cout << "    val_changed_1dv_d = " << ((val_changed_1dv_d)? "true" : "false") << std::endl;
+        std::cout << "    val_changed_1dv_l = " << ((val_changed_1dv_l)? "true" : "false") << std::endl;
+        std::cout << "    val_changed_d     = " << ((val_changed_d    )? "true" : "false") << std::endl;
+        std::cout << "    val_changed_l     = " << ((val_changed_l    )? "true" : "false") << std::endl;
+        std::cout << "    val_changed_s     = " << ((val_changed_s    )? "true" : "false") << std::endl;
+    }
+    
     // Reset change flags 
-    // (thought these'd be useful for more thorough testing, but can't 
-    //  remember why)
     val_changed_3dv_d = false;
     val_changed_3dv_l = false;
     val_changed_2dv_d = false;
