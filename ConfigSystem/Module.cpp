@@ -5,28 +5,377 @@
 */
 
 #include "Module.h"
+#include "Testing_MM_Utils.h"
+#include "ConfigManager.h"
 
+//CONFIGSYSTEMTEST #include "Infrastructure/NUBlackboard.h"
+#include <boost/foreach.hpp>
+#include <vector>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/variate_generator.hpp>
- boost::mt19937 seed(0);
 
+using namespace ConfigSystem;
+
+
+Module::Module()
+{
+    _firstLoad = true;
+
+    _shouldUpdate = false;
+    _updateCalled = false;
+
+    name_3dv_d = "name_3dv_d";
+    name_3dv_l = "name_3dv_l";
+    name_2dv_d = "name_2dv_d";
+    name_2dv_l = "name_2dv_l";
+    name_1dv_d = "name_1dv_d";
+    name_1dv_l = "name_1dv_l";
+    name_d     = "name_d    ";
+    name_l     = "name_l    ";
+    name_s     = "name_s    ";
+    val_changed_3dv_d = false;
+    val_changed_3dv_l = false;
+    val_changed_2dv_d = false;
+    val_changed_2dv_l = false;
+    val_changed_1dv_d = false;
+    val_changed_1dv_l = false;
+    val_changed_d     = false;
+    val_changed_l     = false;
+    val_changed_s     = false;
+    create3DTestVector(val_3dv_d);
+    create3DTestVector(val_3dv_l);
+    create2DTestVector(val_2dv_d);
+    create2DTestVector(val_2dv_l);
+    create1DTestVector(val_1dv_d);
+    create1DTestVector(val_1dv_l);
+    createTestValue   (val_d    );
+    createTestValue   (val_l    );
+    val_s = makeRandomName()     ;
+    val_3dv_d_new = val_3dv_d;
+    val_3dv_l_new = val_3dv_l;
+    val_2dv_d_new = val_2dv_d;
+    val_2dv_l_new = val_2dv_l;
+    val_1dv_d_new = val_1dv_d;
+    val_1dv_l_new = val_1dv_l;
+    val_d_new     = val_d    ;
+    val_l_new     = val_l    ;
+    val_s_new     = val_s    ;
+}
+
+
+// Create params
+// NOTE: 'loadConfig()' was never intended to contain calls to 
+// 'createParam(...)' for all of its parameters.
+// It was just convenient to write tests.
 void Module::loadConfig()
 {
-    double read_d;
-    config->readDoubleValue("Testing.MM", "param_double", read_d);
-    doubleParam1 = read_d;
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+
+    if(_firstLoad)
+    {
+        _firstLoad = false;
+
+        create3DTestVector(val_3dv_d);
+        create3DTestVector(val_3dv_l);
+        create2DTestVector(val_2dv_d);
+        create2DTestVector(val_2dv_l);
+        create1DTestVector(val_1dv_d);
+        create1DTestVector(val_1dv_l);
+        createTestValue   (val_d);
+        createTestValue   (val_l);
+        val_s = makeRandomName();
+        config->createParam(_configBasePath, name_3dv_d, val_3dv_d);
+        config->createParam(_configBasePath, name_3dv_l, val_3dv_l);
+        config->createParam(_configBasePath, name_2dv_d, val_2dv_d);
+        config->createParam(_configBasePath, name_2dv_l, val_2dv_l);
+        config->createParam(_configBasePath, name_1dv_d, val_1dv_d);
+        config->createParam(_configBasePath, name_1dv_l, val_1dv_l);
+        config->createParam(_configBasePath, name_d    , val_d    );
+        config->createParam(_configBasePath, name_l    , val_l    );
+        config->createParam(_configBasePath, name_s    , val_s    );
+    }
+    else
+    {
+        config->readValue(_configBasePath, name_3dv_d, val_3dv_d);
+        config->readValue(_configBasePath, name_3dv_l, val_3dv_l);
+        config->readValue(_configBasePath, name_2dv_d, val_2dv_d);
+        config->readValue(_configBasePath, name_2dv_l, val_2dv_l);
+        config->readValue(_configBasePath, name_1dv_d, val_1dv_d);
+        config->readValue(_configBasePath, name_1dv_l, val_1dv_l);
+        config->readValue(_configBasePath, name_d    , val_d    );
+        config->readValue(_configBasePath, name_l    , val_l    );
+        config->readValue(_configBasePath, name_s    , val_s    );
+    }
+
+    val_changed_3dv_d = false;
+    val_changed_3dv_l = false;
+    val_changed_2dv_d = false;
+    val_changed_2dv_l = false;
+    val_changed_1dv_d = false;
+    val_changed_1dv_l = false;
+    val_changed_d     = false;
+    val_changed_l     = false;
+    val_changed_s     = false;
+    val_3dv_d_new = val_3dv_d;
+    val_3dv_l_new = val_3dv_l;
+    val_2dv_d_new = val_2dv_d;
+    val_2dv_l_new = val_2dv_l;
+    val_1dv_d_new = val_1dv_d;
+    val_1dv_l_new = val_1dv_l;
+    val_d_new     = val_d    ;
+    val_l_new     = val_l    ;
+    val_s_new     = val_s    ;
 }
 
 void Module::updateConfig()
 {
-    loadConfig();
+    _updateCalled = true;
+
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    config->readValue(_configBasePath, name_3dv_d, val_3dv_d);
+    config->readValue(_configBasePath, name_3dv_l, val_3dv_l);
+    config->readValue(_configBasePath, name_2dv_d, val_2dv_d);
+    config->readValue(_configBasePath, name_2dv_l, val_2dv_l);
+    config->readValue(_configBasePath, name_1dv_d, val_1dv_d);
+    config->readValue(_configBasePath, name_1dv_l, val_1dv_l);
+    config->readValue(_configBasePath, name_d    , val_d    );
+    config->readValue(_configBasePath, name_l    , val_l    );
+    config->readValue(_configBasePath, name_s    , val_s    );
 }
-// void Module::updateConfig(
-//     const std::string& paramPath,
-//     const std::string& paramName
-//     )
-// {
 
-//     loadConfig();
-// }
 
+bool Module::compare()
+{
+    bool result = true;
+    
+    // check all values
+    bool res_3dv_d = compare3DVectors(val_3dv_d, val_3dv_d, false);
+    bool res_3dv_l = compare3DVectors(val_3dv_l, val_3dv_l, false);
+    bool res_2dv_d = compare2DVectors(val_2dv_d, val_2dv_d, false);
+    bool res_2dv_l = compare2DVectors(val_2dv_l, val_2dv_l, false);
+    bool res_1dv_d = compare1DVectors(val_1dv_d, val_1dv_d, false);
+    bool res_1dv_l = compare1DVectors(val_1dv_l, val_1dv_l, false);
+    bool res_d     = compareValues   (val_d    , val_d    );
+    bool res_l     = compareValues   (val_l    , val_l    );
+    // should string vals too 
+    
+    // if tests fail, recompare + print failures
+    if(!res_3dv_d) compare3DVectors(val_3dv_d, val_3dv_d);
+    if(!res_3dv_l) compare3DVectors(val_3dv_l, val_3dv_l);
+    if(!res_2dv_d) compare2DVectors(val_2dv_d, val_2dv_d);
+    if(!res_2dv_l) compare2DVectors(val_2dv_l, val_2dv_l);
+    if(!res_1dv_d) compare1DVectors(val_1dv_d, val_1dv_d);
+    if(!res_1dv_l) compare1DVectors(val_1dv_l, val_1dv_l);
+    if(!res_d    ) compareValues   (val_d    , val_d    );
+    if(!res_l    ) compareValues   (val_l    , val_l    );
+
+    // combine with result
+    result &= res_3dv_d;
+    result &= res_3dv_l;
+    result &= res_2dv_d;
+    result &= res_2dv_l;
+    result &= res_1dv_d;
+    result &= res_1dv_l;
+    result &= res_d    ;
+    result &= res_l    ;
+
+    // either needed to update and did,
+    // or didn't need to update and didn't
+    bool correctUpdate = !(_shouldUpdate ^ _updateCalled);
+    if(!correctUpdate)
+    {
+        std::cout 
+            << __PRETTY_FUNCTION__ 
+            << ": "
+            << "Should " 
+            << (_shouldUpdate? "" : "not ") 
+            << "have called 'update()', "
+            << "but 'update()' was " 
+            << (_updateCalled? "" : "not ") 
+            << "called."
+            << std::endl;
+    }
+    result &= correctUpdate;
+    _shouldUpdate = false;
+    _updateCalled = false;
+
+    // Reset change flags 
+    // (thought these'd be useful for more thorough testing, but can't 
+    //  remember why)
+    val_changed_3dv_d = false;
+    val_changed_3dv_l = false;
+    val_changed_2dv_d = false;
+    val_changed_2dv_l = false;
+    val_changed_1dv_d = false;
+    val_changed_1dv_l = false;
+    val_changed_d     = false;
+    val_changed_l     = false;
+    val_changed_s     = false;
+
+    return result;
+}
+
+
+// Note: this method doesn't guarentee that anything should change.
+//       (this is deliberate - flagging of changes is done in the
+//        methods for each parameter)
+void Module::change()
+{
+    // Check that distBool doesn't always generate the same number,
+    // + change it's range slightly if it does. 
+    boost::uniform_int<> distBool(0, 1);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randBool(seed,distBool);
+
+    // choose random values to change
+    if(randBool() != 0) change_3dv_d();
+    if(randBool() != 0) change_3dv_l();
+    if(randBool() != 0) change_2dv_d();
+    if(randBool() != 0) change_2dv_l();
+    if(randBool() != 0) change_1dv_d();
+    if(randBool() != 0) change_1dv_l();
+    if(randBool() != 0) change_d    ();
+    if(randBool() != 0) change_l    ();
+    if(randBool() != 0) change_s    ();
+}
+    
+void Module::change_3dv_d()
+{
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    create3DTestVector(val_3dv_d_new);
+    config->storeValue(_configBasePath, name_3dv_d, val_3dv_d_new);
+    val_changed_3dv_d = true;
+    _shouldUpdate = true;
+}
+void Module::change_3dv_l()
+{
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    create3DTestVector(val_3dv_l_new);
+    config->storeValue(_configBasePath, name_3dv_l, val_3dv_l_new);
+    val_changed_3dv_l = true;
+    _shouldUpdate = true;
+}
+void Module::change_2dv_d()
+{
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    create2DTestVector(val_2dv_d_new);
+    config->storeValue(_configBasePath, name_2dv_d, val_2dv_d_new);
+    val_changed_2dv_d = true;
+    _shouldUpdate = true;
+}
+void Module::change_2dv_l()
+{
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    create2DTestVector(val_2dv_l_new);
+    config->storeValue(_configBasePath, name_2dv_l, val_2dv_l_new);
+    val_changed_2dv_l = true;
+    _shouldUpdate = true;
+}
+void Module::change_1dv_d()
+{
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    create1DTestVector(val_1dv_d_new);
+    config->storeValue(_configBasePath, name_1dv_d, val_1dv_d_new);
+    val_changed_1dv_d = true;
+    _shouldUpdate = true;
+}
+void Module::change_1dv_l()
+{
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    create1DTestVector(val_1dv_l_new);
+    config->storeValue(_configBasePath, name_1dv_l, val_1dv_l_new);
+    val_changed_1dv_l = true;
+    _shouldUpdate = true;
+}
+void Module::change_d    ()
+{
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    createTestValue   (val_d_new    );
+    config->storeValue(_configBasePath, name_d    , val_d_new    );
+    val_changed_d     = true;
+    _shouldUpdate = true;
+}
+void Module::change_l    ()
+{
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    createTestValue   (val_l_new    );
+    config->storeValue(_configBasePath, name_l    , val_l_new    );
+    val_changed_l     = true;
+    _shouldUpdate = true;
+}
+void Module::change_s    ()
+{ 
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    val_s_new    = makeRandomName();
+    config->storeValue(_configBasePath, name_s    , val_s_new    );
+    val_changed_s     = true;
+    _shouldUpdate = true;
+}
+
+
+bool Module::autoUpdateTest()
+{
+    // Sophie: if you can, try to work out why this test fails + whether
+    //         auto-update is behaving reasonably.
+    //         Once it works, just uncomment the lines marked with:
+    //             '//CONFIGSYSTEMTEST'
+    //         and try to build the entire robocup project and test it on the 
+    //         robot.
+
+    static bool firstRun = true;
+    static std::vector<Module> _modules;
+    static int num_modules = 50;
+
+    //CONFIGSYSTEMTEST ConfigManager* config = Blackboard->Config;
+    
+    bool result = true;
+
+    // if this is the first call to autoUpdateTest()
+    if(firstRun) // Note: segfaults if this doesn't run.
+    {
+        firstRun = false;
+
+        // create Modules
+        for(int i = 0; i < num_modules; i++)
+        {
+            Module m;
+
+            Configurable* c = &m;
+            c->setConfigBasePath(makeRandomName());
+
+            _modules.push_back(m);
+        }
+
+        std::vector<Configurable*> cfObjs;
+        // add modules to configObjects
+        BOOST_FOREACH(Module &m, _modules)
+        {
+            cfObjs.push_back(&m);
+        }
+        config->setConfigObjects(cfObjs);
+    }
+    else // on each call to autoUpdateTest() after the first:
+    {
+
+        BOOST_FOREACH(Module &m, _modules)
+        {
+            // Compare changes from auto-update
+            result &= m.compare();
+        }
+        printTestResult("autoUpdateTest", result);
+
+        // Make new changes
+        boost::uniform_int<> distI(0, num_modules - 1);
+        boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
+        
+        int numChanges = randInt(); // choose the number of changes to make
+        for(int i = 0; i < numChanges; i++)
+        {
+            int index = randInt(); // select which module to change
+            _modules[index].change(); // randomly change the module
+        }
+    }
+
+    return result;
+}

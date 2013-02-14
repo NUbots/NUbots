@@ -139,8 +139,16 @@ bool compareValues(T a, T b)
 }
 
 template <typename T>
-bool compare1DVectors(std::vector<T> u, std::vector<T> v, int indent = 0)
+bool compare1DVectors(
+    std::vector<T> u, 
+    std::vector<T> v, 
+    int indent = 0,
+    bool print = true
+    )
 {
+    // Note: should define a null stream rather than using loads of 
+    //       'if' statements for 'print'.
+
     std::stringstream ss;
     for(int i = 0; i < indent; i ++)
     {
@@ -158,30 +166,33 @@ bool compare1DVectors(std::vector<T> u, std::vector<T> v, int indent = 0)
 
     res_c &= (su == sv);
 
-    std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;;
+    if(print) std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;;
     for(int i = 0; i < s_max; i++)
     {
-        std::cout << str_i;
+        if(print) 
+        {
+            std::cout << str_i;
 
-        std::cout.width(8);
-        if(i < su)  std::cout << u[i];
-        else        std::cout << "_";
-        
-        std::cout << ", ";
+            std::cout.width(8);
+            if(i < su)  std::cout << u[i];
+            else        std::cout << "_";
+            
+            std::cout << ", ";
 
-        std::cout.width(8);
-        if(i < sv)  std::cout << v[i];
-        else        std::cout << "_";
+            std::cout.width(8);
+            if(i < sv)  std::cout << v[i];
+            else        std::cout << "_";
+        }
 
         if(i < s_min)
         {
             // bool t_c = ((float)u[i] == (float)v[i]);
             bool t_c = compareValues(u[i], v[i]);
             res_c &= t_c;
-            if(!t_c) std::cout << " *";
+            if(print) if(!t_c) std::cout << " *";
         }
 
-        std::cout << std::endl;
+        if(print) std::cout << std::endl;
     }
 
     return res_c;
@@ -191,7 +202,9 @@ template <typename T>
 bool compare2DVectors(
     std::vector<std::vector<T> > u,
     std::vector<std::vector<T> > v,
-    int indent = 0)
+    int indent = 0,
+    bool print = true
+    )
 {
     std::stringstream ss;
     for(int i = 0; i < indent; i ++)
@@ -211,11 +224,11 @@ bool compare2DVectors(
 
     res_c &= (su == sv);
 
-    std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;
+    if(print) std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;
     for(int i = 0; i < s_max; i++)
     {
         std::vector<T> empty;
-        std::cout << str_i << std::endl;
+        if(print) std::cout << str_i << std::endl;
         if(i >=   su) compare1DVectors(empty, v[i], indent + 1);
         if(i >=   sv) compare1DVectors(u[i], empty, indent + 1);
         if(i < s_min) compare1DVectors(u[i], v[i], indent + 1);
@@ -229,7 +242,9 @@ template <typename T>
 bool compare3DVectors(
     std::vector<std::vector<std::vector<T> > > u,
     std::vector<std::vector<std::vector<T> > > v,
-    int indent = 0)
+    int indent = 0,
+    bool print = true
+    )
 {
     std::stringstream ss;
     for(int i = 0; i < indent; i ++)
@@ -249,12 +264,12 @@ bool compare3DVectors(
 
     res_c &= (su == sv);
 
-    std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;;
+    if(print) std::cout << str_i << "(" << su << ", " << sv << ")" << std::endl;
     for(int i = 0; i < s_max; i++)
     {
         std::vector<std::vector<T> > empty;
 
-        std::cout << str_i << std::endl;
+        if(print) std::cout << str_i << std::endl;
         if(i >=   su) compare2DVectors(empty, v[i], indent + 1);
         if(i >=   sv) compare2DVectors(u[i], empty, indent + 1);
         if(i < s_min) compare2DVectors(u[i], v[i], indent + 1);

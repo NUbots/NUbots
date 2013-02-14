@@ -290,15 +290,13 @@ bool testSaveLoad()
     result &= compare2DVectors(save_2dv_l, load_2dv_l);
     result &= compare1DVectors(save_1dv_d, load_1dv_d);
     result &= compare1DVectors(save_1dv_l, load_1dv_l);
-    result &= compareValues(save_d    , load_d    );
-    result &= compareValues(save_l    , load_l    );
-
+    result &= compareValues   (save_d    , load_d    );
+    result &= compareValues   (save_l    , load_l    );
 
     endTimedTest();
     printTestResult("testSaveLoad", result);
     return result;
 }
-
 
 
 
@@ -320,7 +318,7 @@ int main(void)
     bool res_all = true;
 
     // repeat tests
-    for(int i = 0; i < 2 && res_all; i++)
+    for(int i = 0; i < 5 && res_all; i++)
     {
         // Easy templated value tests
         std::cout << std::endl << "TEST: double" << std::endl;
@@ -354,7 +352,10 @@ int main(void)
         res_all &= test3DVector<long>("param_vector3d_long");
 
         std::cout << std::endl << "TEST: Creating parameters, saving and loading configurations." << std::endl;
-        testSaveLoad();
+        res_all &= testSaveLoad();
+
+        std::cout << std::endl << "TEST: Auto-updating variables." << std::endl;
+        res_all &= Module::autoUpdateTest();
     }
 
     if(res_all) std::cout << std::endl << "Testing complete: All tests passed." << std::endl;
@@ -371,40 +372,40 @@ int main(void)
     ConfigRange<double>                             store_r_d  , read_r_d  ;
     ConfigRange<long>                               store_r_l  , read_r_l  ;
 
-    // Tests:
-    // MODULE:
-    std::vector<Configurable*> cfObjs;
+    // // Tests:
+    // // MODULE:
+    // std::vector<Configurable*> cfObjs;
 
-    // Create config objects
-    Module m1;
-    Module m2;
+    // // Create config objects
+    // Module m1;
+    // Module m2;
 
-    // Set Config Objects
-    cfObjs.push_back(&m1);
-    cfObjs.push_back(&m2);
-    config->setConfigObjects(cfObjs);
+    // // Set Config Objects
+    // cfObjs.push_back(&m1);
+    // cfObjs.push_back(&m2);
+    // config->setConfigObjects(cfObjs);
 
     
-    m1.doubleParam1 = -1;
-    m2.doubleParam1 = -2;
-    m1.setConfigBasePath("Testing.MM");
-    m2.setConfigBasePath("dfhfgh");
+    // m1.doubleParam1 = -1;
+    // m2.doubleParam1 = -2;
+    // m1.setConfigBasePath("Testing.MM");
+    // m2.setConfigBasePath("dfhfgh");
     
-    std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
-    std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
-    store_d = 5;
-    std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
-    std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
-    std::cout << "config->storeDoubleValue(...)" << std::endl; 
-    result = config->storeValue<double>("Testing.MM", "param_double", store_d);
-    // m1.doubleParam1 should not equal 5 here
-    std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
-    std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
-    std::cout << "config->updateConfiguration(...)" << std::endl; 
-    config->updateConfiguration();
-    // m1.doubleParam1 should equal 5 here
-    std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
-    std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
+    // std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
+    // std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
+    // store_d = 5;
+    // std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
+    // std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
+    // std::cout << "config->storeDoubleValue(...)" << std::endl; 
+    // result = config->storeValue<double>("Testing.MM", "param_double", store_d);
+    // // m1.doubleParam1 should not equal 5 here
+    // std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
+    // std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
+    // std::cout << "config->updateConfiguration(...)" << std::endl; 
+    // config->updateConfiguration();
+    // // m1.doubleParam1 should equal 5 here
+    // std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
+    // std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
 
 
     // DOUBLE RANGE:

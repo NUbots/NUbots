@@ -19,6 +19,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ConfigSystem/Module.h" // CONFIG_SYSTEM_TEST
 
 #include "NUPlatform/NUPlatform.h"
 #include "Infrastructure/NUBlackboard.h"
@@ -125,6 +126,11 @@ void SeeThinkThread::run()
             #endif
             
             // ---- Update the configuration system ----
+            if(Module::autoUpdateTest()) // CONFIG_SYSTEM_TEST
+                std::cout << "SeeThinkThread::run(): autoUpdateTest Success!" << std::endl;
+            else 
+                std::cout << "SeeThinkThread::run(): autoUpdateTest FAIL!" << std::endl;
+            
             Blackboard->Config->updateConfiguration();
             // -----------------------------------------
 

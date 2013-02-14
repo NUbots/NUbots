@@ -311,6 +311,9 @@ namespace ConfigSystem
         switch(vt)
         {
             //cases fall through as they use the same - change later if necessary.
+            case vt_string         : // Strings can't have ranges
+                break;
+                
             case vt_double         :
             case vt_1dvector_double: 
             case vt_2dvector_double: 
@@ -391,7 +394,7 @@ namespace ConfigSystem
                 break;
             default: 
                 std::cerr << __PRETTY_FUNCTION__ 
-                         << ": Invalid val_type" 
+                         << ": Invalid val_type: " 
                          << makeValueTypeString(vt)
                          << std::endl;
                 success_v = false;
@@ -401,12 +404,16 @@ namespace ConfigSystem
         // Add range
         switch(vt)
         {
+            case vt_string         : // Strings can't have ranges
+                break;
+
             case vt_double         :
             case vt_1dvector_double:
             case vt_2dvector_double:
             case vt_3dvector_double:
                 success_r = addRangeToPtree<double>(fromParam, toPtree);
                 break;
+
             case vt_bool         :
             case vt_long         :
             case vt_1dvector_long:
@@ -416,7 +423,7 @@ namespace ConfigSystem
                 break;
             default: 
                 std::cerr << __PRETTY_FUNCTION__ 
-                         << ": Invalid val_type" 
+                         << ": Invalid val_type: " 
                          << makeValueTypeString(vt)
                          << std::endl;
                 success_r = false;

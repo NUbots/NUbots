@@ -195,6 +195,8 @@ namespace ConfigSystem
         // (in theory it doesn't matter which...)
         switch(val_type)
         {
+        case vt_none           : _val_long            = NULL; break;
+        
         case vt_bool           : _val_bool            = NULL; break;
         case vt_long           : _val_long            = NULL; break;
         case vt_double         : _val_double          = NULL; break;
@@ -206,19 +208,22 @@ namespace ConfigSystem
         case vt_2dvector_double: _val_2dvector_double = NULL; break;
         case vt_3dvector_double: _val_3dvector_double = NULL; break;
         
-        case vt_none         : _val_long   = NULL; break;
-        
         default: 
             std::cerr << __PRETTY_FUNCTION__ 
                       << ": Invalid val_type '" 
                       << makeValueTypeString(val_type) 
-                      << "'" << std::endl;
+                      << "'." << std::endl;
             _val_long   = NULL;
             break;
         }
 
         switch(val_type)
         {
+        case vt_none           :
+        case vt_string         : // Strings don't have ranges
+            _range_long   = NULL; 
+            break;
+            
         case vt_double         :
         case vt_1dvector_double:
         case vt_2dvector_double:
@@ -232,14 +237,12 @@ namespace ConfigSystem
         case vt_3dvector_long:
             _range_long = new ConfigRange<long>();
             break;
-
-        case vt_none         : _range_long   = NULL; break;
-
+            
         default: 
             std::cerr << __PRETTY_FUNCTION__ 
                       << ": Invalid val_type '" 
                       << makeValueTypeString(val_type) 
-                      << "'" << std::endl;
+                      << "'." << std::endl;
             _range_long   = NULL;
             break;
         }

@@ -20,12 +20,22 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS ConfigRange.template     ConfigRange.h 
-               ConfigManager.cpp        ConfigManager.h
-               ConfigTree.cpp           ConfigTree.h
-               ConfigParameter.cpp      ConfigParameter.h
-               ConfigStorageManager.cpp ConfigStorageManager.h
-               Configurable.cpp         Configurable.h
+SET (YOUR_SRCS ConfigManager.h
+               ConfigParameter.h
+               ConfigRange.h
+               ConfigStorageManager.h
+               ConfigTree.h
+               Configurable.h
+               Module.h
+               Testing_MM_Utils.h
+               ConfigManager.cpp
+               ConfigParameter.cpp
+               ConfigStorageManager.cpp
+               ConfigTree.cpp
+               Configurable.cpp
+               Module.cpp
+               Testing_MM_globals.cpp
+               Testing_MM_Utils.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

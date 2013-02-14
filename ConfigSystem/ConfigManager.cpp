@@ -138,17 +138,17 @@ namespace ConfigSystem
         BOOST_FOREACH(Configurable* c, _configObjects)
         {
             if(c == NULL) continue;
-
+            
             //! skip string comparison if already marked
             if(c->isConfigOutdated()) continue;
-
+            
             //! Check whether the given path is on c's base path
             if(boost::starts_with(paramPath, c->getConfigBasePath()))
                 c->setConfigAsOutdated();
         }
     }
-
-
+    
+    
     template<typename T>
     bool ConfigManager::createParam(
         const std::string &paramPath,

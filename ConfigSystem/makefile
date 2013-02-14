@@ -6,11 +6,11 @@ OBJECTS = ConfigParameter.o      ConfigTree.o    \
 ConfigSystemTest: $(OBJECTS) TestConfig.o
 	g++ $^ -o $@
 
-Testing_MM: $(OBJECTS) Testing_MM.o Testing_MM_Utils.o
+Testing_MM: $(OBJECTS) Testing_MM.o Testing_MM_Utils.o Testing_MM_globals.o
 	g++ $^ -lrt -o $@
 	# -lrt is for realtime extensions (for clock_gettime)
 
-profileTests: $(OBJECTS) Testing_MM.o
+profileTests: $(OBJECTS) Testing_MM.o Testing_MM_Utils.o Testing_MM_globals.o
 	# profile with Valgrind
 	g++ $^ -lrt -o $@
 	valgrind --tool=callgrind ./Testing_MM_prof
