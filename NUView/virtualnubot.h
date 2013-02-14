@@ -94,6 +94,7 @@ signals:
     void updateStatistics(float* selectedColourCounters);
     void LUTChanged(unsigned char* classificationTable);
     void curveChanged(const QwtPlotCurve*, QString);
+    void clearPlots();
 
 private:
     class classEntry

@@ -202,7 +202,6 @@ private:
     OfflineLocalisationDialog* offlinelocDialog;
     LogFileReader* LogReader;
     ColourScheme currentColourScheme;
-
 protected:
     void closeEvent(QCloseEvent *event);
 };

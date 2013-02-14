@@ -17,8 +17,9 @@ public:
 signals:
     
 public slots:
+    void clear();
     void updateCurve(const QwtPlotCurve *curve, QString name);
-
+    virtual void replot();
     
 private:
     map<QString, QwtPlotCurve*> curve_map;

@@ -8,9 +8,15 @@ PlotDisplay::PlotDisplay(QWidget *parent) :
 
 PlotDisplay::~PlotDisplay()
 {
+    clear();
+}
+
+void PlotDisplay::clear()
+{
     map<QString, QwtPlotCurve*>::iterator mit;;
     for(mit = curve_map.begin(); mit != curve_map.end(); mit++)
         delete mit->second;
+    curve_map.clear();
 }
 
 void PlotDisplay::updateCurve(const QwtPlotCurve* curve, QString name)
@@ -37,4 +43,14 @@ void PlotDisplay::updateCurve(const QwtPlotCurve* curve, QString name)
     }
 
     c->setSamples(pts);
+
+    replot();
+}
+
+void PlotDisplay::replot()
+{
+    map<QString, QwtPlotCurve*>::iterator mit;;
+    for(mit = curve_map.begin(); mit != curve_map.end(); mit++)
+        mit->second->attach(this);
+    QwtPlot::replot();
 }

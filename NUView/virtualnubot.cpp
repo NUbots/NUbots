@@ -158,6 +158,7 @@ void virtualNUbot::processVisionFrame()
 void virtualNUbot::processVisionFrame(const NUImage* image)
 {
     if(image != NULL) {
+        emit clearPlots();
         vision->setSensorData(sensorsData);
         vision->setFieldObjects(AllObjects);
         vision->setRawImage(image);
