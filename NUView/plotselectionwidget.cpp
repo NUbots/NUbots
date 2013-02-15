@@ -50,16 +50,19 @@ PlotSelectionWidget::~PlotSelectionWidget()
 
     delete symbolCombo;
     delete styleCombo;
+
+    delete symbolColourButton;
+    delete styleColourButton;
 }
 
 void PlotSelectionWidget::createWidgets()
 {
     curveComboBox = new QComboBox();
 
-    map<QString, QwtPlotCurve*>::const_iterator cit;
-    for(cit = PlotDisplay::curveMap.begin(); cit != PlotDisplay::curveMap.end(); cit++)
+    set<QString>::const_iterator cit;
+    for(cit = PlotDisplay::curveNames.begin(); cit != PlotDisplay::curveNames.end(); cit++)
     {
-        curveComboBox->addItem(cit->first);
+        curveComboBox->addItem(*cit);
     }
 
     // Checkboxes
@@ -67,6 +70,7 @@ void PlotSelectionWidget::createWidgets()
 
     symbolLabel = new QLabel("Symbol");
     symbolCombo = new QComboBox();
+    symbolColourButton = new QPushButton();
 
     for(int i=0; i<15; i++) {
         symbolCombo->addItem(getSymbolName(getSymbolFromInt(i)));
@@ -74,6 +78,7 @@ void PlotSelectionWidget::createWidgets()
 
     styleLabel = new QLabel("Style");
     styleCombo = new QComboBox();
+    styleColourButton = new QPushButton();
 
     for(int i=0; i<5; i++) {
         styleCombo->addItem(getStyleName(getStyleFromInt(i)));
@@ -85,16 +90,19 @@ void PlotSelectionWidget::createLayout()
     // Setup layer toggle controls
     curveSelectionlayout = new QHBoxLayout();
     curveSelectionlayout->addWidget(curveEnabledCheckBox,0,Qt::AlignHCenter);
+    curveSelectionlayout->addStretch(1);
 
     // Setup symbol selection row
     symbolSelectionLayout = new QHBoxLayout();
     symbolSelectionLayout->addWidget(symbolLabel,0,Qt::AlignHCenter);
+    symbolSelectionLayout->addWidget(symbolCombo,0,Qt::AlignHCenter);
     symbolSelectionLayout->addWidget(symbolColourButton,0,Qt::AlignHCenter);
     symbolSelectionLayout->addStretch(1);
 
     // Setup style selection row
     styleSelectionLayout = new QHBoxLayout();
     styleSelectionLayout->addWidget(styleLabel,0,Qt::AlignHCenter);
+    styleSelectionLayout->addWidget(styleCombo,0,Qt::AlignHCenter);
     styleSelectionLayout->addWidget(styleColourButton,0,Qt::AlignHCenter);
     styleSelectionLayout->addStretch(1);
 
@@ -110,7 +118,7 @@ void PlotSelectionWidget::createLayout()
 void PlotSelectionWidget::createConnections()
 {
     // Setup signal to trigger a reload of current settings when a layer is selected.
-    connect(curveComboBox,SIGNAL(activated(int)),this,SLOT(updateSelectedLayerSettings()));
+    connect(curveComboBox,SIGNAL(activated(int)),this,SLOT(updateSelectedCurveSettings()));
 
     // Setup signal to notify when the currently selected window has changed.
     connect(mdiWidget,SIGNAL(subWindowActivated(QMdiSubWindow*)),this,SLOT(focusWindowChanged(QMdiSubWindow*)));
@@ -172,6 +180,19 @@ void PlotSelectionWidget::selectStyleColourClicked()
 {
     QColor newColour = QColorDialog::getColor(getSelectedStyleColour(),this);
     setStyleColour(newColour);
+}
+
+void PlotSelectionWidget::curveNamesUpdates()
+{
+    unsigned int pos = curveComboBox->currentIndex();
+    curveComboBox->clear();
+
+    set<QString>::const_iterator cit;
+    for(cit = PlotDisplay::curveNames.begin(); cit != PlotDisplay::curveNames.end(); cit++)
+    {
+        curveComboBox->addItem(*cit);
+    }
+    curveComboBox->setCurrentIndex(pos);
 }
 
 QColor PlotSelectionWidget::getSelectedSymbolColour()
@@ -390,29 +411,6 @@ void PlotSelectionWidget::enabledSettingChanged(bool enabled)
     currentDisplay->replot();
 }
 
-void PlotSelectionWidget::primarySettingChanged(bool primary)
-{
-    if(!currentDisplay) return;
-
-    if(primary)
-    {
-        layerEnabledCheckBox->setChecked(true);
-    }
-
-    if(disableWriting) return;
-
-    int selectedLayerID = getSelectedLayer();
-
-    QColor colour = getSelectedColour();
-    colour.setAlpha(alphaSlider->value());
-    if(layerPrimaryCheckBox->isChecked())
-    {
-        currentDisplay->setPrimaryDisplay(selectedLayerID);
-        currentDisplay->update();
-    }
-}
-
-
 QwtSymbol::Style PlotSelectionWidget::getSymbolFromInt(int i)
 {
     switch(i) {
@@ -445,7 +443,7 @@ QwtPlotCurve::CurveStyle PlotSelectionWidget::getStyleFromInt(int i)
     }
 }
 
-static QString PlotSelectionWidget::getSymbolName(QwtSymbol::Style id)
+QString PlotSelectionWidget::getSymbolName(QwtSymbol::Style id)
 {
     switch(id) {
     case QwtSymbol::NoSymbol: return "No Symbol";
@@ -467,7 +465,7 @@ static QString PlotSelectionWidget::getSymbolName(QwtSymbol::Style id)
     }
 }
 
-static QString PlotSelectionWidget::getStyleName(QwtPlotCurve::CurveStyle id)
+QString PlotSelectionWidget::getStyleName(QwtPlotCurve::CurveStyle id)
 {
     switch(id) {
     case QwtPlotCurve::NoCurve: return "No Curve";

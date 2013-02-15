@@ -1,6 +1,8 @@
 #include "plotdisplay.h"
 #include "qwt/qwt_symbol.h"
 
+set<QString> PlotDisplay::curveNames;
+
 PlotDisplay::PlotDisplay(QWidget *parent) :
     QwtPlot(parent)
 {
@@ -9,6 +11,11 @@ PlotDisplay::PlotDisplay(QWidget *parent) :
 PlotDisplay::~PlotDisplay()
 {
     //clear();
+}
+
+void PlotDisplay::updateNames(QString name)
+{
+    curveNames.insert(name);
 }
 
 void PlotDisplay::clear()
@@ -21,6 +28,7 @@ void PlotDisplay::clear()
 
 void PlotDisplay::updateCurve(const QwtPlotCurve* curve, QString name)
 {
+    updateNames(name);
     map<QString, QwtPlotCurve*>::iterator mit = curveMap.find(name);
     if(mit == curveMap.end()) {
         //non-existant element, create

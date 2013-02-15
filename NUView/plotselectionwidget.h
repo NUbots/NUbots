@@ -98,15 +98,13 @@ private slots:
       */
     void enabledSettingChanged(bool enabled);
     /*!
-      @brief Updates the current layers primary status.
-      */
-    void primarySettingChanged(bool primary);
-    /*!
       @brief Opens a dialog to allow selection of a custom colour.
       If a valid colour is selected this is updated as the current selection.
       */
     void selectSymbolColourClicked();
     void selectStyleColourClicked();
+
+    void curveNamesUpdates();
 
 private:
     static QwtSymbol::Style getSymbolFromInt(int i);

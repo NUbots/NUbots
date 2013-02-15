@@ -124,8 +124,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     addAsDockable(visionTabs, "Vision tools");
 
     // Add Plots Widget then Dock it on Screen
-//    plotSelection = new PlotSelectionWidget(mdiArea,this);
-//    addAsDockable(plotSelection, "Plot tools");
+    plotSelection = new PlotSelectionWidget(mdiArea,this);
+    addAsDockable(plotSelection, "Plot tools");
     
     // Add Network widgets to Tabs then dock them on Screen
     QTabWidget* networkTabs = new QTabWidget(this);
@@ -485,6 +485,8 @@ void MainWindow::createConnections()
     connect(offlinelocDialog,SIGNAL(LocalisationInfoChanged(QString)),locInfoDisplay, SLOT(setText(QString)));
     connect(offlinelocDialog,SIGNAL(SelfLocalisationInfoChanged(QString)),selflocInfoDisplay, SLOT(setText(QString)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),objectDisplayLog, SLOT(setObjectData(const FieldObjects*)));
+
+    connect(virtualRobot, SIGNAL(clearPlots()), this, SLOT(clearPlots()));
 }
 
 void MainWindow::setColourTheme(ColourScheme newColors)
