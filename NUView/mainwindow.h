@@ -19,6 +19,7 @@
 #include "ObjectDisplayWidget.h"
 #include "GameInformationDisplayWidget.h"
 #include "TeamInformationDisplayWidget.h"
+#include "plotselectionwidget.h"
 #include <QHostInfo>
 #include <QList>
 
@@ -148,6 +149,8 @@ private:
     ClassificationWidget* classification;       //!< Instance of the classification widget
     ConnectionWidget* connection;               //!< Instance of the connection widget; allows connections with robots
     LocalisationWidget* localisation;           //!< Instance of the localisation widget.
+
+    PlotSelectionWidget* plotSelection;
 
     LayerSelectionWidget* layerSelection;
     visionStreamWidget* VisionStreamer;         //!< Instance of VisionStreamWidget

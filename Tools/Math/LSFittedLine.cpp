@@ -135,12 +135,15 @@ void LSFittedLine::calcLine(){
 	setLine(A, B, C);
 }
 
-Vector2<Point> LSFittedLine::getEndPoints() const
+bool LSFittedLine::getEndPoints(Vector2<Point>& endpts) const
 {
+    if(points.size() < 2)
+        return false;
+
     float min = std::numeric_limits<float>::max();
     float max = -std::numeric_limits<float>::max();
     vector<Point>::const_iterator p, p_min, p_max;
-    for(p = points.begin(), p_max = p; p!=points.end(); p++) {
+    for(p = points.begin(), p_min = p_max = p; p!=points.end(); p++) {
         float trans_x = -m_B*p->x - m_A*p->y;
         if(trans_x < min) {
             p_min = p;
@@ -151,15 +154,18 @@ Vector2<Point> LSFittedLine::getEndPoints() const
             max = trans_x;
         }
     }
-    return Vector2<Point>(*p_min, *p_max);
+    endpts = Vector2<Point>(*p_min, *p_max);
+    return true;
 }
 
 double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
 {
     if(valid && other.valid) {
-        Vector2<Point> ep1 = getEndPoints();
-        Vector2<Point> ep2 = other.getEndPoints();
+        Vector2<Point> ep1, ep2;
 
+        //no need to check this works - line is only valid if there are enough points
+        getEndPoints(ep1);
+        other.getEndPoints(ep2);
         //project onto respective lines
         ep1.x = projectOnto(ep1.x);
         ep1.y = projectOnto(ep1.y);
@@ -171,9 +177,7 @@ double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
                d2 = 0.5*( (ep1.y-ep2.x).abs() + (ep1.x-ep2.y).abs() );
         return min(d1, d2); //best pairing results in minimum distance
     }
-    else {
-        return -1.0;    //test for this - distances should always be positive
-    }
+    return -1.0;    //test for this - distances should always be positive
 }
 
 //LinePoint::LinePoint()

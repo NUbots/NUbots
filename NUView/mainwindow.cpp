@@ -123,6 +123,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     visionTabs->addTab(classification,classification->objectName());
     addAsDockable(visionTabs, "Vision tools");
 
+    // Add Plots Widget then Dock it on Screen
+//    plotSelection = new PlotSelectionWidget(mdiArea,this);
+//    addAsDockable(plotSelection, "Plot tools");
     
     // Add Network widgets to Tabs then dock them on Screen
     QTabWidget* networkTabs = new QTabWidget(this);

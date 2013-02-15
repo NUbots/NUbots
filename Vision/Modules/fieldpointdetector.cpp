@@ -36,8 +36,12 @@ void FieldPointDetector::run() const
                 points.push_back(p);
         }
 
+        DataWrapper::getInstance()->plot(POINTS_PLOT, points, "Screen coords");
+
         //map those points to the ground plane
         points = vbb->getTransformer().screenToGroundCartesian(points);
+
+        DataWrapper::getInstance()->plot(POINTS_PLOT, points, "Ground coords");
 
         if(m_circle_detector){
             //first attempt to find a centre circle

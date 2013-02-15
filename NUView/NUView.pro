@@ -205,7 +205,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/depUKF.h \
     ../Localisation/iotests.h \
     NUViewConfig/*.h \
-    plotdisplay.h
+    plotdisplay.h \
+    plotselectionwidget.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -346,7 +347,8 @@ SOURCES += mainwindow.cpp \
     ../Localisation/Models/WeightedModel.cpp \
     ../Tools/Math/depUKF.cpp \
     ../Localisation/iotests.cpp \
-    plotdisplay.cpp
+    plotdisplay.cpp \
+    plotselectionwidget.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

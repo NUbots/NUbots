@@ -492,11 +492,13 @@ void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDis
     for(unsigned int i = 0 ; i < lines.size(); i++)
     {
         const LSFittedLine& line = lines[i];
-        Vector2<Point> endpts = line.getEndPoints();
-        endpts[0] = line.projectOnto(endpts[0]);
-        endpts[1] = line.projectOnto(endpts[1]);
         if(line.valid == true)
         {
+            Vector2<Point> endpts;
+            line.getEndPoints(endpts);
+            endpts[0] = line.projectOnto(endpts[0]);
+            endpts[1] = line.projectOnto(endpts[1]);
+
             glLineWidth(3.0);       // Line width
 
             switch(displayId) {
@@ -527,16 +529,16 @@ void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDis
             }
             glEnd();
         }
-        else
-        {
-            glLineWidth(2.0);       // Line width
-            glColor3ub(100,0,50);
-            glBegin(GL_LINES);                              // Start Lines
-            glVertex2i( int(endpts[0].x), int(endpts[0].y) );                 // Starting point
-            glVertex2i( int(endpts[1].x), int(endpts[1].y) );               // Ending point
-            glEnd();  // End Lines
-
-        }
+        //HOW CAN WE RENDER AN INVALID LINE?
+//        else
+//        {
+//            glLineWidth(2.0);       // Line width
+//            glColor3ub(100,0,50);
+//            glBegin(GL_LINES);                              // Start Lines
+//            glVertex2i( int(endpts[0].x), int(endpts[0].y) );                 // Starting point
+//            glVertex2i( int(endpts[1].x), int(endpts[1].y) );               // Ending point
+//            glEnd();  // End Lines
+//        }
     }
         //glEnable(GL_TEXTURE_2D);
         //glEndList();                                    // END OF LIST

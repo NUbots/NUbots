@@ -3,18 +3,34 @@
 
 FieldLine::FieldLine(const LSFittedLine &screen_line, const LSFittedLine &relative_line)
 {
-    set(screen_line.getEndPoints(), relative_line.getEndPoints());
+    m_id = FIELDLINE;
+    set(screen_line, relative_line);
 }
 
 FieldLine::FieldLine(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points)
 {
+    m_id = FIELDLINE;
     set(screen_end_points, relative_end_points);
+}
+
+void FieldLine::set(const LSFittedLine &screen_line, const LSFittedLine &relative_line)
+{
+    m_screen_line = screen_line;
+    m_relative_line = relative_line;
+
+    if(screen_line.valid)
+        screen_line.getEndPoints(m_screen_end_points);
+    else
+        m_screen_end_points = Vector2<Point>(Point(-1,-1), Point(-1,-1));   //-1 is an invalid pixel location
+
+    if(relative_line.valid)
+        relative_line.getEndPoints(m_relative_end_points);
+    else
+        m_relative_end_points = Vector2<Point>(Point(-1,-1), Point(-1,-1)); //-1 is an impossible relative location
 }
 
 void FieldLine::set(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points)
 {
-    m_id = FIELDLINE;
-
     m_screen_line.setLineFromPoints(screen_end_points.x, screen_end_points.y);
     m_relative_line.setLineFromPoints(relative_end_points.x, relative_end_points.y);
     m_screen_end_points = screen_end_points;

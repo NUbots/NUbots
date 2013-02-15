@@ -8,26 +8,26 @@ PlotDisplay::PlotDisplay(QWidget *parent) :
 
 PlotDisplay::~PlotDisplay()
 {
-    clear();
+    //clear();
 }
 
 void PlotDisplay::clear()
 {
     map<QString, QwtPlotCurve*>::iterator mit;;
-    for(mit = curve_map.begin(); mit != curve_map.end(); mit++)
+    for(mit = curveMap.begin(); mit != curveMap.end(); mit++)
         delete mit->second;
-    curve_map.clear();
+    curveMap.clear();
 }
 
 void PlotDisplay::updateCurve(const QwtPlotCurve* curve, QString name)
 {
-    map<QString, QwtPlotCurve*>::iterator mit = curve_map.find(name);
-    if(mit == curve_map.end()) {
+    map<QString, QwtPlotCurve*>::iterator mit = curveMap.find(name);
+    if(mit == curveMap.end()) {
         //non-existant element, create
-        curve_map[name] = new QwtPlotCurve(name);
+        curveMap[name] = new QwtPlotCurve(name);
     }
 
-    QwtPlotCurve* c = curve_map[name];
+    QwtPlotCurve* c = curveMap[name];
     c->setBrush(curve->brush());
     c->setStyle(curve->style());
     const QwtSymbol* s = curve->symbol();
@@ -50,7 +50,7 @@ void PlotDisplay::updateCurve(const QwtPlotCurve* curve, QString name)
 void PlotDisplay::replot()
 {
     map<QString, QwtPlotCurve*>::iterator mit;;
-    for(mit = curve_map.begin(); mit != curve_map.end(); mit++)
+    for(mit = curveMap.begin(); mit != curveMap.end(); mit++)
         mit->second->attach(this);
     QwtPlot::replot();
 }

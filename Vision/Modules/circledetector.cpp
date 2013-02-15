@@ -1,5 +1,5 @@
 #include "circledetector.h"
-#include "visionblackboard.h"
+#include "Vision/visionblackboard.h"
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/VisionTypes/greenhorizon.h"
 #include "Vision/VisionTypes/RANSACTypes/ransaccircle.h"

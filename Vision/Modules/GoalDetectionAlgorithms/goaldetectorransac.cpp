@@ -116,11 +116,11 @@ vector<Goal> GoalDetectorRANSAC::run()
         goal_lines.push_back(rit->first);
     }
 
-    cout << "lines: " << goal_lines.size() << endl;
+    //cout << "lines: " << goal_lines.size() << endl;
 
     /// @todo MERGE COLINEAR / INTERSECTING
 
-    cout << "after merge: " << goal_lines.size() << endl;
+    //cout << "after merge: " << goal_lines.size() << endl;
 
 #if VISION_FIELDOBJECT_VERBOSITY > 1
     vector<LSFittedLine> debug_lines;
@@ -152,32 +152,36 @@ vector<Goal> GoalDetectorRANSAC::run()
         goal_lines.erase(goal_lines.begin(), goal_lines.end() - 2);
     }
 
-    cout << "after selection (if more than 2): " << goal_lines.size() << endl;
+    //cout << "after selection (if more than 2): " << goal_lines.size() << endl;
 
     BOOST_FOREACH(const RANSACGoal g, goal_lines) {
-        Vector2<Point> endpts = g.getEndPoints();
+        Vector2<Point> endpts;
+        if(g.getEndPoints(endpts)) {
+            //get width vector (to right)
+            Point w = (endpts[0] - endpts[1]).normalize(g.getWidth()).rotateLeft()*0.5;
 
-        //get width vector (to right)
-        Point w = (endpts[0] - endpts[1]).normalize(g.getWidth()).rotateLeft()*0.5;
-
-        if(endpts[0].y < endpts[1].y) {
-            // pt0 is top
-            candidates.push_back(Quad(endpts[1] - w, endpts[0] - w, endpts[0] + w, endpts[1] + w));
+            if(endpts[0].y < endpts[1].y) {
+                // pt0 is top
+                candidates.push_back(Quad(endpts[1] - w, endpts[0] - w, endpts[0] + w, endpts[1] + w));
+            }
+            else {
+                candidates.push_back(Quad(endpts[0] - w, endpts[1] - w, endpts[1] + w, endpts[0] + w));
+            }
         }
         else {
-            candidates.push_back(Quad(endpts[0] - w, endpts[1] - w, endpts[1] + w, endpts[0] + w));
+            errorlog << "GoalDetectorRANSAC::run() - invalid RANSACGoal - no endpoints" << endl;
         }
     }
 
-    cout << "candidates: " << candidates.size() << endl;
+    //cout << "candidates: " << candidates.size() << endl;
 
     //validity check
     removeInvalidPosts(candidates);
-    cout << "after invalid removal: " << candidates.size() << endl;
+    //cout << "after invalid removal: " << candidates.size() << endl;
 
     //overlap check
     overlapCheck(candidates);
-    cout << "after overlap removal: " << candidates.size() << endl;
+    //cout << "after overlap removal: " << candidates.size() << endl;
 
     posts = assignGoals(candidates);
 
@@ -224,40 +228,43 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine>&
             if(s.getAngleBetween(e) < tolerance*mathGeneral::PI*0.5) { //dodgy way (linear with angle between)
             //if(min(a1/a2, a2/a1) <= (1-tolerance)) {
                 //get the end points of each line
-                Vector2<Point> sp = s.getEndPoints(),
-                               ep = e.getEndPoints();
-                //find lengths of line segments
-                double l1 = (sp.x - sp.y).abs(),
-                       l2 = (ep.x - ep.y).abs();
-                //check lengths
-                if(min(l1/l2, l2/l1) >= (1-tolerance)) {
-                    //get num points
-                    double n1 = s.getNumPoints(),
-                           n2 = e.getNumPoints();
-                    if(min(n1/n2, n2/n1) >= (1-tolerance)) {
-                        //check start is to left of end
-                        if(0.5*(sp[0].x + sp[1].x) < 0.5*(ep[0].x + ep[1].x)) {
-                            //success
-                            //order points
-                            if(sp[0].y < sp[1].y) {
-                                sp.transpose();
+                Vector2<Point> sp, ep;
+                if(s.getEndPoints(sp) && e.getEndPoints(ep)) {
+                    //find lengths of line segments
+                    double l1 = (sp.x - sp.y).abs(),
+                           l2 = (ep.x - ep.y).abs();
+                    //check lengths
+                    if(min(l1/l2, l2/l1) >= (1-tolerance)) {
+                        //get num points
+                        double n1 = s.getNumPoints(),
+                               n2 = e.getNumPoints();
+                        if(min(n1/n2, n2/n1) >= (1-tolerance)) {
+                            //check start is to left of end
+                            if(0.5*(sp[0].x + sp[1].x) < 0.5*(ep[0].x + ep[1].x)) {
+                                //success
+                                //order points
+                                if(sp[0].y < sp[1].y) {
+                                    sp.transpose();
+                                }
+                                if(ep[0].y < ep[1].y) {
+                                    ep.transpose();
+                                }
+                                quads.push_back(Quad(sp.x, sp.y, ep.y, ep.x));  //generate candidate
+                                used.at(i) = true;  //remove end line from consideration
+                                cout << "success " << sp << ep << endl;
+                                break;  //do not consider any more lines
                             }
-                            if(ep[0].y < ep[1].y) {
-                                ep.transpose();
-                            }
-                            quads.push_back(Quad(sp.x, sp.y, ep.y, ep.x));  //generate candidate
-                            used.at(i) = true;  //remove end line from consideration
-                            cout << "success " << sp << ep << endl;
-                            break;  //do not consider any more lines
+                            else
+                                cout << "line ordering fail: " << 0.5*(sp[0].x + sp[1].x) << " " << 0.5*(ep[0].x + ep[1].x) << endl;
                         }
                         else
-                            cout << "line ordering fail: " << 0.5*(sp[0].x + sp[1].x) << " " << 0.5*(ep[0].x + ep[1].x) << endl;
+                            cout << "num points fail: " << n1 << " " << n2 << endl;
                     }
                     else
-                        cout << "num points fail: " << n1 << " " << n2 << endl;
+                        cout << "length fail: " << l1 << " " << l2 << endl;
                 }
                 else
-                    cout << "length fail: " << l1 << " " << l2 << endl;
+                    cout << "no endpoints" << endl;
             }
             else
                 cout << "angle fail: " << s.getAngleBetween(e) << " > " << tolerance*mathGeneral::PI*0.5 << endl;

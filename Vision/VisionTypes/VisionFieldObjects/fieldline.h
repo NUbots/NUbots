@@ -13,6 +13,7 @@ public:
     FieldLine(const LSFittedLine& screen_line, const LSFittedLine& relative_line);
     FieldLine(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points);
 
+    void set(const LSFittedLine &screen_line, const LSFittedLine &relative_line);
     void set(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points);
 
     Line getScreenLineEquation() const {return m_screen_line;}

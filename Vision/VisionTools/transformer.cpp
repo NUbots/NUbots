@@ -3,6 +3,8 @@
 #include "Vision/visionconstants.h"
 #include "Tools/Math/General.h"
 #include "Kinematics/Kinematics.h"
+#include "debug.h"
+#include "debugverbosityvision.h"
 
 Transformer::Transformer()
 {
@@ -203,8 +205,9 @@ Point Transformer::screenToGroundCartesian(Point pt) const
 
     Vector3<float> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
 
-    cout << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
-
+#if VISION_FIELDOBJECT_VERBOSITY > 3
+    debug << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
+#endif
     return Point(cartesian_foot_relative.x, cartesian_foot_relative.y);
 }
 
