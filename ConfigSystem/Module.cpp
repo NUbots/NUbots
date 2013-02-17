@@ -235,7 +235,7 @@ bool Module::compare()
     result &= correctUpdate;
     _shouldUpdate = false;
     _updateCalled = false;
-    
+
     if(!result)
     {
         std::cout << "    val_changed_3dv_d = " << ((val_changed_3dv_d)? "true" : "false") << std::endl;
@@ -248,7 +248,7 @@ bool Module::compare()
         std::cout << "    val_changed_l     = " << ((val_changed_l    )? "true" : "false") << std::endl;
         std::cout << "    val_changed_s     = " << ((val_changed_s    )? "true" : "false") << std::endl;
     }
-    
+
     // Reset change flags 
     val_changed_3dv_d = false;
     val_changed_3dv_l = false;
@@ -416,11 +416,17 @@ bool Module::autoUpdateTest()
         boost::variate_generator<boost::mt19937&, boost::uniform_int<> > randInt(seed,distI);
         
         int numChanges = randInt(); // choose the number of changes to make
+        std::cout << "Changes = " << numChanges << std::endl;
         for(int i = 0; i < numChanges; i++)
         {
             int index = randInt(); // select which module to change
             _modules[index].change(); // randomly change the module
         }
+
+        // Update the configuration
+        // (called within See-Think Thread)
+        #error Comment out the following line when testing on the robot:
+        config->updateConfiguration(); 
     }
 
     return result;
