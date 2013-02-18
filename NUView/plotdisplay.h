@@ -8,6 +8,7 @@
 
 using std::map;
 using std::set;
+using std::pair;
 
 class PlotDisplay : public QwtPlot
 {
@@ -15,19 +16,17 @@ class PlotDisplay : public QwtPlot
 
 public:
     static set<QString> curveNames;
-    map<QString, QwtPlotCurve*> curveMap;
-    map<QString, bool> curvesEnabled;
+    map<QString, pair<bool, QwtPlotCurve*> > curveMap;
 
 public:
     explicit PlotDisplay(QWidget *parent = 0);
     virtual ~PlotDisplay();
     static void updateNames(QString name);
-
-signals:
     
 public slots:
-    void clear();
-    void updateCurve(const QwtPlotCurve *curve, QString name);
+    static void clearNames() {curveNames.clear();}
+    void clearMap();
+    void updateCurve(QVector<QPointF> points, QString name);
     virtual void replot();
 };
 

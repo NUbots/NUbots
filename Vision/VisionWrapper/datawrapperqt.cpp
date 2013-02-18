@@ -377,14 +377,21 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
     }
 
     BOOST_FOREACH(LSFittedLine l, data) {
-        Vector2<Point> endpts = l.getEndPoints();
-        gui->addToLayer(id, QLineF(endpts.x.x, endpts.x.y, endpts.y.x, endpts.y.y), linecolour);
-        Point t1 = l.projectOnto(endpts[0]),
-              t2 = l.projectOnto(endpts[1]);
-        gui->addToLayer(id, QPointF(t1.x, t1.y), QPen(endptcolour, 3));
-        gui->addToLayer(id, QPointF(t2.x, t2.y), QPen(endptcolour, 3));
-        BOOST_FOREACH(Point pt, l.getPoints()) {
-            gui->addToLayer(id, QPointF(pt.x, pt.y), pointcolour);
+        Vector2<Point> endpts;
+        if(l.getEndPoints(endpts)) {
+            gui->addToLayer(id, QLineF(endpts.x.x, endpts.x.y, endpts.y.x, endpts.y.y), linecolour);
+            Point t1 = l.projectOnto(endpts[0]),
+                  t2 = l.projectOnto(endpts[1]);
+            gui->addToLayer(id, QPointF(t1.x, t1.y), QPen(endptcolour, 3));
+            gui->addToLayer(id, QPointF(t2.x, t2.y), QPen(endptcolour, 3));
+            BOOST_FOREACH(Point pt, l.getPoints()) {
+                gui->addToLayer(id, QPointF(pt.x, pt.y), pointcolour);
+            }
+        }
+        else {
+            #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "DataWrapper::debugPublish called with invalid line: " << l << endl;
+            #endif
         }
     }
 }

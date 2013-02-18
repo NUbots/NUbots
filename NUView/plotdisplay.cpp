@@ -18,47 +18,36 @@ void PlotDisplay::updateNames(QString name)
     curveNames.insert(name);
 }
 
-void PlotDisplay::clear()
+void PlotDisplay::clearMap()
 {
-    map<QString, QwtPlotCurve*>::iterator mit;;
+    map<QString, pair<bool, QwtPlotCurve*> >::iterator mit;;
     for(mit = curveMap.begin(); mit != curveMap.end(); mit++)
-        delete mit->second;
+        delete mit->second.second;
     curveMap.clear();
 }
 
-void PlotDisplay::updateCurve(const QwtPlotCurve* curve, QString name)
+void PlotDisplay::updateCurve(QVector<QPointF> points, QString name)
 {
     updateNames(name);
-    map<QString, QwtPlotCurve*>::iterator mit = curveMap.find(name);
+    map<QString, pair<bool, QwtPlotCurve*> >::iterator mit = curveMap.find(name);
     if(mit == curveMap.end()) {
         //non-existant element, create
-        curveMap[name] = new QwtPlotCurve(name);
+        curveMap[name] = pair<bool, QwtPlotCurve*>(false, new QwtPlotCurve(name));   //default to disabled
     }
 
-    QwtPlotCurve* c = curveMap[name];
-    c->setBrush(curve->brush());
-    c->setStyle(curve->style());
-    const QwtSymbol* s = curve->symbol();
-    if(s)
-        c->setSymbol(new QwtSymbol(*s));
-
-    const QwtSeriesData<QPointF>* data = curve->data();
-    QVector<QPointF> pts;
-    if(data) {
-        for(size_t i=0; i < data->size(); i++) {
-            pts.push_back(data->sample(i));
-        }
-    }
-
-    c->setSamples(pts);
-
+    QwtPlotCurve* c = curveMap[name].second;
+    c->setSamples(points);
     replot();
 }
 
 void PlotDisplay::replot()
 {
-    map<QString, QwtPlotCurve*>::iterator mit;;
-    for(mit = curveMap.begin(); mit != curveMap.end(); mit++)
-        mit->second->attach(this);
+    map<QString, pair<bool, QwtPlotCurve*> >::iterator mit;
+    for(mit = curveMap.begin(); mit != curveMap.end(); mit++) {
+        if(mit->second.first)
+            mit->second.second->attach(this);
+        else
+            mit->second.second->detach();
+    }
     QwtPlot::replot();
 }

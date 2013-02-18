@@ -64,7 +64,7 @@ public slots:
     *  @param datagram The classified image packet that is recieved, and to be processed by program for visualisation and further vision processing
     */
     void ProcessPacket(QByteArray* packet);
-    void updateLookupTable(unsigned char* packetBuffer){return;}
+    //void updateLookupTable(unsigned char* packetBuffer){return;}
     void updateSelection(Vision::Colour colour, std::vector<Pixel> indexs);
     void UpdateLUT(Vision::Colour colour, std::vector<Pixel> indexs);
     void UndoLUT();
@@ -93,7 +93,7 @@ signals:
     void fftChanged(QImage image, GLDisplay::display displayId);
     void updateStatistics(float* selectedColourCounters);
     void LUTChanged(unsigned char* classificationTable);
-    void curveChanged(const QwtPlotCurve*, QString);
+    void curveChanged(QVector<QPointF>, QString);
     void clearPlots();
 
 private:

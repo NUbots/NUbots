@@ -25,7 +25,7 @@ virtualNUbot::virtualNUbot(QObject * parent): QObject(parent)
     QObject::connect(vision->wrapper, SIGNAL(pointsUpdated(std::vector<Point>,GLDisplay::display)), this, SIGNAL(pointsDisplayChanged(std::vector<Point>,GLDisplay::display)));
     QObject::connect(vision->wrapper, SIGNAL(linesUpdated(std::vector<LSFittedLine>,GLDisplay::display)), this, SIGNAL(fittedLineDisplayChanged(std::vector<LSFittedLine>,GLDisplay::display)));
     QObject::connect(vision->wrapper, SIGNAL(segmentsUpdated(std::vector<std::vector<ColourSegment> >,GLDisplay::display)), this, SIGNAL(segmentsDisplayChanged(std::vector<std::vector<ColourSegment> >,GLDisplay::display)));
-    QObject::connect(vision->wrapper, SIGNAL(plotUpdated(const QwtPlotCurve*,QString)), this, SIGNAL(curveChanged(const QwtPlotCurve*,QString)));
+    QObject::connect(vision->wrapper, SIGNAL(plotUpdated(QVector<QPointF>, QString)), this, SIGNAL(curveChanged(QVector<QPointF>, QString)));
 
     //! TODO: Load LUT from filename.
     AllObjects = new FieldObjects();

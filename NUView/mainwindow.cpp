@@ -815,11 +815,11 @@ QMdiSubWindow* MainWindow::createPlotDisplay()
 {
     PlotDisplay* temp = new PlotDisplay(this);
     //connect signals
-    connect(virtualRobot, SIGNAL(curveChanged(const QwtPlotCurve*,QString)), temp, SLOT(updateCurve(const QwtPlotCurve*,QString)));
-    connect(virtualRobot, SIGNAL(clearPlots()), temp, SLOT(clear()));
+    connect(virtualRobot, SIGNAL(curveChanged(QVector<QPointF>, QString)), plotSelection, SLOT(curveNamesUpdated()));
+    connect(virtualRobot, SIGNAL(curveChanged(QVector<QPointF>, QString)), temp, SLOT(updateCurve(QVector<QPointF>, QString)));
+    connect(virtualRobot, SIGNAL(clearPlots()), temp, SLOT(clearMap()));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->resize(320, 240);
-    temp->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
     temp->show();
     return window;
 }
