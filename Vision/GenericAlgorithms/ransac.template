@@ -279,31 +279,62 @@ namespace RANSAC
         return found;
     }
 
+    //NOTE: Assumes that there are no duplicates in the data
+    //      point set (only way to guarantee no infinite loop)
     template<class Model, typename DataPoint>
     Model generateRandomModel(const vector<DataPoint>& points)
     {
         Model model;
-        if(points.size() >= model.minPointsForFit()) {
-            vector<DataPoint> rand_pts;
-            DataPoint next;
-            rand_pts.push_back(points.at(rand() % points.size()));
+        size_t n = points.size();
+        if(n >= model.minPointsForFit()) {
+            vector<size_t> indices;
+            size_t next;
+            indices.push_back(rand() % n);
 
-            while(rand_pts.size() < model.minPointsForFit()) {
+            while(indices.size() < model.minPointsForFit()) {
                 bool unique;
                 do {
                     unique = true;
-                    next = points.at(rand() % points.size());
-                    BOOST_FOREACH(DataPoint& pt, rand_pts) {
-                        if(pt == next)
+                    next = rand() % n;
+                    BOOST_FOREACH(size_t i, indices) {
+                        if(i == next)
                             unique = false;
                     }
                 }
                 while(!unique);
-                rand_pts.push_back(next);
+                indices.push_back(next);
             }
+
+            vector<DataPoint> rand_pts;
+            BOOST_FOREACH(size_t i, indices) {
+                rand_pts.push_back(points.at(i));
+            }
+
             model.regenerate(rand_pts);
         }
         return model;
+//        Model model;
+//        if(points.size() >= model.minPointsForFit()) {
+//            vector<DataPoint> rand_pts;
+//            DataPoint next;
+//            rand_pts.push_back(points.at(rand() % points.size()));
+
+//            while(rand_pts.size() < model.minPointsForFit()) {
+//                bool unique;
+//                do {
+//                    unique = true;
+//                    next = points.at(rand() % points.size());
+//                    BOOST_FOREACH(DataPoint& pt, rand_pts) {
+//                        if(pt == next)
+//                            unique = false;
+//                    }
+//                }
+//                while(!unique);
+//                rand_pts.push_back(next);
+//            }
+//            model.regenerate(rand_pts);
+//        }
+//        return model;
     }
 }
 

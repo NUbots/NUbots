@@ -113,8 +113,8 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
 #endif
     double theta,
            distance,
-           cos_theta;
-          //tan_theta;
+           cos_theta,
+           cos_bearing;
 
     //resultant angle inclusive of camera pitch, pixel elevation and angle correction factor
     theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
@@ -123,34 +123,16 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
     if(body_pitch_valid)
         theta -= body_pitch;
 
-//    cos_theta = cos(theta);
-//    if(cos_theta == 0)
-//        distance = 0;
-//    else
-//        distance = camera_height / cos_theta / cos(bearing);
-//    tan_theta = tan(theta);
-//    if(tan_theta == 0) {
-//        distance = 0;
-//    }
-//    else {
-//        distance = camera_height / tan_theta / cos(bearing);
-//        //distance = camera_height * tan_theta / cos(bearing);
-//        //distance = camera_height / tan_theta;
-//    }
-
     cos_theta = cos(theta);
-    if(cos_theta == 0) {
+    cos_bearing = cos(bearing);
+    if(cos_theta == 0 || cos_bearing == 0)
         distance = 0;
-    }
-    else {
-        distance = camera_height / cos_theta / cos(bearing);
-        //distance = camera_height * tan_theta / cos(bearing);
-        //distance = camera_height / tan_theta;
-    }
+    else
+        distance = camera_height / cos_theta / cos_bearing;
 
-//#if VISION_BLACKBOARD_VERBOSITY > 1
-    cout << "\ttheta: " << theta << " distance: " << distance << endl;
-//#endif
+#if VISION_BLACKBOARD_VERBOSITY > 1
+    debug << "\ttheta: " << theta << " distance: " << distance << endl;
+#endif
 
     return distance;
 }

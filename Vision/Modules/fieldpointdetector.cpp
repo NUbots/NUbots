@@ -14,10 +14,10 @@ FieldPointDetector::FieldPointDetector(LineDetector *line_detector, CircleDetect
 void FieldPointDetector::run() const
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    const double circle_tolerance = 0.95;
+    const Transformer& transformer = vbb->getTransformer();
 
     //check transforms are valid
-    if(vbb->getTransformer().isScreenToGroundValid()) {
+    if(transformer.isScreenToGroundValid()) {
         vector<Point> points;
         Circle circle;
         vector<LSFittedLine> lines;
@@ -39,9 +39,16 @@ void FieldPointDetector::run() const
         DataWrapper::getInstance()->plot(POINTS_PLOT, points, "Screen coords");
 
         //map those points to the ground plane
-        points = vbb->getTransformer().screenToGroundCartesian(points);
+        points = transformer.screenToGroundCartesian(points);
 
         DataWrapper::getInstance()->plot(POINTS_PLOT, points, "Ground coords");
+
+//        vector<Point> temppts;
+//        BOOST_FOREACH(Point& p, points) {
+//            if(p.abs() < 500)
+//                temppts.push_back(p);
+//        }
+//        DataWrapper::getInstance()->plot(POINTS_PLOT, tempts, "Ground coords");
 
         if(m_circle_detector){
             //first attempt to find a centre circle
