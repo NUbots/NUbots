@@ -268,7 +268,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
     }
 }
 
-void DataWrapper::plot(DEBUG_PLOT_ID id, string name, const vector<Point> &pts)
+void DataWrapper::plot(string name, const vector<Point> &pts)
 {
     QVector<QPointF> qpts;
     BOOST_FOREACH(const Point& p, pts) {

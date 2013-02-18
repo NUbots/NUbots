@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QPair>
 #include <QList>
+#include <QDoubleSpinBox>
 #include <qwt/qwt_symbol.h>
 
 #include "plotdisplay.h"
@@ -89,6 +90,8 @@ private slots:
 
     void setSymbol(QwtSymbol symbol);
 
+    void axisUpdated();
+
 private:
     static void updateButtonColour(QToolButton *button, QColor colour);
     static void updateButtonSymbol(QToolButton* button, const QwtSymbol& symbol);
@@ -105,6 +108,7 @@ private:
     QHBoxLayout* symbolSelectionLayout;         //!< Layout for symbol selection.
     QHBoxLayout* styleSelectionLayout;         //!< Layout for style selection.
     QVBoxLayout* overallLayout;                 //!< Overall widget layout.
+    QGridLayout* axisLimitsLayout;
 
     // Curve Options
     QComboBox* curveComboBox;           //!< Combobox for layer names.
@@ -120,6 +124,12 @@ private:
 
     // Combos
     QComboBox* styleCombo;
+
+    QCheckBox* autoScaleBox;
+    QDoubleSpinBox* xMinSpin;
+    QDoubleSpinBox* xMaxSpin;
+    QDoubleSpinBox* yMinSpin;
+    QDoubleSpinBox* yMaxSpin;
 
     QString selectedCurveName;
 

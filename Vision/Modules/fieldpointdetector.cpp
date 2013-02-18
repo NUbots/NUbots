@@ -36,12 +36,12 @@ void FieldPointDetector::run() const
                 points.push_back(p);
         }
 
-        DataWrapper::getInstance()->plot(POINTS_PLOT, "Screen coords", points);
+        DataWrapper::getInstance()->plot("Screen coords", points);
 
         //map those points to the ground plane
         points = transformer.screenToGroundCartesian(points);
 
-        DataWrapper::getInstance()->plot(POINTS_PLOT, "Ground coords", points);
+        DataWrapper::getInstance()->plot("Ground coords", points);
 
 //        vector<Point> temppts;
 //        BOOST_FOREACH(Point& p, points) {
@@ -55,6 +55,13 @@ void FieldPointDetector::run() const
             if(m_circle_detector->run(points, circle)) {
                 //circle found - points are already removed
                 vbb->addCentreCircle(CentreCircle(circle));
+
+                vector<Point> circle_pts;
+                double r = circle.getRadius();
+                Point c = circle.getCentre();
+                for(double theta = -mathGeneral::PI; theta < mathGeneral::PI; theta+=0.1)
+                    circle_pts.push_back(Point(r*cos(theta), r*sin(theta)) + c);
+                DataWrapper::getInstance()->plot("Centre circle", circle_pts);
             }
         }
 

@@ -26,6 +26,8 @@
 #include <typeinfo>
 #include "GLDisplay.h"
 
+#include <limits>
+
 PlotSelectionWidget::PlotSelectionWidget(QMdiArea* parentMdiWidget, QWidget *parent):
     QWidget(parent),
     mdiWidget(parentMdiWidget),
@@ -48,6 +50,7 @@ PlotSelectionWidget::~PlotSelectionWidget()
     delete curveSelectionlayout;
     delete symbolSelectionLayout;
     delete styleSelectionLayout;
+    delete axisLimitsLayout;
     delete overallLayout;
 
     delete curveComboBox;
@@ -81,6 +84,28 @@ void PlotSelectionWidget::createWidgets()
     for(int i=0; i<5; i++) {
         styleCombo->addItem(getStyleName(getStyleFromInt(i)));
     }
+
+    autoScaleBox = new QCheckBox();
+    autoScaleBox->setText("Automatic scale");
+
+    xMinSpin = new QDoubleSpinBox();
+    xMaxSpin = new QDoubleSpinBox();
+    yMinSpin = new QDoubleSpinBox();
+    yMaxSpin = new QDoubleSpinBox();
+
+    autoScaleBox->setChecked(true);
+    xMinSpin->setRange(-std::numeric_limits<double>::max(), 250);
+    xMaxSpin->setRange(-250, std::numeric_limits<double>::max());
+    yMinSpin->setRange(-std::numeric_limits<double>::max(), 250);
+    yMaxSpin->setRange(-250, std::numeric_limits<double>::max());
+    xMinSpin->setValue(-250);
+    yMinSpin->setValue(-250);
+    xMaxSpin->setValue(250);
+    yMaxSpin->setValue(250);
+    xMinSpin->setEnabled(false);
+    yMinSpin->setEnabled(false);
+    xMaxSpin->setEnabled(false);
+    yMaxSpin->setEnabled(false);
 }
 
 void PlotSelectionWidget::createLayout()
@@ -103,12 +128,20 @@ void PlotSelectionWidget::createLayout()
     styleSelectionLayout->addWidget(styleColourButton,0,Qt::AlignHCenter);
     styleSelectionLayout->addStretch(1);
 
+    axisLimitsLayout = new QGridLayout();
+    axisLimitsLayout->addWidget(xMinSpin, 0, 0);
+    axisLimitsLayout->addWidget(xMaxSpin, 0, 1);
+    axisLimitsLayout->addWidget(yMinSpin, 1, 0);
+    axisLimitsLayout->addWidget(yMaxSpin, 1, 1);
+
     // Setup overall layout
     overallLayout = new QVBoxLayout();
     overallLayout->addWidget(curveComboBox);
     overallLayout->addLayout(curveSelectionlayout);
     overallLayout->addLayout(symbolSelectionLayout);
     overallLayout->addLayout(styleSelectionLayout);
+    overallLayout->addWidget(autoScaleBox);
+    overallLayout->addLayout(axisLimitsLayout);
     setLayout(overallLayout);
 }
 
@@ -129,6 +162,11 @@ void PlotSelectionWidget::createConnections()
     connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),styleLabel,SLOT(setEnabled(bool)));
     connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),styleCombo,SLOT(setEnabled(bool)));
     connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),styleColourButton,SLOT(setEnabled(bool)));
+    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),xMinSpin,SLOT(setEnabled(bool)));
+    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),xMaxSpin,SLOT(setEnabled(bool)));
+    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),yMinSpin,SLOT(setEnabled(bool)));
+    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),yMaxSpin,SLOT(setEnabled(bool)));
+    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),autoScaleBox,SLOT(setEnabled(bool)));
 
     // Setup symbol and style selection signals
     connect(symbolButton, SIGNAL(clicked()), this, SLOT(selectSymbolClicked()));
@@ -136,6 +174,12 @@ void PlotSelectionWidget::createConnections()
     connect(styleColourButton, SIGNAL(clicked()), this, SLOT(selectStyleColourClicked()));
 
     connect(newSymbolDialog, SIGNAL(newSymbolCreated(QwtSymbol)), this, SLOT(setSymbol(QwtSymbol)));
+
+    connect(autoScaleBox, SIGNAL(toggled(bool)), this, SLOT(axisUpdated()));
+    connect(xMinSpin, SIGNAL(valueChanged(double)), this, SLOT(axisUpdated()));
+    connect(xMaxSpin, SIGNAL(valueChanged(double)), this, SLOT(axisUpdated()));
+    connect(yMinSpin, SIGNAL(valueChanged(double)), this, SLOT(axisUpdated()));
+    connect(yMaxSpin, SIGNAL(valueChanged(double)), this, SLOT(axisUpdated()));
 }
 
 void PlotSelectionWidget::setStyleColour(const QColor &newColour)
@@ -167,6 +211,30 @@ void PlotSelectionWidget::setSymbol(QwtSymbol symbol)
 {
     selectedSymbol = symbol;
     displaySettingsChanged();
+}
+
+void PlotSelectionWidget::axisUpdated()
+{
+    xMinSpin->setMaximum(xMaxSpin->value());
+    xMaxSpin->setMinimum(xMinSpin->value());
+    yMinSpin->setMaximum(yMaxSpin->value());
+    yMaxSpin->setMinimum(yMinSpin->value());
+
+    xMinSpin->setEnabled(!autoScaleBox->isChecked());
+    xMaxSpin->setEnabled(!autoScaleBox->isChecked());
+    yMinSpin->setEnabled(!autoScaleBox->isChecked());
+    yMaxSpin->setEnabled(!autoScaleBox->isChecked());
+
+    if(currentDisplay) {
+        if(autoScaleBox->isChecked()) {
+            currentDisplay->setAxisAutoScale(QwtPlot::xBottom, true);
+            currentDisplay->setAxisAutoScale(QwtPlot::yLeft, true);
+        }
+        else {
+            currentDisplay->setAxisScale(QwtPlot::xBottom, xMinSpin->value(), xMaxSpin->value());
+            currentDisplay->setAxisScale(QwtPlot::yLeft, yMinSpin->value(), yMaxSpin->value());
+        }
+    }
 }
 
 void PlotSelectionWidget::curveNamesUpdated(vector<QString> curveNames)
