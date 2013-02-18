@@ -40,12 +40,6 @@ public:
     ~PlotSelectionWidget();
 
     /*!
-      @brief Get the currently selected layer.
-      @return The id of the selected layer
-      */
-    QString getSelectedCurve();
-
-    /*!
       @brief Get a displays history list index.
       @param display The display whose history is required.
       @return The list index of the displays history. -1 if it does not have any.
@@ -53,7 +47,7 @@ public:
     int getDisplayHistoryIndex(PlotDisplay *display);
 
 public slots:
-    void curveNamesUpdated();
+    void curveNamesUpdated(vector<QString> curveNames);
     /*!
       @brief Set the currently selected colour.
       @param newColour The new colour.
@@ -85,12 +79,7 @@ private slots:
       @brief Refreshes the display of the current colour selection and if
       required writes it to the current layer settings.
       */
-    void symbolSettingsChanged();
-    void styleSettingsChanged();
-    /*!
-      @brief Updates the current layers enabled status.
-      */
-    void enabledSettingChanged(bool enabled);
+    void displaySettingsChanged();
     /*!
       @brief Opens a dialog to allow selection of a custom colour.
       If a valid colour is selected this is updated as the current selection.
@@ -132,14 +121,14 @@ private:
     // Combos
     QComboBox* styleCombo;
 
+    QString selectedCurveName;
+
     PlotDisplay* currentDisplay;      //!< Pointer to the current display window.
 
     QwtSymbol selectedSymbol;
     CreateQwtSymbolDialog* newSymbolDialog;
     QwtPlotCurve::CurveStyle selectedStyle;
     QColor selectedStyleColour;      //!< Storage of the currently selected colour.
-
-    QList< QPair<PlotDisplay*,QString> > selectedCurveHistory;
 };
 
 #endif // PLOTSELECTIONWIDGET_H

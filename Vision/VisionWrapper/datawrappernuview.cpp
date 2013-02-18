@@ -268,14 +268,14 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
     }
 }
 
-void DataWrapper::plot(DEBUG_PLOT_ID id, const vector<Point> &pts, string name)
+void DataWrapper::plot(DEBUG_PLOT_ID id, string name, const vector<Point> &pts)
 {
     QVector<QPointF> qpts;
     BOOST_FOREACH(const Point& p, pts) {
         qpts.push_back(QPointF(p.x, p.y));
     }
 
-    emit plotUpdated(qpts, QString(name.c_str()));
+    emit plotUpdated(QString(name.c_str()), qpts);
 }
 
 bool DataWrapper::updateFrame()

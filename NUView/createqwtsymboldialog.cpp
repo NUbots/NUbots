@@ -8,8 +8,8 @@
 CreateQwtSymbolDialog::CreateQwtSymbolDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CreateQwtSymbolDialog),
-    fillColour(Qt::black),
-    borderColour(Qt::gray),
+    fillColour(Qt::gray),
+    borderColour(Qt::black),
     style(QwtSymbol::NoSymbol),
     size(3)
 {

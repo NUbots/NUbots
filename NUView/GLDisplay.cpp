@@ -222,38 +222,32 @@ void GLDisplay::paintGL()
                    primaryLayer->colour.blue(),
                    primaryLayer->colour.alpha());
         glCallList(primaryLayer->displayCommand);
-    }
-    else
-    {
-        return;
-    }
 
-    glEnable(GL_BLEND);		// Turn Blending On
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);		// Turn Blending On
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-    for (int id = 0; id < numDisplays; id++)
-    {
-        if(overlays[id].enabled && overlays[id].hasDisplayCommand && (overlays[id].primary == false))
+        for (int id = 0; id < numDisplays; id++)
         {
-            glColor4ub(overlays[id].colour.red(),
-                       overlays[id].colour.green(),
-                       overlays[id].colour.blue(),
-                       overlays[id].colour.alpha());
-            glCallList(overlays[id].displayCommand);
-            glColor4ub( 255, 255, 255, 255);
+            if(overlays[id].enabled && overlays[id].hasDisplayCommand && (overlays[id].primary == false))
+            {
+                glColor4ub(overlays[id].colour.red(),
+                           overlays[id].colour.green(),
+                           overlays[id].colour.blue(),
+                           overlays[id].colour.alpha());
+                glCallList(overlays[id].displayCommand);
+                glColor4ub( 255, 255, 255, 255);
+            }
         }
+        glDisable(GL_BLEND);		// Turn Blending Off
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+        glFlush();
     }
-    glDisable(GL_BLEND);		// Turn Blending Off
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glFlush();
-    return;
 }
 
 void GLDisplay::resizeGL(int width, int height)
 {
     glViewport(0, 0, width, height);
     updateGL();
-    return;
 }
 
 QSize GLDisplay::minimumSizeHint() const

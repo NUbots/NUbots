@@ -1,53 +1,132 @@
 #include "plotdisplay.h"
 #include "qwt/qwt_symbol.h"
+#include "qwt/qwt_legend.h"
 
-set<QString> PlotDisplay::curveNames;
+map<QString, QVector<QPointF> > PlotDisplay::dataMap;
+map<QString, QwtSymbol> PlotDisplay::symbolMap;
+map<QString, QwtPlotCurve::CurveStyle> PlotDisplay::styleMap;
+map<QString, QColor> PlotDisplay::colourMap;
 
 PlotDisplay::PlotDisplay(QWidget *parent) :
     QwtPlot(parent)
 {
+    // legend
+    QwtLegend *legend = new QwtLegend;
+    legend->setFrameStyle(QFrame::Box|QFrame::Sunken);
+    insertLegend(legend, QwtPlot::RightLegend);
 }
 
 PlotDisplay::~PlotDisplay()
 {
-    //clear();
+    for(map<QString, QwtPlotCurve*>::iterator cit = curveMap.begin(); cit != curveMap.end(); cit++)
+        delete cit->second;
 }
 
-void PlotDisplay::updateNames(QString name)
+vector<QString> PlotDisplay::names()
 {
-    curveNames.insert(name);
+    vector<QString> names;
+    for(map<QString, QVector<QPointF> >::const_iterator it = dataMap.begin(); it != dataMap.end(); it++)
+        names.push_back(it->first);
+    return names;
+}
+
+bool PlotDisplay::nameExists(QString name)
+{
+    map<QString, QVector<QPointF> >::iterator it = dataMap.find(name);
+    return it != dataMap.end();
+}
+
+QwtSymbol PlotDisplay::getSymbol(QString name)
+{
+    return symbolMap[name];
+}
+
+QwtPlotCurve::CurveStyle PlotDisplay::getLineStyle(QString name)
+{
+    return styleMap[name];
+}
+
+QColor PlotDisplay::getLineColour(QString name)
+{
+    return colourMap[name];
+}
+
+void PlotDisplay::toggleCurve(QString name, bool enabled)
+{
+    enabledCurves[name] = enabled;
+}
+
+bool PlotDisplay::isCurveEnabled(QString name)
+{
+    map<QString, bool>::iterator it = enabledCurves.find(name);
+    if(it != enabledCurves.end())
+        return it->second;
+    else
+        return false;
 }
 
 void PlotDisplay::clearMap()
 {
-    map<QString, pair<bool, QwtPlotCurve*> >::iterator mit;;
-    for(mit = curveMap.begin(); mit != curveMap.end(); mit++)
-        delete mit->second.second;
+    dataMap.clear();
+}
+
+void PlotDisplay::clearCurves()
+{
+    for(map<QString, QwtPlotCurve*>::iterator cit = curveMap.begin(); cit != curveMap.end(); cit++)
+        delete cit->second;
     curveMap.clear();
 }
 
-void PlotDisplay::updateCurve(QVector<QPointF> points, QString name)
+void PlotDisplay::updateCurveData(QString name, QVector<QPointF> points)
 {
-    updateNames(name);
-    map<QString, pair<bool, QwtPlotCurve*> >::iterator mit = curveMap.find(name);
-    if(mit == curveMap.end()) {
-        //non-existant element, create
-        curveMap[name] = pair<bool, QwtPlotCurve*>(false, new QwtPlotCurve(name));   //default to disabled
+    bool nameExisted = nameExists(name);
+    dataMap[name] = points;
+    map<QString, bool>::iterator it = enabledCurves.find(name);
+    if(it == enabledCurves.end())
+        enabledCurves[name] = false;
+
+    updateCurve(name);
+
+    if(!nameExisted)
+        emit namesUpdated(names());
+}
+
+void PlotDisplay::updateCurveProperties(QString name, QwtSymbol symbol, QwtPlotCurve::CurveStyle lineStyle, QColor lineColour)
+{
+    if(nameExists(name)) {
+        symbolMap[name] = symbol;
+        styleMap[name] = lineStyle;
+        colourMap[name] = lineColour;
+
+        updateCurve(name);
+    }
+}
+
+void PlotDisplay::updateCurve(QString name)
+{
+    map<QString, QwtPlotCurve*>::iterator it = curveMap.find(name);
+    if(it == curveMap.end()) {
+        curveMap[name] = new QwtPlotCurve(name);
     }
 
-    QwtPlotCurve* c = curveMap[name].second;
-    c->setSamples(points);
+    QwtPlotCurve* curve = curveMap[name];
+
+    curve->setSamples(dataMap[name]);
+    curve->setStyle(styleMap[name]);
+    curve->setSymbol(new QwtSymbol(symbolMap[name]));
+    curve->setPen(QPen(colourMap[name]));
+
     replot();
 }
 
 void PlotDisplay::replot()
 {
-    map<QString, pair<bool, QwtPlotCurve*> >::iterator mit;
-    for(mit = curveMap.begin(); mit != curveMap.end(); mit++) {
-        if(mit->second.first)
-            mit->second.second->attach(this);
+    map<QString, QwtPlotCurve*>::iterator cit;
+    for(cit = curveMap.begin(); cit != curveMap.end(); cit++) {
+        if(enabledCurves[cit->first])
+            cit->second->attach(this);
         else
-            mit->second.second->detach();
+            cit->second->detach();
     }
     QwtPlot::replot();
 }

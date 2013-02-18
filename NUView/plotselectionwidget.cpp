@@ -1,3 +1,5 @@
+/// @author Shannon Fenn
+
 #include "plotselectionwidget.h"
 
 // Qt Includes
@@ -19,6 +21,8 @@
 #include <qwt/qwt_symbol.h>
 #include <qwt/qwt_plot_curve.h>
 
+#include <boost/foreach.hpp>
+
 #include <typeinfo>
 #include "GLDisplay.h"
 
@@ -37,7 +41,6 @@ PlotSelectionWidget::PlotSelectionWidget(QMdiArea* parentMdiWidget, QWidget *par
     createConnections();
     this->setEnabled(false); // Dafault to disabled, until a valid window is selected.
     currentDisplay = 0;
-    curveNamesUpdated();
 }
 
 PlotSelectionWidget::~PlotSelectionWidget()
@@ -118,7 +121,7 @@ void PlotSelectionWidget::createConnections()
     connect(mdiWidget,SIGNAL(subWindowActivated(QMdiSubWindow*)),this,SLOT(focusWindowChanged(QMdiSubWindow*)));
 
     // Signals for layer primary and enabled selections
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),this,SLOT(enabledSettingChanged(bool)));
+    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),this,SLOT(displaySettingsChanged()));
 
     // Signals to disable/enable elements when enabled layer is toggled.
     connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),symbolLabel,SLOT(setEnabled(bool)));
@@ -129,7 +132,7 @@ void PlotSelectionWidget::createConnections()
 
     // Setup symbol and style selection signals
     connect(symbolButton, SIGNAL(clicked()), this, SLOT(selectSymbolClicked()));
-    connect(styleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(styleSettingsChanged()));
+    connect(styleCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(displaySettingsChanged()));
     connect(styleColourButton, SIGNAL(clicked()), this, SLOT(selectStyleColourClicked()));
 
     connect(newSymbolDialog, SIGNAL(newSymbolCreated(QwtSymbol)), this, SLOT(setSymbol(QwtSymbol)));
@@ -140,7 +143,7 @@ void PlotSelectionWidget::setStyleColour(const QColor &newColour)
     if(newColour.isValid())
     {
         selectedStyleColour = newColour;
-        styleSettingsChanged();
+        displaySettingsChanged();
     }
 }
 
@@ -163,25 +166,20 @@ void PlotSelectionWidget::selectStyleColourClicked()
 void PlotSelectionWidget::setSymbol(QwtSymbol symbol)
 {
     selectedSymbol = symbol;
+    displaySettingsChanged();
 }
 
-void PlotSelectionWidget::curveNamesUpdated()
+void PlotSelectionWidget::curveNamesUpdated(vector<QString> curveNames)
 {
-    unsigned int pos = curveComboBox->currentIndex();
+    QString cur = curveComboBox->currentText(); //using text handles the potential for a name to be removed
     curveComboBox->clear();
 
-    set<QString>::const_iterator cit;
-    for(cit = PlotDisplay::curveNames.begin(); cit != PlotDisplay::curveNames.end(); cit++)
-    {
-        if(curveComboBox->findText(*cit) == -1)
-            curveComboBox->addItem(*cit);
+    BOOST_FOREACH(QString& s, curveNames) {
+        if(curveComboBox->findText(s) == -1)
+            curveComboBox->addItem(s);
     }
-    curveComboBox->setCurrentIndex(pos);
-}
 
-QString PlotSelectionWidget::getSelectedCurve()
-{
-    return curveComboBox->itemText(curveComboBox->currentIndex());
+    curveComboBox->setCurrentIndex(curveComboBox->findText(cur));
 }
 
 void PlotSelectionWidget::setSelectedCurve(QString newCurveName)
@@ -189,167 +187,81 @@ void PlotSelectionWidget::setSelectedCurve(QString newCurveName)
     curveComboBox->setCurrentIndex(curveComboBox->findText(newCurveName));
 }
 
-int PlotSelectionWidget::getDisplayHistoryIndex(PlotDisplay* display)
-{
-    int historyListIndex = -1;
-    for (int listIndex = 0; listIndex < selectedCurveHistory.size(); listIndex++)
-    {
-        if(selectedCurveHistory.at(listIndex).first == display)
-            historyListIndex = listIndex;
-    }
-    return historyListIndex;
- }
-
 void PlotSelectionWidget::focusWindowChanged(QMdiSubWindow* focusWindow)
 {
-    if(focusWindow == NULL)
-        return;
+    if(focusWindow) {
+        static QMdiSubWindow* lastWindow = NULL;
+        if(lastWindow != focusWindow) {
+            QWidget* widget = focusWindow->widget();
+            bool correctWindowType = (typeid(*widget) == typeid(PlotDisplay));
 
-    QWidget* widget = focusWindow->widget();
-    bool correctWindowType = (typeid(*widget) == typeid(PlotDisplay));
+            // Enable if the selected window is the right type, disable otherwise.
+            this->setEnabled(correctWindowType);
 
-    // Enable if the selected window is the right type, disable otherwise.
-    this->setEnabled(correctWindowType);
+            currentDisplay = NULL;
 
-    // Save the currently selected layer.
-    int historyListIndex = getDisplayHistoryIndex(currentDisplay);
-    if(historyListIndex != -1)
-    {
-        selectedCurveHistory[historyListIndex].second = getSelectedCurve();
-    }
-    else
-    {
-        selectedCurveHistory.push_back(QPair<PlotDisplay*,QString>(currentDisplay,getSelectedCurve()));
-    }
+            if(correctWindowType)
+            {
+                // Assign to the current display
+                currentDisplay = (PlotDisplay*)widget;
 
-    if(correctWindowType)
-    {
-        // Assign to the current display
-        currentDisplay = (PlotDisplay*)widget;
-
-        // If available load the previously selected layer.
-        historyListIndex = getDisplayHistoryIndex(currentDisplay);
-        if(historyListIndex != -1)
-        {
-            setSelectedCurve(selectedCurveHistory[historyListIndex].second);
+                setSelectedCurve(selectedCurveName);
+                // Get the current settings for the selected layers from the new window.
+                updateSelectedCurveSettings();
+            }
+            lastWindow = focusWindow;
         }
-
-        // Get the current settings for the selected layers from the new window.
-        updateSelectedCurveSettings();
-    }
-    else
-    {
-        currentDisplay = NULL;
     }
 }
 
 void PlotSelectionWidget::updateSelectedCurveSettings()
 {
-    if(!currentDisplay) return;
+    selectedCurveName = curveComboBox->currentText();
 
-    QString selectedCurveName = getSelectedCurve();
+    if(currentDisplay) {
+        if(currentDisplay->nameExists(selectedCurveName)) {
+            curveEnabledCheckBox->setEnabled(true);
+            bool enabled = currentDisplay->isCurveEnabled(selectedCurveName);
+            // Update controls with stored values.
+            curveEnabledCheckBox->setChecked(!enabled);
+            curveEnabledCheckBox->toggle();
 
-    map<QString, pair<bool, QwtPlotCurve*> >::const_iterator curve_it = currentDisplay->curveMap.find(selectedCurveName);
-    if(curve_it == currentDisplay->curveMap.end()) {
-        curveEnabledCheckBox->setChecked(true);
-        curveEnabledCheckBox->toggle();
-        curveEnabledCheckBox->setEnabled(false);
-    }
-    else {
-        curveEnabledCheckBox->setEnabled(true);
-
-        const QwtPlotCurve* selectedCurve = curve_it->second.second;
-
-        bool enabled = curve_it->second.first;
-        // Update controls with stored values.
-        curveEnabledCheckBox->setChecked(!enabled);
-        curveEnabledCheckBox->toggle();
-
-        if(enabled) {
-            //symbol
-            if(selectedCurve->symbol() != NULL) {
-                selectedSymbol = *(selectedCurve->symbol());
+            if(enabled) {
+                //symbol
+                selectedSymbol = currentDisplay->getSymbol(selectedCurveName);
                 updateButtonSymbol(symbolButton, selectedSymbol);
+                //line style
+                styleCombo->setCurrentIndex(styleCombo->findText(getStyleName(currentDisplay->getLineStyle(selectedCurveName))));
+
+                selectedStyleColour = currentDisplay->getLineColour(selectedCurveName);
             }
-            //line style
-            styleCombo->setCurrentIndex(styleCombo->findText(getStyleName(selectedCurve->style())));
-            setStyleColour(selectedCurve->pen().color());
+        }
+        else {
+            curveEnabledCheckBox->setChecked(true);
+            curveEnabledCheckBox->toggle();
+            curveEnabledCheckBox->setEnabled(false);
         }
     }
 }
 
-void PlotSelectionWidget::symbolSettingsChanged()
+void PlotSelectionWidget::displaySettingsChanged()
 {
     if(currentDisplay) {
-        QString selectedCurveName = getSelectedCurve();
+        if(currentDisplay->nameExists(selectedCurveName)) {
 
-        map<QString, pair<bool, QwtPlotCurve*> >::iterator curve_it = currentDisplay->curveMap.find(selectedCurveName);
+            updateButtonSymbol(symbolButton, selectedSymbol);
+            updateButtonColour(styleColourButton, selectedStyleColour);
 
-        if(curve_it == currentDisplay->curveMap.end())
-            return;
+            //can add alpha later if required
+            //colour.setAlpha(alphaSlider->value());
+            currentDisplay->toggleCurve(selectedCurveName, curveEnabledCheckBox->isChecked());
 
-        updateButtonSymbol(symbolButton, selectedSymbol);
+            selectedStyle = getStyleFromInt(styleCombo->currentIndex());
 
-        //can add alpha later if required
-        //colour.setAlpha(alphaSlider->value());
-        curve_it->second.first = curveEnabledCheckBox->isChecked();
-        //assumes curve is already attached to plot (should be)
-        curve_it->second.second->setSymbol(new QwtSymbol(selectedSymbol));
-        currentDisplay->replot();
+            //assumes curve is already attached to plot (should be)
+            currentDisplay->updateCurveProperties(selectedCurveName, selectedSymbol, selectedStyle, selectedStyleColour);
+        }
     }
-}
-
-void PlotSelectionWidget::styleSettingsChanged()
-{
-    if(currentDisplay) {
-        QString selectedCurveName = getSelectedCurve();
-
-        map<QString, pair<bool, QwtPlotCurve*> >::iterator curve_it = currentDisplay->curveMap.find(selectedCurveName);
-
-        if(curve_it == currentDisplay->curveMap.end())
-            return;
-
-        updateButtonColour(styleColourButton, selectedStyleColour);
-
-        selectedStyle = getStyleFromInt(styleCombo->currentIndex());
-        //can add alpha later if required
-        //colour.setAlpha(alphaSlider->value());
-
-        curve_it->second.first = curveEnabledCheckBox->isChecked();
-        //assumes curve is already attached to plot (should be)
-        curve_it->second.second->setPen(selectedStyleColour);
-        curve_it->second.second->setStyle(selectedStyle);
-        currentDisplay->replot();
-    }
-}
-
-void PlotSelectionWidget::enabledSettingChanged(bool enabled)
-{
-    if(!currentDisplay)
-        return;
-
-    QString selectedCurveName = getSelectedCurve();
-
-    map<QString, pair<bool, QwtPlotCurve*> >::iterator curve_it = currentDisplay->curveMap.find(selectedCurveName);
-
-    if(curve_it == currentDisplay->curveMap.end())
-        return;
-
-    updateButtonColour(styleColourButton, selectedStyleColour);
-    updateButtonSymbol(symbolButton, selectedSymbol);
-
-    selectedStyle = getStyleFromInt(styleCombo->currentIndex());
-
-    //can add alpha later if required
-    //colour.setAlpha(alphaSlider->value());
-
-    //assumes curve is already attached to plot (should be)
-    curve_it->second.second->setSymbol(new QwtSymbol(selectedSymbol));
-    curve_it->second.second->setPen(selectedStyleColour);
-    curve_it->second.second->setStyle(selectedStyle);
-
-    curve_it->second.first = enabled;
-    currentDisplay->replot();
 }
 
 void PlotSelectionWidget::updateButtonColour(QToolButton *button, QColor colour)

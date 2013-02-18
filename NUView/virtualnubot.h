@@ -93,7 +93,7 @@ signals:
     void fftChanged(QImage image, GLDisplay::display displayId);
     void updateStatistics(float* selectedColourCounters);
     void LUTChanged(unsigned char* classificationTable);
-    void curveChanged(QVector<QPointF>, QString);
+    void curveChanged(QString, QVector<QPointF>);
     void clearPlots();
 
 private:

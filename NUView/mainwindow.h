@@ -113,7 +113,7 @@ protected slots:
     QMdiSubWindow* createLUTGlDisplay();
     void PrintConnectionInfo(const QHostInfo &hostInfo, int);
 
-    void clearPlots() {PlotDisplay::clearNames();}
+    void clearPlots() {PlotDisplay::clearMap();}
 
 private:
     enum ColourScheme

@@ -36,12 +36,12 @@ void FieldPointDetector::run() const
                 points.push_back(p);
         }
 
-        DataWrapper::getInstance()->plot(POINTS_PLOT, points, "Screen coords");
+        DataWrapper::getInstance()->plot(POINTS_PLOT, "Screen coords", points);
 
         //map those points to the ground plane
         points = transformer.screenToGroundCartesian(points);
 
-        DataWrapper::getInstance()->plot(POINTS_PLOT, points, "Ground coords");
+        DataWrapper::getInstance()->plot(POINTS_PLOT, "Ground coords", points);
 
 //        vector<Point> temppts;
 //        BOOST_FOREACH(Point& p, points) {

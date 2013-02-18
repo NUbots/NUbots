@@ -75,7 +75,7 @@ public:
     void debugPublish(DEBUG_ID id, const NUImage *const img);
     void debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
 
-    void plot(DEBUG_PLOT_ID id, const vector<Point>& pts, string name);
+    void plot(DEBUG_PLOT_ID id, string name, const vector<Point>& pts);
     
 private:
     DataWrapper();
@@ -100,7 +100,7 @@ signals:
     void pointsUpdated(std::vector<Point> pts, GLDisplay::display disp);
     void segmentsUpdated(std::vector<std::vector<ColourSegment> > region, GLDisplay::display disp);
     void linesUpdated(std::vector<LSFittedLine> lines, GLDisplay::display disp);
-    void plotUpdated(QVector<QPointF> points, QString name);
+    void plotUpdated(QString name, QVector<QPointF> points);
     
 private:
 
@@ -132,7 +132,6 @@ private:
     NUCameraData camera_data;
     NUActionatorsData* actions;             //! pointer to shared actionators data
     FieldObjects* field_objects;            //! pointer to shared fieldobject data
-
 };
 
 #endif // VISIONDATAWRAPPERNUVIEW_H

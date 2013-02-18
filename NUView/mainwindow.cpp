@@ -815,9 +815,9 @@ QMdiSubWindow* MainWindow::createPlotDisplay()
 {
     PlotDisplay* temp = new PlotDisplay(this);
     //connect signals
-    connect(virtualRobot, SIGNAL(curveChanged(QVector<QPointF>, QString)), plotSelection, SLOT(curveNamesUpdated()));
-    connect(virtualRobot, SIGNAL(curveChanged(QVector<QPointF>, QString)), temp, SLOT(updateCurve(QVector<QPointF>, QString)));
-    connect(virtualRobot, SIGNAL(clearPlots()), temp, SLOT(clearMap()));
+    connect(virtualRobot, SIGNAL(curveChanged(QString, QVector<QPointF>)), temp, SLOT(updateCurveData(QString, QVector<QPointF>)));
+    connect(virtualRobot, SIGNAL(clearPlots()), temp, SLOT(clearCurves()));
+    connect(temp, SIGNAL(namesUpdated(vector<QString>)), plotSelection, SLOT(curveNamesUpdated(vector<QString>)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->resize(320, 240);
     temp->show();
