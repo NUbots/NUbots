@@ -206,7 +206,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/iotests.h \
     NUViewConfig/*.h \
     plotdisplay.h \
-    plotselectionwidget.h
+    plotselectionwidget.h \
+    createqwtsymboldialog.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -348,7 +349,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/depUKF.cpp \
     ../Localisation/iotests.cpp \
     plotdisplay.cpp \
-    plotselectionwidget.cpp
+    plotselectionwidget.cpp \
+    createqwtsymboldialog.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -394,6 +396,7 @@ SOURCES += \
 
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
 FORMS += \
-    OfflineLocalisationSettingsDialog.ui
+    OfflineLocalisationSettingsDialog.ui \
+    createqwtsymboldialog.ui
 
 

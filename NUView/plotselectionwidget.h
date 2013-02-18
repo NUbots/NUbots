@@ -9,6 +9,7 @@
 #include <qwt/qwt_symbol.h>
 
 #include "plotdisplay.h"
+#include "createqwtsymboldialog.h"
 
 class QMdiArea;
 class QComboBox;
@@ -37,12 +38,6 @@ public:
       @brief Destructor.
       */
     ~PlotSelectionWidget();
-    /*!
-      @brief Get the currently selected colour.
-      @return The current colour of the selected layer.
-      */
-    QColor getSelectedSymbolColour();
-    QColor getSelectedStyleColour();
 
     /*!
       @brief Get the currently selected layer.
@@ -58,17 +53,16 @@ public:
     int getDisplayHistoryIndex(PlotDisplay *display);
 
 public slots:
+    void curveNamesUpdated();
     /*!
       @brief Set the currently selected colour.
       @param newColour The new colour.
       */
-    void setSymbolColour(const QColor& newColour);
     void setStyleColour(const QColor& newColour);
     /*!
       @brief Set the currently selected colour.
       @param newColourName The name of the new colour.
       */
-    void setSymbolColour(const QString& newColourName);
     void setStyleColour(const QString& newColourName);
     /*!
       @brief Set the currently selected layer.
@@ -101,16 +95,19 @@ private slots:
       @brief Opens a dialog to allow selection of a custom colour.
       If a valid colour is selected this is updated as the current selection.
       */
-    void selectSymbolColourClicked();
+    void selectSymbolClicked();
     void selectStyleColourClicked();
 
-    void curveNamesUpdates();
+    void setSymbol(QwtSymbol symbol);
 
 private:
-    static QwtSymbol::Style getSymbolFromInt(int i);
+    static void updateButtonColour(QToolButton *button, QColor colour);
+    static void updateButtonSymbol(QToolButton* button, const QwtSymbol& symbol);
     static QwtPlotCurve::CurveStyle getStyleFromInt(int i);
-    static QString getSymbolName(QwtSymbol::Style id);
     static QString getStyleName(QwtPlotCurve::CurveStyle id);
+    void createWidgets();       //!< Create all of the child widgets.
+    void createLayout();        //!< Layout all of the child widgets.
+    void createConnections();   //!< Connect all of the child widgets.
 
     QMdiArea* mdiWidget; //!< Pointer to keep track of the mdi parent area.
 
@@ -126,24 +123,22 @@ private:
 
     // Labels
     QLabel* symbolLabel;            //!< Label for colour selection.
-    QPushButton* symbolColourButton;            //!< Label for colour selection.
     QLabel* styleLabel;            //!< Label for line style selection.
-    QPushButton* styleColourButton;            //!< Label for colour selection.
+
+    // Buttons
+    QToolButton* symbolButton;            //!< Label for colour selection.
+    QToolButton* styleColourButton;            //!< Label for colour selection.
 
     // Combos
-    QComboBox* symbolCombo;
     QComboBox* styleCombo;
 
     PlotDisplay* currentDisplay;      //!< Pointer to the current display window.
 
-    QColor selectedSymbolColour;      //!< Storage of the currently selected colour.
+    QwtSymbol selectedSymbol;
+    CreateQwtSymbolDialog* newSymbolDialog;
+    QwtPlotCurve::CurveStyle selectedStyle;
     QColor selectedStyleColour;      //!< Storage of the currently selected colour.
 
-
-    void createWidgets();       //!< Create all of the child widgets.
-    void createLayout();        //!< Layout all of the child widgets.
-    void createConnections();   //!< Connect all of the child widgets.
-    bool disableWriting;        //!< Flag used to disable the writing of settings back to the layers when updating the displays.
     QList< QPair<PlotDisplay*,QString> > selectedCurveHistory;
 };
 

@@ -27,7 +27,7 @@ public:
     Vector2<double> getShortLabel() const {return Vector2<double>(m_screen_line.getRho(), m_screen_line.getPhi());}
 
     //dummy until localisation can handle lines
-    bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const {return false;}
+    bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const {return false && fieldobjects && timestamp==0;}
 
     //dummy until localisation can handle lines
     Vector3<float> getRelativeFieldCoords() const {return Vector3<float>(0,0,0);}

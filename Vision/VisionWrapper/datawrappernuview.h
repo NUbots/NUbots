@@ -100,7 +100,7 @@ signals:
     void pointsUpdated(std::vector<Point> pts, GLDisplay::display disp);
     void segmentsUpdated(std::vector<std::vector<ColourSegment> > region, GLDisplay::display disp);
     void linesUpdated(std::vector<LSFittedLine> lines, GLDisplay::display disp);
-    void plotUpdated(const QwtPlotCurve* plot, QString name);
+    void plotUpdated(QVector<QPointF> points, QString name);
     
 private:
 

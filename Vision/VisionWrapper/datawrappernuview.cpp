@@ -270,25 +270,12 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
 
 void DataWrapper::plot(DEBUG_PLOT_ID id, const vector<Point> &pts, string name)
 {
-    QwtPlotCurve curve(QString(name.c_str()));
-
-    switch(id) {
-    case POINTS_PLOT:
-        curve.setStyle(QwtPlotCurve::NoCurve);
-        break;
-    case LINES_PLOT:
-        curve.setStyle(QwtPlotCurve::Lines);
-        break;
-    }
-
     QVector<QPointF> qpts;
     BOOST_FOREACH(const Point& p, pts) {
         qpts.push_back(QPointF(p.x, p.y));
     }
 
-    curve.setSamples(qpts);
-
-    emit plotUpdated(&curve, QString(name.c_str()));
+    emit plotUpdated(qpts, QString(name.c_str()));
 }
 
 bool DataWrapper::updateFrame()

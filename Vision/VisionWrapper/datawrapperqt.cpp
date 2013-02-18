@@ -388,6 +388,11 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
                 gui->addToLayer(id, QPointF(pt.x, pt.y), pointcolour);
             }
         }
+        else {
+            #if VISION_WRAPPER_VERBOSITY > 1
+            debug << "DataWrapper::debugPublish called with invalid line: " << l << endl;
+            #endif
+        }
     }
 }
 
