@@ -50,7 +50,7 @@ void FieldPointDetector::run() const
 //        }
 //        DataWrapper::getInstance()->plot(POINTS_PLOT, tempts, "Ground coords");
 
-        if(m_circle_detector){
+        if(m_circle_detector) {
             //first attempt to find a centre circle
             if(m_circle_detector->run(points, circle)) {
                 //circle found - points are already removed

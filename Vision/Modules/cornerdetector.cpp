@@ -41,11 +41,12 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
                     if(type != CornerPoint::INVALID) {
                         //need screen loc
                         Point screen_loc;
-                        if(it1->getScreenLineEquation().getIntersection(it1->getScreenLineEquation(), screen_loc)) {
+                        if(it1->getScreenLineEquation().getIntersection(it2->getScreenLineEquation(), screen_loc)) {
                             results.push_back(CornerPoint(type, screen_loc, Vector2<float>(intersection.x, intersection.y)));
                         }
                         else {
-                            errorlog << "CornerDetector::run - no intersection found for screen lines - transforms are probably not valid, not publishing corner" << endl;
+                            errorlog << "CornerDetector::run - no intersection found for screen lines - transforms are probably not valid, not publishing corner" <<
+                                        "\t" << it1->getScreenLineEquation() << "\t" << it2->getScreenLineEquation() << endl;
                         }
                     }
                 }

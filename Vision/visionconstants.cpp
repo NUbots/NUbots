@@ -139,6 +139,8 @@ void VisionConstants::loadFromFile(std::string filename)
     RANSAC_MAX_DISTANCE_TO_MERGE = SAM_MAX_DISTANCE_TO_MERGE; //
 
     std::ifstream in(filename.c_str());
+    if(!in.is_open())
+        errorlog << "VisionConstants::loadFromFile failed to load: " << filename << endl;
     std::string name;
     std::string sval;
     while(in.good()) {

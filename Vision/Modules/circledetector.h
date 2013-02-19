@@ -9,7 +9,7 @@ using std::vector;
 class CircleDetector
 {
 public:
-    CircleDetector(double tolerance, unsigned int n = 15, unsigned int k = 40, double e = 4.0);
+    CircleDetector(double tolerance, unsigned int n = 25, unsigned int k = 100, double e = 4.0);
 
     void setTolerance(double tolerance);
 

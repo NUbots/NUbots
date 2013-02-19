@@ -5,6 +5,7 @@
 #include <boost/foreach.hpp>
 #include <QPainter>
 #include <QScrollBar>
+#include <qwt/qwt_legend.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -38,10 +39,26 @@ MainWindow::MainWindow(QWidget *parent) :
     view->setFixedSize(320,240);
     view->setContentsMargins(0,0,0,0);
     view->setFrameShape(QFrame::NoFrame);
-    windows_layout->addWidget(view);
+    windows_layout->addWidget(view, 0, 0);
     scene = new QGraphicsScene;
     scene->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*canvas)));
     view->setScene(scene);
+
+    for(int i = p1; i<=p3; i++) {
+        PLOTWINDOW win = winFromInt(i);
+        plots[win] = new QwtPlot(ui->windowsScrollArea);
+        plots[win]->setAxisAutoScale(QwtPlot::xBottom, true);
+        plots[win]->setAxisAutoScale(QwtPlot::yLeft, true);
+        plots[win]->setFixedSize(320,240);
+        plots[win]->insertLegend(new QwtLegend(), QwtPlot::BottomLegend);
+        //windows_layout->addWidget(plot, row_num, column_num);
+        windows_layout->addWidget(plots[win], (i+1)/2, (i+1)%2);
+
+//        magnifiers[win] = new QwtPlotMagnifier(plots[win]->canvas());
+//        magnifiers[win]->setAxisEnabled(QwtPlot::xBottom, true);
+//        magnifiers[win]->setAxisEnabled(QwtPlot::yLeft, true);
+        zoomers[win] = new QwtPlotZoomer(plots[win]->canvas());
+    }
 
 
     QObject::connect(ui->next_pb, SIGNAL(clicked()), this, SLOT(setNext()));
@@ -57,6 +74,22 @@ MainWindow::~MainWindow()
     for(int id=0; id<DBID_INVALID; id++) {
         delete layer_selections[getDebugIDFromInt(id)];
     }
+
+//    for(map<PLOTWINDOW, QwtPlotMagnifier*>::iterator it = magnifiers.begin(); it != magnifiers.end(); it++) {
+//        delete it->second;
+//    }
+    for(map<PLOTWINDOW, QwtPlotZoomer*>::iterator it = zoomers.begin(); it != zoomers.end(); it++) {
+        delete it->second;
+    }
+    plots.clear();
+    for(map<PLOTWINDOW, QwtPlot*>::iterator it = plots.begin(); it != plots.end(); it++) {
+        delete it->second;
+    }
+    plots.clear();
+    for(map<QString, QwtPlotCurve*>::iterator it = curves.begin(); it != curves.end(); it++) {
+        delete it->second;
+    }
+    curves.clear();
 }
 
 void MainWindow::setFrameNo(int n)
@@ -70,22 +103,19 @@ void MainWindow::clearLayers()
 {
     for(int i=0; i<DBID_INVALID; i++) {
         DEBUG_ID id = getDebugIDFromInt(i);
-
         images[id].clear();
         points[id].clear();
         lines[id].clear();
         rectangles[id].clear();
         circles[id].clear();
         polygons[id].clear();
-
     }
 
-    //clear out plots
-    for(map<QString, pair<QwtPlot*, QwtPlotCurve*> >::iterator it = plots.begin(); it != plots.end(); it++) {
-        delete it->second.second;
-        delete it->second.first;
+    //clear out curves
+    for(map<QString, QwtPlotCurve*>::iterator it = curves.begin(); it != curves.end(); it++) {
+        delete it->second;
     }
-    plots.clear();
+    curves.clear();
 
     refresh();
 }
@@ -139,8 +169,8 @@ void MainWindow::refresh()
     view->show();
 
     //plots
-    for(map<QString, pair<QwtPlot*, QwtPlotCurve*> >::iterator pit = plots.begin(); pit != plots.end(); pit++)
-        pit->second.first->show();
+    for(map<PLOTWINDOW, QwtPlot*>::iterator pit = plots.begin(); pit != plots.end(); pit++)
+        pit->second->show();
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const QImage& img, float alpha)
@@ -208,28 +238,24 @@ void MainWindow::addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen)
     }
 }
 
-void MainWindow::setPlot(QString name, QwtPlotCurve* curve)
+void MainWindow::setPlot(PLOTWINDOW win, QString name, vector<Point> pts, QColor colour, QwtPlotCurve::CurveStyle style)
 {
-    //delete old curve and plot
-    map<QString, pair<QwtPlot*, QwtPlotCurve*> >::iterator it = plots.find(name);
-
-    if(it != plots.end()) {
-        delete it->second.second;
-        delete it->second.first;
+    //set curve
+    QVector<QPointF> qpts;
+    map<QString, QwtPlotCurve*>::iterator cit = curves.find(name);
+    if(cit == curves.end()) {
+        //curve does not exist - create
+        curves[name] = new QwtPlotCurve(name);
     }
 
-    QwtPlot* plot = new QwtPlot(QwtText(name), ui->windowsScrollArea);
+    BOOST_FOREACH(const Point& p, pts) {
+        qpts.push_back( QPointF(p.x, p.y) );
+    }
 
-    plot->setAxisAutoScale(QwtPlot::xBottom, true);
-    plot->setAxisAutoScale(QwtPlot::yLeft, true);
-    plot->setFixedSize(320,240);
+    curves[name]->setSamples(qpts);
+    curves[name]->setStyle(style);
+    curves[name]->setPen(colour);
+    curves[name]->attach(plots[win]);
 
-    curve->attach(plot);
-
-    //windows_layout->addWidget(plot, row_num, column_num);
-    windows_layout->addWidget(plot);
-
-    plot->replot();
-
-    plots[name] = pair<QwtPlot*, QwtPlotCurve*>(plot, curve);
+    plots[win]->replot();
 }

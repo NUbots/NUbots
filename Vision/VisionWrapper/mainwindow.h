@@ -13,6 +13,8 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <qwt/qwt_plot_magnifier.h>
+#include <qwt/qwt_plot_zoomer.h>
 
 #include <map>
 #include <vector>
@@ -54,6 +56,20 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
+    enum PLOTWINDOW {
+        p1 = 0,
+        p2 = 1,
+        p3 = 2
+    };
+
+    PLOTWINDOW winFromInt(int i) {
+        switch(i) {
+        case 1: return p2;
+        case 2: return p3;
+        default: return p1;
+        }
+    }
+
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -73,7 +89,7 @@ public:
     void addToLayer(DEBUG_ID id, const vector<QCircle>& items, QPen pen);
     void addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen);
 
-    void setPlot(QString name, QwtPlotCurve *curve);
+    void setPlot(PLOTWINDOW win, QString name, vector<Point> pts, QColor colour, QwtPlotCurve::CurveStyle style);
     
     bool finished() const {return m_finished;}
     bool next() const {return m_next;}
@@ -111,7 +127,10 @@ private:
     map<DEBUG_ID, vector<pair<QCircle, QPen> > > circles;
     map<DEBUG_ID, vector<pair<Polygon, QPen> > > polygons;
 
-    map<QString, pair<QwtPlot*, QwtPlotCurve*> > plots;
+    map<QString, QwtPlotCurve*> curves;
+    map<PLOTWINDOW, QwtPlot*> plots;
+    //map<PLOTWINDOW, QwtPlotMagnifier*> magnifiers;
+    map<PLOTWINDOW, QwtPlotZoomer*> zoomers;
 };
 
 #endif // MAINWINDOW_H

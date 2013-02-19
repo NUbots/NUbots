@@ -116,8 +116,9 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& 
 
 vector<ColourSegment> ScanLines::classifyVerticalScan(const VisionBlackboard& vbb, const NUImage& img, const Vector2<double> &start)
 {
-    if(start.y >= img.getHeight() || start.x > img.getWidth())
+    if(start.y >= img.getHeight() || start.y < 0 || start.x >= img.getWidth() || start.x < 0) {
         errorlog << start << endl;
+    }
     //simple and nasty first
     //Colour previous, current, next
     const LookUpTable& lut = vbb.getLUT();

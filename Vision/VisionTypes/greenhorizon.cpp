@@ -38,8 +38,8 @@ void GreenHorizon::set(const vector<Point> &initial_points, Point image_size)
                                image_size.x - 1);
         //clamp to image vertical bounds
         y = std::max(y, 0.0);
-        y = std::min(y, image_size.y);
-        original_points.push_back(Point(0, y));
+        y = std::min(y, image_size.y - 1);
+        original_points.push_back(Point(image_size.x - 1, y));
     }
 
     it_start = original_points.begin();

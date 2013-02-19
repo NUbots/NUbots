@@ -22,7 +22,7 @@ vector<LSFittedLine> LineDetectorRANSAC::run(const vector<Point> &points)
     vector< pair<RANSACLine, vector<Point> > > candidates;
     vector<LSFittedLine> lines;
 
-    candidates = RANSAC::findMultipleModels<RANSACLine, Point>(points, m_e, m_n, m_k, m_max_iterations);
+    candidates = RANSAC::findMultipleModels<RANSACLine, Point>(points, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
     for(unsigned int i=0; i<candidates.size(); i++) {
         lines.push_back(LSFittedLine(candidates.at(i).second));
     }

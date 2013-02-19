@@ -109,7 +109,7 @@ vector<Goal> GoalDetectorRANSAC::run()
     }
 
     //use generic ransac implementation to find lines
-    ransac_results = RANSAC::findMultipleModels<RANSACGoal, ColourSegment>(h_segments, m_e, m_n, m_k, m_max_iterations);
+    ransac_results = RANSAC::findMultipleModels<RANSACGoal, ColourSegment>(h_segments, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
 
     for(rit = ransac_results.begin(); rit != ransac_results.end(); rit++) {
         rit->first.fit(rit->second);

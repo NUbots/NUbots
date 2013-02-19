@@ -29,7 +29,7 @@ bool CircleDetector::run(vector<Point> &points, Circle &result)
     vector<Point> consensus, remainder;
     double variance;
     //attemp single RANSAC fit
-    if(RANSAC::findModel<RANSACCircle, Point>(points, candidate, consensus, remainder, variance, m_e, m_n, m_k)) {
+    if(RANSAC::findModel<RANSACCircle, Point>(points, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus)) {
         //now check if the model is good enough
         if(variance <= m_tolerance*candidate.getRadius()) {
             result = candidate;

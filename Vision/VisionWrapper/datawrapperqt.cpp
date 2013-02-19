@@ -17,6 +17,7 @@ DataWrapper* DataWrapper::instance = 0;
 DataWrapper::DataWrapper(MainWindow* ui)
 {
     gui = ui;
+    debug << "openning camera config: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
     m_camspecs.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
     //frame grab methods
     QString camoption("Camera"),
@@ -63,15 +64,17 @@ DataWrapper::DataWrapper(MainWindow* ui)
                 }
             }
             else {
-                streamname = string(getenv("HOME")) + string("/nubot/image.strm");
+                streamname = string(DATA_DIR) + string("/image.strm");
                 if(using_sensors)
-                    sensorstreamname = string(getenv("HOME")) + string("/nubot/sensor.strm");
-                LUTname = string(getenv("HOME")) + string("/nubot/default.lut");
-                configname = string(getenv("HOME")) + string("/nubot/") + string("VisionOptions.cfg");
+                    sensorstreamname = string(DATA_DIR) + string("/sensor.strm");
+                LUTname = string(DATA_DIR) + string("/default.lut");
+                configname = string(CONFIG_DIR) + string("VisionOptions.cfg");
             }
 
+            debug << "openning image stream: " << streamname << endl;
             imagestrm.open(streamname.c_str());
             if(ok && using_sensors) {
+                debug << "openning sensor stream: " << sensorstreamname << endl;
                 sensorstrm.open(sensorstreamname.c_str());
                 if(!sensorstrm.is_open()) {
                     QMessageBox::warning(NULL, "Error", QString("Failed to read sensors from: ") + QString(sensorstreamname.c_str()) + QString(" defaulting to sensors off."));
@@ -86,6 +89,7 @@ DataWrapper::DataWrapper(MainWindow* ui)
             break;
         }
 
+        debug << "config: " << configname << endl;
         //set up fake horizon
         kinematics_horizon.setLine(0, 1, 0);
 
@@ -396,19 +400,31 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
     }
 }
 
-void DataWrapper::plot(DEBUG_PLOT_ID id, vector<Point> pts, string name)
+void DataWrapper::plot(string name, vector<Point> pts)
 {
-    QVector<QPointF> qpts;
+    QwtPlotCurve::CurveStyle style;
+    MainWindow::PLOTWINDOW win;
+    QColor colour;
 
-    QwtPlotCurve* curve = new QwtPlotCurve(name.c_str());
-    curve->setStyle(QwtPlotCurve::Dots);
-    BOOST_FOREACH(const Point& p, pts) {
-        qpts.push_back(QPointF(p.x,p.y));
+    //hackalicious
+    if(name.compare("Centre circle") == 0) {
+        style = QwtPlotCurve::Lines;
+        win = MainWindow::p1;
+        colour = Qt::red;
+    }
+    else if(name.compare("Ground coords") == 0){
+        style = QwtPlotCurve::Dots;
+        win = MainWindow::p1;
+        colour = Qt::green;
+    }
+    else {
+        win = MainWindow::p2;
+        colour = Qt::black;
     }
 
-    curve->setSamples(qpts);
+    gui->setPlot(win, QString(name.c_str()), pts, colour, style);
 
-    gui->setPlot(QString(name.c_str()), curve);
+    cout << name << " " << pts << endl;
 }
 
 bool DataWrapper::updateFrame()

@@ -190,7 +190,7 @@ namespace RANSAC
 //    }
 
     template<class Model, typename DataPoint>
-    vector<pair<Model, vector<DataPoint> > > findMultipleModels(const vector<DataPoint>& points, double e, unsigned int n, unsigned int k, unsigned int max_iterations)
+    vector<pair<Model, vector<DataPoint> > > findMultipleModels(const vector<DataPoint>& points, double e, unsigned int n, unsigned int k, unsigned int max_iterations, RANSAC::SELECTION_METHOD method)
     {
         double variance;
         bool found;
@@ -201,12 +201,12 @@ namespace RANSAC
 
         //run first iterations
 
-        found = findModel(points, model, consensus, remainder, variance, e, n, k);
+        found = findModel(points, model, consensus, remainder, variance, e, n, k, method);
 
         unsigned int i=0;
         while(found && i<max_iterations) {
             results.push_back(pair<Model, vector<DataPoint> >(model, consensus));
-            found = findModel(remainder, model, consensus, remainder, variance, e, n, k);
+            found = findModel(remainder, model, consensus, remainder, variance, e, n, k, method);
             i++;
         }
 
@@ -214,13 +214,14 @@ namespace RANSAC
     }
 
     template<class Model, typename DataPoint>
-    bool findModel(vector<DataPoint> points, Model &result, vector<DataPoint>& consensus, vector<DataPoint>& remainder, double& variance, double e, unsigned int n, unsigned int k)
+    bool findModel(vector<DataPoint> points, Model &result, vector<DataPoint>& consensus, vector<DataPoint>& remainder, double& variance, double e, unsigned int n, unsigned int k, RANSAC::SELECTION_METHOD method)
     {
         if (points.size() < n || n<result.minPointsForFit()) {
             return false;
         }
 
-        double minerr = std::numeric_limits<double>::max();
+        double minerr = std::numeric_limits<double>::max(); // Used for BestFittingConsensus method
+        size_t largestconsensus = 0;                        // Used for LargestConsensus method
         // arrays for storing concensus sets
         bool c1[points.size()];
         bool c2[points.size()];
@@ -255,11 +256,28 @@ namespace RANSAC
 
             cur_variance /= concensus_size; //normalise the variance
 
-            if(concensus_size >= n && cur_variance < minerr) {
-                found = true;
-                result = m;
-                minerr = cur_variance;
-                best_concensus = cur_concensus;
+            //determine whether the consensus is better
+            if(concensus_size >= n) {
+                switch(method) {
+                case LargestConsensus:
+                    if(concensus_size > largestconsensus) {
+                        found = true;
+                        result = m;
+                        largestconsensus = concensus_size;
+                        minerr = cur_variance;  //keep variance for other purposes
+                        best_concensus = cur_concensus;
+                    }
+                    break;
+                case BestFittingConsensus:
+                    if(cur_variance < minerr) {
+                        found = true;
+                        result = m;
+                        minerr = cur_variance;
+                        best_concensus = cur_concensus;
+                    }
+                    break;
+                }
+
             }
         }
         //variance = variance/(points.size()*e);
