@@ -208,6 +208,44 @@ inline void ProjectFromAtoB(float* A, float* B, float distancePast, float* C) {
     C[1] = A[1]+dist*ydiff;
 }
 
+inline double invSqrt( const double& x )
+{
+    double y = x;
+    double xhalf = ( double )0.5 * y;
+    long long i = *( long long* )( &y );
+    i = 0x5fe6ec85e7de30daLL - ( i >> 1 );//LL suffix for (long long) type for GCC
+    y = *( double* )( &i );
+    y = y * ( ( double )1.5 - xhalf * y * y );
+    
+    return y;
+}
+
+inline float invSqrt( const float& number )
+{
+       long i;
+       float x2, y;
+       const float threehalfs = 1.5f;
+
+       x2 = number * 0.5f;
+       y = number;
+       i = * ( long * ) &y; // evil floating point bit level hacking
+       i = 0x5f3759df - ( i >> 1 ); // what the fuck?
+       y = * ( float * ) &i;
+       y = y * ( threehalfs - ( x2 * y * y ) ); // 1st iteration
+       // y = y * ( threehalfs - ( x2 * y * y ) ); // 2nd iteration, this can be removed
+
+       return y;
+} 
+
+
+inline double fSqrt(const double& input) {
+    return 1./invSqrt(input);
+}
+
+inline float fSqrt(const float& input) {
+    return 1.f/invSqrt(input);
+}
+
 } // End namespace
 
 #endif //MATH_GENERAL_H
