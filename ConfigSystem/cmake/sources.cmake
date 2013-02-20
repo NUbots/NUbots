@@ -26,14 +26,18 @@ SET (YOUR_SRCS ConfigManager.h
                ConfigStorageManager.h
                ConfigTree.h
                Configurable.h
-               Module.h
-               Testing_MM_Utils.h
                ConfigManager.cpp
                ConfigParameter.cpp
                ConfigStorageManager.cpp
                ConfigTree.cpp
                Configurable.cpp
+               ###
+               # Extra sources just for testing
+               # (could comment these out on branches
+               # other than ConfigSystem)
+               Module.h
                Module.cpp
+               Testing_MM_Utils.h
                Testing_MM_globals.cpp
                Testing_MM_Utils.cpp
 )

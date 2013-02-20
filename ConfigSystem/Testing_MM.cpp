@@ -371,7 +371,7 @@ int main(void)
     long                                            store_l    , read_l    ;
     ConfigRange<double>                             store_r_d  , read_r_d  ;
     ConfigRange<long>                               store_r_l  , read_r_l  ;
-
+    
     // // Tests:
     // // MODULE:
     // std::vector<Configurable*> cfObjs;
@@ -417,14 +417,14 @@ int main(void)
     // NOTE: Should generate a random range.
     store_r_d = ConfigRange<double>(5, 10, false, true, bt_closed, bt_closed);
     startTimedTest();
-    result = config->storeDoubleRange("Testing.MM", "param_double", store_r_d);
+    result = config->storeRange("Testing.MM", "param_double", store_r_d);
     endTimedTest();
 
     // Read a range<double>:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result &= config->readDoubleRange("Testing.MM", "param_double", read_r_d);
+    result &= config->readRange("Testing.MM", "param_double", read_r_d);
     endTimedTest();
 
     result &= (store_r_d.getMin()            == read_r_d.getMin()            &&
@@ -443,7 +443,7 @@ int main(void)
     // pass: If not stored (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    result = config->storeLongRange("Testing.MM", "param_double", store_r_l);
+    result = config->storeRange("Testing.MM", "param_double", store_r_l);
     endTimedTest();
     printTestResult("storeDoubleRangeAsLongRange", !result);
     
@@ -451,7 +451,7 @@ int main(void)
     // pass: If not read (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    result = config->readLongRange("Testing.MM", "param_double", read_r_l);
+    result = config->readRange("Testing.MM", "param_double", read_r_l);
     endTimedTest();
     printTestResult("readDoubleRangeAsLongRange", !result);
     std::cout << std::endl;

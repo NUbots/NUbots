@@ -126,10 +126,14 @@ void SeeThinkThread::run()
             #endif
             
             // ---- Update the configuration system ----
-            if(Module::autoUpdateTest()) // CONFIG_SYSTEM_TEST
-                std::cout << "SeeThinkThread::run(): autoUpdateTest Success!" << std::endl;
-            else 
-                std::cout << "SeeThinkThread::run(): autoUpdateTest FAIL!" << std::endl;
+            // // Note: should add a define instead of just 
+            // //       commenting/uncommenting this all the time.
+            // // #ifdef SOME_CONFIG_TESTING_DEFINE
+            // if(Module::autoUpdateTest()) // CONFIG_SYSTEM_TEST
+            //     std::cout << "SeeThinkThread::run(): autoUpdateTest Success!" << std::endl;
+            // else 
+            //     std::cout << "SeeThinkThread::run(): autoUpdateTest FAIL!" << std::endl;
+            // // #endif
             
             Blackboard->Config->updateConfiguration();
             // -----------------------------------------

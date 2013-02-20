@@ -39,31 +39,34 @@
 
 namespace ConfigSystem
 {
-    /// Used to identify the type of a ConfigParameter's value.
+    //! Used to identify the type of a ConfigParameter's value.
     enum value_type 
     {
-        vt_none,
-        vt_bool, 
-        vt_long, 
-        vt_double, 
-        vt_string,
-        vt_1dvector_long, 
-        vt_2dvector_long, 
-        vt_3dvector_long, 
-        vt_1dvector_double,
-        vt_2dvector_double,
-        vt_3dvector_double
+        vt_none,             //!< This parameter has no type (and contains no value)
+        vt_bool,             //!< bool
+        vt_long,             //!< long
+        vt_double,           //!< double
+        vt_string,           //!< std::string
+        vt_1dvector_long,    //!< std::vector<long>
+        vt_2dvector_long,    //!< std::vector<<long> >
+        vt_3dvector_long,    //!< std::vector<<<long> > >
+        vt_1dvector_double,  //!< std::vector<double>
+        vt_2dvector_double,  //!< std::vector<<double> >
+        vt_3dvector_double   //!< std::vector<<<double> > >
     };
     
-    //Should these be in a class or better here?
+    /*! Returns a string representation of the given value type. */
     const char* makeValueTypeString   (value_type vt);
+    /*! Returns the value type named by the given string */
     value_type stringToValueType  (std::string typStr);
 
+    /*! Returns a string representation of the given boundary type. */
     const char* makeBoundTypeString  (BoundType vt)      ;
+    /*! Returns the bound type named by the given string. */
     BoundType   stringToBoundType    (std::string typStr);
 
     /*!
-     * 
+     *  Represents a single parameter within the Config System.
      */
     class ConfigParameter
     {
@@ -84,7 +87,11 @@ namespace ConfigSystem
             ConfigParameter(std::vector<std::vector<double> >               value);
             ConfigParameter(std::vector<std::vector<std::vector<double> > > value);
 
+            // Would be safer/better to remove this?
+            // ( + allow a 'ConfigParameter()' constructor to make
+            // a 'none' typed ConfigParameter? )
             ConfigParameter(value_type val_type);
+
 
             // //! Returns this parameter's name.
             // std::string getName();
@@ -227,6 +234,7 @@ namespace ConfigSystem
             std::string _desc;
 
             //! Has this parameter been modified (since this flag was last reset).
+            //! This is not currently used for anything (should consider removing soon).
             bool _modified    ;
             //! Is this parameter 'locked'? (i.e. have changes been disallowed)
             //! The mutator methods of a locked ConfigParameter will all fail
@@ -243,44 +251,41 @@ namespace ConfigSystem
             //   - vector<long>/long[]
             //   - vector<double>/double[]
             
-            // Note: this really does't need to (i.e. shouldn't) be a struct...
-            // struct ParameterValue
-            // {
-                /// The type of this parameter's value
-                value_type _val_type;
+
+            /// The type of this parameter's value
+            value_type _val_type;
+            
+            /// union containing a pointer to the parameter's value
+            // NOTE: A union is used instead of a void* to allow the
+            //       individual variables to have meaningful names
+            //       (avoiding casts everywhere) and so that the 'union'
+            //       keyword (and braces) can simply be commented out 
+            //       to convert the union into a simple set of variables
+            //       (which is a valid, safe implementation that has the 
+            //       drawback of using a fair bit more memory.
+            //       It could be useful for debugging).
+            union 
+            {
+                bool                              *_val_bool           ;
+                long                              *_val_long           ;
+                double                            *_val_double         ;
+                std::string                       *_val_string         ;
                 
-                /// union containing a pointer to the parameter's value
-                // NOTE: A union is used instead of a void* to allow the
-                //       individual variables to have meaningful names
-                //       (avoiding casts everywhere) and so that the 'union'
-                //       keyword (and braces) can simply be commented out 
-                //       to convert the union into a simple set of variables
-                //       (which is a valid, safe implementation that has the 
-                //       drawback of using a fair bit more memory.
-                //       It could be useful for debugging).
-                union 
-                {
-                    bool                              *_val_bool           ;
-                    long                              *_val_long           ;
-                    double                            *_val_double         ;
-                    std::string                       *_val_string         ;
-                    
-                    std::vector<long>                 *_val_1dvector_long  ;
-                    std::vector<std::vector<long> >   *_val_2dvector_long  ;
-                    std::vector<std::vector<std::vector<long> > >   *_val_3dvector_long  ;
-                    std::vector<double>               *_val_1dvector_double;
-                    std::vector<std::vector<double> > *_val_2dvector_double;
-                    std::vector<std::vector<std::vector<double> > > *_val_3dvector_double;
-                };
-                
-                /// union containing a pointer to the parameter's range
-                // See the note on the union above.
-                union 
-                {
-                    ConfigRange<long>   *_range_long  ;
-                    ConfigRange<double> *_range_double;
-                };
-            // } param_value;
+                std::vector<long>                 *_val_1dvector_long  ;
+                std::vector<std::vector<long> >   *_val_2dvector_long  ;
+                std::vector<std::vector<std::vector<long> > >   *_val_3dvector_long  ;
+                std::vector<double>               *_val_1dvector_double;
+                std::vector<std::vector<double> > *_val_2dvector_double;
+                std::vector<std::vector<std::vector<double> > > *_val_3dvector_double;
+            };
+            
+            /// union containing a pointer to the parameter's range
+            // See the note on the union above.
+            union 
+            {
+                ConfigRange<long>   *_range_long  ;
+                ConfigRange<double> *_range_double;
+            };
     };
 }
 

@@ -450,8 +450,7 @@ bool Module::autoUpdateTest()
         }
 
         // Update the configuration
-        // (called within See-Think Thread)
-        // #error Comment out the following line when testing on the robot:
+        // (called within See-Think Thread, unless testing off-robot)
         #ifndef CONFIGSYSTEM_TEST_ROBOT
             config->updateConfiguration(); 
         #endif

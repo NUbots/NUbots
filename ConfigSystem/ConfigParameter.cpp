@@ -29,7 +29,7 @@
 
 namespace ConfigSystem
 {
-	const char* makeValueTypeString(value_type vt)
+    const char* makeValueTypeString(value_type vt)
     {
         switch(vt)
         {
@@ -178,7 +178,11 @@ namespace ConfigSystem
         _val_3dvector_double = new std::vector<std::vector<std::vector<double> > >(value);
         _range_double = new ConfigRange<double>();
     }
-
+    
+    // Would be safer/better to remove this?
+    // ( + allow a 'ConfigParameter()' constructor to make
+    // a 'none' typed ConfigParameter? )
+    // (this is potentially hard to maintain, with little benefit)
     ConfigParameter::ConfigParameter(value_type val_type)
     {
         // Set the value type to the type specified

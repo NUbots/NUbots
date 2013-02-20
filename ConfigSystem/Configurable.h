@@ -5,6 +5,14 @@
     @class Configurable
     @brief Defines an interface for classes that 
            can be configured via the Config system.
+
+    Any object can access the config system, but if an object is to be notified
+    of changes made to parameters in the config system that could affect its
+    configuration, it should inherit from 'ConfigSystem::Configurable', and use
+    'ConfigManager::addConfigObject(Configurable*)' to add itself to the list
+    of objects that the ConfigManager 'manages'.
+    The ConfigManager updates the objects it manages on every iteration of the
+    see-think thread (updating only those that need updating).
     
     @author Mitchell Metcalfe
     
@@ -37,36 +45,28 @@ public:
     // Initialise member variables upon construction.
     Configurable() : _configBasePath(""), _configModified(false) {}
 
-    /*! @brief Configures all of this class's parameters.
+    /*! @brief Completely configures this object.
      *
-     *  Retrieves relevant data from the Configuration System,
+     *  Retrieves all relevant data from the Configuration System,
      *  then assigns them to this module's parameters.
-     *
+     * 
      *  @param No input.
      *  @return No return value.
      */
     virtual void loadConfig()    = 0;
-    
-    /*! @brief Called by the config system to send updated 
-     *         parameters to this class.
+        
+    /*! @brief Called by the config system to notify this object of
+     *         changes to the config tree within this object's base path.
+     *         (i.e. a more recent configuration is available for this object)
      *
-     *  The config system sends the path and value of the parameter that was
-     *  updated.  This method uses the given path and name to update the
-     *  correct parameter.
-     *
-     *  Note: The simplest, but least efficient, implementation of this method
-     *        may be to just call loadConfig().
-     *
-     *  @param paramPath The path to the variable that changed.
-     *  @param paramName The name of the variable that changed.
-     *  @return No return value.
+     *  Note: The simplest implementation of this method is to just call loadConfig().
      */
     virtual void updateConfig() = 0;
     // virtual void updateConfig(
     //     const std::string& paramPath,
     //     const std::string& paramName
     //     ) = 0;
-
+    
     //! Sets this Configurable's base path.
     void setConfigBasePath(std::string configBasePath);
     //! Returns this Configurable's base path.

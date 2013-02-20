@@ -92,6 +92,9 @@ namespace ConfigSystem
     {
         if(configObject == NULL) return false;
         _configObjects.push_back(configObject);
+
+        // Should refactor this method, and reconfigureConfigObjects() to call
+        // a 'reconfigureConfigObject' method.
         configObject->loadConfig();
         configObject->setConfigAsRecent();
         return true;
@@ -101,26 +104,23 @@ namespace ConfigSystem
     {
         BOOST_FOREACH(Configurable* c, _configObjects)
         {
-            if(c == NULL) continue;
-            c->loadConfig();
-            c->setConfigAsRecent();
+            reconfigureConfigObject(c);
         }
     }
 
-    // void ConfigManager::updateConfigObjects(
-    //     const std::string &paramPath,
-    //     const std::string &paramName
-    //     )
+    void ConfigManager::reconfigureConfigObject(Configurable* c)
+    {
+        if(c == NULL) return;
+        c->loadConfig();
+        c->setConfigAsRecent();
+    }
+
+
     void ConfigManager::updateConfigObjects()
     {
-        // Should use some clever data structure to speed this up.
-        // (such a data structure would be initialised within 
-        // ConfigManager::setConfigObjects(...))
         BOOST_FOREACH(Configurable* c, _configObjects)
         {
             if(c == NULL) continue;
-            // if(boost::starts_with(paramPath, c->_configBasePath))
-            //     c->updateConfig(paramPath, paramName);
 
             if(c->isConfigOutdated())
             {
@@ -143,6 +143,9 @@ namespace ConfigSystem
             if(c->isConfigOutdated()) continue;
             
             //! Check whether the given path is on c's base path
+            // Note: Should use some clever data structure to speed this up.
+            // (such a data structure would be initialised within 
+            // ConfigManager::setConfigObjects(...))
             if(boost::starts_with(paramPath, c->getConfigBasePath()))
                 c->setConfigAsOutdated();
         }
@@ -370,46 +373,6 @@ namespace ConfigSystem
         std::vector<std::vector<std::vector<double> > > &data
         );
 
-    // Old (explicitly named) interface.
-    // This should probably be removed soon?
-    bool ConfigManager::readLongValue   (
-        const std::string &paramPath,  const std::string &paramName,
-        long   &data
-        ) { return readValue(paramPath, paramName, data); }
-    bool ConfigManager::readDoubleValue (
-        const std::string &paramPath,  const std::string &paramName,
-        double &data
-        ) { return readValue(paramPath, paramName, data); }
-    bool ConfigManager::readStringValue (
-        const std::string &paramPath,  const std::string &paramName,
-        std::string &data
-        ) { return readValue(paramPath, paramName, data); }
-    bool ConfigManager::readLongVectorValue1D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<long> &data
-        ) { return readValue(paramPath, paramName, data); }
-    bool ConfigManager::readLongVectorValue2D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<std::vector<long> > &data
-        ) { return readValue(paramPath, paramName, data); }
-    bool ConfigManager::readLongVectorValue3D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<std::vector<std::vector<long> > > &data
-        ) { return readValue(paramPath, paramName, data); }
-    bool ConfigManager::readDoubleVectorValue1D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<double> &data
-        ) { return readValue(paramPath, paramName, data); }
-    bool ConfigManager::readDoubleVectorValue2D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<std::vector<double> > &data
-        ) { return readValue(paramPath, paramName, data); }
-    bool ConfigManager::readDoubleVectorValue3D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<std::vector<std::vector<double> > > &data
-        ) { return readValue(paramPath, paramName, data); }
-
-
 
 
     template<typename T>
@@ -473,51 +436,12 @@ namespace ConfigSystem
         std::vector<std::vector<std::vector<double> > > data
         );
 
-    // Old (explicitly named) interface.
-    // This should probably be removed soon?
-    bool ConfigManager::storeLongValue   (
-        const std::string &paramPath,  const std::string &paramName,
-        long   data
-        ) { return storeValue(paramPath, paramName, data); }
-    bool ConfigManager::storeDoubleValue (
-        const std::string &paramPath,  const std::string &paramName,
-        double data
-        ) { return storeValue(paramPath, paramName, data); }
-    bool ConfigManager::storeStringValue (
-        const std::string &paramPath,  const std::string &paramName,
-        std::string data
-        ) { return storeValue(paramPath, paramName, data); }
-    bool ConfigManager::storeLongVectorValue1D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<long> data
-        ) { return storeValue(paramPath, paramName, data); }
-    bool ConfigManager::storeLongVectorValue2D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<std::vector<long> > data
-        ) { return storeValue(paramPath, paramName, data); }
-    bool ConfigManager::storeLongVectorValue3D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<std::vector<std::vector<long> > > data
-        ) { return storeValue(paramPath, paramName, data); }
-    bool ConfigManager::storeDoubleVectorValue1D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<double> data
-        ) { return storeValue(paramPath, paramName, data); }
-    bool ConfigManager::storeDoubleVectorValue2D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<std::vector<double> > data
-        ) { return storeValue(paramPath, paramName, data); }
-    bool ConfigManager::storeDoubleVectorValue3D(
-        const std::string &paramPath,  const std::string &paramName, 
-        std::vector<std::vector<std::vector<double> > > data
-        ) { return storeValue(paramPath, paramName, data); }
 
 
 
-
-    bool ConfigManager::readDoubleRange(const string &paramPath, 
-                                        const string &paramName, 
-                            ConfigRange<double> &range)
+    bool ConfigManager::readRange(const string &paramPath, 
+                                  const string &paramName, 
+                                  ConfigRange<double> &range)
     {
         CONFIGSYS_DEBUG_CALLS;
 
@@ -525,9 +449,9 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         return cp.getRange(range);
     }
-    bool ConfigManager::readLongRange  (const string &paramPath, 
-                                        const string &paramName, 
-                                        ConfigRange<long> &range)
+    bool ConfigManager::readRange  (const string &paramPath, 
+                                    const string &paramName, 
+                                    ConfigRange<long> &range)
     {
         CONFIGSYS_DEBUG_CALLS;
 
@@ -536,9 +460,9 @@ namespace ConfigSystem
         return cp.getRange(range);
     }
 
-    bool ConfigManager::storeDoubleRange(const string &paramPath, 
-                                        const string &paramName, 
-                                        ConfigRange<double> &range)
+    bool ConfigManager::storeRange(const string &paramPath, 
+                                   const string &paramName, 
+                                   ConfigRange<double> &range)
     {
         CONFIGSYS_DEBUG_CALLS;
         //! Get the relevant parameter from the ConfigTree
@@ -548,9 +472,9 @@ namespace ConfigSystem
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
-    bool ConfigManager::storeLongRange (const string &paramPath, 
-                                        const string &paramName, 
-                                        ConfigRange<long> &range)
+    bool ConfigManager::storeRange (const string &paramPath, 
+                                    const string &paramName, 
+                                    ConfigRange<long> &range)
     {
         CONFIGSYS_DEBUG_CALLS;
         //! Get the relevant parameter from the ConfigTree
