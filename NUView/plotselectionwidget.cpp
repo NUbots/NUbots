@@ -54,7 +54,7 @@ PlotSelectionWidget::~PlotSelectionWidget()
     delete overallLayout;
 
     delete curveComboBox;
-    delete curveEnabledCheckBox;
+    delete curveVisibilityCheckBox;
 
     delete symbolLabel;
     delete styleLabel;
@@ -72,7 +72,7 @@ void PlotSelectionWidget::createWidgets()
     curveComboBox = new QComboBox();
 
     // Checkboxes
-    curveEnabledCheckBox = new QCheckBox("Enabled");
+    curveVisibilityCheckBox = new QCheckBox("Visible");
 
     symbolLabel = new QLabel("Symbol");
     symbolButton = new QToolButton();
@@ -112,7 +112,7 @@ void PlotSelectionWidget::createLayout()
 {
     // Setup layer toggle controls
     curveSelectionlayout = new QHBoxLayout();
-    curveSelectionlayout->addWidget(curveEnabledCheckBox,0,Qt::AlignHCenter);
+    curveSelectionlayout->addWidget(curveVisibilityCheckBox,0,Qt::AlignHCenter);
     curveSelectionlayout->addStretch(1);
 
     // Setup symbol selection row
@@ -154,19 +154,19 @@ void PlotSelectionWidget::createConnections()
     connect(mdiWidget,SIGNAL(subWindowActivated(QMdiSubWindow*)),this,SLOT(focusWindowChanged(QMdiSubWindow*)));
 
     // Signals for layer primary and enabled selections
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),this,SLOT(displaySettingsChanged()));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),this,SLOT(displaySettingsChanged()));
 
     // Signals to disable/enable elements when enabled layer is toggled.
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),symbolLabel,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),symbolButton,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),styleLabel,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),styleCombo,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),styleColourButton,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),xMinSpin,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),xMaxSpin,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),yMinSpin,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),yMaxSpin,SLOT(setEnabled(bool)));
-    connect(curveEnabledCheckBox,SIGNAL(toggled(bool)),autoScaleBox,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),symbolLabel,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),symbolButton,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),styleLabel,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),styleCombo,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),styleColourButton,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),xMinSpin,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),xMaxSpin,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),yMinSpin,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),yMaxSpin,SLOT(setEnabled(bool)));
+    connect(curveVisibilityCheckBox,SIGNAL(toggled(bool)),autoScaleBox,SLOT(setEnabled(bool)));
 
     // Setup symbol and style selection signals
     connect(symbolButton, SIGNAL(clicked()), this, SLOT(selectSymbolClicked()));
@@ -288,26 +288,25 @@ void PlotSelectionWidget::updateSelectedCurveSettings()
 
     if(currentDisplay) {
         if(currentDisplay->nameExists(selectedCurveName)) {
-            curveEnabledCheckBox->setEnabled(true);
-            bool enabled = currentDisplay->isCurveEnabled(selectedCurveName);
+            curveVisibilityCheckBox->setEnabled(true);
+            // get values from curve
+            bool visible = currentDisplay->isCurveVisible(selectedCurveName);
+            selectedSymbol = currentDisplay->getSymbol(selectedCurveName);
+            selectedStyle = currentDisplay->getLineStyle(selectedCurveName);
+            selectedStyleColour = currentDisplay->getLineColour(selectedCurveName);
+
             // Update controls with stored values.
-            curveEnabledCheckBox->setChecked(!enabled);
-            curveEnabledCheckBox->toggle();
+            styleCombo->setCurrentIndex(styleCombo->findText(getStyleName(selectedStyle)));
+            updateButtonSymbol(symbolButton, selectedSymbol);
+            updateButtonColour(styleColourButton, selectedStyleColour);
+            curveVisibilityCheckBox->setChecked(visible);
 
-            if(enabled) {
-                //symbol
-                selectedSymbol = currentDisplay->getSymbol(selectedCurveName);
-                updateButtonSymbol(symbolButton, selectedSymbol);
-                //line style
-                styleCombo->setCurrentIndex(styleCombo->findText(getStyleName(currentDisplay->getLineStyle(selectedCurveName))));
-
-                selectedStyleColour = currentDisplay->getLineColour(selectedCurveName);
-            }
+            displaySettingsChanged();
         }
         else {
-            curveEnabledCheckBox->setChecked(true);
-            curveEnabledCheckBox->toggle();
-            curveEnabledCheckBox->setEnabled(false);
+            curveVisibilityCheckBox->setChecked(true);
+            curveVisibilityCheckBox->toggle();
+            curveVisibilityCheckBox->setEnabled(false);
         }
     }
 }
@@ -322,7 +321,7 @@ void PlotSelectionWidget::displaySettingsChanged()
 
             //can add alpha later if required
             //colour.setAlpha(alphaSlider->value());
-            currentDisplay->toggleCurve(selectedCurveName, curveEnabledCheckBox->isChecked());
+            currentDisplay->setCurveVisibility(selectedCurveName, curveVisibilityCheckBox->isChecked());
 
             selectedStyle = getStyleFromInt(styleCombo->currentIndex());
 

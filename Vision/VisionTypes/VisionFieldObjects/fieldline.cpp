@@ -7,34 +7,39 @@ FieldLine::FieldLine(const LSFittedLine &screen_line, const LSFittedLine &relati
     set(screen_line, relative_line);
 }
 
-FieldLine::FieldLine(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points)
+FieldLine::FieldLine(const Vector2<Point>& end_points)
 {
     m_id = FIELDLINE;
-    set(screen_end_points, relative_end_points);
+    set(end_points);
 }
 
-void FieldLine::set(const LSFittedLine &screen_line, const LSFittedLine &relative_line)
+void FieldLine::set(const LSFittedLine& screen_line, const LSFittedLine& ground_line)
 {
     m_screen_line = screen_line;
-    m_relative_line = relative_line;
+    m_ground_line = ground_line;
 
-    if(screen_line.valid)
-        screen_line.getEndPoints(m_screen_end_points);
-    else
-        m_screen_end_points = Vector2<Point>(Point(-1,-1), Point(-1,-1));   //-1 is an invalid pixel location
+    if(screen_line.valid) {
+        screen_line.getEndPoints(m_end_points[0].screen, m_end_points[1].screen);
+    }
+    else {
+        m_end_points[0].screen = Vector2<double>(-1,-1);
+        m_end_points[1].screen = Vector2<double>(-1,-1);   //-1 is an invalid pixel location
+    }
 
-    if(relative_line.valid)
-        relative_line.getEndPoints(m_relative_end_points);
-    else
-        m_relative_end_points = Vector2<Point>(Point(-1,-1), Point(-1,-1)); //-1 is an impossible relative location
+    if(ground_line.valid) {
+        ground_line.getEndPoints(m_end_points[0].ground, m_end_points[1].ground);
+    }
+    else{
+        m_end_points[0].ground = Vector2<double>(-1,-1);
+        m_end_points[1].ground = Vector2<double>(-1,-1);   //-1 is an impossible ground location
+    }
 }
 
-void FieldLine::set(const Vector2<Point>& screen_end_points, const Vector2<Point>& relative_end_points)
+void FieldLine::set(const Vector2<Point>& end_points)
 {
-    m_screen_line.setLineFromPoints(screen_end_points.x, screen_end_points.y);
-    m_relative_line.setLineFromPoints(relative_end_points.x, relative_end_points.y);
-    m_screen_end_points = screen_end_points;
-    m_relative_end_points = relative_end_points;
+    m_screen_line.setLineFromPoints(end_points.x.screen, end_points.y.screen);
+    m_ground_line.setLineFromPoints(end_points.x.ground, end_points.y.ground);
+    m_end_points = end_points;
 }
 
 double FieldLine::findError(const Vector2<double>& measured) const
@@ -57,10 +62,10 @@ ostream& operator<< (ostream& output, const FieldLine& l)
 {
     output << "FieldLine " << endl;
     output << "Equation: " << l.m_screen_line << endl;
-    output << "Field Equation: " << l.m_relative_line << endl;
-    output << "\tpixelloc: [" << l.m_location_pixels.x << ", " << l.m_location_pixels.y << "]" << endl;
-    output << " angularloc: [" << l.m_location_angular.x << ", " << l.m_location_angular.y << "]" << endl;
-    output << "\trelative field coords: [" << l.m_spherical_position.x << ", " << l.m_spherical_position.y << ", " << l.m_spherical_position.z << "]" << endl;
+    output << "Field Equation: " << l.m_ground_line << endl;
+    output << "\tpixelloc: [" << l.m_location.screen.x << ", " << l.m_location.screen.y << "]" << endl;
+    output << " angularloc: [" << l.m_location.angular.x << ", " << l.m_location.angular.y << "]" << endl;
+    output << "\trelative field coords: [" << l.m_location.relativeRadial.x << ", " << l.m_location.relativeRadial.y << ", " << l.m_location.relativeRadial.z << "]" << endl;
     output << "\tspherical error: [" << l.m_spherical_error.x << ", " << l.m_spherical_error.y << "]" << endl;
     output << "\tsize on screen: [" << l.m_size_on_screen.x << ", " << l.m_size_on_screen.y << "]";
     return output;

@@ -6,7 +6,7 @@
 
 #include <boost/foreach.hpp>
 
-bool operator < (const Point& point1, const Point& point2) {
+bool operator < (const Vector2<double>& point1, const Vector2<double>& point2) {
     if(point1.x < point2.x) {
         return true;
     }
@@ -31,7 +31,7 @@ Line::Line(){
 }
 
 // Constructor
-Line::Line(Point p1, Point p2){
+Line::Line(Vector2<double> p1, Vector2<double> p2){
   // General Line Equation: A*x + B*y = C
   setLineFromPoints(p1,p2);
 }
@@ -103,8 +103,8 @@ void Line::normaliseRhoPhi()
 //        m_phi -= 2*mathGeneral::PI;
 }
 
-// setLineFromPoints(Point p1, Point p2): Generate the line that passes through the two given points.
-bool Line::setLineFromPoints(Point p1, Point p2)
+// setLineFromPoints(Vector2<double> p1, Vector2<double> p2): Generate the line that passes through the two given points.
+bool Line::setLineFromPoints(Vector2<double> p1, Vector2<double> p2)
 {
   // Using method found at: http://www.uwm.edu/~ericskey/TANOTES/Ageometry/node4.html
   double A,B,C;
@@ -215,7 +215,7 @@ double Line::getYIntercept() const
   return findYFromX(0);
 }
 
-double Line::getLinePointDistance(Point point) const
+double Line::getLinePointDistance(Vector2<double> point) const
 {
   if(!isValid()) return 0.0;
   return fabs(m_A * point.x + m_B * point.y - m_C) / m_normaliser;
@@ -225,7 +225,7 @@ double Line::getNormaliser() const
 {
     return m_normaliser;
 }
-double Line::getSignedLinePointDistance(Point point) const
+double Line::getSignedLinePointDistance(Vector2<double> point) const
 {
   double distance;
   if(isValid() == false) return 0.0;
@@ -253,20 +253,20 @@ double Line::getPhi() const
     return m_phi;
 }
 
-Point Line::projectOnto(Point pt) const
+Vector2<double> Line::projectOnto(Vector2<double> pt) const
 {
     if(!isValid()) {
         //prevent division by zero with norm.norm
         return pt;
     }
     else {
-        Point shift(0, m_C);
-        Point norm(m_B, -m_A);
+        Vector2<double> shift(0, m_C);
+        Vector2<double> norm(m_B, -m_A);
         return norm*((pt-shift)*norm/(norm*norm)) + shift;
     }
 }
 
-vector<Point> Line::projectOnto(const vector<Point>& pts) const
+vector< Vector2<double> > Line::projectOnto(const vector< Vector2<double> >& pts) const
 {
     if(!isValid()) {
         //prevent division by zero with norm.norm
@@ -274,20 +274,20 @@ vector<Point> Line::projectOnto(const vector<Point>& pts) const
     }
     else {
         //replace later with more optimised version
-        vector<Point> result;
-        BOOST_FOREACH(const Point& p, pts) {
+        vector< Vector2<double> > result;
+        BOOST_FOREACH(const Vector2<double>& p, pts) {
             result.push_back(projectOnto(p));
         }
 
-        //Point shift(0, m_C);
-        //Point norm(m_B, -m_A);
+        //Vector2<double> shift(0, m_C);
+        //Vector2<double> norm(m_B, -m_A);
         //return norm*((pt-shift)*norm/(norm*norm)) + shift;
 
         return result;
     }
 }
 
-bool Line::getIntersection(const Line &other, Point &pt) const
+bool Line::getIntersection(const Line &other, Vector2<double> &pt) const
 {
     double norm = m_A*other.m_B - m_B*other.m_A;
     if(norm != 0) {

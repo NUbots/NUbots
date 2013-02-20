@@ -14,7 +14,7 @@ public:
     };
 
 public:
-    CornerPoint(TYPE type, Point screen_location, Vector2<float> relative_location);
+    CornerPoint(TYPE type, Point location);
 
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const;
 

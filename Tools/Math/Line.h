@@ -17,7 +17,7 @@
   */
 
 using std::vector;
-typedef Vector2<double> Point;
+//typedef Vector2<double> Point;
 
 class Line
 {
@@ -25,7 +25,7 @@ class Line
     //! Default Constructor.
     Line();
     //! Constructor with intialising points. A line is created through these 2 points.
-    Line(Point p1, Point p2);
+    Line(Vector2<double> p1, Vector2<double> p2);
     //! Constructor with intialising values.
     Line(double rho, double phi);
     //! Destructor
@@ -53,7 +53,7 @@ class Line
       @param p2 The second point.
       @return True if a valid line was assigned using the points. False otherwise.
       */
-    bool setLineFromPoints(Point p1, Point p2);
+    bool setLineFromPoints(Vector2<double> p1, Vector2<double> p2);
     /*!
       @brief Normalises the rho/phi values.
       */
@@ -147,7 +147,7 @@ class Line
       @param point The point to find the distance to.
       @return The distance from the line to the point.
       */
-    double getLinePointDistance(Point point) const;
+    double getLinePointDistance(Vector2<double> point) const;
     /*Added by Shannon*/
     /*!
       @brief retreive the normaliser for the coefficients of the line equation - sqrt(A^2 + B^2).
@@ -159,7 +159,7 @@ class Line
       @param point The point to find the distance to.
       @return The signed distance from the line to the point.
       */
-    double getSignedLinePointDistance(Point point) const;
+    double getSignedLinePointDistance(Vector2<double> point) const;
     /*!
       @brief Find the smallest angle between this and the given line.
       @param other The other line.
@@ -181,20 +181,20 @@ class Line
       @param pt The point to project.
       @return The projected point.
       */
-    Point projectOnto(Point pt) const;
+    Vector2<double> projectOnto(Vector2<double> pt) const;
     /*!
       @brief Projects multiple points onto the line.
       @param pts A vector of points to project.
       @return The vector of projected points.
       */
-    vector<Point> projectOnto(const vector<Point>& pts) const;
+    vector< Vector2<double> > projectOnto(const vector< Vector2<double> >& pts) const;
     /*!
       @brief Finds the intersection of the two lines.
       @param other The other line.
       @param pt The resulting point.
       @return Whether the lines intersect.
       */
-    bool getIntersection(const Line& other, Point& pt) const;
+    bool getIntersection(const Line& other, Vector2<double>& pt) const;
     /*Added by Shannon*/
 
 // Overloaded functions

@@ -94,18 +94,18 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& 
         if(current_colour != start_colour) {
             //start of new segment
             //make new segment and push onto vector
-            segment.set(Vector2<double>(start_pos, y), Vector2<double>(x, y), start_colour);
+            segment.set(Point(start_pos, y), Point(x, y), start_colour);
             result.push_back(segment);
             //start new segment
             start_colour = current_colour;
             start_pos = x;
         }
     }
-    segment.set(Vector2<double>(start_pos, y), Vector2<double>(x-1, y), start_colour);
+    segment.set(Point(start_pos, y), Point(x-1, y), start_colour);
     result.push_back(segment);
     
     #if VISION_SCAN_VERBOSITY > 1
-        Vector2<double> end;
+        Point end;
         for(int i=0; i<result.size(); i++) {
             debug << result.at(i).getStart() << " " << result.at(i).getEnd() << " " << (end==result.at(i).getStart()) << endl;
             end = result.at(i).getEnd();
@@ -135,14 +135,14 @@ vector<ColourSegment> ScanLines::classifyVerticalScan(const VisionBlackboard& vb
         if(current_colour != start_colour) {
             //start of new segment
             //make new segment and push onto vector
-            segment.set(Vector2<double>(x, start_pos), Vector2<double>(x, y), start_colour);
+            segment.set(Point(x, start_pos), Point(x, y), start_colour);
             result.push_back(segment);
             //start new segment
             start_colour = current_colour;
             start_pos = y;
         }
     }
-    segment.set(Vector2<double>(x, start_pos), Vector2<double>(x, y), start_colour);
+    segment.set(Point(x, start_pos), Point(x, y), start_colour);
     result.push_back(segment);
     
     return result;

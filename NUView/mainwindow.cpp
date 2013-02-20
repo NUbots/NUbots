@@ -821,6 +821,7 @@ QMdiSubWindow* MainWindow::createPlotDisplay()
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->resize(320, 240);
     temp->show();
+    plotSelection->curveNamesUpdated(temp->names());
     return window;
 }
 

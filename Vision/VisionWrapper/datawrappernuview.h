@@ -70,12 +70,13 @@ public:
     void debugPublish(vector<Goal> data);
     void debugPublish(vector<Obstacle> data);
     void debugPublish(const vector<FieldLine>& data);
+    void debugPublish(DEBUG_ID id, const vector< Vector2<double> >& data_points);
     void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     void debugPublish(DEBUG_ID id, const NUImage *const img);
     void debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
 
-    void plot(string name, const vector<Point>& pts);
+    void plot(string name, vector< Vector2<double> > pts);
     
 private:
     DataWrapper();

@@ -65,16 +65,16 @@ public:
     
     //! only used for ransac - segments cannot overlap and thus cannot have equal centres
     friend bool operator== (const ColourSegment& lhs, const ColourSegment& rhs) {
-        return lhs.m_centre == rhs.m_centre;
+        return lhs.m_centre.screen == rhs.m_centre.screen;
     }
     
 
 private:
     Colour m_colour;    //! @variable The colour of the segment.
     unsigned int m_length_pixels;   //! @variable The length of the segment in pixels.
-    Point m_start,              //! @variable The start screen location.
-                    m_end,                //! @variable The end  screenlocation.
-                    m_centre;       //! @variable The centre screenlocation.
+    Point m_start,              //! @variable The start pixel location.
+          m_end,                //! @variable The end  pixellocation.
+          m_centre;       //! @variable The centre pixellocation.
 };
 
 #endif // COLOURSEGMENT_H

@@ -11,7 +11,7 @@
 Obstacle::Obstacle(const Point& position, double width, double height)
 {
     m_id = OBSTACLE;
-    m_location_pixels = position;
+    m_location = position;
     m_size_on_screen = Vector2<double>(width, height);
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -41,10 +41,10 @@ if(valid) {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Obstacle");
     //newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_ROBOT_UNKNOWN);
-    newAmbObj.UpdateVisualObject(m_spherical_position,
-                                 m_spherical_error,
-                                 m_location_angular,
-                                 Vector2<int>(m_location_pixels.x,m_location_pixels.y),
+    newAmbObj.UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
+                                 Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
+                                 Vector2<float>(m_location.angular.x, m_location.angular.y),
+                                 Vector2<int>(m_location.screen.x,m_location.screen.y),
                                  Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                  timestamp);
     newAmbObj.arc_width = m_size_on_screen.x * vbb->getFOV().x / vbb->getImageWidth();
@@ -77,21 +77,18 @@ bool Obstacle::calculatePositions()
 {
     const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
     //To the bottom of the Goal Post.
-    Point radial = transformer.screenToRadial2D(m_location_pixels);
+    transformer.screenToRadial2D(m_location);
 
     distance_valid = transformer.isDistanceToPointValid();
-    if(distance_valid)
-        d2p = transformer.distanceToPoint(radial.x, radial.y);
-    
-    m_spherical_position.x = d2p;       //distance
-    m_spherical_position.y = radial.x;  //bearing
-    m_spherical_position.z = radial.y;  //elevation
-    
-    m_location_angular = Vector2<float>(radial.x, radial.y);
+    if(distance_valid) {
+        d2p = transformer.distanceToPoint(m_location.angular.x, m_location.angular.y);
+        transformer.screenToRadial3D(m_location, d2p);
+    }
+
     //m_spherical_error - not calculated
 
     #if VISION_FIELDOBJECT_VERBOSITY > 2
-        debug << "Obstacle::calculatePositions: " << m_spherical_position << endl;
+        debug << "Obstacle::calculatePositions: " << m_location.relativeRadial << endl;
     #endif
 
     return distance_valid && d2p > 0;
@@ -110,9 +107,10 @@ bool Obstacle::calculatePositions()
  */
 ostream& operator<< (ostream& output, const Obstacle& o)
 {
-    output << "Obstacle - pixelloc: [" << o.getLocationPixels().x << ", " << o.getLocationPixels().y << "]";
-    output << " angularloc: [" << o.getLocationAngular().x << ", " << o.getLocationAngular().y << "]";
-    output << " relative field coords: [" << o.getRelativeFieldCoords().x << ", " << o.getRelativeFieldCoords().y << ", " << o.getRelativeFieldCoords().z << "]";
+    output << "Obstacle" << endl;
+    output << "\tpixelloc: " << o.m_location.screen << endl;
+    output << "\tangularloc: " << o.m_location.angular << endl;
+    output << "\trelative field coords: " << o.m_location.relativeRadial << endl;
     return output;
 }
 

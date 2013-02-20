@@ -1,31 +1,15 @@
 #include "coloursegment.h"
 
-void ColourSegment::set(const Point& start, const Point& end, Colour colour)
+void ColourSegment::set(const Point &start, const Point &end, Colour colour)
 {
     m_colour = colour;
-    bool flip;
 
-    //check if the points are in correct order
-    if(start.x < end.x)
-        flip = false;
-    else if(start.x > end.x)
-        flip = true;
-    else
-        flip = start.y > end.y;
+    m_start = start;
+    m_end = end;
 
-    //swap them if not
-    if(flip) {
-        m_start = end;
-        m_end = start;
-    }
-    else {
-        m_start = start;
-        m_end = end;
-    }
-    m_length_pixels = (start - end).abs();
-    m_centre.x = 0.5*(m_start.x + m_end.x);
-    m_centre.y = 0.5*(m_start.y + m_end.y);
+    m_length_pixels = (start.screen - end.screen).abs();
 
+    m_centre.screen = (m_start.screen + m_end.screen)*0.5;
 }
 
 void ColourSegment::setColour(Colour colour)
@@ -37,17 +21,19 @@ bool ColourSegment::join(const ColourSegment &other)
 {
     if(m_colour != other.m_colour)
         return false;   //colours don't match - segments cannot be joined
-    if(m_start == other.m_end) {
+
+
+    if(m_start.screen == other.m_end.screen) {
         m_start = other.m_start;
     }
-    else if(m_end == other.m_start) {
+    else if(m_end.screen == other.m_start.screen) {
         m_end = other.m_end;
     }
     else {
         return false;   //there are no matching endpoints
     }
-    m_length_pixels = (m_start - m_end).abs();
-    m_centre.x = 0.5*(m_start.x + m_end.x);
+    m_length_pixels = (m_start.screen - m_end.screen).abs();
+    m_centre.screen = (m_start.screen + m_end.screen)*0.5;
 
     return true;
 }
@@ -57,7 +43,7 @@ bool ColourSegment::join(const ColourSegment &other)
  */
 ostream& operator<< (ostream& output, const ColourSegment& c)
 {
-    output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << getColourName(c.m_colour) << std::endl;
+    output << c.m_start.screen << " - " << c.m_end.screen << " length(pixels): " << c.m_length_pixels << " colour: " << getColourName(c.m_colour) << std::endl;
     return output;
 }
 

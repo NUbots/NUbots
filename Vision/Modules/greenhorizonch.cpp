@@ -37,8 +37,8 @@ void GreenHorizonCH::calculateHorizon()
     const int SPACING = max(VisionConstants::GREEN_HORIZON_SCAN_SPACING, 1U);
     
     // variable declarations    
-    vector<Point> horizon_points,
-                  thrown_points;
+    vector< Vector2<double> > horizon_points,
+                              thrown_points;
 
     const Horizon& kin_hor = vbb->getKinematicsHorizon();
 #if VISION_HORIZON_VERBOSITY > 2
@@ -72,7 +72,7 @@ void GreenHorizonCH::calculateHorizon()
                 green_count++;
                 // if VER_THRESHOLD green pixels found, add point
                 if (green_count == VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS) {
-                    horizon_points.push_back(Point(x, green_top));
+                    horizon_points.push_back(Vector2<double>(x, green_top));
                     break;
                 }
             }
@@ -82,7 +82,7 @@ void GreenHorizonCH::calculateHorizon()
             }
             // if no green found, add bottom pixel
             if (y == height-1) {
-                horizon_points.push_back(Point(x, height-1));
+                horizon_points.push_back(Vector2<double>(x, height-1));
             }
         }
 
@@ -94,13 +94,12 @@ void GreenHorizonCH::calculateHorizon()
 
     // provide blackboard the original set of scan points
     vbb->setGreenHorizonScanPoints(horizon_points);
-    DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_SCANS, horizon_points);
 
     // statistical filter for green horizon points
     double mean_y, std_dev_y;
     accumulator_set<double, stats<tag::mean, tag::variance> > acc;
 
-    BOOST_FOREACH(Point& p, horizon_points) {
+    BOOST_FOREACH(Vector2<double>& p, horizon_points) {
         if (p.y < height-1)     // if not at bottom of image
             acc(p.y);
     }
@@ -112,7 +111,7 @@ void GreenHorizonCH::calculateHorizon()
     debug << "GreenHorizonCH::calculateHorizon() - Statistical filter prep done. Mean: " << mean_y << " Standard Dev: " << std_dev_y << endl;
 #endif
 
-    vector<Point>::iterator p = horizon_points.begin();
+    vector< Vector2<double> >::iterator p = horizon_points.begin();
     while(p < horizon_points.end()) {
         //changing - I don't see any reason to remove pts that are too low if we are
         //           doing a convex hull anyway.
@@ -152,11 +151,11 @@ bool GreenHorizonCH::isPixelGreen(const NUImage& img, int x, int y)
 
 // Returns a list of points on the upper convex hull in clockwise order.
 // Note: Assumes the points are sorted in the x direction.
-vector<Point> GreenHorizonCH::upperConvexHull(const vector<Point>& P)
+vector< Vector2<double> > GreenHorizonCH::upperConvexHull(const vector< Vector2<double> >& P)
 {
         int n = P.size(),
             k = 0;
-        vector<Point> H(n);
+        vector< Vector2<double> > H(n);
 
         // Build upper hull
         for (int i = 0; i < n; i++) {

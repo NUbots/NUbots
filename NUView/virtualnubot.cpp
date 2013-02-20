@@ -88,7 +88,7 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
     }
     else
     {
-        horizonLine.setLineFromPoints(Point(0, 0), Point(320,0));
+        horizonLine.setLineFromPoints(Vector2<double>(0, 0), Vector2<double>(320,0));
     }
     emit lineDisplayChanged(&horizonLine, GLDisplay::horizonLine);
 

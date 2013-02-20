@@ -30,20 +30,18 @@ void ObjectDetectionCH::detectObjects()
     const NUImage& img = vbb->getOriginalImage();
     unsigned int height = img.getHeight();
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
-    vector<Point> horizon_points,
-                  object_points;
+    vector< Vector2<double> > horizon_points;
+    vector<Point> object_points;
     double mean_y,
            std_dev_y;
 
     //get scan points from BB
     horizon_points = green_horizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
 
-    object_points.reserve(horizon_points.size());
-
     //calculate mean and stddev of vertical positions
     accumulator_set<double, stats<tag::mean, tag::variance> > acc;
 
-    BOOST_FOREACH(Point& p, horizon_points) {
+    BOOST_FOREACH(Vector2<double>& p, horizon_points) {
         acc(p.y);
     }
 
@@ -94,7 +92,7 @@ void ObjectDetectionCH::detectObjects()
     it = object_points.begin();
     while (it < object_points.end()) {
 //        cout << it->y - green_horizon.getYFromX(it->x) << endl;
-        if (it->y - green_horizon.getYFromX(it->x) < VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
+        if (it->screen.y - green_horizon.getYFromX(it->screen.x) < VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
             it = object_points.erase(it);
         }
         else {
@@ -114,20 +112,19 @@ void ObjectDetectionCH::detectObjects()
             bottom = 0;
         }
         else {
-            if (object_points.at(i).x - object_points.at(i-1).x == static_cast<int>(VisionConstants::VERTICAL_SCANLINE_SPACING) && (i < object_points.size()-1)) {
+            if (object_points.at(i).screen.x - object_points.at(i-1).screen.x == static_cast<int>(VisionConstants::VERTICAL_SCANLINE_SPACING) && (i < object_points.size()-1)) {
                 count++;
-                if (object_points.at(i).y > bottom)
-                    bottom = object_points.at(i).y;
+                if (object_points.at(i).screen.y > bottom)
+                    bottom = object_points.at(i).screen.y;
             }
             else {
                 if (count > VisionConstants::MIN_CONSECUTIVE_POINTS) {
-//                    cv::line(cvimg, cv::Point2i(object_points.at(start).x, bottom), cv::Point2i(object_points.at(i-1).x, bottom), cv::Scalar(0,0,255),2);
-                    int centre = (object_points.at(i-1).x + object_points.at(start).x)/2;
-                    int width = object_points.at(i-1).x - object_points.at(start).x;
+                    int centre = (object_points.at(i-1).screen.x + object_points.at(start).screen.x)*0.5;
+                    int width = object_points.at(i-1).screen.x - object_points.at(start).screen.x;
                     int NO_HEIGHT = -1; // DOES NOTHING
 
                     // push to blackboard
-                    Obstacle newObstacle(Vector2<double>(centre, bottom), width, NO_HEIGHT);
+                    Obstacle newObstacle(Point(centre, bottom), width, NO_HEIGHT);
                     vbb->addObstacle(newObstacle);
                 }
                 scanning = false;
@@ -135,8 +132,6 @@ void ObjectDetectionCH::detectObjects()
         }
     }
 
-//    cv::namedWindow("objectdetect", CV_WINDOW_KEEPRATIO);
-//    cv::imshow("objectdetect", cvimg);
 
     vbb->setObstaclePoints(object_points);
 }

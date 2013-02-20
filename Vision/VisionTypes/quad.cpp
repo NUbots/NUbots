@@ -68,7 +68,7 @@ int Quad::getTopWidth() const
     return std::abs(m_top_right.x - m_top_left.x + 1);
 }
 
-float Quad::getAverageWidth() const
+double Quad::getAverageWidth() const
 {
     return 0.5*(getBaseWidth() + getTopWidth());
 }
@@ -83,7 +83,7 @@ int Quad::getRightHeight() const
     return std::abs(m_bottom_right.y - m_top_right.y + 1);
 }
 
-float Quad::getAverageHeight() const
+double Quad::getAverageHeight() const
 {
     return 0.5*(getLeftHeight() + getRightHeight());
 }

@@ -4,6 +4,7 @@
 #include "Vision/basicvisiontypes.h"
 #include "Tools/Math/Vector2.h"
 #include "Tools/Math/Vector3.h"
+#include "Tools/Math/Matrix.h"
 #include <vector>
 
 using std::vector;
@@ -15,27 +16,25 @@ public:
     Transformer();
 
     //2D distortion transform
-    Point correctDistortion(const Point& pt);
+    Vector2<double> correctDistortion(const Vector2<double>& pt);
 
     //2D - 2D pixel to camera relative polar transforms
-    Point screenToRadial2D(Point pt) const;
-    vector<Point> screenToRadial2D(const vector<Point>& pts) const;
+    void screenToRadial2D(Point& pt) const;
+    void screenToRadial2D(vector<Point>& pts) const;
+
+    void screenToRadial3D(Point& pt, double distance) const;
 
     //Distance to point - returns the distance of the camera from a point on the
     //                    ground which would be visible at the given screen location.
     bool isDistanceToPointValid() const;
-    double distanceToPoint(Point pixel_loc) const;
     double distanceToPoint(double bearing, double elevation) const;
     //double distanceToPoint(double bearing, double elevation) const;
 
-    //2D pixel - 3D polar (feet relative) - assumes point is on the ground
     bool isScreenToGroundValid() const;
-//    Vector3<double> screenToGroundRadial(Point pt) const;
-//    vector<Vector3<double> > screenToGroundRadial(const vector<Point>& pts) const;
 
     //2D pixel - 2D cartesian (feet relative) - assumes point is on the ground
-    Point screenToGroundCartesian(Point pt) const;
-    vector<Point> screenToGroundCartesian(const vector<Point>& pts) const;
+    void screenToGroundCartesian(Point& pt) const;
+    void screenToGroundCartesian(vector<Point>& pts) const;
 
     double getCameraDistanceInPixels() const { return effective_camera_dist_pixels; }
 
@@ -54,13 +53,13 @@ private:
     Vector2<double> FOV;
     double effective_camera_dist_pixels;
 
-    vector<float> m_ctg_vector;    //! @variable The camera to ground vector (for d2p).
+    Matrix ctgtransform;
     bool m_ctg_valid;              //! @variable Whether the ctgvector is valid.
 //    vector<float> ctvector;     //! @variable The camera transform vector.
 //    bool ctvalid;               //! @variable Whether the ctvector is valid.
 
-    Point image_size;
-    Point image_centre;
+    Vector2<double> image_size;
+    Vector2<double> image_centre;
     Vector2<double> tan_half_FOV;
     Vector2<double> screen_to_radial_factor;
     double camera_pitch;         //! @variable The camera pitch angle.

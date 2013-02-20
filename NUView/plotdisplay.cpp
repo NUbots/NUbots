@@ -14,12 +14,14 @@ PlotDisplay::PlotDisplay(QWidget *parent) :
     QwtLegend *legend = new QwtLegend;
     legend->setFrameStyle(QFrame::Box|QFrame::Sunken);
     insertLegend(legend, QwtPlot::RightLegend);
+    zoomer = new QwtPlotZoomer(canvas());
 }
 
 PlotDisplay::~PlotDisplay()
 {
     for(map<QString, QwtPlotCurve*>::iterator cit = curveMap.begin(); cit != curveMap.end(); cit++)
         delete cit->second;
+    delete zoomer;
 }
 
 vector<QString> PlotDisplay::names()
@@ -51,15 +53,15 @@ QColor PlotDisplay::getLineColour(QString name)
     return colourMap[name];
 }
 
-void PlotDisplay::toggleCurve(QString name, bool enabled)
+void PlotDisplay::setCurveVisibility(QString name, bool visibility)
 {
-    enabledCurves[name] = enabled;
+    visibleCurves[name] = visibility;
 }
 
-bool PlotDisplay::isCurveEnabled(QString name)
+bool PlotDisplay::isCurveVisible(QString name)
 {
-    map<QString, bool>::iterator it = enabledCurves.find(name);
-    if(it != enabledCurves.end())
+    map<QString, bool>::iterator it = visibleCurves.find(name);
+    if(it != visibleCurves.end())
         return it->second;
     else
         return false;
@@ -81,9 +83,9 @@ void PlotDisplay::updateCurveData(QString name, QVector<QPointF> points)
 {
     bool nameExisted = nameExists(name);
     dataMap[name] = points;
-    map<QString, bool>::iterator it = enabledCurves.find(name);
-    if(it == enabledCurves.end())
-        enabledCurves[name] = false;
+    map<QString, bool>::iterator it = visibleCurves.find(name);
+    if(it == visibleCurves.end())
+        visibleCurves[name] = false;
 
     updateCurve(name);
 
@@ -123,7 +125,7 @@ void PlotDisplay::replot()
 {
     map<QString, QwtPlotCurve*>::iterator cit;
     for(cit = curveMap.begin(); cit != curveMap.end(); cit++) {
-        if(enabledCurves[cit->first])
+        if(visibleCurves[cit->first])
             cit->second->attach(this);
         else
             cit->second->detach();

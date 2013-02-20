@@ -187,7 +187,7 @@ void DataWrapper::debugPublish(const vector<FieldLine>& data)
 
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
+void DataWrapper::debugPublish(DEBUG_ID id, const vector< Vector2<double> > &data_points)
 {
     #if VISION_WRAPPER_VERBOSITY > 2
         debug << id << endl;
@@ -201,9 +201,6 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
     case DBID_V_SCANS:
         debug << "DataWrapper::debugPublish - DBID_V_SCANS printing not implemented" << endl;
         break;
-    case DBID_MATCHED_SEGMENTS:
-        emit pointsUpdated(data_points, GLDisplay::Transitions);
-        break;
     case DBID_HORIZON:
         debug << "DataWrapper::debugPublish - DBID_HORIZON printing handled externally to vision" << endl;
         break;
@@ -212,6 +209,22 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
         break;
     case DBID_GREENHORIZON_FINAL:
         emit pointsUpdated(data_points, GLDisplay::greenHorizonPoints);
+        break;
+    default:
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+    }
+}
+
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
+{
+    #if VISION_WRAPPER_VERBOSITY > 2
+        debug << id << endl;
+        debug << data_points << endl;
+    #endif
+
+    switch(id) {
+    case DBID_MATCHED_SEGMENTS:
+        emit pointsUpdated(data_points, GLDisplay::Transitions);
         break;
     case DBID_OBJECT_POINTS:
         debug << "DataWrapper::debugPublish - DBID_OBJECT_POINTS printing not implemented" << endl;
@@ -268,7 +281,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
     }
 }
 
-void DataWrapper::plot(string name, const vector<Point> &pts)
+void DataWrapper::plot(string name, vector< Vector2<double> > pts)
 {
     QVector<QPointF> qpts;
     BOOST_FOREACH(const Point& p, pts) {

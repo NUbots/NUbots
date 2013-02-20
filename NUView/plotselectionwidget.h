@@ -112,7 +112,7 @@ private:
 
     // Curve Options
     QComboBox* curveComboBox;           //!< Combobox for layer names.
-    QCheckBox* curveEnabledCheckBox;    //!< Checkbox to toggle layer enabled.
+    QCheckBox* curveVisibilityCheckBox;    //!< Checkbox to toggle layer enabled.
 
     // Labels
     QLabel* symbolLabel;            //!< Label for colour selection.

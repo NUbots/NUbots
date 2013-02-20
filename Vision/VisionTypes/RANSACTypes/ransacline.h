@@ -3,6 +3,7 @@
 
 #include "Tools/Math/Line.h"
 #include "Vision/VisionTypes/Interfaces/ransacmodel.h"
+#include "Vision/basicvisiontypes.h"
 
 class RANSACLine : public Line
 {

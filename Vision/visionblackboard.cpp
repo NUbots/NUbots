@@ -65,7 +65,7 @@ void VisionBlackboard::setGreenHullPoints(const vector<Vector2<double> >& points
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setGreenHorizonScanPoints(const vector<Point>& points)
+void VisionBlackboard::setGreenHorizonScanPoints(const vector< Vector2<double> >& points)
 {
     gh_scan_points = points;
 }

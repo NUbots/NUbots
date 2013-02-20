@@ -147,7 +147,8 @@ HEADERS += \
     VisionTypes/RANSACTypes/ransacgoal.h \
     VisionTypes/VisionFieldObjects/centrecircle.h \
     Modules/circledetector.h \
-    Modules/fieldpointdetector.h
+    Modules/fieldpointdetector.h \
+    VisionTypes/point.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \

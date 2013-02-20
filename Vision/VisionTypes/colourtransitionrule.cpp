@@ -2,7 +2,7 @@
 #include <boost/algorithm/string.hpp>
 #include "debug.h"
 
-ColourSegment ColourTransitionRule::nomatch(Vector2<double>(0,0), Vector2<double>(0,0), invalid);
+ColourSegment ColourTransitionRule::nomatch(Point(0,0), Point(0,0), invalid);
 
 ColourTransitionRule::ColourTransitionRule()
 {

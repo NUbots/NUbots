@@ -12,11 +12,11 @@ VisionFieldObject::VisionFieldObject()
     
 }
 
-const Point &VisionFieldObject::getLocationPixels() const
+Vector2<double> VisionFieldObject::getLocationPixels() const
 {
-    return m_location_pixels;
+    return m_location.screen;
 }
-const Vector2<float>& VisionFieldObject::getLocationAngular() const
+Vector2<double> VisionFieldObject::getLocationAngular() const
 {
-    return m_location_angular;
+    return m_location.angular;
 }

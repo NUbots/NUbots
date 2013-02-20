@@ -81,12 +81,13 @@ inline std::vector<float> Spherical2Cartesian(const std::vector<float>& spherica
     return result;
 }
 
-inline std::vector<float> Cartesian2Spherical(const std::vector<float>& cartesianCoordinates)
+template<typename T>
+inline std::vector<T> Cartesian2Spherical(const std::vector<T>& cartesianCoordinates)
 {
-    const float x = cartesianCoordinates[0];
-    const float y = cartesianCoordinates[1];
-    const float z = cartesianCoordinates[2];
-    std::vector<float> result(3,0.0f);
+    const T x = cartesianCoordinates[0];
+    const T y = cartesianCoordinates[1];
+    const T z = cartesianCoordinates[2];
+    std::vector<T> result(3,0.0f);
 
     result[0] = sqrt(x*x + y*y + z*z);
     result[1] = atan2(y,x);
@@ -94,27 +95,29 @@ inline std::vector<float> Cartesian2Spherical(const std::vector<float>& cartesia
     return result;
 }
 
-inline Vector3<float> Spherical2Cartesian(const Vector3<float>& sphericalCoordinates)
+template<typename T>
+inline Vector3<T> Spherical2Cartesian(const Vector3<T>& sphericalCoordinates)
 {
-    const float distance = sphericalCoordinates.x;
-    const float bearingcos = cos(sphericalCoordinates.y);
-    const float bearingsin = sin(sphericalCoordinates.y);
-    const float elevationcos = cos(sphericalCoordinates.z);
-    const float elevationsin = sin(sphericalCoordinates.z);
+    const T distance = sphericalCoordinates.x;
+    const T bearingcos = cos(sphericalCoordinates.y);
+    const T bearingsin = sin(sphericalCoordinates.y);
+    const T elevationcos = cos(sphericalCoordinates.z);
+    const T elevationsin = sin(sphericalCoordinates.z);
 
-    Vector3<float> result;
+    Vector3<T> result;
     result.x = distance * bearingcos * elevationcos;
     result.y = distance * bearingsin * elevationcos;
     result.z = distance * elevationsin;
     return result;
 }
 
-inline Vector3<float> Cartesian2Spherical(const Vector3<float>& cartesianCoordinates)
+template<typename T>
+inline Vector3<T> Cartesian2Spherical(const Vector3<T>& cartesianCoordinates)
 {
-    const float x = cartesianCoordinates.x;
-    const float y = cartesianCoordinates.y;
-    const float z = cartesianCoordinates.z;
-    Vector3<float> result;
+    const T x = cartesianCoordinates.x;
+    const T y = cartesianCoordinates.y;
+    const T z = cartesianCoordinates.z;
+    Vector3<T> result;
 
     result.x = sqrt(x*x + y*y + z*z);
     result.y = atan2(y,x);

@@ -212,9 +212,9 @@ void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourS
             case ColourReplacementRule::SPLIT:
             {
                 //generate two new segments matching each end and push them both back
-                Vector2<double> start_pt = temp_seg.getStart(),
-                                end_pt   = temp_seg.getEnd(),
-                                mid_pt   = (start_pt + end_pt) * 0.5;
+                Point start_pt = temp_seg.getStart(),
+                      end_pt   = temp_seg.getEnd(),
+                      mid_pt   = Point( (start_pt.screen + end_pt.screen) * 0.5 );
                 temp_seg.set(start_pt, mid_pt, before.getColour());
                 replacements.push_back(temp_seg);
                 temp_seg.set(mid_pt, end_pt, after.getColour());

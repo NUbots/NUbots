@@ -81,11 +81,11 @@ void Horizon::Calculate(const Matrix& cameraToGroundTransform, const Vector2<dou
 {
     Matrix invCTG = InverseMatrix(cameraToGroundTransform);
 
-    Vector3<float> g1(5000, cameraFieldOfView.x*0.5, 0),
-                   g2(5000, -cameraFieldOfView.x*0.5, 0);
+    Vector3<double> g1(5000, cameraFieldOfView.x*0.5, 0),
+                    g2(5000, -cameraFieldOfView.x*0.5, 0);
 
-    Vector3<float> c1 = Kinematics::TransformPosition(invCTG, g1),
-                   c2 = Kinematics::TransformPosition(invCTG, g2);
+    Vector3<double> c1 = Kinematics::TransformPosition(invCTG, g1),
+                    c2 = Kinematics::TransformPosition(invCTG, g2);
 
     Vector2<double> tanRadial1(tan(c1.y), tan(c1.z)),
                     tanRadial2(tan(c2.y), tan(c2.z));

@@ -5,10 +5,10 @@ Circle::Circle()
 {
 }
 
-bool Circle::constructFromPoints(Point p1, Point p2, Point p3, double tolerance)
+bool Circle::constructFromPoints(Vector2<double> p1, Vector2<double> p2, Vector2<double> p3, double tolerance)
 {
-    Point ab = p1 - p2,
-          bc = p2 - p3;
+    Vector2<double> ab = p1 - p2,
+                    bc = p2 - p3;
     double det = ab.x*bc.y-bc.x*ab.y;
 
     if (std::abs(det) < tolerance) {

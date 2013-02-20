@@ -20,26 +20,26 @@ class LSFittedLine : public Line
 {
   public:
     LSFittedLine();
-    LSFittedLine(vector<Point>& pointlist);
+    LSFittedLine(vector< Vector2<double> >& pointlist);
     ~LSFittedLine();
     bool valid;
     
-    void addPoint(const Point &point);
-    void addPoints(const vector<Point>& pointlist);
+    void addPoint(const Vector2<double> &point);
+    void addPoints(const vector< Vector2<double> >& pointlist);
     void joinLine(LSFittedLine &sourceLine);
     Vector2<double> combinedR2TLSandMSD(const LSFittedLine &sourceLine) const;
     double getMSD() const;
     double getr2tls() const;
     void clearPoints();
     unsigned int getNumPoints() const {return points.size();}
-    const std::vector<Point>& getPoints() const;
-    bool getEndPoints(Vector2<Point>& endpts) const;
+    const std::vector< Vector2<double> >& getPoints() const;
+    bool getEndPoints(Vector2<double>& p1, Vector2<double>& p2) const;
     double averageDistanceBetween(const LSFittedLine& other) const;
 private:
     void calcLine();
     double sumX, sumY, sumX2, sumY2, sumXY;
     double MSD, r2tls;
-    std::vector<Point> points;
+    std::vector< Vector2<double> > points;
     
 };
 

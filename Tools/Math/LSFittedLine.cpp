@@ -10,7 +10,7 @@ LSFittedLine::LSFittedLine(){
 }
 
 
-LSFittedLine::LSFittedLine(vector<Point> &pointlist) {
+LSFittedLine::LSFittedLine(vector< Vector2<double> > &pointlist) {
     clearPoints();
     addPoints(pointlist);
 }
@@ -31,12 +31,12 @@ void LSFittedLine::clearPoints(){
 	points.clear();
 }
 
-const std::vector<Point>& LSFittedLine::getPoints() const
+const std::vector< Vector2<double> >& LSFittedLine::getPoints() const
 {
 	return points;
 }
 
-void LSFittedLine::addPoint(const Point &point){
+void LSFittedLine::addPoint(const Vector2<double> &point){
 	sumX += point.x;
 	sumY += point.y;
 	sumX2 += point.x * point.x;
@@ -48,7 +48,7 @@ void LSFittedLine::addPoint(const Point &point){
         calcLine();
 }
 
-void LSFittedLine::addPoints(const vector<Point>& pointlist){
+void LSFittedLine::addPoints(const vector< Vector2<double> >& pointlist){
     if(!pointlist.empty()) {
         for(unsigned int i=0; i<pointlist.size(); i++) {
             sumX += pointlist[i].x;
@@ -135,14 +135,14 @@ void LSFittedLine::calcLine(){
 	setLine(A, B, C);
 }
 
-bool LSFittedLine::getEndPoints(Vector2<Point>& endpts) const
+bool LSFittedLine::getEndPoints(Vector2<double>& p1, Vector2<double>& p2) const
 {
     if(points.size() < 2)
         return false;
 
     float min = std::numeric_limits<float>::max();
     float max = -std::numeric_limits<float>::max();
-    vector<Point>::const_iterator p, p_min, p_max;
+    vector< Vector2<double> >::const_iterator p, p_min, p_max;
     for(p = points.begin(), p_min = p_max = p; p!=points.end(); p++) {
         float trans_x = -m_B*p->x - m_A*p->y;
         if(trans_x < min) {
@@ -154,27 +154,28 @@ bool LSFittedLine::getEndPoints(Vector2<Point>& endpts) const
             max = trans_x;
         }
     }
-    endpts = Vector2<Point>(*p_min, *p_max);
+    p1 = *p_min;
+    p2 = *p_max;
     return true;
 }
 
 double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
 {
     if(valid && other.valid) {
-        Vector2<Point> ep1, ep2;
+        Vector2<double> ep1, ep2, other_ep1, other_ep2;
 
-        //no need to check this works - line is only valid if there are enough points
-        getEndPoints(ep1);
-        other.getEndPoints(ep2);
+        //no need to check this works - line is only valid if there are at least 2 points
+        getEndPoints(ep1, ep2);
+        other.getEndPoints(other_ep1, other_ep2);
         //project onto respective lines
-        ep1.x = projectOnto(ep1.x);
-        ep1.y = projectOnto(ep1.y);
-        ep2.x = other.projectOnto(ep2.x);
-        ep2.y = other.projectOnto(ep2.y);
+        ep1 = projectOnto(ep1);
+        ep2 = projectOnto(ep2);
+        other_ep1 = other.projectOnto(other_ep1);
+        other_ep2 = other.projectOnto(other_ep2);
 
         //determine distances from the two possible pairings
-        double d1 = 0.5*( (ep1.x-ep2.x).abs() + (ep1.y-ep2.y).abs() ),
-               d2 = 0.5*( (ep1.y-ep2.x).abs() + (ep1.x-ep2.y).abs() );
+        double d1 = 0.5*( (ep1-other_ep1).abs() + (ep2-other_ep2).abs() ),
+               d2 = 0.5*( (ep2-other_ep1).abs() + (ep1-other_ep2).abs() );
         return min(d1, d2); //best pairing results in minimum distance
     }
     return -1.0;    //test for this - distances should always be positive

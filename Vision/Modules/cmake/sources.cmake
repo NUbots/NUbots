@@ -29,8 +29,9 @@ goaldetector.cpp
 balldetector.cpp
 linedetector.cpp
 cornerdetector.cpp
-centrecircledetector.cpp
+circledetector.cpp
 robocuphacks.cpp
+fieldpointdetector.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

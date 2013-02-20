@@ -1,6 +1,34 @@
 #include "colourreplacementrule.h"
 
-ColourSegment ColourReplacementRule::nomatch(Vector2<double>(0,0), Vector2<double>(0,0), invalid);
+ColourSegment ColourReplacementRule::nomatch(Point(0,0), Point(0,0), invalid);
+
+string ColourReplacementRule::getMethodName(ReplacementMethod method)
+{
+    switch(method)
+    {
+        case BEFORE:    return "before";
+        case AFTER:     return "after";
+        case SPLIT:     return "green";
+        default:        return "unknown method";
+    };
+}
+
+/*!
+  Gets the method matching the given string.
+  @param name String name of the method.
+  @return The method desired.
+  */
+ColourReplacementRule::ReplacementMethod ColourReplacementRule::getMethodFromName(const string& name)
+{
+    if(name.compare("before") == 0)
+        return BEFORE;
+    else if(name.compare("after") == 0)
+        return AFTER;
+    else if(name.compare("split") == 0)
+        return SPLIT;
+    else
+        return INVALID;
+}
 
 ColourReplacementRule::ColourReplacementRule()
 {

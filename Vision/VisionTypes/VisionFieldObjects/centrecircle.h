@@ -7,7 +7,9 @@
 class CentreCircle  : public VisionFieldObject
 {
 public:
-    CentreCircle(Circle ground_equation);
+    CentreCircle();
+    CentreCircle(Point centre, double ground_radius, Vector2<double> screen_size);
+    ~CentreCircle();
 
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const;
 
@@ -19,8 +21,10 @@ public:
     //! @brief Calculation of error for optimisation
     virtual double findError(const Vector2<double>& measured) const;
 
+    double getGroundRadius() const {return m_ground_radius;}
+
 private:
-    Circle m_ground_circle;
+    double m_ground_radius;
 };
 
 #endif // CENTRECIRCLE_H

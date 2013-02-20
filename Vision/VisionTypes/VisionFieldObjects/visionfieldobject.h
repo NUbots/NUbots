@@ -21,8 +21,6 @@
 using namespace std;
 using namespace Vision;
 
-typedef Vector2<double> Point;
-
 class VisionFieldObject : public Publishable, public Optimisable
 {
 public:
@@ -31,28 +29,25 @@ public:
 
     VFO_ID getID() const {return m_id;}
     string getName() const {return getVFOName(m_id);}
-    
+
+    const Point& getLocation() const {return m_location;}
     //! @brief returns the screen location in pixels (relative to the top left).
-    const Point& getLocationPixels() const;
+    Vector2<double> getLocationPixels() const;
     //! @brief returns the angular screen location (relative to the camera) in radians.
-    const Vector2<float>& getLocationAngular() const;
+    Vector2<double> getLocationAngular() const;
     //! @brief returns the screen size in pixels.
-    const Vector2<double>& getScreenSize() const { return m_size_on_screen; }
+    Vector2<double> getScreenSize() const { return m_size_on_screen; }
     //! @brief returns the field position relative to the robot.
-    virtual Vector3<float> getRelativeFieldCoords() const {return m_spherical_position;}
+    virtual Vector3<double> getRelativeFieldCoords() const {return m_location.relativeRadial;}
 
 protected:
-    Point m_location_pixels;         //! @variable The pixel location of the object on the screen.
+    Point m_location;                       //! @variable The location of the object (includes screen, radial and ground position).
     Vector2<double> m_size_on_screen;          //! @variable The width and height on screen in pixels.
 
     VFO_ID m_id;
-    Vector2<float> m_location_angular;      //! @variable The angular location of the object relative to the screen centre.
-    //Vector3<float> m_spherical_position;    //! @variable The position (distance, bearing, elevation) of the object relative to the robots camera.
-    Vector3<float> m_spherical_position;    //! @variable The position (distance, bearing, elevation) of the object relative to the robots feet.
     float m_confidence;   //! unused
     float m_error;        //! unused
-    Vector3<float> m_spherical_error;       //! @variable The error in each of the spherical dimensions.
-    //Vector3 <float> m_transformed_spherical_pos;    //! @variable The transformed location (relative to the centre of the feet) in cm.
+    Vector3<double> m_spherical_error;       //! @variable The error in each of the spherical dimensions.
     bool valid;                             //! @variable Whether the object is valid.
     bool distance_valid;                    //! @variable Whether the distance is valid.
 };

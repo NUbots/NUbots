@@ -11,36 +11,27 @@ Transformer::Transformer()
     FOV = Vector2<double>(0,0);
     effective_camera_dist_pixels = 0;
 
-    m_ctg_vector = vector<float>(3,0);
-    m_ctg_valid = false;
-//    ctvector = vector<float>(3,0);
-//    ctvalid = false;
+    m_ctg_valid = camera_pitch_valid = camera_height_valid = body_pitch_valid = false;
 
-    image_size = Point(0,0);
-    image_centre = Point(0,0);
+    image_size = Vector2<double>(0,0);
+    image_centre = Vector2<double>(0,0);
     tan_half_FOV = Vector2<double>(0,0);
     screen_to_radial_factor = Vector2<double>(0,0);
-    camera_pitch = 0;
-    camera_pitch_valid = false;
-    camera_height = 0;
-    camera_height_valid = false;
-    body_pitch = 0;
-    body_pitch_valid = false;
 }
 
 /**
   * Applies radial distortion correction to the given pixel location.
   * @param pt The pixel location to correct.
   */
-Point Transformer::correctDistortion(const Point& pt)
+Vector2<double> Transformer::correctDistortion(const Vector2<double>& pt)
 {
     //get position relative to centre
-    Point half_size = image_size*0.5;
-    Point centre_relative = pt - half_size;
+    Vector2<double> half_size = image_size*0.5;
+    Vector2<double> centre_relative = pt - half_size;
     //calculate correction factor -> 1+kr^2
     double corr_factor = 1 + VisionConstants::RADIAL_CORRECTION_COEFFICIENT*centre_relative.squareAbs();
     //multiply by factor
-    Point result = centre_relative*corr_factor;
+    Vector2<double> result = centre_relative*corr_factor;
     //scale the edges back out to meet again
     result.x /= (1+VisionConstants::RADIAL_CORRECTION_COEFFICIENT*half_size.x*half_size.x);
     result.y /= (1+VisionConstants::RADIAL_CORRECTION_COEFFICIENT*half_size.y*half_size.y);
@@ -52,45 +43,31 @@ Point Transformer::correctDistortion(const Point& pt)
   * Calculates the radial position (relative to the camera vector) from the pixel position.
   * @param pt The pixel location.
   */
-Point Transformer::screenToRadial2D(Point pt) const {
-    Point result;
-    result.x = atan( (image_centre.x-pt.x)  * screen_to_radial_factor.x);
-    result.y = atan( (image_centre.y-pt.y) * screen_to_radial_factor.y);
-    return result;
+void Transformer::screenToRadial2D(Point& pt) const
+{
+    pt.angular.x = atan( (image_centre.x-pt.screen.x)  * screen_to_radial_factor.x);
+    pt.angular.y = atan( (image_centre.y-pt.screen.y) * screen_to_radial_factor.y);
 }
 
 /**
   * Calculates the radial position (relative to the camera vector) from the pixel position for a set of pixels.
   * @param pts The list of pixels.
   */
-vector<Point> Transformer::screenToRadial2D(const vector<Point>& pts) const {
-    //reimplemented for speed
-    vector<Point> result;
-    BOOST_FOREACH(const Point& p, pts) {
-        result.push_back(screenToRadial2D(p));
+void Transformer::screenToRadial2D(vector<Point>& pts) const
+{
+    BOOST_FOREACH(Point& p, pts) {
+        screenToRadial2D(p);
     }
-    return result;
+}
+
+void Transformer::screenToRadial3D(Point &pt, double distance) const
+{
+    pt.relativeRadial = Kinematics::TransformPosition(ctgtransform, Vector3<double>(distance, pt.angular.x, pt.angular.y));
 }
 
 bool Transformer::isDistanceToPointValid() const
 {
     return camera_height_valid && camera_pitch_valid && (not VisionConstants::D2P_INCLUDE_BODY_PITCH || body_pitch_valid);
-}
-
-/**
-  * Calculates the distance to an object at a given point assuming the object is only the same
-  * plane as the robots feet. This is useful as the point of contact with the ground for all field
-  * objects can easily be identified visually.
-  * @param screen_loc The screen position in pixels relative to the top left.
-  * @return The distance to the given point relative to the robots feet.
-  */
-double Transformer::distanceToPoint(Point pixel_loc) const
-{
-#if VISION_BLACKBOARD_VERBOSITY > 2
-    debug << "\tcalled with point: " << pixel_loc << " angle correction: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
-#endif
-    Point radial = screenToRadial2D(pixel_loc);
-    return distanceToPoint(radial.x, radial.y);
 }
 
 /**
@@ -142,64 +119,30 @@ bool Transformer::isScreenToGroundValid() const {
     return isDistanceToPointValid();
 }
 
-///** Calculates the radial position from the pixel position.
-//  * @param pt The pixel location.
-//  */
-//Vector3<double> Transformer::screenToGroundRadial(Point pt) const
-//{
-//    Vector3<double> result;
-//    Point radial = screenToRadial2D(pt);
-//    result.y = radial.x;
-//    result.z = radial.y;
-//    result.x = distanceToPoint(radial.x, radial.y);
-//    return result;
-//}
-
-///** Calculates the radial position from the pixel position for a set of pixels.
-//  * @param pts The list of pixels.
-//  */
-//vector<Vector3<double> > Transformer::screenToGroundRadial(const vector<Point>& pts) const
-//{
-//    //reimplemented for speed
-//    //Vector2<double> halfsize(original_image->getWidth()*0.5, original_image->getHeight()*0.5);
-//    //Vector2<double> tanhalfangle(tan(m_FOV.x*0.5), tan(m_FOV.y*0.5));
-//    vector<Vector3<double> > result;
-//    BOOST_FOREACH(const Point& p, pts) {
-//        //result.push_back(Point( atan( (halfsize.x - p.x)*tanhalfangle.x/halfsize.x),
-//        //                        atan( (halfsize.y - p.y)*tanhalfangle.y/halfsize.y)));
-//        //for lack of a better idea
-//        result.push_back(screenToGroundRadial(p));
-//    }
-//    return result;
-//}
-
-Point Transformer::screenToGroundCartesian(Point pt) const
+void Transformer::screenToGroundCartesian(Point &pt) const
 {
-    Vector2<double> cam_angles = screenToRadial2D(pt);
+    screenToRadial2D(pt);
 
-    double r = distanceToPoint(cam_angles.x, cam_angles.y);
+    double r = distanceToPoint(pt.angular.x, pt.angular.y);
 
     //return Point(r*sin(cam_angles.x), r*cos(cam_angles.x));
-    Matrix ctgtransform = Matrix4x4fromVector(m_ctg_vector);
 
     //Vector3<float> spherical_foot_relative = Kinematics::DistanceToPoint(ctgtransform, cam_angles.x, cam_angles.y);
-    Vector3<float> spherical_foot_relative = Kinematics::TransformPosition(ctgtransform, Vector3<float>(r, cam_angles.x, cam_angles.y));
+    Vector3<double> spherical_foot_relative = Kinematics::TransformPosition(ctgtransform, Vector3<double>(r, pt.angular.x, pt.angular.y));
 
-    Vector3<float> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
+    Vector3<double> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
 
 #if VISION_FIELDOBJECT_VERBOSITY > 3
     debug << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
 #endif
-    return Point(cartesian_foot_relative.x, cartesian_foot_relative.y);
+    pt.ground = Vector2<double>(cartesian_foot_relative.x, cartesian_foot_relative.y);
 }
 
-vector<Point> Transformer::screenToGroundCartesian(const vector<Point>& pts) const
+void Transformer::screenToGroundCartesian(vector<Point> &pts) const
 {
-    vector<Point> results;
-    BOOST_FOREACH(Point p, pts) {
-        results.push_back(screenToGroundCartesian(p));
+    BOOST_FOREACH(Point& p, pts) {
+        screenToGroundCartesian(p);
     }
-    return results;
 }
 
 void Transformer::setKinematicParams(bool cam_pitch_valid, double cam_pitch,
@@ -214,7 +157,7 @@ void Transformer::setKinematicParams(bool cam_pitch_valid, double cam_pitch,
     body_pitch_valid = b_pitch_valid;
     body_pitch = b_pitch;
     m_ctg_valid = ctg_valid;
-    m_ctg_vector = ctg_vector;
+    ctgtransform = Matrix4x4fromVector(ctg_vector);
 }
 
 void Transformer::setCamParams(Vector2<double> imagesize, Vector2<double> fov)

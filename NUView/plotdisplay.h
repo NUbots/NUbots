@@ -6,6 +6,7 @@
 #include <qwt/qwt_plot.h>
 #include <qwt/qwt_symbol.h>
 #include <qwt/qwt_plot_curve.h>
+#include <qwt/qwt_plot_zoomer.h>
 
 using std::map;
 using std::vector;
@@ -24,9 +25,8 @@ public:
     static QwtPlotCurve::CurveStyle getLineStyle(QString name);
     static QColor getLineColour(QString name);
 
-    void toggleCurve(QString name, bool enabled);
-    bool isCurveEnabled(QString name);
-
+    void setCurveVisibility(QString name, bool visibility);
+    bool isCurveVisible(QString name);
 
 public slots:
     static void clearMap();
@@ -49,7 +49,8 @@ private:
     static map<QString, QColor> colourMap;
 
     map<QString, QwtPlotCurve*> curveMap;
-    map<QString, bool> enabledCurves;
+    map<QString, bool> visibleCurves;
+    QwtPlotZoomer* zoomer;
 };
 
 #endif // PLOTDISPLAY_H

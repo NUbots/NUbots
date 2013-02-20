@@ -263,12 +263,12 @@ Matrix Kinematics::CalculateTransform(unsigned int index, const std::vector<floa
 //    return com_position;
 //}
 
-Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY)
+Vector3<double> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform, double angleFromCameraCentreX, double angleFromCameraCentreY)
 {
     const double nearDistance = 10;     // 10 cm
     const double farDistance = 3000;   // 3,000 cm (30 metres)
 
-    Vector3<float> resultCartesian(0,0,0);
+    Vector3<double> resultCartesian(0,0,0);
 
     // pre-calculate required trig values.
     double xcos = cos(angleFromCameraCentreX);
@@ -303,7 +303,7 @@ Vector3<float> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform,
     cout << nearResult << endl << farResult << endl << resultCartesian << endl;
 
     // Convert back to polar coodinates.
-    Vector3<float> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
+    Vector3<double> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
 
     //! TODO: Get the right thing to output, what do we want from this function??
     return resultSpherical;
@@ -316,7 +316,7 @@ Matrix Kinematics::CalculateCamera2GroundTransform(const Matrix& origin2SupportL
     return Translation(legOffsetX,legOffsetY,0)* InverseMatrix(origin2SupportLegTransform) * origin2CameraTransform;
 }
 
-std::vector<float> Kinematics::TransformPosition(const Matrix& Camera2GroundTransform, const std::vector<float>& cameraBasedPosition)
+std::vector<double> Kinematics::TransformPosition(const Matrix& Camera2GroundTransform, const std::vector<double>& cameraBasedPosition)
 {
     Matrix cameraBasedPosMatrix(3,1);
     cameraBasedPosMatrix[0][0] = cameraBasedPosition[0];
@@ -326,7 +326,7 @@ std::vector<float> Kinematics::TransformPosition(const Matrix& Camera2GroundTran
     Matrix resultMatrix = TransformPosition(Camera2GroundTransform, cameraBasedPosMatrix);
 
     // Construct the result
-    std::vector<float> result(3,0.0f);
+    std::vector<double> result(3,0.0f);
     result[0] = resultMatrix[0][0];
     result[1] = resultMatrix[1][0];
     result[2] = resultMatrix[2][0];
@@ -334,7 +334,7 @@ std::vector<float> Kinematics::TransformPosition(const Matrix& Camera2GroundTran
     return result;
 }
 
-Vector3<float> Kinematics::TransformPosition(const Matrix& Camera2GroundTransform, const Vector3<float>& cameraBasedPosition)
+Vector3<double> Kinematics::TransformPosition(const Matrix& Camera2GroundTransform, const Vector3<double>& cameraBasedPosition)
 {
     Matrix cameraBasedPosMatrix(3,1);
     cameraBasedPosMatrix[0][0] = cameraBasedPosition.x;
@@ -344,7 +344,7 @@ Vector3<float> Kinematics::TransformPosition(const Matrix& Camera2GroundTransfor
     Matrix resultMatrix = TransformPosition(Camera2GroundTransform, cameraBasedPosMatrix);
 
     // Construct the result
-    Vector3<float> result;
+    Vector3<double> result;
     result[0] = resultMatrix[0][0];
     result[1] = resultMatrix[1][0];
     result[2] = resultMatrix[2][0];

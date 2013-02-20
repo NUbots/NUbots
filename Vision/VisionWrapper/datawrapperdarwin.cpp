@@ -252,11 +252,12 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
     #endif
 }
 
-void DataWrapper::plotPoints(const vector<Point> &pts, string name)
+void DataWrapper::plot(string name, vector< Vector2<double> > pts)
 {
-    static ofstream out("DataWrapperplotPoints");
+//    static ofstream out("DataWrapperplot");
 
-    out << name << pts << endl;
+//    out << name << pts << endl;
+    cout << name << " " << pts << endl;
 }
 
 /*! @brief Updates the held information ready for a new frame.

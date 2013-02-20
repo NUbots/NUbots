@@ -46,7 +46,7 @@ public:
 
     //MUTATORS
     void setGreenHullPoints(const vector<Vector2<double> >& points);
-    void setGreenHorizonScanPoints(const vector<Point> &points);
+    void setGreenHorizonScanPoints(const vector< Vector2<double> >& points);
 
     void setHorizontalScanlines(const vector<int> &scanlines);
     void setHorizontalSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
@@ -153,7 +153,7 @@ private:
     
     //! Green Horizon data
     GreenHorizon m_green_horizon;   //! @variable The green horizon.
-    vector<Point> gh_scan_points;   //! @variable The location of initial green (used to form GH and find obstacles)
+    vector< Vector2<double> > gh_scan_points;   //! @variable The location of initial green (used to form GH and find obstacles)
     vector<Point> obstacle_points;    //! @variable The list of points used by obstacle detection
 
     Transformer m_transformer;

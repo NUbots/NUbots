@@ -42,10 +42,10 @@ public:
     Vector2<double> getTopLeft() const {return m_top_left;}       //! Returns the top left pixel location  of the Quad.
     Vector2<double> getTopRight() const {return m_top_right;}       //! Returns the top right pixel location  of the Quad.
 
-    float getLeft() const {return 0.5*(m_bottom_left.x + m_top_left.x);}
-    float getRight() const {return 0.5*(m_bottom_right.x + m_top_right.x);}
-    float getTop() const {return 0.5*(m_top_left.y + m_top_right.y);}
-    float getBottom() const {return 0.5*(m_bottom_left.y + m_bottom_right.y);}
+    double getLeft() const {return 0.5*(m_bottom_left.x + m_top_left.x);}
+    double getRight() const {return 0.5*(m_bottom_right.x + m_top_right.x);}
+    double getTop() const {return 0.5*(m_top_left.y + m_top_right.y);}
+    double getBottom() const {return 0.5*(m_bottom_left.y + m_bottom_right.y);}
 
     int getBaseWidth() const;                   //! Returns the base width of the Quad in pixels.
     int getTopWidth() const;                    //! Returns the top width of the Quad in pixels.
@@ -53,8 +53,8 @@ public:
     int getLeftHeight() const;                  //! Returns the left height of the Quad in pixels.
     int getRightHeight() const;                 //! Returns the right height of the Quad in pixels.
 
-    float getAverageWidth() const;                //! Returns the average width of the Quad in pixels.
-    float getAverageHeight() const;               //! Returns the average height of the Quad in pixels.
+    double getAverageWidth() const;                //! Returns the average width of the Quad in pixels.
+    double getAverageHeight() const;               //! Returns the average height of the Quad in pixels.
 
 private:
 

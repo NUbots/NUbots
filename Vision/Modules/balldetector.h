@@ -5,7 +5,7 @@
 #include <iostream>
 
 //#include "Tools/Math/Line.h"
-
+#include "Vision/basicvisiontypes.h"
 #include "Vision/visionblackboard.h"
 #include "Vision/VisionTools/classificationcolours.h"
 #include "Vision/VisionTypes/quad.h"
@@ -23,7 +23,7 @@ public:
     virtual vector<Ball> run();
 
 protected:
-    void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<Point>& pointlist);
+    void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<Point> &pointlist);
 };
 
 #endif // BALLDETECTION_H

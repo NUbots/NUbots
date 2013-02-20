@@ -275,7 +275,7 @@ void DataWrapper::debugPublish(const vector<FieldLine> &data)
     }
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data_points)
 {
     int w = m_current_image.getWidth(),
         h = m_current_image.getHeight();
@@ -288,11 +288,6 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
     case DBID_V_SCANS:
         BOOST_FOREACH(const Point& pt, data_points) {
             gui->addToLayer(id, QLineF(pt.x, pt.y, pt.x, h), QColor(Qt::gray));
-        }
-        break;
-    case DBID_MATCHED_SEGMENTS:
-        BOOST_FOREACH(const Point& pt, data_points) {
-            gui->addToLayer(id, QPointF(pt.x, pt.y), QColor(Qt::cyan));
         }
         break;
     case DBID_HORIZON:
@@ -316,9 +311,23 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
             //gui->addToLayer(id, QPointF(it->x, it->y), QColor(Qt::magenta));
         }
         break;
+    default:
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        return;
+    }
+}
+
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
+{
+    switch(id) {
+    case DBID_MATCHED_SEGMENTS:
+        BOOST_FOREACH(const Point& pt, data_points) {
+            gui->addToLayer(id, QPointF(pt.screen.x, pt.screen.y), QColor(Qt::cyan));
+        }
+        break;
     case DBID_OBJECT_POINTS:
         BOOST_FOREACH(const Point& pt, data_points) {
-            gui->addToLayer(id, QPointF(pt.x, pt.y), QPen(Qt::cyan, 2));
+            gui->addToLayer(id, QPointF(pt.screen.x, pt.screen.y), QPen(Qt::cyan, 2));
         }
         break;
     default:
@@ -400,7 +409,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
     }
 }
 
-void DataWrapper::plot(string name, vector<Point> pts)
+void DataWrapper::plot(string name, vector< Vector2<double> > pts)
 {
     QwtPlotCurve::CurveStyle style;
     MainWindow::PLOTWINDOW win;
@@ -416,6 +425,11 @@ void DataWrapper::plot(string name, vector<Point> pts)
         style = QwtPlotCurve::Dots;
         win = MainWindow::p1;
         colour = Qt::green;
+    }
+    else if(name.compare("Corners") == 0) {
+        style = QwtPlotCurve::Dots;
+        win = MainWindow::p1;
+        colour = Qt::blue;
     }
     else {
         win = MainWindow::p2;
