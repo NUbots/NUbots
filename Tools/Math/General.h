@@ -208,6 +208,8 @@ inline void ProjectFromAtoB(float* A, float* B, float distancePast, float* C) {
     C[1] = A[1]+dist*ydiff;
 }
 
+
+//fast (approximate) inverse square root. Quite accurate.
 inline double invSqrt( const double& x )
 {
     double y = x;
@@ -220,6 +222,7 @@ inline double invSqrt( const double& x )
     return y;
 }
 
+//fast (approximate) inverse square root. Quite accurate.
 inline float invSqrt( const float& number )
 {
        long i;
@@ -237,14 +240,25 @@ inline float invSqrt( const float& number )
        return y;
 } 
 
+//fast (approximate) inverse square root. Up to 6% error.
+inline double fSqrt(const double& x) {
+   unsigned long long i = *(unsigned long long*) &x; 
+   // adjust bias
+   i  += (( long long)1023) << ((long long)52);
+   // approximation of square root
+   i >>= 1; 
+   return *(double*) &i;
+ }
 
-inline double fSqrt(const double& input) {
-    return 1./invSqrt(input);
-}
-
-inline float fSqrt(const float& input) {
-    return 1.f/invSqrt(input);
-}
+//fast (approximate) inverse square root. Up to 6% error.
+inline float fSqrt(const float& x) {
+   unsigned int i = *(unsigned int*) &x; 
+   // adjust bias
+   i  += 127 << 23;
+   // approximation of square root
+   i >>= 1; 
+   return *(float*) &i;
+ }
 
 } // End namespace
 
