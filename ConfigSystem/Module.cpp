@@ -17,9 +17,9 @@
 #include <boost/random/variate_generator.hpp>
 
 
-// #error Define CONFIGSYSTEM_TEST_ROBOT when testing on the robot. Comment out the define if not (else test results will be meaningless).
+// #error Define CONFIGSYSTEM_TEST_ROBOT when compiling on the robot (else code won't compile). Comment out the define otherwise (else test results will be meaningless).
 #warning Ensure that CONFIGSYSTEM_TEST_ROBOT is defined correctly.
-// #define CONFIGSYSTEM_TEST_ROBOT
+#define CONFIGSYSTEM_TEST_ROBOT
 
 #ifdef CONFIGSYSTEM_TEST_ROBOT
     #include "Infrastructure/NUBlackboard.h"
