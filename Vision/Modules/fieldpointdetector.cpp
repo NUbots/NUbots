@@ -20,28 +20,28 @@ void FieldPointDetector::run() const
 
     //check transforms are valid
     if(transformer.isScreenToGroundValid()) {
-        vector<Point> points;
+        vector<GroundPoint> points;
+        GroundPoint temp;
         CentreCircle circle;
-        vector<LSFittedLine> lines;
-        vector<FieldLine> field_lines;
+        vector<FieldLine> lines;
         vector<CornerPoint> corners;
         const GreenHorizon& gh = vbb->getGreenHorizon();
         //collect all vertical and horizontal line transition centres that exist under the green horizon
         BOOST_FOREACH(const ColourSegment& s, vbb->getVerticalTransitions(LINE_COLOUR)) {
-            const Point& p = s.getCentre();
-            if(gh.isBelowHorizon(p.screen))
-                points.push_back(p);
+            temp.screen = s.getCentre();
+            if(gh.isBelowHorizon(temp.screen))
+                points.push_back(temp);
         }
         BOOST_FOREACH(const ColourSegment& s, vbb->getHorizontalTransitions(LINE_COLOUR)) {
-            const Point& p = s.getCentre();
-            if(gh.isBelowHorizon(p.screen))
-                points.push_back(p);
+            temp.screen = s.getCentre();
+            if(gh.isBelowHorizon(temp.screen))
+                points.push_back(temp);
         }
 
         #if VISION_FIELDOBJECT_VERBOSITY > 1
-        vector< Vector2<double> > plotpts;
-        BOOST_FOREACH(const Point& p, points) {
-            plotpts.push_back(p.ground);
+        vector<Point> plotpts;
+        BOOST_FOREACH(const GroundPoint& g, points) {
+            plotpts.push_back(g.screen);
         }
         DataWrapper::getInstance()->plot("Screen coords", plotpts);
         #endif
@@ -50,8 +50,8 @@ void FieldPointDetector::run() const
 
         #if VISION_FIELDOBJECT_VERBOSITY > 1
         plotpts.clear();
-        BOOST_FOREACH(const Point& p, points) {
-            plotpts.push_back(p.ground);
+        BOOST_FOREACH(const GroundPoint& g, points) {
+            plotpts.push_back(g.ground);
         }
         DataWrapper::getInstance()->plot("Ground coords", plotpts);
         #endif
@@ -63,9 +63,9 @@ void FieldPointDetector::run() const
                 vbb->addCentreCircle(circle);
 
                 #if VISION_FIELDOBJECT_VERBOSITY > 1
-                vector< Vector2<double> > circle_pts;
+                vector<Point> circle_pts;
                 double r = circle.getGroundRadius();
-                Vector2<double> c = circle.getLocation().ground;
+                Point c = circle.getLocation().ground;
                 for(double theta = -mathGeneral::PI; theta < mathGeneral::PI; theta+=0.1)
                     circle_pts.push_back(Vector2<double>(r*cos(theta), r*sin(theta)) + c);
                 DataWrapper::getInstance()->plot("Centre circle", circle_pts);
@@ -76,17 +76,11 @@ void FieldPointDetector::run() const
         if(m_line_detector)
             lines = m_line_detector->run(points);
 
-        BOOST_FOREACH(LSFittedLine& relative, lines) {
-            //need to map lines back to screen before adding
-            LSFittedLine screen;
-            field_lines.push_back(FieldLine(screen, relative));
-        }
-
-        vbb->addLines(field_lines);
+        vbb->addLines(lines);
 
         //now find corners
         if(m_corner_detector)
-            corners = m_corner_detector->run(field_lines);
+            corners = m_corner_detector->run(lines);
 
         #if VISION_FIELDOBJECT_VERBOSITY > 1
         vector< Vector2<double> > cpts;

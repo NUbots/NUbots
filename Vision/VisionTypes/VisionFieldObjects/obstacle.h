@@ -8,7 +8,7 @@
 class Obstacle : public VisionFieldObject
 {
 public:
-    Obstacle(const Point& position=Point(0,0), double width=0, double height=0);
+    Obstacle(Point position=Point(0,0), double width=0, double height=0);
 
     /*!
       @brief pushes the obstacle to the external field objects.

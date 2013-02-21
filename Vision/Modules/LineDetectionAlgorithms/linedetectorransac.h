@@ -2,14 +2,13 @@
 #define LINEDETECTORRANSAC_H
 
 #include <vector>
-#include "Tools/Math/LSFittedLine.h"
 #include "Vision/Modules/linedetector.h"
 
 class LineDetectorRANSAC : public LineDetector
 {
 public:
     LineDetectorRANSAC();
-    virtual vector<LSFittedLine> run(const vector<Point> &points);
+    virtual vector<FieldLine> run(const vector<GroundPoint> &points);
 
 private:
     unsigned int m_n,

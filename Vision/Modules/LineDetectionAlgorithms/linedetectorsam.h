@@ -43,10 +43,10 @@ public:
     LineDetectorSAM();
     ~LineDetectorSAM();
 
-    virtual vector<LSFittedLine> run(const vector<Point> &points);
+    virtual vector<FieldLine> run(const vector<GroundPoint> &points);
 
 private:
-    vector<LSFittedLine> fitLines(const vector<Point>& points, bool noise=true);
+    vector< pair<LSFittedLine, LSFittedLine> > fitLines(const vector<GroundPoint>& points, bool noise=true);
     //RULES
     //maximum field objects rules
     //unsigned int MAX_POINTS; //500
@@ -66,24 +66,24 @@ private:
     bool CLEAR_SMALL;
     bool CLEAR_DIRTY;
 
-    vector<Point> noisePoints;
+    vector<GroundPoint> noisePoints;
 
     //LEAST-SQUARES FITTING
-    void split(vector<LSFittedLine>& lines, const vector<Point> &points);
-    void splitIterative(vector<LSFittedLine>& lines, vector<Point>& points);
-    void splitNoise(vector<LSFittedLine>& lines);
+    void split(vector<pair<LSFittedLine, LSFittedLine> > &lines, const vector<GroundPoint> &points);
+    //void splitIterative(vector<LSFittedLine>& lines, vector<Point>& points);
+    void splitNoise(vector<pair<LSFittedLine, LSFittedLine> >& lines);
     void merge(vector<LSFittedLine>& lines);
-    void generateLine(LSFittedLine& line, vector<Point>& points);
-    bool separate(vector<Point>& left, vector<Point>& right, Point split_point, LSFittedLine& line);
+    void generateLines(pair<LSFittedLine, LSFittedLine>& lines, const vector<GroundPoint>& points);
+    bool separate(vector<GroundPoint>& left, vector<GroundPoint>& right, GroundPoint split_point, const vector<GroundPoint>& points, const LSFittedLine& line);
     //static void sortLinesLS(vector<LSFittedLine*>& lines);
 
 
     //GENERIC
     void findPointsOver(LSFittedLine& line, unsigned int &points_over, int& furthest_point);
-    void addToNoise(const Point& point);
-    void addToNoise(const vector<Point>& points);
-    void clearSmallLines(vector<LSFittedLine>& lines);
-    void clearDirtyLines(vector<LSFittedLine>& lines);
+    void addToNoise(const GroundPoint& point);
+    void addToNoise(const vector<GroundPoint>& points);
+    void clearSmallLines(vector<pair<LSFittedLine, LSFittedLine> >& lines);
+    void clearDirtyLines(vector<pair<LSFittedLine, LSFittedLine> >& lines);
 
 };
 

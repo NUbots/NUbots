@@ -14,7 +14,7 @@ public:
     };
 
 public:
-    CornerPoint(TYPE type, Point location);
+    CornerPoint(TYPE type, GroundPoint location);
 
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const;
 

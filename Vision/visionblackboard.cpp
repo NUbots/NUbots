@@ -54,7 +54,7 @@ VisionBlackboard* VisionBlackboard::getInstance()
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setGreenHullPoints(const vector<Vector2<double> >& points)
+void VisionBlackboard::setGreenHullPoints(const vector<Point>& points)
 {
     m_green_horizon.set(points, Point(original_image->getWidth(), original_image->getHeight()));
 }
@@ -65,7 +65,7 @@ void VisionBlackboard::setGreenHullPoints(const vector<Vector2<double> >& points
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setGreenHorizonScanPoints(const vector< Vector2<double> >& points)
+void VisionBlackboard::setGreenHorizonScanPoints(const vector<Point>& points)
 {
     gh_scan_points = points;
 }
@@ -285,7 +285,7 @@ const GreenHorizon& VisionBlackboard::getGreenHorizon() const
 *   @brief returns the object point set.
 *   @return points A vector of pixel locations for objects.
 */
-const vector<Vector2<double> >& VisionBlackboard::getObstaclePoints() const
+const vector<Point>& VisionBlackboard::getObstaclePoints() const
 {
     return obstacle_points;
 }
@@ -665,11 +665,11 @@ void VisionBlackboard::debugPublish() const
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
             if(s.getColour() == white) {
-                pts.push_back(Vector2<double>(s.getCentre().x, s.getCentre().y));
+                pts.push_back(Point(s.getCentre().x, s.getCentre().y));
             }
             else {
-                pts.push_back(Vector2<double>(s.getStart().x, s.getStart().y));
-                pts.push_back(Vector2<double>(s.getEnd().x, s.getEnd().y));
+                pts.push_back(Point(s.getStart().x, s.getStart().y));
+                pts.push_back(Point(s.getEnd().x, s.getEnd().y));
             }
         }
     }
@@ -681,11 +681,11 @@ void VisionBlackboard::debugPublish() const
         v_s = it->second;
         BOOST_FOREACH(const ColourSegment& s, v_s) {
             if(s.getColour() == white) {
-                pts.push_back(Vector2<double>(s.getCentre().x, s.getCentre().y));
+                pts.push_back(Point(s.getCentre().x, s.getCentre().y));
             }
             else {
-                pts.push_back(Vector2<double>(s.getStart().x, s.getStart().y));
-                pts.push_back(Vector2<double>(s.getEnd().x, s.getEnd().y));
+                pts.push_back(Point(s.getStart().x, s.getStart().y));
+                pts.push_back(Point(s.getEnd().x, s.getEnd().y));
             }
         }
     }

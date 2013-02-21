@@ -14,7 +14,7 @@ RANSACGoal::RANSACGoal()
 bool RANSACGoal::regenerate(const vector<ColourSegment>& segments)
 {
     if(segments.size() == 2) {
-        setLineFromPoints(segments[0].getCentre().screen, segments[1].getCentre().screen);
+        setLineFromPoints(segments[0].getCentre(), segments[1].getCentre());
         return true;
     }
     else {
@@ -24,7 +24,7 @@ bool RANSACGoal::regenerate(const vector<ColourSegment>& segments)
 
 double RANSACGoal::calculateError(ColourSegment c) const
 {
-    return getLinePointDistance(c.getCentre().screen);
+    return getLinePointDistance(c.getCentre());
 }
 
 void RANSACGoal::fit(const vector<ColourSegment> &segments)
@@ -32,7 +32,7 @@ void RANSACGoal::fit(const vector<ColourSegment> &segments)
     accumulator_set<double, stats<tag::mean, tag::variance> > acc;
 
     BOOST_FOREACH(const ColourSegment& seg, segments) {
-        addPoint(seg.getCentre().screen);
+        addPoint(seg.getCentre());
         acc(seg.getLength());
     }
 

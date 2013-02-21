@@ -6,24 +6,28 @@ LineDetector::LineDetector() {}
 
 LineDetector::~LineDetector() {}
 
-vector<LSFittedLine> LineDetector::mergeColinear(vector<LSFittedLine> lines, double angle_threshold, double distance_threshold) const
+/// @note this merges based on the first line, so ordering them is important
+vector<pair<LSFittedLine, LSFittedLine> > LineDetector::mergeColinear(vector<pair<LSFittedLine, LSFittedLine> > lines,
+                                                                      double angle_threshold, double distance_threshold) const
 {
     //O(l^2)  -  l=number of lines
     // Compares all lines and merges based on the angle between and the average distance between
 
-    vector<LSFittedLine> finals; // this vector contains lines that have been merged or did not need to be.
-    LSFittedLine current; // line currently being compared with the rest.
+    vector<pair<LSFittedLine, LSFittedLine> > finals; // this vector contains lines that have been merged or did not need to be.
+    pair<LSFittedLine, LSFittedLine> current; // line currently being compared with the rest.
 
     while(!lines.empty()) {
         //get next line
         current = lines.back();
         lines.pop_back();
 
-        vector<LSFittedLine>::iterator it = lines.begin();
+        vector<pair<LSFittedLine, LSFittedLine> >::iterator it = lines.begin();
         //go through all lines and find any that should be merged - merge them
         while(it < lines.end()) {
-            if(current.getAngleBetween(*it) <= angle_threshold && current.averageDistanceBetween(*it) <= distance_threshold) {
-                current.joinLine(*it);  //join the other line to current
+            if(current.first.getAngleBetween(it->first) <= angle_threshold &&
+               current.first.averageDistanceBetween(it->first) <= distance_threshold) {
+                current.first.joinLine(it->first);  //join the other line to current
+                current.second.joinLine(it->second);  //join the other paired lines
                 it = lines.erase(it);   //remove the other line
             }
             else {

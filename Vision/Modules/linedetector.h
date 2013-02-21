@@ -3,7 +3,8 @@
 
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/VisionTypes/greenhorizon.h"
-#include "Tools/Math/LSFittedLine.h"
+#include "Vision/VisionTypes/groundpoint.h"
+#include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 #include <vector>
 
 using std::vector;
@@ -14,10 +15,11 @@ public:
     LineDetector();
     virtual ~LineDetector();
 
-    virtual vector<LSFittedLine> run(const vector<Point>& points) = 0;
+    virtual vector<FieldLine> run(const vector<GroundPoint>& points) = 0;
 
 protected:
-    vector<LSFittedLine> mergeColinear(vector<LSFittedLine> lines, double angle_threshold, double distance_threshold) const;
+    vector<pair<LSFittedLine, LSFittedLine> > mergeColinear(vector<pair<LSFittedLine, LSFittedLine> > lines,
+                                                            double angle_threshold, double distance_threshold) const;
 
 };
 

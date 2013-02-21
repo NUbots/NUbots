@@ -8,7 +8,7 @@ class CentreCircle  : public VisionFieldObject
 {
 public:
     CentreCircle();
-    CentreCircle(Point centre, double ground_radius, Vector2<double> screen_size);
+    CentreCircle(GroundPoint centre, double ground_radius, Vector2<double> screen_size);
     ~CentreCircle();
 
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const;

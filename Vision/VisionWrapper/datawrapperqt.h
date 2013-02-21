@@ -67,8 +67,8 @@ public:
     void debugPublish(const vector<Goal>& data);
     void debugPublish(const vector<Obstacle>& data);
     void debugPublish(const vector<FieldLine>& data);
-    void debugPublish(DEBUG_ID id, const vector< Vector2<double> >& data_points);
     void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
+    void debugPublish(DEBUG_ID id, const vector<GroundPoint>& data_points);
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     void debugPublish(DEBUG_ID id);
     void debugPublish(DEBUG_ID id, const NUImage *const img);

@@ -43,7 +43,7 @@ Vector2<double> Transformer::correctDistortion(const Vector2<double>& pt)
   * Calculates the radial position (relative to the camera vector) from the pixel position.
   * @param pt The pixel location.
   */
-void Transformer::screenToRadial2D(Point& pt) const
+void Transformer::screenToRadial2D(GroundPoint& pt) const
 {
     pt.angular.x = atan( (image_centre.x-pt.screen.x)  * screen_to_radial_factor.x);
     pt.angular.y = atan( (image_centre.y-pt.screen.y) * screen_to_radial_factor.y);
@@ -53,16 +53,54 @@ void Transformer::screenToRadial2D(Point& pt) const
   * Calculates the radial position (relative to the camera vector) from the pixel position for a set of pixels.
   * @param pts The list of pixels.
   */
-void Transformer::screenToRadial2D(vector<Point>& pts) const
+void Transformer::screenToRadial2D(vector<GroundPoint>& pts) const
 {
-    BOOST_FOREACH(Point& p, pts) {
+    BOOST_FOREACH(GroundPoint& p, pts) {
         screenToRadial2D(p);
     }
 }
 
-void Transformer::screenToRadial3D(Point &pt, double distance) const
+/**
+  * Calculates the radial position (relative to the camera vector) from the pixel position.
+  * @param pt The pixel location.
+  */
+GroundPoint Transformer::screenToRadial2D(const Point& pt) const
+{
+    GroundPoint g;
+    g.screen = pt;
+    screenToRadial2D(g);
+}
+
+/**
+  * Calculates the radial position (relative to the camera vector) from the pixel position for a set of pixels.
+  * @param pts The list of pixels.
+  */
+vector<GroundPoint> Transformer::screenToRadial2D(const vector<Point>& pts) const
+{
+    vector<GroundPoint> groundPts;
+    BOOST_FOREACH(const Point& p, pts) {
+        groundPts.push_back(screenToRadial2D(p));
+    }
+    return groundPts;
+}
+
+/// @note Assumes radial calculation already done
+void Transformer::radial2DToRadial3D(GroundPoint &pt, double distance) const
 {
     pt.relativeRadial = Kinematics::TransformPosition(ctgtransform, Vector3<double>(distance, pt.angular.x, pt.angular.y));
+}
+
+void Transformer::screenToRadial3D(GroundPoint &pt, double distance) const
+{
+    screenToRadial2D(pt);
+    radial2DToRadial3D(pt, distance);
+}
+
+GroundPoint Transformer::screenToRadial3D(const Point &pt, double distance) const
+{
+    GroundPoint g = screenToRadial2D(pt);
+    radial2DToRadial3D(g, distance);
+    return g;
 }
 
 bool Transformer::isDistanceToPointValid() const
@@ -119,7 +157,7 @@ bool Transformer::isScreenToGroundValid() const {
     return isDistanceToPointValid();
 }
 
-void Transformer::screenToGroundCartesian(Point &pt) const
+void Transformer::screenToGroundCartesian(GroundPoint& pt) const
 {
     screenToRadial2D(pt);
 
@@ -138,11 +176,28 @@ void Transformer::screenToGroundCartesian(Point &pt) const
     pt.ground = Vector2<double>(cartesian_foot_relative.x, cartesian_foot_relative.y);
 }
 
-void Transformer::screenToGroundCartesian(vector<Point> &pts) const
+void Transformer::screenToGroundCartesian(vector<GroundPoint>& pts) const
 {
-    BOOST_FOREACH(Point& p, pts) {
+    BOOST_FOREACH(GroundPoint& p, pts) {
         screenToGroundCartesian(p);
     }
+}
+
+GroundPoint Transformer::screenToGroundCartesian(const Point &pt) const
+{
+    GroundPoint g;
+    g.screen = pt;
+    screenToGroundCartesian(g);
+    return g;
+}
+
+vector<GroundPoint> Transformer::screenToGroundCartesian(const vector<Point>& pts) const
+{
+    vector<GroundPoint> gpts;
+    BOOST_FOREACH(const Point& p, pts) {
+        gpts.push_back(screenToGroundCartesian(p));
+    }
+    return gpts;
 }
 
 void Transformer::setKinematicParams(bool cam_pitch_valid, double cam_pitch,

@@ -28,14 +28,14 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
 
     for(it1 = lines.begin(); it1 != lines.end()-1; it1++) {
         Line l1 = it1->getGroundLineEquation();
-        Vector2<Point> l1_pts = it1->getEndPoints();
+        Vector2<GroundPoint> l1_pts = it1->getEndPoints();
         for(it2 = it1+1; it2 < lines.end(); it2++) {
             Line l2 = it2->getGroundLineEquation();
-            Vector2<Point> l2_pts = it2->getEndPoints();
+            Vector2<GroundPoint> l2_pts = it2->getEndPoints();
             if(l1.getAngleBetween(l2) < m_tolerance*mathGeneral::PI*0.5) {
                 //nearly perpendicular
                 //now build corner from end points
-                Point intersection;
+                GroundPoint intersection;
                 if(l1.getIntersection(l2, intersection.ground)) {
                     CornerPoint::TYPE type = findCorner(l1_pts, l2_pts, intersection, m_tolerance);
                     if(type != CornerPoint::INVALID) {
@@ -56,10 +56,10 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
     return results;
 }
 
-CornerPoint::TYPE CornerDetector::findCorner(Vector2<Point> ep1, Vector2<Point> ep2, Point intersection, double tolerance) const
+CornerPoint::TYPE CornerDetector::findCorner(Vector2<GroundPoint> ep1, Vector2<GroundPoint> ep2, GroundPoint intersection, double tolerance) const
 {
-    Vector2<double> mid1 = (ep1[0].ground + ep1[1].ground)*0.5,
-                    mid2 = (ep2[0].ground + ep2[1].ground)*0.5;
+    Point mid1 = (ep1[0].ground + ep1[1].ground)*0.5,
+          mid2 = (ep2[0].ground + ep2[1].ground)*0.5;
 
     if(tolerance < 0 || tolerance > 1)
         errorlog << "CornerDetector::findCorner called with invalid tolerance: " << tolerance << " (must be in [0, 1]." << endl;

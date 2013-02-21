@@ -92,7 +92,7 @@ void ObjectDetectionCH::detectObjects()
     it = object_points.begin();
     while (it < object_points.end()) {
 //        cout << it->y - green_horizon.getYFromX(it->x) << endl;
-        if (it->screen.y - green_horizon.getYFromX(it->screen.x) < VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
+        if (it->y - green_horizon.getYFromX(it->x) < VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
             it = object_points.erase(it);
         }
         else {
@@ -112,15 +112,15 @@ void ObjectDetectionCH::detectObjects()
             bottom = 0;
         }
         else {
-            if (object_points.at(i).screen.x - object_points.at(i-1).screen.x == static_cast<int>(VisionConstants::VERTICAL_SCANLINE_SPACING) && (i < object_points.size()-1)) {
+            if (object_points.at(i).x - object_points.at(i-1).x == static_cast<int>(VisionConstants::VERTICAL_SCANLINE_SPACING) && (i < object_points.size()-1)) {
                 count++;
-                if (object_points.at(i).screen.y > bottom)
-                    bottom = object_points.at(i).screen.y;
+                if (object_points.at(i).y > bottom)
+                    bottom = object_points.at(i).y;
             }
             else {
                 if (count > VisionConstants::MIN_CONSECUTIVE_POINTS) {
-                    int centre = (object_points.at(i-1).screen.x + object_points.at(start).screen.x)*0.5;
-                    int width = object_points.at(i-1).screen.x - object_points.at(start).screen.x;
+                    int centre = (object_points.at(i-1).x + object_points.at(start).x)*0.5;
+                    int width = object_points.at(i-1).x - object_points.at(start).x;
                     int NO_HEIGHT = -1; // DOES NOTHING
 
                     // push to blackboard

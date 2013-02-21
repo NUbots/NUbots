@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/groundpoint.h"
 #include "Vision/VisionTypes/VisionFieldObjects/centrecircle.h"
 
 using std::vector;
@@ -14,7 +15,7 @@ public:
 
     void setTolerance(double tolerance);
 
-    virtual bool run(vector<Point>& points, CentreCircle &result);
+    virtual bool run(vector<GroundPoint> &points, CentreCircle &result);
 
 private:
     unsigned int m_n,

@@ -4,11 +4,10 @@
 #include "Tools/Math/Vector2.h"
 #include "Tools/Math/Vector3.h"
 
-class Point
+class GroundPoint
 {
 public:
-    Point(double screen_x = 0.0, double screen_y = 0.0);
-    Point(Vector2<double> screen_pos);
+    GroundPoint();
 
     Vector2<double> screen,
                     angular,

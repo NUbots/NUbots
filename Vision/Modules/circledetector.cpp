@@ -23,13 +23,13 @@ void CircleDetector::setTolerance(double tolerance)
     m_tolerance = max(min(tolerance, 1.0), 0.0); //clamp
 }
 
-bool CircleDetector::run(vector<Point> &points, CentreCircle &result)
+bool CircleDetector::run(vector<GroundPoint> &points, CentreCircle &result)
 {
-    RANSACCircle candidate;
-    vector<Point> consensus, remainder;
+    RANSACCircle<GroundPoint> candidate;
+    vector<GroundPoint> consensus, remainder;
     double variance;
     //attemp single RANSAC fit
-    if(RANSAC::findModel<RANSACCircle, Point>(points, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus)) {
+    if(RANSAC::findModel<RANSACCircle<GroundPoint>, GroundPoint>(points, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus)) {
         //now check if the model is good enough
         if(variance <= m_tolerance*candidate.getRadius()) {
 
@@ -38,7 +38,7 @@ bool CircleDetector::run(vector<Point> &points, CentreCircle &result)
                    right = 0,
                    top = VisionBlackboard::getInstance()->getImageHeight() - 1,
                    bottom = 0;
-            BOOST_FOREACH(Point& p, consensus) {
+            BOOST_FOREACH(const GroundPoint& p, consensus) {
                 left = min(left, p.screen.x);
                 right = max(right, p.screen.x);
                 top = min(top, p.screen.y);

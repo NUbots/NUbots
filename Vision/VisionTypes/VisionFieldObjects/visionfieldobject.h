@@ -8,6 +8,7 @@
 #define VISIONFIELDOBJECT_H
 
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/groundpoint.h"
 
 #include "Vision/VisionTypes/Interfaces/publishable.h"
 #include "Vision/VisionTypes/Interfaces/optimisable.h"
@@ -30,7 +31,7 @@ public:
     VFO_ID getID() const {return m_id;}
     string getName() const {return getVFOName(m_id);}
 
-    const Point& getLocation() const {return m_location;}
+    const GroundPoint& getLocation() const {return m_location;}
     //! @brief returns the screen location in pixels (relative to the top left).
     Vector2<double> getLocationPixels() const;
     //! @brief returns the angular screen location (relative to the camera) in radians.
@@ -41,7 +42,7 @@ public:
     virtual Vector3<double> getRelativeFieldCoords() const {return m_location.relativeRadial;}
 
 protected:
-    Point m_location;                       //! @variable The location of the object (includes screen, radial and ground position).
+    GroundPoint m_location;                       //! @variable The location of the object (includes screen, radial and ground position).
     Vector2<double> m_size_on_screen;          //! @variable The width and height on screen in pixels.
 
     VFO_ID m_id;

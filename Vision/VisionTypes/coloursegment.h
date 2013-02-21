@@ -65,7 +65,7 @@ public:
     
     //! only used for ransac - segments cannot overlap and thus cannot have equal centres
     friend bool operator== (const ColourSegment& lhs, const ColourSegment& rhs) {
-        return lhs.m_centre.screen == rhs.m_centre.screen;
+        return lhs.m_centre == rhs.m_centre;
     }
     
 

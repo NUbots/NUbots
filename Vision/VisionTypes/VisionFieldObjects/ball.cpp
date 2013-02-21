@@ -12,7 +12,6 @@
 Ball::Ball()
 {
     m_id = BALL;
-    m_location = Point(0,0);
     m_diameter = 0;
     valid = calculatePositions();
     valid = valid && check();
@@ -21,14 +20,14 @@ Ball::Ball()
 Ball::Ball(Point centre, double diameter)
 {
     m_id = BALL;
-    double top = centre.screen.y - diameter*0.5,
-           bottom = centre.screen.y + diameter*0.5,
-           left = centre.screen.x - diameter*0.5,
-           right = centre.screen.x + diameter*0.5;
-    Vector2<double> top_pt = Vector2<double>((right-left)*0.5, top);
-    Vector2<double> bottom_pt = Vector2<double>((right-left)*0.5, bottom);
-    Vector2<double> right_pt = Vector2<double>(right, (bottom-top)*0.5);
-    Vector2<double> left_pt = Vector2<double>(left, (bottom-top)*0.5);
+    double top = centre.y - diameter*0.5,
+           bottom = centre.y + diameter*0.5,
+           left = centre.x - diameter*0.5,
+           right = centre.x + diameter*0.5;
+    Point top_pt = Point((right-left)*0.5, top);
+    Point bottom_pt = Point((right-left)*0.5, bottom);
+    Point right_pt = Point(right, (bottom-top)*0.5);
+    Point left_pt = Point(left, (bottom-top)*0.5);
 
     //    if(VisionConstants::DO_RADIAL_CORRECTION) {
     //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -40,7 +39,7 @@ Ball::Ball(Point centre, double diameter)
     //    }
         
     m_diameter = max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x);
-    m_location = centre;
+    m_location.screen = centre;
     m_size_on_screen = Vector2<double>(m_diameter, m_diameter);
     valid = calculatePositions();
     //valid = valid && check();

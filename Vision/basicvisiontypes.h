@@ -3,8 +3,8 @@
 
 #include "Tools/Math/Vector2.h"
 
-#include "Vision/VisionTypes/point.h"
-//typedef Vector2<double> Point;
+//#include "Vision/VisionTypes/groundpoint.h"
+typedef Vector2<double> Point;
 
 namespace Vision {
     enum ScanDirection {

@@ -1,0 +1,38 @@
+template<typename T>
+RANSACLine<T>::RANSACLine() {}
+
+template<typename T>
+bool RANSACLine<T>::regenerate(const vector<T>& pts)
+{
+    if(pts.size() == 2) {
+        setLineFromPoints(pts.at(0), pts.at(1));
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+template<typename T>
+double RANSACLine<T>::calculateError(T p) const
+{
+    return getLinePointDistance(p);
+}
+
+RANSACLine<GroundPoint>::RANSACLine() {}
+
+bool RANSACLine<GroundPoint>::regenerate(const vector<GroundPoint>& pts)
+{
+    if(pts.size() == 2) {
+        setLineFromPoints(pts.at(0).ground, pts.at(1).ground);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+double RANSACLine<GroundPoint>::calculateError(GroundPoint p) const
+{
+    return getLinePointDistance(p.ground);
+}

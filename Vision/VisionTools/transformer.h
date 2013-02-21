@@ -2,6 +2,7 @@
 #define TRANSFORMER_H
 
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/groundpoint.h"
 #include "Tools/Math/Vector2.h"
 #include "Tools/Math/Vector3.h"
 #include "Tools/Math/Matrix.h"
@@ -19,10 +20,15 @@ public:
     Vector2<double> correctDistortion(const Vector2<double>& pt);
 
     //2D - 2D pixel to camera relative polar transforms
-    void screenToRadial2D(Point& pt) const;
-    void screenToRadial2D(vector<Point>& pts) const;
+    void screenToRadial2D(GroundPoint& pt) const;
+    void screenToRadial2D(vector<GroundPoint>& pts) const;
+    GroundPoint screenToRadial2D(const Point& pt) const;
+    vector<GroundPoint> screenToRadial2D(const vector<Point>& pts) const;
 
-    void screenToRadial3D(Point& pt, double distance) const;
+
+    void radial2DToRadial3D(GroundPoint &pt, double distance) const;
+    void screenToRadial3D(GroundPoint &pt, double distance) const;
+    GroundPoint screenToRadial3D(const Point &pt, double distance) const;
 
     //Distance to point - returns the distance of the camera from a point on the
     //                    ground which would be visible at the given screen location.
@@ -33,8 +39,10 @@ public:
     bool isScreenToGroundValid() const;
 
     //2D pixel - 2D cartesian (feet relative) - assumes point is on the ground
-    void screenToGroundCartesian(Point& pt) const;
-    void screenToGroundCartesian(vector<Point>& pts) const;
+    void screenToGroundCartesian(GroundPoint& pt) const;
+    void screenToGroundCartesian(vector<GroundPoint>& pts) const;
+    GroundPoint screenToGroundCartesian(const Point& pt) const;
+    vector<GroundPoint> screenToGroundCartesian(const vector<Point>& pts) const;
 
     double getCameraDistanceInPixels() const { return effective_camera_dist_pixels; }
 

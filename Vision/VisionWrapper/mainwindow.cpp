@@ -238,7 +238,7 @@ void MainWindow::addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen)
     }
 }
 
-void MainWindow::setPlot(PLOTWINDOW win, QString name, vector<Point> pts, QColor colour, QwtPlotCurve::CurveStyle style)
+void MainWindow::setPlot(PLOTWINDOW win, QString name, vector< Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style)
 {
     //set curve
     QVector<QPointF> qpts;
@@ -248,7 +248,7 @@ void MainWindow::setPlot(PLOTWINDOW win, QString name, vector<Point> pts, QColor
         curves[name] = new QwtPlotCurve(name);
     }
 
-    BOOST_FOREACH(const Point& p, pts) {
+    BOOST_FOREACH(const Vector2<double>& p, pts) {
         qpts.push_back( QPointF(p.x, p.y) );
     }
 

@@ -113,7 +113,7 @@ public:
     vector<Obstacle>& getObstacles();
     vector<FieldLine>& getLines();
 
-    const vector<Vector2<double> >& getObstaclePoints() const;
+    const vector<Point>& getObstaclePoints() const;
 
     const LookUpTable& getLUT() const;
 
@@ -153,7 +153,7 @@ private:
     
     //! Green Horizon data
     GreenHorizon m_green_horizon;   //! @variable The green horizon.
-    vector< Vector2<double> > gh_scan_points;   //! @variable The location of initial green (used to form GH and find obstacles)
+    vector<Point> gh_scan_points;   //! @variable The location of initial green (used to form GH and find obstacles)
     vector<Point> obstacle_points;    //! @variable The list of points used by obstacle detection
 
     Transformer m_transformer;

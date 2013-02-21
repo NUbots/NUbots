@@ -20,7 +20,7 @@ class LSFittedLine : public Line
 {
   public:
     LSFittedLine();
-    LSFittedLine(vector< Vector2<double> >& pointlist);
+    LSFittedLine(const vector< Vector2<double> >& pointlist);
     ~LSFittedLine();
     bool valid;
     

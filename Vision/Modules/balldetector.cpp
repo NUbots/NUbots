@@ -33,7 +33,7 @@ vector<Ball> BallDetector::run()
     vector<Point>::iterator it;
     it = edges.begin();
     while (it < edges.end()) {
-        if(green_horizon.isBelowHorizon(it->screen)) {
+        if(green_horizon.isBelowHorizon(*it)) {
             it++;   //move to next edge
         }
         else {
@@ -49,8 +49,8 @@ vector<Ball> BallDetector::run()
         int x_mean = 0,
             y_mean = 0;
         for (unsigned int i = 0; i < edges.size(); i++) {
-            x_mean += edges.at(i).screen.x;
-            y_mean += edges.at(i).screen.y;
+            x_mean += edges.at(i).x;
+            y_mean += edges.at(i).y;
         }
         x_mean /= edges.size();
         y_mean /= edges.size();
@@ -59,8 +59,8 @@ vector<Ball> BallDetector::run()
         int x_dev = 0,
             y_dev = 0;
         for (unsigned int i = 0; i < edges.size(); i++) {
-            x_dev += abs(edges.at(i).screen.x - x_mean);
-            y_dev += abs(edges.at(i).screen.y - y_mean);
+            x_dev += abs(edges.at(i).x - x_mean);
+            y_dev += abs(edges.at(i).y - y_mean);
         }
         x_dev /= edges.size();
         y_dev /= edges.size();
@@ -71,7 +71,7 @@ vector<Ball> BallDetector::run()
         // Statistical throw-out
         it = edges.begin();
         while (it < edges.end()) {
-            if (abs(it->screen.x - x_mean) > x_dev || abs(it->screen.y - y_mean) > y_dev)
+            if (abs(it->x - x_mean) > x_dev || abs(it->y - y_mean) > y_dev)
                 it = edges.erase(it);
             else
                 it++;
@@ -81,8 +81,8 @@ vector<Ball> BallDetector::run()
         long double x_pos = 1,
                y_pos = 1;
         for (unsigned int i = 0; i < edges.size(); i++) {
-            int x = edges.at(i).screen.x,
-                y = edges.at(i).screen.y;
+            int x = edges.at(i).x,
+                y = edges.at(i).y;
 
             x_pos *= pow(x, 1.0/edges.size());
             y_pos *= pow(y, 1.0/edges.size());
@@ -250,7 +250,7 @@ vector<Ball> BallDetector::run()
             center = Point((right+left)/2,(top+bottom)/2);
         }
 
-        if (!(center.screen.x ==1 and center.screen.y==1) && bottom-top > 0 && right-left > 0) {
+        if (!(center.x ==1 and center.y==1) && bottom-top > 0 && right-left > 0) {
 
             // CHECK FOR PIXEL DENSITY
             int count = 0;
@@ -258,10 +258,10 @@ vector<Ball> BallDetector::run()
             int min = std::min(right-left, bottom-top);
             min /= 2;
 
-            int box_left = std::max(center.screen.x - min, 0.0);
-            int box_right = std::min(center.screen.x + min, img.getWidth()-1.0);
-            int box_top = std::max(center.screen.y - min, 0.0);
-            int box_bottom = std::min(center.screen.y + min, img.getHeight()-1.0);
+            int box_left = std::max(center.x - min, 0.0);
+            int box_right = std::min(center.x + min, img.getWidth()-1.0);
+            int box_top = std::max(center.y - min, 0.0);
+            int box_bottom = std::min(center.y + min, img.getHeight()-1.0);
 
             //cout << box_left << ", " << box_right << ", " << box_top << ", " << box_bottom << endl;
 

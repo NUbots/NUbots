@@ -270,12 +270,12 @@ void DataWrapper::debugPublish(const vector<Obstacle>& data)
 void DataWrapper::debugPublish(const vector<FieldLine> &data)
 {
     BOOST_FOREACH(const FieldLine& l, data) {
-        const Vector2<Point>& endpts = l.getScreenEndPoints();
-        gui->addToLayer(DBID_LINES, QLineF( endpts.x.x, endpts.x.y, endpts.y.x, endpts.y.y ), QColor(Qt::red));
+        Vector2<GroundPoint> endpts = l.getEndPoints();
+        gui->addToLayer(DBID_LINES, QLineF( endpts[0].screen.x, endpts[0].screen.y, endpts[1].screen.x, endpts[1].screen.y ), QColor(Qt::red));
     }
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data_points)
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
 {
     int w = m_current_image.getWidth(),
         h = m_current_image.getHeight();
@@ -304,30 +304,21 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
         }
         break;
     case DBID_GREENHORIZON_FINAL:
-        for(vector<Point>::const_iterator it=data_points.begin(); it<data_points.end(); it++) {
+        for(vector< Point >::const_iterator it=data_points.begin(); it<data_points.end(); it++) {
             if (it > data_points.begin()) {
                 gui->addToLayer(id, QLineF((it-1)->x, (it-1)->y, it->x, it->y), QColor(Qt::magenta));
             }
             //gui->addToLayer(id, QPointF(it->x, it->y), QColor(Qt::magenta));
         }
         break;
-    default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
-        return;
-    }
-}
-
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point >& data_points)
-{
-    switch(id) {
     case DBID_MATCHED_SEGMENTS:
         BOOST_FOREACH(const Point& pt, data_points) {
-            gui->addToLayer(id, QPointF(pt.screen.x, pt.screen.y), QColor(Qt::cyan));
+            gui->addToLayer(id, QPointF(pt.x, pt.y), QColor(Qt::cyan));
         }
         break;
     case DBID_OBJECT_POINTS:
         BOOST_FOREACH(const Point& pt, data_points) {
-            gui->addToLayer(id, QPointF(pt.screen.x, pt.screen.y), QPen(Qt::cyan, 2));
+            gui->addToLayer(id, QPointF(pt.x, pt.y), QPen(Qt::cyan, 2));
         }
         break;
     default:
@@ -390,15 +381,15 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
     }
 
     BOOST_FOREACH(LSFittedLine l, data) {
-        Vector2<Point> endpts;
-        if(l.getEndPoints(endpts)) {
-            gui->addToLayer(id, QLineF(endpts.x.x, endpts.x.y, endpts.y.x, endpts.y.y), linecolour);
-            Point t1 = l.projectOnto(endpts[0]),
-                  t2 = l.projectOnto(endpts[1]);
-            gui->addToLayer(id, QPointF(t1.x, t1.y), QPen(endptcolour, 3));
-            gui->addToLayer(id, QPointF(t2.x, t2.y), QPen(endptcolour, 3));
-            BOOST_FOREACH(Point pt, l.getPoints()) {
-                gui->addToLayer(id, QPointF(pt.x, pt.y), pointcolour);
+        Point ep1, ep2;
+        if(l.getEndPoints(ep1, ep2)) {
+            gui->addToLayer(id, QLineF(ep1.x, ep1.y, ep2.x, ep2.y), linecolour);
+            ep1 = l.projectOnto(ep1),
+            ep2 = l.projectOnto(ep2);
+            gui->addToLayer(id, QPointF(ep1.x, ep1.y), QPen(endptcolour, 3));
+            gui->addToLayer(id, QPointF(ep2.x, ep2.y), QPen(endptcolour, 3));
+            BOOST_FOREACH(Point p, l.getPoints()) {
+                gui->addToLayer(id, QPointF(p.x, p.y), pointcolour);
             }
         }
         else {
@@ -409,7 +400,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
     }
 }
 
-void DataWrapper::plot(string name, vector< Vector2<double> > pts)
+void DataWrapper::plot(string name, vector< Point > pts)
 {
     QwtPlotCurve::CurveStyle style;
     MainWindow::PLOTWINDOW win;

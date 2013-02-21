@@ -8,10 +8,10 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-Obstacle::Obstacle(const Point& position, double width, double height)
+Obstacle::Obstacle(Point position, double width, double height)
 {
     m_id = OBSTACLE;
-    m_location = position;
+    m_location.screen = position;
     m_size_on_screen = Vector2<double>(width, height);
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();

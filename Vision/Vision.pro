@@ -144,15 +144,15 @@ HEADERS += \
     VisionWrapper/mainwindow.h \
     ../Tools/Math/Circle.h \
     VisionTypes/RANSACTypes/*.h \
-    VisionTypes/RANSACTypes/ransacgoal.h \
     VisionTypes/VisionFieldObjects/centrecircle.h \
     Modules/circledetector.h \
     Modules/fieldpointdetector.h \
-    VisionTypes/point.h
+    VisionTypes/groundpoint.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
     ../Vision/VisionTypes/RANSACTypes/*.cpp \
+    #../Vision/VisionTypes/RANSACTypes/*.template \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
     VisionTools/lookuptable.cpp \
     ../Vision/Modules/*.cpp \

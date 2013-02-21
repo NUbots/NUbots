@@ -89,7 +89,7 @@ public:
     void addToLayer(DEBUG_ID id, const vector<QCircle>& items, QPen pen);
     void addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen);
 
-    void setPlot(PLOTWINDOW win, QString name, vector<Point> pts, QColor colour, QwtPlotCurve::CurveStyle style);
+    void setPlot(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style);
     
     bool finished() const {return m_finished;}
     bool next() const {return m_next;}

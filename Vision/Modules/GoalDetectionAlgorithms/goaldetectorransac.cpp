@@ -155,17 +155,17 @@ vector<Goal> GoalDetectorRANSAC::run()
     //cout << "after selection (if more than 2): " << goal_lines.size() << endl;
 
     BOOST_FOREACH(const RANSACGoal g, goal_lines) {
-        Vector2<Point> endpts;
-        if(g.getEndPoints(endpts)) {
+        Point ep1, ep2;
+        if(g.getEndPoints(ep1, ep2)) {
             //get width vector (to right)
-            Point w = (endpts[0] - endpts[1]).normalize(g.getWidth()).rotateLeft()*0.5;
+            Point w = (ep1 - ep2).normalize(g.getWidth()).rotateLeft()*0.5;
 
-            if(endpts[0].y < endpts[1].y) {
+            if(ep1.y < ep2.y) {
                 // pt0 is top
-                candidates.push_back(Quad(endpts[1] - w, endpts[0] - w, endpts[0] + w, endpts[1] + w));
+                candidates.push_back(Quad(ep2 - w, ep1 - w, ep1 + w, ep2 + w));
             }
             else {
-                candidates.push_back(Quad(endpts[0] - w, endpts[1] - w, endpts[1] + w, endpts[0] + w));
+                candidates.push_back(Quad(ep1 - w, ep2 - w, ep2 + w, ep1 + w));
             }
         }
         else {
@@ -228,11 +228,12 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine>&
             if(s.getAngleBetween(e) < tolerance*mathGeneral::PI*0.5) { //dodgy way (linear with angle between)
             //if(min(a1/a2, a2/a1) <= (1-tolerance)) {
                 //get the end points of each line
-                Vector2<Point> sp, ep;
-                if(s.getEndPoints(sp) && e.getEndPoints(ep)) {
+                Point sp1, sp2,
+                      ep1, ep2;
+                if(s.getEndPoints(sp1, sp2) && e.getEndPoints(ep1, ep2)) {
                     //find lengths of line segments
-                    double l1 = (sp.x - sp.y).abs(),
-                           l2 = (ep.x - ep.y).abs();
+                    double l1 = (sp1 - sp2).abs(),
+                           l2 = (ep1 - ep2).abs();
                     //check lengths
                     if(min(l1/l2, l2/l1) >= (1-tolerance)) {
                         //get num points
@@ -240,22 +241,22 @@ vector<Quad> GoalDetectorRANSAC::buildQuadsFromLines(const vector<LSFittedLine>&
                                n2 = e.getNumPoints();
                         if(min(n1/n2, n2/n1) >= (1-tolerance)) {
                             //check start is to left of end
-                            if(0.5*(sp[0].x + sp[1].x) < 0.5*(ep[0].x + ep[1].x)) {
+                            if(0.5*(sp1.x + sp2.x) < 0.5*(ep1.x + ep2.x)) {
                                 //success
                                 //order points
-                                if(sp[0].y < sp[1].y) {
-                                    sp.transpose();
+                                if(sp1.y < sp2.y) {
+                                    Point c = sp1; sp1 = sp2; sp2 = c;
                                 }
-                                if(ep[0].y < ep[1].y) {
-                                    ep.transpose();
+                                if(ep1.y < ep2.y) {
+                                    Point c = ep1; ep1 = ep2; ep2 = c;
                                 }
-                                quads.push_back(Quad(sp.x, sp.y, ep.y, ep.x));  //generate candidate
+                                quads.push_back(Quad(sp1, sp2, ep2, ep1));  //generate candidate
                                 used.at(i) = true;  //remove end line from consideration
-                                cout << "success " << sp << ep << endl;
+                                cout << "success " << sp1 << " " << sp2 << " , " << ep1 << " " << ep2 << endl;
                                 break;  //do not consider any more lines
                             }
                             else
-                                cout << "line ordering fail: " << 0.5*(sp[0].x + sp[1].x) << " " << 0.5*(ep[0].x + ep[1].x) << endl;
+                                cout << "line ordering fail: " << 0.5*(sp1.x + sp2.x) << " " << 0.5*(ep1.x + ep2.x) << endl;
                         }
                         else
                             cout << "num points fail: " << n1 << " " << n2 << endl;

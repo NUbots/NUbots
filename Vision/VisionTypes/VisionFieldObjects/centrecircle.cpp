@@ -2,13 +2,12 @@
 
 CentreCircle::CentreCircle()
 {
-    m_location = Point(0,0);
     m_size_on_screen = Vector2<double>(0,0),
     m_ground_radius = 0;
     //need more here
 }
 
-CentreCircle::CentreCircle(Point centre, double ground_radius, Vector2<double> screen_size)
+CentreCircle::CentreCircle(GroundPoint centre, double ground_radius, Vector2<double> screen_size)
 {
     m_location = centre;
     m_size_on_screen = screen_size,

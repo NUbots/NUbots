@@ -1,6 +1,6 @@
 #include "cornerpoint.h"
 
-CornerPoint::CornerPoint(TYPE type, Point location)
+CornerPoint::CornerPoint(TYPE type, GroundPoint location)
 {
     m_type = type;
     m_location = location;

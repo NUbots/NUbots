@@ -10,7 +10,7 @@ LSFittedLine::LSFittedLine(){
 }
 
 
-LSFittedLine::LSFittedLine(vector< Vector2<double> > &pointlist) {
+LSFittedLine::LSFittedLine(const vector<Vector2<double> > &pointlist) {
     clearPoints();
     addPoints(pointlist);
 }
