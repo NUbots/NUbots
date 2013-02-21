@@ -60,8 +60,8 @@ namespace ConfigSystem
          *  @return Returns whether or not the load succeeded.
          */
         bool loadConfig(ConfigTree *&loadTree, std::string configName);
-
-        /*! @brief  Saves a configuration in a ConfigTree to file.
+        
+        /*! @brief  Saves a configuration in a ConfigTree to disk.
          *  @param  The tree containing the configuration to save.
          *  @param  The name to give the saved configuration.
          *  @return Returns whether or not the save succeeded.

@@ -16,8 +16,8 @@
     see-think thread (updating only those that need updating).
     
     Note: Creating more that one ConfigManager will cause errors in the
-          config system's persistant store (i.e. not all changes
-          config parameters will be saved).
+          config system's persistant store (i.e. not all changes to
+          config parameters would be saved).
     
     @author Mitchell Metcalfe, Sophie Calland
     

@@ -66,45 +66,33 @@ namespace ConfigSystem
             ~ConfigRange();
 
 
-            /*! @brief Retrieves the "_max" private member variable.
- 
-               @param N/A.
-            @return Returns a pointer to the "_max" private member variable.
+            /*! @brief Retrieves this range's upper boundary value.
+                @return Returns this range's upper boundary value.
              */
             T getMax();
 
             /*! @brief Retrieves the "_max" private member variable.
- 
-               @param N/A.
-            @return Returns a const pointer to the "_max" private member variable.
+                @return Returns a const pointer to the "_max" private member variable.
              */
             const T getMax() const;
             
-            /*! @brief Retrieves the "_min" private member variable.
- 
-               @param N/A.
-            @return Returns a pointer to the "_min" private member variable.
+            /*! @brief Retrieves this range's lower boundary value.
+                @return Returns this range's lower boundary value
              */
             T getMin();
             
             /*! @brief Retrieves the "_min" private member variable.
- 
-               @param N/A.
-            @return Returns a const pointer to the "_min" private member variable.
+                @return Returns a const pointer to the "_min" private member variable.
              */
             const T getMin() const;
             
             /*! @brief Retrieves the upper bound type of the range.
- 
-               @param N/A.
-            @return Returns the BoundType corresponding to the upper bound of the ConfigRange object.
+                @return Returns the BoundType corresponding to the upper bound of the ConfigRange object.
              */
             BoundType getUpperBoundType();
             
             /*! @brief Retrieves the lower bound type of the range.
- 
-               @param N/A.
-            @return Returns the BoundType corresponding to the lower bound of the ConfigRange object.
+                @return Returns the BoundType corresponding to the lower bound of the ConfigRange object.
              */
             BoundType getLowerBoundType();
 
@@ -128,10 +116,15 @@ namespace ConfigSystem
             bool test(std::vector< std::vector<T> > values);
             bool test(std::vector< std::vector< std::vector<T> > > values);
             
-            
+            //! Checks whether the given value falls outside this range,
+            //! and if it does, minimally adjusts it to satisfy this range
+            //! constraint.
             bool clip(T &value);
+            //! 'Clips' each value in the given vector (see ConfigRange::clip(T&)).
             bool clip(std::vector<T> &values);
+            //! 'Clips' each value in the given vector (see ConfigRange::clip(T&)).
             bool clip(std::vector< std::vector<T> > &values);
+            //! 'Clips' each value in the given vector (see ConfigRange::clip(T&)).
 			bool clip(std::vector< std::vector< std::vector<T> > > &values);            
             
         private:

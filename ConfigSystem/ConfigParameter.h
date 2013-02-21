@@ -191,8 +191,9 @@ namespace ConfigSystem
 
             // Overloaded getters and setters:
             // These simply call the appropriate getter/setter from above.
-            // (these could instead be implemented using 
-            //  templates + specializations)
+            // Note: the above methods are candidates for removal
+            // (these methods could be implemented using 
+            //  templates + specializations instead of overloading)
             bool setValue(bool                &value);
             bool setValue(long                &value);
             bool setValue(double              &value);

@@ -62,11 +62,70 @@ namespace ConfigSystem
 {
     class ConfigTree
     {
-    private:
-        //! 
-        ptree _treeRoot; // could be a pointer, but probably doesn't matter?
+        public:
+        ConfigTree(ptree root);
+        ~ConfigTree();
         
-        //! 
+        /*! 
+         *  @brief  Checks whether the given path and name point to a valid 
+         *          existing parameter.
+         *  @param paramPath The base path of the parameter.
+         *  @param paramName The parameter's name.
+         *  @return Returns whether a valid parameter exists.
+         */
+        bool checkParam (
+            const std::string paramPath,
+            const std::string paramName
+            );
+
+        /*! 
+         *  @brief  Gets a parameter from the ConfigTree
+         *  @param paramPath The base path of the parameter.
+         *  @param paramName The parameter's name.
+         *  @param data The parameter to get.
+         *  @return Returns whether the operation was successful.
+         */
+        bool getParam (
+            const std::string paramPath,
+            const std::string paramName,
+            ConfigParameter &data
+            );
+        
+        /*! 
+         *  @brief  Stores a parameter into the ConfigTree
+         *  @param paramPath The base path of the parameter.
+         *  @param paramName The parameter's name.
+         *  @param data The parameter to store.
+         *  @return Returns whether the operation was successful.
+         */
+        bool storeParam (
+            const std::string paramPath, 
+            const std::string paramName, 
+            ConfigParameter data
+            );
+        
+        /*! @brief Deletes the named parameter stored at the given path.
+         *  @param paramPath Path to the parameter to delete.
+         *  @param paramName Name of the parameter to delete.
+         *  @return Whether the operation was successful.
+         */
+        bool deleteParam(
+            const std::string &paramPath,
+            const std::string &paramName
+            );
+        
+                                
+        //! Return this tree's root node (This method is only intended to
+        //! be used by ConfigStorageManager. Modifying the returned ptree
+        //! is dangerous).
+        ptree getRoot();
+
+
+    private:
+        //! This ConfigTree's root node.
+        ptree _treeRoot;
+        
+        //! The name of the configuration this ConfigTree represents.
         std::string configName;
 
         /*! 
@@ -110,9 +169,18 @@ namespace ConfigSystem
             const std::string paramName
             );
 
-
+        //! Attempts to read parameter information from the given ptree
+        //! into the given ConfigParameter.
+        //! Returns whether the conversion was successful.
         bool addPtreeValueandRangeToParam(ptree fromPtree, ConfigParameter &toParam);
         
+        /*! 
+         *  @brief  Attempts to read and convert the "value" from the given
+         *          ptree, convert it, and store it in the given parameter
+         *  @param fromPtree The ptree from which to read.
+         *  @param toParam   The parameter in which to store the converted value.
+         *  @return Whether the conversion was successful.
+         */
         template<typename T>
         bool addValueToParam(ptree fromPtree, ConfigParameter &toParam)
         {
@@ -121,7 +189,13 @@ namespace ConfigSystem
             return true;
         }
         
-
+        /*! 
+         *  @brief  Attempts to read and convert the given ptree into a vector
+         *          of values.
+         *  @param from_ptree The ptree, representing a 1d array, from which to read.
+         *  @param to_vector  The vector of converted values.
+         *  @return Whether the conversion was successful.
+         */
         template<typename T>
         bool ptreeToVector1D(
             ptree from_ptree, 
@@ -144,6 +218,13 @@ namespace ConfigSystem
             
             return true;
         }
+        /*! 
+         *  @brief  Attempts to read and convert the given ptree into a 2D vector
+         *          of values.
+         *  @param from_ptree The ptree, representing a 2d array, from which to read.
+         *  @param to_vector  The vector of converted values.
+         *  @return Whether the conversion was successful.
+         */
         template<typename T>
         bool ptreeToVector2D(
             ptree from_ptree, 
@@ -179,6 +260,13 @@ namespace ConfigSystem
             
             return true;
         }
+        /*! 
+         *  @brief  Attempts to read and convert the given ptree into a 3D vector
+         *          of values.
+         *  @param from_ptree The ptree, representing a 3d array, from which to read.
+         *  @param to_vector  The vector of converted values.
+         *  @return Whether the conversion was successful.
+         */
         template<typename T>
         bool ptreeToVector3D(
             ptree from_ptree, 
@@ -309,6 +397,12 @@ namespace ConfigSystem
         }
 
 
+        /*! 
+         *  @brief  Creates a ptree representing the given parameter.
+         *  @param fromParam The parameter to convert.
+         *  @param toPtree   The ptree representing the given parameter.
+         *  @return Whether the conversion was successful.
+         */
         bool addParamValueandRangeToPtree(ConfigParameter fromParam, ptree &toPtree);
         
         // Note: should explicitly specify template params + put implementations in .cpp
@@ -461,72 +555,6 @@ namespace ConfigSystem
 
             return true;
         }
-        
-    public:
-        ConfigTree(ptree root);
-        ~ConfigTree();
-        
-        /*! 
-         *  @brief  Checks whether the given path and name point to a valid 
-         *          existing parameter.
-         *  @param paramPath The base path of the parameter.
-         *  @param paramName The parameter's name.
-         *  @return Returns whether a valid parameter exists.
-         */
-        bool checkParam (
-            const std::string paramPath,
-            const std::string paramName
-            );
-
-        /*! 
-         *  @brief  Gets a parameter from the ConfigTree
-         *  @param paramPath The base path of the parameter.
-         *  @param paramName The parameter's name.
-         *  @param data The parameter to get.
-         *  @return Returns whether the operation was successful.
-         */
-        bool getParam (
-            const std::string paramPath,
-            const std::string paramName,
-            ConfigParameter &data
-            );
-        
-        /*! 
-         *  @brief  Stores a parameter into the ConfigTree
-         *  @param paramPath The base path of the parameter.
-         *  @param paramName The parameter's name.
-         *  @param data The parameter to store.
-         *  @return Returns whether the operation was successful.
-         */
-        bool storeParam (
-            const std::string paramPath, 
-            const std::string paramName, 
-            ConfigParameter data
-            );
-        
-        /*! @brief Deletes the named parameter stored at the given path.
-         *  @param paramPath Path to the parameter to delete.
-         *  @param paramName Name of the parameter to delete.
-         *  @return Whether the operation was successful.
-         */
-        bool deleteParam(
-            const std::string &paramPath,
-            const std::string &paramName
-            );
-            
-        /*! 
-         *  @brief  Gets a 1 dimensional vector from the ConfigTree
-         *  @param	"param_path" Base path of parameter.
-         *  @param 	"param_name" The parameter's name.
-         *  @param 	"data" The retrieved parameter.
-         *  @return Returns whether the operation was successful.
-         */
-        // bool getVectorParam1D(const std::string param_path, const std::string param_name, 
-        // 						ConfigParameter &data);
-        						
-        						
-        
-        ptree getRoot();
     };
 }
 

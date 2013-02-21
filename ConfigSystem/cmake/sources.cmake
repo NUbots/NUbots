@@ -20,13 +20,7 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS ConfigManager.h
-               ConfigParameter.h
-               ConfigRange.h
-               ConfigStorageManager.h
-               ConfigTree.h
-               Configurable.h
-               ConfigManager.cpp
+SET (YOUR_SRCS ConfigManager.cpp
                ConfigParameter.cpp
                ConfigStorageManager.cpp
                ConfigTree.cpp
@@ -35,9 +29,7 @@ SET (YOUR_SRCS ConfigManager.h
                # Extra sources just for testing
                # (could comment these out on branches
                # other than ConfigSystem)
-               Module.h
                Module.cpp
-               Testing_MM_Utils.h
                Testing_MM_globals.cpp
                Testing_MM_Utils.cpp
 )

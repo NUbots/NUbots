@@ -47,9 +47,8 @@ public:
     bool _shouldUpdate; // whether this module needs to update
     bool _updateCalled; // whether update was called
 
-
+    //! Implement required methods
     Module();
-
     void loadConfig();
     void updateConfig();
 
