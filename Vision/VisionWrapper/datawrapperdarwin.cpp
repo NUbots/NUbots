@@ -252,7 +252,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
     #endif
 }
 
-void DataWrapper::plotPoints(const vector<Point> &pts, string name)
+void DataWrapper::plot(string name, const vector<Point> &pts)
 {
     static ofstream out("DataWrapperplotPoints");
 
