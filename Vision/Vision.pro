@@ -119,12 +119,14 @@ contains(PLATFORM, "rpi") {
 #this
 HEADERS += \
     ../Vision/VisionTypes/*.h \
+    ../Vision/VisionTypes/RANSACTypes/*.h \
     ../Vision/VisionTypes/VisionFieldObjects/*.h \
     ../Vision/VisionTypes/Interfaces/*.h \
     VisionWrapper/datawrappercurrent.h \
     VisionTools/classificationcolours.h \
     VisionTools/GTAssert.h \
     VisionTools/lookuptable.h \
+    VisionTools/transformer.h \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
     basicvisiontypes.h \
@@ -137,25 +139,17 @@ HEADERS += \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h \
     Modules/GoalDetectionAlgorithms/goaldetectorransac.h \
     Modules/cornerdetector.h \
-    VisionTypes/VisionFieldObjects/cornerpoint.h \
-    VisionTypes/Interfaces/optimisable.h \
-    VisionTools/transformer.h \
-    VisionTypes/Interfaces/ransacmodel.h \
     VisionWrapper/mainwindow.h \
     ../Tools/Math/Circle.h \
-    VisionTypes/RANSACTypes/*.h \
-    VisionTypes/VisionFieldObjects/centrecircle.h \
-    Modules/circledetector.h \
-    Modules/fieldpointdetector.h \
-    VisionTypes/groundpoint.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
     ../Vision/VisionTypes/RANSACTypes/*.cpp \
-    #../Vision/VisionTypes/RANSACTypes/*.template \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
     VisionTools/lookuptable.cpp \
     ../Vision/Modules/*.cpp \
+    VisionTools/transformer.cpp \
+    VisionTools/classificationcolours.cpp \
     ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     visionblackboard.cpp \
     visioncontroller.cpp \
@@ -164,11 +158,9 @@ SOURCES += \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp \
     basicvisiontypes.cpp \
-    VisionTools/transformer.cpp \
-    VisionTools/classificationcolours.cpp \
     GenericAlgorithms/ransac.template \
     VisionWrapper/mainwindow.cpp \
-    ../Tools/Math/Circle.cpp
+    #../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
 
 ##robocup

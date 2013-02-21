@@ -9,13 +9,21 @@ template<typename T>
 class RANSACLine : public Line
 {
 public:
-    RANSACLine();
+    RANSACLine() {}
 
-    bool regenerate(const vector<T>& pts);
+    bool regenerate(const vector<T>& pts) {
+        if(pts.size() == minPointsForFit()) {
+            setLineFromPoints(pts.at(0), pts.at(1));
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
-    unsigned int minPointsForFit() const {return 2;}
+    inline size_t minPointsForFit() const {return 2;}
 
-    double calculateError(T p) const;
+    double calculateError(T p) const { return getLinePointDistance(p); }
 };
 
 
@@ -23,14 +31,21 @@ template<>
 class RANSACLine<GroundPoint> : public Line
 {
 public:
-    RANSACLine();
+    RANSACLine() {}
 
-    bool regenerate(const vector<GroundPoint> &pts);
+    bool regenerate(const vector<GroundPoint> &pts) {
+        if(pts.size() == minPointsForFit()) {
+            setLineFromPoints(pts.at(0).ground, pts.at(1).ground);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
-    unsigned int minPointsForFit() const {return 3;}
+    inline size_t minPointsForFit() const { return 3; }
 
-    double calculateError(GroundPoint p) const;
+    double calculateError(GroundPoint p) const { return getLinePointDistance(p.ground); }
 };
 
-#include "ransacline.template"
 #endif // RANSACLINE_H
