@@ -30,7 +30,6 @@ balldetector.cpp
 linedetector.cpp
 cornerdetector.cpp
 circledetector.cpp
-robocuphacks.cpp
 fieldpointdetector.cpp
 )
 ####################################################################################
