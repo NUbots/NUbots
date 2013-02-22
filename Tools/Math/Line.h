@@ -29,7 +29,7 @@ class Line
     //! Constructor with intialising values.
     Line(double rho, double phi);
     //! Destructor
-    ~Line();
+    virtual ~Line();
 // Make line. Form: Ax + By = C
     /*!
       @brief Assign the line by giving the equation in the form Ax + By = C.
@@ -150,16 +150,16 @@ class Line
     double getLinePointDistance(Vector2<double> point) const;
     /*Added by Shannon*/
     /*!
-      @brief retreive the normaliser for the coefficients of the line equation - sqrt(A^2 + B^2).
-      @return sqrt(A^2 + B^2).
-      */
-    double getNormaliser() const;
-    /*!
       @brief Find the signed distance between the the line and the point.
       @param point The point to find the distance to.
       @return The signed distance from the line to the point.
       */
     double getSignedLinePointDistance(Vector2<double> point) const;
+    /*!
+      @brief retreive the normaliser for the coefficients of the line equation - sqrt(A^2 + B^2).
+      @return sqrt(A^2 + B^2).
+      */
+    double getNormaliser() const;
     /*!
       @brief Find the smallest angle between this and the given line.
       @param other The other line.
@@ -176,6 +176,12 @@ class Line
       @return Phi.
       */
     double getPhi() const;
+    /*!
+      @brief Returns the scalar projection of the point onto the line.
+      @param pt The point to project.
+      @return The scalar projection (length of the vector projection).
+      */
+    double scalarProjection(Vector2<double> pt) const;
     /*!
       @brief Projects the point onto the line.
       @param pt The point to project.
@@ -226,6 +232,7 @@ class Line
     double m_rho;
     double m_phi;
     double m_normaliser;
+    Vector2<double> v, a;   ///! Vector representation
     /*!
       @brief Determine if the line represented by the given equation is valid.
       @param A The A value of the line equation.

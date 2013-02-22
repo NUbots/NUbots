@@ -21,12 +21,12 @@ class LSFittedLine : public Line
   public:
     LSFittedLine();
     LSFittedLine(const vector< Vector2<double> >& pointlist);
-    ~LSFittedLine();
+    virtual ~LSFittedLine();
     bool valid;
     
     void addPoint(const Vector2<double> &point);
     void addPoints(const vector< Vector2<double> >& pointlist);
-    void joinLine(LSFittedLine &sourceLine);
+    void joinLine(const LSFittedLine &sourceLine);
     Vector2<double> combinedR2TLSandMSD(const LSFittedLine &sourceLine) const;
     double getMSD() const;
     double getr2tls() const;

@@ -20,7 +20,7 @@ bool operator < (const Vector2<double>& point1, const Vector2<double>& point2) {
 
 
 // Constructor
-Line::Line(){
+Line::Line() : v(0,0), a(0,0){
   // General Line Equation: A*x + B*y = C
   m_A = 0.0;
   m_B = 0.0;
@@ -70,6 +70,9 @@ bool Line::setLine(double A, double B, double C)
       m_normaliser = m_A;
   }
 
+  a = Vector2<double>(0, m_C);
+  v = Vector2<double>(m_B, -m_A).normalize();
+
   normaliseRhoPhi();
 
   return (isValid()); // Just to double check.
@@ -83,24 +86,15 @@ bool Line::setLine(double rho, double phi)
     m_B = sin(phi);
     m_C = rho;
     m_normaliser = sqrt(m_A*m_A + m_B*m_B);
+    a = Vector2<double>(0, m_C);
+    v = Vector2<double>(m_B, -m_A).normalize();
     normaliseRhoPhi();
     return true; // lines in this form are always valid.
 }
 
 void Line::normaliseRhoPhi()
 {
-    //force rho into [0, inf)
-//    if(m_rho < 0) {
-//        m_rho = -m_rho;
-//        m_phi = m_phi + mathGeneral::PI;   //compensate angle
-//    }
-
-    //force phi into [0, 2*pi)
     m_phi = m_phi - 2*mathGeneral::PI * floor( m_phi / (2*mathGeneral::PI) );
-//    while(m_phi < 0)
-//        m_phi -= 2*mathGeneral::PI;
-//    while(m_phi > 2*mathGeneral::PI)
-//        m_phi -= 2*mathGeneral::PI;
 }
 
 // setLineFromPoints(Vector2<double> p1, Vector2<double> p2): Generate the line that passes through the two given points.
@@ -218,19 +212,20 @@ double Line::getYIntercept() const
 double Line::getLinePointDistance(Vector2<double> point) const
 {
   if(!isValid()) return 0.0;
-  return fabs(m_A * point.x + m_B * point.y - m_C) / m_normaliser;
+  return abs(m_A * point.x + m_B * point.y - m_C) / m_normaliser;
 }
 
-double Line::getNormaliser() const
-{
-    return m_normaliser;
-}
 double Line::getSignedLinePointDistance(Vector2<double> point) const
 {
   double distance;
   if(isValid() == false) return 0.0;
   distance = (m_A * point.x + m_B * point.y - m_C) / m_normaliser;
   return distance;
+}
+
+double Line::getNormaliser() const
+{
+    return m_normaliser;
 }
 
 double Line::getAngleBetween(Line other) const
@@ -253,38 +248,23 @@ double Line::getPhi() const
     return m_phi;
 }
 
+double Line::scalarProjection(Vector2<double> pt) const
+{
+    return abs((pt-a)*v);
+}
+
 Vector2<double> Line::projectOnto(Vector2<double> pt) const
 {
-    if(!isValid()) {
-        //prevent division by zero with norm.norm
-        return pt;
-    }
-    else {
-        Vector2<double> shift(0, m_C);
-        Vector2<double> norm(m_B, -m_A);
-        return norm*((pt-shift)*norm/(norm*norm)) + shift;
-    }
+    return v*((pt-a)*v) + a;
 }
 
 vector< Vector2<double> > Line::projectOnto(const vector< Vector2<double> >& pts) const
 {
-    if(!isValid()) {
-        //prevent division by zero with norm.norm
-        return pts;
+    vector< Vector2<double> > result;
+    BOOST_FOREACH(const Vector2<double>& pt, pts) {
+        result.push_back(v*((pt-a)*v) + a);
     }
-    else {
-        //replace later with more optimised version
-        vector< Vector2<double> > result;
-        BOOST_FOREACH(const Vector2<double>& p, pts) {
-            result.push_back(projectOnto(p));
-        }
-
-        //Vector2<double> shift(0, m_C);
-        //Vector2<double> norm(m_B, -m_A);
-        //return norm*((pt-shift)*norm/(norm*norm)) + shift;
-
-        return result;
-    }
+    return result;
 }
 
 bool Line::getIntersection(const Line &other, Vector2<double> &pt) const
@@ -325,5 +305,5 @@ std::ostream& operator<< (std::ostream& output, const Line& l)
 // isValid(float A, float B, float C): Check if the given values create a valid line.
 bool Line::isValid(double A, double B, double C) const
 {
-  return !((A == 0.0) && (B == 0.0)); // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
+  return (A != 0.0) || (B != 0.0); // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
 }

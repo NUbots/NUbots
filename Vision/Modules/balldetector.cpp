@@ -38,7 +38,7 @@ vector<Ball> BallDetector::run()
         }
         else {
             #if VISION_FIELDOBJECT_VERBOSITY > 2
-                debug << "BallDetector::detectBall() - edge thrown out, above GH: " << it->screen << endl;
+                debug << "BallDetector::detectBall() - edge thrown out, above GH: " << *it << endl;
             #endif
             it = edges.erase(it);
         }

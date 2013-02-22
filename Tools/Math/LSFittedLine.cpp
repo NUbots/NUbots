@@ -64,7 +64,7 @@ void LSFittedLine::addPoints(const vector< Vector2<double> >& pointlist){
     }
 }
 
-void LSFittedLine::joinLine(LSFittedLine &sourceLine)
+void LSFittedLine::joinLine(const LSFittedLine &sourceLine)
 {
 	sumX += sourceLine.sumX;
 	sumY += sourceLine.sumY;

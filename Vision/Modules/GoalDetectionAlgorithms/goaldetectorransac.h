@@ -11,6 +11,7 @@ class GoalDetectorRANSAC : public GoalDetector
 {
 public:
     GoalDetectorRANSAC();
+    virtual vector<Goal> run1();
     virtual vector<Goal> run();
 
 private:

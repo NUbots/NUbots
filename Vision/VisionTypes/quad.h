@@ -37,15 +37,15 @@ public:
 
     Vector2<double> getCentre() const;         //! Returns the centre pixel location  of the Quad.
 
-    Vector2<double> getBottomLeft() const {return m_bottom_left;}     //! Returns the bottom left pixel location  of the Quad.
-    Vector2<double> getBottomRight() const {return m_bottom_right;}     //! Returns the bottom right pixel location  of the Quad.
-    Vector2<double> getTopLeft() const {return m_top_left;}       //! Returns the top left pixel location  of the Quad.
-    Vector2<double> getTopRight() const {return m_top_right;}       //! Returns the top right pixel location  of the Quad.
+    Vector2<double> getBottomLeft() const {return bl;}     //! Returns the bottom left pixel location  of the Quad.
+    Vector2<double> getBottomRight() const {return br;}     //! Returns the bottom right pixel location  of the Quad.
+    Vector2<double> getTopLeft() const {return tl;}       //! Returns the top left pixel location  of the Quad.
+    Vector2<double> getTopRight() const {return tr;}       //! Returns the top right pixel location  of the Quad.
 
-    double getLeft() const {return 0.5*(m_bottom_left.x + m_top_left.x);}
-    double getRight() const {return 0.5*(m_bottom_right.x + m_top_right.x);}
-    double getTop() const {return 0.5*(m_top_left.y + m_top_right.y);}
-    double getBottom() const {return 0.5*(m_bottom_left.y + m_bottom_right.y);}
+    double getLeft() const {return 0.5*(bl.x + tl.x);}
+    double getRight() const {return 0.5*(br.x + tr.x);}
+    double getTop() const {return 0.5*(tl.y + tr.y);}
+    double getBottom() const {return 0.5*(bl.y + br.y);}
 
     int getBaseWidth() const;                   //! Returns the base width of the Quad in pixels.
     int getTopWidth() const;                    //! Returns the top width of the Quad in pixels.
@@ -56,12 +56,14 @@ public:
     double getAverageWidth() const;                //! Returns the average width of the Quad in pixels.
     double getAverageHeight() const;               //! Returns the average height of the Quad in pixels.
 
+    bool overlapsHorizontally(const Quad& other) const;
+
 private:
 
-    Vector2<double> m_bottom_left,     //! @variable The left of the Quad.
-                    m_bottom_right,    //! @variable The right of the Quad.
-                    m_top_right,       //! @variable The top of the Quad.
-                    m_top_left;        //! @variable The bottom of the Quad.
+    Vector2<double> bl,     //! @variable The bottom-left of the Quad.
+                    br,    //! @variable The bottom-right of the Quad.
+                    tr,       //! @variable The top-right of the Quad.
+                    tl;        //! @variable The top-left of the Quad.
 };
 
 #endif // QUAD_H

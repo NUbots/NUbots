@@ -57,7 +57,7 @@ namespace RANSAC
             cur_concensus = (c1 == best_concensus ? c2 : c1);   //use the concensus that is not currently the best
 
             //determine consensus set
-            for (unsigned int i = 0; i < points.size(); i++) {
+            for (size_t i = 0; i < points.size(); i++) {
                 double dist = m.calculateError(points.at(i));
                 if (dist < e) {
                     cur_variance += dist;
@@ -92,10 +92,8 @@ namespace RANSAC
                     }
                     break;
                 }
-
             }
         }
-        //variance = variance/(points.size()*e);
         variance = minerr;
 
         if(found) {

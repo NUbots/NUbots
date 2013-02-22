@@ -1,6 +1,8 @@
 #include "quad.h"
 #include <cmath>
 
+using namespace std;
+
 Quad::Quad()
 {
     set(0,0,0,0);
@@ -8,7 +10,7 @@ Quad::Quad()
 
 Quad::Quad(const Quad& other)
 {
-    set(other.m_bottom_left, other.m_top_left, other.m_top_right, other.m_bottom_right);
+    set(other.bl, other.tl, other.tr, other.br);
 }
 
 Quad::Quad(int left, int top, int right, int bottom)
@@ -34,38 +36,38 @@ void Quad::set(int left, int top, int right, int bottom)
         bottom = temp;
     }
 
-    m_bottom_left = Vector2<double>(left, bottom);
-    m_top_left = Vector2<double>(left, top);
-    m_top_right = Vector2<double>(right, top);
-    m_bottom_right = Vector2<double>(right, bottom);
+    bl = Vector2<double>(left, bottom);
+    tl = Vector2<double>(left, top);
+    tr = Vector2<double>(right, top);
+    br = Vector2<double>(right, bottom);
 }
 
 void Quad::set(Vector2<double> bottom_left, Vector2<double> top_left, Vector2<double> top_right, Vector2<double> bottom_right)
 {
-    m_bottom_left = bottom_left;
-    m_top_left = top_left;
-    m_top_right = top_right;
-    m_bottom_right = bottom_right;
+    bl = bottom_left;
+    tl = top_left;
+    tr = top_right;
+    br = bottom_right;
 }
 
 Vector2<double> Quad::getBottomCentre() const
 {
-    return (m_bottom_left + m_bottom_right)*0.5;
+    return (bl + br)*0.5;
 }
 
 Vector2<double> Quad::getCentre() const
 {
-    return (m_bottom_left + m_top_left + m_top_right + m_bottom_right)*0.25;
+    return (bl + tl + tr + br)*0.25;
 }
 
 int Quad::getBaseWidth() const
 {
-    return std::abs(m_bottom_right.x - m_bottom_left.x + 1);
+    return std::abs(br.x - bl.x + 1);
 }
 
 int Quad::getTopWidth() const
 {
-    return std::abs(m_top_right.x - m_top_left.x + 1);
+    return std::abs(tr.x - tl.x + 1);
 }
 
 double Quad::getAverageWidth() const
@@ -75,12 +77,12 @@ double Quad::getAverageWidth() const
 
 int Quad::getLeftHeight() const
 {
-    return std::abs(m_bottom_left.y - m_top_left.y + 1);
+    return std::abs(bl.y - tl.y + 1);
 }
 
 int Quad::getRightHeight() const
 {
-    return std::abs(m_bottom_right.y - m_top_right.y + 1);
+    return std::abs(br.y - tr.y + 1);
 }
 
 double Quad::getAverageHeight() const
@@ -88,12 +90,23 @@ double Quad::getAverageHeight() const
     return 0.5*(getLeftHeight() + getRightHeight());
 }
 
+bool Quad::overlapsHorizontally(const Quad &other) const
+{
+    //rough for now
+    double far_right = max(tr.x, br.x),
+           far_left = min(tl.x, bl.x),
+           o_far_right = max(other.tr.x, other.br.x),
+           o_far_left = min(other.tl.x, other.bl.x);
+
+    return ! (far_right < o_far_left || o_far_right < far_left);
+}
+
 //void Quad::render(cv::Mat &mat, cv::Scalar colour, bool filled) const
 //{
-//    cv::Point poly[4] = {cv::Point2f(m_bottom_left.x, m_bottom_left.y),
-//                         cv::Point2f(m_top_left.x, m_top_left.y),
-//                         cv::Point2f(m_top_right.x, m_top_right.y),
-//                         cv::Point2f(m_bottom_right.x, m_bottom_right.y)};
+//    cv::Point poly[4] = {cv::Point2f(bl.x, bl.y),
+//                         cv::Point2f(tl.x, tl.y),
+//                         cv::Point2f(tr.x, tr.y),
+//                         cv::Point2f(br.x, br.y)};
 //    if(filled) {
 //        cv::fillConvexPoly(mat, poly, 4, colour, 4);
 //    }

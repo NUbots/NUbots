@@ -15,71 +15,65 @@ GoalDetectorRANSAC::GoalDetectorRANSAC()
 {
     m_n = 10;               //min pts to line essentially
     m_k = 40;               //number of iterations per fitting attempt
-    m_e = 8.0;              //consensus margin
+    m_e = 12.0;              //consensus margin
     m_max_iterations = 3;  //hard limit on number of fitting attempts
 }
 
-//vector<Goal> GoalDetectorRANSAC::run()
-//{
-//    VisionBlackboard* vbb = VisionBlackboard::getInstance();
-//    //get transitions associated with goals
-//    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
-//                          v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
-//    vector<Quad> candidates;
-//    vector<Goal> posts;
+vector<Goal> GoalDetectorRANSAC::run1()
+{
+    VisionBlackboard* vbb = VisionBlackboard::getInstance();
+    //get transitions associated with goals
+    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
+                          v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
+    vector<Quad> candidates;
+    vector<Goal> posts;
 
-//    //finds the edge lines and constructs goals from that
-//    vector<Point> start_points, end_points;
-//    vector<pair<VisionLine, vector<Point> > > ransac_results;
-//    vector<LSFittedLine> start_lines, end_lines;
+    //finds the edge lines and constructs goals from that
+    vector<Point> start_points, end_points;
+    vector<pair<RANSACLine<Point>, vector<Point> > > ransac_results;
+    vector<LSFittedLine> start_lines, end_lines;
 
+    //get edge points
+    BOOST_FOREACH(ColourSegment s, h_segments) {
+        start_points.push_back(s.getStart());
+        end_points.push_back(s.getEnd());
+    }
 
+    //use generic ransac implementation to find lines
+    ransac_results = RANSAC::findMultipleModels<RANSACLine<Point>, Point>(start_points, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
+    for(size_t i=0; i<ransac_results.size(); i++) {
+        start_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    }
 
-//    //get edge points
-//    BOOST_FOREACH(ColourSegment s, h_segments) {
-//        start_points.push_back(s.getStart());
-//        end_points.push_back(s.getEnd());
-//    }
+    ransac_results = RANSAC::findMultipleModels<RANSACLine<Point>, Point>(end_points, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
+    for(size_t i=0; i<ransac_results.size(); i++) {
+        end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    }
 
-//    //use generic ransac implementation to find lines
-//    ransac_results = RANSAC::findMultipleModels<VisionLine, Point>(start_points, m_e, m_n, m_k, m_max_iterations);
-//    for(unsigned int i=0; i<ransac_results.size(); i++) {
-//        start_lines.push_back(LSFittedLine(ransac_results.at(i).second));
-//    }
+    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
+    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
 
-//    ransac_results = RANSAC::findMultipleModels<VisionLine, Point>(end_points, m_e, m_n, m_k, m_max_iterations);
-//    for(unsigned int i=0; i<ransac_results.size(); i++) {
-//        end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
-//    }
+    //Build candidates out of lines
+    candidates = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
 
-//    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
-//    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
+    //validity check
+    removeInvalidPosts(candidates);
 
-//    //Build candidates out of lines
-//    candidates = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
+    //overlap check
+    overlapCheck(candidates);
 
-//    cout << "candidates: " << candidates.size() << endl;
+    posts = assignGoals(candidates);
 
-//    //validity check
-//    removeInvalidPosts(candidates);
-//    cout << "after invalid: " << candidates.size() << endl;
+    //Improves bottom centre estimate using vertical transitions
+    BOOST_FOREACH(ColourSegment v, v_segments) {
+        BOOST_FOREACH(Goal g, posts) {
+            if(v.getEnd().y > g.getLocationPixels().y)
+                g.setBase(v.getEnd());
+        }
+    }
 
-//    //overlap check
-//    overlapCheck(candidates);
-//    cout << "after overlap: " << candidates.size() << endl;
-
-//    posts = assignGoals(candidates);
-
-//    //Improves bottom centre estimate using vertical transitions
-//    BOOST_FOREACH(ColourSegment v, v_segments) {
-//        BOOST_FOREACH(Goal g, posts) {
-//            if(v.getEnd().y > g.getLocationPixels().y)
-//                g.setBase(v.getEnd());
-//        }
-//    }
-
-//    return posts;
-//}
+    return posts;
+}
 
 vector<Goal> GoalDetectorRANSAC::run()
 {
@@ -93,20 +87,19 @@ vector<Goal> GoalDetectorRANSAC::run()
 
     //finds the centre lines and constructs goals from them
     vector<pair<RANSACGoal, vector<ColourSegment> > > ransac_results;
-    vector<RANSACGoal> goal_lines;
     vector<pair<RANSACGoal, vector<ColourSegment> > >::iterator rit;
+    vector<RANSACGoal> goal_lines;
 
-    Vector2<double> h_length_stats = calculateSegmentLengthStatistics(h_segments);
+//    Vector2<double> h_length_stats = calculateSegmentLengthStatistics(h_segments);
 
-    // fill histogram bins
-    vector<ColourSegment>::iterator it = h_segments.begin();
-    while(it != h_segments.end()) {
-        //use stddev throwout to remove topbar segments
-        if(it->getLength() > h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y)
-            it = h_segments.erase(it);
-        else
-            it++;
-    }
+//    //use stddev throwout to remove topbar segments
+//    vector<ColourSegment>::iterator it = h_segments.begin();
+//    while(it != h_segments.end()) {
+//        if(it->getLength() > h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y)
+//            it = h_segments.erase(it);
+//        else
+//            it++;
+//    }
 
     //use generic ransac implementation to find lines
     ransac_results = RANSAC::findMultipleModels<RANSACGoal, ColourSegment>(h_segments, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
@@ -116,60 +109,77 @@ vector<Goal> GoalDetectorRANSAC::run()
         goal_lines.push_back(rit->first);
     }
 
-    //cout << "lines: " << goal_lines.size() << endl;
+    cout << "lines: " << goal_lines.size() << endl;
 
     /// @todo MERGE COLINEAR / INTERSECTING
 
-    //cout << "after merge: " << goal_lines.size() << endl;
+
+    cout << "after merge: " << goal_lines.size() << endl;
 
 #if VISION_FIELDOBJECT_VERBOSITY > 1
-    vector<LSFittedLine> debug_lines;
+    vector<RANSACGoal> debug_lines;
     BOOST_FOREACH(const RANSACGoal& g, goal_lines) {
         debug_lines.push_back(g);
     }
-    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_CENTRE, debug_lines);
+    DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_CENTRE, goal_lines);
 #endif
 
     //Build candidates out of lines
     if(goal_lines.size() > 2) {
-        //pick best two
-        double min_angle_diff = std::numeric_limits<double>::max();
-        pair<unsigned int, unsigned int> best(0,0);
-        for(unsigned int i = 0; i < goal_lines.size(); i++) {
-            for(unsigned int k = i+1; k < goal_lines.size(); k++) {
-                double a = goal_lines[i].getAngleBetween(goal_lines[k]);
-                if(a < min_angle_diff) {
-                    min_angle_diff = a;
-                    best.first = i;
-                    best.second = k;
-                }
+        //pick best two - i.e. most vertical
+        const Horizon& kh = vbb->getKinematicsHorizon();
+
+        pair<double, double> largest_angles = pair<double, double>(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
+        pair<size_t, size_t> best(0,0);
+        for(size_t i = 0; i < goal_lines.size(); i++) {
+            double a = kh.getAngleBetween(goal_lines[i].getLine());
+            if(a > largest_angles.first) {
+                largest_angles.first = a;
+                best.first = i;
+            }
+            else if(a > largest_angles.second) {
+                largest_angles.second = a;
+                best.second = i;
             }
         }
 
+//        double min_angle_diff = std::numeric_limits<double>::max();
+//        pair<size_t, size_t> best(0,0);
+//        for(size_t i = 0; i < goal_lines.size(); i++) {
+//            for(size_t k = i+1; k < goal_lines.size(); k++) {
+//                double a = goal_lines[i].getLine().getAngleBetween(goal_lines[k].getLine());
+//                if(a < min_angle_diff) {
+//                    min_angle_diff = a;
+//                    best.first = i;
+//                    best.second = k;
+//                }
+//            }
+//        }
+
         //add these to end and erase all but
-        goal_lines.push_back(goal_lines[best.first]);
-        goal_lines.push_back(goal_lines[best.second]);
-        goal_lines.erase(goal_lines.begin(), goal_lines.end() - 2);
+        RANSACGoal g1 = goal_lines[best.first],
+                   g2 = goal_lines[best.second];
+
+        goal_lines.clear();
+        goal_lines.push_back(g1);
+        goal_lines.push_back(g2);
     }
 
     //cout << "after selection (if more than 2): " << goal_lines.size() << endl;
 
     BOOST_FOREACH(const RANSACGoal g, goal_lines) {
-        Point ep1, ep2;
-        if(g.getEndPoints(ep1, ep2)) {
-            //get width vector (to right)
-            Point w = (ep1 - ep2).normalize(g.getWidth()).rotateLeft()*0.5;
+        pair<Point, Point> endpts = g.getEndPoints();
+        pair<double, double> widths = g.getWidths();
+        //get width vector (to right)
+        Point w1 = g.getDirection().normalize(widths.first*0.5).rotateLeft(),
+              w2 = g.getDirection().normalize(widths.second*0.5).rotateLeft();
 
-            if(ep1.y < ep2.y) {
-                // pt0 is top
-                candidates.push_back(Quad(ep2 - w, ep1 - w, ep1 + w, ep2 + w));
-            }
-            else {
-                candidates.push_back(Quad(ep1 - w, ep2 - w, ep2 + w, ep1 + w));
-            }
+        if(endpts.first.y < endpts.second.y) {
+            // pt0 is top
+            candidates.push_back(Quad(endpts.second - w2, endpts.first - w1, endpts.first + w1, endpts.second + w2));
         }
         else {
-            errorlog << "GoalDetectorRANSAC::run() - invalid RANSACGoal - no endpoints" << endl;
+            candidates.push_back(Quad(endpts.first - w1, endpts.second - w2, endpts.second + w2, endpts.first + w1));
         }
     }
 
@@ -186,7 +196,8 @@ vector<Goal> GoalDetectorRANSAC::run()
     posts = assignGoals(candidates);
 
     //Improves bottom centre estimate using vertical transitions
-    BOOST_FOREACH(ColourSegment v, v_segments) {
+    BOOST_FOREACH(ColourSegment& v, v_segments) {
+        Point e;
         BOOST_FOREACH(Goal g, posts) {
             if(v.getEnd().y > g.getLocationPixels().y)
                 g.setBase(v.getEnd());

@@ -54,12 +54,10 @@ DataWrapper::DataWrapper(MainWindow* ui)
                 if(!streamname.empty()) {
                     if(using_sensors)
                         sensorstreamname = QFileDialog::getOpenFileName(NULL, "Select sensor stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
-                    if(!(using_sensors && sensorstreamname.empty())) {
-                        LUTname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
-                        if(!LUTname.empty()) {
-                            configname = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
-                            ok = true;
-                        }
+                    LUTname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
+                    if(!LUTname.empty()) {
+                        configname = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
+                        ok = true;
                     }
                 }
             }
@@ -365,11 +363,6 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
         pointcolour = QColor(Qt::blue);
         endptcolour = QColor(Qt::green);
         break;
-    case DBID_GOAL_LINES_CENTRE:
-        linecolour = QColor(Qt::blue);
-        pointcolour = QColor(Qt::red);
-        endptcolour = QColor(Qt::green);
-        break;
     case DBID_GOAL_LINES_END:
         linecolour = QColor(Qt::magenta);
         pointcolour = QColor(Qt::blue);
@@ -397,6 +390,29 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
             debug << "DataWrapper::debugPublish called with invalid line: " << l << endl;
             #endif
         }
+    }
+}
+
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<RANSACGoal>& data)
+{
+    QColor linecolour, pointcolour, endptcolour;
+
+    switch(id) {
+    case DBID_GOAL_LINES_CENTRE:
+        linecolour = QColor(Qt::blue);
+        pointcolour = QColor(Qt::red);
+        endptcolour = QColor(Qt::green);
+        break;
+    default:
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        return;
+    }
+
+    BOOST_FOREACH(RANSACGoal g, data) {
+        pair<Point, Point> endpts = g.getEndPoints();
+        gui->addToLayer(id, QLineF(endpts.first.x, endpts.first.y, endpts.second.x, endpts.second.y), linecolour);
+        gui->addToLayer(id, QPointF(endpts.first.x, endpts.first.y), QPen(endptcolour, 3));
+        gui->addToLayer(id, QPointF(endpts.second.x, endpts.second.y), QPen(endptcolour, 3));
     }
 }
 

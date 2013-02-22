@@ -20,7 +20,8 @@
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
-#include "Tools/Math/LSFittedLine.h"
+
+#include "Vision/VisionTypes/RANSACTypes/ransacgoal.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "NUPlatform/NUCamera/NUCameraData.h"
@@ -72,7 +73,8 @@ public:
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     void debugPublish(DEBUG_ID id);
     void debugPublish(DEBUG_ID id, const NUImage *const img);
-    void debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
+    void debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data);
+    void debugPublish(DEBUG_ID id, const vector<RANSACGoal> &data);
 
     void plot(string name, vector< Vector2<double> > pts);
 
