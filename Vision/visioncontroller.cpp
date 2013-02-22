@@ -22,7 +22,7 @@
 
 VisionController* VisionController::instance = 0;
 
-VisionController::VisionController() : m_corner_detector(0.95), m_circle_detector(0.95)
+VisionController::VisionController() : m_corner_detector(0.1), m_circle_detector(0.25)
 {
     m_data_wrapper = DataWrapper::getInstance();
     m_blackboard = VisionBlackboard::getInstance();

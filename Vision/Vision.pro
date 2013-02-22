@@ -141,6 +141,7 @@ HEADERS += \
     Modules/cornerdetector.h \
     VisionWrapper/mainwindow.h \
     ../Tools/Math/Circle.h \
+    linesegmentscurve.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -162,6 +163,7 @@ SOURCES += \
     VisionWrapper/mainwindow.cpp \
     #../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
+    linesegmentscurve.cpp
 
 ##robocup
 HEADERS += \

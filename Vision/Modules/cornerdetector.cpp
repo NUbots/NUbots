@@ -23,8 +23,14 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
     vector<FieldLine>::const_iterator it1, it2;
     vector<CornerPoint> results;
 
-    if(lines.size() < 2)
+    if(lines.size() < 2) {
         return results;
+    }
+
+    if(m_tolerance < 0 || m_tolerance > 1) {
+        errorlog << "CornerDetector::run called with invalid tolerance: " << m_tolerance << " (must be in [0, 1]." << endl;
+        return results;
+    }
 
     for(it1 = lines.begin(); it1 != lines.end()-1; it1++) {
         Line l1 = it1->getGroundLineEquation();
@@ -41,6 +47,26 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
                     if(type != CornerPoint::INVALID) {
                         //need screen loc
                         if(it1->getScreenLineEquation().getIntersection(it2->getScreenLineEquation(), intersection.screen)) {
+
+                            /// DEBUG
+                            cout << l1.getAngleBetween(l2) << " < " << m_tolerance*mathGeneral::PI*0.5 << " and ";
+                            Point mid1 = (l1_pts[0].ground + l1_pts[1].ground)*0.5,
+                                  mid2 = (l2_pts[0].ground + l2_pts[1].ground)*0.5;
+
+                            //compare end points and midpoints to see what is closest to the intersection
+                            double d1x = (intersection.ground - l1_pts[0].ground).abs(),
+                                   d1y = (intersection.ground - l1_pts[1].ground).abs(),
+                                   d1m = (intersection.ground - mid1).abs(),
+                                   d2x = (intersection.ground - l2_pts[0].ground).abs(),
+                                   d2y = (intersection.ground - l2_pts[1].ground).abs(),
+                                   d2m = (intersection.ground - mid2).abs();
+
+                            double min1 = min(d1m, min(d1x, d1y)),
+                                   min2 = min(d2m, min(d2x, d2y));
+
+                            cout << min1 << " < " << m_tolerance*(l1_pts[0].ground - l1_pts[1].ground).abs() << " and " << min2 << " < " << m_tolerance*(l2_pts[0].ground - l2_pts[1].ground).abs() << endl;
+                            /// END DEBUG
+
                             results.push_back(CornerPoint(type, intersection));
                         }
                         else {
@@ -60,9 +86,6 @@ CornerPoint::TYPE CornerDetector::findCorner(Vector2<GroundPoint> ep1, Vector2<G
 {
     Point mid1 = (ep1[0].ground + ep1[1].ground)*0.5,
           mid2 = (ep2[0].ground + ep2[1].ground)*0.5;
-
-    if(tolerance < 0 || tolerance > 1)
-        errorlog << "CornerDetector::findCorner called with invalid tolerance: " << tolerance << " (must be in [0, 1]." << endl;
 
     //compare end points and midpoints to see what is closest to the intersection
     double d1x = (intersection.ground - ep1[0].ground).abs(),

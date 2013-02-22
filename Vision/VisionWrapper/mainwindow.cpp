@@ -6,6 +6,8 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <qwt/qwt_legend.h>
+#include <sstream>
+#include "linesegmentscurve.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,8 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_finished = m_next = false;
     ui->setupUi(this);
-    canvas = new QImage(QSize(320, 240), QImage::Format_RGB888);
-    canvas->fill(QColor(0,0,0));
+
+    current_window = 0;
 
     layers_layout = new QVBoxLayout();
     layers_box = new QWidget(ui->layersScrollArea);
@@ -26,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QCheckBox* newbox = new QCheckBox(getDebugIDName(getDebugIDFromInt(id)).c_str(), ui->layersScrollArea);
         QObject::connect(newbox, SIGNAL(clicked()), this, SLOT(refresh()));
         layers_layout->addWidget(newbox);
-        layer_selections[id] = newbox;
+        layer_boxes[id] = newbox;
     }
 
     windows_box = new QWidget(ui->windowsScrollArea);
@@ -34,45 +36,55 @@ MainWindow::MainWindow(QWidget *parent) :
     windows_layout = new QGridLayout(windows_box);
     windows_box->setLayout(windows_layout);
 
-    view = new QGraphicsView(ui->windowsScrollArea);
+    //two canvases
+    for(int i=0; i<NUM_CANVASES; i++) {
+        std::stringstream ss;
+        ss << "Window " << i;
+        ui->windowComboBox->addItem(ss.str().c_str());
+        canvases.push_back(new QImage(QSize(320, 240), QImage::Format_RGB888));
+        canvases.back()->fill(QColor(0,0,0));
+        views.push_back(new QGraphicsView(ui->windowsScrollArea));
+        views.back()->setFixedSize(320,240);
+        views.back()->setContentsMargins(0,0,0,0);
+        views.back()->setFrameShape(QFrame::NoFrame);
+        windows_layout->addWidget(views.back(), 0, i);
+        scenes.push_back(new QGraphicsScene);
+        scenes.back()->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*(canvases.back()))));
+        views.back()->setScene(scenes.back());
+        layer_selections.push_back(map<DEBUG_ID, bool>());
+    }
 
-    view->setFixedSize(320,240);
-    view->setContentsMargins(0,0,0,0);
-    view->setFrameShape(QFrame::NoFrame);
-    windows_layout->addWidget(view, 0, 0);
-    scene = new QGraphicsScene;
-    scene->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*canvas)));
-    view->setScene(scene);
-
-    for(int i = p1; i<=p3; i++) {
+    for(int i = p1; i<=p2; i++) {
         PLOTWINDOW win = winFromInt(i);
         plots[win] = new QwtPlot(ui->windowsScrollArea);
         plots[win]->setAxisAutoScale(QwtPlot::xBottom, true);
         plots[win]->setAxisAutoScale(QwtPlot::yLeft, true);
         plots[win]->setFixedSize(320,240);
         plots[win]->insertLegend(new QwtLegend(), QwtPlot::BottomLegend);
-        //windows_layout->addWidget(plot, row_num, column_num);
-        windows_layout->addWidget(plots[win], (i+1)/2, (i+1)%2);
-
-//        magnifiers[win] = new QwtPlotMagnifier(plots[win]->canvas());
-//        magnifiers[win]->setAxisEnabled(QwtPlot::xBottom, true);
-//        magnifiers[win]->setAxisEnabled(QwtPlot::yLeft, true);
+        windows_layout->addWidget(plots[win], (i + NUM_CANVASES)/2, (i+NUM_CANVASES)%2);
         zoomers[win] = new QwtPlotZoomer(plots[win]->canvas());
     }
 
-
-    QObject::connect(ui->next_pb, SIGNAL(clicked()), this, SLOT(setNext()));
-    QObject::connect(ui->exit_pb, SIGNAL(clicked()), this, SLOT(setFinished()));
+    connect(ui->next_pb, SIGNAL(clicked()), this, SLOT(setNext()));
+    connect(ui->exit_pb, SIGNAL(clicked()), this, SLOT(setFinished()));
+    connect(ui->windowComboBox, SIGNAL(activated(int)), this, SLOT(setWindow(int)));
 }
 
 MainWindow::~MainWindow()
 {
-    delete scene;
-    delete view;
-    delete canvas;
+    BOOST_FOREACH(QGraphicsScene* s, scenes) {
+        delete s;
+    }
+    BOOST_FOREACH(QGraphicsView* v, views) {
+        delete v;
+    }
+    BOOST_FOREACH(QImage* c, canvases) {
+        delete c;
+    }
+
     delete ui;
     for(int id=0; id<DBID_INVALID; id++) {
-        delete layer_selections[getDebugIDFromInt(id)];
+        delete layer_boxes[getDebugIDFromInt(id)];
     }
 
 //    for(map<PLOTWINDOW, QwtPlotMagnifier*>::iterator it = magnifiers.begin(); it != magnifiers.end(); it++) {
@@ -122,55 +134,70 @@ void MainWindow::clearLayers()
 
 void MainWindow::refresh()
 {
-    qDeleteAll( scene->items() );
-    //reset image
-    canvas->fill(QColor(Qt::black));
-    //draw over image
-    QPainter painter(canvas);
     for(int i=0; i<DBID_INVALID; i++) {
         DEBUG_ID id = getDebugIDFromInt(i);
-        if(layer_selections[id]->isChecked()) {
-            for(vector<pair<QImage, float> >::iterator it = images[id].begin(); it<images[id].end(); it++) {
-                painter.setOpacity(it->second);
-                painter.drawImage(QPoint(0,0), it->first);
-            }
-            for(vector<pair<QPointF, QPen> >::iterator it = points[id].begin(); it<points[id].end(); it++) {
-                painter.setPen(it->second);
-                painter.drawPoint(it->first);
-            }
-            for(vector<pair<QLineF, QPen> >::iterator it = lines[id].begin(); it<lines[id].end(); it++) {
-                painter.setPen(it->second);
-                painter.drawLine(it->first);
-            }
-            for(vector<pair<QRectF, QPen> >::iterator it = rectangles[id].begin(); it<rectangles[id].end(); it++) {
-                painter.setPen(it->second);
-                painter.drawRect(it->first);
-            }
-            for(vector<pair<QCircle, QPen> >::iterator it = circles[id].begin(); it<circles[id].end(); it++) {
-                painter.setPen(it->second);
-                painter.drawEllipse(it->first.m_centre, it->first.m_radius, it->first.m_radius);
-            }
-            for(vector<pair<Polygon, QPen> >::iterator it = polygons[id].begin(); it<polygons[id].end(); it++) {
-                painter.setPen(it->second);
-                if(it->first.m_filled) {
-                    painter.drawPolygon(it->first.m_polygon);
+        layer_selections[current_window][id] = layer_boxes[id]->isChecked();
+    }
+
+    for(size_t c=0; c<NUM_CANVASES; c++) {
+        qDeleteAll( scenes[c]->items() );
+        //reset image
+        canvases[c]->fill(QColor(Qt::black));
+        //draw over image
+        QPainter painter(canvases[c]);
+        for(int i=0; i<DBID_INVALID; i++) {
+            DEBUG_ID id = getDebugIDFromInt(i);
+            if(layer_selections[c][id]) {
+                for(vector<pair<QImage, float> >::iterator it = images[id].begin(); it<images[id].end(); it++) {
+                    painter.setOpacity(it->second);
+                    painter.drawImage(QPoint(0,0), it->first);
                 }
-                else {
-                    painter.drawPolyline(it->first.m_polygon);
+                for(vector<pair<QPointF, QPen> >::iterator it = points[id].begin(); it<points[id].end(); it++) {
+                    painter.setPen(it->second);
+                    painter.drawPoint(it->first);
+                }
+                for(vector<pair<QLineF, QPen> >::iterator it = lines[id].begin(); it<lines[id].end(); it++) {
+                    painter.setPen(it->second);
+                    painter.drawLine(it->first);
+                }
+                for(vector<pair<QRectF, QPen> >::iterator it = rectangles[id].begin(); it<rectangles[id].end(); it++) {
+                    painter.setPen(it->second);
+                    painter.drawRect(it->first);
+                }
+                for(vector<pair<QCircle, QPen> >::iterator it = circles[id].begin(); it<circles[id].end(); it++) {
+                    painter.setPen(it->second);
+                    painter.drawEllipse(it->first.m_centre, it->first.m_radius, it->first.m_radius);
+                }
+                for(vector<pair<Polygon, QPen> >::iterator it = polygons[id].begin(); it<polygons[id].end(); it++) {
+                    painter.setPen(it->second);
+                    if(it->first.m_filled) {
+                        painter.drawPolygon(it->first.m_polygon);
+                    }
+                    else {
+                        painter.drawPolyline(it->first.m_polygon);
+                    }
                 }
             }
         }
+
+        //render image
+        scenes[c]->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*(canvases[c]))));
+        views[c]->setScene(scenes[c]);
+
+        views[c]->show();
     }
-
-    //render image
-    scene->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*canvas)));
-    view->setScene(scene);
-
-    view->show();
 
     //plots
     for(map<PLOTWINDOW, QwtPlot*>::iterator pit = plots.begin(); pit != plots.end(); pit++)
         pit->second->show();
+}
+
+void MainWindow::updateControls()
+{
+    for(int i=0; i<DBID_INVALID; i++) {
+        DEBUG_ID id = getDebugIDFromInt(i);
+        layer_boxes[id]->setChecked(layer_selections[current_window][id]);
+    }
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const QImage& img, float alpha)
@@ -238,14 +265,20 @@ void MainWindow::addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen)
     }
 }
 
-void MainWindow::setPlot(PLOTWINDOW win, QString name, vector< Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style)
+void MainWindow::setPlot(PLOTWINDOW win, QString name, vector< Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol)
 {
     //set curve
     QVector<QPointF> qpts;
     map<QString, QwtPlotCurve*>::iterator cit = curves.find(name);
     if(cit == curves.end()) {
         //curve does not exist - create
-        curves[name] = new QwtPlotCurve(name);
+        if(name.compare("Lines") == 0) {
+            //hack for plotting line segments
+            curves[name] = new LineSegmentsCurve(name);
+        }
+        else {
+            curves[name] = new QwtPlotCurve(name);
+        }
     }
 
     BOOST_FOREACH(const Vector2<double>& p, pts) {
@@ -255,6 +288,7 @@ void MainWindow::setPlot(PLOTWINDOW win, QString name, vector< Vector2<double> >
     curves[name]->setSamples(qpts);
     curves[name]->setStyle(style);
     curves[name]->setPen(colour);
+    curves[name]->setSymbol(new QwtSymbol(symbol));
     curves[name]->attach(plots[win]);
 
     plots[win]->replot();

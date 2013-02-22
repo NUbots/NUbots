@@ -13,6 +13,7 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <qwt_symbol.h>
 #include <qwt/qwt_plot_magnifier.h>
 #include <qwt/qwt_plot_zoomer.h>
 
@@ -58,14 +59,12 @@ class MainWindow : public QMainWindow
 public:
     enum PLOTWINDOW {
         p1 = 0,
-        p2 = 1,
-        p3 = 2
+        p2 = 1
     };
 
     PLOTWINDOW winFromInt(int i) {
         switch(i) {
         case 1: return p2;
-        case 2: return p3;
         default: return p1;
         }
     }
@@ -89,7 +88,7 @@ public:
     void addToLayer(DEBUG_ID id, const vector<QCircle>& items, QPen pen);
     void addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen);
 
-    void setPlot(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style);
+    void setPlot(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol = QwtSymbol());
     
     bool finished() const {return m_finished;}
     bool next() const {return m_next;}
@@ -100,8 +99,14 @@ public slots:
 private slots:
     void setFinished() {m_finished = true;}
     void setNext() {m_next = true;}
+    void setWindow(int w) { current_window = w; updateControls();}
 
 private:
+    void updateControls();
+
+private:
+    static const size_t NUM_CANVASES = 2;
+
     bool m_finished,
          m_next;
 
@@ -116,10 +121,16 @@ private:
     QWidget *windows_box;
     //ui->gridLayout->addLayout(gridEPG, 1, 0, 1, 3);
 
-    QGraphicsView* view;
-    QGraphicsScene* scene;
-    QImage* canvas;
-    map<DEBUG_ID, QCheckBox*> layer_selections;
+    vector<QGraphicsView*> views;
+    vector<QGraphicsScene*> scenes;
+    vector<QImage*> canvases;
+    vector< map<DEBUG_ID, bool> > layer_selections;
+    //QImage* canvas;
+
+    map<DEBUG_ID, QCheckBox*> layer_boxes;
+
+    size_t current_window;
+
     map<DEBUG_ID, vector<pair<QImage, float> > > images;
     map<DEBUG_ID, vector<pair<QPointF, QPen> > > points;
     map<DEBUG_ID, vector<pair<QLineF, QPen> > > lines;

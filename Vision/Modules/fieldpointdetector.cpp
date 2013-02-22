@@ -76,6 +76,17 @@ void FieldPointDetector::run() const
         if(m_line_detector)
             lines = m_line_detector->run(points);
 
+
+        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        plotpts.clear();
+        BOOST_FOREACH(const FieldLine& l, lines) {
+            Vector2<GroundPoint> ep = l.getEndPoints();
+            plotpts.push_back(ep[0].ground);
+            plotpts.push_back(ep[1].ground);
+        }
+        DataWrapper::getInstance()->plot("Lines", plotpts);
+        #endif
+
         vbb->addLines(lines);
 
         //now find corners

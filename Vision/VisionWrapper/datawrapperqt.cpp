@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <qwt_symbol.h>
 
 DataWrapper* DataWrapper::instance = 0;
 
@@ -421,6 +422,7 @@ void DataWrapper::plot(string name, vector< Point > pts)
     QwtPlotCurve::CurveStyle style;
     MainWindow::PLOTWINDOW win;
     QColor colour;
+    QwtSymbol symbol(QwtSymbol::NoSymbol);
 
     //hackalicious
     if(name.compare("Centre circle") == 0) {
@@ -429,23 +431,35 @@ void DataWrapper::plot(string name, vector< Point > pts)
         colour = Qt::red;
     }
     else if(name.compare("Ground coords") == 0){
-        style = QwtPlotCurve::Dots;
+        style = QwtPlotCurve::NoCurve;
         win = MainWindow::p1;
-        colour = Qt::green;
+        colour = Qt::white;
+        symbol = QwtSymbol(QwtSymbol::Cross,
+                           QBrush(Qt::green),
+                           QPen(Qt::green),
+                           QSize(3,3));
     }
     else if(name.compare("Corners") == 0) {
-        style = QwtPlotCurve::Dots;
+        //use a symbol and no line
+        style = QwtPlotCurve::NoCurve;
         win = MainWindow::p1;
-        colour = Qt::blue;
+        colour = Qt::white;
+        symbol = QwtSymbol(QwtSymbol::XCross,
+                           QBrush(Qt::blue),
+                           QPen(Qt::blue),
+                           QSize(3,3));
+    }
+    else if(name.compare("Lines") == 0) {
+        style = QwtPlotCurve::Lines;
+        win = MainWindow::p1;
+        colour = Qt::red;
     }
     else {
         win = MainWindow::p2;
         colour = Qt::black;
     }
 
-    gui->setPlot(win, QString(name.c_str()), pts, colour, style);
-
-    cout << name << " " << pts << endl;
+    gui->setPlot(win, QString(name.c_str()), pts, colour, style, symbol);
 }
 
 bool DataWrapper::updateFrame()
