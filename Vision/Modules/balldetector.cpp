@@ -22,7 +22,7 @@ vector<Ball> BallDetector::run()
     appendEdgesFromSegments(h_segments, edges);
     appendEdgesFromSegments(v_segments, edges);
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_BALL_VERBOSITY > 1
         debug << "BallDetector::detectBall() - number of vertical ball segments: " << v_segments.size() << endl;
         debug << "BallDetector::detectBall() - number of horizontal ball segments: " << h_segments.size() << endl;
     #endif
@@ -37,12 +37,13 @@ vector<Ball> BallDetector::run()
             it++;   //move to next edge
         }
         else {
-            #if VISION_FIELDOBJECT_VERBOSITY > 2
-                debug << "BallDetector::detectBall() - edge thrown out, above GH: " << *it << endl;
-            #endif
             it = edges.erase(it);
         }
     }
+
+    #if VISION_BALL_VERBOSITY > 1
+    debug << "BallDetector::detectBall() - " << edges.size() << " ball segments above green horizon." << endl;
+    #endif
 
     if (edges.size() > 0) {
         // Arithmetic mean
@@ -278,13 +279,13 @@ vector<Ball> BallDetector::run()
             }
             else {
                 //cout << "BALL THROWN OUT ON RATIO" << endl;
-                #if VISION_FIELDOBJECT_VERBOSITY > 1
+                #if VISION_BALL_VERBOSITY > 1
                     debug << "BallDetector::detectBall - ball thrown out on percentage contained orange" << endl;
                 #endif
             }
         }
         else {
-            #if VISION_FIELDOBJECT_VERBOSITY > 1
+            #if VISION_BALL_VERBOSITY > 1
                 debug << "BallDetector::detectBall - (1,1) ball thrown out" << endl;
             #endif
         }

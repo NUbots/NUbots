@@ -72,8 +72,8 @@ private:
     FieldPointDetector* m_field_point_detector;
 
     GoalDetector* m_goal_detector_hist;
-    GoalDetector* m_goal_detector_ransac;
-
+    GoalDetector* m_goal_detector_ransac_centres;
+    GoalDetector* m_goal_detector_ransac_edges;
 
     LineDetector* m_line_detector_sam;
     LineDetector* m_line_detector_ransac;

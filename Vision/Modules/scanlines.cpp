@@ -45,9 +45,6 @@ void ScanLines::generateScanLines()
 
 void ScanLines::classifyHorizontalScanLines()
 {
-    #if VISION_SCAN_VERBOSITY > 1
-        debug << "ScanLines::classifyHorizontalScanLines() - Begin" << endl;
-    #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
     const vector<int>& horizontal_scan_lines = vbb->getHorizontalScanlines();
@@ -62,9 +59,6 @@ void ScanLines::classifyHorizontalScanLines()
 
 void ScanLines::classifyVerticalScanLines()
 {
-    #if VISION_SCAN_VERBOSITY > 1
-        debug << "ScanLines::classifyVerticalScanLines() - Begin" << endl;
-    #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
     const vector<Vector2<double> >& vertical_start_points = vbb->getGreenHorizon().getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
@@ -104,7 +98,7 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& 
     segment.set(Point(start_pos, y), Point(x-1, y), start_colour);
     result.push_back(segment);
     
-    #if VISION_SCAN_VERBOSITY > 1
+    #if VISION_SCANLINE_VERBOSITY > 1
         Point end;
         for(int i=0; i<result.size(); i++) {
             debug << result.at(i).getStart() << " " << result.at(i).getEnd() << " " << (end==result.at(i).getStart()) << endl;

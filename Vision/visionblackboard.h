@@ -127,7 +127,6 @@ private:
     VisionBlackboard();
     ~VisionBlackboard();
 
-    void updateLUT();
     void calculateFOVAndCamDist();
     void update();
     void publish() const;

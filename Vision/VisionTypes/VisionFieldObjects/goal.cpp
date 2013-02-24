@@ -29,6 +29,15 @@ Goal::Goal(VFO_ID id, const Quad &corners)
     valid = check();
 }
 
+void Goal::setBase(Point base)
+{
+    m_location.screen = base;
+
+    valid = calculatePositions();
+    //valid = valid && check();
+    valid = check();
+}
+
 const Quad& Goal::getQuad() const
 {
     return m_corners;
@@ -45,12 +54,12 @@ const Quad& Goal::getQuad() const
 */
 bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_GOAL_VERBOSITY > 1
         debug << "Goal::addToExternalFieldObjects - m_id: " << getVFOName(m_id) << endl;
         debug << "    " << *this << endl;
     #endif
     if(valid) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::addToExternalFieldObjects - valid" << endl;
         #endif
         AmbiguousObject newAmbObj;
@@ -103,7 +112,7 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         default:
             //invalid object - do not push to fieldobjects
             errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;
-            #if VISION_FIELDOBJECT_VERBOSITY > 1
+            #if VISION_GOAL_VERBOSITY > 1
                 debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;
             #endif
             return false;
@@ -132,7 +141,7 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         return true;
     }
     else {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::addToExternalFieldObjects - invalid" << endl;
         #endif
         return false;
@@ -144,7 +153,7 @@ bool Goal::check() const
     //various throwouts here
 
 //    if(!distance_valid) {
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_GOAL_VERBOSITY > 1
 //            debug << "Goal::check - Goal thrown out: distance invalid" << endl;
 //        #endif
 //        return false;
@@ -152,7 +161,7 @@ bool Goal::check() const
 
     if(VisionConstants::THROWOUT_SHORT_GOALS) {
         if(m_corners.getAverageHeight() <= VisionConstants::MIN_GOAL_HEIGHT) {
-            #if VISION_FIELDOBJECT_VERBOSITY > 1
+            #if VISION_GOAL_VERBOSITY > 1
                 debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
             #endif
             return false;
@@ -161,7 +170,7 @@ bool Goal::check() const
     
     if(VisionConstants::THROWOUT_NARROW_GOALS) {
         if(m_corners.getAverageWidth() <= VisionConstants::MIN_GOAL_WIDTH) {
-            #if VISION_FIELDOBJECT_VERBOSITY > 1
+            #if VISION_GOAL_VERBOSITY > 1
                 debug << "Goal::check - Goal thrown out: less than " << VisionConstants::MIN_GOAL_WIDTH << "pix high" << endl;
             #endif
             return false;
@@ -171,7 +180,7 @@ bool Goal::check() const
     //throwout for base below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS and
        not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screen.x, m_location.screen.y)) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: base above kinematics horizon" << endl;
         #endif
         return false;
@@ -180,7 +189,7 @@ bool Goal::check() const
     //Distance discrepency throwout - if width method says goal is a lot closer than d2p (by specified value) then discard
     if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS and
             width_dist + VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS < d2p) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
         debug << "Goal::check - Goal thrown out: width distance too much smaller than d2p" << endl;
             debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_GOALS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS << endl;
         #endif
@@ -190,7 +199,7 @@ bool Goal::check() const
     //throw out if goal is too far away
     if(VisionConstants::THROWOUT_DISTANT_GOALS and 
         m_location.relativeRadial.x > VisionConstants::MAX_GOAL_DISTANCE) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: too far away" << endl;
             debug << "\td2p: " << m_location.relativeRadial.x << " MAX_GOAL_DISTANCE: " << VisionConstants::MAX_GOAL_DISTANCE << endl;
         #endif
@@ -217,7 +226,7 @@ bool Goal::calculatePositions()
     tran.screenToRadial3D(m_location, dist);
     //m_spherical_error - not calculated
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 2
+    #if VISION_GOAL_VERBOSITY > 2
         debug << "Goal::calculatePositions: ";
         debug << d2p << " " << width_dist << " " << m_location.relativeRadial.x << endl;
     #endif
@@ -248,7 +257,7 @@ double Goal::distanceToGoal(double bearing, double elevation)
     if(d2pvalid)
         d2p = tran.distanceToPoint(bearing, elevation);
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_GOAL_VERBOSITY > 1
         if(!d2pvalid)
             debug << "Goal::distanceToGoal: d2p invalid - combination methods will only return width_dist" << endl;
     #endif
@@ -259,13 +268,13 @@ double Goal::distanceToGoal(double bearing, double elevation)
     float HACKPIXELS = 3;
     //HACK FOR GOALS AT BASE OF IMAGE
     if(m_size_on_screen.x > HACKWIDTH and (VisionBlackboard::getInstance()->getImageHeight() - m_location.screen.y) < HACKPIXELS) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Goal wide and cutoff at bottom so used width_dist" << endl;
         #endif
         return width_dist;
     }
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_GOAL_VERBOSITY > 1
         debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
         debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
         debug << "Goal::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
@@ -273,21 +282,21 @@ double Goal::distanceToGoal(double bearing, double elevation)
     #endif
     switch(VisionConstants::GOAL_DISTANCE_METHOD) {
     case D2P:
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: D2P" << endl;
         #endif
         distance_valid = d2pvalid && d2p > 0;
         result = d2p;
         break;
     case Width:
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Width" << endl;
         #endif
         distance_valid = true;
         result = width_dist;
         break;
     case Average:
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Average" << endl;
         #endif
         //average distances
@@ -295,7 +304,7 @@ double Goal::distanceToGoal(double bearing, double elevation)
         result = (d2p + width_dist) * 0.5;
         break;
     case Least:
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::distanceToGoal: Method: Least" << endl;
         #endif
         distance_valid = d2pvalid && d2p > 0;
@@ -313,7 +322,7 @@ ostream& operator<< (ostream& output, const Goal& g)
 {
     output << "Goal - " << getVFOName(g.m_id) << endl;
     output << "\tpixelloc: " << g.m_location.screen << endl;
-    output << " angularloc: " << g.m_location.angular.x << endl;
+    output << "\tangularloc: " << g.m_location.angular.x << endl;
     output << "\trelative field coords: " << g.m_location.relativeRadial << endl;
     output << "\tspherical error: [" << g.m_spherical_error.x << ", " << g.m_spherical_error.y << "]" << endl;
     output << "\tsize on screen: [" << g.m_size_on_screen.x << ", " << g.m_size_on_screen.y << "]";

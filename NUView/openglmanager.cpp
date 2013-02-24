@@ -496,8 +496,6 @@ void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDis
         {
             Vector2< Vector2<double> > endpts;
             line.getEndPoints(endpts);
-            endpts[0] = line.projectOnto(endpts[0]);
-            endpts[1] = line.projectOnto(endpts[1]);
 
             glLineWidth(3.0);       // Line width
 

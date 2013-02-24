@@ -8,99 +8,60 @@
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/visionconstants.h"
 
-#include <QFileDialog>
-#include <QInputDialog>
 #include <QMessageBox>
 #include <qwt_symbol.h>
 
 DataWrapper* DataWrapper::instance = 0;
 
-DataWrapper::DataWrapper(MainWindow* ui)
+DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string istrm, string sstrm, string cfg, string lname)
 {
+    m_ok = ok;
     gui = ui;
+    m_method = method;
     debug << "openning camera config: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
     m_camspecs.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
-    //frame grab methods
-    QString camoption("Camera"),
-            strmoption("Image stream");
-    QStringList l;
-    l.append(camoption);
-    l.append(strmoption);
-    //get the input choice from the user
-    QString s = QInputDialog::getItem(NULL, "Select Input Method", "Select input method", l, 0, false, &ok);
-    if(ok) {
-        if(s.compare(camoption) == 0)
-            m_method = CAMERA;
-        else if(s.compare(strmoption) == 0)
-            m_method = STREAM;
-        else
-            m_method = STREAM;
 
-        switch(m_method) {
-        case CAMERA:
-            #ifdef TARGET_OS_IS_WINDOWS
-            m_camera = new NUOpenCVCamera();
-            #else
-            m_camera = new PCCamera();
-            #endif
-            m_current_image = *(m_camera->grabNewImage());
-            LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
-            break;
-        case STREAM:
-            using_sensors = (QMessageBox::question(NULL, "", "Use sensor log?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
+    kinematics_horizon.setLine(0, 1, 0);
+    numFramesDropped = numFramesProcessed = 0;
 
-            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-                ok = false;
-                streamname = QFileDialog::getOpenFileName(NULL, "Select image stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
-                if(!streamname.empty()) {
-                    if(using_sensors)
-                        sensorstreamname = QFileDialog::getOpenFileName(NULL, "Select sensor stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
-                    LUTname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
-                    if(!LUTname.empty()) {
-                        configname = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
-                        ok = true;
-                    }
-                }
-            }
-            else {
-                streamname = string(DATA_DIR) + string("/image.strm");
-                if(using_sensors)
-                    sensorstreamname = string(DATA_DIR) + string("/sensor.strm");
-                LUTname = string(DATA_DIR) + string("/default.lut");
-                configname = string(CONFIG_DIR) + string("VisionOptions.cfg");
-            }
+    streamname = istrm;
+    debug << "openning image stream: " << streamname << endl;
+    imagestrm.open(streamname.c_str());
 
-            debug << "openning image stream: " << streamname << endl;
-            imagestrm.open(streamname.c_str());
-            if(ok && using_sensors) {
-                debug << "openning sensor stream: " << sensorstreamname << endl;
-                sensorstrm.open(sensorstreamname.c_str());
-                if(!sensorstrm.is_open()) {
-                    QMessageBox::warning(NULL, "Error", QString("Failed to read sensors from: ") + QString(sensorstreamname.c_str()) + QString(" defaulting to sensors off."));
-                    using_sensors = false;
-                }
-            }
-
-            if(!imagestrm.is_open()) {
-                errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
-                ok = false;
-            }
-            break;
+    using_sensors = !sstrm.empty();
+    sensorstreamname = sstrm;
+    if(m_ok && using_sensors) {
+        debug << "openning sensor stream: " << sensorstreamname << endl;
+        sensorstrm.open(sensorstreamname.c_str());
+        if(!sensorstrm.is_open()) {
+            QMessageBox::warning(NULL, "Error", QString("Failed to read sensors from: ") + QString(sensorstreamname.c_str()) + QString(" defaulting to sensors off."));
+            using_sensors = false;
         }
-
-        debug << "config: " << configname << endl;
-        //set up fake horizon
-        kinematics_horizon.setLine(0, 1, 0);
-
-        if(ok)
-            updateFrame();
-
-        if(!loadLUTFromFile(LUTname)){
-            errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
-            ok = false;
-        }
-        numFramesDropped = numFramesProcessed = 0;
     }
+
+    if(!imagestrm.is_open()) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
+        m_ok = false;
+    }
+
+    configname = cfg;
+    debug << "config: " << configname << endl;
+    VisionConstants::loadFromFile(configname);
+
+    LUTname = lname;
+    if(!loadLUTFromFile(LUTname)){
+        errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
+        ok = false;
+    }
+
+    //DEBUG
+    ratio_hist.first = 0;
+    ratio_hist.second = 0;
+    ratio_r1.first = 0;
+    ratio_r1.second = 0;
+    ratio_r2.first = 0;
+    ratio_r2.second = 0;
+    //END DEBUG
 }
 
 DataWrapper::~DataWrapper()
@@ -249,6 +210,56 @@ void DataWrapper::debugPublish(const vector<Goal>& data)
         gui->addToLayer(DBID_GOALS, QPointF(g.getLocationPixels().x, g.getLocationPixels().y), QPen(QColor(Qt::blue), 3));
     }
 }
+
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<Goal>& data)
+{
+    BOOST_FOREACH(const Goal& g, data) {
+        QPolygonF p;
+        const Quad& q = g.getQuad();
+        p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
+        p.append(QPointF(q.getTopLeft().x, q.getTopLeft().y));
+        p.append(QPointF(q.getTopRight().x, q.getTopRight().y));
+        p.append(QPointF(q.getBottomRight().x, q.getBottomRight().y));
+        p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
+
+        gui->addToLayer(id, Polygon(p, g.getID() != GOAL_U), QPen(Qt::yellow));
+        gui->addToLayer(id, QPointF(g.getLocationPixels().x, g.getLocationPixels().y), QPen(QColor(Qt::blue), 3));
+    }
+}
+
+//DEBUG
+void DataWrapper::debugPublish(int i, const vector<Goal> &d)
+{
+    double mind = std::numeric_limits<double>::max();
+    BOOST_FOREACH(Goal g, d) {
+        mind = std::min(mind, g.width_dist);
+    }
+
+    switch(i) {
+    case 0:
+        if(mind < 1000)
+            acc_hist(mind);
+        else
+            ratio_hist.first++;
+        ratio_hist.second++;
+        break;
+    case 1:
+        if(mind < 1000)
+            acc_r1(mind);
+        else
+            ratio_r1.first++;
+        ratio_r1.second++;
+        break;
+    case 2:
+        if(mind < 1000)
+            acc_r2(mind);
+        else
+            ratio_r2.first++;
+        ratio_r2.second++;
+        break;
+    }
+}
+//DEBUG
 
 void DataWrapper::debugPublish(const vector<Obstacle>& data)
 {
@@ -464,7 +475,7 @@ void DataWrapper::plot(string name, vector< Point > pts)
 
 bool DataWrapper::updateFrame()
 {
-    if(ok) {
+    if(m_ok) {
         gui->clearLayers();
 
         switch(m_method) {
@@ -485,14 +496,15 @@ bool DataWrapper::updateFrame()
                 imagestrm >> m_current_image;
             }
             catch(std::exception& e) {
-                errorlog << "Image stream error - resetting: " << e.what() << endl;
-                imagestrm.clear() ;
-                imagestrm.seekg(0, ios::beg);
-                imagestrm >> m_current_image;
-                if(using_sensors) {
-                    sensorstrm.clear() ;
-                    sensorstrm.seekg(0, ios::beg);
-                }
+//                errorlog << "Image stream error - resetting: " << e.what() << endl;
+//                imagestrm.clear() ;
+//                imagestrm.seekg(0, ios::beg);
+//                imagestrm >> m_current_image;
+//                if(using_sensors) {
+//                    sensorstrm.clear() ;
+//                    sensorstrm.seekg(0, ios::beg);
+//                }
+                return false;
             }
             if(using_sensors) {
                 try {
@@ -513,7 +525,7 @@ bool DataWrapper::updateFrame()
 
         numFramesProcessed++;
 
-        return true;
+        return m_current_image.getHeight() > 0 && m_current_image.getWidth() > 0;
     }
     return false;
 }

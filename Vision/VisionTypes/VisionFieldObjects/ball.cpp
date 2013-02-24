@@ -53,7 +53,7 @@ float Ball::getRadius() const
 
 bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_BALL_VERBOSITY > 1
         debug << "Ball::addToExternalFieldObjects:" << endl;
         debug << *this << endl;
     #endif
@@ -66,13 +66,13 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
                                                                                    Vector2<int>(m_location.screen.x,m_location.screen.y),
                                                                                    Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                                                                    timestamp);
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_BALL_VERBOSITY > 1
             debug << "Ball::addToExternalFieldObjects: valid" << endl;
         #endif
         return true;
     }
     else {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_BALL_VERBOSITY > 1
             debug << "Ball::addToExternalFieldObjects: invalid" << endl;
         #endif
         return false;
@@ -84,7 +84,7 @@ bool Ball::check() const
     //various throwouts here
 
     if(!distance_valid) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_BALL_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: distance invalid" << endl;
         #endif
         return false;
@@ -94,7 +94,7 @@ bool Ball::check() const
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL and
        not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screen.x, m_location.screen.y)) {
         errorlog << "Ball::check() - Ball above horizon: should not occur" << endl;
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_BALL_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: above kinematics horizon" << endl;
         #endif
         return false;
@@ -103,7 +103,7 @@ bool Ball::check() const
     //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
     if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL and
             abs(width_dist - d2p) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_BALL_VERBOSITY > 1
         debug << "Ball::check - Ball thrown out: width distance too much smaller than d2p" << endl;
             debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << endl;
         #endif
@@ -113,7 +113,7 @@ bool Ball::check() const
     //throw out if ball is too small
     if(VisionConstants::THROWOUT_SMALL_BALLS and 
         m_diameter < VisionConstants::MIN_BALL_DIAMETER_PIXELS) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_BALL_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: too small" << endl;
             debug << "\tdiameter: " << m_diameter << " MIN_BALL_DIAMETER_PIXELS: " << VisionConstants::MIN_BALL_DIAMETER_PIXELS << endl;
         #endif
@@ -123,7 +123,7 @@ bool Ball::check() const
     //throw out if ball is too far away
     if(VisionConstants::THROWOUT_DISTANT_BALLS and 
         m_location.relativeRadial.x > VisionConstants::MAX_BALL_DISTANCE) {
-        #if VISION_FIELDOBJECT_VERBOSITY > 1
+        #if VISION_BALL_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: too far away" << endl;
             debug << "\td2p: " << m_location.relativeRadial.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << endl;
         #endif
@@ -146,8 +146,8 @@ bool Ball::calculatePositions()
     m_location.relativeRadial.z = m_location.angular.y;
     //m_spherical_error - not calculated
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 2
-        debug << "Goal::calculatePositions: ";
+    #if VISION_BALL_VERBOSITY > 2
+        debug << "Ball::calculatePositions: ";
         debug << d2p << " " << width_dist << " " << m_location.relativeRadial.x << endl;
     #endif
 
@@ -173,14 +173,14 @@ double Ball::distanceToBall(double bearing, double elevation) {
     if(d2pvalid)
         d2p = tran.distanceToPoint(bearing, elevation);
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_BALL_VERBOSITY > 1
         if(!d2pvalid)
             debug << "Ball::distanceToGoal: d2p invalid - combination methods will only return width_dist" << endl;
     #endif
     //get distance from width
     width_dist = VisionConstants::BALL_WIDTH*tran.getCameraDistanceInPixels()/m_size_on_screen.x;
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_BALL_VERBOSITY > 1
         debug << "Ball::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
         debug << "Ball::distanceToGoal: d2p: " << d2p << endl;
         debug << "Ball::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;

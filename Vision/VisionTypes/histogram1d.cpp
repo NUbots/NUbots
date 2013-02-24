@@ -13,26 +13,28 @@ public:
   }
 };
 
-Histogram1D::Histogram1D(int num_bins, float bin_width)
+Histogram1D::Histogram1D(size_t num_bins, double bin_width)
 {
     m_bins.clear();
-    for(int i=0; i<num_bins; i++) {
+    for(size_t i=0; i<num_bins; i++) {
         m_bins.push_back(emptyBin(i*bin_width, bin_width));
     }
+    m_end = num_bins*bin_width-1;
 }
 
 
-Histogram1D::Histogram1D(vector<float> bin_widths)
+Histogram1D::Histogram1D(vector<double> bin_widths)
 {
-    float cur_pos = 0;
+    double cur_pos = 0;
     m_bins.clear();
-    for(unsigned int i=0; i<bin_widths.size(); i++) {
+    for(size_t i=0; i<bin_widths.size(); i++) {
         m_bins.push_back(emptyBin(cur_pos, bin_widths.at(i)));
         cur_pos += bin_widths.at(i);
     }
+    m_end = cur_pos-1;
 }
 
-Bin Histogram1D::emptyBin(float start, float width)
+Bin Histogram1D::emptyBin(double start, double width)
 {
     Bin b;
     b.start = start;
@@ -41,18 +43,18 @@ Bin Histogram1D::emptyBin(float start, float width)
     return b;
 }
 
-Bin Histogram1D::getBin(float pos) {
+Bin Histogram1D::getBin(double pos) {
     return m_bins.at(getBinIndex(pos));
 }
 
-unsigned int Histogram1D::getBinIndex(float pos)
+size_t Histogram1D::getBinIndex(double pos)
 {
     //adds the given element to the matching bin unless out of range, throws std::out_of_range
     if(pos < 0) {
         throw std::out_of_range("Histogram1D::addToBin called with negative position.");
     }
 
-    for(unsigned int i=0; i<m_bins.size(); i++) {
+    for(size_t i=0; i<m_bins.size(); i++) {
         if(pos < m_bins.at(i).start + m_bins.at(i).width) {
             return i;
         }
@@ -61,7 +63,7 @@ unsigned int Histogram1D::getBinIndex(float pos)
     throw std::out_of_range("Histogram1D::addToBin called with position too high.");
 }
 
-vector<Bin> Histogram1D::getLargestBins(unsigned int n)
+vector<Bin> Histogram1D::getLargestBins(size_t n)
 {
     //O(nk)
     if(n < 1 || n > m_bins.size()) {
@@ -70,11 +72,11 @@ vector<Bin> Histogram1D::getLargestBins(unsigned int n)
     else {
         std::priority_queue<Bin, vector<Bin>, BinComparison> cur_largest;
         //push first n values
-        for(unsigned int k=0; k<n; k++) {
+        for(size_t k=0; k<n; k++) {
             cur_largest.push(m_bins.at(k));
         }
         //go through rest of values
-        for(unsigned int i=n; i<m_bins.size(); i++) {
+        for(size_t i=n; i<m_bins.size(); i++) {
             Bin smallest_held = cur_largest.top();
             Bin next = m_bins.at(i);
             if(next.value > smallest_held.value) {
@@ -94,7 +96,7 @@ vector<Bin> Histogram1D::getLargestBins(unsigned int n)
     }
 }
 
-void Histogram1D::mergeAdjacentPeaks(float minimum_size)
+void Histogram1D::mergeAdjacentPeaks(double minimum_size)
 {
     vector<Bin>::iterator it = m_bins.begin();
     while(it + 1 != m_bins.end()) {
@@ -107,7 +109,7 @@ void Histogram1D::mergeAdjacentPeaks(float minimum_size)
     }
 }
 
-void Histogram1D::addToBin(float pos, float val)
+void Histogram1D::addToBin(double pos, double val)
 {
     //adds the given element to the matching bin - if out_of_range will return false without modifying the histogram
     if(pos < 0) {
@@ -121,7 +123,34 @@ void Histogram1D::addToBin(float pos, float val)
         }
     }
 
-    throw std::out_of_range("Histogram1D::addToBin called with position too high.");
+    throw std::out_of_range("Histogram1D::addToBin called with position too large.");
+}
+
+/// adds "density" to every position in [start, end)
+void Histogram1D::addToBins(double start, double end, double density)
+{
+    //adds the given element to the matching bin - if out_of_range will return false without modifying the histogram
+    if(start < 0)
+        throw std::out_of_range("Histogram1D::addToBin called with negative position.");
+    if(end > m_end)
+        throw std::out_of_range("Histogram1D::addToBin called with position too large.");
+
+    size_t b = 0;
+    //find first bin
+    while(m_bins[b].start + m_bins[b].width < start)
+        b++;
+
+    //spread density across covered portion of first bin
+    m_bins[b].value += density*(m_bins[b].start + m_bins[b].width - start - 1);
+
+    //spread density across full width of intermediate bins
+    while(m_bins[b].start <= end) {
+        m_bins[b].value += density*m_bins[b].width;
+        b++;
+    }
+
+    //spread density across covered portion of last bin
+    m_bins[b].value += density*(end - m_bins[b].start - 1); //non-inclusive end
 }
 
 void Histogram1D::mergeBins(Bin first, Bin second)

@@ -101,18 +101,21 @@ bool Quad::overlapsHorizontally(const Quad &other) const
     return ! (far_right < o_far_left || o_far_right < far_left);
 }
 
-//void Quad::render(cv::Mat &mat, cv::Scalar colour, bool filled) const
-//{
-//    cv::Point poly[4] = {cv::Point2f(bl.x, bl.y),
-//                         cv::Point2f(tl.x, tl.y),
-//                         cv::Point2f(tr.x, tr.y),
-//                         cv::Point2f(br.x, br.y)};
-//    if(filled) {
-//        cv::fillConvexPoly(mat, poly, 4, colour, 4);
-//    }
-//    else {
-//        int num = 4;
-//        const cv::Point* p = poly;
-//        cv::polylines(mat, &p, &num, 1, true, colour, 2, 4);
-//    }
-//}
+/// @brief Stream insertion operator for a single Quad.
+/// @relates Quad
+ostream& operator<< (ostream& output, const Quad& q)
+{
+    output << q.bl << " " << q.tl << " " << q.tr << " " << q.br;
+    return output;
+}
+
+/// @brief Stream insertion operator for a vector of Quads.
+///  @relates Quad
+ostream& operator<< (ostream& output, const vector<Quad>& q)
+{
+    output << "[";
+    for (size_t i=0; i<q.size(); i++)
+        output << q[i] << ", ";
+    output << "]";
+    return output;
+}

@@ -118,8 +118,8 @@ bool Transformer::isDistanceToPointValid() const
   */
 double Transformer::distanceToPoint(double bearing, double elevation) const
 {
-#if VISION_BLACKBOARD_VERBOSITY > 2
-    debug << "VisionBlackboard::distanceToPoint: \n";
+#if VISION_TRANSFORM_VERBOSITY > 2
+    debug << "Transformer::distanceToPoint: \n";
     debug << "\t(bearing, elevation): (" << bearing << ", " <<elevation << ")" << endl;
     debug << "\tbody pitch: include:" << VisionConstants::D2P_INCLUDE_BODY_PITCH << " valid: " << body_pitch_valid << " value: " << body_pitch << endl;
     debug << "\tVisionConstants::D2P_ANGLE_CORRECTION: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
@@ -145,7 +145,7 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
     else
         distance = camera_height / cos_theta / cos_bearing;
 
-#if VISION_BLACKBOARD_VERBOSITY > 1
+#if VISION_TRANSFORM_VERBOSITY > 1
     debug << "\ttheta: " << theta << " distance: " << distance << endl;
 #endif
 

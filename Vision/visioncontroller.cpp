@@ -15,10 +15,11 @@
 #include "Vision/Modules/LineDetectionAlgorithms/linedetectorsam.h"
 #include "Vision/Modules/LineDetectionAlgorithms/linedetectorransac.h"
 #include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h"
-#include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorransac.h"
+#include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h"
+#include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.h"
 
 #include <boost/foreach.hpp>
-
+#include <limits>
 
 VisionController* VisionController::instance = 0;
 
@@ -29,11 +30,11 @@ VisionController::VisionController() : m_corner_detector(0.1), m_circle_detector
     m_line_detector_ransac = new LineDetectorRANSAC();
     m_line_detector_sam = new LineDetectorSAM();
     m_goal_detector_hist = new GoalDetectorHistogram();
-    m_goal_detector_ransac = new GoalDetectorRANSAC();
+    m_goal_detector_ransac_edges = new GoalDetectorRANSACEdges();
+    m_goal_detector_ransac_centres = new GoalDetectorRANSACCentres();
 
     //requires other detectors
     m_field_point_detector = new FieldPointDetector(m_line_detector_ransac, &m_circle_detector, &m_corner_detector);
-
 }
 
 VisionController::~VisionController()
@@ -41,7 +42,8 @@ VisionController::~VisionController()
     delete m_line_detector_ransac;
     delete m_line_detector_sam;
     delete m_goal_detector_hist;
-    delete m_goal_detector_ransac;
+    delete m_goal_detector_ransac_edges;
+    delete m_goal_detector_ransac_centres;
 }
 
 VisionController* VisionController::getInstance()
@@ -53,6 +55,7 @@ VisionController* VisionController::getInstance()
 
 int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 {
+    m_data_wrapper = DataWrapper::getInstance();
     #if VISION_CONTROLLER_VERBOSITY > 1
         debug << "VisionController::runFrame() - Begin" << endl;
     #endif
@@ -97,9 +100,14 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         vector<Goal> hist_goals = m_goal_detector_hist->run();   //POSTS
 
         //testing ransac for goals
-        vector<Goal> ransac_goals = m_goal_detector_ransac->run();
+        vector<Goal> ransac_goals1 = m_goal_detector_ransac_edges->run();
+        vector<Goal> ransac_goals2 = m_goal_detector_ransac_centres->run();
 
-        m_blackboard->addGoals(ransac_goals);
+        m_data_wrapper->debugPublish(0, hist_goals);
+        m_data_wrapper->debugPublish(1, ransac_goals1);
+        m_data_wrapper->debugPublish(2, ransac_goals2);
+//        m_blackboard->addGoals(ransac_goals);
+
 //        if(ransac_goals.size() == 2)
 //            m_blackboard->addGoals(ransac_goals);
 //        else

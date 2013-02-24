@@ -12,7 +12,7 @@ public:
        
     Goal(VFO_ID id=INVALID, const Quad& corners=Quad(0,0,0,0));
 
-    void setBase(Point base) {m_location.screen = base;}
+    void setBase(Point base);
 
     //! @brief reutns the pixel locations of the corners.
     const Quad& getQuad() const;
@@ -56,6 +56,8 @@ private:
     
 private:
     Quad m_corners;                 //! @variable pixel locations of the corners
+
+public:
     double width_dist,
            d2p;
 };

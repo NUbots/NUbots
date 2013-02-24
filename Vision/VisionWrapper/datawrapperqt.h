@@ -28,6 +28,15 @@
 
 #include "mainwindow.h"
 
+///DEBUG
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+
+using namespace boost::accumulators;
+//END DEBUG
+
 using std::vector;
 using std::string;
 
@@ -37,6 +46,12 @@ class DataWrapper
 {
     friend class VisionController;
     friend class VisionControlWrapper;
+
+private:
+    enum INPUT_METHOD {
+        CAMERA,
+        STREAM
+    };
 
 public:
     static DataWrapper* getInstance();
@@ -66,6 +81,8 @@ public:
     void debugPublish(const vector<Ball>& data);
 //    bool debugPublish(const vector<Beacon>& data);
     void debugPublish(const vector<Goal>& data);
+    void debugPublish(DEBUG_ID id, const vector<Goal>& data);
+    void debugPublish(int i, const vector<Goal>& d);
     void debugPublish(const vector<Obstacle>& data);
     void debugPublish(const vector<FieldLine>& data);
     void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
@@ -80,7 +97,7 @@ public:
 
 
 private:
-    DataWrapper(MainWindow* ui);
+    DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string istrm, string sstrm, string cfg, string lname);
     ~DataWrapper();
     bool updateFrame();
     bool loadLUTFromFile(const string& fileName);
@@ -88,15 +105,14 @@ private:
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
 
 private:
-    enum INPUT_METHOD {
-        CAMERA,
-        STREAM
-    };
-
-private:
     static DataWrapper* instance;
 
-    bool ok;
+    bool m_ok;
+
+    //DEBUG
+    accumulator_set<double, stats<tag::mean, tag::variance> > acc_hist, acc_r1, acc_r2;
+    std::pair<double, double> ratio_hist, ratio_r1, ratio_r2;
+    //END DEBUG
 
     MainWindow* gui;
 
@@ -123,7 +139,6 @@ private:
     ifstream sensorstrm;
 
     //! Frame info
-    double m_timestamp;
     int numFramesDropped;
     int numFramesProcessed;
 };

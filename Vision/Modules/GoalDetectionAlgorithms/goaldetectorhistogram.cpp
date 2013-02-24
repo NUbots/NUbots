@@ -1,6 +1,8 @@
 #include "goaldetectorhistogram.h"
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
+#include "debug.h"
+#include "debugverbosityvision.h"
 
 #include <limits>
 
@@ -16,26 +18,33 @@ vector<Goal> GoalDetectorHistogram::run()
     const vector<ColourSegment>& h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR);
     const vector<ColourSegment>& v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
 
-    vector<Quad> posts = detectQuads(h_segments, v_segments);
+    vector<Quad> quads = detectQuads(h_segments, v_segments);
+    vector<Goal> posts;
 
-    removeInvalidPosts(posts);
+    removeInvalidPosts(quads);
 
     // OVERLAP CHECK
-    overlapCheck(posts);
+    overlapCheck(quads);
 
     // DENSITY CHECK - fix later: use segment lengths and scanline spacing to estimate rather than
     //                 re-accessing the image to calculate fully
     //DensityCheck(&yellow_posts, &img, &lut, VisionConstants::GOAL_MIN_PERCENT_YELLOW);
 
-    return assignGoals(posts);
+    posts = assignGoals(quads);
+
+#if VISION_GOAL_VERBOSITY > 0
+    DataWrapper::getInstance()->debugPublish(DBID_GOALS_HIST, posts);
+#endif
+
+    return posts;
 }
 
 vector<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
 {
-    const int BINS = 20;
-    const int MERGE_THRESHOLD = 50;
-    const float STDDEV_THRESHOLD = 1.5;
-    const int CANDIDATE_THRESHOLD = 200;
+    const size_t BINS = 20;
+    const double STDDEV_THRESHOLD = 1.5;
+    const double MERGE_THRESHOLD = 50.0 / VisionConstants::HORIZONTAL_SCANLINE_SPACING;
+    const double CANDIDATE_THRESHOLD = 200.0 / VisionConstants::HORIZONTAL_SCANLINE_SPACING;
 
     Histogram1D hist(BINS, VisionBlackboard::getInstance()->getImageWidth()/(double)BINS);
 
@@ -44,8 +53,10 @@ vector<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_s
     // fill histogram bins
     BOOST_FOREACH(ColourSegment seg, h_segments) {
         //use stddev throwout to remove topbar segments
-        if(seg.getLength() <= h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y)
+        if(seg.getLength() <= h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y) {
             hist.addToBin(seg.getCentre().x, seg.getLength());
+            //hist.addToBins(seg.getStart().x, seg.getEnd().x, 1);
+        }
     }
 
     // use vertical segments as well
@@ -64,9 +75,7 @@ Histogram1D GoalDetectorHistogram::mergePeaks(Histogram1D hist, int minimum_size
     return hist;
 }
 
-vector<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& hist,
-                                                           const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments,
-                                                           int peak_threshold)
+vector<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& hist, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments, int peak_threshold)
 {
     vector<Quad> candidates;
     vector<Bin>::const_iterator b_it;

@@ -79,14 +79,12 @@ contains(PLATFORM, "win") {
 
     HEADERS += \
         VisionWrapper/datawrapperqt.h \
-        VisionWrapper/visioncontrolwrapperpc.h \
         ../Vision/Debug/debugverbosityvision.h \
         ../Vision/Debug/debug.h \
         ../Vision/Debug/nubotdataconfig.h \
 
     SOURCES += \
         VisionWrapper/datawrapperqt.cpp \
-        VisionWrapper/visioncontrolwrapperpc.cpp\
 
     HEADERS += \
         NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h
@@ -137,11 +135,12 @@ HEADERS += \
     #Threads/SaveImagesThread.h
     GenericAlgorithms/ransac.h \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h \
-    Modules/GoalDetectionAlgorithms/goaldetectorransac.h \
     Modules/cornerdetector.h \
     VisionWrapper/mainwindow.h \
     ../Tools/Math/Circle.h \
-    linesegmentscurve.h
+    linesegmentscurve.h \
+    Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.h \
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -157,13 +156,14 @@ SOURCES += \
     visionconstants.cpp \
     main.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransac.cpp \
     basicvisiontypes.cpp \
     GenericAlgorithms/ransac.template \
     VisionWrapper/mainwindow.cpp \
     #../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
-    linesegmentscurve.cpp
+    linesegmentscurve.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp
 
 ##robocup
 HEADERS += \

@@ -34,6 +34,7 @@ class LSFittedLine : public Line
     unsigned int getNumPoints() const {return points.size();}
     const std::vector< Vector2<double> >& getPoints() const;
     bool getEndPoints(Vector2<double>& p1, Vector2<double>& p2) const;
+    bool getOriginalEndPoints(Vector2<double>& p1, Vector2<double>& p2) const;
     double averageDistanceBetween(const LSFittedLine& other) const;
 private:
     void calcLine();

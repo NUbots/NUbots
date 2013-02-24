@@ -53,9 +53,7 @@ void GoalDetector::removeInvalidPosts(vector<Quad>& posts)
         Quad candidate = *it;
         double height = candidate.getAverageHeight();
         double width = candidate.getAverageWidth();
-        if (width < VisionConstants::MIN_GOAL_WIDTH)
-            it = posts.erase(it);
-        else if (height/width < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_LOW || height/width > VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH)
+        if (height/width < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_LOW || height/width > VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH)
             it = posts.erase(it);
         else
             it++;

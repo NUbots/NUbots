@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     windows_box->setLayout(windows_layout);
 
     //two canvases
-    for(int i=0; i<NUM_CANVASES; i++) {
+    for(size_t i=0; i<NUM_CANVASES; i++) {
         std::stringstream ss;
         ss << "Window " << i;
         ui->windowComboBox->addItem(ss.str().c_str());

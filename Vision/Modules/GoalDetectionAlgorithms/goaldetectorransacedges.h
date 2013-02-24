@@ -1,5 +1,5 @@
-#ifndef GOALDETECTORRANSAC_H
-#define GOALDETECTORRANSAC_H
+#ifndef GOALDETECTORRANSACEDGES_H
+#define GOALDETECTORRANSACEDGES_H
 
 #include "Vision/Modules/goaldetector.h"
 #include "Tools/Math/LSFittedLine.h"
@@ -7,11 +7,10 @@
 
 using std::vector;
 
-class GoalDetectorRANSAC : public GoalDetector
+class GoalDetectorRANSACEdges : public GoalDetector
 {
 public:
-    GoalDetectorRANSAC();
-    virtual vector<Goal> run1();
+    GoalDetectorRANSACEdges();
     virtual vector<Goal> run();
 
 private:
@@ -26,10 +25,10 @@ private:
     vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
 
 
-/*    unsigned*/ int m_n,
+    unsigned int m_n,
                  m_k,
                  m_max_iterations;
     float m_e;
 };
 
-#endif // GOALDETECTORRANSAC_H
+#endif // GOALDETECTORRANSACEDGES_H

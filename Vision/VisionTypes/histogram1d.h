@@ -10,34 +10,36 @@ using std::pair;
 
 struct Bin
 {
-    float value;
-    float start;
-    float width;
+    double value;
+    double start;
+    double width;
 };
 
 class Histogram1D
 {
 public:
-    Histogram1D(int num_bins, float bin_width);
-    Histogram1D(vector<float> bin_widths);
+    Histogram1D(size_t num_bins, double bin_width);
+    Histogram1D(vector<double> bin_widths);
 
-    static Bin emptyBin(float start, float width);
+    static Bin emptyBin(double start, double width);
 
     //accessors
-    Bin getBin(float pos);
-    unsigned int getBinIndex(float pos);
-    vector<Bin> getLargestBins(unsigned int n);
+    Bin getBin(double pos);
+    size_t getBinIndex(double pos);
+    vector<Bin> getLargestBins(size_t n);
     vector<Bin>::const_iterator begin() const {return m_bins.begin();}
     vector<Bin>::const_iterator end() const {return m_bins.end();}
 
     //mutators
-    void addToBin(float pos, float val);
+    void addToBin(double pos, double val);
+    void addToBins(double start, double end, double density);
     void mergeBins(Bin first, Bin second);
-    void mergeAdjacentPeaks(float minimum_size);
+    void mergeAdjacentPeaks(double minimum_size);
 
 
 private:
     vector<Bin> m_bins;
+    double m_end;
 };
 
 #endif // HISTOGRAM1D_H

@@ -26,6 +26,7 @@ DataWrapper::DataWrapper()
     Blackboard->lookForLandmarks = true; //initialise
     isSavingImages = false;
     isSavingImagesWithVaryingSettings = false;
+    VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
 }
 
 DataWrapper::~DataWrapper()
@@ -308,7 +309,8 @@ bool DataWrapper::updateFrame()
     //succesful
     field_objects->preProcess(m_timestamp);
     cout << "Frames dropped: " << numFramesDropped << endl;
-    return true;
+
+    return current_frame->getWidth() > 0 && current_frame->getHeight() > 0;
 }
 
 /**

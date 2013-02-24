@@ -23,6 +23,9 @@ namespace Vision {
         case DBID_GOAL_LINES_START:     return "Goal Lines (start)";
         case DBID_GOAL_LINES_CENTRE:    return "Goal Lines (centre)";
         case DBID_GOAL_LINES_END:       return "Goal Lines (end)";
+        case DBID_GOALS_HIST:           return "Goals (from histogram)";
+        case DBID_GOALS_RANSAC_EDGES:   return "Goals (from RANSAC edges)";
+        case DBID_GOALS_RANSAC_CENTRES: return "Goals (from RANSAC centres)";
         default:                        return "NOT VALID";
         }
     }
@@ -48,6 +51,9 @@ namespace Vision {
         case 16: return DBID_GOAL_LINES_START;
         case 17: return DBID_GOAL_LINES_CENTRE;
         case 18: return DBID_GOAL_LINES_END;
+        case 19: return DBID_GOALS_HIST;
+        case 20: return DBID_GOALS_RANSAC_EDGES;
+        case 21: return DBID_GOALS_RANSAC_CENTRES;
         default: return DBID_INVALID;
         }
     }
@@ -73,7 +79,10 @@ namespace Vision {
         case DBID_GOAL_LINES_START:     return 16;
         case DBID_GOAL_LINES_CENTRE:    return 17;
         case DBID_GOAL_LINES_END:       return 18;
-        default:                        return 19;
+        case DBID_GOALS_HIST:           return 19;
+        case DBID_GOALS_RANSAC_EDGES:   return 20;
+        case DBID_GOALS_RANSAC_CENTRES: return 21;
+        default:                        return 22;
         }
     }
 

@@ -104,6 +104,8 @@ DataWrapper::DataWrapper(bool disp_on, bool cam)
     //set up fake horizon
     kinematics_horizon.setLine(0, 1, 50);
 
+    VisionConstants::loadFromFile(configname);
+
     if(!loadLUTFromFile(LUTname)){
         errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
     }

@@ -15,14 +15,8 @@ VisionBlackboard* VisionBlackboard::instance = 0;
 VisionBlackboard::VisionBlackboard()
 {
     wrapper = DataWrapper::getInstance();
-
-    LUT = wrapper->getLUT();
-    
     //Get Image
-    original_image = wrapper->getFrame();
-
-    //get Camera to ground vector
-    //ctgvalid = wrapper->getCTGVector(ctgvector);
+    original_image = NULL;
 
     VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
 }
@@ -34,8 +28,6 @@ VisionBlackboard::VisionBlackboard()
 */
 VisionBlackboard::~VisionBlackboard()
 {
-    //delete original_image_cv_4ch;
-    //delete original_image_cv;
 }
 
 /**
@@ -293,7 +285,7 @@ const vector<Point>& VisionBlackboard::getObstaclePoints() const
 /// @brief returns a pointer to the Lookup Table.
 const LookUpTable& VisionBlackboard::getLUT() const
 {
-    return LUT;
+    return wrapper->getLUT();
 }
 
 /// @brief returns the kinematics horizon line.
@@ -473,34 +465,30 @@ CameraSettings VisionBlackboard::getCameraSettings() const
 }
 
 /**
-*   @brief Retrieves a new LUT from the wrapper.
-*/
-void VisionBlackboard::updateLUT()
-{
-    LUT = wrapper->getLUT();
-}
-
-/**
 *   @brief Retrieves a new image and sensor data from the wrapper.
 *   This method instructs the wrapper to update itself, then grabs the new information 
 *   from the wrapper.
 */
 void VisionBlackboard::update()
 {
-#if VISION_BLACKBOARD_VERBOSITY > 1
+#if VISION_CONTROLFLOW_VERBOSITY > 0
     debug << "VisionBlackboard::update() - Begin" << endl;
 #endif
+
+    wrapper = DataWrapper::getInstance();
 
     //get new image pointer
     original_image = wrapper->getFrame();
 
     //WARNING The following warning may not be triggered properly
-    if(original_image->getHeight()==0 or original_image->getWidth()==0 ){
-        cout<<"VisionBlackboard::update() - WARNING - Camera Image height or width is zero Camera may be disconnected or faulty."<<endl;
+    if(original_image == NULL) {
+        cout << "VisionBlackboard::update() - WARNING - Camera Image pointer is null - Camera may be disconnected or faulty." << endl;
+        errorlog << "VisionBlackboard::update() - WARNING - Camera Image pointer is null - Camera may be disconnected or faulty." << endl;
     }
-
-//    ctgvalid = wrapper->getCTGVector(ctgvector);
-//    ctvalid = wrapper->getCTVector(ctvector);
+    else if(original_image->getHeight()==0 or original_image->getWidth()==0 ) {
+        cout << "VisionBlackboard::update() - WARNING - Image height or width is zero - Camera may be disconnected or faulty." << endl;
+        errorlog << "VisionBlackboard::update() - WARNING - Image height or width is zero - Camera may be disconnected or faulty." << endl;
+    }
 
     bool camera_pitch_valid, camera_height_valid, body_pitch_valid;
     float camera_pitch, camera_height, body_pitch;
@@ -538,7 +526,7 @@ void VisionBlackboard::update()
     m_lines.clear();
     m_vfos.clear();
 
-#if VISION_BLACKBOARD_VERBOSITY > 1
+#if VISION_CONTROLFLOW_VERBOSITY > 0
     debug << "VisionBlackboard::update() - Finish" << endl;
 #endif
 }
@@ -548,7 +536,7 @@ void VisionBlackboard::update()
 */
 void VisionBlackboard::publish() const
 {
-    #if VISION_BLACKBOARD_VERBOSITY > 1
+    #if VISION_CONTROLFLOW_VERBOSITY > 0
         debug << "VisionBlackboard::publish() - Begin" << endl;
     #endif
     //wrapper->publish(m_vfos);
@@ -568,7 +556,7 @@ void VisionBlackboard::publish() const
     for(i=0; i<m_lines.size(); i++) {
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_lines.at(i)));
     }
-    #if VISION_BLACKBOARD_VERBOSITY > 1
+    #if VISION_CONTROLFLOW_VERBOSITY > 0
         debug << "VisionBlackboard::publish() - End" << endl;
     #endif
 }
@@ -578,7 +566,7 @@ void VisionBlackboard::publish() const
 */
 void VisionBlackboard::debugPublish() const
 {
-    #if VISION_BLACKBOARD_VERBOSITY > 1
+    #if VISION_CONTROLFLOW_VERBOSITY > 0
         debug << "VisionBlackboard::debugPublish() - Begin" << endl;
     #endif
     vector<Vector2<double> > pts;
@@ -695,7 +683,7 @@ void VisionBlackboard::debugPublish() const
 //! Checks the kinematics horizon is within the image bounds and resets it if not.
 void VisionBlackboard::checkKinematicsHorizon()
 {
-    #if VISION_BLACKBOARD_VERBOSITY > 1
+    #if VISION_CONTROLFLOW_VERBOSITY > 0
         debug << "VisionBlackboard::checkHorizon() - Begin." << endl;
     #endif
     int width = original_image->getWidth(),

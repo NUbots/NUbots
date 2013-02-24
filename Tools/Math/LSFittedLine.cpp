@@ -43,22 +43,23 @@ void LSFittedLine::addPoint(const Vector2<double> &point){
 	sumY2 += point.y * point.y;
     sumXY += point.x * point.y;
     points.push_back(point);
-    valid = points.size() >= 2;
+    valid = (points.size() >= 2);
     if(valid)
         calcLine();
 }
 
 void LSFittedLine::addPoints(const vector< Vector2<double> >& pointlist){
     if(!pointlist.empty()) {
-        for(unsigned int i=0; i<pointlist.size(); i++) {
-            sumX += pointlist[i].x;
-            sumY += pointlist[i].y;
-            sumX2 += pointlist[i].x * pointlist[i].x;
-            sumY2 += pointlist[i].y * pointlist[i].y;
-            sumXY += pointlist[i].x * pointlist[i].y;
-            points.push_back(pointlist[i]);
+        for(size_t i=0; i<pointlist.size(); i++) {
+            const Vector2<double>& p = pointlist[i];
+            sumX += p.x;
+            sumY += p.y;
+            sumX2 += p.x * p.x;
+            sumY2 += p.y * p.y;
+            sumXY += p.x * p.y;
+            points.push_back(p);
         }
-        valid = points.size() >= 2;
+        valid = (points.size() >= 2);
         if(valid)
             calcLine();
     }
@@ -74,7 +75,7 @@ void LSFittedLine::joinLine(const LSFittedLine &sourceLine)
     for(unsigned int p = 0; p < sourceLine.points.size(); p++) {
 		points.push_back(sourceLine.points[p]);
     }
-    valid = points.size() >= 2;
+    valid = (points.size() >= 2);
     if(valid)
         calcLine();
 }
@@ -154,6 +155,30 @@ bool LSFittedLine::getEndPoints(Vector2<double>& p1, Vector2<double>& p2) const
             max = trans_x;
         }
     }
+    p1 = projectOnto(*p_min);
+    p2 = projectOnto(*p_max);
+    return true;
+}
+
+bool LSFittedLine::getOriginalEndPoints(Vector2<double>& p1, Vector2<double>& p2) const
+{
+    if(points.size() < 2)
+        return false;
+
+    float min = std::numeric_limits<float>::max();
+    float max = -std::numeric_limits<float>::max();
+    vector< Vector2<double> >::const_iterator p, p_min, p_max;
+    for(p = points.begin(), p_min = p_max = p; p!=points.end(); p++) {
+        float trans_x = -m_B*p->x - m_A*p->y;
+        if(trans_x < min) {
+            p_min = p;
+            min = trans_x;
+        }
+        else if(trans_x > max) {
+            p_max = p;
+            max = trans_x;
+        }
+    }
     p1 = *p_min;
     p2 = *p_max;
     return true;
@@ -167,11 +192,6 @@ double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
         //no need to check this works - line is only valid if there are at least 2 points
         getEndPoints(ep1, ep2);
         other.getEndPoints(other_ep1, other_ep2);
-        //project onto respective lines
-        ep1 = projectOnto(ep1);
-        ep2 = projectOnto(ep2);
-        other_ep1 = other.projectOnto(other_ep1);
-        other_ep2 = other.projectOnto(other_ep2);
 
         //determine distances from the two possible pairings
         double d1 = 0.5*( (ep1-other_ep1).abs() + (ep2-other_ep2).abs() ),

@@ -1,8 +1,9 @@
 #ifndef QUAD_H
 #define QUAD_H
 
+#include <iostream>
+#include <vector>
 #include "Tools/Math/Vector2.h"
-
 #include "Vision/basicvisiontypes.h"
 
 class Quad
@@ -57,6 +58,11 @@ public:
     double getAverageHeight() const;               //! Returns the average height of the Quad in pixels.
 
     bool overlapsHorizontally(const Quad& other) const;
+
+    //! @brief output stream operator.
+    friend std::ostream& operator<< (std::ostream& output, const Quad& g);
+    //! @brief output stream operator for a vector of goals.
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& g);
 
 private:
 
