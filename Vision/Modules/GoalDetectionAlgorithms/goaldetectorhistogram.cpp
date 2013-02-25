@@ -101,48 +101,101 @@ Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_seg
     // find bounding box from histogram
     int    left = bin.start,
            right = left + bin.width,
-           h_min = std::numeric_limits<int>::max(),
-           h_max = 0,
-           v_min = std::numeric_limits<int>::max(),
            v_max = 0;
 
     //just use pure bounding box for now, later use stddev thresholding
 
-    //find left and right
-    BOOST_FOREACH(ColourSegment seg, h_segments) {
+    LSFittedLine l, r;
+    Point l1, l2, r1, r2;
+
+    //find left and right by fitting lines
+    BOOST_FOREACH(const ColourSegment& h, h_segments) {
         //check segment centre is within bin
-        if(seg.getCentre().x >= left && seg.getCentre().x <= right) {
-            int s_x = seg.getStart().x,
-                e_x = seg.getEnd().x,
-                y = seg.getCentre().y;
-            //check segment's left edge
-            if(s_x < h_min)
-                h_min = s_x; //segment h-pos is leftmost, keep track
-            //check segment's right edge
-            if(e_x > h_max)
-                h_max = e_x; //segment h-pos is rightmost, keep track
-            //check vertical
-            if(y < v_min)
-                v_min = y; //segment v-pos is uppermost, keep track
-            if(y > v_max)
-                v_max = y; //segment v-pos is lowermost, keep track
+        if(h.getCentre().x >= left && h.getCentre().x <= right) {
+            l.addPoint(h.getStart());
+            r.addPoint(h.getEnd());
         }
     }
 
-    //find top and bottom
-    BOOST_FOREACH(ColourSegment seg, v_segments) {
-        //check segment centre is within bin
-        if(seg.getCentre().x >= left && seg.getCentre().x <= right) {
-            //check start
-            int s_y = seg.getStart().y,
-                e_y = seg.getEnd().y;
-
-            if(s_y < v_min)
-                v_min = s_y; //segment is bottommost, keep track
-            if(e_y > v_max)
-                v_max = e_y; //segment is uppermost, keep track
+    if(l.getEndPoints(l1, l2) && r.getEndPoints(r1, r2)) {
+        // ensure l1 and r1 are uppermost
+        if(l1.y > l2.y) {
+            std::swap(l1, l2);
         }
-    }
+        if(r1.y > r2.y) {
+            // l1 and r2 top
+            std::swap(r1, r2);
+        }
 
-    return Quad(Point(h_min, v_max), Point(h_min, v_min), Point(h_max, v_min), Point(h_max, v_max));
+        //find bottom
+        BOOST_FOREACH(const ColourSegment& v, v_segments) {
+            //check segment centre is within bin
+            const Point& p = v.getCentre();
+            if(p.x >= left && p.x <= right) {
+                // extend lines to new y
+                if(r2.y < p.y)
+                    r2 = Point(r.findXFromY(p.y), p.y);
+                if(l2.y < p.y)
+                    l2 = Point(l.findXFromY(p.y), p.y);
+            }
+        }
+        return Quad(l2, l1, r1, r2);
+    }
+    else {
+        //not enough points
+        return Quad();
+    }
 }
+
+
+//Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
+//{
+//    // find bounding box from histogram
+//    int    left = bin.start,
+//           right = left + bin.width,
+//           h_min = std::numeric_limits<int>::max(),
+//           h_max = 0,
+//           v_min = std::numeric_limits<int>::max(),
+//           v_max = 0;
+
+//    //just use pure bounding box for now, later use stddev thresholding
+
+//    //find left and right
+//    BOOST_FOREACH(ColourSegment seg, h_segments) {
+//        //check segment centre is within bin
+//        if(seg.getCentre().x >= left && seg.getCentre().x <= right) {
+//            int s_x = seg.getStart().x,
+//                e_x = seg.getEnd().x,
+//                y = seg.getCentre().y;
+//            //check segment's left edge
+//            if(s_x < h_min)
+//                h_min = s_x; //segment h-pos is leftmost, keep track
+//            //check segment's right edge
+//            if(e_x > h_max)
+//                h_max = e_x; //segment h-pos is rightmost, keep track
+//            //check vertical
+//            if(y < v_min)
+//                v_min = y; //segment v-pos is uppermost, keep track
+//            if(y > v_max)
+//                v_max = y; //segment v-pos is lowermost, keep track
+//        }
+//    }
+
+//    //find top and bottom
+//    BOOST_FOREACH(ColourSegment seg, v_segments) {
+//        //check segment centre is within bin
+//        if(seg.getCentre().x >= left && seg.getCentre().x <= right) {
+//            //check start
+//            int s_y = seg.getStart().y,
+//                e_y = seg.getEnd().y;
+
+//            if(s_y < v_min)
+//                v_min = s_y; //segment is topmost, keep track
+//            if(e_y > v_max)
+//                v_max = e_y; //segment is bottommost, keep track
+//        }
+//    }
+
+//    return Quad(Point(h_min, v_max), Point(h_min, v_min), Point(h_max, v_min), Point(h_max, v_max));
+//}
+

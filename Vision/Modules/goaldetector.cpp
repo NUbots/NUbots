@@ -15,6 +15,7 @@ void GoalDetector::removeInvalid(list<Quad>& posts)
 {
     list<Quad>::iterator it = posts.begin();
     while (it != posts.end()) {
+        //remove all posts whos aspect ratio is too low
         if (it->getAverageHeight() / it->getAverageWidth() < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_MIN)
             it = posts.erase(it);
         else
@@ -30,17 +31,20 @@ void GoalDetector::mergeOverlapping(list<Quad> &posts) {
         b++;
         while(b != posts.end()) {
             double distance = (a->getCentre() - b->getCentre()).abs();
-            if(distance < a->getAverageWidth() || distance < b->getAverageWidth()) {
-                //get outer lines
+            if( distance < a->getAverageWidth() || distance < b->getAverageWidth() ) {
+                // get outer lines
                 Point tl( min(a->getTopLeft().x, b->getTopLeft().x)         , min(a->getTopLeft().y, b->getTopLeft().y) ),
                       tr( max(a->getTopRight().x, b->getTopRight().x)       , min(a->getTopRight().y, b->getTopRight().y) ),
                       bl( min(a->getBottomLeft().x, b->getBottomLeft().x)   , max(a->getBottomLeft().y, b->getBottomLeft().y) ),
                       br( max(a->getBottomRight().x, b->getBottomRight().x) , max(a->getBottomRight().y, b->getBottomRight().y) );
+
+                //replace original two quads with the new one
                 a->set(bl, tl, tr, br);
                 b = posts.erase(b);
             }
-            else
+            else {
                 b++;
+            }
         }
         a++;
     }

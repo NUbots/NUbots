@@ -15,7 +15,7 @@ GoalDetectorRANSACEdges::GoalDetectorRANSACEdges()
 {
     //m_n = 10;               //min pts to line essentially
     m_n = 30 / VisionConstants::HORIZONTAL_SCANLINE_SPACING;               //min pts to line essentially
-    m_k = 40;               //number of iterations per fitting attempt
+    m_k = 100;               //number of iterations per fitting attempt
     m_e = 12.0;              //consensus margin
     m_max_iterations = 3;  //hard limit on number of fitting attempts
 }
@@ -23,10 +23,13 @@ GoalDetectorRANSACEdges::GoalDetectorRANSACEdges()
 vector<Goal> GoalDetectorRANSACEdges::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
+    const Horizon& khorizon = vbb->getKinematicsHorizon();
     //get transitions associated with goals
-    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
-                          v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
-    list<Quad> candidates;
+    vector<ColourSegment> hsegments = vbb->getHorizontalTransitions(GOAL_COLOUR),
+                          vsegments = vbb->getVerticalTransitions(GOAL_COLOUR);
+    list<Quad> quads,
+               post_candidates;
+    pair<bool, Quad> crossbar(false, Quad());
     vector<Goal> posts;
 
     //finds the edge lines and constructs goals from that
@@ -35,7 +38,7 @@ vector<Goal> GoalDetectorRANSACEdges::run()
     vector<LSFittedLine> start_lines, end_lines;
 
     //get edge points
-    BOOST_FOREACH(ColourSegment s, h_segments) {
+    BOOST_FOREACH(ColourSegment s, hsegments) {
         start_points.push_back(s.getStart());
         end_points.push_back(s.getEnd());
     }
@@ -51,40 +54,67 @@ vector<Goal> GoalDetectorRANSACEdges::run()
         end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
     }
 
-//#if VISION_GOAL_VERBOSITY > 1
     DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
     DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
-//#endif
 
-    //Build candidates out of lines
-    candidates = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
+    //Build candidates out of lines - this finds candidates irrespective of rotation - filtering must be done later
+    quads = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
 
-    cout << candidates.size() << " ";
+//    cout << quads.size() << " ";
 
-    removeInvalid(candidates);
+    // check potential cross bars AND posts (aspect ratio check)
+    removeInvalid(quads);
 
-    cout << candidates.size() << " ";
+//    cout << quads.size() << " ";
 
-    // OVERLAP CHECK
-    mergeOverlapping(candidates);
-
-    cout << candidates.size() << " ";
-
-    posts = assignGoals(candidates);
-
-    cout << posts.size() << endl;
-
-    //Improves bottom centre estimate using vertical transitions
-    BOOST_FOREACH(ColourSegment v, v_segments) {
-        BOOST_FOREACH(Goal g, posts) {
-            if(v.getEnd().y > g.getLocationPixels().y)
-                g.setBase(v.getEnd());
+    const double ANGLE_MARGIN = 0.15;
+    BOOST_FOREACH(Quad& q, quads) {
+        double angle = khorizon.getAngleBetween(Line(q.getTopCentre(), q.getBottomCentre()));
+        cout << angle << endl;
+        if( angle  >= (1-ANGLE_MARGIN)*mathGeneral::PI*0.5 ) {
+            post_candidates.push_back(q);
+        }
+        else if( angle <= ANGLE_MARGIN*mathGeneral::PI*0.5 ) {
+            //only keep largest crossbar candidate
+            if(!crossbar.first) {
+                crossbar.first = true;
+                crossbar.second = q;
+            }
+            else if(crossbar.second.area() < q.area()) {
+                crossbar.second = q;
+            }
         }
     }
 
-#if VISION_GOAL_VERBOSITY > 0
+//    cout << post_candidates.size() << " ";
+
+    // only check potential posts for building
+    mergeOverlapping(post_candidates);
+
+//    cout << post_candidates.size() << " ";
+
+    // generate actual goal from candidate posts
+    if(crossbar.first) {
+        // if a cross bar has been found use it to help assigning left and right
+        posts = assignGoals(post_candidates, crossbar.second);
+    }
+    else {
+        // no crossbar, just use general method
+        posts = GoalDetector::assignGoals(post_candidates);
+    }
+
+//    cout << posts.size() << endl;
+
+    //Improves bottom centre estimate using vertical transitions
+    BOOST_FOREACH(ColourSegment v, vsegments) {
+        const Point& p = v.getEnd();
+        BOOST_FOREACH(Goal g, posts) {
+            if(p.x <= g.getQuad().getRight() && p.x >= g.getQuad().getLeft() && p.y > g.getLocationPixels().y)
+                g.setBase(p);
+        }
+    }
+
     DataWrapper::getInstance()->debugPublish(DBID_GOALS_RANSAC_EDGES, posts);
-#endif
 
     return posts;
 }
@@ -110,37 +140,37 @@ list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLin
 
 
     BOOST_FOREACH(const LSFittedLine& s, start_lines) {
-        vector<bool> tried(used);   //consider all used lines tried
+        vector<bool> tried(used);   // consider all used lines tried
         vector<LSFittedLine>::const_iterator e_it;
         bool matched = false;
 
-        //try end lines in order of closeness
+        // try end lines in order of closeness
         for(unsigned int i = getClosestUntriedLine(s, end_lines, tried);
             i < end_lines.size() && !matched;
             i = getClosestUntriedLine(s, end_lines, tried)) {
 
             const LSFittedLine& e = end_lines.at(i);
 
-            //check angles
-            if(s.getAngleBetween(e) < tolerance*mathGeneral::PI*0.5) { //dodgy way (linear with angle between)
+            // check angles
+            if(s.getAngleBetween(e) <= tolerance*mathGeneral::PI*0.5) { // dodgy way (linear with angle between)
             //if(min(a1/a2, a2/a1) <= (1-tolerance)) {
-                //get the end points of each line
+                // get the end points of each line
                 Point sp1, sp2,
                       ep1, ep2;
                 if(s.getEndPoints(sp1, sp2) && e.getEndPoints(ep1, ep2)) {
-                    //find lengths of line segments
+                    // find lengths of line segments
                     double l1 = (sp1 - sp2).abs(),
                            l2 = (ep1 - ep2).abs();
-                    //check lengths
+                    // check lengths
                     if(min(l1/l2, l2/l1) >= (1-tolerance)) {
-                        //get num points
+                        // get num points
                         double n1 = s.getNumPoints(),
                                n2 = e.getNumPoints();
                         if(min(n1/n2, n2/n1) >= (1-tolerance)) {
-                            //check start is to left of end
+                            // check start is to left of end
                             if(0.5*(sp1.x + sp2.x) < 0.5*(ep1.x + ep2.x)) {
-                                //success
-                                //order points
+                                // success
+                                // order points
                                 if(sp1.y < sp2.y) {
                                     Point c = sp1; sp1 = sp2; sp2 = c;
                                 }
@@ -150,8 +180,7 @@ list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLin
                                 quads.push_back(Quad(sp1, sp2, ep2, ep1));  //generate candidate
                                 used.at(i) = true;  //remove end line from consideration
                                 matched = true;
-//#if VISION_GOAL_VERBOSITY > 2
-#if 1
+#if VISION_GOAL_VERBOSITY > 2
                                 debug << "\tsuccess " << sp1 << " " << sp2 << " , " << ep1 << " " << ep2 << endl;
                             }
                             else
@@ -205,6 +234,21 @@ unsigned int GoalDetectorRANSACEdges::getClosestUntriedLine(const LSFittedLine& 
         tried[best] = true; //mark as used
 
     return best;
+}
+
+vector<Goal> GoalDetectorRANSACEdges::assignGoals(const list<Quad>& candidates, const Quad& crossbar) const
+{
+    if(candidates.size() == 1) {
+        if(crossbar.getCentre().x < candidates.front().getCentre().x) {
+            return vector<Goal>(1, Goal(GOAL_R, candidates.front()));
+        }
+        else {
+            return vector<Goal>(1, Goal(GOAL_L, candidates.front()));
+        }
+    }
+    else {
+        return GoalDetector::assignGoals(candidates);
+    }
 }
 
 vector<Point> GoalDetectorRANSACEdges::getEdgePointsFromSegments(const vector<ColourSegment> &segments)
