@@ -18,13 +18,13 @@ vector<Goal> GoalDetectorHistogram::run()
     const vector<ColourSegment>& h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR);
     const vector<ColourSegment>& v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
 
-    vector<Quad> quads = detectQuads(h_segments, v_segments);
+    list<Quad> quads = detectQuads(h_segments, v_segments);
     vector<Goal> posts;
 
-    removeInvalidPosts(quads);
+    removeInvalid(quads);
 
     // OVERLAP CHECK
-    overlapCheck(quads);
+    mergeOverlapping(quads);
 
     // DENSITY CHECK - fix later: use segment lengths and scanline spacing to estimate rather than
     //                 re-accessing the image to calculate fully
@@ -39,7 +39,7 @@ vector<Goal> GoalDetectorHistogram::run()
     return posts;
 }
 
-vector<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
+list<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
 {
     const size_t BINS = 20;
     const double STDDEV_THRESHOLD = 1.5;
@@ -75,9 +75,9 @@ Histogram1D GoalDetectorHistogram::mergePeaks(Histogram1D hist, int minimum_size
     return hist;
 }
 
-vector<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& hist, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments, int peak_threshold)
+list<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& hist, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments, int peak_threshold)
 {
-    vector<Quad> candidates;
+    list<Quad> candidates;
     vector<Bin>::const_iterator b_it;
 
     for (b_it = hist.begin(); b_it != hist.end(); b_it++) {
@@ -144,5 +144,5 @@ Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_seg
         }
     }
 
-    return Quad(h_min, v_min, h_max, v_max);
+    return Quad(Point(h_min, v_max), Point(h_min, v_min), Point(h_max, v_min), Point(h_max, v_max));
 }

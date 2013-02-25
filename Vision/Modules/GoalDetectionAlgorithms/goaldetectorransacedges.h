@@ -4,8 +4,10 @@
 #include "Vision/Modules/goaldetector.h"
 #include "Tools/Math/LSFittedLine.h"
 #include <vector>
+#include <list>
 
 using std::vector;
+using std::list;
 
 class GoalDetectorRANSACEdges : public GoalDetector
 {
@@ -14,9 +16,10 @@ public:
     virtual vector<Goal> run();
 
 private:
-    vector<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines,
-                                     const vector<LSFittedLine>& end_lines,
-                                     double tolerance);
+    //vector<Goal> assignGoals(const list<Quad>& post_candidates, const Quad& crossbar) const;
+    list<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines,
+                                   const vector<LSFittedLine>& end_lines,
+                                   double tolerance);
 
     unsigned int getClosestUntriedLine(const LSFittedLine& start,
                                        const vector<LSFittedLine>& end_lines,

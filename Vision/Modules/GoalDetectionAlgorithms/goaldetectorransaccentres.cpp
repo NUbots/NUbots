@@ -17,16 +17,18 @@ GoalDetectorRANSACCentres::GoalDetectorRANSACCentres()
     m_n = 30 / VisionConstants::HORIZONTAL_SCANLINE_SPACING;               //min pts to line essentially
     m_k = 40;               //number of iterations per fitting attempt
     m_e = 12.0;              //consensus margin
-    m_max_iterations = 3;  //hard limit on number of fitting attempts
+    m_max_iterations = 5;  //hard limit on number of fitting attempts
 }
 
 vector<Goal> GoalDetectorRANSACCentres::run()
 {
+    const double ANGLE_TOLERANCE = 0.15;
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
+    const Horizon& kh = vbb->getKinematicsHorizon();
     //get transitions associated with goals
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
                           v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
-    vector<Quad> candidates;
+    list<Quad> candidates;
     vector<Goal> posts;
 
     //finds the centre lines and constructs goals from them
@@ -55,7 +57,7 @@ vector<Goal> GoalDetectorRANSACCentres::run()
 
 //    cout << "lines: " << goal_lines.size() << endl;
 
-    /// @todo MERGE COLINEAR / INTERSECTING
+    /// @todo MERGE COLINEAR
 
 //    cout << "after merge: " << goal_lines.size() << endl;
 
@@ -70,8 +72,6 @@ vector<Goal> GoalDetectorRANSACCentres::run()
     //Build candidates out of lines
     if(goal_lines.size() > 2) {
         //pick best two - i.e. most vertical
-        const Horizon& kh = vbb->getKinematicsHorizon();
-
         pair<double, double> largest_angles = pair<double, double>(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max());
         pair<size_t, size_t> best(0,0);
         for(size_t i = 0; i < goal_lines.size(); i++) {
@@ -90,47 +90,49 @@ vector<Goal> GoalDetectorRANSACCentres::run()
         RANSACGoal g1 = goal_lines[best.first],
                    g2 = goal_lines[best.second];
 
+        cout << largest_angles.first << " " << largest_angles.second << endl;
+
         goal_lines.clear();
         goal_lines.push_back(g1);
         goal_lines.push_back(g2);
     }
 
+
     //cout << "after selection (if more than 2): " << goal_lines.size() << endl;
 
     BOOST_FOREACH(const RANSACGoal g, goal_lines) {
-        pair<Point, Point> endpts = g.getEndPoints();
-        pair<double, double> widths = g.getWidths();
-        Vector2<double> dir = g.getDirection();
+        //don't add goals that aren't vertical enough
+        if(kh.getAngleBetween(g.getLine()) >= mathGeneral::PI*0.5*(1-ANGLE_TOLERANCE)) {
+            pair<Point, Point> endpts = g.getEndPoints();
+            pair<double, double> widths = g.getWidths();
+            Vector2<double> dir = g.getDirection();
 
-        cout << endpts.first << " , " << endpts.second << " " << widths.first << "," << widths.second << " " << dir << endl;
-        // compensate width for angle between goal and segments
-        double sin_theta = 1;
+            // compensate width for angle between goal and segments
+            double sin_theta = 1;
 
-        if( dir.x != 0 && dir.y != 0 )
-            sin_theta = dir.y / dir.abs();
+            if( dir.x != 0 && dir.y != 0 )
+                sin_theta = dir.y / dir.abs();
 
-        //get width vector (to right)
-        Point w1 = dir.normalize(sin_theta*widths.first*0.5).rotateRight(),
-              w2 = dir.normalize(sin_theta*widths.second*0.5).rotateRight();
+            //get width vector (to right)
+            Point w1 = dir.normalize(sin_theta*widths.first*0.5).rotateRight(),
+                  w2 = dir.normalize(sin_theta*widths.second*0.5).rotateRight();
 
-
-        if(endpts.first.y < endpts.second.y) {
-            // pt0 is top
-            candidates.push_back(Quad(endpts.second - w2, endpts.first - w1, endpts.first + w1, endpts.second + w2));
+            if(endpts.first.y < endpts.second.y) {
+                // pt0 is top
+                candidates.push_back(Quad(endpts.second - w2, endpts.first - w1, endpts.first + w1, endpts.second + w2));
+            }
+            else {
+                candidates.push_back(Quad(endpts.first - w1, endpts.second - w2, endpts.second + w2, endpts.first + w1));
+            }
         }
-        else {
-            candidates.push_back(Quad(endpts.first - w1, endpts.second - w2, endpts.second + w2, endpts.first + w1));
-        }
-
-        cout << candidates.back() << endl;
     }
 
     //cout << "candidates: " << candidates.size() << endl;
 
-    removeInvalidPosts((candidates));
+    removeInvalid(candidates);
 
     // OVERLAP CHECK
-    overlapCheck((candidates));
+    mergeOverlapping(candidates);
 
     posts = assignGoals(candidates);
 

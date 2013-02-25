@@ -26,7 +26,7 @@ vector<Goal> GoalDetectorRANSACEdges::run()
     //get transitions associated with goals
     vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
                           v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
-    vector<Quad> candidates;
+    list<Quad> candidates;
     vector<Goal> posts;
 
     //finds the edge lines and constructs goals from that
@@ -51,20 +51,28 @@ vector<Goal> GoalDetectorRANSACEdges::run()
         end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
     }
 
-#if VISION_GOAL_VERBOSITY > 1
+//#if VISION_GOAL_VERBOSITY > 1
     DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
     DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
-#endif
+//#endif
 
     //Build candidates out of lines
     candidates = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
 
-    removeInvalidPosts((candidates));
+    cout << candidates.size() << " ";
+
+    removeInvalid(candidates);
+
+    cout << candidates.size() << " ";
 
     // OVERLAP CHECK
-    overlapCheck((candidates));
+    mergeOverlapping(candidates);
+
+    cout << candidates.size() << " ";
 
     posts = assignGoals(candidates);
+
+    cout << posts.size() << endl;
 
     //Improves bottom centre estimate using vertical transitions
     BOOST_FOREACH(ColourSegment v, v_segments) {
@@ -81,7 +89,7 @@ vector<Goal> GoalDetectorRANSACEdges::run()
     return posts;
 }
 
-vector<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLine>& start_lines, const vector<LSFittedLine>& end_lines, double tolerance)
+list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLine>& start_lines, const vector<LSFittedLine>& end_lines, double tolerance)
 {
     // (must match exactly) 0 <= tolerance <= 1 (any pair will be accepted)
     //
@@ -93,7 +101,7 @@ vector<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedL
     if( tolerance < 0 or tolerance > 1)
         throw "GoalDetectorRANSACEdges::buildQuadsFromLines - tolerance must be in [0, 1]";
 
-    vector<Quad> quads;
+    list<Quad> quads;
     vector<bool> used(end_lines.size(), false);
 
 #if VISION_GOAL_VERBOSITY > 2
@@ -104,10 +112,11 @@ vector<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedL
     BOOST_FOREACH(const LSFittedLine& s, start_lines) {
         vector<bool> tried(used);   //consider all used lines tried
         vector<LSFittedLine>::const_iterator e_it;
+        bool matched = false;
 
         //try end lines in order of closeness
         for(unsigned int i = getClosestUntriedLine(s, end_lines, tried);
-            i < end_lines.size();
+            i < end_lines.size() && !matched;
             i = getClosestUntriedLine(s, end_lines, tried)) {
 
             const LSFittedLine& e = end_lines.at(i);
@@ -140,34 +149,31 @@ vector<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedL
                                 }
                                 quads.push_back(Quad(sp1, sp2, ep2, ep1));  //generate candidate
                                 used.at(i) = true;  //remove end line from consideration
-#if VISION_GOAL_VERBOSITY > 2
+                                matched = true;
+//#if VISION_GOAL_VERBOSITY > 2
+#if 1
                                 debug << "\tsuccess " << sp1 << " " << sp2 << " , " << ep1 << " " << ep2 << endl;
-#endif
-                                break;  //do not consider any more lines
                             }
-#if VISION_GOAL_VERBOSITY > 2
                             else
                                 debug << "\tline ordering fail: " << 0.5*(sp1.x + sp2.x) << " " << 0.5*(ep1.x + ep2.x) << endl;
-#endif
                         }
-#if VISION_GOAL_VERBOSITY > 2
                         else
                             debug << "\tnum points fail: " << n1 << " " << n2 << endl;
-#endif
                     }
-#if VISION_GOAL_VERBOSITY > 2
                     else
                         debug << "\tlength fail: " << l1 << " " << l2 << endl;
-#endif
                 }
-#if VISION_GOAL_VERBOSITY > 2
                 else
                     debug << "\tno endpoints" << endl;
-#endif
             }
-#if VISION_GOAL_VERBOSITY > 2
             else
                 debug << "angle fail: " << s.getAngleBetween(e) << " > " << tolerance*mathGeneral::PI*0.5 << endl;
+#else
+                            }
+                        }
+                    }
+                }
+            }
 #endif
         }
     }

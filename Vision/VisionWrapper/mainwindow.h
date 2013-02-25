@@ -73,7 +73,7 @@ public:
     ~MainWindow();
 
     void setFrameNo(int n);
-    void resetFlags() {m_next = m_finished = false;}
+    void resetFlags();
     void clearLayers();
     void addToLayer(DEBUG_ID id, const QImage& img, float alpha=1);
     void addToLayer(DEBUG_ID id, const QPointF& item, QPen pen);
@@ -99,6 +99,7 @@ public slots:
 private slots:
     void setFinished() {m_finished = true;}
     void setNext() {m_next = true;}
+    void toggleContinuous();
     void setWindow(int w) { current_window = w; updateControls();}
 
 private:
@@ -108,6 +109,7 @@ private:
     static const size_t NUM_CANVASES = 2;
 
     bool m_finished,
+         m_continuous,
          m_next;
 
     Ui::MainWindow* ui;

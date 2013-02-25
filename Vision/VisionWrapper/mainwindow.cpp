@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    m_finished = m_next = false;
+    m_finished = m_next = m_continuous = false;
     ui->setupUi(this);
 
     current_window = 0;
@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     connect(ui->next_pb, SIGNAL(clicked()), this, SLOT(setNext()));
+    connect(ui->contButton, SIGNAL(clicked()), this, SLOT(toggleContinuous()));
     connect(ui->exit_pb, SIGNAL(clicked()), this, SLOT(setFinished()));
     connect(ui->windowComboBox, SIGNAL(activated(int)), this, SLOT(setWindow(int)));
 }
@@ -109,6 +110,12 @@ void MainWindow::setFrameNo(int n)
     std::stringstream s;
     s << "Frame: " << n;
     ui->label_frame->setText(s.str().c_str());
+}
+
+void MainWindow::resetFlags()
+{
+     m_next = m_continuous;
+     m_finished = false;
 }
 
 void MainWindow::clearLayers()
@@ -292,4 +299,11 @@ void MainWindow::setPlot(PLOTWINDOW win, QString name, vector< Vector2<double> >
     curves[name]->attach(plots[win]);
 
     plots[win]->replot();
+}
+
+void MainWindow::toggleContinuous()
+{
+    m_continuous = !m_continuous;
+    m_next = m_continuous;
+    ui->next_pb->setEnabled(!m_continuous);
 }

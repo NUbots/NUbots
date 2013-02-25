@@ -10,7 +10,7 @@ class Goal : public VisionFieldObject
 {
 public:
        
-    Goal(VFO_ID id=INVALID, const Quad& corners=Quad(0,0,0,0));
+    Goal(VFO_ID id=INVALID, const Quad& corners=Quad());
 
     void setBase(Point base);
 

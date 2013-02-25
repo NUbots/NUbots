@@ -24,24 +24,30 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string is
     kinematics_horizon.setLine(0, 1, 0);
     numFramesDropped = numFramesProcessed = 0;
 
-    streamname = istrm;
-    debug << "openning image stream: " << streamname << endl;
-    imagestrm.open(streamname.c_str());
+    switch(method) {
+    case STREAM:
+        streamname = istrm;
+        debug << "openning image stream: " << streamname << endl;
+        imagestrm.open(streamname.c_str());
 
-    using_sensors = !sstrm.empty();
-    sensorstreamname = sstrm;
-    if(m_ok && using_sensors) {
-        debug << "openning sensor stream: " << sensorstreamname << endl;
-        sensorstrm.open(sensorstreamname.c_str());
-        if(!sensorstrm.is_open()) {
-            QMessageBox::warning(NULL, "Error", QString("Failed to read sensors from: ") + QString(sensorstreamname.c_str()) + QString(" defaulting to sensors off."));
-            using_sensors = false;
+        using_sensors = !sstrm.empty();
+        sensorstreamname = sstrm;
+        if(m_ok && using_sensors) {
+            debug << "openning sensor stream: " << sensorstreamname << endl;
+            sensorstrm.open(sensorstreamname.c_str());
+            if(!sensorstrm.is_open()) {
+                QMessageBox::warning(NULL, "Error", QString("Failed to read sensors from: ") + QString(sensorstreamname.c_str()) + QString(" defaulting to sensors off."));
+                using_sensors = false;
+            }
         }
-    }
 
-    if(!imagestrm.is_open()) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
-        m_ok = false;
+        if(!imagestrm.is_open()) {
+            errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
+            m_ok = false;
+        }
+        break;
+    case CAMERA:
+        m_camera = new PCCamera;
     }
 
     configname = cfg;
@@ -237,21 +243,21 @@ void DataWrapper::debugPublish(int i, const vector<Goal> &d)
 
     switch(i) {
     case 0:
-        if(mind < 1000)
+        if(mind < std::numeric_limits<double>::max())
             acc_hist(mind);
         else
             ratio_hist.first++;
         ratio_hist.second++;
         break;
     case 1:
-        if(mind < 1000)
+        if(mind < std::numeric_limits<double>::max())
             acc_r1(mind);
         else
             ratio_r1.first++;
         ratio_r1.second++;
         break;
     case 2:
-        if(mind < 1000)
+        if(mind < std::numeric_limits<double>::max())
             acc_r2(mind);
         else
             ratio_r2.first++;

@@ -12,7 +12,6 @@ public:
     
     Quad();
     Quad(const Quad& other);
-    Quad(int left, int top, int right, int bottom);
     Quad(Vector2<double> bottom_left, Vector2<double> top_left, Vector2<double> top_right, Vector2<double> bottom_right);
 
     /**
@@ -33,8 +32,8 @@ public:
       */
     void set(Vector2<double> bottom_left, Vector2<double> top_left, Vector2<double> top_right, Vector2<double> bottom_right);
     
-
-    Vector2<double> getBottomCentre() const;   //! Returns the bottom centre pixel location of the Quad.
+    Vector2<double> getTopCentre() const { return (tl + tr)*0.5; }   //! Returns the bottom centre pixel location of the Quad.
+    Vector2<double> getBottomCentre() const { return (bl + br)*0.5; }   //! Returns the bottom centre pixel location of the Quad.
 
     Vector2<double> getCentre() const;         //! Returns the centre pixel location  of the Quad.
 
@@ -56,6 +55,8 @@ public:
 
     double getAverageWidth() const;                //! Returns the average width of the Quad in pixels.
     double getAverageHeight() const;               //! Returns the average height of the Quad in pixels.
+
+    double area() const;
 
     bool overlapsHorizontally(const Quad& other) const;
 

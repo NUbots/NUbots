@@ -8,8 +8,11 @@
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/VisionTypes/coloursegment.h"
+#include <list>
+#include <vector>
 
-using namespace std;
+using std::vector;
+using std::list;
 
 class GoalDetector
 {
@@ -19,16 +22,14 @@ public:
     virtual vector<Goal> run() = 0;
 
 protected:
-    //creation of goals from quads
-    vector<Goal> assignGoals(const vector<Quad>& candidates) const;
-
     //checks
-    void removeInvalidPosts(vector<Quad> &posts);
-    void DensityCheck(vector<Quad>* posts, NUImage* img, const LookUpTable& lut, const float PERCENT_REQUIRED);
-    void overlapCheck(vector<Quad> &posts);
+    void removeInvalid(list<Quad> &posts);
+    void mergeOverlapping(list<Quad> &posts);
 
     //generic
     Vector2<double> calculateSegmentLengthStatistics(const vector<ColourSegment> segments);
+
+    vector<Goal> assignGoals(const list<Quad>& candidates) const;
 };
 
 #endif // GOALDETECTOR_H

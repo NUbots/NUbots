@@ -26,8 +26,7 @@ public:
     static int MIN_GOAL_WIDTH;          //! The minimum width of a goal.
     static bool THROWOUT_SHORT_GOALS;  //! Whether to throw out goals that are too short.
     static int MIN_GOAL_HEIGHT;          //! The minimum height of a goal.
-    static float GOAL_HEIGHT_TO_WIDTH_RATIO_LOW;
-    static float GOAL_HEIGHT_TO_WIDTH_RATIO_HIGH;
+    static float GOAL_HEIGHT_TO_WIDTH_RATIO_MIN;
     static int GOAL_MAX_OBJECTS;
     static int GOAL_BINS;
     static int GOAL_MIN_THRESHOLD;
