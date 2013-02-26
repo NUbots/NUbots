@@ -25,6 +25,8 @@ private:
                                        const vector<LSFittedLine>& end_lines,
                                        vector<bool>& tried);
 
+    vector<Goal> assignGoals(const list<Quad>& candidates, const Quad& crossbar) const;
+
     vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
 
 

@@ -236,29 +236,90 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Goal>& data)
 //DEBUG
 void DataWrapper::debugPublish(int i, const vector<Goal> &d)
 {
-    double mind = std::numeric_limits<double>::max();
-    BOOST_FOREACH(Goal g, d) {
-        mind = std::min(mind, g.width_dist);
+    double dist = -1;
+    if(true_num_posts == 1) {
+        if(d.size() == 1) {
+            dist = d.front().width_dist;
+        }
+        else {
+            double maxarea = -1;
+            //find biggest
+            BOOST_FOREACH(Goal g, d) {
+                if(g.getQuad().area() > maxarea) {
+                    maxarea = g.getQuad().area();
+                    dist = g.width_dist;
+                }
+            }
+        }
     }
+    else {
+        if(d.size() == 0) {
+            //missed both
+            switch(i) {
+            case 0:
+                ratio_hist.first++;
+                ratio_hist.second++;
+                break;
+            case 1:
+                ratio_r1.first++;
+                ratio_r1.second++;
+                break;
+            case 2:
+                ratio_r2.first++;
+                ratio_r2.second++;
+                break;
+            }
+        }
+        if(d.size() == 1) {
+            //missed one
+            switch(i) {
+            case 0:
+                ratio_hist.first++;
+                ratio_hist.second++;
+                break;
+            case 1:
+                ratio_r1.first++;
+                ratio_r1.second++;
+                break;
+            case 2:
+                ratio_r2.first++;
+                ratio_r2.second++;
+                break;
+            }
+            if(d.front().getLocationPixels().x > 150)
+                dist = d.front().width_dist;
+        }
+        else {
+            double maxx = -1;
+            //find rightmost
+            BOOST_FOREACH(Goal g, d) {
+                if(g.getLocationPixels().x > maxx) {
+                    maxx = g.getLocationPixels().x;
+                    dist = g.width_dist;
+                }
+            }
+        }
+    }
+
 
     switch(i) {
     case 0:
-        if(mind < std::numeric_limits<double>::max())
-            acc_hist(mind);
+        if(dist != -1)
+            acc_hist(dist);
         else
             ratio_hist.first++;
         ratio_hist.second++;
         break;
     case 1:
-        if(mind < std::numeric_limits<double>::max())
-            acc_r1(mind);
+        if(dist != -1)
+            acc_r1(dist);
         else
             ratio_r1.first++;
         ratio_r1.second++;
         break;
     case 2:
-        if(mind < std::numeric_limits<double>::max())
-            acc_r2(mind);
+        if(dist != -1)
+            acc_r2(dist);
         else
             ratio_r2.first++;
         ratio_r2.second++;

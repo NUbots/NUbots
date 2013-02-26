@@ -141,6 +141,9 @@ private:
     //! Frame info
     int numFramesDropped;
     int numFramesProcessed;
+
+    //debug, remove later
+    int true_num_posts;
 };
 
 #endif // DATAWRAPPERQT_H
