@@ -1,0 +1,6 @@
+Add to Options area of Make/CMakeLists.txt syntax:
+	SET(name default-value CACHE STRING "Description - set operational range")
+		OR
+	OPTION(name "description" default(OFF or ON))
+
+Modify translation from cmake name (NUBOT_DEBUG_*_VERBOSITY) to define (*_VERBOSITY) in Make/debugverbosity*.in
