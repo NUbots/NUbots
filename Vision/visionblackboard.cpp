@@ -301,33 +301,43 @@ const Transformer& VisionBlackboard::getTransformer() const
 }
 
 //! Returns the list of found balls.
-vector<Ball>& VisionBlackboard::getBalls()
+const vector<Ball>& VisionBlackboard::getBalls()
 {
     return m_balls;
 }
 
 //! Returns the list of found goals.
-vector<Goal>& VisionBlackboard::getGoals()
+const vector<Goal>& VisionBlackboard::getGoals()
 {
     return m_goals;
 }
 
 ////! Returns the list of found beacons.
-//vector<Beacon>& VisionBlackboard::getBeacons()
+//const vector<Beacon>& VisionBlackboard::getBeacons()
 //{
 //    return m_beacons;
 //}
 
 //! Returns the list of found obstacles.
-vector<Obstacle>& VisionBlackboard::getObstacles()
+const vector<Obstacle>& VisionBlackboard::getObstacles()
 {
     return m_obstacles;
 }
 
 //! Returns the list of found lines.
-vector<FieldLine>& VisionBlackboard::getLines()
+const vector<FieldLine>& VisionBlackboard::getLines()
 {
     return m_lines;
+}
+
+const vector<CentreCircle>& VisionBlackboard::getCentreCircles()
+{
+    return m_centre_circles;
+}
+
+const vector<CornerPoint>& VisionBlackboard::getCorners()
+{
+    return m_corner_points;
 }
 
 /**
@@ -556,6 +566,12 @@ void VisionBlackboard::publish() const
     for(i=0; i<m_lines.size(); i++) {
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_lines.at(i)));
     }
+    for(i=0; i<m_centre_circles.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_centre_circles.at(i)));
+    }
+    for(i=0; i<m_corner_points.size(); i++) {
+        wrapper->publish(static_cast<const VisionFieldObject*>(&m_corner_points.at(i)));
+    }
     #if VISION_CONTROLFLOW_VERBOSITY > 0
         debug << "VisionBlackboard::publish() - End" << endl;
     #endif
@@ -624,6 +640,8 @@ void VisionBlackboard::debugPublish() const
     wrapper->debugPublish(m_balls);
     wrapper->debugPublish(m_obstacles);
     wrapper->debugPublish(m_lines);
+    wrapper->debugPublish(m_centre_circles);
+    wrapper->debugPublish(m_corner_points);
     
     //horizontal scans
     pts.clear();

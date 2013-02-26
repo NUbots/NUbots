@@ -163,11 +163,6 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
     visual_object->addToExternalFieldObjects(field_objects, m_timestamp);
 }
 
-void DataWrapper::debugRefresh()
-{
-    //! @todo Implement + Comment
-}
-
 void DataWrapper::debugPublish(vector<Ball> data) {
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_BALLS) << endl;

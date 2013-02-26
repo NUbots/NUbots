@@ -64,7 +64,6 @@ public:
     void publish(const vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
-    void debugRefresh();
     void debugPublish(vector<Ball> data);
     //bool debugPublish(vector<Beacon> data);
     void debugPublish(vector<Goal> data);

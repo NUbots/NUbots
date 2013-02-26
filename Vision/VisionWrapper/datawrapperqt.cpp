@@ -185,13 +185,21 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
     #endif
 }
 
-//! Outputs debug data to the appropriate external interface
-void DataWrapper::debugRefresh()
-{
-
+void DataWrapper::debugPublish(const vector<Ball>& data) {
+    BOOST_FOREACH(const Ball& b, data) {
+        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
+    }
 }
 
-void DataWrapper::debugPublish(const vector<Ball>& data) {
+void DataWrapper::debugPublish(const vector<CentreCircle>& data)
+{
+    BOOST_FOREACH(const Ball& b, data) {
+        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
+    }
+}
+
+void DataWrapper::debugPublish(const vector<CornerPoint>& data)
+{
     BOOST_FOREACH(const Ball& b, data) {
         gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
     }

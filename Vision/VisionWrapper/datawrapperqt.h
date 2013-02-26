@@ -20,6 +20,8 @@
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
+#include "Vision/VisionTypes/VisionFieldObjects/centrecircle.h"
+#include "Vision/VisionTypes/VisionFieldObjects/cornerpoint.h"
 
 #include "Vision/VisionTypes/RANSACTypes/ransacgoal.h"
 
@@ -77,7 +79,6 @@ public:
     void publish(const vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
-    void debugRefresh();
     void debugPublish(const vector<Ball>& data);
 //    bool debugPublish(const vector<Beacon>& data);
     void debugPublish(const vector<Goal>& data);
@@ -85,6 +86,8 @@ public:
     void debugPublish(int i, const vector<Goal>& d);
     void debugPublish(const vector<Obstacle>& data);
     void debugPublish(const vector<FieldLine>& data);
+    void debugPublish(const vector<CentreCircle>& data);
+    void debugPublish(const vector<CornerPoint>& data);
     void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
     void debugPublish(DEBUG_ID id, const vector<GroundPoint>& data_points);
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);

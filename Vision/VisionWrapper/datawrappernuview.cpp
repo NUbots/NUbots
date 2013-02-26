@@ -158,12 +158,6 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
     visual_object->addToExternalFieldObjects(field_objects, m_timestamp);
 }
 
-//! Outputs debug data to the appropriate external interface
-void DataWrapper::debugRefresh()
-{
-    
-}
-
 void DataWrapper::debugPublish(vector<Ball> data)
 {
 

@@ -107,11 +107,13 @@ public:
 //    bool isBodyPitchValid() const;
 //    float getBodyPitch() const;
 
-    vector<Ball>& getBalls();
-    vector<Goal>& getGoals();
-    //vector<Beacon>& getBeacons();
-    vector<Obstacle>& getObstacles();
-    vector<FieldLine>& getLines();
+    const vector<Ball>& getBalls();
+    const vector<Goal>& getGoals();
+    //const vector<Beacon>& getBeacons();
+    const vector<Obstacle>& getObstacles();
+    const vector<FieldLine>& getLines();
+    const vector<CentreCircle> getCentreCircles();
+    const vector<CornerPoint> getCorners();
 
     const vector<Point>& getObstaclePoints() const;
 
