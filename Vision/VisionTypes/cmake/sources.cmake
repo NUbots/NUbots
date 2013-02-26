@@ -29,6 +29,7 @@ objectcandidate.cpp
 segmentedregion.cpp
 quad.cpp
 histogram1d.cpp
+groundpoint.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

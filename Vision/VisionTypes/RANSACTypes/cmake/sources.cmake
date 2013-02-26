@@ -21,9 +21,7 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-ransaccircle.cpp
 ransacgoal.cpp
-ransacline.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

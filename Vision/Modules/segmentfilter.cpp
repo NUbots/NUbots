@@ -155,13 +155,14 @@ void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const C
     vector<ColourSegment>::const_iterator it;
     
     //loop through each scan
-    BOOST_FOREACH(const vector<ColourSegment> vs, segments) {
+    BOOST_FOREACH(const vector<ColourSegment>& vs, segments) {
         //move down segments in scan pairwise
         it = vs.begin();
         //first check start pair alone
         if(rule.match(ColourTransitionRule::nomatch, *it, *(it+1))) {
             matches.push_back(*it);
         }
+        it++;
         //then check the rest in triplets
         while(it < vs.end()-1) {
             if(rule.match(*(it-1), *it, *(it+1))) {
