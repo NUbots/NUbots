@@ -24,7 +24,7 @@ vector<Goal> GoalDetectorHistogram::run()
     removeInvalid(quads);
 
     // OVERLAP CHECK
-    mergeOverlapping(quads);
+    mergeClose(quads, 1.5);
 
     // DENSITY CHECK - fix later: use segment lengths and scanline spacing to estimate rather than
     //                 re-accessing the image to calculate fully
@@ -50,21 +50,29 @@ list<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_seg
 
     Vector2<double> h_length_stats = calculateSegmentLengthStatistics(h_segments);
 
+    Histogram1D hist2(BINS, VisionBlackboard::getInstance()->getImageWidth()/(double)BINS);
     // fill histogram bins
     BOOST_FOREACH(ColourSegment seg, h_segments) {
         //use stddev throwout to remove topbar segments
         if(seg.getLength() <= h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y) {
             hist.addToBin(seg.getCentre().x, seg.getLength());
-            //hist.addToBins(seg.getStart().x, seg.getEnd().x, 1);
+            hist2.addToBins(seg.getStart().x, seg.getEnd().x + 1, 1);
         }
     }
 
     // use vertical segments as well
     BOOST_FOREACH(ColourSegment seg, v_segments) {
         hist.addToBin(seg.getCentre().x, seg.getLength());
+        hist2.addToBin(seg.getCentre().x, seg.getLength());
     }
 
     Histogram1D h_merged = mergePeaks(hist, MERGE_THRESHOLD);
+    Histogram1D h_merged2 = mergePeaks(hist2, MERGE_THRESHOLD);
+
+    DataWrapper::getInstance()->plotHistogram("Before Merge", hist, blue);
+    DataWrapper::getInstance()->plotHistogram("Before Merge2", hist2, blue);
+    //DataWrapper::getInstance()->plotHistogram("After Merge", h_merged, yellow);
+    //DataWrapper::getInstance()->plotHistogram("After Merge2", h_merged2, yellow);
 
     return generateCandidates(h_merged, h_segments, v_segments, CANDIDATE_THRESHOLD);
 }
@@ -96,12 +104,13 @@ bool GoalDetectorHistogram::checkBinSimilarity(Bin b1, Bin b2, float allowed_dis
     return b1.value*(1+allowed_dissimilarity) >= b2.value && b1.value*(1-allowed_dissimilarity) <= b2.value;
 }
 
+
+// BETTER EDGE FITTING METHOD
 Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
 {
     // find bounding box from histogram
     int    left = bin.start,
-           right = left + bin.width,
-           v_max = 0;
+           right = left + bin.width;
 
     //just use pure bounding box for now, later use stddev thresholding
 
@@ -147,6 +156,8 @@ Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_seg
     }
 }
 
+
+// OLD CRAP BOUNDING BOX METHOD
 
 //Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
 //{

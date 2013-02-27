@@ -2,6 +2,16 @@
 
 namespace Vision {
 
+    //private map
+//    namespace {
+//        class DebugMap : public map<DEBUG_ID, pair<int, string> > {
+//            DebugMap() {
+//                (*this)
+//            }
+//        }
+
+//    }
+
     std::string getDebugIDName(DEBUG_ID id) {
         switch(id) {
         case DBID_IMAGE:                return "Image";

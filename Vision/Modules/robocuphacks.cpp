@@ -13,19 +13,17 @@ RobocupHacks::RobocupHacks()
 void RobocupHacks::ballGoalHack()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    vector<Goal>& goals = vbb->getGoals();
-    vector<Ball>& balls = vbb->getBalls();
     vector<Goal>::iterator g_it;
-    vector<Ball>::iterator ba_it = balls.begin();
+    vector<Ball>::iterator ba_it = vbb->m_balls.begin();
 
-    while(ba_it < balls.end()) {
+    while(ba_it < vbb->m_balls.end()) {
         bool thrown = false;
         //check in goals
-        g_it = goals.begin();
-        while(g_it < goals.end()) {
+        g_it = vbb->m_goals.begin();
+        while(g_it < vbb->m_goals.end()) {
             if(ballInQuad(*ba_it, g_it->getQuad())) {
                 //throw out ball
-                ba_it = balls.erase(ba_it);
+                ba_it = vbb->m_balls.erase(ba_it);
                 thrown = true;
                 break;
             }

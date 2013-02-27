@@ -59,6 +59,7 @@ bool Line::setLine(double A, double B, double C)
       m_normaliser = sqrt(m_A*m_A + m_B*m_B);
       m_phi = acos(m_A/m_normaliser);
       m_rho = m_C/m_normaliser;
+      a = Vector2<double>(0, m_C);
   }
   else {
       //B==0 means vertical
@@ -68,9 +69,9 @@ bool Line::setLine(double A, double B, double C)
       m_phi = 0.0;
       m_rho = m_C;
       m_normaliser = m_A;
+      a = Vector2<double>(m_C, 0);
   }
 
-  a = Vector2<double>(0, m_C);
   v = Vector2<double>(m_B, -m_A).normalize();
 
   normaliseRhoPhi();
@@ -86,7 +87,10 @@ bool Line::setLine(double rho, double phi)
     m_B = sin(phi);
     m_C = rho;
     m_normaliser = sqrt(m_A*m_A + m_B*m_B);
-    a = Vector2<double>(0, m_C);
+    if(m_B == 0)
+        a = Vector2<double>(m_C, 0);
+    else
+        a = Vector2<double>(0, m_C);
     v = Vector2<double>(m_B, -m_A).normalize();
     normaliseRhoPhi();
     return true; // lines in this form are always valid.

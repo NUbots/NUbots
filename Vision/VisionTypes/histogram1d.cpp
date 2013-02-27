@@ -19,7 +19,7 @@ Histogram1D::Histogram1D(size_t num_bins, double bin_width)
     for(size_t i=0; i<num_bins; i++) {
         m_bins.push_back(emptyBin(i*bin_width, bin_width));
     }
-    m_end = num_bins*bin_width-1;
+    m_end = num_bins*bin_width;
 }
 
 
@@ -31,7 +31,7 @@ Histogram1D::Histogram1D(vector<double> bin_widths)
         m_bins.push_back(emptyBin(cur_pos, bin_widths.at(i)));
         cur_pos += bin_widths.at(i);
     }
-    m_end = cur_pos-1;
+    m_end = cur_pos;
 }
 
 Bin Histogram1D::emptyBin(double start, double width)
@@ -134,23 +134,39 @@ void Histogram1D::addToBins(double start, double end, double density)
         throw std::out_of_range("Histogram1D::addToBin called with negative position.");
     if(end > m_end)
         throw std::out_of_range("Histogram1D::addToBin called with position too large.");
+    if(start > end)
+        throw std::out_of_range("Histogram1D::addToBin called with inverted range (start > end).");
 
-    size_t b = 0;
+    vector<Bin>::iterator bs = m_bins.begin(),
+           be,
+           bi;
     //find first bin
-    while(m_bins[b].start + m_bins[b].width < start)
-        b++;
+    while(bs->start + bs->width <= start)   // inclusive start
+        bs++;
 
-    //spread density across covered portion of first bin
-    m_bins[b].value += density*(m_bins[b].start + m_bins[b].width - start - 1);
+    //find last bin
+    be = bs;
+    while(be->start + be->width < end)  // non inclusive end
+        be++;
 
-    //spread density across full width of intermediate bins
-    while(m_bins[b].start <= end) {
-        m_bins[b].value += density*m_bins[b].width;
-        b++;
+    if(be == bs) {
+        //one bin - spread density across covered portion
+        bs->value += density * (end - start);
     }
-
-    //spread density across covered portion of last bin
-    m_bins[b].value += density*(end - m_bins[b].start - 1); //non-inclusive end
+    else {
+        //multiple bins
+        //spread density across covered portion of first bin
+        bs->value += density * (bs->start + bs->width - start);
+        //spread density across covered portion of last bin
+        be->value += density * (end - be->start);
+        //spread density across full width of intermediate bins
+        bi = bs;
+        bi++;
+        while(bi < be) {
+            bi->value += density * bi->width;
+            bi++;
+        }
+    }
 }
 
 void Histogram1D::mergeBins(Bin first, Bin second)

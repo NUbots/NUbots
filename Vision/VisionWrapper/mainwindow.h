@@ -13,6 +13,7 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_histogram.h>
 #include <qwt_symbol.h>
 #include <qwt/qwt_plot_magnifier.h>
 #include <qwt/qwt_plot_zoomer.h>
@@ -21,6 +22,7 @@
 #include <vector>
 
 #include "Vision/basicvisiontypes.h"
+#include "Vision/VisionTypes/histogram1d.h"
 
 using std::map;
 using std::vector;
@@ -59,15 +61,22 @@ class MainWindow : public QMainWindow
 public:
     enum PLOTWINDOW {
         p1 = 0,
-        p2 = 1
+        p2 = 1,
+        p3 = 2,
+        p4 = 3
     };
 
     PLOTWINDOW winFromInt(int i) {
         switch(i) {
         case 1: return p2;
+        case 2: return p3;
+        case 3: return p4;
         default: return p1;
         }
     }
+
+    static const size_t NUM_PLOTS = 4;
+    static const size_t NUM_CANVASES = 2;
 
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -88,7 +97,9 @@ public:
     void addToLayer(DEBUG_ID id, const vector<QCircle>& items, QPen pen);
     void addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen);
 
-    void setPlot(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol = QwtSymbol());
+    void setCurve(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol = QwtSymbol());
+    void setDashedCurve(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol = QwtSymbol());
+    void setHistogram(PLOTWINDOW win, QString name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style);
     
     bool finished() const {return m_finished;}
     bool next() const {return m_next;}
@@ -106,8 +117,6 @@ private:
     void updateControls();
 
 private:
-    static const size_t NUM_CANVASES = 2;
-
     bool m_finished,
          m_continuous,
          m_next;
@@ -141,6 +150,7 @@ private:
     map<DEBUG_ID, vector<pair<Polygon, QPen> > > polygons;
 
     map<QString, QwtPlotCurve*> curves;
+    map<QString, QwtPlotHistogram*> histograms;
     map<PLOTWINDOW, QwtPlot*> plots;
     //map<PLOTWINDOW, QwtPlotMagnifier*> magnifiers;
     map<PLOTWINDOW, QwtPlotZoomer*> zoomers;

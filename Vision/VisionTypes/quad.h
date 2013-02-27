@@ -57,6 +57,7 @@ public:
     double getAverageHeight() const;               //! Returns the average height of the Quad in pixels.
 
     double area() const;
+    double aspectRatio() const;
 
     bool overlapsHorizontally(const Quad& other) const;
 

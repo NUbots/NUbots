@@ -3,6 +3,7 @@
 
 #include "Vision/Modules/goaldetector.h"
 #include "Tools/Math/LSFittedLine.h"
+#include "Kinematics/Horizon.h"
 #include <vector>
 #include <list>
 

@@ -611,7 +611,6 @@ void VisionBlackboard::debugPublish() const
     debug << "matched_vertical_segments: " << size << endl;
 #endif
 
-    wrapper->debugRefresh();
     wrapper->debugPublish(DBID_IMAGE, original_image);
     
     //horizon

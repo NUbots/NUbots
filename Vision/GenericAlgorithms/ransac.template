@@ -17,12 +17,13 @@ namespace RANSAC
         //run first iterations
 
         found = findModel(points, model, consensus, remainder, variance, e, n, k, method);
-
-        unsigned int i=0;
-        while(found && i<max_iterations) {
+        if(found) {
             results.push_back(pair<Model, vector<DataPoint> >(model, consensus));
-            found = findModel(remainder, model, consensus, remainder, variance, e, n, k, method);
-            i++;
+            while(found && results.size() < max_iterations) {
+                found = findModel(remainder, model, consensus, remainder, variance, e, n, k, method);
+                if(found)
+                    results.push_back(pair<Model, vector<DataPoint> >(model, consensus));
+            }
         }
 
         return results;

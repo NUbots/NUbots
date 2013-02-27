@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
         layer_selections.push_back(map<DEBUG_ID, bool>());
     }
 
-    for(int i = p1; i<=p2; i++) {
+    for(int i = p1; i<NUM_PLOTS; i++) {
         PLOTWINDOW win = winFromInt(i);
         plots[win] = new QwtPlot(ui->windowsScrollArea);
         plots[win]->setAxisAutoScale(QwtPlot::xBottom, true);
@@ -272,20 +272,13 @@ void MainWindow::addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen)
     }
 }
 
-void MainWindow::setPlot(PLOTWINDOW win, QString name, vector< Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol)
+void MainWindow::setCurve(PLOTWINDOW win, QString name, vector< Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol)
 {
     //set curve
     QVector<QPointF> qpts;
-    map<QString, QwtPlotCurve*>::iterator cit = curves.find(name);
-    if(cit == curves.end()) {
+    if(curves.find(name) == curves.end()) {
         //curve does not exist - create
-        if(name.compare("Lines") == 0) {
-            //hack for plotting line segments
-            curves[name] = new LineSegmentsCurve(name);
-        }
-        else {
-            curves[name] = new QwtPlotCurve(name);
-        }
+        curves[name] = new QwtPlotCurve(name);
     }
 
     BOOST_FOREACH(const Vector2<double>& p, pts) {
@@ -297,6 +290,49 @@ void MainWindow::setPlot(PLOTWINDOW win, QString name, vector< Vector2<double> >
     curves[name]->setPen(colour);
     curves[name]->setSymbol(new QwtSymbol(symbol));
     curves[name]->attach(plots[win]);
+
+    plots[win]->replot();
+}
+
+void MainWindow::setDashedCurve(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol)
+{
+    //set curve
+    QVector<QPointF> qpts;
+    if(curves.find(name) == curves.end()) {
+        //curve does not exist - create
+        curves[name] = new LineSegmentsCurve(name);
+    }
+
+    BOOST_FOREACH(const Vector2<double>& p, pts) {
+        qpts.push_back( QPointF(p.x, p.y) );
+    }
+
+    curves[name]->setSamples(qpts);
+    curves[name]->setStyle(style);
+    curves[name]->setPen(colour);
+    curves[name]->setSymbol(new QwtSymbol(symbol));
+    curves[name]->attach(plots[win]);
+
+    plots[win]->replot();
+}
+
+void MainWindow::setHistogram(PLOTWINDOW win, QString name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style)
+{
+    //set curve
+    QVector<QwtIntervalSample> samples;
+    if(histograms.find(name) == histograms.end()) {
+        //hist does not exist - create
+        histograms[name] = new QwtPlotHistogram(name);
+    }
+
+    for(vector<Bin>::const_iterator b = hist.begin(); b != hist.end(); b++) {
+        samples.push_back( QwtIntervalSample(b->value, b->start, b->start + b->width) );
+    }
+
+    histograms[name]->setSamples(samples);
+    histograms[name]->setStyle(style);
+    histograms[name]->setPen(colour);
+    histograms[name]->attach(plots[win]);
 
     plots[win]->replot();
 }

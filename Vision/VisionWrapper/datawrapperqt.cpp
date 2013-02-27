@@ -193,16 +193,16 @@ void DataWrapper::debugPublish(const vector<Ball>& data) {
 
 void DataWrapper::debugPublish(const vector<CentreCircle>& data)
 {
-    BOOST_FOREACH(const Ball& b, data) {
-        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
-    }
+//    BOOST_FOREACH(const CentreCircle& b, data) {
+//        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
+//    }
 }
 
 void DataWrapper::debugPublish(const vector<CornerPoint>& data)
 {
-    BOOST_FOREACH(const Ball& b, data) {
-        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
-    }
+//    BOOST_FOREACH(const Ball& b, data) {
+//        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
+//    }
 }
 
 //bool DataWrapper::debugPublish(const vector<Beacon>& data) {
@@ -503,7 +503,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<RANSACGoal>& data)
     }
 }
 
-void DataWrapper::plot(string name, vector< Point > pts)
+void DataWrapper::plotCurve(string name, vector< Point > pts)
 {
     QwtPlotCurve::CurveStyle style;
     MainWindow::PLOTWINDOW win;
@@ -535,17 +535,44 @@ void DataWrapper::plot(string name, vector< Point > pts)
                            QPen(Qt::blue),
                            QSize(3,3));
     }
-    else if(name.compare("Lines") == 0) {
-        style = QwtPlotCurve::Lines;
-        win = MainWindow::p1;
-        colour = Qt::red;
-    }
     else {
         win = MainWindow::p2;
         colour = Qt::black;
     }
 
-    gui->setPlot(win, QString(name.c_str()), pts, colour, style, symbol);
+    gui->setCurve(win, QString(name.c_str()), pts, colour, style, symbol);
+}
+
+void DataWrapper::plotLineSegments(string name, vector< Point > pts)
+{
+    gui->setDashedCurve(MainWindow::p1, QString(name.c_str()), pts, Qt::red, QwtPlotCurve::Lines, QwtSymbol(QwtSymbol::NoSymbol));
+}
+
+void DataWrapper::plotHistogram(string name, const Histogram1D& hist, Colour colour)
+{
+    QColor c;
+    switch(colour) {
+    case unclassified: c = Qt::black; break;
+    case white: c = Qt::white; break;
+    case green: c = Qt::green; break;
+    case shadow_object: c = Qt::darkGray; break;
+    case pink: c = Qt::magenta; break;
+    case pink_orange: c = Qt::magenta; break;
+    case orange: c = Qt::red; break;
+    case yellow_orange: c = Qt::darkYellow; break;
+    case yellow: c = Qt::yellow; break;
+    case blue: c = Qt::blue; break;
+    case shadow_blue: c = Qt::darkBlue; break;
+    default: c = Qt::yellow; break;
+    }
+
+
+    if(name.compare("Before Merge2") == 0 || name.compare("After Merge2") == 0) {
+        gui->setHistogram(MainWindow::p4, QString(name.c_str()), hist, c, QwtPlotHistogram::Columns);
+    }
+    else {
+        gui->setHistogram(MainWindow::p3, QString(name.c_str()), hist, c, QwtPlotHistogram::Columns);
+    }
 }
 
 bool DataWrapper::updateFrame()
@@ -587,6 +614,7 @@ bool DataWrapper::updateFrame()
                 }
                 catch(std::exception& e){
                     errorlog << "Sensor stream error: " << e.what() << endl;
+                    return false;
                 }
             }
             break;

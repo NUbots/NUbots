@@ -101,11 +101,11 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 
         //testing ransac for goals
         vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();
-        vector<Goal> ransac_goals_centres = m_goal_detector_ransac_centres->run();
+        //vector<Goal> ransac_goals_centres = m_goal_detector_ransac_centres->run();
 
         m_data_wrapper->debugPublish(0, hist_goals);
         m_data_wrapper->debugPublish(1, ransac_goals_edges);
-        m_data_wrapper->debugPublish(2, ransac_goals_centres);
+        //m_data_wrapper->debugPublish(2, ransac_goals_centres);
 //        m_blackboard->addGoals(ransac_goals);
 
 //        if(ransac_goals.size() == 2)

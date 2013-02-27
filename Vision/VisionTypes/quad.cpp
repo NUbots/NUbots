@@ -38,13 +38,18 @@ double Quad::getAverageWidth() const
 
 double Quad::getAverageHeight() const
 {
-    return 0.5*((br - tr).abs() + (bl - tl).abs());
+    return 0.5*((br - tr).abs() + (bl - tl).abs()) + 1;
 }
 
 double Quad::area() const
 {
     Line diag(bl, tr);
     return (bl - tr).abs()* (diag.getLinePointDistance(br) + diag.getLinePointDistance(tl) );
+}
+
+double Quad::aspectRatio() const
+{
+    return ( (br - tr).abs() + (bl - tl).abs() + 2 ) / ( (br - bl).abs() + (tr - tl).abs() + 2 );
 }
 
 bool Quad::overlapsHorizontally(const Quad &other) const

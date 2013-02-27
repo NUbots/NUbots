@@ -132,7 +132,7 @@ vector<Goal> GoalDetectorRANSACCentres::run()
     removeInvalid(candidates);
 
     // OVERLAP CHECK
-    mergeOverlapping(candidates);
+    mergeClose(candidates, 1.0);
 
     posts = assignGoals(candidates);
 

@@ -15,23 +15,26 @@ void GoalDetector::removeInvalid(list<Quad>& posts)
 {
     list<Quad>::iterator it = posts.begin();
     while (it != posts.end()) {
-        //remove all posts whos aspect ratio is too low
-        if (it->getAverageHeight() / it->getAverageWidth() < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_MIN)
+        //remove all posts whos' aspect ratios are too low
+        if ( it->aspectRatio() < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_MIN)
             it = posts.erase(it);
         else
             it++;
     }
 }
 
-void GoalDetector::mergeOverlapping(list<Quad> &posts) {
+void GoalDetector::mergeClose(list<Quad> &posts, double width_multiple_to_merge)
+{
     list<Quad>::iterator a = posts.begin(),
                          b;
     while(a != posts.end()) {
         b = a;
         b++;
         while(b != posts.end()) {
-            double distance = (a->getCentre() - b->getCentre()).abs();
-            if( distance < a->getAverageWidth() || distance < b->getAverageWidth() ) {
+            // if the posts overlap
+            // or if their centres are horizontally closer than the largest widths multiplied by width_multiple_to_merge
+            if(a->overlapsHorizontally(*b) ||
+               abs( a->getCentre().x - b->getCentre().x ) <= max(a->getAverageWidth(), b->getAverageWidth())*width_multiple_to_merge) {
                 // get outer lines
                 Point tl( min(a->getTopLeft().x, b->getTopLeft().x)         , min(a->getTopLeft().y, b->getTopLeft().y) ),
                       tr( max(a->getTopRight().x, b->getTopRight().x)       , min(a->getTopRight().y, b->getTopRight().y) ),
@@ -70,8 +73,8 @@ vector<Goal> GoalDetector::assignGoals(const list<Quad>& candidates) const
              post2 = candidates.back();
 
         //calculate separation between candidates
-        double pos1 = std::min(post1.getTopRight().x, post2.getTopRight().x),      // inside right
-               pos2 = std::max(post1.getBottomLeft().x, post2.getBottomLeft().x);  // inside left
+        double pos1 = std::min(post1.getRight(), post2.getRight()),      // inside right
+               pos2 = std::max(post1.getLeft(), post2.getLeft());  // inside left
 
         //only publish if the candidates are far enough apart
         if(std::abs(pos2 - pos1) >= VisionConstants::MIN_GOAL_SEPARATION) {
@@ -84,6 +87,9 @@ vector<Goal> GoalDetector::assignGoals(const list<Quad>& candidates) const
                 goals.push_back(Goal(GOAL_L, post1));
                 goals.push_back(Goal(GOAL_R, post2));
             }
+        }
+        else {
+            //should merge
         }
     }
     else {

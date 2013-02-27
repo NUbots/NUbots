@@ -96,7 +96,9 @@ public:
     void debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data);
     void debugPublish(DEBUG_ID id, const vector<RANSACGoal> &data);
 
-    void plot(string name, vector< Vector2<double> > pts);
+    void plotCurve(string name, vector< Point > pts);
+    void plotLineSegments(string name, vector< Point > pts);
+    void plotHistogram(string name, const Histogram1D& hist, Colour colour = yellow);
 
 
 private:

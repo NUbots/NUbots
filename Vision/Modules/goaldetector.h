@@ -24,7 +24,7 @@ public:
 protected:
     //checks
     void removeInvalid(list<Quad> &posts);
-    void mergeOverlapping(list<Quad> &posts);
+    void mergeClose(list<Quad> &posts, double width_multiple_to_merge);
 
     //generic
     Vector2<double> calculateSegmentLengthStatistics(const vector<ColourSegment> segments);

@@ -28,6 +28,8 @@
 #include "VisionTypes/VisionFieldObjects/cornerpoint.h"
 #include "VisionTypes/greenhorizon.h"
 
+#include "Vision/Modules/robocuphacks.h"
+
 #ifndef VISIONBLACKBOARD_H // mapped_horizontal_transitions: [1-9]+
 #define VISIONBLACKBOARD_H
 
@@ -39,6 +41,7 @@ class VisionWrapper;
 class VisionBlackboard
 {
     friend class VisionController;
+    friend class RobocupHacks;
 
 public:
 
@@ -112,8 +115,8 @@ public:
     //const vector<Beacon>& getBeacons();
     const vector<Obstacle>& getObstacles();
     const vector<FieldLine>& getLines();
-    const vector<CentreCircle> getCentreCircles();
-    const vector<CornerPoint> getCorners();
+    const vector<CentreCircle>& getCentreCircles();
+    const vector<CornerPoint>& getCorners();
 
     const vector<Point>& getObstaclePoints() const;
 
