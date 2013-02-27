@@ -37,7 +37,7 @@
 //bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 //{
 //    #if VISION_FIELDOBJECT_VERBOSITY > 1
-//        debug << "Beacon::addToExternalFieldObjects - m_id: " << getVFOName(m_id) << endl;
+//        debug << "Beacon::addToExternalFieldObjects - m_id: " << VFOName(m_id) << endl;
 //        debug << "    " << *this << endl;
 //    #endif
         

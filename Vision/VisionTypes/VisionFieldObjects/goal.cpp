@@ -55,7 +55,7 @@ const Quad& Goal::getQuad() const
 bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_GOAL_VERBOSITY > 1
-        debug << "Goal::addToExternalFieldObjects - m_id: " << getVFOName(m_id) << endl;
+        debug << "Goal::addToExternalFieldObjects - m_id: " << VFOName(m_id) << endl;
         debug << "    " << *this << endl;
     #endif
     if(valid) {
@@ -111,9 +111,9 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
 //            break;
         default:
             //invalid object - do not push to fieldobjects
-            errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;
+            errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << VFOName(m_id) << endl;
             #if VISION_GOAL_VERBOSITY > 1
-                debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << getVFOName(m_id) << endl;
+                debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << VFOName(m_id) << endl;
             #endif
             return false;
         }
@@ -320,7 +320,7 @@ double Goal::distanceToGoal(double bearing, double elevation)
  */
 ostream& operator<< (ostream& output, const Goal& g)
 {
-    output << "Goal - " << getVFOName(g.m_id) << endl;
+    output << "Goal - " << VFOName(g.m_id) << endl;
     output << "\tpixelloc: " << g.m_location.screen << endl;
     output << "\tangularloc: " << g.m_location.angular.x << endl;
     output << "\trelative field coords: " << g.m_location.relativeRadial << endl;

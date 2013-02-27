@@ -20,7 +20,7 @@
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 
 using namespace std;
-//using namespace cv;
+using namespace vision;
 using cv::Mat;
 using cv::VideoCapture;
 using cv::Scalar;
@@ -33,27 +33,6 @@ class DataWrapper
     friend class VisionControlWrapper;
 
 public:
-    
-    enum DEBUG_ID {
-        DBID_IMAGE              = 0,
-        DBID_CLASSED_IMAGE      = 1,
-        DBID_H_SCANS            = 2,
-        DBID_V_SCANS            = 3,
-        DBID_SEGMENTS           = 4,
-        DBID_MATCHED_SEGMENTS   = 5,
-        DBID_HORIZON            = 6,
-        DBID_GREENHORIZON_SCANS = 7,
-        DBID_GREENHORIZON_FINAL = 8,
-        DBID_OBJECT_POINTS      = 9,
-        DBID_FILTERED_SEGMENTS  = 10,
-        DBID_GOALS              = 11,
-        DBID_BEACONS            = 12,
-        DBID_BALLS              = 13,
-        DBID_OBSTACLES          = 14,
-        DBID_LINES              = 15,
-        NUMBER_OF_IDS           = 16
-    };
-
     enum PIN_MAP {
         GPIO_BALL  = 23,
         GPIO_BGOAL = 18,

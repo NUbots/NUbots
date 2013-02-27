@@ -23,13 +23,15 @@ namespace Vision {
 
     //! VFO_ID enum and associated string conversion methods
     enum VFO_ID {
-        BALL        = 0,
-        GOAL_L      = 1,
-        GOAL_R      = 2,
-        GOAL_U      = 3,
-        FIELDLINE   = 4,
-        OBSTACLE    = 5,
-        INVALID     = 6
+        BALL            = 0,
+        GOAL_L          = 1,
+        GOAL_R          = 2,
+        GOAL_U          = 3,
+        FIELDLINE       = 4,
+        CORNER          = 5,
+        CENTRE_CIRCLE   = 6,
+        OBSTACLE        = 7,
+        INVALID         = 8
 //        GOAL_Y_L=1,
 //        GOAL_Y_R=2,
 //        GOAL_Y_U=3,
@@ -50,24 +52,25 @@ namespace Vision {
         DBID_H_SCANS                = 2,
         DBID_V_SCANS                = 3,
         DBID_SEGMENTS               = 4,
-        DBID_MATCHED_SEGMENTS       = 5,
-        DBID_HORIZON                = 6,
-        DBID_GREENHORIZON_SCANS     = 7,
-        DBID_GREENHORIZON_THROWN    = 8,
-        DBID_GREENHORIZON_FINAL     = 9,
-        DBID_OBJECT_POINTS          = 10,
-        DBID_FILTERED_SEGMENTS      = 11,
+        DBID_FILTERED_SEGMENTS      = 5,
+        DBID_MATCHED_SEGMENTS       = 6,
+        DBID_HORIZON                = 7,
+        DBID_GREENHORIZON_SCANS     = 8,
+        DBID_GREENHORIZON_THROWN    = 9,
+        DBID_GREENHORIZON_FINAL     = 10,
+        DBID_OBSTACLE_POINTS          = 11,
         DBID_GOALS                  = 12,
         DBID_BALLS                  = 13,
         DBID_OBSTACLES              = 14,
         DBID_LINES                  = 15,
-        DBID_GOAL_LINES_START       = 16,
-        DBID_GOAL_LINES_CENTRE      = 17,
-        DBID_GOAL_LINES_END         = 18,
-        DBID_GOALS_HIST             = 19,
-        DBID_GOALS_RANSAC_EDGES     = 20,
-        DBID_GOALS_RANSAC_CENTRES   = 21,
-        DBID_INVALID                = 22
+        DBID_CENTRE_CIRCLES         = 16,
+        DBID_CORNERS                = 17,
+        DBID_GOAL_LINES_START       = 18,
+        DBID_GOAL_LINES_END         = 19,
+        DBID_GOAL_LINES_CENTRE      = 20,
+        DBID_GOALS_HIST             = 21,
+        DBID_GOALS_RANSAC_EDGES     = 22,
+        DBID_GOALS_RANSAC_CENTRES   = 23
 //        DBID_BEACONS            = 12,
 //        DBID_BALLS              = 13,
 //        DBID_OBSTACLES          = 14,
@@ -94,11 +97,13 @@ namespace Vision {
         RANSAC
     };
 
-    std::string getDebugIDName(DEBUG_ID id);
+    std::string debugIDName(DEBUG_ID id);
 
-    DEBUG_ID getDebugIDFromInt(int id);
+    DEBUG_ID debugIDFromInt(int id);
 
-    int getIntFromeDebugID(DEBUG_ID id);
+    int intFromeDebugID(DEBUG_ID id);
+
+    int numDebugIDs();
 
     //! @brief returns whether the given id maps to a goal
     inline bool isGoal(VFO_ID id) { return id >= GOAL_L && id <= GOAL_U;}
@@ -107,22 +112,16 @@ namespace Vision {
     //inline bool isBeacon(VFO_ID id) {return id >= BEACON_Y && id <= BEACON_U;}
 
     //! @brief converts a VisionFieldObject Id into a string.
-    std::string getVFOName(VFO_ID id);
+    std::string VFOName(VFO_ID id);
 
     //! @brief converts a string into a VisionFieldObject Id.
-    VFO_ID getVFOFromName(const std::string &name);
+    VFO_ID VFOFromName(const std::string &name);
 
     //! @brief converts an int into a VisionFieldObject Id.
-    VFO_ID getVFOFromNum(int n);
+    VFO_ID VFOFromNum(int n);
 
     //! @brief converts a VisionFieldObject Id into an int.
-    int getVFONum(VFO_ID id);
-
-    //! @brief Less than operator for VisionFieldObject IDs.
-    inline bool operator <(VFO_ID id0, VFO_ID id1)
-    {
-        return getVFONum(id0) < getVFONum(id1);
-    }
+    int intFromVFO(VFO_ID id);
 
     //! @brief converts a colour class into a string.
     std::string getColourClassName(COLOUR_CLASS id);

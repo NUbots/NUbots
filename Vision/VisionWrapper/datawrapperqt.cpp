@@ -193,16 +193,17 @@ void DataWrapper::debugPublish(const vector<Ball>& data) {
 
 void DataWrapper::debugPublish(const vector<CentreCircle>& data)
 {
-//    BOOST_FOREACH(const CentreCircle& b, data) {
-//        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
-//    }
+    BOOST_FOREACH(const CentreCircle& c, data) {
+        //need to change to display as ellipse - but for now just centre
+        gui->addToLayer(DBID_CENTRE_CIRCLES, QPointF(c.getLocationPixels().x, c.getLocationPixels().y), QPen(Qt::magenta, 5));
+    }
 }
 
 void DataWrapper::debugPublish(const vector<CornerPoint>& data)
 {
-//    BOOST_FOREACH(const Ball& b, data) {
-//        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
-//    }
+    BOOST_FOREACH(const CornerPoint& c, data) {
+        gui->addToLayer(DBID_CORNERS, QPointF(c.getLocationPixels().x, c.getLocationPixels().y), QPen(Qt::cyan, 5));
+    }
 }
 
 //bool DataWrapper::debugPublish(const vector<Beacon>& data) {
@@ -401,7 +402,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
             gui->addToLayer(id, QPointF(pt.x, pt.y), QColor(Qt::cyan));
         }
         break;
-    case DBID_OBJECT_POINTS:
+    case DBID_OBSTACLE_POINTS:
         BOOST_FOREACH(const Point& pt, data_points) {
             gui->addToLayer(id, QPointF(pt.x, pt.y), QPen(Qt::cyan, 2));
         }

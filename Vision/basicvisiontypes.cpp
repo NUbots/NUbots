@@ -1,202 +1,160 @@
 #include "basicvisiontypes.h"
+#include <map>
+
+using namespace std;
 
 namespace Vision {
 
-    //private map
-//    namespace {
-//        class DebugMap : public map<DEBUG_ID, pair<int, string> > {
-//            DebugMap() {
-//                (*this)
-//            }
-//        }
+    //private statically defined maps
+    namespace {
+        class DebugMap : public map<DEBUG_ID, pair<int, string> > {
+        public:
+            DebugMap() {
+                (*this)[DBID_IMAGE]                 = pair<int, string>(0, "Image");
+                (*this)[DBID_CLASSED_IMAGE]         = pair<int, string>(1, "Classified Image");
+                (*this)[DBID_H_SCANS]               = pair<int, string>(2, "Horizontal Scans");
+                (*this)[DBID_V_SCANS]               = pair<int, string>(3, "Vertical Scans");
+                (*this)[DBID_SEGMENTS]              = pair<int, string>(4, "Segments");
+                (*this)[DBID_FILTERED_SEGMENTS]     = pair<int, string>(5, "Filtered Segments");
+                (*this)[DBID_MATCHED_SEGMENTS]      = pair<int, string>(6, "Transitions (matched segments)");
+                (*this)[DBID_HORIZON]               = pair<int, string>(7, "Kinematics Horizon");
+                (*this)[DBID_GREENHORIZON_SCANS]    = pair<int, string>(8, "Green Horizon Scans");
+                (*this)[DBID_GREENHORIZON_THROWN]   = pair<int, string>(9, "GH thrown points");
+                (*this)[DBID_GREENHORIZON_FINAL]    = pair<int, string>(10, "Green Horizon");
+                (*this)[DBID_OBSTACLE_POINTS]       = pair<int, string>(11, "Obstacle Points");
+                (*this)[DBID_GOALS]                 = pair<int, string>(12, "Goals");
+                (*this)[DBID_BALLS]                 = pair<int, string>(13, "Balls");
+                (*this)[DBID_OBSTACLES]             = pair<int, string>(14, "Obstacles");
+                (*this)[DBID_LINES]                 = pair<int, string>(15, "Lines");
+                (*this)[DBID_CENTRE_CIRCLES]        = pair<int, string>(16, "Centre Circles");
+                (*this)[DBID_CORNERS]               = pair<int, string>(17, "Corners");
+                (*this)[DBID_GOAL_LINES_START]      = pair<int, string>(18, "Goal Lines (start)");
+                (*this)[DBID_GOAL_LINES_END]        = pair<int, string>(19, "Goal Lines (end)");
+                (*this)[DBID_GOAL_LINES_CENTRE]     = pair<int, string>(20, "Goal Lines (centre)");
+                (*this)[DBID_GOALS_HIST]            = pair<int, string>(21, "Goals (histogram)");
+                (*this)[DBID_GOALS_RANSAC_EDGES]    = pair<int, string>(22, "Goals (RANSAC edges)");
+                (*this)[DBID_GOALS_RANSAC_CENTRES]  = pair<int, string>(23, "Goals (RANSAC centres)");
+            }
+        };
 
-//    }
+        DebugMap debugmap;
 
-    std::string getDebugIDName(DEBUG_ID id) {
-        switch(id) {
-        case DBID_IMAGE:                return "Image";
-        case DBID_CLASSED_IMAGE:        return "Classified Image";
-        case DBID_H_SCANS:              return "Horizontal Scans";
-        case DBID_V_SCANS:              return "Vertical Scans";
-        case DBID_SEGMENTS:             return "Segments";
-        case DBID_MATCHED_SEGMENTS:     return "Matched Segments (transitions)";
-        case DBID_HORIZON:              return "Kinematic Horizon";
-        case DBID_GREENHORIZON_SCANS:   return "Green Horizon Scans";
-        case DBID_GREENHORIZON_THROWN:  return "Green Horizon Thrown Points";
-        case DBID_GREENHORIZON_FINAL:   return "Green Horizon";
-        case DBID_OBJECT_POINTS:        return "Object Points";
-        case DBID_FILTERED_SEGMENTS:    return "Filtered Segments";
-        case DBID_GOALS:                return "Goals";
-        case DBID_BALLS:                return "Balls";
-        case DBID_LINES:                return "Lines";
-        case DBID_OBSTACLES:            return "Obstacles";
-        case DBID_GOAL_LINES_START:     return "Goal Lines (start)";
-        case DBID_GOAL_LINES_CENTRE:    return "Goal Lines (centre)";
-        case DBID_GOAL_LINES_END:       return "Goal Lines (end)";
-        case DBID_GOALS_HIST:           return "Goals (from histogram)";
-        case DBID_GOALS_RANSAC_EDGES:   return "Goals (from RANSAC edges)";
-        case DBID_GOALS_RANSAC_CENTRES: return "Goals (from RANSAC centres)";
-        default:                        return "NOT VALID";
+        class VFOMap : public map<VFO_ID, pair<int, string> > {
+        public:
+            VFOMap() {
+                (*this)[BALL]           = pair<int, string>(0, "BALL");
+                (*this)[FIELDLINE]      = pair<int, string>(1, "FIELDLINE");
+                (*this)[CORNER]         = pair<int, string>(2, "CORNER");
+                (*this)[CENTRE_CIRCLE]  = pair<int, string>(3, "CENTRE_CIRCLE");
+                (*this)[OBSTACLE]       = pair<int, string>(4, "OBSTACLE");
+                (*this)[GOAL_L]         = pair<int, string>(5, "GOAL_L");
+                (*this)[GOAL_R]         = pair<int, string>(6, "GOAL_R");
+                (*this)[GOAL_U]         = pair<int, string>(7, "GOAL_U");
+                //        GOAL_Y_L=1,
+                //        GOAL_Y_R=2,
+                //        GOAL_Y_U=3,
+                //        GOAL_B_L=4,
+                //        GOAL_B_R=5,
+                //        GOAL_B_U=6,
+                //        BEACON_Y=7,
+                //        BEACON_B=8,
+                //        BEACON_U=9,
+            }
+        };
+
+        VFOMap vfomap;
+    }
+
+    std::string debugIDName(DEBUG_ID id) {
+        map<DEBUG_ID, pair<int, string> >::const_iterator it = debugmap.find(id);
+
+        if(it == debugmap.end()) {
+            throw "Invalid DEBUG_ID";
+        }
+        else {
+            return it->second.second;
         }
     }
 
-    DEBUG_ID getDebugIDFromInt(int id) {
-        switch(id) {
-        case 0: return DBID_IMAGE;
-        case 1: return DBID_CLASSED_IMAGE;
-        case 2: return DBID_H_SCANS;
-        case 3: return DBID_V_SCANS;
-        case 4: return DBID_SEGMENTS;
-        case 5: return DBID_MATCHED_SEGMENTS;
-        case 6: return DBID_HORIZON;
-        case 7: return DBID_GREENHORIZON_SCANS;
-        case 8: return DBID_GREENHORIZON_THROWN;
-        case 9: return DBID_GREENHORIZON_FINAL;
-        case 10: return DBID_OBJECT_POINTS;
-        case 11: return DBID_FILTERED_SEGMENTS;
-        case 12: return DBID_GOALS;
-        case 13: return DBID_BALLS;
-        case 14: return DBID_OBSTACLES;
-        case 15: return DBID_LINES;
-        case 16: return DBID_GOAL_LINES_START;
-        case 17: return DBID_GOAL_LINES_CENTRE;
-        case 18: return DBID_GOAL_LINES_END;
-        case 19: return DBID_GOALS_HIST;
-        case 20: return DBID_GOALS_RANSAC_EDGES;
-        case 21: return DBID_GOALS_RANSAC_CENTRES;
-        default: return DBID_INVALID;
+    DEBUG_ID debugIDFromInt(int id) {
+        map<DEBUG_ID, pair<int, string> >::const_iterator it = debugmap.begin();
+
+        while(it != debugmap.end() && it->second.first != id)
+            it++;
+
+        if(it == debugmap.end()) {
+            throw "Invalid DEBUG_ID number";
+        }
+        else {
+            return it->first;
         }
     }
 
-    int getIntFromeDebugID(DEBUG_ID id) {
-        switch(id) {
-        case DBID_IMAGE:                return 0;
-        case DBID_CLASSED_IMAGE:        return 1;
-        case DBID_H_SCANS:              return 2;
-        case DBID_V_SCANS:              return 3;
-        case DBID_SEGMENTS:             return 4;
-        case DBID_MATCHED_SEGMENTS:     return 5;
-        case DBID_HORIZON:              return 6;
-        case DBID_GREENHORIZON_SCANS:   return 7;
-        case DBID_GREENHORIZON_THROWN:  return 8;
-        case DBID_GREENHORIZON_FINAL:   return 9;
-        case DBID_OBJECT_POINTS:        return 10;
-        case DBID_FILTERED_SEGMENTS:    return 11;
-        case DBID_GOALS:                return 12;
-        case DBID_BALLS:                return 13;
-        case DBID_LINES:                return 14;
-        case DBID_OBSTACLES:            return 15;
-        case DBID_GOAL_LINES_START:     return 16;
-        case DBID_GOAL_LINES_CENTRE:    return 17;
-        case DBID_GOAL_LINES_END:       return 18;
-        case DBID_GOALS_HIST:           return 19;
-        case DBID_GOALS_RANSAC_EDGES:   return 20;
-        case DBID_GOALS_RANSAC_CENTRES: return 21;
-        default:                        return 22;
+    int intFromDebugID(DEBUG_ID id) {
+        map<DEBUG_ID, pair<int, string> >::const_iterator it = debugmap.find(id);
+
+        if(it == debugmap.end()) {
+            throw "Invalid DEBUG_ID";
+        }
+        else {
+            return it->second.first;
         }
     }
 
-    std::string getVFOName(VFO_ID id)
+    int numDebugIDs()
     {
-        switch(id) {
-        case BALL:          return "BALL";
-        case GOAL_L:        return "GOAL_L";
-        case GOAL_R:        return "GOAL_R";
-        case GOAL_U:        return "GOAL_U";
-    //    case GOAL_Y_L:      return "GOAL_Y_L";
-    //    case GOAL_Y_R:      return "GOAL_Y_R";
-    //    case GOAL_Y_U:      return "GOAL_Y_U";
-        //case GOAL_B_L:      return "GOAL_B_L";
-        //case GOAL_B_R:      return "GOAL_B_R";
-        //case GOAL_B_U:      return "GOAL_B_U";
-        //case BEACON_Y:      return "BEACON_Y";
-        //case BEACON_B:      return "BEACON_B";
-        //case BEACON_U:      return "BEACON_U";
-        case FIELDLINE:     return "FIELDLINE";
-        case OBSTACLE:      return "OBSTACLE";
-        default:            return "INVALID";
-        }
+        return debugmap.size();
     }
 
-    VFO_ID getVFOFromName(const std::string &name)
+    std::string VFOName(VFO_ID id)
     {
-        if(name.compare("BALL") == 0)
-            return BALL;
-        else if(name.compare("GOAL_L") == 0)
-            return GOAL_L;
-        else if(name.compare("GOAL_R") == 0)
-            return GOAL_R;
-        else if(name.compare("GOAL_U") == 0)
-            return GOAL_U;
-    //    else if(name.compare("GOAL_Y_L") == 0)
-    //        return GOAL_Y_L;
-    //    else if(name.compare("GOAL_Y_R") == 0)
-    //        return GOAL_Y_R;
-    //    else if(name.compare("GOAL_Y_U") == 0)
-    //        return GOAL_Y_U;
-    //    else if(name.compare("GOAL_B_L") == 0)
-    //        return GOAL_B_L;
-    //    else if(name.compare("GOAL_B_R") == 0)
-    //        return GOAL_B_R;
-    //    else if(name.compare("GOAL_B_U") == 0)
-    //        return GOAL_B_U;
-    //    else if(name.compare("BEACON_Y") == 0)
-    //        return BEACON_Y;
-    //    else if(name.compare("BEACON_B") == 0)
-    //        return BEACON_B;
-    //    else if(name.compare("BEACON_U") == 0)
-    //        return BEACON_U;
-        else if(name.compare("FIELDLINE") == 0)
-            return FIELDLINE;
-        else if(name.compare("OBSTACLE") == 0)
-            return OBSTACLE;
-        else
-            return INVALID;
-    }
+        map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.find(id);
 
-    VFO_ID getVFOFromNum(int n) {
-        switch(n) {
-        case 0: return BALL;
-        case 1: return GOAL_L;
-        case 2: return GOAL_R;
-        case 3: return GOAL_U;
-        case 4: return FIELDLINE;
-        case 5: return OBSTACLE;
-    //    case 1: return GOAL_Y_L;
-    //    case 2: return GOAL_Y_R;
-    //    case 3: return GOAL_Y_U;
-    //    case 4: return GOAL_B_L;
-    //    case 5: return GOAL_B_R;
-    //    case 6: return GOAL_B_U;
-    //    case 7: return BEACON_Y;
-    //    case 8: return BEACON_B;
-    //    case 9: return BEACON_U;
-    //    case 10: return FIELDLINE;
-    //    case 11: return OBSTACLE;
-        default: return INVALID;
+        if(it == vfomap.end()) {
+            throw "Invalid VFO_ID";
+        }
+        else {
+            return it->second.second;
         }
     }
 
-    int getVFONum(VFO_ID id) {
-        switch(id) {
-        case BALL:          return 0;
-        case GOAL_L:        return 1;
-        case GOAL_R:        return 2;
-        case GOAL_U:        return 3;
-        case FIELDLINE:     return 4;
-        case OBSTACLE:      return 5;
-    //    case GOAL_Y_L:      return 1;
-    //    case GOAL_Y_R:      return 2;
-    //    case GOAL_Y_U:      return 3;
-    //    case GOAL_B_L:      return 4;
-    //    case GOAL_B_R:      return 5;
-    //    case GOAL_B_U:      return 6;
-    //    case BEACON_Y:      return 7;
-    //    case BEACON_B:      return 8;
-    //    case BEACON_U:      return 9;
-    //    case FIELDLINE:     return 10;
-    //    case OBSTACLE:      return 11;
-        default:            return -1;
+    VFO_ID VFOFromName(const std::string &name)
+    {
+        map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.begin();
+
+        while(it != vfomap.end() && it->second.second.compare(name) != 0)
+            it++;
+
+        if(it == vfomap.end()) {
+            throw "Invalid VFO_ID name";
+        }
+        else {
+            return it->first;
+        }
+    }
+
+    VFO_ID VFOFromInt(int n) {
+        map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.begin();
+
+        while(it != vfomap.end() && it->second.first != n)
+            it++;
+
+        if(it == vfomap.end()) {
+            throw "Invalid VFO_ID number";
+        }
+        else {
+            return it->first;
+        }
+    }
+
+    int intFromVFO(VFO_ID id) {
+        map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.find(id);
+
+        if(it == vfomap.end()) {
+            throw "Invalid VFO_ID";
+        }
+        else {
+            return it->second.first;
         }
     }
 

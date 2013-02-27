@@ -23,9 +23,9 @@ MainWindow::MainWindow(QWidget *parent) :
     layers_box->setLayout(layers_layout);
     ui->layersScrollArea->setWidget(layers_box);
     //create layers
-    for(int i=0; i<DBID_INVALID; i++) {
-        DEBUG_ID id = getDebugIDFromInt(i);
-        QCheckBox* newbox = new QCheckBox(getDebugIDName(getDebugIDFromInt(id)).c_str(), ui->layersScrollArea);
+    for(int i=0; i<numDebugIDs(); i++) {
+        DEBUG_ID id = debugIDFromInt(i);
+        QCheckBox* newbox = new QCheckBox(debugIDName(id).c_str(), ui->layersScrollArea);
         QObject::connect(newbox, SIGNAL(clicked()), this, SLOT(refresh()));
         layers_layout->addWidget(newbox);
         layer_boxes[id] = newbox;
@@ -84,8 +84,8 @@ MainWindow::~MainWindow()
     }
 
     delete ui;
-    for(int id=0; id<DBID_INVALID; id++) {
-        delete layer_boxes[getDebugIDFromInt(id)];
+    for(int id=0; id<numDebugIDs(); id++) {
+        delete layer_boxes[debugIDFromInt(id)];
     }
 
 //    for(map<PLOTWINDOW, QwtPlotMagnifier*>::iterator it = magnifiers.begin(); it != magnifiers.end(); it++) {
@@ -120,8 +120,8 @@ void MainWindow::resetFlags()
 
 void MainWindow::clearLayers()
 {
-    for(int i=0; i<DBID_INVALID; i++) {
-        DEBUG_ID id = getDebugIDFromInt(i);
+    for(int i=0; i<numDebugIDs(); i++) {
+        DEBUG_ID id = debugIDFromInt(i);
         images[id].clear();
         points[id].clear();
         lines[id].clear();
@@ -141,8 +141,8 @@ void MainWindow::clearLayers()
 
 void MainWindow::refresh()
 {
-    for(int i=0; i<DBID_INVALID; i++) {
-        DEBUG_ID id = getDebugIDFromInt(i);
+    for(int i=0; i<numDebugIDs(); i++) {
+        DEBUG_ID id = debugIDFromInt(i);
         layer_selections[current_window][id] = layer_boxes[id]->isChecked();
     }
 
@@ -152,8 +152,8 @@ void MainWindow::refresh()
         canvases[c]->fill(QColor(Qt::black));
         //draw over image
         QPainter painter(canvases[c]);
-        for(int i=0; i<DBID_INVALID; i++) {
-            DEBUG_ID id = getDebugIDFromInt(i);
+        for(int i=0; i<numDebugIDs(); i++) {
+            DEBUG_ID id = debugIDFromInt(i);
             if(layer_selections[c][id]) {
                 for(vector<pair<QImage, float> >::iterator it = images[id].begin(); it<images[id].end(); it++) {
                     painter.setOpacity(it->second);
@@ -201,8 +201,8 @@ void MainWindow::refresh()
 
 void MainWindow::updateControls()
 {
-    for(int i=0; i<DBID_INVALID; i++) {
-        DEBUG_ID id = getDebugIDFromInt(i);
+    for(int i=0; i<numDebugIDs(); i++) {
+        DEBUG_ID id = debugIDFromInt(i);
         layer_boxes[id]->setChecked(layer_selections[current_window][id]);
     }
 }

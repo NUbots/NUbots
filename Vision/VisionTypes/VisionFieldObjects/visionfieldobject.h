@@ -29,7 +29,7 @@ public:
     virtual ~VisionFieldObject() {}
 
     VFO_ID getID() const {return m_id;}
-    string getName() const {return getVFOName(m_id);}
+    string getName() const {return VFOName(m_id);}
 
     const GroundPoint& getLocation() const {return m_location;}
     //! @brief returns the screen location in pixels (relative to the top left).

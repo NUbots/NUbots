@@ -21,7 +21,7 @@ public:
     Vector2<GroundPoint> getEndPoints() const {return m_end_points;}
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const {out << getVFOName(FIELDLINE) << " " << getShortLabel();}
+    void printLabel(ostream& out) const {out << VFOName(FIELDLINE) << " " << getShortLabel();}
     //! @brief Brief stream output for labelling purposes
     Vector2<double> getShortLabel() const {return Vector2<double>(m_screen_line.getRho(), m_screen_line.getPhi());}
 

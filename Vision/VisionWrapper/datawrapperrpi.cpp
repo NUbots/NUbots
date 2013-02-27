@@ -30,8 +30,8 @@ string DataWrapper::getIDName(DEBUG_ID id) {
         return "DBID_GREENHORIZON_SCANS";
     case DBID_GREENHORIZON_FINAL:
         return "DBID_GREENHORIZON_FINAL";
-    case DBID_OBJECT_POINTS:
-        return "DBID_OBJECT_POINTS";
+    case DBID_OBSTACLE_POINTS:
+        return "DBID_OBSTACLE_POINTS";
     case DBID_FILTERED_SEGMENTS:
         return "DBID_FILTERED_SEGMENTS";
     case DBID_GOALS:
@@ -494,7 +494,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
                 //cv::circle(img, cv::Point2i(it->x, it->y), 1, cv::Scalar(255,0,255), 2);
             }
             break;
-        case DBID_OBJECT_POINTS:
+        case DBID_OBSTACLE_POINTS:
             BOOST_FOREACH(const PointType& pt, data_points) {
                 cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(0,0,255), 4);
             }
