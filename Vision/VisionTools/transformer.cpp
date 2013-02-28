@@ -135,7 +135,7 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
     theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
 
     //if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
-    if(body_pitch_valid)
+    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
         theta -= body_pitch;
 
     cos_theta = cos(theta);
@@ -170,7 +170,7 @@ void Transformer::screenToGroundCartesian(GroundPoint& pt) const
 
     Vector3<double> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
 
-#if VISION_FIELDOBJECT_VERBOSITY > 3
+#if VISION_FIELDPOINT_VERBOSITY > 2
     debug << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
 #endif
     pt.ground = Vector2<double>(cartesian_foot_relative.x, cartesian_foot_relative.y);

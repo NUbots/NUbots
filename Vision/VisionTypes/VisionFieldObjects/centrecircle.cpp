@@ -1,4 +1,7 @@
 #include "centrecircle.h"
+#include "Vision/visionblackboard.h"
+#include "debug.h"
+#include "debugverbosityvision.h"
 
 CentreCircle::CentreCircle()
 {
@@ -13,6 +16,17 @@ CentreCircle::CentreCircle(GroundPoint centre, double ground_radius, Vector2<dou
     m_size_on_screen = screen_size,
     m_ground_radius =ground_radius;
     //need more here
+    const Transformer& t = VisionBlackboard::getInstance()->getTransformer();
+
+    // calculate bearing and elevation
+    t.screenToRadial2D(m_location);
+    valid = t.isDistanceToPointValid();
+    if(valid) {
+        // find distance
+        double distance = t.distanceToPoint(m_location.angular.x, m_location.angular.y);
+        // calculate foot relative 3D location
+        t.radial2DToRadial3D(m_location, distance);
+    }
 }
 
 CentreCircle::~CentreCircle()
@@ -21,7 +35,21 @@ CentreCircle::~CentreCircle()
 
 bool CentreCircle::addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const
 {
+#if VISION_FIELDPOINT_VERBOSITY > 1
+    debug << "CentreCircle::addToExternalFieldObjects:" << endl;
+    debug << *this << endl;
+#endif
 
+    if(valid) {
+        //add centre circle to stationary field objects
+        fieldobjects->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
+                                                                                                       Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
+                                                                                                       Vector2<float>(m_location.angular.x, m_location.angular.y),
+                                                                                                       Vector2<int>(m_location.screen.x,m_location.screen.y),
+                                                                                                       Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
+                                                                                                       timestamp);
+    }
+    return valid;
 }
 
 //! @brief Stream output for labelling purposes
@@ -40,4 +68,22 @@ Vector2<double> CentreCircle::getShortLabel() const
 double CentreCircle::findError(const Vector2<double>& measured) const
 {
     return (m_location.screen - measured).abs();
+}
+
+ostream& operator<< (ostream& output, const CentreCircle& c)
+{
+    output << "CentreCircle - " << endl;
+    output << "\tpixelloc: " << c.m_location.screen << endl;
+    output << "\tangularloc: " << c.m_location.angular << endl;
+    output << "\trelative field coords: " << c.m_location.relativeRadial << endl;
+    output << "\tspherical error: [" << c.m_spherical_error << "]" << endl;
+    output << "\tsize on screen: [" << c.m_size_on_screen << "]";
+    return output;
+}
+
+ostream& operator<< (ostream& output, const vector<CentreCircle>& c)
+{
+    for (size_t i=0; i<c.size(); i++)
+        output << c[i] << endl;
+    return output;
 }

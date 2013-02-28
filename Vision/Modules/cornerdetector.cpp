@@ -10,7 +10,7 @@ CornerDetector::CornerDetector(double tolerance)
 
 void CornerDetector::setTolerance(double tolerance)
 {
-#if VISION_FIELDOBJECT_VERBOSITY > 1
+#if VISION_FIELDPOINT_VERBOSITY > 0
     if(tolerance < 0 || tolerance > 1)
         debug << "CornerDetector::setTolerance - invalid tolerance: " << tolerance << " (must be in [0, 1]." << endl;
 #endif
@@ -38,7 +38,7 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
         for(it2 = it1+1; it2 < lines.end(); it2++) {
             Line l2 = it2->getGroundLineEquation();
             Vector2<GroundPoint> l2_pts = it2->getEndPoints();
-            if(l1.getAngleBetween(l2) < m_tolerance*mathGeneral::PI*0.5) {
+            if(l1.getAngleBetween(l2) > (1-m_tolerance)*mathGeneral::PI*0.5) {
                 //nearly perpendicular
                 //now build corner from end points
                 GroundPoint intersection;
@@ -98,12 +98,13 @@ CornerPoint::TYPE CornerDetector::findCorner(Vector2<GroundPoint> ep1, Vector2<G
     double min1 = min(d1m, min(d1x, d1y)),
            min2 = min(d2m, min(d2x, d2y));
 
-    if(min1 < tolerance*(ep1[0].ground - ep1[1].ground).abs() && min2 < tolerance*(ep2[0].ground - ep2[1].ground).abs()) {
+    //removed distance check
+    //if(min1 < tolerance*(ep1[0].ground - ep1[1].ground).abs() && min2 < tolerance*(ep2[0].ground - ep2[1].ground).abs()) {
         //check distances are within tolerance of the length of the lines
         //perhaps do this later with only 1 line
 
         if(d1m == min1 && d2m == min2) {
-            return CornerPoint::CROSS;
+            return CornerPoint::X;
         }
         else if(d1m == min1 || d2m == min2){
             return CornerPoint::T;
@@ -111,8 +112,8 @@ CornerPoint::TYPE CornerDetector::findCorner(Vector2<GroundPoint> ep1, Vector2<G
         else {
             return CornerPoint::L;
         }
-    }
-    else {
-        return CornerPoint::INVALID;
-    }
+    //}
+    //else {
+    //    return CornerPoint::INVALID;
+    //}
 }

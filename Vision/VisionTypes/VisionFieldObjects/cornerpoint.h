@@ -9,7 +9,7 @@ public:
     enum TYPE {
         L,
         T,
-        CROSS,
+        X,
         INVALID
     };
 
@@ -25,6 +25,11 @@ public:
 
     //! @brief Calculation of error for optimisation
     virtual double findError(const Vector2<double>& measured) const;
+
+    //! @brief output stream operator.
+    friend ostream& operator<< (ostream& output, const CornerPoint& c);
+    //! @brief output stream operator for a vector of corner points.
+    friend ostream& operator<< (ostream& output, const vector<CornerPoint>& c);
 
 private:
     TYPE m_type;

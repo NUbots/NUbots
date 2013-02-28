@@ -5,6 +5,7 @@
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
 
+#include "Vision/visionconstants.h"
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/Jobs/CameraJobs/ChangeCameraSettingsJob.h"
@@ -158,31 +159,7 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
     visual_object->addToExternalFieldObjects(field_objects, m_timestamp);
 }
 
-void DataWrapper::debugPublish(vector<Ball> data)
-{
-
-}
-
-//bool DataWrapper::debugPublish(vector<Beacon> data) {
-//    return false;
-//}
-
-void DataWrapper::debugPublish(vector<Goal> data)
-{
-
-}
-
-void DataWrapper::debugPublish(vector<Obstacle> data)
-{
-
-}
-
-void DataWrapper::debugPublish(const vector<FieldLine>& data)
-{
-
-}
-
-void DataWrapper::debugPublish(DEBUG_ID id, const vector< Vector2<double> > &data_points)
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
 {
     #if VISION_WRAPPER_VERBOSITY > 2
         debug << id << endl;
@@ -205,24 +182,11 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector< Vector2<double> > &dat
     case DBID_GREENHORIZON_FINAL:
         emit pointsUpdated(data_points, GLDisplay::greenHorizonPoints);
         break;
-    default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
-    }
-}
-
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
-{
-    #if VISION_WRAPPER_VERBOSITY > 2
-        debug << id << endl;
-        debug << data_points << endl;
-    #endif
-
-    switch(id) {
     case DBID_MATCHED_SEGMENTS:
         emit pointsUpdated(data_points, GLDisplay::Transitions);
         break;
-    case DBID_OBJECT_POINTS:
-        debug << "DataWrapper::debugPublish - DBID_OBJECT_POINTS printing not implemented" << endl;
+    case DBID_OBSTACLE_POINTS:
+        debug << "DataWrapper::debugPublish - DBID_OBSTACLE_POINTS printing not implemented" << endl;
         break;
     default:
         errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
@@ -276,7 +240,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
     }
 }
 
-void DataWrapper::plot(string name, vector< Vector2<double> > pts)
+void DataWrapper::plotCurve(string name, vector< Vector2<double> > pts)
 {
     QVector<QPointF> qpts;
     BOOST_FOREACH(const Point& p, pts) {
@@ -286,8 +250,21 @@ void DataWrapper::plot(string name, vector< Vector2<double> > pts)
     emit plotUpdated(QString(name.c_str()), qpts);
 }
 
+void DataWrapper::plotHistogram(string name, const Histogram1D &hist, Colour colour)
+{
+    errorlog << "plotHistogram - not implemented for NUView" << endl;
+}
+
+void DataWrapper::plotLineSegments(string name, vector<Point> pts)
+{
+    errorlog << "plotLineSegments - not implemented for NUView" << endl;
+}
+
 bool DataWrapper::updateFrame()
 {
+    // allow dynamic reloading of file values
+    camera_data.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
+    VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
     //should check actions but for some reason it keeps coming in as null
     if (m_current_image == NULL || sensor_data == NULL || field_objects == NULL)
     {

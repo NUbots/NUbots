@@ -186,7 +186,7 @@ void OpenglManager::writePointsToDisplay(std::vector<Point> newpoints, GLDisplay
     glDisable(GL_TEXTURE_2D);
     for (int pointNum = 0; pointNum < (int)newpoints.size(); pointNum++)
     {
-        drawHollowCircle(newpoints[pointNum].screen.x+0.5, newpoints[pointNum].screen.y+0.5, 0.5, 50);
+        drawHollowCircle(newpoints[pointNum].x+0.5, newpoints[pointNum].y+0.5, 0.5, 50);
     }
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST
@@ -224,8 +224,8 @@ void OpenglManager::writeSegmentsToDisplay(vector<vector<ColourSegment> > update
             Vision::getColourAsRGB(segment.getColour(), r, g, b);
             glColor3ub(r,g,b);
             glBegin(GL_LINES);                              // Start Lines
-            glVertex2i( int(s.screen.x), int(s.screen.y) );                 // Starting point
-            glVertex2i( int(e.screen.x), int(e.screen.y) );               // Ending point
+            glVertex2i( int(s.x), int(s.y) );                 // Starting point
+            glVertex2i( int(e.x), int(e.y) );               // Ending point
             glEnd();  // End Lines
         }
     }
@@ -455,12 +455,12 @@ void OpenglManager::writeLinesPointsToDisplay(vector<Point> linepoints, GLDispla
     for(unsigned int i = 0; i < linepoints.size(); i++)
     {
         glBegin(GL_LINES);                              // Start Lines
-        glVertex2i( int(linepoints[i].screen.x-2), int(linepoints[i].screen.y+2));                 // Starting point
-        glVertex2i( int(linepoints[i].screen.x+2), int(linepoints[i].screen.y-2));               // Ending point
+        glVertex2i( int(linepoints[i].x-2), int(linepoints[i].y+2));                 // Starting point
+        glVertex2i( int(linepoints[i].x+2), int(linepoints[i].y-2));               // Ending point
         glEnd();  // End Lines
         glBegin(GL_LINES);                              // Start Lines
-        glVertex2i( int(linepoints[i].screen.x+2), int(linepoints[i].screen.y+2));                 // Starting point
-        glVertex2i( int(linepoints[i].screen.x-2), int(linepoints[i].screen.y-2));               // Ending point
+        glVertex2i( int(linepoints[i].x+2), int(linepoints[i].y+2));                 // Starting point
+        glVertex2i( int(linepoints[i].x-2), int(linepoints[i].y-2));               // Ending point
         glEnd();  // End Lines
 
     }
@@ -494,8 +494,8 @@ void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDis
         const LSFittedLine& line = lines[i];
         if(line.valid == true)
         {
-            Vector2< Vector2<double> > endpts;
-            line.getEndPoints(endpts);
+            Vector2<double> ep1, ep2;
+            line.getEndPoints(ep1, ep2);
 
             glLineWidth(3.0);       // Line width
 
@@ -513,8 +513,8 @@ void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDis
 
 
             glBegin(GL_LINES);                              // Start Lines
-            glVertex2i( int(endpts[0].x), int(endpts[0].y) );                 // Starting point
-            glVertex2i( int(endpts[1].x), int(endpts[1].y) );               // Ending point
+            glVertex2i( int(ep1.x), int(ep1.y) );                 // Starting point
+            glVertex2i( int(ep2.x), int(ep2.y) );               // Ending point
             glEnd();  // End Lines
 
             const std::vector< Vector2<double> >& linePoints = line.getPoints();
@@ -533,8 +533,8 @@ void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDis
 //            glLineWidth(2.0);       // Line width
 //            glColor3ub(100,0,50);
 //            glBegin(GL_LINES);                              // Start Lines
-//            glVertex2i( int(endpts[0].x), int(endpts[0].y) );                 // Starting point
-//            glVertex2i( int(endpts[1].x), int(endpts[1].y) );               // Ending point
+//            glVertex2i( int(ep1.x), int(ep1.y) );                 // Starting point
+//            glVertex2i( int(ep2.x), int(ep2.y) );               // Ending point
 //            glEnd();  // End Lines
 //        }
     }

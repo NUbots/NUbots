@@ -34,13 +34,13 @@ public:
     static float GOAL_RANSAC_MATCHING_TOLERANCE;
 
     //! Beacon filtering constants
-    static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;  //! Whether to throw out beacons whose base is above the kinematics horizon.
-    static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;    //! Whether to throw out beacons when the distance methods disagree.
-    static float MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS;           //! The maximum allowed discrepency between the d2p and width distance measures for beacons
-    static bool THROWOUT_DISTANT_BEACONS;   //! Whether to throw out beacons too far away.
-    static float MAX_BEACON_DISTANCE;       //! How far away a beacon has to been to be ignored.
-    static bool THROWOUT_INSIGNIFICANT_BEACONS; //! Whether to throw out beacons with too few transitions.
-    static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS;    //! The minimum number of transitions to keep a beacon.
+//    static bool THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;  //! Whether to throw out beacons whose base is above the kinematics horizon.
+//    static bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;    //! Whether to throw out beacons when the distance methods disagree.
+//    static float MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS;           //! The maximum allowed discrepency between the d2p and width distance measures for beacons
+//    static bool THROWOUT_DISTANT_BEACONS;   //! Whether to throw out beacons too far away.
+//    static float MAX_BEACON_DISTANCE;       //! How far away a beacon has to been to be ignored.
+//    static bool THROWOUT_INSIGNIFICANT_BEACONS; //! Whether to throw out beacons with too few transitions.
+//    static int MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS;    //! The minimum number of transitions to keep a beacon.
 
     //! Ball filtering constants
     static bool THROWOUT_ON_ABOVE_KIN_HOR_BALL; //! Whether to throw out a ball whose base is above the kinematics horizon.
@@ -61,7 +61,7 @@ public:
     //! Distance method options
     static DistanceMethod BALL_DISTANCE_METHOD;     //! The preferred method for calculating the distance to the ball
     static DistanceMethod GOAL_DISTANCE_METHOD;     //! The preferred method for calculating the distance to the goals
-    static DistanceMethod BEACON_DISTANCE_METHOD;   //! The preferred method for calculating the distance to the beacons
+//    static DistanceMethod BEACON_DISTANCE_METHOD;   //! The preferred method for calculating the distance to the beacons
     
     static LineDetectionMethod LINE_METHOD;
     //! Field-object detection constants
@@ -70,8 +70,8 @@ public:
     static float BALL_MIN_PERCENT_ORANGE;   //! Dave?
     static float GOAL_MIN_PERCENT_YELLOW;   //! Dave?
     static float GOAL_MIN_PERCENT_BLUE;     //! Dave?
-    static float BEACON_MIN_PERCENT_YELLOW; //! Dave?
-    static float BEACON_MIN_PERCENT_BLUE;   //! Dave?
+//    static float BEACON_MIN_PERCENT_YELLOW; //! Dave?
+//    static float BEACON_MIN_PERCENT_BLUE;   //! Dave?
     static int MIN_GOAL_SEPARATION;
 
     //! Obstacle detection constants
@@ -80,9 +80,10 @@ public:
 
     //! Field dimension constants
     static float GOAL_WIDTH;                //! The physical width of the goal posts in cm
+    static float GOAL_HEIGHT_INTERNAL;
     static float DISTANCE_BETWEEN_POSTS;    //! The physical distance between the posts in cm
     static float BALL_WIDTH;                //! The physical width of the ball in cm
-    static float BEACON_WIDTH;              //! The physical width of the beacons in cm
+    static float CENTRE_CIRCLE_RADIUS;
     
     //! ScanLine options
     static unsigned int HORIZONTAL_SCANLINE_SPACING;    //! The spacing between horizontal scans.
@@ -127,7 +128,7 @@ public:
 
     static vector<Parameter> getAllOptimisable();
     static vector<Parameter> getBallParams();
-    static vector<Parameter> getGoalBeaconParams();
+    static vector<Parameter> getGoalParams();
     static vector<Parameter> getObstacleParams();
     static vector<Parameter> getLineParams();
     static vector<Parameter> getGeneralParams();
@@ -135,7 +136,7 @@ public:
 
     static bool setAllOptimisable(const vector<float>& params);
     static bool setBallParams(const vector<float>& params);
-    static bool setGoalBeaconParams(const vector<float>& params);
+    static bool setGoalParams(const vector<float>& params);
     static bool setObstacleParams(const vector<float>& params);
     static bool setLineParams(const vector<float>& params);
     static bool setGeneralParams(const vector<float>& params);

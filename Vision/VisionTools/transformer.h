@@ -34,6 +34,7 @@ public:
     //                    ground which would be visible at the given screen location.
     bool isDistanceToPointValid() const;
     double distanceToPoint(double bearing, double elevation) const;
+    double distanceToPoint(const GroundPoint& gp) const;
     //double distanceToPoint(double bearing, double elevation) const;
 
     bool isScreenToGroundValid() const;

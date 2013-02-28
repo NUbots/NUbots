@@ -23,6 +23,11 @@ public:
 
     double getGroundRadius() const {return m_ground_radius;}
 
+    //! @brief output stream operator.
+    friend ostream& operator<< (ostream& output, const CentreCircle& c);
+    //! @brief output stream operator for a vector of CentreCircles.
+    friend ostream& operator<< (ostream& output, const vector<CentreCircle>& c);
+
 private:
     double m_ground_radius;
 };

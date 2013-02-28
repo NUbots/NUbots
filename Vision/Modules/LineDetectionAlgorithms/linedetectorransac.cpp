@@ -23,8 +23,13 @@ vector<FieldLine> LineDetectorRANSAC::run(const vector<GroundPoint>& points)
     vector<pair<LSFittedLine, LSFittedLine> > linePairs;
     vector<FieldLine> finalLines;
 
+    // find possible line candidates using RANSAC in the ground plane
     candidates = RANSAC::findMultipleModels<RANSACLine<GroundPoint>, GroundPoint>(points, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
-    for(unsigned int i=0; i<candidates.size(); i++) {
+
+    /// @todo perhaps find amount of green along line and remove based on threshold?
+
+    // generate line equations in the image plane
+    for(size_t i=0; i<candidates.size(); i++) {
         pair<LSFittedLine, LSFittedLine> lp;
         BOOST_FOREACH(GroundPoint& g, candidates.at(i).second) {
             //line pairs are ordered as such : (ground, screen)
@@ -34,10 +39,12 @@ vector<FieldLine> LineDetectorRANSAC::run(const vector<GroundPoint>& points)
         linePairs.push_back(lp);
     }
 
+    // merge approximately colinear lines
     mergeColinear(linePairs, VisionConstants::RANSAC_MAX_ANGLE_DIFF_TO_MERGE, VisionConstants::RANSAC_MAX_DISTANCE_TO_MERGE);
 
-    for(unsigned int i=0; i<linePairs.size(); i++) {
-        //line pairs are ordered as such : (ground, screen)
+    // generate FieldLine type from ground and screen equations
+    for(size_t i=0; i<linePairs.size(); i++) {
+        // line pairs are ordered as such : (ground, screen)
         finalLines.push_back(FieldLine(linePairs.at(i).second, linePairs.at(i).first));
     }
 

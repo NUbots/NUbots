@@ -63,23 +63,24 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
             debug << "Goal::addToExternalFieldObjects - valid" << endl;
         #endif
         AmbiguousObject newAmbObj;
-        FieldObjects::StationaryFieldObjectID stat_id;
-        bool stationary = false;
 
         switch(m_id) {
         case GOAL_L:
-            stat_id = FieldObjects::FO_YELLOW_LEFT_GOALPOST;
-            stationary = true;
+            newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Left Yellow Post");
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
             break;
         case GOAL_R:
-            stat_id = FieldObjects::FO_YELLOW_RIGHT_GOALPOST;
-            stationary = true;
+            newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Right Yellow Post");
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
             break;
         case GOAL_U:
             newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
             newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-            stationary = false;
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
             break;
 //        case GOAL_Y_L:
 //            stat_id = FieldObjects::FO_YELLOW_LEFT_GOALPOST;
@@ -118,25 +119,14 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
             return false;
         }
 
-        if(stationary) {
-            //add post to stationaryFieldObjects
-            fieldobjects->stationaryFieldObjects[stat_id].UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
-                                                                             Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
-                                                                             Vector2<float>(m_location.angular.x, m_location.angular.y),
-                                                                             Vector2<int>(m_location.screen.x,m_location.screen.y),
-                                                                             Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
-                                                                             timestamp);
-        }
-        else {
-            //update ambiguous goal post and add it to ambiguousFieldObjects
-            newAmbObj.UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
-                                         Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
-                                         Vector2<float>(m_location.angular.x, m_location.angular.y),
-                                         Vector2<int>(m_location.screen.x,m_location.screen.y),
-                                         Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
-                                         timestamp);
-            fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
-        }
+        //update ambiguous goal post and add it to ambiguousFieldObjects
+        newAmbObj.UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
+                                     Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
+                                     Vector2<float>(m_location.angular.x, m_location.angular.y),
+                                     Vector2<int>(m_location.screen.x,m_location.screen.y),
+                                     Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
+                                     timestamp);
+        fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
 
         return true;
     }
@@ -322,10 +312,10 @@ ostream& operator<< (ostream& output, const Goal& g)
 {
     output << "Goal - " << VFOName(g.m_id) << endl;
     output << "\tpixelloc: " << g.m_location.screen << endl;
-    output << "\tangularloc: " << g.m_location.angular.x << endl;
+    output << "\tangularloc: " << g.m_location.angular << endl;
     output << "\trelative field coords: " << g.m_location.relativeRadial << endl;
-    output << "\tspherical error: [" << g.m_spherical_error.x << ", " << g.m_spherical_error.y << "]" << endl;
-    output << "\tsize on screen: [" << g.m_size_on_screen.x << ", " << g.m_size_on_screen.y << "]";
+    output << "\tspherical error: " << g.m_spherical_error << endl;
+    output << "\tsize on screen: " << g.m_size_on_screen;
     return output;
 }
 

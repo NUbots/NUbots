@@ -534,7 +534,7 @@ void DataWrapper::plotCurve(string name, vector< Point > pts)
         symbol = QwtSymbol(QwtSymbol::XCross,
                            QBrush(Qt::blue),
                            QPen(Qt::blue),
-                           QSize(3,3));
+                           QSize(5,5));
     }
     else {
         win = MainWindow::p2;

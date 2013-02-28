@@ -248,6 +248,7 @@ template <class V = float> class Vector2{
   {
       return Vector2<V>(x/other.x, y/other.y);
   }
+
   /**
   * @brief output stream operator result of the form (x,y)
   */

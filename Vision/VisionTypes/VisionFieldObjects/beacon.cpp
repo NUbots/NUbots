@@ -36,13 +36,13 @@
 
 //bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 //{
-//    #if VISION_FIELDOBJECT_VERBOSITY > 1
+//    #if VISION_BEACON_VERBOSITY > 1
 //        debug << "Beacon::addToExternalFieldObjects - m_id: " << VFOName(m_id) << endl;
 //        debug << "    " << *this << endl;
 //    #endif
         
 //    if(valid) {
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::addToExternalFieldObjects - valid" << endl;
 //        #endif
 //        AmbiguousObject newAmbObj;
@@ -67,7 +67,7 @@
 //        default:
 //            //invalid object - do not push to fieldobjects
 //            errorlog << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
-//            #if VISION_FIELDOBJECT_VERBOSITY > 1
+//            #if VISION_BEACON_VERBOSITY > 1
 //                debug << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
 //            #endif
 //            return false;
@@ -96,7 +96,7 @@
 //        return true;
 //    }
 //    else {
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::addToExternalFieldObjects - invalid" << endl;
 //        #endif
 //        return false;
@@ -106,7 +106,7 @@
 //bool Beacon::check() const
 //{
 ////    if(!distance_valid) {
-////        #if VISION_FIELDOBJECT_VERBOSITY > 1
+////        #if VISION_BEACON_VERBOSITY > 1
 ////            debug << "Beacon::check - Beacon thrown out: distance invalid" << endl;
 ////        #endif
 ////        return false;
@@ -115,7 +115,7 @@
 //    //throwout for base below horizon
 //    if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS and
 //       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::check - Beacon thrown out: base above kinematics horizon" << endl;
 //        #endif
 //        return false;
@@ -124,7 +124,7 @@
 //    //Distance discrepency throwout - if width method says Beacon is a lot closer than d2p (by specified value) then discard
 //    if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS and
 //            width_dist + VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS < d2p) {
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //        debug << "Beacon::check - Beacon thrown out: width distance too much smaller than d2p" << endl;
 //            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS << endl;
 //        #endif
@@ -134,7 +134,7 @@
 //    //throw out if Beacon is too far away
 //    if(VisionConstants::THROWOUT_DISTANT_BEACONS and
 //        m_transformed_spherical_pos.x > VisionConstants::MAX_BEACON_DISTANCE) {
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::check - Beacon thrown out: too far away" << endl;
 //            debug << "\td2p: " << m_transformed_spherical_pos.x << " MAX_BEACON_DISTANCE: " << VisionConstants::MAX_BEACON_DISTANCE << endl;
 //        #endif
@@ -188,12 +188,12 @@
 //    else {
 //        transform_valid = false;
 //        m_transformed_spherical_pos = Vector3<float>(0,0,0);
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::calculatePositions: Kinematics CTG transform invalid - will not push beacon" << endl;
 //        #endif
 //    }
     
-//    #if VISION_FIELDOBJECT_VERBOSITY > 2
+//    #if VISION_BEACON_VERBOSITY > 2
 //        debug << "Beacon::calculatePositions: ";
 //        debug << d2p << " " << width_dist << " " << distance << " " << m_transformed_spherical_pos.x << endl;
 //    #endif
@@ -222,14 +222,14 @@
 ////    }
 //    d2pvalid = vbb->distanceToPoint(bearing, elevation, d2p);
 
-//    #if VISION_FIELDOBJECT_VERBOSITY > 1
+//    #if VISION_BEACON_VERBOSITY > 1
 //        if(!d2pvalid)
 //            debug << "Beacon::distanceToBeacon: d2p invalid - combination methods will only return width_dist" << endl;
 //    #endif
 //    //get distance from width
 //    width_dist = VisionConstants::BEACON_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
 
-//    #if VISION_FIELDOBJECT_VERBOSITY > 1
+//    #if VISION_BEACON_VERBOSITY > 1
 //        debug << "Beacon::distanceToBeacon: bearing: " << bearing << " elevation: " << elevation << endl;
 //        debug << "Beacon::distanceToBeacon: d2p: " << d2p << endl;
 //        debug << "Beacon::distanceToBeacon: m_size_on_screen.x: " << m_size_on_screen.x << endl;
@@ -237,19 +237,19 @@
 //    #endif
 //    switch(VisionConstants::BEACON_DISTANCE_METHOD) {
 //    case VisionConstants::D2P:
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::distanceToBeacon: Method: D2P" << endl;
 //        #endif
 //        distance_valid = d2pvalid;
 //        return d2p;
 //    case VisionConstants::Width:
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::distanceToBeacon: Method: Width" << endl;
 //        #endif
 //        distance_valid = true;
 //        return width_dist;
 //    case VisionConstants::Average:
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::distanceToBeacon: Method: Average" << endl;
 //        #endif
 //        //average distances
@@ -259,7 +259,7 @@
 //        else
 //            return width_dist;
 //    case VisionConstants::Least:
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_BEACON_VERBOSITY > 1
 //            debug << "Beacon::distanceToBeacon: Method: Least" << endl;
 //        #endif
 //        distance_valid = true;

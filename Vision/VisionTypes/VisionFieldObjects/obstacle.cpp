@@ -30,12 +30,12 @@ Obstacle::Obstacle(Point position, double width, double height)
 
 bool Obstacle::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
-#if VISION_FIELDOBJECT_VERBOSITY > 1
+#if VISION_OBSTACLE_VERBOSITY > 1
     debug << "Obstacle::addToExternalFieldObjects" << endl;
     debug << "    " << *this << endl;
 #endif
 if(valid) {
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_OBSTACLE_VERBOSITY > 1
         debug << "Obstacle::addToExternalFieldObjects - valid" << endl;
     #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -52,7 +52,7 @@ if(valid) {
     return true;
 }
 else {
-    #if VISION_FIELDOBJECT_VERBOSITY > 1
+    #if VISION_OBSTACLE_VERBOSITY > 1
         debug << "Obstacle::addToExternalFieldObjects - invalid" << endl;
     #endif
     return false;
@@ -63,7 +63,7 @@ bool Obstacle::check() const
 {
     //! @todo Do a check based on width and d2p consistency
 //    if(!distance_valid) {
-//        #if VISION_FIELDOBJECT_VERBOSITY > 1
+//        #if VISION_OBSTACLE_VERBOSITY > 1
 //            debug << "Obstacle::check - Obstacle thrown out: distance invalid" << endl;
 //        #endif
 //        return false;
@@ -87,7 +87,7 @@ bool Obstacle::calculatePositions()
 
     //m_spherical_error - not calculated
 
-    #if VISION_FIELDOBJECT_VERBOSITY > 2
+    #if VISION_OBSTACLE_VERBOSITY > 2
         debug << "Obstacle::calculatePositions: " << m_location.relativeRadial << endl;
     #endif
 

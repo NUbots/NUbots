@@ -11,7 +11,7 @@ macx {
     OBJECTS_DIR = "../Build/NUView/.obj"
     MOC_DIR = "../Build/NUView/.moc"
     RCC_DIR = "../Build/NUView/.rcc"
-    UI_DIR = "../Build/NUView/.ui"
+    UI_DIR = "../Build/NUView/.ui"con
     #Macports include directory
     INCLUDEPATH += '/opt/local/include'
 }

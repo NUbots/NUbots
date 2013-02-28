@@ -50,29 +50,24 @@ list<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_seg
 
     Vector2<double> h_length_stats = calculateSegmentLengthStatistics(h_segments);
 
-    Histogram1D hist2(BINS, VisionBlackboard::getInstance()->getImageWidth()/(double)BINS);
     // fill histogram bins
     BOOST_FOREACH(ColourSegment seg, h_segments) {
         //use stddev throwout to remove topbar segments
         if(seg.getLength() <= h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y) {
-            hist.addToBin(seg.getCentre().x, seg.getLength());
-            hist2.addToBins(seg.getStart().x, seg.getEnd().x + 1, 1);
+            //hist.addToBin(seg.getCentre().x, seg.getLength());
+            hist.addToBins(seg.getStart().x, seg.getEnd().x + 1, 1);
         }
     }
 
     // use vertical segments as well
     BOOST_FOREACH(ColourSegment seg, v_segments) {
         hist.addToBin(seg.getCentre().x, seg.getLength());
-        hist2.addToBin(seg.getCentre().x, seg.getLength());
     }
 
     Histogram1D h_merged = mergePeaks(hist, MERGE_THRESHOLD);
-    Histogram1D h_merged2 = mergePeaks(hist2, MERGE_THRESHOLD);
 
     DataWrapper::getInstance()->plotHistogram("Before Merge", hist, blue);
-    DataWrapper::getInstance()->plotHistogram("Before Merge2", hist2, blue);
-    //DataWrapper::getInstance()->plotHistogram("After Merge", h_merged, yellow);
-    //DataWrapper::getInstance()->plotHistogram("After Merge2", h_merged2, yellow);
+    DataWrapper::getInstance()->plotHistogram("After Merge", h_merged, yellow);
 
     return generateCandidates(h_merged, h_segments, v_segments, CANDIDATE_THRESHOLD);
 }
