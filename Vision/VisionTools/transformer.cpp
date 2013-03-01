@@ -46,7 +46,7 @@ Vector2<double> Transformer::correctDistortion(const Vector2<double>& pt)
 void Transformer::screenToRadial2D(GroundPoint& pt) const
 {
     pt.angular.x = atan( (image_centre.x-pt.screen.x)  * screen_to_radial_factor.x);
-    pt.angular.y = atan( (image_centre.y-pt.screen.y) * screen_to_radial_factor.y);
+    pt.angular.y = atan( (image_centre.y-pt.screen.y) * screen_to_radial_factor.y) + VisionConstants::D2P_ANGLE_CORRECTION;
 }
 
 /**
@@ -132,7 +132,7 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
            cos_bearing;
 
     //resultant angle inclusive of camera pitch, pixel elevation and angle correction factor
-    theta = mathGeneral::PI*0.5 - camera_pitch + elevation + VisionConstants::D2P_ANGLE_CORRECTION;
+    theta = mathGeneral::PI*0.5 - camera_pitch + elevation;
 
     //if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
     if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)

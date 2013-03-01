@@ -60,21 +60,17 @@ vector<Goal> GoalDetectorRANSACEdges::run()
     DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
     DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
 
-    cout << "(" << start_lines.size() << " " << end_lines.size() << ") ";
+    //cout << "(" << start_lines.size() << " " << end_lines.size() << ") ";
 
     //Build candidates out of lines - this finds candidates irrespective of rotation - filtering must be done later
     quads = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
 
-    cout << quads.size() << " ";
-
-    if(quads.size() > 2) {
-        cout << "fah" << endl;
-    }
+    //cout << quads.size() << " ";
 
     // check potential cross bars AND posts (aspect ratio check)
     removeInvalid(quads);
 
-    cout << quads.size() << " ";
+    //cout << quads.size() << " ";
 
     const double ANGLE_MARGIN = 0.25;
     BOOST_FOREACH(Quad& q, quads) {
@@ -94,12 +90,12 @@ vector<Goal> GoalDetectorRANSACEdges::run()
         }
     }
 
-    cout << post_candidates.size() << " ";
+    //cout << post_candidates.size() << " ";
 
     // only check potential posts for building
     mergeClose(post_candidates, 1.5);
 
-    cout << post_candidates.size() << " ";
+    //cout << post_candidates.size() << " ";
 
     // generate actual goal from candidate posts
     if(crossbar.first) {
@@ -111,7 +107,7 @@ vector<Goal> GoalDetectorRANSACEdges::run()
         posts = GoalDetector::assignGoals(post_candidates);
     }
 
-    cout << posts.size() << endl;
+    //cout << posts.size() << endl;
 
     //Improves bottom centre estimate using vertical transitions
     BOOST_FOREACH(ColourSegment v, vsegments) {
@@ -187,8 +183,7 @@ list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLin
                                 quads.push_back(Quad(sp1, sp2, ep2, ep1));  //generate candidate
                                 used.at(i) = true;  //remove end line from consideration
                                 matched = true;
-//#if VISION_GOAL_VERBOSITY > 2
-#if 1
+#if VISION_GOAL_VERBOSITY > 2
                                 debug << "\tsuccess " << sp1 << " " << sp2 << " , " << ep2 << " " << ep1 << endl;
                             }
                             else

@@ -13,7 +13,7 @@ class FieldPointDetector
 public:
     FieldPointDetector(LineDetector* line_detector = NULL, CircleDetector* circle_detector = NULL, CornerDetector* corner_detector = NULL);
 
-    void run() const;
+    void run(bool circle, bool lines, bool corners) const;
 
     LineDetector* m_line_detector;
     CircleDetector* m_circle_detector;

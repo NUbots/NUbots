@@ -14,6 +14,13 @@
 #include "Vision/visionconstants.h"
 
 #include <boost/foreach.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+
+using namespace boost::accumulators;
 
 DataWrapper* DataWrapper::instance = 0;
 
@@ -151,7 +158,7 @@ const LookUpTable& DataWrapper::getLUT() const
 void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
 {
     //! @todo Implement + Comment
-    
+
     for(int i=0; i<visual_objects.size(); i++) {
         visual_objects.at(i)->addToExternalFieldObjects(field_objects, m_timestamp);
     }
@@ -182,6 +189,42 @@ void DataWrapper::debugPublish(vector<Ball> data) {
 //}
 
 void DataWrapper::debugPublish(vector<Goal> data) {
+//    static accumulator_set<double, stats<tag::mean, tag::variance> > acc_d2p;
+//    static accumulator_set<double, stats<tag::mean, tag::variance> > acc_w;
+//    static int i=0;
+//    if(data.size() > 2) {
+//        cout << "3 or more posts found" << endl;
+//    }
+//    else if(data.size() == 2) {
+//        if(data[0].getID() == GOAL_R) {
+//            acc_d2p( data[0].getLocation().relativeRadial.x );
+//            acc_w( data[0].width_dist);
+//            i++;
+//        }
+//        else if(data[1].getID() == GOAL_R) {
+//            acc_d2p( data[1].getLocation().relativeRadial.x );
+//            acc_w( data[1].width_dist);
+//            i++;
+//        }
+//        else {
+//            cout << "two goals but no right one" << endl;
+//        }
+//    }
+//    else if(data.size() == 1) {
+//        acc_d2p( data.front().getLocation().relativeRadial.x );
+//        acc_w( data.front().width_dist);
+//        i++;
+//    }
+//    else {
+//        cout << "No goals" << endl;
+//    }
+
+//    if(i >= 30) {
+//        cout << "d2p: (" << mean(acc_d2p) << ", " << sqrt(variance(acc_d2p)) << ") width: " << "(" << mean(acc_w) << ", " << sqrt(variance(acc_w)) << ")" << endl;
+//        acc_d2p = accumulator_set<double, stats<tag::mean, tag::variance> >();
+//        acc_w = accumulator_set<double, stats<tag::mean, tag::variance> >();
+//        i=0;
+//    }
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
         BOOST_FOREACH(Goal post, data) {
@@ -216,6 +259,28 @@ void DataWrapper::debugPublish(const vector<FieldLine> &data)
             debug << "DataWrapper::debugPublish - Line = ";
             l.printLabel(debug);
             debug << endl;
+        }
+    #endif
+}
+
+void DataWrapper::debugPublish(const vector<CentreCircle> &data)
+{
+    #if VISION_WRAPPER_VERBOSITY > 2
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
+        BOOST_FOREACH(const CentreCircle& c, data) {
+            debug << "DataWrapper::debugPublish - CentreCircle = ";
+            debug << c << endl;
+        }
+    #endif
+}
+
+void DataWrapper::debugPublish(const vector<CornerPoint> &data)
+{
+    #if VISION_WRAPPER_VERBOSITY > 2
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
+        BOOST_FOREACH(const CornerPoint& c, data) {
+            debug << "DataWrapper::debugPublish - CornerPoint = ";
+            debug << c << endl;
         }
     #endif
 }
@@ -258,12 +323,11 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
     #endif
 }
 
-void DataWrapper::plot(string name, vector<Vector2<double> > pts)
+void DataWrapper::plotCurve(string name, vector<Vector2<double> > pts)
 {
-//    static ofstream out("DataWrapperplot");
-
-//    out << name << pts << endl;
-    cout << name << " " << pts << endl;
+#if VISION_WRAPPER_VERBOSITY > 2
+    debug << "DataWrapper::plotCurve " << name << " " << pts << endl;
+#endif
 }
 
 /*! @brief Updates the held information ready for a new frame.
@@ -280,8 +344,6 @@ bool DataWrapper::updateFrame()
     actions = Blackboard->Actions;
     sensor_data = Blackboard->Sensors;
     camera_data = Blackboard->CameraSpecs;
-//    if(isSavingImages)
-//        sensor_data_copy = *sensor_data;
     field_objects = Blackboard->Objects;
     
     if (current_frame != NULL and Blackboard->Image->GetTimestamp() - m_timestamp > 40)
@@ -305,7 +367,10 @@ bool DataWrapper::updateFrame()
     m_timestamp = current_frame->GetTimestamp();
     //succesful
     field_objects->preProcess(m_timestamp);
-    cout << "Frames dropped: " << numFramesDropped << endl;
+#if VISION_WRAPPER_VERBOSITY > 1
+    debug << "Frames dropped: " << numFramesDropped << endl;
+#endif
+
 
     return current_frame->getWidth() > 0 && current_frame->getHeight() > 0;
 }

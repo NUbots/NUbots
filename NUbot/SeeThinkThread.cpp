@@ -148,6 +148,10 @@ void SeeThinkThread::run()
             Blackboard->GameInfo->UpdateTime(current_time);
             m_logrecorder->WriteData(Blackboard);
 
+            #ifdef THREAD_SEETHINK_PROFILE
+                prof.split("time update");
+            #endif
+
             #ifdef USE_LOCALISATION
                 m_nubot->m_localisation->process(Blackboard->Sensors, Blackboard->Objects, Blackboard->GameInfo, Blackboard->TeamInfo);
                 #ifdef THREAD_SEETHINK_PROFILE

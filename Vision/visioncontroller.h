@@ -20,6 +20,7 @@
 #include "Vision/Modules/cornerdetector.h"
 #include "Vision/Modules/goaldetector.h"
 #include "Vision/Modules/balldetector.h"
+#include "debugverbosityvision.h"
 
 class VisionController
 {
@@ -72,13 +73,17 @@ private:
     FieldPointDetector* m_field_point_detector;
 
     GoalDetector* m_goal_detector_hist;
-    GoalDetector* m_goal_detector_ransac_centres;
     GoalDetector* m_goal_detector_ransac_edges;
 
     LineDetector* m_line_detector_sam;
     LineDetector* m_line_detector_ransac;
     CornerDetector m_corner_detector;
     CircleDetector m_circle_detector;
+
+
+#ifdef VISION_PROFILER_ON
+    ofstream m_profiling_stream;
+#endif
 };
 
 #endif // VISIONCONTROLLER_H

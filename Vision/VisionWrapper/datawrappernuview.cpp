@@ -280,8 +280,8 @@ bool DataWrapper::updateFrame()
         return false;
     }
     m_timestamp = m_current_image->GetTimestamp();
-    cout << "pre: " << m_current_image->GetTimestamp() << endl;
-    field_objects->preProcess(m_current_image->GetTimestamp());
+    cout << "pre: " << m_timestamp << endl;
+    field_objects->preProcess(m_timestamp);
     return true;
 }
 

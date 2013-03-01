@@ -16,12 +16,15 @@
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/basicvisiontypes.h"
 #include "Vision/VisionTypes/segmentedregion.h"
+#include "Vision/VisionTypes/histogram1d.h"
 #include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
 #include "Vision/VisionTypes/VisionFieldObjects/ball.h"
 //#include "Vision/VisionTypes/VisionFieldObjects/beacon.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
+#include "Vision/VisionTypes/VisionFieldObjects/centrecircle.h"
+#include "Vision/VisionTypes/VisionFieldObjects/cornerpoint.h"
 
 using namespace std;
 
@@ -65,13 +68,17 @@ public:
     void debugPublish(int i, const vector<Goal>& d);
     void debugPublish(vector<Obstacle> data);
     void debugPublish(const vector<FieldLine>& data);
+    void debugPublish(const vector<CentreCircle>& data);
+    void debugPublish(const vector<CornerPoint>& data);
     void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     void debugPublish(DEBUG_ID id) {}
     void debugPublish(DEBUG_ID id, const NUImage *const img) {}
     void debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
 
-    void plot(string name, vector< Vector2<double> > pts);
+    void plotCurve(string name, vector< Point > pts);
+    void plotLineSegments(string name, vector< Point > pts) {}
+    void plotHistogram(string name, const Histogram1D& hist, Colour colour = yellow) {}
 
     //! Control interface       
 private:    

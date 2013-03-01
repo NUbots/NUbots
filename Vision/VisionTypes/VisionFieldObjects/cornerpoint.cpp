@@ -27,69 +27,69 @@ bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float ti
     debug << "CornerPoint::addToExternalFieldObjects - m_id: " << VFOName(m_id) << endl;
     debug << "    " << *this << endl;
 #endif
-if(valid) {
-    #if VISION_FIELDPOINT_VERBOSITY > 1
-        debug << "CornerPoint::addToExternalFieldObjects - valid" << endl;
-    #endif
-    AmbiguousObject newAmbObj;
-
-    switch(m_type) {
-    case L:
-        // labelling inside L since I have no idea which is which - going to match it with other possibilities
-        newAmbObj = AmbiguousObject(FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L, "L Corner");
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_RIGHT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_CIRCLE);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_RIGHT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_RIGHT);
-
-        break;
-    case T:
-        newAmbObj = AmbiguousObject(FieldObjects::FO_CORNER_UNKNOWN_T, "T Corner");
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_RIGHT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_RIGHT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_RIGHT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT);
-        newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT);
-        break;
-    case X:
-        // At present a cross is ignored as none exist on the field and this indicates poor detection
-        return false;
-    default:
-        //invalid object - do not push to fieldobjects
-        errorlog << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << endl;
+    if(valid) {
         #if VISION_FIELDPOINT_VERBOSITY > 1
-            debug << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << endl;
+            debug << "CornerPoint::addToExternalFieldObjects - valid" << endl;
+        #endif
+        AmbiguousObject newAmbObj;
+
+        switch(m_type) {
+        case L:
+            // labelling inside L since I have no idea which is which - going to match it with other possibilities
+            newAmbObj = AmbiguousObject(FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L, "L Corner");
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_RIGHT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_CIRCLE);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_RIGHT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_RIGHT);
+
+            break;
+        case T:
+            newAmbObj = AmbiguousObject(FieldObjects::FO_CORNER_UNKNOWN_T, "T Corner");
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_RIGHT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_RIGHT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_RIGHT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT);
+            newAmbObj.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT);
+            break;
+        case X:
+            // At present a cross is ignored as none exist on the field and this indicates poor detection
+            return false;
+        default:
+            //invalid object - do not push to fieldobjects
+            errorlog << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << endl;
+            #if VISION_FIELDPOINT_VERBOSITY > 1
+                debug << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << endl;
+            #endif
+            return false;
+        }
+
+        //update ambiguous corner and add it to ambiguousFieldObjects
+        newAmbObj.UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
+                                     Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
+                                     Vector2<float>(m_location.angular.x, m_location.angular.y),
+                                     Vector2<int>(m_location.screen.x,m_location.screen.y),
+                                     Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
+                                     timestamp);
+        fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
+
+        return true;
+    }
+    else {
+        #if VISION_FIELDPOINT_VERBOSITY > 1
+            debug << "CornerPoint::addToExternalFieldObjects - invalid" << endl;
         #endif
         return false;
     }
-
-    //update ambiguous corner and add it to ambiguousFieldObjects
-    newAmbObj.UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
-                                 Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
-                                 Vector2<float>(m_location.angular.x, m_location.angular.y),
-                                 Vector2<int>(m_location.screen.x,m_location.screen.y),
-                                 Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
-                                 timestamp);
-    fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
-
-    return true;
-}
-else {
-    #if VISION_FIELDPOINT_VERBOSITY > 1
-        debug << "CornerPoint::addToExternalFieldObjects - invalid" << endl;
-    #endif
-    return false;
-}
 }
 
 //! @brief Stream output for labelling purposes

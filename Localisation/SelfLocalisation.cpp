@@ -14,6 +14,8 @@
 #include "nubotdataconfig.h"
 #include "nubotconfig.h"
 
+#include "Tools/Profiling/Profiler.h"
+
 #include <assert.h>
 
 
@@ -115,7 +117,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     // Set default settings
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_viterbi);
-    //    m_settings.setPruneMethod(LocalisationSettings::prune_merge);
+    //m_settings.setPruneMethod(LocalisationSettings::prune_merge);
 //  Changed to viterbi, since we are now introducing a lot of possible 'rubbish' models
 //  to try out resetting conditions. Merging these seems to be bad, as they can gang up
 //  merge together and overpower to good, more accurate models. Works well in the simulations
@@ -207,7 +209,8 @@ SelfLocalisation::~SelfLocalisation()
  */
 void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const GameInformation* gameInfo, const TeamInformation* teamInfo)
 {
-
+    Profiler prof("Localisation");
+    prof.start();
     m_frame_log.str(""); // Clear buffer.
     if (sensor_data == NULL or fobs == NULL)
         return;
@@ -255,7 +258,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
         return;
     }
 #else
-
+    prof.split("Initial Processing");
     if (odom_ok)
     {
         float fwd = odo[0];
@@ -277,6 +280,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
             m_frame_log << std::endl << "Result: " << getBestModel()->summary(false);
         #endif
     }
+    prof.split("Time Update");
 
     #if LOC_SUMMARY > 0
     m_frame_log << "Observation Update:" << std::endl;
@@ -301,7 +305,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
     #endif
     ProcessObjects(fobs, time_increment);
-
+    prof.split("Object Update");
 
     MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
 
@@ -314,17 +318,23 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
 
     // clip models back on to field.
     clipActiveModelsToField();
+    prof.split("Clipping");
 
     // Store WM Data in Field Objects.
     //int bestModelID = getBestModelID();
     // Get the best model to use.
     WriteModelToObjects(getBestModel(), fobs);
+    prof.split("Writing Models");
 
 
     #if LOC_SUMMARY > 0
     m_frame_log << std::endl <<  "Final Result: " << ModelStatusSummary();
     #endif
 #endif
+    prof.stop();
+
+//    cout << prof;
+
 }
 
 /*! @brief Process objects
@@ -336,6 +346,8 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
  */
 void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
 {
+    Profiler prof("Process Objects");
+    prof.start();
     int numUpdates = 0;
     int updateResult;
     int usefulObjectCount = 0;
@@ -382,6 +394,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     updateResult = multipleLandmarkUpdate(update_objects);
     numUpdates+=objectsAdded;
     usefulObjectCount+=objectsAdded;
+    prof.split("Known Object Update");
 
     NormaliseAlphas();
 
@@ -390,6 +403,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
         bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
         removeAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
         // Do Ambiguous objects.
+        std::cout << "Total Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
         AmbiguousObjectsIt currAmb(fobs->ambiguousFieldObjects.begin());
         AmbiguousObjectsConstIt endAmb(fobs->ambiguousFieldObjects.end());
         for(; currAmb != endAmb; ++currAmb){
@@ -411,6 +425,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             PruneModels();
         }
 #endif // MULTIPLE_MODELS_ON
+        prof.split("Ambiguous Objects.");
 
         // Two Object update
     //#if TWO_OBJECT_UPDATE_ON
@@ -430,12 +445,14 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     //#endif
 
         NormaliseAlphas();
-
+        prof.split("Two Object Update");
 
         PruneModels();
+        prof.split("Pruning");
 
         MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
         ballUpdate(ball);
+        prof.split("Ball Update");
 
 #if DEBUG_LOCALISATION_VERBOSITY > 1
         for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
@@ -473,6 +490,8 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             debug_out  << " Robot Theta: " << bestModel->mean(Model::states_heading) << endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2	
+        prof.stop();
+        std::cout << prof << std::endl;
 }
 
 /*! @brief Remove ambiguous pairs

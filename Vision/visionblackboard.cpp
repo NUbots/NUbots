@@ -534,6 +534,8 @@ void VisionBlackboard::update()
     m_goals.clear();
     m_obstacles.clear();
     m_lines.clear();
+    m_corner_points.clear();
+    m_centre_circles.clear();
     m_vfos.clear();
 
 #if VISION_CONTROLFLOW_VERBOSITY > 0

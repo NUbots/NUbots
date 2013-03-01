@@ -49,7 +49,6 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
                         if(it1->getScreenLineEquation().getIntersection(it2->getScreenLineEquation(), intersection.screen)) {
 
                             /// DEBUG
-                            cout << l1.getAngleBetween(l2) << " < " << m_tolerance*mathGeneral::PI*0.5 << " and ";
                             Point mid1 = (l1_pts[0].ground + l1_pts[1].ground)*0.5,
                                   mid2 = (l2_pts[0].ground + l2_pts[1].ground)*0.5;
 
@@ -64,7 +63,6 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
                             double min1 = min(d1m, min(d1x, d1y)),
                                    min2 = min(d2m, min(d2x, d2y));
 
-                            cout << min1 << " < " << m_tolerance*(l1_pts[0].ground - l1_pts[1].ground).abs() << " and " << min2 << " < " << m_tolerance*(l2_pts[0].ground - l2_pts[1].ground).abs() << endl;
                             /// END DEBUG
 
                             results.push_back(CornerPoint(type, intersection));

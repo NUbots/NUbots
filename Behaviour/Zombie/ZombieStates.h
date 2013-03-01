@@ -90,7 +90,7 @@ public:
         //else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
         //    m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
         //UPDATE HEAD
-        m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
+        m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 65);
 
         //UPDATE ARMS:
         //m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 30);
