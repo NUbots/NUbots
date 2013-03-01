@@ -72,6 +72,7 @@ Sensor& Sensor::operator= (const Sensor & source)
     VectorData = source.VectorData;
     MatrixData = source.MatrixData;
     StringData = source.StringData;
+    return (*this);
 }
 
 /*! @brief Gets float sensor reading, returns true if sucessful, false otherwise 

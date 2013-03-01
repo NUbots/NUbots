@@ -32,15 +32,15 @@
 class MotionJob : public Job
 {
 public:
-    MotionJob(job_id_t jobid) : Job(Job::MOTION, jobid){};
-    virtual ~MotionJob() {};
+    MotionJob(job_id_t jobid) : Job(Job::MOTION, jobid){}
+    virtual ~MotionJob() {}
     
     virtual void summaryTo(ostream& output) = 0;
     virtual void csvTo(ostream& output) = 0;
     
     friend ostream& operator<< (ostream& output, const MotionJob& job);
 protected:
-    virtual void toStream(ostream& output) const {};
+    virtual void toStream(ostream& output) const {(void)(output); /*To stop compiler warnings*/}
 };
 
 #endif

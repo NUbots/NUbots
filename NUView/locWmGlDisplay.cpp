@@ -110,11 +110,14 @@ void locWmGlDisplay::setZRotation(int angle)
 
 void locWmGlDisplay::restoreState(const QByteArray & state)
 {
+    // Todo: implement restore.
+    (void)(state); // To stop compiler warnings.
     return;
 }
 
 QByteArray locWmGlDisplay::saveState() const
 {
+    // Todo implement save.
     return QByteArray();
 }
 
@@ -246,6 +249,7 @@ void locWmGlDisplay::initializeGL()
 
 void locWmGlDisplay::paintEvent(QPaintEvent *event)
 {
+    (void)(event); // To stop compiler warnings.
     makeCurrent();
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -1133,7 +1137,7 @@ void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, c
             {
                 glDisable(GL_LIGHTING);      // Enable Global Lighting
                 glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
-                glColor4ub(255,255,255,255);
+                glColor4ub(modelColor.red(),modelColor.green(),modelColor.blue(),modelColor.alpha());
                 renderText(model.state(KF::selfX), model.state(KF::selfY),1,displayString.arg(modelID).arg(model.alpha()*100,0,'f',1));
                 glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
                 glEnable(GL_LIGHTING);      // Enable Global Lighting

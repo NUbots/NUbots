@@ -350,7 +350,7 @@ void MainWindow::createMenus()
     QMenu* LUTWindowMenu = windowMenu->addMenu(tr("&Look Up Table"));
     LUTWindowMenu->addAction(newLUTDisplayAction);
 
-    QMenu* networkWindowMenu = windowMenu->addMenu(tr("&Network"));
+    //QMenu* networkWindowMenu = windowMenu->addMenu(tr("&Network"));
 
     windowMenu->addSeparator();
     // Add the actions for the dockable windows

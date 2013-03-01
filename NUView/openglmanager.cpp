@@ -408,7 +408,7 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
 void OpenglManager::writeLinesPointsToDisplay(std::vector< LinePoint > linepoints, GLDisplay::display displayId)
 {
     makeCurrent();
-    //glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
     glLineWidth(1.0);
     glColor3ub(255,255,0);
     for(unsigned int i = 0; i < linepoints.size(); i++)
@@ -423,13 +423,13 @@ void OpenglManager::writeLinesPointsToDisplay(std::vector< LinePoint > linepoint
         glEnd();  // End Lines
 
     }
-    //glEnable(GL_TEXTURE_2D);
-    //glEndList();                                    // END OF LIST
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
 
-    //displayStored[displayId] = true;
+    displayStored[displayId] = true;
 
-    //qDebug() << "Updating Linepoints:" << fieldLines.size();
-    //emit updatedDisplay(displayId, displays[displayId], width, height);
+//    qDebug() << "Updating Linepoints:" << fieldLines.size();
+    emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
 void OpenglManager::writeFieldLinesToDisplay(std::vector< LSFittedLine > fieldLines, GLDisplay::display displayId)
@@ -730,42 +730,6 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
     displayStored[displayId] = true;
 
     emit updatedDisplay(displayId, displays[displayId], width, height);
-}
-
-void OpenglManager::setExpectedVision(const NUSensorsData* data, const KF* filter, GLDisplay::display displayId)
-{
-    makeCurrent();
-    glDisable(GL_TEXTURE_2D);
-    glLineWidth(4.0);
-    glColor3ub(255,0,0);
-
-    // Draw field and lines
-
-    // Green field border
-    glColor3ub(0,255,0);
-    glBegin(GL_LINES);                      // Start Lines
-    glVertex3i(-370, 270, 0);
-    glVertex3i( 370, 270, 0);
-    glVertex3i( 370,-270, 0);
-    glVertex3i(-370,-270, 0);
-    glEnd();  // End Lines
-
-    // Outside field lines border
-    glColor3ub(255,255,255);
-    glBegin(GL_LINES);                      // Start Lines
-    glVertex3i(-302.5, 202.5, 0);
-    glVertex3i( 302.5, 202.5, 0);
-    glVertex3i( 302.5,-202.5, 0);
-    glVertex3i(-302.5,-202.5, 0);
-    glEnd();  // End Lines
-
-    glEnable(GL_TEXTURE_2D);
-    glEndList();                                    // END OF LIST
-
-    displayStored[displayId] = true;
-
-    emit updatedDisplay(displayId, displays[displayId], width, height);
-
 }
 
 void  OpenglManager::drawEllipse(float cx, float cy, float xradius, float yradius)

@@ -239,6 +239,7 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
 void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 {
+    (void)(image); // To stop compiler warnings.
     return;
 }
 

@@ -182,13 +182,6 @@ public:
         void writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId);
 
         /*!
-          @brief Accepts a new raw image and maps it to the default display layer.
-          @param newImage The new raw image.
-          */
-        void setExpectedVision(const NUSensorsData* data, const KF* filter, GLDisplay::display displayId);
-
-
-        /*!
           @brief Test stub for displaying alpha transparent images
           @param displayId The id of the display layer to write to.
           @param image     The image to update the layer with

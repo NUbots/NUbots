@@ -296,12 +296,16 @@ void Actionator::summaryTo(ostream& output)
 
 void Actionator::csvTo(ostream& output)
 {
+    // TODO: Implement this.
+    (void)(output); // To stop compiler warnings.
+    return;
 }
 
 
 ostream& operator<< (ostream& output, const Actionator& p_actionator)
 {
     //! @todo TODO: implement this function
+    (void)(p_actionator); // To stop compiler warnings.
     return output;
 }
 
@@ -309,6 +313,7 @@ ostream& operator<< (ostream& output, const Actionator& p_actionator)
 istream& operator>> (istream& input, Actionator& p_actionator)
 {
     //! @todo TODO: implement this function
+    (void)(p_actionator); // To stop compiler warnings.
     return input;
 }
 

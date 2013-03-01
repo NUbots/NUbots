@@ -30,7 +30,7 @@
 #include "Tools/Math/Matrix.h"
 #include "UnscentedTransform.h"
 
-class UKF: public UnscentedTransform, public Moment
+class UKF: public Moment, public UnscentedTransform
 {
 public:
     UKF();

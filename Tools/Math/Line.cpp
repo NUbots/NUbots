@@ -223,6 +223,7 @@ bool operator >(const Line& line1, const Line& line2)
 // isValid(float A, float B, float C): Check if the given values create a valid line.
 bool Line::isValid(double A, double B, double C) const
 {
-  if((A == 0.0) && (B == 0.0)) return false; // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
-  return true;
+    (void)(C); // To stop compiler warnings.
+    if((A == 0.0) && (B == 0.0)) return false; // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
+    return true;
 }

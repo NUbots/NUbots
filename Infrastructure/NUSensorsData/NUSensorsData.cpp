@@ -471,6 +471,7 @@ bool NUSensorsData::getFallen(vector<float>& data)
  */
 bool NUSensorsData::getZmp(const id_t& id, vector<float>& data)
 {
+    (void)(id); // To stop compiler warnings.
     // TODO: this isn't right, it will always return the 'all' zmp.
     return get(Zmp, data);
 }
@@ -1079,6 +1080,7 @@ void NUSensorsData::summaryTo(ostream& output) const
  */
 void NUSensorsData::csvTo(ostream& output)
 {
+    (void)(output); // To stop compiler warnings.
 }
 
 /*! @brief Returns the number of sensors in the NUSensorsData
