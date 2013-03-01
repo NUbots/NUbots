@@ -214,7 +214,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Filters/KFBuilder.h \
     ../Tools/Math/Filters/BasicUKF.h \
     ../Tools/Math/Filters/SrBasicUKF.h \
-    ../Tools/Math/Filters/SrSeqUKF.h
+    ../Tools/Math/Filters/SrSeqUKF.h \
+    BatchSelectDialog.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -361,7 +362,8 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Filters/KFBuilder.cpp \
     ../Tools/Math/Filters/BasicUKF.cpp \
     ../Tools/Math/Filters/SrBasicUKF.cpp \
-    ../Tools/Math/Filters/SrSeqUKF.cpp
+    ../Tools/Math/Filters/SrSeqUKF.cpp \
+    BatchSelectDialog.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
