@@ -69,8 +69,9 @@ protected slots:
 
 protected:
     QString ReportName(const LocalisationSettings& settings, const QString& log_name);
-    std::vector<LocalisationSettings*> GenerateBranchMergeBatchSettings();
-    std::vector<LocalisationSettings*> GenerateFilterExperimentBatchSettings();
+    std::vector<LocalisationSettings*> GenerateBranchMergeBatchSettings() const;
+    std::vector<LocalisationSettings*> GenerateFilterExperimentBatchSettings() const;
+    std::vector<LocalisationSettings*> GenerateStandardExperimentBatchSettings() const;
 
     QString FindCommonPath(const QStringList& paths);
 

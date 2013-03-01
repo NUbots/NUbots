@@ -66,17 +66,17 @@ OfflineLocBatch::~OfflineLocBatch()
 }
 
 
-std::vector<LocalisationSettings*> OfflineLocBatch::GenerateBranchMergeBatchSettings()
+std::vector<LocalisationSettings*> OfflineLocBatch::GenerateBranchMergeBatchSettings() const
 {
     std::vector<LocalisationSettings*> simulation_settings;
 
-    LocalisationSettings* loc = new LocalisationSettings();
+    LocalisationSettings loc;
 
-    loc->setBallLocFilter(KFBuilder::kbasic_ukf_filter);
-    loc->setBallLocModel(KFBuilder::kmobile_object_model);
+    loc.setBallLocFilter(KFBuilder::kseq_ukf_filter);
+    loc.setBallLocModel(KFBuilder::kmobile_object_model);
 
-    loc->setSelfLocFilter(KFBuilder::kbasic_ukf_filter);
-    loc->setSelfLocModel(KFBuilder::krobot_model);
+    loc.setSelfLocFilter(KFBuilder::kseq_ukf_filter);
+    loc.setSelfLocModel(KFBuilder::krobot_model);
 
     // make vector of branch methods.
     std::vector<LocalisationSettings::BranchMethod> branch_methods;
@@ -95,51 +95,65 @@ std::vector<LocalisationSettings*> OfflineLocBatch::GenerateBranchMergeBatchSett
     std::vector<LocalisationSettings::BranchMethod>::iterator branch_it = branch_methods.begin();
     for(;branch_it != branch_methods.end(); ++branch_it)
     {
-        loc->setBranchMethod(*branch_it);
+        loc.setBranchMethod(*branch_it);
         std::vector<LocalisationSettings::PruneMethod>::iterator prune_it = prune_methods.begin();
         for (;prune_it != prune_methods.end(); ++prune_it)
         {
-            loc->setPruneMethod(*prune_it);
-            simulation_settings.push_back(new LocalisationSettings(*loc));
+            loc.setPruneMethod(*prune_it);
+            simulation_settings.push_back(new LocalisationSettings(loc));
         }
     }
 
     // add probabalistic data association.
-    loc->setBranchMethod(LocalisationSettings::branch_probDataAssoc);
-    loc->setPruneMethod(LocalisationSettings::prune_none);
-    m_simulation_settings.push_back(new LocalisationSettings(*loc));
+    loc.setBranchMethod(LocalisationSettings::branch_probDataAssoc);
+    loc.setPruneMethod(LocalisationSettings::prune_none);
+    simulation_settings.push_back(new LocalisationSettings(loc));
 
     // add no ambiguous models.
-    loc->setBranchMethod(LocalisationSettings::branch_none);
-    loc->setPruneMethod(LocalisationSettings::prune_none);
-    simulation_settings.push_back(new LocalisationSettings(*loc));
-    delete loc;
+    loc.setBranchMethod(LocalisationSettings::branch_none);
+    loc.setPruneMethod(LocalisationSettings::prune_none);
+    simulation_settings.push_back(new LocalisationSettings(loc));
     return simulation_settings;
 }
 
-std::vector<LocalisationSettings*> OfflineLocBatch::GenerateFilterExperimentBatchSettings()
+std::vector<LocalisationSettings*> OfflineLocBatch::GenerateFilterExperimentBatchSettings() const
 {
     // Delete list of settings
     std::vector<LocalisationSettings*> simulation_settings;
 
-    LocalisationSettings* loc = new LocalisationSettings();
-    loc->setBranchMethod(LocalisationSettings::branch_exhaustive);
-    loc->setPruneMethod(LocalisationSettings::prune_merge);
+    LocalisationSettings loc;
+    loc.setBranchMethod(LocalisationSettings::branch_exhaustive);
+    loc.setPruneMethod(LocalisationSettings::prune_merge);
 
     KFBuilder::Filter filter = KFBuilder::kbasic_ukf_filter;
-    loc->setBallLocFilter(filter);
-    loc->setSelfLocFilter(filter);
-    simulation_settings.push_back(new LocalisationSettings(*loc));
+    loc.setBallLocFilter(filter);
+    loc.setSelfLocFilter(filter);
+    simulation_settings.push_back(new LocalisationSettings(loc));
 
     filter = KFBuilder::kseq_ukf_filter;
-    loc->setBallLocFilter(filter);
-    loc->setSelfLocFilter(filter);
-    simulation_settings.push_back(new LocalisationSettings(*loc));
+    loc.setBallLocFilter(filter);
+    loc.setSelfLocFilter(filter);
+    simulation_settings.push_back(new LocalisationSettings(loc));
 
-    delete loc;
     return simulation_settings;
 }
 
+std::vector<LocalisationSettings*> OfflineLocBatch::GenerateStandardExperimentBatchSettings() const
+{
+    // Delete list of settings
+    std::vector<LocalisationSettings*> simulation_settings;
+
+    LocalisationSettings loc;
+    loc.setBranchMethod(LocalisationSettings::branch_exhaustive);
+    loc.setPruneMethod(LocalisationSettings::prune_merge);
+
+    KFBuilder::Filter filter = KFBuilder::kseq_ukf_filter;
+    loc.setBallLocFilter(filter);
+    loc.setSelfLocFilter(filter);
+    simulation_settings.push_back(new LocalisationSettings(loc));
+
+    return simulation_settings;
+}
 
 void OfflineLocBatch::ProcessFiles(const QStringList& source_files, const QString& report_path, const QString &batch_type)
 {
@@ -158,6 +172,10 @@ void OfflineLocBatch::ProcessFiles(const QStringList& source_files, const QStrin
     else if(batch_type == "Filter Type Comparison")
     {
         m_simulation_settings = GenerateFilterExperimentBatchSettings();
+    }
+    else if(batch_type == "Standard")
+    {
+        m_simulation_settings = GenerateStandardExperimentBatchSettings();
     }
     else
     {
@@ -232,6 +250,10 @@ QString OfflineLocBatch::ReportName(const LocalisationSettings& settings, const 
     else if (m_current_batch_type == "Filter Type Comparison")
     {
         report_name = log_name + '_' + QString(FilterTypeString((*m_current_sim_settings)->selfLocFilter()).c_str()).replace(' ','_');
+    }
+    else
+    {
+        report_name = log_name + "_std";
     }
     return report_name.append(extension);
 }
