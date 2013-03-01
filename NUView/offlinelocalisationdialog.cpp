@@ -348,12 +348,8 @@ void OfflineLocalisationDialog::SetFrame(int frameNumber, int total)
 {
     if(m_offline_loc->hasSimData())
     {
-        const Localisation* temp = m_offline_loc->GetFrame(frameNumber);
-        emit LocalisationChanged(temp);
         const SelfLocalisation* selfTemp = m_offline_loc->GetSelfFrame(frameNumber);
         emit SelfLocalisationChanged(selfTemp);
-        QString message = m_offline_loc->GetFrameInfo(frameNumber);
-        emit LocalisationInfoChanged(message);
         QString self_message = m_offline_loc->GetSelfFrameInfo(frameNumber);
         emit SelfLocalisationInfoChanged(self_message);
     }

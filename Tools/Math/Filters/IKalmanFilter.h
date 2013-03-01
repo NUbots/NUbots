@@ -25,7 +25,7 @@ This contains the basic functions that all implementations can and must use.
  */
 
 #pragma once
-
+#include <assert.h>
 #include <iostream>
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/Moment.h"

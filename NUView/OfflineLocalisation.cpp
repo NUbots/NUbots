@@ -5,7 +5,6 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Localisation/SelfLocalisation.h"
-#include "Localisation/Localisation.h"
 #include <QElapsedTimer>
 #include <QDir>
 #include "Tools/Math/General.h"
@@ -18,7 +17,6 @@
  */
 OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent): QThread(parent), m_log_reader(reader)
 {
-    m_workingLoc = 0;
     m_workingSelfLoc = 0;
     //Initialise(Localisation());
     m_stop_called = false;
@@ -28,14 +26,12 @@ OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent)
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_merge);
     m_running = false;
-    m_use_old_localisation = false;
 }
 
 /*! @brief Class destructor
  */
 OfflineLocalisation::~OfflineLocalisation()
 {
-    if(m_workingLoc) delete m_workingLoc;
     if(m_workingSelfLoc) delete m_workingSelfLoc;
     ClearBuffer();
 }
@@ -45,17 +41,11 @@ OfflineLocalisation::~OfflineLocalisation()
  */
 void OfflineLocalisation::ClearBuffer()
 {
-    for(std::vector<Localisation*>::iterator loc_it = m_localisation_frame_buffer.begin(); loc_it != m_localisation_frame_buffer.end(); ++loc_it)
-    {
-        delete (*loc_it);
-    }
     for(std::vector<SelfLocalisation*>::iterator loc_it = m_self_loc_frame_buffer.begin(); loc_it != m_self_loc_frame_buffer.end(); ++loc_it)
     {
         delete (*loc_it);
     }
     m_self_loc_frame_buffer.clear();
-    m_localisation_frame_buffer.clear();
-    m_frame_info.clear();
     m_self_frame_info.clear();
     m_performance.clear();
     m_sim_data_available = false;
@@ -66,11 +56,9 @@ void OfflineLocalisation::ClearBuffer()
             initial state.
     @param initialState The initial state of the system.
  */
-void OfflineLocalisation::Initialise(const Localisation& intialState)
+void OfflineLocalisation::Initialise()
 {
-    delete m_workingLoc;
     delete m_workingSelfLoc;
-    m_workingLoc = new Localisation(intialState);
     m_workingSelfLoc = new SelfLocalisation(0, m_settings);
     ClearBuffer();
     m_stop_called = false;
@@ -101,8 +89,7 @@ bool OfflineLocalisation::OpenLogs(const std::string& initialLogPath)
 bool OfflineLocalisation::IsInitialised()
 {
     bool filesOpenOk = (m_log_reader->numFrames() > 0);
-    bool internalDataOk = (m_workingLoc != NULL) && (!m_use_old_localisation or m_localisation_frame_buffer.size() >= 0);
-    internalDataOk = internalDataOk and (m_workingSelfLoc != NULL) and (m_self_loc_frame_buffer.size() >= 0);
+    bool internalDataOk = internalDataOk and (m_workingSelfLoc != NULL) and (m_self_loc_frame_buffer.size() >= 0);
     QStringList availableData = m_log_reader->AvailableData();
     bool all_data_available = HasRequiredData(availableData);
 
@@ -141,7 +128,7 @@ void OfflineLocalisation::run()
 {
     qDebug("Starting experiment.");
     m_running = true;
-    Initialise(Localisation());
+    Initialise();
     // Don't do anything if not initialised properly.
     if(IsInitialised() == false)
     {
@@ -162,9 +149,7 @@ void OfflineLocalisation::run()
     m_log_reader->firstFrame();
 
     m_performance.reserve(totalFrames);
-    m_localisation_frame_buffer.reserve(totalFrames);
     m_self_loc_frame_buffer.reserve(totalFrames);
-    m_frame_info.reserve(totalFrames);
     m_self_frame_info.reserve(totalFrames);
 
     emit updateProgress(framesProcessed+1,totalFrames);
@@ -188,6 +173,27 @@ void OfflineLocalisation::run()
         {
             break;
         }
+
+        for(std::vector<AmbiguousObject>::iterator object = tempObjects->ambiguousFieldObjects.begin(); object != tempObjects->ambiguousFieldObjects.end(); ++object)
+        {
+            // Add if seen
+            if(object->isObjectVisible())
+            {
+                // Ignore the mobile objects for now.
+                if(object->getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN) continue;
+                if(object->getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
+                if(object->getID() == FieldObjects::FO_ROBOT_UNKNOWN) continue;
+                if(object->getID() == FieldObjects::FO_OBSTACLE) continue;
+
+                if(object->getID() == FieldObjects::FO_CORNER_UNKNOWN_T or object->getID() == FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L
+                        or object->getID() == FieldObjects::FO_CORNER_UNKNOWN_OUTSIDE_L)
+                {
+                    object->addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_CIRCLE_INTERSECT_LEFT);
+                    object->addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_CIRCLE_INTERSECT_RIGHT);
+                }
+            }
+        }
+
 
         AddFrame(tempSensor, tempObjects, tempTeamInfo, tempGameInfo);
 
@@ -253,12 +259,6 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
     QElapsedTimer timer;
     long int ms_elapsed;
 
-    if(m_use_old_localisation)
-    {
-        NUSensorsData tempSensors = (*sensorData);
-        m_workingLoc->process(&tempSensors,objectData,gameInfo,teamInfo);
-    }
-
     // start timer
     gettimeofday(&t1, NULL);
 
@@ -270,14 +270,6 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
     gettimeofday(&t2, NULL);
     elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
     elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
-
-    if(m_use_old_localisation)
-    {
-        Localisation* temp = new Localisation((*m_workingLoc));
-        m_localisation_frame_buffer.push_back(temp);
-        QString info(m_workingLoc->frameLog().c_str());
-        m_frame_info.push_back(info);
-    }
 
     SelfLocalisation* self_temp = new SelfLocalisation(*m_workingSelfLoc);
 
@@ -311,16 +303,6 @@ int OfflineLocalisation::NumberOfFrames()
     return m_self_loc_frame_buffer.size();
 }
 
-const Localisation* OfflineLocalisation::GetFrame(int frameNumber)
-{
-    if(!m_use_old_localisation) return 0;
-    int index = frameNumber-1;
-    if( (index < 0) || (index >= NumberOfFrames()))
-        return NULL;
-    else
-        return m_localisation_frame_buffer[index];
-}
-
 const SelfLocalisation* OfflineLocalisation::GetSelfFrame(int frameNumber)
 {
     int index = frameNumber-1;
@@ -330,17 +312,6 @@ const SelfLocalisation* OfflineLocalisation::GetSelfFrame(int frameNumber)
     {
         return m_self_loc_frame_buffer[index];
     }
-}
-
-
-QString OfflineLocalisation::GetFrameInfo(int frameNumber)
-{
-    if(!m_use_old_localisation) return QString();
-    int index = frameNumber-1;
-    if( (index < 0) || (index >= NumberOfFrames()))
-        return NULL;
-    else
-        return m_frame_info[index];
 }
 
 QString OfflineLocalisation::GetSelfFrameInfo(int frameNumber)
@@ -355,89 +326,9 @@ QString OfflineLocalisation::GetSelfFrameInfo(int frameNumber)
 /*! @brief Writes a text based summary of the current experiment to file.
     @param logPath Path to which the log will be written
  */
-bool OfflineLocalisation::WriteLog(const std::string& logPath)
-{
-    bool file_saved = false;
-    if(hasSimData())
-    {
-        std::ofstream output_file(logPath.c_str());
-        if(output_file.is_open() && output_file.good())
-        {
-            std::vector<Localisation*>::iterator it = m_localisation_frame_buffer.begin();
-            while(it != m_localisation_frame_buffer.end())
-            {
-                output_file << (*(*it));
-                ++it;
-            }
-        }
-        output_file.close();
-    }
-    return file_saved;
-}
-
-/*! @brief Writes a text based summary of the current experiment to file.
-    @param logPath Path to which the log will be written
- */
 bool OfflineLocalisation::WriteReport(const std::string& reportPath)
 {
     return WriteXML(reportPath);
-
-    std::string temp;
-    bool file_saved = false;
-    if(hasSimData())
-    {
-        std::ofstream output_file(reportPath.c_str());
-        if(output_file.is_open() && output_file.good())
-        {
-            unsigned int total_frames  = m_self_loc_frame_buffer.size();
-
-            // Write the settings information.
-            output_file << "[Settings]" <<std::endl;
-            temp = m_log_reader->path().toStdString();
-            temp = temp.erase(temp.rfind('/')+1);   // unix/linux based path
-            //temp = temp.erase(temp.rfind('\\')+1);  // windows based path
-            output_file << "Source file path:," << temp << std::endl;
-            output_file << "Branching Method:," << m_settings.branchMethodString() <<std::endl;
-            output_file << "Prune Method:," << m_settings.pruneMethodString() <<std::endl;
-            output_file << "[Results]" <<std::endl;
-            output_file << "Total frames:," << total_frames << std::endl;
-            output_file << "Number of models created:," << m_num_models_created <<std::endl;
-            output_file << "Experiment run time:," << this->m_experiment_run_time << std::endl;
-
-
-            // Make headers
-            output_file << "[Error data]" << std::endl;
-            //output_file << "frame";
-            std::stringstream frame_line, error_x_line, error_y_line, error_heading_line;
-
-            //output_file << ",error x, error y, error heading";
-            //output_file << std::endl;
-
-            frame_line << "frame";
-            error_x_line << "error x";
-            error_y_line << "error y";
-            error_heading_line << "error heading";
-            for (unsigned int frame_id = 0; frame_id < total_frames; ++frame_id)
-            {
-                frame_line << "," << frame_id;
-                error_x_line << "," << m_performance[frame_id].error_x();
-                error_y_line << "," << m_performance[frame_id].error_y();
-                error_heading_line << "," << m_performance[frame_id].error_heading();
-//                output_file << frame_id;
-//                output_file << "," << m_performance[frame_id].error_x();
-//                output_file << "," << m_performance[frame_id].error_y();
-//                output_file << "," << m_performance[frame_id].error_heading();
-//                output_file << std::endl;
-            }
-            output_file << frame_line.str() << std::endl;
-            output_file << error_x_line.str() << std::endl;
-            output_file << error_y_line.str() << std::endl;
-            output_file << error_heading_line.str() << std::endl;
-
-        }
-        output_file.close();
-    }
-    return file_saved;
 }
 
 
@@ -579,7 +470,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                     exp_heading.push_back(gps_location.CalculateBearingToStationaryObject(*object));
                 }
             }
-            for(std::vector<AmbiguousObject>::const_iterator object = tempObjects->ambiguousFieldObjects.begin(); object != tempObjects->ambiguousFieldObjects.end(); ++object)
+            for(std::vector<AmbiguousObject>::iterator object = tempObjects->ambiguousFieldObjects.begin(); object != tempObjects->ambiguousFieldObjects.end(); ++object)
             {
                 // Add if seen
                 if(object->isObjectVisible())
@@ -589,6 +480,13 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                     if(object->getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
                     if(object->getID() == FieldObjects::FO_ROBOT_UNKNOWN) continue;
                     if(object->getID() == FieldObjects::FO_OBSTACLE) continue;
+
+                    if(object->getID() == FieldObjects::FO_CORNER_UNKNOWN_T or object->getID() == FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L
+                            or object->getID() == FieldObjects::FO_CORNER_UNKNOWN_OUTSIDE_L)
+                    {
+                        object->addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_CIRCLE_INTERSECT_LEFT);
+                        object->addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_CIRCLE_INTERSECT_RIGHT);
+                    }
 
                     total_amb_obj++;
                     ambiguous_object_count[object->getID()]++;
@@ -603,6 +501,13 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
                     amb_exp_id.push_back(likely_id);
                     amb_exp_distance.push_back(gps_location.CalculateDistanceToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
                     amb_exp_heading.push_back(gps_location.CalculateBearingToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]));
+
+                    double heading = gps_location.CalculateBearingToStationaryObject(tempObjects->stationaryFieldObjects[likely_id]);
+                    double error = fabs(mathGeneral::normaliseAngle(heading - object->measuredBearing()));
+//                    if(error > 0.5)
+//                    {
+//                        std::cout << frame << " - Error: " << error << " - expected object: " << tempObjects->stationaryFieldObjects[likely_id].getName() << std::endl;
+//                    }
 
                     // Now we want to check which option was chosen as the best by the localistion system at the time of update.
                     // Must be a new model to be the result of a split.

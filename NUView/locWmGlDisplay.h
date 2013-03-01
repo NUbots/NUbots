@@ -4,7 +4,6 @@
 #include <QGLWidget>
 #include "Localisation/SelfLocalisation.h"
 
-class KF;
 class Localisation;
 class FieldObjects;
 class Object;
@@ -38,17 +37,6 @@ public:
     QByteArray saveState() const;
 
 public slots:
-    void SetLocalisation(const Localisation* newLocalisation)
-    {
-        currentLocalisation = newLocalisation;
-        update();
-    }
-    void SetLocalLocalisation(const Localisation* newLocalisation)
-    {
-        localLocalisation = newLocalisation;
-        update();
-    }
-
     void setSelfLocalisation(const SelfLocalisation* newSelfLoc)
     {
         m_self_loc = newSelfLoc;
@@ -121,17 +109,12 @@ protected:
         FieldPose CalculateErrorElipse(float xx, float xy, float yy);
         void DrawElipse(const QPoint& location, const QPoint& size, float angle, const QColor& lineColour, const QColor& fillColour);
 
-        void DrawModelObjects(const KF& model, const QColor& modelColor);
         void DrawModelObjects(const Moment& model, const Moment& ball_model, const QColor& modelColor);
         void DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor);
         void DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor);
 
-        void DrawModelMarkers(const KF& model,const QColor& modelColor);
         void DrawModelMarkers(const Moment& model, const QColor& modelColor);
-        void DrawLocalisationMarkers(const Localisation& localisation, const QColor& modelColor);
         void drawLocalisationMarkers(const SelfLocalisation& localisation, const QColor& modelColor);
-
-        void DrawLocalisationOverlay(const Localisation& localisation, const QColor& modelColor);
 
         void drawStationaryObjectLabel(const StationaryObject& object);
         void drawFieldObjectLabels(const FieldObjects& theFieldObjectsobject);
@@ -151,8 +134,6 @@ protected:
         int zRot;
         QPoint lastPos;
 
-        const Localisation* currentLocalisation;
-        const Localisation* localLocalisation;
         const FieldObjects* currentObjects;
         const SelfLocalisation* m_self_loc;
         NUSensorsData* currentSensorData;

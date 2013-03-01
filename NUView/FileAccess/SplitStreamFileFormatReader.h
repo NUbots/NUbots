@@ -3,11 +3,9 @@
 #include "LogFileFormatReader.h"
 #include "StreamFileReader.h"
 #include "Infrastructure/NUImage/NUImage.h"
-#include "Localisation/Localisation.h"
 #include "Localisation/SelfLocalisation.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUSensorsData/NULocalisationSensors.h"
-#include "Localisation/LocWmFrame.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
 #include <QDir>
@@ -28,7 +26,6 @@ public:
 
     const NUImage* GetImageData();
     const NUSensorsData* GetSensorData();
-    const Localisation* GetLocalisationData();
     FieldObjects* GetObjectData();
     const GameInformation* GetGameInfo();
     const TeamInformation* GetTeamInfo();
@@ -59,10 +56,8 @@ protected:
     StreamFileReader<NUImage> imageReader;
     StreamFileReader<NUSensorsData> sensorReader;
     StreamFileReader<NULocalisationSensors> locsensorReader;
-    StreamFileReader<Localisation> locwmReader;
     StreamFileReader<SelfLocalisation> selflocwmReader;
     StreamFileReader<FieldObjects> objectReader;
-    StreamFileReader<LocWmFrame> locmframeReader;
     StreamFileReader<GameInformation> gameinfoReader;
     StreamFileReader<TeamInformation> teaminfoReader;
     QDir m_directory;

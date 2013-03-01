@@ -98,8 +98,6 @@ HEADERS += ui_mainwindow.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../Tools/FileFormats/Parse.h \
-    ../Localisation/KF.h \
-    ../Localisation/Localisation.h \
     ../Infrastructure/FieldObjects/WorldModelShareObject.h \
     ../Infrastructure/GameInformation/GameInformation.h \
     ../Tools/Threading/Thread.h \
@@ -152,7 +150,6 @@ HEADERS += ui_mainwindow.h \
     ../VisionOld/EllipseFitting/jama_lu.h \
     ../VisionOld/EllipseFitting/jama_eig.h \
     ../VisionOld/EllipseFitting/jama_cholesky.h \
-    ../Localisation/odometryMotionModel.h \
     ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
@@ -186,10 +183,7 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/FileFormatException.h \
     offlinelocalisationdialog.h \
     ../Tools/Math/Moment.h \
-    ../Localisation/Models/SelfModel.h \
-    ../Localisation/Models/SelfUKF.h \
     ../Localisation/SelfLocalisation.h \
-    ../Localisation/Models/SelfSRUKF.h \
     ../Localisation/MeasurementError.h \
     ../Localisation/SelfLocalisationTests.h \
     OfflineLocalisationSettingsDialog.h \
@@ -202,7 +196,6 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Filters/UnscentedTransform.h \
     ../Tools/Math/Filters/UKF.h \
     ../Tools/Math/Filters/MobileObjectUKF.h \
-    ../Localisation/Models/WeightedModel.h \
     ../Tools/Math/depUKF.h \
     ../Localisation/iotests.h \
     NUViewConfig/*.h \
@@ -291,9 +284,6 @@ SOURCES += mainwindow.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
-    ../Localisation/KF.cpp \
-    ../Localisation/Models/SelfUKF.cpp \
-    ../Localisation/Localisation.cpp \
     ../Infrastructure/FieldObjects/WorldModelShareObject.cpp \
     ../Infrastructure/GameInformation/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
@@ -309,8 +299,6 @@ SOURCES += mainwindow.cpp \
     ../Motion/Tools/MotionScript.cpp \
     ../Motion/Tools/MotionCurves.cpp \
     ../VisionOld/EllipseFit.cpp \
-    ../Localisation/odometryMotionModel.cpp \
-    ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
     locwmstreamwidget.cpp \
@@ -318,7 +306,6 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Rectangle.cpp \
     ../NUPlatform/NUCamera.cpp \
     #../VisionOld/fitellipsethroughcircle.cpp \
-    ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
     #../VisionOld/SplitAndMerge/SAM.cpp \
@@ -339,9 +326,7 @@ SOURCES += mainwindow.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
     ../Tools/Math/Moment.cpp \
-    ../Localisation/Models/SelfModel.cpp \
     ../Localisation/SelfLocalisation.cpp \
-    ../Localisation/Models/SelfSRUKF.cpp \
     ../Localisation/MeasurementError.cpp \
     ../Localisation/SelfLocalisationtests.cpp \
     OfflineLocalisationSettingsDialog.cpp \
@@ -353,7 +338,6 @@ SOURCES += mainwindow.cpp \
     OfflineLocBatch.cpp \
     ../Tools/Math/Filters/UKF.cpp \
     ../Tools/Math/Filters/MobileObjectUKF.cpp \
-    ../Localisation/Models/WeightedModel.cpp \
     ../Tools/Math/depUKF.cpp \
     ../Localisation/iotests.cpp \
     ../Tools/Math/Filters/SeqUKF.cpp \

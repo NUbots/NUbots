@@ -22,7 +22,6 @@ public:
     int numFrames(){if(currentFileReader){return currentFileReader->numFrames();}return 0;}
     int currentFrame(){if(currentFileReader){return currentFileReader->currentFrame();}return 0;}
 
-    const Localisation* GetLocalisationData(){return currentFileReader->GetLocalisationData();}
     const SelfLocalisation* GetSelfLocalisationData(){return currentFileReader->GetSelfLocalisationData();}
     const NUImage* GetRawImage(){return currentFileReader->GetImageData();}
     const NUSensorsData* GetSensorData(){return currentFileReader->GetSensorData();}
@@ -70,7 +69,6 @@ signals:
     void firstFrameAvailable(bool);
     void lastFrameAvailable(bool);
     void setFrameAvailable(bool);
-    void LocalisationDataChanged(const Localisation*);
     void SelfLocalisationDataChanged(const SelfLocalisation*);
     void rawImageChanged(const NUImage*);
     void sensorDataChanged(const float*, const float*, const float*);
