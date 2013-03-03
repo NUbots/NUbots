@@ -36,7 +36,10 @@ This contains the basic functions that all implementations can and must use.
 class IKalmanFilter
 {
 public:
-    ~IKalmanFilter(){delete m_model;}
+    virtual ~IKalmanFilter()
+    {
+        delete m_model;
+    }
 
     virtual IKalmanFilter* Clone() = 0;
 
