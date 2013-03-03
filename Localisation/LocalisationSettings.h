@@ -105,7 +105,7 @@ public:
     @brief Sets the current ball localisation model.
     @param newModel The ID of the new model.
     */
-    void setBallLocModel(KFBuilder::Model newModel) {m_ball_loc_model - newModel;}
+    void setBallLocModel(KFBuilder::Model newModel) {m_ball_loc_model = newModel;}
 
     /*!
     @brief Sets the current ball localisation filter.
