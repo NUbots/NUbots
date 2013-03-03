@@ -104,11 +104,6 @@ std::vector<LocalisationSettings*> OfflineLocBatch::GenerateBranchMergeBatchSett
         }
     }
 
-    // add probabalistic data association.
-    loc.setBranchMethod(LocalisationSettings::branch_probDataAssoc);
-    loc.setPruneMethod(LocalisationSettings::prune_none);
-    simulation_settings.push_back(new LocalisationSettings(loc));
-
     // add no ambiguous models.
     loc.setBranchMethod(LocalisationSettings::branch_none);
     loc.setPruneMethod(LocalisationSettings::prune_none);
