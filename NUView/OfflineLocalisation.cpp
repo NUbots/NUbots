@@ -229,6 +229,7 @@ void OfflineLocalisation::run()
 
     IKalmanFilter* test = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
     m_num_models_created = test->id() - initial_model_id;
+    delete test;
     m_experiment_run_time = exp_time * 1000;
     std::cout << "Number of models created: " << m_num_models_created << std::endl;
     std::cout << "Total Processing time: " << total_time * 1000 << " ms" <<std::endl;
@@ -291,6 +292,7 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
     m_self_loc_frame_buffer.push_back(self_temp);
     QString self_info(m_workingSelfLoc->frameLog().c_str());
     m_self_frame_info.push_back(self_info);
+    return;
 }
 
 int OfflineLocalisation::NumberOfLogFrames()
