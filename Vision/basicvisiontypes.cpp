@@ -30,10 +30,8 @@ namespace Vision {
                 (*this)[DBID_CORNERS]               = pair<int, string>(17, "Corners");
                 (*this)[DBID_GOAL_LINES_START]      = pair<int, string>(18, "Goal Lines (start)");
                 (*this)[DBID_GOAL_LINES_END]        = pair<int, string>(19, "Goal Lines (end)");
-                (*this)[DBID_GOAL_LINES_CENTRE]     = pair<int, string>(20, "Goal Lines (centre)");
-                (*this)[DBID_GOALS_HIST]            = pair<int, string>(21, "Goals (histogram)");
-                (*this)[DBID_GOALS_RANSAC_EDGES]    = pair<int, string>(22, "Goals (RANSAC edges)");
-                (*this)[DBID_GOALS_RANSAC_CENTRES]  = pair<int, string>(23, "Goals (RANSAC centres)");
+                (*this)[DBID_GOALS_HIST]            = pair<int, string>(20, "Goals (histogram)");
+                (*this)[DBID_GOALS_RANSAC_EDGES]    = pair<int, string>(21, "Goals (RANSAC edges)");
             }
         };
 

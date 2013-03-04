@@ -28,7 +28,7 @@ private:
     
     static VisionControlWrapper* instance;
     
-    VisionController* controller;
+    VisionController controller;
     DataWrapper* data_wrapper;
     SaveImagesThread* m_saveimages_thread;      //!< an external thread to do saving images in parallel with vision processing
 };

@@ -38,7 +38,7 @@ private:
 
     static VisionControlWrapper* instance;  //! @var static singleton instance
 
-    VisionController* controller;           //! @var the system controller
+    VisionController controller;           //! @var the system controller
     DataWrapper* data_wrapper;              //! @var the data wrapper
 };
 

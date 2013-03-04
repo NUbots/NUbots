@@ -20,8 +20,6 @@
 #include <boost/foreach.hpp>
 #include <limits>
 
-VisionController* VisionController::instance = 0;
-
 VisionController::VisionController() : m_corner_detector(0.1), m_circle_detector(0.25, 50, 100, 8.0, 3)
 {
     m_data_wrapper = DataWrapper::getInstance();
@@ -50,13 +48,6 @@ VisionController::~VisionController()
     delete m_goal_detector_ransac_edges;
 }
 
-VisionController* VisionController::getInstance()
-{
-    if(instance == 0)
-        instance = new VisionController();
-    return instance;
-}
-
 int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 {
 #ifdef VISION_PROFILER_ON
@@ -66,12 +57,13 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 
     m_data_wrapper = DataWrapper::getInstance();
 #if VISION_CONTROLLER_VERBOSITY > 1
-    debug << "VisionController::runFrame() - Begin" << endl;
+    debug << "VisionController::runFrame()" << endl;
+    debug << "\tBegin"
 #endif
     //force blackboard to update from wrapper
     m_blackboard->update();
 #if VISION_CONTROLLER_VERBOSITY > 1
-    debug << "VisionController::runFrame() - VisionBlackboard updated" << endl;
+    debug << "\tVisionBlackboard updated" << endl;
 #endif
 
 #ifdef VISION_PROFILER_ON
@@ -82,7 +74,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 
     GreenHorizonCH::calculateHorizon();
 #if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - calculateHorizon done" << endl;
+    debug << "\tcalculateHorizon done" << endl;
 #endif
 
 #ifdef VISION_PROFILER_ON
@@ -93,17 +85,17 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 
     ScanLines::generateScanLines();
 #if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - generateScanLines done" << endl;
+    debug << "\tgenerateScanLines done" << endl;
 #endif
 
     ScanLines::classifyHorizontalScanLines();
 #if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - classifyHorizontalScanLines done" << endl;
+    debug << "\tclassifyHorizontalScanLines done" << endl;
 #endif
 
     ScanLines::classifyVerticalScanLines();
 #if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - classifyVerticalScanLines done" << endl;
+    debug << "\tclassifyVerticalScanLines done" << endl;
 #endif
 
 #ifdef VISION_PROFILER_ON
@@ -112,7 +104,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 
     m_segment_filter.run();
 #if VISION_CONTROLLER_VERBOSITY > 2
-    debug << "VisionController::runFrame() - segment filter done" << endl;
+    debug << "\tsegment filter done" << endl;
 #endif
 
 
@@ -123,13 +115,10 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     //! DETECTION MODULES
 
     if(lookForLandmarks) {
- //       vector<Goal> hist_goals = m_goal_detector_hist->run();   //POSTS
+ //       vector<Goal> hist_goals = m_goal_detector_hist->run();   // histogram method
 
-        //testing ransac for goals
-        vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();
+        vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
 
-//        m_data_wrapper->debugPublish(0, hist_goals);
-        m_data_wrapper->debugPublish(1, ransac_goals_edges);
         m_blackboard->addGoals(ransac_goals_edges);
 
         #ifdef VISION_PROFILER_ON
@@ -137,9 +126,11 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         #endif
 
         #if VISION_CONTROLLER_VERBOSITY > 2
-        debug << "VisionController::runFrame() - goal detection done" << endl;
+        debug << "\tgoal detection done" << endl;
         #endif
 
+        // Edit here to change whether centre circles, lines or corners are found
+        //      (note lines cannot be published yet)
         m_field_point_detector->run(true, true, true);
 
         #ifdef VISION_PROFILER_ON
@@ -147,12 +138,12 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
         #endif
 
         #if VISION_CONTROLLER_VERBOSITY > 2
-            debug << "VisionController::runFrame() - centre circle, line and corner detection done" << endl;
+            debug << "\tcentre circle, line and corner detection done" << endl;
         #endif
     }
     else {
         #if VISION_CONTROLLER_VERBOSITY > 2
-            debug << "VisionController::runFrame() - not looking for landmarks" << endl;
+            debug << "\tnot looking for landmarks" << endl;
         #endif
     }
 
@@ -160,7 +151,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     if(lookForBall) {
         m_blackboard->addBalls(m_ball_detector.run());
         #if VISION_CONTROLLER_VERBOSITY > 2
-            debug << "VisionController::runFrame() - ball detection done" << endl;
+            debug << "\tball detection done" << endl;
         #endif
         #ifdef VISION_PROFILER_ON
         prof.split("Ball");
@@ -168,60 +159,41 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     }
     else {
         #if VISION_CONTROLLER_VERBOSITY > 2
-            debug << "VisionController::runFrame() - not looking for ball" << endl;
+            debug << "\tnot looking for ball" << endl;
         #endif
     }
 
-    ObjectDetectionCH::detectObjects(); //OBSTACLES
+    //OBSTACLES
+    ObjectDetectionCH::detectObjects();
     #if VISION_CONTROLLER_VERBOSITY > 2
-        debug << "VisionController::runFrame() - detectObjects done" << endl;
+        debug << "\tdetectObjects done" << endl;
     #endif
 
     #ifdef VISION_PROFILER_ON
     prof.split("Obstacles");
     #endif
 
+    // publishing
     //force blackboard to publish results through wrapper
     m_blackboard->publish();
     #if VISION_CONTROLLER_VERBOSITY > 1
-        debug << "VisionController::runFrame() - Results published" << endl;
+    debug << "\tResults published" << endl;
     #endif
     //publish debug information as well
-    m_blackboard->debugPublish();
-    #if VISION_CONTROLLER_VERBOSITY > 1
-        debug << "VisionController::runFrame() - Debugging info published" << endl;
+
+    #ifdef DEBUG_VISION_VERBOSITY_ON
+    m_blackboard->debugPublish();   //only debug publish if some verbosity is on
     #endif
-    
     #if VISION_CONTROLLER_VERBOSITY > 1
-        debug << "VisionController::runFrame() - Finish" << endl;
+    debug << "\tDebugging info published" << endl;
+    debug << "\tFinish" << endl;
     #endif
 
     #ifdef VISION_PROFILER_ON
     prof.split("Publishing");
-    #endif
-
-    #ifdef VISION_PROFILER_ON
     prof.stop();
     m_profiling_stream << prof << endl;
     #endif
 
     return 0;
-}
-
-//int VisionController::run()
-//{
-//    char c=0;
-
-//    while(c!=27) {
-//        DataWrapper::getInstance()->updateFrame();
-//        instance->runFrame();
-//        c = waitKey();
-//    }
-
-//    return 0;
-//}
-
-CameraSettings VisionController::getCurrentCameraSettings() const
-{
-    return m_blackboard->getCameraSettings();
 }

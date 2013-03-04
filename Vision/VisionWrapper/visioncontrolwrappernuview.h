@@ -23,7 +23,7 @@ private:
     
     static VisionControlWrapper* instance;
     
-    VisionController* controller;
+    VisionController controller;
     DataWrapper* wrapper;
     //for virtualnubot
     void setRawImage(const NUImage* image);

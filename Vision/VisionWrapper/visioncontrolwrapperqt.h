@@ -23,7 +23,7 @@ private:
     static VisionControlWrapper* instance;
 
     MainWindow gui;
-    VisionController* controller;
+    VisionController controller;
     DataWrapper* wrapper;
 };
 

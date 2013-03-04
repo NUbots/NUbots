@@ -226,116 +226,100 @@ void DataWrapper::debugPublish(const vector<Goal>& data)
     }
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Goal>& data)
-{
-    BOOST_FOREACH(const Goal& g, data) {
-        QPolygonF p;
-        const Quad& q = g.getQuad();
-        p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
-        p.append(QPointF(q.getTopLeft().x, q.getTopLeft().y));
-        p.append(QPointF(q.getTopRight().x, q.getTopRight().y));
-        p.append(QPointF(q.getBottomRight().x, q.getBottomRight().y));
-        p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
-
-        gui->addToLayer(id, Polygon(p, g.getID() != GOAL_U), QPen(Qt::yellow));
-        gui->addToLayer(id, QPointF(g.getLocationPixels().x, g.getLocationPixels().y), QPen(QColor(Qt::blue), 3));
-    }
-}
-
-//DEBUG
-void DataWrapper::debugPublish(int i, const vector<Goal> &d)
-{
-    double dist = -1;
-    if(true_num_posts == 1) {
-        if(d.size() == 1) {
-            dist = d.front().width_dist;
-        }
-        else {
-            double maxarea = -1;
-            //find biggest
-            BOOST_FOREACH(Goal g, d) {
-                if(g.getQuad().area() > maxarea) {
-                    maxarea = g.getQuad().area();
-                    dist = g.width_dist;
-                }
-            }
-        }
-    }
-    else {
-        if(d.size() == 0) {
-            //missed both
-            switch(i) {
-            case 0:
-                ratio_hist.first++;
-                ratio_hist.second++;
-                break;
-            case 1:
-                ratio_r1.first++;
-                ratio_r1.second++;
-                break;
-            case 2:
-                ratio_r2.first++;
-                ratio_r2.second++;
-                break;
-            }
-        }
-        if(d.size() == 1) {
-            //missed one
-            switch(i) {
-            case 0:
-                ratio_hist.first++;
-                ratio_hist.second++;
-                break;
-            case 1:
-                ratio_r1.first++;
-                ratio_r1.second++;
-                break;
-            case 2:
-                ratio_r2.first++;
-                ratio_r2.second++;
-                break;
-            }
-            if(d.front().getLocationPixels().x > 150)
-                dist = d.front().width_dist;
-        }
-        else {
-            double maxx = -1;
-            //find rightmost
-            BOOST_FOREACH(Goal g, d) {
-                if(g.getLocationPixels().x > maxx) {
-                    maxx = g.getLocationPixels().x;
-                    dist = g.width_dist;
-                }
-            }
-        }
-    }
+////DEBUG - FOR GOAL PAPER
+//void DataWrapper::debugPublish(int i, const vector<Goal> &d)
+//{
+//    double dist = -1;
+//    if(true_num_posts == 1) {
+//        if(d.size() == 1) {
+//            dist = d.front().width_dist;
+//        }
+//        else {
+//            double maxarea = -1;
+//            //find biggest
+//            BOOST_FOREACH(Goal g, d) {
+//                if(g.getQuad().area() > maxarea) {
+//                    maxarea = g.getQuad().area();
+//                    dist = g.width_dist;
+//                }
+//            }
+//        }
+//    }
+//    else {
+//        if(d.size() == 0) {
+//            //missed both
+//            switch(i) {
+//            case 0:
+//                ratio_hist.first++;
+//                ratio_hist.second++;
+//                break;
+//            case 1:
+//                ratio_r1.first++;
+//                ratio_r1.second++;
+//                break;
+//            case 2:
+//                ratio_r2.first++;
+//                ratio_r2.second++;
+//                break;
+//            }
+//        }
+//        if(d.size() == 1) {
+//            //missed one
+//            switch(i) {
+//            case 0:
+//                ratio_hist.first++;
+//                ratio_hist.second++;
+//                break;
+//            case 1:
+//                ratio_r1.first++;
+//                ratio_r1.second++;
+//                break;
+//            case 2:
+//                ratio_r2.first++;
+//                ratio_r2.second++;
+//                break;
+//            }
+//            if(d.front().getLocationPixels().x > 150)
+//                dist = d.front().width_dist;
+//        }
+//        else {
+//            double maxx = -1;
+//            //find rightmost
+//            BOOST_FOREACH(Goal g, d) {
+//                if(g.getLocationPixels().x > maxx) {
+//                    maxx = g.getLocationPixels().x;
+//                    dist = g.width_dist;
+//                }
+//            }
+//        }
+//    }
 
 
-    switch(i) {
-    case 0:
-        if(dist != -1)
-            acc_hist(dist);
-        else
-            ratio_hist.first++;
-        ratio_hist.second++;
-        break;
-    case 1:
-        if(dist != -1)
-            acc_r1(dist);
-        else
-            ratio_r1.first++;
-        ratio_r1.second++;
-        break;
-    case 2:
-        if(dist != -1)
-            acc_r2(dist);
-        else
-            ratio_r2.first++;
-        ratio_r2.second++;
-        break;
-    }
-}
-//DEBUG
+//    switch(i) {
+//    case 0:
+//        if(dist != -1)
+//            acc_hist(dist);
+//        else
+//            ratio_hist.first++;
+//        ratio_hist.second++;
+//        break;
+//    case 1:
+//        if(dist != -1)
+//            acc_r1(dist);
+//        else
+//            ratio_r1.first++;
+//        ratio_r1.second++;
+//        break;
+//    case 2:
+//        if(dist != -1)
+//            acc_r2(dist);
+//        else
+//            ratio_r2.first++;
+//        ratio_r2.second++;
+//        break;
+//    }
+//}
+////DEBUG
 
 void DataWrapper::debugPublish(const vector<Obstacle>& data)
 {
@@ -481,26 +465,19 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
     }
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<RANSACGoal>& data)
+void DataWrapper::debugPublish(DEBUG_ID id, const vector<Goal>& data)
 {
-    QColor linecolour, pointcolour, endptcolour;
+    BOOST_FOREACH(const Goal& g, data) {
+        QPolygonF p;
+        const Quad& q = g.getQuad();
+        p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
+        p.append(QPointF(q.getTopLeft().x, q.getTopLeft().y));
+        p.append(QPointF(q.getTopRight().x, q.getTopRight().y));
+        p.append(QPointF(q.getBottomRight().x, q.getBottomRight().y));
+        p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
 
-    switch(id) {
-    case DBID_GOAL_LINES_CENTRE:
-        linecolour = QColor(Qt::blue);
-        pointcolour = QColor(Qt::red);
-        endptcolour = QColor(Qt::green);
-        break;
-    default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
-        return;
-    }
-
-    BOOST_FOREACH(RANSACGoal g, data) {
-        pair<Point, Point> endpts = g.getEndPoints();
-        gui->addToLayer(id, QLineF(endpts.first.x, endpts.first.y, endpts.second.x, endpts.second.y), linecolour);
-        gui->addToLayer(id, QPointF(endpts.first.x, endpts.first.y), QPen(endptcolour, 3));
-        gui->addToLayer(id, QPointF(endpts.second.x, endpts.second.y), QPen(endptcolour, 3));
+        gui->addToLayer(id, Polygon(p, g.getID() != GOAL_U), QPen(Qt::yellow));
+        gui->addToLayer(id, QPointF(g.getLocationPixels().x, g.getLocationPixels().y), QPen(QColor(Qt::blue), 3));
     }
 }
 

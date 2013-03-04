@@ -233,15 +233,6 @@ void DataWrapper::debugPublish(vector<Goal> data) {
     #endif
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Goal>& data)
-{
-}
-
-//DEBUG
-void DataWrapper::debugPublish(int i, const vector<Goal> &d)
-{
-}
-
 void DataWrapper::debugPublish(vector<Obstacle> data) {
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_OBSTACLES) << endl;

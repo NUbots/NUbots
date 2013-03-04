@@ -19,7 +19,7 @@ private:
     
     static VisionControlWrapper* instance;
     
-    VisionController* controller;
+    VisionController controller;
     DataWrapper* wrapper;
 };
 

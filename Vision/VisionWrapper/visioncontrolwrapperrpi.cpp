@@ -13,7 +13,6 @@ VisionControlWrapper* VisionControlWrapper::getInstance(bool disp_on, bool cam)
 
 VisionControlWrapper::VisionControlWrapper(bool disp_on, bool cam)
 {
-    controller = VisionController::getInstance();
     wrapper = DataWrapper::getInstance(disp_on, cam);
 }
 
@@ -31,5 +30,5 @@ int VisionControlWrapper::runFrame()
         #endif
         return -1;  //failure - do not run vision
     }
-    return controller->runFrame(true, true);
+    return controller.runFrame(true, true);
 }

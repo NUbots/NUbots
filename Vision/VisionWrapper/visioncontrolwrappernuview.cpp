@@ -11,7 +11,6 @@ VisionControlWrapper* VisionControlWrapper::getInstance()
 
 VisionControlWrapper::VisionControlWrapper()
 {
-    controller = VisionController::getInstance();
     wrapper = DataWrapper::getInstance();
 }
 
@@ -35,7 +34,7 @@ int VisionControlWrapper::runFrame()
         #endif
         return -1;  //failure - do not run vision
     }
-    status = controller->runFrame(true, true);
+    status = controller.runFrame(true, true);
     wrapper->postProcess();
     return status;
 }

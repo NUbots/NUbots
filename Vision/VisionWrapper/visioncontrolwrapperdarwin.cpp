@@ -17,7 +17,6 @@ VisionControlWrapper* VisionControlWrapper::getInstance()
 
 VisionControlWrapper::VisionControlWrapper()
 {
-    controller = VisionController::getInstance();
     data_wrapper = DataWrapper::getInstance();
     m_saveimages_thread = new SaveImagesThread(this);
 }

@@ -82,8 +82,7 @@ public:
     void debugPublish(const vector<Ball>& data);
 //    bool debugPublish(const vector<Beacon>& data);
     void debugPublish(const vector<Goal>& data);
-    void debugPublish(DEBUG_ID id, const vector<Goal>& data);
-    void debugPublish(int i, const vector<Goal>& d);
+    //void debugPublish(int i, const vector<Goal>& d);
     void debugPublish(const vector<Obstacle>& data);
     void debugPublish(const vector<FieldLine>& data);
     void debugPublish(const vector<CentreCircle>& data);
@@ -94,7 +93,7 @@ public:
     void debugPublish(DEBUG_ID id);
     void debugPublish(DEBUG_ID id, const NUImage *const img);
     void debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data);
-    void debugPublish(DEBUG_ID id, const vector<RANSACGoal> &data);
+    void debugPublish(DEBUG_ID id, const vector<Goal>& data);
 
     void plotCurve(string name, vector< Point > pts);
     void plotLineSegments(string name, vector< Point > pts);

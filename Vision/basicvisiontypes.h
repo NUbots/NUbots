@@ -67,10 +67,8 @@ namespace Vision {
         DBID_CORNERS                = 17,
         DBID_GOAL_LINES_START       = 18,
         DBID_GOAL_LINES_END         = 19,
-        DBID_GOAL_LINES_CENTRE      = 20,
         DBID_GOALS_HIST             = 21,
-        DBID_GOALS_RANSAC_EDGES     = 22,
-        DBID_GOALS_RANSAC_CENTRES   = 23
+        DBID_GOALS_RANSAC_EDGES     = 22
 //        DBID_BEACONS            = 12,
 //        DBID_BALLS              = 13,
 //        DBID_OBSTACLES          = 14,
