@@ -240,6 +240,58 @@ inline void ProjectFromAtoB(float* A, float* B, float distancePast, float* C) {
     C[1] = A[1]+dist*ydiff;
 }
 
+
+//fast (approximate) inverse square root. Quite accurate.
+inline double invSqrt( const double& x )
+{
+    double y = x;
+    double xhalf = ( double )0.5 * y;
+    long long i = *( long long* )( &y );
+    i = 0x5fe6ec85e7de30daLL - ( i >> 1 );//LL suffix for (long long) type for GCC
+    y = *( double* )( &i );
+    y = y * ( ( double )1.5 - xhalf * y * y );
+    
+    return y;
+}
+
+//fast (approximate) inverse square root. Quite accurate.
+inline float invSqrt( const float& number )
+{
+       long i;
+       float x2, y;
+       const float threehalfs = 1.5f;
+
+       x2 = number * 0.5f;
+       y = number;
+       i = * ( long * ) &y; // evil floating point bit level hacking
+       i = 0x5f3759df - ( i >> 1 ); // what the fuck?
+       y = * ( float * ) &i;
+       y = y * ( threehalfs - ( x2 * y * y ) ); // 1st iteration
+       // y = y * ( threehalfs - ( x2 * y * y ) ); // 2nd iteration, this can be removed
+
+       return y;
+} 
+
+//fast (approximate) inverse square root. Up to 6% error.
+inline double fSqrt(const double& x) {
+   unsigned long long i = *(unsigned long long*) &x; 
+   // adjust bias
+   i  += (( long long)1023) << ((long long)52);
+   // approximation of square root
+   i >>= 1; 
+   return *(double*) &i;
+ }
+
+//fast (approximate) inverse square root. Up to 6% error.
+inline float fSqrt(const float& x) {
+   unsigned int i = *(unsigned int*) &x; 
+   // adjust bias
+   i  += 127 << 23;
+   // approximation of square root
+   i >>= 1; 
+   return *(float*) &i;
+ }
+
 } // End namespace
 
 #endif //MATH_GENERAL_H

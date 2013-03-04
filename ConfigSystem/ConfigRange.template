@@ -1,0 +1,389 @@
+/*! 
+    @file     ConfigRange.template
+    @brief     Template implementation file for the ConfigRange class. 
+ 
+    @class     ConfigRange
+    @brief     Templated class used for storing ranges.
+
+    @author Sophie Calland, Mitchell Metcalfe 
+ 
+  Copyright (c) 2012 Sophie Calland, Mitchell Metcalfe 
+ 
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <boost/foreach.hpp>
+#include <vector>
+#include <iostream>
+#include "ConfigRange.h"
+
+using std::string;
+
+namespace ConfigSystem
+{
+    //Constructor
+    template<typename T>
+    ConfigRange<T>::ConfigRange()
+    {
+        _min      = 0      ;
+        _max      = 0      ;
+        _outside  = false  ;
+        _autoClip = false  ;
+        _lBound   = bt_none;
+        _uBound   = bt_none;
+    }
+
+    template<typename T>
+    ConfigRange<T>::ConfigRange(
+        T min, 
+        T max,
+        bool outside, 
+        bool autoClip
+        )
+    {
+        _min      = min      ;
+        _max      = max      ;
+        _outside  = outside  ;
+        _autoClip = autoClip ;
+        _lBound   = bt_closed;
+        _uBound   = bt_closed;
+    }
+    
+    //Constructor
+    template<typename T>
+    ConfigRange<T>::ConfigRange(
+        T min, 
+        T max, 
+        bool outside,
+        bool autoClip,
+        BoundType lBound,
+        BoundType uBound
+        )
+    {
+        _min     = min    ;
+        _max     = max    ;
+        _outside = outside;
+        _autoClip = autoClip;
+        _lBound  = lBound ;
+        _uBound  = uBound ;
+    }
+    
+    //Destructor
+    template<typename T>
+    ConfigRange<T>::~ConfigRange()
+    {
+        // // T is not intended to be a pointer type, so variables of type T
+        // // should not be deleted.
+        // delete _min;
+        // delete _max;
+    }
+    
+    
+    
+    //Retrieves "_max" member variable
+    template<typename T>
+    T ConfigRange<T>::getMax()
+    {
+        return _max;
+    }
+
+    //Retrieves "_max" member variable
+    template<typename T>
+    const T ConfigRange<T>::getMax() const
+    {
+        return _max;
+    }    
+    
+    //Retrieves "_min" member variable
+    template<typename T>
+    T ConfigRange<T>::getMin()
+    {
+        return _min;
+    }    
+    
+    //Retrieves "_min" member variable
+    template<typename T>
+    const T ConfigRange<T>::getMin() const
+    {
+        return _min;
+    }    
+    
+    //Retrieves the upper bound type of the range.
+    template<typename T>
+    BoundType ConfigRange<T>::getUpperBoundType()
+    {
+        return _uBound;
+    }
+    
+    //Retrieves the lower bound type of the range.
+    template<typename T>
+    BoundType ConfigRange<T>::getLowerBoundType()
+    {
+        return _lBound;
+    }
+    
+    template<typename T>
+    bool ConfigRange<T>::getAutoClip()
+    {
+        return _autoClip;
+    }
+    template<typename T>
+    bool ConfigRange<T>::getOutside()
+    {
+        return _outside;
+    }
+
+
+    //(values as reference?)
+    //Vector stuff can probably be done recursively with specifying a dimension?
+    //1d vector test
+    template<typename T>
+    bool ConfigRange<T>::test(std::vector<T> values)
+    {
+        BOOST_FOREACH(T &val, values)
+        {
+            if(!test(val)) return false;
+        }
+
+        return true;
+    }
+    
+    //2d vector test
+    template<typename T>
+    bool ConfigRange<T>::test(std::vector< std::vector<T> > values)
+    {
+    	BOOST_FOREACH(std::vector<T> &val, values)
+    	{
+    		if(!(test(val))) return false;
+    	}
+    	
+    	return true;
+    }
+    
+    //3d vector test
+    template<typename T>
+    bool ConfigRange<T>::test(std::vector< std::vector< std::vector<T> > > values)
+    {
+    	BOOST_FOREACH(std::vector< std::vector<T> > &val, values)
+    	{
+    		if(!(test(val))) return false;
+    	}
+    	
+    	return true;
+    }
+
+	//1d vector clip
+    template<typename T>
+    bool ConfigRange<T>::clip(std::vector<T> &values)
+    {
+        BOOST_FOREACH(T &val, values)
+        {
+            if(!clip(val)) return false;
+        }
+
+        return true;
+    }
+
+	//2d vector clip
+    template<typename T>
+    bool ConfigRange<T>::clip(std::vector< std::vector<T> > &values)
+    {
+        BOOST_FOREACH(std::vector<T> &val, values)
+        {
+            if(!clip(val)) return false;
+        }
+
+        return true;
+    }
+    
+    //3d vector clip
+    template<typename T>
+    bool ConfigRange<T>::clip(std::vector< std::vector< std::vector<T> > > &values)
+    {
+        BOOST_FOREACH(std::vector< std::vector<T> > &val, values)
+        {
+            if(!clip(val)) return false;
+        }
+
+        return true;
+    }
+
+	//1d vector apply.
+    template<typename T>
+    bool ConfigRange<T>::apply(std::vector<T> &values)
+    {
+        BOOST_FOREACH(T &val, values)
+        {
+            if(!apply(val)) return false;
+        }
+
+        return true;
+    }
+    
+    //2d vector apply.
+    template<typename T>
+    bool ConfigRange<T>::apply(std::vector< std::vector<T> > &values)
+    {
+        BOOST_FOREACH(std::vector<T> &val, values)
+        {
+            if(!apply(val)) return false;
+        }
+
+        return true;
+    }
+    
+    //3d vector apply.
+    template<typename T>
+    bool ConfigRange<T>::apply(std::vector< std::vector< std::vector<T> > > &values)
+    {
+        BOOST_FOREACH(std::vector< std::vector<T> > &val, values)
+        {
+            if(!apply(val)) return false;
+        }
+
+        return true;
+    }
+
+    template<typename T>
+    bool ConfigRange<T>::apply(T &value)
+    {
+        if(_autoClip)
+        {
+            clip(value);
+            return true;
+        }
+        else 
+        {
+            return test(value);
+        }
+    }
+    
+    //! Returns whether the given value satisfies the constraints specified
+    //! by this range object. (value as reference?)
+    template<typename T>
+    bool ConfigRange<T>::test(T value)
+    {
+        // Comparisons (unnecessary comparisons, etc. will hopefully be 
+        // optimised away by the compiler).
+
+        bool valLU  = value <  _max;
+        bool valLEU = value <= _max;
+        bool valGU  = !valLEU      ;
+        bool valGEU = !valLU       ;
+        bool valLL  = value <  _min;
+        bool valLEL = value <= _min;
+        bool valGL  = !valLEL      ;
+        bool valGEL = !valLL       ;
+
+        bool lbO = _lBound == bt_open  ;
+        bool lbC = _lBound == bt_closed;
+        bool lbN = _lBound == bt_none  ;
+        bool ubO = _uBound == bt_open  ;
+        bool ubC = _uBound == bt_closed;
+        bool ubN = _uBound == bt_none  ;
+
+        // std::cout << __PRETTY_FUNCTION__ << ": "  << _min <<" < "
+        //                                 << value << " < " << _max << std::endl; 
+
+        // The following tests could be optimised a little.
+        if(!_outside) // [...] || (...)
+        {
+            // If value must be less than max and greater than min
+
+            if(valLEL && lbO) return false; //  x <= (...
+            if(valGEU && ubO) return false; //  ...) >= x
+            if(valLL  && lbC) return false; // x < [...
+            if(valGU  && ubC) return false; // ...] < x
+        }
+        else // ...) (... || ...] [...
+        {
+            // If value must be either greater than max or less than min
+
+            if(lbO   && valGL  && valLU) return false; // ...) >  x <  ?...
+            if(lbO   && valGEL && valLU) return false; // ...) >= x <  ?...
+            if(lbC   && valGL  && valLU) return false; // ...] >  x <  ?...
+            if(lbC   && valGEL && valLU) return false; // ...] >= x <  ?...
+            
+            if(valGL && valLU  && ubO  ) return false; // ...? >  x <  (...
+            if(valGL && valLEU && ubO  ) return false; // ...? >  x <= (...
+            if(valGL && valLU  && ubC  ) return false; // ...? >  x <  [...
+            if(valGL && valLEU && ubC  ) return false; // ...? >  x <= [...
+        }
+
+        return true;
+    }
+
+
+    //! clips the given value (against active bounds, which are assumed
+    //! to be bt_closed) to lie within it's allowable range.
+    //! returns whether or not the value was clipped.
+    template<typename T>
+    bool ConfigRange<T>::clip(T &value)
+    {
+        // Comparisons (unnecessary comparisons, etc. will hopefully be 
+        // optimised away by the compiler).
+
+        bool valLU  = value <  _max;
+        bool valGU  = value >  _max;
+        bool valLL  = value <  _min;
+        bool valGL  = value >  _min;
+
+        bool lbN = (_lBound == bt_none  );
+        bool ubN = (_uBound == bt_none  );
+        bool lbA = !lbN; // A <==> 'active'
+        bool ubA = !ubN;
+
+        if(!_outside) // [...]
+        {
+            // If value must be less than max and greater than min
+
+            if(valLL  && lbA) // x < [...
+            {
+                value = _min;
+                return true;
+            }
+
+            if(valGU  && ubA) // ...] < x
+            {
+                value = _max;
+                return true;
+            }
+        }
+        else // ...] [...
+        {
+            // If value must be either greater than max or less than min
+            T avg = (_max + _min) / 2.0;
+
+            if(lbA && ubA && valGL  && valLU) // ...] >  x <  [...
+            {
+                value = (value < avg)? _min : _max;
+                return true;
+            }
+
+            if(lbA && !ubA && valGL) // ...] >  x
+            {
+                value = _min;
+                return true;
+            }
+            
+            if(valLU  && !lbA && ubA  ) // x <  [...
+            {
+                value = _max;
+                return true;
+            }
+        }
+
+        return false;
+    }
+}

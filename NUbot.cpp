@@ -32,6 +32,8 @@
 #include "Infrastructure/Jobs/Jobs.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/TeamInformation/TeamInformation.h"
+#include "ConfigSystem/ConfigManager.h"
+using ConfigSystem::ConfigManager;
 
 #include "debugverbositynubot.h"
 #include "debug.h"
@@ -221,6 +223,7 @@ void NUbot::createBlackboard()
     m_blackboard->add(new GameInformation(m_platform->getRobotNumber(), m_platform->getTeamNumber()));
     m_blackboard->add(new TeamInformation(m_platform->getRobotNumber(), m_platform->getTeamNumber()));
     m_blackboard->add(new NUCameraData((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str()));
+    m_blackboard->add(new ConfigManager());
 }
 
 /*! @brief Destroys the Blackboard, aka delete the m_blackboard */

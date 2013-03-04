@@ -47,7 +47,7 @@
 
 using namespace std;
 
-SlipTestProvider::SlipTestProvider(Behaviour* manager) : BehaviourProvider(manager)
+SlipTestProvider::SlipTestProvider(Behaviour* manager) : BehaviourProvider(manager), m_slip_matrix({{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}})
 {
     //cout << "Sample ID, Start X, Start Y, Start Heading, End X, End Y, End Heading, Trans Speed, Trans Direction, Turn Speed, X-odometry, Y-odometry, Bearing-odometry, Time Taken" << endl << flush;
     samplePointIndex = 0;
@@ -56,7 +56,8 @@ SlipTestProvider::SlipTestProvider(Behaviour* manager) : BehaviourProvider(manag
     m_trans_direction = walk[1]*6.-3.;
     m_turn_speed = walk[2]*2.-1.;
     
-    m_slip_matrix = {{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}};
+    // m_slip_matrix = {{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}} /* Mitchell Metcalfe, 31-01-13, for GCC4.7, Ubuntu 12.10 compatibility */
+
     m_av_count = 0;
     m_start_x = 0.;
     m_start_y = 0.;

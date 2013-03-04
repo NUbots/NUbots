@@ -18,6 +18,7 @@ SET(NUBOT_DIRS  NUPlatform
                 Infrastructure
                 Tools
                 Kinematics
+                ConfigSystem
 )
 IF(NUBOT_USE_VISION)
 	LIST(APPEND NUBOT_DIRS Vision)

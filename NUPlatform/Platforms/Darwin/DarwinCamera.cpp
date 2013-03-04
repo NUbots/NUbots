@@ -34,6 +34,7 @@
 #include <sys/mman.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <unistd.h> /* Mitchell Metcalfe, 31-01-13, for GCC4.7, Ubuntu 12.10 compatibility */
 
 //ORIGINAL
 /*
