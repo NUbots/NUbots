@@ -111,7 +111,7 @@ namespace Vision {
         map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.find(id);
 
         if(it == vfomap.end()) {
-            throw "Invalid VFO_ID";
+            throw "Invalid VFO_ID passed to VFOName()";
         }
         else {
             return it->second.second;
@@ -126,7 +126,7 @@ namespace Vision {
             it++;
 
         if(it == vfomap.end()) {
-            throw "Invalid VFO_ID name";
+            throw "Invalid VFO_ID name passed to VFOFromName()";
         }
         else {
             return it->first;
@@ -140,7 +140,7 @@ namespace Vision {
             it++;
 
         if(it == vfomap.end()) {
-            throw "Invalid VFO_ID number";
+            throw "Invalid VFO_ID number passed to VFOFromInt()";
         }
         else {
             return it->first;
@@ -151,7 +151,7 @@ namespace Vision {
         map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.find(id);
 
         if(it == vfomap.end()) {
-            throw "Invalid VFO_ID";
+            throw "Invalid VFO_ID passed to intFromVFO()";
         }
         else {
             return it->second.first;

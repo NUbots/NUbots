@@ -1,3 +1,9 @@
+QT += network \
+      opengl
+
+CONFIG += qwt
+
+DEFINES += QT_NO_DEBUG_STREAM
 
 win32{
     INCLUDEPATH += 'C:\Program Files\Boost\boost_1_52_0'
@@ -12,9 +18,7 @@ win32{
     }
 }
 
-CONFIG += qwt
 
-DEFINES += QT_NO_DEBUG_STREAM
 
 INCLUDEPATH += ../
 

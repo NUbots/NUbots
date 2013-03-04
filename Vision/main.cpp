@@ -16,6 +16,35 @@
 #ifndef TARGET_IS_RPI
 #include <QApplication>
 #include <QFileDialog>
+#include <QMessageBox>
+
+//for catching exceptions
+class MyApplication : public QApplication {
+public:
+    MyApplication(int& argc, char ** argv) : QApplication(argc, argv) { }
+    MyApplication(Display* dpy, Qt::HANDLE visual = 0, Qt::HANDLE cmap = 0, int flags = ApplicationFlags) : QApplication(dpy, visual, cmap, flags) { }
+    virtual ~MyApplication() { }
+
+    // reimplemented from QApplication so we can throw exceptions in slots
+    virtual bool notify(QObject * receiver, QEvent * event) {
+        try {
+        return QApplication::notify(receiver, event);
+        }
+        catch(const std::exception& e) {
+            QMessageBox::warning(NULL, "Exception", QString("Exception thrown: ") + e.what());
+        }
+        catch (const std::string& ex) {
+            QMessageBox::warning(NULL, "Exception", QString(("Manual exception thrown: " + ex).c_str()));
+        }
+        catch (const char* str) {
+            QMessageBox::warning(NULL, "Exception", QString("Manual exception thrown: ") + str);
+        }
+        catch (...) {
+            QMessageBox::warning(NULL, "Exception", "Unknown exception thrown.");
+        }
+        return false;
+    }
+};
 #endif
 
 using namespace std;
@@ -158,7 +187,7 @@ int rpi(bool disp_on, bool cam)
 int qt()
 {
 #ifndef TARGET_IS_RPI
-    QApplication app(NULL);
+    MyApplication app(NULL);
 #endif
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();
 
