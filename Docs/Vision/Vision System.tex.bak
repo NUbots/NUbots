@@ -1,7 +1,6 @@
 \documentclass[]{report}
 \usepackage[dvips]{graphicx}
 \usepackage{amssymb}
-\usepackage{placeins}
 % Title Page
 \title{NUbots Vision System Description}
 \author{Shannon Fenn}
@@ -10,7 +9,7 @@
 \maketitle
 
 \begin{abstract}
-This document outlines the software architecture, major classes and expected configuration file formats of the NUbots Vision System as of March 2013.
+This document outlines the software architecture and major classes of the NUbots Vision System as of March 2013.
 \end{abstract}
 \chapter{Software Architecture}
 The vision system (see fig~\ref{fig:visionarchitecturefinal}) consists of a layered architecture consisting of an interfacial layer (to make the system more flexible and portable) and a processing layer. The processing layer itself follows the well known blackboard pattern from the AI community.
@@ -23,11 +22,12 @@ The vision system (see fig~\ref{fig:visionarchitecturefinal}) consists of a laye
 \label{fig:visionarchitecturefinal}
 \end{figure}
 
+
 The \emph{control wrapper} exists as an external interface for invoking the vision system. This is key as vision is itself a subsystem. By designing this interface through a wrapper we trade a very slight decrease in efficiency (through a small number of redundant method calls) for a large increase in flexibility as the wrapper is the only module that need change for the system to be invoked in different ways (provided this change does not require the system's functional behaviour).
 
 The \emph{data wrapper} exists as a way for the vision system to access the external data it needs (the image, kinematic data, sensor data etc). The same reasoning for modelling the control interface as a wrapper is applicable for the data interface. This approach also allows for data validity to be maintained. The data wrapper becomes responsible for maintaining the validity of data for each frame, i.e. it maintaining a copy of the relevant data accessed at the same time as the current frame if the external system cannot be trusted to do so. This insulates vision against poorly maintained external data structures. If the sensor data is updated by the locomotion system whilst the vision system is midway through analysing a frame the data wrapper still has a local copy. This decouples the data responsibilities of the various systems and ensures vision is as robust as possible to change.
 
-Having these interfaces as wrappers has one extra advantage: rapid testing. Either wrapper can be replaced by a stub providing either dummy data in the case of the data wrapper or invoking the system with extra debugging information or only after user triggering. This has allowed for the system to be quickly integrated into a desktop application interfacing with a standalone webcam, without kinematic or sensor data, into the NUbots NUView system, which reads the appropriate data from log files or network streams and also onto the RaspberryPi platform.
+Having these interfaces as wrappers has one extra advantage: rapid testing. Either wrapper can be replaced by a stub providing either dummy data in the case of the data wrapper or invoking the system with extra debugging information or only after user triggering. This has allowed for the system to be quickly integrated into a desktop application interfacing with a standalone webcam, without kinematic or sensor data, into the NUbots NUView system, which reads the appropriate data from log files or network streams and also onto the RaspberryPi platform. 
 
 The centralised \emph{blackboard} was implemented follows the singleton pattern. This is for two reasons: firstly the blackboard is a single object throughout the system and it should not be possible for multiple to be instantiated, secondly it allows for simple global access in the form of a static access method. The blackboard forms a central repository of current state information, each processing stage in the system requests the input it needs from the blackboard and posts results back. This increases the complexity of the system somewhat by requiring correct process order to be maintained by a controller, but allows for rapid reordering of independent stages and implementation of new stages.
 
@@ -37,9 +37,9 @@ The \emph{controller} at present simply calls processing stages in order with st
 \section{Control and Data Wrapper (singletons)}
 The Control Wrapper class is redefined in several files, and in each provides whichever interface the external system requires, in most cases this is simply a per-frame runFrame() command, or a continuous run() command, each has a corresponding data wrapper described below.
 
-The Data Wrapper class is redefined in several files and in each it provides the same minimal interface but a different internal implementation. This class is responsible for communication between the main vision system and whatever external system or interface is using it, be that NUView, the main robot framework, or the stand-alone offline development framework (the "Vision" Qt project). It has a number of publish, debugPublish (useful for providing intermediary data to an external system that is not part of the formal output), and access methods.
+The Data Wrapper class is redefined in several files and in each it provides the same minimal interface but a different internal implementation. This class is responsible for communication between the main vision system and whatever external system or interface is using it, be that NUView, the main robot framework, or the standalone offline development framework (the "Vision" Qt project). It has a number of publish, debugPublish (useful for providing intermediary data to an external system that is not part of the formal output), and access methods. 
 
-Any new implementation of this class should insulate the internal system from external faults (by copying data structures etc. where necessary), and is responsible for reformatting the Vision system outputs to fit external requirements. In order for the internal system to be able to use the appropriate wrapper an inclusion selection header DataWrapperCurrent.h is included. This header uses previously defined precompiler constants to determine which header to pass forward. When building projects with new wrappers, or which reuse old wrappers simply look at this file to decide which precompiler constants need to be defined.
+Any new implementation of this class should insulate the internal system from external faults (by copying data structures etc. where necessary), and is responsible for reformatting the Vision system outputs to fit external requirements. In order for the internal system to be able to use the appropriate wrapper an inclusion selection header DataWrapperCurrent.h is included. This header uses previously defined precompiler constants to determine which header to pass forward. When building projects with new wrappers, or which reuse old wrappers simply look at this file to decide which precompiler constants need to be defined. 
 
 Currently there are 4 versions of the wrappers, indicated by the following suffices in the file names:
 \begin{description}
@@ -59,19 +59,19 @@ Contains the main data held by the system for the duration of a frame, including
 This is not a class but rather a header and source for several global enumerated type definitions and mappings to and from integral and string representations. This also includes some typedef statements for commonly used templated types (in order to increase readability). When changing any of these enumeration definitions in the header be sure to reflect these changes in the private mapping classes defined in the source, the mapping methods themselves use these classes (inherited from std::map) and thus do not need to be modified.
 
 \section{VisionTypes}
-\subsection{Quad}
+\subsection{Quad} 
 This represents a convex quadrilateral in the image plane and forms the basis for goal and obstacle objects. It is a simple type consisting of four corner points along with accessor methods to easily obtain important information such as the bottom-centre position, centre position, mean width, mean height, area and determine intersections.
-\subsection{GreenHorizon}
+\subsection{GreenHorizon} 
 This type represents the field border and internally consists of a set of points provided by the green horizon detection module as well as a list of interpolated points (trading spatial efficiency for temporal efficiency by pre-calculating once rather than several times). This type also allows the retrieval of a single y-value or a series of interpolated points with any given pixel spacing and a function to check if a given point is below the horizon (useful for filtering). Linear interpolation is used for efficiency reasons though the implementation is such that any other method could reasonably be used with little modification by simply replacing the interpolation function.
-\subsection{ColourSegment}
+\subsection{ColourSegment} 
 This type is used to represent a continuous run of pixels with the same colour classification. The type internally consists of a colour and two end points, the length and centre-point of the segment are pre-calculated and maintained as well for efficiency since it they are queried multiple times per frame. This type allows the obvious accessors as well as having input and output stream operators (for file IO) and a method to allow the joining of an adjacent segments (used for replacement rules discussed later).
-\subsection{SegmentedRegion}
+\subsection{SegmentedRegion} 
 This type exists to maintain all of the classified segments in a logical structure. It is a list of lists of segments as well as an alignment. Within the current implementation there are only ever two - one for the vertical and one for the horizontal segments, however it is not restricted to that. It is this data-type that the initial filters operate on to produce the information that the object classifiers rely on.
-\subsection{ColourRule}
+\subsection{ColourRule} 
 This represents an abstract rule used by various colour filters (replacement and transition rules). It consists of three lists (before, middle and after) of colour-classes each with an associated numeric range. The standard accessor methods exist as well as a function for matching the rule to a triplet of segments and stream operators (important since the rules are meant to be read in from file in order to make the system highly configurable without requiring recompilation).
-\subsection{ColourReplacementRule}
+\subsection{ColourReplacementRule} 
 This represents a rule used by the replacement filter. It consists of a name, an enumerated replacement method (for now - before, after and split) and a before as well as the inherited types and methods from the more abstract Rule type.
-\subsection{ColourTransitionRule}
+\subsection{ColourTransitionRule} 
 This is a rule used by the transition detection filter described later, and is similar to the ColourReplacementRule but instead of a name and replacement method the transition rule has a object-class that it belongs to (presently post, ball or line).
 \subsection{GroundPoint}
 This class is an attempt to unify multiple coordinate representations for points that are known to be on the ground. It consist of 2D vectors representing the points Cartesian coordinates in the image plane, radial coordinates relative to the camera vector and Cartesian coordinates relative to the robot in the field plane as well as a 3D vector representing its radial coordinates in the world space.
@@ -122,75 +122,5 @@ This includes:
 \item[LookupTable] A class which allows conversion between a 3D colour space vector (pixel) and a class label via a 128x128x128 char array.
 \item[Transformer] A class which allows transformation between the various spaces used by the vision system, utilising kinematics data collected at the start of the frame as well as the known pixel dimensions and field of view of the camera.
 \end{description}
-
-\chapter{Configuration Files}
-
-\section{Rules}
-The Vision system reads the rules it uses for noise filtering and transition detection from file. 
-
-For replacement rules (those used to filter classification noise) the expected layout is a series of newline separated rules of the form:
-\begin{verbatim}
-name:
-before: (min_b, max_b) [colour0, colour1]   //comment
-middle: (min_m , max_m) [colour2]           //comment
-after: (min_a, max_a) [colour3]             //comment
-replacement: method                         //comment
-\end{verbatim}
-
-Where the min and max values are integer pixel numbers (relative values which expresses a fraction of the image width or height were toyed with, but proved difficult to modify by hand) and \emph{method} is one of ``before'', ``after'' or ``split''. This method describes which colour the middle segment will be replaced with. Within each pair of square braces an unbounded comma separated list of colours to which rule could possibly be matched is given.  An example, used to filter shot noise in the field, is given below:
-\begin{verbatim}
-fieldnoise_v_small:
-before: (3, 320) [green]         //3 pix min
-middle: (0 , 1) [unclassified]   //1 pix max
-after: (3, 320) [green]          //3 pix min
-replacement: before              //before, after, split
-\end{verbatim}
-
-Within the ``Rules'' directory of the configuration directory there must be two of these files, one which is used on vertical segments, and one on horizontal. This could be changed by adding an extra option to the format which specifies the direction (vertical, horizontal or both) to which the rule applies and only reading in rules from a single file.
-
-For transition rules (those used to filter potential field object points) the expected layout is a series of newline separated rules of the form:
-
-\begin{verbatim}
-COLOUR_CLASS:
-before: (min_b, max_b) [colour0, colour1]   //comment
-middle: (min_m , max_m) [unclassified]      //comment
-after: (min_a, max_a) [green]               //comment
-\end{verbatim}
-
-The only difference in format between replacement and transition rules is that instead of a name, transition rules are labelled by a COLOUR\_CLASS which must match one of the elements of the enumerated type with the same name in BasicVisionTypes, and that transition rules lack a replacement method field.
-
-The filenames expected are \emph{ReplacementRules\_h.txt}, \emph{ReplacementRules\_v.txt}, \emph{TransitionRules\_h.txt} and \emph{TransitionRules\_v.txt} and are loaded within the constructor of the SegmentFilter module. In actuality this was an inflexible design choice and at some point in the future these rules should be made to reside on the blackboard and be loaded from the wrapper at each frame (this would allow automated testing or learning of the rules which at present have not been modified much since they were first created). Figure~\ref{fig:rep_rules_vs_gaussian} shows why we use replacement rules rather than a Gaussian or similar blurring method.
-
-\begin{figure}[!htbp]
-\centering
-\vspace{2mm}
-\includegraphics[scale=0.45,angle=0]{rep_rules_vs_gaussian.eps}
-\caption{\footnotesize LUT classified image (top-left). Segments before filtering (top-right). Segments from a blurred image (bottom-left). Segments after replacement rule filtering (bottom-right). \normalsize}
-\label{fig:rep_rules_vs_gaussian}
-\end{figure}
-\FloatBarrier
-
-\section{VisionOptions.cfg}
-VisionOptions.cfg and its relating class ``VisionConstants'' are poorly maintained and should be replaced with new configuration system. Nonetheless this file is currently expected to exist within the configuration directory of the robot, or within robocup/Config/NUView, when using NUView, or manually selected by the user when using the off-line Vision program. It is a newline separated list of entries in the form ``CONSTANT\_NAME: value'' where CONSTANT\_NAME matches the name of a constants within VisionConstants and value is the boolean (0/1, not true/false), integer or decimal value being given or is a string that indicates an enumerated option. An example subset is given below, note that as much horizontal or vertical whitespace as desired can be used to help readability:
-
-\begin{verbatim}
-BALL_DISTANCE_METHOD:                   D2P
-GOAL_DISTANCE_METHOD:                   D2P
-
-BALL_EDGE_THRESHOLD:                    15
-BALL_ORANGE_TOLERANCE:                  25
-BALL_MIN_PERCENT_ORANGE:		0.2
-MIN_GOAL_SEPARATION:            40
-
-GOAL_WIDTH:             10
-GOAL_HEIGHT_INTERNAL:   80
-DISTANCE_BETWEEN_POSTS: 150
-BALL_WIDTH:             6.5
-CENTRE_CIRCLE_RADIUS:   60
-
-LINE_METHOD:	                RANSAC
-RANSAC_MAX_ANGLE_DIFF_TO_MERGE: 0.1
-RANSAC_MAX_DISTANCE_TO_MERGE:   10
-\end{verbatim}
 
 \end{document}
