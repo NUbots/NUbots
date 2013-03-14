@@ -25,7 +25,6 @@ greenhorizon.cpp
 colourreplacementrule.cpp
 coloursegment.cpp
 colourtransitionrule.cpp
-objectcandidate.cpp
 segmentedregion.cpp
 quad.cpp
 histogram1d.cpp
