@@ -5,6 +5,7 @@
  *
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <math.h>
 #include "FSR.h"
