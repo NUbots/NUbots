@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 
 #include "Camera.h"
 #include "LinuxCamera.h"

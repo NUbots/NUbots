@@ -164,6 +164,23 @@ namespace Robot
 		int TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority);
 		unsigned char CalculateChecksum(unsigned char *packet);
 
+
+		// TxRxPacket component methods:
+		void printInstructionType(unsigned char *txpacket, int length);
+		void printResultType(int);
+		void performPriorityWait(int);
+		void performPriorityRelease(int);
+		void TxRxCMPacket(
+		    unsigned char *&txpacket, 
+		    unsigned char *&rxpacket, 
+		    int &res, 
+		    int &length);
+		void TxRxBulkReadPacket(
+		    unsigned char *&txpacket, 
+		    unsigned char *&rxpacket, 
+		    int &res, 
+		    int &length);
+
 	public:
 		bool DEBUG_PRINT;
         BulkReadData m_BulkReadData[ID_BROADCAST];

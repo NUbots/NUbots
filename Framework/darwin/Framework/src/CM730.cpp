@@ -9,6 +9,8 @@
 #include "CM730.h"
 #include "MotionStatus.h"
 
+#include <cassert>
+
 using namespace Robot;
 
 
@@ -40,7 +42,8 @@ BulkReadData::BulkReadData() :
 
 int BulkReadData::ReadByte(int address)
 {
-    if(address >= start_address && address < (start_address + length))
+    if(address >= start_address &&
+       address < (start_address + length))
         return (int)table[address];
 
     return 0;
@@ -48,7 +51,8 @@ int BulkReadData::ReadByte(int address)
 
 int BulkReadData::ReadWord(int address)
 {
-    if(address >= start_address && address < (start_address + length))
+    if(address >= start_address && 
+       address < (start_address + length))
         return CM730::MakeWord(table[address], table[address+1]);
 
     return 0;
@@ -68,312 +72,392 @@ CM730::~CM730()
 	Disconnect();
 }
 
-int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority)
+
+void CM730::printInstructionType(unsigned char *txpacket, int length)
 {
-	if(priority > 1)
-		m_Platform->LowPriorityWait();
-	if(priority > 0)
-		m_Platform->MidPriorityWait();
-	m_Platform->HighPriorityWait();
+    fprintf(stderr, "\nTX: ");
+    for(int n=0; n<length; n++)
+        fprintf(stderr, "%.2X ", txpacket[n]);
 
-	int res = TX_FAIL;
-	int length = txpacket[LENGTH] + 4;
+    fprintf(stderr, "INST: ");
+    switch(txpacket[INSTRUCTION])
+    {
+    case INST_PING:
+        fprintf(stderr, "PING\n");
+        break;
 
-	txpacket[0] = 0xFF;
-    txpacket[1] = 0xFF;
-	txpacket[length - 1] = CalculateChecksum(txpacket);
+    case INST_READ:
+        fprintf(stderr, "READ\n");
+        break;
 
-	if(DEBUG_PRINT == true)
-	{
-		fprintf(stderr, "\nTX: ");
-		for(int n=0; n<length; n++)
-			fprintf(stderr, "%.2X ", txpacket[n]);
+    case INST_WRITE:
+        fprintf(stderr, "WRITE\n");
+        break;
 
-		fprintf(stderr, "INST: ");
-		switch(txpacket[INSTRUCTION])
-		{
-		case INST_PING:
-			fprintf(stderr, "PING\n");
-			break;
+    case INST_REG_WRITE:
+        fprintf(stderr, "REG_WRITE\n");
+        break;
 
-		case INST_READ:
-			fprintf(stderr, "READ\n");
-			break;
+    case INST_ACTION:
+        fprintf(stderr, "ACTION\n");
+        break;
 
-		case INST_WRITE:
-			fprintf(stderr, "WRITE\n");
-			break;
+    case INST_RESET:
+        fprintf(stderr, "RESET\n");
+        break;
 
-		case INST_REG_WRITE:
-			fprintf(stderr, "REG_WRITE\n");
-			break;
+    case INST_SYNC_WRITE:
+        fprintf(stderr, "SYNC_WRITE\n");
+        break;
 
-		case INST_ACTION:
-			fprintf(stderr, "ACTION\n");
-			break;
+    case INST_BULK_READ:
+        fprintf(stderr, "BULK_READ\n");
+        break;
 
-		case INST_RESET:
-			fprintf(stderr, "RESET\n");
-			break;
+    default:
+        fprintf(stderr, "UNKNOWN\n");
+        break;
+    }
+}
 
-		case INST_SYNC_WRITE:
-			fprintf(stderr, "SYNC_WRITE\n");
-			break;
+void CM730::printResultType(int res)
+{
+    fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
+    fprintf(stderr, "RETURN: ");
+    switch(res)
+    {
+    case SUCCESS:
+        fprintf(stderr, "SUCCESS\n");
+        break;
 
-        case INST_BULK_READ:
-            fprintf(stderr, "BULK_READ\n");
-            break;
+    case TX_CORRUPT:
+        fprintf(stderr, "TX_CORRUPT\n");
+        break;
 
-		default:
-			fprintf(stderr, "UNKNOWN\n");
-			break;
-		}
-	}
+    case TX_FAIL:
+        fprintf(stderr, "TX_FAIL\n");
+        break;
 
-	if(length < (MAXNUM_TXPARAM + 6))
-	{
-		m_Platform->ClearPort();
-		if(m_Platform->WritePort(txpacket, length) == length)
-		{
-			if (txpacket[ID] != ID_BROADCAST)
-			{
-				int to_length = 0;
+    case RX_FAIL:
+        fprintf(stderr, "RX_FAIL\n");
+        break;
 
-				if(txpacket[INSTRUCTION] == INST_READ)
-					to_length = txpacket[PARAMETER+1] + 6;
-				else
-					to_length = 6;
+    case RX_TIMEOUT:
+        fprintf(stderr, "RX_TIMEOUT\n");
+        break;
 
-				m_Platform->SetPacketTimeout(length);
+    case RX_CORRUPT:
+        fprintf(stderr, "RX_CORRUPT\n");
+        break;
 
-				int get_length = 0;
-				if(DEBUG_PRINT == true)
-					fprintf(stderr, "RX: ");
-				
-				while(1)
-				{
-					length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
-					if(DEBUG_PRINT == true)
-					{
-						for(int n=0; n<length; n++)
-							fprintf(stderr, "%.2X ", rxpacket[get_length + n]);
-					}
-					get_length += length;
+    default:
+        fprintf(stderr, "UNKNOWN\n");
+        break;
+    }
+}
 
-					if(get_length == to_length)
-					{
-						// Find packet header
-						int i;
-						for(i = 0; i < (get_length - 1); i++)
-						{
-							if(rxpacket[i] == 0xFF && rxpacket[i+1] == 0xFF)
-								break;
-							else if(i == (get_length - 2) && rxpacket[get_length - 1] == 0xFF)
-								break;
-						}
+inline void CM730::performPriorityWait(int priority)
+{
+    if(priority > 1)
+        m_Platform->LowPriorityWait();
+    if(priority > 0)
+        m_Platform->MidPriorityWait();
+    m_Platform->HighPriorityWait();
+}
 
-						if(i == 0)
-						{
-							// Check checksum
-							unsigned char checksum = CalculateChecksum(rxpacket);
-							if(DEBUG_PRINT == true)
-								fprintf(stderr, "CHK:%.2X\n", checksum);
-
-							if(rxpacket[get_length-1] == checksum)
-								res = SUCCESS;
-							else
-								res = RX_CORRUPT;
-							
-							break;
-						}
-						else
-						{
-							for(int j = 0; j < (get_length - i); j++)
-								rxpacket[j] = rxpacket[j+i];
-							get_length -= i;
-						}						
-					}
-					else
-					{
-						if(m_Platform->IsPacketTimeout() == true)
-						{
-							if(get_length == 0)
-								res = RX_TIMEOUT;
-							else
-								res = RX_CORRUPT;
-							
-							break;
-						}
-					}
-				}
-			}
-			else if(txpacket[INSTRUCTION] == INST_BULK_READ)
-			{
-                int to_length = 0;
-                int num = (txpacket[LENGTH]-3) / 3;
-
-                for(int x = 0; x < num; x++)
-                {
-                    int _id = txpacket[PARAMETER+(3*x)+2];
-                    int _len = txpacket[PARAMETER+(3*x)+1];
-                    int _addr = txpacket[PARAMETER+(3*x)+3];
-
-                    to_length += _len + 6;
-                    m_BulkReadData[_id].length = _len;
-                    m_BulkReadData[_id].start_address = _addr;
-                }
-
-                m_Platform->SetPacketTimeout(to_length*1.5);
-
-                int get_length = 0;
-                if(DEBUG_PRINT == true)
-                    fprintf(stderr, "RX: ");
-
-                while(1)
-                {
-                    length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
-                    if(DEBUG_PRINT == true)
-                    {
-                        for(int n=0; n<length; n++)
-                            fprintf(stderr, "%.2X ", rxpacket[get_length + n]);
-                    }
-                    get_length += length;
-
-                    if(get_length == to_length)
-                    {
-                        res = SUCCESS;
-                        break;
-                    }
-                    else
-                    {
-                        if(m_Platform->IsPacketTimeout() == true)
-                        {
-                            if(get_length == 0)
-                                res = RX_TIMEOUT;
-                            else
-                                res = RX_CORRUPT;
-
-                            break;
-                        }
-                    }
-                }
-
-                for(int x = 0; x < num; x++)
-                {
-                    int _id = txpacket[PARAMETER+(3*x)+2];
-                    m_BulkReadData[_id].error = -1;
-                }
-
-                while(1)
-                {
-                    int i;
-                    for(i = 0; i < get_length - 1; i++)
-                    {
-                        if(rxpacket[i] == 0xFF && rxpacket[i+1] == 0xFF)
-                            break;
-                        else if(i == (get_length - 2) && rxpacket[get_length - 1] == 0xFF)
-                            break;
-                    }
-
-                    if(i == 0)
-                    {
-                        // Check checksum
-                        unsigned char checksum = CalculateChecksum(rxpacket);
-                        if(DEBUG_PRINT == true)
-                            fprintf(stderr, "CHK:%.2X\n", checksum);
-
-                        if(rxpacket[LENGTH+rxpacket[LENGTH]] == checksum)
-                        {
-                            for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
-                                m_BulkReadData[rxpacket[ID]].table[m_BulkReadData[rxpacket[ID]].start_address + j] = rxpacket[PARAMETER + j];
-
-                            m_BulkReadData[rxpacket[ID]].error = (int)rxpacket[ERRBIT];
-
-                            int cur_packet_length = LENGTH + 1 + rxpacket[LENGTH];
-                            to_length = get_length - cur_packet_length;
-                            for(int j = 0; j <= to_length; j++)
-                                rxpacket[j] = rxpacket[j+cur_packet_length];
-
-                            get_length = to_length;
-                            num--;
-                        }
-                        else
-                        {
-                            res = RX_CORRUPT;
-
-                            for(int j = 0; j <= get_length - 2; j++)
-                                rxpacket[j] = rxpacket[j+2];
-
-                            to_length = get_length -= 2;
-                        }
-
-                        if(num == 0)
-                            break;
-                        else if(get_length <= 6)
-                        {
-                            if(num != 0) res = RX_CORRUPT;
-                            break;
-                        }
-
-                    }
-                    else
-                    {
-                        for(int j = 0; j < (get_length - i); j++)
-                            rxpacket[j] = rxpacket[j+i];
-                        get_length -= i;
-                    }
-                }
-			}
-			else
-				res = SUCCESS;			
-		}
-		else
-			res = TX_FAIL;		
-	}
-	else
-		res = TX_CORRUPT;
-
-	if(DEBUG_PRINT == true)
-	{
-		fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
-		fprintf(stderr, "RETURN: ");
-		switch(res)
-		{
-		case SUCCESS:
-			fprintf(stderr, "SUCCESS\n");
-			break;
-
-		case TX_CORRUPT:
-			fprintf(stderr, "TX_CORRUPT\n");
-			break;
-
-		case TX_FAIL:
-			fprintf(stderr, "TX_FAIL\n");
-			break;
-
-		case RX_FAIL:
-			fprintf(stderr, "RX_FAIL\n");
-			break;
-
-		case RX_TIMEOUT:
-			fprintf(stderr, "RX_TIMEOUT\n");
-			break;
-
-		case RX_CORRUPT:
-			fprintf(stderr, "RX_CORRUPT\n");
-			break;
-
-		default:
-			fprintf(stderr, "UNKNOWN\n");
-			break;
-		}
-	}
-
-	m_Platform->HighPriorityRelease();
+inline void CM730::performPriorityRelease(int priority)
+{
+    m_Platform->HighPriorityRelease();
     if(priority > 0)
         m_Platform->MidPriorityRelease();
     if(priority > 1)
         m_Platform->LowPriorityRelease();
+}
+
+
+inline void CM730::TxRxCMPacket(
+    unsigned char* &txpacket,
+    unsigned char* &rxpacket,
+    int &res,
+    int &length)
+{
+    int to_length = 0;
+
+    if(txpacket[INSTRUCTION] == INST_READ)
+        to_length = txpacket[PARAMETER+1] + 6;
+    else
+        to_length = 6;
+
+    m_Platform->SetPacketTimeout(length);
+
+    int get_length = 0;
+    if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
+
+    while(1)
+    {
+        length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
+        if(DEBUG_PRINT == true)
+        {
+            for(int n=0; n<length; n++)
+                fprintf(stderr, "%.2X ", rxpacket[get_length + n]);
+        }
+        get_length += length;
+
+        if(get_length == to_length)
+        {
+            // Find packet header
+            int i;
+            for(i = 0; i < (get_length - 1); i++)
+            {
+                if(rxpacket[i] == 0xFF && rxpacket[i+1] == 0xFF)
+                    break;
+                else if(i == (get_length - 2) && rxpacket[get_length - 1] == 0xFF)
+                    break;
+            }
+
+            if(i == 0)
+            {
+                // Check checksum
+                unsigned char checksum = CalculateChecksum(rxpacket);
+                if(DEBUG_PRINT == true)
+                    fprintf(stderr, "CHK:%.2X\n", checksum);
+
+                if(rxpacket[get_length-1] == checksum)
+                    res = SUCCESS;
+                else
+                    res = RX_CORRUPT;
+                
+                break;
+            }
+            else
+            {
+                for(int j = 0; j < (get_length - i); j++)
+                    rxpacket[j] = rxpacket[j+i];
+                get_length -= i;
+            }                       
+        }
+        else
+        {
+            if(m_Platform->IsPacketTimeout() == true)
+            {
+                if(get_length == 0)
+                    res = RX_TIMEOUT;
+                else
+                    res = RX_CORRUPT;
+                
+                break;
+            }
+        }
+    }
+}
+
+inline void CM730::TxRxBulkReadPacket(
+    unsigned char* &txpacket, 
+    unsigned char* &rxpacket, 
+    int &res, 
+    int &length)
+{
+    int to_length = 0; //! length in bytes of data to read
+    int num = (txpacket[LENGTH]-3) / 3;
+
+    // Set bulkreaddata lengths and start addresses
+    for(int x = 0; x < num; x++)
+    {
+        int _id = txpacket[PARAMETER+(3*x)+2];
+        int _len = txpacket[PARAMETER+(3*x)+1];
+        int _addr = txpacket[PARAMETER+(3*x)+3];
+
+        to_length += _len + 6;
+        m_BulkReadData[_id].length = _len;
+        m_BulkReadData[_id].start_address = _addr;
+    }
+
+    m_Platform->SetPacketTimeout(to_length*1.5);
+
+    if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
+
+
+    int get_length = 0; //! length in bytes of data read so far
+    
+    // Read data from port 
+    // (loop until all data has been read, or a timeout occurs)
+    while(1)
+    {
+        // read some (more) data
+        length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
+        if(DEBUG_PRINT == true)
+        {
+            for(int n=0; n<length; n++)
+                fprintf(stderr, "%.2X ", rxpacket[get_length + n]);
+        }
+        get_length += length;
+
+        // break if all data has been read
+        if(get_length == to_length)
+        {
+            res = SUCCESS;
+            break;
+        }
+        else
+        {
+            // break, and set error code, if a timeout occured
+            if(m_Platform->IsPacketTimeout() == true)
+            {
+                if(get_length == 0)
+                    res = RX_TIMEOUT;
+                else
+                    res = RX_CORRUPT;
+
+                break;
+            }
+        }
+    }
+
+    // resetBulkReadDataErrorCodes
+    for(int x = 0; x < num; x++)
+    {
+        int _id = txpacket[PARAMETER+(3*x)+2];
+        m_BulkReadData[_id].error = -1;
+    }
+
+
+    // Validate received data (in rxpacket) and
+    // copy it into BulkReadData objects (in m_BulkReadData).
+    while(1)
+    {
+        // Note: rxpacket may contain several sets of values to be read
+        //       (e.g. one set for each motor, containing all the values from
+        //        that motor's memory table).
+        // 
+        // The first bytes of a valid set of values are the following:
+        // 0x00: 0xFF      (literal value 0xFF)
+        // 0x01: 0xFF      (literal value 0xFF)
+        // 0x02: ID        (a byte indicating which motor/device's data follows)
+        // 0x03: LENGTH    (the number of bytes following the error bit)
+        // 0x04: ERRBIT    (stores an error code for this read)
+        // 0x05: (PARAMETER) (the first byte of data from the device)
+        //
+        // ... (all the data)
+        //
+        // (LENGTH)+0x03: A checksum for this data packet. 
+        //                (Note: this is the last address of the packet)
+        //
+        // In particular, sets always start with the bytes, 0xFF 0xFF.
+        // 
+
+        int i;
+        for(i = 0; i < get_length - 1; i++)
+        {
+            if(rxpacket[i] == 0xFF && rxpacket[i+1] == 0xFF)
+                break;
+            else if(i == (get_length - 2) && rxpacket[get_length - 1] == 0xFF)
+                break;
+        }
+        
+        if(i != 0)
+        {
+            // skip invalid/header bytes
+            for(int j = 0; j < (get_length - i); j++)
+                rxpacket[j] = rxpacket[j+i];
+            get_length -= i;
+
+            // continue;
+        }
+        else
+        // if(i == 0)
+        {
+            // Check checksum
+            unsigned char checksum = CalculateChecksum(rxpacket);
+            if(DEBUG_PRINT == true)
+                fprintf(stderr, "CHK:%.2X\n", checksum);
+
+            // If the last element is equal to the checksum...
+            // Note: rxpacket[LENGTH] stores the number of bytes in rxpacket
+            //       after the array position LENGTH.
+            if(rxpacket[LENGTH+rxpacket[LENGTH]] == checksum)
+            {
+                // Copy data of first value to the datatable of the
+                // corresponding BulkReadData object.
+                for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
+                    m_BulkReadData[rxpacket[ID]].table[m_BulkReadData[rxpacket[ID]].start_address + j] = rxpacket[PARAMETER + j];
+
+                m_BulkReadData[rxpacket[ID]].error = (int)rxpacket[ERRBIT];
+
+                // skip the rxpacket entry that was just read
+                int cur_packet_length = LENGTH + 1 + rxpacket[LENGTH];
+                to_length = get_length - cur_packet_length;
+                for(int j = 0; j <= to_length; j++)
+                    rxpacket[j] = rxpacket[j+cur_packet_length];
+
+                get_length = to_length;
+                num--;
+            }
+            else
+            {
+                res = RX_CORRUPT;
+
+                // skip next 2 bytes of rxpacket
+                for(int j = 0; j <= get_length - 2; j++)
+                    rxpacket[j] = rxpacket[j+2];
+
+                to_length = get_length -= 2;
+            }
+
+            if(num == 0)
+                break;
+            else if(get_length <= 6) // rxpacket has been read entirely
+            {
+                if(num != 0) res = RX_CORRUPT;
+                break;
+            }
+
+            // continue;
+        }
+    }
+}
+
+int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority)
+{
+	// Acquire resources
+    performPriorityWait(priority);
+
+    int res = TX_FAIL;
+    int length = txpacket[LENGTH] + 4;
+
+    txpacket[0] = 0xFF;
+    txpacket[1] = 0xFF;
+    txpacket[length - 1] = CalculateChecksum(txpacket);
+
+    if(DEBUG_PRINT == true) printInstructionType(txpacket, length);
+    
+    
+    if(length < (MAXNUM_TXPARAM + 6))
+    {
+        m_Platform->ClearPort();
+        if(m_Platform->WritePort(txpacket, length) == length)
+        {
+            if (txpacket[ID] != ID_BROADCAST)
+            {
+                TxRxCMPacket(txpacket, rxpacket, res, length);
+            }
+            else if(txpacket[INSTRUCTION] == INST_BULK_READ)
+            {
+                TxRxBulkReadPacket(txpacket, rxpacket, res, length);
+            }
+            else
+                res = SUCCESS;          
+        }
+        else
+            res = TX_FAIL;      
+    }
+    else
+        res = TX_CORRUPT;
+
+    
+	if(DEBUG_PRINT == true) printResultType(res);
+	
+    // Release resources
+	performPriorityRelease(priority);
 
 	return res;
 }
