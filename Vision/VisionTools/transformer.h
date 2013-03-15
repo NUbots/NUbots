@@ -52,6 +52,7 @@ public:
 private:
     //! Calculate the field of view and effective camera distance in pixels.
     void setKinematicParams(bool cam_pitch_valid, double cam_pitch,
+                            bool cam_yaw_valid, double cam_yaw,
                             bool cam_height_valid, double cam_height,
                             bool b_pitch_valid, double b_pitch,
                             bool ctg_valid, vector<float> ctg_vector);
@@ -73,6 +74,8 @@ private:
     Vector2<double> screen_to_radial_factor;
     double camera_pitch;         //! @variable The camera pitch angle.
     bool camera_pitch_valid;    //! @variable Whether the camera pitch is valid.
+    double camera_yaw;         //! @variable The camera yaw angle.
+    bool camera_yaw_valid;    //! @variable Whether the camera yaw is valid.
     double camera_height;        //! @variable The height of the camera from the ground.
     bool camera_height_valid;   //! @variable Whether the camera height is valid.
     double body_pitch;           //! @variable The body pitch angle.

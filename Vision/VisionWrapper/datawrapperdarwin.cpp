@@ -126,6 +126,15 @@ bool DataWrapper::getCameraPitch(float& pitch)
     return sensor_data->getPosition(NUSensorsData::HeadPitch, pitch);
 }
 
+/*! @brief Retrieves the camera yaw returns it.
+*   @param yaw A reference to a float to change.
+*   @return valid Whether the retrieved value is valid or not.
+*/
+bool DataWrapper::getCameraYaw(float& yaw)
+{
+    return sensor_data->getPosition(NUSensorsData::HeadYaw, yaw);
+}
+
 /*! @brief Retrieves the body pitch returns it.
 *   @param pitch A reference to a float to change.
 *   @return valid Whether the retrieved value is valid or not.

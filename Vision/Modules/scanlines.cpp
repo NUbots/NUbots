@@ -51,7 +51,7 @@ void ScanLines::classifyHorizontalScanLines()
     vector< vector<ColourSegment> > classifications;
 
     BOOST_FOREACH(int y, horizontal_scan_lines) {
-        classifications.push_back(classifyHorizontalScan(vbb->getLUT();, img, y));
+        classifications.push_back(classifyHorizontalScan(vbb->getLUT(), img, y));
     }
     
     vbb->setHorizontalSegments(classifications);

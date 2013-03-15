@@ -500,11 +500,12 @@ void VisionBlackboard::update()
         errorlog << "VisionBlackboard::update() - WARNING - Image height or width is zero - Camera may be disconnected or faulty." << endl;
     }
 
-    bool camera_pitch_valid, camera_height_valid, body_pitch_valid;
-    float camera_pitch, camera_height, body_pitch;
+    bool camera_pitch_valid, camera_yaw_valid, camera_height_valid, body_pitch_valid;
+    float camera_pitch, camera_yaw, camera_height, body_pitch;
 
     //get data copies from wrapper
     camera_pitch_valid = wrapper->getCameraPitch(camera_pitch);
+    camera_yaw_valid = wrapper->getCameraYaw(camera_yaw);
     camera_height_valid = wrapper->getCameraHeight(camera_height);
     body_pitch_valid = wrapper->getBodyPitch(body_pitch);
 
@@ -515,6 +516,7 @@ void VisionBlackboard::update()
 
     //setup transformer
     m_transformer.setKinematicParams(camera_pitch_valid, camera_pitch,
+                                     camera_yaw_valid, camera_yaw,
                                      camera_height_valid, camera_height,
                                      body_pitch_valid, body_pitch,
                                      ctg_valid, ctg_vector);

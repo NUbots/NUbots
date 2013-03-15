@@ -46,7 +46,13 @@ Vector2<double> Transformer::correctDistortion(const Vector2<double>& pt)
 void Transformer::screenToRadial2D(GroundPoint& pt) const
 {
     pt.angular.x = atan( (image_centre.x-pt.screen.x)  * screen_to_radial_factor.x);
+    if(camera_yaw_valid)
+        pt.angular.y -= camera_yaw; //not sure on the sign here yet
     pt.angular.y = atan( (image_centre.y-pt.screen.y) * screen_to_radial_factor.y) + VisionConstants::D2P_ANGLE_CORRECTION;
+    if(camera_pitch_valid)
+        pt.angular.y -= camera_pitch;
+    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
+        pt.angular.y -= body_pitch;
 }
 
 /**
@@ -105,7 +111,7 @@ GroundPoint Transformer::screenToRadial3D(const Point &pt, double distance) cons
 
 bool Transformer::isDistanceToPointValid() const
 {
-    return camera_height_valid && camera_pitch_valid && (not VisionConstants::D2P_INCLUDE_BODY_PITCH || body_pitch_valid);
+    return camera_height_valid && camera_pitch_valid && camera_yaw_valid && (not VisionConstants::D2P_INCLUDE_BODY_PITCH || body_pitch_valid);
 }
 
 /**
@@ -132,11 +138,7 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
            cos_bearing;
 
     //resultant angle inclusive of camera pitch, pixel elevation and angle correction factor
-    theta = mathGeneral::PI*0.5 - camera_pitch + elevation;
-
-    //if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
-    if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
-        theta -= body_pitch;
+    theta = mathGeneral::PI*0.5 + elevation;
 
     cos_theta = cos(theta);
     cos_bearing = cos(bearing);
@@ -200,13 +202,15 @@ vector<GroundPoint> Transformer::screenToGroundCartesian(const vector<Point>& pt
     return gpts;
 }
 
-void Transformer::setKinematicParams(bool cam_pitch_valid, double cam_pitch,
+void Transformer::setKinematicParams(bool cam_pitch_valid, double cam_pitch, bool cam_yaw_valid, double cam_yaw,
                                      bool cam_height_valid, double cam_height,
                                      bool b_pitch_valid, double b_pitch,
                                      bool ctg_valid, vector<float> ctg_vector)
 {
     camera_pitch_valid = cam_pitch_valid;
     camera_pitch = cam_pitch;
+    camera_yaw_valid = cam_yaw_valid;
+    camera_yaw = cam_yaw;
     camera_height_valid = cam_height_valid;
     camera_height = cam_height;
     body_pitch_valid = b_pitch_valid;
