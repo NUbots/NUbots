@@ -120,7 +120,7 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
 {
 #if VISION_TRANSFORM_VERBOSITY > 2
     debug << "Transformer::distanceToPoint: \n";
-    debug << "\t(bearing, elevation): (" << bearing << ", " <<elevation << ")" << endl;
+    debug << "\t(bearing, elevation): (" << bearing << ", " << elevation << ")" << endl;
     debug << "\tbody pitch: include:" << VisionConstants::D2P_INCLUDE_BODY_PITCH << " valid: " << body_pitch_valid << " value: " << body_pitch << endl;
     debug << "\tVisionConstants::D2P_ANGLE_CORRECTION: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
     debug << "\tcamera height valid: " << camera_height_valid << " value: " << camera_height << endl;
