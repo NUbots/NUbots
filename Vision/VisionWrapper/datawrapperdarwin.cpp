@@ -382,7 +382,7 @@ void DataWrapper::postProcess()
 {
     if (current_frame != NULL && field_objects != NULL)
     {
-        field_objects->postProcess(current_frame->GetTimestamp());
+        field_objects->postProcess(m_timestamp);
     }
 }
 
