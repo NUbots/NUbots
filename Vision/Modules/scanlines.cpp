@@ -51,7 +51,7 @@ void ScanLines::classifyHorizontalScanLines()
     vector< vector<ColourSegment> > classifications;
 
     BOOST_FOREACH(int y, horizontal_scan_lines) {
-        classifications.push_back(classifyHorizontalScan(*vbb, img, y));
+        classifications.push_back(classifyHorizontalScan(vbb->getLUT(), img, y));
     }
     
     vbb->setHorizontalSegments(classifications);
@@ -65,23 +65,26 @@ void ScanLines::classifyVerticalScanLines()
     vector< vector<ColourSegment> > classifications;
 
     for(unsigned int i=0; i<vertical_start_points.size(); i++) {
-        classifications.push_back(classifyVerticalScan(*vbb, img, vertical_start_points.at(i)));
+        classifications.push_back(classifyVerticalScan(vbb->getLUT(), img, vertical_start_points.at(i)));
     }
     
     vbb->setVerticalSegments(classifications);
 }
 
-vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& vbb, const NUImage& img, unsigned int y)
+vector<ColourSegment> ScanLines::classifyHorizontalScan(const LookUpTable& lut, const NUImage& img, unsigned int y)
 {
+    vector<ColourSegment> result;
+	if(y < 0 || y >= img.getHeight()) {
+		errorlog << "ScanLines::classifyHorizontalScan invalid y: " << y << endl;
+		return result;
+	}
     //simple and nasty first
     //Colour previous, current, next
     int     start_pos = 0,
             x;
-    const LookUpTable& lut = vbb.getLUT();
     Colour start_colour = getColourFromIndex(lut.classifyPixel(img(0,y))),
                         current_colour;
     ColourSegment segment;
-    vector<ColourSegment> result;
 
     for(x = 0; x < img.getWidth(); x++) {
         current_colour = getColourFromIndex(lut.classifyPixel(img(x,y)));
@@ -108,18 +111,18 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const VisionBlackboard& 
     return result;
 }
 
-vector<ColourSegment> ScanLines::classifyVerticalScan(const VisionBlackboard& vbb, const NUImage& img, const Vector2<double> &start)
+vector<ColourSegment> ScanLines::classifyVerticalScan(const LookUpTable& lut, const NUImage& img, const Vector2<double> &start)
 {
+    vector<ColourSegment> result;
     if(start.y >= img.getHeight() || start.y < 0 || start.x >= img.getWidth() || start.x < 0) {
-        errorlog << start << endl;
+		errorlog << "ScanLines::classifyVerticalScan invalid start position: " << start << endl; 
+		return result;
     }
     //simple and nasty first
     //Colour previous, current, next
-    const LookUpTable& lut = vbb.getLUT();
     Colour start_colour = getColourFromIndex(lut.classifyPixel(img(start.x,start.y))),
                         current_colour;
     ColourSegment segment;
-    vector<ColourSegment> result;
     int     start_pos = start.y,
             x = start.x,
             y;

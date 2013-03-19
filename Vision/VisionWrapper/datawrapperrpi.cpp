@@ -203,6 +203,13 @@ bool DataWrapper::getCameraPitch(float& pitch)
     return false;
 }
 
+//! @brief Generates spoofed camera yaw.
+bool DataWrapper::getCameraYaw(float& yaw)
+{
+    pitch = 0;
+    return false;
+}
+
 //! @brief Generates spoofed body pitch.
 bool DataWrapper::getBodyPitch(float& pitch)
 {

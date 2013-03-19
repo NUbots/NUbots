@@ -127,7 +127,6 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
                                      Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                      timestamp);
         fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
-
         return true;
     }
     else {
