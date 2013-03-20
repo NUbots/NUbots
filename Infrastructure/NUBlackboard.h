@@ -76,8 +76,9 @@ public:
     GameInformation* GameInfo;
     TeamInformation* TeamInfo;
     ConfigManager* Config;
-    bool lookForBall;
-    bool lookForLandmarks;
+    bool lookForBall;           /// Enables vision processing for the ball
+    bool lookForGoals;          /// Enables vision processing for goal posts
+    bool lookForFieldPoints;    /// Enables vision processing for lines, corners and the centre circle
 };
 
 extern NUBlackboard* Blackboard;

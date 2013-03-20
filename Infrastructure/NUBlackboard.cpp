@@ -46,6 +46,9 @@ NUBlackboard::NUBlackboard()
     GameInfo = 0;
     TeamInfo = 0;
     Config = 0;
+    lookForBall = true;
+    lookForGoals = true;
+    lookForFieldPoints = false;
 }
 
 NUBlackboard::~NUBlackboard()

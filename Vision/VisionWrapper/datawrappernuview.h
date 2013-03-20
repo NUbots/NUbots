@@ -53,6 +53,7 @@ public:
     bool getCTVector(vector<float>& ctvector);    //for transforms
     bool getCameraHeight(float& height);            //for transforms
     bool getCameraPitch(float& pitch);              //for transforms
+    bool getCameraYaw(float& yaw);                  //for transforms
     bool getBodyPitch(float& pitch);
     Vector2<double> getCameraFOV() const {return Vector2<double>(camera_data.m_horizontalFov, camera_data.m_verticalFov);}
     
