@@ -85,6 +85,11 @@ bool DataWrapper::getCameraPitch(float& pitch)
     return sensor_data->getPosition(NUSensorsData::HeadPitch, pitch);
 }
 
+bool DataWrapper::getCameraYaw(float& yaw)
+{
+    return sensor_data->getPosition(NUSensorsData::HeadYaw, yaw);
+}
+
 bool DataWrapper::getBodyPitch(float& pitch)
 {
     vector<float> orientation;

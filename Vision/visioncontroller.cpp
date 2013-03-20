@@ -48,7 +48,7 @@ VisionController::~VisionController()
     delete m_goal_detector_ransac_edges;
 }
 
-int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
+int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookForFieldPoints)
 {
 #ifdef VISION_PROFILER_ON
     Profiler prof("Vision");
@@ -114,38 +114,45 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
 
     //! DETECTION MODULES
 
-    if(lookForLandmarks) {
+    if(lookForGoals) {
  //       vector<Goal> hist_goals = m_goal_detector_hist->run();   // histogram method
 
         vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
 
         m_blackboard->addGoals(ransac_goals_edges);
-
-        #ifdef VISION_PROFILER_ON
-        prof.split("Goals");
-        #endif
-
-        #if VISION_CONTROLLER_VERBOSITY > 2
-        debug << "\tgoal detection done" << endl;
-        #endif
-
-        // Edit here to change whether centre circles, lines or corners are found
-        //      (note lines cannot be published yet)
-        m_field_point_detector->run(true, true, true);
-
-        #ifdef VISION_PROFILER_ON
-        prof.split("Field Points");
-        #endif
-
-        #if VISION_CONTROLLER_VERBOSITY > 2
-            debug << "\tcentre circle, line and corner detection done" << endl;
-        #endif
     }
     else {
         #if VISION_CONTROLLER_VERBOSITY > 2
-            debug << "\tnot looking for landmarks" << endl;
+            debug << "\tnot looking for goals" << endl;
         #endif
     }
+
+    #ifdef VISION_PROFILER_ON
+    prof.split("Goals");
+    #endif
+
+    #if VISION_CONTROLLER_VERBOSITY > 2
+    debug << "\tgoal detection done" << endl;
+    #endif
+
+    if(lookForFieldPoints) {
+        // Edit here to change whether centre circles, lines or corners are found
+        //      (note lines cannot be published yet)
+        m_field_point_detector->run(true, true, true);
+    }
+    else {
+        #if VISION_CONTROLLER_VERBOSITY > 2
+            debug << "\tnot looking for lines, corners or the centre circle" << endl;
+        #endif
+    }
+
+    #ifdef VISION_PROFILER_ON
+    prof.split("Field Points");
+    #endif
+
+    #if VISION_CONTROLLER_VERBOSITY > 2
+        debug << "\tcentre circle, line and corner detection done" << endl;
+    #endif
 
     //find balls and publish to BB
     if(lookForBall) {
@@ -179,8 +186,12 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     #if VISION_CONTROLLER_VERBOSITY > 1
     debug << "\tResults published" << endl;
     #endif
-    //publish debug information as well
 
+    #ifdef VISION_PROFILER_ON
+    prof.split("Publishing");
+    #endif
+
+    //publish debug information as well
     #ifdef DEBUG_VISION_VERBOSITY_ON
     m_blackboard->debugPublish();   //only debug publish if some verbosity is on
     #endif
@@ -190,7 +201,7 @@ int VisionController::runFrame(bool lookForBall, bool lookForLandmarks)
     #endif
 
     #ifdef VISION_PROFILER_ON
-    prof.split("Publishing");
+    prof.split("Debug publishing");
     prof.stop();
     m_profiling_stream << prof << endl;
     #endif

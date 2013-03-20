@@ -207,7 +207,13 @@ HEADERS += ui_mainwindow.h \
     NUViewConfig/*.h \
     plotdisplay.h \
     plotselectionwidget.h \
-    createqwtsymboldialog.h
+    createqwtsymboldialog.h \
+    ../ConfigSystem/ConfigManager.h \
+    ../ConfigSystem/ConfigParameter.h \
+    ../ConfigSystem/ConfigRange.h \
+    ../ConfigSystem/ConfigStorageManager.h \
+    ../ConfigSystem/ConfigTree.h \
+    ../ConfigSystem/Configurable.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -350,7 +356,12 @@ SOURCES += mainwindow.cpp \
     ../Localisation/iotests.cpp \
     plotdisplay.cpp \
     plotselectionwidget.cpp \
-    createqwtsymboldialog.cpp
+    createqwtsymboldialog.cpp \
+    ../ConfigSystem/ConfigManager.cpp \
+    ../ConfigSystem/ConfigParameter.cpp \
+    ../ConfigSystem/ConfigStorageManager.cpp \
+    ../ConfigSystem/ConfigTree.cpp \
+    ../ConfigSystem/Configurable.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

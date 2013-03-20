@@ -31,7 +31,7 @@ DataWrapper::DataWrapper()
     numSavedImages = 0;
     loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
     Blackboard->lookForBall = true; //initialise
-    Blackboard->lookForLandmarks = true; //initialise
+    Blackboard->lookForGoals = true; //initialise
     isSavingImages = false;
     isSavingImagesWithVaryingSettings = false;
     VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
