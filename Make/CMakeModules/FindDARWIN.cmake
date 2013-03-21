@@ -12,8 +12,8 @@
 
 # This finds the location of the darwin.a and sets DARWIN_DIR, DARWIN_INCLUDE_DIR, DARWIN_LIBRARIES
 
-IF (EXISTS /../../Framework/darwin/Linux/lib/darwin.a)
-    SET(DARWIN_DIR /usr)
+IF (EXISTS ${PROJECT_SOURCE_DIR}/../Framework/darwin/Linux/lib/darwin.a)
+    SET(DARWIN_DIR ${PROJECT_SOURCE_DIR}/../Framework/darwin/Linux)
 ELSE()
     IF (EXISTS /usr/lib/darwin.a)
         SET(DARWIN_DIR /usr)
@@ -41,4 +41,3 @@ MARK_AS_ADVANCED(
     DARWIN_INCLUDE_DIR
     DARWIN_LIBRARIES
 )
-
