@@ -31,7 +31,7 @@ public:
     *   @brief Runs the vision system for a single frame.
     *   @return A status indication of the execution of the frame.
     */
-    int runFrame(bool lookForBall, bool lookForLandmarks);
+    int runFrame(bool lookForBall, bool lookForGoals, bool lookForFieldPoints);
 
 private:
 //! VARIABLES

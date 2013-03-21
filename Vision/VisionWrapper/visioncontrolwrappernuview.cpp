@@ -34,8 +34,11 @@ int VisionControlWrapper::runFrame()
         #endif
         return -1;  //failure - do not run vision
     }
-    status = controller.runFrame(true, true);
+
+    status = controller.runFrame(Blackboard->lookForBall, Blackboard->lookForGoals, Blackboard->lookForFieldPoints); //run vision on the frame
+
     wrapper->postProcess();
+
     return status;
 }
 

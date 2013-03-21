@@ -491,7 +491,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2	
         prof.stop();
-        std::cout << prof << std::endl;
+        //std::cout << prof << std::endl;
 }
 
 /*! @brief Remove ambiguous pairs
