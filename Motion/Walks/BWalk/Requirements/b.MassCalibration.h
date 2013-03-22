@@ -123,8 +123,8 @@ public:
       masses[footRight].mass = 163.04;
       masses[footRight].offset = Vector3<>(24.89, -3.3, -32.08);
 
-      masses[torso].mass = 1026.28;
-      masses[torso].offset = Vector3<>(-4.8, 0.06, 127.27);
+      masses[torso].mass = 1206.28;
+      masses[torso].offset = Vector3<>(-4.08, 0.051, 116.48);
 
   }
 
