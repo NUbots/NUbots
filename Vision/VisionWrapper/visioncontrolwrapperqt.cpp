@@ -5,11 +5,11 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-///DEBUG
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
+// FOR GOAL PAPER CODE
+//#include <boost/accumulators/accumulators.hpp>
+//#include <boost/accumulators/statistics/stats.hpp>
+//#include <boost/accumulators/statistics/mean.hpp>
+//#include <boost/accumulators/statistics/variance.hpp>
 
 using namespace boost::accumulators;
 //END DEBUG
@@ -28,7 +28,7 @@ VisionControlWrapper::VisionControlWrapper()
     wrapper = NULL;
 }
 
-//DEBUG
+// GOAL PAPER CODE
 //int VisionControlWrapper::run()
 //{
 //    string base = string(getenv("HOME")) + "/nubot/Images/GoalPaper/";
@@ -139,17 +139,17 @@ VisionControlWrapper::VisionControlWrapper()
 
 //    return 0;
 //}
-//REPLACE ABOVE WITH BELOW
+// REPLACE ABOVE WITH BELOW
 
 int VisionControlWrapper::run()
 {
     //SETUP DATA WRAPPER
     DataWrapper::INPUT_METHOD method;
     bool ok;
-    string istrm = "",
-            sstrm = "",
-            cfg = "",
-            lname = "";
+    string istrm = "";
+    string sstrm = "";
+    string cfg = "";
+    string lname = "";
 
     getOptions(method, ok, istrm, sstrm, cfg, lname);
 
@@ -157,18 +157,20 @@ int VisionControlWrapper::run()
     DataWrapper::instance = wrapper;
 
     //BEGIN
-    int frame = 1,
-        error = 0;
-    bool finished = false,
-         next;
+    int frame = 1;
+    int error = 0;
+    bool finished = false;
+    bool next;
 
     gui.show();
-    while(!finished) {
+    while(!finished)
+    {
         gui.resetFlags();
         gui.setFrameNo(frame);
         next = false;
         error = runFrame();
-        if(error) {
+        if(error)
+        {
             if(QMessageBox::question(&gui, "", "No more frames, reset stream?", QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok) {
                 delete wrapper;
                 wrapper = new DataWrapper(&gui, ok, method, istrm, sstrm, cfg, lname);
@@ -180,7 +182,8 @@ int VisionControlWrapper::run()
         }
         else {
             gui.refresh();
-            while(!next && !finished && error == 0) {
+            while(!next && !finished && error == 0)
+            {
                 QApplication::processEvents();
                 next = gui.next();
                 finished = gui.finished();
@@ -196,7 +199,8 @@ int VisionControlWrapper::run()
 
 int VisionControlWrapper::runFrame()
 {
-    if(!wrapper->updateFrame()) {
+    if(!wrapper->updateFrame())
+    {
         #if VISION_WRAPPER_VERBOSITY > 1
             debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;
         #endif
@@ -216,7 +220,8 @@ void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& o
     l.append(strmoption);
     //get the input choice from the user
     QString s = QInputDialog::getItem(NULL, "Select Input Method", "Select input method", l, 0, false, &ok);
-    if(ok) {
+    if(ok)
+    {
         if(s.compare(camoption) == 0)
             method = DataWrapper::CAMERA;
         else if(s.compare(strmoption) == 0)
@@ -226,7 +231,8 @@ void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& o
 
         switch(method) {
         case DataWrapper::CAMERA:
-            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+            {
                 ok = false;
                 lname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
                 if(!lname.empty()) {
@@ -234,7 +240,8 @@ void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& o
                     ok = true;
                 }
             }
-            else {
+            else
+            {
                 lname = string(DATA_DIR) +  string("/default.lut");
                 cfg = string(CONFIG_DIR) + string("VisionOptions.cfg");
             }
@@ -242,7 +249,8 @@ void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& o
         case DataWrapper::STREAM:
             using_sensors = (QMessageBox::question(NULL, "", "Use sensor log?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
 
-            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+            {
                 ok = false;
                 istrm = QFileDialog::getOpenFileName(NULL, "Select image stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
                 if(!istrm.empty()) {
@@ -255,7 +263,8 @@ void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& o
                     }
                 }
             }
-            else {
+            else
+            {
                 istrm = string(DATA_DIR) + string("/image.strm");
                 if(using_sensors)
                     sstrm = string(DATA_DIR) + string("/sensor.strm");
