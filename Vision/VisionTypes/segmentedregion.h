@@ -35,10 +35,7 @@ public:
     size_t getNumberOfScans() const;
     //! Returns the alignment of the scans.
     ScanDirection getDirection() const;
-    
-    //! Returns an iterator over the region beginning at the given scan.
-    vector<ColourSegment>::const_iterator iteratorAt(size_t i) const;
-    
+
 private:
     vector< vector<ColourSegment> > m_segmented_scans;  //! @variable The segments in this region.
     ScanDirection m_direction;  //! The alignment of the scans in this region.

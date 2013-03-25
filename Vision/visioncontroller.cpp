@@ -192,9 +192,9 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     #endif
 
     //publish debug information as well
-    #ifdef DEBUG_VISION_VERBOSITY_ON
+
     m_blackboard->debugPublish();   //only debug publish if some verbosity is on
-    #endif
+
     #if VISION_CONTROLLER_VERBOSITY > 1
     debug << "\tDebugging info published" << endl;
     debug << "\tFinish" << endl;

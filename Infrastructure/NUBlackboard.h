@@ -36,6 +36,7 @@
 
 
 #include "NUPlatform/NUCamera/NUCameraData.h"
+#include "Vision/VisionTypes/segmentedregion.h"
 #include "ConfigSystem/ConfigManager.h"
 using ConfigSystem::ConfigManager;
 
@@ -79,6 +80,9 @@ public:
     bool lookForBall;           /// Enables vision processing for the ball
     bool lookForGoals;          /// Enables vision processing for goal posts
     bool lookForFieldPoints;    /// Enables vision processing for lines, corners and the centre circle
+
+    SegmentedRegion horizontalScans;    // For NUBugger
+    SegmentedRegion verticalScans;      // For NUBugger
 };
 
 extern NUBlackboard* Blackboard;
