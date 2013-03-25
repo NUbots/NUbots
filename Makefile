@@ -391,7 +391,7 @@ else
 endif
 
 ################ Darwin ################
-Darwin:
+Darwin: DarwinFramework
 ifeq ($(VM_IP), )							## if we have not given a virtual machine IP then use this machine to compile
 	@echo "Compiling for Darwin"
         ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(DARWIN_BUILD_DIR)/*)), )		## check if the project has already been configured
@@ -450,7 +450,7 @@ else
 	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinClean;"
 endif
 
-DarwinVeryClean:
+DarwinVeryClean: DarwinFrameworkClean
 ifeq ($(VM_IP), )
 	@set -e; \
 		echo "Hosing Darwin Build"; \
