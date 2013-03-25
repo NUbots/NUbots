@@ -48,7 +48,7 @@ VisionController::~VisionController()
     delete m_goal_detector_ransac_edges;
 }
 
-int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookForFieldPoints)
+int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookForFieldPoints, bool lookForObstacles)
 {
 #ifdef VISION_PROFILER_ON
     Profiler prof("Vision");
@@ -171,10 +171,20 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     }
 
     //OBSTACLES
-    ObjectDetectionCH::detectObjects();
-    #if VISION_CONTROLLER_VERBOSITY > 2
+    if(lookForObstacles)
+    {
+        ObjectDetectionCH::detectObjects();
+        #if VISION_CONTROLLER_VERBOSITY > 2
         debug << "\tdetectObjects done" << endl;
-    #endif
+        #endif
+    }
+    else
+    {
+        #if VISION_CONTROLLER_VERBOSITY > 2
+        debug << "\tnot looking for obstacles" << endl;
+        #endif
+    }
+
 
     #ifdef VISION_PROFILER_ON
     prof.split("Obstacles");

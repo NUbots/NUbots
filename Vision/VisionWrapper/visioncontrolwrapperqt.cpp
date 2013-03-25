@@ -206,7 +206,7 @@ int VisionControlWrapper::runFrame()
         #endif
         return -1;  //failure - do not run vision
     }
-    return controller.runFrame(true, true, true);
+    return controller.runFrame(true, true, true, true);
 }
 
 void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& ok, string& istrm, string& sstrm, string& cfg, string& lname)

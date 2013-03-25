@@ -403,7 +403,6 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
         bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
         removeAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
         // Do Ambiguous objects.
-        std::cout << "Total Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
         AmbiguousObjectsIt currAmb(fobs->ambiguousFieldObjects.begin());
         AmbiguousObjectsConstIt endAmb(fobs->ambiguousFieldObjects.end());
         for(; currAmb != endAmb; ++currAmb){
