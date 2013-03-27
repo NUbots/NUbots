@@ -175,6 +175,7 @@ inline void CM730::performPriorityRelease(int priority)
 }
 
 
+// CoMmand packet? (simply checks whether the commands sent were successful)
 inline void CM730::TxRxCMPacket(
     unsigned char* &txpacket,
     unsigned char* &rxpacket,
@@ -307,7 +308,6 @@ inline void CM730::TxRxBulkReadPacket(
                     res = RX_TIMEOUT;
                 else
                     res = RX_CORRUPT;
-
                 break;
             }
         }
@@ -431,29 +431,37 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
     if(DEBUG_PRINT == true) printInstructionType(txpacket, length);
     
     
-    if(length < (MAXNUM_TXPARAM + 6))
+    if(length < (MAXNUM_TXPARAM + 6)) // Enforce hardware/api limit on length of data to send.
     {
         m_Platform->ClearPort();
         if(m_Platform->WritePort(txpacket, length) == length)
         {
-            if (txpacket[ID] != ID_BROADCAST)
+            if (txpacket[ID] != ID_BROADCAST) // i.e. Must be ID_CM.
             {
-                TxRxCMPacket(txpacket, rxpacket, res, length);
+                TxRxCMPacket(txpacket, rxpacket, res, length); // Note: 'length' can be passed by value here.
             }
-            else if(txpacket[INSTRUCTION] == INST_BULK_READ)
+            else if(txpacket[INSTRUCTION] == INST_BULK_READ) // (INST_BULK_READ is an ID_BROADCAST)
             {
-                TxRxBulkReadPacket(txpacket, rxpacket, res, length);
+                TxRxBulkReadPacket(txpacket, rxpacket, res, length); // Note: length input is unnecessary.
             }
             else
-                res = SUCCESS;          
+            {
+                // i.e. Must be an ID_BROADCAST, and one of:
+                //   - INST_PING
+                //   - INST_READ
+                //   - INST_WRITE
+                //   - INST_REG_WRITE
+                //   - INST_ACTION
+                //   - INST_RESET
+                //   - INST_SYNC_WRITE
+                res = SUCCESS;
+            }
         }
-        else
-            res = TX_FAIL;      
+        else res = TX_FAIL;      
     }
-    else
-        res = TX_CORRUPT;
+    else res = TX_CORRUPT;
 
-    
+
 	if(DEBUG_PRINT == true) printResultType(res);
 	
     // Release resources

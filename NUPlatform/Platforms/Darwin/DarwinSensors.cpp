@@ -30,6 +30,7 @@
 #include "debug.h"
 #include "debugverbositynusensors.h"
 
+// Note: These defines are simply copied from those in CM730.cpp
 #define ID					(2)
 #define LENGTH				(3)
 #define INSTRUCTION			(4)
@@ -128,12 +129,8 @@ std::string DarwinSensors::error2Description(unsigned int errorValue)
 void DarwinSensors::copyFromHardwareCommunications()
 {
     int result;
-//	if(m_current_time < 2000)
-//	{
-//		result = cm730->BulkReadLight();
-//		return;
-//	}
 
+    // 1. Copy data from last bulk read of the CM730.
 
     //Control Board Data:
     copyFromAccelerometerAndGyro();
@@ -144,16 +141,14 @@ void DarwinSensors::copyFromHardwareCommunications()
     copyFromJoints();
     copyFromFeet();
 
-    //READ FROM JOINTS and CONTROL BOARD:
+    // 2. Read data in bulk from the CM730 controller board (i.e. read all sensor and motor data for the next iteration).
     result = cm730->BulkRead();
-    //OLD FIRMWARE
-    //result = cm730->BulkReadLight();
       
     if(motor_error) {
         #if DEBUG_NUSENSORS_VERBOSITY > 0
-            debug << "DarwinSensors::copyFromHardwareCommunications\nMotor error: " <<endl;
+            debug << "DarwinSensors::copyFromHardwareCommunications\nMotor error: " << endl;
         #endif
-        errorlog << "Motor error: " <<endl;
+        errorlog << "Motor error: " << endl;
 
         for(int i=0; i<NUM_MOTORS; i++) {
             #if DEBUG_NUSENSORS_VERBOSITY > 0
@@ -169,9 +164,6 @@ void DarwinSensors::copyFromHardwareCommunications()
         motor_error = false;
     }
 
-    //delete CMdatatable;
-
-	
 	
     //DEBUG NEEDED HERE:
     int num_tries = 0;
@@ -186,9 +178,6 @@ void DarwinSensors::copyFromHardwareCommunications()
             debug << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
         #endif
         errorlog << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
-        
-        //OLD FIRMWARE
-        //result = cm730->BulkReadLight();
         
         result = cm730->BulkRead();
         num_tries++;
@@ -260,7 +249,7 @@ void DarwinSensors::copyFromJoints()
         addr = int(Robot::MX28::P_TORQUE_ENABLE);
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadByte(addr);
         //data = int(datatable[addr-start_addr]);
-        joint[NUSensorsData::StiffnessId] = 100*data;
+        joint[NUSensorsData::StiffnessId] = 100*data; // 'NUSensorsData::StiffnessId' can't be right? It's used for the actual 'stiffness' value.
 		*/
         addr = int(Robot::MX28::P_PRESENT_LOAD_L);
         data = (int)cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
@@ -460,7 +449,7 @@ void DarwinSensors::copyFromButtons()
 void DarwinSensors::copyFromBattery()
 {
     //External Voltage is 8-15V
-    //Values are 10x higher then actual present voltage.
+    //Values are 10x higher than actual present voltage.
 	
     int addr = Robot::CM730::P_VOLTAGE;
     int data  = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
