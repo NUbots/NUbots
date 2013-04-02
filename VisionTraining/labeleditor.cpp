@@ -266,42 +266,36 @@ void LabelEditor::addObject()
         //if the user didn't hit cancel then generate the new object
         new_id = VFOFromName(new_object_name.toStdString());
         if(isGoal(new_id)) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Goal(new_id, Quad(150,150,165,200)));
+            new_object = new Goal(new_id, Quad(150,150,165,200));
         }
         else if(new_id == BALL) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Ball(Point(150,150), 15));
+            new_object = new Ball(Point(150,150), 15);
         }
         else if(new_id == OBSTACLE) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Obstacle(Point(150,150), 15, 30));
+            new_object = new Obstacle(Point(150,150), 15, 30);
         }
         else if(new_id == FIELDLINE) {
             // generate endpoints for new line
             Line l(150, 0);
-            Point p1, p2;
+            vector<Point> p;
 
             if(l.isVertical())
             {
-                p1.x = l.getXIntercept();
-                p1.y = 0;
-                p2.x = l.getXIntercept();
-                p2.y = 240;
+                p.push_back( Point(l.getXIntercept(), 0) );
+                p.push_back( Point(l.getXIntercept(), 240) );
             }
             else if(l.isHorizontal())
             {
-                p1.x = 0;
-                p1.y = l.getYIntercept();
-                p2.x = 320;
-                p2.y = l.getYIntercept();
+                p.push_back( Point(0, l.getYIntercept()) );
+                p.push_back( Point(320, l.getYIntercept()) );
             }
             else
             {
-                p1.x = 0;
-                p1.y = l.getYIntercept();
-                p2.x = l.getXIntercept();
-                p2.y = 0;
+                p.push_back( Point(0, l.getYIntercept()) );
+                p.push_back( Point(l.getXIntercept(), 0) );
             }
 
-            new_object = dynamic_cast<VisionFieldObject*>(new FieldLine(LSFittedLine(p1, p2), LSFittedLine(Point(0,0), Point(0,0))));
+            new_object = new FieldLine(LSFittedLine(p), LSFittedLine());
         }
 
         //add it to the list of labels
@@ -379,7 +373,7 @@ void LabelEditor::updateControls()
         VFO_ID id = vfo->getID();
 
         //determine what to show for each object type
-        if(isGoal(id) || isBeacon(id) || id==OBSTACLE) {
+        if(isGoal(id) || id==OBSTACLE) {
             pi.first = "x";
             pi.second = Vector3<int>(vfo->getLocationPixels().x, 0, 319);
             vi.push_back(pi);
@@ -408,10 +402,10 @@ void LabelEditor::updateControls()
         }
         else if(id==FIELDLINE) {
             pd.first = "rho";
-            pd.second = Vector3<double>(dynamic_cast<FieldLine*>(vfo)->m_rho, -sqrt(319*319+239*239), sqrt(319*319+239*239));
+            pd.second = Vector3<double>(dynamic_cast<FieldLine*>(vfo)->getScreenLineEquation().getRho(), -sqrt(319*319+239*239), sqrt(319*319+239*239));
             vd.push_back(pd);
             pd.first = "phi";
-            pd.second = Vector3<double>(dynamic_cast<FieldLine*>(vfo)->m_phi, -mathGeneral::PI, mathGeneral::PI);
+            pd.second = Vector3<double>(dynamic_cast<FieldLine*>(vfo)->getScreenLineEquation().getPhi(), -mathGeneral::PI, mathGeneral::PI);
             vd.push_back(pd);
             setDoubles(vd);
         }
@@ -485,20 +479,53 @@ void LabelEditor::updateValues()
         VFO_ID id = vfo->getID();
 
         //determine the label type and decide which controls and values to use
-        if(isGoal(id) || isBeacon(id) || id==OBSTACLE) {
-            vfo->m_location_pixels.x = m_i_spins[0]->value();
-            vfo->m_location_pixels.y = m_i_spins[1]->value();
-            vfo->m_size_on_screen.x = m_i_spins[2]->value();
-            vfo->m_size_on_screen.y = m_i_spins[3]->value();
+        if(isGoal(id)) {
+            delete vfo;
+
+            vfo = new Goal(id, Quad(m_i_spins[0]->value() - 0.5 * m_i_spins[2]->value(),    // left
+                                    m_i_spins[1]->value() - m_i_spins[3]->value(),          // top
+                                    m_i_spins[0]->value() + 0.5 * m_i_spins[2]->value(),    // right
+                                    m_i_spins[1]->value()));                                // bottom
+        }
+        if(id==OBSTACLE) {
+            delete vfo;
+
+            vfo = new Obstacle(Point(m_i_spins[0]->value(), m_i_spins[1]->value()),     // base
+                               m_i_spins[2]->value(),                                   // width
+                               m_i_spins[3]->value());                                  // height
         }
         else if(id==BALL) {
-            vfo->m_location_pixels.x = m_i_spins[0]->value();
-            vfo->m_location_pixels.y = m_i_spins[1]->value();
-            dynamic_cast<Ball*>(vfo)->m_diameter = m_i_spins[2]->value();
+            delete vfo;
+
+            vfo = new Ball(Point(m_i_spins[0]->value(), m_i_spins[1]->value()), // centre
+                           m_i_spins[2]->value());                              // diameter
         }
         else if(id==FIELDLINE) {
-            dynamic_cast<FieldLine*>(vfo)->m_rho = m_d_spins[0]->value();
-            dynamic_cast<FieldLine*>(vfo)->m_phi = m_d_spins[1]->value();
+            delete vfo;
+
+            Line l(m_d_spins[0]->value(),   // rho
+                   m_d_spins[1]->value());  // phi
+
+            // generate endpoints for new line
+            vector<Point> p;
+
+            if(l.isVertical())
+            {
+                p.push_back( Point(l.getXIntercept(), 0) );
+                p.push_back( Point(l.getXIntercept(), 240) );
+            }
+            else if(l.isHorizontal())
+            {
+                p.push_back( Point(0, l.getYIntercept()) );
+                p.push_back( Point(320, l.getYIntercept()) );
+            }
+            else
+            {
+                p.push_back( Point(0, l.getYIntercept()) );
+                p.push_back( Point(l.getXIntercept(), 0) );
+            }
+
+            vfo = new FieldLine(LSFittedLine(p), LSFittedLine());
         }
         m_image_updated = true; //indicate the image needs to be re-rendered
     }

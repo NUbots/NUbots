@@ -32,7 +32,7 @@ VisionOptimiser::OPT_ID VisionOptimiser::getIDFromInt(int i)
 {
     switch(i) {
     case 0: return BALL_OPT;
-    case 1: return GOAL_BEACON_OPT;
+    case 1: return GOAL_OPT;
     case 2: return OBSTACLE_OPT;
     case 3: return LINE_OPT;
     case 4: return GENERAL_OPT;
@@ -45,7 +45,7 @@ string VisionOptimiser::getIDName(VisionOptimiser::OPT_ID id)
 {
     switch(id) {
     case BALL_OPT: return "BALL";
-    case GOAL_BEACON_OPT: return "GOAL_BEACON_OPT";
+    case GOAL_OPT: return "GOAL_OPT";
     case OBSTACLE_OPT: return "OBSTACLE_OPT";
     case LINE_OPT: return "LINE_OPT";
     case GENERAL_OPT: return "GENERAL_OPT";
@@ -68,7 +68,7 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
         m_opt_name = "VisionEHCLS";
 #ifdef MULTI_OPT
         m_optimisers[BALL_OPT] = new EHCLSOptimiser("EHCLSBall", VisionConstants::getBallParams());
-        m_optimisers[GOAL_BEACON_OPT] = new EHCLSOptimiser("EHCLSGoalBeacon", VisionConstants::getGoalBeaconParams());
+        m_optimisers[GOAL_OPT] = new EHCLSOptimiser("EHCLSGoalBeacon", VisionConstants::getGoalParams());
         m_optimisers[OBSTACLE_OPT] = new EHCLSOptimiser("EHCLSObstacle", VisionConstants::getObstacleParams());
         m_optimisers[LINE_OPT] = new EHCLSOptimiser("EHCLSLine", VisionConstants::getLineParams());
         m_optimisers[GENERAL_OPT] = new EHCLSOptimiser("EHCLSGeneral", VisionConstants::getGeneralParams());
@@ -80,7 +80,7 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
         m_opt_name = "VisionPGRL";
 #ifdef MULTI_OPT
         m_optimisers[BALL_OPT] = new PGRLOptimiser("PGRLBall", VisionConstants::getBallParams());
-        m_optimisers[GOAL_BEACON_OPT] = new PGRLOptimiser("PGRLGoalBeacon", VisionConstants::getGoalBeaconParams());
+        m_optimisers[GOAL_OPT] = new PGRLOptimiser("PGRLGoalBeacon", VisionConstants::getGoalParams());
         m_optimisers[OBSTACLE_OPT] = new PGRLOptimiser("PGRLObstacle", VisionConstants::getObstacleParams());
         m_optimisers[LINE_OPT] = new PGRLOptimiser("PGRLLine", VisionConstants::getLineParams());
         m_optimisers[GENERAL_OPT] = new PGRLOptimiser("PGRLGeneral", VisionConstants::getGeneralParams());
@@ -92,7 +92,7 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
         m_opt_name = "VisionPSO";
 #ifdef MULTI_OPT
         m_optimisers[BALL_OPT] = new PSOOptimiser("PSOBall", VisionConstants::getBallParams());
-        m_optimisers[GOAL_BEACON_OPT] = new PSOOptimiser("PSOGoalBeacon", VisionConstants::getGoalBeaconParams());
+        m_optimisers[GOAL_OPT] = new PSOOptimiser("PSOGoalBeacon", VisionConstants::getGoalParams());
         m_optimisers[OBSTACLE_OPT] = new PSOOptimiser("PSOObstacle", VisionConstants::getObstacleParams());
         m_optimisers[LINE_OPT] = new PSOOptimiser("PSOLine", VisionConstants::getLineParams());
         m_optimisers[GENERAL_OPT] = new PSOOptimiser("PSOGeneral", VisionConstants::getGeneralParams());
@@ -104,7 +104,7 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
         m_opt_name = "VisionPGA";
 #ifdef MULTI_OPT
         m_optimisers[BALL_OPT] = new PGAOptimiser("PGABall", VisionConstants::getBallParams());
-        m_optimisers[GOAL_BEACON_OPT] = new PGAOptimiser("PGAGoalBeacon", VisionConstants::getGoalBeaconParams());
+        m_optimisers[GOAL_OPT] = new PGAOptimiser("PGAGoalBeacon", VisionConstants::getGoalParams());
         m_optimisers[OBSTACLE_OPT] = new PGAOptimiser("PGAObstacle", VisionConstants::getObstacleParams());
         m_optimisers[LINE_OPT] = new PGAOptimiser("PGALine", VisionConstants::getLineParams());
         m_optimisers[GENERAL_OPT] = new PGAOptimiser("PGAGeneral", VisionConstants::getGeneralParams());
@@ -115,18 +115,12 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
     }
 
     //generate a map between VFO_IDs and OPT_IDs
-    m_vfo_optimiser_map[VisionFieldObject::BALL].push_back(BALL_OPT); m_vfo_optimiser_map[VisionFieldObject::BALL].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_L].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_L].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_R].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_R].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_U].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_Y_U].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::GOAL_B_L].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_B_L].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::GOAL_B_R].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_B_R].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::GOAL_B_U].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::GOAL_B_U].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::BEACON_Y].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::BEACON_Y].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::BEACON_B].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::BEACON_B].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::BEACON_U].push_back(GOAL_BEACON_OPT); m_vfo_optimiser_map[VisionFieldObject::BEACON_U].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::OBSTACLE].push_back(OBSTACLE_OPT); m_vfo_optimiser_map[VisionFieldObject::OBSTACLE].push_back(GENERAL_OPT);
-    m_vfo_optimiser_map[VisionFieldObject::FIELDLINE].push_back(LINE_OPT); m_vfo_optimiser_map[VisionFieldObject::FIELDLINE].push_back(GENERAL_OPT);
+    m_vfo_optimiser_map[BALL].push_back(BALL_OPT); m_vfo_optimiser_map[BALL].push_back(GENERAL_OPT);
+    m_vfo_optimiser_map[GOAL_L].push_back(GOAL_OPT); m_vfo_optimiser_map[GOAL_L].push_back(GENERAL_OPT);
+    m_vfo_optimiser_map[GOAL_R].push_back(GOAL_OPT); m_vfo_optimiser_map[GOAL_R].push_back(GENERAL_OPT);
+    m_vfo_optimiser_map[GOAL_U].push_back(GOAL_OPT); m_vfo_optimiser_map[GOAL_U].push_back(GENERAL_OPT);
+    m_vfo_optimiser_map[OBSTACLE].push_back(OBSTACLE_OPT); m_vfo_optimiser_map[OBSTACLE].push_back(GENERAL_OPT);
+    m_vfo_optimiser_map[FIELDLINE].push_back(LINE_OPT); m_vfo_optimiser_map[FIELDLINE].push_back(GENERAL_OPT);
 
     vision = VisionControlWrapper::getInstance();
 
@@ -145,7 +139,7 @@ VisionOptimiser::~VisionOptimiser()
 #ifdef MULTI_OPT
     delete m_optimisers[OBSTACLE_OPT];
     delete m_optimisers[BALL_OPT];
-    delete m_optimisers[GOAL_BEACON_OPT];
+    delete m_optimisers[GOAL_OPT];
     delete m_optimisers[LINE_OPT];
     delete m_optimisers[GENERAL_OPT];
 #else
@@ -245,7 +239,7 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
                 //print the others to stdout
                 cout << fitnesses[OBSTACLE_OPT] << " ";
                 cout << fitnesses[BALL_OPT] << " ";
-                cout << fitnesses[GOAL_BEACON_OPT] << " ";
+                cout << fitnesses[GOAL_OPT] << " ";
                 cout << fitnesses[LINE_OPT] << " ";
                 cout << fitnesses[GENERAL_OPT] << endl;
             }
@@ -342,7 +336,7 @@ void VisionOptimiser::run(string directory, int total_iterations)
         //print out the best combined parameter set
 #ifdef MULTI_OPT
         if(VisionConstants::setBallParams(Parameter::getAsVector(m_best_params[BALL_OPT])) &&
-                VisionConstants::setGoalBeaconParams(Parameter::getAsVector(m_best_params[GOAL_BEACON_OPT])) &&
+                VisionConstants::setGoalParams(Parameter::getAsVector(m_best_params[GOAL_OPT])) &&
                 VisionConstants::setObstacleParams(Parameter::getAsVector(m_best_params[OBSTACLE_OPT])) &&
                 VisionConstants::setLineParams(Parameter::getAsVector(m_best_params[LINE_OPT])) &&
                 VisionConstants::setGeneralParams(Parameter::getAsVector(m_best_params[GENERAL_OPT]))) {
@@ -391,7 +385,7 @@ bool VisionOptimiser::trainingStep(int iteration,
     bool success = true;
 #ifdef MULTI_OPT
     success = success && VisionConstants::setBallParams(m_optimisers[BALL_OPT]->getNextParameters());
-    success = success && VisionConstants::setGoalBeaconParams(m_optimisers[GOAL_BEACON_OPT]->getNextParameters());
+    success = success && VisionConstants::setGoalParams(m_optimisers[GOAL_OPT]->getNextParameters());
     success = success && VisionConstants::setObstacleParams(m_optimisers[OBSTACLE_OPT]->getNextParameters());
     success = success && VisionConstants::setLineParams(m_optimisers[LINE_OPT]->getNextParameters());
     success = success && VisionConstants::setGeneralParams(m_optimisers[GENERAL_OPT]->getNextParameters());
@@ -431,7 +425,7 @@ bool VisionOptimiser::trainingStep(int iteration,
         //write results to logs
 #ifdef MULTI_OPT
         *(m_individual_progress_logs[BALL_OPT]) << VisionConstants::getBallParams() << endl;
-        *(m_individual_progress_logs[GOAL_BEACON_OPT]) << VisionConstants::getGoalBeaconParams() << endl;
+        *(m_individual_progress_logs[GOAL_OPT]) << VisionConstants::getGoalParams() << endl;
         *(m_individual_progress_logs[OBSTACLE_OPT]) << VisionConstants::getObstacleParams() << endl;
         *(m_individual_progress_logs[LINE_OPT]) << VisionConstants::getLineParams() << endl;
         *(m_individual_progress_logs[GENERAL_OPT]) << VisionConstants::getGeneralParams() << endl;
@@ -480,10 +474,10 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
         map<VFO_ID, pair<float, int> > frame_errors = vision->evaluateFrame(ground_truth[frame_no], false_pos_costs, false_neg_costs);
 
         //accumulate errors
-        for(int i=0; i<VisionFieldObject::INVALID; i++) {
-            VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
+        for(int i=0; i<numVFOIDs(); i++) {
+            VFO_ID vfo_id = VFOFromNum(i);
             vector<OPT_ID>::const_iterator it;
-            //cout << VisionFieldObject::getVFOName(vfo_id) << " " << frame_errors[vfo_id].first << " " << frame_errors[vfo_id].second << endl;
+            //cout << VFOName(vfo_id) << " " << frame_errors[vfo_id].first << " " << frame_errors[vfo_id].second << endl;
             for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
                 batch_errors.at(*it).first += frame_errors.at(vfo_id).first;
                 batch_errors.at(*it).second += frame_errors.at(vfo_id).second;
@@ -538,8 +532,8 @@ map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBat
         //get errors
         detections = vision->precisionRecall(ground_truth[frame_no]);
         //accumulate errors
-        for(int i=0; i<VisionFieldObject::INVALID; i++) {
-            VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
+        for(int i = 0; i < numVFOIDs(); i++) {
+            VFO_ID vfo_id = VFOFromNum(i);
             vector<OPT_ID>::const_iterator it;
             for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
                 detection_sum.at(*it) += detections.at(vfo_id);
@@ -578,7 +572,7 @@ void VisionOptimiser::printResults(int iteration, map<OPT_ID, float> fitnesses, 
 {
     if(!fitnesses.empty()) {
         #ifdef MULTI_OPT
-            performance_log << iteration << " " << fitnesses[BALL_OPT]<< " " << fitnesses[GOAL_BEACON_OPT]<< " " << fitnesses[OBSTACLE_OPT] << " " << fitnesses[LINE_OPT] << " " << fitnesses[GENERAL_OPT] << " " << endl;
+            performance_log << iteration << " " << fitnesses[BALL_OPT]<< " " << fitnesses[GOAL_OPT]<< " " << fitnesses[OBSTACLE_OPT] << " " << fitnesses[LINE_OPT] << " " << fitnesses[GENERAL_OPT] << " " << endl;
         #else
             performance_log << iteration << " " << fitnesses[GENERAL_OPT] << endl;
         #endif
@@ -597,11 +591,6 @@ void VisionOptimiser::setupVisionConstants()
     VisionConstants::THROWOUT_INSIGNIFICANT_GOALS = true;
     VisionConstants::THROWOUT_NARROW_GOALS = true;
     VisionConstants::THROWOUT_SHORT_GOALS = true;
-    // Beacon filtering constants
-    VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS = false;
-    VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS = false;
-    VisionConstants::THROWOUT_DISTANT_BEACONS = false;
-    VisionConstants::THROWOUT_INSIGNIFICANT_BEACONS = true;
     // Ball filtering constants
     VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL = false;
     VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = false;
@@ -612,11 +601,8 @@ void VisionOptimiser::setupVisionConstants()
     VisionConstants::HORIZONTAL_SCANLINE_SPACING = 3;
     VisionConstants::VERTICAL_SCANLINE_SPACING = 3;
     VisionConstants::GREEN_HORIZON_SCAN_SPACING = 11;
-    // Split and Merge constants
-    VisionConstants::SAM_MAX_LINES = 150;
-    VisionConstants::SAM_CLEAR_SMALL = true;
-    VisionConstants::SAM_CLEAR_DIRTY = true;
-    VisionConstants::LINE_METHOD = VisionConstants::SAM;
+    // RANSAC constants
+    VisionConstants::LINE_METHOD = RANSAC;
 }
 
 /** @brief Initialises a map of costs for each field object
@@ -624,31 +610,19 @@ void VisionOptimiser::setupVisionConstants()
 void VisionOptimiser::setupCosts()
 {
     //at present they are all set the same
-    m_false_positive_costs[VisionFieldObject::BALL] = 200;
-    m_false_positive_costs[VisionFieldObject::GOAL_Y_L] = 200;
-    m_false_positive_costs[VisionFieldObject::GOAL_Y_R] = 200;
-    m_false_positive_costs[VisionFieldObject::GOAL_Y_U] = 200;
-    m_false_positive_costs[VisionFieldObject::GOAL_B_L] = 200;
-    m_false_positive_costs[VisionFieldObject::GOAL_B_R] = 200;
-    m_false_positive_costs[VisionFieldObject::GOAL_B_U] = 200;
-    m_false_positive_costs[VisionFieldObject::BEACON_Y] = 200;
-    m_false_positive_costs[VisionFieldObject::BEACON_B] = 200;
-    m_false_positive_costs[VisionFieldObject::BEACON_U] = 200;
-    m_false_positive_costs[VisionFieldObject::OBSTACLE] = 200;
-    m_false_positive_costs[VisionFieldObject::FIELDLINE] = 200;
+    m_false_positive_costs[BALL] = 200;
+    m_false_positive_costs[GOAL_L] = 200;
+    m_false_positive_costs[GOAL_R] = 200;
+    m_false_positive_costs[GOAL_U] = 200;
+    m_false_positive_costs[OBSTACLE] = 200;
+    m_false_positive_costs[FIELDLINE] = 200;
 
-    m_false_negative_costs[VisionFieldObject::BALL] = 200;
-    m_false_negative_costs[VisionFieldObject::GOAL_Y_L] = 200;
-    m_false_negative_costs[VisionFieldObject::GOAL_Y_R] = 200;
-    m_false_negative_costs[VisionFieldObject::GOAL_Y_U] = 200;
-    m_false_negative_costs[VisionFieldObject::GOAL_B_L] = 200;
-    m_false_negative_costs[VisionFieldObject::GOAL_B_R] = 200;
-    m_false_negative_costs[VisionFieldObject::GOAL_B_U] = 200;
-    m_false_negative_costs[VisionFieldObject::BEACON_Y] = 200;
-    m_false_negative_costs[VisionFieldObject::BEACON_B] = 200;
-    m_false_negative_costs[VisionFieldObject::BEACON_U] = 200;
-    m_false_negative_costs[VisionFieldObject::OBSTACLE] = 200;
-    m_false_negative_costs[VisionFieldObject::FIELDLINE] = 200;
+    m_false_negative_costs[BALL] = 200;
+    m_false_negative_costs[GOAL_L] = 200;
+    m_false_negative_costs[GOAL_R] = 200;
+    m_false_negative_costs[GOAL_U] = 200;
+    m_false_negative_costs[OBSTACLE] = 200;
+    m_false_negative_costs[FIELDLINE] = 200;
 }
 
 /** @brief Opens and initialises the various log files.
@@ -659,7 +633,7 @@ void VisionOptimiser::openLogFiles(string directory)
     //log(s) to save the optimiser state(s)
 #ifdef MULTI_OPT
     m_optimiser_logs[BALL_OPT] = new ofstream((directory + m_opt_name + string("_ball.log")).c_str());
-    m_optimiser_logs[GOAL_BEACON_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon.log")).c_str());
+    m_optimiser_logs[GOAL_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon.log")).c_str());
     m_optimiser_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + string("_obstacle.log")).c_str());
     m_optimiser_logs[LINE_OPT] = new ofstream((directory + m_opt_name + string("_line.log")).c_str());
     m_optimiser_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + string("_general.log")).c_str());
@@ -670,7 +644,7 @@ void VisionOptimiser::openLogFiles(string directory)
     //log(s) to save the parameter sets trialed
 #ifdef MULTI_OPT
     m_individual_progress_logs[BALL_OPT] = new ofstream((directory + m_opt_name + string("_ball_progress.log")).c_str());
-    m_individual_progress_logs[GOAL_BEACON_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon_progress.log")).c_str());
+    m_individual_progress_logs[GOAL_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon_progress.log")).c_str());
     m_individual_progress_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + string("_obstacle_progress.log")).c_str());
     m_individual_progress_logs[LINE_OPT] = new ofstream((directory + m_opt_name + string("_line_progress.log")).c_str());
     m_individual_progress_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + string("_general_progress.log")).c_str());
@@ -701,7 +675,7 @@ vector<Parameter> VisionOptimiser::getParams(OPT_ID id)
 {
     switch(id) {
     case BALL_OPT: return VisionConstants::getBallParams();
-    case GOAL_BEACON_OPT: return VisionConstants::getGoalBeaconParams();
+    case GOAL_OPT: return VisionConstants::getGoalParams();
     case OBSTACLE_OPT: return VisionConstants::getObstacleParams();
     case LINE_OPT: return VisionConstants::getLineParams();
     case GENERAL_OPT: return VisionConstants::getGeneralParams();

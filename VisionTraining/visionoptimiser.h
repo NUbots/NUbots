@@ -28,7 +28,7 @@ public:
     //! Represents broad classes of field object
     enum OPT_ID {
         BALL_OPT        = 0,
-        GOAL_BEACON_OPT = 1,
+        GOAL_OPT        = 1,
         OBSTACLE_OPT    = 2,
         LINE_OPT        = 3,
         GENERAL_OPT     = 4
