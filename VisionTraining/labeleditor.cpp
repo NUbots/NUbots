@@ -5,6 +5,7 @@
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
 #include "Tools/Math/General.h"
+#include <boost/foreach.hpp>
 
 LabelEditor::LabelEditor(QWidget *parent) :
     QMainWindow(parent),
@@ -144,13 +145,24 @@ int LabelEditor::run(string dir, string label_name, string image_name)
 */
 void LabelEditor::display(const NUImage& frame, const LookUpTable& lut)
 {
-    //generate openCV matrices
-    cv::Mat plain(frame.getHeight(), frame.getWidth(), CV_8UC3),        //a cv mat for the labelled image
-            classified(frame.getHeight(), frame.getWidth(), CV_8UC3);   //a cv mat for the classified image
+    //generate images
+    int w = frame.getWidth();
+    int h = frame.getHeight();
+    unsigned char r, g, b;
+    QImage plain(w, h, QImage::Format_RGB888);
+    QImage classified(w, h, QImage::Format_RGB888);
 
     renderFrame(frame, plain, m_ground_truth); //render the frame, along with current labels
 
-    lut.classifyImage(frame, classified);   //classify the image
+    //classify the image
+    for(int y = 0; y < h; y++)
+    {
+        for(int x = 0; x < w; x++)
+        {
+            Vision::getColourAsRGB(lut.classifyPixel(frame(x,y)), r, g, b);
+            classified.setPixel(x, y, qRgb(r, g, b));
+        }
+    }
 
     //clear old display
     if(!m_plain_scene.items().empty())
@@ -158,15 +170,8 @@ void LabelEditor::display(const NUImage& frame, const LookUpTable& lut)
     if(!m_classified_scene.items().empty())
         m_classified_scene.removeItem(m_classified_scene.items().first());
 
-    //generate QT display objects
-    QImage q_plain((uchar*) plain.data, plain.cols, plain.rows, plain.step, QImage::Format_RGB888);
-    QImage q_classified((uchar*) classified.data, classified.cols, classified.rows, classified.step, QImage::Format_RGB888);
-
-    q_plain = q_plain.rgbSwapped();
-    q_classified = q_classified.rgbSwapped();
-
-    m_plain_pixmap.setPixmap(QPixmap::fromImage(q_plain));
-    m_classified_pixmap.setPixmap(QPixmap::fromImage(q_classified));
+    m_plain_pixmap.setPixmap(QPixmap::fromImage(plain));
+    m_classified_pixmap.setPixmap(QPixmap::fromImage(classified));
     m_plain_scene.addItem(&m_plain_pixmap);
     m_classified_scene.addItem(&m_classified_pixmap);
 
@@ -177,29 +182,64 @@ void LabelEditor::display(const NUImage& frame, const LookUpTable& lut)
 
 /** @brief Renders image and labels to an OpenCV mat.
 *   @param frame Image to display.
-*   @param mat The mat to render to (output param).
+*   @param img The QImage to render to (output param).
 *   @param gt The labels to render
 */
-void LabelEditor::renderFrame(const NUImage& frame, cv::Mat& mat, vector<VisionFieldObject*>& gt) const
+void LabelEditor::renderFrame(const NUImage& frame, QImage& img, vector<VisionFieldObject*>& gt) const
 {
-    unsigned char* ptr,         //pointer for image row start
-                    r, g, b;    //for colour conversion
+    unsigned char r, g, b;    //r,g,b conversion values
+    int h = frame.getHeight();
+    int w = frame.getWidth();
+    vector<const VisionFieldObject*>::const_iterator it;
 
-    //iterate over all pixels
-    for(int y=0; y<frame.getHeight(); y++) {
-        ptr = mat.ptr<unsigned char>(y);
-        for(int x=0; x<frame.getWidth(); x++) {
+    //initialise image
+    img = QImage(w, h, QImage::Format_RGB888);
+
+    //convert and copy pixel data
+    for(int y = 0; y < h; y++) {
+        for(int x = 0; x < w; x++) {
             //convert to RGB
             ColorModelConversions::fromYCbCrToRGB(frame(x,y).y, frame(x,y).cb, frame(x,y).cr, r, g, b);
-            ptr[3*x]   = b;
-            ptr[3*x+1] = g;
-            ptr[3*x+2] = r;
+            img.setPixel(x, y, qRgb(r, g, b));
         }
     }
 
-    //also render all labels
-    for(vector<VisionFieldObject*>::const_iterator it=gt.begin(); it<gt.end(); it++)
-        (*it)->render(mat);
+    //render the detected object
+    BOOST_FOREACH(const VisionFieldObject* vfo, gt)
+    {
+        VFO_ID id = vfo->getID();
+        QPainter painter(&img);
+
+        if(id == BALL)
+        {
+            painter.setPen(QColor(255,160,0));
+            painter.drawEllipse(QPointF(vfo->getLocationPixels().x, vfo->getLocationPixels().y), vfo->getScreenSize().x, vfo->getScreenSize().y);
+        }
+        else if(id == GOAL_L || id == GOAL_R)
+        {
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(QBrush(Qt::yellow));
+            painter.drawRect(vfo->getLocationPixels().x, vfo->getLocationPixels().y, vfo->getScreenSize().x, vfo->getScreenSize().y);
+        }
+        else if(id == GOAL_U)
+        {
+            painter.setPen(QPen(Qt::yellow));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawRect(vfo->getLocationPixels().x, vfo->getLocationPixels().y, vfo->getScreenSize().x, vfo->getScreenSize().y);
+        }
+        else if(id == OBSTACLE)
+        {
+            painter.setPen(QPen(Qt::white));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawRect(vfo->getLocationPixels().x, vfo->getLocationPixels().y, vfo->getScreenSize().x, vfo->getScreenSize().y);
+        }
+        else if(id == FIELDLINE)
+        {
+            FieldLine* line = (FieldLine*) vfo;
+            painter.setPen(QPen(QBrush(Qt::red), 3));
+            painter.drawLine(line->getEndPoints().x.screen.x, line->getEndPoints().x.screen.y, line->getEndPoints().y.screen.x, line->getEndPoints().y.screen.y);
+        }
+    }
 }
 
 /** @brief Adds a user selected label.
@@ -208,14 +248,14 @@ void LabelEditor::renderFrame(const NUImage& frame, cv::Mat& mat, vector<VisionF
 void LabelEditor::addObject()
 {
     QStringList string_list;                //selection list
-    VisionFieldObject::VFO_ID new_id;       //id for the added object
+    VFO_ID new_id;       //id for the added object
     VisionFieldObject* new_object = NULL;   //new object
     bool ok;                                //to detect if the user hits cancel
 
     //generate a list of all object types
-    for(int i=0; i<VisionFieldObject::INVALID; i++) {
-        VisionFieldObject::VFO_ID id = VisionFieldObject::getVFOFromNum(i);
-        string_list.append(QString(VisionFieldObject::getVFOName(id).c_str()));
+    for(int i=0; i < numVFOIDs(); i++) {
+        VFO_ID id = VFOFromNum(i);
+        string_list.append(QString(VFOName(id).c_str()));
     }
 
     //get user selection
@@ -224,21 +264,44 @@ void LabelEditor::addObject()
 
     if(ok) {
         //if the user didn't hit cancel then generate the new object
-        new_id = VisionFieldObject::getVFOFromName(new_object_name.toStdString());
-        if(VisionFieldObject::isGoal(new_id)) {
+        new_id = VFOFromName(new_object_name.toStdString());
+        if(isGoal(new_id)) {
             new_object = dynamic_cast<VisionFieldObject*>(new Goal(new_id, Quad(150,150,165,200)));
         }
-        else if(VisionFieldObject::isBeacon(new_id)) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Beacon(new_id, Quad(150,150,165,200)));
+        else if(new_id == BALL) {
+            new_object = dynamic_cast<VisionFieldObject*>(new Ball(Point(150,150), 15));
         }
-        else if(new_id == VisionFieldObject::BALL) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Ball(PointType(150,150), 15));
+        else if(new_id == OBSTACLE) {
+            new_object = dynamic_cast<VisionFieldObject*>(new Obstacle(Point(150,150), 15, 30));
         }
-        else if(new_id == VisionFieldObject::OBSTACLE) {
-            new_object = dynamic_cast<VisionFieldObject*>(new Obstacle(PointType(150,150), 15, 30));
-        }
-        else if(new_id == VisionFieldObject::FIELDLINE) {
-            new_object = dynamic_cast<VisionFieldObject*>(new FieldLine(150, 0));
+        else if(new_id == FIELDLINE) {
+            // generate endpoints for new line
+            Line l(150, 0);
+            Point p1, p2;
+
+            if(l.isVertical())
+            {
+                p1.x = l.getXIntercept();
+                p1.y = 0;
+                p2.x = l.getXIntercept();
+                p2.y = 240;
+            }
+            else if(l.isHorizontal())
+            {
+                p1.x = 0;
+                p1.y = l.getYIntercept();
+                p2.x = 320;
+                p2.y = l.getYIntercept();
+            }
+            else
+            {
+                p1.x = 0;
+                p1.y = l.getYIntercept();
+                p2.x = l.getXIntercept();
+                p2.y = 0;
+            }
+
+            new_object = dynamic_cast<VisionFieldObject*>(new FieldLine(LSFittedLine(p1, p2), LSFittedLine(Point(0,0), Point(0,0))));
         }
 
         //add it to the list of labels
@@ -313,10 +376,10 @@ void LabelEditor::updateControls()
         pair<string, Vector3<int> > pi;
         vector< pair<string, Vector3<double> > > vd;
         pair<string, Vector3<double> > pd;
-        VisionFieldObject::VFO_ID id = vfo->getID();
+        VFO_ID id = vfo->getID();
 
         //determine what to show for each object type
-        if(VisionFieldObject::isGoal(id) || VisionFieldObject::isBeacon(id) || id==VisionFieldObject::OBSTACLE) {
+        if(isGoal(id) || isBeacon(id) || id==OBSTACLE) {
             pi.first = "x";
             pi.second = Vector3<int>(vfo->getLocationPixels().x, 0, 319);
             vi.push_back(pi);
@@ -331,7 +394,7 @@ void LabelEditor::updateControls()
             vi.push_back(pi);
             setInts(vi);
         }
-        else if(id==VisionFieldObject::BALL) {
+        else if(id==BALL) {
             pi.first = "x";
             pi.second = Vector3<int>(vfo->getLocationPixels().x, -50, 450);
             vi.push_back(pi);
@@ -343,7 +406,7 @@ void LabelEditor::updateControls()
             vi.push_back(pi);
             setInts(vi);
         }
-        else if(id==VisionFieldObject::FIELDLINE) {
+        else if(id==FIELDLINE) {
             pd.first = "rho";
             pd.second = Vector3<double>(dynamic_cast<FieldLine*>(vfo)->m_rho, -sqrt(319*319+239*239), sqrt(319*319+239*239));
             vd.push_back(pd);
@@ -419,21 +482,21 @@ void LabelEditor::updateValues()
 {
     if(!m_ground_truth.empty()) {
         VisionFieldObject* vfo = m_ground_truth.at(m_current_object);
-        VisionFieldObject::VFO_ID id = vfo->getID();
+        VFO_ID id = vfo->getID();
 
         //determine the label type and decide which controls and values to use
-        if(VisionFieldObject::isGoal(id) || VisionFieldObject::isBeacon(id) || id==VisionFieldObject::OBSTACLE) {
+        if(isGoal(id) || isBeacon(id) || id==OBSTACLE) {
             vfo->m_location_pixels.x = m_i_spins[0]->value();
             vfo->m_location_pixels.y = m_i_spins[1]->value();
             vfo->m_size_on_screen.x = m_i_spins[2]->value();
             vfo->m_size_on_screen.y = m_i_spins[3]->value();
         }
-        else if(id==VisionFieldObject::BALL) {
+        else if(id==BALL) {
             vfo->m_location_pixels.x = m_i_spins[0]->value();
             vfo->m_location_pixels.y = m_i_spins[1]->value();
             dynamic_cast<Ball*>(vfo)->m_diameter = m_i_spins[2]->value();
         }
-        else if(id==VisionFieldObject::FIELDLINE) {
+        else if(id==FIELDLINE) {
             dynamic_cast<FieldLine*>(vfo)->m_rho = m_d_spins[0]->value();
             dynamic_cast<FieldLine*>(vfo)->m_phi = m_d_spins[1]->value();
         }

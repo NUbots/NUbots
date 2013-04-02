@@ -119,7 +119,7 @@ bool VisionControlWrapper::readLabels(istream &in, vector<vector<VisionFieldObje
   * @param in The stream to read from.
   * @param labels The resulting labels (output parameter)
   */
-bool VisionControlWrapper::readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const
+bool VisionControlWrapper::readLabels(istream& in, vector< vector< pair<VFO_ID, Vector2<double> > > >& labels) const
 {
     return data_wrapper->readLabels(in, labels);
 }
@@ -131,14 +131,14 @@ bool VisionControlWrapper::readLabels(istream& in, vector< vector< pair<VisionFi
   * @param false_neg_costs A map between field object IDs and false negative costs
   * @return a map between field object IDs and total cost|incident number
   */
-map<VisionFieldObject::VFO_ID, pair<float, int> > VisionControlWrapper::evaluateFrame(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth,
-                                                                          const map<VisionFieldObject::VFO_ID, float>& false_pos_costs,
-                                                                          const map<VisionFieldObject::VFO_ID, float>& false_neg_costs)
+map<VFO_ID, pair<float, int> > VisionControlWrapper::evaluateFrame(const vector<pair<VFO_ID, Vector2<double> > >& ground_truth,
+                                                                          const map<VFO_ID, float>& false_pos_costs,
+                                                                          const map<VFO_ID, float>& false_neg_costs)
 {
     vector<bool> matched_detections(data_wrapper->detections.size(), false);    //tracks what detections have been matched
     //initi
-    map<VisionFieldObject::VFO_ID, pair<float, int> > errors;                   //the current erors and incidence counts
-    vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >::const_iterator gt;
+    map<VFO_ID, pair<float, int> > errors;                   //the current erors and incidence counts
+    vector<pair<VFO_ID, Vector2<double> > >::const_iterator gt;
 
     //initialise errors map
     for(int i=0; i<VisionFieldObject::INVALID; i++)
@@ -183,7 +183,7 @@ map<VisionFieldObject::VFO_ID, pair<float, int> > VisionControlWrapper::evaluate
             //false positive
             //only apply if costs have been provided
             if(!false_pos_costs.empty()) {
-                VisionFieldObject::VFO_ID id = data_wrapper->detections.at(d)->getID();
+                VFO_ID id = data_wrapper->detections.at(d)->getID();
                 errors.at(id).first += false_pos_costs.at(id);
                 errors.at(id).second++;
             }
@@ -198,19 +198,19 @@ map<VisionFieldObject::VFO_ID, pair<float, int> > VisionControlWrapper::evaluate
   * @param ground_truth The labels to compare with.
   * @return a map between field object IDs and total detections | false_pos | false_neg
   */
-map<VisionFieldObject::VFO_ID, Vector3<double> > VisionControlWrapper::precisionRecall(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth)
+map<VFO_ID, Vector3<double> > VisionControlWrapper::precisionRecall(const vector<pair<VFO_ID, Vector2<double> > >& ground_truth)
 {
     //average distance error 3D for now
     vector<bool> matched_detections(data_wrapper->detections.size(), false);
-    map<VisionFieldObject::VFO_ID, Vector3<double> > result;    //final result
-    map<VisionFieldObject::VFO_ID, double> matches;             //accumulator for detections
-    map<VisionFieldObject::VFO_ID, double> false_pos;           //accumulator for false positives
-    map<VisionFieldObject::VFO_ID, double> false_neg;           //accumulator for false negatives
-    vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >::const_iterator gt;
+    map<VFO_ID, Vector3<double> > result;    //final result
+    map<VFO_ID, double> matches;             //accumulator for detections
+    map<VFO_ID, double> false_pos;           //accumulator for false positives
+    map<VFO_ID, double> false_neg;           //accumulator for false negatives
+    vector<pair<VFO_ID, Vector2<double> > >::const_iterator gt;
 
     //initialise accumulators
     for(int i=0; i<VisionFieldObject::INVALID; i++) {
-        VisionFieldObject::VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
+        VFO_ID vfo_id = VisionFieldObject::getVFOFromNum(i);
         matches[vfo_id] = 0;
         false_pos[vfo_id] = 0;
         false_neg[vfo_id] = 0;
@@ -246,14 +246,14 @@ map<VisionFieldObject::VFO_ID, Vector3<double> > VisionControlWrapper::precision
     for(unsigned int d=0; d<matched_detections.size(); d++) {
         if(!matched_detections.at(d)) {
             //false positive
-            VisionFieldObject::VFO_ID id = data_wrapper->detections.at(d)->getID();
+            VFO_ID id = data_wrapper->detections.at(d)->getID();
             false_pos.at(id)++;
         }
     }
 
     //build result from accumulators
     for(int i=0; i<VisionFieldObject::INVALID; i++) {
-        VisionFieldObject::VFO_ID id = VisionFieldObject::getVFOFromNum(i);
+        VFO_ID id = VisionFieldObject::getVFOFromNum(i);
         result[id].x = matches[id];
         result[id].y = false_pos[id];
         result[id].z = false_neg[id];
@@ -265,7 +265,7 @@ map<VisionFieldObject::VFO_ID, Vector3<double> > VisionControlWrapper::precision
 /*!
   * @brief returns whether two IDs are a match
   */
-bool VisionControlWrapper::objectTypesMatch(VisionFieldObject::VFO_ID id0, VisionFieldObject::VFO_ID id1) const
+bool VisionControlWrapper::objectTypesMatch(VFO_ID id0, VFO_ID id1) const
 {
     switch(id0) {
     case VisionFieldObject::BALL:
@@ -311,7 +311,7 @@ void VisionControlWrapper::resetHistory()
   * @param mat The cv::Mat to render to.
   * @return success
   */
-bool VisionControlWrapper::renderFrame(cv::Mat& mat, bool lines_only)
+bool VisionControlWrapper::renderFrame(QImage& img, bool lines_only)
 {
-    return data_wrapper->renderFrame(mat, lines_only);
+    return data_wrapper->renderFrame(img, lines_only);
 }

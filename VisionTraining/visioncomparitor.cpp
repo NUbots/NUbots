@@ -87,7 +87,7 @@ void VisionComparitor::run(string image_name, string lut_name, string config0, s
     ui->totalLCD->display((int)m_frames.size());
 
     while(!m_halted) {
-        ui->frameLCD->display((int)(m_frame_no+1));
+        ui->frameLCD->display( (int)(m_frame_no+1) );
         m_next = m_prev = false;
 
         //run the vision system with the first parameter set and render the results
@@ -133,9 +133,9 @@ void VisionComparitor::run(string image_name, string lut_name, string config0, s
 *   @param mat0 Mat for parameter set 0
 *   @param mat1 Mat for parameter set 1
 */
-void VisionComparitor::display(const cv::Mat& mat0, const cv::Mat& mat1, const cv::Mat& mat_c)
+void VisionComparitor::display(const QImage &img0, const QImage &img1, const QImage &classifiedImg)
 {
-    //clear old display
+    // clear old display
     if(!m_scenes.first.items().empty())
         m_scenes.first.removeItem(m_scenes.first.items().first());
     if(!m_scenes.second.items().empty())
@@ -143,20 +143,10 @@ void VisionComparitor::display(const cv::Mat& mat0, const cv::Mat& mat1, const c
     if(!m_class_scene.items().empty())
         m_class_scene.removeItem(m_class_scene.items().first());
 
-    //point QImage objects at the cv::mat data
-    QImage qimg0((uchar*) mat0.data, mat0.cols, mat0.rows, mat0.step, QImage::Format_RGB888);
-    QImage qimg1((uchar*) mat1.data, mat1.cols, mat1.rows, mat1.step, QImage::Format_RGB888);
-    QImage qimg_c((uchar*) mat_c.data, mat_c.cols, mat_c.rows, mat_c.step, QImage::Format_RGB888);
-
-    //flip the rgb channels
-    qimg0 = qimg0.rgbSwapped();
-    qimg1 = qimg1.rgbSwapped();
-    qimg_c = qimg_c.rgbSwapped();
-
     //set pixmap and scenes up
-    m_pixmaps.first.setPixmap(QPixmap::fromImage(qimg0));
-    m_pixmaps.second.setPixmap(QPixmap::fromImage(qimg1));
-    m_class_pixmap.setPixmap(QPixmap::fromImage(qimg_c));
+    m_pixmaps.first.setPixmap(QPixmap::fromImage(img0));
+    m_pixmaps.second.setPixmap(QPixmap::fromImage(img1));
+    m_class_pixmap.setPixmap(QPixmap::fromImage(classifiedImg));
     m_scenes.first.addItem(&m_pixmaps.first);
     m_scenes.second.addItem(&m_pixmaps.second);
     m_class_scene.addItem(&m_class_pixmap);

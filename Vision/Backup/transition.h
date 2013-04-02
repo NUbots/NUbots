@@ -12,7 +12,7 @@ class Transition
 public:
     
     Transition();
-    Transition(const PointType& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);
+    Transition(const Point& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);
     Transition(ColourSegment before, ColourSegment after, ScanDirection direction);
 
     /**
@@ -22,7 +22,7 @@ public:
       * @param after The colour of the segment after the transition.
       * @param direction The alignment of the producing segments (vertical/horizontal).
       */
-    void set(const PointType& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);
+    void set(const Point& location, ClassIndex::Colour before, ClassIndex::Colour after, ScanDirection& direction);
     /**
       * Sets the transition values from supplied segments.
       * @param before The segment before the transition.
@@ -31,7 +31,7 @@ public:
       */
     void set(const ColourSegment& before, const ColourSegment& after, ScanDirection direction);
     
-    const PointType& getLocation() const;   //! Returns the location of the transition in pixel coordinates.
+    const Point& getLocation() const;   //! Returns the location of the transition in pixel coordinates.
 //    ClassIndex::Colour getBefore() const;   //! Returns the colour of the segment before the transition.
 //    ClassIndex::Colour getAfter() const;    //! Returns the colour of the segment after the transition.
 //    ScanDirection getDirection() const;     //! Returns the alignment of the segments that produce the transition.
@@ -42,7 +42,7 @@ public:
     friend ostream& operator<< (ostream& output, const vector<Transition>& c);  //! output stream operator for a vector of transitions
     
 private:
-    PointType m_location;   //! @variable The pixel location of the transition.
+    Point m_location;   //! @variable The pixel location of the transition.
     ClassIndex::Colour m_before_colour, //! @variable The colour of the segment before the transition.
                        m_after_colour;  //! @variable The colour of the segment after the transition.
     ScanDirection m_direction;  //! @variable The alignment of the segments that produced this transition.

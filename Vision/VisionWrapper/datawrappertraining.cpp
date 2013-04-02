@@ -6,44 +6,10 @@
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
 
-DataWrapper* DataWrapper::instance = 0;
+#include <QPainter>
+#include <QPen>
 
-/** @brief Enum to string converter for a DEBUG_ID
-*/
-string DataWrapper::getIDName(DEBUG_ID id) {
-    switch(id) {
-    case DBID_IMAGE:
-        return "DBID_IMAGE";
-    case DBID_H_SCANS:
-        return "DBID_H_SCANS";
-    case DBID_V_SCANS:
-        return "DBID_V_SCANS";
-    case DBID_SEGMENTS:
-        return "DBID_SEGMENTS";
-    case DBID_MATCHED_SEGMENTS:
-        return "DBID_MATCHED_SEGMENTS";
-    case DBID_HORIZON:
-        return "DBID_HORIZON";
-    case DBID_GREENHORIZON_SCANS:
-        return "DBID_GREENHORIZON_SCANS";
-    case DBID_GREENHORIZON_FINAL:
-        return "DBID_GREENHORIZON_FINAL";
-    case DBID_OBJECT_POINTS:
-        return "DBID_OBJECT_POINTS";
-    case DBID_FILTERED_SEGMENTS:
-        return "DBID_FILTERED_SEGMENTS";
-    case DBID_GOALS:
-        return "DBID_GOALS";
-    case DBID_BEACONS:
-        return "DBID_BEACONS";
-    case DBID_BALLS:
-        return "DBID_BALLS";
-    case DBID_OBSTACLES:
-        return "DBID_OBSTACLES";
-    default:
-        return "NOT VALID";
-    }
-}
+DataWrapper* DataWrapper::instance = 0;
 
 DataWrapper::DataWrapper()
 {
@@ -350,7 +316,7 @@ bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& 
         next_vec.clear();
         for(int i=0; i<n; i++) {
             string name;
-            VisionFieldObject::VFO_ID id;
+            VFO_ID id;
             //get ID
             in >> name;
             id = VisionFieldObject::getVFOFromName(name);
@@ -403,10 +369,10 @@ bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& 
 *   @param labels The resulting labels (ouput parameter).
 *   @return The success of the operation.
 */
-bool DataWrapper::readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const
+bool DataWrapper::readLabels(istream& in, vector< vector< pair<VFO_ID, Vector2<double> > > >& labels) const
 {
-    pair<VisionFieldObject::VFO_ID, Vector2<double> > next;
-    vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > next_vec;
+    pair<VFO_ID, Vector2<double> > next;
+    vector< pair<VFO_ID, Vector2<double> > > next_vec;
     vector< vector<VisionFieldObject* > > objects;
 
     readLabels(in, objects);
@@ -427,42 +393,73 @@ bool DataWrapper::readLabels(istream& in, vector< vector< pair<VisionFieldObject
 *   @brief Renders the current image and detections to the supplied cv::Mat
 *   @param mat The cv::Mat to render to (output parameter).
 *   @return The success of the operation.
+*
+*   @note THIS DOES NOT HANDLE CORNERS OR CENTRE CIRCLE YET
 */
-bool DataWrapper::renderFrame(cv::Mat &mat, bool lines_only)
+bool DataWrapper::renderFrame(QImage& img, bool lines_only)
 {
     //cannot render frames not processed
     if(numFramesProcessed == 0) {
         return false;
     }
-    unsigned char* ptr, //pointer to image row
-            r, g, b;    //r,g,b conversion values
+    unsigned char r, g, b;    //r,g,b conversion values
+    int h = m_current_image->getHeight();
+    int w = m_current_image->getWidth();
     vector<const VisionFieldObject*>::const_iterator it;
 
-    //initialise mat
-    mat.create(m_current_image->getHeight(), m_current_image->getWidth(), CV_8UC3);
+    //initialise image
+    img = QImage(w, h, QImage::Format_RGB888);
 
     //convert and copy pixel data
-    for(int y=0; y<m_current_image->getHeight(); y++) {
-        ptr = mat.ptr<unsigned char>(y);
-        for(int x=0; x<m_current_image->getWidth(); x++) {
+    for(int y = 0; y < h; y++) {
+        for(int x = 0; x < w; x++) {
             //convert to RGB
             ColorModelConversions::fromYCbCrToRGB((*m_current_image)(x,y).y, (*m_current_image)(x,y).cb, (*m_current_image)(x,y).cr, r, g, b);
-            //store as BGR
-            ptr[3*x]   = b;
-            ptr[3*x+1] = g;
-            ptr[3*x+2] = r;
+            img.setPixel(x, y, qRgb(r, g, b));
         }
     }
 
     //render the detected object
-    for(it=detections.begin(); it<detections.end(); it++) {
-        if(lines_only) {
-            if((*it)->getID() == VisionFieldObject::FIELDLINE) {
-                (*it)->render(mat);
+    BOOST_FOREACH(const VisionFieldObject* vfo, detections)
+    {
+        VFO_ID id = vfo->getID();
+        QPainter painter(&img);
+
+        if(!lines_only)
+        {
+            if(id == BALL)
+            {
+                painter.setPen(QColor(255,160,0));
+                painter.drawEllipse(QPointF(vfo->getLocationPixels().x, vfo->getLocationPixels().y), vfo->getScreenSize().x, vfo->getScreenSize().y);
             }
+            else if(id == GOAL_L || id == GOAL_R)
+            {
+                painter.setPen(Qt::NoPen);
+                painter.setBrush(QBrush(Qt::yellow));
+                painter.drawRect(vfo->getLocationPixels().x, vfo->getLocationPixels().y, vfo->getScreenSize().x, vfo->getScreenSize().y);
+            }
+            else if(id == GOAL_U)
+            {
+                painter.setPen(QPen(Qt::yellow));
+                painter.setBrush(Qt::NoBrush);
+                painter.drawRect(vfo->getLocationPixels().x, vfo->getLocationPixels().y, vfo->getScreenSize().x, vfo->getScreenSize().y);
+            }
+            else if(id == OBSTACLE)
+            {
+                painter.setPen(QPen(Qt::white));
+                painter.setBrush(Qt::NoBrush);
+                painter.drawRect(vfo->getLocationPixels().x, vfo->getLocationPixels().y, vfo->getScreenSize().x, vfo->getScreenSize().y);
+            }
+
+            vfo->render(img);
         }
-        else {
-            (*it)->render(mat);
+
+        // render lines regardless
+        if(id == FIELDLINE)
+        {
+            FieldLine* line = (FieldLine*) vfo;
+            painter.setPen(QPen(QBrush(Qt::red), 3));
+            painter.drawLine(line->getEndPoints().x.screen.x, line->getEndPoints().x.screen.y, line->getEndPoints().y.screen.x, line->getEndPoints().y.screen.y);
         }
     }
     return true;

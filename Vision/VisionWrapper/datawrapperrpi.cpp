@@ -47,7 +47,7 @@ string DataWrapper::getIDName(DEBUG_ID id) {
     }
 }
 
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<cv::Scalar>& colours, vector<PointType>& pts)
+void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<cv::Scalar>& colours, vector<Point>& pts)
 {
     unsigned char r, g, b;
 
@@ -447,7 +447,7 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
 
 bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data_points)
 {
-    vector<PointType>::const_iterator it;
+    vector<Point>::const_iterator it;
 
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data_points.empty()) {
@@ -469,17 +469,17 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
 
         switch(id) {
         case DBID_H_SCANS:
-            BOOST_FOREACH(const PointType& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 cv::line(img, cv::Point2i(0, pt.y), cv::Point2i(img.cols, pt.y), cv::Scalar(127,127,127), 1);
             }
             break;
         case DBID_V_SCANS:
-            BOOST_FOREACH(const PointType& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 cv::line(img, cv::Point2i(pt.x, pt.y), cv::Point2i(pt.x, img.rows), cv::Scalar(127,127,127), 1);
             }
             break;
         case DBID_MATCHED_SEGMENTS:
-            BOOST_FOREACH(const PointType& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,255,0), 4);
             }
             break;
@@ -487,7 +487,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
             line(img, cv::Point2i(data_points.front().x, data_points.front().y), cv::Point2i(data_points.back().x, data_points.back().y), cv::Scalar(255,255,0), 1);
             break;
         case DBID_GREENHORIZON_SCANS:
-            BOOST_FOREACH(const PointType& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 line(img, cv::Point2i(pt.x, kinematics_horizon.findYFromX(pt.x)), cv::Point2i(pt.x, img.rows), cv::Scalar(127,127,127), 1);
                 //cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(127,127,127), 2);
                 cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(255,0,255), 2);
@@ -502,7 +502,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
             }
             break;
         case DBID_OBSTACLE_POINTS:
-            BOOST_FOREACH(const PointType& pt, data_points) {
+            BOOST_FOREACH(const Point& pt, data_points) {
                 cv::circle(img, cv::Point2i(pt.x, pt.y), 1, cv::Scalar(0,0,255), 4);
             }
             break;
@@ -522,9 +522,9 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
 bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     if(m_display_on && false) {
-        vector<PointType> data_points;
+        vector<Point> data_points;
         vector<cv::Scalar> colours;
-        vector<PointType>::const_iterator it;
+        vector<Point>::const_iterator it;
         vector<cv::Scalar>::const_iterator c_it;
 
         getPointsAndColoursFromSegments(region.getSegments(), colours, data_points);

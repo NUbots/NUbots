@@ -79,6 +79,8 @@ void MainWindow::modifyLabels()
   */
 void MainWindow::compareParams()
 {
+    VisionComparitor comp;
+
     //get the stream file
     QString image = QFileDialog::getOpenFileName(this, "Select Image Stream", (string(getenv("HOME")) + string("/nubot/")).c_str(), "stream Files (*.strm)");
     if(!image.isNull()) {
@@ -91,7 +93,6 @@ void MainWindow::compareParams()
                 //get the second parameter file
                 QString config1 = QFileDialog::getOpenFileName(this, "Select First Config", (string(getenv("HOME")) + string("/nubot/Config/")).c_str(), "config Files (*.cfg)");
                 if(!config1.isNull()) {
-                    VisionComparitor comp;
                     comp.show();
                     comp.run(image.toStdString(), lut.toStdString(), config0.toStdString(), config1.toStdString());
                 }

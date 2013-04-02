@@ -178,7 +178,7 @@ vector<Ball> BallDetector::run()
 //            //fit circle and recover data
 //            Circle fitted_ball = fitter.FitCircleLMF(edge_points);
 //            if (fitted_ball.isDefined) {
-//                PointType centre = PointType((int)fitted_ball.centreX,(int)fitted_ball.centreY);
+//                Point centre = Point((int)fitted_ball.centreX,(int)fitted_ball.centreY);
 //                Ball newball(centre, (float)fitted_ball.radius);
 //                vbb->addBall(newball);
 //            }

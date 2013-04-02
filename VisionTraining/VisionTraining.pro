@@ -44,6 +44,7 @@ SOURCES += \
 HEADERS += \
     ../Vision/VisionTypes/*.h \
     ../Vision/VisionTypes/VisionFieldObjects/*.h \
+    ../Vision/VisionTypes/RANSACTypes/*.h \
     ../Vision/VisionWrapper/datawrappercurrent.h \
     ../Vision/VisionTools/classificationcolours.h \
     ../Vision/VisionTools/GTAssert.h \
@@ -58,9 +59,11 @@ HEADERS += \
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
+    ../Vision/VisionTypes/RANSACTypes/*.cpp \
     ../Vision/VisionTools/lookuptable.cpp \
     ../Vision/Modules/*.cpp \
     ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
+    ../Vision/basicvisiontypes.cpp \
     ../Vision/visionblackboard.cpp \
     ../Vision/visioncontroller.cpp \
     ../Vision/visionconstants.cpp \

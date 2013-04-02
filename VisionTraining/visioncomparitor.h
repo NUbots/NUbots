@@ -5,7 +5,6 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include "Infrastructure/NUImage/NUImage.h"
-#include "opencv2/core/core.hpp"
 
 namespace Ui {
 class VisionComparitor;
@@ -22,7 +21,7 @@ public:
     void run(string image_name, string lut_name, string config0, string config1);
 
 private:
-    void display(const cv::Mat& mat0, const cv::Mat& mat1, const cv::Mat& mat_c);
+    void display(const QImage& img0, const QImage& img1, const QImage& classifiedImg);
 
 private slots:
     void halt() {m_halted=true;}
