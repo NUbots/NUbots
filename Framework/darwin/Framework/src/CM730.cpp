@@ -62,7 +62,7 @@ int BulkReadData::ReadWord(int address)
 CM730::CM730(PlatformCM730 *platform)
 {
 	m_Platform = platform;
-	DEBUG_PRINT = true;
+	DEBUG_PRINT = false;
 	for(int i = 0; i < ID_BROADCAST; i++)
 	    m_BulkReadData[i] = BulkReadData();
 }
