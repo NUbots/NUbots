@@ -34,8 +34,3 @@ ScanDirection SegmentedRegion::getDirection() const
 {
     return m_direction;
 }
-
-vector<ColourSegment>::const_iterator SegmentedRegion::iteratorAt(size_t i) const
-{
-    return m_segmented_scans.at(i).begin();
-}

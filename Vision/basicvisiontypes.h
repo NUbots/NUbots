@@ -116,10 +116,12 @@ namespace Vision {
     VFO_ID VFOFromName(const std::string &name);
 
     //! @brief converts an int into a VisionFieldObject Id.
-    VFO_ID VFOFromNum(int n);
+    VFO_ID VFOFromInt(int n);
 
     //! @brief converts a VisionFieldObject Id into an int.
     int intFromVFO(VFO_ID id);
+
+    int numVFOIDs();
 
     //! @brief converts a colour class into a string.
     std::string getColourClassName(COLOUR_CLASS id);

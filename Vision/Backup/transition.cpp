@@ -10,7 +10,7 @@ Transition::Transition()
 {
 }
 
-Transition::Transition(const PointType &location, ClassIndex::Colour before_colour, ClassIndex::Colour after_colour, ScanDirection &direction)
+Transition::Transition(const Point &location, ClassIndex::Colour before_colour, ClassIndex::Colour after_colour, ScanDirection &direction)
 {
     set(location, before_colour, after_colour, direction);
 }
@@ -20,7 +20,7 @@ Transition::Transition(ColourSegment before, ColourSegment after, ScanDirection 
     set(before, after, direction);
 }
 
-void Transition::set(const PointType &location, ClassIndex::Colour before_colour, ClassIndex::Colour after_colour, ScanDirection &direction)
+void Transition::set(const Point &location, ClassIndex::Colour before_colour, ClassIndex::Colour after_colour, ScanDirection &direction)
 {
     m_location = location;
     m_before_colour = before_colour;
@@ -45,7 +45,7 @@ void Transition::set(const ColourSegment& before, const ColourSegment& after, Sc
 /*! @brief Returns the transition pixel location.
 *
 */
-const PointType& Transition::getLocation() const
+const Point& Transition::getLocation() const
 {
     return m_location;
 }

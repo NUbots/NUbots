@@ -199,6 +199,17 @@ bool Goal::check() const
     return true;
 }
 
+double Goal::findScreenError(VisionFieldObject* other) const
+{
+    Goal* g = dynamic_cast<Goal*>(other);
+    return ( m_location.screen - g->m_location.screen ).abs() + ( m_size_on_screen - g->m_size_on_screen ).abs();
+}
+
+double Goal::findGroundError(VisionFieldObject* other) const
+{
+    Goal* g = dynamic_cast<Goal*>(other);
+    return ( m_location.ground - g->m_location.ground ).abs();
+}
 /*!
 *   @brief Updates the spherical position, angular location and transformed spherical position.
 *   

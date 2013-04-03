@@ -8,6 +8,8 @@
 *
 */
 
+#include <map>
+
 #include "Kinematics/Horizon.h"
 #include "NUPlatform/NUCamera/NUCameraData.h"
 #include "Tools/Math/Vector2.h"
@@ -33,7 +35,8 @@
 #ifndef VISIONBLACKBOARD_H // mapped_horizontal_transitions: [1-9]+
 #define VISIONBLACKBOARD_H
 
-using namespace std;
+using std::map;
+using std::vector;
 using namespace Vision;
 
 class VisionWrapper;

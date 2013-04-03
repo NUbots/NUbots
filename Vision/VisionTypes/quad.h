@@ -13,6 +13,7 @@ public:
     Quad();
     Quad(const Quad& other);
     Quad(Vector2<double> bottom_left, Vector2<double> top_left, Vector2<double> top_right, Vector2<double> bottom_right);
+    Quad(int left, int top, int right, int bottom);
 
     /**
       * Sets the Quad as a screen aligned rectangle given the specified positions.

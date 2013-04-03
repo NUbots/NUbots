@@ -156,6 +156,11 @@ namespace Vision {
         }
     }
 
+    int numVFOIDs()
+    {
+        return vfomap.size();
+    }
+
     std::string getColourClassName(COLOUR_CLASS id)
     {
         switch(id) {

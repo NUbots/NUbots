@@ -47,7 +47,9 @@ if(valid) {
                                  Vector2<int>(m_location.screen.x,m_location.screen.y),
                                  Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                  timestamp);
-    newAmbObj.arc_width = m_size_on_screen.x * vbb->getFOV().x / vbb->getImageWidth();
+
+    newAmbObj.arc_width = m_arc_width;
+
     fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
     return true;
 }
@@ -73,6 +75,22 @@ bool Obstacle::check() const
     return true;
 }
 
+double Obstacle::findScreenError(VisionFieldObject* other) const
+{
+    Obstacle* o = dynamic_cast<Obstacle*>(other);
+    return ( m_location.screen - o->m_location.screen ).abs() + ( m_size_on_screen - o->m_size_on_screen ).abs();
+}
+
+double Obstacle::findGroundError(VisionFieldObject* other) const
+{
+    Obstacle* o = dynamic_cast<Obstacle*>(other);
+    double w = 2 * m_location.relativeRadial.x * tan(m_arc_width*0.5);              // w/2 = d * tan(theta/2)
+    double w_o = 2 * o->m_location.relativeRadial.x * tan(o->m_arc_width*0.5);
+
+    return ( m_location.ground - o->m_location.ground ).abs() + abs( w - w_o );
+}
+
+
 bool Obstacle::calculatePositions()
 {
     const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
@@ -84,6 +102,13 @@ bool Obstacle::calculatePositions()
         d2p = transformer.distanceToPoint(m_location.angular.x, m_location.angular.y);
         transformer.screenToRadial3D(m_location, d2p);
     }
+
+    // find arc width
+    GroundPoint gp1, gp2;
+    gp1 = transformer.screenToRadial2D(m_location.screen - Point(m_size_on_screen.x, 0));
+    gp2 = transformer.screenToRadial2D(m_location.screen + Point(m_size_on_screen.x, 0));
+
+    m_arc_width = abs( gp1.angular.x - gp2.angular.x );
 
     //m_spherical_error - not calculated
 

@@ -27,8 +27,8 @@ bool LabelGenerator::run(const string &dir)
     int num_images=0,
         cur_image=0;
     NUImage temp;
-    ifstream infile((dir + string("image.strm")).c_str());
-    ofstream outfile((dir + string("auto_labels.lbl")).c_str());
+    ifstream infile((dir + string("/image.strm")).c_str());
+    ofstream outfile((dir + string("/auto_labels.lbl")).c_str());
 
     cancelled = false;
     while(!cancelled && infile.good()) {
@@ -46,28 +46,31 @@ bool LabelGenerator::run(const string &dir)
             
     //setup vision system
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();
-    if(!vision->setImageStream(dir + string("image.strm"))) {
+    if(!vision->setImageStream(dir + string("/image.strm"))) {
         QMessageBox::warning(this, "Error", QString("Failed to read image stream: ") + QString((dir+string("image.strm")).c_str()));
+        return false;
+    }
+    if(!vision->setSensorStream(dir + string("/sensor.strm"))) {
+        QMessageBox::warning(this, "Error", QString("Failed to read sensor stream: ") + QString((dir+string("sensor.strm")).c_str()));
         return false;
     }
     if(!vision->setLUT(dir + string("default.lut"))) {
         QMessageBox::warning(this, "Error", QString("Failed to read lookup table: ") + QString((dir+string("default.lut")).c_str()));
         return false;
     }
-
-    //vision->setSensorStream(dir + string("sensor.strm"));
     
     ui->progressBar->setMaximum(num_images);
     
     //whilever the vision processes frames and the user hasn't cancelled the process
-    while(!cancelled && vision->runFrame()==0) {
+    while(!cancelled && vision->runFrame() == 0)
+    {
         vision->printLabels(outfile);            //use the wrappers to print the labels
         ui->progressBar->setValue(cur_image);
         QApplication::processEvents();
         cur_image++;
     }
 
-    QMessageBox::information(this, "Finished", QString("Label generation complete for ") + QString((dir+string("image.strm")).c_str()));
+    QMessageBox::information(this, "Finished", QString("Label generation complete for ") + QString((dir+string("image.strm")).c_str()) + QString(" and ") + QString((dir+string("sensor.strm")).c_str()));
 
     close();
     return cancelled;

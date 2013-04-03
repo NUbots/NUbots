@@ -4,6 +4,8 @@
 #include "Vision/visioncontroller.h"
 #include "Vision/VisionWrapper/datawrappertraining.h"
 
+#include <QImage>
+
 class NUSensorsData;
 class NUActionatorsData;
 
@@ -13,28 +15,29 @@ public:
     static VisionControlWrapper* getInstance();
 
     int runFrame();
-    int runFrame(NUImage& img);
+    int runFrame(NUImage& img, NUSensorsData &sensors);
     bool setLUT(const string& filename);
     bool setImageStream(const string& filename);
+    bool setSensorStream(const string& filename);
     void restartStream();
     void resetHistory();
-    bool renderFrame(cv::Mat& mat, bool lines_only=false);
-    void writeBatchDetections(ostream& out);
+    bool renderFrame(QImage& mat, bool lines_only=false);
     void printLabels(ostream& out) const;
     bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
-    bool readLabels(istream& in, vector< vector< pair<VisionFieldObject::VFO_ID, Vector2<double> > > >& labels) const;
+   // bool readLabels(istream& in, vector< vector< pair<VFO_ID, Vector2<double> > > >& labels) const;
 
-    map<VisionFieldObject::VFO_ID, pair<float, int> > evaluateFrame(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth,
-                                                                    const map<VisionFieldObject::VFO_ID, float>& false_pos_costs,
-                                                                    const map<VisionFieldObject::VFO_ID, float>& false_neg_costs);
+    map<VFO_ID, pair<float, int> > evaluateFrame(const vector<VisionFieldObject *> &ground_truth,
+                                                 const map<VFO_ID, float>& false_pos_costs,
+                                                 const map<VFO_ID, float>& false_neg_costs,
+                                                 bool use_ground_errors);
 
-    map<VisionFieldObject::VFO_ID, Vector3<double> > precisionRecall(const vector<pair<VisionFieldObject::VFO_ID, Vector2<double> > >& ground_truth);
+    map<VFO_ID, Vector3<double> > precisionRecall(const vector<VisionFieldObject *>& ground_truth, bool use_ground_errors);
 
 
 private:
     VisionControlWrapper();
 
-    bool objectTypesMatch(VisionFieldObject::VFO_ID id0, VisionFieldObject::VFO_ID id1) const;
+    bool objectTypesMatch(VFO_ID id0, VFO_ID id1) const;
 
     static VisionControlWrapper* instance;  //! @var static singleton instance
 

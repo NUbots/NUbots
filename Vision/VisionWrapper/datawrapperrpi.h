@@ -71,7 +71,7 @@ public:
     bool debugPublish(const vector<Goal>& data);
     bool debugPublish(const vector<Obstacle>& data);
     bool debugPublish(const vector<FieldLine>& data);
-    bool debugPublish(DEBUG_ID id, const vector<PointType>& data_points);
+    bool debugPublish(DEBUG_ID id, const vector<Point>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id);
     bool debugPublish(DEBUG_ID id, const NUImage *const img);

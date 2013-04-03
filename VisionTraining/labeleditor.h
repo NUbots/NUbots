@@ -12,6 +12,7 @@
 #include "Vision/VisionWrapper/visioncontrolwrappertraining.h"
 
 using namespace std;
+using namespace Vision;
 
 namespace Ui {
     class LabelEditor;
@@ -29,7 +30,7 @@ public:
 
 private:
     void display(const NUImage& frame, const LookUpTable& lut);
-    void renderFrame(const NUImage& frame, cv::Mat& mat, vector<VisionFieldObject*>& gt) const;
+    void renderFrame(const NUImage& frame, QImage& img, vector<VisionFieldObject*>& gt) const;
     void setInts(vector< pair<string, Vector3<int> > > vals);
     void setDoubles(vector<pair<string, Vector3<double> > > vals);
     void updateCombo();

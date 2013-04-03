@@ -21,12 +21,10 @@ public:
     bool check() const;
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const {out << VFOName(OBSTACLE) << " " << m_location.screen << " " << m_size_on_screen;}
-    //! @brief Brief stream output for labelling purposes
-    //void printLabelBrief(ostream& out) const {out << VFOName(OBSTACLE) << " " << m_location_pixels;}
-    Vector2<double> getShortLabel() const {return Vector2<double>(m_location.screen.x, m_location.screen.y);}
+    void printLabel(ostream& out) const {out << VFOName(OBSTACLE) << " " << m_location << " " << m_size_on_screen;}
 
-    double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location.screen.x - measured.x,2) + pow(m_location.screen.y - measured.y,2));}
+    virtual double findScreenError(VisionFieldObject* other) const;
+    virtual double findGroundError(VisionFieldObject* other) const;
 
     //! @brief output stream operator.
     friend ostream& operator<< (ostream& output, const Obstacle& o);
@@ -42,6 +40,7 @@ private:
     
 private:
     float d2p;                      //! @variable the distance of the obstacle in cm as found by the distance to point method
+    double m_arc_width;               //! @variable the angle subtended by the obstacle (based on the screen width)
 };
 
 #endif // OBSTACLE_H

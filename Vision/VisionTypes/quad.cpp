@@ -18,6 +18,19 @@ Quad::Quad(Vector2<double> bottom_left, Vector2<double> top_left, Vector2<double
     set(bottom_left, top_left, top_right, bottom_right);
 }
 
+Quad::Quad(int left, int top, int right, int bottom)
+{
+    set(left, top, right, bottom);
+}
+
+void Quad::set(int left, int top, int right, int bottom)
+{
+    bl = Vector2<double>(left, bottom);
+    tl = Vector2<double>(left, top);
+    tr = Vector2<double>(right, top);
+    br = Vector2<double>(right, bottom);
+}
+
 void Quad::set(Vector2<double> bottom_left, Vector2<double> top_left, Vector2<double> top_right, Vector2<double> bottom_right)
 {
     bl = bottom_left;

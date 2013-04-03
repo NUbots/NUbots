@@ -20,9 +20,15 @@ public:
       @param colour 
       @return index of colour.
       */
-    static inline unsigned int  getLUTIndex(const Pixel& colour)
+    static unsigned int getLUTIndex(const Pixel& colour)
     {
-        return (((colour.y >> 1) <<14) + ((colour.cb >> 1) <<7) + (colour.cr >> 1));
+        unsigned int index = 0;
+        index += ((colour.y >> 1) <<14);
+        index += ((colour.cb >> 1) <<7);
+        index += (colour.cr >> 1);
+        return index;
+
+        //return (((colour.y >> 1) <<14) + ((colour.cb >> 1) <<7) + (colour.cr >> 1));
     }
 
     /*!

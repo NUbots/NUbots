@@ -42,21 +42,37 @@ void FieldLine::set(const Vector2<GroundPoint>& end_points)
     m_end_points = end_points;
 }
 
-double FieldLine::findError(const Vector2<double>& measured) const
+void FieldLine::printLabel(ostream &out) const
 {
-    double d_rho = abs(m_screen_line.getRho() - measured.x),
-           d_phi = abs(m_screen_line.getPhi() - measured.y);
-
-    if(d_phi > mathGeneral::PI*0.5)
-        d_phi = mathGeneral::PI - d_phi;
-
-    return sqrt( pow(d_rho,2) + pow(d_phi*140/mathGeneral::PI,2));
+    out << m_end_points;
 }
 
-double FieldLine::findError(const FieldLine& measured) const
+double FieldLine::findScreenError(VisionFieldObject* other) const
 {
-    return findError(Vector2<double>(measured.getScreenLineEquation().getRho(), measured.getScreenLineEquation().getPhi()));
+    FieldLine* l = dynamic_cast<FieldLine*>(other);
+
+    // distances vary depending on endpoint assignment
+    double d1 = ( m_end_points[0].screen - l->m_end_points[0].screen ).abs() + ( m_end_points[1].screen - l->m_end_points[1].screen ).abs();
+    double d2 = ( m_end_points[0].screen - l->m_end_points[1].screen ).abs() + ( m_end_points[1].screen - l->m_end_points[0].screen ).abs();
+
+    return min(d1, d2);
 }
+
+double FieldLine::findGroundError(VisionFieldObject* other) const
+{
+    FieldLine* l = dynamic_cast<FieldLine*>(other);
+
+    // distances vary depending on endpoint assignment
+    double d1 = ( m_end_points[0].ground - l->m_end_points[0].ground ).abs() + ( m_end_points[1].ground - l->m_end_points[1].ground ).abs();
+    double d2 = ( m_end_points[0].ground - l->m_end_points[1].ground ).abs() + ( m_end_points[1].ground - l->m_end_points[0].ground ).abs();
+
+    return min(d1, d2);
+}
+
+//double FieldLine::findError(const FieldLine& measured) const
+//{
+//    return findError(Vector2<double>(measured.getScreenLineEquation().getRho(), measured.getScreenLineEquation().getPhi()));
+//}
 
 ostream& operator<< (ostream& output, const FieldLine& l)
 {

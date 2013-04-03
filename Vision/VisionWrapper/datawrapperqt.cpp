@@ -19,7 +19,10 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string is
     gui = ui;
     m_method = method;
     debug << "openning camera config: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
-    m_camspecs.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
+    if( ! m_camspecs.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str())) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load camera specifications: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
+        ok = false;
+    }
 
     kinematics_horizon.setLine(0, 1, 0);
     numFramesDropped = numFramesProcessed = 0;
@@ -154,6 +157,11 @@ bool DataWrapper::getBodyPitch(float& pitch)
         }
     }
     return false;
+}
+
+Vector2<double> DataWrapper::getCameraFOV() const
+{
+    return Vector2<double>(m_camspecs.m_horizontalFov, m_camspecs.m_verticalFov);
 }
 
 //! @brief Returns spoofed kinecv::Matics horizon.

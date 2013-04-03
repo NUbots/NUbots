@@ -95,19 +95,20 @@ bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float ti
 //! @brief Stream output for labelling purposes
 void CornerPoint::printLabel(ostream& out) const
 {
-    out << getShortLabel();
-}
-
-//! @brief Brief stream output for labelling purposes
-Vector2<double> CornerPoint::getShortLabel() const
-{
-    return m_location.screen;
+    out << m_location;
 }
 
 //! @brief Calculation of error for optimisation
-double CornerPoint::findError(const Vector2<double>& measured) const
+double CornerPoint::findScreenError(VisionFieldObject* other) const
 {
-    return (m_location.screen - measured).abs();
+    CornerPoint* c = dynamic_cast<CornerPoint*>(other);
+    return ( m_location.screen - c->m_location.screen ).abs();
+}
+
+double CornerPoint::findGroundError(VisionFieldObject *other) const
+{
+    CornerPoint* c = dynamic_cast<CornerPoint*>(other);
+    return ( m_location.ground - c->m_location.ground ).abs();
 }
 
 ostream& operator<< (ostream& output, const CornerPoint& c)

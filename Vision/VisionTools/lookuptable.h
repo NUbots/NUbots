@@ -45,13 +45,7 @@ public:
     inline Colour classifyPixel(const Pixel& p) const
     {
         //return  currentLookupTable[(temp->y<<16) + (temp->cb<<8) + temp->cr]; //8 bit LUT
-        if(LUT != NULL) {
-            return getColourFromIndex(LUT[LUTTools::getLUTIndex(p)]); // 7bit LUT
-        }
-        else {
-            errorlog << "LookUpTable::classifyPixel - null LUT" << std::endl;
-            return unclassified;
-        }
+        return getColourFromIndex(LUT[LUTTools::getLUTIndex(p)]); // 7bit LUT
     }
 
 //    /*!
