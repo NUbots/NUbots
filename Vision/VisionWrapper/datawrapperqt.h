@@ -67,7 +67,7 @@ public:
     bool getCameraPitch(float& pitch);              //for transforms
     bool getCameraYaw(float& yaw);                  //for transforms
     bool getBodyPitch(float& pitch);
-    Vector2<double> getCameraFOV() const {return Vector2<double>(m_camspecs.m_horizontalFov, m_camspecs.m_verticalFov);}
+    Vector2<double> getCameraFOV() const;
 
     //! @brief Generates spoofed horizon line.
     const Horizon& getKinematicsHorizon();

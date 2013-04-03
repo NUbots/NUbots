@@ -29,11 +29,9 @@ public:
         
     //! @brief Stream output for labelling purposes
     void printLabel(ostream& out) const {out << VFOName(m_id) << " " << m_location.screen << " " << m_size_on_screen;}
-    //! @brief Brief stream output for labelling purposes
-    //void printLabelBrief(ostream& out) const {out << VFOName(m_id) << " " << m_location_pixels;}
-    Vector2<double> getShortLabel() const {return Vector2<double>(m_location.screen.x, m_location.screen.y);}
 
-    double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location.screen.x - measured.x,2) + pow(m_location.screen.y - measured.y,2));}
+    virtual double findScreenError(VisionFieldObject* other) const;
+    virtual double findGroundError(VisionFieldObject* other) const;
 
     //! @brief output stream operator.
     friend ostream& operator<< (ostream& output, const Goal& g);

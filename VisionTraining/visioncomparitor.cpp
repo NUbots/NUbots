@@ -27,11 +27,12 @@ VisionComparitor::~VisionComparitor()
 *   @param config0 File name for parameter set 0
 *   @param config1 File name for parameter set 1
 */
-void VisionComparitor::run(string image_name, string lut_name, string config0, string config1)
+void VisionComparitor::run(string image_name, string sensor_name, string lut_name, string config0, string config1)
 {
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();
     ifstream image_file(image_name.c_str());
-    cv::Mat mat0, mat1, mat_c;
+    ifstream sensor_file(sensor_name.c_str());
+    QImage img0, img1, img_c;
     LookUpTable lut;
 
     //setup
@@ -64,21 +65,29 @@ void VisionComparitor::run(string image_name, string lut_name, string config0, s
     }
     try {
         //attempt to read the image stream into a frame array
-        while(image_file.good()) {
-            NUImage img;
-            image_file >> img;
-            m_frames.push_back(img);
+        while(image_file.good() && sensor_file.good()) {
+            pair<NUImage, NUSensorsData> frame;
+
+            image_file >> frame.first;
+            sensor_file >> frame.second;
+            m_frames.push_back(frame);
             image_file.peek();
+            sensor_file.peek();
         }
     }
     catch(exception e) {
-        QMessageBox::warning(this, "Failure", QString("Invalid image stream file: ") + QString(image_name.c_str()));
+        QMessageBox::warning(this, "Failure", QString("Invalid image or sensors stream file: \n\t") +
+                             QString(image_name.c_str()) + QString("\n\t") +
+                             QString(sensor_name.c_str()));
         return;
     }
     image_file.close();
+    sensor_file.close();
 
     if(m_frames.size() == 0) {
-        QMessageBox::warning(this, "Failure", QString("No images in image stream: ") + QString(image_name.c_str()));
+        QMessageBox::warning(this, "Failure", QString("Empty image or sensor stream: ") +
+                                              QString(image_name.c_str()) + QString("\n\t") +
+                                              QString(sensor_name.c_str()));
         return;
     }
 
@@ -92,18 +101,27 @@ void VisionComparitor::run(string image_name, string lut_name, string config0, s
 
         //run the vision system with the first parameter set and render the results
         VisionConstants::loadFromFile(config0);
-        vision->runFrame(m_frames[m_frame_no]);
-        vision->renderFrame(mat0, lines_only);
+        vision->runFrame(m_frames[m_frame_no].first, m_frames[m_frame_no].second);
+        vision->renderFrame(img0, lines_only);
 
         //and again with the second
         VisionConstants::loadFromFile(config1);
-        vision->runFrame(m_frames[m_frame_no]);
-        vision->renderFrame(mat1, lines_only);
+        vision->runFrame(m_frames[m_frame_no].first, m_frames[m_frame_no].second);
+        vision->renderFrame(img1, lines_only);
 
-        lut.classifyImage(m_frames[m_frame_no], mat_c);
+        //classify the image
+        unsigned char r, g, b;
+        for(int y = 0; y < m_frames[m_frame_no].first.getHeight(); y++)
+        {
+            for(int x = 0; x < m_frames[m_frame_no].first.getWidth(); x++)
+            {
+                Vision::getColourAsRGB(lut.classifyPixel(m_frames[m_frame_no].first(x,y)), r, g, b);
+                img_c.setPixel(x, y, qRgb(r, g, b));
+            }
+        }
 
         //display the rendered images
-        display(mat0, mat1, mat_c);
+        display(img0, img1, img_c);
 
         while(!m_halted && !m_next && !m_prev) {
             QApplication::processEvents();

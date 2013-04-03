@@ -13,6 +13,7 @@ using std::vector;
 class Transformer
 {
     friend class VisionBlackboard;
+    friend class DataWrapper;
 public:
     Transformer();
 

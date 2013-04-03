@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include "Infrastructure/NUImage/NUImage.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
 namespace Ui {
 class VisionComparitor;
@@ -18,7 +19,7 @@ public:
     explicit VisionComparitor(QWidget *parent = 0);
     ~VisionComparitor();
 
-    void run(string image_name, string lut_name, string config0, string config1);
+    void run(string image_name, string sensor_name, string lut_name, string config0, string config1);
 
 private:
     void display(const QImage& img0, const QImage& img1, const QImage& classifiedImg);
@@ -37,7 +38,7 @@ private:
     QGraphicsPixmapItem m_class_pixmap;
 
     unsigned int m_frame_no;    //! @var The current frame index
-    vector<NUImage> m_frames;   //! @var The frames read in from file
+    vector<pair<NUImage, NUSensorsData> > m_frames;   //! @var The frames read in from file
     bool m_halted,              //! @var Flag for user selecting to exit
          m_next,                //! @var Flag for user selecting to go to next frame
          m_prev;                //! @var Flag for user selecting to go to prev frame

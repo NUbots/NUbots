@@ -15,11 +15,10 @@ public:
 
     //! @brief Stream output for labelling purposes
     virtual void printLabel(ostream& out) const;
-    //! @brief Brief stream output for labelling purposes
-    virtual Vector2<double> getShortLabel() const;
 
     //! @brief Calculation of error for optimisation
-    virtual double findError(const Vector2<double>& measured) const;
+    virtual double findScreenError(VisionFieldObject* other) const;
+    virtual double findGroundError(VisionFieldObject* other) const;
 
     double getGroundRadius() const {return m_ground_radius;}
 

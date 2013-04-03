@@ -151,9 +151,9 @@ VisionOptimiser::~VisionOptimiser()
 *   @param directory Location of image stream, LUT and parameter set.
 *   @note This method uses default names for each file.
 */
-void VisionOptimiser::errorPandRevaluation(string directory)
+void VisionOptimiser::errorPandRevaluation(string directory, bool use_ground_errors)
 {
-    vector<vector<pair<VFO_ID, Vector2<double> > > > gt; //ground truth
+    vector<vector<VisionFieldObject *> > gt; //ground truth
     map<OPT_ID, float> fitnesses;                                           //result fitnesses
     map<OPT_ID, pair<double, double> > PR;                                  //results P and R
     string image_name = directory + string("/image.strm");                  //image filename
@@ -176,25 +176,23 @@ void VisionOptimiser::errorPandRevaluation(string directory)
     setupVisionConstants();
 
     //calculate the fitness P and R
-    fitnesses = evaluateBatch(gt, image_name, zero_costs, zero_costs);
-    PR = evaluateBatchPR(gt, image_name);
+    fitnesses = evaluateBatch(gt, image_name, zero_costs, zero_costs, use_ground_errors);
+    PR = evaluateBatchPR(gt, image_name, use_ground_errors);
 
     //print to stdout
-//    for(int i=0; i<=GENERAL_OPT; i++) {
-//        OPT_ID id = getIDFromInt(i);
-//        cout << getIDName(id) << " f: " << fitnesses[id] << " P: " << PR[id].first << " R: " << PR[id].second << endl;
-//    }
-
-    cout << getIDName(LINE_OPT) << " f: " << fitnesses[LINE_OPT] << " P: " << PR[LINE_OPT].first << " R: " << PR[LINE_OPT].second << endl;
+    for(int i=0; i<=GENERAL_OPT; i++) {
+        OPT_ID id = getIDFromInt(i);
+        cout << getIDName(id) << " f: " << fitnesses[id] << " P: " << PR[id].first << " R: " << PR[id].second << endl;
+    }
 }
 
 /** @brief Runs a grid search over a pair of parameters.
 *   @param directory The directory for all input files.
 *   @param grids_per_side The number of divisions for the grid search
 */
-void VisionOptimiser::gridSearch(string directory, int grids_per_side)
+void VisionOptimiser::gridSearch(string directory, int grids_per_side, bool use_ground_errors)
 {
-    vector<vector<pair<VFO_ID, Vector2<double> > > > gt;
+    vector<vector<VisionFieldObject *> > gt;
     map<OPT_ID, float> fitnesses;
     string image_name = directory + string("image.strm");
     ifstream train_label_file((directory + string("labels.lbl")).c_str());
@@ -232,7 +230,7 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
                 halt = true;
                 break;
             }
-            fitnesses = evaluateBatch(gt, image_name, m_false_positive_costs, m_false_negative_costs);
+            fitnesses = evaluateBatch(gt, image_name, m_false_positive_costs, m_false_negative_costs, use_ground_errors);
             if(!fitnesses.empty()) {
                 //log the general fitness
                 grid_log << fitnesses[GENERAL_OPT] << " ";
@@ -258,7 +256,7 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side)
 *   @param dir Directory for input and output files
 *   @param total_iterations Number of samples to run for.
 */
-void VisionOptimiser::run(string directory, int total_iterations)
+void VisionOptimiser::run(string directory, int total_iterations, bool use_ground_errors)
 {
     int iteration = 0;      //sample counter
     bool success = true;    //flag for failures
@@ -313,11 +311,11 @@ void VisionOptimiser::run(string directory, int total_iterations)
         bool training = (iteration%2==0);   //modulo 2 gives alternating training and testing runs
         if(training) {
             //run a training step - i.e. update the optimisers
-            success = trainingStep(iteration/2, m_ground_truth_training, m_training_performance_log, m_training_image_name);
+            success = trainingStep(iteration/2, m_ground_truth_training, m_training_performance_log, m_training_image_name, use_ground_errors);
         }
         else {
             //run over the test set, no optimiser update
-            printResults(iteration/2, evaluateBatch(m_ground_truth_test, m_test_image_name, m_false_positive_costs, m_false_negative_costs), m_test_performance_log);
+            printResults(iteration/2, evaluateBatch(m_ground_truth_test, m_test_image_name, m_false_positive_costs, m_false_negative_costs, use_ground_errors), m_test_performance_log);
         }
         iteration++;
     }
@@ -369,9 +367,10 @@ void VisionOptimiser::run(string directory, int total_iterations)
 *   @param stream_name The image stream to use.
 */
 bool VisionOptimiser::trainingStep(int iteration,
-                                   const vector<vector<pair<VFO_ID, Vector2<double> > > >& ground_truth,
+                                   const vector<vector<VisionFieldObject *> >& ground_truth,
                                    ostream& performance_log,
-                                   const string& stream_name)
+                                   const string& stream_name,
+                                   bool use_ground_errors)
 {
     map<OPT_ID, float> fitnesses;   //a map between fitnesses and optimiser ID
 
@@ -398,7 +397,7 @@ bool VisionOptimiser::trainingStep(int iteration,
     }
 
     //evaluate the batch
-    fitnesses = evaluateBatch(ground_truth, stream_name, m_false_positive_costs, m_false_negative_costs);
+    fitnesses = evaluateBatch(ground_truth, stream_name, m_false_positive_costs, m_false_negative_costs, use_ground_errors);
 
     vision->resetHistory();
 
@@ -449,10 +448,11 @@ bool VisionOptimiser::trainingStep(int iteration,
 *
 *   @note If an empty map for false pos or neg costs is given then no accounting is made for them.
 */
-map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<vector<pair<VFO_ID, Vector2<double> > > >& ground_truth,
+map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<vector<VisionFieldObject *> >& ground_truth,
                                                                    const string& stream_name,
                                                                    map<VFO_ID, float>& false_pos_costs,
-                                                                   map<VFO_ID, float>& false_neg_costs) const
+                                                                   map<VFO_ID, float>& false_neg_costs,
+                                                                   bool use_ground_errors) const
 {
     //initialise batch errors
     map<OPT_ID, float> fitnesses;
@@ -471,11 +471,11 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
     vision_code = vision->runFrame();
     while(vision_code == 0 && frame_no < ground_truth.size()-1 && !m_halted) {
         //get errors
-        map<VFO_ID, pair<float, int> > frame_errors = vision->evaluateFrame(ground_truth[frame_no], false_pos_costs, false_neg_costs);
+        map<VFO_ID, pair<float, int> > frame_errors = vision->evaluateFrame(ground_truth[frame_no], false_pos_costs, false_neg_costs, use_ground_errors);
 
         //accumulate errors
         for(int i=0; i<numVFOIDs(); i++) {
-            VFO_ID vfo_id = VFOFromNum(i);
+            VFO_ID vfo_id = VFOFromInt(i);
             vector<OPT_ID>::const_iterator it;
             //cout << VFOName(vfo_id) << " " << frame_errors[vfo_id].first << " " << frame_errors[vfo_id].second << endl;
             for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
@@ -511,7 +511,7 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
 *   @param stream_name The image stream to use.
 *   @return A map of optimiser IDs to P&R pairs
 */
-map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBatchPR(const vector<vector<pair<VFO_ID, Vector2<double> > > >& ground_truth, const string& stream_name) const
+map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBatchPR(const vector<vector<VisionFieldObject *> >& ground_truth, const string& stream_name, bool use_ground_errors) const
 {
     //initialise batch errors
     map<OPT_ID, pair<double, double> > PR;
@@ -530,10 +530,10 @@ map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBat
     vision_code = vision->runFrame();
     while(vision_code == 0 && frame_no < ground_truth.size()-1 && !m_halted) {
         //get errors
-        detections = vision->precisionRecall(ground_truth[frame_no]);
+        detections = vision->precisionRecall(ground_truth[frame_no], use_ground_errors);
         //accumulate errors
         for(int i = 0; i < numVFOIDs(); i++) {
-            VFO_ID vfo_id = VFOFromNum(i);
+            VFO_ID vfo_id = VFOFromInt(i);
             vector<OPT_ID>::const_iterator it;
             for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
                 detection_sum.at(*it) += detections.at(vfo_id);

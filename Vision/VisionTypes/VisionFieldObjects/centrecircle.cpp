@@ -55,19 +55,20 @@ bool CentreCircle::addToExternalFieldObjects(FieldObjects* fieldobjects, float t
 //! @brief Stream output for labelling purposes
 void CentreCircle::printLabel(ostream& out) const
 {
-    out << getShortLabel();
-}
-
-//! @brief Brief stream output for labelling purposes
-Vector2<double> CentreCircle::getShortLabel() const
-{
-    return m_location.screen;
+    out << m_location << " " <<  m_ground_radius << " " << m_size_on_screen;
 }
 
 //! @brief Calculation of error for optimisation
-double CentreCircle::findError(const Vector2<double>& measured) const
+double CentreCircle::findScreenError(VisionFieldObject* other) const
 {
-    return (m_location.screen - measured).abs();
+    CentreCircle* c = dynamic_cast<CentreCircle*>(other);
+    return ( m_location.screen - c->m_location.screen ).abs() + ( m_size_on_screen - c->m_size_on_screen ).abs();
+}
+
+double CentreCircle::findGroundError(VisionFieldObject *other) const
+{
+    CentreCircle* c = dynamic_cast<CentreCircle*>(other);
+    return ( m_location.ground - c->m_location.ground ).abs() + abs( m_ground_radius - c->m_ground_radius );
 }
 
 ostream& operator<< (ostream& output, const CentreCircle& c)

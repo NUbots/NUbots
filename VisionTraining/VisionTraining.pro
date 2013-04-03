@@ -1,7 +1,4 @@
-INCLUDEPATH += /usr/local/include/opencv2/
 INCLUDEPATH += /usr/include/boost/
-
-LIBS += -lopencv_core -lopencv_highgui -lopencv_imgproc
 
 DEFINES += TARGET_IS_TRAINING
 DEFINES += QT_NO_DEBUG_STREAM
@@ -26,6 +23,7 @@ SOURCES += \
 
 HEADERS += \
     ../Vision/VisionTools/pccamera.h \
+    ../Vision/VisionTools/transformer.h \
     ../Vision/VisionWrapper/datawrappertraining.h \
     ../Vision/VisionWrapper/visioncontrolwrappertraining.h \
     ../Vision/Debug/debugverbosityvision.h \
@@ -37,6 +35,7 @@ HEADERS += \
 
 SOURCES += \
     ../Vision/VisionTools/pccamera.cpp \
+    ../Vision/VisionTools/transformer.cpp \
     ../Vision/VisionWrapper/datawrappertraining.cpp \
     ../Vision/VisionWrapper/visioncontrolwrappertraining.cpp \
 
@@ -45,12 +44,14 @@ HEADERS += \
     ../Vision/VisionTypes/*.h \
     ../Vision/VisionTypes/VisionFieldObjects/*.h \
     ../Vision/VisionTypes/RANSACTypes/*.h \
+    ../Vision/VisionTypes/Interfaces/*.h \
     ../Vision/VisionWrapper/datawrappercurrent.h \
     ../Vision/VisionTools/classificationcolours.h \
     ../Vision/VisionTools/GTAssert.h \
     ../Vision/VisionTools/lookuptable.h \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
+    ../Vision/Modules/GoalDetectionAlgorithms/*.h \
     ../Vision/basicvisiontypes.h \
     ../Vision/visionblackboard.h \
     ../Vision/visioncontroller.h \
@@ -63,6 +64,8 @@ SOURCES += \
     ../Vision/VisionTools/lookuptable.cpp \
     ../Vision/Modules/*.cpp \
     ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
+    ../Vision/Modules/GoalDetectionAlgorithms/*.cpp \
+    ../Vision/VisionTools/classificationcolours.cpp \
     ../Vision/basicvisiontypes.cpp \
     ../Vision/visionblackboard.cpp \
     ../Vision/visioncontroller.cpp \

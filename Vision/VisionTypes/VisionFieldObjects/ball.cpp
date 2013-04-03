@@ -134,6 +134,18 @@ bool Ball::check() const
     return true;
 }
 
+double Ball::findScreenError(VisionFieldObject *other) const
+{
+    Ball* b = dynamic_cast<Ball*>(other);
+    return ( m_location.screen - b->m_location.screen ).abs() + ( m_size_on_screen - b->m_size_on_screen ).abs();
+}
+
+double Ball::findGroundError(VisionFieldObject *other) const
+{
+    Ball* b = dynamic_cast<Ball*>(other);
+    return ( m_location.ground - b->m_location.ground ).abs();
+}
+
 bool Ball::calculatePositions()
 {
     const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();

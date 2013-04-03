@@ -11,7 +11,7 @@
 #include "Vision/VisionTypes/groundpoint.h"
 
 #include "Vision/VisionTypes/Interfaces/publishable.h"
-#include "Vision/VisionTypes/Interfaces/optimisable.h"
+#include "Vision/VisionTypes/Interfaces/printable.h"
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Tools/Math/Vector3.h"
@@ -22,7 +22,7 @@
 using namespace std;
 using namespace Vision;
 
-class VisionFieldObject : public Publishable, public Optimisable
+class VisionFieldObject : public Publishable, public Printable
 {
 public:
     VisionFieldObject();
@@ -40,6 +40,9 @@ public:
     Vector2<double> getScreenSize() const { return m_size_on_screen; }
     //! @brief returns the field position relative to the robot.
     virtual Vector3<double> getRelativeFieldCoords() const {return m_location.relativeRadial;}
+
+    virtual double findScreenError(VisionFieldObject* other) const = 0;
+    virtual double findGroundError(VisionFieldObject* other) const = 0;
 
 protected:
     GroundPoint m_location;                       //! @variable The location of the object (includes screen, radial and ground position).

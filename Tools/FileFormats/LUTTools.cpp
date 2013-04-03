@@ -10,14 +10,19 @@ bool LUTTools::LoadLUT(unsigned char* targetBuffer, int length){
 
 bool LUTTools::LoadLUT(unsigned char* targetBuffer, int length, const char* filename){
     char* lutBuffer = (char*)targetBuffer;
-    fstream lutfile; 
-    lutfile.open(filename, ios::in | ios::binary);
-    if(lutfile.is_open()){  // check if file opened correctly
+    ifstream lutfile;
+    lutfile.open(filename, ios::binary | ios::ate);
+
+    // check if file opened correctly and is correct size
+    if(lutfile.is_open() && lutfile.tellg() == LUT_SIZE)
+    {
         lutfile.seekg (0, ios::beg);  // move to start of file.
         lutfile.read (lutBuffer, length); // read in buffer
         lutfile.close();
         return true;
-    } else {
+    }
+    else
+    {
         lutfile.clear();
         return false;
     }

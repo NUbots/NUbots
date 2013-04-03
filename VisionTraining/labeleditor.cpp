@@ -254,7 +254,7 @@ void LabelEditor::addObject()
 
     //generate a list of all object types
     for(int i=0; i < numVFOIDs(); i++) {
-        VFO_ID id = VFOFromNum(i);
+        VFO_ID id = VFOFromInt(i);
         string_list.append(QString(VFOName(id).c_str()));
     }
 

@@ -48,11 +48,8 @@ void Transformer::screenToRadial2D(GroundPoint& pt) const
 
     pt.angular.x = atan( (image_centre.x-pt.screen.x)  * screen_to_radial_factor.x);
     pt.angular.y = atan( (image_centre.y-pt.screen.y) * screen_to_radial_factor.y) + VisionConstants::D2P_ANGLE_CORRECTION;
-    cout << " Transformer::screenToRadial2D: " << pt.angular.x;
     if(camera_yaw_valid)
         pt.angular.x += camera_yaw;
-
-    cout << " " << pt.angular.x << endl;
     if(camera_pitch_valid)
         pt.angular.y -= camera_pitch;
 

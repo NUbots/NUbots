@@ -21,16 +21,14 @@ public:
     Vector2<GroundPoint> getEndPoints() const {return m_end_points;}
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const {out << VFOName(FIELDLINE) << " " << getShortLabel();}
-    //! @brief Brief stream output for labelling purposes
-    Vector2<double> getShortLabel() const {return Vector2<double>(m_screen_line.getRho(), m_screen_line.getPhi());}
+    void printLabel(ostream& out) const;
 
     //dummy until localisation can handle lines
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const {return false && fieldobjects && timestamp==0;}
 
-    //! @brief Calculation of error for optimisation - assumed measured = (rho, phi)
-    double findError(const Vector2<double>& measured) const;
-    double findError(const FieldLine& measured) const;
+    //! @brief Calculation of error for optimisation
+    virtual double findScreenError(VisionFieldObject* other) const;
+    virtual double findGroundError(VisionFieldObject* other) const;
 
     //! @brief output stream operator
     friend ostream& operator<< (ostream& output, const FieldLine& l);

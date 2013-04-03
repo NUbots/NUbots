@@ -82,8 +82,8 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const LookUpTable& lut, 
     //Colour previous, current, next
     int     start_pos = 0,
             x;
-    Colour start_colour = getColourFromIndex(lut.classifyPixel(img(0,y))),
-                        current_colour;
+    Colour start_colour = getColourFromIndex(lut.classifyPixel(img(0,y)));
+    Colour current_colour;
     ColourSegment segment;
 
     for(x = 0; x < img.getWidth(); x++) {

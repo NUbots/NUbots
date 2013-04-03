@@ -232,6 +232,11 @@ template <class V = float> class Vector2{
   {
     return  (&x)[i];
   }
+
+  const V& operator[](int i) const
+  {
+    return  (&x)[i];
+  }
   
   /** Calculation of the angle of this vector */
   double angle() const
