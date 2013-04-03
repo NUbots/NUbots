@@ -43,6 +43,7 @@ public:
     ~DarwinSensors();
     
     void copyFromHardwareCommunications();
+
     void copyFromJoints();
     void copyFromAccelerometerAndGyro();
     void copyFromFeet();
@@ -50,19 +51,23 @@ public:
     void copyFromBattery();
     
 protected:
-    vector<NUData::id_t*> m_joint_ids;    	//!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
+    //! A vector containing pointers to all of the joint id_t.
+    //! This is used to loop through all of the joints quickly
+    vector<NUData::id_t*> m_joint_ids;
     vector<float> m_previous_positions;
     vector<float> m_previous_velocities;
     DarwinPlatform* platform;
     Robot::CM730* cm730;
     DarwinJointMapping* m_joint_mapping;
 
-    vector<vector<int> > error_fields;      //! A vector of motor id/error field pairs
-    bool motor_error;                       //! A flag to indicate a motor indicated an error
+    //! A flag to indicate a motor indicated an error
+    bool motor_error;
+    /// Returns a string containing a list of descriptions of the set error
+    /// flags in the given errorvalue.
     std::string error2Description(unsigned int errorValue);
 
 private:
-    static const unsigned int NUM_MOTORS=20;
+    static const unsigned int NUM_MOTORS = 20;
 };
 
 #endif

@@ -30,6 +30,16 @@
 #include "debug.h"
 #include "debugverbositynusensors.h"
 
+// Error flags returned by sensor + servo reads/commands.
+#define SENSOR_ERROR_NONE                  (0x0000)
+#define SENSOR_ERROR_FLAG_INPUT_VOLTAGE    (0x0001)
+#define SENSOR_ERROR_FLAG_ANGLE_LIMIT      (0x0002)
+#define SENSOR_ERROR_FLAG_OVERHEATING      (0x0004)
+#define SENSOR_ERROR_FLAG_RANGE            (0x0008)
+#define SENSOR_ERROR_FLAG_CHECKSUM         (0x0010)
+#define SENSOR_ERROR_FLAG_OVERLOAD         (0x0020)
+#define SENSOR_ERROR_FLAG_INSTRUCTION      (0x0040)
+
 // Note: These defines are simply copied from those in CM730.cpp
 #define ID					(2)
 #define LENGTH				(3)
@@ -72,11 +82,6 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
     m_data->set(NUSensorsData::LLegEndEffector, m_data->CurrentTime, invalid);
 
     motor_error = false;
-    error_fields.resize(NUM_MOTORS);
-    for(int i = 0 ; i < NUM_MOTORS ; i++)
-    {
-        error_fields[i].resize(2);
-    }
 }
 
 /*! @brief Destructor for DarwinSensors
@@ -92,32 +97,32 @@ DarwinSensors::~DarwinSensors()
 std::string DarwinSensors::error2Description(unsigned int errorValue)
 {
     std::string error_description;
-    if(errorValue == 0x0000) return "No Errors";
-    if(errorValue & 0x0001)
+    if(errorValue == SENSOR_ERROR_NONE) return "No Errors";
+    if(errorValue & SENSOR_ERROR_FLAG_INPUT_VOLTAGE)
     {
         error_description.append("Input Voltage Error; ");
     }
-    if(errorValue & 0x0002)
+    if(errorValue & SENSOR_ERROR_FLAG_ANGLE_LIMIT)
     {
         error_description.append("Angle Limit Error; ");
     }
-    if(errorValue & 0x0004)
+    if(errorValue & SENSOR_ERROR_FLAG_OVERHEATING)
     {
         error_description.append("OverHeating Error; ");
     }
-    if(errorValue & 0x0008)
+    if(errorValue & SENSOR_ERROR_FLAG_RANGE)
     {
         error_description.append("Range Error; ");
     }
-    if(errorValue & 0x0010)
+    if(errorValue & SENSOR_ERROR_FLAG_CHECKSUM)
     {
         error_description.append("Checksum Error; ");
     }
-    if(errorValue & 0x0020)
+    if(errorValue & SENSOR_ERROR_FLAG_OVERLOAD)
     {
         error_description.append("Overload Error; ");
     }
-    if(errorValue & 0x0040)
+    if(errorValue & SENSOR_ERROR_FLAG_INSTRUCTION)
     {
         error_description.append("Instruction Error; ");
     }
@@ -128,8 +133,6 @@ std::string DarwinSensors::error2Description(unsigned int errorValue)
  */
 void DarwinSensors::copyFromHardwareCommunications()
 {
-    int result;
-
     // 1. Copy data from last bulk read of the CM730.
 
     //Control Board Data:
@@ -141,47 +144,75 @@ void DarwinSensors::copyFromHardwareCommunications()
     copyFromJoints();
     copyFromFeet();
 
-    // 2. Read data in bulk from the CM730 controller board (i.e. read all sensor and motor data for the next iteration).
-    result = cm730->BulkRead();
-      
-    if(motor_error) {
-        #if DEBUG_NUSENSORS_VERBOSITY > 0
-            debug << "DarwinSensors::copyFromHardwareCommunications\nMotor error: " << endl;
-        #endif
-        errorlog << "Motor error: " << endl;
+    // 2. Read data in bulk from the CM730 controller board 
+    //    (i.e. read all sensor and motor data for the next iteration)
+//         #if DEBUG_NUSENSORS_VERBOSITY > 0
+//         debug << "Motor error: " << endl;
+//         #endif
+//         errorlog << "Motor error: " << endl;
+// //        cm730->DXLPowerOff();
+// //        platform->msleep(500);
+// //        cm730->DXLPowerOn();
 
-        for(int i=0; i<NUM_MOTORS; i++) {
-            #if DEBUG_NUSENSORS_VERBOSITY > 0
-                debug << "ID: " << error_fields[i][0] << " err: " << error2Description(error_fields[i][1]) << endl;
-            #endif
-            errorlog << "ID: " << error_fields[i][0] << " err: " << error2Description(error_fields[i][1]) << endl;
-        }
-
-//        cm730->DXLPowerOff();
-//        platform->msleep(500);
-//        cm730->DXLPowerOn();
-
-        motor_error = false;
-    }
-
-	
-    //DEBUG NEEDED HERE:
-    int num_tries = 0;
-    while(result != Robot::CM730::SUCCESS)
+    bool repeat_bulk_read = false;
+    do
     {
-//        if(num_tries == 50) {
-//            cm730->DXLPowerOff();
-//            platform->msleep(500);
-//            cm730->DXLPowerOn();
-//        }
-        #if DEBUG_NUSENSORS_VERBOSITY > 0
-            debug << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
-        #endif
-        errorlog << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
-        
-        result = cm730->BulkRead();
-        num_tries++;
-    }
+        // Perform the read operation from the CM730.
+        // Note: Possible error codes are:
+        //   - SUCCESS
+        //   - TX_CORRUPT
+        //   - TX_FAIL
+        //   - RX_FAIL
+        //   - RX_TIMEOUT
+        //   - RX_CORRUPT
+        int bulk_read_error_code = cm730->BulkRead();
+
+        if(bulk_read_error_code != Robot::CM730::SUCCESS)
+        {
+            debug   << __PRETTY_FUNCTION__ << ": "
+                    << "BULK READ ERROR: "
+                    << bulk_read_error_code
+                    << endl;
+
+            // Check for servo read errors: (and also other sensors)
+            // Note: Possible error flags are:
+            //   - SENSOR_ERROR_NONE
+            //   - SENSOR_ERROR_FLAG_INPUT_VOLTAGE
+            //   - SENSOR_ERROR_FLAG_ANGLE_LIMIT
+            //   - SENSOR_ERROR_FLAG_OVERHEATING
+            //   - SENSOR_ERROR_FLAG_RANGE
+            //   - SENSOR_ERROR_FLAG_CHECKSUM
+            //   - SENSOR_ERROR_FLAG_OVERLOAD
+            //   - SENSOR_ERROR_FLAG_INSTRUCTION
+            bool servo_read_error = false;
+            for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
+            {
+                int servo_ID   = int(platform->m_servo_IDs[i]);
+                int servo_error_code = cm730->m_BulkReadData[servo_ID].error;
+
+                if(servo_error_code != SENSOR_ERROR_NONE)
+                {
+                    // keep track of which sensors failed?
+                    // (use a list - speed doesn't matter much, since it 
+                    // shouldn't be used often if the robot is functioning correctly)
+                    servo_read_error = true;
+                    //         errorlog << "Motor error: " << endl;
+                    debug   << __PRETTY_FUNCTION__ << ": "
+                            << "Motor error: id = '" << servo_ID 
+                            << "', error='" << error2Description(servo_error_code) 
+                            << "';" 
+                            << endl;
+                }
+            }
+            debug << endl;
+
+            // Decide whether to repeat the read based on errors returned:
+            repeat_bulk_read = true;
+
+            // // cycle dynamixel power?
+        }
+    } while (repeat_bulk_read);
+
     return;
 }
 
@@ -219,11 +250,11 @@ void DarwinSensors::copyFromJoints()
         addr = int(Robot::MX28::P_PRESENT_POSITION_L);
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
 
-        //error fields
-        error_fields[i][0] = int(platform->m_servo_IDs[i]);
-        error_fields[i][1] = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].error;
-        if(error_fields[i][1] != 0)
-            motor_error = true;
+        // //error fields (no longer used. delete this now! -MM)
+        // error_fields[i][0] = int(platform->m_servo_IDs[i]);
+        // error_fields[i][1] = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].error;
+        // if(error_fields[i][1] != 0)
+        //     motor_error = true;
 
         //cm730->MakeWord(datatable[addr-start_addr],datatable[addr-start_addr+1]);
 
