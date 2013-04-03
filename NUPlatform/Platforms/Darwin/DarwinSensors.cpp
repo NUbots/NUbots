@@ -166,7 +166,7 @@ void DarwinSensors::copyFromHardwareCommunications()
         //   - RX_TIMEOUT
         //   - RX_CORRUPT
         int bulk_read_error_code = cm730->BulkRead();
-
+        
         if(bulk_read_error_code != Robot::CM730::SUCCESS)
         {
             debug   << __PRETTY_FUNCTION__ << ": "

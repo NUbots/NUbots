@@ -73,12 +73,8 @@ CM730::~CM730()
 }
 
 
-void CM730::printInstructionType(unsigned char *txpacket, int length)
+void CM730::printInstructionType(unsigned char *txpacket)
 {
-    fprintf(stderr, "\nTX: ");
-    for(int n=0; n<length; n++)
-        fprintf(stderr, "%.2X ", txpacket[n]);
-
     fprintf(stderr, "INST: ");
     switch(txpacket[INSTRUCTION])
     {
@@ -122,7 +118,6 @@ void CM730::printInstructionType(unsigned char *txpacket, int length)
 
 void CM730::printResultType(int res)
 {
-    fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
     fprintf(stderr, "RETURN: ");
     switch(res)
     {
@@ -428,8 +423,14 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
     txpacket[1] = 0xFF;
     txpacket[length - 1] = CalculateChecksum(txpacket);
 
-    if(DEBUG_PRINT == true) printInstructionType(txpacket, length);
-    
+    if(DEBUG_PRINT == true) 
+    {
+        fprintf(stderr, "\nTX: ");
+        for(int n=0; n<length; n++)
+            fprintf(stderr, "%.2X ", txpacket[n]);
+
+        printInstructionType(txpacket);
+    }
     
     if(length < (MAXNUM_TXPARAM + 6)) // Enforce hardware/api limit on length of data to send.
     {
@@ -462,7 +463,11 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
     else res = TX_CORRUPT;
 
 
-	if(DEBUG_PRINT == true) printResultType(res);
+	if(DEBUG_PRINT == true) 
+    {
+        fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
+        printResultType(res);
+    }
 	
     // Release resources
 	performPriorityRelease(priority);
