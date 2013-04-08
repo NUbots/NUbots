@@ -434,9 +434,12 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
     
     if(length < (MAXNUM_TXPARAM + 6)) // Enforce hardware/api limit on length of data to send.
     {
+        // Transmit the packet:
         m_Platform->ClearPort();
         if(m_Platform->WritePort(txpacket, length) == length)
         {
+            // Receive the response:
+            
             if (txpacket[ID] != ID_BROADCAST) // i.e. Must be ID_CM.
             {
                 TxRxCMPacket(txpacket, rxpacket, res, length); // Note: 'length' can be passed by value here.

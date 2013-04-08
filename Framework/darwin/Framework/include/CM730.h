@@ -9,6 +9,7 @@
 #define _CM_730_H_
 
 #include "MX28.h"
+#include <string>
 
 #define MAXNUM_TXPARAM      (256)
 #define MAXNUM_RXPARAM      (1024)
