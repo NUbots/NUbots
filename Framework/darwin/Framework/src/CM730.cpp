@@ -75,80 +75,13 @@ CM730::~CM730()
 
 void CM730::printInstructionType(unsigned char *txpacket)
 {
-    fprintf(stderr, "INST: ");
-    switch(txpacket[INSTRUCTION])
-    {
-    case INST_PING:
-        fprintf(stderr, "PING\n");
-        break;
-
-    case INST_READ:
-        fprintf(stderr, "READ\n");
-        break;
-
-    case INST_WRITE:
-        fprintf(stderr, "WRITE\n");
-        break;
-
-    case INST_REG_WRITE:
-        fprintf(stderr, "REG_WRITE\n");
-        break;
-
-    case INST_ACTION:
-        fprintf(stderr, "ACTION\n");
-        break;
-
-    case INST_RESET:
-        fprintf(stderr, "RESET\n");
-        break;
-
-    case INST_SYNC_WRITE:
-        fprintf(stderr, "SYNC_WRITE\n");
-        break;
-
-    case INST_BULK_READ:
-        fprintf(stderr, "BULK_READ\n");
-        break;
-
-    default:
-        fprintf(stderr, "UNKNOWN\n");
-        break;
-    }
+    int instruction_value = txpacket[INSTRUCTION];
+    fprintf(stderr, "INST: %s\n", getInstructionTypeString(instruction_value));
 }
 
-void CM730::printResultType(int res)
+void CM730::printResultType(int error_code)
 {
-    fprintf(stderr, "RETURN: ");
-    switch(res)
-    {
-    case SUCCESS:
-        fprintf(stderr, "SUCCESS\n");
-        break;
-
-    case TX_CORRUPT:
-        fprintf(stderr, "TX_CORRUPT\n");
-        break;
-
-    case TX_FAIL:
-        fprintf(stderr, "TX_FAIL\n");
-        break;
-
-    case RX_FAIL:
-        fprintf(stderr, "RX_FAIL\n");
-        break;
-
-    case RX_TIMEOUT:
-        fprintf(stderr, "RX_TIMEOUT\n");
-        break;
-
-    case RX_CORRUPT:
-        fprintf(stderr, "RX_CORRUPT\n");
-        break;
-
-    default:
-        fprintf(stderr, "UNKNOWN\n");
-        break;
-    }
+    fprintf(stderr, "RETURN: %s\n", getTxRxErrorString(error_code));
 }
 
 inline void CM730::performPriorityWait(int priority)
@@ -795,4 +728,34 @@ int CM730::MakeColor(int red, int green, int blue)
 	int b = blue & 0xFF;
 
 	return (int)(((b>>3)<<10)|((g>>3)<<5)|(r>>3));
+}
+
+char* CM730::getTxRxErrorString(int error_code)
+{
+    switch(error_code)
+    {
+    case SUCCESS   : return "SUCCESS"   ;
+    case TX_CORRUPT: return "TX_CORRUPT";
+    case TX_FAIL   : return "TX_FAIL"   ;
+    case RX_FAIL   : return "RX_FAIL"   ;
+    case RX_TIMEOUT: return "RX_TIMEOUT";
+    case RX_CORRUPT: return "RX_CORRUPT";
+    default        : return "UNKNOWN"   ; 
+    }
+}
+
+char* CM730::getInstructionTypeString(int instruction_value)
+{
+    switch(instruction_value)
+    {
+    case INST_PING      : return "PING"      ;
+    case INST_READ      : return "READ"      ;
+    case INST_WRITE     : return "WRITE"     ;
+    case INST_REG_WRITE : return "REG_WRITE" ;
+    case INST_ACTION    : return "ACTION"    ;
+    case INST_RESET     : return "RESET"     ;
+    case INST_SYNC_WRITE: return "SYNC_WRITE";
+    case INST_BULK_READ : return "BULK_READ" ;
+    default             : return "UNKNOWN"   ;
+    }
 }

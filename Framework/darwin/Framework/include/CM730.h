@@ -9,7 +9,6 @@
 #define _CM_730_H_
 
 #include "MX28.h"
-#include <string>
 
 #define MAXNUM_TXPARAM      (256)
 #define MAXNUM_RXPARAM      (1024)
@@ -217,6 +216,8 @@ namespace Robot
 		static int GetLowByte(int word);
 		static int GetHighByte(int word);
 		static int MakeColor(int red, int green, int blue);
+		static char* getTxRxErrorString(int error_code);
+		static char* getInstructionTypeString(int instruction_value);
 	};
 }
 

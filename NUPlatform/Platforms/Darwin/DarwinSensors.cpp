@@ -21,6 +21,7 @@
 
 #include <limits>
 
+
 #include "DarwinSensors.h"
 #include "DarwinPlatform.h"
 #include "DarwinJointMapping.h"
@@ -29,6 +30,8 @@
 
 #include "debug.h"
 #include "debugverbositynusensors.h"
+
+#include "Framework/darwin/Framework/include/CM730.h"
 
 // Error flags returned by sensor + servo reads/commands.
 #define SENSOR_ERROR_NONE                  (0x0000)
@@ -94,38 +97,37 @@ DarwinSensors::~DarwinSensors()
     delete cm730;
 }
 
-std::string DarwinSensors::error2Description(unsigned int errorValue)
+std::string DarwinSensors::getSensorErrorDescription(unsigned int error_value)
 {
     std::string error_description;
-    if(errorValue == SENSOR_ERROR_NONE) return "No Errors";
-    if(errorValue & SENSOR_ERROR_FLAG_INPUT_VOLTAGE)
-    {
+
+    if(error_value == SENSOR_ERROR_NONE) 
+        return "No Errors";
+
+    if(error_value == -1) 
+        return "All error flags are set.";
+    
+    if(error_value & SENSOR_ERROR_FLAG_INPUT_VOLTAGE)
         error_description.append("Input Voltage Error; ");
-    }
-    if(errorValue & SENSOR_ERROR_FLAG_ANGLE_LIMIT)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_ANGLE_LIMIT)
         error_description.append("Angle Limit Error; ");
-    }
-    if(errorValue & SENSOR_ERROR_FLAG_OVERHEATING)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_OVERHEATING)
         error_description.append("OverHeating Error; ");
-    }
-    if(errorValue & SENSOR_ERROR_FLAG_RANGE)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_RANGE)
         error_description.append("Range Error; ");
-    }
-    if(errorValue & SENSOR_ERROR_FLAG_CHECKSUM)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_CHECKSUM)
         error_description.append("Checksum Error; ");
-    }
-    if(errorValue & SENSOR_ERROR_FLAG_OVERLOAD)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_OVERLOAD)
         error_description.append("Overload Error; ");
-    }
-    if(errorValue & SENSOR_ERROR_FLAG_INSTRUCTION)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_INSTRUCTION)
         error_description.append("Instruction Error; ");
-    }
+    
     return error_description;
 }
 
@@ -169,9 +171,9 @@ void DarwinSensors::copyFromHardwareCommunications()
         
         if(bulk_read_error_code != Robot::CM730::SUCCESS)
         {
-            debug   << __PRETTY_FUNCTION__ << ": "
+            cout   << __PRETTY_FUNCTION__ << ": "
                     << "BULK READ ERROR: "
-                    << bulk_read_error_code
+                    << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
                     << endl;
 
             // Check for servo read errors: (and also other sensors)
@@ -197,14 +199,14 @@ void DarwinSensors::copyFromHardwareCommunications()
                     // shouldn't be used often if the robot is functioning correctly)
                     servo_read_error = true;
                     //         errorlog << "Motor error: " << endl;
-                    debug   << __PRETTY_FUNCTION__ << ": "
+                    cout   << __PRETTY_FUNCTION__ << ": "
                             << "Motor error: id = '" << servo_ID 
-                            << "', error='" << error2Description(servo_error_code) 
+                            << "', error='" << getSensorErrorDescription(servo_error_code)
                             << "';" 
                             << endl;
                 }
             }
-            debug << endl;
+            cout << endl;
 
             // Decide whether to repeat the read based on errors returned:
             repeat_bulk_read = true;
@@ -249,12 +251,6 @@ void DarwinSensors::copyFromJoints()
 
         addr = int(Robot::MX28::P_PRESENT_POSITION_L);
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
-
-        // //error fields (no longer used. delete this now! -MM)
-        // error_fields[i][0] = int(platform->m_servo_IDs[i]);
-        // error_fields[i][1] = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].error;
-        // if(error_fields[i][1] != 0)
-        //     motor_error = true;
 
         //cm730->MakeWord(datatable[addr-start_addr],datatable[addr-start_addr+1]);
 

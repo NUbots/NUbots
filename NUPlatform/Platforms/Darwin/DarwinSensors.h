@@ -64,7 +64,7 @@ protected:
     bool motor_error;
     /// Returns a string containing a list of descriptions of the set error
     /// flags in the given errorvalue.
-    std::string error2Description(unsigned int errorValue);
+    std::string getSensorErrorDescription(unsigned int error_value);
 
 private:
     static const unsigned int NUM_MOTORS = 20;
