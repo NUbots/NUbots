@@ -461,6 +461,7 @@ else
 endif
 
 DarwinFramework:
+	mkdir -p $(DARWIN_FRAMEWORK_BUILD_DIR)/../lib; \
 	cd $(DARWIN_FRAMEWORK_BUILD_DIR); \
 	make;
 

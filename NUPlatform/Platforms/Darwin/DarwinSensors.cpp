@@ -32,6 +32,7 @@
 #include "debugverbositynusensors.h"
 
 #include "Framework/darwin/Framework/include/CM730.h"
+#include "Framework/darwin/Framework/include/JointData.h"
 
 // Error flags returned by sensor + servo reads/commands.
 #define SENSOR_ERROR_NONE                  (0x0000)
@@ -200,9 +201,11 @@ void DarwinSensors::copyFromHardwareCommunications()
                     servo_read_error = true;
                     //         errorlog << "Motor error: " << endl;
                     cout   << __PRETTY_FUNCTION__ << ": "
-                            << "Motor error: id = '" << servo_ID 
-                            << "', error='" << getSensorErrorDescription(servo_error_code)
-                            << "';" 
+                            << "Motor error: id = '"
+                            << Robot::JointData::GetJointName(servo_ID) 
+                            << "', error='"
+                            << getSensorErrorDescription(servo_error_code)
+                            << "';"
                             << endl;
                 }
             }
