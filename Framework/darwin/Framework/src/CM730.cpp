@@ -344,10 +344,80 @@ inline void CM730::TxRxBulkReadPacket(
     }
 }
 
+// int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority)
+// {
+// 	// Acquire resources
+//     performPriorityWait(priority);
+
+//     int res = TX_FAIL;
+//     int length = txpacket[LENGTH] + 4;
+
+//     txpacket[0] = 0xFF;
+//     txpacket[1] = 0xFF;
+//     txpacket[length - 1] = CalculateChecksum(txpacket);
+
+//     if(DEBUG_PRINT == true) 
+//     {
+//         fprintf(stderr, "\nTX: ");
+//         for(int n=0; n<length; n++)
+//             fprintf(stderr, "%.2X ", txpacket[n]);
+
+//         printInstructionType(txpacket);
+//     }
+    
+//     if(length < (MAXNUM_TXPARAM + 6)) // Enforce hardware/api limit on length of data to send.
+//     {
+//         // Transmit the packet:
+//         m_Platform->ClearPort();
+//         if(m_Platform->WritePort(txpacket, length) == length)
+//         {
+//             // Receive the response:
+            
+//             if (txpacket[ID] != ID_BROADCAST) // i.e. Must be ID_CM.
+//             {
+//                 TxRxCMPacket(txpacket, rxpacket, res, length); // Note: 'length' can be passed by value here.
+//             }
+//             else if(txpacket[INSTRUCTION] == INST_BULK_READ) // (INST_BULK_READ is an ID_BROADCAST)
+//             {
+//                 TxRxBulkReadPacket(txpacket, rxpacket, res, length); // Note: length input is unnecessary.
+//             }
+//             else
+//             {
+//                 // i.e. Must be an ID_BROADCAST, and one of:
+//                 //   - INST_PING
+//                 //   - INST_READ
+//                 //   - INST_WRITE
+//                 //   - INST_REG_WRITE
+//                 //   - INST_ACTION
+//                 //   - INST_RESET
+//                 //   - INST_SYNC_WRITE
+//                 res = SUCCESS;
+//             }
+//         }
+//         else res = TX_FAIL;      
+//     }
+//     else res = TX_CORRUPT;
+
+
+// 	if(DEBUG_PRINT == true) 
+//     {
+//         fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
+//         printResultType(res);
+//     }
+	
+//     // Release resources
+// 	performPriorityRelease(priority);
+
+// 	return res;
+// }
+
 int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority)
 {
-	// Acquire resources
-    performPriorityWait(priority);
+    if(priority > 1)
+        m_Platform->LowPriorityWait();
+    if(priority > 0)
+        m_Platform->MidPriorityWait();
+    m_Platform->HighPriorityWait();
 
     int res = TX_FAIL;
     int length = txpacket[LENGTH] + 4;
@@ -356,59 +426,299 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
     txpacket[1] = 0xFF;
     txpacket[length - 1] = CalculateChecksum(txpacket);
 
-    if(DEBUG_PRINT == true) 
+    if(DEBUG_PRINT == true)
     {
         fprintf(stderr, "\nTX: ");
         for(int n=0; n<length; n++)
             fprintf(stderr, "%.2X ", txpacket[n]);
 
-        printInstructionType(txpacket);
+        fprintf(stderr, "INST: ");
+        switch(txpacket[INSTRUCTION])
+        {
+        case INST_PING:
+            fprintf(stderr, "PING\n");
+            break;
+
+        case INST_READ:
+            fprintf(stderr, "READ\n");
+            break;
+
+        case INST_WRITE:
+            fprintf(stderr, "WRITE\n");
+            break;
+
+        case INST_REG_WRITE:
+            fprintf(stderr, "REG_WRITE\n");
+            break;
+
+        case INST_ACTION:
+            fprintf(stderr, "ACTION\n");
+            break;
+
+        case INST_RESET:
+            fprintf(stderr, "RESET\n");
+            break;
+
+        case INST_SYNC_WRITE:
+            fprintf(stderr, "SYNC_WRITE\n");
+            break;
+
+        case INST_BULK_READ:
+            fprintf(stderr, "BULK_READ\n");
+            break;
+
+        default:
+            fprintf(stderr, "UNKNOWN\n");
+            break;
+        }
     }
-    
-    if(length < (MAXNUM_TXPARAM + 6)) // Enforce hardware/api limit on length of data to send.
+
+    if(length < (MAXNUM_TXPARAM + 6))
     {
-        // Transmit the packet:
         m_Platform->ClearPort();
         if(m_Platform->WritePort(txpacket, length) == length)
         {
-            // Receive the response:
-            
-            if (txpacket[ID] != ID_BROADCAST) // i.e. Must be ID_CM.
+            if (txpacket[ID] != ID_BROADCAST)
             {
-                TxRxCMPacket(txpacket, rxpacket, res, length); // Note: 'length' can be passed by value here.
+                int to_length = 0;
+
+                if(txpacket[INSTRUCTION] == INST_READ)
+                    to_length = txpacket[PARAMETER+1] + 6;
+                else
+                    to_length = 6;
+
+                m_Platform->SetPacketTimeout(length);
+
+                int get_length = 0;
+                if(DEBUG_PRINT == true)
+                    fprintf(stderr, "RX: ");
+
+                while(1)
+                {
+                    length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
+                    if(DEBUG_PRINT == true)
+                    {
+                        for(int n=0; n<length; n++)
+                            fprintf(stderr, "%.2X ", rxpacket[get_length + n]);
+                    }
+                    get_length += length;
+
+                    if(get_length == to_length)
+                    {
+                        // Find packet header
+                        int i;
+                        for(i = 0; i < (get_length - 1); i++)
+                        {
+                            if(rxpacket[i] == 0xFF && rxpacket[i+1] == 0xFF)
+                                break;
+                            else if(i == (get_length - 2) && rxpacket[get_length - 1] == 0xFF)
+                                break;
+                        }
+
+                        if(i == 0)
+                        {
+                            // Check checksum
+                            unsigned char checksum = CalculateChecksum(rxpacket);
+                            if(DEBUG_PRINT == true)
+                                fprintf(stderr, "CHK:%.2X\n", checksum);
+
+                            if(rxpacket[get_length-1] == checksum)
+                                res = SUCCESS;
+                            else
+                                res = RX_CORRUPT;
+
+                            break;
+                        }
+                        else
+                        {
+                            for(int j = 0; j < (get_length - i); j++)
+                                rxpacket[j] = rxpacket[j+i];
+                            get_length -= i;
+                        }                       
+                    }
+                    else
+                    {
+                        if(m_Platform->IsPacketTimeout() == true)
+                        {
+                            if(get_length == 0)
+                                res = RX_TIMEOUT;
+                            else
+                                res = RX_CORRUPT;
+
+                            break;
+                        }
+                    }
+                }
             }
-            else if(txpacket[INSTRUCTION] == INST_BULK_READ) // (INST_BULK_READ is an ID_BROADCAST)
+            else if(txpacket[INSTRUCTION] == INST_BULK_READ)
             {
-                TxRxBulkReadPacket(txpacket, rxpacket, res, length); // Note: length input is unnecessary.
+                int to_length = 0;
+                int num = (txpacket[LENGTH]-3) / 3;
+
+                for(int x = 0; x < num; x++)
+                {
+                    int _id = txpacket[PARAMETER+(3*x)+2];
+                    int _len = txpacket[PARAMETER+(3*x)+1];
+                    int _addr = txpacket[PARAMETER+(3*x)+3];
+
+                    to_length += _len + 6;
+                    m_BulkReadData[_id].length = _len;
+                    m_BulkReadData[_id].start_address = _addr;
+                }
+
+                m_Platform->SetPacketTimeout(to_length*1.5);
+
+                int get_length = 0;
+                if(DEBUG_PRINT == true)
+                    fprintf(stderr, "RX: ");
+
+                while(1)
+                {
+                    length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
+                    if(DEBUG_PRINT == true)
+                    {
+                        for(int n=0; n<length; n++)
+                            fprintf(stderr, "%.2X ", rxpacket[get_length + n]);
+                    }
+                    get_length += length;
+
+                    if(get_length == to_length)
+                    {
+                        res = SUCCESS;
+                        break;
+                    }
+                    else
+                    {
+                        if(m_Platform->IsPacketTimeout() == true)
+                        {
+                            if(get_length == 0)
+                                res = RX_TIMEOUT;
+                            else
+                                res = RX_CORRUPT;
+
+                            break;
+                        }
+                    }
+                }
+
+                for(int x = 0; x < num; x++)
+                {
+                    int _id = txpacket[PARAMETER+(3*x)+2];
+                    m_BulkReadData[_id].error = -1;
+                }
+
+                while(1)
+                {
+                    int i;
+                    for(i = 0; i < get_length - 1; i++)
+                    {
+                        if(rxpacket[i] == 0xFF && rxpacket[i+1] == 0xFF)
+                            break;
+                        else if(i == (get_length - 2) && rxpacket[get_length - 1] == 0xFF)
+                            break;
+                    }
+
+                    if(i == 0)
+                    {
+                        // Check checksum
+                        unsigned char checksum = CalculateChecksum(rxpacket);
+                        if(DEBUG_PRINT == true)
+                            fprintf(stderr, "CHK:%.2X\n", checksum);
+
+                        if(rxpacket[LENGTH+rxpacket[LENGTH]] == checksum)
+                        {
+                            for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
+                                m_BulkReadData[rxpacket[ID]].table[m_BulkReadData[rxpacket[ID]].start_address + j] = rxpacket[PARAMETER + j];
+
+                            m_BulkReadData[rxpacket[ID]].error = (int)rxpacket[ERRBIT];
+
+                            int cur_packet_length = LENGTH + 1 + rxpacket[LENGTH];
+                            to_length = get_length - cur_packet_length;
+                            for(int j = 0; j <= to_length; j++)
+                                rxpacket[j] = rxpacket[j+cur_packet_length];
+
+                            get_length = to_length;
+                            num--;
+                        }
+                        else
+                        {
+                            res = RX_CORRUPT;
+
+                            for(int j = 0; j <= get_length - 2; j++)
+                                rxpacket[j] = rxpacket[j+2];
+
+                            to_length = get_length -= 2;
+                        }
+
+                        if(num == 0)
+                            break;
+                        else if(get_length <= 6)
+                        {
+                            if(num != 0) res = RX_CORRUPT;
+                            break;
+                        }
+
+                    }
+                    else
+                    {
+                        for(int j = 0; j < (get_length - i); j++)
+                            rxpacket[j] = rxpacket[j+i];
+                        get_length -= i;
+                    }
+                }
             }
             else
-            {
-                // i.e. Must be an ID_BROADCAST, and one of:
-                //   - INST_PING
-                //   - INST_READ
-                //   - INST_WRITE
-                //   - INST_REG_WRITE
-                //   - INST_ACTION
-                //   - INST_RESET
-                //   - INST_SYNC_WRITE
-                res = SUCCESS;
-            }
+                res = SUCCESS;          
         }
-        else res = TX_FAIL;      
+        else
+            res = TX_FAIL;      
     }
-    else res = TX_CORRUPT;
+    else
+        res = TX_CORRUPT;
 
-
-	if(DEBUG_PRINT == true) 
+    if(DEBUG_PRINT == true)
     {
         fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
-        printResultType(res);
-    }
-	
-    // Release resources
-	performPriorityRelease(priority);
+        fprintf(stderr, "RETURN: ");
+        switch(res)
+        {
+        case SUCCESS:
+            fprintf(stderr, "SUCCESS\n");
+            break;
 
-	return res;
+        case TX_CORRUPT:
+            fprintf(stderr, "TX_CORRUPT\n");
+            break;
+
+        case TX_FAIL:
+            fprintf(stderr, "TX_FAIL\n");
+            break;
+
+        case RX_FAIL:
+            fprintf(stderr, "RX_FAIL\n");
+            break;
+
+        case RX_TIMEOUT:
+            fprintf(stderr, "RX_TIMEOUT\n");
+            break;
+
+        case RX_CORRUPT:
+            fprintf(stderr, "RX_CORRUPT\n");
+            break;
+
+        default:
+            fprintf(stderr, "UNKNOWN\n");
+            break;
+        }
+    }
+
+    m_Platform->HighPriorityRelease();
+    if(priority > 0)
+        m_Platform->MidPriorityRelease();
+    if(priority > 1)
+        m_Platform->LowPriorityRelease();
+
+    return res;
 }
 
 unsigned char CM730::CalculateChecksum(unsigned char *packet)
