@@ -149,6 +149,10 @@ void DarwinSensors::copyFromHardwareCommunications()
 
     // 2. Read data in bulk from the CM730 controller board 
     //    (i.e. read all sensor and motor data for the next iteration)
+    
+    // Note: The following comment contains old code.
+    //       It is preserved here in the hope that it might be handy later.
+    //       Please delete it if you *know* that it won't be. -MM
 //         #if DEBUG_NUSENSORS_VERBOSITY > 0
 //         debug << "Motor error: " << endl;
 //         #endif
@@ -156,10 +160,15 @@ void DarwinSensors::copyFromHardwareCommunications()
 // //        cm730->DXLPowerOff();
 // //        platform->msleep(500);
 // //        cm730->DXLPowerOn();
-
-    bool repeat_bulk_read = false;
+    
+    // A flag to indicate whether the bulk read must be repeated
+    // (i.e. it is set to true if a significant error occurs during the read)
+    bool repeat_bulk_read;
     do
     {
+        // Reset the repeat_bulk_read flag on each loop
+        repeat_bulk_read = false;
+
         // Perform the read operation from the CM730.
         // Note: Possible error codes are:
         //   - SUCCESS
@@ -214,7 +223,7 @@ void DarwinSensors::copyFromHardwareCommunications()
             // Decide whether to repeat the read based on errors returned:
             repeat_bulk_read = true;
 
-            // // cycle dynamixel power?
+            // cycle dynamixel power?
         }
     } while (repeat_bulk_read);
 
