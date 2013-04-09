@@ -77,6 +77,7 @@ GroundPoint Transformer::screenToRadial2D(const Point& pt) const
     GroundPoint g;
     g.screen = pt;
     screenToRadial2D(g);
+    return g;
 }
 
 /**
