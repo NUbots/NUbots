@@ -20,21 +20,11 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NUPlatform.cpp NUPlatform.h
-                NUSensors.cpp NUSensors.h
-                NUActionators.cpp NUActionators.h
-                NUCamera.cpp NUCamera.h
-                NUIO.cpp NUIO.h
-                NUAPI.cpp NUAPI.h
+SET (YOUR_SRCS  NUAPI.pb.cc NUAPI.pb.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Platforms
-                NUSensors
-                NUActionators	
-                NUCamera
-                NUIO
-                NUAPI
+SET (YOUR_DIRS  
 )
 ####################################################################################
 
