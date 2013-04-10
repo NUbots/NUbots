@@ -103,7 +103,10 @@ inline void CM730::performPriorityRelease(int priority)
 }
 
 
-// CoMmand packet? (simply checks whether the commands sent were successful)
+// Command packet? (simply checks whether the commands sent were successful)
+// Note: This method is similar to CM730::TxRxBulkReadPacket.
+//       See the comments there for help deciphering it.
+//       (I'll refactor these soon. -MM)
 inline void CM730::TxRxCMPacket(
     unsigned char* &txpacket,
     unsigned char* &rxpacket,
@@ -187,13 +190,13 @@ inline void CM730::TxRxBulkReadPacket(
     int &length)
 {
     int to_length = 0; //! length in bytes of data to read
-    int num = (txpacket[LENGTH]-3) / 3;
+    int num = (txpacket[LENGTH]-3) / 3; // number of blocks to read
 
     // Set bulkreaddata lengths and start addresses
     for(int x = 0; x < num; x++)
     {
-        int _id = txpacket[PARAMETER+(3*x)+2];
-        int _len = txpacket[PARAMETER+(3*x)+1];
+        int _id   = txpacket[PARAMETER+(3*x)+2];
+        int _len  = txpacket[PARAMETER+(3*x)+1];
         int _addr = txpacket[PARAMETER+(3*x)+3];
 
         to_length += _len + 6;
@@ -272,7 +275,7 @@ inline void CM730::TxRxBulkReadPacket(
         //
         // In particular, sets always start with the bytes, 0xFF 0xFF.
         // 
-        
+
         int i;
         for(i = 0; i < get_length - 1; i++)
         {
@@ -323,7 +326,7 @@ inline void CM730::TxRxBulkReadPacket(
             else
             {
                 res = RX_CORRUPT;
-                
+
                 // skip next 2 bytes of rxpacket
                 for(int j = 0; j <= get_length - 2; j++)
                     rxpacket[j] = rxpacket[j+2];
