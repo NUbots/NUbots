@@ -14,20 +14,20 @@
 using namespace Robot;
 
 
-#define ID					(2)
-#define LENGTH				(3)
-#define INSTRUCTION			(4)
-#define ERRBIT				(4)
-#define PARAMETER			(5)
-#define DEFAULT_BAUDNUMBER	(1)
+#define ID                    (2)
+#define LENGTH                (3)
+#define INSTRUCTION            (4)
+#define ERRBIT                (4)
+#define PARAMETER            (5)
+#define DEFAULT_BAUDNUMBER    (1)
 
-#define INST_PING			(1)
-#define INST_READ			(2)
-#define INST_WRITE			(3)
-#define INST_REG_WRITE		(4)
-#define INST_ACTION			(5)
-#define INST_RESET			(6)
-#define INST_SYNC_WRITE		(131)   // 0x83
+#define INST_PING            (1)
+#define INST_READ            (2)
+#define INST_WRITE            (3)
+#define INST_REG_WRITE        (4)
+#define INST_ACTION            (5)
+#define INST_RESET            (6)
+#define INST_SYNC_WRITE        (131)   // 0x83
 #define INST_BULK_READ      (146)   // 0x92
 
 
@@ -51,7 +51,7 @@ int BulkReadData::ReadByte(int address)
 
 int BulkReadData::ReadWord(int address)
 {
-    if(address >= start_address && 
+    if(address >= start_address &&
        address < (start_address + length))
         return CM730::MakeWord(table[address], table[address+1]);
 
@@ -61,15 +61,15 @@ int BulkReadData::ReadWord(int address)
 
 CM730::CM730(PlatformCM730 *platform)
 {
-	m_Platform = platform;
-	DEBUG_PRINT = false;
-	for(int i = 0; i < ID_BROADCAST; i++)
-	    m_BulkReadData[i] = BulkReadData();
+    m_Platform = platform;
+    DEBUG_PRINT = false;
+    for(int i = 0; i < ID_BROADCAST; i++)
+        m_BulkReadData[i] = BulkReadData();
 }
 
 CM730::~CM730()
 {
-	Disconnect();
+    Disconnect();
 }
 
 
@@ -103,7 +103,8 @@ inline void CM730::performPriorityRelease(int priority)
 }
 
 
-// Command packet? (simply checks whether the commands sent were successful)
+// Cm730 packet (communicate only to the CM730 controller board,
+// and not attached devices)
 // Note: This method is similar to CM730::TxRxBulkReadPacket.
 //       See the comments there for help deciphering it.
 //       (I'll refactor these soon. -MM)
@@ -158,7 +159,7 @@ inline void CM730::TxRxCMPacket(
                     res = SUCCESS;
                 else
                     res = RX_CORRUPT;
-                
+
                 break;
             }
             else
@@ -166,7 +167,7 @@ inline void CM730::TxRxCMPacket(
                 for(int j = 0; j < (get_length - i); j++)
                     rxpacket[j] = rxpacket[j+i];
                 get_length -= i;
-            }                       
+            }
         }
         else
         {
@@ -176,7 +177,7 @@ inline void CM730::TxRxCMPacket(
                     res = RX_TIMEOUT;
                 else
                     res = RX_CORRUPT;
-                
+
                 break;
             }
         }
@@ -184,9 +185,9 @@ inline void CM730::TxRxCMPacket(
 }
 
 inline void CM730::TxRxBulkReadPacket(
-    unsigned char* &txpacket, 
-    unsigned char* &rxpacket, 
-    int &res, 
+    unsigned char* &txpacket,
+    unsigned char* &rxpacket,
+    int &res,
     int &length)
 {
     int to_length = 0; //! length in bytes of data to read
@@ -210,8 +211,8 @@ inline void CM730::TxRxBulkReadPacket(
 
 
     int get_length = 0; //! length in bytes of data read so far
-    
-    // Read data from port 
+
+    // Read data from port
     // (loop until all data has been read, or a timeout occurs)
     while(1)
     {
@@ -259,7 +260,7 @@ inline void CM730::TxRxBulkReadPacket(
         // Note: rxpacket may contain several sets of values to be read
         //       (e.g. one set for each motor, containing all the values from
         //        that motor's memory table).
-        // 
+        //
         // The first bytes of a valid set of values are the following:
         // 0x00: 0xFF      (literal value 0xFF)
         // 0x01: 0xFF      (literal value 0xFF)
@@ -270,11 +271,11 @@ inline void CM730::TxRxBulkReadPacket(
         //
         // ... (all the data)
         //
-        // (LENGTH)+0x03: A checksum for this data packet. 
+        // (LENGTH)+0x03: A checksum for this data packet.
         //                (Note: this is the last address of the packet)
         //
         // In particular, sets always start with the bytes, 0xFF 0xFF.
-        // 
+        //
 
         int i;
         for(i = 0; i < get_length - 1; i++)
@@ -284,7 +285,7 @@ inline void CM730::TxRxBulkReadPacket(
             else if(i == (get_length - 2) && rxpacket[get_length - 1] == 0xFF)
                 break;
         }
-        
+
         if(i != 0)
         {
             // skip invalid/header bytes
@@ -349,7 +350,7 @@ inline void CM730::TxRxBulkReadPacket(
 
 int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority)
 {
-	// Acquire resources
+    // Acquire resources
     performPriorityWait(priority);
 
     int res = TX_FAIL;
@@ -359,7 +360,7 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
     txpacket[1] = 0xFF;
     txpacket[length - 1] = CalculateChecksum(txpacket);
 
-    if(DEBUG_PRINT == true) 
+    if(DEBUG_PRINT == true)
     {
         fprintf(stderr, "\nTX: ");
         for(int n=0; n<length; n++)
@@ -367,7 +368,7 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
 
         printInstructionType(txpacket);
     }
-    
+
     if(length < (MAXNUM_TXPARAM + 6)) // Enforce hardware/api limit on length of data to send.
     {
         // Transmit the packet:
@@ -375,7 +376,7 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
         if(m_Platform->WritePort(txpacket, length) == length)
         {
             // Receive the response:
-            
+
             if (txpacket[ID] != ID_BROADCAST) // i.e. Must be ID_CM.
             {
                 TxRxCMPacket(txpacket, rxpacket, res, length); // Note: 'length' can be passed by value here.
@@ -397,29 +398,29 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
                 res = SUCCESS;
             }
         }
-        else res = TX_FAIL;      
+        else res = TX_FAIL;
     }
     else res = TX_CORRUPT;
 
 
-	if(DEBUG_PRINT == true) 
+    if(DEBUG_PRINT == true)
     {
         fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
         printResultType(res);
     }
-	
-    // Release resources
-	performPriorityRelease(priority);
 
-	return res;
+    // Release resources
+    performPriorityRelease(priority);
+
+    return res;
 }
 
 unsigned char CM730::CalculateChecksum(unsigned char *packet)
 {
-	unsigned char checksum = 0x00;
-	for(int i=2; i<packet[LENGTH]+3; i++ )
-		checksum += packet[i];
-	return (~checksum);
+    unsigned char checksum = 0x00;
+    for(int i=2; i<packet[LENGTH]+3; i++ )
+        checksum += packet[i];
+    return (~checksum);
 }
 
 void CM730::MakeBulkReadPacket()
@@ -483,14 +484,14 @@ int CM730::BulkRead()
 
 int CM730::SyncWrite(int start_addr, int each_length, int number, int *pParam)
 {
-	unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
-	unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
-	int n;
+    unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
+    unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
+    int n;
 
     txpacket[ID]                = (unsigned char)ID_BROADCAST;
     txpacket[INSTRUCTION]       = INST_SYNC_WRITE;
-    txpacket[PARAMETER]			= (unsigned char)start_addr;
-    txpacket[PARAMETER + 1]		= (unsigned char)(each_length - 1);
+    txpacket[PARAMETER]            = (unsigned char)start_addr;
+    txpacket[PARAMETER + 1]        = (unsigned char)(each_length - 1);
     for(n = 0; n < (number * each_length); n++)
         txpacket[PARAMETER + 2 + n]   = (unsigned char)pParam[n];
     txpacket[LENGTH]            = n + 4;
@@ -500,14 +501,14 @@ int CM730::SyncWrite(int start_addr, int each_length, int number, int *pParam)
 
 bool CM730::Connect()
 {
-	if(m_Platform->OpenPort() == false)
-	{
+    if(m_Platform->OpenPort() == false)
+    {
         fprintf(stderr, "\n Fail to open port\n");
         fprintf(stderr, " CM-730 is used by another program or do not have root privileges.\n\n");
-		return false;
-	}
+        return false;
+    }
 
-	return DXLPowerOn();
+    return DXLPowerOn();
 }
 
 bool CM730::ChangeBaud(int baud)
@@ -523,185 +524,185 @@ bool CM730::ChangeBaud(int baud)
 
 bool CM730::DXLPowerOn()
 {
-	if(WriteByte(CM730::ID_CM, CM730::P_DXL_POWER, 1, 0) == CM730::SUCCESS)
-	{
-		if(DEBUG_PRINT == true)
-			fprintf(stderr, " Succeed to change Dynamixel power!\n");
-		
-		WriteWord(CM730::ID_CM, CM730::P_LED_HEAD_L, MakeColor(255, 128, 0), 0);
-		m_Platform->Sleep(300); // about 300msec
-	}
-	else
-	{
-		if(DEBUG_PRINT == true)
-			fprintf(stderr, " Fail to change Dynamixel power!\n");
-		return false;
-	}
+    if(WriteByte(CM730::ID_CM, CM730::P_DXL_POWER, 1, 0) == CM730::SUCCESS)
+    {
+        if(DEBUG_PRINT == true)
+            fprintf(stderr, " Succeed to change Dynamixel power!\n");
 
-	return true;
+        WriteWord(CM730::ID_CM, CM730::P_LED_HEAD_L, MakeColor(255, 128, 0), 0);
+        m_Platform->Sleep(300); // about 300msec
+    }
+    else
+    {
+        if(DEBUG_PRINT == true)
+            fprintf(stderr, " Fail to change Dynamixel power!\n");
+        return false;
+    }
+
+    return true;
 }
 
 void CM730::Disconnect()
 {
     // Make the Head LED to green
-	//WriteWord(CM730::ID_CM, CM730::P_LED_HEAD_L, MakeColor(0, 255, 0), 0);
-	unsigned char txpacket[] = {0xFF, 0xFF, 0xC8, 0x05, 0x03, 0x1A, 0xE0, 0x03, 0x32};
-	m_Platform->WritePort(txpacket, 9);
+    //WriteWord(CM730::ID_CM, CM730::P_LED_HEAD_L, MakeColor(0, 255, 0), 0);
+    unsigned char txpacket[] = {0xFF, 0xFF, 0xC8, 0x05, 0x03, 0x1A, 0xE0, 0x03, 0x32};
+    m_Platform->WritePort(txpacket, 9);
 
-	m_Platform->ClosePort();
+    m_Platform->ClosePort();
 }
 
 int CM730::WriteByte(int address, int value, int *error)
 {
-	return WriteByte(ID_CM, address, value, error);
+    return WriteByte(ID_CM, address, value, error);
 }
 
 int CM730::WriteWord(int address, int value, int *error)
 {
-	return WriteWord(ID_CM, address, value, error);
+    return WriteWord(ID_CM, address, value, error);
 }
 
 int CM730::Ping(int id, int *error)
 {
-	unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
-	unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
-	int result;
+    unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
+    unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
+    int result;
 
     txpacket[ID]           = (unsigned char)id;
     txpacket[INSTRUCTION]  = INST_PING;
     txpacket[LENGTH]       = 2;
 
-	result = TxRxPacket(txpacket, rxpacket, 2);
-	if(result == SUCCESS && txpacket[ID] != ID_BROADCAST)
-	{		
-		if(error != 0)
-			*error = (int)rxpacket[ERRBIT];
-	}
+    result = TxRxPacket(txpacket, rxpacket, 2);
+    if(result == SUCCESS && txpacket[ID] != ID_BROADCAST)
+    {
+        if(error != 0)
+            *error = (int)rxpacket[ERRBIT];
+    }
 
-	return result;
+    return result;
 }
 
 int CM730::ReadByte(int id, int address, int *pValue, int *error)
 {
-	unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
-	unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
-	int result;
+    unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
+    unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
+    int result;
 
     txpacket[ID]           = (unsigned char)id;
     txpacket[INSTRUCTION]  = INST_READ;
-	txpacket[PARAMETER]    = (unsigned char)address;
+    txpacket[PARAMETER]    = (unsigned char)address;
     txpacket[PARAMETER+1]  = 1;
     txpacket[LENGTH]       = 4;
 
-	result = TxRxPacket(txpacket, rxpacket, 2);
-	if(result == SUCCESS)
-	{
-		*pValue = (int)rxpacket[PARAMETER];
-		if(error != 0)
-			*error = (int)rxpacket[ERRBIT];
-	}
+    result = TxRxPacket(txpacket, rxpacket, 2);
+    if(result == SUCCESS)
+    {
+        *pValue = (int)rxpacket[PARAMETER];
+        if(error != 0)
+            *error = (int)rxpacket[ERRBIT];
+    }
 
-	return result;
+    return result;
 }
 
 int CM730::ReadWord(int id, int address, int *pValue, int *error)
 {
-	unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
-	unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
-	int result;
+    unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
+    unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
+    int result;
 
     txpacket[ID]           = (unsigned char)id;
     txpacket[INSTRUCTION]  = INST_READ;
-	txpacket[PARAMETER]    = (unsigned char)address;
+    txpacket[PARAMETER]    = (unsigned char)address;
     txpacket[PARAMETER+1]  = 2;
     txpacket[LENGTH]       = 4;
 
-	result = TxRxPacket(txpacket, rxpacket, 2);
-	if(result == SUCCESS)
-	{
-		*pValue = MakeWord((int)rxpacket[PARAMETER], (int)rxpacket[PARAMETER + 1]);
+    result = TxRxPacket(txpacket, rxpacket, 2);
+    if(result == SUCCESS)
+    {
+        *pValue = MakeWord((int)rxpacket[PARAMETER], (int)rxpacket[PARAMETER + 1]);
 
-		if(error != 0)
-			*error = (int)rxpacket[ERRBIT];
-	}
+        if(error != 0)
+            *error = (int)rxpacket[ERRBIT];
+    }
 
-	return result;
+    return result;
 }
 
 int CM730::ReadTable(int id, int start_addr, int end_addr, unsigned char *table, int *error)
 {
-	unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
-	unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
-	int result;
-	int length = end_addr - start_addr + 1;
+    unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
+    unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
+    int result;
+    int length = end_addr - start_addr + 1;
 
     txpacket[ID]           = (unsigned char)id;
     txpacket[INSTRUCTION]  = INST_READ;
-	txpacket[PARAMETER]    = (unsigned char)start_addr;
+    txpacket[PARAMETER]    = (unsigned char)start_addr;
     txpacket[PARAMETER+1]  = (unsigned char)length;
     txpacket[LENGTH]       = 4;
 
-	result = TxRxPacket(txpacket, rxpacket, 1);
-	if(result == SUCCESS)
-	{
-		for(int i=0; i<length; i++)
-			table[start_addr + i] = rxpacket[PARAMETER + i];
+    result = TxRxPacket(txpacket, rxpacket, 1);
+    if(result == SUCCESS)
+    {
+        for(int i=0; i<length; i++)
+            table[start_addr + i] = rxpacket[PARAMETER + i];
 
-		if(error != 0)
-			*error = (int)rxpacket[ERRBIT];
-	}
+        if(error != 0)
+            *error = (int)rxpacket[ERRBIT];
+    }
 
-	return result;
+    return result;
 }
 
 int CM730::WriteByte(int id, int address, int value, int *error)
 {
-	unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
-	unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
-	int result;
+    unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
+    unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
+    int result;
 
     txpacket[ID]           = (unsigned char)id;
     txpacket[INSTRUCTION]  = INST_WRITE;
-	txpacket[PARAMETER]    = (unsigned char)address;
+    txpacket[PARAMETER]    = (unsigned char)address;
     txpacket[PARAMETER+1]  = (unsigned char)value;
     txpacket[LENGTH]       = 4;
 
-	result = TxRxPacket(txpacket, rxpacket, 2);
-	if(result == SUCCESS && id != ID_BROADCAST)
-	{
-		if(error != 0)
-			*error = (int)rxpacket[ERRBIT];
-	}
+    result = TxRxPacket(txpacket, rxpacket, 2);
+    if(result == SUCCESS && id != ID_BROADCAST)
+    {
+        if(error != 0)
+            *error = (int)rxpacket[ERRBIT];
+    }
 
-	return result;
+    return result;
 }
 
 int CM730::WriteWord(int id, int address, int value, int *error)
 {
-	unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
-	unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
-	int result;
+    unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
+    unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
+    int result;
 
     txpacket[ID]           = (unsigned char)id;
     txpacket[INSTRUCTION]  = INST_WRITE;
-	txpacket[PARAMETER]    = (unsigned char)address;
+    txpacket[PARAMETER]    = (unsigned char)address;
     txpacket[PARAMETER+1]  = (unsigned char)GetLowByte(value);
-	txpacket[PARAMETER+2]  = (unsigned char)GetHighByte(value);
+    txpacket[PARAMETER+2]  = (unsigned char)GetHighByte(value);
     txpacket[LENGTH]       = 5;
 
-	result = TxRxPacket(txpacket, rxpacket, 2);
-	if(result == SUCCESS && id != ID_BROADCAST)
-	{
-		if(error != 0)
-			*error = (int)rxpacket[ERRBIT];
-	}
+    result = TxRxPacket(txpacket, rxpacket, 2);
+    if(result == SUCCESS && id != ID_BROADCAST)
+    {
+        if(error != 0)
+            *error = (int)rxpacket[ERRBIT];
+    }
 
-	return result;
+    return result;
 }
 
 int CM730::MakeWord(int lowbyte, int highbyte)
 {
-	unsigned short word;
+    unsigned short word;
 
     word = highbyte;
     word = word << 8;
@@ -712,25 +713,25 @@ int CM730::MakeWord(int lowbyte, int highbyte)
 
 int CM730::GetLowByte(int word)
 {
-	unsigned short temp;
+    unsigned short temp;
     temp = word & 0xff;
     return (int)temp;
 }
 
 int CM730::GetHighByte(int word)
 {
-	unsigned short temp;
+    unsigned short temp;
     temp = word & 0xff00;
     return (int)(temp >> 8);
 }
 
 int CM730::MakeColor(int red, int green, int blue)
 {
-	int r = red & 0xFF;
-	int g = green & 0xFF;
-	int b = blue & 0xFF;
+    int r = red & 0xFF;
+    int g = green & 0xFF;
+    int b = blue & 0xFF;
 
-	return (int)(((b>>3)<<10)|((g>>3)<<5)|(r>>3));
+    return (int)(((b>>3)<<10)|((g>>3)<<5)|(r>>3));
 }
 
 char* CM730::getTxRxErrorString(int error_code)
@@ -743,7 +744,7 @@ char* CM730::getTxRxErrorString(int error_code)
     case RX_FAIL   : return "RX_FAIL"   ;
     case RX_TIMEOUT: return "RX_TIMEOUT";
     case RX_CORRUPT: return "RX_CORRUPT";
-    default        : return "UNKNOWN"   ; 
+    default        : return "UNKNOWN"   ;
     }
 }
 
