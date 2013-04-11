@@ -249,6 +249,6 @@ char* JointData::GetJointName(int joint_id)
     case ID_L_ANKLE_ROLL    : return "L_ANKLE_ROLL"    ;
     case ID_HEAD_PAN        : return "HEAD_PAN"        ;
     case ID_HEAD_TILT       : return "HEAD_TILT"       ;
-    default                 : return "UNKNOWN_JOINT"   ; 
+    default                 : return "UNKNOWN_JOINT"   ;
     }
 }

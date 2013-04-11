@@ -205,8 +205,8 @@ inline void CM730::TxRxBulkReadPacket(
         m_BulkReadData[_id].start_address = _addr;
     }
 
-    // m_Platform->SetPacketTimeout(to_length*1.5);
-	m_Platform->SetPacketTimeout(to_length * 1.5 + 100);
+    m_Platform->SetPacketTimeout(to_length*1.5);
+	// m_Platform->SetPacketTimeout(to_length * 1.5 + 100);
 
     if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
 
@@ -230,6 +230,7 @@ inline void CM730::TxRxBulkReadPacket(
         if(get_length == to_length)
         {
             res = SUCCESS;
+            fprintf(stderr, "Read Success! (time = %dms)\n", m_Platform->GetPacketTime());
             break;
         }
         else
@@ -240,9 +241,9 @@ inline void CM730::TxRxBulkReadPacket(
                 if(get_length == 0)
                     res = RX_TIMEOUT;
                 else
-				{
-		            res = RX_CORRUPT;
-					fprintf(stderr, "RX_CORRUPT: Reading data.\n");
+                {
+                    res = RX_CORRUPT;
+                    fprintf(stderr, "RX_CORRUPT: Reading data (time = %dms)\n", m_Platform->GetPacketTime());
 				}
                 break;
             }
@@ -362,6 +363,8 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
 {
     // Acquire resources
     performPriorityWait(priority);
+
+    m_Platform->Sleep(100); // DEBUG
 
     int res = TX_FAIL;
     int length = txpacket[LENGTH] + 4;

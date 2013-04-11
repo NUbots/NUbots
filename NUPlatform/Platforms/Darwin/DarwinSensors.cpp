@@ -199,33 +199,10 @@ void DarwinSensors::copyFromHardwareCommunications()
             //   - SENSOR_ERROR_FLAG_OVERLOAD
             //   - SENSOR_ERROR_FLAG_INSTRUCTION
             bool servo_read_error = false;
-            for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
-            {
-                int servo_ID   = int(platform->m_servo_IDs[i]);
-                int servo_error_code = cm730->m_BulkReadData[servo_ID].error;
-				
-                if(servo_error_code != SENSOR_ERROR_NONE)
-                {
-                    // keep track of which sensors failed?
-                    // (use a list - speed doesn't matter much, since it 
-                    // shouldn't be used often if the robot is functioning correctly)
-                    servo_read_error = true;
-                    //         errorlog << "Motor error: " << endl;
-                    cout
-//							<< __PRETTY_FUNCTION__ << ": "
-							<< "DS::CFHC()" << ": "
-                            << "Motor error: id = '"
-                            << Robot::JointData::GetJointName(servo_ID) 
-                            << "', error='"
-                            << getSensorErrorDescription(servo_error_code)
-                            << "';"
-                            << endl;
-                }
-				else
-				{
-					cout << "|" << Robot::JointData::GetJointName(servo_ID) << "|";
-				}
-            }
+            // for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
+            // {
+                // int servo_ID   = int(platform->m_servo_IDs[i]);
+            servo_read_error |= CheckServoBulkReadErrors();
 
             // Decide whether to repeat the read based on errors returned:
             repeat_bulk_read = true;
@@ -240,6 +217,53 @@ void DarwinSensors::copyFromHardwareCommunications()
 
     return;
 }
+
+bool DarwinSensors::CheckServoBulkReadErrors()
+{
+    bool servo_read_error = false;
+    
+    for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
+         it != platform->m_servo_IDs.end(); ++it)
+    {
+        int servo_id = *it;
+        servo_read_error |= CheckSensorBulkReadErrors(servo_id);
+    }
+
+    return servo_read_error;
+}
+
+bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
+{
+    bool servo_read_error = false;
+
+    int servo_error_code = cm730->m_BulkReadData[sensor_id].error;
+
+    if(servo_error_code != SENSOR_ERROR_NONE)
+    {
+        // keep track of which sensors failed?
+        // (use a list map? - not that speed matters much)
+        servo_read_error = true;
+        // errorlog << "Motor error: " << endl;
+        cout
+                // << __PRETTY_FUNCTION__ << ": "
+                << "DS::CFHC()" << ": "
+                << "Motor error: id = '"
+                << Robot::JointData::GetJointName(sensor_id)
+                << "' ("
+                << sensor_id
+                << "), error='"
+                << getSensorErrorDescription(servo_error_code)
+                << "';"
+                << endl;
+    }
+    else
+    {
+        cout << "|" << Robot::JointData::GetJointName(sensor_id) << "|";
+    }
+
+    return servo_read_error;
+}
+
 
 /*! @brief Copys the joint sensor data 
  */
