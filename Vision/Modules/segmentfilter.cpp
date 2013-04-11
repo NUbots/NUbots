@@ -280,10 +280,14 @@ void SegmentFilter::loadTransitionRules(string filename)
     input.close();
 
     if(rules_h.size()  == 0 || rules_v.size() == 0){
-        cout <<"=========================WARNING=========================\n"
-             << "SegmentFilter::loadTransitionRules - " << filename
-             <<"_v.txt or _h.txt empty!\n \n" << "The robot may exhibit blindness."
-             <<"=========================WARNING=========================\n" << endl;
+        cout << endl
+             << "=========================WARNING=========================" << endl
+             << __PRETTY_FUNCTION__ << ":"                                  << endl
+             << "  " << filename << "  _v.txt and/or _h.txt are empty!"     << endl 
+             << ""                                                          << endl
+             << "  The robot may exhibit blindness."                        << endl
+             << "=========================WARNING=========================" << endl
+             << endl;
     }
     //DEBUG
 #if VISION_FILTER_VERBOSITY > 0
