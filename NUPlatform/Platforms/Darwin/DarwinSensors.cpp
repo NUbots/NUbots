@@ -181,11 +181,13 @@ void DarwinSensors::copyFromHardwareCommunications()
         
         if(bulk_read_error_code != Robot::CM730::SUCCESS)
         {
-            cout   << __PRETTY_FUNCTION__ << ": "
+            cout    << endl
+//					<< __PRETTY_FUNCTION__ << ": "
+					<< "DS::CFHC()" << ": "
                     << "BULK READ ERROR: "
                     << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
                     << endl;
-
+			
             // Check for servo read errors: (and also other sensors)
             // Note: Possible error flags are:
             //   - SENSOR_ERROR_NONE
@@ -201,7 +203,7 @@ void DarwinSensors::copyFromHardwareCommunications()
             {
                 int servo_ID   = int(platform->m_servo_IDs[i]);
                 int servo_error_code = cm730->m_BulkReadData[servo_ID].error;
-
+				
                 if(servo_error_code != SENSOR_ERROR_NONE)
                 {
                     // keep track of which sensors failed?
@@ -209,7 +211,9 @@ void DarwinSensors::copyFromHardwareCommunications()
                     // shouldn't be used often if the robot is functioning correctly)
                     servo_read_error = true;
                     //         errorlog << "Motor error: " << endl;
-                    cout   << __PRETTY_FUNCTION__ << ": "
+                    cout
+//							<< __PRETTY_FUNCTION__ << ": "
+							<< "DS::CFHC()" << ": "
                             << "Motor error: id = '"
                             << Robot::JointData::GetJointName(servo_ID) 
                             << "', error='"
@@ -217,14 +221,21 @@ void DarwinSensors::copyFromHardwareCommunications()
                             << "';"
                             << endl;
                 }
+				else
+				{
+					cout << "|" << Robot::JointData::GetJointName(servo_ID) << "|";
+				}
             }
-            cout << endl;
 
             // Decide whether to repeat the read based on errors returned:
             repeat_bulk_read = true;
 
             // cycle dynamixel power?
         }
+		else
+		{
+			cout << ".";
+		}
     } while (repeat_bulk_read);
 
     return;
@@ -496,3 +507,4 @@ void DarwinSensors::copyFromBattery()
     m_data->set(NUSensorsData::BatteryVoltage, m_current_time, battery_percentage); //Convert to percent
     return;
 }
+

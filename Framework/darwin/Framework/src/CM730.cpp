@@ -205,7 +205,8 @@ inline void CM730::TxRxBulkReadPacket(
         m_BulkReadData[_id].start_address = _addr;
     }
 
-    m_Platform->SetPacketTimeout(to_length*1.5);
+    // m_Platform->SetPacketTimeout(to_length*1.5);
+	m_Platform->SetPacketTimeout(to_length * 1.5 + 100);
 
     if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
 
@@ -239,7 +240,10 @@ inline void CM730::TxRxBulkReadPacket(
                 if(get_length == 0)
                     res = RX_TIMEOUT;
                 else
-                    res = RX_CORRUPT;
+				{
+		            res = RX_CORRUPT;
+					fprintf(stderr, "RX_CORRUPT: Reading data.\n");
+				}
                 break;
             }
         }
@@ -326,8 +330,9 @@ inline void CM730::TxRxBulkReadPacket(
             }
             else
             {
-                res = RX_CORRUPT;
-
+                fprintf(stderr, "RX_CORRUPT: Checksum.\n");
+				res = RX_CORRUPT;
+				
                 // skip next 2 bytes of rxpacket
                 for(int j = 0; j <= get_length - 2; j++)
                     rxpacket[j] = rxpacket[j+2];
@@ -339,7 +344,12 @@ inline void CM730::TxRxBulkReadPacket(
                 break;
             else if(get_length <= 6) // rxpacket has been read entirely
             {
-                if(num != 0) res = RX_CORRUPT;
+                if(num != 0) 
+				{
+					res = RX_CORRUPT;
+					fprintf(stderr, "RX_CORRUPT: Unexpected end of packet.\n");
+				}
+
                 break;
             }
 
