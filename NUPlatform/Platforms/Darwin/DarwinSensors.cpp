@@ -203,8 +203,9 @@ void DarwinSensors::copyFromHardwareCommunications()
             // {
                 // int servo_ID   = int(platform->m_servo_IDs[i]);
             servo_read_error |= CheckServosBulkReadErrors();
-            // servo_read_error |= CheckSensorBulkReadErrors();
-            // servo_read_error |= CheckSensorBulkReadErrors();
+            servo_read_error |= CheckSensorBulkReadErrors(Robot::FSR::ID_L_FSR);
+            servo_read_error |= CheckSensorBulkReadErrors(Robot::FSR::ID_R_FSR);
+            servo_read_error |= CheckSensorBulkReadErrors(Robot::CM730::ID_CM );
 
             // Decide whether to repeat the read based on errors returned:
             repeat_bulk_read = true;
