@@ -184,6 +184,27 @@ inline void CM730::TxRxCMPacket(
     }
 }
 
+void PrintSuccessfulBulkReadTimes(Robot::PlatformCM730* m_Platform)
+{
+    static const int len = 128;
+    static double successful_bulk_read_times[len] = { 0, }; // DEBUG
+    static int index = 0;
+
+    double new_time = m_Platform->GetPacketTime();
+    fprintf(stderr, "Read Success! (time = %fms)\n", new_time);
+
+    successful_bulk_read_times[index] = new_time;
+    ++index;
+    if(index >= len) index = 0;
+
+    double avg = 0;
+    for(int i = 0; i < len; i++) 
+        avg += successful_bulk_read_times[i];
+    avg /= (double)len;
+
+    fprintf(stderr, "Average successful bulk read time = %fms\n", avg);
+}
+
 inline void CM730::TxRxBulkReadPacket(
     unsigned char* &txpacket,
     unsigned char* &rxpacket,
@@ -206,7 +227,7 @@ inline void CM730::TxRxBulkReadPacket(
     }
 
     m_Platform->SetPacketTimeout(to_length*1.5);
-    
+
 
     if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
 
@@ -230,7 +251,7 @@ inline void CM730::TxRxBulkReadPacket(
         if(get_length == to_length)
         {
             res = SUCCESS;
-            fprintf(stderr, "Read Success! (time = %fms)\n", m_Platform->GetPacketTime());
+            PrintSuccessfulBulkReadTimes(m_Platform);
             break;
         }
         else
@@ -443,7 +464,7 @@ void CM730::MakeBulkReadPacket()
     m_BulkReadTxPacket[ID]              = (unsigned char)ID_BROADCAST;
     m_BulkReadTxPacket[INSTRUCTION]     = INST_BULK_READ;
     m_BulkReadTxPacket[PARAMETER]       = (unsigned char)0x0;
-    
+
     if(Ping(CM730::ID_CM, 0) == SUCCESS)
     {
         m_BulkReadTxPacket[PARAMETER+3*number+1] = 20;
