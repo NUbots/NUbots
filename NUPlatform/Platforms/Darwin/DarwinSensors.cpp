@@ -234,15 +234,15 @@ bool DarwinSensors::CheckServoBulkReadErrors()
 
 bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
 {
-    bool servo_read_error = false;
+    bool sensor_read_error = false;
 
-    int servo_error_code = cm730->m_BulkReadData[sensor_id].error;
+    int sensor_error_code = cm730->m_BulkReadData[sensor_id].error;
 
-    if(servo_error_code != SENSOR_ERROR_NONE)
+    if(sensor_error_code != SENSOR_ERROR_NONE)
     {
         // keep track of which sensors failed?
         // (use a list map? - not that speed matters much)
-        servo_read_error = true;
+        sensor_read_error = true;
         // errorlog << "Motor error: " << endl;
         cout
                 // << __PRETTY_FUNCTION__ << ": "
@@ -252,7 +252,7 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
                 << "' ("
                 << sensor_id
                 << "), error='"
-                << getSensorErrorDescription(servo_error_code)
+                << getSensorErrorDescription(sensor_error_code)
                 << "';"
                 << endl;
     }
@@ -261,7 +261,7 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
         cout << "|" << Robot::JointData::GetJointName(sensor_id) << "|";
     }
 
-    return servo_read_error;
+    return sensor_read_error;
 }
 
 
