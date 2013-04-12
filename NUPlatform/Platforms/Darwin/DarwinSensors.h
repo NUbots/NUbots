@@ -66,10 +66,12 @@ protected:
     /// flags in the given errorvalue.
     std::string getSensorErrorDescription(unsigned int error_value);
     //! Prints bulk read errors for all servos and returns true if any occured.
-    bool CheckServoBulkReadErrors();
+    bool CheckServosBulkReadErrors();
     //! Checks a single sensor/servo for bulk read errors, prints them, and
     //! returns whether or not any occured.
     bool CheckSensorBulkReadErrors(int sensor_id);
+    
+    static const char* GetSensorName(int joint_id);
 
 private:
     static const unsigned int NUM_MOTORS = 20;

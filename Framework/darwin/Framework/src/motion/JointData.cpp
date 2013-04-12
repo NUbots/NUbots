@@ -224,31 +224,3 @@ int JointData::GetCCWSlope(int id)
 {
     return m_CCWSlope[id];
 }
-
-char* JointData::GetJointName(int joint_id)
-{
-    switch (joint_id)
-    {
-    case ID_R_SHOULDER_PITCH: return "R_SHOULDER_PITCH";
-    case ID_L_SHOULDER_PITCH: return "L_SHOULDER_PITCH";
-    case ID_R_SHOULDER_ROLL : return "R_SHOULDER_ROLL" ;
-    case ID_L_SHOULDER_ROLL : return "L_SHOULDER_ROLL" ;
-    case ID_R_ELBOW         : return "R_ELBOW"         ;
-    case ID_L_ELBOW         : return "L_ELBOW"         ;
-    case ID_R_HIP_YAW       : return "R_HIP_YAW"       ;
-    case ID_L_HIP_YAW       : return "L_HIP_YAW"       ;
-    case ID_R_HIP_ROLL      : return "R_HIP_ROLL"      ;
-    case ID_L_HIP_ROLL      : return "L_HIP_ROLL"      ;
-    case ID_R_HIP_PITCH     : return "R_HIP_PITCH"     ;
-    case ID_L_HIP_PITCH     : return "L_HIP_PITCH"     ;
-    case ID_R_KNEE          : return "R_KNEE"          ;
-    case ID_L_KNEE          : return "L_KNEE"          ;
-    case ID_R_ANKLE_PITCH   : return "R_ANKLE_PITCH"   ;
-    case ID_L_ANKLE_PITCH   : return "L_ANKLE_PITCH"   ;
-    case ID_R_ANKLE_ROLL    : return "R_ANKLE_ROLL"    ;
-    case ID_L_ANKLE_ROLL    : return "L_ANKLE_ROLL"    ;
-    case ID_HEAD_PAN        : return "HEAD_PAN"        ;
-    case ID_HEAD_TILT       : return "HEAD_TILT"       ;
-    default                 : return "UNKNOWN_JOINT"   ;
-    }
-}

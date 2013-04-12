@@ -202,7 +202,9 @@ void DarwinSensors::copyFromHardwareCommunications()
             // for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
             // {
                 // int servo_ID   = int(platform->m_servo_IDs[i]);
-            servo_read_error |= CheckServoBulkReadErrors();
+            servo_read_error |= CheckServosBulkReadErrors();
+            // servo_read_error |= CheckSensorBulkReadErrors();
+            // servo_read_error |= CheckSensorBulkReadErrors();
 
             // Decide whether to repeat the read based on errors returned:
             repeat_bulk_read = true;
@@ -218,10 +220,10 @@ void DarwinSensors::copyFromHardwareCommunications()
     return;
 }
 
-bool DarwinSensors::CheckServoBulkReadErrors()
+bool DarwinSensors::CheckServosBulkReadErrors()
 {
     bool servo_read_error = false;
-    
+
     for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
          it != platform->m_servo_IDs.end(); ++it)
     {
@@ -247,8 +249,8 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
         cout
                 // << __PRETTY_FUNCTION__ << ": "
                 << "DS::CFHC()" << ": "
-                << "Motor error: id = '"
-                << Robot::JointData::GetJointName(sensor_id)
+                << "Sensor error: id = '"
+                << GetSensorName(sensor_id)
                 << "' ("
                 << sensor_id
                 << "), error='"
@@ -258,7 +260,7 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
     }
     else
     {
-        cout << "|" << Robot::JointData::GetJointName(sensor_id) << "|";
+        cout << "|" << GetSensorName(sensor_id) << "|";
     }
 
     return sensor_read_error;
@@ -532,3 +534,33 @@ void DarwinSensors::copyFromBattery()
     return;
 }
 
+const char* DarwinSensors::GetSensorName(int joint_id)
+{
+    switch (joint_id)
+    {
+    case Robot::JointData::ID_R_SHOULDER_PITCH: return "R_SHOULDER_PITCH";
+    case Robot::JointData::ID_L_SHOULDER_PITCH: return "L_SHOULDER_PITCH";
+    case Robot::JointData::ID_R_SHOULDER_ROLL : return "R_SHOULDER_ROLL" ;
+    case Robot::JointData::ID_L_SHOULDER_ROLL : return "L_SHOULDER_ROLL" ;
+    case Robot::JointData::ID_R_ELBOW         : return "R_ELBOW"         ;
+    case Robot::JointData::ID_L_ELBOW         : return "L_ELBOW"         ;
+    case Robot::JointData::ID_R_HIP_YAW       : return "R_HIP_YAW"       ;
+    case Robot::JointData::ID_L_HIP_YAW       : return "L_HIP_YAW"       ;
+    case Robot::JointData::ID_R_HIP_ROLL      : return "R_HIP_ROLL"      ;
+    case Robot::JointData::ID_L_HIP_ROLL      : return "L_HIP_ROLL"      ;
+    case Robot::JointData::ID_R_HIP_PITCH     : return "R_HIP_PITCH"     ;
+    case Robot::JointData::ID_L_HIP_PITCH     : return "L_HIP_PITCH"     ;
+    case Robot::JointData::ID_R_KNEE          : return "R_KNEE"          ;
+    case Robot::JointData::ID_L_KNEE          : return "L_KNEE"          ;
+    case Robot::JointData::ID_R_ANKLE_PITCH   : return "R_ANKLE_PITCH"   ;
+    case Robot::JointData::ID_L_ANKLE_PITCH   : return "L_ANKLE_PITCH"   ;
+    case Robot::JointData::ID_R_ANKLE_ROLL    : return "R_ANKLE_ROLL"    ;
+    case Robot::JointData::ID_L_ANKLE_ROLL    : return "L_ANKLE_ROLL"    ;
+    case Robot::JointData::ID_HEAD_PAN        : return "HEAD_PAN"        ;
+    case Robot::JointData::ID_HEAD_TILT       : return "HEAD_TILT"       ;
+    case Robot::FSR::ID_L_FSR                 : return "L_FSR"           ;
+    case Robot::FSR::ID_R_FSR                 : return "R_FSR"           ;
+    case Robot::CM730::ID_CM                  : return "CM"              ;
+    default                                   : return "UNKNOWN_JOINT"   ;
+    }
+}

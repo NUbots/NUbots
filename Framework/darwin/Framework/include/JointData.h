@@ -113,8 +113,6 @@ namespace Robot
         int  GetIGain(int id)            { return m_IGain[id]; }
         void SetDGain(int id, int dgain) { m_DGain[id] = dgain; }
         int  GetDGain(int id)            { return m_DGain[id]; }
-
-        static char* GetJointName(int joint_id);
 	};
 }
 
