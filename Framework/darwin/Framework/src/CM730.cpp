@@ -186,23 +186,33 @@ inline void CM730::TxRxCMPacket(
 
 void PrintSuccessfulBulkReadTimes(Robot::PlatformCM730* m_Platform)
 {
-    static const int len = 128;
+    static const int len = 256;
     static double successful_bulk_read_times[len] = { 0, }; // DEBUG
+    static double max_successful_bulk_read_time = 0;
+    static double min_successful_bulk_read_time = 100000;
     static int index = 0;
 
     double new_time = m_Platform->GetPacketTime();
     fprintf(stderr, "Read Success! (time = %fms)\n", new_time);
-
+    
     successful_bulk_read_times[index] = new_time;
     ++index;
     if(index >= len) index = 0;
+    
+    if(max_successful_bulk_read_time < new_time)
+        max_successful_bulk_read_time = new_time;
+
+    if(min_successful_bulk_read_time > new_time)
+        min_successful_bulk_read_time = new_time;
 
     double avg = 0;
     for(int i = 0; i < len; i++) 
         avg += successful_bulk_read_times[i];
     avg /= (double)len;
-
+    
     fprintf(stderr, "Average successful bulk read time = %fms\n", avg);
+    fprintf(stderr, "Maximum successful bulk read time = %fms\n", max_successful_bulk_read_time);
+    fprintf(stderr, "Minimum successful bulk read time = %fms\n", min_successful_bulk_read_time);
 }
 
 inline void CM730::TxRxBulkReadPacket(
@@ -226,7 +236,8 @@ inline void CM730::TxRxBulkReadPacket(
         m_BulkReadData[_id].start_address = _addr;
     }
 
-    m_Platform->SetPacketTimeout(to_length*1.5);
+    // original multiplier of 1.5 appears to be an undocumented hack.
+    m_Platform->SetPacketTimeout(to_length * 1.5 * 5);
 
 
     if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
@@ -251,7 +262,7 @@ inline void CM730::TxRxBulkReadPacket(
         if(get_length == to_length)
         {
             res = SUCCESS;
-            PrintSuccessfulBulkReadTimes(m_Platform);
+//            PrintSuccessfulBulkReadTimes(m_Platform);
             break;
         }
         else
@@ -260,7 +271,10 @@ inline void CM730::TxRxBulkReadPacket(
             if(m_Platform->IsPacketTimeout() == true)
             {
                 if(get_length == 0)
+                {
                     res = RX_TIMEOUT;
+                    fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
+                }
                 else
                 {
                     res = RX_CORRUPT;
