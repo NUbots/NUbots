@@ -171,15 +171,19 @@ namespace Robot
         void performPriorityWait(int);
         void performPriorityRelease(int);
         void TxRxCMPacket(
-            unsigned char *&txpacket, 
-            unsigned char *&rxpacket, 
-            int &res, 
+            unsigned char *&txpacket,
+            unsigned char *&rxpacket,
+            int &res,
             int &length);
         void TxRxBulkReadPacket(
-            unsigned char *&txpacket, 
-            unsigned char *&rxpacket, 
-            int &res, 
-            int &length);
+            unsigned char *&txpacket,
+            unsigned char *&rxpacket,
+            int &res);
+        int ReceiveBulkReadResponseFromPort(
+		    unsigned char* rxpacket,
+		    int to_length,
+		    PlatformCM730 *m_Platform,
+		    int &res);
 
     public:
         bool DEBUG_PRINT;
@@ -219,6 +223,11 @@ namespace Robot
         static int MakeColor(int red, int green, int blue);
         static char* getTxRxErrorString(int error_code);
         static char* getInstructionTypeString(int instruction_value);
+
+        // Shifts all bytes in buffer 'num_bytes_to_advance' towards the
+        // 0 index. Returns the new length of the buffer
+        static int AdvanceBuffer(unsigned char* buffer, int buffer_length,
+        	                      int num_bytes_to_advance);
     };
 }
 

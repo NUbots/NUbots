@@ -215,11 +215,74 @@ void PrintSuccessfulBulkReadTimes(Robot::PlatformCM730* m_Platform)
     fprintf(stderr, "Minimum successful bulk read time = %fms\n", min_successful_bulk_read_time);
 }
 
+inline void CM730::ReceiveBulkReadResponseFromPort(
+    unsigned char* rxpacket,
+    int to_length,
+    PlatformCM730 *m_Platform,
+    int &res)
+{
+    if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
+
+    // original multiplier of 1.5 appears to be an undocumented hack.
+    m_Platform->SetPacketTimeout(to_length * 1.5 * 5);
+
+    int get_length = 0; //! length in bytes of data read so far
+    // Read data from port
+    // (loop until all data has been read, or a timeout occurs)
+    while(true)
+    {
+        // read some (more) data
+        int length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
+        if(DEBUG_PRINT == true)
+        {
+            for(int n = 0; n < length; n++)
+                fprintf(stderr, "%.2X ", rxpacket[get_length + n]);
+        }
+        get_length += length;
+
+        // break if all data has been read
+        if(get_length == to_length)
+        {
+            res = SUCCESS;
+//            PrintSuccessfulBulkReadTimes(m_Platform);
+            break;
+        }
+
+        // break, and set error code, if a timeout occured
+        if(m_Platform->IsPacketTimeout() == true)
+        {
+            if(get_length == 0)
+            {
+                res = RX_TIMEOUT;
+                fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
+            }
+            else
+            {
+                res = RX_CORRUPT;
+                fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
+            }
+            break;
+        }
+    }
+
+    return get_length;
+}
+
+int CM730::AdvanceBuffer(unsigned char* buffer, int buffer_length,
+                          int num_bytes_to_advance)
+{
+    int new_length = buffer_length - num_bytes_to_advance;
+    
+    for(int i = 0; i < new_length; i++)
+        rxpacket[i] = rxpacket[i + num_bytes_to_advance];
+
+    return new_length;
+}
+
 inline void CM730::TxRxBulkReadPacket(
     unsigned char* &txpacket,
     unsigned char* &rxpacket,
-    int &res,
-    int &length)
+    int &res)
 {
     int to_length = 0; //! length in bytes of data to read
     int num = (txpacket[LENGTH]-3) / 3; // number of blocks to read
@@ -236,56 +299,12 @@ inline void CM730::TxRxBulkReadPacket(
         m_BulkReadData[_id].start_address = _addr;
     }
 
-    // original multiplier of 1.5 appears to be an undocumented hack.
-    m_Platform->SetPacketTimeout(to_length * 1.5 * 5);
-
-
-    if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
-
-
-    int get_length = 0; //! length in bytes of data read so far
-
     // Read data from port
-    // (loop until all data has been read, or a timeout occurs)
-    while(1)
-    {
-        // read some (more) data
-        length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
-        if(DEBUG_PRINT == true)
-        {
-            for(int n=0; n<length; n++)
-                fprintf(stderr, "%.2X ", rxpacket[get_length + n]);
-        }
-        get_length += length;
+    int get_length = ReceiveBulkReadResponseFromPort(rxpacket, to_length,
+                                                     m_Platform, res);
+    
 
-        // break if all data has been read
-        if(get_length == to_length)
-        {
-            res = SUCCESS;
-//            PrintSuccessfulBulkReadTimes(m_Platform);
-            break;
-        }
-        else
-        {
-            // break, and set error code, if a timeout occured
-            if(m_Platform->IsPacketTimeout() == true)
-            {
-                if(get_length == 0)
-                {
-                    res = RX_TIMEOUT;
-                    fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
-                }
-                else
-                {
-                    res = RX_CORRUPT;
-                    fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
-                }
-                break;
-            }
-        }
-    }
-
-    // resetBulkReadDataErrorCodes
+    // ResetBulkReadDataErrorCodes
     for(int x = 0; x < num; x++)
     {
         int _id = txpacket[PARAMETER+(3*x)+2];
@@ -311,7 +330,7 @@ inline void CM730::TxRxBulkReadPacket(
         //
         // ... (all the data)
         //
-        // (LENGTH)+0x03: A checksum for this data packet.
+        // 0x03+(LENGTH): A checksum for this data packet.
         //                (Note: this is the last address of the packet)
         //
         // In particular, sets always start with the bytes, 0xFF 0xFF.
@@ -329,9 +348,7 @@ inline void CM730::TxRxBulkReadPacket(
         if(i != 0)
         {
             // skip invalid/header bytes
-            for(int j = 0; j < (get_length - i); j++)
-                rxpacket[j] = rxpacket[j+i];
-            get_length -= i;
+            get_length = AdvanceBuffer(rxpacket, get_length, i);
 
             // continue;
         }
@@ -350,18 +367,19 @@ inline void CM730::TxRxBulkReadPacket(
             {
                 // Copy data of first value to the datatable of the
                 // corresponding BulkReadData object.
-                for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
-                    m_BulkReadData[rxpacket[ID]].table[m_BulkReadData[rxpacket[ID]].start_address + j] = rxpacket[PARAMETER + j];
+                int sensor_id = rxpacket[ID];
+                BulkReadData& sensor_data = m_BulkReadData[sensor_id];
 
-                m_BulkReadData[rxpacket[ID]].error = (int)rxpacket[ERRBIT];
+                for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
+                    sensor_data.table[sensor_data.start_address + j] = rxpacket[PARAMETER + j];
+
+                sensor_data.error = (int)rxpacket[ERRBIT];
 
                 // skip the rxpacket entry that was just read
                 int cur_packet_length = LENGTH + 1 + rxpacket[LENGTH];
-                to_length = get_length - cur_packet_length;
-                for(int j = 0; j <= to_length; j++)
-                    rxpacket[j] = rxpacket[j+cur_packet_length];
-
+                to_length = AdvanceBuffer(rxpacket, get_length, cur_packet_length);
                 get_length = to_length;
+
                 num--;
             }
             else
@@ -370,22 +388,19 @@ inline void CM730::TxRxBulkReadPacket(
                 res = RX_CORRUPT;
                 
                 // skip next 2 bytes of rxpacket
-                for(int j = 0; j <= get_length - 2; j++)
-                    rxpacket[j] = rxpacket[j+2];
-
-                to_length = get_length -= 2;
+                to_length = AdvanceBuffer(rxpacket, get_length, 2);
+                get_length = to_length;
             }
 
-            if(num == 0)
+            if(num == 0) // rxpacket has been read entirely
                 break;
-            else if(get_length <= 6) // rxpacket has been read entirely
+            else if(get_length <= 6) // no room for any more data
             {
-                if(num != 0) 
-                {
+                // if(num != 0) // redundant
+                // {
                     res = RX_CORRUPT;
                     fprintf(stderr, "RX_CORRUPT: Unexpected end of packet.\n");
-                }
-
+                // }
                 break;
             }
 
@@ -431,7 +446,7 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
             }
             else if(txpacket[INSTRUCTION] == INST_BULK_READ) // (INST_BULK_READ is an ID_BROADCAST)
             {
-                TxRxBulkReadPacket(txpacket, rxpacket, res, length); // Note: length input is unnecessary.
+                TxRxBulkReadPacket(txpacket, rxpacket, res);
             }
             else
             {
