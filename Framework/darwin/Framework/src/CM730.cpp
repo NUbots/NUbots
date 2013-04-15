@@ -479,7 +479,7 @@ void CM730::MakeBulkReadPacket()
     m_BulkReadTxPacket[INSTRUCTION]     = INST_BULK_READ;
     m_BulkReadTxPacket[PARAMETER]       = (unsigned char)0x0;
 
-    if(Ping(CM730::ID_CM, 0) == SUCCESS)
+    if(Ping(CM730::ID_CM, NULL) == SUCCESS)
     {
         m_BulkReadTxPacket[PARAMETER+3*number+1] = 20;
         m_BulkReadTxPacket[PARAMETER+3*number+2] = CM730::ID_CM;
@@ -498,7 +498,7 @@ void CM730::MakeBulkReadPacket()
 //        }
     }
 
-    if(Ping(FSR::ID_L_FSR, 0) == SUCCESS)
+    if(Ping(FSR::ID_L_FSR, NULL) == SUCCESS)
     {
         m_BulkReadTxPacket[PARAMETER+3*number+1] = 10;               // length
         m_BulkReadTxPacket[PARAMETER+3*number+2] = FSR::ID_L_FSR;   // id
@@ -506,7 +506,7 @@ void CM730::MakeBulkReadPacket()
         number++;
     }
 
-    if(Ping(FSR::ID_R_FSR, 0) == SUCCESS)
+    if(Ping(FSR::ID_R_FSR, NULL) == SUCCESS)
     {
         m_BulkReadTxPacket[PARAMETER+3*number+1] = 10;               // length
         m_BulkReadTxPacket[PARAMETER+3*number+2] = FSR::ID_R_FSR;   // id
