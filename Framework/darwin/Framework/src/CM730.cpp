@@ -14,21 +14,21 @@
 using namespace Robot;
 
 
-#define ID                    (2)
-#define LENGTH                (3)
-#define INSTRUCTION            (4)
-#define ERRBIT                (4)
-#define PARAMETER            (5)
-#define DEFAULT_BAUDNUMBER    (1)
+#define ID                  (2)
+#define LENGTH              (3)
+#define INSTRUCTION         (4)
+#define ERRBIT              (4)
+#define PARAMETER           (5)
+#define DEFAULT_BAUDNUMBER  (1)
 
-#define INST_PING            (1)
-#define INST_READ            (2)
-#define INST_WRITE            (3)
-#define INST_REG_WRITE        (4)
-#define INST_ACTION            (5)
-#define INST_RESET            (6)
-#define INST_SYNC_WRITE        (131)   // 0x83
-#define INST_BULK_READ      (146)   // 0x92
+#define INST_PING       (1)
+#define INST_READ       (2)
+#define INST_WRITE      (3)
+#define INST_REG_WRITE  (4)
+#define INST_ACTION     (5)
+#define INST_RESET      (6)
+#define INST_SYNC_WRITE (131)   // 0x83
+#define INST_BULK_READ  (146)   // 0x92
 
 
 BulkReadData::BulkReadData() :
@@ -279,7 +279,7 @@ inline void CM730::TxRxBulkReadPacket(
                 {
                     res = RX_CORRUPT;
                     fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
-				}
+                }
                 break;
             }
         }
@@ -367,8 +367,8 @@ inline void CM730::TxRxBulkReadPacket(
             else
             {
                 fprintf(stderr, "RX_CORRUPT: Checksum.\n");
-				res = RX_CORRUPT;
-				
+                res = RX_CORRUPT;
+                
                 // skip next 2 bytes of rxpacket
                 for(int j = 0; j <= get_length - 2; j++)
                     rxpacket[j] = rxpacket[j+2];
@@ -381,10 +381,10 @@ inline void CM730::TxRxBulkReadPacket(
             else if(get_length <= 6) // rxpacket has been read entirely
             {
                 if(num != 0) 
-				{
-					res = RX_CORRUPT;
-					fprintf(stderr, "RX_CORRUPT: Unexpected end of packet.\n");
-				}
+                {
+                    res = RX_CORRUPT;
+                    fprintf(stderr, "RX_CORRUPT: Unexpected end of packet.\n");
+                }
 
                 break;
             }
