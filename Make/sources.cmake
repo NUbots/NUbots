@@ -52,3 +52,8 @@ ENDFOREACH (loop_var ${NUBOT_DIRS})
 #LIST(APPEND NUBOT_LINK_LIBRARIES json)
 #LIST(APPEND NUBOT_LINK_LIBRARIES boost_filesystem-mt)
 #LIST(APPEND NUBOT_LINK_LIBRARIES boost_date_time)
+
+# Specify c++11
+# if(UNIX)
+    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# endif()

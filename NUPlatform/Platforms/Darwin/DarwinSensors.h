@@ -26,7 +26,6 @@
 #define DARWINSENSORS_H
 
 #include <vector>
-#include <unordered_map>
 #include "NUPlatform/NUSensors.h"
 #include "Infrastructure/NUData.h"
 
@@ -60,9 +59,6 @@ protected:
     DarwinPlatform* platform;
     Robot::CM730* cm730;
     DarwinJointMapping* m_joint_mapping;
-
-    // Current percentage of reads from this sensor that do not result in an error
-    std::unordered_map<int, double> sensor_response_rates;
 
     //! A flag to indicate a motor indicated an error
     bool motor_error;
