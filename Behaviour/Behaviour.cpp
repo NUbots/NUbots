@@ -30,6 +30,7 @@
 #include "MiscBehaviours/VisionCalibrationProvider.h"
 #include "ChaseBall/ChaseBallProvider.h"
 #include "Zombie/ZombieProvider.h"
+#include "Ragdoll/RagdollProvider.h"
 #include "WalkOptimisation/WalkOptimisationProvider.h"
 #include "Kicker/KickerProvider.h"
 #include "PassingChallenge/PassingChallengeProvider.h"
@@ -75,6 +76,7 @@ Behaviour::Behaviour()
         m_behaviour = new SoccerProvider(this);
         //m_behaviour = new ZombieProvider(this);
         //m_behaviour = new HBTProvider(this);
+        //m_behaviour = new RagdollProvider(this);
         //m_behaviour = new ChaseBallProvider(this);
         //m_behaviour = new WalkOptimisationProvider(this);
         //m_behaviour = new ForwardWalkProvider(this);

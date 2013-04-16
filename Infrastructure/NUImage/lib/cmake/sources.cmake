@@ -20,21 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NUPlatform.cpp NUPlatform.h
-                NUSensors.cpp NUSensors.h
-                NUActionators.cpp NUActionators.h
-                NUCamera.cpp NUCamera.h
-                NUIO.cpp NUIO.h
-                NUAPI.cpp NUAPI.h
+SET (YOUR_SRCS
+	jpge.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Platforms
-                NUSensors
-                NUActionators	
-                NUCamera
-                NUIO
-                NUAPI
+SET (YOUR_DIRS
 )
 ####################################################################################
 
@@ -47,7 +38,7 @@ FOREACH(loop_var ${YOUR_SRCS})
 ENDFOREACH(loop_var ${YOUR_SRCS})
 
 # Do the same thing for each subdirectory in TWO steps
-SET(YOUR_CMAKE_FILES )
+SET(YOUR_CMAKE_FILES )				
 FOREACH(loop_var ${YOUR_DIRS}) 
     LIST(APPEND YOUR_CMAKE_FILES "${THIS_SRC_DIR}/${loop_var}/cmake/sources.cmake")
 ENDFOREACH(loop_var ${YOUR_DIRS})

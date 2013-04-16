@@ -201,6 +201,11 @@ void SeeThinkThread::run()
                     prof.split("motion_jobs");
                 #endif
             #endif
+
+					
+			//std::cout << m_nubot->m_platform->getRealTime() << std::endl << Blackboard->Image->GetTimestamp() << std::endl << std::endl;
+            m_nubot->m_api->sendAll();
+			
 #ifdef LOGGING_ENABLED
             locfile << *m_nubot->m_localisation;
 #endif
