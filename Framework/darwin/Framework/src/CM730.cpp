@@ -215,7 +215,7 @@ void PrintSuccessfulBulkReadTimes(Robot::PlatformCM730* m_Platform)
     fprintf(stderr, "Minimum successful bulk read time = %fms\n", min_successful_bulk_read_time);
 }
 
-inline void CM730::ReceiveBulkReadResponseFromPort(
+inline int CM730::ReceiveBulkReadResponseFromPort(
     unsigned char* rxpacket,
     int to_length,
     PlatformCM730 *m_Platform,
@@ -274,7 +274,7 @@ int CM730::AdvanceBuffer(unsigned char* buffer, int buffer_length,
     int new_length = buffer_length - num_bytes_to_advance;
     
     for(int i = 0; i < new_length; i++)
-        rxpacket[i] = rxpacket[i + num_bytes_to_advance];
+        buffer[i] = buffer[i + num_bytes_to_advance];
 
     return new_length;
 }
