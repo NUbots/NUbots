@@ -21,6 +21,7 @@
 
 #include <limits>
 
+
 #include "DarwinSensors.h"
 #include "DarwinPlatform.h"
 #include "DarwinJointMapping.h"
@@ -30,6 +31,21 @@
 #include "debug.h"
 #include "debugverbositynusensors.h"
 
+#include "Framework/darwin/Framework/include/CM730.h"
+#include "Framework/darwin/Framework/include/JointData.h"
+
+
+// Error flags returned by sensor + servo reads/commands.
+#define SENSOR_ERROR_NONE                  (0x0000)
+#define SENSOR_ERROR_FLAG_INPUT_VOLTAGE    (0x0001)
+#define SENSOR_ERROR_FLAG_ANGLE_LIMIT      (0x0002)
+#define SENSOR_ERROR_FLAG_OVERHEATING      (0x0004)
+#define SENSOR_ERROR_FLAG_RANGE            (0x0008)
+#define SENSOR_ERROR_FLAG_CHECKSUM         (0x0010)
+#define SENSOR_ERROR_FLAG_OVERLOAD         (0x0020)
+#define SENSOR_ERROR_FLAG_INSTRUCTION      (0x0040)
+
+// Note: These defines are simply copied from those in CM730.cpp
 #define ID					(2)
 #define LENGTH				(3)
 #define INSTRUCTION			(4)
@@ -71,11 +87,6 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
     m_data->set(NUSensorsData::LLegEndEffector, m_data->CurrentTime, invalid);
 
     motor_error = false;
-    error_fields.resize(NUM_MOTORS);
-    for(int i = 0 ; i < NUM_MOTORS ; i++)
-    {
-        error_fields[i].resize(2);
-    }
 }
 
 /*! @brief Destructor for DarwinSensors
@@ -88,38 +99,37 @@ DarwinSensors::~DarwinSensors()
     delete cm730;
 }
 
-std::string DarwinSensors::error2Description(unsigned int errorValue)
+std::string DarwinSensors::getSensorErrorDescription(unsigned int error_value)
 {
     std::string error_description;
-    if(errorValue == 0x0000) return "No Errors";
-    if(errorValue & 0x0001)
-    {
+
+    if(error_value == SENSOR_ERROR_NONE) 
+        return "No Errors";
+
+    if(error_value == -1) 
+        return "All error flags are set.";
+    
+    if(error_value & SENSOR_ERROR_FLAG_INPUT_VOLTAGE)
         error_description.append("Input Voltage Error; ");
-    }
-    if(errorValue & 0x0002)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_ANGLE_LIMIT)
         error_description.append("Angle Limit Error; ");
-    }
-    if(errorValue & 0x0004)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_OVERHEATING)
         error_description.append("OverHeating Error; ");
-    }
-    if(errorValue & 0x0008)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_RANGE)
         error_description.append("Range Error; ");
-    }
-    if(errorValue & 0x0010)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_CHECKSUM)
         error_description.append("Checksum Error; ");
-    }
-    if(errorValue & 0x0020)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_OVERLOAD)
         error_description.append("Overload Error; ");
-    }
-    if(errorValue & 0x0040)
-    {
+    
+    if(error_value & SENSOR_ERROR_FLAG_INSTRUCTION)
         error_description.append("Instruction Error; ");
-    }
+    
     return error_description;
 }
 
@@ -127,13 +137,7 @@ std::string DarwinSensors::error2Description(unsigned int errorValue)
  */
 void DarwinSensors::copyFromHardwareCommunications()
 {
-    int result;
-//	if(m_current_time < 2000)
-//	{
-//		result = cm730->BulkReadLight();
-//		return;
-//	}
-
+    // 1. Copy data from last bulk read of the CM730.
 
     //Control Board Data:
     copyFromAccelerometerAndGyro();
@@ -144,57 +148,126 @@ void DarwinSensors::copyFromHardwareCommunications()
     copyFromJoints();
     copyFromFeet();
 
-    //READ FROM JOINTS and CONTROL BOARD:
-    result = cm730->BulkRead();
-    //OLD FIRMWARE
-    //result = cm730->BulkReadLight();
-      
-    if(motor_error) {
-        #if DEBUG_NUSENSORS_VERBOSITY > 0
-            debug << "DarwinSensors::copyFromHardwareCommunications\nMotor error: " <<endl;
-        #endif
-        errorlog << "Motor error: " <<endl;
-
-        for(int i=0; i<NUM_MOTORS; i++) {
-            #if DEBUG_NUSENSORS_VERBOSITY > 0
-                debug << "ID: " << error_fields[i][0] << " err: " << error2Description(error_fields[i][1]) << endl;
-            #endif
-            errorlog << "ID: " << error_fields[i][0] << " err: " << error2Description(error_fields[i][1]) << endl;
-        }
-
-//        cm730->DXLPowerOff();
-//        platform->msleep(500);
-//        cm730->DXLPowerOn();
-
-        motor_error = false;
-    }
-
-    //delete CMdatatable;
-
-	
-	
-    //DEBUG NEEDED HERE:
-    int num_tries = 0;
-    while(result != Robot::CM730::SUCCESS)
+    // 2. Read data in bulk from the CM730 controller board 
+    //    (i.e. read all sensor and motor data for the next iteration)
+    
+    // Note: The following comment contains old code.
+    //       It is preserved here in the hope that it might be handy later.
+    //       Please delete it if you *know* that it won't be. -MM
+//         #if DEBUG_NUSENSORS_VERBOSITY > 0
+//         debug << "Motor error: " << endl;
+//         #endif
+//         errorlog << "Motor error: " << endl;
+// //        cm730->DXLPowerOff();
+// //        platform->msleep(500);
+// //        cm730->DXLPowerOn();
+    
+    // A flag to indicate whether the bulk read must be repeated
+    // (i.e. it is set to true if a significant error occurs during the read)
+    bool repeat_bulk_read;
+    do
     {
-//        if(num_tries == 50) {
-//            cm730->DXLPowerOff();
-//            platform->msleep(500);
-//            cm730->DXLPowerOn();
-//        }
-        #if DEBUG_NUSENSORS_VERBOSITY > 0
-            debug << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
-        #endif
-        errorlog << "BulkRead Error: " << result  << " Trying Again " << num_tries <<endl;
+        // Reset the repeat_bulk_read flag on each loop
+        repeat_bulk_read = false;
+
+        // Perform the read operation from the CM730.
+        // Note: Possible error codes are:
+        //   - SUCCESS
+        //   - TX_CORRUPT
+        //   - TX_FAIL
+        //   - RX_FAIL
+        //   - RX_TIMEOUT
+        //   - RX_CORRUPT
+        int bulk_read_error_code = cm730->BulkRead();
         
-        //OLD FIRMWARE
-        //result = cm730->BulkReadLight();
-        
-        result = cm730->BulkRead();
-        num_tries++;
-    }
+        if(bulk_read_error_code != Robot::CM730::SUCCESS)
+        {
+            cout    << endl
+//					<< __PRETTY_FUNCTION__ << ": "
+					<< "DS::CFHC()" << ": "
+                    << "BULK READ ERROR: "
+                    << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
+                    << endl;
+			
+            // Check for servo read errors: (and also other sensors)
+            // Note: Possible error flags are:
+            //   - SENSOR_ERROR_NONE
+            //   - SENSOR_ERROR_FLAG_INPUT_VOLTAGE
+            //   - SENSOR_ERROR_FLAG_ANGLE_LIMIT
+            //   - SENSOR_ERROR_FLAG_OVERHEATING
+            //   - SENSOR_ERROR_FLAG_RANGE
+            //   - SENSOR_ERROR_FLAG_CHECKSUM
+            //   - SENSOR_ERROR_FLAG_OVERLOAD
+            //   - SENSOR_ERROR_FLAG_INSTRUCTION
+            bool servo_read_error = false;
+            // for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
+            // {
+                // int servo_ID   = int(platform->m_servo_IDs[i]);
+            servo_read_error |= CheckServosBulkReadErrors();
+            servo_read_error |= CheckSensorBulkReadErrors(Robot::FSR::ID_L_FSR);
+            servo_read_error |= CheckSensorBulkReadErrors(Robot::FSR::ID_R_FSR);
+            servo_read_error |= CheckSensorBulkReadErrors(Robot::CM730::ID_CM );
+
+            // Decide whether to repeat the read based on errors returned:
+            repeat_bulk_read = true;
+
+            // cycle dynamixel power?
+        }
+		else
+		{
+			cout << ".";
+		}
+    } while (repeat_bulk_read);
+
     return;
 }
+
+bool DarwinSensors::CheckServosBulkReadErrors()
+{
+    bool servo_read_error = false;
+
+    for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
+         it != platform->m_servo_IDs.end(); ++it)
+    {
+        int servo_id = *it;
+        servo_read_error |= CheckSensorBulkReadErrors(servo_id);
+    }
+
+    return servo_read_error;
+}
+
+bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
+{
+    bool sensor_read_error = false;
+
+    int sensor_error_code = cm730->m_BulkReadData[sensor_id].error;
+
+    if(sensor_error_code != SENSOR_ERROR_NONE)
+    {
+        // keep track of which sensors failed?
+        // (use a list map? - not that speed matters much)
+        sensor_read_error = true;
+        // errorlog << "Motor error: " << endl;
+        cout
+                // << __PRETTY_FUNCTION__ << ": "
+                << "DS::CFHC()" << ": "
+                << "Sensor error: id = '"
+                << GetSensorName(sensor_id)
+                << "' ("
+                << sensor_id
+                << "), error='"
+                << getSensorErrorDescription(sensor_error_code)
+                << "';"
+                << endl;
+    }
+    else
+    {
+        cout << "|" << GetSensorName(sensor_id) << "|";
+    }
+
+    return sensor_read_error;
+}
+
 
 /*! @brief Copys the joint sensor data 
  */
@@ -230,12 +303,6 @@ void DarwinSensors::copyFromJoints()
         addr = int(Robot::MX28::P_PRESENT_POSITION_L);
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
 
-        //error fields
-        error_fields[i][0] = int(platform->m_servo_IDs[i]);
-        error_fields[i][1] = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].error;
-        if(error_fields[i][1] != 0)
-            motor_error = true;
-
         //cm730->MakeWord(datatable[addr-start_addr],datatable[addr-start_addr+1]);
 
         joint[NUSensorsData::PositionId] = m_joint_mapping->raw2joint(i, data);
@@ -260,7 +327,7 @@ void DarwinSensors::copyFromJoints()
         addr = int(Robot::MX28::P_TORQUE_ENABLE);
         data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadByte(addr);
         //data = int(datatable[addr-start_addr]);
-        joint[NUSensorsData::StiffnessId] = 100*data;
+        joint[NUSensorsData::StiffnessId] = 100*data; // 'NUSensorsData::StiffnessId' can't be right? It's used for the actual 'stiffness' value.
 		*/
         addr = int(Robot::MX28::P_PRESENT_LOAD_L);
         data = (int)cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
@@ -460,11 +527,42 @@ void DarwinSensors::copyFromButtons()
 void DarwinSensors::copyFromBattery()
 {
     //External Voltage is 8-15V
-    //Values are 10x higher then actual present voltage.
+    //Values are 10x higher than actual present voltage.
 	
     int addr = Robot::CM730::P_VOLTAGE;
     int data  = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
     float battery_percentage = data/120.00 *100.00;
     m_data->set(NUSensorsData::BatteryVoltage, m_current_time, battery_percentage); //Convert to percent
     return;
+}
+
+const char* DarwinSensors::GetSensorName(int joint_id)
+{
+    switch (joint_id)
+    {
+    case Robot::JointData::ID_R_SHOULDER_PITCH: return "R_SHOULDER_PITCH";
+    case Robot::JointData::ID_L_SHOULDER_PITCH: return "L_SHOULDER_PITCH";
+    case Robot::JointData::ID_R_SHOULDER_ROLL : return "R_SHOULDER_ROLL" ;
+    case Robot::JointData::ID_L_SHOULDER_ROLL : return "L_SHOULDER_ROLL" ;
+    case Robot::JointData::ID_R_ELBOW         : return "R_ELBOW"         ;
+    case Robot::JointData::ID_L_ELBOW         : return "L_ELBOW"         ;
+    case Robot::JointData::ID_R_HIP_YAW       : return "R_HIP_YAW"       ;
+    case Robot::JointData::ID_L_HIP_YAW       : return "L_HIP_YAW"       ;
+    case Robot::JointData::ID_R_HIP_ROLL      : return "R_HIP_ROLL"      ;
+    case Robot::JointData::ID_L_HIP_ROLL      : return "L_HIP_ROLL"      ;
+    case Robot::JointData::ID_R_HIP_PITCH     : return "R_HIP_PITCH"     ;
+    case Robot::JointData::ID_L_HIP_PITCH     : return "L_HIP_PITCH"     ;
+    case Robot::JointData::ID_R_KNEE          : return "R_KNEE"          ;
+    case Robot::JointData::ID_L_KNEE          : return "L_KNEE"          ;
+    case Robot::JointData::ID_R_ANKLE_PITCH   : return "R_ANKLE_PITCH"   ;
+    case Robot::JointData::ID_L_ANKLE_PITCH   : return "L_ANKLE_PITCH"   ;
+    case Robot::JointData::ID_R_ANKLE_ROLL    : return "R_ANKLE_ROLL"    ;
+    case Robot::JointData::ID_L_ANKLE_ROLL    : return "L_ANKLE_ROLL"    ;
+    case Robot::JointData::ID_HEAD_PAN        : return "HEAD_PAN"        ;
+    case Robot::JointData::ID_HEAD_TILT       : return "HEAD_TILT"       ;
+    case Robot::FSR::ID_L_FSR                 : return "L_FSR"           ;
+    case Robot::FSR::ID_R_FSR                 : return "R_FSR"           ;
+    case Robot::CM730::ID_CM                  : return "CM"              ;
+    default                                   : return "UNKNOWN_JOINT"   ;
+    }
 }

@@ -25,6 +25,7 @@ CYCLOID_BUILD_DIR = Build/Cycloid
 BEAR_BUILD_DIR = Build/Bear
 DARWIN_BUILD_DIR = Build/Darwin
 NUVIEW_BUILD_DIR = Build/NUView
+DARWIN_FRAMEWORK_BUILD_DIR = Framework/darwin/Linux/build
 
 # Aldebaran build tools
 ALD_CTC = $(AL_DIR)/crosstoolchain/toolchain-geode.cmake
@@ -40,7 +41,7 @@ BEAR_EXT_DIR = projects/robocup
 .PHONY: Cycloid CycloidConfig CycloidConfigInstall CycloidClean CycloidVeryClean
 .PHONY: Bear BearConfig BearConfigInstall BearClean BearVeryClean
 .PHONY: BearExternal
-.PHONY: Darwin DarwinConfig DarwinConfigInstall DarwinClean DarwinVeryClean
+.PHONY: Darwin DarwinConfig DarwinConfigInstall DarwinClean DarwinVeryClean DarwinFramework DarwinFrameworkClean
 .PHONY: DarwinExternal
 .PHONY: NUView NUViewConfig NUViewClean NUViewVeryClean
 .PHONY: clean veryclean
@@ -390,7 +391,7 @@ else
 endif
 
 ################ Darwin ################
-Darwin:
+Darwin: DarwinFramework
 ifeq ($(VM_IP), )							## if we have not given a virtual machine IP then use this machine to compile
 	@echo "Compiling for Darwin"
         ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(DARWIN_BUILD_DIR)/*)), )		## check if the project has already been configured
@@ -449,7 +450,7 @@ else
 	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinClean;"
 endif
 
-DarwinVeryClean:
+DarwinVeryClean: DarwinFrameworkClean
 ifeq ($(VM_IP), )
 	@set -e; \
 		echo "Hosing Darwin Build"; \
@@ -458,6 +459,15 @@ ifeq ($(VM_IP), )
 else
 	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinVeryClean;"
 endif
+
+DarwinFramework:
+	mkdir -p $(DARWIN_FRAMEWORK_BUILD_DIR)/../lib; \
+	cd $(DARWIN_FRAMEWORK_BUILD_DIR); \
+	make;
+
+DarwinFrameworkClean:
+	cd $(DARWIN_FRAMEWORK_BUILD_DIR); \
+	make clean;
 
 	
 ################ NUView ################
