@@ -274,7 +274,7 @@ void DarwinSensors::InitialiseSensorResponseRates()
 {
     sensor_response_rates[Robot::FSR::ID_L_FSR] = 1.0;
     sensor_response_rates[Robot::FSR::ID_R_FSR] = 1.0;
-    sensor_response_rates[Robot::FSR::ID_CM   ] = 1.0;
+    sensor_response_rates[Robot::CM730::ID_CM ] = 1.0;
     for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
         it != platform->m_servo_IDs.end(); ++it)
     {

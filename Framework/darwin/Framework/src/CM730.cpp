@@ -5,11 +5,12 @@
  *
  */
 #include <stdio.h>
+#include <cassert>
+#include <sys/time.h>
+ 
 #include "FSR.h"
 #include "CM730.h"
 #include "MotionStatus.h"
-
-#include <cassert>
 
 using namespace Robot;
 
@@ -184,9 +185,67 @@ inline void CM730::TxRxCMPacket(
     }
 }
 
+double GetCurrentTime()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    return ((double)tv.tv_sec*1000.0 + (double)tv.tv_usec/1000.0);
+}
+double BulkReadTimer(bool reset = false)
+{
+    static double start_time = 0.0;
+    double time;
+
+    if(reset)
+    {
+        start_time = GetCurrentTime();
+        return start_time;
+    }
+
+    time = GetCurrentTime() - start_time;
+    if(time < 0.0)
+        start_time = GetCurrentTime();
+
+    return time;
+}
+
+void PrintSuccessfulBulkReadPeriod(Robot::PlatformCM730* m_Platform)
+{
+    static const int len = 512;
+    static double successful_bulk_read_times[len] = { 0, }; // DEBUG
+    static double max_successful_bulk_read_time = 0;
+    static double min_successful_bulk_read_time = 100000;
+    static int index = 0;
+
+    double new_time = BulkReadTimer();
+    BulkReadTimer(true);
+
+    fprintf(stderr, "Read Success! (time = %fms)\n", new_time);
+    
+    successful_bulk_read_times[index] = new_time;
+    ++index;
+    if(index >= len) index = 0;
+    
+    if(max_successful_bulk_read_time < new_time)
+        max_successful_bulk_read_time = new_time;
+
+    if(min_successful_bulk_read_time > new_time)
+        min_successful_bulk_read_time = new_time;
+
+    double avg = 0;
+    for(int i = 0; i < len; i++) 
+        avg += successful_bulk_read_times[i];
+    avg /= (double)len;
+    
+    fprintf(stderr, "Average successful bulk read period = %fms\n", avg);
+    fprintf(stderr, "Maximum successful bulk read period = %fms\n", max_successful_bulk_read_time);
+    fprintf(stderr, "Minimum successful bulk read period = %fms\n", min_successful_bulk_read_time);
+}
+
 void PrintSuccessfulBulkReadTimes(Robot::PlatformCM730* m_Platform)
 {
-    static const int len = 256;
+    static const int len = 512;
     static double successful_bulk_read_times[len] = { 0, }; // DEBUG
     static double max_successful_bulk_read_time = 0;
     static double min_successful_bulk_read_time = 100000;
@@ -244,7 +303,8 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
         if(get_length == to_length)
         {
             res = SUCCESS;
-//            PrintSuccessfulBulkReadTimes(m_Platform);
+            PrintSuccessfulBulkReadTimes(m_Platform);
+            PrintSuccessfulBulkReadPeriod(m_Platform);
             break;
         }
 
