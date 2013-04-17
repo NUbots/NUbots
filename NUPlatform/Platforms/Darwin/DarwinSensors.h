@@ -76,8 +76,6 @@ protected:
     //! returns whether or not any occured.
     bool CheckSensorBulkReadErrors(int sensor_id);
     
-    static const char* GetSensorName(int joint_id);
-    
     //! Initialises the mapping of sensor values to their respective response
     //! rates.
     //! Should be called before the first call to UpdateSensorResponseRate(...).
@@ -87,7 +85,10 @@ protected:
     //! given sensor error code.
     //! returns the updated response rate.
     double UpdateSensorResponseRate(int sensor_id, int error_code);
-    
+
+    // Feel free to make this method public if necessary. -MM
+    static const char* GetSensorName(int joint_id);
+
 private:
     static const unsigned int NUM_MOTORS = 20;
 };

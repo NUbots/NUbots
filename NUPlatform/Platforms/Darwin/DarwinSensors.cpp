@@ -255,8 +255,14 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
     {
         // keep track of which sensors failed?
         // (use a list map? - not that speed matters much)
-        sensor_read_error = true;
+
+        // If the error occurs very often, we should stop reporting it,
+        // since repeating the bulk read indefinitely will freeze the robot.
+        if(response_rate > 0.5)
+            sensor_read_error = true;
+
         // errorlog << "Motor error: " << endl;
+        
         std::cout
                 // << __PRETTY_FUNCTION__ << ": "
                 << "DS::CFHC()" << ": "
