@@ -32,6 +32,7 @@
 #include "debugverbositynusensors.h"
 
 #include "Framework/darwin/Framework/include/CM730.h"
+#include "Framework/darwin/Framework/include/FSR.h"
 #include "Framework/darwin/Framework/include/JointData.h"
 
 
