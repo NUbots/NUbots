@@ -70,7 +70,7 @@ using namespace std;
 DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "DarwinSensors::DarwinSensors()" << endl;
+        debug << "DarwinSensors::DarwinSensors()" << std::endl;
     #endif
 
     platform = darwin;
@@ -86,6 +86,9 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
     std::vector<float> invalid(NUSensorsData::NumEndEffectorIndices, numeric_limits<float>::quiet_NaN());
     m_data->set(NUSensorsData::RLegEndEffector, m_data->CurrentTime, invalid);
     m_data->set(NUSensorsData::LLegEndEffector, m_data->CurrentTime, invalid);
+
+    // Initialise response rates (used to detect malfunctioning sensors)
+    InitialiseSensorResponseRates();
 
     motor_error = false;
 }
@@ -184,12 +187,12 @@ void DarwinSensors::copyFromHardwareCommunications()
         
         if(bulk_read_error_code != Robot::CM730::SUCCESS)
         {
-            cout    << endl
+            std::cout    << std::endl
 //					<< __PRETTY_FUNCTION__ << ": "
 					<< "DS::CFHC()" << ": "
                     << "BULK READ ERROR: "
                     << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
-                    << endl;
+                    << std::endl;
 			
             // Check for servo read errors: (and also other sensors)
             // Note: Possible error flags are:
@@ -217,7 +220,7 @@ void DarwinSensors::copyFromHardwareCommunications()
         }
 		else
 		{
-			cout << ".";
+			std::cout << ".";
 		}
     } while (repeat_bulk_read);
 
@@ -244,13 +247,17 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
 
     int sensor_error_code = cm730->m_BulkReadData[sensor_id].error;
 
+    double response_rate = UpdateSensorResponseRate(sensor_id, sensor_error_code);
+
+    std::cout << GetSensorName(sensor_id) << "response_rate = " << response_rate << std::endl;
+
     if(sensor_error_code != SENSOR_ERROR_NONE)
     {
         // keep track of which sensors failed?
         // (use a list map? - not that speed matters much)
         sensor_read_error = true;
         // errorlog << "Motor error: " << endl;
-        cout
+        std::cout
                 // << __PRETTY_FUNCTION__ << ": "
                 << "DS::CFHC()" << ": "
                 << "Sensor error: id = '"
@@ -260,11 +267,11 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
                 << "), error='"
                 << getSensorErrorDescription(sensor_error_code)
                 << "';"
-                << endl;
+                << std::endl;
     }
     else
     {
-        cout << "|" << GetSensorName(sensor_id) << "|";
+        std::cout << "|" << GetSensorName(sensor_id) << "|";
     }
 
     return sensor_read_error;
@@ -386,7 +393,7 @@ void DarwinSensors::copyFromJoints()
         m_previous_velocities[i] = joint[NUSensorsData::VelocityId];
 
         #if DEBUG_NUSENSORS_VERBOSITY > 0
-            debug << "DarwinSensors::CopyFromJoints " << i << " " << joint[NUSensorsData::PositionId]<<endl;
+            debug << "DarwinSensors::CopyFromJoints " << i << " " << joint[NUSensorsData::PositionId] << std::endl;
     	#endif
     }
 }

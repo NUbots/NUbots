@@ -85,7 +85,8 @@ protected:
     
     //! Updates the response rate estimate for the given sensor using the
     //! given sensor error code.
-    void UpdateSensorResponseRate(int sensor_id, int error_code);
+    //! returns the updated response rate.
+    double UpdateSensorResponseRate(int sensor_id, int error_code);
     
 private:
     static const unsigned int NUM_MOTORS = 20;
