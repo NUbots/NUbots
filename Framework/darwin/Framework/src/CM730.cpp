@@ -227,7 +227,7 @@ void PrintSuccessfulBulkReadPeriod(Robot::PlatformCM730* m_Platform)
     ++index;
     if(index >= len) index = 0;
     
-    if(max_successful_bulk_read_time < new_time)
+    if(max_successful_bulk_read_time < new_time && new_time < 1000)
         max_successful_bulk_read_time = new_time;
 
     if(min_successful_bulk_read_time > new_time)
@@ -283,7 +283,7 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
     if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
 
     // original multiplier of 1.5 appears to be an undocumented hack.
-    m_Platform->SetPacketTimeout(to_length * 1.5 * 5);
+    m_Platform->SetPacketTimeout(to_length * 1.5 * 8);
 
     int get_length = 0; //! length in bytes of data read so far
     // Read data from port
