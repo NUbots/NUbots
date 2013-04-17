@@ -300,7 +300,7 @@ void DarwinSensors::InitialiseSensorResponseRates()
 // Update a response rate estimate given an error value.
 // It doesn't matter how this is done, so long as it's relatively fast
 // and results in reasonable performance.
-void DarwinSensors::UpdateSensorResponseRate(int sensor_id, int error_code)
+double DarwinSensors::UpdateSensorResponseRate(int sensor_id, int error_code)
 {
     double old_rate = sensor_response_rates[sensor_id];
     double new_value = (error_code == Robot::CM730::SUCCESS)? 1.0 : 0.0;
@@ -311,6 +311,8 @@ void DarwinSensors::UpdateSensorResponseRate(int sensor_id, int error_code)
     double new_rate = (old_factor * old_rate) + (new_factor * new_value);
     
     sensor_response_rates[sensor_id] = new_rate;
+
+	return new_rate;
 }
 
 
