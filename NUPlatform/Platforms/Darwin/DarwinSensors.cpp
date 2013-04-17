@@ -133,6 +133,7 @@ std::string DarwinSensors::getSensorErrorDescription(unsigned int error_value)
     return error_description;
 }
 
+
 /*! @brief Copys the sensors data from the hardware communication module to the NUSensorsData container
  */
 void DarwinSensors::copyFromHardwareCommunications()
@@ -266,6 +267,36 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
     }
 
     return sensor_read_error;
+}
+
+// Initialise response rates:
+void DarwinSensors::InitialiseSensorResponseRates()
+{
+    sensor_response_rates[Robot::FSR::ID_L_FSR] = 1.0;
+    sensor_response_rates[Robot::FSR::ID_R_FSR] = 1.0;
+    sensor_response_rates[Robot::FSR::ID_CM   ] = 1.0;
+    for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
+        it != platform->m_servo_IDs.end(); ++it)
+    {
+       int servo_id = *it;
+       sensor_response_rates[servo_id] = 1.0;
+    }
+}
+
+// Update a response rate estimate given an error value.
+// It doesn't matter how this is done, so long as it's relatively fast
+// and results in reasonable performance.
+void DarwinSensors::UpdateSensorResponseRate(int sensor_id, int error_code)
+{
+    double old_rate = sensor_response_rates[sensor_id];
+    double new_value = (error_code == Robot::CM730::SUCCESS)? 1.0 : 0.0;
+    
+    // This value is arbitrary, and should be tuned for reasonable performance
+    double old_factor = 0.75;
+    double new_factor = 1 - old_factor;
+    double new_rate = (old_factor * old_rate) + (new_factor * new_value);
+    
+    sensor_response_rates[sensor_id] = new_rate;
 }
 
 

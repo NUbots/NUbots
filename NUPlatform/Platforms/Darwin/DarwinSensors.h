@@ -26,8 +26,10 @@
 #define DARWINSENSORS_H
 
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "NUPlatform/NUSensors.h"
 #include "Infrastructure/NUData.h"
+
 
 class DarwinJointMapping;
 class DarwinPlatform;
@@ -60,6 +62,9 @@ protected:
     Robot::CM730* cm730;
     DarwinJointMapping* m_joint_mapping;
 
+    // Current percentage of reads from this sensor that do not result in an error
+    boost::unordered_map<int, double> sensor_response_rates;
+
     //! A flag to indicate a motor indicated an error
     bool motor_error;
     /// Returns a string containing a list of descriptions of the set error
@@ -72,7 +77,16 @@ protected:
     bool CheckSensorBulkReadErrors(int sensor_id);
     
     static const char* GetSensorName(int joint_id);
-
+    
+    //! Initialises the mapping of sensor values to their respective response
+    //! rates.
+    //! Should be called before the first call to UpdateSensorResponseRate(...).
+    void InitialiseSensorResponseRates();
+    
+    //! Updates the response rate estimate for the given sensor using the
+    //! given sensor error code.
+    void UpdateSensorResponseRate(int sensor_id, int error_code);
+    
 private:
     static const unsigned int NUM_MOTORS = 20;
 };
