@@ -89,8 +89,6 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
 
     // Initialise response rates (used to detect malfunctioning sensors)
     InitialiseSensorResponseRates();
-
-    motor_error = false;
 }
 
 /*! @brief Destructor for DarwinSensors
@@ -153,20 +151,18 @@ void DarwinSensors::copyFromHardwareCommunications()
     copyFromJoints();
     copyFromFeet();
 
+    // Note: The following comment contains old code.
+    //       It was preserved here in the hope that it might be handy later.
+    //       Please delete it if you know that it won't be. -MM
+    // debug    << "Motor error: " << endl;
+    // errorlog << "Motor error: " << endl;
+    // cm730->DXLPowerOff(); platform->msleep(500); cm730->DXLPowerOn();
+    
     // 2. Read data in bulk from the CM730 controller board 
     //    (i.e. read all sensor and motor data for the next iteration)
-    
-    // Note: The following comment contains old code.
-    //       It is preserved here in the hope that it might be handy later.
-    //       Please delete it if you *know* that it won't be. -MM
-//         #if DEBUG_NUSENSORS_VERBOSITY > 0
-//         debug << "Motor error: " << endl;
-//         #endif
-//         errorlog << "Motor error: " << endl;
-// //        cm730->DXLPowerOff();
-// //        platform->msleep(500);
-// //        cm730->DXLPowerOn();
-    
+
+    int debug_count = 0;
+
     // A flag to indicate whether the bulk read must be repeated
     // (i.e. it is set to true if a significant error occurs during the read)
     bool repeat_bulk_read;
@@ -177,34 +173,27 @@ void DarwinSensors::copyFromHardwareCommunications()
 
         // Perform the read operation from the CM730.
         // Note: Possible error codes are:
-        //   - SUCCESS
-        //   - TX_CORRUPT
-        //   - TX_FAIL
-        //   - RX_FAIL
-        //   - RX_TIMEOUT
-        //   - RX_CORRUPT
+        //  { SUCCESS, TX_CORRUPT, TX_FAIL, RX_FAIL, RX_TIMEOUT, RX_CORRUPT }
         int bulk_read_error_code = cm730->BulkRead();
         
         if(bulk_read_error_code != Robot::CM730::SUCCESS)
         {
+            std::cout << "Repeat: " << debug_count++ << ";" << std::endl;
+
             // Check for servo read errors: (and also other sensors)
             // Note: Possible error flags are:
-            //   - SENSOR_ERROR_NONE
-            //   - SENSOR_ERROR_FLAG_INPUT_VOLTAGE
-            //   - SENSOR_ERROR_FLAG_ANGLE_LIMIT
-            //   - SENSOR_ERROR_FLAG_OVERHEATING
-            //   - SENSOR_ERROR_FLAG_RANGE
-            //   - SENSOR_ERROR_FLAG_CHECKSUM
-            //   - SENSOR_ERROR_FLAG_OVERLOAD
-            //   - SENSOR_ERROR_FLAG_INSTRUCTION
+            //  { SENSOR_ERROR_NONE, SENSOR_ERROR_FLAG_INPUT_VOLTAGE,
+            //    SENSOR_ERROR_FLAG_ANGLE_LIMIT, SENSOR_ERROR_FLAG_OVERHEATING,
+            //    SENSOR_ERROR_FLAG_RANGE, SENSOR_ERROR_FLAG_CHECKSUM,
+            //    SENSOR_ERROR_FLAG_OVERLOAD, SENSOR_ERROR_FLAG_INSTRUCTION }
             std::cout    
                     << std::endl
-//					<< __PRETTY_FUNCTION__ << ": "
-					<< "DS::CFHC()" << ": "
+                    // << __PRETTY_FUNCTION__ << ": "
+                    << "DS::CFHC()" << ": "
                     << "BULK READ ERROR: "
                     << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
                     << std::endl;
-			
+
             bool servo_read_error = false;
 
             servo_read_error |= CheckServosBulkReadErrors();
@@ -221,8 +210,6 @@ void DarwinSensors::copyFromHardwareCommunications()
             PrintSensorResponseRates();
         }
     } while (repeat_bulk_read);
-
-    return;
 }
 
 double DarwinSensors::UpdateSensorResponseRates(int error_code)
@@ -367,7 +354,6 @@ void DarwinSensors::copyFromJoints()
     //unsigned char* datatable = new unsigned char[datasize+1];
     //int addr;
     //int error;
-    motor_error = false;
 
     for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
     {

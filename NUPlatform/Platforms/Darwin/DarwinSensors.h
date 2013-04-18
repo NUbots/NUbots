@@ -65,8 +65,6 @@ protected:
     // Current percentage of reads from this sensor that do not result in an error
     boost::unordered_map<int, double> sensor_response_rates;
 
-    //! A flag to indicate a motor indicated an error
-    bool motor_error;
     /// Returns a string containing a list of descriptions of the set error
     /// flags in the given errorvalue.
     std::string getSensorErrorDescription(unsigned int error_value);
@@ -80,21 +78,16 @@ protected:
     //! rates.
     //! Should be called before the first call to UpdateSensorResponseRate(...).
     void InitialiseSensorResponseRates();
-    
+    //! Updates all sensor response rates using the same error code for each
+    double UpdateSensorResponseRates(int error_code);
     //! Updates the response rate estimate for the given sensor using the
     //! given sensor error code.
     //! returns the updated response rate.
     double UpdateSensorResponseRate(int sensor_id, int error_code);
-
-    //! Updates all sensor response rates using the same error code for each
-    double UpdateSensorResponseRates(int error_code);
-
-
     //! Pretty prints the response rate of all sensors
     void PrintSensorResponseRates();
     //! Pretty prints the response rate of a single sensors
     void PrintSensorResponseRate(int sensor_id);
-
 
     // Feel free to make this method public if necessary. -MM
     static const char* GetSensorName(int joint_id);
