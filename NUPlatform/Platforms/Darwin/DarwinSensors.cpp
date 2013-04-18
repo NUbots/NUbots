@@ -242,8 +242,6 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
 
     double response_rate = UpdateSensorResponseRate(sensor_id, sensor_error_code);
 
-    std::cout << GetSensorName(sensor_id) << "response_rate = " << response_rate << std::endl;
-
     if(sensor_error_code != SENSOR_ERROR_NONE)
     {
         // If the error occurs very often, we should stop reporting it,
@@ -264,10 +262,12 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
                 << getSensorErrorDescription(sensor_error_code)
                 << "';"
                 << std::endl;
+        std::cout << GetSensorName(sensor_id) << " response_rate = " << response_rate << std::endl;
     }
     else
     {
         std::cout << "|" << GetSensorName(sensor_id) << "|";
+        std::cout << GetSensorName(sensor_id) << " response_rate = " << response_rate << std::endl;
     }
 
     return sensor_read_error;
