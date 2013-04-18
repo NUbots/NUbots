@@ -187,13 +187,6 @@ void DarwinSensors::copyFromHardwareCommunications()
         
         if(bulk_read_error_code != Robot::CM730::SUCCESS)
         {
-            std::cout    << std::endl
-//					<< __PRETTY_FUNCTION__ << ": "
-					<< "DS::CFHC()" << ": "
-                    << "BULK READ ERROR: "
-                    << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
-                    << std::endl;
-			
             // Check for servo read errors: (and also other sensors)
             // Note: Possible error flags are:
             //   - SENSOR_ERROR_NONE
@@ -204,24 +197,24 @@ void DarwinSensors::copyFromHardwareCommunications()
             //   - SENSOR_ERROR_FLAG_CHECKSUM
             //   - SENSOR_ERROR_FLAG_OVERLOAD
             //   - SENSOR_ERROR_FLAG_INSTRUCTION
+            std::cout    
+                    << std::endl
+//					<< __PRETTY_FUNCTION__ << ": "
+					<< "DS::CFHC()" << ": "
+                    << "BULK READ ERROR: "
+                    << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
+                    << std::endl;
+			
             bool servo_read_error = false;
-            // for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
-            // {
-                // int servo_ID   = int(platform->m_servo_IDs[i]);
+
             servo_read_error |= CheckServosBulkReadErrors();
             servo_read_error |= CheckSensorBulkReadErrors(Robot::FSR::ID_L_FSR);
             servo_read_error |= CheckSensorBulkReadErrors(Robot::FSR::ID_R_FSR);
             servo_read_error |= CheckSensorBulkReadErrors(Robot::CM730::ID_CM );
 
             // Decide whether to repeat the read based on errors returned:
-            repeat_bulk_read = true;
-
-            // cycle dynamixel power?
+            repeat_bulk_read = servo_read_error;
         }
-		else
-		{
-			std::cout << ".";
-		}
     } while (repeat_bulk_read);
 
     return;
@@ -253,9 +246,6 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
 
     if(sensor_error_code != SENSOR_ERROR_NONE)
     {
-        // keep track of which sensors failed?
-        // (use a list map? - not that speed matters much)
-
         // If the error occurs very often, we should stop reporting it,
         // since repeating the bulk read indefinitely will freeze the robot.
         if(response_rate > 0.5)
