@@ -86,6 +86,16 @@ protected:
     //! returns the updated response rate.
     double UpdateSensorResponseRate(int sensor_id, int error_code);
 
+    //! Updates all sensor response rates using the same error code for each
+    double UpdateSensorResponseRates(int error_code);
+
+
+    //! Pretty prints the response rate of all sensors
+    void PrintSensorResponseRates();
+    //! Pretty prints the response rate of a single sensors
+    void PrintSensorResponseRate(int sensor_id);
+
+
     // Feel free to make this method public if necessary. -MM
     static const char* GetSensorName(int joint_id);
 

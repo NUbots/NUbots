@@ -215,9 +215,51 @@ void DarwinSensors::copyFromHardwareCommunications()
             // Decide whether to repeat the read based on errors returned:
             repeat_bulk_read = servo_read_error;
         }
+        else
+        {
+            UpdateSensorResponseRates(SENSOR_ERROR_NONE);
+            PrintSensorResponseRates();
+        }
     } while (repeat_bulk_read);
 
     return;
+}
+
+double DarwinSensors::UpdateSensorResponseRates(int error_code)
+{
+    for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
+        it != platform->m_servo_IDs.end(); ++it)
+    {
+        int servo_id = *it;
+        UpdateSensorResponseRate(servo_id, error_code);
+    }
+    UpdateSensorResponseRate(Robot::FSR::ID_L_FSR, error_code);
+    UpdateSensorResponseRate(Robot::FSR::ID_R_FSR, error_code);
+    UpdateSensorResponseRate(Robot::CM730::ID_CM , error_code);
+}
+
+void DarwinSensors::PrintSensorResponseRates()
+{
+    for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
+        it != platform->m_servo_IDs.end(); ++it)
+    {
+        int servo_id = *it;
+        PrintSensorResponseRate(servo_id);
+    }
+    PrintSensorResponseRate(Robot::FSR::ID_L_FSR);
+    PrintSensorResponseRate(Robot::FSR::ID_R_FSR);
+    PrintSensorResponseRate(Robot::CM730::ID_CM );
+}
+
+void DarwinSensors::PrintSensorResponseRate(int sensor_id)
+{
+    double response_rate = sensor_response_rates[sensor_id];
+    std::cout 
+        << GetSensorName(sensor_id)
+        << " response_rate = " 
+        << response_rate 
+        << ";"
+        << std::endl;
 }
 
 bool DarwinSensors::CheckServosBulkReadErrors()
@@ -262,12 +304,11 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
                 << getSensorErrorDescription(sensor_error_code)
                 << "';"
                 << std::endl;
-        std::cout << GetSensorName(sensor_id) << " response_rate = " << response_rate << std::endl;
+        PrintSensorResponseRate(sensor_id);
     }
     else
     {
-        std::cout << "|" << GetSensorName(sensor_id) << "|";
-        std::cout << GetSensorName(sensor_id) << " response_rate = " << response_rate << std::endl;
+        PrintSensorResponseRate(sensor_id);
     }
 
     return sensor_read_error;
