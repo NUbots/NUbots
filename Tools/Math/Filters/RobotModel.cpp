@@ -80,6 +80,12 @@ Matrix RobotModel::measurementDistance(const Matrix& measurement1, const Matrix&
     return result;
 }
 
+void RobotModel::limitMean(Matrix &mean)
+{
+    mean[2][0] = mathGeneral::normaliseAngle(mean[2][0]);
+    return;
+}
+
 Matrix RobotModel::landmarkMeasurementEquation(const Matrix& state, const Matrix& measurementArgs)
 {
     // measurementArgs contain the vector [x,y]^T location of the object observed.

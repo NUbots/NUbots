@@ -43,6 +43,8 @@ public:
 
     Matrix measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type);
 
+    void limitMean(Matrix &mean);
+
     unsigned int totalStates() const
     {
         return kstates_total;

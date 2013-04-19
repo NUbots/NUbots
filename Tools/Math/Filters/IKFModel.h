@@ -34,6 +34,11 @@ class IKFModel
 {
 public:
     virtual IKFModel* Clone() = 0;
+    virtual ~IKFModel()
+    {
+    }
+
+
     /*! The process equation, this describes the transition of the estimate due to time and inputs applied.
       @param state The state determined frim the previous estimate.
       @param deltaT The elapsed time since the previous update was performed.
@@ -51,6 +56,7 @@ public:
 
     virtual Matrix measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type) = 0;
 
+    virtual void limitMean(Matrix& mean) = 0;
 
     virtual unsigned int totalStates() const = 0;
 
