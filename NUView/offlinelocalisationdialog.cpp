@@ -268,7 +268,11 @@ QStringList OfflineLocalisationDialog::GetLogPaths(const QDir& directory)
 
 void OfflineLocalisationDialog::BeginSimulation()
 {
-    if(m_offline_loc->isRunning()) return;
+    if(m_offline_loc->isRunning())
+    {
+        qDebug() << "Localisation already running.";
+        return;
+    }
     m_progressBar->setRange(0, m_offline_loc->NumberOfLogFrames());
     m_progressBar->setValue(0);
     m_progressBar->setAutoClose(true);
