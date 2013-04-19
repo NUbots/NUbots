@@ -5,7 +5,7 @@ LocalisationSettings::LocalisationSettings()
     m_self_loc_model = KFBuilder::krobot_model;
     m_self_loc_filter = KFBuilder::kbasic_ukf_filter;
     m_ball_loc_model = KFBuilder::kmobile_object_model;
-    m_ball_loc_filter = KFBuilder::kbasic_ukf_filter;
+    m_ball_loc_filter = KFBuilder::kseq_ukf_filter;
 }
 
 LocalisationSettings::LocalisationSettings(const LocalisationSettings& source)
