@@ -38,7 +38,10 @@ class IKalmanFilter
 public:
     virtual ~IKalmanFilter()
     {
-        delete m_model;
+        if(m_model != NULL)
+            delete m_model;
+        m_parent_history_buffer.clear();
+        m_previous_decisions.clear();
     }
 
     virtual IKalmanFilter* Clone() = 0;
@@ -141,7 +144,11 @@ public:
         return result;
     }
 
-    void setModel(IKFModel* newModel) {m_model = newModel;}
+    void setModel(IKFModel* newModel)
+    {
+        if(m_model) delete m_model;
+        m_model = newModel;
+    }
 
     double creationTime() const {return m_creation_time;}
 
