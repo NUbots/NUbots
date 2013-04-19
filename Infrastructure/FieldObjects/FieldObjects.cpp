@@ -17,7 +17,7 @@ FieldObjects::~FieldObjects()
 	
 }
 
-FieldObjects::FieldObjects(const FieldObjects& source): m_timestamp(source.m_timestamp), self(source.self),
+FieldObjects::FieldObjects(const FieldObjects& source): TimestampedData(), m_timestamp(source.m_timestamp), self(source.self),
 stationaryFieldObjects(source.stationaryFieldObjects), mobileFieldObjects(source.mobileFieldObjects), ambiguousFieldObjects(source.ambiguousFieldObjects)
 {
 }
@@ -216,6 +216,17 @@ void FieldObjects::InitStationaryFieldObjects()
                     x = 0.0f;
                     y = 240.0f; // NOTE: This is not to field spec - should be 240
                     objectName = "Yellow Beacon";
+                    break;
+
+                case FO_CORNER_CENTRE_CIRCLE_INTERSECT_LEFT:
+                    x = 0.0f;
+                    y = 60.f;
+                    objectName = "Left Centre Circle Intersect";
+                    break;
+                case FO_CORNER_CENTRE_CIRCLE_INTERSECT_RIGHT:
+                    x = 0.0f;
+                    y = -60.f;
+                    objectName = "Right Centre Circle Intersect";
                     break;
                 default:
                     x = y = 0.0f;
@@ -438,7 +449,7 @@ int FieldObjects::getClosestStationaryOption(const Self& location, const Ambiguo
         float total_error = sqrt(x_diff*x_diff + y_diff*y_diff);
 
 //        std::cout << "option: " << obj->getName() << std::endl;
-//        std::cout << "error: " << total_weighted_error << " curr min: " << min_err << std::endl;
+//        std::cout << "error: " << total_error << " curr min: " << min_err << std::endl;
         // Get smalest value for error
         if(total_error < min_err)
         {
@@ -453,8 +464,6 @@ vector<StationaryObject*> FieldObjects::filterToVisible(const Self& location, co
 {
     const float c_view_direction = location.Heading() + headPan;
     const float c_view_range = fovX + 2 * location.sdHeading();
-    const float c_minHeading =  c_view_direction - c_view_range;
-    const float c_maxHeading =  c_view_direction + c_view_range;
 
     vector<int> poss_ids = amb_object.getPossibleObjectIDs();
     vector<StationaryObject*> result;

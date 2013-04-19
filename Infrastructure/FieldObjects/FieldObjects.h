@@ -58,7 +58,10 @@ class FieldObjects: public TimestampedData
                 //FO_YELLOW_GOAL_GAP 		= 25,
                 //FO_BLUE_GOAL_GAP 		= 26,
 
-                NUM_STAT_FIELD_OBJECTS 		= 27
+                FO_CORNER_CENTRE_CIRCLE_INTERSECT_LEFT  = 27,
+                FO_CORNER_CENTRE_CIRCLE_INTERSECT_RIGHT 	= 28,
+
+                NUM_STAT_FIELD_OBJECTS 		= 29
 
             };
 
