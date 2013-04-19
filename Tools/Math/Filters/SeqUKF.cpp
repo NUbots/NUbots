@@ -71,15 +71,11 @@ Matrix SeqUKF::GenerateSigmaPoints() const
     points.setCol(0, current_mean); // First sigma point is the current mean with no deviation
     Matrix weightedCov = m_unscented_transform.covarianceSigmaWeight() * m_estimate.covariance();
     Matrix sqtCovariance = cholesky(weightedCov);
-//    if(not sqtCovariance.isValid())
-//    {
-//        sqtCovariance = cholesky(weightedCov.transp());
-//    }
     Matrix deviation;
 
     for(unsigned int i = 1; i < num_states + 1; i++){
         int negIndex = i+num_states;
-        deviation = sqtCovariance.getCol(i - 1);        // Get deviation from weighted covariance
+        deviation = sqtCovariance.getCol(i - 1);              // Get deviation from weighted covariance
         points.setCol(i, (current_mean + deviation));         // Add mean + deviation
         points.setCol(negIndex, (current_mean - deviation));  // Add mean - deviation
     }
@@ -154,8 +150,22 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
         std::cout << "Covariance:\n" << m_estimate.covariance() << std::endl;
         std::cout << "Sqrt Covariance:\n" << cholesky(m_estimate.covariance()) << std::endl;
         std::cout << "m_sigma_points:\n" << m_sigma_points << std::endl;
+
+        std::cout << "cov = [";
+        Matrix cov = m_estimate.covariance();
+        for(unsigned int i = 0; i < cov.getm(); ++i)
+        {
+            if(i!=0) std::cout << "; ";
+            for(unsigned int j = 0; j < cov.getm(); ++j)
+            {
+                if(j!=0) std::cout << ",";
+                std::cout << setprecision(9) << cov[i][j];
+            }
+        }
+        std::cout << "]" << std::endl;
     }
 
+    m_model->limitMean(predictedMean);
     new_estimate.setMean(predictedMean);
     new_estimate.setCovariance(predictedCovariance);
     initialiseEstimate(new_estimate);
@@ -197,9 +207,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     }
 
     // Calculate the new C and d values.
-    Matrix Yaug = Y;
-    //Yaug.setCol(0, mathGeneral::sign(m_covariance_weights[0][0]) * Yaug.getCol(0));
-    Matrix Ytransp = Yaug.transp();
+    Matrix Ytransp = Y.transp();
 
     const Matrix innovation = m_model->measurementDistance(measurement, Ymean, type);
 
@@ -230,6 +238,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
         std::cout << "New covariance:\n" << updated_covariance << std::endl;
     }
 
+    m_model->limitMean(updated_mean);
     m_estimate.setMean(updated_mean);
     m_estimate.setCovariance(updated_covariance);
     return true;
@@ -285,11 +294,6 @@ bool SeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimat
             return false;
         }
     }
-
-//    if(m_weighting_enabled)
-//    {
-//        m_filter_weight *= 1 / ( 1 + convDble(innov_transp * InverseMatrix(measurement_variance) * innovation));
-//    }
 
     if(m_weighting_enabled)
     {
