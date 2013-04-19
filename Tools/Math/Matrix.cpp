@@ -412,6 +412,7 @@ Matrix diagcat(Matrix a, Matrix b)
 }
 Matrix cholesky(Matrix P)
 {
+    const double eps = 1e-6;
     Matrix L = Matrix (P.getm(),P.getn(),false);
     double a=0;
     for(int i=0;i<P.getm();i++)
@@ -430,6 +431,11 @@ Matrix cholesky(Matrix P)
         {
 			a=a-pow(L[i][k],2);
 		}
+        if(a < 0)
+        {
+            // Due to rounding errors this can sometime become a small -ve number.
+            a = eps;
+        }
 		L[i][i]=sqrt(a);
 	}
     return L;
@@ -480,13 +486,31 @@ Matrix HT(Matrix A)
 	return B;
 }
 
+double determinant1x1(const Matrix& mat)
+{
+    return mat[0][0];
+}
+
+double determinant2x2(const Matrix& mat)
+{
+    return (mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0]);
+}
+
+double determinant3x3(const Matrix& mat)
+{
+    return (mat[0][0]*mat[1][1]*mat[2][2] + mat[0][1]*mat[1][2]*mat[2][0] + mat[0][2]*mat[1][0]*mat[2][1]
+            - mat[0][2]*mat[1][1]*mat[2][0] - mat[0][1]*mat[1][0]*mat[2][2] - mat[0][0]*mat[1][2]*mat[2][1]);
+}
+
 
 double determinant(const Matrix& mat)
 {
     if(mat.getm()==1)
-        return mat[0][0];
+        return determinant1x1(mat);
     else if(mat.getm()==2)
-        return (mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0]);                                              
+        return determinant2x2(mat);
+    else if(mat.getm()==3)
+        return determinant3x3(mat);
     
     double det = 0;
     
@@ -522,7 +546,6 @@ double determinant(const Matrix& mat)
     {
        delete subMat[i];
     }
-    
     return det;
 }
 
