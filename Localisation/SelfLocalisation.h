@@ -1,8 +1,6 @@
 #ifndef SELF_LOCWM_H_DEFINED
 #define SELF_LOCWM_H_DEFINED
-//#include "Models/SelfSRUKF.h"
-//#include "Models/SelfUKF.h"
-//#include "Tools/Math/Filters/MobileObjectUKF.h"
+
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -94,7 +92,15 @@ class SelfLocalisation: public TimestampedData
 
         // New merge
         bool MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* model_b);
+        bool MergeTwoModelsPreserveBestMean(IKalmanFilter* model_a, IKalmanFilter* model_b);
         double MergeMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+
+        double WilliamsMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+        double SalmondMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+        double RunnallMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+        double QuinlanMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+
+        bool MetricTest();
 
         // Merging helper functions.
 //        bool MergeTwoModels(SelfModel* modelA, SelfModel* modelB);
