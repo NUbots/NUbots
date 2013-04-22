@@ -30,11 +30,6 @@
 #define SHARED_BALL_ON 0
 #define TWO_OBJECT_UPDATE_ON 0
 
-#define BOX_LENGTH_X 160
-#define BOX_LENGTH_Y 160
-#define X_BOUNDARY 300
-#define Y_BOUNDARY 200
-
 #define CENTER_CIRCLE_ON 1 
 
 //#define debug_out cout
@@ -60,18 +55,11 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
-//const float SelfLocalisation::c_obj_theta_variance = 0.05f*0.05f;        // (0.05 rad)^2
 const float SelfLocalisation::c_obj_theta_variance = 0.1f*0.1f;        // (0.1 rad)^2
-//const float SelfLocalisation::c_obj_range_offset_variance = 25.0f*25.0f;     // (10cm)^2
-//const float SelfLocalisation::c_obj_range_relative_variance = 0.10f*0.10f;   // 20% of range added
 
 const float SelfLocalisation::c_obj_range_offset_variance = 20.0f*20.0f;     // (25cm)^2
-//const float SelfLocalisation::c_obj_range_offset_variance = 10.0f*10.0f;     // (10cm)^2
-//const float SelfLocalisation::c_obj_range_relative_variance = 0.2f*0.2f;   // 30% of range added
-const float SelfLocalisation::c_obj_range_relative_variance = 0.3f*0.3f;   // 30% of range added
-
+const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
 const float SelfLocalisation::c_centre_circle_heading_variance = (float)(deg2rad(20)*deg2rad(20)); // (10 degrees)^2
-
 const float SelfLocalisation::c_twoObjectAngleVariance = 0.05f*0.05f; //Small! error in angle difference is normally very small
 
 /*! @brief Constructor
@@ -102,7 +90,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
  */
 SelfLocalisation::SelfLocalisation(const SelfLocalisation& source): TimestampedData(), m_settings(source.m_settings)
 {
-    m_ball_filter = newBallModel();
+    m_ball_filter = NULL;
     *this = source;
 }
 
@@ -126,11 +114,6 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
         m_settings = source.m_settings;
 
         clearModels();
-        //m_robot_filters.clear();
-//        for (std::list<IKalmanFilter*>::const_iterator model_it = source.m_robot_filters.begin(); model_it != source.m_robot_filters.end(); ++model_it)
-//        {
-//            m_robot_filters.push_back(new Model(*(*model_it)));
-//        }
 
         // New robot models
         m_robot_filters.clear();
@@ -141,7 +124,10 @@ SelfLocalisation& SelfLocalisation::operator=(const SelfLocalisation& source)
             m_robot_filters.push_back(filter);
         }
 
-        if (m_ball_filter!=NULL) delete m_ball_filter;
+        if (m_ball_filter!=NULL)
+        {
+            delete m_ball_filter;
+        }
         m_ball_filter = newBallModel();
         m_ball_filter->initialiseEstimate(source.m_ball_filter->estimate());
     }
@@ -162,9 +148,7 @@ void SelfLocalisation::init()
     m_timeSinceFieldObjectSeen = 0;
     m_gps.resize(2,0.0f);
 
-    //m_robot_filters.reserve(c_MAX_MODELS);
     m_pastAmbiguous.resize(FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS);
-    //m_ball_model = new MobileObjectUKF();
     m_prevSharedBalls.clear();
 
     m_ball_filter = newBallModel();
@@ -187,7 +171,10 @@ void SelfLocalisation::init()
 SelfLocalisation::~SelfLocalisation()
 {
     clearModels();
-    if (m_ball_filter!=NULL) delete m_ball_filter;
+    if (m_ball_filter!=NULL)
+    {
+        delete m_ball_filter;
+    }
     #if DEBUG_LOCALISATION_VERBOSITY > 0
     debug_file.close();
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -266,7 +253,6 @@ IKalmanFilter* SelfLocalisation::newRobotModel(IKalmanFilter* filter, const Stat
  */
 void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const GameInformation* gameInfo, const TeamInformation* teamInfo)
 {
-
     m_frame_log.str(""); // Clear buffer.
     if (sensor_data == NULL or fobs == NULL)
         return;
@@ -360,16 +346,16 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
     #endif
 
+
     ProcessObjects(fobs, time_increment);
 
+// Shared ball stuff
     MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
-
-    // Shared ball stuff
-//    if(ball.lost() and ball.TimeLastSeen() > 3000)
-//    {
-//        std::vector<TeamPacket::SharedBall> shared_balls = FindNewSharedBalls(teamInfo->getSharedBalls());
-//        sharedBallUpdate(shared_balls);
-//    }
+    if(ball.lost() and ball.TimeLastSeen() > 3000)
+    {
+        std::vector<TeamPacket::SharedBall> shared_balls = FindNewSharedBalls(teamInfo->getSharedBalls());
+        sharedBallUpdate(shared_balls);
+    }
 
     // clip models back on to field.
     clipActiveModelsToField();
@@ -427,7 +413,7 @@ void SelfLocalisation::IndividualStationaryObjectUpdate(FieldObjects* fobs, floa
     if(total_bad_known_objects > 3)
     {
         // reset
-        if(m_settings.pruneMethod() != LocalisationSettings::branch_none and m_settings.pruneMethod() != LocalisationSettings::branch_unknown)
+        if(m_settings.pruneMethod() != LocalisationSettings::prune_none and m_settings.pruneMethod() != LocalisationSettings::prune_unknown)
         {
             doReset();
         }
@@ -492,7 +478,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
 
     IndividualStationaryObjectUpdate(fobs, time_increment);
 
-    if(m_settings.pruneMethod() != LocalisationSettings::prune_none and m_settings.pruneMethod() != LocalisationSettings::branch_unknown)
+    if(m_settings.pruneMethod() != LocalisationSettings::prune_none and m_settings.pruneMethod() != LocalisationSettings::prune_unknown)
     {
         // Two Object update
     //#if TWO_OBJECT_UPDATE_ON
@@ -542,8 +528,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
         NormaliseAlphas();
         PruneModels();
 
-        MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
-        ballUpdate(ball);
+        ballUpdate(fobs->mobileFieldObjects[FieldObjects::FO_BALL]);
 
 #if DEBUG_LOCALISATION_VERBOSITY > 1
         for (std::list<IKalmanFilter*>::const_iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
@@ -776,7 +761,7 @@ bool SelfLocalisation::CheckGameState(bool currently_incapacitated, const GameIn
         #endif
         return false;
     }
-    
+
     if (current_state == GameInformation::ReadyState)
     {   // if are in ready. If previously in initial or penalised do a reset. Also reset if fallen over.
         if (m_previous_game_state == GameInformation::InitialState)
@@ -874,7 +859,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     }
 
     clearModels();
-    
+
     // The models are always in the team's own half
     // Model 0: On left sideline facing in, 1/3 from half way
     // Model 1: On left sideline facing in, 2/3 from half way
@@ -882,12 +867,12 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     // Model 3: On right sideline facing in, 2/3 from half way
     // Model 4: In centre of own half facing opponents goal
     // Model 5: In goal keeper position facing opponents goal
-	 
+
     float left_y = 200.0;
     float left_heading = -PI/2;
     float right_y = -200.0;
     float right_heading = PI/2;
-    
+
     float front_x = -300.0/4.0f;
     float centre_x = -300.0/2.0f;
     float centre_heading = 0;
@@ -901,10 +886,11 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
         back_x = -back_x;
         goal_line_x = -goal_line_x;
     }
-    
+
     float cov_x = pow(100.f,2);
     float cov_y = pow(75.f,2);
-    float cov_head = pow(6.f,2);
+    //float cov_head = pow(6.f,2);
+    float cov_head = pow(1.f,2);
     Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
     Moment temp(3);
     temp.setCovariance(cov_matrix);
@@ -927,20 +913,20 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     temp.setMean(mean_matrix(back_x, left_y, left_heading));
     positions.push_back(temp);
 
-    // Postition 7
+    // Postition 5
     temp.setMean(mean_matrix(2*centre_x, 95.0f, centre_heading));
     positions.push_back(temp);
 
-    // Postition 8
+    // Postition 6
     temp.setMean(mean_matrix(2*centre_x, -95.0f, centre_heading));
     positions.push_back(temp);
 
-    // Postition 5
-    temp.setCovariance(covariance_matrix(pow(200.0f,2), pow(150.0f,2), pow(6.f,2)));
+    // Postition 7
+    temp.setCovariance(covariance_matrix(pow(200.0f,2), pow(150.0f,2), pow(1.f,2)));
     temp.setMean(mean_matrix(centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
-    // Postition 6
+    // Postition 8
     temp.setMean(mean_matrix(2*centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
@@ -1263,12 +1249,6 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
     measurementNoise[2][2] = 0.005*0.005; // Robot Theta. 0.00001
 
     // calculate the linear process noise.
-//    Matrix processNoise = Matrix(4,4,true);
-//    processNoise[0][0] = 20*20;
-//    processNoise[1][1] = 20*20;
-//    processNoise[2][2] = 40*40;
-//    processNoise[3][3] = 40*40;
-
     Matrix processNoise = Matrix(4,4,true);
     processNoise[0][0] = 2*2;
     processNoise[1][1] = 2*2;
@@ -1284,9 +1264,9 @@ bool SelfLocalisation::doTimeUpdate(float odomForward, float odomLeft, float odo
 
     bool result = false;
     processNoise = Matrix(3,3,false);
-    processNoise[0][0] = pow(0.5,2);
-    processNoise[1][1] = pow(0.5,2);
-    processNoise[2][2] = pow(0.01, 2);
+    processNoise[0][0] = pow(0.5f,2);
+    processNoise[1][1] = pow(0.5f,2);
+    processNoise[2][2] = pow(0.015f, 2);
 
     for (std::list<IKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
     {
@@ -1373,11 +1353,6 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
         }
         kf_return = 1;
         kf_return = (*model_it)->measurementUpdate(measurement, temp_error.errorCovariance(), args, RobotModel::klandmark_measurement);
-
-
-//        kf_return = m_robot_filters[modelID].fieldObjectmeas(flatObjectDistance, landmark.measuredBearing(),landmark.X(), landmark.Y(),
-//			distanceOffsetError, distanceRelativeError, bearingError);
-//        if(kf_return == Model::RESULT_OUTLIER) m_modelObjectErrors[modelID][landmark.getID()] += 1.0;
 
 #if DEBUG_LOCALISATION_VERBOSITY > 0
         if(kf_return != 1)
@@ -1480,7 +1455,6 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
         m_frame_log << "Position2: X = " << landmark2.X() << ", Y = " << landmark2.Y() <<std::endl;
         m_frame_log << "Current State: " << est.mean(0) << ", " << est.mean(1) << ", " << est.mean(2) << std::endl;
     #endif
-//        (*model_it)->updateAngleBetween(angle_beween_objects, landmark1.X(), landmark1.Y(), landmark2.X(), landmark2.Y(), c_twoObjectAngleVariance);
     }
 
     Vector2<float> position = TriangulateTwoObject(landmark1, landmark2);
@@ -1600,7 +1574,7 @@ int SelfLocalisation::PruneModels()
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
     {
         removeSimilarModels();
-        PruneViterbi(6);
+        PruneViterbi(c_MAX_MODELS_AFTER_MERGE);
     }
     else if (m_settings.pruneMethod() == LocalisationSettings::prune_nscan)
     {
@@ -1615,7 +1589,7 @@ int SelfLocalisation::PruneModels()
 */
 int SelfLocalisation::PruneMaxLikelyhood()
 {
-    return PruneViterbi(1);     // Max likelyhood is the equivalent of keeping the best 1 model.
+    return PruneViterbi(1);     // Max likelyhood is the equivalent of keeping the best model.
 }
 
 struct model_ptr_cmp
@@ -1659,52 +1633,52 @@ bool AlphaSumPredicate( const ParentSum& a, const ParentSum& b )
 */
 int SelfLocalisation::PruneNScan(unsigned int N)
 {
-    return PruneViterbi(1);
-//    std::vector<ParentSum> results;
-//    // Sum the alphas of sibling branches from a common parent at branch K-N
-//    for (std::list<IKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
-//    {
-//        if((*model_it)->active() == false) continue;
-//        unsigned int parent_id = (*model_it)->history(N);
-//        float alpha = (*model_it)->getFilterWeight();
-//        bool added = false;
-//        if(parent_id == 0) continue;
-//        // Sort all of the models
-//        for(std::vector<ParentSum>::iterator resIt = results.begin(); resIt != results.end(); ++resIt)
-//        {
-//            // Assign to existing sum.
-//            if(resIt->first == parent_id)
-//            {
-//                resIt->second += alpha;
-//                added = true;
-//                break;
-//            }
-//        }
-//        // If not able to assign to an existing sum create a new one.
-//        if(!added)
-//        {
-//            ParentSum temp = make_pair(parent_id, alpha);
-//            results.push_back(temp);
-//        }
-//    }
+    std::vector<ParentSum> results;
+    // Sum the alphas of sibling branches from a common parent at branch K-N
+    for (std::list<IKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
+    {
+        if((*model_it)->active() == false) continue;
+        unsigned int parent_id = (*model_it)->m_parent_history_buffer.at(N);
+        float alpha = (*model_it)->getFilterWeight();
+        bool added = false;
+        if(parent_id == 0) continue;
+        // Sort all of the models
+        for(std::vector<ParentSum>::iterator resIt = results.begin(); resIt != results.end(); ++resIt)
+        {
+            // Assign to existing sum.
+            if(resIt->first == parent_id)
+            {
+                resIt->second += alpha;
+                added = true;
+                break;
+            }
+        }
+        // If not able to assign to an existing sum create a new one.
+        if(!added)
+        {
+            ParentSum temp = make_pair(parent_id, alpha);
+            results.push_back(temp);
+        }
+    }
 
-//    if(results.size() > 0)
-//    {
-//        std::sort(results.begin(), results.end(), AlphaSumPredicate); // Sort by alpha sum, smallest to largest
-//        unsigned int bestParentId = results.back().first;       // Get the parent Id of the best branch.
+    if(results.size() > 0)
+    {
+        std::sort(results.begin(), results.end(), AlphaSumPredicate); // Sort by alpha sum, smallest to largest
+        unsigned int bestParentId = results.back().first;       // Get the parent Id of the best branch.
 
-//        // Remove all siblings not created from the best branch.
-//        for (std::list<IKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
-//        {
-//            if((*model_it)->history(N) == 0) continue;  // was not involved with this branch.
-//            if((*model_it)->history(N) != bestParentId)
-//            {
-//                (*model_it)->setActive(false);
-//            }
-//        }
-//    }
-//    removeInactiveModels();
-//    return 0;
+        // Remove all siblings not created from the best branch.
+        for (std::list<IKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
+        {
+            unsigned int parent_id = (*model_it)->m_parent_history_buffer.at(N);
+            if(parent_id == 0) continue;  // was not involved with this branch.
+            if(parent_id != bestParentId)
+            {
+                (*model_it)->setActive(false);
+            }
+        }
+    }
+    removeInactiveModels();
+    return 0;
 }
 
 /*! @brief Performs an ambiguous measurement update using the exhaustive process. This creates a new model for each possible location for the measurement.
@@ -1727,12 +1701,11 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
         {
             temp_object = *(*obj_it);
             temp_object.CopyObject(ambiguousObject);
-            //temp_mod = new Model(*(*model_it), ambiguousObject, *(*obj_it), error, GetTimestamp());
             temp_mod = newRobotModel(*model_it, temp_object, error, ambiguousObject.getID(), GetTimestamp());
+            new_models.push_back(temp_mod);
 
             if(temp_mod->active())
             {
-                new_models.push_back(temp_mod);
                 models_added++;
             }
 
@@ -1783,7 +1756,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
 */
 int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
-    const float outlier_factor = 0.0001;
+    const float outlier_factor = 0.001;
     std::list<IKalmanFilter*> new_models;
     IKalmanFilter* temp_mod, *curr_model;
 
@@ -1811,8 +1784,6 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
         {
             temp_object = *(*obj_it);
             temp_object.CopyObject(ambiguousObject);
-
-//            temp_mod = new Model(*curr_model, ambiguousObject, *(*obj_it), error, GetTimestamp());
             temp_mod = newRobotModel(curr_model, temp_object, error, ambiguousObject.getID(), GetTimestamp());
             new_models.push_back(temp_mod);
             if(temp_mod->active())
@@ -1853,7 +1824,8 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
 
 int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
 {
-    const float c_Max_Elapsed_Time = 1.0f;
+    const float c_Max_Elapsed_Time = 100.0f;
+    const float outlier_factor = 0.001;
 
     // First step: Check if the same ambiguous type has beem seen recently.
     float time_elapsed = ambiguousObject.TimeLastSeen() - m_pastAmbiguous[ambiguousObject.getID()].TimeLastSeen();
@@ -1873,8 +1845,6 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
         MeasurementError error = calculateError(ambiguousObject);
         float max_distance_deviation = error.distance();
         float max_heading_deviation = error.heading();
-
-        m_pastAmbiguous[ambiguousObject.getID()] = ambiguousObject;
 
         similar_meas_found = (dist_delta < max_distance_deviation) && (heading_delta < max_heading_deviation);
         if(similar_meas_found)
@@ -1896,8 +1866,15 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
                         StationaryObject update_object(*(*obj_it));
                         update_object.CopyMeasurement(ambiguousObject);
                         temp_model = newRobotModel((*model_it), update_object, error, ambiguousObject.getID(), GetTimestamp());
-                        new_models.push_back(temp_model);  // Copy the new model and add it to the new list.
-                        (*model_it)->setActive(false); // disable the old model.
+                        new_models.push_back(temp_model);  // add the model to the new list.
+                        if(temp_model->active())
+                        {
+                            (*model_it)->setActive(false); // disable the old model.
+                        }
+                        else
+                        {
+                            (*model_it)->setFilterWeight(outlier_factor * (*model_it)->getFilterWeight());
+                        }
                     }
                 }
                 // Check if model has been updated yet
@@ -1910,9 +1887,9 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
                         StationaryObject update_object(*(*option_it));
                         update_object.CopyMeasurement(ambiguousObject);
                         temp_model = newRobotModel((*model_it), update_object, error, ambiguousObject.getID(), GetTimestamp());
+                        new_models.push_back(temp_model);
                         if(temp_model->active())
                         {
-                            new_models.push_back(temp_model);
                             update_performed = true;
                         }
                     }
@@ -1922,18 +1899,22 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
                     }
                 }
             }
-            removeInactiveModels();
+            removeInactiveModels(new_models);
             m_robot_filters.insert(m_robot_filters.begin(),new_models.begin(), new_models.end());
         }
     }
+
+    int return_value = 0;
     if(!similar_meas_found or !similar_meas_found)
     {
         // Third Step (B): Perfrom splitting if measurement was not previously seen or not consistant.
         // Use the regular splitting method.
-        return ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
+        return_value = ambiguousLandmarkUpdateExhaustive(ambiguousObject, possibleObjects);
     }
+    // Save new info from object
+    m_pastAmbiguous[ambiguousObject.getID()] = ambiguousObject;
     removeInactiveModels();
-    return 0;
+    return return_value;
 }
 
 int SelfLocalisation::ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
@@ -1953,10 +1934,6 @@ bool SelfLocalisation::MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* mod
 
     if(success == false)
     {
-#if DEBUG_LOCALISATION_VERBOSITY > 2
-        cout << "Merge failed." <<std::endl;
-        debug_out  <<"[" << m_timestamp << "]: Merge Between model[" << model_a->id() << "] and model[" << model_b->id() << "] FAILED." << endl;
-#endif // DEBUG_LOCALISATION_VERBOSITY > 0
         return success;
     }
 
@@ -2003,13 +1980,80 @@ bool SelfLocalisation::MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* mod
     model_a->setFilterWeight(alphaMerged);
     model_a->m_creation_time = newest_creation_time;
 
-//    std::cout <<"[" << m_timestamp << "]: Merge Between model[" << model_a->id() << "] and model[" << model_b->id() << "]" << endl;
-//    std::cout << "pa:\n" << estimate_a.covariance() << std::endl;
-//    std::cout << "sqrt pa:\n" << cholesky(estimate_a.covariance()) << std::endl;
-//    std::cout << "pb:\n" << estimate_b.covariance() << std::endl;
-//    std::cout << "sqrt pb:\n" << cholesky(estimate_b.covariance()) << std::endl;
-//    std::cout << "pMerged:\n" << pMerged << std::endl;
-//    std::cout << "sqrt pMerged:\n" << cholesky(pMerged) << std::endl;
+    estimate_a.setMean(xMerged);
+    estimate_b.setCovariance(pMerged);
+
+    model_a->initialiseEstimate(estimate_a);
+
+    // Disable second model
+    model_a->setActive(true);
+    model_b->setActive(false);
+    return true;
+}
+
+bool SelfLocalisation::MergeTwoModelsPreserveBestMean(IKalmanFilter* model_a, IKalmanFilter* model_b)
+{
+    // Merges second model into first model, then disables second model.
+    bool success = true;
+    if(model_a == model_b) success = false; // Don't merge the same model.
+    if((not model_a->active()) or (not model_b->active())) success = false; // Both models must be active.
+
+    if(success == false)
+    {
+#if LOC_SUMMARY_LEVEL > 0
+        m_frame_log  <<"[" << m_timestamp << "]: Merge Between model[" << model_a->id() << "] and model[" << model_b->id() << "] FAILED." << endl;
+        if(model_a == model_b)
+        {
+            m_frame_log << "Reason - index: " << model_a->id() << " = " << "index: " << model_b->id() << std::endl;
+        } else if (model_a->active() == false)
+        {
+            m_frame_log << "Reason - model " << model_a->id() << " is inactive."<< std::endl;
+        } else if (model_b->active() == false)
+        {
+            m_frame_log << "Reason - model " << model_b->id() << " is inactive."<< std::endl;
+        }
+#endif // LOC_SUMMARY_LEVEL > 0
+#if DEBUG_LOCALISATION_VERBOSITY > 2
+        cout << "Merge failed." <<std::endl;
+        debug_out  <<"[" << m_timestamp << "]: Merge Between model[" << model_a->id() << "] and model[" << model_b->id() << "] FAILED." << endl;
+#endif // DEBUG_LOCALISATION_VERBOSITY > 0
+        return success;
+    }
+
+    // Merge alphas
+    double newest_creation_time = model_a->creationTime() > model_b->creationTime() ? model_a->creationTime() : model_b->creationTime();
+    double alphaMerged = model_a->getFilterWeight() + model_b->getFilterWeight();
+    double alphaA = model_a->getFilterWeight() / alphaMerged;
+    double alphaB = model_b->getFilterWeight() / alphaMerged;
+
+    Moment estimate_a = model_a->estimate();
+    Moment estimate_b = model_b->estimate();
+
+    Matrix xMerged; // Merge State matrix
+
+    // If one model is much more correct than the other, use the correct states.
+    // This prevents drifting from continuouse splitting and merging even when one model is much more likely.
+    if(alphaA > alphaB)
+    {
+        xMerged = estimate_a.mean();
+    }
+    else
+    {
+        xMerged = estimate_b.mean();
+    }
+
+    // Merge Covariance matrix (S = sqrt(P))
+    Matrix xDiff = estimate_a.mean() - xMerged;
+    Matrix pA = (estimate_a.covariance() + xDiff * xDiff.transp());
+
+    xDiff = estimate_b.mean() - xMerged;
+    Matrix pB = (estimate_b.covariance() + xDiff * xDiff.transp());
+
+    Matrix pMerged = alphaA * pA + alphaB * pB;
+
+    // Copy merged value to first model
+    model_a->setFilterWeight(alphaMerged);
+    model_a->m_creation_time = newest_creation_time;
 
     estimate_a.setMean(xMerged);
     estimate_b.setCovariance(pMerged);
@@ -2024,8 +2068,126 @@ bool SelfLocalisation::MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* mod
 
 double SelfLocalisation::MergeMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const
 {
-    if (model_a==model_b) return 10000.0;
+    if (model_a==model_b) return 10000.0;   // The same model
     if ((not model_a->active()) or (not model_b->active())) return 10000.0; //at least one model inactive
+//    return QuinlanMetric(model_a, model_b);
+//    return WilliamsMetric(model_a, model_b)*1e3;
+//    return SalmondMetric(model_a, model_b);
+    return RunnallMetric(model_a, model_b);
+
+}
+
+
+double MVE(const Matrix& x1, const Matrix& x2, const Matrix P1plusP2)
+{
+    Matrix xdiff = x1 - x2;
+    xdiff[RobotModel::kstates_heading][0] = normaliseAngle(xdiff[RobotModel::kstates_heading][0]);
+
+    double multiplier = pow(determinant(2*mathGeneral::PI*P1plusP2),-0.5);
+    double exponent = -0.5 * convDble(xdiff.transp() * InverseMatrix(P1plusP2) * xdiff);
+
+    return multiplier * exp(exponent);
+
+}
+
+bool SelfLocalisation::MetricTest()
+{
+    IKalmanFilter* a = newRobotModel();
+    IKalmanFilter* b = newRobotModel();
+    a->setFilterWeight(0.5);
+    b->setFilterWeight(0.5);
+
+    Matrix amean(1,1);
+    Matrix bmean(1,1);
+
+    Matrix acov(1,1);
+    Matrix bcov(1,1);
+
+    amean[0][0] = 0;
+    bmean[0][0] = 0;
+
+    acov[0][0] = 1;
+    bcov[0][0] = 6;
+
+    a->initialiseEstimate(Moment(amean, acov));
+    b->initialiseEstimate(Moment(bmean, bcov));
+
+    std::cout << "Test 1" << std::endl;
+    std::cout << "-Model A-" << std::endl << "Mean:" << std::endl << amean << std::endl << "Covariance:" << std::endl << acov << std::endl;
+    std::cout << "-Model B-" << std::endl << "Mean:" << std::endl << bmean << std::endl << "Covariance:" << std::endl << bcov << std::endl;
+
+    std::cout << "Salmond = " << SalmondMetric(a,b) << std::endl;
+    std::cout << "Williams = " << WilliamsMetric(a,b) << std::endl;
+    std::cout << "Runnall = " << RunnallMetric(a,b) << std::endl;
+
+    amean[0][0] = -0.1;
+    bmean[0][0] = 0.1;
+
+    acov[0][0] = 1;
+    bcov[0][0] = 1;
+
+    a->initialiseEstimate(Moment(amean, acov));
+    b->initialiseEstimate(Moment(bmean, bcov));
+
+    std::cout << "Test 2" << std::endl;
+    std::cout << "-Model A-" << std::endl << "Mean:" << std::endl << amean << std::endl << "Covariance:" << std::endl << acov << std::endl;
+    std::cout << "-Model B-" << std::endl << "Mean:" << std::endl << bmean << std::endl << "Covariance:" << std::endl << bcov << std::endl;
+
+    std::cout << "Salmond = " << SalmondMetric(a,b) << std::endl;
+    std::cout << "Williams = " << WilliamsMetric(a,b) << std::endl;
+    std::cout << "Runnall = " << RunnallMetric(a,b) << std::endl;
+    return true;
+}
+
+double SelfLocalisation::WilliamsMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const
+{
+    double wa = model_a->getFilterWeight();
+    double wb = model_b->getFilterWeight();
+    double wab = wa + wb;
+
+    Matrix xa = model_a->estimate().mean();
+    Matrix xb = model_b->estimate().mean();
+
+    Matrix Pa = model_a->estimate().covariance();
+    Matrix Pb = model_b->estimate().covariance();
+
+    Matrix xdiff = xa - xb;
+    Matrix Pab = wa / wab * Pa + wb / wab * Pb + wa * wb / (wab * wab) * xdiff * xdiff.transp();
+    Matrix xab = (wa*xa + wb*xb) / wab;
+
+
+    double Jhh = wa*wa*MVE(xa, xa, Pa + Pa) + wa*wb*MVE(xa, xb, Pa + Pb) + wb*wa*MVE(xb, xa, Pb + Pa) + wb*wb*MVE(xb, xb, Pb + Pb);
+    double Jhr = wa*wab*MVE(xa, xab, Pa + Pab) + wb*wab*MVE(xb, xab, Pb + Pab);
+    double Jrr = wab*wab*MVE(xab, xab, Pab + Pab);
+    return Jhh - 2 * Jhr + Jrr;
+}
+
+double SelfLocalisation::SalmondMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const
+{
+    double wa = model_a->getFilterWeight();
+    double wb = model_b->getFilterWeight();
+    double wab = wa + wb;
+
+    Matrix xdiff = model_a->estimate().mean() - model_b->estimate().mean();
+    Matrix Pab = wa / wab * model_a->estimate().covariance() + wb / wab * model_b->estimate().covariance() + wa * wb / (wab * wab) * xdiff * xdiff.transp();
+
+    return wa * wb / wab * convDble(xdiff.transp() * InverseMatrix(Pab) * xdiff);
+}
+
+double SelfLocalisation::RunnallMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const
+{
+    double wa = model_a->getFilterWeight();
+    double wb = model_b->getFilterWeight();
+    double wab = wa + wb;
+
+    Matrix xdiff = model_a->estimate().mean() - model_b->estimate().mean();
+    Matrix Pab = wa / wab * model_a->estimate().covariance() + wb / wab * model_b->estimate().covariance() + wa * wb / (wab * wab) * xdiff * xdiff.transp();
+
+    return 0.5 * (wab*log(determinant(Pab)) - wa*log(determinant(model_a->estimate().covariance())) - wb*log(determinant(model_b->estimate().covariance())));
+}
+
+double SelfLocalisation::QuinlanMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const
+{
     Moment estimate_a = model_a->estimate();
     Moment estimate_b = model_b->estimate();
     Matrix xdif = estimate_a.mean() - estimate_b.mean();
@@ -2128,15 +2290,11 @@ void SelfLocalisation::NormaliseAlphas()
 void SelfLocalisation::MergeModels(int maxAfterMerge)
 {
     MergeModelsBelowThreshold(0.001);
-  
-//  double threshold=0.04;
     double threshold=0.01;
-
     while (getNumActiveModels()>maxAfterMerge)
     {
         MergeModelsBelowThreshold(threshold);
-//      threshold*=5.0;
-        threshold+=0.01;
+        threshold*=5.0;
     }
     removeInactiveModels();
     return;
@@ -2180,34 +2338,6 @@ void SelfLocalisation::PrintModelStatus(const IKalmanFilter *model)
 void SelfLocalisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
 {
     double mergeM;
-    for (std::list<IKalmanFilter*>::iterator i = m_robot_filters.begin(); i != m_robot_filters.end(); ++i)
-    {
-        for (std::list<IKalmanFilter*>::iterator j = i; j != m_robot_filters.end(); ++j)
-        {
-            if((*i) == (*j))
-            {
-                continue;
-            }
-            IKalmanFilter* modelA = (*i);
-            IKalmanFilter* modelB = (*j);
-            if (modelA->active()==false || modelB->active()==false)
-            {
-                continue;
-            }
-            mergeM = abs( MergeMetric(modelA,modelB) );
-            if (mergeM < MergeMetricThreshold) { //0.5
-#if LOC_SUMMARY_LEVEL > 0
-            m_frame_log << "Model " << (*j)->id() << " merged into " << (*i)->id() << std::endl;
-#endif
-#if DEBUG_LOCALISATION_VERBOSITY > 2
-                debug_out  <<"[" << m_currentFrameNumber << "]: Merging Model[" << modelB->id() << "][alpha=" << modelB->getFilterWeight() << "]";
-                debug_out  << " into Model[" << modelA->id() << "][alpha=" << modelA->getFilterWeight() << "] " << " Merge Metric = " << mergeM << endl  ;
-#endif
-                MergeTwoModels(modelA,modelB);
-            }
-        }
-    }
-
     // New models
     for (std::list<IKalmanFilter*>::iterator i = m_robot_filters.begin(); i != m_robot_filters.end(); ++i)
     {
@@ -2224,7 +2354,7 @@ void SelfLocalisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
                 continue;
             }
             mergeM = abs( MergeMetric(modelA,modelB) );
-            if (mergeM < MergeMetricThreshold)
+            if (mergeM <= MergeMetricThreshold)
             { //0.5
 #if LOC_SUMMARY_LEVEL > 0
             m_frame_log << "Model " << (*j)->id() << " merged into " << (*i)->id() << std::endl;
@@ -2237,7 +2367,7 @@ void SelfLocalisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
             }
         }
     }
-
+    return;
 }
 
 bool SelfLocalisation::operator ==(const SelfLocalisation& b) const
@@ -2373,11 +2503,11 @@ std::istream& operator>> (std::istream& input, SelfLocalisation& p_loc)
  */
 void SelfLocalisation::clearModels()
 {
-    while(!m_robot_filters.empty())
+    for(std::list<IKalmanFilter*>::iterator loc_it = m_robot_filters.begin(); loc_it != m_robot_filters.end(); ++loc_it)
     {
-        delete m_robot_filters.back();
-        m_robot_filters.pop_back();
+        delete (*loc_it);
     }
+    m_robot_filters.clear();
 }
 
 
@@ -2648,6 +2778,8 @@ Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& ob
 
 bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall>& sharedBalls)
 {
+
+    // NOT IMPLEMENTED
     return false;
     std::vector<TeamPacket::SharedBall>::const_iterator their_ball = sharedBalls.begin();
 
