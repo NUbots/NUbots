@@ -18,7 +18,6 @@
 OfflineLocalisation::OfflineLocalisation(LogFileReader* reader, QObject *parent): QThread(parent), m_log_reader(reader)
 {
     m_workingSelfLoc = 0;
-    //Initialise(Localisation());
     m_stop_called = false;
     m_sim_data_available = false;
     m_num_models_created = 0;
@@ -89,7 +88,7 @@ bool OfflineLocalisation::OpenLogs(const std::string& initialLogPath)
 bool OfflineLocalisation::IsInitialised()
 {
     bool filesOpenOk = (m_log_reader->numFrames() > 0);
-    bool internalDataOk = internalDataOk and (m_workingSelfLoc != NULL) and (m_self_loc_frame_buffer.size() >= 0);
+    bool internalDataOk = (m_workingSelfLoc != NULL) and (m_self_loc_frame_buffer.size() >= 0);
     QStringList availableData = m_log_reader->AvailableData();
     bool all_data_available = HasRequiredData(availableData);
 
@@ -173,18 +172,103 @@ void OfflineLocalisation::run()
         {
             break;
         }
+/*
+        AmbiguousObject t_corner(FieldObjects::FO_CORNER_UNKNOWN_T, "Unknown T");
+        AmbiguousObject l_corner(FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L, "Unknown Inside L");
+
+        AmbiguousObject b_post(FieldObjects::FO_BLUE_GOALPOST_UNKNOWN, "Unknown Blue Post");
+        AmbiguousObject y_post(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
+
+
+        b_post.setIsVisible(true);
+        y_post.setIsVisible(true);
+        l_corner.setIsVisible(true);
+        t_corner.setIsVisible(true);
+
+        b_post.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
+        b_post.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
+
+        y_post.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
+        y_post.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
+
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_LEFT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_T_RIGHT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_LEFT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_CENTRE_T_RIGHT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_LEFT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_T_RIGHT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT);
+        t_corner.addPossibleObjectID(FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT);
+
+
+        l_corner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_LEFT);
+        l_corner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_FIELD_RIGHT);
+        l_corner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_LEFT);
+        l_corner.addPossibleObjectID(FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT);
+        l_corner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_LEFT);
+        l_corner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_PEN_RIGHT);
+        l_corner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_LEFT);
+        l_corner.addPossibleObjectID(FieldObjects::FO_CORNER_BLUE_FIELD_RIGHT);
+
+        for(std::vector<StationaryObject>::iterator object = tempObjects->stationaryFieldObjects.begin(); object != tempObjects->stationaryFieldObjects.end(); ++object)
+        {
+            if(object->isObjectVisible() == false) continue;
+            switch(object->getID())
+            {
+                case FieldObjects::FO_BLUE_LEFT_GOALPOST:
+                case FieldObjects::FO_BLUE_RIGHT_GOALPOST:
+                    b_post.CopyMeasurement(*object);
+                    object->setIsVisible(false);
+                    tempObjects->ambiguousFieldObjects.push_back(b_post);
+                    break;
+
+                case FieldObjects::FO_YELLOW_LEFT_GOALPOST:
+                case FieldObjects::FO_YELLOW_RIGHT_GOALPOST:
+                    y_post.CopyMeasurement(*object);
+                    object->setIsVisible(false);
+                    tempObjects->ambiguousFieldObjects.push_back(y_post);
+                    break;
+
+                case FieldObjects::FO_CORNER_YELLOW_FIELD_LEFT:
+                case FieldObjects::FO_CORNER_YELLOW_FIELD_RIGHT:
+                case FieldObjects::FO_CORNER_YELLOW_PEN_LEFT:
+                case FieldObjects::FO_CORNER_YELLOW_PEN_RIGHT:
+                case FieldObjects::FO_CORNER_BLUE_PEN_LEFT:
+                case FieldObjects::FO_CORNER_BLUE_PEN_RIGHT:
+                case FieldObjects::FO_CORNER_BLUE_FIELD_LEFT:
+                case FieldObjects::FO_CORNER_BLUE_FIELD_RIGHT:
+                    l_corner.CopyMeasurement(*object);
+                    object->setIsVisible(false);
+                    tempObjects->ambiguousFieldObjects.push_back(l_corner);
+                    break;
+                case FieldObjects::FO_CORNER_YELLOW_T_LEFT:
+                case FieldObjects::FO_CORNER_YELLOW_T_RIGHT:
+                case FieldObjects::FO_CORNER_CENTRE_T_LEFT:
+                case FieldObjects::FO_CORNER_CENTRE_T_RIGHT:
+                case FieldObjects::FO_CORNER_BLUE_T_LEFT:
+                case FieldObjects::FO_CORNER_BLUE_T_RIGHT:
+                case FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_LEFT:
+                case FieldObjects::FO_CORNER_PROJECTED_T_YELLOW_RIGHT:
+                case FieldObjects::FO_CORNER_PROJECTED_T_BLUE_LEFT:
+                case FieldObjects::FO_CORNER_PROJECTED_T_BLUE_RIGHT:
+                    t_corner.CopyMeasurement(*object);
+                    object->setIsVisible(false);
+                    tempObjects->ambiguousFieldObjects.push_back(t_corner);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        */
 
         for(std::vector<AmbiguousObject>::iterator object = tempObjects->ambiguousFieldObjects.begin(); object != tempObjects->ambiguousFieldObjects.end(); ++object)
         {
             // Add if seen
             if(object->isObjectVisible())
             {
-                // Ignore the mobile objects for now.
-                if(object->getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN) continue;
-                if(object->getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN) continue;
-                if(object->getID() == FieldObjects::FO_ROBOT_UNKNOWN) continue;
-                if(object->getID() == FieldObjects::FO_OBSTACLE) continue;
-
                 if(object->getID() == FieldObjects::FO_CORNER_UNKNOWN_T or object->getID() == FieldObjects::FO_CORNER_UNKNOWN_INSIDE_L
                         or object->getID() == FieldObjects::FO_CORNER_UNKNOWN_OUTSIDE_L)
                 {
