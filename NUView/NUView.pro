@@ -378,7 +378,6 @@ HEADERS += \
     ../Vision/VisionWrapper/datawrappercurrent.h \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.h \
     ../Vision/VisionWrapper/datawrappernuview.h \
-    ../Vision/VisionTools/pccamera.h \
     ../Vision/VisionTools/lookuptable.h \
     ../Vision/VisionTools/classificationcolours.h \
     ../Vision/VisionTools/transformer.h \
@@ -391,7 +390,6 @@ SOURCES += \
     ../Vision/VisionTypes/*.cpp \
     ../Vision/VisionTypes/RANSACTypes/*.cpp \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
-    ../Vision/VisionTools/pccamera.cpp \
     ../Vision/VisionTools/lookuptable.cpp \
     ../Vision/VisionTools/classificationcolours.cpp \
     ../Vision/VisionTools/transformer.cpp \
@@ -405,9 +403,16 @@ SOURCES += \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.cpp \
     ../Vision/VisionWrapper/datawrappernuview.cpp \
 
+# pccamera uses Video4Linux, so only works on linux systems.
+!macx{
+    !win32{
+        HEADERS += ../Vision/VisionTools/pccamera.h \
+        SOURCES += ../Vision/VisionTools/pccamera.cpp \
+    }
+}
+
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
 FORMS += \
     OfflineLocalisationSettingsDialog.ui \
     createqwtsymboldialog.ui
-
 
