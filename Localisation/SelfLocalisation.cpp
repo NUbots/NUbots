@@ -15,11 +15,11 @@
 #include "nubotconfig.h"
 
 #include "Tools/Profiling/Profiler.h"
-#include "Tools/Math/Filters/IKalmanFilter.h"
-#include "Tools/Math/Filters/KFBuilder.h"
-#include "Tools/Math/Filters/IKFModel.h"
-#include "Tools/Math/Filters/MobileObjectModel.h"
-#include "Tools/Math/Filters/RobotModel.h"
+#include "Localisation/Filters/IKalmanFilter.h"
+#include "Localisation/Filters/KFBuilder.h"
+#include "Localisation/Filters/IKFModel.h"
+#include "Localisation/Filters/MobileObjectModel.h"
+#include "Localisation/Filters/RobotModel.h"
 #include <algorithm>
 
 #include <assert.h>

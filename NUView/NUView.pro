@@ -191,9 +191,9 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
     ../Tools/Math/statistics.h \
     OfflineLocBatch.h \
-    ../Tools/Math/Filters/UnscentedTransform.h \
-    ../Tools/Math/Filters/UKF.h \
-    ../Tools/Math/Filters/MobileObjectUKF.h \
+    ../Localisation/Filters/UnscentedTransform.h \
+    ../Localisation/Filters/UKF.h \
+    ../Localisation/Filters/MobileObjectUKF.h \
     ../Tools/Math/depUKF.h \
     ../Localisation/iotests.h \
     NUViewConfig/*.h \
@@ -206,15 +206,15 @@ HEADERS += ui_mainwindow.h \
     ../ConfigSystem/ConfigStorageManager.h \
     ../ConfigSystem/ConfigTree.h \
     ../ConfigSystem/Configurable.h \
-    ../Tools/Math/Filters/IKalmanFilter.h \
-    ../Tools/Math/Filters/SeqUKF.h \
-    ../Tools/Math/Filters/IKFModel.h \
-    ../Tools/Math/Filters/MobileObjectModel.h \
-    ../Tools/Math/Filters/RobotModel.h \
-    ../Tools/Math/Filters/KFBuilder.h \
-    ../Tools/Math/Filters/BasicUKF.h \
-    ../Tools/Math/Filters/SrBasicUKF.h \
-    ../Tools/Math/Filters/SrSeqUKF.h \
+    ../Localisation/Filters/IKalmanFilter.h \
+    ../Localisation/Filters/SeqUKF.h \
+    ../Localisation/Filters/IKFModel.h \
+    ../Localisation/Filters/MobileObjectModel.h \
+    ../Localisation/Filters/RobotModel.h \
+    ../Localisation/Filters/KFBuilder.h \
+    ../Localisation/Filters/BasicUKF.h \
+    ../Localisation/Filters/SrBasicUKF.h \
+    ../Localisation/Filters/SrSeqUKF.h \
     BatchSelectDialog.h \
 
 !win32 {
@@ -280,6 +280,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/sphere.cpp \
     ../Localisation/cylinder.cpp \
     ../Localisation/cameramatrix.cpp \
+    ../Tools/Math/depUKF.cpp \
     ../Tools/Math/matrix.cpp \
     localisationwidget.cpp \
     #../VisionOld/Ball.cpp \
@@ -343,9 +344,8 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
     ../Tools/Math/statistics.cpp \
     OfflineLocBatch.cpp \
-    ../Tools/Math/Filters/UKF.cpp \
-    ../Tools/Math/Filters/MobileObjectUKF.cpp \
-    ../Tools/Math/depUKF.cpp \
+    ../Localisation/Filters/UKF.cpp \
+    ../Localisation/Filters/MobileObjectUKF.cpp \
     ../Localisation/iotests.cpp \
     plotdisplay.cpp \
     plotselectionwidget.cpp \
@@ -355,13 +355,13 @@ SOURCES += mainwindow.cpp \
     ../ConfigSystem/ConfigStorageManager.cpp \
     ../ConfigSystem/ConfigTree.cpp \
     ../ConfigSystem/Configurable.cpp \
-    ../Tools/Math/Filters/SeqUKF.cpp \
-    ../Tools/Math/Filters/MobileObjectModel.cpp \
-    ../Tools/Math/Filters/RobotModel.cpp \
-    ../Tools/Math/Filters/KFBuilder.cpp \
-    ../Tools/Math/Filters/BasicUKF.cpp \
-    ../Tools/Math/Filters/SrBasicUKF.cpp \
-    ../Tools/Math/Filters/SrSeqUKF.cpp \
+    ../Localisation/Filters/SeqUKF.cpp \
+    ../Localisation/Filters/MobileObjectModel.cpp \
+    ../Localisation/Filters/RobotModel.cpp \
+    ../Localisation/Filters/KFBuilder.cpp \
+    ../Localisation/Filters/BasicUKF.cpp \
+    ../Localisation/Filters/SrBasicUKF.cpp \
+    ../Localisation/Filters/SrSeqUKF.cpp \
     BatchSelectDialog.cpp \
 
 !win32{

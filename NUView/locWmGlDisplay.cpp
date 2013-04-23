@@ -9,9 +9,9 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Tools/Math/Limit.h"
 
-#include "Tools/Math/Filters/MobileObjectModel.h"
-#include "Tools/Math/Filters/IKalmanFilter.h"
-#include "Tools/Math/Filters/RobotModel.h"
+#include "Localisation/Filters/MobileObjectModel.h"
+#include "Localisation/Filters/IKalmanFilter.h"
+#include "Localisation/Filters/RobotModel.h"
 
 // Apple has to be different...
 #if defined(__APPLE__) || defined(MACOSX)
