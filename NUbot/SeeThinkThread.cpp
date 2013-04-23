@@ -29,7 +29,6 @@
 #include "NUPlatform/NUIO.h"
 #include "NUbot.h"
 #include "SeeThinkThread.h"
-#include "Localisation/LocWmFrame.h"
 #include "nubotdataconfig.h"
 
 //#define LOGGING_ENABLED 1
