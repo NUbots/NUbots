@@ -14,7 +14,7 @@ void TCPServer::broadcast(std::string message) {
 }
 
 void TCPServer::start_accept() {
-	TCPConnection::pointer new_connection = TCPConnection::create(acceptor_.io_service());
+    TCPConnection::pointer new_connection = TCPConnection::create(acceptor_.get_io_service());
 	acceptor_.async_accept(new_connection->socket(), boost::bind(&TCPServer::handle_accept, this, new_connection, boost::asio::placeholders::error));
 }
 
