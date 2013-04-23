@@ -110,6 +110,7 @@ public:
         {
             return false;
         }
+        return true;
     }
     bool operator !=(const IKalmanFilter& b) const
     {return (!((*this) == b));}
