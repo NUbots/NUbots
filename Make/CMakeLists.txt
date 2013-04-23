@@ -127,8 +127,10 @@ SET( CMAKE_COLOR_MAKEFILE TRUE )
 ############################ FIND PACKAGES
 
 FIND_PACKAGE( PTHREAD REQUIRED )
-FIND_PACKAGE( BOOST REQUIRED )
+FIND_PACKAGE( Boost COMPONENTS filesystem system iostreams REQUIRED)
 FIND_PACKAGE( RT )
+FIND_PACKAGE( ZMQ REQUIRED)
+FIND_PACKAGE( Protobuf REQUIRED)
 
 ############################ targetconfig.h GENERATION
 CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/targetconfig.in"
@@ -204,6 +206,8 @@ ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
 INCLUDE_DIRECTORIES( ${PTHREAD_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIR}
                      ${LIBRT_INCLUDE_DIR}
+		     ${ZMQ_INCLUDE_DIR}
+	             ${PROTOBUF_INCLUDE_DIRS}
 )
 
 IF (DEBUG)
@@ -232,7 +236,12 @@ TARGET_LINK_LIBRARIES( nubot
                        ${PTHREAD_LIBRARIES}
                        ${Boost_LIBRARIES}
                        ${LIBRT_LIBRARIES}
+		       ${ZMQ_LIBRARIES}
+			${PROTOBUF_LIBRARIES}
 )
+
+LIST(APPEND NUBOT_LINK_LIBRARIES TARGET_LINK_LIBRARIES)
+
 
 ############################ BINARY COPY
 # copy binaries in the output folder automatically
