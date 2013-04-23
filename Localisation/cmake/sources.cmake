@@ -21,7 +21,6 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  pose2d.h
-               probabilityUtils.cpp probabilityUtils.h
 		SelfLocalisation.cpp SelfLocalisation.h
 		MeasurementError.cpp MeasurementError.h
 		LocalisationSettings.cpp LocalisationSettings.h
