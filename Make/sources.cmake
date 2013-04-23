@@ -59,5 +59,5 @@ LIST(APPEND NUBOT_LINK_LIBRARIES protobuf)
 # Build protocol buffer classes
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
-file(GLOB ProtoFiles "/home/darwin/robocup/NUPlatform/NUAPI/proto/*.proto")
+file(GLOB ProtoFiles "../NUPlatform/NUAPI/proto/*.proto")
 PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
