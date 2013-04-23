@@ -1,8 +1,6 @@
 #ifndef SELF_LOCWM_H_DEFINED
 #define SELF_LOCWM_H_DEFINED
-#include "Models/SelfSRUKF.h"
-#include "Models/SelfUKF.h"
-#include "Tools/Math/Filters/MobileObjectUKF.h"
+
 
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
@@ -17,6 +15,8 @@ class NUSensorsData;
 #include <sstream>
 #include <list>
 
+#include "MeasurementError.h"
+
 // Debug output level.
 // Please follow this guide.
 // 0 - No messages
@@ -25,13 +25,17 @@ class NUSensorsData;
 // 3 - All messages
 // #define  DEBUG_LOCALISATION_VERBOSITY 3
 
-//#define LOC_SUMMARY 3
+#define LOC_SUMMARY_LEVEL 3
 
-typedef SelfSRUKF Model;
+//typedef SelfSRUKF Model;
 //typedef SelfUKF Model;
-typedef std::list<SelfModel*> ModelContainer;
+//typedef std::list<SelfModel*> ModelContainer;
 typedef std::pair<unsigned int, float> ParentSum;
 #include "LocalisationSettings.h"
+
+class IKalmanFilter;
+class KFBuilder;
+class Moment;
 
 class SelfLocalisation: public TimestampedData
 {
@@ -46,11 +50,15 @@ class SelfLocalisation: public TimestampedData
         void ProcessObjects(FieldObjects* fobs, float time_increment);
         void writeToLog();
         bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double time_increment);
-        void WriteModelToObjects(const SelfModel* model, FieldObjects* fobs);
-        bool clipModelToField(SelfModel* theModel);
+        void WriteModelToObjects(const IKalmanFilter* model, FieldObjects* fobs);
+        bool clipRobotState(Moment* estimate, int stateIndex, double minValue, double maxValue);
+        bool clipEstimateToField(Moment* estimate);
         bool clipActiveModelsToField();
 
-        int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
+        void IndividualStationaryObjectUpdate(FieldObjects* fobs, float time_increment);
+//        void ParallellStationaryObjectUpdate(FieldObjects* fobs, float time_increment);
+
+//        int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
         int landmarkUpdate(StationaryObject &landmark);
         bool ballUpdate(const MobileObject& ball);
         bool sharedBallUpdate(const std::vector<TeamPacket::SharedBall>& sharedBalls);
@@ -62,14 +70,14 @@ class SelfLocalisation: public TimestampedData
         int ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int ambiguousLandmarkUpdateSelective(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
         int ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
-        int ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject);
+        int ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects);
 
 
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         unsigned int getNumActiveModels();
         unsigned int getNumFreeModels();
-        const SelfModel* getBestModel() const;
-        const MobileObjectUKF* getBallModel() const;
+        const IKalmanFilter* getBestModel() const;
+        const IKalmanFilter* getBallModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
 
@@ -82,11 +90,23 @@ class SelfLocalisation: public TimestampedData
         int PruneNScan(unsigned int N);
         void MergeModels(int maxAfterMerge);
 
+        // New merge
+        bool MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* model_b);
+        bool MergeTwoModelsPreserveBestMean(IKalmanFilter* model_a, IKalmanFilter* model_b);
+        double MergeMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+
+        double WilliamsMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+        double SalmondMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+        double RunnallMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+        double QuinlanMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+
+        bool MetricTest();
+
         // Merging helper functions.
-        bool MergeTwoModels(SelfModel* modelA, SelfModel* modelB);
-        double MergeMetric(const SelfModel* modelA, const SelfModel* modelB) const;
+//        bool MergeTwoModels(SelfModel* modelA, SelfModel* modelB);
+//        double MergeMetric(const SelfModel* modelA, const SelfModel* modelB) const;
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
-        void PrintModelStatus(const SelfModel* model);
+        void PrintModelStatus(const IKalmanFilter* model);
         std::string ModelStatusSummary();
 
         void removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& ambiguousobjects, bool yellow_seen, bool blue_seen);
@@ -98,16 +118,17 @@ class SelfLocalisation: public TimestampedData
         float m_timeSinceFieldObjectSeen;     // the time since a useful field object has been seen
 
         unsigned int removeInactiveModels();
-        static unsigned int removeInactiveModels(ModelContainer& container);
-        const ModelContainer allModels() const
-        {return m_models;}
+        static unsigned int removeInactiveModels(std::list<IKalmanFilter*>& container);
+        const std::list<IKalmanFilter*>& allModels() const
+        {return m_robot_filters;}
 
         // Model Reset Functions
         void initSingleModel(float x, float y, float heading);
-        void initBallModel(MobileObjectUKF* ball_model);
+        void initBallModel(IKalmanFilter* ball_model);
         bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
         void doInitialReset(GameInformation::TeamColour team_colour);
         void doSingleInitialReset(GameInformation::TeamColour team_colour);
+        void doSingleReset();
         void doSetReset(GameInformation::TeamColour team_colour, int player_number, bool have_kickoff);
         void doPenaltyReset();
         void doBallOutReset();
@@ -116,15 +137,22 @@ class SelfLocalisation: public TimestampedData
         void resetSdMatrix(int modelNumber);
         void swapFieldStateTeam(float& x, float& y, float& heading);
 
+        IKalmanFilter* newBallModel();
+        IKalmanFilter* robotFilter();
+
+        IKalmanFilter* newRobotModel();
+        IKalmanFilter* newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError&  error,
+                                     int ambiguous_id, double timestamp);
         static Matrix mean_matrix(float x, float y, float heading);
         static Matrix covariance_matrix(float x_var, float y_var, float heading_var);
         void InitialiseModels(const std::vector<Moment>& positions);
-        void setModels(ModelContainer& newModels);
+        void setModels(std::list<IKalmanFilter*>& newModels);
 
         void addToBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var);
         void setBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var);
 
         void clearModels();
+        void removeSimilarModels();
 
         std::vector<TeamPacket::SharedBall> FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls);
 
@@ -175,12 +203,17 @@ class SelfLocalisation: public TimestampedData
     protected:
         MeasurementError calculateError(const Object& theObject);
         Vector2<float> TriangulateTwoObject(const StationaryObject& object1, const StationaryObject& object2);
+        vector<StationaryObject*> filterToVisible(const Self& location, const vector<StationaryObject*>& possibleObjects, float headPan, float fovX);
+        void init();
 
         // Multiple Models Stuff
-        static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
+        static const int c_MAX_MODELS_AFTER_MERGE = 8; // Max models at the end of the frame
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
-        ModelContainer m_models;
-        MobileObjectUKF* m_ball_model;
+//        ModelContainer m_models;
+
+        std::list<IKalmanFilter*> m_robot_filters;
+
+        IKalmanFilter* m_ball_filter;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
         ofstream debug_file; // Logging file
@@ -204,6 +237,7 @@ class SelfLocalisation: public TimestampedData
 
         std::vector<AmbiguousObject> m_pastAmbiguous;
         std::vector<TeamPacket::SharedBall> m_prevSharedBalls;
+        unsigned int total_bad_known_objects;
 
         // Outlier tuning Constants -- Values assigned in SelfLocalisation.cpp
         static const float c_LargeAngleSD;

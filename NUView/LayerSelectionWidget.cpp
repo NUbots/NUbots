@@ -355,7 +355,7 @@ void LayerSelectionWidget::enabledSettingChanged(bool enabled)
     }
     else
     {
-        currentDisplay->setOverlayDrawing(selectedLayerID, layerEnabledCheckBox->isChecked());
+        currentDisplay->setOverlayDrawing(selectedLayerID, enabled);
         currentDisplay->update();
     }
 

@@ -31,7 +31,6 @@
 #include <string.h>
 #include <errno.h>
 #if defined(USE_LOCALISATION)
-    #include "Localisation/Localisation.h"
     #include "Localisation/SelfLocalisation.h"
 #endif
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -275,29 +274,6 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
 }
 
 #if defined(USE_LOCALISATION)
-    void TcpPort::sendData(const Localisation& p_locwm, const FieldObjects& p_objects)
-    {
-        #if DEBUG_NETWORK_VERBOSITY > 4
-            debug << "Sending worldmodel packet" << endl;
-        #endif
-        network_data_t netdata;
-        network_data_t sizedata;
-        stringstream buffer;
-        buffer << p_locwm;
-        buffer << p_objects;
-
-        std::string string = buffer.str();
-        netdata.data = (char*) string.c_str();
-        netdata.size = string.size();
-
-        int totalsize = netdata.size;
-        sizedata.data = reinterpret_cast<char*>(&totalsize);
-        sizedata.size = sizeof(totalsize);
-
-        sendData(sizedata);
-        sendData(netdata);
-    }
-
     void TcpPort::sendData(const SelfLocalisation& p_locwm, const FieldObjects& p_objects)
     {
         #if DEBUG_NETWORK_VERBOSITY > 4

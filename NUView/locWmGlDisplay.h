@@ -4,7 +4,6 @@
 #include <QGLWidget>
 #include "Localisation/SelfLocalisation.h"
 
-class KF;
 class Localisation;
 class FieldObjects;
 class Object;
@@ -14,6 +13,7 @@ class SelfLocalisation;
 class GLUquadric;
 class Matrix;
 class QPoint;
+class IKalmanFilter;
 
 struct FieldPose
 {
@@ -37,17 +37,6 @@ public:
     QByteArray saveState() const;
 
 public slots:
-    void SetLocalisation(const Localisation* newLocalisation)
-    {
-        currentLocalisation = newLocalisation;
-        update();
-    }
-    void SetLocalLocalisation(const Localisation* newLocalisation)
-    {
-        localLocalisation = newLocalisation;
-        update();
-    }
-
     void setSelfLocalisation(const SelfLocalisation* newSelfLoc)
     {
         m_self_loc = newSelfLoc;
@@ -68,6 +57,17 @@ public slots:
       @brief Copy the current image displayed to the system clipboard.
       */
     void snapshotToClipboard();
+    void setDisplayDisabled(bool isDisabled = true)
+    {
+        m_displayEnabled = not isDisabled;
+        if(m_displayEnabled) update();
+    }
+
+    void setDisplayEnabled(bool isEnabled = true)
+    {
+        m_displayEnabled = isEnabled;
+        if(m_displayEnabled) update();
+    }
 
 public slots:
     void setXRotation(int angle);
@@ -109,24 +109,19 @@ protected:
         FieldPose CalculateErrorElipse(float xx, float xy, float yy);
         void DrawElipse(const QPoint& location, const QPoint& size, float angle, const QColor& lineColour, const QColor& fillColour);
 
-        void DrawModelObjects(const KF& model, const QColor& modelColor);
-        void DrawModelObjects(const SelfModel& model, const MobileObjectUKF& ball_model, const QColor& modelColor);
+        void DrawModelObjects(const Moment& model, const Moment& ball_model, const QColor& modelColor);
         void DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor);
         void DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor);
 
-        void DrawModelMarkers(const KF& model,const QColor& modelColor);
-        void DrawModelMarkers(const SelfModel* model, const QColor& modelColor);
-        void DrawLocalisationMarkers(const Localisation& localisation, const QColor& modelColor);
+        void DrawModelMarkers(const Moment& model, const QColor& modelColor);
         void drawLocalisationMarkers(const SelfLocalisation& localisation, const QColor& modelColor);
-
-        void DrawLocalisationOverlay(const Localisation& localisation, const QColor& modelColor);
 
         void drawStationaryObjectLabel(const StationaryObject& object);
         void drawFieldObjectLabels(const FieldObjects& theFieldObjectsobject);
 
         void drawLegend(QPainter* painter);
 
-        FieldPose calculateBallPosition(const SelfModel& robot_model, const MobileObjectUKF& ball_model);
+        FieldPose calculateBallPosition(const Moment& robot_model, const Moment& ball_estimate);
 
         GLuint robotAuraTexture;
         GLuint fieldLineTexture;
@@ -139,8 +134,6 @@ protected:
         int zRot;
         QPoint lastPos;
 
-        const Localisation* currentLocalisation;
-        const Localisation* localLocalisation;
         const FieldObjects* currentObjects;
         const SelfLocalisation* m_self_loc;
         NUSensorsData* currentSensorData;
@@ -159,6 +152,7 @@ protected:
         bool drawSigmaPoints;
         bool drawBestModelOnly;
         bool m_showBall;
+        bool m_displayEnabled;
 
 };
 

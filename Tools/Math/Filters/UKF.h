@@ -30,7 +30,7 @@
 #include "Tools/Math/Matrix.h"
 #include "UnscentedTransform.h"
 
-class UKF: public UnscentedTransform, public Moment
+class UKF: public Moment, public UnscentedTransform
 {
 public:
     UKF();
@@ -42,6 +42,7 @@ public:
     // They are virtual in case the need to be redefined, but the default functions should work in most cases.
     virtual bool timeUpdate(double deltaT, const Matrix& measurment, const Matrix& linearProcessNoise, const Matrix& measurementNoise);
     virtual bool measurementUpdate(const Matrix& measurement, const Matrix& measurementNoise, const Matrix& measurementArgs = Matrix());
+    virtual void initialiseModel(const Matrix& mean, const Matrix& covariance);
 
     bool operator ==(const UKF& b) const;
     bool operator !=(const UKF& b) const
@@ -64,8 +65,11 @@ public:
 protected:
    Matrix m_mean_weights;
    Matrix m_covariance_weights;
+   Matrix m_sqrt_covariance_weights;
    Matrix m_sigma_points;
    Matrix m_sigma_mean;
+   Matrix m_C;
+   Matrix m_d;
 
    // Functions for performing steps of the UKF algorithm.
    void CalculateWeights();

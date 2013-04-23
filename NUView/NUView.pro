@@ -98,8 +98,6 @@ HEADERS += ui_mainwindow.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../Tools/FileFormats/Parse.h \
-    ../Localisation/KF.h \
-    ../Localisation/Localisation.h \
     ../Infrastructure/FieldObjects/WorldModelShareObject.h \
     ../Infrastructure/GameInformation/GameInformation.h \
     ../Tools/Threading/Thread.h \
@@ -152,8 +150,6 @@ HEADERS += ui_mainwindow.h \
 #    ../VisionOld/EllipseFitting/jama_lu.h \
 #    ../VisionOld/EllipseFitting/jama_eig.h \
 #    ../VisionOld/EllipseFitting/jama_cholesky.h \
-    ../Localisation/odometryMotionModel.h \
-    ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
     locwmstreamwidget.h \
@@ -185,10 +181,7 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/FileFormatException.h \
     offlinelocalisationdialog.h \
     ../Tools/Math/Moment.h \
-    ../Localisation/Models/SelfModel.h \
-    ../Localisation/Models/SelfUKF.h \
     ../Localisation/SelfLocalisation.h \
-    ../Localisation/Models/SelfSRUKF.h \
     ../Localisation/MeasurementError.h \
     ../Localisation/SelfLocalisationTests.h \
     OfflineLocalisationSettingsDialog.h \
@@ -201,7 +194,6 @@ HEADERS += ui_mainwindow.h \
     ../Tools/Math/Filters/UnscentedTransform.h \
     ../Tools/Math/Filters/UKF.h \
     ../Tools/Math/Filters/MobileObjectUKF.h \
-    ../Localisation/Models/WeightedModel.h \
     ../Tools/Math/depUKF.h \
     ../Localisation/iotests.h \
     NUViewConfig/*.h \
@@ -213,7 +205,17 @@ HEADERS += ui_mainwindow.h \
     ../ConfigSystem/ConfigRange.h \
     ../ConfigSystem/ConfigStorageManager.h \
     ../ConfigSystem/ConfigTree.h \
-    ../ConfigSystem/Configurable.h
+    ../ConfigSystem/Configurable.h \
+    ../Tools/Math/Filters/IKalmanFilter.h \
+    ../Tools/Math/Filters/SeqUKF.h \
+    ../Tools/Math/Filters/IKFModel.h \
+    ../Tools/Math/Filters/MobileObjectModel.h \
+    ../Tools/Math/Filters/RobotModel.h \
+    ../Tools/Math/Filters/KFBuilder.h \
+    ../Tools/Math/Filters/BasicUKF.h \
+    ../Tools/Math/Filters/SrBasicUKF.h \
+    ../Tools/Math/Filters/SrSeqUKF.h \
+    BatchSelectDialog.h \
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -290,9 +292,6 @@ SOURCES += mainwindow.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
-    ../Localisation/KF.cpp \
-    ../Localisation/Models/SelfUKF.cpp \
-    ../Localisation/Localisation.cpp \
     ../Infrastructure/FieldObjects/WorldModelShareObject.cpp \
     ../Infrastructure/GameInformation/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
@@ -308,8 +307,6 @@ SOURCES += mainwindow.cpp \
     ../Motion/Tools/MotionScript.cpp \
     ../Motion/Tools/MotionCurves.cpp \
     #../VisionOld/EllipseFit.cpp \
-    ../Localisation/odometryMotionModel.cpp \
-    ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
     locwmstreamwidget.cpp \
@@ -317,7 +314,6 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Rectangle.cpp \
     ../NUPlatform/NUCamera.cpp \
     #../VisionOld/fitellipsethroughcircle.cpp \
-    ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
@@ -337,9 +333,7 @@ SOURCES += mainwindow.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
     ../Tools/Math/Moment.cpp \
-    ../Localisation/Models/SelfModel.cpp \
     ../Localisation/SelfLocalisation.cpp \
-    ../Localisation/Models/SelfSRUKF.cpp \
     ../Localisation/MeasurementError.cpp \
     ../Localisation/SelfLocalisationtests.cpp \
     OfflineLocalisationSettingsDialog.cpp \
@@ -351,7 +345,6 @@ SOURCES += mainwindow.cpp \
     OfflineLocBatch.cpp \
     ../Tools/Math/Filters/UKF.cpp \
     ../Tools/Math/Filters/MobileObjectUKF.cpp \
-    ../Localisation/Models/WeightedModel.cpp \
     ../Tools/Math/depUKF.cpp \
     ../Localisation/iotests.cpp \
     plotdisplay.cpp \
@@ -361,7 +354,15 @@ SOURCES += mainwindow.cpp \
     ../ConfigSystem/ConfigParameter.cpp \
     ../ConfigSystem/ConfigStorageManager.cpp \
     ../ConfigSystem/ConfigTree.cpp \
-    ../ConfigSystem/Configurable.cpp
+    ../ConfigSystem/Configurable.cpp \
+    ../Tools/Math/Filters/SeqUKF.cpp \
+    ../Tools/Math/Filters/MobileObjectModel.cpp \
+    ../Tools/Math/Filters/RobotModel.cpp \
+    ../Tools/Math/Filters/KFBuilder.cpp \
+    ../Tools/Math/Filters/BasicUKF.cpp \
+    ../Tools/Math/Filters/SrBasicUKF.cpp \
+    ../Tools/Math/Filters/SrSeqUKF.cpp \
+    BatchSelectDialog.cpp \
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \

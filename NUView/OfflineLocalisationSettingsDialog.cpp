@@ -119,9 +119,11 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
     LocalisationSettings result;
     QComboBox* prune_combo_box = qFindChild<QComboBox*>(this, "PruneMethodComboBox");
     QComboBox* branch_combo_box = qFindChild<QComboBox*>(this, "BranchMethodComboBox");
+    QComboBox* filter_combo_box = qFindChild<QComboBox*>(this, "FilterTypeComboBox");
 
     QString prune_text = prune_combo_box->currentText().toLower();
     QString branch_text = branch_combo_box->currentText().toLower();
+    QString filter_type = filter_combo_box->currentText().toLower();
 
     if(prune_text.compare("merge", Qt::CaseInsensitive) == 0)
     {
@@ -172,5 +174,15 @@ LocalisationSettings OfflineLocalisationSettingsDialog::settings()
     {
         result.setBranchMethod(LocalisationSettings::branch_unknown);
     }
+
+    if(filter_type.compare("basic ukf", Qt::CaseInsensitive) == 0)
+    {
+        result.setSelfLocFilter(KFBuilder::kbasic_ukf_filter);
+    }
+    else if (filter_type.compare("sequential ukf", Qt::CaseInsensitive) == 0)
+    {
+        result.setSelfLocFilter(KFBuilder::kseq_ukf_filter);
+    }
+
     return result;
 }

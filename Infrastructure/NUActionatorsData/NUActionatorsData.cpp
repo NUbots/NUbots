@@ -1246,12 +1246,14 @@ void NUActionatorsData::summaryTo(ostream& output)
 ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
+    (void)(p_sensor); // To stop compiler warnings.
     return output;
 }
 
 istream& operator>> (istream& input, NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
+    (void)(p_sensor); // To stop compiler warnings.
     return input;
 }
 

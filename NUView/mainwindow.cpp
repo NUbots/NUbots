@@ -172,6 +172,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 }
 
 
+
+
+
 MainWindow::~MainWindow()
 {
     // NOTE: QObjects with parents do not need to be deleted.
@@ -361,7 +364,7 @@ void MainWindow::createMenus()
     QMenu* LUTWindowMenu = windowMenu->addMenu(tr("&Look Up Table"));
     LUTWindowMenu->addAction(newLUTDisplayAction);
 
-    QMenu* networkWindowMenu = windowMenu->addMenu(tr("&Network"));
+    //QMenu* networkWindowMenu = windowMenu->addMenu(tr("&Network"));
 
     windowMenu->addSeparator();
     // Add the actions for the dockable windows
@@ -828,15 +831,13 @@ QMdiSubWindow* MainWindow::createPlotDisplay()
 QMdiSubWindow* MainWindow::createLocWmGlDisplay()
 {
     locWmGlDisplay* temp = new locWmGlDisplay(this);
-    connect(LogReader,SIGNAL(LocalisationDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LogReader,SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),temp, SLOT(setSensorData(NUSensorsData*)));
     connect(LogReader, SIGNAL(ObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
-    connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LocWmStreamer, SIGNAL(selfLocwmDataChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
-    connect(offlinelocDialog, SIGNAL(LocalisationChanged(const Localisation*)),temp, SLOT(SetLocalLocalisation(const Localisation*)));
     connect(offlinelocDialog, SIGNAL(SelfLocalisationChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
+    connect(offlinelocDialog, SIGNAL(ProcessingStateChanged(bool)),temp, SLOT(setDisplayDisabled(bool)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
     return window;

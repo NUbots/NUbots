@@ -177,57 +177,58 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
                 canvas->setPixel(x,y,0);
         emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
 
-        float datavalue = 0.0;
-        sensorsData->get(NUSensorsData::HeadPitch,datavalue);
-        qDebug() << "Sensors Data: Head Elevation: " << datavalue;
+//        float datavalue = 0.0;
+//        sensorsData->get(NUSensorsData::HeadPitch,datavalue);
+//        qDebug() << "Sensors Data: Head Elevation: " << datavalue;
 
 
         FieldObjects* field_objects = vision->wrapper->field_objects;
         //POST PROCESS:
-        qDebug() << image->GetTimestamp() ;
+//        qDebug() << image->GetTimestamp() ;
         emit fieldObjectsChanged(field_objects);
         emit fieldObjectsDisplayChanged(field_objects,GLDisplay::FieldObjects);
 
-        //SUMMARY:
-        qDebug() << "Time: " << vision->wrapper->m_timestamp;
-        for(unsigned int i = 0; i < field_objects->stationaryFieldObjects.size();i++)
-        {
-            if(field_objects->stationaryFieldObjects[i].isObjectVisible() == true)
-            {
-                qDebug() << "Stationary Object: " << i << ":" << QString(field_objects->stationaryFieldObjects[i].getName().c_str())
-                         <<"Seen at "<<  field_objects->stationaryFieldObjects[i].ScreenX()
-                         <<","       <<  field_objects->stationaryFieldObjects[i].ScreenY()
-                        << "\t Distance: " << field_objects->stationaryFieldObjects[i].measuredDistance();
-            }
-        }
-        for(unsigned  int i = 0; i < field_objects->mobileFieldObjects.size();i++)
-        {
-            if(field_objects->mobileFieldObjects[i].isObjectVisible() == true)
-            {
-                qDebug() << "Mobile Object: " << i << ":" << QString(field_objects->mobileFieldObjects[i].getName().c_str())
-                         << "Seen at "   <<  field_objects->mobileFieldObjects[i].ScreenX()
-                         <<","           <<  field_objects->mobileFieldObjects[i].ScreenY()
-                        << "\t Distance: " << field_objects->mobileFieldObjects[i].measuredDistance();
-            }
-        }
+//        //SUMMARY:
+//        qDebug() << "Time: " << vision->wrapper->m_timestamp;
+//        for(unsigned int i = 0; i < field_objects->stationaryFieldObjects.size();i++)
+//        {
+//            if(field_objects->stationaryFieldObjects[i].isObjectVisible() == true)
+//            {
+//                qDebug() << "Stationary Object: " << i << ":" << QString(field_objects->stationaryFieldObjects[i].getName().c_str())
+//                         <<"Seen at "<<  field_objects->stationaryFieldObjects[i].ScreenX()
+//                         <<","       <<  field_objects->stationaryFieldObjects[i].ScreenY()
+//                        << "\t Distance: " << field_objects->stationaryFieldObjects[i].measuredDistance();
+//            }
+//        }
+//        for(unsigned  int i = 0; i < field_objects->mobileFieldObjects.size();i++)
+//        {
+//            if(field_objects->mobileFieldObjects[i].isObjectVisible() == true)
+//            {
+//                qDebug() << "Mobile Object: " << i << ":" << QString(field_objects->mobileFieldObjects[i].getName().c_str())
+//                         << "Seen at "   <<  field_objects->mobileFieldObjects[i].ScreenX()
+//                         <<","           <<  field_objects->mobileFieldObjects[i].ScreenY()
+//                        << "\t Distance: " << field_objects->mobileFieldObjects[i].measuredDistance();
+//            }
+//        }
 
-        for(unsigned int i = 0; i < field_objects->ambiguousFieldObjects.size();i++)
-        {
-            if(field_objects->ambiguousFieldObjects[i].isObjectVisible() == true)
-            {
-                qDebug() << "Ambiguous Object: " << i << ":" << field_objects->ambiguousFieldObjects[i].getID()
-                         <<  QString(field_objects->ambiguousFieldObjects[i].getName().c_str())
-                         << "Seen at "          <<  field_objects->ambiguousFieldObjects[i].ScreenX()
-                         << ","                 <<  field_objects->ambiguousFieldObjects[i].ScreenY()
-                         << "\t Distance: " << field_objects->ambiguousFieldObjects[i].measuredDistance();
+//        for(unsigned int i = 0; i < field_objects->ambiguousFieldObjects.size();i++)
+//        {
+//            if(field_objects->ambiguousFieldObjects[i].isObjectVisible() == true)
+//            {
+//                qDebug() << "Ambiguous Object: " << i << ":" << field_objects->ambiguousFieldObjects[i].getID()
+//                         <<  QString(field_objects->ambiguousFieldObjects[i].getName().c_str())
+//                         << "Seen at "          <<  field_objects->ambiguousFieldObjects[i].ScreenX()
+//                         << ","                 <<  field_objects->ambiguousFieldObjects[i].ScreenY()
+//                         << "\t Distance: " << field_objects->ambiguousFieldObjects[i].measuredDistance();
 
-            }
-        }
+//            }
+//        }
     }
 }
 
 void virtualNUbot::processVisionFrame(ClassifiedImage& image)
 {
+    (void)(image); // To stop compiler warnings.
     return;
 }
 

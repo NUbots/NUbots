@@ -44,6 +44,7 @@ int LogFileFormatReader::lastFrame()
 
 int LogFileFormatReader::setFrame(int frameNumber)
 {
+    (void)(frameNumber); // To prevent compiler warnings.
     displayControlError("setFrame");
     return 0;
 }

@@ -412,6 +412,7 @@ Matrix diagcat(Matrix a, Matrix b)
 }
 Matrix cholesky(Matrix P)
 {
+    const double eps = 1e-6;
     Matrix L = Matrix (P.getm(),P.getn(),false);
     double a=0;
     for(int i=0;i<P.getm();i++)
@@ -430,6 +431,11 @@ Matrix cholesky(Matrix P)
         {
 			a=a-pow(L[i][k],2);
 		}
+        if(a < 0)
+        {
+            // Due to rounding errors this can sometime become a small -ve number.
+            a = eps;
+        }
 		L[i][i]=sqrt(a);
 	}
     return L;
@@ -480,13 +486,31 @@ Matrix HT(Matrix A)
 	return B;
 }
 
+double determinant1x1(const Matrix& mat)
+{
+    return mat[0][0];
+}
+
+double determinant2x2(const Matrix& mat)
+{
+    return (mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0]);
+}
+
+double determinant3x3(const Matrix& mat)
+{
+    return (mat[0][0]*mat[1][1]*mat[2][2] + mat[0][1]*mat[1][2]*mat[2][0] + mat[0][2]*mat[1][0]*mat[2][1]
+            - mat[0][2]*mat[1][1]*mat[2][0] - mat[0][1]*mat[1][0]*mat[2][2] - mat[0][0]*mat[1][2]*mat[2][1]);
+}
+
 
 double determinant(const Matrix& mat)
 {
     if(mat.getm()==1)
-        return mat[0][0];
+        return determinant1x1(mat);
     else if(mat.getm()==2)
-        return (mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0]);                                              
+        return determinant2x2(mat);
+    else if(mat.getm()==3)
+        return determinant3x3(mat);
     
     double det = 0;
     
@@ -522,7 +546,6 @@ double determinant(const Matrix& mat)
     {
        delete subMat[i];
     }
-    
     return det;
 }
 
@@ -576,7 +599,7 @@ ostream& operator <<(ostream& out, const Matrix &mat)
         out << "[ ";
         for(int j=0; j<mat.getn(); j++)
         {
-            out << std::setw(12) << std::setprecision(4) << mat[i][j];        
+            out << std::setw(12) << std::setprecision(4) << mat[i][j];
         }
         out << "]\n";
     }
@@ -649,6 +672,123 @@ Matrix GaussJordanInverse(const Matrix& mat)
     Matrix result(mat.getm(), mat.getn(), false);
     for(i=0; i < mat.getn(); ++i)
         result.setCol(i, A.getCol(i + mat.getn()));
+    return result;
+}
+
+Matrix CholeskyUpdate(Matrix S, Matrix U, float v)
+{
+    const unsigned int size = U.getm();
+    const unsigned int cols = U.getn();
+    const int sign = v >= 0.f ? 1 : -1;
+    // Do each of the collumns.
+    U = sqrt(fabs(v)) * U;
+    for(unsigned int col = 0; col < cols; ++col)
+    {
+        for(unsigned int k = 0; k < size; ++k)
+        {
+            const double r = sqrt(pow(S[k][k],2) + sign * pow(U[k][col],2));
+            const double c = r / S[k][k];
+            const double s = U[k][col] / S[k][k];
+            S[k][k] = r;
+            for(unsigned int j = k+1; j < size; ++j)
+            {
+                S[k][j] = (S[k][j] + sign * s * U[j][col]) / c;
+                U[j][col] = c * U[j][col] - s * S[k][j];
+            }
+        }
+    }
+    return S;
+}
+
+Matrix QR_Householder(const Matrix& A)
+{
+    Matrix input = A.getm() >= A.getn() ? A : A.transp();
+    const unsigned int rows = input.getm();
+    const unsigned int cols = input.getn();
+    const unsigned int size = std::min(rows-1, cols);
+
+    Matrix V(rows, 1, false);
+    double a_norm, temp, beta;
+
+    for(unsigned int k = 0; k < size; ++k)
+    {
+        // Equivalent of HOUSEHOLDER function.
+        temp = 0.0;
+        for(unsigned int i = k; i < rows; ++i)
+        {
+            temp += input[i][k] * input[i][k];
+        }
+        a_norm = sqrt(temp);
+        beta = input[k][k] >= 0 ? input[k][k] + a_norm :  input[k][k] - a_norm;
+        V[k][0] = 1.0;
+        for(unsigned int i = k+1; i < rows; ++i)
+        {
+            V[i][0] = 1 / beta * input[i][k];
+        }
+
+        // Equivalent of HOUSEHOLDER_MULT function
+        // 	A(k:n,k:m) = HOUSEHOLDER_MULT(A(k:n,k:m),v(k:n,1));
+        double vv = 0.0;
+        for(unsigned int i = k; i < rows; ++i)
+        {
+            vv += V[i][0] * V[i][0];
+        }
+        beta = -2 / vv;
+        Matrix w(1, rows, false);
+        for(unsigned int col = k; col < cols; ++col)
+        {
+            for(unsigned int row = k; row < rows; ++row)
+            {
+                w[0][col] += V[row][0] * input[row][col];
+            }
+        }
+
+        for(unsigned int col = k; col < cols; ++col)
+        {
+            for(unsigned int row = k; row < rows; ++row)
+            {
+                input[row][col] = input[row][col] + beta * V[row][0] * w[0][col];
+            }
+        }
+
+        for(unsigned int row = k+1; row < rows; ++row)
+        {
+            input[row][k] = V[row][0];
+        }
+    }
+    Matrix result(size,size, false);
+    for(unsigned int k = 0; k < size; ++k)
+    {
+        for(unsigned int l = k; l < size; ++l)
+        {
+            result[k][l] = input[k][l];
+        }
+    }
+
+    return result;
+}
+
+Matrix diag(const Matrix& A)
+{
+    Matrix result;
+    if(A.getm() == 1)
+    {
+        unsigned int size = A.getn();
+        result = Matrix(size, size, false);
+        for(unsigned int i = 0; i < size; ++i)
+        {
+            result[i][i] = A[0][i];
+        }
+    }
+    else if(A.getn() == 1)
+    {
+        unsigned int size = A.getn();
+        result = Matrix(size, size, false);
+        for(unsigned int i = 0; i < size; ++i)
+        {
+            result[i][i] = A[i][0];
+        }
+    }
     return result;
 }
 

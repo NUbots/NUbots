@@ -439,6 +439,7 @@ bool NUPlatform::verifySensors()
  */
 bool NUPlatform::verifyVision(int framesdropped, int framesprocessed)
 {
+    (void)(framesdropped); // To stop compiler warnings.
     // check to see if all of the frames were dropped
     /*if (framesdropped >= framesprocessed and framesprocessed >= 1)
         m_frames_dropped_count++;
@@ -472,6 +473,9 @@ bool NUPlatform::verifyVision(int framesdropped, int framesprocessed)
  */
 void NUPlatform::add(const LedIndices& led, double time, const vector<float>& value)
 {
+    (void)(led); // To stop compiler warnings.
+    (void)(time); // To stop compiler warnings.
+    (void)(value); // To stop compiler warnings.
     // this function is really just for the NAO because it has shit-loads of little leds
 }
 
@@ -479,6 +483,9 @@ void NUPlatform::add(const LedIndices& led, double time, const vector<float>& va
  */
 void NUPlatform::toggle(const LedIndices& led, double time, const vector<float>& value)
 {
+    (void)(led); // To stop compiler warnings.
+    (void)(time); // To stop compiler warnings.
+    (void)(value); // To stop compiler warnings.
     // this function is really just for the NAO because it has shit-loads of little leds
 }
 

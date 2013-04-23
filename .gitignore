@@ -52,7 +52,7 @@ NUView-build*/*
 /NUView/debug/*
 /NUView/release/*
 /NUView/Makefile
-/NUView/NUView.pro.user
+/NUView/NUView.pro.user*
 
 /Vision-build-desktop*/*
 *.pro.user*

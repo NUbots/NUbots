@@ -14,6 +14,7 @@ public:
     Moment();
     Moment(unsigned int numStates);
     Moment(const Moment& source);
+    Moment(const Matrix& mean, const Matrix& covariance);
     virtual ~Moment()
     {
     }
