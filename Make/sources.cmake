@@ -52,6 +52,7 @@ ENDFOREACH (loop_var ${NUBOT_DIRS})
 LIST(APPEND NUBOT_LINK_LIBRARIES json)
 
 # Build protocol buffer classes
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 file(GLOB ProtoFiles "../NUPlatform/NUAPI/proto/*.proto")
