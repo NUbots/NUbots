@@ -210,7 +210,7 @@ bool SrBasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& nois
     return true;
 }
 
-void SrBasicUKF::initialiseEstimate(const Moment& estimate)
+void SrBasicUKF::initialiseEstimate(const MultivariateGaussian& estimate)
 {
     // This is pretty simple.
     // Assign the estimate.
@@ -219,7 +219,7 @@ void SrBasicUKF::initialiseEstimate(const Moment& estimate)
     return;
 }
 
-const Moment& SrBasicUKF::estimate() const
+const MultivariateGaussian& SrBasicUKF::estimate() const
 {
     return m_estimate;
 }
@@ -266,7 +266,7 @@ std::istream& SrBasicUKF::readStreamBinary (std::istream& input)
 {
     m_model->readStreamBinary(input);
     m_unscented_transform.readStreamBinary(input);
-    Moment temp;
+    MultivariateGaussian temp;
     temp.readStreamBinary(input);
     CalculateWeights();
     initialiseEstimate(temp);

@@ -773,7 +773,7 @@ void locWmGlDisplay::DrawBallSigma(QColor colour, float x, float y)
     return;
 }
 
-void locWmGlDisplay::DrawModelObjects(const Moment& model, const Moment& ball_model, const QColor& modelColor)
+void locWmGlDisplay::DrawModelObjects(const MultivariateGaussian& model, const MultivariateGaussian& ball_model, const QColor& modelColor)
 {
     QColor drawColor(modelColor);
     int alpha = drawColor.alpha();
@@ -814,7 +814,7 @@ void locWmGlDisplay::DrawLocalisationObjects(const SelfLocalisation& localisatio
     }
 }
 
-void locWmGlDisplay::DrawModelMarkers(const Moment& model, const QColor& modelColor)
+void locWmGlDisplay::DrawModelMarkers(const MultivariateGaussian& model, const QColor& modelColor)
 {
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
     float mean_x = model.mean(RobotModel::kstates_x);
@@ -841,7 +841,7 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
 
     const IKalmanFilter* ball_model = localisation.getBallModel();
-    Moment ball_estimate = ball_model->estimate();
+    MultivariateGaussian ball_estimate = ball_model->estimate();
 
     Matrix cov = ball_estimate.covariance();
     float xx = cov[MobileObjectModel::kstates_x_pos][MobileObjectModel::kstates_x_pos];
@@ -888,7 +888,7 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
 
 }
 
-FieldPose locWmGlDisplay::calculateBallPosition(const Moment &robot_estimate, const Moment &ball_estimate)
+FieldPose locWmGlDisplay::calculateBallPosition(const MultivariateGaussian &robot_estimate, const MultivariateGaussian &ball_estimate)
 {
     FieldPose result;
     float selfX = robot_estimate.mean(RobotModel::kstates_x);

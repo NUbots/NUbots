@@ -135,7 +135,7 @@ bool BasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matri
     Matrix predicted_covariance = CalculateCovarianceFromSigmas(sigma_points, predicted_mean) + process_noise;
 
     // Set the new mean and covariance values.
-    initialiseEstimate(Moment(predicted_mean, predicted_covariance));
+    initialiseEstimate(MultivariateGaussian(predicted_mean, predicted_covariance));
     return false;
 }
 
@@ -195,11 +195,11 @@ bool BasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise,
     Matrix new_mean = m_estimate.mean() + K * innovation;
     Matrix new_covariance = m_estimate.covariance() - K*Pyy*K.transp();
 
-    initialiseEstimate(Moment(new_mean, new_covariance));
+    initialiseEstimate(MultivariateGaussian(new_mean, new_covariance));
     return true;
 }
 
-void BasicUKF::initialiseEstimate(const Moment& estimate)
+void BasicUKF::initialiseEstimate(const MultivariateGaussian& estimate)
 {
     // This is pretty simple.
     // Assign the estimate.
@@ -208,7 +208,7 @@ void BasicUKF::initialiseEstimate(const Moment& estimate)
     return;
 }
 
-const Moment& BasicUKF::estimate() const
+const MultivariateGaussian& BasicUKF::estimate() const
 {
     return m_estimate;
 }
@@ -267,7 +267,7 @@ std::istream& BasicUKF::readStreamBinary (std::istream& input)
 {
     m_model->readStreamBinary(input);
     m_unscented_transform.readStreamBinary(input);
-    Moment temp;
+    MultivariateGaussian temp;
     temp.readStreamBinary(input);
     CalculateWeights();
     initialiseEstimate(temp);

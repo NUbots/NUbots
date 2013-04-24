@@ -145,7 +145,7 @@ bool timingTest()
     rightLoc[0][0] = rightYGoal->X();
     rightLoc[1][0] = rightYGoal->Y();
 
-    theModel->initialiseEstimate(Moment(initial_mean, initial_cov));
+    theModel->initialiseEstimate(MultivariateGaussian(initial_mean, initial_cov));
 
     seq_update.start();
     for (unsigned int i = 0; i < total_updates; ++i)
@@ -212,13 +212,13 @@ bool MergingTest()
 
     IKalmanFilter *temp = newRobotModel();
     temp->setFilterWeight(0.5);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(99.5f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(99.5f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
     temp = newRobotModel();
     temp->setFilterWeight(0.5);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(100.0f, 1.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(100.0f, 1.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
@@ -237,13 +237,13 @@ bool MergingTest()
     // Add models
     temp = newRobotModel();
     temp->setFilterWeight(0.5);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(100.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(100.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
     temp = newRobotModel();
     temp->setFilterWeight(0.5);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(-100.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(-100.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
@@ -271,7 +271,7 @@ bool MaxLikelyhoodTest()
 
     temp = newRobotModel();
     temp->setFilterWeight(0.5);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(300.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(300.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
@@ -279,13 +279,13 @@ bool MaxLikelyhoodTest()
 
     temp = newRobotModel();
     temp->setFilterWeight(0.2);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(200.0f, 40.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(200.0f, 40.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
     temp = newRobotModel();
     temp->setFilterWeight(0.3);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(100.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(100.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
@@ -315,7 +315,7 @@ bool ViterbiTest()
 
     temp = newRobotModel();
     temp->setFilterWeight(0.2);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(300.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(300.0f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
@@ -323,31 +323,31 @@ bool ViterbiTest()
 
     temp = newRobotModel();
     temp->setFilterWeight(0.1);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(200.0f, 40.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(200.0f, 40.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
     temp = newRobotModel();
     temp->setFilterWeight(0.1);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(100.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(100.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
     temp = newRobotModel();
     temp->setFilterWeight(0.3);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
     temp = newRobotModel();
     temp->setFilterWeight(0.14);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(-100.0f, 30.0f, -0.6f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(-100.0f, 30.0f, -0.6f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
     temp = newRobotModel();
     temp->setFilterWeight(0.16);
-    temp->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(-50.0f, 30.0f, -1.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(-50.0f, 30.0f, -1.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
     models.push_back(temp);
 
@@ -441,12 +441,12 @@ bool NscanTest()
     // N=2
     IKalmanFilter* model0 = newRobotModel();
     model0->setFilterWeight(0.5);
-    model0->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    model0->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     model0->setActive();
 
     IKalmanFilter* model1 = newRobotModel();
     model1->setFilterWeight(0.5);
-    model0->initialiseEstimate(Moment(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
+    model0->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     model1->setActive();
 
     // Write measurement from ambiguous object

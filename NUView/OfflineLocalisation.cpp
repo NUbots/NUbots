@@ -366,7 +366,7 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
     if(tempSensors2.getGps(gps) and tempSensors2.getCompass(compass))
     {
         float err_x, err_y, err_head;
-        const Moment best_estimate = m_workingSelfLoc->getBestModel()->estimate();
+        const MultivariateGaussian best_estimate = m_workingSelfLoc->getBestModel()->estimate();
         err_x = best_estimate.mean(RobotModel::kstates_x) - gps[0];
         err_y = best_estimate.mean(RobotModel::kstates_y) - gps[1];
         err_head = mathGeneral::normaliseAngle(best_estimate.mean(RobotModel::kstates_heading) - compass);
@@ -535,7 +535,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             assert(temp_loc);
             Vector3<float> estimate(0,0,0);
             const IKalmanFilter* best_model = temp_loc->getBestModel();
-            const Moment best_estimate = best_model->estimate();
+            const MultivariateGaussian best_estimate = best_model->estimate();
             estimate.x = best_estimate.mean(RobotModel::kstates_x);
             estimate.y = best_estimate.mean(RobotModel::kstates_y);
             estimate.z = best_estimate.mean(RobotModel::kstates_heading);

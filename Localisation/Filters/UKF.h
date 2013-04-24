@@ -26,11 +26,11 @@
  */
 
 #pragma once
-#include "Tools/Math/Moment.h"
+#include "Tools/Math/MultivariateGaussian.h"
 #include "Tools/Math/Matrix.h"
 #include "UnscentedTransform.h"
 
-class UKF: public Moment, public UnscentedTransform
+class UKF: public MultivariateGaussian, public UnscentedTransform
 {
 public:
     UKF();

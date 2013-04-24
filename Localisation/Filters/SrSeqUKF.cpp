@@ -133,7 +133,7 @@ bool SrSeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matri
     Matrix predictedCovariance = CalculateCovarianceFromSigmas(m_sigma_points, predictedMean) + process_noise;
 
     // Set the new mean and covariance values.
-    Moment new_estimate = m_estimate;
+    MultivariateGaussian new_estimate = m_estimate;
     new_estimate.setMean(predictedMean);
     new_estimate.setCovariance(predictedCovariance);
     initialiseEstimate(new_estimate);
@@ -198,7 +198,7 @@ bool SrSeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise,
     return true;
 }
 
-void SrSeqUKF::initialiseEstimate(const Moment& estimate)
+void SrSeqUKF::initialiseEstimate(const MultivariateGaussian& estimate)
 {
     // This is more complicated than you might expect because of all of the buffered values that
     // must be kept up to date.
@@ -227,7 +227,7 @@ void SrSeqUKF::initialiseEstimate(const Moment& estimate)
     return;
 }
 
-const Moment& SrSeqUKF::estimate() const
+const MultivariateGaussian& SrSeqUKF::estimate() const
 {
     return m_estimate;
 }
@@ -274,7 +274,7 @@ std::istream& SrSeqUKF::readStreamBinary (std::istream& input)
 {
     m_model->readStreamBinary(input);
     m_unscented_transform.readStreamBinary(input);
-    Moment temp;
+    MultivariateGaussian temp;
     temp.readStreamBinary(input);
     CalculateWeights();
     initialiseEstimate(temp);

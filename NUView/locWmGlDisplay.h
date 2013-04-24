@@ -109,11 +109,11 @@ protected:
         FieldPose CalculateErrorElipse(float xx, float xy, float yy);
         void DrawElipse(const QPoint& location, const QPoint& size, float angle, const QColor& lineColour, const QColor& fillColour);
 
-        void DrawModelObjects(const Moment& model, const Moment& ball_model, const QColor& modelColor);
+        void DrawModelObjects(const MultivariateGaussian& model, const MultivariateGaussian& ball_model, const QColor& modelColor);
         void DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor);
         void DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor);
 
-        void DrawModelMarkers(const Moment& model, const QColor& modelColor);
+        void DrawModelMarkers(const MultivariateGaussian& model, const QColor& modelColor);
         void drawLocalisationMarkers(const SelfLocalisation& localisation, const QColor& modelColor);
 
         void drawStationaryObjectLabel(const StationaryObject& object);
@@ -121,7 +121,7 @@ protected:
 
         void drawLegend(QPainter* painter);
 
-        FieldPose calculateBallPosition(const Moment& robot_model, const Moment& ball_estimate);
+        FieldPose calculateBallPosition(const MultivariateGaussian& robot_model, const MultivariateGaussian& ball_estimate);
 
         GLuint robotAuraTexture;
         GLuint fieldLineTexture;

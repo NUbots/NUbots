@@ -654,7 +654,7 @@ void SelfLocalisation::WriteModelToObjects(const IKalmanFilter* model, FieldObje
     if (m_lostCount > 20)
         lost = true;
 
-    Moment est = model->estimate();
+    MultivariateGaussian est = model->estimate();
 
     // Update the robots location.
     fieldObjects->self.updateLocationOfSelf(est.mean(0), est.mean(1), est.mean(2), est.sd(0), est.sd(1), est.sd(2), false);
@@ -668,7 +668,7 @@ void SelfLocalisation::WriteModelToObjects(const IKalmanFilter* model, FieldObje
     float hcos = cos(self.Heading());
     float hsin = sin(self.Heading());
 
-    Moment ball_estimate = m_ball_filter->estimate();
+    MultivariateGaussian ball_estimate = m_ball_filter->estimate();
 
     // Retrieve the ball model values.
     const float relBallX = ball_estimate.mean(MobileObjectModel::kstates_x_pos);
@@ -822,9 +822,9 @@ void SelfLocalisation::initSingleModel(float x, float y, float heading)
     debug_out  << "Initialising single model." << endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     clearModels();
-    std::vector<Moment> positions;
+    std::vector<MultivariateGaussian> positions;
     positions.reserve(1);
-    Moment temp(3);
+    MultivariateGaussian temp(3);
     temp.setMean(mean_matrix(x,y,heading));
     temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*2*PI*2*PI));
     positions.push_back(temp);
@@ -852,7 +852,7 @@ void SelfLocalisation::initBallModel(IKalmanFilter* ball_model)
     state = MobileObjectModel::kstates_y_vel;
     covariance[state][state] = initial_vel_cov;
 
-    Moment estimate(mean, covariance);
+    MultivariateGaussian estimate(mean, covariance);
     ball_model->initialiseEstimate(estimate);
 }
 
@@ -919,9 +919,9 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     //float cov_head = pow(6.f,2);
     float cov_head = pow(1.f,2);
     Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
-    Moment temp(3);
+    MultivariateGaussian temp(3);
     temp.setCovariance(cov_matrix);
-    std::vector<Moment> positions;
+    std::vector<MultivariateGaussian> positions;
     positions.reserve(5);
 
     // Position 1
@@ -975,8 +975,8 @@ void SelfLocalisation::doSetReset(GameInformation::TeamColour team_colour, int p
     const float position_sd = 15;
     const float heading_sd = 0.1;
     int num_filters;
-    std::vector<Moment> positions;
-    Moment temp(3);
+    std::vector<MultivariateGaussian> positions;
+    MultivariateGaussian temp(3);
     temp.setCovariance(covariance_matrix(position_sd*position_sd, position_sd*position_sd, heading_sd*heading_sd));
     if (player_number == 1)
     {   // if we are the goal keeper and we get manually positioned we know exactly where we will be put
@@ -1059,9 +1059,9 @@ void SelfLocalisation::doPenaltyReset()
 
     clearModels();
 
-    std::vector<Moment> positions;
+    std::vector<MultivariateGaussian> positions;
     positions.reserve(2);
-    Moment temp(3);
+    MultivariateGaussian temp(3);
     temp.setCovariance(covariance_matrix(75.0f*75.0f, 25.0f*25.0f, 0.35f*0.35f));
 
     // setup model 0 as top 'T'
@@ -1090,7 +1090,7 @@ void SelfLocalisation::doFallenReset()
     // New models
     for(std::list<IKalmanFilter*>::iterator filter_it = m_robot_filters.begin(); filter_it != m_robot_filters.end(); ++ filter_it)
     {
-        Moment est = (*filter_it)->estimate();
+        MultivariateGaussian est = (*filter_it)->estimate();
         temp = est.covariance();
         temp[2][2] += 0.707*0.707;     // Robot heading
         est.setCovariance(temp);
@@ -1109,10 +1109,10 @@ void SelfLocalisation::doReset()
 
     clearModels();
 
-    std::vector<Moment> newPositions;
+    std::vector<MultivariateGaussian> newPositions;
     newPositions.reserve(4);
 
-    Moment temp(3);
+    MultivariateGaussian temp(3);
 
     temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*PI*2*PI));
 
@@ -1154,7 +1154,7 @@ void SelfLocalisation::swapFieldStateTeam(float& x, float& y, float& heading)
     heading = normaliseAngle(heading + PI);
 }
 
-bool SelfLocalisation::clipRobotState(Moment* estimate, int stateIndex, double minValue, double maxValue)
+bool SelfLocalisation::clipRobotState(MultivariateGaussian* estimate, int stateIndex, double minValue, double maxValue)
 {
     bool clipped = false;
     Matrix mean = estimate->mean();
@@ -1190,7 +1190,7 @@ bool SelfLocalisation::clipRobotState(Moment* estimate, int stateIndex, double m
 
     @return True if clipping was required. False if not.
 */
-bool SelfLocalisation::clipEstimateToField(Moment* estimate)
+bool SelfLocalisation::clipEstimateToField(MultivariateGaussian* estimate)
 {
     const double fieldXLength = 680.0;
     const double fieldYLength = 440.0;
@@ -1249,7 +1249,7 @@ bool SelfLocalisation::clipActiveModelsToField()
     bool modelClipped = false;
 
     // New models
-    Moment est;
+    MultivariateGaussian est;
     for (std::list<IKalmanFilter*>::const_iterator filter_it = m_robot_filters.begin(); filter_it != m_robot_filters.end(); ++filter_it)
     {
         if((*filter_it)->active() == false) continue;
@@ -1396,7 +1396,7 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
-    Moment est = (*model_it)->estimate();
+    MultivariateGaussian est = (*model_it)->estimate();
     #if LOC_SUMMARY_LEVEL > 0
         m_frame_log << "Model " << (*model_it)->id() << " updated using " << landmark.getName() << " measurment." << std::endl;
         m_frame_log << "Measurement: Distance = " << flatObjectDistance << ", Heading = " << landmark.measuredBearing() <<std::endl;
@@ -1475,7 +1475,7 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
         (*model_it)->measurementUpdate(measurement, noise, args, RobotModel::kangle_between_landmark_measurement);
 
     #if LOC_SUMMARY_LEVEL > 0
-        Moment est = (*model_it)->estimate();
+        MultivariateGaussian est = (*model_it)->estimate();
         m_frame_log << "Model " << (*model_it)->id() << " updated using " << landmark1.getName() << " + " << landmark2.getName() << " combined measurment." << std::endl;
         m_frame_log << "Measurement: Angle = " << angle_beween_objects <<std::endl;
         m_frame_log << "Position1: X = " << landmark1.X() << ", Y = " << landmark1.Y() <<std::endl;
@@ -1502,7 +1502,7 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
     float alpha = getBestModel()->getFilterWeight() * 0.0001f;
 
     IKalmanFilter* temp = newRobotModel();
-    temp->initialiseEstimate(Moment(mean, cov));
+    temp->initialiseEstimate(MultivariateGaussian(mean, cov));
     temp->setFilterWeight(alpha);
     temp->setActive(true);
     m_robot_filters.push_back(temp);
@@ -1571,7 +1571,7 @@ bool SelfLocalisation::ballUpdate(const MobileObject& ball)
         m_ball_filter->measurementUpdate(measurement, measurementNoise, Matrix(), 0);
         if((m_timestamp - m_prev_ball_update_time) > time_for_new_loc)
         {
-            Moment est = m_ball_filter->estimate();
+            MultivariateGaussian est = m_ball_filter->estimate();
             Matrix filter_mean = est.mean();
             filter_mean[2][0] = 0.0;
             filter_mean[3][0] = 0.0;
@@ -1736,7 +1736,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
                 models_added++;
             }
 
-            Moment est = (*model_it)->estimate();
+            MultivariateGaussian est = (*model_it)->estimate();
 
 #if LOC_SUMMARY_LEVEL > 0
 
@@ -1799,7 +1799,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
 
         //Self position = curr_model->GenerateSelfState();
         Self position;
-        Moment est = curr_model->estimate();
+        MultivariateGaussian est = curr_model->estimate();
         position.updateLocationOfSelf(est.mean(0), est.mean(1), est.mean(2), est.sd(0), est.sd(1), est.sd(2), false);
 
         float headYaw;
@@ -1970,8 +1970,8 @@ bool SelfLocalisation::MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* mod
     double alphaA = model_a->getFilterWeight() / alphaMerged;
     double alphaB = model_b->getFilterWeight() / alphaMerged;
 
-    Moment estimate_a = model_a->estimate();
-    Moment estimate_b = model_b->estimate();
+    MultivariateGaussian estimate_a = model_a->estimate();
+    MultivariateGaussian estimate_b = model_b->estimate();
 
     Matrix xMerged; // Merge State matrix
 
@@ -2053,8 +2053,8 @@ bool SelfLocalisation::MergeTwoModelsPreserveBestMean(IKalmanFilter* model_a, IK
     double alphaA = model_a->getFilterWeight() / alphaMerged;
     double alphaB = model_b->getFilterWeight() / alphaMerged;
 
-    Moment estimate_a = model_a->estimate();
-    Moment estimate_b = model_b->estimate();
+    MultivariateGaussian estimate_a = model_a->estimate();
+    MultivariateGaussian estimate_b = model_b->estimate();
 
     Matrix xMerged; // Merge State matrix
 
@@ -2136,8 +2136,8 @@ bool SelfLocalisation::MetricTest()
     acov[0][0] = 1;
     bcov[0][0] = 6;
 
-    a->initialiseEstimate(Moment(amean, acov));
-    b->initialiseEstimate(Moment(bmean, bcov));
+    a->initialiseEstimate(MultivariateGaussian(amean, acov));
+    b->initialiseEstimate(MultivariateGaussian(bmean, bcov));
 
     std::cout << "Test 1" << std::endl;
     std::cout << "-Model A-" << std::endl << "Mean:" << std::endl << amean << std::endl << "Covariance:" << std::endl << acov << std::endl;
@@ -2153,8 +2153,8 @@ bool SelfLocalisation::MetricTest()
     acov[0][0] = 1;
     bcov[0][0] = 1;
 
-    a->initialiseEstimate(Moment(amean, acov));
-    b->initialiseEstimate(Moment(bmean, bcov));
+    a->initialiseEstimate(MultivariateGaussian(amean, acov));
+    b->initialiseEstimate(MultivariateGaussian(bmean, bcov));
 
     std::cout << "Test 2" << std::endl;
     std::cout << "-Model A-" << std::endl << "Mean:" << std::endl << amean << std::endl << "Covariance:" << std::endl << acov << std::endl;
@@ -2215,8 +2215,8 @@ double SelfLocalisation::RunnallMetric(const IKalmanFilter* model_a, const IKalm
 
 double SelfLocalisation::QuinlanMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const
 {
-    Moment estimate_a = model_a->estimate();
-    Moment estimate_b = model_b->estimate();
+    MultivariateGaussian estimate_a = model_a->estimate();
+    MultivariateGaussian estimate_b = model_b->estimate();
     Matrix xdif = estimate_a.mean() - estimate_b.mean();
     Matrix p1 = estimate_a.covariance();
     Matrix p2 = estimate_b.covariance();
@@ -2538,14 +2538,14 @@ void SelfLocalisation::clearModels()
 }
 
 
-float translation_distance(const Moment& a, const Moment& b)
+float translation_distance(const MultivariateGaussian& a, const MultivariateGaussian& b)
 {
     float diff_x = a.mean(RobotModel::kstates_x) - b.mean(RobotModel::kstates_x);
     float diff_y = a.mean(RobotModel::kstates_y) - b.mean(RobotModel::kstates_y);
     return sqrt(diff_x * diff_x + diff_y * diff_y);
 }
 
-float heading_distance(const Moment& a, const Moment& b)
+float heading_distance(const MultivariateGaussian& a, const MultivariateGaussian& b)
 {
     float diff_head = a.mean(RobotModel::kstates_heading) - b.mean(RobotModel::kstates_heading);
     return diff_head;
@@ -2591,7 +2591,7 @@ void SelfLocalisation::removeSimilarModels()
 
     @param positions A vector containing any number of moments (measurements) of position.
 */
-void SelfLocalisation::InitialiseModels(const std::vector<Moment>& positions)
+void SelfLocalisation::InitialiseModels(const std::vector<MultivariateGaussian>& positions)
 {
     if(positions.size() <= 0) return;      // Don't do anything if no positions are given.
     const float split_alpha = 1.0f / positions.size();            // Uniform split alpha for all models.
@@ -2602,14 +2602,14 @@ void SelfLocalisation::InitialiseModels(const std::vector<Moment>& positions)
 #if LOC_SUMMARY_LEVEL > 0
     m_frame_log << "Intitialising models." << std::endl;
     m_frame_log << "Positions:" << std::endl;
-    for (std::vector<Moment>::const_iterator pos_it = positions.begin(); pos_it != positions.end(); ++pos_it)
+    for (std::vector<MultivariateGaussian>::const_iterator pos_it = positions.begin(); pos_it != positions.end(); ++pos_it)
     {
         m_frame_log << "(" << (*pos_it).mean(RobotModel::kstates_x) << "," << (*pos_it).mean(RobotModel::kstates_y) << "," << (*pos_it).mean(RobotModel::kstates_heading);
         m_frame_log << ") - (" << (*pos_it).sd(RobotModel::kstates_x) << "," << (*pos_it).sd(RobotModel::kstates_y) << "," << (*pos_it).sd(RobotModel::kstates_heading) << std::endl;
     }
 #endif
 
-    for (std::vector<Moment>::const_iterator pos = positions.begin(); pos != positions.end(); pos++)
+    for (std::vector<MultivariateGaussian>::const_iterator pos = positions.begin(); pos != positions.end(); pos++)
     {
         filter = newRobotModel();
         filter->setFilterWeight(split_alpha);
@@ -2643,7 +2643,7 @@ void SelfLocalisation::addToBallVariance(float x_pos_var, float y_pos_var, float
     // Add the extra variance
     cov = cov + additiveNoise;
 
-    Moment est = m_ball_filter->estimate();
+    MultivariateGaussian est = m_ball_filter->estimate();
     cov = est.covariance();
     cov = cov + additiveNoise;
     est.setCovariance(cov);
@@ -2661,7 +2661,7 @@ void SelfLocalisation::setBallVariance(float x_pos_var, float y_pos_var, float x
     cov[MobileObjectModel::kstates_x_vel][MobileObjectModel::kstates_x_vel] = x_vel_var;
     cov[MobileObjectModel::kstates_y_vel][MobileObjectModel::kstates_y_vel] = y_vel_var;
 
-    Moment est = m_ball_filter->estimate();
+    MultivariateGaussian est = m_ball_filter->estimate();
     est.setCovariance(cov);
     m_ball_filter->initialiseEstimate(est);
     return;
@@ -2810,7 +2810,7 @@ bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall
     return false;
     std::vector<TeamPacket::SharedBall>::const_iterator their_ball = sharedBalls.begin();
 
-    const Moment& best_estimate = (*getBestModel()).estimate();
+    const MultivariateGaussian& best_estimate = (*getBestModel()).estimate();
     float robotx = best_estimate.mean(RobotModel::kstates_x);
     float roboty = best_estimate.mean(RobotModel::kstates_y);
     float robotheading = best_estimate.mean(RobotModel::kstates_heading);

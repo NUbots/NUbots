@@ -5,17 +5,17 @@
 using namespace std;
 
 
-UKF::UKF(): Moment(0), UnscentedTransform(0)
+UKF::UKF(): MultivariateGaussian(0), UnscentedTransform(0)
 {
     CalculateWeights();
 }
 
-UKF::UKF(unsigned int numStates): Moment(numStates), UnscentedTransform(numStates)
+UKF::UKF(unsigned int numStates): MultivariateGaussian(numStates), UnscentedTransform(numStates)
 {
     CalculateWeights();
 }
 
-UKF::UKF(const UKF& source): Moment(source), UnscentedTransform(source)
+UKF::UKF(const UKF& source): MultivariateGaussian(source), UnscentedTransform(source)
 {
     CalculateWeights();
 }
@@ -204,9 +204,9 @@ void UKF::initialiseModel(const Matrix& mean, const Matrix& covariance)
 
 bool UKF::operator ==(const UKF& b) const
 {
-    // Check Moment portions are equal
-    const Moment* this_moment = this;
-    const Moment* other_moment = &b;
+    // Check MultivariateGaussian portions are equal
+    const MultivariateGaussian* this_moment = this;
+    const MultivariateGaussian* other_moment = &b;
     if(*this_moment != *other_moment)
     {
         return false;
@@ -231,7 +231,7 @@ bool UKF::operator ==(const UKF& b) const
 std::ostream& UKF::writeStreamBinary (std::ostream& output) const
 {
     UnscentedTransform::writeStreamBinary(output);
-    Moment::writeStreamBinary(output);
+    MultivariateGaussian::writeStreamBinary(output);
     WriteMatrix(output, m_sigma_points);
     return output;
 }
@@ -239,7 +239,7 @@ std::ostream& UKF::writeStreamBinary (std::ostream& output) const
 std::istream& UKF::readStreamBinary (std::istream& input)
 {
     UnscentedTransform::readStreamBinary(input);
-    Moment::readStreamBinary(input);
+    MultivariateGaussian::readStreamBinary(input);
     CalculateWeights();
 
     m_sigma_points = ReadMatrix(input);

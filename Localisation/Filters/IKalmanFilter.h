@@ -28,7 +28,7 @@ This contains the basic functions that all implementations can and must use.
 #include <assert.h>
 #include <iostream>
 #include "Tools/Math/Matrix.h"
-#include "Tools/Math/Moment.h"
+#include "Tools/Math/MultivariateGaussian.h"
 #include "IKFModel.h"
 #include <boost/circular_buffer.hpp>
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -73,14 +73,14 @@ public:
     Used to initialise the filters estimate.
     @param estimate The initial estimate of the filter.
     */
-    virtual void initialiseEstimate(const Moment& estimate) = 0;
+    virtual void initialiseEstimate(const MultivariateGaussian& estimate) = 0;
 
     /*!
     @brief Get function for the estimate.
     Retrieves the filters current best estimate for the system.
     @return The current estimate of the filter.
     */
-    virtual const Moment& estimate() const = 0;
+    virtual const MultivariateGaussian& estimate() const = 0;
 
     // Active controld
     virtual bool active() const {return m_active;}
@@ -103,8 +103,8 @@ public:
 
     bool operator ==(const IKalmanFilter& b) const
     {
-        Moment estA = this->estimate();
-        Moment estB = b.estimate();
+        MultivariateGaussian estA = this->estimate();
+        MultivariateGaussian estB = b.estimate();
         // Check estimates are equal
         if(estA != estB)
         {

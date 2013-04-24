@@ -31,7 +31,7 @@
 #pragma once
 #include "IKalmanFilter.h"
 #include "Tools/Math/Matrix.h"
-#include "Tools/Math/Moment.h"
+#include "Tools/Math/MultivariateGaussian.h"
 #include "UnscentedTransform.h"
 class SrSeqUKF: public IKalmanFilter
 {
@@ -72,14 +72,14 @@ public:
     Used to initialise the filters estimate.
     @param estimate The initial estimate of the filter.
     */
-    void initialiseEstimate(const Moment& estimate);
+    void initialiseEstimate(const MultivariateGaussian& estimate);
 
     /*!
     @brief Get function for the estimate.
     Retrieves the filters current best estimate for the system.
     @return The current estimate of the filter.
     */
-    const Moment& estimate() const;
+    const MultivariateGaussian& estimate() const;
 
     std::string summary(bool detailed) const;
 
@@ -113,7 +113,7 @@ private:
     float m_outlier_threshold;
     bool m_weighting_enabled;
     float m_filter_weight;
-    Moment m_estimate;
+    MultivariateGaussian m_estimate;
     Matrix m_mean_weights;
     Matrix m_covariance_weights;
     Matrix m_sqrt_covariance_weights;

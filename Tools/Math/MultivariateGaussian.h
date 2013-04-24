@@ -1,6 +1,4 @@
-#ifndef MOMENT_H
-#define MOMENT_H
-
+#pragma once
 #include "Matrix.h"
 #include <string>
 
@@ -8,14 +6,14 @@
   * A class used to represent the second moment (mean and covariance) of n states.
   */
 
-class Moment
+class MultivariateGaussian
 {
 public:
-    Moment();
-    Moment(unsigned int numStates);
-    Moment(const Moment& source);
-    Moment(const Matrix& mean, const Matrix& covariance);
-    virtual ~Moment()
+    MultivariateGaussian();
+    MultivariateGaussian(unsigned int numStates);
+    MultivariateGaussian(const MultivariateGaussian& source);
+    MultivariateGaussian(const Matrix& mean, const Matrix& covariance);
+    virtual ~MultivariateGaussian()
     {
     }
 
@@ -32,20 +30,20 @@ public:
     void writeData(std::ostream& output) const;
     unsigned int totalStates() const  {return m_numStates;}
 
-    Moment& operator= (const Moment & source);
-    bool operator ==(const Moment& b) const;
-    bool operator !=(const Moment& b) const
+    MultivariateGaussian& operator= (const MultivariateGaussian & source);
+    bool operator ==(const MultivariateGaussian& b) const;
+    bool operator !=(const MultivariateGaussian& b) const
     {return (!((*this) == b));}
 
     /*!
-    @brief Outputs a binary representation of the Moment object to a stream.
+    @brief Outputs a binary representation of the MultivariateGaussian object to a stream.
     @param output The output stream.
     @return The output stream.
     */
     std::ostream& writeStreamBinary (std::ostream& output) const;
 
     /*!
-    @brief Reads in a Moment from the input stream.
+    @brief Reads in a MultivariateGaussian from the input stream.
     @param input The input stream.
     @return The input stream.
     */
@@ -56,14 +54,14 @@ public:
     @param output The output stream.
     @param p_moment The source moment to be streamed.
     */
-    friend std::ostream& operator<< (std::ostream& output, const Moment& p_moment);
+    friend std::ostream& operator<< (std::ostream& output, const MultivariateGaussian& p_moment);
 
     /*!
     @brief Input streaming operation.
     @param input The input stream.
     @param p_moment The destination moment to be streamed to.
     */
-    friend std::istream& operator>> (std::istream& input, Moment& p_moment);
+    friend std::istream& operator>> (std::istream& input, MultivariateGaussian& p_moment);
 
 protected:
     unsigned int m_numStates;
@@ -71,4 +69,3 @@ protected:
     Matrix m_covariance;
 };
 
-#endif // MOMENT_H

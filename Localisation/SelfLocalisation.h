@@ -35,7 +35,7 @@ typedef std::pair<unsigned int, float> ParentSum;
 
 class IKalmanFilter;
 class KFBuilder;
-class Moment;
+class MultivariateGaussian;
 
 class SelfLocalisation: public TimestampedData
 {
@@ -51,8 +51,8 @@ class SelfLocalisation: public TimestampedData
         void writeToLog();
         bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double time_increment);
         void WriteModelToObjects(const IKalmanFilter* model, FieldObjects* fobs);
-        bool clipRobotState(Moment* estimate, int stateIndex, double minValue, double maxValue);
-        bool clipEstimateToField(Moment* estimate);
+        bool clipRobotState(MultivariateGaussian* estimate, int stateIndex, double minValue, double maxValue);
+        bool clipEstimateToField(MultivariateGaussian* estimate);
         bool clipActiveModelsToField();
 
         void IndividualStationaryObjectUpdate(FieldObjects* fobs, float time_increment);
@@ -145,7 +145,7 @@ class SelfLocalisation: public TimestampedData
                                      int ambiguous_id, double timestamp);
         static Matrix mean_matrix(float x, float y, float heading);
         static Matrix covariance_matrix(float x_var, float y_var, float heading_var);
-        void InitialiseModels(const std::vector<Moment>& positions);
+        void InitialiseModels(const std::vector<MultivariateGaussian>& positions);
         void setModels(std::list<IKalmanFilter*>& newModels);
 
         void addToBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var);

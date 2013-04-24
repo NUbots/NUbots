@@ -180,7 +180,7 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/LogRecorder.h \
     ../Tools/FileFormats/FileFormatException.h \
     offlinelocalisationdialog.h \
-    ../Tools/Math/Moment.h \
+    ../Tools/Math/MultivariateGaussian.h \
     ../Localisation/SelfLocalisation.h \
     ../Localisation/MeasurementError.h \
     ../Localisation/SelfLocalisationTests.h \
@@ -333,7 +333,7 @@ SOURCES += mainwindow.cpp \
     GameInformationDisplayWidget.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
-    ../Tools/Math/Moment.cpp \
+    ../Tools/Math/MultivariateGaussian.cpp \
     ../Localisation/SelfLocalisation.cpp \
     ../Localisation/MeasurementError.cpp \
     ../Localisation/SelfLocalisationtests.cpp \
