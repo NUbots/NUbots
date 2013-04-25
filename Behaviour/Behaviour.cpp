@@ -67,6 +67,9 @@ Behaviour::Behaviour()
         //m_behaviour = new WalkOptimisationProvider(this);
         m_behaviour = new IKTestProvider(this);
         //m_behaviour = new SoccerProvider(this);
+    #elif defined(TARGET_IS_DARWINWEBOTS)
+        //m_behaviour = new SoccerProvider(this);
+        m_behaviour = new ZombieProvider(this);
     #elif defined(TARGET_IS_BEAR)
         m_behaviour = new BearModeProvider(this);
     #elif defined(TARGET_IS_CYCLOID)
@@ -81,8 +84,8 @@ Behaviour::Behaviour()
         //m_behaviour = new WalkOptimisationProvider(this);
         //m_behaviour = new ForwardWalkProvider(this);
         //m_behaviour = new SlipTestProvider(this);
-        m_next_behaviour = NULL;
     #endif
+    m_next_behaviour = NULL;
 }
 
 Behaviour::~Behaviour()
