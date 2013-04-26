@@ -76,7 +76,7 @@ SelfLocalisation::SelfLocalisation(int playerNumber): m_timestamp(0)
     // Set default settings
     m_settings.setBranchMethod(LocalisationSettings::branch_exhaustive);
     m_settings.setPruneMethod(LocalisationSettings::prune_viterbi);
-    m_settings.setBallLocFilter(KFBuilder::ksr_basic_ukf_filter);
+    m_settings.setBallLocFilter(KFBuilder::kseq_ukf_filter);
     m_settings.setBallLocModel(KFBuilder::kmobile_object_model);
     m_settings.setSelfLocFilter(KFBuilder::kseq_ukf_filter);
     m_settings.setSelfLocModel(KFBuilder::krobot_model);
