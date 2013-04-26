@@ -81,10 +81,17 @@ using ConfigSystem::ConfigManager;
     #include "NUPlatform/Platforms/Darwin/DarwinPlatform.h"
     #include "NUPlatform/Platforms/Darwin/DarwinIO.h"
 	#include "NUPlatform/Platforms/Darwin/DarwinAPI.h"
+#elif defined(TARGET_IS_DARWINWEBOTS)
+    #include "NUPlatform/Platforms/DarwinWebots/DarwinWebotsPlatform.h"
+    #include "NUPlatform/Platforms/DarwinWebots/DarwinWebotsIO.h"
 #elif defined(TARGET_IS_NUVIEW)
     #error You should not be compiling NUbot.cpp when targeting NUview, you should use the virtualNUbot.
 #else
     #error There is no platform (TARGET_IS_${}) defined
+#endif
+
+#if (defined(TARGET_IS_NAOWEBOTS)) or (defined(TARGET_IS_DARWINWEBOTS))
+    #define TARGET_IS_WEBOTS TRUE
 #endif
 
 #include <time.h>
@@ -191,6 +198,8 @@ void NUbot::createPlatform(int argc, const char *argv[])
         m_platform = new BearPlatform();
     #elif defined(TARGET_IS_DARWIN)
         m_platform = new DarwinPlatform();
+    #elif defined(TARGET_IS_DARWINWEBOTS)
+        m_platform = new DarwinWebotsPlatform(argc, argv);
     #else
         #error You need to create a Platform instance for this platform
     #endif
@@ -257,6 +266,8 @@ void NUbot::createNetwork()
     #elif defined(TARGET_IS_DARWIN)
         m_io = new DarwinIO(this);
 		m_api = new DarwinAPI();
+    #elif defined(TARGET_IS_DARWINWEBOTS)
+        m_io = new DarwinWebotsIO(this, dynamic_cast<DarwinWebotsPlatform*>(m_platform));
     #else
         #error You need to create an IO class for this platform
     #endif
@@ -287,7 +298,7 @@ void NUbot::createModules()
     #endif
         
     #ifdef USE_LOCALISATION
-        #if defined(TARGET_IS_NAOWEBOTS)
+        #ifdef TARGET_IS_WEBOTS
             m_localisation = new SelfLocalisation(Platform->getRobotNumber());
         #else
             m_localisation = new SelfLocalisation();
@@ -345,7 +356,7 @@ void NUbot::createThreads()
     m_sensemove_thread = new SenseMoveThread(this);
     m_sensemove_thread->start();
     
-    #ifndef TARGET_IS_NAOWEBOTS
+    #ifndef TARGET_IS_WEBOTS
         m_watchdog_thread = new WatchDogThread(this);
         m_watchdog_thread->start();
     #endif
@@ -369,12 +380,12 @@ void NUbot::destroyThreads()
     #if defined(USE_VISION) or defined(USE_LOCALISATION)
         m_seethink_thread->stop();
     #endif
-    #ifndef TARGET_IS_NAOWEBOTS
+    #ifndef TARGET_IS_WEBOTS
         m_watchdog_thread->stop();
     #endif
     m_sensemove_thread->stop();
     
-    #ifndef TARGET_IS_NAOWEBOTS
+    #ifndef TARGET_IS_WEBOTS
         delete m_watchdog_thread;
         m_watchdog_thread = 0;
     #endif
@@ -402,10 +413,14 @@ void NUbot::destroyThreads()
  */
 void NUbot::run()
 {
-#if defined(TARGET_IS_NAOWEBOTS)
+#ifdef TARGET_IS_WEBOTS
     int count = 0;
     double previoussimtime;
-    NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
+    #if defined(TARGET_IS_NAOWEBOTS)
+        NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
+    #else
+        DarwinWebotsPlatform* webots = (DarwinWebotsPlatform*) m_platform;
+    #endif /*TARGET_IS_NAOWEBOTS*/
     int timestep = int(webots->getBasicTimeStep());
     while (true)
     {

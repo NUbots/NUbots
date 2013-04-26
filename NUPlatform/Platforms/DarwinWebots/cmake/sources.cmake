@@ -4,7 +4,7 @@
 #       - put each source file in YOUR_SRCS including a *relative* path
 #       - include another source.cmake for each subdirectory
 #
-#    Copyright (c) 2009 Jason Kulk
+#    Copyright (c) 2012 Jason Kulk, Jed Rietveld
 #    This file is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
@@ -15,30 +15,20 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 
-IF(DEBUG)
-    MESSAGE(STATUS ${CMAKE_CURRENT_LIST_FILE})
-ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS
-)
+SET (YOUR_SRCS  nao_soccer_player_blue.cpp
+                DarwinWebotsPlatform.cpp DarwinWebotsPlatform.h
+                DarwinWebotsCamera.cpp DarwinWebotsCamera.h
+                DarwinWebotsSensors.cpp DarwinWebotsSensors.h
+                DarwinWebotsActionators.cpp DarwinWebotsActionators.h
+                DarwinWebotsIO.cpp DarwinWebotsIO.h
+                DarwinWebotsNetworkThread.cpp DarwinWebotsNetworkThread.h
+				DarwinJointMapping.cpp DarwinJointMapping.h)
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS
+SET (YOUR_DIRS  
 )
-
-IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS)
-    LIST(APPEND YOUR_DIRS Webots)
-ENDIF()
-IF(${TARGET_ROBOT} STREQUAL DARWINWEBOTS)
-    LIST(APPEND YOUR_DIRS Webots)
-ENDIF()
-IF(${TARGET_ROBOT} STREQUAL BEAR)
-    LIST(APPEND YOUR_DIRS Robotis)
-ENDIF()
-IF(${TARGET_ROBOT} STREQUAL CYCLOID)
-    LIST(APPEND YOUR_DIRS Robotis)
-ENDIF()
 ####################################################################################
 
 # I need to prefix each file and directory with the correct path
@@ -50,7 +40,7 @@ FOREACH(loop_var ${YOUR_SRCS})
 ENDFOREACH(loop_var ${YOUR_SRCS})
 
 # Do the same thing for each subdirectory in TWO steps
-SET(YOUR_CMAKE_FILES )
+SET(YOUR_CMAKE_FILES )				
 FOREACH(loop_var ${YOUR_DIRS}) 
     LIST(APPEND YOUR_CMAKE_FILES "${THIS_SRC_DIR}/${loop_var}/cmake/sources.cmake")
 ENDFOREACH(loop_var ${YOUR_DIRS})

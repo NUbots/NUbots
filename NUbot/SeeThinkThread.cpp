@@ -120,7 +120,7 @@ void SeeThinkThread::run()
     {
         try
         {
-            #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
+            #if defined(TARGET_IS_NAOWEBOTS) or defined(TARGET_IS_DARWINWEBOTS) or (not defined(USE_VISION))
                 wait();
             #endif
             
@@ -133,7 +133,7 @@ void SeeThinkThread::run()
             // else 
             //     std::cout << "SeeThinkThread::run(): autoUpdateTest FAIL!" << std::endl;
             // // #endif
-            
+
             Blackboard->Config->updateConfiguration();
             // -----------------------------------------
 
@@ -202,8 +202,8 @@ void SeeThinkThread::run()
             #endif
 
 					
-			//std::cout << m_nubot->m_platform->getRealTime() << std::endl << Blackboard->Image->GetTimestamp() << std::endl << std::endl;
-            m_nubot->m_api->sendAll();
+            //std::cout << m_nubot->m_platform->getRealTime() << std::endl << Blackboard->Image->GetTimestamp() << std::endl << std::endl;
+            //m_nubot->m_api->sendAll();
 			
 #ifdef LOGGING_ENABLED
             locfile << *m_nubot->m_localisation;

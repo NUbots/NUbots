@@ -1,0 +1,68 @@
+##############################
+# wedarwin.cmake
+# 
+#   - set TARGET_ROBOT_DIR to DarwinWebots
+#   - include the DarwinWebots specific sources via DarwinWebots/cmake/sources.cmake
+#   - set CMAKE_MODULES_PATH to ./CMakeModules
+#   - try and find WEBOTS 
+#   - set NUBOT_IS_EXECUTABLE
+#   - set the OUTPUT_ROOT_DIR_EXE to 
+#         WEBOTS_HOME/projects/contests/robotstadium/controllers/darwin-op_team_1
+#   - ADD_DEFINITIONS
+#   - INCLUDE_DIRECTORIES
+#   - Append required libraries to NUBOT_LINK_LIBRARIES
+#   - On Darwin we need to make sure that we target i386 and not x86_64, because at this time weboots does not support x86_64
+#   - print debug information if desired
+
+INCLUDE(${TARGET_ROBOT_DIR}/cmake/sources.cmake)
+
+############################ CMAKE PACKAGE DIRECTORY
+# Set cmakeModules folder
+SET( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules )
+
+######### Try and find where WEBOTS is installed
+FIND_PACKAGE(WEBOTS REQUIRED)
+
+# ######### For Darwin walk engine:
+# FIND_PACKAGE(DARWIN REQUIRED)
+# INCLUDE_DIRECTORIES( ${DARWIN_INCLUDE_DIR})
+# LIST(APPEND NUBOT_LINK_LIBRARIES ${DARWIN_LIBRARIES})
+
+######### Set NUBOT_EXECUTABLE so that the code is compiled into an executable
+SET(NUBOT_IS_EXECUTABLE ON)
+
+######### Set the output path so it goes nicely into the webots file structure
+IF (${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+    SET( OUTPUT_ROOT_DIR_1 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/darwin-op_team_1/darwin-op_team_1.exe" CACHE FILEPATH "cleared")
+ELSE()
+    SET( OUTPUT_ROOT_DIR_1 "${WEBOTS_DIR}/projects/contests/robotstadium/controllers/darwin-op_team_1/darwin-op_team_1" CACHE FILEPATH "cleared")
+ENDIF()
+
+######### ADD_DEFINITIONS used by this target
+ADD_DEFINITIONS(${WEBOTS_DEFINITIONS})
+
+######### INCLUDE_DIRECTORIES required by this target
+INCLUDE_DIRECTORIES( ${WEBOTS_INCLUDE_DIR}
+)
+
+######### Append required libraries to NUBOT_LINK_LIBRARIES
+LIST(APPEND NUBOT_LINK_LIBRARIES ${WEBOTS_LIBRARIES})
+
+IF (${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+    SET(CMAKE_EXE_LINKER_FLAGS "-arch i386" CACHE STRING "os-x arch" FORCE)
+    SET(CMAKE_CXX_FLAGS "-arch i386" CACHE STRING "os-x arch" FORCE)
+ENDIF (${CMAKE_SYSTEM_NAME} STREQUAL Darwin)
+
+######### Debug information
+IF (DEBUG)
+	MESSAGE(STATUS "Webots Package: ")
+    MESSAGE(STATUS "-------directory: ${WEBOTS_DIR}")
+    MESSAGE(STATUS "-------include:   ")
+    FOREACH(loop_var ${WEBOTS_INCLUDE_DIR})
+        MESSAGE(STATUS "-------------- ${loop_var}")
+    ENDFOREACH(loop_var ${WEBOTS_INCLUDE_DIR})    
+    MESSAGE(STATUS "       lib:       ")
+    FOREACH(loop_var ${WEBOTS_LIBRARIES})
+        MESSAGE(STATUS "-------------- ${loop_var}")
+    ENDFOREACH(loop_var ${WEBOTS_LIBRARIES}) 
+ENDIF (DEBUG)
