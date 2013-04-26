@@ -47,7 +47,7 @@
 
 using namespace std;
 
-SlipTestProvider::SlipTestProvider(Behaviour* manager) : BehaviourProvider(manager), m_slip_matrix({{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}})
+SlipTestProvider::SlipTestProvider(Behaviour* manager) : BehaviourProvider(manager)//, m_slip_matrix({{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}})
 {
     //cout << "Sample ID, Start X, Start Y, Start Heading, End X, End Y, End Heading, Trans Speed, Trans Direction, Turn Speed, X-odometry, Y-odometry, Bearing-odometry, Time Taken" << endl << flush;
     samplePointIndex = 0;
@@ -56,6 +56,13 @@ SlipTestProvider::SlipTestProvider(Behaviour* manager) : BehaviourProvider(manag
     m_trans_direction = walk[1]*6.-3.;
     m_turn_speed = walk[2]*2.-1.;
     
+    // SN changed to this initialisation, since my compiler did not like the others.
+    float s_mat[3][3] = {{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}};
+    for(unsigned int i = 0; i < 3; ++i)
+    {
+        for(unsigned int j = 0; j < 3; ++j)
+            m_slip_matrix[i][j] = s_mat[i][j];
+    }
     // m_slip_matrix = {{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}} /* Mitchell Metcalfe, 31-01-13, for GCC4.7, Ubuntu 12.10 compatibility */
 
     m_av_count = 0;
