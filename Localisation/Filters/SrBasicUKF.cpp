@@ -97,7 +97,6 @@ Matrix SrBasicUKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, cons
 bool SrBasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix& process_noise, const Matrix& measurement_noise)
 {
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
-    std::cout << "measurement:\n" << measurement << std::endl;
     // Calculate the current sigma points, and write to member variable.
     Matrix sigma_points = GenerateSigmaPoints();
 
@@ -124,8 +123,6 @@ bool SrBasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Mat
 
     //Matrix concat = horzcat(temp, cholesky(measurement_noise));
     Matrix concat = temp;
-    std::cout << "concat:\n" << concat << std::endl;
-    //Matrix Sy = HT(concat).transp();
 
     Matrix Sy = QR_Householder(concat.transp());
 
