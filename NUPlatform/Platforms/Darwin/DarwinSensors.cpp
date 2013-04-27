@@ -267,7 +267,7 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
 {
     bool sensor_read_error = false;
 
-    int sensor_error_code = cm730->m_BulkReadData[sensor_id].error;
+    int sensor_error_code = cm730->bulk_read_data_[sensor_id].error;
 
     double response_rate = UpdateSensorResponseRate(sensor_id, sensor_error_code);
 
@@ -279,7 +279,7 @@ bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
             sensor_read_error = true;
 
         // errorlog << "Motor error: " << endl;
-        
+
         std::cout
                 // << __PRETTY_FUNCTION__ << ": "
                 << "DS::CFHC()" << ": "
@@ -322,6 +322,7 @@ double DarwinSensors::UpdateSensorResponseRate(int sensor_id, int error_code)
 {
     double old_rate = sensor_response_rates[sensor_id];
     double new_value = (error_code == Robot::CM730::SUCCESS)? 1.0 : 0.0;
+    // double new_value = (error_code != -1)? 1.0 : 0.0; // allows errors
     
     // This value is arbitrary, and should be tuned for reasonable performance
     double old_factor = 0.75;
@@ -334,7 +335,7 @@ double DarwinSensors::UpdateSensorResponseRate(int sensor_id, int error_code)
 }
 
 
-/*! @brief Copys the joint sensor data 
+/*! @brief Copys the joint sensor data
  */
 void DarwinSensors::copyFromJoints()
 {
@@ -365,7 +366,7 @@ void DarwinSensors::copyFromJoints()
 //        }
 
         addr = int(Robot::MX28::P_PRESENT_POSITION_L);
-        data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
+        data = cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadWord(addr);
 
         //cm730->MakeWord(datatable[addr-start_addr],datatable[addr-start_addr+1]);
 
@@ -374,27 +375,27 @@ void DarwinSensors::copyFromJoints()
         /*
         // Extra values - Not currently used.
         addr = int(Robot::MX28::P_GOAL_POSITION_L);
-        data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
+        data = cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadWord(addr);
         //data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
         joint[NUSensorsData::TargetId] = Value2Radian(data) + platform->m_servo_Offsets[i];
 		
         addr = int(Robot::MX28::P_MOVING_SPEED_L);
-        data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
+        data = cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadWord(addr);
         //data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
         joint[NUSensorsData::VelocityId] = data;
 
         addr = int(Robot::MX28::P_PRESENT_TEMPERATURE);
-        data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadByte(addr);
+        data = cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadByte(addr);
         //data = int(datatable[addr-start_addr]);
         joint[NUSensorsData::TemperatureId] = data;
 
         addr = int(Robot::MX28::P_TORQUE_ENABLE);
-        data = cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadByte(addr);
+        data = cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadByte(addr);
         //data = int(datatable[addr-start_addr]);
         joint[NUSensorsData::StiffnessId] = 100*data; // 'NUSensorsData::StiffnessId' can't be right? It's used for the actual 'stiffness' value.
 		*/
         addr = int(Robot::MX28::P_PRESENT_LOAD_L);
-        data = (int)cm730->m_BulkReadData[int(platform->m_servo_IDs[i])].ReadWord(addr);
+        data = (int)cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadWord(addr);
         //data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
         joint[NUSensorsData::TorqueId] = data*1.262e-3;
         //<! Current is blank
@@ -443,17 +444,17 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     //<! Assign the robot data to the NUSensor Structure:
     addr = int(Robot::CM730::P_GYRO_X_L);
     //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    float tGx = data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tGx = data[0] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     data[0] = (data[0]-centrevalue)/VALUETORPS_RATIO;
 	
     addr = int(Robot::CM730::P_GYRO_Y_L);
     //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    float tGy = data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tGy = data[1] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     data[1] = (data[1]-centrevalue)/VALUETORPS_RATIO;
 
     addr = int(Robot::CM730::P_GYRO_Z_L);
     //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
-    float tGz = data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tGz = data[2] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     data[2] = (data[2]-centrevalue)/VALUETORPS_RATIO;
 
    // cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
@@ -462,17 +463,17 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     m_data->set(NUSensorsData::Gyro,m_current_time, data);
 
     addr = int(Robot::CM730::P_ACCEL_Y_L);
-    float tAx = data[0] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tAx = data[0] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[0] = -(data[0]-centrevalue)/VALUETOACCEL_RATIO;
 
     addr = int(Robot::CM730::P_ACCEL_X_L);
-    float tAy = data[1] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tAy = data[1] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[1] = (data[1]-centrevalue)/VALUETOACCEL_RATIO;
 	
     addr = int(Robot::CM730::P_ACCEL_Z_L);
-    float tAz = data[2] = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    float tAz = data[2] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[2] = -(data[2]-centrevalue)/VALUETOACCEL_RATIO;
 	
@@ -495,8 +496,8 @@ void DarwinSensors::copyFromFeet()
     // Darwin FSR give value in milli newtons - we want newtons
     const float fsr_scale_factor = 1e-3;
 
-    int right_fsr_error = cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].error;
-    int left_fsr_error = cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].error;
+    int right_fsr_error = cm730->bulk_read_data_[int(Robot::FSR::ID_R_FSR)].error;
+    int left_fsr_error = cm730->bulk_read_data_[int(Robot::FSR::ID_L_FSR)].error;
 
     // Test if the FSR sensors are available.
     if(right_fsr_error == 0 and left_fsr_error == 0)
@@ -513,10 +514,10 @@ void DarwinSensors::copyFromFeet()
         // 3 - back right
         // 4 - back left
 
-        right_fsr[0] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr1);
-        right_fsr[1] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr2);
-        right_fsr[2] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr3);
-        right_fsr[3] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr4);
+        right_fsr[0] = fsr_scale_factor * cm730->bulk_read_data_[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr1);
+        right_fsr[1] = fsr_scale_factor * cm730->bulk_read_data_[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr2);
+        right_fsr[2] = fsr_scale_factor * cm730->bulk_read_data_[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr3);
+        right_fsr[3] = fsr_scale_factor * cm730->bulk_read_data_[int(Robot::FSR::ID_R_FSR)].ReadWord(fsr4);
 
         // For left foot, fsr positions are as follows:
         // 1 - back right
@@ -524,10 +525,10 @@ void DarwinSensors::copyFromFeet()
         // 3 - front left
         // 4 - front right
 
-        left_fsr[0] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr3);
-        left_fsr[1] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr4);
-        left_fsr[2] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr1);
-        left_fsr[3] = fsr_scale_factor * cm730->m_BulkReadData[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr2);
+        left_fsr[0] = fsr_scale_factor * cm730->bulk_read_data_[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr3);
+        left_fsr[1] = fsr_scale_factor * cm730->bulk_read_data_[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr4);
+        left_fsr[2] = fsr_scale_factor * cm730->bulk_read_data_[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr1);
+        left_fsr[3] = fsr_scale_factor * cm730->bulk_read_data_[int(Robot::FSR::ID_L_FSR)].ReadWord(fsr2);
 
         // Write to sensor values.
         m_data->set(NUSensorsData::RFootTouch, m_current_time, right_fsr);
@@ -548,7 +549,7 @@ void DarwinSensors::copyFromButtons()
     //Bit 1 <= Start Button
  
     int addr = Robot::CM730::P_BUTTON;
-    int data  = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadByte(addr);
+    int data  = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadByte(addr);
 
     if(data == 1)
     {
@@ -594,7 +595,7 @@ void DarwinSensors::copyFromBattery()
     //Values are 10x higher than actual present voltage.
 	
     int addr = Robot::CM730::P_VOLTAGE;
-    int data  = cm730->m_BulkReadData[int(Robot::CM730::ID_CM)].ReadWord(addr);
+    int data  = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     float battery_percentage = data/120.00 *100.00;
     m_data->set(NUSensorsData::BatteryVoltage, m_current_time, battery_percentage); //Convert to percent
     return;

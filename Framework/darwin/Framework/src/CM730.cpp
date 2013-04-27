@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <cassert>
 #include <sys/time.h>
- 
+
 #include "FSR.h"
 #include "CM730.h"
 #include "MotionStatus.h"
@@ -65,7 +65,7 @@ CM730::CM730(PlatformCM730 *platform)
     m_Platform = platform;
     DEBUG_PRINT = false;
     for(int i = 0; i < ID_BROADCAST; i++)
-        m_BulkReadData[i] = BulkReadData();
+        bulk_read_data_[i] = BulkReadData();
 }
 
 CM730::~CM730()
@@ -355,8 +355,8 @@ inline void CM730::TxRxBulkReadPacket(
         int _addr = txpacket[PARAMETER+(3*x)+3];
 
         to_length += _len + 6;
-        m_BulkReadData[_id].length = _len;
-        m_BulkReadData[_id].start_address = _addr;
+        bulk_read_data_[_id].length = _len;
+        bulk_read_data_[_id].start_address = _addr;
     }
 
     // Read data from port
@@ -368,12 +368,12 @@ inline void CM730::TxRxBulkReadPacket(
     for(int x = 0; x < num; x++)
     {
         int _id = txpacket[PARAMETER+(3*x)+2];
-        m_BulkReadData[_id].error = -1;
+        bulk_read_data_[_id].error = -1;
     }
 
 
     // Validate received data (in rxpacket) and
-    // copy it into BulkReadData objects (in m_BulkReadData).
+    // copy it into BulkReadData objects (in bulk_read_data_).
     while(1)
     {
         // Note: rxpacket may contain several sets of values to be read
@@ -428,7 +428,7 @@ inline void CM730::TxRxBulkReadPacket(
                 // Copy data of first value to the datatable of the
                 // corresponding BulkReadData object.
                 int sensor_id = rxpacket[ID];
-                BulkReadData& sensor_data = m_BulkReadData[sensor_id];
+                BulkReadData& sensor_data = bulk_read_data_[sensor_id];
 
                 for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
                     sensor_data.table[sensor_data.start_address + j] = rxpacket[PARAMETER + j];
@@ -550,15 +550,15 @@ void CM730::MakeBulkReadPacket()
 {
     int number = 0;
 
-    m_BulkReadTxPacket[ID]              = (unsigned char)ID_BROADCAST;
-    m_BulkReadTxPacket[INSTRUCTION]     = INST_BULK_READ;
-    m_BulkReadTxPacket[PARAMETER]       = (unsigned char)0x0;
+    bulk_read_tx_packet_[ID]          = (unsigned char)ID_BROADCAST;
+    bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
+    bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
 
     if(Ping(CM730::ID_CM, NULL) == SUCCESS)
     {
-        m_BulkReadTxPacket[PARAMETER+3*number+1] = 20;
-        m_BulkReadTxPacket[PARAMETER+3*number+2] = CM730::ID_CM;
-        m_BulkReadTxPacket[PARAMETER+3*number+3] = CM730::P_BUTTON;
+        bulk_read_tx_packet_[PARAMETER+3*number+1] = 20;
+        bulk_read_tx_packet_[PARAMETER+3*number+2] = CM730::ID_CM;
+        bulk_read_tx_packet_[PARAMETER+3*number+3] = CM730::P_BUTTON;
         number++;
     }
 
@@ -566,38 +566,38 @@ void CM730::MakeBulkReadPacket()
     {
 //        if(MotionStatus::m_CurrentJoints.GetEnable(id))
 //        {
-            m_BulkReadTxPacket[PARAMETER+3*number+1] = 2;   // length
-            m_BulkReadTxPacket[PARAMETER+3*number+2] = id;  // id
-            m_BulkReadTxPacket[PARAMETER+3*number+3] = MX28::P_PRESENT_POSITION_L; // start address
+            bulk_read_tx_packet_[PARAMETER+3*number+1] = 2;   // length
+            bulk_read_tx_packet_[PARAMETER+3*number+2] = id;  // id
+            bulk_read_tx_packet_[PARAMETER+3*number+3] = MX28::P_PRESENT_POSITION_L; // start address
             number++;
 //        }
     }
 
     if(Ping(FSR::ID_L_FSR, NULL) == SUCCESS)
     {
-        m_BulkReadTxPacket[PARAMETER+3*number+1] = 10;               // length
-        m_BulkReadTxPacket[PARAMETER+3*number+2] = FSR::ID_L_FSR;   // id
-        m_BulkReadTxPacket[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
+        bulk_read_tx_packet_[PARAMETER+3*number+1] = 10;               // length
+        bulk_read_tx_packet_[PARAMETER+3*number+2] = FSR::ID_L_FSR;   // id
+        bulk_read_tx_packet_[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
         number++;
     }
 
     if(Ping(FSR::ID_R_FSR, NULL) == SUCCESS)
     {
-        m_BulkReadTxPacket[PARAMETER+3*number+1] = 10;               // length
-        m_BulkReadTxPacket[PARAMETER+3*number+2] = FSR::ID_R_FSR;   // id
-        m_BulkReadTxPacket[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
+        bulk_read_tx_packet_[PARAMETER+3*number+1] = 10;               // length
+        bulk_read_tx_packet_[PARAMETER+3*number+2] = FSR::ID_R_FSR;   // id
+        bulk_read_tx_packet_[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
         number++;
     }
 
-    m_BulkReadTxPacket[LENGTH]          = (number * 3) + 3;
+    bulk_read_tx_packet_[LENGTH]          = (number * 3) + 3;
 }
 
 int CM730::BulkRead()
 {
     unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
 
-    if(m_BulkReadTxPacket[LENGTH] != 0)
-        return TxRxPacket(m_BulkReadTxPacket, rxpacket, 0);
+    if(bulk_read_tx_packet_[LENGTH] != 0)
+        return TxRxPacket(bulk_read_tx_packet_, rxpacket, 0);
     else
     {
         MakeBulkReadPacket();

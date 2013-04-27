@@ -156,10 +156,10 @@ namespace Robot
 
     private:
         PlatformCM730 *m_Platform;
-        static const int RefreshTime = 6; //msec
-        unsigned char m_ControlTable[MAXNUM_ADDRESS];
+        // static const int RefreshTime = 6; //msec
+        // unsigned char m_ControlTable[MAXNUM_ADDRESS];
 
-        unsigned char m_BulkReadTxPacket[MAXNUM_TXPARAM + 10];
+        unsigned char bulk_read_tx_packet_[MAXNUM_TXPARAM + 10];
 
         int TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority);
         unsigned char CalculateChecksum(unsigned char *packet);
@@ -187,7 +187,7 @@ namespace Robot
 
     public:
         bool DEBUG_PRINT;
-        BulkReadData m_BulkReadData[ID_BROADCAST];
+        BulkReadData bulk_read_data_[ID_BROADCAST];
 
         CM730(PlatformCM730 *platform);
         ~CM730();

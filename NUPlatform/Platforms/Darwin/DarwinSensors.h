@@ -44,6 +44,8 @@ public:
     DarwinSensors(DarwinPlatform*, Robot::CM730*);
     ~DarwinSensors();
     
+protected:
+    
     void copyFromHardwareCommunications();
 
     void copyFromJoints();
@@ -51,8 +53,7 @@ public:
     void copyFromFeet();
     void copyFromButtons();
     void copyFromBattery();
-    
-protected:
+
     //! A vector containing pointers to all of the joint id_t.
     //! This is used to loop through all of the joints quickly
     vector<NUData::id_t*> m_joint_ids;
