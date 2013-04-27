@@ -505,16 +505,18 @@ NUViewVeryClean:
 
 ########################################
 
-clean: 	NAOClean             \
-		NAOWebotsClean       \
-		CycloidClean         \
-		BearClean            \
-		DarwinClean          \
-		NUViewClean          \
+clean: \
+	DarwinClean          \
+	NUViewClean          \
+	NAOWebotsClean       \
+	NAOClean             \
+	CycloidClean         \
+	BearClean            \
 
-veryclean:  NAOVeryClean         \
-			NAOWebotsVeryClean   \
-			CycloidVeryClean     \
-			BearVeryClean        \
-			DarwinVeryClean      \
-			NUViewVeryClean      \
+veryclean: \
+	DarwinVeryClean      \
+	NUViewVeryClean      \
+	NAOWebotsVeryClean   \
+	NAOVeryClean         \
+	CycloidVeryClean     \
+	BearVeryClean        \
