@@ -37,30 +37,30 @@
 
 
 // Error flags returned by sensor + servo reads/commands.
-#define SENSOR_ERROR_NONE                  (0x0000)
-#define SENSOR_ERROR_FLAG_INPUT_VOLTAGE    (0x0001)
-#define SENSOR_ERROR_FLAG_ANGLE_LIMIT      (0x0002)
-#define SENSOR_ERROR_FLAG_OVERHEATING      (0x0004)
-#define SENSOR_ERROR_FLAG_RANGE            (0x0008)
-#define SENSOR_ERROR_FLAG_CHECKSUM         (0x0010)
-#define SENSOR_ERROR_FLAG_OVERLOAD         (0x0020)
-#define SENSOR_ERROR_FLAG_INSTRUCTION      (0x0040)
+#define SENSOR_ERROR_NONE               (0x0000)
+#define SENSOR_ERROR_FLAG_INPUT_VOLTAGE (0x0001)
+#define SENSOR_ERROR_FLAG_ANGLE_LIMIT   (0x0002)
+#define SENSOR_ERROR_FLAG_OVERHEATING   (0x0004)
+#define SENSOR_ERROR_FLAG_RANGE         (0x0008)
+#define SENSOR_ERROR_FLAG_CHECKSUM      (0x0010)
+#define SENSOR_ERROR_FLAG_OVERLOAD      (0x0020)
+#define SENSOR_ERROR_FLAG_INSTRUCTION   (0x0040)
 
 // Note: These defines are simply copied from those in CM730.cpp
-#define ID					(2)
-#define LENGTH				(3)
-#define INSTRUCTION			(4)
-#define ERRBIT				(4)
-#define PARAMETER			(5)
-#define DEFAULT_BAUDNUMBER	(1)
+#define ID                  (2)
+#define LENGTH              (3)
+#define INSTRUCTION         (4)
+#define ERRBIT              (4)
+#define PARAMETER           (5)
+#define DEFAULT_BAUDNUMBER  (1)
 
-#define INST_PING			(1)
-#define INST_READ			(2)
-#define INST_WRITE			(3)
-#define INST_REG_WRITE		(4)
-#define INST_ACTION			(5)
-#define INST_RESET			(6)
-#define INST_SYNC_WRITE		(131)   // 0x83
+#define INST_PING           (1)
+#define INST_READ           (2)
+#define INST_WRITE          (3)
+#define INST_REG_WRITE      (4)
+#define INST_ACTION         (5)
+#define INST_RESET          (6)
+#define INST_SYNC_WRITE     (131)   // 0x83
 #define INST_BULK_READ      (146)   // 0x92
 
 using namespace std;
@@ -331,7 +331,7 @@ double DarwinSensors::UpdateSensorResponseRate(int sensor_id, int error_code)
     
     sensor_response_rates[sensor_id] = new_rate;
 
-	return new_rate;
+    return new_rate;
 }
 
 
@@ -344,7 +344,7 @@ void DarwinSensors::copyFromJoints()
     float delta_t = (m_current_time - m_previous_time)/1000;
     int data;
     int addr;
-	
+    
     //int start_addr = int(Robot::MX28::P_TORQUE_ENABLE);
     //int end_addr   = int(Robot::MX28::P_PRESENT_TEMPERATURE);
 
@@ -378,7 +378,7 @@ void DarwinSensors::copyFromJoints()
         data = cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadWord(addr);
         //data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
         joint[NUSensorsData::TargetId] = Value2Radian(data) + platform->m_servo_Offsets[i];
-		
+        
         addr = int(Robot::MX28::P_MOVING_SPEED_L);
         data = cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadWord(addr);
         //data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
@@ -393,7 +393,7 @@ void DarwinSensors::copyFromJoints()
         data = cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadByte(addr);
         //data = int(datatable[addr-start_addr]);
         joint[NUSensorsData::StiffnessId] = 100*data; // 'NUSensorsData::StiffnessId' can't be right? It's used for the actual 'stiffness' value.
-		*/
+        */
         addr = int(Robot::MX28::P_PRESENT_LOAD_L);
         data = (int)cm730->bulk_read_data_[int(platform->m_servo_IDs[i])].ReadWord(addr);
         //data = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
@@ -420,7 +420,7 @@ void DarwinSensors::copyFromJoints()
 
         #if DEBUG_NUSENSORS_VERBOSITY > 0
             debug << "DarwinSensors::CopyFromJoints " << i << " " << joint[NUSensorsData::PositionId] << std::endl;
-    	#endif
+        #endif
     }
 }
 
@@ -446,7 +446,7 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     //data[0] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     float tGx = data[0] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     data[0] = (data[0]-centrevalue)/VALUETORPS_RATIO;
-	
+    
     addr = int(Robot::CM730::P_GYRO_Y_L);
     //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     float tGy = data[1] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
@@ -471,12 +471,12 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     float tAy = data[1] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[1] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[1] = (data[1]-centrevalue)/VALUETOACCEL_RATIO;
-	
+    
     addr = int(Robot::CM730::P_ACCEL_Z_L);
     float tAz = data[2] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[2] = -(data[2]-centrevalue)/VALUETOACCEL_RATIO;
-	
+    
     //cout << "ACCEL: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
   //  cout << "ACCEL_RAW: \t(" << tAx << "," << tAy << "," << tAz << ")"<< endl;
 
@@ -593,7 +593,7 @@ void DarwinSensors::copyFromBattery()
 {
     //External Voltage is 8-15V
     //Values are 10x higher than actual present voltage.
-	
+    
     int addr = Robot::CM730::P_VOLTAGE;
     int data  = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     float battery_percentage = data/120.00 *100.00;
