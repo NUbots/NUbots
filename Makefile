@@ -13,6 +13,11 @@
 #
 # Targets: NAO, NAOWebots, Cycloid, Bear, NUView
 
+# Helpful tips:
+# 1. Makefile uses actual tabs as separators, so you'll get a missing separator
+#    with editors that use spaces instead
+# 2. Make sure there is no white space after the \
+
 CUR_DIR = $(shell pwd)
 
 # Make directories
@@ -500,12 +505,16 @@ NUViewVeryClean:
 
 ########################################
 
-clean: NAOClean NAOWebotsClean CycloidClean NUViewClean
+clean: 	NAOClean             \
+		NAOWebotsClean       \
+		CycloidClean         \
+		BearClean            \
+		DarwinClean          \
+		NUViewClean          \
 
-veryclean: NAOVeryClean NAOWebotsVeryClean CycloidVeryClean NUViewVeryClean
-
-
-# Helpful tips:
-# 1. Makefile uses actual tabs as separators, so you'll get a missing separator
-#    with editors that use spaces instead
-# 2. Make sure there is no white space after the \
+veryclean:  NAOVeryClean         \
+			NAOWebotsVeryClean   \
+			CycloidVeryClean     \
+			BearVeryClean        \
+			DarwinVeryClean      \
+			NUViewVeryClean      \
