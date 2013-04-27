@@ -97,7 +97,7 @@ endif
 MAKE_OPTIONS = --no-print-directory -j $(NPROCS) --quiet
 
 
-default_target: NAOWebots
+default_target: Darwin
 
 all: NAO NAOWebots Cycloid Bear Darwin NUView
 
