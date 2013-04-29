@@ -8,6 +8,7 @@
 #ifndef _CM_730_H_
 #define _CM_730_H_
 
+#include <boost/unordered_map.hpp>
 #include "MX28.h"
 
 #define MAXNUM_TXPARAM      (256)
@@ -221,8 +222,8 @@ namespace Robot
         static int GetLowByte(int word);
         static int GetHighByte(int word);
         static int MakeColor(int red, int green, int blue);
-        static char* getTxRxErrorString(int error_code);
-        static char* getInstructionTypeString(int instruction_value);
+        static const char* getTxRxErrorString(int error_code);
+        static const char* getInstructionTypeString(int instruction_value);
 
         // Shifts all bytes in buffer 'num_bytes_to_advance' towards the
         // 0 index. Returns the new length of the buffer

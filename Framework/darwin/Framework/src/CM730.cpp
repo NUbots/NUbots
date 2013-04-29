@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <cassert>
 #include <sys/time.h>
+#include <algorithm>
 
 #include "FSR.h"
 #include "CM730.h"
@@ -546,6 +547,7 @@ unsigned char CM730::CalculateChecksum(unsigned char *packet)
     return (~checksum);
 }
 
+// Replaced by SensorReadManager::MakeBulkReadPacket()
 void CM730::MakeBulkReadPacket()
 {
     int number = 0;
@@ -857,7 +859,7 @@ int CM730::MakeColor(int red, int green, int blue)
     return (int)(((b>>3)<<10)|((g>>3)<<5)|(r>>3));
 }
 
-char* CM730::getTxRxErrorString(int error_code)
+const char* CM730::getTxRxErrorString(int error_code)
 {
     switch(error_code)
     {
@@ -871,7 +873,7 @@ char* CM730::getTxRxErrorString(int error_code)
     }
 }
 
-char* CM730::getInstructionTypeString(int instruction_value)
+const char* CM730::getInstructionTypeString(int instruction_value)
 {
     switch(instruction_value)
     {
