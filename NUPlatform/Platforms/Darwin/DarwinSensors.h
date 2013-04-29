@@ -26,8 +26,10 @@
 #define DARWINSENSORS_H
 
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "NUPlatform/NUSensors.h"
 #include "Infrastructure/NUData.h"
+
 
 class DarwinJointMapping;
 class DarwinPlatform;
@@ -42,27 +44,57 @@ public:
     DarwinSensors(DarwinPlatform*, Robot::CM730*);
     ~DarwinSensors();
     
+protected:
+    
     void copyFromHardwareCommunications();
+
     void copyFromJoints();
     void copyFromAccelerometerAndGyro();
     void copyFromFeet();
     void copyFromButtons();
     void copyFromBattery();
-    
-protected:
-    vector<NUData::id_t*> m_joint_ids;    	//!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
+
+    //! A vector containing pointers to all of the joint id_t.
+    //! This is used to loop through all of the joints quickly
+    vector<NUData::id_t*> m_joint_ids;
     vector<float> m_previous_positions;
     vector<float> m_previous_velocities;
     DarwinPlatform* platform;
     Robot::CM730* cm730;
     DarwinJointMapping* m_joint_mapping;
 
-    vector<vector<int> > error_fields;      //! A vector of motor id/error field pairs
-    bool motor_error;                       //! A flag to indicate a motor indicated an error
-    std::string error2Description(unsigned int errorValue);
+    // Current percentage of reads from this sensor that do not result in an error
+    boost::unordered_map<int, double> sensor_response_rates;
+
+    /// Returns a string containing a list of descriptions of the set error
+    /// flags in the given errorvalue.
+    std::string getSensorErrorDescription(unsigned int error_value);
+    //! Prints bulk read errors for all servos and returns true if any occured.
+    bool CheckServosBulkReadErrors();
+    //! Checks a single sensor/servo for bulk read errors, prints them, and
+    //! returns whether or not any occured.
+    bool CheckSensorBulkReadErrors(int sensor_id);
+    
+    //! Initialises the mapping of sensor values to their respective response
+    //! rates.
+    //! Should be called before the first call to UpdateSensorResponseRate(...).
+    void InitialiseSensorResponseRates();
+    //! Updates all sensor response rates using the same error code for each
+    double UpdateSensorResponseRates(int error_code);
+    //! Updates the response rate estimate for the given sensor using the
+    //! given sensor error code.
+    //! returns the updated response rate.
+    double UpdateSensorResponseRate(int sensor_id, int error_code);
+    //! Pretty prints the response rate of all sensors
+    void PrintSensorResponseRates();
+    //! Pretty prints the response rate of a single sensors
+    void PrintSensorResponseRate(int sensor_id);
+
+    // Feel free to make this method public if necessary. -MM
+    static const char* GetSensorName(int joint_id);
 
 private:
-    static const unsigned int NUM_MOTORS=20;
+    static const unsigned int NUM_MOTORS = 20;
 };
 
 #endif
