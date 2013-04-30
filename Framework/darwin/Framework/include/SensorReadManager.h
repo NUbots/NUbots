@@ -7,20 +7,72 @@
 
 namespace Robot
 {
+    class BulkReadData;
+}
+
+namespace Robot
+{
     //! A container for read descriptors.
     //! Supports constant-time lookup by sensor_id, and iteration in order of
     //! decreasing response_rate.
     class SensorReadManager
     {
     public:
+        //! Allows the sensor read descriptors to be accessed by sensor id
+        SensorReadDescriptor& operator[](const int sensor_id);
+
+        //! Processes all error information returned from a bulk read,
+        //! and updates sensor response rates accordingly.
+        bool ProcessBulkReadErrors(
+            int bulk_read_error_code, 
+            BulkReadData* bulk_read_data_);
+
+        //! Creates data structures and sensor descriptors.
         void Initialize();
+
+        //! Copies descriptor data to the given transmit packet buffer,
+        //! ordering the sensors such that the number that are expected to
+        //! respond is high.
         void MakeBulkReadPacket(unsigned char* tx_packet);
+
+        //! Filters the list of response rates to return a list of sensor IDs that
+        //! Are actually failing.
+        //! (i.e. Removes likely false-positives from the list of failing sensors.
+        //! Currently assumes that all sensors are always in use.
+        //! Note: If three sensors on the same limb are not responding, it is likely 
+        //!       that only the first of them requires attention)
         void GetFilteredLikelySensorFailures(std::vector<int>* failing_sensors);
-        SensorReadDescriptor& operator[](const int index);
-        // void InitialiseSensorResponseRates();
+
+        //! Returns a string containing a list of descriptions of the set error
+        //! flags in the given errorvalue.
+        std::string GetSensorErrorDescription(unsigned int error_value);
+
+        //! Prints bulk read errors for all servos and returns true if any occured.
+        bool CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data_);
+
+        //! Checks a single sensor/servo for bulk read errors, prints them, and
+        //! returns whether or not any occured.
+        bool CheckSensorBulkReadErrors(
+            int sensor_id,
+            BulkReadData* bulk_read_data_);
+        
+        //! Initialises the mapping of sensor values to their respective response
+        //! rates.
+        //! Should be called before the first call to UpdateSensorResponseRate(...).
+        void InitialiseSensorResponseRates();
+
+        //! Updates all sensor response rates using the same error code for each
         void UpdateSensorResponseRates(int error_code);
+
+        //! Updates the response rate estimate for the given sensor using the
+        //! given sensor error code.
+        //! returns the updated response rate.
         double UpdateSensorResponseRate(int sensor_id, int error_code);
+
+        //! Pretty prints the response rate of all sensors
         void PrintSensorResponseRates();
+
+        //! Pretty prints the response rate of a single sensors
         void PrintSensorResponseRate(int sensor_id);
 
         //! Returns the name of the sensor with the given id as a string
@@ -32,12 +84,14 @@ namespace Robot
             std::vector<int>& failing_sensors);
 
         //! A vector to store the actual descriptors
-        std::vector<SensorReadDescriptor> descriptor_list;
+        std::vector<SensorReadDescriptor> descriptor_list_;
+
         // Data structures containing pointers to elements of descriptor_list.
         // (Used to support SensorReadManager's access requirements) 
-        boost::unordered_map<int, SensorReadDescriptor*> descriptor_map;
+        boost::unordered_map<int, SensorReadDescriptor*> descriptor_map_;
+
         // Note: A heap is probably an awful choice for this
-        std::vector<SensorReadDescriptor*> descriptor_heap;
+        std::vector<SensorReadDescriptor*> descriptor_heap_;
     };
 }
 

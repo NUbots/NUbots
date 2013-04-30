@@ -63,31 +63,7 @@ protected:
     DarwinJointMapping* m_joint_mapping;
 
     //! Manages sensor read descriptors
-    Robot::SensorReadManager* sensor_read_manager;
-
-    /// Returns a string containing a list of descriptions of the set error
-    /// flags in the given errorvalue.
-    std::string getSensorErrorDescription(unsigned int error_value);
-    //! Prints bulk read errors for all servos and returns true if any occured.
-    bool CheckServosBulkReadErrors();
-    //! Checks a single sensor/servo for bulk read errors, prints them, and
-    //! returns whether or not any occured.
-    bool CheckSensorBulkReadErrors(int sensor_id);
-    
-    //! Initialises the mapping of sensor values to their respective response
-    //! rates.
-    //! Should be called before the first call to UpdateSensorResponseRate(...).
-    void InitialiseSensorResponseRates();
-    //! Updates all sensor response rates using the same error code for each
-    double UpdateSensorResponseRates(int error_code);
-    //! Updates the response rate estimate for the given sensor using the
-    //! given sensor error code.
-    //! returns the updated response rate.
-    double UpdateSensorResponseRate(int sensor_id, int error_code);
-    //! Pretty prints the response rate of all sensors
-    void PrintSensorResponseRates();
-    //! Pretty prints the response rate of a single sensors
-    void PrintSensorResponseRate(int sensor_id);
+    Robot::SensorReadManager* sensor_read_manager_;
 
 private:
     static const unsigned int NUM_MOTORS = 20;

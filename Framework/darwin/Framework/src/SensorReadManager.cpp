@@ -11,6 +11,16 @@ using namespace Robot;
 const int Robot::FSR::ID_R_FSR;
 const int Robot::FSR::ID_L_FSR;
 
+// Error flags returned by sensor + servo reads/commands.
+#define SENSOR_ERROR_NONE               (0x0000)
+#define SENSOR_ERROR_FLAG_INPUT_VOLTAGE (0x0001)
+#define SENSOR_ERROR_FLAG_ANGLE_LIMIT   (0x0002)
+#define SENSOR_ERROR_FLAG_OVERHEATING   (0x0004)
+#define SENSOR_ERROR_FLAG_RANGE         (0x0008)
+#define SENSOR_ERROR_FLAG_CHECKSUM      (0x0010)
+#define SENSOR_ERROR_FLAG_OVERLOAD      (0x0020)
+#define SENSOR_ERROR_FLAG_INSTRUCTION   (0x0040)
+
 // Duplicated from CM730.cpp. These should be constants.
 #define ID                  (2)
 #define LENGTH              (3)
@@ -27,55 +37,147 @@ const int Robot::FSR::ID_L_FSR;
 #define INST_SYNC_WRITE (131)   // 0x83
 #define INST_BULK_READ  (146)   // 0x92
 
+bool SensorReadManager::ProcessBulkReadErrors(
+	int bulk_read_error_code,
+	BulkReadData* bulk_read_data_)
+{
+	// A flag to indicate whether the bulk read must be repeated
+    // (i.e. it is set to true if a significant error occurs during the read)
+    bool repeat_bulk_read = false;
 
-//! Filters the list of response rates to return a list of sensor IDs that
-//! Are actually failing.
-//! (i.e. Removes likely false-positives from the list of failing sensors.
-//! Currently assumes that all sensors are always in use.
-//! Note: If three sensors on the same limb are not responding, it is likely 
-//!       that only the first of them requires attention)
+    if(bulk_read_error_code != Robot::CM730::SUCCESS)
+    {
+        // Check for servo read errors: (and also other sensors)
+        // Note: Possible error flags are:
+        //  { SENSOR_ERROR_NONE, SENSOR_ERROR_FLAG_INPUT_VOLTAGE,
+        //    SENSOR_ERROR_FLAG_ANGLE_LIMIT, SENSOR_ERROR_FLAG_OVERHEATING,
+        //    SENSOR_ERROR_FLAG_RANGE, SENSOR_ERROR_FLAG_CHECKSUM,
+        //    SENSOR_ERROR_FLAG_OVERLOAD, SENSOR_ERROR_FLAG_INSTRUCTION }
+        std::cout    
+                << std::endl
+                // << __PRETTY_FUNCTION__ << ": "
+                << "DS::CFHC()" << ": "
+                << "BULK READ ERROR: "
+                << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
+                << std::endl;
+
+        bool sensor_read_error = CheckSensorsBulkReadErrors(bulk_read_data_);
+
+        // Decide whether to repeat the read based on errors returned:
+        repeat_bulk_read = sensor_read_error;
+    }
+    else
+    {
+        UpdateSensorResponseRates(SENSOR_ERROR_NONE);
+        PrintSensorResponseRates();
+    }
+
+    return repeat_bulk_read;
+}
+
+bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data_)
+{
+    bool sensor_read_error = false;
+
+    for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_heap_.begin();
+         it != descriptor_heap_.end(); ++it)
+    {
+        int sensor_id = (*it)->sensor_id();
+        sensor_read_error |= CheckSensorBulkReadErrors(sensor_id, bulk_read_data_);
+    }
+
+    return sensor_read_error;
+}
+
+bool SensorReadManager::CheckSensorBulkReadErrors(
+	int sensor_id,
+	BulkReadData* bulk_read_data_)
+{
+    bool sensor_read_error = false;
+
+    int sensor_error_code = bulk_read_data_[sensor_id].error;
+
+    double response_rate = descriptor_map_[sensor_id]->UpdateResponseRate(sensor_error_code);
+
+    if(sensor_error_code != SENSOR_ERROR_NONE)
+    {
+        // If the error occurs very often, we should stop reporting it,
+        // since repeating the bulk read indefinitely will freeze the robot.
+        if(response_rate > 0.5)
+            sensor_read_error = true;
+
+        // errorlog << "Motor error: " << endl;
+
+        std::cout
+                // << __PRETTY_FUNCTION__ << ": "
+                << "DS::CFHC()" << ": "
+                << "Sensor error: id = '"
+                << Robot::SensorReadManager::SensorNameForId(sensor_id)
+                << "' ("
+                << sensor_id
+                << "), error='"
+                << GetSensorErrorDescription(sensor_error_code)
+                << "';"
+                << std::endl;
+        PrintSensorResponseRate(sensor_id);
+    }
+    else
+    {
+        PrintSensorResponseRate(sensor_id);
+    }
+
+    return sensor_read_error;
+}
+
 void SensorReadManager::GetFilteredLikelySensorFailures(
     std::vector<int>* failing_sensors)
 {
-    static std::vector<int> sensors_right_arm;// {
-    //     Robot::JointData::ID_R_SHOULDER_PITCH,
-    //     Robot::JointData::ID_R_SHOULDER_ROLL ,
-    //     Robot::JointData::ID_R_ELBOW         ,
-    //     };
-    // static std::vector<int> sensors_left_arm  {
-    //     Robot::JointData::ID_L_SHOULDER_PITCH,
-    //     Robot::JointData::ID_L_SHOULDER_ROLL ,
-    //     Robot::JointData::ID_L_ELBOW         ,
-    //     };
-    // static std::vector<int> sensors_right_leg {
-    //     Robot::JointData::ID_R_HIP_YAW       ,
-    //     Robot::JointData::ID_R_HIP_ROLL      ,
-    //     Robot::JointData::ID_R_HIP_PITCH     ,
-    //     Robot::JointData::ID_R_KNEE          ,
-    //     Robot::JointData::ID_R_ANKLE_PIT     ,
-    //     Robot::JointData::ID_R_ANKLE_ROL     ,
-    //     Robot::FSR::ID_R_FSR                 ,
-    //     };
-    // static std::vector<int> sensors_left_leg  {
-    //     Robot::JointData::ID_L_HIP_YAW       ,
-    //     Robot::JointData::ID_L_HIP_ROLL      ,
-    //     Robot::JointData::ID_L_HIP_PITCH     ,
-    //     Robot::JointData::ID_L_KNEE          ,
-    //     Robot::JointData::ID_L_ANKLE_PITCH   ,
-    //     Robot::JointData::ID_L_ANKLE_ROLL    ,
-    //     Robot::FSR::ID_L_FSR                 ,
-    //     };
-    // static std::vector<int> sensors_head      {
-    //     Robot::JointData::ID_HEAD_PAN        ,
-    //     Robot::JointData::ID_HEAD_TILT       ,
-    //     };
+    static const int arr_sensors_right_arm[] = {
+        Robot::JointData::ID_R_SHOULDER_PITCH,
+        Robot::JointData::ID_R_SHOULDER_ROLL ,
+        Robot::JointData::ID_R_ELBOW         ,
+        };
+    static const int arr_sensors_left_arm[]  = {
+        Robot::JointData::ID_L_SHOULDER_PITCH,
+        Robot::JointData::ID_L_SHOULDER_ROLL ,
+        Robot::JointData::ID_L_ELBOW         ,
+        };
+    static const int arr_sensors_right_leg[] = {
+        Robot::JointData::ID_R_HIP_YAW       ,
+        Robot::JointData::ID_R_HIP_ROLL      ,
+        Robot::JointData::ID_R_HIP_PITCH     ,
+        Robot::JointData::ID_R_KNEE          ,
+        Robot::JointData::ID_R_ANKLE_PITCH   ,
+        Robot::JointData::ID_R_ANKLE_ROLL    ,
+        Robot::FSR::ID_R_FSR                 ,
+        };
+    static const int arr_sensors_left_leg[]  = {
+        Robot::JointData::ID_L_HIP_YAW       ,
+        Robot::JointData::ID_L_HIP_ROLL      ,
+        Robot::JointData::ID_L_HIP_PITCH     ,
+        Robot::JointData::ID_L_KNEE          ,
+        Robot::JointData::ID_L_ANKLE_PITCH   ,
+        Robot::JointData::ID_L_ANKLE_ROLL    ,
+        Robot::FSR::ID_L_FSR                 ,
+        };
+    static const int arr_sensors_head[]      = {
+        Robot::JointData::ID_HEAD_PAN        ,
+        Robot::JointData::ID_HEAD_TILT       ,
+        };
+	// Note: These vectors should be initialised using initialiser lists
+	//       once we start using c++11.
+	static std::vector<int> sensors_right_arm(arr_sensors_right_arm, arr_sensors_right_arm + sizeof(arr_sensors_right_arm) / sizeof(arr_sensors_right_arm[0]));
+	static std::vector<int> sensors_left_arm (arr_sensors_left_arm , arr_sensors_left_arm  + sizeof(arr_sensors_left_arm ) / sizeof(arr_sensors_left_arm [0]));
+	static std::vector<int> sensors_right_leg(arr_sensors_right_leg, arr_sensors_right_leg + sizeof(arr_sensors_right_leg) / sizeof(arr_sensors_right_leg[0]));
+	static std::vector<int> sensors_left_leg (arr_sensors_left_leg , arr_sensors_left_leg  + sizeof(arr_sensors_left_leg ) / sizeof(arr_sensors_left_leg [0]));
+	static std::vector<int> sensors_head     (arr_sensors_head     , arr_sensors_head      + sizeof(arr_sensors_head     ) / sizeof(arr_sensors_head     [0]));
 
     // Create a new vector for the results
     *failing_sensors = std::vector<int>();
 
     // Assume that a CM failure prevents all sensors from working
     // (should test this, + remove this comment (or amend the code) soon)
-    double cm_response_rate = descriptor_map[Robot::CM730::ID_CM]->response_rate();
+    double cm_response_rate = descriptor_map_[Robot::CM730::ID_CM]->response_rate();
     if(0.5 > cm_response_rate)
     {
         failing_sensors->push_back(Robot::CM730::ID_CM);
@@ -83,10 +185,10 @@ void SensorReadManager::GetFilteredLikelySensorFailures(
     }
 
     FilterLimbSensorFailures(sensors_right_arm, *failing_sensors);
-    // FilterLimbSensorFailures(sensors_left_leg , *failing_sensors);
-    // FilterLimbSensorFailures(sensors_right_arm, *failing_sensors);
-    // FilterLimbSensorFailures(sensors_left_leg , *failing_sensors);
-    // FilterLimbSensorFailures(sensors_head     , *failing_sensors);                
+    FilterLimbSensorFailures(sensors_left_leg , *failing_sensors);
+    FilterLimbSensorFailures(sensors_right_arm, *failing_sensors);
+    FilterLimbSensorFailures(sensors_left_leg , *failing_sensors);
+    FilterLimbSensorFailures(sensors_head     , *failing_sensors);                
 }
 
 void SensorReadManager::FilterLimbSensorFailures(
@@ -97,7 +199,7 @@ void SensorReadManager::FilterLimbSensorFailures(
         it != limb_sensors.end(); ++it)
     {
         int sensor_id = *it;
-        double response_rate = descriptor_map[sensor_id]->response_rate();
+        double response_rate = descriptor_map_[sensor_id]->response_rate();
         if(0.5 > response_rate)
         {
             failing_sensors.push_back(sensor_id);
@@ -113,16 +215,16 @@ void SensorReadManager::Initialize()
     // Ping(CM730::ID_CM, NULL) == SUCCESS
 
     // Create the read descriptors.
-    descriptor_list.clear();
+    descriptor_list_.clear();
 
     // CM730:
     SensorReadDescriptor cm_read;
     cm_read.set_sensor_id(CM730::ID_CM);
     cm_read.set_start_address(CM730::P_BUTTON);
     cm_read.set_num_bytes(20);
-    descriptor_list.push_back(cm_read);
-    descriptor_heap.push_back(&cm_read);
-    descriptor_map[CM730::ID_CM] = &cm_read;
+    descriptor_list_.push_back(cm_read);
+    descriptor_heap_.push_back(&cm_read);
+    descriptor_map_[CM730::ID_CM] = &cm_read;
 
     // Servo motors:
     for(int servo_id = 1; servo_id < JointData::NUMBER_OF_JOINTS; ++servo_id)
@@ -131,9 +233,9 @@ void SensorReadManager::Initialize()
         servo_read.set_sensor_id(servo_id);
         servo_read.set_start_address(MX28::P_PRESENT_POSITION_L);
         servo_read.set_num_bytes(2);
-        descriptor_list.push_back(servo_read);
-        descriptor_heap.push_back(&servo_read);
-        descriptor_map[servo_id] = &servo_read;
+        descriptor_list_.push_back(servo_read);
+        descriptor_heap_.push_back(&servo_read);
+        descriptor_map_[servo_id] = &servo_read;
     }
 
     // Force-sensitive resistors:
@@ -141,17 +243,17 @@ void SensorReadManager::Initialize()
     fsr_l_read.set_sensor_id(FSR::ID_L_FSR);
     fsr_l_read.set_start_address(FSR::P_FSR1_L);
     fsr_l_read.set_num_bytes(10);
-    descriptor_list.push_back(fsr_l_read);
-    descriptor_heap.push_back(&fsr_l_read);
-    descriptor_map[FSR::ID_L_FSR] = &fsr_l_read;
+    descriptor_list_.push_back(fsr_l_read);
+    descriptor_heap_.push_back(&fsr_l_read);
+    descriptor_map_[FSR::ID_L_FSR] = &fsr_l_read;
 
     SensorReadDescriptor fsr_r_read;
     fsr_r_read.set_sensor_id(Robot::FSR::ID_R_FSR);
     fsr_r_read.set_start_address(FSR::P_FSR1_L);
     fsr_r_read.set_num_bytes(10);
-    descriptor_list.push_back(fsr_r_read);
-    descriptor_heap.push_back(&fsr_r_read);
-    descriptor_map[Robot::FSR::ID_R_FSR] = &fsr_r_read;
+    descriptor_list_.push_back(fsr_r_read);
+    descriptor_heap_.push_back(&fsr_r_read);
+    descriptor_map_[Robot::FSR::ID_R_FSR] = &fsr_r_read;
 
     // // Make the initial bulk read packet.
     // MakeBulkReadPacket();
@@ -162,21 +264,21 @@ void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
     const int kDataStart = (PARAMETER) + 1;
 
     std::make_heap(
-        descriptor_heap.begin(), 
-        descriptor_heap.end(),
+        descriptor_heap_.begin(), 
+        descriptor_heap_.end(),
         CompareSensorReadDescriptors());
 
     // Make Data Packet
     int pos = 0;
-    // for (std::vector<SensorReadDescriptor>::iterator it = descriptor_heap.begin();
-    //      it != descriptor_heap.end(); 
+    // for (std::vector<SensorReadDescriptor>::iterator it = descriptor_heap_.begin();
+    //      it != descriptor_heap_.end(); 
     //      ++it)
-    for(int i = 0; i < (int)descriptor_heap.size(); i++)
+    for(int i = 0; i < (int)descriptor_heap_.size(); i++)
     {
-        SensorReadDescriptor* sensor_read = descriptor_heap.front();
+        SensorReadDescriptor* sensor_read = descriptor_heap_.front();
         std::pop_heap(
-            descriptor_heap.begin(), 
-            descriptor_heap.end(),
+            descriptor_heap_.begin(), 
+            descriptor_heap_.end(),
             CompareSensorReadDescriptors());
 
         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->num_bytes();
@@ -189,32 +291,18 @@ void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
     bulk_read_tx_packet_[LENGTH]      = pos + 3;
     bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
     bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
-    // descriptor_heap.length() * 3 + 3
+    // descriptor_heap_.length() * 3 + 3
 }
 
-SensorReadDescriptor& SensorReadManager::operator[](const int index)
+SensorReadDescriptor& SensorReadManager::operator[](const int sensor_id)
 {
-    return *(descriptor_map[index]);
+    return *(descriptor_map_[sensor_id]);
 }
-
-// // Initialise response rates:
-// void SensorReadManager::InitialiseSensorResponseRates()
-// {
-//     sensor_response_rates[112] = 1.0; // Robot::FSR::ID_L_FSR
-//     sensor_response_rates[111] = 1.0; // Robot::FSR::ID_R_FSR
-//     sensor_response_rates[Robot::CM730::ID_CM ] = 1.0;
-//     for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
-//         it != platform->m_servo_IDs.end(); ++it)
-//     {
-//        int servo_id = *it;
-//        sensor_response_rates[servo_id] = 1.0;
-//     }
-// }
 
 void SensorReadManager::UpdateSensorResponseRates(int error_code)
 {
-    for (std::vector<SensorReadDescriptor>::iterator it = descriptor_list.begin();
-         it != descriptor_list.end(); ++it)
+    for (std::vector<SensorReadDescriptor>::iterator it = descriptor_list_.begin();
+         it != descriptor_list_.end(); ++it)
     {
         SensorReadDescriptor& sensor_read = *it;
         sensor_read.UpdateResponseRate(error_code);
@@ -223,8 +311,8 @@ void SensorReadManager::UpdateSensorResponseRates(int error_code)
 
 void SensorReadManager::PrintSensorResponseRates()
 {
-    for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_heap.begin();
-         it != descriptor_heap.end(); ++it)
+    for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_heap_.begin();
+         it != descriptor_heap_.end(); ++it)
     {
         SensorReadDescriptor* sensor_read = *it;
         PrintSensorResponseRate(sensor_read->sensor_id());
@@ -233,13 +321,47 @@ void SensorReadManager::PrintSensorResponseRates()
 
 void SensorReadManager::PrintSensorResponseRate(int sensor_id)
 {
-    double response_rate = descriptor_map[sensor_id]->response_rate();
+    double response_rate = descriptor_map_[sensor_id]->response_rate();
     std::cout 
         << SensorNameForId(sensor_id)
         << " response_rate = " 
         << response_rate 
         << ";"
         << std::endl;
+}
+
+std::string SensorReadManager::GetSensorErrorDescription(unsigned int error_value)
+{
+    std::string error_description;
+
+    if(error_value == SENSOR_ERROR_NONE) 
+        return "No Errors";
+
+    if(error_value == -1) 
+        return "All error flags are set.";
+    
+    if(error_value & SENSOR_ERROR_FLAG_INPUT_VOLTAGE)
+        error_description.append("Input Voltage Error; ");
+    
+    if(error_value & SENSOR_ERROR_FLAG_ANGLE_LIMIT)
+        error_description.append("Angle Limit Error; ");
+    
+    if(error_value & SENSOR_ERROR_FLAG_OVERHEATING)
+        error_description.append("OverHeating Error; ");
+    
+    if(error_value & SENSOR_ERROR_FLAG_RANGE)
+        error_description.append("Range Error; ");
+    
+    if(error_value & SENSOR_ERROR_FLAG_CHECKSUM)
+        error_description.append("Checksum Error; ");
+    
+    if(error_value & SENSOR_ERROR_FLAG_OVERLOAD)
+        error_description.append("Overload Error; ");
+    
+    if(error_value & SENSOR_ERROR_FLAG_INSTRUCTION)
+        error_description.append("Instruction Error; ");
+    
+    return error_description;
 }
 
 const char* SensorReadManager::SensorNameForId(int sensor_id)

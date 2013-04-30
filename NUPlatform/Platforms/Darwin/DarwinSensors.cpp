@@ -36,7 +36,7 @@
 #include "Framework/darwin/Framework/include/JointData.h"
 #include "Framework/darwin/Framework/include/SensorReadManager.h"
 #include "Framework/darwin/Framework/include/SensorReadDescriptor.h"
-
+ 
 // Error flags returned by sensor + servo reads/commands.
 #define SENSOR_ERROR_NONE               (0x0000)
 #define SENSOR_ERROR_FLAG_INPUT_VOLTAGE (0x0001)
@@ -88,9 +88,7 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
     m_data->set(NUSensorsData::RLegEndEffector, m_data->CurrentTime, invalid);
     m_data->set(NUSensorsData::LLegEndEffector, m_data->CurrentTime, invalid);
 
-    sensor_read_manager = new Robot::SensorReadManager();
-    // Initialise response rates (used to detect malfunctioning sensors)
-    sensor_read_manager->Initialize();
+    sensor_read_manager_ = cm730->sensor_read_manager();
 }
 
 /*! @brief Destructor for DarwinSensors
@@ -101,43 +99,8 @@ DarwinSensors::~DarwinSensors()
         debug << "DarwinSensors::~DarwinSensors()" << endl;
     #endif
     delete cm730;
-    delete sensor_read_manager;
+    delete sensor_read_manager_;
 }
-
-std::string DarwinSensors::getSensorErrorDescription(unsigned int error_value)
-{
-    std::string error_description;
-
-    if(error_value == SENSOR_ERROR_NONE) 
-        return "No Errors";
-
-    if(error_value == -1) 
-        return "All error flags are set.";
-    
-    if(error_value & SENSOR_ERROR_FLAG_INPUT_VOLTAGE)
-        error_description.append("Input Voltage Error; ");
-    
-    if(error_value & SENSOR_ERROR_FLAG_ANGLE_LIMIT)
-        error_description.append("Angle Limit Error; ");
-    
-    if(error_value & SENSOR_ERROR_FLAG_OVERHEATING)
-        error_description.append("OverHeating Error; ");
-    
-    if(error_value & SENSOR_ERROR_FLAG_RANGE)
-        error_description.append("Range Error; ");
-    
-    if(error_value & SENSOR_ERROR_FLAG_CHECKSUM)
-        error_description.append("Checksum Error; ");
-    
-    if(error_value & SENSOR_ERROR_FLAG_OVERLOAD)
-        error_description.append("Overload Error; ");
-    
-    if(error_value & SENSOR_ERROR_FLAG_INSTRUCTION)
-        error_description.append("Instruction Error; ");
-    
-    return error_description;
-}
-
 
 /*! @brief Copys the sensors data from the hardware communication module to the NUSensorsData container
  */
@@ -154,7 +117,7 @@ void DarwinSensors::copyFromHardwareCommunications()
     copyFromJoints();
     copyFromFeet();
 
-    // Note: The following comment contains old code.
+    // Note: The following comment contains (very) old code.
     //       It was preserved here in the hope that it might be handy later.
     //       Please delete it if you know that it won't be. -MM
     // debug    << "Motor error: " << endl;
@@ -163,108 +126,11 @@ void DarwinSensors::copyFromHardwareCommunications()
     
     // 2. Read data in bulk from the CM730 controller board 
     //    (i.e. read all sensor and motor data for the next iteration)
-
     int debug_count = 0;
-
-    // A flag to indicate whether the bulk read must be repeated
-    // (i.e. it is set to true if a significant error occurs during the read)
-    bool repeat_bulk_read;
-    do
+    while(cm730->BulkRead())
     {
-        // Reset the repeat_bulk_read flag on each loop
-        repeat_bulk_read = false;
-
-        // Perform the read operation from the CM730.
-        // Note: Possible error codes are:
-        //  { SUCCESS, TX_CORRUPT, TX_FAIL, RX_FAIL, RX_TIMEOUT, RX_CORRUPT }
-        int bulk_read_error_code = cm730->BulkRead();
-        
-        if(bulk_read_error_code != Robot::CM730::SUCCESS)
-        {
-            std::cout << "Repeat: " << debug_count++ << ";" << std::endl;
-
-            // Check for servo read errors: (and also other sensors)
-            // Note: Possible error flags are:
-            //  { SENSOR_ERROR_NONE, SENSOR_ERROR_FLAG_INPUT_VOLTAGE,
-            //    SENSOR_ERROR_FLAG_ANGLE_LIMIT, SENSOR_ERROR_FLAG_OVERHEATING,
-            //    SENSOR_ERROR_FLAG_RANGE, SENSOR_ERROR_FLAG_CHECKSUM,
-            //    SENSOR_ERROR_FLAG_OVERLOAD, SENSOR_ERROR_FLAG_INSTRUCTION }
-            std::cout    
-                    << std::endl
-                    // << __PRETTY_FUNCTION__ << ": "
-                    << "DS::CFHC()" << ": "
-                    << "BULK READ ERROR: "
-                    << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
-                    << std::endl;
-
-            bool servo_read_error = false;
-
-            servo_read_error |= CheckServosBulkReadErrors();
-            servo_read_error |= CheckSensorBulkReadErrors(Robot::FSR::ID_L_FSR);
-            servo_read_error |= CheckSensorBulkReadErrors(Robot::FSR::ID_R_FSR);
-            servo_read_error |= CheckSensorBulkReadErrors(Robot::CM730::ID_CM );
-
-            // Decide whether to repeat the read based on errors returned:
-            repeat_bulk_read = servo_read_error;
-        }
-        else
-        {
-            sensor_read_manager->UpdateSensorResponseRates(SENSOR_ERROR_NONE);
-            sensor_read_manager->PrintSensorResponseRates();
-        }
-    } while (repeat_bulk_read);
-}
-
-bool DarwinSensors::CheckServosBulkReadErrors()
-{
-    bool servo_read_error = false;
-
-    for (std::vector<int>::iterator it = platform->m_servo_IDs.begin();
-         it != platform->m_servo_IDs.end(); ++it)
-    {
-        int servo_id = *it;
-        servo_read_error |= CheckSensorBulkReadErrors(servo_id);
+        std::cout << "Repeat: " << ++debug_count << ";" << std::endl;
     }
-
-    return servo_read_error;
-}
-
-bool DarwinSensors::CheckSensorBulkReadErrors(int sensor_id)
-{
-    bool sensor_read_error = false;
-
-    int sensor_error_code = cm730->bulk_read_data_[sensor_id].error;
-
-    double response_rate = (*sensor_read_manager)[sensor_id].UpdateResponseRate(sensor_error_code);
-
-    if(sensor_error_code != SENSOR_ERROR_NONE)
-    {
-        // If the error occurs very often, we should stop reporting it,
-        // since repeating the bulk read indefinitely will freeze the robot.
-        if(response_rate > 0.5)
-            sensor_read_error = true;
-
-        // errorlog << "Motor error: " << endl;
-
-        std::cout
-                // << __PRETTY_FUNCTION__ << ": "
-                << "DS::CFHC()" << ": "
-                << "Sensor error: id = '"
-                << Robot::SensorReadManager::SensorNameForId(sensor_id)
-                << "' ("
-                << sensor_id
-                << "), error='"
-                << getSensorErrorDescription(sensor_error_code)
-                << "';"
-                << std::endl;
-        sensor_read_manager->PrintSensorResponseRate(sensor_id);
-    }
-    else
-    {
-        sensor_read_manager->PrintSensorResponseRate(sensor_id);
-    }
-
-    return sensor_read_error;
 }
 
 /*! @brief Copys the joint sensor data

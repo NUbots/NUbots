@@ -67,6 +67,10 @@ CM730::CM730(PlatformCM730 *platform)
     DEBUG_PRINT = false;
     for(int i = 0; i < ID_BROADCAST; i++)
         bulk_read_data_[i] = BulkReadData();
+
+    sensor_read_manager_ = new Robot::SensorReadManager();
+    // Initialise response rates (used to detect malfunctioning sensors)
+    sensor_read_manager_->Initialize();
 }
 
 CM730::~CM730()
@@ -81,12 +85,12 @@ void CM730::printInstructionType(unsigned char *txpacket)
     fprintf(stderr, "INST: %s\n", getInstructionTypeString(instruction_value));
 }
 
-void CM730::printResultType(int error_code)
+void CM730::PrintResultType(int error_code)
 {
     fprintf(stderr, "RETURN: %s\n", getTxRxErrorString(error_code));
 }
 
-inline void CM730::performPriorityWait(int priority)
+inline void CM730::PerformPriorityWait(int priority)
 {
     if(priority > 1)
         m_Platform->LowPriorityWait();
@@ -95,7 +99,7 @@ inline void CM730::performPriorityWait(int priority)
     m_Platform->HighPriorityWait();
 }
 
-inline void CM730::performPriorityRelease(int priority)
+inline void CM730::PerformPriorityRelease(int priority)
 {
     m_Platform->HighPriorityRelease();
     if(priority > 0)
@@ -473,7 +477,7 @@ inline void CM730::TxRxBulkReadPacket(
 int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority)
 {
     // Acquire resources
-    performPriorityWait(priority);
+    PerformPriorityWait(priority);
 
     // m_Platform->Sleep(100); // DEBUG (crashes robot...)
 
@@ -530,11 +534,11 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
     if(DEBUG_PRINT == true)
     {
         fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
-        printResultType(res);
+        PrintResultType(res);
     }
 
     // Release resources
-    performPriorityRelease(priority);
+    PerformPriorityRelease(priority);
 
     return res;
 }
@@ -547,64 +551,69 @@ unsigned char CM730::CalculateChecksum(unsigned char *packet)
     return (~checksum);
 }
 
-// Replaced by SensorReadManager::MakeBulkReadPacket()
-void CM730::MakeBulkReadPacket()
-{
-    int number = 0;
+// // Replaced by SensorReadManager::MakeBulkReadPacket()
+// void CM730::MakeBulkReadPacket()
+// {
+//     int number = 0;
 
-    bulk_read_tx_packet_[ID]          = (unsigned char)ID_BROADCAST;
-    bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
-    bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
+//     bulk_read_tx_packet_[ID]          = (unsigned char)ID_BROADCAST;
+//     bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
+//     bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
 
-    if(Ping(CM730::ID_CM, NULL) == SUCCESS)
-    {
-        bulk_read_tx_packet_[PARAMETER+3*number+1] = 20;
-        bulk_read_tx_packet_[PARAMETER+3*number+2] = CM730::ID_CM;
-        bulk_read_tx_packet_[PARAMETER+3*number+3] = CM730::P_BUTTON;
-        number++;
-    }
+//     if(Ping(CM730::ID_CM, NULL) == SUCCESS)
+//     {
+//         bulk_read_tx_packet_[PARAMETER+3*number+1] = 20;
+//         bulk_read_tx_packet_[PARAMETER+3*number+2] = CM730::ID_CM;
+//         bulk_read_tx_packet_[PARAMETER+3*number+3] = CM730::P_BUTTON;
+//         number++;
+//     }
 
-    for(int id = 1; id < JointData::NUMBER_OF_JOINTS; id++)
-    {
-//        if(MotionStatus::m_CurrentJoints.GetEnable(id))
-//        {
-            bulk_read_tx_packet_[PARAMETER+3*number+1] = 2;   // length
-            bulk_read_tx_packet_[PARAMETER+3*number+2] = id;  // id
-            bulk_read_tx_packet_[PARAMETER+3*number+3] = MX28::P_PRESENT_POSITION_L; // start address
-            number++;
-//        }
-    }
+//     for(int id = 1; id < JointData::NUMBER_OF_JOINTS; id++)
+//     {
+// //        if(MotionStatus::m_CurrentJoints.GetEnable(id))
+// //        {
+//             bulk_read_tx_packet_[PARAMETER+3*number+1] = 2;   // length
+//             bulk_read_tx_packet_[PARAMETER+3*number+2] = id;  // id
+//             bulk_read_tx_packet_[PARAMETER+3*number+3] = MX28::P_PRESENT_POSITION_L; // start address
+//             number++;
+// //        }
+//     }
 
-    if(Ping(FSR::ID_L_FSR, NULL) == SUCCESS)
-    {
-        bulk_read_tx_packet_[PARAMETER+3*number+1] = 10;               // length
-        bulk_read_tx_packet_[PARAMETER+3*number+2] = FSR::ID_L_FSR;   // id
-        bulk_read_tx_packet_[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
-        number++;
-    }
+//     if(Ping(FSR::ID_L_FSR, NULL) == SUCCESS)
+//     {
+//         bulk_read_tx_packet_[PARAMETER+3*number+1] = 10;               // length
+//         bulk_read_tx_packet_[PARAMETER+3*number+2] = FSR::ID_L_FSR;   // id
+//         bulk_read_tx_packet_[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
+//         number++;
+//     }
 
-    if(Ping(FSR::ID_R_FSR, NULL) == SUCCESS)
-    {
-        bulk_read_tx_packet_[PARAMETER+3*number+1] = 10;               // length
-        bulk_read_tx_packet_[PARAMETER+3*number+2] = FSR::ID_R_FSR;   // id
-        bulk_read_tx_packet_[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
-        number++;
-    }
+//     if(Ping(FSR::ID_R_FSR, NULL) == SUCCESS)
+//     {
+//         bulk_read_tx_packet_[PARAMETER+3*number+1] = 10;               // length
+//         bulk_read_tx_packet_[PARAMETER+3*number+2] = FSR::ID_R_FSR;   // id
+//         bulk_read_tx_packet_[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
+//         number++;
+//     }
 
-    bulk_read_tx_packet_[LENGTH]          = (number * 3) + 3;
-}
+//     bulk_read_tx_packet_[LENGTH]          = (number * 3) + 3;
+// }
 
 int CM730::BulkRead()
 {
     unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
 
-    if(bulk_read_tx_packet_[LENGTH] != 0)
-        return TxRxPacket(bulk_read_tx_packet_, rxpacket, 0);
-    else
-    {
-        MakeBulkReadPacket();
-        return TX_FAIL;
-    }
+    // Note: This can be skipped if no errors have occured, and all sensors are
+    //       responding for appropriately many consecutive reads.
+    sensor_read_manager_->MakeBulkReadPacket(bulk_read_tx_packet_);
+
+    // Perform the read operation from the CM730.
+    // Note: Possible error codes are:
+    //  { SUCCESS, TX_CORRUPT, TX_FAIL, RX_FAIL, RX_TIMEOUT, RX_CORRUPT }
+    int bulk_read_error_code = TxRxPacket(bulk_read_tx_packet_, rxpacket, 0);
+    
+    bool error_occurred = sensor_read_manager_->ProcessBulkReadErrors(bulk_read_error_code, bulk_read_data_);
+
+    return error_occurred;
 }
 
 int CM730::SyncWrite(int start_addr, int each_length, int number, int *pParam)

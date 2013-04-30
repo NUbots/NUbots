@@ -10,6 +10,7 @@
 
 #include <boost/unordered_map.hpp>
 #include "MX28.h"
+#include "SensorReadManager.h"
 
 #define MAXNUM_TXPARAM      (256)
 #define MAXNUM_RXPARAM      (1024)
@@ -160,6 +161,9 @@ namespace Robot
         // static const int RefreshTime = 6; //msec
         // unsigned char m_ControlTable[MAXNUM_ADDRESS];
 
+        //! Manages sensor read descriptors
+        SensorReadManager* sensor_read_manager_;
+
         unsigned char bulk_read_tx_packet_[MAXNUM_TXPARAM + 10];
 
         int TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority);
@@ -168,9 +172,9 @@ namespace Robot
 
         // TxRxPacket component methods:
         void printInstructionType(unsigned char *txpacket);
-        void printResultType(int);
-        void performPriorityWait(int);
-        void performPriorityRelease(int);
+        void PrintResultType(int);
+        void PerformPriorityWait(int);
+        void PerformPriorityRelease(int);
         void TxRxCMPacket(
             unsigned char *&txpacket,
             unsigned char *&rxpacket,
@@ -192,6 +196,8 @@ namespace Robot
 
         CM730(PlatformCM730 *platform);
         ~CM730();
+
+        SensorReadManager* sensor_read_manager() { return sensor_read_manager_; }
 
         bool Connect();
         bool ChangeBaud(int baud);
