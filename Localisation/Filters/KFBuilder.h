@@ -1,6 +1,6 @@
 #ifndef KFBUILDER_H
 #define KFBUILDER_H
-#include "IKalmanFilter.h"
+#include "IWeightedKalmanFilter.h"
 
 class KFBuilder
 {
@@ -20,7 +20,7 @@ public:
         ktotal_filters
     };
     KFBuilder();
-    static IKalmanFilter* getNewFilter(Filter filter_type, Model model_type);
+    static IWeightedKalmanFilter* getNewFilter(Filter filter_type, Model model_type);
 };
 
 std::string FilterTypeString(KFBuilder::Filter filter_type);

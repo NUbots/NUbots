@@ -3,12 +3,12 @@
 #include "IKFModel.h"
 #include <sstream>
 
-SrSeqUKF::SrSeqUKF(IKFModel *model): IKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
+SrSeqUKF::SrSeqUKF(IKFModel *model): IWeightedKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
 {
     init();
 }
 
-SrSeqUKF::SrSeqUKF(const SrSeqUKF& source): IKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
+SrSeqUKF::SrSeqUKF(const SrSeqUKF& source): IWeightedKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
     init();
     m_filter_weight = source.m_filter_weight;

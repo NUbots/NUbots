@@ -7,14 +7,14 @@
 #include "Localisation/Filters/KFBuilder.h"
 #include "Localisation/Filters/RobotModel.h"
 
-IKalmanFilter* robotFilter()
+IWeightedKalmanFilter* robotFilter()
 {
     return KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
 }
 
-IKalmanFilter* newRobotModel()
+IWeightedKalmanFilter* newRobotModel()
 {
-    IKalmanFilter* filter = robotFilter();
+    IWeightedKalmanFilter* filter = robotFilter();
 
     // set initial settings.
     filter->enableOutlierFiltering();
@@ -24,9 +24,9 @@ IKalmanFilter* newRobotModel()
     return filter;
 }
 
-IKalmanFilter* newRobotModel(IKalmanFilter* filter)
+IWeightedKalmanFilter* newRobotModel(IWeightedKalmanFilter* filter)
 {
-    IKalmanFilter* new_filter = robotFilter();
+    IWeightedKalmanFilter* new_filter = robotFilter();
 
     // This should be fixed in a different way. The default copy copies the pointer value and would otherwise lose the model.
     IKFModel* temp_model = new_filter->model();
@@ -44,11 +44,11 @@ IKalmanFilter* newRobotModel(IKalmanFilter* filter)
     return new_filter;
 }
 
-IKalmanFilter* newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError &error, double timestamp)
+IWeightedKalmanFilter* newRobotModel(IWeightedKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError &error, double timestamp)
 {
     Matrix meas_noise = error.errorCovariance();
 
-    IKalmanFilter* new_filter = robotFilter();
+    IWeightedKalmanFilter* new_filter = robotFilter();
     // set initial settings.
     new_filter->enableOutlierFiltering();
     new_filter->setOutlierThreshold(15.f);
@@ -97,7 +97,7 @@ bool RunTests()
 
 bool timingTest()
 {
-    IKalmanFilter *theModel = newRobotModel();
+    IWeightedKalmanFilter *theModel = newRobotModel();
     bool success = true;
     const unsigned int total_updates = 100000;
 
@@ -202,7 +202,7 @@ bool MergingTest()
     settings.setPruneMethod(LocalisationSettings::prune_merge);
     SelfLocalisation loc(2,settings);
     bool success = true;
-    std::list<IKalmanFilter*> models;
+    std::list<IWeightedKalmanFilter*> models;
 
     // --- Test for correct merge ---
 
@@ -210,7 +210,7 @@ bool MergingTest()
 
     // Create the models.
 
-    IKalmanFilter *temp = newRobotModel();
+    IWeightedKalmanFilter *temp = newRobotModel();
     temp->setFilterWeight(0.5);
     temp->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(99.5f, 0.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     temp->setActive();
@@ -265,9 +265,9 @@ bool MaxLikelyhoodTest()
     settings.setPruneMethod(LocalisationSettings::prune_max_likelyhood);
     SelfLocalisation loc(2,settings);
 
-    std::list<IKalmanFilter*> models;
+    std::list<IWeightedKalmanFilter*> models;
     // Create the models.
-    IKalmanFilter* temp;
+    IWeightedKalmanFilter* temp;
 
     temp = newRobotModel();
     temp->setFilterWeight(0.5);
@@ -309,9 +309,9 @@ bool ViterbiTest()
     settings.setPruneMethod(LocalisationSettings::prune_viterbi);
     SelfLocalisation loc(2,settings);
 
-    std::list<IKalmanFilter*> models;
+    std::list<IWeightedKalmanFilter*> models;
     // Create the models.
-    IKalmanFilter* temp;
+    IWeightedKalmanFilter* temp;
 
     temp = newRobotModel();
     temp->setFilterWeight(0.2);
@@ -437,14 +437,14 @@ bool NscanTest()
     // ------------------------
 
     // Make the first two models
-    std::list<IKalmanFilter*> example_tree;
+    std::list<IWeightedKalmanFilter*> example_tree;
     // N=2
-    IKalmanFilter* model0 = newRobotModel();
+    IWeightedKalmanFilter* model0 = newRobotModel();
     model0->setFilterWeight(0.5);
     model0->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     model0->setActive();
 
-    IKalmanFilter* model1 = newRobotModel();
+    IWeightedKalmanFilter* model1 = newRobotModel();
     model1->setFilterWeight(0.5);
     model0->initialiseEstimate(MultivariateGaussian(SelfLocalisation::mean_matrix(0.0f, 30.0f, 0.0f), SelfLocalisation::covariance_matrix(50.0f,15.0f,0.2f)));
     model1->setActive();
@@ -454,48 +454,48 @@ bool NscanTest()
     rightGoal->CopyObject(ambPost);
 
     // N=1
-    IKalmanFilter* model2 = newRobotModel(model0, *leftGoal, error, 100);
-    IKalmanFilter* model3 = newRobotModel(model0, *rightGoal, error, 100);
-    IKalmanFilter* model4 = newRobotModel(model1, *leftGoal, error, 100);
-    IKalmanFilter* model5 = newRobotModel(model1, *rightGoal, error, 100);
+    IWeightedKalmanFilter* model2 = newRobotModel(model0, *leftGoal, error, 100);
+    IWeightedKalmanFilter* model3 = newRobotModel(model0, *rightGoal, error, 100);
+    IWeightedKalmanFilter* model4 = newRobotModel(model1, *leftGoal, error, 100);
+    IWeightedKalmanFilter* model5 = newRobotModel(model1, *rightGoal, error, 100);
 
     // N=0
-    IKalmanFilter* model6 = newRobotModel(model2, *leftGoal, error, 200);
+    IWeightedKalmanFilter* model6 = newRobotModel(model2, *leftGoal, error, 200);
     model6->setActive();
     model6->setFilterWeight(0.1f);
     example_tree.push_back(model6);
 
-    IKalmanFilter* model7 = newRobotModel(model2, *rightGoal, error, 200);
+    IWeightedKalmanFilter* model7 = newRobotModel(model2, *rightGoal, error, 200);
     model7->setActive();
     model7->setFilterWeight(0.2f);
     example_tree.push_back(model7);
 
-    IKalmanFilter* model8 = newRobotModel(model3, *leftGoal, error, 200);
+    IWeightedKalmanFilter* model8 = newRobotModel(model3, *leftGoal, error, 200);
     model8->setActive();
     model8->setFilterWeight(0.05f);
     example_tree.push_back(model8);
 
-    IKalmanFilter* model9 = newRobotModel(model3, *rightGoal, error, 200);
+    IWeightedKalmanFilter* model9 = newRobotModel(model3, *rightGoal, error, 200);
     model9->setActive();
     model9->setFilterWeight(0.1f);
     example_tree.push_back(model9);
 
-    IKalmanFilter* model10 = newRobotModel(model4, *leftGoal, error, 200);
+    IWeightedKalmanFilter* model10 = newRobotModel(model4, *leftGoal, error, 200);
     model10->setActive();
     model10->setFilterWeight(0.12f);
     example_tree.push_back(model10);
 
-    IKalmanFilter* model11 = newRobotModel(model4, *rightGoal, error, 200);
+    IWeightedKalmanFilter* model11 = newRobotModel(model4, *rightGoal, error, 200);
     model11->setActive();
     model11->setFilterWeight(0.13f);
     example_tree.push_back(model11);
 
-    IKalmanFilter* model12 = newRobotModel(model5, *leftGoal, error, 200);
+    IWeightedKalmanFilter* model12 = newRobotModel(model5, *leftGoal, error, 200);
     model12->setActive();
     model12->setFilterWeight(0.17f);
     example_tree.push_back(model12);
 
-    IKalmanFilter* model13 = newRobotModel(model2, *rightGoal, error, 200);
+    IWeightedKalmanFilter* model13 = newRobotModel(model2, *rightGoal, error, 200);
     model13->setActive();
     model13->setFilterWeight(0.13f);
     example_tree.push_back(model13);
@@ -524,11 +524,11 @@ bool NscanTest()
 //        std::cout << (*mod_it)->summary(false);
 //    }
 
-    std::list<IKalmanFilter*> tree_copy = example_tree;
+    std::list<IWeightedKalmanFilter*> tree_copy = example_tree;
     // Make a copy so we can perform two tests
-//    for(std::list<IKalmanFilter*>::iterator model_it = example_tree.begin(); model_it != example_tree.end(); ++model_it)
+//    for(std::list<IWeightedKalmanFilter*>::iterator model_it = example_tree.begin(); model_it != example_tree.end(); ++model_it)
 //    {
-//        IKalmanFilter* temp = new Model(*(*model_it));
+//        IWeightedKalmanFilter* temp = new Model(*(*model_it));
 //        tree_copy.push_back(temp);
 //    }
 
@@ -565,7 +565,7 @@ bool NscanTest()
     bool model12_found = false;
     bool model13_found = false;
 
-    for(std::list<IKalmanFilter*>::const_iterator model_it = tree_copy.begin(); model_it != tree_copy.end(); ++model_it)
+    for(std::list<IWeightedKalmanFilter*>::const_iterator model_it = tree_copy.begin(); model_it != tree_copy.end(); ++model_it)
     {
         if((*model_it)->id() == model10->id()) model10_found = true;
         if((*model_it)->id() == model11->id()) model11_found = true;
@@ -591,7 +591,7 @@ bool NscanTest()
     model12_found = false;
     model13_found = false;
     tree_copy = loc.allModels();
-    for(std::list<IKalmanFilter*>::const_iterator model_it = tree_copy.begin(); model_it != tree_copy.end(); ++model_it)
+    for(std::list<IWeightedKalmanFilter*>::const_iterator model_it = tree_copy.begin(); model_it != tree_copy.end(); ++model_it)
     {
         if((*model_it)->id() == model12->id()) model12_found = true;
         if((*model_it)->id() == model13->id()) model13_found = true;

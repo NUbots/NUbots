@@ -3,12 +3,12 @@
 #include "IKFModel.h"
 #include <sstream>
 
-SrBasicUKF::SrBasicUKF(IKFModel *model): IKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
+SrBasicUKF::SrBasicUKF(IKFModel *model): IWeightedKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
 {
     init();
 }
 
-SrBasicUKF::SrBasicUKF(const SrBasicUKF& source): IKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
+SrBasicUKF::SrBasicUKF(const SrBasicUKF& source): IWeightedKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
     init();
     m_filter_weight = source.m_filter_weight;
@@ -131,6 +131,7 @@ bool SrBasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Mat
 
     // Set the new mean and covariance values.
     Matrix predicted_covariance = Sy * Sy.transp();
+    m_model->limitState(predicted_mean);
     m_estimate.setMean(predicted_mean);
     m_estimate.setCovariance(predicted_covariance);
     m_sqrt_covariance = Sy;
@@ -186,7 +187,7 @@ bool SrBasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& nois
     Matrix Sy = QR_Householder(concat.transp());
     Sy = CholeskyUpdate(Sy, m_sqrt_covariance_weights[0][0]*(Yprop.getCol(0) - Ymean), mathGeneral::sign(m_covariance_weights[0][0]));
 
-    const Matrix innovation = measurement - Ymean;
+    const Matrix innovation = m_model->measurementDistance(measurement, Ymean, type);
     // Check for outlier, if outlier return without updating estimate.
     if(evaluateMeasurement(innovation, Sy*Sy.transp(), noise) == false) // Y * Y^T is the estimate variance, by definition.
         return false;
@@ -202,6 +203,7 @@ bool SrBasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& nois
     Matrix new_covariance = new_sqrt_cov * new_sqrt_cov.transp();
 
     m_sqrt_covariance = new_sqrt_cov;
+    m_model->limitState(new_mean);
     m_estimate.setMean(new_mean);
     m_estimate.setCovariance(new_covariance);
     return true;

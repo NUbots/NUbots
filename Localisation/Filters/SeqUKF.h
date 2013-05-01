@@ -29,16 +29,16 @@
  */
 
 #pragma once
-#include "IKalmanFilter.h"
+#include "IWeightedKalmanFilter.h"
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/MultivariateGaussian.h"
 #include "UnscentedTransform.h"
-class SeqUKF: public IKalmanFilter
+class SeqUKF: public IWeightedKalmanFilter
 {
 public:
     SeqUKF(IKFModel* model);
     ~SeqUKF();
-    IKalmanFilter* Clone()
+    IWeightedKalmanFilter* Clone()
     {
         return new SeqUKF(*this);
     }

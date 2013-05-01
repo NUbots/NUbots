@@ -33,7 +33,7 @@ class NUSensorsData;
 typedef std::pair<unsigned int, float> ParentSum;
 #include "LocalisationSettings.h"
 
-class IKalmanFilter;
+class IWeightedKalmanFilter;
 class KFBuilder;
 class MultivariateGaussian;
 
@@ -50,7 +50,7 @@ class SelfLocalisation: public TimestampedData
         void ProcessObjects(FieldObjects* fobs, float time_increment);
         void writeToLog();
         bool doTimeUpdate(float odomForward, float odomLeft, float odomTurn, double time_increment);
-        void WriteModelToObjects(const IKalmanFilter* model, FieldObjects* fobs);
+        void WriteModelToObjects(const IWeightedKalmanFilter* model, FieldObjects* fobs);
         bool clipRobotState(MultivariateGaussian* estimate, int stateIndex, double minValue, double maxValue);
         bool clipEstimateToField(MultivariateGaussian* estimate);
         bool clipActiveModelsToField();
@@ -76,8 +76,8 @@ class SelfLocalisation: public TimestampedData
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         unsigned int getNumActiveModels();
         unsigned int getNumFreeModels();
-        const IKalmanFilter* getBestModel() const;
-        const IKalmanFilter* getBallModel() const;
+        const IWeightedKalmanFilter* getBestModel() const;
+        const IWeightedKalmanFilter* getBallModel() const;
         void NormaliseAlphas();
         int FindNextFreeModel();
 
@@ -91,14 +91,14 @@ class SelfLocalisation: public TimestampedData
         void MergeModels(int maxAfterMerge);
 
         // New merge
-        bool MergeTwoModels(IKalmanFilter* model_a, IKalmanFilter* model_b);
-        bool MergeTwoModelsPreserveBestMean(IKalmanFilter* model_a, IKalmanFilter* model_b);
-        double MergeMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+        bool MergeTwoModels(IWeightedKalmanFilter* model_a, IWeightedKalmanFilter* model_b);
+        bool MergeTwoModelsPreserveBestMean(IWeightedKalmanFilter* model_a, IWeightedKalmanFilter* model_b);
+        double MergeMetric(const IWeightedKalmanFilter* model_a, const IWeightedKalmanFilter* model_b) const;
 
-        double WilliamsMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
-        double SalmondMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
-        double RunnallMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
-        double QuinlanMetric(const IKalmanFilter* model_a, const IKalmanFilter* model_b) const;
+        double WilliamsMetric(const IWeightedKalmanFilter* model_a, const IWeightedKalmanFilter* model_b) const;
+        double SalmondMetric(const IWeightedKalmanFilter* model_a, const IWeightedKalmanFilter* model_b) const;
+        double RunnallMetric(const IWeightedKalmanFilter* model_a, const IWeightedKalmanFilter* model_b) const;
+        double QuinlanMetric(const IWeightedKalmanFilter* model_a, const IWeightedKalmanFilter* model_b) const;
 
         bool MetricTest();
 
@@ -106,7 +106,7 @@ class SelfLocalisation: public TimestampedData
 //        bool MergeTwoModels(SelfModel* modelA, SelfModel* modelB);
 //        double MergeMetric(const SelfModel* modelA, const SelfModel* modelB) const;
         void MergeModelsBelowThreshold(double MergeMetricThreshold);
-        void PrintModelStatus(const IKalmanFilter* model);
+        void PrintModelStatus(const IWeightedKalmanFilter* model);
         std::string ModelStatusSummary();
 
         void removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& ambiguousobjects, bool yellow_seen, bool blue_seen);
@@ -118,13 +118,13 @@ class SelfLocalisation: public TimestampedData
         float m_timeSinceFieldObjectSeen;     // the time since a useful field object has been seen
 
         unsigned int removeInactiveModels();
-        static unsigned int removeInactiveModels(std::list<IKalmanFilter*>& container);
-        const std::list<IKalmanFilter*>& allModels() const
+        static unsigned int removeInactiveModels(std::list<IWeightedKalmanFilter*>& container);
+        const std::list<IWeightedKalmanFilter*>& allModels() const
         {return m_robot_filters;}
 
         // Model Reset Functions
         void initSingleModel(float x, float y, float heading);
-        void initBallModel(IKalmanFilter* ball_model);
+        void initBallModel(IWeightedKalmanFilter* ball_model);
         bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
         void doInitialReset(GameInformation::TeamColour team_colour);
         void doSingleInitialReset(GameInformation::TeamColour team_colour);
@@ -137,16 +137,16 @@ class SelfLocalisation: public TimestampedData
         void resetSdMatrix(int modelNumber);
         void swapFieldStateTeam(float& x, float& y, float& heading);
 
-        IKalmanFilter* newBallModel();
-        IKalmanFilter* robotFilter();
+        IWeightedKalmanFilter* newBallModel();
+        IWeightedKalmanFilter* robotFilter();
 
-        IKalmanFilter* newRobotModel();
-        IKalmanFilter* newRobotModel(IKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError&  error,
+        IWeightedKalmanFilter* newRobotModel();
+        IWeightedKalmanFilter* newRobotModel(IWeightedKalmanFilter* filter, const StationaryObject& measured_object, const MeasurementError&  error,
                                      int ambiguous_id, double timestamp);
         static Matrix mean_matrix(float x, float y, float heading);
         static Matrix covariance_matrix(float x_var, float y_var, float heading_var);
         void InitialiseModels(const std::vector<MultivariateGaussian>& positions);
-        void setModels(std::list<IKalmanFilter*>& newModels);
+        void setModels(std::list<IWeightedKalmanFilter*>& newModels);
 
         void addToBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var);
         void setBallVariance(float x_pos_var, float y_pos_var, float x_vel_var, float y_vel_var);
@@ -211,9 +211,9 @@ class SelfLocalisation: public TimestampedData
         static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
 //        ModelContainer m_models;
 
-        std::list<IKalmanFilter*> m_robot_filters;
+        std::list<IWeightedKalmanFilter*> m_robot_filters;
 
-        IKalmanFilter* m_ball_filter;
+        IWeightedKalmanFilter* m_ball_filter;
 
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
         ofstream debug_file; // Logging file

@@ -1,18 +1,18 @@
 #ifndef BASICUKF_H
 #define BASICUKF_H
 
-#include "IKalmanFilter.h"
+#include "IWeightedKalmanFilter.h"
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/MultivariateGaussian.h"
 #include "UnscentedTransform.h"
 
-class BasicUKF: public IKalmanFilter
+class BasicUKF: public IWeightedKalmanFilter
 {
 public:
     BasicUKF(IKFModel* model);
     ~BasicUKF();
 
-    IKalmanFilter* Clone()
+    IWeightedKalmanFilter* Clone()
     {
         return new BasicUKF(*this);
     }

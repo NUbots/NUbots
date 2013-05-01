@@ -15,9 +15,9 @@ KFBuilder::KFBuilder()
 {
 }
 
-IKalmanFilter* KFBuilder::getNewFilter(Filter filter_type, Model model_type)
+IWeightedKalmanFilter *KFBuilder::getNewFilter(Filter filter_type, Model model_type)
 {
-    IKalmanFilter* filter = NULL;
+    IWeightedKalmanFilter* filter = NULL;
     IKFModel* model = NULL;
 
     // First get the correct model to use for our filter.

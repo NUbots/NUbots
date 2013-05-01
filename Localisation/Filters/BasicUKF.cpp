@@ -3,12 +3,12 @@
 #include "IKFModel.h"
 #include <sstream>
 
-BasicUKF::BasicUKF(IKFModel *model): IKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
+BasicUKF::BasicUKF(IKFModel *model): IWeightedKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
 {
     init();
 }
 
-BasicUKF::BasicUKF(const BasicUKF& source): IKalmanFilter(source), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
+BasicUKF::BasicUKF(const BasicUKF& source): IWeightedKalmanFilter(source), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
     m_outlier_filtering_enabled = source.m_outlier_filtering_enabled;
     m_outlier_threshold = source.m_outlier_threshold;

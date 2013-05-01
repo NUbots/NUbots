@@ -12,6 +12,7 @@
 #include <sys/time.h>
 #include "Localisation/Filters/KFBuilder.h"
 #include "Localisation/Filters/RobotModel.h"
+#include "Localisation/Filters/IWeightedKalmanFilter.h"
 
 /*! @brief Default Constructor
  */
@@ -311,7 +312,7 @@ void OfflineLocalisation::run()
         ++curr_frame;
     }
 
-    IKalmanFilter* test = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
+    IWeightedKalmanFilter* test = KFBuilder::getNewFilter(KFBuilder::kseq_ukf_filter, KFBuilder::krobot_model);
     m_num_models_created = test->id() - initial_model_id;
     delete test;
     m_experiment_run_time = exp_time * 1000;
@@ -500,7 +501,9 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
         {
             m_log_reader->setFrame(frame);
             tempObjects = m_log_reader->GetObjectData();
-            NUSensorsData tempSensor = (*m_log_reader->GetSensorData());
+            const NUSensorsData* sensors = m_log_reader->GetSensorData();
+            std::cout << sensors << std::endl;
+            NUSensorsData tempSensor = (*sensors);
             tempTeamInfo = m_log_reader->GetTeamInfo();
             tempGameInfo = m_log_reader->GetGameInfo();
 
@@ -534,7 +537,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             temp_loc = GetSelfFrame(frame+1);
             assert(temp_loc);
             Vector3<float> estimate(0,0,0);
-            const IKalmanFilter* best_model = temp_loc->getBestModel();
+            const IWeightedKalmanFilter* best_model = temp_loc->getBestModel();
             const MultivariateGaussian best_estimate = best_model->estimate();
             estimate.x = best_estimate.mean(RobotModel::kstates_x);
             estimate.y = best_estimate.mean(RobotModel::kstates_y);

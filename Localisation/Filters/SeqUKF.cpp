@@ -3,12 +3,12 @@
 #include "IKFModel.h"
 #include <sstream>
 
-SeqUKF::SeqUKF(IKFModel *model): IKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
+SeqUKF::SeqUKF(IKFModel *model): IWeightedKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
 {
     init();
 }
 
-SeqUKF::SeqUKF(const SeqUKF& source): IKalmanFilter(source), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
+SeqUKF::SeqUKF(const SeqUKF& source): IWeightedKalmanFilter(source), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
     m_outlier_filtering_enabled = source.m_outlier_filtering_enabled;
     m_outlier_threshold = source.m_outlier_threshold;
@@ -165,7 +165,7 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
         std::cout << "]" << std::endl;
     }
 
-    m_model->limitMean(predictedMean);
+    m_model->limitState(predictedMean);
     new_estimate.setMean(predictedMean);
     new_estimate.setCovariance(predictedCovariance);
     initialiseEstimate(new_estimate);
@@ -238,7 +238,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
         std::cout << "New covariance:\n" << updated_covariance << std::endl;
     }
 
-    m_model->limitMean(updated_mean);
+    m_model->limitState(updated_mean);
     m_estimate.setMean(updated_mean);
     m_estimate.setCovariance(updated_covariance);
     return true;

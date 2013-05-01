@@ -10,7 +10,7 @@
 #include "Tools/Math/Limit.h"
 
 #include "Localisation/Filters/MobileObjectModel.h"
-#include "Localisation/Filters/IKalmanFilter.h"
+#include "Localisation/Filters/IWeightedKalmanFilter.h"
 #include "Localisation/Filters/RobotModel.h"
 
 // Apple has to be different...
@@ -788,20 +788,20 @@ void locWmGlDisplay::DrawModelObjects(const MultivariateGaussian& model, const M
 
 void locWmGlDisplay::DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor)
 {
-    const IKalmanFilter* ball_model = localisation.getBallModel();
+    const IWeightedKalmanFilter* ball_model = localisation.getBallModel();
     if(drawBestModelOnly)
     {
-        const IKalmanFilter* model = localisation.getBestModel();
+        const IWeightedKalmanFilter* model = localisation.getBestModel();
         DrawModelObjects(model->estimate(), ball_model->estimate(), modelColor);
         std::cout << model->getFilterWeight() << std::endl;
     }
     else
     {
-        std::list<IKalmanFilter*> models = localisation.allModels();
+        std::list<IWeightedKalmanFilter*> models = localisation.allModels();
 
-        for(std::list<IKalmanFilter*>::iterator model = models.begin(); model != models.end(); ++model)
+        for(std::list<IWeightedKalmanFilter*>::iterator model = models.begin(); model != models.end(); ++model)
         {
-            const IKalmanFilter* currModel = (*model);
+            const IWeightedKalmanFilter* currModel = (*model);
             if(currModel->active())
             {
                 QColor drawColor(modelColor);
@@ -840,7 +840,7 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     QColor drawColor(modelColor);
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
 
-    const IKalmanFilter* ball_model = localisation.getBallModel();
+    const IWeightedKalmanFilter* ball_model = localisation.getBallModel();
     MultivariateGaussian ball_estimate = ball_model->estimate();
 
     Matrix cov = ball_estimate.covariance();
@@ -854,7 +854,7 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     if(drawBestModelOnly)
     {
         drawColor.setAlpha(255);
-        const IKalmanFilter* model = localisation.getBestModel();
+        const IWeightedKalmanFilter* model = localisation.getBestModel();
         DrawModelMarkers(model->estimate(), drawColor);
         FieldPose ball_pose = calculateBallPosition(model->estimate(), ball_estimate);
         if(m_showBall)
@@ -867,8 +867,8 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     else
     {
         QString displayString("Model %1 (%2%)");
-        std::list<IKalmanFilter*> models = localisation.allModels();
-        for(std::list<IKalmanFilter*>::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
+        std::list<IWeightedKalmanFilter*> models = localisation.allModels();
+        for(std::list<IWeightedKalmanFilter*>::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
         {
             if((*model_it)->active())
             {

@@ -1,19 +1,19 @@
 #ifndef SRBASICUKF_H
 #define SRBASICUKF_H
 
-#include "IKalmanFilter.h"
+#include "IWeightedKalmanFilter.h"
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/MultivariateGaussian.h"
 #include "UnscentedTransform.h"
 
-class SrBasicUKF: public IKalmanFilter
+class SrBasicUKF: public IWeightedKalmanFilter
 {
 public:
     SrBasicUKF(IKFModel* model);
     SrBasicUKF(const SrBasicUKF& source);
     ~SrBasicUKF();
 
-    IKalmanFilter* Clone()
+    IWeightedKalmanFilter* Clone()
     {
         return new SrBasicUKF(*this);
     }
