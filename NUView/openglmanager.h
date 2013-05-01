@@ -50,6 +50,7 @@ class ClassifiedImage;
 class Horizon;
 class NUSensorsData;
 class KF;
+class SensorCalibration;
 
 class OpenglManager : public QGLWidget
 {
@@ -195,6 +196,8 @@ public:
         */
         void clearAllDisplays();
 
+        void writeExpectedViewToDisplay(const NUSensorsData *SensorData, SensorCalibration* calibration, GLDisplay::display displayId);
+
     public:
         /*!
             @brief Determine if a layer has a valid display instruction.
@@ -249,6 +252,7 @@ public:
         void drawSolidCircle(float cx, float cy, float r, int num_segments);
 
         void  drawEllipse(float cx, float cy, float xradius, float yradius);
+        void DrawArc(float cx, float cy, float r, float start_angle, float arc_angle, int num_segments);
 
 };
 

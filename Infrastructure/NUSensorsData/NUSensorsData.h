@@ -134,69 +134,69 @@ public:
     void addSensors(const vector<string>& hardwarenames);
     
     // Get methods for joint information
-    bool getPosition(const id_t id, float& data);
-    bool getPosition(const id_t id, vector<float>& data);
-    bool getVelocity(const id_t id, float& data);
-    bool getVelocity(const id_t id, vector<float>& data);
-    bool getAcceleration(const id_t id, float& data);
-    bool getAcceleration(const id_t id, vector<float>& data);
-    bool getTarget(const id_t id, float& data);
-    bool getTarget(const id_t id, vector<float>& data);
-    bool getStiffness(const id_t id, float& data);
-    bool getStiffness(const id_t id, vector<float>& data);
-    bool getCurrent(const id_t id, float& data);
-    bool getCurrent(const id_t id, vector<float>& data);
-    bool getTorque(const id_t id, float& data);
-    bool getTorque(const id_t id, vector<float>& data);
-    bool getTemperature(const id_t id, float& data);
-    bool getTemperature(const id_t id, vector<float>& data);
+    bool getPosition(const id_t id, float& data) const;
+    bool getPosition(const id_t id, vector<float>& data) const;
+    bool getVelocity(const id_t id, float& data) const;
+    bool getVelocity(const id_t id, vector<float>& data) const;
+    bool getAcceleration(const id_t id, float& data) const;
+    bool getAcceleration(const id_t id, vector<float>& data) const;
+    bool getTarget(const id_t id, float& data) const;
+    bool getTarget(const id_t id, vector<float>& data) const;
+    bool getStiffness(const id_t id, float& data) const;
+    bool getStiffness(const id_t id, vector<float>& data) const;
+    bool getCurrent(const id_t id, float& data) const;
+    bool getCurrent(const id_t id, vector<float>& data) const;
+    bool getTorque(const id_t id, float& data) const;
+    bool getTorque(const id_t id, vector<float>& data) const;
+    bool getTemperature(const id_t id, float& data) const;
+    bool getTemperature(const id_t id, vector<float>& data) const;
     
     // Get methods for end effector information
-    bool getBumper(const id_t& id, float& data);
-    bool getForce(const id_t& id, float& data);
-    bool getContact(const id_t& id, bool& data);
-    bool getSupport(const id_t& id, bool& data);
-    bool getCoP(const id_t& id, vector<float>& data);
-    bool getEndPosition(const id_t id, vector<float>& data);
+    bool getBumper(const id_t& id, float& data) const;
+    bool getForce(const id_t& id, float& data) const;
+    bool getContact(const id_t& id, bool& data) const;
+    bool getSupport(const id_t& id, bool& data) const;
+    bool getCoP(const id_t& id, vector<float>& data) const;
+    bool getEndPosition(const id_t id, vector<float>& data) const;
     
     // Get methods for kinematic based information
-    bool getCameraHeight(float& data);
-    bool getHorizon(vector<float>& data);
+    bool getCameraHeight(float& data) const;
+    bool getHorizon(vector<float>& data) const;
     bool getOdometry(vector<float>& data);
     
     // Get methods for balance information
-    bool getAccelerometer(vector<float>& data);
-    bool getGyro(vector<float>& data);
-    bool getOrientation(vector<float>& data);
-    bool getFalling(vector<float>& data);
-    bool getFallen(vector<float>& data);
-    bool getZmp(const id_t& id, vector<float>& data);
+    bool getAccelerometer(vector<float>& data) const;
+    bool getGyro(vector<float>& data) const;
+    bool getOrientation(vector<float>& data) const;
+    bool getFalling(vector<float>& data) const;
+    bool getFallen(vector<float>& data) const;
+    bool getZmp(const id_t& id, vector<float>& data) const;
     
     // Get methods for other sensors
-    bool getGps(vector<float>& data);
-    bool getCompass(float& data);
-    bool getDistance(const id_t& id, vector<float>& data);
+    bool getGps(vector<float>& data) const;
+    bool getCompass(float& data) const;
+    bool getDistance(const id_t& id, vector<float>& data) const;
     
-    bool getButton(const id_t& id, float& data);
-    bool getButtonDuration(const id_t& id, float& data);
+    bool getButton(const id_t& id, float& data) const;
+    bool getButtonDuration(const id_t& id, float& data) const;
     
-    bool getBatteryVoltage(float& data);
-    bool getBatteryCurrent(float& data);
-    bool getBatteryCharge(float& data);
+    bool getBatteryVoltage(float& data) const;
+    bool getBatteryCurrent(float& data) const;
+    bool getBatteryCharge(float& data) const;
 
     // Common sub-get methods
-    bool isFalling();
-    bool isFallen();
-    bool isOnGround();
-    bool isIncapacitated();
+    bool isFalling() const;
+    bool isFallen() const;
+    bool isOnGround() const;
+    bool isIncapacitated() const;
     
     // Get Methods (generic) internal use only
-    bool get(const id_t& id, bool& data);
-    bool get(const id_t& id, float& data);
-    bool get(const id_t& id, double& data);
-    bool get(const id_t& id, vector<float>& data);
-    bool get(const id_t& id, vector<vector<float> >& data);
-    bool get(const id_t& id, string& data);
+    bool get(const id_t& id, bool& data) const;
+    bool get(const id_t& id, float& data) const;
+    bool get(const id_t& id, double& data) const;
+    bool get(const id_t& id, vector<float>& data) const;
+    bool get(const id_t& id, vector<vector<float> >& data) const;
+    bool get(const id_t& id, string& data) const;
     
     
     
@@ -221,10 +221,10 @@ public:
     void setLocSensors(const NULocalisationSensors& locsensors);
     NULocalisationSensors getLocSensors();
 private:
-    bool getJointData(const id_t& id, const JointSensorIndices& in, float& data);
-    bool getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data);
-    bool getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data);
-    bool getButtonData(const id_t& id, const ButtonSensorIndices& in, float& data);
+    bool getJointData(const id_t& id, const JointSensorIndices& in, float& data) const;
+    bool getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data) const;
+    bool getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data) const;
+    bool getButtonData(const id_t& id, const ButtonSensorIndices& in, float& data) const;
 
 private:
     static vector<id_t*> m_ids;				 //!< a vector containing all of the actionator ids

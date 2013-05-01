@@ -40,6 +40,8 @@ class NUBlackboard;
 
 class NUViewIO;
 class OfflineLocalisationDialog;
+class SensorCalibrationWidget;
+class SensorCalibration;
 
 
 namespace Ui
@@ -81,14 +83,14 @@ public slots:
     void BonjourTest();
 
     void RunOfflineLocalisation();
+    void SetSensorCalibration(SensorCalibration* new_calibration);
 
     /*!
-      @brief Used to select the colour at a given position in the image and
-      set it as the selected colour in the classification widget.
+      @brief Used to select a pixel within an GLDisplay.
       @param x The x coordinate of the pixel.
       @param y The y coordinate of the pixel.
       */
-    void SelectColourAtPixel(int x, int y);
+    void SelectPixel(int x, int y);
     /*!
       @brief Adds the currently selected colours to the lookup table.
       */
@@ -172,6 +174,7 @@ private:
     TeamInformationDisplayWidget* teamInfoDisplay;
     QTextBrowser* locInfoDisplay;
     QTextBrowser* selflocInfoDisplay;
+    SensorCalibrationWidget* sensorCalibrationTool;
 
     QList<QDockWidget*> m_dockable_windows;
 

@@ -134,7 +134,7 @@ void NUSensorsData::addSensors(const vector<string>& hardwarenames)
     @param data will be updated with the angle
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getPosition(const id_t id, float& data)
+bool NUSensorsData::getPosition(const id_t id, float& data) const
 {
     return getJointData(id, PositionId, data);
 }
@@ -144,7 +144,7 @@ bool NUSensorsData::getPosition(const id_t id, float& data)
     @param data will be updated with the joint angles
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getPosition(const id_t id, vector<float>& data)
+bool NUSensorsData::getPosition(const id_t id, vector<float>& data) const
 {
     return getJointData(id, PositionId, data);
 }
@@ -154,7 +154,7 @@ bool NUSensorsData::getPosition(const id_t id, vector<float>& data)
     @param data will be updated with joint velocity
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getVelocity(const id_t id, float& data)
+bool NUSensorsData::getVelocity(const id_t id, float& data) const
 {
     return getJointData(id, VelocityId, data);
 }
@@ -164,7 +164,7 @@ bool NUSensorsData::getVelocity(const id_t id, float& data)
     @param data will be updated with joint velocities
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getVelocity(const id_t id, vector<float>& data)
+bool NUSensorsData::getVelocity(const id_t id, vector<float>& data) const
 {
     return getJointData(id, VelocityId, data);
 }
@@ -174,7 +174,7 @@ bool NUSensorsData::getVelocity(const id_t id, vector<float>& data)
     @param data will be updated with joint acceleration
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getAcceleration(const id_t id, float& data)
+bool NUSensorsData::getAcceleration(const id_t id, float& data) const
 {
     return getJointData(id, AccelerationId, data);
 }
@@ -184,7 +184,7 @@ bool NUSensorsData::getAcceleration(const id_t id, float& data)
     @param data will be updated with joint accelerations
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getAcceleration(const id_t id, vector<float>& data)
+bool NUSensorsData::getAcceleration(const id_t id, vector<float>& data) const
 {
     return getJointData(id, AccelerationId, data);
 }
@@ -194,7 +194,7 @@ bool NUSensorsData::getAcceleration(const id_t id, vector<float>& data)
     @param data will be updated with joint target
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTarget(const id_t id, float& data)
+bool NUSensorsData::getTarget(const id_t id, float& data) const
 {
     return getJointData(id, TargetId, data);
 }
@@ -204,7 +204,7 @@ bool NUSensorsData::getTarget(const id_t id, float& data)
     @param data will be updated with joint targets
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTarget(const id_t id, vector<float>& data)
+bool NUSensorsData::getTarget(const id_t id, vector<float>& data) const
 {
     return getJointData(id, TargetId, data);
 }
@@ -214,7 +214,7 @@ bool NUSensorsData::getTarget(const id_t id, vector<float>& data)
     @param data will be updated with joint stiffness
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getStiffness(const id_t id, float& data)
+bool NUSensorsData::getStiffness(const id_t id, float& data) const
 {
     return getJointData(id, StiffnessId, data);
 }
@@ -224,7 +224,7 @@ bool NUSensorsData::getStiffness(const id_t id, float& data)
     @param data will be updated with joint stiffnesses
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getStiffness(const id_t id, vector<float>& data)
+bool NUSensorsData::getStiffness(const id_t id, vector<float>& data) const
 {
     return getJointData(id, StiffnessId, data);
 }
@@ -234,7 +234,7 @@ bool NUSensorsData::getStiffness(const id_t id, vector<float>& data)
     @param data will be updated with joint current
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getCurrent(const id_t id, float& data)
+bool NUSensorsData::getCurrent(const id_t id, float& data) const
 {
     return getJointData(id, CurrentId, data);
 }
@@ -244,7 +244,7 @@ bool NUSensorsData::getCurrent(const id_t id, float& data)
     @param data will be updated with joint currents
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getCurrent(const id_t id, vector<float>& data)
+bool NUSensorsData::getCurrent(const id_t id, vector<float>& data) const
 {
     return getJointData(id, CurrentId, data);
 }
@@ -254,7 +254,7 @@ bool NUSensorsData::getCurrent(const id_t id, vector<float>& data)
     @param data will be updated with joint torque
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTorque(const id_t id, float& data)
+bool NUSensorsData::getTorque(const id_t id, float& data) const
 {
     return getJointData(id, TorqueId, data);
 }
@@ -264,7 +264,7 @@ bool NUSensorsData::getTorque(const id_t id, float& data)
     @param data will be updated with joint torques
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTorque(const id_t id, vector<float>& data)
+bool NUSensorsData::getTorque(const id_t id, vector<float>& data) const
 {
     return getJointData(id, TorqueId, data);
 }
@@ -274,7 +274,7 @@ bool NUSensorsData::getTorque(const id_t id, vector<float>& data)
     @param data will be updated with joint temperature
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTemperature(const id_t id, float& data)
+bool NUSensorsData::getTemperature(const id_t id, float& data) const
 {
     return getJointData(id, TemperatureId, data);
 }
@@ -284,7 +284,7 @@ bool NUSensorsData::getTemperature(const id_t id, float& data)
     @param data will be updated with joint temperatures
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTemperature(const id_t id, vector<float>& data)
+bool NUSensorsData::getTemperature(const id_t id, vector<float>& data) const
 {
     return getJointData(id, TemperatureId, data);
 }
@@ -298,7 +298,7 @@ bool NUSensorsData::getTemperature(const id_t id, vector<float>& data)
     @param data will be updated with bumper value
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getBumper(const id_t& id, float& data)
+bool NUSensorsData::getBumper(const id_t& id, float& data) const
 {
     return getEndEffectorData(id, BumperId, data);
 }
@@ -308,7 +308,7 @@ bool NUSensorsData::getBumper(const id_t& id, float& data)
     @param data will be updated with force value
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getForce(const id_t& id, float& data)
+bool NUSensorsData::getForce(const id_t& id, float& data) const
 {
     return getEndEffectorData(id, ForceId, data);
 }
@@ -318,7 +318,7 @@ bool NUSensorsData::getForce(const id_t& id, float& data)
     @param data will be updated with contact value (0 means no contact, 1 means there is contact (with the ground))
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getContact(const id_t& id, bool& data)
+bool NUSensorsData::getContact(const id_t& id, bool& data) const
 {
     float buffer;
     bool successful = getEndEffectorData(id, ContactId, buffer);
@@ -331,7 +331,7 @@ bool NUSensorsData::getContact(const id_t& id, bool& data)
     @param data will be updated with support value (0 means this end effector is not supporting the robot, 1 means it is)
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getSupport(const id_t& id, bool& data)
+bool NUSensorsData::getSupport(const id_t& id, bool& data) const
 {
     float buffer;
     bool successful = getEndEffectorData(id, SupportId, buffer);
@@ -344,7 +344,7 @@ bool NUSensorsData::getSupport(const id_t& id, bool& data)
     @param data will be updated with centre of presssure [x(cm), y(cm)]
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
+bool NUSensorsData::getCoP(const id_t& id, vector<float>& data) const
 {
     data = vector<float>(2);
     bool successful = true;
@@ -359,7 +359,7 @@ bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
     @param data will be updated with the position [x, y, z, roll, pitch, yaw]
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getEndPosition(const id_t id, vector<float>& data)
+bool NUSensorsData::getEndPosition(const id_t id, vector<float>& data) const
 {
     data = vector<float>(6);
     bool successful = true;
@@ -380,7 +380,7 @@ bool NUSensorsData::getEndPosition(const id_t id, vector<float>& data)
  	@param data will be update with the height in cm
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getCameraHeight(float& data)
+bool NUSensorsData::getCameraHeight(float& data) const
 {
     return get(CameraHeight, data);
 }
@@ -389,7 +389,7 @@ bool NUSensorsData::getCameraHeight(float& data)
  	@param data will be updated with the [A, B, C] of the line
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getHorizon(vector<float>& data)
+bool NUSensorsData::getHorizon(vector<float>& data) const
 {
     return get(Horizon, data);
 }
@@ -418,7 +418,7 @@ bool NUSensorsData::getOdometry(vector<float>& data)
     @param data will be update with the [x(cm/s/s), y(cm/s/s), z(cm/s/s)] 
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getAccelerometer(vector<float>& data)
+bool NUSensorsData::getAccelerometer(vector<float>& data) const
 {
     return get(Accelerometer, data);
 }
@@ -427,7 +427,7 @@ bool NUSensorsData::getAccelerometer(vector<float>& data)
     @param data will be update with the [roll(rad/s), pitch(rad/s), yaw(rad/s)]
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getGyro(vector<float>& data)
+bool NUSensorsData::getGyro(vector<float>& data) const
 {
     vector<float> gyro, offset; 
     bool successful = get(Gyro, gyro);
@@ -441,7 +441,7 @@ bool NUSensorsData::getGyro(vector<float>& data)
  	@param data will be updated with the [x(rad), y(rad), z(rad)]
  	@return true is valid, false if invalid
  */
-bool NUSensorsData::getOrientation(vector<float>& data)
+bool NUSensorsData::getOrientation(vector<float>& data) const
 {
     return get(Orientation, data);
 }
@@ -450,7 +450,7 @@ bool NUSensorsData::getOrientation(vector<float>& data)
  	@param data will be updated with the [total, left, right, forward, backward]
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getFalling(vector<float>& data)
+bool NUSensorsData::getFalling(vector<float>& data) const
 {
     return get(Falling, data);
 }
@@ -459,7 +459,7 @@ bool NUSensorsData::getFalling(vector<float>& data)
  	@param data will be updated with the [total, left, right, forward, backward]
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getFallen(vector<float>& data)
+bool NUSensorsData::getFallen(vector<float>& data) const
 {
     return get(Fallen, data);
 }
@@ -469,7 +469,7 @@ bool NUSensorsData::getFallen(vector<float>& data)
  	@param data will be updated with the [x(cm), y(cm)]
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getZmp(const id_t& id, vector<float>& data)
+bool NUSensorsData::getZmp(const id_t& id, vector<float>& data) const
 {
     (void)(id); // To stop compiler warnings.
     // TODO: this isn't right, it will always return the 'all' zmp.
@@ -484,7 +484,7 @@ bool NUSensorsData::getZmp(const id_t& id, vector<float>& data)
  	@param data will be updated with the [x(cm), y(cm), z(cm)]
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getGps(vector<float>& data)
+bool NUSensorsData::getGps(vector<float>& data) const
 {
     return get(Gps, data);
 }
@@ -493,7 +493,7 @@ bool NUSensorsData::getGps(vector<float>& data)
     @param data will be updated with the bearing
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getCompass(float& data)
+bool NUSensorsData::getCompass(float& data) const
 {
     return get(Compass, data);
 }
@@ -517,7 +517,7 @@ bool NUSensorsData::getCompass(float& data)
  	@param data will be updated the distances
  	@return true if the data is valid, false if not
  */
-bool NUSensorsData::getDistance(const id_t& id, vector<float>& data)
+bool NUSensorsData::getDistance(const id_t& id, vector<float>& data) const
 {
     if (id < LDistance or id > LaserDistance)		// check the id is for a distance sensor
         return false;
@@ -529,7 +529,7 @@ bool NUSensorsData::getDistance(const id_t& id, vector<float>& data)
     @param data will be updated with the value
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getButton(const id_t& id, float& data)
+bool NUSensorsData::getButton(const id_t& id, float& data) const
 {
     return getButtonData(id, StateId, data);
 }
@@ -539,7 +539,7 @@ bool NUSensorsData::getButton(const id_t& id, float& data)
  	@param data will be updated with the duration
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getButtonDuration(const id_t& id, float& data)
+bool NUSensorsData::getButtonDuration(const id_t& id, float& data) const
 {
     return getButtonData(id, DurationId, data);
 }
@@ -548,7 +548,7 @@ bool NUSensorsData::getButtonDuration(const id_t& id, float& data)
  	@param data will be updated with the voltage
  	@return true is valid, false if invalid
  */
-bool NUSensorsData::getBatteryVoltage(float& data)
+bool NUSensorsData::getBatteryVoltage(float& data) const
 {
     return get(BatteryVoltage, data);
 }
@@ -557,7 +557,7 @@ bool NUSensorsData::getBatteryVoltage(float& data)
     @param data will be updated with the current
     @return true is valid, false if invalid
  */
-bool NUSensorsData::getBatteryCurrent(float& data)
+bool NUSensorsData::getBatteryCurrent(float& data) const
 {
     return get(BatteryCurrent, data);
 }
@@ -566,7 +566,7 @@ bool NUSensorsData::getBatteryCurrent(float& data)
     @param data will be updated with the percent charged
     @return true is valid, false if invalid
  */
-bool NUSensorsData::getBatteryCharge(float& data)
+bool NUSensorsData::getBatteryCharge(float& data) const
 {
     return get(BatteryCharge, data);
 }
@@ -580,7 +580,7 @@ bool NUSensorsData::getBatteryCharge(float& data)
     @param data will be updated with the sensor reading
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, bool& data)
+bool NUSensorsData::get(const id_t& id, bool& data) const
 {
     const vector<int>& ids = mapIdToIndices(id);
     float floatBuffer;
@@ -599,7 +599,7 @@ bool NUSensorsData::get(const id_t& id, bool& data)
     @param data will be updated with the sensor reading
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, float& data)
+bool NUSensorsData::get(const id_t& id, float& data) const
 {
     const vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
@@ -613,7 +613,7 @@ bool NUSensorsData::get(const id_t& id, float& data)
     @param data will be updated with the sensor reading
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, double& data)
+bool NUSensorsData::get(const id_t& id, double& data) const
 {
     float floatBuffer;
     bool successful = get(id, floatBuffer);
@@ -626,7 +626,7 @@ bool NUSensorsData::get(const id_t& id, double& data)
     @param data will be updated with the sensor reading(s)
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, vector<float>& data)
+bool NUSensorsData::get(const id_t& id, vector<float>& data) const
 {
     const vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
@@ -654,7 +654,7 @@ bool NUSensorsData::get(const id_t& id, vector<float>& data)
     @param data will be updated with the sensor reading(s)
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data)
+bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data) const
 {
     const vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
@@ -682,7 +682,7 @@ bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data)
     @param data will be updated with the sensor reading
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, string& data)
+bool NUSensorsData::get(const id_t& id, string& data) const
 {
     const vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
@@ -697,7 +697,7 @@ bool NUSensorsData::get(const id_t& id, string& data)
    @param data will be updated the the sensor readings
    @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, float& data)
+bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, float& data) const
 {
     if (id < All or id > NumJointIds) 			// check that the id is actually that of a joint
         return false;
@@ -731,7 +731,7 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, f
    @param data will be updated the the sensor readings
    @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data)
+bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data) const
 {
     if (id < All or id > NumJointIds) 			// check that the id is actually that of a joint
         return false;
@@ -767,7 +767,7 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, v
    @param data will be updated the the sensor readings
    @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data)
+bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices& in, float& data) const
 {
     // map similar ids to the proper EndEffector ids
     id_t e_id = id;
@@ -812,7 +812,7 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
     @param data will be updated the the sensor readings
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::getButtonData(const id_t& id, const ButtonSensorIndices& in, float& data)
+bool NUSensorsData::getButtonData(const id_t& id, const ButtonSensorIndices& in, float& data) const
 {
     if (id < MainButton or id > RightButton)			// check the id is for a button sensor
         return false;
@@ -847,7 +847,7 @@ bool NUSensorsData::getButtonData(const id_t& id, const ButtonSensorIndices& in,
 
 /*! @brief Returns true if the robot is falling over, false if it is not falling (or it is impossble to tell)
  */
-bool NUSensorsData::isFalling()
+bool NUSensorsData::isFalling() const
 {
     vector<float> temp;
     if (get(Falling, temp) and temp[0] > 0)
@@ -858,7 +858,7 @@ bool NUSensorsData::isFalling()
 
 /*! @brief Returns true if the robot has fallen over, false if it hasn't (or it is impossible to tell)
  */
-bool NUSensorsData::isFallen()
+bool NUSensorsData::isFallen() const
 {
     vector<float> temp;
     if (get(Fallen, temp) and temp[0] > 0)
@@ -869,7 +869,7 @@ bool NUSensorsData::isFallen()
 
 /*! @brief Returns true if the robot is on the ground or there are insufficient sensors to determine its state, false otherwise
  */
-bool NUSensorsData::isOnGround()
+bool NUSensorsData::isOnGround() const
 {
     float lf, rf;
     if (getEndEffectorData(LFoot, ContactId, lf) and getEndEffectorData(RFoot, ContactId, rf))
@@ -891,7 +891,7 @@ bool NUSensorsData::isOnGround()
 
 /*! @brief Returns true if the robot is currently incapacitated. A robot is incapacitated if it is falling, fallen, not on the ground or getting up
  */
-bool NUSensorsData::isIncapacitated()
+bool NUSensorsData::isIncapacitated() const
 {
     bool gettingup = false;
     get(MotionGetupActive, gettingup);

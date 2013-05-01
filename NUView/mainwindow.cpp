@@ -9,6 +9,7 @@
 #include "camerasettingswidget.h"
 #include "MotionWidgets/WalkParameterWidget.h"
 #include "MotionWidgets/KickWidget.h"
+#include "SensorCalibrationWidget.h"
 #include <QtGui>
 #include <QMdiArea>
 #include <QStatusBar>
@@ -126,6 +127,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     // Add Plots Widget then Dock it on Screen
     plotSelection = new PlotSelectionWidget(mdiArea,this);
     addAsDockable(plotSelection, "Plot tools");
+
+    // Add Sensor Calibration Widget then Dock it on Screen
+    sensorCalibrationTool = new SensorCalibrationWidget(this);
+    addAsDockable(sensorCalibrationTool, "Sensor Calibration Tool");
     
     // Add Network widgets to Tabs then dock them on Screen
     QTabWidget* networkTabs = new QTabWidget(this);
@@ -169,6 +174,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     readSettings();
 
     glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
+    SensorCalibration calibration;
+    glManager.writeExpectedViewToDisplay(NULL, &calibration, GLDisplay::ExpectedProjection);
 }
 
 
@@ -490,6 +497,9 @@ void MainWindow::createConnections()
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),objectDisplayLog, SLOT(setObjectData(const FieldObjects*)));
 
     connect(virtualRobot, SIGNAL(clearPlots()), this, SLOT(clearPlots()));
+
+    // Connect sensor calibration tool
+    connect(sensorCalibrationTool,SIGNAL(CalibrationChanged(SensorCalibration*)), this, SLOT(SetSensorCalibration(SensorCalibration*)));
 }
 
 void MainWindow::setColourTheme(ColourScheme newColors)
@@ -545,6 +555,8 @@ void MainWindow::openLog(const QString& fileName)
         LogReader->openFile(fileName);
         LogReader->firstFrame();
     }
+    SensorCalibration calibration;
+    glManager.writeExpectedViewToDisplay(NULL, &calibration, GLDisplay::ExpectedProjection);
 }
 
 void MainWindow::copy()
@@ -771,6 +783,7 @@ void MainWindow::imageFrameChanged(int currFrame, int totalFrames)
     message.append("/");
     message.append(QString::number(totalFrames));
     statusBar()->showMessage(message, 10000);
+    glManager.writeExpectedViewToDisplay(LogReader->GetSensorData(), sensorCalibrationTool->Calibration(), GLDisplay::ExpectedProjection);
 }
 
 void MainWindow::selectFrame()
@@ -785,6 +798,11 @@ void MainWindow::selectFrame()
         offlinelocDialog->SetFrame(selectedFrameNumber);
     }
     return;
+}
+
+void MainWindow::SetSensorCalibration(SensorCalibration* new_calibration)
+{
+    glManager.writeExpectedViewToDisplay(LogReader->GetSensorData(), new_calibration, GLDisplay::ExpectedProjection);
 }
 
 int MainWindow::getNumMdiWindowType(const QString& windowType)
@@ -859,7 +877,7 @@ void MainWindow::updateSelection()
     virtualRobot->updateSelection(classification->getColourLabel(),classification->getSelectedColours());
 }
 
-void MainWindow::SelectColourAtPixel(int x, int y)
+void MainWindow::SelectPixel(int x, int y)
 {
     if(virtualRobot->imageAvailable())
     {
@@ -884,7 +902,7 @@ void MainWindow::SelectAndClassifySelectedPixel(int x, int y)
 {
     if(virtualRobot->imageAvailable())
     {
-        SelectColourAtPixel(x,y);
+        SelectPixel(x,y);
         ClassifySelectedColour();
     }
 }

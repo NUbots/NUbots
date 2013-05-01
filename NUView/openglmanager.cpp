@@ -24,9 +24,12 @@
 #include "openglmanager.h"
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
 #include <QDebug>
+#include <QGLPixelBuffer>
+#include "SensorCalibrationWidget.h"
 
 // Apple has to be different...
 #if defined(__APPLE__) || defined(MACOSX)
@@ -35,7 +38,9 @@
   #include <GL/glu.h>
 #endif
 
-OpenglManager::OpenglManager(): width(320), height(240)
+#include <boost/foreach.hpp>
+
+OpenglManager::OpenglManager(): width(640), height(480)
 {
     for(int id = 0; id < GLDisplay::numDisplays; id++)
     {
@@ -424,15 +429,10 @@ void OpenglManager::clearAllDisplays()
 }
 
 void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
-{
+{    
     makeCurrent();
-    int stepSize = 360 / num_segments;
-    glBegin(GL_LINE_LOOP);
-    for(int angle = 0; angle < 360; angle += stepSize)
-    {
-        glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
-    }
-    glEnd();
+    DrawArc(cx, cy, r, 0, 360, num_segments);
+    return;
 }
 
 void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segments)
@@ -807,4 +807,315 @@ void  OpenglManager::drawEllipse(float cx, float cy, float xradius, float yradiu
    }
 
    glEnd();
+}
+
+void OpenglManager::DrawArc(float cx, float cy, float r, float start_angle, float arc_angle, int num_segments)
+{
+    float theta = arc_angle / float(num_segments - 1);//theta is now calculated from the arc angle instead, the - 1 bit comes from the fact that the arc is open
+
+    float tangetial_factor = tanf(theta);
+
+    float radial_factor = cosf(theta);
+
+
+    float x = r * cosf(start_angle);//we now start at the start angle
+    float y = r * sinf(start_angle);
+
+    glBegin(GL_LINE_STRIP);//since the arc is not a closed curve, this is a strip now
+    for(int ii = 0; ii < num_segments; ii++)
+    {
+        glVertex2f(x + cx, y + cy);
+
+        float tx = -y;
+        float ty = x;
+
+        x += tx * tangetial_factor;
+        y += ty * tangetial_factor;
+
+        x *= radial_factor;
+        y *= radial_factor;
+    }
+    glEnd();
+}
+
+void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, SensorCalibration* calibration, GLDisplay::display displayId)
+{
+    const float fov_horizontal = 60.0;
+    const float fov_vertical = 46.0;
+
+    // Make field - all done manually unfortunately
+    typedef Vector2<float> point;
+    typedef std::pair<point, point> line;
+    std::vector<line> field_lines;
+
+    // Field dimensions in cm.
+    const float line_width = 5.f;
+    const float field_width = 400.f;
+    const float field_length = 600.f;
+    const float penalty_width = 220.f;
+    const float penalty_length = 60.f;
+    const float pen_spot_distance = 180.f;
+    const float pen_spot_length = 10.f;
+    const float center_circle_diameter = 120.f;
+
+    // Other measurements calculated from field dimensions.
+    const float lhw = 0.5f * line_width;        // line half width
+    const float hfw = 0.5f * field_width;       // half field width
+    const float hfl = 0.5f * field_length;      // half field length
+    const float hpw = 0.5f * penalty_width;     // half penalty width
+    const float hpl = 0.5f * penalty_length;    // half penalty length
+    const float center_circle_radius = 0.5f * center_circle_diameter;
+
+    // Base and side line positions.
+    const float inner_base = hfl - lhw;
+    const float outer_base = hfl + lhw;
+    const float inner_side = hfw - lhw;
+    const float outer_side = hfw + lhw;
+
+    // border
+    field_lines.push_back(line(point(-outer_base,-outer_side),point(-outer_base, outer_side))); // Blue baseline
+    field_lines.push_back(line(point( outer_base,-outer_side),point( outer_base, outer_side))); // Yellow baseline
+    field_lines.push_back(line(point(-outer_base, outer_side),point( outer_base, outer_side))); // Sideline
+    field_lines.push_back(line(point(-outer_base,-outer_side),point( outer_base,-outer_side))); // Sideline
+
+    // penalty box positions.
+    const float inner_penalty_side = hpw - lhw;
+    const float outer_penalty_side = hpw + lhw;
+    const float inner_penalty_front = hfl - penalty_length + lhw;
+    const float outer_penalty_front = hfl - penalty_length - lhw;
+
+    // Inner baseline Blue
+    field_lines.push_back(line(point(-inner_base,-inner_side),point(-inner_base,-outer_penalty_side))); // Side
+    field_lines.push_back(line(point(-inner_base, inner_side),point(-inner_base, outer_penalty_side))); // Side
+    field_lines.push_back(line(point(-inner_base,-inner_penalty_side),point(-inner_base, inner_penalty_side))); // centre
+
+    // Inner baseline Yellow
+    field_lines.push_back(line(point( inner_base,-inner_side),point( inner_base,-outer_penalty_side))); // Side
+    field_lines.push_back(line(point( inner_base, inner_side),point( inner_base, outer_penalty_side))); // Side
+    field_lines.push_back(line(point( inner_base,-inner_penalty_side),point( inner_base, inner_penalty_side))); // centre
+
+    // Inner Sidelines
+    field_lines.push_back(line(point(-inner_base, inner_side),point(-lhw, inner_side))); // Sideline
+    field_lines.push_back(line(point( inner_base, inner_side),point( lhw, inner_side))); // Sideline
+    field_lines.push_back(line(point(-inner_base,-inner_side),point(-lhw,-inner_side))); // Sideline
+    field_lines.push_back(line(point( inner_base,-inner_side),point( lhw,-inner_side))); // Sideline
+
+    // Blue Penalty Box
+    field_lines.push_back(line(point(-inner_base,-inner_penalty_side),point(-inner_penalty_front,-inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point(-inner_base,-outer_penalty_side),point(-outer_penalty_front,-outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point(-inner_base, inner_penalty_side),point(-inner_penalty_front, inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point(-inner_base, outer_penalty_side),point(-outer_penalty_front, outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point(-inner_penalty_front,-inner_penalty_side),point(-inner_penalty_front, inner_penalty_side))); // Front inner
+    field_lines.push_back(line(point(-outer_penalty_front,-outer_penalty_side),point(-outer_penalty_front, outer_penalty_side))); // Front outer
+
+    // Yellow Penalty Box
+    field_lines.push_back(line(point( inner_base,-inner_penalty_side),point( inner_penalty_front,-inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point( inner_base,-outer_penalty_side),point( outer_penalty_front,-outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point( inner_base, inner_penalty_side),point( inner_penalty_front, inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point( inner_base, outer_penalty_side),point( outer_penalty_front, outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point( inner_penalty_front,-inner_penalty_side),point( inner_penalty_front, inner_penalty_side))); // Front inner
+    field_lines.push_back(line(point( outer_penalty_front,-outer_penalty_side),point( outer_penalty_front, outer_penalty_side))); // Front outer
+
+    // Center circle calculations.
+    const float inner_cc = center_circle_radius - lhw;
+    const float outer_cc = center_circle_radius + lhw;
+    const float inner_arc_start_angle = asin(lhw / inner_cc);   // work out where the inner center circle meets the edge of the halfway line.
+    const float outer_arc_start_angle = asin(lhw / outer_cc);   // work out where the outer center circle meets the edge of the halfway line.
+
+    // Penalty spot positions.
+    const float spot_hl = 0.5*pen_spot_length;
+    const float spot_center = hfl - pen_spot_distance;
+    const float spot_front = spot_center - spot_hl;
+    const float spot_back = spot_center + spot_hl;
+
+    // Halfway line
+    field_lines.push_back(line(point(-lhw, inner_side),point(-lhw, outer_cc)));
+    field_lines.push_back(line(point( lhw, inner_side),point( lhw, outer_cc)));
+    field_lines.push_back(line(point(-lhw,-inner_side),point(-lhw,-outer_cc)));
+    field_lines.push_back(line(point( lhw,-inner_side),point( lhw,-outer_cc)));
+    field_lines.push_back(line(point(-lhw,-inner_cc),point(-lhw,-lhw)));
+    field_lines.push_back(line(point( lhw,-inner_cc),point( lhw,-lhw)));
+    field_lines.push_back(line(point(-lhw, inner_cc),point(-lhw, lhw)));
+    field_lines.push_back(line(point( lhw, inner_cc),point( lhw, lhw)));
+
+    // Center marker
+    field_lines.push_back(line(point( spot_hl,-lhw),point( spot_hl, lhw)));
+    field_lines.push_back(line(point(-spot_hl,-lhw),point(-spot_hl, lhw)));
+    field_lines.push_back(line(point( spot_hl,-lhw),point( lhw,-lhw)));
+    field_lines.push_back(line(point(-spot_hl,-lhw),point(-lhw,-lhw)));
+    field_lines.push_back(line(point( spot_hl, lhw),point( lhw, lhw)));
+    field_lines.push_back(line(point(-spot_hl, lhw),point(-lhw, lhw)));
+
+    // outer
+    field_lines.push_back(line(point( spot_front,-lhw),point( spot_front, lhw)));
+    field_lines.push_back(line(point( spot_back,-lhw),point( spot_back, lhw)));
+    field_lines.push_back(line(point(spot_center-lhw, spot_hl),point(spot_center+lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center-lhw,-spot_hl),point(spot_center+lhw,-spot_hl)));
+    // vertical inner
+    field_lines.push_back(line(point(spot_center-lhw, lhw),point(spot_center-lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center+lhw, lhw),point(spot_center+lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center-lhw, -lhw),point(spot_center-lhw, -spot_hl)));
+    field_lines.push_back(line(point(spot_center+lhw, -lhw),point(spot_center+lhw, -spot_hl)));
+    // horizontal inner
+    field_lines.push_back(line(point( spot_front, lhw),point(spot_center-lhw, lhw)));
+    field_lines.push_back(line(point( spot_front,-lhw),point(spot_center-lhw,-lhw)));
+    field_lines.push_back(line(point( spot_back, lhw),point(spot_center+lhw, lhw)));
+    field_lines.push_back(line(point( spot_back,-lhw),point(spot_center+lhw,-lhw)));
+    // outer
+    field_lines.push_back(line(point(-spot_front,-lhw),point(-spot_front, lhw)));
+    field_lines.push_back(line(point(-spot_back,-lhw),point(-spot_back, lhw)));
+    field_lines.push_back(line(point(-(spot_center-lhw), spot_hl),point(-(spot_center+lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center-lhw),-spot_hl),point(-(spot_center+lhw),-spot_hl)));
+    // vertical inner
+    field_lines.push_back(line(point(-(spot_center-lhw), lhw),point(-(spot_center-lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center+lhw), lhw),point(-(spot_center+lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center-lhw), -lhw),point(-(spot_center-lhw), -spot_hl)));
+    field_lines.push_back(line(point(-(spot_center+lhw), -lhw),point(-(spot_center+lhw), -spot_hl)));
+    // horizontal inner
+    field_lines.push_back(line(point(-spot_front, lhw),point(-(spot_center-lhw), lhw)));
+    field_lines.push_back(line(point(-spot_front,-lhw),point(-(spot_center-lhw),-lhw)));
+    field_lines.push_back(line(point(-spot_back, lhw),point(-(spot_center+lhw), lhw)));
+    field_lines.push_back(line(point(-spot_back,-lhw),point(-(spot_center+lhw),-lhw)));
+
+    // Varibles for orientations.
+    float camera_pitch = 0.698;
+    float camera_yaw = 0.f;
+    float camera_roll = 0.f;
+
+    float body_pitch = 0.f;
+    float body_yaw = 0.f;
+    float body_roll = 0.f;
+
+    // OpenGL coordinate system:
+    // x is horizontal going from left to right
+    // y is vertical from bottom to top
+    // z is depth, pointing toward the camera.
+
+    // Robot coordinate system:
+    // x is depth going from the robot forward
+    // y is vertical going from the right of the robot to the left.
+    // z is vertical going from the foot of the robot toward the head.
+
+    // OpenGL to Robot:
+    // x -> y
+    // z -> x
+    // y -> -z
+    // Note: the z axis is negative
+
+    // Offsets for rotations to change from OpenGL coords to Robot coords.
+    // These are hard-coded since they are the conversion from opengl to standard robot coordinated.
+    const float pitch_offset = -90;
+    const float yaw_offset = -90.f;
+    const float roll_offset = 0.f;
+
+    // Camera offset values. (These should not be hard-coded since they differ per robot type)
+    const float camera_x_offset = 3.32f;
+    const float camera_y_offset = 0.f;
+    const float camera_z_offset = 3.44f;
+
+    // Body offset values. (These should not be hard-coded since they differ per robot type)
+    const float body_x_offset = 0.f;
+    const float body_y_offset = 0.f;
+    const float body_z_offset = 39.22f;
+
+    // Get the sensor information.
+    float temp = 0.f;   // temp variable for fetching sensor values.
+    if(SensorData)  // Check if sensor data is available
+    {
+        // Camera pitch
+        if(SensorData->getPosition(NUSensorsData::HeadPitch, temp))
+        {
+            camera_pitch += temp;
+        }
+        // Camera yaw
+        if(SensorData->getPosition(NUSensorsData::HeadYaw, temp))
+        {
+            camera_yaw += temp;
+        }
+        // Camera roll - Our robots do not have thus at the moment.
+        if(SensorData->getPosition(NUSensorsData::HeadRoll, temp))
+        {
+            camera_roll += temp;
+        }
+        // Camera Height
+//        if(SensorData->getCameraHeight(temp))
+//        {
+//            std::cout << "Camera Height: " << temp << std::endl;
+//        }
+    }
+
+    // Setup opengl drawing buffer.
+    QGLPixelBuffer buffer(width, height);   // Initialise at correct resolution.
+    buffer.makeCurrent();                   // Set buffer as target for OpenGL commands.
+
+    // Initialise OpenGL for drawing
+    glClearColor(0,0,0,0); // clear with no alpha for transparent background.
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Do clear
+    glLineWidth(1.f);       // Drawing line width
+
+    glMatrixMode(GL_PROJECTION);    // Set to projection to setup camera.
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // Use Best Perspective Calculations
+    glLoadIdentity();   // Initialise matrix
+    // Setup field of view
+    gluPerspective(fov_vertical,(GLfloat)(fov_horizontal/fov_vertical),0.1f,10000.0f);
+
+    glMatrixMode(GL_MODELVIEW); // Change back to model view matrix to render scene.
+
+    // Move to correct orientation to match robot coordinate system.
+    glRotatef(pitch_offset, 1.f, 0.f, 0.f);
+    glRotatef(yaw_offset, 0.f, 0.f, 1.0f);
+    glRotatef(roll_offset, 0.f, 1.f, 0.f);
+
+    glTranslatef(camera_x_offset, camera_y_offset, -camera_z_offset);
+
+    // Apply camera orientation
+    glRotatef(mathGeneral::rad2deg(camera_pitch + calibration->camera_pitch_offset), 0.f, 1.f, 0.f);    //  Pitch
+    glRotatef(mathGeneral::rad2deg(camera_yaw + calibration->camera_yaw_offset), 0.f, 0.f, -1.f);   //  Yaw
+    glRotatef(mathGeneral::rad2deg(camera_roll + calibration->camera_roll_offset), 1.f, 0.f, 0.f);   //  Roll
+
+    // Apply translation for body
+    glTranslatef(body_x_offset, body_y_offset, -body_z_offset);
+
+    // Apply Body Orientation
+    glRotatef(mathGeneral::rad2deg(body_pitch+calibration->body_pitch_offset), 0.f, 1.f, 0.f);     // Pitch
+    glRotatef(mathGeneral::rad2deg(body_yaw), 0.f, 0.f, -1.f);     // Yaw
+    glRotatef(mathGeneral::rad2deg(body_roll+calibration->body_roll_offset), 1.f, 0.f, 0.f);   // Roll
+
+    // Apply the robot heading
+    glRotatef(mathGeneral::rad2deg(calibration->location_orientation), 0.f, 0.f, -1.f);
+    // Position on field
+    glTranslatef(calibration->location_x, calibration->location_y, 0.f); // Translation
+
+    // Draw expected field.
+    point start;
+    point end;
+    glColor3ub(255,255,255);    // Set draw colour (White)
+
+    // Draw all of the lines.
+    BOOST_FOREACH(line curr_line, field_lines)
+    {
+        glBegin(GL_LINES);                               // Start Lines
+        start = curr_line.first;
+        end = curr_line.second;
+        glVertex3f(start.x, start.y, 0.f);             // Starting point
+        glVertex3f(end.x, end.y, 0.f);             // Ending point
+        glEnd();  // End Lines
+    }
+
+    // Draw the center circle.
+    const float angle_offset = mathGeneral::deg2rad(90);
+    const float arc_base_length = mathGeneral::deg2rad(180);
+    DrawArc(0,0,inner_cc,angle_offset+inner_arc_start_angle,arc_base_length-2*inner_arc_start_angle, 100);
+    DrawArc(0,0,inner_cc,angle_offset-inner_arc_start_angle,-arc_base_length+2*inner_arc_start_angle, 100);
+    DrawArc(0,0,outer_cc,angle_offset+outer_arc_start_angle,arc_base_length-2*outer_arc_start_angle, 100);
+    DrawArc(0,0,outer_cc,angle_offset-outer_arc_start_angle,-arc_base_length+2*outer_arc_start_angle, 100);
+
+    // Get the drawn image from the buffer.
+    buffer.doneCurrent();
+    QImage image = buffer.toImage();
+
+    // Save as a layer and emit the change.
+    createDrawTextureImage(image, displayId);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+    return;
 }

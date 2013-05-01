@@ -216,6 +216,7 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/Filters/SrBasicUKF.h \
     ../Localisation/Filters/SrSeqUKF.h \
     BatchSelectDialog.h \
+    SensorCalibrationWidget.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -363,6 +364,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/Filters/SrBasicUKF.cpp \
     ../Localisation/Filters/SrSeqUKF.cpp \
     BatchSelectDialog.cpp \
+    SensorCalibrationWidget.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -415,5 +417,6 @@ SOURCES += \
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
 FORMS += \
     OfflineLocalisationSettingsDialog.ui \
-    createqwtsymboldialog.ui
+    createqwtsymboldialog.ui \
+    SensorCalibrationWidget.ui
 

@@ -27,7 +27,7 @@ GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
 
     // Setup connections.
     connect(shareWidget,SIGNAL(updatedDisplay(int,GLuint,int,int)),this, SLOT(updatedDisplay(int, GLuint, int, int)));
-    connect(this, SIGNAL(selectPixel(int,int)), parent ,SLOT(SelectColourAtPixel(int,int)));
+    connect(this, SIGNAL(selectPixel(int,int)), parent ,SLOT(SelectPixel(int,int)));
     connect(this, SIGNAL(rightSelectPixel(int,int)), parent,SLOT(ClassifySelectedColour()));
     connect(this, SIGNAL(ctrlSelectPixel(int,int)), parent,SLOT(SelectAndClassifySelectedPixel(int,int)));
     return;
