@@ -551,53 +551,6 @@ unsigned char CM730::CalculateChecksum(unsigned char *packet)
     return (~checksum);
 }
 
-// // Replaced by SensorReadManager::MakeBulkReadPacket()
-// void CM730::MakeBulkReadPacket()
-// {
-//     int number = 0;
-
-//     bulk_read_tx_packet_[ID]          = (unsigned char)ID_BROADCAST;
-//     bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
-//     bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
-
-//     if(Ping(CM730::ID_CM, NULL) == SUCCESS)
-//     {
-//         bulk_read_tx_packet_[PARAMETER+3*number+1] = 20;
-//         bulk_read_tx_packet_[PARAMETER+3*number+2] = CM730::ID_CM;
-//         bulk_read_tx_packet_[PARAMETER+3*number+3] = CM730::P_BUTTON;
-//         number++;
-//     }
-
-//     for(int id = 1; id < JointData::NUMBER_OF_JOINTS; id++)
-//     {
-// //        if(MotionStatus::m_CurrentJoints.GetEnable(id))
-// //        {
-//             bulk_read_tx_packet_[PARAMETER+3*number+1] = 2;   // length
-//             bulk_read_tx_packet_[PARAMETER+3*number+2] = id;  // id
-//             bulk_read_tx_packet_[PARAMETER+3*number+3] = MX28::P_PRESENT_POSITION_L; // start address
-//             number++;
-// //        }
-//     }
-
-//     if(Ping(FSR::ID_L_FSR, NULL) == SUCCESS)
-//     {
-//         bulk_read_tx_packet_[PARAMETER+3*number+1] = 10;               // length
-//         bulk_read_tx_packet_[PARAMETER+3*number+2] = FSR::ID_L_FSR;   // id
-//         bulk_read_tx_packet_[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
-//         number++;
-//     }
-
-//     if(Ping(FSR::ID_R_FSR, NULL) == SUCCESS)
-//     {
-//         bulk_read_tx_packet_[PARAMETER+3*number+1] = 10;               // length
-//         bulk_read_tx_packet_[PARAMETER+3*number+2] = FSR::ID_R_FSR;   // id
-//         bulk_read_tx_packet_[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
-//         number++;
-//     }
-
-//     bulk_read_tx_packet_[LENGTH]          = (number * 3) + 3;
-// }
-
 int CM730::BulkRead()
 {
     unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };

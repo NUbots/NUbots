@@ -43,7 +43,7 @@ bool SensorReadManager::ProcessBulkReadErrors(
 {
 	// A flag to indicate whether the bulk read must be repeated
     // (i.e. it is set to true if a significant error occurs during the read)
-    bool repeat_bulk_read = false;
+    bool error_occurred = false;
 
     if(bulk_read_error_code != Robot::CM730::SUCCESS)
     {
@@ -64,7 +64,7 @@ bool SensorReadManager::ProcessBulkReadErrors(
         bool sensor_read_error = CheckSensorsBulkReadErrors(bulk_read_data_);
 
         // Decide whether to repeat the read based on errors returned:
-        repeat_bulk_read = sensor_read_error;
+        error_occurred = sensor_read_error;
     }
     else
     {
@@ -72,7 +72,7 @@ bool SensorReadManager::ProcessBulkReadErrors(
         PrintSensorResponseRates();
     }
 
-    return repeat_bulk_read;
+    return error_occurred;
 }
 
 bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data_)
@@ -103,7 +103,7 @@ bool SensorReadManager::CheckSensorBulkReadErrors(
     {
         // If the error occurs very often, we should stop reporting it,
         // since repeating the bulk read indefinitely will freeze the robot.
-        if(response_rate > 0.5)
+        if(response_rate < 0.5)
             sensor_read_error = true;
 
         // errorlog << "Motor error: " << endl;

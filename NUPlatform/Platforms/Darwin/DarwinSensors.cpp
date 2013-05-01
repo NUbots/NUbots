@@ -35,7 +35,6 @@
 #include "Framework/darwin/Framework/include/FSR.h"
 #include "Framework/darwin/Framework/include/JointData.h"
 #include "Framework/darwin/Framework/include/SensorReadManager.h"
-#include "Framework/darwin/Framework/include/SensorReadDescriptor.h"
  
 // Error flags returned by sensor + servo reads/commands.
 #define SENSOR_ERROR_NONE               (0x0000)
@@ -130,6 +129,15 @@ void DarwinSensors::copyFromHardwareCommunications()
     while(cm730->BulkRead())
     {
         std::cout << "Repeat: " << ++debug_count << ";" << std::endl;
+        std::vector<int> failing_sensors;
+        sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
+        std::cout << "The following sensors are performing badly:" << std::endl;
+        for (std::vector<int>::iterator it = failing_sensors.begin(); 
+            it != failing_sensors.end(); ++it)
+        {
+            int sensor_id = *it;
+            sensor_read_manager_->PrintSensorResponseRate(sensor_id);
+        }
     }
 }
 
