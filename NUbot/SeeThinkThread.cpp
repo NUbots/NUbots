@@ -83,6 +83,7 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
     m_logrecorder->SetLogging("gameinfo",true);
     m_logrecorder->SetLogging("teaminfo",true);
     m_logrecorder->SetLogging("object",true);
+    m_logrecorder->SetLogging("image",true);
 #endif
 }
 
