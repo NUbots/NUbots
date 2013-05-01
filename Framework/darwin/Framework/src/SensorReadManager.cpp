@@ -39,7 +39,7 @@ const int Robot::FSR::ID_L_FSR;
 
 bool SensorReadManager::ProcessBulkReadErrors(
 	int bulk_read_error_code,
-	BulkReadData* bulk_read_data_)
+	BulkReadData* bulk_read_data)
 {
 	// A flag to indicate whether the bulk read must be repeated
     // (i.e. it is set to true if a significant error occurs during the read)
@@ -61,7 +61,7 @@ bool SensorReadManager::ProcessBulkReadErrors(
                 << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
                 << std::endl;
 
-        bool sensor_read_error = CheckSensorsBulkReadErrors(bulk_read_data_);
+        bool sensor_read_error = CheckSensorsBulkReadErrors(bulk_read_data);
 
         // Decide whether to repeat the read based on errors returned:
         error_occurred = sensor_read_error;
@@ -75,7 +75,7 @@ bool SensorReadManager::ProcessBulkReadErrors(
     return error_occurred;
 }
 
-bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data_)
+bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data)
 {
     bool sensor_read_error = false;
 
@@ -83,7 +83,7 @@ bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data_
          it != descriptor_heap_.end(); ++it)
     {
         int sensor_id = (*it)->sensor_id();
-        sensor_read_error |= CheckSensorBulkReadErrors(sensor_id, bulk_read_data_);
+        sensor_read_error |= CheckSensorBulkReadErrors(sensor_id, bulk_read_data);
     }
 
     return sensor_read_error;
@@ -91,11 +91,11 @@ bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data_
 
 bool SensorReadManager::CheckSensorBulkReadErrors(
 	int sensor_id,
-	BulkReadData* bulk_read_data_)
+	BulkReadData* bulk_read_data)
 {
     bool sensor_read_error = false;
 
-    int sensor_error_code = bulk_read_data_[sensor_id].error;
+    int sensor_error_code = bulk_read_data[sensor_id].error;
 
     double response_rate = descriptor_map_[sensor_id]->UpdateResponseRate(sensor_error_code);
 
@@ -223,8 +223,8 @@ void SensorReadManager::Initialize()
     cm_read.set_start_address(CM730::P_BUTTON);
     cm_read.set_num_bytes(20);
     descriptor_list_.push_back(cm_read);
-    descriptor_heap_.push_back(&cm_read);
-    descriptor_map_[CM730::ID_CM] = &cm_read;
+    descriptor_heap_.push_back(&(descriptor_list_.back()));
+    descriptor_map_[CM730::ID_CM] = &(descriptor_list_.back());
 
     // Servo motors:
     for(int servo_id = 1; servo_id < JointData::NUMBER_OF_JOINTS; ++servo_id)
@@ -234,8 +234,8 @@ void SensorReadManager::Initialize()
         servo_read.set_start_address(MX28::P_PRESENT_POSITION_L);
         servo_read.set_num_bytes(2);
         descriptor_list_.push_back(servo_read);
-        descriptor_heap_.push_back(&servo_read);
-        descriptor_map_[servo_id] = &servo_read;
+        descriptor_heap_.push_back(&(descriptor_list_.back()));
+        descriptor_map_[servo_id] = &(descriptor_list_.back());
     }
 
     // Force-sensitive resistors:
@@ -244,19 +244,16 @@ void SensorReadManager::Initialize()
     fsr_l_read.set_start_address(FSR::P_FSR1_L);
     fsr_l_read.set_num_bytes(10);
     descriptor_list_.push_back(fsr_l_read);
-    descriptor_heap_.push_back(&fsr_l_read);
-    descriptor_map_[FSR::ID_L_FSR] = &fsr_l_read;
+    descriptor_heap_.push_back(&(descriptor_list_.back()));
+    descriptor_map_[FSR::ID_L_FSR] = &(descriptor_list_.back());
 
     SensorReadDescriptor fsr_r_read;
     fsr_r_read.set_sensor_id(Robot::FSR::ID_R_FSR);
     fsr_r_read.set_start_address(FSR::P_FSR1_L);
     fsr_r_read.set_num_bytes(10);
     descriptor_list_.push_back(fsr_r_read);
-    descriptor_heap_.push_back(&fsr_r_read);
-    descriptor_map_[Robot::FSR::ID_R_FSR] = &fsr_r_read;
-
-    // // Make the initial bulk read packet.
-    // MakeBulkReadPacket();
+    descriptor_heap_.push_back(&(descriptor_list_.back()));
+    descriptor_map_[Robot::FSR::ID_R_FSR] = &(descriptor_list_.back());
 }
 
 void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)

@@ -90,7 +90,7 @@ namespace Robot
         // (Used to support SensorReadManager's access requirements) 
         boost::unordered_map<int, SensorReadDescriptor*> descriptor_map_;
 
-        // Note: A heap is probably an awful choice for this
+        // Note: A heap may not be the fastest option
         std::vector<SensorReadDescriptor*> descriptor_heap_;
     };
 }
