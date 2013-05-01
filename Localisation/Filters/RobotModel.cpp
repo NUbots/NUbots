@@ -80,9 +80,9 @@ Matrix RobotModel::measurementDistance(const Matrix& measurement1, const Matrix&
     return result;
 }
 
-void RobotModel::limitMean(Matrix &mean)
+void RobotModel::limitState(Matrix &state)
 {
-    mean[2][0] = mathGeneral::normaliseAngle(mean[2][0]);
+    state[2][0] = mathGeneral::normaliseAngle(state[2][0]);
     return;
 }
 

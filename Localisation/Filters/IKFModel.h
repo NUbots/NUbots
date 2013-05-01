@@ -56,7 +56,7 @@ public:
 
     virtual Matrix measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type) = 0;
 
-    virtual void limitMean(Matrix& mean) = 0;
+    virtual void limitState(Matrix& state) = 0;
 
     virtual unsigned int totalStates() const = 0;
 
