@@ -285,7 +285,7 @@ bool DataWrapper::updateFrame()
         return false;
     }
     m_timestamp = m_current_image->GetTimestamp();
-    cout << "pre: " << m_timestamp << endl;
+    //cout << "pre: " << m_timestamp << endl;
     field_objects->preProcess(m_timestamp);
     return true;
 }
@@ -294,7 +294,7 @@ void DataWrapper::postProcess()
 {
     if (m_current_image != NULL && field_objects != NULL)
     {
-        cout << "post: " << m_current_image->GetTimestamp() << endl;
+        //cout << "post: " << m_current_image->GetTimestamp() << endl;
         field_objects->postProcess(m_current_image->GetTimestamp());
     }
 }
