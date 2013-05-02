@@ -52,7 +52,7 @@ namespace Robot
         bool operator()(SensorReadDescriptor*& x, 
                         SensorReadDescriptor*& y) const
         {
-            return (x->response_rate() < y->response_rate());
+            return (x->response_rate() > y->response_rate());
         }
     };
 }

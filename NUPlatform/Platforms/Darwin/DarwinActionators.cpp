@@ -104,66 +104,46 @@ void DarwinActionators::copyToServos()
     static vector<float> positions;
     static vector<float> gains;
     
+    // Get the values that must be written to the servos
     m_data->getNextServos(positions, gains);
 
     //Data for Sync Write:
-    int param[platform->m_servo_IDs.size() * (Robot::MX28::PARAM_BYTES)];
+    int sync_write_tx_packet[platform->m_servo_IDs.size() * (Robot::MX28::PARAM_BYTES)];
     int n = 0;
-    int joint_num = 0;
+    int num_joints = 0;
 
     //Defaults from data sheet:
     // int P_GAIN = 64;
     int I_GAIN = 0;
     int D_GAIN = 0;
-	
-    for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
+
+    // Build sync_write_tx_packet:
+    for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
     {
         platform->setMotorGoalPosition(i,positions[i]);
         platform->setMotorStiffness(i,gains[i]);
-		
-	//Old code, above functions (setMotorStiffness and setMotorGoalPosition) complete these tasks separately.
-	//Check before deleting!
-        //cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
-    	//cm730->WriteWord(m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-        /*
-        if(gains[i] > 0)
-        {
-            int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
-            //int value = Radian2Value(0-platform->m_servo_Offsets[i]);
-            cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-            cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
-        }
-        else
-        {
-            //cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 0, 0);
-        }
-        */
 
         if(gains[i] > 0)
         {
             int value = m_joint_mapping->joint2rawClipped(i, positions[i]);
-            param[n++] = platform->m_servo_IDs[i];
-            //param[n++] = P_GAIN;
-            
-            //OLD FIRMWARE
-            //param[n++] = gains[i] / 128 * 100;
-            //param[n++] = I_GAIN;
-            //param[n++] = D_GAIN;
+            sync_write_tx_packet[n++] = platform->m_servo_IDs[i];
 
-	    param[n++] = D_GAIN;
-            param[n++] = I_GAIN;
-            param[n++] = gains[i] / 128 * 100;
+            sync_write_tx_packet[n++] = D_GAIN;
+            sync_write_tx_packet[n++] = I_GAIN;
+            sync_write_tx_packet[n++] = gains[i] / 128 * 100; // P_GAIN
             
-            param[n++] = 0;
-            param[n++] = Robot::CM730::GetLowByte(value);
-            param[n++] = Robot::CM730::GetHighByte(value);
-            joint_num++;
+            sync_write_tx_packet[n++] = 0;
+            sync_write_tx_packet[n++] = Robot::CM730::GetLowByte(value);
+            sync_write_tx_packet[n++] = Robot::CM730::GetHighByte(value);
+            num_joints++;
         }
     }
-    int result = cm730->SyncWrite(Robot::MX28::P_D_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
-    
-    //OLD FIRMWARE
-    //int result = cm730->SyncWrite(Robot::MX28::P_P_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
+
+    // Send new servo data to all motors at once:
+    int error_code = cm730->SyncWrite(Robot::MX28::P_D_GAIN,
+                                      Robot::MX28::PARAM_BYTES,
+                                      num_joints,
+                                      sync_write_tx_packet);
 }
 
 void DarwinActionators::copyToLeds()

@@ -153,6 +153,38 @@ bool SensorReadManager::ProcessBulkReadErrors(
     return error_occurred;
 }
 
+// void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
+// {
+//     const int kDataStart = (PARAMETER) + 1;
+
+//     std::make_heap(
+//         descriptor_heap_.begin(), 
+//         descriptor_heap_.end(),
+//         CompareSensorReadDescriptors());
+
+//     // Make Data Packet
+//     int pos = 0;
+//     for(int i = 0; i < (int)descriptor_heap_.size(); i++)
+//     {
+//         SensorReadDescriptor* sensor_read = descriptor_heap_.front();
+//         std::pop_heap(
+//             descriptor_heap_.begin(), 
+//             descriptor_heap_.end(),
+//             CompareSensorReadDescriptors());
+
+//         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->num_bytes();
+//         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->sensor_id();
+//         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->start_address();
+//     }
+
+//     // Make Packet Header
+//     bulk_read_tx_packet_[ID]          = (unsigned char)CM730::ID_BROADCAST;
+//     bulk_read_tx_packet_[LENGTH]      = pos + 3;
+//     bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
+//     bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
+//     // descriptor_heap_.length() * 3 + 3
+// }
+
 void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
 {
     const int kDataStart = (PARAMETER) + 1;
@@ -162,28 +194,26 @@ void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
         descriptor_heap_.end(),
         CompareSensorReadDescriptors());
 
-    // Make Data Packet
     int pos = 0;
     for(int i = 0; i < (int)descriptor_heap_.size(); i++)
     {
+        // SensorReadDescriptor* sensor_read = descriptor_heap_[i];
         SensorReadDescriptor* sensor_read = descriptor_heap_.front();
         std::pop_heap(
-            descriptor_heap_.begin(), 
-            descriptor_heap_.end(),
+            descriptor_heap_.begin(),
+            descriptor_heap_.end() - i,
             CompareSensorReadDescriptors());
-
         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->num_bytes();
         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->sensor_id();
         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->start_address();
     }
 
-    // Make Packet Header
     bulk_read_tx_packet_[ID]          = (unsigned char)CM730::ID_BROADCAST;
-    bulk_read_tx_packet_[LENGTH]      = pos + 3;
+    bulk_read_tx_packet_[LENGTH]      = 3 + pos;
     bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
     bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
-    // descriptor_heap_.length() * 3 + 3
 }
+
 
 bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data)
 {
@@ -213,7 +243,8 @@ bool SensorReadManager::CheckSensorBulkReadErrors(
     {
         // If the error occurs very often, we should stop reporting it,
         // since repeating the bulk read indefinitely will freeze the robot.
-        if(response_rate < 0.5)
+        // i.e. only report errors in sensors with HIGH response rates.
+        if(response_rate > 0.5)
             sensor_read_error = true;
 
         // errorlog << "Motor error: " << endl;
@@ -316,13 +347,11 @@ void SensorReadManager::GetFilteredLikelySensorFailures(
     // Create a new vector for the results
     *failing_sensors = std::vector<int>();
 
-    // Assume that a CM failure prevents all sensors from working
-    // (should test this, + remove this comment (or amend the code) soon)
     double cm_response_rate = GetDescriptorById(Robot::CM730::ID_CM)->response_rate();
     if(0.5 > cm_response_rate)
     {
         failing_sensors->push_back(Robot::CM730::ID_CM);
-        return;
+        // return;
     }
 
     FilterLimbSensorFailures(sensors_right_arm, *failing_sensors);

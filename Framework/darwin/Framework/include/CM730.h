@@ -204,11 +204,9 @@ namespace Robot
         void Disconnect();
         bool DXLPowerOn();
 
-        // For board
         int WriteByte(int address, int value, int *error);
         int WriteWord(int address, int value, int *error);
 
-        // For actuators
         int Ping(int id, int *error);
         int ReadByte(int id, int address, int *pValue, int *error);
         int ReadWord(int id, int address, int *pValue, int *error);
@@ -216,8 +214,6 @@ namespace Robot
                       unsigned char *table, int *error);
         int WriteByte(int id, int address, int value, int *error);
         int WriteWord(int id, int address, int value, int *error);
-
-        // For motion control
         int SyncWrite(int start_addr, int each_length, int number, int *pParam);
 
         void MakeBulkReadPacket();
