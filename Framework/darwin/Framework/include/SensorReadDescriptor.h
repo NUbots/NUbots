@@ -26,10 +26,11 @@ namespace Robot
         void set_num_bytes(int num_bytes) { num_bytes_ = num_bytes; }
         void set_response_rate(double rate) { response_rate_ = rate; }
 
-        //! Updates the response rate estimate given an error value.
+        //! Updates the response rate estimate for the given sensor using the
+        //! given sensor error code.
+        //! returns the updated response rate.
         // It doesn't matter how this is done, so long as it's relatively fast
         // and results in reasonable performance.
-        // returns the new response rate
         double UpdateResponseRate(int error_code);
 
     private:

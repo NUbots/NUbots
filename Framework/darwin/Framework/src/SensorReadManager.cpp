@@ -37,11 +37,89 @@ const int Robot::FSR::ID_L_FSR;
 #define INST_SYNC_WRITE (131)   // 0x83
 #define INST_BULK_READ  (146)   // 0x92
 
-bool SensorReadManager::ProcessBulkReadErrors(
-	int bulk_read_error_code,
-	BulkReadData* bulk_read_data)
+
+SensorReadManager::SensorReadManager()
 {
-	// A flag to indicate whether the bulk read must be repeated
+    // Should consider pinging things sometime:
+    // Ping(CM730::ID_CM, NULL) == SUCCESS
+
+    // Create the read descriptors:
+
+    //   - CM730:
+    SensorReadDescriptor* cm_read = new SensorReadDescriptor();
+    cm_read->set_sensor_id(CM730::ID_CM);
+    cm_read->set_start_address(CM730::P_BUTTON);
+    cm_read->set_num_bytes(20);
+    descriptor_list_.push_back(cm_read);
+
+    //   - Servo motors:
+    for(int servo_id = 1; servo_id < JointData::NUMBER_OF_JOINTS; ++servo_id)
+    {
+        SensorReadDescriptor* servo_read = new SensorReadDescriptor();
+        servo_read->set_sensor_id(servo_id);
+        servo_read->set_start_address(MX28::P_PRESENT_POSITION_L);
+        servo_read->set_num_bytes(2);
+        descriptor_list_.push_back(servo_read);
+    }
+
+    //   - Force-sensitive resistors:
+    SensorReadDescriptor* fsr_l_read = new SensorReadDescriptor();
+    fsr_l_read->set_sensor_id(FSR::ID_L_FSR);
+    fsr_l_read->set_start_address(FSR::P_FSR1_L);
+    fsr_l_read->set_num_bytes(10);
+    descriptor_list_.push_back(fsr_l_read);
+
+    SensorReadDescriptor* fsr_r_read = new SensorReadDescriptor();
+    fsr_r_read->set_sensor_id(Robot::FSR::ID_R_FSR);
+    fsr_r_read->set_start_address(FSR::P_FSR1_L);
+    fsr_r_read->set_num_bytes(10);
+    descriptor_list_.push_back(fsr_r_read);
+
+    // Populate the map and the heap with the same descriptors:
+    for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_list_.begin();
+         it != descriptor_list_.end(); ++it)
+    {
+        SensorReadDescriptor* sensor_read = *it;
+        descriptor_heap_.push_back(sensor_read);
+        descriptor_map_[sensor_read->sensor_id()] = sensor_read;
+    }
+}
+
+SensorReadManager::~SensorReadManager()
+{
+    // Delete the descriptors
+    for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_list_.begin();
+         it != descriptor_list_.end(); ++it)
+    {
+        SensorReadDescriptor* sensor_read = *it;
+        delete sensor_read;
+    }
+}
+
+// SensorReadDescriptor& SensorReadManager::operator[](const int sensor_id)
+// {
+//     return *(descriptor_map_[sensor_id]);
+// }
+
+SensorReadDescriptor* SensorReadManager::GetDescriptorById(int sensor_id)
+{
+    if(descriptor_map_.end() == descriptor_map_.find(sensor_id))
+    {
+        // If the sensor_id is not found
+        std::cout 
+            << __PRETTY_FUNCTION__ 
+            << ": Sensor " << sensor_id << " not found."
+            << std::endl;
+    }
+
+    return descriptor_map_[sensor_id];
+}
+
+bool SensorReadManager::ProcessBulkReadErrors(
+    int bulk_read_error_code,
+    BulkReadData* bulk_read_data)
+{
+    // A flag to indicate whether the bulk read must be repeated
     // (i.e. it is set to true if a significant error occurs during the read)
     bool error_occurred = false;
 
@@ -75,6 +153,38 @@ bool SensorReadManager::ProcessBulkReadErrors(
     return error_occurred;
 }
 
+void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
+{
+    const int kDataStart = (PARAMETER) + 1;
+
+    std::make_heap(
+        descriptor_heap_.begin(), 
+        descriptor_heap_.end(),
+        CompareSensorReadDescriptors());
+
+    // Make Data Packet
+    int pos = 0;
+    for(int i = 0; i < (int)descriptor_heap_.size(); i++)
+    {
+        SensorReadDescriptor* sensor_read = descriptor_heap_.front();
+        std::pop_heap(
+            descriptor_heap_.begin(), 
+            descriptor_heap_.end(),
+            CompareSensorReadDescriptors());
+
+        bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->num_bytes();
+        bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->sensor_id();
+        bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->start_address();
+    }
+
+    // Make Packet Header
+    bulk_read_tx_packet_[ID]          = (unsigned char)CM730::ID_BROADCAST;
+    bulk_read_tx_packet_[LENGTH]      = pos + 3;
+    bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
+    bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
+    // descriptor_heap_.length() * 3 + 3
+}
+
 bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data)
 {
     bool sensor_read_error = false;
@@ -90,14 +200,14 @@ bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data)
 }
 
 bool SensorReadManager::CheckSensorBulkReadErrors(
-	int sensor_id,
-	BulkReadData* bulk_read_data)
+    int sensor_id,
+    BulkReadData* bulk_read_data)
 {
     bool sensor_read_error = false;
 
     int sensor_error_code = bulk_read_data[sensor_id].error;
 
-    double response_rate = descriptor_map_[sensor_id]->UpdateResponseRate(sensor_error_code);
+    double response_rate = GetDescriptorById(sensor_id)->UpdateResponseRate(sensor_error_code);
 
     if(sensor_error_code != SENSOR_ERROR_NONE)
     {
@@ -127,6 +237,37 @@ bool SensorReadManager::CheckSensorBulkReadErrors(
     }
 
     return sensor_read_error;
+}
+
+void SensorReadManager::UpdateSensorResponseRates(int error_code)
+{
+    for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_list_.begin();
+         it != descriptor_list_.end(); ++it)
+    {
+        SensorReadDescriptor* sensor_read = *it;
+        sensor_read->UpdateResponseRate(error_code);
+    }
+}
+
+void SensorReadManager::PrintSensorResponseRates()
+{
+    for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_heap_.begin();
+         it != descriptor_heap_.end(); ++it)
+    {
+        SensorReadDescriptor* sensor_read = *it;
+        PrintSensorResponseRate(sensor_read->sensor_id());
+    }
+}
+
+void SensorReadManager::PrintSensorResponseRate(int sensor_id)
+{
+    double response_rate = GetDescriptorById(sensor_id)->response_rate();
+    std::cout 
+        << SensorNameForId(sensor_id)
+        << " response_rate = " 
+        << response_rate 
+        << ";"
+        << std::endl;
 }
 
 void SensorReadManager::GetFilteredLikelySensorFailures(
@@ -164,20 +305,20 @@ void SensorReadManager::GetFilteredLikelySensorFailures(
         Robot::JointData::ID_HEAD_PAN        ,
         Robot::JointData::ID_HEAD_TILT       ,
         };
-	// Note: These vectors should be initialised using initialiser lists
-	//       once we start using c++11.
-	static std::vector<int> sensors_right_arm(arr_sensors_right_arm, arr_sensors_right_arm + sizeof(arr_sensors_right_arm) / sizeof(arr_sensors_right_arm[0]));
-	static std::vector<int> sensors_left_arm (arr_sensors_left_arm , arr_sensors_left_arm  + sizeof(arr_sensors_left_arm ) / sizeof(arr_sensors_left_arm [0]));
-	static std::vector<int> sensors_right_leg(arr_sensors_right_leg, arr_sensors_right_leg + sizeof(arr_sensors_right_leg) / sizeof(arr_sensors_right_leg[0]));
-	static std::vector<int> sensors_left_leg (arr_sensors_left_leg , arr_sensors_left_leg  + sizeof(arr_sensors_left_leg ) / sizeof(arr_sensors_left_leg [0]));
-	static std::vector<int> sensors_head     (arr_sensors_head     , arr_sensors_head      + sizeof(arr_sensors_head     ) / sizeof(arr_sensors_head     [0]));
+    // Note: These vectors should be initialised using initialiser lists
+    //       once we start using c++11.
+    static std::vector<int> sensors_right_arm(arr_sensors_right_arm, arr_sensors_right_arm + sizeof(arr_sensors_right_arm) / sizeof(arr_sensors_right_arm[0]));
+    static std::vector<int> sensors_left_arm (arr_sensors_left_arm , arr_sensors_left_arm  + sizeof(arr_sensors_left_arm ) / sizeof(arr_sensors_left_arm [0]));
+    static std::vector<int> sensors_right_leg(arr_sensors_right_leg, arr_sensors_right_leg + sizeof(arr_sensors_right_leg) / sizeof(arr_sensors_right_leg[0]));
+    static std::vector<int> sensors_left_leg (arr_sensors_left_leg , arr_sensors_left_leg  + sizeof(arr_sensors_left_leg ) / sizeof(arr_sensors_left_leg [0]));
+    static std::vector<int> sensors_head     (arr_sensors_head     , arr_sensors_head      + sizeof(arr_sensors_head     ) / sizeof(arr_sensors_head     [0]));
 
     // Create a new vector for the results
     *failing_sensors = std::vector<int>();
 
     // Assume that a CM failure prevents all sensors from working
     // (should test this, + remove this comment (or amend the code) soon)
-    double cm_response_rate = descriptor_map_[Robot::CM730::ID_CM]->response_rate();
+    double cm_response_rate = GetDescriptorById(Robot::CM730::ID_CM)->response_rate();
     if(0.5 > cm_response_rate)
     {
         failing_sensors->push_back(Robot::CM730::ID_CM);
@@ -199,7 +340,7 @@ void SensorReadManager::FilterLimbSensorFailures(
         it != limb_sensors.end(); ++it)
     {
         int sensor_id = *it;
-        double response_rate = descriptor_map_[sensor_id]->response_rate();
+        double response_rate = GetDescriptorById(sensor_id)->response_rate();
         if(0.5 > response_rate)
         {
             failing_sensors.push_back(sensor_id);
@@ -207,124 +348,6 @@ void SensorReadManager::FilterLimbSensorFailures(
             break;
         }
     }
-}
-
-void SensorReadManager::Initialize()
-{
-    // Should consider pinging things sometime:
-    // Ping(CM730::ID_CM, NULL) == SUCCESS
-
-    // Create the read descriptors.
-    descriptor_list_.clear();
-
-    // CM730:
-    SensorReadDescriptor cm_read;
-    cm_read.set_sensor_id(CM730::ID_CM);
-    cm_read.set_start_address(CM730::P_BUTTON);
-    cm_read.set_num_bytes(20);
-    descriptor_list_.push_back(cm_read);
-    descriptor_heap_.push_back(&(descriptor_list_.back()));
-    descriptor_map_[CM730::ID_CM] = &(descriptor_list_.back());
-
-    // Servo motors:
-    for(int servo_id = 1; servo_id < JointData::NUMBER_OF_JOINTS; ++servo_id)
-    {
-        SensorReadDescriptor servo_read;
-        servo_read.set_sensor_id(servo_id);
-        servo_read.set_start_address(MX28::P_PRESENT_POSITION_L);
-        servo_read.set_num_bytes(2);
-        descriptor_list_.push_back(servo_read);
-        descriptor_heap_.push_back(&(descriptor_list_.back()));
-        descriptor_map_[servo_id] = &(descriptor_list_.back());
-    }
-
-    // Force-sensitive resistors:
-    SensorReadDescriptor fsr_l_read;
-    fsr_l_read.set_sensor_id(FSR::ID_L_FSR);
-    fsr_l_read.set_start_address(FSR::P_FSR1_L);
-    fsr_l_read.set_num_bytes(10);
-    descriptor_list_.push_back(fsr_l_read);
-    descriptor_heap_.push_back(&(descriptor_list_.back()));
-    descriptor_map_[FSR::ID_L_FSR] = &(descriptor_list_.back());
-
-    SensorReadDescriptor fsr_r_read;
-    fsr_r_read.set_sensor_id(Robot::FSR::ID_R_FSR);
-    fsr_r_read.set_start_address(FSR::P_FSR1_L);
-    fsr_r_read.set_num_bytes(10);
-    descriptor_list_.push_back(fsr_r_read);
-    descriptor_heap_.push_back(&(descriptor_list_.back()));
-    descriptor_map_[Robot::FSR::ID_R_FSR] = &(descriptor_list_.back());
-}
-
-void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
-{
-    const int kDataStart = (PARAMETER) + 1;
-
-    std::make_heap(
-        descriptor_heap_.begin(), 
-        descriptor_heap_.end(),
-        CompareSensorReadDescriptors());
-
-    // Make Data Packet
-    int pos = 0;
-    // for (std::vector<SensorReadDescriptor>::iterator it = descriptor_heap_.begin();
-    //      it != descriptor_heap_.end(); 
-    //      ++it)
-    for(int i = 0; i < (int)descriptor_heap_.size(); i++)
-    {
-        SensorReadDescriptor* sensor_read = descriptor_heap_.front();
-        std::pop_heap(
-            descriptor_heap_.begin(), 
-            descriptor_heap_.end(),
-            CompareSensorReadDescriptors());
-
-        bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->num_bytes();
-        bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->sensor_id();
-        bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->start_address();
-    }
-
-    // Make Packet Header
-    bulk_read_tx_packet_[ID]          = (unsigned char)CM730::ID_BROADCAST;
-    bulk_read_tx_packet_[LENGTH]      = pos + 3;
-    bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
-    bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
-    // descriptor_heap_.length() * 3 + 3
-}
-
-SensorReadDescriptor& SensorReadManager::operator[](const int sensor_id)
-{
-    return *(descriptor_map_[sensor_id]);
-}
-
-void SensorReadManager::UpdateSensorResponseRates(int error_code)
-{
-    for (std::vector<SensorReadDescriptor>::iterator it = descriptor_list_.begin();
-         it != descriptor_list_.end(); ++it)
-    {
-        SensorReadDescriptor& sensor_read = *it;
-        sensor_read.UpdateResponseRate(error_code);
-    }
-}
-
-void SensorReadManager::PrintSensorResponseRates()
-{
-    for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_heap_.begin();
-         it != descriptor_heap_.end(); ++it)
-    {
-        SensorReadDescriptor* sensor_read = *it;
-        PrintSensorResponseRate(sensor_read->sensor_id());
-    }
-}
-
-void SensorReadManager::PrintSensorResponseRate(int sensor_id)
-{
-    double response_rate = descriptor_map_[sensor_id]->response_rate();
-    std::cout 
-        << SensorNameForId(sensor_id)
-        << " response_rate = " 
-        << response_rate 
-        << ";"
-        << std::endl;
 }
 
 std::string SensorReadManager::GetSensorErrorDescription(unsigned int error_value)

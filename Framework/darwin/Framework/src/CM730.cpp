@@ -68,9 +68,8 @@ CM730::CM730(PlatformCM730 *platform)
     for(int i = 0; i < ID_BROADCAST; i++)
         bulk_read_data_[i] = BulkReadData();
 
+    // Create the sensor read manager
     sensor_read_manager_ = new Robot::SensorReadManager();
-    // Initialise response rates (used to detect malfunctioning sensors)
-    sensor_read_manager_->Initialize();
 }
 
 CM730::~CM730()
