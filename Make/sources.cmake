@@ -49,7 +49,6 @@ FOREACH (loop_var ${NUBOT_DIRS})
 ENDFOREACH (loop_var ${NUBOT_DIRS})
 
 # Include some libraries!
-LIST(APPEND NUBOT_LINK_LIBRARIES json)
 LIST(APPEND NUBOT_LINK_LIBRARIES boost_filesystem-mt)
 LIST(APPEND NUBOT_LINK_LIBRARIES boost_iostreams-mt)
 LIST(APPEND NUBOT_LINK_LIBRARIES zmq)
@@ -57,7 +56,7 @@ LIST(APPEND NUBOT_LINK_LIBRARIES protobuf)
 #LIST(APPEND NUBOT_LINK_LIBRARIES boost_date_time)
 
 # Build protocol buffer classes
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-file(GLOB ProtoFiles "/home/darwin/robocup/NUPlatform/NUAPI/proto/*.proto")
-PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
+#find_package(Protobuf REQUIRED)
+#include_directories(${PROTOBUF_INCLUDE_DIRS})
+#file(GLOB ProtoFiles "/home/darwin/robocup/NUPlatform/NUAPI/proto/*.proto")
+#PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
