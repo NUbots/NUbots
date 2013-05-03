@@ -7,6 +7,7 @@
 #include "debug.h"
 
 #include <cstdlib>
+#include <fstream>
 
 
 using namespace TransformMatrices;

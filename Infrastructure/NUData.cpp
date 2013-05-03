@@ -27,6 +27,7 @@
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 #include "debugverbositynusensors.h"
+#include <iostream>
 
 /*! @brief Streaming operator for id_t* objects. Copies the object at the pointer location.
     @param output The output stream on which to write.
