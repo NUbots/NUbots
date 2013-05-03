@@ -502,7 +502,6 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             m_log_reader->setFrame(frame);
             tempObjects = m_log_reader->GetObjectData();
             const NUSensorsData* sensors = m_log_reader->GetSensorData();
-            std::cout << sensors << std::endl;
             NUSensorsData tempSensor = (*sensors);
             tempTeamInfo = m_log_reader->GetTeamInfo();
             tempGameInfo = m_log_reader->GetGameInfo();
