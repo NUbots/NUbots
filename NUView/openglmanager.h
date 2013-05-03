@@ -253,6 +253,10 @@ public:
 
         void  drawEllipse(float cx, float cy, float xradius, float yradius);
         void DrawArc(float cx, float cy, float r, float start_angle, float arc_angle, int num_segments);
+        void InitFieldLines();
+
+        GLuint m_field_lines_draw_list;
+
 
 };
 

@@ -47,6 +47,8 @@ OpenglManager::OpenglManager(): width(640), height(480)
         textureStored[id] = false;
         displayStored[id] = false;
     }
+    m_field_lines_draw_list = 0;
+    InitFieldLines();
 }
 
 OpenglManager::~OpenglManager()
@@ -56,6 +58,194 @@ OpenglManager::~OpenglManager()
         if(textureStored[id]) glDeleteTextures(1, &textures[id]);
         if(displayStored[id]) glDeleteLists(displays[id],1);
     }
+}
+
+typedef Vector2<float> point;
+typedef std::pair<point, point> line;
+class arc
+{
+public:
+    arc(float rad, float s_ang, float e_ang): r(rad), start_angle(s_ang), end_angle(e_ang) {}
+    float r;
+    float start_angle;
+    float end_angle;
+};
+void OpenglManager::InitFieldLines()
+{
+    makeCurrent();
+
+    std::vector<line> field_lines;
+    std::vector<arc> centre_circle_arcs;
+
+    // Make field - all done manually unfortunately
+    // Field dimensions in cm.
+    const float line_width = 5.f;
+    const float field_width = 400.f;
+    const float field_length = 600.f;
+    const float penalty_width = 220.f;
+    const float penalty_length = 60.f;
+    const float pen_spot_distance = 180.f;
+    const float pen_spot_length = 10.f;
+    const float center_circle_diameter = 120.f;
+
+    // Other measurements calculated from field dimensions.
+    const float lhw = 0.5f * line_width;        // line half width
+    const float hfw = 0.5f * field_width;       // half field width
+    const float hfl = 0.5f * field_length;      // half field length
+    const float hpw = 0.5f * penalty_width;     // half penalty width
+    const float hpl = 0.5f * penalty_length;    // half penalty length
+    const float center_circle_radius = 0.5f * center_circle_diameter;
+
+    // Base and side line positions.
+    const float inner_base = hfl - lhw;
+    const float outer_base = hfl + lhw;
+    const float inner_side = hfw - lhw;
+    const float outer_side = hfw + lhw;
+
+    // Clear vectors
+    field_lines.clear();
+    centre_circle_arcs.clear();
+
+    // border
+    field_lines.push_back(line(point(-outer_base,-outer_side),point(-outer_base, outer_side))); // Blue baseline
+    field_lines.push_back(line(point( outer_base,-outer_side),point( outer_base, outer_side))); // Yellow baseline
+    field_lines.push_back(line(point(-outer_base, outer_side),point( outer_base, outer_side))); // Sideline
+    field_lines.push_back(line(point(-outer_base,-outer_side),point( outer_base,-outer_side))); // Sideline
+
+    // penalty box positions.
+    const float inner_penalty_side = hpw - lhw;
+    const float outer_penalty_side = hpw + lhw;
+    const float inner_penalty_front = hfl - penalty_length + lhw;
+    const float outer_penalty_front = hfl - penalty_length - lhw;
+
+    // Inner baseline Blue
+    field_lines.push_back(line(point(-inner_base,-inner_side),point(-inner_base,-outer_penalty_side))); // Side
+    field_lines.push_back(line(point(-inner_base, inner_side),point(-inner_base, outer_penalty_side))); // Side
+    field_lines.push_back(line(point(-inner_base,-inner_penalty_side),point(-inner_base, inner_penalty_side))); // centre
+
+    // Inner baseline Yellow
+    field_lines.push_back(line(point( inner_base,-inner_side),point( inner_base,-outer_penalty_side))); // Side
+    field_lines.push_back(line(point( inner_base, inner_side),point( inner_base, outer_penalty_side))); // Side
+    field_lines.push_back(line(point( inner_base,-inner_penalty_side),point( inner_base, inner_penalty_side))); // centre
+
+    // Inner Sidelines
+    field_lines.push_back(line(point(-inner_base, inner_side),point(-lhw, inner_side))); // Sideline
+    field_lines.push_back(line(point( inner_base, inner_side),point( lhw, inner_side))); // Sideline
+    field_lines.push_back(line(point(-inner_base,-inner_side),point(-lhw,-inner_side))); // Sideline
+    field_lines.push_back(line(point( inner_base,-inner_side),point( lhw,-inner_side))); // Sideline
+
+    // Blue Penalty Box
+    field_lines.push_back(line(point(-inner_base,-inner_penalty_side),point(-inner_penalty_front,-inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point(-inner_base,-outer_penalty_side),point(-outer_penalty_front,-outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point(-inner_base, inner_penalty_side),point(-inner_penalty_front, inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point(-inner_base, outer_penalty_side),point(-outer_penalty_front, outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point(-inner_penalty_front,-inner_penalty_side),point(-inner_penalty_front, inner_penalty_side))); // Front inner
+    field_lines.push_back(line(point(-outer_penalty_front,-outer_penalty_side),point(-outer_penalty_front, outer_penalty_side))); // Front outer
+
+    // Yellow Penalty Box
+    field_lines.push_back(line(point( inner_base,-inner_penalty_side),point( inner_penalty_front,-inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point( inner_base,-outer_penalty_side),point( outer_penalty_front,-outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point( inner_base, inner_penalty_side),point( inner_penalty_front, inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point( inner_base, outer_penalty_side),point( outer_penalty_front, outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point( inner_penalty_front,-inner_penalty_side),point( inner_penalty_front, inner_penalty_side))); // Front inner
+    field_lines.push_back(line(point( outer_penalty_front,-outer_penalty_side),point( outer_penalty_front, outer_penalty_side))); // Front outer
+
+    // Center circle calculations.
+    const float inner_cc = center_circle_radius - lhw;
+    const float outer_cc = center_circle_radius + lhw;
+    const float inner_arc_start_angle = asin(lhw / inner_cc);   // work out where the inner center circle meets the edge of the halfway line.
+    const float outer_arc_start_angle = asin(lhw / outer_cc);   // work out where the outer center circle meets the edge of the halfway line.
+
+    // Penalty spot positions.
+    const float spot_hl = 0.5*pen_spot_length;
+    const float spot_center = hfl - pen_spot_distance;
+    const float spot_front = spot_center - spot_hl;
+    const float spot_back = spot_center + spot_hl;
+
+    // Halfway line
+    field_lines.push_back(line(point(-lhw, inner_side),point(-lhw, outer_cc)));
+    field_lines.push_back(line(point( lhw, inner_side),point( lhw, outer_cc)));
+    field_lines.push_back(line(point(-lhw,-inner_side),point(-lhw,-outer_cc)));
+    field_lines.push_back(line(point( lhw,-inner_side),point( lhw,-outer_cc)));
+    field_lines.push_back(line(point(-lhw,-inner_cc),point(-lhw,-lhw)));
+    field_lines.push_back(line(point( lhw,-inner_cc),point( lhw,-lhw)));
+    field_lines.push_back(line(point(-lhw, inner_cc),point(-lhw, lhw)));
+    field_lines.push_back(line(point( lhw, inner_cc),point( lhw, lhw)));
+
+    // Center marker
+    field_lines.push_back(line(point( spot_hl,-lhw),point( spot_hl, lhw)));
+    field_lines.push_back(line(point(-spot_hl,-lhw),point(-spot_hl, lhw)));
+    field_lines.push_back(line(point( spot_hl,-lhw),point( lhw,-lhw)));
+    field_lines.push_back(line(point(-spot_hl,-lhw),point(-lhw,-lhw)));
+    field_lines.push_back(line(point( spot_hl, lhw),point( lhw, lhw)));
+    field_lines.push_back(line(point(-spot_hl, lhw),point(-lhw, lhw)));
+
+    // outer
+    field_lines.push_back(line(point( spot_front,-lhw),point( spot_front, lhw)));
+    field_lines.push_back(line(point( spot_back,-lhw),point( spot_back, lhw)));
+    field_lines.push_back(line(point(spot_center-lhw, spot_hl),point(spot_center+lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center-lhw,-spot_hl),point(spot_center+lhw,-spot_hl)));
+    // vertical inner
+    field_lines.push_back(line(point(spot_center-lhw, lhw),point(spot_center-lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center+lhw, lhw),point(spot_center+lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center-lhw, -lhw),point(spot_center-lhw, -spot_hl)));
+    field_lines.push_back(line(point(spot_center+lhw, -lhw),point(spot_center+lhw, -spot_hl)));
+    // horizontal inner
+    field_lines.push_back(line(point( spot_front, lhw),point(spot_center-lhw, lhw)));
+    field_lines.push_back(line(point( spot_front,-lhw),point(spot_center-lhw,-lhw)));
+    field_lines.push_back(line(point( spot_back, lhw),point(spot_center+lhw, lhw)));
+    field_lines.push_back(line(point( spot_back,-lhw),point(spot_center+lhw,-lhw)));
+    // outer
+    field_lines.push_back(line(point(-spot_front,-lhw),point(-spot_front, lhw)));
+    field_lines.push_back(line(point(-spot_back,-lhw),point(-spot_back, lhw)));
+    field_lines.push_back(line(point(-(spot_center-lhw), spot_hl),point(-(spot_center+lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center-lhw),-spot_hl),point(-(spot_center+lhw),-spot_hl)));
+    // vertical inner
+    field_lines.push_back(line(point(-(spot_center-lhw), lhw),point(-(spot_center-lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center+lhw), lhw),point(-(spot_center+lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center-lhw), -lhw),point(-(spot_center-lhw), -spot_hl)));
+    field_lines.push_back(line(point(-(spot_center+lhw), -lhw),point(-(spot_center+lhw), -spot_hl)));
+    // horizontal inner
+    field_lines.push_back(line(point(-spot_front, lhw),point(-(spot_center-lhw), lhw)));
+    field_lines.push_back(line(point(-spot_front,-lhw),point(-(spot_center-lhw),-lhw)));
+    field_lines.push_back(line(point(-spot_back, lhw),point(-(spot_center+lhw), lhw)));
+    field_lines.push_back(line(point(-spot_back,-lhw),point(-(spot_center+lhw),-lhw)));
+
+    // Now do center circle
+    const float angle_offset = mathGeneral::deg2rad(90);
+    const float arc_base_length = mathGeneral::deg2rad(180);
+    centre_circle_arcs.push_back(arc(inner_cc, angle_offset+inner_arc_start_angle, arc_base_length-2*inner_arc_start_angle));
+    centre_circle_arcs.push_back(arc(inner_cc, angle_offset-inner_arc_start_angle, -arc_base_length+2*inner_arc_start_angle));
+    centre_circle_arcs.push_back(arc(outer_cc, angle_offset+outer_arc_start_angle, arc_base_length-2*outer_arc_start_angle));
+    centre_circle_arcs.push_back(arc(outer_cc,angle_offset-outer_arc_start_angle,-arc_base_length+2*outer_arc_start_angle));
+
+    point start;
+    point end;
+    if(m_field_lines_draw_list)
+    {
+        glDeleteLists(m_field_lines_draw_list,1);
+    }
+    m_field_lines_draw_list = glGenLists(1);
+    glNewList(m_field_lines_draw_list, GL_COMPILE);    // START OF LIST
+
+    glBegin(GL_LINES);                               // Start Lines
+    // Draw all of the lines.
+    BOOST_FOREACH(line curr_line, field_lines)
+    {
+        start = curr_line.first;
+        end = curr_line.second;
+        glVertex3f(start.x, start.y, 0.f);             // Starting point
+        glVertex3f(end.x, end.y, 0.f);             // Ending point
+    }
+    glEnd();  // End Lines
+
+    // Draw the center circle.
+    BOOST_FOREACH(arc curr_arc, centre_circle_arcs)
+    {
+        DrawArc(0,0,curr_arc.r, curr_arc.start_angle, curr_arc.end_angle, 100);
+    }
+
+    glEndList();                                    // END OF LIST
 }
 
 void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
@@ -73,9 +263,9 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
 
     // Create Nearest Filtered Texture
     glBindTexture(GL_TEXTURE_2D, textures[displayId]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
 
     textureStored[displayId] = true;
 
@@ -89,15 +279,16 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     displays[displayId] = glGenLists(1);
 
     glNewList(displays[displayId],GL_COMPILE);
-        glBindTexture(GL_TEXTURE_2D, textures[displayId]);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);    // Turn off filtering of textures
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);    // Turn off filtering of textures
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0f, 0.0f); glVertex3f(0.0f, (float)height,  1.0f);      // Bottom Left Of The Texture and Quad
-            glTexCoord2f(1.0f, 0.0f); glVertex3f( (float)width, (float)height,  1.0f);    // Bottom Right Of The Texture and Quad
-            glTexCoord2f(1.0f, 1.0f); glVertex3f( (float)width,  0.0f,  1.0f);     // Top Right Of The Texture and Quad
-            glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f,  0.0f,  1.0f);       // Top Left Of The Texture and Quad
-        glEnd();
+//        glBindTexture(GL_TEXTURE_2D, textures[displayId]);
+//        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);    // Turn off filtering of textures
+//        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);    // Turn off filtering of textures
+//        glBegin(GL_QUADS);
+//            glTexCoord2f(0.0f, 0.0f); glVertex3f(0.0f, (float)height,  1.0f);      // Bottom Left Of The Texture and Quad
+//            glTexCoord2f(1.0f, 0.0f); glVertex3f( (float)width, (float)height,  1.0f);    // Bottom Right Of The Texture and Quad
+//            glTexCoord2f(1.0f, 1.0f); glVertex3f( (float)width,  0.0f,  1.0f);     // Top Right Of The Texture and Quad
+//            glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f,  0.0f,  1.0f);       // Top Left Of The Texture and Quad
+//        glEnd();
+    drawTexture(QRectF(0,0,tex.width(),tex.height()), textures[displayId], GL_TEXTURE_2D);
     glEndList();
     displayStored[displayId] = true;
 }
@@ -452,18 +643,16 @@ void OpenglManager::writeLinesPointsToDisplay(vector<Point> linepoints, GLDispla
     glDisable(GL_TEXTURE_2D);
     glLineWidth(1.0);
     glColor3ub(255,255,0);
+    glBegin(GL_LINES);                              // Start Lines
     for(unsigned int i = 0; i < linepoints.size(); i++)
     {
-        glBegin(GL_LINES);                              // Start Lines
+
         glVertex2i( int(linepoints[i].x-2), int(linepoints[i].y+2));                 // Starting point
         glVertex2i( int(linepoints[i].x+2), int(linepoints[i].y-2));               // Ending point
-        glEnd();  // End Lines
-        glBegin(GL_LINES);                              // Start Lines
         glVertex2i( int(linepoints[i].x+2), int(linepoints[i].y+2));                 // Starting point
         glVertex2i( int(linepoints[i].x-2), int(linepoints[i].y-2));               // Ending point
-        glEnd();  // End Lines
-
     }
+    glEnd();  // End Lines
     glEnable(GL_TEXTURE_2D);
     glEndList();                                    // END OF LIST
 
@@ -602,24 +791,23 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
     glLineWidth(2.0);       // Line width
 
     //! DRAW STATIONARY OBJECTS:
-    vector < StationaryObject > ::iterator statFOit;
-    for(statFOit = AllObjects->stationaryFieldObjects.begin(); statFOit  < AllObjects->stationaryFieldObjects.end(); )
+    BOOST_FOREACH(StationaryObject& stationary_object, AllObjects->stationaryFieldObjects)
     {
         //! Check if the object is seen, if seen then continue to next Object
-        if((*statFOit).isObjectVisible() == false)
+        if(stationary_object.isObjectVisible() == false)
         {
-            ++statFOit;
             continue;
         }
+        int object_id = stationary_object.getID();
         unsigned char r,g,b;
-        if(     (*statFOit).getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST  ||
-                (*statFOit).getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST )
+        if(     object_id == FieldObjects::FO_BLUE_LEFT_GOALPOST  ||
+                object_id == FieldObjects::FO_BLUE_RIGHT_GOALPOST )
         {
             Vision::getColourAsRGB(Vision::blue,r,g,b);
             glColor3ub(r,g,b);
         }
-        else if(     (*statFOit).getID() == FieldObjects::FO_YELLOW_LEFT_GOALPOST ||
-                     (*statFOit).getID() == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
+        else if(     object_id == FieldObjects::FO_YELLOW_LEFT_GOALPOST ||
+                     object_id == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
         {
             Vision::getColourAsRGB(Vision::yellow,r,g,b);
             glColor3ub(r,g,b);
@@ -630,17 +818,16 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glColor3ub(r,g,b);
         }
 
-        if((*statFOit).getID() == FieldObjects::FO_CORNER_CENTRE_CIRCLE)
+        if(object_id == FieldObjects::FO_CORNER_CENTRE_CIRCLE)
         {
-            drawEllipse((*statFOit).ScreenX(),(*statFOit).ScreenY(), (*statFOit).getObjectWidth()/2, (*statFOit).getObjectHeight()/2);
-            ++statFOit;
+            drawEllipse(stationary_object.ScreenX(), stationary_object.ScreenY(), stationary_object.getObjectWidth()/2, stationary_object.getObjectHeight()/2);
             continue;
         }
 
-        int X = (*statFOit).ScreenX();
-        int Y = (*statFOit).ScreenY();
-        int ObjectWidth = (*statFOit).getObjectWidth();
-        int ObjectHeight = (*statFOit).getObjectHeight();
+        int X = stationary_object.ScreenX();
+        int Y = stationary_object.ScreenY();
+        int ObjectWidth = stationary_object.getObjectWidth();
+        int ObjectHeight = stationary_object.getObjectHeight();
 
         glBegin(GL_QUADS);                              // Start Lines
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2); //TOP LEFT
@@ -648,62 +835,56 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM RIGHT
             glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM LEFT
         glEnd();
-
-        //! Incrememnt to next object:
-        ++statFOit;
     }
 
     //! DRAW MOBILE OBJECTS:
-    vector < MobileObject > ::iterator mobileFOit;
-    for(mobileFOit = AllObjects->mobileFieldObjects.begin(); mobileFOit  < AllObjects->mobileFieldObjects.end(); )
+    BOOST_FOREACH(MobileObject& mobile_object, AllObjects->mobileFieldObjects)
     {
         //! Check if the object is seen, if seen then continue to next Object
-        if((*mobileFOit).isObjectVisible() == false)
+        if(mobile_object.isObjectVisible() == false)
         {
-            ++mobileFOit;
             continue;
         }
-        qDebug() << "Seen: Mobile: " <<(*mobileFOit).getID() ;
         unsigned char r,g,b;
+        int object_id = mobile_object.getID();
         //CHECK IF BALL: if so Draw a circle
-        if(     (*mobileFOit).getID() == FieldObjects::FO_BALL)
+        if(object_id == FieldObjects::FO_BALL)
         {
             Vision::getColourAsRGB(Vision::orange,r,g,b);
             glColor3ub(r,g,b);
 
-            int cx = (*mobileFOit).ScreenX();
-            int cy = (*mobileFOit).ScreenY();
-            int radius = (*mobileFOit).getObjectWidth()/2;
+            int cx = mobile_object.ScreenX();
+            int cy = mobile_object.ScreenY();
+            int radius = mobile_object.getObjectWidth()/2;
             int num_segments = 360;
 
             drawSolidCircle(cx, cy, radius, num_segments);
-            ++mobileFOit;
             continue;
         }
 
 
-        if(     (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_1  ||
-                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_2  ||
-                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_3  ||
-                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_4  )
+        if(     object_id == FieldObjects::FO_BLUE_ROBOT_1  ||
+                object_id == FieldObjects::FO_BLUE_ROBOT_2  ||
+                object_id == FieldObjects::FO_BLUE_ROBOT_3  ||
+                object_id == FieldObjects::FO_BLUE_ROBOT_4  )
         {
             Vision::getColourAsRGB(Vision::shadow_blue,r,g,b);
             glColor3ub(r,g,b);
         }
 
-        else if(     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_1 ||
-                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_2 ||
-                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_3 ||
-                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_4)
+        else if(     object_id == FieldObjects::FO_PINK_ROBOT_1 ||
+                     object_id == FieldObjects::FO_PINK_ROBOT_2 ||
+                     object_id == FieldObjects::FO_PINK_ROBOT_3 ||
+                     object_id == FieldObjects::FO_PINK_ROBOT_4)
         {
             Vision::getColourAsRGB(Vision::pink,r,g,b);
             glColor3ub(r,g,b);
         }
 
-        int X = (*mobileFOit).ScreenX();
-        int Y = (*mobileFOit).ScreenY();
-        int ObjectWidth = (*mobileFOit).getObjectWidth();
-        int ObjectHeight = (*mobileFOit).getObjectHeight();
+        int X = mobile_object.ScreenX();
+        int Y = mobile_object.ScreenY();
+        int ObjectWidth = mobile_object.getObjectWidth();
+        int ObjectHeight = mobile_object.getObjectHeight();
 
         glBegin(GL_LINE_STRIP);                              // Start Lines
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
@@ -712,42 +893,35 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
         glEnd();
-
-        //! Increment to next object
-        ++mobileFOit;
     }
 
-    //! DRAW AMBIGUOUS OBJECTS: Using itterator as size is unknown
-
-    vector < AmbiguousObject > ::iterator ambigFOit;
-    qDebug() <<"Size Of Ambig Objects: " <<  AllObjects->ambiguousFieldObjects.size();
-    for(ambigFOit = AllObjects->ambiguousFieldObjects.begin(); ambigFOit  < AllObjects->ambiguousFieldObjects.end(); )
+    //! DRAW AMBIGUOUS OBJECTS:
+    BOOST_FOREACH(AmbiguousObject& ambiguous_obj, AllObjects->ambiguousFieldObjects)
     {
         //! Check if the object is seen, if seen then continue to next Object
-        if((*ambigFOit).isObjectVisible() == false)
+        if(ambiguous_obj.isObjectVisible() == false)
         {
-            ++ambigFOit;
             continue;
         }
-        qDebug() <<"Ambig Objects seen: " <<  (*ambigFOit).getID();
         unsigned char r,g,b;
-        if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN)
+        int object_id = ambiguous_obj.getID();
+        if(object_id == FieldObjects::FO_BLUE_ROBOT_UNKNOWN)
         {
             Vision::getColourAsRGB(Vision::shadow_blue,r,g,b);
             glColor3ub(r,g,b);
         }
 
-        else if(     (*ambigFOit).getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
+        else if(object_id == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
         {
             Vision::getColourAsRGB(Vision::pink,r,g,b);
             glColor3ub(r,g,b);
         }
-        else if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+        else if(object_id == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
         {
             Vision::getColourAsRGB(Vision::blue,r,g,b);
             glColor3ub(r,g,b);
         }
-        else if(     (*ambigFOit).getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+        else if(object_id == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
         {
             Vision::getColourAsRGB(Vision::yellow,r,g,b);
             glColor3ub(r,g,b);
@@ -759,10 +933,10 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
 
         }
 
-        int X = (*ambigFOit).ScreenX();
-        int Y = (*ambigFOit).ScreenY();
-        int ObjectWidth = (*ambigFOit).getObjectWidth();
-        int ObjectHeight = (*ambigFOit).getObjectHeight();
+        int X = ambiguous_obj.ScreenX();
+        int Y = ambiguous_obj.ScreenY();
+        int ObjectWidth = ambiguous_obj.getObjectWidth();
+        int ObjectHeight = ambiguous_obj.getObjectHeight();
 
         glBegin(GL_LINE_STRIP);                              // Start Lines
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
@@ -771,9 +945,6 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
         glEnd();
-
-        //! Increment to next object
-        ++ambigFOit;
     }
 
 
@@ -843,140 +1014,6 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
     const float fov_horizontal = 60.0;
     const float fov_vertical = 46.0;
 
-    // Make field - all done manually unfortunately
-    typedef Vector2<float> point;
-    typedef std::pair<point, point> line;
-    std::vector<line> field_lines;
-
-    // Field dimensions in cm.
-    const float line_width = 5.f;
-    const float field_width = 400.f;
-    const float field_length = 600.f;
-    const float penalty_width = 220.f;
-    const float penalty_length = 60.f;
-    const float pen_spot_distance = 180.f;
-    const float pen_spot_length = 10.f;
-    const float center_circle_diameter = 120.f;
-
-    // Other measurements calculated from field dimensions.
-    const float lhw = 0.5f * line_width;        // line half width
-    const float hfw = 0.5f * field_width;       // half field width
-    const float hfl = 0.5f * field_length;      // half field length
-    const float hpw = 0.5f * penalty_width;     // half penalty width
-    const float hpl = 0.5f * penalty_length;    // half penalty length
-    const float center_circle_radius = 0.5f * center_circle_diameter;
-
-    // Base and side line positions.
-    const float inner_base = hfl - lhw;
-    const float outer_base = hfl + lhw;
-    const float inner_side = hfw - lhw;
-    const float outer_side = hfw + lhw;
-
-    // border
-    field_lines.push_back(line(point(-outer_base,-outer_side),point(-outer_base, outer_side))); // Blue baseline
-    field_lines.push_back(line(point( outer_base,-outer_side),point( outer_base, outer_side))); // Yellow baseline
-    field_lines.push_back(line(point(-outer_base, outer_side),point( outer_base, outer_side))); // Sideline
-    field_lines.push_back(line(point(-outer_base,-outer_side),point( outer_base,-outer_side))); // Sideline
-
-    // penalty box positions.
-    const float inner_penalty_side = hpw - lhw;
-    const float outer_penalty_side = hpw + lhw;
-    const float inner_penalty_front = hfl - penalty_length + lhw;
-    const float outer_penalty_front = hfl - penalty_length - lhw;
-
-    // Inner baseline Blue
-    field_lines.push_back(line(point(-inner_base,-inner_side),point(-inner_base,-outer_penalty_side))); // Side
-    field_lines.push_back(line(point(-inner_base, inner_side),point(-inner_base, outer_penalty_side))); // Side
-    field_lines.push_back(line(point(-inner_base,-inner_penalty_side),point(-inner_base, inner_penalty_side))); // centre
-
-    // Inner baseline Yellow
-    field_lines.push_back(line(point( inner_base,-inner_side),point( inner_base,-outer_penalty_side))); // Side
-    field_lines.push_back(line(point( inner_base, inner_side),point( inner_base, outer_penalty_side))); // Side
-    field_lines.push_back(line(point( inner_base,-inner_penalty_side),point( inner_base, inner_penalty_side))); // centre
-
-    // Inner Sidelines
-    field_lines.push_back(line(point(-inner_base, inner_side),point(-lhw, inner_side))); // Sideline
-    field_lines.push_back(line(point( inner_base, inner_side),point( lhw, inner_side))); // Sideline
-    field_lines.push_back(line(point(-inner_base,-inner_side),point(-lhw,-inner_side))); // Sideline
-    field_lines.push_back(line(point( inner_base,-inner_side),point( lhw,-inner_side))); // Sideline
-
-    // Blue Penalty Box
-    field_lines.push_back(line(point(-inner_base,-inner_penalty_side),point(-inner_penalty_front,-inner_penalty_side))); // Side inner
-    field_lines.push_back(line(point(-inner_base,-outer_penalty_side),point(-outer_penalty_front,-outer_penalty_side))); // Side outer
-    field_lines.push_back(line(point(-inner_base, inner_penalty_side),point(-inner_penalty_front, inner_penalty_side))); // Side inner
-    field_lines.push_back(line(point(-inner_base, outer_penalty_side),point(-outer_penalty_front, outer_penalty_side))); // Side outer
-    field_lines.push_back(line(point(-inner_penalty_front,-inner_penalty_side),point(-inner_penalty_front, inner_penalty_side))); // Front inner
-    field_lines.push_back(line(point(-outer_penalty_front,-outer_penalty_side),point(-outer_penalty_front, outer_penalty_side))); // Front outer
-
-    // Yellow Penalty Box
-    field_lines.push_back(line(point( inner_base,-inner_penalty_side),point( inner_penalty_front,-inner_penalty_side))); // Side inner
-    field_lines.push_back(line(point( inner_base,-outer_penalty_side),point( outer_penalty_front,-outer_penalty_side))); // Side outer
-    field_lines.push_back(line(point( inner_base, inner_penalty_side),point( inner_penalty_front, inner_penalty_side))); // Side inner
-    field_lines.push_back(line(point( inner_base, outer_penalty_side),point( outer_penalty_front, outer_penalty_side))); // Side outer
-    field_lines.push_back(line(point( inner_penalty_front,-inner_penalty_side),point( inner_penalty_front, inner_penalty_side))); // Front inner
-    field_lines.push_back(line(point( outer_penalty_front,-outer_penalty_side),point( outer_penalty_front, outer_penalty_side))); // Front outer
-
-    // Center circle calculations.
-    const float inner_cc = center_circle_radius - lhw;
-    const float outer_cc = center_circle_radius + lhw;
-    const float inner_arc_start_angle = asin(lhw / inner_cc);   // work out where the inner center circle meets the edge of the halfway line.
-    const float outer_arc_start_angle = asin(lhw / outer_cc);   // work out where the outer center circle meets the edge of the halfway line.
-
-    // Penalty spot positions.
-    const float spot_hl = 0.5*pen_spot_length;
-    const float spot_center = hfl - pen_spot_distance;
-    const float spot_front = spot_center - spot_hl;
-    const float spot_back = spot_center + spot_hl;
-
-    // Halfway line
-    field_lines.push_back(line(point(-lhw, inner_side),point(-lhw, outer_cc)));
-    field_lines.push_back(line(point( lhw, inner_side),point( lhw, outer_cc)));
-    field_lines.push_back(line(point(-lhw,-inner_side),point(-lhw,-outer_cc)));
-    field_lines.push_back(line(point( lhw,-inner_side),point( lhw,-outer_cc)));
-    field_lines.push_back(line(point(-lhw,-inner_cc),point(-lhw,-lhw)));
-    field_lines.push_back(line(point( lhw,-inner_cc),point( lhw,-lhw)));
-    field_lines.push_back(line(point(-lhw, inner_cc),point(-lhw, lhw)));
-    field_lines.push_back(line(point( lhw, inner_cc),point( lhw, lhw)));
-
-    // Center marker
-    field_lines.push_back(line(point( spot_hl,-lhw),point( spot_hl, lhw)));
-    field_lines.push_back(line(point(-spot_hl,-lhw),point(-spot_hl, lhw)));
-    field_lines.push_back(line(point( spot_hl,-lhw),point( lhw,-lhw)));
-    field_lines.push_back(line(point(-spot_hl,-lhw),point(-lhw,-lhw)));
-    field_lines.push_back(line(point( spot_hl, lhw),point( lhw, lhw)));
-    field_lines.push_back(line(point(-spot_hl, lhw),point(-lhw, lhw)));
-
-    // outer
-    field_lines.push_back(line(point( spot_front,-lhw),point( spot_front, lhw)));
-    field_lines.push_back(line(point( spot_back,-lhw),point( spot_back, lhw)));
-    field_lines.push_back(line(point(spot_center-lhw, spot_hl),point(spot_center+lhw, spot_hl)));
-    field_lines.push_back(line(point(spot_center-lhw,-spot_hl),point(spot_center+lhw,-spot_hl)));
-    // vertical inner
-    field_lines.push_back(line(point(spot_center-lhw, lhw),point(spot_center-lhw, spot_hl)));
-    field_lines.push_back(line(point(spot_center+lhw, lhw),point(spot_center+lhw, spot_hl)));
-    field_lines.push_back(line(point(spot_center-lhw, -lhw),point(spot_center-lhw, -spot_hl)));
-    field_lines.push_back(line(point(spot_center+lhw, -lhw),point(spot_center+lhw, -spot_hl)));
-    // horizontal inner
-    field_lines.push_back(line(point( spot_front, lhw),point(spot_center-lhw, lhw)));
-    field_lines.push_back(line(point( spot_front,-lhw),point(spot_center-lhw,-lhw)));
-    field_lines.push_back(line(point( spot_back, lhw),point(spot_center+lhw, lhw)));
-    field_lines.push_back(line(point( spot_back,-lhw),point(spot_center+lhw,-lhw)));
-    // outer
-    field_lines.push_back(line(point(-spot_front,-lhw),point(-spot_front, lhw)));
-    field_lines.push_back(line(point(-spot_back,-lhw),point(-spot_back, lhw)));
-    field_lines.push_back(line(point(-(spot_center-lhw), spot_hl),point(-(spot_center+lhw), spot_hl)));
-    field_lines.push_back(line(point(-(spot_center-lhw),-spot_hl),point(-(spot_center+lhw),-spot_hl)));
-    // vertical inner
-    field_lines.push_back(line(point(-(spot_center-lhw), lhw),point(-(spot_center-lhw), spot_hl)));
-    field_lines.push_back(line(point(-(spot_center+lhw), lhw),point(-(spot_center+lhw), spot_hl)));
-    field_lines.push_back(line(point(-(spot_center-lhw), -lhw),point(-(spot_center-lhw), -spot_hl)));
-    field_lines.push_back(line(point(-(spot_center+lhw), -lhw),point(-(spot_center+lhw), -spot_hl)));
-    // horizontal inner
-    field_lines.push_back(line(point(-spot_front, lhw),point(-(spot_center-lhw), lhw)));
-    field_lines.push_back(line(point(-spot_front,-lhw),point(-(spot_center-lhw),-lhw)));
-    field_lines.push_back(line(point(-spot_back, lhw),point(-(spot_center+lhw), lhw)));
-    field_lines.push_back(line(point(-spot_back,-lhw),point(-(spot_center+lhw),-lhw)));
-
     // Varibles for orientations.
     float camera_pitch = 0.698;
     float camera_yaw = 0.f;
@@ -1045,7 +1082,7 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
     }
 
     // Setup opengl drawing buffer.
-    QGLPixelBuffer buffer(width, height);   // Initialise at correct resolution.
+    QGLPixelBuffer buffer(width, height, QGLFormat(QGL::Rgba), this);   // Initialise at correct resolution, shared with this widget.
     buffer.makeCurrent();                   // Set buffer as target for OpenGL commands.
 
     // Initialise OpenGL for drawing
@@ -1087,28 +1124,8 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
     glTranslatef(calibration->location_x, calibration->location_y, 0.f); // Translation
 
     // Draw expected field.
-    point start;
-    point end;
     glColor3ub(255,255,255);    // Set draw colour (White)
-
-    // Draw all of the lines.
-    BOOST_FOREACH(line curr_line, field_lines)
-    {
-        glBegin(GL_LINES);                               // Start Lines
-        start = curr_line.first;
-        end = curr_line.second;
-        glVertex3f(start.x, start.y, 0.f);             // Starting point
-        glVertex3f(end.x, end.y, 0.f);             // Ending point
-        glEnd();  // End Lines
-    }
-
-    // Draw the center circle.
-    const float angle_offset = mathGeneral::deg2rad(90);
-    const float arc_base_length = mathGeneral::deg2rad(180);
-    DrawArc(0,0,inner_cc,angle_offset+inner_arc_start_angle,arc_base_length-2*inner_arc_start_angle, 100);
-    DrawArc(0,0,inner_cc,angle_offset-inner_arc_start_angle,-arc_base_length+2*inner_arc_start_angle, 100);
-    DrawArc(0,0,outer_cc,angle_offset+outer_arc_start_angle,arc_base_length-2*outer_arc_start_angle, 100);
-    DrawArc(0,0,outer_cc,angle_offset-outer_arc_start_angle,-arc_base_length+2*outer_arc_start_angle, 100);
+    glCallList(m_field_lines_draw_list);
 
     // Get the drawn image from the buffer.
     buffer.doneCurrent();
