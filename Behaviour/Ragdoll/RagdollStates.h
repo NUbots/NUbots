@@ -19,11 +19,12 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ZOMBIESTATES_H
-#define ZOMBIESTATES_H
+#ifndef RAGDOLLSTATES_H
+#define RAGDOLLSTATES_H
 
 #include "Behaviour/BehaviourState.h"
-#include "ZombieProvider.h"
+#include "Behaviour/Common/HeadBehaviour.h"
+#include "RagdollProvider.h"
 
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
@@ -40,33 +41,24 @@
 #include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
 
-#include "Behaviour/Common/HeadBehaviour.h"
-
 #include "debug.h"
 
-class ZombieSubState : public BehaviourState
+class RagdollSubState : public BehaviourState
 {
 public:
-    ZombieSubState(ZombieProvider* provider){m_provider = provider;}
+    RagdollSubState(RagdollProvider* provider){m_provider = provider;}
 protected:
-    ZombieProvider* m_provider;
+    RagdollProvider* m_provider;
 };
 
 // ----------------------------------------------------------------------------------------------------------------------- PausedState
-class ZombieState : public ZombieSubState
+class RagdollState : public RagdollSubState
 {
 public:
-
-    ZombieState(ZombieProvider* provider) : ZombieSubState(provider) {
-
-    }
+    RagdollState(RagdollProvider* provider) : RagdollSubState(provider) {}
     BehaviourState* nextState() {return m_provider->m_state;}
     void doState()
     {
-		bool standing = true;
-		bool headTrack = true;
-		bool trackBall = true;
-		
         while (m_game_info->getCurrentState() != GameInformation::PlayingState)
             m_game_info->doManualStateChange();
 
@@ -85,34 +77,16 @@ public:
         nu_nextHeadJoints.assign(joints.begin(), joints.begin()+2);
         nu_nextLeftArmJoints.assign(joints.begin()+2, joints.begin()+5);
         nu_nextRightArmJoints.assign(joints.begin()+5, joints.begin()+8);
-        nu_nextLeftLegJoints.assign(joints.begin()+8, joints.begin()+14);
-        nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
-        
-        //HEAD TRACK
-		if (headTrack) {
-			if (trackBall && m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
-			   m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
-			else if (!trackBall || m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
-				m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
-		}
-		
         //UPDATE HEAD
-        //m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 65);
-        //m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
+        m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
 
         //UPDATE ARMS:
-        //m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 30);
-        //m_actions->add(NUActionatorsData::LArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftArmJoints, 30);
-
-        //loose
         m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 0);
         m_actions->add(NUActionatorsData::LArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftArmJoints, 0);
 
         //UPDATE LEGS:
-        m_actions->add(NUActionatorsData::RLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightLegJoints, (standing ? 65 : 0));
-        m_actions->add(NUActionatorsData::LLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftLegJoints, (standing ? 65 : 0));
-
-
+        m_actions->add(NUActionatorsData::RLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightLegJoints, 0);
+        m_actions->add(NUActionatorsData::LLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftLegJoints, 0);
     };
 };
 

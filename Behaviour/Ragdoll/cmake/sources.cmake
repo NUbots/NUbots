@@ -2,7 +2,7 @@
 #   - add your source files to YOUR_SRCS
 #   - to include subdirectories either
 #       - put each source file in YOUR_SRCS including a *relative* path
-#       - include another source.cmake for each subdirectory
+#       - include add each subdirectory to YOUR_DIRS and put a cmake/sources.cmake in each
 #
 #    Copyright (c) 2009 Jason Kulk
 #    This file is free software: you can redistribute it and/or modify
@@ -20,21 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NUPlatform.cpp NUPlatform.h
-                NUSensors.cpp NUSensors.h
-                NUActionators.cpp NUActionators.h
-                NUCamera.cpp NUCamera.h
-                NUIO.cpp NUIO.h
-                NUAPI.cpp NUAPI.h
+SET (YOUR_SRCS  RagdollProvider.cpp RagdollProvider.h
+                RagdollStates.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS  Platforms
-                NUSensors
-                NUActionators	
-                NUCamera
-                NUIO
-                NUAPI
+SET (YOUR_DIRS  
 )
 ####################################################################################
 
@@ -47,7 +38,7 @@ FOREACH(loop_var ${YOUR_SRCS})
 ENDFOREACH(loop_var ${YOUR_SRCS})
 
 # Do the same thing for each subdirectory in TWO steps
-SET(YOUR_CMAKE_FILES )
+SET(YOUR_CMAKE_FILES )				
 FOREACH(loop_var ${YOUR_DIRS}) 
     LIST(APPEND YOUR_CMAKE_FILES "${THIS_SRC_DIR}/${loop_var}/cmake/sources.cmake")
 ENDFOREACH(loop_var ${YOUR_DIRS})

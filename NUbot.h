@@ -61,6 +61,7 @@
 
 #include "targetconfig.h"
 #include "nubotconfig.h"
+#include "NUPlatform/NUAPI.h"
 
 class NUBlackboard;
 class NUPlatform;
@@ -139,6 +140,8 @@ private:
     #endif
     
     NUIO* m_io;                           //!< io module
+	
+	NUAPI* m_api;                           //!< new api module (replaces m_io)
 public:         //! @todo TODO: this door should be closed. It is open atm because I need the sensemove_thread to connect to the serial comms of the bear.
     friend class SeeThinkThread;
     #if defined(USE_VISION) or defined(USE_LOCALISATION)
