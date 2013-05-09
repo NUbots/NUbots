@@ -83,9 +83,10 @@ DarwinPlatform::DarwinPlatform()
     #else
         m_camera = 0;
     #endif
+
+    
     m_sensors = new DarwinSensors(this,cm730);
     m_actionators = new DarwinActionators(this,cm730);
-
 	
 	//cout << m_servo_Stiffness << endl;
 }

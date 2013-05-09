@@ -32,8 +32,8 @@ class DarwinPlatform;
 namespace Robot
 {
     class CM730;
+    class SensorReadManager;
 }
-
 
 class DarwinActionators : public NUActionators
 {
@@ -51,6 +51,9 @@ protected:
     DarwinPlatform* platform;
     int count;
     DarwinJointMapping* m_joint_mapping;
+
+    //! Manages sensor read descriptors
+    Robot::SensorReadManager* sensor_read_manager_;
 
     static vector<string> m_footled_names;
     static unsigned int m_num_footleds;

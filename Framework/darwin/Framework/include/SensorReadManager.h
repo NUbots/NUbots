@@ -60,7 +60,7 @@ namespace Robot
         void PrintSensorResponseRate(int sensor_id);
 
         //! Filters the list of response rates to return a list of sensor IDs that
-        //! Are actually failing.
+        //! are actually failing.
         //! (i.e. Removes likely false-positives from the list of failing sensors.
         //! Currently assumes that all sensors are always in use.
         //! Note: If three sensors on the same limb are not responding, it is likely 
@@ -73,6 +73,10 @@ namespace Robot
 
         //! Returns the name of the sensor with the given id as a string
         static const char* SensorNameForId(int sensor_id);
+
+        //! DEBUG
+        #warning This must be private!!
+        std::vector<SensorReadDescriptor*> descriptor_heap_;
 
     private:
         void FilterLimbSensorFailures(
@@ -89,7 +93,7 @@ namespace Robot
         // Note: A heap may not be the fastest option
         // Use 'SensorReadManager::GetDescriptorById(int sensor_id)'
         // instead of acessing the map directly.
-        std::vector<SensorReadDescriptor*> descriptor_heap_;
+        // std::vector<SensorReadDescriptor*> descriptor_heap_;
     };
 }
 

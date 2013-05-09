@@ -75,10 +75,11 @@ CM730::CM730(PlatformCM730 *platform)
 CM730::~CM730()
 {
     Disconnect();
+    delete sensor_read_manager_;
 }
 
 
-void CM730::printInstructionType(unsigned char *txpacket)
+void CM730::PrintInstructionType(unsigned char *txpacket)
 {
     int instruction_value = txpacket[INSTRUCTION];
     fprintf(stderr, "INST: %s\n", getInstructionTypeString(instruction_value));
@@ -216,7 +217,7 @@ double BulkReadTimer(bool reset = false)
 
 void PrintSuccessfulBulkReadPeriod(Robot::PlatformCM730* m_Platform)
 {
-    static const int len = 512;
+    static const int len = 128;
     static double successful_bulk_read_times[len] = { 0, }; // DEBUG
     static double max_successful_bulk_read_time = 0;
     static double min_successful_bulk_read_time = 100000;
@@ -225,7 +226,7 @@ void PrintSuccessfulBulkReadPeriod(Robot::PlatformCM730* m_Platform)
     double new_time = BulkReadTimer();
     BulkReadTimer(true);
 
-    fprintf(stderr, "Read Success! (time = %fms)\n", new_time);
+    fprintf(stderr, "Read Ended. (time = %fms)\n", new_time);
     
     successful_bulk_read_times[index] = new_time;
     ++index;
@@ -242,9 +243,10 @@ void PrintSuccessfulBulkReadPeriod(Robot::PlatformCM730* m_Platform)
         avg += successful_bulk_read_times[i];
     avg /= (double)len;
     
-    fprintf(stderr, "Average successful bulk read period = %fms\n", avg);
-    fprintf(stderr, "Maximum successful bulk read period = %fms\n", max_successful_bulk_read_time);
-    fprintf(stderr, "Minimum successful bulk read period = %fms\n", min_successful_bulk_read_time);
+    fprintf(stderr, "   Last bulk read period = %fms\n", new_time);
+    fprintf(stderr, "Average bulk read period = %fms\n", avg);
+    fprintf(stderr, "Maximum bulk read period = %fms\n", max_successful_bulk_read_time);
+    fprintf(stderr, "Minimum bulk read period = %fms\n", min_successful_bulk_read_time);
 }
 
 void PrintSuccessfulBulkReadTimes(Robot::PlatformCM730* m_Platform)
@@ -287,7 +289,10 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
     if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
 
     // original multiplier of 1.5 appears to be an undocumented hack.
-    m_Platform->SetPacketTimeout(to_length * 1.5 * 8);
+    // m_Platform->SetPacketTimeout(to_length * 1.5 * 0.5);
+    m_Platform->SetPacketTimeout(to_length * 1.5 * 1);
+    // m_Platform->SetPacketTimeout(to_length * 1.5 * 40);
+    // m_Platform->SetPacketTimeout(to_length * 1.5 * 400);
 
     int get_length = 0; //! length in bytes of data read so far
     // Read data from port
@@ -295,7 +300,8 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
     while(true)
     {
         // read some (more) data
-        int length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
+        int length = m_Platform->ReadPort(&rxpacket[get_length],
+                                          to_length - get_length);
         if(DEBUG_PRINT == true)
         {
             for(int n = 0; n < length; n++)
@@ -308,7 +314,7 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
         {
             res = SUCCESS;
             PrintSuccessfulBulkReadTimes(m_Platform);
-            PrintSuccessfulBulkReadPeriod(m_Platform);
+            // PrintSuccessfulBulkReadPeriod(m_Platform);
             break;
         }
 
@@ -318,16 +324,20 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
             if(get_length == 0)
             {
                 res = RX_TIMEOUT;
-                fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
+                fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n",
+                        m_Platform->GetPacketTime());
             }
             else
             {
                 res = RX_CORRUPT;
-                fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
+                fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n",
+                        m_Platform->GetPacketTime());
             }
             break;
         }
     }
+
+    PrintSuccessfulBulkReadPeriod(m_Platform);
 
     return get_length;
 }
@@ -493,7 +503,7 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
         for(int n=0; n<length; n++)
             fprintf(stderr, "%.2X ", txpacket[n]);
 
-        printInstructionType(txpacket);
+        PrintInstructionType(txpacket);
     }
 
     if(length < (MAXNUM_TXPARAM + 6)) // Enforce hardware/api limit on length of data to send.
@@ -563,7 +573,9 @@ int CM730::BulkRead()
     //  { SUCCESS, TX_CORRUPT, TX_FAIL, RX_FAIL, RX_TIMEOUT, RX_CORRUPT }
     int bulk_read_error_code = TxRxPacket(bulk_read_tx_packet_, rxpacket, 0);
     
-    bool error_occurred = sensor_read_manager_->ProcessBulkReadErrors(bulk_read_error_code, bulk_read_data_);
+    bool error_occurred = sensor_read_manager_->ProcessBulkReadErrors(
+        bulk_read_error_code,
+        bulk_read_data_);
 
     return error_occurred;
 }
@@ -576,10 +588,10 @@ int CM730::SyncWrite(int start_addr, int each_length, int number, int *pParam)
 
     txpacket[ID]                = (unsigned char)ID_BROADCAST;
     txpacket[INSTRUCTION]       = INST_SYNC_WRITE;
-    txpacket[PARAMETER]            = (unsigned char)start_addr;
-    txpacket[PARAMETER + 1]        = (unsigned char)(each_length - 1);
+    txpacket[PARAMETER]         = (unsigned char)start_addr;
+    txpacket[PARAMETER + 1]     = (unsigned char)(each_length - 1);
     for(n = 0; n < (number * each_length); n++)
-        txpacket[PARAMETER + 2 + n]   = (unsigned char)pParam[n];
+        txpacket[PARAMETER + 2 + n] = (unsigned char)pParam[n];
     txpacket[LENGTH]            = n + 4;
 
     return TxRxPacket(txpacket, rxpacket, 0);
@@ -706,7 +718,8 @@ int CM730::ReadWord(int id, int address, int *pValue, int *error)
     result = TxRxPacket(txpacket, rxpacket, 2);
     if(result == SUCCESS)
     {
-        *pValue = MakeWord((int)rxpacket[PARAMETER], (int)rxpacket[PARAMETER + 1]);
+        *pValue = MakeWord((int)rxpacket[PARAMETER],
+                           (int)rxpacket[PARAMETER + 1]);
 
         if(error != 0)
             *error = (int)rxpacket[ERRBIT];
@@ -715,7 +728,8 @@ int CM730::ReadWord(int id, int address, int *pValue, int *error)
     return result;
 }
 
-int CM730::ReadTable(int id, int start_addr, int end_addr, unsigned char *table, int *error)
+int CM730::ReadTable(int id, int start_addr, int end_addr,
+                     unsigned char *table, int *error)
 {
     unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
     unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };

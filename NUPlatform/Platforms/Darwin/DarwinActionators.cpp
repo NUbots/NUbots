@@ -23,7 +23,6 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "DarwinJointMapping.h"
 #include "DarwinPlatform.h"
-
 #include <cmath>
 
 #include "debug.h"
@@ -48,7 +47,7 @@ static string temp_footled_names[] = {  "LFoot Led", "RFoot Led"};
 vector<string> DarwinActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
 unsigned int DarwinActionators::m_num_footleds = DarwinActionators::m_footled_names.size();
 
-DarwinActionators::DarwinActionators(DarwinPlatform* darwin,Robot::CM730* subboard)
+DarwinActionators::DarwinActionators(DarwinPlatform* darwin, Robot::CM730* subboard)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         debug << "DarwinActionators::DarwinActionators()" <<endl;
@@ -72,6 +71,8 @@ DarwinActionators::DarwinActionators(DarwinPlatform* darwin,Robot::CM730* subboa
 
     InitialiseMotors();
     m_joint_mapping = &DarwinJointMapping::Instance();
+
+    sensor_read_manager_ = subboard->sensor_read_manager();
 }
 
 DarwinActionators::~DarwinActionators()
@@ -99,13 +100,48 @@ void DarwinActionators::copyToHardwareCommunications()
     copyToSound();
 }
 
+
+int MapSensorIdToServoIndex(int sensor_id)
+{
+    switch(sensor_id)
+    {
+        case Robot::JointData::ID_HEAD_TILT       : return  0;
+        case Robot::JointData::ID_HEAD_PAN        : return  1;
+        case Robot::JointData::ID_L_SHOULDER_ROLL : return  2;
+        case Robot::JointData::ID_L_SHOULDER_PITCH: return  3;
+        case Robot::JointData::ID_L_ELBOW         : return  4;
+        case Robot::JointData::ID_R_SHOULDER_ROLL : return  5;
+        case Robot::JointData::ID_R_SHOULDER_PITCH: return  6;
+        case Robot::JointData::ID_R_ELBOW         : return  7;
+        case Robot::JointData::ID_L_HIP_ROLL      : return  8;
+        case Robot::JointData::ID_L_HIP_PITCH     : return  9;
+        case Robot::JointData::ID_L_HIP_YAW       : return 10;
+        case Robot::JointData::ID_L_KNEE          : return 11;
+        case Robot::JointData::ID_L_ANKLE_ROLL    : return 12;
+        case Robot::JointData::ID_L_ANKLE_PITCH   : return 13;
+        case Robot::JointData::ID_R_HIP_ROLL      : return 14;
+        case Robot::JointData::ID_R_HIP_PITCH     : return 15;
+        case Robot::JointData::ID_R_HIP_YAW       : return 16;
+        case Robot::JointData::ID_R_KNEE          : return 17;
+        case Robot::JointData::ID_R_ANKLE_ROLL    : return 18;
+        case Robot::JointData::ID_R_ANKLE_PITCH   : return 19;
+        default: {
+            std::cout   << __PRETTY_FUNCTION__
+                        << ": Invalid sensor_id: " << sensor_id << ";"
+                        << std::endl;
+            return -1;
+        }
+    }
+}
+
+
 void DarwinActionators::copyToServos()
 {
     static vector<float> positions;
-    static vector<float> gains;
+    static vector<float> p_gains;
     
     // Get the values that must be written to the servos
-    m_data->getNextServos(positions, gains);
+    m_data->getNextServos(positions, p_gains);
 
     //Data for Sync Write:
     int sync_write_tx_packet[platform->m_servo_IDs.size() * (Robot::MX28::PARAM_BYTES)];
@@ -119,18 +155,32 @@ void DarwinActionators::copyToServos()
 
     // Build sync_write_tx_packet:
     for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
+    // std::vector<Robot::SensorReadDescriptor*> &sorted_descriptors = sensor_read_manager_->descriptor_heap_;
+    // for (std::vector<Robot::SensorReadDescriptor*>::iterator it = sorted_descriptors.begin();
+    //      it != sorted_descriptors.end(); ++it)
     {
-        platform->setMotorGoalPosition(i,positions[i]);
-        platform->setMotorStiffness(i,gains[i]);
+        // Robot::SensorReadDescriptor* sensor_read = *it;
+        // int sensor_id = sensor_read->sensor_id();
 
-        if(gains[i] > 0)
+        // if(sensor_id > 19) continue;
+
+        int sensor_index = i; // MapSensorIdToServoIndex(sensor_id);
+
+        platform->setMotorGoalPosition(sensor_index, positions[sensor_index]);
+        // Note: 'setMotorStiffness' writes directly to the CM730 board,
+        //       which is costly.
+        //       Doing this for each motor sequentially is questionable.
+        //       This code should be reviewed. -MM (2013-05-07)
+        platform->setMotorStiffness(sensor_index, p_gains[sensor_index]);
+
+        if(p_gains[sensor_index] > 0)
         {
-            int value = m_joint_mapping->joint2rawClipped(i, positions[i]);
-            sync_write_tx_packet[n++] = platform->m_servo_IDs[i];
+            int value = m_joint_mapping->joint2rawClipped(sensor_index, positions[sensor_index]);
+            sync_write_tx_packet[n++] = platform->m_servo_IDs[sensor_index]; // sensor_id; // 
 
             sync_write_tx_packet[n++] = D_GAIN;
             sync_write_tx_packet[n++] = I_GAIN;
-            sync_write_tx_packet[n++] = gains[i] / 128 * 100; // P_GAIN
+            sync_write_tx_packet[n++] = (p_gains[sensor_index] * 100) / 128; // P_GAIN
             
             sync_write_tx_packet[n++] = 0;
             sync_write_tx_packet[n++] = Robot::CM730::GetLowByte(value);

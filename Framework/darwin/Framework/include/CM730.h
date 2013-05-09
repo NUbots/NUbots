@@ -171,7 +171,7 @@ namespace Robot
 
 
         // TxRxPacket component methods:
-        void printInstructionType(unsigned char *txpacket);
+        void PrintInstructionType(unsigned char *txpacket);
         void PrintResultType(int);
         void PerformPriorityWait(int);
         void PerformPriorityRelease(int);
