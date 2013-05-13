@@ -289,9 +289,10 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
     if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
 
     // original multiplier of 1.5 appears to be an undocumented hack.
+    // Make the timeout long enough that we always get reasonable information
+    // on failed motors.
     // m_Platform->SetPacketTimeout(to_length * 1.5 * 0.5);
-    m_Platform->SetPacketTimeout(to_length * 1.5 * 1);
-    // m_Platform->SetPacketTimeout(to_length * 1.5 * 40);
+    m_Platform->SetPacketTimeout(to_length * 1.5 * 40);
     // m_Platform->SetPacketTimeout(to_length * 1.5 * 400);
 
     int get_length = 0; //! length in bytes of data read so far
@@ -444,6 +445,8 @@ inline void CM730::TxRxBulkReadPacket(
                 int sensor_id = rxpacket[ID];
                 BulkReadData& sensor_data = bulk_read_data_[sensor_id];
 
+                fprintf(stderr, "BulkReading: id=%d\n", sensor_id);
+
                 for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
                     sensor_data.table[sensor_data.start_address + j] = rxpacket[PARAMETER + j];
 
@@ -487,8 +490,6 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
 {
     // Acquire resources
     PerformPriorityWait(priority);
-
-    // m_Platform->Sleep(100); // DEBUG (crashes robot...)
 
     int res = TX_FAIL;
     int length = txpacket[LENGTH] + 4;

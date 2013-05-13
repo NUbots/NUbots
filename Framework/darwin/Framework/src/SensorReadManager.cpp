@@ -162,7 +162,7 @@ void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
     const int kDataStart = (PARAMETER) + 1;
 
     // Note: descriptor_heap_ doesn't need to be a heap, and, whatever it is,
-    //       it should probably only be accessed through an iterator.
+          // it should probably only be accessed through an iterator.
     std::make_heap(
         descriptor_heap_.begin(), 
         descriptor_heap_.end(),

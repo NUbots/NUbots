@@ -74,14 +74,14 @@ namespace Robot
         //! Returns the name of the sensor with the given id as a string
         static const char* SensorNameForId(int sensor_id);
 
-        //! DEBUG
-        #warning This must be private!!
-        std::vector<SensorReadDescriptor*> descriptor_heap_;
-
     private:
         void FilterLimbSensorFailures(
             std::vector<int>& limb_sensors, 
             std::vector<int>& failing_sensors);
+
+        // Note: The following data structures should be moved into a
+        //       new SensorDescriptorContainer class that
+        //       implements the required iterators and access operations.
 
         //! A vector to store the actual descriptors
         std::vector<SensorReadDescriptor*> descriptor_list_;
@@ -90,10 +90,10 @@ namespace Robot
         // (Used to support SensorReadManager's access requirements) 
         boost::unordered_map<int, SensorReadDescriptor*> descriptor_map_;
 
-        // Note: A heap may not be the fastest option
+        // Note: A heap may not be the fastest option.
         // Use 'SensorReadManager::GetDescriptorById(int sensor_id)'
         // instead of acessing the map directly.
-        // std::vector<SensorReadDescriptor*> descriptor_heap_;
+        std::vector<SensorReadDescriptor*> descriptor_heap_;
     };
 }
 
