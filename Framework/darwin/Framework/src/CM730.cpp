@@ -314,7 +314,7 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
         if(get_length == to_length)
         {
             res = SUCCESS;
-            PrintSuccessfulBulkReadTimes(m_Platform);
+            // PrintSuccessfulBulkReadTimes(m_Platform);
             // PrintSuccessfulBulkReadPeriod(m_Platform);
             break;
         }
@@ -325,20 +325,20 @@ inline int CM730::ReceiveBulkReadResponseFromPort(
             if(get_length == 0)
             {
                 res = RX_TIMEOUT;
-                fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n",
-                        m_Platform->GetPacketTime());
+                // fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n",
+                //         m_Platform->GetPacketTime());
             }
             else
             {
                 res = RX_CORRUPT;
-                fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n",
-                        m_Platform->GetPacketTime());
+                // fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n",
+                //         m_Platform->GetPacketTime());
             }
             break;
         }
     }
 
-    PrintSuccessfulBulkReadPeriod(m_Platform);
+    // PrintSuccessfulBulkReadPeriod(m_Platform);
 
     return get_length;
 }
@@ -445,7 +445,7 @@ inline void CM730::TxRxBulkReadPacket(
                 int sensor_id = rxpacket[ID];
                 BulkReadData& sensor_data = bulk_read_data_[sensor_id];
 
-                fprintf(stderr, "BulkReading: id=%d\n", sensor_id);
+                // fprintf(stderr, "BulkReading: id=%d\n", sensor_id);
 
                 for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
                     sensor_data.table[sensor_data.start_address + j] = rxpacket[PARAMETER + j];
@@ -461,7 +461,7 @@ inline void CM730::TxRxBulkReadPacket(
             }
             else
             {
-                fprintf(stderr, "RX_CORRUPT: Checksum.\n");
+                // fprintf(stderr, "RX_CORRUPT: Checksum.\n");
                 res = RX_CORRUPT;
                 
                 // skip next 2 bytes of rxpacket
@@ -476,7 +476,7 @@ inline void CM730::TxRxBulkReadPacket(
                 // if(num != 0) // redundant
                 // {
                     res = RX_CORRUPT;
-                    fprintf(stderr, "RX_CORRUPT: Unexpected end of packet.\n");
+                    // fprintf(stderr, "RX_CORRUPT: Unexpected end of packet.\n");
                 // }
                 break;
             }

@@ -135,13 +135,13 @@ bool SensorReadManager::ProcessBulkReadErrors(
         //    SENSOR_ERROR_FLAG_ANGLE_LIMIT, SENSOR_ERROR_FLAG_OVERHEATING,
         //    SENSOR_ERROR_FLAG_RANGE, SENSOR_ERROR_FLAG_CHECKSUM,
         //    SENSOR_ERROR_FLAG_OVERLOAD, SENSOR_ERROR_FLAG_INSTRUCTION }
-        std::cout    
-                << std::endl
-                // << __PRETTY_FUNCTION__ << ": "
-                << "DS::CFHC()" << ": "
-                << "BULK READ ERROR: "
-                << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
-                << std::endl;
+        // std::cout    
+        //         << std::endl
+        //         // << __PRETTY_FUNCTION__ << ": "
+        //         << "DS::CFHC()" << ": "
+        //         << "BULK READ ERROR: "
+        //         << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
+        //         << std::endl;
 
         bool sensor_read_error = CheckSensorsBulkReadErrors(bulk_read_data);
 
@@ -151,7 +151,7 @@ bool SensorReadManager::ProcessBulkReadErrors(
     else
     {
         UpdateSensorResponseRates(SENSOR_ERROR_NONE);
-        PrintSensorResponseRates();
+        // PrintSensorResponseRates();
     }
 
     return error_occurred;
@@ -203,13 +203,13 @@ bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data)
         int sensor_id = (*it)->sensor_id();
         if(!sensor_read_error)
             sensor_read_error |= CheckSensorBulkReadErrors(sensor_id, bulk_read_data);
-        else PrintSensorResponseRate(sensor_id);
+        // else PrintSensorResponseRate(sensor_id);
     }
 
     #warning Must return actual error!
-    std::cout   << __PRETTY_FUNCTION__ << " - " 
-                << "DEBUG: return false;"
-                << std::endl;
+    // std::cout   << __PRETTY_FUNCTION__ << " - " 
+    //             << "DEBUG: return false;"
+    //             << std::endl;
     return false; // sensor_read_error;
 }
 
@@ -237,22 +237,22 @@ bool SensorReadManager::CheckSensorBulkReadErrors(
 
         // errorlog << "Motor error: " << endl;
 
-        PrintSensorResponseRate(sensor_id);
-        std::cout
-                // << __PRETTY_FUNCTION__ << ": "
-                // << "DS::CFHC()" << ": "
-                // << "Sensor error: id = '"
-                // << Robot::SensorReadManager::SensorNameForId(sensor_id)
-                // << "' ("
-                // << sensor_id
-                // << "), error='"
-                << GetSensorErrorDescription(sensor_error_code)
-                << "';"
-                << std::endl;
+        // PrintSensorResponseRate(sensor_id);
+        // std::cout
+        //         // << __PRETTY_FUNCTION__ << ": "
+        //         // << "DS::CFHC()" << ": "
+        //         // << "Sensor error: id = '"
+        //         // << Robot::SensorReadManager::SensorNameForId(sensor_id)
+        //         // << "' ("
+        //         // << sensor_id
+        //         // << "), error='"
+        //         << GetSensorErrorDescription(sensor_error_code)
+        //         << "';"
+        //         << std::endl;
     }
     else
     {
-        PrintSensorResponseRate(sensor_id);
+        // PrintSensorResponseRate(sensor_id);
     }
 
     return sensor_read_error;

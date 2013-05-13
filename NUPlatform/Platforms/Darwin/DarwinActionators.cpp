@@ -162,16 +162,16 @@ void DarwinActionators::copyToServos()
     //     int sensor_index = MapSensorIdToServoIndex(sensor_id); // i; //
     //     if(sensor_index == -1) continue;
 
-        std::cout   << "Writing: "
-                    << std::setw(16) << Robot::SensorReadManager::SensorNameForId(sensor_id) 
-                    << " ("
-                    << std::setw(3) << sensor_id
-                    << "): index="
-                    << std::setw(3) << sensor_index
-                    << ", consecutive_errors:"
-                    // << std::setw(3) << sensor_read->consecutive_errors()
-                    << ";"
-                    << std::endl;
+        // std::cout   << "Writing: "
+        //             << std::setw(16) << Robot::SensorReadManager::SensorNameForId(sensor_id) 
+        //             << " ("
+        //             << std::setw(3) << sensor_id
+        //             << "): index="
+        //             << std::setw(3) << sensor_index
+        //             << ", consecutive_errors:"
+        //             // << std::setw(3) << sensor_read->consecutive_errors()
+        //             << ";"
+        //             << std::endl;
 
         platform->setMotorGoalPosition(sensor_index, positions[sensor_index]);
         // Note: 'setMotorStiffness' writes directly to the CM730 board,
