@@ -593,16 +593,16 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     float ballFieldLocationY = self.wmY() + rotatedY;
 
     // Calculate the ball location SD in field coordinates. - Not yet implemented
-    float ballFieldSdX = relBallSdX;
-    float ballFieldSdY = relBallSdY;
+	float ballFieldSdX = relBallSdX * hcos - relBallSdY * hsin;
+    float ballFieldSdY = relBallSdX * hsin + relBallSdY * hcos;
 
     // Calculate the Ball velocity in field coordinates.
     float ballFieldVelocityX = relBallXVel * hcos - relBallYVel * hsin;
     float ballFieldVelocityY = relBallXVel * hsin + relBallYVel * hcos;
 
     // Calculate the ball velocity SD in field coordinates. - Not yet implemented
-    float ballFieldVelocitySdX = relBallSdXVel;
-    float ballFieldVelocitySdY = relBallSdYVel;
+    float ballFieldVelocitySdX = relBallSdXVel * hcos - relBallSdYVel * hsin;
+    float ballFieldVelocitySdY = relBallSdXVel * hsin + relBallSdYVel * hcos;
 
     // Calculate the relative distance and heading.
     float ballDistance = sqrt(relBallX*relBallX + relBallY*relBallY);
@@ -621,11 +621,21 @@ void SelfLocalisation::WriteModelToObjects(const SelfModel* model, FieldObjects*
     selfPositionVariance[0][1] = model->covariance(0,1);
     selfPositionVariance[1][0] = model->covariance(1,0);
     selfPositionVariance[1][1] = model->covariance(1,1);
+	
+	
+	Matrix covMatrix(2,2,false);
+	covMatrix[0][0] = m_ball_model->covariance(0,0);
+    covMatrix[0][1] = m_ball_model->covariance(0,1);
+    covMatrix[1][0] = m_ball_model->covariance(1,0);
+    covMatrix[1][1] = m_ball_model->covariance(1,1);
 
     // calculate the field variance of the ball R^-1 * Sigma * R + SelfVariance
     // We are assuming that the variances are independant.
-    Matrix fieldBallVariance = InverseMatrix(rotMatrix) * m_ball_model->covariance() * rotMatrix + selfPositionVariance;
-
+    //Matrix fieldBallVariance = InverseMatrix(rotMatrix) * m_ball_model->covariance() * rotMatrix + selfPositionVariance;
+	Matrix fieldBallVariance = InverseMatrix(rotMatrix) * covMatrix * rotMatrix;
+	
+	//std::cout << covMatrix << std::endl;
+	
     // Write the results to the ball object.
     ball.updateObjectLocation(ballFieldLocationX, ballFieldLocationY, ballFieldSdX, ballFieldSdY);
     ball.updateObjectVelocities(ballFieldVelocityX,ballFieldVelocityY,ballFieldVelocitySdX, ballFieldVelocitySdY);

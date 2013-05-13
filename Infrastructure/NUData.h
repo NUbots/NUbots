@@ -164,6 +164,9 @@ public:
 protected:
     static vector<id_t*> m_common_ids;
     vector<id_t*> m_ids_copy;                       //!< this is a non-static copy of the ids. It is non-static so that it is not shared between derived classes (ie sensors and actionators have different ids)
+
+    // #warning This public statement is for debugging on the CM730Errors branch. It should be removed.
+public:
     vector<vector<int> > m_id_to_indices;
     vector<int> m_available_ids;
     
@@ -172,7 +175,7 @@ protected:
     
     virtual bool belongsToGroup(const id_t& member, const id_t& group);
     virtual bool belongsToGroup(const string& name, const id_t& group);
-    
+
     const vector<int>& mapIdToIndices(const id_t& id) const;
     
     // debug tools

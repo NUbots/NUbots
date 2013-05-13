@@ -33,6 +33,7 @@ SET (YOUR_DIRS  Soccer
                 ChaseBall
                 NUWalkTest
                 Zombie
+                Ragdoll
                 MiscBehaviours
                 WalkOptimisation
                 Kicker

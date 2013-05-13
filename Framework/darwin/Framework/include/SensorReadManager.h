@@ -60,7 +60,7 @@ namespace Robot
         void PrintSensorResponseRate(int sensor_id);
 
         //! Filters the list of response rates to return a list of sensor IDs that
-        //! Are actually failing.
+        //! are actually failing.
         //! (i.e. Removes likely false-positives from the list of failing sensors.
         //! Currently assumes that all sensors are always in use.
         //! Note: If three sensors on the same limb are not responding, it is likely 
@@ -79,6 +79,10 @@ namespace Robot
             std::vector<int>& limb_sensors, 
             std::vector<int>& failing_sensors);
 
+        // Note: The following data structures should be moved into a
+        //       new SensorDescriptorContainer class that
+        //       implements the required iterators and access operations.
+
         //! A vector to store the actual descriptors
         std::vector<SensorReadDescriptor*> descriptor_list_;
 
@@ -86,7 +90,7 @@ namespace Robot
         // (Used to support SensorReadManager's access requirements) 
         boost::unordered_map<int, SensorReadDescriptor*> descriptor_map_;
 
-        // Note: A heap may not be the fastest option
+        // Note: A heap may not be the fastest option.
         // Use 'SensorReadManager::GetDescriptorById(int sensor_id)'
         // instead of acessing the map directly.
         std::vector<SensorReadDescriptor*> descriptor_heap_;

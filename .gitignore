@@ -76,3 +76,10 @@ NUView-build*/*
 *.nif
 *.nul
 *.strm
+
+# Other ignored formats
+*.komodoproject
+*.kpf
+
+# NetBeans
+nbproject

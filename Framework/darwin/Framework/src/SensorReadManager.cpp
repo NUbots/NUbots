@@ -1,8 +1,12 @@
+#include <iomanip>
+#include <vector>
+#include <algorithm>
 #include "FSR.h"
 #include "CM730.h"
 #include "MotionStatus.h"
 #include "SensorReadManager.h"
 #include "SensorReadDescriptor.h"
+#include "CompareSensorReadDescriptors.h"
 
 using namespace Robot;
 
@@ -131,13 +135,13 @@ bool SensorReadManager::ProcessBulkReadErrors(
         //    SENSOR_ERROR_FLAG_ANGLE_LIMIT, SENSOR_ERROR_FLAG_OVERHEATING,
         //    SENSOR_ERROR_FLAG_RANGE, SENSOR_ERROR_FLAG_CHECKSUM,
         //    SENSOR_ERROR_FLAG_OVERLOAD, SENSOR_ERROR_FLAG_INSTRUCTION }
-        std::cout    
-                << std::endl
-                // << __PRETTY_FUNCTION__ << ": "
-                << "DS::CFHC()" << ": "
-                << "BULK READ ERROR: "
-                << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
-                << std::endl;
+        // std::cout    
+        //         << std::endl
+        //         // << __PRETTY_FUNCTION__ << ": "
+        //         << "DS::CFHC()" << ": "
+        //         << "BULK READ ERROR: "
+        //         << Robot::CM730::getTxRxErrorString(bulk_read_error_code)
+        //         << std::endl;
 
         bool sensor_read_error = CheckSensorsBulkReadErrors(bulk_read_data);
 
@@ -147,62 +151,37 @@ bool SensorReadManager::ProcessBulkReadErrors(
     else
     {
         UpdateSensorResponseRates(SENSOR_ERROR_NONE);
-        PrintSensorResponseRates();
+        // PrintSensorResponseRates();
     }
 
     return error_occurred;
 }
 
-// void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
-// {
-//     const int kDataStart = (PARAMETER) + 1;
-
-//     std::make_heap(
-//         descriptor_heap_.begin(), 
-//         descriptor_heap_.end(),
-//         CompareSensorReadDescriptors());
-
-//     // Make Data Packet
-//     int pos = 0;
-//     for(int i = 0; i < (int)descriptor_heap_.size(); i++)
-//     {
-//         SensorReadDescriptor* sensor_read = descriptor_heap_.front();
-//         std::pop_heap(
-//             descriptor_heap_.begin(), 
-//             descriptor_heap_.end(),
-//             CompareSensorReadDescriptors());
-
-//         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->num_bytes();
-//         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->sensor_id();
-//         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->start_address();
-//     }
-
-//     // Make Packet Header
-//     bulk_read_tx_packet_[ID]          = (unsigned char)CM730::ID_BROADCAST;
-//     bulk_read_tx_packet_[LENGTH]      = pos + 3;
-//     bulk_read_tx_packet_[INSTRUCTION] = INST_BULK_READ;
-//     bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
-//     // descriptor_heap_.length() * 3 + 3
-// }
-
 void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
 {
     const int kDataStart = (PARAMETER) + 1;
 
+    // Note: descriptor_heap_ doesn't need to be a heap, and, whatever it is,
+          // it should probably only be accessed through an iterator.
     std::make_heap(
         descriptor_heap_.begin(), 
+        descriptor_heap_.end(),
+        CompareSensorReadDescriptors());
+    std::sort_heap(
+        descriptor_heap_.begin(),
         descriptor_heap_.end(),
         CompareSensorReadDescriptors());
 
     int pos = 0;
     for(int i = 0; i < (int)descriptor_heap_.size(); i++)
     {
-        // SensorReadDescriptor* sensor_read = descriptor_heap_[i];
-        SensorReadDescriptor* sensor_read = descriptor_heap_.front();
-        std::pop_heap(
-            descriptor_heap_.begin(),
-            descriptor_heap_.end() - i,
-            CompareSensorReadDescriptors());
+        // SensorReadDescriptor* sensor_read = descriptor_heap_[(descriptor_heap_.size() - 1) - i];
+        SensorReadDescriptor* sensor_read = descriptor_heap_[i];
+        // SensorReadDescriptor* sensor_read = descriptor_heap_.front();
+        // std::pop_heap(
+        //     descriptor_heap_.begin(),
+        //     descriptor_heap_.end() - i,
+        //     CompareSensorReadDescriptors());
         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->num_bytes();
         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->sensor_id();
         bulk_read_tx_packet_[kDataStart + pos++] = sensor_read->start_address();
@@ -214,7 +193,6 @@ void SensorReadManager::MakeBulkReadPacket(unsigned char* bulk_read_tx_packet_)
     bulk_read_tx_packet_[PARAMETER]   = (unsigned char)0x0;
 }
 
-
 bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data)
 {
     bool sensor_read_error = false;
@@ -223,16 +201,26 @@ bool SensorReadManager::CheckSensorsBulkReadErrors(BulkReadData* bulk_read_data)
          it != descriptor_heap_.end(); ++it)
     {
         int sensor_id = (*it)->sensor_id();
-        sensor_read_error |= CheckSensorBulkReadErrors(sensor_id, bulk_read_data);
+        if(!sensor_read_error)
+            sensor_read_error |= CheckSensorBulkReadErrors(sensor_id, bulk_read_data);
+        // else PrintSensorResponseRate(sensor_id);
     }
 
-    return sensor_read_error;
+    #warning Must return actual error!
+    // std::cout   << __PRETTY_FUNCTION__ << " - " 
+    //             << "DEBUG: return false;"
+    //             << std::endl;
+    return false; // sensor_read_error;
 }
 
 bool SensorReadManager::CheckSensorBulkReadErrors(
     int sensor_id,
     BulkReadData* bulk_read_data)
 {
+    // std::cout   << "CSBRE: " 
+    //             << std::setw(3) << sensor_id 
+    //             << std::endl;
+
     bool sensor_read_error = false;
 
     int sensor_error_code = bulk_read_data[sensor_id].error;
@@ -244,27 +232,27 @@ bool SensorReadManager::CheckSensorBulkReadErrors(
         // If the error occurs very often, we should stop reporting it,
         // since repeating the bulk read indefinitely will freeze the robot.
         // i.e. only report errors in sensors with HIGH response rates.
-        if(response_rate > 0.5)
+        // if(response_rate > 0.5)
             sensor_read_error = true;
 
         // errorlog << "Motor error: " << endl;
 
-        std::cout
-                // << __PRETTY_FUNCTION__ << ": "
-                << "DS::CFHC()" << ": "
-                << "Sensor error: id = '"
-                << Robot::SensorReadManager::SensorNameForId(sensor_id)
-                << "' ("
-                << sensor_id
-                << "), error='"
-                << GetSensorErrorDescription(sensor_error_code)
-                << "';"
-                << std::endl;
-        PrintSensorResponseRate(sensor_id);
+        // PrintSensorResponseRate(sensor_id);
+        // std::cout
+        //         // << __PRETTY_FUNCTION__ << ": "
+        //         // << "DS::CFHC()" << ": "
+        //         // << "Sensor error: id = '"
+        //         // << Robot::SensorReadManager::SensorNameForId(sensor_id)
+        //         // << "' ("
+        //         // << sensor_id
+        //         // << "), error='"
+        //         << GetSensorErrorDescription(sensor_error_code)
+        //         << "';"
+        //         << std::endl;
     }
     else
     {
-        PrintSensorResponseRate(sensor_id);
+        // PrintSensorResponseRate(sensor_id);
     }
 
     return sensor_read_error;
@@ -293,10 +281,15 @@ void SensorReadManager::PrintSensorResponseRates()
 void SensorReadManager::PrintSensorResponseRate(int sensor_id)
 {
     double response_rate = GetDescriptorById(sensor_id)->response_rate();
+    double consecutive_errors = GetDescriptorById(sensor_id)->consecutive_errors();
     std::cout 
-        << SensorNameForId(sensor_id)
+        << std::setw(16) << SensorNameForId(sensor_id)
+        << " (" << std::setw(3) << sensor_id << "):"
         << " response_rate = " 
-        << response_rate 
+        << std::setw(6) << response_rate 
+        << ";"
+        << " consecutive_errors = " 
+        << std::setw(3) << consecutive_errors 
         << ";"
         << std::endl;
 }
@@ -384,31 +377,32 @@ std::string SensorReadManager::GetSensorErrorDescription(unsigned int error_valu
     std::string error_description;
 
     if(error_value == SENSOR_ERROR_NONE) 
-        return "No Errors";
+        return "No errors";
 
     if(error_value == -1) 
-        return "All error flags are set.";
+        return "No response from sensor.";
+        // return "All error flags are set.";
     
     if(error_value & SENSOR_ERROR_FLAG_INPUT_VOLTAGE)
-        error_description.append("Input Voltage Error; ");
+        error_description.append("input-voltage error; ");
     
     if(error_value & SENSOR_ERROR_FLAG_ANGLE_LIMIT)
-        error_description.append("Angle Limit Error; ");
+        error_description.append("angle-limit error; ");
     
     if(error_value & SENSOR_ERROR_FLAG_OVERHEATING)
-        error_description.append("OverHeating Error; ");
+        error_description.append("overheating error; ");
     
     if(error_value & SENSOR_ERROR_FLAG_RANGE)
-        error_description.append("Range Error; ");
+        error_description.append("range error; ");
     
     if(error_value & SENSOR_ERROR_FLAG_CHECKSUM)
-        error_description.append("Checksum Error; ");
+        error_description.append("checksum error; ");
     
     if(error_value & SENSOR_ERROR_FLAG_OVERLOAD)
-        error_description.append("Overload Error; ");
+        error_description.append("overload error; ");
     
     if(error_value & SENSOR_ERROR_FLAG_INSTRUCTION)
-        error_description.append("Instruction Error; ");
+        error_description.append("instruction error; ");
     
     return error_description;
 }

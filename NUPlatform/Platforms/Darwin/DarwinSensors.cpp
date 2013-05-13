@@ -98,7 +98,6 @@ DarwinSensors::~DarwinSensors()
         debug << "DarwinSensors::~DarwinSensors()" << endl;
     #endif
     delete cm730;
-    delete sensor_read_manager_;
 }
 
 /*! @brief Copys the sensors data from the hardware communication module to the NUSensorsData container
@@ -129,15 +128,15 @@ void DarwinSensors::copyFromHardwareCommunications()
     while(cm730->BulkRead())
     {
         std::cout << "Repeat: " << ++debug_count << ";" << std::endl;
-        std::vector<int> failing_sensors;
-        sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
-        std::cout << "The following sensors are performing badly:" << std::endl;
-        for (std::vector<int>::iterator it = failing_sensors.begin(); 
-            it != failing_sensors.end(); ++it)
-        {
-            int sensor_id = *it;
-            sensor_read_manager_->PrintSensorResponseRate(sensor_id);
-        }
+        // std::vector<int> failing_sensors;
+        // sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
+        // std::cout << "The following sensors are performing badly:" << std::endl;
+        // for (std::vector<int>::iterator it = failing_sensors.begin(); 
+        //     it != failing_sensors.end(); ++it)
+        // {
+        //     int sensor_id = *it;
+        //     sensor_read_manager_->PrintSensorResponseRate(sensor_id);
+        // }
     }
 }
 
