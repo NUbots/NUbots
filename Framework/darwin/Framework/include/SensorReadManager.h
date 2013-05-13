@@ -1,6 +1,7 @@
 #ifndef SENSOR_READ_MANAGER_H
 #define SENSOR_READ_MANAGER_H
 
+#include <vector>
 #include <boost/unordered_map.hpp>
 
 #include "CM730.h"
