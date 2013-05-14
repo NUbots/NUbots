@@ -1,0 +1,160 @@
+[RoboPlus Motion Protocol]
+
+<Note>
+=> : from Host(PC) to DARwIn
+<= : from DARwIn to Host(PC)
+\n : New line character
+... : Iterate until last one
+
+
+(1)Connect/Disconnect
+*TCP/IP Connect/Disconnect
+*Port number is 6501
+
+
+(2)Version
+----------------------------------------
+=> v
+<= {[DARwIn:VERSION]}\n
+----------------------------------------
+*VERSION: Version of roboplus_vm. (ex, 1.000)
+
+
+(3)Start
+-----------------------------------------
+=> E
+<= {[DARwIn:VERSION]}
+<= {[PC:TCP/IP][DXL:1000000(BPS)]}
+<= {[ID:MODEL(NAME)]...}
+<= {[DXL:NUMBER(PCS)}
+<= {[ME]}\n
+-----------------------------------------
+*VERSION: Version of roboplus_vm
+*MODEL: Model number of dynamixel (ex, 29 (MX-28))
+*NUMBER: Number of connected dynamixel
+
+
+(4)Exit
+-----------------------------------------
+=> exit
+-----------------------------------------
+
+
+(5)Get page list
+-----------------------------------------
+=> List
+<= {[PAGE:STEP:NEXT:EXIT] ...}
+<= {[ME]}\n
+-----------------------------------------
+*PAGE: Index of page
+*STEP: Number of step in the page
+*NEXT: Value of next page in the page
+*EXIT: Value of exit page in the page
+
+
+(6)Get step
+-----------------------------------------
+=> Get
+<= {[VALUE] ...}
+-----------------------------------------
+*VALUE: Present position value of dynamixel
+        ----: No exist
+        ????: State of torque off
+        0~1023: Position value
+
+
+(7)Go step
+------------------------------------------
+=> go VALUE1 ...
+<= {[VALUE2] ...}
+------------------------------------------
+*VALUE1: Goal position value of dynamixel
+*VALUE2: Same as return of "Get step" 
+
+
+(8)Torque on/off
+------------------------------------------
+=> on/off ID ...
+<= {[VALUE] ...}
+------------------------------------------
+*ID: ID of selected dynamixel. If no id, it means all dynamixel.
+*VALUE: Same as return of "Get step"
+
+
+(9)Set joint
+-------------------------------------------
+=> set ID VALUE1
+<= {[VALUE2]}
+<= {[ME]}\n
+-------------------------------------------
+*ID: ID of selected dynamixel
+*VALUE1: Goal position value of selected dydnamixel
+*VALUE2: Present position value of selected dydnamixel. Format is same as return of "Get step"
+
+
+(10)Play
+-------------------------------------------
+(Start playing)
+=> play PAGE1
+
+(Get current inforamtion while playing)
+=> info
+<= {[PAGE2:STEP]}\n
+
+(Stop/Break playing)
+=> stop/break
+
+(When playing done)
+<= {[OK]}\n
+-------------------------------------------
+*PAGE1: Index of page to play
+*PAGE2: Index of current page in playing
+*STEP: Index of current step in playing
+
+
+(11)RDownload
+-------------------------------------------
+=> RDownload
+<= {[READY]}\n
+=> STREAM
+
+(If success)
+<= {[SUCCESS]}\n
+(If failed)
+<= {[FAILURE]}\n
+
+<={[ME]}\n
+--------------------------------------------
+*STREAM: Byte stream of page to download
+
+
+(12)RPlay
+--------------------------------------------
+=> rplay PAGE
+(Same as return of "Play")
+--------------------------------------------
+*PAGE: Index of page to play
+
+
+(13)Upload
+--------------------------------------------
+=> upload ADDRESS SIZE
+<= STREAM
+<= {[ME]}\n
+--------------------------------------------
+*ADDRESS: Start address of page to upload
+*SIZE: Number of byte of page to upload
+*STREAM: Byte stream of page to upload
+
+
+(14)Download
+--------------------------------------------
+=> ld ADDRESS SIZE
+<= {[READY]}\n
+=> STREAM
+--------------------------------------------
+*ADDRESS: Start address of page to download
+*SIZE: Number of byte of page to download
+*STREAM: Byte stream of page to download
+
+
