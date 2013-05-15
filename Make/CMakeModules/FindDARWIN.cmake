@@ -12,23 +12,27 @@
 
 # This finds the location of the darwin.a and sets DARWIN_DIR, DARWIN_INCLUDE_DIR, DARWIN_LIBRARIES
 
-IF (EXISTS /usr/lib/darwin.a)
-    SET(DARWIN_DIR /usr)
+IF (EXISTS ${PROJECT_SOURCE_DIR}/../Framework/darwin/Linux/lib/darwin.a)
+    SET(DARWIN_DIR ${PROJECT_SOURCE_DIR}/../Framework/darwin/Linux)
 ELSE()
-    IF (EXISTS /usr/local/lib/darwin.a)
-        SET(DARWIN_DIR /usr/local)
+    IF (EXISTS /usr/lib/darwin.a)
+        SET(DARWIN_DIR /usr)
     ELSE()
-        IF (EXISTS /darwin/Linux/lib/darwin.a)
-            SET(DARWIN_DIR /darwin/Linux)
+        IF (EXISTS /usr/local/lib/darwin.a)
+            SET(DARWIN_DIR /usr/local)
+        ELSE()
+            IF (EXISTS /darwin/Linux/lib/darwin.a)
+                SET(DARWIN_DIR /darwin/Linux)
+            ENDIF()
         ENDIF()
     ENDIF()
 ENDIF()
 
 IF (DARWIN_DIR)
     SET(DARWIN_INCLUDE_DIR ${DARWIN_DIR}/include CACHE FILEPATH "Cleared." FORCE)
-	LIST(APPEND DARWIN_INCLUDE_DIR ${DARWIN_DIR}/../Framework/include)
+    LIST(APPEND DARWIN_INCLUDE_DIR ${DARWIN_DIR}/../Framework/include)
     SET(DARWIN_LIBRARIES ${DARWIN_DIR}/lib/darwin.a CACHE FILEPATH "Cleared." FORCE)
-	MESSAGE(STATUS ${DARWIN_INCLUDE_DIR})
+    MESSAGE(STATUS ${DARWIN_INCLUDE_DIR})
 ELSE()
     MESSAGE(ERROR darwin not found)
 ENDIF()
@@ -37,5 +41,3 @@ MARK_AS_ADVANCED(
     DARWIN_INCLUDE_DIR
     DARWIN_LIBRARIES
 )
-
-

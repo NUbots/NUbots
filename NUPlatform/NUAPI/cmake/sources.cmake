@@ -20,8 +20,7 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  TCPConnection.cpp TCPConnection.h
-                TCPServer.cpp TCPServer.h
+SET (YOUR_SRCS  
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
