@@ -74,7 +74,7 @@ namespace Robot
             TX_FAIL,
             RX_FAIL,
             RX_TIMEOUT,
-            RX_CORRUPT
+            RX_CORRUPT,
         };
 
         enum
@@ -217,7 +217,7 @@ namespace Robot
         int SyncWrite(int start_addr, int each_length, int number, int *pParam);
 
         void MakeBulkReadPacket();
-        int BulkRead();
+        bool BulkRead(int* out_error_code);
 
         // Utility
         static int MakeWord(int lowbyte, int highbyte);
