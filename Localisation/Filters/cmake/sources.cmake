@@ -21,14 +21,16 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-BasicUKF.cpp BasicUKF.h
 KFBuilder.cpp KFBuilder.h
 MobileObjectModel.h MobileObjectModel.cpp
 MobileObjectUKF.cpp MobileObjectUKF.h
 RobotModel.h RobotModel.cpp
+IMUModel.h IMUModel.cpp
 SeqUKF.cpp SeqUKF.h
-SrBasicUKF.cpp SrBasicUKF.h
-SrSeqUKF.cpp SrSeqUKF.h
+WBasicUKF.cpp WBasicUKF.h
+WSeqUKF.cpp WSeqUKF.h
+WSrBasicUKF.cpp WSrBasicUKF.h
+WSrSeqUKF.cpp WSrSeqUKF.h
 UKF.cpp UKF.h
 UnscentedTransform.h
 )
