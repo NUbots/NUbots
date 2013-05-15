@@ -18,6 +18,15 @@ win32{
     }
 }
 
+macx {
+    # Mac Specific Includes
+    QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
+    LIBS += -framework CoreFoundation -lz
+    #Macports include directory
+    INCLUDEPATH += '/opt/local/include'
+    INCLUDEPATH += '/opt/local/include/boost/'
+}
+
 
 
 INCLUDEPATH += ../
@@ -25,8 +34,13 @@ INCLUDEPATH += ../
 win32 {
     PLATFORM = win
 }
+macx {
+    PLATFORM = mac
+}
 !win32 {
-    PLATFORM = pc
+    !macx {
+        PLATFORM = pc
+    }
 }
 
 contains(PLATFORM, "darwin") {
@@ -36,7 +50,7 @@ contains(PLATFORM, "darwin") {
     INCLUDEPATH += ../Autoconfig/
 
     HEADERS += \
-        NUPlatform/Platforms/Darwin/DarwinCamera.h \
+        ../NUPlatform/Platforms/Darwin/DarwinCamera.h \
         VisionWrapper/datawrapperdarwin.h \
         ../Autoconfig/debug.h \
         ../Autoconfig/nubotdataconfig.h \
@@ -52,16 +66,16 @@ contains(PLATFORM, "pc") {
      message("Compiling for PC")
     DEFINES += TARGET_IS_PC
 
-    INCLUDEPATH += ../Vision/Debug/
+    INCLUDEPATH += ../Vision/NUDebug/
 
     HEADERS += \
         #VisionWrapper/datawrapperpc.h \
         VisionWrapper/datawrapperqt.h \
         #VisionWrapper/visioncontrolwrapperpc.h\
         VisionWrapper/visioncontrolwrapperqt.h\
-        ../Vision/Debug/debugverbosityvision.h \
-        ../Vision/Debug/debug.h \
-        ../Vision/Debug/nubotdataconfig.h \
+        ../Vision//NUDebug/debugverbosityvision.h \
+        ../Vision/NUDebug/debug.h \
+        ../Vision/NUDebug/nubotdataconfig.h \
 
     SOURCES += \
         #VisionWrapper/datawrapperpc.cpp \
@@ -78,38 +92,64 @@ contains(PLATFORM, "pc") {
 contains(PLATFORM, "win") {
      message("Compiling for Windows")
 #    DEFINES += TARGET_IS_PC
+    DEFINES += TARGET_IS_WINDOWS
 
-    INCLUDEPATH += ../Vision/Debug/
+    INCLUDEPATH += ../Vision/NUDebug/
 
     HEADERS += \
         VisionWrapper/datawrapperqt.h \
-        ../Vision/Debug/debugverbosityvision.h \
-        ../Vision/Debug/debug.h \
-        ../Vision/Debug/nubotdataconfig.h \
+        VisionWrapper/visioncontrolwrapperqt.h\
+        ../Vision/NUDebug/debugverbosityvision.h \
+        ../Vision/NUDebug/debug.h \
+        ../Vision/NUDebug/nubotdataconfig.h \
 
     SOURCES += \
         VisionWrapper/datawrapperqt.cpp \
+        VisionWrapper/visioncontrolwrapperqt.cpp\
 
     HEADERS += \
-        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h
+        ../NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h
     SOURCES += \
-        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp
+        ../NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp
 }
 
+contains(PLATFORM, "mac") {
+     message("Compiling for Mac")
+    DEFINES += TARGET_IS_MAC
+
+    INCLUDEPATH += ../Vision/NUDebug/
+
+    HEADERS += \
+        VisionWrapper/datawrapperqt.h \
+        VisionWrapper/visioncontrolwrapperqt.h\
+        ../Vision/NUDebug/debugverbosityvision.h \
+        ../Vision/NUDebug/debug.h \
+        ../Vision/NUDebug/nubotdataconfig.h \
+        ../NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h \
+
+    SOURCES += \
+        VisionWrapper/datawrapperqt.cpp \
+        VisionWrapper/visioncontrolwrapperqt.cpp\
+        ../NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp \
+
+
+    LIBS += -lopencv_core -lopencv_highgui
+
+}
 
 contains(PLATFORM, "rpi") {
      message("Compiling for RPi")
     DEFINES += TARGET_IS_RPI
 
-    INCLUDEPATH += ../Vision/Debug/
+    INCLUDEPATH += ../Vision/NUDebug/
 
     HEADERS += \
         VisionTools/pccamera.h \
         VisionWrapper/datawrapperrpi.h \
         VisionWrapper/visioncontrolwrapperrpi.h \
-        ../Vision/Debug/debugverbosityvision.h \
-        ../Vision/Debug/debug.h \
-        ../Vision/Debug/nubotdataconfig.h \
+        ../Vision/NUDebug/debugverbosityvision.h \
+        ../Vision/NUDebug/debug.h \
+        ../Vision/NUDebug/nubotdataconfig.h \
 
     SOURCES += \
         VisionTools/pccamera.cpp \

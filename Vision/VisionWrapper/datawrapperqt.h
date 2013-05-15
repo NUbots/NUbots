@@ -6,7 +6,10 @@
 
 #include "Kinematics/Horizon.h"
 
-#ifdef TARGET_OS_IS_WINDOWS
+
+#ifdef TARGET_IS_MAC
+#include "NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h"
+#elif TARGET_OS_IS_WINDOWS
 #include "NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h"
 #else
 #include "Vision/VisionTools/pccamera.h"

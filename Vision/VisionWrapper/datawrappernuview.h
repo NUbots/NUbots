@@ -21,10 +21,11 @@
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 #include "Vision/VisionTypes/VisionFieldObjects/centrecircle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/cornerpoint.h"
-#include "Vision/VisionTools/pccamera.h"
+
 #include "Vision/VisionTools/lookuptable.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
 #include "NUPlatform/NUCamera/NUCameraData.h"
+#include "Vision/VisionTools/pccamera.h"
 
 //for virtualNUbot/Qt
 #include "GLDisplay.h"

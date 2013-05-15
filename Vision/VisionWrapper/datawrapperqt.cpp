@@ -50,7 +50,14 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string is
         }
         break;
     case CAMERA:
+
+        #ifdef TARGET_IS_MAC
+        m_camera = new NUOpenCVCamera;
+        #elif TARGET_IS_WINDOWS
+        m_camera = new NUOpenCVCamera;
+        #else
         m_camera = new PCCamera;
+        #endif
     }
 
     configname = cfg;
