@@ -2,7 +2,7 @@
 #define SENSORCALIBRATIONWIDGET_H
 
 #include <QWidget>
-
+class NUSensorsData;
 namespace Ui {
 class SensorCalibrationWidget;
 }
@@ -39,11 +39,17 @@ public:
 
 signals:
     void CalibrationChanged(SensorCalibration* newCalibration);
+public slots:
+    void setSensorData(NUSensorsData* new_sensordata);
+    void select_pixel(int x, int y);
 protected slots:
     void ValueChanged();
 private:
     Ui::SensorCalibrationWidget *ui;
     SensorCalibration m_calibration;
+    NUSensorsData* m_sensors;
+    int selected_x;
+    int selected_y;
 
 };
 
