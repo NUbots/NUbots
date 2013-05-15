@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include <assert.h>
+#include <boost/foreach.hpp>
 
 
 #define MULTIPLE_MODELS_ON 1
@@ -387,22 +388,23 @@ void SelfLocalisation::IndividualStationaryObjectUpdate(FieldObjects* fobs, floa
     int usefulObjectCount = 0;
 
     // Proccess the Stationary Known Field Objects
-    StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
-    StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
+//    StationaryObjectsIt currStat(fobs->stationaryFieldObjects.begin());
+//    StationaryObjectsConstIt endStat(fobs->stationaryFieldObjects.end());
 
     // all objects at once.
     unsigned int objectsAdded = 0;
     unsigned int totalSuccessfulUpdates = 0;
-    for(; currStat != endStat; ++currStat)
+
+    BOOST_FOREACH(StationaryObject& currStat, fobs->stationaryFieldObjects)
     {
-        if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
+        if(currStat.isObjectVisible() == false) continue; // Skip objects that were not seen.
 #if CENTER_CIRCLE_ON
-        totalSuccessfulUpdates += landmarkUpdate(*currStat);
+        totalSuccessfulUpdates += landmarkUpdate(currStat);
         objectsAdded++;
 #else
-        if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
+        if(!(currStat.getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
         {
-            totalSuccessfulUpdates += landmarkUpdate(*currStat);
+            totalSuccessfulUpdates += landmarkUpdate(currStat);
             objectsAdded++;
         }
 #endif
@@ -430,18 +432,16 @@ void SelfLocalisation::IndividualStationaryObjectUpdate(FieldObjects* fobs, floa
             doSingleReset();
         }
         // reapply the updates.
-        currStat = fobs->stationaryFieldObjects.begin();
-        endStat = fobs->stationaryFieldObjects.end();
-        for(; currStat != endStat; ++currStat)
+        BOOST_FOREACH(StationaryObject& currStat, fobs->stationaryFieldObjects)
         {
-            if(currStat->isObjectVisible() == false) continue; // Skip objects that were not seen.
+            if(currStat.isObjectVisible() == false) continue; // Skip objects that were not seen.
     #if CENTER_CIRCLE_ON
-            totalSuccessfulUpdates += landmarkUpdate(*currStat);
+            totalSuccessfulUpdates += landmarkUpdate(currStat);
             objectsAdded++;
     #else
-            if(!((*currStat).getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
+            if(!(currStat.getName() == fobs->stationaryFieldObjects[FieldObjects::FO_CORNER_CENTRE_CIRCLE].getName()))
             {
-                totalSuccessfulUpdates += landmarkUpdate(*currStat);
+                totalSuccessfulUpdates += landmarkUpdate(currStat);
                 objectsAdded++;
             }
     #endif
@@ -474,14 +474,14 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     if(numUpdates == 0 )
     {
         debug_out  <<"[" << m_timestamp << "]: Update Starting." << endl;
-        for (std::list<IWeightedKalmanFilter*>::const_iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
+        BOOST_FOREACH(IWeightedKalmanFilter* filter, m_robot_filters)
         {
-            if((*model_it)->active() == false) continue;
-            debug_out  << "[" << m_timestamp << "]: Model[" << (*model_it)->id() << "]";
-            debug_out  << " [alpha = " << (*model_it)->getFilterWeight() << "]";
-            debug_out  << " Robot X: " << (*model_it)->mean(RobotModel::kstates_x);
-            debug_out  << " Robot Y: " << (*model_it)->mean(RobotModel::kstates_y);
-            debug_out  << " Robot Theta: " << (*model_it)->mean(RobotModel::kstates_heading) << endl;
+            if(filter->active() == false) continue;
+            debug_out  << "[" << m_timestamp << "]: Model[" << filter->id() << "]";
+            debug_out  << " [alpha = " << filter->getFilterWeight() << "]";
+            debug_out  << " Robot X: " << filter->estimate().mean(RobotModel::kstates_x);
+            debug_out  << " Robot Y: " << filter->estimate().mean(RobotModel::kstates_y);
+            debug_out  << " Robot Theta: " << filter->estimate().mean(RobotModel::kstates_heading) << endl;
         }
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
@@ -489,6 +489,8 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     IndividualStationaryObjectUpdate(fobs, time_increment);
 
     prof.split("Known Object Update");
+
+
 
     if(m_settings.pruneMethod() != LocalisationSettings::prune_none and m_settings.pruneMethod() != LocalisationSettings::prune_unknown)
     {
@@ -515,26 +517,27 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
         bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
         removeAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
         // Do Ambiguous objects.
-        AmbiguousObjectsIt currAmb(fobs->ambiguousFieldObjects.begin());
-        AmbiguousObjectsConstIt endAmb(fobs->ambiguousFieldObjects.end());
-        for(; currAmb != endAmb; ++currAmb){
-            if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
-            //std::cout << "Ambiguous object update: " << currAmb->getName() << " (" << m_robot_filters.size() << ")" << std::endl << std::flush;
-            std::vector<int> possible_ids = currAmb->getPossibleObjectIDs();
+
+        BOOST_FOREACH(AmbiguousObject& ambigous_obj, fobs->ambiguousFieldObjects)
+        {
+            if(ambigous_obj.isObjectVisible() == false) continue; // Skip objects that were not seen.
+            std::vector<int> possible_ids = ambigous_obj.getPossibleObjectIDs();
             std::vector<StationaryObject*> poss_obj;
             poss_obj.reserve(possible_ids.size());
-            for(std::vector<int>::iterator pos_it = possible_ids.begin(); pos_it != possible_ids.end(); ++pos_it)
+
+            BOOST_FOREACH(unsigned int possible_object_id, possible_ids)
             {
-                poss_obj.push_back(&(fobs->stationaryFieldObjects[(*pos_it)]));
+                poss_obj.push_back(&(fobs->stationaryFieldObjects[possible_object_id]));
             }
 
-            updateResult = ambiguousLandmarkUpdate((*currAmb), poss_obj);
+            updateResult = ambiguousLandmarkUpdate(ambigous_obj, poss_obj);
             NormaliseAlphas();
             PruneModels();
             numUpdates++;
-            if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN or currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+            if(ambigous_obj.getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN or ambigous_obj.getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
                 usefulObjectCount++;
         }
+
 #endif // MULTIPLE_MODELS_ON
         prof.split("Ambiguous Objects.");
     //#endif
@@ -598,43 +601,41 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
 void SelfLocalisation::removeAmbiguousGoalPairs(std::vector<AmbiguousObject>& ambiguousobjects, bool yellow_seen, bool blue_seen)
 {
     // Do Ambiguous objects.
-    AmbiguousObjectsIt currAmb(ambiguousobjects.begin());
-    AmbiguousObjectsConstIt endAmb(ambiguousobjects.end());
-    AmbiguousObjectsIt blueGoal = ambiguousobjects.end();
-    AmbiguousObjectsIt yellowGoal = ambiguousobjects.end();
+    AmbiguousObject* blueGoal = NULL;
+    AmbiguousObject* yellowGoal = NULL;
     bool toomanyblue = blue_seen;
     bool toomanyyellow = yellow_seen;
 
-    for(; currAmb != endAmb; ++currAmb)
+    BOOST_FOREACH(AmbiguousObject& ambiguous_object, ambiguousobjects)
     {
-        if(currAmb->isObjectVisible() == false) continue; // Skip objects that were not seen.
-        if(currAmb->getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+        if(ambiguous_object.isObjectVisible() == false) continue; // Skip objects that were not seen.
+        if(ambiguous_object.getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
         {
-            if(yellowGoal == endAmb)
+            if(yellowGoal == NULL)
             {
-                yellowGoal = currAmb;
+                yellowGoal = &ambiguous_object;
             }
             else
             {
                 toomanyyellow = true;
-                currAmb->setIsVisible(false);
+                ambiguous_object.setIsVisible(false);
             }
         }
-        if(toomanyyellow) yellowGoal->setIsVisible(false);
+        if(toomanyyellow and yellowGoal != NULL) yellowGoal->setIsVisible(false);
 
-        if(currAmb->getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+        if(ambiguous_object.getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
         {
-            if(blueGoal == endAmb)
+            if(blueGoal == NULL)
             {
-                blueGoal = currAmb;
+                blueGoal = &ambiguous_object;
             }
             else
             {
                 toomanyblue=true;
-                currAmb->setIsVisible(false);
+                ambiguous_object.setIsVisible(false);
             }
         }
-        if(toomanyblue) blueGoal->setIsVisible(false);
+        if(toomanyblue and blueGoal != NULL) blueGoal->setIsVisible(false);
     }
     return;
 }
@@ -1088,13 +1089,13 @@ void SelfLocalisation::doFallenReset()
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     // New models
-    for(std::list<IWeightedKalmanFilter*>::iterator filter_it = m_robot_filters.begin(); filter_it != m_robot_filters.end(); ++ filter_it)
+    BOOST_FOREACH(IWeightedKalmanFilter* filter, m_robot_filters)
     {
-        MultivariateGaussian est = (*filter_it)->estimate();
+        MultivariateGaussian est = filter->estimate();
         temp = est.covariance();
         temp[2][2] += 0.707*0.707;     // Robot heading
         est.setCovariance(temp);
-        (*filter_it)->initialiseEstimate(est);
+        filter->initialiseEstimate(est);
     }
 
     addToBallVariance(50*50, 50*50, 0.f, 0.f);
@@ -1662,20 +1663,20 @@ int SelfLocalisation::PruneNScan(unsigned int N)
 {
     std::vector<ParentSum> results;
     // Sum the alphas of sibling branches from a common parent at branch K-N
-    for (std::list<IWeightedKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
+    BOOST_FOREACH(IWeightedKalmanFilter* filter, m_robot_filters)
     {
-        if((*model_it)->active() == false) continue;
-        unsigned int parent_id = (*model_it)->m_parent_history_buffer.at(N);
-        float alpha = (*model_it)->getFilterWeight();
+        if(filter->active() == false) continue;
+        unsigned int parent_id = filter->m_parent_history_buffer.at(N);
+        float alpha = filter->getFilterWeight();
         bool added = false;
         if(parent_id == 0) continue;
         // Sort all of the models
-        for(std::vector<ParentSum>::iterator resIt = results.begin(); resIt != results.end(); ++resIt)
+        BOOST_FOREACH(ParentSum result, results)
         {
             // Assign to existing sum.
-            if(resIt->first == parent_id)
+            if(result.first == parent_id)
             {
-                resIt->second += alpha;
+                result.second += alpha;
                 added = true;
                 break;
             }
@@ -1694,13 +1695,13 @@ int SelfLocalisation::PruneNScan(unsigned int N)
         unsigned int bestParentId = results.back().first;       // Get the parent Id of the best branch.
 
         // Remove all siblings not created from the best branch.
-        for (std::list<IWeightedKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
+        BOOST_FOREACH(IWeightedKalmanFilter* filter, m_robot_filters)
         {
-            unsigned int parent_id = (*model_it)->m_parent_history_buffer.at(N);
+            unsigned int parent_id = filter->m_parent_history_buffer.at(N);
             if(parent_id == 0) continue;  // was not involved with this branch.
             if(parent_id != bestParentId)
             {
-                (*model_it)->setActive(false);
+                filter->setActive(false);
             }
         }
     }
@@ -1720,15 +1721,15 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
 
     MeasurementError error = calculateError(ambiguousObject);
 
-    for (std::list<IWeightedKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
+    BOOST_FOREACH(IWeightedKalmanFilter* filter, m_robot_filters)
     {
-        if((*model_it)->active() == false) continue;
+        if(filter->active() == false) continue;
         unsigned int models_added = 0;
-        for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
+        BOOST_FOREACH(StationaryObject* possible_object, possibleObjects)
         {
-            temp_object = *(*obj_it);
-            temp_object.CopyObject(ambiguousObject);
-            temp_mod = newRobotModel(*model_it, temp_object, error, ambiguousObject.getID(), GetTimestamp());
+            temp_object = *possible_object;
+            temp_object.CopyMeasurement(ambiguousObject);
+            temp_mod = newRobotModel(filter, temp_object, error, ambiguousObject.getID(), GetTimestamp());
             new_models.push_back(temp_mod);
 
             if(temp_mod->active())
@@ -1736,7 +1737,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
                 models_added++;
             }
 
-            MultivariateGaussian est = (*model_it)->estimate();
+            MultivariateGaussian est = filter->estimate();
 
 #if LOC_SUMMARY_LEVEL > 0
 
@@ -1745,7 +1746,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
 
             float expected_distance = sqrt(dX*dX + dY*dY);;
             float expected_heading = mathGeneral::normaliseAngle(atan2(dY,dX) - est.mean(2));
-            m_frame_log << "Model [" << (*model_it)->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
+            m_frame_log << "Model [" << filter->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string(possible_object->getName());
             m_frame_log << " exp (" << expected_distance << ", " << expected_heading << ")  Result: ";
             if(temp_mod->active())
             {
@@ -1759,14 +1760,14 @@ int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguo
 #endif
         }
         removeInactiveModels(new_models);
-//        if(models_added)
-//        {
-//            (*model_it)->setActive(false);
-//        }
-//        else
-//        {
-            (*model_it)->setFilterWeight(outlier_factor * (*model_it)->getFilterWeight());
-//        }
+        if(models_added)
+        {
+            filter->setActive(false);
+        }
+        else
+        {
+            filter->setFilterWeight(outlier_factor * filter->getFilterWeight());
+        }
     }
     if(new_models.size() > 0)
     {
@@ -1807,9 +1808,9 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
         //! TODO: The FOV of the camera should NOT be hard-coded!
         poss_objects = filterToVisible(position, possibleObjects, headYaw, 0.81f);
 
-        for(std::vector<StationaryObject*>::const_iterator obj_it = poss_objects.begin(); obj_it != poss_objects.end(); ++obj_it)
+        BOOST_FOREACH(StationaryObject* object, poss_objects)
         {
-            temp_object = *(*obj_it);
+            temp_object = *object;
             temp_object.CopyObject(ambiguousObject);
             temp_mod = newRobotModel(curr_model, temp_object, error, ambiguousObject.getID(), GetTimestamp());
             new_models.push_back(temp_mod);
@@ -1817,7 +1818,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
                 models_added++;
 
 #if LOC_SUMMARY_LEVEL > 0
-            m_frame_log << "Model [" << curr_model->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string((*obj_it)->getName());
+            m_frame_log << "Model [" << curr_model->id() << " - > " << temp_mod->id() << "] Ambiguous object update: " << std::string(object->getName());
             m_frame_log << "  Result: " << (temp_mod->active() ? "Valid update" : "Outlier");
             if(temp_mod->active())
             {
@@ -1880,40 +1881,40 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
             std::list<IWeightedKalmanFilter*> new_models;
             IWeightedKalmanFilter* temp_model = NULL;
 
-            for (std::list<IWeightedKalmanFilter*>::iterator model_it = m_robot_filters.begin(); model_it != m_robot_filters.end(); ++model_it)
+            BOOST_FOREACH(IWeightedKalmanFilter* filter, m_robot_filters)
             {
                 // Get the id of the object to use for the update.
-                unsigned int object_id = (*model_it)->previousSplitOption(ambiguousObject);
+                unsigned int object_id = filter->previousSplitOption(ambiguousObject);
                 // Find the option that matches the previous decision
-                for(std::vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
+                BOOST_FOREACH(StationaryObject* option, possibleObjects)
                 {
-                    if((*obj_it)->getID() == object_id)
+                    if(option->getID() == object_id)
                     {
                         // Perform the update
-                        StationaryObject update_object(*(*obj_it));
+                        StationaryObject update_object(*option);
                         update_object.CopyMeasurement(ambiguousObject);
-                        temp_model = newRobotModel((*model_it), update_object, error, ambiguousObject.getID(), GetTimestamp());
+                        temp_model = newRobotModel(filter, update_object, error, ambiguousObject.getID(), GetTimestamp());
                         new_models.push_back(temp_model);  // add the model to the new list.
                         if(temp_model->active())
                         {
-                            (*model_it)->setActive(false); // disable the old model.
+                            filter->setActive(false); // disable the old model.
                         }
                         else
                         {
-                            (*model_it)->setFilterWeight(outlier_factor * (*model_it)->getFilterWeight());
+                            filter->setFilterWeight(outlier_factor * filter->getFilterWeight());
                         }
                     }
                 }
                 // Check if model has been updated yet
                 // If not need to do a exhaustive update for this model
-                if((*model_it)->active())
+                if(filter->active())
                 {
                     bool update_performed = false;
-                    for(vector<StationaryObject*>::const_iterator option_it = possibleObjects.begin(); option_it != possibleObjects.end(); ++option_it)
+                    BOOST_FOREACH(StationaryObject* option, possibleObjects)
                     {
-                        StationaryObject update_object(*(*option_it));
+                        StationaryObject update_object(*option);
                         update_object.CopyMeasurement(ambiguousObject);
-                        temp_model = newRobotModel((*model_it), update_object, error, ambiguousObject.getID(), GetTimestamp());
+                        temp_model = newRobotModel(filter, update_object, error, ambiguousObject.getID(), GetTimestamp());
                         new_models.push_back(temp_model);
                         if(temp_model->active())
                         {
@@ -1922,7 +1923,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
                     }
                     if(update_performed)
                     {
-                        (*model_it)->setActive(false);
+                        filter->setActive(false);
                     }
                 }
             }
@@ -2530,9 +2531,9 @@ std::istream& operator>> (std::istream& input, SelfLocalisation& p_loc)
  */
 void SelfLocalisation::clearModels()
 {
-    for(std::list<IWeightedKalmanFilter*>::iterator loc_it = m_robot_filters.begin(); loc_it != m_robot_filters.end(); ++loc_it)
+    BOOST_FOREACH(IWeightedKalmanFilter* filter, m_robot_filters)
     {
-        delete (*loc_it);
+        delete filter;
     }
     m_robot_filters.clear();
 }
@@ -2556,27 +2557,27 @@ void SelfLocalisation::removeSimilarModels()
     const float min_trans_dist = 5;
     const float min_head_dist = 0.01;
 
-    for(std::list<IWeightedKalmanFilter*>::iterator iter1 = m_robot_filters.begin(); iter1 != m_robot_filters.end(); ++iter1)
+    BOOST_FOREACH(IWeightedKalmanFilter* filterA, m_robot_filters)
     {
-        if(!(*iter1)->active()) continue;
-        for(std::list<IWeightedKalmanFilter*>::iterator iter2 = m_robot_filters.begin(); iter2 != m_robot_filters.end(); ++iter2)
+        if(!filterA->active()) continue;
+        BOOST_FOREACH(IWeightedKalmanFilter* filterB, m_robot_filters)
         {
-            if(!(*iter2)->active()) continue;
-            if(iter1 == iter2) continue;    // don't compare the same models.
-            float trans_dist = translation_distance((*iter1)->estimate(), (*iter2)->estimate());
-            float head_dist = heading_distance((*iter1)->estimate(), (*iter2)->estimate());
+            if(!filterB->active()) continue;
+            if(filterA == filterB) continue;    // don't compare the same models.
+            float trans_dist = translation_distance(filterA->estimate(), filterB->estimate());
+            float head_dist = heading_distance(filterA->estimate(), filterB->estimate());
             if( (trans_dist < min_trans_dist) and (head_dist < min_head_dist))
             {
-                float total_alpha = (*iter1)->getFilterWeight() + (*iter2)->getFilterWeight();
-                if((*iter1)->getFilterWeight() < (*iter2)->getFilterWeight())
+                float total_alpha = filterA->getFilterWeight() + filterB->getFilterWeight();
+                if(filterA->getFilterWeight() < filterB->getFilterWeight())
                 {
-                    (*iter1)->setActive(false);
-                    (*iter2)->setFilterWeight(total_alpha);
+                    filterA->setActive(false);
+                    filterB->setFilterWeight(total_alpha);
                 }
                 else
                 {
-                    (*iter1)->setFilterWeight(total_alpha);
-                    (*iter2)->setActive(false);
+                    filterA->setFilterWeight(total_alpha);
+                    filterB->setActive(false);
                 }
             }
         }
@@ -2602,19 +2603,19 @@ void SelfLocalisation::InitialiseModels(const std::vector<MultivariateGaussian>&
 #if LOC_SUMMARY_LEVEL > 0
     m_frame_log << "Intitialising models." << std::endl;
     m_frame_log << "Positions:" << std::endl;
-    for (std::vector<MultivariateGaussian>::const_iterator pos_it = positions.begin(); pos_it != positions.end(); ++pos_it)
+    BOOST_FOREACH(MultivariateGaussian estimate, positions)
     {
-        m_frame_log << "(" << (*pos_it).mean(RobotModel::kstates_x) << "," << (*pos_it).mean(RobotModel::kstates_y) << "," << (*pos_it).mean(RobotModel::kstates_heading);
-        m_frame_log << ") - (" << (*pos_it).sd(RobotModel::kstates_x) << "," << (*pos_it).sd(RobotModel::kstates_y) << "," << (*pos_it).sd(RobotModel::kstates_heading) << std::endl;
+        m_frame_log << "(" << estimate.mean(RobotModel::kstates_x) << "," << estimate.mean(RobotModel::kstates_y) << "," << estimate.mean(RobotModel::kstates_heading);
+        m_frame_log << ") - (" << estimate.sd(RobotModel::kstates_x) << "," << estimate.sd(RobotModel::kstates_y) << "," << estimate.sd(RobotModel::kstates_heading) << std::endl;
     }
 #endif
 
-    for (std::vector<MultivariateGaussian>::const_iterator pos = positions.begin(); pos != positions.end(); pos++)
+    BOOST_FOREACH(MultivariateGaussian estimate, positions)
     {
         filter = newRobotModel();
         filter->setFilterWeight(split_alpha);
         filter->setActive(true);
-        filter->initialiseEstimate(*pos);
+        filter->initialiseEstimate(estimate);
         m_robot_filters.push_back(filter);
     }
     return;
@@ -2885,16 +2886,16 @@ vector<StationaryObject*> SelfLocalisation::filterToVisible(const Self& location
     vector<StationaryObject*> result;
     result.reserve(possibleObjects.size());
 
-    for(vector<StationaryObject*>::const_iterator obj_it = possibleObjects.begin(); obj_it != possibleObjects.end(); ++obj_it)
+    BOOST_FOREACH(StationaryObject* possible_object, possibleObjects)
     {
-        float obj_heading = location.CalculateBearingToStationaryObject(*(*obj_it));
+        float obj_heading = location.CalculateBearingToStationaryObject(*possible_object);
         // Calculate the distance from the viewing direction to the object.
         float delta_angle = mathGeneral::normaliseAngle(obj_heading - c_view_direction);
 
         // If the distance to the object heading is within the viewing range the object may be seen,
         if(fabs(delta_angle) < c_view_range)
         {
-            result.push_back(*obj_it);
+            result.push_back(possible_object);
         }
     }
     return result;
