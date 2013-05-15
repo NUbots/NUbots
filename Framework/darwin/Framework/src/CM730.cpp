@@ -561,12 +561,14 @@ unsigned char CM730::CalculateChecksum(unsigned char *packet)
     return (~checksum);
 }
 
-int CM730::BulkRead()
+bool CM730::BulkRead(int* out_error_code)
 {
     unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
 
     // Note: This can be skipped if no errors have occured, and all sensors are
     //       responding for appropriately many consecutive reads.
+    //       (at the time of writing, however, this call is comparatively
+    //        inexpensive)
     sensor_read_manager_->MakeBulkReadPacket(bulk_read_tx_packet_);
 
     // Perform the read operation from the CM730.
@@ -574,11 +576,14 @@ int CM730::BulkRead()
     //  { SUCCESS, TX_CORRUPT, TX_FAIL, RX_FAIL, RX_TIMEOUT, RX_CORRUPT }
     int bulk_read_error_code = TxRxPacket(bulk_read_tx_packet_, rxpacket, 0);
     
-    bool error_occurred = sensor_read_manager_->ProcessBulkReadErrors(
+    if(out_error_code != NULL)
+        *out_error_code = bulk_read_error_code;
+
+    bool significant_error_occurred = sensor_read_manager_->ProcessBulkReadErrors(
         bulk_read_error_code,
         bulk_read_data_);
 
-    return error_occurred;
+    return significant_error_occurred;
 }
 
 int CM730::SyncWrite(int start_addr, int each_length, int number, int *pParam)

@@ -318,7 +318,7 @@ void MotionManager::Process()
 #endif
     }
 
-    m_CM730->BulkRead();
+    m_CM730->BulkRead(NULL);
 
     if(m_IsLogging)
     {

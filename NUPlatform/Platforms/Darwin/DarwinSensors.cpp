@@ -124,19 +124,52 @@ void DarwinSensors::copyFromHardwareCommunications()
     
     // 2. Read data in bulk from the CM730 controller board 
     //    (i.e. read all sensor and motor data for the next iteration)
-    int debug_count = 0;
-    while(cm730->BulkRead())
+    //    Note: Repeating the bulk read on failure doesn't appear to benefit
+    //          the function of the robot much.
+    // int debug_count = 0;
+    // while(cm730->BulkRead())
+    // {
+    //     std::cout << "Repeat: " << ++debug_count << ";" << std::endl;
+    static bool last_read_was_successful = false;
+    int bulk_read_error_code = 0;
+    bool significant_bulk_read_error_occurred = cm730->BulkRead(&bulk_read_error_code);
+    
+    if(bulk_read_error_code == Robot::CM730::SUCCESS)
     {
-        std::cout << "Repeat: " << ++debug_count << ";" << std::endl;
-        // std::vector<int> failing_sensors;
-        // sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
-        // std::cout << "The following sensors are performing badly:" << std::endl;
-        // for (std::vector<int>::iterator it = failing_sensors.begin(); 
-        //     it != failing_sensors.end(); ++it)
-        // {
-        //     int sensor_id = *it;
-        //     sensor_read_manager_->PrintSensorResponseRate(sensor_id);
-        // }
+        if(!last_read_was_successful)
+        {
+            std::cout   << "Reads from all sensors are succeeding!"
+                        << std::endl;
+        }
+
+        last_read_was_successful = true;
+    }
+
+    if(significant_bulk_read_error_occurred)
+    {
+        last_read_was_successful = false;
+
+        bool is_reset_state = sensor_read_manager_->CheckForCM730ResetState();
+        if(is_reset_state)
+        {
+            std::cout   << "Reads from all sensors are failing!"
+                        << "(did you press the reset button?)" 
+                        << std::endl;
+        }
+        else
+        {
+            std::vector<int> failing_sensors;
+            sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
+            std::cout << "The following "
+                      << failing_sensors.size()
+                      << " sensors may be disconnected:" << std::endl;
+            for (std::vector<int>::iterator it = failing_sensors.begin();
+                it != failing_sensors.end(); ++it)
+            {
+                int sensor_id = *it;
+                sensor_read_manager_->PrintSensorResponseRate(sensor_id);
+            }
+        }
     }
 }
 
