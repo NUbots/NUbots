@@ -153,7 +153,7 @@ void DarwinSensors::copyFromHardwareCommunications()
         if(is_reset_state)
         {
             std::cout   << "Reads from all sensors are failing!"
-                        << "(did you press the reset button?)" 
+                        << " (did you press the reset button?)" 
                         << std::endl;
         }
         else

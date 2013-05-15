@@ -255,7 +255,8 @@ bool SensorReadManager::CheckSensorBulkReadErrors(
         // since repeating the bulk read indefinitely will freeze the robot.
         // i.e. only report errors in sensors with HIGH response rates.
         // if(response_rate > 0.5)
-        if(consecutive_errors > 0 && consecutive_errors < 3)
+        // if(consecutive_errors > 0 && consecutive_errors < 3)
+        if(consecutive_errors == 1)
             error_is_significant = true;
 
         // errorlog << "Motor error: " << endl;
