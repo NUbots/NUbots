@@ -207,16 +207,18 @@ HEADERS += ui_mainwindow.h \
     ../ConfigSystem/ConfigTree.h \
     ../ConfigSystem/Configurable.h \
     ../Localisation/Filters/IKalmanFilter.h \
-    ../Localisation/Filters/SeqUKF.h \
     ../Localisation/Filters/IKFModel.h \
     ../Localisation/Filters/MobileObjectModel.h \
     ../Localisation/Filters/RobotModel.h \
     ../Localisation/Filters/KFBuilder.h \
-    ../Localisation/Filters/BasicUKF.h \
-    ../Localisation/Filters/SrBasicUKF.h \
-    ../Localisation/Filters/SrSeqUKF.h \
     BatchSelectDialog.h \
-    SensorCalibrationWidget.h
+    SensorCalibrationWidget.h \
+    ../Localisation/Filters/WBasicUKF.h \
+    ../Localisation/Filters/WSeqUKF.h \
+    ../Localisation/Filters/SeqUKF.h \
+    ../Localisation/Filters/WSrSeqUKF.h \
+    ../Localisation/Filters/WSrBasicUKF.h \
+    ../Localisation/Filters/IMUModel.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -356,15 +358,17 @@ SOURCES += mainwindow.cpp \
     ../ConfigSystem/ConfigStorageManager.cpp \
     ../ConfigSystem/ConfigTree.cpp \
     ../ConfigSystem/Configurable.cpp \
-    ../Localisation/Filters/SeqUKF.cpp \
     ../Localisation/Filters/MobileObjectModel.cpp \
     ../Localisation/Filters/RobotModel.cpp \
     ../Localisation/Filters/KFBuilder.cpp \
-    ../Localisation/Filters/BasicUKF.cpp \
-    ../Localisation/Filters/SrBasicUKF.cpp \
-    ../Localisation/Filters/SrSeqUKF.cpp \
     BatchSelectDialog.cpp \
-    SensorCalibrationWidget.cpp
+    SensorCalibrationWidget.cpp \
+    ../Localisation/Filters/WBasicUKF.cpp \
+    ../Localisation/Filters/WSeqUKF.cpp \
+    ../Localisation/Filters/SeqUKF.cpp \
+    ../Localisation/Filters/WSrSeqUKF.cpp \
+    ../Localisation/Filters/WSrBasicUKF.cpp \
+    ../Localisation/Filters/IMUModel.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
