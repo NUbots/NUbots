@@ -422,6 +422,7 @@ void MainWindow::createConnections()
     // Connect to log file reader
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),virtualRobot, SLOT(setSensorData(NUSensorsData*)));
+    connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorCalibrationTool, SLOT(setSensorData(NUSensorsData*)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),offlinelocDialog,SLOT(SetFrame(int,int)));
     connect(LogReader,SIGNAL(ObjectDataChanged(const FieldObjects*)),objectDisplayLog, SLOT(setObjectData(const FieldObjects*)));
@@ -437,7 +438,6 @@ void MainWindow::createConnections()
 
     connect(LogReader,SIGNAL(cameraChanged(int)),virtualRobot, SLOT(setCamera(int)));
     connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)),virtualRobot, SLOT(setRawImage(const NUImage*)));
-    //connect(LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),virtualRobot, SLOT(processVisionFrame()));
 
     connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)), this, SLOT(updateSelection()));
@@ -448,6 +448,7 @@ void MainWindow::createConnections()
     connect(VisionStreamer,SIGNAL(rawImageChanged(const NUImage*)),virtualRobot, SLOT(processVisionFrame()));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
+    connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorCalibrationTool, SLOT(setSensorData(NUSensorsData*)));
     // Setup navigation control enabling/disabling
     connect(LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
     connect(LogReader,SIGNAL(nextFrameAvailable(bool)),nextFrameAction, SLOT(setEnabled(bool)));
@@ -891,6 +892,7 @@ void MainWindow::SelectPixel(int x, int y)
         statusBar()->showMessage(message, 10000);
         classification->setColour(tempPixel);
     }
+    sensorCalibrationTool->select_pixel(x,y);
 }
 
 void MainWindow::ClassifySelectedColour()
