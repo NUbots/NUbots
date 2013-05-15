@@ -329,9 +329,9 @@ void OpenglManager::writeClassImageToDisplay(ClassifiedImage* newImage, GLDispla
         imageLine = (QRgb*)image.scanLine(y);
         for (int x=0; x < width; x++)
         {
-            alpha = 255;
             tempIndex = newImage->image[y][x];
             if(tempIndex == Vision::unclassified) alpha = 0;
+            else alpha = 255;
             Vision::getColourAsRGB(Vision::getColourFromIndex(tempIndex), r, g, b);
             imageLine[x] = qRgba(r,g,b,alpha);
         }
@@ -1015,13 +1015,18 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
     const float fov_vertical = 46.0;
 
     // Varibles for orientations.
-    float camera_pitch = 0.698;
-    float camera_yaw = 0.f;
-    float camera_roll = 0.f;
+    float camera_roll = calibration->camera_roll_offset;
+    float camera_pitch = calibration->camera_pitch_offset;
+    float camera_yaw = calibration->camera_yaw_offset;
 
-    float body_pitch = 0.f;
+    float head_roll = 0.f;
+    float head_pitch = 0.f;
+    float head_yaw = 0.f;
+
+    float body_roll = calibration->body_roll_offset;
+    float body_pitch = calibration->body_pitch_offset;
     float body_yaw = 0.f;
-    float body_roll = 0.f;
+
 
     // OpenGL coordinate system:
     // x is horizontal going from left to right
@@ -1041,9 +1046,10 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
 
     // Offsets for rotations to change from OpenGL coords to Robot coords.
     // These are hard-coded since they are the conversion from opengl to standard robot coordinated.
+    const float roll_offset = 0.f;
     const float pitch_offset = -90;
     const float yaw_offset = -90.f;
-    const float roll_offset = 0.f;
+
 
     // Camera offset values. (These should not be hard-coded since they differ per robot type)
     const float camera_x_offset = 3.32f;
@@ -1057,23 +1063,32 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
 
     // Get the sensor information.
     float temp = 0.f;   // temp variable for fetching sensor values.
+    std::vector<float> temp_vec;
     if(SensorData)  // Check if sensor data is available
     {
-        // Camera pitch
+        // Head pitch
         if(SensorData->getPosition(NUSensorsData::HeadPitch, temp))
         {
-            camera_pitch += temp;
+            head_pitch += temp;
         }
-        // Camera yaw
+        // Head yaw
         if(SensorData->getPosition(NUSensorsData::HeadYaw, temp))
         {
-            camera_yaw += temp;
+            head_yaw += temp;
         }
-        // Camera roll - Our robots do not have thus at the moment.
+        // Head roll - Our robots do not have thus at the moment.
         if(SensorData->getPosition(NUSensorsData::HeadRoll, temp))
         {
-            camera_roll += temp;
+            head_roll += temp;
         }
+//        if(SensorData->getOrientation(temp_vec))
+//        {
+//            body_roll += temp_vec[0];
+//            body_pitch += temp_vec[1];
+//            body_yaw += temp_vec[2];
+
+//            std::cout << body_roll << ", " << body_pitch << ", " << body_yaw << std::endl;
+//        }
         // Camera Height
 //        if(SensorData->getCameraHeight(temp))
 //        {
@@ -1103,20 +1118,26 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
     glRotatef(yaw_offset, 0.f, 0.f, 1.0f);
     glRotatef(roll_offset, 0.f, 1.f, 0.f);
 
+    // Apply camera orientation
+    glRotatef(mathGeneral::rad2deg(camera_pitch), 0.f, 1.f, 0.f);    //  Pitch
+    glRotatef(mathGeneral::rad2deg(camera_yaw), 0.f, 0.f, -1.f);   //  Yaw
+    glRotatef(mathGeneral::rad2deg(camera_roll), 1.f, 0.f, 0.f);   //  Roll
+
+    // Apply camera to neck translation
     glTranslatef(camera_x_offset, camera_y_offset, -camera_z_offset);
 
-    // Apply camera orientation
-    glRotatef(mathGeneral::rad2deg(camera_pitch + calibration->camera_pitch_offset), 0.f, 1.f, 0.f);    //  Pitch
-    glRotatef(mathGeneral::rad2deg(camera_yaw + calibration->camera_yaw_offset), 0.f, 0.f, -1.f);   //  Yaw
-    glRotatef(mathGeneral::rad2deg(camera_roll + calibration->camera_roll_offset), 1.f, 0.f, 0.f);   //  Roll
+    // Apply head orientation
+    glRotatef(mathGeneral::rad2deg(head_pitch), 0.f, 1.f, 0.f);    //  Pitch
+    glRotatef(mathGeneral::rad2deg(head_yaw), 0.f, 0.f, -1.f);   //  Yaw
+    glRotatef(mathGeneral::rad2deg(head_roll), 1.f, 0.f, 0.f);   //  Roll
 
     // Apply translation for body
     glTranslatef(body_x_offset, body_y_offset, -body_z_offset);
 
     // Apply Body Orientation
-    glRotatef(mathGeneral::rad2deg(body_pitch+calibration->body_pitch_offset), 0.f, 1.f, 0.f);     // Pitch
+    glRotatef(mathGeneral::rad2deg(body_pitch), 0.f, 1.f, 0.f);     // Pitch
     glRotatef(mathGeneral::rad2deg(body_yaw), 0.f, 0.f, -1.f);     // Yaw
-    glRotatef(mathGeneral::rad2deg(body_roll+calibration->body_roll_offset), 1.f, 0.f, 0.f);   // Roll
+    glRotatef(mathGeneral::rad2deg(body_roll), 1.f, 0.f, 0.f);   // Roll
 
     // Apply the robot heading
     glRotatef(mathGeneral::rad2deg(calibration->location_orientation), 0.f, 0.f, -1.f);
@@ -1134,5 +1155,8 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
     // Save as a layer and emit the change.
     createDrawTextureImage(image, displayId);
     emit updatedDisplay(displayId, displays[displayId], width, height);
+
+
+
     return;
 }
