@@ -33,6 +33,10 @@ Autoconfig/*
 # ignore Qt builds
 Vision*-build*/*
 /Vision/Vision.pro.user
+/Vision/Makefile
+/Vision/*.app
+/Vision/moc_*
+/Vision/ui_*
 NUView-build*/*
 /NUView/debug/*
 /NUView/release/*
