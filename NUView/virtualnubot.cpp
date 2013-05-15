@@ -169,13 +169,13 @@ void virtualNUbot::processVisionFrame(const NUImage* image)
 
         generateClassifiedImage();
 
-        QImage* canvas = new QImage(image->getWidth(), image->getHeight(), QImage::Format_ARGB32);
+//        QImage* canvas = new QImage(image->getWidth(), image->getHeight(), QImage::Format_ARGB32);
 
-        //Blank canvas - zero alpha (transparent)
-        for (int x = 0; x < canvas->width(); x++)
-            for(int y = 0; y < canvas->height(); y++)
-                canvas->setPixel(x,y,0);
-        emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
+//        //Blank canvas - zero alpha (transparent)
+//        for (int x = 0; x < canvas->width(); x++)
+//            for(int y = 0; y < canvas->height(); y++)
+//                canvas->setPixel(x,y,0);
+//        emit edgeFilterChanged(*canvas, GLDisplay::EdgeFilter);
 
 //        float datavalue = 0.0;
 //        sensorsData->get(NUSensorsData::HeadPitch,datavalue);
