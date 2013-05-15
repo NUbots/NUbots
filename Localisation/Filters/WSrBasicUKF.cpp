@@ -1,59 +1,45 @@
-#include "SrBasicUKF.h"
+#include "WSrBasicUKF.h"
 #include "Tools/Math/General.h"
 #include "IKFModel.h"
 #include <sstream>
 
-SrBasicUKF::SrBasicUKF(IKFModel *model): IWeightedKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
+WSrBasicUKF::WSrBasicUKF(IKFModel *model): IWeightedKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
 {
     init();
 }
 
-SrBasicUKF::SrBasicUKF(const SrBasicUKF& source): IWeightedKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
+WSrBasicUKF::WSrBasicUKF(const WSrBasicUKF& source): IWeightedKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
     init();
     m_filter_weight = source.m_filter_weight;
 }
 
-SrBasicUKF::~SrBasicUKF()
+WSrBasicUKF::~WSrBasicUKF()
 {
 }
 
-void SrBasicUKF::init()
+void WSrBasicUKF::init()
 {
-    CalculateWeights();
     Matrix covariance = m_estimate.covariance();
     covariance[0][0] = 1;
     covariance[1][1] = 1;
     covariance[2][2] = 1;
     m_estimate.setCovariance(covariance);
     initialiseEstimate(m_estimate);
-    m_outlier_filtering_enabled = false;
     m_weighting_enabled = false;
-    m_outlier_threshold = 15.f;
     m_filter_weight = 1.f;
-}
 
-void SrBasicUKF::CalculateWeights()
-{
-    const unsigned int totalWeights = m_unscented_transform.totalSigmaPoints();
-
-    // initialise to correct sizes. These are row vectors.
-    m_mean_weights = Matrix(1, totalWeights, false);
-    m_covariance_weights = Matrix(1, totalWeights, false);
-    m_sqrt_covariance_weights = Matrix(1, totalWeights, false);
-
-    // Calculate the weights.
-    for (unsigned int i = 0; i < totalWeights; ++i)
+    m_sqrt_covariance_weights = Matrix(m_unscented_transform.covarianceWeights());
+    for(unsigned int m = 0; m < m_sqrt_covariance_weights.getm(); ++m)
     {
-        m_mean_weights[0][i] = m_unscented_transform.Wm(i);
-        m_covariance_weights[0][i] = m_unscented_transform.Wc(i);
-        m_sqrt_covariance_weights[0][i] = sqrt(fabs(m_covariance_weights[0][i]));
+        for(unsigned int n = 0; n < m_sqrt_covariance_weights.getm(); ++n)
+        {
+            m_sqrt_covariance_weights[m][n] = sqrt(m_sqrt_covariance_weights[m][n]);
+        }
     }
-
-    return;
 }
 
-Matrix SrBasicUKF::GenerateSigmaPoints() const
+Matrix WSrBasicUKF::GenerateSqrtSigmaPoints() const
 {
     const unsigned int numPoints = m_unscented_transform.totalSigmaPoints();
     const Matrix current_mean = m_estimate.mean();
@@ -72,33 +58,12 @@ Matrix SrBasicUKF::GenerateSigmaPoints() const
     return points;
 }
 
-Matrix SrBasicUKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
-{
-    return sigmaPoints * m_mean_weights.transp();
-}
 
-Matrix SrBasicUKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const
-{
-    const unsigned int numPoints = m_unscented_transform.totalSigmaPoints();
-    const unsigned int numStates = m_estimate.totalStates();
-    Matrix covariance(numStates, numStates, false);  // Blank covariance matrix.
-    Matrix diff;
-    float weightsum = 0;
-    for(unsigned int i = 0; i < numPoints; ++i)
-    {
-        const double weight = m_covariance_weights[0][i];
-        weightsum += weight;
-        diff = sigmaPoints.getCol(i) - mean;
-        covariance = covariance + weight*diff*diff.transp();
-    }
-    return covariance;
-}
-
-bool SrBasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix& process_noise, const Matrix& measurement_noise)
+bool WSrBasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix& process_noise, const Matrix& measurement_noise)
 {
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
     // Calculate the current sigma points, and write to member variable.
-    Matrix sigma_points = GenerateSigmaPoints();
+    Matrix sigma_points = GenerateSqrtSigmaPoints();
 
     Matrix current_point; // temporary storage.
 
@@ -110,7 +75,7 @@ bool SrBasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Mat
     }
 
     // Calculate the new mean and covariance values.
-    Matrix predicted_mean = CalculateMeanFromSigmas(sigma_points);
+    Matrix predicted_mean = m_unscented_transform.CalculateMeanFromSigmas(sigma_points);
     //Matrix predicted_covariance = CalculateCovarianceFromSigmas(sigma_points, predicted_mean) + process_noise;
 
     Matrix centre_x = predicted_mean;//sigma_points.getCol(0);
@@ -127,7 +92,7 @@ bool SrBasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Mat
     Matrix Sy = QR_Householder(concat.transp());
 
     Matrix U0 = m_sqrt_covariance_weights[0][0] * (sigma_points.getCol(0)-centre_x);
-    Sy = CholeskyUpdate(Sy, U0, mathGeneral::sign(m_covariance_weights[0][0]));
+    Sy = CholeskyUpdate(Sy, U0, mathGeneral::sign(m_unscented_transform.Wc(0)));
 
     // Set the new mean and covariance values.
     Matrix predicted_covariance = Sy * Sy.transp();
@@ -139,13 +104,13 @@ bool SrBasicUKF::timeUpdate(double delta_t, const Matrix& measurement, const Mat
     return true;
 }
 
-bool SrBasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, const Matrix& args, unsigned int type)
+bool WSrBasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, const Matrix& args, unsigned int type)
 {
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
     const unsigned int numStates = m_model->totalStates();
     const unsigned int totalMeasurements = measurement.getm();
 
-    Matrix sigma_points = GenerateSigmaPoints();
+    Matrix sigma_points = GenerateSqrtSigmaPoints();
     Matrix sigma_mean = m_estimate.mean();
 
     Matrix current_point; // temporary storage.
@@ -161,14 +126,16 @@ bool SrBasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& nois
     Matrix sqrt_noise = cholesky(noise).transp();
 
     // Now calculate the mean of these measurement sigmas.
-    Matrix Ymean = CalculateMeanFromSigmas(Yprop);
+    Matrix Ymean = m_unscented_transform.CalculateMeanFromSigmas(Yprop);
 
     Matrix Pxy(numStates, totalMeasurements, false); // initialised as 0
+
+    const Matrix cov_weights = m_unscented_transform.covarianceWeights();
 
     // Calculate the Pyy and Pxy variance matrices.
     for(unsigned int i = 0; i < total_points; ++i)
     {
-        double weight = m_covariance_weights[0][i];
+        double weight = cov_weights[0][i];
         // store difference between prediction and measurement.
         current_point = Yprop.getCol(i) - Ymean;
         // Cross correlation matrix
@@ -185,7 +152,7 @@ bool SrBasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& nois
     Matrix concat = horzcat(Ydif, sqrt_noise);
 
     Matrix Sy = QR_Householder(concat.transp());
-    Sy = CholeskyUpdate(Sy, m_sqrt_covariance_weights[0][0]*(Yprop.getCol(0) - Ymean), mathGeneral::sign(m_covariance_weights[0][0]));
+    Sy = CholeskyUpdate(Sy, m_sqrt_covariance_weights[0][0]*(Yprop.getCol(0) - Ymean), mathGeneral::sign(cov_weights[0][0]));
 
     const Matrix innovation = m_model->measurementDistance(measurement, Ymean, type);
     // Check for outlier, if outlier return without updating estimate.
@@ -209,7 +176,7 @@ bool SrBasicUKF::measurementUpdate(const Matrix& measurement, const Matrix& nois
     return true;
 }
 
-void SrBasicUKF::initialiseEstimate(const MultivariateGaussian& estimate)
+void WSrBasicUKF::initialiseEstimate(const MultivariateGaussian& estimate)
 {
     // This is pretty simple.
     // Assign the estimate.
@@ -218,12 +185,7 @@ void SrBasicUKF::initialiseEstimate(const MultivariateGaussian& estimate)
     return;
 }
 
-const MultivariateGaussian& SrBasicUKF::estimate() const
-{
-    return m_estimate;
-}
-
-bool SrBasicUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance)
+bool WSrBasicUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance)
 {
     if(!m_outlier_filtering_enabled and !m_weighting_enabled) return true;
 
@@ -245,7 +207,7 @@ bool SrBasicUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& est
     return true;
 }
 
-std::string SrBasicUKF::summary(bool detailed) const
+std::string WSrBasicUKF::summary(bool detailed) const
 {
     std::stringstream str_strm;
     str_strm << "ID: " << m_id <<  " Weight: " << m_filter_weight << std::endl;
@@ -253,7 +215,7 @@ std::string SrBasicUKF::summary(bool detailed) const
     return str_strm.str();
 }
 
-std::ostream& SrBasicUKF::writeStreamBinary (std::ostream& output) const
+std::ostream& WSrBasicUKF::writeStreamBinary (std::ostream& output) const
 {
     m_model->writeStreamBinary(output);
     m_unscented_transform.writeStreamBinary(output);
@@ -261,13 +223,13 @@ std::ostream& SrBasicUKF::writeStreamBinary (std::ostream& output) const
     return output;
 }
 
-std::istream& SrBasicUKF::readStreamBinary (std::istream& input)
+std::istream& WSrBasicUKF::readStreamBinary (std::istream& input)
 {
     m_model->readStreamBinary(input);
     m_unscented_transform.readStreamBinary(input);
+    init();
     MultivariateGaussian temp;
     temp.readStreamBinary(input);
-    CalculateWeights();
     initialiseEstimate(temp);
     return input;
 }

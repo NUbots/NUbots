@@ -24,6 +24,7 @@
 
 #pragma once
 #include <iostream>
+#include "Tools/Math/Matrix.h"
 
 class UnscentedTransform
 {
@@ -39,7 +40,10 @@ public:
      * @param beta the beta variable. This is used to incorporate prior knowledge of the distribution. For gaussian distributions 2 is optimal.
      */
     UnscentedTransform(unsigned int L, double alpha=1e-2, double kappa=0.f, double beta=2.f): m_L(L), m_alpha(alpha), m_kappa(kappa), m_beta(beta)
-    {m_lambda = lambda();}
+    {
+        m_lambda = lambda();
+        CalculateWeights();
+    }
 
     UnscentedTransform(const UnscentedTransform& source)
     {
@@ -48,9 +52,10 @@ public:
         m_kappa = source.m_kappa;
         m_beta = source.m_beta;
         m_lambda = source.m_lambda;
+        m_mean_weights = source.m_mean_weights;
+        m_covariance_weights = source.m_covariance_weights;
     }
 
-    
     /*!
      * @brief Function used to set the Unscented transform parameters.
      *
@@ -155,6 +160,75 @@ public:
         return m_L + m_lambda;
     }
 
+    const Matrix& meanWeights() const
+    {
+        return m_mean_weights;
+    }
+
+    const Matrix& covarianceWeights() const
+    {
+        return m_covariance_weights;
+    }
+
+    // Functions for performing steps of the UKF algorithm.
+    void CalculateWeights()
+    {
+        const unsigned int totalWeights = totalSigmaPoints();
+
+        // initialise to correct sizes. These are row vectors.
+        m_mean_weights = Matrix(totalWeights, 1,  false);
+        m_covariance_weights = Matrix(1, totalWeights, false);
+
+        // Calculate the weights.
+        for (unsigned int i = 0; i < totalWeights; ++i)
+        {
+            m_mean_weights[i][0] = Wm(i);
+            m_covariance_weights[0][i] = Wc(i);
+        }
+        return;
+    }
+
+    Matrix GenerateSigmaPoints(const Matrix& mean, const Matrix& covariance) const
+    {
+        const unsigned int numPoints = totalSigmaPoints();
+        const Matrix current_mean = mean;
+        const unsigned int num_states = mean.getm();
+        Matrix points(num_states, numPoints, false);
+
+        points.setCol(0, current_mean); // First sigma point is the current mean with no deviation
+        Matrix weightedCov = covarianceSigmaWeight() * covariance;
+        Matrix sqtCovariance = cholesky(weightedCov);
+        Matrix deviation;
+
+        for(unsigned int i = 1; i < num_states + 1; i++){
+            int negIndex = i+num_states;
+            deviation = sqtCovariance.getCol(i - 1);              // Get deviation from weighted covariance
+            points.setCol(i, (current_mean + deviation));         // Add mean + deviation
+            points.setCol(negIndex, (current_mean - deviation));  // Add mean - deviation
+        }
+        return points;
+    }
+
+    Matrix CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
+    {
+        return sigmaPoints * m_mean_weights;
+    }
+
+    Matrix CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const
+    {
+        const unsigned int numPoints = totalSigmaPoints();
+        const unsigned int numStates = mean.getm();
+        Matrix covariance(numStates, numStates, false);  // Blank covariance matrix.
+        Matrix diff;
+        for(unsigned int i = 0; i < numPoints; ++i)
+        {
+            const double weight = m_covariance_weights[0][i];
+            diff = sigmaPoints.getCol(i) - mean;
+            covariance = covariance + weight*diff*diff.transp();
+        }
+        return covariance;
+    }
+
     bool operator ==(const UnscentedTransform& b) const
     {
         if(m_L != b.m_L) return false;
@@ -191,6 +265,7 @@ public:
         input.read(reinterpret_cast<char*>(&m_alpha), sizeof(m_alpha));
         input.read(reinterpret_cast<char*>(&m_kappa), sizeof(m_kappa));
         input.read(reinterpret_cast<char*>(&m_beta), sizeof(m_beta));
+        CalculateWeights();
         return input;
     }
 
@@ -200,4 +275,6 @@ private:
     double m_kappa;
     double m_beta;
     double m_lambda;
+    Matrix m_mean_weights;
+    Matrix m_covariance_weights;
 };

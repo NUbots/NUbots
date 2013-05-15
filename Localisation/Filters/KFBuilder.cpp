@@ -4,12 +4,13 @@
 // Include different models.
 #include "MobileObjectModel.h"
 #include "RobotModel.h"
+#include "IMUModel.h"
 
-// Include different filters.
-#include "SeqUKF.h"
-#include "BasicUKF.h"
-#include "SrSeqUKF.h"
-#include "SrBasicUKF.h"
+// Include different weighted filters.
+#include "WSeqUKF.h"
+#include "WBasicUKF.h"
+#include "WSrSeqUKF.h"
+#include "WSrBasicUKF.h"
 
 KFBuilder::KFBuilder()
 {
@@ -40,16 +41,16 @@ IWeightedKalmanFilter *KFBuilder::getNewFilter(Filter filter_type, Model model_t
     switch (filter_type)
     {
         case kbasic_ukf_filter:
-            filter = new BasicUKF(model);
+            filter = new WBasicUKF(model);
             break;
         case ksr_basic_ukf_filter:
-            filter = new SrBasicUKF(model);
+            filter = new WSrBasicUKF(model);
             break;
         case kseq_ukf_filter:
-            filter = new SeqUKF(model);
+            filter = new WSeqUKF(model);
             break;
         case ksr_seq_ukf_filter:
-            filter = new SrSeqUKF(model);
+            filter = new WSrSeqUKF(model);
             break;
         default:
             filter = NULL;

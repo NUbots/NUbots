@@ -1,21 +1,47 @@
-#ifndef SRBASICUKF_H
-#define SRBASICUKF_H
+/*! @file WSeqUKF.h
+ @brief Declaration of general WSeqUKF class
 
+ @class WSeqUKF
+ @brief This class is a template to create a custom WSeqUKF specific for an application.
+
+ The WSeqUKF is a Sequential Unscented Kalman filter, where measurement updates are able to be performed
+ sequentially rather than in parallel, while still returning the identical numerical results.
+
+ The processEquation and measurementEquation virtual functions must be defined for each application,
+ the remainder of the algorithm is otherwise identical.
+
+ @author Steven Nicklin
+
+ Copyright (c) 2012 Steven Nicklin
+
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#pragma once
 #include "IWeightedKalmanFilter.h"
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/MultivariateGaussian.h"
 #include "UnscentedTransform.h"
-
-class SrBasicUKF: public IWeightedKalmanFilter
+#include "IKalmanFilter.h"
+class WSeqUKF: public IWeightedKalmanFilter
 {
 public:
-    SrBasicUKF(IKFModel* model);
-    SrBasicUKF(const SrBasicUKF& source);
-    ~SrBasicUKF();
-
+    WSeqUKF(IKFModel* model);
+    ~WSeqUKF();
     IWeightedKalmanFilter* Clone()
     {
-        return new SrBasicUKF(*this);
+        return new WSeqUKF(*this);
     }
 
     /*!
@@ -47,13 +73,6 @@ public:
     */
     void initialiseEstimate(const MultivariateGaussian& estimate);
 
-    /*!
-    @brief Get function for the estimate.
-    Retrieves the filters current best estimate for the system.
-    @return The current estimate of the filter.
-    */
-    const MultivariateGaussian& estimate() const;
-
     std::string summary(bool detailed) const;
 
     /*!
@@ -75,34 +94,19 @@ public:
     float getFilterWeight() const {return m_filter_weight;}
     void setFilterWeight(float weight) {m_filter_weight = weight;}
 
-    // Outlier filtering settings.
-    void enableOutlierFiltering(bool enabled = true) {m_outlier_filtering_enabled = enabled;}
-    void setOutlierThreshold(float new_threshold){m_outlier_threshold = new_threshold;}
-    bool outlierFiltering() const {return m_outlier_filtering_enabled;}
-    float outlierThreshold() const {return m_outlier_threshold;}
+protected:
 
-private:
-    bool m_outlier_filtering_enabled;
-    float m_outlier_threshold;
+    WSeqUKF(const WSeqUKF& source);
     bool m_weighting_enabled;
     float m_filter_weight;
-    MultivariateGaussian m_estimate;
-    Matrix m_mean_weights;
-    Matrix m_covariance_weights;
-    Matrix m_sqrt_covariance_weights;
-
-    Matrix m_sqrt_covariance;
+    Matrix m_sigma_points;
+    Matrix m_sigma_mean;
+    Matrix m_C;
+    Matrix m_d;
+    Matrix m_X;
 
     UnscentedTransform m_unscented_transform;
 
     void init();
     bool evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance);
-
-    // Functions for performing steps of the UKF algorithm.
-    void CalculateWeights();
-    Matrix GenerateSigmaPoints() const;
-    Matrix CalculateMeanFromSigmas(const Matrix& sigmaPoints) const;
-    Matrix CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const;
 };
-
-#endif // SRBASICUKF_H

@@ -1,20 +1,19 @@
-#ifndef BASICUKF_H
-#define BASICUKF_H
+#pragma once
 
 #include "IWeightedKalmanFilter.h"
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/MultivariateGaussian.h"
 #include "UnscentedTransform.h"
 
-class BasicUKF: public IWeightedKalmanFilter
+class WBasicUKF: public IWeightedKalmanFilter
 {
 public:
-    BasicUKF(IKFModel* model);
-    ~BasicUKF();
+    WBasicUKF(IKFModel* model);
+    ~WBasicUKF();
 
     IWeightedKalmanFilter* Clone()
     {
-        return new BasicUKF(*this);
+        return new WBasicUKF(*this);
     }
 
     /*!
@@ -46,13 +45,6 @@ public:
     */
     void initialiseEstimate(const MultivariateGaussian& estimate);
 
-    /*!
-    @brief Get function for the estimate.
-    Retrieves the filters current best estimate for the system.
-    @return The current estimate of the filter.
-    */
-    const MultivariateGaussian& estimate() const;
-
     std::string summary(bool detailed) const;
 
     /*!
@@ -74,35 +66,13 @@ public:
     float getFilterWeight() const {return m_filter_weight;}
     void setFilterWeight(float weight) {m_filter_weight = weight;}
 
-    // Outlier filtering settings.
-    void enableOutlierFiltering(bool enabled = true) {m_outlier_filtering_enabled = enabled;}
-    void setOutlierThreshold(float new_threshold){m_outlier_threshold = new_threshold;}
-    bool outlierFiltering() const {return m_outlier_filtering_enabled;}
-    float outlierThreshold() const {return m_outlier_threshold;}
-
-
-
 protected:
-    BasicUKF(const BasicUKF& source);
-
-    bool m_outlier_filtering_enabled;
-    float m_outlier_threshold;
+    WBasicUKF(const WBasicUKF& source);
     bool m_weighting_enabled;
     float m_filter_weight;
-    MultivariateGaussian m_estimate;
-    Matrix m_mean_weights;
-    Matrix m_covariance_weights;
 
     UnscentedTransform m_unscented_transform;
 
     void init();
     bool evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance);
-
-    // Functions for performing steps of the UKF algorithm.
-    void CalculateWeights();
-    Matrix GenerateSigmaPoints() const;
-    Matrix CalculateMeanFromSigmas(const Matrix& sigmaPoints) const;
-    Matrix CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const;
 };
-
-#endif // BASICUKF_H

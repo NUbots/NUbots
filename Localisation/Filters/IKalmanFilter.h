@@ -77,13 +77,13 @@ public:
     Retrieves the filters current best estimate for the system.
     @return The current estimate of the filter.
     */
-    virtual const MultivariateGaussian& estimate() const = 0;
+    virtual const MultivariateGaussian& estimate() const {return m_estimate;}
 
     // Outlier filtering settings.
-    virtual void enableOutlierFiltering(bool enabled = true) = 0;
-    virtual void setOutlierThreshold(float new_threshold) = 0;
-    virtual bool outlierFiltering() const = 0;
-    virtual float outlierThreshold() const = 0;
+    virtual void enableOutlierFiltering(bool enabled = true) {m_outlier_filtering_enabled = enabled;}
+    virtual void setOutlierThreshold(float new_threshold){m_outlier_threshold = new_threshold;}
+    virtual bool outlierFiltering() const {return m_outlier_filtering_enabled;}
+    virtual float outlierThreshold() const {return m_outlier_threshold;}
 
     IKFModel* model() {return m_model;}
 
@@ -125,13 +125,20 @@ public:
 
 protected:
     IKFModel* m_model;
+    MultivariateGaussian m_estimate;
+    bool m_outlier_filtering_enabled;
+    float m_outlier_threshold;
 
-    IKalmanFilter(IKFModel* model): m_model(model)
+    IKalmanFilter(IKFModel* model): m_model(model), m_estimate(model->totalStates())
     {
+        m_outlier_filtering_enabled = false;
+        m_outlier_threshold = 15.f;
     }
 
-    IKalmanFilter(const IKalmanFilter& source)
+    IKalmanFilter(const IKalmanFilter& source): m_estimate(source.estimate())
     {
         m_model = source.m_model->Clone();
+        m_outlier_filtering_enabled = source.m_outlier_filtering_enabled;
+        m_outlier_threshold = source.m_outlier_threshold;
     }
 };

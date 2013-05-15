@@ -1,10 +1,10 @@
-/*! @file WSeqUKF.h
- @brief Declaration of general WSeqUKF class
+/*! @file WSrSeqUKF.h
+ @brief Declaration of general SeqUKF class
 
- @class WSeqUKF
- @brief This class is a template to create a custom WSeqUKF specific for an application.
+ @class SeqUKF
+ @brief This class is a template to create a custom SeqUKF specific for an application.
 
- The WSeqUKF is a Sequential Unscented Kalman filter, where measurement updates are able to be performed
+ The SeqUKF is a Sequential Unscented Kalman filter, where measurement updates are able to be performed
  sequentially rather than in parallel, while still returning the identical numerical results.
 
  The processEquation and measurementEquation virtual functions must be defined for each application,
@@ -29,18 +29,20 @@
  */
 
 #pragma once
+#include "IWeightedKalmanFilter.h"
 #include "Tools/Math/Matrix.h"
 #include "Tools/Math/MultivariateGaussian.h"
 #include "UnscentedTransform.h"
-#include "IKalmanFilter.h"
-class SeqUKF: public IKalmanFilter
+class WSrSeqUKF: public IWeightedKalmanFilter
 {
 public:
-    SeqUKF(IKFModel* model);
-    ~SeqUKF();
-    IKalmanFilter* Clone()
+    WSrSeqUKF(IKFModel* model);
+    WSrSeqUKF(const WSrSeqUKF& source);
+    ~WSrSeqUKF();
+
+    IWeightedKalmanFilter* Clone()
     {
-        return new SeqUKF(*this);
+        return new WSrSeqUKF(*this);
     }
 
     /*!
@@ -88,9 +90,18 @@ public:
     */
     std::istream& readStreamBinary (std::istream& input);
 
-protected:
+    // Weighting functions.
+    void enableWeighting(bool enabled = true) {m_weighting_enabled = enabled;}
+    float getFilterWeight() const {return m_filter_weight;}
+    void setFilterWeight(float weight) {m_filter_weight = weight;}
 
-    SeqUKF(const SeqUKF& source);
+private:
+    bool m_weighting_enabled;
+    float m_filter_weight;
+    MultivariateGaussian m_estimate;
+    Matrix m_mean_weights;
+    Matrix m_covariance_weights;
+    Matrix m_sqrt_covariance_weights;
     Matrix m_sigma_points;
     Matrix m_sigma_mean;
     Matrix m_C;
@@ -101,4 +112,7 @@ protected:
 
     void init();
     bool evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance);
+
+    // Functions for performing steps of the UKF algorithm.
+    Matrix GenerateSqrtSigmaPoints() const;
 };

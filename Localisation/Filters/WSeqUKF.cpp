@@ -1,15 +1,17 @@
-#include "SeqUKF.h"
+#include "WSeqUKF.h"
 #include "Tools/Math/General.h"
 #include "IKFModel.h"
 #include <sstream>
 
-SeqUKF::SeqUKF(IKFModel *model): IKalmanFilter(model), m_unscented_transform(model->totalStates())
+WSeqUKF::WSeqUKF(IKFModel *model): IWeightedKalmanFilter(model), m_unscented_transform(model->totalStates())
 {
     init();
 }
 
-SeqUKF::SeqUKF(const SeqUKF& source): IKalmanFilter(source), m_unscented_transform(source.m_unscented_transform)
+WSeqUKF::WSeqUKF(const WSeqUKF& source): IWeightedKalmanFilter(source), m_unscented_transform(source.m_unscented_transform)
 {
+    m_weighting_enabled = source.m_weighting_enabled;
+    m_filter_weight = source.m_filter_weight;
     m_sigma_points = source.m_sigma_points;
     m_sigma_mean = source.m_sigma_mean;
     m_C = source.m_C;
@@ -17,13 +19,15 @@ SeqUKF::SeqUKF(const SeqUKF& source): IKalmanFilter(source), m_unscented_transfo
     m_X = source.m_X;
 }
 
-SeqUKF::~SeqUKF()
+WSeqUKF::~WSeqUKF()
 {
 }
 
-void SeqUKF::init()
+void WSeqUKF::init()
 {
     initialiseEstimate(m_estimate);
+    m_weighting_enabled = false;
+    m_filter_weight = 1.f;
 }
 
 /*!
@@ -33,7 +37,7 @@ void SeqUKF::init()
  * @param linearProcessNoise The linear process noise that will be added.
  * @return True if the time update was performed successfully. False if it was not.
  */
-bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix& process_noise, const Matrix& measurement_noise)
+bool WSeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix& process_noise, const Matrix& measurement_noise)
 {
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
 
@@ -47,6 +51,7 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
         currentPoint = m_sigma_points.getCol(i);    // Get the sigma point.
         m_sigma_points.setCol(i, m_model->processEquation(currentPoint, delta_t, measurement));   // Write the propagated version of it.
     }
+
     // Calculate the new mean and covariance values.
     Matrix predictedMean = m_unscented_transform.CalculateMeanFromSigmas(m_sigma_points);
     Matrix predictedCovariance = m_unscented_transform.CalculateCovarianceFromSigmas(m_sigma_points, predictedMean) + process_noise;
@@ -56,6 +61,8 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
 
     if(not predictedCovariance.isValid())
     {
+        std::cout << "ID: " << id() << " " ;
+        std::cout << "Weight: " << this->getFilterWeight() << " ";
         std::cout << "Mean:\n" << m_estimate.mean() << std::endl;
         std::cout << "Covariance:\n" << m_estimate.covariance() << std::endl;
         std::cout << "Sqrt Covariance:\n" << cholesky(m_estimate.covariance()) << std::endl;
@@ -89,7 +96,7 @@ bool SeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix&
  * @param measurementArgs Any additional information about the measurement, if required.
  * @return True if the measurement update was performed successfully. False if it was not.
  */
-bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, const Matrix& args, unsigned int type)
+bool WSeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, const Matrix& args, unsigned int type)
 {
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
     const unsigned int totalMeasurements = measurement.getm();
@@ -136,6 +143,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
 
     if(not updated_covariance.isValid())
     {
+        std::cout << "ID: " << id() << std::endl;
         std::cout << "Sigma mean:\n" << m_X << std::endl;
         std::cout << "measurement:\n" << measurement << std::endl;
         std::cout << "noise:\n" << noise << std::endl;
@@ -155,7 +163,7 @@ bool SeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, c
     return true;
 }
 
-void SeqUKF::initialiseEstimate(const MultivariateGaussian& estimate)
+void WSeqUKF::initialiseEstimate(const MultivariateGaussian& estimate)
 {
     // This is more complicated than you might expect because of all of the buffered values that
     // must be kept up to date.
@@ -184,9 +192,9 @@ void SeqUKF::initialiseEstimate(const MultivariateGaussian& estimate)
     return;
 }
 
-bool SeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance)
+bool WSeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance)
 {
-    if(!m_outlier_filtering_enabled) return true;
+    if(!m_outlier_filtering_enabled and !m_weighting_enabled) return true;
 
     Matrix innov_transp = innovation.transp();
     Matrix innov_variance = estimate_variance + measurement_variance;
@@ -196,21 +204,32 @@ bool SeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimat
         float innovation_2 = convDble(innov_transp * InverseMatrix(innov_variance) * innovation);
         if(m_outlier_threshold > 0 and innovation_2 > m_outlier_threshold)
         {
+            m_filter_weight *= 0.0005;
             return false;
         }
     }
 
+    if(m_weighting_enabled)
+    {
+        int measurement_dimensions = measurement_variance.getm();
+        const float outlier_probability = 0.05;
+        double exp_term = -0.5 * convDble(innovation.transp() * InverseMatrix(innov_variance) *  innovation);
+        double fract = 1 / sqrt( pow(2 * mathGeneral::PI, measurement_dimensions) * determinant(innov_variance));
+        m_filter_weight *= (1.f - outlier_probability) * fract * exp(exp_term) + outlier_probability;
+     }
+
     return true;
 }
 
-std::string SeqUKF::summary(bool detailed) const
+std::string WSeqUKF::summary(bool detailed) const
 {
     std::stringstream str_strm;
+    str_strm << "ID: " << m_id <<  " Weight: " << m_filter_weight << std::endl;
     str_strm << m_estimate.string() << std::endl;
     return str_strm.str();
 }
 
-std::ostream& SeqUKF::writeStreamBinary (std::ostream& output) const
+std::ostream& WSeqUKF::writeStreamBinary (std::ostream& output) const
 {
     m_model->writeStreamBinary(output);
     m_unscented_transform.writeStreamBinary(output);
@@ -218,7 +237,7 @@ std::ostream& SeqUKF::writeStreamBinary (std::ostream& output) const
     return output;
 }
 
-std::istream& SeqUKF::readStreamBinary (std::istream& input)
+std::istream& WSeqUKF::readStreamBinary (std::istream& input)
 {
     m_model->readStreamBinary(input);
     m_unscented_transform.readStreamBinary(input);

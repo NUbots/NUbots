@@ -1,60 +1,44 @@
-#include "SrSeqUKF.h"
+#include "WSrSeqUKF.h"
 #include "Tools/Math/General.h"
 #include "IKFModel.h"
 #include <sstream>
 
-SrSeqUKF::SrSeqUKF(IKFModel *model): IWeightedKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
+WSrSeqUKF::WSrSeqUKF(IKFModel *model): IWeightedKalmanFilter(model), m_estimate(model->totalStates()), m_unscented_transform(model->totalStates())
 {
     init();
 }
 
-SrSeqUKF::SrSeqUKF(const SrSeqUKF& source): IWeightedKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
+WSrSeqUKF::WSrSeqUKF(const WSrSeqUKF& source): IWeightedKalmanFilter(source.m_model), m_estimate(source.m_estimate), m_unscented_transform(source.m_unscented_transform)
 {
     init();
     m_filter_weight = source.m_filter_weight;
 }
 
-SrSeqUKF::~SrSeqUKF()
+WSrSeqUKF::~WSrSeqUKF()
 {
 }
 
-void SrSeqUKF::init()
+void WSrSeqUKF::init()
 {
-    CalculateWeights();
     initialiseEstimate(m_estimate);
-    m_outlier_filtering_enabled = false;
     m_weighting_enabled = false;
-    m_outlier_threshold = 15.f;
     m_filter_weight = 1.f;
-}
 
-/*!
- * @brief Pre-calculate the sigma point weightings, based on the current unscented transform parameters.
- */
-void SrSeqUKF::CalculateWeights()
-{
-    const unsigned int totalWeights = m_unscented_transform.totalSigmaPoints();
-
-    // initialise to correct sizes. These are row vectors.
-    m_mean_weights = Matrix(1, totalWeights, false);
-    m_covariance_weights = Matrix(1, totalWeights, false);
-    m_sqrt_covariance_weights = Matrix(1, totalWeights, false);
-
-    // Calculate the weights.
-    for (unsigned int i = 0; i < totalWeights; ++i)
+    m_sqrt_covariance_weights = Matrix(m_unscented_transform.covarianceWeights());
+    for(unsigned int m = 0; m < m_sqrt_covariance_weights.getm(); ++m)
     {
-        m_mean_weights[0][i] = m_unscented_transform.Wm(i);
-        m_covariance_weights[0][i] = m_unscented_transform.Wc(i);
-        m_sqrt_covariance_weights[0][i] = sqrt(fabs(m_covariance_weights[0][i]));
+        for(unsigned int n = 0; n < m_sqrt_covariance_weights.getm(); ++n)
+        {
+            m_sqrt_covariance_weights[m][n] = sqrt(m_sqrt_covariance_weights[m][n]);
+        }
     }
-    return;
 }
 
 /*!
  * @brief Calculates the sigma points from the current mean an covariance of the filter.
  * @return The sigma points that describe the current mean and covariance.
  */
-Matrix SrSeqUKF::GenerateSigmaPoints() const
+Matrix WSrSeqUKF::GenerateSqrtSigmaPoints() const
 {
     const unsigned int numPoints = m_unscented_transform.totalSigmaPoints();
     const Matrix current_mean = m_estimate.mean();
@@ -75,49 +59,18 @@ Matrix SrSeqUKF::GenerateSigmaPoints() const
 }
 
 /*!
- * @brief Calculate the mean from a set of sigma points.
- * @param sigmaPoints The sigma points.
- * @return The mean of the given sigma points.
- */
-Matrix SrSeqUKF::CalculateMeanFromSigmas(const Matrix& sigmaPoints) const
-{
-    return sigmaPoints * m_mean_weights.transp();
-}
-
-/*!
- * @brief Calculate the mean from a set of sigma points, given the mean of these points.
- * @param sigmaPoints The sigma points.
- * @param mean The mean of the sigma points.
- * @return The covariance of the given sigma points.
- */
-Matrix SrSeqUKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Matrix& mean) const
-{
-    const unsigned int numPoints = m_unscented_transform.totalSigmaPoints();
-    const unsigned int numStates = m_estimate.totalStates();
-    Matrix covariance(numStates, numStates, false);  // Blank covariance matrix.
-    Matrix diff;
-    for(unsigned int i = 0; i < numPoints; ++i)
-    {
-        const double weight = m_covariance_weights[0][i];
-        diff = sigmaPoints.getCol(i) - mean;
-        covariance = covariance + weight*diff*diff.transp();
-    }
-    return covariance;
-}
-
-/*!
  * @brief Performs the time update of the filter.
  * @param deltaT The time that has passed since the previous update.
  * @param measurement The measurement/s (if any) that can be used to measure a change in the system.
  * @param linearProcessNoise The linear process noise that will be added.
  * @return True if the time update was performed successfully. False if it was not.
  */
-bool SrSeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix& process_noise, const Matrix& measurement_noise)
+bool WSrSeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matrix& process_noise, const Matrix& measurement_noise)
 {
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
 
     // Calculate the current sigma points, and write to member variable.
-    m_sigma_points = GenerateSigmaPoints();
+    m_sigma_points = GenerateSqrtSigmaPoints();
 
     Matrix currentPoint; // temporary storage.
 
@@ -129,8 +82,8 @@ bool SrSeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matri
     }
 
     // Calculate the new mean and covariance values.
-    Matrix predictedMean = CalculateMeanFromSigmas(m_sigma_points);
-    Matrix predictedCovariance = CalculateCovarianceFromSigmas(m_sigma_points, predictedMean) + process_noise;
+    Matrix predictedMean = m_unscented_transform.CalculateMeanFromSigmas(m_sigma_points);
+    Matrix predictedCovariance = m_unscented_transform.CalculateCovarianceFromSigmas(m_sigma_points, predictedMean) + process_noise;
 
     // Set the new mean and covariance values.
     MultivariateGaussian new_estimate = m_estimate;
@@ -148,7 +101,7 @@ bool SrSeqUKF::timeUpdate(double delta_t, const Matrix& measurement, const Matri
  * @param measurementArgs Any additional information about the measurement, if required.
  * @return True if the measurement update was performed successfully. False if it was not.
  */
-bool SrSeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, const Matrix& args, unsigned int type)
+bool WSrSeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise, const Matrix& args, unsigned int type)
 {
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
     const unsigned int totalMeasurements = measurement.getm();
@@ -164,7 +117,7 @@ bool SrSeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise,
     }
 
     // Now calculate the mean of these measurement sigmas.
-    Matrix Ymean = CalculateMeanFromSigmas(Yprop);
+    Matrix Ymean = m_unscented_transform.CalculateMeanFromSigmas(Yprop);
 
     Matrix Y(totalMeasurements, total_points,false);
 
@@ -198,7 +151,7 @@ bool SrSeqUKF::measurementUpdate(const Matrix& measurement, const Matrix& noise,
     return true;
 }
 
-void SrSeqUKF::initialiseEstimate(const MultivariateGaussian& estimate)
+void WSrSeqUKF::initialiseEstimate(const MultivariateGaussian& estimate)
 {
     // This is more complicated than you might expect because of all of the buffered values that
     // must be kept up to date.
@@ -210,7 +163,7 @@ void SrSeqUKF::initialiseEstimate(const MultivariateGaussian& estimate)
 
     // Redraw sigma points to cover this new estimate.
     m_sigma_mean = estimate.mean();
-    m_sigma_points = GenerateSigmaPoints();
+    m_sigma_points = GenerateSqrtSigmaPoints();
 
     // Initialise the variables for sequential measurement updates.
     m_C = Matrix(total_points, total_points, true);
@@ -227,12 +180,7 @@ void SrSeqUKF::initialiseEstimate(const MultivariateGaussian& estimate)
     return;
 }
 
-const MultivariateGaussian& SrSeqUKF::estimate() const
-{
-    return m_estimate;
-}
-
-bool SrSeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance)
+bool WSrSeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estimate_variance, const Matrix& measurement_variance)
 {
     if(!m_outlier_filtering_enabled and !m_weighting_enabled) return true;
 
@@ -254,7 +202,7 @@ bool SrSeqUKF::evaluateMeasurement(const Matrix& innovation, const Matrix& estim
     return true;
 }
 
-std::string SrSeqUKF::summary(bool detailed) const
+std::string WSrSeqUKF::summary(bool detailed) const
 {
     std::stringstream str_strm;
     str_strm << "ID: " << m_id <<  " Weight: " << m_filter_weight << std::endl;
@@ -262,7 +210,7 @@ std::string SrSeqUKF::summary(bool detailed) const
     return str_strm.str();
 }
 
-std::ostream& SrSeqUKF::writeStreamBinary (std::ostream& output) const
+std::ostream& WSrSeqUKF::writeStreamBinary (std::ostream& output) const
 {
     m_model->writeStreamBinary(output);
     m_unscented_transform.writeStreamBinary(output);
@@ -270,13 +218,13 @@ std::ostream& SrSeqUKF::writeStreamBinary (std::ostream& output) const
     return output;
 }
 
-std::istream& SrSeqUKF::readStreamBinary (std::istream& input)
+std::istream& WSrSeqUKF::readStreamBinary (std::istream& input)
 {
     m_model->readStreamBinary(input);
     m_unscented_transform.readStreamBinary(input);
+    init();
     MultivariateGaussian temp;
     temp.readStreamBinary(input);
-    CalculateWeights();
     initialiseEstimate(temp);
     return input;
 }
