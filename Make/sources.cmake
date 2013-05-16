@@ -48,9 +48,6 @@ FOREACH (loop_var ${NUBOT_DIRS})
     INCLUDE(../${loop_var}/cmake/sources.cmake)
 ENDFOREACH (loop_var ${NUBOT_DIRS})
 
-# Include some libraries!
-LIST(APPEND NUBOT_LINK_LIBRARIES json)
-
 # Build protocol buffer classes
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
 find_package(Protobuf REQUIRED)
