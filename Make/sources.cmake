@@ -47,10 +47,3 @@ INCLUDE_DIRECTORIES(../Autoconfig)
 FOREACH (loop_var ${NUBOT_DIRS})
     INCLUDE(../${loop_var}/cmake/sources.cmake)
 ENDFOREACH (loop_var ${NUBOT_DIRS})
-
-# Build protocol buffer classes
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/")
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-file(GLOB ProtoFiles "../NUPlatform/NUAPI/proto/*.proto")
-PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})

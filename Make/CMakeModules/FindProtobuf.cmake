@@ -62,21 +62,21 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   set(${HDRS})
   foreach(FIL ${ARGN})
     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
-    get_filename_component(FIL_WE ${FIL} NAME_WE)
-    get_filename_component(FIL_PT ${FIL} PATH)
+    get_filename_component(FIL_WE ${ABS_FIL} NAME_WE)
+    get_filename_component(FIL_PT ${ABS_FIL} PATH)
     
-    list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_PT}/${FIL_WE}.pb.cc")
-    list(APPEND ${HDRS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_PT}/${FIL_WE}.pb.h")
+    list(APPEND ${SRCS} "${FIL_PT}/${FIL_WE}.pb.cc")
+    list(APPEND ${HDRS} "${FIL_PT}/${FIL_WE}.pb.h")
 
     if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${FIL_PT})
         file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${FIL_PT})
     endif()
 
     add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_PT}/${FIL_WE}.pb.cc"
-             "${CMAKE_CURRENT_BINARY_DIR}/${FIL_PT}/${FIL_WE}.pb.h"
+      OUTPUT "${FIL_PT}/${FIL_WE}.pb.cc"
+             "${FIL_PT}/${FIL_WE}.pb.h"
       COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
-      ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR}/${FIL_PT} --proto_path ${CMAKE_CURRENT_SOURCE_DIR}/${FIL_PT} ${ABS_FIL}
+      ARGS --cpp_out ${FIL_PT} --proto_path ${FIL_PT} ${ABS_FIL}
       DEPENDS ${ABS_FIL}
       COMMENT "Running C++ protocol buffer compiler on ${FIL}"
       VERBATIM )

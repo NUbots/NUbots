@@ -140,6 +140,7 @@ FIND_PACKAGE( RT )
 FIND_PACKAGE( ZMQ REQUIRED)
 FIND_PACKAGE( Protobuf REQUIRED)
 
+
 ############################ targetconfig.h GENERATION
 CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/targetconfig.in"
                 "${CMAKE_CURRENT_SOURCE_DIR}/../Autoconfig/targetconfig.h"
@@ -217,6 +218,16 @@ INCLUDE_DIRECTORIES( ${PTHREAD_INCLUDE_DIR}
 		     ${ZMQ_INCLUDE_DIR}
 	             ${PROTOBUF_INCLUDE_DIRS}
 )
+
+############################ Build Proto files
+# Build protocol buffer classes
+file(GLOB ProtoFiles_rel RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "../NUPlatform/NUAPI/proto/*.proto")
+
+get_filename_component(ProtoFiles ${ProtoFiles_rel} REALPATH)
+MESSAGE(STATUS "Proto Files: ${ProtoFiles}")
+PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
+LIST(APPEND NUBOT_SRCS ${ProtoSources} ${ProtoHeaders})
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ProtoSources}")
 
 IF (DEBUG)
     MESSAGE(STATUS "Source files:")
