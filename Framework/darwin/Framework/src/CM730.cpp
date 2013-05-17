@@ -5,11 +5,13 @@
  *
  */
 #include <stdio.h>
+#include <cassert>
+#include <sys/time.h>
+#include <algorithm>
+
 #include "FSR.h"
 #include "CM730.h"
 #include "MotionStatus.h"
-
-#include <cassert>
 
 using namespace Robot;
 
@@ -64,27 +66,31 @@ CM730::CM730(PlatformCM730 *platform)
     m_Platform = platform;
     DEBUG_PRINT = false;
     for(int i = 0; i < ID_BROADCAST; i++)
-        m_BulkReadData[i] = BulkReadData();
+        bulk_read_data_[i] = BulkReadData();
+
+    // Create the sensor read manager
+    sensor_read_manager_ = new Robot::SensorReadManager();
 }
 
 CM730::~CM730()
 {
     Disconnect();
+    delete sensor_read_manager_;
 }
 
 
-void CM730::printInstructionType(unsigned char *txpacket)
+void CM730::PrintInstructionType(unsigned char *txpacket)
 {
     int instruction_value = txpacket[INSTRUCTION];
     fprintf(stderr, "INST: %s\n", getInstructionTypeString(instruction_value));
 }
 
-void CM730::printResultType(int error_code)
+void CM730::PrintResultType(int error_code)
 {
     fprintf(stderr, "RETURN: %s\n", getTxRxErrorString(error_code));
 }
 
-inline void CM730::performPriorityWait(int priority)
+inline void CM730::PerformPriorityWait(int priority)
 {
     if(priority > 1)
         m_Platform->LowPriorityWait();
@@ -93,7 +99,7 @@ inline void CM730::performPriorityWait(int priority)
     m_Platform->HighPriorityWait();
 }
 
-inline void CM730::performPriorityRelease(int priority)
+inline void CM730::PerformPriorityRelease(int priority)
 {
     m_Platform->HighPriorityRelease();
     if(priority > 0)
@@ -184,9 +190,68 @@ inline void CM730::TxRxCMPacket(
     }
 }
 
+double GetCurrentTime()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    return ((double)tv.tv_sec*1000.0 + (double)tv.tv_usec/1000.0);
+}
+double BulkReadTimer(bool reset = false)
+{
+    static double start_time = 0.0;
+    double time;
+
+    if(reset)
+    {
+        start_time = GetCurrentTime();
+        return start_time;
+    }
+
+    time = GetCurrentTime() - start_time;
+    if(time < 0.0)
+        start_time = GetCurrentTime();
+
+    return time;
+}
+
+void PrintSuccessfulBulkReadPeriod(Robot::PlatformCM730* m_Platform)
+{
+    static const int len = 128;
+    static double successful_bulk_read_times[len] = { 0, }; // DEBUG
+    static double max_successful_bulk_read_time = 0;
+    static double min_successful_bulk_read_time = 100000;
+    static int index = 0;
+
+    double new_time = BulkReadTimer();
+    BulkReadTimer(true);
+
+    fprintf(stderr, "Read Ended. (time = %fms)\n", new_time);
+    
+    successful_bulk_read_times[index] = new_time;
+    ++index;
+    if(index >= len) index = 0;
+    
+    if(max_successful_bulk_read_time < new_time && new_time < 1000)
+        max_successful_bulk_read_time = new_time;
+
+    if(min_successful_bulk_read_time > new_time)
+        min_successful_bulk_read_time = new_time;
+
+    double avg = 0;
+    for(int i = 0; i < len; i++) 
+        avg += successful_bulk_read_times[i];
+    avg /= (double)len;
+    
+    fprintf(stderr, "   Last bulk read period = %fms\n", new_time);
+    fprintf(stderr, "Average bulk read period = %fms\n", avg);
+    fprintf(stderr, "Maximum bulk read period = %fms\n", max_successful_bulk_read_time);
+    fprintf(stderr, "Minimum bulk read period = %fms\n", min_successful_bulk_read_time);
+}
+
 void PrintSuccessfulBulkReadTimes(Robot::PlatformCM730* m_Platform)
 {
-    static const int len = 256;
+    static const int len = 512;
     static double successful_bulk_read_times[len] = { 0, }; // DEBUG
     static double max_successful_bulk_read_time = 0;
     static double min_successful_bulk_read_time = 100000;
@@ -215,7 +280,7 @@ void PrintSuccessfulBulkReadTimes(Robot::PlatformCM730* m_Platform)
     fprintf(stderr, "Minimum successful bulk read time = %fms\n", min_successful_bulk_read_time);
 }
 
-inline void CM730::ReceiveBulkReadResponseFromPort(
+inline int CM730::ReceiveBulkReadResponseFromPort(
     unsigned char* rxpacket,
     int to_length,
     PlatformCM730 *m_Platform,
@@ -224,7 +289,11 @@ inline void CM730::ReceiveBulkReadResponseFromPort(
     if(DEBUG_PRINT == true) fprintf(stderr, "RX: ");
 
     // original multiplier of 1.5 appears to be an undocumented hack.
-    m_Platform->SetPacketTimeout(to_length * 1.5 * 5);
+    // Make the timeout long enough that we always get reasonable information
+    // on failed motors.
+    // m_Platform->SetPacketTimeout(to_length * 1.5 * 0.5);
+    m_Platform->SetPacketTimeout(to_length * 1.5 * 40);
+    // m_Platform->SetPacketTimeout(to_length * 1.5 * 400);
 
     int get_length = 0; //! length in bytes of data read so far
     // Read data from port
@@ -232,7 +301,8 @@ inline void CM730::ReceiveBulkReadResponseFromPort(
     while(true)
     {
         // read some (more) data
-        int length = m_Platform->ReadPort(&rxpacket[get_length], to_length - get_length);
+        int length = m_Platform->ReadPort(&rxpacket[get_length],
+                                          to_length - get_length);
         if(DEBUG_PRINT == true)
         {
             for(int n = 0; n < length; n++)
@@ -244,7 +314,8 @@ inline void CM730::ReceiveBulkReadResponseFromPort(
         if(get_length == to_length)
         {
             res = SUCCESS;
-//            PrintSuccessfulBulkReadTimes(m_Platform);
+            // PrintSuccessfulBulkReadTimes(m_Platform);
+            // PrintSuccessfulBulkReadPeriod(m_Platform);
             break;
         }
 
@@ -254,16 +325,20 @@ inline void CM730::ReceiveBulkReadResponseFromPort(
             if(get_length == 0)
             {
                 res = RX_TIMEOUT;
-                fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
+                // fprintf(stderr, "RX_TIMEOUT: Reading data (time = %fms)\n",
+                //         m_Platform->GetPacketTime());
             }
             else
             {
                 res = RX_CORRUPT;
-                fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n", m_Platform->GetPacketTime());
+                // fprintf(stderr, "RX_CORRUPT: Reading data (time = %fms)\n",
+                //         m_Platform->GetPacketTime());
             }
             break;
         }
     }
+
+    // PrintSuccessfulBulkReadPeriod(m_Platform);
 
     return get_length;
 }
@@ -274,7 +349,7 @@ int CM730::AdvanceBuffer(unsigned char* buffer, int buffer_length,
     int new_length = buffer_length - num_bytes_to_advance;
     
     for(int i = 0; i < new_length; i++)
-        rxpacket[i] = rxpacket[i + num_bytes_to_advance];
+        buffer[i] = buffer[i + num_bytes_to_advance];
 
     return new_length;
 }
@@ -295,8 +370,8 @@ inline void CM730::TxRxBulkReadPacket(
         int _addr = txpacket[PARAMETER+(3*x)+3];
 
         to_length += _len + 6;
-        m_BulkReadData[_id].length = _len;
-        m_BulkReadData[_id].start_address = _addr;
+        bulk_read_data_[_id].length = _len;
+        bulk_read_data_[_id].start_address = _addr;
     }
 
     // Read data from port
@@ -308,12 +383,12 @@ inline void CM730::TxRxBulkReadPacket(
     for(int x = 0; x < num; x++)
     {
         int _id = txpacket[PARAMETER+(3*x)+2];
-        m_BulkReadData[_id].error = -1;
+        bulk_read_data_[_id].error = -1;
     }
 
 
     // Validate received data (in rxpacket) and
-    // copy it into BulkReadData objects (in m_BulkReadData).
+    // copy it into BulkReadData objects (in bulk_read_data_).
     while(1)
     {
         // Note: rxpacket may contain several sets of values to be read
@@ -368,7 +443,9 @@ inline void CM730::TxRxBulkReadPacket(
                 // Copy data of first value to the datatable of the
                 // corresponding BulkReadData object.
                 int sensor_id = rxpacket[ID];
-                BulkReadData& sensor_data = m_BulkReadData[sensor_id];
+                BulkReadData& sensor_data = bulk_read_data_[sensor_id];
+
+                // fprintf(stderr, "BulkReading: id=%d\n", sensor_id);
 
                 for(int j = 0; j < (rxpacket[LENGTH]-2); j++)
                     sensor_data.table[sensor_data.start_address + j] = rxpacket[PARAMETER + j];
@@ -384,7 +461,7 @@ inline void CM730::TxRxBulkReadPacket(
             }
             else
             {
-                fprintf(stderr, "RX_CORRUPT: Checksum.\n");
+                // fprintf(stderr, "RX_CORRUPT: Checksum.\n");
                 res = RX_CORRUPT;
                 
                 // skip next 2 bytes of rxpacket
@@ -399,7 +476,7 @@ inline void CM730::TxRxBulkReadPacket(
                 // if(num != 0) // redundant
                 // {
                     res = RX_CORRUPT;
-                    fprintf(stderr, "RX_CORRUPT: Unexpected end of packet.\n");
+                    // fprintf(stderr, "RX_CORRUPT: Unexpected end of packet.\n");
                 // }
                 break;
             }
@@ -412,9 +489,7 @@ inline void CM730::TxRxBulkReadPacket(
 int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int priority)
 {
     // Acquire resources
-    performPriorityWait(priority);
-
-    // m_Platform->Sleep(100); // DEBUG (crashes robot...)
+    PerformPriorityWait(priority);
 
     int res = TX_FAIL;
     int length = txpacket[LENGTH] + 4;
@@ -429,7 +504,7 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
         for(int n=0; n<length; n++)
             fprintf(stderr, "%.2X ", txpacket[n]);
 
-        printInstructionType(txpacket);
+        PrintInstructionType(txpacket);
     }
 
     if(length < (MAXNUM_TXPARAM + 6)) // Enforce hardware/api limit on length of data to send.
@@ -469,11 +544,11 @@ int CM730::TxRxPacket(unsigned char *txpacket, unsigned char *rxpacket, int prio
     if(DEBUG_PRINT == true)
     {
         fprintf(stderr, "Time:%.2fms  ", m_Platform->GetPacketTime());
-        printResultType(res);
+        PrintResultType(res);
     }
 
     // Release resources
-    performPriorityRelease(priority);
+    PerformPriorityRelease(priority);
 
     return res;
 }
@@ -486,63 +561,24 @@ unsigned char CM730::CalculateChecksum(unsigned char *packet)
     return (~checksum);
 }
 
-void CM730::MakeBulkReadPacket()
-{
-    int number = 0;
-
-    m_BulkReadTxPacket[ID]              = (unsigned char)ID_BROADCAST;
-    m_BulkReadTxPacket[INSTRUCTION]     = INST_BULK_READ;
-    m_BulkReadTxPacket[PARAMETER]       = (unsigned char)0x0;
-
-    if(Ping(CM730::ID_CM, NULL) == SUCCESS)
-    {
-        m_BulkReadTxPacket[PARAMETER+3*number+1] = 20;
-        m_BulkReadTxPacket[PARAMETER+3*number+2] = CM730::ID_CM;
-        m_BulkReadTxPacket[PARAMETER+3*number+3] = CM730::P_BUTTON;
-        number++;
-    }
-
-    for(int id = 1; id < JointData::NUMBER_OF_JOINTS; id++)
-    {
-//        if(MotionStatus::m_CurrentJoints.GetEnable(id))
-//        {
-            m_BulkReadTxPacket[PARAMETER+3*number+1] = 2;   // length
-            m_BulkReadTxPacket[PARAMETER+3*number+2] = id;  // id
-            m_BulkReadTxPacket[PARAMETER+3*number+3] = MX28::P_PRESENT_POSITION_L; // start address
-            number++;
-//        }
-    }
-
-    if(Ping(FSR::ID_L_FSR, NULL) == SUCCESS)
-    {
-        m_BulkReadTxPacket[PARAMETER+3*number+1] = 10;               // length
-        m_BulkReadTxPacket[PARAMETER+3*number+2] = FSR::ID_L_FSR;   // id
-        m_BulkReadTxPacket[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
-        number++;
-    }
-
-    if(Ping(FSR::ID_R_FSR, NULL) == SUCCESS)
-    {
-        m_BulkReadTxPacket[PARAMETER+3*number+1] = 10;               // length
-        m_BulkReadTxPacket[PARAMETER+3*number+2] = FSR::ID_R_FSR;   // id
-        m_BulkReadTxPacket[PARAMETER+3*number+3] = FSR::P_FSR1_L;    // start address
-        number++;
-    }
-
-    m_BulkReadTxPacket[LENGTH]          = (number * 3) + 3;
-}
-
 int CM730::BulkRead()
 {
     unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
 
-    if(m_BulkReadTxPacket[LENGTH] != 0)
-        return TxRxPacket(m_BulkReadTxPacket, rxpacket, 0);
-    else
-    {
-        MakeBulkReadPacket();
-        return TX_FAIL;
-    }
+    // Note: This can be skipped if no errors have occured, and all sensors are
+    //       responding for appropriately many consecutive reads.
+    sensor_read_manager_->MakeBulkReadPacket(bulk_read_tx_packet_);
+
+    // Perform the read operation from the CM730.
+    // Note: Possible error codes are:
+    //  { SUCCESS, TX_CORRUPT, TX_FAIL, RX_FAIL, RX_TIMEOUT, RX_CORRUPT }
+    int bulk_read_error_code = TxRxPacket(bulk_read_tx_packet_, rxpacket, 0);
+    
+    bool error_occurred = sensor_read_manager_->ProcessBulkReadErrors(
+        bulk_read_error_code,
+        bulk_read_data_);
+
+    return error_occurred;
 }
 
 int CM730::SyncWrite(int start_addr, int each_length, int number, int *pParam)
@@ -553,10 +589,10 @@ int CM730::SyncWrite(int start_addr, int each_length, int number, int *pParam)
 
     txpacket[ID]                = (unsigned char)ID_BROADCAST;
     txpacket[INSTRUCTION]       = INST_SYNC_WRITE;
-    txpacket[PARAMETER]            = (unsigned char)start_addr;
-    txpacket[PARAMETER + 1]        = (unsigned char)(each_length - 1);
+    txpacket[PARAMETER]         = (unsigned char)start_addr;
+    txpacket[PARAMETER + 1]     = (unsigned char)(each_length - 1);
     for(n = 0; n < (number * each_length); n++)
-        txpacket[PARAMETER + 2 + n]   = (unsigned char)pParam[n];
+        txpacket[PARAMETER + 2 + n] = (unsigned char)pParam[n];
     txpacket[LENGTH]            = n + 4;
 
     return TxRxPacket(txpacket, rxpacket, 0);
@@ -683,7 +719,8 @@ int CM730::ReadWord(int id, int address, int *pValue, int *error)
     result = TxRxPacket(txpacket, rxpacket, 2);
     if(result == SUCCESS)
     {
-        *pValue = MakeWord((int)rxpacket[PARAMETER], (int)rxpacket[PARAMETER + 1]);
+        *pValue = MakeWord((int)rxpacket[PARAMETER],
+                           (int)rxpacket[PARAMETER + 1]);
 
         if(error != 0)
             *error = (int)rxpacket[ERRBIT];
@@ -692,7 +729,8 @@ int CM730::ReadWord(int id, int address, int *pValue, int *error)
     return result;
 }
 
-int CM730::ReadTable(int id, int start_addr, int end_addr, unsigned char *table, int *error)
+int CM730::ReadTable(int id, int start_addr, int end_addr,
+                     unsigned char *table, int *error)
 {
     unsigned char txpacket[MAXNUM_TXPARAM + 10] = {0, };
     unsigned char rxpacket[MAXNUM_RXPARAM + 10] = {0, };
@@ -797,7 +835,7 @@ int CM730::MakeColor(int red, int green, int blue)
     return (int)(((b>>3)<<10)|((g>>3)<<5)|(r>>3));
 }
 
-char* CM730::getTxRxErrorString(int error_code)
+const char* CM730::getTxRxErrorString(int error_code)
 {
     switch(error_code)
     {
@@ -811,7 +849,7 @@ char* CM730::getTxRxErrorString(int error_code)
     }
 }
 
-char* CM730::getInstructionTypeString(int instruction_value)
+const char* CM730::getInstructionTypeString(int instruction_value)
 {
     switch(instruction_value)
     {

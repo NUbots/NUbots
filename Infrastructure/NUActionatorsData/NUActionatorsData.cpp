@@ -212,22 +212,30 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
         Actionator& a = m_actionators[ids[i]];
         double time;
         float position;
-        if (not a.empty())
+        if (!a.empty())
         {
             if (a.get(time, position))
-                positions[i] = interpolate(time, positions_current[i], position);
+                positions[i] = interpolate(time, positions_current[i],
+                                           position);
             else
             {
                 vector<float> positiongain;
                 if (a.get(time, positiongain))
                 {
                     position = positiongain[0];
-                    positions[i] = interpolate(time, positions_current[i], position);
-                    gains[i] = interpolate(time, gains_current[i], positiongain[1]);
+                    positions[i] = interpolate(time, positions_current[i],
+                                               position);
+                    gains[i] = interpolate(time, gains_current[i], 
+                                           positiongain[1]);
                 }
             }
+
             #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-                debug << a.Name << " [" << positions[i] << "," << gains[i] << "] target: " << time - CurrentTime << ": " << positions_current[i] << " -> " << position << "]" << endl;
+                debug   << a.Name
+                        << " [" << positions[i] << "," << gains[i] 
+                        << "] target: " << time - CurrentTime << ": "
+                        << positions_current[i] << " -> " << position << "]"
+                        << endl;
             #endif
         }
     }

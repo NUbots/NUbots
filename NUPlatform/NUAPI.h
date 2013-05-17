@@ -27,7 +27,6 @@
 #include <ctime>
 #include <zmq.hpp>
 #include <zhelpers.hpp>
-#include <libjson/libjson.h>
 #include <boost/lexical_cast.hpp>
 
 #include <zlib.h>
@@ -68,8 +67,6 @@ public:
 private:
 	zmq::context_t context;
 	zmq::socket_t publisher;
-
-    void send(const JSONNode& node);
 
 	void populate_vision_field_object(std::string name, Object& field_object, API::VisionFieldObject* api_field_object, API::VisionFieldObject::Type type);
 	

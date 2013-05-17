@@ -13,6 +13,11 @@
 #
 # Targets: NAO, NAOWebots, Cycloid, Bear, NUView
 
+# Helpful tips:
+# 1. Makefile uses actual tabs as separators, so you'll get a missing separator
+#    with editors that use spaces instead
+# 2. Make sure there is no white space after the \
+
 CUR_DIR = $(shell pwd)
 
 # Make directories
@@ -97,7 +102,7 @@ endif
 MAKE_OPTIONS = --no-print-directory -j $(NPROCS) --quiet
 
 
-default_target: NAOWebots
+default_target: Darwin
 
 all: NAO NAOWebots Cycloid Bear Darwin NUView
 
@@ -500,12 +505,18 @@ NUViewVeryClean:
 
 ########################################
 
-clean: NAOClean NAOWebotsClean CycloidClean NUViewClean
+clean: \
+	DarwinClean          \
+	NUViewClean          \
+	NAOWebotsClean       \
+	NAOClean             \
+	CycloidClean         \
+	BearClean            \
 
-veryclean: NAOVeryClean NAOWebotsVeryClean CycloidVeryClean NUViewVeryClean
-
-
-# Helpful tips:
-# 1. Makefile uses actual tabs as separators, so you'll get a missing separator
-#    with editors that use spaces instead
-# 2. Make sure there is no white space after the \
+veryclean: \
+	DarwinVeryClean      \
+	NUViewVeryClean      \
+	NAOWebotsVeryClean   \
+	NAOVeryClean         \
+	CycloidVeryClean     \
+	BearVeryClean        \
