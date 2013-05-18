@@ -76,7 +76,7 @@ Module::Module()
 
 // Create params
 // NOTE: 'loadConfig()' was never intended to contain calls to 
-// 'createParam(...)' for all of its parameters.
+// 'CreateParam(...)' for all of its parameters.
 // It was just convenient to write tests.
 void Module::loadConfig()
 {
@@ -97,27 +97,27 @@ void Module::loadConfig()
         createTestValue   (val_d);
         createTestValue   (val_l);
         val_s = makeRandomName();
-        config->createParam(_configBasePath, name_3dv_d, val_3dv_d);
-        config->createParam(_configBasePath, name_3dv_l, val_3dv_l);
-        config->createParam(_configBasePath, name_2dv_d, val_2dv_d);
-        config->createParam(_configBasePath, name_2dv_l, val_2dv_l);
-        config->createParam(_configBasePath, name_1dv_d, val_1dv_d);
-        config->createParam(_configBasePath, name_1dv_l, val_1dv_l);
-        config->createParam(_configBasePath, name_d    , val_d    );
-        config->createParam(_configBasePath, name_l    , val_l    );
-        config->createParam(_configBasePath, name_s    , val_s    );
+        config->CreateParam(_configBasePath, name_3dv_d, val_3dv_d);
+        config->CreateParam(_configBasePath, name_3dv_l, val_3dv_l);
+        config->CreateParam(_configBasePath, name_2dv_d, val_2dv_d);
+        config->CreateParam(_configBasePath, name_2dv_l, val_2dv_l);
+        config->CreateParam(_configBasePath, name_1dv_d, val_1dv_d);
+        config->CreateParam(_configBasePath, name_1dv_l, val_1dv_l);
+        config->CreateParam(_configBasePath, name_d    , val_d    );
+        config->CreateParam(_configBasePath, name_l    , val_l    );
+        config->CreateParam(_configBasePath, name_s    , val_s    );
     }
     else
     {
-        config->readValue(_configBasePath, name_3dv_d, val_3dv_d);
-        config->readValue(_configBasePath, name_3dv_l, val_3dv_l);
-        config->readValue(_configBasePath, name_2dv_d, val_2dv_d);
-        config->readValue(_configBasePath, name_2dv_l, val_2dv_l);
-        config->readValue(_configBasePath, name_1dv_d, val_1dv_d);
-        config->readValue(_configBasePath, name_1dv_l, val_1dv_l);
-        config->readValue(_configBasePath, name_d    , val_d    );
-        config->readValue(_configBasePath, name_l    , val_l    );
-        config->readValue(_configBasePath, name_s    , val_s    );
+        config->ReadValue(_configBasePath, name_3dv_d, val_3dv_d);
+        config->ReadValue(_configBasePath, name_3dv_l, val_3dv_l);
+        config->ReadValue(_configBasePath, name_2dv_d, val_2dv_d);
+        config->ReadValue(_configBasePath, name_2dv_l, val_2dv_l);
+        config->ReadValue(_configBasePath, name_1dv_d, val_1dv_d);
+        config->ReadValue(_configBasePath, name_1dv_l, val_1dv_l);
+        config->ReadValue(_configBasePath, name_d    , val_d    );
+        config->ReadValue(_configBasePath, name_l    , val_l    );
+        config->ReadValue(_configBasePath, name_s    , val_s    );
     }
 
     _shouldUpdate = false;
@@ -150,15 +150,15 @@ void Module::updateConfig()
     #ifdef CONFIGSYSTEM_TEST_ROBOT
         ConfigManager* config = Blackboard->Config;
     #endif
-    config->readValue(_configBasePath, name_3dv_d, val_3dv_d);
-    config->readValue(_configBasePath, name_3dv_l, val_3dv_l);
-    config->readValue(_configBasePath, name_2dv_d, val_2dv_d);
-    config->readValue(_configBasePath, name_2dv_l, val_2dv_l);
-    config->readValue(_configBasePath, name_1dv_d, val_1dv_d);
-    config->readValue(_configBasePath, name_1dv_l, val_1dv_l);
-    config->readValue(_configBasePath, name_d    , val_d    );
-    config->readValue(_configBasePath, name_l    , val_l    );
-    config->readValue(_configBasePath, name_s    , val_s    );
+    config->ReadValue(_configBasePath, name_3dv_d, val_3dv_d);
+    config->ReadValue(_configBasePath, name_3dv_l, val_3dv_l);
+    config->ReadValue(_configBasePath, name_2dv_d, val_2dv_d);
+    config->ReadValue(_configBasePath, name_2dv_l, val_2dv_l);
+    config->ReadValue(_configBasePath, name_1dv_d, val_1dv_d);
+    config->ReadValue(_configBasePath, name_1dv_l, val_1dv_l);
+    config->ReadValue(_configBasePath, name_d    , val_d    );
+    config->ReadValue(_configBasePath, name_l    , val_l    );
+    config->ReadValue(_configBasePath, name_s    , val_s    );
 }
 
 
@@ -305,7 +305,7 @@ void Module::change_3dv_d()
         ConfigManager* config = Blackboard->Config;
     #endif
     create3DTestVector(val_3dv_d_new);
-    config->storeValue(_configBasePath, name_3dv_d, val_3dv_d_new);
+    config->StoreValue(_configBasePath, name_3dv_d, val_3dv_d_new);
     val_changed_3dv_d = true;
     _shouldUpdate = true;
 }
@@ -315,7 +315,7 @@ void Module::change_3dv_l()
         ConfigManager* config = Blackboard->Config;
     #endif
     create3DTestVector(val_3dv_l_new);
-    config->storeValue(_configBasePath, name_3dv_l, val_3dv_l_new);
+    config->StoreValue(_configBasePath, name_3dv_l, val_3dv_l_new);
     val_changed_3dv_l = true;
     _shouldUpdate = true;
 }
@@ -325,7 +325,7 @@ void Module::change_2dv_d()
         ConfigManager* config = Blackboard->Config;
     #endif
     create2DTestVector(val_2dv_d_new);
-    config->storeValue(_configBasePath, name_2dv_d, val_2dv_d_new);
+    config->StoreValue(_configBasePath, name_2dv_d, val_2dv_d_new);
     val_changed_2dv_d = true;
     _shouldUpdate = true;
 }
@@ -335,7 +335,7 @@ void Module::change_2dv_l()
         ConfigManager* config = Blackboard->Config;
     #endif
     create2DTestVector(val_2dv_l_new);
-    config->storeValue(_configBasePath, name_2dv_l, val_2dv_l_new);
+    config->StoreValue(_configBasePath, name_2dv_l, val_2dv_l_new);
     val_changed_2dv_l = true;
     _shouldUpdate = true;
 }
@@ -345,7 +345,7 @@ void Module::change_1dv_d()
         ConfigManager* config = Blackboard->Config;
     #endif
     create1DTestVector(val_1dv_d_new);
-    config->storeValue(_configBasePath, name_1dv_d, val_1dv_d_new);
+    config->StoreValue(_configBasePath, name_1dv_d, val_1dv_d_new);
     val_changed_1dv_d = true;
     _shouldUpdate = true;
 }
@@ -355,7 +355,7 @@ void Module::change_1dv_l()
         ConfigManager* config = Blackboard->Config;
     #endif
     create1DTestVector(val_1dv_l_new);
-    config->storeValue(_configBasePath, name_1dv_l, val_1dv_l_new);
+    config->StoreValue(_configBasePath, name_1dv_l, val_1dv_l_new);
     val_changed_1dv_l = true;
     _shouldUpdate = true;
 }
@@ -365,7 +365,7 @@ void Module::change_d    ()
         ConfigManager* config = Blackboard->Config;
     #endif
     createTestValue   (val_d_new    );
-    config->storeValue(_configBasePath, name_d    , val_d_new    );
+    config->StoreValue(_configBasePath, name_d    , val_d_new    );
     val_changed_d     = true;
     _shouldUpdate = true;
 }
@@ -375,7 +375,7 @@ void Module::change_l    ()
         ConfigManager* config = Blackboard->Config;
     #endif
     createTestValue   (val_l_new    );
-    config->storeValue(_configBasePath, name_l    , val_l_new    );
+    config->StoreValue(_configBasePath, name_l    , val_l_new    );
     val_changed_l     = true;
     _shouldUpdate = true;
 }
@@ -385,7 +385,7 @@ void Module::change_s    ()
         ConfigManager* config = Blackboard->Config;
     #endif
     val_s_new    = makeRandomName();
-    config->storeValue(_configBasePath, name_s    , val_s_new    );
+    config->StoreValue(_configBasePath, name_s    , val_s_new    );
     val_changed_s     = true;
     _shouldUpdate = true;
 }
@@ -425,7 +425,7 @@ bool Module::autoUpdateTest()
         {
             cfObjs.push_back(&m);
         }
-        config->setConfigObjects(cfObjs);
+        config->SetConfigObjects(cfObjs);
     }
     else // on each call to autoUpdateTest() after the first:
     {
@@ -452,7 +452,7 @@ bool Module::autoUpdateTest()
         // Update the configuration
         // (called within See-Think Thread, unless testing off-robot)
         #ifndef CONFIGSYSTEM_TEST_ROBOT
-            config->updateConfiguration(); 
+            config->UpdateConfiguration(); 
         #endif
     }
 

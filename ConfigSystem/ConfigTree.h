@@ -109,7 +109,7 @@ namespace ConfigSystem
          *  @param paramName Name of the parameter to delete.
          *  @return Whether the operation was successful.
          */
-        bool deleteParam(
+        bool DeleteParam(
             const std::string &paramPath,
             const std::string &paramName
             );

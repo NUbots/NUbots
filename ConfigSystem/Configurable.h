@@ -9,7 +9,7 @@
     Any object can access the config system, but if an object is to be notified
     of changes made to parameters in the config system that could affect its
     configuration, it should inherit from 'ConfigSystem::Configurable', and use
-    'ConfigManager::addConfigObject(Configurable*)' to add itself to the list
+    'ConfigManager::AddConfigObject(Configurable*)' to add itself to the list
     of objects that the ConfigManager 'manages'.
     The ConfigManager updates the objects it manages on every iteration of the
     see-think thread (updating only those that need updating).

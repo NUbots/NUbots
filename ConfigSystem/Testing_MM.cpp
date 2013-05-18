@@ -79,14 +79,14 @@ bool testValue(const std::string &paramname, const std::string &wrongparamname)
     // FAIL: If not stored.
     createTestValue<T>(store_t, 0, 100);
     startTimedTest();
-    bool res_s = config->storeValue("Testing.MM", paramname, store_t);
+    bool res_s = config->StoreValue("Testing.MM", paramname, store_t);
     endTimedTest();
     
     // Read a double:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    bool res_r = config->readValue("Testing.MM", paramname, read_t);
+    bool res_r = config->ReadValue("Testing.MM", paramname, read_t);
     endTimedTest();
 
     bool res_c = (((float)store_t) == ((float)read_t)); // ignore rounding errors by comparig as floats
@@ -103,7 +103,7 @@ bool testValue(const std::string &paramname, const std::string &wrongparamname)
     // pass: If not stored (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    res_s = config->storeValue("Testing.MM", wrongparamname, store_t);
+    res_s = config->StoreValue("Testing.MM", wrongparamname, store_t);
     endTimedTest();
     printTestResult("storeAsIncorrectType", !res_s);
 
@@ -111,7 +111,7 @@ bool testValue(const std::string &paramname, const std::string &wrongparamname)
     // pass: If not read (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    res_r = config->readValue("Testing.MM", wrongparamname, read_t);
+    res_r = config->ReadValue("Testing.MM", wrongparamname, read_t);
     endTimedTest();
     printTestResult("storeAsIncorrectType", !res_r);
     std::cout << std::endl;
@@ -129,14 +129,14 @@ bool test1DVector(const std::string &paramName)
     create1DTestVector(store_1dv_t);
 
     startTimedTest();
-    bool res_s = config->storeValue("Testing.MM", paramName, store_1dv_t);
+    bool res_s = config->StoreValue("Testing.MM", paramName, store_1dv_t);
     endTimedTest();
 
     // Read a vector<T>:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    bool res_r = config->readValue("Testing.MM", paramName, read_1dv_t);
+    bool res_r = config->ReadValue("Testing.MM", paramName, read_1dv_t);
     endTimedTest();
 
     bool res_c = compare1DVectors(store_1dv_t, read_1dv_t);
@@ -162,7 +162,7 @@ bool test2DVector(const std::string &paramName)
     create2DTestVector(store_2dv_t);
 
     startTimedTest();
-    bool res_s = config->storeValue("Testing.MM", paramName, store_2dv_t);
+    bool res_s = config->StoreValue("Testing.MM", paramName, store_2dv_t);
     endTimedTest();
     std::cout << (res_s? "T":"F" ) << std::endl;
 
@@ -170,7 +170,7 @@ bool test2DVector(const std::string &paramName)
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    bool res_r = config->readValue("Testing.MM", paramName, read_2dv_t);
+    bool res_r = config->ReadValue("Testing.MM", paramName, read_2dv_t);
     endTimedTest();
     std::cout << (res_r? "T":"F" ) << std::endl;
 
@@ -196,7 +196,7 @@ bool test3DVector(const std::string &paramName)
     create3DTestVector(store_3dv_t);
 
     startTimedTest();
-    bool res_s = config->storeValue("Testing.MM", paramName, store_3dv_t);
+    bool res_s = config->StoreValue("Testing.MM", paramName, store_3dv_t);
     endTimedTest();
     std::cout << (res_s? "T":"F" ) << std::endl;
 
@@ -205,7 +205,7 @@ bool test3DVector(const std::string &paramName)
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    bool res_r = config->readValue("Testing.MM", paramName, read_3dv_t);
+    bool res_r = config->ReadValue("Testing.MM", paramName, read_3dv_t);
     endTimedTest();
     std::cout << (res_r? "T":"F" ) << std::endl;
 
@@ -257,29 +257,29 @@ bool testSaveLoad()
     std::string name_d     = makeRandomName();
     std::string name_l     = makeRandomName();
     std::cout << "create parameters:" << std::endl;
-    config->createParam("testSaveLoad", name_3dv_d, save_3dv_d);
-    config->createParam("testSaveLoad", name_3dv_l, save_3dv_l);
-    config->createParam("testSaveLoad", name_2dv_d, save_2dv_d);
-    config->createParam("testSaveLoad", name_2dv_l, save_2dv_l);
-    config->createParam("testSaveLoad", name_1dv_d, save_1dv_d);
-    config->createParam("testSaveLoad", name_1dv_l, save_1dv_l);
-    config->createParam("testSaveLoad", name_d    , save_d    );
-    config->createParam("testSaveLoad", name_l    , save_l    );
+    config->CreateParam("testSaveLoad", name_3dv_d, save_3dv_d);
+    config->CreateParam("testSaveLoad", name_3dv_l, save_3dv_l);
+    config->CreateParam("testSaveLoad", name_2dv_d, save_2dv_d);
+    config->CreateParam("testSaveLoad", name_2dv_l, save_2dv_l);
+    config->CreateParam("testSaveLoad", name_1dv_d, save_1dv_d);
+    config->CreateParam("testSaveLoad", name_1dv_l, save_1dv_l);
+    config->CreateParam("testSaveLoad", name_d    , save_d    );
+    config->CreateParam("testSaveLoad", name_l    , save_l    );
 
     std::cout << "save configuration:" << std::endl;
-    config->saveConfiguration("testSaveLoadConfig");
+    config->SaveConfiguration("testSaveLoadConfig");
     std::cout << "load configuration:" << std::endl;
-    config->loadConfiguration("testSaveLoadConfig");
+    config->LoadConfiguration("testSaveLoadConfig");
 
     std::cout << "read values:" << std::endl;
-    config->readValue("testSaveLoad", name_3dv_d, load_3dv_d);
-    config->readValue("testSaveLoad", name_3dv_l, load_3dv_l);
-    config->readValue("testSaveLoad", name_2dv_d, load_2dv_d);
-    config->readValue("testSaveLoad", name_2dv_l, load_2dv_l);
-    config->readValue("testSaveLoad", name_1dv_d, load_1dv_d);
-    config->readValue("testSaveLoad", name_1dv_l, load_1dv_l);
-    config->readValue("testSaveLoad", name_d    , load_d    );
-    config->readValue("testSaveLoad", name_l    , load_l    );
+    config->ReadValue("testSaveLoad", name_3dv_d, load_3dv_d);
+    config->ReadValue("testSaveLoad", name_3dv_l, load_3dv_l);
+    config->ReadValue("testSaveLoad", name_2dv_d, load_2dv_d);
+    config->ReadValue("testSaveLoad", name_2dv_l, load_2dv_l);
+    config->ReadValue("testSaveLoad", name_1dv_d, load_1dv_d);
+    config->ReadValue("testSaveLoad", name_1dv_l, load_1dv_l);
+    config->ReadValue("testSaveLoad", name_d    , load_d    );
+    config->ReadValue("testSaveLoad", name_l    , load_l    );
     
     bool result = true;
 
@@ -383,7 +383,7 @@ int main(void)
     // // Set Config Objects
     // cfObjs.push_back(&m1);
     // cfObjs.push_back(&m2);
-    // config->setConfigObjects(cfObjs);
+    // config->SetConfigObjects(cfObjs);
 
     
     // m1.doubleParam1 = -1;
@@ -397,12 +397,12 @@ int main(void)
     // std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
     // std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
     // std::cout << "config->storeDoubleValue(...)" << std::endl; 
-    // result = config->storeValue<double>("Testing.MM", "param_double", store_d);
+    // result = config->StoreValue<double>("Testing.MM", "param_double", store_d);
     // // m1.doubleParam1 should not equal 5 here
     // std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
     // std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
-    // std::cout << "config->updateConfiguration(...)" << std::endl; 
-    // config->updateConfiguration();
+    // std::cout << "config->UpdateConfiguration(...)" << std::endl; 
+    // config->UpdateConfiguration();
     // // m1.doubleParam1 should equal 5 here
     // std::cout << "Module.doubleParam1 = " << m1.doubleParam1 << std::endl; 
     // std::cout << "Module.doubleParam2 = " << m2.doubleParam1 << std::endl; 
@@ -417,14 +417,14 @@ int main(void)
     // NOTE: Should generate a random range.
     store_r_d = ConfigRange<double>(5, 10, false, true, bt_closed, bt_closed);
     startTimedTest();
-    result = config->storeRange("Testing.MM", "param_double", store_r_d);
+    result = config->StoreRange("Testing.MM", "param_double", store_r_d);
     endTimedTest();
 
     // Read a range<double>:
     // pass: If read successfully.
     // FAIL: If not read.
     startTimedTest();
-    result &= config->readRange("Testing.MM", "param_double", read_r_d);
+    result &= config->ReadRange("Testing.MM", "param_double", read_r_d);
     endTimedTest();
 
     result &= (store_r_d.getMin()            == read_r_d.getMin()            &&
@@ -443,7 +443,7 @@ int main(void)
     // pass: If not stored (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    result = config->storeRange("Testing.MM", "param_double", store_r_l);
+    result = config->StoreRange("Testing.MM", "param_double", store_r_l);
     endTimedTest();
     printTestResult("storeDoubleRangeAsLongRange", !result);
     
@@ -451,7 +451,7 @@ int main(void)
     // pass: If not read (returning an error).
     // FAIL: If no error occurs (i.e. if returns true).
     startTimedTest();
-    result = config->readRange("Testing.MM", "param_double", read_r_l);
+    result = config->ReadRange("Testing.MM", "param_double", read_r_l);
     endTimedTest();
     printTestResult("readDoubleRangeAsLongRange", !result);
     std::cout << std::endl;
@@ -462,30 +462,30 @@ int main(void)
     #warning Must add range tests (already tested by Sophie?)
 
 
-    bool res_del = config->deleteParam("Testing", "MM");
+    bool res_del = config->DeleteParam("Testing", "MM");
     std::cout << std::endl 
-              << "TEST: deleteParam(...) 1: " 
+              << "TEST: DeleteParam(...) 1: " 
               << (res_del? "T" : "F") 
               << std::endl;
-    res_del = config->deleteParam("Testing.MM", "param_double");
+    res_del = config->DeleteParam("Testing.MM", "param_double");
     std::cout << std::endl 
-              << "TEST: deleteParam(...) 2: " 
+              << "TEST: DeleteParam(...) 2: " 
               << (res_del? "T" : "F") 
               << std::endl;
     
-    config->createParam<double>("Testing.MM", "param_double", 10);
+    config->CreateParam<double>("Testing.MM", "param_double", 10);
 
-    res_del = config->deleteParam("Testing.MM", "param_double");
+    res_del = config->DeleteParam("Testing.MM", "param_double");
     std::cout << std::endl 
-              << "TEST: deleteParam(...) 3: " 
+              << "TEST: DeleteParam(...) 3: " 
               << (res_del? "T" : "F") 
               << std::endl;
     
-    config->createParam<double>("Testing.MM", "param_double", 10);
+    config->CreateParam<double>("Testing.MM", "param_double", 10);
 
     // Save configuration as 'newConfig'.
     startTimedTest();
-    config->saveConfiguration("newConfig");
+    config->SaveConfiguration("newConfig");
     endTimedTest();
     std::cout << "Save configuration." << std::endl;
     std::cout << std::endl;
