@@ -88,7 +88,7 @@ int main(void)
     stored = config.storeLongValue("vision.Camera", "AutoWhiteBalance", 0);
     std::cout << "storeLongValue = " << (stored? "success!" : "FAILED.") << std::endl;
     
-    config.saveConfiguration("newConfig");
+    config.SaveConfiguration("newConfig");
 
     // // A property tree that holds ConfigParameter objects
     // boost::property_tree::basic_ptree<std::string, ConfigParameter, std::less<std::string> >
