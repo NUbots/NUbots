@@ -295,7 +295,7 @@ namespace ConfigSystem
     }
 
 
-    bool ConfigManager::SetParamDescription(
+    bool ConfigManager::SetDescription(
         const std::string &paramPath,
         const std::string &paramName,
         const std::string &paramDesc
@@ -325,58 +325,65 @@ namespace ConfigSystem
     bool ConfigManager::ReadValue (
         const std::string &paramPath,
         const std::string &paramName,
-        T &data
+        T* value
         )
     {
         CONFIGSYS_DEBUG_CALLS;
+        if(value == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ":"
+                      << " 'value' must not be NULL"
+                      << " (Cannot read into a null pointer)."
+                      << std::endl;
+            return false;
+        }
+
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getValue(data);
+        return cp.getValue(value);
     }
 
-
-    // New interface (using explicit template instantiations).
     template bool ConfigManager::ReadValue<long> (
         const std::string &paramPath, const std::string &paramName,
-        long &data
+        long *value
         );
     template bool ConfigManager::ReadValue<double> (
         const std::string &paramPath, const std::string &paramName,
-        double &data
+        double *value
         );
     template bool ConfigManager::ReadValue<std::string> (
         const std::string &paramPath, const std::string &paramName,
-        std::string &data
+        std::string *value
         );
     template bool ConfigManager::ReadValue<std::vector<long> > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<long> &data
+        std::vector<long> *value
         );
     template bool ConfigManager::ReadValue<std::vector<std::vector<long> > > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<std::vector<long> > &data
+        std::vector<std::vector<long> > *value
         );
     template bool ConfigManager::ReadValue<std::vector<std::vector<std::vector<long> > > > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<std::vector<std::vector<long> > > &data
+        std::vector<std::vector<std::vector<long> > > *value
         );
     template bool ConfigManager::ReadValue<std::vector<double> > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<double>  &data
+        std::vector<double>  *value
         );
     template bool ConfigManager::ReadValue<std::vector<std::vector<double> > > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<std::vector<double> >  &data
+        std::vector<std::vector<double> >  *value
         );
     template bool ConfigManager::ReadValue<std::vector<std::vector<std::vector<double> > > > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<std::vector<std::vector<double> > > &data
+        std::vector<std::vector<std::vector<double> > > *value
         );
 
 
 
     template<typename T>
-    bool ConfigManager::StoreValue(
+    bool ConfigManager::SetValue(
        const std::string &paramPath,
        const std::string &paramName,
        T data)
@@ -398,69 +405,46 @@ namespace ConfigSystem
         return true;
     }
     
-    // New interface (using explicit template instantiations).
-    template bool ConfigManager::StoreValue<long> (
+    template bool ConfigManager::SetValue<long> (
         const std::string &paramPath, const std::string &paramName,
         long data
         );
-    template bool ConfigManager::StoreValue<double> (
+    template bool ConfigManager::SetValue<double> (
         const std::string &paramPath, const std::string &paramName,
         double data
         );
-    template bool ConfigManager::StoreValue<std::string> (
+    template bool ConfigManager::SetValue<std::string> (
         const std::string &paramPath, const std::string &paramName,
         std::string data
         );
-    template bool ConfigManager::StoreValue<std::vector<long> > (
+    template bool ConfigManager::SetValue<std::vector<long> > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<long> data
         );
-    template bool ConfigManager::StoreValue<std::vector<std::vector<long> > > (
+    template bool ConfigManager::SetValue<std::vector<std::vector<long> > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<long> > data
         );
-    template bool ConfigManager::StoreValue<std::vector<std::vector<std::vector<long> > > > (
+    template bool ConfigManager::SetValue<std::vector<std::vector<std::vector<long> > > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<std::vector<long> > > data
         );
-    template bool ConfigManager::StoreValue<std::vector<double> > (
+    template bool ConfigManager::SetValue<std::vector<double> > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<double>  data
         );
-    template bool ConfigManager::StoreValue<std::vector<std::vector<double> > > (
+    template bool ConfigManager::SetValue<std::vector<std::vector<double> > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<double> >  data
         );
-    template bool ConfigManager::StoreValue<std::vector<std::vector<std::vector<double> > > > (
+    template bool ConfigManager::SetValue<std::vector<std::vector<std::vector<double> > > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<std::vector<double> > > data
         );
 
 
 
-
-    bool ConfigManager::ReadRange(const string &paramPath, 
-                                  const string &paramName, 
-                                  ConfigRange<double> &range)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getRange(range);
-    }
-    bool ConfigManager::ReadRange  (const string &paramPath, 
-                                    const string &paramName, 
-                                    ConfigRange<long> &range)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getRange(range);
-    }
-
-    bool ConfigManager::StoreRange(const string &paramPath, 
+    bool ConfigManager::SetRange(const string &paramPath, 
                                    const string &paramName, 
                                    ConfigRange<double> &range)
     {
@@ -472,7 +456,7 @@ namespace ConfigSystem
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
-    bool ConfigManager::StoreRange (const string &paramPath, 
+    bool ConfigManager::SetRange (const string &paramPath, 
                                     const string &paramName, 
                                     ConfigRange<long> &range)
     {
@@ -483,5 +467,42 @@ namespace ConfigSystem
         if(!cp.setRange(range)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
+    }
+
+    bool ConfigManager::ReadRange(const string &paramPath, 
+                                  const string &paramName, 
+                                  ConfigRange<double>* range)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        if(range == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ":"
+                      << " 'range' must not be NULL"
+                      << " (Cannot read into a null pointer)."
+                      << std::endl;
+            return false;
+        }
+
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        return cp.getRange(range);
+    }
+    bool ConfigManager::ReadRange  (const string &paramPath,
+                                    const string &paramName,
+                                    ConfigRange<long>* range)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        if(range == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ":"
+                      << " 'range' must not be NULL"
+                      << " (Cannot read into a null pointer)."
+                      << std::endl;
+            return false;
+        }
+        
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        return cp.getRange(range);
     }
 }

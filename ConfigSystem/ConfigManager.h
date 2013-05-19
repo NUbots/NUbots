@@ -159,7 +159,7 @@ namespace ConfigSystem
          *  @param param_name Name of the parameter to have its description set.
          *  @return Whether the operation was successful.
          */
-        bool SetParamDescription(
+        bool SetDescription(
         const std::string &param_path,
         const std::string &param_name,
         const std::string &paramDesc);
@@ -174,20 +174,20 @@ namespace ConfigSystem
         bool ReadValue(
             const std::string &param_path,
             const std::string &param_name,
-            T &data);
+            T* value);
 
-        /*! @brief Stores the given value in the current configuration 
-         *         at the given path.
-         *  @param  param_path Path at which to store the parameter.
-         *  @param  param_name Name of the parameter to be stored.
-         *  @param  data The data to store.
+        /*! @brief Sets the value of the named parameter in the given path
+         *         to the given value.
+         *  @param  param_path Path of the parameter.
+         *  @param  param_name Name of the parameter.
+         *  @param  data The value to set.
          *  @return Whether the operation was successful.
          */
         template<typename T>
-        bool StoreValue(
+        bool SetValue(
             const std::string &param_path,
             const std::string &param_name,
-            T data);
+            T value);
 
         /*! @brief     Stores the range in the current configuration 
          *             at the given path.
@@ -196,12 +196,12 @@ namespace ConfigSystem
          *  @param     "range" The data to store.
          *  @return Whether the operation was successful.
          */
-        bool StoreRange(
+        bool SetRange(
             const std::string &param_path, 
             const std::string &param_name, 
             ConfigRange<double> &range);
 
-        bool StoreRange(
+        bool SetRange(
             const std::string &param_path, 
             const std::string &param_name, 
             ConfigRange<long> &range);
@@ -216,12 +216,12 @@ namespace ConfigSystem
         bool ReadRange(
             const std::string &param_path, 
             const std::string &param_name,
-            ConfigRange<double> &range);
+            ConfigRange<double> *range);
 
         bool ReadRange(
             const std::string &param_path,
-            const std::string &param_name, 
-            ConfigRange<long> &range);
+            const std::string &param_name,
+            ConfigRange<long> *range);
         
     private:
         /*! The Configuration System's storage manager. */

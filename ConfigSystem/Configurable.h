@@ -41,7 +41,6 @@
 class Configurable
 {
 public: 
-    
     // Initialise member variables upon construction.
     Configurable() : _configBasePath(""), _configModified(false) {}
 
@@ -53,8 +52,8 @@ public:
      *  @param No input.
      *  @return No return value.
      */
-    virtual void loadConfig()    = 0;
-        
+    virtual void loadConfig()   = 0;
+
     /*! @brief Called by the config system to notify this object of
      *         changes to the config tree within this object's base path.
      *         (i.e. a more recent configuration is available for this object)
@@ -62,13 +61,10 @@ public:
      *  Note: The simplest implementation of this method is to just call loadConfig().
      */
     virtual void updateConfig() = 0;
-    // virtual void updateConfig(
-    //     const std::string& paramPath,
-    //     const std::string& paramName
-    //     ) = 0;
-    
+
     //! Sets this Configurable's base path.
     void setConfigBasePath(std::string configBasePath);
+
     //! Returns this Configurable's base path.
     std::string getConfigBasePath();
 
@@ -94,7 +90,6 @@ public:
     void setConfigAsOutdated();
 
 protected:
-
     //! The base path of this configurable object.
     //! Changes made on this path within the config system will cause this object's
     //! updateConfig method to be called.
