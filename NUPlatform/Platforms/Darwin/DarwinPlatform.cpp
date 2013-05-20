@@ -83,9 +83,10 @@ DarwinPlatform::DarwinPlatform()
     #else
         m_camera = 0;
     #endif
+
+    
     m_sensors = new DarwinSensors(this,cm730);
     m_actionators = new DarwinActionators(this,cm730);
-
 	
 	//cout << m_servo_Stiffness << endl;
 }
@@ -121,26 +122,23 @@ float DarwinPlatform::getMotorStiffness(int localArrayIndex)
 
 void DarwinPlatform::setMotorStiffness(int localArrayIndex, float targetStiffness)
 {
+	int result;
 
-		int result;
+	if( (targetStiffness == 0||isnan(targetStiffness)) && \
+		(m_servo_Stiffness[localArrayIndex]!= 0 && !(isnan(m_servo_Stiffness[localArrayIndex]))) )
+	{
+		//Try to turn stiffness off:			
+		//cout << "stiffness off: " << m_servo_names[localArrayIndex] <<"\t" << targetStiffness<<endl;
+		result = cm730->WriteByte(m_servo_IDs[localArrayIndex], Robot::MX28::P_TORQUE_ENABLE, 0, 0);
+	}
 
-		if( (targetStiffness == 0||isnan(targetStiffness)) && \
-			(m_servo_Stiffness[localArrayIndex]!= 0 && !(isnan(m_servo_Stiffness[localArrayIndex]))) )
-		{
-			//Try to turn stiffness off:			
-			//cout << "stiffness off: " << m_servo_names[localArrayIndex] <<"\t" << targetStiffness<<endl;
-			result = cm730->WriteByte(m_servo_IDs[localArrayIndex], Robot::MX28::P_TORQUE_ENABLE, 0, 0);
-		}
-
-		else if( 	(targetStiffness != 0	&&	!isnan(targetStiffness)) && \
-					(m_servo_Stiffness[localArrayIndex] == 0 || isnan(m_servo_Stiffness[localArrayIndex])))
-		{
-			//Try to turn stiffness on:
-			//cout << "stiffness on: " << m_servo_names[localArrayIndex]<<"\t" << targetStiffness<<endl;	
-			result = cm730->WriteByte(m_servo_IDs[localArrayIndex], Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-		}
-		m_servo_Stiffness[localArrayIndex] = targetStiffness;
-		//cout << m_servo_Stiffness << endl;
+	else if( 	(targetStiffness != 0	&&	!isnan(targetStiffness)) && \
+				(m_servo_Stiffness[localArrayIndex] == 0 || isnan(m_servo_Stiffness[localArrayIndex])))
+	{
+		//Try to turn stiffness on:
+		//cout << "stiffness on: " << m_servo_names[localArrayIndex]<<"\t" << targetStiffness<<endl;	
+		result = cm730->WriteByte(m_servo_IDs[localArrayIndex], Robot::MX28::P_TORQUE_ENABLE, 1, 0);
+	}
+	m_servo_Stiffness[localArrayIndex] = targetStiffness;
+	//cout << m_servo_Stiffness << endl;
 }
-
-

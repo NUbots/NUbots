@@ -166,7 +166,7 @@ namespace ConfigSystem
     }
 
 
-    bool ConfigTree::deleteParam(
+    bool ConfigTree::DeleteParam(
             const std::string &paramPath,
             const std::string &paramName
             )
@@ -187,7 +187,7 @@ namespace ConfigSystem
             int del_n = paramParent.erase(paramName);
             if(del_n == 0)
             {
-                std::cout   << "ConfigTree::deleteParam(...): Nothing to erase"
+                std::cout   << "ConfigTree::DeleteParam(...): Nothing to erase"
                             << " (there's no '" << paramName << "' at the given path)."
                             << std::endl;
                 return false; // return failure if nothing was erased
@@ -198,7 +198,7 @@ namespace ConfigSystem
         }
         catch (boost::property_tree::ptree_error e)
         {
-            std::cout   << "ConfigTree::deleteParam(...): ACCESS ERROR:" 
+            std::cout   << "ConfigTree::DeleteParam(...): ACCESS ERROR:" 
                         << e.what() 
                         << std::endl;
             return false;

@@ -108,7 +108,6 @@ Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_seg
            right = left + bin.width;
 
     //just use pure bounding box for now, later use stddev thresholding
-
     LSFittedLine l, r;
     Point l1, l2, r1, r2;
 
@@ -150,58 +149,3 @@ Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_seg
         return Quad();
     }
 }
-
-
-// OLD CRAP BOUNDING BOX METHOD
-
-//Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
-//{
-//    // find bounding box from histogram
-//    int    left = bin.start,
-//           right = left + bin.width,
-//           h_min = std::numeric_limits<int>::max(),
-//           h_max = 0,
-//           v_min = std::numeric_limits<int>::max(),
-//           v_max = 0;
-
-//    //just use pure bounding box for now, later use stddev thresholding
-
-//    //find left and right
-//    BOOST_FOREACH(ColourSegment seg, h_segments) {
-//        //check segment centre is within bin
-//        if(seg.getCentre().x >= left && seg.getCentre().x <= right) {
-//            int s_x = seg.getStart().x,
-//                e_x = seg.getEnd().x,
-//                y = seg.getCentre().y;
-//            //check segment's left edge
-//            if(s_x < h_min)
-//                h_min = s_x; //segment h-pos is leftmost, keep track
-//            //check segment's right edge
-//            if(e_x > h_max)
-//                h_max = e_x; //segment h-pos is rightmost, keep track
-//            //check vertical
-//            if(y < v_min)
-//                v_min = y; //segment v-pos is uppermost, keep track
-//            if(y > v_max)
-//                v_max = y; //segment v-pos is lowermost, keep track
-//        }
-//    }
-
-//    //find top and bottom
-//    BOOST_FOREACH(ColourSegment seg, v_segments) {
-//        //check segment centre is within bin
-//        if(seg.getCentre().x >= left && seg.getCentre().x <= right) {
-//            //check start
-//            int s_y = seg.getStart().y,
-//                e_y = seg.getEnd().y;
-
-//            if(s_y < v_min)
-//                v_min = s_y; //segment is topmost, keep track
-//            if(e_y > v_max)
-//                v_max = e_y; //segment is bottommost, keep track
-//        }
-//    }
-
-//    return Quad(Point(h_min, v_max), Point(h_min, v_min), Point(h_max, v_min), Point(h_max, v_max));
-//}
-

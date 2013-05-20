@@ -31,11 +31,14 @@
 
 namespace ConfigSystem
 {
-    // enum representing the possible types of boundaries of an interval.
-    // open   <==> (_min, _max) <==> _min <  x >  _max
-    // closed <==> [_min, _max] <==> _min <= x >= _max
-    // none   <==> (-inf, +inf) <==> unrestricted x
-    enum BoundType { bt_none, bt_open, bt_closed, bt_unknown };
+    //! Enum representing the possible types of boundaries of an interval.
+    enum BoundType 
+    { 
+        bt_none,    //!< none   <==> (-inf, +inf) <==> unrestricted x
+        bt_open,    //!< open   <==> (_min, _max) <==> _min <  x >  _max
+        bt_closed,  //!< closed <==> [_min, _max] <==> _min <= x >= _max
+        bt_unknown  //!< The range has an invalid type.
+    };
     
     /*! 
      * This class represents a range, and provides 
@@ -46,45 +49,30 @@ namespace ConfigSystem
     {
         public:
             ConfigRange();
-            // ConfigRange(T min, T max);
-            // ConfigRange(T min, T max, BoundType lBound, BoundType uBound );
+
             ConfigRange(T min, 
                         T max, 
                         bool outside  = false, 
-                        bool autoClip = false
-                        );
+                        bool autoClip = false);
             
             ConfigRange(T min,
                         T max,
                         bool outside,
                         bool autoClip,
                         BoundType lBound,
-                        BoundType uBound
-                        );
+                        BoundType uBound);
             
-            //destructor:
             ~ConfigRange();
-
 
             /*! @brief Retrieves this range's upper boundary value.
                 @return Returns this range's upper boundary value.
              */
-            T getMax();
-
-            /*! @brief Retrieves the "_max" private member variable.
-                @return Returns a const pointer to the "_max" private member variable.
-             */
-            const T getMax() const;
+            T getMax() const;
             
             /*! @brief Retrieves this range's lower boundary value.
                 @return Returns this range's lower boundary value
              */
-            T getMin();
-            
-            /*! @brief Retrieves the "_min" private member variable.
-                @return Returns a const pointer to the "_min" private member variable.
-             */
-            const T getMin() const;
+            T getMin() const;
             
             /*! @brief Retrieves the upper bound type of the range.
                 @return Returns the BoundType corresponding to the upper bound of the ConfigRange object.
@@ -119,6 +107,9 @@ namespace ConfigSystem
             //! Checks whether the given value falls outside this range,
             //! and if it does, minimally adjusts it to satisfy this range
             //! constraint.
+            //! Returns whether or not the value was clipped.
+            //! Note: bt_open is treated as bt_closed for clipping
+            //!       purposes.
             bool clip(T &value);
             //! 'Clips' each value in the given vector (see ConfigRange::clip(T&)).
             bool clip(std::vector<T> &values);

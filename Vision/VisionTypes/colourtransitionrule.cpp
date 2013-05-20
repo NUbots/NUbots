@@ -1,5 +1,6 @@
 #include "colourtransitionrule.h"
 #include <boost/algorithm/string.hpp>
+#include <algorithm>
 #include "debug.h"
 
 ColourSegment ColourTransitionRule::nomatch(Point(0,0), Point(0,0), invalid);
