@@ -47,9 +47,7 @@ int VisionControlWrapper::runFrame()
         m_saveimages_thread->signal();
     }
         
-    //int result = controller.runFrame(Blackboard->lookForBall, Blackboard->lookForGoals, Blackboard->lookForFieldPoints, true); //run vision on the frame
-
-    int result = controller.runFrame(Blackboard->lookForBall, false, false, false); //run vision on the frame
+    int result = controller.runFrame(Blackboard->lookForBall, Blackboard->lookForGoals, Blackboard->lookForFieldPoints, Blackboard->lookForObstacles); //run vision on the frame
     
     data_wrapper->postProcess();    //post process all the field objects
     
