@@ -1,4 +1,5 @@
 #include "colourreplacementrule.h"
+#include <algorithm>
 
 ColourSegment ColourReplacementRule::nomatch(Point(0,0), Point(0,0), invalid);
 

@@ -30,22 +30,22 @@
 #include "Infrastructure/TeamInformation/TeamInformation.h"
 #include "ConfigSystem/ConfigManager.h"
 
-NUBlackboard* Blackboard = 0;
+NUBlackboard* Blackboard = NULL;
 
 /*! @brief Construct the NUBlackboard --- the global data store. 
 */
 NUBlackboard::NUBlackboard()
 {
     Blackboard = this;
-    Sensors = 0;
-    Actions = 0;
-    Image = 0;
-    CameraSpecs = 0;
-    Objects = 0;
-    Jobs = 0;
-    GameInfo = 0;
-    TeamInfo = 0;
-    Config = 0;
+    Sensors = NULL;
+    Actions = NULL;
+    Image = NULL;
+    CameraSpecs = NULL;
+    Objects = NULL;
+    Jobs = NULL;
+    GameInfo = NULL;
+    TeamInfo = NULL;
+    Config = NULL;
     lookForBall = true;
     lookForGoals = true;
     lookForFieldPoints = false; // disabled until working
@@ -55,23 +55,23 @@ NUBlackboard::NUBlackboard()
 NUBlackboard::~NUBlackboard()
 {
     delete Sensors;
-    Sensors = 0;
+    Sensors = NULL;
     delete Actions;
-    Actions = 0;
+    Actions = NULL;
     delete Image;
-    Image = 0;
+    Image = NULL;
     delete CameraSpecs;
-    CameraSpecs = 0;
+    CameraSpecs = NULL;
     delete Objects;
-    Objects = 0;
+    Objects = NULL;
     delete Jobs;
-    Jobs = 0;
+    Jobs = NULL;
     delete GameInfo;
-    GameInfo = 0;
+    GameInfo = NULL;
     delete TeamInfo;
-    TeamInfo = 0;
+    TeamInfo = NULL;
     delete Config;
-    Config = 0;
+    Config = NULL;
 }
 
 /*! @brief Adds a NUSensorsData object to the blackboard. Note that ownership of the object is now with the Blackboard. 
@@ -154,9 +154,9 @@ void NUBlackboard::add(TeamInformation* teaminfo)
 /*! @brief Adds a ConfigManager object to the blackboard. Note that ownership of the object is now with the Blackboard. 
     @param config a pointer to the new config manager object
  */
-void NUBlackboard::add(ConfigManager* config)
+void NUBlackboard::add(ConfigSystem::ConfigManager* config)
 {
-    ConfigManager* oldconfig = Config;
+    ConfigSystem::ConfigManager* oldconfig = Config;
     Config = config;
     delete oldconfig;
 }

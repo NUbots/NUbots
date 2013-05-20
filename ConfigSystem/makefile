@@ -16,9 +16,6 @@ Testing_MM_globals.o   \
 Testing_MM_Utils.o
 
 
-ConfigSystemTest: $(OBJECTS) TestConfig.o
-	g++ $^ -o $@
-
 Testing_MM: $(TESTOBJECTS)
 	g++ $^ -lrt -o $@
 	# -lrt is for realtime extensions (for clock_gettime)

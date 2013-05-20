@@ -2,9 +2,6 @@
     @file     ConfigRange.template
     @brief     Template implementation file for the ConfigRange class. 
  
-    @class     ConfigRange
-    @brief     Templated class used for storing ranges.
-
     @author Sophie Calland, Mitchell Metcalfe 
  
   Copyright (c) 2012 Sophie Calland, Mitchell Metcalfe 
@@ -32,7 +29,6 @@ using std::string;
 
 namespace ConfigSystem
 {
-    //Constructor
     template<typename T>
     ConfigRange<T>::ConfigRange()
     {
@@ -60,7 +56,6 @@ namespace ConfigSystem
         _uBound   = bt_closed;
     }
     
-    //Constructor
     template<typename T>
     ConfigRange<T>::ConfigRange(
         T min, 
@@ -79,54 +74,30 @@ namespace ConfigSystem
         _uBound  = uBound ;
     }
     
-    //Destructor
     template<typename T>
     ConfigRange<T>::~ConfigRange()
     {
-        // // T is not intended to be a pointer type, so variables of type T
-        // // should not be deleted.
-        // delete _min;
-        // delete _max;
-    }
-    
-    
-    
-    //Retrieves "_max" member variable
-    template<typename T>
-    T ConfigRange<T>::getMax()
-    {
-        return _max;
-    }
 
-    //Retrieves "_max" member variable
+    }
+    
     template<typename T>
-    const T ConfigRange<T>::getMax() const
+    T ConfigRange<T>::getMax() const
     {
         return _max;
-    }    
+    }
     
-    //Retrieves "_min" member variable
     template<typename T>
-    T ConfigRange<T>::getMin()
+    T ConfigRange<T>::getMin() const
     {
         return _min;
-    }    
+    }
     
-    //Retrieves "_min" member variable
-    template<typename T>
-    const T ConfigRange<T>::getMin() const
-    {
-        return _min;
-    }    
-    
-    //Retrieves the upper bound type of the range.
     template<typename T>
     BoundType ConfigRange<T>::getUpperBoundType()
     {
         return _uBound;
     }
     
-    //Retrieves the lower bound type of the range.
     template<typename T>
     BoundType ConfigRange<T>::getLowerBoundType()
     {
@@ -144,10 +115,6 @@ namespace ConfigSystem
         return _outside;
     }
 
-
-    //(values as reference?)
-    //Vector stuff can probably be done recursively with specifying a dimension?
-    //1d vector test
     template<typename T>
     bool ConfigRange<T>::test(std::vector<T> values)
     {
@@ -159,7 +126,6 @@ namespace ConfigSystem
         return true;
     }
     
-    //2d vector test
     template<typename T>
     bool ConfigRange<T>::test(std::vector< std::vector<T> > values)
     {
@@ -171,7 +137,6 @@ namespace ConfigSystem
     	return true;
     }
     
-    //3d vector test
     template<typename T>
     bool ConfigRange<T>::test(std::vector< std::vector< std::vector<T> > > values)
     {
@@ -183,7 +148,6 @@ namespace ConfigSystem
     	return true;
     }
 
-	//1d vector clip
     template<typename T>
     bool ConfigRange<T>::clip(std::vector<T> &values)
     {
@@ -195,7 +159,6 @@ namespace ConfigSystem
         return true;
     }
 
-	//2d vector clip
     template<typename T>
     bool ConfigRange<T>::clip(std::vector< std::vector<T> > &values)
     {
@@ -207,7 +170,6 @@ namespace ConfigSystem
         return true;
     }
     
-    //3d vector clip
     template<typename T>
     bool ConfigRange<T>::clip(std::vector< std::vector< std::vector<T> > > &values)
     {
@@ -219,7 +181,6 @@ namespace ConfigSystem
         return true;
     }
 
-	//1d vector apply.
     template<typename T>
     bool ConfigRange<T>::apply(std::vector<T> &values)
     {
@@ -231,7 +192,6 @@ namespace ConfigSystem
         return true;
     }
     
-    //2d vector apply.
     template<typename T>
     bool ConfigRange<T>::apply(std::vector< std::vector<T> > &values)
     {
@@ -243,7 +203,6 @@ namespace ConfigSystem
         return true;
     }
     
-    //3d vector apply.
     template<typename T>
     bool ConfigRange<T>::apply(std::vector< std::vector< std::vector<T> > > &values)
     {
@@ -269,8 +228,6 @@ namespace ConfigSystem
         }
     }
     
-    //! Returns whether the given value satisfies the constraints specified
-    //! by this range object. (value as reference?)
     template<typename T>
     bool ConfigRange<T>::test(T value)
     {
@@ -324,16 +281,10 @@ namespace ConfigSystem
         return true;
     }
 
-
-    //! clips the given value (against active bounds, which are assumed
-    //! to be bt_closed) to lie within it's allowable range.
-    //! returns whether or not the value was clipped.
     template<typename T>
     bool ConfigRange<T>::clip(T &value)
     {
-        // Comparisons (unnecessary comparisons, etc. will hopefully be 
-        // optimised away by the compiler).
-
+        // Comparisons
         bool valLU  = value <  _max;
         bool valGU  = value >  _max;
         bool valLL  = value <  _min;
@@ -341,7 +292,7 @@ namespace ConfigSystem
 
         bool lbN = (_lBound == bt_none  );
         bool ubN = (_uBound == bt_none  );
-        bool lbA = !lbN; // A <==> 'active'
+        bool lbA = !lbN; // A is for 'Active'
         bool ubA = !ubN;
 
         if(!_outside) // [...]

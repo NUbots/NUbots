@@ -3,8 +3,8 @@
 #include "Vision/visionblackboard.h"
 #include "Vision/visionconstants.h"
 #include "Vision/GenericAlgorithms/ransac.h"
-#include "Vision/VisionTypes//RANSACTypes/ransacline.h"
-#include "Vision/VisionTypes//RANSACTypes/ransacgoal.h"
+#include "Vision/VisionTypes/RANSACTypes/ransacline.h"
+#include "Vision/VisionTypes/RANSACTypes/ransacgoal.h"
 #include "Tools/Math/General.h"
 
 #include <limits>
@@ -13,15 +13,15 @@
 
 GoalDetectorRANSACEdges::GoalDetectorRANSACEdges()
 {
-    //m_n = 10;               //min pts to line essentially
-    m_n = 25 / VisionConstants::HORIZONTAL_SCANLINE_SPACING;               //min pts to line essentially
-    m_k = 100;               //number of iterations per fitting attempt
-    m_e = 5.0;              //consensus margin - prev 12
-    m_max_iterations = 3;  //hard limit on number of fitting attempts
+    m_n = 25 / VisionConstants::HORIZONTAL_SCANLINE_SPACING;    //min pts to line essentially
+    m_k = 100;              //number of iterations per fitting attempt
+    m_e = 5.0;              //consensus margin
+    m_max_iterations = 3;   //hard limit on number of fitting attempts
 }
 
 vector<Goal> GoalDetectorRANSACEdges::run()
 {
+    //use ransac model with largest number of points, rather than best fitting
     const RANSAC::SELECTION_METHOD ransac_method = RANSAC::LargestConsensus;
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const Horizon& khorizon = vbb->getKinematicsHorizon();
@@ -33,7 +33,6 @@ vector<Goal> GoalDetectorRANSACEdges::run()
     pair<bool, Quad> crossbar(false, Quad());
     vector<Goal> posts;
 
-    //finds the edge lines and constructs goals from that
     vector<Point> start_points, end_points;
     vector<pair<RANSACLine<Point>, vector<Point> > > ransac_results;
     vector<LSFittedLine> start_lines, end_lines;
@@ -44,34 +43,30 @@ vector<Goal> GoalDetectorRANSACEdges::run()
         end_points.push_back(s.getEnd());
     }
 
-    //use generic ransac implementation to find lines
+    //use generic ransac implementation to find start lines (left edges)
     ransac_results = RANSAC::findMultipleModels<RANSACLine<Point>, Point>(start_points, m_e, m_n, m_k, m_max_iterations, ransac_method);
-
-    //sorting start lines horizontally  allows us to move right to left
     for(size_t i=0; i<ransac_results.size(); i++) {
         start_lines.push_back(LSFittedLine(ransac_results.at(i).second));
     }
 
+    //use generic ransac implementation to find end lines (right edges)
     ransac_results = RANSAC::findMultipleModels<RANSACLine<Point>, Point>(end_points, m_e, m_n, m_k, m_max_iterations, ransac_method);
     for(size_t i=0; i<ransac_results.size(); i++) {
         end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
     }
 
+    //publish these lines for debugging
     DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_START, start_lines);
     DataWrapper::getInstance()->debugPublish(DBID_GOAL_LINES_END, end_lines);
-
-    //cout << "(" << start_lines.size() << " " << end_lines.size() << ") ";
 
     //Build candidates out of lines - this finds candidates irrespective of rotation - filtering must be done later
     quads = buildQuadsFromLines(start_lines, end_lines, VisionConstants::GOAL_RANSAC_MATCHING_TOLERANCE);
 
-    //cout << quads.size() << " ";
-
-    // check potential cross bars AND posts (aspect ratio check)
+    // remove posts with invalid aspect ratio : check potential cross bars AND posts
     removeInvalid(quads);
 
-    //cout << quads.size() << " ";
-
+    // sort out potential crossbars and vertical posts (posts on too large of a lean will be removed)
+    // edit ANGLE_MARGIN to affect this
     const double ANGLE_MARGIN = 0.25;
     BOOST_FOREACH(Quad& q, quads) {
         double angle = khorizon.getAngleBetween(Line(q.getTopCentre(), q.getBottomCentre()));
@@ -90,12 +85,8 @@ vector<Goal> GoalDetectorRANSACEdges::run()
         }
     }
 
-    //cout << post_candidates.size() << " ";
-
-    // only check potential posts for building
+    // only check upright posts for building candidates
     mergeClose(post_candidates, 1.5);
-
-    //cout << post_candidates.size() << " ";
 
     // generate actual goal from candidate posts
     if(crossbar.first) {
@@ -107,8 +98,6 @@ vector<Goal> GoalDetectorRANSACEdges::run()
         posts = GoalDetector::assignGoals(post_candidates);
     }
 
-    //cout << posts.size() << endl;
-
     //Improves bottom centre estimate using vertical transitions
     BOOST_FOREACH(ColourSegment v, vsegments) {
         const Point& p = v.getEnd();
@@ -118,6 +107,7 @@ vector<Goal> GoalDetectorRANSACEdges::run()
         }
     }
 
+    //publish to debugging interface
     DataWrapper::getInstance()->debugPublish(DBID_GOALS_RANSAC_EDGES, posts);
 
     return posts;

@@ -115,10 +115,8 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     //! DETECTION MODULES
 
     if(lookForGoals) {
- //       vector<Goal> hist_goals = m_goal_detector_hist->run();   // histogram method
-
+//       vector<Goal> hist_goals = m_goal_detector_hist->run();   // histogram method
         vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
-
         m_blackboard->addGoals(ransac_goals_edges);
     }
     else {
