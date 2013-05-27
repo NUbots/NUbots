@@ -218,7 +218,8 @@ HEADERS += ui_mainwindow.h \
     ../Localisation/Filters/SeqUKF.h \
     ../Localisation/Filters/WSrSeqUKF.h \
     ../Localisation/Filters/WSrBasicUKF.h \
-    ../Localisation/Filters/IMUModel.h
+    ../Localisation/Filters/IMUModel.h \
+    ../Infrastructure/SensorCalibration.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
