@@ -83,7 +83,7 @@ public slots:
     void BonjourTest();
 
     void RunOfflineLocalisation();
-    void SetSensorCalibration(SensorCalibration* new_calibration);
+    void SetSensorCalibration(SensorCalibrationSettings *new_calibration);
 
     /*!
       @brief Used to select a pixel within an GLDisplay.

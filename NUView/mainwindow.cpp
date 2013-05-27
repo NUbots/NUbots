@@ -174,7 +174,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     readSettings();
 
     glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
-    SensorCalibration calibration;
+    SensorCalibrationSettings calibration;
     glManager.writeExpectedViewToDisplay(NULL, &calibration, GLDisplay::ExpectedProjection);
 }
 
@@ -500,7 +500,7 @@ void MainWindow::createConnections()
     connect(virtualRobot, SIGNAL(clearPlots()), this, SLOT(clearPlots()));
 
     // Connect sensor calibration tool
-    connect(sensorCalibrationTool,SIGNAL(CalibrationChanged(SensorCalibration*)), this, SLOT(SetSensorCalibration(SensorCalibration*)));
+    connect(sensorCalibrationTool,SIGNAL(CalibrationChanged(SensorCalibrationSettings*)), this, SLOT(SetSensorCalibration(SensorCalibrationSettings*)));
 }
 
 void MainWindow::setColourTheme(ColourScheme newColors)
@@ -556,7 +556,7 @@ void MainWindow::openLog(const QString& fileName)
         LogReader->openFile(fileName);
         LogReader->firstFrame();
     }
-    SensorCalibration calibration;
+    SensorCalibrationSettings calibration;
     glManager.writeExpectedViewToDisplay(NULL, &calibration, GLDisplay::ExpectedProjection);
 }
 
@@ -801,9 +801,12 @@ void MainWindow::selectFrame()
     return;
 }
 
-void MainWindow::SetSensorCalibration(SensorCalibration* new_calibration)
+void MainWindow::SetSensorCalibration(SensorCalibrationSettings* new_calibration)
 {
-    glManager.writeExpectedViewToDisplay(LogReader->GetSensorData(), new_calibration, GLDisplay::ExpectedProjection);
+    if(LogReader->numFrames() > 0)
+    {
+        glManager.writeExpectedViewToDisplay(LogReader->GetSensorData(), new_calibration, GLDisplay::ExpectedProjection);
+    }
 }
 
 int MainWindow::getNumMdiWindowType(const QString& windowType)
