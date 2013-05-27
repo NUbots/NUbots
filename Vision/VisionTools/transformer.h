@@ -7,6 +7,7 @@
 #include "Tools/Math/Vector3.h"
 #include "Tools/Math/Matrix.h"
 #include <vector>
+#include "Infrastructure/SensorCalibration.h"
 
 using std::vector;
 
@@ -14,8 +15,22 @@ class Transformer
 {
     friend class VisionBlackboard;
     friend class DataWrapper;
+    friend class SensorCalibrationWidget;
 public:
     Transformer();
+    Transformer(const SensorCalibration& calibration)
+    {
+        setCalibration(calibration);
+    }
+
+    void setCalibration(const SensorCalibration& calibration)
+    {
+        sensor_calibration = calibration;
+        preCalculateTransforms();
+    }
+    SensorCalibration calibration(){return sensor_calibration;}
+
+    void preCalculateTransforms();
 
     //2D distortion transform
     Vector2<double> correctDistortion(const Vector2<double>& pt);
@@ -37,6 +52,16 @@ public:
     double distanceToPoint(double bearing, double elevation) const;
     double distanceToPoint(const GroundPoint& gp) const;
     //double distanceToPoint(double bearing, double elevation) const;
+
+    /*!
+    * @brief Distance to point calculation. Calculates the distance, bearing and elevation of an point based
+    * on the position in the pixel in the image and the camera position.
+    * @param x pixel x-position.
+    * @param y pixel y-position.
+    * @param object_height The height of the object or point at the pixel we are measuring. (default = 0.0) ie ground level.
+    * @return The 3d vector containing the distance, bearing and elevation to the point.
+    */
+    Vector3<double> distanceToPoint(unsigned int x_pixel, unsigned int y_pixel, double object_height=0.0);
 
     bool isScreenToGroundValid() const;
 
@@ -60,6 +85,8 @@ private:
     void setCamParams(Vector2<double> imagesize,
                       Vector2<double> fov);
 
+    void setSensors(double new_head_pitch, double new_head_yaw, double new_body_roll, double new_body_pitch, Vector3<double> new_neck_position);
+
 private:
     Vector2<double> FOV;
     double effective_camera_dist_pixels;
@@ -81,6 +108,15 @@ private:
     bool camera_height_valid;   //! @variable Whether the camera height is valid.
     double body_pitch;           //! @variable The body pitch angle.
     bool body_pitch_valid;      //! @variable Whether the body pitch is valid.
+
+    // New for transforms.
+    SensorCalibration sensor_calibration;
+    Matrix camVector;
+    Matrix camV2RobotRotation;
+    double head_pitch;
+    double head_yaw;
+    double body_roll;
+    Vector3<double> neck_position;
 };
 
 #endif // TRANSFORMER_H
