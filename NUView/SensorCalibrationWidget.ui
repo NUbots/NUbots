@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>280</width>
-    <height>315</height>
+    <width>262</width>
+    <height>393</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>280</width>
+    <width>250</width>
     <height>300</height>
    </size>
   </property>
@@ -22,8 +22,8 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>130</y>
+     <x>80</x>
+     <y>110</y>
      <width>171</width>
      <height>27</height>
     </rect>
@@ -60,8 +60,8 @@
   <widget class="QWidget" name="layoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>190</y>
+     <x>80</x>
+     <y>170</y>
      <width>171</width>
      <height>27</height>
     </rect>
@@ -95,8 +95,8 @@
   <widget class="QWidget" name="layoutWidget_3">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>230</y>
+     <x>100</x>
+     <y>200</y>
      <width>151</width>
      <height>27</height>
     </rect>
@@ -130,8 +130,8 @@
   <widget class="QWidget" name="layoutWidget_5">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>260</y>
+     <x>100</x>
+     <y>230</y>
      <width>151</width>
      <height>27</height>
     </rect>
@@ -233,7 +233,7 @@
     <item>
      <widget class="QLabel" name="label_field_ori">
       <property name="text">
-       <string>Field Position Orientation</string>
+       <string>Field Pos. Orientation</string>
       </property>
      </widget>
     </item>
@@ -255,11 +255,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>160</y>
+     <x>80</x>
+     <y>140</y>
      <width>171</width>
      <height>27</height>
     </rect>
@@ -289,6 +289,75 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>260</y>
+     <width>201</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Camera</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="comboBox_camera_select">
+      <item>
+       <property name="text">
+        <string>Darwin</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>DarwinWebots</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QPushButton" name="loadButton">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>350</y>
+     <width>114</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Open...</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="saveButton">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>350</y>
+     <width>114</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save...</string>
+   </property>
+  </widget>
+  <widget class="QTextBrowser" name="textOutput">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>290</y>
+     <width>241</width>
+     <height>61</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <resources/>
