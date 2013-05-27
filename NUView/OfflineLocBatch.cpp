@@ -230,6 +230,7 @@ void OfflineLocBatch::writeReport()
     report_path = QFileInfo(report_path).absoluteDir().filePath(filename);
     QDir new_path;
     new_path.mkpath(QFileInfo(report_path).absoluteDir().path());
+    qDebug() << "Writing report: " << report_path;
     m_report_writer->WriteReport(m_offline_loc, report_path);
 }
 
