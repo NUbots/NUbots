@@ -153,26 +153,29 @@ void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const C
 {
     const vector<vector<ColourSegment> >& segments = scans.getSegments();
     vector<ColourSegment>::const_iterator it;
-    
+
     //loop through each scan
     BOOST_FOREACH(const vector<ColourSegment>& vs, segments) {
-        //move down segments in scan pairwise
-        it = vs.begin();
-        //first check start pair alone
-        if(rule.match(ColourTransitionRule::nomatch, *it, *(it+1))) {
-            matches.push_back(*it);
-        }
-        it++;
-        //then check the rest in triplets
-        while(it < vs.end()-1) {
-            if(rule.match(*(it-1), *it, *(it+1))) {
+        // Only check for multiple segments
+        if(vs.size() > 1) {
+            //move down segments in scan pairwise
+            it = vs.begin();
+            //first check start pair alone
+            if(rule.match(ColourTransitionRule::nomatch, *it, *(it+1))) {
                 matches.push_back(*it);
             }
             it++;
-        }
-        //lastly check final pair alone
-        if(rule.match(*(it-1), *it, ColourTransitionRule::nomatch)) {
-            matches.push_back(*it);
+            //then check the rest in triplets
+            while(it < vs.end() - 1) {
+                if(rule.match(*(it-1), *it, *(it+1))) {
+                    matches.push_back(*it);
+                }
+                it++;
+            }
+            //lastly check final pair alone
+            if(rule.match(*(it-1), *it, ColourTransitionRule::nomatch)) {
+                matches.push_back(*it);
+            }
         }
     }
 }
