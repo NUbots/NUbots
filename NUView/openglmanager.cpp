@@ -1009,22 +1009,24 @@ void OpenglManager::DrawArc(float cx, float cy, float r, float start_angle, floa
     glEnd();
 }
 
-void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, SensorCalibration* calibration, GLDisplay::display displayId)
+void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, SensorCalibrationSettings* calibration, GLDisplay::display displayId)
 {
-    const float fov_horizontal = 60.0;
-    const float fov_vertical = 46.0;
+    if(!SensorData or !calibration) return;
+    // From webots, need to change for robot image.
+    const float fov_horizontal = calibration->m_fov.x;
+    const float fov_vertical = calibration->m_fov.y;
 
     // Varibles for orientations.
-    float camera_roll = calibration->camera_roll_offset;
-    float camera_pitch = calibration->camera_pitch_offset;
-    float camera_yaw = calibration->camera_yaw_offset;
+    float camera_roll = calibration->m_calibration.m_camera_angle_offset.x;
+    float camera_pitch = calibration->m_calibration.m_camera_angle_offset.y;
+    float camera_yaw = calibration->m_calibration.m_camera_angle_offset.z;
 
     float head_roll = 0.f;
     float head_pitch = 0.f;
     float head_yaw = 0.f;
 
-    float body_roll = calibration->body_roll_offset;
-    float body_pitch = calibration->body_pitch_offset;
+    float body_roll = calibration->m_calibration.m_body_angle_offset.x;
+    float body_pitch = calibration->m_calibration.m_body_angle_offset.y;
     float body_yaw = 0.f;
 
 
@@ -1081,14 +1083,12 @@ void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, 
         {
             head_roll += temp;
         }
-//        if(SensorData->getOrientation(temp_vec))
-//        {
-//            body_roll += temp_vec[0];
-//            body_pitch += temp_vec[1];
-//            body_yaw += temp_vec[2];
-
-//            std::cout << body_roll << ", " << body_pitch << ", " << body_yaw << std::endl;
-//        }
+        if(SensorData->getOrientation(temp_vec))
+        {
+            body_roll += temp_vec[0];
+            body_pitch += temp_vec[1];
+            body_yaw += temp_vec[2];
+        }
         // Camera Height
 //        if(SensorData->getCameraHeight(temp))
 //        {

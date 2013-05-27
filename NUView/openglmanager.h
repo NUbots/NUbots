@@ -50,7 +50,7 @@ class ClassifiedImage;
 class Horizon;
 class NUSensorsData;
 class KF;
-class SensorCalibration;
+class SensorCalibrationSettings;
 
 class OpenglManager : public QGLWidget
 {
@@ -196,7 +196,7 @@ public:
         */
         void clearAllDisplays();
 
-        void writeExpectedViewToDisplay(const NUSensorsData *SensorData, SensorCalibration* calibration, GLDisplay::display displayId);
+        void writeExpectedViewToDisplay(const NUSensorsData *SensorData, SensorCalibrationSettings* calibration, GLDisplay::display displayId);
 
     public:
         /*!
