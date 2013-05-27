@@ -523,6 +523,13 @@ void VisionBlackboard::update()
     m_transformer.setCamParams(Vector2<double>(original_image->getWidth(), original_image->getHeight()),
                                wrapper->getCameraFOV());
 
+    // ++++++++ TODO: SHANNON - MAKE THIS CORRECT +++++++++++
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    m_transformer.setSensors(camera_pitch, camera_yaw, 0.0, body_pitch, Vector3<double>(0.0, 0.0, 39.22));
+    m_transformer.setCalibration(SensorCalibration());
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     kinematics_horizon = wrapper->getKinematicsHorizon();
     checkKinematicsHorizon();
         
