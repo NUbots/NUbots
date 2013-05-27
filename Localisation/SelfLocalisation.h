@@ -37,6 +37,12 @@ class IWeightedKalmanFilter;
 class KFBuilder;
 class MultivariateGaussian;
 
+struct ProcessingRequiredState
+{
+    bool time;
+    bool measurement;
+};
+
 class SelfLocalisation: public TimestampedData
 {
     public:
@@ -125,7 +131,7 @@ class SelfLocalisation: public TimestampedData
         // Model Reset Functions
         void initSingleModel(float x, float y, float heading);
         void initBallModel(IWeightedKalmanFilter* ball_model);
-        bool CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
+        ProcessingRequiredState CheckGameState(bool currently_incapacitated, const GameInformation *game_info);
         void doInitialReset(GameInformation::TeamColour team_colour);
         void doSingleInitialReset(GameInformation::TeamColour team_colour);
         void doSingleReset();

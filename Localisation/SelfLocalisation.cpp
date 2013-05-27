@@ -271,7 +271,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
 #endif
 
     // Check if processing is required.
-    bool processing_required = CheckGameState(sensor_data->isIncapacitated(), gameInfo);
+    ProcessingRequiredState processing_required = CheckGameState(sensor_data->isIncapacitated(), gameInfo);
 
     // retrieve gps data
     if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
@@ -283,7 +283,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     vector<float> odo;
     bool odom_ok = sensor_data->getOdometry(odo);
 
-    if(processing_required == false)
+    if(processing_required.measurement == false and processing_required.time == false)
     {
         #if LOC_SUMMARY_LEVEL > 0
         m_frame_log << "Processing Cancelled." << std::endl;
@@ -305,7 +305,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     }
 #else
     prof.split("Initial Processing");
-    if (odom_ok)
+    if (odom_ok and processing_required.time)
     {
         float fwd = odo[0];
         float side = odo[1];
@@ -328,32 +328,34 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     }
     prof.split("Time Update");
 
-    #if LOC_SUMMARY_LEVEL > 0
-    m_frame_log << "Observation Update:" << std::endl;
-    int objseen = 0;
-    bool seen;
-    std::vector<StationaryObject>::iterator s_it = fobs->stationaryFieldObjects.begin();
-    while(s_it != fobs->stationaryFieldObjects.end())
+    if(processing_required.measurement)
     {
-        seen = s_it->isObjectVisible();
-        if(seen)
-            ++objseen;
-        ++s_it;
-    }
-    m_frame_log << "Stationary Objects: " << objseen << std::endl;
+        #if LOC_SUMMARY_LEVEL > 0
+        m_frame_log << "Observation Update:" << std::endl;
+        int objseen = 0;
+        bool seen;
+        std::vector<StationaryObject>::iterator s_it = fobs->stationaryFieldObjects.begin();
+        while(s_it != fobs->stationaryFieldObjects.end())
+        {
+            seen = s_it->isObjectVisible();
+            if(seen)
+                ++objseen;
+            ++s_it;
+        }
+        m_frame_log << "Stationary Objects: " << objseen << std::endl;
 
-    objseen = 0;
-    for (unsigned int i=0; i < fobs->mobileFieldObjects.size(); i++)
-    {
-        if(fobs->mobileFieldObjects[i].isObjectVisible()) ++objseen;
-    }
-    m_frame_log << "Mobile Objects: " << objseen << std::endl;
-    m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
-    #endif
-    ProcessObjects(fobs, time_increment);
-    prof.split("Object Update");
+        objseen = 0;
+        for (unsigned int i=0; i < fobs->mobileFieldObjects.size(); i++)
+        {
+            if(fobs->mobileFieldObjects[i].isObjectVisible()) ++objseen;
+        }
+        m_frame_log << "Mobile Objects: " << objseen << std::endl;
+        m_frame_log << "Ambiguous Objects: " << fobs->ambiguousFieldObjects.size() << std::endl;
+        #endif
 
-    ProcessObjects(fobs, time_increment);
+        ProcessObjects(fobs, time_increment);
+        prof.split("Object Update");
+    }
 
 // Shared ball stuff
     MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -513,9 +515,9 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
     prof.split("Two Object Update");
 
 #if MULTIPLE_MODELS_ON
-        bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
-        bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
-        removeAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
+//        bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
+//        bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
+//        removeAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
         // Do Ambiguous objects.
 
         BOOST_FOREACH(AmbiguousObject& ambigous_obj, fobs->ambiguousFieldObjects)
@@ -763,8 +765,12 @@ void SelfLocalisation::WriteModelToObjects(const IWeightedKalmanFilter* model, F
     @return Returns True if processing should be performed. False if it should not.
 
  */
-bool SelfLocalisation::CheckGameState(bool currently_incapacitated, const GameInformation* game_info)
+ProcessingRequiredState SelfLocalisation::CheckGameState(bool currently_incapacitated, const GameInformation* game_info)
 {
+    ProcessingRequiredState result;
+    result.time = true;
+    result.measurement = true;
+
     //GameInformation::TeamColour team_colour = game_info->getTeamColour();
     GameInformation::TeamColour team_colour = GameInformation::RedTeam;
     GameInformation::RobotState current_state = game_info->getCurrentState();
@@ -782,39 +788,55 @@ bool SelfLocalisation::CheckGameState(bool currently_incapacitated, const GameIn
 
     if (current_state == GameInformation::InitialState or current_state == GameInformation::FinishedState or current_state == GameInformation::PenalisedState)
     {   // if we are in initial, finished, penalised or substitute states do not do localisation
-        m_previous_game_state = current_state;
-        m_previously_incapacitated = currently_incapacitated;
         #if LOC_SUMMARY_LEVEL > 0
         m_frame_log << "Robot in non-processing state: " << GameInformation::stateName(current_state) << std::endl;
         #endif
-        return false;
+        result.time = false;
+        result.measurement = false;
     }
-
-    if (current_state == GameInformation::ReadyState)
+    else if (current_state == GameInformation::ReadyState)
     {   // if are in ready. If previously in initial or penalised do a reset. Also reset if fallen over.
         if (m_previous_game_state == GameInformation::InitialState)
+        {
             doInitialReset(team_colour);
+            result.time = false;
+        }
         else if (m_previous_game_state == GameInformation::PenalisedState)
+        {
             doPenaltyReset();
+            result.time = false;
+        }
         else if (m_previously_incapacitated and not currently_incapacitated)
+        {
             doFallenReset();
+            result.time = false;
+        }
     }
     else if (current_state == GameInformation::SetState)
     {   // if we are in set look for manual placement, if detected then do a reset.
         if (m_previously_incapacitated and not currently_incapacitated)
+        {
             doSetReset(team_colour, game_info->getPlayerNumber(), game_info->haveKickoff());
+            result.time = false;
+        }
     }
     else
     {   // if we are playing. If previously penalised do a reset. Also reset if fallen over
         if (m_previous_game_state == GameInformation::PenalisedState)
+        {
             doPenaltyReset();
+            result.time = false;
+        }
         else if (m_previously_incapacitated and not currently_incapacitated)
+        {
             doFallenReset();
+            result.time = false;
+        }
     }
     
     m_previously_incapacitated = currently_incapacitated;
     m_previous_game_state = current_state;
-    return true;
+    return result;
 }
 
 void SelfLocalisation::initSingleModel(float x, float y, float heading)
@@ -827,7 +849,7 @@ void SelfLocalisation::initSingleModel(float x, float y, float heading)
     positions.reserve(1);
     MultivariateGaussian temp(3);
     temp.setMean(mean_matrix(x,y,heading));
-    temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*2*PI*2*PI));
+    temp.setCovariance(covariance_matrix(150.0f*150.0f, 100.0f*100.0f, 2*PI));
     positions.push_back(temp);
     InitialiseModels(positions);
     initBallModel(m_ball_filter);
@@ -950,7 +972,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     positions.push_back(temp);
 
     // Postition 7
-    temp.setCovariance(covariance_matrix(pow(200.0f,2), pow(150.0f,2), pow(1.f,2)));
+    temp.setCovariance(covariance_matrix(pow(150.0f,2), pow(100.0f,2), pow(1.f,2)));
     temp.setMean(mean_matrix(centre_x, 0.0f, centre_heading));
     positions.push_back(temp);
 
@@ -1581,6 +1603,7 @@ bool SelfLocalisation::ballUpdate(const MobileObject& ball)
         }
         m_prev_ball_update_time = m_timestamp;
     }
+    return false;
 }
 
 /*! @brief Prunes the models using a selectable method. This is a interface function to access a variety of methods.
