@@ -1,9 +1,10 @@
-#ifndef _Matrix_h_DEFINED
-#define _Matrix_h_DEFINED
+#pragma once
 
 #include <vector>
 #include <math.h>
 #include <iomanip>
+#include "Vector2.h"
+#include "Vector3.h"
 
 using std::ostream;
 
@@ -23,6 +24,12 @@ public:
 	Matrix(int m, int n, bool I=false);
 	~Matrix();
 	Matrix(const Matrix& a);
+
+    Matrix(const Vector2<float>& vector);
+    Matrix(const Vector2<double>& vector);
+    Matrix(const Vector3<float>& vector);
+    Matrix(const Vector3<double>& vector);
+
 	
     Matrix transp() const; // Matrix Transpose
     Matrix getRow(int index) const; // Get Row
@@ -96,6 +103,8 @@ double dot(const Matrix& mat1, const Matrix& mat2);
 void WriteMatrix(std::ostream& out, const Matrix &mat);
 Matrix ReadMatrix(std::istream& in);
 
-#endif
+Matrix xRotMatrix(double angle);
+Matrix yRotMatrix(double angle);
+Matrix zRotMatrix(double angle);
 
 

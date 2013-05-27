@@ -49,6 +49,44 @@ Matrix::Matrix(const Matrix& a)
 	memcpy(X,a.X,sizeof(double)*M*N);
 }
 
+Matrix::Matrix(const Vector2<float>& vector)
+{
+    M=2;
+    N=1;
+    X=new double [M*N];
+    X[0] = (double)vector.x;
+    X[1] = (double)vector.y;
+}
+
+Matrix::Matrix(const Vector2<double>& vector)
+{
+    M=2;
+    N=1;
+    X=new double [M*N];
+    X[0] = (double)vector.x;
+    X[1] = (double)vector.y;
+}
+
+Matrix::Matrix(const Vector3<float>& vector)
+{
+    M=3;
+    N=1;
+    X=new double [M*N];
+    X[0] = (double)vector.x;
+    X[1] = (double)vector.y;
+    X[2] = (double)vector.z;
+}
+
+Matrix::Matrix(const Vector3<double>& vector)
+{
+    M=3;
+    N=1;
+    X=new double [M*N];
+    X[0] = (double)vector.x;
+    X[1] = (double)vector.y;
+    X[2] = (double)vector.z;
+}
+
 // Destructor
 Matrix::~Matrix()
 {
@@ -826,6 +864,42 @@ Matrix ReadMatrix(std::istream& in)
             result[i][j] = element;
         }
     }
+    return result;
+}
+
+Matrix xRotMatrix(double angle)
+{
+    Matrix result = Matrix(3,3,true);
+    const double sinA = sin(angle);
+    const double cosA = cos(angle);
+    result[1][1] = cosA;
+    result[1][2] = -sinA;
+    result[2][1] = sinA;
+    result[2][2] = cosA;
+    return result;
+}
+
+Matrix yRotMatrix(double angle)
+{
+    Matrix result = Matrix(3,3,true);
+    const double sinA = sin(angle);
+    const double cosA = cos(angle);
+    result[0][0] = cosA;
+    result[0][2] = sinA;
+    result[2][0] = -sinA;
+    result[2][2] = cosA;
+    return result;
+}
+
+Matrix zRotMatrix(double angle)
+{
+    Matrix result = Matrix(3,3,true);
+    const double sinA = sin(angle);
+    const double cosA = cos(angle);
+    result[0][0] = cosA;
+    result[0][1] = -sinA;
+    result[1][0] = sinA;
+    result[1][1] = cosA;
     return result;
 }
 
