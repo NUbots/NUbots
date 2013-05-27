@@ -101,7 +101,7 @@ Matrix IMUModel::accelerometerMeasurementEquation(const Matrix& state, const Mat
     Matrix g_vec(3,1,false);
     g_vec[0][0] = 0.f;
     g_vec[1][0] = 0.f;
-    g_vec[2][0] = 980.7f;
+    g_vec[2][0] = -980.7f;
 
     const double body_roll = state[kstates_body_angle_x][0];
     const double body_pitch = state[kstates_body_angle_y][0];
@@ -111,16 +111,16 @@ Matrix IMUModel::accelerometerMeasurementEquation(const Matrix& state, const Mat
     sinA = sin(body_roll);
     cosA = cos(body_roll);
     body_roll_rot[1][1] = cosA;
-    body_roll_rot[1][2] = -sinA;
-    body_roll_rot[2][1] = sinA;
+    body_roll_rot[1][2] = sinA;
+    body_roll_rot[2][1] = -sinA;
     body_roll_rot[2][2] = cosA;
 
     Matrix body_pitch_rot = Matrix(3,3,true);
     sinA = sin(body_pitch);
     cosA = cos(body_pitch);
     body_pitch_rot[0][0] = cosA;
-    body_pitch_rot[0][2] = sinA;
-    body_pitch_rot[2][0] = -sinA;
+    body_pitch_rot[0][2] = -sinA;
+    body_pitch_rot[2][0] = sinA;
     body_pitch_rot[2][2] = cosA;
 
     Matrix result = body_roll_rot * body_pitch_rot * g_vec;
