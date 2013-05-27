@@ -159,7 +159,7 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
         case Qt::Key_R:
             viewTranslation[0] = 0.0f;
             viewTranslation[1] = 0.0f;
-            viewTranslation[2] = -700.0f;
+            viewTranslation[2] = -800.0f;
             xRot = 0;
             yRot = 0;
             zRot = 0;
@@ -820,7 +820,9 @@ void locWmGlDisplay::DrawModelMarkers(const MultivariateGaussian& model, const Q
     float mean_x = model.mean(RobotModel::kstates_x);
     float mean_y = model.mean(RobotModel::kstates_y);
     float mean_angle = model.mean(RobotModel::kstates_heading);
-    drawRobotMarker(modelColor, mean_x, mean_y, mean_angle);
+
+    QColor marker_colour(modelColor);
+    drawRobotMarker(marker_colour, mean_x, mean_y, mean_angle);
 
     Matrix cov = model.covariance();
     float xx = cov[RobotModel::kstates_x][RobotModel::kstates_x];
@@ -830,7 +832,7 @@ void locWmGlDisplay::DrawModelMarkers(const MultivariateGaussian& model, const Q
 
     QColor outline(modelColor);
     float model_draw_alpha = modelColor.alphaF();
-    outline.setAlphaF(std::max(model_draw_alpha, c_min_display_alpha / 255.0f));
+    //outline.setAlphaF(std::max(model_draw_alpha, c_min_display_alpha / 255.0f));
     QColor fill(modelColor);
     fill.setAlpha(std::max((int)(100 * model_draw_alpha), c_min_display_alpha));
     DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
@@ -868,11 +870,24 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     {
         QString displayString("Model %1 (%2%)");
         std::list<IWeightedKalmanFilter*> models = localisation.allModels();
+
+        // find the maximum weighting so that we can normalise.
+        float max_weight = 0.f;
         for(std::list<IWeightedKalmanFilter*>::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
         {
             if((*model_it)->active())
             {
-                int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->getFilterWeight()));
+                float weight = (*model_it)->getFilterWeight();
+                if(weight > max_weight)
+                    max_weight = weight;
+            }
+        }
+
+        for(std::list<IWeightedKalmanFilter*>::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
+        {
+            if((*model_it)->active())
+            {
+                int alpha = std::max(c_min_display_alpha, (int)(255.f * (*model_it)->getFilterWeight() / max_weight));
                 drawColor.setAlpha(alpha);
                 DrawModelMarkers((*model_it)->estimate(), drawColor);
                 if(m_showBall)
