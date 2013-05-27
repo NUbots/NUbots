@@ -29,7 +29,7 @@ void GreenHorizon::set(const vector< Vector2<double> > &initial_points, Vector2<
         double y = interpolate(original_points.at(0), original_points.at(1), 0);
         //clamp to image vertical bounds
         y = std::max(y, 0.0);
-        y = std::min(y, image_size.y);
+        y = std::min(y, image_size.y - 1);
         original_points.insert(original_points.begin(), Vector2<double>(0, y));
     }
     if(original_points.back().x < image_size.x - 1) {
