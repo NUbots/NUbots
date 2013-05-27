@@ -8,6 +8,7 @@
 #include "Tools/Math/Rectangle.h"
 #include "debug.h"
 #include "Tools/Math/General.h"
+#include "Tools/Math/Vector3.h"
 
 class Kinematics
 {
@@ -232,6 +233,16 @@ public:
     * @return A pointer to the current robot model.
     */
     const RobotModel* getModel() const {return &m_endEffectors;}
+
+    /*!
+    * @brief Calculates the position of the neck.
+    *
+    * @param LeftFootTransform The transform matrix from the origin to the left foot.
+    * @param RightFootTransform The transform matrix from the origin to the right foot.
+    * @param neckOffset The offset from the origin to the neck.
+    * @return The three dimensional (x, y, z) position of the neck.
+    */
+    static Vector3<double> CalculateNeckPosition(const Matrix& LeftFootTransform, const Matrix& RightFootTransform, Vector3<double> neckOffset);
 
 protected:
     RobotModel m_endEffectors;  //!< Robot model made up of a list of end effectors.

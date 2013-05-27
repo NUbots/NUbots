@@ -346,9 +346,9 @@ Vector3<double> Kinematics::TransformPosition(const Matrix& Camera2GroundTransfo
 
     // Construct the result
     Vector3<double> result;
-    result[0] = resultMatrix[0][0];
-    result[1] = resultMatrix[1][0];
-    result[2] = resultMatrix[2][0];
+    result.x = resultMatrix[0][0];
+    result.y = resultMatrix[1][0];
+    result.z = resultMatrix[2][0];
 
     return result;
 }
@@ -400,4 +400,14 @@ Vector2<float> Kinematics::TransformPositionToFoot(const Matrix& FootTransformMa
     returnResult.x = result[0][0];
     returnResult.y = result[1][0];
     return returnResult;
+}
+
+Vector3<double> Kinematics::CalculateNeckPosition(const Matrix& LeftFootTransform, const Matrix& RightFootTransform, Vector3<double> neckOffset)
+{
+    Matrix translation = TransformMatrices::Translation(neckOffset.x, neckOffset.y, neckOffset.z);
+    double leftHeight = (InverseMatrix(LeftFootTransform) * translation)[2][3];
+    double rightHeight = (InverseMatrix(RightFootTransform) * translation)[2][3];
+    double height = max(leftHeight, rightHeight);
+
+    return Vector3<double>(0.0, 0.0, height);
 }
