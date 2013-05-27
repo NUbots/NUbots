@@ -486,6 +486,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
         std::vector<float> amb_exp_distance;
         std::vector<float> amb_exp_heading;
         std::vector<unsigned int> amb_decision_id;
+        std::vector<std::string> states;
 
         unsigned int total_amb_obj = 0;
 
@@ -505,6 +506,8 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             NUSensorsData tempSensor = (*sensors);
             tempTeamInfo = m_log_reader->GetTeamInfo();
             tempGameInfo = m_log_reader->GetGameInfo();
+
+            states.push_back(tempGameInfo->stateName(tempGameInfo->getCurrentState()));
 
             vector<float> gps;
             float compass;
@@ -735,6 +738,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
 //                output_file << Tabbing(tab_depth++) << BeginTag("item") << std::endl;
                 output_file << Tabbing(tab_depth++) << BeginTag("measured_position") << std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("frame") << frame_id << EndTag("frame") <<std::endl;
+                output_file << Tabbing(tab_depth) << BeginTag("gamestate") << states[frame_id] << EndTag("gamestate") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("x") << measured_positions[frame_id].x << EndTag("x") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("y") << measured_positions[frame_id].y << EndTag("y") <<std::endl;
                 output_file << Tabbing(tab_depth) << BeginTag("heading") << measured_positions[frame_id].z << EndTag("heading") <<std::endl;
