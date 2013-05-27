@@ -132,7 +132,9 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   //p.speedMaxBackwards = 50 * 2.f;
   //p.speedMaxChange = Pose2D(0.3f, 8.f, 20.f);
 
-  //p.observerMeasurementMode = Parameters::torsoMatrix;
+  // Parameters::torsoMatrix Uses the orientation sensor in the model.
+  // Parameters::robotModel Uses the forward kinematics in the model.
+//  p.observerMeasurementMode = Parameters::torsoMatrix;
   p.observerMeasurementMode = Parameters::robotModel;
   p.observerMeasurementDelay = 40.f;
 
@@ -584,32 +586,13 @@ void WalkingEngine::computeMeasuredStance()
 {
     float heightLeg5Joint = 45.19;
     std::vector<float> orientation_sensors;
-    bool validKinematics = m_data->getOrientation(orientation_sensors);
-
-//    std::vector<float> accelerations;
-//    m_data->getAccelerometer(accelerations);
-//    float roll = mathGeneral::PI/2.f + atan2(accelerations[2], accelerations[1]);
-//    float pitch = mathGeneral::PI/2.f + atan2(accelerations[2], accelerations[0]);
-
-
-    std::vector<float> accelerations;
-    m_data->getAccelerometer(accelerations);
-    Vector3<> accel(accelerations[0], accelerations[1], accelerations[2]);
-    float roll = -asin(accel.y / accel.abs());
-    float pitch = asin(accel.x / accel.abs());
-
-
-//    std::cout << "pitch: " << pitch << std::endl;
-//    std::cout << "roll: " << roll << std::endl;
-//    std::cout << "accel: [" << accelerations[0] << ", " << accelerations[1] << ", " << accelerations[2] << "]" << std::endl;
-//    std::cout << "orientation: [" << orientation_sensors[0] << ", " << orientation_sensors[1] << "]" << std::endl;
-    const Vector3<> acc_axis(roll, pitch, 0);
+    m_data->getOrientation(orientation_sensors);
     const Vector3<> axis(orientation_sensors[0], orientation_sensors[1], 0);
-    RotationMatrix torso(acc_axis);
+    RotationMatrix torso(axis);
 
   switch(p.observerMeasurementMode)
   {
-  case Parameters::robotModel:
+  case Parameters::robotModel:  // This method uses the kinematic model
   {
 
     Pose3D comToLeft = Pose3D(-theRobotModel.centerOfMass).conc(theRobotModel.limbs[MassCalibration::footLeft]).translate(0.f, 0.f, -heightLeg5Joint);
@@ -634,7 +617,7 @@ void WalkingEngine::computeMeasuredStance()
   }
   break;
 
-  default:
+  default:  // This method uses the body orientation
     measuredLeftToCom = -Pose3D(torso).translate(-theRobotModel.centerOfMass).conc(theRobotModel.limbs[MassCalibration::footLeft]).translate(0.f, 0.f, -heightLeg5Joint).translation;
     measuredRightToCom = -Pose3D(torso).translate(-theRobotModel.centerOfMass).conc(theRobotModel.limbs[MassCalibration::footRight]).translate(0.f, 0.f, -heightLeg5Joint).translation;
     break;
