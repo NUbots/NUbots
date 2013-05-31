@@ -191,7 +191,7 @@ void DarwinWebotsSensors::copyFromAccelerometerAndGyro()
     //for (size_t i=0; i<numdimensions; i++)
     accelerometerdata[0] = (centrevalue-(buffer[1]))/VALUETOACCEL_RATIO;
 	accelerometerdata[1] = (centrevalue-(buffer[0]))/VALUETOACCEL_RATIO; 
-	accelerometerdata[2] = (centrevalue-(buffer[2]))/VALUETOACCEL_RATIO;  
+    accelerometerdata[2] = -(centrevalue-(buffer[2]))/VALUETOACCEL_RATIO;
 
 
 	// convert from m/s/s to cm/s/s, and swap sign as it is incorrect in webots
