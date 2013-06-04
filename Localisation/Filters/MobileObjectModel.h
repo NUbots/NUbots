@@ -44,6 +44,7 @@ public:
     */
     Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type);
     Matrix observedMeasurementEquation(const Matrix& state, const Matrix& measurementArgs);
+    Matrix sharedMeasurementEquation(const Matrix& state, const Matrix& measurementArgs);
 
     Matrix measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type);
     void limitState(Matrix& state){(void)(state);}
