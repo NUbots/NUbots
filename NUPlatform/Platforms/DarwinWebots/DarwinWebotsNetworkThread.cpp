@@ -96,13 +96,13 @@ void DarwinWebotsNetworkThread::convertToGamePacket(const RoboCupGameControlData
     
     m_game_packet->teams[0].teamNumber = data->teams[0].teamNumber;
     m_game_packet->teams[0].teamColour = data->teams[0].teamColour;
-    m_game_packet->teams[0].goalColour = 0;
+    m_game_packet->teams[0].goalColour = data->teams[0].teamColour;
     m_game_packet->teams[0].score = data->teams[0].score;    
     memcpy(m_game_packet->teams[0].players, data->teams[0].players, sizeof(data->teams[0].players));
     
     m_game_packet->teams[1].teamNumber = data->teams[1].teamNumber;
     m_game_packet->teams[1].teamColour = data->teams[1].teamColour;
-    m_game_packet->teams[1].goalColour = 0;
+    m_game_packet->teams[1].goalColour = data->teams[1].teamColour;
     m_game_packet->teams[1].score = data->teams[1].score; 
     memcpy(m_game_packet->teams[1].players, data->teams[1].players, sizeof(data->teams[1].players));
 }
