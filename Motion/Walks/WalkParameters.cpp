@@ -480,6 +480,7 @@ void WalkParameters::load(const string& name)
     {
         file >> this;
         file.close();
+        debug << "WalkParameters::load(): " << filepath << " Loaded sucessfully." << endl;
     }
     else
     {
