@@ -68,8 +68,8 @@ Behaviour::Behaviour()
         m_behaviour = new IKTestProvider(this);
         //m_behaviour = new SoccerProvider(this);
     #elif defined(TARGET_IS_DARWINWEBOTS)
-        //m_behaviour = new SoccerProvider(this);
-        m_behaviour = new ZombieProvider(this);
+        m_behaviour = new SoccerProvider(this);
+        //m_behaviour = new ZombieProvider(this);
     #elif defined(TARGET_IS_BEAR)
         m_behaviour = new BearModeProvider(this);
     #elif defined(TARGET_IS_CYCLOID)
