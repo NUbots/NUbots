@@ -77,6 +77,18 @@ Matrix MobileObjectModel::processEquation(const Matrix& sigma_point, double delt
  */
 Matrix MobileObjectModel::measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type)
 {
+    if(type == kobserved_measurement)
+    {
+        return observedMeasurementEquation(state, measurementArgs);
+    }
+    else if(type == kshared_measurement)
+    {
+        return sharedMeasurementEquation(state, measurementArgs);
+    }
+}
+
+Matrix MobileObjectModel::observedMeasurementEquation(const Matrix& state, const Matrix& measurementArgs)
+{
     // measurementArgs not required, since the measurements are only reliant on the current state.
     // Measurement is to be in polar coordinates (distance, theta).
 
@@ -95,6 +107,26 @@ Matrix MobileObjectModel::measurementEquation(const Matrix& state, const Matrix&
     Matrix expected_measurement(2,1,false);
     expected_measurement[0][0] = distance;
     expected_measurement[1][0] = angle;
+
+    return expected_measurement;
+}
+
+Matrix MobileObjectModel::sharedMeasurementEquation(const Matrix& state, const Matrix& measurementArgs)
+{
+    // measurementArgs not required, since the measurements are only reliant on the current state.
+    // Measurement is to be in polar coordinates (distance, theta).
+
+    // measurementArgs not required, since the measurements are only reliant on the current state.
+    // Measurement is to be in polar coordinates (distance, theta).
+
+    // Get position from sigma point.
+    const double x = state[kstates_x_pos][0];
+    const double y = state[kstates_y_pos][0];
+
+    // Write to matrix for return.
+    Matrix expected_measurement(2,1,false);
+    expected_measurement[0][0] = x;
+    expected_measurement[1][0] = y;
 
     return expected_measurement;
 }

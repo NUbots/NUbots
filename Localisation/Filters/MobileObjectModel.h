@@ -15,6 +15,13 @@ public:
         kstates_total
     };
 
+    enum MeasurementType
+    {
+        kobserved_measurement,
+        kshared_measurement,
+        ktotal_measurement_types
+    };
+
     MobileObjectModel();
 
     IKFModel* Clone()
@@ -36,6 +43,7 @@ public:
       @return The expected measurment for the given conditions.
     */
     Matrix measurementEquation(const Matrix& state, const Matrix& measurementArgs, unsigned int type);
+    Matrix observedMeasurementEquation(const Matrix& state, const Matrix& measurementArgs);
 
     Matrix measurementDistance(const Matrix& measurement1, const Matrix& measurement2, unsigned int type);
     void limitState(Matrix& state){(void)(state);}

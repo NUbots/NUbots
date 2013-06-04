@@ -273,12 +273,6 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     // Check if processing is required.
     ProcessingRequiredState processing_required = CheckGameState(sensor_data->isIncapacitated(), gameInfo);
 
-    // retrieve gps data
-    if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
-    {
-        m_hasGps = true;
-    }
-
     // Retrieve odometry data
     vector<float> odo;
     bool odom_ok = sensor_data->getOdometry(odo);
@@ -288,6 +282,15 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
         #if LOC_SUMMARY_LEVEL > 0
         m_frame_log << "Processing Cancelled." << std::endl;
         #endif
+        return;
+    }
+
+    // retrieve gps data
+    if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
+    {
+        m_hasGps = true;
+        fobs->self.updateLocationOfSelf(m_gps[0], m_gps[1], m_compass, 0.1, 0.1, 0.01, false);
+//        std::cout << "Position: " << m_gps[0] << ", " << m_gps[1] << ", " << m_compass << std::endl;
         return;
     }
 
@@ -2865,6 +2868,7 @@ bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall
 
         // TODO: Do somehting that does the update.
         //m_ball_model->directUpdate(relativePosition, covariance);
+        m_ball_filter->measurementUpdate(relativePosition, covariance, Matrix(), MobileObjectModel::kshared_measurement)
 
         ++their_ball;
     }
