@@ -86,7 +86,7 @@ void NUAPI::sendVisionData() {
 
 		AmbiguousObject& ambiguous_object = *it;
 
-		std::cout << ambiguous_object.getName() << " " << ambiguous_object.isObjectVisible() << std::endl;
+		// std::cout << ambiguous_object.getName() << " " << ambiguous_object.isObjectVisible() << std::endl;
 
 		API::VisionFieldObject* api_field_object = api_vision->add_field_object();
 		populate_vision_field_object(ambiguous_object.getName(), ambiguous_object, api_field_object, API::VisionFieldObject::RECTANGLE);
