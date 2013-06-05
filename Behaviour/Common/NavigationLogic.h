@@ -116,6 +116,100 @@ public:
         
         return result;
     }
+    
+    /*! @brief Returns the position of the ball on the field.
+     */
+    static vector<float> getBallPosition() {
+        vector<float> result;
+        
+        //XXX: unimplemented
+        
+        return result;
+    }
+    
+    
+    /*! @brief Returns a defensive support (intercepting) position on the field, facing the ball.
+     */
+    static vector<float> getBallDefensePosition() {
+        const float supportDistance = 70.;
+        const float goalBoxClearance = 40.;
+        vector<float> result(3,600);
+        
+        //intialise positions
+        vector<float> ballPos = this::getBallPosition();
+        vector<float> myGoalPos = this::getOwnGoalPosition();
+        vector<float> ballToGoal(2,0);
+        
+        //calculate values
+        ballToGoal[0] = myGoalPos[0]-ballPos[0];
+        ballToGoal[1] = myGoalPos[1]-ballPos[1];
+        float ballToGoalDistance = MathGeneral::sqrt(ballToGoal[0]*ballToGoal[0]+ballToGoal[1]*ballToGoal[1]);
+        
+        float supportDistance = MathGeneral::min(supportDistance,ballToGoalDistance-goalBoxClearance);
+        
+        if (supportDistance > 0.) {
+            //calculate position
+            result[0] = ballToGoal[0]*supportDistance/(ballToGoalDistance+0.000001)+ballPos[0];
+            result[1] = ballToGoal[1]*supportDistance/(ballToGoalDistance+0.000001)+ballPos[1];
+            
+            //calculate heading
+            result[2] = atan2(-ballToGoal[1]/(ballToGoalDistance+0.000001),-ballToGoal[0]/(ballToGoalDistance+0.000001));
+        }
+        
+        return result;
+    }
+    
+    /*! @brief Returns an offensive support (passing) position on the field, angled to see the ball.
+     */
+    static vector<float> getBallOffensePosition() {
+        vector<float> result(3,0);
+        
+        //XXX: unimplemented
+        
+        return result;
+    }
+    
+     /*! @brief Returns the kickoff start position on the field.
+     */
+    static vector<float> getStartOffensePosition() {
+        //XXX: hardcoded starting positions
+        const float[][] positions={{-20,0,0}, //robot 1 - kickoff robot!
+                                   {-20,90,0}, //robot 2
+                                   {-50,-90,0}, //etc
+                                   {20,-90,0},
+                                   {-50,90,0},
+                                   {-150,0,0}}
+        vector<float> result(3,0);
+        int teamPosition = Blackboard->GameInfo->getPlayerNumber();
+        
+        result[0] = positions[teamPosition][0];
+        result[1] = positions[teamPosition][1];
+        result[2] = positions[teamPosition][2];
+        
+        
+        return result;
+    }
+    
+    /*! @brief Returns the non-kickoff start position on the field.
+     */
+    static vector<float> getStartDefensePosition() {
+        //XXX: hardcoded starting positions
+        const float[][] positions={{-70,0,0}, //robot 1 - kickoff robot!
+                                   {-20,90,0}, //robot 2
+                                   {-50,-90,0}, //etc
+                                   {20,-90,0},
+                                   {-50,90,0},
+                                   {-150,0,0}}
+        vector<float> result(3,0);
+        int teamPosition = Blackboard->GameInfo->getPlayerNumber();
+        
+        result[0] = positions[teamPosition][0];
+        result[1] = positions[teamPosition][1];
+        result[2] = positions[teamPosition][2];
+        
+        
+        return result;
+    }
 
 }
 
