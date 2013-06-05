@@ -97,7 +97,7 @@ private:
     
     doBallApproachAndKick(logic,movement,head) {
         movement->goToBall();
-        head->prioritiseBall();
+        head->prioritiseBall();        
     }
     
     goToOffensiveSupportPosition(logic,movement,head) {
