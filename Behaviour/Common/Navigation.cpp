@@ -59,15 +59,15 @@ vector<float> Navigation::generateWalk(float distance, float relative_bearing, f
     
     //check turning hysteresis
     if (m_turning < 0 and walk_bearing < -m_turn_deviation) {
-        walk_speed = min(walk_speed,m_turn_speed);
+        walk_speed = min(walk_bearing,m_turn_speed);
     } else if (m_turning > 0 and walk_bearing > m_turn_deviation) {
-        walk_speed = min(walk_speed,m_turn_speed);
+        walk_speed = min(walk_bearing,m_turn_speed);
     } else {
         walk_bearing = 0;
     }
     
     new_walk[0] = walk_speed;
-    new_walk[2] = walk_speed;
+    new_walk[2] = walk_bearing;
     return new_walk;
 }
 
@@ -81,7 +81,7 @@ float Navigation::avoidObstacles(const vector<float> position, float distance, f
     //use either localised or visual avoidance
     if (m_use_localisation_avoidance) {
         //XXX: localisation based avoidance not implemented
-        
+        //wait for localisation to track obstacles
         
     } else {
         obstacles = NavigationLogic::getVisibleObstacles();
@@ -192,12 +192,12 @@ vector<float> Navigation::goToBall(Object kickTarget = NULL) {
     //XXX: fix ball approach
     
     //must generate the walk last
-    
+    current_walk_command = generateWalk(move[0],move[1],move[2]);
     return current_walk_command;
 }
     
 
-void update() {
+void Navigation::update() {
     
     //update our calculations
     switch (current_command) 
@@ -218,3 +218,12 @@ void update() {
     //set the walkjob
     Blackboard->Jobs->addMotionJob(new WalkJob(current_walk_command[0], current_walk_command[1], current_walk_command[2]));
 }
+
+Navigation* Navigation::getInstance() {
+    //if (!Instance) {
+    static Navigation* Instance = new Navigation();
+    //}
+    return Instance;
+}
+
+
