@@ -239,32 +239,16 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
     lastVisionPolicy = fieldVisionPolicy;
 
     switch (fieldVisionPolicy) {
-        case BallFarVisionPolicy:
-            landmarkSeenFrequency = 1200;
-            ballSeenFrequency = 800;
-            ballFocusBias = 200.;
-            doPriorityListPolicy();
-            break;
-        case BallNearVisionPolicy:
-            landmarkSeenFrequency = 1400;
-            ballSeenFrequency = 600;
-            ballFocusBias = 800.;
-            doPriorityListPolicy();
-            break;
-        case BallLostVisionPolicy:
-        case RobotLostVisionPolicy:
-        case BallOnlyVisionPolicy:
-            landmarkSeenFrequency = 1000000.;
-            ballSeenFrequency = 10;
-            ballFocusBias = 1000.;
-            doPriorityListPolicy();
-            break;
-        case LandmarkOnlyVisionPolicy:
-            landmarkSeenFrequency = 10.;
-            ballSeenFrequency = 1000000.;
-            ballFocusBias = -1000.;
-            doPriorityListPolicy();
-            break;
+        case PrioritiseLocalisationPolicy:
+            doAgentBasedPolicy();//TODO:add bias to landmarks
+        case PrioritiseBallPolicy:
+            doAgentBasedPolicy();//TODO:add bias to ball
+        case LookAtBallPolicy:
+            dispatchHeadJob(&Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]);
+        case LookForBallPolicy:
+            dispatchHeadJob(&Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]);
+        case LookForFieldObjectsPolicy:
+            doAgentBasedPolicy();//TODO:add selection of landmarks only
         case TimeVSCostPriority:
             doTimeVSCostPriorityPolicy();
             break;
@@ -325,13 +309,24 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
             }
             break;
 
-        //Policy which should be used during gameplay. Simply checks the policy of the RLAgent.
+        // Simply checks the policy of the RLAgent.
         case CheckAgentPolicy:
             doCheckAgentPolicy();
             break;
     }
 
 }
+
+void  HeadBehaviour::doAgentBasedPolicy(){
+    if (actions_taken_this_state < ACTIONS_PER_STATE){
+         doRLAgentPolicy();
+         actions_taken_this_state++;
+    }else{
+        Mrlagent.saveMRLAgent(agent_filename);
+        actions_taken_this_state = 0;
+    }
+}
+
 
 /*! @brief Motivated rlagent online learning policy.
 */
@@ -515,15 +510,67 @@ vector<float> HeadBehaviour::getPercept(){
     return inputs;
 }
 
+
+
+
+/*! @brief Sets head behaviour to prioritise landmarks(==field objects).
+    Uses agent decision making.
+*/
+void HeadBehaviour::prioritiseLocalisation(){
+    current_policy = PrioritiseLocalisationPolicy;
+}
+
+/*! @brief  Sets head behaviour to prioritise ball, but not to the exclusion of all else.
+  Uses agent decision making.
+
+*/
+void HeadBehaviour::prioritiseBall(){
+    current_policy = PrioritiseBallPolicy;
+}
+
+/*! @brief  Sets head behaviour to track the ball when it is in view.
+  WARNING: Currently identical to lookForBall() - both simply assign head job and track if possible; otherwise pan
+*/
+void HeadBehaviour::lookAtBall(){
+    current_policy = LookAtBallPolicy;
+}
+
+
+/*! @brief Sets head behaviour to look for the ball. Used when the ball is out of vision range.
+    Simply give head pan job for ball.
+    WARNING: Currently identical to lookAtBall() - both simply assign head job and track if possible; otherwise pan
+*/
+void HeadBehaviour::lookForBall(){
+    current_policy = LookForBallPolicy;
+}
+
+
+/*! @brief Sets the head behaviour to look for landmarks(==field objects). That is, the robot is lost; localisation information is required.
+    Should not be called unless robot is lost.
+    Uses agent decision making, but cuts off all mobile objects.
+*/
+void HeadBehaviour::lookForFieldObjects(){
+    current_policy = LookForFieldObjectsPolicy;
+}
+
+
+/*! @brief Performs post processing and adds a head job to the joblist
+*/
+void HeadBehaviour::update(){
+    makeVisionChoice(current_policy);
+}
+
+
+
 void HeadBehaviour::dispatchHeadJob(StationaryObject* ObjectToTrack) {
     //initiate a new pan job using the robots estimated standard deviation of heading as the pan width
 
     actionObjectID = ObjectToTrack->getID();
     actionStartTime = Blackboard->Sensors->GetTimestamp();
     if (ObjectToTrack->isObjectVisible()) {
-        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack));
     } else {
-        Blackboard->Jobs->addMotionJob(new HeadPanJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadPanJob(*ObjectToTrack));
     }
 }
 void HeadBehaviour::dispatchHeadJob(MobileObject* ObjectToTrack) {
@@ -532,9 +579,9 @@ void HeadBehaviour::dispatchHeadJob(MobileObject* ObjectToTrack) {
     actionObjectID = ObjectToTrack->getID() + FieldObjects::NUM_MOBILE_FIELD_OBJECTS;
     actionStartTime = Blackboard->Sensors->GetTimestamp();
     if (ObjectToTrack->isObjectVisible()) {
-        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack));
     } else {
-        Blackboard->Jobs->addMotionJob(new HeadPanJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadPanJob(*ObjectToTrack));
     }
 }
 void HeadBehaviour::dispatchHeadJob(AmbiguousObject* ObjectToTrack) {
@@ -543,7 +590,7 @@ void HeadBehaviour::dispatchHeadJob(AmbiguousObject* ObjectToTrack) {
     actionObjectID = ObjectToTrack->getID() + FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS;
     actionStartTime = Blackboard->Sensors->GetTimestamp();
     if (ObjectToTrack->isObjectVisible()) {
-        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack));
     }
 
 }

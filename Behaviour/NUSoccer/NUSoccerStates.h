@@ -99,7 +99,7 @@ private:
     
     void doBallApproachAndKick(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         movement->goToBall();
-        head->prioritiseBall();
+        head->prioritiseBall();        
     }
     
     void goToOffensiveSupportPosition(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
