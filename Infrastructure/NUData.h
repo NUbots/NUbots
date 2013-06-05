@@ -156,7 +156,7 @@ public:
     const static id_t NumCommonIds;                 //!< internal use only
     const static int m_num_common_ids = 49;			//!< this *MUST* be manually updated to match NumCommonIds.Id
     
-    double CurrentTime;
+    double CurrentTime;    
     double PreviousTime;
     
     vector<id_t*> mapIdToIds(const id_t& id);
@@ -165,6 +165,8 @@ protected:
     static vector<id_t*> m_common_ids;
     vector<id_t*> m_ids_copy;                       //!< this is a non-static copy of the ids. It is non-static so that it is not shared between derived classes (ie sensors and actionators have different ids)
 
+    // #warning This public statement is for debugging on the CM730Errors branch. It should be removed.
+public:
     vector<vector<int> > m_id_to_indices;
     vector<int> m_available_ids;
     

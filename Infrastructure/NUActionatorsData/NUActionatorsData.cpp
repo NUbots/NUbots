@@ -207,50 +207,39 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
 
     // now do the interpolation for each joint that has new data
     const vector<int>& ids = mapIdToIndices(All);
-    for (size_t i = 0; i < ids.size(); i++)
+    for (size_t i=0; i<ids.size(); i++)
     {
         Actionator& a = m_actionators[ids[i]];
-        float pos, gain;
-        InterpolateActionatorValues(pos, gain, a, positions_current[i],
-                                    gains_current[i]);
-        positions[i] = pos;
-        gains[i] = gain;
-    }
-}
-
-void NUActionatorsData::InterpolateActionatorValues(float& position_new,
-                                                    float& gain_new,
-                                                    Actionator& a,
-                                                    float position_current,
-                                                    float gain_current)
-{
-    double time;
-    float position;
-    if (!a.empty())
-    {
-        if (a.get(time, position))
-            position_new = interpolate(time, position_current, position);
-        else
+        double time;
+        float position;
+        if (!a.empty())
         {
-            vector<float> positiongain;
-            if (a.get(time, positiongain))
+            if (a.get(time, position))
+                positions[i] = interpolate(time, positions_current[i],
+                                           position);
+            else
             {
-                position = positiongain[0];
-                position_new = interpolate(time, position_current, position);
-                gain_new = interpolate(time, gain_current, positiongain[1]);
+                vector<float> positiongain;
+                if (a.get(time, positiongain))
+                {
+                    position = positiongain[0];
+                    positions[i] = interpolate(time, positions_current[i],
+                                               position);
+                    gains[i] = interpolate(time, gains_current[i], 
+                                           positiongain[1]);
+                }
             }
-        }
 
-        #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-            debug   << a.Name
-                    << " [" << position_new << "," << gain_new 
-                    << "] target: " << time - CurrentTime << ": "
-                    << position_current << " -> " << position << "]"
-                    << endl;
-        #endif
+            #if DEBUG_NUACTIONATORS_VERBOSITY > 0
+                debug   << a.Name
+                        << " [" << positions[i] << "," << gains[i] 
+                        << "] target: " << time - CurrentTime << ": "
+                        << positions_current[i] << " -> " << position << "]"
+                        << endl;
+            #endif
+        }
     }
 }
-
 
 /*! @brief Gets the target values for each led
  

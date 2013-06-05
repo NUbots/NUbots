@@ -28,19 +28,6 @@ public:
 private:
     void loadKickParameters();
 
-    void AddActionsForNextKickFrame(
-        unsigned int m_current_index,
-        vector<float>& nu_nextLeftArmJoints,
-        vector<float>& nu_nextRightArmJoints,
-        vector<float>& nu_nextLeftLegJoints,
-        vector<float>& nu_nextRightLegJoints,
-        vector<float>& nu_nextHeadJoints,
-        vector<float>& nu_nextLeftArmGains,
-        vector<float>& nu_nextRightArmGains,
-        vector<float>& nu_nextLeftLegGains,
-        vector<float>& nu_nextRightLegGains,
-        vector<float>& nu_nextHeadGains);
-
 protected:
     MotionScript* m_left_kick_script;
     MotionScript* m_right_kick_script;

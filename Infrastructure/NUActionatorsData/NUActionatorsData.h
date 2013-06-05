@@ -62,12 +62,6 @@ public:
     void getNextLeds(vector<vector<vector<float> > >& leds);
     void getNextSounds(vector<string>& sounds);
     void postProcess();
-
-    void InterpolateActionatorValues(float& position_new,
-                                     float& gain_new,
-                                     Actionator& a,
-                                     float position_current,
-                                     float gain_current);
     
     bool isMemberOfGroup(const string& name, const id_t& group);
     size_t getSize(const id_t& actionatorid);
