@@ -34,13 +34,13 @@
 
 
 class Navigation {
-private:
-    //classification so we know which foot to line the ball up with
+public:
+//classification so we know which foot to line the ball up with
     enum DIRECTION 
         {
         LEFT = 1,
         BOTH = 0,
-        RIGHT = -1;
+        RIGHT = -1
         };
     enum WALK_TYPE 
         {
@@ -49,50 +49,52 @@ private:
         GOTOOBJECT = 1,
         GOTOBALL = 2
         };
+
+private:
+    
     
 
 //XXX: load all these from central config ----------------------------------------
     //load these values from walk config
-    float m_turn_speed = 0.4;
-    float m_walk_speed = 0.9;
-    float m_feet_separation = 14.0;
+    static const float m_turn_speed = 0.4;
+    static const float m_walk_speed = 0.9;
+    static const float m_feet_separation = 14.0;
     
     //load from robot model
-    float m_foot_size = 10.0;
+    static const float m_foot_size = 10.0;
     
     //timers for starting turning and walking
-    double m_walk_start_time = 0.2;
-    double m_walk_turn_time = 0.2;
+    static const double m_walk_start_time = 0.2;
+    static const double m_walk_turn_time = 0.2;
     
     //walk accel/deccel controls
-    double m_acceleration_time = 0.2;
-    float m_acceleration_fraction = 0.5;
+    static const double m_acceleration_time = 0.2;
+    static const float m_acceleration_fraction = 0.5;
     
     //approach speeds
-    float m_close_approach_speed = 0.2;
-    float m_close_approach_distance = 30.0;
-    float m_mid_approach_speed = 0.6;
-    float m_mid_approach_distance = 60.0;
+    static const float m_close_approach_speed = 0.2;
+    static const float m_close_approach_distance = 30.0;
+    static const float m_mid_approach_speed = 0.6;
+    static const float m_mid_approach_distance = 60.0;
     
     //turning values
-    float m_turn_deviation = 0.1;
-    float m_turn_speed = 0.4;
+    static const float m_turn_deviation = 0.1;
     
     //hystereses
-    float m_distance_hysteresis = 10.0;
-    float m_turning_hysteresis = 0.1;
-    float m_position_hysteresis = 30.0;
+    static const float m_distance_hysteresis = 10.0;
+    static const float m_turning_hysteresis = 0.1;
+    static const float m_position_hysteresis = 30.0;
     
     //ball lineup
     vector<float> m_ball_approach_angle;
     vector<int> m_ball_kick_foot;
-    float m_ball_lineup_distance = 15.0;
-    int m_ball_lineup_min_distance = 12.0;
+    static const float m_ball_lineup_distance = 15.0;
+    static const int m_ball_lineup_min_distance = 12.0;
     
     //extra config options
-    bool m_use_localisation_avoidance = false;
-    float m_assumed_obstacle_width = 25.0;
-    float m_avoid_distance = 50.0;
+    static const bool m_use_localisation_avoidance = false;
+    static const float m_assumed_obstacle_width = 25.0;
+    static const float m_avoid_distance = 50.0;
 //END config variables section-------------------------------------------------------------------
     
     //hysteresis variables
@@ -130,12 +132,12 @@ private:
 public:
     
     int getCurrentCommand() {
-        return currentCommand;
+        return current_command;
     }
     
     bool isStopped() {
         const float epsilon = 0.05;
-        return current_walk_command[0] < epsilon and MathGeneral::abs(current_walk_command[1]) < epsilon and MathGeneral::abs(current_walk_command[2]) < epsilon
+        return current_walk_command[0] < epsilon and mathGeneral::abs(current_walk_command[1]) < epsilon and mathGeneral::abs(current_walk_command[2]) < epsilon;
     }
         
     /*! @brief Go to a point and face a heading. Returned vector is walk command vector.
