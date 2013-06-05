@@ -120,11 +120,7 @@ public:
     /*! @brief Returns the position of the ball on the field.
      */
     static vector<float> getBallPosition() {
-        vector<float> result;
-        
-        //XXX: unimplemented
-        
-        return result;
+        return getObjectPosition((Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]));
     }
     
     
@@ -162,9 +158,33 @@ public:
     /*! @brief Returns an offensive support (passing) position on the field, angled to see the ball.
      */
     static vector<float> getBallOffensePosition() {
+        const float supportDistance = 130.; //XXX: put this offset somewhere
         vector<float> result(3,0);
         
-        //XXX: unimplemented
+        //intialise positions
+        vector<float> ballPos = this::getBallPosition();
+        vector<float> goalPos = this::getOpponentGoalPosition();
+        vector<float> ballToGoal(2,0);
+        vector<float> supportDirection(2,0);
+        
+        //calculate values
+        ballToGoal[0] = goalPos[0]-ballPos[0];
+        ballToGoal[1] = goalPos[1]-ballPos[1];
+        float ballToGoalDistance = MathGeneral::sqrt(ballToGoal[0]*ballToGoal[0]+ballToGoal[1]*ballToGoal[1]);
+        
+        //work out where we have to rotate to get support directions
+        if (ballPos[0] > 0) {
+            supportDirection[0] = ballToGoal[1]/ballToGoalDistance;
+            supportDirection[1] = -ballToGoal[0]/ballToGoalDistance;
+        } else {
+            supportDirection[0] = -ballToGoal[1]/ballToGoalDistance;
+            supportDirection[1] = ballToGoal[0]/ballToGoalDistance;
+        }
+        
+        result[0] = supportDirection[0]*supportDistance;
+        result[1] = supportDirection[1]*supportDistance;
+        
+        result[2] = atan2(ballPos[1]+ballToGoal[1]*0.75-result[1],ballPos[0]+ballToGoal[0]*0.75-result[0]); //first y, then x
         
         return result;
     }
@@ -210,7 +230,19 @@ public:
         
         return result;
     }
-
+    
+    static vector<float> fieldLocalisationPosition() {
+        vector<float> result(3,0);
+        
+        result[2] = 0.5; //XXX: fix this to be less lazy
+        
+        return result;
+    }
+    
+    static vector<float> ballLocalisationPosition() {
+        return fieldLocalisationPosition(); //XXX: make this not so lazy
+    }
+    
 }
 
 #endif

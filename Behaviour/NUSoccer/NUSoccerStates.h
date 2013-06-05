@@ -76,7 +76,7 @@ private:
     }
     
     goToStartOffensePositions(logic,movement,head) { //offensive fielding position
-        std::vector<float> position = NavigationLogic::getStartDefensePosition();
+        std::vector<float> position = NavigationLogic::getStartOffensePosition();
         movement->goToPoint(position[0],position[1],position[2]);
         head->prioritiseLocalisation();
     }
@@ -86,12 +86,12 @@ private:
     }
     
     doFieldLocalisation(logic,movement,head) {
-        movement->fieldLocalisationTurn();
+        movement->goToPoint(NavigationLogic::fieldLocalisationPosition());
         head->lookForFieldObjects();
     }
     
     doBallLocalisation(logic,movement,head) {
-        movement->ballLocalisationTurn();
+        movement->goToPoint(NavigationLogic::ballLocalisationPosition());
         head->lookForBall();
     }
     
