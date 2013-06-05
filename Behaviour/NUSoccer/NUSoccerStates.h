@@ -70,13 +70,13 @@ private:
     }
     
     goToStartDefensePositions(logic,movement,head) { //defensive fielding position
-        std::vector<float> position = NavigationLogic::getBallDefensePosition();
+        std::vector<float> position = NavigationLogic::getStartDefensePosition();
         movement->goToPoint(position[0],position[1],position[2]);
         head->prioritiseLocalisation();
     }
     
     goToStartOffensePositions(logic,movement,head) { //offensive fielding position
-        std::vector<float> position = NavigationLogic::getBallDefensePosition();
+        std::vector<float> position = NavigationLogic::getStartDefensePosition();
         movement->goToPoint(position[0],position[1],position[2]);
         head->prioritiseLocalisation();
     }
@@ -107,7 +107,7 @@ private:
     }
     
     goToDefensiveSupportPosition(logic,movement,head) {
-        std::vector<float> position = NavigationLogic::getBallDefensePosition();
+        std::vector<float> position = NavigationLogic::getBallOffensePosition();
         movement->goToPoint(position[0],position[1],position[2]);
         head->prioritiseBall();
     }
