@@ -101,7 +101,7 @@ WalkingEngine::WalkingEngine(NUSensorsData* data, NUActionatorsData* actions, NU
   //p.walkStepDurationAtFullSpeedX = 400.f;
   //p.walkStepDurationAtFullSpeedY = 400.f;
 
-  p.walkHeight = Vector2<>(p.standComPosition.z, 300.f);
+  p.walkHeight = Vector2<>(p.standComPosition.z,200.f);//OLD VALUEL: p.walkHeight =  = Vector2<>(p.standComPosition.z,300.f);
   p.walkArmRotation = 0.4f;
   p.walkRefXSoftLimit.min = -3.f;
   p.walkRefXSoftLimit.max = 5.f;
@@ -582,7 +582,7 @@ void WalkingEngine::updateObservedPendulumPlayer()
 
 void WalkingEngine::computeMeasuredStance()
 {
-    float heightLeg5Joint = 45.19;
+    float heightLeg5Joint = 45.19;//old value for NAO heightLeg5Joint = 45.19; Should be 33.5! But when set that way walking ceases.
     std::vector<float> orientation_sensors;
     bool validKinematics = m_data->getOrientation(orientation_sensors);
 
