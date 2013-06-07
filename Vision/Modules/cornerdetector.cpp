@@ -34,31 +34,31 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
 
     for(it1 = lines.begin(); it1 != lines.end()-1; it1++) {
         Line l1 = it1->getGroundLineEquation();
-        Vector2<GroundPoint> l1_pts = it1->getEndPoints();
+        Vector2<NUPoint> l1_pts = it1->getEndPoints();
         for(it2 = it1+1; it2 < lines.end(); it2++) {
             Line l2 = it2->getGroundLineEquation();
-            Vector2<GroundPoint> l2_pts = it2->getEndPoints();
+            Vector2<NUPoint> l2_pts = it2->getEndPoints();
             if(l1.getAngleBetween(l2) > (1-m_tolerance)*mathGeneral::PI*0.5) {
                 //nearly perpendicular
                 //now build corner from end points
-                GroundPoint intersection;
-                if(l1.getIntersection(l2, intersection.ground)) {
+                NUPoint intersection;
+                if(l1.getIntersection(l2, intersection.groundCartesian)) {
                     CornerPoint::TYPE type = findCorner(l1_pts, l2_pts, intersection, m_tolerance);
                     if(type != CornerPoint::INVALID) {
                         //need screen loc
-                        if(it1->getScreenLineEquation().getIntersection(it2->getScreenLineEquation(), intersection.screen)) {
+                        if(it1->getScreenLineEquation().getIntersection(it2->getScreenLineEquation(), intersection.screenCartesian)) {
 
                             /// DEBUG
-                            Point mid1 = (l1_pts[0].ground + l1_pts[1].ground)*0.5,
-                                  mid2 = (l2_pts[0].ground + l2_pts[1].ground)*0.5;
+                            Point mid1 = (l1_pts[0].groundCartesian + l1_pts[1].groundCartesian)*0.5,
+                                  mid2 = (l2_pts[0].groundCartesian + l2_pts[1].groundCartesian)*0.5;
 
                             //compare end points and midpoints to see what is closest to the intersection
-                            double d1x = (intersection.ground - l1_pts[0].ground).abs(),
-                                   d1y = (intersection.ground - l1_pts[1].ground).abs(),
-                                   d1m = (intersection.ground - mid1).abs(),
-                                   d2x = (intersection.ground - l2_pts[0].ground).abs(),
-                                   d2y = (intersection.ground - l2_pts[1].ground).abs(),
-                                   d2m = (intersection.ground - mid2).abs();
+                            double d1x = (intersection.groundCartesian - l1_pts[0].groundCartesian).abs(),
+                                   d1y = (intersection.groundCartesian - l1_pts[1].groundCartesian).abs(),
+                                   d1m = (intersection.groundCartesian - mid1).abs(),
+                                   d2x = (intersection.groundCartesian - l2_pts[0].groundCartesian).abs(),
+                                   d2y = (intersection.groundCartesian - l2_pts[1].groundCartesian).abs(),
+                                   d2m = (intersection.groundCartesian - mid2).abs();
 
                             double min1 = min(d1m, min(d1x, d1y)),
                                    min2 = min(d2m, min(d2x, d2y));
@@ -80,18 +80,18 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
     return results;
 }
 
-CornerPoint::TYPE CornerDetector::findCorner(Vector2<GroundPoint> ep1, Vector2<GroundPoint> ep2, GroundPoint intersection, double tolerance) const
+CornerPoint::TYPE CornerDetector::findCorner(Vector2<NUPoint> ep1, Vector2<NUPoint> ep2, NUPoint intersection, double tolerance) const
 {
-    Point mid1 = (ep1[0].ground + ep1[1].ground)*0.5,
-          mid2 = (ep2[0].ground + ep2[1].ground)*0.5;
+    Point mid1 = (ep1[0].groundCartesian + ep1[1].groundCartesian)*0.5,
+          mid2 = (ep2[0].groundCartesian + ep2[1].groundCartesian)*0.5;
 
     //compare end points and midpoints to see what is closest to the intersection
-    double d1x = (intersection.ground - ep1[0].ground).abs(),
-           d1y = (intersection.ground - ep1[1].ground).abs(),
-           d1m = (intersection.ground - mid1).abs(),
-           d2x = (intersection.ground - ep2[0].ground).abs(),
-           d2y = (intersection.ground - ep2[1].ground).abs(),
-           d2m = (intersection.ground - mid2).abs();
+    double d1x = (intersection.groundCartesian - ep1[0].groundCartesian).abs(),
+           d1y = (intersection.groundCartesian - ep1[1].groundCartesian).abs(),
+           d1m = (intersection.groundCartesian - mid1).abs(),
+           d2x = (intersection.groundCartesian - ep2[0].groundCartesian).abs(),
+           d2y = (intersection.groundCartesian - ep2[1].groundCartesian).abs(),
+           d2m = (intersection.groundCartesian - mid2).abs();
 
     double min1 = min(d1m, min(d1x, d1y)),
            min2 = min(d2m, min(d2x, d2y));

@@ -28,7 +28,7 @@ public:
     bool check() const;
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const {out << VFOName(BALL) << " " << m_location.screen << " " << m_diameter;}
+    void printLabel(ostream& out) const {out << VFOName(BALL) << " " << m_location.screenCartesian << " " << m_diameter;}
 
     virtual double findScreenError(VisionFieldObject* other) const;
     virtual double findGroundError(VisionFieldObject* other) const;
@@ -50,7 +50,7 @@ private:
       @param elevation the angle between the ball and the image centre in the xz plane.
       @return the distance to the ball in cm.
       */
-    double distanceToBall(double bearing, double elevation);
+    //double distanceToBall(double bearing, double elevation);
     
 public:
     int m_diameter;     //! @variable the radius of the ball in pixels

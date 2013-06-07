@@ -99,71 +99,34 @@ NUImage* DataWrapper::getFrame()
     return &m_current_image;
 }
 
-//! @brief Generates spoofed camera transform vector.
-bool DataWrapper::getCTGVector(vector<float> &ctgvector)
+//! @brief Retrieves the camera height returns it.
+float DataWrapper::getCameraHeight()
 {
-    if(using_sensors) {
-        return m_sensor_data.get(NUSensorsData::CameraToGroundTransform, ctgvector);
-    }
-    else {
-        ctgvector.assign(4, 0);
-        return false;
-    }
+    return m_camera_height;
 }
 
-//! @brief Generates spoofed camera transform vector.
-bool DataWrapper::getCTVector(vector<float> &ctvector)
+//! @brief Retrieves the camera pitch returns it.
+float DataWrapper::getHeadPitch()
 {
-    if(using_sensors) {
-        return m_sensor_data.get(NUSensorsData::CameraTransform, ctvector);
-    }
-    else {
-        ctvector.assign(4, 0);
-        return false;
-    }
+    return m_head_pitch;
 }
 
-
-//! @brief Generates spoofed camera height.
-bool DataWrapper::getCameraHeight(float& height)
+//! @brief Retrieves the camera yaw returns it.
+float DataWrapper::getHeadYaw()
 {
-    if(using_sensors)
-        return m_sensor_data.getCameraHeight(height);
-    else
-        return false;
+    return m_head_yaw;
 }
 
-
-//! @brief Generates spoofed camera pitch.
-bool DataWrapper::getCameraPitch(float& pitch)
+//! @brief Retrieves the body pitch returns it.
+Vector3<float> DataWrapper::getOrientation()
 {
-    if(using_sensors)
-        return m_sensor_data.getPosition(NUSensorsData::HeadPitch, pitch);
-    else
-        return false;
+    return m_orientation;
 }
 
-//! @brief Generates spoofed camera yaw.
-bool DataWrapper::getCameraYaw(float& yaw)
+//! @brief Returns the neck position snapshot.
+Vector3<double> DataWrapper::getNeckPosition()
 {
-    if(using_sensors)
-        return m_sensor_data.getPosition(NUSensorsData::HeadYaw, yaw);
-    else
-        return false;
-}
-
-//! @brief Generates spoofed body pitch.
-bool DataWrapper::getBodyPitch(float& pitch)
-{
-    if(using_sensors) {
-        vector<float> orientation;
-        bool valid = m_sensor_data.get(NUSensorsData::Orientation, orientation);
-        if(valid && orientation.size() > 2) {
-            pitch = orientation.at(1);
-            return true;
-        }
-    }
-    return false;
+    return m_neck_position;
 }
 
 Vector2<double> DataWrapper::getCameraFOV() const
@@ -364,8 +327,8 @@ void DataWrapper::debugPublish(const vector<Obstacle>& data)
 void DataWrapper::debugPublish(const vector<FieldLine> &data)
 {
     BOOST_FOREACH(const FieldLine& l, data) {
-        Vector2<GroundPoint> endpts = l.getEndPoints();
-        gui->addToLayer(DBID_LINES, QLineF( endpts[0].screen.x, endpts[0].screen.y, endpts[1].screen.x, endpts[1].screen.y ), QColor(Qt::red));
+        Vector2<NUPoint> endpts = l.getEndPoints();
+        gui->addToLayer(DBID_LINES, QLineF( endpts[0].screenCartesian.x, endpts[0].screenCartesian.y, endpts[1].screenCartesian.x, endpts[1].screenCartesian.y ), QColor(Qt::red));
     }
 }
 
@@ -626,6 +589,36 @@ bool DataWrapper::updateFrame()
         vector<float> hor_data;
         if(using_sensors && m_sensor_data.getHorizon(hor_data)) {
             kinematics_horizon.setLine(hor_data.at(0), hor_data.at(1), hor_data.at(2));
+        }
+
+        //update kinematics snapshot
+        if(using_sensors) {
+
+            if(!m_sensor_data.getCameraHeight(m_camera_height))
+                errorlog << "DataWrapperQt - updateFrame() - failed to get camera height from NUSensorsData" << endl;
+            if(!m_sensor_data.getPosition(NUSensorsData::HeadPitch, m_head_pitch))
+                errorlog << "DataWrapperQt - updateFrame() - failed to get head pitch from NUSensorsData" << endl;
+            if(!m_sensor_data.getPosition(NUSensorsData::HeadYaw, m_head_yaw))
+                errorlog << "DataWrapperQt - updateFrame() - failed to get head yaw from NUSensorsData" << endl;
+            if(!m_sensor_data.get(NUSensorsData::Orientation, m_orientation))
+                errorlog << "DataWrapperQt - updateFrame() - failed to get orientation from NUSensorsData" << endl;
+
+            vector<float> left, right;
+            if(m_sensor_data->get(NUSensorsData::LLegTransform, left) and m_sensor_data->get(NUSensorsData::RLegTransform, right))
+            {
+                m_neck_position = Kinematics::CalculateNeckPosition(Matrix4x4fromVector(left), Matrix4x4fromVector(right), m_calibration.m_calibration.m_neck_position_offset);
+            }
+            else
+            {
+                errorlog << "DataWrapperQt - updateFrame() - failed to get left or right leg transforms from NUSensorsData" << endl;
+                // Default in case kinemtaics not available. Base height of darwin.
+                m_neck_position = Vector3<double>(0.0, 0.0, 39.22);
+            }
+        }
+        else {
+            m_camera_height = m_head_pitch = m_head_yaw = 0;
+            m_orientation = Vector3<float>(0,0,0);
+            m_neck_position = Vector3<double>(0.0, 0.0, 39.22);
         }
 
         numFramesProcessed++;

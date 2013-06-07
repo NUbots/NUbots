@@ -84,73 +84,34 @@ const Horizon& DataWrapper::getKinematicsHorizon()
     return m_kinematics_horizon;
 }
 
-/*! @brief Retrieves the camera to ground vector returns it.
-*   @param ctgvector A reference to a float vector to fill.
-*   @return valid Whether the retrieved values are valid or not.
-*/
-bool DataWrapper::getCTGVector(vector<float>& ctgvector)
+//! @brief Retrieves the camera height returns it.
+bool DataWrapper::getCameraHeight()
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTGVector()" << endl;
-    #endif
-    return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    return m_camera_height;
 }
 
-/*! @brief Retrieves the camera transform vector returns it.
-*   @param ctgvector A reference to a float vector to fill.
-*   @return valid Whether the retrieved values are valid or not.
-*/
-bool DataWrapper::getCTVector(vector<float>& ctvector)
+//! @brief Retrieves the camera pitch returns it.
+bool DataWrapper::getHeadPitch()
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTVector()" << endl;
-    #endif
-    return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
+    return m_head_pitch;
 }
 
-/*! @brief Retrieves the camera height returns it.
-*   @param height A reference to a float to change.
-*   @return valid Whether the retrieved value is valid or not.
-*/
-bool DataWrapper::getCameraHeight(float& height)
+//! @brief Retrieves the camera yaw returns it.
+bool DataWrapper::getHeadYaw()
 {
-    return sensor_data->getCameraHeight(height);
+    return m_head_yaw;
 }
 
-/*! @brief Retrieves the camera pitch returns it.
-*   @param pitch A reference to a float to change.
-*   @return valid Whether the retrieved value is valid or not.
-*/
-bool DataWrapper::getCameraPitch(float& pitch)
+//! @brief Retrieves the body pitch returns it.
+Vector3<float> DataWrapper::getOrientation()
 {
-    return sensor_data->getPosition(NUSensorsData::HeadPitch, pitch);
+    return m_orientation;
 }
 
-/*! @brief Retrieves the camera yaw returns it.
-*   @param yaw A reference to a float to change.
-*   @return valid Whether the retrieved value is valid or not.
-*/
-bool DataWrapper::getCameraYaw(float& yaw)
+//! @brief Returns the neck position snapshot.
+Vector3<float> DataWrapper::getOrientation()
 {
-    return sensor_data->getPosition(NUSensorsData::HeadYaw, yaw);
-}
-
-/*! @brief Retrieves the body pitch returns it.
-*   @param pitch A reference to a float to change.
-*   @return valid Whether the retrieved value is valid or not.
-*/
-bool DataWrapper::getBodyPitch(float& pitch)
-{
-    vector<float> orientation;
-    bool valid = sensor_data->get(NUSensorsData::Orientation, orientation);
-    if(valid && orientation.size() > 2) {
-        pitch = orientation.at(1);
-        return true;
-    }
-    else {
-        pitch = 0;
-        return false;
-    }
+    return m_orientation;
 }
 
 /*! @brief Returns a reference to the stored Lookup Table
@@ -381,6 +342,28 @@ bool DataWrapper::updateFrame()
 #if VISION_WRAPPER_VERBOSITY > 1
     debug << "Frames dropped: " << numFramesDropped << endl;
 #endif
+
+    //update kinematics snapshot
+    if(!sensor_data.getCameraHeight(m_camera_height))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get camera height from NUSensorsData" << endl;
+    if(!sensor_data.getPosition(NUSensorsData::HeadPitch, m_head_pitch))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get head pitch from NUSensorsData" << endl;
+    if(!sensor_data.getPosition(NUSensorsData::HeadYaw, m_head_yaw))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get head yaw from NUSensorsData" << endl;
+    if(!sensor_data.get(NUSensorsData::Orientation, m_orientation))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get orientation from NUSensorsData" << endl;
+
+    vector<float> left, right;
+    if(sensor_data->get(NUSensorsData::LLegTransform, left) and sensor_data->get(NUSensorsData::RLegTransform, right))
+    {
+        m_neck_position = Kinematics::CalculateNeckPosition(Matrix4x4fromVector(left), Matrix4x4fromVector(right), m_calibration.m_calibration.m_neck_position_offset);
+    }
+    else
+    {
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get left or right leg transforms from NUSensorsData" << endl;
+        // Default in case kinemtaics not available. Base height of darwin.
+        m_neck_position = Vector3<double>(0.0, 0.0, 39.22);
+    }
 
 
     return current_frame->getWidth() > 0 && current_frame->getHeight() > 0;

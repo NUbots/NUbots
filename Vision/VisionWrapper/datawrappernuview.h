@@ -50,12 +50,11 @@ public:
     //! RETRIEVAL METHODS
     const NUImage* getFrame();
 
-    bool getCTGVector(vector<float>& ctgvector);    //for transforms
-    bool getCTVector(vector<float>& ctvector);    //for transforms
-    bool getCameraHeight(float& height);            //for transforms
-    bool getCameraPitch(float& pitch);              //for transforms
-    bool getCameraYaw(float& yaw);                  //for transforms
-    bool getBodyPitch(float& pitch);
+    float getCameraHeight();            //for transforms
+    float getCameraPitch();              //for transforms
+    float getCameraYaw();                  //for transforms
+    Vector3<float> getOrientation();
+    Vector3<double> getNeckPosition();
     Vector2<double> getCameraFOV() const {return Vector2<double>(camera_data.m_horizontalFov, camera_data.m_verticalFov);}
     
     //! @brief Generates spoofed horizon line.

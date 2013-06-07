@@ -7,7 +7,7 @@ FieldLine::FieldLine(const LSFittedLine &screen_line, const LSFittedLine &relati
     set(screen_line, relative_line);
 }
 
-FieldLine::FieldLine(const Vector2<GroundPoint>& end_points)
+FieldLine::FieldLine(const Vector2<NUPoint>& end_points)
 {
     m_id = FIELDLINE;
     set(end_points);
@@ -19,26 +19,26 @@ void FieldLine::set(const LSFittedLine& screen_line, const LSFittedLine& ground_
     m_ground_line = ground_line;
 
     if(screen_line.valid) {
-        screen_line.getEndPoints(m_end_points[0].screen, m_end_points[1].screen);
+        screen_line.getEndPoints(m_end_points[0].screenCartesian, m_end_points[1].screenCartesian);
     }
     else {
-        m_end_points[0].screen = Vector2<double>(-1,-1);
-        m_end_points[1].screen = Vector2<double>(-1,-1);   //-1 is an invalid pixel location
+        m_end_points[0].screenCartesian = Vector2<double>(-1,-1);
+        m_end_points[1].screenCartesian = Vector2<double>(-1,-1);   //-1 is an invalid pixel location
     }
 
     if(ground_line.valid) {
-        ground_line.getEndPoints(m_end_points[0].ground, m_end_points[1].ground);
+        ground_line.getEndPoints(m_end_points[0].groundCartesian, m_end_points[1].groundCartesian);
     }
     else{
-        m_end_points[0].ground = Vector2<double>(-1,-1);
-        m_end_points[1].ground = Vector2<double>(-1,-1);   //-1 is an impossible ground location
+        m_end_points[0].groundCartesian = Vector2<double>(-1,-1);
+        m_end_points[1].groundCartesian = Vector2<double>(-1,-1);   //-1 is an impossible ground location
     }
 }
 
-void FieldLine::set(const Vector2<GroundPoint>& end_points)
+void FieldLine::set(const Vector2<NUPoint>& end_points)
 {
-    m_screen_line.setLineFromPoints(end_points.x.screen, end_points.y.screen);
-    m_ground_line.setLineFromPoints(end_points.x.ground, end_points.y.ground);
+    m_screen_line.setLineFromPoints(end_points.x.screenCartesian, end_points.y.screenCartesian);
+    m_ground_line.setLineFromPoints(end_points.x.groundCartesian, end_points.y.groundCartesian);
     m_end_points = end_points;
 }
 
@@ -52,8 +52,8 @@ double FieldLine::findScreenError(VisionFieldObject* other) const
     FieldLine* l = dynamic_cast<FieldLine*>(other);
 
     // distances vary depending on endpoint assignment
-    double d1 = ( m_end_points[0].screen - l->m_end_points[0].screen ).abs() + ( m_end_points[1].screen - l->m_end_points[1].screen ).abs();
-    double d2 = ( m_end_points[0].screen - l->m_end_points[1].screen ).abs() + ( m_end_points[1].screen - l->m_end_points[0].screen ).abs();
+    double d1 = ( m_end_points[0].screenCartesian - l->m_end_points[0].screenCartesian ).abs() + ( m_end_points[1].screenCartesian - l->m_end_points[1].screenCartesian ).abs();
+    double d2 = ( m_end_points[0].screenCartesian - l->m_end_points[1].screenCartesian ).abs() + ( m_end_points[1].screenCartesian - l->m_end_points[0].screenCartesian ).abs();
 
     return min(d1, d2);
 }
@@ -63,8 +63,8 @@ double FieldLine::findGroundError(VisionFieldObject* other) const
     FieldLine* l = dynamic_cast<FieldLine*>(other);
 
     // distances vary depending on endpoint assignment
-    double d1 = ( m_end_points[0].ground - l->m_end_points[0].ground ).abs() + ( m_end_points[1].ground - l->m_end_points[1].ground ).abs();
-    double d2 = ( m_end_points[0].ground - l->m_end_points[1].ground ).abs() + ( m_end_points[1].ground - l->m_end_points[0].ground ).abs();
+    double d1 = ( m_end_points[0].groundCartesian - l->m_end_points[0].groundCartesian ).abs() + ( m_end_points[1].groundCartesian - l->m_end_points[1].groundCartesian ).abs();
+    double d2 = ( m_end_points[0].groundCartesian - l->m_end_points[1].groundCartesian ).abs() + ( m_end_points[1].groundCartesian - l->m_end_points[0].groundCartesian ).abs();
 
     return min(d1, d2);
 }
@@ -79,9 +79,9 @@ ostream& operator<< (ostream& output, const FieldLine& l)
     output << "FieldLine " << endl;
     output << "Equation: " << l.m_screen_line << endl;
     output << "Field Equation: " << l.m_ground_line << endl;
-    output << "\tpixelloc: [" << l.m_location.screen.x << ", " << l.m_location.screen.y << "]" << endl;
-    output << " angularloc: [" << l.m_location.angular.x << ", " << l.m_location.angular.y << "]" << endl;
-    output << "\trelative field coords: [" << l.m_location.relativeRadial.x << ", " << l.m_location.relativeRadial.y << ", " << l.m_location.relativeRadial.z << "]" << endl;
+    output << "\tpixelloc: [" << l.m_location.screenCartesian.x << ", " << l.m_location.screenCartesian.y << "]" << endl;
+    output << " angularloc: [" << l.m_location.screenAngular.x << ", " << l.m_location.screenAngular.y << "]" << endl;
+    output << "\trelative field coords: [" << l.m_location.neckRelativeRadial.x << ", " << l.m_location.neckRelativeRadial.y << ", " << l.m_location.neckRelativeRadial.z << "]" << endl;
     output << "\tspherical error: [" << l.m_spherical_error.x << ", " << l.m_spherical_error.y << "]" << endl;
     output << "\tsize on screen: [" << l.m_size_on_screen.x << ", " << l.m_size_on_screen.y << "]";
     return output;

@@ -43,10 +43,10 @@ public:
     LineDetectorSAM();
     ~LineDetectorSAM();
 
-    virtual vector<FieldLine> run(const vector<GroundPoint> &points);
+    virtual vector<FieldLine> run(const vector<NUPoint> &points);
 
 private:
-    vector< pair<LSFittedLine, LSFittedLine> > fitLines(const vector<GroundPoint>& points, bool noise=true);
+    vector< pair<LSFittedLine, LSFittedLine> > fitLines(const vector<NUPoint>& points, bool noise=true);
     //RULES
     //maximum field objects rules
     //unsigned int MAX_POINTS; //500
@@ -66,22 +66,22 @@ private:
     bool CLEAR_SMALL;
     bool CLEAR_DIRTY;
 
-    vector<GroundPoint> noisePoints;
+    vector<NUPoint> noisePoints;
 
     //LEAST-SQUARES FITTING
-    void split(vector<pair<LSFittedLine, LSFittedLine> > &lines, const vector<GroundPoint> &points);
+    void split(vector<pair<LSFittedLine, LSFittedLine> > &lines, const vector<NUPoint> &points);
     //void splitIterative(vector<LSFittedLine>& lines, vector<Point>& points);
     void splitNoise(vector<pair<LSFittedLine, LSFittedLine> >& lines);
     void merge(vector<LSFittedLine>& lines);
-    void generateLines(pair<LSFittedLine, LSFittedLine>& lines, const vector<GroundPoint>& points);
-    bool separate(vector<GroundPoint>& left, vector<GroundPoint>& right, GroundPoint split_point, const vector<GroundPoint>& points, const LSFittedLine& line);
+    void generateLines(pair<LSFittedLine, LSFittedLine>& lines, const vector<NUPoint>& points);
+    bool separate(vector<NUPoint>& left, vector<NUPoint>& right, NUPoint split_point, const vector<NUPoint>& points, const LSFittedLine& line);
     //static void sortLinesLS(vector<LSFittedLine*>& lines);
 
 
     //GENERIC
     void findPointsOver(LSFittedLine& line, unsigned int &points_over, int& furthest_point);
-    void addToNoise(const GroundPoint& point);
-    void addToNoise(const vector<GroundPoint>& points);
+    void addToNoise(const NUPoint& point);
+    void addToNoise(const vector<NUPoint>& points);
     void clearSmallLines(vector<pair<LSFittedLine, LSFittedLine> >& lines);
     void clearDirtyLines(vector<pair<LSFittedLine, LSFittedLine> >& lines);
 

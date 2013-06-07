@@ -4,7 +4,7 @@
 #include <vector>
 #include <cmath>
 #include "Vision/basicvisiontypes.h"
-#include "Vision/VisionTypes/groundpoint.h"
+#include "Vision/VisionTypes/nupoint.h"
 
 using std::vector;
 
@@ -64,12 +64,12 @@ private:
 };
 
 template<>
-class RANSACCircle<GroundPoint>
+class RANSACCircle<NUPoint>
 {
 public:
     RANSACCircle() : m_radius(0) {}
 
-    bool regenerate(const vector<GroundPoint> &pts)
+    bool regenerate(const vector<NUPoint> &pts)
     {
         if(pts.size() == minPointsForFit()) {
             return constructFromPoints(pts[0], pts[1], pts[2], 1.0e-2);
@@ -81,19 +81,19 @@ public:
 
     unsigned int minPointsForFit() const {return 3;}
 
-    double calculateError(GroundPoint p) const
+    double calculateError(NUPoint p) const
     {
-        return std::abs( (p.ground - m_centre.ground).abs() - m_radius);
+        return std::abs( (p.groundCartesian - m_centre.groundCartesian).abs() - m_radius);
     }
 
     double getRadius() const {return m_radius;}
-    GroundPoint getCentre() const {return m_centre;}
+    NUPoint getCentre() const {return m_centre;}
 
 private:
-    bool constructFromPoints(GroundPoint p1, GroundPoint p2, GroundPoint p3, double tolerance = 1.0e-6) {
-        Point pa = p1.ground,
-              pb = p2.ground,
-              pc = p3.ground;
+    bool constructFromPoints(NUPoint p1, NUPoint p2, NUPoint p3, double tolerance = 1.0e-6) {
+        Point pa = p1.groundCartesian,
+              pb = p2.groundCartesian,
+              pc = p3.groundCartesian;
         Point ab = pa - pb,
           bc = pb - pc;
         double det = ab.x*bc.y-bc.x*ab.y;
@@ -108,15 +108,15 @@ private:
         double bc_norm = (b_len_sqr - pc.squareAbs())/2.0;
 
         det = 1/det;
-        m_centre.ground.x = (ab_norm*(bc.y)-bc_norm*(ab.y))*det;
-        m_centre.ground.y = ((ab.x)*bc_norm-(bc.x)*ab_norm)*det;
+        m_centre.groundCartesian.x = (ab_norm*(bc.y)-bc_norm*(ab.y))*det;
+        m_centre.groundCartesian.y = ((ab.x)*bc_norm-(bc.x)*ab_norm)*det;
 
-        m_radius = (m_centre.ground - pa).abs();
+        m_radius = (m_centre.groundCartesian - pa).abs();
         return true;
     }
 
 private:
-    GroundPoint m_centre;
+    NUPoint m_centre;
     double m_radius;
 };
 

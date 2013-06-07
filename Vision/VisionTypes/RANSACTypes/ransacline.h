@@ -3,7 +3,7 @@
 
 #include "Tools/Math/Line.h"
 #include "Vision/basicvisiontypes.h"
-#include "Vision/VisionTypes/groundpoint.h"
+#include "Vision/VisionTypes/nupoint.h"
 
 template<typename T>
 class RANSACLine : public Line
@@ -28,12 +28,12 @@ public:
 
 
 template<>
-class RANSACLine<GroundPoint> : public Line
+class RANSACLine<NUPoint> : public Line
 {
 public:
     RANSACLine() {}
 
-    bool regenerate(const vector<GroundPoint> &pts) {
+    bool regenerate(const vector<NUPoint> &pts) {
         if(pts.size() == minPointsForFit()) {
             setLineFromPoints(pts.at(0).ground, pts.at(1).ground);
             return true;
@@ -45,7 +45,7 @@ public:
 
     inline size_t minPointsForFit() const { return 3; }
 
-    double calculateError(GroundPoint p) const { return getLinePointDistance(p.ground); }
+    double calculateError(NUPoint p) const { return getLinePointDistance(p.groundCartesian); }
 };
 
 #endif // RANSACLINE_H
