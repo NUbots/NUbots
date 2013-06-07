@@ -27,6 +27,7 @@
 
 class Behaviour;
 #include "Behaviour/BehaviourFSMProvider.h"
+#include "Behaviour/Common/HeadBehaviour.h"
 
 #include <vector>
 using namespace std;
@@ -55,6 +56,8 @@ public:
     vector<float> m_led_orange;
     vector<float> m_led_yellow;
     vector<float> m_led_off;
+
+    HeadBehaviour* head_behaviour;
 };
 
 

@@ -62,7 +62,7 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
         //cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << endl;
         fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
                                                                                    Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
-                                                                                   Vector2<float>(m_location.angular.x, m_location.angular.y),
+                                                                                   Vector2<float>(m_location.angular.x, m_location.angular.y),//This is likely causing ball tracking errors
                                                                                    Vector2<int>(m_location.screen.x,m_location.screen.y),
                                                                                    Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                                                                    timestamp);

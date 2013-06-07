@@ -103,7 +103,7 @@ public:
 
 
         //Head behaviour testing:
-        head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentTrainingPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy, HeadBehaviour::TimeVSCostPriority
+        head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy, HeadBehaviour::TimeVSCostPriority
     };
 };
 

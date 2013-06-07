@@ -48,13 +48,15 @@ void Transformer::screenToRadial2D(GroundPoint& pt) const
 
     pt.angular.x = atan( (image_centre.x-pt.screen.x)  * screen_to_radial_factor.x);
     pt.angular.y = atan( (image_centre.y-pt.screen.y) * screen_to_radial_factor.y) + VisionConstants::D2P_ANGLE_CORRECTION;
-    if(camera_yaw_valid)
+    /*including camera angles causes incorrect head movement.
+if(camera_yaw_valid)
         pt.angular.x += camera_yaw;
     if(camera_pitch_valid)
         pt.angular.y -= camera_pitch;
 
     if(VisionConstants::D2P_INCLUDE_BODY_PITCH && body_pitch_valid)
         pt.angular.y -= body_pitch;
+        */
 }
 
 /**
