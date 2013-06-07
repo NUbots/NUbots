@@ -10,7 +10,7 @@ CentreCircle::CentreCircle()
     //need more here
 }
 
-CentreCircle::CentreCircle(GroundPoint centre, double ground_radius, Vector2<double> screen_size)
+CentreCircle::CentreCircle(NUPoint centre, double ground_radius, Vector2<double> screen_size)
 {
     m_location = centre;
     m_size_on_screen = screen_size,

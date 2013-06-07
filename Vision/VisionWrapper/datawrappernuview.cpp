@@ -55,53 +55,34 @@ const NUImage* DataWrapper::getFrame()
     return m_current_image;
 }
 
-bool DataWrapper::getCTGVector(vector<float>& ctgvector)
+//! @brief Retrieves the camera height returns it.
+bool DataWrapper::getCameraHeight()
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTGVector()" << endl;
-    #endif
-    return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    return m_camera_height;
 }
 
-/*! @brief Retrieves the camera transform vector returns it.
-*   @param ctgvector A reference to a float vector to fill.
-*   @return valid Whether the retrieved values are valid or not.
-*/
-bool DataWrapper::getCTVector(vector<float>& ctvector)
+//! @brief Retrieves the camera pitch returns it.
+bool DataWrapper::getHeadPitch()
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTVector()" << endl;
-    #endif
-    return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
+    return m_head_pitch;
 }
 
-bool DataWrapper::getCameraHeight(float& height)
+//! @brief Retrieves the camera yaw returns it.
+bool DataWrapper::getHeadYaw()
 {
-    return sensor_data->getCameraHeight(height);
+    return m_head_yaw;
 }
 
-bool DataWrapper::getCameraPitch(float& pitch)
+//! @brief Retrieves the body pitch returns it.
+Vector3<float> DataWrapper::getOrientation()
 {
-    return sensor_data->getPosition(NUSensorsData::HeadPitch, pitch);
+    return m_orientation;
 }
 
-bool DataWrapper::getCameraYaw(float& yaw)
+//! @brief Returns the neck position snapshot.
+Vector3<float> DataWrapper::getOrientation()
 {
-    return sensor_data->getPosition(NUSensorsData::HeadYaw, yaw);
-}
-
-bool DataWrapper::getBodyPitch(float& pitch)
-{
-    vector<float> orientation;
-    bool valid = sensor_data->get(NUSensorsData::Orientation, orientation);
-    if(valid && orientation.size() > 2) {
-        pitch = orientation.at(1);
-        return true;
-    }
-    else {
-        pitch = 0;
-        return false;
-    }
+    return m_orientation;
 }
 
 const Horizon& DataWrapper::getKinematicsHorizon()

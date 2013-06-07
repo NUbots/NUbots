@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 
-CornerPoint::CornerPoint(TYPE type, GroundPoint location)
+CornerPoint::CornerPoint(TYPE type, NUPoint location)
 {
     m_size_on_screen = Vector2<double>(3,3);
     m_type = type;

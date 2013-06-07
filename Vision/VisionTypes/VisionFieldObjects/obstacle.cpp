@@ -104,7 +104,7 @@ bool Obstacle::calculatePositions()
     }
 
     // find arc width
-    GroundPoint gp1, gp2;
+    NUPoint gp1, gp2;
     gp1 = transformer.screenToRadial2D(m_location.screen - Point(m_size_on_screen.x, 0));
     gp2 = transformer.screenToRadial2D(m_location.screen + Point(m_size_on_screen.x, 0));
 

@@ -64,12 +64,11 @@ public:
     //! RETRIEVAL METHODS
     NUImage* getFrame();
 
-    bool getCTGVector(vector<float>& ctgvector);    //for transforms
-    bool getCTVector(vector<float>& ctvector);    //for transforms
-    bool getCameraHeight(float& height);            //for transforms
-    bool getCameraPitch(float& pitch);              //for transforms
-    bool getCameraYaw(float& yaw);                  //for transforms
-    bool getBodyPitch(float& pitch);
+    float getCameraHeight();            //for transforms
+    float getCameraPitch();              //for transforms
+    float getCameraYaw();                  //for transforms
+    Vector3<float> getOrientation();
+    Vector3<double> getNeckPosition();
     Vector2<double> getCameraFOV() const;
 
     //! @brief Generates spoofed horizon line.
@@ -92,7 +91,7 @@ public:
     void debugPublish(const vector<CentreCircle>& data);
     void debugPublish(const vector<CornerPoint>& data);
     void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
-    void debugPublish(DEBUG_ID id, const vector<GroundPoint>& data_points);
+    void debugPublish(DEBUG_ID id, const vector<NUPoint>& data_points);
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     void debugPublish(DEBUG_ID id);
     void debugPublish(DEBUG_ID id, const NUImage *const img);
@@ -128,6 +127,12 @@ private:
 
     NUImage m_current_image;
     NUSensorsData m_sensor_data;
+
+    float m_camera_height;
+    float m_head_pitch;
+    float m_head_yaw;
+    Vector3<float> m_orientation;
+    Vector3<double> m_neck_position;
 
     string configname;
 

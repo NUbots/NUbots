@@ -7,7 +7,7 @@ FieldLine::FieldLine(const LSFittedLine &screen_line, const LSFittedLine &relati
     set(screen_line, relative_line);
 }
 
-FieldLine::FieldLine(const Vector2<GroundPoint>& end_points)
+FieldLine::FieldLine(const Vector2<NUPoint>& end_points)
 {
     m_id = FIELDLINE;
     set(end_points);
@@ -35,7 +35,7 @@ void FieldLine::set(const LSFittedLine& screen_line, const LSFittedLine& ground_
     }
 }
 
-void FieldLine::set(const Vector2<GroundPoint>& end_points)
+void FieldLine::set(const Vector2<NUPoint>& end_points)
 {
     m_screen_line.setLineFromPoints(end_points.x.screen, end_points.y.screen);
     m_ground_line.setLineFromPoints(end_points.x.ground, end_points.y.ground);

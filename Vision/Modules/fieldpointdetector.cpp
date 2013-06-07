@@ -24,8 +24,8 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
     if(TRANSFORM_FIRST) {
         //check transforms are valid
         if(transformer.isScreenToGroundValid()) {
-            vector<GroundPoint> points;
-            GroundPoint temp;
+            vector<NUPoint> points;
+            NUPoint temp;
             CentreCircle circle;
             vector<FieldLine> lines;
             vector<CornerPoint> corners;
@@ -45,7 +45,7 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
 
             #if VISION_FIELDPOINT_VERBOSITY > 1
             vector<Point> plotpts;
-            BOOST_FOREACH(const GroundPoint& g, points) {
+            BOOST_FOREACH(const NUPoint& g, points) {
                 plotpts.push_back(g.screen);
             }
             DataWrapper::getInstance()->plotCurve("Screen coords", plotpts);
@@ -55,7 +55,7 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
 
             #if VISION_FIELDPOINT_VERBOSITY > 1
             plotpts.clear();
-            BOOST_FOREACH(const GroundPoint& g, points) {
+            BOOST_FOREACH(const NUPoint& g, points) {
                 plotpts.push_back(g.ground);
             }
             DataWrapper::getInstance()->plotCurve("Ground coords", plotpts);
@@ -84,7 +84,7 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
                 #if VISION_FIELDPOINT_VERBOSITY > 1
                 plotpts.clear();
                 BOOST_FOREACH(const FieldLine& l, lines) {
-                    Vector2<GroundPoint> ep = l.getEndPoints();
+                    Vector2<NUPoint> ep = l.getEndPoints();
                     plotpts.push_back(ep[0].ground);
                     plotpts.push_back(ep[1].ground);
                 }

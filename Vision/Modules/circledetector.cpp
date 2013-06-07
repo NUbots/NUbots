@@ -27,10 +27,10 @@ void CircleDetector::setTolerance(double tolerance)
     m_tolerance = max(min(tolerance, 1.0), 0.0); //clamp
 }
 
-bool CircleDetector::run(vector<GroundPoint> &points, CentreCircle &result)
+bool CircleDetector::run(vector<NUPoint> &points, CentreCircle &result)
 {
-    RANSACCircle<GroundPoint> candidate;
-    vector<GroundPoint> consensus, remainder;
+    RANSACCircle<NUPoint> candidate;
+    vector<NUPoint> consensus, remainder;
     double variance;
     int i=0;
     bool modelfound = false;
@@ -38,7 +38,7 @@ bool CircleDetector::run(vector<GroundPoint> &points, CentreCircle &result)
     // attemp multiple RANSAC fits
 
     // run first iterations
-    modelfound = RANSAC::findModel<RANSACCircle<GroundPoint>, GroundPoint>(points, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus);
+    modelfound = RANSAC::findModel<RANSACCircle<NUPoint>, NUPoint>(points, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus);
 
     //continue while models are found but not a final version
     while(modelfound && i < m_max_iterations) {
@@ -52,7 +52,7 @@ bool CircleDetector::run(vector<GroundPoint> &points, CentreCircle &result)
                    right = 0,
                    top = VisionBlackboard::getInstance()->getImageHeight() - 1,
                    bottom = 0;
-            BOOST_FOREACH(const GroundPoint& p, consensus) {
+            BOOST_FOREACH(const NUPoint& p, consensus) {
                 left = min(left, p.screen.x);
                 right = max(right, p.screen.x);
                 top = min(top, p.screen.y);
@@ -65,7 +65,7 @@ bool CircleDetector::run(vector<GroundPoint> &points, CentreCircle &result)
         }
         else {
             // model isn't good enough, reattempt with remainder
-            modelfound = RANSAC::findModel<RANSACCircle<GroundPoint>, GroundPoint>(remainder, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus);
+            modelfound = RANSAC::findModel<RANSACCircle<NUPoint>, NUPoint>(remainder, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus);
         }
 
         i++;
