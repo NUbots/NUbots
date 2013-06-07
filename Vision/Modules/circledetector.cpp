@@ -32,7 +32,7 @@ bool CircleDetector::run(vector<GroundPoint> &points, CentreCircle &result)
     RANSACCircle<GroundPoint> candidate;
     vector<GroundPoint> consensus, remainder;
     double variance;
-    int i=0;
+    unsigned int i=0;
     bool modelfound = false;
 
     // attemp multiple RANSAC fits

@@ -38,7 +38,6 @@ if(valid) {
     #if VISION_OBSTACLE_VERBOSITY > 1
         debug << "Obstacle::addToExternalFieldObjects - valid" << endl;
     #endif
-    VisionBlackboard* vbb = VisionBlackboard::getInstance();
     AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Obstacle");
     //newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_ROBOT_UNKNOWN);
     newAmbObj.UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
