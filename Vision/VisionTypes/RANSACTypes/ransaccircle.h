@@ -83,7 +83,7 @@ public:
 
     double calculateError(NUPoint p) const
     {
-        return std::abs( (p.ground - m_centre.ground).abs() - m_radius);
+        return std::abs( (p.groundCartesian - m_centre.groundCartesian).abs() - m_radius);
     }
 
     double getRadius() const {return m_radius;}
@@ -91,9 +91,9 @@ public:
 
 private:
     bool constructFromPoints(NUPoint p1, NUPoint p2, NUPoint p3, double tolerance = 1.0e-6) {
-        Point pa = p1.ground,
-              pb = p2.ground,
-              pc = p3.ground;
+        Point pa = p1.groundCartesian,
+              pb = p2.groundCartesian,
+              pc = p3.groundCartesian;
         Point ab = pa - pb,
           bc = pb - pc;
         double det = ab.x*bc.y-bc.x*ab.y;
@@ -108,10 +108,10 @@ private:
         double bc_norm = (b_len_sqr - pc.squareAbs())/2.0;
 
         det = 1/det;
-        m_centre.ground.x = (ab_norm*(bc.y)-bc_norm*(ab.y))*det;
-        m_centre.ground.y = ((ab.x)*bc_norm-(bc.x)*ab_norm)*det;
+        m_centre.groundCartesian.x = (ab_norm*(bc.y)-bc_norm*(ab.y))*det;
+        m_centre.groundCartesian.y = ((ab.x)*bc_norm-(bc.x)*ab_norm)*det;
 
-        m_radius = (m_centre.ground - pa).abs();
+        m_radius = (m_centre.groundCartesian - pa).abs();
         return true;
     }
 

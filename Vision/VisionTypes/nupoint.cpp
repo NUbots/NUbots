@@ -1,3 +1,3 @@
 #include "nupoint.h"
 
-NUPoint::NUPoint() : screen(0,0), angular(0,0), ground(0,0), relativeRadial(0,0,0) {}
+NUPoint::NUPoint() : screenCartesian(0,0), screenAngular(0,0), groundCartesian(0,0), neckRelativeRadial(0,0,0) {}

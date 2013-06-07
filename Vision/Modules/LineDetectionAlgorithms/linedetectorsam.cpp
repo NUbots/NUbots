@@ -98,8 +98,8 @@ void LineDetectorSAM::split(vector< pair<LSFittedLine, LSFittedLine> >& lines, c
     //generate new LSFittedLine
     pair<LSFittedLine, LSFittedLine> line;
     BOOST_FOREACH(const NUPoint& g, points) {
-        line.first.addPoint(g.ground);
-        line.second.addPoint(g.screen);
+        line.first.addPoint(g.groundCartesian);
+        line.second.addPoint(g.screenCartesian);
     }
 
     //check for points over threshold
@@ -403,15 +403,15 @@ bool LineDetectorSAM::separate(vector<NUPoint> &left, vector<NUPoint> &right, NU
     */
 
     //temp holder vars
-    double x_split = split_point.ground.x;
-    double y_split = split_point.ground.y;
+    double x_split = split_point.groundCartesian.x;
+    double y_split = split_point.groundCartesian.y;
 
     left.push_back(split_point);    //splitting point should be included in both groups
     right.push_back(split_point);
     if(line.isHorizontal()) {
         //horizontal line - no rotation
         BOOST_FOREACH(NUPoint pt, points) {
-            if(pt.ground != split_point.ground) {
+            if(pt.ground != split_point.groundCartesian) {
                 if(pt.ground.x < x_split) //point is to the left
                     left.push_back(pt);
                 else
@@ -422,7 +422,7 @@ bool LineDetectorSAM::separate(vector<NUPoint> &left, vector<NUPoint> &right, NU
     else if(line.isVertical()) {
         //vertical line - 90 degree rotation
         BOOST_FOREACH(NUPoint pt, points) {
-            if(pt.ground != split_point.ground) {
+            if(pt.ground != split_point.groundCartesian) {
                 if(pt.ground.y < y_split) //point is to the left
                     left.push_back(pt);
                 else
@@ -431,11 +431,11 @@ bool LineDetectorSAM::separate(vector<NUPoint> &left, vector<NUPoint> &right, NU
         }
     }
     else {
-        double xsplit = line.projectOnto(split_point.ground).x;
+        double xsplit = line.projectOnto(split_point.groundCartesian).x;
         BOOST_FOREACH(NUPoint pt, points) {
             //check all points, calculate translated x coord
             //and place in appropriate vector
-            if(pt.ground != split_point.ground) {
+            if(pt.ground != split_point.groundCartesian) {
                 if(line.projectOnto(pt.ground).x < xsplit) {
                     //point is to the left
                     left.push_back(pt);
@@ -456,8 +456,8 @@ void LineDetectorSAM::generateLines(pair<LSFittedLine, LSFittedLine>& lines, con
     lines.first.clearPoints();
     lines.second.clearPoints();
     BOOST_FOREACH(const NUPoint& g, points) {
-        lines.first.addPoint(g.ground);
-        lines.second.addPoint(g.screen);
+        lines.first.addPoint(g.groundCartesian);
+        lines.second.addPoint(g.screenCartesian);
     }
 }
 
@@ -467,7 +467,7 @@ void LineDetectorSAM::addToNoise(const NUPoint& point) {
     //NOT EFFICIENT
     //O(M) for every insertion - where M is the size of noisePoints
     BOOST_FOREACH(NUPoint pt, noisePoints) {
-        if(pt.ground == point.ground)
+        if(pt.ground == point.groundCartesian)
             return;
     }
     //only occurs if there are not copies of the point in the noise list

@@ -39,7 +39,7 @@ public:
     //! @brief returns the screen size in pixels.
     Vector2<double> getScreenSize() const { return m_size_on_screen; }
     //! @brief returns the field position relative to the robot.
-    virtual Vector3<double> getRelativeFieldCoords() const {return m_location.relativeRadial;}
+    virtual Vector3<double> getRelativeFieldCoords() const {return m_location.neckRelativeRadial;}
 
     virtual double findScreenError(VisionFieldObject* other) const = 0;
     virtual double findGroundError(VisionFieldObject* other) const = 0;
@@ -53,7 +53,7 @@ protected:
     float m_error;        //! unused
     Vector3<double> m_spherical_error;       //! @variable The error in each of the spherical dimensions.
     bool valid;                             //! @variable Whether the object is valid.
-    bool distance_valid;                    //! @variable Whether the distance is valid.
+    //bool distance_valid;                    //! @variable Whether the distance is valid.
 };
 
 #endif // VISIONFIELDOBJECT_H

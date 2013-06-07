@@ -100,19 +100,19 @@ NUImage* DataWrapper::getFrame()
 }
 
 //! @brief Retrieves the camera height returns it.
-bool DataWrapper::getCameraHeight()
+float DataWrapper::getCameraHeight()
 {
     return m_camera_height;
 }
 
 //! @brief Retrieves the camera pitch returns it.
-bool DataWrapper::getHeadPitch()
+float DataWrapper::getHeadPitch()
 {
     return m_head_pitch;
 }
 
 //! @brief Retrieves the camera yaw returns it.
-bool DataWrapper::getHeadYaw()
+float DataWrapper::getHeadYaw()
 {
     return m_head_yaw;
 }
@@ -124,9 +124,9 @@ Vector3<float> DataWrapper::getOrientation()
 }
 
 //! @brief Returns the neck position snapshot.
-Vector3<float> DataWrapper::getOrientation()
+Vector3<double> DataWrapper::getNeckPosition()
 {
-    return m_orientation;
+    return m_neck_position;
 }
 
 Vector2<double> DataWrapper::getCameraFOV() const
@@ -328,7 +328,7 @@ void DataWrapper::debugPublish(const vector<FieldLine> &data)
 {
     BOOST_FOREACH(const FieldLine& l, data) {
         Vector2<NUPoint> endpts = l.getEndPoints();
-        gui->addToLayer(DBID_LINES, QLineF( endpts[0].screen.x, endpts[0].screen.y, endpts[1].screen.x, endpts[1].screen.y ), QColor(Qt::red));
+        gui->addToLayer(DBID_LINES, QLineF( endpts[0].screenCartesian.x, endpts[0].screenCartesian.y, endpts[1].screenCartesian.x, endpts[1].screenCartesian.y ), QColor(Qt::red));
     }
 }
 

@@ -53,10 +53,10 @@ bool CircleDetector::run(vector<NUPoint> &points, CentreCircle &result)
                    top = VisionBlackboard::getInstance()->getImageHeight() - 1,
                    bottom = 0;
             BOOST_FOREACH(const NUPoint& p, consensus) {
-                left = min(left, p.screen.x);
-                right = max(right, p.screen.x);
-                top = min(top, p.screen.y);
-                bottom = max(bottom, p.screen.y);
+                left = min(left, p.screenCartesian.x);
+                right = max(right, p.screenCartesian.x);
+                top = min(top, p.screenCartesian.y);
+                bottom = max(bottom, p.screenCartesian.y);
             }
 
             result = CentreCircle(candidate.getCentre(), candidate.getRadius(), Vector2<double>(right-left, bottom-top));

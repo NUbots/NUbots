@@ -11,7 +11,7 @@
 Obstacle::Obstacle(Point position, double width, double height)
 {
     m_id = OBSTACLE;
-    m_location.screen = position;
+    m_location.screenCartesian = position;
     m_size_on_screen = Vector2<double>(width, height);
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -41,10 +41,10 @@ if(valid) {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Obstacle");
     //newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_ROBOT_UNKNOWN);
-    newAmbObj.UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
+    newAmbObj.UpdateVisualObject(Vector3<float>(m_location.neckRelativeRadial.x, m_location.neckRelativeRadial.y, m_location.neckRelativeRadial.z),
                                  Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
-                                 Vector2<float>(m_location.angular.x, m_location.angular.y),
-                                 Vector2<int>(m_location.screen.x,m_location.screen.y),
+                                 Vector2<float>(m_location.screenAngular.x, m_location.screenAngular.y),
+                                 Vector2<int>(m_location.screenCartesian.x,m_location.screenCartesian.y),
                                  Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                  timestamp);
 
@@ -78,16 +78,16 @@ bool Obstacle::check() const
 double Obstacle::findScreenError(VisionFieldObject* other) const
 {
     Obstacle* o = dynamic_cast<Obstacle*>(other);
-    return ( m_location.screen - o->m_location.screen ).abs() + ( m_size_on_screen - o->m_size_on_screen ).abs();
+    return ( m_location.screenCartesian - o->m_location.screenCartesian ).abs() + ( m_size_on_screen - o->m_size_on_screen ).abs();
 }
 
 double Obstacle::findGroundError(VisionFieldObject* other) const
 {
     Obstacle* o = dynamic_cast<Obstacle*>(other);
-    double w = 2 * m_location.relativeRadial.x * tan(m_arc_width*0.5);              // w/2 = d * tan(theta/2)
-    double w_o = 2 * o->m_location.relativeRadial.x * tan(o->m_arc_width*0.5);
+    double w = 2 * m_location.neckRelativeRadial.x * tan(m_arc_width*0.5);              // w/2 = d * tan(theta/2)
+    double w_o = 2 * o->m_location.neckRelativeRadial.x * tan(o->m_arc_width*0.5);
 
-    return ( m_location.ground - o->m_location.ground ).abs() + abs( w - w_o );
+    return ( m_location.groundCartesian - o->m_location.groundCartesian ).abs() + abs( w - w_o );
 }
 
 
@@ -95,28 +95,22 @@ bool Obstacle::calculatePositions()
 {
     const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
     //To the bottom of the Goal Post.
-    transformer.screenToRadial2D(m_location);
-
-    distance_valid = transformer.isDistanceToPointValid();
-    if(distance_valid) {
-        d2p = transformer.distanceToPoint(m_location.angular.x, m_location.angular.y);
-        transformer.screenToRadial3D(m_location, d2p);
-    }
+    transformer.calculateRepresentations(m_location);
 
     // find arc width
     NUPoint gp1, gp2;
-    gp1 = transformer.screenToRadial2D(m_location.screen - Point(m_size_on_screen.x, 0));
-    gp2 = transformer.screenToRadial2D(m_location.screen + Point(m_size_on_screen.x, 0));
+    gp1.screenCartesian = m_location.screenCartesian - Point(m_size_on_screen.x, 0);
+    gp2.screenCartesian = m_location.screenCartesian + Point(m_size_on_screen.x, 0);
+    transformer.calculateRepresentations(gp1);
+    transformer.calculateRepresentations(gp2);
 
-    m_arc_width = abs( gp1.angular.x - gp2.angular.x );
-
-    //m_spherical_error - not calculated
+    m_arc_width = abs( gp1.screenAngular.x - gp2.screenAngular.x );
 
     #if VISION_OBSTACLE_VERBOSITY > 2
-        debug << "Obstacle::calculatePositions: " << m_location.relativeRadial << endl;
+        debug << "Obstacle::calculatePositions: " << m_location << endl;
     #endif
 
-    return distance_valid && d2p > 0;
+    return m_location.neckRelativeRadial.x > 0;
 }
 
 //void Obstacle::render(cv::Mat &mat) const
@@ -133,9 +127,9 @@ bool Obstacle::calculatePositions()
 ostream& operator<< (ostream& output, const Obstacle& o)
 {
     output << "Obstacle" << endl;
-    output << "\tpixelloc: " << o.m_location.screen << endl;
-    output << "\tangularloc: " << o.m_location.angular << endl;
-    output << "\trelative field coords: " << o.m_location.relativeRadial << endl;
+    output << "\tpixelloc: " << o.m_location.screenCartesian << endl;
+    output << "\tangularloc: " << o.m_location.screenAngular << endl;
+    output << "\trelative field coords: " << o.m_location.neckRelativeRadial << endl;
     return output;
 }
 

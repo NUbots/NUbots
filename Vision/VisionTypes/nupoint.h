@@ -9,20 +9,20 @@ class NUPoint
 public:
     NUPoint();
 
-    Vector2<double> screen,
-                    angular,
-                    ground;
-    Vector3<double>  relativeRadial;
+    Vector2<double> screenCartesian,
+                    screenAngular,
+                    groundCartesian;
+    Vector3<double>  neckRelativeRadial;
 
     friend std::istream& operator>>(std::istream& stream, NUPoint& p)
     {
-        stream >> p.screen >> p.angular >> p.ground >> p.relativeRadial;
+        stream >> p.screenCartesian >> p.screenAngular >> p.groundCartesian >> p.neckRelativeRadial;
         return stream;
     }
 
     friend std::ostream& operator<<(std::ostream& stream, const NUPoint& p)
     {
-        stream << p.screen << p.angular << p.ground << p.relativeRadial;
+        stream << p.screenCartesian << p.screenAngular << p.groundCartesian << p.neckRelativeRadial;
         return stream;
     }
 };

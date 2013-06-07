@@ -89,54 +89,59 @@ void Transformer::preCalculateTransforms()
     return;
 }
 
-void Transformer::calculateRepresentations(NUPoint& pt, bool ground = true, double val = 0.0) const
+void Transformer::calculateRepresentations(NUPoint& pt, bool known_distance, double val) const
 {
     // Calculate the radial position (relative to the camera vector) from the pixel position.
-    pt.angular.x = atan( (image_centre.x-pt.screen.x)  * screen_to_radial_factor.x);
-    pt.angular.y = atan( (image_centre.y-pt.screen.y) * screen_to_radial_factor.y);
+    pt.screenAngular.x = atan( (image_centre.x-pt.screenCartesian.x)  * screen_to_radial_factor.x);
+    pt.screenAngular.y = atan( (image_centre.y-pt.screenCartesian.y) * screen_to_radial_factor.y);
 
-    if(ground) {
-        // In this case val represents known height
-        // Calculate the radial position relative to
-        Vector3<double> radial = distanceToPoint(pt.screen, val);
+    if(known_distance) {
+        // In this case val represents known distance (for e.g. found by perspective comparison)
+        Matrix image_position_spherical(Vector3<double>(val, pt.screenAngular.x, pt.screenAngular.y));
+        Matrix rel_spherical = mathGeneral::Cartesian2Spherical(camV2RobotRotation * mathGeneral::Spherical2Cartesian(image_position_spherical));
+        pt.neckRelativeRadial = Vector3<double>(rel_spherical[0][0], rel_spherical[1][0], rel_spherical[2][0]);
     }
     else {
-        // In this case val represents known distance (for e.g. found by perspective comparison)
-        Vector3<double> radial =
+        // In this case val represents known height
+        // Calculate the radial position relative to
+        pt.neckRelativeRadial = distanceToPoint(pt.screenCartesian, val);
     }
+
+    pt.groundCartesian.x = cos(pt.neckRelativeRadial.z) * cos(pt.neckRelativeRadial.y) * pt.neckRelativeRadial.x;
+    pt.groundCartesian.y = cos(pt.neckRelativeRadial.z) * sin(pt.neckRelativeRadial.y) * pt.neckRelativeRadial.x;
 }
 
-void Transformer::calculateRepresentations(vector<NUPoint>& pts, bool ground = true, double val = 0.0) const
+void Transformer::calculateRepresentations(vector<NUPoint>& pts, bool known_distance, double val) const
 {
     BOOST_FOREACH(NUPoint& p, pts) {
-        calculateRepresentations(p);
+        calculateRepresentations(p, known_distance, val);
     }
 }
 
-NUPoint Transformer::calculateRepresentations(const Point& pt, bool ground = true, double val = 0.0) const
-{
-    NUPoint np;
-    np.screen = pt;
-    calculateRepresentations(np);
-    return np;
-}
+//NUPoint Transformer::calculateRepresentations(const Point& pt, bool ground = true, double val = 0.0) const
+//{
+//    NUPoint np;
+//    np.screenCartesian = pt;
+//    calculateRepresentations(np);
+//    return np;
+//}
 
-vector<NUPoint> Transformer::calculateRepresentations(const vector<Point>& pts, bool ground = true, double val = 0.0) const
-{
-    vector<NUPoint> nps;
-    BOOST_FOREACH(const Point& p, pts) {
-        nps.push_back(calculateRepresentations(p));
-    }
-    return nps;
-}
+//vector<NUPoint> Transformer::calculateRepresentations(const vector<Point>& pts, bool ground = true, double val = 0.0) const
+//{
+//    vector<NUPoint> nps;
+//    BOOST_FOREACH(const Point& p, pts) {
+//        nps.push_back(calculateRepresentations(p));
+//    }
+//    return nps;
+//}
 
 
 /// @note Assumes radial calculation already done
 void Transformer::radial2DToRadial3D(NUPoint &pt, double distance) const
 {
-    Matrix image_position_spherical(Vector3<double>(distance, pt.angular.x, pt.angular.y));
+    Matrix image_position_spherical(Vector3<double>(distance, pt.screenAngular.x, pt.screenAngular.y));
     Matrix rel_spherical = mathGeneral::Cartesian2Spherical(camV2RobotRotation * mathGeneral::Spherical2Cartesian(image_position_spherical));
-    pt.relativeRadial = Vector3<double>(rel_spherical[0][0], rel_spherical[1][0], rel_spherical[2][0]);
+    pt.neckRelativeRadial = Vector3<double>(rel_spherical[0][0], rel_spherical[1][0], rel_spherical[2][0]);
 }
 
 /**
@@ -166,7 +171,7 @@ Vector3<double> Transformer::distanceToPoint(Vector2<double> pixel, double objec
 
 void Transformer::screenToGroundCartesian(NUPoint& pt) const
 {
-    Vector3<double> v = distanceToPoint(pt.screen, 0.0);
+    Vector3<double> v = distanceToPoint(pt.screenCartesian, 0.0);
 
     Vector3<double> spherical_foot_relative = Kinematics::TransformPosition(ctgtransform, v);
 
@@ -175,7 +180,7 @@ void Transformer::screenToGroundCartesian(NUPoint& pt) const
 #if VISION_FIELDPOINT_VERBOSITY > 2
     debug << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
 #endif
-    pt.ground = Vector2<double>(cartesian_foot_relative.x, cartesian_foot_relative.y);
+    pt.groundCartesian = Vector2<double>(cartesian_foot_relative.x, cartesian_foot_relative.y);
 }
 
 void Transformer::screenToGroundCartesian(vector<NUPoint>& pts) const
@@ -188,7 +193,7 @@ void Transformer::screenToGroundCartesian(vector<NUPoint>& pts) const
 NUPoint Transformer::screenToGroundCartesian(const Point &pt) const
 {
     NUPoint g;
-    g.screen = pt;
+    g.screenCartesian = pt;
     screenToGroundCartesian(g);
     return g;
 }

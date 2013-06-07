@@ -34,10 +34,10 @@ public:
     //2D distortion transform
     Vector2<double> correctDistortion(const Vector2<double>& pt);
 
-    void calculateRepresentations(NUPoint& pt, bool ground = true, double val = 0.0) const;
-    void calculateRepresentations(vector<NUPoint>& pts, bool ground = true, double val = 0.0) const;
-    NUPoint calculateRepresentations(const Point& pt, bool ground = true, double val = 0.0) const;
-    vector<NUPoint> calculateRepresentations(const vector<Point>& pts, bool ground = true, double val = 0.0) const;
+    void calculateRepresentations(NUPoint& pt, bool known_distance = false, double val = 0.0) const;
+    void calculateRepresentations(vector<NUPoint>& pts, bool known_distance = false, double val = 0.0) const;
+//    NUPoint calculateRepresentations(const Point& pt, bool ground = true, double val = 0.0) const;
+//    vector<NUPoint> calculateRepresentations(const vector<Point>& pts, bool ground = true, double val = 0.0) const;
 
     double getCameraDistanceInPixels() const { return effective_camera_dist_pixels; }
 
