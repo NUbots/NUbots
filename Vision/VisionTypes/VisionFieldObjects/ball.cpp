@@ -83,13 +83,6 @@ bool Ball::check() const
 {
     //various throwouts here
 
-    if(!distance_valid) {
-        #if VISION_BALL_VERBOSITY > 1
-            debug << "Ball::check - Ball thrown out: distance invalid" << endl;
-        #endif
-        return false;
-    }
-
     //throwout for below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL and
        not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screenCartesian.x, m_location.screenCartesian.y)) {
@@ -101,14 +94,14 @@ bool Ball::check() const
     }
     
     //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
-    if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL and
-            abs(width_dist - d2p) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL) {
-        #if VISION_BALL_VERBOSITY > 1
-        debug << "Ball::check - Ball thrown out: width distance too much smaller than d2p" << endl;
-            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << endl;
-        #endif
-        return false;
-    }
+//    if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL and
+//            abs(width_dist - d2p) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL) {
+//        #if VISION_BALL_VERBOSITY > 1
+//        debug << "Ball::check - Ball thrown out: width distance too much smaller than d2p" << endl;
+//            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << endl;
+//        #endif
+//        return false;
+//    }
 
     //throw out if ball is too small
     if(VisionConstants::THROWOUT_SMALL_BALLS and 

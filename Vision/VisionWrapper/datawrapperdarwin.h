@@ -8,6 +8,7 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/SensorCalibration.h"
 #include "Kinematics/Horizon.h"
 
 #include "Vision/VisionTools/lookuptable.h"
@@ -41,12 +42,13 @@ public:
     
     NUImage* getFrame();
 
-    float getCameraHeight();            //for transforms
-    float getCameraPitch();              //for transforms
-    float getCameraYaw();                  //for transforms
-    Vector3<float> getOrientation();
-    Vector3<double> getNeckPosition();
-    Vector2<double> getCameraFOV() const {return Vector2<double>(camera_data->m_horizontalFov, camera_data->m_verticalFov);}
+    float getCameraHeight() const;            //for transforms
+    float getCameraPitch() const;              //for transforms
+    float getCameraYaw() const;                  //for transforms
+    Vector3<float> getOrientation() const;
+    Vector3<double> getNeckPosition() const;
+    Vector2<double> getCameraFOV() const;
+    SensorCalibration getSensorCalibration() const;
     
     //! @brief Returns a reference to the kinematics horizon line.
     const Horizon& getKinematicsHorizon();
@@ -112,6 +114,8 @@ private:
     ofstream imagefile;
     ofstream sensorfile;
     CameraSettings currentSettings;
+
+    SensorCalibration m_sensor_calibration;
     
     //! Shared data objects
     NUImage* current_frame;

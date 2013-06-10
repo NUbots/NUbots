@@ -55,10 +55,10 @@ private:
     NUPoint screenToRadial3D(const Point &pt, double distance) const;
 
     //2D pixel - 2D cartesian (feet relative) - assumes point is on the ground
-    void screenToGroundCartesian(NUPoint& pt) const;
-    void screenToGroundCartesian(vector<NUPoint>& pts) const;
-    NUPoint screenToGroundCartesian(const Point& pt) const;
-    vector<NUPoint> screenToGroundCartesian(const vector<Point>& pts) const;
+//    void screenToGroundCartesian(NUPoint& pt) const;
+//    void screenToGroundCartesian(vector<NUPoint>& pts) const;
+//    NUPoint screenToGroundCartesian(const Point& pt) const;
+//    vector<NUPoint> screenToGroundCartesian(const vector<Point>& pts) const;
 
     /**
       * Calculates the distance to a point at a given height
@@ -66,7 +66,7 @@ private:
       * @param object_height The height of the point to be measured (from the ground).
       * @return A 3 dimensional vector containing the distance, bearing and elevation to the point.
       */
-    Vector3<double> distanceToPoint(Vector2<double> pixel, double object_height=0.0);
+    Vector3<double> distanceToPoint(Vector2<double> pixel, double object_height=0.0) const;
 
 private:
     Vector2<double> FOV;

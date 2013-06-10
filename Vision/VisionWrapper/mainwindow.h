@@ -103,6 +103,7 @@ public:
     
     bool finished() const {return m_finished;}
     bool next() const {return m_next;}
+    bool prev() const {return m_prev;}
 
 public slots:
     void refresh();
@@ -110,6 +111,7 @@ public slots:
 private slots:
     void setFinished() {m_finished = true;}
     void setNext() {m_next = true;}
+    void setPrev() {m_prev = true;}
     void toggleContinuous();
     void setWindow(int w) { current_window = w; updateControls();}
 
@@ -119,7 +121,8 @@ private:
 private:
     bool m_finished,
          m_continuous,
-         m_next;
+         m_next,
+         m_prev;
 
     Ui::MainWindow* ui;
     QWidgetList windows;

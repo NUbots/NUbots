@@ -184,7 +184,8 @@ HEADERS += \
     ../Tools/Math/Circle.h \
     linesegmentscurve.h \
     Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.h \
-    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h \
+    VisionWrapper/startoptionsdialog.h
 
 SOURCES += \
     ../Vision/VisionTypes/*.cpp \
@@ -207,7 +208,8 @@ SOURCES += \
     #Threads/SaveImagesThread.cpp
     linesegmentscurve.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp \
+    VisionWrapper/startoptionsdialog.cpp
 
 ##robocup
 HEADERS += \
@@ -262,4 +264,5 @@ SOURCES += \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
 
 FORMS += \
-    VisionWrapper/mainwindow.ui
+    VisionWrapper/mainwindow.ui \
+    VisionWrapper/startoptionsdialog.ui

@@ -47,7 +47,7 @@ bool CentreCircle::addToExternalFieldObjects(FieldObjects* fieldobjects, float t
 //! @brief Stream output for labelling purposes
 void CentreCircle::printLabel(ostream& out) const
 {
-    out << m_location << " " <<  m_ground_radius << " " << m_size_on_screen;
+    out << VFOName(CENTRE_CIRCLE) << " " << m_location << " " <<  m_ground_radius << " " << m_size_on_screen;
 }
 
 //! @brief Calculation of error for optimisation

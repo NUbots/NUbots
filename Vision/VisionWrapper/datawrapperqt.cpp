@@ -1,6 +1,7 @@
 #include <boost/foreach.hpp>
 #include "datawrapperqt.h"
 #include "Infrastructure/NUImage/ColorModelConversions.h"
+#include "Kinematics/Kinematics.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
@@ -18,10 +19,19 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string is
     m_ok = ok;
     gui = ui;
     m_method = method;
-    debug << "openning camera config: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
-    if( ! m_camspecs.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str())) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load camera specifications: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
+    string cam_spec_name = string(CONFIG_DIR) + string("CameraSpecs.cfg");
+    string sen_calib_name = string(CONFIG_DIR) + string("SensorCalibration.cfg");
+
+    debug << "opening camera config: " << cam_spec_name << endl;
+    if( ! m_camspecs.LoadFromConfigFile(cam_spec_name.c_str())) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load camera specifications: " << cam_spec_name << endl;
         ok = false;
+    }
+
+    debug << "opening sensor calibration config: " << sen_calib_name << endl;
+    if( ! m_sensor_calibration.ReadSettings(sen_calib_name)) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load sensor calibration: " << sen_calib_name << ". Using default values." << endl;
+        m_sensor_calibration = SensorCalibration();
     }
 
     kinematics_horizon.setLine(0, 1, 0);
@@ -100,31 +110,31 @@ NUImage* DataWrapper::getFrame()
 }
 
 //! @brief Retrieves the camera height returns it.
-float DataWrapper::getCameraHeight()
+float DataWrapper::getCameraHeight() const
 {
     return m_camera_height;
 }
 
 //! @brief Retrieves the camera pitch returns it.
-float DataWrapper::getHeadPitch()
+float DataWrapper::getHeadPitch() const
 {
     return m_head_pitch;
 }
 
 //! @brief Retrieves the camera yaw returns it.
-float DataWrapper::getHeadYaw()
+float DataWrapper::getHeadYaw() const
 {
     return m_head_yaw;
 }
 
 //! @brief Retrieves the body pitch returns it.
-Vector3<float> DataWrapper::getOrientation()
+Vector3<float> DataWrapper::getOrientation() const
 {
     return m_orientation;
 }
 
 //! @brief Returns the neck position snapshot.
-Vector3<double> DataWrapper::getNeckPosition()
+Vector3<double> DataWrapper::getNeckPosition() const
 {
     return m_neck_position;
 }
@@ -135,13 +145,13 @@ Vector2<double> DataWrapper::getCameraFOV() const
 }
 
 //! @brief Returns spoofed kinecv::Matics horizon.
-const Horizon& DataWrapper::getKinematicsHorizon()
+const Horizon& DataWrapper::getKinematicsHorizon() const
 {
     return kinematics_horizon;
 }
 
 //! @brief Returns camera settings.
-CameraSettings DataWrapper::getCameraSettings()
+CameraSettings DataWrapper::getCameraSettings() const
 {
     switch(m_method) {
     case CAMERA:
@@ -151,6 +161,11 @@ CameraSettings DataWrapper::getCameraSettings()
     default:
         return CameraSettings();
     }
+}
+
+SensorCalibration DataWrapper::getSensorCalibration() const
+{
+    return m_sensor_calibration;
 }
 
 const LookUpTable& DataWrapper::getLUT() const
@@ -475,13 +490,28 @@ void DataWrapper::plotCurve(string name, vector< Point > pts)
     QColor colour;
     QwtSymbol symbol(QwtSymbol::NoSymbol);
 
+    // FILE OUTPUT, REMOVE LATER
+    static bool clear = true;
+    ofstream out;
+    if(clear)
+        out.open("lines.txt");
+    else
+        out.open("lines.txt", ios_base::app);
+    clear = false;
+    out << name << " = [" << name << " {[";
+    BOOST_FOREACH(Point p, pts) {
+        out << p.x << " " << p.y << ";";
+    }
+    out << "]}];" << endl;
+    out.close();
+
     //hackalicious
-    if(name.compare("Centre circle") == 0) {
+    if(name.compare("Centrecircle") == 0) {
         style = QwtPlotCurve::Lines;
         win = MainWindow::p1;
         colour = Qt::red;
     }
-    else if(name.compare("Ground coords") == 0){
+    else if(name.compare("Groundcoords") == 0){
         style = QwtPlotCurve::NoCurve;
         win = MainWindow::p1;
         colour = Qt::white;
@@ -540,7 +570,7 @@ void DataWrapper::plotHistogram(string name, const Histogram1D& hist, Colour col
     }
 }
 
-bool DataWrapper::updateFrame()
+bool DataWrapper::updateFrame(bool forward)
 {
     if(m_ok) {
         gui->clearLayers();
@@ -560,21 +590,17 @@ bool DataWrapper::updateFrame()
                 return false;
             }
             try {
+                if(!forward)
+                    imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), ios_base::cur);
                 imagestrm >> m_current_image;
             }
             catch(std::exception& e) {
-//                errorlog << "Image stream error - resetting: " << e.what() << endl;
-//                imagestrm.clear() ;
-//                imagestrm.seekg(0, ios::beg);
-//                imagestrm >> m_current_image;
-//                if(using_sensors) {
-//                    sensorstrm.clear() ;
-//                    sensorstrm.seekg(0, ios::beg);
-//                }
                 return false;
             }
             if(using_sensors) {
                 try {
+                    if(!forward)
+                        imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), ios_base::cur);
                     sensorstrm >> m_sensor_data;
                 }
                 catch(std::exception& e){
@@ -594,19 +620,22 @@ bool DataWrapper::updateFrame()
         //update kinematics snapshot
         if(using_sensors) {
 
+            vector<float> orientation(3, 0);
+
             if(!m_sensor_data.getCameraHeight(m_camera_height))
                 errorlog << "DataWrapperQt - updateFrame() - failed to get camera height from NUSensorsData" << endl;
             if(!m_sensor_data.getPosition(NUSensorsData::HeadPitch, m_head_pitch))
                 errorlog << "DataWrapperQt - updateFrame() - failed to get head pitch from NUSensorsData" << endl;
             if(!m_sensor_data.getPosition(NUSensorsData::HeadYaw, m_head_yaw))
                 errorlog << "DataWrapperQt - updateFrame() - failed to get head yaw from NUSensorsData" << endl;
-            if(!m_sensor_data.get(NUSensorsData::Orientation, m_orientation))
+            if(!m_sensor_data.getOrientation(orientation))
                 errorlog << "DataWrapperQt - updateFrame() - failed to get orientation from NUSensorsData" << endl;
+            m_orientation = Vector3<float>(orientation.at(0), orientation.at(1), orientation.at(2));
 
             vector<float> left, right;
-            if(m_sensor_data->get(NUSensorsData::LLegTransform, left) and m_sensor_data->get(NUSensorsData::RLegTransform, right))
+            if(m_sensor_data.get(NUSensorsData::LLegTransform, left) and m_sensor_data.get(NUSensorsData::RLegTransform, right))
             {
-                m_neck_position = Kinematics::CalculateNeckPosition(Matrix4x4fromVector(left), Matrix4x4fromVector(right), m_calibration.m_calibration.m_neck_position_offset);
+                m_neck_position = Kinematics::CalculateNeckPosition(Matrix4x4fromVector(left), Matrix4x4fromVector(right), m_sensor_calibration.m_neck_position_offset);
             }
             else
             {

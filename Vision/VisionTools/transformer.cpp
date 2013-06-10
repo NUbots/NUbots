@@ -86,7 +86,6 @@ void Transformer::preCalculateTransforms()
 
     camVector = (headV2RobotRotation * camOffsetVec) + neckV;
     camV2RobotRotation = headV2RobotRotation * camera_pitch_rot * camera_roll_rot * camera_yaw_rot;
-    return;
 }
 
 void Transformer::calculateRepresentations(NUPoint& pt, bool known_distance, double val) const
@@ -136,13 +135,13 @@ void Transformer::calculateRepresentations(vector<NUPoint>& pts, bool known_dist
 //}
 
 
-/// @note Assumes radial calculation already done
-void Transformer::radial2DToRadial3D(NUPoint &pt, double distance) const
-{
-    Matrix image_position_spherical(Vector3<double>(distance, pt.screenAngular.x, pt.screenAngular.y));
-    Matrix rel_spherical = mathGeneral::Cartesian2Spherical(camV2RobotRotation * mathGeneral::Spherical2Cartesian(image_position_spherical));
-    pt.neckRelativeRadial = Vector3<double>(rel_spherical[0][0], rel_spherical[1][0], rel_spherical[2][0]);
-}
+///// @note Assumes radial calculation already done
+//void Transformer::radial2DToRadial3D(NUPoint &pt, double distance) const
+//{
+//    Matrix image_position_spherical(Vector3<double>(distance, pt.screenAngular.x, pt.screenAngular.y));
+//    Matrix rel_spherical = mathGeneral::Cartesian2Spherical(camV2RobotRotation * mathGeneral::Spherical2Cartesian(image_position_spherical));
+//    pt.neckRelativeRadial = Vector3<double>(rel_spherical[0][0], rel_spherical[1][0], rel_spherical[2][0]);
+//}
 
 /**
   * Calculates the distance to a point at a given height
@@ -150,14 +149,14 @@ void Transformer::radial2DToRadial3D(NUPoint &pt, double distance) const
   * @param object_height The height of the point to be measured (from the ground).
   * @return A 3 dimensional vector containing the distance, bearing and elevation to the point.
   */
-Vector3<double> Transformer::distanceToPoint(Vector2<double> pixel, double object_height)
+Vector3<double> Transformer::distanceToPoint(Vector2<double> pixel, double object_height) const
 {
     Vector3<double> result;
 
     Matrix vcam(3,1,false);
     vcam[0][0] = effective_camera_dist_pixels;
-    vcam[1][0] = image_size.x / 2.f - pixel.x;
-    vcam[2][0] = image_size.y / 2.f - pixel.y;
+    vcam[1][0] = image_size.x / 2.0 - pixel.x;
+    vcam[2][0] = image_size.y / 2.0 - pixel.y;
 
     Matrix roboVdir = camV2RobotRotation * vcam;
     double alpha = (object_height - camVector[2][0]) / roboVdir[2][0];
@@ -169,43 +168,43 @@ Vector3<double> Transformer::distanceToPoint(Vector2<double> pixel, double objec
     return result;
 }
 
-void Transformer::screenToGroundCartesian(NUPoint& pt) const
-{
-    Vector3<double> v = distanceToPoint(pt.screenCartesian, 0.0);
+//void Transformer::screenToGroundCartesian(NUPoint& pt) const
+//{
+//    Vector3<double> v = distanceToPoint(pt.screenCartesian, 0.0);
 
-    Vector3<double> spherical_foot_relative = Kinematics::TransformPosition(ctgtransform, v);
+//    Vector3<double> spherical_foot_relative = Kinematics::TransformPosition(ctgtransform, v);
 
-    Vector3<double> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
+//    Vector3<double> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
 
-#if VISION_FIELDPOINT_VERBOSITY > 2
-    debug << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
-#endif
-    pt.groundCartesian = Vector2<double>(cartesian_foot_relative.x, cartesian_foot_relative.y);
-}
+//#if VISION_FIELDPOINT_VERBOSITY > 2
+//    debug << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
+//#endif
+//    pt.groundCartesian = Vector2<double>(cartesian_foot_relative.x, cartesian_foot_relative.y);
+//}
 
-void Transformer::screenToGroundCartesian(vector<NUPoint>& pts) const
-{
-    BOOST_FOREACH(NUPoint& p, pts) {
-        screenToGroundCartesian(p);
-    }
-}
+//void Transformer::screenToGroundCartesian(vector<NUPoint>& pts) const
+//{
+//    BOOST_FOREACH(NUPoint& p, pts) {
+//        screenToGroundCartesian(p);
+//    }
+//}
 
-NUPoint Transformer::screenToGroundCartesian(const Point &pt) const
-{
-    NUPoint g;
-    g.screenCartesian = pt;
-    screenToGroundCartesian(g);
-    return g;
-}
+//NUPoint Transformer::screenToGroundCartesian(const Point &pt) const
+//{
+//    NUPoint g;
+//    g.screenCartesian = pt;
+//    screenToGroundCartesian(g);
+//    return g;
+//}
 
-vector<NUPoint> Transformer::screenToGroundCartesian(const vector<Point>& pts) const
-{
-    vector<NUPoint> gpts;
-    BOOST_FOREACH(const Point& p, pts) {
-        gpts.push_back(screenToGroundCartesian(p));
-    }
-    return gpts;
-}
+//vector<NUPoint> Transformer::screenToGroundCartesian(const vector<Point>& pts) const
+//{
+//    vector<NUPoint> gpts;
+//    BOOST_FOREACH(const Point& p, pts) {
+//        gpts.push_back(screenToGroundCartesian(p));
+//    }
+//    return gpts;
+//}
 
 void Transformer::setSensors(double new_head_pitch, double new_head_yaw, double new_body_roll,
                              double new_body_pitch, Vector3<double> new_neck_position)
@@ -228,4 +227,11 @@ void Transformer::setCamParams(Vector2<double> imagesize, Vector2<double> fov)
     //screen_to_radial_factor = (FOV).elemDiv(image_centre);
 
     effective_camera_dist_pixels = image_centre.x/tan_half_FOV.x;
+
+    cout << "Transformer: imagesize: " << image_size <<
+            " centre: " << image_centre <<
+            " FOV: " << FOV <<
+            " tan half fov: " << tan_half_FOV <<
+            " effective camera dist pix: " << effective_camera_dist_pixels << endl;
+
 }

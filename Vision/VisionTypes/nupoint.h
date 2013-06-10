@@ -22,7 +22,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& stream, const NUPoint& p)
     {
-        stream << p.screenCartesian << p.screenAngular << p.groundCartesian << p.neckRelativeRadial;
+        stream << p.screenCartesian << "  " << p.screenAngular << "  " << p.groundCartesian << "  " << p.neckRelativeRadial;
         return stream;
     }
 };

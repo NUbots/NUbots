@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Quad::Quad() : bl(0,0), br(0,0), tl(0,0), tr(0,0)
+Quad::Quad() : bl(0,0), br(0,0), tr(0,0), tl(0,0)
 {
 }
 

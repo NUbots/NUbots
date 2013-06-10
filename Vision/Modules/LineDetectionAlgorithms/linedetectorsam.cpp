@@ -411,8 +411,8 @@ bool LineDetectorSAM::separate(vector<NUPoint> &left, vector<NUPoint> &right, NU
     if(line.isHorizontal()) {
         //horizontal line - no rotation
         BOOST_FOREACH(NUPoint pt, points) {
-            if(pt.ground != split_point.groundCartesian) {
-                if(pt.ground.x < x_split) //point is to the left
+            if(pt.groundCartesian != split_point.groundCartesian) {
+                if(pt.groundCartesian.x < x_split) //point is to the left
                     left.push_back(pt);
                 else
                     right.push_back(pt);
@@ -422,8 +422,8 @@ bool LineDetectorSAM::separate(vector<NUPoint> &left, vector<NUPoint> &right, NU
     else if(line.isVertical()) {
         //vertical line - 90 degree rotation
         BOOST_FOREACH(NUPoint pt, points) {
-            if(pt.ground != split_point.groundCartesian) {
-                if(pt.ground.y < y_split) //point is to the left
+            if(pt.groundCartesian != split_point.groundCartesian) {
+                if(pt.groundCartesian.y < y_split) //point is to the left
                     left.push_back(pt);
                 else
                     right.push_back(pt);
@@ -435,8 +435,8 @@ bool LineDetectorSAM::separate(vector<NUPoint> &left, vector<NUPoint> &right, NU
         BOOST_FOREACH(NUPoint pt, points) {
             //check all points, calculate translated x coord
             //and place in appropriate vector
-            if(pt.ground != split_point.groundCartesian) {
-                if(line.projectOnto(pt.ground).x < xsplit) {
+            if(pt.groundCartesian != split_point.groundCartesian) {
+                if(line.projectOnto(pt.groundCartesian).x < xsplit) {
                     //point is to the left
                     left.push_back(pt);
                 }
@@ -467,7 +467,7 @@ void LineDetectorSAM::addToNoise(const NUPoint& point) {
     //NOT EFFICIENT
     //O(M) for every insertion - where M is the size of noisePoints
     BOOST_FOREACH(NUPoint pt, noisePoints) {
-        if(pt.ground == point.groundCartesian)
+        if(pt.groundCartesian == point.groundCartesian)
             return;
     }
     //only occurs if there are not copies of the point in the noise list

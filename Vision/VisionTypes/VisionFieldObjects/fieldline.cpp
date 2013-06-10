@@ -44,7 +44,7 @@ void FieldLine::set(const Vector2<NUPoint>& end_points)
 
 void FieldLine::printLabel(ostream &out) const
 {
-    out << m_end_points;
+    out << VFOName(FIELDLINE) << "\tp1: " << m_end_points[0] << "\tp2: " << m_end_points[1];
 }
 
 double FieldLine::findScreenError(VisionFieldObject* other) const

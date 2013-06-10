@@ -99,7 +99,7 @@
             <x>0</x>
             <y>0</y>
             <width>209</width>
-            <height>325</height>
+            <height>292</height>
            </rect>
           </property>
          </widget>
@@ -116,6 +116,16 @@
         <widget class="QPushButton" name="next_pb">
          <property name="text">
           <string>Next</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="prev_pb">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Previous</string>
          </property>
         </widget>
        </item>

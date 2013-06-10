@@ -34,7 +34,16 @@ DataWrapper::DataWrapper()
     Blackboard->lookForGoals = true; //initialise
     isSavingImages = false;
     isSavingImagesWithVaryingSettings = false;
+
     VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
+
+    string sen_calib_name = string(CONFIG_DIR) + string("SensorCalibration.cfg");
+
+    debug << "opening sensor calibration config: " << sen_calib_name << endl;
+    if( ! m_sensor_calibration.ReadSettings(sen_calib_name)) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load sensor calibration: " << sen_calib_name << ". Using default values." << endl;
+        m_sensor_calibration = SensorCalibration();
+    }
 }
 
 DataWrapper::~DataWrapper()
@@ -85,33 +94,43 @@ const Horizon& DataWrapper::getKinematicsHorizon()
 }
 
 //! @brief Retrieves the camera height returns it.
-bool DataWrapper::getCameraHeight()
+bool DataWrapper::getCameraHeight() const
 {
     return m_camera_height;
 }
 
 //! @brief Retrieves the camera pitch returns it.
-bool DataWrapper::getHeadPitch()
+bool DataWrapper::getHeadPitch() const
 {
     return m_head_pitch;
 }
 
 //! @brief Retrieves the camera yaw returns it.
-bool DataWrapper::getHeadYaw()
+bool DataWrapper::getHeadYaw() const
 {
     return m_head_yaw;
 }
 
 //! @brief Retrieves the body pitch returns it.
-Vector3<float> DataWrapper::getOrientation()
+Vector3<float> DataWrapper::getOrientation() const
 {
     return m_orientation;
 }
 
 //! @brief Returns the neck position snapshot.
-Vector3<float> DataWrapper::getOrientation()
+Vector3<float> DataWrapper::getNeckPosition() const
 {
-    return m_orientation;
+    return m_neck_position;
+}
+
+Vector2<double> DataWrapper::getCameraFOV() const
+{
+    return Vector2<double>(camera_data->m_horizontalFov, camera_data->m_verticalFov);
+}
+
+SensorCalibration DataWrapper::getSensorCalibration() const
+{
+    return m_sensor_calibration;
 }
 
 /*! @brief Returns a reference to the stored Lookup Table

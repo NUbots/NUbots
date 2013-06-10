@@ -35,7 +35,7 @@ public:
 
     bool regenerate(const vector<NUPoint> &pts) {
         if(pts.size() == minPointsForFit()) {
-            setLineFromPoints(pts.at(0).ground, pts.at(1).ground);
+            setLineFromPoints(pts.at(0).groundCartesian, pts.at(1).groundCartesian);
             return true;
         }
         else {

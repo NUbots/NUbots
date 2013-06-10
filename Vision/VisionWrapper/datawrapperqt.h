@@ -29,6 +29,7 @@
 #include "Vision/VisionTypes/RANSACTypes/ransacgoal.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/SensorCalibration.h"
 #include "NUPlatform/NUCamera/NUCameraData.h"
 
 #include "mainwindow.h"
@@ -64,17 +65,18 @@ public:
     //! RETRIEVAL METHODS
     NUImage* getFrame();
 
-    float getCameraHeight();            //for transforms
-    float getHeadPitch();              //for transforms
-    float getHeadYaw();                  //for transforms
-    Vector3<float> getOrientation();
-    Vector3<double> getNeckPosition();
+    float getCameraHeight() const;            //for transforms
+    float getHeadPitch() const;              //for transforms
+    float getHeadYaw() const;                  //for transforms
+    Vector3<float> getOrientation() const;
+    Vector3<double> getNeckPosition() const;
     Vector2<double> getCameraFOV() const;
 
     //! @brief Generates spoofed horizon line.
-    const Horizon& getKinematicsHorizon();
+    const Horizon& getKinematicsHorizon() const;
 
-    CameraSettings getCameraSettings();
+    CameraSettings getCameraSettings() const;
+    SensorCalibration getSensorCalibration() const;
 
     const LookUpTable& getLUT() const;
 
@@ -106,7 +108,7 @@ public:
 private:
     DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string istrm, string sstrm, string cfg, string lname);
     ~DataWrapper();
-    bool updateFrame();
+    bool updateFrame(bool forward = true);
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
@@ -143,6 +145,7 @@ private:
 
     NUCamera* m_camera;
     NUCameraData m_camspecs;
+    SensorCalibration m_sensor_calibration;
 
     //! Used when reading from strm
     string streamname;

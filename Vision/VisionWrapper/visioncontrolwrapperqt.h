@@ -16,7 +16,7 @@ public:
     int run();
 
 private:
-    int runFrame();
+    int runFrame(bool forward = true);
     VisionControlWrapper();
     void getOptions(DataWrapper::INPUT_METHOD& method, bool& ok, string& istrm, string& sstrm, string& cfg, string& lname);
 

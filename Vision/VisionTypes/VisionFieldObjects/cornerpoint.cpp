@@ -87,7 +87,7 @@ bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float ti
 //! @brief Stream output for labelling purposes
 void CornerPoint::printLabel(ostream& out) const
 {
-    out << m_location;
+    out << VFOName(CORNER) << " " << m_location;
 }
 
 //! @brief Calculation of error for optimisation

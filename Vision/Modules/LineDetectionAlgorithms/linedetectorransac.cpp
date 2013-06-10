@@ -33,8 +33,8 @@ vector<FieldLine> LineDetectorRANSAC::run(const vector<NUPoint>& points)
         pair<LSFittedLine, LSFittedLine> lp;
         BOOST_FOREACH(NUPoint& g, candidates.at(i).second) {
             //line pairs are ordered as such : (ground, screen)
-            lp.first.addPoint(g.ground);
-            lp.second.addPoint(g.screen);
+            lp.first.addPoint(g.groundCartesian);
+            lp.second.addPoint(g.screenCartesian);
         }
         linePairs.push_back(lp);
     }

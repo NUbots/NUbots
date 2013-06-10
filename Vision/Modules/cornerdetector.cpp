@@ -47,24 +47,6 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
                     if(type != CornerPoint::INVALID) {
                         //need screen loc
                         if(it1->getScreenLineEquation().getIntersection(it2->getScreenLineEquation(), intersection.screenCartesian)) {
-
-                            /// DEBUG
-                            Point mid1 = (l1_pts[0].groundCartesian + l1_pts[1].groundCartesian)*0.5,
-                                  mid2 = (l2_pts[0].groundCartesian + l2_pts[1].groundCartesian)*0.5;
-
-                            //compare end points and midpoints to see what is closest to the intersection
-                            double d1x = (intersection.groundCartesian - l1_pts[0].groundCartesian).abs(),
-                                   d1y = (intersection.groundCartesian - l1_pts[1].groundCartesian).abs(),
-                                   d1m = (intersection.groundCartesian - mid1).abs(),
-                                   d2x = (intersection.groundCartesian - l2_pts[0].groundCartesian).abs(),
-                                   d2y = (intersection.groundCartesian - l2_pts[1].groundCartesian).abs(),
-                                   d2m = (intersection.groundCartesian - mid2).abs();
-
-                            double min1 = min(d1m, min(d1x, d1y)),
-                                   min2 = min(d2m, min(d2x, d2y));
-
-                            /// END DEBUG
-
                             results.push_back(CornerPoint(type, intersection));
                         }
                         else {
