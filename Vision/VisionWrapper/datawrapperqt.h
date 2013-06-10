@@ -129,6 +129,7 @@ private:
 
     NUImage m_current_image;
     NUSensorsData m_sensor_data;
+    SensorCalibration m_sensor_calibration;
 
     float m_camera_height;
     float m_head_pitch;
@@ -145,7 +146,6 @@ private:
 
     NUCamera* m_camera;
     NUCameraData m_camspecs;
-    SensorCalibration m_sensor_calibration;
 
     //! Used when reading from strm
     string streamname;

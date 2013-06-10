@@ -207,7 +207,7 @@ SOURCES += \
     VisionTypes/coloursegment.cpp \
     VisionTypes/colourtransitionrule.cpp \
     VisionTypes/greenhorizon.cpp \
-    VisionTypes/groundpoint.cpp \
+    VisionTypes/nupoint.cpp \
     VisionTypes/histogram1d.cpp \
     VisionTypes/quad.cpp \
     VisionTypes/segmentedregion.cpp \
@@ -232,8 +232,6 @@ SOURCES += \
     #../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
     linesegmentscurve.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp \
     VisionWrapper/startoptionsdialog.cpp
 
 ##robocup

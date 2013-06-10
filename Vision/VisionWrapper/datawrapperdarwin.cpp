@@ -8,6 +8,7 @@
 
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
+#include "Kinematics/Kinematics.h"
 
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/basicvisiontypes.h"
@@ -362,20 +363,22 @@ bool DataWrapper::updateFrame()
     debug << "Frames dropped: " << numFramesDropped << endl;
 #endif
 
+    vector<float> orientation(3, 0);
+
     //update kinematics snapshot
-    if(!sensor_data.getCameraHeight(m_camera_height))
+    if(!sensor_data->getCameraHeight(m_camera_height))
         errorlog << "DataWrapperDarwin - updateFrame() - failed to get camera height from NUSensorsData" << endl;
-    if(!sensor_data.getPosition(NUSensorsData::HeadPitch, m_head_pitch))
+    if(!sensor_data->getPosition(NUSensorsData::HeadPitch, m_head_pitch))
         errorlog << "DataWrapperDarwin - updateFrame() - failed to get head pitch from NUSensorsData" << endl;
-    if(!sensor_data.getPosition(NUSensorsData::HeadYaw, m_head_yaw))
+    if(!sensor_data->getPosition(NUSensorsData::HeadYaw, m_head_yaw))
         errorlog << "DataWrapperDarwin - updateFrame() - failed to get head yaw from NUSensorsData" << endl;
-    if(!sensor_data.get(NUSensorsData::Orientation, m_orientation))
+    if(!sensor_data->getOrientation(orientation))
         errorlog << "DataWrapperDarwin - updateFrame() - failed to get orientation from NUSensorsData" << endl;
 
     vector<float> left, right;
     if(sensor_data->get(NUSensorsData::LLegTransform, left) and sensor_data->get(NUSensorsData::RLegTransform, right))
     {
-        m_neck_position = Kinematics::CalculateNeckPosition(Matrix4x4fromVector(left), Matrix4x4fromVector(right), m_calibration.m_calibration.m_neck_position_offset);
+        m_neck_position = Kinematics::CalculateNeckPosition(Matrix4x4fromVector(left), Matrix4x4fromVector(right), m_sensor_calibration.m_neck_position_offset);
     }
     else
     {
@@ -383,7 +386,6 @@ bool DataWrapper::updateFrame()
         // Default in case kinemtaics not available. Base height of darwin.
         m_neck_position = Vector3<double>(0.0, 0.0, 39.22);
     }
-
 
     return current_frame->getWidth() > 0 && current_frame->getHeight() > 0;
 }

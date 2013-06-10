@@ -8,6 +8,7 @@
 #include "Kinematics/Horizon.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
+#include "Infrastructure/SensorCalibration.h"
 //#include "Infrastructure/Jobs/JobList.h"
 //#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
@@ -50,12 +51,13 @@ public:
     //! RETRIEVAL METHODS
     const NUImage* getFrame();
 
-    float getCameraHeight();            //for transforms
-    float getCameraPitch();              //for transforms
-    float getCameraYaw();                  //for transforms
-    Vector3<float> getOrientation();
-    Vector3<double> getNeckPosition();
-    Vector2<double> getCameraFOV() const {return Vector2<double>(camera_data.m_horizontalFov, camera_data.m_verticalFov);}
+
+    float getCameraHeight() const;            //for transforms
+    float getHeadPitch() const;              //for transforms
+    float getHeadYaw() const;                  //for transforms
+    Vector3<float> getOrientation() const;
+    Vector3<double> getNeckPosition() const;
+    Vector2<double> getCameraFOV() const;
     
     //! @brief Generates spoofed horizon line.
     const Horizon& getKinematicsHorizon();
@@ -122,6 +124,12 @@ private:
     vector<float> m_horizon_coefficients;
     Horizon m_kinematics_horizon;
     
+    float m_camera_height;
+    float m_head_pitch;
+    float m_head_yaw;
+    Vector3<float> m_orientation;
+    Vector3<double> m_neck_position;
+
     //! Frame info
     double m_timestamp;
     int numFramesDropped;
@@ -140,6 +148,7 @@ private:
     NUCameraData camera_data;
     NUActionatorsData* actions;             //! pointer to shared actionators data
     FieldObjects* field_objects;            //! pointer to shared fieldobject data
+    SensorCalibration m_sensor_calibration;
 };
 
 #endif // VISIONDATAWRAPPERNUVIEW_H
