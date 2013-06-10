@@ -24,7 +24,7 @@ SET (YOUR_SRCS  main.cpp
                 DarwinActionators.cpp DarwinActionators.h
 		DarwinJointMapping.cpp DarwinJointMapping.h
                 DarwinIO.cpp DarwinIO.h
-		DarwinAPI.cpp DarwinAPI.h
+				DarwinAPI.cpp DarwinAPI.h
 #				../Generic/Cameras/NUOpenCVCamera.h ../Generic/Cameras/NUOpenCVCamera.cpp
 )
 ####################################################################################

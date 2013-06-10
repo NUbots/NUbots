@@ -109,7 +109,7 @@ namespace ConfigSystem
          *  @param paramName Name of the parameter to delete.
          *  @return Whether the operation was successful.
          */
-        bool deleteParam(
+        bool DeleteParam(
             const std::string &paramPath,
             const std::string &paramName
             );
@@ -410,7 +410,7 @@ namespace ConfigSystem
         bool addValueToPtree(ConfigParameter fromParam, ptree &toPtree)
         {
             T v; 
-            if(!fromParam.getValue(v)) return false;
+            if(!fromParam.getValue(&v)) return false;
             toPtree.put("value", v);
             return true;
         }
@@ -422,7 +422,7 @@ namespace ConfigSystem
             ptree child;
             std::vector<T> retrieved_vector;
             //Retrieve vector from the CP object
-            if( !from_param.getValue(retrieved_vector) ) return false;
+            if( !from_param.getValue(&retrieved_vector) ) return false;
             
             try
             {
@@ -451,7 +451,7 @@ namespace ConfigSystem
             std::vector< std::vector<T> > retrieved_vector;
             
             //Retrieve vector from the CP object
-            if(!from_param.getValue(retrieved_vector))
+            if(!from_param.getValue(&retrieved_vector))
             {
                 std::cout << "addVectorValueToPtree2D(...): No 2d vector in this ConfigParameter."
                           << std::endl;
@@ -494,7 +494,7 @@ namespace ConfigSystem
             std::vector< std::vector< std::vector<T> > > retrieved_vector;
             
             //Retrieve vector from the CP object
-            if( !from_param.getValue(retrieved_vector) ) return false;
+            if( !from_param.getValue(&retrieved_vector) ) return false;
             
             try
             {
@@ -537,7 +537,7 @@ namespace ConfigSystem
         bool addRangeToPtree(ConfigParameter fromParam, ptree &toPtree)
         {
             ConfigRange<T> r;
-            if(!fromParam.getRange(r)) return false;
+            if(!fromParam.getRange(&r)) return false;
 
             toPtree.put("range.min"     , r.getMin());
             toPtree.put("range.max"     , r.getMax());

@@ -13,7 +13,7 @@
 #include "mjpg_streamer.h"
 #include "LinuxDARwIn.h"
 
-#define INI_FILE_PATH       "../../../../Data/config.ini"
+#define INI_FILE_PATH       "config.ini"
 #define U2D_DEV_NAME        "/dev/ttyUSB0"
 
 using namespace Robot;
@@ -57,9 +57,6 @@ int main(void)
 		printf("Fail to initialize Motion Manager!\n");
 			return 0;
 	}
-    MotionManager::GetInstance()->LoadINISettings(ini);
-    Walking::GetInstance()->LoadINISettings(ini);
-
 	MotionManager::GetInstance()->AddModule((MotionModule*)Head::GetInstance());
 	MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
     LinuxMotionTimer *motion_timer = new LinuxMotionTimer(MotionManager::GetInstance());

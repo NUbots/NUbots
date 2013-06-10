@@ -140,7 +140,7 @@ void DrawIntro(CM730 *cm730)
 	for(int id=JointData::ID_R_SHOULDER_PITCH; id<JointData::NUMBER_OF_JOINTS; id++)
 	{
 		wStartPosition = MotionStatus::m_CurrentJoints.GetValue(id);
-		wGoalPosition = Walking::GetInstance()->m_Joint.GetValue(id) + MotionManager::GetInstance()->m_Offset[id];
+		wGoalPosition = Walking::GetInstance()->m_Joint.GetValue(id);
 		if( wStartPosition > wGoalPosition )
 			wDistance = wStartPosition - wGoalPosition;
 		else

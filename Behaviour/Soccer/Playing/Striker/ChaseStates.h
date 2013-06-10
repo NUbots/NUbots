@@ -65,11 +65,11 @@ public:
         m_previous_time = 0;
         m_has_fallen = false;
 
-        head_behaviour = HeadBehaviour::getInstance();
+       //head_behaviour = HeadBehaviour::getInstance();
     }
     ~GoToBall() {}
 protected:
-    HeadBehaviour* head_behaviour;
+    //HeadBehaviour* head_behaviour;
     BehaviourState* nextState()
     {   // do state transitions in the chase state machine
         return this;
@@ -163,7 +163,8 @@ protected:
             #endif
         } 
         //Get head behaviour decision
-        head_behaviour->makeVisionChoice(HeadBehaviour::CheckAgentPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy for learning to be active via either motivated or world rewards
+       // cout<<"ChaseStates.h::doState() - head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentPolicy)"<<endl;
+       // head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy for learning to be active via either motivated or world rewards
 
     }
 

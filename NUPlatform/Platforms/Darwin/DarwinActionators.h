@@ -32,9 +32,19 @@ class DarwinPlatform;
 namespace Robot
 {
     class CM730;
+    // class SensorReadManager;
 }
 
+/*! 
+    @brief Constructs a nubot actionator class with a Darwin backend
+        The Darwin backend takes aspects from both the NAO and the Robotis
+        backends; the Darwin has a secondary board to perform all the
+        communication with hardware, like the NAO. However, it also uses
+        Robotis motors, like the Cycloid/Bear.
 
+        This backend is also the most recent, and probably should serve as a
+        template for future platforms.
+ */ 
 class DarwinActionators : public NUActionators
 {
 public:
@@ -51,6 +61,9 @@ protected:
     DarwinPlatform* platform;
     int count;
     DarwinJointMapping* m_joint_mapping;
+
+    //! Manages sensor read descriptors
+    // Robot::SensorReadManager* sensor_read_manager_;
 
     static vector<string> m_footled_names;
     static unsigned int m_num_footleds;

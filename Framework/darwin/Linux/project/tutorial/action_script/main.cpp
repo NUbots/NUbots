@@ -31,8 +31,6 @@
 #define MOTION_FILE_PATH    "../../../../Data/motion_4096.bin"
 #endif
 
-#define INI_FILE_PATH       "../../../../Data/config.ini"
-
 void change_current_dir()
 {
     char exepath[1024] = {0};
@@ -43,8 +41,6 @@ void change_current_dir()
 int main(void)
 {
     printf( "\n===== Action script Tutorial for DARwIn =====\n\n");
-
-    minIni* ini = new minIni(INI_FILE_PATH);
 
     change_current_dir();
 
@@ -58,7 +54,6 @@ int main(void)
         printf("Fail to initialize Motion Manager!\n");
             return 0;
     }
-    MotionManager::GetInstance()->LoadINISettings(ini);
     MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());
     LinuxMotionTimer *motion_timer = new LinuxMotionTimer(MotionManager::GetInstance());
     motion_timer->Start();

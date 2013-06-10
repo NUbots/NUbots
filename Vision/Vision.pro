@@ -188,19 +188,44 @@ HEADERS += \
     VisionWrapper/startoptionsdialog.h
 
 SOURCES += \
-    ../Vision/VisionTypes/*.cpp \
-    ../Vision/VisionTypes/RANSACTypes/*.cpp \
-    ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
+    Modules/balldetector.cpp \
+    Modules/circledetector.cpp \
+    Modules/cornerdetector.cpp \
+    Modules/fieldpointdetector.cpp \
+    Modules/goaldetector.cpp \
+    Modules/greenhorizonch.cpp \
+    Modules/linedetector.cpp \
+    Modules/objectdetectionch.cpp \
+    Modules/scanlines.cpp \
+    Modules/segmentfilter.cpp \
+    Modules/LineDetectionAlgorithms/linedetectorransac.cpp \
+    Modules/LineDetectionAlgorithms/linedetectorsam.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp \
+    VisionTypes/colourreplacementrule.cpp \
+    VisionTypes/coloursegment.cpp \
+    VisionTypes/colourtransitionrule.cpp \
+    VisionTypes/greenhorizon.cpp \
+    VisionTypes/groundpoint.cpp \
+    VisionTypes/histogram1d.cpp \
+    VisionTypes/quad.cpp \
+    VisionTypes/segmentedregion.cpp \
+    VisionTypes/RANSACTypes/ransacgoal.cpp \
+    VisionTypes/VisionFieldObjects/ball.cpp \
+    VisionTypes/VisionFieldObjects/centrecircle.cpp \
+    VisionTypes/VisionFieldObjects/cornerpoint.cpp \
+    VisionTypes/VisionFieldObjects/fieldline.cpp \
+    VisionTypes/VisionFieldObjects/goal.cpp \
+    VisionTypes/VisionFieldObjects/obstacle.cpp \
+    VisionTypes/VisionFieldObjects/visionfieldobject.cpp\
     VisionTools/lookuptable.cpp \
-    ../Vision/Modules/*.cpp \
     VisionTools/transformer.cpp \
     VisionTools/classificationcolours.cpp \
-    ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     visionblackboard.cpp \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     basicvisiontypes.cpp \
     GenericAlgorithms/ransac.template \
     VisionWrapper/mainwindow.cpp \

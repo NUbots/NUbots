@@ -84,9 +84,7 @@ int main()
         printf("Fail to initialize Motion Manager!\n");
             return 0;
     }
-    MotionManager::GetInstance()->LoadINISettings(ini);
     Walking::GetInstance()->LoadINISettings(ini);
-
     MotionManager::GetInstance()->AddModule((MotionModule*)Head::GetInstance());
     MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
     LinuxMotionTimer *motion_timer = new LinuxMotionTimer(MotionManager::GetInstance());
@@ -138,23 +136,23 @@ int main()
         printf("\r");
 
         /* Read & print FSR value */
-//        printf(" L1:%5d", cm730.m_BulkReadData[FSR::ID_L_FSR].ReadWord(FSR::P_FSR1_L));
-//        printf(" L2:%5d", cm730.m_BulkReadData[FSR::ID_L_FSR].ReadWord(FSR::P_FSR2_L));
-//        printf(" L3:%5d", cm730.m_BulkReadData[FSR::ID_L_FSR].ReadWord(FSR::P_FSR3_L));
-//        printf(" L4:%5d", cm730.m_BulkReadData[FSR::ID_L_FSR].ReadWord(FSR::P_FSR4_L));
+//        printf(" L1:%5d", cm730.bulk_read_data_[FSR::ID_L_FSR].ReadWord(FSR::P_FSR1_L));
+//        printf(" L2:%5d", cm730.bulk_read_data_[FSR::ID_L_FSR].ReadWord(FSR::P_FSR2_L));
+//        printf(" L3:%5d", cm730.bulk_read_data_[FSR::ID_L_FSR].ReadWord(FSR::P_FSR3_L));
+//        printf(" L4:%5d", cm730.bulk_read_data_[FSR::ID_L_FSR].ReadWord(FSR::P_FSR4_L));
 
-        left_fsr_x = cm730.m_BulkReadData[FSR::ID_L_FSR].ReadByte(FSR::P_FSR_X);
-        left_fsr_y = cm730.m_BulkReadData[FSR::ID_L_FSR].ReadByte(FSR::P_FSR_Y);
+        left_fsr_x = cm730.bulk_read_data_[FSR::ID_L_FSR].ReadByte(FSR::P_FSR_X);
+        left_fsr_y = cm730.bulk_read_data_[FSR::ID_L_FSR].ReadByte(FSR::P_FSR_Y);
         printf(" LX:%3d", MAX_FSR_VALUE-left_fsr_x);
         printf(" LY:%3d", MAX_FSR_VALUE-left_fsr_y);
 
-//        printf(" R1:%5d", cm730.m_BulkReadData[FSR::ID_R_FSR].ReadWord(FSR::P_FSR1_L));
-//        printf(" R2:%5d", cm730.m_BulkReadData[FSR::ID_R_FSR].ReadWord(FSR::P_FSR2_L));
-//        printf(" R3:%5d", cm730.m_BulkReadData[FSR::ID_R_FSR].ReadWord(FSR::P_FSR3_L));
-//        printf(" R4:%5d", cm730.m_BulkReadData[FSR::ID_R_FSR].ReadWord(FSR::P_FSR4_L));
+//        printf(" R1:%5d", cm730.bulk_read_data_[FSR::ID_R_FSR].ReadWord(FSR::P_FSR1_L));
+//        printf(" R2:%5d", cm730.bulk_read_data_[FSR::ID_R_FSR].ReadWord(FSR::P_FSR2_L));
+//        printf(" R3:%5d", cm730.bulk_read_data_[FSR::ID_R_FSR].ReadWord(FSR::P_FSR3_L));
+//        printf(" R4:%5d", cm730.bulk_read_data_[FSR::ID_R_FSR].ReadWord(FSR::P_FSR4_L));
 
-        right_fsr_x = cm730.m_BulkReadData[FSR::ID_R_FSR].ReadByte(FSR::P_FSR_X);
-        right_fsr_y = cm730.m_BulkReadData[FSR::ID_R_FSR].ReadByte(FSR::P_FSR_Y);
+        right_fsr_x = cm730.bulk_read_data_[FSR::ID_R_FSR].ReadByte(FSR::P_FSR_X);
+        right_fsr_y = cm730.bulk_read_data_[FSR::ID_R_FSR].ReadByte(FSR::P_FSR_Y);
         printf(" RX:%3d", right_fsr_x);
         printf(" RY:%3d", right_fsr_y);
 

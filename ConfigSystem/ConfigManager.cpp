@@ -23,7 +23,7 @@ namespace ConfigSystem
         _configObjects  = std::vector<Configurable*>();
 
         _configStore = new ConfigStorageManager();
-    	loadConfiguration(configName);
+    	LoadConfiguration(configName);
     }
 
     ConfigManager::~ConfigManager()
@@ -35,7 +35,7 @@ namespace ConfigSystem
     }
     
 
-    bool ConfigManager::loadConfiguration(std::string configName)
+    bool ConfigManager::LoadConfiguration(std::string configName)
     {
         bool loaded = _configStore->loadConfig(_currConfigTree, configName);
 
@@ -50,14 +50,14 @@ namespace ConfigSystem
         else
         {
             // Send the new configuration to the configObjects
-            // #warning Should occur within updateConfiguration()
+            // #warning Should occur within UpdateConfiguration()
             reconfigureConfigObjects();
         }
         
         return loaded;
     }
     
-    bool ConfigManager::saveConfiguration(std::string configName)
+    bool ConfigManager::SaveConfiguration(std::string configName)
     {
         bool saved = _configStore->saveConfig(_currConfigTree, configName);
 
@@ -74,21 +74,21 @@ namespace ConfigSystem
     }
 
 
-    void ConfigManager::updateConfiguration()
+    void ConfigManager::UpdateConfiguration()
     {
         // Update all ConfigObjects whose configurations have been outdated.
         updateConfigObjects();
     }
 
 
-    bool ConfigManager::setConfigObjects(std::vector<Configurable*> configObjects)
+    bool ConfigManager::SetConfigObjects(std::vector<Configurable*> configObjects)
     {
         _configObjects = configObjects;
         reconfigureConfigObjects();
         return true;
     }
 
-    bool ConfigManager::addConfigObject(Configurable* configObject)
+    bool ConfigManager::AddConfigObject(Configurable* configObject)
     {
         if(configObject == NULL) return false;
         _configObjects.push_back(configObject);
@@ -145,7 +145,7 @@ namespace ConfigSystem
             //! Check whether the given path is on c's base path
             // Note: Should use some clever data structure to speed this up.
             // (such a data structure would be initialised within 
-            // ConfigManager::setConfigObjects(...))
+            // ConfigManager::SetConfigObjects(...))
             if(boost::starts_with(paramPath, c->getConfigBasePath()))
                 c->setConfigAsOutdated();
         }
@@ -153,7 +153,7 @@ namespace ConfigSystem
     
     
     template<typename T>
-    bool ConfigManager::createParam(
+    bool ConfigManager::CreateParam(
         const std::string &paramPath,
         const std::string &paramName,
         T initialValue
@@ -164,7 +164,7 @@ namespace ConfigSystem
         //! Get the relevant parameter from the ConfigTree
         if(_currConfigTree->checkParam(paramPath, paramName))
         {
-            std::cout << "ConfigManager::createParam(...): "
+            std::cout << "ConfigManager::CreateParam(...): "
                       << paramPath << "." << paramName << " already exists."
                       << std::endl;
             return false;
@@ -184,46 +184,46 @@ namespace ConfigSystem
         return true;
     }
     // Define allowed template parameters (using explicit template instantiations).
-    template bool ConfigManager::createParam<long> (
+    template bool ConfigManager::CreateParam<long> (
         const std::string &paramPath, const std::string &paramName,
         long initialValue
         );
-    template bool ConfigManager::createParam<double> (
+    template bool ConfigManager::CreateParam<double> (
         const std::string &paramPath, const std::string &paramName,
         double initialValue
         );
-    template bool ConfigManager::createParam<std::string> (
+    template bool ConfigManager::CreateParam<std::string> (
         const std::string &paramPath, const std::string &paramName,
         std::string initialValue
         );
-    template bool ConfigManager::createParam<std::vector<long> > (
+    template bool ConfigManager::CreateParam<std::vector<long> > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<long> initialValue
         );
-    template bool ConfigManager::createParam<std::vector<std::vector<long> > > (
+    template bool ConfigManager::CreateParam<std::vector<std::vector<long> > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<long> > initialValue
         );
-    template bool ConfigManager::createParam<std::vector<std::vector<std::vector<long> > > > (
+    template bool ConfigManager::CreateParam<std::vector<std::vector<std::vector<long> > > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<std::vector<long> > > initialValue
         );
-    template bool ConfigManager::createParam<std::vector<double> > (
+    template bool ConfigManager::CreateParam<std::vector<double> > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<double>  initialValue
         );
-    template bool ConfigManager::createParam<std::vector<std::vector<double> > > (
+    template bool ConfigManager::CreateParam<std::vector<std::vector<double> > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<double> >  initialValue
         );
-    template bool ConfigManager::createParam<std::vector<std::vector<std::vector<double> > > > (
+    template bool ConfigManager::CreateParam<std::vector<std::vector<std::vector<double> > > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<std::vector<double> > > initialValue
         );
 
 
 
-    bool ConfigManager::deleteParam(
+    bool ConfigManager::DeleteParam(
             const std::string &paramPath,
             const std::string &paramName
             )
@@ -243,14 +243,14 @@ namespace ConfigSystem
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
         else if(cp.isLocked()) return false;
 		
-        if(!_currConfigTree->deleteParam(paramPath, paramName)) return false;
+        if(!_currConfigTree->DeleteParam(paramPath, paramName)) return false;
 
         return true;
     }
 
 
 
-    bool ConfigManager::lockParam(
+    bool ConfigManager::LockParam(
             const std::string &paramPath,
             const std::string &paramName
             )
@@ -272,7 +272,7 @@ namespace ConfigSystem
         return true;
     }
 
-    bool ConfigManager::unlockParam(
+    bool ConfigManager::UnlockParam(
             const std::string &paramPath,
             const std::string &paramName
             )
@@ -295,7 +295,7 @@ namespace ConfigSystem
     }
 
 
-    bool ConfigManager::setParamDescription(
+    bool ConfigManager::SetDescription(
         const std::string &paramPath,
         const std::string &paramName,
         const std::string &paramDesc
@@ -322,61 +322,68 @@ namespace ConfigSystem
 
 
     template<typename T>
-    bool ConfigManager::readValue (
+    bool ConfigManager::ReadValue (
         const std::string &paramPath,
         const std::string &paramName,
-        T &data
+        T* value
         )
     {
         CONFIGSYS_DEBUG_CALLS;
+        if(value == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ":"
+                      << " 'value' must not be NULL"
+                      << " (Cannot read into a null pointer)."
+                      << std::endl;
+            return false;
+        }
+
         ConfigParameter cp(vt_none);
         if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getValue(data);
+        return cp.getValue(value);
     }
 
-
-    // New interface (using explicit template instantiations).
-    template bool ConfigManager::readValue<long> (
+    template bool ConfigManager::ReadValue<long> (
         const std::string &paramPath, const std::string &paramName,
-        long &data
+        long *value
         );
-    template bool ConfigManager::readValue<double> (
+    template bool ConfigManager::ReadValue<double> (
         const std::string &paramPath, const std::string &paramName,
-        double &data
+        double *value
         );
-    template bool ConfigManager::readValue<std::string> (
+    template bool ConfigManager::ReadValue<std::string> (
         const std::string &paramPath, const std::string &paramName,
-        std::string &data
+        std::string *value
         );
-    template bool ConfigManager::readValue<std::vector<long> > (
+    template bool ConfigManager::ReadValue<std::vector<long> > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<long> &data
+        std::vector<long> *value
         );
-    template bool ConfigManager::readValue<std::vector<std::vector<long> > > (
+    template bool ConfigManager::ReadValue<std::vector<std::vector<long> > > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<std::vector<long> > &data
+        std::vector<std::vector<long> > *value
         );
-    template bool ConfigManager::readValue<std::vector<std::vector<std::vector<long> > > > (
+    template bool ConfigManager::ReadValue<std::vector<std::vector<std::vector<long> > > > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<std::vector<std::vector<long> > > &data
+        std::vector<std::vector<std::vector<long> > > *value
         );
-    template bool ConfigManager::readValue<std::vector<double> > (
+    template bool ConfigManager::ReadValue<std::vector<double> > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<double>  &data
+        std::vector<double>  *value
         );
-    template bool ConfigManager::readValue<std::vector<std::vector<double> > > (
+    template bool ConfigManager::ReadValue<std::vector<std::vector<double> > > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<std::vector<double> >  &data
+        std::vector<std::vector<double> >  *value
         );
-    template bool ConfigManager::readValue<std::vector<std::vector<std::vector<double> > > > (
+    template bool ConfigManager::ReadValue<std::vector<std::vector<std::vector<double> > > > (
         const std::string &paramPath, const std::string &paramName,
-        std::vector<std::vector<std::vector<double> > > &data
+        std::vector<std::vector<std::vector<double> > > *value
         );
 
 
 
     template<typename T>
-    bool ConfigManager::storeValue(
+    bool ConfigManager::SetValue(
        const std::string &paramPath,
        const std::string &paramName,
        T data)
@@ -398,69 +405,46 @@ namespace ConfigSystem
         return true;
     }
     
-    // New interface (using explicit template instantiations).
-    template bool ConfigManager::storeValue<long> (
+    template bool ConfigManager::SetValue<long> (
         const std::string &paramPath, const std::string &paramName,
         long data
         );
-    template bool ConfigManager::storeValue<double> (
+    template bool ConfigManager::SetValue<double> (
         const std::string &paramPath, const std::string &paramName,
         double data
         );
-    template bool ConfigManager::storeValue<std::string> (
+    template bool ConfigManager::SetValue<std::string> (
         const std::string &paramPath, const std::string &paramName,
         std::string data
         );
-    template bool ConfigManager::storeValue<std::vector<long> > (
+    template bool ConfigManager::SetValue<std::vector<long> > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<long> data
         );
-    template bool ConfigManager::storeValue<std::vector<std::vector<long> > > (
+    template bool ConfigManager::SetValue<std::vector<std::vector<long> > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<long> > data
         );
-    template bool ConfigManager::storeValue<std::vector<std::vector<std::vector<long> > > > (
+    template bool ConfigManager::SetValue<std::vector<std::vector<std::vector<long> > > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<std::vector<long> > > data
         );
-    template bool ConfigManager::storeValue<std::vector<double> > (
+    template bool ConfigManager::SetValue<std::vector<double> > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<double>  data
         );
-    template bool ConfigManager::storeValue<std::vector<std::vector<double> > > (
+    template bool ConfigManager::SetValue<std::vector<std::vector<double> > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<double> >  data
         );
-    template bool ConfigManager::storeValue<std::vector<std::vector<std::vector<double> > > > (
+    template bool ConfigManager::SetValue<std::vector<std::vector<std::vector<double> > > > (
         const std::string &paramPath, const std::string &paramName,
         std::vector<std::vector<std::vector<double> > > data
         );
 
 
 
-
-    bool ConfigManager::readRange(const string &paramPath, 
-                                  const string &paramName, 
-                                  ConfigRange<double> &range)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getRange(range);
-    }
-    bool ConfigManager::readRange  (const string &paramPath, 
-                                    const string &paramName, 
-                                    ConfigRange<long> &range)
-    {
-        CONFIGSYS_DEBUG_CALLS;
-
-        ConfigParameter cp(vt_none);
-        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
-        return cp.getRange(range);
-    }
-
-    bool ConfigManager::storeRange(const string &paramPath, 
+    bool ConfigManager::SetRange(const string &paramPath, 
                                    const string &paramName, 
                                    ConfigRange<double> &range)
     {
@@ -472,7 +456,7 @@ namespace ConfigSystem
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
     }
-    bool ConfigManager::storeRange (const string &paramPath, 
+    bool ConfigManager::SetRange (const string &paramPath, 
                                     const string &paramName, 
                                     ConfigRange<long> &range)
     {
@@ -483,5 +467,42 @@ namespace ConfigSystem
         if(!cp.setRange(range)) return false; //!< Set the new value
         //! Store the modified parameter back into the tree
         return _currConfigTree->storeParam(paramPath, paramName, cp);
+    }
+
+    bool ConfigManager::ReadRange(const string &paramPath, 
+                                  const string &paramName, 
+                                  ConfigRange<double>* range)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        if(range == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ":"
+                      << " 'range' must not be NULL"
+                      << " (Cannot read into a null pointer)."
+                      << std::endl;
+            return false;
+        }
+
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        return cp.getRange(range);
+    }
+    bool ConfigManager::ReadRange  (const string &paramPath,
+                                    const string &paramName,
+                                    ConfigRange<long>* range)
+    {
+        CONFIGSYS_DEBUG_CALLS;
+        if(range == NULL)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ":"
+                      << " 'range' must not be NULL"
+                      << " (Cannot read into a null pointer)."
+                      << std::endl;
+            return false;
+        }
+        
+        ConfigParameter cp(vt_none);
+        if(!_currConfigTree->getParam(paramPath, paramName, cp)) return false;
+        return cp.getRange(range);
     }
 }

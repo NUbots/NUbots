@@ -29,11 +29,13 @@
 #include "NUPlatform/NUSensors.h"
 #include "Infrastructure/NUData.h"
 
+// Avoid framework includes by forward declaring classes + namespaces:
 class DarwinJointMapping;
 class DarwinPlatform;
 namespace Robot
 {
     class CM730;
+    class SensorReadManager;
 }
 
 class DarwinSensors : public NUSensors
@@ -42,27 +44,29 @@ public:
     DarwinSensors(DarwinPlatform*, Robot::CM730*);
     ~DarwinSensors();
     
+protected:
     void copyFromHardwareCommunications();
+
     void copyFromJoints();
     void copyFromAccelerometerAndGyro();
     void copyFromFeet();
     void copyFromButtons();
     void copyFromBattery();
-    
-protected:
-    vector<NUData::id_t*> m_joint_ids;    	//!< a vector containing pointers to all of the joint id_t. This is used to loop through all of the joints quickly
+
+    //! A vector containing pointers to all of the joint id_t.
+    //! This is used to loop through all of the joints quickly
+    vector<NUData::id_t*> m_joint_ids;
     vector<float> m_previous_positions;
     vector<float> m_previous_velocities;
     DarwinPlatform* platform;
     Robot::CM730* cm730;
     DarwinJointMapping* m_joint_mapping;
 
-    vector<vector<int> > error_fields;      //! A vector of motor id/error field pairs
-    bool motor_error;                       //! A flag to indicate a motor indicated an error
-    std::string error2Description(unsigned int errorValue);
+    //! Manages sensor read descriptors
+    Robot::SensorReadManager* sensor_read_manager_;
 
 private:
-    static const unsigned int NUM_MOTORS=20;
+    static const unsigned int NUM_MOTORS = 20;
 };
 
 #endif

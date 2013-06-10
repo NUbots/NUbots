@@ -134,8 +134,7 @@ void SeeThinkThread::run()
             // else 
             //     std::cout << "SeeThinkThread::run(): autoUpdateTest FAIL!" << std::endl;
             // // #endif
-
-            Blackboard->Config->updateConfiguration();
+            Blackboard->Config->UpdateConfiguration();
             // -----------------------------------------
 
             #ifdef THREAD_SEETHINK_PROFILE
