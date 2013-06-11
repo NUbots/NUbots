@@ -1,16 +1,14 @@
-/*! @file Sensor.h
-    @brief Declaration of a single sensor class
+/*! @file CycloidActionators.h
+    @brief Declaration of Bear actionators class
+
     @author Jason Kulk
  
-    @class Sensor
-    @brief A single set of sensors class to store sensor data in a platform independent way
- 
-    A Sensor is a container for a set of similar sensors that share a common time.
-    For example, all of the JointPositions are encapsulated in a single Sensor.
+    @class CycloidActionators
+    @brief The cycloid actionators class
  
     @author Jason Kulk
  
-  Copyright (c) 2009, 2010 Jason Kulk
+  Copyright (c) 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,52 +24,28 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef SENSOR_H
-#define SENSOR_H
+#ifndef CYCLOIDACTIONATORS_H
+#define CYCLOIDACTIONATORS_H
 
-#include <vector>
-#include <string>
+#include "NUPlatform/NUActionators.h"
+class Motors;
 
 
-class Sensor 
+class CycloidActionators : public NUActionators
 {
 public:
-    Sensor(std::string sensorname);
-    Sensor(const Sensor& source);
-
-    bool get(float& data) const;
-    bool get(std::vector<float>& data) const;
-    bool get(std::vector<std::vector<float> >& data) const;
-    bool get(std::string& data) const;
+    CycloidActionators(Motors* motors);
+    ~CycloidActionators();
     
-    void set(double time, const float& data);
-    void set(double time, const std::vector<float>& data);
-    void set(double time, const std::vector<std::vector<float> >& data);
-    void set(double time, const std::string& data);
-    void setAsInvalid();
-    
-    void modify(double time, unsigned int start, const float& data);
-    void modify(double time, unsigned int start, const std::vector<float>& data);
-    
-    void summaryTo(std::ostream& output) const;
-    
-    friend std::ostream& operator<< (std::ostream& output, const Sensor& p_sensor);
-    friend std::istream& operator>> (std::istream& input, Sensor& p_sensor);
-    Sensor& operator= (const Sensor & source);
-public:
-    std::string Name;                        //!< the sensor's name
-    double Time;                        //!< the timestamp associated with the data
 private:
-    // only a single type of data is used at one time
-    // the Valid flags are used to tell which type is the valid one
-    float FloatData;                    //!< the float data
-    bool ValidFloat;                    //!< a flag to indicate whether the float data is valid
-    std::vector<float> VectorData;           //!< the std::vector data
-    bool ValidVector;                   //!< a flag to indicate whether the std::vector data is valid
-    std::vector<std::vector<float> > MatrixData;  //!< the matrix data
-    bool ValidMatrix;                   //!< a flag to indicate whether the matrix data is valid
-    std::string StringData;                  //!< the std::string data
-    bool ValidString;                   //!< a flag to indicate whether the std::string data is valid
+    void copyToHardwareCommunications();
+    void copyToServos();
+    
+private:
+    // Actionators
+    static std::vector<std::string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
+    
+    Motors* m_motors;
 };
 
 #endif

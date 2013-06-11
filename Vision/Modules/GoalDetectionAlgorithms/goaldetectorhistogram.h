@@ -1,67 +1,31 @@
-/*! @file HeadNodJob.h
-    @brief Declaration of HeadNodJob class.
- 
-    @class HeadNodJob
-    @brief A class to encapsulate jobs head nods.
- 
-    There are three types of nods
-        - Ball
-        - BallAndLocalisation
-        - Localisation
- 
-    @author Jason Kulk
- 
-  Copyright (c) 2009, 2010 Jason Kulk
- 
-    This file is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+#ifndef GOALDETECTORHISTOGRAM_H
+#define GOALDETECTORHISTOGRAM_H
 
-    This file is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+#include <stdio.h>
+#include <iostream>
 
-    You should have received a copy of the GNU General Public License
-    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
-*/
+#include "Vision/Modules/goaldetector.h"
+#include "Vision/VisionTypes/histogram1d.h"
 
-#ifndef NODHEADJOB_H
-#define NODHEADJOB_H
+using std::vector;
+using std::list;
 
-#include "../MotionJob.h"
-#include <vector>
-
-
-class HeadNodJob : public MotionJob
+class GoalDetectorHistogram : public GoalDetector
 {
 public:
-    enum head_nod_t
-    {
-        Ball,
-        BallAndLocalisation,
-        Localisation
-    };
-public:
-    HeadNodJob(head_nod_t nodtype, float centreangle = 0);
-    HeadNodJob(std::istream& input);
-    ~HeadNodJob();
-    
-    head_nod_t getNodType();
-    float getCentreAngle();
-    
-    virtual void summaryTo(std::ostream& output);
-    virtual void csvTo(std::ostream& output);
-    
-    friend std::ostream& operator<<(std::ostream& output, const HeadNodJob& job);
-    friend std::ostream& operator<<(std::ostream& output, const HeadNodJob* job);
-protected:
-    virtual void toStream(std::ostream& output) const;
+    GoalDetectorHistogram();
+    ~GoalDetectorHistogram();
+    virtual std::vector<Goal> run();
 private:
-    head_nod_t m_nod_type;
-    float m_centre_angle;
+    std::list<Quad> detectQuads(const std::vector<ColourSegment>& h_segments, const std::vector<ColourSegment>& v_segments);
+    Histogram1D mergePeaks(Histogram1D hist, int minimum_threshold);
+    std::list<Quad> generateCandidates(const Histogram1D& hist,
+                                  const std::vector<ColourSegment>& h_segments, const std::vector<ColourSegment>& v_segments,
+                                  int peak_threshold);
+    Quad makeQuad(Bin bin, const std::vector<ColourSegment>& h_segments, const std::vector<ColourSegment>& v_segments);
+
+    //minor methods
+    bool checkBinSimilarity(Bin b1, Bin b2, float allowed_dissimilarity);
 };
 
-#endif
-
+#endif // GOALDETECTORHISTOGRAM_H

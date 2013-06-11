@@ -298,7 +298,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
 void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     //! @todo better debug printing + Comment
-    switch(region.getDirection()) {
+    switch(id) {
     case HORIZONTAL:
         Blackboard->horizontalScans = &region;
         break;
@@ -306,7 +306,9 @@ void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
         Blackboard->verticalScans = &region;
         break;
     }
-	
+
+
+
     #if VISION_WRAPPER_VERBOSITY > 2
         debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
         BOOST_FOREACH(const vector<ColourSegment>& line, region.getSegments()) {

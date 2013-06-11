@@ -1,91 +1,54 @@
-/*! @file NUBlackboard.h
-	@brief The blackboard class.
+/*! @file NUNAO.h
+    @brief Declaration of NUNAO class.
  
-	@class NUBlackboard
-	@brief A blackboard for storing data that is required by multiple modules.
-		   The blackboard contains the following containers
-				- Sensors; which contains all of the sensor data
-				- Actions; which contains all of the actions for the robot's hardware
-				- Objects; which contains all of the information about the location of landmarks in the environment
-				- Jobs; which contains all of the pending jobs for the robot
-				- GameInfo; which contains all of the information about the state of the 'game'
-				- TeamInfo; which contains all of the information about the team mates' state
+    @author Jason Kulk
  
-	@note Adding a new type of object to the Blackboard is considered a major change, and should be avoided.
+ Copyright (c) 2009 Jason Kulk
  
-	@author Jason Kulk
- 
-  Copyright (c) 2010 Jason Kulk
- 
-	This file is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-	This file is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef NUNAO_H
+#define NUNAO_H
 
-#ifndef NUBLACKBOARD_H
-#define NUBLACKBOARD_H
+#include <alcommon/albroker.h>
+#include <alcommon/alproxy.h>
+using namespace AL;
 
-#include "NUPlatform/NUCamera/NUCameraData.h"
-#include "Vision/VisionTypes/segmentedregion.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <time.h>
 
-class NUSensorsData;
-class NUActionatorsData;
-class NUImage;
-class FieldObjects;
-class JobList;
-class GameInformation;
-class TeamInformation;
-class NUPlatform;
-namespace ConfigSystem
-{
-	class ConfigManager;
-}
 
-class NUBlackboard
+class NUbot;
+
+class NUNAO : public ALModule
 {
 public:
-	NUBlackboard();
-	~NUBlackboard();
-
-	void add(NUSensorsData* sensorsdata);
-	void add(NUActionatorsData* actionsdata);
-	void add(NUImage* image);
-	void add(NUCameraData* camdata);
-	void add(FieldObjects* objects);
-	void add(JobList* joblist);
-	void add(GameInformation* gameinfo);
-	void add(TeamInformation* teaminfo);
-	void add(ConfigSystem::ConfigManager* config);
-
+    static ALPtr<ALBroker> m_broker;
+    NUbot* m_nubot;
+    
 public:
-	NUSensorsData* Sensors;
-	NUActionatorsData* Actions;
-	NUImage* Image;
-	NUCameraData* CameraSpecs;
-	FieldObjects* Objects;
-	JobList* Jobs;
-	GameInformation* GameInfo;
-	TeamInformation* TeamInfo;
-	ConfigSystem::ConfigManager* Config;
-	bool lookForBall; /// Enables vision processing for the ball
-	bool lookForGoals; /// Enables vision processing for goal posts
-	bool lookForFieldPoints; /// Enables vision processing for lines, corners and the centre circle
-	bool lookForObstacles; /// Enables vision processing for obstacles
-
-	const SegmentedRegion* horizontalScans; // For NUBugger
-	const SegmentedRegion* verticalScans; // For NUBugger
-};
-
-extern NUBlackboard* Blackboard;
+    NUNAO(ALPtr<ALBroker> pBroker, const std::string& pName);
+    virtual ~NUNAO();
+    
+    void dataChanged(const std::string& pDataName, const ALValue& pValue, const std::string& pMessage) {};
+    
+    bool innerTest() {return true;};
+}; 
 
 #endif
+
+
 

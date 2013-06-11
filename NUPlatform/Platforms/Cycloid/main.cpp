@@ -1,49 +1,24 @@
-/*! @file MotionFreezeJob.h
-    @brief Declaration of MotionFreezeJob class.
- 
-    @class MotionFreezeJob
-    @brief Freezes all motion for at least 5 seconds. Each motion module will
-           be unfrozen when they each receive a new job.
- 
-    @author Jason Kulk
- 
-  Copyright (c) 2010 Jason Kulk
- 
-    This file is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+#include "NUbot.h"
 
-    This file is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+#include "../Robotis/Motors.h"
+#include "NUbot/SenseMoveThread.h"
 
-    You should have received a copy of the GNU General Public License
-    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
-*/
+#include "debug.h"
+#include "nubotdataconfig.h"
 
-#ifndef MOTIONFREEZEJOB_H
-#define MOTIONFREEZEJOB_H
-
-#include "../MotionJob.h"
-#include <vector>
+#include <iostream>
 
 
-class MotionFreezeJob : public MotionJob
+ofstream debug;
+ofstream errorlog;
+
+int main(int argc, const char *argv[]) 
 {
-public:
-    MotionFreezeJob();
-    ~MotionFreezeJob();
-    
-    virtual void summaryTo(std::ostream& output);
-    virtual void csvTo(std::ostream& output);
-    
-    friend std::ostream& operator<<(std::ostream& output, const MotionFreezeJob& job);
-    friend std::ostream& operator<<(std::ostream& output, const MotionFreezeJob* job);
-protected:
-    virtual void toStream(std::ostream& output) const;
-};
-
-#endif
-
+    debug.open("/var/volatile/debug.log");
+    errorlog.open((DATA_DIR + "error.log").c_str());
+                  
+    NUbot* nubot = new NUbot(argc, argv);
+    Motors::getInstance()->setSensorThread(nubot->m_sensemove_thread);
+    nubot->run();
+    delete nubot;
+}
