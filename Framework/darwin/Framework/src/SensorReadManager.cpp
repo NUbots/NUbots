@@ -80,6 +80,7 @@ SensorReadManager::SensorReadManager()
     // fsr_r_read->set_num_bytes(10);
     // descriptor_list_.push_back(fsr_r_read);
 
+
     // Populate the map and the heap with the same descriptors:
     for (std::vector<SensorReadDescriptor*>::iterator it = descriptor_list_.begin();
          it != descriptor_list_.end(); ++it)

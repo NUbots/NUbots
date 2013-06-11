@@ -58,16 +58,32 @@ TeamInformation::~TeamInformation()
 
 bool TeamInformation::amIClosestToBall()
 {
+    int closer = 0;
+    for (size_t i=0; i<m_received_packets.size(); i++)
+    {
+        Self& self = m_objects->self;
+        MobileObject& ball = m_objects->mobileFieldObjects[FieldObjects::FO_BALL];
+        if (not m_received_packets[i].empty())
+        { //check if I'm clsoest to the ball *I can see*
+            if ((m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < m_TIMEOUT) and (m_packet.TimeToBall > m_received_packets[i].back().TimeToBall))
+                closer++;
+        }
+    }
+    return closer == 0;
+}
 
+int TeamInformation::howManyCloserToBall()
+{
+    int closer = 0;
     for (size_t i=0; i<m_received_packets.size(); i++)
     {
         if (not m_received_packets[i].empty())
         { //check if I'm clsoest to the ball *I can see*
             if ((m_data->CurrentTime - m_received_packets[i].back().ReceivedTime < m_TIMEOUT) and (m_packet.TimeToBall > m_received_packets[i].back().TimeToBall))
-                return false;
+                closer++;
         }
     }
-    return true;
+    return closer;
 }
 
 /*! @brief Returns all of the shared balls in the TeamInformation
