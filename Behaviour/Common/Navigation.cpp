@@ -23,8 +23,8 @@
 #include "Tools/Math/General.h"
 #include "Behaviour/Common/NavigationLogic.h"
 
-vector<float> Navigation::generateWalk(float distance, float relative_bearing, float relative_heading, bool avoidObstacles = true) {
-    vector<float> new_walk(3,0);
+std::vector<float> Navigation::generateWalk(float distance, float relative_bearing, float relative_heading, bool avoidObstacles = true) {
+    std::vector<float> new_walk(3,0);
     double current_time;
     float walk_speed;
     float walk_bearing;
@@ -71,10 +71,10 @@ vector<float> Navigation::generateWalk(float distance, float relative_bearing, f
     return new_walk;
 }
 
-float Navigation::avoidObstacles(const vector<float> position, float distance, float relative_bearing) {
+float Navigation::avoidObstacles(const std::vector<float> position, float distance, float relative_bearing) {
     float new_bearing = relative_bearing;
     float avoid_distance = min(m_avoid_distance,distance);
-    vector<Object> obstacles;
+    std::vector<Object> obstacles;
     
     
     
@@ -124,7 +124,7 @@ void Navigation::resetHystereses() {
 }
     
 
-vector<float> Navigation::goToPoint(float distance, float relative_bearing, float relative_heading) {
+std::vector<float> Navigation::goToPoint(float distance, float relative_bearing, float relative_heading) {
     
     
     
@@ -137,13 +137,13 @@ vector<float> Navigation::goToPoint(float distance, float relative_bearing, floa
 }
     
 
-vector<float> Navigation::goToPoint(Object fieldObject, float heading) {
+std::vector<float> Navigation::goToPoint(Object fieldObject, float heading) {
     
     //calculate the desired move
-    vector<float> self = NavigationLogic::getSelfPosition();
-    vector<float> destination = NavigationLogic::getObjectPosition(fieldObject);
+    std::vector<float> self = NavigationLogic::getSelfPosition();
+    std::vector<float> destination = NavigationLogic::getObjectPosition(fieldObject);
     destination[2] = heading;
-    vector<float> move = NavigationLogic::getPositionDifference(self,destination);
+    std::vector<float> move = NavigationLogic::getPositionDifference(self,destination);
     
     //set continuing movement policy
     current_object = fieldobject;
@@ -158,11 +158,11 @@ vector<float> Navigation::goToPoint(Object fieldObject, float heading) {
 }
     
 
-vector<float> Navigation::goToPoint(const vector<float> point) {
+std::vector<float> Navigation::goToPoint(const std::vector<float> point) {
     
     //calculate the desired move
-    vector<float> self = NavigationLogic::getSelfPosition();
-    vector<float> move = NavigationLogic::getPositionDifference(self,point);
+    std::vector<float> self = NavigationLogic::getSelfPosition();
+    std::vector<float> move = NavigationLogic::getPositionDifference(self,point);
     
     
     //set continuing movement policy
@@ -177,11 +177,11 @@ vector<float> Navigation::goToPoint(const vector<float> point) {
 }
 
 
-vector<float> Navigation::goToBall(Object kickTarget = NULL) {
+std::vector<float> Navigation::goToBall(Object kickTarget = NULL) {
     
     //calculate the desired move
-    vector<float> self = NavigationLogic::getSelfPosition();
-    vector<float> move = NavigationLogic::getPositionDifference(self,point);
+    std::vector<float> self = NavigationLogic::getSelfPosition();
+    std::vector<float> move = NavigationLogic::getPositionDifference(self,point);
     
     //set continuing movement policy
     current_object = kickTarget;

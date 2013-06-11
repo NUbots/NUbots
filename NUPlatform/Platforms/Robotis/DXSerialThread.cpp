@@ -31,7 +31,7 @@
     #include "Tools/Profiling/Profiler.h"
 #endif
 
-using namespace std;
+
 
 /*! @brief Creates a thread
     @param motors the name of the thread (used entirely for debug purposes)
@@ -40,7 +40,7 @@ using namespace std;
 DXSerialThread::DXSerialThread(Motors* motors, int period) : PeriodicThread("DXSerialThread", period, 51), m_motors(motors)
 {
     #if DEBUG_NUPLATFORM_VERBOSITY > 0
-        debug << "DXSerialThread::DXSerialThread(" << m_motors << ", " << m_period << ", " << static_cast<int>(m_priority) << ")" << endl;
+        debug << "DXSerialThread::DXSerialThread(" << m_motors << ", " << m_period << ", " << static_cast<int>(m_priority) << ")" << std::endl;
     #endif
     m_sensor_thread = 0;
     start();
@@ -51,7 +51,7 @@ DXSerialThread::DXSerialThread(Motors* motors, int period) : PeriodicThread("DXS
 DXSerialThread::~DXSerialThread()
 {
     #if DEBUG_NUPLATFORM_VERBOSITY > 0
-        debug << "DXSerialThread::~DXSerialThread() " << m_name << endl;
+        debug << "DXSerialThread::~DXSerialThread() " << m_name << std::endl;
     #endif
     stop();
 }

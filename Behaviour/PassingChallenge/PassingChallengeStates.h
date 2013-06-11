@@ -64,7 +64,7 @@ public:
     }
     void doState() 
     {
-        debug << "PassingChallenge: Paused" << endl;
+        debug << "PassingChallenge: Paused" << std::endl;
     };
 };
 
@@ -104,7 +104,7 @@ public:
         
         
         
-        vector<float> position(3,0);
+        std::vector<float> position(3,0);
         if (m_game_info->getPlayerNumber() == 2)
         {
             position[0] = -200;
@@ -119,7 +119,7 @@ public:
         }
 
         
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 60, 200);
+        std::vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 5, 60, 200);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
     }
 };
@@ -138,7 +138,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "PassingKickingState" << endl;
+            debug << "PassingKickingState" << std::endl;
         #endif
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -157,14 +157,14 @@ protected:
         
         if(!iskicking)
         {
-            vector<float> speed = BehaviourPotentials::goToBall(ball, self, bearing_to_goal);
+            std::vector<float> speed = BehaviourPotentials::goToBall(ball, self, bearing_to_goal);
             m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
         }
         
         if( (ball.estimatedDistance() < 20.0f) && fabs(bearing_to_goal) < 3.1416/8)
         {
-            vector<float> kickPosition(2,0);
-            vector<float> targetPosition(2,0);
+            std::vector<float> kickPosition(2,0);
+            std::vector<float> targetPosition(2,0);
             kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
             kickPosition[1] = ball.estimatedDistance() * sin(ball.estimatedBearing());
             targetPosition[0] = kickPosition[0] + 1000.0f;
@@ -194,7 +194,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "BallIsLostSpin" << endl;
+            debug << "BallIsLostSpin" << std::endl;
         #endif
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         m_spin_speed = m_ROTATIONAL_SPEED;

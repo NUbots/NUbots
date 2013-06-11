@@ -57,11 +57,11 @@ class SelfLocalisation: public TimestampedData
 
         // Ambiguous object updates.
         // Main function.
-        int ambiguousLandmarkUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
+        int ambiguousLandmarkUpdate(AmbiguousObject &ambigousObject, const std::vector<StationaryObject*>& possibleObjects);
         // Individual methods.
-        int ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
-        int ambiguousLandmarkUpdateSelective(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
-        int ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambigousObject, const vector<StationaryObject*>& possibleObjects);
+        int ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambigousObject, const std::vector<StationaryObject*>& possibleObjects);
+        int ambiguousLandmarkUpdateSelective(AmbiguousObject &ambigousObject, const std::vector<StationaryObject*>& possibleObjects);
+        int ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambigousObject, const std::vector<StationaryObject*>& possibleObjects);
         int ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguousObject);
 
 

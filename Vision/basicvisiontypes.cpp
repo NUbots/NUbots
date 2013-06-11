@@ -1,53 +1,53 @@
 #include "basicvisiontypes.h"
 #include <map>
 
-using namespace std;
+
 
 namespace Vision {
 
     //private statically defined maps
     namespace {
-        class DebugMap : public map<DEBUG_ID, pair<int, string> > {
+        class DebugMap : public std::map<DEBUG_ID, std::pair<int, std::string> > {
         public:
             DebugMap() {
-                (*this)[DBID_IMAGE]                 = pair<int, string>(0, "Image");
-                (*this)[DBID_CLASSED_IMAGE]         = pair<int, string>(1, "Classified Image");
-                (*this)[DBID_H_SCANS]               = pair<int, string>(2, "Horizontal Scans");
-                (*this)[DBID_V_SCANS]               = pair<int, string>(3, "Vertical Scans");
-                (*this)[DBID_SEGMENTS]              = pair<int, string>(4, "Segments");
-                (*this)[DBID_FILTERED_SEGMENTS]     = pair<int, string>(5, "Filtered Segments");
-                (*this)[DBID_MATCHED_SEGMENTS]      = pair<int, string>(6, "Transitions (matched segments)");
-                (*this)[DBID_HORIZON]               = pair<int, string>(7, "Kinematics Horizon");
-                (*this)[DBID_GREENHORIZON_SCANS]    = pair<int, string>(8, "Green Horizon Scans");
-                (*this)[DBID_GREENHORIZON_THROWN]   = pair<int, string>(9, "GH thrown points");
-                (*this)[DBID_GREENHORIZON_FINAL]    = pair<int, string>(10, "Green Horizon");
-                (*this)[DBID_OBSTACLE_POINTS]       = pair<int, string>(11, "Obstacle Points");
-                (*this)[DBID_GOALS]                 = pair<int, string>(12, "Goals");
-                (*this)[DBID_BALLS]                 = pair<int, string>(13, "Balls");
-                (*this)[DBID_OBSTACLES]             = pair<int, string>(14, "Obstacles");
-                (*this)[DBID_LINES]                 = pair<int, string>(15, "Lines");
-                (*this)[DBID_CENTRE_CIRCLES]        = pair<int, string>(16, "Centre Circles");
-                (*this)[DBID_CORNERS]               = pair<int, string>(17, "Corners");
-                (*this)[DBID_GOAL_LINES_START]      = pair<int, string>(18, "Goal Lines (start)");
-                (*this)[DBID_GOAL_LINES_END]        = pair<int, string>(19, "Goal Lines (end)");
-                (*this)[DBID_GOALS_HIST]            = pair<int, string>(20, "Goals (histogram)");
-                (*this)[DBID_GOALS_RANSAC_EDGES]    = pair<int, string>(21, "Goals (RANSAC edges)");
+                (*this)[DBID_IMAGE]                 = std::pair<int, std::string>(0, "Image");
+                (*this)[DBID_CLASSED_IMAGE]         = std::pair<int, std::string>(1, "Classified Image");
+                (*this)[DBID_H_SCANS]               = std::pair<int, std::string>(2, "Horizontal Scans");
+                (*this)[DBID_V_SCANS]               = std::pair<int, std::string>(3, "Vertical Scans");
+                (*this)[DBID_SEGMENTS]              = std::pair<int, std::string>(4, "Segments");
+                (*this)[DBID_FILTERED_SEGMENTS]     = std::pair<int, std::string>(5, "Filtered Segments");
+                (*this)[DBID_MATCHED_SEGMENTS]      = std::pair<int, std::string>(6, "Transitions (matched segments)");
+                (*this)[DBID_HORIZON]               = std::pair<int, std::string>(7, "Kinematics Horizon");
+                (*this)[DBID_GREENHORIZON_SCANS]    = std::pair<int, std::string>(8, "Green Horizon Scans");
+                (*this)[DBID_GREENHORIZON_THROWN]   = std::pair<int, std::string>(9, "GH thrown points");
+                (*this)[DBID_GREENHORIZON_FINAL]    = std::pair<int, std::string>(10, "Green Horizon");
+                (*this)[DBID_OBSTACLE_POINTS]       = std::pair<int, std::string>(11, "Obstacle Points");
+                (*this)[DBID_GOALS]                 = std::pair<int, std::string>(12, "Goals");
+                (*this)[DBID_BALLS]                 = std::pair<int, std::string>(13, "Balls");
+                (*this)[DBID_OBSTACLES]             = std::pair<int, std::string>(14, "Obstacles");
+                (*this)[DBID_LINES]                 = std::pair<int, std::string>(15, "Lines");
+                (*this)[DBID_CENTRE_CIRCLES]        = std::pair<int, std::string>(16, "Centre Circles");
+                (*this)[DBID_CORNERS]               = std::pair<int, std::string>(17, "Corners");
+                (*this)[DBID_GOAL_LINES_START]      = std::pair<int, std::string>(18, "Goal Lines (start)");
+                (*this)[DBID_GOAL_LINES_END]        = std::pair<int, std::string>(19, "Goal Lines (end)");
+                (*this)[DBID_GOALS_HIST]            = std::pair<int, std::string>(20, "Goals (histogram)");
+                (*this)[DBID_GOALS_RANSAC_EDGES]    = std::pair<int, std::string>(21, "Goals (RANSAC edges)");
             }
         };
 
         DebugMap debugmap;
 
-        class VFOMap : public map<VFO_ID, pair<int, string> > {
+        class VFOMap : public std::map<VFO_ID, std::pair<int, std::string> > {
         public:
             VFOMap() {
-                (*this)[BALL]           = pair<int, string>(0, "BALL");
-                (*this)[FIELDLINE]      = pair<int, string>(1, "FIELDLINE");
-                (*this)[CORNER]         = pair<int, string>(2, "CORNER");
-                (*this)[CENTRE_CIRCLE]  = pair<int, string>(3, "CENTRE_CIRCLE");
-                (*this)[OBSTACLE]       = pair<int, string>(4, "OBSTACLE");
-                (*this)[GOAL_L]         = pair<int, string>(5, "GOAL_L");
-                (*this)[GOAL_R]         = pair<int, string>(6, "GOAL_R");
-                (*this)[GOAL_U]         = pair<int, string>(7, "GOAL_U");
+                (*this)[BALL]           = std::pair<int, std::string>(0, "BALL");
+                (*this)[FIELDLINE]      = std::pair<int, std::string>(1, "FIELDLINE");
+                (*this)[CORNER]         = std::pair<int, std::string>(2, "CORNER");
+                (*this)[CENTRE_CIRCLE]  = std::pair<int, std::string>(3, "CENTRE_CIRCLE");
+                (*this)[OBSTACLE]       = std::pair<int, std::string>(4, "OBSTACLE");
+                (*this)[GOAL_L]         = std::pair<int, std::string>(5, "GOAL_L");
+                (*this)[GOAL_R]         = std::pair<int, std::string>(6, "GOAL_R");
+                (*this)[GOAL_U]         = std::pair<int, std::string>(7, "GOAL_U");
                 //        GOAL_Y_L=1,
                 //        GOAL_Y_R=2,
                 //        GOAL_Y_U=3,
@@ -64,7 +64,7 @@ namespace Vision {
     }
 
     std::string debugIDName(DEBUG_ID id) {
-        map<DEBUG_ID, pair<int, string> >::const_iterator it = debugmap.find(id);
+        std::map<DEBUG_ID, std::pair<int, std::string> >::const_iterator it = debugmap.find(id);
 
         if(it == debugmap.end()) {
             throw "Invalid DEBUG_ID";
@@ -75,7 +75,7 @@ namespace Vision {
     }
 
     DEBUG_ID debugIDFromInt(int id) {
-        map<DEBUG_ID, pair<int, string> >::const_iterator it = debugmap.begin();
+        std::map<DEBUG_ID, std::pair<int, std::string> >::const_iterator it = debugmap.begin();
 
         while(it != debugmap.end() && it->second.first != id)
             it++;
@@ -89,7 +89,7 @@ namespace Vision {
     }
 
     int intFromDebugID(DEBUG_ID id) {
-        map<DEBUG_ID, pair<int, string> >::const_iterator it = debugmap.find(id);
+        std::map<DEBUG_ID, std::pair<int, std::string> >::const_iterator it = debugmap.find(id);
 
         if(it == debugmap.end()) {
             throw "Invalid DEBUG_ID";
@@ -106,7 +106,7 @@ namespace Vision {
 
     std::string VFOName(VFO_ID id)
     {
-        map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.find(id);
+        std::map<VFO_ID, std::pair<int, std::string> >::const_iterator it = vfomap.find(id);
 
         if(it == vfomap.end()) {
             throw "Invalid VFO_ID passed to VFOName()";
@@ -118,7 +118,7 @@ namespace Vision {
 
     VFO_ID VFOFromName(const std::string &name)
     {
-        map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.begin();
+        std::map<VFO_ID, std::pair<int, std::string> >::const_iterator it = vfomap.begin();
 
         while(it != vfomap.end() && it->second.second.compare(name) != 0)
             it++;
@@ -132,7 +132,7 @@ namespace Vision {
     }
 
     VFO_ID VFOFromInt(int n) {
-        map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.begin();
+        std::map<VFO_ID, std::pair<int, std::string> >::const_iterator it = vfomap.begin();
 
         while(it != vfomap.end() && it->second.first != n)
             it++;
@@ -146,7 +146,7 @@ namespace Vision {
     }
 
     int intFromVFO(VFO_ID id) {
-        map<VFO_ID, pair<int, string> >::const_iterator it = vfomap.find(id);
+        std::map<VFO_ID, std::pair<int, std::string> >::const_iterator it = vfomap.find(id);
 
         if(it == vfomap.end()) {
             throw "Invalid VFO_ID passed to intFromVFO()";

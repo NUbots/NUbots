@@ -15,9 +15,9 @@ SegmentFilter::SegmentFilter()
 }
 
 double averageLength(const SegmentedRegion& scans, Colour colour) {
-    const vector<vector<ColourSegment> >& segments = scans.getSegments();
-    vector<vector<ColourSegment> >::const_iterator line_it;
-    vector<ColourSegment>::const_iterator seg_it;
+    const std::vector<std::vector<ColourSegment> >& segments = scans.getSegments();
+    std::vector<std::vector<ColourSegment> >::const_iterator line_it;
+    std::vector<ColourSegment>::const_iterator seg_it;
     double sum = 0,
            num = 0;
     //loop through each scan
@@ -36,13 +36,13 @@ double averageLength(const SegmentedRegion& scans, Colour colour) {
 void SegmentFilter::run() const
 {
     #if VISION_FILTER_VERBOSITY > 1
-        debug << "SegmentFilter::run() - Begin" << endl;
+        debug << "SegmentFilter::run() - Begin" << std::endl;
     #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const SegmentedRegion& h_segments = vbb->getHorizontalSegmentedRegion();
     const SegmentedRegion& v_segments = vbb->getVerticalSegmentedRegion();
     SegmentedRegion h_filtered, v_filtered;
-    map<COLOUR_CLASS, vector<ColourSegment> > h_result, v_result;
+    map<COLOUR_CLASS, std::vector<ColourSegment> > h_result, v_result;
     
     if(PREFILTER_ON) {
 
@@ -55,14 +55,14 @@ void SegmentFilter::run() const
         filter(v_filtered, v_result);
 
         //count segment length
-//        cout << averageLength(h_segments, yellow) << " ";
-//        cout << averageLength(v_segments, yellow) << " ";
-//        cout << averageLength(h_filtered, yellow) << " ";
-//        cout << averageLength(v_filtered, yellow) << endl;
-//        cout << averageLength(h_segments, green) << " ";
-//        cout << averageLength(v_segments, green) << " ";
-//        cout << averageLength(h_filtered, green) << " ";
-//        cout << averageLength(v_filtered, green) << endl;
+//        std::cout << averageLength(h_segments, yellow) << " ";
+//        std::cout << averageLength(v_segments, yellow) << " ";
+//        std::cout << averageLength(h_filtered, yellow) << " ";
+//        std::cout << averageLength(v_filtered, yellow) << std::endl;
+//        std::cout << averageLength(h_segments, green) << " ";
+//        std::cout << averageLength(v_segments, green) << " ";
+//        std::cout << averageLength(h_filtered, green) << " ";
+//        std::cout << averageLength(v_filtered, green) << std::endl;
     }
     else {
         //Vision problem should occur in here:
@@ -91,12 +91,12 @@ void SegmentFilter::run() const
 
 void SegmentFilter::preFilter(const SegmentedRegion &scans, SegmentedRegion &result) const
 {
-    const vector<vector<ColourSegment> >& segments = scans.getSegments();
-    vector<vector<ColourSegment> >& final_segments = result.m_segmented_scans;
-    vector<ColourSegment> line;
+    const std::vector<std::vector<ColourSegment> >& segments = scans.getSegments();
+    std::vector<std::vector<ColourSegment> >& final_segments = result.m_segmented_scans;
+    std::vector<ColourSegment> line;
     
-    vector<vector<ColourSegment> >::const_iterator line_it;
-    vector<ColourSegment>::const_iterator before_it, middle_it, after_it;
+    std::vector<std::vector<ColourSegment> >::const_iterator line_it;
+    std::vector<ColourSegment>::const_iterator before_it, middle_it, after_it;
     ScanDirection dir = scans.getDirection();
     
     result.m_direction = dir;
@@ -128,18 +128,18 @@ void SegmentFilter::preFilter(const SegmentedRegion &scans, SegmentedRegion &res
     }
 }
 
-void SegmentFilter::filter(const SegmentedRegion &scans, map<COLOUR_CLASS, vector<ColourSegment> > &result) const
+void SegmentFilter::filter(const SegmentedRegion &scans, map<COLOUR_CLASS, std::vector<ColourSegment> > &result) const
 {
     switch(scans.getDirection()) {
     case VERTICAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_v) {
-            vector<ColourSegment>& segments = result[rule.getColourClass()];
+            std::vector<ColourSegment>& segments = result[rule.getColourClass()];
             checkRuleAgainstRegion(scans, rule, segments);
         }
         break;
     case HORIZONTAL:
         BOOST_FOREACH(const ColourTransitionRule& rule, rules_h) {
-            vector<ColourSegment>& segments = result[rule.getColourClass()];
+            std::vector<ColourSegment>& segments = result[rule.getColourClass()];
             checkRuleAgainstRegion(scans, rule, segments);
         }
         break;
@@ -149,13 +149,13 @@ void SegmentFilter::filter(const SegmentedRegion &scans, map<COLOUR_CLASS, vecto
     }   
 }
 
-void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const ColourTransitionRule &rule, vector<ColourSegment> &matches) const
+void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const ColourTransitionRule &rule, std::vector<ColourSegment> &matches) const
 {
-    const vector<vector<ColourSegment> >& segments = scans.getSegments();
-    vector<ColourSegment>::const_iterator it;
+    const std::vector<std::vector<ColourSegment> >& segments = scans.getSegments();
+    std::vector<ColourSegment>::const_iterator it;
 
     //loop through each scan
-    BOOST_FOREACH(const vector<ColourSegment>& vs, segments) {
+    BOOST_FOREACH(const std::vector<ColourSegment>& vs, segments) {
         // Only check for multiple segments
         if(vs.size() > 1) {
             //move down segments in scan pairwise
@@ -180,9 +180,9 @@ void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion &scans, const C
     }
 }
 
-void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, vector<ColourSegment>& replacements, ScanDirection dir) const
+void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, std::vector<ColourSegment>& replacements, ScanDirection dir) const
 {
-    vector<ColourReplacementRule>::const_iterator rules_it, begin, end;
+    std::vector<ColourReplacementRule>::const_iterator rules_it, begin, end;
     ColourSegment temp_seg;
     
     switch(dir) {
@@ -195,7 +195,7 @@ void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourS
         end = replacement_rules_h.end();
         break;
     default:
-        errorlog << "SegmentFilter::applyReplacements - invalid direction" << endl;
+        errorlog << "SegmentFilter::applyReplacements - invalid direction" << std::endl;
         return;
     }    
     
@@ -226,7 +226,7 @@ void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourS
                 break;
             }
             case ColourReplacementRule::INVALID:
-                errorlog << "SegmentFilter::applyReplacements - invalid replacement rule" << endl;
+                errorlog << "SegmentFilter::applyReplacements - invalid replacement rule" << std::endl;
                 replacements.push_back(middle);
                 break;
             }
@@ -237,9 +237,9 @@ void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourS
     replacements.push_back(middle); //no replacement so keep middle
 }
 
-void SegmentFilter::joinMatchingSegments(vector<ColourSegment> &line) const
+void SegmentFilter::joinMatchingSegments(std::vector<ColourSegment> &line) const
 {
-    vector<ColourSegment>::iterator before_it, after_it;
+    std::vector<ColourSegment>::iterator before_it, after_it;
     before_it = line.begin();
     after_it=before_it+1;
     while(after_it<line.end()) {
@@ -255,17 +255,17 @@ void SegmentFilter::joinMatchingSegments(vector<ColourSegment> &line) const
     }
 }
 
-void SegmentFilter::loadTransitionRules(string filename)
+void SegmentFilter::loadTransitionRules(std::string filename)
 {
     //load the horizontal rules
-    string temp_filename = filename + "_h.txt";
-    ifstream input(temp_filename.c_str());
+    std::string temp_filename = filename + "_h.txt";
+    std::ifstream input(temp_filename.c_str());
     
     if(input.good()) {
         input >> rules_h;
     }
     else {
-        debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << endl;
+        debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << std::endl;
     }
     input.close();
 
@@ -278,39 +278,39 @@ void SegmentFilter::loadTransitionRules(string filename)
         input >> rules_v;
     }
     else {
-        debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << endl;
+        debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << std::endl;
     }
     input.close();
 
     if(rules_h.size()  == 0 || rules_v.size() == 0){
-        cout << endl
-             << "=========================WARNING=========================" << endl
-             << __PRETTY_FUNCTION__ << ":"                                  << endl
-             << "  " << filename << "  _v.txt and/or _h.txt are empty!"     << endl 
-             << ""                                                          << endl
-             << "  The robot may exhibit blindness."                        << endl
-             << "=========================WARNING=========================" << endl
-             << endl;
+        std::cout << std::endl
+             << "=========================WARNING=========================" << std::endl
+             << __PRETTY_FUNCTION__ << ":"                                  << std::endl
+             << "  " << filename << "  _v.txt and/or _h.txt are empty!"     << std::endl 
+             << ""                                                          << std::endl
+             << "  The robot may exhibit blindness."                        << std::endl
+             << "=========================WARNING=========================" << std::endl
+             << std::endl;
     }
     //DEBUG
 #if VISION_FILTER_VERBOSITY > 0
-    debug << "SegmentFilter::loadTransitionRules()" << endl;
+    debug << "SegmentFilter::loadTransitionRules()" << std::endl;
     debug << "rules_h (" << rules_h.size() << ")\n" << rules_h;
     debug << "rules_v (" << rules_v.size() << ")\n" << rules_v;
 #endif
 }
 
-void SegmentFilter::loadReplacementRules(string filename)
+void SegmentFilter::loadReplacementRules(std::string filename)
 {
     //load the horizontal rules
-    string temp_filename = filename + "_h.txt";
-    ifstream input(temp_filename.c_str());
+    std::string temp_filename = filename + "_h.txt";
+    std::ifstream input(temp_filename.c_str());
 
     if(input.good()) {
         input >> replacement_rules_h;
     }
     else {
-        debug << "SegmentFilter::loadReplacementRules - failed to read from " << temp_filename << endl;
+        debug << "SegmentFilter::loadReplacementRules - failed to read from " << temp_filename << std::endl;
     }
     input.close();
 
@@ -323,13 +323,13 @@ void SegmentFilter::loadReplacementRules(string filename)
         input >> replacement_rules_v;
     }
     else {
-        debug << "SegmentFilter::loadReplacementRules - failed to read from " << temp_filename << endl;
+        debug << "SegmentFilter::loadReplacementRules - failed to read from " << temp_filename << std::endl;
     }
     input.close();
     
     //DEBUG
 #if VISION_FILTER_VERBOSITY > 0
-    debug << "SegmentFilter::loadReplacementRules()" << endl;
+    debug << "SegmentFilter::loadReplacementRules()" << std::endl;
     debug << "replacement_rules_h (" << replacement_rules_h.size() << ")\n" << replacement_rules_h;
     debug << "replacement_rules_v (" << replacement_rules_v.size() << ")\n" << replacement_rules_v;
 #endif

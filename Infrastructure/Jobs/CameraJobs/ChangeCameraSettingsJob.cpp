@@ -37,7 +37,7 @@ ChangeCameraSettingsJob::ChangeCameraSettingsJob(const CameraSettings& settings)
  
     Remember that only members introduced at this level are read at this level.
  */
-ChangeCameraSettingsJob::ChangeCameraSettingsJob(istream& input) : CameraJob(Job::CAMERA_CHANGE_SETTINGS)
+ChangeCameraSettingsJob::ChangeCameraSettingsJob(std::istream& input) : CameraJob(Job::CAMERA_CHANGE_SETTINGS)
 {
     m_job_time = 0;
 
@@ -70,19 +70,19 @@ void ChangeCameraSettingsJob::setSettings(const CameraSettings& newsettings)
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void ChangeCameraSettingsJob::summaryTo(ostream& output)
+void ChangeCameraSettingsJob::summaryTo(std::ostream& output)
 {
     output << "ChangeCameraSettingsJob: " << m_job_time << " ";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void ChangeCameraSettingsJob::csvTo(ostream& output)
+void ChangeCameraSettingsJob::csvTo(std::ostream& output)
 {
     output << "ChangeCameraSettingsJob, " << m_job_time << ", ";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -92,9 +92,9 @@ void ChangeCameraSettingsJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void ChangeCameraSettingsJob::toStream(ostream& output) const
+void ChangeCameraSettingsJob::toStream(std::ostream& output) const
 {
-    debug << "ChangeCameraSettingsJob::toStream" << endl;
+    debug << "ChangeCameraSettingsJob::toStream" << std::endl;
     Job::toStream(output);                  // This writes data introduced at the base level
     CameraJob::toStream(output);            // This writes data introduced at the camera level
                                             // Then we write ChangeCameraSettingsJob specific data
@@ -107,9 +107,9 @@ void ChangeCameraSettingsJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const ChangeCameraSettingsJob& job)
+std::ostream& operator<<(std::ostream& output, const ChangeCameraSettingsJob& job)
 {
-    debug << "<<ChangeCameraSettingsJob" << endl;
+    debug << "<<ChangeCameraSettingsJob" << std::endl;
     job.toStream(output);
     return output;
 }
@@ -120,9 +120,9 @@ ostream& operator<<(ostream& output, const ChangeCameraSettingsJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const ChangeCameraSettingsJob* job)
+std::ostream& operator<<(std::ostream& output, const ChangeCameraSettingsJob* job)
 {
-    debug << "<<ChangeCameraSettingsJob" << endl;
+    debug << "<<ChangeCameraSettingsJob" << std::endl;
     if (job != NULL)
         job->toStream(output);
     else

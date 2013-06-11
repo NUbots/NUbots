@@ -44,7 +44,7 @@
 #include "Tools/Math/Vector2.h"
 #include "Tools/Math/General.h"
 
-using namespace std;
+
 
 NUWalkTestProvider::NUWalkTestProvider(Behaviour* manager) : BehaviourProvider(manager)
 {

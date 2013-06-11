@@ -43,7 +43,7 @@ class NUSensorsData;
 class NUActionatorsData;
 class DarwinJointMapping;
 
-using namespace std;
+
 
 class DarwinWalk : public NUWalk
 {

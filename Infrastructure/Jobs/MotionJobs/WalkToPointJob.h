@@ -27,27 +27,27 @@
 
 #include "../MotionJob.h"
 #include <vector>
-using namespace std;
+
 
 class WalkToPointJob : public MotionJob
 {
 public:
-    WalkToPointJob(double time, const vector<float>& position);
-    WalkToPointJob(double time, istream& input);
+    WalkToPointJob(double time, const std::vector<float>& position);
+    WalkToPointJob(double time, std::istream& input);
     ~WalkToPointJob();
     
-    void setPosition(double time, const vector<float>& newposition);
-    void getPosition(double& time, vector<float>& position);
+    void setPosition(double time, const std::vector<float>& newposition);
+    void getPosition(double& time, std::vector<float>& position);
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const WalkToPointJob& job);
-    friend ostream& operator<<(ostream& output, const WalkToPointJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkToPointJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkToPointJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
-    vector<float> m_walk_position;                 //!< the walk position x (cm), y (cm) and theta (rad)
+    std::vector<float> m_walk_position;                 //!< the walk position x (cm), y (cm) and theta (rad)
 };
 
 #endif

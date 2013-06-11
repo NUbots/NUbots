@@ -38,7 +38,7 @@
 #include "Infrastructure/NUData.h"
 
 #include <vector>
-using namespace std;
+
 
 class EndEffectorTouch
 {
@@ -57,18 +57,18 @@ private:
     void calculateCentreOfPressure(const NUData::id_t& endeffector);
     void calculateSupport(const NUData::id_t &endeffector);
     
-    void getHull(const NUData::id_t& endeffector, vector<vector<float> >& hull);
+    void getHull(const NUData::id_t& endeffector, std::vector<std::vector<float> >& hull);
 private:
-    vector<float> m_touch_data;								//!< the current touch data we are working with
+    std::vector<float> m_touch_data;								//!< the current touch data we are working with
     
     int m_id_offset;
-    vector<float> m_min_forces;								//!< the min forces on each of the end effectors
-    vector<float> m_max_forces;								//!< the max forces on each of the end effectors
+    std::vector<float> m_min_forces;								//!< the min forces on each of the end effectors
+    std::vector<float> m_max_forces;								//!< the max forces on each of the end effectors
     
-    vector<vector<vector<float> > > m_hulls;				//!< the convex hulls for each of the end effectors [[[x,y],...,[x,y]],...,]
+    std::vector<std::vector<std::vector<float> > > m_hulls;				//!< the convex hulls for each of the end effectors [[[x,y],...,[x,y]],...,]
     
     float m_Nan;											//!< the value used to represent invalid data
-    vector<float> m_Nan_all;								//!< the vector to invalidate all of the touch sensor
+    std::vector<float> m_Nan_all;								//!< the std::vector to invalidate all of the touch sensor
 };
 
 #endif

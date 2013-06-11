@@ -13,9 +13,9 @@
 
 DataWrapper* DataWrapper::instance = 0;
 
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<Colour>& colours, vector<Point>& pts)
+void getPointsAndColoursFromSegments(const std::vector< std::vector<ColourSegment> >& segments, std::vector<Colour>& colours, std::vector<Point>& pts)
 {
-    BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
+    BOOST_FOREACH(const std::vector<ColourSegment>& line, segments) {
         BOOST_FOREACH(const ColourSegment& seg, line) {
             pts.push_back(seg.getStart());
             pts.push_back(seg.getEnd());
@@ -26,8 +26,8 @@ void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segm
 
 DataWrapper::DataWrapper()
 {
-    camera_data.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
-    VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
+    camera_data.LoadFromConfigFile((std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg")).c_str());
+    VisionConstants::loadFromFile(std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"));
     numFramesDropped = numFramesProcessed = 0;
 }
 
@@ -55,10 +55,10 @@ const NUImage* DataWrapper::getFrame()
     return m_current_image;
 }
 
-bool DataWrapper::getCTGVector(vector<float>& ctgvector)
+bool DataWrapper::getCTGVector(std::vector<float>& ctgvector)
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTGVector()" << endl;
+        debug << "DataWrapper::getCTGVector()" << std::endl;
     #endif
     return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
 }
@@ -67,10 +67,10 @@ bool DataWrapper::getCTGVector(vector<float>& ctgvector)
 *   @param ctgvector A reference to a float vector to fill.
 *   @return valid Whether the retrieved values are valid or not.
 */
-bool DataWrapper::getCTVector(vector<float>& ctvector)
+bool DataWrapper::getCTVector(std::vector<float>& ctvector)
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTVector()" << endl;
+        debug << "DataWrapper::getCTVector()" << std::endl;
     #endif
     return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
 }
@@ -92,7 +92,7 @@ bool DataWrapper::getCameraYaw(float& yaw)
 
 bool DataWrapper::getBodyPitch(float& pitch)
 {
-    vector<float> orientation;
+    std::vector<float> orientation;
     bool valid = sensor_data->get(NUSensorsData::Orientation, orientation);
     if(valid && orientation.size() > 2) {
         pitch = orientation.at(1);
@@ -107,18 +107,18 @@ bool DataWrapper::getBodyPitch(float& pitch)
 const Horizon& DataWrapper::getKinematicsHorizon()
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getKinematicsHorizon() - Begin" << endl;
+        debug << "DataWrapper::getKinematicsHorizon() - Begin" << std::endl;
     #endif
     if(sensor_data->getHorizon(m_horizon_coefficients)) {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::getKinematicsHorizon() - success" << endl;
+            debug << "DataWrapper::getKinematicsHorizon() - success" << std::endl;
         #endif
         m_kinematics_horizon.setLine(m_horizon_coefficients.at(0), m_horizon_coefficients.at(1), m_horizon_coefficients.at(2));
         m_kinematics_horizon.exists = true;
     }
     else {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
+            debug << "DataWrapper::getKinematicsHorizon() - failed" << std::endl;
         #endif
         m_kinematics_horizon.setLineFromPoints(Point(0, 0), Point(m_current_image->getWidth(), 0));
 
@@ -151,7 +151,7 @@ const LookUpTable& DataWrapper::getLUT() const
     return LUT;
 }
 
-void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
+void DataWrapper::publish(const std::vector<const VisionFieldObject*> &visual_objects)
 {
     for(int i=0; i<visual_objects.size(); i++) {
         visual_objects.at(i)->addToExternalFieldObjects(field_objects, m_timestamp);
@@ -160,26 +160,26 @@ void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects
 
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
-    cout << m_timestamp << endl;
+    std::cout << m_timestamp << std::endl;
     visual_object->addToExternalFieldObjects(field_objects, m_timestamp);
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
+void DataWrapper::debugPublish(DEBUG_ID id, const std::vector<Point> &data_points)
 {
     #if VISION_WRAPPER_VERBOSITY > 2
-        debug << id << endl;
-        debug << data_points << endl;
+        debug << id << std::endl;
+        debug << data_points << std::endl;
     #endif
 
     switch(id) {
     case DBID_H_SCANS:
-        debug << "DataWrapper::debugPublish - DBID_H_SCANS printing not implemented" << endl;
+        debug << "DataWrapper::debugPublish - DBID_H_SCANS printing not implemented" << std::endl;
         break;
     case DBID_V_SCANS:
-        debug << "DataWrapper::debugPublish - DBID_V_SCANS printing not implemented" << endl;
+        debug << "DataWrapper::debugPublish - DBID_V_SCANS printing not implemented" << std::endl;
         break;
     case DBID_HORIZON:
-        debug << "DataWrapper::debugPublish - DBID_HORIZON printing handled externally to vision" << endl;
+        debug << "DataWrapper::debugPublish - DBID_HORIZON printing handled externally to vision" << std::endl;
         break;
     case DBID_GREENHORIZON_SCANS:
         emit pointsUpdated(data_points, GLDisplay::greenHorizonScanPoints);
@@ -191,10 +191,10 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
         emit pointsUpdated(data_points, GLDisplay::Transitions);
         break;
     case DBID_OBSTACLE_POINTS:
-        debug << "DataWrapper::debugPublish - DBID_OBSTACLE_POINTS printing not implemented" << endl;
+        debug << "DataWrapper::debugPublish - DBID_OBSTACLE_POINTS printing not implemented" << std::endl;
         break;
     default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
     }
 }
 
@@ -222,7 +222,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 //        }
         break;
     default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
     }
 }
 
@@ -231,7 +231,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const NUImage* const img)
 
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
+void DataWrapper::debugPublish(DEBUG_ID id, const std::vector<LSFittedLine> &data)
 {
     switch(id) {
     case DBID_GOAL_LINES_START:
@@ -241,11 +241,11 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
         emit linesUpdated(data, GLDisplay::GoalEdgeLinesEnd);
         break;
     default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
     }
 }
 
-void DataWrapper::plotCurve(string name, vector< Vector2<double> > pts)
+void DataWrapper::plotCurve(std::string name, std::vector< Vector2<double> > pts)
 {
     QVector<QPointF> qpts;
     BOOST_FOREACH(const Point& p, pts) {
@@ -255,26 +255,26 @@ void DataWrapper::plotCurve(string name, vector< Vector2<double> > pts)
     emit plotUpdated(QString(name.c_str()), qpts);
 }
 
-void DataWrapper::plotHistogram(string name, const Histogram1D &hist, Colour colour)
+void DataWrapper::plotHistogram(std::string name, const Histogram1D &hist, Colour colour)
 {
-    errorlog << "plotHistogram - not implemented for NUView" << endl;
+    errorlog << "plotHistogram - not implemented for NUView" << std::endl;
 }
 
-void DataWrapper::plotLineSegments(string name, vector<Point> pts)
+void DataWrapper::plotLineSegments(std::string name, std::vector<Point> pts)
 {
-    errorlog << "plotLineSegments - not implemented for NUView" << endl;
+    errorlog << "plotLineSegments - not implemented for NUView" << std::endl;
 }
 
 bool DataWrapper::updateFrame()
 {
     // allow dynamic reloading of file values
-    camera_data.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str());
-    VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
+    camera_data.LoadFromConfigFile((std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg")).c_str());
+    VisionConstants::loadFromFile(std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"));
     //should check actions but for some reason it keeps coming in as null
     if (m_current_image == NULL || sensor_data == NULL || field_objects == NULL)
     {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::updateFrame(): null reference from BB" << endl;
+            debug << "DataWrapper::updateFrame(): null reference from BB" << std::endl;
         #endif
         // keep object times updated.
         if(field_objects && sensor_data)
@@ -285,7 +285,7 @@ bool DataWrapper::updateFrame()
         return false;
     }
     m_timestamp = m_current_image->GetTimestamp();
-    cout << "pre: " << m_timestamp << endl;
+    std::cout << "pre: " << m_timestamp << std::endl;
     field_objects->preProcess(m_timestamp);
     return true;
 }
@@ -294,7 +294,7 @@ void DataWrapper::postProcess()
 {
     if (m_current_image != NULL && field_objects != NULL)
     {
-        cout << "post: " << m_current_image->GetTimestamp() << endl;
+        std::cout << "post: " << m_current_image->GetTimestamp() << std::endl;
         field_objects->postProcess(m_current_image->GetTimestamp());
     }
 }
@@ -304,7 +304,7 @@ void DataWrapper::postProcess()
 *   @param filename The filename for the LUT stored on disk
 *   @note Taken from original vision system
 */
-bool DataWrapper::loadLUTFromFile(const string& fileName)
+bool DataWrapper::loadLUTFromFile(const std::string& fileName)
 {
     return LUT.loadLUTFromFile(fileName);
 }
@@ -366,13 +366,13 @@ void DataWrapper::classifyPreviewImage(ClassifiedImage &target,unsigned char* te
 void DataWrapper::saveAnImage()
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::SaveAnImage(). Starting..." << endl;
+        debug << "DataWrapper::SaveAnImage(). Starting..." << std::endl;
     #endif
 
     if (!imagefile.is_open())
-        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+        imagefile.open((std::string(DATA_DIR) + std::string("image.strm")).c_str());
     if (!sensorfile.is_open())
-        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
+        sensorfile.open((std::string(DATA_DIR) + std::string("sensor.strm")).c_str());
 
     if (imagefile.is_open() and numSavedImages < 2500)
     {
@@ -436,6 +436,6 @@ void DataWrapper::saveAnImage()
         }
     }
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::SaveAnImage(). Finished" << endl;
+        debug << "DataWrapper::SaveAnImage(). Finished" << std::endl;
     #endif
 }

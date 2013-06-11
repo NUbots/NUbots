@@ -28,14 +28,14 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 SelectBehaviourProvider::SelectBehaviourProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
     m_introduction_done = false;
     m_selection_index = 0;
-    string names[] = {"play_soccer", "chase_ball", "walk_optimiser", "save_images", "kicker","pose","scripted_pose","robo_pedestrian","camera_calibration","environmental_emotions"};
-    m_available_behaviours = vector<string>(names, names + sizeof(names)/sizeof(*names));
+    std::string names[] = {"play_soccer", "chase_ball", "walk_optimiser", "save_images", "kicker","pose","scripted_pose","robo_pedestrian","camera_calibration","environmental_emotions"};
+    m_available_behaviours = std::vector<std::string>(names, names + sizeof(names)/sizeof(*names));
 }
 
 

@@ -29,21 +29,21 @@
 #include "debugverbositynuactionators.h"
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
-                                    string("NeckPitch"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowRoll"), \
-                                    string("TorsoRoll"), string("TorsoYaw"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
-vector<string> BearActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+static std::string temp_servo_names[] = {std::string("HeadPitch"), std::string("HeadYaw"), \
+                                    std::string("NeckPitch"), \
+                                    std::string("LShoulderRoll"), std::string("LShoulderPitch"), std::string("LElbowRoll"), \
+                                    std::string("RShoulderRoll"), std::string("RShoulderPitch"), std::string("RElbowRoll"), \
+                                    std::string("TorsoRoll"), std::string("TorsoYaw"), \
+                                    std::string("LHipRoll"),  std::string("LHipPitch"), std::string("LKneePitch"), std::string("LAnkleRoll"), std::string("LAnklePitch"), \
+                                    std::string("RHipRoll"),  std::string("RHipPitch"), std::string("RKneePitch"), std::string("RAnkleRoll"), std::string("RAnklePitch")};
+std::vector<std::string> BearActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 /*! @brief Constructs a nubot actionator class with a Bear backend
  */ 
 BearActionators::BearActionators(Motors* motors)
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "BearActionators::BearActionators()" << endl;
+    debug << "BearActionators::BearActionators()" << std::endl;
 #endif
     m_current_time = 0;
     m_motors = motors;
@@ -51,7 +51,7 @@ BearActionators::BearActionators(Motors* motors)
     m_data->addActionators(m_servo_names);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-    debug << "BearActionators::BearActionators(). Avaliable Actionators: " << endl;
+    debug << "BearActionators::BearActionators(). Avaliable Actionators: " << std::endl;
     m_data->summaryTo(debug);
 #endif
 }
@@ -63,7 +63,7 @@ BearActionators::~BearActionators()
 void BearActionators::copyToHardwareCommunications()
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
-    debug << "BearActionators::copyToHardwareCommunications()" << endl;
+    debug << "BearActionators::copyToHardwareCommunications()" << std::endl;
 #endif
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
@@ -73,8 +73,8 @@ void BearActionators::copyToHardwareCommunications()
 
 void BearActionators::copyToServos()
 {
-    static vector<float> positions;
-    static vector<float> gains;
+    static std::vector<float> positions;
+    static std::vector<float> gains;
     
     m_data->getNextServos(positions, gains);
     for (size_t i=0; i<positions.size(); i++)

@@ -36,11 +36,11 @@ NUOpenCVCamera::NUOpenCVCamera()
 	m_camera = new VideoCapture(0); 			// open the default camera
 	if(not m_camera or !m_camera->isOpened())  	// check if we succeeded
 	{
-		debug << "NUOpenCVCamera::NUOpenCVCamera(). Failed to open default camera." << endl;
-		errorlog << "NUOpenCVCamera::NUOpenCVCamera(). Failed to open default camera." << endl;
+		debug << "NUOpenCVCamera::NUOpenCVCamera(). Failed to open default camera." << std::endl;
+		errorlog << "NUOpenCVCamera::NUOpenCVCamera(). Failed to open default camera." << std::endl;
 		m_camera = 0;
 	}
-	CameraSettings fileSettings(CONFIG_DIR + string("Camera.cfg"));
+	CameraSettings fileSettings(CONFIG_DIR + std::string("Camera.cfg"));
 	setSettings(fileSettings);
 
 

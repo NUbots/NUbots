@@ -127,7 +127,7 @@ bool NUKick::isUsingLegs()
 void NUKick::kill()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Kick kill called." << endl;
+    debug << "Kick kill called." << std::endl;
     #endif
 
     m_kick_enabled = false;
@@ -137,7 +137,7 @@ void NUKick::kill()
 void NUKick::stop()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Kick stop called." << endl;
+    debug << "Kick stop called." << std::endl;
     #endif
     stopHead();
     stopArms();
@@ -160,7 +160,7 @@ void NUKick::stopArms()
 void NUKick::stopLegs()
 {   // if another module wants to use the legs, then we should stop
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Legs stop called." << endl;
+    debug << "Legs stop called." << std::endl;
     #endif
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
     stop();
@@ -194,8 +194,8 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
     if (actions == NULL || data == NULL)
         return;
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NUKick::process(" << data << ", " << actions << ")" << endl;
-        debug << "NUKick::process " << " ready: " << m_kick_ready << " active: " << m_kick_enabled << endl;
+        debug << "NUKick::process(" << data << ", " << actions << ")" << std::endl;
+        debug << "NUKick::process " << " ready: " << m_kick_ready << " active: " << m_kick_enabled << std::endl;
     #endif
     
     m_data = data;
@@ -214,11 +214,11 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
 void NUKick::process(KickJob* job)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "void NUKick::process(KickJob* job)" << endl;
+    debug << "void NUKick::process(KickJob* job)" << std::endl;
     #endif
     double time;
-    vector<float> kickposition;
-    vector<float> kicktarget;
+    std::vector<float> kickposition;
+    std::vector<float> kicktarget;
     job->getKick(time, kickposition, kicktarget);
     /*
     if(kickposition[0] == 1.0 && kickposition[1] == 2.0 && kicktarget[0] == 3.0f && kicktarget[1] == 4.0f)
@@ -227,21 +227,21 @@ void NUKick::process(KickJob* job)
     {
         m_variableGainValue += 0.001;
         #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "Special kick command: increasing variable gain to " << m_variableGainValue << endl;
+        debug << "Special kick command: increasing variable gain to " << m_variableGainValue << std::endl;
         #endif
     }
     else if(kickposition[0] == -1.0 && kickposition[1] == -1.0 && kicktarget[0] == -1.0f && kicktarget[1] == -1.0f)
     {
         m_variableGainValue -= 0.001;
         #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "Special kick command: decreasing variable gain to " << m_variableGainValue << endl;
+        debug << "Special kick command: decreasing variable gain to " << m_variableGainValue << std::endl;
         #endif
     }*/
     kickToPoint(kickposition, kicktarget);
 }
 
 
-void NUKick::kickToPoint(const vector<float>& position, const vector<float>& target)
+void NUKick::kickToPoint(const std::vector<float>& position, const std::vector<float>& target)
 {
     // Evaluate the kicking target to start a new kick, or change a kick in progress.
     m_ball_x = position[0];
@@ -251,7 +251,7 @@ void NUKick::kickToPoint(const vector<float>& position, const vector<float>& tar
     m_target_y = target[1];
 
 #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "void NAOKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << endl;
+    debug << "void NAOKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << std::endl;
 #endif
 
 }

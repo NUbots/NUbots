@@ -32,25 +32,25 @@
 #include <limits>
 
 
-static string temp_chestled_names[] = { "Chest/Led/"};
-vector<string> DarwinActionators::m_chestled_names(temp_chestled_names, temp_chestled_names + sizeof(temp_chestled_names)/sizeof(*temp_chestled_names));
+static std::string temp_chestled_names[] = { "Chest/Led/"};
+std::vector<std::string> DarwinActionators::m_chestled_names(temp_chestled_names, temp_chestled_names + sizeof(temp_chestled_names)/sizeof(*temp_chestled_names));
 unsigned int DarwinActionators::m_num_chestleds = DarwinActionators::m_chestled_names.size();
 
-static string temp_footled_names[] = {  "LFoot Led", "RFoot Led"};
-vector<string> DarwinActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
+static std::string temp_footled_names[] = {  "LFoot Led", "RFoot Led"};
+std::vector<std::string> DarwinActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
 unsigned int DarwinActionators::m_num_footleds = DarwinActionators::m_footled_names.size();
 
 DarwinActionators::DarwinActionators(DarwinPlatform* darwin, Robot::CM730* subboard)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "DarwinActionators::DarwinActionators()" <<endl;
+        debug << "DarwinActionators::DarwinActionators()" <<std::endl;
     #endif
     m_current_time = 0;
     platform = darwin;
     cm730 = subboard;
     count = 0;
-    vector<string> sound(1, "Sound");
-    vector<string> names;
+    std::vector<std::string> sound(1, "Sound");
+    std::vector<std::string> names;
     names.insert(names.end(), platform->m_servo_names.begin(), platform->m_servo_names.end());
     names.insert(names.end(), m_chestled_names.begin(), m_chestled_names.end());
     names.insert(names.end(), m_footled_names.begin(), m_footled_names.end());
@@ -58,7 +58,7 @@ DarwinActionators::DarwinActionators(DarwinPlatform* darwin, Robot::CM730* subbo
     m_data->addActionators(names);
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "DarwinActionators::DarwinActionators(). Avaliable Actionators: " << endl;
+        debug << "DarwinActionators::DarwinActionators(). Avaliable Actionators: " << std::endl;
         m_data->summaryTo(debug);
     #endif
 
@@ -83,7 +83,7 @@ void DarwinActionators::InitialiseMotors()
 void DarwinActionators::copyToHardwareCommunications()
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 3
-        debug << "DarwinActionators::copyToHardwareCommunications()" << endl;
+        debug << "DarwinActionators::copyToHardwareCommunications()" << std::endl;
     #endif
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         m_data->summaryTo(debug);
@@ -130,8 +130,8 @@ void DarwinActionators::copyToHardwareCommunications()
 
 void DarwinActionators::copyToServos()
 {
-    static vector<float> positions;
-    static vector<float> p_gains;
+    static std::vector<float> positions;
+    static std::vector<float> p_gains;
     
     // Get the values that must be written to the servos
     m_data->getNextServos(positions, p_gains);
@@ -215,7 +215,7 @@ void DarwinActionators::copyToLeds()
 	
     if(count % 10 == 0)
     {
-        static vector<  vector < vector < float > > > ledvalues;
+        static std::vector<  std::vector < std::vector < float > > > ledvalues;
         m_data->getNextLeds(ledvalues);
         int value = (int(ledvalues[0][0][0]*31) << 0) + (int(ledvalues[0][0][1]*31) << 5) + (int(ledvalues[0][0][2]*31) << 10);
         cm730->WriteWord(Robot::CM730::P_LED_HEAD_L, value, 0);

@@ -5,7 +5,7 @@ RANSACGoal::RANSACGoal() : s1(0,0), s2(0,0), w1(0), w2(0), width_diff(0), v(0,0)
 {
 }
 
-bool RANSACGoal::regenerate(const vector<ColourSegment>& segments)
+bool RANSACGoal::regenerate(const std::vector<ColourSegment>& segments)
 {
     if(segments.size() == 2) {
         s1 = segments[0].getCentre();
@@ -47,7 +47,7 @@ double RANSACGoal::getInterpolatedWidth(Point p) const
 }
 
 // WIDTH REGRESSION METHOD
-//void RANSACGoal::fit(const vector<ColourSegment> &segments)
+//void RANSACGoal::fit(const std::vector<ColourSegment> &segments)
 //{
 //    BOOST_FOREACH(const ColourSegment& seg, segments) {
 //        l.addPoint(seg.getCentre());
@@ -88,7 +88,7 @@ double RANSACGoal::getInterpolatedWidth(Point p) const
 //}
 
 // WIDTH EXTRAPOLATION METHOD - FROM ORIGINAL RANSAC POINTS
-void RANSACGoal::fit(const vector<ColourSegment> &segments)
+void RANSACGoal::fit(const std::vector<ColourSegment> &segments)
 {
     BOOST_FOREACH(const ColourSegment& seg, segments) {
         l.addPoint(seg.getCentre());
@@ -126,7 +126,7 @@ void RANSACGoal::fit(const vector<ColourSegment> &segments)
 }
 
 // WIDTH EXTRAPOLATION METHOD - FROM TWO MAXIMUM WIDTH POINTS
-//void RANSACGoal::fit(const vector<ColourSegment> &segments)
+//void RANSACGoal::fit(const std::vector<ColourSegment> &segments)
 //{
 //    if(segments.size() >= 2) {
 //        std::pair<Point, double> best1(Point(), -1),

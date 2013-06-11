@@ -33,8 +33,8 @@ public:
     // NAO specific functions
     bool displayBatteryState();
     bool verifySensors();
-    void add(const LedIndices& led, double time, const vector<float>& value);
-    void toggle(const LedIndices& led, double time, const vector<float>& value);
+    void add(const LedIndices& led, double time, const std::vector<float>& value);
+    void toggle(const LedIndices& led, double time, const std::vector<float>& value);
     
 private:
     // members for the battery display
@@ -49,9 +49,9 @@ private:
     int m_heat_count;
     
     // members for the eye leds
-    vector<vector<float> > m_eye_indices; 
-    vector<vector<float> > m_leye;
-    vector<vector<float> > m_reye;
+    std::vector<std::vector<float> > m_eye_indices; 
+    std::vector<std::vector<float> > m_leye;
+    std::vector<std::vector<float> > m_reye;
 };
 
 #endif

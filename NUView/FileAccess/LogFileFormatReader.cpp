@@ -1,49 +1,57 @@
-#include "LogFileFormatReader.h"
-#include <QMessageBox>
-#include <QStringList>
+/*! @file WalkJob.h
+    @brief Declaration of WalkJob class.
+ 
+    @class WalkJob
+    @brief A base class to encapsulate jobs issued for the walk module.
+ 
+    @author Jason Kulk
+ 
+  Copyright (c) 2009, 2010 Jason Kulk
+ 
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef WALKJOB_H
+#define WALKJOB_H
+
+#include "../MotionJob.h"
+#include <vector>
 
 
-LogFileFormatReader::LogFileFormatReader(QObject *parent) :
-    QObject(parent)
+class WalkJob : public MotionJob
 {
-}
+public:
+    WalkJob(float x, float y, float yaw);
+    WalkJob(std::istream& input);
+    ~WalkJob();
+    
+    float getTranslationSpeed();
+    float getDirection();
+    float getRotationSpeed();
+    
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
+    
+    friend std::ostream& operator<<(std::ostream& output, const WalkJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkJob* job);
+protected:
+    virtual void toStream(std::ostream& output) const;
+private:
+    float m_translation_speed;          //!< the translational speed between 0 and 1
+    float m_direction;                  //!< the translational direction of the walk    
+    float m_rotation_speed;             //!< the rotational speed in rad/s
+};
 
-LogFileFormatReader::~LogFileFormatReader()
-{
-}
+#endif
 
-void LogFileFormatReader::displayControlError(const QString& controlName)
-{
-    QString message = "Control %1 is not available for this file.";
-    QMessageBox::warning( 0, "LogFileFormatReader Error", message.arg(controlName));
-}
-
-int LogFileFormatReader::nextFrame()
-{
-    displayControlError("nextFrame");
-    return 0;
-}
-
-int LogFileFormatReader::previousFrame()
-{
-    displayControlError("previousFrame");
-    return 0;
-}
-
-int LogFileFormatReader::firstFrame()
-{
-    displayControlError("firstFrame");
-    return 0;
-}
-
-int LogFileFormatReader::lastFrame()
-{
-    displayControlError("lastFrame");
-    return 0;
-}
-
-int LogFileFormatReader::setFrame(int frameNumber)
-{
-    displayControlError("setFrame");
-    return 0;
-}

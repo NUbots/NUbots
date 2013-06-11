@@ -23,16 +23,16 @@
 #include "debug.h"
 #include "debugverbositythreading.h"
 
-using namespace std;
+
 
 /*! @brief Creates a thread
     @param name the name of the thread (used entirely for debug purposes)
     @param priority the priority of the thread. If non-zero the thread will be a bona fide real-time thread.
  */
-Thread::Thread(string name, unsigned char priority) : m_name(name), running(false), m_priority(priority)
+Thread::Thread(std::string name, unsigned char priority) : m_name(name), running(false), m_priority(priority)
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "Thread::Thread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << endl;
+        debug << "Thread::Thread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << std::endl;
     #endif
 }
 
@@ -41,7 +41,7 @@ Thread::Thread(string name, unsigned char priority) : m_name(name), running(fals
 Thread::~Thread()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "Thread::~Thread(): " << m_name << endl;
+        debug << "Thread::~Thread(): " << m_name << std::endl;
     #endif
     stop();
 }
@@ -55,14 +55,14 @@ int Thread::start()
 		return -1;
     
     #if DEBUG_THREADING_VERBOSITY > 0
-        debug << "Thread::start(): " << m_name << endl;
+        debug << "Thread::start(): " << m_name << std::endl;
     #endif
     
     int err;
     err = pthread_create(&m_pthread, NULL, runThread, (void*) this);         // The last parameter is the arguement to the thread
     if (err != 0)
     {
-        errorlog << "Thread::start(). Failed to create " << m_name << ". The error code was: " << err << endl;
+        errorlog << "Thread::start(). Failed to create " << m_name << ". The error code was: " << err << std::endl;
         return -1;
     }
     
@@ -77,13 +77,13 @@ int Thread::start()
         sched_param actualparam;
         pthread_getschedparam(m_pthread, &actualpolicy, &actualparam);
         #if DEBUG_THREADING_VERBOSITY > 0
-            debug << "Thread::start(). " << m_name << " Policy: " << actualpolicy << " Priority: " << actualparam.sched_priority << endl;
+            debug << "Thread::start(). " << m_name << " Policy: " << actualpolicy << " Priority: " << actualparam.sched_priority << std::endl;
         #endif
         if (actualpolicy != SCHED_FIFO)
-            debug << "Thread::start(). " << m_name << ". Warning your thread does not have the correct policy." << endl;
+            debug << "Thread::start(). " << m_name << ". Warning your thread does not have the correct policy." << std::endl;
         
         if (actualparam.sched_priority != m_priority)
-            debug << "Thread::start(). " << m_name << ". Warning your thread does not have the correct priority." << endl;
+            debug << "Thread::start(). " << m_name << ". Warning your thread does not have the correct priority." << std::endl;
     }
 
 	return 0;
@@ -101,7 +101,7 @@ int Thread::join()
 void Thread::stop()
 {
     #if DEBUG_THREADING_VERBOSITY > 0
-        debug << "Thread::stop(): " << m_name << endl;
+        debug << "Thread::stop(): " << m_name << std::endl;
     #endif
     pthread_cancel(m_pthread);
 	running = false;

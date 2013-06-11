@@ -38,17 +38,17 @@ MotionKillJob::~MotionKillJob()
 /*! @brief Prints a human-readable summary to the stream
     @param output the stream to be written to
  */
-void MotionKillJob::summaryTo(ostream& output)
+void MotionKillJob::summaryTo(std::ostream& output)
 {
-    output << "MotionKillJob." << endl;
+    output << "MotionKillJob." << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void MotionKillJob::csvTo(ostream& output)
+void MotionKillJob::csvTo(std::ostream& output)
 {
-    output << "MotionKillJob." << endl;
+    output << "MotionKillJob." << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -58,10 +58,10 @@ void MotionKillJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void MotionKillJob::toStream(ostream& output) const
+void MotionKillJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "MotionKillJob::toStream" << endl;
+        debug << "MotionKillJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -74,10 +74,10 @@ void MotionKillJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const MotionKillJob& job)
+std::ostream& operator<<(std::ostream& output, const MotionKillJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "<<MotionKillJob" << endl;
+        debug << "<<MotionKillJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -89,10 +89,10 @@ ostream& operator<<(ostream& output, const MotionKillJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const MotionKillJob* job)
+std::ostream& operator<<(std::ostream& output, const MotionKillJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "<<MotionKillJob" << endl;
+        debug << "<<MotionKillJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

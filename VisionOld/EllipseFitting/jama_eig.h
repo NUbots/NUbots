@@ -13,7 +13,7 @@
 // for abs() below
 
 using namespace TNT;
-using namespace std;
+
 
 namespace JAMA
 {
@@ -315,7 +315,7 @@ class Eigenvalue
          e[l] = 0.0;
       }
      
-      // Sort eigenvalues and corresponding vectors.
+      // Sort eigenvalues and corresponding std::vectors.
    
       for (int i = 0; i < n-1; i++) {
          int k = i;

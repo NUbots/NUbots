@@ -28,7 +28,7 @@
     @param kickposition the point you want to kick (hopefully the position of the ball) [x(cm), y(cm)]
     @param kicktarget the point you want to kick the ball at (probably the goal) from your current position [x(cm), y(cm)]
  */
-KickJob::KickJob(double time, const vector<float>& kickposition, const vector<float>& kicktarget) : MotionJob(Job::MOTION_KICK)
+KickJob::KickJob(double time, const std::vector<float>& kickposition, const std::vector<float>& kicktarget) : MotionJob(Job::MOTION_KICK)
 {
     m_job_time = time;
     m_kick_position = kickposition;
@@ -39,7 +39,7 @@ KickJob::KickJob(double time, const vector<float>& kickposition, const vector<fl
     @param time the time in ms to perform the kick
     @param input the stream from which to read the job specific data
  */
-KickJob::KickJob(double time, istream& input) : MotionJob(Job::MOTION_KICK)
+KickJob::KickJob(double time, std::istream& input) : MotionJob(Job::MOTION_KICK)
 {
     m_job_time = time;
 
@@ -51,8 +51,8 @@ KickJob::KickJob(double time, istream& input) : MotionJob(Job::MOTION_KICK)
     input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
     unsigned int m_kick_position_size = uintBuffer;
     
-    // read in the kick position vector
-    m_kick_position = vector<float>(m_kick_position_size, 0);
+    // read in the kick position std::vector
+    m_kick_position = std::vector<float>(m_kick_position_size, 0);
     for (unsigned int i=0; i<m_kick_position_size; i++)
     {
         input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
@@ -63,8 +63,8 @@ KickJob::KickJob(double time, istream& input) : MotionJob(Job::MOTION_KICK)
     input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
     unsigned int m_kick_target_size = uintBuffer;
     
-    // read in the kick position vector
-    m_kick_target = vector<float>(m_kick_target_size, 0);
+    // read in the kick position std::vector
+    m_kick_target = std::vector<float>(m_kick_target_size, 0);
     for (unsigned int i=0; i<m_kick_target_size; i++)
     {
         input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
@@ -85,7 +85,7 @@ KickJob::~KickJob()
     @param kickposition the point you want to kick (hopefully the position of the ball) [x(cm), y(cm)]
     @param kicktarget the point you want to kick the ball at (probably the goal) from your current position [x(cm), y(cm)]
  */
-void KickJob::setKick(double time, const vector<float>& kickposition, const vector<float>& kicktarget)
+void KickJob::setKick(double time, const std::vector<float>& kickposition, const std::vector<float>& kicktarget)
 {
     m_job_time = time;
     m_kick_position = kickposition;
@@ -96,7 +96,7 @@ void KickJob::setKick(double time, const vector<float>& kickposition, const vect
     @param time the time you want to kick
     @param kickposition the point you want to kick (hopefully the position of the ball) [x(cm), y(cm)]
  */
-void KickJob::setKickPosition(double time, const vector<float>& kickposition)
+void KickJob::setKickPosition(double time, const std::vector<float>& kickposition)
 {
     m_job_time = time;
     m_kick_position = kickposition;
@@ -105,7 +105,7 @@ void KickJob::setKickPosition(double time, const vector<float>& kickposition)
 /*! @brief Sets the kick target
     @param kicktarget the point you want to kick the ball at (probably the goal) from your current position [x(cm), y(cm)]
  */
-void KickJob::setKickTarget(const vector<float>& kicktarget)
+void KickJob::setKickTarget(const std::vector<float>& kicktarget)
 {
     m_kick_target = kicktarget;
 }
@@ -115,7 +115,7 @@ void KickJob::setKickTarget(const vector<float>& kicktarget)
     @param kickposition the point you want to kick (hopefully the position of the ball) [x(cm), y(cm)]
     @param kicktarget the point you want to kick the ball at (probably the goal) from your current position [x(cm), y(cm)]
  */
-void KickJob::getKick(double& time, vector<float>& kickposition, vector<float>& kicktarget)
+void KickJob::getKick(double& time, std::vector<float>& kickposition, std::vector<float>& kicktarget)
 {
     time = m_job_time;
     kickposition = m_kick_position;
@@ -126,7 +126,7 @@ void KickJob::getKick(double& time, vector<float>& kickposition, vector<float>& 
     @param time the time you want to kick
     @param kickposition the point you want to kick (hopefully the position of the ball) [x(cm), y(cm)]
  */
-void KickJob::getKickPosition(double& time, vector<float>& kickposition)
+void KickJob::getKickPosition(double& time, std::vector<float>& kickposition)
 {
     time = m_job_time;
     kickposition = m_kick_position;
@@ -135,7 +135,7 @@ void KickJob::getKickPosition(double& time, vector<float>& kickposition)
 /*! @brief Gets the kick target
     @param kicktarget the point you want to kick the ball at (probably the goal) from your current position [x(cm), y(cm)]
  */
-void KickJob::getKickTarget(vector<float>& kicktarget)
+void KickJob::getKickTarget(std::vector<float>& kicktarget)
 {
     kicktarget = m_kick_target;
 }
@@ -143,7 +143,7 @@ void KickJob::getKickTarget(vector<float>& kicktarget)
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void KickJob::summaryTo(ostream& output)
+void KickJob::summaryTo(std::ostream& output)
 {
     output << "KickJob: " << m_job_time << " (";
     for (unsigned int i=0; i<m_kick_position.size(); i++)
@@ -151,20 +151,20 @@ void KickJob::summaryTo(ostream& output)
     output << ")-->(";
     for (unsigned int i=0; i<m_kick_target.size(); i++)
         output << m_kick_target[i] << ",";
-    output << ")" << endl;
+    output << ")" << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void KickJob::csvTo(ostream& output)
+void KickJob::csvTo(std::ostream& output)
 {
     output << "KickJob: " << m_job_time << "(";
     for (unsigned int i=0; i<m_kick_position.size(); i++)
         output << m_kick_position[i] << ", ";
     for (unsigned int i=0; i<m_kick_target.size(); i++)
         output << m_kick_target[i] << ", ";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -174,10 +174,10 @@ void KickJob::csvTo(ostream& output)
  
  @param output the stream to write the job to
  */
-void KickJob::toStream(ostream& output) const
+void KickJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 2
-        debug << "KickJob::toStream" << endl;
+        debug << "KickJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -198,10 +198,10 @@ void KickJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const KickJob& job)
+std::ostream& operator<<(std::ostream& output, const KickJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<KickJob" << endl;
+        debug << "<<KickJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -213,10 +213,10 @@ ostream& operator<<(ostream& output, const KickJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const KickJob* job)
+std::ostream& operator<<(std::ostream& output, const KickJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<KickJob" << endl;
+        debug << "<<KickJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

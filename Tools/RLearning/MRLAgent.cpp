@@ -37,185 +37,194 @@
 
 #include <math.h>
 
-MRLAgent::MRLAgent():RLAgent()
+MRLAgent::MRLAgent(): RLAgent()
 {
-    FunctionApproximator = (ApproximatorInterface*)(new FourierApproximator(false, (float)0.01));
-    expectation_map = (ApproximatorInterface*)(new FourierApproximator(false, (float)0.01));
+	FunctionApproximator = (ApproximatorInterface*) (new FourierApproximator(false, (float) 0.01));
+	expectation_map = (ApproximatorInterface*) (new FourierApproximator(false, (float) 0.01));
 }
 
-MRLAgent::~MRLAgent(){
-    delete expectation_map;
+MRLAgent::~MRLAgent()
+{
+	delete expectation_map;
 }
-
 
 /*! @brief
-        Initialises agent by initialising function approximator
-*/
-void MRLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range){
-    FunctionApproximator->initialiseApproximator(numberOfInputs, numberOfOutputs, numberOfHiddens,max_parameter_range);
-    expectation_map->initialiseApproximator(numberOfInputs+1, numberOfInputs,numberOfHiddens,1.0);
-    num_inputs = numberOfInputs;
-    num_outputs = numberOfOutputs;
-    num_hidden = numberOfHiddens;
+		Initialises agent by initialising function approximator
+ */
+void MRLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range)
+{
+	FunctionApproximator->initialiseApproximator(numberOfInputs, numberOfOutputs, numberOfHiddens, max_parameter_range);
+	expectation_map->initialiseApproximator(numberOfInputs + 1, numberOfInputs, numberOfHiddens, 1.0);
+	num_inputs = numberOfInputs;
+	num_outputs = numberOfOutputs;
+	num_hidden = numberOfHiddens;
 
-    //Perform initial observations, values and rewards list setups. Required to offset learning updates.
-    vector<float> dummy_observation(numberOfInputs,0);
-    vector<int> vect(num_outputs,1);
-    getAction(dummy_observation,vect);
-    giveMotivationReward();
+	//Perform initial observations, values and rewards std::list setups. Required to offset learning updates.
+	std::vector<float> dummy_observation(numberOfInputs, 0);
+	std::vector<int> vect(num_outputs, 1);
+	getAction(dummy_observation, vect);
+	giveMotivationReward();
 }
-
-
 
 /*! @brief
-    Main feature of the MRL agent. The novelty of the state-action is calculated by comparing the expected outcome of the action from the state
-    to the actual outcome of the action. The expected outcome is learned as a second dictionary approximator: expectation_map.
-    The motivation reward is then calculated by taking the Wundt function of the novelty.
-    The agent will receive the highest reward when the expected outcome of an action differs optimally from the actual outcome.
-    That is, the expected outcome must not be too different but not too similar to the actual outcome to generate reward.
-    This causes the agent to seek out optimally novel experiences: not too complex to learn but not too simple to become 'bored'.
-*/
+	Main feature of the MRL agent. The novelty of the state-action is calculated by comparing the expected outcome of the action from the state
+	to the actual outcome of the action. The expected outcome is learned as a second dictionary approximator: expectation_map.
+	The motivation reward is then calculated by taking the Wundt function of the novelty.
+	The agent will receive the highest reward when the expected outcome of an action differs optimally from the actual outcome.
+	That is, the expected outcome must not be too different but not too similar to the actual outcome to generate reward.
+	This causes the agent to seek out optimally novel experiences: not too complex to learn but not too simple to become 'bored'.
+ */
 
-void MRLAgent::giveMotivationReward(){
-    //Initialise novelty
-    float novelty=0;
-    //Initialise the state-action vector to be fed to expectation map.
-    vector<float> observation_action(num_inputs, 0);
+void MRLAgent::giveMotivationReward()
+{
+	//Initialise novelty
+	float novelty = 0;
+	//Initialise the state-action std::vector to be fed to expectation map.
+	std::vector<float> observation_action(num_inputs, 0);
 
-    //If less than 2 observations have been made, leave observation_action a zero vector. Otherwise set to second last observation.
-    if ((int)observations.size()>=2){
-       observation_action = observations[observations.size()-2];
-    }
-    //Add action to state in which the action is taken
-    observation_action.push_back(actions[actions.size()-2]);
-    //Get expected observation and actual observation.
-    vector<float> expected_observation = expectation_map->getValues(observation_action);
-    vector<float> actual_observation = observations[observations.size()-1];
+	//If less than 2 observations have been made, leave observation_action a zero std::vector. Otherwise set to second last observation.
+	if ((int) observations.size() >= 2)
+	{
+		observation_action = observations[observations.size() - 2];
+	}
+	//Add action to state in which the action is taken
+	observation_action.push_back(actions[actions.size() - 2]);
+	//Get expected observation and actual observation.
+	std::vector<float> expected_observation = expectation_map->getValues(observation_action);
+	std::vector<float> actual_observation = observations[observations.size() - 1];
 
-    //Setup values for learning. Moves the expected_observation along the straight line toward actual_observation in R^n.
-    vector<vector<float> > obs(1,observation_action);//Setup vector with one input to be used for expectation_map learning.
-    vector<vector<float> > val(1,expected_observation);//setup unit list of values.
-    //Change values:
-    for (int j=0; j<expected_observation.size();j++){
-        float diff = actual_observation[j]-expected_observation[j];
+	//Setup values for learning. Moves the expected_observation along the straight line toward actual_observation in R^n.
+	std::vector<std::vector<float> > obs(1, observation_action); //Setup std::vector with one input to be used for expectation_map learning.
+	std::vector<std::vector<float> > val(1, expected_observation); //setup unit std::list of values.
+	//Change values:
+	for (int j = 0; j < expected_observation.size(); j++)
+	{
+		float diff = actual_observation[j] - expected_observation[j];
 
-        val[0][j]+= lambda*diff;
-    }
-
-
-    /*If expected observation is the zero vector it is highly likely that the state has not been visited before.
-    In this case set the novelty to zero.
-    */
-    float sum_exp = 0;
-    for (int j=0; j<expected_observation.size();j++){
-        sum_exp = expected_observation[j]*expected_observation[j];
-    }
-    if(sum_exp == 0){
-        //Do learning for expectation_map
-        expectation_map->doLearningEpisode(obs,val,1.0,1);
-
-        float motivation = wundtFunction(0);
-        //cout<<"MRLAGENT:: giveMotivationReward - novelty = "<<0<<endl;
-        giveReward(motivation);
-        return;
-
-    }
-
-    //If expected observation non-zero, calculate error in prediction to get novelty:
-
-    for (int j=0; j<expected_observation.size();j++){
-        float diff = 0;
-        diff = (expected_observation[j]-actual_observation[j]);
-        novelty+= diff*diff;
-    }
-
-    //cout<<"Novelty = "<<novelty<<endl;
-    //Do learning for expectation_map
-    expectation_map->doLearningEpisode(obs,val,1.0,1);
-
-    float motivation = wundtFunction(novelty);
-    //cout<<"MRLAGENT:: giveMotivationReward - novelty = "<<novelty<< " Reward = "<< motivation<<endl;
-    giveReward(motivation);
-
-   /*OLD NOVELTY
-
-    //Debug
-    // cout<<"obs list size = "<<observations.size()<<endl;
-    float memory_decay = 0.5;
-    int count=0;
-    //Iterate backwards over all observations and calculate a sum of euclidean metrics of latest observation with old observations.
-    for (int i=observations.size()-2; i>=std::max(0,((int)observations.size()-memory_length-1));i--){
+		val[0][j] += lambda*diff;
+	}
 
 
-        for (int j=0; j<observations[i].size();j++){
-            float diff = observations[observations.size()-1][j]-observations[i][j];
-            novelty+= memory_decay*diff*diff;
-        }
+	/*If expected observation is the zero std::vector it is highly likely that the state has not been visited before.
+	In this case set the novelty to zero.
+	 */
+	float sum_exp = 0;
+	for (int j = 0; j < expected_observation.size(); j++)
+	{
+		sum_exp = expected_observation[j] * expected_observation[j];
+	}
+	if (sum_exp == 0)
+	{
+		//Do learning for expectation_map
+		expectation_map->doLearningEpisode(obs, val, 1.0, 1);
 
-        count++;
-        memory_decay*=memory_decay;
+		float motivation = wundtFunction(0);
+		//std::cout<<"MRLAGENT:: giveMotivationReward - novelty = "<<0<<std::endl;
+		giveReward(motivation);
+		return;
 
-    }
+	}
 
-    END OLD NOVELTY
-*/ 
+	//If expected observation non-zero, calculate error in prediction to get novelty:
+
+	for (int j = 0; j < expected_observation.size(); j++)
+	{
+		float diff = 0;
+		diff = (expected_observation[j] - actual_observation[j]);
+		novelty += diff*diff;
+	}
+
+	//std::cout<<"Novelty = "<<novelty<<std::endl;
+	//Do learning for expectation_map
+	expectation_map->doLearningEpisode(obs, val, 1.0, 1);
+
+	float motivation = wundtFunction(novelty);
+	//std::cout<<"MRLAGENT:: giveMotivationReward - novelty = "<<novelty<< " Reward = "<< motivation<<std::endl;
+	giveReward(motivation);
+
+	/*OLD NOVELTY
+
+	 //Debug
+	 // std::cout<<"obs std::list size = "<<observations.size()<<std::endl;
+	 float memory_decay = 0.5;
+	 int count=0;
+	 //Iterate backwards over all observations and calculate a sum of euclidean metrics of latest observation with old observations.
+	 for (int i=observations.size()-2; i>=std::max(0,((int)observations.size()-memory_length-1));i--){
+
+
+		 for (int j=0; j<observations[i].size();j++){
+			 float diff = observations[observations.size()-1][j]-observations[i][j];
+			 novelty+= memory_decay*diff*diff;
+		 }
+
+		 count++;
+		 memory_decay*=memory_decay;
+
+	 }
+
+	 END OLD NOVELTY
+	 */
 }
-
-
 
 /*! @brief
-        The wundt function is a linear combination of two sigmoids, offset by the float, baseline. It is analogous to a decapitated gaussian distribution.
-        The most important parameters are N1 and N2, which give the rise and fall points of the distribution respectively.
-*/
-float MRLAgent::wundtFunction(float N){
-    //Set for the robot motivation headbehaviour learner.
-    float N1 = 100;//Location of max positive gradient
-    float N2 = 200;//Location of max negative gradient
+		The wundt function is a linear combination of two sigmoids, offset by the float, baseline. It is analogous to a decapitated gaussian distribution.
+		The most important parameters are N1 and N2, which give the rise and fall points of the distribution respectively.
+ */
+float MRLAgent::wundtFunction(float N)
+{
+	//Set for the robot motivation headbehaviour learner.
+	float N1 = 100; //Location of max positive gradient
+	float N2 = 200; //Location of max negative gradient
 
-    float M1 = 1;//Maximum motivation offset (eg: M1=2, M2 = 0, baseline = -1 gives range -1 to 1)
-    float M2 = 0;//Minimum motivation offset
-    float baseline = 0;
-    float M3 = M2-M1;//maximum negative reward
+	float M1 = 1; //Maximum motivation offset (eg: M1=2, M2 = 0, baseline = -1 gives range -1 to 1)
+	float M2 = 0; //Minimum motivation offset
+	float baseline = 0;
+	float M3 = M2 - M1; //maximum negative reward
 
-    float p1 = 0.05;//Max pos gradient
-    float p2 = 0.05;//Max negative gradient
+	float p1 = 0.05; //Max pos gradient
+	float p2 = 0.05; //Max negative gradient
 
-    //Positive reward
-    float F1 = M1/(1+exp(-p1*(N-N1)));
-    //Negative Reward
-    float F2 = M3/(1+exp(-p2*(N-N2)));
+	//Positive reward
+	float F1 = M1 / (1 + exp(-p1 * (N - N1)));
+	//Negative Reward
+	float F2 = M3 / (1 + exp(-p2 * (N - N2)));
 
-    return (F1+F2+baseline);
+	return (F1 + F2 + baseline);
 
 }
+
 /*! @brief Gets the map from the dictionary approximator.
  */
- map<string,float>* MRLAgent::getMap(){
-     return ((DictionaryApproximator*)FunctionApproximator)->getMap();
- }
+std::map<std::string, float>* MRLAgent::getMap()
+{
+	return ((DictionaryApproximator*) FunctionApproximator)->getMap();
+}
 
+/*! @brief Main loop for MRLAgent. Returns the agents decision as an integer as to which action to take. Also performs the learning for the secand last state-action pair.
+ */
+int MRLAgent::getActionAndLearn(std::vector<float> observations, std::vector<int> valid_actions)
+{
+	int action = getAction(observations, valid_actions);
+	giveMotivationReward();
+	doLearning();
+	return action;
+}
 
- /*! @brief Main loop for MRLAgent. Returns the agents decision as an integer as to which action to take. Also performs the learning for the secand last state-action pair.
-  */
- int MRLAgent::getActionAndLearn(vector<float> observations, vector<int> valid_actions){
-     int action = getAction(observations,valid_actions);
-     giveMotivationReward();
-     doLearning();
-     return action;
- }
+/*! @brief Saves the MRLAgent
+ */
 
- /*! @brief Saves the MRLAgent
-  */
+void MRLAgent::saveMRLAgent(std::string agentName)
+{
+	expectation_map->saveApproximator(agentName + "_expectation_map");
+	saveAgent(agentName);
 
- void MRLAgent::saveMRLAgent(string agentName){
-     expectation_map->saveApproximator(agentName+"_expectation_map");
-     saveAgent(agentName);
+}
 
- }
- /*! @brief Loads the MRLAgent
-  */
- void MRLAgent::loadMRLAgent(string agentName){
-     expectation_map->loadApproximator(agentName+"_expectation_map");
-     loadAgent(agentName);
+/*! @brief Loads the MRLAgent
+ */
+void MRLAgent::loadMRLAgent(std::string agentName)
+{
+	expectation_map->loadApproximator(agentName + "_expectation_map");
+	loadAgent(agentName);
 
- }
+}

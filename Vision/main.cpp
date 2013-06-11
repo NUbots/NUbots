@@ -47,7 +47,7 @@ public:
 };
 #endif
 
-using namespace std;
+
 
 int qt();
 int pc();
@@ -58,10 +58,10 @@ int rpi(bool disp_on, bool cam);
 //#include <vector>
 int main(int argc, char** argv)
 {
-//    vector<NUImage> imgs;
-//    vector<NUSensorsData> sensors;
-//    ifstream i((string(getenv("HOME")) + "/nubot/image.strm").c_str()),
-//            s((string(getenv("HOME")) + "/nubot/sensor.strm").c_str());
+//    std::vector<NUImage> imgs;
+//    std::vector<NUSensorsData> sensors;
+//    ifstream i((std::string(getenv("HOME")) + "/nubot/image.strm").c_str()),
+//            s((std::string(getenv("HOME")) + "/nubot/sensor.strm").c_str());
 
 //    while(i.good()) {
 //        NUImage im;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 //        sensors.push_back(sd);
 //    }
 
-//    cout << imgs.size() << " " << sensors.size() << endl;
+//    std::cout << imgs.size() << " " << sensors.size() << std::endl;
 
 //    return 0;
 
@@ -94,9 +94,9 @@ int main(int argc, char** argv)
     //run with user option if given or display off by default
     switch(argc) {
     case 2:
-        return rpi(string(argv[1]).compare("1") == 0, true);
+        return rpi(std::string(argv[1]).compare("1") == 0, true);
     case 3:
-        return rpi(string(argv[1]).compare("1") == 0, string(argv[2]).compare("1"));
+        return rpi(std::string(argv[1]).compare("1") == 0, std::string(argv[2]).compare("1"));
     default:
         return rpi(false, true);
     }
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     //return pc();
     return qt();
     #else
-    cout << "Error not a valid define! Must be TARGET_IS_RPI or TARGET_IS_PC" << endl;
+    std::cout << "Error not a valid define! Must be TARGET_IS_RPI or TARGET_IS_PC" << std::endl;
     return 0;
     #endif
 }
@@ -120,7 +120,7 @@ int rpi(bool disp_on, bool cam)
     VisionControlWrapper* vision = VisionControlWrapper::getInstance(disp_on, cam);
 
     if(disp_on)
-        cout << "Running with display on" << endl;
+        std::cout << "Running with display on" << std::endl;
 
     char c=0;
     int error=0;
@@ -142,7 +142,7 @@ int rpi(bool disp_on, bool cam)
         }
     }
     if(error != 0)
-        cout << "Error: " << error << endl;
+        std::cout << "Error: " << error << std::endl;
 #endif
     return 0;
 }
@@ -164,7 +164,7 @@ int rpi(bool disp_on, bool cam)
 //    int frame = 0;
 //    while(c!=ESC_KEY && error==0) {
 //        //visiondata->updateFrame();
-//        cout << "frame: " << ++frame << endl;
+//        std::cout << "frame: " << ++frame << std::endl;
 //        error = vision->runFrame();
 //        if(stepping) {
 //            c=0;
@@ -180,7 +180,7 @@ int rpi(bool disp_on, bool cam)
 //        }
 //    }
 //    if(error != 0)
-//        cout << "Error: " << error << endl;
+//        std::cout << "Error: " << error << std::endl;
 //    return 0;
 //}
 
@@ -193,6 +193,6 @@ int qt()
 
     int error = vision->run();
     if(error != 0)
-        cout << "Error: " << error << endl;
+        std::cout << "Error: " << error << std::endl;
     return 0;
 }

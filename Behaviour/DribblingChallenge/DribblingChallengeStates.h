@@ -66,7 +66,7 @@ public:
     }
     void doState() 
     {
-        debug << "DribblingPausedState" << endl;
+        debug << "DribblingPausedState" << std::endl;
     }
 };
 
@@ -89,7 +89,7 @@ public:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "DribblingMoveToBallState" << endl;
+            debug << "DribblingMoveToBallState" << std::endl;
         #endif
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -98,12 +98,12 @@ public:
         else if (ball.TimeSinceLastSeen() > 250)
             m_jobs->addMotionJob(new HeadPanJob(ball));
         
-        vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
-        vector<float> result;
+        std::vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info));
+        std::vector<float> result;
         // decide whether we need to dodge or not
         float leftobstacle = 255;
         float rightobstacle = 255;
-        vector<float> temp;
+        std::vector<float> temp;
         if (m_data->getDistanceLeftValues(temp) and temp.size() > 0)
             leftobstacle = temp[0];
         if (m_data->getDistanceRightValues(temp) and temp.size() > 0)
@@ -120,7 +120,7 @@ public:
 };
 
 // ----------------------------------------------------------------------------------------------------------------------- ScanForObstacles
-vector<MobileObjects> obstacles;
+std::vector<MobileObjects> obstacles;
 class DribblingScanForObstaclesState : public DribblingChallengeSubState
 {
 public:
@@ -143,7 +143,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "DribblingScanForObstaclesState" << endl;
+            debug << "DribblingScanForObstaclesState" << std::endl;
         #endif
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         // keep track of the time in this state
@@ -210,7 +210,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "DribblingKickingState" << endl;
+            debug << "DribblingKickingState" << std::endl;
         #endif
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -226,7 +226,7 @@ protected:
         m_data->getMotionKickActive(iskicking);
         if(!iskicking)
         {
-            vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::CalculateBestKickBearing(obstacles, m_field_objects, m_game_info));     // need target bearing
+            std::vector<float> speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::CalculateBestKickBearing(obstacles, m_field_objects, m_game_info));     // need target bearing
             m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
         }
         
@@ -235,8 +235,8 @@ protected:
         
         if( (ball.estimatedDistance() < 25.0f && fabs(BehaviourPotentials::CalculateBestKickBearing(obstacles, m_field_objects, m_game_info)) < 0.30))
         {
-            vector<float> kickPosition(2,0);
-            vector<float> targetPosition(2,0);
+            std::vector<float> kickPosition(2,0);
+            std::vector<float> targetPosition(2,0);
             kickPosition[0] = ball.estimatedDistance() * cos(ball.estimatedBearing());
             kickPosition[1] = ball.estimatedDistance() * sin(ball.estimatedBearing());
             targetPosition[0] = kickPosition[0] + 1000.0f;
@@ -269,7 +269,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "BallIsLostSpin" << endl;
+            debug << "BallIsLostSpin" << std::endl;
         #endif
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         m_spin_speed = m_ROTATIONAL_SPEED;

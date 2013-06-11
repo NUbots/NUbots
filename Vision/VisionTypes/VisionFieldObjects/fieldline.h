@@ -21,7 +21,7 @@ public:
     Vector2<GroundPoint> getEndPoints() const {return m_end_points;}
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const;
+    void printLabel(std::ostream& out) const;
 
     //dummy until localisation can handle lines
     bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const {return false && fieldobjects && timestamp==0;}
@@ -31,9 +31,9 @@ public:
     virtual double findGroundError(VisionFieldObject* other) const;
 
     //! @brief output stream operator
-    friend ostream& operator<< (ostream& output, const FieldLine& l);
-    //! @brief output stream operator for a vector of FieldLines
-    friend ostream& operator<< (ostream& output, const vector<FieldLine>& v);
+    friend std::ostream& operator<< (std::ostream& output, const FieldLine& l);
+    //! @brief output stream operator for a std::vector of FieldLines
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<FieldLine>& v);
 
 private:
     Line m_screen_line,

@@ -1,7 +1,7 @@
 #ifndef BASICVISIONTYPES_H
 #define BASICVISIONTYPES_H
 
-#include "Tools/Math/Vector2.h"
+#include "../Tools/Math/Vector2.h"
 
 //#include "Vision/VisionTypes/groundpoint.h"
 typedef Vector2<double> Point;
@@ -21,7 +21,7 @@ namespace Vision {
         UNKNOWN_COLOUR
     };
 
-    //! VFO_ID enum and associated string conversion methods
+    //! VFO_ID enum and associated std::string conversion methods
     enum VFO_ID {
         BALL            = 0,
         GOAL_L          = 1,

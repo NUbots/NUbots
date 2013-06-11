@@ -273,7 +273,7 @@ void GLDisplay::snapshotToFile()
     paintGL(); // Redraw the scene in case it needs to be updated.
     QImage tempPicture(this->grabFrameBuffer(false)); // grab current image
     //save image to file
-    stringstream fileName (stringstream::in|stringstream::out);
+    std::stringstream fileName (std::stringstream::in|std::stringstream::out);
     fileName << "camera_image" << imageCount << ".png";
     imageCount++;
     tempPicture.save(fileName.str().c_str());

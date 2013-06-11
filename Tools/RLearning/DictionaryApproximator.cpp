@@ -1,5 +1,5 @@
 /*! @file DictionaryApproximator.cpp
-    @brief Uses a discrete lookup table derived from the continuous input vectors. Used in: MRLAgent.
+    @brief Uses a discrete lookup table derived from the continuous input std::vectors. Used in: MRLAgent.
 
     @author Josiah Walker
 
@@ -25,11 +25,11 @@ void DictionaryApproximator::initialiseApproximator(int numberOfInputs, int numb
     numInputs = numberOfInputs;
     numOutputs = numberOfOutputs;
     tileMultiplier = numberOfHiddens;
-   //Debug: cout<<"Approx init"<<endl;
+   //Debug: std::cout<<"Approx init"<<std::endl;
 }
     
-void DictionaryApproximator::doLearningEpisode(vector<vector<float> > const& observations, vector< vector<float> > const& values, float stepSize, int iterations) {
-    string tmp;
+void DictionaryApproximator::doLearningEpisode(std::vector<std::vector<float> > const& observations, std::vector< std::vector<float> > const& values, float stepSize, int iterations) {
+    std::string tmp;
     for (int i = 0; i < observations.size(); i++) {
        //for each observation
         for (int j = 0; j < numOutputs; j++) {
@@ -40,8 +40,8 @@ void DictionaryApproximator::doLearningEpisode(vector<vector<float> > const& obs
     }
 }
     
-vector<float> DictionaryApproximator::getValues(vector<float> const& observations) {
-    vector<float> result;
+std::vector<float> DictionaryApproximator::getValues(std::vector<float> const& observations) {
+    std::vector<float> result;
     
     for (int i = 0; i < numOutputs; i++) {//For expectation_function from MRLAgent, i represents the ith entry of the predicted state.
         result.push_back(getValue(observations,i));
@@ -49,39 +49,39 @@ vector<float> DictionaryApproximator::getValues(vector<float> const& observation
     return result;
 }
 
-void DictionaryApproximator::saveApproximator(string agentName) {
-    ofstream save_file;
-    stringstream file_name;
+void DictionaryApproximator::saveApproximator(std::string agentName) {
+    std::ofstream save_file;
+    std::stringstream file_name;
     file_name<<save_location<<agentName;
-    save_file.open(file_name.str().c_str(),fstream::out);
+    save_file.open(file_name.str().c_str(),std::fstream::out);
 
-    string tempstr;
+    std::string tempstr;
     
     save_file << approximator.size();
     
-    for (map<string,float>::iterator iter = approximator.begin(); iter != approximator.end(); iter++) {
+    for (std::map<std::string,float>::iterator iter = approximator.begin(); iter != approximator.end(); iter++) {
         save_file << "\n" << iter->first << " " << iter->second;
-        //cout<< "Saved ("<< iter->first << "," << iter->second<<")"<<endl;
+        //std::cout<< "Saved ("<< iter->first << "," << iter->second<<")"<<std::endl;
     }
 
     save_file.close();
     
 }
 
-map<string,float>* DictionaryApproximator::getMap(){
+std::map<std::string,float>* DictionaryApproximator::getMap(){
     return (&approximator);
 }
 
     
-void DictionaryApproximator::loadApproximator(string agentName) {
-    ifstream save_file;
-    stringstream file_name;
+void DictionaryApproximator::loadApproximator(std::string agentName) {
+    std::ifstream save_file;
+    std::stringstream file_name;
     file_name<<save_location<<agentName;
-    save_file.open(file_name.str().c_str(),fstream::out);
+    save_file.open(file_name.str().c_str(),std::fstream::out);
     if(!save_file.good()) {
-        throw string("DictionaryApproximator::loadApproximator - file not found: ") + file_name.str();
+        throw std::string("DictionaryApproximator::loadApproximator - file not found: ") + file_name.str();
     }
-    string tempstr;
+    std::string tempstr;
     float tempval;
     int numvals;
     
@@ -93,15 +93,15 @@ void DictionaryApproximator::loadApproximator(string agentName) {
         save_file >> tempval;
         approximator[tempstr] = tempval;
         //Debug
-        //cout<<"Loading: (s,a) = "<<tempstr<<", v = "<< tempval<<endl;
+        //std::cout<<"Loading: (s,a) = "<<tempstr<<", v = "<< tempval<<std::endl;
     }
 
     save_file.close();
 }
 
 
-string DictionaryApproximator::getRepresentation(vector<float> const& observations,int action) {
-    stringstream result;
+std::string DictionaryApproximator::getRepresentation(std::vector<float> const& observations,int action) {
+    std::stringstream result;
     
     for (int i = 0; i < observations.size(); i++) {
         result << (int)(observations[i]*tileMultiplier) << "_";//Changed seperator to underscore to avoid interfering with the save feature.
@@ -110,15 +110,15 @@ string DictionaryApproximator::getRepresentation(vector<float> const& observatio
     return result.str();
 }
 
-float DictionaryApproximator::getValue(vector<float> const& observations,int action) {
+float DictionaryApproximator::getValue(std::vector<float> const& observations,int action) {
 
-    string val = getRepresentation(observations,action);
+    std::string val = getRepresentation(observations,action);
     float result = approximator[val];
 
     return result;
 }
 
-float DictionaryApproximator::setValue(vector<float> const& observations,int action,float value) {
-    string val = getRepresentation(observations,action);
+float DictionaryApproximator::setValue(std::vector<float> const& observations,int action,float value) {
+    std::string val = getRepresentation(observations,action);
     approximator[val] = value;
 }

@@ -27,7 +27,7 @@
     @param time the time in ms to perform the save
     @param position the position at which to perform the save
  */
-SaveJob::SaveJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_SAVE)
+SaveJob::SaveJob(double time, const std::vector<float>& position) : MotionJob(Job::MOTION_SAVE)
 {
     m_job_time = time;     
     m_save_position = position;
@@ -38,7 +38,7 @@ SaveJob::SaveJob(double time, const vector<float>& position) : MotionJob(Job::MO
     @param time the time in ms to perform the save
     @param input the stream from which to read the job specific data
  */
-SaveJob::SaveJob(double time, istream& input) : MotionJob(Job::MOTION_SAVE)
+SaveJob::SaveJob(double time, std::istream& input) : MotionJob(Job::MOTION_SAVE)
 {
     m_job_time = time;
 
@@ -50,8 +50,8 @@ SaveJob::SaveJob(double time, istream& input) : MotionJob(Job::MOTION_SAVE)
     input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
     unsigned int m_save_position_size = uintBuffer;
     
-    // read in the save position vector
-    m_save_position = vector<float>(m_save_position_size, 0);
+    // read in the save position std::vector
+    m_save_position = std::vector<float>(m_save_position_size, 0);
     for (unsigned int i=0; i<m_save_position_size; i++)
     {
         input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
@@ -73,7 +73,7 @@ SaveJob::~SaveJob()
     
     @param newposition the new position for the save job [x(cm), y(cm), theta(rad)]
  */
-void SaveJob::setPosition(double time, const vector<float>& newposition)
+void SaveJob::setPosition(double time, const std::vector<float>& newposition)
 {
     m_job_time = time;
     m_save_position = newposition;
@@ -82,7 +82,7 @@ void SaveJob::setPosition(double time, const vector<float>& newposition)
 /*! @brief Gets the position of the save job
     @param position parameter that will be updated with the point we want to save
  */
-void SaveJob::getPosition(double& time, vector<float>& position)
+void SaveJob::getPosition(double& time, std::vector<float>& position)
 {
     time = m_job_time;
     position = m_save_position;
@@ -91,23 +91,23 @@ void SaveJob::getPosition(double& time, vector<float>& position)
 /*! @brief Prints a human-readable summary to the stream
     @param output the stream to be written to
  */
-void SaveJob::summaryTo(ostream& output)
+void SaveJob::summaryTo(std::ostream& output)
 {
     output << "SaveJob: " << m_job_time << " (";
     for (unsigned int i=0; i<m_save_position.size(); i++)
         output << m_save_position[i] << ",";
-    output << ")" << endl;
+    output << ")" << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
     @param output the stream to be written to
  */
-void SaveJob::csvTo(ostream& output)
+void SaveJob::csvTo(std::ostream& output)
 {
     output << "SaveJob, " << m_job_time << ", ";
     for (unsigned int i=0; i<m_save_position.size(); i++)
         output << m_save_position[i] << ", ";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -117,10 +117,10 @@ void SaveJob::csvTo(ostream& output)
  
     @param output the stream to write the job to
  */
-void SaveJob::toStream(ostream& output) const
+void SaveJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 2
-        debug << "SaveJob::toStream" << endl;
+        debug << "SaveJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -137,10 +137,10 @@ void SaveJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const SaveJob& job)
+std::ostream& operator<<(std::ostream& output, const SaveJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<SaveJob" << endl;
+        debug << "<<SaveJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -152,10 +152,10 @@ ostream& operator<<(ostream& output, const SaveJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const SaveJob* job)
+std::ostream& operator<<(std::ostream& output, const SaveJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<SaveJob" << endl;
+        debug << "<<SaveJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

@@ -28,14 +28,14 @@
 #include "debug.h"
 #include "debugverbositynetwork.h"
 
-using namespace std;
+
 
 NUViewIO* nuio;
 
 NUViewIO::NUViewIO(): NUIO(Blackboard->GameInfo, Blackboard->TeamInfo, Blackboard->Jobs)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUviewIO::NUviewIO(" << static_cast<void*>(Blackboard->GameInfo) << ", " << static_cast<void*>(Blackboard->TeamInfo) << ", " << static_cast<void*>(Blackboard->Jobs) << ")" << endl;
+    debug << "NUviewIO::NUviewIO(" << static_cast<void*>(Blackboard->GameInfo) << ", " << static_cast<void*>(Blackboard->TeamInfo) << ", " << static_cast<void*>(Blackboard->Jobs) << ")" << std::endl;
 #endif
     if (nuio == NULL)
         nuio = this;
@@ -44,7 +44,7 @@ NUViewIO::NUViewIO(): NUIO(Blackboard->GameInfo, Blackboard->TeamInfo, Blackboar
 NUViewIO::~NUViewIO()
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUviewIO::~NUviewIO()" << endl;
+    debug << "NUviewIO::~NUviewIO()" << std::endl;
 #endif
 }
 

@@ -36,8 +36,8 @@ CentreCircle::~CentreCircle()
 bool CentreCircle::addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const
 {
 #if VISION_FIELDPOINT_VERBOSITY > 1
-    debug << "CentreCircle::addToExternalFieldObjects:" << endl;
-    debug << *this << endl;
+    debug << "CentreCircle::addToExternalFieldObjects:" << std::endl;
+    debug << *this << std::endl;
 #endif
 
     if(valid) {
@@ -53,7 +53,7 @@ bool CentreCircle::addToExternalFieldObjects(FieldObjects* fieldobjects, float t
 }
 
 //! @brief Stream output for labelling purposes
-void CentreCircle::printLabel(ostream& out) const
+void CentreCircle::printLabel(std::ostream& out) const
 {
     out << m_location << " " <<  m_ground_radius << " " << m_size_on_screen;
 }
@@ -71,20 +71,20 @@ double CentreCircle::findGroundError(VisionFieldObject *other) const
     return ( m_location.ground - c->m_location.ground ).abs() + abs( m_ground_radius - c->m_ground_radius );
 }
 
-ostream& operator<< (ostream& output, const CentreCircle& c)
+std::ostream& operator<< (std::ostream& output, const CentreCircle& c)
 {
-    output << "CentreCircle - " << endl;
-    output << "\tpixelloc: " << c.m_location.screen << endl;
-    output << "\tangularloc: " << c.m_location.angular << endl;
-    output << "\trelative field coords: " << c.m_location.relativeRadial << endl;
-    output << "\tspherical error: [" << c.m_spherical_error << "]" << endl;
+    output << "CentreCircle - " << std::endl;
+    output << "\tpixelloc: " << c.m_location.screen << std::endl;
+    output << "\tangularloc: " << c.m_location.angular << std::endl;
+    output << "\trelative field coords: " << c.m_location.relativeRadial << std::endl;
+    output << "\tspherical error: [" << c.m_spherical_error << "]" << std::endl;
     output << "\tsize on screen: [" << c.m_size_on_screen << "]";
     return output;
 }
 
-ostream& operator<< (ostream& output, const vector<CentreCircle>& c)
+std::ostream& operator<< (std::ostream& output, const std::vector<CentreCircle>& c)
 {
     for (size_t i=0; i<c.size(); i++)
-        output << c[i] << endl;
+        output << c[i] << std::endl;
     return output;
 }

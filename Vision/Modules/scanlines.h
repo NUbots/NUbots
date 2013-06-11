@@ -1,52 +1,100 @@
-/**
-*   @name   ScanLines
-*   @file   scanlines.h
-*   @brief  generate horizontal and vertical scanlines.
-*   @author David Budden
-*   @date   23/03/2012
-*/
+/*! @file MotionFreezeJob.cpp
+    @brief Implementation of MotionFreezeJob class
 
-#ifndef SCANLINES_H
-#define SCANLINES_H
+    @author Jason Kulk
+ 
+ Copyright (c) 2009 Jason Kulk
+ 
+ This file is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ 
+ This file is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include <stdio.h>
-#include <iostream>
+#include "MotionFreezeJob.h"
+#include "debug.h"
+#include "debugverbosityjobs.h"
 
-#include "Vision/visionblackboard.h"
-//#include "../VisionTools/classificationcolours.h"
-
-using namespace std;
-
-class ScanLines
+/*! @brief Constructs a MotionFreezeJob to be executed immediately
+ */
+MotionFreezeJob::MotionFreezeJob() : MotionJob(Job::MOTION_FREEZE)
 {
-public:
-    /**
-    *   @brief  generates the horizontal scanline heights.
-    *   This uses the average y positions of the horizon end points and an equal spacing from there
-    *   to the top of the image.
-    */
-    static void generateScanLines();
-    
-    /**
-    *   @brief  classifies each horizontal scanline into blocks of continuous colour.
-    */
-    static void classifyHorizontalScanLines();
-    /**
-    *   @brief  classifies each vertical scanline into blocks of continuous colour.
-    */
-    static void classifyVerticalScanLines();
-    
-private:
-    /**
-    *   @brief  classifies a single horizontal scanline.
-    */
-    static vector<ColourSegment> classifyHorizontalScan(const LookUpTable& lut, const NUImage& img, unsigned int y);
-    /**
-    *   @brief  classifies a single vertical scanline.
-    */
-    static vector<ColourSegment> classifyVerticalScan(const LookUpTable& lut, const NUImage& img, const Vector2<double>& start);
-    
-    
-};
+}
 
-#endif // SCANLINES_H
+/*! @brief MotionFreezeJob destructor
+ */
+MotionFreezeJob::~MotionFreezeJob()
+{
+}
+
+/*! @brief Prints a human-readable summary to the stream
+    @param output the stream to be written to
+ */
+void MotionFreezeJob::summaryTo(std::ostream& output)
+{
+    output << "MotionFreezeJob." << std::endl;
+}
+
+/*! @brief Prints a csv version to the stream
+ @param output the stream to be written to
+ */
+void MotionFreezeJob::csvTo(std::ostream& output)
+{
+    output << "MotionFreezeJob." << std::endl;
+}
+
+/*! @brief A helper function to ease writing Job objects to classes
+ 
+    This function calls its parents versions of the toStream, each parent
+    writes the members introduced at that level
+
+    @param output the stream to write the job to
+ */
+void MotionFreezeJob::toStream(std::ostream& output) const
+{
+    #if DEBUG_JOBS_VERBOSITY > 1
+        debug << "MotionFreezeJob::toStream" << std::endl;
+    #endif
+    Job::toStream(output);                  // This writes data introduced at the base level
+    MotionJob::toStream(output);            // This writes data introduced at the motion level
+    // there is no data introduced at this level
+}
+
+/*! @relates MotionFreezeJob
+    @brief Stream insertion operator for a MotionFreezeJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
+ */
+std::ostream& operator<<(std::ostream& output, const MotionFreezeJob& job)
+{
+    #if DEBUG_JOBS_VERBOSITY > 0
+        debug << "<<MotionFreezeJob" << std::endl;
+    #endif
+    job.toStream(output);
+    return output;
+}
+
+/*! @relates MotionFreezeJob
+    @brief Stream insertion operator for a pointer to MotionFreezeJob
+
+    @param output the stream to write to
+    @param job the job to be written to the stream
+ */
+std::ostream& operator<<(std::ostream& output, const MotionFreezeJob* job)
+{
+    #if DEBUG_JOBS_VERBOSITY > 0
+        debug << "<<MotionFreezeJob" << std::endl;
+    #endif
+    if (job != NULL)
+        job->toStream(output);
+    return output;
+}

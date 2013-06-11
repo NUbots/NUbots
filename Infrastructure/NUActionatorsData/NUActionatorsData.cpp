@@ -33,7 +33,7 @@
 #include "debugverbositynuactionators.h"
 
 int a_curr_id = NUData::m_num_common_ids+1;
-vector<NUActionatorsData::id_t*> NUActionatorsData::m_ids;
+std::vector<NUActionatorsData::id_t*> NUActionatorsData::m_ids;
 // Led actionators
 const NUActionatorsData::id_t NUActionatorsData::LEarLed(a_curr_id++, "LEarLed", NUActionatorsData::m_ids);
 const NUActionatorsData::id_t NUActionatorsData::REarLed(a_curr_id++, "REarLed", NUActionatorsData::m_ids);
@@ -55,14 +55,14 @@ const NUActionatorsData::id_t NUActionatorsData::Teleporter(a_curr_id++, "Telepo
 NUActionatorsData::NUActionatorsData()
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "NUActionatorsData::NUActionatorsData" << endl;
+        debug << "NUActionatorsData::NUActionatorsData" << std::endl;
     #endif
     CurrentTime = 0;
     PreviousTime = 0;
     
     m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
     m_ids_copy = m_ids;
-    m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
+    m_id_to_indices = std::vector<std::vector<int> >(m_ids.size(), std::vector<int>());
     
     for (size_t i=0; i<m_ids.size(); i++)
         m_actionators.push_back(Actionator(m_ids[i]->Name));
@@ -80,7 +80,7 @@ NUActionatorsData::~NUActionatorsData()
 /*! @brief Adds the actionators to the NUActionatorsData listed in hardwarenames
     @param hardwarenames a vector containing every actionator available on the robotic platform
  */
-void NUActionatorsData::addActionators(const vector<string>& hardwarenames)
+void NUActionatorsData::addActionators(const std::vector<std::string>& hardwarenames)
 {
     addDevices(hardwarenames);
 }
@@ -100,21 +100,21 @@ bool NUActionatorsData::belongsToGroup(const id_t& member, const id_t& group)
     {
         if (FaceLeds == group)
         {
-            if (member.Name.find("Led") != string::npos and (member.Name.find("Eye") != string::npos or member.Name.find("Mouth") != string::npos))
+            if (member.Name.find("Led") != std::string::npos and (member.Name.find("Eye") != std::string::npos or member.Name.find("Mouth") != std::string::npos))
                 return true;
             else
                 return false;
         }
         else if (FeetLeds == group)
         {
-            if (member.Name.find("Led") != string::npos and member.Name.find("Foot") != string::npos)
+            if (member.Name.find("Led") != std::string::npos and member.Name.find("Foot") != std::string::npos)
                 return true;
             else
                 return false;
         }
         else if (AllLeds == group)
         {
-            if (member.Name.find("Led") != string::npos)
+            if (member.Name.find("Led") != std::string::npos)
                 return true;
             else
                 return false;
@@ -129,7 +129,7 @@ bool NUActionatorsData::belongsToGroup(const id_t& member, const id_t& group)
     @param group the group id
     @return true if member belongs to group 
  */
-bool NUActionatorsData::belongsToGroup(const string& member, const id_t& group)
+bool NUActionatorsData::belongsToGroup(const std::string& member, const id_t& group)
 {
 	if (group == member or FaceLeds == member or FeetLeds == member or AllLeds == member)			// we careful not to add ids for groups to groups
         return false;
@@ -139,21 +139,21 @@ bool NUActionatorsData::belongsToGroup(const string& member, const id_t& group)
     {
         if (FaceLeds == group)
         {
-            if (member.find("Led") != string::npos and (member.find("Eye") != string::npos or member.find("Mouth") != string::npos))
+            if (member.find("Led") != std::string::npos and (member.find("Eye") != std::string::npos or member.find("Mouth") != std::string::npos))
                 return true;
             else
                 return false;
         }
         else if (FeetLeds == group)
         {
-            if (member.find("Led") != string::npos and member.find("Foot") != string::npos)
+            if (member.find("Led") != std::string::npos and member.find("Foot") != std::string::npos)
                 return true;
             else
                 return false;
         }
         else if (AllLeds == group)
         {
-            if (member.find("Led") != string::npos)
+            if (member.find("Led") != std::string::npos)
                 return true;
             else
                 return false;
@@ -189,13 +189,13 @@ void NUActionatorsData::postProcess()
  	@param positions will be updated with the positions for the next cycle
  	@param gains will be updated with the gains for the next cycle
  */
-void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& gains)
+void NUActionatorsData::getNextServos(std::vector<float>& positions, std::vector<float>& gains)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "NUActionatorsData::getNextServos" << endl;
+        debug << "NUActionatorsData::getNextServos" << std::endl;
     #endif
     // get the sensor positions and gains
-    vector<float> positions_current, gains_current;
+    std::vector<float> positions_current, gains_current;
     Blackboard->Sensors->getTarget(All, positions_current);
     Blackboard->Sensors->getStiffness(All, gains_current);
     
@@ -206,7 +206,7 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
         gains = gains_current;
 
     // now do the interpolation for each joint that has new data
-    const vector<int>& ids = mapIdToIndices(All);
+    const std::vector<int>& ids = mapIdToIndices(All);
     for (size_t i=0; i<ids.size(); i++)
     {
         Actionator& a = m_actionators[ids[i]];
@@ -219,7 +219,7 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
                                            position);
             else
             {
-                vector<float> positiongain;
+                std::vector<float> positiongain;
                 if (a.get(time, positiongain))
                 {
                     position = positiongain[0];
@@ -235,7 +235,7 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
                         << " [" << positions[i] << "," << gains[i] 
                         << "] target: " << time - CurrentTime << ": "
                         << positions_current[i] << " -> " << position << "]"
-                        << endl;
+                        << std::endl;
             #endif
         }
     }
@@ -253,17 +253,17 @@ void NUActionatorsData::getNextServos(vector<float>& positions, vector<float>& g
  
  	@param leds will be updated with the [rgb] values for the next cycle
  */
-void NUActionatorsData::getNextLeds(vector<vector<vector<float> > >& leds)
+void NUActionatorsData::getNextLeds(std::vector<std::vector<std::vector<float> > >& leds)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "NUActionatorsData::getNextLeds" << endl;
+        debug << "NUActionatorsData::getNextLeds" << std::endl;
     #endif
 	// since we have no led 'sensors' we just assume they are exactly what I set them to be
     
     // check that leds is the right size; if not 'resize' them
-    const vector<int>& ids = mapIdToIndices(AllLeds);
+    const std::vector<int>& ids = mapIdToIndices(AllLeds);
 	if (leds.size() != ids.size())
-        leds = vector<vector<vector<float> > >(ids.size(), vector<vector<float> >(1, vector<float>(3,0)));
+        leds = std::vector<std::vector<std::vector<float> > >(ids.size(), std::vector<std::vector<float> >(1, std::vector<float>(3,0)));
     
     for (size_t i=0; i<ids.size(); i++)
     {
@@ -271,12 +271,12 @@ void NUActionatorsData::getNextLeds(vector<vector<vector<float> > >& leds)
         if (not a.empty())
         {
             double time;
-            vector<vector<float> >& target_led = leds[i];
+            std::vector<std::vector<float> >& target_led = leds[i];
             float luminance;
             if (a.get(time, luminance))
             {	// if the led actionator stores a single value, assume it is a brightness
                 float current = (target_led[0][0] + target_led[0][1] + target_led[0][2])/3;				// calculate the current brightness as the average
-                vector<float> interpolated_led(3, interpolate(time, current, luminance));				// interpolate the brightness as usual
+                std::vector<float> interpolated_led(3, interpolate(time, current, luminance));				// interpolate the brightness as usual
                 target_led.resize(1);																	// resize the leds to have only a single rgb value
                 target_led[0] = interpolated_led;
             }
@@ -284,12 +284,12 @@ void NUActionatorsData::getNextLeds(vector<vector<vector<float> > >& leds)
             {	// if the led actionator stores a vector<float> it could be 
                 //		a single multi-colour led or,
                 //		a list of single coloured leds (if the array has exactly three leds then LOL)
-                vector<float> value;
+                std::vector<float> value;
                 if (a.get(time, value))
                 {
                     if (value.size() == 3)
                     {	// Assume value specifies the colour of a single multi-colour led
-                        vector<float> interpolated_led(3,0);
+                        std::vector<float> interpolated_led(3,0);
                         interpolated_led[0] = interpolate(time, target_led[0][0], value[0]);
                         interpolated_led[1] = interpolate(time, target_led[0][1], value[1]);
                         interpolated_led[2] = interpolate(time, target_led[0][2], value[2]);
@@ -299,12 +299,12 @@ void NUActionatorsData::getNextLeds(vector<vector<vector<float> > >& leds)
                     else
                     {	// Assume value specifies the brightness for an array of single colour leds
                         if (target_led.size() != value.size())
-                            target_led.resize(value.size(), vector<float>(3,0));
+                            target_led.resize(value.size(), std::vector<float>(3,0));
                         
                         for (size_t i=0; i<value.size(); i++)
                         {
                             float current = (target_led[i][0] + target_led[i][1] + target_led[i][2])/3;
-                            vector<float> interpolated_led(3, interpolate(time, current, value[i]));
+                            std::vector<float> interpolated_led(3, interpolate(time, current, value[i]));
                             target_led[i] = interpolated_led;
                         }
                     }
@@ -312,15 +312,15 @@ void NUActionatorsData::getNextLeds(vector<vector<vector<float> > >& leds)
                 else
                 {
                     // if the led actionator stores a vector<vector<float> > it can only be an array of multi-colour leds
-                    vector<vector<float> > matrix;
+                    std::vector<std::vector<float> > matrix;
                     if (a.get(time, matrix))
                     {	
                         if (target_led.size() != matrix.size())
-                            target_led.resize(matrix.size(), vector<float>(3,0));
+                            target_led.resize(matrix.size(), std::vector<float>(3,0));
                         
                         for (size_t i=0; i<matrix.size(); i++)
                         {
-                            vector<float> interpolated_led(3,0);
+                            std::vector<float> interpolated_led(3,0);
                             interpolated_led[0] = interpolate(time, target_led[i][0], matrix[i][0]);
                             interpolated_led[1] = interpolate(time, target_led[i][1], matrix[i][1]);
                             interpolated_led[2] = interpolate(time, target_led[i][2], matrix[i][2]);
@@ -331,7 +331,7 @@ void NUActionatorsData::getNextLeds(vector<vector<vector<float> > >& leds)
             }
         }
         #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-            debug << a.Name << " " << leds[i] << endl;
+            debug << a.Name << " " << leds[i] << std::endl;
         #endif
     }
 }
@@ -339,13 +339,13 @@ void NUActionatorsData::getNextLeds(vector<vector<vector<float> > >& leds)
 /*! @brief Gets the a list of sounds to be added to the sound queue in this cycle
     @param sounds will be updated
  */
-void NUActionatorsData::getNextSounds(vector<string>& sounds)
+void NUActionatorsData::getNextSounds(std::vector<std::string>& sounds)
 {
     sounds.clear();
     
     double time;
-    string nextsound;
-    vector<string> nextsounds;
+    std::string nextsound;
+    std::vector<std::string> nextsounds;
     if (m_actionators[Sound.Id].get(time, nextsound))
     {
         if (time <= CurrentTime)
@@ -383,7 +383,7 @@ float NUActionatorsData::interpolate(const double& time, const float& current, c
  	@param group the id_t of the group
  	@return true if it is a member of group, false otherwise
  */
-bool NUActionatorsData::isMemberOfGroup(const string& name, const id_t& group)
+bool NUActionatorsData::isMemberOfGroup(const std::string& name, const id_t& group)
 {
     return belongsToGroup(name, group);
 }
@@ -406,9 +406,9 @@ size_t NUActionatorsData::getSize(const id_t& actionatorid)
 void NUActionatorsData::add(const id_t& actionatorid, double time, float data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     for (size_t i=0; i<ids.size(); i++)
         m_actionators[ids[i]].add(time, data);
 }
@@ -422,10 +422,10 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, float data)
 void NUActionatorsData::add(const id_t& actionatorid, double time, float data, float gain)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << std::endl;
     #endif
     // combine the data and gain into a vector
-    vector<float> d(2,data);
+    std::vector<float> d(2,data);
     d[1] = gain;
     // then just add it
     add(actionatorid, time, d);
@@ -442,12 +442,12 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, float data, f
     @param time the time in ms associated with the data
     @param data the data
 */
-void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<float>& data)
+void NUActionatorsData::add(const id_t& actionatorid, double time, const std::vector<float>& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -463,7 +463,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
                 m_actionators[ids[i]].add(time, data[i]);
         }
         else
-        {	// if the data size differs then assume we want a copy of the entire vector given to each actionator
+        {	// if the data size differs then assume we want a copy of the entire std::vector given to each actionator
             for (size_t i=0; i<numids; i++) 
                 m_actionators[ids[i]].add(time, data);
         }
@@ -478,18 +478,18 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     @param data the data
     @param gain the gain
  */
-void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<float>& data, float gain)
+void NUActionatorsData::add(const id_t& actionatorid, double time, const std::vector<float>& data, float gain)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
     else if (numids > 1 and numids == data.size())
     {	// as we are including a gain, we must be assigning a single value from data to each actionator in a group
-        vector<float> d(2,gain);
+        std::vector<float> d(2,gain);
         for (size_t i=0; i<numids; i++)
         {
             d[0] = data[i];
@@ -499,7 +499,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     else
     {
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). The data is incorrectly formatted. ";
-        debug << "data.size():" << data.size() << " must be ids.size()" << numids << endl;
+        debug << "data.size():" << data.size() << " must be ids.size()" << numids << std::endl;
     }
 }
 
@@ -511,18 +511,18 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     @param data the data
     @param gain the gain
  */
-void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<float>& data, const vector<float>& gain)
+void NUActionatorsData::add(const id_t& actionatorid, double time, const std::vector<float>& data, const std::vector<float>& gain)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
     else if (numids > 1 and numids == data.size() and numids == gain.size())
     {	// as we are including gains, we must assign a single data,gain pair to each actionator in a group
-        vector<float> d(2,0);
+        std::vector<float> d(2,0);
         for (size_t i=0; i<numids; i++)
         {
             d[0] = data[i];
@@ -533,7 +533,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     else
     {
         debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). The data is incorrectly formatted. ";
-        debug << "data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size()" << numids << endl;
+        debug << "data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size()" << numids << std::endl;
     }
 }
 
@@ -548,12 +548,12 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     @param time the time in ms associated with the data
     @param data the data
  */
-void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<vector<float> >& data)
+void NUActionatorsData::add(const id_t& actionatorid, double time, const std::vector<std::vector<float> >& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -569,7 +569,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
                 m_actionators[ids[i]].add(time, data[i]);
         }
         else
-        {	// if the data size differs then assume we want a copy of the entire vector given to each actionator
+        {	// if the data size differs then assume we want a copy of the entire std::vector given to each actionator
             for (size_t i=0; i<numids; i++)
                 m_actionators[ids[i]].add(time, data);
         }
@@ -587,12 +587,12 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     @param time the time in ms associated with the data
     @param data the data
  */
-void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<vector<vector<float> > >& data)
+void NUActionatorsData::add(const id_t& actionatorid, double time, const std::vector<std::vector<std::vector<float> > >& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -608,7 +608,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
                 m_actionators[ids[i]].add(time, data[i]);
         }
         else
-        {	// if the data size differs then assume we want a copy of the entire vector given to each actionator
+        {	// if the data size differs then assume we want a copy of the entire std::vector given to each actionator
             for (size_t i=0; i<numids; i++)
                 m_actionators[ids[i]].add(time, data);
         }
@@ -620,27 +620,27 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     @param time the time in ms associated with the data
     @param data the data
  */
-void NUActionatorsData::add(const id_t& actionatorid, double time, const string& data)
+void NUActionatorsData::add(const id_t& actionatorid, double time, const std::string& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     for (size_t i=0; i<ids.size(); i++)
         m_actionators[ids[i]].add(time, data);
 }
 
-/*! @brief Adds a list of sounds to be played one after the other [time, [sounds]]
+/*! @brief Adds a std::list of sounds to be played one after the other [time, [sounds]]
     @param actionatorid the id of the actionator to add the data
     @param time the time in ms associated with the data
     @param data the data
  */
-void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<string>& data)
+void NUActionatorsData::add(const id_t& actionatorid, double time, const std::vector<std::string>& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -656,7 +656,7 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
                 m_actionators[ids[i]].add(time, data[i]);
         }
         else
-        {	// if the data size differs then assume we want a copy of the entire vector given to each actionator
+        {	// if the data size differs then assume we want a copy of the entire std::vector given to each actionator
             for (size_t i=0; i<numids; i++) 
                 m_actionators[ids[i]].add(time, data);
         }
@@ -674,13 +674,13 @@ void NUActionatorsData::add(const id_t& actionatorid, double time, const vector<
     @param time the sequence of times in ms
     @param data the sequence of data points
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<float>& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
     
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
 
     if (numids == 0)
@@ -691,7 +691,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
             for (size_t i=0; i<time.size(); i++)
                 add(actionatorid, time[i], data[i]);
         else
-            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). time and data need to have the same length when targeting a single actionator." << endl;
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). time and data need to have the same length when targeting a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -711,7 +711,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
-            debug << "time.size():" << time.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -727,13 +727,13 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     @param time the sequence of times in ms
     @param data the sequence of data points
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, float gain)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<float>& data, float gain)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << std::endl;
     #endif
     
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -746,7 +746,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
                 add(actionatorid, time[i], data[i], gain);
         }
         else
-            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). time and data need to have the same length when targeting a single actionator." << endl;
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). time and data need to have the same length when targeting a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -758,7 +758,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
-            debug << "time.size():" << time.size() << " and " << data.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " and " << data.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -774,13 +774,13 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     @param data the sequence of data points
     @param gain the sequence of gain points (%)
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<float>& data, const std::vector<float>& gain)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << ")" << std::endl;
     #endif
     
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -793,7 +793,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
-            debug << " time.size():" << time.size() << ", data.size():" << data.size() << "and gain.size():" << gain.size() << " must be the same." << endl;
+            debug << " time.size():" << time.size() << ", data.size():" << data.size() << "and gain.size():" << gain.size() << " must be the same." << std::endl;
         }
     }
     else
@@ -806,14 +806,14 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
-            debug << "time.size():" << time.size() << ", data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << ", data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
 
-/*! @brief Adds a sequence of [time, vector] pairs to an actionatorid
+/*! @brief Adds a sequence of [time, std::vector] pairs to an actionatorid
  
-    For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN], where each data is a vector.
+    For a single actionator the data needs to be formatted as [time0, time1, ... , timeN, [data0, data1, ... , dataN], where each data is a std::vector.
     For a group actionator the data needs to
         id [time0, time1, ... , timeN], [data0, data1, ... , dataN], so each data element is given to the group with a single time
         [id0, id1, ... , idN] time [data0, data1, ... , dataN], so each actionator in the group receives a single data element at a sequence of times
@@ -821,15 +821,15 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
  
     @param actionatorid the id of the targetted actionator
     @param time the sequence of times in ms
-    @param data the sequence of vectors to give to the actionator
+    @param data the sequence of std::vectors to give to the actionator
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<float> >& data)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<std::vector<float> >& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
     
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -842,7 +842,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
-            debug << " time.size():" << time.size() << " and data.size():" << data.size() << " must be the same." << endl;
+            debug << " time.size():" << time.size() << " and data.size():" << data.size() << " must be the same." << std::endl;
         }
     }
     else
@@ -881,13 +881,13 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     @param time the sequence of times in ms
     @param data the sequence of vectors to give to the actionator
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<std::vector<std::vector<float> > >& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
     
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -902,7 +902,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
-            debug << " time.size():" << time.size() << " and data.size():" << data.size() << " must be the same." << endl;
+            debug << " time.size():" << time.size() << " and data.size():" << data.size() << " must be the same." << std::endl;
         }
     }
     else
@@ -924,7 +924,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         }
         else
         {
-            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). lolwut?" << endl;
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). lolwut?" << std::endl;
         }
     }
 }
@@ -941,12 +941,12 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     @param time the sequence of times in ms
     @param data the sequence of vectors to give to the actionator
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<std::vector<std::vector<std::vector<float> > > >& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -961,7 +961,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
-            debug << " time.size():" << time.size() << " and data.size():" << data.size() << " must be the same." << endl;
+            debug << " time.size():" << time.size() << " and data.size():" << data.size() << " must be the same." << std::endl;
         }
     }
     else
@@ -978,7 +978,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         }
         else
         {
-            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). lolwut?" << endl;
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). lolwut?" << std::endl;
         }
     }
 }
@@ -992,13 +992,13 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
  @param time the sequence of times in ms
  @param data the sequence of strings
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time, const vector<string>& data)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<std::string>& data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << ")" << std::endl;
     #endif
     
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
@@ -1011,7 +1011,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
                 add(actionatorid, time[i], data[i]);
         }
         else
-            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). time and data need to have the same length when targeting a single actionator." << endl;
+            debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). time and data need to have the same length when targeting a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -1023,7 +1023,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
-            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -1037,16 +1037,16 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<double>& time
     @param time the sequence of times in ms
     @param data the sequence of vectors to give to the actionator
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<float> >& data)
 {
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
         return;
     else if (numids == 1)
     {   // if actionatorid is a single actionator
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -1058,7 +1058,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
-            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -1073,16 +1073,16 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
     @param data the sequence of vectors to give to the actionator
     @param gain the single gain value added to each data
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, float gain)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<float> >& data, float gain)
 {
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
         return;
     else if (numids == 1)
     {   // if actionatorid is a single actionator
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -1094,7 +1094,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
-            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -1109,16 +1109,16 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
     @param data the sequence of vectors to give to the actionator
     @param gain the sequence of gains added to each data
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<float> >& data, const std::vector<float>& gain)
 {
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
         return;
     else if (numids == 1)
     {   // if actionatorid is a single actionator
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -1130,7 +1130,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
-            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -1145,16 +1145,16 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
     @param data the sequence of vectors to give to the actionator
     @param gain the sequence of gains added to each data
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<float> >& data, const std::vector<std::vector<float> >& gain)
 {
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
         return;
     else if (numids == 1)
     {   // if actionatorid is a single actionator
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). Can not be used to add data to a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -1166,7 +1166,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "," << gain << "). ";
-            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " and gain.size():" << gain.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -1180,16 +1180,16 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
     @param time the sequence of times in ms
     @param data the sequence of matricies to give to the actionator
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<std::vector<float> > >& data)
 {
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
         return;
     else if (numids == 1)
     {   // if actionatorid is a single actionator
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -1201,7 +1201,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
-            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -1215,16 +1215,16 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
     @param time the sequence of times in ms
     @param data the sequence of matricies to give to the actionator
  */
-void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data)
+void NUActionatorsData::add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<std::vector<std::vector<float> > > >& data)
 {
-    const vector<int>& ids = mapIdToIndices(actionatorid);
+    const std::vector<int>& ids = mapIdToIndices(actionatorid);
     size_t numids = ids.size();
     
     if (numids == 0)
         return;
     else if (numids == 1)
     {   // if actionatorid is a single actionator
-        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << endl;
+        debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). Can not be used to add data to a single actionator." << std::endl;
     }
     else
     {   // if actionatorid is a group
@@ -1236,7 +1236,7 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
         else
         {
             debug << "NUActionatorsData::add(" << actionatorid.Name << "," << time << "," << data << "). ";
-            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << endl;
+            debug << "time.size():" << time.size() << " and data.size():" << data.size() << " must be ids.size():" << ids.size() << std::endl;
         }
     }
 }
@@ -1245,19 +1245,19 @@ void NUActionatorsData::add(const id_t& actionatorid, const vector<vector<double
  Displaying Contents and Serialisation
  ******************************************************************************************************************************************/
 
-void NUActionatorsData::summaryTo(ostream& output)
+void NUActionatorsData::summaryTo(std::ostream& output)
 {
     for (unsigned int i=0; i<m_available_ids.size(); i++)
         m_actionators[m_available_ids[i]].summaryTo(output);
 }
 
-ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor)
+std::ostream& operator<< (std::ostream& output, const NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
     return output;
 }
 
-istream& operator>> (istream& input, NUActionatorsData& p_sensor)
+std::istream& operator>> (std::istream& input, NUActionatorsData& p_sensor)
 {
     //! @todo TODO: implement this function
     return input;

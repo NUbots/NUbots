@@ -37,13 +37,13 @@ BearWalk::BearWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
     m_previous_time = 0;
     
     // Initialise the leg values
-    m_left_front_angles = vector<float>(3,0);
-    m_right_front_angles = vector<float>(3,0);
+    m_left_front_angles = std::vector<float>(3,0);
+    m_right_front_angles = std::vector<float>(3,0);
     
-    m_left_back_angles = vector<float>(5,0);
-    m_right_back_angles = vector<float>(5,0);
+    m_left_back_angles = std::vector<float>(5,0);
+    m_right_back_angles = std::vector<float>(5,0);
     
-    m_torso_angles = vector<float>(2,0);
+    m_torso_angles = std::vector<float>(2,0);
     
     m_walk_parameters.load("BearWalkDefault");
 }

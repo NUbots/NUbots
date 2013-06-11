@@ -33,7 +33,7 @@
     @param id The object to be written to the stream.
     @return The output stream with the object written to it.
  */
-ostream& operator << (ostream& output, const NUData::id_t* id)
+std::ostream& operator << (std::ostream& output, const NUData::id_t* id)
 {
     output << id->Id << " ";
     output << id->Name << " ";
@@ -45,7 +45,7 @@ ostream& operator << (ostream& output, const NUData::id_t* id)
     @param id The pointer where the new object will be written.
     @return The input stream post read.
  */
-istream& operator >> (istream& input, NUData::id_t* id)
+std::istream& operator >> (std::istream& input, NUData::id_t* id)
 {
     //id = new NUData::id_t();
     input >> id->Id;
@@ -54,7 +54,7 @@ istream& operator >> (istream& input, NUData::id_t* id)
 }
 
 int curr_id = 0;
-vector<NUData::id_t*> NUData::m_common_ids;
+std::vector<NUData::id_t*> NUData::m_common_ids;
 const NUData::id_t NUData::All(curr_id++, "All", NUData::m_common_ids);							//0
 const NUData::id_t NUData::Head(curr_id++, "Head", NUData::m_common_ids);	
 const NUData::id_t NUData::Body(curr_id++, "Body", NUData::m_common_ids);	
@@ -108,10 +108,10 @@ const NUData::id_t NUData::NumJointIds(curr_id++, "NumJointIds", NUData::m_commo
 
 const NUData::id_t NUData::NumCommonIds(curr_id++, "NumCommonIds", NUData::m_common_ids);		//49 Remember that m_num_common_ids needs to be manually set to this value
 
-void NUData::addDevices(const vector<string>& hardwarenames)
+void NUData::addDevices(const std::vector<std::string>& hardwarenames)
 {
-    vector<string> names = standardiseNames(hardwarenames);
-    vector<id_t*>& ids = m_ids_copy;
+    std::vector<std::string> names = standardiseNames(hardwarenames);
+    std::vector<id_t*>& ids = m_ids_copy;
     
     for (size_t i=0; i<names.size(); i++)
     {	// for each name compare it to the name of every id
@@ -121,7 +121,7 @@ void NUData::addDevices(const vector<string>& hardwarenames)
             if (id == names[i])
             {   // if the name matches the id, then add the actionator to m_available_ids and update the map
                 #if DEBUG_NUSENSORS_VERBOSITY > 4 or DEBUG_NUACTIONATORS_VERBOSITY > 4
-                    debug << id.Name << " == " << names[i] << endl;
+                    debug << id.Name << " == " << names[i] << std::endl;
                 #endif
                 if (find(m_available_ids.begin(), m_available_ids.end(), id.Id) == m_available_ids.end())
                     m_available_ids.push_back(id.Id);
@@ -145,7 +145,7 @@ void NUData::addDevices(const vector<string>& hardwarenames)
     }
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0 or DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "NUData::addDevices:" << endl;
+        debug << "NUData::addDevices:" << std::endl;
         printMap(debug);
     #endif
 }
@@ -154,12 +154,12 @@ void NUData::addDevices(const vector<string>& hardwarenames)
     @param hardwarenames a list of hardwarenames
     @return a vector with the simplified names
  */
-vector<string> NUData::standardiseNames(const vector<string>& hardwarenames)
+std::vector<std::string> NUData::standardiseNames(const std::vector<std::string>& hardwarenames)
 {
-    vector<string> simplenames;
+    std::vector<std::string> simplenames;
     for (size_t i=0; i<hardwarenames.size(); i++)
     {
-        string simplename = getStandardName(hardwarenames[i]);
+        std::string simplename = getStandardName(hardwarenames[i]);
         if (simplenames.empty())
             simplenames.push_back(simplename);    
         else if (simplename.compare(simplenames.back()) != 0)
@@ -172,26 +172,26 @@ vector<string> NUData::standardiseNames(const vector<string>& hardwarenames)
     @param hardwarename the string to simplify
     @return the simplename
 */
-string NUData::getStandardName(const string& hardwarename)
+std::string NUData::getStandardName(const std::string& hardwarename)
 {
-    string simplename, currentletter;
+    std::string simplename, currentletter;
     // compare each letter to a space, an underscore, a forward slash, a backward slash and a period
     for (size_t j=0; j<hardwarename.size(); j++)
     {
         currentletter = hardwarename.substr(j, 1);
-        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
+        if (currentletter.compare(std::string(" ")) != 0 && currentletter.compare(std::string("_")) != 0 && currentletter.compare(std::string("/")) != 0 && currentletter.compare(std::string("\\")) != 0 && currentletter.compare(std::string(".")) != 0)
             simplename += currentletter[0];            
     }
 
     // Replace "Left"/"Right" with L/R and move to front of name
     size_t Left = simplename.find("Left");
     size_t Right = simplename.find("Right");
-    if (Left != string::npos)
+    if (Left != std::string::npos)
     {
         simplename.erase(Left, 4);
         simplename.insert(0, "L");
     }
-    if (Right != string::npos)
+    if (Right != std::string::npos)
     {
         simplename.erase(Right, 5);
         simplename.insert(0, "R");
@@ -200,33 +200,33 @@ string NUData::getStandardName(const string& hardwarename)
     // Replace plurals (ears, eyes)
     size_t Ears = simplename.find("Ears");
     size_t Eyes = simplename.find("Eyes");
-    if (Ears != string::npos)
+    if (Ears != std::string::npos)
         simplename.replace(Ears, 4, "Ear");
-    if (Eyes != string::npos)
+    if (Eyes != std::string::npos)
         simplename.replace(Ears, 4, "Eye");
     
     // Replace ChestBoard with Chest
     size_t ChestBoard = simplename.find("ChestBoard");
-    if (ChestBoard != string::npos)
+    if (ChestBoard != std::string::npos)
         simplename.replace(ChestBoard, 10, "Chest");
     
     // Replace LFace with LEye and RFace with REye
     size_t LFace = simplename.find("LFace");
     size_t RFace = simplename.find("RFace");
-    if (LFace != string::npos)
+    if (LFace != std::string::npos)
     	simplename.replace(LFace, 5, "LEye");
-    if (RFace != string::npos)
+    if (RFace != std::string::npos)
     	simplename.replace(RFace, 5, "REye");
     
     // Remove colours
     size_t Red = simplename.find("Red");
-    if (Red != string::npos)
+    if (Red != std::string::npos)
         simplename.erase(Red, 3);
     size_t Green = simplename.find("Green");
-    if (Green != string::npos)
+    if (Green != std::string::npos)
         simplename.erase(Green, 5);
     size_t Blue = simplename.find("Blue");
-    if (Blue != string::npos)
+    if (Blue != std::string::npos)
         simplename.erase(Blue, 4);
     
     // Remove everything after a number
@@ -260,9 +260,9 @@ bool NUData::belongsToGroup(const id_t& member, const id_t& group)
     @param group the group id
     @return true if member belongs to group 
  */
-bool NUData::belongsToGroup(const string& name, const id_t& group)
+bool NUData::belongsToGroup(const std::string& name, const id_t& group)
 {
-    return t_belongsToGroup<string>(name, group);
+    return t_belongsToGroup<std::string>(name, group);
 }
 
 /*! @brief A templated function to determine whether a member belongs to a particular group
@@ -336,29 +336,29 @@ template<typename T> bool NUData::t_belongsToGroup(const T& member, const id_t& 
            the sensors/actionators under id can be accessed.
     @param id the id of the sensor/actionator(s) to get the indicies for
  */
-const vector<int>& NUData::mapIdToIndices(const id_t& id) const
+const std::vector<int>& NUData::mapIdToIndices(const id_t& id) const
 {
     return m_id_to_indices[id.Id];
 }
 
-vector<NUData::id_t*> NUData::mapIdToIds(const id_t& id)
+std::vector<NUData::id_t*> NUData::mapIdToIds(const id_t& id)
 {
-    const vector<int>& indicies = mapIdToIndices(id);
-    vector<id_t*> ids;
+    const std::vector<int>& indicies = mapIdToIndices(id);
+    std::vector<id_t*> ids;
     ids.reserve(indicies.size());
     for (size_t i=0; i<indicies.size(); i++)
         ids.push_back(m_ids_copy[indicies[i]]);
     return ids;
 }
 
-void NUData::printMap(ostream& output)
+void NUData::printMap(std::ostream& output)
 {
     for (size_t j=0; j<m_id_to_indices.size(); j++)
     {
         output << m_ids_copy[j]->Name << "->[";
         for (size_t k=0; k<m_id_to_indices[j].size(); k++)
             output << m_ids_copy[m_id_to_indices[j][k]]->Name << " ";
-        output << "]" << endl;
+        output << "]" << std::endl;
     }
 }
 

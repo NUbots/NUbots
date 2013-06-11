@@ -41,7 +41,7 @@ bool ColourSegment::join(const ColourSegment &other)
 /*! @brief Stream insertion operator for a single ColourSegment.
  *      The segment is terminated by a newline.
  */
-ostream& operator<< (ostream& output, const ColourSegment& c)
+std::ostream& operator<< (std::ostream& output, const ColourSegment& c)
 {
     output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << getColourName(c.m_colour) << std::endl;
     return output;
@@ -51,7 +51,7 @@ ostream& operator<< (ostream& output, const ColourSegment& c)
  *      Each segment is terminated by a newline.
  *  @relates ColourSegment
  */
-ostream& operator<< (ostream& output, const vector<ColourSegment>& c)
+std::ostream& operator<< (std::ostream& output, const std::vector<ColourSegment>& c)
 {
     for (size_t i=0; i<c.size(); i++)
         output << c[i];

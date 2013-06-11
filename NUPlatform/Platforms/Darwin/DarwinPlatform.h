@@ -36,8 +36,8 @@ public:
     DarwinPlatform();
     ~DarwinPlatform();
 
-    vector<string> 	m_servo_names;          //!< the names of the available joints (eg HeadYaw, AnklePitch etc) in the Darwin-OP robot
-	vector<int> 	m_servo_IDs;			//!< Corresponding servo ids to names
+    std::vector<std::string> 	m_servo_names;          //!< the names of the available joints (eg HeadYaw, AnklePitch etc) in the Darwin-OP robot
+	std::vector<int> 	m_servo_IDs;			//!< Corresponding servo ids to names
 
 	//<-Access to Local copy of motor commands:
 	float getMotorGoalPosition(int localArrayIndex);
@@ -50,8 +50,8 @@ protected:
 private:
 	Robot::LinuxCM730* linux_cm730;									//!< Darwin Subcontrolller connection
 	Robot::CM730* cm730;
-	vector<float>	m_servo_Goal_Positions;
-	vector<float>	m_servo_Stiffness;
+	std::vector<float>	m_servo_Goal_Positions;
+	std::vector<float>	m_servo_Stiffness;
 };
 
 #endif

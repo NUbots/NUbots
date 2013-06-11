@@ -106,7 +106,7 @@ void Motors::setSensorThread(ConditionalThread* thread)
 void Motors::initSelf()
 {
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << "MOTORS: Initialising self." << endl;
+      debug << "MOTORS: Initialising self." << std::endl;
    #endif
    // Initialise the controls to their default values
    for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
@@ -143,7 +143,7 @@ void Motors::initSelf()
 void Motors::initRequestMessages()
 {
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << "MOTORS: Initialising Request Messages. Number of lower blocks: " << MOTORS_NUM_LOWER_REQUEST_BLOCKS << " Number of upper blocks: " << MOTORS_NUM_UPPER_REQUEST_BLOCKS << endl;
+      debug << "MOTORS: Initialising Request Messages. Number of lower blocks: " << MOTORS_NUM_LOWER_REQUEST_BLOCKS << " Number of upper blocks: " << MOTORS_NUM_UPPER_REQUEST_BLOCKS << std::endl;
    #endif
    // The 'data' for the request packet for each motor is always the same
    unsigned char data[] = {P_PRESENT_POSITION_L, NUM_FEEDBACK_MOTOR};   // [start address, length]
@@ -180,7 +180,7 @@ void Motors::initRequestMessages()
    }
 
 #if DEBUG_NUPLATFORM_VERBOSITY > 2
-   debug << "MOTORS: Initialised request messages:" << MotorRequestsLowerLength[0] << " upper length: " << MotorRequestsUpperLength[0] << endl;
+   debug << "MOTORS: Initialised request messages:" << MotorRequestsLowerLength[0] << " upper length: " << MotorRequestsUpperLength[0] << std::endl;
 #endif
 }
 
@@ -195,52 +195,52 @@ void Motors::initSerial()
 {
    // open, set baud rate, set data characteristics, set timeouts
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << "MOTORS: Initialising RS-485 dual channel comms to DX-117s." << endl;
+      debug << "MOTORS: Initialising RS-485 dual channel comms to DX-117s." << std::endl;
    #endif
    
    // Open
    FT_STATUS status;
    status = FT_Open(0, &lowerHandle);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to open lower body serial connection" << endl;
+      debug << "MOTORS: Unable to open lower body serial connection" << std::endl;
 
    status = FT_Open(1, &upperHandle);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to open upper body serial connection" << endl;
+      debug << "MOTORS: Unable to open upper body serial connection" << std::endl;
    
    // Set Baud Rate
    status = FT_SetBaudRate(lowerHandle, MOTORS_BAUD_RATE);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to set lower body serial baud rate" << endl;
+      debug << "MOTORS: Unable to set lower body serial baud rate" << std::endl;
    
    status = FT_SetBaudRate(upperHandle, MOTORS_BAUD_RATE);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to set upper body serial baud rate" << endl;
+      debug << "MOTORS: Unable to set upper body serial baud rate" << std::endl;
    
    // Set Data characteristics (8 bit bytes, no parity, 1 stop bit)
    status = FT_SetDataCharacteristics(lowerHandle, FT_BITS_8, FT_STOP_BITS_1, FT_PARITY_NONE);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to set lower body serial data characteristics" << endl;
+      debug << "MOTORS: Unable to set lower body serial data characteristics" << std::endl;
    
    status = FT_SetDataCharacteristics(upperHandle, FT_BITS_8, FT_STOP_BITS_1, FT_PARITY_NONE);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to set upper body serial data characteristics" << endl;
+      debug << "MOTORS: Unable to set upper body serial data characteristics" << std::endl;
    
    // Set timeouts
    status = FT_SetTimeouts(lowerHandle, 1, 1);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to set lower body serial timeouts" << endl;
+      debug << "MOTORS: Unable to set lower body serial timeouts" << std::endl;
    
    status = FT_SetTimeouts(upperHandle, 1, 1);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to set upper body serial timeouts" << endl;
+      debug << "MOTORS: Unable to set upper body serial timeouts" << std::endl;
    
    status = FT_SetLatencyTimer(lowerHandle, 2);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to set lower latency timer" << endl;
+      debug << "MOTORS: Unable to set lower latency timer" << std::endl;
    status = FT_SetLatencyTimer(upperHandle, 2);
    if (status != FT_OK)
-      debug << "MOTORS: Unable to set upper latency timer" << endl;
+      debug << "MOTORS: Unable to set upper latency timer" << std::endl;
 }
 
 /* Initialise the motor return delays (ie. the delay between receiving a request for data, and the motor replying)
@@ -254,7 +254,7 @@ void Motors::initSerial()
 void Motors::initReturnDelays()
 {
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << "MOTORS: Initialising DX-117 return delays." << endl;
+      debug << "MOTORS: Initialising DX-117 return delays." << std::endl;
    #endif
    // The idea here is to set the return delays to be different so that the motors do not reply to bulk read_data commands all at once.
    unsigned char data[] = {P_RETURN_DELAY_TIME, 0};         // write a single byte to that address, first byte is the address, second byte is the new return delay
@@ -308,7 +308,7 @@ void Motors::initControlTables()
    {
       if(findHeader(readdata, numbytes, &index))
       {
-         // debug << "MOTORS: init: header end at index: " << index << endl;
+         // debug << "MOTORS: init: header end at index: " << index << std::endl;
          if (index + 2 < numbytes)
          {
             index++;
@@ -316,7 +316,7 @@ void Motors::initControlTables()
             index++;
             length = readdata[index];
          }
-         // debug << "MOTORS: scanData: id: " << (int)id << " length: " << (int)length << endl;
+         // debug << "MOTORS: scanData: id: " << (int)id << " length: " << (int)length << std::endl;
          if (length < MAX_MESSAGE_LENGTH)
          {
             if (index + length < numbytes)
@@ -337,12 +337,12 @@ void Motors::initControlTables()
                if ((calculatedchecksum == checksum) && ((length - 2) == 16) && (id < MOTORS_NUM_MOTORS))
                {
                   if (error > 0)
-                     debug << "MOTORS: Motor " << (int)id << " has error " << (int)error << ", you should look into it ;)" << endl;
+                     debug << "MOTORS: Motor " << (int)id << " has error " << (int)error << ", you should look into it ;)" << std::endl;
                   for (unsigned char i=0; i<length-2; i++)
                   {
                      debug << (int)packetdata[i] << ", ";
                   }
-                  debug << "!:! " << (int)numupdates << endl;
+                  debug << "!:! " << (int)numupdates << std::endl;
                   numupdates++;
                }
             }
@@ -358,7 +358,7 @@ void Motors::initControlTables()
 void Motors::initSlopes()
 {
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << "MOTORS: Initialising DX-117 compliance slopes." << endl;
+      debug << "MOTORS: Initialising DX-117 compliance slopes." << std::endl;
    #endif
    unsigned char data[] = {P_CW_COMPLIANCE_SLOPE, 0, 0};      // address, cw_slope, ccw_slope
    
@@ -444,17 +444,17 @@ void Motors::closeSerial()
    FT_STATUS status;
    status = FT_Close(lowerHandle);
    if (status != FT_OK)
-      debug << "MOTORS: Failed to close lower body serial connection" << endl;
+      debug << "MOTORS: Failed to close lower body serial connection" << std::endl;
    
    status = FT_Close(upperHandle);
    if (status != FT_OK)
-      debug << "MOTORS: Failed to close lower body serial connection" << endl;
+      debug << "MOTORS: Failed to close lower body serial connection" << std::endl;
 }
 
 /*! @brief Gets the current motor targets in motor units (to be consistent with the rest of the interface)
     @param targets will be updated with the current targets
  */
-void Motors::getTargets(vector<float>& targets)
+void Motors::getTargets(std::vector<float>& targets)
 {
     targets.clear();
     for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
@@ -464,7 +464,7 @@ void Motors::getTargets(vector<float>& targets)
 /*! @brief Gets the current stiffness of each motor. Because of the present limitations the stiffness is either 0 or 100%.
     @param stiffnesses will be updated with the current stiffnesses
  */
-void Motors::getStiffnesses(vector<float>& stiffnesses)
+void Motors::getStiffnesses(std::vector<float>& stiffnesses)
 {
     stiffnesses.clear();
     for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
@@ -477,7 +477,7 @@ void Motors::getStiffnesses(vector<float>& stiffnesses)
 void Motors::torqueEnable()
 {
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << "MOTORS: Enabling torque on all motors" << endl;
+      debug << "MOTORS: Enabling torque on all motors" << std::endl;
    #endif
    unsigned char data[] = {P_TORQUE_ENABLE, DX117_TORQUE_ON};
    write(DX117_BROADCASTING_ID, DX117_WRITE, data, 2);
@@ -487,15 +487,15 @@ void Motors::torqueEnable()
  */
 void Motors::emergencyOff()
 {
-   debug << "MOTORS: Emergency motor off!" << endl;
+   debug << "MOTORS: Emergency motor off!" << std::endl;
    for (unsigned char i=0; i<MOTORS_NUM_MOTORS; i++)
    {
       MotorTorqueOn[i] = false;
    }
    unsigned char data[] = {P_TORQUE_ENABLE, DX117_TORQUE_OFF};
-   debug << "MOTORS: Writing to motors" << endl;
+   debug << "MOTORS: Writing to motors" << std::endl;
    write(DX117_BROADCASTING_ID, DX117_WRITE, data, 2);
-   debug << "MOTORS: Finished writing to motors" << endl;
+   debug << "MOTORS: Finished writing to motors" << std::endl;
 }
 
 /*! @brief Turns torque on for a single motor
@@ -504,7 +504,7 @@ void Motors::emergencyOff()
 void Motors::torqueOn(unsigned char motorid)
 {
    #if DEBUG_NUPLATFORM_VERBOSITY > 2
-      debug << "MOTORS: torqueOn " << (int) motorid << endl;
+      debug << "MOTORS: torqueOn " << (int) motorid << std::endl;
    #endif
    MotorTorqueOn[MotorIDToIndex[motorid]] = true;
 }
@@ -605,7 +605,7 @@ void Motors::updateControls(unsigned char motorid[], unsigned char nummotors, un
    }
    
 #if DEBUG_NUPLATFORM_VERBOSITY > 2
-   debug << "MOTORS: Updating controls: " << endl;
+   debug << "MOTORS: Updating controls: " << std::endl;
    for (int j=0; j<nummotors; j++)
    {
       debug << j << ": ";
@@ -613,7 +613,7 @@ void Motors::updateControls(unsigned char motorid[], unsigned char nummotors, un
          debug << (unsigned int)MotorControls[motorid[i]][i] << ", ";
       for (int i=0; i<3; i++)
          debug << (unsigned int)MotorPunches[motorid[i]][i] << ", ";
-      debug << endl;
+      debug << std::endl;
    }
 #endif
    return;
@@ -661,7 +661,7 @@ bool Motors::write(unsigned char motorid[], unsigned char nummotors, unsigned ch
    // error checking
    if (status != FT_OK)
    {
-      debug << "MOTORS: write(motorid[]) failed with FT_Write returning sum of error codes " << status << endl;
+      debug << "MOTORS: write(motorid[]) failed with FT_Write returning sum of error codes " << status << std::endl;
       return false;
    }
    if (bytessentlower+bytessentupper != lowerindex+upperindex) 
@@ -719,7 +719,7 @@ bool Motors::write(unsigned char motorid, unsigned char command, unsigned char d
    
    if (status != FT_OK)
    {
-      debug << "MOTORS: write failed with FT_Write returning error code " << status << endl;
+      debug << "MOTORS: write failed with FT_Write returning error code " << status << std::endl;
       return false;
    }
    if (bytessent != messagelength) 
@@ -733,7 +733,7 @@ bool Motors::write(unsigned char motorid, unsigned char command, unsigned char d
       debug << ": ";
    for (unsigned short i=0; i<messagelength; i++)
       debug << (int)messagebuffer[i] << ", ";
-   debug << endl;
+   debug << std::endl;
    #endif
    
    return true;
@@ -767,7 +767,7 @@ bool Motors::write(unsigned char command, unsigned char data[MOTORS_NUM_MOTORS][
    // error checking
    if (status != FT_OK)
    {
-      debug << "MOTORS: write(motorid[]) failed with FT_Write returning sum of error codes " << status << endl;
+      debug << "MOTORS: write(motorid[]) failed with FT_Write returning sum of error codes " << status << std::endl;
       return false;
    }
    if (bytessentlower+bytessentupper != lowerindex+upperindex) 
@@ -788,16 +788,16 @@ bool Motors::write(unsigned char command, unsigned char data[MOTORS_NUM_MOTORS][
 void Motors::appendControlPacketsToBuffer(unsigned char lowermessagebuffer[], unsigned char uppermessagebuffer[], unsigned short* lowerindex, unsigned short* upperindex)
 {
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << "appendControlPacketsToBuffer()" << endl;
+      debug << "appendControlPacketsToBuffer()" << std::endl;
    #endif
    appendPacketsToBuffer(DX117_WRITE, MotorControls, lowermessagebuffer, uppermessagebuffer, lowerindex, upperindex);
    appendPacketsToBuffer(DX117_WRITE, MotorPunches, lowermessagebuffer, uppermessagebuffer, lowerindex, upperindex);
    return;
 }
 
-/* Append packets to the buffer (the same command with different data to each motor in the list)
+/* Append packets to the buffer (the same command with different data to each motor in the std::list)
  
- @param motorid[]: the list of motor ids for each of the packets
+ @param motorid[]: the std::list of motor ids for each of the packets
  @param nummotors: the length of motorid
  @param command: the command for each packet (the same command is sent to every motor)
  @param data[]: an array of pointers to the data associated with the each packet (the data can be different for each motor, but each entry has to be the same length)
@@ -954,7 +954,7 @@ bool Motors::broadcast(unsigned char command, unsigned char data[], unsigned sho
     checksum = ~(ID + length + instruction + para1,..., paraN) & 0xFF 
     */
 #if DEBUG_NUPLATFORM_VERBOSITY > 0
-   debug << "MOTORS: Broadcasting command " << (int)command << endl;
+   debug << "MOTORS: Broadcasting command " << (int)command << std::endl;
 #endif
    unsigned char messagebuffer[MAX_MESSAGE_LENGTH];
    unsigned char checksum = 0;
@@ -985,7 +985,7 @@ bool Motors::broadcast(unsigned char command, unsigned char data[], unsigned sho
    
    if (status != FT_OK)
    {
-      debug << "MOTORS: broadcast failed with FT_Write returning error code " << status << endl;
+      debug << "MOTORS: broadcast failed with FT_Write returning error code " << status << std::endl;
       return false;
    }
    if (bytessent != messagelength) 
@@ -999,7 +999,7 @@ bool Motors::broadcast(unsigned char command, unsigned char data[], unsigned sho
    debug << "MOTORS: Packets sent: ";
    for (unsigned short i=0; i<messagelength; i++)
       debug << (int)messagebuffer[i] << ", ";
-   debug << endl;
+   debug << std::endl;
 #endif
    
    return true;
@@ -1111,14 +1111,14 @@ bool Motors::request()
 bool Motors::read(FT_HANDLE fthandle, unsigned char data[], unsigned short numbytestoread)
 {
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << "MOTORS: Reading buffer:" << endl;
+      debug << "MOTORS: Reading buffer:" << std::endl;
    #endif
    FT_STATUS status;
    DWORD numbytesread;
    status = FT_Read(fthandle, data, numbytestoread, &numbytesread);
    if (status != FT_OK)
    {
-      debug << "MOTORS: read failed with FT_READ error code: " << status << endl;
+      debug << "MOTORS: read failed with FT_READ error code: " << status << std::endl;
       return false;
    }
    
@@ -1126,10 +1126,10 @@ bool Motors::read(FT_HANDLE fthandle, unsigned char data[], unsigned short numby
       debug << "MOTORS: Bytes read: " << numbytesread << " :";
       for (unsigned short i=0; i<numbytesread; i++)
          debug << (int)data[i] << ", ";
-      debug << endl;
+      debug << std::endl;
    #endif
    #if DEBUG_NUPLATFORM_VERBOSITY > 0
-      debug << numbytesread << endl;
+      debug << numbytesread << std::endl;
    #endif
    if (numbytesread != numbytestoread)
       return false;
@@ -1160,7 +1160,7 @@ unsigned short Motors::getNumBytesInQueue(FT_HANDLE fthandle)
  */
 unsigned short Motors::readQueue(FT_HANDLE fthandle, unsigned char data[], unsigned short maxdatalength)
 {
-   //debug << "MOTORS: readQueue" << endl;
+   //debug << "MOTORS: readQueue" << std::endl;
    unsigned short numbytesinqueue = getNumBytesInQueue(fthandle);
    if (numbytesinqueue > maxdatalength)
       numbytesinqueue = maxdatalength;
@@ -1179,7 +1179,7 @@ unsigned short Motors::readQueue(FT_HANDLE fthandle, unsigned char data[], unsig
  */
 unsigned char Motors::updateFeedbackData(unsigned char readdata[], unsigned short numbytes)
 {
-   // debug << "MOTORS: UpdateFeedbackData" << numbytes << endl;
+   // debug << "MOTORS: UpdateFeedbackData" << numbytes << std::endl;
    
    /* DX117 Reply Packet Format:
     0xFF, 0xFF, ID, length, error, para1, para2, ..., para(length-2), checksum
@@ -1193,7 +1193,7 @@ unsigned char Motors::updateFeedbackData(unsigned char readdata[], unsigned shor
    {
       if(findHeader(readdata, numbytes, &index))
       {
-         // debug << "MOTORS: scanData: header end at index: " << index << endl;
+         // debug << "MOTORS: scanData: header end at index: " << index << std::endl;
          if (index + 2 < numbytes)
          {
             index++;
@@ -1201,7 +1201,7 @@ unsigned char Motors::updateFeedbackData(unsigned char readdata[], unsigned shor
             index++;
             length = readdata[index];
          }
-         // debug << "MOTORS: scanData: id: " << (int)id << " length: " << (int)length << endl;
+         // debug << "MOTORS: scanData: id: " << (int)id << " length: " << (int)length << std::endl;
          if (length < MAX_MESSAGE_LENGTH)
          {
             if (index + length < numbytes)
@@ -1222,7 +1222,7 @@ unsigned char Motors::updateFeedbackData(unsigned char readdata[], unsigned shor
                if ((calculatedchecksum == checksum) && ((length - 2) == NUM_FEEDBACK_MOTOR) && id < MOTORS_MAX_ID && id > MOTORS_MIN_ID)
                {
                   if (error > 0)
-                     debug << "MOTORS: Motor " << (int)id << " has error " << (int)error << ", you should look into it ;)" << endl;
+                     debug << "MOTORS: Motor " << (int)id << " has error " << (int)error << ", you should look into it ;)" << std::endl;
                   int index = MotorIDToIndex[id];
                   JointPositions[index] = ((packetdata[1] & 0x3) << 8) + packetdata[0];
                   JointSpeeds[index] = ((packetdata[3] & 0x3) << 8) + packetdata[2];

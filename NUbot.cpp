@@ -115,8 +115,8 @@ NUbot::NUbot(int argc, const char *argv[])
 
 
     #if DEBUG_NUBOT_VERBOSITY > 0
-        cout<< "DEBUG_NUBOT_VERBOSITY = " <<DEBUG_NUBOT_VERBOSITY<<endl;
-        debug << "NUbot::NUbot()." << endl;
+        std::cout<< "DEBUG_NUBOT_VERBOSITY = " <<DEBUG_NUBOT_VERBOSITY<<std::endl;
+        debug << "NUbot::NUbot()." << std::endl;
     #endif
     NUbot::m_this = this;
     
@@ -128,7 +128,7 @@ NUbot::NUbot(int argc, const char *argv[])
     createThreads();
     
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::NUbot(). Finished." << endl;
+        debug << "NUbot::NUbot(). Finished." << std::endl;
     #endif
 }
 
@@ -137,7 +137,7 @@ NUbot::NUbot(int argc, const char *argv[])
 NUbot::~NUbot()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot()." << endl;
+        debug << "NUbot::~NUbot()." << std::endl;
     #endif
     
     #ifdef USE_MOTION
@@ -153,7 +153,7 @@ NUbot::~NUbot()
     destroyPlatform();
     
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::~NUbot(). Finished!" << endl;
+        debug << "NUbot::~NUbot(). Finished!" << std::endl;
     #endif
 }
 
@@ -162,7 +162,7 @@ NUbot::~NUbot()
 void NUbot::createErrorHandling()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::createErrorHandling()." << endl;
+        debug << "NUbot::createErrorHandling()." << std::endl;
     #endif
     #ifndef TARGET_OS_IS_WINDOWS
         signal(SIGINT, terminationHandler);
@@ -178,7 +178,7 @@ void NUbot::createErrorHandling()
 void NUbot::createPlatform(int argc, const char *argv[])
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::createPlatform()." << endl;
+        debug << "NUbot::createPlatform()." << std::endl;
     #endif
     
     #if defined(TARGET_IS_NAOWEBOTS)
@@ -200,7 +200,7 @@ void NUbot::createPlatform(int argc, const char *argv[])
 void NUbot::destroyPlatform()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::destroyPlatform()." << endl;
+        debug << "NUbot::destroyPlatform()." << std::endl;
     #endif
     
     delete m_platform;
@@ -214,7 +214,7 @@ void NUbot::destroyPlatform()
 void NUbot::createBlackboard()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::createBlackboard()." << endl;
+        debug << "NUbot::createBlackboard()." << std::endl;
     #endif
     
     m_blackboard = new NUBlackboard();
@@ -232,7 +232,7 @@ void NUbot::createBlackboard()
 void NUbot::destroyBlackboard()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::destroyBlackboard()." << endl;
+        debug << "NUbot::destroyBlackboard()." << std::endl;
     #endif
     
     delete m_blackboard;
@@ -243,7 +243,7 @@ void NUbot::destroyBlackboard()
 void NUbot::createNetwork()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::createNetwork()." << endl;
+        debug << "NUbot::createNetwork()." << std::endl;
     #endif
     
     #if defined(TARGET_IS_NAOWEBOTS)
@@ -266,7 +266,7 @@ void NUbot::createNetwork()
 void NUbot::destroyNetwork()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::destroyNetwork()." << endl;
+        debug << "NUbot::destroyNetwork()." << std::endl;
     #endif
     
     delete m_io;
@@ -279,7 +279,7 @@ void NUbot::destroyNetwork()
 void NUbot::createModules()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::createModules()." << endl;
+        debug << "NUbot::createModules()." << std::endl;
     #endif
     
     #ifdef USE_VISION
@@ -307,7 +307,7 @@ void NUbot::createModules()
 void NUbot::destroyModules()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::destroyModules()." << endl;
+        debug << "NUbot::destroyModules()." << std::endl;
     #endif
     
     #ifdef USE_VISION
@@ -335,7 +335,7 @@ void NUbot::destroyModules()
 void NUbot::createThreads()
 {
 #if DEBUG_NUBOT_VERBOSITY > 1
-    debug << "NUbot::createThreads(). Constructing threads." << endl;
+    debug << "NUbot::createThreads(). Constructing threads." << std::endl;
 #endif
     
     #if defined(USE_VISION) or defined(USE_LOCALISATION)
@@ -355,7 +355,7 @@ void NUbot::createThreads()
     #endif
 
 #if DEBUG_NUBOT_VERBOSITY > 1
-    debug << "NUbot::createThreads(). Finished." << endl;
+    debug << "NUbot::createThreads(). Finished." << std::endl;
 #endif
 }
 
@@ -363,7 +363,7 @@ void NUbot::createThreads()
 void NUbot::destroyThreads()
 {
     #if DEBUG_NUBOT_VERBOSITY > 0
-        debug << "NUbot::destroyThreads()." << endl;
+        debug << "NUbot::destroyThreads()." << std::endl;
     #endif
     
     #if defined(USE_VISION) or defined(USE_LOCALISATION)
@@ -450,41 +450,41 @@ void NUbot::terminationHandler(int signum)
 {
     errorlog << "TERMINATION HANDLER: ";
     debug << "TERMINATION HANDLER: ";
-    cout << "TERMINATION HANDLER: ";
+    std::cout << "TERMINATION HANDLER: ";
     
     #ifndef TARGET_OS_IS_WINDOWS
         if (signum == SIGILL)
         {
-            errorlog << "SIGILL" << endl;
-            debug << "SIGILL" << endl;
-            cout << "SIGILL" << endl;
+            errorlog << "SIGILL" << std::endl;
+            debug << "SIGILL" << std::endl;
+            std::cout << "SIGILL" << std::endl;
         }
         else if (signum == SIGSEGV)
         {
-            errorlog << "SIGSEGV" << endl;
-            debug << "SIGSEGV" << endl;
-            cout << "SIGSEGV" << endl;
+            errorlog << "SIGSEGV" << std::endl;
+            debug << "SIGSEGV" << std::endl;
+            std::cout << "SIGSEGV" << std::endl;
         }
         else if (signum == SIGBUS)
         {
-            errorlog << "SIGBUS" << endl;
-            debug << "SIGBUS" << endl;
-            cout << "SIGBUS" << endl;
+            errorlog << "SIGBUS" << std::endl;
+            debug << "SIGBUS" << std::endl;
+            std::cout << "SIGBUS" << std::endl;
         }
         else if (signum == SIGABRT)
         {
-            errorlog << "SIGABRT" << endl;
-            debug << "SIGABRT" << endl;
-            cout << "SIGABRT" << endl;
+            errorlog << "SIGABRT" << std::endl;
+            debug << "SIGABRT" << std::endl;
+            std::cout << "SIGABRT" << std::endl;
         }
     #else
-        errorlog << endl;
-        debug << endl;
-        cout << endl;
+        errorlog << std::endl;
+        debug << std::endl;
+        std::cout << std::endl;
     #endif
-    errorlog << flush;
-    debug << flush;
-    cout << flush;
+    errorlog << std::flush;
+    debug << std::flush;
+    std::cout << std::flush;
     
     #ifndef TARGET_OS_IS_WINDOWS
         void *array[10];
@@ -493,7 +493,7 @@ void NUbot::terminationHandler(int signum)
         size = backtrace(array, 10);
         strings = backtrace_symbols(array, size);
         for (size_t i=0; i<size; i++)
-            errorlog << strings[i] << endl;
+            errorlog << strings[i] << std::endl;
     #endif
     
     if (NUbot::m_this != NULL)
@@ -526,12 +526,12 @@ void NUbot::terminationHandler(int signum)
 /*! @brief 'Handles an unhandled exception; logs the backtrace to errorlog
     @param e the exception
  */
-void NUbot::unhandledExceptionHandler(exception& e)
+void NUbot::unhandledExceptionHandler(std::exception& e)
 {
 	#ifndef TARGET_OS_IS_WINDOWS
         //!< @todo TODO: check whether the exception is serious, if it is fail safely
-        errorlog << "UNHANDLED EXCEPTION. " << endl;
-        debug << "UNHANDLED EXCEPTION. " << endl; 
+        errorlog << "UNHANDLED EXCEPTION. " << std::endl;
+        debug << "UNHANDLED EXCEPTION. " << std::endl; 
         Blackboard->Actions->add(NUActionatorsData::Sound, 0, NUSounds::UNHANDLED_EXCEPTION);
         void *array[20];
         size_t size;
@@ -539,8 +539,8 @@ void NUbot::unhandledExceptionHandler(exception& e)
         size = backtrace(array, 20);
         strings = backtrace_symbols(array, size);
         for (size_t i=0; i<size; i++)
-            errorlog << strings[i] << endl;
-        errorlog << e.what() << endl;
+            errorlog << strings[i] << std::endl;
+        errorlog << e.what() << std::endl;
 	#endif
 }
 

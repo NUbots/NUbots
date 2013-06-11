@@ -19,7 +19,7 @@ public:
     explicit VisionComparitor(QWidget *parent = 0);
     ~VisionComparitor();
 
-    void run(string image_name, string sensor_name, string lut_name, string config0, string config1);
+    void run(std::string image_name, std::string sensor_name, std::string lut_name, std::string config0, std::string config1);
 
 private:
     void display(const QImage& img0, const QImage& img1, const QImage& classifiedImg);
@@ -38,7 +38,7 @@ private:
     QGraphicsPixmapItem m_class_pixmap;
 
     unsigned int m_frame_no;    //! @var The current frame index
-    vector<pair<NUImage, NUSensorsData> > m_frames;   //! @var The frames read in from file
+    std::vector<pair<NUImage, NUSensorsData> > m_frames;   //! @var The frames read in from file
     bool m_halted,              //! @var Flag for user selecting to exit
          m_next,                //! @var Flag for user selecting to go to next frame
          m_prev;                //! @var Flag for user selecting to go to prev frame

@@ -51,26 +51,26 @@ private:
     void copyToHardwareCommunications();
     
 private:
-    static vector<string> m_servo_position_names;
+    static std::vector<std::string> m_servo_position_names;
     static unsigned int m_num_servo_positions;
-    static vector<string> m_servo_stiffness_names;
+    static std::vector<std::string> m_servo_stiffness_names;
     static unsigned int m_num_servo_stiffnesses;
     
-    static vector<string> m_earled_names;
+    static std::vector<std::string> m_earled_names;
     static unsigned int m_num_earleds;
-    static vector<string> m_eyeled_names;
+    static std::vector<std::string> m_eyeled_names;
     static unsigned int m_num_eyeleds;
-    static vector<string> m_chestled_names;
+    static std::vector<std::string> m_chestled_names;
     static unsigned int m_num_chestleds;
-    static vector<string> m_footled_names;
+    static std::vector<std::string> m_footled_names;
     static unsigned int m_num_footleds;
-    static vector<string> m_led_names;
+    static std::vector<std::string> m_led_names;
     static unsigned int m_num_leds;
     
-    static vector<string> m_other_names;
+    static std::vector<std::string> m_other_names;
     static unsigned int m_num_others;
     
-    static vector<string> m_actionator_names;
+    static std::vector<std::string> m_actionator_names;
     static unsigned int m_num_actionators;
     
     DCMProxy* m_al_dcm;

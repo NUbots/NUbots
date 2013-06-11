@@ -46,7 +46,7 @@ public:
         if (m_parent->stateChanged())
         {
             m_jobs->addMotionJob(new WalkJob(0,0,0));
-            m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 500, vector<float>(2,0)));;
+            m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 500, std::vector<float>(2,0)));;
         }
     };
 };

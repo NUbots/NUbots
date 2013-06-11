@@ -26,7 +26,7 @@
 
 #define CENTER_CIRCLE_ON 1 
 
-//#define debug_out cout
+//#define debug_out std::cout
 #if DEBUG_LOCALISATION_VERBOSITY > 0
 #define debug_out debug_file
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -182,12 +182,12 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         m_hasGps = true;
     }
 
-    vector<float> odo;
+    std::vector<float> odo;
     bool odom_available = sensor_data->getOdometry(odo);
 
     #if !defined(USE_VISION)// || 1
         // If vision is disabled, gps coordinates are used in its place to trach location.
-        vector<float> gps;
+        std::vector<float> gps;
         float compass;
         if (sensor_data->getGps(gps) and sensor_data->getCompass(compass))
         {   
@@ -220,7 +220,7 @@ void Localisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, const
         }
         else
         {
-            cout << "Localisatiojn unable to retrieve odometry!" << std::endl;
+            std::cout << "Localisatiojn unable to retrieve odometry!" << std::endl;
         }
 
         std::vector<TeamPacket::SharedBall> sharedBalls = FindNewSharedBalls(teamInfo->getSharedBalls());
@@ -306,7 +306,7 @@ std::vector<TeamPacket::SharedBall> Localisation::FindNewSharedBalls(const std::
     return updateBalls;
 }
 
-void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::SharedBall>& sharedballs, float time_increment)
+void Localisation::ProcessObjects(FieldObjects* fobs, const std::vector<TeamPacket::SharedBall>& sharedballs, float time_increment)
 {
     int numUpdates = 0;
     int updateResult;
@@ -315,14 +315,14 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
 #if DEBUG_LOCALISATION_VERBOSITY > 2
     if(numUpdates == 0 )
     {
-        debug_out  <<"[" << m_timestamp << "]: Update Starting." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Update Starting." << std::endl;
         for(int i = 0; i < c_MAX_MODELS; i++){
             if(m_models[i].active() == false) continue;
             debug_out  << "[" << m_timestamp << "]: Model[" << i << "]";
             debug_out  << " [alpha = " << m_models[i].alpha() << "]";
             debug_out  << " Robot X: " << m_models[i].state(KF::selfX);
             debug_out  << " Robot Y: " << m_models[i].state(KF::selfY);
-            debug_out  << " Robot Theta: " << m_models[i].state(KF::selfTheta) << endl;
+            debug_out  << " Robot Theta: " << m_models[i].state(KF::selfTheta) << std::endl;
         }
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
@@ -428,7 +428,7 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
             if(m_models[currID].active())
             {
                 debug_out   <<"Model : "<<currID<<" Pos  : "<<m_models[currID].stateEstimates[0][0]<<", "
-                            <<m_models[currID].stateEstimates[0][1]<<","<< m_models[currID].stateEstimates[0][2]<<endl;
+                            <<m_models[currID].stateEstimates[0][1]<<","<< m_models[currID].stateEstimates[0][2]<<std::endl;
             }
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
@@ -448,13 +448,13 @@ void Localisation::ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::S
                 debug_out  << " [alpha = " << m_models[i].alpha() << "]";
                 debug_out  << " Robot X: " << m_models[i].state(0);
                 debug_out  << " Robot Y: " << m_models[i].state(1);
-                debug_out  << " Robot Theta: " << m_models[i].state(2) << endl;
+                debug_out  << " Robot Theta: " << m_models[i].state(2) << std::endl;
             }
             debug_out  << "[" << m_timestamp << "]: Best Model";
             debug_out  << " [alpha = " << bestModel->alpha() << "]";
             debug_out  << " Robot X: " << bestModel->state(0);
             debug_out  << " Robot Y: " << bestModel->state(1);
-            debug_out  << " Robot Theta: " << bestModel->state(2) << endl;
+            debug_out  << " Robot Theta: " << bestModel->state(2) << std::endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2	
 }
@@ -623,7 +623,7 @@ void Localisation::ClearAllModels()
 void Localisation::initSingleModel(float x, float y, float theta)
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Initialising single model." << endl;
+    debug_out  << "Initialising single model." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     ClearAllModels();
     setupModel(0,1,x,y,theta);
@@ -635,7 +635,7 @@ void Localisation::doInitialReset(GameInformation::TeamColour team_colour)
     m_frame_log << "Reset leaving initial." << std::endl;
     #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing initial->ready reset." << endl;
+    debug_out  << "Performing initial->ready reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     
     ClearAllModels();
@@ -686,7 +686,7 @@ void Localisation::doSetReset(GameInformation::TeamColour team_colour, int playe
     m_frame_log << "Reset due to manual positioning." << std::endl;
     #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing manual position reset." << endl;
+    debug_out  << "Performing manual position reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     ClearAllModels();
     float x, y, heading;
@@ -762,7 +762,7 @@ void Localisation::doPenaltyReset()
     m_frame_log << "Reset due to penalty." << std::endl;
     #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing penalty reset." << endl;
+    debug_out  << "Performing penalty reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     ClearAllModels();
@@ -784,7 +784,7 @@ void Localisation::doFallenReset()
     m_frame_log << "Reset due to fall." << std::endl;
     #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing fallen reset." << endl;
+    debug_out  << "Performing fallen reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++)
     {   // Increase heading uncertainty if fallen
@@ -797,7 +797,7 @@ void Localisation::doFallenReset()
 void Localisation::doReset()
 {
     #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing player reset." << endl;
+    debug_out  << "Performing player reset." << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     ClearAllModels();
@@ -867,7 +867,7 @@ void Localisation::doReset()
 void Localisation::doBallOutReset()
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing ball out reset." << endl;
+    debug_out  << "Performing ball out reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     // Increase uncertainty of ball position if it has gone out.. Cause it has probably been moved.
     for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
@@ -959,7 +959,7 @@ bool Localisation::clipModelToField(int modelID)
         debug_out  << " [alpha = " << m_models[modelID].alpha() << "]";
         debug_out  << " State(0) clipped.";
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].state(0);
-        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << endl;
+        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << std::endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     wasClipped = wasClipped || clipped;
@@ -974,9 +974,9 @@ bool Localisation::clipModelToField(int modelID)
     if(clipped){
         debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << m_models[modelID].alpha() << "]";
-        debug_out  << " State(1) clipped." << endl;
+        debug_out  << " State(1) clipped." << std::endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].state(0);
-        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << endl;
+        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << std::endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
@@ -991,9 +991,9 @@ bool Localisation::clipModelToField(int modelID)
     if(clipped){
         debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << m_models[modelID].alpha() << "]";
-        debug_out  << " State(3) clipped." << endl;
+        debug_out  << " State(3) clipped." << std::endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].state(0);
-        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << endl;
+        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << std::endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     
@@ -1009,9 +1009,9 @@ bool Localisation::clipModelToField(int modelID)
     if(clipped){
         debug_out  << "[" << m_timestamp << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << m_models[modelID].alpha() << "]";
-        debug_out  << " State(4) clipped." << endl;
+        debug_out  << " State(4) clipped." << std::endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << m_models[modelID].state(0);
-        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << endl;
+        debug_out  << "," << m_models[modelID].state(1) << "," << m_models[modelID].state(2) << ")" << std::endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     
@@ -1105,7 +1105,7 @@ int Localisation::doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall)
         return 0;
     
     #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  << "[" << m_timestamp << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;
+        debug_out  << "[" << m_timestamp << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << std::endl;
     #endif
 
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
@@ -1125,13 +1125,13 @@ int Localisation::doBallMeasurementUpdate(MobileObject &ball)
     if(IsValidObject(ball) == false)
     {
     #if DEBUG_LOCALISATION_VERBOSITY > 0
-        debug_out  <<"[" << m_timestamp << "]: Skipping Invalid Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
+        debug_out  <<"[" << m_timestamp << "]: Skipping Invalid Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
         return KF_OUTLIER;
     }
 
     #if DEBUG_LOCALISATION_VERBOSITY > 2
-    debug_out  <<"[" << m_timestamp << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
+    debug_out  <<"[" << m_timestamp << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
     double flatBallDistance = ball.measuredDistance() * cos(ball.measuredElevation());
@@ -1254,7 +1254,7 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
         debug_out  << landmark.getName();
         debug_out  << " Distance = " << landmark.measuredDistance();
         debug_out  << " Bearing = " << landmark.measuredBearing();
-        debug_out  << endl;
+        debug_out  << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
         return KF_OUTLIER;
     }
@@ -1281,7 +1281,7 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
         if(landmark.measuredBearing() != landmark.measuredBearing())
 	{
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-            debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << endl;
+            debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
             continue;
         }
@@ -1293,14 +1293,14 @@ int Localisation::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 #if DEBUG_LOCALISATION_VERBOSITY > 0
         if(kf_return != KF_OK)
         {
-            debug_out << "OUTLIER!" << endl;
-            debug_out << "Model[" << modelID << "]: Outlier Detected - " << landmark.getName() << endl;
-            debug_out << "Measured - Distance = " << landmark.measuredDistance() << " Bearing = " << landmark.measuredBearing() << endl;
-            debug_out << "Expected - Distance = " << m_models[modelID].getDistanceToPosition(landmark.X(),landmark.Y()) << " Bearing = " << m_models[modelID].getBearingToPosition(landmark.X(),landmark.Y()) << endl;
+            debug_out << "OUTLIER!" << std::endl;
+            debug_out << "Model[" << modelID << "]: Outlier Detected - " << landmark.getName() << std::endl;
+            debug_out << "Measured - Distance = " << landmark.measuredDistance() << " Bearing = " << landmark.measuredBearing() << std::endl;
+            debug_out << "Expected - Distance = " << m_models[modelID].getDistanceToPosition(landmark.X(),landmark.Y()) << " Bearing = " << m_models[modelID].getBearingToPosition(landmark.X(),landmark.Y()) << std::endl;
         }
         else
         {
-            debug_out << "OK!" << endl;
+            debug_out << "OK!" << std::endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     #if LOC_SUMMARY > 0
@@ -1342,9 +1342,9 @@ int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObjec
     float totalAngle = landmark1.measuredBearing() - landmark2.measuredBearing();
 
     #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out << "Two Object Update:" << endl;
-    debug_out << landmark1.getName() << " - Bearing = " << landmark1.measuredBearing() << endl;
-    debug_out << landmark2.getName() << " - Bearing = " << landmark2.measuredBearing() << endl;
+    debug_out << "Two Object Update:" << std::endl;
+    debug_out << landmark1.getName() << " - Bearing = " << landmark1.measuredBearing() << std::endl;
+    debug_out << landmark2.getName() << " - Bearing = " << landmark2.measuredBearing() << std::endl;
     #endif
     for (int currID = 0; currID < c_MAX_MODELS; currID++){
         if(m_models[currID].active())
@@ -1355,10 +1355,10 @@ int Localisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryObjec
     return 1;
 }
 
-int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)
+int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &ambigousObject, const std::vector<StationaryObject>& possibleObjects)
 {
     int kf_return;
-    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
+    std::vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
 
 #if LOC_SUMMARY > 0
     m_frame_log << std::endl << "Ambiguous landmark update: " << ambigousObject.getName() << std::endl;
@@ -1408,20 +1408,20 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
         int maxActiveAfterMerge = c_MAX_MODELS /  (numOptions + 1);
 
         #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << m_timestamp << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << endl;
-        debug_out  <<"[" << m_timestamp << "]: Merging to " << maxActiveAfterMerge << " Max models." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << std::endl;
+        debug_out  <<"[" << m_timestamp << "]: Merging to " << maxActiveAfterMerge << " Max models." << std::endl;
         #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
         MergeModels(maxActiveAfterMerge);
 
         #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << m_timestamp << "]: " << getNumFreeModels() << " models now available." << endl;
+        debug_out  <<"[" << m_timestamp << "]: " << getNumFreeModels() << " models now available." << std::endl;
         #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
         if(getNumFreeModels() < (getNumActiveModels() * (int)numOptions)){
 
             #if DEBUG_LOCALISATION_VERBOSITY > 0
-            debug_out  <<"[" << m_timestamp << "]: " << "Not enough models. Aborting Update." << endl;
+            debug_out  <<"[" << m_timestamp << "]: " << "Not enough models. Aborting Update." << std::endl;
             #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
             return KF_OUTLIER;
@@ -1431,7 +1431,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     //debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
     debug_out << " Distance = " << ambigousObject.measuredDistance();
-    debug_out  << " Bearing = " << ambigousObject.measuredBearing() << endl;
+    debug_out  << " Bearing = " << ambigousObject.measuredBearing() << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
@@ -1460,7 +1460,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
             {
 
                 #if DEBUG_LOCALISATION_VERBOSITY > 0
-                debug_out  <<"[" << m_timestamp << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
+                debug_out  <<"[" << m_timestamp << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << std::endl;
                 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
                 for(int m = 0; m < c_MAX_MODELS; m++) m_models[m].m_toBeActivated = false;
@@ -1506,8 +1506,8 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
 
 
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
-            else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
+            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha() << std::endl;
+            else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha() << std::endl;
 #endif
 #if LOC_SUMMARY > 0
             m_frame_log << "Model " << modelID << " split to " << newModelID << " using " << possibleObjects[possibleObjectID].getName() << std::endl;
@@ -1566,10 +1566,10 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &a
     return 1;
 }
 
-int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)
+int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const std::vector<StationaryObject>& possibleObjects)
 {
     int kf_return;
-    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
+    std::vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
 
 #if LOC_SUMMARY > 0
     m_frame_log << std::endl << "Ambiguous landmark update: " << ambigousObject.getName() << std::endl;
@@ -1614,20 +1614,20 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
         int maxActiveAfterMerge = c_MAX_MODELS /  (numOptions + 1);
 
         #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << m_timestamp << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << endl;
-        debug_out  <<"[" << m_timestamp << "]: Merging to " << maxActiveAfterMerge << " Max models." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << std::endl;
+        debug_out  <<"[" << m_timestamp << "]: Merging to " << maxActiveAfterMerge << " Max models." << std::endl;
         #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
         MergeModels(maxActiveAfterMerge);
 
         #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << m_timestamp << "]: " << getNumFreeModels() << " models now available." << endl;
+        debug_out  <<"[" << m_timestamp << "]: " << getNumFreeModels() << " models now available." << std::endl;
         #endif // DEBUG_LOCALISATION_VERBOSITY > 2
 
         if(getNumFreeModels() < (getNumActiveModels() * (int)numOptions)){
 
             #if DEBUG_LOCALISATION_VERBOSITY > 0
-            debug_out  <<"[" << m_timestamp << "]: " << "Not enough models. Aborting Update." << endl;
+            debug_out  <<"[" << m_timestamp << "]: " << "Not enough models. Aborting Update." << std::endl;
             #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
             return KF_OUTLIER;
@@ -1637,7 +1637,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
     #if DEBUG_LOCALISATION_VERBOSITY > 1
     //debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
     debug_out << " Distance = " << ambigousObject.measuredDistance();
-    debug_out  << " Bearing = " << ambigousObject.measuredBearing() << endl;
+    debug_out  << " Bearing = " << ambigousObject.measuredBearing() << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++)
@@ -1664,7 +1664,7 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
             {
 
                 #if DEBUG_LOCALISATION_VERBOSITY > 0
-                debug_out  <<"[" << m_timestamp << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
+                debug_out  <<"[" << m_timestamp << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << std::endl;
                 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
                 for(int m = 0; m < c_MAX_MODELS; m++) m_models[m].m_toBeActivated = false;
@@ -1704,8 +1704,8 @@ int Localisation::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigous
             }
 
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
-            else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha() << endl;
+            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << m_models[newModelID].alpha() << std::endl;
+            else debug_out  << "OUTLIER" << "  Resulting alpha = " << m_models[newModelID].alpha() << std::endl;
 #endif
 #if LOC_SUMMARY > 0
             m_frame_log << "Model " << modelID << " split to " << newModelID << " using " << possibleObjects[possibleObjectID].getName() << std::endl;
@@ -1741,7 +1741,7 @@ bool Localisation::MergeTwoModels(int index1, int index2)
     if(success == false)
     {
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-        debug_out  <<"[" << m_timestamp << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
         return success;
     }
@@ -2021,7 +2021,7 @@ void Localisation::resetPlayingStateModels()
     m_models[3].stateEstimates[1][0] = lowY + BOX_LENGTH_Y/4;
     m_models[3].stateEstimates[2][0] = currTheta;
     
-    cout<<"\n\nResetting model during playing state!";
+    std::cout<<"\n\nResetting model during playing state!";
     
 
 }
@@ -2067,7 +2067,7 @@ bool Localisation::varianceCheck(int modelID, FieldObjects* fobs)
      {	
   	  #if DEBUG_LOCALISATION_VERBOSITY > 0
 	     debug_out<<"Localisation : Saw left blue goal , and distance is : "
-                            <<fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()<<endl;
+                            <<fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredDistance()<<std::endl;
 	  #endif
           m_models[modelID].stateEstimates[2][0]=(blueDirection - fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].measuredBearing());
               changed = true;
@@ -2077,7 +2077,7 @@ bool Localisation::varianceCheck(int modelID, FieldObjects* fobs)
      {
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
 	     debug_out<<"Localisation : Saw right blue goal , and distance is : "
-                            <<fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance()<<endl;
+                            <<fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredDistance()<<std::endl;
 	#endif
 
          m_models[modelID].stateEstimates[2][0]=(blueDirection - fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].measuredBearing());
@@ -2096,7 +2096,7 @@ bool Localisation::varianceCheck(int modelID, FieldObjects* fobs)
      {
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
 	     debug_out<<"Localisation : Saw left yellow goal , and distance is : "
-                            <<fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()<<endl;
+                            <<fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].measuredDistance()<<std::endl;
 	#endif
 			     
          m_models[modelID].stateEstimates[2][0]=(yellowDirection -
@@ -2109,7 +2109,7 @@ bool Localisation::varianceCheck(int modelID, FieldObjects* fobs)
 	     
 	#if DEBUG_LOCALISATION_VERBOSITY > 0
 	     debug_out<<"Localisation : Saw left yellow goal , and distance is : "
-                            <<fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()<<endl;
+                            <<fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].measuredDistance()<<std::endl;
 	#endif
 			     
          m_models[modelID].stateEstimates[2][0]=(yellowDirection -
@@ -2129,7 +2129,7 @@ bool Localisation::varianceCheck(int modelID, FieldObjects* fobs)
 	  {
 		  
                 debug_out << "[" << m_timestamp << "]: Model[" << modelID << "]";
-                debug_out << "Bearing adjusted due to Goal. New Value = " << m_models[modelID].stateEstimates[2][0] << endl;
+                debug_out << "Bearing adjusted due to Goal. New Value = " << m_models[modelID].stateEstimates[2][0] << std::endl;
 	  }
  	#endif
    	  return changed;
@@ -2175,7 +2175,7 @@ void Localisation::ResetAll()
 {
 
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  <<"[" << m_timestamp << "]: Resetting All Models." << endl;
+    debug_out  <<"[" << m_timestamp << "]: Resetting All Models." << std::endl;
 #endif
 
     for(int modelNum = 0; modelNum < c_MAX_MODELS; modelNum++)
@@ -2230,7 +2230,7 @@ void Localisation::PrintModelStatus(int modelID)
   debug_out  <<"[" << m_currentFrameNumber << "]: Model[" << modelID << "]";
   debug_out  << "[alpha=" << m_models[modelID].alpha() << "]";
   debug_out  << " active = " << m_models[modelID].active();
-  debug_out  << " activate = " << m_models[modelID].m_toBeActivated << endl;
+  debug_out  << " activate = " << m_models[modelID].m_toBeActivated << std::endl;
 #endif
   return;
 }
@@ -2251,7 +2251,7 @@ void Localisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
 #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 2
                 debug_out  <<"[" << m_currentFrameNumber << "]: Merging Model[" << j << "][alpha=" << m_models[j].alpha() << "]";
-                debug_out  << " into Model[" << i << "][alpha=" << m_models[i].alpha() << "] " << " Merge Metric = " << mergeM << endl  ;
+                debug_out  << " into Model[" << i << "][alpha=" << m_models[i].alpha() << "] " << " Merge Metric = " << mergeM << std::endl  ;
 #endif
                 MergeTwoModels(i,j);
             }

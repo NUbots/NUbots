@@ -35,26 +35,26 @@ class NUHostInfo;
 #include <dns_sd.h>
 #include <vector>
 #include <string>
-using namespace std;
+
 
 class BonjourProvider : public QObject
 {
     Q_OBJECT
 public:
-    BonjourProvider(const vector<string>& servicetypes);
+    BonjourProvider(const std::vector<std::string>& servicetypes);
     ~BonjourProvider(); 
     
-    vector<string>& getServices();
-    vector<list<NUHostInfo> > getHosts();
+    std::vector<std::string>& getServices();
+    std::vector<std::list<NUHostInfo> > getHosts();
     
-    NUHostInfo lookupHostName(string& name);
+    NUHostInfo lookupHostName(std::string& name);
 signals:
     void newBrowserInformation();
 private slots:
     void onNewBrowserInformation();
 private:
-    vector<string> m_service_names;					//!< the names of the bonjour services we are interested in
-    vector<BonjourServiceBrowser*> m_services;		//!< a browser over each of the services in m_service_names
+    std::vector<std::string> m_service_names;					//!< the names of the bonjour services we are interested in
+    std::vector<BonjourServiceBrowser*> m_services;		//!< a browser over each of the services in m_service_names
 };
 
 #endif

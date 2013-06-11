@@ -11,9 +11,9 @@ using namespace boost::accumulators;
 GoalDetector::GoalDetector() {}
 GoalDetector::~GoalDetector() {}
 
-void GoalDetector::removeInvalid(list<Quad>& posts)
+void GoalDetector::removeInvalid(std::list<Quad>& posts)
 {
-    list<Quad>::iterator it = posts.begin();
+    std::list<Quad>::iterator it = posts.begin();
     while (it != posts.end()) {
         //remove all posts whos' aspect ratios are too low
         if ( it->aspectRatio() < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_MIN)
@@ -23,9 +23,9 @@ void GoalDetector::removeInvalid(list<Quad>& posts)
     }
 }
 
-void GoalDetector::mergeClose(list<Quad> &posts, double width_multiple_to_merge)
+void GoalDetector::mergeClose(std::list<Quad> &posts, double width_multiple_to_merge)
 {
-    list<Quad>::iterator a = posts.begin(),
+    std::list<Quad>::iterator a = posts.begin(),
                          b;
     while(a != posts.end()) {
         b = a;
@@ -34,12 +34,12 @@ void GoalDetector::mergeClose(list<Quad> &posts, double width_multiple_to_merge)
             // if the posts overlap
             // or if their centres are horizontally closer than the largest widths multiplied by width_multiple_to_merge
             if(a->overlapsHorizontally(*b) ||
-               abs( a->getCentre().x - b->getCentre().x ) <= max(a->getAverageWidth(), b->getAverageWidth())*width_multiple_to_merge) {
+               abs( a->getCentre().x - b->getCentre().x ) <= std::max(a->getAverageWidth(), b->getAverageWidth())*width_multiple_to_merge) {
                 // get outer lines
-                Point tl( min(a->getTopLeft().x, b->getTopLeft().x)         , min(a->getTopLeft().y, b->getTopLeft().y) ),
-                      tr( max(a->getTopRight().x, b->getTopRight().x)       , min(a->getTopRight().y, b->getTopRight().y) ),
-                      bl( min(a->getBottomLeft().x, b->getBottomLeft().x)   , max(a->getBottomLeft().y, b->getBottomLeft().y) ),
-                      br( max(a->getBottomRight().x, b->getBottomRight().x) , max(a->getBottomRight().y, b->getBottomRight().y) );
+                Point tl( std::min(a->getTopLeft().x, b->getTopLeft().x)         , std::min(a->getTopLeft().y, b->getTopLeft().y) ),
+                      tr( std::max(a->getTopRight().x, b->getTopRight().x)       , std::min(a->getTopRight().y, b->getTopRight().y) ),
+                      bl( std::min(a->getBottomLeft().x, b->getBottomLeft().x)   , std::max(a->getBottomLeft().y, b->getBottomLeft().y) ),
+                      br( std::max(a->getBottomRight().x, b->getBottomRight().x) , std::max(a->getBottomRight().y, b->getBottomRight().y) );
 
                 //replace original two quads with the new one
                 a->set(bl, tl, tr, br);
@@ -53,7 +53,7 @@ void GoalDetector::mergeClose(list<Quad> &posts, double width_multiple_to_merge)
     }
 }
 
-Vector2<double> GoalDetector::calculateSegmentLengthStatistics(const vector<ColourSegment> segments)
+Vector2<double> GoalDetector::calculateSegmentLengthStatistics(const std::vector<ColourSegment> segments)
 {
     accumulator_set<double, stats<tag::mean, tag::variance> > acc;
 
@@ -64,9 +64,9 @@ Vector2<double> GoalDetector::calculateSegmentLengthStatistics(const vector<Colo
     return Vector2<double>(mean(acc), sqrt(variance(acc)));
 }
 
-vector<Goal> GoalDetector::assignGoals(const list<Quad>& candidates) const
+std::vector<Goal> GoalDetector::assignGoals(const std::list<Quad>& candidates) const
 {
-    vector<Goal> goals;
+    std::vector<Goal> goals;
     if(candidates.size() == 2) {
         //there are exactly two candidates, identify each as left or right
         Quad post1 = candidates.front(),

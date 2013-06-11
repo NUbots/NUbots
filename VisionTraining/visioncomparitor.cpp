@@ -27,7 +27,7 @@ VisionComparitor::~VisionComparitor()
 *   @param config0 File name for parameter set 0
 *   @param config1 File name for parameter set 1
 */
-void VisionComparitor::run(string image_name, string sensor_name, string lut_name, string config0, string config1)
+void VisionComparitor::run(std::string image_name, std::string sensor_name, std::string lut_name, std::string config0, std::string config1)
 {
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();
     ifstream image_file(image_name.c_str());

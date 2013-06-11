@@ -32,7 +32,7 @@
 
 #include "../MotionJob.h"
 #include <vector>
-using namespace std;
+
 
 class HeadNodJob : public MotionJob
 {
@@ -45,19 +45,19 @@ public:
     };
 public:
     HeadNodJob(head_nod_t nodtype, float centreangle = 0);
-    HeadNodJob(istream& input);
+    HeadNodJob(std::istream& input);
     ~HeadNodJob();
     
     head_nod_t getNodType();
     float getCentreAngle();
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const HeadNodJob& job);
-    friend ostream& operator<<(ostream& output, const HeadNodJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadNodJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadNodJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
     head_nod_t m_nod_type;
     float m_centre_angle;

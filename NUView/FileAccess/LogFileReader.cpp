@@ -109,7 +109,7 @@ int LogFileReader::nextFrame()
         int curr = 0;
         try{
             curr = currentFileReader->nextFrame();
-            debug << "Processing Frame: " << curr << endl;
+            debug << "Processing Frame: " << curr << std::endl;
         }
         catch(exception e)
         {

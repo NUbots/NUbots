@@ -26,7 +26,7 @@
 
 #include "UdpPort.h"
 #include <fstream>
-using namespace std;
+
 class NUSensorsData;
 class SSLVisionPacket;
 class TeamInformation;
@@ -46,7 +46,7 @@ private:
     TeamInformation* m_team_info;
     SSLVisionPacket* m_packet;
     int m_ssl_id;
-	ofstream storage;
+	std::ofstream storage;
 };
 
 #endif

@@ -53,14 +53,14 @@
     #include <netinet/in.h>
 #endif
 
-using namespace std;
+
 
 NUPlatform* Platform = NULL;
 
 NUPlatform::NUPlatform()
 {
     #if DEBUG_NUPLATFORM_VERBOSITY > 1
-        debug << "NUPlatform::NUPlatform()" << endl;
+        debug << "NUPlatform::NUPlatform()" << std::endl;
     #endif
     m_camera = NULL;
     m_actionators = NULL;
@@ -74,7 +74,7 @@ NUPlatform::NUPlatform()
 NUPlatform::~NUPlatform()
 {
     #if DEBUG_NUPLATFORM_VERBOSITY > 0
-        debug << "NUPlatform::~NUPlatform()" << endl;
+        debug << "NUPlatform::~NUPlatform()" << std::endl;
     #endif
     if(m_camera) delete m_camera;
     m_camera = 0;
@@ -92,7 +92,7 @@ void NUPlatform::init()
 {
     initClock();
     initIdentity();
-    debug << "NUPlatform Name: " << m_name << " Number: " << m_robot_number << " Team: " << m_team_number << " MAC: " << m_mac_address << endl;
+    debug << "NUPlatform Name: " << m_name << " Number: " << m_robot_number << " Team: " << m_team_number << " MAC: " << m_mac_address << std::endl;
 }
 
 /*! @brief Initialises the NUPlatform's clock 
@@ -128,7 +128,7 @@ void NUPlatform::initName()
     // By default the robot's name should be the hostname
     char hostname[255];
     gethostname(hostname, 255);
-    m_name = string(hostname); 
+    m_name = std::string(hostname); 
 }
 
 /*! @brief Initialises the NUPlatform's robot number
@@ -157,12 +157,12 @@ void NUPlatform::initNumber()
 void NUPlatform::initTeam()
 {
     // By default the team number is stored in a config file
-    ifstream teamfile((string(CONFIG_DIR) + string("Team.cfg")).c_str());      // the team number is stored in a file
+    std::ifstream teamfile((std::string(CONFIG_DIR) + std::string("Team.cfg")).c_str());      // the team number is stored in a file
     if (teamfile.is_open())
         m_team_number = MotionFileTools::toFloat(teamfile);
     else
     {
-        errorlog << "NUPlatform::initTeam(). Unable to load Team.cfg" << endl;
+        errorlog << "NUPlatform::initTeam(). Unable to load Team.cfg" << std::endl;
         m_team_number = 0;
     }
     teamfile.close();
@@ -178,7 +178,7 @@ void NUPlatform::initMAC()
     #ifndef TARGET_OS_IS_WINDOWS
         int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
         if (sockfd == -1) 
-            errorlog << "NUPlatform::initMAC(). Unable to open socket, so unable to get mac address." << endl;
+            errorlog << "NUPlatform::initMAC(). Unable to open socket, so unable to get mac address." << std::endl;
         else
         {
             struct ifreq ifr;
@@ -199,11 +199,11 @@ void NUPlatform::initMAC()
                 }
                 if (success)
                 {   // convert the ifr.ifr_hwaddr.sa_data to "XX-XX-XX-XX-XX"
-                    stringstream ss;
-                    ss << hex << setw(2) << setfill('0');
+                    std::stringstream ss;
+                    ss << std::hex << std::setw(2) << std::setfill('0');
                     for (int i=0; i<5; i++)
-                        ss << setw(2) << setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[i] << "-";
-                    ss << setw(2) << setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[5];
+                        ss << std::setw(2) << std::setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[i] << "-";
+                    ss << std::setw(2) << std::setfill('0') << (int) (unsigned char) ifr.ifr_hwaddr.sa_data[5];
                     m_mac_address = ss.str();
                 }
             #endif
@@ -213,7 +213,7 @@ void NUPlatform::initMAC()
 }
 
 /*! @brief Returns the name of the robot */
-string& NUPlatform::getName()
+std::string& NUPlatform::getName()
 {
     return m_name;
 }
@@ -231,7 +231,7 @@ int NUPlatform::getTeamNumber()
 }
 
 /*! @brief Returns the robot's mac address. */
-string& NUPlatform::getMacAddress()
+std::string& NUPlatform::getMacAddress()
 {
     return m_mac_address;
 }
@@ -374,10 +374,10 @@ void NUPlatform::processActions()
 
 void NUPlatform::process(JobList* jobs, NUIO* m_io)
 {
-    static list<Job*>::iterator it;     // the iterator over the jobs
+    static std::list<Job*>::iterator it;     // the iterator over the jobs
     for (it = jobs->camera_begin(); it != jobs->camera_end();)
     {
-        //debug  << "NUPlatform::Process - Processing Job" << endl;
+        //debug  << "NUPlatform::Process - Processing Job" << std::endl;
         if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
         {   // process a camera settings job
             CameraSettings settings;
@@ -385,7 +385,7 @@ void NUPlatform::process(JobList* jobs, NUIO* m_io)
             job = (ChangeCameraSettingsJob*) (*it);
             settings = job->getSettings();
             #if DEBUG_NUPLATFORM_VERBOSITY > 4
-                debug << "NUPlatform::process(): Processing a camera job." << endl;
+                debug << "NUPlatform::process(): Processing a camera job." << std::endl;
             #endif
             
             if( settings.p_exposure.get() == 0 &&
@@ -393,7 +393,7 @@ void NUPlatform::process(JobList* jobs, NUIO* m_io)
                 settings.p_gain.get()     == 0 )
             {
                 #if DEBUG_NUPLATFORM_VERBOSITY > 4
-                    debug << "NUPlatform::Process - Send CAMERASETTINGS Request Recieved: " << endl;
+                    debug << "NUPlatform::Process - Send CAMERASETTINGS Request Recieved: " << std::endl;
                 #endif
                 JobList toSendList;
                 ChangeCameraSettingsJob newJob(m_camera->getSettings());
@@ -470,14 +470,14 @@ bool NUPlatform::verifyVision(int framesdropped, int framesprocessed)
 
 /*! @brief Sets one of the 8 platform dependent leds to the given value at the given time
  */
-void NUPlatform::add(const LedIndices& led, double time, const vector<float>& value)
+void NUPlatform::add(const LedIndices& led, double time, const std::vector<float>& value)
 {
     // this function is really just for the NAO because it has shit-loads of little leds
 }
 
 /*! @brief Toggles one of the 8 platform dependent leds to the given value at the given time
  */
-void NUPlatform::toggle(const LedIndices& led, double time, const vector<float>& value)
+void NUPlatform::toggle(const LedIndices& led, double time, const std::vector<float>& value)
 {
     // this function is really just for the NAO because it has shit-loads of little leds
 }

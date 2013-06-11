@@ -12,7 +12,7 @@
     RLAgent rlagent;
     try{
         loadAgent(Filename);
-    }catch (string s){
+    }catch (std::string s){
         rlagent.setParameters(0.1,0.5,0.5,1.0,1,5);//example parameters
         rlagent.initialiseAgent(observation_size,number_of_actions,resolution_of_FunctionApproximator);
     }
@@ -76,13 +76,13 @@ void RLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numbe
     num_inputs = numberOfInputs;
     num_outputs = numberOfOutputs;
     num_hidden = numberOfHiddens;
-    vector<float> lv(numberOfOutputs,0.0);
+    std::vector<float> lv(numberOfOutputs,0.0);
     last_values = lv;
 
 
     //Perform initreturnial observations, values and rewards list setups. Required to offset learning updates.
-    vector<float> dummy_observation(numberOfInputs,0);
-    vector<int> vect(num_outputs,1);
+    std::vector<float> dummy_observation(numberOfInputs,0);
+    std::vector<int> vect(num_outputs,1);
     getAction(dummy_observation,vect);
     giveReward(0);
 
@@ -97,13 +97,13 @@ void RLAgent::initialiseAgent(int numberOfInputs, int numberOfOutputs, int numbe
         -N(=memory_length) most recent rewards, values and observations
     Note: calling doLearning before saving agent will minimise the save file size.
  */
-void RLAgent::saveAgent(string agentName){
+void RLAgent::saveAgent(std::string agentName){
     FunctionApproximator->saveApproximator(agentName+"_func_approx");
-    //cout<<"funapp saved"<<endl;
-    ofstream save_file;
-    stringstream file_name;
+    //std::cout<<"funapp saved"<<std::endl;
+    std::ofstream save_file;
+    std::stringstream file_name;
     file_name<<save_location<<agentName<<"_agent";
-    save_file.open(file_name.str().c_str(),fstream::out);
+    save_file.open(file_name.str().c_str(),std::fstream::out);
 
     save_file << alpha<<" ";
     save_file << beta<<" ";
@@ -130,7 +130,7 @@ void RLAgent::saveAgent(string agentName){
     for(int i =0; i< memory_size;i++){
         for (int j=0;j<(int)observations[i].size();j++){
             save_file<<observations[i][j]<<" ";
-           // cout<<"Saving observation: "<< observations[i][j]<<endl;
+           // std::cout<<"Saving observation: "<< observations[i][j]<<std::endl;
         }
         save_file <<"\n";
     }
@@ -161,7 +161,7 @@ void RLAgent::saveAgent(string agentName){
         }
         save_file <<"\n";
     }
-    cout<<"RLAgent Saved Successfully"<<endl;
+    std::cout<<"RLAgent Saved Successfully"<<std::endl;
     save_file.close();
 
 }
@@ -174,17 +174,17 @@ void RLAgent::saveAgent(string agentName){
             -N most recent rewards, observations, values  for motivation function
 
 */
-void RLAgent::loadAgent(string agentName){
+void RLAgent::loadAgent(std::string agentName){
 
     FunctionApproximator->loadApproximator(agentName+"_func_approx");
-    ifstream load_file;
-    stringstream file_name;
+    std::ifstream load_file;
+    std::stringstream file_name;
     file_name<<save_location<<agentName<<"_agent";
-    load_file.open(file_name.str().c_str(),fstream::in);
+    load_file.open(file_name.str().c_str(),std::fstream::in);
     if(!load_file.good()) {
-        throw string("RLAgent::loadAgent - file not found ") + file_name.str();
+        throw std::string("RLAgent::loadAgent - file not found ") + file_name.str();
     }
-    string tmp;
+    std::string tmp;
 
     load_file >> alpha;
     load_file >> beta;
@@ -206,7 +206,7 @@ void RLAgent::loadAgent(string agentName){
     int memory_size;
     load_file >> memory_size;
 
-    vector<vector<float> > obs(memory_size, vector<float> (num_inputs,0));
+    std::vector<std::vector<float> > obs(memory_size, std::vector<float> (num_inputs,0));
     observations = obs;
     //Load observations:
     for(int i =0; i< memory_size;i++){
@@ -215,7 +215,7 @@ void RLAgent::loadAgent(string agentName){
         }
     }
 
-    vector<float> rew(memory_size, 0);
+    std::vector<float> rew(memory_size, 0);
     rewards = rew;
 
     //Load rewards
@@ -224,38 +224,38 @@ void RLAgent::loadAgent(string agentName){
     }
 
 
-    vector<vector<float> > val(memory_size, vector<float> (num_outputs,0));
+    std::vector<std::vector<float> > val(memory_size, std::vector<float> (num_outputs,0));
     values = val;
     //Load values
     for(int i =0; i< memory_size;i++){
         for (int j=0;j<values[i].size();j++){
             load_file>>values[i][j];
-            //cout<<"Values: " << values[i][j]<< endl;
+            //std::cout<<"Values: " << values[i][j]<< std::endl;
         }
     }
 
-    vector<int> act(memory_size);
-    actions = act;//init actions vector to zeros
+    std::vector<int> act(memory_size);
+    actions = act;//init actions std::vector to zeros
     for(int i =0; i< memory_size;i++){
         load_file >> actions[i];
     }
 
-    vector<vector<int> > validities(memory_size, vector<int> (num_outputs,1));
+    std::vector<std::vector<int> > validities(memory_size, std::vector<int> (num_outputs,1));
     action_validities = validities;
     //Load validities
     for(int i =0; i< memory_size;i++){
         for (int j=0;j<action_validities[i].size();j++){
             load_file>>action_validities[i][j];
-            //cout<<"Values: " << values[i][j]<< endl;
+            //std::cout<<"Values: " << values[i][j]<< std::endl;
         }
     }
 
     if(num_inputs == 0 or
         num_outputs == 0 or
         num_hidden == 0 )  {
-        throw string("RLAgent::loadAgent - warning: num_inputs,outputs or hiddens are zero") + file_name.str();
+        throw std::string("RLAgent::loadAgent - warning: num_inputs,outputs or hiddens are zero") + file_name.str();
     }
-    cout<<"RLAgent::loadAgent - RLAgent loaded successfully.";
+    std::cout<<"RLAgent::loadAgent - RLAgent loaded successfully.";
 
     load_file.close();
 }
@@ -291,9 +291,9 @@ void RLAgent::setParameters(float alpha, float beta, float gamma, float lambda,i
 void RLAgent::giveReward(float reward){
     //Store rewards for learning:
     rewards.push_back(reward);
-    stringstream text;
+    std::stringstream text;
     text<<"Reward: "<<reward<<"\n";
-    string text_ = text.str();
+    std::string text_ = text.str();
     log(text_);
     //Store values for learning:
     values.push_back(last_values);
@@ -306,11 +306,11 @@ void RLAgent::giveReward(float reward){
         Picks the action that will maximise reward based on the function approximator. Returns an int between 0 and num_outputs-1.
         By default this method stores data for learning: observations.
 */
-int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
+int RLAgent::getAction(std::vector<float> observation,std::vector<int> valid_actions){
 
     if(valid_actions.size()!=num_outputs){
-        cout<<"Throwing string RLAgent::getAction(..) ..."<<endl;
-        throw string("RLAgent::getAction - valid actions list is incorrect length.");
+        std::cout<<"Throwing std::string RLAgent::getAction(..) ..."<<std::endl;
+        throw std::string("RLAgent::getAction - valid actions std::list is incorrect length.");
     }
     int BestAction = rand()%num_outputs;
     //Store observation and validities for learning later on:
@@ -324,13 +324,13 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
     }
 
     //Logging:
-    stringstream text;
+    std::stringstream text;
     text << "Observation: ";
     for(int i = 0; i< observation.size();i++){
         text<<observation[i]<<" ";
     }
     text << " \n";
-    string text_ = text.str();
+    std::string text_ = text.str();
     log(text_);
 
     //Store last values
@@ -359,7 +359,7 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
             }
             else
             {
-                cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<endl;
+                std::cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<std::endl;
                 BestAction = rand()%(num_outputs);
             }
         }
@@ -367,7 +367,7 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
         actions.push_back(BestAction);        
 
         //Logging:
-        stringstream text2;
+        std::stringstream text2;
         text2 << "Action Taken: "<<BestAction<<" \n";
         text_ = text2.str();
         log(text_);
@@ -410,13 +410,13 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
             }
         }
         else{
-            cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<endl;
+            std::cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<std::endl;
             BestAction = rand()%(num_outputs);
         }
 
         actions.push_back(BestAction);
         //Logging:
-        stringstream text2;
+        std::stringstream text2;
         text2 << "Action Taken: "<<BestAction<<" \n";
         text_ = text2.str();
         log(text_);
@@ -428,7 +428,7 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
 
 
     //Logging:
-    stringstream text2;
+    std::stringstream text2;
     text2 << "Action Taken: "<<BestAction<<" \n";
     text_ = text2.str();
     log(text_);
@@ -448,11 +448,11 @@ void RLAgent::doLearning(){
 
             int second_last_action = actions[observation_num];
             int last_action = actions[observation_num+1];
-           // cout<< "value for observation "<< observation_num<< ", action "<< second_last_action<<" of "<<actions.size()<<" updated from: " <<values[observation_num][second_last_action];
+           // std::cout<< "value for observation "<< observation_num<< ", action "<< second_last_action<<" of "<<actions.size()<<" updated from: " <<values[observation_num][second_last_action];
 
             //Q-learning:
             values[observation_num][second_last_action] += alpha*(rewards[observation_num+1]+gamma*max(values[observation_num+1],action_validities[observation_num+1])-values[observation_num][second_last_action]);//Page 55 of MoRL book Merrick+Maher
-            //cout<<" to: " <<values[observation_num][second_last_action]<<"\n"<<endl;
+            //std::cout<<" to: " <<values[observation_num][second_last_action]<<"\n"<<std::endl;
             learning_done = true;
 
         }
@@ -476,8 +476,8 @@ void RLAgent::doLearning(){
         Returns the maximum value of the floats in a vector<float>.
 */
 
-float RLAgent::max(vector<float> x, vector<int> valid_actions){
-    //Randomly choose start vector
+float RLAgent::max(std::vector<float> x, std::vector<int> valid_actions){
+    //Randomly choose start std::vector
     int ran = rand()%num_outputs;
     //choose best valid action value
     float best_value = x[ran];
@@ -491,22 +491,22 @@ float RLAgent::max(vector<float> x, vector<int> valid_actions){
 /*! @brief
        Logs strings to the file RL_log.log
 */
-void RLAgent::log(string text){
-    ofstream log_file;
-    stringstream s;
+void RLAgent::log(std::string text){
+    std::ofstream log_file;
+    std::stringstream s;
     s<<save_location<<"RLearning.log";
-    log_file.open((s.str()).c_str(),ios_base::app);
+    log_file.open((s.str()).c_str(),std::ios_base::app);
 
     log_file << text;
-    //cout<<"Logging: "<<text<<endl;
+    //std::cout<<"Logging: "<<text<<std::endl;
     log_file.close();
 }
 
 /*! @brief
-       Returns the state-action values for the given state vector<float> v.
+       Returns the state-action values for the given state std::vector<float> v.
 */
 
-vector<float> RLAgent::getValues(vector<float> v){
+std::vector<float> RLAgent::getValues(std::vector<float> v){
     return FunctionApproximator->getValues(v);
 }
 
@@ -515,10 +515,10 @@ vector<float> RLAgent::getValues(vector<float> v){
        Checks the policy at state obs WITHOUT recording the action, reward, value, observation for learning.
         Will not choose with epsilon-greedy but will choose with softmax if set use_soft_max == true.
 */
-int RLAgent::checkAction(vector<float> obs, vector<int> valid_actions){
+int RLAgent::checkAction(std::vector<float> obs, std::vector<int> valid_actions){
     if(valid_actions.size()!=num_outputs)
-        throw string("RLAgent::getAction - valid actions list is incorrect length.");
-    vector<float> values = FunctionApproximator->getValues(obs);
+        throw std::string("RLAgent::getAction - valid actions list is incorrect length.");
+    std::vector<float> values = FunctionApproximator->getValues(obs);
     if (use_soft_max) return getSoftMaxAction(values,valid_actions);
     int BestAction = 0;
     float BestReward = values[0];
@@ -532,9 +532,9 @@ int RLAgent::checkAction(vector<float> obs, vector<int> valid_actions){
     return BestAction;
 }
 
-int  RLAgent::getSoftMaxAction(vector<float> values, vector<int> valid_actions){
+int  RLAgent::getSoftMaxAction(std::vector<float> values, std::vector<int> valid_actions){
 
-    vector<float> probabilities;
+    std::vector<float> probabilities;
     //calculate non-normalised probabilities
     float total_non_normalised =0;
     for(int i = 0; i<values.size();i++){

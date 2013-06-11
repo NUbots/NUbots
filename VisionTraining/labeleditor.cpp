@@ -67,7 +67,7 @@ LabelEditor::~LabelEditor()
 *   @param image_name Filename for image stream.
 *   @return Integer return code.
 */
-int LabelEditor::run(string dir, string label_name, string image_name)
+int LabelEditor::run(std::string dir, std::string label_name, std::string image_name)
 {
     VisionControlWrapper* vision = VisionControlWrapper::getInstance(); //vision wrapper
     NUImage frame;                              //frame to display
@@ -75,7 +75,7 @@ int LabelEditor::run(string dir, string label_name, string image_name)
             image_file(image_name.c_str());     //input frames
     LookUpTable lut;                            //for classification
 
-    lut.loadLUTFromFile(dir + string("default.lut"));
+    lut.loadLUTFromFile(dir + std::string("default.lut"));
 
     //read in the labels
     if(!vision->readLabels(label_file, m_ground_truth_full)) {
@@ -86,7 +86,7 @@ int LabelEditor::run(string dir, string label_name, string image_name)
     m_frame_no = 0;
 
     //file for output labels
-    ofstream label_out((dir + string("opt_label.lbl")).c_str());
+    ofstream label_out((dir + std::string("opt_label.lbl")).c_str());
 
     //run over entire batch
     while(!m_halted && m_frame_no < m_total_frames) {
@@ -109,10 +109,10 @@ int LabelEditor::run(string dir, string label_name, string image_name)
         }
 
         //write out labels
-        label_out << m_ground_truth.size() << endl;
+        label_out << m_ground_truth.size() << std::endl;
         for(unsigned int i=0; i<m_ground_truth.size(); i++) {
             m_ground_truth.at(i)->printLabel(label_out);
-            label_out << endl;
+            label_out << std::endl;
         }
         m_frame_no++;
     }
@@ -124,10 +124,10 @@ int LabelEditor::run(string dir, string label_name, string image_name)
             m_ground_truth = m_ground_truth_full.at(k);
 
             //write out labels
-            label_out << m_ground_truth.size() << endl;
+            label_out << m_ground_truth.size() << std::endl;
             for(unsigned int i=0; i<m_ground_truth.size(); i++) {
                 m_ground_truth.at(i)->printLabel(label_out);
-                label_out << endl;
+                label_out << std::endl;
             }
         }
         QMessageBox::information(this, "Finished", QString("Results in ") + QString(dir.c_str()) + QString("opt_label.lbl"));
@@ -185,12 +185,12 @@ void LabelEditor::display(const NUImage& frame, const LookUpTable& lut)
 *   @param img The QImage to render to (output param).
 *   @param gt The labels to render
 */
-void LabelEditor::renderFrame(const NUImage& frame, QImage& img, vector<VisionFieldObject*>& gt) const
+void LabelEditor::renderFrame(const NUImage& frame, QImage& img, std::vector<VisionFieldObject*>& gt) const
 {
     unsigned char r, g, b;    //r,g,b conversion values
     int h = frame.getHeight();
     int w = frame.getWidth();
-    vector<const VisionFieldObject*>::const_iterator it;
+    std::vector<const VisionFieldObject*>::const_iterator it;
 
     //initialise image
     img = QImage(w, h, QImage::Format_RGB888);
@@ -247,12 +247,12 @@ void LabelEditor::renderFrame(const NUImage& frame, QImage& img, vector<VisionFi
 */
 void LabelEditor::addObject()
 {
-    QStringList string_list;                //selection list
+    Qstd::stringstd::list std::string_std::list;                //selection std::list
     VFO_ID new_id;       //id for the added object
     VisionFieldObject* new_object = NULL;   //new object
     bool ok;                                //to detect if the user hits cancel
 
-    //generate a list of all object types
+    //generate a std::list of all object types
     for(int i=0; i < numVFOIDs(); i++) {
         VFO_ID id = VFOFromInt(i);
         string_list.append(QString(VFOName(id).c_str()));
@@ -277,7 +277,7 @@ void LabelEditor::addObject()
         else if(new_id == FIELDLINE) {
             // generate endpoints for new line
             Line l(150, 0);
-            vector<Point> p;
+            std::vector<Point> p;
 
             if(l.isVertical())
             {
@@ -352,7 +352,7 @@ void LabelEditor::updateCombo() {
     ui->comboBox->clear();
     //add all current objects to selection box
     for(unsigned int i=0; i<m_ground_truth.size(); i++) {
-        cout << m_ground_truth.at(i)->getName() << endl;
+        std::cout << m_ground_truth.at(i)->getName() << std::endl;
         ui->comboBox->addItem(QString(m_ground_truth.at(i)->getName().c_str()));
     }
     m_current_object = cur;
@@ -366,10 +366,10 @@ void LabelEditor::updateControls()
     if(!m_ground_truth.empty()) {
         //if there are labels add controls for the current object
         VisionFieldObject* vfo = m_ground_truth.at(m_current_object);
-        vector< pair<string, Vector3<int> > > vi;
-        pair<string, Vector3<int> > pi;
-        vector< pair<string, Vector3<double> > > vd;
-        pair<string, Vector3<double> > pd;
+        std::vector< pair<std::string, Vector3<int> > > vi;
+        pair<std::string, Vector3<int> > pi;
+        std::vector< pair<std::string, Vector3<double> > > vd;
+        pair<std::string, Vector3<double> > pd;
         VFO_ID id = vfo->getID();
 
         //determine what to show for each object type
@@ -423,7 +423,7 @@ void LabelEditor::updateControls()
 
 /** @brief Sets the integer value controls.
 */
-void LabelEditor::setInts(vector< pair<string, Vector3<int> > > vals)
+void LabelEditor::setInts(std::vector< pair<std::string, Vector3<int> > > vals)
 {
     //hide all controls
     for(int i=0; i<m_text_labels.size(); i++) {
@@ -450,7 +450,7 @@ void LabelEditor::setInts(vector< pair<string, Vector3<int> > > vals)
 
 /** @brief Sets the decimal value controls.
 */
-void LabelEditor::setDoubles(vector<pair<string, Vector3<double> > > vals)
+void LabelEditor::setDoubles(std::vector<pair<std::string, Vector3<double> > > vals)
 {
     //hide all controls
     for(int i=0; i<m_text_labels.size(); i++) {
@@ -507,7 +507,7 @@ void LabelEditor::updateValues()
                    m_d_spins[1]->value());  // phi
 
             // generate endpoints for new line
-            vector<Point> p;
+            std::vector<Point> p;
 
             if(l.isVertical())
             {

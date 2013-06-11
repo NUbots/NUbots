@@ -49,19 +49,19 @@ void MotionFileSyntaxHighlighter::highlightBlock(const QString& text)
 
 void MotionFileSyntaxHighlighter::checkSyntax()
 {
-    /*stringstream text(m_editor->toPlainText().toStdString());
-    string line;
+    /*std::stringstream text(m_editor->toPlainText().toStdString());
+    std::string line;
     while (text.good())
     {
     	getline(text, line);
         if (not bracketsOK(line))
-            debug << "syntax broken" << endl;
+            debug << "syntax broken" << std::endl;
     }*/
     // for each line check that there are an equal number of ([]) in each line
     
 }
 
-bool MotionFileSyntaxHighlighter::bracketsOK(const string& line)
+bool MotionFileSyntaxHighlighter::bracketsOK(const std::string& line)
 {
     int brackets = 0;				// the sum of the brackets +1 for [, -1 for ]
     for (size_t i=0; i<line.size(); i++)

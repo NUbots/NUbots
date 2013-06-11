@@ -50,6 +50,8 @@ NUBlackboard::NUBlackboard()
     lookForGoals = true;
     lookForFieldPoints = false; // disabled until working
     lookForObstacles = true;
+	horizontalScans = NULL;
+	verticalScans = NULL;
 }
 
 NUBlackboard::~NUBlackboard()

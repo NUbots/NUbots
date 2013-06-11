@@ -43,7 +43,7 @@ class SoccerFSMState;       // ChaseState is a SoccerFSMState
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 class ChaseSubState : public SoccerState
 {
@@ -77,7 +77,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "GoToBall" << endl;
+            debug << "GoToBall" << std::endl;
         #endif
         if (m_parent->stateChanged() or m_data->CurrentTime - m_previous_time > 200)
         {
@@ -117,24 +117,24 @@ protected:
                 ballbearing = ball.measuredBearing();
                 balldistance = ball.measuredDistance();//*cos(ball.measuredElevation();
         }
-        vector<float> speed;
+        std::vector<float> speed;
         if(not iskicking)
         {
             /*Attempt to fix kick (jake):
               swapped from goToBallDirectWithSidewardsKick to goToBall*/
             speed = BehaviourPotentials::goToBall(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance-4.f,42.);
            // speed = BehaviourPotentials::goToBallDirectWithSidewardsKick(ball, self, BehaviourPotentials::getBearingToOpponentGoal(m_field_objects, m_game_info),targetKickDistance,37.);
-            vector<float> result;
+            std::vector<float> result;
 
             // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
             result = speed;
             
             //if ((m_pan_started and not m_pan_finished or not m_pan_started) and ball.estimatedDistance() < targetKickDistance and BehaviourPotentials::opponentsGoalLinedUp(m_field_objects, m_game_info))
-            //    result = vector<float>(3,0);
+            //    result = std::vector<float>(3,0);
             
             m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
-                debug << m_data->CurrentTime << ": Going to Ball - (" << result[0] << ", " << result[1] << ", " << result[2] << ")" << endl;
+                debug << m_data->CurrentTime << ": Going to Ball - (" << result[0] << ", " << result[1] << ", " << result[2] << ")" << std::endl;
             #endif
         }
         
@@ -146,9 +146,9 @@ protected:
               // && ball.TimeSeen() > 0 && m_pan_finished)
         {
             //m_jobs->addMotionJob(new WalkJob(0, 0, 0));
-            vector<float> kickPosition(2,0);
-            vector<float> targetPosition(2,0);
-            vector<float> goalPosition(3,0);
+            std::vector<float> kickPosition(2,0);
+            std::vector<float> targetPosition(2,0);
+            std::vector<float> goalPosition(3,0);
             goalPosition = self.CalculateDifferenceFromGoal(BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info));
             kickPosition[0] = balldistance * cos(ballbearing);
             kickPosition[1] = balldistance * sin(ballbearing);
@@ -156,10 +156,10 @@ protected:
             targetPosition[1] = goalPosition[0] * sin(goalPosition[1]);
             KickJob* kjob = new KickJob(0,kickPosition, targetPosition);
             m_jobs->addMotionJob(kjob);
-            //cout << "Kick! " << ballbearing << "; " << goalPosition[1] << endl;
-           // cout << "GoalRel: " << targetPosition[0] << ", " << targetPosition[1] << endl;
+            //std::cout << "Kick! " << ballbearing << "; " << goalPosition[1] << std::endl;
+           // std::cout << "GoalRel: " << targetPosition[0] << ", " << targetPosition[1] << std::endl;
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
-                debug << m_data->CurrentTime << ": Kicking Ball at distance " << balldistance << endl;
+                debug << m_data->CurrentTime << ": Kicking Ball at distance " << balldistance << std::endl;
             #endif
         } 
         //Get head behaviour decision
@@ -192,7 +192,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "FindTarget" << endl;
+            debug << "FindTarget" << std::endl;
         #endif
     }
 };
@@ -210,7 +210,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "Kick" << endl;
+            debug << "Kick" << std::endl;
         #endif
     }
 };

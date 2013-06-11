@@ -28,7 +28,7 @@
 
 #include <string>
 #include <vector>
-using namespace std;
+
 
 class NUData
 {
@@ -48,14 +48,14 @@ public:
          	@param name a unigue name for the sensor/actionator
          	@param list the list of id_t's to add this new id_t to
          */
-        id_t(int id, const string& name, vector<NUData::id_t*>& list) 
+        id_t(int id, const std::string& name, std::vector<NUData::id_t*>& list) 
         {
             Id = id; 
             Name = name;
             list.push_back(this);
         }
         int Id;				//!< unique id
-        string Name;		//!< unique name
+        std::string Name;		//!< unique name
         bool operator==(const id_t& other) const
         {
             return Id == other.Id;
@@ -64,9 +64,9 @@ public:
         {
             return Id == other;
         }
-        bool operator==(const string& other) const
+        bool operator==(const std::string& other) const
         {
-            return other.find(Name) != string::npos;
+            return other.find(Name) != std::string::npos;
         }
         bool operator!=(const id_t& other) const
         {
@@ -95,8 +95,8 @@ public:
             return Name[0] == 'R';
         }
         
-        friend ostream& operator <<(ostream& output, const id_t* id);
-        friend istream& operator >>(istream& input, id_t* id);
+        friend std::ostream& operator <<(std::ostream& output, const id_t* id);
+        friend std::istream& operator >>(std::istream& input, id_t* id);
     };
         
     // Common aliases
@@ -159,30 +159,30 @@ public:
     double CurrentTime;    
     double PreviousTime;
     
-    vector<id_t*> mapIdToIds(const id_t& id);
+    std::vector<id_t*> mapIdToIds(const id_t& id);
     NUData::id_t* getId(const std::string& name);
 protected:
-    static vector<id_t*> m_common_ids;
-    vector<id_t*> m_ids_copy;                       //!< this is a non-static copy of the ids. It is non-static so that it is not shared between derived classes (ie sensors and actionators have different ids)
+    static std::vector<id_t*> m_common_ids;
+    std::vector<id_t*> m_ids_copy;                       //!< this is a non-static copy of the ids. It is non-static so that it is not shared between derived classes (ie sensors and actionators have different ids)
 
     // #warning This public statement is for debugging on the CM730Errors branch. It should be removed.
 public:
-    vector<vector<int> > m_id_to_indices;
-    vector<int> m_available_ids;
+    std::vector<std::vector<int> > m_id_to_indices;
+    std::vector<int> m_available_ids;
     
 protected:
-    void addDevices(const vector<string>& hardwarenames);
+    void addDevices(const std::vector<std::string>& hardwarenames);
     
     virtual bool belongsToGroup(const id_t& member, const id_t& group);
-    virtual bool belongsToGroup(const string& name, const id_t& group);
+    virtual bool belongsToGroup(const std::string& name, const id_t& group);
 
-    const vector<int>& mapIdToIndices(const id_t& id) const;
+    const std::vector<int>& mapIdToIndices(const id_t& id) const;
     
     // debug tools
-    void printMap(ostream& output);
+    void printMap(std::ostream& output);
 private:
-    string getStandardName(const string& hardwarename);
-    vector<string> standardiseNames(const vector<string>& hardwarenames);
+    std::string getStandardName(const std::string& hardwarename);
+    std::vector<std::string> standardiseNames(const std::vector<std::string>& hardwarenames);
     template<typename T> bool t_belongsToGroup(const T& member, const id_t& group);
 };
 

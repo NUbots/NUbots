@@ -35,7 +35,7 @@
 Getup::Getup(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("Getup", data, actions)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "Getup::Getup()" << endl;
+        debug << "Getup::Getup()" << std::endl;
     #endif
     m_walk = walk;
     
@@ -117,8 +117,8 @@ void Getup::kill()
         m_head_completion_time = 0;
         m_arm_completion_time = 0;
         
-        vector<float> sensor_larm, sensor_rarm;
-        vector<float> sensor_lleg, sensor_rleg;
+        std::vector<float> sensor_larm, sensor_rarm;
+        std::vector<float> sensor_lleg, sensor_rleg;
         m_data->getPosition(NUSensorsData::LArm, sensor_larm);
         m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
         m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
@@ -195,7 +195,7 @@ void Getup::process(NUSensorsData* data, NUActionatorsData* actions)
     if (enabled() and m_data->isFallen())
     {
         #if DEBUG_NUMOTION_VERBOSITY > 1
-            debug << "Getup::process()" << endl;
+            debug << "Getup::process()" << std::endl;
         #endif
         if (not isActive())
             playGetup();
@@ -207,7 +207,7 @@ void Getup::playGetup()
     if (m_walk)
         m_walk->kill();
     
-    vector<float> fallen;
+    std::vector<float> fallen;
     if (m_data->get(NUSensorsData::Fallen, fallen))
     {
         MotionScript* getup = m_on_front;
@@ -222,7 +222,7 @@ void Getup::playGetup()
         getup->play(m_data, m_actions);
         m_completion_time = getup->timeFinished();
         m_head_completion_time = getup->timeFinishedWithHead();
-        m_arm_completion_time = max(getup->timeFinishedWithLArm(), getup->timeFinishedWithRArm());
+        m_arm_completion_time = std::max(getup->timeFinishedWithLArm(), getup->timeFinishedWithRArm());
     }
 }
 

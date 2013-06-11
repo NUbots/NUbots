@@ -35,7 +35,7 @@
 QSRelax::QSRelax(const NUData::id_t& joint, const QSBallisticController* parent)
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 4
-        debug << "QSRelax::QSRelax" << endl;
+        debug << "QSRelax::QSRelax" << std::endl;
     #endif
     m_joint = joint;
     m_parent = parent;
@@ -56,7 +56,7 @@ QSRelax::~QSRelax()
 void QSRelax::doState()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "QSRelax::doState" << endl;
+        debug << "QSRelax::doState" << std::endl;
     #endif
     float target = m_parent->getTargetEstimate();
     
@@ -75,7 +75,7 @@ void QSRelax::doState()
 BehaviourState* QSRelax::nextState()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "QSRelax::nextState" << endl;
+        debug << "QSRelax::nextState" << std::endl;
     #endif
     // I am fixing the time_in_state to be 0.64*catch_duration
     if (m_time_in_state > 200 and fabs(m_parent->getVelocity()) > QSBallisticController::VelocityThreshold)

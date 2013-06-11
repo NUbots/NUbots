@@ -27,30 +27,30 @@
 #include "debugverbositynusensors.h"
 
 #include <limits>
-using namespace std;
+
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
-                                    string("NeckPitch"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowPitch"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowPitch"), \
-                                    string("TorsoRoll"), string("TorsoYaw"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
-vector<string> BearSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+static std::string temp_servo_names[] = {std::string("HeadPitch"), std::string("HeadYaw"), \
+                                    std::string("NeckPitch"), \
+                                    std::string("LShoulderRoll"), std::string("LShoulderPitch"), std::string("LElbowPitch"), \
+                                    std::string("RShoulderRoll"), std::string("RShoulderPitch"), std::string("RElbowPitch"), \
+                                    std::string("TorsoRoll"), std::string("TorsoYaw"), \
+                                    std::string("LHipRoll"),  std::string("LHipPitch"), std::string("LKneePitch"), std::string("LAnkleRoll"), std::string("LAnklePitch"), \
+                                    std::string("RHipRoll"),  std::string("RHipPitch"), std::string("RKneePitch"), std::string("RAnkleRoll"), std::string("RAnklePitch")};
+std::vector<std::string> BearSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 /*! @brief Constructs a nubot sensor class with Bear backend
  */
 BearSensors::BearSensors(Motors* motors)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "BearSensors::BearSensors()" << endl;
+        debug << "BearSensors::BearSensors()" << std::endl;
     #endif
     m_motors = motors;
     m_data->addSensors(m_servo_names);
     m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
-    m_previous_positions = vector<float>(m_joint_ids.size(), 0);
-    m_previous_velocities = vector<float>(m_joint_ids.size(), 0);
+    m_previous_positions = std::vector<float>(m_joint_ids.size(), 0);
+    m_previous_velocities = std::vector<float>(m_joint_ids.size(), 0);
 }
 
 /*! @brief Destructor for BearSensors
@@ -58,7 +58,7 @@ BearSensors::BearSensors(Motors* motors)
 BearSensors::~BearSensors()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "BearSensors::~BearSensors()" << endl;
+        debug << "BearSensors::~BearSensors()" << std::endl;
     #endif
 }
 
@@ -76,12 +76,12 @@ void BearSensors::copyFromHardwareCommunications()
  */
 void BearSensors::copyFromJoints()
 {
-    static const float NaN = numeric_limits<float>::quiet_NaN();
+    static const float NaN = std::numeric_limits<float>::quiet_NaN();
     
-    vector<float> targets;
+    std::vector<float> targets;
     m_motors->getTargets(targets);
     
-    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    std::vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000.0;
     for (size_t i=0; i<m_joint_ids.size(); i++)
     {

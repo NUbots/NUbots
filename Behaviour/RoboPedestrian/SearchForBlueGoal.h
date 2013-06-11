@@ -44,7 +44,7 @@ public:
     {
         if (isTargetVisible())
         {
-            debug << "SearchForBlueGoal -> ChaseBlueGoal" << endl;
+            debug << "SearchForBlueGoal -> ChaseBlueGoal" << std::endl;
             return m_parent->m_chase_blue_goal;
         }
         else

@@ -223,7 +223,7 @@ class Vision
     void DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection* LineDetector);
 
     void DetectLines(LineDetection* LineDetector);
-    void DetectLines(LineDetection* LineDetector, vector<ObjectCandidate>& candidates, vector< TransitionSegment >& leftover);
+    void DetectLines(LineDetection* LineDetector, std::vector<ObjectCandidate>& candidates, std::vector< TransitionSegment >& leftover);
 
      std::vector< ObjectCandidate > ClassifyCandidatesAboveTheHorizon(std::vector< TransitionSegment > &segments,
                                                                       const std::vector<unsigned char> &validColours,
@@ -261,7 +261,7 @@ class Vision
       @param candidates A vector of ObjectCandidates to make the AmbiguousObjects from.
       @return vector<AmbiguousObject> Vector of objects for later use.
     */
-    vector<AmbiguousObject> getObjectsFromCandidates(vector<ObjectCandidate> candidates);
+    std::vector<AmbiguousObject> getObjectsFromCandidates(std::vector<ObjectCandidate> candidates);
     //ADDED BY SHANNON 08-12-11
     /*!
       @brief Calculates the vertical differences between the green border points and the hull made from them.
@@ -269,7 +269,7 @@ class Vision
       @param hull The upper convex hull of the border points (should be the same length as prehull).
       @return vector<int> Vector of the pairwise differences between the inputs (will be null if the inputs do not match).
     */
-    vector<int> getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const;
+    std::vector<int> getVerticalDifferences(const std::vector< Vector2<int> >& prehull, const std::vector< Vector2<int> >& hull) const;
     /*!
       @brief Generates a vector of ObjectCandidates corresponding to seen obstacles.
       @param prehull The original green border points (should be the same length as hull).
@@ -278,7 +278,7 @@ class Vision
       @param width_min  The minimum number of consecutive breaks for an obstacle.
       @return vector<ObjectCandidate> The obstacles found.
     */
-    vector<ObjectCandidate> getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+    std::vector<ObjectCandidate> getObstacleCandidates(const std::vector< Vector2<int> >& prehull, const std::vector< Vector2<int> >& hull,
                                                   int height_thresh, int width_min) const;
 /**ADDED BY SHANNON**/
 

@@ -31,7 +31,7 @@
 NUActionators::NUActionators()
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionators::NUActionators" << endl;
+        debug << "NUActionators::NUActionators" << std::endl;
     #endif
     m_data = new NUActionatorsData();
     m_sound_thread = new NUSoundThread();
@@ -40,7 +40,7 @@ NUActionators::NUActionators()
 NUActionators::~NUActionators()
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionators::~NUActionators" << endl;
+        debug << "NUActionators::~NUActionators" << std::endl;
     #endif
     delete m_sound_thread;
     m_sound_thread = 0;
@@ -53,7 +53,7 @@ NUActionators::~NUActionators()
 void NUActionators::process(NUActionatorsData* data)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "NUActionators::process" << endl;
+        debug << "NUActionators::process" << std::endl;
     #endif
     m_data->preProcess(Platform->getTime());
     copyToHardwareCommunications();
@@ -74,7 +74,7 @@ NUActionatorsData* NUActionators::getNUActionatorsData()
  */
 void NUActionators::copyToSound()
 {
-    vector<string> sounds;
+    std::vector<std::string> sounds;
     m_data->getNextSounds(sounds);
     for (unsigned int i=0; i<sounds.size(); i++)
         m_sound_thread->pushBack(sounds[i]);

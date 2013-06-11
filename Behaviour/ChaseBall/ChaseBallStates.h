@@ -71,12 +71,12 @@ public:
     {
         if (m_provider->m_current_time - m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() > 500)
         {
-            debug << "Chase -> Search" << endl;
+            debug << "Chase -> Search" << std::endl;
             return m_provider->m_search_state;
         }
         else if (not m_provider->m_team_info->amIClosestToBall())
         {
-            debug << "Chase -> Position" << endl;
+            debug << "Chase -> Position" << std::endl;
             return m_provider->m_position_state;
         }
         else
@@ -100,7 +100,7 @@ public:
             
             if (true or balldistance > 15)
             {
-                vector<float> temp;
+                std::vector<float> temp;
                 float leftobstacle = 255;
                 float rightobstacle = 255;
                 if (m_data->get(NUSensorsData::LDistance, temp))
@@ -145,12 +145,12 @@ public:
     {
         if (m_provider->m_current_time - m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeLastSeen() > 500)
         {
-            debug << "Position -> Search" << endl;
+            debug << "Position -> Search" << std::endl;
             return m_provider->m_search_state;
         }
         else if (m_provider->m_team_info->amIClosestToBall())
         {
-            debug << "Position -> Chase" << endl;
+            debug << "Position -> Chase" << std::endl;
             return m_provider->m_chase_state;
         }
         else
@@ -174,12 +174,12 @@ public:
             //    balldistance = sqrt(pow(measureddistance,2) - 46*46);
             float ballbearing = m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing();
             
-            vector<float> walkVector(3, 0);
+            std::vector<float> walkVector(3, 0);
             walkVector[1] = 2*sin(ballbearing);
             walkVector[2] = ballbearing/2.0;
             walkVector[0] = 0.5*(balldistance - 100)*cos(ballbearing);
             
-            vector<float> temp;
+            std::vector<float> temp;
             float leftobstacle = 255;
             float rightobstacle = 255;
             
@@ -219,7 +219,7 @@ public:
     {
         if (m_provider->m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSeen() > 0)
         {
-            debug << "Search -> Chase" << endl;
+            debug << "Search -> Chase" << std::endl;
             return m_provider->m_chase_state;
         }
         else

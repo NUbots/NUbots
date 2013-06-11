@@ -27,31 +27,31 @@
 #include "debugverbositynusensors.h"
 
 #include <limits>
-using namespace std;
+
 using namespace webots;
 
-// Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
+// Apparently the best way to initialise a std::vector like an array, is to initialise the std::vector from an array
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), string("LElbowYaw"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowRoll"), string("RElbowYaw"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYawPitch"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYawPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
-vector<string> NAOWebotsSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+static std::string temp_servo_names[] = {std::string("HeadPitch"), std::string("HeadYaw"), \
+                                    std::string("LShoulderRoll"), std::string("LShoulderPitch"), std::string("LElbowRoll"), std::string("LElbowYaw"), \
+                                    std::string("RShoulderRoll"), std::string("RShoulderPitch"), std::string("RElbowRoll"), std::string("RElbowYaw"), \
+                                    std::string("LHipRoll"),  std::string("LHipPitch"), std::string("LHipYawPitch"), std::string("LKneePitch"), std::string("LAnkleRoll"), std::string("LAnklePitch"), \
+                                    std::string("RHipRoll"),  std::string("RHipPitch"), std::string("RHipYawPitch"), std::string("RKneePitch"), std::string("RAnkleRoll"), std::string("RAnklePitch")};
+std::vector<std::string> NAOWebotsSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 // init m_distance_names:
-static string temp_distance_names[] = {string("US/TopLeft"), string("US/BottomLeft"), string("US/TopRight"), string("US/BottomRight")};
-vector<string> NAOWebotsSensors::m_distance_names(temp_distance_names, temp_distance_names + sizeof(temp_distance_names)/sizeof(*temp_distance_names));
+static std::string temp_distance_names[] = {std::string("US/TopLeft"), std::string("US/BottomLeft"), std::string("US/TopRight"), std::string("US/BottomRight")};
+std::vector<std::string> NAOWebotsSensors::m_distance_names(temp_distance_names, temp_distance_names + sizeof(temp_distance_names)/sizeof(*temp_distance_names));
 
 // init m_foot_names:
-static string temp_foot_sole_names[] = {string("LFsrFL"), string("LFsrFR"), string("LFsrBR"), string("LFsrBL"), \
-                                    string("RFsrFL"), string("RFsrFR"), string("RFsrBR"), string("RFsrBL")};
-vector<string> NAOWebotsSensors::m_foot_sole_names(temp_foot_sole_names, temp_foot_sole_names + sizeof(temp_foot_sole_names)/sizeof(*temp_foot_sole_names));
+static std::string temp_foot_sole_names[] = {std::string("LFsrFL"), std::string("LFsrFR"), std::string("LFsrBR"), std::string("LFsrBL"), \
+                                    std::string("RFsrFL"), std::string("RFsrFR"), std::string("RFsrBR"), std::string("RFsrBL")};
+std::vector<std::string> NAOWebotsSensors::m_foot_sole_names(temp_foot_sole_names, temp_foot_sole_names + sizeof(temp_foot_sole_names)/sizeof(*temp_foot_sole_names));
 
 // init m_button_names:
-static string temp_foot_bumper_names[] = {string("LFoot/Bumper/Left"), string("LFoot/Bumper/Right"), string("RFoot/Bumper/Left"), string("RFoot/Bumper/Right")};
-vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, temp_foot_bumper_names + sizeof(temp_foot_bumper_names)/sizeof(*temp_foot_bumper_names));
+static std::string temp_foot_bumper_names[] = {std::string("LFoot/Bumper/Left"), std::string("LFoot/Bumper/Right"), std::string("RFoot/Bumper/Left"), std::string("RFoot/Bumper/Right")};
+std::vector<std::string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, temp_foot_bumper_names + sizeof(temp_foot_bumper_names)/sizeof(*temp_foot_bumper_names));
 
 /*! @brief Constructs a nubot sensor class with Webots backend
  
@@ -60,15 +60,15 @@ vector<string> NAOWebotsSensors::m_foot_bumper_names(temp_foot_bumper_names, tem
 NAOWebotsSensors::NAOWebotsSensors(NAOWebotsPlatform* platform) : m_simulation_step(int(platform->getBasicTimeStep()))
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOWebotsSensors::NAOWebotsSensors()" << endl;
+    debug << "NAOWebotsSensors::NAOWebotsSensors()" << std::endl;
 #endif
     m_platform = platform;
     getSensorsFromWebots();
     enableSensorsInWebots();
     m_data->addSensors(m_servo_names);
     m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
-    m_previous_positions = vector<float>(m_servo_names.size(), 0);
-    m_previous_velocities = vector<float>(m_servo_names.size(), 0);
+    m_previous_positions = std::vector<float>(m_servo_names.size(), 0);
+    m_previous_velocities = std::vector<float>(m_servo_names.size(), 0);
 }
 
 /*! @brief Gets pointers to each of the sensors in the simulated NAO
@@ -151,7 +151,7 @@ NAOWebotsSensors::~NAOWebotsSensors()
 void NAOWebotsSensors::copyFromHardwareCommunications()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << endl;
+    debug << "NAOWebotsSensors::copyFromHardwareCommunications()" << std::endl;
 #endif
     copyFromJoints();
     copyFromAccelerometerAndGyro();
@@ -167,11 +167,11 @@ void NAOWebotsSensors::copyFromHardwareCommunications()
 void NAOWebotsSensors::copyFromJoints()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NAOWebotsSensors::copyFromJoints()" << endl;
+        debug << "NAOWebotsSensors::copyFromJoints()" << std::endl;
     #endif
-    static float NaN = numeric_limits<float>::quiet_NaN();
+    static float NaN = std::numeric_limits<float>::quiet_NaN();
 
-    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    std::vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000;
     for (size_t i=0; i<m_servos.size(); i++)
     {
@@ -194,11 +194,11 @@ void NAOWebotsSensors::copyFromJoints()
 void NAOWebotsSensors::copyFromAccelerometerAndGyro()
 {
     const unsigned char numdimensions = 3;
-    static vector<float> accelerometerdata(numdimensions, 0);
-    static vector<float> gyrodata(numdimensions, 0);
+    static std::vector<float> accelerometerdata(numdimensions, 0);
+    static std::vector<float> gyrodata(numdimensions, 0);
     
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOWebotsSensors::copyFromAccelerometerAndGyro()" << endl;
+    debug << "NAOWebotsSensors::copyFromAccelerometerAndGyro()" << std::endl;
 #endif
     
     // Copy accelerometer [ax, ay, az]
@@ -218,11 +218,11 @@ void NAOWebotsSensors::copyFromAccelerometerAndGyro()
  */
 void NAOWebotsSensors::copyFromDistance()
 {
-    static vector<float> leftdistance(1,0);
-    static vector<float> rightdistance(1,0);
+    static std::vector<float> leftdistance(1,0);
+    static std::vector<float> rightdistance(1,0);
     
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOWebotsSensors::copyFromDistance()" << endl;
+    debug << "NAOWebotsSensors::copyFromDistance()" << std::endl;
 #endif
     
     // Copy left distance readings
@@ -250,11 +250,11 @@ void NAOWebotsSensors::copyFromDistance()
  */
 void NAOWebotsSensors::copyFromFootSole()
 {
-    static vector<float> lfootsoledata(m_foot_sole_sensors.size()/2, 0);
-    static vector<float> rfootsoledata(m_foot_sole_sensors.size()/2, 0);
+    static std::vector<float> lfootsoledata(m_foot_sole_sensors.size()/2, 0);
+    static std::vector<float> rfootsoledata(m_foot_sole_sensors.size()/2, 0);
     
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOWebotsSensors::copyFromFootSole()" << endl;
+    debug << "NAOWebotsSensors::copyFromFootSole()" << std::endl;
 #endif
     
     // Copy foot sole readings
@@ -272,7 +272,7 @@ void NAOWebotsSensors::copyFromFootSole()
 void NAOWebotsSensors::copyFromFootBumper()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NAOWebotsSensors::copyFromFootBumper()" << endl;
+        debug << "NAOWebotsSensors::copyFromFootBumper()" << std::endl;
     #endif
     float leftbumper = m_foot_bumper_sensors[0]->getValue() + m_foot_bumper_sensors[1]->getValue();
     float rightbumper =  m_foot_bumper_sensors[2]->getValue() + m_foot_bumper_sensors[3]->getValue();
@@ -287,11 +287,11 @@ void NAOWebotsSensors::copyFromGPS()
     const unsigned char numdimensions = 3;
     if (m_gps != NULL)
     {
-        static vector<float> gpsdata(numdimensions, 0);
+        static std::vector<float> gpsdata(numdimensions, 0);
         static const double *buffer;
         
         #if DEBUG_NUSENSORS_VERBOSITY > 4
-            debug << "NAOWebotsSensors::copyFromGPS()" << endl;
+            debug << "NAOWebotsSensors::copyFromGPS()" << std::endl;
         #endif
         
         buffer = m_gps->getValues();
@@ -311,7 +311,7 @@ void NAOWebotsSensors::copyFromCompass()
         static const double *buffer;
         
         #if DEBUG_NUSENSORS_VERBOSITY > 4
-            debug << "NAOWebotsSensors::copyFromCompass()" << endl;
+            debug << "NAOWebotsSensors::copyFromCompass()" << std::endl;
         #endif
         
         buffer = m_compass->getValues();

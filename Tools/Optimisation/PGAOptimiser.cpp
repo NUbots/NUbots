@@ -36,7 +36,7 @@ using namespace boost::accumulators;
  	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
  	@param parameters the initial seed for the optimisation
  */
-PGAOptimiser::PGAOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
+PGAOptimiser::PGAOptimiser(std::string name, std::vector<Parameter> parameters) : Optimiser(name, parameters)
 {
     m_step_size = 0.01;        	   // Tune this
     m_epsilon = 0.01;              // Tune this
@@ -61,7 +61,7 @@ PGAOptimiser::~PGAOptimiser()
 {
 }
 
-void PGAOptimiser::setParametersResult(const vector<float>& fitness)
+void PGAOptimiser::setParametersResult(const std::vector<float>& fitness)
 {
 	float selectedfitness = fitness[m_selected_fitness];
 	setParametersResult(selectedfitness);
@@ -80,7 +80,7 @@ void PGAOptimiser::setParametersResult(const vector<float>& fitness)
 		m_stall_count = 0;
 		m_selected_fitness = (m_selected_fitness+1)%fitness.size();
 	}
-	debug << "PGAOptimiser::setParametersResult(" << fitness << "). Using fitness " << m_selected_fitness << ". Stalled for " << m_stall_count << endl;
+	debug << "PGAOptimiser::setParametersResult(" << fitness << "). Using fitness " << m_selected_fitness << ". Stalled for " << m_stall_count << std::endl;
 }
 
 void PGAOptimiser::setParametersResult(float fitness)
@@ -92,10 +92,10 @@ void PGAOptimiser::setParametersResult(float fitness)
         m_current_parameters += calculateStep();
         generatePolicies();
     }
-    debug << "PGAOptimiser::setParametersResult fitness: " << fitness << endl;
+    debug << "PGAOptimiser::setParametersResult fitness: " << fitness << std::endl;
 }
 
-vector<float> PGAOptimiser::getNextParameters()
+std::vector<float> PGAOptimiser::getNextParameters()
 {
     return m_random_policies[m_random_policies_index];
 }
@@ -110,11 +110,11 @@ void PGAOptimiser::generatePolicies()
 /*! @brief Calculates a probability weighted movement in the direction of the gradient estimated through the polices selected
  *	@return the step (ie. the new parameters should be parameters += step)
  */
-vector<float> PGAOptimiser::calculateStep()
+std::vector<float> PGAOptimiser::calculateStep()
 {
     int num_dim = m_current_parameters.size();
-    vector<float> A(num_dim);
-    vector<float> deltas(m_random_policies.size());
+    std::vector<float> A(num_dim);
+    std::vector<float> deltas(m_random_policies.size());
     float minfit = 1000000.f,maxfit = -1000000.f;
     
     //get fitness min and max
@@ -149,7 +149,7 @@ vector<float> PGAOptimiser::calculateStep()
 /*! @brief Generates m_num_particles random policies from the seed.
  	@param seed the seed set of parameters used to generate the random policies
  */
-void PGAOptimiser::generateRandomPolices(const vector<Parameter>& seed)
+void PGAOptimiser::generateRandomPolices(const std::vector<Parameter>& seed)
 {
     m_random_policies_index = 0;
     m_fitnesses.clear();
@@ -158,15 +158,15 @@ void PGAOptimiser::generateRandomPolices(const vector<Parameter>& seed)
         m_random_policies.push_back(generateRandomPolicy(seed));
 
     for (size_t i=0; i<m_random_policies.size(); i++)
-        debug << m_random_policies[i] << endl;
+        debug << m_random_policies[i] << std::endl;
 }
 
 /*! @brief Generates a single random policy from the seed, and returns it
  	@param seed the random policy seed
  */
-vector<float> PGAOptimiser::generateRandomPolicy(const vector<Parameter>& seed)
+std::vector<float> PGAOptimiser::generateRandomPolicy(const std::vector<Parameter>& seed)
 {
-    vector<float> newpolicy;
+    std::vector<float> newpolicy;
     newpolicy.reserve(seed.size());
     for (size_t i=0; i<seed.size(); i++)
     {
@@ -193,19 +193,19 @@ int PGAOptimiser::getRandomDirection()
 /*! @brief Generates a set of random policies from the seed
  *	@param seed the set of parameters which is used as a base to generate the random policies
  */
-void PGAOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
+void PGAOptimiser::generateShuffledPolices(const std::vector<Parameter>& seed)
 {
 	m_random_policies_index = 0;
 	m_fitnesses.clear();
 
-	vector<float> floatseed(seed.size());
+	std::vector<float> floatseed(seed.size());
 	for (size_t i=0; i<seed.size(); i++)
 		floatseed[i] = seed[i].get();
-	m_random_policies = vector<vector<float> >(3*(m_num_particles/3), floatseed);
+	m_random_policies = std::vector<std::vector<float> >(3*(m_num_particles/3), floatseed);
 
 	for (size_t i=0; i<seed.size(); i++)
 	{
-		vector<float> temp = generateSigns();
+		std::vector<float> temp = generateSigns();
 		float epsilon = m_epsilon*(seed[i].max() - seed[i].min());
 
         //old non-clamping method
@@ -226,7 +226,7 @@ void PGAOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
 	}
 
 	for (size_t i=0; i<m_random_policies.size(); i++)
-		debug << m_random_policies[i] << endl;
+		debug << m_random_policies[i] << std::endl;
 }
 
 /*! @brief Generates a vector of signs to be used when generating the random policies.
@@ -236,11 +236,11 @@ void PGAOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
  *         are given epsilon's with one of the signs.
  *  @return the vector
  */
-vector<float> PGAOptimiser::generateSigns()
+std::vector<float> PGAOptimiser::generateSigns()
 {
 	int num_of_each = m_num_particles/3;
 	size_t size = 3*num_of_each;				// round the number of particles to multiple of 3
-	vector<float> signs(size);
+	std::vector<float> signs(size);
 	for (size_t i=0; i<num_of_each; i++)
 	{
 		signs[3*i] = 1;
@@ -256,13 +256,13 @@ vector<float> PGAOptimiser::generateSigns()
 /*! @brief Generates m_num_particles random policies from the seed.
  	@param seed the seed set of parameters used to generate the random policies
  */
-void PGAOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
+void PGAOptimiser::generateOpponentPolicies(const std::vector<Parameter>& seed)
 {
     m_random_policies_index = 0;
     m_fitnesses.clear();
     m_random_policies.clear();
 
-    vector<float> policy, opponent;
+    std::vector<float> policy, opponent;
     for (int i=0; i<m_num_particles/2; i++)
     {
     	generateOpponents(seed, policy, opponent);
@@ -271,7 +271,7 @@ void PGAOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
     }
 
     for (size_t i=0; i<m_random_policies.size(); i++)
-        debug << m_random_policies[i] << endl;
+        debug << m_random_policies[i] << std::endl;
 }
 
 /*! @brief Generates a pair of policies (policy, opponent) near seed to estimate the gradient
@@ -279,7 +279,7 @@ void PGAOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
  * 	@param policy the first policy near seed
  * 	@param opponent the 'opposite' policy near seed (ie this has the epsilon of opposite sign to policy)
  */
-void PGAOptimiser::generateOpponents(const vector<Parameter>& seed, vector<float>& policy, vector<float>& opponent)
+void PGAOptimiser::generateOpponents(const std::vector<Parameter>& seed, std::vector<float>& policy, std::vector<float>& opponent)
 {
 	policy.clear();
 	opponent.clear();
@@ -292,23 +292,23 @@ void PGAOptimiser::generateOpponents(const vector<Parameter>& seed, vector<float
 	}
 }
 
-void PGAOptimiser::summaryTo(ostream& stream)
+void PGAOptimiser::summaryTo(std::ostream& stream)
 {
 }
 
-void PGAOptimiser::toStream(ostream& o) const
+void PGAOptimiser::toStream(std::ostream& o) const
 {
-    o << m_step_size << " " << m_epsilon << " " << m_num_particles << " " << m_stalled_threshold << endl;
+    o << m_step_size << " " << m_epsilon << " " << m_num_particles << " " << m_stalled_threshold << std::endl;
     
-    o << m_random_policies_index << endl;
-    o << m_current_parameters << endl;
-    o << m_random_policies << endl;
-    o << m_fitnesses << endl;
+    o << m_random_policies_index << std::endl;
+    o << m_current_parameters << std::endl;
+    o << m_random_policies << std::endl;
+    o << m_fitnesses << std::endl;
 
-    o << m_selected_fitness << " " << m_best_fitness << " " << m_stall_count << endl;
+    o << m_selected_fitness << " " << m_best_fitness << " " << m_stall_count << std::endl;
 }
 
-void PGAOptimiser::fromStream(istream& i)
+void PGAOptimiser::fromStream(std::istream& i)
 {
     i >> m_step_size;
     i >> m_epsilon;

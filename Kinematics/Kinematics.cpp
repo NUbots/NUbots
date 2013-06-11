@@ -13,7 +13,7 @@ using namespace TransformMatrices;
 
 bool Kinematics::LoadModel()
 {
-    const std::string default_file = (CONFIG_DIR + string("Motion/kinematics") + ".cfg");
+    const std::string default_file = (CONFIG_DIR + std::string("Motion/kinematics") + ".cfg");
     std::ifstream file(default_file.c_str());
     bool worked = false;
     if(file.is_open())
@@ -23,8 +23,8 @@ bool Kinematics::LoadModel()
     else
     {
         // File was not opened correctly. Send out a warning/error message.
-        debug << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << endl;
-        errorlog << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << endl;
+        debug << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << std::endl;
+        errorlog << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << std::endl;
     }
     file.close();
     return worked;
@@ -300,7 +300,7 @@ Vector3<double> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform
     resultCartesian.y = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
     resultCartesian.z = 0.0;
 
-    cout << nearResult << endl << farResult << endl << resultCartesian << endl;
+    std::cout << nearResult << std::endl << farResult << std::endl << resultCartesian << std::endl;
 
     // Convert back to polar coodinates.
     Vector3<double> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));

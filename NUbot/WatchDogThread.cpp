@@ -48,10 +48,10 @@
 /*! @brief Constructs the sense->move thread
  */
 
-WatchDogThread::WatchDogThread(NUbot* nubot) : PeriodicThread(string("WatchDogThread"), 1000, 0)
+WatchDogThread::WatchDogThread(NUbot* nubot) : PeriodicThread(std::string("WatchDogThread"), 1000, 0)
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "WatchDogThread::WatchDogThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
+        debug << "WatchDogThread::WatchDogThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << std::endl;
     #endif
     m_nubot = nubot;
 }
@@ -59,7 +59,7 @@ WatchDogThread::WatchDogThread(NUbot* nubot) : PeriodicThread(string("WatchDogTh
 WatchDogThread::~WatchDogThread()
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "WatchDogThread::~WatchDogThread()" << endl;
+        debug << "WatchDogThread::~WatchDogThread()" << std::endl;
     #endif
     stop();
 }

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-//#define debug_out cout
+//#define debug_out std::cout
 #if LOCWM_VERBOSITY > 0
 #define debug_out debug_file
 #endif // LOCWM_VERBOSITY > 0
@@ -88,14 +88,14 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
 
     #if LOCWM_VERBOSITY > 2
     if(numUpdates == 0 ){ 
-        debug_out  <<"[" << currentFrameNumber << "]: Update Starting." << endl;
+        debug_out  <<"[" << currentFrameNumber << "]: Update Starting." << std::endl;
         for(int i = 0; i < c_MAX_MODELS; i++){
             if(models[i].isActive == false) continue;
             debug_out  << "[" << currentFrameNumber << "]: Model[" << i << "]";
             debug_out  << " [alpha = " << models[i].alpha << "]";
             debug_out  << " Robot X: " << models[i].getState(0);
             debug_out  << " Robot Y: " << models[i].getState(1);
-            debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
+            debug_out  << " Robot Theta: " << models[i].getState(2) << std::endl;
         }
     }
     #endif // LOCWM_VERBOSITY > 2
@@ -107,7 +107,7 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
     doTimeUpdate(0.0f, 0.0f, 0.0f); //!TODO: This function needs to take values.
 
     #if LOCWM_VERBOSITY > 2
-    //debug_out  << "[" << currentFrameNumber << "]: Time update - odomForward = " << odomForward << " odomLeft = " << odomLeft << " odomTurn = " << odomTurn << endl;
+    //debug_out  << "[" << currentFrameNumber << "]: Time update - odomForward = " << odomForward << " odomLeft = " << odomLeft << " odomTurn = " << odomTurn << std::endl;
     #endif // LOCWM_VERBOSITY > 2
 
     // Proccess the Known Field Objects
@@ -141,13 +141,13 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
             if(mostRecentPackets[robotNum].processedWM == false){
                 if(mostRecentPackets[robotNum].packet.ball.seen == true){
                     #if LOCWM_VERBOSITY > 2
-                    debug_out  << "[" << currentFrameNumber << "]: Doing Shared ball update from robot " << robotNum+1 <<  endl;
+                    debug_out  << "[" << currentFrameNumber << "]: Doing Shared ball update from robot " << robotNum+1 <<  std::endl;
                     #endif
                     doSharedBallUpdate(mostRecentPackets[robotNum].packet.ball);
                 }
                 else {
                     #if LOCWM_VERBOSITY > 2
-                    debug_out  << "[" << currentFrameNumber << "]: Skipping shared ball update from robot " << robotNum+1 << endl;
+                    debug_out  << "[" << currentFrameNumber << "]: Skipping shared ball update from robot " << robotNum+1 << std::endl;
                     #endif
                 }
                 mostRecentPackets[robotNum].processedWM = true;
@@ -217,13 +217,13 @@ void LocWM::ProcessObjects(int frameNumber, FieldObjects* ourfieldObjects, void*
             debug_out  << " [alpha = " << models[i].alpha << "]";
             debug_out  << " Robot X: " << models[i].getState(0);
             debug_out  << " Robot Y: " << models[i].getState(1);
-            debug_out  << " Robot Theta: " << models[i].getState(2) << endl;
+            debug_out  << " Robot Theta: " << models[i].getState(2) << std::endl;
         }
         debug_out  << "[" << currentFrameNumber << "]: Best Model";
         debug_out  << " [alpha = " << models[bestModelID].alpha << "]";
         debug_out  << " Robot X: " << models[bestModelID].getState(0);
         debug_out  << " Robot Y: " << models[bestModelID].getState(1);
-        debug_out  << " Robot Theta: " << models[bestModelID].getState(2) << endl;
+        debug_out  << " Robot Theta: " << models[bestModelID].getState(2) << std::endl;
     }
     #endif // LOCWM_VERBOSITY > 2
 }
@@ -267,7 +267,7 @@ void LocWM::CheckGameState()
 void LocWM::doPenaltyReset()
 {
 #if LOCWM_VERBOSITY > 0
-    debug_out  << "[" << currentFrameNumber << "] Performing penalty reset." << endl;
+    debug_out  << "[" << currentFrameNumber << "] Performing penalty reset." << std::endl;
 #endif // LOCWM_VERBOSITY > 0
 
     // Reset all of the models
@@ -318,7 +318,7 @@ void LocWM::doPenaltyReset()
 void LocWM::doPlayerReset()
 {
     #if LOCWM_VERBOSITY > 0
-    debug_out  << "[" << currentFrameNumber << "] Performing player reset." << endl;
+    debug_out  << "[" << currentFrameNumber << "] Performing player reset." << std::endl;
     #endif // LOCWM_VERBOSITY > 0
 
     // Reset all of the models
@@ -432,7 +432,7 @@ bool LocWM::clipModelToField(int modelID)
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
         debug_out  << " State(0) clipped.";
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
-        debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
+        debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << std::endl;
     }
     #endif // LOCWM_VERBOSITY > 1
     wasClipped = wasClipped || clipped;
@@ -447,9 +447,9 @@ bool LocWM::clipModelToField(int modelID)
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
-        debug_out  << " State(1) clipped." << endl;
+        debug_out  << " State(1) clipped." << std::endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
-        debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
+        debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << std::endl;
     }
     #endif // LOCWM_VERBOSITY > 1
 
@@ -464,9 +464,9 @@ bool LocWM::clipModelToField(int modelID)
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
-        debug_out  << " State(3) clipped." << endl;
+        debug_out  << " State(3) clipped." << std::endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
-        debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
+        debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << std::endl;
     }
     #endif // LOCWM_VERBOSITY > 1
     
@@ -482,9 +482,9 @@ bool LocWM::clipModelToField(int modelID)
     if(clipped){
         debug_out  << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
         debug_out  << " [alpha = " << models[modelID].alpha << "]";
-        debug_out  << " State(4) clipped." << endl;
+        debug_out  << " State(4) clipped." << std::endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << models[modelID].getState(0);
-        debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << endl;
+        debug_out  << "," << models[modelID].getState(1) << "," << models[modelID].getState(2) << ")" << std::endl;
     }
     #endif // LOCWM_VERBOSITY > 1
     
@@ -534,7 +534,7 @@ int LocWM::doSharedBallUpdate(WirelessFieldObj &sharedBall)
     double SRYY = sharedBall.SRYY;
 
 #if LOCWM_VERBOSITY > 1
-    debug_out  << "[" << currentFrameNumber << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << endl;
+    debug_out  << "[" << currentFrameNumber << "]: Doing Shared Ball Update. X = " << sharedBallX << " Y = " << sharedBallY << " SRXX = " << SRXX << " SRXY = " << SRXY << "SRYY = " << SRYY << std::endl;
 #endif
 
     for(int modelID = 0; modelID < c_MAX_MODELS; modelID++){
@@ -554,7 +554,7 @@ int LocWM::doBallMeasurementUpdate(MobileObject &ball)
     int numSuccessfulUpdates = 0;
 
     #if LOCWM_VERBOSITY > 1
-    debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << endl;
+    debug_out  <<"[" << currentFrameNumber << "]: Doing Ball Update. Distance = " << ball.measuredDistance() << " Bearing = " << ball.measuredBearing() << std::endl;
     #endif // LOCWM_VERBOSITY > 1
 
     double flatBallDistance = ball.measuredDistance() * cos(ball.measuredElevation());
@@ -600,7 +600,7 @@ int LocWM::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
         if(landmark.measuredBearing() != landmark.measuredBearing()){
 
             #if LOCWM_VERBOSITY > 0
-            debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << endl;
+            debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << std::endl;
             #endif // LOCWM_VERBOSITY > 0
 
             continue;
@@ -610,8 +610,8 @@ int LocWM::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
         if(kf_return == KF_OUTLIER) modelObjectErrors[modelID][landmark.getID()] += 1.0;
 
         #if LOCWM_VERBOSITY > 1
-        if(kf_return == KF_OK) debug_out  << "OK" << endl;
-        else debug_out  << "OUTLIER" << endl;
+        if(kf_return == KF_OK) debug_out  << "OK" << std::endl;
+        else debug_out  << "OUTLIER" << std::endl;
         #endif // LOCWM_VERBOSITY > 1
 
         if(kf_return == KF_OK) numSuccessfulUpdates++;
@@ -621,7 +621,7 @@ int LocWM::doKnownLandmarkMeasurementUpdate(StationaryObject &landmark)
 
 
 
-int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects)
+int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const std::vector<StationaryObject>& possibleObjects)
 {
     int kf_return;
 
@@ -636,7 +636,7 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
     #endif // AMBIGUOUS_CORNERS_ON <= 0
     */
 
-    vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
+    std::vector<int> possabilities = ambigousObject.getPossibleObjectIDs();
     unsigned int numOptions = possabilities.size();
     int outlierModelID = -1;
     int numFreeModels = getNumFreeModels();
@@ -647,20 +647,20 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
         int maxActiveAfterMerge = c_MAX_MODELS /  (numOptions + 1);
 
         #if LOCWM_VERBOSITY > 2
-        debug_out  <<"[" << currentFrameNumber << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << endl;
-        debug_out  <<"[" << currentFrameNumber << "]: Merging to " << maxActiveAfterMerge << " Max models." << endl;
+        debug_out  <<"[" << currentFrameNumber << "]: Only " <<  numFreeModels << " Free. Need " << numRequiredModels << " for Update." << std::endl;
+        debug_out  <<"[" << currentFrameNumber << "]: Merging to " << maxActiveAfterMerge << " Max models." << std::endl;
         #endif // LOCWM_VERBOSITY > 2
 
         MergeModels(maxActiveAfterMerge);
 
         #if LOCWM_VERBOSITY > 2
-        debug_out  <<"[" << currentFrameNumber << "]: " << getNumFreeModels() << " models now available." << endl;
+        debug_out  <<"[" << currentFrameNumber << "]: " << getNumFreeModels() << " models now available." << std::endl;
         #endif // LOCWM_VERBOSITY > 2
 
         if(getNumFreeModels() < (getNumActiveModels() * (int)numOptions)){
 
             #if LOCWM_VERBOSITY > 0
-            debug_out  <<"[" << currentFrameNumber << "]: " << "Not enough models. Aborting Update." << endl;
+            debug_out  <<"[" << currentFrameNumber << "]: " << "Not enough models. Aborting Update." << std::endl;
             #endif // LOCWM_VERBOSITY > 0
 
             return KF_OUTLIER;
@@ -670,7 +670,7 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
     #if LOCWM_VERBOSITY > 1
     //debug_out <<"[" << currentFrameNumber << "]: Doing Ambiguous Object Update. Object = " << ambigousObject.name();
     debug_out << " Distance = " << ambigousObject.measuredDistance();
-    debug_out  << " Bearing = " << ambigousObject.measuredBearing() << endl;
+    debug_out  << " Bearing = " << ambigousObject.measuredBearing() << std::endl;
     #endif // LOCWM_VERBOSITY > 1
 
     for (int modelID = 0; modelID < c_MAX_MODELS; modelID++){
@@ -695,7 +695,7 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
             if(newModelID < 0){ 
 
                 #if LOCWM_VERBOSITY > 0
-                debug_out  <<"[" << currentFrameNumber << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << endl;
+                debug_out  <<"[" << currentFrameNumber << "]: !!! WARNING !!! Bad Model ID returned. Update aborted." << std::endl;
                 #endif // LOCWM_VERBOSITY > 0
 
                 for(int m = 0; m < c_MAX_MODELS; m++) models[m].toBeActivated = false;
@@ -733,8 +733,8 @@ int LocWM::doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject,
             }
 
 #if LOCWM_VERBOSITY > 2
-            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << models[newModelID].alpha << endl;
-            else debug_out  << "OUTLIER" << "  Resulting alpha = " << models[newModelID].alpha << endl;
+            if(kf_return == KF_OK) debug_out  << "OK" << "  Resulting alpha = " << models[newModelID].alpha << std::endl;
+            else debug_out  << "OUTLIER" << "  Resulting alpha = " << models[newModelID].alpha << std::endl;
 #endif
 
         }
@@ -761,7 +761,7 @@ bool LocWM::MergeTwoModels(int index1, int index2)
     if(success == false){
 
 #if LOCWM_VERBOSITY > 0
-        debug_out  <<"[" << currentFrameNumber << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << endl;
+        debug_out  <<"[" << currentFrameNumber << "]: Merge Between model[" << index1 << "] and model[" << index2 << "] FAILED." << std::endl;
 #endif // LOCWM_VERBOSITY > 0
 
         return success;
@@ -873,7 +873,7 @@ bool LocWM::CheckModelForOutlierReset(int modelID)
         models[modelID].Reset(); //Reset KF varainces. Leave Xhat!
 
         #if LOCWM_VERBOSITY > 1
-        debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << endl;
+        debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "] Reset due to outliers." << std::endl;
         #endif // LOCWM_VERBOSITY > 1
 
         for (int i=0; i<c_numOutlierTrackedObjects; i++) modelObjectErrors[modelID][i] = 0.0; // Reset the outlier history
@@ -955,7 +955,7 @@ bool LocWM::varianceCheck(int modelID)
 #if LOCWM_VERBOSITY > 1
     if(changed){
         debug_out << "[" << currentFrameNumber << "]: Model[" << modelID << "]";
-        debug_out << "Bearing adjusted due to Goal. New Value = " << models[modelID].stateEstimates[2][0] << endl;
+        debug_out << "Bearing adjusted due to Goal. New Value = " << models[modelID].stateEstimates[2][0] << std::endl;
     }
 #endif
     return changed;
@@ -998,7 +998,7 @@ void LocWM::ResetAll()
 {
 
 #if LOCWM_VERBOSITY > 1
-    debug_out  <<"[" << currentFrameNumber << "]: Resetting All Models." << endl;
+    debug_out  <<"[" << currentFrameNumber << "]: Resetting All Models." << std::endl;
 #endif
 
     for(int modelNum = 0; modelNum < c_MAX_MODELS; modelNum++){
@@ -1035,7 +1035,7 @@ void LocWM::PrintModelStatus(int modelID)
   debug_out  <<"[" << currentFrameNumber << "]: Model[" << modelID << "]";
   debug_out  << "[alpha=" << models[modelID].alpha << "]";
   debug_out  << " active = " << models[modelID].isActive;
-  debug_out  << " activate = " << models[modelID].toBeActivated << endl;
+  debug_out  << " activate = " << models[modelID].toBeActivated << std::endl;
 #endif
   return;
 }
@@ -1053,7 +1053,7 @@ void LocWM::MergeModelsBelowThreshold(double MergeMetricThreshold)
             if (mergeM < MergeMetricThreshold) { //0.5
 #if LOCWM_VERBOSITY > 2
                 debug_out  <<"[" << currentFrameNumber << "]: Merging Model[" << j << "][alpha=" << models[j].alpha << "]";
-                debug_out  << " into Model[" << i << "][alpha=" << models[i].alpha << "] " << " Merge Metric = " << mergeM << endl  ;
+                debug_out  << " into Model[" << i << "][alpha=" << models[i].alpha << "] " << " Merge Metric = " << mergeM << std::endl  ;
 #endif
                 MergeTwoModels(i,j);
             }

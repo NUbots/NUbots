@@ -1,45 +1,54 @@
-#ifndef PARSE_H
-#define PARSE_H
+/*! @file WalkToPointJob.h
+    @brief Declaration of WalkToPointJob class.
+ 
+    @class WalkToPointJob
+    @brief A class to encapsulate jobs issued for the walk module.
+ 
+    @author Jason Kulk
+ 
+  Copyright (c) 2009, 2010 Jason Kulk
+ 
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef WALKTOPOINTJOB_H
+#define WALKTOPOINTJOB_H
+
+#include "../MotionJob.h"
 #include <vector>
-#include <stdlib.h>
-#include <stdio.h>
 
-// these define the maximum number of characters in a key, and in a value
-#define MAX_KEYLENGTH 64
-#define MAX_VALLENGTH 64
 
-using namespace std;
-
-struct Pair {
-  char* key; // note max lengths above
-  char* val;
-};
-
-class Parse {
-  public:
-    Parse();
-    void WriteFile(const char* filename, const char* buffer, int buffersize);
-    bool ParseFile(const char* filename);
-
-    // probably should never call this externally, but there's no technical reason why you can't ...
-    void RegisterPair(char* k, char* v);
-
-    int GetAsInt(const char* k);
-    bool GetAsBool(const char* k);
-    char* GetAsString(const char* k);
-    double GetAsDouble(const char* k);
-    bool HasKey(const char* k);
-  private:
-    // don't mess with this.
-    Pair* FindPair(const char* k);
-    Pair* FindPairFailFast(const char* k);
-
-    bool IsTerminator(const char c);
-    bool IsLF(const char c);
-    bool IsSpace(const char c);
-
-    vector<Pair> keyValuePairs;
+class WalkToPointJob : public MotionJob
+{
+public:
+    WalkToPointJob(double time, const std::vector<float>& position);
+    WalkToPointJob(double time, std::istream& input);
+    ~WalkToPointJob();
+    
+    void setPosition(double time, const std::vector<float>& newposition);
+    void getPosition(double& time, std::vector<float>& position);
+    
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
+    
+    friend std::ostream& operator<<(std::ostream& output, const WalkToPointJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkToPointJob* job);
+protected:
+    virtual void toStream(std::ostream& output) const;
+private:
+    std::vector<float> m_walk_position;                 //!< the walk position x (cm), y (cm) and theta (rad)
 };
 
 #endif
+

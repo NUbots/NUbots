@@ -39,7 +39,7 @@ ScriptJob::ScriptJob(double time, const MotionScript& script) : MotionJob(Job::M
     @param time the time in ms to perform the save
     @param name the name of the script to play  
  */
-ScriptJob::ScriptJob(double time, const string& name) : MotionJob(Job::MOTION_SCRIPT)
+ScriptJob::ScriptJob(double time, const std::string& name) : MotionJob(Job::MOTION_SCRIPT)
 {
     m_job_time = time;
     m_name = name;
@@ -49,7 +49,7 @@ ScriptJob::ScriptJob(double time, const string& name) : MotionJob(Job::MOTION_SC
     @param time the time in ms to perform the save
     @param input the stream from which to read the job specific data
  */
-ScriptJob::ScriptJob(double time, istream& input) : MotionJob(Job::MOTION_SCRIPT)
+ScriptJob::ScriptJob(double time, std::istream& input) : MotionJob(Job::MOTION_SCRIPT)
 {
     m_job_time = time;
     input >> m_name; 
@@ -77,7 +77,7 @@ void ScriptJob::getScript(double& time, MotionScript& script)
 
 /*! @brief Returns the name of the associated script
  */
-string& ScriptJob::getName()
+std::string& ScriptJob::getName()
 {
     return m_name;
 }
@@ -85,17 +85,17 @@ string& ScriptJob::getName()
 /*! @brief Prints a human-readable summary to the stream
     @param output the stream to be written to
  */
-void ScriptJob::summaryTo(ostream& output)
+void ScriptJob::summaryTo(std::ostream& output)
 {
-    output << "ScriptJob: " << m_job_time << " " << m_name << endl;;
+    output << "ScriptJob: " << m_job_time << " " << m_name << std::endl;;
 }
 
 /*! @brief Prints a csv version to the stream
     @param output the stream to be written to
  */
-void ScriptJob::csvTo(ostream& output)
+void ScriptJob::csvTo(std::ostream& output)
 {
-    output << "ScriptJob, " << m_job_time << ", " << m_name << endl;
+    output << "ScriptJob, " << m_job_time << ", " << m_name << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -105,10 +105,10 @@ void ScriptJob::csvTo(ostream& output)
  
     @param output the stream to write the job to
  */
-void ScriptJob::toStream(ostream& output) const
+void ScriptJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 2
-        debug << "ScriptJob::toStream" << endl;
+        debug << "ScriptJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -123,10 +123,10 @@ void ScriptJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const ScriptJob& job)
+std::ostream& operator<<(std::ostream& output, const ScriptJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<ScriptJob" << endl;
+        debug << "<<ScriptJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -138,10 +138,10 @@ ostream& operator<<(ostream& output, const ScriptJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const ScriptJob* job)
+std::ostream& operator<<(std::ostream& output, const ScriptJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<ScriptJob" << endl;
+        debug << "<<ScriptJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

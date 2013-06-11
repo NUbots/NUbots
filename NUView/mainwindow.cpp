@@ -43,7 +43,7 @@
 
 #include "debug.h"
 
-using namespace std;
+
 ofstream debug("debug.log");
 ofstream errorlog("error.log");
 
@@ -619,7 +619,7 @@ void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)
     if (!addresses.isEmpty())
     {
         QHostAddress address = addresses.first();
-        qDebug() << "Connect: " << address.toString() << " Port: " << port << endl;
+        qDebug() << "Connect: " << address.toString() << " Port: " << port << std::endl;
     }
 }
 

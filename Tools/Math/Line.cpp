@@ -262,9 +262,9 @@ Vector2<double> Line::projectOnto(Vector2<double> pt) const
     return v*((pt-a)*v) + a;
 }
 
-vector< Vector2<double> > Line::projectOnto(const vector< Vector2<double> >& pts) const
+std::vector< Vector2<double> > Line::projectOnto(const std::vector< Vector2<double> >& pts) const
 {
-    vector< Vector2<double> > result;
+    std::vector< Vector2<double> > result;
     BOOST_FOREACH(const Vector2<double>& pt, pts) {
         result.push_back(v*((pt-a)*v) + a);
     }

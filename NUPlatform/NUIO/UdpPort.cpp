@@ -34,7 +34,7 @@
 #endif
 #include <errno.h>
 #include <cstring>
-using namespace std;
+
 
 /*! @brief Constructs a udp port on the specified port
  
@@ -44,14 +44,14 @@ using namespace std;
     @param portnumber the port number the data will be sent and received on
     @param ignoreself set this to true if you want to ignore your own transmissions on this port
  */
-UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
+UdpPort::UdpPort(std::string name, int portnumber, bool ignoreself): Thread(name, 0)
 {
     #ifdef WIN32
         WSADATA wsa_Data;
         int wsa_ReturnCode = WSAStartup(0x101,&wsa_Data);
         if (wsa_ReturnCode != 0)
         {
-            debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << endl;
+            debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << std::endl;
         }
     #endif
     
@@ -61,7 +61,7 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
     
     // Set the socket as UDP
     if ((m_sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) 
-        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to create socket file descriptor, errno: " << errno << endl;
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to create socket file descriptor, errno: " << errno << std::endl;
     
     // Set the broadcast flag (a) so we receive broadcasted packets, and (b) so we can broadcast if we want to
     #ifdef WIN32
@@ -70,7 +70,7 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
         int broadcastflag = 1;
     #endif
     if (setsockopt(m_sockfd, SOL_SOCKET, SO_BROADCAST, &broadcastflag, sizeof(broadcastflag)) == -1)
-        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to set broadcast socket options, errno: " << errno << endl;
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to set broadcast socket options, errno: " << errno << std::endl;
     
     // Set the reuse address flag
     #ifdef WIN32
@@ -79,7 +79,7 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
         int reuseflag = 1;
     #endif
     if (setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseflag, sizeof(reuseflag)) == -1)
-        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to set reuseaddr socket options, errno: " << errno << endl;
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to set reuseaddr socket options, errno: " << errno << std::endl;
     
     // Construct this address
     m_address.sin_family = AF_INET;                                     // host byte order
@@ -143,13 +143,13 @@ UdpPort::UdpPort(string name, int portnumber, bool ignoreself): Thread(name, 0)
     
     // Bind the socket to this address
     if (bind(m_sockfd, (struct sockaddr*)&m_address, sizeof m_address) == -1)
-        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to bind socket, errno: " << errno << endl;
+        errorlog << "UdpPort::UdpPort(" << m_port_name << "). Failed to bind socket, errno: " << errno << std::endl;
     
     pthread_mutex_init(&m_socket_mutex, NULL);
     
     #if DEBUG_NETWORK_VERBOSITY > 0
         debug << "UdpPort::UdpPort(" << name << ", " << portnumber << ") connected on " << inet_ntoa(m_local_address.sin_addr) << " to ";
-        debug << inet_ntoa(m_target_address.sin_addr) << " with broadcast " << inet_ntoa(m_broadcast_address.sin_addr) << endl;
+        debug << inet_ntoa(m_target_address.sin_addr) << " with broadcast " << inet_ntoa(m_broadcast_address.sin_addr) << std::endl;
     #endif
     
     start();
@@ -174,7 +174,7 @@ UdpPort::~UdpPort()
 void UdpPort::run()
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "UdpPort::run(). Starting udpport: " << m_port_name << "'s mainloop" << endl;
+    debug << "UdpPort::run(). Starting udpport: " << m_port_name << "'s mainloop" << std::endl;
 #endif
     struct sockaddr_in local_their_addr; // connector's address information
     socklen_t local_addr_len = sizeof(local_their_addr);
@@ -186,15 +186,15 @@ void UdpPort::run()
         if (localnumBytes != -1 and ((not m_ignore_self) or (local_their_addr.sin_addr.s_addr != m_local_address.sin_addr.s_addr)))
         {
             #if DEBUG_NETWORK_VERBOSITY > 0
-                debug << "UdpPort::run()." << m_port_number << " Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
+                debug << "UdpPort::run()." << m_port_number << " Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << std::endl;
             #endif
-            stringstream buffer;
+            std::stringstream buffer;
             buffer.write(reinterpret_cast<char*>(localdata), localnumBytes);
             #if DEBUG_NETWORK_VERBOSITY > 4
-                string s = buffer.str();
+                std::string s = buffer.str();
                 for (size_t i=0; i<s.size(); i++)
                     debug << s[i];
-                debug << endl;
+                debug << std::endl;
             #endif
             handleNewData(buffer);
         }
@@ -205,14 +205,14 @@ void UdpPort::run()
 /*! @brief Sends a string stream over the network
     @param stream the stream containing the information to be sent over the network
  */
-void UdpPort::sendData(const stringstream& stream)
+void UdpPort::sendData(const std::stringstream& stream)
 {
     char* data;
     int numbytes;
     numbytes = stream.str().size();
     data = (char*) stream.str().c_str();
     #if DEBUG_NETWORK_VERBOSITY > 4
-        debug << "UdpPort::sendData(). Sending " << numbytes << " bytes to " << inet_ntoa(m_target_address.sin_addr) << endl;
+        debug << "UdpPort::sendData(). Sending " << numbytes << " bytes to " << inet_ntoa(m_target_address.sin_addr) << std::endl;
     #endif
     pthread_mutex_lock(&m_socket_mutex);
     sendto(m_sockfd, data, numbytes, 0, (struct sockaddr *)&m_target_address, sizeof(m_target_address));

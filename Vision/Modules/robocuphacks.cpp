@@ -13,8 +13,8 @@ RobocupHacks::RobocupHacks()
 void RobocupHacks::ballGoalHack()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    vector<Goal>::iterator g_it;
-    vector<Ball>::iterator ba_it = vbb->m_balls.begin();
+    std::vector<Goal>::iterator g_it;
+    std::vector<Ball>::iterator ba_it = vbb->m_balls.begin();
 
     while(ba_it < vbb->m_balls.end()) {
         bool thrown = false;
@@ -34,7 +34,7 @@ void RobocupHacks::ballGoalHack()
         }
         else {
             #ifdef DEBUG_VISION_VERBOSITY_ON
-                debug << "RobocupHacks::ballGoalHack - ball thrown out in beacon or goal" << endl;
+                debug << "RobocupHacks::ballGoalHack - ball thrown out in beacon or goal" << std::endl;
             #endif
         }
     }

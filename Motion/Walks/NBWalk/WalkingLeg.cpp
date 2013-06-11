@@ -23,7 +23,7 @@
 
 #include "Infrastructure/NUBlackboard.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
-using namespace std;
+
 
 using namespace Kinematics;
 using namespace NBMath;
@@ -98,7 +98,7 @@ LegJointStiffTuple WalkingLeg::tick(boost::shared_ptr<Step> step,
                                 boost::shared_ptr<Step> _swing_dest,
                                 ufmatrix3 fc_Transform){
 #ifdef DEBUG_WALKINGLEG
-    cout << "WalkingLeg::tick() "<<leg_name <<" leg, state is "<<state<<endl;
+    std::cout << "WalkingLeg::tick() "<<leg_name <<" leg, state is "<<state<<std::endl;
 #endif
     cur_dest = step;
     swing_src = _swing_src;
@@ -126,7 +126,7 @@ LegJointStiffTuple WalkingLeg::tick(boost::shared_ptr<Step> step,
         result  = supporting(fc_Transform);
         break;
     default:
-        cout << "Invalid SupportMode"<<endl;
+        std::cout << "Invalid SupportMode"<<std::endl;
         throw "Invalid SupportMode passed to WalkingLeg::tick";
     }
 
@@ -193,9 +193,9 @@ LegJointStiffTuple WalkingLeg::swinging(ufmatrix3 fc_Transform){
     goal(1) = target_c_y;
     goal(2) = -gait->stance[WP::BODY_HEIGHT] + heightOffGround;
 
-    vector<float> joint_result = finalizeJoints(goal);
+    std::vector<float> joint_result = finalizeJoints(goal);
 
-    vector<float> stiff_result = getStiffnesses();
+    std::vector<float> stiff_result = getStiffnesses();
     return LegJointStiffTuple(joint_result,stiff_result);
 }
 
@@ -228,21 +228,21 @@ LegJointStiffTuple WalkingLeg::supporting(ufmatrix3 fc_Transform){//float dest_x
 		com_height_adjustment = sin(percent_complete*M_PI_FLOAT)
 			* com_height_adjustment_max;
 
-		//cout << "percent complete: " << percent_complete << endl;
-//		cout << "height adjustment " << com_height_adjustment << endl;
+		//std::cout << "percent complete: " << percent_complete << std::endl;
+//		std::cout << "height adjustment " << com_height_adjustment << std::endl;
 	}
 
     goal(0) = dest_x; //targetX for this leg
     goal(1) = dest_y;  //targetY
     goal(2) = -gait->stance[WP::BODY_HEIGHT] - com_height_adjustment; //targetZ
 
-    vector<float> joint_result = finalizeJoints(goal);
-    vector<float> stiff_result = getStiffnesses();
+    std::vector<float> joint_result = finalizeJoints(goal);
+    std::vector<float> stiff_result = getStiffnesses();
     return LegJointStiffTuple(joint_result,stiff_result);
 }
 
 
-const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
+const std::vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
     const float startStopSensorScale = getEndStepSensorScale();
 
     //Center of mass control
@@ -294,7 +294,7 @@ const vector<float> WalkingLeg::finalizeJoints(const ufvector3& footGoal){
     applyHipHacks(result.angles);
 
     memcpy(lastJoints, result.angles, LEG_JOINTS*sizeof(float));
-    return vector<float>(result.angles, &result.angles[LEG_JOINTS]);
+    return std::vector<float>(result.angles, &result.angles[LEG_JOINTS]);
 
 }
 
@@ -477,7 +477,7 @@ WalkingLeg::getHipHack(const float footAngleZ){
  * in the gait cycle. Currently, the stiffnesses are static throughout the gait
  * cycle
  */
-const vector<float> WalkingLeg::getStiffnesses(){
+const std::vector<float> WalkingLeg::getStiffnesses(){
 
     //get shorter names for all the constants
     const float maxS = gait->stiffness[WP::HIP];
@@ -487,7 +487,7 @@ const vector<float> WalkingLeg::getStiffnesses(){
 
     float stiffnesses[LEG_JOINTS] = {maxS, maxS, maxS,
                                      kneeS,anklePitchS,ankleRollS};
-    vector<float> stiff_result = vector<float>(stiffnesses,
+    std::vector<float> stiff_result = std::vector<float>(stiffnesses,
                                                &stiffnesses[LEG_JOINTS]);
     return stiff_result;
 
@@ -517,7 +517,7 @@ void WalkingLeg::computeOdoUpdate(){
 /**
  *  STATIC!! method to get angles from a goal, and the components of walking params
  */
-vector<float>
+std::vector<float>
 WalkingLeg::getAnglesFromGoal(const ChainID chainID,
                               const ufvector3 & goal,
                               const float stance[WP::LEN_STANCE_CONFIG]){
@@ -543,7 +543,7 @@ WalkingLeg::getAnglesFromGoal(const ChainID chainID,
                                                foot_orientation,
                                                body_goal,
                                                body_orientation);
-        return  vector<float>(result.angles,&result.angles[LEG_JOINTS]);
+        return  std::vector<float>(result.angles,&result.angles[LEG_JOINTS]);
 
 }
 
@@ -551,7 +551,7 @@ WalkingLeg::getAnglesFromGoal(const ChainID chainID,
 /**
  * Assuming this is the support foot, then we can return how far we have moved
  */
-vector<float> WalkingLeg::getOdoUpdate(){
+std::vector<float> WalkingLeg::getOdoUpdate(){
     return odoUpdate;
 }
 
@@ -650,16 +650,16 @@ void WalkingLeg::debugProcessing(){
 #ifdef DEBUG_WALKING_STATE_TRANSITIONS
     if (firstFrame()){
         if(chainID == LLEG_CHAIN){
-            cout<<"Left leg "
+            std::cout<<"Left leg "
         }else{
-            cout<<"Right leg "
+            std::cout<<"Right leg "
         }
       if(state == SUPPORTING)
-          cout <<"switched into single support"<<endl;
+          std::cout <<"switched into single support"<<std::endl;
       else if(state== DOUBLE_SUPPORT || state == PERSISTENT_DOUBLE_SUPPORT)
-          cout <<"switched into double support"<<endl;
+          std::cout <<"switched into double support"<<std::endl;
       else if(state == SWINGING)
-          cout << "switched into swinging."<<endl;
+          std::cout << "switched into swinging."<<std::endl;
     }
 #endif
 
@@ -671,12 +671,12 @@ void WalkingLeg::debugProcessing(){
 
     if(diff(0) > GTHRSH || diff(1) > GTHRSH ||diff(2) > GTHRSH ){
         if(chainID == LLEG_CHAIN){
-            cout << "Left leg ";
+            std::cout << "Left leg ";
         }else
-            cout << "Right leg ";
-        cout << "noticed a big jump from last frame"<< diff<<endl;
-        cout << "  from: "<< last_goal<<endl;
-        cout << "  to: "<< goal<<endl;
+            std::cout << "Right leg ";
+        std::cout << "noticed a big jump from last frame"<< diff<<std::endl;
+        std::cout << "  from: "<< last_goal<<std::endl;
+        std::cout << "  to: "<< goal<<std::endl;
 
     }
 #endif

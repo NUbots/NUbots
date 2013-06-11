@@ -38,7 +38,7 @@ SaveImagesJob::SaveImagesJob(bool saveimages, bool varycamerasettings) : VisionJ
  
     Remember that only members introduced at this level are read at this level.
  */
-SaveImagesJob::SaveImagesJob(istream& input) : VisionJob(Job::VISION_SAVE_IMAGES)
+SaveImagesJob::SaveImagesJob(std::istream& input) : VisionJob(Job::VISION_SAVE_IMAGES)
 {
     m_job_time = 0;
     // Temporary read buffers
@@ -74,7 +74,7 @@ bool SaveImagesJob::varyCameraSettings()
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void SaveImagesJob::summaryTo(ostream& output)
+void SaveImagesJob::summaryTo(std::ostream& output)
 {
     output << "SaveImagesJob: " << m_job_time << " ";
     if (m_save_images == true)
@@ -85,13 +85,13 @@ void SaveImagesJob::summaryTo(ostream& output)
         output << "true";
     else
         output << "false";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void SaveImagesJob::csvTo(ostream& output)
+void SaveImagesJob::csvTo(std::ostream& output)
 {
     output << "SaveImagesJob, " << m_job_time << ", ";
     if (m_save_images == true)
@@ -102,7 +102,7 @@ void SaveImagesJob::csvTo(ostream& output)
         output << "true, ";
     else
         output << "false, ";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -112,7 +112,7 @@ void SaveImagesJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void SaveImagesJob::toStream(ostream& output) const
+void SaveImagesJob::toStream(std::ostream& output) const
 {
     Job::toStream(output);                  // This writes data introduced at the base level
     VisionJob::toStream(output);            // This writes data introduced at the vision level
@@ -127,7 +127,7 @@ void SaveImagesJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const SaveImagesJob& job)
+std::ostream& operator<<(std::ostream& output, const SaveImagesJob& job)
 {
     job.toStream(output);
     return output;
@@ -139,7 +139,7 @@ ostream& operator<<(ostream& output, const SaveImagesJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const SaveImagesJob* job)
+std::ostream& operator<<(std::ostream& output, const SaveImagesJob* job)
 {
     if (job != NULL)
         job->toStream(output);

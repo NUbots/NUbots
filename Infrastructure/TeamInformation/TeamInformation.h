@@ -33,7 +33,7 @@ class FieldObjects;
 #include <vector>
 #include <iostream>
 #include "Tools/FileFormats/TimestampedData.h"
-using namespace std;
+
 
 #define TEAM_PACKET_STRUCT_HEADER "NUtm"
 
@@ -69,18 +69,18 @@ public:
     SharedSelf Self;
 
     std::string toString() const;
-    ostream& toFile(ostream& output) const;
-    istream& fromFile(istream& input);
-    void summaryTo(ostream& output) const;
-    friend ostream& operator<< (ostream& output, const TeamPacket& packet);
-    friend istream& operator>> (istream& input, TeamPacket& packet);
+    std::ostream& toFile(std::ostream& output) const;
+    std::istream& fromFile(std::istream& input);
+    void summaryTo(std::ostream& output) const;
+    friend std::ostream& operator<< (std::ostream& output, const TeamPacket& packet);
+    friend std::istream& operator>> (std::istream& input, TeamPacket& packet);
 };
 
 class TeamInformation: public TimestampedData
 {
 public:
     typedef boost::circular_buffer<TeamPacket> PacketBuffer;
-    typedef vector<PacketBuffer> PacketBufferArray;
+    typedef std::vector<PacketBuffer> PacketBufferArray;
 
     TeamInformation(int playernum=0, int teamnum=0);
     ~TeamInformation();
@@ -90,16 +90,16 @@ public:
     int getTeamNumber() {return m_team_number;};
     bool amIClosestToBall();
     
-    vector<TeamPacket::SharedBall> getSharedBalls() const;
+    std::vector<TeamPacket::SharedBall> getSharedBalls() const;
     
     void UpdateTime(double newTime) {m_timestamp=newTime;};
     double GetTimestamp() const{return m_timestamp;};
     std::string toString() const;
 
-    friend ostream& operator<< (ostream& output, const TeamInformation& info);
-    //friend ostream& operator<< (ostream& output, TeamInformation* info);
-    friend istream& operator>> (istream& input, TeamInformation& info);
-    //friend istream& operator>> (istream& input, TeamInformation* info);
+    friend std::ostream& operator<< (std::ostream& output, const TeamInformation& info);
+    //friend std::ostream& operator<< (std::ostream& output, TeamInformation* info);
+    friend std::istream& operator>> (std::istream& input, TeamInformation& info);
+    //friend std::istream& operator>> (std::istream& input, TeamInformation* info);
 
     TeamPacket generateTeamTransmissionPacket();
     void addReceivedTeamPacket(TeamPacket& receivedPacket);
@@ -121,8 +121,8 @@ private:
 
     PacketBufferArray m_received_packets;     //!< team packets received from other robots
     
-    vector<float> m_led_green;
-    vector<float> m_led_red;
+    std::vector<float> m_led_green;
+    std::vector<float> m_led_red;
 };
 
 

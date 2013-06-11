@@ -29,20 +29,20 @@
 #include "debugverbositynuactionators.h"
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadYaw"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowPitch"), string("LElbowYaw"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowPitch"), string("RElbowYaw"), \
-                                    string("TorsoRoll"), string("TorsoPitch"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYaw"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYaw"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
-vector<string> CycloidActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+static std::string temp_servo_names[] = {std::string("HeadYaw"), \
+                                    std::string("LShoulderRoll"), std::string("LShoulderPitch"), std::string("LElbowPitch"), std::string("LElbowYaw"), \
+                                    std::string("RShoulderRoll"), std::string("RShoulderPitch"), std::string("RElbowPitch"), std::string("RElbowYaw"), \
+                                    std::string("TorsoRoll"), std::string("TorsoPitch"), \
+                                    std::string("LHipRoll"),  std::string("LHipPitch"), std::string("LHipYaw"), std::string("LKneePitch"), std::string("LAnkleRoll"), std::string("LAnklePitch"), \
+                                    std::string("RHipRoll"),  std::string("RHipPitch"), std::string("RHipYaw"), std::string("RKneePitch"), std::string("RAnkleRoll"), std::string("RAnklePitch")};
+std::vector<std::string> CycloidActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 /*! @brief Constructs a nubot actionator class with a Bear backend
  */ 
 CycloidActionators::CycloidActionators(Motors* motors)
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "CycloidActionators::CycloidActionators()" << endl;
+    debug << "CycloidActionators::CycloidActionators()" << std::endl;
 #endif
     m_current_time = 0;
     m_motors = motors;
@@ -50,7 +50,7 @@ CycloidActionators::CycloidActionators(Motors* motors)
     m_data->addActionators(m_servo_names);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-    debug << "CycloidActionators::CycloidActionators(). Avaliable Actionators: " << endl;
+    debug << "CycloidActionators::CycloidActionators(). Avaliable Actionators: " << std::endl;
     m_data->summaryTo(debug);
 #endif
 }
@@ -62,7 +62,7 @@ CycloidActionators::~CycloidActionators()
 void CycloidActionators::copyToHardwareCommunications()
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
-    debug << "CycloidActionators::copyToHardwareCommunications()" << endl;
+    debug << "CycloidActionators::copyToHardwareCommunications()" << std::endl;
 #endif
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
@@ -72,8 +72,8 @@ void CycloidActionators::copyToHardwareCommunications()
 
 void CycloidActionators::copyToServos()
 {
-    static vector<float> positions;
-    static vector<float> gains;
+    static std::vector<float> positions;
+    static std::vector<float> gains;
     
     m_data->getNextServos(positions, gains);
     for (size_t i=0; i<positions.size(); i++)

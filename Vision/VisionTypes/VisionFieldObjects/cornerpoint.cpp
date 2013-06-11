@@ -24,12 +24,12 @@ CornerPoint::CornerPoint(TYPE type, GroundPoint location)
 bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const
 {
 #if VISION_FIELDPOINT_VERBOSITY > 1
-    debug << "CornerPoint::addToExternalFieldObjects - m_id: " << VFOName(m_id) << endl;
-    debug << "    " << *this << endl;
+    debug << "CornerPoint::addToExternalFieldObjects - m_id: " << VFOName(m_id) << std::endl;
+    debug << "    " << *this << std::endl;
 #endif
     if(valid) {
         #if VISION_FIELDPOINT_VERBOSITY > 1
-            debug << "CornerPoint::addToExternalFieldObjects - valid" << endl;
+            debug << "CornerPoint::addToExternalFieldObjects - valid" << std::endl;
         #endif
         AmbiguousObject newAmbObj;
 
@@ -66,9 +66,9 @@ bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float ti
             return false;
         default:
             //invalid object - do not push to fieldobjects
-            errorlog << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << endl;
+            errorlog << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << std::endl;
             #if VISION_FIELDPOINT_VERBOSITY > 1
-                debug << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << endl;
+                debug << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << std::endl;
             #endif
             return false;
         }
@@ -86,14 +86,14 @@ bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float ti
     }
     else {
         #if VISION_FIELDPOINT_VERBOSITY > 1
-            debug << "CornerPoint::addToExternalFieldObjects - invalid" << endl;
+            debug << "CornerPoint::addToExternalFieldObjects - invalid" << std::endl;
         #endif
         return false;
     }
 }
 
 //! @brief Stream output for labelling purposes
-void CornerPoint::printLabel(ostream& out) const
+void CornerPoint::printLabel(std::ostream& out) const
 {
     out << m_location;
 }
@@ -111,9 +111,9 @@ double CornerPoint::findGroundError(VisionFieldObject *other) const
     return ( m_location.ground - c->m_location.ground ).abs();
 }
 
-ostream& operator<< (ostream& output, const CornerPoint& c)
+std::ostream& operator<< (std::ostream& output, const CornerPoint& c)
 {
-    string nm;
+    std::string nm;
     switch(c.m_type) {
     case CornerPoint::L:
         nm = "L";
@@ -129,18 +129,18 @@ ostream& operator<< (ostream& output, const CornerPoint& c)
         break;
     }
 
-    output << "CornerPoint - " << nm << endl;
-    output << "\tpixelloc: " << c.m_location.screen << endl;
-    output << "\tangularloc: " << c.m_location.angular << endl;
-    output << "\trelative field coords: " << c.m_location.relativeRadial << endl;
-    output << "\tspherical error: [" << c.m_spherical_error << "]" << endl;
+    output << "CornerPoint - " << nm << std::endl;
+    output << "\tpixelloc: " << c.m_location.screen << std::endl;
+    output << "\tangularloc: " << c.m_location.angular << std::endl;
+    output << "\trelative field coords: " << c.m_location.relativeRadial << std::endl;
+    output << "\tspherical error: [" << c.m_spherical_error << "]" << std::endl;
     output << "\tsize on screen: [" << c.m_size_on_screen << "]";
     return output;
 }
 
-ostream& operator<< (ostream& output, const vector<CornerPoint>& c)
+std::ostream& operator<< (std::ostream& output, const std::vector<CornerPoint>& c)
 {
     for (size_t i=0; i<c.size(); i++)
-        output << c[i] << endl;
+        output << c[i] << std::endl;
     return output;
 }

@@ -33,7 +33,7 @@
 #include "NUPlatform/NUActionators/NUActionatorsData.h"
 
 #include <fstream>
-using namespace std;
+
 
 class VSCWalk : public NUWalk
 {
@@ -45,8 +45,8 @@ protected:
 private:
     void calculateLeftArm();
     void calculateRightArm();
-    void calculateArmAngles(float legphase, float armsign, vector<float>& angles);
-    void calculateArmGains(float legphase, vector<float>& gains);
+    void calculateArmAngles(float legphase, float armsign, std::vector<float>& angles);
+    void calculateArmGains(float legphase, std::vector<float>& gains);
     
     void updateActionatorsData();
 
@@ -68,15 +68,15 @@ private:
     float m_previous_t;         //!< the previous step time in milliseconds
     int m_step_leg;             //!< the side (left or right) of the current step. 0 if its a left, and 1 if its a right step
     
-    vector<float> m_left_leg_angles;
-    vector<float> m_right_leg_angles;
-    vector<float> m_left_leg_gains;
-    vector<float> m_right_leg_gains;
+    std::vector<float> m_left_leg_angles;
+    std::vector<float> m_right_leg_angles;
+    std::vector<float> m_left_leg_gains;
+    std::vector<float> m_right_leg_gains;
     
-    vector<float> m_left_arm_angles;
-    vector<float> m_right_arm_angles;
-    vector<float> m_left_arm_gains;
-    vector<float> m_right_arm_gains;
+    std::vector<float> m_left_arm_angles;
+    std::vector<float> m_right_arm_angles;
+    std::vector<float> m_left_arm_gains;
+    std::vector<float> m_right_arm_gains;
     
     ofstream m_pattern_debug;
 

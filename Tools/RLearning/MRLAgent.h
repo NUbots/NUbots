@@ -54,11 +54,11 @@ public:
 
     void giveMotivationReward();
     float wundtFunction(float N);
-    int getActionAndLearn(vector<float> observations, vector<int> valid_actions);
-    void saveMRLAgent(string agentName);
-    void loadMRLAgent(string agentName);
+    int getActionAndLearn(std::vector<float> observations, std::vector<int> valid_actions);
+    void saveMRLAgent(std::string agentName);
+    void loadMRLAgent(std::string agentName);
 
-    map<string,float>* getMap();
+    std::map<std::string,float>* getMap();
     ApproximatorInterface* expectation_map;
 };
 

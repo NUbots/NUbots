@@ -41,14 +41,14 @@ void FourierFunction::initialiseFunction(int order_k_, int num_inputs_m_, bool f
     generateConstants();
     number_of_basis_functions_n = basis_constants_c.size();
     learning_rate_alpha = learning_rate_alpha_;
-    weights_w = vector<float>(number_of_basis_functions_n,0);
+    weights_w = std::vector<float>(number_of_basis_functions_n,0);
     max_period = max_period_;
 }
 /*! @brief Returns string of info about function which can then be saved to disk and reloaded using loadSaveData(..)
 */
-string FourierFunction::getSaveData()
+std::string FourierFunction::getSaveData()
 {
-    stringstream save_data;
+    std::stringstream save_data;
     save_data<< order_k << "\n";
     save_data<< num_inputs_m << "\n";
     save_data <<max_period<<"\n";
@@ -63,11 +63,11 @@ string FourierFunction::getSaveData()
     return save_data.str();
 
 }
-/*! @brief Loads function from string of saved data.
+/*! @brief Loads function from std::string of saved data.
 */
-void FourierFunction::loadSaveData(string save_data_)
+void FourierFunction::loadSaveData(std::string save_data_)
 {
-    stringstream save_data(save_data_.c_str());
+    std::stringstream save_data(save_data_.c_str());
     save_data >> order_k;
     save_data >> num_inputs_m;
     save_data >> max_period;
@@ -81,7 +81,7 @@ void FourierFunction::loadSaveData(string save_data_)
 
     generateConstants();
     number_of_basis_functions_n = basis_constants_c.size();
-    weights_w = vector<float>(number_of_basis_functions_n,0);
+    weights_w = std::vector<float>(number_of_basis_functions_n,0);
 
     for (unsigned int i = 0; i<weights_w.size();i++){
         save_data >> weights_w[i];
@@ -91,7 +91,7 @@ void FourierFunction::loadSaveData(string save_data_)
 }
 /*! @brief Evaluates the function at the point input in R^m
 */
-float FourierFunction::evaluate(vector<float> const& input)
+float FourierFunction::evaluate(std::vector<float> const& input)
 {
     float result = 0;
     for(int i = 0; i<number_of_basis_functions_n;i++){
@@ -105,12 +105,12 @@ float FourierFunction::evaluate(vector<float> const& input)
            value = desired value
            iterations = number of learning iterations to take
 */
-void FourierFunction::learn(vector<float> input, float value, int iterations)
+void FourierFunction::learn(std::vector<float> input, float value, int iterations)
 {
     for(int i = 0; i<iterations; i++){
         float delta = value - evaluate(input);
-        //calculate the phi vector and its norm for learning:
-        vector<float> phi;
+        //calculate the phi std::vector and its norm for learning:
+        std::vector<float> phi;
         for(int j = 0; j<number_of_basis_functions_n;j++){
             phi.push_back(cos(PI*dotProd(basis_constants_c[j],input)/max_period));
         }
@@ -130,7 +130,7 @@ void FourierFunction::learn(vector<float> input, float value, int iterations)
 
 /*! @brief Calculates the dot product of two vectors
 */
-float FourierFunction::dotProd(vector<float> x, vector<float> y)
+float FourierFunction::dotProd(std::vector<float> x, std::vector<float> y)
 {
     float result = 0;
     for (unsigned int i = 0; i<x.size(); i++){
@@ -145,7 +145,7 @@ void FourierFunction::generateConstants()
     basis_constants_c.clear();
 
     if(fully_coupled){
-        vector<float> constant(num_inputs_m,0);//Create initial vector of zeros
+        std::vector<float> constant(num_inputs_m,0);//Create initial vector of zeros
         int num = (int)pow((double)order_k+1,(double)num_inputs_m);
         for(int i = 0; i<num;i++){
             basis_constants_c.push_back(constant);
@@ -155,7 +155,7 @@ void FourierFunction::generateConstants()
         //Uncoupled: simply generate linearly independant constant vectors
         for(int i = 0; i<num_inputs_m;i++){
             for(int j = 0; j<=order_k;j++){
-                vector<float> constant(num_inputs_m,0);
+                std::vector<float> constant(num_inputs_m,0);
                 constant[i] = j;
                 basis_constants_c.push_back(constant);
             }
@@ -164,7 +164,7 @@ void FourierFunction::generateConstants()
 }
 /*! @brief Iterates a length n vector as if it is a base k+1 number, with each entry representing one digit.
 */
-void FourierFunction::getNextConstant(vector<float> &c)
+void FourierFunction::getNextConstant(std::vector<float> &c)
 {
 
     //Increments through number of length m in base k+1
