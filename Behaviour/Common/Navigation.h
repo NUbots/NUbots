@@ -115,7 +115,7 @@ private:
     
     /*! @brief Returns a new direction (bearing) to move that avoids all obstacles
      */
-    float avoidObstacles(const vector<float> position, float relative_bearing);
+    float avoidObstacles(const vector<float> position, float distance, float relative_bearing);
     
     /*! @brief Returns a new direction (bearing) to move that aligns the designated foot with the ball
      */
@@ -146,7 +146,7 @@ public:
     
     /*! @brief Go to a point and face a heading. Returned vector is walk command vector.
      */
-    vector<float> goToPoint(Object fieldObject, float heading);
+    vector<float> goToPoint(Object* fieldObject, float heading);
     
     /*! @brief Go to a point and face a heading. Returned vector is walk command vector.
      */
@@ -154,7 +154,15 @@ public:
     
     /*! @brief Approach the ball with a good angle to kick from. Returned vector is walk command vector.
      */
-    vector<float> goToBall(Object kickTarget = NULL);
+    vector<float> goToBall(Object* kickTarget = NULL);
+
+    /*! @brief Stop the walk.
+     */
+    vector<float> stop();
+
+    /*! @brief A wrapper to send kick commands. The kick should decide whether to listen or not.
+     */
+    void kick();
     
     /*! @brief Update the goto calculations and send the walk commands (if actions are not active).
      */

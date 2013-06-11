@@ -26,6 +26,7 @@
 #include "Behaviour/Common/HeadBehaviour.h"
 #include "Behaviour/Common/BehaviourStateLogic.h"
 #include "Behaviour/Common/Navigation.h"
+#include "Behaviour/Common/NavigationLogic.h"
 #include "NUSoccerProvider.h"
 
 #include "Infrastructure/Jobs/JobList.h"
@@ -99,6 +100,7 @@ private:
     
     void doBallApproachAndKick(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         movement->goToBall();
+        movement->kick();
         head->prioritiseBall();        
     }
     
