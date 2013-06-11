@@ -22,27 +22,27 @@
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef RAGDOLLBEHAVIOUR_H
-#define RAGDOLLBEHAVIOUR_H
+#ifndef NUSOCCERBEHAVIOUR_H
+#define NUSOCCERBEHAVIOUR_H
 
 #include "Behaviour/BehaviourFSMProvider.h"
 
-class RagdollState;
+class NUSoccerState;
 
 #include <vector>
 #include <string>
 
-class RagdollProvider : public BehaviourFSMProvider
+class NUSoccerProvider : public BehaviourFSMProvider
 {
 public:
-    RagdollProvider(Behaviour* manager, bool pauseable = false);
-    ~RagdollProvider();
+    NUSoccerProvider(Behaviour* manager, bool pauseable = false);
+    ~NUSoccerProvider();
 protected:
     BehaviourState* nextStateCommons();
 private:
     bool m_pauseable;
 
-    friend class RagdollState;
+    friend class NUSoccerState;
     BehaviourState* m_paused_state;
 };
 

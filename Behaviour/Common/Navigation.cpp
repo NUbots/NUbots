@@ -22,15 +22,18 @@
 #include "Navigation.h"
 #include "Tools/Math/General.h"
 #include "Behaviour/Common/NavigationLogic.h"
+#include "Infrastructure/Jobs/JobList.h"
+#include "Infrastructure/Jobs/MotionJobs/KickJob.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 
-vector<float> Navigation::generateWalk(float distance, float relative_bearing, float relative_heading, bool avoidObstacles = true) {
+vector<float> Navigation::generateWalk(float distance, float relative_bearing, float relative_heading, bool avoidObstacles) {
     vector<float> new_walk(3,0);
     double current_time;
     float walk_speed;
     float walk_bearing;
     
     if (avoidObstacles) {
-        relative_bearing = avoidObstacles(distance, relative_bearing);
+        relative_bearing = this->avoidObstacles(NavigationLogic::getSelfPosition(),distance, relative_bearing);
     }
     
     //check what distance increment we're in:
@@ -41,7 +44,7 @@ vector<float> Navigation::generateWalk(float distance, float relative_bearing, f
                distance < m_mid_approach_distance) {
         m_distance_increment = 2;
         walk_speed = m_mid_approach_speed;
-    } else if (distance > m_stop_distance + m_distance_hysteresis and
+    } else if (distance > m_ball_lineup_distance + m_distance_hysteresis and
                distance < m_close_approach_distance) {
         m_distance_increment = 1;
         walk_speed = m_close_approach_speed;
@@ -137,16 +140,17 @@ vector<float> Navigation::goToPoint(float distance, float relative_bearing, floa
 }
     
 
-vector<float> Navigation::goToPoint(Object fieldObject, float heading) {
+vector<float> Navigation::goToPoint(Object* fieldObject, float heading) {
     
     //calculate the desired move
     vector<float> self = NavigationLogic::getSelfPosition();
-    vector<float> destination = NavigationLogic::getObjectPosition(fieldObject);
+    vector<float> destination = NavigationLogic::getObjectPosition(*fieldObject);
     destination[2] = heading;
     vector<float> move = NavigationLogic::getPositionDifference(self,destination);
     
     //set continuing movement policy
-    current_object = fieldobject;
+    //XXX: be very careful - can only do this with objects we don't delete
+    current_object = fieldObject;
     current_heading = heading;
     if (current_command != GOTOOBJECT)
         resetHystereses();
@@ -177,13 +181,15 @@ vector<float> Navigation::goToPoint(const vector<float> point) {
 }
 
 
-vector<float> Navigation::goToBall(Object kickTarget = NULL) {
+vector<float> Navigation::goToBall(Object* kickTarget) {
     
     //calculate the desired move
     vector<float> self = NavigationLogic::getSelfPosition();
+    vector<float> point = NavigationLogic::getBallPosition();
     vector<float> move = NavigationLogic::getPositionDifference(self,point);
     
     //set continuing movement policy
+    //XXX: this only works if the kick target isn't deleted ever
     current_object = kickTarget;
     if (current_command != GOTOBALL)
         resetHystereses();
@@ -224,6 +230,23 @@ Navigation* Navigation::getInstance() {
     static Navigation* Instance = new Navigation();
     //}
     return Instance;
+}
+
+vector<float> Navigation::stop() {
+    
+    
+    
+    //set continuing movement policy
+    current_command = USELASTCOMMAND;
+    
+    //must generate the walk last
+    current_walk_command = generateWalk(0,0,0);
+    return current_walk_command;
+}
+
+void Navigation::kick() {
+    //set the kick
+    Blackboard->Jobs->addMotionJob(new KickJob(Blackboard->Sensors->GetTimestamp(),NavigationLogic::getBallPosition(), NavigationLogic::getOpponentGoalPosition()));
 }
 
 

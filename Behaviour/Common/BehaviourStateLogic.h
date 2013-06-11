@@ -46,11 +46,30 @@
 
 class BehaviourStateLogic{
 
+private:
+        //timer variables, since nothing in this robot system tracks time
+        double timeFallen;
+        double timeGetup;
+        //double timeGameResumed = 0.0;
+        double timeGameStarted;
+        double timePutDown;
+        double timeUnPenalised;
+        int m_GoalKeeper;
+
 public:
+    BehaviourStateLogic() {
+        timeFallen = -50000.;
+        timeGetup = -50000.;
+        //timeGameResumed = 0.0;
+        timeGameStarted = 0.0;
+        timePutDown = -20000.0;
+        timeUnPenalised = -20000.0;
+        m_GoalKeeper = 1;
+    }
 
     static BehaviourStateLogic* getInstance();
     
-    std::vector<bool> states(30);
+    bool states[30];
     
     enum StateVariableID{
         IS_CLOSEST_TO_BALL = 0,
@@ -79,52 +98,44 @@ public:
     };
     
     double timeSinceFallen() {
-        return (Blackboard->Sensors->GetTimeStamp()-timeFallen);
+        return (Blackboard->Sensors->GetTimestamp()-timeFallen);
     }
     
     double timeSinceGetup() {
-        return (Blackboard->Sensors->GetTimeStamp()-timeGetup);
+        return (Blackboard->Sensors->GetTimestamp()-timeGetup);
     }
     
     double timeSinceGameStarted() {
-        return (Blackboard->Sensors->GetTimeStamp()-timeGameStarted);
+        return (Blackboard->Sensors->GetTimestamp()-timeGameStarted);
     }
     
     double timeSincePutDown() {
-        return (Blackboard->Sensors->GetTimeStamp()-timePutDown);
+        return (Blackboard->Sensors->GetTimestamp()-timePutDown);
     }
     
     double timeSinceUnPenalised() {
-        return (Blackboard->Sensors->GetTimeStamp()-timeUnPenalised);
+        return (Blackboard->Sensors->GetTimestamp()-timeUnPenalised);
     }
     
     //fill in the distance to ball bools
-    std::vector<bool> checkDistanceToBall();
+    void checkDistanceToBall();
     
     //fill in the ball visibility/islost bools
-    std::vector<bool> checkVisibilityOfBall();
+    void checkVisibilityOfBall();
     
     //fill in the gamestate bools
-    std::vector<bool> checkGameState();
+    void checkGameState();
     
     //fill in the personal movement goals/position bools
-    std::vector<bool> checkMyMovement();
+    void checkMyMovement();
     
     //fill in the fallen/picked up bools
-    std::vector<bool> checkFallen();
+    void checkFallen();
     
     //update everything.
     void update();
     
-    private:
-        //timer variables, since nothing in this robot system tracks time
-        double timeFallen = -50000.;
-        double timeGetup = -50000.;
-        //double timeGameResumed = 0.0;
-        double timeGameStarted = 0.0;
-        double timePutDown = -20000.0;
-        double timeUnPenalised = -20000.0;
-        int m_GoalKeeper = 1;
-}
+    
+};
 
 #endif

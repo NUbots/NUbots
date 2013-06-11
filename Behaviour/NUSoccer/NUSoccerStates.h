@@ -24,6 +24,9 @@
 
 #include "Behaviour/BehaviourState.h"
 #include "Behaviour/Common/HeadBehaviour.h"
+#include "Behaviour/Common/BehaviourStateLogic.h"
+#include "Behaviour/Common/Navigation.h"
+#include "Behaviour/Common/NavigationLogic.h"
 #include "NUSoccerProvider.h"
 
 #include "Infrastructure/Jobs/JobList.h"
@@ -65,48 +68,49 @@ class NUSoccerState : public NUSoccerSubState
 //all private functions are simple soccer behaviours
 private:
     
-    void stopMoving(logic,movement,head) { //this is the freeze for penalised/pickup/initial
+    void stopMoving(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) { //this is the freeze for penalised/pickup/initial
         movement->stop();
     }
     
-    goToStartDefensePositions(logic,movement,head) { //defensive fielding position
+    void goToStartDefensePositions(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) { //defensive fielding position
         std::vector<float> position = NavigationLogic::getStartDefensePosition();
         movement->goToPoint(position[0],position[1],position[2]);
         head->prioritiseLocalisation();
     }
     
-    goToStartOffensePositions(logic,movement,head) { //offensive fielding position
+    void goToStartOffensePositions(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) { //offensive fielding position
         std::vector<float> position = NavigationLogic::getStartOffensePosition();
         movement->goToPoint(position[0],position[1],position[2]);
         head->prioritiseLocalisation();
     }
     
-    watchTheBall(logic,movement,head) {
+    void watchTheBall(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         head->lookAtBall();
     }
     
-    doFieldLocalisation(logic,movement,head) {
+    void doFieldLocalisation(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         movement->goToPoint(NavigationLogic::fieldLocalisationPosition());
         head->lookForFieldObjects();
     }
     
-    doBallLocalisation(logic,movement,head) {
+    void doBallLocalisation(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         movement->goToPoint(NavigationLogic::ballLocalisationPosition());
         head->lookForBall();
     }
     
-    doBallApproachAndKick(logic,movement,head) {
+    void doBallApproachAndKick(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         movement->goToBall();
+        movement->kick();
         head->prioritiseBall();        
     }
     
-    goToOffensiveSupportPosition(logic,movement,head) {
+    void goToOffensiveSupportPosition(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         std::vector<float> position = NavigationLogic::getBallDefensePosition();
         movement->goToPoint(position[0],position[1],position[2]);
         head->prioritiseBall();
     }
     
-    goToDefensiveSupportPosition(logic,movement,head) {
+    void goToDefensiveSupportPosition(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         std::vector<float> position = NavigationLogic::getBallOffensePosition();
         movement->goToPoint(position[0],position[1],position[2]);
         head->prioritiseBall();
@@ -129,21 +133,21 @@ public:
             logic->states[BehaviourStateLogic::GAME_STATE_READY] or
             logic->states[BehaviourStateLogic::IS_PICKED_UP]) {
             
-            stopMoving(logic,movement,head);
+            stopMoving( logic, movement, head);
             
         } else if (logic->states[BehaviourStateLogic::GAME_STATE_POSITIONING] and
                    not logic->states[BehaviourStateLogic::GAME_STATE_KICKOFF]) {
             
-            goToStartDefensePositions(logic,movement,head);
+            goToStartDefensePositions( logic, movement, head);
             
         } else if (logic->states[BehaviourStateLogic::GAME_STATE_POSITIONING] and
                    logic->states[BehaviourStateLogic::GAME_STATE_KICKOFF]) {
             
-            goToStartOffensePositions(logic,movement,head);
+            goToStartOffensePositions(logic, movement, head);
             
         } else if (logic->states[BehaviourStateLogic::IS_KICKING]) {
             
-            watchTheBall(logic,movement,head);
+            watchTheBall( logic, movement, head);
             
         } else if (logic->states[BehaviourStateLogic::IS_FALLEN_OVER] or
                    logic->states[BehaviourStateLogic::IS_GETTING_UP] or
@@ -151,28 +155,28 @@ public:
                    logic->states[BehaviourStateLogic::JUST_PUT_DOWN] or 
                    logic->states[BehaviourStateLogic::JUST_UNPENALISED]) {
                    
-            doFieldLocalisation(logic,movement,head);
+            doFieldLocalisation( logic, movement, head);
             
         } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] and
                    not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]) {
                    
-            doBallLocalisation(logic,movement,head);
+            doBallLocalisation( logic, movement, head);
             
         } else if ((logic->states[BehaviourStateLogic::IS_APPROACHING_BALL] and
                    not logic->states[BehaviourStateLogic::IS_FURTHEST_FROM_BALL]) or
                    logic->states[BehaviourStateLogic::IS_CLOSEST_TO_BALL]) {
                    
-            doBallApproachAndKick(logic,movement,head);
+            doBallApproachAndKick( logic, movement, head);
             
         } else if (logic->states[BehaviourStateLogic::IS_SECOND_FROM_BALL] and
-                   not logic->states[BehaviourStateLogic::IS_GOALKEEPER]) {
+                   not logic->states[BehaviourStateLogic::IS_GOAL_KEEPER]) {
             //XXX: we need to know if it's not the closest to the ball but is the closest to the offensive position....
-            goToOffensiveSupportPosition(logic,movement,head);
+            goToOffensiveSupportPosition(logic,  movement, head);
             
         } else if (logic->states[BehaviourStateLogic::IS_SECOND_FROM_BALL] and
-                   not logic->states[BehaviourStateLogic::IS_GOALKEEPER]) {
+                   not logic->states[BehaviourStateLogic::IS_GOAL_KEEPER]) {
             //XXX: see above
-            goToDefensiveSupportPosition(logic,movement,head);
+            goToDefensiveSupportPosition( logic,  movement, head);
             
         } /*else if () {
             

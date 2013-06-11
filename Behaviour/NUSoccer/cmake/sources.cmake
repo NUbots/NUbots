@@ -20,8 +20,8 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  RagdollProvider.cpp RagdollProvider.h
-                RagdollStates.h
+SET (YOUR_SRCS  NUSoccerProvider.cpp NUSoccerProvider.h
+                NUSoccerStates.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
