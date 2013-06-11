@@ -31,7 +31,7 @@
 HeadNodJob::HeadNodJob(head_nod_t nodtype, float centreangle) : MotionJob(Job::MOTION_NOD)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "HeadNodJob::HeadNodJob()" << endl;
+        debug << "HeadNodJob::HeadNodJob()" << std::endl;
     #endif
         m_job_time = 0;
         m_nod_type = nodtype;
@@ -44,7 +44,7 @@ HeadNodJob::HeadNodJob(head_nod_t nodtype, float centreangle) : MotionJob(Job::M
 /*! @brief Constructs a HeadNodJob from stream data
     @param input the stream from which to read the job specific data
  */
-HeadNodJob::HeadNodJob(istream& input) : MotionJob(Job::MOTION_NOD)
+HeadNodJob::HeadNodJob(std::istream& input) : MotionJob(Job::MOTION_NOD)
 {
     m_job_time = 0;
     // Temporary read buffers
@@ -87,7 +87,7 @@ float HeadNodJob::getCentreAngle()
 /*! @brief Prints a human-readable summary to the stream
     @param output the stream to be written to
  */
-void HeadNodJob::summaryTo(ostream& output)
+void HeadNodJob::summaryTo(std::ostream& output)
 {
     output << "HeadNodJob: ";
     if (m_nod_type == Ball)
@@ -96,13 +96,13 @@ void HeadNodJob::summaryTo(ostream& output)
         output << "BallAndLocalisation";
     else
         output << "Localisation";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
     @param output the stream to be written to
  */
-void HeadNodJob::csvTo(ostream& output)
+void HeadNodJob::csvTo(std::ostream& output)
 {
     output << "HeadNodJob: ";
     if (m_nod_type == Ball)
@@ -111,7 +111,7 @@ void HeadNodJob::csvTo(ostream& output)
         output << "BallAndLocalisation";
     else
         output << "Localisation";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -121,10 +121,10 @@ void HeadNodJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void HeadNodJob::toStream(ostream& output) const
+void HeadNodJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "HeadPanJob::toStream" << endl;
+        debug << "HeadPanJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -139,10 +139,10 @@ void HeadNodJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const HeadNodJob& job)
+std::ostream& operator<<(std::ostream& output, const HeadNodJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "HeadNodJob::operator<<" << endl;
+        debug << "HeadNodJob::operator<<" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -154,10 +154,10 @@ ostream& operator<<(ostream& output, const HeadNodJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const HeadNodJob* job)
+std::ostream& operator<<(std::ostream& output, const HeadNodJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "HeadNodJob::operator<<" << endl;
+        debug << "HeadNodJob::operator<<" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

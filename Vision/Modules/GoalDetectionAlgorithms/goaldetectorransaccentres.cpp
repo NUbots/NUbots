@@ -21,26 +21,26 @@ GoalDetectorRANSACCentres::GoalDetectorRANSACCentres()
 }
 
 /// THIS METHOD IS NOT WORKING
-vector<Goal> GoalDetectorRANSACCentres::run()
+std::vector<Goal> GoalDetectorRANSACCentres::run()
 {
 //    const double ANGLE_TOLERANCE = 0.15;
 //    VisionBlackboard* vbb = VisionBlackboard::getInstance();
 //    const Horizon& kh = vbb->getKinematicsHorizon();
 //    //get transitions associated with goals
-//    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
+//    std::vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
 //                          v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
-//    list<Quad> candidates;
-//    vector<Goal> posts;
+//    std::list<Quad> candidates;
+//    std::vector<Goal> posts;
 
 //    //finds the centre lines and constructs goals from them
-//    vector<pair<RANSACGoal, vector<ColourSegment> > > ransac_results;
-//    vector<pair<RANSACGoal, vector<ColourSegment> > >::iterator rit;
-//    vector<RANSACGoal> goal_lines;
+//    std::vector<pair<RANSACGoal, std::vector<ColourSegment> > > ransac_results;
+//    std::vector<pair<RANSACGoal, std::vector<ColourSegment> > >::iterator rit;
+//    std::vector<RANSACGoal> goal_lines;
 
 ////    Vector2<double> h_length_stats = calculateSegmentLengthStatistics(h_segments);
 
 ////    //use stddev throwout to remove topbar segments
-////    vector<ColourSegment>::iterator it = h_segments.begin();
+////    std::vector<ColourSegment>::iterator it = h_segments.begin();
 ////    while(it != h_segments.end()) {
 ////        if(it->getLength() > h_length_stats.x + STDDEV_THRESHOLD*h_length_stats.y)
 ////            it = h_segments.erase(it);
@@ -56,14 +56,14 @@ vector<Goal> GoalDetectorRANSACCentres::run()
 //        goal_lines.push_back(rit->first);
 //    }
 
-////    cout << "lines: " << goal_lines.size() << endl;
+////    std::cout << "lines: " << goal_lines.size() << std::endl;
 
 //    /// @todo MERGE COLINEAR
 
-////    cout << "after merge: " << goal_lines.size() << endl;
+////    std::cout << "after merge: " << goal_lines.size() << std::endl;
 
 //#if VISION_GOAL_VERBOSITY > 1
-//    vector<RANSACGoal> debug_lines;
+//    std::vector<RANSACGoal> debug_lines;
 //    BOOST_FOREACH(const RANSACGoal& g, goal_lines) {
 //        debug_lines.push_back(g);
 //    }
@@ -91,7 +91,7 @@ vector<Goal> GoalDetectorRANSACCentres::run()
 //        RANSACGoal g1 = goal_lines[best.first],
 //                   g2 = goal_lines[best.second];
 
-//        cout << largest_angles.first << " " << largest_angles.second << endl;
+//        std::cout << largest_angles.first << " " << largest_angles.second << std::endl;
 
 //        goal_lines.clear();
 //        goal_lines.push_back(g1);
@@ -99,7 +99,7 @@ vector<Goal> GoalDetectorRANSACCentres::run()
 //    }
 
 
-//    //cout << "after selection (if more than 2): " << goal_lines.size() << endl;
+//    //std::cout << "after selection (if more than 2): " << goal_lines.size() << std::endl;
 
 //    BOOST_FOREACH(const RANSACGoal g, goal_lines) {
 //        //don't add goals that aren't vertical enough
@@ -128,7 +128,7 @@ vector<Goal> GoalDetectorRANSACCentres::run()
 //        }
 //    }
 
-//    //cout << "candidates: " << candidates.size() << endl;
+//    //std::cout << "candidates: " << candidates.size() << std::endl;
 
 //    removeInvalid(candidates);
 

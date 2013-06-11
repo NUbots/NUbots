@@ -21,38 +21,38 @@
 
 #include "NUSounds.h"
 
-string NUSounds::PRE_INITIAL = string("pre_initial.wav");
-string NUSounds::INITIAL = string("initial.wav");
-string NUSounds::READY = string("ready.wav");
-string NUSounds::SET = string("set.wav");
-string NUSounds::PLAYING = string("playing.wav");
-string NUSounds::FINISHED = string("finished.wav");
-string NUSounds::PENALISED = string("penalised.wav");
-string NUSounds::REQUEST_PICK_UP = string("request_pick_up.wav");
-string NUSounds::SUBSTITUTE = string("substitute.wav");
-string NUSounds::RED_TEAM = string("red_team.wav");
-string NUSounds::BLUE_TEAM = string("blue_team.wav");
-string NUSounds::NUBOT1 = string("nubot1.wav");
-string NUSounds::NUBOT2 = string("nubot2.wav");
-string NUSounds::NUBOT3 = string("nubot3.wav");
-string NUSounds::NUBOT4 = string("nubot4.wav");
-string NUSounds::NUBOT5 = string("nubot5.wav");
-string NUSounds::NUBOT6 = string("nubot6.wav");
-string NUSounds::NUBOT7 = string("nubot7.wav");
-string NUSounds::NUBOT8 = string("nubot8.wav");
-string NUSounds::NUBOT9 = string("nubot9.wav");
-string NUSounds::NUBOT10 = string("nubot10.wav");
-string NUSounds::MY_IP_IS = string("my_ip_is.wav");
+std::string NUSounds::PRE_INITIAL = std::string("pre_initial.wav");
+std::string NUSounds::INITIAL = std::string("initial.wav");
+std::string NUSounds::READY = std::string("ready.wav");
+std::string NUSounds::SET = std::string("set.wav");
+std::string NUSounds::PLAYING = std::string("playing.wav");
+std::string NUSounds::FINISHED = std::string("finished.wav");
+std::string NUSounds::PENALISED = std::string("penalised.wav");
+std::string NUSounds::REQUEST_PICK_UP = std::string("request_pick_up.wav");
+std::string NUSounds::SUBSTITUTE = std::string("substitute.wav");
+std::string NUSounds::RED_TEAM = std::string("red_team.wav");
+std::string NUSounds::BLUE_TEAM = std::string("blue_team.wav");
+std::string NUSounds::NUBOT1 = std::string("nubot1.wav");
+std::string NUSounds::NUBOT2 = std::string("nubot2.wav");
+std::string NUSounds::NUBOT3 = std::string("nubot3.wav");
+std::string NUSounds::NUBOT4 = std::string("nubot4.wav");
+std::string NUSounds::NUBOT5 = std::string("nubot5.wav");
+std::string NUSounds::NUBOT6 = std::string("nubot6.wav");
+std::string NUSounds::NUBOT7 = std::string("nubot7.wav");
+std::string NUSounds::NUBOT8 = std::string("nubot8.wav");
+std::string NUSounds::NUBOT9 = std::string("nubot9.wav");
+std::string NUSounds::NUBOT10 = std::string("nubot10.wav");
+std::string NUSounds::MY_IP_IS = std::string("my_ip_is.wav");
 
-string NUSounds::ILLEGAL_INSTRUCTION = string("illegal_instruction.wav");
-string NUSounds::SEG_FAULT = string("seg_fault.wav");
-string NUSounds::BUS_ERROR = string("bus_error.wav");
-string NUSounds::ABORT = string("abort.wav");
-string NUSounds::UNHANDLED_EXCEPTION = string("unhandled_exception.wav");
-string NUSounds::LOW_BATTERY = string("low_battery.wav");
+std::string NUSounds::ILLEGAL_INSTRUCTION = std::string("illegal_instruction.wav");
+std::string NUSounds::SEG_FAULT = std::string("seg_fault.wav");
+std::string NUSounds::BUS_ERROR = std::string("bus_error.wav");
+std::string NUSounds::ABORT = std::string("abort.wav");
+std::string NUSounds::UNHANDLED_EXCEPTION = std::string("unhandled_exception.wav");
+std::string NUSounds::LOW_BATTERY = std::string("low_battery.wav");
 
-string NUSounds::START_SAVING_IMAGES = string("start_saving_images.wav");
-string NUSounds::STOP_SAVING_IMAGES = string("stop_saving_images.wav");
-string NUSounds::LOADING_LUT = string("loading_lut.wav");
+std::string NUSounds::START_SAVING_IMAGES = std::string("start_saving_images.wav");
+std::string NUSounds::STOP_SAVING_IMAGES = std::string("stop_saving_images.wav");
+std::string NUSounds::LOADING_LUT = std::string("loading_lut.wav");
 
 

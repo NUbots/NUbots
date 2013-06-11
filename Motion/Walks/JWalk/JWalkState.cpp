@@ -28,7 +28,7 @@
  	@param name the name of the state
  	@param leg either NUData::LLeg or NUData::RLeg which this state will control
  */
-JWalkState::JWalkState(const string& name, const NUData::id_t& leg) 
+JWalkState::JWalkState(const std::string& name, const NUData::id_t& leg) 
 {
     m_name = leg.Name + name;
     m_leg = leg;
@@ -63,7 +63,7 @@ JWalkState::JWalkState(const string& name, const NUData::id_t& leg)
 }
 
 /*! @brief Returns the state's name */
-string& JWalkState::getName()
+std::string& JWalkState::getName()
 {
     return m_name;
 }

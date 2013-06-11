@@ -35,11 +35,11 @@ public:
     BehaviourJob(job_id_t jobid) : Job(Job::BEHAVIOUR, jobid){};
     virtual ~BehaviourJob() {};
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    virtual ostream& operator<< (ostream& output);
-    virtual istream& operator>> (istream& input);
+    virtual std::ostream& operator<< (std::ostream& output);
+    virtual std::istream& operator>> (std::istream& input);
 };
 
 #endif

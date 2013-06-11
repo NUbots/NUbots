@@ -79,7 +79,7 @@ private:
     const float m_BLOCK_TRIGGER;
     const float m_BLOCK_WIDTH;
     double m_block_time;
-    vector<float> m_block_position;
+    std::vector<float> m_block_position;
 };
 
 #endif

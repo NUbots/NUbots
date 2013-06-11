@@ -23,26 +23,26 @@
 #include "debug.h"
 #include "debugverbositythreading.h"
 
-using namespace std;
+
 
 /*! @brief Creates a thread
     @param name the name of the thread (used entirely for debug purposes)
     @param priority the priority of the thread. If non-zero the thread will be a bona fide real-time thread.
  */
 template <typename T>
-QueueThread<T>::QueueThread(string name, unsigned char priority) : Thread(name, priority)
+QueueThread<T>::QueueThread(std::string name, unsigned char priority) : Thread(name, priority)
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "QueueThread::QueueThread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << endl;
+        debug << "QueueThread::QueueThread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << std::endl;
     #endif
     int err;
     err = pthread_mutex_init(&m_condition_mutex, NULL);
     if (err != 0)
-        errorlog << "QueueThread::QueueThread(" << m_name << ") Failed to create m_condition_mutex." << endl;
+        errorlog << "QueueThread::QueueThread(" << m_name << ") Failed to create m_condition_mutex." << std::endl;
     
     err = pthread_cond_init(&m_condition, NULL);
     if (err != 0)
-        errorlog << "QueueThread::QueueThread(" << m_name << ") Failed to create m_condition." << endl;
+        errorlog << "QueueThread::QueueThread(" << m_name << ") Failed to create m_condition." << std::endl;
 }
 
 /*! @brief Stops the thread
@@ -51,7 +51,7 @@ template <typename T>
 QueueThread<T>::~QueueThread()
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "QueueThread::~QueueThread() " << m_name << endl;
+        debug << "QueueThread::~QueueThread() " << m_name << std::endl;
     #endif
     stop();
     pthread_cond_destroy(&m_condition);
@@ -65,7 +65,7 @@ template <typename T>
 void QueueThread<T>::pushBack(T newdata)
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "QueueThread::pushBack(" << newdata << ") " << m_name << endl;
+        debug << "QueueThread::pushBack(" << newdata << ") " << m_name << std::endl;
     #endif
     m_queue.push_back(newdata);
     

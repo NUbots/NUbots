@@ -1,7 +1,7 @@
 #include "depUKF.h"
 #include "debug.h"
 
-using namespace std;
+
 
 
 depUKF::depUKF(): m_numStates(0)

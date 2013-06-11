@@ -11,7 +11,7 @@
 #include "LinuxDARwIn.h"
 
 using namespace Robot;
-using namespace std;
+
 
 #ifdef MX28_1024
 #define MOTION_FILE_PATH    "../../../Data/motion_1024.bin"
@@ -40,12 +40,12 @@ int _getch()
 	return ch;
 }
 
-string* string_split(string str_org, string str_tok)
+std::string* std::string_split(std::string str_org, std::string str_tok)
 {
     int cutAt;
     int index = 0;
 
-    string* str_result = new string[ARGUMENT_NAXNUM];
+    std::string* str_result = new std::string[ARGUMENT_NAXNUM];
 
     while((cutAt = str_org.find_first_of(str_tok)) != str_org.npos)
     {
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-	cout << "[Running....]\n";
+	std::cout << "[Running....]\n";
     try
     {
         // Create the socket
@@ -147,21 +147,21 @@ int main(int argc, char *argv[])
 
         while ( true )
         {
-            cout << "[Waiting..]" << endl;            
+            std::cout << "[Waiting..]" << std::endl;            
             server.accept ( new_sock );
-            cout << "[Accepted..]" << endl;
+            std::cout << "[Accepted..]" << std::endl;
 
             try
             {
                 while ( true )
                 {
-                    string data;
+                    std::string data;
 					Action::PAGE page;
 
                     new_sock >> data;
-					cout << data << endl;
+					std::cout << data << std::endl;
 
-                    string* p_str_tok = string_split(data, " ");
+                    std::string* p_str_tok = std::string_split(data, " ");
 
                     if(p_str_tok[0] == "v")
                     {
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 						for(int id=0; id<ROBOPLUS_JOINT_MAXNUM; id++)
 						{
 							new_sock << "[";
-							cout << "[";
+							std::cout << "[";
 							if(id >= 1 && id < JointData::NUMBER_OF_JOINTS)
 							{
 								if(cm730.ReadByte(id, MX28::P_TORQUE_ENABLE, &torque, 0) == CM730::SUCCESS)
@@ -243,35 +243,35 @@ int main(int argc, char *argv[])
 										if(cm730.ReadWord(id, MX28::P_GOAL_POSITION_L, &position, 0) == CM730::SUCCESS)
 										{
 											new_sock << position;
-											cout << position;
+											std::cout << position;
 										}
 										else
 										{
 											new_sock << "----";
-											cout << "Fail to read present position ID(" << id << ")";
+											std::cout << "Fail to read present position ID(" << id << ")";
 										}
 									}
 									else
 									{
 										new_sock << "????";
-										cout << "????";
+										std::cout << "????";
 									}
 								}
 								else
 								{
 									new_sock << "----";
-									cout << "Fail to read torque ID(" << id << ")";
+									std::cout << "Fail to read torque ID(" << id << ")";
 								}
 							}
 							else
 							{
 								new_sock << "----";
-								cout << "----";
+								std::cout << "----";
 							}
 							new_sock << "]";
-							cout << "]";
+							std::cout << "]";
 						}
-						cout << endl;
+						std::cout << std::endl;
 						new_sock << "}";
                         new_sock << "{[ME]}\n";
                     }
@@ -301,27 +301,27 @@ int main(int argc, char *argv[])
 									if(cm730.WriteWord(id, MX28::P_GOAL_POSITION_L, GoalPosition, 0) == CM730::SUCCESS)
 									{
 										new_sock << "[" << GoalPosition << "]";
-										cout << "[" << GoalPosition << "]";
+										std::cout << "[" << GoalPosition << "]";
 									}
 									else
 									{
 										new_sock << "[----]";
-										cout << "[----]";
+										std::cout << "[----]";
 									}
 								}
 								else
 								{
 									new_sock << "[----]";
-									cout << "[----]";
+									std::cout << "[----]";
 								}
 							}
 							else
 							{
 								new_sock << "[----]";
-								cout << "[----]";
+								std::cout << "[----]";
 							}
 						}
-						cout << endl;
+						std::cout << std::endl;
 						new_sock << "}";
 						new_sock << "{[ME]}\n";
                     }
@@ -334,21 +334,21 @@ int main(int argc, char *argv[])
 						{
 							if(cm730.ReadWord(id, MX28::P_GOAL_POSITION_L, &position, 0) == CM730::SUCCESS)
 							{
-								cout << "{[" << position << "]}";
+								std::cout << "{[" << position << "]}";
 								new_sock << "{[" << position << "]}";
 							}
 							else
 							{
-								cout << "[Fail to read goal position ID(" << id << ")]";
+								std::cout << "[Fail to read goal position ID(" << id << ")]";
 								new_sock << "{[----]}";
 							}
 						}
 						else
 						{
-							cout << "[Fail to write goal position ID(" << id << ")]";
+							std::cout << "[Fail to write goal position ID(" << id << ")]";
 							new_sock << "{[----]}";
 						}
-						cout << endl;
+						std::cout << std::endl;
 						new_sock << "{[ME]}\n";
                     }
                     else if(p_str_tok[0] == "play" || p_str_tok[0] == "rplay")
@@ -366,18 +366,18 @@ int main(int argc, char *argv[])
 										if(cm730.ReadWord(id, MX28::P_PRESENT_POSITION_L, &value, 0) == CM730::SUCCESS)
 											MotionStatus::m_CurrentJoints.SetValue(id, value);
 										else
-											cout << "[Fail to communication ID(" << id << ")]" << endl;
+											std::cout << "[Fail to communication ID(" << id << ")]" << std::endl;
 									}
 									else
 									{
 										if(cm730.ReadWord(id, MX28::P_GOAL_POSITION_L, &value, 0) == CM730::SUCCESS)
 											MotionStatus::m_CurrentJoints.SetValue(id, value);
 										else
-											cout << "[Fail to communication ID(" << id << ")]" << endl;
+											std::cout << "[Fail to communication ID(" << id << ")]" << std::endl;
 									}
 								}
 								else
-									cout << "[Fail to communication ID(" << id << ")]" << endl;
+									std::cout << "[Fail to communication ID(" << id << ")]" << std::endl;
 							}
 						}														
 						
@@ -396,12 +396,12 @@ int main(int argc, char *argv[])
 						if(Action::GetInstance()->IsRunning(&ipage, &istep) == 1)
 						{
 							new_sock << "{[" << ipage << ":" << istep << "]}\n";
-							cout << "[" << ipage << ":" << istep << "]" << endl;
+							std::cout << "[" << ipage << ":" << istep << "]" << std::endl;
 						}
 						else
 						{
 							new_sock << "{[OK]}\n";
-							cout << "[END]" << endl;
+							std::cout << "[END]" << std::endl;
 							MotionManager::GetInstance()->SetEnable(false);
 							motion_timer->Stop();
 						}
@@ -418,12 +418,12 @@ int main(int argc, char *argv[])
                         if(Action::GetInstance()->IsRunning(&ipage, &istep) == 1)
                         {
                             new_sock << "{[" << ipage << ":" << istep << "]}\n";
-                            cout << "[" << ipage << ":" << istep << "]" << endl;
+                            std::cout << "[" << ipage << ":" << istep << "]" << std::endl;
                         }
                         else
                         {
                             new_sock << "{[OK]}\n";
-                            cout << "[END]" << endl;
+                            std::cout << "[END]" << std::endl;
                             MotionManager::GetInstance()->SetEnable(false);
                             motion_timer->Stop();
                         }
@@ -440,12 +440,12 @@ int main(int argc, char *argv[])
                         if(Action::GetInstance()->IsRunning(&ipage, &istep) == 1)
                         {
                             new_sock << "{[" << ipage << ":" << istep << "]}\n";
-                            cout << "[" << ipage << ":" << istep << "]" << endl;
+                            std::cout << "[" << ipage << ":" << istep << "]" << std::endl;
                         }
                         else
                         {
                             new_sock << "{[OK]}\n";
-                            cout << "[END]" << endl;
+                            std::cout << "[END]" << std::endl;
                             MotionManager::GetInstance()->SetEnable(false);
                             motion_timer->Stop();
                         }
@@ -488,7 +488,7 @@ int main(int argc, char *argv[])
 						int i_data;
 						unsigned char *data;
 
-						cout << "[READY]" << endl;
+						std::cout << "[READY]" << std::endl;
                         new_sock << "{[READY]}\n";
 
                         // byte stream
@@ -504,18 +504,18 @@ int main(int argc, char *argv[])
 								rcv_len -= i_data;
 							}
 							Action::GetInstance()->SavePage(index + i, &page);
-							cout << "[SAVE:" << index + i << "]" << endl;
+							std::cout << "[SAVE:" << index + i << "]" << std::endl;
 						}
                     }
 					else
 					{
-						cout << " [Invalid:" << p_str_tok[0] << "]" << endl;
+						std::cout << " [Invalid:" << p_str_tok[0] << "]" << std::endl;
 					}
                 }
             }
             catch ( LinuxSocketException& )
 			{
-				cout << "[Disconnected]" << endl;
+				std::cout << "[Disconnected]" << std::endl;
 
 				if(Action::GetInstance()->IsRunning() == 1)
 				{
@@ -530,7 +530,7 @@ int main(int argc, char *argv[])
     }
     catch ( LinuxSocketException& e )
     {
-        cout << "Exception was caught:" << e.description() << "\nExiting.\n";
+        std::cout << "Exception was caught:" << e.description() << "\nExiting.\n";
     }
 
 	return 0;

@@ -39,7 +39,7 @@ class Localisation: public TimestampedData
 	
         void feedback(double*);
         double feedbackPosition[3];
-        void ProcessObjects(FieldObjects* fobs, const vector<TeamPacket::SharedBall>& sharedballs, float time_increment);
+        void ProcessObjects(FieldObjects* fobs, const std::vector<TeamPacket::SharedBall>& sharedballs, float time_increment);
         bool varianceCheck(int modelID, FieldObjects* fobs);
         int varianceCheckAll(FieldObjects* fobs);
         void ResetAll();
@@ -53,8 +53,8 @@ class Localisation: public TimestampedData
         int doKnownLandmarkMeasurementUpdate(StationaryObject &landmark);
         int doSharedBallUpdate(const TeamPacket::SharedBall& sharedBall);
         int doBallMeasurementUpdate(MobileObject &ball);
-        int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
-        int doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
+        int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const std::vector<StationaryObject>& possibleObjects);
+        int doAmbiguousLandmarkMeasurementUpdateDiscard(AmbiguousObject &ambigousObject, const std::vector<StationaryObject>& possibleObjects);
         int doTwoObjectUpdate(StationaryObject &landmark1, StationaryObject &landmark2);
         int getNumActiveModels();
         int getNumFreeModels();

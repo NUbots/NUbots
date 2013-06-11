@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
         scenes.push_back(new QGraphicsScene);
         scenes.back()->addItem(new QGraphicsPixmapItem(QPixmap::fromImage(*(canvases.back()))));
         views.back()->setScene(scenes.back());
-        layer_selections.push_back(map<DEBUG_ID, bool>());
+        layer_selections.push_back(std::map<DEBUG_ID, bool>());
     }
 
     for(int i = p1; i<NUM_PLOTS; i++) {
@@ -88,18 +88,18 @@ MainWindow::~MainWindow()
         delete layer_boxes[debugIDFromInt(id)];
     }
 
-//    for(map<PLOTWINDOW, QwtPlotMagnifier*>::iterator it = magnifiers.begin(); it != magnifiers.end(); it++) {
+//    for(std::map<PLOTWINDOW, QwtPlotMagnifier*>::iterator it = magnifiers.begin(); it != magnifiers.end(); it++) {
 //        delete it->second;
 //    }
-    for(map<PLOTWINDOW, QwtPlotZoomer*>::iterator it = zoomers.begin(); it != zoomers.end(); it++) {
+    for(std::map<PLOTWINDOW, QwtPlotZoomer*>::iterator it = zoomers.begin(); it != zoomers.end(); it++) {
         delete it->second;
     }
     plots.clear();
-    for(map<PLOTWINDOW, QwtPlot*>::iterator it = plots.begin(); it != plots.end(); it++) {
+    for(std::map<PLOTWINDOW, QwtPlot*>::iterator it = plots.begin(); it != plots.end(); it++) {
         delete it->second;
     }
     plots.clear();
-    for(map<QString, QwtPlotCurve*>::iterator it = curves.begin(); it != curves.end(); it++) {
+    for(std::std::map<QString, QwtPlotCurve*>::iterator it = curves.begin(); it != curves.end(); it++) {
         delete it->second;
     }
     curves.clear();
@@ -131,7 +131,7 @@ void MainWindow::clearLayers()
     }
 
     //clear out curves
-    for(map<QString, QwtPlotCurve*>::iterator it = curves.begin(); it != curves.end(); it++) {
+    for(std::map<QString, QwtPlotCurve*>::iterator it = curves.begin(); it != curves.end(); it++) {
         delete it->second;
     }
     curves.clear();
@@ -155,27 +155,27 @@ void MainWindow::refresh()
         for(int i=0; i<numDebugIDs(); i++) {
             DEBUG_ID id = debugIDFromInt(i);
             if(layer_selections[c][id]) {
-                for(vector<pair<QImage, float> >::iterator it = images[id].begin(); it<images[id].end(); it++) {
+                for(std::vector<std::pair<QImage, float> >::iterator it = images[id].begin(); it<images[id].end(); it++) {
                     painter.setOpacity(it->second);
                     painter.drawImage(QPoint(0,0), it->first);
                 }
-                for(vector<pair<QPointF, QPen> >::iterator it = points[id].begin(); it<points[id].end(); it++) {
+                for(std::vector<std::pair<QPointF, QPen> >::iterator it = points[id].begin(); it<points[id].end(); it++) {
                     painter.setPen(it->second);
                     painter.drawPoint(it->first);
                 }
-                for(vector<pair<QLineF, QPen> >::iterator it = lines[id].begin(); it<lines[id].end(); it++) {
+                for(std::vector<std::pair<QLineF, QPen> >::iterator it = lines[id].begin(); it<lines[id].end(); it++) {
                     painter.setPen(it->second);
                     painter.drawLine(it->first);
                 }
-                for(vector<pair<QRectF, QPen> >::iterator it = rectangles[id].begin(); it<rectangles[id].end(); it++) {
+                for(std::vector<std::pair<QRectF, QPen> >::iterator it = rectangles[id].begin(); it<rectangles[id].end(); it++) {
                     painter.setPen(it->second);
                     painter.drawRect(it->first);
                 }
-                for(vector<pair<QCircle, QPen> >::iterator it = circles[id].begin(); it<circles[id].end(); it++) {
+                for(std::vector<std::pair<QCircle, QPen> >::iterator it = circles[id].begin(); it<circles[id].end(); it++) {
                     painter.setPen(it->second);
                     painter.drawEllipse(it->first.m_centre, it->first.m_radius, it->first.m_radius);
                 }
-                for(vector<pair<Polygon, QPen> >::iterator it = polygons[id].begin(); it<polygons[id].end(); it++) {
+                for(std::vector<std::pair<Polygon, QPen> >::iterator it = polygons[id].begin(); it<polygons[id].end(); it++) {
                     painter.setPen(it->second);
                     if(it->first.m_filled) {
                         painter.drawPolygon(it->first.m_polygon);
@@ -195,7 +195,7 @@ void MainWindow::refresh()
     }
 
     //plots
-    for(map<PLOTWINDOW, QwtPlot*>::iterator pit = plots.begin(); pit != plots.end(); pit++)
+    for(std::map<PLOTWINDOW, QwtPlot*>::iterator pit = plots.begin(); pit != plots.end(); pit++)
         pit->second->show();
 }
 
@@ -209,70 +209,70 @@ void MainWindow::updateControls()
 
 void MainWindow::addToLayer(DEBUG_ID id, const QImage& img, float alpha)
 {
-    images[id].push_back(pair<QImage, float>(img, alpha));
+    images[id].push_back(std::pair<QImage, float>(img, alpha));
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const QPointF& item, QPen pen)
 {
-    points[id].push_back(pair<QPointF, QPen>(item, pen));
+    points[id].push_back(std::pair<QPointF, QPen>(item, pen));
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const QLineF& item, QPen pen)
 {
-    lines[id].push_back(pair<QLineF, QPen>(item, pen));
+    lines[id].push_back(std::pair<QLineF, QPen>(item, pen));
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const QRectF& item, QPen pen)
 {
-    rectangles[id].push_back(pair<QRectF, QPen>(item, pen));
+    rectangles[id].push_back(std::pair<QRectF, QPen>(item, pen));
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const QCircle& item, QPen pen)
 {
-    circles[id].push_back(pair<QCircle, QPen>(item, pen));
+    circles[id].push_back(std::pair<QCircle, QPen>(item, pen));
 }
 
 void MainWindow::addToLayer(DEBUG_ID id, const Polygon& item, QPen pen)
 {
-    polygons[id].push_back(pair<Polygon, QPen>(item, pen));
+    polygons[id].push_back(std::pair<Polygon, QPen>(item, pen));
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<QPointF>& items, QPen pen)
+void MainWindow::addToLayer(DEBUG_ID id, const std::vector<QPointF>& items, QPen pen)
 {
     BOOST_FOREACH(const QPointF& item, items) {
         addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<QLineF>& items, QPen pen)
+void MainWindow::addToLayer(DEBUG_ID id, const std::vector<QLineF>& items, QPen pen)
 {
     BOOST_FOREACH(const QLineF& item, items) {
         addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<QRectF>& items, QPen pen)
+void MainWindow::addToLayer(DEBUG_ID id, const std::vector<QRectF>& items, QPen pen)
 {
     BOOST_FOREACH(const QRectF& item, items) {
         addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<QCircle>& items, QPen pen)
+void MainWindow::addToLayer(DEBUG_ID id, const std::vector<QCircle>& items, QPen pen)
 {
     BOOST_FOREACH(const QCircle& item, items) {
         addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen)
+void MainWindow::addToLayer(DEBUG_ID id, const std::vector<Polygon>& items, QPen pen)
 {
     BOOST_FOREACH(const Polygon& item, items) {
         addToLayer(id, item, pen);
     }
 }
 
-void MainWindow::setCurve(PLOTWINDOW win, QString name, vector< Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol)
+void MainWindow::setCurve(PLOTWINDOW win, QString name, std::vector< Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol)
 {
     //set curve
     QVector<QPointF> qpts;
@@ -294,7 +294,7 @@ void MainWindow::setCurve(PLOTWINDOW win, QString name, vector< Vector2<double> 
     plots[win]->replot();
 }
 
-void MainWindow::setDashedCurve(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol)
+void MainWindow::setDashedCurve(PLOTWINDOW win, QString name, std::vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol)
 {
     //set curve
     QVector<QPointF> qpts;
@@ -316,16 +316,16 @@ void MainWindow::setDashedCurve(PLOTWINDOW win, QString name, vector<Vector2<dou
     plots[win]->replot();
 }
 
-void MainWindow::setHistogram(PLOTWINDOW win, QString name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style)
+void MainWindow::setHistogram(PLOTWINDOW win, Qstd::string name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style)
 {
     //set curve
-    QVector<QwtIntervalSample> samples;
+    Qstd::vector<QwtIntervalSample> samples;
     if(histograms.find(name) == histograms.end()) {
         //hist does not exist - create
         histograms[name] = new QwtPlotHistogram(name);
     }
 
-    for(vector<Bin>::const_iterator b = hist.begin(); b != hist.end(); b++) {
+    for(std::vector<Bin>::const_iterator b = hist.begin(); b != hist.end(); b++) {
         samples.push_back( QwtIntervalSample(b->value, b->start, b->start + b->width) );
     }
 

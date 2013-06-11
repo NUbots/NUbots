@@ -34,7 +34,7 @@ class LocWM
         int doKnownLandmarkMeasurementUpdate(StationaryObject &landmark);
         //int doSharedBallUpdate(WirelessFieldObj &sharedBall);
         int doBallMeasurementUpdate(MobileObject &ball);
-        int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const vector<StationaryObject>& possibleObjects);
+        int doAmbiguousLandmarkMeasurementUpdate(AmbiguousObject &ambigousObject, const std::vector<StationaryObject>& possibleObjects);
         int getNumActiveModels();
         int getNumFreeModels();
         bool CheckModelForOutlierReset(int modelID);

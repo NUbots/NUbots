@@ -1,20 +1,36 @@
-#ifndef LINEDETECTORRANSAC_H
-#define LINEDETECTORRANSAC_H
-
-#include <vector>
-#include "Vision/Modules/linedetector.h"
-
-class LineDetectorRANSAC : public LineDetector
+#ifndef NULOCALISATIONSENSORS_H
+#define NULOCALISATIONSENSORS_H
+#include "Sensor.h"
+#include "Tools/FileFormats/TimestampedData.h"
+class NULocalisationSensors: public TimestampedData
 {
 public:
-    LineDetectorRANSAC();
-    virtual vector<FieldLine> run(const vector<GroundPoint> &points);
+    NULocalisationSensors();
+    NULocalisationSensors(double time, const Sensor& gps, const Sensor& compass, const Sensor& odom,
+                          const Sensor& falling, const Sensor& fallen, const Sensor& getup, const Sensor& lf, const Sensor& rf);
+    Sensor gps() const {return m_gps;}
+    Sensor compass() const {return m_compass;}
+    Sensor odometry() const {return m_odometry;}
+    Sensor falling() const {return m_falling;}
+    Sensor fallen() const {return m_fallen;}
+    Sensor getup() const {return m_getup;}
+    Sensor leftFoot() const {return m_left_foot;}
+    Sensor rightFoot() const {return m_right_foot;}
+    double GetTimestamp() const {return m_time;}
 
-private:
-    unsigned int m_n,
-                 m_k,
-                 m_max_iterations;
-    float m_e;
+    friend std::ostream& operator<< (std::ostream& output, const NULocalisationSensors& p_sensor);
+    friend std::istream& operator>> (std::istream& input, NULocalisationSensors& p_sensor);
+protected:
+    Sensor m_gps;                   //!< gps sensor
+    Sensor m_compass;               //!< compass sensor
+    Sensor m_odometry;              //!< odometry sensor
+    Sensor m_falling;         //!< incapacitated sensor
+    Sensor m_fallen;
+    Sensor m_left_foot;
+    Sensor m_right_foot;
+    Sensor m_getup;
+    double m_time;
+
 };
 
-#endif // LINEDETECTORRANSAC_H
+#endif // NULOCALISATIONSENSORS_H

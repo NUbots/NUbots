@@ -120,8 +120,8 @@ KickWidget::~KickWidget()
 
 void KickWidget::kickPressed()
 {
-    static vector<float> kickposition(2,0);
-    static vector<float> kicktarget(2,0);
+    static std::vector<float> kickposition(2,0);
+    static std::vector<float> kicktarget(2,0);
     static KickJob* kickjob = new KickJob(0, kickposition, kicktarget);
 
     kickposition[0] = positionXSpinBox->value()/10.0;

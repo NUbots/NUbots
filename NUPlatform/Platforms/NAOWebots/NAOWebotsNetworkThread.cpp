@@ -28,14 +28,14 @@
 
 #include <string>
 #include <sstream>
-using namespace std;
+
 
 #include "debug.h"
 
 /*! @brief Constructs the team packet transmission thread
  */
 
-NAOWebotsNetworkThread::NAOWebotsNetworkThread(GameInformation* gameinfo, TeamInformation* teaminfo, NAOWebotsPlatform* webots, int period) : PeriodicThread(string("NAOWebotsNetworkThread"), period, 0)
+NAOWebotsNetworkThread::NAOWebotsNetworkThread(GameInformation* gameinfo, TeamInformation* teaminfo, NAOWebotsPlatform* webots, int period) : PeriodicThread(std::string("NAOWebotsNetworkThread"), period, 0)
 {
     m_game_info = gameinfo;
     m_game_packet = new RoboCupGameControlData();
@@ -64,19 +64,19 @@ void NAOWebotsNetworkThread::periodicFunction()
         }
         else if (memcmp(data, TEAM_PACKET_STRUCT_HEADER, sizeof(TEAM_PACKET_STRUCT_HEADER)-1) == 0 and m_receiver->getDataSize() == sizeof(TeamPacket))
         {   // if it is a team packet
-            stringstream ss;
+            std::stringstream ss;
             ss.write((char*) data, sizeof(TeamPacket));
             TeamPacket temp;
             ss >> temp;
             m_team_info->addReceivedTeamPacket(temp);
         }
         else
-            cout << "Received " << m_receiver->getDataSize() << " unknown bytes. Want " << sizeof(RoboCupGameControlDataWebots) << " or " << sizeof(TeamPacket) << endl;
+            std::cout << "Received " << m_receiver->getDataSize() << " unknown bytes. Want " << sizeof(RoboCupGameControlDataWebots) << " or " << sizeof(TeamPacket) << std::endl;
         m_receiver->nextPacket();
     };
     
     // Do transmitting
-    stringstream ss;
+    std::stringstream ss;
     ss << m_team_info->generateTeamTransmissionPacket();
     m_emitter->send(ss.str().c_str(), ss.str().size());
 }

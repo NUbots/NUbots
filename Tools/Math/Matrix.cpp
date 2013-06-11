@@ -569,7 +569,7 @@ Matrix InverseMatrix(const Matrix& mat)
         return GaussJordanInverse(mat);
 }
 
-ostream& operator <<(ostream& out, const Matrix &mat)
+std::ostream& operator <<(std::ostream& out, const Matrix &mat)
 {
     for(int i=0; i<mat.getm(); i++)
     {

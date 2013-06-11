@@ -29,29 +29,29 @@
 #include "debugverbositynusensors.h"
 
 #include <limits>
-using namespace std;
+
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadYaw"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), string("LElbowYaw"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowRoll"), string("RElbowYaw"), \
-                                    string("TorsoRoll"), string("TorsoPitch"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYaw"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYaw"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
-vector<string> CycloidSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+static std::string temp_servo_names[] = {std::string("HeadYaw"), \
+                                    std::string("LShoulderRoll"), std::string("LShoulderPitch"), std::string("LElbowRoll"), std::string("LElbowYaw"), \
+                                    std::string("RShoulderRoll"), std::string("RShoulderPitch"), std::string("RElbowRoll"), std::string("RElbowYaw"), \
+                                    std::string("TorsoRoll"), std::string("TorsoPitch"), \
+                                    std::string("LHipRoll"),  std::string("LHipPitch"), std::string("LHipYaw"), std::string("LKneePitch"), std::string("LAnkleRoll"), std::string("LAnklePitch"), \
+                                    std::string("RHipRoll"),  std::string("RHipPitch"), std::string("RHipYaw"), std::string("RKneePitch"), std::string("RAnkleRoll"), std::string("RAnklePitch")};
+std::vector<std::string> CycloidSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 /*! @brief Constructs a nubot sensor class with Bear backend
  */
 CycloidSensors::CycloidSensors(Motors* motors)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "CycloidSensors::CycloidSensors()" << endl;
+        debug << "CycloidSensors::CycloidSensors()" << std::endl;
     #endif
     m_motors = motors;
     m_data->addSensors(m_servo_names);
     m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
-    m_previous_positions = vector<float>(m_joint_ids.size(), 0);
-    m_previous_velocities = vector<float>(m_joint_ids.size(), 0);
+    m_previous_positions = std::vector<float>(m_joint_ids.size(), 0);
+    m_previous_velocities = std::vector<float>(m_joint_ids.size(), 0);
 }
 
 /*! @brief Destructor for CycloidSensors
@@ -59,7 +59,7 @@ CycloidSensors::CycloidSensors(Motors* motors)
 CycloidSensors::~CycloidSensors()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "CycloidSensors::~CycloidSensors()" << endl;
+        debug << "CycloidSensors::~CycloidSensors()" << std::endl;
     #endif
 }
 
@@ -77,13 +77,13 @@ void CycloidSensors::copyFromHardwareCommunications()
  */
 void CycloidSensors::copyFromJoints()
 {
-    static const float NaN = numeric_limits<float>::quiet_NaN();
+    static const float NaN = std::numeric_limits<float>::quiet_NaN();
     
-    vector<float> targets, stiffnesses;
+    std::vector<float> targets, stiffnesses;
     m_motors->getTargets(targets);
     m_motors->getStiffnesses(stiffnesses);
     
-    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    std::vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000;
     for (size_t i=0; i<m_joint_ids.size(); i++)
     {

@@ -1,7 +1,7 @@
 #include "COMKinematics.h"
 
 using namespace NBMath;
-using namespace std;
+
 using namespace boost::numeric;
 
 //#define DEBUG_COM
@@ -34,7 +34,7 @@ Kinematics::getCOMc(const vector<float> bodyAngles) {
 	ufvector4 partialComPos = chestMass.offset * chestMass.mass;
 
 #ifdef DEBUG_COM_VERBOSE
-	cout << "Chest COM " << partialComPos/chestMass.mass << endl;
+	std::cout << "Chest COM " << partialComPos/chestMass.mass << std::endl;
 #endif
 
 	// add each joint's mass relative to origin (0,0,0)
@@ -53,13 +53,13 @@ Kinematics::getCOMc(const vector<float> bodyAngles) {
 		partialComPos += partial;
 
 #ifdef DEBUG_COM_VERBOSE
-		cout << "joint: " << joint <<" pos " << partial/jointMass[joint].mass;
-		cout << " angle: " << angles[joint] << endl;
+		std::cout << "joint: " << joint <<" pos " << partial/jointMass[joint].mass;
+		std::cout << " angle: " << angles[joint] << std::endl;
 #endif
 	}
 
 #ifdef DEBUG_COM
-	cout << "Body Com " << partialComPos/TOTAL_MASS <<endl;
+	std::cout << "Body Com " << partialComPos/TOTAL_MASS <<std::endl;
 #endif
 
 	return partialComPos/TOTAL_MASS;

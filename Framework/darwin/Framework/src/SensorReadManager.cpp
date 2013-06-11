@@ -259,7 +259,7 @@ bool SensorReadManager::CheckSensorBulkReadErrors(
         if(consecutive_errors == 1)
             error_is_significant = true;
 
-        // errorlog << "Motor error: " << endl;
+        // errorlog << "Motor error: " << std::endl;
 
         // PrintSensorResponseRate(sensor_id);
 

@@ -146,7 +146,7 @@ void VisionConstants::loadFromFile(std::string filename)
 
     std::ifstream in(filename.c_str());
     if(!in.is_open())
-        errorlog << "VisionConstants::loadFromFile failed to load: " << filename << endl;
+        errorlog << "VisionConstants::loadFromFile failed to load: " << filename << std::endl;
     std::string name;
     std::string sval;
     while(in.good()) {
@@ -420,7 +420,7 @@ void VisionConstants::loadFromFile(std::string filename)
     //print(debug);
 }
 
-bool VisionConstants::setParameter(string name, bool val)
+bool VisionConstants::setParameter(std::string name, bool val)
 {
     if(name.compare("DO_RADIAL_CORRECTION") == 0) {
         DO_RADIAL_CORRECTION = val;
@@ -488,7 +488,7 @@ bool VisionConstants::setParameter(string name, bool val)
     return true;
 }
 
-bool VisionConstants::setParameter(string name, int val)
+bool VisionConstants::setParameter(std::string name, int val)
 {
     if(name.compare("BALL_EDGE_THRESHOLD") == 0) {
         BALL_EDGE_THRESHOLD = val;
@@ -536,7 +536,7 @@ bool VisionConstants::setParameter(string name, int val)
 }
 
 
-bool VisionConstants::setParameter(string name, unsigned int val)
+bool VisionConstants::setParameter(std::string name, unsigned int val)
 {
     if(name.compare("HORIZONTAL_SCANLINE_SPACING") == 0) {
         HORIZONTAL_SCANLINE_SPACING = val;
@@ -568,7 +568,7 @@ bool VisionConstants::setParameter(string name, unsigned int val)
     return true;
 }
 
-bool VisionConstants::setParameter(string name, float val)
+bool VisionConstants::setParameter(std::string name, float val)
 {
     if(name.compare("RADIAL_CORRECTION_COEFFICIENT") == 0) {
         RADIAL_CORRECTION_COEFFICIENT = val;
@@ -672,7 +672,7 @@ bool VisionConstants::setParameter(string name, float val)
     return true;
 }
 
-bool VisionConstants::setParameter(string name, DistanceMethod val)
+bool VisionConstants::setParameter(std::string name, DistanceMethod val)
 {
     if(name.compare("BALL_DISTANCE_METHOD") == 0) {
         BALL_DISTANCE_METHOD = val;
@@ -689,7 +689,7 @@ bool VisionConstants::setParameter(string name, DistanceMethod val)
     return true;
 }
 
-void VisionConstants::print(ostream& out)
+void VisionConstants::print(std::ostream& out)
 {
     out << "DO_RADIAL_CORRECTION: " << DO_RADIAL_CORRECTION << std::endl;
     out << "RADIAL_CORRECTION_COEFFICIENT: " << RADIAL_CORRECTION_COEFFICIENT << std::endl;
@@ -791,9 +791,9 @@ void VisionConstants::setFlags(bool val)
 
 }
 
-vector<Parameter> VisionConstants::getAllOptimisable()
+std::vector<Parameter> VisionConstants::getAllOptimisable()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     //! Goal filtering constants
     params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS", MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS, 1, 500));
     params.push_back(Parameter("MIN_GOAL_WIDTH", MIN_GOAL_WIDTH, 0, 320));
@@ -839,9 +839,9 @@ vector<Parameter> VisionConstants::getAllOptimisable()
     return params;
 }
 
-vector<Parameter> VisionConstants::getBallParams()
+std::vector<Parameter> VisionConstants::getBallParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     params.push_back(Parameter("MIN_BALL_DIAMETER_PIXELS", MIN_BALL_DIAMETER_PIXELS, 1, 100));
     params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL", MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL, 1, 500));
     params.push_back(Parameter("BALL_EDGE_THRESHOLD", BALL_EDGE_THRESHOLD, 0, 50));
@@ -851,9 +851,9 @@ vector<Parameter> VisionConstants::getBallParams()
     return params;
 }
 
-vector<Parameter> VisionConstants::getGoalParams()
+std::vector<Parameter> VisionConstants::getGoalParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     //! Goal filtering constants
     params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS", MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS, 1, 500));
     params.push_back(Parameter("MIN_GOAL_WIDTH", MIN_GOAL_WIDTH, 0, 320));
@@ -875,18 +875,18 @@ vector<Parameter> VisionConstants::getGoalParams()
     return params;
 }
 
-vector<Parameter> VisionConstants::getObstacleParams()
+std::vector<Parameter> VisionConstants::getObstacleParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     //! Obstacle detection constants
     params.push_back(Parameter("MIN_DISTANCE_FROM_HORIZON", MIN_DISTANCE_FROM_HORIZON, 0, 240));
     params.push_back(Parameter("MIN_CONSECUTIVE_POINTS", MIN_CONSECUTIVE_POINTS, 0, 50));
     return params;
 }
 
-vector<Parameter> VisionConstants::getLineParams()
+std::vector<Parameter> VisionConstants::getLineParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     //! Split and Merge constants
     params.push_back(Parameter("SAM_SPLIT_DISTANCE", SAM_SPLIT_DISTANCE, 0, 320));
     params.push_back(Parameter("SAM_MIN_POINTS_OVER", SAM_MIN_POINTS_OVER, 1, 500));
@@ -899,9 +899,9 @@ vector<Parameter> VisionConstants::getLineParams()
     return params;
 }
 
-vector<Parameter> VisionConstants::getGeneralParams()
+std::vector<Parameter> VisionConstants::getGeneralParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     params.push_back(Parameter("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50));
     params.push_back(Parameter("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20));
     params.push_back(Parameter("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20));
@@ -913,7 +913,7 @@ vector<Parameter> VisionConstants::getGeneralParams()
     return params;
 }
 
-bool VisionConstants::setAllOptimisable(const vector<float>& params)
+bool VisionConstants::setAllOptimisable(const std::vector<float>& params)
 {
     if(params.size() != 30) {
         return false; //not a valid size
@@ -953,7 +953,7 @@ bool VisionConstants::setAllOptimisable(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setBallParams(const vector<float>& params)
+bool VisionConstants::setBallParams(const std::vector<float>& params)
 {
     if(params.size() != 5) {
         return false; //not a valid size
@@ -966,7 +966,7 @@ bool VisionConstants::setBallParams(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setGoalParams(const vector<float>& params)
+bool VisionConstants::setGoalParams(const std::vector<float>& params)
 {
     if(params.size() != 11) {
         return false; //not a valid size
@@ -987,7 +987,7 @@ bool VisionConstants::setGoalParams(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setObstacleParams(const vector<float>& params)
+bool VisionConstants::setObstacleParams(const std::vector<float>& params)
 {
     if(params.size() != 2) {
         return false; //not a valid size
@@ -997,7 +997,7 @@ bool VisionConstants::setObstacleParams(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setLineParams(const vector<float>& params)
+bool VisionConstants::setLineParams(const std::vector<float>& params)
 {
     if(params.size() != 8) {
         return false; //not a valid size
@@ -1013,7 +1013,7 @@ bool VisionConstants::setLineParams(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setGeneralParams(const vector<float>& params)
+bool VisionConstants::setGeneralParams(const std::vector<float>& params)
 {
     if(params.size() != 6) {
         return false; //not a valid size

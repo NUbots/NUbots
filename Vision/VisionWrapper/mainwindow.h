@@ -91,14 +91,14 @@ public:
     void addToLayer(DEBUG_ID id, const QCircle& item, QPen pen);
     void addToLayer(DEBUG_ID id, const Polygon& item, QPen pen);
 
-    void addToLayer(DEBUG_ID id, const vector<QPointF>& items, QPen pen);
-    void addToLayer(DEBUG_ID id, const vector<QLineF>& items, QPen pen);
-    void addToLayer(DEBUG_ID id, const vector<QRectF>& items, QPen pen);
-    void addToLayer(DEBUG_ID id, const vector<QCircle>& items, QPen pen);
-    void addToLayer(DEBUG_ID id, const vector<Polygon>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const std::vector<QPointF>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const std::vector<QLineF>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const std::vector<QRectF>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const std::vector<QCircle>& items, QPen pen);
+    void addToLayer(DEBUG_ID id, const std::vector<Polygon>& items, QPen pen);
 
-    void setCurve(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol = QwtSymbol());
-    void setDashedCurve(PLOTWINDOW win, QString name, vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol = QwtSymbol());
+    void setCurve(PLOTWINDOW win, QString name, std::vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol = QwtSymbol());
+    void setDashedCurve(PLOTWINDOW win, QString name, std::vector<Vector2<double> > pts, QColor colour, QwtPlotCurve::CurveStyle style, QwtSymbol symbol = QwtSymbol());
     void setHistogram(PLOTWINDOW win, QString name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style);
     
     bool finished() const {return m_finished;}
@@ -132,22 +132,22 @@ private:
     QWidget *windows_box;
     //ui->gridLayout->addLayout(gridEPG, 1, 0, 1, 3);
 
-    vector<QGraphicsView*> views;
-    vector<QGraphicsScene*> scenes;
-    vector<QImage*> canvases;
-    vector< map<DEBUG_ID, bool> > layer_selections;
+    std::vector<QGraphicsView*> views;
+    std::vector<QGraphicsScene*> scenes;
+    std::vector<QImage*> canvases;
+    std::vector< map<DEBUG_ID, bool> > layer_selections;
     //QImage* canvas;
 
     map<DEBUG_ID, QCheckBox*> layer_boxes;
 
     size_t current_window;
 
-    map<DEBUG_ID, vector<pair<QImage, float> > > images;
-    map<DEBUG_ID, vector<pair<QPointF, QPen> > > points;
-    map<DEBUG_ID, vector<pair<QLineF, QPen> > > lines;
-    map<DEBUG_ID, vector<pair<QRectF, QPen> > > rectangles;
-    map<DEBUG_ID, vector<pair<QCircle, QPen> > > circles;
-    map<DEBUG_ID, vector<pair<Polygon, QPen> > > polygons;
+    map<DEBUG_ID, std::vector<std::pair<QImage, float> > > images;
+    map<DEBUG_ID, std::vector<std::pair<QPointF, QPen> > > points;
+    map<DEBUG_ID, std::vector<std::pair<QLineF, QPen> > > lines;
+    map<DEBUG_ID, std::vector<std::pair<QRectF, QPen> > > rectangles;
+    map<DEBUG_ID, std::vector<std::pair<QCircle, QPen> > > circles;
+    map<DEBUG_ID, std::vector<std::pair<Polygon, QPen> > > polygons;
 
     map<QString, QwtPlotCurve*> curves;
     map<QString, QwtPlotHistogram*> histograms;

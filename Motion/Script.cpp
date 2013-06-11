@@ -33,7 +33,7 @@
 Script::Script(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("Script", data, actions)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "Script::Script()" << endl;
+    debug << "Script::Script()" << std::endl;
 #endif
     m_walk = walk;
     m_script_start_time = -1;
@@ -68,8 +68,8 @@ void Script::kill()
     {   // if the script is currently running, the only way to kill it is to set the stiffnesses to 0
         m_script_start_time = 0;
         
-        vector<float> sensor_larm, sensor_rarm;
-        vector<float> sensor_lleg, sensor_rleg;
+        std::vector<float> sensor_larm, sensor_rarm;
+        std::vector<float> sensor_lleg, sensor_rleg;
         m_data->getPosition(NUSensorsData::LArm, sensor_larm);
         m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
         m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
@@ -95,13 +95,13 @@ bool Script::isUsingHead()
 
 bool Script::isUsingArms()
 {
-    return m_data->CurrentTime <= max(m_script.timeFinishedWithLArm(),m_script.timeFinishedWithRArm()) + m_script_start_time;
+    return m_data->CurrentTime <= std::max(m_script.timeFinishedWithLArm(),m_script.timeFinishedWithRArm()) + m_script_start_time;
 }
 
 /*! @brief Returns true if a script uses the legs */
 bool Script::isUsingLegs()
 {
-    return m_data->CurrentTime <= max(m_script.timeFinishedWithLLeg(),m_script.timeFinishedWithRLeg()) + m_script_start_time;
+    return m_data->CurrentTime <= std::max(m_script.timeFinishedWithLLeg(),m_script.timeFinishedWithRLeg()) + m_script_start_time;
 }
 
 bool Script::isReady()
@@ -135,7 +135,7 @@ void Script::process(NUSensorsData* data, NUActionatorsData* actions)
     if (data == NULL || actions == NULL)
         return;
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "Script::process()" << endl;
+        debug << "Script::process()" << std::endl;
     #endif
     if (m_script_pending and m_script_start_time < m_data->CurrentTime)
     {

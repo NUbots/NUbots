@@ -28,30 +28,30 @@
 
 #include "../MotionJob.h"
 #include <vector>
-using namespace std;
+
 
 class HeadJob : public MotionJob
 {
 public:
-    HeadJob(double time, const vector<float>& position);
-    HeadJob(const vector<double>& times, const vector<vector<float> >& positions); 
-    HeadJob(double time, istream& input);
+    HeadJob(double time, const std::vector<float>& position);
+    HeadJob(const std::vector<double>& times, const std::vector<std::vector<float> >& positions); 
+    HeadJob(double time, std::istream& input);
     ~HeadJob();
     
-    void setPosition(double time, const vector<float>& newposition);
-    void setPositions(const vector<double>& times, const vector<vector<float> >& positions);
-    void getPositions(vector<double>& times, vector<vector<float> >& positions);
+    void setPosition(double time, const std::vector<float>& newposition);
+    void setPositions(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
+    void getPositions(std::vector<double>& times, std::vector<std::vector<float> >& positions);
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const HeadJob& job);
-    friend ostream& operator<<(ostream& output, const HeadJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
-    vector<double> m_times;                                 //!< the times for each head position in the sequence
-    vector<vector<float> > m_head_positions;                //!< the head position [[roll0, pitch0, yaw0], [roll1, pitch1, yaw1], ... ,[rollN, pitchN, yawN]]
+    std::vector<double> m_times;                                 //!< the times for each head position in the sequence
+    std::vector<std::vector<float> > m_head_positions;                //!< the head position [[roll0, pitch0, yaw0], [roll1, pitch1, yaw1], ... ,[rollN, pitchN, yawN]]
     unsigned int m_size;
     unsigned int m_width;
 };

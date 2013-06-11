@@ -14,10 +14,10 @@ LineDetectorSAM::~LineDetectorSAM()
     noisePoints.clear();
 }
 
-vector<FieldLine> LineDetectorSAM::run(const vector<GroundPoint>& points)
+std::vector<FieldLine> LineDetectorSAM::run(const std::vector<GroundPoint>& points)
 {
-    vector<pair<LSFittedLine, LSFittedLine> > linePairs = fitLines(points, true);
-    vector<FieldLine> finalLines;
+    std::vector<std::pair<LSFittedLine, LSFittedLine> > linePairs = fitLines(points, true);
+    std::vector<FieldLine> finalLines;
     for(size_t i=0; i<linePairs.size(); i++) {
         finalLines.push_back(FieldLine(linePairs[i].second, linePairs[i].first));
     }
@@ -25,10 +25,10 @@ vector<FieldLine> LineDetectorSAM::run(const vector<GroundPoint>& points)
     return finalLines;
 }
 
-vector< pair<LSFittedLine, LSFittedLine> > LineDetectorSAM::fitLines(const vector<GroundPoint>& points, bool noise) {
+std::vector< std::pair<LSFittedLine, LSFittedLine> > LineDetectorSAM::fitLines(const std::vector<GroundPoint>& points, bool noise) {
     //Performs split-and-merge algorithm with input consisting of a set of point clusters
     // and a set of unclustered points, putting the resulting lines into a reference
-    // passed vector
+    // passed std::vector
     //Import parameters from constants file
     SPLIT_DISTANCE = VisionConstants::SAM_SPLIT_DISTANCE;
     MIN_POINTS_OVER = VisionConstants::SAM_MIN_POINTS_OVER;
@@ -43,7 +43,7 @@ vector< pair<LSFittedLine, LSFittedLine> > LineDetectorSAM::fitLines(const vecto
     CLEAR_SMALL = VisionConstants::SAM_CLEAR_SMALL;
     CLEAR_DIRTY = VisionConstants::SAM_CLEAR_DIRTY;
 
-    vector< pair<LSFittedLine, LSFittedLine> > lines;
+    std::vector< std::pair<LSFittedLine, LSFittedLine> > lines;
     noisePoints.clear();
 
     //splitIterative(lines, points);
@@ -73,7 +73,7 @@ vector< pair<LSFittedLine, LSFittedLine> > LineDetectorSAM::fitLines(const vecto
 
 
 
-void LineDetectorSAM::split(vector< pair<LSFittedLine, LSFittedLine> >& lines, const vector<GroundPoint>& points) {
+void LineDetectorSAM::split(std::vector< std::pair<LSFittedLine, LSFittedLine> >& lines, const std::vector<GroundPoint>& points) {
     // Recursive split algorithm
 
     //Assumes:
@@ -96,7 +96,7 @@ void LineDetectorSAM::split(vector< pair<LSFittedLine, LSFittedLine> >& lines, c
     int greatest_point = 0; //which point in vector is the furthest
 
     //generate new LSFittedLine
-    pair<LSFittedLine, LSFittedLine> line;
+    std::pair<LSFittedLine, LSFittedLine> line;
     BOOST_FOREACH(const GroundPoint& g, points) {
         line.first.addPoint(g.ground);
         line.second.addPoint(g.screen);
@@ -108,8 +108,8 @@ void LineDetectorSAM::split(vector< pair<LSFittedLine, LSFittedLine> >& lines, c
     //if num points over threshold > limit -> split at greatest distance point.
     if(points_over >= MIN_POINTS_OVER) {
         //there are enough points distant to justify a split
-        vector<GroundPoint> left;    //holder vectors
-        vector<GroundPoint> right;
+        std::vector<GroundPoint> left;    //holder vectors
+        std::vector<GroundPoint> right;
         if(separate(left, right, points[greatest_point], points, line.first)) {
             //split was valid - recursively split new lines
             split(lines, left);
@@ -151,7 +151,7 @@ void LineDetectorSAM::split(vector< pair<LSFittedLine, LSFittedLine> >& lines, c
     }
 }
 
-//void LineDetectorSAM::splitIterative(vector<LSFittedLine>& lines, vector<Point>& points) {
+//void LineDetectorSAM::splitIterative(std::vector<LSFittedLine>& lines, std::vector<Point>& points) {
 //    //Iterative split algorithm, uses a stack of lines and iterates over it, splitting
 //    //each line or adding it to a final list.
 
@@ -167,11 +167,11 @@ void LineDetectorSAM::split(vector< pair<LSFittedLine, LSFittedLine> >& lines, c
 //    }
 
 //    //Locals
-//    vector<LSFittedLine> stack;
+//    std::vector<LSFittedLine> stack;
 //    stack.clear();
 //    int furthest_point;
 //    int points_over;
-//    vector<Point> left, right;
+//    std::vector<Point> left, right;
 
 //    LSFittedLine* tempLine = new LSFittedLine();
 //    //generate first line
@@ -355,7 +355,7 @@ void LineDetectorSAM::findPointsOver(LSFittedLine& line, unsigned int& points_ov
     unsigned int current_point = 0;
     points_over = 0;
     furthest_point = -1;
-    vector<Point> points = line.getPoints();
+    std::vector<Point> points = line.getPoints();
 
     //check points for perp distance over threshold
     for(current_point = 0; current_point < points.size(); current_point++) {
@@ -376,13 +376,13 @@ void LineDetectorSAM::findPointsOver(LSFittedLine& line, unsigned int& points_ov
     //qDebug() <<furthest_point <<greatest_distance;
 }
 
-void LineDetectorSAM::splitNoise(vector<pair<LSFittedLine, LSFittedLine> > &lines) {
-    //this method creates a copy of the noisePoints vector,
-    //clears the current noisePoints vector and runs
+void LineDetectorSAM::splitNoise(std::vector<std::pair<LSFittedLine, LSFittedLine> > &lines) {
+    //this method creates a copy of the noisePoints std::vector,
+    //clears the current noisePoints std::vector and runs
     //the split algorithm on the copy
 
     if(noisePoints.size() >= MIN_POINTS_TO_LINE_FINAL) {
-        vector<GroundPoint> noiseCopy;
+        std::vector<GroundPoint> noiseCopy;
 
         noiseCopy = noisePoints;
         noisePoints.clear();
@@ -391,9 +391,9 @@ void LineDetectorSAM::splitNoise(vector<pair<LSFittedLine, LSFittedLine> > &line
     }
 }
 
-bool LineDetectorSAM::separate(vector<GroundPoint> &left, vector<GroundPoint> &right, GroundPoint split_point, const vector<GroundPoint> &points, const LSFittedLine& line) {
+bool LineDetectorSAM::separate(std::vector<GroundPoint> &left, std::vector<GroundPoint> &right, GroundPoint split_point, const std::vector<GroundPoint> &points, const LSFittedLine& line) {
     /*splits a section of points around a splitting point by rotating and translating onto the line about the splitting point
-     *Pre: left and right should be empty vectors
+     *Pre: left and right should be empty std::vectors
      *		points contains all the points to be split
      *		split_point is a valid point in points
      *		line is the LSFittedLine
@@ -434,7 +434,7 @@ bool LineDetectorSAM::separate(vector<GroundPoint> &left, vector<GroundPoint> &r
         double xsplit = line.projectOnto(split_point.ground).x;
         BOOST_FOREACH(GroundPoint pt, points) {
             //check all points, calculate translated x coord
-            //and place in appropriate vector
+            //and place in appropriate std::vector
             if(pt.ground != split_point.ground) {
                 if(line.projectOnto(pt.ground).x < xsplit) {
                     //point is to the left
@@ -450,7 +450,7 @@ bool LineDetectorSAM::separate(vector<GroundPoint> &left, vector<GroundPoint> &r
     return (left.size() < points.size() && right.size() < points.size());
 }
 
-void LineDetectorSAM::generateLines(pair<LSFittedLine, LSFittedLine>& lines, const vector<GroundPoint>& points) {
+void LineDetectorSAM::generateLines(std::pair<LSFittedLine, LSFittedLine>& lines, const std::vector<GroundPoint>& points) {
     //creates a Least Squared Fitted line
 
     lines.first.clearPoints();
@@ -470,21 +470,21 @@ void LineDetectorSAM::addToNoise(const GroundPoint& point) {
         if(pt.ground == point.ground)
             return;
     }
-    //only occurs if there are not copies of the point in the noise list
+    //only occurs if there are not copies of the point in the noise std::list
     noisePoints.push_back(point);
 }
 
-void LineDetectorSAM::addToNoise(const vector<GroundPoint > &points) {
+void LineDetectorSAM::addToNoise(const std::vector<GroundPoint > &points) {
     BOOST_FOREACH(GroundPoint pt, points) {
         addToNoise(pt);
     }
 }
 
-void LineDetectorSAM::clearSmallLines(vector<pair<LSFittedLine, LSFittedLine> >& lines) {
-    //removes any lines from the vector whose vector of
+void LineDetectorSAM::clearSmallLines(std::vector<std::pair<LSFittedLine, LSFittedLine> >& lines) {
+    //removes any lines from the std::vector whose std::vector of
     //member points is too small
 
-    vector<pair<LSFittedLine, LSFittedLine> >::iterator it = lines.begin();
+    std::vector<std::pair<LSFittedLine, LSFittedLine> >::iterator it = lines.begin();
 
     while(it < lines.end()) {
         if(it->first.getNumPoints() < MIN_POINTS_TO_LINE_FINAL)
@@ -495,10 +495,10 @@ void LineDetectorSAM::clearSmallLines(vector<pair<LSFittedLine, LSFittedLine> >&
 }
 
 
-void LineDetectorSAM::clearDirtyLines(vector<pair<LSFittedLine, LSFittedLine> > &lines) {
-    //removes any lines from the vector whose R^2 value is
+void LineDetectorSAM::clearDirtyLines(std::vector<std::pair<LSFittedLine, LSFittedLine> > &lines) {
+    //removes any lines from the std::vector whose R^2 value is
     //less than MIN_LINE_R2_FIT
-    vector<pair<LSFittedLine, LSFittedLine> >::iterator it = lines.begin();
+    std::vector<std::pair<LSFittedLine, LSFittedLine> >::iterator it = lines.begin();
 
     while(it < lines.end()) {
         if(it->first.getr2tls() < MIN_LINE_R2_FIT || it->first.getMSD() > MAX_LINE_MSD) {

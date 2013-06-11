@@ -30,7 +30,7 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include <fstream>
-using namespace std;
+
 
 class BearWalk : public NUWalk
 {
@@ -50,15 +50,15 @@ private:
     double m_previous_time;                 //!< the previous time doWalk was called in ms
     
     // Front legs
-    vector<float> m_left_front_angles;
-    vector<float> m_right_front_angles;
+    std::vector<float> m_left_front_angles;
+    std::vector<float> m_right_front_angles;
     
     // Back legs
-    vector<float> m_left_back_angles;
-    vector<float> m_right_back_angles;
+    std::vector<float> m_left_back_angles;
+    std::vector<float> m_right_back_angles;
     
     // Torso
-    vector<float> m_torso_angles;
+    std::vector<float> m_torso_angles;
 };
 
 #endif

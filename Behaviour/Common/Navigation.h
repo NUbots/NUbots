@@ -88,8 +88,8 @@ private:
     float m_position_hysteresis;
     
     //ball lineup
-    vector<float> m_ball_approach_angle;
-    vector<int> m_ball_kick_foot;
+    std::vector<float> m_ball_approach_angle;
+    std::vector<int> m_ball_kick_foot;
     float m_ball_lineup_distance;
     int m_ball_lineup_min_distance;
     
@@ -105,18 +105,18 @@ private:
     
     //info for the current walk
     Object* current_object;
-    vector<float> current_point;
+    std::vector<float> current_point;
     int current_command;
-    vector<float> current_walk_command;
+    std::vector<float> current_walk_command;
     float current_heading;
     
     /*! @brief Given a distance, and relative bearing and heading, returns a new walk command based on the navigation parameters
      */
-    vector<float> generateWalk(float distance, float relative_bearing, float relative_heading, bool avoidObstacles = true);
+    std::vector<float> generateWalk(float distance, float relative_bearing, float relative_heading, bool avoidObstacles = true);
     
     /*! @brief Returns a new direction (bearing) to move that avoids all obstacles
      */
-    float avoidObstacles(const vector<float> position, float relative_bearing);
+    float avoidObstacles(const std::vector<float> position, float relative_bearing);
     
     /*! @brief Returns a new direction (bearing) to move that aligns the designated foot with the ball
      */
@@ -133,21 +133,21 @@ private:
 public:
     
         
-    /*! @brief Go to a point and face a heading. Returned vector is walk command vector.
+    /*! @brief Go to a point and face a heading. Returned std::vector is walk command std::vector.
      */
-    vector<float> goToPoint(float distance, float relative_bearing, float relative_heading);
+    std::vector<float> goToPoint(float distance, float relative_bearing, float relative_heading);
     
-    /*! @brief Go to a point and face a heading. Returned vector is walk command vector.
+    /*! @brief Go to a point and face a heading. Returned std::vector is walk command std::vector.
      */
-    vector<float> goToPoint(Object fieldObject, float heading);
+    std::vector<float> goToPoint(Object fieldObject, float heading);
     
-    /*! @brief Go to a point and face a heading. Returned vector is walk command vector.
+    /*! @brief Go to a point and face a heading. Returned std::vector is walk command std::vector.
      */
-    vector<float> goToPoint(const vector<float> point);
+    std::vector<float> goToPoint(const std::vector<float> point);
     
-    /*! @brief Approach the ball with a good angle to kick from. Returned vector is walk command vector.
+    /*! @brief Approach the ball with a good angle to kick from. Returned std::vector is walk command std::vector.
      */
-    vector<float> goToBall(Object kickTarget = NULL);
+    std::vector<float> goToBall(Object kickTarget = NULL);
     
     /*! @brief Update the goto calculations and send the walk commands (if actions are not active).
      */

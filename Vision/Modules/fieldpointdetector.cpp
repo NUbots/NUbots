@@ -24,11 +24,11 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
     if(TRANSFORM_FIRST) {
         //check transforms are valid
         if(transformer.isScreenToGroundValid()) {
-            vector<GroundPoint> points;
+            std::vector<GroundPoint> points;
             GroundPoint temp;
             CentreCircle circle;
-            vector<FieldLine> lines;
-            vector<CornerPoint> corners;
+            std::vector<FieldLine> lines;
+            std::vector<CornerPoint> corners;
             const GreenHorizon& gh = vbb->getGreenHorizon();
 
             // collect all vertical and horizontal line transition centres that exist under the green horizon
@@ -44,7 +44,7 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
             }
 
             #if VISION_FIELDPOINT_VERBOSITY > 1
-            vector<Point> plotpts;
+            std::vector<Point> plotpts;
             BOOST_FOREACH(const GroundPoint& g, points) {
                 plotpts.push_back(g.screen);
             }
@@ -68,7 +68,7 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
                     vbb->addCentreCircle(circle);
 
                     #if VISION_FIELDPOINT_VERBOSITY > 1
-                    vector<Point> circle_pts;
+                    std::vector<Point> circle_pts;
                     double r = circle.getGroundRadius();
                     Point c = circle.getLocation().ground;
                     for(double theta = -mathGeneral::PI; theta < mathGeneral::PI; theta+=0.1)
@@ -99,7 +99,7 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
                 corners = m_corner_detector->run(lines);
 
                 #if VISION_FIELDPOINT_VERBOSITY > 1
-                vector< Vector2<double> > cpts;
+                std::vector< Vector2<double> > cpts;
                 BOOST_FOREACH(CornerPoint& cp, corners) {
                     cpts.push_back(cp.getLocation().ground);
                 }

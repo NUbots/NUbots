@@ -31,9 +31,9 @@ ofstream debug;
 ofstream errorlog;
 ALPtr<ALBroker> NUNAO::m_broker;
 
-NUNAO::NUNAO(ALPtr<ALBroker> pBroker, const string& pName): ALModule(pBroker, pName)
+NUNAO::NUNAO(ALPtr<ALBroker> pBroker, const std::string& pName): ALModule(pBroker, pName)
 {
-    debug << "NUNAO.cpp: NUNAO::NUNAO" << endl;
+    debug << "NUNAO.cpp: NUNAO::NUNAO" << std::endl;
     m_broker = pBroker;
     m_nubot = new NUbot(0, NULL);
     getParentBroker()->getProxy("DCM")->getModule()->atPostProcess(boost::bind<void>(&SenseMoveThread::signal, m_nubot->m_sensemove_thread));
@@ -48,10 +48,10 @@ NUNAO::~NUNAO()
 extern "C" int _createModule(ALPtr<ALBroker> pBroker)
 {
     debug.open("/var/volatile/debug.log");
-    debug << "NUbot Debug Log" << endl;
-    debug << "NUNAO.cpp: _createModule" << endl;
+    debug << "NUbot Debug Log" << std::endl;
+    debug << "NUNAO.cpp: _createModule" << std::endl;
     errorlog.open("/var/volatile/error.log");
-    errorlog << "NUbot Error Log" << endl;
+    errorlog << "NUbot Error Log" << std::endl;
     ALModule::createModule<NUNAO>(pBroker, "NUNAO");
     return 0;
 }

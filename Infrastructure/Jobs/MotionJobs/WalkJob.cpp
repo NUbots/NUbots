@@ -39,7 +39,7 @@ WalkJob::WalkJob(float trans_speed, float trans_direction, float rot_speed) : Mo
 /*! @brief Constructs a WalkJob from stream data
     @param speed the speed for the walk job [x (cm/s), y (cm/s), theta (rad/s)]
  */
-WalkJob::WalkJob(istream& input) : MotionJob(Job::MOTION_WALK)
+WalkJob::WalkJob(std::istream& input) : MotionJob(Job::MOTION_WALK)
 {
     m_job_time = 0;
     float floatBuffer;
@@ -84,17 +84,17 @@ float WalkJob::getRotationSpeed()
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void WalkJob::summaryTo(ostream& output)
+void WalkJob::summaryTo(std::ostream& output)
 {
-    output << "WalkJob: " << m_job_time << " " << m_translation_speed << " " << m_direction << " " << m_rotation_speed << endl;
+    output << "WalkJob: " << m_job_time << " " << m_translation_speed << " " << m_direction << " " << m_rotation_speed << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void WalkJob::csvTo(ostream& output)
+void WalkJob::csvTo(std::ostream& output)
 {
-    output << "WalkJob: " << m_job_time << ", " << m_translation_speed << ", " << m_direction << ", " << m_rotation_speed << endl;
+    output << "WalkJob: " << m_job_time << ", " << m_translation_speed << ", " << m_direction << ", " << m_rotation_speed << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -104,10 +104,10 @@ void WalkJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void WalkJob::toStream(ostream& output) const
+void WalkJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 2
-        debug << "WalkJob::toStream" << endl;
+        debug << "WalkJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -123,10 +123,10 @@ void WalkJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const WalkJob& job)
+std::ostream& operator<<(std::ostream& output, const WalkJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<WalkJob" << endl;
+        debug << "<<WalkJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -138,10 +138,10 @@ ostream& operator<<(ostream& output, const WalkJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const WalkJob* job)
+std::ostream& operator<<(std::ostream& output, const WalkJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<WalkJob" << endl;
+        debug << "<<WalkJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

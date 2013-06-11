@@ -35,19 +35,19 @@ public:
     
     virtual void setParameters(float alpha=0.1f, float beta=0.5, float gamma=0.9f, float lambda=0.9f,int learningIterations=1, int memory_length = 10, bool use_soft_max = false)=0;
     
-    virtual int getAction(vector<float> observations, vector<int> valid_actions)=0;//Must return integer between 0 and numberOfOutputs-1
+    virtual int getAction(std::vector<float> observations, std::vector<int> valid_actions)=0;//Must return integer between 0 and numberOfOutputs-1
     
     virtual void giveReward(float reward)=0;
     
     virtual void doLearning()=0;
     
-    virtual void saveAgent(string agentName)=0;
+    virtual void saveAgent(std::string agentName)=0;
 
-    virtual void loadAgent(string agentName)=0;
+    virtual void loadAgent(std::string agentName)=0;
 
 protected:
 
-    string save_location;
+    std::string save_location;
 
 
 };

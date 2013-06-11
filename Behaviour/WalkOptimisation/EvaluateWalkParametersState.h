@@ -39,15 +39,15 @@ public:
 	void doState();
 	float distance();
 private:
-	vector<float> getStartPoint();
+	std::vector<float> getStartPoint();
 	bool pointReached();
-	vector<float> getNextPoint();
+	std::vector<float> getNextPoint();
 	bool allPointsReached();
-	vector<float> reversePoint(const vector<float>& point);
+	std::vector<float> reversePoint(const std::vector<float>& point);
 	float calculateCircuitLength();
 
 	bool m_reverse_points;
-    vector<float> m_previous_reverse;
+    std::vector<float> m_previous_reverse;
 	unsigned int m_current_point_index;
 };
 

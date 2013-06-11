@@ -1,28 +1,58 @@
-#ifndef CIRCLEDETECTOR_H
-#define CIRCLEDETECTOR_H
+/*! @file VisionJob.h
+    @brief Declaration of base VisionJob class.
+ 
+    @class VisionJob
+    @brief A base class to encapsulate jobs issued for the vision module.
+ 
+    All vision jobs should inherit from this base class.
+ 
+    @author Jason Kulk
+ 
+  Copyright (c) 2009 Jason Kulk
+ 
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-#include <vector>
-#include "Vision/basicvisiontypes.h"
-#include "Vision/VisionTypes/groundpoint.h"
-#include "Vision/VisionTypes/VisionFieldObjects/centrecircle.h"
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-using std::vector;
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-class CircleDetector
+#ifndef VISIONJOB_H
+#define VISIONJOB_H
+
+#include "Job.h"
+
+class VisionJob : public Job
 {
 public:
-    CircleDetector(double tolerance, unsigned int n = 25, unsigned int k = 100, double e = 4.0, unsigned int max_iterations=2);
-
-    void setTolerance(double tolerance);
-
-    virtual bool run(vector<GroundPoint> &points, CentreCircle &result);
-
-private:
-    unsigned int m_n,
-                 m_k,
-                 m_max_iterations;
-    double m_e,
-           m_tolerance;
+    VisionJob(job_id_t jobid) : Job(Job::VISION, jobid) {};
+    virtual ~VisionJob() {};
+    
+    virtual void summaryTo(std::ostream& output) = 0;
+    virtual void csvTo(std::ostream& output) = 0;
+    
+    friend std::ostream& operator<< (std::ostream& output, const VisionJob& job) 
+    {   job.toStream(output); 
+        return output;
+    };
+    friend std::ostream& operator<< (std::ostream& output, const VisionJob* job)
+    {
+        if (job != NULL) 
+            job->toStream(output);
+        else
+            output << "NULL";
+        return output;
+    };
+protected:
+    virtual void toStream(std::ostream& output) const {};
 };
 
-#endif // CIRCLEDETECTOR_H
+#endif
+

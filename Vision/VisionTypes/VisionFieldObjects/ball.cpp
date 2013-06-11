@@ -38,7 +38,7 @@ Ball::Ball(Point centre, double diameter)
     //        centre_pt = vbb->correctDistortion(centre_pt);
     //    }
         
-    m_diameter = max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x);
+    m_diameter = std::max(bottom_pt.y - top_pt.y, right_pt.x - left_pt.x);
     m_location.screen = centre;
     m_size_on_screen = Vector2<double>(m_diameter, m_diameter);
     valid = calculatePositions();
@@ -54,12 +54,12 @@ float Ball::getRadius() const
 bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_BALL_VERBOSITY > 1
-        debug << "Ball::addToExternalFieldObjects:" << endl;
-        debug << *this << endl;
+        debug << "Ball::addToExternalFieldObjects:" << std::endl;
+        debug << *this << std::endl;
     #endif
     if(valid) {
         //add ball to mobileFieldObjects
-        //cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << endl;
+        //std::cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << std::endl;
         fieldobjects->mobileFieldObjects[FieldObjects::FO_BALL].UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
                                                                                    Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
                                                                                    Vector2<float>(m_location.angular.x, m_location.angular.y),//This is likely causing ball tracking errors
@@ -67,13 +67,13 @@ bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
                                                                                    Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                                                                    timestamp);
         #if VISION_BALL_VERBOSITY > 1
-            debug << "Ball::addToExternalFieldObjects: valid" << endl;
+            debug << "Ball::addToExternalFieldObjects: valid" << std::endl;
         #endif
         return true;
     }
     else {
         #if VISION_BALL_VERBOSITY > 1
-            debug << "Ball::addToExternalFieldObjects: invalid" << endl;
+            debug << "Ball::addToExternalFieldObjects: invalid" << std::endl;
         #endif
         return false;
     }
@@ -85,7 +85,7 @@ bool Ball::check() const
 
     if(!distance_valid) {
         #if VISION_BALL_VERBOSITY > 1
-            debug << "Ball::check - Ball thrown out: distance invalid" << endl;
+            debug << "Ball::check - Ball thrown out: distance invalid" << std::endl;
         #endif
         return false;
     }
@@ -93,9 +93,9 @@ bool Ball::check() const
     //throwout for below horizon
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL and
        not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screen.x, m_location.screen.y)) {
-        errorlog << "Ball::check() - Ball above horizon: should not occur" << endl;
+        errorlog << "Ball::check() - Ball above horizon: should not occur" << std::endl;
         #if VISION_BALL_VERBOSITY > 1
-            debug << "Ball::check - Ball thrown out: above kinematics horizon" << endl;
+            debug << "Ball::check - Ball thrown out: above kinematics horizon" << std::endl;
         #endif
         return false;
     }
@@ -104,8 +104,8 @@ bool Ball::check() const
     if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL and
             abs(width_dist - d2p) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL) {
         #if VISION_BALL_VERBOSITY > 1
-        debug << "Ball::check - Ball thrown out: width distance too much smaller than d2p" << endl;
-            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << endl;
+        debug << "Ball::check - Ball thrown out: width distance too much smaller than d2p" << std::endl;
+            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << std::endl;
         #endif
         return false;
     }
@@ -114,8 +114,8 @@ bool Ball::check() const
     if(VisionConstants::THROWOUT_SMALL_BALLS and 
         m_diameter < VisionConstants::MIN_BALL_DIAMETER_PIXELS) {
         #if VISION_BALL_VERBOSITY > 1
-            debug << "Ball::check - Ball thrown out: too small" << endl;
-            debug << "\tdiameter: " << m_diameter << " MIN_BALL_DIAMETER_PIXELS: " << VisionConstants::MIN_BALL_DIAMETER_PIXELS << endl;
+            debug << "Ball::check - Ball thrown out: too small" << std::endl;
+            debug << "\tdiameter: " << m_diameter << " MIN_BALL_DIAMETER_PIXELS: " << VisionConstants::MIN_BALL_DIAMETER_PIXELS << std::endl;
         #endif
         return false;
     }
@@ -124,8 +124,8 @@ bool Ball::check() const
     if(VisionConstants::THROWOUT_DISTANT_BALLS and 
         m_location.relativeRadial.x > VisionConstants::MAX_BALL_DISTANCE) {
         #if VISION_BALL_VERBOSITY > 1
-            debug << "Ball::check - Ball thrown out: too far away" << endl;
-            debug << "\td2p: " << m_location.relativeRadial.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << endl;
+            debug << "Ball::check - Ball thrown out: too far away" << std::endl;
+            debug << "\td2p: " << m_location.relativeRadial.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << std::endl;
         #endif
         return false;
     }
@@ -160,7 +160,7 @@ bool Ball::calculatePositions()
 
     #if VISION_BALL_VERBOSITY > 2
         debug << "Ball::calculatePositions: ";
-        debug << d2p << " " << width_dist << " " << m_location.relativeRadial.x << endl;
+        debug << d2p << " " << width_dist << " " << m_location.relativeRadial.x << std::endl;
     #endif
 
     return distance_valid && dist > 0;
@@ -187,17 +187,17 @@ double Ball::distanceToBall(double bearing, double elevation) {
 
     #if VISION_BALL_VERBOSITY > 1
         if(!d2pvalid)
-            debug << "Ball::distanceToGoal: d2p invalid - combination methods will only return width_dist" << endl;
+            debug << "Ball::distanceToGoal: d2p invalid - combination methods will only return width_dist" << std::endl;
     #endif
     //get distance from width
     width_dist = VisionConstants::BALL_WIDTH*tran.getCameraDistanceInPixels()/m_size_on_screen.x;
 
     #if VISION_BALL_VERBOSITY > 1
-        debug << "Ball::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
-        debug << "Ball::distanceToGoal: d2p: " << d2p << endl;
-        debug << "Ball::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
-        debug << "Ball::distanceToGoal: width_dist: " << width_dist << endl;
-        debug << "Ball::distanceToGoal: Method: " << getDistanceMethodName(VisionConstants::BALL_DISTANCE_METHOD) << endl;
+        debug << "Ball::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << std::endl;
+        debug << "Ball::distanceToGoal: d2p: " << d2p << std::endl;
+        debug << "Ball::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << std::endl;
+        debug << "Ball::distanceToGoal: width_dist: " << width_dist << std::endl;
+        debug << "Ball::distanceToGoal: Method: " << getDistanceMethodName(VisionConstants::BALL_DISTANCE_METHOD) << std::endl;
     #endif
     switch(VisionConstants::BALL_DISTANCE_METHOD) {
     case D2P:
@@ -215,27 +215,27 @@ double Ball::distanceToBall(double bearing, double elevation) {
         break;
     case Least:
         distance_valid = d2pvalid && d2p > 0;
-        result = (distance_valid ? min(d2p, width_dist) : width_dist);
+        result = (distance_valid ? std::min(d2p, width_dist) : width_dist);
         break;
     }
 
     return result;
 }
 
-ostream& operator<< (ostream& output, const Ball& b)
+std::ostream& operator<< (std::ostream& output, const Ball& b)
 {
-    output << "Ball " << endl;
-    output << "\tpixelloc: [" << b.m_location.screen.x << ", " << b.m_location.screen.y << "]" << endl;
-    output << " angularloc: [" << b.m_location.angular.x << ", " << b.m_location.angular.y << "]" << endl;
-    output << "\trelative field coords: [" << b.m_location.relativeRadial.x << ", " << b.m_location.relativeRadial.y << ", " << b.m_location.relativeRadial.z << "]" << endl;
-    output << "\tspherical error: [" << b.m_spherical_error.x << ", " << b.m_spherical_error.y << "]" << endl;
+    output << "Ball " << std::endl;
+    output << "\tpixelloc: [" << b.m_location.screen.x << ", " << b.m_location.screen.y << "]" << std::endl;
+    output << " angularloc: [" << b.m_location.angular.x << ", " << b.m_location.angular.y << "]" << std::endl;
+    output << "\trelative field coords: [" << b.m_location.relativeRadial.x << ", " << b.m_location.relativeRadial.y << ", " << b.m_location.relativeRadial.z << "]" << std::endl;
+    output << "\tspherical error: [" << b.m_spherical_error.x << ", " << b.m_spherical_error.y << "]" << std::endl;
     output << "\tsize on screen: [" << b.m_size_on_screen.x << ", " << b.m_size_on_screen.y << "]";
     return output;
 }
 
-ostream& operator<< (ostream& output, const vector<Ball>& b)
+std::ostream& operator<< (std::ostream& output, const std::vector<Ball>& b)
 {
     for (size_t i=0; i<b.size(); i++)
-        output << b[i] << endl;
+        output << b[i] << std::endl;
     return output;
 }

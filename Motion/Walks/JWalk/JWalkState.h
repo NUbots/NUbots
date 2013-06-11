@@ -31,19 +31,19 @@
 #include "JWalk.h"
 
 #include <string>
-using namespace std;
+
 
 class JWalkState
 {
 public:
-    JWalkState(const string& name, const NUData::id_t& leg);
+    JWalkState(const std::string& name, const NUData::id_t& leg);
     virtual ~JWalkState() {};
     virtual void doIt() = 0;
     virtual JWalkState* next() = 0;
     
-    string& getName();
+    std::string& getName();
 protected:
-    string m_name;
+    std::string m_name;
     NUData::id_t m_leg;
     NUData::id_t m_other_leg;
     

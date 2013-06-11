@@ -12,7 +12,7 @@
 #include "LinuxNetwork.h"
 
 using namespace Robot;
-using namespace std;
+
 
 
 LinuxSocket::LinuxSocket() : m_sock ( -1 )
@@ -128,7 +128,7 @@ int LinuxSocket::recv ( std::string& s ) const
 
     if ( status == -1 )
     {
-        cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
+        std::cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
         return 0;
     }
     else if ( status == 0 )
@@ -148,7 +148,7 @@ int LinuxSocket::recv ( void* data, int length ) const
 
     if ( status == -1 )
     {
-        cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
+        std::cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
         return 0;
     }
     else if ( status == 0 )

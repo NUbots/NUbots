@@ -42,7 +42,7 @@ class NUActionatorsData;
 
 #include <vector>
 #include <fstream>
-using namespace std;
+
 
 class NBWalk : public NUWalk
 {
@@ -61,12 +61,12 @@ private:
     
     void updateNBSensors();
     void setGait();
-    void nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjoints);
-    void nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujoints);
-    void nbToNULeftLegJointOrder(const vector<float>& nbjoints, vector<float>& nuleftlegjoints);
-    void nbToNURightLegJointOrder(const vector<float>& nbjoints, vector<float>& nurightlegjoints);
-    void nbToNULeftArmJointOrder(const vector<float>& nbjoints, vector<float>& nuleftarmjoints);
-    void nbToNURightArmJointOrder(const vector<float>& nbjoints, vector<float>& nurightarmjoints);
+    void nuToNBJointOrder(const std::vector<float>& nujoints, std::vector<float>& nbjoints);
+    void nbToNUJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nujoints);
+    void nbToNULeftLegJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nuleftlegjoints);
+    void nbToNURightLegJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nurightlegjoints);
+    void nbToNULeftArmJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nuleftarmjoints);
+    void nbToNURightArmJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nurightarmjoints);
     void updateActionatorsData();
     
 public:

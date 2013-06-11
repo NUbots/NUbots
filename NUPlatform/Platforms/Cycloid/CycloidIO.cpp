@@ -1,9 +1,18 @@
-/*! @file CycloidIO.cpp
-    @brief Implementation of CycloidIO input/output class
-
+/*! @file HeadPanJob.h
+    @brief Declaration of HeadPanJob class.
+ 
+    @class HeadPanJob
+    @brief A class to encapsulate pan jobs issued for the head module. 
+ 
+    There are three types of pans:
+        - Ball --- a pan to just look for the ball
+        - BallAndLocalisation --- a pan to both look for the ball and to passively localise
+        - Localisation -- a pan just for localisation
+    The type specifies (a) default pitch and yaw limits (b) the speed.
+ 
     @author Jason Kulk
  
- Copyright (c) 2010 Jason Kulk
+  Copyright (c) 2009, 2010 Jason Kulk
  
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,32 +26,56 @@
 
     You should have received a copy of the GNU General Public License
     along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
-#include "CycloidIO.h"
-#include "NUbot.h"
+#ifndef PANHEADJOB_H
+#define PANHEADJOB_H
 
-#include "debug.h"
-#include "debugverbositynetwork.h"
-#include "ioconfig.h"
+#include "../MotionJob.h"
+class MobileObject;
+class StationaryObject;
 
-using namespace std;
+#include <vector>
 
-/*! @brief Construct a CycloidIO object
-    @param nubot a pointer to the NUbot, we need this to gain access to the public store
- */
-CycloidIO::CycloidIO(NUbot* nubot): NUIO(nubot)
+
+class HeadPanJob : public MotionJob
 {
-#if DEBUG_NETWORK_VERBOSITY > 0
-    debug << "CycloidIO::CycloidIO()" << endl;
-#endif
-    m_nubot = nubot;
-}
+public:
+    enum head_pan_t
+    {
+        Ball,
+        BallAndLocalisation,
+        Localisation
+    };
+public:
+    HeadPanJob(head_pan_t pantype);
+    HeadPanJob(head_pan_t pantype, float xmin, float xmax, float yawmin, float yawmax);
+    HeadPanJob(const MobileObject& object, float hackfactor = 1.0);
+    HeadPanJob(const StationaryObject& object, float hackfactor = 1.0);
+    HeadPanJob(const std::vector<StationaryObject>& objects, float hackfactor = 1.0);
+    HeadPanJob(std::istream& input);
+    ~HeadPanJob();
+    
+    head_pan_t getPanType();
+    bool useDefaultValues();
+    void getX(float& xmin, float& xmax);
+    void getYaw(float& yawmin, float& yawmax);
+    
+    void summaryTo(std::ostream& output);
+    void csvTo(std::ostream& output);
+    
+    friend std::ostream& operator<<(std::ostream& output, const HeadPanJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadPanJob* job);
+protected:
+    virtual void toStream(std::ostream& output) const;
+private:
+    head_pan_t m_pan_type;              //!< the type of pan
+    bool m_use_default;                 //!< true if the head should use the default values
+    float m_x_min;                      //!< the minimum x distance to include in the pan (cm)
+    float m_x_max;                      //!< the maximum x distance to include in the pan (cm)
+    float m_yaw_min;                    //!< the minimum (right) yaw angle to include in the pan (rad)
+    float m_yaw_max;                    //!< the maximum (left) yaw angle to include in the pan (rad)
+};
 
-CycloidIO::~CycloidIO()
-{
-#if DEBUG_NETWORK_VERBOSITY > 0
-    debug << "CycloidIO::~CycloidIO()" << endl;
 #endif
-}
 

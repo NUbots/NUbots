@@ -63,7 +63,7 @@
 #define INST_SYNC_WRITE     (131)   // 0x83
 #define INST_BULK_READ      (146)   // 0x92
 
-using namespace std;
+
 
 /*! @brief Constructs a nubot sensor class with Darwin backend
  */
@@ -79,11 +79,11 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
     m_data->addSensors(platform->m_servo_names);
 
     m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
-    m_previous_positions = vector<float>(platform->m_servo_names.size(), 0);
-    m_previous_velocities = vector<float>(platform->m_servo_names.size(), 0);
+    m_previous_positions = std::vector<float>(platform->m_servo_names.size(), 0);
+    m_previous_velocities = std::vector<float>(platform->m_servo_names.size(), 0);
     m_joint_mapping = &DarwinJointMapping::Instance();
 
-    std::vector<float> invalid(NUSensorsData::NumEndEffectorIndices, numeric_limits<float>::quiet_NaN());
+    std::vector<float> invalid(NUSensorsData::NumEndEffectorIndices, std::numeric_limits<float>::quiet_NaN());
     m_data->set(NUSensorsData::RLegEndEffector, m_data->CurrentTime, invalid);
     m_data->set(NUSensorsData::LLegEndEffector, m_data->CurrentTime, invalid);
 
@@ -95,7 +95,7 @@ DarwinSensors::DarwinSensors(DarwinPlatform* darwin, Robot::CM730* subboard)
 DarwinSensors::~DarwinSensors()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "DarwinSensors::~DarwinSensors()" << endl;
+        debug << "DarwinSensors::~DarwinSensors()" << std::endl;
     #endif
     delete cm730;
 }
@@ -118,8 +118,8 @@ void DarwinSensors::copyFromHardwareCommunications()
     // Note: The following comment contains (very) old code.
     //       It was preserved here in the hope that it might be handy later.
     //       Please delete it if you know that it won't be. -MM
-    // debug    << "Motor error: " << endl;
-    // errorlog << "Motor error: " << endl;
+    // debug    << "Motor error: " << std::endl;
+    // errorlog << "Motor error: " << std::endl;
     // cm730->DXLPowerOff(); platform->msleep(500); cm730->DXLPowerOn();
     
     // 2. Read data in bulk from the CM730 controller board 
@@ -179,8 +179,8 @@ void DarwinSensors::copyFromHardwareCommunications()
  */
 void DarwinSensors::copyFromJoints()
 {
-    static const float NaN = numeric_limits<float>::quiet_NaN();
-    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    static const float NaN = std::numeric_limits<float>::quiet_NaN();
+    std::vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000;
     int data;
     int addr;
@@ -201,7 +201,7 @@ void DarwinSensors::copyFromJoints()
 //        int result = cm730->ReadTable(int(platform->m_servo_IDs[i]),table_start_addr,end_addr,datatable,&error);
 //        if(result != Robot::CM730::SUCCESS)
 //        {
-//            debug << "Sensor " << platform->m_servo_IDs[i] <<  " failed."<< endl;
+//            debug << "Sensor " << platform->m_servo_IDs[i] <<  " failed."<< std::endl;
 //            continue;
 //        }
 
@@ -278,7 +278,7 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     int addr;
     int x,y,z;
     float centrevalue = 512;
-    vector<float> data(3,0);
+    std::vector<float> data(3,0);
 
 
     //<! Assign the robot data to the NUSensor Structure:
@@ -297,8 +297,8 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     float tGz = data[2] = cm730->bulk_read_data_[int(Robot::CM730::ID_CM)].ReadWord(addr);
     data[2] = (data[2]-centrevalue)/VALUETORPS_RATIO;
 
-   // cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
-    //cout << "GYRO_RAW: \t(" << tGx << "," << tGy << "," << tGz << ")"<< endl;
+   // std::cout << "GYRO: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< std::endl;
+    //std::cout << "GYRO_RAW: \t(" << tGx << "," << tGy << "," << tGz << ")"<< std::endl;
 
     m_data->set(NUSensorsData::Gyro,m_current_time, data);
 
@@ -317,8 +317,8 @@ void DarwinSensors::copyFromAccelerometerAndGyro()
     //data[2] = cm730->MakeWord(datatable[addr-start_addr],datatable[addr+1-start_addr]);
     data[2] = -(data[2]-centrevalue)/VALUETOACCEL_RATIO;
     
-    //cout << "ACCEL: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< endl;
-  //  cout << "ACCEL_RAW: \t(" << tAx << "," << tAy << "," << tAz << ")"<< endl;
+    //std::cout << "ACCEL: \t(" << data[0] << "," << data[1]<< "," << data[2] << ")"<< std::endl;
+  //  std::cout << "ACCEL_RAW: \t(" << tAx << "," << tAy << "," << tAz << ")"<< std::endl;
 
     m_data->set(NUSensorsData::Accelerometer,m_current_time, data);
 }
@@ -395,7 +395,7 @@ void DarwinSensors::copyFromButtons()
     {
         //Mode Button Pressed:
         m_data->modify(NUSensorsData::LeftButton, NUSensorsData::StateId, m_current_time, 1);
-        //cout << "Mode Button Pressed" << endl;
+        //std::cout << "Mode Button Pressed" << std::endl;
     }
     else
     {
@@ -406,7 +406,7 @@ void DarwinSensors::copyFromButtons()
     {
         //Start Button Pressed:
         m_data->modify(NUSensorsData::MainButton, NUSensorsData::StateId, m_current_time, 1);
-        //cout << "Start Button Pressed" << endl;
+        //std::cout << "Start Button Pressed" << std::endl;
     }
     else
     {
@@ -419,7 +419,7 @@ void DarwinSensors::copyFromButtons()
         //Mode and Start Button Pressed:
         //m_data->modify(NUSensorsData::LeftButton, NUSensorsData::StateId, m_current_time, 1);
         //m_data->modify(NUSensorsData::MainButton, NUSensorsData::StateId, m_current_time, 1);
-        //cout << "Mode and Start Button Pressed" << endl;
+        //std::cout << "Mode and Start Button Pressed" << std::endl;
         m_data->modify(NUSensorsData::RightButton, NUSensorsData::StateId, m_current_time, 1);
     }
     else

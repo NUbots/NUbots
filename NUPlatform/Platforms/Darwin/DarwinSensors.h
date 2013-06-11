@@ -55,9 +55,9 @@ protected:
 
     //! A vector containing pointers to all of the joint id_t.
     //! This is used to loop through all of the joints quickly
-    vector<NUData::id_t*> m_joint_ids;
-    vector<float> m_previous_positions;
-    vector<float> m_previous_velocities;
+    std::vector<NUData::id_t*> m_joint_ids;
+    std::vector<float> m_previous_positions;
+    std::vector<float> m_previous_velocities;
     DarwinPlatform* platform;
     Robot::CM730* cm730;
     DarwinJointMapping* m_joint_mapping;

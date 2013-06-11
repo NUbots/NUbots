@@ -23,7 +23,7 @@ using boost::shared_ptr;
 
 #include "NBInclude/Sensors.h"
 #include "WalkProvider.h"
-using namespace std;
+
 
 using namespace Kinematics;
 
@@ -66,7 +66,7 @@ void WalkProvider::hardReset(){
 void WalkProvider::calculateNextJointsAndStiffnesses() 
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "WalkProvider::calculateNextJointsAndStiffnesses()"<<endl;
+    debug << "WalkProvider::calculateNextJointsAndStiffnesses()"<<std::endl;
 #endif
     pthread_mutex_lock(&walk_provider_mutex);
     if ( pendingGaitCommands){
@@ -101,8 +101,8 @@ void WalkProvider::calculateNextJointsAndStiffnesses()
     //Also need to process stepCommands here
 
     if(!isActive()){
-        cout << "WARNING, I wouldn't be calling the Walkprovider while"
-            " it thinks its DONE if I were you!" <<endl;
+        std::cout << "WARNING, I wouldn't be calling the Walkprovider while"
+            " it thinks its DONE if I were you!" <<std::endl;
     }
 
     //ask the step Generator to update ZMP values, com targets
@@ -115,16 +115,16 @@ void WalkProvider::calculateNextJointsAndStiffnesses()
     WalkArmsTuple arms_result = stepGenerator.tick_arms();
 
     //Get the joints and stiffnesses for each Leg
-    vector<float> lleg_joints = legs_result.get<LEFT_FOOT>().get<JOINT_INDEX>();
-    vector<float> rleg_joints = legs_result.get<RIGHT_FOOT>().get<JOINT_INDEX>();
-    vector<float> lleg_gains = legs_result.get<LEFT_FOOT>().get<STIFF_INDEX>();
-    vector<float> rleg_gains = legs_result.get<RIGHT_FOOT>().get<STIFF_INDEX>();
+    std::vector<float> lleg_joints = legs_result.get<LEFT_FOOT>().get<JOINT_INDEX>();
+    std::vector<float> rleg_joints = legs_result.get<RIGHT_FOOT>().get<JOINT_INDEX>();
+    std::vector<float> lleg_gains = legs_result.get<LEFT_FOOT>().get<STIFF_INDEX>();
+    std::vector<float> rleg_gains = legs_result.get<RIGHT_FOOT>().get<STIFF_INDEX>();
 
     //grab the stiffnesses for the arms
-    vector<float> larm_joints = arms_result.get<LEFT_FOOT>().get<JOINT_INDEX>();
-    vector<float> rarm_joints = arms_result.get<RIGHT_FOOT>().get<JOINT_INDEX>();
-    vector<float> larm_gains = arms_result.get<LEFT_FOOT>().get<STIFF_INDEX>();
-    vector<float> rarm_gains = arms_result.get<RIGHT_FOOT>().get<STIFF_INDEX>();
+    std::vector<float> larm_joints = arms_result.get<LEFT_FOOT>().get<JOINT_INDEX>();
+    std::vector<float> rarm_joints = arms_result.get<RIGHT_FOOT>().get<JOINT_INDEX>();
+    std::vector<float> larm_gains = arms_result.get<LEFT_FOOT>().get<STIFF_INDEX>();
+    std::vector<float> rarm_gains = arms_result.get<RIGHT_FOOT>().get<STIFF_INDEX>();
 
 
     //Return the joints for the legs
@@ -147,7 +147,7 @@ void WalkProvider::setCommand(const WalkCommand * command){
     //grab the velocities in mm/second rad/second from WalkCommand
     pthread_mutex_lock(&walk_provider_mutex);
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "WalkProvider::setCommand(" << *command << ") " << command  << "nextCommand: " << nextCommand << endl;
+        debug << "WalkProvider::setCommand(" << *command << ") " << command  << "nextCommand: " << nextCommand << std::endl;
     #endif
     nextCommand = command;
     pendingCommands = true;
@@ -183,8 +183,8 @@ void WalkProvider::setActive()
 
 std::vector<BodyJointCommand *> WalkProvider::getGaitTransitionCommand(){
     pthread_mutex_lock(&walk_provider_mutex);
-    vector<float> curJoints = sensors->getMotionBodyAngles();
-    vector<float> * gaitJoints = stepGenerator.getDefaultStance(nextGait);
+    std::vector<float> curJoints = sensors->getMotionBodyAngles();
+    std::vector<float> * gaitJoints = stepGenerator.getDefaultStance(nextGait);
 
     startGait = nextGait;
     pendingStartGaitCommands = true;
@@ -203,7 +203,7 @@ std::vector<BodyJointCommand *> WalkProvider::getGaitTransitionCommand(){
     const float  MAX_RAD_PER_SEC =  M_PI_FLOAT*0.3f;
     float time = max_change/MAX_RAD_PER_SEC;
 
-    vector<BodyJointCommand *> commands;
+    std::vector<BodyJointCommand *> commands;
 
     if(time <= MotionConstants::MOTION_FRAME_LENGTH_S)
         return commands;
@@ -213,15 +213,15 @@ std::vector<BodyJointCommand *> WalkProvider::getGaitTransitionCommand(){
     float larm_angles[] = {0.9f, 0.3f,0.0f,0.0f};
     float rarm_angles[] = {0.9f,-0.3f,0.0f,0.0f};
 
-    vector<float> *safe_larm = new vector<float>(larm_angles,
+    std::vector<float> *safe_larm = new std::vector<float>(larm_angles,
                                                  &larm_angles[ARM_JOINTS]);
-    vector<float> * safe_rarm =new vector<float>(rarm_angles,
+    std::vector<float> * safe_rarm =new std::vector<float>(rarm_angles,
                                                  &rarm_angles[ARM_JOINTS]);
 
 	// HACK @joho get gait stiffness params. nextGait->maxStiffness
-	vector<float> * stiffness = new vector<float>(Kinematics::NUM_JOINTS,
+	std::vector<float> * stiffness = new std::vector<float>(Kinematics::NUM_JOINTS,
 												  0.85f);
-	vector<float> * stiffness2 = new vector<float>(Kinematics::NUM_JOINTS,
+	std::vector<float> * stiffness2 = new std::vector<float>(Kinematics::NUM_JOINTS,
 												  0.85f);
 
     commands.push_back(new BodyJointCommand(0.5f,safe_larm,NULL,NULL,safe_rarm,

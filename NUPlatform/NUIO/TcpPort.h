@@ -43,7 +43,7 @@ class SelfLocalisation;
 class FieldObjects;
 
 #include <sstream>
-using namespace std;
+
 
 typedef unsigned char byte;
 #ifndef NETDATA

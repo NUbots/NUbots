@@ -78,7 +78,7 @@ void BonjourServiceResolver::startServiceResolve(uint32_t iface, const char* nam
 {
     DNSServiceErrorType err = DNSServiceResolve(&m_ref, 0, iface, name, type, domain, onResolveResults, this);
     if (err != kDNSServiceErr_NoError)
-        debug << "BonjourServiceResolver::startServiceResolve. DNSServiceResolve failed for " << name << " " << type << endl;
+        debug << "BonjourServiceResolver::startServiceResolve. DNSServiceResolve failed for " << name << " " << type << std::endl;
     else
     {
         m_sockfd = DNSServiceRefSockFD(m_ref);
@@ -118,7 +118,7 @@ void BonjourServiceResolver::onLookupCompleted(const QHostInfo& info)
 }
 void BonjourServiceResolver::onResolveResults(DNSServiceRef, DNSServiceFlags, uint32_t, DNSServiceErrorType, const char*, const char* hostname, uint16_t, uint16_t, const unsigned char*, void* context)
 {
-    string temp(hostname);				// There is a backwards compatibility problem:
+    std::string temp(hostname);				// There is a backwards compatibility problem:
     size_t length = temp.size();		// hostnames used to have a '.' at the end eg. smacbook.local.
     if (temp[length-1] == '.')			// However, on my laptop such a hostname is invalid
         temp.erase(length-1);			// Thus, if there is a '.' on the end remove it

@@ -50,6 +50,6 @@ void FinishedState::doState()
         m_jobs->addMotionJob(new MotionKillJob());
     }
     // In finished the chest led should be off
-    m_actions->add(NUActionatorsData::ChestLed, m_actions->CurrentTime, vector<float>(3,0));
+    m_actions->add(NUActionatorsData::ChestLed, m_actions->CurrentTime, std::vector<float>(3,0));
 }
 

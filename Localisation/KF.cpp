@@ -182,7 +182,7 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 {
 	
 	
-// 	cout<<"Cov Matrix : " <<srukfCovX<<endl;
+// 	std::cout<<"Cov Matrix : " <<srukfCovX<<std::endl;
 	// Step 1 : Calculate sqaure root of Covariance
 	
 	//-----------------------------------------------------------------------------------------------
@@ -265,10 +265,10 @@ void KF::performFiltering(double odom_X, double odom_Y, double odom_Theta)
 //        stateStandardDeviations = HT(horzcat(Mx,motionNoise));
         stateEstimates = newStateEstimates;
 
-//        cout << "Odometry: (" << odom_X << "," << odom_Y << "," << odom_Theta << ")" << std::endl;
-//        cout << "Odometry Variance: (" << varX << "," << varY << "," << varTheta << ")" << std::endl;
-//        cout << HT(Mx) << std::endl;
-//        cout << stateStandardDeviations << std::endl;
+//        std::cout << "Odometry: (" << odom_X << "," << odom_Y << "," << odom_Theta << ")" << std::endl;
+//        std::cout << "Odometry Variance: (" << varX << "," << varY << "," << varTheta << ")" << std::endl;
+//        std::cout << HT(Mx) << std::endl;
+//        std::cout << stateStandardDeviations << std::endl;
 /*	return KF_OK;*/
 }
 
@@ -353,7 +353,7 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
                 sigmaPoints[0][i] = *newPose;
 		sigmaPoints[1][i] = *(newPose+1);
 		sigmaPoints[2][i] = *(newPose+2);
-// 		cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
+// 		std::cout<<"\nOld Sigma = [ "<<oldPose.X<<", "<<oldPose.Y<<", "<<oldPose.Theta<<" ]"<<"\tNew Sigma = [ "<<sigmaPoints[0][i]<<", "<<sigmaPoints[1][i]<<", "<<sigmaPoints[2][i]<<" ]";
    
    
 	}
@@ -369,7 +369,7 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
         for(int i=0; i < numSigmaPoints; i++){
 		newStateEstimates = newStateEstimates + sqrtOfTestWeightings[0][i]*sqrtOfTestWeightings[0][i]*sigmaPoints.getCol(i);
 	}
-	cout<<"New Mean    = ["<<newStateEstimates[0][0]<<", "<<newStateEstimates[1][0]<<", "<<newStateEstimates[1][0]<<" ]"<<endl;
+	std::cout<<"New Mean    = ["<<newStateEstimates[0][0]<<", "<<newStateEstimates[1][0]<<", "<<newStateEstimates[1][0]<<" ]"<<std::endl;
 // std::cout << "Calculating Covariance." << std::endl;
 	Matrix temp;
   // Update Covariance
@@ -381,7 +381,7 @@ KfUpdateResult KF::odometeryUpdate(double odom_X, double odom_Y, double odom_The
 	stateEstimates = newStateEstimates;
 //   newCovariance.print();
 	stateStandardDeviations = cholesky(newCovariance);
-//   cout<<"\nNew current State = ["<<stateStandardDeviations[0][0]<<", "<<stateStandardDeviations[1][0]<<", "<<stateStandardDeviations[1][0]<<" ]";
+//   std::cout<<"\nNew current State = ["<<stateStandardDeviations[0][0]<<", "<<stateStandardDeviations[1][0]<<", "<<stateStandardDeviations[1][0]<<" ]";
 	return KF_OK; 
 }
 
@@ -530,7 +530,7 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
 		if(Blackboard->GameInfo->getCurrentState() == STATE_PLAYING ) // if an outlier is detected during play
 		{
 			// Increase the variance of this model by 10%
-			cout<<"\nIncreasing uncertainty by 10%";
+			std::cout<<"\nIncreasing uncertainty by 10%";
 			    stateStandardDeviations[0][0] += stateStandardDeviations[0][0]*0.1;
 				stateStandardDeviations[1][1] += stateStandardDeviations[1][1]*0.1;
 				stateStandardDeviations[2][2] += stateStandardDeviations[2][2]*0.1;
@@ -710,7 +710,7 @@ KfUpdateResult KF::fieldObjectmeas(double distance,double bearing,double objX, d
   {
 //          #ifdef PLAYING_STATE_RESETTING
 //                        // Increase the variance of this model by 10%
-//                        //cout<<"\nIncreasing uncertainty by 10%";
+//                        //std::cout<<"\nIncreasing uncertainty by 10%";
 //                    stateStandardDeviations[0][0] += stateStandardDeviations[0][0]*0.1;
 //                    stateStandardDeviations[1][1] += stateStandardDeviations[1][1]*0.1;
 //                    stateStandardDeviations[2][2] += stateStandardDeviations[2][2]*0.1;
@@ -994,12 +994,12 @@ std::string KF::summary(bool brief) const
     std::stringstream buffer;
     buffer << "Model Id " << id() << " Alpha: " << alpha() << " Position: (" << state(KF::selfX) << ",";
     buffer << state(KF::selfY) << "," << state(KF::selfTheta) << ")" << std::endl << "Ball Position: (" << state(KF::ballX) << ",";
-    buffer << state(KF::ballY) << ")" << endl;
+    buffer << state(KF::ballY) << ")" << std::endl;
     if(!brief)
     {
             buffer << "Variance - Position: (" << sd(KF::selfX) << ",";
             buffer << sd(KF::selfY) << "," << sd(KF::selfTheta) << ") Ball Position: (" << sd(KF::ballX) << ",";
-            buffer << sd(KF::ballY) << ")" << endl;
+            buffer << sd(KF::ballY) << ")" << std::endl;
     }
     return buffer.str();
 }

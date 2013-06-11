@@ -29,25 +29,25 @@
 #include "Motion/Walks/WalkParameters.h"
 
 #include <vector>
-using namespace std;
+
 
 class WalkParametersJob : public MotionJob
 {
 public:
     WalkParametersJob(const WalkParameters& walkparameters);
-    WalkParametersJob(istream& input);
+    WalkParametersJob(std::istream& input);
     ~WalkParametersJob();
     
     void setWalkParameters(const WalkParameters& walkparameters);
     void getWalkParameters(WalkParameters& walkparameters);
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const WalkParametersJob& job);
-    friend ostream& operator<<(ostream& output, const WalkParametersJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkParametersJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkParametersJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
     WalkParameters m_walk_parameters;               //!< the walk parameters to give to the walk engine
 };

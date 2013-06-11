@@ -14,29 +14,29 @@ DataWrapper* DataWrapper::instance = 0;
 DataWrapper::DataWrapper()
 {
     //defaults for streams and LUTs
-    image_stream_name = string(getenv("HOME")) +  string("/nubot/image.strm");
-    sensor_stream_name = string(getenv("HOME")) +  string("/nubot/sensor.strm");
-    LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
+    image_stream_name = std::string(getenv("HOME")) +  std::string("/nubot/image.strm");
+    sensor_stream_name = std::string(getenv("HOME")) +  std::string("/nubot/sensor.strm");
+    LUTname = std::string(getenv("HOME")) +  std::string("/nubot/default.lut");
     imagestrm.open(image_stream_name.c_str());
     sensorstrm.open(sensor_stream_name.c_str());
 
     valid = true;
 
-    if(!m_camspecs.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str())) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load camera specifications: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
+    if(!m_camspecs.LoadFromConfigFile((std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg")).c_str())) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load camera specifications: " << std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg") << std::endl;
         valid = false;
     }
 
     if(!imagestrm.is_open()) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load image stream: " << image_stream_name << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load image stream: " << image_stream_name << std::endl;
         valid = false;
     }
     if(!sensorstrm.is_open()) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load sensor stream: " << sensor_stream_name << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load sensor stream: " << sensor_stream_name << std::endl;
         valid = false;
     }
     if(!loadLUTFromFile(LUTname)) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << std::endl;
         valid = false;
     }
 
@@ -65,13 +65,13 @@ NUImage* DataWrapper::getFrame()
 }
 
 //! @brief Generates spoofed camera transform vector.
-bool DataWrapper::getCTGVector(vector<float> &ctgvector)
+bool DataWrapper::getCTGVector(std::vector<float> &ctgvector)
 {
     return m_current_sensors.get(NUSensorsData::CameraToGroundTransform, ctgvector);
 }
 
 //! @brief Generates spoofed camera transform vector.
-bool DataWrapper::getCTVector(vector<float> &ctvector)
+bool DataWrapper::getCTVector(std::vector<float> &ctvector)
 {
     return m_current_sensors.get(NUSensorsData::CameraTransform, ctvector);
 }
@@ -99,7 +99,7 @@ bool DataWrapper::getCameraYaw(float& yaw)
 //! @brief Generates spoofed body pitch.
 bool DataWrapper::getBodyPitch(float& pitch)
 {
-    vector<float> orientation;
+    std::vector<float> orientation;
     bool valid = m_current_sensors.get(NUSensorsData::Orientation, orientation);
     if(valid && orientation.size() > 2) {
         pitch = orientation.at(1);
@@ -132,47 +132,47 @@ const LookUpTable& DataWrapper::getLUT() const
 }
 
 //! @brief Stores detections for later.
-void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
+void DataWrapper::publish(const std::vector<const VisionFieldObject*> &visual_objects)
 {
-    detections.insert(detections.end(), visual_objects.begin(), visual_objects.end());    //add onto detections list - invalid
+    detections.insert(detections.end(), visual_objects.begin(), visual_objects.end());    //add onto detections std::list - invalid
 }
 
 //! @brief Stores detections for later.
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
-    detections.push_back(visual_object);    //add onto detections list - invalid
+    detections.push_back(visual_object);    //add onto detections std::list - invalid
 }
 
 //! @brief Stores detections for later.
-void DataWrapper::debugPublish(const vector<Ball>& data)
+void DataWrapper::debugPublish(const std::vector<Ball>& data)
 {
     ball_detections.insert(ball_detections.end(), data.begin(), data.end());
 }
 
 //! @brief Stores detections for later.
-void DataWrapper::debugPublish(const vector<Goal>& data)
+void DataWrapper::debugPublish(const std::vector<Goal>& data)
 {
     goal_detections.insert(goal_detections.end(), data.begin(), data.end());
 }
 
 //! @brief Stores detections for later.
-void DataWrapper::debugPublish(const vector<Obstacle>& data)
+void DataWrapper::debugPublish(const std::vector<Obstacle>& data)
 {
     obstacle_detections.insert(obstacle_detections.end(), data.begin(), data.end());
 }
 
 //! @brief Stores detections for later.
-void DataWrapper::debugPublish(const vector<FieldLine>& data)
+void DataWrapper::debugPublish(const std::vector<FieldLine>& data)
 {
     line_detections.insert(line_detections.end(), data.begin(), data.end());
 }
 
-void DataWrapper::debugPublish(const vector<CentreCircle>& data)
+void DataWrapper::debugPublish(const std::vector<CentreCircle>& data)
 {
     centrecircle_detections.insert(centrecircle_detections.end(), data.begin(), data.end());
 }
 
-void DataWrapper::debugPublish(const vector<CornerPoint>& data)
+void DataWrapper::debugPublish(const std::vector<CornerPoint>& data)
 {
     corner_detections.insert(corner_detections.end(), data.begin(), data.end());
 }
@@ -194,7 +194,7 @@ bool DataWrapper::updateFrame()
             image_good = true;
         }
         else {
-            debug << "DataWrapper::updateFrame - failed to read image stream: " << image_stream_name << endl;
+            debug << "DataWrapper::updateFrame - failed to read image stream: " << image_stream_name << std::endl;
         }
 
         // read sensors from the stream
@@ -203,7 +203,7 @@ bool DataWrapper::updateFrame()
             sensors_good = true;
         }
         else {
-            debug << "DataWrapper::updateFrame - failed to read sensor stream: " << sensor_stream_name << endl;
+            debug << "DataWrapper::updateFrame - failed to read sensor stream: " << sensor_stream_name << std::endl;
         }
 
         if(image_good && sensors_good)
@@ -243,7 +243,7 @@ void DataWrapper::updateFrame(NUImage& img, NUSensorsData& sensors)
     numFramesProcessed++;
 
     //overwrite sensor horizon
-    vector<float> hor_data;
+    std::vector<float> hor_data;
     if(m_current_sensors.getHorizon(hor_data)) {
         kinematics_horizon.setLine(hor_data.at(0), hor_data.at(1), hor_data.at(2));
     }
@@ -251,7 +251,7 @@ void DataWrapper::updateFrame(NUImage& img, NUSensorsData& sensors)
     bool camera_pitch_valid, camera_yaw_valid, camera_height_valid, body_pitch_valid;
     float camera_pitch, camera_yaw, camera_height, body_pitch;
     bool ctg_valid;
-    vector<float> ctg_vector;
+    std::vector<float> ctg_vector;
 
     //get data copies from wrapper
     camera_pitch_valid = getCameraPitch(camera_pitch);
@@ -295,28 +295,28 @@ void DataWrapper::resetDetections()
 /*! @brief Prints the detection history to stream.
   * @param out The stream to print to.
   */
-void DataWrapper::printHistory(ostream& out)
+void DataWrapper::printHistory(std::ostream& out)
 {
-    BOOST_FOREACH(vector<Ball> vb, ball_detection_history) {
+    BOOST_FOREACH(std::vector<Ball> vb, ball_detection_history) {
         out << vb;
     }
-    BOOST_FOREACH(vector<Goal> vg, goal_detection_history) {
+    BOOST_FOREACH(std::vector<Goal> vg, goal_detection_history) {
         out << vg;
     }
-    BOOST_FOREACH(vector<Obstacle> vo, obstacle_detection_history) {
+    BOOST_FOREACH(std::vector<Obstacle> vo, obstacle_detection_history) {
         out << vo;
     }
-    BOOST_FOREACH(vector<FieldLine> vl, line_detection_history) {
+    BOOST_FOREACH(std::vector<FieldLine> vl, line_detection_history) {
         BOOST_FOREACH(FieldLine l, vl) {
             out << l;
         }
     }    
-    BOOST_FOREACH(vector<CentreCircle> vcc, centrecircle_detection_history) {
+    BOOST_FOREACH(std::vector<CentreCircle> vcc, centrecircle_detection_history) {
         BOOST_FOREACH(CentreCircle cc, vcc) {
             out << cc;
         }
     }
-    BOOST_FOREACH(vector<CornerPoint> vc, corner_detection_history) {
+    BOOST_FOREACH(std::vector<CornerPoint> vc, corner_detection_history) {
         BOOST_FOREACH(CornerPoint c, vc) {
             out << c;
         }
@@ -328,7 +328,7 @@ void DataWrapper::printHistory(ostream& out)
 *   @param filename The filename for the LUT stored on disk.
 *   @return The success of the operation.
 */
-bool DataWrapper::loadLUTFromFile(const string& filename)
+bool DataWrapper::loadLUTFromFile(const std::string& filename)
 {
     return LUT.loadLUTFromFile(filename);
 }
@@ -338,14 +338,14 @@ bool DataWrapper::loadLUTFromFile(const string& filename)
 *   @param filename The filename for the stream stored on disk.
 *   @return The success of the operation.
 */
-bool DataWrapper::setImageStream(const string &filename)
+bool DataWrapper::setImageStream(const std::string &filename)
 {
     image_stream_name = filename;
     imagestrm.close();
     imagestrm.open(image_stream_name.c_str());
     numFramesProcessed = 0;
     if(!imagestrm.is_open()) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load image stream: " << image_stream_name << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load image stream: " << image_stream_name << std::endl;
         return false;
     }
     return true;
@@ -356,14 +356,14 @@ bool DataWrapper::setImageStream(const string &filename)
 *   @param filename The filename for the stream stored on disk.
 *   @return The success of the operation.
 */
-bool DataWrapper::setSensorStream(const string &filename)
+bool DataWrapper::setSensorStream(const std::string &filename)
 {
     sensor_stream_name = filename;
     sensorstrm.close();
     sensorstrm.open(sensor_stream_name.c_str());
     numFramesProcessed = 0;
     if(!sensorstrm.is_open()) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load sensor stream: " << sensor_stream_name << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load sensor stream: " << sensor_stream_name << std::endl;
         return false;
     }
     return true;
@@ -385,12 +385,12 @@ void DataWrapper::resetStream()
 *   @brief Prints the detections as labels to stream.
 *   @param out The stream to print to.
 */
-void DataWrapper::printLabels(ostream& out) const
+void DataWrapper::printLabels(std::ostream& out) const
 {
-    out << detections.size() << endl;
+    out << detections.size() << std::endl;
     for(unsigned int i=0; i<detections.size(); i++) {
         detections.at(i)->printLabel(out);
-        out << endl;
+        out << std::endl;
     }
 }
 
@@ -400,16 +400,16 @@ void DataWrapper::printLabels(ostream& out) const
 *   @param labels The resulting labels (ouput parameter).
 *   @return The success of the operation.
 */
-bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const
+bool DataWrapper::readLabels(std::istream& in, std::vector< std::vector<VisionFieldObject*> >& labels) const
 {
     VisionFieldObject* next;
-    vector<VisionFieldObject*> next_vec;
+    std::vector<VisionFieldObject*> next_vec;
     int n;
     while(in.good()) {
         in >> n;
         next_vec.clear();
         for(int i=0; i<n; i++) {
-            string name;
+            std::string name;
             VFO_ID id;
             // get ID
             in >> name;
@@ -458,14 +458,14 @@ bool DataWrapper::readLabels(istream& in, vector< vector<VisionFieldObject*> >& 
 //*   @param labels The resulting labels (ouput parameter).
 //*   @return The success of the operation.
 //*/
-//bool DataWrapper::readLabels(istream& in, vector< vector< pair<VFO_ID, Vector2<double> > > >& labels) const
+//bool DataWrapper::readLabels(std::istream& in, std::vector< std::vector< pair<VFO_ID, Vector2<double> > > >& labels) const
 //{
 //    pair<VFO_ID, Vector2<double> > next;
-//    vector< pair<VFO_ID, Vector2<double> > > next_vec;
-//    vector< vector<VisionFieldObject* > > objects;
+//    std::vector< pair<VFO_ID, Vector2<double> > > next_vec;
+//    std::vector< std::vector<VisionFieldObject* > > objects;
 
 //    readLabels(in, objects);
-//    BOOST_FOREACH(vector<VisionFieldObject*> vec, objects) {
+//    BOOST_FOREACH(std::vector<VisionFieldObject*> vec, objects) {
 //        next_vec.clear();
 //        BOOST_FOREACH(VisionFieldObject* vfo, vec) {
 //            next.first = vfo->getID();
@@ -494,7 +494,7 @@ bool DataWrapper::renderFrame(QImage& img, bool lines_only)
     unsigned char r, g, b;    //r,g,b conversion values
     int h = m_current_image.getHeight();
     int w = m_current_image.getWidth();
-    vector<const VisionFieldObject*>::const_iterator it;
+    std::vector<const VisionFieldObject*>::const_iterator it;
 
     //initialise image
     img = QImage(w, h, QImage::Format_RGB888);

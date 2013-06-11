@@ -44,7 +44,7 @@
 #define evaluations 100
 #define repeatCount 10
 
-using namespace std;
+
 
 CameraCalibrationProvider::CameraCalibrationProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
@@ -58,8 +58,8 @@ CameraCalibrationProvider::CameraCalibrationProvider(Behaviour* manager) : Behav
     
     // load initial camera settings from file
     
-    CameraSettings settings = CameraSettings(CONFIG_DIR + string("Camera.cfg"));                        // loading from file needs to be changed
-    //m_settings = CameraSettings(CONFIG_DIR + string("Camera.cfg"));
+    CameraSettings settings = CameraSettings(CONFIG_DIR + std::string("Camera.cfg"));                        // loading from file needs to be changed
+    //m_settings = CameraSettings(CONFIG_DIR + std::string("Camera.cfg"));
     
     m_optimiser = new PSOOptimiser("CameraSettings", settings.getAsParameters());                     // new CameraSettings.getAsParameters() required
     //m_optimiser = new EHCLSOptimiser("CameraSettings", settings.getAsParameters());
@@ -71,12 +71,12 @@ CameraCalibrationProvider::CameraCalibrationProvider(Behaviour* manager) : Behav
     debugLogName << "optimisation.log";
     debug_file.open(debugLogName.str().c_str());
     debug_file.clear();
-    debug_file << "OPTIMISATION LOG\n" << endl;
+    debug_file << "OPTIMISATION LOG\n" << std::endl;
     
-    debug_file << "\nINITIALISE OPTIMISER\n" << endl;
-    //debug_file << settings.getAsParameters() << endl;
-    debug_file << m_settings.getAsParameters() << endl;
-    debug_file << endl; 
+    debug_file << "\nINITIALISE OPTIMISER\n" << std::endl;
+    //debug_file << settings.getAsParameters() << std::endl;
+    debug_file << m_settings.getAsParameters() << std::endl;
+    debug_file << std::endl; 
 }
 
 
@@ -135,7 +135,7 @@ void CameraCalibrationProvider::doSelectedMotion()
     if (isStart < 50)
     {
     // stand up
-        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        std::vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50);
         m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
 		isStart++;
@@ -151,7 +151,7 @@ void CameraCalibrationProvider::doSelectedMotion()
     //Start the bahaviour:
     else
     {        
-        vector<float> position(3);
+        std::vector<float> position(3);
         //POSITION [PITCH, YAW, ROLL]
         
         position[0] = m_pitch_index;
@@ -163,7 +163,7 @@ void CameraCalibrationProvider::doSelectedMotion()
     
 }
 
-int CameraCalibrationProvider::evaluate(vector< vector<int> > coordinates)
+int CameraCalibrationProvider::evaluate(std::vector< std::vector<int> > coordinates)
 {
     int min = 1000;
     
@@ -171,7 +171,7 @@ int CameraCalibrationProvider::evaluate(vector< vector<int> > coordinates)
     {
         for (int j = i+1; j < 8; j++)
         {
-            //debug << "Distance: " << distance(coordinates[i], coordinates[j]) << endl;
+            //debug << "Distance: " << distance(coordinates[i], coordinates[j]) << std::endl;
          // IGNORE GREY AND SHADOW BLUE
             if (i != 3 and j != 3 and i != 7 and j != 7)
             {
@@ -186,53 +186,53 @@ int CameraCalibrationProvider::evaluate(vector< vector<int> > coordinates)
     return min;
 }
 
-int CameraCalibrationProvider::distance(vector<int> p, vector<int> q)
+int CameraCalibrationProvider::distance(std::vector<int> p, std::vector<int> q)
 {
     return sqrt((q[0]-p[0])*(q[0]-p[0]) + (q[1]-p[1])*(q[1]-p[1]) + (q[2]-p[2])*(q[2]-p[2]));
 }
 
 void CameraCalibrationProvider::imageProcess()
 {
-     vector< vector<int> > coordinates;
+     std::vector< std::vector<int> > coordinates;
      static float efficiency = 0;
      static int i = 0;
      
      refImage.copyFromExisting(*(Blackboard->Image));
      
      
-     //debug << "\nWHITE" << endl;
+     //debug << "\nWHITE" << std::endl;
      coordinates.push_back(getColourAvg(80,60));     
      
-     //debug << "\nYELLOW" << endl;
+     //debug << "\nYELLOW" << std::endl;
      coordinates.push_back(getColourAvg(160,60));    
      
-     //debug << "\nORANGE" << endl;
+     //debug << "\nORANGE" << std::endl;
      coordinates.push_back(getColourAvg(240,60));                     
      
-     //debug << "\nGREY endl" << endl;
+     //debug << "\nGREY std::endl" << std::endl;
      coordinates.push_back(getColourAvg(80,120));                    
      
-     //debug << "\nGREEN" << endl;
+     //debug << "\nGREEN" << std::endl;
      coordinates.push_back(getColourAvg(160,120));                     
      
-     //debug << "\nPINK" << endl;
+     //debug << "\nPINK" << std::endl;
      coordinates.push_back(getColourAvg(240,120));                     
      
-     //debug << "\nBLUE" << endl;
+     //debug << "\nBLUE" << std::endl;
      coordinates.push_back(getColourAvg(80,180));                     
      
-     //debug << "\nSHADOW BLUE" << endl;
+     //debug << "\nSHADOW BLUE" << std::endl;
      coordinates.push_back(getColourAvg(160,180));
      
      efficiency += (float)evaluate(coordinates)/256.0;
-     //debug << "\nEfficiency:\t" << efficiency << "\n" << endl;    
+     //debug << "\nEfficiency:\t" << efficiency << "\n" << std::endl;    
      
      i++;
      
      if (i == repeatCount)
      {   
-         //debug << i << endl;  // delete me      
-         debug_file << optCount << ", " << (efficiency/repeatCount*100) << ", " << m_parameters << endl;
+         //debug << i << std::endl;  // delete me      
+         debug_file << optCount << ", " << (efficiency/repeatCount*100) << ", " << m_parameters << std::endl;
          m_optimiser->setParametersResult(efficiency/repeatCount*25);  // blame Jason     
          
          m_parameters = m_optimiser->getNextParameters();   
@@ -248,7 +248,7 @@ void CameraCalibrationProvider::imageProcess()
      }     
 }
 
-vector<int> CameraCalibrationProvider::getColourAvg(const int x, const int y)
+std::vector<int> CameraCalibrationProvider::getColourAvg(const int x, const int y)
 {
      Pixel tmp;
      
@@ -267,7 +267,7 @@ vector<int> CameraCalibrationProvider::getColourAvg(const int x, const int y)
              cb_temp += (int)tmp.cb;
              cr_temp += (int)tmp.cr;
              
-             //debug << "Pixel Data: \tY1: " << (int)tmp.yCbCrPadding << "\t\tU: " << (int)tmp.cb << "\t\tY2: "<< (int)tmp.y << "\t\tV: " << (int)tmp.cr << "\t\t(" << i << "," << j << ")\n" << endl;       
+             //debug << "Pixel Data: \tY1: " << (int)tmp.yCbCrPadding << "\t\tU: " << (int)tmp.cb << "\t\tY2: "<< (int)tmp.y << "\t\tV: " << (int)tmp.cr << "\t\t(" << i << "," << j << ")\n" << std::endl;       
          }
      }
      
@@ -276,23 +276,23 @@ vector<int> CameraCalibrationProvider::getColourAvg(const int x, const int y)
      cb_temp /= 400;
      cr_temp /= 400;     
      
-     vector<int> YUV, RGB;
+     std::vector<int> YUV, RGB;
      YUV.push_back((int)y2_temp);
      YUV.push_back((int)cb_temp);
      YUV.push_back((int)cr_temp);
      
      RGB = YUV2RGB(YUV);
      
-     //debug << "\nR: " << RGB[0] << endl; 
-     //debug << "G: " << RGB[1] << endl; 
-     //debug << "B: " << RGB[2] << endl << endl;
+     //debug << "\nR: " << RGB[0] << std::endl; 
+     //debug << "G: " << RGB[1] << std::endl; 
+     //debug << "B: " << RGB[2] << std::endl << std::endl;
      
      return RGB;
 }
 
-vector<int> CameraCalibrationProvider::YUV2RGB(vector<int> YUV)
+std::vector<int> CameraCalibrationProvider::YUV2RGB(std::vector<int> YUV)
 {
-     vector<int> RGB;     
+     std::vector<int> RGB;     
      int c, d, e;
      
      c = YUV[0] - 16;

@@ -101,7 +101,7 @@ int nulVersion1FormatReader::previousFrame()
     if(isPreviousFrameAvailable())
     {
         --m_currentFrameIndex;
-        qDebug() << "Frame: " << m_currentFrameIndex << " Seeking to:" << m_currentFrameIndex*m_frameLength << endl;
+        qDebug() << "Frame: " << m_currentFrameIndex << " Seeking to:" << m_currentFrameIndex*m_frameLength << std::endl;
         fileStream.seekg((m_currentFrameIndex-1)*m_frameLength,std::ios_base::beg);
         qDebug() << fileStream.tellg();
         fileStream >> rawImageBuffer;

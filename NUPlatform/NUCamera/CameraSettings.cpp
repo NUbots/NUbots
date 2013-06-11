@@ -80,7 +80,7 @@ CameraSettings::CameraSettings(const std::vector<Parameter> parameters)
 
     for(unsigned int i=0; i<parameters.size(); i++) {
         if(!SetByName(parameters[i]))
-            debug << "CameraSettings::LoadFromFile(): \"" << parameters[i] << "\" not found." << endl;
+            debug << "CameraSettings::LoadFromFile(): \"" << parameters[i] << "\" not found." << std::endl;
     }
     p_valid = true;
     
@@ -91,7 +91,7 @@ CameraSettings::CameraSettings(const std::vector<Parameter> parameters)
 
 std::vector<float> CameraSettings::getAsVector() const
 {
-    vector<float> parameters;
+    std::vector<float> parameters;
     
     parameters.push_back(p_brightness.get());
     parameters.push_back(p_contrast.get());
@@ -117,7 +117,7 @@ std::vector<float> CameraSettings::getAsVector() const
 
 std::vector<Parameter> CameraSettings::getAsParameters()
 {
-    vector<Parameter> parameters;
+    std::vector<Parameter> parameters;
     
     parameters.push_back(p_brightness);
     parameters.push_back(p_contrast);
@@ -172,8 +172,8 @@ void CameraSettings::SetDefaults()
 
 void CameraSettings::LoadFromFile(const std::string& configFileName)
 {     
-    fstream myStream(configFileName.c_str());
-    vector<Parameter> parameters;   
+    std::fstream myStream(configFileName.c_str());
+    std::vector<Parameter> parameters;   
      
     SetDefaults();  // Set default values incase some are missing in the file.
     if (myStream.is_open())
@@ -188,15 +188,15 @@ void CameraSettings::LoadFromFile(const std::string& configFileName)
 
         for(unsigned int i=0; i<parameters.size(); i++) {
             if(!SetByName(parameters[i]))
-                debug << "CameraSettings::LoadFromFile(): \"" << parameters[i].name() << "\" not found." << endl;
+                debug << "CameraSettings::LoadFromFile(): \"" << parameters[i].name() << "\" not found." << std::endl;
             else
                 debug << "CameraSettings::LoadFromFile(): " << parameters[i].name() << " " << parameters[i].get() <<
-                         " [" << parameters[i].min() << ", " << parameters[i].max() << "]" << endl;
+                         " [" << parameters[i].min() << ", " << parameters[i].max() << "]" << std::endl;
         }
         p_valid = true;
     }
     else
-    	debug << "CameraSettings::LoadFromFile() Failed to load CameraSettings from " << configFileName << endl;
+    	debug << "CameraSettings::LoadFromFile() Failed to load CameraSettings from " << configFileName << std::endl;
     
     copyParams();
     
@@ -270,7 +270,7 @@ void CameraSettings::copyParams()
  */
 std::ostream& operator<< (std::ostream& output, const CameraSettings& p_cameraSetting)
 {
-    vector<float> vals = p_cameraSetting.getAsVector();
+    std::vector<float> vals = p_cameraSetting.getAsVector();
     for(unsigned int i=0; i<vals.size(); i++)
         output << vals.at(i) << " ";
 

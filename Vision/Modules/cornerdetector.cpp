@@ -12,23 +12,23 @@ void CornerDetector::setTolerance(double tolerance)
 {
 #if VISION_FIELDPOINT_VERBOSITY > 0
     if(tolerance < 0 || tolerance > 1)
-        debug << "CornerDetector::setTolerance - invalid tolerance: " << tolerance << " (must be in [0, 1]." << endl;
+        debug << "CornerDetector::setTolerance - invalid tolerance: " << tolerance << " (must be in [0, 1]." << std::endl;
 #endif
 
-    m_tolerance = max(min(tolerance, 1.0), 0.0); //clamp
+    m_tolerance = std::max(std::min(tolerance, 1.0), 0.0); //clamp
 }
 
-vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
+std::vector<CornerPoint> CornerDetector::run(const std::vector<FieldLine> &lines) const
 {
-    vector<FieldLine>::const_iterator it1, it2;
-    vector<CornerPoint> results;
+    std::vector<FieldLine>::const_iterator it1, it2;
+    std::vector<CornerPoint> results;
 
     if(lines.size() < 2) {
         return results;
     }
 
     if(m_tolerance < 0 || m_tolerance > 1) {
-        errorlog << "CornerDetector::run called with invalid tolerance: " << m_tolerance << " (must be in [0, 1]." << endl;
+        errorlog << "CornerDetector::run called with invalid tolerance: " << m_tolerance << " (must be in [0, 1]." << std::endl;
         return results;
     }
 
@@ -60,8 +60,8 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
                                    d2y = (intersection.ground - l2_pts[1].ground).abs(),
                                    d2m = (intersection.ground - mid2).abs();
 
-                            double min1 = min(d1m, min(d1x, d1y)),
-                                   min2 = min(d2m, min(d2x, d2y));
+                            double min1 = std::min(d1m, std::min(d1x, d1y)),
+                                   min2 = std::min(d2m, std::min(d2x, d2y));
 
                             /// END DEBUG
 
@@ -69,7 +69,7 @@ vector<CornerPoint> CornerDetector::run(const vector<FieldLine> &lines) const
                         }
                         else {
                             errorlog << "CornerDetector::run - no intersection found for screen lines - transforms are probably not valid, not publishing corner" <<
-                                        "\t" << it1->getScreenLineEquation() << "\t" << it2->getScreenLineEquation() << endl;
+                                        "\t" << it1->getScreenLineEquation() << "\t" << it2->getScreenLineEquation() << std::endl;
                         }
                     }
                 }
@@ -93,8 +93,8 @@ CornerPoint::TYPE CornerDetector::findCorner(Vector2<GroundPoint> ep1, Vector2<G
            d2y = (intersection.ground - ep2[1].ground).abs(),
            d2m = (intersection.ground - mid2).abs();
 
-    double min1 = min(d1m, min(d1x, d1y)),
-           min2 = min(d2m, min(d2x, d2y));
+    double min1 = std::min(d1m, std::min(d1x, d1y)),
+           min2 = std::min(d2m, std::min(d2x, d2y));
 
     //removed distance check
     //if(min1 < tolerance*(ep1[0].ground - ep1[1].ground).abs() && min2 < tolerance*(ep2[0].ground - ep2[1].ground).abs()) {

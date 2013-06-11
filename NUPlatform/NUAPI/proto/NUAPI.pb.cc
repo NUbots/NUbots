@@ -28,6 +28,12 @@ const ::google::protobuf::Descriptor* VisionFieldObject_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   VisionFieldObject_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* VisionFieldObject_Type_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* VisionClassifiedSegment_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  VisionClassifiedSegment_reflection_ = NULL;
+const ::google::protobuf::Descriptor* VisionClassifiedImage_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  VisionClassifiedImage_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Vision_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Vision_reflection_ = NULL;
@@ -94,8 +100,9 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Image));
   VisionFieldObject_descriptor_ = file->message_type(2);
-  static const int VisionFieldObject_offsets_[10] = {
+  static const int VisionFieldObject_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, visible_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, screen_x_),
@@ -118,10 +125,46 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(VisionFieldObject));
   VisionFieldObject_Type_descriptor_ = VisionFieldObject_descriptor_->enum_type(0);
-  Vision_descriptor_ = file->message_type(3);
-  static const int Vision_offsets_[2] = {
+  VisionClassifiedSegment_descriptor_ = file->message_type(3);
+  static const int VisionClassifiedSegment_offsets_[5] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedSegment, start_x_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedSegment, start_y_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedSegment, end_x_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedSegment, end_y_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedSegment, colour_),
+  };
+  VisionClassifiedSegment_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      VisionClassifiedSegment_descriptor_,
+      VisionClassifiedSegment::default_instance_,
+      VisionClassifiedSegment_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedSegment, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedSegment, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(VisionClassifiedSegment));
+  VisionClassifiedImage_descriptor_ = file->message_type(4);
+  static const int VisionClassifiedImage_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedImage, num_segments_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedImage, segment_),
+  };
+  VisionClassifiedImage_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      VisionClassifiedImage_descriptor_,
+      VisionClassifiedImage::default_instance_,
+      VisionClassifiedImage_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedImage, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionClassifiedImage, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(VisionClassifiedImage));
+  Vision_descriptor_ = file->message_type(5);
+  static const int Vision_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Vision, image_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Vision, field_object_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Vision, classified_image_),
   };
   Vision_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -134,7 +177,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Vision));
-  Motor_descriptor_ = file->message_type(4);
+  Motor_descriptor_ = file->message_type(6);
   static const int Motor_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Motor, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Motor, position_),
@@ -157,7 +200,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Motor));
-  SensorData_descriptor_ = file->message_type(5);
+  SensorData_descriptor_ = file->message_type(7);
   static const int SensorData_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SensorData, motor_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SensorData, accelerometer_),
@@ -175,7 +218,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SensorData));
-  LocalisationFieldObject_descriptor_ = file->message_type(6);
+  LocalisationFieldObject_descriptor_ = file->message_type(8);
   static const int LocalisationFieldObject_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, wm_x_),
@@ -200,7 +243,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(LocalisationFieldObject));
-  Localisation_descriptor_ = file->message_type(7);
+  Localisation_descriptor_ = file->message_type(9);
   static const int Localisation_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Localisation, field_object_),
   };
@@ -215,7 +258,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Localisation));
-  Vector_descriptor_ = file->message_type(8);
+  Vector_descriptor_ = file->message_type(10);
   static const int Vector_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Vector, float_value_),
   };
@@ -249,6 +292,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     VisionFieldObject_descriptor_, &VisionFieldObject::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    VisionClassifiedSegment_descriptor_, &VisionClassifiedSegment::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    VisionClassifiedImage_descriptor_, &VisionClassifiedImage::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Vision_descriptor_, &Vision::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Motor_descriptor_, &Motor::default_instance());
@@ -271,6 +318,10 @@ void protobuf_ShutdownFile_NUAPI_2eproto() {
   delete Image_reflection_;
   delete VisionFieldObject::default_instance_;
   delete VisionFieldObject_reflection_;
+  delete VisionClassifiedSegment::default_instance_;
+  delete VisionClassifiedSegment_reflection_;
+  delete VisionClassifiedImage::default_instance_;
+  delete VisionClassifiedImage_reflection_;
   delete Vision::default_instance_;
   delete Vision_reflection_;
   delete Motor::default_instance_;
@@ -299,36 +350,45 @@ void protobuf_AddDesc_NUAPI_2eproto() {
     "alisation\030\005 \001(\0132\021.API.Localisation\"5\n\004Ty"
     "pe\022\017\n\013SENSOR_DATA\020\001\022\n\n\006VISION\020\002\022\020\n\014LOCAL"
     "ISATION\020\003\"4\n\005Image\022\r\n\005width\030\001 \001(\r\022\016\n\006hei"
-    "ght\030\002 \001(\r\022\014\n\004data\030\003 \001(\014\"\202\002\n\021VisionFieldO"
+    "ght\030\002 \001(\r\022\014\n\004data\030\003 \001(\014\"\233\002\n\021VisionFieldO"
     "bject\022)\n\004type\030\001 \001(\0162\033.API.VisionFieldObj"
-    "ect.Type\022\014\n\004name\030\002 \001(\t\022\017\n\007visible\030\003 \001(\010\022"
-    "\020\n\010screen_x\030\004 \001(\002\022\020\n\010screen_y\030\005 \001(\002\022\020\n\010r"
-    "otation\030\006 \001(\002\022\016\n\006radius\030\007 \001(\r\022\r\n\005width\030\010"
-    " \001(\r\022\016\n\006height\030\t \001(\r\022\016\n\006points\030\n \003(\r\".\n\004"
-    "Type\022\n\n\006CIRCLE\020\001\022\r\n\tRECTANGLE\020\002\022\013\n\007POLYG"
-    "ON\020\003\"Q\n\006Vision\022\031\n\005image\030\001 \001(\0132\n.API.Imag"
-    "e\022,\n\014field_object\030\002 \003(\0132\026.API.VisionFiel"
-    "dObject\"\250\001\n\005Motor\022\014\n\004name\030\001 \001(\t\022\020\n\010posit"
-    "ion\030\002 \001(\002\022\020\n\010velocity\030\003 \001(\002\022\024\n\014accelerat"
-    "ion\030\004 \001(\002\022\016\n\006target\030\005 \001(\002\022\021\n\tstiffness\030\006"
-    " \001(\002\022\017\n\007current\030\007 \001(\002\022\016\n\006torque\030\010 \001(\002\022\023\n"
-    "\013temperature\030\t \001(\002\"\210\001\n\nSensorData\022\031\n\005mot"
-    "or\030\001 \003(\0132\n.API.Motor\022\"\n\raccelerometer\030\002 "
-    "\001(\0132\013.API.Vector\022\031\n\004gyro\030\003 \001(\0132\013.API.Vec"
-    "tor\022 \n\013orientation\030\004 \001(\0132\013.API.Vector\"\277\001"
-    "\n\027LocalisationFieldObject\022\014\n\004name\030\001 \001(\t\022"
-    "\014\n\004wm_x\030\002 \001(\002\022\014\n\004wm_y\030\003 \001(\002\022\014\n\004sd_x\030\004 \001("
-    "\002\022\014\n\004sd_y\030\005 \001(\002\022\r\n\005sr_xx\030\006 \001(\002\022\r\n\005sr_xy\030"
-    "\007 \001(\002\022\r\n\005sr_yy\030\010 \001(\002\022\017\n\007heading\030\t \001(\002\022\022\n"
-    "\nsd_heading\030\n \001(\002\022\014\n\004lost\030\013 \001(\010\"B\n\014Local"
-    "isation\0222\n\014field_object\030\001 \003(\0132\034.API.Loca"
-    "lisationFieldObject\"\035\n\006Vector\022\023\n\013float_v"
-    "alue\030\001 \003(\002", 1250);
+    "ect.Type\022\n\n\002id\030\002 \001(\r\022\014\n\004name\030\003 \001(\t\022\017\n\007vi"
+    "sible\030\004 \001(\010\022\020\n\010screen_x\030\005 \001(\002\022\020\n\010screen_"
+    "y\030\006 \001(\002\022\020\n\010rotation\030\007 \001(\002\022\016\n\006radius\030\010 \001("
+    "\r\022\r\n\005width\030\t \001(\r\022\016\n\006height\030\n \001(\r\022\016\n\006poin"
+    "ts\030\013 \003(\r\";\n\004Type\022\n\n\006CIRCLE\020\001\022\r\n\tRECTANGL"
+    "E\020\002\022\013\n\007POLYGON\020\003\022\013\n\007UNKNOWN\020\004\"i\n\027VisionC"
+    "lassifiedSegment\022\017\n\007start_x\030\001 \001(\r\022\017\n\007sta"
+    "rt_y\030\002 \001(\r\022\r\n\005end_x\030\003 \001(\r\022\r\n\005end_y\030\004 \001(\r"
+    "\022\016\n\006colour\030\005 \001(\r\"\\\n\025VisionClassifiedImag"
+    "e\022\024\n\014num_segments\030\001 \001(\r\022-\n\007segment\030\002 \003(\013"
+    "2\034.API.VisionClassifiedSegment\"\207\001\n\006Visio"
+    "n\022\031\n\005image\030\001 \001(\0132\n.API.Image\022,\n\014field_ob"
+    "ject\030\002 \003(\0132\026.API.VisionFieldObject\0224\n\020cl"
+    "assified_image\030\003 \001(\0132\032.API.VisionClassif"
+    "iedImage\"\250\001\n\005Motor\022\014\n\004name\030\001 \001(\t\022\020\n\010posi"
+    "tion\030\002 \001(\002\022\020\n\010velocity\030\003 \001(\002\022\024\n\014accelera"
+    "tion\030\004 \001(\002\022\016\n\006target\030\005 \001(\002\022\021\n\tstiffness\030"
+    "\006 \001(\002\022\017\n\007current\030\007 \001(\002\022\016\n\006torque\030\010 \001(\002\022\023"
+    "\n\013temperature\030\t \001(\002\"\210\001\n\nSensorData\022\031\n\005mo"
+    "tor\030\001 \003(\0132\n.API.Motor\022\"\n\raccelerometer\030\002"
+    " \001(\0132\013.API.Vector\022\031\n\004gyro\030\003 \001(\0132\013.API.Ve"
+    "ctor\022 \n\013orientation\030\004 \001(\0132\013.API.Vector\"\277"
+    "\001\n\027LocalisationFieldObject\022\014\n\004name\030\001 \001(\t"
+    "\022\014\n\004wm_x\030\002 \001(\002\022\014\n\004wm_y\030\003 \001(\002\022\014\n\004sd_x\030\004 \001"
+    "(\002\022\014\n\004sd_y\030\005 \001(\002\022\r\n\005sr_xx\030\006 \001(\002\022\r\n\005sr_xy"
+    "\030\007 \001(\002\022\r\n\005sr_yy\030\010 \001(\002\022\017\n\007heading\030\t \001(\002\022\022"
+    "\n\nsd_heading\030\n \001(\002\022\014\n\004lost\030\013 \001(\010\"B\n\014Loca"
+    "lisation\0222\n\014field_object\030\001 \003(\0132\034.API.Loc"
+    "alisationFieldObject\"\035\n\006Vector\022\023\n\013float_"
+    "value\030\001 \003(\002", 1531);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "NUAPI.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
   Image::default_instance_ = new Image();
   VisionFieldObject::default_instance_ = new VisionFieldObject();
+  VisionClassifiedSegment::default_instance_ = new VisionClassifiedSegment();
+  VisionClassifiedImage::default_instance_ = new VisionClassifiedImage();
   Vision::default_instance_ = new Vision();
   Motor::default_instance_ = new Motor();
   SensorData::default_instance_ = new SensorData();
@@ -338,6 +398,8 @@ void protobuf_AddDesc_NUAPI_2eproto() {
   Message::default_instance_->InitAsDefaultInstance();
   Image::default_instance_->InitAsDefaultInstance();
   VisionFieldObject::default_instance_->InitAsDefaultInstance();
+  VisionClassifiedSegment::default_instance_->InitAsDefaultInstance();
+  VisionClassifiedImage::default_instance_->InitAsDefaultInstance();
   Vision::default_instance_->InitAsDefaultInstance();
   Motor::default_instance_->InitAsDefaultInstance();
   SensorData::default_instance_->InitAsDefaultInstance();
@@ -1073,6 +1135,7 @@ bool VisionFieldObject_Type_IsValid(int value) {
     case 1:
     case 2:
     case 3:
+    case 4:
       return true;
     default:
       return false;
@@ -1083,12 +1146,14 @@ bool VisionFieldObject_Type_IsValid(int value) {
 const VisionFieldObject_Type VisionFieldObject::CIRCLE;
 const VisionFieldObject_Type VisionFieldObject::RECTANGLE;
 const VisionFieldObject_Type VisionFieldObject::POLYGON;
+const VisionFieldObject_Type VisionFieldObject::UNKNOWN;
 const VisionFieldObject_Type VisionFieldObject::Type_MIN;
 const VisionFieldObject_Type VisionFieldObject::Type_MAX;
 const int VisionFieldObject::Type_ARRAYSIZE;
 #endif  // _MSC_VER
 #ifndef _MSC_VER
 const int VisionFieldObject::kTypeFieldNumber;
+const int VisionFieldObject::kIdFieldNumber;
 const int VisionFieldObject::kNameFieldNumber;
 const int VisionFieldObject::kVisibleFieldNumber;
 const int VisionFieldObject::kScreenXFieldNumber;
@@ -1117,6 +1182,7 @@ VisionFieldObject::VisionFieldObject(const VisionFieldObject& from)
 void VisionFieldObject::SharedCtor() {
   _cached_size_ = 0;
   type_ = 1;
+  id_ = 0u;
   name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   visible_ = false;
   screen_x_ = 0;
@@ -1163,6 +1229,7 @@ VisionFieldObject* VisionFieldObject::New() const {
 void VisionFieldObject::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     type_ = 1;
+    id_ = 0u;
     if (has_name()) {
       if (name_ != &::google::protobuf::internal::kEmptyString) {
         name_->clear();
@@ -1173,9 +1240,9 @@ void VisionFieldObject::Clear() {
     screen_y_ = 0;
     rotation_ = 0;
     radius_ = 0u;
-    width_ = 0u;
   }
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    width_ = 0u;
     height_ = 0u;
   }
   points_.Clear();
@@ -1205,12 +1272,28 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(18)) goto parse_name;
+        if (input->ExpectTag(16)) goto parse_id;
         break;
       }
       
-      // optional string name = 2;
+      // optional uint32 id = 2;
       case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_id:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &id_)));
+          set_has_id();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(26)) goto parse_name;
+        break;
+      }
+      
+      // optional string name = 3;
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_name:
@@ -1222,12 +1305,12 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(24)) goto parse_visible;
+        if (input->ExpectTag(32)) goto parse_visible;
         break;
       }
       
-      // optional bool visible = 3;
-      case 3: {
+      // optional bool visible = 4;
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_visible:
@@ -1238,12 +1321,12 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(37)) goto parse_screen_x;
+        if (input->ExpectTag(45)) goto parse_screen_x;
         break;
       }
       
-      // optional float screen_x = 4;
-      case 4: {
+      // optional float screen_x = 5;
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
          parse_screen_x:
@@ -1254,12 +1337,12 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(45)) goto parse_screen_y;
+        if (input->ExpectTag(53)) goto parse_screen_y;
         break;
       }
       
-      // optional float screen_y = 5;
-      case 5: {
+      // optional float screen_y = 6;
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
          parse_screen_y:
@@ -1270,12 +1353,12 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(53)) goto parse_rotation;
+        if (input->ExpectTag(61)) goto parse_rotation;
         break;
       }
       
-      // optional float rotation = 6;
-      case 6: {
+      // optional float rotation = 7;
+      case 7: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
          parse_rotation:
@@ -1286,12 +1369,12 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(56)) goto parse_radius;
+        if (input->ExpectTag(64)) goto parse_radius;
         break;
       }
       
-      // optional uint32 radius = 7;
-      case 7: {
+      // optional uint32 radius = 8;
+      case 8: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_radius:
@@ -1302,12 +1385,12 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(64)) goto parse_width;
+        if (input->ExpectTag(72)) goto parse_width;
         break;
       }
       
-      // optional uint32 width = 8;
-      case 8: {
+      // optional uint32 width = 9;
+      case 9: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_width:
@@ -1318,12 +1401,12 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(72)) goto parse_height;
+        if (input->ExpectTag(80)) goto parse_height;
         break;
       }
       
-      // optional uint32 height = 9;
-      case 9: {
+      // optional uint32 height = 10;
+      case 10: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_height:
@@ -1334,18 +1417,18 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(80)) goto parse_points;
+        if (input->ExpectTag(88)) goto parse_points;
         break;
       }
       
-      // repeated uint32 points = 10;
-      case 10: {
+      // repeated uint32 points = 11;
+      case 11: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_points:
           DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 1, 80, input, this->mutable_points())));
+                 1, 88, input, this->mutable_points())));
         } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
                    == ::google::protobuf::internal::WireFormatLite::
                       WIRETYPE_LENGTH_DELIMITED) {
@@ -1355,7 +1438,7 @@ bool VisionFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(80)) goto parse_points;
+        if (input->ExpectTag(88)) goto parse_points;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1384,54 +1467,59 @@ void VisionFieldObject::SerializeWithCachedSizes(
       1, this->type(), output);
   }
   
-  // optional string name = 2;
+  // optional uint32 id = 2;
+  if (has_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->id(), output);
+  }
+  
+  // optional string name = 3;
   if (has_name()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
       this->name().data(), this->name().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      2, this->name(), output);
+      3, this->name(), output);
   }
   
-  // optional bool visible = 3;
+  // optional bool visible = 4;
   if (has_visible()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(3, this->visible(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->visible(), output);
   }
   
-  // optional float screen_x = 4;
+  // optional float screen_x = 5;
   if (has_screen_x()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(4, this->screen_x(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(5, this->screen_x(), output);
   }
   
-  // optional float screen_y = 5;
+  // optional float screen_y = 6;
   if (has_screen_y()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(5, this->screen_y(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(6, this->screen_y(), output);
   }
   
-  // optional float rotation = 6;
+  // optional float rotation = 7;
   if (has_rotation()) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(6, this->rotation(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(7, this->rotation(), output);
   }
   
-  // optional uint32 radius = 7;
+  // optional uint32 radius = 8;
   if (has_radius()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(7, this->radius(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(8, this->radius(), output);
   }
   
-  // optional uint32 width = 8;
+  // optional uint32 width = 9;
   if (has_width()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(8, this->width(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(9, this->width(), output);
   }
   
-  // optional uint32 height = 9;
+  // optional uint32 height = 10;
   if (has_height()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(9, this->height(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(10, this->height(), output);
   }
   
-  // repeated uint32 points = 10;
+  // repeated uint32 points = 11;
   for (int i = 0; i < this->points_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(
-      10, this->points(i), output);
+      11, this->points(i), output);
   }
   
   if (!unknown_fields().empty()) {
@@ -1448,55 +1536,60 @@ void VisionFieldObject::SerializeWithCachedSizes(
       1, this->type(), target);
   }
   
-  // optional string name = 2;
+  // optional uint32 id = 2;
+  if (has_id()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->id(), target);
+  }
+  
+  // optional string name = 3;
   if (has_name()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
       this->name().data(), this->name().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        2, this->name(), target);
+        3, this->name(), target);
   }
   
-  // optional bool visible = 3;
+  // optional bool visible = 4;
   if (has_visible()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(3, this->visible(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->visible(), target);
   }
   
-  // optional float screen_x = 4;
+  // optional float screen_x = 5;
   if (has_screen_x()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(4, this->screen_x(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(5, this->screen_x(), target);
   }
   
-  // optional float screen_y = 5;
+  // optional float screen_y = 6;
   if (has_screen_y()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(5, this->screen_y(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(6, this->screen_y(), target);
   }
   
-  // optional float rotation = 6;
+  // optional float rotation = 7;
   if (has_rotation()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(6, this->rotation(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(7, this->rotation(), target);
   }
   
-  // optional uint32 radius = 7;
+  // optional uint32 radius = 8;
   if (has_radius()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(7, this->radius(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(8, this->radius(), target);
   }
   
-  // optional uint32 width = 8;
+  // optional uint32 width = 9;
   if (has_width()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(8, this->width(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(9, this->width(), target);
   }
   
-  // optional uint32 height = 9;
+  // optional uint32 height = 10;
   if (has_height()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(9, this->height(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(10, this->height(), target);
   }
   
-  // repeated uint32 points = 10;
+  // repeated uint32 points = 11;
   for (int i = 0; i < this->points_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
-      WriteUInt32ToArray(10, this->points(i), target);
+      WriteUInt32ToArray(11, this->points(i), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -1516,50 +1609,57 @@ int VisionFieldObject::ByteSize() const {
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
     }
     
-    // optional string name = 2;
+    // optional uint32 id = 2;
+    if (has_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->id());
+    }
+    
+    // optional string name = 3;
     if (has_name()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->name());
     }
     
-    // optional bool visible = 3;
+    // optional bool visible = 4;
     if (has_visible()) {
       total_size += 1 + 1;
     }
     
-    // optional float screen_x = 4;
+    // optional float screen_x = 5;
     if (has_screen_x()) {
       total_size += 1 + 4;
     }
     
-    // optional float screen_y = 5;
+    // optional float screen_y = 6;
     if (has_screen_y()) {
       total_size += 1 + 4;
     }
     
-    // optional float rotation = 6;
+    // optional float rotation = 7;
     if (has_rotation()) {
       total_size += 1 + 4;
     }
     
-    // optional uint32 radius = 7;
+    // optional uint32 radius = 8;
     if (has_radius()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->radius());
     }
     
-    // optional uint32 width = 8;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional uint32 width = 9;
     if (has_width()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->width());
     }
     
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
-    // optional uint32 height = 9;
+    // optional uint32 height = 10;
     if (has_height()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
@@ -1567,7 +1667,7 @@ int VisionFieldObject::ByteSize() const {
     }
     
   }
-  // repeated uint32 points = 10;
+  // repeated uint32 points = 11;
   {
     int data_size = 0;
     for (int i = 0; i < this->points_size(); i++) {
@@ -1607,6 +1707,9 @@ void VisionFieldObject::MergeFrom(const VisionFieldObject& from) {
     if (from.has_type()) {
       set_type(from.type());
     }
+    if (from.has_id()) {
+      set_id(from.id());
+    }
     if (from.has_name()) {
       set_name(from.name());
     }
@@ -1625,11 +1728,11 @@ void VisionFieldObject::MergeFrom(const VisionFieldObject& from) {
     if (from.has_radius()) {
       set_radius(from.radius());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_width()) {
       set_width(from.width());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_height()) {
       set_height(from.height());
     }
@@ -1657,6 +1760,7 @@ bool VisionFieldObject::IsInitialized() const {
 void VisionFieldObject::Swap(VisionFieldObject* other) {
   if (other != this) {
     std::swap(type_, other->type_);
+    std::swap(id_, other->id_);
     std::swap(name_, other->name_);
     std::swap(visible_, other->visible_);
     std::swap(screen_x_, other->screen_x_);
@@ -1684,8 +1788,623 @@ void VisionFieldObject::Swap(VisionFieldObject* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int VisionClassifiedSegment::kStartXFieldNumber;
+const int VisionClassifiedSegment::kStartYFieldNumber;
+const int VisionClassifiedSegment::kEndXFieldNumber;
+const int VisionClassifiedSegment::kEndYFieldNumber;
+const int VisionClassifiedSegment::kColourFieldNumber;
+#endif  // !_MSC_VER
+
+VisionClassifiedSegment::VisionClassifiedSegment()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void VisionClassifiedSegment::InitAsDefaultInstance() {
+}
+
+VisionClassifiedSegment::VisionClassifiedSegment(const VisionClassifiedSegment& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void VisionClassifiedSegment::SharedCtor() {
+  _cached_size_ = 0;
+  start_x_ = 0u;
+  start_y_ = 0u;
+  end_x_ = 0u;
+  end_y_ = 0u;
+  colour_ = 0u;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+VisionClassifiedSegment::~VisionClassifiedSegment() {
+  SharedDtor();
+}
+
+void VisionClassifiedSegment::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void VisionClassifiedSegment::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* VisionClassifiedSegment::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return VisionClassifiedSegment_descriptor_;
+}
+
+const VisionClassifiedSegment& VisionClassifiedSegment::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_NUAPI_2eproto();  return *default_instance_;
+}
+
+VisionClassifiedSegment* VisionClassifiedSegment::default_instance_ = NULL;
+
+VisionClassifiedSegment* VisionClassifiedSegment::New() const {
+  return new VisionClassifiedSegment;
+}
+
+void VisionClassifiedSegment::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    start_x_ = 0u;
+    start_y_ = 0u;
+    end_x_ = 0u;
+    end_y_ = 0u;
+    colour_ = 0u;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool VisionClassifiedSegment::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional uint32 start_x = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &start_x_)));
+          set_has_start_x();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_start_y;
+        break;
+      }
+      
+      // optional uint32 start_y = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_start_y:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &start_y_)));
+          set_has_start_y();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_end_x;
+        break;
+      }
+      
+      // optional uint32 end_x = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_end_x:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &end_x_)));
+          set_has_end_x();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(32)) goto parse_end_y;
+        break;
+      }
+      
+      // optional uint32 end_y = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_end_y:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &end_y_)));
+          set_has_end_y();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_colour;
+        break;
+      }
+      
+      // optional uint32 colour = 5;
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_colour:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &colour_)));
+          set_has_colour();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+      
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void VisionClassifiedSegment::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional uint32 start_x = 1;
+  if (has_start_x()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->start_x(), output);
+  }
+  
+  // optional uint32 start_y = 2;
+  if (has_start_y()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->start_y(), output);
+  }
+  
+  // optional uint32 end_x = 3;
+  if (has_end_x()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->end_x(), output);
+  }
+  
+  // optional uint32 end_y = 4;
+  if (has_end_y()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(4, this->end_y(), output);
+  }
+  
+  // optional uint32 colour = 5;
+  if (has_colour()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->colour(), output);
+  }
+  
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* VisionClassifiedSegment::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional uint32 start_x = 1;
+  if (has_start_x()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->start_x(), target);
+  }
+  
+  // optional uint32 start_y = 2;
+  if (has_start_y()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->start_y(), target);
+  }
+  
+  // optional uint32 end_x = 3;
+  if (has_end_x()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->end_x(), target);
+  }
+  
+  // optional uint32 end_y = 4;
+  if (has_end_y()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(4, this->end_y(), target);
+  }
+  
+  // optional uint32 colour = 5;
+  if (has_colour()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->colour(), target);
+  }
+  
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int VisionClassifiedSegment::ByteSize() const {
+  int total_size = 0;
+  
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional uint32 start_x = 1;
+    if (has_start_x()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->start_x());
+    }
+    
+    // optional uint32 start_y = 2;
+    if (has_start_y()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->start_y());
+    }
+    
+    // optional uint32 end_x = 3;
+    if (has_end_x()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->end_x());
+    }
+    
+    // optional uint32 end_y = 4;
+    if (has_end_y()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->end_y());
+    }
+    
+    // optional uint32 colour = 5;
+    if (has_colour()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->colour());
+    }
+    
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void VisionClassifiedSegment::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const VisionClassifiedSegment* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const VisionClassifiedSegment*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void VisionClassifiedSegment::MergeFrom(const VisionClassifiedSegment& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_start_x()) {
+      set_start_x(from.start_x());
+    }
+    if (from.has_start_y()) {
+      set_start_y(from.start_y());
+    }
+    if (from.has_end_x()) {
+      set_end_x(from.end_x());
+    }
+    if (from.has_end_y()) {
+      set_end_y(from.end_y());
+    }
+    if (from.has_colour()) {
+      set_colour(from.colour());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void VisionClassifiedSegment::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void VisionClassifiedSegment::CopyFrom(const VisionClassifiedSegment& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool VisionClassifiedSegment::IsInitialized() const {
+  
+  return true;
+}
+
+void VisionClassifiedSegment::Swap(VisionClassifiedSegment* other) {
+  if (other != this) {
+    std::swap(start_x_, other->start_x_);
+    std::swap(start_y_, other->start_y_);
+    std::swap(end_x_, other->end_x_);
+    std::swap(end_y_, other->end_y_);
+    std::swap(colour_, other->colour_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata VisionClassifiedSegment::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = VisionClassifiedSegment_descriptor_;
+  metadata.reflection = VisionClassifiedSegment_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int VisionClassifiedImage::kNumSegmentsFieldNumber;
+const int VisionClassifiedImage::kSegmentFieldNumber;
+#endif  // !_MSC_VER
+
+VisionClassifiedImage::VisionClassifiedImage()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void VisionClassifiedImage::InitAsDefaultInstance() {
+}
+
+VisionClassifiedImage::VisionClassifiedImage(const VisionClassifiedImage& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void VisionClassifiedImage::SharedCtor() {
+  _cached_size_ = 0;
+  num_segments_ = 0u;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+VisionClassifiedImage::~VisionClassifiedImage() {
+  SharedDtor();
+}
+
+void VisionClassifiedImage::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void VisionClassifiedImage::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* VisionClassifiedImage::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return VisionClassifiedImage_descriptor_;
+}
+
+const VisionClassifiedImage& VisionClassifiedImage::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_NUAPI_2eproto();  return *default_instance_;
+}
+
+VisionClassifiedImage* VisionClassifiedImage::default_instance_ = NULL;
+
+VisionClassifiedImage* VisionClassifiedImage::New() const {
+  return new VisionClassifiedImage;
+}
+
+void VisionClassifiedImage::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    num_segments_ = 0u;
+  }
+  segment_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool VisionClassifiedImage::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional uint32 num_segments = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &num_segments_)));
+          set_has_num_segments();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_segment;
+        break;
+      }
+      
+      // repeated .API.VisionClassifiedSegment segment = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_segment:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_segment()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_segment;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+      
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void VisionClassifiedImage::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional uint32 num_segments = 1;
+  if (has_num_segments()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->num_segments(), output);
+  }
+  
+  // repeated .API.VisionClassifiedSegment segment = 2;
+  for (int i = 0; i < this->segment_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->segment(i), output);
+  }
+  
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* VisionClassifiedImage::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional uint32 num_segments = 1;
+  if (has_num_segments()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->num_segments(), target);
+  }
+  
+  // repeated .API.VisionClassifiedSegment segment = 2;
+  for (int i = 0; i < this->segment_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->segment(i), target);
+  }
+  
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int VisionClassifiedImage::ByteSize() const {
+  int total_size = 0;
+  
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional uint32 num_segments = 1;
+    if (has_num_segments()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->num_segments());
+    }
+    
+  }
+  // repeated .API.VisionClassifiedSegment segment = 2;
+  total_size += 1 * this->segment_size();
+  for (int i = 0; i < this->segment_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->segment(i));
+  }
+  
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void VisionClassifiedImage::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const VisionClassifiedImage* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const VisionClassifiedImage*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void VisionClassifiedImage::MergeFrom(const VisionClassifiedImage& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  segment_.MergeFrom(from.segment_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_num_segments()) {
+      set_num_segments(from.num_segments());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void VisionClassifiedImage::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void VisionClassifiedImage::CopyFrom(const VisionClassifiedImage& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool VisionClassifiedImage::IsInitialized() const {
+  
+  return true;
+}
+
+void VisionClassifiedImage::Swap(VisionClassifiedImage* other) {
+  if (other != this) {
+    std::swap(num_segments_, other->num_segments_);
+    segment_.Swap(&other->segment_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata VisionClassifiedImage::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = VisionClassifiedImage_descriptor_;
+  metadata.reflection = VisionClassifiedImage_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
 const int Vision::kImageFieldNumber;
 const int Vision::kFieldObjectFieldNumber;
+const int Vision::kClassifiedImageFieldNumber;
 #endif  // !_MSC_VER
 
 Vision::Vision()
@@ -1695,6 +2414,7 @@ Vision::Vision()
 
 void Vision::InitAsDefaultInstance() {
   image_ = const_cast< ::API::Image*>(&::API::Image::default_instance());
+  classified_image_ = const_cast< ::API::VisionClassifiedImage*>(&::API::VisionClassifiedImage::default_instance());
 }
 
 Vision::Vision(const Vision& from)
@@ -1706,6 +2426,7 @@ Vision::Vision(const Vision& from)
 void Vision::SharedCtor() {
   _cached_size_ = 0;
   image_ = NULL;
+  classified_image_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1716,6 +2437,7 @@ Vision::~Vision() {
 void Vision::SharedDtor() {
   if (this != default_instance_) {
     delete image_;
+    delete classified_image_;
   }
 }
 
@@ -1743,6 +2465,9 @@ void Vision::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_image()) {
       if (image_ != NULL) image_->::API::Image::Clear();
+    }
+    if (has_classified_image()) {
+      if (classified_image_ != NULL) classified_image_->::API::VisionClassifiedImage::Clear();
     }
   }
   field_object_.Clear();
@@ -1780,6 +2505,20 @@ bool Vision::MergePartialFromCodedStream(
           goto handle_uninterpreted;
         }
         if (input->ExpectTag(18)) goto parse_field_object;
+        if (input->ExpectTag(26)) goto parse_classified_image;
+        break;
+      }
+      
+      // optional .API.VisionClassifiedImage classified_image = 3;
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_classified_image:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_classified_image()));
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1814,6 +2553,12 @@ void Vision::SerializeWithCachedSizes(
       2, this->field_object(i), output);
   }
   
+  // optional .API.VisionClassifiedImage classified_image = 3;
+  if (has_classified_image()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      3, this->classified_image(), output);
+  }
+  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1836,6 +2581,13 @@ void Vision::SerializeWithCachedSizes(
         2, this->field_object(i), target);
   }
   
+  // optional .API.VisionClassifiedImage classified_image = 3;
+  if (has_classified_image()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        3, this->classified_image(), target);
+  }
+  
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -1852,6 +2604,13 @@ int Vision::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->image());
+    }
+    
+    // optional .API.VisionClassifiedImage classified_image = 3;
+    if (has_classified_image()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->classified_image());
     }
     
   }
@@ -1893,6 +2652,9 @@ void Vision::MergeFrom(const Vision& from) {
     if (from.has_image()) {
       mutable_image()->::API::Image::MergeFrom(from.image());
     }
+    if (from.has_classified_image()) {
+      mutable_classified_image()->::API::VisionClassifiedImage::MergeFrom(from.classified_image());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -1918,6 +2680,7 @@ void Vision::Swap(Vision* other) {
   if (other != this) {
     std::swap(image_, other->image_);
     field_object_.Swap(&other->field_object_);
+    std::swap(classified_image_, other->classified_image_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

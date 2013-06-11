@@ -13,14 +13,14 @@
 
 DataWrapper* DataWrapper::instance = 0;
 
-DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string istrm, string sstrm, string cfg, string lname)
+DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, std::string istrm, std::string sstrm, std::string cfg, std::string lname)
 {
     m_ok = ok;
     gui = ui;
     m_method = method;
-    debug << "openning camera config: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
-    if( ! m_camspecs.LoadFromConfigFile((string(CONFIG_DIR) + string("CameraSpecs.cfg")).c_str())) {
-        errorlog << "DataWrapper::DataWrapper() - failed to load camera specifications: " << string(CONFIG_DIR) + string("CameraSpecs.cfg") << endl;
+    debug << "openning camera config: " << std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg") << std::endl;
+    if( ! m_camspecs.LoadFromConfigFile((std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg")).c_str())) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load camera specifications: " << std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg") << std::endl;
         ok = false;
     }
 
@@ -30,13 +30,13 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string is
     switch(method) {
     case STREAM:
         streamname = istrm;
-        debug << "openning image stream: " << streamname << endl;
+        debug << "openning image stream: " << streamname << std::endl;
         imagestrm.open(streamname.c_str());
 
         using_sensors = !sstrm.empty();
         sensorstreamname = sstrm;
         if(m_ok && using_sensors) {
-            debug << "openning sensor stream: " << sensorstreamname << endl;
+            debug << "openning sensor stream: " << sensorstreamname << std::endl;
             sensorstrm.open(sensorstreamname.c_str());
             if(!sensorstrm.is_open()) {
                 QMessageBox::warning(NULL, "Error", QString("Failed to read sensors from: ") + QString(sensorstreamname.c_str()) + QString(" defaulting to sensors off."));
@@ -45,7 +45,7 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string is
         }
 
         if(!imagestrm.is_open()) {
-            errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
+            errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << std::endl;
             m_ok = false;
         }
         break;
@@ -54,12 +54,12 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string is
     }
 
     configname = cfg;
-    debug << "config: " << configname << endl;
+    debug << "config: " << configname << std::endl;
     VisionConstants::loadFromFile(configname);
 
     LUTname = lname;
     if(!loadLUTFromFile(LUTname)){
-        errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << std::endl;
         ok = false;
     }
 
@@ -92,8 +92,8 @@ NUImage* DataWrapper::getFrame()
     return &m_current_image;
 }
 
-//! @brief Generates spoofed camera transform vector.
-bool DataWrapper::getCTGVector(vector<float> &ctgvector)
+//! @brief Generates spoofed camera transform std::vector.
+bool DataWrapper::getCTGVector(std::vector<float> &ctgvector)
 {
     if(using_sensors) {
         return m_sensor_data.get(NUSensorsData::CameraToGroundTransform, ctgvector);
@@ -104,8 +104,8 @@ bool DataWrapper::getCTGVector(vector<float> &ctgvector)
     }
 }
 
-//! @brief Generates spoofed camera transform vector.
-bool DataWrapper::getCTVector(vector<float> &ctvector)
+//! @brief Generates spoofed camera transform std::vector.
+bool DataWrapper::getCTVector(std::vector<float> &ctvector)
 {
     if(using_sensors) {
         return m_sensor_data.get(NUSensorsData::CameraTransform, ctvector);
@@ -149,7 +149,7 @@ bool DataWrapper::getCameraYaw(float& yaw)
 bool DataWrapper::getBodyPitch(float& pitch)
 {
     if(using_sensors) {
-        vector<float> orientation;
+        std::vector<float> orientation;
         bool valid = m_sensor_data.get(NUSensorsData::Orientation, orientation);
         if(valid && orientation.size() > 2) {
             pitch = orientation.at(1);
@@ -188,27 +188,27 @@ const LookUpTable& DataWrapper::getLUT() const
     return LUT;
 }
 
-void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
+void DataWrapper::publish(const std::vector<const VisionFieldObject*> &visual_objects)
 {
-    //cout << visual_objects.size() << " visual objects seen" << std::endl;
+    //std::cout << visual_objects.size() << " visual objects seen" << std::endl;
 }
 
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
-    //cout << "Visual object seen at " << visual_object->getLocationPixels() << std::endl;
+    //std::cout << "Visual object seen at " << visual_object->getLocationPixels() << std::endl;
     #if VISION_WRAPPER_VERBOSITY > 0
     visual_object->printLabel(debug);
-    debug << endl;
+    debug << std::endl;
     #endif
 }
 
-void DataWrapper::debugPublish(const vector<Ball>& data) {
+void DataWrapper::debugPublish(const std::vector<Ball>& data) {
     BOOST_FOREACH(const Ball& b, data) {
         gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
     }
 }
 
-void DataWrapper::debugPublish(const vector<CentreCircle>& data)
+void DataWrapper::debugPublish(const std::vector<CentreCircle>& data)
 {
     BOOST_FOREACH(const CentreCircle& c, data) {
         //need to change to display as ellipse - but for now just centre
@@ -216,18 +216,18 @@ void DataWrapper::debugPublish(const vector<CentreCircle>& data)
     }
 }
 
-void DataWrapper::debugPublish(const vector<CornerPoint>& data)
+void DataWrapper::debugPublish(const std::vector<CornerPoint>& data)
 {
     BOOST_FOREACH(const CornerPoint& c, data) {
         gui->addToLayer(DBID_CORNERS, QPointF(c.getLocationPixels().x, c.getLocationPixels().y), QPen(Qt::cyan, 5));
     }
 }
 
-//bool DataWrapper::debugPublish(const vector<Beacon>& data) {
+//bool DataWrapper::debugPublish(const std::vector<Beacon>& data) {
 //
 //}
 
-void DataWrapper::debugPublish(const vector<Goal>& data)
+void DataWrapper::debugPublish(const std::vector<Goal>& data)
 {
     BOOST_FOREACH(const Goal& g, data) {
         QPolygonF p;
@@ -244,7 +244,7 @@ void DataWrapper::debugPublish(const vector<Goal>& data)
 }
 
 ////DEBUG - FOR GOAL PAPER
-//void DataWrapper::debugPublish(int i, const vector<Goal> &d)
+//void DataWrapper::debugPublish(int i, const std::vector<Goal> &d)
 //{
 //    double dist = -1;
 //    if(true_num_posts == 1) {
@@ -338,7 +338,7 @@ void DataWrapper::debugPublish(const vector<Goal>& data)
 //}
 ////DEBUG
 
-void DataWrapper::debugPublish(const vector<Obstacle>& data)
+void DataWrapper::debugPublish(const std::vector<Obstacle>& data)
 {
     BOOST_FOREACH(const Obstacle& o, data) {
         QPolygonF p;
@@ -354,7 +354,7 @@ void DataWrapper::debugPublish(const vector<Obstacle>& data)
     }
 }
 
-void DataWrapper::debugPublish(const vector<FieldLine> &data)
+void DataWrapper::debugPublish(const std::vector<FieldLine> &data)
 {
     BOOST_FOREACH(const FieldLine& l, data) {
         Vector2<GroundPoint> endpts = l.getEndPoints();
@@ -362,7 +362,7 @@ void DataWrapper::debugPublish(const vector<FieldLine> &data)
     }
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
+void DataWrapper::debugPublish(DEBUG_ID id, const std::vector<Point> &data_points)
 {
     int w = m_current_image.getWidth(),
         h = m_current_image.getHeight();
@@ -391,7 +391,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
         }
         break;
     case DBID_GREENHORIZON_FINAL:
-        for(vector< Point >::const_iterator it=data_points.begin(); it<data_points.end(); it++) {
+        for(std::vector< Point >::const_iterator it=data_points.begin(); it<data_points.end(); it++) {
             if (it > data_points.begin()) {
                 gui->addToLayer(id, QLineF((it-1)->x, (it-1)->y, it->x, it->y), QColor(Qt::magenta));
             }
@@ -409,7 +409,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
         }
         break;
     default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
         return;
     }
 }
@@ -418,7 +418,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
 void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     unsigned char r, g, b;
-    BOOST_FOREACH(const vector<ColourSegment>& line, region.getSegments()) {
+    BOOST_FOREACH(const std::vector<ColourSegment>& line, region.getSegments()) {
         BOOST_FOREACH(const ColourSegment& seg, line) {
             getColourAsRGB(seg.getColour(), r, g, b);
             gui->addToLayer(id, QLineF(seg.getStart().x, seg.getStart().y, seg.getEnd().x, seg.getEnd().y), QColor(r, g, b));
@@ -442,7 +442,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
     gui->addToLayer(id, qimg, 1);
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
+void DataWrapper::debugPublish(DEBUG_ID id, const std::vector<LSFittedLine>& data)
 {
     QColor linecolour, pointcolour, endptcolour;
 
@@ -458,7 +458,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
         endptcolour = QColor(Qt::green);
         break;
     default:
-        errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
         return;
     }
 
@@ -476,13 +476,13 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data)
         }
         else {
             #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::debugPublish called with invalid line: " << l << endl;
+            debug << "DataWrapper::debugPublish called with invalid line: " << l << std::endl;
             #endif
         }
     }
 }
 
-void DataWrapper::debugPublish(DEBUG_ID id, const vector<Goal>& data)
+void DataWrapper::debugPublish(DEBUG_ID id, const std::vector<Goal>& data)
 {
     BOOST_FOREACH(const Goal& g, data) {
         QPolygonF p;
@@ -498,7 +498,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Goal>& data)
     }
 }
 
-void DataWrapper::plotCurve(string name, vector< Point > pts)
+void DataWrapper::plotCurve(std::string name, std::vector< Point > pts)
 {
     QwtPlotCurve::CurveStyle style;
     MainWindow::PLOTWINDOW win;
@@ -538,12 +538,12 @@ void DataWrapper::plotCurve(string name, vector< Point > pts)
     gui->setCurve(win, QString(name.c_str()), pts, colour, style, symbol);
 }
 
-void DataWrapper::plotLineSegments(string name, vector< Point > pts)
+void DataWrapper::plotLineSegments(std::string name, std::vector< Point > pts)
 {
     gui->setDashedCurve(MainWindow::p1, QString(name.c_str()), pts, Qt::red, QwtPlotCurve::Lines, QwtSymbol(QwtSymbol::NoSymbol));
 }
 
-void DataWrapper::plotHistogram(string name, const Histogram1D& hist, Colour colour)
+void DataWrapper::plotHistogram(std::string name, const Histogram1D& hist, Colour colour)
 {
     QColor c;
     switch(colour) {
@@ -582,18 +582,18 @@ bool DataWrapper::updateFrame()
         case STREAM:
             VisionConstants::loadFromFile(configname);
             if(!imagestrm.is_open()) {
-                errorlog << "No image stream - " << streamname << endl;
+                errorlog << "No image stream - " << streamname << std::endl;
                 return false;
             }
             if(using_sensors && !sensorstrm.is_open()) {
-                errorlog << "No sensor stream - " << sensorstreamname << endl;
+                errorlog << "No sensor stream - " << sensorstreamname << std::endl;
                 return false;
             }
             try {
                 imagestrm >> m_current_image;
             }
             catch(std::exception& e) {
-//                errorlog << "Image stream error - resetting: " << e.what() << endl;
+//                errorlog << "Image stream error - resetting: " << e.what() << std::endl;
 //                imagestrm.clear() ;
 //                imagestrm.seekg(0, ios::beg);
 //                imagestrm >> m_current_image;
@@ -608,7 +608,7 @@ bool DataWrapper::updateFrame()
                     sensorstrm >> m_sensor_data;
                 }
                 catch(std::exception& e){
-                    errorlog << "Sensor stream error: " << e.what() << endl;
+                    errorlog << "Sensor stream error: " << e.what() << std::endl;
                     return false;
                 }
             }
@@ -616,7 +616,7 @@ bool DataWrapper::updateFrame()
         }
 
         //overwrite sensor horizon if using sensors
-        vector<float> hor_data;
+        std::vector<float> hor_data;
         if(using_sensors && m_sensor_data.getHorizon(hor_data)) {
             kinematics_horizon.setLine(hor_data.at(0), hor_data.at(1), hor_data.at(2));
         }
@@ -633,7 +633,7 @@ bool DataWrapper::updateFrame()
 *   @param filename The filename for the LUT stored on disk
 *   @note Taken from original vision system
 */
-bool DataWrapper::loadLUTFromFile(const string& fileName)
+bool DataWrapper::loadLUTFromFile(const std::string& fileName)
 {
     return LUT.loadLUTFromFile(fileName);
 }

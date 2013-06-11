@@ -18,7 +18,7 @@ VisionBlackboard::VisionBlackboard()
     //Get Image
     original_image = NULL;
 
-    VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
+    VisionConstants::loadFromFile(std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"));
 }
 
 /** @brief Private destructor.
@@ -46,7 +46,7 @@ VisionBlackboard* VisionBlackboard::getInstance()
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setGreenHullPoints(const vector<Point>& points)
+void VisionBlackboard::setGreenHullPoints(const std::vector<Point>& points)
 {
     m_green_horizon.set(points, Point(original_image->getWidth(), original_image->getHeight()));
 }
@@ -57,7 +57,7 @@ void VisionBlackboard::setGreenHullPoints(const vector<Point>& points)
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setGreenHorizonScanPoints(const vector<Point>& points)
+void VisionBlackboard::setGreenHorizonScanPoints(const std::vector<Point>& points)
 {
     gh_scan_points = points;
 }
@@ -68,7 +68,7 @@ void VisionBlackboard::setGreenHorizonScanPoints(const vector<Point>& points)
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setObstaclePoints(const vector<Point>& points)
+void VisionBlackboard::setObstaclePoints(const std::vector<Point>& points)
 {
     obstacle_points = points;
 }
@@ -140,7 +140,7 @@ void VisionBlackboard::addCornerPoint(const CornerPoint &newcorner)
     m_corner_points.push_back(newcorner);
 }
 
-void VisionBlackboard::addGoals(const vector<Goal>& newgoals)
+void VisionBlackboard::addGoals(const std::vector<Goal>& newgoals)
 {
     if(!newgoals.empty())
         m_goals.insert(m_goals.end(), newgoals.begin(), newgoals.end());
@@ -151,30 +151,30 @@ void VisionBlackboard::addGoals(const vector<Goal>& newgoals)
 //    m_beacons.insert(m_beacons.end(), newbeacons.begin(), newbeacons.end());
 //}
 
-void VisionBlackboard::addBalls(const vector<Ball>& newballs)
+void VisionBlackboard::addBalls(const std::vector<Ball>& newballs)
 {
     if(!newballs.empty())
         m_balls.insert(m_balls.end(), newballs.begin(), newballs.end());
 }
-void VisionBlackboard::addObstacles(const vector<Obstacle>& newobstacles)
+void VisionBlackboard::addObstacles(const std::vector<Obstacle>& newobstacles)
 {
     if(!newobstacles.empty())
         m_obstacles.insert(m_obstacles.end(), newobstacles.begin(), newobstacles.end());
 }
 
-void VisionBlackboard::addLines(const vector<FieldLine>& newlines)
+void VisionBlackboard::addLines(const std::vector<FieldLine>& newlines)
 {
     if(!newlines.empty())
         m_lines.insert(m_lines.end(), newlines.begin(), newlines.end());
 }
 
-void VisionBlackboard::addCentreCircles(const vector<CentreCircle> &newcircles)
+void VisionBlackboard::addCentreCircles(const std::vector<CentreCircle> &newcircles)
 {
     if(!newcircles.empty())
         m_centre_circles.insert(m_centre_circles.end(), newcircles.begin(), newcircles.end());
 }
 
-void VisionBlackboard::addCornerPoints(const vector<CornerPoint> &newcorners)
+void VisionBlackboard::addCornerPoints(const std::vector<CornerPoint> &newcorners)
 {
     if(!newcorners.empty())
         m_corner_points.insert(m_corner_points.end(), newcorners.begin(), newcorners.end());
@@ -186,7 +186,7 @@ void VisionBlackboard::addCornerPoints(const vector<CornerPoint> &newcorners)
 *
 *   Clears the previous list of point pointers and copies the new list.
 */
-void VisionBlackboard::setHorizontalScanlines(const vector<int>& scanlines)
+void VisionBlackboard::setHorizontalScanlines(const std::vector<int>& scanlines)
 {
     horizontal_scanlines = scanlines;
 }
@@ -195,7 +195,7 @@ void VisionBlackboard::setHorizontalScanlines(const vector<int>& scanlines)
 *   @brief sets the horizontal segments.
 *   @param segmented_scanlines A vector of vectors of colour segments.
 */
-void VisionBlackboard::setHorizontalSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
+void VisionBlackboard::setHorizontalSegments(const std::vector<std::vector<ColourSegment> >& segmented_scanlines)
 {
     horizontal_segmented_scanlines.set(segmented_scanlines, HORIZONTAL);
 }
@@ -204,7 +204,7 @@ void VisionBlackboard::setHorizontalSegments(const vector<vector<ColourSegment> 
 *   @brief sets the vertical segments.
 *   @param segmented_scanlines A vector of vectors of colour segments.
 */
-void VisionBlackboard::setVerticalSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
+void VisionBlackboard::setVerticalSegments(const std::vector<std::vector<ColourSegment> >& segmented_scanlines)
 {
     vertical_segmented_scanlines.set(segmented_scanlines, VERTICAL);
 }
@@ -213,7 +213,7 @@ void VisionBlackboard::setVerticalSegments(const vector<vector<ColourSegment> >&
 *   @brief sets the filtered horizontal segments.
 *   @param segmented_scanlines A vector of vectors of colour segments.
 */
-void VisionBlackboard::setHorizontalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
+void VisionBlackboard::setHorizontalFilteredSegments(const std::vector<std::vector<ColourSegment> >& segmented_scanlines)
 {
     horizontal_filtered_segments.set(segmented_scanlines, HORIZONTAL);
 }
@@ -222,7 +222,7 @@ void VisionBlackboard::setHorizontalFilteredSegments(const vector<vector<ColourS
 *   @brief sets the filtered vertical segments.
 *   @param segmented_scanlines A vector of vectors of colour segments.
 */
-void VisionBlackboard::setVerticalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines)
+void VisionBlackboard::setVerticalFilteredSegments(const std::vector<std::vector<ColourSegment> >& segmented_scanlines)
 {
     vertical_filtered_segments.set(segmented_scanlines, VERTICAL);
 }
@@ -232,7 +232,7 @@ void VisionBlackboard::setVerticalFilteredSegments(const vector<vector<ColourSeg
 *   @param vfo_if The identifier of the field object
 *   @param transitions A vector of transitions that matched the horizontal rules.
 */
-void VisionBlackboard::setHorizontalTransitions(COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
+void VisionBlackboard::setHorizontalTransitions(COLOUR_CLASS colour_class, const std::vector<ColourSegment> &transitions)
 {
     matched_horizontal_segments[colour_class] = transitions;
 }
@@ -242,7 +242,7 @@ void VisionBlackboard::setHorizontalTransitions(COLOUR_CLASS colour_class, const
 *   @param vfo_if The identifier of the field object
 *   @param transitions A vector of transitions that matched the vertical rules.
 */
-void VisionBlackboard::setVerticalTransitions(COLOUR_CLASS colour_class, const vector<ColourSegment> &transitions)
+void VisionBlackboard::setVerticalTransitions(COLOUR_CLASS colour_class, const std::vector<ColourSegment> &transitions)
 {
     matched_vertical_segments[colour_class] = transitions;
 }
@@ -251,7 +251,7 @@ void VisionBlackboard::setVerticalTransitions(COLOUR_CLASS colour_class, const v
 *   @brief sets the horizontal transition rule matches for all vision field objects.
 *   @param t_map A map from COLOUR_CLASSs to transitions that matched the horizontal rules.
 */
-void VisionBlackboard::setHorizontalTransitionsMap(const map<COLOUR_CLASS, vector<ColourSegment> > &t_map)
+void VisionBlackboard::setHorizontalTransitionsMap(const map<COLOUR_CLASS, std::vector<ColourSegment> > &t_map)
 {
     matched_horizontal_segments = t_map;
 }
@@ -260,7 +260,7 @@ void VisionBlackboard::setHorizontalTransitionsMap(const map<COLOUR_CLASS, vecto
 *   @brief sets the vertical transition rule matches for all vision field objects.
 *   @param t_map A map from COLOUR_CLASSs to transitions that matched the vertical rules.
 */
-void VisionBlackboard::setVerticalTransitionsMap(const map<COLOUR_CLASS, vector<ColourSegment> > &t_map)
+void VisionBlackboard::setVerticalTransitionsMap(const map<COLOUR_CLASS, std::vector<ColourSegment> > &t_map)
 {
     matched_vertical_segments = t_map;
 }
@@ -277,7 +277,7 @@ const GreenHorizon& VisionBlackboard::getGreenHorizon() const
 *   @brief returns the object point set.
 *   @return points A vector of pixel locations for objects.
 */
-const vector<Point>& VisionBlackboard::getObstaclePoints() const
+const std::vector<Point>& VisionBlackboard::getObstaclePoints() const
 {
     return obstacle_points;
 }
@@ -301,41 +301,41 @@ const Transformer& VisionBlackboard::getTransformer() const
 }
 
 //! Returns the list of found balls.
-const vector<Ball>& VisionBlackboard::getBalls()
+const std::vector<Ball>& VisionBlackboard::getBalls()
 {
     return m_balls;
 }
 
 //! Returns the list of found goals.
-const vector<Goal>& VisionBlackboard::getGoals()
+const std::vector<Goal>& VisionBlackboard::getGoals()
 {
     return m_goals;
 }
 
 ////! Returns the list of found beacons.
-//const vector<Beacon>& VisionBlackboard::getBeacons()
+//const std::vector<Beacon>& VisionBlackboard::getBeacons()
 //{
 //    return m_beacons;
 //}
 
 //! Returns the list of found obstacles.
-const vector<Obstacle>& VisionBlackboard::getObstacles()
+const std::vector<Obstacle>& VisionBlackboard::getObstacles()
 {
     return m_obstacles;
 }
 
 //! Returns the list of found lines.
-const vector<FieldLine>& VisionBlackboard::getLines()
+const std::vector<FieldLine>& VisionBlackboard::getLines()
 {
     return m_lines;
 }
 
-const vector<CentreCircle>& VisionBlackboard::getCentreCircles()
+const std::vector<CentreCircle>& VisionBlackboard::getCentreCircles()
 {
     return m_centre_circles;
 }
 
-const vector<CornerPoint>& VisionBlackboard::getCorners()
+const std::vector<CornerPoint>& VisionBlackboard::getCorners()
 {
     return m_corner_points;
 }
@@ -344,7 +344,7 @@ const vector<CornerPoint>& VisionBlackboard::getCorners()
 *   @brief returns the set of heights for horizontal scan lines.
 *   @return horizontal_scanlines A vector of unsigned ints defining horizontal scanlines.
 */
-const vector<int>& VisionBlackboard::getHorizontalScanlines() const
+const std::vector<int>& VisionBlackboard::getHorizontalScanlines() const
 {
     return horizontal_scanlines;
 }
@@ -395,7 +395,7 @@ const SegmentedRegion& VisionBlackboard::getVerticalFilteredRegion() const
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
 */
-const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(COLOUR_CLASS colour_class)
+const std::vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(COLOUR_CLASS colour_class)
 {
     return matched_horizontal_segments[colour_class];
 }
@@ -410,7 +410,7 @@ const vector<ColourSegment> &VisionBlackboard::getHorizontalTransitions(COLOUR_C
 *   is good as there is no need to worry about manually inserting a vector for each field object
 *   or doing any checks in this method for missing mappings.
 */
-const vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(COLOUR_CLASS colour_class)
+const std::vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(COLOUR_CLASS colour_class)
 {
     return matched_vertical_segments[colour_class];
 }
@@ -419,7 +419,7 @@ const vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(COLOUR_CLA
 *   @brief returns the horizontal transition rule matches for all VFOs
 *   @return horizontal_segments The horizontal transition rule matches for all VFOs
 */
-const map<COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getHorizontalTransitionsMap() const
+const map<COLOUR_CLASS, std::vector<ColourSegment> > &VisionBlackboard::getHorizontalTransitionsMap() const
 {
     return matched_horizontal_segments;
 }
@@ -428,7 +428,7 @@ const map<COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getHorizontal
 *   @brief returns the vertical transition rule matches for all VFOs
 *   @return vertical_segments The vertical transition rule matches for all VFOs
 */
-const map<COLOUR_CLASS, vector<ColourSegment> > &VisionBlackboard::getVerticalTransitionsMap() const
+const map<COLOUR_CLASS, std::vector<ColourSegment> > &VisionBlackboard::getVerticalTransitionsMap() const
 {
     return matched_vertical_segments;
 }
@@ -482,7 +482,7 @@ CameraSettings VisionBlackboard::getCameraSettings() const
 void VisionBlackboard::update()
 {
 #if VISION_CONTROLFLOW_VERBOSITY > 0
-    debug << "VisionBlackboard::update() - Begin" << endl;
+    debug << "VisionBlackboard::update() - Begin" << std::endl;
 #endif
 
     wrapper = DataWrapper::getInstance();
@@ -492,12 +492,12 @@ void VisionBlackboard::update()
 
     //WARNING The following warning may not be triggered properly
     if(original_image == NULL) {
-        cout << "VisionBlackboard::update() - WARNING - Camera Image pointer is null - Camera may be disconnected or faulty." << endl;
-        errorlog << "VisionBlackboard::update() - WARNING - Camera Image pointer is null - Camera may be disconnected or faulty." << endl;
+        std::cout << "VisionBlackboard::update() - WARNING - Camera Image pointer is null - Camera may be disconnected or faulty." << std::endl;
+        errorlog << "VisionBlackboard::update() - WARNING - Camera Image pointer is null - Camera may be disconnected or faulty." << std::endl;
     }
     else if(original_image->getHeight()==0 or original_image->getWidth()==0 ) {
-        cout << "VisionBlackboard::update() - WARNING - Image height or width is zero - Camera may be disconnected or faulty." << endl;
-        errorlog << "VisionBlackboard::update() - WARNING - Image height or width is zero - Camera may be disconnected or faulty." << endl;
+        std::cout << "VisionBlackboard::update() - WARNING - Image height or width is zero - Camera may be disconnected or faulty." << std::endl;
+        errorlog << "VisionBlackboard::update() - WARNING - Image height or width is zero - Camera may be disconnected or faulty." << std::endl;
     }
 
     bool camera_pitch_valid, camera_yaw_valid, camera_height_valid, body_pitch_valid;
@@ -510,7 +510,7 @@ void VisionBlackboard::update()
     body_pitch_valid = wrapper->getBodyPitch(body_pitch);
 
     bool ctg_valid;
-    vector<float> ctg_vector;
+    std::vector<float> ctg_vector;
 
     ctg_valid = wrapper->getCTGVector(ctg_vector);
 
@@ -541,7 +541,7 @@ void VisionBlackboard::update()
     m_vfos.clear();
 
 #if VISION_CONTROLFLOW_VERBOSITY > 0
-    debug << "VisionBlackboard::update() - Finish" << endl;
+    debug << "VisionBlackboard::update() - Finish" << std::endl;
 #endif
 }
 
@@ -551,7 +551,7 @@ void VisionBlackboard::update()
 void VisionBlackboard::publish() const
 {
     #if VISION_CONTROLFLOW_VERBOSITY > 0
-        debug << "VisionBlackboard::publish() - Begin" << endl;
+        debug << "VisionBlackboard::publish() - Begin" << std::endl;
     #endif
     //wrapper->publish(m_vfos);
     unsigned int i;
@@ -577,7 +577,7 @@ void VisionBlackboard::publish() const
         wrapper->publish(static_cast<const VisionFieldObject*>(&m_corner_points.at(i)));
     }
     #if VISION_CONTROLFLOW_VERBOSITY > 0
-        debug << "VisionBlackboard::publish() - End" << endl;
+        debug << "VisionBlackboard::publish() - End" << std::endl;
     #endif
 }
 
@@ -587,32 +587,32 @@ void VisionBlackboard::publish() const
 void VisionBlackboard::debugPublish() const
 {
     #if VISION_CONTROLFLOW_VERBOSITY > 0
-        debug << "VisionBlackboard::debugPublish() - Begin" << endl;
+        debug << "VisionBlackboard::debugPublish() - Begin" << std::endl;
     #endif
-    vector<Vector2<double> > pts;
-    map<COLOUR_CLASS, vector<ColourSegment> >::const_iterator it;
-    vector<ColourSegment> v_s;
+    std::vector<Vector2<double> > pts;
+    map<COLOUR_CLASS, std::vector<ColourSegment> >::const_iterator it;
+    std::vector<ColourSegment> v_s;
 
 #if VISION_BLACKBOARD_VERBOSITY > 1
-    debug << "VisionBlackboard::debugPublish - " << endl;
-    debug << "kinematics_horizon: " << kinematics_horizon.getA() << " " << kinematics_horizon.getB() << " " << kinematics_horizon.getC() << endl;
-    debug << "horizon_scan_points: " << m_green_horizon.getOriginalPoints().size() << endl;
-    debug << "object_points: " << obstacle_points.size() << endl;
-    debug << "horizontal_scanlines: " << horizontal_scanlines.size() << endl;
-    debug << "horizontal_segmented_scanlines: " << horizontal_segmented_scanlines.getSegments().size() << endl;
-    debug << "vertical_segmented_scanlines: " << vertical_segmented_scanlines.getSegments().size() << endl;
-    debug << "horizontal_filtered_segments: " << horizontal_segmented_scanlines.getSegments().size() << endl;
-    debug << "vertical_filtered_segments: " << vertical_segmented_scanlines.getSegments().size() << endl;
+    debug << "VisionBlackboard::debugPublish - " << std::endl;
+    debug << "kinematics_horizon: " << kinematics_horizon.getA() << " " << kinematics_horizon.getB() << " " << kinematics_horizon.getC() << std::endl;
+    debug << "horizon_scan_points: " << m_green_horizon.getOriginalPoints().size() << std::endl;
+    debug << "object_points: " << obstacle_points.size() << std::endl;
+    debug << "horizontal_scanlines: " << horizontal_scanlines.size() << std::endl;
+    debug << "horizontal_segmented_scanlines: " << horizontal_segmented_scanlines.getSegments().size() << std::endl;
+    debug << "vertical_segmented_scanlines: " << vertical_segmented_scanlines.getSegments().size() << std::endl;
+    debug << "horizontal_filtered_segments: " << horizontal_segmented_scanlines.getSegments().size() << std::endl;
+    debug << "vertical_filtered_segments: " << vertical_segmented_scanlines.getSegments().size() << std::endl;
     int size=0;
     for(it=matched_horizontal_segments.begin(); it!=matched_horizontal_segments.end(); it++) {
         size += it->second.size();
     }
-    debug << "matched_horizontal_segments: " << size << endl;
+    debug << "matched_horizontal_segments: " << size << std::endl;
     size=0;
     for(it=matched_vertical_segments.begin(); it!=matched_vertical_segments.end(); it++) {
         size += it->second.size();
     }
-    debug << "matched_vertical_segments: " << size << endl;
+    debug << "matched_vertical_segments: " << size << std::endl;
 #endif
 
     wrapper->debugPublish(DBID_IMAGE, original_image);
@@ -625,7 +625,7 @@ void VisionBlackboard::debugPublish() const
         wrapper->debugPublish(DBID_HORIZON, pts);
     }
     else {
-        errorlog << "VisionBlackboard::publishDebug - vertical horizon!" << endl;
+        errorlog << "VisionBlackboard::publishDebug - vertical horizon!" << std::endl;
     }
 
     //horizon scans
@@ -705,7 +705,7 @@ void VisionBlackboard::debugPublish() const
 void VisionBlackboard::checkKinematicsHorizon()
 {
     #if VISION_CONTROLFLOW_VERBOSITY > 0
-        debug << "VisionBlackboard::checkHorizon() - Begin." << endl;
+        debug << "VisionBlackboard::checkHorizon() - Begin." << std::endl;
     #endif
     int width = original_image->getWidth(),
         height = original_image->getHeight();
@@ -714,7 +714,7 @@ void VisionBlackboard::checkKinematicsHorizon()
         if(kinematics_horizon.isVertical()) {
             //vertical horizon
             #if VISION_BLACKBOARD_VERBOSITY > 1
-                debug << "VisionBlackboard::checkHorizon() - Vertical Horizon, clamping to top." << endl;
+                debug << "VisionBlackboard::checkHorizon() - Vertical Horizon, clamping to top." << std::endl;
             #endif
             kinematics_horizon.setLineFromPoints(Point(0, 0), Point(width, 0));
         }
@@ -722,27 +722,27 @@ void VisionBlackboard::checkKinematicsHorizon()
             //check the base points are below the horizon
             if(kinematics_horizon.IsBelowHorizon(0, height) && kinematics_horizon.IsBelowHorizon(width, height)) {
                 #if VISION_BLACKBOARD_VERBOSITY > 1
-                    debug << "VisionBlackboard::checkHorizon() - Image bottom corners are not below horizon - clamping to top." << endl;
+                    debug << "VisionBlackboard::checkHorizon() - Image bottom corners are not below horizon - clamping to top." << std::endl;
                 #endif
                 kinematics_horizon.setLineFromPoints(Point(0, 0), Point(width, 0));
             }
 //            if(kinematics_horizon.findYFromX(0) < 0 || kinematics_horizon.findYFromX(0) > height) {
 //                //left point off screen
 //                #if VISION_BLACKBOARD_VERBOSITY > 1
-//                    debug << "VisionBlackboard::checkHorizon() - Left kinematics horizon point off screen." << endl;
+//                    debug << "VisionBlackboard::checkHorizon() - Left kinematics horizon point off screen." << std::endl;
 //                #endif
 //            }
 //            if(kinematics_horizon.findYFromX(width) < 0 || kinematics_horizon.findYFromX(width) > height) {
 //                //right point off screen
 //                #if VISION_BLACKBOARD_VERBOSITY > 1
-//                    debug << "VisionBlackboard::checkHorizon() - Right kinematics horizon point off screen." << endl;
+//                    debug << "VisionBlackboard::checkHorizon() - Right kinematics horizon point off screen." << std::endl;
 //                #endif
 //            }
         }
     }
     else {
         #if VISION_BLACKBOARD_VERBOSITY > 1
-            debug << "VisionBlackboard::checkHorizon() - Horizon non-existant." << endl;
+            debug << "VisionBlackboard::checkHorizon() - Horizon non-existant." << std::endl;
         #endif
     }
 }

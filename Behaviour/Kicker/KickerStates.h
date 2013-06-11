@@ -82,8 +82,8 @@ public:
     KickState(KickerProvider* provider) : KickerState(provider)
     {
         m_kickActivePrev = false;
-        m_kickPos = vector<float>(2,0);
-        m_kickTarget = vector<float>(2,0);
+        m_kickPos = std::vector<float>(2,0);
+        m_kickTarget = std::vector<float>(2,0);
     };
     BehaviourState* nextState()
     {
@@ -94,7 +94,7 @@ public:
 
         if (kickFinished)
         {
-            debug << "Kicking -> Waiting" << endl;
+            debug << "Kicking -> Waiting" << std::endl;
             return m_provider->m_wait_state;
         }
         else
@@ -142,8 +142,8 @@ public:
     };
 private:
     bool m_kickActivePrev;
-    vector<float> m_kickPos;
-    vector<float> m_kickTarget;
+    std::vector<float> m_kickPos;
+    std::vector<float> m_kickTarget;
 };
 
 #endif

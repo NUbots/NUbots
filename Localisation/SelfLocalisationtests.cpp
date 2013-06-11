@@ -457,7 +457,7 @@ bool NscanTest()
 //    std::cout << "Tree Copy" << "  (" << tree_copy.size() << ")" << std::endl;
 //    for (ModelContainer::const_iterator mod_it = tree_copy.begin(); mod_it != tree_copy.end(); ++mod_it)
 //    {
-//        std:: cout << (*mod_it)->summary(false);
+//        std:: std::cout << (*mod_it)->summary(false);
 //    }
 //    std::cout << std::flush;
     // Do the nscan prune at N=2
@@ -480,7 +480,7 @@ bool NscanTest()
 //    std::cout << "Size - " << tree_copy.size() << std::endl;
 //    for (ModelContainer::const_iterator mod_it = tree_copy.begin(); mod_it != tree_copy.end(); ++mod_it)
 //    {
-//        std:: cout << (*mod_it)->summary(false) <<std::endl;
+//        std:: std::cout << (*mod_it)->summary(false) <<std::endl;
 //    }
     bool model10_found = false;
     bool model11_found = false;

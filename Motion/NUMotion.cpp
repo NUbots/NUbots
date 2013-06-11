@@ -58,7 +58,7 @@
 NUMotion::NUMotion(NUSensorsData* data, NUActionatorsData* actions)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NUMotion::NUMotion" << endl;
+        debug << "NUMotion::NUMotion" << std::endl;
     #endif
     m_current_time = 0;
     m_previous_time = 0;
@@ -173,7 +173,7 @@ void NUMotion::stop()
 void NUMotion::kill()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NUMotion::kill()" << endl;
+        debug << "NUMotion::kill()" << std::endl;
     #endif
     
     m_killed = true;
@@ -203,9 +203,9 @@ void NUMotion::kill()
     float safelarmpositions[] = {0.2, 1.5, 0.f};
     float saferarmpositions[] = {-0.2, 1.5, 0.f};
 
-    vector<float> legpositions(safelegpositions, safelegpositions + sizeof(safelegpositions)/sizeof(*safelegpositions));
-    vector<float> larmpositions(safelarmpositions, safelarmpositions + sizeof(safelarmpositions)/sizeof(*safelarmpositions));
-    vector<float> rarmpositions(saferarmpositions, saferarmpositions + sizeof(saferarmpositions)/sizeof(*saferarmpositions));
+    std::vector<float> legpositions(safelegpositions, safelegpositions + sizeof(safelegpositions)/sizeof(*safelegpositions));
+    std::vector<float> larmpositions(safelarmpositions, safelarmpositions + sizeof(safelarmpositions)/sizeof(*safelarmpositions));
+    std::vector<float> rarmpositions(saferarmpositions, saferarmpositions + sizeof(saferarmpositions)/sizeof(*saferarmpositions));
     
     // check if there is a reason it is not safe or possible to go into the crouch position
     if (m_actions == NULL)
@@ -213,7 +213,7 @@ void NUMotion::kill()
     else if (m_data != NULL)
     {
         // check the orientation
-        vector<float> orientation;
+        std::vector<float> orientation;
         if (m_data->get(NUSensorsData::Orientation, orientation))
             if (fabs(orientation[0]) > 0.5 or fabs(orientation[1]) > 0.5)
             {
@@ -234,7 +234,7 @@ void NUMotion::kill()
         }
         
         // check the stiffness is on
-        vector<float> leftstiffnesses, rightstiffnesses;
+        std::vector<float> leftstiffnesses, rightstiffnesses;
         if (m_data->getStiffness(NUSensorsData::LLeg, leftstiffnesses) and m_data->getStiffness(NUSensorsData::RLeg, rightstiffnesses))
             if (mathGeneral::allZeros(leftstiffnesses) and mathGeneral::allZeros(rightstiffnesses))
                 return;
@@ -287,7 +287,7 @@ void NUMotion::stopActiveProviders()
 void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 0
-        debug << "NUMotion::process(" << data << ", " << actions << ")" << endl;
+        debug << "NUMotion::process(" << data << ", " << actions << ")" << std::endl;
     #endif
     if (data == NULL || actions == NULL)
         return;
@@ -349,7 +349,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
             debug << m_current_leg_provider->getName();
         else
             debug << "None";
-        debug << endl;
+        debug << std::endl;
     #endif
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NUMotion::nextProviders. Head: ";
@@ -367,7 +367,7 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
             debug << m_next_leg_provider->getName();
         else
             debug << "None";
-        debug << endl;
+        debug << std::endl;
     #endif
     
     // ---------------------------- Handle transitions for the head provider
@@ -433,17 +433,17 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
 
 /*! @brief Process the jobs. Jobs are deleted when they are completed, and more jobs can be added inside this function.
     
-    @param jobs the current list of jobs
+    @param jobs the current std::list of jobs
  */
 void NUMotion::process(JobList* jobs)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 0
-        debug << "NUMotion::process(jobs): Start" << endl;
+        debug << "NUMotion::process(jobs): Start" << std::endl;
     #endif
     if (jobs == NULL or m_data == NULL or m_actions == NULL or m_current_time < m_last_kill_time + 2000)
         return;
     
-    list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
+    std::list<Job*>::iterator it = jobs->motion_begin();     // the iterator over the motion jobs
     while (it != jobs->motion_end())
     {
         m_killed = false;
@@ -525,7 +525,7 @@ void NUMotion::process(JobList* jobs)
     }
     
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NUMotion::process(jobs): Finished" << endl;
+        debug << "NUMotion::process(jobs): Finished" << std::endl;
     #endif
 }
 
@@ -549,7 +549,7 @@ void NUMotion::setNextProviders(NUMotionProvider* next_provider)
                 debug << m_next_arm_provider->getName() << " ";
             if (m_next_leg_provider)
                 debug << m_next_leg_provider->getName() << " ";
-            debug << endl;
+            debug << std::endl;
         #endif
     }
 }
@@ -631,14 +631,14 @@ void NUMotion::updateMotionSensors()
         m_data->set(NUSensorsData::MotionScriptActive, m_current_time, false);
     #endif
     #ifdef USE_WALK
-        vector<float> speed;
+        std::vector<float> speed;
         m_walk->getCurrentSpeed(speed);
         m_data->set(NUSensorsData::MotionWalkSpeed, m_current_time, speed);
         m_walk->getMaximumSpeed(speed);
         m_data->set(NUSensorsData::MotionWalkMaxSpeed, m_current_time, speed);
     #else
-        m_data->set(NUSensorsData::MotionWalkSpeed, m_current_time, vector<float> (3,0));
-        m_data->set(NUSensorsData::MotionWalkMaxSpeed, m_current_time, vector<float> (3, 0.1));
+        m_data->set(NUSensorsData::MotionWalkSpeed, m_current_time, std::vector<float> (3,0));
+        m_data->set(NUSensorsData::MotionWalkMaxSpeed, m_current_time, std::vector<float> (3, 0.1));
     #endif
     #ifdef USE_HEAD
         m_data->set(NUSensorsData::MotionHeadCompletionTime, m_current_time, static_cast<float>(m_head->getCompletionTime()));

@@ -55,12 +55,12 @@ const Quad& Goal::getQuad() const
 bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_GOAL_VERBOSITY > 1
-        debug << "Goal::addToExternalFieldObjects - m_id: " << VFOName(m_id) << endl;
-        debug << "    " << *this << endl;
+        debug << "Goal::addToExternalFieldObjects - m_id: " << VFOName(m_id) << std::endl;
+        debug << "    " << *this << std::endl;
     #endif
     if(valid) {
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::addToExternalFieldObjects - valid" << endl;
+            debug << "Goal::addToExternalFieldObjects - valid" << std::endl;
         #endif
         AmbiguousObject newAmbObj;
 
@@ -112,9 +112,9 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
 //            break;
         default:
             //invalid object - do not push to fieldobjects
-            errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << VFOName(m_id) << endl;
+            errorlog << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << VFOName(m_id) << std::endl;
             #if VISION_GOAL_VERBOSITY > 1
-                debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << VFOName(m_id) << endl;
+                debug << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << VFOName(m_id) << std::endl;
             #endif
             return false;
         }
@@ -131,7 +131,7 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
     }
     else {
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::addToExternalFieldObjects - invalid" << endl;
+            debug << "Goal::addToExternalFieldObjects - invalid" << std::endl;
         #endif
         return false;
     }
@@ -143,7 +143,7 @@ bool Goal::check() const
 
 //    if(!distance_valid) {
 //        #if VISION_GOAL_VERBOSITY > 1
-//            debug << "Goal::check - Goal thrown out: distance invalid" << endl;
+//            debug << "Goal::check - Goal thrown out: distance invalid" << std::endl;
 //        #endif
 //        return false;
 //    }
@@ -151,7 +151,7 @@ bool Goal::check() const
     if(VisionConstants::THROWOUT_SHORT_GOALS) {
         if(m_corners.getAverageHeight() <= VisionConstants::MIN_GOAL_HEIGHT) {
             #if VISION_GOAL_VERBOSITY > 1
-                debug << "Goal::check - Goal thrown out: less than 20pix high" << endl;
+                debug << "Goal::check - Goal thrown out: less than 20pix high" << std::endl;
             #endif
             return false;
         }
@@ -160,7 +160,7 @@ bool Goal::check() const
     if(VisionConstants::THROWOUT_NARROW_GOALS) {
         if(m_corners.getAverageWidth() <= VisionConstants::MIN_GOAL_WIDTH) {
             #if VISION_GOAL_VERBOSITY > 1
-                debug << "Goal::check - Goal thrown out: less than " << VisionConstants::MIN_GOAL_WIDTH << "pix high" << endl;
+                debug << "Goal::check - Goal thrown out: less than " << VisionConstants::MIN_GOAL_WIDTH << "pix high" << std::endl;
             #endif
             return false;
         }
@@ -170,7 +170,7 @@ bool Goal::check() const
     if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_GOALS and
        not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screen.x, m_location.screen.y)) {
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: base above kinematics horizon" << endl;
+            debug << "Goal::check - Goal thrown out: base above kinematics horizon" << std::endl;
         #endif
         return false;
     }
@@ -179,8 +179,8 @@ bool Goal::check() const
     if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_GOALS and
             width_dist + VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS < d2p) {
         #if VISION_GOAL_VERBOSITY > 1
-        debug << "Goal::check - Goal thrown out: width distance too much smaller than d2p" << endl;
-            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_GOALS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS << endl;
+        debug << "Goal::check - Goal thrown out: width distance too much smaller than d2p" << std::endl;
+            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_GOALS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_GOALS << std::endl;
         #endif
         return false;
     }
@@ -189,8 +189,8 @@ bool Goal::check() const
     if(VisionConstants::THROWOUT_DISTANT_GOALS and 
         m_location.relativeRadial.x > VisionConstants::MAX_GOAL_DISTANCE) {
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::check - Goal thrown out: too far away" << endl;
-            debug << "\td2p: " << m_location.relativeRadial.x << " MAX_GOAL_DISTANCE: " << VisionConstants::MAX_GOAL_DISTANCE << endl;
+            debug << "Goal::check - Goal thrown out: too far away" << std::endl;
+            debug << "\td2p: " << m_location.relativeRadial.x << " MAX_GOAL_DISTANCE: " << VisionConstants::MAX_GOAL_DISTANCE << std::endl;
         #endif
         return false;
     }
@@ -228,7 +228,7 @@ bool Goal::calculatePositions()
 
     #if VISION_GOAL_VERBOSITY > 2
         debug << "Goal::calculatePositions: ";
-        debug << d2p << " " << width_dist << " " << m_location.relativeRadial.x << endl;
+        debug << d2p << " " << width_dist << " " << m_location.relativeRadial.x << std::endl;
     #endif
 
     return distance_valid && dist > 0;
@@ -259,7 +259,7 @@ double Goal::distanceToGoal(double bearing, double elevation)
 
     #if VISION_GOAL_VERBOSITY > 1
         if(!d2pvalid)
-            debug << "Goal::distanceToGoal: d2p invalid - combination methods will only return width_dist" << endl;
+            debug << "Goal::distanceToGoal: d2p invalid - combination methods will only return width_dist" << std::endl;
     #endif
     //get distance from width
     width_dist = VisionConstants::GOAL_WIDTH*tran.getCameraDistanceInPixels()/m_size_on_screen.x;
@@ -269,35 +269,35 @@ double Goal::distanceToGoal(double bearing, double elevation)
     //HACK FOR GOALS AT BASE OF IMAGE
     if(m_size_on_screen.x > HACKWIDTH and (VisionBlackboard::getInstance()->getImageHeight() - m_location.screen.y) < HACKPIXELS) {
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::distanceToGoal: Goal wide and cutoff at bottom so used width_dist" << endl;
+            debug << "Goal::distanceToGoal: Goal wide and cutoff at bottom so used width_dist" << std::endl;
         #endif
         return width_dist;
     }
 
     #if VISION_GOAL_VERBOSITY > 1
-        debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << endl;
-        debug << "Goal::distanceToGoal: d2p: " << d2p << endl;
-        debug << "Goal::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << endl;
-        debug << "Goal::distanceToGoal: width_dist: " << width_dist << endl;
+        debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << std::endl;
+        debug << "Goal::distanceToGoal: d2p: " << d2p << std::endl;
+        debug << "Goal::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << std::endl;
+        debug << "Goal::distanceToGoal: width_dist: " << width_dist << std::endl;
     #endif
     switch(VisionConstants::GOAL_DISTANCE_METHOD) {
     case D2P:
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::distanceToGoal: Method: D2P" << endl;
+            debug << "Goal::distanceToGoal: Method: D2P" << std::endl;
         #endif
         distance_valid = d2pvalid && d2p > 0;
         result = d2p;
         break;
     case Width:
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::distanceToGoal: Method: Width" << endl;
+            debug << "Goal::distanceToGoal: Method: Width" << std::endl;
         #endif
         distance_valid = true;
         result = width_dist;
         break;
     case Average:
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::distanceToGoal: Method: Average" << endl;
+            debug << "Goal::distanceToGoal: Method: Average" << std::endl;
         #endif
         //average distances
         distance_valid = d2pvalid && d2p > 0;
@@ -305,10 +305,10 @@ double Goal::distanceToGoal(double bearing, double elevation)
         break;
     case Least:
         #if VISION_GOAL_VERBOSITY > 1
-            debug << "Goal::distanceToGoal: Method: Least" << endl;
+            debug << "Goal::distanceToGoal: Method: Least" << std::endl;
         #endif
         distance_valid = d2pvalid && d2p > 0;
-        result = (distance_valid ? min(d2p, width_dist) : width_dist);
+        result = (distance_valid ? std::min(d2p, width_dist) : width_dist);
         break;
     }
 
@@ -318,24 +318,24 @@ double Goal::distanceToGoal(double bearing, double elevation)
 /*! @brief Stream insertion operator for a single ColourSegment.
  *      The segment is terminated by a newline.
  */
-ostream& operator<< (ostream& output, const Goal& g)
+std::ostream& operator<< (std::ostream& output, const Goal& g)
 {
-    output << "Goal - " << VFOName(g.m_id) << endl;
-    output << "\tpixelloc: " << g.m_location.screen << endl;
-    output << "\tangularloc: " << g.m_location.angular << endl;
-    output << "\trelative field coords: " << g.m_location.relativeRadial << endl;
-    output << "\tspherical error: " << g.m_spherical_error << endl;
+    output << "Goal - " << VFOName(g.m_id) << std::endl;
+    output << "\tpixelloc: " << g.m_location.screen << std::endl;
+    output << "\tangularloc: " << g.m_location.angular << std::endl;
+    output << "\trelative field coords: " << g.m_location.relativeRadial << std::endl;
+    output << "\tspherical error: " << g.m_spherical_error << std::endl;
     output << "\tsize on screen: " << g.m_size_on_screen;
     return output;
 }
 
-/*! @brief Stream insertion operator for a vector of ColourSegments.
+/*! @brief Stream insertion operator for a std::vector of ColourSegments.
  *      Each segment is terminated by a newline.
  *  @relates ColourSegment
  */
-ostream& operator<< (ostream& output, const vector<Goal>& g)
+std::ostream& operator<< (std::ostream& output, const std::vector<Goal>& g)
 {
     for (size_t i=0; i<g.size(); i++)
-        output << g[i] << endl;
+        output << g[i] << std::endl;
     return output;
 }

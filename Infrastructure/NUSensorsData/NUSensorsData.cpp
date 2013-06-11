@@ -29,7 +29,7 @@
 #include <limits>
 
 int s_curr_id = NUData::m_num_common_ids+1; 
-vector<NUSensorsData::id_t*> NUSensorsData::m_ids;
+std::vector<NUSensorsData::id_t*> NUSensorsData::m_ids;
 
 // end effector sensors
 const NUSensorsData::id_t NUSensorsData::LArmEndEffector(s_curr_id++, "LArmEndEffector", NUSensorsData::m_ids);
@@ -91,7 +91,7 @@ const unsigned int NUSensorsData::m_num_sensor_ids = s_curr_id;
 NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 0
-    debug << "NUSensorsData::NUSensorsData" << endl;
+    debug << "NUSensorsData::NUSensorsData" << std::endl;
 #endif
     CurrentTime = 0;
     PreviousTime = 0;
@@ -101,7 +101,7 @@ NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
         m_ids.insert(m_ids.begin(), NUData::m_common_ids.begin(), NUData::m_common_ids.end());
 
     m_ids_copy = m_ids;
-    m_id_to_indices = vector<vector<int> >(m_ids.size(), vector<int>());
+    m_id_to_indices = std::vector<std::vector<int> >(m_ids.size(), std::vector<int>());
 
     for (size_t i=0; i<m_ids.size(); i++)
         m_sensors.push_back(Sensor(m_ids[i]->Name));
@@ -110,11 +110,11 @@ NUSensorsData::NUSensorsData() : NUData(), TimestampedData()
 NUSensorsData::~NUSensorsData()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "NUSensorsData::~NUSensorsData" << endl;
+        debug << "NUSensorsData::~NUSensorsData" << std::endl;
     #endif
 }
 
-void NUSensorsData::addSensors(const vector<string>& hardwarenames)
+void NUSensorsData::addSensors(const std::vector<std::string>& hardwarenames)
 {
 
     // the model we use for sensors, is that every sensor is 'available', but the data may be invalid.
@@ -144,7 +144,7 @@ bool NUSensorsData::getPosition(const id_t id, float& data)
     @param data will be updated with the joint angles
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getPosition(const id_t id, vector<float>& data)
+bool NUSensorsData::getPosition(const id_t id, std::vector<float>& data)
 {
     return getJointData(id, PositionId, data);
 }
@@ -164,7 +164,7 @@ bool NUSensorsData::getVelocity(const id_t id, float& data)
     @param data will be updated with joint velocities
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getVelocity(const id_t id, vector<float>& data)
+bool NUSensorsData::getVelocity(const id_t id, std::vector<float>& data)
 {
     return getJointData(id, VelocityId, data);
 }
@@ -184,7 +184,7 @@ bool NUSensorsData::getAcceleration(const id_t id, float& data)
     @param data will be updated with joint accelerations
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getAcceleration(const id_t id, vector<float>& data)
+bool NUSensorsData::getAcceleration(const id_t id, std::vector<float>& data)
 {
     return getJointData(id, AccelerationId, data);
 }
@@ -204,7 +204,7 @@ bool NUSensorsData::getTarget(const id_t id, float& data)
     @param data will be updated with joint targets
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTarget(const id_t id, vector<float>& data)
+bool NUSensorsData::getTarget(const id_t id, std::vector<float>& data)
 {
     return getJointData(id, TargetId, data);
 }
@@ -224,7 +224,7 @@ bool NUSensorsData::getStiffness(const id_t id, float& data)
     @param data will be updated with joint stiffnesses
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getStiffness(const id_t id, vector<float>& data)
+bool NUSensorsData::getStiffness(const id_t id, std::vector<float>& data)
 {
     return getJointData(id, StiffnessId, data);
 }
@@ -244,7 +244,7 @@ bool NUSensorsData::getCurrent(const id_t id, float& data)
     @param data will be updated with joint currents
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getCurrent(const id_t id, vector<float>& data)
+bool NUSensorsData::getCurrent(const id_t id, std::vector<float>& data)
 {
     return getJointData(id, CurrentId, data);
 }
@@ -264,7 +264,7 @@ bool NUSensorsData::getTorque(const id_t id, float& data)
     @param data will be updated with joint torques
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTorque(const id_t id, vector<float>& data)
+bool NUSensorsData::getTorque(const id_t id, std::vector<float>& data)
 {
     return getJointData(id, TorqueId, data);
 }
@@ -284,7 +284,7 @@ bool NUSensorsData::getTemperature(const id_t id, float& data)
     @param data will be updated with joint temperatures
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getTemperature(const id_t id, vector<float>& data)
+bool NUSensorsData::getTemperature(const id_t id, std::vector<float>& data)
 {
     return getJointData(id, TemperatureId, data);
 }
@@ -344,9 +344,9 @@ bool NUSensorsData::getSupport(const id_t& id, bool& data)
     @param data will be updated with centre of presssure [x(cm), y(cm)]
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
+bool NUSensorsData::getCoP(const id_t& id, std::vector<float>& data)
 {
-    data = vector<float>(2);
+    data = std::vector<float>(2);
     bool successful = true;
     successful &= getEndEffectorData(id, CoPXId, data[0]);
     successful &= getEndEffectorData(id, CoPYId, data[1]);
@@ -359,9 +359,9 @@ bool NUSensorsData::getCoP(const id_t& id, vector<float>& data)
     @param data will be updated with the position [x, y, z, roll, pitch, yaw]
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getEndPosition(const id_t id, vector<float>& data)
+bool NUSensorsData::getEndPosition(const id_t id, std::vector<float>& data)
 {
-    data = vector<float>(6);
+    data = std::vector<float>(6);
     bool successful = true;
     successful &= getEndEffectorData(id, EndPositionXId, data[0]);
     successful &= getEndEffectorData(id, EndPositionYId, data[1]);
@@ -389,7 +389,7 @@ bool NUSensorsData::getCameraHeight(float& data)
  	@param data will be updated with the [A, B, C] of the line
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getHorizon(vector<float>& data)
+bool NUSensorsData::getHorizon(std::vector<float>& data)
 {
     return get(Horizon, data);
 }
@@ -398,9 +398,9 @@ bool NUSensorsData::getHorizon(vector<float>& data)
  	@param data will be updated with the current odometry data [delta_x (cm), delta_y (cm), delta_yaw (rad)] since the last call to getOdometryData
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getOdometry(vector<float>& data)
+bool NUSensorsData::getOdometry(std::vector<float>& data)
 {
-    const static vector<float> zeros(3,0);
+    const static std::vector<float> zeros(3,0);
     if (get(Odometry, data))
     {
         set(Odometry, CurrentTime, zeros);			// reset the current odometry value
@@ -418,7 +418,7 @@ bool NUSensorsData::getOdometry(vector<float>& data)
     @param data will be update with the [x(cm/s/s), y(cm/s/s), z(cm/s/s)] 
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getAccelerometer(vector<float>& data)
+bool NUSensorsData::getAccelerometer(std::vector<float>& data)
 {
     return get(Accelerometer, data);
 }
@@ -427,9 +427,9 @@ bool NUSensorsData::getAccelerometer(vector<float>& data)
     @param data will be update with the [roll(rad/s), pitch(rad/s), yaw(rad/s)]
     @return true if valid, false if invalid
  */
-bool NUSensorsData::getGyro(vector<float>& data)
+bool NUSensorsData::getGyro(std::vector<float>& data)
 {
-    vector<float> gyro, offset; 
+    std::vector<float> gyro, offset; 
     bool successful = get(Gyro, gyro);
     successful &= get(GyroOffset, offset);
     if (successful)
@@ -441,7 +441,7 @@ bool NUSensorsData::getGyro(vector<float>& data)
  	@param data will be updated with the [x(rad), y(rad), z(rad)]
  	@return true is valid, false if invalid
  */
-bool NUSensorsData::getOrientation(vector<float>& data)
+bool NUSensorsData::getOrientation(std::vector<float>& data)
 {
     return get(Orientation, data);
 }
@@ -450,7 +450,7 @@ bool NUSensorsData::getOrientation(vector<float>& data)
  	@param data will be updated with the [total, left, right, forward, backward]
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getFalling(vector<float>& data)
+bool NUSensorsData::getFalling(std::vector<float>& data)
 {
     return get(Falling, data);
 }
@@ -459,7 +459,7 @@ bool NUSensorsData::getFalling(vector<float>& data)
  	@param data will be updated with the [total, left, right, forward, backward]
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getFallen(vector<float>& data)
+bool NUSensorsData::getFallen(std::vector<float>& data)
 {
     return get(Fallen, data);
 }
@@ -469,7 +469,7 @@ bool NUSensorsData::getFallen(vector<float>& data)
  	@param data will be updated with the [x(cm), y(cm)]
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getZmp(const id_t& id, vector<float>& data)
+bool NUSensorsData::getZmp(const id_t& id, std::vector<float>& data)
 {
     // TODO: this isn't right, it will always return the 'all' zmp.
     return get(Zmp, data);
@@ -483,7 +483,7 @@ bool NUSensorsData::getZmp(const id_t& id, vector<float>& data)
  	@param data will be updated with the [x(cm), y(cm), z(cm)]
  	@return true if valid, false if invalid
  */
-bool NUSensorsData::getGps(vector<float>& data)
+bool NUSensorsData::getGps(std::vector<float>& data)
 {
     return get(Gps, data);
 }
@@ -516,7 +516,7 @@ bool NUSensorsData::getCompass(float& data)
  	@param data will be updated the distances
  	@return true if the data is valid, false if not
  */
-bool NUSensorsData::getDistance(const id_t& id, vector<float>& data)
+bool NUSensorsData::getDistance(const id_t& id, std::vector<float>& data)
 {
     if (id < LDistance or id > LaserDistance)		// check the id is for a distance sensor
         return false;
@@ -581,7 +581,7 @@ bool NUSensorsData::getBatteryCharge(float& data)
  */
 bool NUSensorsData::get(const id_t& id, bool& data)
 {
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     float floatBuffer;
     if (ids.size() == 1)
     {
@@ -600,7 +600,7 @@ bool NUSensorsData::get(const id_t& id, bool& data)
  */
 bool NUSensorsData::get(const id_t& id, float& data)
 {
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
         return m_sensors[ids[0]].get(data);
     else
@@ -625,9 +625,9 @@ bool NUSensorsData::get(const id_t& id, double& data)
     @param data will be updated with the sensor reading(s)
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, vector<float>& data)
+bool NUSensorsData::get(const id_t& id, std::vector<float>& data)
 {
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return false;
@@ -653,9 +653,9 @@ bool NUSensorsData::get(const id_t& id, vector<float>& data)
     @param data will be updated with the sensor reading(s)
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data)
+bool NUSensorsData::get(const id_t& id, std::vector<std::vector<float> >& data)
 {
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return false;
@@ -666,7 +666,7 @@ bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data)
         data.clear();
         data.reserve(numids);
         bool successful = true;
-        vector<float> vectorBuffer;
+        std::vector<float> vectorBuffer;
         for (size_t i=0; i<ids.size(); i++)
         {
             successful &= m_sensors[ids[i]].get(vectorBuffer);
@@ -681,9 +681,9 @@ bool NUSensorsData::get(const id_t& id, vector<vector<float> >& data)
     @param data will be updated with the sensor reading
     @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::get(const id_t& id, string& data)
+bool NUSensorsData::get(const id_t& id, std::string& data)
 {
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
         return m_sensors[ids[0]].get(data);
     else
@@ -701,16 +701,16 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, f
     if (id < All or id > NumJointIds) 			// check that the id is actually that of a joint
         return false;
     
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
     {
-        vector<float> vectorBuffer;
+        std::vector<float> vectorBuffer;
         if (m_sensors[ids[0]].get(vectorBuffer))
         {
             if (static_cast<unsigned>(in) < vectorBuffer.size())
             	data = vectorBuffer[in];
             else
-                data = numeric_limits<float>::quiet_NaN();
+                data = std::numeric_limits<float>::quiet_NaN();
             
             if (isnan(data))
                 return false;
@@ -730,12 +730,12 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, f
    @param data will be updated the the sensor readings
    @return true if the data is valid, false otherwise
  */
-bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, vector<float>& data)
+bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, std::vector<float>& data)
 {
     if (id < All or id > NumJointIds) 			// check that the id is actually that of a joint
         return false;
     
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids <= 1)
         return false;
@@ -744,7 +744,7 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, v
         data.clear();
         data.reserve(numids);
         bool successful = true;
-        vector<float> vectorBuffer;
+        std::vector<float> vectorBuffer;
         float floatBuffer;
         for (size_t i=0; i<numids; i++)
         {
@@ -752,8 +752,8 @@ bool NUSensorsData::getJointData(const id_t& id, const JointSensorIndices& in, v
             if (static_cast<unsigned>(in) < vectorBuffer.size())
                 floatBuffer = vectorBuffer[in];
             else
-                floatBuffer = numeric_limits<float>::quiet_NaN();
-            successful &= not isnan(floatBuffer);
+                floatBuffer = std::numeric_limits<float>::quiet_NaN();
+            successful &= not std::isnan(floatBuffer);
             data.push_back(floatBuffer);
         }
         return successful;
@@ -783,17 +783,17 @@ bool NUSensorsData::getEndEffectorData(const id_t& id, const EndEffectorIndices&
         return false;
     
     // proceed as usual with the proper end effector id
-    const vector<int>& ids = mapIdToIndices(e_id);
+    const std::vector<int>& ids = mapIdToIndices(e_id);
     if (ids.size() == 1)
     {
-        vector<float> vectorBuffer;
+        std::vector<float> vectorBuffer;
         if (m_sensors[ids[0]].get(vectorBuffer))
         {
             if (static_cast<size_t>(in) < vectorBuffer.size())
             	data = vectorBuffer[in];
             else
-                data = numeric_limits<float>::quiet_NaN();
-            if (isnan(data))
+                data = std::numeric_limits<float>::quiet_NaN();
+            if (std::isnan(data))
                 return false;
             else
                 return true;
@@ -816,16 +816,16 @@ bool NUSensorsData::getButtonData(const id_t& id, const ButtonSensorIndices& in,
     if (id < MainButton or id > RightButton)			// check the id is for a button sensor
         return false;
     
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     if (ids.size() == 1)
     {
-        vector<float> vectorBuffer;
+        std::vector<float> vectorBuffer;
         if (m_sensors[ids[0]].get(vectorBuffer))
         {
             if (static_cast<unsigned>(in) < vectorBuffer.size())
             	data = vectorBuffer[in];
             else
-                data = numeric_limits<float>::quiet_NaN();
+                data = std::numeric_limits<float>::quiet_NaN();
             if (isnan(data))
                 return false;
             else
@@ -848,7 +848,7 @@ bool NUSensorsData::getButtonData(const id_t& id, const ButtonSensorIndices& in,
  */
 bool NUSensorsData::isFalling()
 {
-    vector<float> temp;
+    std::vector<float> temp;
     if (get(Falling, temp) and temp[0] > 0)
         return true;
     else
@@ -859,7 +859,7 @@ bool NUSensorsData::isFalling()
  */
 bool NUSensorsData::isFallen()
 {
-    vector<float> temp;
+    std::vector<float> temp;
     if (get(Fallen, temp) and temp[0] > 0)
         return true;
     else
@@ -923,9 +923,9 @@ void NUSensorsData::set(const id_t& id, double time, bool data)
 void NUSensorsData::set(const id_t& id, double time, const float& data)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].set(time, data);
 }
@@ -935,12 +935,12 @@ void NUSensorsData::set(const id_t& id, double time, const float& data)
     @param time the time in ms the value was captured
     @param data the data
  */
-void NUSensorsData::set(const id_t& id, double time, const vector<float>& data)
+void NUSensorsData::set(const id_t& id, double time, const std::vector<float>& data)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -956,7 +956,7 @@ void NUSensorsData::set(const id_t& id, double time, const vector<float>& data)
     else
     {
         debug << "NUSensors::set(" << id.Name << "," << time << "," << data << "). The data is incorrectly formatted. ";
-        debug << "data.size():" << data.size() << " must be ids.size():" << numids << endl;
+        debug << "data.size():" << data.size() << " must be ids.size():" << numids << std::endl;
     }
 }
 
@@ -965,12 +965,12 @@ void NUSensorsData::set(const id_t& id, double time, const vector<float>& data)
     @param time the time in ms the value was captured
     @param data the data
  */
-void NUSensorsData::set(const id_t& id, double time, const vector<vector<float> >& data)
+void NUSensorsData::set(const id_t& id, double time, const std::vector<std::vector<float> >& data)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << endl;
+        debug << "NUSensorsData::set(" << id.Name << "," << time << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -986,7 +986,7 @@ void NUSensorsData::set(const id_t& id, double time, const vector<vector<float> 
     else
     {
         debug << "NUSensors::set(" << id.Name << "," << time << "," << data << "). The data is incorrectly formatted. ";
-        debug << "data.size():" << data.size() << " must be ids.size():" << numids << endl;
+        debug << "data.size():" << data.size() << " must be ids.size():" << numids << std::endl;
     }
 }
 
@@ -995,12 +995,12 @@ void NUSensorsData::set(const id_t& id, double time, const vector<vector<float> 
     @param time the time in ms the value was captured
     @param data the data
  */
-void NUSensorsData::set(const id_t& id, double time, const string& data)
+void NUSensorsData::set(const id_t& id, double time, const std::string& data)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NUSensorsData::set(" << id.Name << "," << time << ",\"" << data << "\")" << endl;
+        debug << "NUSensorsData::set(" << id.Name << "," << time << ",\"" << data << "\")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].set(time, data);
 }
@@ -1010,7 +1010,7 @@ void NUSensorsData::set(const id_t& id, double time, const string& data)
  */
 void NUSensorsData::setAsInvalid(const id_t& id)
 {
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].setAsInvalid();
 }
@@ -1024,9 +1024,9 @@ void NUSensorsData::setAsInvalid(const id_t& id)
 void NUSensorsData::modify(const id_t& id, int start, double time, const float& data)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NUSensorsData::modify(" << id.Name << "," << time << "," << start << "," << data << ")" << endl;
+        debug << "NUSensorsData::modify(" << id.Name << "," << time << "," << start << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     for (size_t i=0; i<ids.size(); i++)
         m_sensors[ids[i]].modify(time, start, data);
 }
@@ -1037,12 +1037,12 @@ void NUSensorsData::modify(const id_t& id, int start, double time, const float& 
     @param time the time is ms the new data was captured
     @param data the new data
  */
-void NUSensorsData::modify(const id_t& id, int start, double time, const vector<float>& data)
+void NUSensorsData::modify(const id_t& id, int start, double time, const std::vector<float>& data)
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 4
-        debug << "NUSensorsData::modify(" << id.Name << "," << time << "," << start << "," << data << ")" << endl;
+        debug << "NUSensorsData::modify(" << id.Name << "," << time << "," << start << "," << data << ")" << std::endl;
     #endif
-    const vector<int>& ids = mapIdToIndices(id);
+    const std::vector<int>& ids = mapIdToIndices(id);
     size_t numids = ids.size();
     if (numids == 0)
         return;
@@ -1058,7 +1058,7 @@ void NUSensorsData::modify(const id_t& id, int start, double time, const vector<
     else
     {
         debug << "NUSensors::modify(" << id.Name << "," << time << "," << start << "," << data << "). The data is incorrectly formatted. ";
-        debug << "data.size():" << data.size() << " must be ids.size():" << numids << endl;
+        debug << "data.size():" << data.size() << " must be ids.size():" << numids << std::endl;
     }
 }
 
@@ -1069,7 +1069,7 @@ void NUSensorsData::modify(const id_t& id, int start, double time, const vector<
 /*! @brief Puts a user readable summary of the contents of the NUSensorsData class
     @param output the stream in which to put the summary
  */
-void NUSensorsData::summaryTo(ostream& output) const
+void NUSensorsData::summaryTo(std::ostream& output) const
 {
     for (unsigned int i=0; i<m_sensors.size(); i++)
         m_sensors[i].summaryTo(output);
@@ -1077,7 +1077,7 @@ void NUSensorsData::summaryTo(ostream& output) const
 
 /*! @todo Implement this function
  */
-void NUSensorsData::csvTo(ostream& output)
+void NUSensorsData::csvTo(std::ostream& output)
 {
 }
 
@@ -1091,49 +1091,49 @@ int NUSensorsData::size() const
 void NUSensorsData::setLocSensors(const NULocalisationSensors& locsensors)
 {
     int gps_id,compass_id,odom_id,falling_id,fallen_id,getup_id,lf_id,rf_id;
-    const vector<int>& gps_ids = mapIdToIndices(Gps);
+    const std::vector<int>& gps_ids = mapIdToIndices(Gps);
     if (gps_ids.size() == 1)
     {
         gps_id = gps_ids[0];
         m_sensors[gps_id] = locsensors.gps();
     }
-    const vector<int>& compass_ids = mapIdToIndices(Compass);
+    const std::vector<int>& compass_ids = mapIdToIndices(Compass);
     if (compass_ids.size() == 1)
     {
         compass_id = compass_ids[0];
         m_sensors[compass_id] = locsensors.compass();
     }
-    const vector<int>& odom_ids = mapIdToIndices(Odometry);
+    const std::vector<int>& odom_ids = mapIdToIndices(Odometry);
     if (odom_ids.size() == 1)
     {
         odom_id = odom_ids[0];
         m_sensors[odom_id] = locsensors.odometry();
     }
-    const vector<int>& falling_ids = mapIdToIndices(Falling);
+    const std::vector<int>& falling_ids = mapIdToIndices(Falling);
     if (falling_ids.size() == 1)
     {
         falling_id = falling_ids[0];
         m_sensors[falling_id] = locsensors.falling();
     }
-    const vector<int>& fallen_ids = mapIdToIndices(Fallen);
+    const std::vector<int>& fallen_ids = mapIdToIndices(Fallen);
     if (fallen_ids.size() == 1)
     {
         fallen_id = fallen_ids[0];
         m_sensors[fallen_id] = locsensors.fallen();
     }
-    const vector<int>& getup_ids = mapIdToIndices(MotionGetupActive);
+    const std::vector<int>& getup_ids = mapIdToIndices(MotionGetupActive);
     if (fallen_ids.size() == 1)
     {
         getup_id = getup_ids[0];
         m_sensors[getup_id] = locsensors.getup();
     }
-    const vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
+    const std::vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
     if (lf_ids.size() == 1)
     {
         lf_id = lf_ids[0];
         m_sensors[lf_id] = locsensors.leftFoot();
     }
-    const vector<int>& rf_ids = mapIdToIndices(RLegEndEffector);
+    const std::vector<int>& rf_ids = mapIdToIndices(RLegEndEffector);
     if (rf_ids.size() == 1)
     {
         rf_id = rf_ids[0];
@@ -1146,43 +1146,43 @@ void NUSensorsData::setLocSensors(const NULocalisationSensors& locsensors)
 NULocalisationSensors NUSensorsData::getLocSensors()
 {
     int gps_id,compass_id,odom_id,falling_id,fallen_id,getup_id,lf_id,rf_id;
-    const vector<int>& gps_ids = mapIdToIndices(Gps);
+    const std::vector<int>& gps_ids = mapIdToIndices(Gps);
     if (gps_ids.size() == 1)
     {
         gps_id = gps_ids[0];
     }
-    const vector<int>& compass_ids = mapIdToIndices(Compass);
+    const std::vector<int>& compass_ids = mapIdToIndices(Compass);
     if (compass_ids.size() == 1)
     {
         compass_id = compass_ids[0];
     }
-    const vector<int>& odom_ids = mapIdToIndices(Odometry);
+    const std::vector<int>& odom_ids = mapIdToIndices(Odometry);
     if (odom_ids.size() == 1)
     {
         odom_id = odom_ids[0];
     }
-    const vector<int>& falling_ids = mapIdToIndices(Falling);
+    const std::vector<int>& falling_ids = mapIdToIndices(Falling);
     if (falling_ids.size() == 1)
     {
         falling_id = falling_ids[0];
     }
-    const vector<int>& fallen_ids = mapIdToIndices(Fallen);
+    const std::vector<int>& fallen_ids = mapIdToIndices(Fallen);
     if (fallen_ids.size() == 1)
     {
         fallen_id = fallen_ids[0];
     }
 
-    const vector<int>& getup_ids = mapIdToIndices(MotionGetupActive);
+    const std::vector<int>& getup_ids = mapIdToIndices(MotionGetupActive);
     if (fallen_ids.size() == 1)
     {
         getup_id = getup_ids[0];
     }
-    const vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
+    const std::vector<int>& lf_ids = mapIdToIndices(LLegEndEffector);
     if (lf_ids.size() == 1)
     {
         lf_id = lf_ids[0];
     }
-    const vector<int>& rf_ids = mapIdToIndices(RLegEndEffector);
+    const std::vector<int>& rf_ids = mapIdToIndices(RLegEndEffector);
     if (rf_ids.size() == 1)
     {
         rf_id = rf_ids[0];
@@ -1194,21 +1194,21 @@ NULocalisationSensors NUSensorsData::getLocSensors()
 
 /*! @brief Put the entire contents of the NUSensorsData class into a stream
  */
-ostream& operator<< (ostream& output, const NUSensorsData& p_data)
+std::ostream& operator<< (std::ostream& output, const NUSensorsData& p_data)
 {    
-    output << p_data.m_common_ids << endl;
-    output << p_data.m_ids_copy << endl;
-    output << p_data.m_id_to_indices << endl;
-    output << p_data.m_available_ids << endl;
+    output << p_data.m_common_ids << std::endl;
+    output << p_data.m_ids_copy << std::endl;
+    output << p_data.m_id_to_indices << std::endl;
+    output << p_data.m_available_ids << std::endl;
     output << p_data.size() << " ";
     for (int i=0; i<p_data.size(); i++)
-        output << p_data.m_sensors[i] << endl;
+        output << p_data.m_sensors[i] << std::endl;
     return output;
 }
 
 /*! @brief Get the entire contents of the NUSensorsData class from a stream
  */
-istream& operator>> (istream& input, NUSensorsData& p_data)
+std::istream& operator>> (std::istream& input, NUSensorsData& p_data)
 {
     //input >> p_data.m_common_ids;
     readIdList(input, p_data.m_common_ids);
@@ -1223,7 +1223,7 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
     Sensor tempSensor("temp");
     for (int i=0; i<numsensors; i++)
     {
-        if(!input.good()) throw exception();
+        if(!input.good()) throw std::exception();
         input >> tempSensor;
         p_data.m_sensors.push_back(Sensor(tempSensor));
         if(tempSensor.Time > lastUpdateTime) lastUpdateTime = tempSensor.Time;
@@ -1235,10 +1235,10 @@ istream& operator>> (istream& input, NUSensorsData& p_data)
     return input;
 }
 
-void readIdList(istream& input, std::vector<NUData::id_t*>& list)
+void readIdList(std::istream& input, std::vector<NUData::id_t*>& list)
 {
-    stringstream wholevector;
-    //list.clear();
+    std::stringstream wholevector;
+    //std::list.clear();
     // get all of the data between [ ... ]
     input.ignore(128, '[');
     char c;

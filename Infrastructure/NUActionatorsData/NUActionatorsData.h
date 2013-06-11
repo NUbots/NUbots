@@ -31,7 +31,7 @@ class Actionator;
 
 #include <vector>
 #include <string>
-using namespace std;
+
 
 class NUActionatorsData : public NUData
 {
@@ -55,55 +55,55 @@ public:
     NUActionatorsData();
     ~NUActionatorsData();
     
-    void addActionators(const vector<string>& hardwarenames);
+    void addActionators(const std::vector<std::string>& hardwarenames);
     
     void preProcess(double currenttime);
-    void getNextServos(vector<float>& positions, vector<float>& gains);
-    void getNextLeds(vector<vector<vector<float> > >& leds);
-    void getNextSounds(vector<string>& sounds);
+    void getNextServos(std::vector<float>& positions, std::vector<float>& gains);
+    void getNextLeds(std::vector<std::vector<std::vector<float> > >& leds);
+    void getNextSounds(std::vector<std::string>& sounds);
     void postProcess();
     
-    bool isMemberOfGroup(const string& name, const id_t& group);
+    bool isMemberOfGroup(const std::string& name, const id_t& group);
     size_t getSize(const id_t& actionatorid);
     
     void add(const id_t& actionatorid, double time, float data);
     void add(const id_t& actionatorid, double time, float data, float gain);
-    void add(const id_t& actionatorid, double time, const vector<float>& data);
-    void add(const id_t& actionatorid, double time, const vector<float>& data, float gain);
-    void add(const id_t& actionatorid, double time, const vector<float>& data, const vector<float>& gain);
-    void add(const id_t& actionatorid, double time, const vector<vector<float> >& data);
-    void add(const id_t& actionatorid, double time, const vector<vector<vector<float> > >& data);
-    void add(const id_t& actionatorid, double time, const string& data);
-    void add(const id_t& actionatorid, double time, const vector<string>& data);
+    void add(const id_t& actionatorid, double time, const std::vector<float>& data);
+    void add(const id_t& actionatorid, double time, const std::vector<float>& data, float gain);
+    void add(const id_t& actionatorid, double time, const std::vector<float>& data, const std::vector<float>& gain);
+    void add(const id_t& actionatorid, double time, const std::vector<std::vector<float> >& data);
+    void add(const id_t& actionatorid, double time, const std::vector<std::vector<std::vector<float> > >& data);
+    void add(const id_t& actionatorid, double time, const std::string& data);
+    void add(const id_t& actionatorid, double time, const std::vector<std::string>& data);
     
-    void add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data);
-    void add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, float gain);
-    void add(const id_t& actionatorid, const vector<double>& time, const vector<float>& data, const vector<float>& gain);
-    void add(const id_t& actionatorid, const vector<double>& time, const vector<vector<float> >& data);
-    void add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<float> > >& data);
-    void add(const id_t& actionatorid, const vector<double>& time, const vector<vector<vector<vector<float> > > >& data);
-    void add(const id_t& actionatorid, const vector<double>& time, const vector<string>& data);
+    void add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<float>& data);
+    void add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<float>& data, float gain);
+    void add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<float>& data, const std::vector<float>& gain);
+    void add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<std::vector<float> >& data);
+    void add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<std::vector<std::vector<float> > >& data);
+    void add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<std::vector<std::vector<std::vector<float> > > >& data);
+    void add(const id_t& actionatorid, const std::vector<double>& time, const std::vector<std::string>& data);
 
-    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data);
-    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, float gain);
-    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<float>& gain);
-    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<float> >& data, const vector<vector<float> >& gain);
-    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<float> > >& data);
-    void add(const id_t& actionatorid, const vector<vector<double> >& time, const vector<vector<vector<vector<float> > > >& data);
+    void add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<float> >& data);
+    void add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<float> >& data, float gain);
+    void add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<float> >& data, const std::vector<float>& gain);
+    void add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<float> >& data, const std::vector<std::vector<float> >& gain);
+    void add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<std::vector<float> > >& data);
+    void add(const id_t& actionatorid, const std::vector<std::vector<double> >& time, const std::vector<std::vector<std::vector<std::vector<float> > > >& data);
     
-    void summaryTo(ostream& output);
+    void summaryTo(std::ostream& output);
     
-    friend ostream& operator<< (ostream& output, const NUActionatorsData& p_sensor);
-    friend istream& operator>> (istream& input, NUActionatorsData& p_sensor);
+    friend std::ostream& operator<< (std::ostream& output, const NUActionatorsData& p_sensor);
+    friend std::istream& operator>> (std::istream& input, NUActionatorsData& p_sensor);
 
 private:
     bool belongsToGroup(const id_t& member, const id_t& group);
-    bool belongsToGroup(const string& member, const id_t& group);
+    bool belongsToGroup(const std::string& member, const id_t& group);
     float interpolate(const double& time, const float& current, const float& target);
 
 private:
-    static vector<id_t*> m_ids;								   //!< a vector containing ALL of the actionator ids (even the ones which aren't available)
-    vector<Actionator> m_actionators;                          //!< a vector containing ALL actionators (even the ones which aren't available)
+    static std::vector<id_t*> m_ids;								   //!< a std::vector containing ALL of the actionator ids (even the ones which aren't available)
+    std::vector<Actionator> m_actionators;                          //!< a std::vector containing ALL actionators (even the ones which aren't available)
 };
 
 #endif

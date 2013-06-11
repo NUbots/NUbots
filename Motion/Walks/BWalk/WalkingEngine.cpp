@@ -253,7 +253,7 @@ void WalkingEngine::init()
 void WalkingEngine::setWalkParameters(const WalkParameters& walkparameters)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 0
-    debug << "WalkingEngine::setWalkParameters: " << endl;
+    debug << "WalkingEngine::setWalkParameters: " << std::endl;
 #endif
     m_walk_parameters = walkparameters;
     writeParameters();
@@ -262,14 +262,14 @@ void WalkingEngine::setWalkParameters(const WalkParameters& walkparameters)
 void WalkingEngine::writeParameters()
 {
 //#if DEBUG_NUMOTION_VERBOSITY > 0
-    debug << "WalkingEngine::writeParameters: " << endl;
+    debug << "WalkingEngine::writeParameters: " << std::endl;
 //#endif
-    vector<Parameter>& params = m_walk_parameters.getParameters();
+    std::vector<Parameter>& params = m_walk_parameters.getParameters();
     for(unsigned int i=0; i<params.size(); i++) {
-        string& nm = params.at(i).name();
+        std::string& nm = params.at(i).name();
         float value = params.at(i).get();
 //#if DEBUG_NUMOTION_VERBOSITY > 0
-    debug << nm << " : " << value << endl;
+    debug << nm << " : " << value << std::endl;
 //#endif
         if(nm.compare("standComPositionZ") == 0)
             p.standComPosition.z = value;
@@ -364,7 +364,7 @@ void WalkingEngine::writeParameters()
         else if(nm.compare("balanceBodyRotationYD") == 0)
             p.balanceBodyRotation.y.d = value;
         else
-            debug << "WalkingEngine::setWalkParameters(): No matching parameter found: " << nm << endl;
+            debug << "WalkingEngine::setWalkParameters(): No matching parameter found: " << nm << std::endl;
     }
 
     // Copy the default NUwalk parameter speed limits into the B-Human walk speed limits.
@@ -1245,9 +1245,9 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
             tmpSpeed.x *= (p.speedMaxMin.translation.x + maxSpeed.translation.x);
             tmpSpeed.y *= (p.speedMaxMin.translation.y + maxSpeed.translation.y);
             tmpSpeed.z *= (p.speedMaxMin.rotation + maxSpeed.rotation);
-            maxSpeed.translation.x = min(abs(tmpSpeed.x), maxSpeed.translation.x);
-            maxSpeed.translation.y = min(abs(tmpSpeed.y), maxSpeed.translation.y);
-            maxSpeed.rotation = min(abs(tmpSpeed.z), maxSpeed.rotation);
+            maxSpeed.translation.x = std::min(std::abs(tmpSpeed.x), maxSpeed.translation.x);
+            maxSpeed.translation.y = std::min(std::abs(tmpSpeed.y), maxSpeed.translation.y);
+            maxSpeed.rotation = std::min(std::abs(tmpSpeed.z), maxSpeed.rotation);
           }
 
 //          // x-speed clipping to handle limited deceleration

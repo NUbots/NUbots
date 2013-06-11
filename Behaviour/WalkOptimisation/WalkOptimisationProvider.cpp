@@ -60,7 +60,7 @@
 WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "WalkOptimisationProvider::WalkOptimisationProvider" << endl;
+        debug << "WalkOptimisationProvider::WalkOptimisationProvider" << std::endl;
     #endif
     loadId();
     loadWayPoints();
@@ -72,9 +72,9 @@ WalkOptimisationProvider::WalkOptimisationProvider(Behaviour* manager) : Behavio
     initOptimiser();
 
     if (not m_optimiser)
-        m_log.open((DATA_DIR + "/Optimisation/" + m_parameters.getName() + ".log").c_str(), fstream::out);
+        m_log.open((DATA_DIR + "/Optimisation/" + m_parameters.getName() + ".log").c_str(), std::fstream::out);
     else
-        m_log.open((DATA_DIR + "/Optimisation/" + m_id + "Log.log").c_str(), fstream::out | fstream::app);
+        m_log.open((DATA_DIR + "/Optimisation/" + m_id + "Log.log").c_str(), std::fstream::out | std::fstream::app);
 
     m_generate = new GenerateWalkParametersState(this);
     m_evaluate = new EvaluateWalkParametersState(this);
@@ -133,31 +133,31 @@ void WalkOptimisationProvider::doBehaviourCommons()
     if (m_previous_state == m_paused and m_state == m_generate)
         m_jobs->addMotionJob(new WalkParametersJob(m_parameters)); 
 	#ifndef USE_VISION		// if there is no vision then just fix the head in (0,0) position
-		m_jobs->addMotionJob(new HeadJob(0,vector<float>(2,0)));
+		m_jobs->addMotionJob(new HeadJob(0,std::vector<float>(2,0)));
 	#endif
 }
 
 void WalkOptimisationProvider::tickOptimiser()
 {    
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "WalkOptimisationProvider::tickOptimiser" << endl;
+        debug << "WalkOptimisationProvider::tickOptimiser" << std::endl;
     #endif 
     // update the optimiser and give the next set of parameters to the walk engine
 	#ifdef USE_MO
-        vector<float> fitness = calculateFitnesses();
+        std::vector<float> fitness = calculateFitnesses();
 	#else
         float fitness = calculateFitness();
 	#endif
     if (m_optimiser)
     {            
 		m_optimiser->setParametersResult(fitness);
-        vector<float> nextparameters = m_optimiser->getNextParameters();
+        std::vector<float> nextparameters = m_optimiser->getNextParameters();
         m_parameters.set(nextparameters);
     }
     m_jobs->addMotionJob(new WalkParametersJob(m_parameters));
     
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-			debug << "WalkOptimisationProvider::tickOptimiser() new parameters: " << m_parameters.getAsVector() << endl;
+			debug << "WalkOptimisationProvider::tickOptimiser() new parameters: " << m_parameters.getAsVector() << std::endl;
     #endif
 
     // save the state of the optimiser, and the walk parameters in case of hardware failure.
@@ -166,9 +166,9 @@ void WalkOptimisationProvider::tickOptimiser()
     m_iteration_count++;
 }
 
-vector<float> WalkOptimisationProvider::calculateFitnesses()
+std::vector<float> WalkOptimisationProvider::calculateFitnesses()
 {
-    vector<float> fitness(2,0);
+    std::vector<float> fitness(2,0);
     float speed = 0;
     float cost = 0;
     bool unstable = true;
@@ -176,11 +176,11 @@ vector<float> WalkOptimisationProvider::calculateFitnesses()
     if (not m_generate->success())
     {
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 2
-			debug << "WalkOptimisationProvider::calculateFitness() Generate state was not successful" << endl;
+			debug << "WalkOptimisationProvider::calculateFitness() Generate state was not successful" << std::endl;
 		#endif
-		float distance = max(10.0f, m_generate->distance());
-		float duration = max(300.0f, m_generate->duration());
-		float energy = max(20.0f, m_generate->energy());
+		float distance = std::max(10.0f, m_generate->distance());
+		float duration = std::max(300.0f, m_generate->duration());
+		float energy = std::max(20.0f, m_generate->energy());
 		speed = 1000*distance/duration;
 		cost = 100*energy/(9.81*4.6*distance);
 
@@ -191,11 +191,11 @@ vector<float> WalkOptimisationProvider::calculateFitnesses()
     else if (not m_evaluate->success())
     {
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 2
-			debug << "WalkOptimisationProvider::calculateFitness() Evaluate state was not successful" << endl;
+			debug << "WalkOptimisationProvider::calculateFitness() Evaluate state was not successful" << std::endl;
 		#endif
-		float distance = max(10.0f, m_generate->distance() + m_evaluate->distance());
-		float duration = max(300.0f, m_generate->duration() + m_evaluate->duration());
-		float energy = max(20.0f, m_generate->energy() + m_evaluate->energy());
+		float distance = std::max(10.0f, m_generate->distance() + m_evaluate->distance());
+		float duration = std::max(300.0f, m_generate->duration() + m_evaluate->duration());
+		float energy = std::max(20.0f, m_generate->energy() + m_evaluate->energy());
 		speed = 1000*distance/duration;
 		cost = 100*energy/(9.81*4.6*distance);
 
@@ -206,7 +206,7 @@ vector<float> WalkOptimisationProvider::calculateFitnesses()
     else
     {
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 2
-			debug << "WalkOptimisationProvider::calculateFitness() Evaluate state was successful" << endl;
+			debug << "WalkOptimisationProvider::calculateFitness() Evaluate state was successful" << std::endl;
 		#endif
     	speed = 1000*m_evaluate->distance()/m_evaluate->duration();
     	cost = 100*m_evaluate->energy()/(9.81*4.6*m_evaluate->distance());
@@ -214,7 +214,7 @@ vector<float> WalkOptimisationProvider::calculateFitnesses()
     }
 
 	#if DEBUG_BEHAVIOUR_VERBOSITY > 2
-		debug << "WalkOptimisationProvider::calculateFitness() speed: " << speed << " " << cost << endl;
+		debug << "WalkOptimisationProvider::calculateFitness() speed: " << speed << " " << cost << std::endl;
 	#endif
 
     #ifdef TARGET_IS_NAOWEBOTS
@@ -225,14 +225,14 @@ vector<float> WalkOptimisationProvider::calculateFitnesses()
     fitness[0] = speed;                      	// speed--based fitness
     fitness[1] = 180/(4+cost);                  // cost--based fitness
     //fitness = 20*pow(speed,2)/(9.81*m_parameters.getAsVector()[18]);      // froude--based fitness
-    m_log << m_iteration_count << ", " << fitness[1] << ", " << speed << ", " << cost << ", " << unstable << ", " << m_parameters.getAsVector() << endl << flush;
+    m_log << m_iteration_count << ", " << fitness[1] << ", " << speed << ", " << cost << ", " << unstable << ", " << m_parameters.getAsVector() << std::endl << std::flush;
 
     // update fall count    
     if (unstable)
         m_fall_count++;    
 
 	#if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "WalkOptimisationProvider::calculateFitness() " << fitness << " for " << m_parameters.getAsVector() << endl;
+        debug << "WalkOptimisationProvider::calculateFitness() " << fitness << " for " << m_parameters.getAsVector() << std::endl;
     #endif
 
     return fitness;
@@ -250,8 +250,8 @@ float WalkOptimisationProvider::calculateFitness()
 /*! @brief Returns the distance required to stop for the current walk parameters */
 float WalkOptimisationProvider::stoppingDistance()
 {
-    vector<float>& speeds = m_parameters.getMaxSpeeds();
-    vector<float>& accels = m_parameters.getMaxAccelerations();
+    std::vector<float>& speeds = m_parameters.getMaxSpeeds();
+    std::vector<float>& accels = m_parameters.getMaxAccelerations();
     float xd = pow(1.1*speeds[0],2)/(2*accels[0]);          // s = u^2/2a with a 10% margin for error
     float yd = pow(1.1*speeds[1],2)/(2*accels[1]);
     return sqrt(xd*xd + yd*yd);              
@@ -261,50 +261,50 @@ float WalkOptimisationProvider::stoppingDistance()
  */
 void WalkOptimisationProvider::loadWayPoints()
 {
-	ifstream points_file((CONFIG_DIR + string("Motion/Optimisation/WayPoints.cfg")).c_str());
+	std::ifstream points_file((CONFIG_DIR + std::string("Motion/Optimisation/WayPoints.cfg")).c_str());
 	if (points_file.is_open())
 	{
 		points_file >> m_way_points;
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 0
-			debug << "WalkOptimisationProvider::m_way_points " << m_way_points << endl;
+			debug << "WalkOptimisationProvider::m_way_points " << m_way_points << std::endl;
 		#endif
 		points_file.close();
 	}
 	else
-		errorlog << "WalkOptimisationProvider::WalkOptimsationProvider. Unable to load WalkPoints.cfg" << endl;
+		errorlog << "WalkOptimisationProvider::WalkOptimsationProvider. Unable to load WalkPoints.cfg" << std::endl;
 }
 
 /* @brief Loads the optimisation episode's id from Count.txt. The id is stored in m_id
  */
 void WalkOptimisationProvider::loadId()
 {
-	fstream id_file((DATA_DIR + "/Optimisation/Count.txt").c_str());
+	std::fstream id_file((DATA_DIR + "/Optimisation/Count.txt").c_str());
 	if (id_file.is_open())
 	{
 		int int_id = 0;
 		id_file >> int_id;
 		int_id++;
-		stringstream ss;
+		std::stringstream ss;
 		ss << int_id;
 		m_id = ss.str();
-		id_file.seekp(0, fstream::beg);
-		id_file << int_id << endl;
+		id_file.seekp(0, std::fstream::beg);
+		id_file << int_id << std::endl;
 		id_file.close();
 	}
 	#if DEBUG_BEHAVIOUR_VERBOSITY > 0
-		debug << "Episode Id: " << m_id << endl;
+		debug << "Episode Id: " << m_id << std::endl;
 	#endif
-	cout << m_id << endl;
+	std::cout << m_id << std::endl;
 }
 
 /*! @brief Loads the initial set of walk parameters for the optimisation episode
  *  @param name the name of the parameters to load
  */
-void WalkOptimisationProvider::loadParameters(const string& name)
+void WalkOptimisationProvider::loadParameters(const std::string& name)
 {
 	m_parameters.load(name);
 	#if DEBUG_BEHAVIOUR_VERBOSITY > 1
-		debug << "Initial Parameters: " << m_parameters << endl;
+		debug << "Initial Parameters: " << m_parameters << std::endl;
 	#endif
 }
 
@@ -312,7 +312,7 @@ void WalkOptimisationProvider::loadParameters(const string& name)
  */
 void WalkOptimisationProvider::initOptimiser()
 {
-	vector<Parameter> parameters = m_parameters.getAsParameters();
+	std::vector<Parameter> parameters = m_parameters.getAsParameters();
 	#if not defined(USE_STIFFNESS)
 		parameters.resize(parameters.size() - 6);           // remove the stiffnesses from the parameter set
 	#endif

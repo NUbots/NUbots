@@ -39,7 +39,7 @@ void ScriptKick::kill()
 void ScriptKick::stop()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Kick stop called. Finishing Kick." << endl;
+    debug << "Kick stop called. Finishing Kick." << std::endl;
     #endif
     if(m_script_start_time == -1 or m_current_script == NULL or
         m_data->CurrentTime > m_current_script->timeFinished()) {
@@ -82,9 +82,9 @@ void ScriptKick::loadKickParameters()
     float y_min_left_side = 3.2f;
     float y_max_left_side = 6.5f;
 
-    string filename = CONFIG_DIR + string("kickboxes.cfg");
-    ifstream input(filename.c_str());
-    string id_str;
+    std::string filename = CONFIG_DIR + std::string("kickboxes.cfg");
+    std::ifstream input(filename.c_str());
+    std::string id_str;
     if(input.good()) {
         float xmin, xmax, ymin, ymax;
         while(input.good()) {
@@ -132,32 +132,32 @@ void ScriptKick::loadKickParameters()
                 y_max_left_side = ymax;
             }
             else
-                errorlog << "ScriptKick::loadKickParameters - invalid kick name: " << id_str << endl;
+                errorlog << "ScriptKick::loadKickParameters - invalid kick name: " << id_str << std::endl;
         }
     }
     else {
-        errorlog << "ScriptKick::loadKickParameters - failed to load kickboxes.cfg" << endl;
+        errorlog << "ScriptKick::loadKickParameters - failed to load kickboxes.cfg" << std::endl;
     }
 
-    cout << " x_min_right_forward = " << x_min_right_forward << endl;
-    cout << " x_max_right_forward = " << x_max_right_forward << endl;
-    cout << " y_min_right_forward = " << y_min_right_forward << endl;
-    cout << " y_max_right_forward = " << y_max_right_forward << endl;
+    std::cout << " x_min_right_forward = " << x_min_right_forward << std::endl;
+    std::cout << " x_max_right_forward = " << x_max_right_forward << std::endl;
+    std::cout << " y_min_right_forward = " << y_min_right_forward << std::endl;
+    std::cout << " y_max_right_forward = " << y_max_right_forward << std::endl;
 
-    cout << " x_min_left_forward = " << x_min_left_forward << endl;
-    cout << " x_max_left_forward = " << x_max_left_forward << endl;
-    cout << " y_min_left_forward = " << y_min_left_forward << endl;
-    cout << " y_max_left_forward = " << y_max_left_forward << endl;
+    std::cout << " x_min_left_forward = " << x_min_left_forward << std::endl;
+    std::cout << " x_max_left_forward = " << x_max_left_forward << std::endl;
+    std::cout << " y_min_left_forward = " << y_min_left_forward << std::endl;
+    std::cout << " y_max_left_forward = " << y_max_left_forward << std::endl;
 
-    cout << " x_min_right_side = " << x_min_right_side << endl;
-    cout << " x_max_right_side = " << x_max_right_side << endl;
-    cout << " y_min_right_side = " << y_min_right_side << endl;
-    cout << " y_max_right_side = " << y_max_right_side << endl;
+    std::cout << " x_min_right_side = " << x_min_right_side << std::endl;
+    std::cout << " x_max_right_side = " << x_max_right_side << std::endl;
+    std::cout << " y_min_right_side = " << y_min_right_side << std::endl;
+    std::cout << " y_max_right_side = " << y_max_right_side << std::endl;
 
-    cout << " x_min_left_side = " << x_min_left_side << endl;
-    cout << " x_max_left_side = " << x_max_left_side << endl;
-    cout << " y_min_left_side = " << y_min_left_side << endl;
-    cout << " y_max_left_side = " << y_max_left_side << endl;
+    std::cout << " x_min_left_side = " << x_min_left_side << std::endl;
+    std::cout << " x_max_left_side = " << x_max_left_side << std::endl;
+    std::cout << " y_min_left_side = " << y_min_left_side << std::endl;
+    std::cout << " y_max_left_side = " << y_max_left_side << std::endl;
 
     m_right_kick_area = Rectangle(x_min_right_forward, x_max_right_forward, y_min_right_forward, y_max_right_forward);
     m_left_kick_area = Rectangle(x_min_left_forward, x_max_left_forward, y_min_left_forward, y_max_left_forward); //HACK: move right kick box three cm to right
@@ -206,7 +206,7 @@ bool ScriptKick::isUsingArms()
 {
     if(m_current_script != NULL)
     {
-        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLArm(),m_current_script->timeFinishedWithRArm()+100);
+        return m_data->CurrentTime > std::max(m_current_script->timeFinishedWithLArm(),m_current_script->timeFinishedWithRArm()+100);
     }
     else
     {
@@ -219,7 +219,7 @@ bool ScriptKick::isUsingLegs()
 {
     if(m_current_script != NULL)
     {
-        return m_data->CurrentTime > max(m_current_script->timeFinishedWithLLeg(),m_current_script->timeFinishedWithRLeg()+100);
+        return m_data->CurrentTime > std::max(m_current_script->timeFinishedWithLLeg(),m_current_script->timeFinishedWithRLeg()+100);
     }
     else
     {
@@ -267,25 +267,25 @@ void ScriptKick::doKick()
 {
     if(m_current_script and m_kick_enabled and m_kick_ready)
     {
-        static vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
-        static vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
-        static vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
-        static vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
-        static vector<float> nu_nextHeadJoints(m_actions->getSize(NUActionatorsData::Head), 0.0f);  // Right Leg
+        static std::vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
+        static std::vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
+        static std::vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
+        static std::vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
+        static std::vector<float> nu_nextHeadJoints(m_actions->getSize(NUActionatorsData::Head), 0.0f);  // Right Leg
 
-        static vector<float> nu_nextLeftArmGains(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
-        static vector<float> nu_nextRightArmGains(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
-        static vector<float> nu_nextLeftLegGains(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
-        static vector<float> nu_nextRightLegGains(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
-        static vector<float> nu_nextHeadGains(m_actions->getSize(NUActionatorsData::Head), 0.0f);  // Right Leg
+        static std::vector<float> nu_nextLeftArmGains(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
+        static std::vector<float> nu_nextRightArmGains(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
+        static std::vector<float> nu_nextLeftLegGains(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
+        static std::vector<float> nu_nextRightLegGains(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
+        static std::vector<float> nu_nextHeadGains(m_actions->getSize(NUActionatorsData::Head), 0.0f);  // Right Leg
         if((m_walk == NULL or !m_walk->isActive()) and (m_script_start_time == -1))   // Either we have no walk, or we want it to be inactive.
         {
             m_current_index = 0;
             m_script_start_time = m_data->CurrentTime;
             m_script_end_time = m_data->CurrentTime + m_current_script->m_times.back().back();
 
-            m_joints = std::vector<std::vector<float> > (m_current_script->m_times.back().size(), vector<float>());
-            m_gains = std::vector<std::vector<float> > (m_current_script->m_times.back().size(), vector<float>());
+            m_joints = std::vector<std::vector<float> > (m_current_script->m_times.back().size(), std::vector<float>());
+            m_gains = std::vector<std::vector<float> > (m_current_script->m_times.back().size(), std::vector<float>());
 
             unsigned int totalJoints = m_current_script->m_positions.size();
             unsigned int totalFrames = m_current_script->m_times.back().size();
@@ -401,7 +401,7 @@ void ScriptKick::doKick()
             m_script_end_time = -1;
         }
     }
-    //cout << "dokick is called" << endl;
+    //std::cout << "dokick is called" << std::endl;
 //    if(m_current_script and m_kick_enabled and m_kick_ready and (m_script_start_time == -1))    // Check if there is a script ready, that has not been started.
 //    {
 //        if(m_walk == NULL or !m_walk->isActive())   // Either we have no walk, or we want it to be inactive.
@@ -414,9 +414,9 @@ void ScriptKick::doKick()
         
 //    }
 //    #if DEBUG_NUMOTION_VERBOSITY > 3
-//    debug << "Current Time: " << m_data->CurrentTime << endl;
-//    debug << "Walk: " << m_walk->isActive()<< endl;
-//    debug << "Script will finish at: " << m_current_script->timeFinished() << endl;
+//    debug << "Current Time: " << m_data->CurrentTime << std::endl;
+//    debug << "Walk: " << m_walk->isActive()<< std::endl;
+//    debug << "Script will finish at: " << m_current_script->timeFinished() << std::endl;
 //    #endif
 
 //    if((m_script_end_time != -1) and (m_data->CurrentTime > m_script_end_time))
@@ -435,7 +435,7 @@ void ScriptKick::doKick()
     return;
 }
 
-void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> &target)
+void ScriptKick::kickToPoint(const std::vector<float> &position, const std::vector<float> &target)
 {
     bool kick_begin = false;
 
@@ -458,7 +458,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         //std::cout << "Angle Too Large: " << theta << std::endl;
         return;
     }*/
-    //cout << theta << endl; //angle for debugging kick boxes / kick triggering
+    //std::cout << theta << std::endl; //angle for debugging kick boxes / kick triggering
     // Ball is in position for left kick.
 
     if((/*true or*/ theta > angle_margin and m_side_left_kick_area.PointInside(ball_x, ball_y)) and
@@ -477,7 +477,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         m_kicking_leg = leftLeg;
         m_current_script = m_left_kick_script;
         #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "leftfront: " << theta << endl;
+        debug << "leftfront: " << theta << std::endl;
         #endif
     }
     else if(theta < -angle_margin and m_side_right_kick_area.PointInside(ball_x, ball_y) and
@@ -487,7 +487,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         m_kicking_leg = leftLeg;
         m_current_script = m_side_right_kick_script;
         #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "rightside: " << theta << endl;
+        debug << "rightside: " << theta << std::endl;
         #endif
     }
     else if(theta >= -angle_margin and theta <= angle_margin
@@ -497,7 +497,7 @@ void ScriptKick::kickToPoint(const vector<float> &position, const vector<float> 
         m_kicking_leg = rightLeg;
         m_current_script = m_right_kick_script;
         #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "rightfront: " << theta << endl;
+        debug << "rightfront: " << theta << std::endl;
         #endif
     }
     else

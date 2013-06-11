@@ -27,12 +27,12 @@
 #include "debugverbositynetwork.h"
 
 /*! @brief Constructs a JobPort
-    @param nubotjobs the public nubot job list
+    @param nubotjobs the public nubot job std::list
  */
-JobPort::JobPort(JobList* nubotjobs): UdpPort(string("JobPort"), JOBS_PORT, true)
+JobPort::JobPort(JobList* nubotjobs): UdpPort(std::string("JobPort"), JOBS_PORT, true)
 {
     #if DEBUG_NETWORK_VERBOSITY > 0
-        debug << "JobPort::JobPort(" << nubotjobs << ")" << endl;
+        debug << "JobPort::JobPort(" << nubotjobs << ")" << std::endl;
     #endif
     m_jobs = nubotjobs;
 }
@@ -42,7 +42,7 @@ JobPort::JobPort(JobList* nubotjobs): UdpPort(string("JobPort"), JOBS_PORT, true
 JobPort::~JobPort()
 {
 #if DEBUG_NETWORK_VERBOSITY > 0
-    debug << "JobPort::~JobPort()" << endl;
+    debug << "JobPort::~JobPort()" << std::endl;
 #endif
 }
 
@@ -56,7 +56,7 @@ void JobPort::setTargetAddress(std::string ipaddress)
 {
     m_target_address.sin_addr.s_addr = inet_addr(ipaddress.c_str());
     #if DEBUG_NETWORK_VERBOSITY > 0
-        debug << "JobPort::setTargetAddress() " << inet_ntoa(m_target_address.sin_addr) << endl;
+        debug << "JobPort::setTargetAddress() " << inet_ntoa(m_target_address.sin_addr) << std::endl;
     #endif
 }
 
@@ -66,17 +66,17 @@ void JobPort::setBroadcast()
 {
     m_target_address = m_broadcast_address;
     #if DEBUG_NETWORK_VERBOSITY > 0
-        debug << "JobPort::setTargetAddress() " << inet_ntoa(m_target_address.sin_addr) << endl;
+        debug << "JobPort::setTargetAddress() " << inet_ntoa(m_target_address.sin_addr) << std::endl;
     #endif
 }
 
 /*! @brief Send the jobs over the network
     @param port the jobport
-    @param jobs the job list to send
+    @param jobs the job std::list to send
  */
 JobPort& operator<<(JobPort& port, JobList& jobs)
 {   
-    stringstream buffer;
+    std::stringstream buffer;
     buffer << jobs;
     port.sendData(buffer);
     return port;
@@ -84,11 +84,11 @@ JobPort& operator<<(JobPort& port, JobList& jobs)
 
 /*! @brief Send the jobs over the network
     @param port the jobport
-    @param jobs the job list to send
+    @param jobs the job std::list to send
  */
 JobPort& operator<<(JobPort& port, JobList* jobs)
 {
-    stringstream buffer;
+    std::stringstream buffer;
     buffer << *jobs;
     port.sendData(buffer);
     return port;
@@ -100,7 +100,7 @@ JobPort& operator<<(JobPort& port, JobList* jobs)
 void JobPort::handleNewData(std::stringstream& buffer)
 {
     #if DEBUG_NETWORK_VERBOSITY > 0
-        debug << "JobPort::handleNewData()" << endl;
+        debug << "JobPort::handleNewData()" << std::endl;
     #endif
     buffer >> *m_jobs;
     #if DEBUG_NETWORK_VERBOSITY > 0

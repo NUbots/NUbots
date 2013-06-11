@@ -14,7 +14,7 @@ class RANSACCircle
 public:
     RANSACCircle() : m_centre(0,0), m_radius(0) {}
 
-    bool regenerate(const vector<T> &pts)
+    bool regenerate(const std::vector<T> &pts)
     {
         if(pts.size() == minPointsForFit()) {
             return constructFromPoints(pts[0], pts[1], pts[2], 1.0e-2);
@@ -69,7 +69,7 @@ class RANSACCircle<GroundPoint>
 public:
     RANSACCircle() : m_radius(0) {}
 
-    bool regenerate(const vector<GroundPoint> &pts)
+    bool regenerate(const std::vector<GroundPoint> &pts)
     {
         if(pts.size() == minPointsForFit()) {
             return constructFromPoints(pts[0], pts[1], pts[2], 1.0e-2);

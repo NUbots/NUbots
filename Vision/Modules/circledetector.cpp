@@ -21,16 +21,16 @@ void CircleDetector::setTolerance(double tolerance)
 {
 #if VISION_FIELDPOINT_VERBOSITY > 0
     if(tolerance < 0 || tolerance > 1)
-        debug << "CircleDetector::setTolerance - invalid tolerance: " << tolerance << " (must be in [0, 1]." << endl;
+        debug << "CircleDetector::setTolerance - invalid tolerance: " << tolerance << " (must be in [0, 1]." << std::endl;
 #endif
 
-    m_tolerance = max(min(tolerance, 1.0), 0.0); //clamp
+    m_tolerance = std::max(std::min(tolerance, 1.0), 0.0); //clamp
 }
 
-bool CircleDetector::run(vector<GroundPoint> &points, CentreCircle &result)
+bool CircleDetector::run(std::vector<GroundPoint> &points, CentreCircle &result)
 {
     RANSACCircle<GroundPoint> candidate;
-    vector<GroundPoint> consensus, remainder;
+    std::vector<GroundPoint> consensus, remainder;
     double variance;
     int i=0;
     bool modelfound = false;
@@ -53,10 +53,10 @@ bool CircleDetector::run(vector<GroundPoint> &points, CentreCircle &result)
                    top = VisionBlackboard::getInstance()->getImageHeight() - 1,
                    bottom = 0;
             BOOST_FOREACH(const GroundPoint& p, consensus) {
-                left = min(left, p.screen.x);
-                right = max(right, p.screen.x);
-                top = min(top, p.screen.y);
-                bottom = max(bottom, p.screen.y);
+                left = std::min(left, p.screen.x);
+                right = std::max(right, p.screen.x);
+                top = std::min(top, p.screen.y);
+                bottom = std::max(bottom, p.screen.y);
             }
 
             result = CentreCircle(candidate.getCentre(), candidate.getRadius(), Vector2<double>(right-left, bottom-top));

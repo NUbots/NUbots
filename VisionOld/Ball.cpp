@@ -100,7 +100,7 @@ bool Ball::isVisualBallDistanceCloseDistanceToPoint(Circle circ, Vision* vision,
     visualSphericalPosition[1] = bearing;
     visualSphericalPosition[2] = elevation;
 
-    vector<float> ctvector;
+    std::vector<float> ctvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
     if(isOK == true)
     {
@@ -111,7 +111,7 @@ bool Ball::isVisualBallDistanceCloseDistanceToPoint(Circle circ, Vision* vision,
 
     //GET CENTRE POINT on CIRCLE, use Distance to point:
 
-    vector<float> ctgvector;
+    std::vector<float> ctgvector;
     float distanceD2P = 0.0;
     isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
     if(isOK == true)
@@ -120,7 +120,7 @@ bool Ball::isVisualBallDistanceCloseDistanceToPoint(Circle circ, Vision* vision,
         Vector3<float> relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
         distanceD2P = relativePoint[0];
         #if DEBUG_VISION_VERBOSITY > 6
-            debug << "\t\tCalculated Distance to Point: " << distanceD2P << endl;
+            debug << "\t\tCalculated Distance to Point: " << distanceD2P << std::endl;
         #endif
     }
     else
@@ -131,7 +131,7 @@ bool Ball::isVisualBallDistanceCloseDistanceToPoint(Circle circ, Vision* vision,
     //COMPARE: VisualDistance and Distance to Point:
 
     #if DEBUG_VISION_VERBOSITY > 6
-        debug << "Ball Distance Check: "<< "Measured:"<< VisualFlatDistance << "D2P:"<< distanceD2P <<endl;
+        debug << "Ball Distance Check: "<< "Measured:"<< VisualFlatDistance << "D2P:"<< distanceD2P <<std::endl;
     #endif
     //qDebug() << VisualFlatDistance << distanceD2P << elevation << 3.14/2-headElevation<<VisualDistance;
     //float DistanceDifference = fabs(VisualFlatDistance - distanceD2P);
@@ -483,7 +483,7 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
             circ.isDefined = false;
         }
         //#if TARGET_OS_IS_WINDOWS
-        //    qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd/circ.radius << endl;
+        //    qDebug() << "Circle found " << circ.isDefined<<": (" << circ.centreX << "," << circ.centreY << ") Radius: "<< circ.radius << " Fitting: " << circ.sd/circ.radius << std::endl;
         //#endif
     }
     else
@@ -502,7 +502,7 @@ Circle Ball::isCorrectFit(const std::vector < Vector2<int> > &ballPoints, const 
         float elevation = vision->CalculateElevation(circ.centreY);
         float distance;
         // check if distance to point is available
-        vector<float> ctgvector;
+        std::vector<float> ctgvector;
         bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
         if(isOK == true)
         {   // if distance to point is available, then hack it, and set the radius of the ball to be what it should be

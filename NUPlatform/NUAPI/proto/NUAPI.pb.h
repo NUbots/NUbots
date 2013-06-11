@@ -35,6 +35,8 @@ void protobuf_ShutdownFile_NUAPI_2eproto();
 class Message;
 class Image;
 class VisionFieldObject;
+class VisionClassifiedSegment;
+class VisionClassifiedImage;
 class Vision;
 class Motor;
 class SensorData;
@@ -65,11 +67,12 @@ inline bool Message_Type_Parse(
 enum VisionFieldObject_Type {
   VisionFieldObject_Type_CIRCLE = 1,
   VisionFieldObject_Type_RECTANGLE = 2,
-  VisionFieldObject_Type_POLYGON = 3
+  VisionFieldObject_Type_POLYGON = 3,
+  VisionFieldObject_Type_UNKNOWN = 4
 };
 bool VisionFieldObject_Type_IsValid(int value);
 const VisionFieldObject_Type VisionFieldObject_Type_Type_MIN = VisionFieldObject_Type_CIRCLE;
-const VisionFieldObject_Type VisionFieldObject_Type_Type_MAX = VisionFieldObject_Type_POLYGON;
+const VisionFieldObject_Type VisionFieldObject_Type_Type_MAX = VisionFieldObject_Type_UNKNOWN;
 const int VisionFieldObject_Type_Type_ARRAYSIZE = VisionFieldObject_Type_Type_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* VisionFieldObject_Type_descriptor();
@@ -396,6 +399,7 @@ class VisionFieldObject : public ::google::protobuf::Message {
   static const Type CIRCLE = VisionFieldObject_Type_CIRCLE;
   static const Type RECTANGLE = VisionFieldObject_Type_RECTANGLE;
   static const Type POLYGON = VisionFieldObject_Type_POLYGON;
+  static const Type UNKNOWN = VisionFieldObject_Type_UNKNOWN;
   static inline bool Type_IsValid(int value) {
     return VisionFieldObject_Type_IsValid(value);
   }
@@ -426,10 +430,17 @@ class VisionFieldObject : public ::google::protobuf::Message {
   inline ::API::VisionFieldObject_Type type() const;
   inline void set_type(::API::VisionFieldObject_Type value);
   
-  // optional string name = 2;
+  // optional uint32 id = 2;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 2;
+  inline ::google::protobuf::uint32 id() const;
+  inline void set_id(::google::protobuf::uint32 value);
+  
+  // optional string name = 3;
   inline bool has_name() const;
   inline void clear_name();
-  static const int kNameFieldNumber = 2;
+  static const int kNameFieldNumber = 3;
   inline const ::std::string& name() const;
   inline void set_name(const ::std::string& value);
   inline void set_name(const char* value);
@@ -437,59 +448,59 @@ class VisionFieldObject : public ::google::protobuf::Message {
   inline ::std::string* mutable_name();
   inline ::std::string* release_name();
   
-  // optional bool visible = 3;
+  // optional bool visible = 4;
   inline bool has_visible() const;
   inline void clear_visible();
-  static const int kVisibleFieldNumber = 3;
+  static const int kVisibleFieldNumber = 4;
   inline bool visible() const;
   inline void set_visible(bool value);
   
-  // optional float screen_x = 4;
+  // optional float screen_x = 5;
   inline bool has_screen_x() const;
   inline void clear_screen_x();
-  static const int kScreenXFieldNumber = 4;
+  static const int kScreenXFieldNumber = 5;
   inline float screen_x() const;
   inline void set_screen_x(float value);
   
-  // optional float screen_y = 5;
+  // optional float screen_y = 6;
   inline bool has_screen_y() const;
   inline void clear_screen_y();
-  static const int kScreenYFieldNumber = 5;
+  static const int kScreenYFieldNumber = 6;
   inline float screen_y() const;
   inline void set_screen_y(float value);
   
-  // optional float rotation = 6;
+  // optional float rotation = 7;
   inline bool has_rotation() const;
   inline void clear_rotation();
-  static const int kRotationFieldNumber = 6;
+  static const int kRotationFieldNumber = 7;
   inline float rotation() const;
   inline void set_rotation(float value);
   
-  // optional uint32 radius = 7;
+  // optional uint32 radius = 8;
   inline bool has_radius() const;
   inline void clear_radius();
-  static const int kRadiusFieldNumber = 7;
+  static const int kRadiusFieldNumber = 8;
   inline ::google::protobuf::uint32 radius() const;
   inline void set_radius(::google::protobuf::uint32 value);
   
-  // optional uint32 width = 8;
+  // optional uint32 width = 9;
   inline bool has_width() const;
   inline void clear_width();
-  static const int kWidthFieldNumber = 8;
+  static const int kWidthFieldNumber = 9;
   inline ::google::protobuf::uint32 width() const;
   inline void set_width(::google::protobuf::uint32 value);
   
-  // optional uint32 height = 9;
+  // optional uint32 height = 10;
   inline bool has_height() const;
   inline void clear_height();
-  static const int kHeightFieldNumber = 9;
+  static const int kHeightFieldNumber = 10;
   inline ::google::protobuf::uint32 height() const;
   inline void set_height(::google::protobuf::uint32 value);
   
-  // repeated uint32 points = 10;
+  // repeated uint32 points = 11;
   inline int points_size() const;
   inline void clear_points();
-  static const int kPointsFieldNumber = 10;
+  static const int kPointsFieldNumber = 11;
   inline ::google::protobuf::uint32 points(int index) const;
   inline void set_points(int index, ::google::protobuf::uint32 value);
   inline void add_points(::google::protobuf::uint32 value);
@@ -502,6 +513,8 @@ class VisionFieldObject : public ::google::protobuf::Message {
  private:
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_id();
+  inline void clear_has_id();
   inline void set_has_name();
   inline void clear_has_name();
   inline void set_has_visible();
@@ -521,19 +534,20 @@ class VisionFieldObject : public ::google::protobuf::Message {
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
-  ::std::string* name_;
   int type_;
+  ::google::protobuf::uint32 id_;
+  ::std::string* name_;
   bool visible_;
   float screen_x_;
   float screen_y_;
   float rotation_;
   ::google::protobuf::uint32 radius_;
   ::google::protobuf::uint32 width_;
-  ::google::protobuf::uint32 height_;
   ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > points_;
+  ::google::protobuf::uint32 height_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
   
   friend void  protobuf_AddDesc_NUAPI_2eproto();
   friend void protobuf_AssignDesc_NUAPI_2eproto();
@@ -541,6 +555,223 @@ class VisionFieldObject : public ::google::protobuf::Message {
   
   void InitAsDefaultInstance();
   static VisionFieldObject* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class VisionClassifiedSegment : public ::google::protobuf::Message {
+ public:
+  VisionClassifiedSegment();
+  virtual ~VisionClassifiedSegment();
+  
+  VisionClassifiedSegment(const VisionClassifiedSegment& from);
+  
+  inline VisionClassifiedSegment& operator=(const VisionClassifiedSegment& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+  
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+  
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const VisionClassifiedSegment& default_instance();
+  
+  void Swap(VisionClassifiedSegment* other);
+  
+  // implements Message ----------------------------------------------
+  
+  VisionClassifiedSegment* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const VisionClassifiedSegment& from);
+  void MergeFrom(const VisionClassifiedSegment& from);
+  void Clear();
+  bool IsInitialized() const;
+  
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  
+  ::google::protobuf::Metadata GetMetadata() const;
+  
+  // nested types ----------------------------------------------------
+  
+  // accessors -------------------------------------------------------
+  
+  // optional uint32 start_x = 1;
+  inline bool has_start_x() const;
+  inline void clear_start_x();
+  static const int kStartXFieldNumber = 1;
+  inline ::google::protobuf::uint32 start_x() const;
+  inline void set_start_x(::google::protobuf::uint32 value);
+  
+  // optional uint32 start_y = 2;
+  inline bool has_start_y() const;
+  inline void clear_start_y();
+  static const int kStartYFieldNumber = 2;
+  inline ::google::protobuf::uint32 start_y() const;
+  inline void set_start_y(::google::protobuf::uint32 value);
+  
+  // optional uint32 end_x = 3;
+  inline bool has_end_x() const;
+  inline void clear_end_x();
+  static const int kEndXFieldNumber = 3;
+  inline ::google::protobuf::uint32 end_x() const;
+  inline void set_end_x(::google::protobuf::uint32 value);
+  
+  // optional uint32 end_y = 4;
+  inline bool has_end_y() const;
+  inline void clear_end_y();
+  static const int kEndYFieldNumber = 4;
+  inline ::google::protobuf::uint32 end_y() const;
+  inline void set_end_y(::google::protobuf::uint32 value);
+  
+  // optional uint32 colour = 5;
+  inline bool has_colour() const;
+  inline void clear_colour();
+  static const int kColourFieldNumber = 5;
+  inline ::google::protobuf::uint32 colour() const;
+  inline void set_colour(::google::protobuf::uint32 value);
+  
+  // @@protoc_insertion_point(class_scope:API.VisionClassifiedSegment)
+ private:
+  inline void set_has_start_x();
+  inline void clear_has_start_x();
+  inline void set_has_start_y();
+  inline void clear_has_start_y();
+  inline void set_has_end_x();
+  inline void clear_has_end_x();
+  inline void set_has_end_y();
+  inline void clear_has_end_y();
+  inline void set_has_colour();
+  inline void clear_has_colour();
+  
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+  
+  ::google::protobuf::uint32 start_x_;
+  ::google::protobuf::uint32 start_y_;
+  ::google::protobuf::uint32 end_x_;
+  ::google::protobuf::uint32 end_y_;
+  ::google::protobuf::uint32 colour_;
+  
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  
+  friend void  protobuf_AddDesc_NUAPI_2eproto();
+  friend void protobuf_AssignDesc_NUAPI_2eproto();
+  friend void protobuf_ShutdownFile_NUAPI_2eproto();
+  
+  void InitAsDefaultInstance();
+  static VisionClassifiedSegment* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class VisionClassifiedImage : public ::google::protobuf::Message {
+ public:
+  VisionClassifiedImage();
+  virtual ~VisionClassifiedImage();
+  
+  VisionClassifiedImage(const VisionClassifiedImage& from);
+  
+  inline VisionClassifiedImage& operator=(const VisionClassifiedImage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+  
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+  
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const VisionClassifiedImage& default_instance();
+  
+  void Swap(VisionClassifiedImage* other);
+  
+  // implements Message ----------------------------------------------
+  
+  VisionClassifiedImage* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const VisionClassifiedImage& from);
+  void MergeFrom(const VisionClassifiedImage& from);
+  void Clear();
+  bool IsInitialized() const;
+  
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  
+  ::google::protobuf::Metadata GetMetadata() const;
+  
+  // nested types ----------------------------------------------------
+  
+  // accessors -------------------------------------------------------
+  
+  // optional uint32 num_segments = 1;
+  inline bool has_num_segments() const;
+  inline void clear_num_segments();
+  static const int kNumSegmentsFieldNumber = 1;
+  inline ::google::protobuf::uint32 num_segments() const;
+  inline void set_num_segments(::google::protobuf::uint32 value);
+  
+  // repeated .API.VisionClassifiedSegment segment = 2;
+  inline int segment_size() const;
+  inline void clear_segment();
+  static const int kSegmentFieldNumber = 2;
+  inline const ::API::VisionClassifiedSegment& segment(int index) const;
+  inline ::API::VisionClassifiedSegment* mutable_segment(int index);
+  inline ::API::VisionClassifiedSegment* add_segment();
+  inline const ::google::protobuf::RepeatedPtrField< ::API::VisionClassifiedSegment >&
+      segment() const;
+  inline ::google::protobuf::RepeatedPtrField< ::API::VisionClassifiedSegment >*
+      mutable_segment();
+  
+  // @@protoc_insertion_point(class_scope:API.VisionClassifiedImage)
+ private:
+  inline void set_has_num_segments();
+  inline void clear_has_num_segments();
+  
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+  
+  ::google::protobuf::RepeatedPtrField< ::API::VisionClassifiedSegment > segment_;
+  ::google::protobuf::uint32 num_segments_;
+  
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  
+  friend void  protobuf_AddDesc_NUAPI_2eproto();
+  friend void protobuf_AssignDesc_NUAPI_2eproto();
+  friend void protobuf_ShutdownFile_NUAPI_2eproto();
+  
+  void InitAsDefaultInstance();
+  static VisionClassifiedImage* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -618,18 +849,29 @@ class Vision : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::API::VisionFieldObject >*
       mutable_field_object();
   
+  // optional .API.VisionClassifiedImage classified_image = 3;
+  inline bool has_classified_image() const;
+  inline void clear_classified_image();
+  static const int kClassifiedImageFieldNumber = 3;
+  inline const ::API::VisionClassifiedImage& classified_image() const;
+  inline ::API::VisionClassifiedImage* mutable_classified_image();
+  inline ::API::VisionClassifiedImage* release_classified_image();
+  
   // @@protoc_insertion_point(class_scope:API.Vision)
  private:
   inline void set_has_image();
   inline void clear_has_image();
+  inline void set_has_classified_image();
+  inline void clear_has_classified_image();
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
   ::API::Image* image_;
   ::google::protobuf::RepeatedPtrField< ::API::VisionFieldObject > field_object_;
+  ::API::VisionClassifiedImage* classified_image_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
   
   friend void  protobuf_AddDesc_NUAPI_2eproto();
   friend void protobuf_AssignDesc_NUAPI_2eproto();
@@ -1550,15 +1792,37 @@ inline void VisionFieldObject::set_type(::API::VisionFieldObject_Type value) {
   type_ = value;
 }
 
-// optional string name = 2;
-inline bool VisionFieldObject::has_name() const {
+// optional uint32 id = 2;
+inline bool VisionFieldObject::has_id() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void VisionFieldObject::set_has_name() {
+inline void VisionFieldObject::set_has_id() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void VisionFieldObject::clear_has_name() {
+inline void VisionFieldObject::clear_has_id() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void VisionFieldObject::clear_id() {
+  id_ = 0u;
+  clear_has_id();
+}
+inline ::google::protobuf::uint32 VisionFieldObject::id() const {
+  return id_;
+}
+inline void VisionFieldObject::set_id(::google::protobuf::uint32 value) {
+  set_has_id();
+  id_ = value;
+}
+
+// optional string name = 3;
+inline bool VisionFieldObject::has_name() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void VisionFieldObject::set_has_name() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void VisionFieldObject::clear_has_name() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void VisionFieldObject::clear_name() {
   if (name_ != &::google::protobuf::internal::kEmptyString) {
@@ -1608,15 +1872,15 @@ inline ::std::string* VisionFieldObject::release_name() {
   }
 }
 
-// optional bool visible = 3;
+// optional bool visible = 4;
 inline bool VisionFieldObject::has_visible() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void VisionFieldObject::set_has_visible() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void VisionFieldObject::clear_has_visible() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void VisionFieldObject::clear_visible() {
   visible_ = false;
@@ -1630,15 +1894,15 @@ inline void VisionFieldObject::set_visible(bool value) {
   visible_ = value;
 }
 
-// optional float screen_x = 4;
+// optional float screen_x = 5;
 inline bool VisionFieldObject::has_screen_x() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void VisionFieldObject::set_has_screen_x() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void VisionFieldObject::clear_has_screen_x() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void VisionFieldObject::clear_screen_x() {
   screen_x_ = 0;
@@ -1652,15 +1916,15 @@ inline void VisionFieldObject::set_screen_x(float value) {
   screen_x_ = value;
 }
 
-// optional float screen_y = 5;
+// optional float screen_y = 6;
 inline bool VisionFieldObject::has_screen_y() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void VisionFieldObject::set_has_screen_y() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void VisionFieldObject::clear_has_screen_y() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void VisionFieldObject::clear_screen_y() {
   screen_y_ = 0;
@@ -1674,15 +1938,15 @@ inline void VisionFieldObject::set_screen_y(float value) {
   screen_y_ = value;
 }
 
-// optional float rotation = 6;
+// optional float rotation = 7;
 inline bool VisionFieldObject::has_rotation() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void VisionFieldObject::set_has_rotation() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void VisionFieldObject::clear_has_rotation() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void VisionFieldObject::clear_rotation() {
   rotation_ = 0;
@@ -1696,15 +1960,15 @@ inline void VisionFieldObject::set_rotation(float value) {
   rotation_ = value;
 }
 
-// optional uint32 radius = 7;
+// optional uint32 radius = 8;
 inline bool VisionFieldObject::has_radius() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void VisionFieldObject::set_has_radius() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void VisionFieldObject::clear_has_radius() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void VisionFieldObject::clear_radius() {
   radius_ = 0u;
@@ -1718,15 +1982,15 @@ inline void VisionFieldObject::set_radius(::google::protobuf::uint32 value) {
   radius_ = value;
 }
 
-// optional uint32 width = 8;
+// optional uint32 width = 9;
 inline bool VisionFieldObject::has_width() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void VisionFieldObject::set_has_width() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void VisionFieldObject::clear_has_width() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void VisionFieldObject::clear_width() {
   width_ = 0u;
@@ -1740,15 +2004,15 @@ inline void VisionFieldObject::set_width(::google::protobuf::uint32 value) {
   width_ = value;
 }
 
-// optional uint32 height = 9;
+// optional uint32 height = 10;
 inline bool VisionFieldObject::has_height() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void VisionFieldObject::set_has_height() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void VisionFieldObject::clear_has_height() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void VisionFieldObject::clear_height() {
   height_ = 0u;
@@ -1762,7 +2026,7 @@ inline void VisionFieldObject::set_height(::google::protobuf::uint32 value) {
   height_ = value;
 }
 
-// repeated uint32 points = 10;
+// repeated uint32 points = 11;
 inline int VisionFieldObject::points_size() const {
   return points_.size();
 }
@@ -1785,6 +2049,171 @@ VisionFieldObject::points() const {
 inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
 VisionFieldObject::mutable_points() {
   return &points_;
+}
+
+// -------------------------------------------------------------------
+
+// VisionClassifiedSegment
+
+// optional uint32 start_x = 1;
+inline bool VisionClassifiedSegment::has_start_x() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void VisionClassifiedSegment::set_has_start_x() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void VisionClassifiedSegment::clear_has_start_x() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void VisionClassifiedSegment::clear_start_x() {
+  start_x_ = 0u;
+  clear_has_start_x();
+}
+inline ::google::protobuf::uint32 VisionClassifiedSegment::start_x() const {
+  return start_x_;
+}
+inline void VisionClassifiedSegment::set_start_x(::google::protobuf::uint32 value) {
+  set_has_start_x();
+  start_x_ = value;
+}
+
+// optional uint32 start_y = 2;
+inline bool VisionClassifiedSegment::has_start_y() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void VisionClassifiedSegment::set_has_start_y() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void VisionClassifiedSegment::clear_has_start_y() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void VisionClassifiedSegment::clear_start_y() {
+  start_y_ = 0u;
+  clear_has_start_y();
+}
+inline ::google::protobuf::uint32 VisionClassifiedSegment::start_y() const {
+  return start_y_;
+}
+inline void VisionClassifiedSegment::set_start_y(::google::protobuf::uint32 value) {
+  set_has_start_y();
+  start_y_ = value;
+}
+
+// optional uint32 end_x = 3;
+inline bool VisionClassifiedSegment::has_end_x() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void VisionClassifiedSegment::set_has_end_x() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void VisionClassifiedSegment::clear_has_end_x() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void VisionClassifiedSegment::clear_end_x() {
+  end_x_ = 0u;
+  clear_has_end_x();
+}
+inline ::google::protobuf::uint32 VisionClassifiedSegment::end_x() const {
+  return end_x_;
+}
+inline void VisionClassifiedSegment::set_end_x(::google::protobuf::uint32 value) {
+  set_has_end_x();
+  end_x_ = value;
+}
+
+// optional uint32 end_y = 4;
+inline bool VisionClassifiedSegment::has_end_y() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void VisionClassifiedSegment::set_has_end_y() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void VisionClassifiedSegment::clear_has_end_y() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void VisionClassifiedSegment::clear_end_y() {
+  end_y_ = 0u;
+  clear_has_end_y();
+}
+inline ::google::protobuf::uint32 VisionClassifiedSegment::end_y() const {
+  return end_y_;
+}
+inline void VisionClassifiedSegment::set_end_y(::google::protobuf::uint32 value) {
+  set_has_end_y();
+  end_y_ = value;
+}
+
+// optional uint32 colour = 5;
+inline bool VisionClassifiedSegment::has_colour() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void VisionClassifiedSegment::set_has_colour() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void VisionClassifiedSegment::clear_has_colour() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void VisionClassifiedSegment::clear_colour() {
+  colour_ = 0u;
+  clear_has_colour();
+}
+inline ::google::protobuf::uint32 VisionClassifiedSegment::colour() const {
+  return colour_;
+}
+inline void VisionClassifiedSegment::set_colour(::google::protobuf::uint32 value) {
+  set_has_colour();
+  colour_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// VisionClassifiedImage
+
+// optional uint32 num_segments = 1;
+inline bool VisionClassifiedImage::has_num_segments() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void VisionClassifiedImage::set_has_num_segments() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void VisionClassifiedImage::clear_has_num_segments() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void VisionClassifiedImage::clear_num_segments() {
+  num_segments_ = 0u;
+  clear_has_num_segments();
+}
+inline ::google::protobuf::uint32 VisionClassifiedImage::num_segments() const {
+  return num_segments_;
+}
+inline void VisionClassifiedImage::set_num_segments(::google::protobuf::uint32 value) {
+  set_has_num_segments();
+  num_segments_ = value;
+}
+
+// repeated .API.VisionClassifiedSegment segment = 2;
+inline int VisionClassifiedImage::segment_size() const {
+  return segment_.size();
+}
+inline void VisionClassifiedImage::clear_segment() {
+  segment_.Clear();
+}
+inline const ::API::VisionClassifiedSegment& VisionClassifiedImage::segment(int index) const {
+  return segment_.Get(index);
+}
+inline ::API::VisionClassifiedSegment* VisionClassifiedImage::mutable_segment(int index) {
+  return segment_.Mutable(index);
+}
+inline ::API::VisionClassifiedSegment* VisionClassifiedImage::add_segment() {
+  return segment_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::API::VisionClassifiedSegment >&
+VisionClassifiedImage::segment() const {
+  return segment_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::API::VisionClassifiedSegment >*
+VisionClassifiedImage::mutable_segment() {
+  return &segment_;
 }
 
 // -------------------------------------------------------------------
@@ -1843,6 +2272,35 @@ Vision::field_object() const {
 inline ::google::protobuf::RepeatedPtrField< ::API::VisionFieldObject >*
 Vision::mutable_field_object() {
   return &field_object_;
+}
+
+// optional .API.VisionClassifiedImage classified_image = 3;
+inline bool Vision::has_classified_image() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Vision::set_has_classified_image() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Vision::clear_has_classified_image() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Vision::clear_classified_image() {
+  if (classified_image_ != NULL) classified_image_->::API::VisionClassifiedImage::Clear();
+  clear_has_classified_image();
+}
+inline const ::API::VisionClassifiedImage& Vision::classified_image() const {
+  return classified_image_ != NULL ? *classified_image_ : *default_instance_->classified_image_;
+}
+inline ::API::VisionClassifiedImage* Vision::mutable_classified_image() {
+  set_has_classified_image();
+  if (classified_image_ == NULL) classified_image_ = new ::API::VisionClassifiedImage;
+  return classified_image_;
+}
+inline ::API::VisionClassifiedImage* Vision::release_classified_image() {
+  clear_has_classified_image();
+  ::API::VisionClassifiedImage* temp = classified_image_;
+  classified_image_ = NULL;
+  return temp;
 }
 
 // -------------------------------------------------------------------

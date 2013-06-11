@@ -37,13 +37,13 @@
 //bool Beacon::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 //{
 //    #if VISION_BEACON_VERBOSITY > 1
-//        debug << "Beacon::addToExternalFieldObjects - m_id: " << VFOName(m_id) << endl;
-//        debug << "    " << *this << endl;
+//        debug << "Beacon::addToExternalFieldObjects - m_id: " << VFOName(m_id) << std::endl;
+//        debug << "    " << *this << std::endl;
 //    #endif
         
 //    if(valid) {
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::addToExternalFieldObjects - valid" << endl;
+//            debug << "Beacon::addToExternalFieldObjects - valid" << std::endl;
 //        #endif
 //        AmbiguousObject newAmbObj;
 //        FieldObjects::StationaryFieldObjectID stat_id;
@@ -66,9 +66,9 @@
 //            break;
 //        default:
 //            //invalid object - do not push to fieldobjects
-//            errorlog << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
+//            errorlog << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << std::endl;
 //            #if VISION_BEACON_VERBOSITY > 1
-//                debug << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << endl;
+//                debug << "Beacon::addToExternalFieldObjects - attempt to add invalid Beacon object" << std::endl;
 //            #endif
 //            return false;
 //        }
@@ -97,7 +97,7 @@
 //    }
 //    else {
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::addToExternalFieldObjects - invalid" << endl;
+//            debug << "Beacon::addToExternalFieldObjects - invalid" << std::endl;
 //        #endif
 //        return false;
 //    }
@@ -107,7 +107,7 @@
 //{
 ////    if(!distance_valid) {
 ////        #if VISION_BEACON_VERBOSITY > 1
-////            debug << "Beacon::check - Beacon thrown out: distance invalid" << endl;
+////            debug << "Beacon::check - Beacon thrown out: distance invalid" << std::endl;
 ////        #endif
 ////        return false;
 ////    }
@@ -116,7 +116,7 @@
 //    if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BEACONS and
 //       not VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location_pixels.x, m_location_pixels.y)) {
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::check - Beacon thrown out: base above kinematics horizon" << endl;
+//            debug << "Beacon::check - Beacon thrown out: base above kinematics horizon" << std::endl;
 //        #endif
 //        return false;
 //    }
@@ -125,8 +125,8 @@
 //    if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS and
 //            width_dist + VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS < d2p) {
 //        #if VISION_BEACON_VERBOSITY > 1
-//        debug << "Beacon::check - Beacon thrown out: width distance too much smaller than d2p" << endl;
-//            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS << endl;
+//        debug << "Beacon::check - Beacon thrown out: width distance too much smaller than d2p" << std::endl;
+//            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS << std::endl;
 //        #endif
 //        return false;
 //    }
@@ -135,8 +135,8 @@
 //    if(VisionConstants::THROWOUT_DISTANT_BEACONS and
 //        m_transformed_spherical_pos.x > VisionConstants::MAX_BEACON_DISTANCE) {
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::check - Beacon thrown out: too far away" << endl;
-//            debug << "\td2p: " << m_transformed_spherical_pos.x << " MAX_BEACON_DISTANCE: " << VisionConstants::MAX_BEACON_DISTANCE << endl;
+//            debug << "Beacon::check - Beacon thrown out: too far away" << std::endl;
+//            debug << "\td2p: " << m_transformed_spherical_pos.x << " MAX_BEACON_DISTANCE: " << VisionConstants::MAX_BEACON_DISTANCE << std::endl;
 //        #endif
 //        return false;
 //    }
@@ -167,7 +167,7 @@
 //        m_transformed_spherical_pos = Vector3<float>(0,0,0);
 //        return false;
 //    }
-//    //debug << "Goal::calculatePositions() distance: " << distance << endl;
+//    //debug << "Goal::calculatePositions() distance: " << distance << std::endl;
     
 //    m_spherical_position[0] = distance;//distance
 //    m_spherical_position[1] = bearing;
@@ -189,13 +189,13 @@
 //        transform_valid = false;
 //        m_transformed_spherical_pos = Vector3<float>(0,0,0);
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::calculatePositions: Kinematics CTG transform invalid - will not push beacon" << endl;
+//            debug << "Beacon::calculatePositions: Kinematics CTG transform invalid - will not push beacon" << std::endl;
 //        #endif
 //    }
     
 //    #if VISION_BEACON_VERBOSITY > 2
 //        debug << "Beacon::calculatePositions: ";
-//        debug << d2p << " " << width_dist << " " << distance << " " << m_transformed_spherical_pos.x << endl;
+//        debug << d2p << " " << width_dist << " " << distance << " " << m_transformed_spherical_pos.x << std::endl;
 //    #endif
 
 //    return transform_valid;
@@ -224,33 +224,33 @@
 
 //    #if VISION_BEACON_VERBOSITY > 1
 //        if(!d2pvalid)
-//            debug << "Beacon::distanceToBeacon: d2p invalid - combination methods will only return width_dist" << endl;
+//            debug << "Beacon::distanceToBeacon: d2p invalid - combination methods will only return width_dist" << std::endl;
 //    #endif
 //    //get distance from width
 //    width_dist = VisionConstants::BEACON_WIDTH*vbb->getCameraDistanceInPixels()/m_size_on_screen.x;
 
 //    #if VISION_BEACON_VERBOSITY > 1
-//        debug << "Beacon::distanceToBeacon: bearing: " << bearing << " elevation: " << elevation << endl;
-//        debug << "Beacon::distanceToBeacon: d2p: " << d2p << endl;
-//        debug << "Beacon::distanceToBeacon: m_size_on_screen.x: " << m_size_on_screen.x << endl;
-//        debug << "Beacon::distanceToBeacon: width_dist: " << width_dist << endl;
+//        debug << "Beacon::distanceToBeacon: bearing: " << bearing << " elevation: " << elevation << std::endl;
+//        debug << "Beacon::distanceToBeacon: d2p: " << d2p << std::endl;
+//        debug << "Beacon::distanceToBeacon: m_size_on_screen.x: " << m_size_on_screen.x << std::endl;
+//        debug << "Beacon::distanceToBeacon: width_dist: " << width_dist << std::endl;
 //    #endif
 //    switch(VisionConstants::BEACON_DISTANCE_METHOD) {
 //    case VisionConstants::D2P:
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::distanceToBeacon: Method: D2P" << endl;
+//            debug << "Beacon::distanceToBeacon: Method: D2P" << std::endl;
 //        #endif
 //        distance_valid = d2pvalid;
 //        return d2p;
 //    case VisionConstants::Width:
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::distanceToBeacon: Method: Width" << endl;
+//            debug << "Beacon::distanceToBeacon: Method: Width" << std::endl;
 //        #endif
 //        distance_valid = true;
 //        return width_dist;
 //    case VisionConstants::Average:
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::distanceToBeacon: Method: Average" << endl;
+//            debug << "Beacon::distanceToBeacon: Method: Average" << std::endl;
 //        #endif
 //        //average distances
 //        distance_valid = true;
@@ -260,7 +260,7 @@
 //            return width_dist;
 //    case VisionConstants::Least:
 //        #if VISION_BEACON_VERBOSITY > 1
-//            debug << "Beacon::distanceToBeacon: Method: Least" << endl;
+//            debug << "Beacon::distanceToBeacon: Method: Least" << std::endl;
 //        #endif
 //        distance_valid = true;
 //        if(d2pvalid)
@@ -290,25 +290,25 @@
 ///*! @brief Stream insertion operator for a single ColourSegment.
 // *      The segment is terminated by a newline.
 // */
-//ostream& operator<< (ostream& output, const Beacon& b)
+//std::ostream& operator<< (std::ostream& output, const Beacon& b)
 //{
 //    output << "Beacon - pixelloc: [" << b.getLocationPixels().x << ", " << b.getLocationPixels().y << "]";
-//    output << "\tpixelloc: [" << b.m_location_pixels.x << ", " << b.m_location_pixels.y << "]" << endl;
-//    output << " angularloc: [" << b.m_location_angular.x << ", " << b.m_location_angular.y << "]" << endl;
-//    output << "\trelative field coords: [" << b.m_spherical_position.x << ", " << b.m_spherical_position.y << ", " << b.m_spherical_position.z << "]" << endl;
-//    output << "\ttransformed field coords: [" << b.m_transformed_spherical_pos.x << ", " << b.m_transformed_spherical_pos.y << ", " << b.m_transformed_spherical_pos.z << "]" << endl;
-//    output << "\tspherical error: [" << b.m_spherical_error.x << ", " << b.m_spherical_error.y << "]" << endl;
+//    output << "\tpixelloc: [" << b.m_location_pixels.x << ", " << b.m_location_pixels.y << "]" << std::endl;
+//    output << " angularloc: [" << b.m_location_angular.x << ", " << b.m_location_angular.y << "]" << std::endl;
+//    output << "\trelative field coords: [" << b.m_spherical_position.x << ", " << b.m_spherical_position.y << ", " << b.m_spherical_position.z << "]" << std::endl;
+//    output << "\ttransformed field coords: [" << b.m_transformed_spherical_pos.x << ", " << b.m_transformed_spherical_pos.y << ", " << b.m_transformed_spherical_pos.z << "]" << std::endl;
+//    output << "\tspherical error: [" << b.m_spherical_error.x << ", " << b.m_spherical_error.y << "]" << std::endl;
 //    output << "\tsize on screen: [" << b.m_size_on_screen.x << ", " << b.m_size_on_screen.y << "]";
 //    return output;
 //}
 
-///*! @brief Stream insertion operator for a vector of ColourSegments.
+///*! @brief Stream insertion operator for a std::vector of ColourSegments.
 // *      Each segment is terminated by a newline.
 // *  @relates ColourSegment
 // */
-//ostream& operator<< (ostream& output, const vector<Beacon>& b)
+//std::ostream& operator<< (std::ostream& output, const std::vector<Beacon>& b)
 //{
 //    for (size_t i=0; i<b.size(); i++)
-//        output << b[i] << endl;
+//        output << b[i] << std::endl;
 //    return output;
 //}

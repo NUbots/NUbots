@@ -51,11 +51,11 @@ protected:
     void doBehaviour();
     void doSelectedMotion();
     void imageProcess();
-    vector<int> getColourAvg(const int x, const int y);
-    vector<int> YUV2RGB(vector<int> YUV);
+    std::vector<int> getColourAvg(const int x, const int y);
+    std::vector<int> YUV2RGB(std::vector<int> YUV);
     int clip(int input);
-    int evaluate(vector< vector<int> > coordinates);
-    int distance(vector<int> p, vector<int> q);   
+    int evaluate(std::vector< std::vector<int> > coordinates);
+    int distance(std::vector<int> p, std::vector<int> q);   
     
     
     //float calculatePitchPosition();
@@ -71,8 +71,8 @@ private:
     bool topcam;
     float angleOffset;
     Optimiser *m_optimiser;
-    ofstream debug_file; // Logging file
-    vector<float> m_parameters;
+    std::ofstream debug_file; // Logging file
+    std::vector<float> m_parameters;
     int optCount;
     CameraSettings m_settings;
 };

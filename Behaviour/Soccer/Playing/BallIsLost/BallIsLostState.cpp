@@ -28,7 +28,7 @@
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 BallIsLostState::BallIsLostState(SoccerFSMState* parent) : SoccerFSMState(parent)
 {
@@ -49,7 +49,7 @@ BallIsLostState::~BallIsLostState()
 void BallIsLostState::doStateCommons()
 {   // do behaviour that is common to all sub ball is lost states
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "BallIsLostState" << endl;
+        debug << "BallIsLostState" << std::endl;
     #endif
 }
 

@@ -33,7 +33,7 @@ GameInformation::GameInformation(int playerNumber, int teamNumber): TimestampedD
     memcpy(m_currentReturnData->header, GAMECONTROLLER_RETURN_STRUCT_HEADER, sizeof(m_currentReturnData->header));
     m_currentReturnData->version = GAMECONTROLLER_RETURN_STRUCT_VERSION;
     
-    m_led_red = vector<float>(3,0);
+    m_led_red = std::vector<float>(3,0);
     m_led_red[0] = 1;
 }
 
@@ -89,7 +89,7 @@ bool GameInformation::amIASubstitute() const
 /*! @brief Returns the player number of the substitute player */
 int GameInformation::getSubstituteNumber() const
 {
-    vector<vector<int> > penalties = getPenaltyReasons();
+    std::vector<std::vector<int> > penalties = getPenaltyReasons();
     for (size_t i=0; i<penalties.size(); i++)
     {
         if (penalties[i][1] == PENALTY_SPL_SUBSTITUTE)
@@ -170,9 +170,9 @@ int GameInformation::getNumberOfPlayersPenalised() const
 /*! @brief Returns a list containing the penalty reasons for each that is penalised 
            The list is formatted as [[playernumber, reason], [playernumber, reason], ...]
  */
-vector<vector<int> > GameInformation::getPenaltyReasons() const
+std::vector<std::vector<int> > GameInformation::getPenaltyReasons() const
 {
-    vector<vector<int> > result;
+    std::vector<std::vector<int> > result;
     const TeamInfo* team = getMyTeamInfo();
     if(team)
     {
@@ -180,7 +180,7 @@ vector<vector<int> > GameInformation::getPenaltyReasons() const
         {
             if (team->players[i].penalty != PENALTY_NONE)
             {
-                vector<int> num_reason;
+                std::vector<int> num_reason;
                 num_reason.push_back(i+1);
                 num_reason.push_back(team->players[i].penalty);
                 result.push_back(num_reason);

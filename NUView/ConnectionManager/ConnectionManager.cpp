@@ -48,7 +48,7 @@ ConnectionManager::ConnectionManager(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_user_ip_input);
     setLayout(m_layout);
     
-    vector<string> types;
+    std::vector<std::string> types;
     types.push_back("_nubot._tcp");
     types.push_back("_workstation._tcp");
     types.push_back("_ssh._tcp");
@@ -83,7 +83,7 @@ void ConnectionManager::onListButton()
     emit newHosts(m_current_hosts);					// emit the signal that we have newHost(s)
     
     // now update the user input to reflect the selected host
-    string text;
+    std::string text;
     if (not m_current_hosts.empty())
     {
         for (size_t i=0; i<m_current_hosts.size()-1; i++)
@@ -99,13 +99,13 @@ void ConnectionManager::onListButton()
  */
 void ConnectionManager::onInputFinished()
 {
-    stringstream userinput(m_user_ip_input->text().toStdString());
-    vector<string> hosts;
+    std::stringstream userinput(m_user_ip_input->text().toStdString());
+    std::vector<std::string> hosts;
     
     // first split the user input using the commas
     while (userinput.good())
     {
-    	string temp;
+    	std::string temp;
     	getline(userinput, temp, ',');
         if (not temp.empty())				// I don't want empty hosts/ipaddresses
         {
@@ -128,7 +128,7 @@ void ConnectionManager::onInputFinished()
         }
     }
     
-    debug << "ConnectionManager::onInputFinished(): " << m_current_hosts << endl;
+    debug << "ConnectionManager::onInputFinished(): " << m_current_hosts << std::endl;
     emit newHosts(m_current_hosts);
 }
 

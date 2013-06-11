@@ -64,14 +64,14 @@ public:
         {
             debug << "Analsyse Environment [DO]: ";
             //process IMAGE to get averageColour:
-            string word = ProcessImage();
-            //string word = "relaxed";
+            std::string word = ProcessImage();
+            //std::string word = "relaxed";
 
 
             //int index = (rand())%(numEmotions-1);
             //debug << "Array Index: "<<index;
             //debug << word;
-            vector<string> sounds (2);
+            std::vector<std::string> sounds (2);
             sounds[0] = "EmotionalWords/IFeel.wav";
             sounds[1] = "EmotionalWords/" + word + ".wav";
             m_actions->add(NUActionatorsData::Sound, m_data->GetTimestamp(), sounds);
@@ -80,7 +80,7 @@ public:
         return;
         //m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation, 40, 90000, -0.8, 0.8));
     };
-    virtual string ProcessImage()
+    virtual std::string ProcessImage()
     {
         unsigned char R,G,B;
         double Tr = 0;
@@ -88,7 +88,7 @@ public:
         double Tb = 0;
         int numRandomPoints = 10000;
         int i = 0;
-        string word;
+        std::string word;
         debug << "Colours: "<< Tr << Tg << Tb;
         while (i < numRandomPoints)
         {
@@ -105,7 +105,7 @@ public:
         {
             debug << "RED: "<< Tr << Tg << Tb;
             int numEmotions = 5;
-            string emotions[] = {"cheerful","anxious","excited","surprised","angry"};
+            std::string emotions[] = {"cheerful","anxious","excited","surprised","angry"};
             int index = rand()%(numEmotions);
             word = emotions[index];
         }
@@ -114,7 +114,7 @@ public:
         {
             debug << "BLUE: "<< Tr << Tg << Tb;
             int numEmotions = 4;
-            string emotions[] = {"scared","tense","nervous","horrified"};
+            std::string emotions[] = {"scared","tense","nervous","horrified"};
             int index = rand()%(numEmotions);
             word = emotions[index];
         }
@@ -123,7 +123,7 @@ public:
         {
             debug << "GREEN: "<< Tr << Tg << Tb;
             int numEmotions = 2;
-            string emotions[] = {"happy","relaxed"};
+            std::string emotions[] = {"happy","relaxed"};
             int index = rand()%(numEmotions);
             word =  emotions[index];
         }

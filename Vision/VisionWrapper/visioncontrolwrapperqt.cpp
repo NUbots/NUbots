@@ -31,9 +31,9 @@ VisionControlWrapper::VisionControlWrapper()
 // GOAL PAPER CODE
 //int VisionControlWrapper::run()
 //{
-//    string base = string(getenv("HOME")) + "/nubot/Images/GoalPaper/";
-//    vector<string> leans;
-//    vector<int> dists;
+//    std::string base = std::string(getenv("HOME")) + "/nubot/Images/GoalPaper/";
+//    std::vector<std::string> leans;
+//    std::vector<int> dists;
 //    leans.push_back("No_Lean"); dists.push_back(60);
 //    leans.push_back("No_Lean"); dists.push_back(150);
 //    leans.push_back("No_Lean"); dists.push_back(300);
@@ -55,8 +55,8 @@ VisionControlWrapper::VisionControlWrapper()
 //    leans.push_back("Large_Lean"); dists.push_back(530);
 //    leans.push_back("Large_Lean"); dists.push_back(600);
 
-//    string cfg = string(CONFIG_DIR) + string("VisionOptions.cfg"),
-//           lname = string(DATA_DIR) +  string("/default.lut");
+//    std::string cfg = std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"),
+//           lname = std::string(DATA_DIR) +  std::string("/default.lut");
 
 //    ofstream h((base + "h.txt").c_str());
 //    ofstream r1((base + "r1.txt").c_str());
@@ -70,7 +70,7 @@ VisionControlWrapper::VisionControlWrapper()
 //        bool finished = false;
 //        if(wrapper)
 //            delete wrapper;
-//        stringstream nm;
+//        std::stringstream nm;
 //        nm << base << leans[i] << "/" << dists[i] << "/image.strm";
 //        wrapper = new DataWrapper(&gui, true, DataWrapper::STREAM, nm.str(), "", cfg, lname);
 //        DataWrapper::instance = wrapper;
@@ -112,23 +112,23 @@ VisionControlWrapper::VisionControlWrapper()
 //                rat_r2 = 1 - wrapper->ratio_r2.first/wrapper->ratio_r2.second;
 
 
-//        cout << wrapper->ratio_hist.first << " " << wrapper->ratio_hist.second << " " << frame << endl;
-//        cout << wrapper->ratio_r1.first << " " << wrapper->ratio_r1.second << " " << frame << endl;
-//        cout << wrapper->ratio_r2.first << " " << wrapper->ratio_r2.second << " " << frame << endl;
+//        std::cout << wrapper->ratio_hist.first << " " << wrapper->ratio_hist.second << " " << frame << std::endl;
+//        std::cout << wrapper->ratio_r1.first << " " << wrapper->ratio_r1.second << " " << frame << std::endl;
+//        std::cout << wrapper->ratio_r2.first << " " << wrapper->ratio_r2.second << " " << frame << std::endl;
 //        if(rat_h > 0)
-//            h << mean(wrapper->acc_hist) << " " << sqrt(variance(wrapper->acc_hist)) << " " << rat_h << endl;
+//            h << mean(wrapper->acc_hist) << " " << sqrt(variance(wrapper->acc_hist)) << " " << rat_h << std::endl;
 //        else
-//            h << 0 << " " << 0 << " " << rat_h << endl;
+//            h << 0 << " " << 0 << " " << rat_h << std::endl;
 
 //        if(rat_r1 > 0)
-//            r1 << mean(wrapper->acc_r1) << " " << sqrt(variance(wrapper->acc_r1)) << " " << rat_r1 << endl;
+//            r1 << mean(wrapper->acc_r1) << " " << sqrt(variance(wrapper->acc_r1)) << " " << rat_r1 << std::endl;
 //        else
-//            r1 << 0 << " " << 0 << " " << rat_r1 << endl;
+//            r1 << 0 << " " << 0 << " " << rat_r1 << std::endl;
 
 //        if(rat_r2 > 0)
-//            r2 << mean(wrapper->acc_r2) << " " << sqrt(variance(wrapper->acc_r2)) << " " << rat_r2 << endl;
+//            r2 << mean(wrapper->acc_r2) << " " << sqrt(variance(wrapper->acc_r2)) << " " << rat_r2 << std::endl;
 //        else
-//            r2 << 0 << " " << 0 << " " << rat_r2 << endl;
+//            r2 << 0 << " " << 0 << " " << rat_r2 << std::endl;
 //    }
 
 //    gui.hide();
@@ -146,10 +146,10 @@ int VisionControlWrapper::run()
     //SETUP DATA WRAPPER
     DataWrapper::INPUT_METHOD method;
     bool ok;
-    string istrm = "";
-    string sstrm = "";
-    string cfg = "";
-    string lname = "";
+    std::string istrm = "";
+    std::string sstrm = "";
+    std::string cfg = "";
+    std::string lname = "";
 
     getOptions(method, ok, istrm, sstrm, cfg, lname);
 
@@ -202,14 +202,14 @@ int VisionControlWrapper::runFrame()
     if(!wrapper->updateFrame())
     {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;
+            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << std::endl;
         #endif
         return -1;  //failure - do not run vision
     }
     return controller.runFrame(true, true, true, true);
 }
 
-void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& ok, string& istrm, string& sstrm, string& cfg, string& lname)
+void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& ok, std::string& istrm, std::string& sstrm, std::string& cfg, std::string& lname)
 {
     bool using_sensors;
     //frame grab methods
@@ -242,8 +242,8 @@ void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& o
             }
             else
             {
-                lname = string(DATA_DIR) +  string("/default.lut");
-                cfg = string(CONFIG_DIR) + string("VisionOptions.cfg");
+                lname = std::string(DATA_DIR) +  std::string("/default.lut");
+                cfg = std::string(CONFIG_DIR) + std::string("VisionOptions.cfg");
             }
             break;
         case DataWrapper::STREAM:
@@ -265,11 +265,11 @@ void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& o
             }
             else
             {
-                istrm = string(DATA_DIR) + string("/image.strm");
+                istrm = std::string(DATA_DIR) + std::string("/image.strm");
                 if(using_sensors)
-                    sstrm = string(DATA_DIR) + string("/sensor.strm");
-                lname = string(DATA_DIR) + string("/default.lut");
-                cfg = string(CONFIG_DIR) + string("VisionOptions.cfg");
+                    sstrm = std::string(DATA_DIR) + std::string("/sensor.strm");
+                lname = std::string(DATA_DIR) + std::string("/default.lut");
+                cfg = std::string(CONFIG_DIR) + std::string("VisionOptions.cfg");
             }
             break;
         }

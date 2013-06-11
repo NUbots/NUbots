@@ -4,7 +4,7 @@
 
 using namespace boost::numeric;
 using namespace NBMath;
-using namespace std;
+
 //#define DEBUG_SPRING
 
 SpringSensor::SpringSensor(const MetaGait * _gait,
@@ -35,11 +35,11 @@ SpringSensor::SpringSensor(const MetaGait * _gait,
     reset();
     updateMatrices();
 #ifdef DEBUG_SPRING
-    cout << "SpringSensor init finished."<<endl
-         << "   A:"<<A<<endl
-         << "   b:"<<b<<endl
-         << "   max Angle:"<<gait->sensor[MAX_INDEX]<<endl;
-    cout << "   max angle index! = "<<MAX_INDEX<<endl;
+    std::cout << "SpringSensor init finished."<<std::endl
+         << "   A:"<<A<<std::endl
+         << "   b:"<<b<<std::endl
+         << "   max Angle:"<<gait->sensor[MAX_INDEX]<<std::endl;
+    std::cout << "   max angle index! = "<<MAX_INDEX<<std::endl;
 #endif
 }
 
@@ -55,12 +55,12 @@ void SpringSensor::tick_sensor(const float sensorAngle){
     updateMatrices();
 
 #ifdef DEBUG_SPRING
-    cout << "tick sensor "<<name<<endl
+    std::cout << "tick sensor "<<name<<std::endl
          << "   sensor"<<sensorAngle
          << "   start x_k"<<x_k
-         << "   A:"<<A<<endl
-         << "   b:"<<b<<endl
-         << "   max Angle:"<<gait->sensor[MAX_INDEX]<<endl;
+         << "   A:"<<A<<std::endl
+         << "   b:"<<b<<std::endl
+         << "   max Angle:"<<gait->sensor[MAX_INDEX]<<std::endl;
 #endif
 
     //const float clippedSensorAngle  = NBMath::clip(sensorAngle, gait->sensor[MAX_INDEX]);
@@ -76,9 +76,9 @@ void SpringSensor::tick_sensor(const float sensorAngle){
     //when we are near position zero, clip velocity
 
 #ifdef DEBUG_SPRING
-    cout << "   control*GAMMA: "<<b*u<<endl;
-    cout << "   pre-clip x_k: "<<x_hat<<endl;
-    cout << "   post-clip x_k: "<<x_k<<endl;
+    std::cout << "   control*GAMMA: "<<b*u<<std::endl;
+    std::cout << "   pre-clip x_k: "<<x_hat<<std::endl;
+    std::cout << "   post-clip x_k: "<<x_k<<std::endl;
 #endif
 
     lastSensorAngle = sensorAngle;//unused

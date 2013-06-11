@@ -7,7 +7,7 @@ PURPOSE: 	Odometry motion Model which can be tweaked for any robot
 #include "probabilityUtils.h"
 
 #include <iostream>
-using namespace std;
+
 
 
 /**
@@ -69,10 +69,10 @@ void OdometryMotionModel::prepareForSampling(Pose2D diffState)
 // 	odoStatePrev.Theta = LimitTheta(odoStatePrev.Theta);
 	double thetaDeg = (diffState.Theta*180)/M_PI;
 	dRot1 = atan2((diffState.Y), (diffState.X)) - thetaDeg;
-// 	cout<<"\nThetaDeg = "<<thetaDeg<<"  dRot1 deg = "<<dRot1;
+// 	std::cout<<"\nThetaDeg = "<<thetaDeg<<"  dRot1 deg = "<<dRot1;
 	dRot1 = (dRot1 * M_PI) / 180;
 	
-// 	cout<<"  dRot1 Rad = "<<dRot1;
+// 	std::cout<<"  dRot1 Rad = "<<dRot1;
 	dTrans =fabs(sqrt(pow(diffState.Y, 2) + pow(diffState.X, 2)));
 
 	dRot2 = diffState.Theta - dRot1;
@@ -161,14 +161,14 @@ double OdometryMotionModel::getProbabilityOfSample(Pose2D newState,Pose2D diffOd
 	
 	if (p1 == 0 || p2 == 0 || p3 == 0 || !double(p1) || !double(p2) || !double(p3))
 	{
-		cout<<"Problem with weights: "<< endl;
-		cout<<" values of p1,p2,p3 respectively :"<<p1<<","<<p2<<","<<p3;
+		std::cout<<"Problem with weights: "<< std::endl;
+		std::cout<<" values of p1,p2,p3 respectively :"<<p1<<","<<p2<<","<<p3;
 		return 0;
 	}
 	if(!p1*p2*p3)
 	{
-		cout<<"Problem with weights: "<< endl;
-		cout<<" values of p1,p2,p3 respectively :"<<p1<<","<<p2<<","<<p3;
+		std::cout<<"Problem with weights: "<< std::endl;
+		std::cout<<" values of p1,p2,p3 respectively :"<<p1<<","<<p2<<","<<p3;
 		return 0;	  
 	}
 	return (p1 * p2 * p3);

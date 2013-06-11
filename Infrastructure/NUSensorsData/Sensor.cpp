@@ -20,7 +20,7 @@
 
 #include "Sensor.h"
 
-#include "Tools/Math/StlVector.h"
+#include "../../Tools/Math/StlVector.h"
 
 #include "debug.h"
 #include "debugverbositynusensors.h"
@@ -28,7 +28,7 @@
 /*! @brief Constructor for a Sensor
     @param sensorname the name of the sensor
  */
-Sensor::Sensor(string sensorname)
+Sensor::Sensor(std::string sensorname)
 {
     Name = sensorname;
     Time = 0.0;
@@ -95,7 +95,7 @@ bool Sensor::get(float& data) const
     @param data will be updated with reading
     @return true if valid sensor reading, false otherwise
  */
-bool Sensor::get(vector<float>& data) const
+bool Sensor::get(std::vector<float>& data) const
 {
     if (ValidVector)
     {
@@ -110,7 +110,7 @@ bool Sensor::get(vector<float>& data) const
     @param data will be updated with reading
     @return true if valid sensor reading, false otherwise
  */
-bool Sensor::get(vector<vector<float> >& data) const
+bool Sensor::get(std::vector<std::vector<float> >& data) const
 {
     if (ValidMatrix)
     {
@@ -125,7 +125,7 @@ bool Sensor::get(vector<vector<float> >& data) const
     @param data will be updated with reading
     @return true if valid sensor reading, false otherwise
  */
-bool Sensor::get(string& data) const
+bool Sensor::get(std::string& data) const
 {
     if (ValidString)
     {
@@ -154,7 +154,7 @@ void Sensor::set(double time, const float& data)
     @param time the time in milliseconds the data was captured
     @param data the vector of new sensor data
  */
-void Sensor::set(double time, const vector<float>& data)
+void Sensor::set(double time, const std::vector<float>& data)
 {
     Time = time;
     VectorData = data;
@@ -168,7 +168,7 @@ void Sensor::set(double time, const vector<float>& data)
     @param time the time in milliseconds the data was captured
     @param data the matrix of new sensor data
  */
-void Sensor::set(double time, const vector<vector<float> >& data)
+void Sensor::set(double time, const std::vector<std::vector<float> >& data)
 {
     Time = time;
     MatrixData = data;
@@ -182,7 +182,7 @@ void Sensor::set(double time, const vector<vector<float> >& data)
     @param time the time in milliseconds the data was captured
     @param data the string of new sensor data
  */
-void Sensor::set(double time, const string& data)
+void Sensor::set(double time, const std::string& data)
 {
     Time = time;
     StringData = data;
@@ -221,13 +221,13 @@ void Sensor::modify(double time, unsigned int start, const float& data)
     {
         ValidFloat = false;
         ValidVector = true;
-        VectorData = vector<float>(2, FloatData);
+        VectorData = std::vector<float>(2, FloatData);
         VectorData[1] = data;
     }
     else if (start == 0)
     {
         ValidVector = true;
-        VectorData = vector<float>(1, data);
+        VectorData = std::vector<float>(1, data);
 	}
 }
 
@@ -236,7 +236,7 @@ void Sensor::modify(double time, unsigned int start, const float& data)
  	@param start the first position in which the new data will be inserted 
  	@param data the data to insert 
  */
-void Sensor::modify(double time, unsigned int start, const vector<float>& data)
+void Sensor::modify(double time, unsigned int start, const std::vector<float>& data)
 {
     Time = time;
     if (ValidVector)
@@ -264,7 +264,7 @@ void Sensor::modify(double time, unsigned int start, const vector<float>& data)
  
     @param output the ostream in which to put the string
  */
-void Sensor::summaryTo(ostream& output) const
+void Sensor::summaryTo(std::ostream& output) const
 {
     if (ValidFloat or ValidVector or ValidMatrix or ValidString)
     {
@@ -285,7 +285,7 @@ void Sensor::summaryTo(ostream& output) const
     The data in the stream will not be human readable as some of the data
     is written in binary mode.
  */
-ostream& operator<< (ostream& output, const Sensor& p_sensor)
+std::ostream& operator<< (std::ostream& output, const Sensor& p_sensor)
 {
     output << p_sensor.Name << " ";
     output << p_sensor.Time << " ";
@@ -306,7 +306,7 @@ ostream& operator<< (ostream& output, const Sensor& p_sensor)
      The data in the stream will not be human readable as some of the data
      is written in binary mode.
  */
-istream& operator>> (istream& input, Sensor& p_sensor)
+std::istream& operator>> (std::istream& input, Sensor& p_sensor)
 {
     input >> p_sensor.Name;
     input >> p_sensor.Time;

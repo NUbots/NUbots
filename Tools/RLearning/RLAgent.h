@@ -12,7 +12,7 @@
     RLAgent rlagent;
     try{
         loadAgent(Filename);
-    }catch (string s){
+    }catch (std::string s){
         rlagent.setParameters(0.1,0.5,0.5,1.0,1,5);//example parameters
         rlagent.initialiseAgent(observation_size,number_of_actions,resolution_of_FunctionApproximator);
     }
@@ -67,21 +67,21 @@ public:
 
     virtual void setParameters(float alpha=0.1f, float beta=0.5, float gamma=0.9f, float lambda=0.9f,int learningIterations=1, int memory_length = 10, bool use_soft_max = false);
 
-    virtual int getAction(vector<float> observations,vector<int> valid_actions);//Must return integer between 0 and numberOfOutputs-1
+    virtual int getAction(std::vector<float> observations,std::vector<int> valid_actions);//Must return integer between 0 and numberOfOutputs-1
 
     virtual void giveReward(float reward);
 
     virtual void doLearning();
 
-    virtual void saveAgent(string agentName);
+    virtual void saveAgent(std::string agentName);
 
-    virtual void loadAgent(string agentName);
+    virtual void loadAgent(std::string agentName);
 
-    virtual void log(string text);
+    virtual void log(std::string text);
 
 
-    vector<float> getValues(vector<float> v);
-    int checkAction(vector<float> obs, vector<int> valid_actions);
+    std::vector<float> getValues(std::vector<float> v);
+    int checkAction(std::vector<float> obs, std::vector<int> valid_actions);
 
     RLAgent();
     ~RLAgent();
@@ -99,17 +99,17 @@ protected:
     int num_outputs;
     int num_hidden;
 
-    vector<int> actions;
-    vector<float> last_values;
-    vector<vector<int> > action_validities;
+    std::vector<int> actions;
+    std::vector<float> last_values;
+    std::vector<std::vector<int> > action_validities;
 
-    vector<vector<float> > values;
-    vector<vector<float> > observations;
-    vector<float> rewards;
+    std::vector<std::vector<float> > values;
+    std::vector<std::vector<float> > observations;
+    std::vector<float> rewards;
 
-    float max(vector<float> x, vector<int> valid_actions);
+    float max(std::vector<float> x, std::vector<int> valid_actions);
 
-    int getSoftMaxAction(vector<float> values, vector<int> valid_actions);
+    int getSoftMaxAction(std::vector<float> values, std::vector<int> valid_actions);
 
     bool use_soft_max;
 

@@ -36,7 +36,7 @@ HeadLogic* HeadLogic::getInstance(){
 
 HeadLogic::HeadLogic(){
     //cout<<"Head logic constructor start"<<endl;
-    NUCameraData cameraSpecs(string(/*CONFIG_DIR*/ "Config/Darwin") + "CameraSpecs.cfg");
+    NUCameraData cameraSpecs(std::string(/*CONFIG_DIR*/ "Config/Darwin") + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
     m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
 

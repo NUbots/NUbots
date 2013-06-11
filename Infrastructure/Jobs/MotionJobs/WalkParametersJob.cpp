@@ -35,7 +35,7 @@ WalkParametersJob::WalkParametersJob(const WalkParameters& walkparameters) : Mot
 /*! @brief Constructs a WalkParameterJob from stream data
     @param walkparameters the walk parameters associated with the job
  */
-WalkParametersJob::WalkParametersJob(istream& input) : MotionJob(Job::MOTION_WALK_PARAMETERS)
+WalkParametersJob::WalkParametersJob(std::istream& input) : MotionJob(Job::MOTION_WALK_PARAMETERS)
 {
     m_job_time = 0;
     input >> m_walk_parameters;
@@ -46,7 +46,7 @@ WalkParametersJob::WalkParametersJob(istream& input) : MotionJob(Job::MOTION_WAL
 WalkParametersJob::~WalkParametersJob()
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "WalkParametersJob::~WalkParametersJob()" << endl;
+        debug << "WalkParametersJob::~WalkParametersJob()" << std::endl;
     #endif
 }
 
@@ -73,7 +73,7 @@ void WalkParametersJob::getWalkParameters(WalkParameters& walkparameters)
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void WalkParametersJob::summaryTo(ostream& output)
+void WalkParametersJob::summaryTo(std::ostream& output)
 {
     output << "WalkParametersJob: ";
     m_walk_parameters.summaryTo(output);
@@ -82,11 +82,11 @@ void WalkParametersJob::summaryTo(ostream& output)
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void WalkParametersJob::csvTo(ostream& output)
+void WalkParametersJob::csvTo(std::ostream& output)
 {
     output << "WalkParametersJob, " << m_job_time << ", ";
     m_walk_parameters.csvTo(output);
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -96,10 +96,10 @@ void WalkParametersJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void WalkParametersJob::toStream(ostream& output) const
+void WalkParametersJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 2
-        debug << "WalkParametersJob::toStream" << endl;
+        debug << "WalkParametersJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -113,10 +113,10 @@ void WalkParametersJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const WalkParametersJob& job)
+std::ostream& operator<<(std::ostream& output, const WalkParametersJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<WalkParametersJob" << endl;
+        debug << "<<WalkParametersJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -128,10 +128,10 @@ ostream& operator<<(ostream& output, const WalkParametersJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const WalkParametersJob* job)
+std::ostream& operator<<(std::ostream& output, const WalkParametersJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<WalkParametersJob" << endl;
+        debug << "<<WalkParametersJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

@@ -69,7 +69,7 @@ VSCWalk::~VSCWalk()
 
 void VSCWalk::doWalk()
 {
-    debug << "VSCWalk::doWalk()" << endl;
+    debug << "VSCWalk::doWalk()" << std::endl;
     
     // I need to go from speed to:
     //          - the four forward gait parameters: theta, alpha, beta and period
@@ -119,13 +119,13 @@ void VSCWalk::doWalk()
     if (m_step_leg == 0)
     {
         if (m_left_leg_angles.size() == 0)
-            m_left_leg_angles = vector<float>(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
+            m_left_leg_angles = std::vector<float>(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
         m_left_leg_angles[1] = -hippitch1;        // pitch
         m_left_leg_angles[3] = kneepitch1;        // knee pitch
         m_left_leg_angles[5] = anklepitch1;        // ankle pitch
         
         if (m_right_leg_angles.size() == 0)
-            m_right_leg_angles = vector<float>(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 0);
+            m_right_leg_angles = std::vector<float>(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 0);
         m_right_leg_angles[1] = -hippitch2;        // pitch
         m_right_leg_angles[3] = kneepitch2;        // knee pitch
         m_right_leg_angles[5] = anklepitch2;        // ankle pitch
@@ -133,13 +133,13 @@ void VSCWalk::doWalk()
     else
     {
         if (m_left_leg_angles.size() == 0)
-            m_left_leg_angles = vector<float>(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
+            m_left_leg_angles = std::vector<float>(m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
         m_left_leg_angles[1] = -hippitch2;        // pitch
         m_left_leg_angles[3] = kneepitch2;        // knee pitch
         m_left_leg_angles[5] = anklepitch2;        // ankle pitch
         
         if (m_right_leg_angles.size() == 0)
-            m_right_leg_angles = vector<float>(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 0);
+            m_right_leg_angles = std::vector<float>(m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 0);
         m_right_leg_angles[1] = -hippitch1;        // pitch
         m_right_leg_angles[3] = kneepitch1;        // knee pitch
         m_right_leg_angles[5] = anklepitch1;        // ankle pitch
@@ -178,10 +178,10 @@ void VSCWalk::calculateRightArm()
  @param legphase the phase for the arm
  @param armsign as with the leg; -1 for left and 1 for right
  */
-void VSCWalk::calculateArmAngles(float legphase, float armsign, vector<float>& angles)
+void VSCWalk::calculateArmAngles(float legphase, float armsign, std::vector<float>& angles)
 {
     if (angles.size() == 0)
-        angles = vector<float> (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints),0);
+        angles = std::vector<float> (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints),0);
     angles[0] = -0.15*armsign;                          // ShoulderRoll
     angles[1] = 0.4*sin(legphase + M_PI) + M_PI/2.0;    // ShoulderPitch
     angles[2] = 0;                                      // ElbowRoll
@@ -192,10 +192,10 @@ void VSCWalk::calculateArmAngles(float legphase, float armsign, vector<float>& a
  @param legphase the phase for the arm
  @param angles the parameter to get the new gains
  */
-void VSCWalk::calculateArmGains(float legphase, vector<float>& gains)
+void VSCWalk::calculateArmGains(float legphase, std::vector<float>& gains)
 {
     if (gains.size() == 0)
-        gains = vector<float> (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints),0);
+        gains = std::vector<float> (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints),0);
     gains[0] = 50;
     gains[1] = 50;
     gains[2] = 25;
@@ -204,11 +204,11 @@ void VSCWalk::calculateArmGains(float legphase, vector<float>& gains)
 
 void VSCWalk::updateActionatorsData()
 {
-    static vector<float> zeroleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
-    static vector<float> zeroarm (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
+    static std::vector<float> zeroleg (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 0);
+    static std::vector<float> zeroarm (m_actions->getNumberOfJoints(NUActionatorsData::LeftArmJoints), 0);
     
-    static vector<float> m_left_leg_gains (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 100);
-    static vector<float> m_right_leg_gains (m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 100);
+    static std::vector<float> m_left_leg_gains (m_actions->getNumberOfJoints(NUActionatorsData::LeftLegJoints), 100);
+    static std::vector<float> m_right_leg_gains (m_actions->getNumberOfJoints(NUActionatorsData::RightLegJoints), 100);
     m_actions->addJointPositions(NUActionatorsData::LeftLegJoints, nusystem->getTime() + 40, m_left_leg_angles, zeroleg, m_left_leg_gains);
     m_actions->addJointPositions(NUActionatorsData::RightLegJoints, nusystem->getTime() + 40, m_right_leg_angles, zeroleg, m_right_leg_gains);
     if (m_larm_enabled)

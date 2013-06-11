@@ -36,7 +36,7 @@ class MobileObject;
 class StationaryObject;
 
 #include <vector>
-using namespace std;
+
 
 class HeadPanJob : public MotionJob
 {
@@ -52,8 +52,8 @@ public:
     HeadPanJob(head_pan_t pantype, float xmin, float xmax, float yawmin, float yawmax);
     HeadPanJob(const MobileObject& object, float hackfactor = 1.0);
     HeadPanJob(const StationaryObject& object, float hackfactor = 1.0);
-    HeadPanJob(const vector<StationaryObject>& objects, float hackfactor = 1.0);
-    HeadPanJob(istream& input);
+    HeadPanJob(const std::vector<StationaryObject>& objects, float hackfactor = 1.0);
+    HeadPanJob(std::istream& input);
     ~HeadPanJob();
     
     head_pan_t getPanType();
@@ -61,13 +61,13 @@ public:
     void getX(float& xmin, float& xmax);
     void getYaw(float& yawmin, float& yawmax);
     
-    void summaryTo(ostream& output);
-    void csvTo(ostream& output);
+    void summaryTo(std::ostream& output);
+    void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const HeadPanJob& job);
-    friend ostream& operator<<(ostream& output, const HeadPanJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadPanJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadPanJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
     head_pan_t m_pan_type;              //!< the type of pan
     bool m_use_default;                 //!< true if the head should use the default values

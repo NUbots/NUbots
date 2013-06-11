@@ -13,9 +13,9 @@ class SegmentFilter
 public:
     SegmentFilter();
     /**
-      @brief runs the segment filter over the horizontal and vertical segments lists.
+      @brief runs the segment filter over the horizontal and vertical segments std::lists.
       This matches pairs of segments to preloaded transition rules and stores matching results
-      as transitions back on the blackboard. This method also calls some smoothing prefilters on the lists
+      as transitions back on the blackboard. This method also calls some smoothing prefilters on the std::lists
       which are also set by preloaded rules.
       */
     void run() const;
@@ -23,62 +23,62 @@ public:
 private:
 
     /**
-      @brief runs the segment prefilter rules over a segment list.
-      @param scans the lists of segments.
+      @brief runs the segment prefilter rules over a segment std::list.
+      @param scans the std::lists of segments.
       @param result a smoothed result.
       */
     void preFilter(const SegmentedRegion& scans, SegmentedRegion &result) const;
     /**
-      @brief runs the transition rules over a segment list.
-      @param scans the lists of segments - smoothed or unsmoothed.
-      @param result vectors of transition rule matches and the field object ids they map to.
+      @brief runs the transition rules over a segment std::list.
+      @param scans the std::lists of segments - smoothed or unsmoothed.
+      @param result std::vectors of transition rule matches and the field object ids they map to.
       */
-    void filter(const SegmentedRegion& scans, map<COLOUR_CLASS, vector<ColourSegment> >& result) const;
+    void filter(const SegmentedRegion& scans, map<COLOUR_CLASS, std::vector<ColourSegment> >& result) const;
     
     /**
       @brief Applies a single rule to a segmented region.
-      @param scans the lists of segments - smoothed or unsmoothed.
+      @param scans the std::lists of segments - smoothed or unsmoothed.
       @param rule The transition rule to apply.
-      @param matches the resulting list of transitions.
+      @param matches the resulting std::list of transitions.
       */
-    void checkRuleAgainstRegion(const SegmentedRegion& scans, const ColourTransitionRule& rule, vector<ColourSegment>& matches) const;
+    void checkRuleAgainstRegion(const SegmentedRegion& scans, const ColourTransitionRule& rule, std::vector<ColourSegment>& matches) const;
     /**
       @brief Applies a replacement rule to a triplet of segments.
       @param before the first segment.
       @param middle the second segment.
       @param after the last segment.
-      @param replacement a reference to a vector of segments that should replace the middle segment.
+      @param replacement a reference to a std::vector of segments that should replace the middle segment.
       @param dir the scan direction (vertical or horizontal).
       */
-    void applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, vector<ColourSegment>& replacement, ScanDirection dir) const;
+    void applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, std::vector<ColourSegment>& replacement, ScanDirection dir) const;
         
     /**
       @brief Joins any adjacent segments that are the same colour.
-      @param line the list of segments.
+      @param line the std::list of segments.
       */
-    void joinMatchingSegments(vector<ColourSegment>& line) const;
+    void joinMatchingSegments(std::vector<ColourSegment>& line) const;
 
     /**
       @brief Loads the transition rules from a pair of files.
       @param filename the filename to load from, note that "_h.txt" and "_v.txt" will be appended to
              this to find the actual files.
       */
-    void loadTransitionRules(string filename);
+    void loadTransitionRules(std::string filename);
     /**
       @brief Loads the replacement rules from a pair of files.
       @param filename the filename to load from, note that "_h.txt" and "_v.txt" will be appended to
              this to find the actual files.
       */
-    void loadReplacementRules(string filename);
+    void loadReplacementRules(std::string filename);
     
 public:
     static const bool PREFILTER_ON = true;
     
 private:
-    vector<ColourReplacementRule> replacement_rules_h;  //! @variable The list of horizontal replacement rules
-    vector<ColourReplacementRule> replacement_rules_v;  //! @variable The list of vertical replacement rules
-    vector<ColourTransitionRule> rules_h;               //! @variable The list of horizontal transition rules
-    vector<ColourTransitionRule> rules_v;               //! @variable The list of vertical transition rules
+    std::vector<ColourReplacementRule> replacement_rules_h;  //! @variable The std::list of horizontal replacement rules
+    std::vector<ColourReplacementRule> replacement_rules_v;  //! @variable The std::list of vertical replacement rules
+    std::vector<ColourTransitionRule> rules_h;               //! @variable The std::list of horizontal transition rules
+    std::vector<ColourTransitionRule> rules_v;               //! @variable The std::list of vertical transition rules
     
 };
 

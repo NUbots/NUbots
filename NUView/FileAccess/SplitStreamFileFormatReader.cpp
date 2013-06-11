@@ -4,8 +4,8 @@
 SplitStreamFileFormatReader::SplitStreamFileFormatReader(QObject *parent): LogFileFormatReader(parent)
 {
 
-    string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "MotionGetupActive", "LLegEndEffector", "RLegEndEffector"};
-    vector<string> sensor_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
+    std::string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "MotionGetupActive", "LLegEndEffector", "RLegEndEffector"};
+    std::vector<std::string> sensor_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
     m_tempSensors.addSensors(sensor_names);
     setKnownDataTypes();
     m_fileGood = false;
@@ -13,8 +13,8 @@ SplitStreamFileFormatReader::SplitStreamFileFormatReader(QObject *parent): LogFi
 
 SplitStreamFileFormatReader::SplitStreamFileFormatReader(const QString& filename, QObject *parent): LogFileFormatReader(parent)
 {
-    string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "MotionGetupActive", "LLegEndEffector", "RLegEndEffector"};
-    vector<string> sensor_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
+    std::string temp_accel_names[] = {"Gps", "Compass", "Odometry", "Falling", "Fallen", "MotionGetupActive", "LLegEndEffector", "RLegEndEffector"};
+    std::vector<std::string> sensor_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
     m_tempSensors.addSensors(sensor_names);
     m_fileGood = false;
     setKnownDataTypes();

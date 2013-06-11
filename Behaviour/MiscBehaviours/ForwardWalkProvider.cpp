@@ -31,7 +31,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 ForwardWalkProvider::ForwardWalkProvider(Behaviour* manager) : BehaviourProvider(manager)
 {

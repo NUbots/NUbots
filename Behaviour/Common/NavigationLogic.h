@@ -36,8 +36,8 @@ public:
     
     /*! @brief Returns a vector of (x,y,heading) for the robot's current location.
      */
-    static vector<float> getSelfPosition() {
-        vector<float> result(3,0);
+    static std::vector<float> getSelfPosition() {
+        std::vector<float> result(3,0);
         Self self = Blackboard->Objects->self;
         result[0] = self.wmX();
         result[1] = self.wmY();
@@ -48,8 +48,8 @@ public:
     
     /*! @brief Returns a vector of (x,y,0) for the object's current location.
      */
-    static vector<float> getObjectPosition(Object& object) {
-        vector<float> result(3,0);
+    static std::vector<float> getObjectPosition(Object& object) {
+        std::vector<float> result(3,0);
         
         result[0] = object.estimatedDistance()*cos(object.estimatedBearing());
         result[1] = object.estimatedDistance()*sin(object.estimatedBearing());
@@ -59,8 +59,8 @@ public:
 
     /*! @brief Returns a vector of (x,y,0) for the centre of the opponent goal.
      */
-    static vector<float> getOpponentGoalPosition() {
-        vector<float> result(3,0);
+    static std::vector<float> getOpponentGoalPosition() {
+        std::vector<float> result(3,0);
         float x,y;
         
         if (Blackboard->TeamInfo->TeamNumber == GameInformation::TEAM_BLUE) {
@@ -76,8 +76,8 @@ public:
     
     /*! @brief Returns a vector of (x,y,0) for the centre of our own goal.
      */
-    static vector<float> getOwnGoalPosition() {
-        vector<float> result(3,0);
+    static std::vector<float> getOwnGoalPosition() {
+        std::vector<float> result(3,0);
         float x,y;
         
         if (not Blackboard->TeamInfo->TeamNumber == GameInformation::TEAM_BLUE) {
@@ -93,8 +93,8 @@ public:
     
     /*! @brief Returns a vector of relative (distance,bearing,heading) for the difference betweek two (x,y,heading) vectors.
      */
-    static vector<float> getPositionDifference(position1,position2) {
-        vector<float> result(3,0);
+    static std::vector<float> getPositionDifference(position1,position2) {
+        std::vector<float> result(3,0);
         float rel_x,rel_y;
         
         rel_x = position2[0]-position1[0];
@@ -109,8 +109,8 @@ public:
     
     /*! @brief Returns a vector of visible field Objects which are identified by flags as obstacles.
      */
-    static vector<Object> getVisibleObstacles() {
-        vector<Object> result;
+    static std::vector<Object> getVisibleObstacles() {
+        std::vector<Object> result;
         
         //XXX: unimplemented
         

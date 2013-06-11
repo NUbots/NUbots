@@ -29,14 +29,14 @@
 #include "debugverbositynuplatform.h"
 #include "nubotconfig.h"
 
-using namespace std;
+
 
 /*! @brief Constructor for Bear robotic platform
  */
 BearPlatform::BearPlatform()
 {
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
-    debug << "BearPlatform::BearPlatform" << endl;
+    debug << "BearPlatform::BearPlatform" << std::endl;
 #endif
     init();
     #ifdef USE_VISION

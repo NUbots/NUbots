@@ -25,17 +25,17 @@
 #include "debug.h"
 #include "debugverbositythreading.h"
 
-using namespace std;
+
 
 /*! @brief Creates a periodic signaller thread. Effectively, this class is an adapter turning a conditional thread into a periodic one.
     @param name the name of the thread (used entirely for debug purposes)
     @param listener the thread which will be signaled periodically by this thread to run
     @param period the time in ms between each main loop execution
  */
-PeriodicSignalerThread::PeriodicSignalerThread(string name, ConditionalThread* listener, int period) : PeriodicThread(name, period, listener->getPriority()+1), m_listener(listener)
+PeriodicSignalerThread::PeriodicSignalerThread(std::string name, ConditionalThread* listener, int period) : PeriodicThread(name, period, listener->getPriority()+1), m_listener(listener)
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "PeriodicSignalerThread::PeriodicSignalerThread(" << m_name << ", " << listener->m_name << ", " << m_period << ", " << static_cast<int>(m_priority) << ")" << endl;
+        debug << "PeriodicSignalerThread::PeriodicSignalerThread(" << m_name << ", " << listener->m_name << ", " << m_period << ", " << static_cast<int>(m_priority) << ")" << std::endl;
     #endif
 }
 
@@ -44,7 +44,7 @@ PeriodicSignalerThread::PeriodicSignalerThread(string name, ConditionalThread* l
 PeriodicSignalerThread::~PeriodicSignalerThread()
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "PeriodicSignalerThread::~PeriodicSignalerThread() " << m_name << endl;
+        debug << "PeriodicSignalerThread::~PeriodicSignalerThread() " << m_name << std::endl;
     #endif
     stop();
 }

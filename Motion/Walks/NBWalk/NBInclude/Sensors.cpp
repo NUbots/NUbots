@@ -22,7 +22,6 @@
 #include <fstream>
 #include <algorithm>
 #include <cstdlib>
-using namespace std;
 
 #include <boost/assign/std/vector.hpp>
 using namespace boost::assign;
@@ -61,7 +60,7 @@ Sensors::Sensors ()
       supportFoot(LEFT_SUPPORT),
       unfilteredInertial(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
       chestButton(0.0f),batteryCharge(0.0f),batteryCurrent(0.0f),
-      FRM_FOLDER(string(getenv("HOME"))+"/frames")
+      FRM_FOLDER(std::string(getenv("HOME"))+"/frames")
 {
     pthread_mutex_init(&angles_mutex, NULL);
     pthread_mutex_init(&vision_angles_mutex, NULL);
@@ -99,21 +98,21 @@ Sensors::~Sensors ()
 #endif
 }
 
-const vector<float> Sensors::getBodyAngles () const
+const std::vector<float> Sensors::getBodyAngles () const
 {
     pthread_mutex_lock (&angles_mutex);
 
-    vector<float> vec(bodyAngles);
+    std::vector<float> vec(bodyAngles);
 
     pthread_mutex_unlock (&angles_mutex);
 
     return vec;
 }
 
-const vector<float> Sensors::getHeadAngles () const
+const std::vector<float> Sensors::getHeadAngles () const
 {
     pthread_mutex_lock (&vision_angles_mutex);
-    vector<float> vec(2);
+    std::vector<float> vec(2);
     vec[0] = visionBodyAngles[0];
     vec[1] = visionBodyAngles[1];
     pthread_mutex_unlock (&vision_angles_mutex);
@@ -121,11 +120,11 @@ const vector<float> Sensors::getHeadAngles () const
     return vec;
 }
 
-const vector<float> Sensors::getBodyAngles_degs () const
+const std::vector<float> Sensors::getBodyAngles_degs () const
 {
     pthread_mutex_lock (&angles_mutex);
 
-    vector<float> vec(bodyAngles);
+    std::vector<float> vec(bodyAngles);
 
     pthread_mutex_unlock (&angles_mutex);
 
@@ -135,22 +134,22 @@ const vector<float> Sensors::getBodyAngles_degs () const
     return vec;
 }
 
-const vector<float> Sensors::getVisionBodyAngles() const
+const std::vector<float> Sensors::getVisionBodyAngles() const
 {
     pthread_mutex_lock (&vision_angles_mutex);
 
-    vector<float> vec(visionBodyAngles);
+    std::vector<float> vec(visionBodyAngles);
 
     pthread_mutex_unlock (&vision_angles_mutex);
 
     return vec;
 }
 
-const vector<float> Sensors::getMotionBodyAngles_degs () const
+const std::vector<float> Sensors::getMotionBodyAngles_degs () const
 {
     pthread_mutex_lock (&motion_angles_mutex);
 
-    vector<float> vec(motionBodyAngles);
+    std::vector<float> vec(motionBodyAngles);
 
     pthread_mutex_unlock (&motion_angles_mutex);
 
@@ -160,22 +159,22 @@ const vector<float> Sensors::getMotionBodyAngles_degs () const
     return vec;
 }
 
-const vector<float> Sensors::getMotionBodyAngles() const
+const std::vector<float> Sensors::getMotionBodyAngles() const
 {
     pthread_mutex_lock (&motion_angles_mutex);
 
-    vector<float> vec(motionBodyAngles);
+    std::vector<float> vec(motionBodyAngles);
 
     pthread_mutex_unlock (&motion_angles_mutex);
 
     return vec;
 }
 
-const vector<float> Sensors::getBodyTemperatures() const
+const std::vector<float> Sensors::getBodyTemperatures() const
 {
     pthread_mutex_lock (&temperatures_mutex);
 
-    vector<float> vec(bodyTemperatures);
+    std::vector<float> vec(bodyTemperatures);
 
     pthread_mutex_unlock (&temperatures_mutex);
 
@@ -192,11 +191,11 @@ const float Sensors::getBodyAngle(const int index) const {
     return angle;
 }
 
-const vector<float> Sensors::getBodyAngleErrors () const
+const std::vector<float> Sensors::getBodyAngleErrors () const
 {
     pthread_mutex_lock (&errors_mutex);
 
-    vector<float> vec(bodyAnglesError);
+    std::vector<float> vec(bodyAnglesError);
 
     pthread_mutex_unlock (&errors_mutex);
 
@@ -370,7 +369,7 @@ const float Sensors::getBatteryCurrent () const
     return current;
 }
 
-const vector<float> Sensors::getAllSensors () const
+const std::vector<float> Sensors::getAllSensors () const
 {
     //All sensors sans unfiltered Inertials and Temperatures
     //and the chest button preses
@@ -380,7 +379,7 @@ const vector<float> Sensors::getAllSensors () const
     pthread_mutex_lock (&ultra_sound_mutex);
     pthread_mutex_lock (&support_foot_mutex);
 
-    vector<float> allSensors;
+    std::vector<float> allSensors;
 
     // write the FSR values
     allSensors += leftFootFSR.frontLeft, leftFootFSR.frontRight,
@@ -414,23 +413,23 @@ const vector<float> Sensors::getAllSensors () const
     return allSensors;
 }
 
-void Sensors::setBodyAngles (const vector<float>& v)
+void Sensors::setBodyAngles (const std::vector<float>& v)
 {
     pthread_mutex_lock (&angles_mutex);
 
     bodyAngles = v;
     /*
-      cout << "Body angles in sensors";
+      std::cout << "Body angles in sensors";
       for (int i = 0 ; i < 22; i++){
-      cout <<  bodyAngles[i] << " ";
+      std::cout <<  bodyAngles[i] << " ";
 
       }
-      cout << endl;
+      std::cout << std::endl;
     */
     pthread_mutex_unlock (&angles_mutex);
 }
 
-void Sensors::setVisionBodyAngles (const vector<float>& v)
+void Sensors::setVisionBodyAngles (const std::vector<float>& v)
 {
     pthread_mutex_lock (&vision_angles_mutex);
 
@@ -439,7 +438,7 @@ void Sensors::setVisionBodyAngles (const vector<float>& v)
     pthread_mutex_unlock (&vision_angles_mutex);
 }
 
-void Sensors::setMotionBodyAngles (const vector<float>& v)
+void Sensors::setMotionBodyAngles (const std::vector<float>& v)
 {
     pthread_mutex_lock (&motion_angles_mutex);
 
@@ -448,7 +447,7 @@ void Sensors::setMotionBodyAngles (const vector<float>& v)
     pthread_mutex_unlock (&motion_angles_mutex);
 }
 
-void Sensors::setBodyAngleErrors (const vector<float>& v)
+void Sensors::setBodyAngleErrors (const std::vector<float>& v)
 {
     pthread_mutex_lock (&errors_mutex);
 
@@ -458,7 +457,7 @@ void Sensors::setBodyAngleErrors (const vector<float>& v)
 }
 
 
-void Sensors::setBodyTemperatures (const vector<float>& v)
+void Sensors::setBodyTemperatures (const std::vector<float>& v)
 {
     pthread_mutex_lock (&temperatures_mutex);
 
@@ -652,7 +651,7 @@ void Sensors::setVisionSensors (const FootBumper &_leftBumper,
 
 }
 
-void Sensors::setAllSensors (vector<float> sensorValues) {
+void Sensors::setAllSensors (std::vector<float> sensorValues) {
     //All sensors sans unfiltered Inertials and Temperatures
     //and the chest button preses
     pthread_mutex_lock (&fsr_mutex);
@@ -748,16 +747,16 @@ void Sensors::saveFrame()
 	int MAX_FRAMES = 3000;
 	if (saved_frames > MAX_FRAMES)
 		return;
-    string EXT(".NBFRM");
-    string BASE("/");
+    std::string EXT(".NBFRM");
+    std::string BASE("/");
     int NUMBER = saved_frames;
-    stringstream FRAME_PATH;
+    std::stringstream FRAME_PATH;
 
     FRAME_PATH << FRM_FOLDER << BASE << NUMBER << EXT;
     fstream fout(FRAME_PATH.str().c_str(), fstream::out);
 
     // Retrive joints
-    vector<float> joints = getVisionBodyAngles();
+    std::vector<float> joints = getVisionBodyAngles();
 
     // Lock and write imag1e
     lockImage();
@@ -769,18 +768,18 @@ void Sensors::saveFrame()
     fout << VERSION << " ";
 
     // Write joints
-    for (vector<float>::const_iterator i = joints.begin(); i < joints.end();
+    for (std::vector<float>::const_iterator i = joints.begin(); i < joints.end();
          i++) {
         fout << *i << " ";
     }
 
     // Write sensors
-    vector<float> sensor_data = getAllSensors();
-    for (vector<float>::const_iterator i = sensor_data.begin();
+    std::vector<float> sensor_data = getAllSensors();
+    for (std::vector<float>::const_iterator i = sensor_data.begin();
          i != sensor_data.end(); i++) {
         fout << *i << " ";
     }
 
     fout.close();
-    cout << "Saved frame #" << saved_frames++ << endl;
+    std::cout << "Saved frame #" << saved_frames++ << std::endl;
 }

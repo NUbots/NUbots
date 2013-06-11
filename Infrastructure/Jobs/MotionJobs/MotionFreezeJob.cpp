@@ -38,17 +38,17 @@ MotionFreezeJob::~MotionFreezeJob()
 /*! @brief Prints a human-readable summary to the stream
     @param output the stream to be written to
  */
-void MotionFreezeJob::summaryTo(ostream& output)
+void MotionFreezeJob::summaryTo(std::ostream& output)
 {
-    output << "MotionFreezeJob." << endl;
+    output << "MotionFreezeJob." << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void MotionFreezeJob::csvTo(ostream& output)
+void MotionFreezeJob::csvTo(std::ostream& output)
 {
-    output << "MotionFreezeJob." << endl;
+    output << "MotionFreezeJob." << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -58,10 +58,10 @@ void MotionFreezeJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void MotionFreezeJob::toStream(ostream& output) const
+void MotionFreezeJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "MotionFreezeJob::toStream" << endl;
+        debug << "MotionFreezeJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -74,10 +74,10 @@ void MotionFreezeJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const MotionFreezeJob& job)
+std::ostream& operator<<(std::ostream& output, const MotionFreezeJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "<<MotionFreezeJob" << endl;
+        debug << "<<MotionFreezeJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -89,10 +89,10 @@ ostream& operator<<(ostream& output, const MotionFreezeJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const MotionFreezeJob* job)
+std::ostream& operator<<(std::ostream& output, const MotionFreezeJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "<<MotionFreezeJob" << endl;
+        debug << "<<MotionFreezeJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

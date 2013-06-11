@@ -22,9 +22,9 @@ public:
 
     //2D - 2D pixel to camera relative polar transforms
     void screenToRadial2D(GroundPoint& pt) const;
-    void screenToRadial2D(vector<GroundPoint>& pts) const;
+    void screenToRadial2D(std::vector<GroundPoint>& pts) const;
     GroundPoint screenToRadial2D(const Point& pt) const;
-    vector<GroundPoint> screenToRadial2D(const vector<Point>& pts) const;
+    std::vector<GroundPoint> screenToRadial2D(const std::vector<Point>& pts) const;
 
 
     void radial2DToRadial3D(GroundPoint &pt, double distance) const;
@@ -42,9 +42,9 @@ public:
 
     //2D pixel - 2D cartesian (feet relative) - assumes point is on the ground
     void screenToGroundCartesian(GroundPoint& pt) const;
-    void screenToGroundCartesian(vector<GroundPoint>& pts) const;
+    void screenToGroundCartesian(std::vector<GroundPoint>& pts) const;
     GroundPoint screenToGroundCartesian(const Point& pt) const;
-    vector<GroundPoint> screenToGroundCartesian(const vector<Point>& pts) const;
+    std::vector<GroundPoint> screenToGroundCartesian(const std::vector<Point>& pts) const;
 
     double getCameraDistanceInPixels() const { return effective_camera_dist_pixels; }
 
@@ -66,7 +66,7 @@ private:
 
     Matrix ctgtransform;
     bool m_ctg_valid;              //! @variable Whether the ctgvector is valid.
-//    vector<float> ctvector;     //! @variable The camera transform vector.
+//    std::vector<float> ctvector;     //! @variable The camera transform vector.
 //    bool ctvalid;               //! @variable Whether the ctvector is valid.
 
     Vector2<double> image_size;

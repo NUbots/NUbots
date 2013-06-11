@@ -40,7 +40,7 @@ WalkParameters::WalkParameters()
 /*! @brief Constructs a walk parameter set with only a name. Presumably the parameters will be set later using the set functions
     @param name the name of this walk parameter set
  */
-WalkParameters::WalkParameters(const string& name)
+WalkParameters::WalkParameters(const std::string& name)
 {
     m_name = name;
     m_num_arm_gains = 0;
@@ -55,7 +55,7 @@ WalkParameters::WalkParameters(const string& name)
     @param leggains the gains: [first phase, second phase, third phase, etc] where each phase [hip roll, hip pitch, hip yaw, knee, ankle roll, ankle pitch]
     @param parameters the walk engine parameters
  */
-WalkParameters::WalkParameters(const string& name, const vector<float>& maxspeeds, const vector<float>& maxaccels, const vector<Parameter>& parameters, const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains)
+WalkParameters::WalkParameters(const std::string& name, const std::vector<float>& maxspeeds, const std::vector<float>& maxaccels, const std::vector<Parameter>& parameters, const std::vector<std::vector<float> >& armgains, const std::vector<std::vector<float> >& torsogains, const std::vector<std::vector<float> >& leggains)
 {
     m_name = name;
     setMaxSpeeds(maxspeeds);
@@ -75,9 +75,9 @@ WalkParameters::~WalkParameters()
 /*! @brief Gets all of the values of every interesting walk parameter.
     @return a vector of floats containing all of the values of all of the interesting walk parameters.
  */
-vector<float> WalkParameters::getAsVector()
+std::vector<float> WalkParameters::getAsVector()
 {
-    vector<float> data;
+    std::vector<float> data;
     data.reserve(size());
     
     for (size_t i=0; i<m_max_speeds.size(); i++)
@@ -99,9 +99,9 @@ vector<float> WalkParameters::getAsVector()
 /*! @brief Gets all of the values of every interesting walk parameter.
     @return a vector of floats containing all of the values of all of the interesting walk parameters.
  */
-vector<Parameter> WalkParameters::getAsParameters()
+std::vector<Parameter> WalkParameters::getAsParameters()
 {
-    vector<Parameter> data;
+    std::vector<Parameter> data;
     data.reserve(size());
 
 #ifdef USE_ALWALK       // this is a horrible hack. The ranges for the velocities and accelerations should be put in the walk parameter file...
@@ -136,7 +136,7 @@ vector<Parameter> WalkParameters::getAsParameters()
 /*! @brief Returns the walk parameter set's name
     @return the walk parameter name
  */
-string& WalkParameters::getName()
+std::string& WalkParameters::getName()
 {
     return m_name;
 }
@@ -144,7 +144,7 @@ string& WalkParameters::getName()
 /*! @brief Gets the walk engine max speed values stored here
  @returns the walk engine max speeds stored as [x (cm/s), y (cm/s), theta (rad/s)].
  */
-vector<float>& WalkParameters::getMaxSpeeds()
+std::vector<float>& WalkParameters::getMaxSpeeds()
 {
     return m_max_speeds;
 }
@@ -152,7 +152,7 @@ vector<float>& WalkParameters::getMaxSpeeds()
 /*! @brief Gets the walk engine max acceleration values stored here
  @return the maximum accelerations as [x (cm/s/s), y (cm/s/s), theta (rad/s/s)].
  */
-vector<float>& WalkParameters::getMaxAccelerations()
+std::vector<float>& WalkParameters::getMaxAccelerations()
 {
     return m_max_accelerations;
 }
@@ -160,7 +160,7 @@ vector<float>& WalkParameters::getMaxAccelerations()
 /*! @brief Gets the walk engine parameters stored here
  @return the walk engine parameters stored in this object
  */
-vector<Parameter>& WalkParameters::getParameters()
+std::vector<Parameter>& WalkParameters::getParameters()
 {
     return m_parameters;
 }
@@ -168,7 +168,7 @@ vector<Parameter>& WalkParameters::getParameters()
 /*! @brief Gets the arm gains stored in this WalkParameter class
     @return returns the armgains as: [first phase, second phase, third phase, etc] where each phase [shoulder roll, shouler pitch, shouler yaw, elbow roll, elbow pitch]
  */
-vector<vector<float> >& WalkParameters::getArmGains()
+std::vector<std::vector<float> >& WalkParameters::getArmGains()
 {
     return m_arm_gains;
 }
@@ -176,7 +176,7 @@ vector<vector<float> >& WalkParameters::getArmGains()
 /*! @brief Gets the torso gains stored in this WalkParameter class
     @return the torsogains as [first phase, second phase, third phase, etc] where each phase [torso roll, torso pitch, torso yaw]
  */
-vector<vector<float> >& WalkParameters::getTorsoGains()
+std::vector<std::vector<float> >& WalkParameters::getTorsoGains()
 {
     return m_torso_gains;
 }
@@ -184,7 +184,7 @@ vector<vector<float> >& WalkParameters::getTorsoGains()
 /*! @brief Gets the leg gains stored in this WalkParameter class
     @return the leggains as [first phase, second phase, third phase, etc] where each phase [hip roll, hip pitch, hip yaw, knee, ankle roll, ankle pitch]
  */
-vector<vector<float> >& WalkParameters::getLegGains()
+std::vector<std::vector<float> >& WalkParameters::getLegGains()
 {
     return m_leg_gains;
 }
@@ -192,7 +192,7 @@ vector<vector<float> >& WalkParameters::getLegGains()
 /*! @brief Sets all of the interesting walk parameters with the given values
     @param data, a vector containing all of the new and interesting walk parameters
  */
-void WalkParameters::set(const vector<float>& data)
+void WalkParameters::set(const std::vector<float>& data)
 {
     if (data.size() < m_max_speeds.size() + m_max_accelerations.size() + m_parameters.size())
         return;
@@ -229,7 +229,7 @@ void WalkParameters::set(const vector<float>& data)
 /*! @brief Sets the walk parameter set's name
     @param name the new name
  */
-void WalkParameters::setName(const string& name)
+void WalkParameters::setName(const std::string& name)
 {
     m_name = name;
 }
@@ -237,9 +237,9 @@ void WalkParameters::setName(const string& name)
 /*! @brief Sets the walk engine max speeds stored here
  @param maxspeeds the walk engine max speeds stored as [x (cm/s), y (cm/s), theta (rad/s)].
  */
-void WalkParameters::setMaxSpeeds(const vector<float>& maxspeeds)
+void WalkParameters::setMaxSpeeds(const std::vector<float>& maxspeeds)
 {
-    vector<float> tempspeeds;
+    std::vector<float> tempspeeds;
     for (unsigned int i=0; i<maxspeeds.size(); i++)
     {
         if (maxspeeds[i] < 0)
@@ -253,9 +253,9 @@ void WalkParameters::setMaxSpeeds(const vector<float>& maxspeeds)
 /*! @brief Sets the walk engine max accelerations stored here
  @param maxspeeds the walk engine max accelerations stored as [x (cm/s/s), y (cm/s/s), theta (rad/s/s)].
  */
-void WalkParameters::setMaxAccelerations(const vector<float>& maxaccels)
+void WalkParameters::setMaxAccelerations(const std::vector<float>& maxaccels)
 {
-    vector<float> tempaccels;
+    std::vector<float> tempaccels;
     for (unsigned int i=0; i<maxaccels.size(); i++)
     {
         if (maxaccels[i] < 0)
@@ -270,7 +270,7 @@ void WalkParameters::setMaxAccelerations(const vector<float>& maxaccels)
 /*! @brief Sets the walk engine parameters stored here
     @param parameters the walk engine parameters
  */
-void WalkParameters::setParameters(const vector<Parameter>& parameters)
+void WalkParameters::setParameters(const std::vector<Parameter>& parameters)
 {
     m_parameters = parameters;
 }
@@ -278,7 +278,7 @@ void WalkParameters::setParameters(const vector<Parameter>& parameters)
 /*! @brief Sets the arm gains
     @param armgains the gains: [first phase, second phase, third phase, etc] where each phase [shoulder roll, shouler pitch, shouler yaw, elbow roll, elbow pitch]
  */
-void WalkParameters::setArmGains(const vector<vector<float> >& armgains)
+void WalkParameters::setArmGains(const std::vector<std::vector<float> >& armgains)
 {
     setGains(m_arm_gains, m_num_arm_gains, armgains);
 }
@@ -286,7 +286,7 @@ void WalkParameters::setArmGains(const vector<vector<float> >& armgains)
 /*! @brief Sets the torso gains stored in this WalkParameter class
     @param torsogains the gains: [first phase, second phase, third phase, etc] where each phase [torso roll, torso pitch, torso yaw]
  */
-void WalkParameters::setTorsoGains(const vector<vector<float> >& torsogains)
+void WalkParameters::setTorsoGains(const std::vector<std::vector<float> >& torsogains)
 {
     setGains(m_torso_gains, m_num_torso_gains, torsogains);
 }
@@ -294,7 +294,7 @@ void WalkParameters::setTorsoGains(const vector<vector<float> >& torsogains)
 /*! @brief Sets the leg gains stored in this WalkParameter class
     @param leggains the gains: [first phase, second phase, third phase, etc] where each phase [hip roll, hip pitch, hip yaw, knee, ankle roll, ankle pitch]
  */
-void WalkParameters::setLegGains(const vector<vector<float> >& leggains)
+void WalkParameters::setLegGains(const std::vector<std::vector<float> >& leggains)
 {
     setGains(m_leg_gains, m_num_torso_gains, leggains);
 }
@@ -303,7 +303,7 @@ void WalkParameters::setLegGains(const vector<vector<float> >& leggains)
     @param gains the data member to be updated
     @param newgains the new gains to be saved to the class
  */
-void WalkParameters::setGains(vector<vector<float> >& gains, unsigned int& numgains, const vector<vector<float> >& newgains)
+void WalkParameters::setGains(std::vector<std::vector<float> >& gains, unsigned int& numgains, const std::vector<std::vector<float> >& newgains)
 {
     if (newgains.size() == 0)
     {
@@ -312,7 +312,7 @@ void WalkParameters::setGains(vector<vector<float> >& gains, unsigned int& numga
     }
     else
     {
-        vector<vector<float> > tempgains;
+        std::vector<std::vector<float> > tempgains;
         // we need to make sure that the shape of the gains is rectangular (ie each row has the same length)
         // so I pick the shortest row and use that length for all rows
         unsigned int width = newgains[0].size();
@@ -325,7 +325,7 @@ void WalkParameters::setGains(vector<vector<float> >& gains, unsigned int& numga
         // now copy and clip the gains to tempgains
         for (unsigned int i=0; i<newgains.size(); i++)
         {
-            tempgains.push_back(vector<float>());
+            tempgains.push_back(std::vector<float>());
             for (unsigned int j=0; j<width; j++)
             {
                 if (newgains[i][j] < 0)
@@ -344,45 +344,45 @@ void WalkParameters::setGains(vector<vector<float> >& gains, unsigned int& numga
 /*! @brief Prints a human readable summary of the walk parameters
     Only those relevant to optimisation are shown.
  */
-void WalkParameters::summaryTo(ostream& output)
+void WalkParameters::summaryTo(std::ostream& output)
 {
     output << m_name << " WalkParameters: ";
-    vector<float> temp = getAsVector();
+    std::vector<float> temp = getAsVector();
     for (size_t i=0; i<temp.size(); i++)
         output << temp[i] << " ";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief Prints a comma separated string of the parameters
  */
-void WalkParameters::csvTo(ostream& output)
+void WalkParameters::csvTo(std::ostream& output)
 {
-    vector<float> temp = getAsVector();
+    std::vector<float> temp = getAsVector();
     for (size_t i=0; i<temp.size(); i++)
         output << temp[i] << ", ";
 }
 
 /*! @brief Saves the entire contents of the WalkParameters class in the stream
  */
-ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters)
+std::ostream& operator<< (std::ostream& output, const WalkParameters& p_walkparameters)
 {
-    output << p_walkparameters.m_name << endl;
-    output << "Max Speeds (x cm/s, y cm/s, yaw rad/s): " << MotionFileTools::fromVector(p_walkparameters.m_max_speeds) << endl;
-    output << "Max Accelerations (x cm/s/s, y cm/s/s, yaw rad/s/s): " << MotionFileTools::fromVector(p_walkparameters.m_max_accelerations) << endl;
+    output << p_walkparameters.m_name << std::endl;
+    output << "Max Speeds (x cm/s, y cm/s, yaw rad/s): " << MotionFileTools::fromVector(p_walkparameters.m_max_speeds) << std::endl;
+    output << "Max Accelerations (x cm/s/s, y cm/s/s, yaw rad/s/s): " << MotionFileTools::fromVector(p_walkparameters.m_max_accelerations) << std::endl;
     
     for (unsigned int i=0; i<p_walkparameters.m_parameters.size(); i++)
         output << p_walkparameters.m_parameters[i];
 
-    output << "ArmGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_arm_gains) << endl;
-    output << "TorsoGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_torso_gains) << endl;
-    output << "LegGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_leg_gains) << endl;
+    output << "ArmGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_arm_gains) << std::endl;
+    output << "TorsoGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_torso_gains) << std::endl;
+    output << "LegGains (%): " << MotionFileTools::fromMatrix(p_walkparameters.m_leg_gains) << std::endl;
 
     return output;
 }
 
 /*! @brief Saves the entire contents of the WalkParameters class in the stream
  */
-ostream& operator<< (ostream& output, const WalkParameters* p_walkparameters)
+std::ostream& operator<< (std::ostream& output, const WalkParameters* p_walkparameters)
 {
     output << (*p_walkparameters);
     return output;
@@ -390,7 +390,7 @@ ostream& operator<< (ostream& output, const WalkParameters* p_walkparameters)
 
 /*! @brief Loads the entire contents of the WalkParameters class from the stream
  */
-istream& operator>> (istream& input, WalkParameters& p_walkparameters)
+std::istream& operator>> (std::istream& input, WalkParameters& p_walkparameters)
 {
     getline(input, p_walkparameters.m_name);
     p_walkparameters.m_max_speeds = MotionFileTools::toFloatVector(input);
@@ -402,9 +402,9 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
     p_walkparameters.m_parameters.clear();
     
     int beforepeek = input.tellg();
-    string label;
+    std::string label;
     input >> label;
-    while (label.find("ArmGains") == string::npos && label.find("TorsoGains") == string::npos && label.find("LegGains") == string::npos)
+    while (label.find("ArmGains") == std::string::npos && label.find("TorsoGains") == std::string::npos && label.find("LegGains") == std::string::npos)
     {
         input.seekg(beforepeek);
         input >> p;
@@ -417,17 +417,17 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
     
     while (!input.eof())
     {
-        if (label.find("ArmGains") != string::npos)
+        if (label.find("ArmGains") != std::string::npos)
         {
             p_walkparameters.m_arm_gains = MotionFileTools::toFloatMatrix(input);
             p_walkparameters.m_num_arm_gains = MotionFileTools::size(p_walkparameters.m_arm_gains);
         }
-        else if (label.find("TorsoGains") != string::npos)
+        else if (label.find("TorsoGains") != std::string::npos)
         {
             p_walkparameters.m_torso_gains = MotionFileTools::toFloatMatrix(input);
             p_walkparameters.m_num_torso_gains = MotionFileTools::size(p_walkparameters.m_torso_gains);
         }
-        else if (label.find("LegGains") != string::npos)
+        else if (label.find("LegGains") != std::string::npos)
         {
             p_walkparameters.m_leg_gains = MotionFileTools::toFloatMatrix(input);
             p_walkparameters.m_num_leg_gains = MotionFileTools::size(p_walkparameters.m_leg_gains);
@@ -440,7 +440,7 @@ istream& operator>> (istream& input, WalkParameters& p_walkparameters)
 
 /*! @brief Loads the entire contents of the WalkParameters class from the stream
  */
-istream& operator>> (istream& input, WalkParameters* p_walkparameters)
+std::istream& operator>> (std::istream& input, WalkParameters* p_walkparameters)
 {
     input >> (*p_walkparameters);
     return input;
@@ -456,26 +456,26 @@ void WalkParameters::save()
 /*! @brief Saves the walk parameters to a new file given by the name
     @param name the new file will be name.cfg
  */
-void WalkParameters::saveAs(const string& name)
+void WalkParameters::saveAs(const std::string& name)
 {
-    ofstream file((CONFIG_DIR + string("Motion/Walks/") + name + ".cfg").c_str());
+    std::ofstream file((CONFIG_DIR + std::string("Motion/Walks/") + name + ".cfg").c_str());
     if (file.is_open())
     {
         file << this;
         file.close();
     }
     else
-        debug << "WalkParameters::save(): Failed to open file " << name + ".cfg" << endl;
+        debug << "WalkParameters::save(): Failed to open file " << name + ".cfg" << std::endl;
     file.close();
 }
 
 /*! @brief Loads the walk parameters from a file
     @param name the name of the file to load from
  */
-void WalkParameters::load(const string& name)
+void WalkParameters::load(const std::string& name)
 {
-    string filepath = CONFIG_DIR + string("Motion/Walks/") + name + ".cfg";
-    ifstream file(filepath.c_str());
+    std::string filepath = CONFIG_DIR + std::string("Motion/Walks/") + name + ".cfg";
+    std::ifstream file(filepath.c_str());
     if (file.is_open())
     {
         file >> this;
@@ -484,9 +484,9 @@ void WalkParameters::load(const string& name)
     else
     {
         // This is important, so shout it everywhere.
-        debug << "WalkParameters::load(): Failed to load file " << filepath << endl;
-        errorlog << "WalkParameters::load(): Failed to load file " << filepath << endl;
-        cout << "WARNING: WalkParameters::load(): Failed to load file " << filepath << endl;
+        debug << "WalkParameters::load(): Failed to load file " << filepath << std::endl;
+        errorlog << "WalkParameters::load(): Failed to load file " << filepath << std::endl;
+        std::cout << "WARNING: WalkParameters::load(): Failed to load file " << filepath << std::endl;
     }
     file.close();
 }

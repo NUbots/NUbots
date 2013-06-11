@@ -45,7 +45,7 @@ Vision::Vision()
     classifiedCounter = 0;
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
-    loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
+    loadLUTFromFile(std::string(DATA_DIR) + std::string("default.lut"));
     m_saveimages_thread = new SaveImagesThread(this);
     isSavingImages = false;
     isSavingImagesWithVaryingSettings = false;
@@ -53,7 +53,7 @@ Vision::Vision()
     ImageFrameNumber = 0;
     numFramesDropped = 0;
     numFramesProcessed = 0;
-    m_camera_specs = new NUCameraData(string(CONFIG_DIR) + string("CameraSpecs.cfg"));
+    m_camera_specs = new NUCameraData(std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg"));
     return;
 }
 
@@ -70,16 +70,16 @@ Vision::~Vision()
 void Vision::process(JobList* jobs)
 {
     #if DEBUG_VISION_VERBOSITY > 4
-        debug  << "Vision::Process - Begin" << endl;
+        debug  << "Vision::Process - Begin" << std::endl;
     #endif
-    static list<Job*>::iterator it;     // the iterator over the motion jobs
+    static std::list<Job*>::iterator it;     // the iterator over the motion jobs
     
     for (it = jobs->vision_begin(); it != jobs->vision_end();)
     {
         if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
         {   
             #if DEBUG_VISION_VERBOSITY > 4
-                debug << "Vision::process(): Processing a save images job." << endl;
+                debug << "Vision::process(): Processing a save images job." << std::endl;
             #endif
             static SaveImagesJob* job;
             job = (SaveImagesJob*) (*it);
@@ -89,9 +89,9 @@ void Vision::process(JobList* jobs)
                 {
                     currentSettings = currentImage->getCameraSettings();
                     if (!imagefile.is_open())
-                        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+                        imagefile.open((std::string(DATA_DIR) + std::string("image.strm")).c_str());
                     if (!sensorfile.is_open())
-                        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
+                        sensorfile.open((std::string(DATA_DIR) + std::string("sensor.strm")).c_str());
                     m_actions->add(NUActionatorsData::Sound, m_sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else
@@ -124,7 +124,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     #endif
     
     #if DEBUG_VISION_VERBOSITY > 4
-        debug << "Vision::ProcessFrame()." << endl;
+        debug << "Vision::ProcessFrame()." << std::endl;
     #endif
 
     if (image == NULL || data == NULL || actions == NULL || fieldobjects == NULL)
@@ -161,20 +161,20 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     //spacings = (int)(currentImage->getWidth()/20); //16 for Robot, 8 for simulator = width/20
     Circle circ;
     int tempNumScanLines = 0;
-    //debug << "Setting Image: " <<endl;
+    //debug << "Setting Image: " <<std::endl;
 
     if(isSavingImages)
     {
         #if DEBUG_VISION_VERBOSITY > 1
-            debug << "Vision::starting the save images loop." << endl;
+            debug << "Vision::starting the save images loop." << std::endl;
         #endif
         m_saveimages_thread->signal();
     }
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Generating Horizon Line: " << endl;
+        debug << "Generating Horizon Line: " << std::endl;
     #endif
     //Generate HorizonLine:
-    vector <float> horizonInfo;
+    std::vector <float> horizonInfo;
 
 
     if(m_sensor_data->get(NUSensorsData::Horizon, horizonInfo))
@@ -184,7 +184,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     else
     {
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "No Horizon Data" << endl;
+            debug << "No Horizon Data" << std::endl;
         #endif
         //AllFieldObjects->postProcess(image->m_timestamp);
         //return;
@@ -192,8 +192,8 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     }
 
     #if DEBUG_VISION_VERBOSITY > 7
-        debug << "Generating Horizon Line: Finnished" <<endl;
-        debug << "Image(0,0) is below: " << m_horizonLine.IsBelowHorizon(0, 0)<< endl;
+        debug << "Generating Horizon Line: Finnished" <<std::endl;
+        debug << "Image(0,0) is below: " << m_horizonLine.IsBelowHorizon(0, 0)<< std::endl;
     #endif
 
     std::vector<unsigned char> validColours;
@@ -218,13 +218,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 #endif    
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Begin Scanning: " << endl;
+        debug << "Begin Scanning: " << std::endl;
     #endif
 
     green_border_points = findGreenBorderPoints(spacings,&m_horizonLine);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tFind Edges: finnished" << endl;
+        debug << "\tFind Edges: finnished" << std::endl;
     #endif
 
 
@@ -237,12 +237,12 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     points = interpolateBorders(points,spacings);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tGenerating Green Border: Finnished" <<endl;
+        debug << "\tGenerating Green Border: Finnished" <<std::endl;
     #endif
 
 //START OBSTACLE DETECTION
-    vector<ObjectCandidate> obstacle_candidates;
-    vector<AmbiguousObject> obstacle_objects;
+    std::vector<ObjectCandidate> obstacle_candidates;
+    std::vector<AmbiguousObject> obstacle_objects;
 
     obstacle_candidates = getObstacleCandidates(green_border_points, points, OBSTACLE_HEIGH_THRESH, OBSTACLE_WIDTH_MIN);
     obstacle_objects = getObjectsFromCandidates(obstacle_candidates);
@@ -252,11 +252,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
     #if DEBUG_VISION_VERBOSITY > 7
-        debug << "\tObstacles Detected: " << obstacle_objects.size() << endl;
+        debug << "\tObstacles Detected: " << obstacle_objects.size() << std::endl;
     #endif
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tObstacle Detection: Finnished" <<endl;
+        debug << "\tObstacle Detection: Finnished" <<std::endl;
     #endif
 //END OBSTACLE DETECTION
 
@@ -268,7 +268,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     ClassifiedSection vertScanArea = verticalScan(points,spacings);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tVert ScanPaths : Finnished " << vertScanArea.getNumberOfScanLines() <<endl;
+        debug << "\tVert ScanPaths : Finnished " << vertScanArea.getNumberOfScanLines() <<std::endl;
     #endif
 
 
@@ -280,7 +280,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     ClassifiedSection horiScanArea = horizontalScan(points,spacings);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tHorizontal ScanPaths : Finnished " << horiScanArea.getNumberOfScanLines() <<endl;
+        debug << "\tHorizontal ScanPaths : Finnished " << horiScanArea.getNumberOfScanLines() <<std::endl;
     #endif
     
 
@@ -293,7 +293,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     ClassifyScanArea(&horiScanArea);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tClassify ScanPaths : Finnished" <<endl;
+        debug << "\tClassify ScanPaths : Finnished" <<std::endl;
     #endif
 
     //! Different Segments for Different possible objects:
@@ -351,14 +351,14 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 #endif    
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Finding Line or Robot Segments: with " << horizontalsegments.size()<< "horizontalsegments"<<endl;
+        debug << "Finding Line or Robot Segments: with " << horizontalsegments.size()<< "horizontalsegments"<<std::endl;
     #endif
     LineDetection LineDetector;
 
     DetectLineOrRobotPoints(&vertScanArea, &LineDetector);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Line or Robot Segments: " << " Vertical Line Segments: "<<LineDetector.verticalLineSegments.size() << "Horizontal Line Segments: " << LineDetector.horizontalLineSegments.size()<< " Robot Segments: "<< LineDetector.robotSegments.size()<< endl;
+        debug << "Line or Robot Segments: " << " Vertical Line Segments: "<<LineDetector.verticalLineSegments.size() << "Horizontal Line Segments: " << LineDetector.horizontalLineSegments.size()<< " Robot Segments: "<< LineDetector.robotSegments.size()<< std::endl;
     #endif
     //! Identify Field Objects
 #ifdef VISION_PROFILE
@@ -412,11 +412,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     LineCandidates.insert(LineCandidates.end(), HorizontalLineCandidates.begin(),HorizontalLineCandidates.end());
     LineCandidates.insert(LineCandidates.end(),VerticalLineCandidates.begin(),VerticalLineCandidates.end());
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Line Candidates: " << LineCandidates.size() << "\tHorizontal Line Candidates: " << HorizontalLineCandidates.size()<< "\tVertical Candidates: " << VerticalLineCandidates.size()<< endl;
+        debug << "Line Candidates: " << LineCandidates.size() << "\tHorizontal Line Candidates: " << HorizontalLineCandidates.size()<< "\tVertical Candidates: " << VerticalLineCandidates.size()<< std::endl;
     #endif
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Begin Classify Candidates: " << endl;
+        debug << "Begin Classify Candidates: " << std::endl;
     #endif
 
     std::vector< ObjectCandidate > RobotCandidates;
@@ -441,13 +441,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
                 //validColours.push_back(ClassIndex::blue);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPRE-ROBOT: Segments:\t" <<  LineDetector.robotSegments.size() << endl;
+                    debug << "\tPRE-ROBOT: Segments:\t" <<  LineDetector.robotSegments.size() << std::endl;
                 #endif
 
                 RobotCandidates = classifyCandidates(LineDetector.robotSegments, points ,validColours, spacings, 0.2, 2.0, 12, method);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPOST-ROBOT: Robots candidates:\t" << RobotCandidates.size()<< endl;
+                    debug << "\tPOST-ROBOT: Robots candidates:\t" << RobotCandidates.size()<< std::endl;
                 #endif
 
                 break;
@@ -458,13 +458,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
                 validColours.push_back(ClassIndex::yellow_orange);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPRE-BALL: Segments:\t" <<  BallSegments.size() <<endl;
+                    debug << "\tPRE-BALL: Segments:\t" <<  BallSegments.size() <<std::endl;
                 #endif
 
                 BallCandidates = classifyCandidates(BallSegments, points, validColours, spacings, 0, 3.0, 1, method);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPOST-BALL: Ball Candidates:\t"<< BallCandidates.size() << endl;
+                    debug << "\tPOST-BALL: Ball Candidates:\t"<< BallCandidates.size() << std::endl;
                 #endif
 
                 break;
@@ -473,14 +473,14 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
                 validColours.push_back(ClassIndex::yellow);
                 //validColours.push_back(ClassIndex::yellow_orange);
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPRE-YELLOW-GOALS" << endl;
+                    debug << "\tPRE-YELLOW-GOALS" << std::endl;
                 #endif
 
                 //tempCandidates = classifyCandidates(segments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 YellowGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 YellowGoalCandidates = classifyCandidates(GoalYellowSegments, points, validColours, spacings, 0.1, 4.0, 2, method);
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPOST-YELLOW-GOALS" << endl;
+                    debug << "\tPOST-YELLOW-GOALS" << std::endl;
                 #endif
 
                 break;
@@ -490,14 +490,14 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
                 //validColours.push_back(ClassIndex::shadow_blue);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPRE-BLUE-GOALS" << endl;
+                    debug << "\tPRE-BLUE-GOALS" << std::endl;
                 #endif
 
                 BlueGoalAboveHorizonCandidates = ClassifyCandidatesAboveTheHorizon(horizontalsegments,validColours,spacings*1.5,3);
                 BlueGoalCandidates = classifyCandidates(GoalBlueSegments, points, validColours, spacings, 0.1, 4.0, 2, method);
 
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug << "\tPOST-BLUE-GOALS" <<endl;
+                    debug << "\tPOST-BLUE-GOALS" <<std::endl;
                 #endif
 
                 break;
@@ -505,11 +505,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     }
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Finnished Classify Candidates" <<endl;
+        debug << "Finnished Classify Candidates" <<std::endl;
     #endif
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Begin Object Recognition: " <<endl;
+        debug << "Begin Object Recognition: " <<std::endl;
     #endif
 
     //! Find Robots:
@@ -519,13 +519,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPre-Robot Formation: " <<endl;
+            debug << "\tPre-Robot Formation: " <<std::endl;
         #endif
 
         DetectRobots(RobotCandidates);
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPost-Robot Formation: " <<endl;
+            debug << "\tPost-Robot Formation: " <<std::endl;
         #endif
 
     //! Find Goals:
@@ -535,7 +535,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPre-GOALPost Recognition: " <<endl;
+            debug << "\tPre-GOALPost Recognition: " <<std::endl;
         #endif
 
         DetectGoals(YellowGoalCandidates, YellowGoalAboveHorizonCandidates, horizontalsegments);
@@ -544,7 +544,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         PostProcessGoals();
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPost-GOALPost Recognition: " <<endl;
+            debug << "\tPost-GOALPost Recognition: " <<std::endl;
         #endif
 
 
@@ -555,7 +555,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPre-Line Formation: with " << LineCandidates.size() << " candidates"<<endl;
+            debug << "\tPre-Line Formation: with " << LineCandidates.size() << " candidates"<<std::endl;
         #endif
 
         //SHANNON
@@ -565,7 +565,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         //DetectLines(&LineDetector);
     
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPost-Line Formation: " <<endl;
+            debug << "\tPost-Line Formation: " <<std::endl;
         #endif
 
     //! Form Ball
@@ -575,7 +575,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPre-Ball Recognition: " <<endl;
+            debug << "\tPre-Ball Recognition: " <<std::endl;
         #endif
 
         if(BallCandidates.size() > 0)
@@ -584,11 +584,11 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         }
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\tPost-Ball Recognition: " <<endl;
+            debug << "\tPost-Ball Recognition: " <<std::endl;
         #endif
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "Finished Object Recognition: " <<endl;
+        debug << "Finished Object Recognition: " <<std::endl;
     #endif
     AllFieldObjects->postProcess(image->GetTimestamp());
 
@@ -604,12 +604,12 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
     }*/
     #if DEBUG_VISION_VERBOSITY > 3
 	debug 	<< "Vision::ProcessFrame - Number of Pixels Classified: " << classifiedCounter 
-			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << endl;
+			<< "\t Percent of Image: " << classifiedCounter / float(currentImage->getWidth() * currentImage->getHeight()) * 100.00 << "%" << std::endl;
     #endif
     
 	/*For Testing Ultrasonic Distances:
 	debug << "US Distances: " ;
-	vector<float> leftDistances, rightDistances;
+	std::vector<float> leftDistances, rightDistances;
 	m_sensor_data->getDistanceLeftValues(leftDistances);
 	m_sensor_data->getDistanceRightValues(rightDistances);
 	debug << "US Left Distances: " ;
@@ -622,17 +622,17 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 	{
 		debug << "\t " << rightDistances[i];
 	}
-	debug << endl;*/
+	debug << std::endl;*/
 	
     #if DEBUG_VISION_VERBOSITY > 4
         //! Debug information for Frame:
-        debug << "Time: " << m_timestamp << endl;
+        debug << "Time: " << m_timestamp << std::endl;
         for(unsigned int i = 0; i < AllFieldObjects->stationaryFieldObjects.size();i++)
         {
             if(AllFieldObjects->stationaryFieldObjects[i].isObjectVisible() == true)
             {
                 debug << " \tStationary Object: " << i << ": " << AllFieldObjects->stationaryFieldObjects[i].getName() << " Seen at \tDistance: " <<  AllFieldObjects->stationaryFieldObjects[i].measuredDistance() << "cm away."
-                        << "\tBearing: "<< AllFieldObjects->stationaryFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->stationaryFieldObjects[i].measuredElevation()<<endl;
+                        << "\tBearing: "<< AllFieldObjects->stationaryFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->stationaryFieldObjects[i].measuredElevation()<<std::endl;
             }
         }
         for(unsigned int i = 0; i < AllFieldObjects->mobileFieldObjects.size();i++)
@@ -640,7 +640,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
             if(AllFieldObjects->mobileFieldObjects[i].isObjectVisible() == true)
             {
                 debug << "\tMobile Object: " << i << ": " << AllFieldObjects->mobileFieldObjects[i].getName() << " Seen at \tDistance: " <<  AllFieldObjects->mobileFieldObjects[i].measuredDistance() <<  "cm away."
-                        << "\tBearing: "<< AllFieldObjects->mobileFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->mobileFieldObjects[i].measuredElevation()<<endl;
+                        << "\tBearing: "<< AllFieldObjects->mobileFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->mobileFieldObjects[i].measuredElevation()<<std::endl;
             }
         }
 
@@ -649,7 +649,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
             if(AllFieldObjects->ambiguousFieldObjects[i].isObjectVisible() == true)
             {
                 debug << "\tAmbiguous Object: " << i << ": " << AllFieldObjects->ambiguousFieldObjects[i].getName() << " Seen at \tDistance: " <<  AllFieldObjects->ambiguousFieldObjects[i].measuredDistance() << "cm away."
-                        << "\tBearing: "<< AllFieldObjects->ambiguousFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->ambiguousFieldObjects[i].measuredElevation()<<endl;
+                        << "\tBearing: "<< AllFieldObjects->ambiguousFieldObjects[i].measuredBearing() << "\tElevation: " << AllFieldObjects->ambiguousFieldObjects[i].measuredElevation()<<std::endl;
             }
         }
     #endif
@@ -727,7 +727,7 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
         //END: UNCOMMENT TO SAVE IMAGES OF A CERTAIN FIELDOBJECT!!------------------------------------------------------------------------------------
 
         #if DEBUG_VISION_VERBOSITY > 1
-            debug << "Visible Objects:\n" << AllFieldObjects->toString(true) << endl;
+            debug << "Visible Objects:\n" << AllFieldObjects->toString(true) << std::endl;
         #endif
             
             
@@ -741,13 +741,13 @@ void Vision::ProcessFrame(NUImage* image, NUSensorsData* data, NUActionatorsData
 void Vision::SaveAnImage()
 {
     #if DEBUG_VISION_VERBOSITY > 1
-        debug << "Vision::SaveAnImage(). Starting..." << endl;
+        debug << "Vision::SaveAnImage(). Starting..." << std::endl;
     #endif
 
     if (!imagefile.is_open())
-        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+        imagefile.open((std::string(DATA_DIR) + std::string("image.strm")).c_str());
     if (!sensorfile.is_open())
-        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
+        sensorfile.open((std::string(DATA_DIR) + std::string("sensor.strm")).c_str());
 
     if (imagefile.is_open() and numSavedImages < 2500)
     {
@@ -811,7 +811,7 @@ void Vision::SaveAnImage()
         }
     }
     #if DEBUG_VISION_VERBOSITY > 1
-        debug << "Vision::SaveAnImage(). Finished" << endl;
+        debug << "Vision::SaveAnImage(). Finished" << std::endl;
     #endif
 }
 
@@ -849,7 +849,7 @@ void Vision::loadLUTFromFile(const std::string& fileName)
     else
     {
         lut_loaded = false;
-        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
+        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << std::endl;
     }
     
 #if DEBUG_VISION_VERBOSITY > 0
@@ -928,12 +928,12 @@ std::vector< Vector2<int> > Vision::findGreenBorderPoints(int scanSpacing, Horiz
 {
     classifiedCounter = 0;
     std::vector< Vector2<int> > results;
-    //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << endl;
+    //debug << "Finding Green Boarders: "  << scanSpacing << "  Under Horizon: " << horizonLine->getA() << "x + " << horizonLine->getB() << "y + " << horizonLine->getC() << " = 0" << std::endl;
 
     bool pixel_pushed;
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
-    //debug << width << " , "<< height << endl;
+    //debug << width << " , "<< height << std::endl;
     int yStart;
     int consecutiveGreenPixels = 0;
     for (int x = 0; x < width; x+=scanSpacing)
@@ -1684,7 +1684,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
                    && tempY < height && tempY > 0)
                 {
                     tempColour = classifyPixel(StartPoint.x+k,tempY);
-                    //debug << tempY<< "," << (int)tempColour<< endl;
+                    //debug << tempY<< "," << (int)tempColour<< std::endl;
                     colourBuff.push_back(tempColour);
                 }
                 else
@@ -2718,7 +2718,7 @@ std::vector< ObjectCandidate > Vision::ClassifyCandidatesAboveTheHorizon(   std:
 
 void Vision::DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection* LineDetector)
 {
-    //qDebug() << "Forming Lines or Robot Points:" << endl;
+    //qDebug() << "Forming Lines or Robot Points:" << std::endl;
 
     LineDetector->FindLineOrRobotPoints(scanArea, this);
 
@@ -2728,39 +2728,39 @@ void Vision::DetectLineOrRobotPoints(ClassifiedSection* scanArea, LineDetection*
 
 void Vision::DetectLines(LineDetection* LineDetector)
 {
-    //qDebug() << "Forming Lines:" << endl;
+    //qDebug() << "Forming Lines:" << std::endl;
 
     LineDetector->FormLines(AllFieldObjects, this, m_sensor_data);
 
-    //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
+    //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<std::endl;
 
     return;
 }
-void Vision::DetectLines(LineDetection* LineDetector, vector< ObjectCandidate >& candidates, vector< TransitionSegment >& leftover)
+void Vision::DetectLines(LineDetection* LineDetector, std::vector< ObjectCandidate >& candidates, std::vector< TransitionSegment >& leftover)
 {
-    //qDebug() << "Forming Lines:" << endl;
+    //qDebug() << "Forming Lines:" << std::endl;
 
     LineDetector->FormLines(AllFieldObjects, this, m_sensor_data, candidates, leftover);
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\tDetected: " <<  LineDetector->fieldLines.size() << " Lines, " << LineDetector->cornerPoints.size() << " Corners." <<endl;
+        debug << "\tDetected: " <<  LineDetector->fieldLines.size() << " Lines, " << LineDetector->cornerPoints.size() << " Corners." <<std::endl;
     #endif
 
-    //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<endl;
+    //qDebug() << "Detected: " <<  fieldLines.size() << " Lines, " << cornerPoints.size() << " Corners." <<std::endl;
 
     return;
 }
 Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
 {
-    //debug<< "Vision::DetectBall" << endl;
+    //debug<< "Vision::DetectBall" << std::endl;
 
     Ball BallFinding;
 
-    //qDebug() << "Vision::DetectBall : Ball Class created" << endl;
+    //qDebug() << "Vision::DetectBall : Ball Class created" << std::endl;
     int width = currentImage->getWidth();
     int height = currentImage->getHeight();
-    //qDebug() << "Vision::DetectBall : getting Image sizes" << endl;
-    //qDebug() << "Vision::DetectBall : Init Ball" << endl;
+    //qDebug() << "Vision::DetectBall : getting Image sizes" << std::endl;
+    //qDebug() << "Vision::DetectBall : Init Ball" << std::endl;
 
     Circle ball;
     ball.isDefined = false;
@@ -2769,16 +2769,16 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         return ball;
     }
 	#if DEBUG_VISION_VERBOSITY > 6
-    	debug << "Vision::DetectBall : Find Ball" << endl;
+    	debug << "Vision::DetectBall : Find Ball" << std::endl;
 	#endif
     ball = BallFinding.FindBall(FO_Candidates, AllFieldObjects, this, height, width);
 	#if DEBUG_VISION_VERBOSITY > 6
-    debug << "Vision::DetectBall : Finnised FO_Ball" << endl;
+    debug << "Vision::DetectBall : Finnised FO_Ball" << std::endl;
 	#endif
     if(ball.isDefined)
     {
 		#if DEBUG_VISION_VERBOSITY > 6
-        	debug<< "Vision::DetectBall : Update FO_Ball" << endl;
+        	debug<< "Vision::DetectBall : Update FO_Ball" << std::endl;
 		#endif
         Vector2<float> positionAngle;
         Vector2<int> viewPosition;
@@ -2799,7 +2799,7 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         visualSphericalPosition[1] = bearing;
         visualSphericalPosition[2] = elevation;
         
-        vector<float> ctvector;
+        std::vector<float> ctvector;
         bool isOK = getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
         if(isOK == true)
         {
@@ -2822,12 +2822,12 @@ Circle Vision::DetectBall(const std::vector<ObjectCandidate> &FO_Candidates)
         #if DEBUG_VISION_VERBOSITY > 6
         debug    << "At: Distance: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredDistance()
                     << " Bearing: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredBearing()
-                    << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation() << endl;
+                    << " Elevation: " << AllFieldObjects->mobileFieldObjects[FieldObjects::FO_BALL].measuredElevation() << std::endl;
         #endif
 
     }
 
-    //qDebug() << "Vision::DetectBall : Finnished" << endl;
+    //qDebug() << "Vision::DetectBall : Finnished" << std::endl;
     return ball;
 
 }
@@ -2890,7 +2890,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             float elevation = CalculateElevation(cy);
             float distance = 0;
             //qDebug() << i <<": Blue Robot: get transform";
-            vector<float> ctgvector;
+            std::vector<float> ctgvector;
             Vector3<float> measured(distance,bearing,elevation);
             Vector2<float> screenPositionAngle(bearing,elevation);
             bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
@@ -2900,7 +2900,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
                 measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6
-                    debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+                    debug << "\t\tCalculated Distance to Point: " << distance<<std::endl;
                 #endif
             }
             //qDebug() << i <<": Blue Robot: get things in order";
@@ -2925,7 +2925,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
             float elevation = CalculateElevation(cy);
             float distance = 0;
             //qDebug() << i <<": pink Robot: get transform";
-            vector<float> ctgvector;
+            std::vector<float> ctgvector;
             Vector3<float> measured(distance,bearing,elevation);
             Vector2<float> screenPositionAngle(bearing,elevation);
             bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
@@ -2935,7 +2935,7 @@ void Vision::DetectRobots(std::vector < ObjectCandidate > &RobotCandidates)
                 measured = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
                 #if DEBUG_VISION_VERBOSITY > 6
-                    debug << "\t\tCalculated Distance to Point: " << distance<<endl;
+                    debug << "\t\tCalculated Distance to Point: " << distance<<std::endl;
                 #endif
             }
             Vector3<float> measuredError(0,0,0);
@@ -3104,7 +3104,7 @@ bool Vision::isPixelOnScreen(int x, int y)
 
 //OBSTACLE DETECTION
 
-vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate> candidates)
+std::vector<AmbiguousObject> Vision::getObjectsFromCandidates(std::vector<ObjectCandidate> candidates)
 {
     vector<AmbiguousObject> objectList;
 
@@ -3123,7 +3123,7 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
         float bearing = CalculateBearing(cx);
         float elevation = CalculateElevation(cy);
         float distance = 0;
-        vector<float> ctgvector;
+        std::vector<float> ctgvector;
         Vector3<float> measured(distance,bearing,elevation);
         Vector2<float> screenPositionAngle(bearing,elevation);
         //bool isOK = getSensorsData()->get(NUSensorsData::CameraTransform, ctgvector);
@@ -3142,7 +3142,7 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
             }
 
             #if DEBUG_VISION_VERBOSITY > 6
-                debug << "\t\tCalculated Distance to Point: " << distance << endl;
+                debug << "\t\tCalculated Distance to Point: " << distance << std::endl;
             #endif
         }
         //qDebug() << i << ": Obstacle: get things in order";
@@ -3154,30 +3154,30 @@ vector<AmbiguousObject> Vision::getObjectsFromCandidates(vector<ObjectCandidate>
         #if DEBUG_VISION_VERBOSITY > 0
             debug << "Obst " << i << " bottom: (" << cx << ", " << cy << ") centre: (" <<
                      visual_centre.x << ", " << visual_centre.y << ") d2p: " <<
-                     measured.x << "cm b2p:" << measured.y << "rad e2p:" << measured.z <<endl;
+                     measured.x << "cm b2p:" << measured.y << "rad e2p:" << measured.z <<std::endl;
         #endif
     }
 
     return objectList;
 }
 
-vector<int> Vision::getVerticalDifferences(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull) const
+std::vector<int> Vision::getVerticalDifferences(const std::vector< Vector2<int> >& prehull, const std::vector< Vector2<int> >& hull) const
 {
-    //returns a vector of pairwise vertical distance values from prehull to hull (in screen coordinates)
-    vector<int> result;
+    //returns a std::vector of pairwise vertical distance values from prehull to hull (in screen coordinates)
+    std::vector<int> result;
     int next_diff;
     if(prehull.size() != hull.size()) {
-        //non matching vectors - return empty result
+        //non matching std::vectors - return empty result
         //debug
         #if DEBUG_VISION_VERBOSITY > 1
-            debug << "Non matching vectors - no obstacle detection\n";
+            debug << "Non matching std::vectors - no obstacle detection\n";
         #endif
 
         return result;
     }
     else {
         for(unsigned int i=0; i<hull.size(); i++) {
-            //loop through the vectors in parallel
+            //loop through the std::vectors in parallel
             next_diff = prehull.at(i).y - hull.at(i).y;  //prehull has larger y value (counts down from top)
             result.push_back(next_diff);
         }
@@ -3185,15 +3185,15 @@ vector<int> Vision::getVerticalDifferences(const vector< Vector2<int> >& prehull
     }
 }
 
-vector<ObjectCandidate> Vision::getObstacleCandidates(const vector< Vector2<int> >& prehull, const vector< Vector2<int> >& hull,
+std::vector<ObjectCandidate> Vision::getObstacleCandidates(const std::vector< Vector2<int> >& prehull, const std::vector< Vector2<int> >& hull,
                                                           int height_thresh, int width_min) const
 {
-    vector<ObjectCandidate> result;
+    std::vector<ObjectCandidate> result;
     ObjectCandidate next_obst;
     Vector2<int> start, end, top_left, bottom_right;
     int width, height;
 
-    vector<int> differences = getVerticalDifferences(prehull, hull);
+    std::vector<int> differences = getVerticalDifferences(prehull, hull);
 
     int consecutive_hull_breaks = 0;
     int lowest_point;

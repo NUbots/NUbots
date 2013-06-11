@@ -35,14 +35,14 @@ public:
     VisionJob(job_id_t jobid) : Job(Job::VISION, jobid) {};
     virtual ~VisionJob() {};
     
-    virtual void summaryTo(ostream& output) = 0;
-    virtual void csvTo(ostream& output) = 0;
+    virtual void summaryTo(std::ostream& output) = 0;
+    virtual void csvTo(std::ostream& output) = 0;
     
-    friend ostream& operator<< (ostream& output, const VisionJob& job) 
+    friend std::ostream& operator<< (std::ostream& output, const VisionJob& job) 
     {   job.toStream(output); 
         return output;
     };
-    friend ostream& operator<< (ostream& output, const VisionJob* job)
+    friend std::ostream& operator<< (std::ostream& output, const VisionJob* job)
     {
         if (job != NULL) 
             job->toStream(output);
@@ -51,7 +51,7 @@ public:
         return output;
     };
 protected:
-    virtual void toStream(ostream& output) const {};
+    virtual void toStream(std::ostream& output) const {};
 };
 
 #endif

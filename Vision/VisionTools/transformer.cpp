@@ -63,7 +63,7 @@ if(camera_yaw_valid)
   * Calculates the radial position (relative to the camera vector) from the pixel position for a set of pixels.
   * @param pts The list of pixels.
   */
-void Transformer::screenToRadial2D(vector<GroundPoint>& pts) const
+void Transformer::screenToRadial2D(std::vector<GroundPoint>& pts) const
 {
     BOOST_FOREACH(GroundPoint& p, pts) {
         screenToRadial2D(p);
@@ -86,9 +86,9 @@ GroundPoint Transformer::screenToRadial2D(const Point& pt) const
   * Calculates the radial position (relative to the camera vector) from the pixel position for a set of pixels.
   * @param pts The list of pixels.
   */
-vector<GroundPoint> Transformer::screenToRadial2D(const vector<Point>& pts) const
+std::vector<GroundPoint> Transformer::screenToRadial2D(const std::vector<Point>& pts) const
 {
-    vector<GroundPoint> groundPts;
+    std::vector<GroundPoint> groundPts;
     BOOST_FOREACH(const Point& p, pts) {
         groundPts.push_back(screenToRadial2D(p));
     }
@@ -131,11 +131,11 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
 {
 #if VISION_TRANSFORM_VERBOSITY > 2
     debug << "Transformer::distanceToPoint: \n";
-    debug << "\t(bearing, elevation): (" << bearing << ", " << elevation << ")" << endl;
-    debug << "\tbody pitch: include:" << VisionConstants::D2P_INCLUDE_BODY_PITCH << " valid: " << body_pitch_valid << " value: " << body_pitch << endl;
-    debug << "\tVisionConstants::D2P_ANGLE_CORRECTION: " << VisionConstants::D2P_ANGLE_CORRECTION << endl;
-    debug << "\tcamera height valid: " << camera_height_valid << " value: " << camera_height << endl;
-    debug << "\tcamera pitch valid: " << camera_pitch_valid << " value: " << camera_pitch << endl;
+    debug << "\t(bearing, elevation): (" << bearing << ", " << elevation << ")" << std::endl;
+    debug << "\tbody pitch: include:" << VisionConstants::D2P_INCLUDE_BODY_PITCH << " valid: " << body_pitch_valid << " value: " << body_pitch << std::endl;
+    debug << "\tVisionConstants::D2P_ANGLE_CORRECTION: " << VisionConstants::D2P_ANGLE_CORRECTION << std::endl;
+    debug << "\tcamera height valid: " << camera_height_valid << " value: " << camera_height << std::endl;
+    debug << "\tcamera pitch valid: " << camera_pitch_valid << " value: " << camera_pitch << std::endl;
 #endif
     double theta,
            distance,
@@ -153,7 +153,7 @@ double Transformer::distanceToPoint(double bearing, double elevation) const
         distance = camera_height / cos_theta / cos_bearing;
 
 #if VISION_TRANSFORM_VERBOSITY > 1
-    debug << "\ttheta: " << theta << " distance: " << distance << endl;
+    debug << "\ttheta: " << theta << " distance: " << distance << std::endl;
 #endif
 
     return distance;
@@ -178,12 +178,12 @@ void Transformer::screenToGroundCartesian(GroundPoint& pt) const
     Vector3<double> cartesian_foot_relative = mathGeneral::Spherical2Cartesian(spherical_foot_relative);
 
 #if VISION_FIELDPOINT_VERBOSITY > 2
-    debug << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << endl;
+    debug << "Transformer::screenToGroundCartesian - the following should be near zero: " << cartesian_foot_relative.z << std::endl;
 #endif
     pt.ground = Vector2<double>(cartesian_foot_relative.x, cartesian_foot_relative.y);
 }
 
-void Transformer::screenToGroundCartesian(vector<GroundPoint>& pts) const
+void Transformer::screenToGroundCartesian(std::vector<GroundPoint>& pts) const
 {
     BOOST_FOREACH(GroundPoint& p, pts) {
         screenToGroundCartesian(p);
@@ -198,9 +198,9 @@ GroundPoint Transformer::screenToGroundCartesian(const Point &pt) const
     return g;
 }
 
-vector<GroundPoint> Transformer::screenToGroundCartesian(const vector<Point>& pts) const
+std::vector<GroundPoint> Transformer::screenToGroundCartesian(const std::vector<Point>& pts) const
 {
-    vector<GroundPoint> gpts;
+    std::vector<GroundPoint> gpts;
     BOOST_FOREACH(const Point& p, pts) {
         gpts.push_back(screenToGroundCartesian(p));
     }

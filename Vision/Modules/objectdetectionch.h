@@ -1,39 +1,53 @@
-/**
-*   @name   ObjectDetectionCH
-*   @file   objectdetectionch.h
-*   @brief  basic object detection by checking breaks in green horizon.
-*   @author David Budden
-*   @date   22/02/2012
+/*! @file ChangeCameraSettingsJob.h
+    @brief Declaration of ChangeCameraSettingsJob class.
+ 
+    @class ChangeCameraSettingsJob
+    @brief A job to set whether images should be saved or not.
+ 
+    @author Jason Kulk
+ 
+  Copyright (c) 2009 Jason Kulk
+ 
+    This file is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This file is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef OBJECTDETECTIONCH_H
-#define OBJECTDETECTIONCH_H
+#ifndef CHANGECAMERASETTINGSJOB_H
+#define CHANGECAMERASETTINGSJOB_H
 
-#include <stdio.h>
-#include <iostream>
+#include "../CameraJob.h"
+#include "NUPlatform/NUCamera/CameraSettings.h"
 
-#include "Vision/visionblackboard.h"
-#include "Vision/VisionTools/classificationcolours.h"
-
-using namespace std;
-
-class ObjectDetectionCH
+class ChangeCameraSettingsJob : public CameraJob
 {
 public:
-    static void detectObjects();
+    ChangeCameraSettingsJob(const CameraSettings& settings);
+    ChangeCameraSettingsJob(std::istream& input);
+    virtual ~ChangeCameraSettingsJob();
+    
+    CameraSettings& getSettings();
+    void setSettings(const CameraSettings& newsettings);
+    
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
+    
+    friend std::ostream& operator<<(std::ostream& output, const ChangeCameraSettingsJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const ChangeCameraSettingsJob* job);
+protected:
+    virtual void toStream(std::ostream& output) const;
 private:
-    /**
-    *   @brief  determine whether pixel is green.
-    *   @param  img The original image.
-    *   @param  x The pixel x coordinate.
-    *   @param  y The pixel y coordinate.
-    *   @return whether the pixel is green
-    */
-    static bool isPixelGreen(const NUImage& img, int x, int y);
-
-    //! CONSTANTS
-    static const unsigned int VER_THRESHOLD = 2;                //! @variable number of consecutive green pixels required.
-    static const unsigned int OBJECT_THRESHOLD_MULT = 1.5;      //! @variable lower standard deviation multiplier
+    CameraSettings m_camera_settings;         //!< the camera settings to apply
 };
 
-#endif // OBJECTDETECTIONCH_H
+#endif
+

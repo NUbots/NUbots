@@ -17,11 +17,11 @@ LineDetectorRANSAC::LineDetectorRANSAC()
     m_max_iterations = 10;  //hard limit on number of lines
 }
 
-vector<FieldLine> LineDetectorRANSAC::run(const vector<GroundPoint>& points)
+std::vector<FieldLine> LineDetectorRANSAC::run(const std::vector<GroundPoint>& points)
 {
-    vector< pair<RANSACLine<GroundPoint>, vector<GroundPoint> > > candidates;
-    vector<pair<LSFittedLine, LSFittedLine> > linePairs;
-    vector<FieldLine> finalLines;
+    std::vector< std::pair<RANSACLine<GroundPoint>, std::vector<GroundPoint> > > candidates;
+    std::vector<std::pair<LSFittedLine, LSFittedLine> > linePairs;
+    std::vector<FieldLine> finalLines;
 
     // find possible line candidates using RANSAC in the ground plane
     candidates = RANSAC::findMultipleModels<RANSACLine<GroundPoint>, GroundPoint>(points, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
@@ -30,9 +30,9 @@ vector<FieldLine> LineDetectorRANSAC::run(const vector<GroundPoint>& points)
 
     // generate line equations in the image plane
     for(size_t i=0; i<candidates.size(); i++) {
-        pair<LSFittedLine, LSFittedLine> lp;
+        std::pair<LSFittedLine, LSFittedLine> lp;
         BOOST_FOREACH(GroundPoint& g, candidates.at(i).second) {
-            //line pairs are ordered as such : (ground, screen)
+            //line std::pairs are ordered as such : (ground, screen)
             lp.first.addPoint(g.ground);
             lp.second.addPoint(g.screen);
         }
@@ -44,7 +44,7 @@ vector<FieldLine> LineDetectorRANSAC::run(const vector<GroundPoint>& points)
 
     // generate FieldLine type from ground and screen equations
     for(size_t i=0; i<linePairs.size(); i++) {
-        // line pairs are ordered as such : (ground, screen)
+        // line std::pairs are ordered as such : (ground, screen)
         finalLines.push_back(FieldLine(linePairs.at(i).second, linePairs.at(i).first));
     }
 

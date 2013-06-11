@@ -51,21 +51,21 @@ public:
     static VisionBlackboard* getInstance();
 
     //MUTATORS
-    void setGreenHullPoints(const vector<Vector2<double> >& points);
-    void setGreenHorizonScanPoints(const vector< Vector2<double> >& points);
+    void setGreenHullPoints(const std::vector<Vector2<double> >& points);
+    void setGreenHorizonScanPoints(const std::vector< Vector2<double> >& points);
 
-    void setHorizontalScanlines(const vector<int> &scanlines);
-    void setHorizontalSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
-    void setVerticalSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
-    void setHorizontalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
-    void setVerticalFilteredSegments(const vector<vector<ColourSegment> >& segmented_scanlines);
+    void setHorizontalScanlines(const std::vector<int> &scanlines);
+    void setHorizontalSegments(const std::vector<std::vector<ColourSegment> >& segmented_scanlines);
+    void setVerticalSegments(const std::vector<std::vector<ColourSegment> >& segmented_scanlines);
+    void setHorizontalFilteredSegments(const std::vector<std::vector<ColourSegment> >& segmented_scanlines);
+    void setVerticalFilteredSegments(const std::vector<std::vector<ColourSegment> >& segmented_scanlines);
 
-    void setHorizontalTransitions(COLOUR_CLASS colour_class, const vector<ColourSegment>& transitions);
-    void setVerticalTransitions(COLOUR_CLASS colour_class, const vector<ColourSegment>& transitions);
-    void setHorizontalTransitionsMap(const map<COLOUR_CLASS, vector<ColourSegment> >& t_map);
-    void setVerticalTransitionsMap(const map<COLOUR_CLASS, vector<ColourSegment> >& t_map);
+    void setHorizontalTransitions(COLOUR_CLASS colour_class, const std::vector<ColourSegment>& transitions);
+    void setVerticalTransitions(COLOUR_CLASS colour_class, const std::vector<ColourSegment>& transitions);
+    void setHorizontalTransitionsMap(const map<COLOUR_CLASS, std::vector<ColourSegment> >& t_map);
+    void setVerticalTransitionsMap(const map<COLOUR_CLASS, std::vector<ColourSegment> >& t_map);
 
-    void setObstaclePoints(const vector<Point> &points);
+    void setObstaclePoints(const std::vector<Point> &points);
     
     void addGoal(const Goal& newgoal);
     //void addBeacon(const Beacon& newbeacon);
@@ -75,13 +75,13 @@ public:
     void addCentreCircle(const CentreCircle& newcircle);
     void addCornerPoint(const CornerPoint& newcorner);
 
-    void addGoals(const vector<Goal>& newgoals);
-    //void addBeacons(const vector<Beacon>& newbeacons);
-    void addBalls(const vector<Ball>& newballs);
-    void addObstacles(const vector<Obstacle>& newobstacles);
-    void addLines(const vector<FieldLine>& newlines);
-    void addCentreCircles(const vector<CentreCircle>& newcircles);
-    void addCornerPoints(const vector<CornerPoint>& newcorners);
+    void addGoals(const std::vector<Goal>& newgoals);
+    //void addBeacons(const std::vector<Beacon>& newbeacons);
+    void addBalls(const std::vector<Ball>& newballs);
+    void addObstacles(const std::vector<Obstacle>& newobstacles);
+    void addLines(const std::vector<FieldLine>& newlines);
+    void addCentreCircles(const std::vector<CentreCircle>& newcircles);
+    void addCornerPoints(const std::vector<CornerPoint>& newcorners);
 
 
     //ACCESSORS
@@ -89,19 +89,19 @@ public:
     const NUImage& getOriginalImage() const;
 
     const GreenHorizon& getGreenHorizon() const;
-    const vector<Vector2<double> >& getGreenHorizonScanPoints() const;
+    const std::vector<Vector2<double> >& getGreenHorizonScanPoints() const;
 
-    const vector<int> &getHorizontalScanlines() const;
+    const std::vector<int> &getHorizontalScanlines() const;
     
     const SegmentedRegion& getHorizontalSegmentedRegion() const;
     const SegmentedRegion& getVerticalSegmentedRegion() const;
     const SegmentedRegion& getHorizontalFilteredRegion() const;
     const SegmentedRegion& getVerticalFilteredRegion() const;
 
-    const vector<ColourSegment>& getHorizontalTransitions(COLOUR_CLASS colour_class);
-    const vector<ColourSegment>& getVerticalTransitions(COLOUR_CLASS colour_class);
-    const map<COLOUR_CLASS, vector<ColourSegment> >& getHorizontalTransitionsMap() const;
-    const map<COLOUR_CLASS, vector<ColourSegment> >& getVerticalTransitionsMap() const;
+    const std::vector<ColourSegment>& getHorizontalTransitions(COLOUR_CLASS colour_class);
+    const std::vector<ColourSegment>& getVerticalTransitions(COLOUR_CLASS colour_class);
+    const map<COLOUR_CLASS, std::vector<ColourSegment> >& getHorizontalTransitionsMap() const;
+    const map<COLOUR_CLASS, std::vector<ColourSegment> >& getVerticalTransitionsMap() const;
     
     const Horizon& getKinematicsHorizon() const;
     const Transformer& getTransformer() const;
@@ -113,15 +113,15 @@ public:
 //    bool isBodyPitchValid() const;
 //    float getBodyPitch() const;
 
-    const vector<Ball>& getBalls();
-    const vector<Goal>& getGoals();
-    //const vector<Beacon>& getBeacons();
-    const vector<Obstacle>& getObstacles();
-    const vector<FieldLine>& getLines();
-    const vector<CentreCircle>& getCentreCircles();
-    const vector<CornerPoint>& getCorners();
+    const std::vector<Ball>& getBalls();
+    const std::vector<Goal>& getGoals();
+    //const std::vector<Beacon>& getBeacons();
+    const std::vector<Obstacle>& getObstacles();
+    const std::vector<FieldLine>& getLines();
+    const std::vector<CentreCircle>& getCentreCircles();
+    const std::vector<CornerPoint>& getCorners();
 
-    const vector<Point>& getObstaclePoints() const;
+    const std::vector<Point>& getObstaclePoints() const;
 
     const LookUpTable& getLUT() const;
 
@@ -160,38 +160,38 @@ private:
     
     //! Green Horizon data
     GreenHorizon m_green_horizon;   //! @variable The green horizon.
-    vector<Point> gh_scan_points;   //! @variable The location of initial green (used to form GH and find obstacles)
-    vector<Point> obstacle_points;    //! @variable The list of points used by obstacle detection
+    std::vector<Point> gh_scan_points;   //! @variable The location of initial green (used to form GH and find obstacles)
+    std::vector<Point> obstacle_points;    //! @variable The std::list of points used by obstacle detection
 
     Transformer m_transformer;
 
     //! Object data
-    //vector<Vector2<double> > object_points;   //! @variable Vector of points indicating potential objects.
+    //std::vector<Vector2<double> > object_points;   //! @variable Vector of points indicating potential objects.
     
     //! Kinematics Data
     Horizon kinematics_horizon; //! @variable Line defining kinematics horizon.
 
     //! Scanline/Segmentation data
-    vector<int> horizontal_scanlines;                   //! @variable Vector of unsigned ints representing heights of horizontal scan lines.
+    std::vector<int> horizontal_scanlines;                   //! @variable Vector of unsigned ints representing heights of horizontal scan lines.
     SegmentedRegion horizontal_segmented_scanlines;     //! @variable The segmented horizontal scanlines.
     SegmentedRegion vertical_segmented_scanlines;       //! @variable The segmented vertical scanlines.
     SegmentedRegion horizontal_filtered_segments;       //! @variable The filtered segmented horizontal scanlines.
     SegmentedRegion vertical_filtered_segments;         //! @variable The filtered segmented vertical scanlines.
 
     //! Transitions
-    map<COLOUR_CLASS, vector<ColourSegment> > matched_horizontal_segments;
-    map<COLOUR_CLASS, vector<ColourSegment> > matched_vertical_segments;
-    //vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments.
-    //vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments.
+    map<COLOUR_CLASS, std::vector<ColourSegment> > matched_horizontal_segments;
+    map<COLOUR_CLASS, std::vector<ColourSegment> > matched_vertical_segments;
+    //std::vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments.
+    //std::vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments.
     
-    vector<const VisionFieldObject*> m_vfos;
-    vector<Goal> m_goals;
-    //vector<Beacon> m_beacons;
-    vector<Ball> m_balls;
-    vector<Obstacle> m_obstacles;
-    vector<FieldLine> m_lines;
-    vector<CentreCircle> m_centre_circles;
-    vector<CornerPoint> m_corner_points;
+    std::vector<const VisionFieldObject*> m_vfos;
+    std::vector<Goal> m_goals;
+    //std::vector<Beacon> m_beacons;
+    std::vector<Ball> m_balls;
+    std::vector<Obstacle> m_obstacles;
+    std::vector<FieldLine> m_lines;
+    std::vector<CentreCircle> m_centre_circles;
+    std::vector<CornerPoint> m_corner_points;
     
 };
 

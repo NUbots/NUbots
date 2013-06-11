@@ -66,7 +66,7 @@ class GoalDetection
 
 
         //! FieldObject Updating Functions
-        void UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, FieldObjects* AllObjects, Vision* vision);
+        void UpdateGoalObjects(std::vector < ObjectCandidate > FO_Candidates, FieldObjects* AllObjects, Vision* vision);
 
         void UpdateAFieldObject(FieldObjects* AllObjects,Vision* vision, ObjectCandidate* GoalPost ,  int ID, Vector3<float> sphericalPosition);
 

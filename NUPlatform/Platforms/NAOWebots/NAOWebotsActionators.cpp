@@ -32,22 +32,22 @@ using namespace webots;
 #include <string.h>
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowRoll"), string("LElbowYaw"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowRoll"), string("RElbowYaw"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYawPitch"), string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYawPitch"), string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
-vector<string> NAOWebotsActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+static std::string temp_servo_names[] = {std::string("HeadPitch"), std::string("HeadYaw"), \
+                                    std::string("LShoulderRoll"), std::string("LShoulderPitch"), std::string("LElbowRoll"), std::string("LElbowYaw"), \
+                                    std::string("RShoulderRoll"), std::string("RShoulderPitch"), std::string("RElbowRoll"), std::string("RElbowYaw"), \
+                                    std::string("LHipRoll"),  std::string("LHipPitch"), std::string("LHipYawPitch"), std::string("LKneePitch"), std::string("LAnkleRoll"), std::string("LAnklePitch"), \
+                                    std::string("RHipRoll"),  std::string("RHipPitch"), std::string("RHipYawPitch"), std::string("RKneePitch"), std::string("RAnkleRoll"), std::string("RAnklePitch")};
+std::vector<std::string> NAOWebotsActionators::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 // init m_led_names:
-static string temp_led_names[] = {string("Ears/Led/Left"), string("Ears/Led/Right"), string("Face/Led/Left"), string("Face/Led/Right"), \
-                                  string("ChestBoard/Led"), \
-                                  string("LFoot/Led"), string("RFoot/Led")};
-vector<string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
+static std::string temp_led_names[] = {std::string("Ears/Led/Left"), std::string("Ears/Led/Right"), std::string("Face/Led/Left"), std::string("Face/Led/Right"), \
+                                  std::string("ChestBoard/Led"), \
+                                  std::string("LFoot/Led"), std::string("RFoot/Led")};
+std::vector<std::string> NAOWebotsActionators::m_led_names(temp_led_names, temp_led_names + sizeof(temp_led_names)/sizeof(*temp_led_names));
 
 // init m_other_names:
-static string temp_other_names[] = {string("Teleporter"), string("Sound")};
-vector<string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
+static std::string temp_other_names[] = {std::string("Teleporter"), std::string("Sound")};
+std::vector<std::string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_names + sizeof(temp_other_names)/sizeof(*temp_other_names));
 
 /*! @brief Constructs a nubot actionator class with a Webots backend
  
@@ -56,21 +56,21 @@ vector<string> NAOWebotsActionators::m_other_names(temp_other_names, temp_other_
 NAOWebotsActionators::NAOWebotsActionators(NAOWebotsPlatform* platform) : m_simulation_step(int(platform->getBasicTimeStep()))
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOWebotsActionators::NAOWebotsActionators()" << endl;
+    debug << "NAOWebotsActionators::NAOWebotsActionators()" << std::endl;
 #endif
     m_platform = platform;
     m_current_time = 0;
     getActionatorsFromWebots(platform);
     enableActionatorsInWebots();
     
-    vector<string> names;
+    std::vector<std::string> names;
     names.insert(names.end(), m_servo_names.begin(), m_servo_names.end());
     names.insert(names.end(), m_led_names.begin(), m_led_names.end());
     names.insert(names.end(), m_other_names.begin(), m_other_names.end());
     m_data->addActionators(names);
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
-    debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << endl;
+    debug << "NAOWebotsActionators::NAOWebotsActionators(). Avaliable Actionators: " << std::endl;
     m_data->summaryTo(debug);
 #endif
 }
@@ -103,7 +103,7 @@ NAOWebotsActionators::~NAOWebotsActionators()
 void NAOWebotsActionators::copyToHardwareCommunications()
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 3
-    debug << "NAOWebotsActionators::copyToHardwareCommunications()" << endl;
+    debug << "NAOWebotsActionators::copyToHardwareCommunications()" << std::endl;
 #endif
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     m_data->summaryTo(debug);
@@ -119,8 +119,8 @@ void NAOWebotsActionators::copyToHardwareCommunications()
  */
 void NAOWebotsActionators::copyToServos()
 {
-    static vector<float> positions;
-    static vector<float> gains;
+    static std::vector<float> positions;
+    static std::vector<float> gains;
     
     m_data->getNextServos(positions, gains);
     for (size_t i=0; i<m_servos.size(); i++)
@@ -142,10 +142,10 @@ void NAOWebotsActionators::copyToServos()
  */
 void NAOWebotsActionators::copyToLeds()
 {
-    static vector<vector<vector<float> > > ledvalues;
+    static std::vector<std::vector<std::vector<float> > > ledvalues;
     
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOWebotsActionators::copyToLeds()" << endl;
+    debug << "NAOWebotsActionators::copyToLeds()" << std::endl;
 #endif
     
     m_data->getNextLeds(ledvalues);
@@ -166,9 +166,9 @@ void NAOWebotsActionators::copyToTeleporter()
 {
     static bool l_isvalid;
     static double l_time;
-    static vector<float> l_position(3, 0);
+    static std::vector<float> l_position(3, 0);
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-    debug << "NAOWebotsActionators::copyToTeleporter()" << endl;
+    debug << "NAOWebotsActionators::copyToTeleporter()" << std::endl;
 #endif 
     /*
     if (m_data->getNextTeleportation(l_isvalid, l_time, l_position))

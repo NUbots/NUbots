@@ -17,7 +17,7 @@ GoalDetection::GoalDetection()
 {
     MINIMUM_GOAL_WIDTH_IN_PIXELS = 0;
     MINIMUM_GOAL_HEIGHT_IN_PIXELS = 0;
-    //debug<< "Vision::GoalDetection : GoalDetection Class created" << endl;
+    //debug<< "Vision::GoalDetection : GoalDetection Class created" << std::endl;
 }
 GoalDetection::~GoalDetection()
 {
@@ -36,7 +36,7 @@ ObjectCandidate GoalDetection::FindGoal(std::vector <ObjectCandidate>& FO_Candid
         MINIMUM_GOAL_HEIGHT_IN_PIXELS_AT_SCREEN_EDGE = 10;
 
         ObjectCandidate result;
-        vector < ObjectCandidate > ::iterator it;
+        std::vector < ObjectCandidate > ::iterator it;
         //qDebug()<< "Candidate Size[Before Extending Above Horizon]: " <<FO_Candidates.size() << "\t Above horizon: " << FO_AboveHorizonCandidates.size();
         //! Go through all the candidates: to find a possible goal
         for(it = FO_Candidates.begin(); it  < FO_Candidates.end();)
@@ -184,8 +184,8 @@ bool GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
     bool hasBeenExtended = false;
     if((int)FO_AboveHorizonCandidates.size() ==0) return hasBeenExtended;
 
-    vector < ObjectCandidate > ::iterator itAboveHorizon;
-    //qDebug() << "AboveHoriCands:" << endl;
+    std::vector < ObjectCandidate > ::iterator itAboveHorizon;
+    //qDebug() << "AboveHoriCands:" << std::endl;
     for (itAboveHorizon = FO_AboveHorizonCandidates.begin(); itAboveHorizon < FO_AboveHorizonCandidates.end(); )
     {
         //qDebug() << itAboveHorizon->getTopLeft().x << "," << itAboveHorizon->getTopLeft().y << "\t " << itAboveHorizon->getBottomRight().x << "," << itAboveHorizon->getBottomRight().y;
@@ -221,7 +221,7 @@ bool GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
 
             hasBeenExtended = true;
 
-            //qDebug() << "OverLapping: Join Cand " << endl;
+            //qDebug() << "OverLapping: Join Cand " << std::endl;
             //usedAbovehorizonCandidate[i] = true;
             //qDebug() <<"Found OverLapping Candidate Above horizon" << FO_AboveHorizonCandidates.size();
         }
@@ -234,7 +234,7 @@ bool GoalDetection::ExtendGoalAboveHorizon(ObjectCandidate* PossibleGoal,
     }
 
     //qDebug() << "Final Possible Goal" << PossibleGoal->getTopLeft().x << ", " << PossibleGoal->getTopLeft().y <<
-    //            "\t" << PossibleGoal->getBottomRight().x << ", " << PossibleGoal->getBottomRight().y << endl;
+    //            "\t" << PossibleGoal->getBottomRight().x << ", " << PossibleGoal->getBottomRight().y << std::endl;
 /*    //SCANS UP THE IMAGE
     std::vector<TransitionSegment>::reverse_iterator revIt = horizontalSegments.rbegin();
     for (; revIt != horizontalSegments.rend(); ++revIt)
@@ -350,12 +350,12 @@ void GoalDetection::classifyGoalClosely(ObjectCandidate* PossibleGoal,Vision* vi
 void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& FO_Candidates)
 {
 
-    vector < ObjectCandidate > ::iterator it;
+    std::vector < ObjectCandidate > ::iterator it;
     int boarder = 10;
     //! Go through all the candidates: to find overlapping and add to the bigger object candidate:
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end();  )
     {
-        vector < ObjectCandidate > ::iterator itInside;
+        std::vector < ObjectCandidate > ::iterator itInside;
         for(itInside = it+1; itInside  < FO_Candidates.end(); )
         {
             //! CHECK INSIDE Object TOPLEFT is within outside Object
@@ -508,7 +508,7 @@ void GoalDetection::CombineOverlappingCandidates(std::vector <ObjectCandidate>& 
 
 void GoalDetection::CheckCandidateSizeRatio(std::vector< ObjectCandidate >& FO_Candidates,int height, int width)
 {
-    vector < ObjectCandidate > ::iterator it;
+    std::vector < ObjectCandidate > ::iterator it;
        //! Go through all the candidates: to find a possible goal
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
@@ -573,7 +573,7 @@ void GoalDetection::CheckIsFilled(std::vector< ObjectCandidate >& FO_Candidates,
     //Add lengths of segments of these scanlines (be a multiple of width)
     //Add lengths of transition segments in object
     //Compare and throw out "small percentages"
-    vector < ObjectCandidate > ::iterator it;
+    std::vector < ObjectCandidate > ::iterator it;
     for(it =  FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
 
@@ -585,7 +585,7 @@ void GoalDetection::CheckIsFilled(std::vector< ObjectCandidate >& FO_Candidates,
 
         int maxScanLengthOfMinScanlines = minIntersectingScanlines * widthOfPossibleGoal;
 
-        vector<TransitionSegment> segments = it->getSegments();
+        std::vector<TransitionSegment> segments = it->getSegments();
         int lengthsOfSegments = 0;
         int numberOfHorizontalScanLines = 0;
         for(unsigned int i = 0; i < segments.size(); i++)
@@ -646,7 +646,7 @@ bool GoalDetection::isCorrectCheckRatio(ObjectCandidate PossibleGoal,int height,
 
 void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Candidates, FieldObjects* AllObjects)
 {
-    vector < ObjectCandidate > ::iterator it;
+    std::vector < ObjectCandidate > ::iterator it;
     bool objectRemoved;
 
        //! Go through all the candidates: to find a possible goal
@@ -662,7 +662,7 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
         //qDebug() << "Checking  Goal: BLUE" ;
         Vector2<int> topLeft = it->getTopLeft();
         Vector2<int> bottomRight = it->getBottomRight();
-        vector < AmbiguousObject > ::iterator FO_it;
+        std::vector < AmbiguousObject > ::iterator FO_it;
         for (FO_it = AllObjects->ambiguousFieldObjects.begin();  FO_it  < AllObjects->ambiguousFieldObjects.end(); FO_it++)
         {
             //qDebug() << "Checking  Robot: " << FO_it->getID();
@@ -696,7 +696,7 @@ void  GoalDetection::CheckCandidateIsInRobot(std::vector<ObjectCandidate>& FO_Ca
 
 void GoalDetection::CheckObjectIsBelowHorizon(std::vector<ObjectCandidate>& FO_Candidates, Vision* vision)
 {
-    vector < ObjectCandidate > ::iterator it;
+    std::vector < ObjectCandidate > ::iterator it;
     for(it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
         int buffer = 0;
@@ -893,17 +893,17 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
     }
 */
 
-    //qDebug() << "Equation of MidLine is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y  = " << midPointLine.getC() << endl;
-    //qDebug()<< "Interescting Screen at TOP: \t"<< midPointLine.findXFromY(0)<< ","<< 0 << endl;
-    //qDebug()<< "Interescting Screen at Bottom: \t"<< midPointLine.findXFromY(240)<< ","<< 240 << endl;
+    //qDebug() << "Equation of MidLine is: " << midPointLine.getA()<< "x + " <<  midPointLine.getB() << "y  = " << midPointLine.getC() << std::endl;
+    //qDebug()<< "Interescting Screen at TOP: \t"<< midPointLine.findXFromY(0)<< ","<< 0 << std::endl;
+    //qDebug()<< "Interescting Screen at Bottom: \t"<< midPointLine.findXFromY(240)<< ","<< 240 << std::endl;
 
-    //qDebug() << "Equation of LeftLine is: " << leftPointLine.getA()<< "x + " <<  leftPointLine.getB() << "y = " << leftPointLine.getC()  << endl;
-    //qDebug()<< "Interescting Screen at TOP: \t"<< leftPointLine.findXFromY(0)<< ","<< 0 << endl;
-    //qDebug()<< "Interescting Screen at Bottom: \t"<< leftPointLine.findXFromY(240)<< ","<< 240 << endl;
+    //qDebug() << "Equation of LeftLine is: " << leftPointLine.getA()<< "x + " <<  leftPointLine.getB() << "y = " << leftPointLine.getC()  << std::endl;
+    //qDebug()<< "Interescting Screen at TOP: \t"<< leftPointLine.findXFromY(0)<< ","<< 0 << std::endl;
+    //qDebug()<< "Interescting Screen at Bottom: \t"<< leftPointLine.findXFromY(240)<< ","<< 240 << std::endl;
 
-    //qDebug() << "Equation of RightLine is: " << rightPointLine.getA()<< "x + " <<  rightPointLine.getB() << "y = " << rightPointLine.getC() << endl;
-    //qDebug()<< "Interescting Screen at TOP: \t"<< rightPointLine.findXFromY(0)<< ","<< 0 << endl;
-    //qDebug()<< "Interescting Screen at Bottom: \t"<< rightPointLine.findXFromY(240)<< ","<< 240 << endl;
+    //qDebug() << "Equation of RightLine is: " << rightPointLine.getA()<< "x + " <<  rightPointLine.getB() << "y = " << rightPointLine.getC() << std::endl;
+    //qDebug()<< "Interescting Screen at TOP: \t"<< rightPointLine.findXFromY(0)<< ","<< 0 << std::endl;
+    //qDebug()<< "Interescting Screen at Bottom: \t"<< rightPointLine.findXFromY(240)<< ","<< 240 << std::endl;
 
     Vector2<int> leftpoint;
     leftpoint.y = (PossibleGoal.getBottomRight().y + PossibleGoal.getTopLeft().y)/2;
@@ -1009,7 +1009,7 @@ Vector3<float> GoalDetection::FindGoalSphericalPosition( const ObjectCandidate &
     float D2Pdistance = DistanceToPoint(PossibleGoal,vision);
 
 #if DEBUG_VISION_VERBOSITY > 5
-    debug << "Possible Goal " << PossibleGoal.getColour() << "d2p: " << D2Pdistance << " Other dist: " << distance << endl;
+    debug << "Possible Goal " << PossibleGoal.getColour() << "d2p: " << D2Pdistance << " Other dist: " << distance << std::endl;
 #endif
 
     //qDebug() << "After Average Distance to Bottom Of Goals: Width:"<< distance << ", D2PDistance: " << D2Pdistance;
@@ -1051,7 +1051,7 @@ float GoalDetection::DistanceToPoint(const ObjectCandidate &PossibleGoal, Vision
     //! @todo TODO: the camera to ground transform is going to be made private in a future release.
     // I think Kinematics::DistanceToPoint should be a friend with the sensor data, and get the transform itself
     // Also will need to be updated when the sensor data can properly store kinematic data
-    vector<float> ctgvector;
+    std::vector<float> ctgvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
     if(isOK == true)
     {
@@ -1063,7 +1063,7 @@ float GoalDetection::DistanceToPoint(const ObjectCandidate &PossibleGoal, Vision
         elevation = result[2];
 
         #if DEBUG_VISION_VERBOSITY > 6
-            debug << "\t\tCalculated Distance to Point: " << D2Pdistance <<endl;
+            debug << "\t\tCalculated Distance to Point: " << D2Pdistance <<std::endl;
         #endif
     }
     return D2Pdistance;
@@ -1073,7 +1073,7 @@ float GoalDetection::DistanceLineToPoint(const LSFittedLine &midPointLine, const
 {
     float distance = fabs( point.x * midPointLine.getA() + point.y *  midPointLine.getB() - midPointLine.getC())
                    / sqrt( midPointLine.getA() *  midPointLine.getA() + midPointLine.getB() *  midPointLine.getB());
-    //debug << "Distance L2P: " << distance << "\t Using: "<<point.x << ","<< point.y<<endl;
+    //debug << "Distance L2P: " << distance << "\t Using: "<<point.x << ","<< point.y<<std::endl;
     return distance;
 }
 
@@ -1114,7 +1114,7 @@ void GoalDetection::UpdateAFieldObject(FieldObjects* AllObjects, Vision* vision,
     //! @todo TODO: the camera to ground transform is going to be made private in a future release.
     // I think Kinematics::DistanceToPoint should be a friend with the sensor data, and get the transform itself
     // Also will need to be updated when the sensor data can properly store kinematic data
-    vector<float> ctvector;
+    std::vector<float> ctvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
     if(isOK == true)
     {
@@ -1304,7 +1304,7 @@ void GoalDetection::AddAmbiguousGoalPost(ObjectCandidate* GoalPost, FieldObjects
     Vector3 <float> transformedSphericalPosition;
     Vector2<float> screenPositionAngle(sphericalPosition[1], sphericalPosition[2]);
     
-    vector<float> ctvector;
+    std::vector<float> ctvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraTransform, ctvector);
     if(isOK == true)
     {
@@ -1328,7 +1328,7 @@ void GoalDetection::AddAmbiguousGoalPost(ObjectCandidate* GoalPost, FieldObjects
     }
 }
 
-void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, FieldObjects* AllObjects, Vision* vision)
+void GoalDetection::UpdateGoalObjects(std::vector < ObjectCandidate > FO_Candidates, FieldObjects* AllObjects, Vision* vision)
 {
     float maxElevation = 10.00;
     if(FO_Candidates.size() >= 2 && FO_Candidates[0].getCentreX() < FO_Candidates[1].getCentreX() )
@@ -1441,7 +1441,7 @@ void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, 
         }
     }
     //qDebug()<< "Finisihed Updating FO: Posts";
-    vector < ObjectCandidate > ::iterator it;
+    std::vector < ObjectCandidate > ::iterator it;
     for (it = FO_Candidates.begin(); it  < FO_Candidates.end(); )
     {
         //! SKIP first 2 objects if size is greater or equal then 2!
@@ -1462,7 +1462,7 @@ void GoalDetection::UpdateGoalObjects(vector < ObjectCandidate > FO_Candidates, 
 
         //debug << "Amb Object Visibility: "<< AllObjects->ambiguousFieldObjects.back().isObjectVisible() << ","<< vision->m_timestamp;
         ++it;
-        //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << endl;
+        //debug << "Distance to Goal[" << 0 <<"]: "<< FinalDistance << std::endl;
 
     }
 
