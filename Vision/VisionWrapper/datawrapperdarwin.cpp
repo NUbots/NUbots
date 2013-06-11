@@ -95,19 +95,19 @@ const Horizon& DataWrapper::getKinematicsHorizon()
 }
 
 //! @brief Retrieves the camera height returns it.
-bool DataWrapper::getCameraHeight() const
+float DataWrapper::getCameraHeight() const
 {
     return m_camera_height;
 }
 
 //! @brief Retrieves the camera pitch returns it.
-bool DataWrapper::getHeadPitch() const
+float DataWrapper::getCameraPitch() const
 {
     return m_head_pitch;
 }
 
 //! @brief Retrieves the camera yaw returns it.
-bool DataWrapper::getHeadYaw() const
+float DataWrapper::getCameraYaw() const
 {
     return m_head_yaw;
 }
@@ -119,7 +119,7 @@ Vector3<float> DataWrapper::getOrientation() const
 }
 
 //! @brief Returns the neck position snapshot.
-Vector3<float> DataWrapper::getNeckPosition() const
+Vector3<double> DataWrapper::getNeckPosition() const
 {
     return m_neck_position;
 }

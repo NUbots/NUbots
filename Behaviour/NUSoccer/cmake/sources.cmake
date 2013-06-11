@@ -20,17 +20,8 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  HeadBehaviour.h 
-		HeadBehaviour.cpp
-		HeadLogic.h
-		HeadLogic.cpp
-		BehaviourStateLogic.h
-		BehaviourStateLogic.cpp
-		NavigationLogic.h
-		Navigation.h
-		Navigation.cpp
-                 
-                
+SET (YOUR_SRCS  NUSoccerProvider.cpp NUSoccerProvider.h
+                NUSoccerStates.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
