@@ -182,11 +182,76 @@ vector<float> Navigation::goToPoint(const vector<float> point) {
 
 
 vector<float> Navigation::goToBall(Object* kickTarget) {
-    
+    if (current_command != GOTOBALL)
+        resetHystereses();
+    current_command = GOTOBALL;
+    vector<float> move(3,0);    
+
     //calculate the desired move
     vector<float> self = NavigationLogic::getSelfPosition();
-    vector<float> point = NavigationLogic::getBallPosition();
-    vector<float> move = NavigationLogic::getPositionDifference(self,point);
+    
+    vector<float> target;
+    if (kickTarget != NULL) {
+        target = NavigationLogic::getObjectPosition(*kickTarget);
+    } else {
+        target = NavigationLogic::getBallPosition();
+    }
+    vector<float> ball = NavigationLogic::getBallPosition();
+    
+    //get my position difference to the ball
+    vector<float> posDifference = NavigationLogic::getPositionDifference(self,ball);
+    float ballDistance = std::sqrt(posDifference[0]*posDifference[0]+posDifference[1]*posDifference[1]);
+    
+    //use a 90 degree rotation of the ball to target vector as the centre of our circle
+    vector<float> targetVector = NavigationLogic::getPositionDifference(target,ball);
+    float targetDistance = std::sqrt(targetVector[0]*targetVector[0]+targetVector[1]*targetVector[1]);
+    vector<float> navCircleCentre(3,0);
+    
+    //rotate by 90 degrees and scale by our slowing distance (the circle radius)
+    navCircleCentre[0] = targetVector[1]/targetDistance*m_close_approach_distance;
+    navCircleCentre[1] = -targetVector[0]/targetDistance*m_close_approach_distance;
+    
+    //if the robot is the other side of the target vector, put the target circle on the other side of the ball
+    if (navCircleCentre[0]*posDifference[0]+navCircleCentre[1]*posDifference[1]<0.f) {
+        navCircleCentre[0] = -navCircleCentre[0];
+        navCircleCentre[1] = -navCircleCentre[1];
+    }
+
+    //now we have the right side, get a position ready to do some trig with
+    vector<float> navCirclePos(3,0);
+    navCirclePos[0] = navCircleCentre[0]+ball[0];
+    navCirclePos[1] = navCircleCentre[1]+ball[1];
+    
+    //get the distance to the circle centre (this is our triangle hypotenuse)
+    vector<float> selfToCircleCentre = NavigationLogic::getPositionDifference(self,navCirclePos);
+    float circleCentreDistance = std::sqrt(selfToCircleCentre[0]*selfToCircleCentre[0]+selfToCircleCentre[1]*selfToCircleCentre[1]);
+    
+    //XXX:do a distance check here and switch to line following (maybe)
+    if (circleCentreDistance > m_close_approach_distance+m_distance_hysteresis) { //XXX: add hysteresis
+        //the opposite side to what we want is our close approach distance (circle radius), so work out the angle of the final side
+        float angle = std::asin(m_close_approach_distance/circleCentreDistance);
+        
+        //rotate by the angle difference and normalise
+        vector<float> direction(3,0);
+        direction[0] = (selfToCircleCentre[0]*std::cos(angle)-selfToCircleCentre[1]*std::sin(angle))/circleCentreDistance;
+        direction[1] = (selfToCircleCentre[1]*std::cos(angle)+selfToCircleCentre[0]*std::sin(angle))/circleCentreDistance;
+        
+        //this is our angular difference
+        float angleDifference = mathGeneral::normaliseAngle(std::atan2(direction[1],direction[0]) - self[2]);
+        
+        //set movement values - use a gaussian scaling to slow down movement when we are off-heading
+        move[0] = 1./(1.+std::exp(angleDifference)); 
+        move[2] = angleDifference;
+        
+    } else if (ballDistance > m_close_approach_distance or true) { //else follow the circle
+        float curvature = (2*3.14159/m_close_approach_distance)*20.; //XXX: (radians/radius) * walkspeed (estimated)
+        float angle = curvature + (circleCentreDistance-m_close_approach_distance)/m_close_approach_distance; //we add a correction to turning to account for error in line following
+        move[0] = 1./(1.+std::exp(angle));
+        move[2] = angle*m_mid_approach_speed;
+    
+    } else { //else line up the ball
+    
+    }
     
     //set continuing movement policy
     //XXX: this only works if the kick target isn't deleted ever
@@ -195,10 +260,8 @@ vector<float> Navigation::goToBall(Object* kickTarget) {
         resetHystereses();
     current_command = GOTOBALL;
     
-    //XXX: fix ball approach
-    
     //must generate the walk last
-    current_walk_command = generateWalk(move[0],move[1],move[2]);
+    current_walk_command = generateWalk(move[0],move[2],move[2]);
     return current_walk_command;
 }
     
@@ -238,6 +301,7 @@ vector<float> Navigation::stop() {
     
     //set continuing movement policy
     current_command = USELASTCOMMAND;
+    resetHystereses();
     
     //must generate the walk last
     current_walk_command = generateWalk(0,0,0);
