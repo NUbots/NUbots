@@ -124,13 +124,13 @@ Observer::Observer()
  * Tick calculates the next state vector for the robot, given the zmp_ref
  *
  */
-const float Observer::tick(const list<float> *zmp_ref,
+const float Observer::tick(const std::list<float> *zmp_ref,
                            const float cur_zmp_ref,
                            const float sensor_zmp) {
     float preview_control = 0.0f;
     unsigned int counter = 0;
 
-    for (list<float>::const_iterator i = zmp_ref->begin();
+    for (std::list<float>::const_iterator i = zmp_ref->begin();
          counter < NUM_PREVIEW_FRAMES; ++counter, ++i) {
         preview_control += weights[counter]* (*i);
     }

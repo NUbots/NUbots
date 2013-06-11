@@ -11,7 +11,7 @@ class RANSACGoal
 public:
     RANSACGoal();
 
-    bool regenerate(const vector<ColourSegment> &segments);
+    bool regenerate(const std::vector<ColourSegment> &segments);
 
     unsigned int minPointsForFit() const {return 2;}
 
@@ -24,7 +24,7 @@ public:
     std::pair<Point, Point> getEndPoints() const { return std::pair<Point, Point>(s1, s2); }
     std::pair<double, double> getWidths() const { return std::pair<double, double>(w1, w2); }
     Vector2<double> getDirection() const { return v; }
-    void fit(const vector<ColourSegment> &segments);
+    void fit(const std::vector<ColourSegment> &segments);
 
 //    void merge(const RANSACGoal& other);
 

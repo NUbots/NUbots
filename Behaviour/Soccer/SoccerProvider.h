@@ -29,7 +29,7 @@ class Behaviour;
 #include "Behaviour/BehaviourFSMProvider.h"
 
 #include <vector>
-using namespace std;
+
 
 class SoccerProvider : public BehaviourFSMProvider
 {
@@ -48,13 +48,13 @@ public:
     BehaviourState* m_finished;
     BehaviourState* m_penalised;
     
-    vector<float> m_led_white;
-    vector<float> m_led_red;
-    vector<float> m_led_green;
-    vector<float> m_led_blue;
-    vector<float> m_led_orange;
-    vector<float> m_led_yellow;
-    vector<float> m_led_off;
+    std::vector<float> m_led_white;
+    std::vector<float> m_led_red;
+    std::vector<float> m_led_green;
+    std::vector<float> m_led_blue;
+    std::vector<float> m_led_orange;
+    std::vector<float> m_led_yellow;
+    std::vector<float> m_led_off;
 };
 
 

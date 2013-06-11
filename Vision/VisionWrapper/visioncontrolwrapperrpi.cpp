@@ -20,13 +20,13 @@ int VisionControlWrapper::runFrame()
 {
     static int frame = 0;
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
+        debug << "VisionControlWrapper::runFrame(): - frame " << frame << std::endl;
     #endif
     frame++;
-    cout << "frame: " << frame << endl;
+    std::cout << "frame: " << frame << std::endl;
     if(!wrapper->updateFrame()) {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;
+            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << std::endl;
         #endif
         return -1;  //failure - do not run vision
     }

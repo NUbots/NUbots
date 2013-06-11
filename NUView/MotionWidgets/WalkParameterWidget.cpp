@@ -39,7 +39,7 @@ WalkParameterWidget::WalkParameterWidget(QWidget *parent): QWidget(parent)
     setObjectName(tr("Walk"));
     setWindowTitle(tr("Walk"));
     #ifndef WIN32
-        connect(ConnectionMan, SIGNAL(newHosts(vector<NUHostInfo>)), this, SLOT(onNewHost(vector<NUHostInfo>)));
+        connect(ConnectionMan, SIGNAL(newHosts(std::vector<NUHostInfo>)), this, SLOT(onNewHost(std::vector<NUHostInfo>)));
     #endif
     //m_job_list = new JobList();
     
@@ -63,7 +63,7 @@ WalkParameterWidget::~WalkParameterWidget()
 }
 
 
-void WalkParameterWidget::onNewHost(vector<NUHostInfo> hosts)
+void WalkParameterWidget::onNewHost(std::vector<NUHostInfo> hosts)
 {
     if (not hosts.empty())
         nuio->setJobAddress(hosts.front().getAddress());
@@ -78,18 +78,18 @@ void WalkParameterWidget::onSelectButtonPressed()
     if (result == QDialog::Accepted and not files.empty())
     {
         m_editor = new MotionFileEditor(files.front().toStdString());
-        connect(m_editor, SIGNAL(sendRequested(string)), this, SLOT(onSendRequested(string)));
+        connect(m_editor, SIGNAL(sendRequested(std::string)), this, SLOT(onSendRequested(std::string)));
         m_editor->show();
     }
 }
 
-void WalkParameterWidget::onSendRequested(string text)
+void WalkParameterWidget::onSendRequested(std::string text)
 {
-    debug << "sending" << endl;
+    debug << "sending" << std::endl;
     JobList jobs;
     WalkParameters parameters;
     
-    stringstream ss(text);
+    std::stringstream ss(text);
     ss >> parameters;
     jobs.addMotionJob(new WalkParametersJob(parameters));
     *nuio << jobs;

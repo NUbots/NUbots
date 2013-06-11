@@ -33,7 +33,7 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include <fstream>
-using namespace std;
+
 
 class JuppWalk : public NUWalk
 {
@@ -51,13 +51,13 @@ private:
     
     void calculateLeftLeg();
     void calculateRightLeg();
-    void calculateLegAngles(float legphase, float legsign, vector<float>& angles);
-    void calculateLegGains(float legphase, vector<float>& gains);
+    void calculateLegAngles(float legphase, float legsign, std::vector<float>& angles);
+    void calculateLegGains(float legphase, std::vector<float>& gains);
     
     void calculateLeftArm();
     void calculateRightArm();
-    void calculateArmAngles(float armphase, float armsign, vector<float>& angles);
-    void calculateArmGains(float armphase, vector<float>& gains);
+    void calculateArmAngles(float armphase, float armsign, std::vector<float>& angles);
+    void calculateArmGains(float armphase, std::vector<float>& gains);
     
     void updateActionatorsData();
 public:
@@ -96,16 +96,16 @@ private:
     float m_gyro_leg_pitch;
     
     // Legs
-    vector<float> m_left_leg_angles;
-    vector<float> m_left_leg_gains;
-    vector<float> m_right_leg_angles;
-    vector<float> m_right_leg_gains;
+    std::vector<float> m_left_leg_angles;
+    std::vector<float> m_left_leg_gains;
+    std::vector<float> m_right_leg_angles;
+    std::vector<float> m_right_leg_gains;
     
     // Arms
-    vector<float> m_left_arm_angles;
-    vector<float> m_left_arm_gains;
-    vector<float> m_right_arm_angles;
-    vector<float> m_right_arm_gains;
+    std::vector<float> m_left_arm_angles;
+    std::vector<float> m_left_arm_gains;
+    std::vector<float> m_right_arm_angles;
+    std::vector<float> m_right_arm_gains;
 };
 
 #endif

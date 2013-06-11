@@ -34,46 +34,46 @@
 #include <deque>
 #include <string>
 #include <pthread.h>
-using namespace std;
+
 
 class Actionator 
 {
 public:
-    Actionator(string actionatorname);
+    Actionator(std::string actionatorname);
     ~Actionator();
     
     void preProcess();
     void postProcess(double currenttime);
     
     bool get(double& time, float& data);
-    bool get(double& time, vector<float>& data);
-    bool get(double& time, vector<vector<float> >& data);
-    bool get(double& time, vector<vector<vector<float> > >& data);
-    bool get(double& time, string& data);
-    bool get(double& time, vector<string>& data);
+    bool get(double& time, std::vector<float>& data);
+    bool get(double& time, std::vector<std::vector<float> >& data);
+    bool get(double& time, std::vector<std::vector<std::vector<float> > >& data);
+    bool get(double& time, std::string& data);
+    bool get(double& time, std::vector<std::string>& data);
     
     void add(const double& time, const float& data);
-    void add(const double& time, const vector<float>& data);
-    void add(const double& time, const vector<vector<float> >& data);
-    void add(const double& time, const vector<vector<vector<float> > >& data);
-    void add(const double& time, const string& data);
-    void add(const double& time, const vector<string>& data);
+    void add(const double& time, const std::vector<float>& data);
+    void add(const double& time, const std::vector<std::vector<float> >& data);
+    void add(const double& time, const std::vector<std::vector<std::vector<float> > >& data);
+    void add(const double& time, const std::string& data);
+    void add(const double& time, const std::vector<std::string>& data);
     
     bool empty();
     
-    void summaryTo(ostream& output);
-    void csvTo(ostream& output);
+    void summaryTo(std::ostream& output);
+    void csvTo(std::ostream& output);
     
-    friend ostream& operator<< (ostream& output, const Actionator& p_actionator);
-    friend istream& operator>> (istream& input, Actionator& p_actionator);
+    friend std::ostream& operator<< (std::ostream& output, const Actionator& p_actionator);
+    friend std::istream& operator>> (std::istream& input, Actionator& p_actionator);
 private:
     void addToBuffer(const ActionatorPoint& p);
 public:
-    string Name;                                     //!< the name of the actionator
+    std::string Name;                                     //!< the name of the actionator
 private:
-    deque<ActionatorPoint> m_points;                 //!< the double-ended queue of actionator points (it needs to be a deque because we remove from the front, and add to the back)
-    vector<ActionatorPoint> m_add_points_buffer;     //!< a buffer of unordered points added since the last call to preProcess()
-    vector<ActionatorPoint> m_preprocess_buffer;     //!< a local buffer for preProcess() to provide thread safety
+    std::deque<ActionatorPoint> m_points;                 //!< the double-ended queue of actionator points (it needs to be a deque because we remove from the front, and add to the back)
+    std::vector<ActionatorPoint> m_add_points_buffer;     //!< a buffer of unordered points added since the last call to preProcess()
+    std::vector<ActionatorPoint> m_preprocess_buffer;     //!< a local buffer for preProcess() to provide thread safety
     
     pthread_mutex_t m_lock;                          //!< lock for m_add_points_buffer
 };

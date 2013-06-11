@@ -14,7 +14,7 @@ public:
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const;
 
     //! @brief Stream output for labelling purposes
-    virtual void printLabel(ostream& out) const;
+    virtual void printLabel(std::ostream& out) const;
 
     //! @brief Calculation of error for optimisation
     virtual double findScreenError(VisionFieldObject* other) const;
@@ -23,9 +23,9 @@ public:
     double getGroundRadius() const {return m_ground_radius;}
 
     //! @brief output stream operator.
-    friend ostream& operator<< (ostream& output, const CentreCircle& c);
+    friend std::ostream& operator<< (std::ostream& output, const CentreCircle& c);
     //! @brief output stream operator for a vector of CentreCircles.
-    friend ostream& operator<< (ostream& output, const vector<CentreCircle>& c);
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<CentreCircle>& c);
 
 private:
     double m_ground_radius;

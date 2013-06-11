@@ -59,7 +59,7 @@
 #include "debugverbositynumotion.h"
 
 #include <math.h>
-using namespace std;
+
 #include "Tools/Math/General.h"
 using namespace mathGeneral;
 
@@ -129,7 +129,7 @@ NUWalk::NUWalk(NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvid
 NUWalk::~NUWalk()
 {
 #if DEBUG_NUMOTION_VERBOSITY > 0
-    debug << "NUWalk::~NUWalk()" << endl;
+    debug << "NUWalk::~NUWalk()" << std::endl;
 #endif  
     kill();
 }
@@ -139,7 +139,7 @@ NUWalk::~NUWalk()
 void NUWalk::enableWalk()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NUWalk::enableWalk()" << endl;
+        debug << "NUWalk::enableWalk()" << std::endl;
     #endif
     if (m_data == NULL or m_actions == NULL)
         m_walk_enabled = false;
@@ -157,7 +157,7 @@ void NUWalk::enableWalk()
 void NUWalk::stop()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NUWalk::stop()" << endl;
+        debug << "NUWalk::stop()" << std::endl;
     #endif
     stopLegs();
 }
@@ -166,7 +166,7 @@ void NUWalk::stop()
 void NUWalk::stopArms()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NUWalk::stopArms()" << endl;
+        debug << "NUWalk::stopArms()" << std::endl;
     #endif
     setArmEnabled(false, false);
 }
@@ -174,7 +174,7 @@ void NUWalk::stopArms()
 void NUWalk::stopLegs()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NUWalk::stopLegs()" << endl;
+        debug << "NUWalk::stopLegs()" << std::endl;
     #endif
     m_target_speed_x = 0;
     m_target_speed_y = 0;
@@ -188,7 +188,7 @@ void NUWalk::stopLegs()
 void NUWalk::kill()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NUWalk::kill()" << endl;
+        debug << "NUWalk::kill()" << std::endl;
     #endif
     m_walk_enabled = false;
 }
@@ -202,7 +202,7 @@ bool NUWalk::isActive()
         return true;
     else 
     {
-        vector<float> jointvelocities;
+        std::vector<float> jointvelocities;
         float jointvelocitysum = 0.0f;
         if(m_data->getVelocity(NUSensorsData::Body, jointvelocities))
         {
@@ -246,7 +246,7 @@ bool NUWalk::isUsingLegs()
 void NUWalk::process(NUSensorsData* data, NUActionatorsData* actions)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 2
-        debug << "NUWalk::process(" << data << ", " << actions << ") requiresArms: " << requiresArms() << " isUsingArms: " << isUsingArms() << " requiresLegs: " << requiresLegs() << " isUsingLegs: " << isUsingLegs() << endl;
+        debug << "NUWalk::process(" << data << ", " << actions << ") requiresArms: " << requiresArms() << " isUsingArms: " << isUsingArms() << " requiresLegs: " << requiresLegs() << " isUsingLegs: " << isUsingLegs() << std::endl;
     #endif
     if (actions == NULL || data == NULL)
         return;
@@ -294,7 +294,7 @@ void NUWalk::process(WalkJob* job, bool currentprovider)
  */
 void NUWalk::process(WalkToPointJob* job, bool currentprovider)
 {
-    errorlog << "NUWalk::process(WalkToPointJob) is no longer supported. Your job has been discarded!" << endl;
+    errorlog << "NUWalk::process(WalkToPointJob) is no longer supported. Your job has been discarded!" << std::endl;
 }
 
 /*! @brief Process a walk parameters job
@@ -331,7 +331,7 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
     #if DEBUG_NUMOTION_VERBOSITY > 3
         debug << "NUWalk::setTargetSpeed(" << trans_speed << "," << trans_direction << "," << rot_speed << ")";
     #endif
-    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
+    std::vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
     if (isnan(trans_speed))
         trans_speed = 1.0;
@@ -380,7 +380,7 @@ void NUWalk::setTargetSpeed(float trans_speed, float trans_direction, float rot_
     m_target_speed_yaw = rot_speed;
     
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "->(" << x << "," << y << "," << rot_speed << ")" << endl;
+        debug << "->(" << x << "," << y << "," << rot_speed << ")" << std::endl;
     #endif
 }
 
@@ -408,7 +408,7 @@ void NUWalk::calculateCurrentSpeed()
     }
     
     // clip the accelerations to the max values (if the max values exist)
-    vector<float>& maxaccels = m_walk_parameters.getMaxAccelerations();
+    std::vector<float>& maxaccels = m_walk_parameters.getMaxAccelerations();
     if (maxaccels.size() > 0 && fabs(x) > fabs(maxaccels[0]))      // if clipping is available, and the input is greater than the limit, then clip it
         x = sign(x)*maxaccels[0];
     
@@ -426,9 +426,9 @@ void NUWalk::calculateCurrentSpeed()
 
 /*! @brief Updates currentspeed with the current speed of the walk engine
  */
-void NUWalk::getCurrentSpeed(vector<float>& currentspeed)
+void NUWalk::getCurrentSpeed(std::vector<float>& currentspeed)
 {
-    static vector<float> speeds(3,0);
+    static std::vector<float> speeds(3,0);
     speeds[0] = m_speed_x;
     speeds[1] = m_speed_y;
     speeds[2] = m_speed_yaw;
@@ -436,7 +436,7 @@ void NUWalk::getCurrentSpeed(vector<float>& currentspeed)
 }
 
 /*! @brief Updates maxspeeds with the current maximum speeds of the walk engine */
-void NUWalk::getMaximumSpeed(vector<float>& maxspeeds)
+void NUWalk::getMaximumSpeed(std::vector<float>& maxspeeds)
 {
     maxspeeds = m_walk_parameters.getMaxSpeeds();
 }
@@ -447,7 +447,7 @@ void NUWalk::getMaximumSpeed(vector<float>& maxspeeds)
 void NUWalk::setWalkParameters(const WalkParameters& walkparameters)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NUWalk::setWalkParameters(" << walkparameters << ")" << endl;
+        debug << "NUWalk::setWalkParameters(" << walkparameters << ")" << std::endl;
     #endif
     m_walk_parameters = walkparameters;
 }
@@ -473,8 +473,8 @@ void NUWalk::setArmEnabled(bool leftarm, bool rightarm)
 bool NUWalk::inInitialPosition()
 {
     // get the current joint positions
-    vector<float> sensor_larm, sensor_rarm;
-    vector<float> sensor_lleg, sensor_rleg;
+    std::vector<float> sensor_larm, sensor_rarm;
+    std::vector<float> sensor_lleg, sensor_rleg;
     m_data->getPosition(NUSensorsData::LArm, sensor_larm);
     m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
     m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
@@ -502,11 +502,11 @@ void NUWalk::moveToInitialPosition()
     else
     {
         #if DEBUG_NUMOTION_VERBOSITY > 3
-            debug << "NUWalk::moveToInitialPosition()" << endl;
+            debug << "NUWalk::moveToInitialPosition()" << std::endl;
         #endif
         // get the current joint positions
-        vector<float> sensor_larm, sensor_rarm;
-        vector<float> sensor_lleg, sensor_rleg;
+        std::vector<float> sensor_larm, sensor_rarm;
+        std::vector<float> sensor_lleg, sensor_rleg;
         m_data->getPosition(NUSensorsData::LArm, sensor_larm);
         m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
         m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
@@ -541,7 +541,7 @@ void NUWalk::moveToInitialPosition()
     @param leftleg a vector of joint values for the left leg
     @param rightleg a vector of joint values for the right leg
  */
-void NUWalk::applyPerturbation(vector<float>& leftleg, vector<float>& leftleggains, vector<float>& rightleg, vector<float> rightleggains)
+void NUWalk::applyPerturbation(std::vector<float>& leftleg, std::vector<float>& leftleggains, std::vector<float>& rightleg, std::vector<float> rightleggains)
 {   // the problem is that here I can't do this in a platform independent way :(
     // so this will have to go on my TODO: implement this in a platform independent way
     if (m_current_time - m_perturbation_start_time < 200)

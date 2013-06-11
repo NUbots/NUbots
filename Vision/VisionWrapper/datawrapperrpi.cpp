@@ -12,7 +12,7 @@
 
 DataWrapper* DataWrapper::instance = 0;
 
-string DataWrapper::getIDName(DEBUG_ID id) {
+std::string DataWrapper::getIDName(DEBUG_ID id) {
     switch(id) {
     case DBID_IMAGE:
         return "DBID_IMAGE";
@@ -47,11 +47,11 @@ string DataWrapper::getIDName(DEBUG_ID id) {
     }
 }
 
-void getPointsAndColoursFromSegments(const vector< vector<ColourSegment> >& segments, vector<cv::Scalar>& colours, vector<Point>& pts)
+void getPointsAndColoursFromSegments(const std::vector< std::vector<ColourSegment> >& segments, std::vector<cv::Scalar>& colours, std::vector<Point>& pts)
 {
     unsigned char r, g, b;
 
-    BOOST_FOREACH(const vector<ColourSegment>& line, segments) {
+    BOOST_FOREACH(const std::vector<ColourSegment>& line, segments) {
         BOOST_FOREACH(const ColourSegment& seg, line) {
             getColourAsRGB(seg.getColour(), r, g, b);
             pts.push_back(seg.getStart());
@@ -71,27 +71,27 @@ DataWrapper::DataWrapper(bool disp_on, bool cam)
     //frame grab methods
     switch(m_input_method) {
     case STREAM:
-        streamname = string(getenv("HOME")) + string("/nubot/image.strm");
-        LUTname = string(getenv("HOME")) + string("/nubot/default.lut");
-        configname = string(getenv("HOME")) + string("/nubot/") + string("VisionOptions.cfg");
+        streamname = std::string(getenv("HOME")) + std::string("/nubot/image.strm");
+        LUTname = std::string(getenv("HOME")) + std::string("/nubot/default.lut");
+        configname = std::string(getenv("HOME")) + std::string("/nubot/") + std::string("VisionOptions.cfg");
         imagestrm.open(streamname.c_str());
         m_current_image = new NUImage();
         if(imagestrm.is_open()) {
             imagestrm >> *m_current_image;
         }
         else {
-            errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << endl;
+            errorlog << "DataWrapper::DataWrapper() - failed to load stream: " << streamname << std::endl;
         }
         #ifdef DEBUG_VISION_VERBOSITY_ON
-            debug << streamname << endl;
-            debug << LUTname << endl;
-            debug << configname << endl;
+            debug << streamname << std::endl;
+            debug << LUTname << std::endl;
+            debug << configname << std::endl;
         #endif
         break;
     case CAMERA:
         m_camera = new PCCamera();
         m_current_image = m_camera->grabNewImage();
-        LUTname = string(getenv("HOME")) +  string("/nubot/default.lut");
+        LUTname = std::string(getenv("HOME")) +  std::string("/nubot/default.lut");
         break;
     }
 
@@ -107,7 +107,7 @@ DataWrapper::DataWrapper(bool disp_on, bool cam)
     VisionConstants::loadFromFile(configname);
 
     if(!loadLUTFromFile(LUTname)){
-        errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << endl;
+        errorlog << "DataWrapper::DataWrapper() - failed to load LUT: " << LUTname << std::endl;
     }
     
     if(m_display_on) {
@@ -162,7 +162,7 @@ NUImage* DataWrapper::getFrame()
 }
 
 //! @brief Generates spoofed camera transform vector.
-bool DataWrapper::getCTGVector(vector<float> &ctgvector)
+bool DataWrapper::getCTGVector(std::vector<float> &ctgvector)
 {
     //bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
     //return isOK;
@@ -175,7 +175,7 @@ bool DataWrapper::getCTGVector(vector<float> &ctgvector)
 }
 
 //! @brief Generates spoofed camera transform vector.
-bool DataWrapper::getCTVector(vector<float> &ctvector)
+bool DataWrapper::getCTVector(std::vector<float> &ctvector)
 {
     //bool isOK = getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
     //return isOK;
@@ -234,7 +234,7 @@ const LookUpTable& DataWrapper::getLUT() const
     return LUT;
 }
 
-void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects)
+void DataWrapper::publish(const std::vector<const VisionFieldObject*> &visual_objects)
 {
     BOOST_FOREACH(const VisionFieldObject* vfo, visual_objects) {
         publish(vfo);
@@ -244,7 +244,7 @@ void DataWrapper::publish(const vector<const VisionFieldObject*> &visual_objects
 void DataWrapper::publish(const VisionFieldObject* visual_object)
 {
     visual_object->printLabel(debug);
-    debug << endl;
+    debug << std::endl;
 }
 
 //! Outputs debug data to the appropriate external interface
@@ -277,12 +277,12 @@ bool DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
 {
     if(m_display_on && false) {
         if(id != DBID_IMAGE) {
-            errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+            errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
             return false;
         }
 
         cv::Mat& img_map = results_img;    //get image from pair
-        string& window = results_window_name; //get window name from pair
+        std::string& window = results_window_name; //get window name from pair
 
         unsigned char* ptr,
                 r, g, b;
@@ -302,10 +302,10 @@ bool DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
     return false;
 }
 
-bool DataWrapper::debugPublish(const vector<Ball>& data) {
+bool DataWrapper::debugPublish(const std::vector<Ball>& data) {
     #if VISION_WRAPPER_VERBOSITY > 1
         if(data.empty()) {
-            debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_BALLS) << endl;
+            debug << "DataWrapper::debugPublish - empty std::vector DEBUG_ID = " << getIDName(DBID_BALLS) << std::endl;
             return false;
         }
     #endif
@@ -317,7 +317,7 @@ bool DataWrapper::debugPublish(const vector<Ball>& data) {
     
     if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
-        string& window = results_window_name; //get window name from pair
+        std::string& window = results_window_name; //get window name from pair
 
         BOOST_FOREACH(Ball b, data) {
             b.render(img);
@@ -329,11 +329,11 @@ bool DataWrapper::debugPublish(const vector<Ball>& data) {
     return false;
 }
 
-bool DataWrapper::debugPublish(const vector<Beacon>& data) {
+bool DataWrapper::debugPublish(const std::vector<Beacon>& data) {
     
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
-        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        debug << "DataWrapper::debugPublish - empty std::vector DEBUG_ID = " << getIDName(DBID_GOALS) << std::endl;
         return false;
     }
 #endif
@@ -345,7 +345,7 @@ bool DataWrapper::debugPublish(const vector<Beacon>& data) {
 
     if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
-        string& window = results_window_name; //get window name from pair
+        std::string& window = results_window_name; //get window name from pair
 
         BOOST_FOREACH(Beacon b, data) {
             b.render(img);
@@ -357,11 +357,11 @@ bool DataWrapper::debugPublish(const vector<Beacon>& data) {
     return false;
 }
 
-bool DataWrapper::debugPublish(const vector<Goal>& data) {
+bool DataWrapper::debugPublish(const std::vector<Goal>& data) {
 
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
-        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        debug << "DataWrapper::debugPublish - empty std::vector DEBUG_ID = " << getIDName(DBID_GOALS) << std::endl;
         return false;
     }
 #endif
@@ -379,7 +379,7 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
 
     if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
-        string& window = results_window_name; //get window name from pair
+        std::string& window = results_window_name; //get window name from pair
 
         BOOST_FOREACH(Goal post, data) {
             post.render(img);
@@ -391,11 +391,11 @@ bool DataWrapper::debugPublish(const vector<Goal>& data) {
     return false;
 }
 
-bool DataWrapper::debugPublish(const vector<Obstacle>& data)
+bool DataWrapper::debugPublish(const std::vector<Obstacle>& data)
 {
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
-        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_OBSTACLES) << endl;
+        debug << "DataWrapper::debugPublish - empty std::vector DEBUG_ID = " << getIDName(DBID_OBSTACLES) << std::endl;
         return false;
     }
 #endif
@@ -405,7 +405,7 @@ bool DataWrapper::debugPublish(const vector<Obstacle>& data)
 
     if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
-        string& window = results_window_name; //get window name from pair
+        std::string& window = results_window_name; //get window name from pair
 
         BOOST_FOREACH(Obstacle o, data) {
             o.render(img);
@@ -417,11 +417,11 @@ bool DataWrapper::debugPublish(const vector<Obstacle>& data)
     return false;
 }
 
-bool DataWrapper::debugPublish(const vector<FieldLine> &data)
+bool DataWrapper::debugPublish(const std::vector<FieldLine> &data)
 {
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data.empty()) {
-        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(DBID_LINES) << endl;
+        debug << "DataWrapper::debugPublish - empty std::vector DEBUG_ID = " << getIDName(DBID_LINES) << std::endl;
         return false;
     }
 #endif
@@ -433,7 +433,7 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
 
     if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
-        string& window = results_window_name; //get window name from pair
+        std::string& window = results_window_name; //get window name from pair
 
         BOOST_FOREACH(FieldLine l, data) {
             l.render(img);
@@ -445,26 +445,26 @@ bool DataWrapper::debugPublish(const vector<FieldLine> &data)
     return false;
 }
 
-bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data_points)
+bool DataWrapper::debugPublish(DEBUG_ID id, const std::vector<Vector2<double> >& data_points)
 {
-    vector<Point>::const_iterator it;
+    std::vector<Point>::const_iterator it;
 
 #if VISION_WRAPPER_VERBOSITY > 1
     if(data_points.empty()) {
-        debug << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
+        debug << "DataWrapper::debugPublish - empty std::vector DEBUG_ID = " << getIDName(id) << std::endl;
         return false;
     }
 #endif
 
     if(m_display_on && false) {
         cv::Mat& img = results_img;    //get image from pair
-        string& window = results_window_name; //get window name from pair
+        std::string& window = results_window_name; //get window name from pair
 
 
         #if VISION_WRAPPER_VERBOSITY > 2
-            debug << id << endl;
+            debug << id << std::endl;
             debug << colour[0] << "," << colour[1] << "," << colour[2] << "," << colour[3] << "\t";
-            debug << data_points << endl;
+            debug << data_points << std::endl;
         #endif
 
         switch(id) {
@@ -507,7 +507,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
             }
             break;
         default:
-            errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+            errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
             return false;
         }
 
@@ -522,26 +522,26 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const vector<Vector2<double> >& data
 bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     if(m_display_on && false) {
-        vector<Point> data_points;
-        vector<cv::Scalar> colours;
-        vector<Point>::const_iterator it;
-        vector<cv::Scalar>::const_iterator c_it;
+        std::vector<Point> data_points;
+        std::vector<cv::Scalar> colours;
+        std::vector<Point>::const_iterator it;
+        std::vector<cv::Scalar>::const_iterator c_it;
 
         getPointsAndColoursFromSegments(region.getSegments(), colours, data_points);
 
         if(data_points.empty() || colours.empty()) {
-            errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << endl;
+            errorlog << "DataWrapper::debugPublish - empty vector DEBUG_ID = " << getIDName(id) << std::endl;
             return false;
         }
 
         cv::Mat& img = results_img;    //get image from pair
-        string& window = results_window_name; //get window name from pair
+        std::string& window = results_window_name; //get window name from pair
 
 
         #if VISION_WRAPPER_VERBOSITY > 2
-            debug << id << endl;
+            debug << id << std::endl;
             debug << colours.front()[0] << "," << colours.front()[1] << "," << colours.front()[2] << "," << colours.front()[3] << "\t";
-            debug << data_points << endl;
+            debug << data_points << std::endl;
         #endif
 
         switch(id) {
@@ -562,7 +562,7 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
             }
             break;
         default:
-            errorlog << "DataWrapper::debugPublish - Called with invalid id" << endl;
+            errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
             return false;
         }
 
@@ -584,7 +584,7 @@ bool DataWrapper::updateFrame()
     case STREAM:
         VisionConstants::loadFromFile(configname);
         if(!imagestrm.is_open()) {
-            errorlog << "No image stream" << endl;
+            errorlog << "No image stream" << std::endl;
             return false;
         }
         try {
@@ -592,7 +592,7 @@ bool DataWrapper::updateFrame()
             //doGaussian(m_current_image);
         }
         catch(std::exception& e){
-            cout << "Stream error - resetting: " << e.what() << endl;
+            std::cout << "Stream error - resetting: " << e.what() << std::endl;
             imagestrm.clear() ;
             imagestrm.seekg(0, ios::beg);
             imagestrm >> *m_current_image;
@@ -609,7 +609,7 @@ bool DataWrapper::updateFrame()
 *   @param filename The filename for the LUT stored on disk
 *   @note Taken from original vision system
 */
-bool DataWrapper::loadLUTFromFile(const string& fileName)
+bool DataWrapper::loadLUTFromFile(const std::string& fileName)
 {
     return LUT.loadLUTFromFile(fileName);
 }

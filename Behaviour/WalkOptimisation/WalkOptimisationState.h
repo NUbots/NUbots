@@ -47,7 +47,7 @@ public:
 
     	m_current_time = 0;
     	m_previous_time = 0;
-    	m_current_target_state = vector<float>(3,0);
+    	m_current_target_state = std::vector<float>(3,0);
     	m_starting_position = m_current_target_state;
     	m_current_position = m_current_target_state;
     	m_completed = false;
@@ -96,7 +96,7 @@ protected:
     virtual void start()
     {
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 0
-			debug << "WalkOptimisationState::start()" << endl;
+			debug << "WalkOptimisationState::start()" << std::endl;
 		#endif
 		m_current_time = m_data->CurrentTime;
 		m_previous_time = 0;
@@ -118,7 +118,7 @@ protected:
     	updateTime();
 		updateEnergy();
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 1
-			debug << "WalkOptimisationState::tick(). position: " << m_current_position << " time: " << m_time_in_state << " energy: " << m_energy_used << endl;
+			debug << "WalkOptimisationState::tick(). position: " << m_current_position << " time: " << m_time_in_state << " energy: " << m_energy_used << std::endl;
 		#endif
 		m_previous_time = m_current_time;
     }
@@ -128,20 +128,20 @@ protected:
     {
     	m_completed = true;
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 0
-			debug << "WalkOptimisationState::finish(). distance: " << distance() << " duration(): " << duration() << " energy(): " << energy() << endl;
+			debug << "WalkOptimisationState::finish(). distance: " << distance() << " duration(): " << duration() << " energy(): " << energy() << std::endl;
 		#endif
     }
 
     /* @brief Returns the start point for the optimisation state */
-    virtual vector<float> getStartPoint()
+    virtual std::vector<float> getStartPoint()
 	{
-		vector<float> front = m_way_points.front();
-		vector<float> back = m_way_points.back();
+		std::vector<float> front = m_way_points.front();
+		std::vector<float> back = m_way_points.back();
 
-		vector<float> difference_from_front = m_field_objects->self.CalculateDifferenceFromFieldState(front);
-		vector<float> difference_from_back = m_field_objects->self.CalculateDifferenceFromFieldState(back);
+		std::vector<float> difference_from_front = m_field_objects->self.CalculateDifferenceFromFieldState(front);
+		std::vector<float> difference_from_back = m_field_objects->self.CalculateDifferenceFromFieldState(back);
 
-		vector<float> startpoint;
+		std::vector<float> startpoint;
 		if (difference_from_back[0] < difference_from_front[0])
 			startpoint = back;
 		else
@@ -171,10 +171,10 @@ protected:
     	}
 
 		// There are three ways to measure the energy used (a) using joint torques or (b) using battery currents (c) using joint currents
-		vector<float> currents;
+		std::vector<float> currents;
 		float batteryvoltage, batterycurrent;
-		vector<float> positions;
-		vector<float> torques;
+		std::vector<float> positions;
+		std::vector<float> torques;
 
 		bool batteryavaliable = m_data->getBatteryVoltage(batteryvoltage);
 		batteryavaliable &= m_data->getBatteryCurrent(batterycurrent);
@@ -280,18 +280,18 @@ protected:
 protected:
     WalkOptimisationProvider* m_parent;
 
-    vector<vector<float> > m_way_points;		//!< the list of way points along the circuit used for optimisation
+    std::vector<std::vector<float> > m_way_points;		//!< the std::list of way points along the circuit used for optimisation
 
     float m_current_time;						//!< the current time in ms
     float m_previous_time;						//!< the previous time this state was run in ms
-    vector<float> m_current_target_state;		//!< the current field location we are walking to [x,y,theta]
-    vector<float> m_starting_position;			//!< the position [x,y,theta] at which the this state was entered
-    vector<float> m_current_position;			//!< the current position [x,y,theta], when leaving this state, this will become the final position
+    std::vector<float> m_current_target_state;		//!< the current field location we are walking to [x,y,theta]
+    std::vector<float> m_starting_position;			//!< the position [x,y,theta] at which the this state was entered
+    std::vector<float> m_current_position;			//!< the current position [x,y,theta], when leaving this state, this will become the final position
     bool m_completed;							//!< true if the last time we were in this state, it completed successfully.
 
     float m_time_in_state;						//!< the amount of time in ms spent in this state
     float m_energy_used;						//!< the amount of energy in Joules used in this state
-    vector<float> m_previous_positions;			//!< the previous joint positions (used to calculate energy used via joint torques)
+    std::vector<float> m_previous_positions;			//!< the previous joint positions (used to calculate energy used via joint torques)
 };
 
 #endif

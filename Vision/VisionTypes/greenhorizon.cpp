@@ -6,12 +6,12 @@ GreenHorizon::GreenHorizon()
 {
 }
 
-GreenHorizon::GreenHorizon(const vector< Vector2<double> >& initial_points, Vector2<double> image_size)
+GreenHorizon::GreenHorizon(const std::vector< Vector2<double> >& initial_points, Vector2<double> image_size)
 {
     set(initial_points, image_size);
 }
 
-void GreenHorizon::set(const vector< Vector2<double> > &initial_points, Vector2<double> image_size)
+void GreenHorizon::set(const std::vector< Vector2<double> > &initial_points, Vector2<double> image_size)
 {
 #if VISION_HORIZON_VERBOSITY > 1
     debug << "GreenHorizon::GreenHorizon - Begin" << std::endl;
@@ -22,7 +22,7 @@ void GreenHorizon::set(const vector< Vector2<double> > &initial_points, Vector2<
 
     //unsigned int position, y_new;
     int y_new;
-    vector< Vector2<double> >::const_iterator it_start, it_end;
+    std::vector< Vector2<double> >::const_iterator it_start, it_end;
 
     //generate start/end edge points (if not there)
     if(original_points.front().x > 0) {
@@ -73,19 +73,19 @@ bool GreenHorizon::isBelowHorizon(const Vector2<double>& pt) const
     return pt.y > interpolated_points.at(pt.x).y;
 }
 
-const vector< Vector2<double> >& GreenHorizon::getOriginalPoints() const
+const std::vector< Vector2<double> >& GreenHorizon::getOriginalPoints() const
 {
     return original_points;
 }
 
-const vector< Vector2<double> >& GreenHorizon::getInterpolatedPoints() const
+const std::vector< Vector2<double> >& GreenHorizon::getInterpolatedPoints() const
 {
     return interpolated_points;
 }
 
-vector< Vector2<double> > GreenHorizon::getInterpolatedSubset(unsigned int spacing) const
+std::vector< Vector2<double> > GreenHorizon::getInterpolatedSubset(unsigned int spacing) const
 {
-    vector< Vector2<double> > subset;
+    std::vector< Vector2<double> > subset;
     for(unsigned int i=0; i<interpolated_points.size(); i+=spacing) {
         subset.push_back(interpolated_points.at(i));
     }

@@ -62,7 +62,7 @@ class ConditionalThread;
 #include <iostream>
 #include <fstream>
 #include <string>
-using namespace std;
+
  
 #define MOTORS_BAUD_RATE                  1000000
 
@@ -97,8 +97,8 @@ class Motors
       bool request();                                                                     // request for feedback data
       bool read();                                                                        // read feedback data and put it into global feedback arrays
     
-      void getTargets(vector<float>& targets);
-      void getStiffnesses(vector<float>& stiffnesses);
+      void getTargets(std::vector<float>& targets);
+      void getStiffnesses(std::vector<float>& stiffnesses);
     
       void torqueEnable();                                                                // turn on all motors
       void emergencyOff();                                                                // emergency off (fast, collapse in heap)

@@ -197,7 +197,7 @@ void OpenglManager::writePointsToDisplay(std::vector<Point> newpoints, GLDisplay
     return;
 }
 
-void OpenglManager::writeSegmentsToDisplay(vector<vector<ColourSegment> > updatedSegments, GLDisplay::display displayId)
+void OpenglManager::writeSegmentsToDisplay(std::vector<std::vector<ColourSegment> > updatedSegments, GLDisplay::display displayId)
 {
     makeCurrent();
     // If there is an old list stored, delete it first.
@@ -213,7 +213,7 @@ void OpenglManager::writeSegmentsToDisplay(vector<vector<ColourSegment> > update
     glLineWidth(1.0);       // Line width
     for(unsigned int i = 0 ; i < updatedSegments.size(); i++)
     {
-        vector<ColourSegment>& line = updatedSegments[i];
+        std::vector<ColourSegment>& line = updatedSegments[i];
         for(unsigned int k = 0 ; k < line.size(); k++) {
             ColourSegment& segment = line[i];
             const Point& s = segment.getStart();
@@ -446,7 +446,7 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
     }
     glEnd();
 }
-void OpenglManager::writeLinesPointsToDisplay(vector<Point> linepoints, GLDisplay::display displayId)
+void OpenglManager::writeLinesPointsToDisplay(std::vector<Point> linepoints, GLDisplay::display displayId)
 {
     makeCurrent();
     //glDisable(GL_TEXTURE_2D);
@@ -654,7 +654,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
     }
 
     //! DRAW MOBILE OBJECTS:
-    vector < MobileObject > ::iterator mobileFOit;
+    std::vector < MobileObject > ::iterator mobileFOit;
     for(mobileFOit = AllObjects->mobileFieldObjects.begin(); mobileFOit  < AllObjects->mobileFieldObjects.end(); )
     {
         //! Check if the object is seen, if seen then continue to next Object
@@ -719,7 +719,7 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
 
     //! DRAW AMBIGUOUS OBJECTS: Using itterator as size is unknown
 
-    vector < AmbiguousObject > ::iterator ambigFOit;
+    std::vector < AmbiguousObject > ::iterator ambigFOit;
     qDebug() <<"Size Of Ambig Objects: " <<  AllObjects->ambiguousFieldObjects.size();
     for(ambigFOit = AllObjects->ambiguousFieldObjects.begin(); ambigFOit  < AllObjects->ambiguousFieldObjects.end(); )
     {

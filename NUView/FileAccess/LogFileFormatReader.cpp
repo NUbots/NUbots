@@ -1,6 +1,6 @@
 #include "LogFileFormatReader.h"
 #include <QMessageBox>
-#include <QStringList>
+#include <Qstd::stringstd::list>
 
 
 LogFileFormatReader::LogFileFormatReader(QObject *parent) :

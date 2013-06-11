@@ -17,7 +17,7 @@
 #include "Vision/visionblackboard.h"
 #include "Vision/VisionTools/classificationcolours.h"
 
-using namespace std;
+
 
 class GreenHorizonCH
 {
@@ -37,7 +37,7 @@ private:
     */
     static bool isPixelGreen(const NUImage& img, int x, int y);
 
-    // 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
+    // 2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
     // Returns a positive value, if OAB makes a counter-clockwise turn,
     // negative for clockwise turn, and zero if the points are collinear.
     static double cross(const Vector2<double> &O, const Vector2<double> &A, const Vector2<double> &B)
@@ -45,9 +45,9 @@ private:
         return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
     }
 
-    // Returns a list of points on the convex hull in counter-clockwise order.
-    // Note: the last point in the returned list is the same as the first one.
-    static vector< Vector2<double> > upperConvexHull(const vector< Vector2<double> >& points);
+    // Returns a std::list of points on the convex hull in counter-clockwise order.
+    // Note: the last point in the returned std::list is the same as the first one.
+    static std::vector< Vector2<double> > upperConvexHull(const std::vector< Vector2<double> >& points);
     //! CONSTANTS
     //static const unsigned int VER_SEGMENTS = 30;            //! @variable number of vertical scan segments.
     //static const unsigned int VER_THRESHOLD = 5;            //! @variable number of consecutive green pixels required.

@@ -54,26 +54,26 @@ public:
     const LookUpTable& getLUT() const;
 
     //! PUBLISH METHODS
-    void publish(const vector<const VisionFieldObject*> &visual_objects);
+    void publish(const std::vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
-    void debugPublish(const vector<Ball>& data);
-    void debugPublish(const vector<Goal>& data);
-    void debugPublish(const vector<Obstacle>& data);
-    void debugPublish(const vector<FieldLine>& data);
-    void debugPublish(const vector<CentreCircle>& data);
-    void debugPublish(const vector<CornerPoint>& data);
-    bool debugPublish(DEBUG_ID id, const vector<Point>& data_points) {return false;}
+    void debugPublish(const std::vector<Ball>& data);
+    void debugPublish(const std::vector<Goal>& data);
+    void debugPublish(const std::vector<Obstacle>& data);
+    void debugPublish(const std::vector<FieldLine>& data);
+    void debugPublish(const std::vector<CentreCircle>& data);
+    void debugPublish(const std::vector<CornerPoint>& data);
+    bool debugPublish(DEBUG_ID id, const std::vector<Point>& data_points) {return false;}
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region) {return false;}
     bool debugPublish(DEBUG_ID id, const NUImage* const img) {return false;}
     void debugPublish(DEBUG_ID id);
-    void debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data) {}
-    void debugPublish(DEBUG_ID id, const vector<Goal>& data) {}
+    void debugPublish(DEBUG_ID id, const std::vector<LSFittedLine>& data) {}
+    void debugPublish(DEBUG_ID id, const std::vector<Goal>& data) {}
 
 
-    void plotCurve(string name, vector< Point > pts) {}
-    void plotLineSegments(string name, vector< Point > pts) {}
-    void plotHistogram(string name, const Histogram1D& hist, Colour colour = yellow) {}
+    void plotCurve(std::string name, std::vector< Point > pts) {}
+    void plotLineSegments(std::string name, std::vector< Point > pts) {}
+    void plotHistogram(std::string name, const Histogram1D& hist, Colour colour = yellow) {}
 
 private:
     DataWrapper();
@@ -84,15 +84,15 @@ private:
 
     void resetHistory();
     void resetDetections();
-    void printHistory(ostream& out);
-    bool setImageStream(const string& filename);
-    bool setSensorStream(const string &filename);
-    bool loadLUTFromFile(const string& filename);
+    void printHistory(std::ostream& out);
+    bool setImageStream(const std::string& filename);
+    bool setSensorStream(const std::string &filename);
+    bool loadLUTFromFile(const std::string& filename);
     void resetStream();
     
-    void printLabels(ostream& out) const;
-    bool readLabels(istream& in, vector< vector<VisionFieldObject*> >& labels) const;
-    //bool readLabels(istream& in, vector< vector< pair<VFO_ID, Vector2<double> > > >& labels) const;
+    void printLabels(std::ostream& out) const;
+    bool readLabels(std::istream& in, std::vector< std::vector<VisionFieldObject*> >& labels) const;
+    //bool readLabels(std::istream& in, std::vector< std::vector< pair<VFO_ID, Vector2<double> > > >& labels) const;
 
     bool renderFrame(QImage &img, bool lines_only=false);
 private:
@@ -103,14 +103,14 @@ private:
     NUImage m_current_image;       //! @var The current image pointer
     NUSensorsData m_current_sensors;
 
-    string LUTname;                 //! @var look up table filename
+    std::string LUTname;                 //! @var look up table filename
     LookUpTable LUT;                //! @var look up table
 
     Horizon kinematics_horizon;     //! @var the kinematics horizon - represents "level"
 
-    string image_stream_name;       //! @var filename for the image stream
+    std::string image_stream_name;       //! @var filename for the image stream
     ifstream imagestrm;             //! @var image stream
-    string sensor_stream_name;
+    std::string sensor_stream_name;
     ifstream sensorstrm;
 
     int numFramesProcessed;         //! @var the number of frames processed so far
@@ -119,21 +119,21 @@ private:
     Transformer transformer;
 
     //! Detection info
-    vector<Ball> ball_detections;           //! @var balls detected in this frame
-    vector<Goal> goal_detections;           //! @var goals
-    vector<Obstacle> obstacle_detections;   //! @var obstacles
-    vector<FieldLine> line_detections;      //! @var lines
-    vector<CentreCircle> centrecircle_detections;      //! @var lines
-    vector<CornerPoint> corner_detections;      //! @var lines
+    std::vector<Ball> ball_detections;           //! @var balls detected in this frame
+    std::vector<Goal> goal_detections;           //! @var goals
+    std::vector<Obstacle> obstacle_detections;   //! @var obstacles
+    std::vector<FieldLine> line_detections;      //! @var lines
+    std::vector<CentreCircle> centrecircle_detections;      //! @var lines
+    std::vector<CornerPoint> corner_detections;      //! @var lines
 
-    vector<vector<Ball> > ball_detection_history;           //! @var balls detected in each frame so far
-    vector<vector<Goal> > goal_detection_history;           //! @var goals
-    vector<vector<Obstacle> > obstacle_detection_history;   //! @var obstacles
-    vector<vector<FieldLine> > line_detection_history;      //! @var lines
-    vector<vector<CentreCircle> > centrecircle_detection_history;      //! @var lines
-    vector<vector<CornerPoint> > corner_detection_history;      //! @var lines
+    std::vector<std::vector<Ball> > ball_detection_history;           //! @var balls detected in each frame so far
+    std::vector<std::vector<Goal> > goal_detection_history;           //! @var goals
+    std::vector<std::vector<Obstacle> > obstacle_detection_history;   //! @var obstacles
+    std::vector<std::vector<FieldLine> > line_detection_history;      //! @var lines
+    std::vector<std::vector<CentreCircle> > centrecircle_detection_history;      //! @var lines
+    std::vector<std::vector<CornerPoint> > corner_detection_history;      //! @var lines
 
-    vector<const VisionFieldObject*> detections;    //! @var all field objects detected in this frame
+    std::vector<const VisionFieldObject*> detections;    //! @var all field objects detected in this frame
 };
 
 #endif // DATAWRAPPERTRAINING_H

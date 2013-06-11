@@ -31,12 +31,12 @@ Obstacle::Obstacle(Point position, double width, double height)
 bool Obstacle::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
 #if VISION_OBSTACLE_VERBOSITY > 1
-    debug << "Obstacle::addToExternalFieldObjects" << endl;
-    debug << "    " << *this << endl;
+    debug << "Obstacle::addToExternalFieldObjects" << std::endl;
+    debug << "    " << *this << std::endl;
 #endif
 if(valid) {
     #if VISION_OBSTACLE_VERBOSITY > 1
-        debug << "Obstacle::addToExternalFieldObjects - valid" << endl;
+        debug << "Obstacle::addToExternalFieldObjects - valid" << std::endl;
     #endif
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     AmbiguousObject newAmbObj = AmbiguousObject(FieldObjects::FO_OBSTACLE, "Unknown Obstacle");
@@ -55,7 +55,7 @@ if(valid) {
 }
 else {
     #if VISION_OBSTACLE_VERBOSITY > 1
-        debug << "Obstacle::addToExternalFieldObjects - invalid" << endl;
+        debug << "Obstacle::addToExternalFieldObjects - invalid" << std::endl;
     #endif
     return false;
 }
@@ -66,7 +66,7 @@ bool Obstacle::check() const
     //! @todo Do a check based on width and d2p consistency
 //    if(!distance_valid) {
 //        #if VISION_OBSTACLE_VERBOSITY > 1
-//            debug << "Obstacle::check - Obstacle thrown out: distance invalid" << endl;
+//            debug << "Obstacle::check - Obstacle thrown out: distance invalid" << std::endl;
 //        #endif
 //        return false;
 //    }
@@ -113,7 +113,7 @@ bool Obstacle::calculatePositions()
     //m_spherical_error - not calculated
 
     #if VISION_OBSTACLE_VERBOSITY > 2
-        debug << "Obstacle::calculatePositions: " << m_location.relativeRadial << endl;
+        debug << "Obstacle::calculatePositions: " << m_location.relativeRadial << std::endl;
     #endif
 
     return distance_valid && d2p > 0;
@@ -130,12 +130,12 @@ bool Obstacle::calculatePositions()
 /*! @brief Stream insertion operator for a single ColourSegment.
  *      The segment is terminated by a newline.
  */
-ostream& operator<< (ostream& output, const Obstacle& o)
+std::ostream& operator<< (std::ostream& output, const Obstacle& o)
 {
-    output << "Obstacle" << endl;
-    output << "\tpixelloc: " << o.m_location.screen << endl;
-    output << "\tangularloc: " << o.m_location.angular << endl;
-    output << "\trelative field coords: " << o.m_location.relativeRadial << endl;
+    output << "Obstacle" << std::endl;
+    output << "\tpixelloc: " << o.m_location.screen << std::endl;
+    output << "\tangularloc: " << o.m_location.angular << std::endl;
+    output << "\trelative field coords: " << o.m_location.relativeRadial << std::endl;
     return output;
 }
 
@@ -143,9 +143,9 @@ ostream& operator<< (ostream& output, const Obstacle& o)
  *      Each segment is terminated by a newline.
  *  @relates ColourSegment
  */
-ostream& operator<< (ostream& output, const vector<Obstacle>& o)
+std::ostream& operator<< (std::ostream& output, const std::vector<Obstacle>& o)
 {
     for (size_t i=0; i<o.size(); i++)
-        output << o[i] << endl;
+        output << o[i] << std::endl;
     return output;
 }

@@ -193,7 +193,7 @@ class Line
       @param pts A vector of points to project.
       @return The vector of projected points.
       */
-    vector< Vector2<double> > projectOnto(const vector< Vector2<double> >& pts) const;
+    std::vector< Vector2<double> > projectOnto(const std::vector< Vector2<double> >& pts) const;
     /*!
       @brief Finds the intersection of the two lines.
       @param other The other line.

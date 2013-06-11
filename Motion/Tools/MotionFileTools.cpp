@@ -26,15 +26,14 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <cctype>
-using namespace std;
 
 /*! @brief Reads a boolean from a stream
     @param input the stream to read from
  */
-bool MotionFileTools::toBool(istream& input)
+bool MotionFileTools::toBool(std::istream& input)
 {
     input.ignore(128, ':');
-    string buffer;
+    std::string buffer;
     getline(input, buffer);
     buffer.erase(remove(buffer.begin(), buffer.end(), ' '), buffer.end());          // remove leading and trailing whitespace
     if (buffer.empty())
@@ -71,7 +70,7 @@ float MotionFileTools::toFloat(const char* data)
     @param data the string to convert
     @return the float
  */
-float MotionFileTools::toFloat(const string& data)
+float MotionFileTools::toFloat(const std::string& data)
 {
     return toFloat(data.c_str());
 }
@@ -80,7 +79,7 @@ float MotionFileTools::toFloat(const string& data)
     @param input the stream to read from
     @param the float
  */
-float MotionFileTools::toFloat(istream& input)
+float MotionFileTools::toFloat(std::istream& input)
 {
     char buffer[128];
     input.ignore(128, ':');
@@ -88,15 +87,15 @@ float MotionFileTools::toFloat(istream& input)
     return toFloat(buffer);
 }
 
-/*! @brief Converts a vector<float> to formatted string
+/*! @brief Converts a std::vector<float> to formatted string
  
     The data is written as [a,b,c, ...., n]
     @param data the data to convert
     @return the string containing the serialised vector
  */
-string MotionFileTools::fromVector(vector<float> data)
+std::string MotionFileTools::fromVector(std::vector<float> data)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << "[";
     if (not data.empty())
     {
@@ -108,15 +107,15 @@ string MotionFileTools::fromVector(vector<float> data)
     return ss.str();
 }
 
-/*! @brief Converts a vector<float> to formatted string
+/*! @brief Converts a std::vector<float> to formatted string
  
  The data is written as [a,b,c, ...., n]
  @param data the data to convert
  @return the string containing the serialised vector
  */
-string MotionFileTools::fromVector(vector<double> data)
+std::string MotionFileTools::fromVector(std::vector<double> data)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << "[";
     if (not data.empty())
     {
@@ -130,13 +129,13 @@ string MotionFileTools::fromVector(vector<double> data)
 
 /*! @brief Reads a comma separated vector from a string
     @param data the string to read
-    @return the vector<float>
+    @return the std::vector<float>
  */
-vector<float> MotionFileTools::toFloatVector(const string& data)
+std::vector<float> MotionFileTools::toFloatVector(const std::string& data)
 {
-    stringstream ss(data);
-    string buffer;
-    vector<float> values;
+    std::stringstream ss(data);
+    std::string buffer;
+    std::vector<float> values;
     while (getline(ss, buffer, ','))
         values.push_back(toFloat(buffer));
     
@@ -146,23 +145,23 @@ vector<float> MotionFileTools::toFloatVector(const string& data)
 /*! @brief Reads a comma separated vector from a stream. All content before the '[' is considerd a comment, the stream is read up to the next ']'.
            For example, "Gains: [65, 100, 25, 30]".
     @param input the stream to read from
-    @return the vector<float> from the stream
+    @return the std::vector<float> from the stream
  */
-vector<float> MotionFileTools::toFloatVector(istream& input)
+std::vector<float> MotionFileTools::toFloatVector(std::istream& input)
 {
-    string buffer;
+    std::string buffer;
     input.ignore(128, '[');
     getline(input, buffer, ']');
     return toFloatVector(buffer);
 }
 
-/*! @brief Converts a vector<string> to a formated string
+/*! @brief Converts a std::vector<string> to a formated string
     @param data the data to be put in the string
     @return thre formatted string
  */
-string MotionFileTools::fromVector(vector<string> data)
+std::string MotionFileTools::fromVector(std::vector<std::string> data)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << "[";
     if (not data.empty())
     {
@@ -178,14 +177,14 @@ string MotionFileTools::fromVector(vector<string> data)
     @param input the stream to read from
     @return the list of strings
  */
-vector<string> MotionFileTools::toStringVector(istream& input)
+std::vector<std::string> MotionFileTools::toStringVector(std::istream& input)
 {
-    vector<string> s;
+    std::vector<std::string> s;
     
-    string line, token;
+    std::string line, token;
     getline(input, line);
     
-    stringstream ss(line);
+    std::stringstream ss(line);
     while (getline(ss, token, ','))
     {
         token.replace(token.find('"'), 1, "", 0, 1);        // I don't like quotes around my joint labels
@@ -201,9 +200,9 @@ vector<string> MotionFileTools::toStringVector(istream& input)
     @param value the value from the string
     @param range the [min,max] tuple
  */
-void MotionFileTools::toFloatWithRange(const string& data, float& value, vector<float>& range)
+void MotionFileTools::toFloatWithRange(const std::string& data, float& value, std::vector<float>& range)
 {
-    stringstream ss(data);
+    std::stringstream ss(data);
     toFloatWithRange(data, value, range);
 }
 
@@ -214,7 +213,7 @@ void MotionFileTools::toFloatWithRange(const string& data, float& value, vector<
     @param value the value from the string
     @param range the [min,max] tuple
  */
-void MotionFileTools::toFloatWithRange(istream& input, float& value, vector<float>& range)
+void MotionFileTools::toFloatWithRange(std::istream& input, float& value, std::vector<float>& range)
 {
     char buffer[128];
     input.ignore(128, ':');
@@ -228,9 +227,9 @@ void MotionFileTools::toFloatWithRange(istream& input, float& value, vector<floa
     @param data the matrix to convert
     @return the serialised matrix
  */
-string MotionFileTools::fromMatrix(const vector<vector<float> >& data)
+std::string MotionFileTools::fromMatrix(const std::vector<std::vector<float> >& data)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << "[";
     for (size_t i=0; i<data.size(); i++)
         ss << fromVector(data[i]);
@@ -242,9 +241,9 @@ string MotionFileTools::fromMatrix(const vector<vector<float> >& data)
  @param data the matrix to convert
  @return the serialised matrix
  */
-string MotionFileTools::fromMatrix(const vector<vector<double> >& data)
+std::string MotionFileTools::fromMatrix(const std::vector<std::vector<double> >& data)
 {
-    stringstream ss;
+    std::stringstream ss;
     ss << "[";
     for (size_t i=0; i<data.size(); i++)
         ss << fromVector(data[i]);
@@ -256,11 +255,11 @@ string MotionFileTools::fromMatrix(const vector<vector<double> >& data)
     @param data the string containing the matrix
     @return the matrix
  */
-vector<vector<float> > MotionFileTools::toFloatMatrix(const string& data)
+std::vector<std::vector<float> > MotionFileTools::toFloatMatrix(const std::string& data)
 {
-    stringstream ss(data);
-    string buffer;
-    vector<vector<float> > values;
+    std::stringstream ss(data);
+    std::string buffer;
+    std::vector<std::vector<float> > values;
     ss.ignore(10, '[');
     while(getline(ss, buffer, ']'))
     {
@@ -275,7 +274,7 @@ vector<vector<float> > MotionFileTools::toFloatMatrix(const string& data)
     @param data the string containing the matrix
     @return the matrix
  */
-vector<vector<float> > MotionFileTools::toFloatMatrix(istream& input)
+std::vector<std::vector<float> > MotionFileTools::toFloatMatrix(std::istream& input)
 {
     char buffer[512];
     input.ignore(512, '[');
@@ -289,7 +288,7 @@ vector<vector<float> > MotionFileTools::toFloatMatrix(istream& input)
     @param value the value will be stored here
     @param matrix the matrix will be stored here
  */
-void MotionFileTools::toFloatWithMatrix(istream& input, float& value, vector<vector<float> >& matrix)
+void MotionFileTools::toFloatWithMatrix(std::istream& input, float& value, std::vector<std::vector<float> >& matrix)
 {
     char buffer[128];
     input.getline(buffer, 128, ':');
@@ -299,7 +298,7 @@ void MotionFileTools::toFloatWithMatrix(istream& input, float& value, vector<vec
 
 /*! @brief Returns the size of a matrix
  */
-size_t MotionFileTools::size(vector<vector<float> > data)
+size_t MotionFileTools::size(std::vector<std::vector<float> > data)
 {
     size_t size = 0;
     for (size_t i=0; i<data.size(); i++)
@@ -309,7 +308,7 @@ size_t MotionFileTools::size(vector<vector<float> > data)
 
 /*! @brief Returns the size of a matrix
  */
-size_t MotionFileTools::size(vector<vector<double> > data)
+size_t MotionFileTools::size(std::vector<std::vector<double> > data)
 {
     size_t size = 0;
     for (size_t i=0; i<data.size(); i++)

@@ -116,30 +116,30 @@ public:
     static float RANSAC_MAX_DISTANCE_TO_MERGE; //
 
     static void loadFromFile(std::string filename); //! Loads the constants from a file
-    static void print(ostream& out);
+    static void print(std::ostream& out);
 
-    static bool setParameter(string name, bool val);
-    static bool setParameter(string name, int val);
-    static bool setParameter(string name, unsigned int val);
-    static bool setParameter(string name, float val);
-    static bool setParameter(string name, DistanceMethod val);
+    static bool setParameter(std::string name, bool val);
+    static bool setParameter(std::string name, int val);
+    static bool setParameter(std::string name, unsigned int val);
+    static bool setParameter(std::string name, float val);
+    static bool setParameter(std::string name, DistanceMethod val);
 
     static void setFlags(bool val=true);
 
-    static vector<Parameter> getAllOptimisable();
-    static vector<Parameter> getBallParams();
-    static vector<Parameter> getGoalParams();
-    static vector<Parameter> getObstacleParams();
-    static vector<Parameter> getLineParams();
-    static vector<Parameter> getGeneralParams();
+    static std::vector<Parameter> getAllOptimisable();
+    static std::vector<Parameter> getBallParams();
+    static std::vector<Parameter> getGoalParams();
+    static std::vector<Parameter> getObstacleParams();
+    static std::vector<Parameter> getLineParams();
+    static std::vector<Parameter> getGeneralParams();
 
 
-    static bool setAllOptimisable(const vector<float>& params);
-    static bool setBallParams(const vector<float>& params);
-    static bool setGoalParams(const vector<float>& params);
-    static bool setObstacleParams(const vector<float>& params);
-    static bool setLineParams(const vector<float>& params);
-    static bool setGeneralParams(const vector<float>& params);
+    static bool setAllOptimisable(const std::vector<float>& params);
+    static bool setBallParams(const std::vector<float>& params);
+    static bool setGoalParams(const std::vector<float>& params);
+    static bool setObstacleParams(const std::vector<float>& params);
+    static bool setLineParams(const std::vector<float>& params);
+    static bool setGeneralParams(const std::vector<float>& params);
     
 private:
     VisionConstants();  //so noone can make an object of this type

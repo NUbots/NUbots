@@ -9,7 +9,7 @@ class CornerDetector
 public:
     CornerDetector(double tolerance);
 
-    vector<CornerPoint> run(const vector<FieldLine>& lines) const;
+    std::vector<CornerPoint> run(const std::vector<FieldLine>& lines) const;
 
     void setTolerance(double tolerance);
 

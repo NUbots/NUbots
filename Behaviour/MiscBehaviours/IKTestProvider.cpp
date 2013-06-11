@@ -34,7 +34,7 @@
 #include "Kinematics/Ik_squat.h"
 #include "Kinematics/Ik_hula.h"
 #include "Kinematics/InverseKinematics.h"
-using namespace std;
+
 
 IKTestProvider::IKTestProvider(Behaviour* manager) : BehaviourProvider(manager),m_current_ik_motion(NULL)
 {

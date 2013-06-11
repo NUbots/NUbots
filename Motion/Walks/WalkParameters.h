@@ -38,66 +38,65 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-using namespace std;
 
 class WalkParameters
 {
 public:
     WalkParameters();
-    WalkParameters(const string& name);
-    WalkParameters(const string& name, const vector<float>& maxspeeds, const vector<float>& maxaccels, const vector<Parameter>& parameters, const vector<vector<float> >& armgains, const vector<vector<float> >& torsogains, const vector<vector<float> >& leggains);
+    WalkParameters(const std::string& name);
+    WalkParameters(const std::string& name, const std::vector<float>& maxspeeds, const std::vector<float>& maxaccels, const std::vector<Parameter>& parameters, const std::vector<std::vector<float> >& armgains, const std::vector<std::vector<float> >& torsogains, const std::vector<std::vector<float> >& leggains);
     ~WalkParameters();
     
     // get methods
-    vector<float> getAsVector();
-    vector<Parameter> getAsParameters();
-    string& getName();
-    vector<float>& getMaxSpeeds();
-    vector<float>& getMaxAccelerations();
-    vector<Parameter>& getParameters();
-    vector<vector<float> >& getArmGains();
-    vector<vector<float> >& getTorsoGains();
-    vector<vector<float> >& getLegGains();
+    std::vector<float> getAsVector();
+    std::vector<Parameter> getAsParameters();
+    std::string& getName();
+    std::vector<float>& getMaxSpeeds();
+    std::vector<float>& getMaxAccelerations();
+    std::vector<Parameter>& getParameters();
+    std::vector<std::vector<float> >& getArmGains();
+    std::vector<std::vector<float> >& getTorsoGains();
+    std::vector<std::vector<float> >& getLegGains();
     
     // set methods
-    void set(const vector<float>& data);
-    void setName(const string& name);
-    void setMaxSpeeds(const vector<float>& maxspeeds);
-    void setMaxAccelerations(const vector<float>& maxaccels);
-    void setParameters(const vector<Parameter>& parameters);
-    void setArmGains(const vector<vector<float> >& armgains);
-    void setTorsoGains(const vector<vector<float> >& torsogains);
-    void setLegGains(const vector<vector<float> >& leggains);
+    void set(const std::vector<float>& data);
+    void setName(const std::string& name);
+    void setMaxSpeeds(const std::vector<float>& maxspeeds);
+    void setMaxAccelerations(const std::vector<float>& maxaccels);
+    void setParameters(const std::vector<Parameter>& parameters);
+    void setArmGains(const std::vector<std::vector<float> >& armgains);
+    void setTorsoGains(const std::vector<std::vector<float> >& torsogains);
+    void setLegGains(const std::vector<std::vector<float> >& leggains);
     
     // display methods
-    void summaryTo(ostream& output);
-    void csvTo(ostream& output);
+    void summaryTo(std::ostream& output);
+    void csvTo(std::ostream& output);
     
     // serialisation
-    friend ostream& operator<< (ostream& output, const WalkParameters& p_walkparameters);
-    friend ostream& operator<< (ostream& output, const WalkParameters* p_walkparameters);
-    friend istream& operator>> (istream& input, WalkParameters& p_walkparameters);
-    friend istream& operator>> (istream& input, WalkParameters* p_walkparameters);
+    friend std::ostream& operator<< (std::ostream& output, const WalkParameters& p_walkparameters);
+    friend std::ostream& operator<< (std::ostream& output, const WalkParameters* p_walkparameters);
+    friend std::istream& operator>> (std::istream& input, WalkParameters& p_walkparameters);
+    friend std::istream& operator>> (std::istream& input, WalkParameters* p_walkparameters);
     void save();
-    void saveAs(const string& name);
-    void load(const string& name);
+    void saveAs(const std::string& name);
+    void load(const std::string& name);
     
     size_t size() const;
 private:
-    void setGains(vector<vector<float> >& gains, unsigned int& numgains, const vector<vector<float> >& newgains);
+    void setGains(std::vector<std::vector<float> >& gains, unsigned int& numgains, const std::vector<std::vector<float> >& newgains);
 public:
 private:
-    string m_name;                             //!< the name of the walk parameter set
-    vector<float> m_max_speeds;                //!< stores the maximum speeds (x,y,theta) allowed by the walk engine
-    vector<float> m_max_accelerations;         //!< stores the maximum accelerations (x,y,theta) allowed by the walk engine
+    std::string m_name;                             //!< the name of the walk parameter set
+    std::vector<float> m_max_speeds;                //!< stores the maximum speeds (x,y,theta) allowed by the walk engine
+    std::vector<float> m_max_accelerations;         //!< stores the maximum accelerations (x,y,theta) allowed by the walk engine
     
-    vector<Parameter> m_parameters;            //!< stores the parameters for the walk engine
+    std::vector<Parameter> m_parameters;            //!< stores the parameters for the walk engine
     
-    vector<vector<float> > m_arm_gains;        //!< stores the arm gains for a walk
+    std::vector<std::vector<float> > m_arm_gains;        //!< stores the arm gains for a walk
     unsigned int m_num_arm_gains;              //!< stores the total number of arm gains
-    vector<vector<float> > m_torso_gains;      //!< stores the torso gains for a walk
+    std::vector<std::vector<float> > m_torso_gains;      //!< stores the torso gains for a walk
     unsigned int m_num_torso_gains;            //!< stores the total number of torso gains
-    vector<vector<float> > m_leg_gains;        //!< stores the leg gains for a walk
+    std::vector<std::vector<float> > m_leg_gains;        //!< stores the leg gains for a walk
     unsigned int m_num_leg_gains;              //!< stores the total number of leg gains
 };
 

@@ -13,7 +13,7 @@ enum KfUpdateResult
     KF_OK = 1,
 };
 
-using namespace std;
+
 
 class KF {
     public:

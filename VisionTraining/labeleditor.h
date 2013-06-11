@@ -11,7 +11,7 @@
 #include <vector>
 #include "Vision/VisionWrapper/visioncontrolwrappertraining.h"
 
-using namespace std;
+
 using namespace Vision;
 
 namespace Ui {
@@ -26,13 +26,13 @@ public:
     explicit LabelEditor(QWidget *parent = 0);
     ~LabelEditor();
     
-    int run(string dir, string label_name, string image_name);
+    int run(std::string dir, std::string label_name, std::string image_name);
 
 private:
     void display(const NUImage& frame, const LookUpTable& lut);
-    void renderFrame(const NUImage& frame, QImage& img, vector<VisionFieldObject*>& gt) const;
-    void setInts(vector< pair<string, Vector3<int> > > vals);
-    void setDoubles(vector<pair<string, Vector3<double> > > vals);
+    void renderFrame(const NUImage& frame, QImage& img, std::vector<VisionFieldObject*>& gt) const;
+    void setInts(std::vector< pair<std::string, Vector3<int> > > vals);
+    void setDoubles(std::vector<pair<std::string, Vector3<double> > > vals);
     void updateCombo();
     void updateControls();
 
@@ -48,12 +48,12 @@ private slots:
     
 private:
     Ui::LabelEditor *ui;                        //! @var The GUI pointer.
-    vector<QLabel*> m_text_labels;              //! @var The dynamic labels.
-    vector<QSlider*> m_sliders;                 //! @var The dynamic integer sliders.
-    vector<QSpinBox*> m_i_spins;                //! @var The dynamic integer inputs.
-    vector<QDoubleSpinBox*> m_d_spins;          //! @var The dynamic decimal inputs.
-    vector<VisionFieldObject*> m_ground_truth;  //! @var The current labels.
-    vector< vector<VisionFieldObject*> > m_ground_truth_full;   //! @var All labels.
+    std::vector<QLabel*> m_text_labels;              //! @var The dynamic labels.
+    std::vector<QSlider*> m_sliders;                 //! @var The dynamic integer sliders.
+    std::vector<QSpinBox*> m_i_spins;                //! @var The dynamic integer inputs.
+    std::vector<QDoubleSpinBox*> m_d_spins;          //! @var The dynamic decimal inputs.
+    std::vector<VisionFieldObject*> m_ground_truth;  //! @var The current labels.
+    std::vector< std::vector<VisionFieldObject*> > m_ground_truth_full;   //! @var All labels.
     QGraphicsScene m_plain_scene;               //! @var The scene for displaying the labelled image.
     QGraphicsScene m_classified_scene;          //! @var The scene for displayying the classified image.
     QGraphicsPixmapItem m_plain_pixmap;         //! @var The labelled image pixmap.

@@ -14,7 +14,7 @@ NULocalisationSensors::NULocalisationSensors(double time, const Sensor& gps, con
     m_time = time;
 }
 
-ostream& operator<< (ostream& output, const NULocalisationSensors& p_sensor)
+std::ostream& operator<< (std::ostream& output, const NULocalisationSensors& p_sensor)
 {
     output << p_sensor.gps();
     output << p_sensor.compass();
@@ -27,7 +27,7 @@ ostream& operator<< (ostream& output, const NULocalisationSensors& p_sensor)
     return output;
 }
 
-istream& operator>> (istream& input, NULocalisationSensors& p_sensor)
+std::istream& operator>> (std::istream& input, NULocalisationSensors& p_sensor)
 {
     input >> p_sensor.m_gps;
     input >> p_sensor.m_compass;

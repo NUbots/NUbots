@@ -26,7 +26,7 @@
 #include "debugverbositynetwork.h"
 #include "ioconfig.h"
 
-using namespace std;
+
 
 /*! @brief Construct a DarwinIO object
     @param nubot a pointer to the NUbot, we need this to gain access to the public store
@@ -34,7 +34,7 @@ using namespace std;
 DarwinIO::DarwinIO(NUbot* nubot): NUIO(nubot)
 {
     #if DEBUG_NETWORK_VERBOSITY > 0
-        debug << "DarwinIO::DarwinIO()" << endl;
+        debug << "DarwinIO::DarwinIO()" << std::endl;
     #endif
     m_nubot = nubot;
 }
@@ -42,7 +42,7 @@ DarwinIO::DarwinIO(NUbot* nubot): NUIO(nubot)
 DarwinIO::~DarwinIO()
 {
     #if DEBUG_NETWORK_VERBOSITY > 0
-        debug << "DarwinIO::~DarwinIO()" << endl;
+        debug << "DarwinIO::~DarwinIO()" << std::endl;
     #endif
 }
 

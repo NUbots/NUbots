@@ -5,24 +5,24 @@
 namespace RANSAC
 {
     template<class Model, typename DataPoint>
-    vector<pair<Model, vector<DataPoint> > > findMultipleModels(const vector<DataPoint>& points, double e, unsigned int n, unsigned int k, unsigned int max_iterations, RANSAC::SELECTION_METHOD method)
+    std::vector<pair<Model, std::vector<DataPoint> > > findMultipleModels(const std::vector<DataPoint>& points, double e, unsigned int n, unsigned int k, unsigned int max_iterations, RANSAC::SELECTION_METHOD method)
     {
         double variance;
         bool found;
         Model model;
-        vector<pair<Model, vector<DataPoint> > > results;
-        vector<DataPoint> consensus;
-        vector<DataPoint> remainder;
+        std::vector<pair<Model, std::vector<DataPoint> > > results;
+        std::vector<DataPoint> consensus;
+        std::vector<DataPoint> remainder;
 
         //run first iterations
 
         found = findModel(points, model, consensus, remainder, variance, e, n, k, method);
         if(found) {
-            results.push_back(pair<Model, vector<DataPoint> >(model, consensus));
+            results.push_back(pair<Model, std::vector<DataPoint> >(model, consensus));
             while(found && results.size() < max_iterations) {
                 found = findModel(remainder, model, consensus, remainder, variance, e, n, k, method);
                 if(found)
-                    results.push_back(pair<Model, vector<DataPoint> >(model, consensus));
+                    results.push_back(pair<Model, std::vector<DataPoint> >(model, consensus));
             }
         }
 
@@ -30,7 +30,7 @@ namespace RANSAC
     }
 
     template<class Model, typename DataPoint>
-    bool findModel(vector<DataPoint> points, Model &result, vector<DataPoint>& consensus, vector<DataPoint>& remainder, double& variance, double e, unsigned int n, unsigned int k, RANSAC::SELECTION_METHOD method)
+    bool findModel(std::vector<DataPoint> points, Model &result, std::vector<DataPoint>& consensus, std::vector<DataPoint>& remainder, double& variance, double e, unsigned int n, unsigned int k, RANSAC::SELECTION_METHOD method)
     {
         if (points.size() < n || n<result.minPointsForFit()) {
             return false;
@@ -114,12 +114,12 @@ namespace RANSAC
     //NOTE: Assumes that there are no duplicates in the data
     //      point set (only way to guarantee no infinite loop)
     template<class Model, typename DataPoint>
-    Model generateRandomModel(const vector<DataPoint>& points)
+    Model generateRandomModel(const std::vector<DataPoint>& points)
     {
         Model model;
         size_t n = points.size();
         if(n >= model.minPointsForFit()) {
-            vector<size_t> indices;
+            std::vector<size_t> indices;
             size_t next;
             indices.push_back(rand() % n);
 
@@ -137,7 +137,7 @@ namespace RANSAC
                 indices.push_back(next);
             }
 
-            vector<DataPoint> rand_pts;
+            std::vector<DataPoint> rand_pts;
             BOOST_FOREACH(size_t i, indices) {
                 rand_pts.push_back(points.at(i));
             }
@@ -147,7 +147,7 @@ namespace RANSAC
         return model;
 //        Model model;
 //        if(points.size() >= model.minPointsForFit()) {
-//            vector<DataPoint> rand_pts;
+//            std::vector<DataPoint> rand_pts;
 //            DataPoint next;
 //            rand_pts.push_back(points.at(rand() % points.size()));
 

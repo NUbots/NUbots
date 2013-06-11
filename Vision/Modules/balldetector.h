@@ -10,7 +10,7 @@
 #include "Vision/VisionTools/classificationcolours.h"
 #include "Vision/VisionTypes/quad.h"
 
-using namespace std;
+
 
 class BallDetector
 {
@@ -20,10 +20,10 @@ public:
     /*! @brief Detects a single ball from orange transitions using a geometric mean for general location
       and close classification at the pixel level combined with occlusion detection for refinement.
     */
-    virtual vector<Ball> run();
+    virtual std::vector<Ball> run();
 
 protected:
-    void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<Point> &pointlist);
+    void appendEdgesFromSegments(const std::vector<ColourSegment>& segments, std::vector<Point> &pointList);
 };
 
 #endif // BALLDETECTION_H

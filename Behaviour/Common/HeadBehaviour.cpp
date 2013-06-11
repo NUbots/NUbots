@@ -48,7 +48,7 @@ bool HeadBehaviour::ObjectNotSeen() {
   */
 HeadBehaviour::HeadBehaviour():Mrlagent(){
     MAX_PERCEPT_RANGESIZE = 10;
-    NUCameraData cameraSpecs(string(CONFIG_DIR) + "CameraSpecs.cfg");
+    NUCameraData cameraSpecs(std::string(CONFIG_DIR) + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
     m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
     head_logic = HeadLogic::getInstance();
@@ -73,10 +73,10 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
     vector<float> inputs = getPercept();
     try{
         Mrlagent.loadMRLAgent(agent_filename);
-        cout<<"HeadBehaviour::HeadBehaviour():Mrlagent() - agent loaded successfully."<<endl;
-    } catch (string s){
+        std::cout<<"HeadBehaviour::HeadBehaviour():Mrlagent() - agent loaded successfully."<<std::endl;
+    } catch (std::string s){
         Mrlagent.log("\nHeadBehaviour::HeadBehaviour():Mrlagent() - Agent did not load properly. Resetting..."+s);
-        cout<<s<<"\nHeadBehaviour::HeadBehaviour():Mrlagent() - Agent did not load properly. Resetting..."<<endl;
+        std::cout<<s<<"\nHeadBehaviour::HeadBehaviour():Mrlagent() - Agent did not load properly. Resetting..."<<std::endl;
         try{
             Mrlagent.initialiseAgent(inputs.size()
                                      //Calculate output size = sum of the number of stationary, mobile and ambiguous objects.
@@ -87,15 +87,15 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
                                      ,MAX_PERCEPT_RANGESIZE);
             Mrlagent.setParameters(0.5,1,0.1,0.5,5,15, true);
 
-        }catch(string s){
-           cout<<s<<endl;
-           throw string("");
+        }catch(std::string s){
+           std::cout<<s<<std::endl;
+           throw std::string("");
         }
     }
 
     //Log training session date and time.
-    ofstream save_file;
-    save_file.open(rewards_log_pathname.c_str(),ofstream::app);
+    std::ofstream save_file;
+    save_file.open(rewards_log_pathname.c_str(),std::ofstream::app);
     time_t t = time(0);// get time now
     save_file<<"\n";
     save_file << ctime(&t);
@@ -116,15 +116,15 @@ void HeadBehaviour::doPriorityListPolicy() {
 
     //Josiah's simple priority list head behaviour.
     //prepare vision priority times
-    //cout << "doing priority list policy" << flush;
+    //std::cout << "doing priority list policy" << flush;
     float timeSinceBallSeen = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen()+ballFocusBias;
-    float timeSinceLandmarkSeen = min(10000000.f,Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST ].TimeSinceLastSeen());
+    float timeSinceLandmarkSeen = std::min(10000000.f,Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST ].TimeSinceLastSeen());
 
-    timeSinceLandmarkSeen = min(timeSinceLandmarkSeen,Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST ].TimeSinceLastSeen());
-    timeSinceLandmarkSeen = min(timeSinceLandmarkSeen,Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST ].TimeSinceLastSeen());
-    timeSinceLandmarkSeen = min(timeSinceLandmarkSeen,Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST ].TimeSinceLastSeen());
+    timeSinceLandmarkSeen = std::min(timeSinceLandmarkSeen,Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST ].TimeSinceLastSeen());
+    timeSinceLandmarkSeen = std::min(timeSinceLandmarkSeen,Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST ].TimeSinceLastSeen());
+    timeSinceLandmarkSeen = std::min(timeSinceLandmarkSeen,Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST ].TimeSinceLastSeen());
 
-    //cout << "Ball: " << timeSinceBallSeen << "; Landmark: " << timeSinceLandmarkSeen << endl;
+    //std::cout << "Ball: " << timeSinceBallSeen << "; Landmark: " << timeSinceLandmarkSeen << std::endl;
     //check what we need to prioritise looking at
     if (timeSinceBallSeen/ballSeenFrequency > timeSinceLandmarkSeen/landmarkSeenFrequency) {
         dispatchHeadJob(&Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]);
@@ -143,16 +143,16 @@ void HeadBehaviour::doTimeVSCostPriorityPolicy(){
 
 
     //Debug:
-    cout<<" HeadBehaviour::doTimeVSCostPriorityPolicy(): cost list = [";
+    std::cout<<" HeadBehaviour::doTimeVSCostPriorityPolicy(): cost list = [";
     for(int i = 0; i<costs.size(); i++){
-        cout<<" "<<costs[i]<<",";
+        std::cout<<" "<<costs[i]<<",";
     }
-    cout<<"]"<<endl;
-    cout<<" HeadBehaviour::doTimeVSCostPriorityPolicy(): time since last seen list = [";
+    std::cout<<"]"<<std::endl;
+    std::cout<<" HeadBehaviour::doTimeVSCostPriorityPolicy(): time since last seen list = [";
     for(int i = 0; i<times.size(); i++){
-        cout<<" "<<times[i]<<",";
+        std::cout<<" "<<times[i]<<",";
     }
-    cout<<"]"<<endl;
+    std::cout<<"]"<<std::endl;
 
     vector<float> priorities(0);
     if(times.size()==costs.size()){
@@ -163,13 +163,13 @@ void HeadBehaviour::doTimeVSCostPriorityPolicy(){
                 priorities.push_back((float)times[i]/costs[i]);
             }
         }
-    }else cout<<"HeadBehaviour::doTimeVSCostPriorityPolicy(): Times and costs different sizes()."<<endl;
+    }else std::cout<<"HeadBehaviour::doTimeVSCostPriorityPolicy(): Times and costs different sizes()."<<std::endl;
 
-    cout<<" HeadBehaviour::doTimeVSCostPriorityPolicy(): priorities = [";
+    std::cout<<" HeadBehaviour::doTimeVSCostPriorityPolicy(): priorities = [";
     for(int i = 0; i<priorities.size(); i++){
-        cout<<" "<<priorities[i]<<",";
+        std::cout<<" "<<priorities[i]<<",";
     }
-    cout<<"]"<<endl;
+    std::cout<<"]"<<std::endl;
 
     float bestPriority = 0;
     int bestObject = 0;
@@ -185,13 +185,13 @@ void HeadBehaviour::doTimeVSCostPriorityPolicy(){
 
     if (ob_type == 1){
         dispatchHeadJob((MobileObject*)head_logic->getObject(bestObject));
-        cout<<" HeadBehaviour::doPriorityListPolicy() Performing priority policy - Mobile Object: "<< bestObject <<endl;
+        std::cout<<" HeadBehaviour::doPriorityListPolicy() Performing priority policy - Mobile Object: "<< bestObject <<std::endl;
     } else if (ob_type == 2){
         dispatchHeadJob((AmbiguousObject*)head_logic->getObject(bestObject));
-        cout<<" HeadBehaviour::doPriorityListPolicy() Performing priority policy - Ambiguous Object: "<< bestObject <<endl;
+        std::cout<<" HeadBehaviour::doPriorityListPolicy() Performing priority policy - Ambiguous Object: "<< bestObject <<std::endl;
     } else {
         dispatchHeadJob((StationaryObject*)head_logic->getObject(bestObject));
-        cout<<" HeadBehaviour::doPriorityListPolicy() Performing priority policy - Stationary Object: "<< bestObject <<endl;
+        std::cout<<" HeadBehaviour::doPriorityListPolicy() Performing priority policy - Stationary Object: "<< bestObject <<std::endl;
     }
 
 
@@ -230,7 +230,7 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
         actionObjectID = -1;
         time_since_last_localisation = current_time;
 
-        cout << "objects lost, searching" << endl;
+        std::cout << "objects lost, searching" << std::endl;
         return;
     }*/
 
@@ -297,7 +297,7 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
             }else{
                 //Wait for button press
                 Mrlagent.saveMRLAgent(agent_filename);
-                cout<<"HeadBehaviour::makeVisionChoice - RLAgentTrainingPolicy - Waiting for left button press before continuing... Move robot to new location."<<endl;
+                std::cout<<"HeadBehaviour::makeVisionChoice - RLAgentTrainingPolicy - Waiting for left button press before continuing... Move robot to new location."<<std::endl;
                 actions_taken_this_state = 0;
                 float button_state;
                 Blackboard->Sensors->getButton(NUSensorsData::MainButton,button_state);
@@ -315,7 +315,7 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
             }else{
                 actions_taken_this_state = 0;
                 Mrlagent.saveMRLAgent(agent_filename);
-                cout<<"HeadBehaviour::makeVisionChoice - MRLAgentTrainingPolicy - Waiting for left button press before continuing... Move robot to new location."<<endl;
+                std::cout<<"HeadBehaviour::makeVisionChoice - MRLAgentTrainingPolicy - Waiting for left button press before continuing... Move robot to new location."<<std::endl;
                 //Wait for button press
                 float button_state;
                 Blackboard->Sensors->getButton(NUSensorsData::MainButton,button_state);
@@ -345,29 +345,29 @@ void HeadBehaviour::doMRLAgentPolicy(){
         dispatchHeadJob((StationaryObject*)(head_logic->getObject(action)));
 
         //Debug text for use when training:
-        // cout<<" HeadBehaviour::doMRLAgentPolicy() Performing priority policy - Stationary Object: "<< action << "- Percept = [";
+        // std::cout<<" HeadBehaviour::doMRLAgentPolicy() Performing priority policy - Stationary Object: "<< action << "- Percept = [";
         /*for(int i = 0; i<inputs.size(); i++){
-            cout<<" "<<inputs[i]<<",";
+            std::cout<<" "<<inputs[i]<<",";
         }*/
-       // cout<<"]"<<endl;
+       // std::cout<<"]"<<std::endl;
     } else if (action < head_logic->relevantObjects[1].size()+head_logic->relevantObjects[0].size()){ //i.e. Mobile Object
         dispatchHeadJob((MobileObject*)(head_logic->getObject(action)));
 
         //Debug text for use when training:
-        //cout<<" HeadBehaviour::doMRLAgentPolicy() Performing priority policy - Mobile Object: "<< action << "- Percept = [";
+        //std::cout<<" HeadBehaviour::doMRLAgentPolicy() Performing priority policy - Mobile Object: "<< action << "- Percept = [";
         /*for(int i = 0; i<inputs.size(); i++){
-            cout<<" "<<inputs[i]<<",";
+            std::cout<<" "<<inputs[i]<<",";
         }*/
-        //cout<<"]"<<endl;
+        //std::cout<<"]"<<std::endl;
     } else {
         dispatchHeadJob((AmbiguousObject*)(head_logic->getObject(action)));
 
         //Debug text for use when training:
-        /*cout<<" HeadBehaviour::doMRLAgentPolicy() Performing priority policy - Ambiguous Object: "<< action << "- Percept = [";
+        /*std::cout<<" HeadBehaviour::doMRLAgentPolicy() Performing priority policy - Ambiguous Object: "<< action << "- Percept = [";
         /*for(int i = 0; i<inputs.size(); i++){
-            cout<<" "<<inputs[i]<<",";
+            std::cout<<" "<<inputs[i]<<",";
         }
-        cout<<"]"<<endl;*/
+        std::cout<<"]"<<std::endl;*/
     }
 
 }
@@ -379,34 +379,34 @@ void HeadBehaviour::doRLAgentPolicy(){
     vector<float> inputs = getPercept();
     int action = Mrlagent.getAction(inputs,head_logic->getValidObjectsToLookAt());
     float rew = calculateReward();
-    cout<< "Reward = "<<rew<<endl;
+    std::cout<< "Reward = "<<rew<<std::endl;
     Mrlagent.giveReward(rew);
     Mrlagent.doLearning();
 
     if (action < head_logic->relevantObjects[0].size()){    //i.e. Stationary Object
         dispatchHeadJob((StationaryObject*)(head_logic->getObject(action)));
-        /*cout<<" HeadBehaviour::doRLAgentPolicy() Performing priority policy - Stationary Object: "<< action <<endl;
-        cout<< "- Percept = [";
+        /*std::cout<<" HeadBehaviour::doRLAgentPolicy() Performing priority policy - Stationary Object: "<< action <<std::endl;
+        std::cout<< "- Percept = [";
         for(int i = 0; i<inputs.size(); i++){
-            cout<<" "<<inputs[i]<<",";
+            std::cout<<" "<<inputs[i]<<",";
         }
-        cout<<"]"<<endl;*/
+        std::cout<<"]"<<std::endl;*/
     } else if (action < head_logic->relevantObjects[1].size()+head_logic->relevantObjects[0].size()){ //i.e. Mobile Object
         dispatchHeadJob((MobileObject*)(head_logic->getObject(action)));
-        /*cout<<" HeadBehaviour::doRLAgentPolicy() Performing priority policy - Mobile Object: "<< action << endl;
-        cout<< "Percept = [";
+        /*std::cout<<" HeadBehaviour::doRLAgentPolicy() Performing priority policy - Mobile Object: "<< action << std::endl;
+        std::cout<< "Percept = [";
         for(int i = 0; i<inputs.size(); i++){
-            cout<<" "<<inputs[i]<<",";
+            std::cout<<" "<<inputs[i]<<",";
         }
-        cout<<"]"<<endl;*/
+        std::cout<<"]"<<std::endl;*/
     } else {
         dispatchHeadJob((AmbiguousObject*)(head_logic->getObject(action)));
-        /*cout<<" HeadBehaviour::doRLAgentPolicy() Performing priority policy - Ambiguous Object: "<< action <<endl;
-        cout<<  "- Percept = [";
+        /*std::cout<<" HeadBehaviour::doRLAgentPolicy() Performing priority policy - Ambiguous Object: "<< action <<std::endl;
+        std::cout<<  "- Percept = [";
         for(int i = 0; i<inputs.size(); i++){
-            cout<<" "<<inputs[i]<<",";
+            std::cout<<" "<<inputs[i]<<",";
         }
-        cout<<"]"<<endl;*/
+        std::cout<<"]"<<std::endl;*/
     }
 
 }
@@ -454,8 +454,8 @@ float HeadBehaviour::calculateReward(){
 */
 void HeadBehaviour::recordReward(float r)
 {
-    ofstream save_file;
-    save_file.open(rewards_log_pathname.c_str(),ofstream::app);
+    std::ofstream save_file;
+    save_file.open(rewards_log_pathname.c_str(),std::ofstream::app);
     if (actions_taken_this_state == ACTIONS_PER_STATE-1 or lastVisionPolicy==RLAgentPolicy or lastVisionPolicy==MRLAgentPolicy)
         save_file<<r<<"\n";
     else

@@ -7,30 +7,30 @@ BallDetector::BallDetector() {}
 
 BallDetector::~BallDetector() {}
 
-vector<Ball> BallDetector::run()
+std::vector<Ball> BallDetector::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     NUImage img = vbb->getOriginalImage();
     const LookUpTable& lut = vbb->getLUT();
     // BEGIN BALL DETECTION -----------------------------------------------------------------
 
-    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(BALL_COLOUR);
-    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(BALL_COLOUR);
-    vector<Point> edges;
-    vector<Ball> balls; //will only ever hold one
+    std::vector<ColourSegment> v_segments = vbb->getVerticalTransitions(BALL_COLOUR);
+    std::vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(BALL_COLOUR);
+    std::vector<Point> edges;
+    std::vector<Ball> balls; //will only ever hold one
 
     appendEdgesFromSegments(h_segments, edges);
     appendEdgesFromSegments(v_segments, edges);
 
     #if VISION_BALL_VERBOSITY > 1
-        debug << "BallDetector::detectBall() - number of vertical ball segments: " << v_segments.size() << endl;
-        debug << "BallDetector::detectBall() - number of horizontal ball segments: " << h_segments.size() << endl;
+        debug << "BallDetector::detectBall() - number of vertical ball segments: " << v_segments.size() << std::endl;
+        debug << "BallDetector::detectBall() - number of horizontal ball segments: " << h_segments.size() << std::endl;
     #endif
 
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
 
     // Throw out points above the horizon
-    vector<Point>::iterator it;
+    std::vector<Point>::iterator it;
     it = edges.begin();
     while (it < edges.end()) {
         if(green_horizon.isBelowHorizon(*it)) {
@@ -42,7 +42,7 @@ vector<Ball> BallDetector::run()
     }
 
     #if VISION_BALL_VERBOSITY > 1
-    debug << "BallDetector::detectBall() - " << edges.size() << " ball segments above green horizon." << endl;
+    debug << "BallDetector::detectBall() - " << edges.size() << " ball segments above green horizon." << std::endl;
     #endif
 
     if (edges.size() > 0) {
@@ -66,7 +66,7 @@ vector<Ball> BallDetector::run()
         x_dev /= edges.size();
         y_dev /= edges.size();
 
-        //cout << edges.size() << endl;
+        //std::cout << edges.size() << std::endl;
 
 
         // Statistical throw-out
@@ -161,7 +161,7 @@ vector<Ball> BallDetector::run()
 //        if (false) {
 //            CircleFitting fitter = CircleFitting();
             
-//            //make a vector of edge points
+//            //make a std::vector of edge points
 //            std::vector< Vector2<int> > edge_points;
 //            Vector2<int> pt_top,pt_bottom,pt_left,pt_right;
 //            pt_left.y = pt_right.y = y_pos;
@@ -227,10 +227,10 @@ vector<Ball> BallDetector::run()
         }
         else if (left_edge == true && right_edge == true) {
             if (top_edge == true && bottom_edge == false) {
-                center = Point((right+left)/2, min((top+(top+right-left))/2, img.getHeight()-1));
+                center = Point((right+left)/2, std::min((top+(top+right-left))/2, img.getHeight()-1));
             }
             else if (top_edge == false && bottom_edge == true) {
-                center = Point((right+left)/2, max((bottom+(bottom-right+left))/2, 0));
+                center = Point((right+left)/2, std::max((bottom+(bottom-right+left))/2, 0));
             }
             else {
                 center = Point((right+left)/2,(top+bottom)/2);
@@ -238,10 +238,10 @@ vector<Ball> BallDetector::run()
         }
         else if (top_edge == true && bottom_edge == true) {
             if (left_edge == true && right_edge == false) {
-                center = Point(min((left+(left+bottom-top))/2, img.getWidth()-1),(top+bottom)/2);
+                center = Point(std::min((left+(left+bottom-top))/2, img.getWidth()-1),(top+bottom)/2);
             }
             else if (left_edge == false && right_edge == true) {
-                center = Point(max((right+(right-bottom+top))/2, 0),(top+bottom)/2);
+                center = Point(std::max((right+(right-bottom+top))/2, 0),(top+bottom)/2);
             }
             else {
                 center = Point((right+left)/2,(top+bottom)/2);
@@ -264,7 +264,7 @@ vector<Ball> BallDetector::run()
             int box_top = std::max(center.y - min, 0.0);
             int box_bottom = std::min(center.y + min, img.getHeight()-1.0);
 
-            //cout << box_left << ", " << box_right << ", " << box_top << ", " << box_bottom << endl;
+            //std::cout << box_left << ", " << box_right << ", " << box_top << ", " << box_bottom << std::endl;
 
             for (int i = box_left; i < box_right; i++) {
                 for (int j = box_top; j < box_bottom; j++) {
@@ -272,21 +272,21 @@ vector<Ball> BallDetector::run()
                         count++;
                 }
             }
-            //cout << "PERCENT ORANGE: " << float(count)/((min*2)*(min*2)) << endl;
+            //std::cout << "PERCENT ORANGE: " << float(count)/((min*2)*(min*2)) << std::endl;
 
             if (count/((min*2.0)*(min*2.0)) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
-                balls.push_back(Ball(center, max((right-left), (bottom-top))));
+                balls.push_back(Ball(center, std::max((right-left), (bottom-top))));
             }
             else {
-                //cout << "BALL THROWN OUT ON RATIO" << endl;
+                //std::cout << "BALL THROWN OUT ON RATIO" << std::endl;
                 #if VISION_BALL_VERBOSITY > 1
-                    debug << "BallDetector::detectBall - ball thrown out on percentage contained orange" << endl;
+                    debug << "BallDetector::detectBall - ball thrown out on percentage contained orange" << std::endl;
                 #endif
             }
         }
         else {
             #if VISION_BALL_VERBOSITY > 1
-                debug << "BallDetector::detectBall - (1,1) ball thrown out" << endl;
+                debug << "BallDetector::detectBall - (1,1) ball thrown out" << std::endl;
             #endif
         }
     }
@@ -294,11 +294,11 @@ vector<Ball> BallDetector::run()
     return balls;
 }
 
-void BallDetector::appendEdgesFromSegments(const vector<ColourSegment> &segments, vector< Point > &pointlist)
+void BallDetector::appendEdgesFromSegments(const std::vector<ColourSegment> &segments, std::vector< Point > &pointList)
 {
-    vector<ColourSegment>::const_iterator it;
+    std::vector<ColourSegment>::const_iterator it;
     for(it = segments.begin(); it < segments.end(); it++) {
-        pointlist.push_back(it->getStart());
-        pointlist.push_back(it->getEnd());
+        pointList.push_back(it->getStart());
+        pointList.push_back(it->getEnd());
     }
 }

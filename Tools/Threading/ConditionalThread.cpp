@@ -26,29 +26,29 @@
     #include "NUPlatform/NUPlatform.h"
 #endif
 
-using namespace std;
+
 
 /*! @brief Creates a thread
     @param name the name of the thread (used entirely for debug purposes)
     @param priority the priority of the thread. If non-zero the thread will be a bona fide real-time thread.
  */
-ConditionalThread::ConditionalThread(string name, unsigned char priority) : Thread(name, priority)
+ConditionalThread::ConditionalThread(std::string name, unsigned char priority) : Thread(name, priority)
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "ConditionalThread::ConditionalThread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << endl;
+        debug << "ConditionalThread::ConditionalThread(" << m_name << ", " << static_cast<int>(m_priority) << ")" << std::endl;
     #endif
     int err;
     err = pthread_mutex_init(&m_condition_mutex, NULL);
     if (err != 0)
-        errorlog << "ConditionalThread::ConditionalThread(" << m_name << ") Failed to create m_condition_mutex." << endl;
+        errorlog << "ConditionalThread::ConditionalThread(" << m_name << ") Failed to create m_condition_mutex." << std::endl;
     
     err = pthread_cond_init(&m_condition, NULL);
     if (err != 0)
-        errorlog << "ConditionalThread::ConditionalThread(" << m_name << ") Failed to create m_condition." << endl;
+        errorlog << "ConditionalThread::ConditionalThread(" << m_name << ") Failed to create m_condition." << std::endl;
     
     err = pthread_mutex_init(&m_running_mutex, NULL);
     if (err != 0)
-        errorlog << "ConditionalThread::ConditionalThread(" << m_name << ") Failed to create m_running_mutex." << endl;
+        errorlog << "ConditionalThread::ConditionalThread(" << m_name << ") Failed to create m_running_mutex." << std::endl;
     pthread_mutex_lock(&m_running_mutex);
 }
 
@@ -57,7 +57,7 @@ ConditionalThread::ConditionalThread(string name, unsigned char priority) : Thre
 ConditionalThread::~ConditionalThread()
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "ConditionalThread::~ConditionalThread() " << m_name << endl;
+        debug << "ConditionalThread::~ConditionalThread() " << m_name << std::endl;
     #endif
     stop();
     pthread_cond_destroy(&m_condition);
@@ -71,7 +71,7 @@ ConditionalThread::~ConditionalThread()
 void ConditionalThread::signal(bool blocking)
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread::signal() " << m_name << " at " << Platform->getTime() << endl;
+        debug << "ConditionalThread::signal() " << m_name << " at " << Platform->getTime() << std::endl;
     #endif
     if (blocking)
     	pthread_mutex_lock(&m_running_mutex);
@@ -81,7 +81,7 @@ void ConditionalThread::signal(bool blocking)
     	if (err !=0)
     	{
 			#if DEBUG_THREADING_VERBOSITY > 2
-				debug << "ConditionalThread::signal() " << m_name << " is not ready!" << endl;
+				debug << "ConditionalThread::signal() " << m_name << " is not ready!" << std::endl;
 			#endif
 			return;
     	}
@@ -107,7 +107,7 @@ void ConditionalThread::signal()
 void ConditionalThread::wait()
 {
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread: " << m_name << " is waiting at " << Platform->getTime() << endl;
+        debug << "ConditionalThread: " << m_name << " is waiting at " << Platform->getTime() << std::endl;
     #endif
     pthread_mutex_lock(&m_condition_mutex);
 	pthread_mutex_unlock(&m_running_mutex);
@@ -115,6 +115,6 @@ void ConditionalThread::wait()
     pthread_mutex_lock(&m_running_mutex);
     pthread_mutex_unlock(&m_condition_mutex);
     #if DEBUG_THREADING_VERBOSITY > 2
-        debug << "ConditionalThread: " << m_name << " finished waiting at " << Platform->getTime() << endl;
+        debug << "ConditionalThread: " << m_name << " finished waiting at " << Platform->getTime() << std::endl;
     #endif
 }

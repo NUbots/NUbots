@@ -25,7 +25,7 @@ using namespace boost::accumulators;
 void GreenHorizonCH::calculateHorizon()
 {
     #if VISION_HORIZON_VERBOSITY > 1
-        debug << "GreenHorizonCH::calculateHorizon() - Begin" << endl;
+        debug << "GreenHorizonCH::calculateHorizon() - Begin" << std::endl;
     #endif
     // get blackboard instance
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
@@ -34,21 +34,21 @@ void GreenHorizonCH::calculateHorizon()
         height = img.getHeight();
 
     //makes this fail-safe in the event of improper parameters
-    const int SPACING = max(VisionConstants::GREEN_HORIZON_SCAN_SPACING, 1U);
+    const int SPACING = std::max(VisionConstants::GREEN_HORIZON_SCAN_SPACING, 1U);
     
     // variable declarations    
-    vector< Vector2<double> > horizon_points,
+    std::vector< Vector2<double> > horizon_points,
                               thrown_points;
 
     const Horizon& kin_hor = vbb->getKinematicsHorizon();
 #if VISION_HORIZON_VERBOSITY > 2
-    debug<<"GreenHorizonCH::calculateHorizon(): kinematics horizon line eq: "<<kin_hor.getA()<<"x + "<< kin_hor.getB()<< "y = "<<kin_hor.getC()<<endl;
+    debug<<"GreenHorizonCH::calculateHorizon(): kinematics horizon line eq: "<<kin_hor.getA()<<"x + "<< kin_hor.getB()<< "y = "<<kin_hor.getC()<<std::endl;
 #endif
     int kin_hor_y;
 
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
-    debug << "GreenHorizonCH::calculateHorizon() - (if seg fault occurs camera or camera cable may be faulty)" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Starting" << std::endl;
+    debug << "GreenHorizonCH::calculateHorizon() - (if seg fault occurs camera or camera cable may be faulty)" << std::endl;
 #endif
 
     for (int x = 0; x < width; x+=SPACING) {
@@ -59,8 +59,8 @@ void GreenHorizonCH::calculateHorizon()
 
         kin_hor_y = kin_hor.findYFromX(x);
         //clamp green horizon values
-        kin_hor_y = max(0, kin_hor_y);
-        kin_hor_y = min(height-1, kin_hor_y);
+        kin_hor_y = std::max(0, kin_hor_y);
+        kin_hor_y = std::min(height-1, kin_hor_y);
 
 
         for (int y = kin_hor_y; y < height; y++) {
@@ -89,7 +89,7 @@ void GreenHorizonCH::calculateHorizon()
     }
 
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << std::endl;
 #endif
 
     // provide blackboard the original set of scan points
@@ -108,10 +108,10 @@ void GreenHorizonCH::calculateHorizon()
     std_dev_y = sqrt(variance(acc));
     
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter prep done. Mean: " << mean_y << " Standard Dev: " << std_dev_y << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter prep done. Mean: " << mean_y << " Standard Dev: " << std_dev_y << std::endl;
 #endif
 
-    vector< Vector2<double> >::iterator p = horizon_points.begin();
+    std::vector< Vector2<double> >::iterator p = horizon_points.begin();
     while(p < horizon_points.end()) {
         //changing - I don't see any reason to remove pts that are too low if we are
         //           doing a convex hull anyway.
@@ -129,13 +129,13 @@ void GreenHorizonCH::calculateHorizon()
     DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_THROWN, thrown_points);
 
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << std::endl;
 #endif
 
     horizon_points = upperConvexHull(horizon_points);
 
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << std::endl;
 #endif
 
     // set hull points
@@ -149,13 +149,13 @@ bool GreenHorizonCH::isPixelGreen(const NUImage& img, int x, int y)
     return getColourFromIndex(LUT.classifyPixel(img(x,y))) == green;
 }
 
-// Returns a list of points on the upper convex hull in clockwise order.
+// Returns a std::list of points on the upper convex hull in clockwise order.
 // Note: Assumes the points are sorted in the x direction.
-vector< Vector2<double> > GreenHorizonCH::upperConvexHull(const vector< Vector2<double> >& P)
+std::vector< Vector2<double> > GreenHorizonCH::upperConvexHull(const std::vector< Vector2<double> >& P)
 {
         int n = P.size(),
             k = 0;
-        vector< Vector2<double> > H(n);
+        std::vector< Vector2<double> > H(n);
 
         // Build upper hull
         for (int i = 0; i < n; i++) {

@@ -62,7 +62,7 @@ public:
         NUMBER_OF_IDS           = 18
     };
 
-    static string getIDName(DEBUG_ID id);
+    static std::string getIDName(DEBUG_ID id);
 
     static DataWrapper* getInstance();
 
@@ -83,27 +83,27 @@ public:
     const LookUpTable& getLUT() const;
         
     //! PUBLISH METHODS
-    void publish(const vector<const VisionFieldObject*> &visual_objects);
+    void publish(const std::vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
     void debugRefresh();
-    bool debugPublish(const vector<Ball>& data);
-//    bool debugPublish(const vector<Beacon>& data);
-    bool debugPublish(const vector<Goal>& data);
-    bool debugPublish(const vector<Obstacle>& data);
-    bool debugPublish(const vector<FieldLine>& data);
-    bool debugPublish(DEBUG_ID id, const vector<Point>& data_points);
+    bool debugPublish(const std::vector<Ball>& data);
+//    bool debugPublish(const std::vector<Beacon>& data);
+    bool debugPublish(const std::vector<Goal>& data);
+    bool debugPublish(const std::vector<Obstacle>& data);
+    bool debugPublish(const std::vector<FieldLine>& data);
+    bool debugPublish(DEBUG_ID id, const std::vector<Point>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id);
     bool debugPublish(DEBUG_ID id, const NUImage *const img);
-    bool debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data);
+    bool debugPublish(DEBUG_ID id, const std::vector<LSFittedLine> &data);
     
     
 private:
     DataWrapper();
     ~DataWrapper();
     bool updateFrame();
-    bool loadLUTFromFile(const string& fileName);
+    bool loadLUTFromFile(const std::string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
     
@@ -124,9 +124,9 @@ private:
     NUImage m_current_image;
     NUSensorsData m_sensor_data;
 
-    string configname;
+    std::string configname;
 
-    string LUTname;
+    std::string LUTname;
     LookUpTable LUT;
 
     Horizon kinematics_horizon;
@@ -134,19 +134,19 @@ private:
     PCCamera* m_camera;          //! Used when streaming from camera
 
     //! Used when reading from strm
-    string streamname;
+    std::string streamname;
     ifstream imagestrm;
     bool using_sensors;
-    string sensorstreamname;
+    std::string sensorstreamname;
     ifstream sensorstrm;
 
     //! Used for debugging
     int debug_window_num;
-    map<DEBUG_ID, vector<pair<string, Mat>* > > debug_map;
-    pair<string, Mat>* debug_windows;
+    map<DEBUG_ID, std::vector<pair<std::string, Mat>* > > debug_map;
+    pair<std::string, Mat>* debug_windows;
 
     //! Used for displaying results
-    string results_window_name;
+    std::string results_window_name;
     Mat results_img;
     
     //! Frame info

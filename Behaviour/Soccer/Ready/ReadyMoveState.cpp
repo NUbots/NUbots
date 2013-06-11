@@ -40,7 +40,7 @@ ReadyMoveState::~ReadyMoveState()
 void ReadyMoveState::doStateCommons()
 {   // do behaviour that is common to all ready move states
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "ReadyMoveState" << endl;
+        debug << "ReadyMoveState" << std::endl;
     #endif
 }
 

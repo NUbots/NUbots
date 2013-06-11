@@ -40,7 +40,7 @@
 QSCatch::QSCatch(const NUData::id_t& joint, const QSBallisticController* parent)
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 4
-        debug << "QSCatch::QSCatch" << endl;
+        debug << "QSCatch::QSCatch" << std::endl;
     #endif
     m_joint = joint;
     m_parent = parent;
@@ -61,7 +61,7 @@ QSCatch::~QSCatch()
 void QSCatch::doState()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "QSCatch::doState" << endl;
+        debug << "QSCatch::doState" << std::endl;
     #endif
     if (not m_catch_issued)
     {
@@ -84,8 +84,8 @@ void QSCatch::doState()
         float total_duration = normalDistribution(m_catch_duration, m_catch_duration_variance);
         float tone_duration = normalDistribution(m_tonic_duration, (m_tonic_duration/m_catch_duration)*m_catch_duration_variance);
         
-        vector<double> times;
-        vector<float> positions, velocities;
+        std::vector<double> times;
+        std::vector<float> positions, velocities;
         MotionCurves::calculate(m_actions->CurrentTime, m_actions->CurrentTime + (total_duration - tone_duration), currenttarget, target, 1, 13, times, positions, velocities);
         m_actions->add(m_joint, times, positions, 100);
         m_catch_issued = true;
@@ -96,7 +96,7 @@ void QSCatch::doState()
 BehaviourState* QSCatch::nextState()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "QSCatch::nextState" << endl;
+        debug << "QSCatch::nextState" << std::endl;
     #endif
     if (m_catch_issued and m_actions->CurrentTime > m_finish_time)
     {

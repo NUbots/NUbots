@@ -30,25 +30,25 @@
 class Object;
 
 #include <vector>
-using namespace std;
+
 
 class HeadTrackJob : public MotionJob
 {
 public:
     HeadTrackJob(const Object& object, float centreelevation = 0, float centrebearing = 0);
     HeadTrackJob(float elevation, float bearing, float centreelevation = 0, float centrebearing = 0);
-    HeadTrackJob(istream& input);
+    HeadTrackJob(std::istream& input);
     ~HeadTrackJob();
     
     void getData(float& elevation, float& bearing, float& centreelevation, float& centrebearing);
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const HeadTrackJob& job);
-    friend ostream& operator<<(ostream& output, const HeadTrackJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadTrackJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const HeadTrackJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
     float m_elevation;
     float m_bearing;

@@ -62,10 +62,10 @@ void WalkOptimiser::tick(float performance, WalkParameters& nextparameters)
         m_best_parameters = m_current_parameters;
         m_best_performance = performance;
         m_count_since_last_improvement = 0;
-        cout << "Improvement. m_alpha: " << m_alpha << " with: "; 
-        m_best_parameters.summaryTo(cout);
-        cout << "Delta:";
-        m_best_delta_parameters.summaryTo(cout);
+        std::cout << "Improvement. m_alpha: " << m_alpha << " with: "; 
+        m_best_parameters.summaryTo(std::cout);
+        std::cout << "Delta:";
+        m_best_delta_parameters.summaryTo(std::cout);
     }
     if (m_minimise == true && performance < m_real_best_performance || m_minimise == false && performance > m_real_best_performance)
     {   // check if it is the best set of parameters I have ever seen!
@@ -109,27 +109,27 @@ void WalkOptimiser::mutateParameters(WalkParameters& base_parameters, WalkParame
 {
     // generate phi to mutate the BestParameters
     float sigma = 0.1*exp(m_count_since_last_improvement/m_reset_limit - 1);
-    vector<float> phi(base_parameters.size(), 0);
+    std::vector<float> phi(base_parameters.size(), 0);
     for (int i=0; i<base_parameters.size(); i++)
         phi[i] = normalDistribution(1, sigma);
     
     // mutate the BestParameters
-    vector<float> mutant(base_parameters.size(), 0);
+    std::vector<float> mutant(base_parameters.size(), 0);
     for (int i=0; i<base_parameters.size(); i++)
         mutant[i] = base_parameters[i] * phi[i];        // TODO: Add in C
 
     // calculate the difference between the mutated state and the best one
-    vector<float> deltamutant(base_parameters.size(), 0);
+    std::vector<float> deltamutant(base_parameters.size(), 0);
     for (int i=0; i<base_parameters.size(); i++)
         deltamutant[i] = base_parameters[i] - mutant[i];
     
     // calculate the desired change in parameters
-    vector<float> deltaparameters(base_parameters.size(), 0);
+    std::vector<float> deltaparameters(base_parameters.size(), 0);
     for (int i=0; i<base_parameters.size(); i++)
         deltaparameters[i] = m_alpha*basedelta_parameters[i] + (1-m_alpha)*deltamutant[i];
     
     // now calculate the new parameters themselves
-    vector<float> newparameters(base_parameters.size(), 0);
+    std::vector<float> newparameters(base_parameters.size(), 0);
     for (int i=0; i<base_parameters.size(); i++)
         newparameters[i] = base_parameters[i] + deltaparameters[i];
     
@@ -171,7 +171,7 @@ float WalkOptimiser::normalDistribution(float mean, float sigma)
 /*! @brief Prints a human readable summary of the optimiser's state.
     The summary includes the current best performance, and the best set of walk parameters
  */
-void WalkOptimiser::summaryTo(ostream& output)
+void WalkOptimiser::summaryTo(std::ostream& output)
 {
     output << "WalkOptimiser Performance: " << m_real_best_performance << " with ";
     m_real_best_parameters.summaryTo(output);
@@ -179,18 +179,18 @@ void WalkOptimiser::summaryTo(ostream& output)
 
 /*! @brief Prints a csv of iteration count and best performance
  */
-void WalkOptimiser::csvTo(ostream& output)
+void WalkOptimiser::csvTo(std::ostream& output)
 {
     output << m_iteration_count << ", " << m_current_performance << ", ";
     m_previous_parameters.csvTo(output);        // there is a bit of a miss match depending on when this function is called.
                                                 // In general, we print after we tick the optimiser, so we really want to print the
                                                 // previous parameters because the current ones are still under test!
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief Stores the entire contents of the WalkOptimiser in the stream
  */
-ostream& operator<< (ostream& output, const WalkOptimiser& p)
+std::ostream& operator<< (std::ostream& output, const WalkOptimiser& p)
 {
     output << p.m_best_parameters;
     output << p.m_best_delta_parameters;   
@@ -211,7 +211,7 @@ ostream& operator<< (ostream& output, const WalkOptimiser& p)
 
 /*! @brief Retrieves a stored WalkOptimiser from a stream
  */
-istream& operator>> (istream& input, WalkOptimiser& p)
+std::istream& operator>> (std::istream& input, WalkOptimiser& p)
 {
     input >> p.m_best_parameters;
     input >> p.m_best_delta_parameters;

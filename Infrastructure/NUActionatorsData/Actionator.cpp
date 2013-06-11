@@ -28,7 +28,7 @@
 /*! @brief Constructor for an Actionator with known name and type
     @param actionatorname the name of the actionator
  */
-Actionator::Actionator(string actionatorname)
+Actionator::Actionator(std::string actionatorname)
 {
     Name = actionatorname;
 
@@ -37,7 +37,7 @@ Actionator::Actionator(string actionatorname)
     int err;
     err = pthread_mutex_init(&m_lock, NULL);
     if (err != 0)
-        errorlog << "Actionator::Actionator(" << Name << ") Failed to create m_lock." << endl;
+        errorlog << "Actionator::Actionator(" << Name << ") Failed to create m_lock." << std::endl;
 }
 
 /*! @brief Destroys the Actionator */
@@ -71,7 +71,7 @@ bool Actionator::get(double& time, float& data)
     @param data will be updated 
     @return true if time,data were successfully updated, false otherwise
  */
-bool Actionator::get(double& time, vector<float>& data)
+bool Actionator::get(double& time, std::vector<float>& data)
 {
     if (not empty())
     {
@@ -91,7 +91,7 @@ bool Actionator::get(double& time, vector<float>& data)
     @param data will be updated 
     @return true if time,data were successfully updated, false otherwise
  */
-bool Actionator::get(double& time, vector<vector<float> >& data)
+bool Actionator::get(double& time, std::vector<std::vector<float> >& data)
 {
     if (not empty())
     {
@@ -111,7 +111,7 @@ bool Actionator::get(double& time, vector<vector<float> >& data)
     @param data will be updated 
     @return true if time,data were successfully updated, false otherwise
  */
-bool Actionator::get(double& time, vector<vector<vector<float> > >& data)
+bool Actionator::get(double& time, std::vector<std::vector<std::vector<float> > >& data)
 {
     if (not empty())
     {
@@ -131,7 +131,7 @@ bool Actionator::get(double& time, vector<vector<vector<float> > >& data)
     @param data will be updated 
     @return true if time,data were successfully updated, false otherwise
  */
-bool Actionator::get(double& time, string& data)
+bool Actionator::get(double& time, std::string& data)
 {
     if (not empty())
     {
@@ -146,12 +146,12 @@ bool Actionator::get(double& time, string& data)
     return false;
 }
 
-/*! @brief Attempts to get the next vector of string data for this actionator. If there is none, return false.
+/*! @brief Attempts to get the next std::vector of std::string data for this actionator. If there is none, return false.
     @param time will be updated with the time associated with the data
     @param data will be updated 
     @return true if time,data were successfully updated, false otherwise
  */
-bool Actionator::get(double& time, vector<string>& data)
+bool Actionator::get(double& time, std::vector<std::string>& data)
 {
     if (not empty())
     {
@@ -179,9 +179,9 @@ void Actionator::add(const double& time, const float& data)
 
 /*! @brief Add an actionator point to the actionator
     @param time the time the data will be applied
-    @param data the data associated with the point (vector of float)
+    @param data the data associated with the point (std::vector of float)
  */
-void Actionator::add(const double& time, const vector<float>& data)
+void Actionator::add(const double& time, const std::vector<float>& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -191,7 +191,7 @@ void Actionator::add(const double& time, const vector<float>& data)
     @param time the time the data will be applied
     @param data the data associated with the point (matrix of float)
  */
-void Actionator::add(const double& time, const vector<vector<float> >& data)
+void Actionator::add(const double& time, const std::vector<std::vector<float> >& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -201,7 +201,7 @@ void Actionator::add(const double& time, const vector<vector<float> >& data)
     @param time the time the data will be applied
     @param data the data associated with the point (3d matrix of float)
  */
-void Actionator::add(const double& time, const vector<vector<vector<float> > >& data)
+void Actionator::add(const double& time, const std::vector<std::vector<std::vector<float> > >& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -211,7 +211,7 @@ void Actionator::add(const double& time, const vector<vector<vector<float> > >& 
     @param time the time the data will be applied
     @param data the data associated with the point
  */
-void Actionator::add(const double& time, const string& data)
+void Actionator::add(const double& time, const std::string& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -221,7 +221,7 @@ void Actionator::add(const double& time, const string& data)
     @param time the time the data will be applied
     @param data the data associated with the point
  */
-void Actionator::add(const double& time, const vector<string>& data)
+void Actionator::add(const double& time, const std::vector<std::string>& data)
 {
     ActionatorPoint p(time, data);
     addToBuffer(p);
@@ -250,14 +250,14 @@ void Actionator::preProcess()
         // I need to keep the actionator points sorted based on their time.
         //      (a) I need to sort the buffer before adding the points
         //      (b) I need to search m_points for the correct place to add new point(s)
-        sort(m_preprocess_buffer.begin(), m_preprocess_buffer.end());
+        std::sort(m_preprocess_buffer.begin(), m_preprocess_buffer.end());
         
         // because I did (a) and I choose to clear all existing points later in time
         // I can simply find the location where the first point should be inserted, and then insert ALL new points after that
         if (not m_points.empty())
         {
-            deque<ActionatorPoint>::iterator insertposition;
-            insertposition = lower_bound(m_points.begin(), m_points.end(), m_preprocess_buffer.front());
+            std::deque<ActionatorPoint>::iterator insertposition;
+            insertposition = std::lower_bound(m_points.begin(), m_points.end(), m_preprocess_buffer.front());
             m_points.erase(insertposition, m_points.end());     // Clear all points after the new one 
         }
         m_points.insert(m_points.end(), m_preprocess_buffer.begin(), m_preprocess_buffer.end());
@@ -281,32 +281,32 @@ void Actionator::postProcess(double currenttime)
  The idea is to use this function when writing to a debug log. I guarentee that the 
  output will be human readable.
  
- @param output the ostream in which to put the string
+ @param output the std::ostream in which to put the std::string
  */
-void Actionator::summaryTo(ostream& output)
+void Actionator::summaryTo(std::ostream& output)
 {
     if (not empty())
     {
         output << Name << " ";
         for (unsigned int i=0; i<m_points.size(); i++)
             output << m_points[i] << " ";
-        output << endl;
+        output << std::endl;
     }
 }
 
-void Actionator::csvTo(ostream& output)
+void Actionator::csvTo(std::ostream& output)
 {
 }
 
 
-ostream& operator<< (ostream& output, const Actionator& p_actionator)
+std::ostream& operator<< (std::ostream& output, const Actionator& p_actionator)
 {
     //! @todo TODO: implement this function
     return output;
 }
 
 
-istream& operator>> (istream& input, Actionator& p_actionator)
+std::istream& operator>> (std::istream& input, Actionator& p_actionator)
 {
     //! @todo TODO: implement this function
     return input;

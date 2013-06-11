@@ -23,9 +23,9 @@ COLOUR_CLASS ColourTransitionRule::getColourClass() const
 
 /*! @brief Stream insertion operator for a single ColourTransitionRule
  */
-ostream& operator<< (ostream& output, const ColourTransitionRule& c)
+std::ostream& operator<< (std::ostream& output, const ColourTransitionRule& c)
 {
-    vector<Colour>::const_iterator it;
+    std::vector<Colour>::const_iterator it;
 
     output << getColourClassName(c.m_colour_class) << ":\n";
 
@@ -48,7 +48,7 @@ ostream& operator<< (ostream& output, const ColourTransitionRule& c)
     for(it = c.m_after.begin(); it != c.m_after.end(); it++) {
         output << getColourName(*it) << ", ";
     }
-    output << "]\t// (min, max) [colourlist]" << endl;
+    output << "]\t// (min, max) [colourlist]" << std::endl;
 
     return output;
 }
@@ -56,7 +56,7 @@ ostream& operator<< (ostream& output, const ColourTransitionRule& c)
 /*! @brief Stream insertion operator for a vector of ColourTransitionRule.
  *  @relates ColourRule
  */
-ostream& operator<< (ostream& output, const vector<ColourTransitionRule>& v)
+std::ostream& operator<< (std::ostream& output, const std::vector<ColourTransitionRule>& v)
 {
     for (size_t i=0; i<v.size(); i++)
         output << v.at(i);
@@ -66,11 +66,11 @@ ostream& operator<< (ostream& output, const vector<ColourTransitionRule>& v)
 /*! @brief Stream extraction operator for a ColourTransitionRule.
  *  @relates ColourRule
  */
-istream& operator>> (istream& input, ColourTransitionRule& c)
+std::istream& operator>> (std::istream& input, ColourTransitionRule& c)
 {
-    stringstream colour_stream;
-    string next, colour_str;
-    string id_str;
+    std::stringstream colour_stream;
+    std::string next, colour_str;
+    std::string id_str;
 
     // read in the rule name
     getline(input, id_str, ':');
@@ -158,7 +158,7 @@ istream& operator>> (istream& input, ColourTransitionRule& c)
 /*! @brief Stream extraction operator for a vector of ColourTransitionRule.
  *  @relates ColourTransitionRule
  */
-istream& operator>> (istream& input, vector<ColourTransitionRule>& v)
+std::istream& operator>> (std::istream& input, std::vector<ColourTransitionRule>& v)
 {
     ColourTransitionRule temp;
     v.clear();
@@ -169,7 +169,7 @@ istream& operator>> (istream& input, vector<ColourTransitionRule>& v)
             v.push_back(temp);
         }
         else {
-            errorlog << "ColourTransitionRule istream operator: UNKOWN_COLOUR match ignored." << endl;
+            errorlog << "ColourTransitionRule istream operator: UNKOWN_COLOUR match ignored." << std::endl;
         }
     }
 
@@ -187,7 +187,7 @@ bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const Colour
     }
 
     bool valid;
-    vector<Colour>::const_iterator it;
+    std::vector<Colour>::const_iterator it;
 
     if(!m_middle.empty()) {
         if(middle.getColour() == invalid)

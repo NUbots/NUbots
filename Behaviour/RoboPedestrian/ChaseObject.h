@@ -64,8 +64,8 @@ public:
             m_chasing_time = 0;
         }
         
-        vector<float> speed(3,0);
-        vector<float> result(3,0);
+        std::vector<float> speed(3,0);
+        std::vector<float> result(3,0);
         speed[0] = 1;
         speed[1] = m_target.measuredBearing();
         speed[2] = m_target.measuredBearing()/2;

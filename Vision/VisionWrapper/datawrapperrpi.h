@@ -19,7 +19,7 @@
 #include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTypes/VisionFieldObjects/fieldline.h"
 
-using namespace std;
+
 using namespace vision;
 using cv::Mat;
 using cv::VideoCapture;
@@ -40,7 +40,7 @@ public:
         GPIO_LINE  = 17
     };
 
-    static string getIDName(DEBUG_ID id);
+    static std::string getIDName(DEBUG_ID id);
 
     static DataWrapper* getInstance(bool disp_on=false, bool cam=true);
 
@@ -62,16 +62,16 @@ public:
     const LookUpTable& getLUT() const;
         
     //! PUBLISH METHODS
-    void publish(const vector<const VisionFieldObject*> &visual_objects);
+    void publish(const std::vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
     void debugRefresh();
-    bool debugPublish(const vector<Ball>& data);
-    bool debugPublish(const vector<Beacon>& data);
-    bool debugPublish(const vector<Goal>& data);
-    bool debugPublish(const vector<Obstacle>& data);
-    bool debugPublish(const vector<FieldLine>& data);
-    bool debugPublish(DEBUG_ID id, const vector<Point>& data_points);
+    bool debugPublish(const std::vector<Ball>& data);
+    bool debugPublish(const std::vector<Beacon>& data);
+    bool debugPublish(const std::vector<Goal>& data);
+    bool debugPublish(const std::vector<Obstacle>& data);
+    bool debugPublish(const std::vector<FieldLine>& data);
+    bool debugPublish(DEBUG_ID id, const std::vector<Point>& data_points);
     bool debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     bool debugPublish(DEBUG_ID id);
     bool debugPublish(DEBUG_ID id, const NUImage *const img);
@@ -86,9 +86,9 @@ private:private:
 
     DataWrapper(bool disp_on=false, bool cam=true);
     ~DataWrapper();
-    //void startImageFileGroup(string filename);
+    //void startImageFileGroup(std::string filename);
     bool updateFrame();
-    bool loadLUTFromFile(const string& fileName);
+    bool loadLUTFromFile(const std::string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
 
@@ -98,7 +98,7 @@ private:
     bool m_writing;
     ofstream out_stream;
 
-    string streamname;
+    std::string streamname;
     ifstream imagestrm;
 
     static DataWrapper* instance;
@@ -107,9 +107,9 @@ private:
 
     bool m_display_on;
 
-    string configname;
+    std::string configname;
 
-    string LUTname;
+    std::string LUTname;
     LookUpTable LUT;
 
     Horizon kinematics_horizon;
@@ -117,7 +117,7 @@ private:
     PCCamera* m_camera;          //! Used when streaming from camera
 
     //! Used for displaying results
-    string results_window_name;
+    std::string results_window_name;
     Mat results_img;
     
     //! Frame info

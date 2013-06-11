@@ -81,10 +81,10 @@ bool FitEllipseThroughCircle::Fit_Ellipse_Through_Circle(std::vector<LinePoint*>
     #endif
 
     #if TARGET_OS_IS_WINDOWS
-    qDebug() << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Elevation: " << relElevation <<" Radius: "<< r << "."<< result << endl;
+    qDebug() << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Elevation: " << relElevation <<" Radius: "<< r << "."<< result << std::endl;
     #endif
     #if DEBUG_VISION_VERBOSITY > 6
-        debug << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Radius: " << r << "."<<endl;
+        debug << "\t\tELLIPISEthroughCircle::Calculated Centre Circle: " << relDistance << "cm , "<< relBearing <<" rad. Radius: " << r << "."<<std::endl;
     #endif
     return result;
 }
@@ -100,7 +100,7 @@ bool FitEllipseThroughCircle::isThisAGoodFit()
 
         sd = fabs(r-ActualRadius);
         #if TARGET_OS_IS_WINDOWS
-        qDebug() << "\t\tELLIPISEthroughCircle::Centre Circle: SD :" << sd << "cm." <<endl;
+        qDebug() << "\t\tELLIPISEthroughCircle::Centre Circle: SD :" << sd << "cm." <<std::endl;
         #endif
         return true;
     }
@@ -120,7 +120,7 @@ Vector3<float> FitEllipseThroughCircle::DistanceToPoint(LinePoint* point, Vision
     float bearing = vision->CalculateBearing(point->x);
     float elevation = vision->CalculateElevation(point->y);
 
-    vector<float> ctgvector;
+    std::vector<float> ctgvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
     if(isOK == true)
     {
@@ -134,11 +134,11 @@ Vector3<float> FitEllipseThroughCircle::DistanceToPoint(LinePoint* point, Vision
 
 
         #if DEBUG_VISION_VERBOSITY > 6
-        debug << "\t\tELLIPISE::Calculated Distance to Point: " << relativePoint.x <<endl;
+        debug << "\t\tELLIPISE::Calculated Distance to Point: " << relativePoint.x <<std::endl;
         #endif
 
         //#if TARGET_OS_IS_WINDOWS
-        //qDebug() << "\t\t Point On Screen: " << point->x << point->y <<endl;
+        //qDebug() << "\t\t Point On Screen: " << point->x << point->y <<std::endl;
         //#endif
         //CalculateScreenPosition(relativePoint.x, relativePoint.y, vision);
     }

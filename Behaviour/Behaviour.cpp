@@ -58,7 +58,7 @@
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 Behaviour::Behaviour()
 {
@@ -96,7 +96,7 @@ Behaviour::~Behaviour()
         
     Calls the process function of the current behaviour provider and handles change of provider when there is a next one.
 
-    @param jobs the nubot job list
+    @param jobs the nubot job std::list
     @param data the nubot sensor data
     @param actions the nubot actionators data
     @param fieldobjects the nubot world model
@@ -106,12 +106,12 @@ Behaviour::~Behaviour()
 void Behaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "Behaviour::process()" << endl;
+        debug << "Behaviour::process()" << std::endl;
     #endif
     if (m_next_behaviour != NULL)
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-            debug << "Behaviour::process() is swaping the behaviour provider" << endl;
+            debug << "Behaviour::process() is swaping the behaviour provider" << std::endl;
         #endif
         delete m_behaviour;
         m_behaviour = m_next_behaviour;
@@ -136,15 +136,15 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
     name = simplifyName(name);
     if (name.compare("selectbehaviour") == 0)
         return new SelectBehaviourProvider(this);
-    else if (name.find("soccer") != string::npos)
+    else if (name.find("soccer") != std::string::npos)
         return new SoccerProvider(this);
     else if (name.compare("chaseball") == 0)
         return new ChaseBallProvider(this);
-    else if (name.compare("visioncalibration") == 0 or name.find("saveimage") != string::npos)
+    else if (name.compare("visioncalibration") == 0 or name.find("saveimage") != std::string::npos)
         return new VisionCalibrationProvider(this);
-    else if (name.find("walkoptimis") != string::npos)
+    else if (name.find("walkoptimis") != std::string::npos)
         return new WalkOptimisationProvider(this);
-    else if (name.find("kicker") != string::npos)
+    else if (name.find("kicker") != std::string::npos)
         return new KickerProvider(this);
     else if (name.compare("scriptedpose") == 0)
         return new ScriptedPoseProvider(this);
@@ -154,7 +154,7 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
         return new RoboPedestrianProvider(this);
 	else if (name.compare("cameracalibration") == 0)
         return new CameraCalibrationProvider(this);
-    else if (name.find("enviro") != string::npos)
+    else if (name.find("enviro") != std::string::npos)
         return new EnvironmentalEmotionsProvider(this);
     else
         return NULL;
@@ -163,16 +163,16 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
 
 /*! @brief Simplifies a name. The name is converted to lowercase, and spaces, underscores, forward slash, backward slash and dots are removed from the name.
     @param input the name to be simplified
-    @return the simplified string
+    @return the simplified std::string
  */
-string Behaviour::simplifyName(const string& input)
+std::string Behaviour::simplifyName(const std::string& input)
 {
-    string namebuffer, currentletter;
+    std::string namebuffer, currentletter;
     // compare each letter to a space and an underscore and a forward slash
     for (unsigned int j=0; j<input.size(); j++)
     {
         currentletter = input.substr(j, 1);
-        if (currentletter.compare(string(" ")) != 0 && currentletter.compare(string("_")) != 0 && currentletter.compare(string("/")) != 0 && currentletter.compare(string("\\")) != 0 && currentletter.compare(string(".")) != 0)
+        if (currentletter.compare(std::string(" ")) != 0 && currentletter.compare(std::string("_")) != 0 && currentletter.compare(std::string("/")) != 0 && currentletter.compare(std::string("\\")) != 0 && currentletter.compare(std::string(".")) != 0)
             namebuffer += tolower(currentletter[0]);            
     }
     return namebuffer;

@@ -281,7 +281,7 @@ void OfflineLocalisation::AddFrame(const NUSensorsData* sensorData, FieldObjects
     LocalisationPerformanceMeasure performance_measure;
 //    performance_measure.setProcessingTime(ms_elapsed / 1000.0f);
     performance_measure.setProcessingTime(elapsedTime);
-    vector<float> gps;
+    std::vector<float> gps;
     float compass;
     if(tempSensors2.getGps(gps) and tempSensors2.getCompass(compass))
     {
@@ -523,7 +523,7 @@ bool OfflineLocalisation::WriteXML(const std::string& xmlPath)
             tempTeamInfo = m_log_reader->GetTeamInfo();
             tempGameInfo = m_log_reader->GetGameInfo();
 
-            vector<float> gps;
+            std::vector<float> gps;
             float compass;
             Vector3<float> measure(0,0,0);
             Self gps_location;

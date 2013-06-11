@@ -27,7 +27,7 @@
     @param time the time in ms to perform the move
     @param position the head will move to this position
  */
-HeadJob::HeadJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_HEAD)
+HeadJob::HeadJob(double time, const std::vector<float>& position) : MotionJob(Job::MOTION_HEAD)
 {
     setPosition(time, position);
 }
@@ -38,7 +38,7 @@ HeadJob::HeadJob(double time, const vector<float>& position) : MotionJob(Job::MO
  
     Note that times and positions should have the same length, and that positions must be rectangular.
  */
-HeadJob::HeadJob(const vector<double>& times, const vector<vector<float> >& positions) : MotionJob(Job::MOTION_HEAD)
+HeadJob::HeadJob(const std::vector<double>& times, const std::vector<std::vector<float> >& positions) : MotionJob(Job::MOTION_HEAD)
 {
     setPositions(times, positions);
 }
@@ -47,7 +47,7 @@ HeadJob::HeadJob(const vector<double>& times, const vector<vector<float> >& posi
     @param time the time in ms to perform the save
     @param input the stream from which to read the job specific data
  */
-HeadJob::HeadJob(double time, istream& input) : MotionJob(Job::MOTION_HEAD)
+HeadJob::HeadJob(double time, std::istream& input) : MotionJob(Job::MOTION_HEAD)
 {
     m_job_time = time;
 
@@ -60,9 +60,9 @@ HeadJob::HeadJob(double time, istream& input) : MotionJob(Job::MOTION_HEAD)
     input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(uintBuffer));
     unsigned int times_size = uintBuffer;
     
-    // read in the head_position vector
-    m_times = vector<double>(times_size, 0);
-    m_head_positions = vector<vector<float> > (times_size, vector<float>(0,0));
+    // read in the head_position std::vector
+    m_times = std::vector<double>(times_size, 0);
+    m_head_positions = std::vector<std::vector<float> > (times_size, std::vector<float>(0,0));
     for (unsigned int i=0; i<times_size; i++)
     {
         input.read(reinterpret_cast<char*>(&doubleBuffer), sizeof(doubleBuffer));
@@ -91,11 +91,11 @@ HeadJob::~HeadJob()
     You should only need to use this function if you are recycling the one job 
     (ie. I provide this function if you are worried about creating a new job every time)
  */
-void HeadJob::setPosition(double time, const vector<float>& newposition)
+void HeadJob::setPosition(double time, const std::vector<float>& newposition)
 {
     m_job_time = time;     
-    m_times = vector<double> (1, time);
-    m_head_positions = vector<vector<float> > (1, newposition);
+    m_times = std::vector<double> (1, time);
+    m_head_positions = std::vector<std::vector<float> > (1, newposition);
 }
 
 /*! @brief Sets the sequence of positions and times
@@ -104,7 +104,7 @@ void HeadJob::setPosition(double time, const vector<float>& newposition)
 
     Note that times and positions should have the same length, and that positions must be rectangular.
  */
-void HeadJob::setPositions(const vector<double>& times, const vector<vector<float> >& positions)
+void HeadJob::setPositions(const std::vector<double>& times, const std::vector<std::vector<float> >& positions)
 {
     if (times.size() != 0 && positions.size() != 0)
     {
@@ -118,7 +118,7 @@ void HeadJob::setPositions(const vector<double>& times, const vector<vector<floa
     @param times the time for each point in the sequence
     @param positions the sequence of positions
  */
-void HeadJob::getPositions(vector<double>& times, vector<vector<float> >& positions)
+void HeadJob::getPositions(std::vector<double>& times, std::vector<std::vector<float> >& positions)
 {
     times = m_times;
     positions = m_head_positions;
@@ -127,7 +127,7 @@ void HeadJob::getPositions(vector<double>& times, vector<vector<float> >& positi
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void HeadJob::summaryTo(ostream& output)
+void HeadJob::summaryTo(std::ostream& output)
 {
     output << "HeadJob: " << m_job_time << " ";
     for (unsigned int i=0; i<m_times.size(); i++)
@@ -139,13 +139,13 @@ void HeadJob::summaryTo(ostream& output)
         }
         output << ") ";
     }
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void HeadJob::csvTo(ostream& output)
+void HeadJob::csvTo(std::ostream& output)
 {
     output << "HeadJob: " << ", ";
     for (unsigned int i=0; i<m_times.size(); i++)
@@ -156,7 +156,7 @@ void HeadJob::csvTo(ostream& output)
             output << m_head_positions[i][j] << ",";
         }
     }
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -166,10 +166,10 @@ void HeadJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void HeadJob::toStream(ostream& output) const
+void HeadJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "HeadJob::toStream" << endl;
+        debug << "HeadJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -192,10 +192,10 @@ void HeadJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const HeadJob& job)
+std::ostream& operator<<(std::ostream& output, const HeadJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "<<HeadJob" << endl;
+        debug << "<<HeadJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -207,10 +207,10 @@ ostream& operator<<(ostream& output, const HeadJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const HeadJob* job)
+std::ostream& operator<<(std::ostream& output, const HeadJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "<<HeadJob" << endl;
+        debug << "<<HeadJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

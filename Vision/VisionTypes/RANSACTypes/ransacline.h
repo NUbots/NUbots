@@ -11,7 +11,7 @@ class RANSACLine : public Line
 public:
     RANSACLine() {}
 
-    bool regenerate(const vector<T>& pts) {
+    bool regenerate(const std::vector<T>& pts) {
         if(pts.size() == minPointsForFit()) {
             setLineFromPoints(pts.at(0), pts.at(1));
             return true;
@@ -33,7 +33,7 @@ class RANSACLine<GroundPoint> : public Line
 public:
     RANSACLine() {}
 
-    bool regenerate(const vector<GroundPoint> &pts) {
+    bool regenerate(const std::vector<GroundPoint> &pts) {
         if(pts.size() == minPointsForFit()) {
             setLineFromPoints(pts.at(0).ground, pts.at(1).ground);
             return true;

@@ -29,7 +29,7 @@ using namespace AL;
 #include <fstream>
 #include <string>
 #include <time.h>
-using namespace std;
+
 
 class NUbot;
 
@@ -40,10 +40,10 @@ public:
     NUbot* m_nubot;
     
 public:
-    NUNAO(ALPtr<ALBroker> pBroker, const string& pName);
+    NUNAO(ALPtr<ALBroker> pBroker, const std::string& pName);
     virtual ~NUNAO();
     
-    void dataChanged(const string& pDataName, const ALValue& pValue, const string& pMessage) {};
+    void dataChanged(const std::string& pDataName, const ALValue& pValue, const std::string& pMessage) {};
     
     bool innerTest() {return true;};
 }; 

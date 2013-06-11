@@ -76,11 +76,11 @@ void virtualNUbot::setSensorData(NUSensorsData* newsensorsData)
 {
     //std::stringstream data;
     //newsensorsData->summaryTo(data);
-    //qDebug() << data.str().c_str() << endl;
+    //qDebug() << data.str().c_str() << std::endl;
 
     sensorsData = newsensorsData;
     vision->setSensorData(sensorsData);
-    vector<float> horizondata;
+    std::vector<float> horizondata;
     bool isOK = sensorsData->getHorizon(horizondata);
     if(isOK)
     {

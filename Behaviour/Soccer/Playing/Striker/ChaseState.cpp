@@ -48,7 +48,7 @@ ChaseState::~ChaseState()
 void ChaseState::doStateCommons()
 {   // do behaviour that is common to all sub chase states
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "ChaseState" << endl;
+        debug << "ChaseState" << std::endl;
     #endif
 }
 

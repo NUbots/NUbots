@@ -10,7 +10,7 @@ class GoalDetectorRANSACCentres : public GoalDetector
 {
 public:
     GoalDetectorRANSACCentres();
-    virtual vector<Goal> run();
+    virtual std::vector<Goal> run();
 
 private:
     unsigned int m_n,

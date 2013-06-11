@@ -23,15 +23,15 @@ using namespace boost::accumulators;
 void ObjectDetectionCH::detectObjects()
 {
     #if VISION_HORIZON_VERBOSITY > 1
-        debug << "ObjectDetectionCH::detectObjects() - Begin" << endl;
+        debug << "ObjectDetectionCH::detectObjects() - Begin" << std::endl;
     #endif
     // get blackboard instance
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
     unsigned int height = img.getHeight();
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
-    vector< Vector2<double> > horizon_points;
-    vector<Point> object_points;
+    std::vector< Vector2<double> > horizon_points;
+    std::vector<Point> object_points;
     double mean_y,
            std_dev_y;
 
@@ -68,7 +68,7 @@ void ObjectDetectionCH::detectObjects()
                     // if VER_THRESHOLD green pixels found outside of acceptable range, add point
                     if (green_count == VER_THRESHOLD) {
                         if (green_top > mean_y + OBJECT_THRESHOLD_MULT*std_dev_y + 1) {
-                            //cout << "OBJECT: (" << horizon_points->at(x).x << ", " << y << ")" << endl;
+                            //std::cout << "OBJECT: (" << horizon_points->at(x).x << ", " << y << ")" << std::endl;
                             object_points.push_back(Point(horizon_points.at(x).x, y));
                         }
                         break;
@@ -88,10 +88,10 @@ void ObjectDetectionCH::detectObjects()
     }
 
     // ignore transitions very close to horizon
-    vector<Point>::iterator it;
+    std::vector<Point>::iterator it;
     it = object_points.begin();
     while (it < object_points.end()) {
-//        cout << it->y - green_horizon.getYFromX(it->x) << endl;
+//        std::cout << it->y - green_horizon.getYFromX(it->x) << std::endl;
         if (it->y - green_horizon.getYFromX(it->x) < VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
             it = object_points.erase(it);
         }

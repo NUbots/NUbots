@@ -29,12 +29,12 @@ DataWrapper::DataWrapper()
     numFramesDropped = 0;
     numFramesProcessed = 0;
     numSavedImages = 0;
-    loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
+    loadLUTFromFile(std::string(DATA_DIR) + std::string("default.lut"));
     Blackboard->lookForBall = true; //initialise
     Blackboard->lookForGoals = true; //initialise
     isSavingImages = false;
     isSavingImagesWithVaryingSettings = false;
-    VisionConstants::loadFromFile(string(CONFIG_DIR) + string("VisionOptions.cfg"));
+    VisionConstants::loadFromFile(std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"));
 }
 
 DataWrapper::~DataWrapper()
@@ -300,10 +300,10 @@ void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     //! @todo better debug printing + Comment
     switch(id) {
     case HORIZONTAL:
-        Blackboard->horizontalScans = region;
+        Blackboard->horizontalScans = &region;
         break;
     case VERTICAL:
-        Blackboard->verticalScans = region;
+        Blackboard->verticalScans = &region;
         break;
     }
 
@@ -334,7 +334,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
     #endif
 }
 
-void DataWrapper::plotCurve(string name, vector<Vector2<double> > pts)
+void DataWrapper::plotCurve(std::string name, vector<Vector2<double> > pts)
 {
 #if VISION_WRAPPER_VERBOSITY > 2
     debug << "DataWrapper::plotCurve " << name << " " << pts << endl;
@@ -402,7 +402,7 @@ void DataWrapper::postProcess()
 *   @param filename The filename for the LUT stored on disk
 *   @note Taken from original vision system
 */
-bool DataWrapper::loadLUTFromFile(const string& fileName)
+bool DataWrapper::loadLUTFromFile(const std::string& fileName)
 {
     #if VISION_WRAPPER_VERBOSITY > 1
         debug << "DataWrapper::loadLUTFromFile() - " << fileName << endl;
@@ -420,7 +420,7 @@ void DataWrapper::process(JobList* jobs)
     #if VISION_WRAPPER_VERBOSITY > 1
         debug  << "DataWrapper::Process - Begin" << endl;
     #endif
-    static list<Job*>::iterator it;     // the iterator over the motion jobs
+    static std::list<Job*>::iterator it;     // the iterator over the motion jobs
     
     for (it = jobs->vision_begin(); it != jobs->vision_end();)
     {
@@ -437,9 +437,9 @@ void DataWrapper::process(JobList* jobs)
                     //we weren't saving and now we've started
                     currentSettings = current_frame->getCameraSettings();
                     if (!imagefile.is_open())
-                        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+                        imagefile.open((std::string(DATA_DIR) + std::string("image.strm")).c_str());
                     if (!sensorfile.is_open())
-                        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
+                        sensorfile.open((std::string(DATA_DIR) + std::string("sensor.strm")).c_str());
                     actions->add(NUActionatorsData::Sound, sensor_data->CurrentTime, NUSounds::START_SAVING_IMAGES);
                 }
                 else {
@@ -474,16 +474,16 @@ void DataWrapper::saveAnImage()
     #endif
 
     if (!imagefile.is_open())
-        imagefile.open((string(DATA_DIR) + string("image.strm")).c_str());
+        imagefile.open((std::string(DATA_DIR) + std::string("image.strm")).c_str());
     if (!sensorfile.is_open())
-        sensorfile.open((string(DATA_DIR) + string("sensor.strm")).c_str());
+        sensorfile.open((std::string(DATA_DIR) + std::string("sensor.strm")).c_str());
 
     if (imagefile.is_open() and numSavedImages < 2500)
     {
         if(sensorfile.is_open())
         {
-            sensorfile << (*sensor_data) << flush;
-            //sensorfile << sensor_data_copy << flush;
+            sensorfile << (*sensor_data) << std::flush;
+            //sensorfile << sensor_data_copy << std::flush;
         }
         NUImage buffer;
         buffer.cloneExisting(*current_frame);

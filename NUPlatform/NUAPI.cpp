@@ -1,19 +1,20 @@
 #include "NUAPI.h"
+#include <boost/foreach.hpp>
 
-NUAPI::NUAPI() : context(1), publisher(context, ZMQ_PUB) {
-
+NUAPI::NUAPI(): context(1), publisher(context, ZMQ_PUB)
+{
 	//int hwm = 1;
 	//publisher.setsockopt(ZMQ_SNDHWM, &hwm, sizeof (hwm));
 	publisher.bind("tcp://*:12000");
 
 }
 
-NUAPI::~NUAPI() {
-
+NUAPI::~NUAPI()
+{
 }
 
-void NUAPI::sendAll() {
-
+void NUAPI::sendAll()
+{
 	//int now = clock();
 	sendVisionData();
 	sendSensorData();
@@ -24,10 +25,12 @@ void NUAPI::sendAll() {
 
 }
 
-void NUAPI::sendVisionData() {
-
+void NUAPI::sendVisionData()
+{
 	NUImage* image = Blackboard->Image;
 	FieldObjects* fieldObjects = Blackboard->Objects;
+	const vector<vector<ColourSegment> >& hColourSegments = Blackboard->horizontalScans->getSegments();
+	const vector<vector<ColourSegment> >& vColourSegments = Blackboard->verticalScans->getSegments();
 
 	API::Message api_message;
 
@@ -43,8 +46,10 @@ void NUAPI::sendVisionData() {
 	jpge::uint8* data = new jpge::uint8[image_width * image_height * 3]();
 
 	int index = 0;
-	for (int y = image_height - 1; y >= 0; y--) {
-		for (int x = image_width - 1; x >= 0; x--) {
+	for (int y = image_height - 1; y >= 0; y--)
+	{
+		for (int x = image_width - 1; x >= 0; x--)
+		{
 			Pixel pixel = image->at(x, y);
 
 			unsigned char r, g, b;
@@ -73,39 +78,61 @@ void NUAPI::sendVisionData() {
 	free(pBuf);
 
 	MobileObject& ball = fieldObjects->mobileFieldObjects[FieldObjects::FO_BALL];
-	//	StationaryObject& goal_blue_left = fieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
-	//	StationaryObject& goal_blue_right = fieldObjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
-	//	StationaryObject& goal_yellow_left = fieldObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
-	//	StationaryObject& goal_yellow_right = fieldObjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
-	//	AmbiguousObject& goal_blue_unknown = fieldObjects->ambiguousFieldObjects[FieldObjects::FO_BLUE_GOALPOST_UNKNOWN];
-	//	AmbiguousObject& goal_yellow_unknown = fieldObjects->ambiguousFieldObjects[FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN];
 
 	populate_vision_field_object("ball", ball, api_vision->add_field_object(), API::VisionFieldObject::CIRCLE);
 
-	for (vector<AmbiguousObject>::iterator it = fieldObjects->ambiguousFieldObjects.begin(); it != fieldObjects->ambiguousFieldObjects.end(); it++) {
-
-		AmbiguousObject& ambiguous_object = *it;
-
-		// std::cout << ambiguous_object.getName() << " " << ambiguous_object.isObjectVisible() << std::endl;
-
+	BOOST_FOREACH(AmbiguousObject& ambiguous_object, fieldObjects->ambiguousFieldObjects)
+	{
 		API::VisionFieldObject* api_field_object = api_vision->add_field_object();
 		populate_vision_field_object(ambiguous_object.getName(), ambiguous_object, api_field_object, API::VisionFieldObject::RECTANGLE);
 		api_field_object->set_visible(true); // hack - all ambiguous objects are visible - https://github.com/nubots/robocup/issues/10
 
 	}
-	//	populate_vision_field_object("goal_blue_left", goal_blue_left, api_vision->add_field_object(), API::VisionFieldObject::RECTANGLE);
-	//	populate_vision_field_object("goal_blue_right", goal_blue_right, api_vision->add_field_object(), API::VisionFieldObject::RECTANGLE);
-	//	populate_vision_field_object("goal_yellow_left", goal_yellow_left, api_vision->add_field_object(), API::VisionFieldObject::RECTANGLE);
-	//	populate_vision_field_object("goal_yellow_right", goal_yellow_right, api_vision->add_field_object(), API::VisionFieldObject::RECTANGLE);
 
-	//populate_vision_field_object("goal_blue_unknown", goal_blue_unknown, api_vision->add_field_object(), API::VisionFieldObject::RECTANGLE);
-	//populate_vision_field_object("goal_yellow_unknown", goal_yellow_unknown, api_vision->add_field_object(), API::VisionFieldObject::RECTANGLE);
+	API::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
+
+	BOOST_FOREACH(const vector<ColourSegment>& rowColourSegments, hColourSegments)
+	{
+
+		BOOST_FOREACH(const ColourSegment& colorSegment, rowColourSegments)
+		{
+			const Point& start = colorSegment.getStart();
+			const Point& end = colorSegment.getEnd();
+			Colour colour = colorSegment.getColour();
+
+			API::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
+			api_segment->set_start_x(start[0]);
+			api_segment->set_start_y(start[1]);
+			api_segment->set_end_x(end[0]);
+			api_segment->set_end_y(end[1]);
+			api_segment->set_colour(colour);
+
+			std::cout << "testing" << std::endl;
+		}
+	}
+
+	BOOST_FOREACH(const vector<ColourSegment>& columnColourSegments, vColourSegments)
+	{
+		for (const ColourSegment& colorSegment: columnColourSegments)
+		{
+			const Point& start = colorSegment.getStart();
+			const Point& end = colorSegment.getEnd();
+			Colour colour = colorSegment.getColour();
+
+			API::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
+			api_segment->set_start_x(start[0]);
+			api_segment->set_start_y(start[1]);
+			api_segment->set_end_x(end[0]);
+			api_segment->set_end_y(end[1]);
+			api_segment->set_colour(colour);
+		}
+	}
 
 	send(api_message);
 }
 
-void NUAPI::sendSensorData() {
-
+void NUAPI::sendSensorData()
+{
 	NUSensorsData* sensors = Blackboard->Sensors;
 
 	API::Message api_message;
@@ -115,9 +142,9 @@ void NUAPI::sendSensorData() {
 
 	API::SensorData* api_sensor_data = api_message.mutable_sensor_data();
 
-	vector<NUData::id_t*> vec2 = sensors->mapIdToIds(NUSensorsData::All);
-	for (vector<NUData::id_t*>::iterator it = vec2.begin(); it != vec2.end(); it++) {
-		NUData::id_t motor = **it;
+	BOOST_FOREACH(NUData::id_t* motor_ptr, sensors->mapIdToIds(NUSensorsData::All))
+	{
+		NUData::id_t& motor = *motor_ptr;
 
 		API::Motor* api_motor = api_sensor_data->add_motor();
 		api_motor->set_name(motor.Name);
@@ -174,8 +201,8 @@ void NUAPI::sendSensorData() {
 
 }
 
-void NUAPI::sendLocalisationData() {
-
+void NUAPI::sendLocalisationData()
+{
 	FieldObjects* fieldObjects = Blackboard->Objects;
 	Self& self = fieldObjects->self;
 	MobileObject& ball = fieldObjects->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -212,8 +239,8 @@ void NUAPI::sendLocalisationData() {
 
 }
 
-void NUAPI::send(API::Message api_message) {
-
+void NUAPI::send(API::Message api_message)
+{
 	std::string output;
 	api_message.SerializeToString(&output);
 
@@ -221,15 +248,17 @@ void NUAPI::send(API::Message api_message) {
 
 }
 
-void NUAPI::populate_vision_field_object(std::string name, Object& field_object, API::VisionFieldObject* api_field_object, API::VisionFieldObject::Type type) {
-
+void NUAPI::populate_vision_field_object(std::string name, Object& field_object, API::VisionFieldObject* api_field_object, API::VisionFieldObject::Type type)
+{
+	api_field_object->set_id(field_object.getID());
 	api_field_object->set_name(name);
 	api_field_object->set_visible(field_object.isObjectVisible());
 	api_field_object->set_screen_x(field_object.ScreenX());
 	api_field_object->set_screen_y(field_object.ScreenY());
 	api_field_object->set_type(type);
 
-	switch (type) {
+	switch (type)
+	{
 		case API::VisionFieldObject::CIRCLE:
 			api_field_object->set_radius(field_object.getObjectWidth() / 2);
 			break;
@@ -238,14 +267,14 @@ void NUAPI::populate_vision_field_object(std::string name, Object& field_object,
 			api_field_object->set_height(field_object.getObjectHeight());
 			break;
 	}
-
 }
 
 template <typename T>
-void NUAPI::api_add_vector(API::Vector* api_vector, vector<T>& vec) {
+void NUAPI::api_add_vector(API::Vector* api_vector, vector<T>& vec)
+{
 
-	for (typename vector<T>::iterator it = vec.begin(); it != vec.end(); it++) {
-		api_vector->add_float_value(*it);
+	BOOST_FOREACH(T& value, vec)
+	{
+		api_vector->add_float_value(value);
 	}
-
 }

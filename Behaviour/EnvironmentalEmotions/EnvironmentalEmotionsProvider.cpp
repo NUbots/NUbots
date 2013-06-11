@@ -36,7 +36,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 EnvironmentalEmotionsProvider::EnvironmentalEmotionsProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {

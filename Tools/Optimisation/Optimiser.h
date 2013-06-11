@@ -37,40 +37,40 @@ class Parameter;
     #include "NUPlatform/NUPlatform.h"
 #endif
 
-using namespace std;
+
 
 class Optimiser
 {
 public:
-    Optimiser(string name, vector<Parameter> parameters);
+    Optimiser(std::string name, std::vector<Parameter> parameters);
     ~Optimiser();
     
-    virtual vector<float> getNextParameters() = 0;
+    virtual std::vector<float> getNextParameters() = 0;
     virtual void setParametersResult(float fitness) = 0;
-    virtual void setParametersResult(const vector<float>& fitness);
+    virtual void setParametersResult(const std::vector<float>& fitness);
     
-    string& getName();
-    virtual void summaryTo(ostream& stream) = 0;
-    friend ostream& operator<<(ostream& o, const Optimiser& optimser);
-    friend ostream& operator<<(ostream& o, const Optimiser* optimser);
-    friend istream& operator>>(istream& i, Optimiser& optimser);
-    friend istream& operator>>(istream& i, Optimiser* optimser);
+    std::string& getName();
+    virtual void summaryTo(std::ostream& stream) = 0;
+    friend std::ostream& operator<<(std::ostream& o, const Optimiser& optimser);
+    friend std::ostream& operator<<(std::ostream& o, const Optimiser* optimser);
+    friend std::istream& operator>>(std::istream& i, Optimiser& optimser);
+    friend std::istream& operator>>(std::istream& i, Optimiser* optimser);
     void save();
-    void saveAs(string name);
+    void saveAs(std::string name);
     void load();
 
-    virtual vector<Parameter> getBest() const = 0;
+    virtual std::vector<Parameter> getBest() const = 0;
 
 protected:
     float normalDistribution(float mean, float sigma);
     float uniformDistribution(float min, float max);
     double getRealTime();
-    virtual void toStream(ostream& o) const = 0;
-    virtual void fromStream(istream& i) = 0;
+    virtual void toStream(std::ostream& o) const = 0;
+    virtual void fromStream(std::istream& i) = 0;
 
 protected:
-    string m_name;
-    vector<Parameter> m_initial_parameters;
+    std::string m_name;
+    std::vector<Parameter> m_initial_parameters;
     #ifdef TARGET_IS_TRAINING
         boost::posix_time::ptime m_microsec_starttime;  //!< the program's start time according to boost::posix_time
     #endif

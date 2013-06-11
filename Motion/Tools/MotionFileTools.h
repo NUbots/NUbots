@@ -27,36 +27,35 @@
 
 #include <vector>
 #include <string>
-using namespace std;
 
 class MotionFileTools
 {
 public:
-    static bool toBool(istream& input);
+    static bool toBool(std::istream& input);
     
     static float toFloat(const char* data);
-    static float toFloat(const string& data);
-    static float toFloat(istream& input);
+    static float toFloat(const std::string& data);
+    static float toFloat(std::istream& input);
     
-    static string fromVector(vector<float> data);
-    static string fromVector(vector<double> data);
-    static vector<float> toFloatVector(const string& data);
-    static vector<float> toFloatVector(istream& input);
+    static std::string fromVector(std::vector<float> data);
+    static std::string fromVector(std::vector<double> data);
+    static std::vector<float> toFloatVector(const std::string& data);
+    static std::vector<float> toFloatVector(std::istream& input);
     
-    static string fromVector(vector<string> data);
-    static vector<string> toStringVector(istream& input);
+    static std::string fromVector(std::vector<std::string> data);
+    static std::vector<std::string> toStringVector(std::istream& input);
     
-    static void toFloatWithRange(const string& data, float& value, vector<float>& range);
-    static void toFloatWithRange(istream& input, float& value, vector<float>& range);
+    static void toFloatWithRange(const std::string& data, float& value, std::vector<float>& range);
+    static void toFloatWithRange(std::istream& input, float& value, std::vector<float>& range);
     
-    static string fromMatrix(const vector<vector<float> >& data);
-    static string fromMatrix(const vector<vector<double> >& data);
-    static vector<vector<float> > toFloatMatrix(const string& data);
-    static vector<vector<float> > toFloatMatrix(istream& input);
-    static size_t size(vector<vector<float> > data);
-    static size_t size(vector<vector<double> > data);
+    static std::string fromMatrix(const std::vector<std::vector<float> >& data);
+    static std::string fromMatrix(const std::vector<std::vector<double> >& data);
+    static std::vector<std::vector<float> > toFloatMatrix(const std::string& data);
+    static std::vector<std::vector<float> > toFloatMatrix(std::istream& input);
+    static size_t size(std::vector<std::vector<float> > data);
+    static size_t size(std::vector<std::vector<double> > data);
     
-    static void toFloatWithMatrix(istream& input, float& value, vector<vector<float> >& matrix);
+    static void toFloatWithMatrix(std::istream& input, float& value, std::vector<std::vector<float> >& matrix);
     
 private:
     MotionFileTools() {};

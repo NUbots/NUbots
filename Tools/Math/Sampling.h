@@ -10,7 +10,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
-using namespace std;
+
 
 namespace Sampling
 {
@@ -25,8 +25,8 @@ float HaltonPoint(int index = 0, int prime = 2) {
     return result;
 }
 
-vector<float> HaltonPointND(int index = 0, int dimensions = 3) {
-    vector<float> result;
+std::vector<float> HaltonPointND(int index = 0, int dimensions = 3) {
+    std::vector<float> result;
     float primes[26] = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101};
     for (int i = 0; i < dimensions; i++) {
         result.push_back(HaltonPoint(index,primes[i]));
@@ -34,7 +34,7 @@ vector<float> HaltonPointND(int index = 0, int dimensions = 3) {
     return result;
 }
 
-float Covariance1D(vector<float>& x, vector<float>& y) {
+float Covariance1D(std::vector<float>& x, std::vector<float>& y) {
     float result = 0.;
     
     for (int i = 0; i < x.size(); i++) {
@@ -48,7 +48,7 @@ float Covariance1D(vector<float>& x, vector<float>& y) {
     return result;
 }
 
-float Variance1D(vector<float>& x) {
+float Variance1D(std::vector<float>& x) {
     float result = 0.;
     float r2 = 0.;
     for (int i = 0; i < x.size(); i++) {

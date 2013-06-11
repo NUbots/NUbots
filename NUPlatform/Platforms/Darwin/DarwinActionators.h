@@ -65,9 +65,9 @@ protected:
     //! Manages sensor read descriptors
     // Robot::SensorReadManager* sensor_read_manager_;
 
-    static vector<string> m_footled_names;
+    static std::vector<std::string> m_footled_names;
     static unsigned int m_num_footleds;
-    static vector<string> m_chestled_names;
+    static std::vector<std::string> m_chestled_names;
     static unsigned int m_num_chestleds;
 };
 

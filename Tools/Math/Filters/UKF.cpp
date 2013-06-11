@@ -1,7 +1,7 @@
 #include "UKF.h"
 #include "debug.h"
 
-using namespace std;
+
 
 
 UKF::UKF(): Moment(0), UnscentedTransform(0)

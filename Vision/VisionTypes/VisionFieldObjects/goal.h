@@ -28,15 +28,15 @@ public:
     bool check() const;
         
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const {out << VFOName(m_id) << " " << m_location.screen << " " << m_size_on_screen;}
+    void printLabel(std::ostream& out) const {out << VFOName(m_id) << " " << m_location.screen << " " << m_size_on_screen;}
 
     virtual double findScreenError(VisionFieldObject* other) const;
     virtual double findGroundError(VisionFieldObject* other) const;
 
     //! @brief output stream operator.
-    friend ostream& operator<< (ostream& output, const Goal& g);
+    friend std::ostream& operator<< (std::ostream& output, const Goal& g);
     //! @brief output stream operator for a vector of goals.
-    friend ostream& operator<< (ostream& output, const vector<Goal>& g);    
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<Goal>& g);    
     
 private:
     /*!

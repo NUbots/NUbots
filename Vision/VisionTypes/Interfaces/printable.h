@@ -5,7 +5,7 @@ class Printable {
 public:
     virtual ~Printable() {}
     //! @brief Stream output for labelling purposes
-    virtual void printLabel(ostream& out) const = 0;
+    virtual void printLabel(std::ostream& out) const = 0;
 };
 
 #endif // PRINTABLE_H

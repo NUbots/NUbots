@@ -36,7 +36,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 KickerProvider::KickerProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {

@@ -13,7 +13,7 @@ namespace RANSAC
 
     //Model must provide several features
     template<class Model, typename DataPoint>
-    vector<pair<Model, vector<DataPoint> > > findMultipleModels(const vector<DataPoint>& line_points,
+    std::vector<pair<Model, std::vector<DataPoint> > > findMultipleModels(const std::vector<DataPoint>& line_points,
                                                                 double e,
                                                                 unsigned int n,
                                                                 unsigned int k,
@@ -21,10 +21,10 @@ namespace RANSAC
                                                                 SELECTION_METHOD method);
 
     template<class Model, typename DataPoint>
-    bool findModel(vector<DataPoint> points,
+    bool findModel(std::vector<DataPoint> points,
                    Model& result,
-                   vector<DataPoint>& consensus,
-                   vector<DataPoint>& remainder,
+                   std::vector<DataPoint>& consensus,
+                   std::vector<DataPoint>& remainder,
                    double& variance,
                    double e,
                    unsigned int n,
@@ -32,7 +32,7 @@ namespace RANSAC
                    SELECTION_METHOD method);
 
     template<class Model, typename DataPoint>
-    Model generateRandomModel(const vector<DataPoint>& points);
+    Model generateRandomModel(const std::vector<DataPoint>& points);
 }
 
 #include "ransac.template"

@@ -14,21 +14,21 @@ class GoalDetectorRANSACEdges : public GoalDetector
 {
 public:
     GoalDetectorRANSACEdges();
-    virtual vector<Goal> run();
+    virtual std::vector<Goal> run();
 
 private:
-    //vector<Goal> assignGoals(const list<Quad>& post_candidates, const Quad& crossbar) const;
-    list<Quad> buildQuadsFromLines(const vector<LSFittedLine>& start_lines,
-                                   const vector<LSFittedLine>& end_lines,
+    //std::vector<Goal> assignGoals(const std::list<Quad>& post_candidates, const Quad& crossbar) const;
+    std::list<Quad> buildQuadsFromLines(const std::vector<LSFittedLine>& start_lines,
+                                   const std::vector<LSFittedLine>& end_lines,
                                    double tolerance);
 
     unsigned int getClosestUntriedLine(const LSFittedLine& start,
-                                       const vector<LSFittedLine>& end_lines,
-                                       vector<bool>& tried);
+                                       const std::vector<LSFittedLine>& end_lines,
+                                       std::vector<bool>& tried);
 
-    vector<Goal> assignGoals(const list<Quad>& candidates, const Quad& crossbar) const;
+    std::vector<Goal> assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const;
 
-    vector<Point> getEdgePointsFromSegments(const vector<ColourSegment> &segments);
+    std::vector<Point> getEdgePointsFromSegments(const std::vector<ColourSegment> &segments);
 
 
     unsigned int m_n,

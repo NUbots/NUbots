@@ -28,7 +28,7 @@ void LinearApproximator::initialiseApproximator(int numberOfInputs, int numberOf
 {
     num_inputs = numberOfInputs;
     num_outputs = numberOfOutputs;
-    vector<vector<float> > w(num_outputs,vector<float>(num_inputs+1,0));
+    std::vector<std::vector<float> > w(num_outputs,std::vector<float>(num_inputs+1,0));
     for (int i = 0; i<w.size();i++){
          for (int j = 0; j<w[0].size();j++){
              w[i][j] =0;//rand()/(float)RAND_MAX;
@@ -37,8 +37,8 @@ void LinearApproximator::initialiseApproximator(int numberOfInputs, int numberOf
     weights = w;
 }
 
-vector<float> LinearApproximator::getValues(vector<float> const& observations){
-    vector<float> result;
+std::vector<float> LinearApproximator::getValues(std::vector<float> const& observations){
+    std::vector<float> result;
     for(int i = 0; i<num_outputs; i++){
         float sum = 0;
         for( int j = 0; j<observations.size(); j++){
@@ -52,16 +52,16 @@ vector<float> LinearApproximator::getValues(vector<float> const& observations){
 
 }
 
-void LinearApproximator::doLearningEpisode(vector<vector<float> > const& observations, vector<vector<float> > const& values, float stepSize, int iterations){
+void LinearApproximator::doLearningEpisode(std::vector<std::vector<float> > const& observations, std::vector<std::vector<float> > const& values, float stepSize, int iterations){
     for (int obs = 0; obs<observations.size()-1; obs++){
-        //Calculate the norm of the observation vector.
+        //Calculate the norm of the observation std::vector.
         float norm_squared = 0;
         for (int i = 0; i<observations[obs].size();i++){
             norm_squared+=observations[obs][i]*observations[obs][i];
         }
         //Update neurons:
         for (int i = 0; i<iterations;i++){
-            vector<float> current_values = getValues(observations[obs]);
+            std::vector<float> current_values = getValues(observations[obs]);
             for(int action = 0; action < num_outputs; action++){
                 float delta = values[obs][action]-current_values[action];
                 for(int input = 0; input<num_inputs; input++){
@@ -80,12 +80,12 @@ void LinearApproximator::doLearningEpisode(vector<vector<float> > const& observa
 
 
 
-void LinearApproximator::saveApproximator(string agentName)
+void LinearApproximator::saveApproximator(std::string agentName)
 {
 }
 
 
-void LinearApproximator::loadApproximator(string agentName)
+void LinearApproximator::loadApproximator(std::string agentName)
 {
 }
 

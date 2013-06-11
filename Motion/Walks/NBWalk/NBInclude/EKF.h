@@ -175,9 +175,9 @@ public:
             std::cout << "\t P_k_bar is " << P_k_bar << std::endl;
             std::cout << "\t P_k is " << P_k << std::endl;
             std::cout << "\t A_k is " << A_k << std::endl;
-            std::cout << "\t deltas are " << deltas << std:: endl;
-            std::cout << "\t betas are " << betas << std:: endl;
-            std::cout << "\t gammas are " << gammas << std:: endl;
+            std::cout << "\t deltas are " << deltas << std:: std::endl;
+            std::cout << "\t betas are " << betas << std:: std::endl;
+            std::cout << "\t gammas are " << gammas << std:: std::endl;
         }
 #endif
     }

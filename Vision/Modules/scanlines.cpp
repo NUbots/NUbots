@@ -13,30 +13,30 @@
 void ScanLines::generateScanLines()
 {
     #if VISION_SCAN_VERBOSITY > 1
-        debug << "ScanLines::generateScanLines() - Begin" << endl;
+        debug << "ScanLines::generateScanLines() - Begin" << std::endl;
     #endif
     VisionBlackboard *vbb = VisionBlackboard::getInstance();
-    vector<int> horizontal_scan_lines;
-    const vector<Vector2<double> >& horizon_points = vbb->getGreenHorizon().getInterpolatedPoints();   //need this to get the left and right
+    std::vector<int> horizontal_scan_lines;
+    const std::vector<Vector2<double> >& horizon_points = vbb->getGreenHorizon().getInterpolatedPoints();   //need this to get the left and right
 
     Vector2<double> left = horizon_points.front();
     Vector2<double> right = horizon_points.back();
 
     if(left.y >= vbb->getImageHeight())
-        errorlog << "left: " << left.y << endl;
+        errorlog << "left: " << left.y << std::endl;
     
     if(right.y >= vbb->getImageHeight())
-        errorlog << "right: " << right.y << endl;
+        errorlog << "right: " << right.y << std::endl;
     
     //unsigned int bottom_horizontal_scan = (left.y + right.y) / 2;
     int bottom_horizontal_scan = vbb->getImageHeight() - 1;    //we need h-scans under the GH for field lines
 
     if(bottom_horizontal_scan >= vbb->getImageHeight())
-        errorlog << "avg: " << bottom_horizontal_scan << endl;
+        errorlog << "avg: " << bottom_horizontal_scan << std::endl;
 
     for (int y = bottom_horizontal_scan; y >= 0; y -= VisionConstants::HORIZONTAL_SCANLINE_SPACING) {
         if(y >= vbb->getImageHeight())
-            errorlog << " y: " << y << endl;
+            errorlog << " y: " << y << std::endl;
         horizontal_scan_lines.push_back(y);
     }
     
@@ -47,8 +47,8 @@ void ScanLines::classifyHorizontalScanLines()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
-    const vector<int>& horizontal_scan_lines = vbb->getHorizontalScanlines();
-    vector< vector<ColourSegment> > classifications;
+    const std::vector<int>& horizontal_scan_lines = vbb->getHorizontalScanlines();
+    std::vector< std::vector<ColourSegment> > classifications;
 
     BOOST_FOREACH(int y, horizontal_scan_lines) {
         classifications.push_back(classifyHorizontalScan(vbb->getLUT(), img, y));
@@ -61,8 +61,8 @@ void ScanLines::classifyVerticalScanLines()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
-    const vector<Vector2<double> >& vertical_start_points = vbb->getGreenHorizon().getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
-    vector< vector<ColourSegment> > classifications;
+    const std::vector<Vector2<double> >& vertical_start_points = vbb->getGreenHorizon().getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
+    std::vector< std::vector<ColourSegment> > classifications;
 
     for(unsigned int i=0; i<vertical_start_points.size(); i++) {
         classifications.push_back(classifyVerticalScan(vbb->getLUT(), img, vertical_start_points.at(i)));
@@ -71,11 +71,11 @@ void ScanLines::classifyVerticalScanLines()
     vbb->setVerticalSegments(classifications);
 }
 
-vector<ColourSegment> ScanLines::classifyHorizontalScan(const LookUpTable& lut, const NUImage& img, unsigned int y)
+std::vector<ColourSegment> ScanLines::classifyHorizontalScan(const LookUpTable& lut, const NUImage& img, unsigned int y)
 {
-    vector<ColourSegment> result;
+    std::vector<ColourSegment> result;
 	if(y < 0 || y >= img.getHeight()) {
-		errorlog << "ScanLines::classifyHorizontalScan invalid y: " << y << endl;
+		errorlog << "ScanLines::classifyHorizontalScan invalid y: " << y << std::endl;
 		return result;
 	}
     //simple and nasty first
@@ -90,7 +90,7 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const LookUpTable& lut, 
         current_colour = getColourFromIndex(lut.classifyPixel(img(x,y)));
         if(current_colour != start_colour) {
             //start of new segment
-            //make new segment and push onto vector
+            //make new segment and push onto std::vector
             segment.set(Point(start_pos, y), Point(x, y), start_colour);
             result.push_back(segment);
             //start new segment
@@ -104,18 +104,18 @@ vector<ColourSegment> ScanLines::classifyHorizontalScan(const LookUpTable& lut, 
     #if VISION_SCANLINE_VERBOSITY > 1
         Point end;
         for(int i=0; i<result.size(); i++) {
-            debug << result.at(i).getStart() << " " << result.at(i).getEnd() << " " << (end==result.at(i).getStart()) << endl;
+            debug << result.at(i).getStart() << " " << result.at(i).getEnd() << " " << (end==result.at(i).getStart()) << std::endl;
             end = result.at(i).getEnd();
         }
     #endif
     return result;
 }
 
-vector<ColourSegment> ScanLines::classifyVerticalScan(const LookUpTable& lut, const NUImage& img, const Vector2<double> &start)
+std::vector<ColourSegment> ScanLines::classifyVerticalScan(const LookUpTable& lut, const NUImage& img, const Vector2<double> &start)
 {
-    vector<ColourSegment> result;
+    std::vector<ColourSegment> result;
     if(start.y >= img.getHeight() || start.y < 0 || start.x >= img.getWidth() || start.x < 0) {
-		errorlog << "ScanLines::classifyVerticalScan invalid start position: " << start << endl; 
+		errorlog << "ScanLines::classifyVerticalScan invalid start position: " << start << std::endl; 
 		return result;
     }
     //simple and nasty first
@@ -131,7 +131,7 @@ vector<ColourSegment> ScanLines::classifyVerticalScan(const LookUpTable& lut, co
         current_colour = getColourFromIndex(lut.classifyPixel(img(x,y)));
         if(current_colour != start_colour) {
             //start of new segment
-            //make new segment and push onto vector
+            //make new segment and push onto std::vector
             segment.set(Point(x, start_pos), Point(x, y), start_colour);
             result.push_back(segment);
             //start new segment

@@ -36,37 +36,37 @@ public:
 
     static OPT_TYPE getChoiceFromString(string str);
     static OPT_ID getIDFromInt(int i);
-    static string getIDName(OPT_ID id);
+    static std::string getIDName(OPT_ID id);
 
     explicit VisionOptimiser(QWidget *parent = 0, OPT_TYPE id=PSO);
     ~VisionOptimiser();
 
-    void run(string directory, int total_iterations, bool use_ground_errors);
-    void gridSearch(string directory, int grids_per_side, bool use_ground_errors);
-    void errorPandRevaluation(string directory, bool use_ground_errors);
+    void run(std::string directory, int total_iterations, bool use_ground_errors);
+    void gridSearch(std::string directory, int grids_per_side, bool use_ground_errors);
+    void errorPandRevaluation(std::string directory, bool use_ground_errors);
 
 private:
     bool trainingStep(int iteration,
-                      const vector<vector<VisionFieldObject *> >& ground_truth,
-                      ostream& performance_log,
-                      const string& stream_name,
+                      const std::vector<std::vector<VisionFieldObject *> >& ground_truth,
+                      std::ostream& performance_log,
+                      const std::string& stream_name,
                       bool use_ground_errors);
 
-    map<OPT_ID, float> evaluateBatch(const vector<vector<VisionFieldObject *> >& ground_truth,
-                                     const string& stream_name,
+    map<OPT_ID, float> evaluateBatch(const std::vector<std::vector<VisionFieldObject *> >& ground_truth,
+                                     const std::string& stream_name,
                                      map<VFO_ID, float>& false_pos_costs,
                                      map<VFO_ID, float>& false_neg_costs,
                                      bool use_ground_errors) const;
 
-    map<OPT_ID, pair<double, double> > evaluateBatchPR(const vector<vector<VisionFieldObject *> >& ground_truth,
-                                                       const string& stream_name,
+    map<OPT_ID, pair<double, double> > evaluateBatchPR(const std::vector<std::vector<VisionFieldObject *> >& ground_truth,
+                                                       const std::string& stream_name,
                                                        bool ground_errors) const;
 
-    void printResults(int iteration, map<OPT_ID, float> fitnesses, ostream& performance_log) const;
+    void printResults(int iteration, map<OPT_ID, float> fitnesses, std::ostream& performance_log) const;
     void setupVisionConstants();
     void setupCosts();
-    void openLogFiles(string directory);
-    vector<Parameter> getParams(OPT_ID id);
+    void openLogFiles(std::string directory);
+    std::vector<Parameter> getParams(OPT_ID id);
 
 private slots:
     void halt() {m_halted = true;}
@@ -75,26 +75,26 @@ private:
     Ui::VisionOptimiser *ui;                //! @var UI pointer
 
 #ifdef MULTI_OPT
-    vector<Optimiser*> m_optimiser_list;        //! @var list of optimiser pointers
+    std::vector<Optimiser*> m_optimiser_std::list;        //! @var std::list of optimiser pointers
     map<OPT_ID, Optimiser*> m_optimisers;       //! @var map between object class and optimiser
-    map<OPT_ID, float> m_best_fitnesses;             //! @var list of best fitnesses seen
-    map<OPT_ID, vector<Parameter> > m_best_params;   //! @var list of best params seen
+    map<OPT_ID, float> m_best_fitnesses;             //! @var std::list of best fitnesses seen
+    map<OPT_ID, std::vector<Parameter> > m_best_params;   //! @var std::list of best params seen
 #else
     Optimiser* m_optimiser;             //! @var optimiser pointer
     float m_best_fitness;               //! @var best fitness seen
-    vector<Parameter> m_best_params;    //! @var best params seen
+    std::vector<Parameter> m_best_params;    //! @var best params seen
 #endif
 
-    map<VFO_ID, vector<OPT_ID> > m_vfo_optimiser_map;    //! @var map between exact field object type and broad class.
+    map<VFO_ID, std::vector<OPT_ID> > m_vfo_optimiser_map;    //! @var map between exact field object type and broad class.
     map<VFO_ID, float> m_false_positive_costs;           //! @var map between field object type and false positive cost.
     map<VFO_ID, float> m_false_negative_costs;           //! @var map between field object type and false negative cost.
 
     VisionControlWrapper* vision;   //! @var The vision training wrapper.
-    string m_training_image_name,   //! @var The file name for the training batch.
+    std::string m_training_image_name,   //! @var The file name for the training batch.
             m_test_image_name;      //! @var The file name for the test batch.
 
-    vector<vector<VisionFieldObject *> > m_ground_truth_training;    //! @var labels for the training batch
-    vector<vector<VisionFieldObject *> > m_ground_truth_test;        //! @var labels for the test batch
+    std::vector<std::vector<VisionFieldObject *> > m_ground_truth_training;    //! @var labels for the training batch
+    std::vector<std::vector<VisionFieldObject *> > m_ground_truth_test;        //! @var labels for the test batch
 
     bool m_halted;                  //! @var A flag for the user opting to halt.
     //! LOGS
@@ -109,7 +109,7 @@ private:
     ofstream m_training_performance_log,    //! @var training fitness log
              m_test_performance_log;        //! @var test fitness log
 
-    string m_opt_name;                      //! @var optimiser name
+    std::string m_opt_name;                      //! @var optimiser name
 };
 
 #endif // VISIONOPTIMISER_H

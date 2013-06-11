@@ -33,7 +33,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 PoseProvider::PoseProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
@@ -114,7 +114,7 @@ void PoseProvider::doSelectedMotion()
     //Initialisation: First 50 Frames, will be used to stand up
     if (isStart < 5)
     {
-        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        std::vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50);
         m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
 		isStart++;
@@ -122,8 +122,8 @@ void PoseProvider::doSelectedMotion()
     //Start the bahaviour:
     else
     {
-        //vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
-        vector<float> position(3);
+        //std::vector<float> zero(m_actions->getNumberOfJoints(NUActionatorsData::HeadJoints), 0);
+        std::vector<float> position(3);
         //POSITION [PITCH, YAW, ROLL]
         position[0] = calculatePitchPosition()*3.14/180;
         position[1] = calculateYawPosition()*3.14/180; //degrees to radians
@@ -167,9 +167,9 @@ void PoseProvider::sayPosition(float degrees)
 	int tens = int(floor(fabs(degrees) /10.0));
 	int units = int(fabs(degrees) - tens*10);
 	
-	string unit_numbers[] = {"0","1","2","3","4","5","6","7","8","9","10"};
-	string teen_numbers[] = {"10","11","12","13","14","15","16","17","18","19"};
-	string ten_numbers[] ={"0","10","20","30","40","50","60","70","80","90","100","110","120"};
+	std::string unit_numbers[] = {"0","1","2","3","4","5","6","7","8","9","10"};
+	std::string teen_numbers[] = {"10","11","12","13","14","15","16","17","18","19"};
+	std::string ten_numbers[] ={"0","10","20","30","40","50","60","70","80","90","100","110","120"};
 	if(tens == 1)
 	{
 		m_actions->add(NUActionatorsData::Sound, m_current_time, teen_numbers[units]  + ".wav");
@@ -190,7 +190,7 @@ void PoseProvider::sayPosition(float degrees)
 		m_actions->add(NUActionatorsData::Sound, m_current_time, unit_numbers[units] + ".wav");
 		return;
 	}
-	vector<string> sounds (2);
+	std::vector<std::string> sounds (2);
 	sounds[0] = ten_numbers[tens] + ".wav";
 	sounds[1] = unit_numbers[units] + ".wav";
 	m_actions->add(NUActionatorsData::Sound, m_current_time, sounds);

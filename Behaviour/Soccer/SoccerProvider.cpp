@@ -40,7 +40,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 /*! @brief Construct a behaviour provider with the given manager
  */
@@ -55,8 +55,8 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
     
     m_state = m_initial;
     
-    m_led_white = vector<float>(3,1);
-    m_led_off = vector<float>(3,0);
+    m_led_white = std::vector<float>(3,1);
+    m_led_off = std::vector<float>(3,0);
     m_led_red = m_led_off; m_led_red[0] = 1;
     m_led_green = m_led_off; m_led_green[1] = 1;
     m_led_blue = m_led_off; m_led_blue[2] = 1;
@@ -94,13 +94,13 @@ void SoccerProvider::doBehaviourCommons()
         // In every state the left foot led must display the team colour
         if (m_game_info->getTeamColour() == GameInformation::BlueTeam)
         {
-            vector<float> blue(3,1);
+            std::vector<float> blue(3,1);
             blue[0] = 0;
             m_actions->add(NUActionatorsData::LFootLed, m_current_time, blue);
         }
         else
         {
-            vector<float> pink(3,1);
+            std::vector<float> pink(3,1);
             pink[1] = 0;
             m_actions->add(NUActionatorsData::LFootLed, m_current_time, pink);
         }

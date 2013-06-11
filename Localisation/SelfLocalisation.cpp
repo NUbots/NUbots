@@ -234,7 +234,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     }
 
     // Retrieve odometry data
-    vector<float> odo;
+    std::vector<float> odo;
     bool odom_ok = sensor_data->getOdometry(odo);
 
     if(processing_required == false)
@@ -247,7 +247,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
 
 #ifndef USE_VISION
     // If vision is disabled, gps coordinates are used in its place to trach location.
-    vector<float> gps;
+    std::vector<float> gps;
     float compass;
     if (sensor_data->getGps(gps) and sensor_data->getCompass(compass))
     {
@@ -333,7 +333,7 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
 #endif
     prof.stop();
 
-//    cout << prof;
+//    std::cout << prof;
 
 }
 
@@ -355,7 +355,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
 #if DEBUG_LOCALISATION_VERBOSITY > 2
     if(numUpdates == 0 )
     {
-        debug_out  <<"[" << m_timestamp << "]: Update Starting." << endl;
+        debug_out  <<"[" << m_timestamp << "]: Update Starting." << std::endl;
         for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
         {
             if((*model_it)->active() == false) continue;
@@ -363,7 +363,7 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
             debug_out  << " [alpha = " << (*model_it)->alpha() << "]";
             debug_out  << " Robot X: " << (*model_it)->mean(SelfModel::states_x);
             debug_out  << " Robot Y: " << (*model_it)->mean(SelfModel::states_y);
-            debug_out  << " Robot Theta: " << (*model_it)->mean(SelfModel::states_heading) << endl;
+            debug_out  << " Robot Theta: " << (*model_it)->mean(SelfModel::states_heading) << std::endl;
         }
     }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2
@@ -480,13 +480,13 @@ void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
                 debug_out  << " [alpha = " << (*model_it)->alpha() << "]";
                 debug_out  << " Robot X: " << (*model_it)->mean(Model::states_x);
                 debug_out  << " Robot Y: " << (*model_it)->mean(Model::states_y);
-                debug_out  << " Robot Theta: " << (*model_it)->mean(Model::states_heading) << endl;
+                debug_out  << " Robot Theta: " << (*model_it)->mean(Model::states_heading) << std::endl;
             }
             debug_out  << "[" << m_timestamp << "]: Best Model";
             debug_out  << " [alpha = " << bestModel->alpha() << "]";
             debug_out  << " Robot X: " << bestModel->mean(Model::states_x);
             debug_out  << " Robot Y: " << bestModel->mean(Model::states_y);
-            debug_out  << " Robot Theta: " << bestModel->mean(Model::states_heading) << endl;
+            debug_out  << " Robot Theta: " << bestModel->mean(Model::states_heading) << std::endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 2	
         prof.stop();
@@ -755,7 +755,7 @@ bool SelfLocalisation::CheckGameState(bool currently_incapacitated, const GameIn
 void SelfLocalisation::initSingleModel(float x, float y, float heading)
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Initialising single model." << endl;
+    debug_out  << "Initialising single model." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     clearModels();
     std::vector<Moment> positions;
@@ -804,7 +804,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     m_frame_log << "Reset leaving initial." << std::endl;
     #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing initial->ready reset." << endl;
+    debug_out  << "Performing initial->ready reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     // For the probabalistic data association technique we only want a single model present.
@@ -880,7 +880,7 @@ void SelfLocalisation::doSetReset(GameInformation::TeamColour team_colour, int p
     m_frame_log << "Reset due to manual positioning." << std::endl;
     #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing manual position reset." << endl;
+    debug_out  << "Performing manual position reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     clearModels();
     float x, y, heading;
@@ -966,7 +966,7 @@ void SelfLocalisation::doPenaltyReset()
     m_frame_log << "Reset due to penalty." << std::endl;
     #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing penalty reset." << endl;
+    debug_out  << "Performing penalty reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     clearModels();
@@ -995,7 +995,7 @@ void SelfLocalisation::doFallenReset()
     m_frame_log << "Reset due to fall." << std::endl;
     #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing fallen reset." << endl;
+    debug_out  << "Performing fallen reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
     for (ModelContainer::const_iterator model_it = m_models.begin(); model_it != m_models.end(); ++model_it)
     {   // Increase heading uncertainty if fallen
@@ -1010,7 +1010,7 @@ void SelfLocalisation::doFallenReset()
 void SelfLocalisation::doReset()
 {
     #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing player reset." << endl;
+    debug_out  << "Performing player reset." << std::endl;
     #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 
     clearModels();
@@ -1046,7 +1046,7 @@ void SelfLocalisation::doReset()
 void SelfLocalisation::doBallOutReset()
 {
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-    debug_out  << "Performing ball out reset." << endl;
+    debug_out  << "Performing ball out reset." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
 //    // Increase uncertainty of ball position if it has gone out.. Cause it has probably been moved.
 //    for (int modelNumber = 0; modelNumber < c_MAX_MODELS; modelNumber++){
@@ -1096,7 +1096,7 @@ bool SelfLocalisation::clipModelToField(SelfModel* theModel)
         debug_out  << " [alpha = " << theModel->alpha() << "]";
         debug_out  << " State(0) clipped.";
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << theModel->mean(Model::states_x);
-        debug_out  << "," << theModel->mean(Model::states_y) << "," << theModel->mean(Model::states_heading) << ")" << endl;
+        debug_out  << "," << theModel->mean(Model::states_y) << "," << theModel->mean(Model::states_heading) << ")" << std::endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     wasClipped = wasClipped || clipped;
@@ -1111,9 +1111,9 @@ bool SelfLocalisation::clipModelToField(SelfModel* theModel)
     if(clipped){
         debug_out  << "[" << m_timestamp << "]: Model[" << theModel->id() << "]";
         debug_out  << " [alpha = " << theModel->alpha() << "]";
-        debug_out  << " State(1) clipped." << endl;
+        debug_out  << " State(1) clipped." << std::endl;
         debug_out  << " (" << prevX << "," << prevY << "," << prevTheta << ") -> (" << theModel->mean(Model::states_x);
-        debug_out  << "," << theModel->mean(Model::states_y) << "," << theModel->mean(Model::states_heading) << ")" << endl;
+        debug_out  << "," << theModel->mean(Model::states_y) << "," << theModel->mean(Model::states_heading) << ")" << std::endl;
     }
     #endif // DEBUG_LOCALISATION_VERBOSITY > 1
 
@@ -1340,7 +1340,7 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
         debug_out  << landmark.getName();
         debug_out  << " Distance = " << landmark.measuredDistance();
         debug_out  << " Bearing = " << landmark.measuredBearing();
-        debug_out  << endl;
+        debug_out  << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
         return SelfModel::RESULT_OUTLIER;
     }
@@ -1366,7 +1366,7 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
         if(landmark.measuredBearing() != landmark.measuredBearing())
 	{
 #if DEBUG_LOCALISATION_VERBOSITY > 0
-            debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << endl;
+            debug_out  << "ABORTED Object Update Bearing is NaN skipping object." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
             continue;
         }
@@ -1383,14 +1383,14 @@ int SelfLocalisation::landmarkUpdate(StationaryObject &landmark)
         if(kf_return != SelfModel::RESULT_OK)
         {
             Matrix estimated_measurement = (*model_it)->CalculateMeasurementPrediction(landmark.X(),landmark.Y());
-            debug_out << "OUTLIER!" << endl;
-            debug_out << "Model[" << (*model_it)->id() << "]: Outlier Detected - " << landmark.getName() << endl;
-            debug_out << "Measured - Distance = " << landmark.measuredDistance() << " Bearing = " << landmark.measuredBearing() << endl;
-            debug_out << "Expected - Distance = " << estimated_measurement[0][0] << " Bearing = " << estimated_measurement[1][0] << endl;
+            debug_out << "OUTLIER!" << std::endl;
+            debug_out << "Model[" << (*model_it)->id() << "]: Outlier Detected - " << landmark.getName() << std::endl;
+            debug_out << "Measured - Distance = " << landmark.measuredDistance() << " Bearing = " << landmark.measuredBearing() << std::endl;
+            debug_out << "Expected - Distance = " << estimated_measurement[0][0] << " Bearing = " << estimated_measurement[1][0] << std::endl;
         }
         else
         {
-            debug_out << "OK!" << endl;
+            debug_out << "OK!" << std::endl;
         }
 #endif // DEBUG_LOCALISATION_VERBOSITY > 1
     #if LOC_SUMMARY > 0
@@ -1472,7 +1472,7 @@ int SelfLocalisation::doTwoObjectUpdate(StationaryObject &landmark1, StationaryO
 /*! @brief Perfroms an ambiguous measurement update. This is a interface function to access a variety of methods.
     @return The number of models that were removed during this process.
 */
-int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
+int SelfLocalisation::ambiguousLandmarkUpdate(AmbiguousObject &ambiguousObject, const std::vector<StationaryObject*>& possibleObjects)
 {
     if(m_settings.branchMethod() == LocalisationSettings::branch_exhaustive)
     {
@@ -1617,7 +1617,7 @@ int SelfLocalisation::PruneNScan(unsigned int N)
         // If not able to assign to an existing sum create a new one.
         if(!added)
         {
-            ParentSum temp = make_pair(parent_id, alpha);
+            ParentSum temp = std::make_pair(parent_id, alpha);
             results.push_back(temp);
         }
     }
@@ -1643,7 +1643,7 @@ int SelfLocalisation::PruneNScan(unsigned int N)
 /*! @brief Performs an ambiguous measurement update using the exhaustive process. This creates a new model for each possible location for the measurement.
     @return Returns RESULT_OK if measurment updates were sucessfully performed, RESULT_OUTLIER if they were not.
 */
-int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
+int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(AmbiguousObject &ambiguousObject, const std::vector<StationaryObject*>& possibleObjects)
 {
 
     const float outlier_factor = 0.0001;
@@ -1710,7 +1710,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
     {
         curr_model = (*model_it);
         if(curr_model->inactive()) continue;
-        vector<StationaryObject*> poss_objects;
+        std::vector<StationaryObject*> poss_objects;
         unsigned int models_added = 0;
         Self position = curr_model->GenerateSelfState();
         float headYaw;
@@ -1756,7 +1756,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateConstraint(AmbiguousObject &ambiguo
     return SelfModel::RESULT_OUTLIER;
 }
 
-int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
+int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguousObject, const std::vector<StationaryObject*>& possibleObjects)
 {
     const float c_Max_Elapsed_Time = 1.0f;
 
@@ -1801,7 +1801,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
                         StationaryObject update_object(*(*obj_it));
                         update_object.CopyMeasurement(ambiguousObject);
                         (*model_it)->MeasurementUpdate(update_object, error);
-                        new_models.push_back(new Model(*(*model_it)));  // Copy the new model and add it to the new list.
+                        new_models.push_back(new Model(*(*model_it)));  // Copy the new model and add it to the new std::list.
                         (*model_it)->setActive(false);
                         continue;
                     }
@@ -1811,7 +1811,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
                 if((*model_it)->active())
                 {
                     bool update_performed = false;
-                    for(vector<StationaryObject*>::const_iterator option_it = possibleObjects.begin(); option_it != possibleObjects.end(); ++option_it)
+                    for(std::vector<StationaryObject*>::const_iterator option_it = possibleObjects.begin(); option_it != possibleObjects.end(); ++option_it)
                     {
                         temp_model = new Model(*(*model_it), ambiguousObject, *(*option_it), error, m_timestamp);
                         if(temp_model->active())
@@ -1839,7 +1839,7 @@ int SelfLocalisation::ambiguousLandmarkUpdateSelective(AmbiguousObject &ambiguou
     return SelfModel::RESULT_OUTLIER;
 }
 
-int SelfLocalisation::ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambiguousObject, const vector<StationaryObject*>& possibleObjects)
+int SelfLocalisation::ambiguousLandmarkUpdateProbDataAssoc(AmbiguousObject &ambiguousObject, const std::vector<StationaryObject*>& possibleObjects)
 {
     MeasurementError error = calculateError(ambiguousObject);
     SelfModel::updateResult result = SelfModel::RESULT_FAILED;
@@ -1862,8 +1862,8 @@ bool SelfLocalisation::MergeTwoModels(SelfModel* modelA, SelfModel* modelB)
     if(success == false)
     {
 #if DEBUG_LOCALISATION_VERBOSITY > 2
-        cout << "Merge failed." <<std::endl;
-        debug_out  <<"[" << m_timestamp << "]: Merge Between model[" << modelA->id() << "] and model[" << modelB->id() << "] FAILED." << endl;
+        std::cout << "Merge failed." <<std::endl;
+        debug_out  <<"[" << m_timestamp << "]: Merge Between model[" << modelA->id() << "] and model[" << modelB->id() << "] FAILED." << std::endl;
 #endif // DEBUG_LOCALISATION_VERBOSITY > 0
         return success;
     }
@@ -2038,7 +2038,7 @@ void SelfLocalisation::PrintModelStatus(const SelfModel* model)
 #if DEBUG_LOCALISATION_VERBOSITY > 2
   debug_out  <<"[" << m_currentFrameNumber << "]: Model[" << model->id() << "]";
   debug_out  << "[alpha=" << model->alpha() << "]";
-  debug_out  << " active = " << model->active() << endl;
+  debug_out  << " active = " << model->active() << std::endl;
 #endif
   return;
 }
@@ -2070,7 +2070,7 @@ void SelfLocalisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
 #endif
 #if DEBUG_LOCALISATION_VERBOSITY > 2
                 debug_out  <<"[" << m_currentFrameNumber << "]: Merging Model[" << modelB->id() << "][alpha=" << modelB->alpha() << "]";
-                debug_out  << " into Model[" << modelA->id() << "][alpha=" << modelA->alpha() << "] " << " Merge Metric = " << mergeM << endl  ;
+                debug_out  << " into Model[" << modelA->id() << "][alpha=" << modelA->alpha() << "] " << " Merge Metric = " << mergeM << std::endl  ;
 #endif
                 MergeTwoModels(modelA,modelB);
             }

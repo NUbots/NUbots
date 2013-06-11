@@ -42,7 +42,7 @@ void FieldLine::set(const Vector2<GroundPoint>& end_points)
     m_end_points = end_points;
 }
 
-void FieldLine::printLabel(ostream &out) const
+void FieldLine::printLabel(std::ostream &out) const
 {
     out << m_end_points;
 }
@@ -55,7 +55,7 @@ double FieldLine::findScreenError(VisionFieldObject* other) const
     double d1 = ( m_end_points[0].screen - l->m_end_points[0].screen ).abs() + ( m_end_points[1].screen - l->m_end_points[1].screen ).abs();
     double d2 = ( m_end_points[0].screen - l->m_end_points[1].screen ).abs() + ( m_end_points[1].screen - l->m_end_points[0].screen ).abs();
 
-    return min(d1, d2);
+    return std::min(d1, d2);
 }
 
 double FieldLine::findGroundError(VisionFieldObject* other) const
@@ -66,7 +66,7 @@ double FieldLine::findGroundError(VisionFieldObject* other) const
     double d1 = ( m_end_points[0].ground - l->m_end_points[0].ground ).abs() + ( m_end_points[1].ground - l->m_end_points[1].ground ).abs();
     double d2 = ( m_end_points[0].ground - l->m_end_points[1].ground ).abs() + ( m_end_points[1].ground - l->m_end_points[0].ground ).abs();
 
-    return min(d1, d2);
+    return std::min(d1, d2);
 }
 
 //double FieldLine::findError(const FieldLine& measured) const
@@ -74,23 +74,23 @@ double FieldLine::findGroundError(VisionFieldObject* other) const
 //    return findError(Vector2<double>(measured.getScreenLineEquation().getRho(), measured.getScreenLineEquation().getPhi()));
 //}
 
-ostream& operator<< (ostream& output, const FieldLine& l)
+std::ostream& operator<< (std::ostream& output, const FieldLine& l)
 {
-    output << "FieldLine " << endl;
-    output << "Equation: " << l.m_screen_line << endl;
-    output << "Field Equation: " << l.m_ground_line << endl;
-    output << "\tpixelloc: [" << l.m_location.screen.x << ", " << l.m_location.screen.y << "]" << endl;
-    output << " angularloc: [" << l.m_location.angular.x << ", " << l.m_location.angular.y << "]" << endl;
-    output << "\trelative field coords: [" << l.m_location.relativeRadial.x << ", " << l.m_location.relativeRadial.y << ", " << l.m_location.relativeRadial.z << "]" << endl;
-    output << "\tspherical error: [" << l.m_spherical_error.x << ", " << l.m_spherical_error.y << "]" << endl;
+    output << "FieldLine " << std::endl;
+    output << "Equation: " << l.m_screen_line << std::endl;
+    output << "Field Equation: " << l.m_ground_line << std::endl;
+    output << "\tpixelloc: [" << l.m_location.screen.x << ", " << l.m_location.screen.y << "]" << std::endl;
+    output << " angularloc: [" << l.m_location.angular.x << ", " << l.m_location.angular.y << "]" << std::endl;
+    output << "\trelative field coords: [" << l.m_location.relativeRadial.x << ", " << l.m_location.relativeRadial.y << ", " << l.m_location.relativeRadial.z << "]" << std::endl;
+    output << "\tspherical error: [" << l.m_spherical_error.x << ", " << l.m_spherical_error.y << "]" << std::endl;
     output << "\tsize on screen: [" << l.m_size_on_screen.x << ", " << l.m_size_on_screen.y << "]";
     return output;
 }
 
-ostream& operator<< (ostream& output, const vector<FieldLine>& v)
+std::ostream& operator<< (std::ostream& output, const std::vector<FieldLine>& v)
 {
     for (size_t i=0; i<v.size(); i++)
-        output << v[i] << endl;
+        output << v[i] << std::endl;
     return output;
 }
 
@@ -121,7 +121,7 @@ ostream& operator<< (ostream& output, const vector<FieldLine>& v)
 //            render_pt2 = right_i;
 //        }
 //        else {
-//            errorlog << "FieldLine::render - line outside image bounds" << endl;
+//            errorlog << "FieldLine::render - line outside image bounds" << std::endl;
 //            return;
 //        }
 //    }
@@ -134,7 +134,7 @@ ostream& operator<< (ostream& output, const vector<FieldLine>& v)
 //            render_pt2 = bottom_i;
 //        }
 //        else {
-//            errorlog << "FieldLine::render - line outside image bounds" << endl;
+//            errorlog << "FieldLine::render - line outside image bounds" << std::endl;
 //            return;
 //        }
 //    }
@@ -144,7 +144,7 @@ ostream& operator<< (ostream& output, const vector<FieldLine>& v)
 //            render_pt2 = bottom_i;
 //        }
 //        else {
-//            errorlog << "FieldLine::render - line outside image bounds" << endl;
+//            errorlog << "FieldLine::render - line outside image bounds" << std::endl;
 //            return;
 //        }
 //    }

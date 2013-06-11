@@ -7,7 +7,7 @@
 #include "nubotdataconfig.h"
 
 #include <iostream>
-using namespace std;
+
 
 ofstream debug;
 ofstream errorlog;

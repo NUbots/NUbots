@@ -44,12 +44,12 @@ public:
     virtual void doState()
     {
 	#if DEBUG_BEHAVIOUR_VERBOSITY > 3
-        debug << "PausedWalkOptimisationState::doState" << endl;
+        debug << "PausedWalkOptimisationState::doState" << std::endl;
     #endif
         if (m_parent->stateChanged())
         {
             m_jobs->addMotionJob(new WalkJob(0,0,0));
-            vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+            std::vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
             m_jobs->addMotionJob(new HeadJob(m_actions->CurrentTime + 500, zero));
         }
     };

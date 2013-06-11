@@ -15,7 +15,7 @@
 #include "Vision/visionblackboard.h"
 #include "Vision/VisionTools/classificationcolours.h"
 
-using namespace std;
+
 
 class ObjectDetectionCH
 {

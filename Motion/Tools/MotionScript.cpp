@@ -34,7 +34,6 @@
 
 #include <sstream>
 #include <cmath>
-using namespace std;
 
 MotionScript::MotionScript()
 {
@@ -43,7 +42,7 @@ MotionScript::MotionScript()
     m_play_start_time = 0;
 }
 
-MotionScript::MotionScript(string filename)
+MotionScript::MotionScript(std::string filename)
 {
     m_name = filename;
     m_is_valid = load();
@@ -51,7 +50,7 @@ MotionScript::MotionScript(string filename)
     m_play_start_time = 0;
 }
 
-string& MotionScript::getName()
+std::string& MotionScript::getName()
 {
     return m_name;
 }
@@ -192,23 +191,23 @@ void MotionScript::play(NUSensorsData* data, NUActionatorsData* actions)
             debug << "LLeg until " << timeFinishedWithLLeg() << ", ";
         if (m_uses_rleg)
             debug << "RLeg until " << timeFinishedWithRLeg() << ", ";
-        debug << "runs from " << m_play_start_time << " to " << timeFinished() << endl;
+        debug << "runs from " << m_play_start_time << " to " << timeFinished() << std::endl;
     #endif
     
     #if DEBUG_NUMOTION_VERBOSITY > 1
-        debug << MotionFileTools::fromMatrix(m_curvetimes) << endl;
-        debug << MotionFileTools::fromMatrix(m_curvepositions) << endl;
-        debug << MotionFileTools::fromMatrix(m_curvevelocities) << endl;
-        debug << MotionFileTools::fromMatrix(m_curvegains) << endl;
+        debug << MotionFileTools::fromMatrix(m_curvetimes) << std::endl;
+        debug << MotionFileTools::fromMatrix(m_curvepositions) << std::endl;
+        debug << MotionFileTools::fromMatrix(m_curvevelocities) << std::endl;
+        debug << MotionFileTools::fromMatrix(m_curvegains) << std::endl;
     #endif
 }
 
 bool MotionScript::load()
 {
-    ifstream file((CONFIG_DIR + "Motion/Scripts/" + m_name + ".num").c_str());
+    std::ifstream file((CONFIG_DIR + "Motion/Scripts/" + m_name + ".num").c_str());
     if (!file.is_open())
     {
-        errorlog << "MotionScript::load(). Unable to open " << m_name << endl;
+        errorlog << "MotionScript::load(). Unable to open " << m_name << std::endl;
         return false;
     }
     else
@@ -218,7 +217,7 @@ bool MotionScript::load()
         m_labels = MotionFileTools::toStringVector(file);
         if (m_labels.empty())
         {
-            errorlog << "MotionScript::load(). Unable to load " << m_name << " the file labels are invalid " << endl;
+            errorlog << "MotionScript::load(). Unable to load " << m_name << " the file labels are invalid " << std::endl;
             return false;
         }
         m_playspeed = 1.0;
@@ -394,22 +393,22 @@ void MotionScript::appendReturnLimbToStart(const vector<int>& ids, vector<vector
     }
 }
 
-ostream& operator<< (ostream& output, const MotionScript& p_script)
+std::ostream& operator<< (std::ostream& output, const MotionScript& p_script)
 {
     return output;
 }
 
-ostream& operator<< (ostream& output, const MotionScript* p_script)
+std::ostream& operator<< (std::ostream& output, const MotionScript* p_script)
 {
     return output;
 }
 
-istream& operator>> (istream& input, MotionScript& p_script)
+std::istream& operator>> (std::istream& input, MotionScript& p_script)
 {
     return input;
 }
 
-istream& operator>> (istream& input, MotionScript* p_script)
+std::istream& operator>> (std::istream& input, MotionScript* p_script)
 {
     return input;
 }

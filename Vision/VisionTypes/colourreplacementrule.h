@@ -23,14 +23,14 @@ public:
       @param method The method name desired.
       @return String name of the method.
       */
-    static string getMethodName(ReplacementMethod method);
+    static std::string getMethodName(ReplacementMethod method);
 
     /*!
       Gets the method matching the given string.
       @param name String name of the method.
       @return The method desired.
       */
-    static ReplacementMethod getMethodFromName(const string& name);
+    static ReplacementMethod getMethodFromName(const std::string& name);
 
 public:
     static ColourSegment nomatch;   //! @variable a static segment used to represent one that cannot be matched to any rule.
@@ -57,17 +57,17 @@ public:
     ReplacementMethod getMethod() const;
     
     //! output stream operator.
-    friend ostream& operator<< (ostream& output, const ColourReplacementRule& c);
+    friend std::ostream& operator<< (std::ostream& output, const ColourReplacementRule& c);
     //! output stream operator for a vector of rules.
-    friend ostream& operator<< (ostream& output, const vector<ColourReplacementRule>& v);
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<ColourReplacementRule>& v);
 
     //! input stream operator.
-    friend istream& operator>> (istream& input, ColourReplacementRule& c);
+    friend std::istream& operator>> (std::istream& input, ColourReplacementRule& c);
     //! input stream operator for a vector of rules.
-    friend istream& operator>> (istream& input, vector<ColourReplacementRule>& v);
+    friend std::istream& operator>> (std::istream& input, std::vector<ColourReplacementRule>& v);
     
 private:
-    string m_name;  //! @variable the name of the rule.
+    std::string m_name;  //! @variable the name of the rule.
     
     unsigned int m_middle_min,   //! @variable the minimum length of the middle segment for a match.
                  m_middle_max,   //! @variable the maximum length of the middle segment for a match.
@@ -76,7 +76,7 @@ private:
                  m_after_min,    //! @variable the minimum length of the last segment for a match.
                  m_after_max;    //! @variable the maximum length of the last segment for a match.
     
-    vector<Colour>  m_before,   //! @variable The colour that the first segment must be.
+    std::vector<Colour>  m_before,   //! @variable The colour that the first segment must be.
                     m_middle,   //! @variable The colour that the middle segment must be.
                     m_after;    //! @variable The colour that the last segment must be.
     

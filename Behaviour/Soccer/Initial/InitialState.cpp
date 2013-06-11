@@ -56,17 +56,17 @@ void InitialState::doState()
     }
     m_jobs->addMotionJob(new WalkJob(0.f,0.f,0.f));
     // In inital the chest led should be off
-    m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, vector<float>(3,0));
+    m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, std::vector<float>(3,0));
     
     // In initial if we have kick off the led should be on, and off when we don't have kick off
     if (m_game_info->haveKickoff())
     {
-        vector<float> yellow(3,1);
+        std::vector<float> yellow(3,1);
         yellow[2] = 0;
         m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, yellow);
     }
     else
-        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, vector<float>(3,0));
+        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, std::vector<float>(3,0));
     
     // In initial if the left foot is pressed then we should swap teams
     if (m_provider->singleLeftBumperClick() or m_provider->longLeftBumperClick())

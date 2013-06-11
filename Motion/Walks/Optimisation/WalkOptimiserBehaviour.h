@@ -35,7 +35,7 @@
 
 #include <string>
 #include <fstream>
-using namespace std;
+
 
 class WalkOptimiserBehaviour
 {
@@ -46,8 +46,8 @@ public:
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(JobList& joblist);
     
-    void summaryTo(ostream& output);
-    void csvTo(ostream& output);
+    void summaryTo(std::ostream& output);
+    void csvTo(std::ostream& output);
 protected:
     void startCostTrial();
     void measureCost();
@@ -115,8 +115,8 @@ private:
     
     bool m_assessor_running;
     // Serialisation
-    string m_assessparameters_filename;
-    string m_saved_optimiser_filename;
+    std::string m_assessparameters_filename;
+    std::string m_saved_optimiser_filename;
     ofstream m_parameter_log;
     ofstream m_performance_log;
 };

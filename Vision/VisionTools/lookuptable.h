@@ -32,10 +32,10 @@ public:
 
     /*!
       @brief Loads a new LUT from a given file.
-      @param filename The filename string.
+      @param filename The filename std::string.
       @return Returns the success of the operation.
       */
-    bool loadLUTFromFile(const string& fileName);
+    bool loadLUTFromFile(const std::string& fileName);
 
     /*!
     *  @brief Classifies an individual pixel.

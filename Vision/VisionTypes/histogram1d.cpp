@@ -23,7 +23,7 @@ Histogram1D::Histogram1D(size_t num_bins, double bin_width)
 }
 
 
-Histogram1D::Histogram1D(vector<double> bin_widths)
+Histogram1D::Histogram1D(std::vector<double> bin_widths)
 {
     double cur_pos = 0;
     m_bins.clear();
@@ -63,14 +63,14 @@ size_t Histogram1D::getBinIndex(double pos)
     throw std::out_of_range("Histogram1D::addToBin called with position too high.");
 }
 
-vector<Bin> Histogram1D::getLargestBins(size_t n)
+std::vector<Bin> Histogram1D::getLargestBins(size_t n)
 {
     //O(nk)
     if(n < 1 || n > m_bins.size()) {
         throw std::out_of_range("Histogram1D::getLargestBins called for too many or too few bins.");
     }
     else {
-        std::priority_queue<Bin, vector<Bin>, BinComparison> cur_largest;
+        std::priority_queue<Bin, std::vector<Bin>, BinComparison> cur_largest;
         //push first n values
         for(size_t k=0; k<n; k++) {
             cur_largest.push(m_bins.at(k));
@@ -86,7 +86,7 @@ vector<Bin> Histogram1D::getLargestBins(size_t n)
         }
 
         //generate vector from priority queue
-        vector<Bin> result;
+        std::vector<Bin> result;
         while(!cur_largest.empty()) {
             result.push_back(cur_largest.top());
             cur_largest.pop();
@@ -98,7 +98,7 @@ vector<Bin> Histogram1D::getLargestBins(size_t n)
 
 void Histogram1D::mergeAdjacentPeaks(double minimum_size)
 {
-    vector<Bin>::iterator it = m_bins.begin();
+    std::vector<Bin>::iterator it = m_bins.begin();
     while(it + 1 != m_bins.end()) {
         if(it->value > minimum_size && (it+1)->value > minimum_size) {
             mergeBins(*it, *(it+1));
@@ -137,7 +137,7 @@ void Histogram1D::addToBins(double start, double end, double density)
     if(start > end)
         throw std::out_of_range("Histogram1D::addToBin called with inverted range (start > end).");
 
-    vector<Bin>::iterator bs = m_bins.begin(),
+    std::vector<Bin>::iterator bs = m_bins.begin(),
            be,
            bi;
     //find first bin
@@ -183,8 +183,8 @@ void Histogram1D::mergeBins(Bin first, Bin second)
         first_index = temp;
     }
 
-    vector<Bin>::iterator it_first = m_bins.begin() + first_index;
-    vector<Bin>::iterator it_next;
+    std::vector<Bin>::iterator it_first = m_bins.begin() + first_index;
+    std::vector<Bin>::iterator it_next;
 
     for(it_next = it_first + 1; it_next != m_bins.begin() + second_index + 1; it_next++) {
         it_first->value += it_next->value;

@@ -35,7 +35,7 @@ using namespace webots;
 NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 0
-    debug << "NAOWebotsCamera::NAOWebotsCamera(" << platform << ")" << endl;
+    debug << "NAOWebotsCamera::NAOWebotsCamera(" << platform << ")" << std::endl;
 #endif
     m_camera = platform->getCamera("camera");
     m_camera->enable(80); 
@@ -47,7 +47,7 @@ NAOWebotsCamera::NAOWebotsCamera(NAOWebotsPlatform* platform)
     m_totalpixels = m_width*m_height;
 
 #if DEBUG_NUCAMERA_VERBOSITY > 0
-    debug << "NAOWebotsCamera::NAOWebotsCamera(). Width = " << m_width << " Height = " << m_height << endl;
+    debug << "NAOWebotsCamera::NAOWebotsCamera(). Width = " << m_width << " Height = " << m_height << std::endl;
 #endif
     
     m_image = new NUImage(m_width, m_height, false);

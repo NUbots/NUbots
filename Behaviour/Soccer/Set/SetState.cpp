@@ -53,7 +53,7 @@ void SetState::doState()
         m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::SET);
     }
     // In set the chest led should be yellow
-    vector<float> yellow(3,1);
+    std::vector<float> yellow(3,1);
     yellow[0] = 0.9;
     yellow[2] = 0.1;
     m_actions->add(NUActionatorsData::ChestLed, m_data->CurrentTime, yellow);
@@ -62,7 +62,7 @@ void SetState::doState()
     if (m_game_info->haveKickoff())
         m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, yellow);
     else
-        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, vector<float>(3,0));
+        m_actions->add(NUActionatorsData::RFootLed, m_data->CurrentTime, std::vector<float>(3,0));
     
     // In set we can move the head, so track the ball if you can see it otherwise do a pan
     

@@ -6,7 +6,7 @@ class RANSACModel {
 public:
     virtual ~RANSACModel();
 
-    virtual bool regenerate(const vector<DataPoint>& pts) = 0;
+    virtual bool regenerate(const std::vector<DataPoint>& pts) = 0;
 
     virtual unsigned int minPointsForFit() const = 0;
 

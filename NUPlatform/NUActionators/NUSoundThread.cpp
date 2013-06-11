@@ -28,24 +28,24 @@
 #include <stdlib.h>
 #include <errno.h>
 
-using namespace std;
+
 
 /*! @brief Constructs the sound thread
  */
 
-NUSoundThread::NUSoundThread() : QueueThread<std::string>(string("NUSoundThread"), 0)
+NUSoundThread::NUSoundThread() : QueueThread<std::string>(std::string("NUSoundThread"), 0)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "NUSoundThread::NUSoundThread() with priority " << static_cast<int>(m_priority) << endl;
+        debug << "NUSoundThread::NUSoundThread() with priority " << static_cast<int>(m_priority) << std::endl;
     #endif
     #if defined(TARGET_OS_IS_WINDOWS)
-        m_player_command = string("start/min sndrec32 /play /close ");
+        m_player_command = std::string("start/min sndrec32 /play /close ");
     #elif defined(TARGET_OS_IS_DARWIN)
-        m_player_command = string("afplay ");
+        m_player_command = std::string("afplay ");
     #else
-        m_player_command = string("aplay ");
+        m_player_command = std::string("aplay ");
     #endif
-    m_sound_dir = string(DATA_DIR) + string("Sounds/");
+    m_sound_dir = std::string(DATA_DIR) + std::string("Sounds/");
     start();
 }
 
@@ -54,7 +54,7 @@ NUSoundThread::NUSoundThread() : QueueThread<std::string>(string("NUSoundThread"
 NUSoundThread::~NUSoundThread()
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "NUSoundThread::~NUSoundThread()" << endl;
+        debug << "NUSoundThread::~NUSoundThread()" << std::endl;
     #endif
 }
 
@@ -63,7 +63,7 @@ NUSoundThread::~NUSoundThread()
 void NUSoundThread::run()
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "NUSoundThread::run()" << endl;
+        debug << "NUSoundThread::run()" << std::endl;
     #endif
     
     int err = 0;
@@ -71,10 +71,10 @@ void NUSoundThread::run()
     {
         waitForCondition();
         // ------------------------------------------------------------------------------------------------------------------------------------------
-        debug << "NUSoundThread Processing: " << m_player_command + m_sound_dir + m_queue.front() << endl;
+        debug << "NUSoundThread Processing: " << m_player_command + m_sound_dir + m_queue.front() << std::endl;
         err = system((m_player_command + m_sound_dir + m_queue.front()).c_str());
         m_queue.pop_front();
         // ------------------------------------------------------------------------------------------------------------------------------------------
     } 
-    errorlog << "NUSoundThread is exiting. err: " << err << " errno: " << errno << endl;
+    errorlog << "NUSoundThread is exiting. err: " << err << " errno: " << errno << std::endl;
 }

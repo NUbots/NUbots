@@ -1,5 +1,5 @@
 /*! @file DictionaryApproximator.h
-    @brief Uses a discretised lookup table derived from the continuous input vectors. Used in: MRLAgent.
+    @brief Uses a discretised lookup table derived from the continuous input std::vectors. Used in: MRLAgent.
 
     @author Josiah Walker
 
@@ -32,17 +32,17 @@
 #include <vector>
 #include <iostream>
 #include "ApproximatorInterface.h"
-using namespace std;
+
 
 
 class DictionaryApproximator: public ApproximatorInterface {
 
 private:
     int tileMultiplier,numInputs,numOutputs;
-    map<string,float> approximator;
-    float getValue(vector<float> const& observations,int action);
-    float setValue(vector<float> const& observations,int action,float value);
-    string getRepresentation(vector<float> const& observations,int action);
+    std::map<std::string,float> approximator;
+    float getValue(std::vector<float> const& observations,int action);
+    float setValue(std::vector<float> const& observations,int action,float value);
+    std::string getRepresentation(std::vector<float> const& observations,int action);
     
 public:
     /*! @brief numberOfHiddens represents the tileMultiplier variable. This variable controls the resolution of the discretisation of the lookup table.
@@ -50,15 +50,15 @@ public:
     */
     virtual void initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range = 1);
     
-    virtual void doLearningEpisode(vector< vector<float> > const& observations, vector< vector<float> > const& values, float stepSize=0.1, int iterations=1);
+    virtual void doLearningEpisode(std::vector< std::vector<float> > const& observations, std::vector< std::vector<float> > const& values, float stepSize=0.1, int iterations=1);
     
-    virtual vector<float> getValues(vector<float> const& observations);
+    virtual std::vector<float> getValues(std::vector<float> const& observations);
     
-    virtual void saveApproximator(string agentName);
+    virtual void saveApproximator(std::string agentName);
     
-    virtual void loadApproximator(string agentName);
+    virtual void loadApproximator(std::string agentName);
     
-    map<string,float>* getMap();
+    std::map<std::string,float>* getMap();
 
     DictionaryApproximator():ApproximatorInterface(){}
     

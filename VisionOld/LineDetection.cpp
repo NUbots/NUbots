@@ -9,7 +9,7 @@
 //#define LINE_SEARCH_GRID_SIZE 4
 //#define POINT_SEARCH_GRID_SIZE 4
 #include <stdio.h>
-//using namespace std;
+
 #include <vector>
 #include "Vision.h"
 #include "EllipseFit.h"
@@ -106,7 +106,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //}
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Pre-FindPenaltySpot" << endl;
+        debug  << "\t\tLineDetection::Pre-FindPenaltySpot" << std::endl;
     #endif
     
     //qDebug() << "Finding Penalty Spots:";
@@ -114,7 +114,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     //qDebug() << "Finding Corner Points:";
     
     #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Post-FindPenaltySpot" << endl;
+        debug  << "\t\tLineDetection::Post-FindPenaltySpot" << std::endl;
     #endif
 
 
@@ -122,13 +122,13 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 
 
     #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Pre-FindCornerPoints" << endl;
+        debug  << "\t\tLineDetection::Pre-FindCornerPoints" << std::endl;
     #endif
     
     FindCornerPoints(image_width,image_height,vision);
     
     #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Post-FindCornerPoints: Found " << cornerPoints.size() << " corners."<< endl;
+        debug  << "\t\tLineDetection::Post-FindCornerPoints: Found " << cornerPoints.size() << " corners."<< std::endl;
     #endif
     //qDebug() << "Corners found: " << cornerPoints.size();
     //for (unsigned int i = 0; i < cornerPoints.size(); i ++)
@@ -149,35 +149,35 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
     #endif
     //qDebug() << "Decode Corners:";
     #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Pre-DecodeCorners" << endl;
+        debug  << "\t\tLineDetection::Pre-DecodeCorners" << std::endl;
     #endif
     
     DecodeCorners(AllObjects, vision->m_timestamp, vision);
     
     #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Post-DecodeCorners" << endl;
+        debug  << "\t\tLineDetection::Post-DecodeCorners" << std::endl;
     #endif
     //qDebug() << "Decode Penalty Spots:";
     
     
     #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Pre-DecodePenaltySpot" << endl;
+        debug  << "\t\tLineDetection::Pre-DecodePenaltySpot" << std::endl;
     #endif
     
     DecodePenaltySpot(AllObjects, vision->m_timestamp);
     
     #if DEBUG_VISION_VERBOSITY > 5
-        debug  << "\t\tLineDetection::Post-DecodePenaltySpot" << endl;
+        debug  << "\t\tLineDetection::Post-DecodePenaltySpot" << std::endl;
     #endif
     //qDebug() << "Finnished Decoding Penalty Spots:";
 
     //
     /*#if DEBUG_VISION_VERBOSITY > 5
     end = clock();
-    debug << "\t\t\tLine Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    debug << "\t\t\tLine Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    debug << "\t\t\tLine Detection: Field Lines  : " << ((double)startCorner-startLineForm)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
-    debug << "\t\t\tLine Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << endl;
+    debug << "\t\t\tLine Detection: " << ((double)end-start)/CLOCKS_PER_SEC * 1000 << " ms" << std::endl;
+    debug << "\t\t\tLine Detection: Corner Points: " << ((double)end-startCorner)/CLOCKS_PER_SEC * 1000 << " ms" << std::endl;
+    debug << "\t\t\tLine Detection: Field Lines  : " << ((double)startCorner-startLineForm)/CLOCKS_PER_SEC * 1000 << " ms" << std::endl;
+    debug << "\t\t\tLine Detection: Line Points  : " << ((double)startLineForm-start)/CLOCKS_PER_SEC * 1000 << " ms" << std::endl;
     #endif
     */
 }
@@ -185,8 +185,8 @@ void LineDetection::FormLines(FieldObjects* AllObjects, Vision* vision, NUSensor
 void LineDetection::FormLines(FieldObjects* AllObjects,
                               Vision* vision,
                               NUSensorsData* data,
-                              vector< ObjectCandidate >& candidates,
-                              vector< TransitionSegment>& leftoverPoints) {
+                              std::vector< ObjectCandidate >& candidates,
+                              std::vector< TransitionSegment>& leftoverPoints) {
 
 
     //Setting up the variables:
@@ -197,7 +197,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     int image_width = vision->getImageWidth();
     sensorsData = data;
 
-    vector<float> ctgvector;
+    std::vector<float> ctgvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
     if(isOK == false)
     {
@@ -216,20 +216,20 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     /*SHANNON'S NEW LINE DETECTION*/
 
     //get clusters
-    vector< vector<LinePoint*> > clusters;
-    vector< LinePoint* > leftover;
+    std::vector< std::vector<LinePoint*> > clusters;
+    std::vector< LinePoint* > leftover;
     //temps
-    vector< TransitionSegment > tempseg;
+    std::vector< TransitionSegment > tempseg;
     LinePoint* temppoint;
-    vector<LinePoint*> tempcluster;
+    std::vector<LinePoint*> tempcluster;
     for(unsigned int i=0; i<candidates.size(); i++)
     {
-        //For each ObjectCandidate create vector of linepoints and add it to clusters
+        //For each ObjectCandidate create std::vector of linepoints and add it to clusters
         tempseg = candidates[i].getSegments();
         tempcluster.clear();
         for(unsigned int k=0; k<tempseg.size(); k++)
         {
-            //For each segment create a new linepoint and push it to a vector
+            //For each segment create a new linepoint and push it to a std::vector
             temppoint = new LinePoint();
             temppoint->x = (double)tempseg[k].getMidPoint().x;
             temppoint->y = (double)tempseg[k].getMidPoint().y;
@@ -301,7 +301,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     */
 
     //qDebug() << "Beginning SAM:\n";
-    vector<LSFittedLine*> lines;
+    std::vector<LSFittedLine*> lines;
     /*OUTPUT FOR DEBUGGING*/
     /*
     ofstream fout;
@@ -336,7 +336,7 @@ void LineDetection::FormLines(FieldObjects* AllObjects,
     pointsout.open("convertedpoints.txt");
     linesout.open("convertedlines.txt");
     LSFittedLine* line;
-    vector<LinePoint*> points;
+    std::vector<LinePoint*> points;
     for(unsigned int i=0; i<lines.size(); i++) {
         line = lines[i];
         //output line
@@ -648,7 +648,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
 
     //HORIZONTAL Line Search:
     //clock_t startHorizontalSearch = clock();
-    //debug << "Line Detection: Field Lines  : Sorting: " << (double)(startHorizontalSearch - startSort )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //debug << "Line Detection: Field Lines  : Sorting: " << (double)(startHorizontalSearch - startSort )/ CLOCKS_PER_SEC * 1000 << " ms"<<std::endl;
     //Only bother searching if there is enough points to make part of a line..
     for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size() ; SearchFrom++)
     {   //for all line points recorded
@@ -723,7 +723,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //SORT POINTS
     //qDebug() << "SORTING...";
     //clock_t startSortAgain = clock();
-    //debug << "Line Detection: Field Lines  : Horizontal Search: " << (double)(startSortAgain - startHorizontalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //debug << "Line Detection: Field Lines  : Horizontal Search: " << (double)(startSortAgain - startHorizontalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<std::endl;
     qsort(linePoints,0,linePoints.size()-1,1);
     /*for (size_t i = 0; i < linePoints.size() ; i++)
     {
@@ -733,7 +733,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     //qDebug() << "Finnished...";
 
     //clock_t startVerticalSearch = clock();
-    //debug << "Line Detection: Field Lines  : Sort: " << (double)(startVerticalSearch -  startSortAgain )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //debug << "Line Detection: Field Lines  : Sort: " << (double)(startVerticalSearch -  startSortAgain )/ CLOCKS_PER_SEC * 1000 << " ms"<<std::endl;
     for (unsigned int SearchFrom = 0; SearchFrom < linePoints.size() ; SearchFrom++){
         if(fieldLines.size()> MAX_FIELDLINES) break;
         if(linePoints[SearchFrom].inUse) continue;
@@ -802,7 +802,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     }
 
     //clock_t startJoining = clock();
-    //debug << "Line Detection: Field Lines  : Vertical Search: " << (double)(startJoining - startVerticalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //debug << "Line Detection: Field Lines  : Vertical Search: " << (double)(startJoining - startVerticalSearch )/ CLOCKS_PER_SEC * 1000 << " ms"<<std::endl;
 
     //---------------------------------------------------
     // START OF JOINING LINES
@@ -975,7 +975,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
     }*/
 
     //clock_t end = clock();
-    //debug << "Line Detection: Field Lines  : Joining Search: " << (double)(end - startJoining )/ CLOCKS_PER_SEC * 1000 << " ms"<<endl;
+    //debug << "Line Detection: Field Lines  : Joining Search: " << (double)(end - startJoining )/ CLOCKS_PER_SEC * 1000 << " ms"<<std::endl;
 
 }
 
@@ -988,7 +988,7 @@ void LineDetection::FindFieldLines(int IMAGE_WIDTH, int IMAGE_HEIGHT){
                 //4. If no white found then we have penalty spot
 -------------**/
 
-void LineDetection::FindPenaltySpot(vector< ObjectCandidate >& candidates, Vision* vision)
+void LineDetection::FindPenaltySpot(std::vector< ObjectCandidate >& candidates, Vision* vision)
 {
         //int IMAGE_WIDTH = vision->getImageWidth();
 
@@ -1038,10 +1038,10 @@ void LineDetection::FindPenaltySpot(vector< ObjectCandidate >& candidates, Visio
             #if DEBUG_VISION_VERBOSITY > 5
                 debug << "\t\t\tPenalty Spots: "<< i <<"Look for Whites around the penalty spot.\n";
             #endif
-            //qDebug() << "\t\t_______________CHECK PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+            //qDebug() << "\t\t_______________CHECK PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< std::endl;
             if(checkAroundForWhite(lx,ly,mx, my,rx,ry, lineLength, vision)) continue;
 
-            //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+            //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< std::endl;
             #if DEBUG_VISION_VERBOSITY > 5
                 debug << "\t\t\tPenalty Spots: "<< i <<"No Whites around the penalty spot.\n";
             #endif
@@ -1067,7 +1067,7 @@ void LineDetection::FindPenaltySpot(vector< ObjectCandidate >& candidates, Visio
                 return;
             }
 
-            //qDebug() << "Distance:\t"<< TempDist<<  "\tBearing:\t"<< TempBearing <<  "\tElevation:\t" << TempElev<< endl;
+            //qDebug() << "Distance:\t"<< TempDist<<  "\tBearing:\t"<< TempBearing <<  "\tElevation:\t" << TempElev<< std::endl;
             #if DEBUG_VISION_VERBOSITY > 5
                 debug << "\t\t\tPenalty Spots: "<< i <<" Distance to point Success.\n";
             #endif
@@ -1087,7 +1087,7 @@ void LineDetection::FindPenaltySpot(vector< ObjectCandidate >& candidates, Visio
             #if DEBUG_VISION_VERBOSITY > 5
                 debug << "\t\t\tPenalty Spots: "<< i <<" Line too long.\n";
             #endif
-            //cout << "Line["<< i<< "] too long."<< endl;
+            //std::cout << "Line["<< i<< "] too long."<< std::endl;
             continue;
         }
     }
@@ -1141,10 +1141,10 @@ void LineDetection::FindPenaltySpot(vector< ObjectCandidate >& candidates, Visio
 
             lineLength = fabs(lx-rx);
 
-            //qDebug() << "\t\t_______________CHECK PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+            //qDebug() << "\t\t_______________CHECK PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< std::endl;
             if(checkAroundForWhite(lx,ly,mx, my,rx,ry, lineLength, vision)) continue;
 
-            //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< endl;
+            //qDebug() << "\t\t_______________PENALTY SPOT FOUND!!!___________ at ("  << mx << ","<<  my << ")"<< std::endl;
             #if DEBUG_VISION_VERBOSITY > 5
                 debug << "\t\t\tPenalty Spots: "<< i <<"No Whites around the penalty spot.\n";
             #endif
@@ -1170,7 +1170,7 @@ void LineDetection::FindPenaltySpot(vector< ObjectCandidate >& candidates, Visio
                 return;
             }
 
-            //qDebug() << "Distance:\t"<< TempDist<<  "\tBearing:\t"<< TempBearing <<  "\tElevation:\t" << TempElev<< endl;
+            //qDebug() << "Distance:\t"<< TempDist<<  "\tBearing:\t"<< TempBearing <<  "\tElevation:\t" << TempElev<< std::endl;
             #if DEBUG_VISION_VERBOSITY > 5
                 debug << "\t\t\tPenalty Spots: "<< i <<" Distance to point Success.\n";
             #endif
@@ -1190,7 +1190,7 @@ void LineDetection::FindPenaltySpot(vector< ObjectCandidate >& candidates, Visio
             #if DEBUG_VISION_VERBOSITY > 5
                 debug << "\t\t\tPenalty Spots: "<< i <<" Line too long.\n";
             #endif
-            //cout << "Line["<< i<< "] too long."<< endl;
+            //std::cout << "Line["<< i<< "] too long."<< std::endl;
             continue;
         }
     }
@@ -1378,10 +1378,10 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
         if(isOKA== false || isOKB ==false)
         {
             #if DEBUG_VISION_VERBOSITY > 0
-                debug << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << endl;
+                debug << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << std::endl;
             #endif
             #if TARGET_OS_IS_WINDOWS
-                qDebug() << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << endl;
+                qDebug() << "TransformLinesToWorldModelSpace:: Distance to Point Failed." << std::endl;
             #endif
             break;
         }
@@ -1416,7 +1416,7 @@ void  LineDetection::TransformLinesToWorldModelSpace(Vision* vision)
 
     //Find Candidates for CentreCircle Lines:
 
-    vector<unsigned int> usedLines;
+    std::vector<unsigned int> usedLines;
 
     for(unsigned int i = 0 ; i < transformedFieldLines.size(); i++ )
     {
@@ -1852,10 +1852,10 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
 
 
         #if TARGET_OS_IS_WINDOWS
-            qDebug()  << "Start Centre Circle Detection: Corners " << cornerPoints.size() << cornerPointsOnScreen << endl;
+            qDebug()  << "Start Centre Circle Detection: Corners " << cornerPoints.size() << cornerPointsOnScreen << std::endl;
         #endif
         #if DEBUG_VISION_VERBOSITY > 0
-            debug  << "Start Centre Circle Detection: Corners " << cornerPoints.size() << cornerPointsOnScreen <<endl;
+            debug  << "Start Centre Circle Detection: Corners " << cornerPoints.size() << cornerPointsOnScreen <<std::endl;
         #endif
 
         //Sort Lines by most Left:
@@ -1863,7 +1863,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
 
         for (unsigned int i = 0; i<fieldLines.size(); i++)
         {
-            //cout << "i:";
+            //std::cout << "i:";
             if(fieldLines[i].valid == false)	continue;
             int lx,ly,rx,ry;
             lx = fieldLines[i].leftPoint.x;
@@ -1935,10 +1935,10 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
             }
         }
         #if TARGET_OS_IS_WINDOWS
-            qDebug()  << "LinePoints For Centre Circle Found: " << points.size()<< endl;
+            qDebug()  << "LinePoints For Centre Circle Found: " << points.size()<< std::endl;
         #endif
         #if DEBUG_VISION_VERBOSITY > 0
-            debug  << "LinePoints For Centre Circle Found: " << points.size()<< endl;
+            debug  << "LinePoints For Centre Circle Found: " << points.size()<< std::endl;
         #endif
 
         if(points.size() > 5)
@@ -2004,10 +2004,10 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
             {
 
                 #if TARGET_OS_IS_WINDOWS
-                    qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.relCx << ", " << ellipseCircleFitter.relCy << ", "<< ellipseCircleFitter.r << "]"<<endl;
+                    qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.relCx << ", " << ellipseCircleFitter.relCy << ", "<< ellipseCircleFitter.r << "]"<<std::endl;
                 #endif
                 #if DEBUG_VISION_VERBOSITY > 5
-                    debug  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
+                    debug  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<std::endl;
                 #endif
                 Vector3<float> measured((float)ellipseCircleFitter.relDistance,(float)ellipseCircleFitter.relBearing, (float)ellipseCircleFitter.relElevation);
                 Vector3<float> measuredError(ellipseCircleFitter.sd,0.0,0.0);
@@ -2029,7 +2029,7 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
                 
                 return;
             }
-            //qDebug() << "Center Circle: " << cx << "," << cy <<endl;
+            //qDebug() << "Center Circle: " << cx << "," << cy <<std::endl;
 
 
         }
@@ -2052,10 +2052,10 @@ void LineDetection::DecodeCorners(FieldObjects* AllObjects, double timestamp, Vi
         {
 
             #if TARGET_OS_IS_WINDOWS
-                qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.relCx << ", " << ellipseCircleFitter.relCy << ", "<< ellipseCircleFitter.r << "]"<<endl;
+                qDebug()  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.relCx << ", " << ellipseCircleFitter.relCy << ", "<< ellipseCircleFitter.r << "]"<<std::endl;
             #endif
             #if DEBUG_VISION_VERBOSITY > 5
-                debug  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<endl;
+                debug  << "Ellipse Fit Through Circle: [" << ellipseCircleFitter.cx << ", " << ellipseCircleFitter.cy << ", "<< "]"<<std::endl;
             #endif
             Vector3<float> measured((float)ellipseCircleFitter.relDistance,(float)ellipseCircleFitter.relBearing, (float)ellipseCircleFitter.relElevation);
             Vector3<float> measuredError(ellipseCircleFitter.sd,0.0,0.0);
@@ -2697,13 +2697,13 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, double timestamp
 
         if(yellowGoalSeen && blueGoalSeen)
         {
-                //qDebug() << "Cannot see both yellow and blue Goals at once." << endl;
+                //qDebug() << "Cannot see both yellow and blue Goals at once." << std::endl;
                 //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
                 return;
         }
         if(yellowGoalSeen==false && blueGoalSeen==false)
         {
-                //qDebug() << "No Goals or Posts seen." << endl;
+                //qDebug() << "No Goals or Posts seen." << std::endl;
                 //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
                 return;
         }
@@ -2714,7 +2714,7 @@ void LineDetection::DecodePenaltySpot(FieldObjects* AllObjects, double timestamp
         }
         //else
         //{
-                //cout << "No CentreCircle Visible" << endl;
+                //std::cout << "No CentreCircle Visible" << std::endl;
                 //AllObjects->ambiguousFieldObjects.push_back(possiblePenaltySpots[i]);
                 //return;
         //}
@@ -2814,7 +2814,7 @@ bool LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
     *bearing = vision->CalculateBearing(cx);
     *elevation = vision->CalculateElevation(cy);
 
-    vector<float> ctgvector;
+    std::vector<float> ctgvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector); 
     if(isOK == true)
     {
@@ -2826,7 +2826,7 @@ bool LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
         *elevation = result[2];
 
         #if DEBUG_VISION_VERBOSITY > 6
-            debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+            debug << "\t\tCalculated Distance to Point: " << *distance<<std::endl;
         #endif
     }
     return isOK;
@@ -2835,17 +2835,17 @@ bool LineDetection::GetDistanceToPoint(double cx, double cy, double* distance, d
 bool LineDetection::GetDistanceToPoint(LinePoint point, Vector3<float> &relativePoint, Vision* vision)
 {
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\t\t Calculated Bearing and Elevation: " << endl;
+        debug << "\t\t Calculated Bearing and Elevation: " << std::endl;
     #endif
     float bearing = vision->CalculateBearing(point.x);
     float elevation = vision->CalculateElevation(point.y);
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\t\t Bearing and Elevation: " << bearing << elevation << endl;
+        debug << "\t\t Bearing and Elevation: " << bearing << elevation << std::endl;
     #endif
-    vector<float> ctgvector;
+    std::vector<float> ctgvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
     #if DEBUG_VISION_VERBOSITY > 5
-        debug << "\t\t Get Sensor Data:  " << isOK << endl;
+        debug << "\t\t Get Sensor Data:  " << isOK << std::endl;
     #endif
     if(isOK == true)
     {
@@ -2854,7 +2854,7 @@ bool LineDetection::GetDistanceToPoint(LinePoint point, Vector3<float> &relative
         relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
         #if DEBUG_VISION_VERBOSITY > 5
-            debug << "\t\tCalculated Distance to Point: " << endl;
+            debug << "\t\tCalculated Distance to Point: " << std::endl;
         #endif
     }
     return isOK;
@@ -2865,7 +2865,7 @@ bool LineDetection::GetDistanceToPoint(Point point, Vector3<float> &relativePoin
     float bearing = vision->CalculateBearing(point.x);
     float elevation = vision->CalculateElevation(point.y);
 
-    vector<float> ctgvector;
+    std::vector<float> ctgvector;
     bool isOK = vision->getSensorsData()->get(NUSensorsData::CameraToGroundTransform, ctgvector);
     if(isOK == true)
     {
@@ -2874,7 +2874,7 @@ bool LineDetection::GetDistanceToPoint(Point point, Vector3<float> &relativePoin
         relativePoint = Kinematics::DistanceToPoint(camera2groundTransform, bearing, elevation);
 
         //#if DEBUG_VISION_VERBOSITY > 6
-        //    debug << "\t\tCalculated Distance to Point: " << *distance<<endl;
+        //    debug << "\t\tCalculated Distance to Point: " << *distance<<std::endl;
         //#endif
     }
     return isOK;
@@ -2973,8 +2973,8 @@ void LineDetection::MergeCloseCorners()
 {
     //Pixel Distance before Merging:
     int minDistance = 10;
-    vector < CornerPoint > ::iterator cornerPointIterator1;
-    vector < CornerPoint > ::iterator cornerPointIterator2;
+    std::vector < CornerPoint > ::iterator cornerPointIterator1;
+    std::vector < CornerPoint > ::iterator cornerPointIterator2;
     for(cornerPointIterator1 = cornerPoints.begin(); cornerPointIterator1 < cornerPoints.end(); )
     {
 

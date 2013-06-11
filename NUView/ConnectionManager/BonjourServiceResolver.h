@@ -33,7 +33,7 @@
 #include <dns_sd.h>
 #include <string>
 #include <list>
-using namespace std;
+
 
 class BonjourServiceResolver : public QObject
 {

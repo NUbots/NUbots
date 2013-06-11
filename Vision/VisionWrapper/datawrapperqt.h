@@ -77,35 +77,35 @@ public:
     const LookUpTable& getLUT() const;
 
     //! PUBLISH METHODS
-    void publish(const vector<const VisionFieldObject*> &visual_objects);
+    void publish(const std::vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
-    void debugPublish(const vector<Ball>& data);
-//    bool debugPublish(const vector<Beacon>& data);
-    void debugPublish(const vector<Goal>& data);
-    //void debugPublish(int i, const vector<Goal>& d);
-    void debugPublish(const vector<Obstacle>& data);
-    void debugPublish(const vector<FieldLine>& data);
-    void debugPublish(const vector<CentreCircle>& data);
-    void debugPublish(const vector<CornerPoint>& data);
-    void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
-    void debugPublish(DEBUG_ID id, const vector<GroundPoint>& data_points);
+    void debugPublish(const std::vector<Ball>& data);
+//    bool debugPublish(const std::vector<Beacon>& data);
+    void debugPublish(const std::vector<Goal>& data);
+    //void debugPublish(int i, const std::vector<Goal>& d);
+    void debugPublish(const std::vector<Obstacle>& data);
+    void debugPublish(const std::vector<FieldLine>& data);
+    void debugPublish(const std::vector<CentreCircle>& data);
+    void debugPublish(const std::vector<CornerPoint>& data);
+    void debugPublish(DEBUG_ID id, const std::vector<Point>& data_points);
+    void debugPublish(DEBUG_ID id, const std::vector<GroundPoint>& data_points);
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     void debugPublish(DEBUG_ID id);
     void debugPublish(DEBUG_ID id, const NUImage *const img);
-    void debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data);
-    void debugPublish(DEBUG_ID id, const vector<Goal>& data);
+    void debugPublish(DEBUG_ID id, const std::vector<LSFittedLine>& data);
+    void debugPublish(DEBUG_ID id, const std::vector<Goal>& data);
 
-    void plotCurve(string name, vector< Point > pts);
-    void plotLineSegments(string name, vector< Point > pts);
-    void plotHistogram(string name, const Histogram1D& hist, Colour colour = yellow);
+    void plotCurve(std::string name, std::vector< Point > pts);
+    void plotLineSegments(std::string name, std::vector< Point > pts);
+    void plotHistogram(std::string name, const Histogram1D& hist, Colour colour = yellow);
 
 
 private:
-    DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string istrm, string sstrm, string cfg, string lname);
+    DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, std::string istrm, std::string sstrm, std::string cfg, std::string lname);
     ~DataWrapper();
     bool updateFrame();
-    bool loadLUTFromFile(const string& fileName);
+    bool loadLUTFromFile(const std::string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
 
@@ -126,9 +126,9 @@ private:
     NUImage m_current_image;
     NUSensorsData m_sensor_data;
 
-    string configname;
+    std::string configname;
 
-    string LUTname;
+    std::string LUTname;
     LookUpTable LUT;
 
     Horizon kinematics_horizon;
@@ -137,10 +137,10 @@ private:
     NUCameraData m_camspecs;
 
     //! Used when reading from strm
-    string streamname;
+    std::string streamname;
     ifstream imagestrm;
     bool using_sensors;
-    string sensorstreamname;
+    std::string sensorstreamname;
     ifstream sensorstrm;
 
     //! Frame info

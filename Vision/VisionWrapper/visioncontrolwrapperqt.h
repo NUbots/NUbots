@@ -18,7 +18,7 @@ public:
 private:
     int runFrame();
     VisionControlWrapper();
-    void getOptions(DataWrapper::INPUT_METHOD& method, bool& ok, string& istrm, string& sstrm, string& cfg, string& lname);
+    void getOptions(DataWrapper::INPUT_METHOD& method, bool& ok, std::string& istrm, std::string& sstrm, std::string& cfg, std::string& lname);
 
     static VisionControlWrapper* instance;
 

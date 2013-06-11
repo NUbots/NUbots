@@ -72,10 +72,10 @@
 /*! @brief Constructs the sense->move thread
  */
 
-SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThinkThread"), THREAD_SEETHINK_PRIORITY)
+SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(std::string("SeeThinkThread"), THREAD_SEETHINK_PRIORITY)
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
+        debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << std::endl;
     #endif
     m_nubot = nubot;
     m_logrecorder = new LogRecorder(m_nubot->m_blackboard->GameInfo->getPlayerNumber());
@@ -90,7 +90,7 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
 SeeThinkThread::~SeeThinkThread()
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SeeThinkThread::~SeeThinkThread()" << endl;
+        debug << "SeeThinkThread::~SeeThinkThread()" << std::endl;
     #endif
     stop();
 }
@@ -108,13 +108,13 @@ SeeThinkThread::~SeeThinkThread()
 void SeeThinkThread::run()
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SeeThinkThread::run()" << endl;
+        debug << "SeeThinkThread::run()" << std::endl;
     #endif
     #ifdef THREAD_SEETHINK_PROFILE
         Profiler prof = Profiler("SeeThinkThread");
     #endif
 #ifdef LOGGING_ENABLED
-    ofstream locfile((string(DATA_DIR) + string("selflocwm.strm")).c_str(), ios_base::trunc);
+    ofstream locfile((std::string(DATA_DIR) + std::string("selflocwm.strm")).c_str(), ios_base::trunc);
 #endif
     int err = 0;
     while (err == 0 && errno != EINTR)
@@ -220,5 +220,5 @@ void SeeThinkThread::run()
             m_nubot->unhandledExceptionHandler(e);
         }
     } 
-    errorlog << "SeeThinkThread is exiting. err: " << err << " errno: " << errno << endl;
+    errorlog << "SeeThinkThread is exiting. err: " << err << " errno: " << errno << std::endl;
 }

@@ -29,14 +29,14 @@
 #include "nubotconfig.h"
 #include <math.h>
 
-using namespace std;
+
 
 /*! @brief Constructor for Darwin robotic platform
  */
 DarwinPlatform::DarwinPlatform()
 {
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
-    debug << "DarwinPlatform::DarwinPlatform" << endl;
+    debug << "DarwinPlatform::DarwinPlatform" << std::endl;
 #endif
     init();
 
@@ -45,13 +45,13 @@ DarwinPlatform::DarwinPlatform()
         in its declaration
      */
     // start with the joints
-    string temp_servo_names[] = {   string("HeadPitch"), string("HeadYaw"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowPitch"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowPitch"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYaw"), \
-									string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYaw"), \
-									string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
+    std::string temp_servo_names[] = {   std::string("HeadPitch"), std::string("HeadYaw"), \
+                                    std::string("LShoulderRoll"), std::string("LShoulderPitch"), std::string("LElbowPitch"), \
+                                    std::string("RShoulderRoll"), std::string("RShoulderPitch"), std::string("RElbowPitch"), \
+                                    std::string("LHipRoll"),  std::string("LHipPitch"), std::string("LHipYaw"), \
+									std::string("LKneePitch"), std::string("LAnkleRoll"), std::string("LAnklePitch"), \
+                                    std::string("RHipRoll"),  std::string("RHipPitch"), std::string("RHipYaw"), \
+									std::string("RKneePitch"), std::string("RAnkleRoll"), std::string("RAnklePitch")};
 
 	int temp_servo_IDs[] = 		{	Robot::JointData::ID_HEAD_TILT, Robot::JointData::ID_HEAD_PAN, \
 									Robot::JointData::ID_L_SHOULDER_ROLL, Robot::JointData::ID_L_SHOULDER_PITCH, Robot::JointData::ID_L_ELBOW, \
@@ -63,11 +63,11 @@ DarwinPlatform::DarwinPlatform()
 
 	float zeros[sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs)] = {0};
 
-    m_servo_names = vector<string>(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
-	m_servo_IDs = vector<int>(temp_servo_IDs, temp_servo_IDs + sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs));
+    m_servo_names = std::vector<std::string>(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+	m_servo_IDs = std::vector<int>(temp_servo_IDs, temp_servo_IDs + sizeof(temp_servo_IDs)/sizeof(*temp_servo_IDs));
 
-	m_servo_Goal_Positions = vector<float>(zeros, zeros + sizeof(zeros)/sizeof(*zeros));
-	m_servo_Stiffness = vector<float>(zeros, zeros + sizeof(zeros)/sizeof(*zeros));
+	m_servo_Goal_Positions = std::vector<float>(zeros, zeros + sizeof(zeros)/sizeof(*zeros));
+	m_servo_Stiffness = std::vector<float>(zeros, zeros + sizeof(zeros)/sizeof(*zeros));
 
 	//Code to Connect to Darwin SubController [Taken from Read/Write Tutorial]: 
 	linux_cm730 = new Robot::LinuxCM730("/dev/ttyUSB0");
@@ -88,7 +88,7 @@ DarwinPlatform::DarwinPlatform()
     m_sensors = new DarwinSensors(this,cm730);
     m_actionators = new DarwinActionators(this,cm730);
 	
-	//cout << m_servo_Stiffness << endl;
+	//std::cout << m_servo_Stiffness << std::endl;
 }
 
 DarwinPlatform::~DarwinPlatform()
@@ -128,7 +128,7 @@ void DarwinPlatform::setMotorStiffness(int localArrayIndex, float targetStiffnes
 		(m_servo_Stiffness[localArrayIndex]!= 0 && !(isnan(m_servo_Stiffness[localArrayIndex]))) )
 	{
 		//Try to turn stiffness off:			
-		//cout << "stiffness off: " << m_servo_names[localArrayIndex] <<"\t" << targetStiffness<<endl;
+		//std::cout << "stiffness off: " << m_servo_names[localArrayIndex] <<"\t" << targetStiffness<<std::endl;
 		result = cm730->WriteByte(m_servo_IDs[localArrayIndex], Robot::MX28::P_TORQUE_ENABLE, 0, 0);
 	}
 
@@ -136,9 +136,9 @@ void DarwinPlatform::setMotorStiffness(int localArrayIndex, float targetStiffnes
 				(m_servo_Stiffness[localArrayIndex] == 0 || isnan(m_servo_Stiffness[localArrayIndex])))
 	{
 		//Try to turn stiffness on:
-		//cout << "stiffness on: " << m_servo_names[localArrayIndex]<<"\t" << targetStiffness<<endl;	
+		//std::cout << "stiffness on: " << m_servo_names[localArrayIndex]<<"\t" << targetStiffness<<std::endl;	
 		result = cm730->WriteByte(m_servo_IDs[localArrayIndex], Robot::MX28::P_TORQUE_ENABLE, 1, 0);
 	}
 	m_servo_Stiffness[localArrayIndex] = targetStiffness;
-	//cout << m_servo_Stiffness << endl;
+	//std::cout << m_servo_Stiffness << std::endl;
 }

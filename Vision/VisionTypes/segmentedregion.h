@@ -16,20 +16,20 @@ friend class SegmentFilter;
 public:
     SegmentedRegion();
     SegmentedRegion(const SegmentedRegion& other);
-    SegmentedRegion(const vector<vector<ColourSegment> >& segmented_scans, ScanDirection direction);
+    SegmentedRegion(const std::vector<std::vector<ColourSegment> >& segmented_scans, ScanDirection direction);
     
     /**
       * Sets the segments and direction of this region.
       * @param segmented_scans A 2D vector of segments.
       * @param direction The alignment of the segments in this region (vertical or horizontal).
       */
-    void set(const vector<vector<ColourSegment> >& segmented_scans, ScanDirection direction);
+    void set(const std::vector<std::vector<ColourSegment> >& segmented_scans, ScanDirection direction);
 
     bool empty() const {return m_segmented_scans.empty();}
     
     //consider removing later and replacing with iterator
     //! Returns a const reference to the segments.
-    const vector<vector<ColourSegment> >& getSegments() const;
+    const std::vector<std::vector<ColourSegment> >& getSegments() const;
 
     //! Returns the number of segments in the region.
     size_t getNumberOfScans() const;
@@ -37,7 +37,7 @@ public:
     ScanDirection getDirection() const;
 
 private:
-    vector< vector<ColourSegment> > m_segmented_scans;  //! @variable The segments in this region.
+    std::vector< std::vector<ColourSegment> > m_segmented_scans;  //! @variable The segments in this region.
     ScanDirection m_direction;  //! The alignment of the scans in this region.
 };
 

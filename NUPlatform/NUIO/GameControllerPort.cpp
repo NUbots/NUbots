@@ -27,7 +27,7 @@
 #include "debugverbositynetwork.h"
 
 #include <string>
-using namespace std;
+
 
 /*! @brief Constructs a GameControllerPort
     @param nubotjobs the public nubot job list
@@ -48,7 +48,7 @@ void GameControllerPort::sendReturnPacket(RoboCupGameControlReturnData* data)
 {
     if (data)
     { 
-        stringstream buffer;
+        std::stringstream buffer;
         buffer.write((char*) data, sizeof(*data));
         sendData(buffer);
     }
@@ -59,7 +59,7 @@ void GameControllerPort::sendReturnPacket(RoboCupGameControlReturnData* data)
 */
 void GameControllerPort::handleNewData(std::stringstream& buffer)
 {
-    string s_buffer = buffer.str();
+    std::string s_buffer = buffer.str();
     if (s_buffer.size() == sizeof(RoboCupGameControlData))
     {   // discard game controller packets that are the wrong size
         RoboCupGameControlData* gcpacket = (RoboCupGameControlData*) s_buffer.c_str();

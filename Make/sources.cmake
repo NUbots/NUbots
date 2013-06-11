@@ -56,9 +56,9 @@ LIST(APPEND NUBOT_LINK_LIBRARIES protobuf)
 #LIST(APPEND NUBOT_LINK_LIBRARIES boost_date_time)
 
 # Specify c++11
-# if(UNIX)
-    # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-# endif()
+#if(UNIX)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+#endif()
 
 # Build protocol buffer classes
 #find_package(Protobuf REQUIRED)

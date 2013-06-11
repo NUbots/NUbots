@@ -15,7 +15,7 @@ public:
 
     void setTolerance(double tolerance);
 
-    virtual bool run(vector<GroundPoint> &points, CentreCircle &result);
+    virtual bool run(std::vector<GroundPoint> &points, CentreCircle &result);
 
 private:
     unsigned int m_n,

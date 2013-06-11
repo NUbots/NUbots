@@ -44,7 +44,7 @@ PositioningState::~PositioningState()
 void PositioningState::doStateCommons()
 {   // do behaviour that is common to all sub positioning states
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "PositioningState" << endl;
+        debug << "PositioningState" << std::endl;
     #endif
 }
 

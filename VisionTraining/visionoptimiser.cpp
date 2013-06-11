@@ -10,7 +10,7 @@
 
 /** @brief String to enum converter for the OPT_TYPE enum.
 */
-VisionOptimiser::OPT_TYPE VisionOptimiser::getChoiceFromString(string str)
+VisionOptimiser::OPT_TYPE VisionOptimiser::getChoiceFromString(std::string str)
 {
     if(str.compare("PGRL") == 0) {
         return PGRL;
@@ -41,7 +41,7 @@ VisionOptimiser::OPT_ID VisionOptimiser::getIDFromInt(int i)
 
 /** @brief Enum to string converter for the OPT_ID enum.
 */
-string VisionOptimiser::getIDName(VisionOptimiser::OPT_ID id)
+std::string VisionOptimiser::getIDName(VisionOptimiser::OPT_ID id)
 {
     switch(id) {
     case BALL_OPT: return "BALL";
@@ -126,10 +126,10 @@ VisionOptimiser::VisionOptimiser(QWidget* parent, OPT_TYPE id) :
 
 #ifdef MULTI_OPT
     for(int i=0; i<=GENERAL_OPT; i++) {
-        m_best_fitnesses[getIDFromInt(i)] = -numeric_limits<float>::max();
+        m_best_fitnesses[getIDFromInt(i)] = -std::numeric_limits<float>::max();
     }
 #else
-    m_best_fitness = -numeric_limits<float>::max();
+    m_best_fitness = -std::numeric_limits<float>::max();
 #endif
 }
 
@@ -151,17 +151,17 @@ VisionOptimiser::~VisionOptimiser()
 *   @param directory Location of image stream, LUT and parameter set.
 *   @note This method uses default names for each file.
 */
-void VisionOptimiser::errorPandRevaluation(string directory, bool use_ground_errors)
+void VisionOptimiser::errorPandRevaluation(std::string directory, bool use_ground_errors)
 {
-    vector<vector<VisionFieldObject *> > gt; //ground truth
+    std::vector<std::vector<VisionFieldObject *> > gt; //ground truth
     map<OPT_ID, float> fitnesses;                                           //result fitnesses
     map<OPT_ID, pair<double, double> > PR;                                  //results P and R
-    string image_name = directory + string("/image.strm");                  //image filename
-    ifstream label_file((directory + string("/labels.lbl")).c_str());      //label file
+    std::string image_name = directory + std::string("/image.strm");                  //image filename
+    ifstream label_file((directory + std::string("/labels.lbl")).c_str());      //label file
     map<VFO_ID, float> zero_costs;                       //empty costs map removes consideration of false positives and negatives
 
     //load parameter file from directory
-    VisionConstants::loadFromFile(directory + string("/VisionOptions.cfg"));
+    VisionConstants::loadFromFile(directory + std::string("/VisionOptions.cfg"));
 
     //read in the labels
     if(!vision->readLabels(label_file, gt)) {
@@ -170,7 +170,7 @@ void VisionOptimiser::errorPandRevaluation(string directory, bool use_ground_err
     }
 
     //initialise vision system
-    vision->setLUT(directory+string("/default.lut"));
+    vision->setLUT(directory+std::string("/default.lut"));
 
     //set the options we need
     setupVisionConstants();
@@ -182,7 +182,7 @@ void VisionOptimiser::errorPandRevaluation(string directory, bool use_ground_err
     //print to stdout
     for(int i=0; i<=GENERAL_OPT; i++) {
         OPT_ID id = getIDFromInt(i);
-        cout << getIDName(id) << " f: " << fitnesses[id] << " P: " << PR[id].first << " R: " << PR[id].second << endl;
+        std::cout << getIDName(id) << " f: " << fitnesses[id] << " P: " << PR[id].first << " R: " << PR[id].second << std::endl;
     }
 }
 
@@ -190,13 +190,13 @@ void VisionOptimiser::errorPandRevaluation(string directory, bool use_ground_err
 *   @param directory The directory for all input files.
 *   @param grids_per_side The number of divisions for the grid search
 */
-void VisionOptimiser::gridSearch(string directory, int grids_per_side, bool use_ground_errors)
+void VisionOptimiser::gridSearch(std::string directory, int grids_per_side, bool use_ground_errors)
 {
-    vector<vector<VisionFieldObject *> > gt;
+    std::vector<std::vector<VisionFieldObject *> > gt;
     map<OPT_ID, float> fitnesses;
-    string image_name = directory + string("image.strm");
-    ifstream train_label_file((directory + string("labels.lbl")).c_str());
-    ofstream grid_log((directory + string("grid.txt")).c_str());
+    std::string image_name = directory + std::string("image.strm");
+    ifstream train_label_file((directory + std::string("labels.lbl")).c_str());
+    ofstream grid_log((directory + std::string("grid.txt")).c_str());
 
     //parameters to search over
     Parameter p1("GREEN_HORIZON_MIN_GREEN_PIXELS", 1, 1, 50),
@@ -209,24 +209,24 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side, bool use_
     }
 
     //initialise vision system
-    vision->setLUT(directory+string("default.lut"));
+    vision->setLUT(directory+std::string("default.lut"));
 
     //set the options we need
     setupVisionConstants();
 
     bool halt = false;
-    grid_log << "x : " << p1.name() << " y : " << p2.name() << endl;
+    grid_log << "x : " << p1.name() << " y : " << p2.name() << std::endl;
     //search over set number of grids
     for(float x = p1.min(); x<p1.max() && !halt; x+= (p1.max() - p1.min())/grids_per_side) {
         for(float y = p2.min(); y<p2.max() && !halt; y+= (p2.max() - p2.min())/grids_per_side) {
             //change parameters
             if(!VisionConstants::setParameter(p1.name(), x)) {
-                cout << "error setting p1" << endl;
+                std::cout << "error setting p1" << std::endl;
                 halt = true;
                 break;
             }
             if(!VisionConstants::setParameter(p2.name(), (unsigned int)y)) {
-                cout << "error setting p2" << endl;
+                std::cout << "error setting p2" << std::endl;
                 halt = true;
                 break;
             }
@@ -235,28 +235,28 @@ void VisionOptimiser::gridSearch(string directory, int grids_per_side, bool use_
                 //log the general fitness
                 grid_log << fitnesses[GENERAL_OPT] << " ";
                 //print the others to stdout
-                cout << fitnesses[OBSTACLE_OPT] << " ";
-                cout << fitnesses[BALL_OPT] << " ";
-                cout << fitnesses[GOAL_OPT] << " ";
-                cout << fitnesses[LINE_OPT] << " ";
-                cout << fitnesses[GENERAL_OPT] << endl;
+                std::cout << fitnesses[OBSTACLE_OPT] << " ";
+                std::cout << fitnesses[BALL_OPT] << " ";
+                std::cout << fitnesses[GOAL_OPT] << " ";
+                std::cout << fitnesses[LINE_OPT] << " ";
+                std::cout << fitnesses[GENERAL_OPT] << std::endl;
             }
             else {
-                cout << "failed" << endl;
+                std::cout << "failed" << std::endl;
                 break;
             }
         }
-        grid_log << endl;
-        cout << 100*x/(p1.max()-p1.min()) << "%" << endl;
+        grid_log << std::endl;
+        std::cout << 100*x/(p1.max()-p1.min()) << "%" << std::endl;
     }
-    cout << "100%" << endl;
+    std::cout << "100%" << std::endl;
 }
 
 /** @brief runs the label editor application.
 *   @param dir Directory for input and output files
 *   @param total_iterations Number of samples to run for.
 */
-void VisionOptimiser::run(string directory, int total_iterations, bool use_ground_errors)
+void VisionOptimiser::run(std::string directory, int total_iterations, bool use_ground_errors)
 {
     int iteration = 0;      //sample counter
     bool success = true;    //flag for failures
@@ -264,12 +264,12 @@ void VisionOptimiser::run(string directory, int total_iterations, bool use_groun
     //initialise
     m_halted = false;
     //image streams
-    m_training_image_name = directory + string("train_image.strm");
-    m_test_image_name = directory + string("test_image.strm");
+    m_training_image_name = directory + std::string("train_image.strm");
+    m_test_image_name = directory + std::string("test_image.strm");
 
     //read labels
-    ifstream train_label_file((directory + string("train_labels.lbl")).c_str());
-    ifstream test_label_file((directory + string("test_labels.lbl")).c_str());
+    ifstream train_label_file((directory + std::string("train_labels.lbl")).c_str());
+    ifstream test_label_file((directory + std::string("test_labels.lbl")).c_str());
 
     total_iterations*=2; //double since we are running once each for training and testing
 
@@ -292,7 +292,7 @@ void VisionOptimiser::run(string directory, int total_iterations, bool use_groun
     QApplication::processEvents();
 
     //initialise vision system
-    vision->setLUT(directory+string("default.lut"));
+    vision->setLUT(directory+std::string("default.lut"));
 
     //set the options we need
     setupVisionConstants();
@@ -324,12 +324,12 @@ void VisionOptimiser::run(string directory, int total_iterations, bool use_groun
 #ifdef MULTI_OPT
         for(int i=0; i<=GENERAL_OPT; i++) {
             OPT_ID id = getIDFromInt(i);
-            *(m_optimiser_logs[id]) << m_optimisers[id] << endl;
+            *(m_optimiser_logs[id]) << m_optimisers[id] << std::endl;
         }
 #else
-        m_optimiser_log << m_optimiser << endl;
+        m_optimiser_log << m_optimiser << std::endl;
 #endif
-        ofstream final((directory + m_opt_name + string("best.cfg")).c_str());
+        ofstream final((directory + m_opt_name + std::string("best.cfg")).c_str());
 
         //print out the best combined parameter set
 #ifdef MULTI_OPT
@@ -367,9 +367,9 @@ void VisionOptimiser::run(string directory, int total_iterations, bool use_groun
 *   @param stream_name The image stream to use.
 */
 bool VisionOptimiser::trainingStep(int iteration,
-                                   const vector<vector<VisionFieldObject *> >& ground_truth,
-                                   ostream& performance_log,
-                                   const string& stream_name,
+                                   const std::vector<std::vector<VisionFieldObject *> >& ground_truth,
+                                   std::ostream& performance_log,
+                                   const std::string& stream_name,
                                    bool use_ground_errors)
 {
     map<OPT_ID, float> fitnesses;   //a map between fitnesses and optimiser ID
@@ -423,13 +423,13 @@ bool VisionOptimiser::trainingStep(int iteration,
 
         //write results to logs
 #ifdef MULTI_OPT
-        *(m_individual_progress_logs[BALL_OPT]) << VisionConstants::getBallParams() << endl;
-        *(m_individual_progress_logs[GOAL_OPT]) << VisionConstants::getGoalParams() << endl;
-        *(m_individual_progress_logs[OBSTACLE_OPT]) << VisionConstants::getObstacleParams() << endl;
-        *(m_individual_progress_logs[LINE_OPT]) << VisionConstants::getLineParams() << endl;
-        *(m_individual_progress_logs[GENERAL_OPT]) << VisionConstants::getGeneralParams() << endl;
+        *(m_individual_progress_logs[BALL_OPT]) << VisionConstants::getBallParams() << std::endl;
+        *(m_individual_progress_logs[GOAL_OPT]) << VisionConstants::getGoalParams() << std::endl;
+        *(m_individual_progress_logs[OBSTACLE_OPT]) << VisionConstants::getObstacleParams() << std::endl;
+        *(m_individual_progress_logs[LINE_OPT]) << VisionConstants::getLineParams() << std::endl;
+        *(m_individual_progress_logs[GENERAL_OPT]) << VisionConstants::getGeneralParams() << std::endl;
 #else
-        m_progress_log << VisionConstants::getAllOptimisable() << endl;
+        m_progress_log << VisionConstants::getAllOptimisable() << std::endl;
 #endif
         printResults(iteration, fitnesses, performance_log);
         return true;
@@ -448,8 +448,8 @@ bool VisionOptimiser::trainingStep(int iteration,
 *
 *   @note If an empty map for false pos or neg costs is given then no accounting is made for them.
 */
-map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<vector<VisionFieldObject *> >& ground_truth,
-                                                                   const string& stream_name,
+map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const std::vector<std::vector<VisionFieldObject *> >& ground_truth,
+                                                                   const std::string& stream_name,
                                                                    map<VFO_ID, float>& false_pos_costs,
                                                                    map<VFO_ID, float>& false_neg_costs,
                                                                    bool use_ground_errors) const
@@ -476,8 +476,8 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
         //accumulate errors
         for(int i=0; i<numVFOIDs(); i++) {
             VFO_ID vfo_id = VFOFromInt(i);
-            vector<OPT_ID>::const_iterator it;
-            //cout << VFOName(vfo_id) << " " << frame_errors[vfo_id].first << " " << frame_errors[vfo_id].second << endl;
+            std::vector<OPT_ID>::const_iterator it;
+            //std::cout << VFOName(vfo_id) << " " << frame_errors[vfo_id].first << " " << frame_errors[vfo_id].second << std::endl;
             for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
                 batch_errors.at(*it).first += frame_errors.at(vfo_id).first;
                 batch_errors.at(*it).second += frame_errors.at(vfo_id).second;
@@ -498,7 +498,7 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
         for(int i=0; i<=GENERAL_OPT; i++) {
             OPT_ID id = getIDFromInt(i);
             if(batch_errors[id].first == 0) //not likely but just in case
-                fitnesses[id] = numeric_limits<float>::max();
+                fitnesses[id] = std::numeric_limits<float>::max();
             else
                 fitnesses[id] = batch_errors[id].second/batch_errors[id].first; // #instances / sum(error)
         }
@@ -511,7 +511,7 @@ map<VisionOptimiser::OPT_ID, float> VisionOptimiser::evaluateBatch(const vector<
 *   @param stream_name The image stream to use.
 *   @return A map of optimiser IDs to P&R pairs
 */
-map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBatchPR(const vector<vector<VisionFieldObject *> >& ground_truth, const string& stream_name, bool use_ground_errors) const
+map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBatchPR(const std::vector<std::vector<VisionFieldObject *> >& ground_truth, const std::string& stream_name, bool use_ground_errors) const
 {
     //initialise batch errors
     map<OPT_ID, pair<double, double> > PR;
@@ -534,7 +534,7 @@ map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBat
         //accumulate errors
         for(int i = 0; i < numVFOIDs(); i++) {
             VFO_ID vfo_id = VFOFromInt(i);
-            vector<OPT_ID>::const_iterator it;
+            std::vector<OPT_ID>::const_iterator it;
             for(it = m_vfo_optimiser_map.at(vfo_id).begin(); it != m_vfo_optimiser_map.at(vfo_id).end(); it++) {
                 detection_sum.at(*it) += detections.at(vfo_id);
             }
@@ -568,13 +568,13 @@ map<VisionOptimiser::OPT_ID, pair<double, double> > VisionOptimiser::evaluateBat
 *   @param fitnesses A map between optimiser ID and fitnesses.
 *   @param performance_log The stream to print to.
 */
-void VisionOptimiser::printResults(int iteration, map<OPT_ID, float> fitnesses, ostream& performance_log) const
+void VisionOptimiser::printResults(int iteration, map<OPT_ID, float> fitnesses, std::ostream& performance_log) const
 {
     if(!fitnesses.empty()) {
         #ifdef MULTI_OPT
-            performance_log << iteration << " " << fitnesses[BALL_OPT]<< " " << fitnesses[GOAL_OPT]<< " " << fitnesses[OBSTACLE_OPT] << " " << fitnesses[LINE_OPT] << " " << fitnesses[GENERAL_OPT] << " " << endl;
+            performance_log << iteration << " " << fitnesses[BALL_OPT]<< " " << fitnesses[GOAL_OPT]<< " " << fitnesses[OBSTACLE_OPT] << " " << fitnesses[LINE_OPT] << " " << fitnesses[GENERAL_OPT] << " " << std::endl;
         #else
-            performance_log << iteration << " " << fitnesses[GENERAL_OPT] << endl;
+            performance_log << iteration << " " << fitnesses[GENERAL_OPT] << std::endl;
         #endif
     }
 }
@@ -628,50 +628,50 @@ void VisionOptimiser::setupCosts()
 /** @brief Opens and initialises the various log files.
 *   @param directory Directory for files.
 */
-void VisionOptimiser::openLogFiles(string directory)
+void VisionOptimiser::openLogFiles(std::string directory)
 {
     //log(s) to save the optimiser state(s)
 #ifdef MULTI_OPT
-    m_optimiser_logs[BALL_OPT] = new ofstream((directory + m_opt_name + string("_ball.log")).c_str());
-    m_optimiser_logs[GOAL_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon.log")).c_str());
-    m_optimiser_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + string("_obstacle.log")).c_str());
-    m_optimiser_logs[LINE_OPT] = new ofstream((directory + m_opt_name + string("_line.log")).c_str());
-    m_optimiser_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + string("_general.log")).c_str());
+    m_optimiser_logs[BALL_OPT] = new ofstream((directory + m_opt_name + std::string("_ball.log")).c_str());
+    m_optimiser_logs[GOAL_OPT] = new ofstream((directory + m_opt_name + std::string("_goalbeacon.log")).c_str());
+    m_optimiser_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + std::string("_obstacle.log")).c_str());
+    m_optimiser_logs[LINE_OPT] = new ofstream((directory + m_opt_name + std::string("_line.log")).c_str());
+    m_optimiser_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + std::string("_general.log")).c_str());
 #else
-    m_optimiser_log.open((directory + m_opt_name + string(".log")).c_str());
+    m_optimiser_log.open((directory + m_opt_name + std::string(".log")).c_str());
 #endif
 
     //log(s) to save the parameter sets trialed
 #ifdef MULTI_OPT
-    m_individual_progress_logs[BALL_OPT] = new ofstream((directory + m_opt_name + string("_ball_progress.log")).c_str());
-    m_individual_progress_logs[GOAL_OPT] = new ofstream((directory + m_opt_name + string("_goalbeacon_progress.log")).c_str());
-    m_individual_progress_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + string("_obstacle_progress.log")).c_str());
-    m_individual_progress_logs[LINE_OPT] = new ofstream((directory + m_opt_name + string("_line_progress.log")).c_str());
-    m_individual_progress_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + string("_general_progress.log")).c_str());
+    m_individual_progress_logs[BALL_OPT] = new ofstream((directory + m_opt_name + std::string("_ball_progress.log")).c_str());
+    m_individual_progress_logs[GOAL_OPT] = new ofstream((directory + m_opt_name + std::string("_goalbeacon_progress.log")).c_str());
+    m_individual_progress_logs[OBSTACLE_OPT] = new ofstream((directory + m_opt_name + std::string("_obstacle_progress.log")).c_str());
+    m_individual_progress_logs[LINE_OPT] = new ofstream((directory + m_opt_name + std::string("_line_progress.log")).c_str());
+    m_individual_progress_logs[GENERAL_OPT] = new ofstream((directory + m_opt_name + std::string("_general_progress.log")).c_str());
 #else
-    m_progress_log.open((directory + m_opt_name + string("_progress.log")).c_str());
+    m_progress_log.open((directory + m_opt_name + std::string("_progress.log")).c_str());
 #endif
 
     //logs to record the training and test performance
-    m_training_performance_log.open((directory + m_opt_name + string("_training_performance.log")).c_str());
+    m_training_performance_log.open((directory + m_opt_name + std::string("_training_performance.log")).c_str());
     m_training_performance_log.setf(ios_base::fixed);
-    m_test_performance_log.open((directory + m_opt_name + string("_test_performance.log")).c_str());
+    m_test_performance_log.open((directory + m_opt_name + std::string("_test_performance.log")).c_str());
     m_test_performance_log.setf(ios_base::fixed);
 
     //print headers to the performance logs
 #ifdef MULTI_OPT
-    m_training_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << endl;
-    m_test_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << endl;
+    m_training_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << std::endl;
+    m_test_performance_log << "Iteration Ball GoalBeacon Obstacle Line General" << std::endl;
 #else
-    m_training_performance_log << "Iteration Fitness" << endl;
-    m_test_performance_log << "Iteration Fitness" << endl;
+    m_training_performance_log << "Iteration Fitness" << std::endl;
+    m_test_performance_log << "Iteration Fitness" << std::endl;
 #endif
 }
 
 /** @brief Retrieves the parameters associated with the optimiser id
 *   @param id The optimiser identifier.
 */
-vector<Parameter> VisionOptimiser::getParams(OPT_ID id)
+std::vector<Parameter> VisionOptimiser::getParams(OPT_ID id)
 {
     switch(id) {
     case BALL_OPT: return VisionConstants::getBallParams();

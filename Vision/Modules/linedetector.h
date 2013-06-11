@@ -15,10 +15,10 @@ public:
     LineDetector();
     virtual ~LineDetector();
 
-    virtual vector<FieldLine> run(const vector<GroundPoint>& points) = 0;
+    virtual std::vector<FieldLine> run(const std::vector<GroundPoint>& points) = 0;
 
 protected:
-    vector<pair<LSFittedLine, LSFittedLine> > mergeColinear(vector<pair<LSFittedLine, LSFittedLine> > lines,
+    std::vector<std::pair<LSFittedLine, LSFittedLine> > mergeColinear(std::vector<std::pair<LSFittedLine, LSFittedLine> > lines,
                                                             double angle_threshold, double distance_threshold) const;
 
 };

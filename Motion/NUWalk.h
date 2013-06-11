@@ -68,8 +68,8 @@ public:
     
     virtual void setArmEnabled(bool leftarm, bool rightarm);
     
-    void getCurrentSpeed(vector<float>& currentspeed);
-    void getMaximumSpeed(vector<float>& currentspeed);
+    void getCurrentSpeed(std::vector<float>& currentspeed);
+    void getMaximumSpeed(std::vector<float>& currentspeed);
 protected:
     NUWalk(NUSensorsData* data, NUActionatorsData* actions);
     virtual void doWalk() = 0;
@@ -82,7 +82,7 @@ protected:
     void calculateCurrentSpeed();
     
     virtual void applyPerturbation() {};
-    void applyPerturbation(vector<float>& leftleg, vector<float>& leftleggains, vector<float>& rightleg, vector<float> rightleggains);
+    void applyPerturbation(std::vector<float>& leftleg, std::vector<float>& leftleggains, std::vector<float>& rightleg, std::vector<float> rightleggains);
 
 protected:
     double m_current_time;                          //!< the current time
@@ -107,10 +107,10 @@ protected:
     float m_perturbation_magnitude;                 //!< the magnitude of the current perturbation as a percentage
     float m_perturbation_direction;                 //!< the direction of the current perturbation in radians
     
-    vector<float> m_initial_larm;
-    vector<float> m_initial_rarm;
-    vector<float> m_initial_lleg;
-    vector<float> m_initial_rleg;
+    std::vector<float> m_initial_larm;
+    std::vector<float> m_initial_rarm;
+    std::vector<float> m_initial_lleg;
+    std::vector<float> m_initial_rleg;
 };
 
 #endif

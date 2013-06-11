@@ -45,9 +45,9 @@ TeamInformation::TeamInformation(int playernum, int teamnum) : TimestampedData()
     initTeamPacket();
     m_received_packets = PacketBufferArray(13, boost::circular_buffer<TeamPacket>(3));
     
-    m_led_red = vector<float>(3,0);
+    m_led_red = std::vector<float>(3,0);
     m_led_red[0] = 1;
-    m_led_green = vector<float>(3,0);
+    m_led_green = std::vector<float>(3,0);
     m_led_green[1] = 1;
 }
 
@@ -74,9 +74,9 @@ bool TeamInformation::amIClosestToBall()
 
 /*! @brief Returns all of the shared balls in the TeamInformation
  */
-vector<TeamPacket::SharedBall> TeamInformation::getSharedBalls() const
+std::vector<TeamPacket::SharedBall> TeamInformation::getSharedBalls() const
 {
-    vector<TeamPacket::SharedBall> sharedballs;
+    std::vector<TeamPacket::SharedBall> sharedballs;
     sharedballs.reserve(m_received_packets.size());
     for (size_t i=0; i<m_received_packets.size(); i++)
     {
@@ -161,7 +161,7 @@ float TeamInformation::getTimeToBall()
         return time;
     else if (m_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost() == false)
     {   // if neither the ball or self are lost or if we can see the ball then we can chase.
-        vector<float> walkspeed, maxspeed;
+        std::vector<float> walkspeed, maxspeed;
         bool walk_speed_good = m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed);
         bool max_speed_good = m_data->get(NUSensorsData::MotionWalkMaxSpeed, maxspeed);
 
@@ -185,7 +185,7 @@ float TeamInformation::getTimeToBall()
     return time;
 }
 
-ostream& TeamPacket::toFile(ostream& output) const
+std::ostream& TeamPacket::toFile(std::ostream& output) const
 {
     output.write(reinterpret_cast<const char*>(Header), 4);
     int temp_id = ID;
@@ -201,7 +201,7 @@ ostream& TeamPacket::toFile(ostream& output) const
 }
 
 //#include <QDebug>
-istream& TeamPacket::fromFile(istream& input)
+std::istream& TeamPacket::fromFile(std::istream& input)
 {
 //    //qDebug() << "Size is " << sizeof(ID);
     input.read(reinterpret_cast<char*>(Header), 4);
@@ -225,13 +225,13 @@ std::string TeamPacket::toString() const
     return result.str();
 }
 
-void TeamPacket::summaryTo(ostream& output) const
+void TeamPacket::summaryTo(std::ostream& output) const
 {
     output << "ID: " << ID;
     output << " Player: " << (int)PlayerNumber;
     output << " Team: " << (int)TeamNumber;
     output << " TimeToBall: " << TimeToBall;
-    output << endl;
+    output << std::endl;
 }
 
 TeamPacket TeamInformation::generateTeamTransmissionPacket()
@@ -275,7 +275,7 @@ void TeamInformation::addReceivedTeamPacket(TeamPacket& receivedPacket)
         #if DEBUG_NETWORK_VERBOSITY > 0
             debug << ">>TeamInformation. Rejected team packet:";
             receivedPacket.summaryTo(debug);
-            debug << endl;
+            debug << std::endl;
         #endif
     }
     return;
@@ -316,13 +316,13 @@ std::string TeamInformation::toString() const
 }
 
 
-ostream& operator<< (ostream& output, const TeamPacket& packet)
+std::ostream& operator<< (std::ostream& output, const TeamPacket& packet)
 {
     output.write((char*) &packet, sizeof(packet));
     return output;
 }
 
-istream& operator>> (istream& input, TeamPacket& packet)
+std::istream& operator>> (std::istream& input, TeamPacket& packet)
 {
     TeamPacket packetBuffer;
     input.read(reinterpret_cast<char*>(&packetBuffer), sizeof(packetBuffer));
@@ -331,7 +331,7 @@ istream& operator>> (istream& input, TeamPacket& packet)
     return input;
 }
 
-ostream& operator<< (ostream& output, const TeamInformation& info)
+std::ostream& operator<< (std::ostream& output, const TeamInformation& info)
 {
     output.write(reinterpret_cast<const char*>(&info.m_timestamp), sizeof(info.m_timestamp));
     output.write(reinterpret_cast<const char*>(&info.m_player_number), sizeof(info.m_player_number));
@@ -359,7 +359,7 @@ ostream& operator<< (ostream& output, const TeamInformation& info)
     return output;
 }
 
-istream& operator>> (istream& input, TeamInformation& info)
+std::istream& operator>> (std::istream& input, TeamInformation& info)
 {
     input.read(reinterpret_cast<char*>(&info.m_timestamp), sizeof(info.m_timestamp));
     input.read(reinterpret_cast<char*>(&info.m_player_number), sizeof(info.m_player_number));
@@ -403,7 +403,7 @@ istream& operator>> (istream& input, TeamInformation& info)
 }
 
 /*
-ostream& operator<< (ostream& output, TeamInformation& info)
+std::ostream& operator<< (std::ostream& output, TeamInformation& info)
 {
     info.updateTeamPacket();
     output << info.m_packet;
@@ -411,14 +411,14 @@ ostream& operator<< (ostream& output, TeamInformation& info)
     return output;
 }
 
-ostream& operator<< (ostream& output, TeamInformation* info)
+std::ostream& operator<< (std::ostream& output, TeamInformation* info)
 {
     if (info != NULL)
         output << (*info);
     return output;
 }
 
-istream& operator>> (istream& input, TeamInformation& info)
+std::istream& operator>> (std::istream& input, TeamInformation& info)
 {
     TeamPacket temp;
     input >> temp;
@@ -454,13 +454,13 @@ istream& operator>> (istream& input, TeamInformation& info)
         #if DEBUG_NETWORK_VERBOSITY > 0
             debug << ">>TeamInformation. Rejected team packet:";
             temp.summaryTo(debug);
-            debug << endl;
+            debug << std::endl;
         #endif
     }
     return input;
 }
 
-istream& operator>> (istream& input, TeamInformation* info)
+std::istream& operator>> (std::istream& input, TeamInformation* info)
 {
     if (info != NULL)
         input >> (*info);

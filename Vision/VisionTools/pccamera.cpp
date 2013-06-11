@@ -87,14 +87,14 @@ PCCamera::PCCamera() :
 currentBuf(0)
 {
     #if DEBUG_NUCAMERA_VERBOSITY > 4
-        debug << "PCCamera::PCCamera()" << endl;
+        debug << "PCCamera::PCCamera()" << std::endl;
     #endif
 
     //Read camera settings from file.
     CameraSettings fileSettings;
-    fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
+    fileSettings.LoadFromFile(CONFIG_DIR + std::string("Camera.cfg"));
     #if DEBUG_NUCAMERA_VERBOSITY > 4
-        debug << "Loading settings from " << CONFIG_DIR + string("Camera.cfg") << endl;
+        debug << "Loading settings from " << CONFIG_DIR + std::string("Camera.cfg") << std::endl;
     #endif
 
     // Open device
@@ -114,7 +114,7 @@ currentBuf(0)
 PCCamera::~PCCamera()
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 4
-    debug << "PCCamera::~PCCamera()" << endl;
+    debug << "PCCamera::~PCCamera()" << std::endl;
 #endif
   // disable streaming
   setStreaming(false);
@@ -135,14 +135,14 @@ void PCCamera::openCameraDevice(std::string device_name)
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(fd != -1)
     {
-        debug << "PCCamera::PCCamera(): " << device_name << " Opened Successfully." << endl;
+        debug << "PCCamera::PCCamera(): " << device_name << " Opened Successfully." << std::endl;
     }
     else {
-        debug << "PCCamera::PCCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << endl;
+        debug << "PCCamera::PCCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << std::endl;
     }
     #endif
     if(fd == -1)
-        errorlog << "PCCamera::PCCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << endl;
+        errorlog << "PCCamera::PCCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << std::endl;
     ASSERT(fd >= 0);
 }
 
@@ -152,7 +152,7 @@ void PCCamera::setStreaming(bool streaming_on)
     int instruction = streaming_on ? VIDIOC_STREAMON: VIDIOC_STREAMOFF;
     VERIFY(ioctl(fd, instruction, &type) != -1);
 #if DEBUG_NUCAMERA_VERBOSITY > 1
-    debug << "PCCamera: streaming - " << streaming_on << endl;
+    debug << "PCCamera: streaming - " << streaming_on << std::endl;
 #endif
 }
 
@@ -186,11 +186,11 @@ void PCCamera::initialiseCamera()
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(returnValue)
     {
-        debug << "PCCamera::PCCamera(): Error Setting Format: " << strerror(errno) << endl;
+        debug << "PCCamera::PCCamera(): Error Setting Format: " << strerror(errno) << std::endl;
     }
     else
     {
-        debug << "PCCamera::PCCamera(): Format set" << endl;
+        debug << "PCCamera::PCCamera(): Format set" << std::endl;
     }
     #else
     //VERIFY(!returnValue);
@@ -297,17 +297,17 @@ void PCCamera::readCameraSettings()
     m_settings.p_sharpness.set(m_settings.sharpness);
 
 #if DEBUG_NUCAMERA_VERBOSITY > 1
-    debug << "PCCamera::readCameraSettings()" << endl;
-    debug << "\texposureAuto " << m_settings.exposureAuto  << endl;
-    debug << "autoWhiteBalance " << m_settings.autoWhiteBalance  << endl;
-    debug << "exposureAutoPriority " << m_settings.exposureAutoPriority  << endl;
-    debug << "brightness " << m_settings.brightness  << endl;
-    debug << "contrast " << m_settings.contrast  << endl;
-    debug << "saturation " << m_settings.saturation  << endl;
-    debug << "gain " << m_settings.gain  << endl;
-    debug << "exposureAbsolute " << m_settings.exposureAbsolute  << endl;
-    debug << "powerLineFrequency " << m_settings.powerLineFrequency  << endl;
-    debug << "sharpness " << m_settings.sharpness  << endl;
+    debug << "PCCamera::readCameraSettings()" << std::endl;
+    debug << "\texposureAuto " << m_settings.exposureAuto  << std::endl;
+    debug << "autoWhiteBalance " << m_settings.autoWhiteBalance  << std::endl;
+    debug << "exposureAutoPriority " << m_settings.exposureAutoPriority  << std::endl;
+    debug << "brightness " << m_settings.brightness  << std::endl;
+    debug << "contrast " << m_settings.contrast  << std::endl;
+    debug << "saturation " << m_settings.saturation  << std::endl;
+    debug << "gain " << m_settings.gain  << std::endl;
+    debug << "exposureAbsolute " << m_settings.exposureAbsolute  << std::endl;
+    debug << "powerLineFrequency " << m_settings.powerLineFrequency  << std::endl;
+    debug << "sharpness " << m_settings.sharpness  << std::endl;
 #endif
 }
 
@@ -426,16 +426,16 @@ void PCCamera::forceApplySettings(const CameraSettings& newset)
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 1
     //Copying the new Paramters into m_settings
-    debug << "p_exposureAuto" << newset.p_exposureAuto.get() << endl;
-    debug << "p_autoWhiteBalance" << newset.p_autoWhiteBalance.get() << endl;
-    debug << "p_exposureAutoPriority" << newset.p_exposureAutoPriority.get() << endl;
-    debug << "p_brightness" << newset.p_brightness.get() << endl;
-    debug << "p_contrast" << newset.p_contrast.get() << endl;
-    debug << "p_saturation" << newset.p_saturation.get() << endl;
-    debug << "p_gain" << newset.p_gain.get() << endl;
-    debug << "p_exposureAbsolute" << newset.p_exposureAbsolute.get() << endl;
-    debug << "p_powerLineFrequency" << newset.p_powerLineFrequency.get() << endl;
-    debug << "p_sharpness" << newset.p_sharpness.get() << endl;
+    debug << "p_exposureAuto" << newset.p_exposureAuto.get() << std::endl;
+    debug << "p_autoWhiteBalance" << newset.p_autoWhiteBalance.get() << std::endl;
+    debug << "p_exposureAutoPriority" << newset.p_exposureAutoPriority.get() << std::endl;
+    debug << "p_brightness" << newset.p_brightness.get() << std::endl;
+    debug << "p_contrast" << newset.p_contrast.get() << std::endl;
+    debug << "p_saturation" << newset.p_saturation.get() << std::endl;
+    debug << "p_gain" << newset.p_gain.get() << std::endl;
+    debug << "p_exposureAbsolute" << newset.p_exposureAbsolute.get() << std::endl;
+    debug << "p_powerLineFrequency" << newset.p_powerLineFrequency.get() << std::endl;
+    debug << "p_sharpness" << newset.p_sharpness.get() << std::endl;
 #endif
     //Copying the new Paramters into m_settings
     m_settings = newset;

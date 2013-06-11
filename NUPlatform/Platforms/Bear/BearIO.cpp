@@ -26,7 +26,7 @@
 #include "debugverbositynetwork.h"
 #include "ioconfig.h"
 
-using namespace std;
+
 
 /*! @brief Construct a BearIO object
     @param nubot a pointer to the NUbot, we need this to gain access to the public store
@@ -34,7 +34,7 @@ using namespace std;
 BearIO::BearIO(NUbot* nubot): NUIO(nubot)
 {
 #if DEBUG_NETWORK_VERBOSITY > 0
-    debug << "BearIO::BearIO()" << endl;
+    debug << "BearIO::BearIO()" << std::endl;
 #endif
     m_nubot = nubot;
 }
@@ -42,7 +42,7 @@ BearIO::BearIO(NUbot* nubot): NUIO(nubot)
 BearIO::~BearIO()
 {
 #if DEBUG_NETWORK_VERBOSITY > 0
-    debug << "BearIO::~BearIO()" << endl;
+    debug << "BearIO::~BearIO()" << std::endl;
 #endif
 }
 

@@ -51,7 +51,7 @@ namespace Vision {
 
     /*!
       Gets the colour matching given name.
-      @param name String name of the colour desired.
+      @param name std::string name of the colour desired.
       @return The method mathing the given name.
       */
     Colour getColourFromName(const std::string& name)

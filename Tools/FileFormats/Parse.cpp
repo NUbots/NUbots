@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string.h>
-using namespace std;
+
 
 #define strcmpi strcmp 
 
@@ -32,13 +32,13 @@ bool Parse::IsSpace(const char c) {
 }
 
 void Parse::WriteFile(const char* filename, const char* buffer, int buffersize) {
-  printf("Config: Writing %s.\n",filename);
-  FILE* f = fopen("/ms/open-r/mw/test.t","wb");
+  std::printf("Config: Writing %s.\n",filename);
+  std::FILE* f = std::fopen("/ms/open-r/mw/test.t","wb");
   if (f != NULL) { 
-    fwrite(buffer,1,buffersize,f);
-    fclose(f);
+    std::fwrite(buffer,1,buffersize,f);
+    std::fclose(f);
   } else {
-    cout << "Parse: unable to open file for writing" << endl << flush;
+    std::cout << "Parse: unable to open file for writing" << std::endl << std::flush;
   }
 }
 
@@ -48,22 +48,22 @@ void Parse::WriteFile(const char* filename, const char* buffer, int buffersize) 
 //   are stored in a vector using RegisterPair().
 bool Parse::ParseFile(const char* filename) {
   //printf("Config: Loading %s.\n", filename);
-  FILE* f = fopen(filename,"rb");
+  std::FILE* f = std::fopen(filename,"rb");
   if (f == NULL) {
-    printf("Config: Unable to open file %s.\n",filename);
+    std::printf("Config: Unable to open file %s.\n",filename);
     return false;
   }
-  fseek(f,0,SEEK_END);
-  long filesize = ftell(f);
-  rewind(f);
+  std::fseek(f,0,SEEK_END);
+  long filesize = std::ftell(f);
+  std::rewind(f);
   char* filebuffer = (char*) malloc(filesize);
   if (filebuffer == NULL) {
-    printf("Config: Unable to malloc %d bytes required to parse %s.\n",(int)filesize,filename);
+    std::printf("Config: Unable to malloc %d bytes required to parse %s.\n",(int)filesize,filename);
     return false;
   }
 
-  fread(filebuffer,1,filesize,f);
-  fclose(f);
+  std::fread(filebuffer,1,filesize,f);
+  std::fclose(f);
 
   int i = 0;
   int linenumber=0;
@@ -99,10 +99,10 @@ bool Parse::ParseFile(const char* filename) {
       i++;
       // did anyone ever understand this?
       if (IsLF(filebuffer[i-1])) i++;
-      printf("Config: Error on line %d of file %s - ",linenumber,filename);
+      std::printf("Config: Error on line %d of file %s - ",linenumber,filename);
       if (k >= MAX_KEYLENGTH) {
-        printf("Key too long.\n");
-      } else printf("Missing equals.\n");
+        std::printf("Key too long.\n");
+      } else std::printf("Missing equals.\n");
       free(keystring);
       free(valstring);
       continue;
@@ -129,8 +129,8 @@ bool Parse::ParseFile(const char* filename) {
       while (i < filesize && IsTerminator(filebuffer[i]) == false) i++;
       i++;
       if (IsLF(filebuffer[i-1])) i++;
-      printf("Config: Error on line %d of file %s - ",linenumber,filename);
-      printf("Value was too long.\n");
+      std::printf("Config: Error on line %d of file %s - ",linenumber,filename);
+      std::printf("Value was too long.\n");
       continue;
     }
     i++;
@@ -155,7 +155,7 @@ void Parse::RegisterPair(char* k,char* v) {
   if (p != NULL) {
     // value changed when we reloaded it ! warn user.
     if (strcmpi(p->val,v)!=0) {
-      printf("Config: WARNING! Pair (%s,%s) is now (%s,%s).\n",p->key,p->val, k, v);
+      std::printf("Config: WARNING! Pair (%s,%s) is now (%s,%s).\n",p->key,p->val, k, v);
     }
     free(p->val);
     p->val = v;
@@ -166,9 +166,9 @@ void Parse::RegisterPair(char* k,char* v) {
   newp.val = v;
   keyValuePairs.push_back(newp);
   if (strlen(v) != 0) {
-    //printf("Config: Registered (%s,%s).\n",newp.key,newp.val);
+    //std::printf("Config: Registered (%s,%s).\n",newp.key,newp.val);
   } else {
-    //printf("Config: Registered (%s,%s) (Value field empty!).\n",newp.key,newp.val);
+    //std::printf("Config: Registered (%s,%s) (Value field empty!).\n",newp.key,newp.val);
   }
 
 }
@@ -179,7 +179,7 @@ Pair* Parse::FindPair(const char* k) {
       return &keyValuePairs[i];
     }
   }
-  printf("Config: Unable to find key %s.\n",k);
+  std::printf("Config: Unable to find key %s.\n",k);
   return NULL;
 }
 

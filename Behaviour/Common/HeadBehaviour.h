@@ -91,8 +91,8 @@ private:
     //variables for training
     int ACTIONS_PER_STATE;
     int actions_taken_this_state;
-    string rewards_log_pathname;
-    string agent_filename;
+    std::string rewards_log_pathname;
+    std::string agent_filename;
 
     float last_reward;
     

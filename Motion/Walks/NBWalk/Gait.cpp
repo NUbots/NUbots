@@ -1,15 +1,15 @@
 #include "Gait.h"
 #include <iostream>
-using namespace std;
+
 
 Gait::Gait(const Gait & other){
     setGaitFromGait(other);
-    //cout << "from Gait: "<<endl<< toString() <<endl;
+    //std::cout << "from Gait: "<<std::endl<< toString() <<std::endl;
 
 }
 Gait::Gait(const AbstractGait & other){
     setGaitFromGait(other);
-    //cout << "from Abstract gait: "<<endl<< toString() <<endl;
+    //std::cout << "from Abstract gait: "<<std::endl<< toString() <<std::endl;
 }
 
 Gait::Gait(
@@ -30,7 +30,7 @@ Gait::Gait(
                   _stiffness_config,
                   _odo_config,
                   _arm_config);
-    //cout << "from arrays: "<<endl<< toString() <<endl;
+    //std::cout << "from arrays: "<<std::endl<< toString() <<std::endl;
 }
 
 

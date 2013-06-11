@@ -12,14 +12,14 @@
 GoalDetectorHistogram::GoalDetectorHistogram() {}
 GoalDetectorHistogram::~GoalDetectorHistogram() {}
 
-vector<Goal> GoalDetectorHistogram::run()
+std::vector<Goal> GoalDetectorHistogram::run()
 {
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
-    const vector<ColourSegment>& h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR);
-    const vector<ColourSegment>& v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
+    const std::vector<ColourSegment>& h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR);
+    const std::vector<ColourSegment>& v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
 
-    list<Quad> quads = detectQuads(h_segments, v_segments);
-    vector<Goal> posts;
+    std::list<Quad> quads = detectQuads(h_segments, v_segments);
+    std::vector<Goal> posts;
 
     removeInvalid(quads);
 
@@ -39,7 +39,7 @@ vector<Goal> GoalDetectorHistogram::run()
     return posts;
 }
 
-list<Quad> GoalDetectorHistogram::detectQuads(const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
+std::list<Quad> GoalDetectorHistogram::detectQuads(const std::vector<ColourSegment>& h_segments, const std::vector<ColourSegment>& v_segments)
 {
     const size_t BINS = 20;
     const double STDDEV_THRESHOLD = 1.5;
@@ -78,10 +78,10 @@ Histogram1D GoalDetectorHistogram::mergePeaks(Histogram1D hist, int minimum_size
     return hist;
 }
 
-list<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& hist, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments, int peak_threshold)
+std::list<Quad> GoalDetectorHistogram::generateCandidates(const Histogram1D& hist, const std::vector<ColourSegment>& h_segments, const std::vector<ColourSegment>& v_segments, int peak_threshold)
 {
-    list<Quad> candidates;
-    vector<Bin>::const_iterator b_it;
+    std::list<Quad> candidates;
+    std::vector<Bin>::const_iterator b_it;
 
     for (b_it = hist.begin(); b_it != hist.end(); b_it++) {
         if(b_it->value >= peak_threshold) {
@@ -101,7 +101,7 @@ bool GoalDetectorHistogram::checkBinSimilarity(Bin b1, Bin b2, float allowed_dis
 
 
 // BETTER EDGE FITTING METHOD
-Quad GoalDetectorHistogram::makeQuad(Bin bin, const vector<ColourSegment>& h_segments, const vector<ColourSegment>& v_segments)
+Quad GoalDetectorHistogram::makeQuad(Bin bin, const std::vector<ColourSegment>& h_segments, const std::vector<ColourSegment>& v_segments)
 {
     // find bounding box from histogram
     int    left = bin.start,

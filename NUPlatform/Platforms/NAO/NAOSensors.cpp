@@ -30,57 +30,56 @@
 #include "debugverbositynusensors.h"
 
 #include <limits>
-using namespace std;
 
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
-static string temp_jointposition_names[] = {HEAD_PITCH_POSITION, HEAD_YAW_POSITION, L_SHOULDER_ROLL_POSITION, L_SHOULDER_PITCH_POSITION, L_ELBOW_ROLL_POSITION, L_ELBOW_YAW_POSITION, R_SHOULDER_ROLL_POSITION, R_SHOULDER_PITCH_POSITION, R_ELBOW_ROLL_POSITION, R_ELBOW_YAW_POSITION, L_HIP_ROLL_POSITION, L_HIP_PITCH_POSITION, L_HIP_YAWPITCH_POSITION, L_KNEE_PITCH_POSITION, L_ANKLE_ROLL_POSITION, L_ANKLE_PITCH_POSITION, R_HIP_ROLL_POSITION, R_HIP_PITCH_POSITION, R_HIP_YAWPITCH_POSITION, R_KNEE_PITCH_POSITION, R_ANKLE_ROLL_POSITION, R_ANKLE_PITCH_POSITION};
-vector<string> NAOSensors::m_jointposition_names(temp_jointposition_names, temp_jointposition_names + sizeof(temp_jointposition_names)/sizeof(*temp_jointposition_names));
+static std::string temp_jointposition_names[] = {HEAD_PITCH_POSITION, HEAD_YAW_POSITION, L_SHOULDER_ROLL_POSITION, L_SHOULDER_PITCH_POSITION, L_ELBOW_ROLL_POSITION, L_ELBOW_YAW_POSITION, R_SHOULDER_ROLL_POSITION, R_SHOULDER_PITCH_POSITION, R_ELBOW_ROLL_POSITION, R_ELBOW_YAW_POSITION, L_HIP_ROLL_POSITION, L_HIP_PITCH_POSITION, L_HIP_YAWPITCH_POSITION, L_KNEE_PITCH_POSITION, L_ANKLE_ROLL_POSITION, L_ANKLE_PITCH_POSITION, R_HIP_ROLL_POSITION, R_HIP_PITCH_POSITION, R_HIP_YAWPITCH_POSITION, R_KNEE_PITCH_POSITION, R_ANKLE_ROLL_POSITION, R_ANKLE_PITCH_POSITION};
+std::vector<std::string> NAOSensors::m_jointposition_names(temp_jointposition_names, temp_jointposition_names + sizeof(temp_jointposition_names)/sizeof(*temp_jointposition_names));
 
-static string temp_jointtarget_names[] = {HEAD_PITCH_TARGET, HEAD_YAW_TARGET, L_SHOULDER_ROLL_TARGET, L_SHOULDER_PITCH_TARGET, L_ELBOW_ROLL_TARGET, L_ELBOW_YAW_TARGET, R_SHOULDER_ROLL_TARGET, R_SHOULDER_PITCH_TARGET, R_ELBOW_ROLL_TARGET, R_ELBOW_YAW_TARGET, L_HIP_ROLL_TARGET, L_HIP_PITCH_TARGET, L_HIP_YAWPITCH_TARGET, L_KNEE_PITCH_TARGET, L_ANKLE_ROLL_TARGET, L_ANKLE_PITCH_TARGET, R_HIP_ROLL_TARGET, R_HIP_PITCH_TARGET, R_HIP_YAWPITCH_TARGET, R_KNEE_PITCH_TARGET, R_ANKLE_ROLL_TARGET, R_ANKLE_PITCH_TARGET};
-vector<string> NAOSensors::m_jointtarget_names(temp_jointtarget_names, temp_jointtarget_names + sizeof(temp_jointtarget_names)/sizeof(*temp_jointtarget_names));
+static std::string temp_jointtarget_names[] = {HEAD_PITCH_TARGET, HEAD_YAW_TARGET, L_SHOULDER_ROLL_TARGET, L_SHOULDER_PITCH_TARGET, L_ELBOW_ROLL_TARGET, L_ELBOW_YAW_TARGET, R_SHOULDER_ROLL_TARGET, R_SHOULDER_PITCH_TARGET, R_ELBOW_ROLL_TARGET, R_ELBOW_YAW_TARGET, L_HIP_ROLL_TARGET, L_HIP_PITCH_TARGET, L_HIP_YAWPITCH_TARGET, L_KNEE_PITCH_TARGET, L_ANKLE_ROLL_TARGET, L_ANKLE_PITCH_TARGET, R_HIP_ROLL_TARGET, R_HIP_PITCH_TARGET, R_HIP_YAWPITCH_TARGET, R_KNEE_PITCH_TARGET, R_ANKLE_ROLL_TARGET, R_ANKLE_PITCH_TARGET};
+std::vector<std::string> NAOSensors::m_jointtarget_names(temp_jointtarget_names, temp_jointtarget_names + sizeof(temp_jointtarget_names)/sizeof(*temp_jointtarget_names));
 
-static string temp_jointstiffness_names[] = {HEAD_PITCH_HARDNESS, HEAD_YAW_HARDNESS, L_SHOULDER_ROLL_HARDNESS, L_SHOULDER_PITCH_HARDNESS, L_ELBOW_ROLL_HARDNESS, L_ELBOW_YAW_HARDNESS, R_SHOULDER_ROLL_HARDNESS, R_SHOULDER_PITCH_HARDNESS, R_ELBOW_ROLL_HARDNESS, R_ELBOW_YAW_HARDNESS, L_HIP_ROLL_HARDNESS, L_HIP_PITCH_HARDNESS, L_HIP_YAWPITCH_HARDNESS, L_KNEE_PITCH_HARDNESS, L_ANKLE_ROLL_HARDNESS, L_ANKLE_PITCH_HARDNESS, R_HIP_ROLL_HARDNESS, R_HIP_PITCH_HARDNESS, R_HIP_YAWPITCH_HARDNESS, R_KNEE_PITCH_HARDNESS, R_ANKLE_ROLL_HARDNESS, R_ANKLE_PITCH_HARDNESS};
-vector<string> NAOSensors::m_jointstiffness_names(temp_jointstiffness_names, temp_jointstiffness_names + sizeof(temp_jointstiffness_names)/sizeof(*temp_jointstiffness_names));
+static std::string temp_jointstiffness_names[] = {HEAD_PITCH_HARDNESS, HEAD_YAW_HARDNESS, L_SHOULDER_ROLL_HARDNESS, L_SHOULDER_PITCH_HARDNESS, L_ELBOW_ROLL_HARDNESS, L_ELBOW_YAW_HARDNESS, R_SHOULDER_ROLL_HARDNESS, R_SHOULDER_PITCH_HARDNESS, R_ELBOW_ROLL_HARDNESS, R_ELBOW_YAW_HARDNESS, L_HIP_ROLL_HARDNESS, L_HIP_PITCH_HARDNESS, L_HIP_YAWPITCH_HARDNESS, L_KNEE_PITCH_HARDNESS, L_ANKLE_ROLL_HARDNESS, L_ANKLE_PITCH_HARDNESS, R_HIP_ROLL_HARDNESS, R_HIP_PITCH_HARDNESS, R_HIP_YAWPITCH_HARDNESS, R_KNEE_PITCH_HARDNESS, R_ANKLE_ROLL_HARDNESS, R_ANKLE_PITCH_HARDNESS};
+std::vector<std::string> NAOSensors::m_jointstiffness_names(temp_jointstiffness_names, temp_jointstiffness_names + sizeof(temp_jointstiffness_names)/sizeof(*temp_jointstiffness_names));
 
-static string temp_jointcurrent_names[] = {HEAD_PITCH_CURRENT, HEAD_YAW_CURRENT, L_SHOULDER_ROLL_CURRENT, L_SHOULDER_PITCH_CURRENT, L_ELBOW_ROLL_CURRENT, L_ELBOW_YAW_CURRENT, R_SHOULDER_ROLL_CURRENT, R_SHOULDER_PITCH_CURRENT, R_ELBOW_ROLL_CURRENT, R_ELBOW_YAW_CURRENT, L_HIP_ROLL_CURRENT, L_HIP_PITCH_CURRENT, L_HIP_YAWPITCH_CURRENT, L_KNEE_PITCH_CURRENT, L_ANKLE_ROLL_CURRENT, L_ANKLE_PITCH_CURRENT, R_HIP_ROLL_CURRENT, R_HIP_PITCH_CURRENT, R_HIP_YAWPITCH_CURRENT, R_KNEE_PITCH_CURRENT, R_ANKLE_ROLL_CURRENT, R_ANKLE_PITCH_CURRENT};
-vector<string> NAOSensors::m_jointcurrent_names(temp_jointcurrent_names, temp_jointcurrent_names + sizeof(temp_jointcurrent_names)/sizeof(*temp_jointcurrent_names));
+static std::string temp_jointcurrent_names[] = {HEAD_PITCH_CURRENT, HEAD_YAW_CURRENT, L_SHOULDER_ROLL_CURRENT, L_SHOULDER_PITCH_CURRENT, L_ELBOW_ROLL_CURRENT, L_ELBOW_YAW_CURRENT, R_SHOULDER_ROLL_CURRENT, R_SHOULDER_PITCH_CURRENT, R_ELBOW_ROLL_CURRENT, R_ELBOW_YAW_CURRENT, L_HIP_ROLL_CURRENT, L_HIP_PITCH_CURRENT, L_HIP_YAWPITCH_CURRENT, L_KNEE_PITCH_CURRENT, L_ANKLE_ROLL_CURRENT, L_ANKLE_PITCH_CURRENT, R_HIP_ROLL_CURRENT, R_HIP_PITCH_CURRENT, R_HIP_YAWPITCH_CURRENT, R_KNEE_PITCH_CURRENT, R_ANKLE_ROLL_CURRENT, R_ANKLE_PITCH_CURRENT};
+std::vector<std::string> NAOSensors::m_jointcurrent_names(temp_jointcurrent_names, temp_jointcurrent_names + sizeof(temp_jointcurrent_names)/sizeof(*temp_jointcurrent_names));
 
-static string temp_jointtemperature_names[] = {HEAD_PITCH_TEMPERATURE, HEAD_YAW_TEMPERATURE, L_SHOULDER_ROLL_TEMPERATURE, L_SHOULDER_PITCH_TEMPERATURE, L_ELBOW_ROLL_TEMPERATURE, L_ELBOW_YAW_TEMPERATURE, R_SHOULDER_ROLL_TEMPERATURE, R_SHOULDER_PITCH_TEMPERATURE, R_ELBOW_ROLL_TEMPERATURE, R_ELBOW_YAW_TEMPERATURE, L_HIP_ROLL_TEMPERATURE, L_HIP_PITCH_TEMPERATURE, L_HIP_YAWPITCH_TEMPERATURE, L_KNEE_PITCH_TEMPERATURE, L_ANKLE_ROLL_TEMPERATURE, L_ANKLE_PITCH_TEMPERATURE, R_HIP_ROLL_TEMPERATURE, R_HIP_PITCH_TEMPERATURE, R_HIP_YAWPITCH_TEMPERATURE, R_KNEE_PITCH_TEMPERATURE, R_ANKLE_ROLL_TEMPERATURE, R_ANKLE_PITCH_TEMPERATURE};
-vector<string> NAOSensors::m_jointtemperature_names(temp_jointtemperature_names, temp_jointtemperature_names + sizeof(temp_jointtemperature_names)/sizeof(*temp_jointtemperature_names));
+static std::string temp_jointtemperature_names[] = {HEAD_PITCH_TEMPERATURE, HEAD_YAW_TEMPERATURE, L_SHOULDER_ROLL_TEMPERATURE, L_SHOULDER_PITCH_TEMPERATURE, L_ELBOW_ROLL_TEMPERATURE, L_ELBOW_YAW_TEMPERATURE, R_SHOULDER_ROLL_TEMPERATURE, R_SHOULDER_PITCH_TEMPERATURE, R_ELBOW_ROLL_TEMPERATURE, R_ELBOW_YAW_TEMPERATURE, L_HIP_ROLL_TEMPERATURE, L_HIP_PITCH_TEMPERATURE, L_HIP_YAWPITCH_TEMPERATURE, L_KNEE_PITCH_TEMPERATURE, L_ANKLE_ROLL_TEMPERATURE, L_ANKLE_PITCH_TEMPERATURE, R_HIP_ROLL_TEMPERATURE, R_HIP_PITCH_TEMPERATURE, R_HIP_YAWPITCH_TEMPERATURE, R_KNEE_PITCH_TEMPERATURE, R_ANKLE_ROLL_TEMPERATURE, R_ANKLE_PITCH_TEMPERATURE};
+std::vector<std::string> NAOSensors::m_jointtemperature_names(temp_jointtemperature_names, temp_jointtemperature_names + sizeof(temp_jointtemperature_names)/sizeof(*temp_jointtemperature_names));
 
-static string temp_accel_names[] = {ACCEL_X, ACCEL_Y, ACCEL_Z};
-vector<string> NAOSensors::m_accel_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
+static std::string temp_accel_names[] = {ACCEL_X, ACCEL_Y, ACCEL_Z};
+std::vector<std::string> NAOSensors::m_accel_names(temp_accel_names, temp_accel_names + sizeof(temp_accel_names)/sizeof(*temp_accel_names));
 
-static string temp_gyro_names[] = {GYRO_X, GYRO_Y};
-vector<string> NAOSensors::m_gyro_names(temp_gyro_names, temp_gyro_names + sizeof(temp_gyro_names)/sizeof(*temp_gyro_names));
+static std::string temp_gyro_names[] = {GYRO_X, GYRO_Y};
+std::vector<std::string> NAOSensors::m_gyro_names(temp_gyro_names, temp_gyro_names + sizeof(temp_gyro_names)/sizeof(*temp_gyro_names));
 
-static string temp_orientation_names[] = {ANGLE_X, ANGLE_Y};
-vector<string> NAOSensors::m_orientation_names(temp_orientation_names, temp_orientation_names + sizeof(temp_orientation_names)/sizeof(*temp_orientation_names));
+static std::string temp_orientation_names[] = {ANGLE_X, ANGLE_Y};
+std::vector<std::string> NAOSensors::m_orientation_names(temp_orientation_names, temp_orientation_names + sizeof(temp_orientation_names)/sizeof(*temp_orientation_names));
 
-static string temp_foot_left_sole_names[] = {L_FSR_FL, L_FSR_FR, L_FSR_BR, L_FSR_BL};
-static string temp_foot_right_sole_names[] = {R_FSR_FL, R_FSR_FR, R_FSR_BR, R_FSR_BL};
-vector<string> NAOSensors::m_foot_left_sole_names(temp_foot_left_sole_names, temp_foot_left_sole_names + sizeof(temp_foot_left_sole_names)/sizeof(*temp_foot_left_sole_names));
-vector<string> NAOSensors::m_foot_right_sole_names(temp_foot_right_sole_names, temp_foot_right_sole_names + sizeof(temp_foot_right_sole_names)/sizeof(*temp_foot_right_sole_names));
+static std::string temp_foot_left_sole_names[] = {L_FSR_FL, L_FSR_FR, L_FSR_BR, L_FSR_BL};
+static std::string temp_foot_right_sole_names[] = {R_FSR_FL, R_FSR_FR, R_FSR_BR, R_FSR_BL};
+std::vector<std::string> NAOSensors::m_foot_left_sole_names(temp_foot_left_sole_names, temp_foot_left_sole_names + sizeof(temp_foot_left_sole_names)/sizeof(*temp_foot_left_sole_names));
+std::vector<std::string> NAOSensors::m_foot_right_sole_names(temp_foot_right_sole_names, temp_foot_right_sole_names + sizeof(temp_foot_right_sole_names)/sizeof(*temp_foot_right_sole_names));
 
-static string temp_foot_bumper_names[] = {L_BUMP_L, L_BUMP_R, R_BUMP_L, R_BUMP_R};
-vector<string> NAOSensors::m_foot_bumper_names(temp_foot_bumper_names, temp_foot_bumper_names + sizeof(temp_foot_bumper_names)/sizeof(*temp_foot_bumper_names));
+static std::string temp_foot_bumper_names[] = {L_BUMP_L, L_BUMP_R, R_BUMP_L, R_BUMP_R};
+std::vector<std::string> NAOSensors::m_foot_bumper_names(temp_foot_bumper_names, temp_foot_bumper_names + sizeof(temp_foot_bumper_names)/sizeof(*temp_foot_bumper_names));
 
-static string temp_button_names[] = {CHEST_BUTTON};
-vector<string> NAOSensors::m_button_names(temp_button_names, temp_button_names + sizeof(temp_button_names)/sizeof(*temp_button_names));
+static std::string temp_button_names[] = {CHEST_BUTTON};
+std::vector<std::string> NAOSensors::m_button_names(temp_button_names, temp_button_names + sizeof(temp_button_names)/sizeof(*temp_button_names));
 
-static string temp_battery_names[] = {CHARGE, CURRENT, VOLTAGE_MIN, VOLTAGE_MAX, TEMPERATURE};
-vector<string> NAOSensors::m_battery_names(temp_battery_names, temp_battery_names + sizeof(temp_battery_names)/sizeof(*temp_battery_names));
+static std::string temp_battery_names[] = {CHARGE, CURRENT, VOLTAGE_MIN, VOLTAGE_MAX, TEMPERATURE};
+std::vector<std::string> NAOSensors::m_battery_names(temp_battery_names, temp_battery_names + sizeof(temp_battery_names)/sizeof(*temp_battery_names));
 
-static string temp_ulstrasonic_left_distance[] = {	US_DISTANCE_LEFT_VALUE0, US_DISTANCE_LEFT_VALUE1, US_DISTANCE_LEFT_VALUE2, 
+static std::string temp_ulstrasonic_left_distance[] = {	US_DISTANCE_LEFT_VALUE0, US_DISTANCE_LEFT_VALUE1, US_DISTANCE_LEFT_VALUE2, 
 									US_DISTANCE_LEFT_VALUE3, US_DISTANCE_LEFT_VALUE4, US_DISTANCE_LEFT_VALUE5, 
 									US_DISTANCE_LEFT_VALUE6, US_DISTANCE_LEFT_VALUE7, US_DISTANCE_LEFT_VALUE8, 
 									US_DISTANCE_LEFT_VALUE9 	};
-static string temp_ulstrasonic_right_distance[] = {	US_DISTANCE_RIGHT_VALUE0, US_DISTANCE_RIGHT_VALUE1, US_DISTANCE_RIGHT_VALUE2, 
+static std::string temp_ulstrasonic_right_distance[] = {	US_DISTANCE_RIGHT_VALUE0, US_DISTANCE_RIGHT_VALUE1, US_DISTANCE_RIGHT_VALUE2, 
 									US_DISTANCE_RIGHT_VALUE3, US_DISTANCE_RIGHT_VALUE4, US_DISTANCE_RIGHT_VALUE5, 
 									US_DISTANCE_RIGHT_VALUE6, US_DISTANCE_RIGHT_VALUE7, US_DISTANCE_RIGHT_VALUE8, 
 									US_DISTANCE_RIGHT_VALUE9	};
-vector<string> NAOSensors::m_ultrasonic_left_distances(temp_ulstrasonic_left_distance, temp_ulstrasonic_left_distance + sizeof(temp_ulstrasonic_left_distance)/sizeof(*temp_ulstrasonic_left_distance));
-vector<string> NAOSensors::m_ultrasonic_right_distances(temp_ulstrasonic_right_distance, temp_ulstrasonic_right_distance + sizeof(temp_ulstrasonic_right_distance)/sizeof(*temp_ulstrasonic_right_distance));
+std::vector<std::string> NAOSensors::m_ultrasonic_left_distances(temp_ulstrasonic_left_distance, temp_ulstrasonic_left_distance + sizeof(temp_ulstrasonic_left_distance)/sizeof(*temp_ulstrasonic_left_distance));
+std::vector<std::string> NAOSensors::m_ultrasonic_right_distances(temp_ulstrasonic_right_distance, temp_ulstrasonic_right_distance + sizeof(temp_ulstrasonic_right_distance)/sizeof(*temp_ulstrasonic_right_distance));
 
 /*! @brief Constructs a NUSensors for NAO class
  */
@@ -147,14 +146,14 @@ void NAOSensors::getSensorsFromALMemory()
 
 void NAOSensors::initBuffers()
 {
-    m_buffer_positions = vector<float>(m_jointposition_names.size(), 0);
-    m_buffer_targets = vector<float>(m_jointposition_names.size(), 0);
-    m_buffer_stiffnesses = vector<float>(m_jointposition_names.size(), 0);
-    m_buffer_currents = vector<float>(m_jointposition_names.size(), 0);
-    m_buffer_temperatures = vector<float>(m_jointposition_names.size(), 0);
+    m_buffer_positions = std::vector<float>(m_jointposition_names.size(), 0);
+    m_buffer_targets = std::vector<float>(m_jointposition_names.size(), 0);
+    m_buffer_stiffnesses = std::vector<float>(m_jointposition_names.size(), 0);
+    m_buffer_currents = std::vector<float>(m_jointposition_names.size(), 0);
+    m_buffer_temperatures = std::vector<float>(m_jointposition_names.size(), 0);
     
-    m_previous_positions = vector<float>(m_jointposition_names.size(), 0);
-    m_previous_velocities = vector<float>(m_jointposition_names.size(), 0);
+    m_previous_positions = std::vector<float>(m_jointposition_names.size(), 0);
+    m_previous_velocities = std::vector<float>(m_jointposition_names.size(), 0);
 }
 
 /*! @brief Copies the sensor data from almemory to NUSensorsData
@@ -192,7 +191,7 @@ void NAOSensors::copyFromJoints()
     m_al_current_access->GetValues(m_buffer_currents);
     m_al_temperature_access->GetValues(m_buffer_temperatures);
     
-    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    std::vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000;
     for (size_t i=0; i<m_buffer_positions.size(); i++)
     {
