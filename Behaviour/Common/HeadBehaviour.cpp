@@ -55,7 +55,7 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
     landmarkSeenFrequency = 1200;
     ballSeenFrequency = 800;
     lastVisionPolicy = -1;
-    maximumSearchTime = 2500.;
+    maximumSearchTime = 1000.;
     CONFIRMATION_TIME = 250.;
     buttonPressTime = 0.;
     actionObjectID = -1;
@@ -64,8 +64,13 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
     actions_taken_this_state = 0;
 
     rewards_log_pathname = "nubot/Config/Darwin/HeadRewards.csv";//Rewards are not recorded unless uncommented in calculateReward() method
-    agent_filename = "Order30_HeadBehaviourRL";
+    agent_filename = "Order30_CombinedAgent";
+    give_rew_to_mot = true;
 
+
+    //Policy Parameters:
+    prioritise_localisation_policy_bias = 0.5;//Probability prioritising localisation will give no looking at mobile objects
+    prioritise_ball_policy_bias = 0.5; //Probability prioritising localisation will give no looking at stationary objects
     srand(Blackboard->Sensors->GetTimestamp());
 
     //MRL Agent
@@ -85,7 +90,7 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
                                      ,30
                                      //max_percept_values
                                      ,MAX_PERCEPT_RANGESIZE);
-            Mrlagent.setParameters(0.5,1,0.1,0.5,5,15, true);
+            Mrlagent.setParameters(0.5,0,0.1,0.5,5,15, false);//Default for Combined or motivated agent.
 
         }catch(string s){
            cout<<s<<endl;
@@ -217,9 +222,12 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
 
     float current_time = Blackboard->Sensors->GetTimestamp();
     //If we are still moving to look at something else, don't make a new decision
-    if (current_time < actionStartTime+maximumSearchTime &&
+    if (
+        current_time < actionStartTime+maximumSearchTime &&
         fieldVisionPolicy == lastVisionPolicy and
-        ObjectNotSeen()) {
+        ObjectNotSeen()
+       )
+    {
         return;
     }
 //Localisation hack: activated to improve performance if robot is getting lost too much.
@@ -240,15 +248,68 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
 
     switch (fieldVisionPolicy) {
         case PrioritiseLocalisationPolicy:
-            doAgentBasedPolicy();//TODO:add bias to landmarks
+            {
+                vector<int> object_selection_vector = head_logic->getValidObjectsToLookAt();
+                if(rand()< prioritise_localisation_policy_bias*RAND_MAX){
+                    for(int i =0; i<head_logic->relevantObjects[HeadLogic::MOBILE_OBJECT].size(); i++){
+                        object_selection_vector[head_logic->getObjectIndex(HeadLogic::MOBILE_OBJECT,i)] = 0;//For each mobile object set selection possibility to zero sometimes.
+                    }
+                    for(int i =0; i<head_logic->relevantObjects[HeadLogic::AMBIGUOUS_OBJECT].size(); i++){
+                        object_selection_vector[head_logic->getObjectIndex(HeadLogic::AMBIGUOUS_OBJECT,i)] = 0;//For each ambiguous object set selection possibility to zero sometimes.
+                    }
+                }
+                doAgentBasedPolicy(object_selection_vector);//TODO:add bias to landmarks
+                break;
+            }
         case PrioritiseBallPolicy:
-            doAgentBasedPolicy();//TODO:add bias to ball
+            {
+                vector<int> object_selection_vector = head_logic->getValidObjectsToLookAt();
+                if(rand()< prioritise_ball_policy_bias*RAND_MAX){
+                    for(int i =0; i<head_logic->relevantObjects[HeadLogic::STATIONARY_OBJECT].size(); i++){
+                        object_selection_vector[head_logic->getObjectIndex(HeadLogic::STATIONARY_OBJECT,i)] = 0;//For each stationary object set selection possibility to zero sometimes.
+                    }
+                    for(int i =0; i<head_logic->relevantObjects[HeadLogic::AMBIGUOUS_OBJECT].size(); i++){
+                        object_selection_vector[head_logic->getObjectIndex(HeadLogic::AMBIGUOUS_OBJECT,i)] = 0;//For each ambiguous object set selection possibility to zero sometimes.
+                    }
+                }
+                doAgentBasedPolicy(object_selection_vector);//TODO:add bias to ball
+                break;
+            }
         case LookAtBallPolicy:
-            dispatchHeadJob(&Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]);
-        case LookForBallPolicy:
-            dispatchHeadJob(&Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]);
+            {
+                vector<int> object_selection_vector = head_logic->getValidObjectsToLookAt();
+                //Look at nothing but the ball:
+                for (int i =0; i<object_selection_vector.size();i++){
+                    object_selection_vector[i]=0;
+                }
+                object_selection_vector[head_logic->getObjectIndex(HeadLogic::MOBILE_OBJECT,FieldObjects::FO_BALL)] = 1;//Set ball to be looked at
+                doAgentBasedPolicy(object_selection_vector);//TODO:add bias to ball
+                break;
+            }
+        case LookForBallPolicy://TODO: implement ball localisation head movement
+            {
+                vector<int> object_selection_vector = head_logic->getValidObjectsToLookAt();
+                //Look at nothing but the ball:
+                for (int i =0; i<object_selection_vector.size();i++){
+                    object_selection_vector[i]=0;
+                }
+                object_selection_vector[head_logic->getObjectIndex(HeadLogic::MOBILE_OBJECT,FieldObjects::FO_BALL)] = 1;//Set ball to be looked at
+                doAgentBasedPolicy(object_selection_vector);
+                break;
+            }
         case LookForFieldObjectsPolicy:
-            doAgentBasedPolicy();//TODO:add selection of landmarks only
+            {
+            vector<int> object_selection_vector = head_logic->getValidObjectsToLookAt();
+            for(int i =0; i<head_logic->relevantObjects[HeadLogic::MOBILE_OBJECT].size(); i++){
+                object_selection_vector[head_logic->getObjectIndex(HeadLogic::MOBILE_OBJECT,i)] = 0;//For each mobile object set selection possibility to zero always.
+            }
+            for(int i =0; i<head_logic->relevantObjects[HeadLogic::AMBIGUOUS_OBJECT].size(); i++){
+                object_selection_vector[head_logic->getObjectIndex(HeadLogic::AMBIGUOUS_OBJECT,i)] = 0;//For each ambiguous object set selection possibility to zero always.
+            }
+
+            doAgentBasedPolicy(object_selection_vector);
+            break;
+            }
         case TimeVSCostPriority:
             doTimeVSCostPriorityPolicy();
             break;
@@ -317,14 +378,30 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
 
 }
 
-void  HeadBehaviour::doAgentBasedPolicy(){
-    if (actions_taken_this_state < ACTIONS_PER_STATE){
-         doRLAgentPolicy();
-         actions_taken_this_state++;
-    }else{
-        Mrlagent.saveMRLAgent(agent_filename);
-        actions_taken_this_state = 0;
-    }
+void  HeadBehaviour::doAgentBasedPolicy(vector<int> object_selection_vector){
+//        cout<<"HeadBehaviour::doAgentBasedPolicy - object_selection_vector =";
+//        for (int i =0; i< object_selection_vector.size();i++){
+//            cout <<", "<< object_selection_vector[i]<<" ";
+//        }
+//        cout<< "]";
+        vector<float> inputs = getPercept();
+        int action = Mrlagent.getActionAndLearn(inputs,object_selection_vector,(give_rew_to_mot ? calculateReward()-0.5:0));
+        float temp = (!give_rew_to_mot ? calculateReward():0);//Calculate reward to measure and record performance if not done already.
+
+        //Send Job:
+        if (action < head_logic->relevantObjects[0].size()){    //i.e. Stationary Object
+            dispatchHeadJob((StationaryObject*)(head_logic->getObject(action)));
+        } else if (action < head_logic->relevantObjects[1].size()+head_logic->relevantObjects[0].size()){ //i.e. Mobile Object
+            dispatchHeadJob((MobileObject*)(head_logic->getObject(action)));
+        } else {
+            dispatchHeadJob((AmbiguousObject*)(head_logic->getObject(action)));
+        }
+
+        actions_taken_this_state++;
+        if (actions_taken_this_state >= ACTIONS_PER_STATE){
+            Mrlagent.saveMRLAgent(agent_filename);
+            actions_taken_this_state = 0;
+        }
 }
 
 
@@ -333,8 +410,9 @@ void  HeadBehaviour::doAgentBasedPolicy(){
 void HeadBehaviour::doMRLAgentPolicy(){
 
     vector<float> inputs = getPercept();
-    int action = Mrlagent.getActionAndLearn(inputs,head_logic->getValidObjectsToLookAt());
-    float temp = calculateReward();//Calculate reward to measure and record performance.
+    int action = Mrlagent.getActionAndLearn(inputs,head_logic->getValidObjectsToLookAt(),(give_rew_to_mot ? calculateReward()-0.5:0));
+    float temp = (!give_rew_to_mot ? calculateReward():0);//Calculate reward to measure and record performance if not done already.
+
 
     if (action < head_logic->relevantObjects[0].size()){    //i.e. Stationary Object
         dispatchHeadJob((StationaryObject*)(head_logic->getObject(action)));

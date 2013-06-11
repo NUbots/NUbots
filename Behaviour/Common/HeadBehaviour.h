@@ -112,8 +112,11 @@ private:
     string agent_filename;
 
     float last_reward;
+    bool give_rew_to_mot;
     
-
+    //Policy Parameters
+    float prioritise_localisation_policy_bias;
+    float prioritise_ball_policy_bias;
     /*! @brief
     */
     bool ObjectNotSeen();
@@ -131,9 +134,12 @@ private:
     */
     void doTimeVSCostPriorityPolicy();
 
-    /*! @brief Use the motivated reinforcement learning agent to make policy decisions.
+    /*! @brief Use the combined reinforcement learning agent to make policy decisions.
+      @param
     */
-    void doAgentBasedPolicy();
+    void doAgentBasedPolicy(vector<int> object_selection_vector);
+
+    /*Tertiary methods for experimentation and testing.*/
     void doMRLAgentPolicy();
     void doRLAgentPolicy();
     void doCheckAgentPolicy();
@@ -141,6 +147,8 @@ private:
     /*! @brief Writes to the HeadRewards.log file in nubot folder
     */
     void recordReward(float r);
+
+    /*! @brief Gives a vector of ones which acts as a basis for indicating available objects to look at  */
 
 
 public:

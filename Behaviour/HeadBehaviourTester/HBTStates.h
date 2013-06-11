@@ -57,9 +57,13 @@ protected:
 class HBTState : public HBTSubState
 {
 public:
+    float time_last_pressed;
+    int head_behaviour_type;
     HeadBehaviour* head_behaviour;
     HBTState(HBTProvider* provider) : HBTSubState(provider) {
         head_behaviour = HeadBehaviour::getInstance();
+        head_behaviour_type = 0;
+        time_last_pressed = 0;
     }
     BehaviourState* nextState() {return m_provider->m_state;}
     void doState()
@@ -82,28 +86,59 @@ public:
         nu_nextHeadJoints.assign(joints.begin(), joints.begin()+2);
         //nu_nextLeftArmJoints.assign(joints.begin()+2, joints.begin()+5);
         //nu_nextRightArmJoints.assign(joints.begin()+5, joints.begin()+8);
-        nu_nextLeftLegJoints.assign(joints.begin()+8, joints.begin()+14);
-        nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
-        
+        //nu_nextLeftLegJoints.assign(joints.begin()+8, joints.begin()+14);
+       // nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
+        nu_nextRightArmJoints[1]=1.5;
+        nu_nextLeftArmJoints[1]=1.5;
         //HEAD TRACK
         //if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible())
         //    m_jobs->addMotionJob(new HeadTrackJob(m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL]));
         //else if (m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 250)
         //    m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
         //UPDATE HEAD
-        m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
+        //m_actions->add(NUActionatorsData::Head, Blackboard->Sensors->GetTimestamp()+6000, nu_nextHeadJoints, 0);
 
         //UPDATE ARMS:
-       // m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 30);
-        //m_actions->add(NUActionatorsData::LArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftArmJoints, 30);
+        m_actions->add(NUActionatorsData::RArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightArmJoints, 30);
+        m_actions->add(NUActionatorsData::LArm, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftArmJoints, 30);
 
         //UPDATE LEGS:
         m_actions->add(NUActionatorsData::RLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextRightLegJoints, 65);
         m_actions->add(NUActionatorsData::LLeg, Blackboard->Sensors->GetTimestamp()+6000, nu_nextLeftLegJoints, 65);
 
 
-        //Head behaviour testing:
-        head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentTrainingPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy, HeadBehaviour::TimeVSCostPriority
+
+        float button_state;
+        Blackboard->Sensors->getButton(NUSensorsData::MainButton,button_state);
+        if(button_state > 0 and Blackboard->Sensors->GetTimestamp()-time_last_pressed>1000){
+             head_behaviour_type = (head_behaviour_type+1)%5;
+             time_last_pressed = Blackboard->Sensors->GetTimestamp();
+        }
+
+        //Head behaviour testing:        
+        switch(head_behaviour_type){
+            case 0:
+                cout << "Testing Head Behaviour - prioritiseLocalisation"<< endl;
+                head_behaviour->prioritiseLocalisation();
+                break;
+            case 1:
+                cout << "Testing Head Behaviour - prioritiseBall"<< endl;
+                head_behaviour->prioritiseBall();
+                break;
+            case 2:
+                cout << "Testing Head Behaviour - lookAtBall"<< endl;
+                head_behaviour->lookAtBall();
+                break;
+            case 3:
+                cout << "Testing Head Behaviour - lookForBall"<< endl;
+                head_behaviour->lookForBall();
+                break;
+            case 4:
+                cout << "Testing Head Behaviour - lookForFieldObjects"<< endl;
+                head_behaviour->lookForFieldObjects();
+                break;
+        }
+        head_behaviour->update();
     };
 };
 
