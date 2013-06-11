@@ -3,8 +3,8 @@
 
 NUAPI::NUAPI(): context(1), publisher(context, ZMQ_PUB)
 {
-	//int hwm = 1;
-	//publisher.setsockopt(ZMQ_SNDHWM, &hwm, sizeof (hwm));
+	int64_t hwm = 1;
+	publisher.setsockopt(ZMQ_HWM, &hwm, sizeof (hwm));
 	publisher.bind("tcp://*:12000");
 
 }
@@ -85,7 +85,7 @@ void NUAPI::sendVisionData()
 		const vector<vector<ColourSegment> >& hColourSegments = Blackboard->horizontalScans->getSegments();
 		const vector<vector<ColourSegment> >& vColourSegments = Blackboard->verticalScans->getSegments();
 
-		BOOST_FOREACH(AmbiguousObject& ambiguous_object, fieldObjects->ambiguousFieldObjects)
+		for (auto& ambiguous_object: fieldObjects->ambiguousFieldObjects)
 		{
 			API::VisionFieldObject* api_field_object = api_vision->add_field_object();
 			populate_vision_field_object(ambiguous_object.getName(), ambiguous_object, api_field_object, API::VisionFieldObject::RECTANGLE);
@@ -95,10 +95,10 @@ void NUAPI::sendVisionData()
 
 		API::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
 
-		BOOST_FOREACH(const vector<ColourSegment>& rowColourSegments, hColourSegments)
+		for (auto& rowColourSegments: hColourSegments)
 		{
 
-			BOOST_FOREACH(const ColourSegment& colorSegment, rowColourSegments)
+			for (auto& colorSegment: rowColourSegments)
 			{
 				const Point& start = colorSegment.getStart();
 				const Point& end = colorSegment.getEnd();
@@ -113,9 +113,9 @@ void NUAPI::sendVisionData()
 			}
 		}
 
-		BOOST_FOREACH(const vector<ColourSegment>& columnColourSegments, vColourSegments)
+		for (auto& columnColourSegments: vColourSegments)
 		{
-			for (const ColourSegment& colorSegment: columnColourSegments)
+			for (auto& colorSegment: columnColourSegments)
 			{
 				const Point& start = colorSegment.getStart();
 				const Point& end = colorSegment.getEnd();
@@ -276,7 +276,7 @@ template <typename T>
 void NUAPI::api_add_vector(API::Vector* api_vector, vector<T>& vec)
 {
 
-	BOOST_FOREACH(T& value, vec)
+	for (T& value: vec)
 	{
 		api_vector->add_float_value(value);
 	}
