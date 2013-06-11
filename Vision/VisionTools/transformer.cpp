@@ -228,10 +228,10 @@ void Transformer::setCamParams(Vector2<double> imagesize, Vector2<double> fov)
 
     effective_camera_dist_pixels = image_centre.x/tan_half_FOV.x;
 
-    cout << "Transformer: imagesize: " << image_size <<
-            " centre: " << image_centre <<
-            " FOV: " << FOV <<
-            " tan half fov: " << tan_half_FOV <<
-            " effective camera dist pix: " << effective_camera_dist_pixels << endl;
+//   cout << "Transformer: imagesize: " << image_size <<
+//            " centre: " << image_centre <<
+//            " FOV: " << FOV <<
+//            " tan half fov: " << tan_half_FOV <<
+//            " effective camera dist pix: " << effective_camera_dist_pixels << endl;
 
 }
