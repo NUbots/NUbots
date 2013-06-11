@@ -501,8 +501,8 @@ void VisionBlackboard::update()
     }
 
     //get data copies from wrapper
-    float head_pitch = wrapper->getCameraPitch();//changed from getHeadPitch/Yaw() - Jake
-    float head_yaw = wrapper->getCameraYaw();
+    float head_pitch = wrapper->getHeadPitch();
+    float head_yaw = wrapper->getHeadYaw();
     Vector3<float> orientation = wrapper->getOrientation();
     Vector3<double> neck_position = wrapper->getNeckPosition();
 

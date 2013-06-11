@@ -43,8 +43,8 @@ public:
     NUImage* getFrame();
 
     float getCameraHeight() const;            //for transforms
-    float getCameraPitch() const;              //for transforms
-    float getCameraYaw() const;                  //for transforms
+    float getHeadPitch() const;              //for transforms
+    float getHeadYaw() const;                  //for transforms
     Vector3<float> getOrientation() const;
     Vector3<double> getNeckPosition() const;
     Vector2<double> getCameraFOV() const;

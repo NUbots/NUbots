@@ -101,13 +101,13 @@ float DataWrapper::getCameraHeight() const
 }
 
 //! @brief Retrieves the camera pitch returns it.
-float DataWrapper::getCameraPitch() const
+float DataWrapper::getHeadPitch() const
 {
     return m_head_pitch;
 }
 
 //! @brief Retrieves the camera yaw returns it.
-float DataWrapper::getCameraYaw() const
+float DataWrapper::getHeadYaw() const
 {
     return m_head_yaw;
 }

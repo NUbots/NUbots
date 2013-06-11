@@ -3,9 +3,243 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 
+////for stat
+//#include <boost/foreach.hpp>
+//#include <boost/accumulators/accumulators.hpp>
+//#include <boost/accumulators/statistics/stats.hpp>
+//#include <boost/accumulators/statistics/mean.hpp>
+//#include <boost/accumulators/statistics/variance.hpp>
+
+//using namespace boost::accumulators;
+
 BallDetector::BallDetector() {}
 
 BallDetector::~BallDetector() {}
+
+// BROKEN
+//vector<Ball> BallDetector::run()
+//{
+//    VisionBlackboard* vbb = VisionBlackboard::getInstance();
+//    NUImage img = vbb->getOriginalImage();
+//    const LookUpTable& lut = vbb->getLUT();
+//    // BEGIN BALL DETECTION -----------------------------------------------------------------
+
+//    vector<ColourSegment> v_segments = vbb->getVerticalTransitions(BALL_COLOUR);
+//    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(BALL_COLOUR);
+//    vector<Point> edges;
+//    vector<Ball> balls; //will only ever hold one
+
+//    appendEdgesFromSegments(h_segments, edges);
+//    appendEdgesFromSegments(v_segments, edges);
+
+//    #if VISION_BALL_VERBOSITY > 1
+//        debug << "BallDetector::detectBall() - number of vertical ball segments: " << v_segments.size() << endl;
+//        debug << "BallDetector::detectBall() - number of horizontal ball segments: " << h_segments.size() << endl;
+//    #endif
+
+//    const GreenHorizon& green_horizon = vbb->getGreenHorizon();
+
+//    #if VISION_BALL_VERBOSITY > 1
+//    int debug_edges_size = edges.size();
+//    #endif
+
+//    // Throw out points above the horizon
+//    vector<Point>::iterator it;
+//    it = edges.begin();
+//    while (it < edges.end()) {
+//        if(green_horizon.isBelowHorizon(*it))
+//            it++;   //move to next edge
+//        else
+//            it = edges.erase(it);
+//    }
+
+//    #if VISION_BALL_VERBOSITY > 1
+//    debug << "BallDetector::detectBall() - " << debug_edges_size - edges.size() << " ball segments above green horizon." << endl;
+//    #endif
+
+//    if (edges.size() > 0) {
+//        int height = img.getHeight();
+//        int width = img.getWidth();
+
+//        // Arithmetic mean
+//        Point avg, stddev;
+//        Vector2<accumulator_set<double, stats<tag::mean, tag::variance> > > acc;
+
+//        BOOST_FOREACH(Point& p, edges) {
+//            acc.x(p.x);
+//            acc.y(p.y);
+//        }
+
+//        avg.x = mean(acc.x);
+//        avg.y = mean(acc.y);
+//        stddev.x = sqrt(variance(acc.x));
+//        stddev.y = sqrt(variance(acc.y));
+
+//        // Statistical throw-out
+//        it = edges.begin();
+//        while (it < edges.end()) {
+//            if (abs(it->x - avg.x) > stddev.x || abs(it->y - avg.y) > stddev.y)
+//                it = edges.erase(it);
+//            else
+//                it++;
+//        }
+
+//        // Geometric mean
+//        Vector2<long double> pos(1.0, 1.0);
+
+//        BOOST_FOREACH(Point& p, edges) {
+//            pos.x *= pow(p.x, 1.0/edges.size());
+//            pos.y *= pow(p.y, 1.0/edges.size());
+//        }
+
+//        pos.x = min(pos.x, width - 1.0L);
+//        pos.y = min(pos.y, height - 1.0L);
+
+//        // Find ball centre (not occluded)
+//        int top = pos.y,
+//            bottom = pos.y,
+//            left = pos.x,
+//            right = pos.x;
+//        int not_orange_count = 0;
+
+//        // FIND BALL CENTRE (single iteration approach; doesn't deal great with occlusion)
+//        for(top = pos.y; top > 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE; top--) {
+//            if (getColourFromIndex( lut.classifyPixel( img((int)pos.x, top) ) ) != orange) {
+//                not_orange_count++;
+//            }
+//            else {
+//                not_orange_count = 0;
+//            }
+//        }
+//        top += not_orange_count;
+
+//        not_orange_count = 0;
+//        for(bottom = pos.y; bottom < height && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE; bottom++) {
+//            if (getColourFromIndex( lut.classifyPixel( img((int)pos.x, bottom) ) ) != orange)
+//                not_orange_count++;
+//            else
+//                not_orange_count = 0;
+//            bottom ++;
+//        }
+//        bottom -= not_orange_count;
+//        not_orange_count = 0;
+
+//        while (left > 0 && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
+//            if (getColourFromIndex( lut.classifyPixel( img(left, (int)pos.y) ) ) != orange) {
+//                not_orange_count++;
+//            }
+//            else {
+//                not_orange_count = 0;
+//            }
+//            left --;
+//        }
+//        left += not_orange_count;
+//        not_orange_count = 0;
+
+//        while (right < width && not_orange_count <= VisionConstants::BALL_ORANGE_TOLERANCE) {
+//            if (getColourFromIndex( lut.classifyPixel( img(right, (int)pos.y) ) ) != orange)
+//                not_orange_count++;
+//            else
+//                not_orange_count = 0;
+//            right ++;
+//        }
+//        right -= not_orange_count;
+
+//        // CHECK IF POINT IS ON EDGE OF BALL (OR OCCLUDED)
+//        // OCCLUSION CHECK / COMPENSATION
+//        bool top_edge = false,
+//             bottom_edge = false,
+//             left_edge = false,
+//             right_edge = false;
+
+//        for (int i = left; i > left - VisionConstants::BALL_EDGE_THRESHOLD && i >= 0; i--) {
+//            if (getColourFromIndex(lut.classifyPixel(img(i, (int)pos.y))) == green) {
+//                left_edge = true;
+//                break;
+//            }
+//        }
+//        for (int i = right; i < right + VisionConstants::BALL_EDGE_THRESHOLD && i < width; i++) {
+//            if (getColourFromIndex(lut.classifyPixel(img(i, (int)pos.y))) == green) {
+//                right_edge = true;
+//                break;
+//            }
+//        }
+//        for (int i = bottom; i < bottom + VisionConstants::BALL_EDGE_THRESHOLD && i < height; i++) {
+//            if (getColourFromIndex(lut.classifyPixel(img((int)pos.x, i))) == green) {
+//                bottom_edge = true;
+//                break;
+//            }
+//        }
+//        for (int i = top; i > top - VisionConstants::BALL_EDGE_THRESHOLD && i >= 0; i--) {
+//            if (getColourFromIndex(lut.classifyPixel(img((int)pos.x, i))) == green) {
+//                top_edge = true;
+//                break;
+//            }
+//        }
+//        top_edge = true;
+
+//        // DETERMINE CENTRE
+//        Point center;
+
+//        if (left_edge && right_edge && top_edge && !bottom_edge)        // only bottom occluded
+//            center = Point((right+left)/2, min((top+(top+right-left))/2, height-1));
+//        else if (left_edge && right_edge && !top_edge && bottom_edge)   // only top occluded
+//            center = Point((right+left)/2, max((bottom+(bottom-right+left))/2, 0));
+//        else if (left_edge && !right_edge && top_edge && bottom_edge)   // only right occluded
+//            center = Point(min((left+(left+bottom-top))/2, width-1),(top+bottom)/2);
+//        else if (!left_edge && right_edge && top_edge && bottom_edge)   // only left occluded
+//            center = Point(max((right+(right-bottom+top))/2, 0),(top+bottom)/2);
+//        else
+//            center = Point((right+left)/2,(top+bottom)/2);
+
+//        // CHECK FOR SUCCESS
+//        if (center != Point(1, 1) && bottom > top && right > left) {
+//            // expensive check - only do if we want to
+//            if(VisionConstants::BALL_MIN_PERCENT_ORANGE > 0) {
+//                // CHECK FOR PIXEL DENSITY
+//                int count = 0;
+
+//                double min_dimension = std::min(right-left, bottom-top);
+
+//                int box_left = std::max(center.x - min_dimension/2, 0.0);
+//                int box_right = std::min(center.x + min_dimension/2, width-1.0);
+//                int box_top = std::max(center.y - min_dimension/2, 0.0);
+//                int box_bottom = std::min(center.y + min_dimension/2, height-1.0);
+
+//                //cout << box_left << ", " << box_right << ", " << box_top << ", " << box_bottom << endl;
+
+//                for (int i = box_left; i < box_right; i++) {
+//                    for (int j = box_top; j < box_bottom; j++) {
+//                        if (getColourFromIndex(lut.classifyPixel(img(i, j))) == orange)
+//                            count++;
+//                    }
+//                }
+//                //cout << "PERCENT ORANGE: " << float(count)/((min*2)*(min*2)) << endl;
+
+//                if (count/(min_dimension*min_dimension) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
+//                    balls.push_back(Ball(center, max((right-left), (bottom-top))));
+//                }
+//                else {
+//                    //cout << "BALL THROWN OUT ON RATIO" << endl;
+//                    #if VISION_BALL_VERBOSITY > 1
+//                        debug << "BallDetector::detectBall - ball thrown out on percentage contained orange" << endl;
+//                    #endif
+//                }
+//            }
+//            else {
+//                balls.push_back(Ball(center, max((right-left), (bottom-top))));
+//            }
+//        }
+//        else {
+//            #if VISION_BALL_VERBOSITY > 1
+//                debug << "BallDetector::detectBall - (1,1) ball thrown out" << endl;
+//            #endif
+//        }
+//    }
+
+//    return balls;
+//}
+
 
 vector<Ball> BallDetector::run()
 {
