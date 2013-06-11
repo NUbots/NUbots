@@ -1,88 +1,40 @@
-#include "AmbiguousObject.h"
+#ifndef GOALDETECTORRANSACEDGES_H
+#define GOALDETECTORRANSACEDGES_H
 
-//AMBIGUOUS FIELD OBJECT ID: Automatically set up the possible IDS
+#include "Vision/Modules/goaldetector.h"
+#include "Tools/Math/LSFittedLine.h"
+#include "Kinematics/Horizon.h"
+#include <vector>
+#include <list>
 
-AmbiguousObject::AmbiguousObject(int id, const std::string& initName): Object(id, initName)
+using std::vector;
+using std::list;
+
+class GoalDetectorRANSACEdges : public GoalDetector
 {
+public:
+    GoalDetectorRANSACEdges();
+    virtual std::vector<Goal> run();
 
-}
+private:
+    //std::vector<Goal> assignGoals(const std::list<Quad>& post_candidates, const Quad& crossbar) const;
+    std::list<Quad> buildQuadsFromLines(const std::vector<LSFittedLine>& start_lines,
+                                   const std::vector<LSFittedLine>& end_lines,
+                                   double tolerance);
 
-AmbiguousObject::~AmbiguousObject()
-{
+    unsigned int getClosestUntriedLine(const LSFittedLine& start,
+                                       const std::vector<LSFittedLine>& end_lines,
+                                       std::vector<bool>& tried);
 
-}
+    std::vector<Goal> assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const;
 
-void AmbiguousObject::addPossibleObjectID(int ID)
-{
-	PossibleObjectIDs.push_back(ID);
-}
+    std::vector<Point> getEdgePointsFromSegments(const std::vector<ColourSegment> &segments);
 
-void AmbiguousObject::setPossibleObjectIDs(std::vector<int> VectorOfIDs)
-{
-	PossibleObjectIDs = VectorOfIDs;
-}
 
-bool AmbiguousObject::isObjectAPossibility(int ID)
-{
-	bool isInVector = false;
-	for (unsigned int i = 0; i < PossibleObjectIDs.size(); i++)
-	{
-		if (PossibleObjectIDs[i] == ID)
-		{
-			isInVector = true;
-			break;
-		}
-	}
-	return isInVector;
-}
+    unsigned int m_n,
+                 m_k,
+                 m_max_iterations;
+    float m_e;
+};
 
-void AmbiguousObject::setVisibility(bool newIsVisible)
-{
-	isVisible = newIsVisible;
-}
-
-std::ostream& operator<<(std::ostream& output, const AmbiguousObject& p_amb)
-{
-	output << *static_cast<const Object*> (&p_amb);
-
-	int nameLength = p_amb.name.size();
-	output.write(reinterpret_cast<const char*> (&nameLength), sizeof (nameLength));
-	for (int i = 0; i < nameLength; ++i)
-		output.write(reinterpret_cast<const char*> (&p_amb.name[i]), sizeof (p_amb.name[i]));
-
-	int size;
-	size = p_amb.PossibleObjectIDs.size();
-	output.write(reinterpret_cast<const char*> (&size), sizeof (size));
-	for (int i = 0; i < size; ++i)
-		output.write(reinterpret_cast<const char*> (&p_amb.PossibleObjectIDs[i]), sizeof (p_amb.PossibleObjectIDs[i]));
-	return output;
-}
-
-std::istream& operator>>(std::istream& input, AmbiguousObject& p_amb)
-{
-	input >> *static_cast<Object*> (&p_amb);
-
-	int nameLength;
-	input.read(reinterpret_cast<char*> (&nameLength), sizeof (nameLength));
-	char tempChar;
-	std::string name;
-	for (int i = 0; i < nameLength; ++i)
-	{
-		if (input.eof() || input.bad()) break;
-		input.read(reinterpret_cast<char*> (&tempChar), sizeof (tempChar));
-		name += tempChar;
-	}
-	p_amb.name = name;
-
-	unsigned int numEntries;
-	int id;
-	input.read(reinterpret_cast<char*> (&numEntries), sizeof (numEntries));
-	p_amb.PossibleObjectIDs.clear();
-	for (unsigned int i = 0; i < numEntries; i++)
-	{
-		if (input.eof() || input.bad()) break;
-		input.read(reinterpret_cast<char*> (&id), sizeof (id));
-		p_amb.PossibleObjectIDs.push_back(id);
-	}
-	return input;
-}
+#endif // GOALDETECTORRANSACEDGES_H

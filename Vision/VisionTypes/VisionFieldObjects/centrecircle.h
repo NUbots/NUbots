@@ -1,56 +1,34 @@
-/*! @file WalkPerturbationJob.h
-    @brief Declaration of WalkPerturbationJob class.
- 
-    @class WalkPerturbationJob
-    @brief A job to to remotely perturb/push the robot while it is walking
- 
-    @author Jason Kulk
- 
-  Copyright (c) 2010 Jason Kulk
- 
-    This file is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+#ifndef CENTRECIRCLE_H
+#define CENTRECIRCLE_H
 
-    This file is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+#include "visionfieldobject.h"
+#include "Tools/Math/Circle.h"
 
-    You should have received a copy of the GNU General Public License
-    along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-#ifndef WALK_PERTURBATION_JOB_H
-#define WALK_PERTURBATION_JOB_H
-
-#include "../MotionJob.h"
-
-#include <vector>
-
-
-class WalkPerturbationJob : public MotionJob
+class CentreCircle  : public VisionFieldObject
 {
 public:
-    WalkPerturbationJob(float magnitude, float direction);
-    WalkPerturbationJob(std::istream& input);
-    ~WalkPerturbationJob();
-    
-    float getMagnitude();
-    float getDirection();
-    
-    virtual void summaryTo(std::ostream& output);
-    virtual void csvTo(std::ostream& output);
-    
-    friend std::ostream& operator<<(std::ostream& output, const WalkPerturbationJob& job);
-    friend std::ostream& operator<<(std::ostream& output, const WalkPerturbationJob* job);
-protected:
-    virtual void toStream(std::ostream& output) const;
+    CentreCircle();
+    CentreCircle(GroundPoint centre, double ground_radius, Vector2<double> screen_size);
+    ~CentreCircle();
+
+    virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const;
+
+    //! @brief Stream output for labelling purposes
+    virtual void printLabel(std::ostream& out) const;
+
+    //! @brief Calculation of error for optimisation
+    virtual double findScreenError(VisionFieldObject* other) const;
+    virtual double findGroundError(VisionFieldObject* other) const;
+
+    double getGroundRadius() const {return m_ground_radius;}
+
+    //! @brief output stream operator.
+    friend std::ostream& operator<< (std::ostream& output, const CentreCircle& c);
+    //! @brief output stream operator for a vector of CentreCircles.
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<CentreCircle>& c);
+
 private:
-    float m_magnitude;                  //!< the magnitude of the perturbation (0 to 100)
-    float m_direction;                  //!< the direction to perturbed the robot in radians
+    double m_ground_radius;
 };
 
-#endif
-
+#endif // CENTRECIRCLE_H
