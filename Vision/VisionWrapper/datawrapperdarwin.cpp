@@ -298,7 +298,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
 void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     //! @todo better debug printing + Comment
-    switch(id) {
+    switch(region.getDirection()) {
     case HORIZONTAL:
         Blackboard->horizontalScans = &region;
         break;

@@ -29,8 +29,6 @@ void NUAPI::sendVisionData()
 {
 	NUImage* image = Blackboard->Image;
 	FieldObjects* fieldObjects = Blackboard->Objects;
-	const vector<vector<ColourSegment> >& hColourSegments = Blackboard->horizontalScans->getSegments();
-	const vector<vector<ColourSegment> >& vColourSegments = Blackboard->verticalScans->getSegments();
 
 	API::Message api_message;
 
@@ -80,51 +78,56 @@ void NUAPI::sendVisionData()
 	MobileObject& ball = fieldObjects->mobileFieldObjects[FieldObjects::FO_BALL];
 
 	populate_vision_field_object("ball", ball, api_vision->add_field_object(), API::VisionFieldObject::CIRCLE);
-
-	BOOST_FOREACH(AmbiguousObject& ambiguous_object, fieldObjects->ambiguousFieldObjects)
+	
+	
+	if (Blackboard->horizontalScans != NULL && Blackboard->verticalScans != NULL)
 	{
-		API::VisionFieldObject* api_field_object = api_vision->add_field_object();
-		populate_vision_field_object(ambiguous_object.getName(), ambiguous_object, api_field_object, API::VisionFieldObject::RECTANGLE);
-		api_field_object->set_visible(true); // hack - all ambiguous objects are visible - https://github.com/nubots/robocup/issues/10
+		const vector<vector<ColourSegment> >& hColourSegments = Blackboard->horizontalScans->getSegments();
+		const vector<vector<ColourSegment> >& vColourSegments = Blackboard->verticalScans->getSegments();
 
-	}
-
-	API::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
-
-	BOOST_FOREACH(const vector<ColourSegment>& rowColourSegments, hColourSegments)
-	{
-
-		BOOST_FOREACH(const ColourSegment& colorSegment, rowColourSegments)
+		BOOST_FOREACH(AmbiguousObject& ambiguous_object, fieldObjects->ambiguousFieldObjects)
 		{
-			const Point& start = colorSegment.getStart();
-			const Point& end = colorSegment.getEnd();
-			Colour colour = colorSegment.getColour();
+			API::VisionFieldObject* api_field_object = api_vision->add_field_object();
+			populate_vision_field_object(ambiguous_object.getName(), ambiguous_object, api_field_object, API::VisionFieldObject::RECTANGLE);
+			api_field_object->set_visible(true); // hack - all ambiguous objects are visible - https://github.com/nubots/robocup/issues/10
 
-			API::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
-			api_segment->set_start_x(start[0]);
-			api_segment->set_start_y(start[1]);
-			api_segment->set_end_x(end[0]);
-			api_segment->set_end_y(end[1]);
-			api_segment->set_colour(colour);
-
-			std::cout << "testing" << std::endl;
 		}
-	}
 
-	BOOST_FOREACH(const vector<ColourSegment>& columnColourSegments, vColourSegments)
-	{
-		for (const ColourSegment& colorSegment: columnColourSegments)
+		API::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
+
+		BOOST_FOREACH(const vector<ColourSegment>& rowColourSegments, hColourSegments)
 		{
-			const Point& start = colorSegment.getStart();
-			const Point& end = colorSegment.getEnd();
-			Colour colour = colorSegment.getColour();
 
-			API::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
-			api_segment->set_start_x(start[0]);
-			api_segment->set_start_y(start[1]);
-			api_segment->set_end_x(end[0]);
-			api_segment->set_end_y(end[1]);
-			api_segment->set_colour(colour);
+			BOOST_FOREACH(const ColourSegment& colorSegment, rowColourSegments)
+			{
+				const Point& start = colorSegment.getStart();
+				const Point& end = colorSegment.getEnd();
+				Colour colour = colorSegment.getColour();
+
+				API::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
+				api_segment->set_start_x(start[0]);
+				api_segment->set_start_y(start[1]);
+				api_segment->set_end_x(end[0]);
+				api_segment->set_end_y(end[1]);
+				api_segment->set_colour(colour);
+			}
+		}
+
+		BOOST_FOREACH(const vector<ColourSegment>& columnColourSegments, vColourSegments)
+		{
+			for (const ColourSegment& colorSegment: columnColourSegments)
+			{
+				const Point& start = colorSegment.getStart();
+				const Point& end = colorSegment.getEnd();
+				Colour colour = colorSegment.getColour();
+
+				API::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
+				api_segment->set_start_x(start[0]);
+				api_segment->set_start_y(start[1]);
+				api_segment->set_end_x(end[0]);
+				api_segment->set_end_y(end[1]);
+				api_segment->set_colour(colour);
+			}
 		}
 	}
 
