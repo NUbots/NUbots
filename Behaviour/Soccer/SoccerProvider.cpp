@@ -34,6 +34,7 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUPlatform.h"
+#include "Behaviour/Common/HeadBehaviour.h"
 
 #include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
@@ -62,6 +63,7 @@ SoccerProvider::SoccerProvider(Behaviour* manager) : BehaviourFSMProvider(manage
     m_led_blue = m_led_off; m_led_blue[2] = 1;
     m_led_orange = m_led_off; m_led_orange[0] = 1; m_led_orange[1] = 0.3;
     m_led_yellow = m_led_off; m_led_yellow[0] = 1; m_led_yellow[1] = 1;
+    head_behaviour = HeadBehaviour::getInstance();
 }
 
 /*! @brief Destroys the behaviour provider as well as all of the associated states
@@ -74,6 +76,7 @@ SoccerProvider::~SoccerProvider()
     delete m_playing;
     delete m_finished;
     delete m_penalised;
+
 }
 
 /*! @brief Performs behaviour that is common to all states in the soccer behaviour provider
@@ -109,7 +112,10 @@ void SoccerProvider::doBehaviourCommons()
     {
          m_actions->add(NUActionatorsData::LFootLed, m_current_time, m_led_off);
     }
-
+    if(m_state == m_ready or m_state == m_set or m_state == m_playing){
+        //cout<<"SoccerProvider::doBehaviourCommons() - localisation required => head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentPolicy)"<<endl;
+        head_behaviour->makeVisionChoice(HeadBehaviour::RLAgentPolicy);//or pass HeadBehaviour::(M)RLAgentPolicy for learning to be active via either motivated or world rewards
+    }
     /*
     // set the right eyes to indicate lost states
     bool balllost = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL].lost();

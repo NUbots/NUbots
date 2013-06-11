@@ -379,7 +379,7 @@ void HeadBehaviour::doRLAgentPolicy(){
     vector<float> inputs = getPercept();
     int action = Mrlagent.getAction(inputs,head_logic->getValidObjectsToLookAt());
     float rew = calculateReward();
-    std::cout<< "Reward = "<<rew<<std::endl;
+    std::cout << "Reward = " << rew << std::endl;
     Mrlagent.giveReward(rew);
     Mrlagent.doLearning();
 
@@ -521,9 +521,9 @@ void HeadBehaviour::dispatchHeadJob(StationaryObject* ObjectToTrack) {
     actionObjectID = ObjectToTrack->getID();
     actionStartTime = Blackboard->Sensors->GetTimestamp();
     if (ObjectToTrack->isObjectVisible()) {
-        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack));
     } else {
-        Blackboard->Jobs->addMotionJob(new HeadPanJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadPanJob(*ObjectToTrack));
     }
 }
 void HeadBehaviour::dispatchHeadJob(MobileObject* ObjectToTrack) {
@@ -532,9 +532,9 @@ void HeadBehaviour::dispatchHeadJob(MobileObject* ObjectToTrack) {
     actionObjectID = ObjectToTrack->getID() + FieldObjects::NUM_MOBILE_FIELD_OBJECTS;
     actionStartTime = Blackboard->Sensors->GetTimestamp();
     if (ObjectToTrack->isObjectVisible()) {
-        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack));
     } else {
-        Blackboard->Jobs->addMotionJob(new HeadPanJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadPanJob(*ObjectToTrack));
     }
 }
 void HeadBehaviour::dispatchHeadJob(AmbiguousObject* ObjectToTrack) {
@@ -543,7 +543,7 @@ void HeadBehaviour::dispatchHeadJob(AmbiguousObject* ObjectToTrack) {
     actionObjectID = ObjectToTrack->getID() + FieldObjects::NUM_AMBIGUOUS_FIELD_OBJECTS;
     actionStartTime = Blackboard->Sensors->GetTimestamp();
     if (ObjectToTrack->isObjectVisible()) {
-        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack, Blackboard->Objects->self.sdHeading()));
+        Blackboard->Jobs->addMotionJob(new HeadTrackJob(*ObjectToTrack));
     }
 
 }

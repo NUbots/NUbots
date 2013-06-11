@@ -27,6 +27,7 @@
 
 class Behaviour;
 #include "Behaviour/BehaviourFSMProvider.h"
+#include "Behaviour/Common/HeadBehaviour.h"
 
 #include <vector>
 
@@ -47,7 +48,6 @@ public:
     BehaviourState* m_playing;
     BehaviourState* m_finished;
     BehaviourState* m_penalised;
-    
     std::vector<float> m_led_white;
     std::vector<float> m_led_red;
     std::vector<float> m_led_green;
@@ -55,6 +55,8 @@ public:
     std::vector<float> m_led_orange;
     std::vector<float> m_led_yellow;
     std::vector<float> m_led_off;
+
+    HeadBehaviour* head_behaviour;
 };
 
 
