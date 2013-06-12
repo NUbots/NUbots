@@ -224,19 +224,19 @@
                 \todo[inline]{Write how the proposed system would resolve this scenario}
                             
         \subsection{Tracing data to aid debugging}
-        	Debugging is involved in every major software development operation. One of the most
-			useful techniques available for software debugging is being able to trace the data that
-			is going into and coming out of a section of code. Once the data that enters a section
-			of code is known, the remainder of the code can be analysed by hand to ensure that each
-			step has the expected result. This allows tracing of the data through the system until
-			the step where the problem is found.
-			
-			The NUBots team have encountered a problem in their code where the robot after
-			receiving a notification that it kicked an own goal will proceed to breakdance instead
-			of hanging its head in shame. They have identified that this activity is due to the
-			Breakdance action being performed instead of the expected SadRobot action. However, they
-			are unable to identify why this action is being performed and need to trace the source
-			of this logical error.
+            Debugging is involved in every major software development operation. One of the most
+            useful techniques available for software debugging is being able to trace the data that
+            is going into and coming out of a section of code. Once the data that enters a section
+            of code is known, the remainder of the code can be analysed by hand to ensure that each
+            step has the expected result. This allows tracing of the data through the system until
+            the step where the problem is found.
+            
+            The NUBots team have encountered a problem in their code where the robot after
+            receiving a notification that it kicked an own goal will proceed to breakdance instead
+            of hanging its head in shame. They have identified that this activity is due to the
+            Breakdance action being performed instead of the expected SadRobot action. However, they
+            are unable to identify why this action is being performed and need to trace the source
+            of this logical error.
     
             \subsubsection{Current System}
                 \todo[inline]{Write how the current system would resolve this scenario}
@@ -244,8 +244,20 @@
                 \todo[inline]{Write how the proposed system would resolve this scenario}
             
         \subsection{The Robot is used to perform a new task}
-            \todo[inline]{Write a description of the scenario}
-    
+            Robotics is an ever expanding field of research with robots being applied to an
+            increasing number of tasks. Each of these tasks are often performed on the same robotic
+            platforms and need to perform similar tasks. This provides a huge opportunity for code
+            reuse amongst these tasks. However, code that is difficult to understand, or separate
+            from the surrounding code may be ignored in favour of rewriting the required
+            functionality.
+            
+            The NUBots team have just won the latest RoboCup tournament and are about to celebrate
+            at their local establishment when the realise that they all left their ID back in the
+            car. Instead of walking back (It is really cold outside) they decide to adapt
+            their existing code to program the robot to go and obtain their wallets for them. They
+            realise that they already have code that will allow them to walk, identify objects and
+            move things (by kicking), but need new code to allow them to climb and use car keys.
+            
             \subsubsection{Current System}
                 \todo[inline]{Write how the current system would resolve this scenario}
             \subsubsection{Proposed System}
