@@ -538,21 +538,27 @@
                     %\node at (0,1) (thread2) {Thread 2};
                     %\node at (0,0) (thread3) {Thread 3};
 
-                    \begin{scope}[task/.style={draw=black,fill=blue!10},scale=.80]
+                    \begin{scope}[
+                        scale=.80,
+                        task/.style={draw=black},
+                        cameratriggered/.style={fill=blue!10},
+                        sensortriggered/.style={fill=red!10}
+                     ]
+                     
                         \draw (1, 1) grid (21, 4);
 
                         %% Thread 1
-                        \draw[task] (1, 3) rectangle node {Camera} (6, 4);             
-                        \draw[task] (13, 3) rectangle node {Localisation} (17, 4);
-                        \draw[task] (19, 3) rectangle node {Motors} (21, 4);
+                        \draw[cameratriggered, task] (1, 3) rectangle node {Camera} (6, 4);             
+                        \draw[cameratriggered, task] (13, 3) rectangle node {Localisation} (17, 4);
+                        \draw[cameratriggered, task] (19, 3) rectangle node {Motors} (21, 4);
                         
                         %% Thread 2
-                       \draw[task] (1, 2) rectangle node {Sensors} (5, 3);
-                       \draw[task] (6, 2) rectangle node {Vision} (13, 3);
-                       \draw[task] (17, 2) rectangle node {Behavior} (19, 3);
+                       \draw[sensortriggered, task] (1, 2) rectangle node {Sensors} (5, 3);
+                       \draw[cameratriggered, task] (6, 2) rectangle node {Vision} (13, 3);
+                       \draw[cameratriggered, task] (17, 2) rectangle node {Behavior} (19, 3);
                        
                         %% Thread 3
-                        \draw[task] (5, 1) rectangle node {Odometry} (8, 2);
+                        \draw[sensortriggered, task] (5, 1) rectangle node {Odometry} (8, 2);
                         
                         % Row labels
                         \node[anchor=east, inner sep=0] at (.8, 3.5) {Thread 1};
