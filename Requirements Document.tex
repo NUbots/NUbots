@@ -163,34 +163,34 @@
 		}
 
 		\subsection{New Functionality Added to System}
-			The robot is currently designed with a finite number of components integrated together
-			allowing it to play soccer. However, to enhance it's ability to play effectively, new
-			components may be added to the system to either augment existing abilities or provide
-			entirely new functionality.
+			The robot currently consists of several integrated components allowing it to play soccer.
+			However, to enhance its ability to play effectively, new components may be added to the system.
+			These components will either augment existing abilities or provide new functionality.
 
-			Due to recent rule changes in the RoboCup humanoid division
-			\cite[Section 1.2]{humanoid2013rules} the goal posts are no longer different colours.
-			Therefore, a new component must be added into the robots system that allows determining
-			the direction it is facing in the event that it falls over. The component responsible
-			for finding the direction would be a compass like system. To provide this service it
-			would need to access existing sensor input and provide it's output to the localisation
-			system.
+			\paragraph{Scenario} Due to a recent rule changes in the 
+			\emph{RoboCup humanoid division}~\cite[Section 1.2]{humanoid2013rules}, the goal posts are no longer different colours.
+			Therefore, a new component must be added to the robot's software allowing it to determine the
+			direction it is facing. In the event that the robot falls over this component would break the
+			field symmetry and reorient the robot. The component responsible for finding the direction would
+			require access to existing sensor input and its output would need to influence the localisation
+			system. The team has already developed a system that is able to determine the direction the
+			robot is facing by looking at features above it. All that remains is to integrate this with the current codebase.
 
 			\subsubsection{Current System}
 				To solve this problem we need to modify the Vision system such that it can classify new inputs
 				from the camera for the compass system. 
 				Adding new functionality the vision means we need to understand how sensors interact with vision. 
 				We also need to understand how blackboard facilitates the communication between sensors and vision.
-				Additionally we need to add a new behavior because the robot needs to be able to look upwards and currently
-				there is no behavior for that.
-				To add a new behavior we also need to understand the Job and Motion system and the high level Behavior finite state machine.
+				Additionally we need to add a new behaviour because the robot needs to be able to look upwards and currently
+				there is no behaviour for that.
+				To add a new behaviour we also need to understand the Job and Motion system and the high level Behaviour finite state machine.
 				Adding a new job involves modifying the core job system so we need to make sure we have an in-depth understanding
 				or we can break the entire robot AI.
 				Once we've developed the compass system we also need to integrate it with Localisation, this means we need to
 				modify the core of localisation to request the information from the appropriate modules. In order to modify
 				localisation we need to understand how it interacts with blackboard and jobs.
 				
-				In addition to all these steps we need to make sure that our changes don't accidently break something another component
+				In addition to all these steps we need to make sure that our changes don't accidentally break something another component
 				relies on. It's possible for any component in the system to indirectly rely on thousands of tiny details so we need to be extremely
 				careful with what we change.
 				
@@ -202,9 +202,9 @@
 				the camera for the compass system. 
 				However adding new functionality in the proposed architecture doesn't require us to understand the sensor system.
 				We simply need to understand the data coming out of the sensor system.
-				We also still need to add a new behavior to look upwards. We no longer need to change the job system as it's merged
+				We also still need to add a new behaviour to look upwards. We no longer need to change the job system as it's merged
 				in as part of the standard communication api. Instead we modify the motion reactor to handle the new type of movement.
-				Integration with localisation is much easier, we simply use the standard power plant emit/on mechanism to send the data to localization.
+				Integration with localisation is much easier, we simply use the standard power plant emit/on mechanism to send the data to localisation.
 				
 				All of the communication between components uses the consistent power plant interface. This means that if you
 				understand how to communicate with power plant then you understand how to communicate with every other component
@@ -212,59 +212,48 @@
 
 				\todo[inline]{Write how the proposed system would resolve this scenario}
 
-		\subsection{Component expanded to use Networking with other Robots}
-			Many systems within the robots infrastructure can benefit from information gathered
-			by other robots on their team. This information includes things such as the position of
-			objects on the field and the behaviour of the robots such as their role and current
-			action. Sharing this information allows co-ordination as a team, and provides the
-			opportunity for distributed computing on difficult problems the team may face.
-
-			The NUBots team have decided to improve their behaviour system to allow the robots to
-			better plan and make decisions together. To facilitate this, the robots need to be able
-			to easily communicate their intentions to each-other across the network. The networking
-			system would need to be able to convert the data from the behaviour system into a
-			serialised form that can be sent over the network, and deserialize this data at the
-			receiving end.
-
+		\subsection{Networking with other Robots}
+			Many modules within the robots code can benefit from information gathered by other robots on their team. Sharing information such as the position of objects on the field and each robots current action allows better co-ordination of the team. Another advantage provided by networking
+			is the opportunity for distributed computing computationally or spatially intensive problems.
+			
+			\paragraph{Scenario} The \emph{NUBots} team have decided to improve their behaviour system to promote better teamwork between the robots. To facilitate this, the robots need an easy method to communicate their intentions to each-other across the network. The networking
+			system needs to serialise the data from the behaviour system and deserialize this data on the receiving robots.
+			
 			\subsubsection{Current System}
 				The current system performs networking at the socket level. This means each component
 				that wants to communicate over the network needs to interact directly with sockets in order
 				to communicate information.
 				
-				To implement this behavior sharing mechanism a new packet type needs to be declared and a deep
+				To implement this behaviour sharing mechanism a new packet type needs to be declared and a deep
 				understanding of Win32 sockets, POSIX sockets and the existing network code is needed. Once the new
-				packet is defined serialization methods need to be written to convert it to a network compatible representation
-				and back. Custom network code then needs to be written for the behavior system to handle sending/recieving the
+				packet is defined serialisation methods need to be written to convert it to a network compatible representation
+				and back. Custom network code then needs to be written for the behaviour system to handle sending/receiving the
 				networked data to ensure it is used correctly.
 				
-				Once the network transfer is complete the behavior system then needs to be modified to utilize the new information.
+				Once the network transfer is complete the behaviour system then needs to be modified to utilise the new information.
 				\todo[inline]{Write how the current system would resolve or does resolve this scenario}
 			\subsubsection{Proposed System}
 				The proposed architecture provides networking as part of the standard power plant interface.
 				The first step is to define a new packet which can be done with either raw C++ classes or 
 				google protocol buffers. Once that packet is defined you also need to add a network event handler
-				to the Behavior class which is a tiny modification in the proposed architecture.
+				to the Behaviour class which is a tiny modification in the proposed architecture.
 				
 				Once the handler is hooked up you simply use the standard api tools to send the networked packet
-				between the robots. The architecture will handle details like serialization, sockets and other network
+				between the robots. The architecture will handle details like serialisation, sockets and other network
 				issues.
 				
-				As with the existing architecture you still need to modify the behavior system to utilize the new data.
+				As with the existing architecture you still need to modify the behaviour system to utilise the new data.
 				\todo[inline]{Write how the proposed system would resolve this scenario}
 
-		\subsection{The System is moved to a new platform}
-			There are currently many robotic platforms that are available, the NUBots team alone
-			have in previous years made use of the \emph{Sony AIBO}, the \emph{Aldebaran Nao} and
-			the \emph{Robotis DARwIn-OP} platforms. It is highly likely that in the future,
-			additional robotic platforms will be used, and the cost of moving the code to the new
-			platform will result in alterations to the code base.
+		\subsection{Moving to a new hardware platform}
+			Currently there are many robotic platforms that are available for the development of autonomous
+			robotic systems. In previous years the \emph{NUBots} team have made use of the \emph{Sony AIBO},
+			the \emph{Aldebaran Nao} and the \emph{Robotis DARwIn-OP} platforms. Additional robotic platforms will be used as technology progresses, requiring that the code be ported to the new platform.
+			Ideally this action will result in a minimal number of changes to the code base.
 
-			After a number of years, the Darwin-OP platform has become obsolete and a new platform,
-			the Super Turbotron 5000, has been selected as its replacement in the RoboCup
-			competition. It has twenty additional degrees of freedom,stereo vision and two giant
-			laser cannons. The system must be adapted to be able to utilise these changes with a
-			minimal amount of impact to the existing codebase, as well as being able to still
-			operate on the Darwin-OP during the transition.
+			\paragraph{scenario} After a number of years, the Darwin-OP platform has become obsolete and a new platform, the Super Turbotron 5000, has been selected as its replacement. It has twenty
+			additional degrees of freedom, stereo vision and two giant laser cannons. The system must be
+			adapted to be able to utilise these changes with a minimal amount of impact to the existing codebase, as well as being able to still operate on the Darwin-OP during the transition.
 
 			\subsubsection{Current System}
 				The current system handles platform changes through a long and complicated chain of conditional compilation. There are
@@ -276,7 +265,7 @@
 				components will also need to be modified. Typically this cascades to a system-wide modification.
 				\todo[inline]{Write how the current system would resolve this scenario}
 			\subsubsection{Proposed System}
-				Because of the loose coupling between components it's only neccecary to replace the components that directly depend on
+				Because of the loose coupling between components it's only necessary to replace the components that directly depend on
 				robot hardware. All low-level conditional compilation is rendered obsolete in the proposed architecture with only a skeleton
 				remaining to tell the system which high-level components to activate.
 				
@@ -284,19 +273,16 @@
 				old components may need to be updated to take advantage of new hardware.
 				\todo[inline]{Write how the proposed system would resolve this scenario}
 
-		\subsection{Tracing data to aid debugging}
-			Debugging is involved in every major software development operation. One of the most
-			useful techniques available for software debugging is being able to trace the data that
-			is going into and coming out of a section of code. Once the data that enters a section
+		\subsection{Debugging bad Data}
+			\begin{quote}``Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'' - Brian Kernighan\end{quote}
+			One of the most useful techniques available for software debugging is being able to see inputs and outputs for a section of code. Once the data that enters a section
 			of code is known, the remainder of the code can be analysed by hand to ensure that each
-			step has the expected result. This allows tracing of the data through the system until
-			the step where the problem is found.
+			step has the expected result. Tracing the data through the system to where the unexpected results start reveals the source of the problem.
 
-			The NUBots team have encountered a problem in their code where the robot after
-			receiving a notification that it kicked an own goal will proceed to breakdance instead
+			\paragraph{Scenario} The NUBots team have encountered a problem where the robot after
+			receiving a notification that it kicked an own goal, will proceed to breakdance instead
 			of hanging its head in shame. They have identified that this activity is due to the
-			Breakdance action being performed instead of the expected SadRobot action. However, they
-			are unable to identify why this action is being performed and need to trace the source
+			\em{Breakdance} action being performed instead of the expected \em{SadRobot} action. However, they are unable to identify why this action is being performed and need to trace the source
 			of this logical error.
 
 			\subsubsection{Current System}
@@ -814,6 +800,10 @@
 			\todo[inline]{Explain the diagram that all the components are loosely coupled}
 
 	\section{Requirements}
+		
+		\todo[inline]{add an introduction to non goals and remove the instructions}
+		{
+		\em % This is the instructions
 		This is the nitty-gritty section of the document. You can expect this section to be many
 		times longer than any other section. Here we need to list every single requirement: What it
 		is, why it's important, how we can test if we've achieved it and any important details about
@@ -821,6 +811,7 @@
 
 		One of the most important things to include here are any decisions and assumptions that have
 		been made. For example:
+		}
 
 		\subsection{Multiprocessing}
 			\requirement{The architecture must take advantage of all CPU cores}
