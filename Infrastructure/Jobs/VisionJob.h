@@ -51,7 +51,7 @@ public:
         return output;
     };
 protected:
-    virtual void toStream(std::ostream& output) const {};
+    virtual void toStream(std::ostream& output) const {(void)(output); /* To stop compiler warnings.*/}
 };
 
 #endif

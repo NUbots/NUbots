@@ -9,6 +9,7 @@
 #include "camerasettingswidget.h"
 #include "MotionWidgets/WalkParameterWidget.h"
 #include "MotionWidgets/KickWidget.h"
+#include "SensorCalibrationWidget.h"
 #include <QtGui>
 #include <QMdiArea>
 #include <QStatusBar>
@@ -126,6 +127,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     // Add Plots Widget then Dock it on Screen
     plotSelection = new PlotSelectionWidget(mdiArea,this);
     addAsDockable(plotSelection, "Plot tools");
+
+    // Add Sensor Calibration Widget then Dock it on Screen
+    sensorCalibrationTool = new SensorCalibrationWidget(this);
+    addAsDockable(sensorCalibrationTool, "Sensor Calibration Tool");
     
     // Add Network widgets to Tabs then dock them on Screen
     QTabWidget* networkTabs = new QTabWidget(this);
@@ -169,7 +174,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     readSettings();
 
     glManager.writeCalGridToDisplay(GLDisplay::CalGrid);
+    SensorCalibrationSettings calibration;
+    glManager.writeExpectedViewToDisplay(NULL, &calibration, GLDisplay::ExpectedProjection);
 }
+
+
+
 
 
 MainWindow::~MainWindow()
@@ -361,7 +371,7 @@ void MainWindow::createMenus()
     QMenu* LUTWindowMenu = windowMenu->addMenu(tr("&Look Up Table"));
     LUTWindowMenu->addAction(newLUTDisplayAction);
 
-    QMenu* networkWindowMenu = windowMenu->addMenu(tr("&Network"));
+    //QMenu* networkWindowMenu = windowMenu->addMenu(tr("&Network"));
 
     windowMenu->addSeparator();
     // Add the actions for the dockable windows
@@ -412,6 +422,7 @@ void MainWindow::createConnections()
     // Connect to log file reader
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),virtualRobot, SLOT(setSensorData(NUSensorsData*)));
+    connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),sensorCalibrationTool, SLOT(setSensorData(NUSensorsData*)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),this, SLOT(imageFrameChanged(int,int)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),offlinelocDialog,SLOT(SetFrame(int,int)));
     connect(LogReader,SIGNAL(ObjectDataChanged(const FieldObjects*)),objectDisplayLog, SLOT(setObjectData(const FieldObjects*)));
@@ -427,7 +438,6 @@ void MainWindow::createConnections()
 
     connect(LogReader,SIGNAL(cameraChanged(int)),virtualRobot, SLOT(setCamera(int)));
     connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)),virtualRobot, SLOT(setRawImage(const NUImage*)));
-    //connect(LogReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),virtualRobot, SLOT(setSensorData(const float*, const float*, const float*)));
     connect(LogReader,SIGNAL(frameChanged(int,int)),virtualRobot, SLOT(processVisionFrame()));
 
     connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)), this, SLOT(updateSelection()));
@@ -438,6 +448,7 @@ void MainWindow::createConnections()
     connect(VisionStreamer,SIGNAL(rawImageChanged(const NUImage*)),virtualRobot, SLOT(processVisionFrame()));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
+    connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorCalibrationTool, SLOT(setSensorData(NUSensorsData*)));
     // Setup navigation control enabling/disabling
     connect(LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
     connect(LogReader,SIGNAL(nextFrameAvailable(bool)),nextFrameAction, SLOT(setEnabled(bool)));
@@ -487,6 +498,9 @@ void MainWindow::createConnections()
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),objectDisplayLog, SLOT(setObjectData(const FieldObjects*)));
 
     connect(virtualRobot, SIGNAL(clearPlots()), this, SLOT(clearPlots()));
+
+    // Connect sensor calibration tool
+    connect(sensorCalibrationTool,SIGNAL(CalibrationChanged(SensorCalibrationSettings*)), this, SLOT(SetSensorCalibration(SensorCalibrationSettings*)));
 }
 
 void MainWindow::setColourTheme(ColourScheme newColors)
@@ -542,6 +556,8 @@ void MainWindow::openLog(const QString& fileName)
         LogReader->openFile(fileName);
         LogReader->firstFrame();
     }
+    SensorCalibrationSettings calibration;
+    glManager.writeExpectedViewToDisplay(NULL, &calibration, GLDisplay::ExpectedProjection);
 }
 
 void MainWindow::copy()
@@ -768,6 +784,7 @@ void MainWindow::imageFrameChanged(int currFrame, int totalFrames)
     message.append("/");
     message.append(QString::number(totalFrames));
     statusBar()->showMessage(message, 10000);
+    glManager.writeExpectedViewToDisplay(LogReader->GetSensorData(), sensorCalibrationTool->Calibration(), GLDisplay::ExpectedProjection);
 }
 
 void MainWindow::selectFrame()
@@ -782,6 +799,14 @@ void MainWindow::selectFrame()
         offlinelocDialog->SetFrame(selectedFrameNumber);
     }
     return;
+}
+
+void MainWindow::SetSensorCalibration(SensorCalibrationSettings* new_calibration)
+{
+    if(LogReader->numFrames() > 0)
+    {
+        glManager.writeExpectedViewToDisplay(LogReader->GetSensorData(), new_calibration, GLDisplay::ExpectedProjection);
+    }
 }
 
 int MainWindow::getNumMdiWindowType(const QString& windowType)
@@ -828,15 +853,13 @@ QMdiSubWindow* MainWindow::createPlotDisplay()
 QMdiSubWindow* MainWindow::createLocWmGlDisplay()
 {
     locWmGlDisplay* temp = new locWmGlDisplay(this);
-    connect(LogReader,SIGNAL(LocalisationDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LogReader,SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
     connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)),temp, SLOT(setSensorData(NUSensorsData*)));
     connect(LogReader, SIGNAL(ObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
-    connect(LocWmStreamer, SIGNAL(locwmDataChanged(const Localisation*)),temp, SLOT(SetLocalisation(const Localisation*)));
     connect(LocWmStreamer, SIGNAL(selfLocwmDataChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
     connect(LocWmStreamer, SIGNAL(fieldObjectDataChanged(const FieldObjects*)),temp, SLOT(setFieldObjects(const FieldObjects*)));
-    connect(offlinelocDialog, SIGNAL(LocalisationChanged(const Localisation*)),temp, SLOT(SetLocalLocalisation(const Localisation*)));
     connect(offlinelocDialog, SIGNAL(SelfLocalisationChanged(const SelfLocalisation*)),temp, SLOT(setSelfLocalisation(const SelfLocalisation*)));
+    connect(offlinelocDialog, SIGNAL(ProcessingStateChanged(bool)),temp, SLOT(setDisplayDisabled(bool)));
     QMdiSubWindow* window = mdiArea->addSubWindow(temp);
     temp->show();
     return window;
@@ -858,7 +881,7 @@ void MainWindow::updateSelection()
     virtualRobot->updateSelection(classification->getColourLabel(),classification->getSelectedColours());
 }
 
-void MainWindow::SelectColourAtPixel(int x, int y)
+void MainWindow::SelectPixel(int x, int y)
 {
     if(virtualRobot->imageAvailable())
     {
@@ -872,6 +895,7 @@ void MainWindow::SelectColourAtPixel(int x, int y)
         statusBar()->showMessage(message, 10000);
         classification->setColour(tempPixel);
     }
+    sensorCalibrationTool->select_pixel(x,y);
 }
 
 void MainWindow::ClassifySelectedColour()
@@ -883,7 +907,7 @@ void MainWindow::SelectAndClassifySelectedPixel(int x, int y)
 {
     if(virtualRobot->imageAvailable())
     {
-        SelectColourAtPixel(x,y);
+        SelectPixel(x,y);
         ClassifySelectedColour();
     }
 }

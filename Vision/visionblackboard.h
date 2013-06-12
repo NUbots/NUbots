@@ -30,9 +30,7 @@
 #include "VisionTypes/VisionFieldObjects/cornerpoint.h"
 #include "VisionTypes/greenhorizon.h"
 
-#include "Vision/Modules/robocuphacks.h"
-
-#ifndef VISIONBLACKBOARD_H // mapped_horizontal_transitions: [1-9]+
+#ifndef VISIONBLACKBOARD_H
 #define VISIONBLACKBOARD_H
 
 using std::map;
@@ -68,7 +66,6 @@ public:
     void setObstaclePoints(const std::vector<Point> &points);
     
     void addGoal(const Goal& newgoal);
-    //void addBeacon(const Beacon& newbeacon);
     void addBall(const Ball& newball);
     void addObstacle(const Obstacle& newobstacle);
     void addLine(const FieldLine& newline);
@@ -76,7 +73,6 @@ public:
     void addCornerPoint(const CornerPoint& newcorner);
 
     void addGoals(const std::vector<Goal>& newgoals);
-    //void addBeacons(const std::vector<Beacon>& newbeacons);
     void addBalls(const std::vector<Ball>& newballs);
     void addObstacles(const std::vector<Obstacle>& newobstacles);
     void addLines(const std::vector<FieldLine>& newlines);
@@ -85,7 +81,6 @@ public:
 
 
     //ACCESSORS
-//    const Mat* getOriginalImageMat() const;
     const NUImage& getOriginalImage() const;
 
     const GreenHorizon& getGreenHorizon() const;
@@ -106,16 +101,8 @@ public:
     const Horizon& getKinematicsHorizon() const;
     const Transformer& getTransformer() const;
 
-//    bool isCameraPitchValid() const;
-//    float getCameraPitch() const;
-//    bool isCameraHeightValid() const;
-//    float getCameraHeight() const;
-//    bool isBodyPitchValid() const;
-//    float getBodyPitch() const;
-
     const std::vector<Ball>& getBalls();
     const std::vector<Goal>& getGoals();
-    //const std::vector<Beacon>& getBeacons();
     const std::vector<Obstacle>& getObstacles();
     const std::vector<FieldLine>& getLines();
     const std::vector<CentreCircle>& getCentreCircles();
@@ -148,25 +135,17 @@ private:
 //! SELF
     static VisionBlackboard* instance;           //! @variable Singleton instance.
 
-//! VARIABLES
-
     //! Image Data
     DataWrapper* wrapper;
-//    Mat* original_image_cv;                 //! @variable Opencv mat for storing the original image 3 channels.
-//    Mat* original_image_cv_4ch;             //! @variable Opencv mat for storing the original image 4 channels.
     const NUImage* original_image;                  //! @variable Image for storing the original image.
 
     LookUpTable LUT;
+    Transformer m_transformer;
     
     //! Green Horizon data
     GreenHorizon m_green_horizon;   //! @variable The green horizon.
     std::vector<Point> gh_scan_points;   //! @variable The location of initial green (used to form GH and find obstacles)
     std::vector<Point> obstacle_points;    //! @variable The std::list of points used by obstacle detection
-
-    Transformer m_transformer;
-
-    //! Object data
-    //std::vector<Vector2<double> > object_points;   //! @variable Vector of points indicating potential objects.
     
     //! Kinematics Data
     Horizon kinematics_horizon; //! @variable Line defining kinematics horizon.
@@ -179,14 +158,11 @@ private:
     SegmentedRegion vertical_filtered_segments;         //! @variable The filtered segmented vertical scanlines.
 
     //! Transitions
-    map<COLOUR_CLASS, std::vector<ColourSegment> > matched_horizontal_segments;
-    map<COLOUR_CLASS, std::vector<ColourSegment> > matched_vertical_segments;
-    //std::vector<Transition> horizontal_transitions;  //! @variable The transition rule matches in the horizontal segments.
-    //std::vector<Transition> vertical_transitions;    //! @variable The transition rule matches in the vertical segments.
+    std::map<COLOUR_CLASS, std::vector<ColourSegment> > matched_horizontal_segments;
+    std::map<COLOUR_CLASS, std::vector<ColourSegment> > matched_vertical_segments;
     
     std::vector<const VisionFieldObject*> m_vfos;
     std::vector<Goal> m_goals;
-    //std::vector<Beacon> m_beacons;
     std::vector<Ball> m_balls;
     std::vector<Obstacle> m_obstacles;
     std::vector<FieldLine> m_lines;

@@ -89,6 +89,7 @@ public:
     void setPlayerNumber(int num) {m_player_number = num;};
     int getTeamNumber() {return m_team_number;};
     bool amIClosestToBall();
+    int howManyCloserToBall();
     
     std::vector<TeamPacket::SharedBall> getSharedBalls() const;
     

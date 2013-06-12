@@ -35,6 +35,7 @@ Object::~Object()
  */
 void Object::preProcess(const float timestamp)
 {
+    (void)(timestamp); // To stop compiler warnings.
 }
 
 /*! @brief Updates the field object's measured position, measured error, position in image, and last seen time

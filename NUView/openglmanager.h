@@ -50,6 +50,7 @@ class ClassifiedImage;
 class Horizon;
 class NUSensorsData;
 class KF;
+class SensorCalibrationSettings;
 
 class OpenglManager : public QGLWidget
 {
@@ -185,13 +186,6 @@ public:
         void writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDisplay::display displayId);
 
         /*!
-          @brief Accepts a new raw image and maps it to the default display layer.
-          @param newImage The new raw image.
-          */
-        void setExpectedVision(const NUSensorsData* data, const KF* filter, GLDisplay::display displayId);
-
-
-        /*!
           @brief Test stub for displaying alpha transparent images
           @param displayId The id of the display layer to write to.
           @param image     The image to update the layer with
@@ -201,6 +195,8 @@ public:
         @brief Removes all of the previous display instructions so old display data is not reused.
         */
         void clearAllDisplays();
+
+        void writeExpectedViewToDisplay(const NUSensorsData *SensorData, SensorCalibrationSettings* calibration, GLDisplay::display displayId);
 
     public:
         /*!
@@ -256,6 +252,11 @@ public:
         void drawSolidCircle(float cx, float cy, float r, int num_segments);
 
         void  drawEllipse(float cx, float cy, float xradius, float yradius);
+        void DrawArc(float cx, float cy, float r, float start_angle, float arc_angle, int num_segments);
+        void InitFieldLines();
+
+        GLuint m_field_lines_draw_list;
+
 
 };
 

@@ -214,7 +214,7 @@ void VisionConstants::loadFromFile(std::string filename)
             in >> D2P_INCLUDE_BODY_PITCH;
         }
         else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
-            #if (defined TARGET_IS_PC || defined TARGET_IS_TRAINING || defined TARGET_IS_RPI)
+            #if (defined TARGET_IS_PC || defined TARGET_IS_TRAINING || defined TARGET_IS_RPI || defined TARGET_IS_MAC || defined TARGET_IS_WINDOWS)
                 in >> D2P_ANGLE_CORRECTION;
                 D2P_ANGLE_CORRECTION = 0;   //discard the value
             #else

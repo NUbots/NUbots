@@ -1,6 +1,7 @@
 #include "EndEffector.h"
 #include "debug.h"
 #include <assert.h>
+#include <iostream>
 
 EndEffector::EndEffector(const Matrix& startTrans, const std::vector<Link>& endEffectorlinks, const Matrix& endTrans, const std::string& effectorName):
         m_startTransform(startTrans), m_links(endEffectorlinks), m_endTransform(endTrans), m_name(effectorName)

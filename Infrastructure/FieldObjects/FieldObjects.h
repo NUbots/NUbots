@@ -49,13 +49,10 @@ public:
 		FO_PENALTY_YELLOW = 23,
 		FO_PENALTY_BLUE = 24,
 
-		// Beacons
-		FO_BLUE_BEACON = 25,
-		FO_YELLOW_BEACON = 26,
+        FO_CORNER_CENTRE_CIRCLE_INTERSECT_LEFT  = 25,
+        FO_CORNER_CENTRE_CIRCLE_INTERSECT_RIGHT 	= 26,
 
-		// Goal Gaps
-		//FO_YELLOW_GOAL_GAP 		= 25,
-		//FO_BLUE_GOAL_GAP 		= 26,
+
 
 		NUM_STAT_FIELD_OBJECTS = 27
 
@@ -112,7 +109,7 @@ public:
 
 	void preProcess(const float timestamp);
 	void postProcess(const float timestamp);
-
+    
 	double GetTimestamp() const
 	{
 		return m_timestamp;

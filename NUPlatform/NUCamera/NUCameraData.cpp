@@ -1,6 +1,7 @@
 #include "NUCameraData.h"
 #include <istream>
 #include <sstream>
+#include <fstream>
 #include "debug.h"
 #include "Tools/Math/General.h"
 

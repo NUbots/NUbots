@@ -26,9 +26,9 @@ protected:
     Sensor m_odometry;              //!< odometry sensor
     Sensor m_falling;         //!< incapacitated sensor
     Sensor m_fallen;
+    Sensor m_getup;
     Sensor m_left_foot;
     Sensor m_right_foot;
-    Sensor m_getup;
     double m_time;
 
 };

@@ -52,14 +52,19 @@ public:
     ~MRLAgent();
     void initialiseAgent(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range = 10);
 
-    void giveMotivationReward();
+    void giveMotivationReward(float env_rew = 0);
     float wundtFunction(float N);
-    int getActionAndLearn(std::vector<float> observations, std::vector<int> valid_actions);
+    int getActionAndLearn(std::vector<float> observations, std::vector<int> valid_actions, float rew = 0);
     void saveMRLAgent(std::string agentName);
     void loadMRLAgent(std::string agentName);
 
     std::map<std::string,float>* getMap();
     ApproximatorInterface* expectation_map;
+
+    float average_novelty;
+    float max_novelty;
+    float min_novelty;
+    static constexpr float novelty_learning_rate = 0.05;
 };
 
 #endif // MRLAGENT_H

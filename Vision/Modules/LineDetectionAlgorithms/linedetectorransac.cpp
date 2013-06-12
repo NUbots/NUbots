@@ -17,24 +17,24 @@ LineDetectorRANSAC::LineDetectorRANSAC()
     m_max_iterations = 10;  //hard limit on number of lines
 }
 
-std::vector<FieldLine> LineDetectorRANSAC::run(const std::vector<GroundPoint>& points)
+std::vector<FieldLine> LineDetectorRANSAC::run(const std::vector<NUPoint>& points)
 {
-    std::vector< std::pair<RANSACLine<GroundPoint>, std::vector<GroundPoint> > > candidates;
-    std::vector<std::pair<LSFittedLine, LSFittedLine> > linePairs;
+    std::vector< pair<RANSACLine<NUPoint>, vector<NUPoint> > > candidates;
+    std::vector<pair<LSFittedLine, LSFittedLine> > linePairs;
     std::vector<FieldLine> finalLines;
 
     // find possible line candidates using RANSAC in the ground plane
-    candidates = RANSAC::findMultipleModels<RANSACLine<GroundPoint>, GroundPoint>(points, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
+    candidates = RANSAC::findMultipleModels<RANSACLine<NUPoint>, NUPoint>(points, m_e, m_n, m_k, m_max_iterations, RANSAC::BestFittingConsensus);
 
     /// @todo perhaps find amount of green along line and remove based on threshold?
 
     // generate line equations in the image plane
     for(size_t i=0; i<candidates.size(); i++) {
         std::pair<LSFittedLine, LSFittedLine> lp;
-        BOOST_FOREACH(GroundPoint& g, candidates.at(i).second) {
+        BOOST_FOREACH(NUPoint& g, candidates.at(i).second) {
             //line std::pairs are ordered as such : (ground, screen)
-            lp.first.addPoint(g.ground);
-            lp.second.addPoint(g.screen);
+            lp.first.addPoint(g.groundCartesian);
+            lp.second.addPoint(g.screenCartesian);
         }
         linePairs.push_back(lp);
     }

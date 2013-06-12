@@ -14,6 +14,9 @@ class Localisation;
 class SelfLocalisation;
 class LogFileReader;
 class OfflineLocBatch;
+class QLineEdit;
+class QLabel;
+class QComboBox;
 
 class OfflineLocalisationDialog : public QDialog
 {
@@ -28,7 +31,8 @@ signals:
     void SelfLocalisationChanged(const SelfLocalisation*);
     void LocalisationInfoChanged(const QString&);
     void SelfLocalisationInfoChanged(const QString&);
-    void PostBatchJob(const QStringList&);
+    void PostBatchJob(const QStringList&, const QString&, const QString&);
+    void ProcessingStateChanged(bool isProcessing);
 
 public slots:
     void OpenLogFiles();
@@ -56,5 +60,6 @@ private:
     LogFileReader* m_reader;
     OfflineLocBatch* m_batch_processsor;
 };
+
 
 #endif // OFFLINELOCALISATIONDIALOG_H

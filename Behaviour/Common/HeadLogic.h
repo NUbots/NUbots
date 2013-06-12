@@ -68,6 +68,7 @@ public:
     Object* getObject(int object_type, int object_enum_value);    
     Object* getObject(int index);    
     int getObjectType(int index);
+    int getObjectIndex(int object_type, int object_enum_value);
     std::vector<float> getObjectLocation(int object_type,int object_enum_value);
     std::vector<float> calculateStationaryObjectLocation(StationaryObject ob);
     std::vector<float> calculateMobileObjectLocation(MobileObject ob);

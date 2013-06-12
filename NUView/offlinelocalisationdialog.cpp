@@ -3,19 +3,26 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTextBrowser>
+#include <QGroupBox>
 #include <QPushButton>
 #include <QFileDialog>
-#include <QDir>
 #include <QFileInfo>
+#include <QDir>
 #include <QLabel>
 #include <QProgressDialog>
 #include <QFileDialog>
 #include <QAction>
+#include <QDialogButtonBox>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QStyle>
 #include "FileAccess/SplitStreamFileFormatReader.h"
 #include "FileAccess/LogFileReader.h"
 #include "OfflineLocalisationSettingsDialog.h"
 
 #include "OfflineLocBatch.h"
+
+#include "BatchSelectDialog.h"
 
 OfflineLocalisationDialog::OfflineLocalisationDialog(QWidget *parent) :
     QDialog(parent)
@@ -203,26 +210,33 @@ void OfflineLocalisationDialog::ValidateData(bool available)
 
 void OfflineLocalisationDialog::BeginBatch()
 {
-    connect(this, SIGNAL(PostBatchJob(QStringList)), m_batch_processsor, SLOT(ProcessFiles(QStringList)));
-    QString initial_path = ".";         // Default path.
-    if(!m_previous_log_path.isEmpty())
+    BatchSelectDialog *dlg = new BatchSelectDialog();
+    if(dlg->exec() == QDialog::Accepted)
     {
-        initial_path = m_previous_log_path;
-    }
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),initial_path);
-    if(dir.isEmpty())
-    {
-        return;
-    }
-    m_previous_log_path = dir;
+        qDebug() << "accepted";
+        connect(this, SIGNAL(PostBatchJob(QStringList,const QString&,const QString&)), m_batch_processsor,
+                SLOT(ProcessFiles(QStringList,const QString&,const QString&)));
 
-    QStringList log_paths = GetLogPaths(QDir(dir));  // get the paths with log files in them
-    qDebug() << log_paths;
-    m_progressBar->setRange(0, 0);
-    m_progressBar->setValue(0);
-    m_progressBar->setAutoClose(false);
-    m_progressBar->reset();
-    emit PostBatchJob(log_paths);
+        QString source_dir = dlg->sourcePath();
+        QString result_dir = dlg->resultPath();
+        QString experiment = dlg->experimentType();
+        if(not (source_dir.isEmpty() or result_dir.isEmpty() or experiment.isEmpty()))
+        {
+            m_previous_log_path = source_dir;
+            QStringList log_paths = GetLogPaths(QDir(source_dir));  // get the paths with log files in them
+            if(!log_paths.empty())
+            {
+                m_progressBar->setRange(0, 0);
+                m_progressBar->setValue(0);
+                m_progressBar->setAutoClose(false);
+                m_progressBar->reset();
+                ProcessingStateChanged(true);
+                emit PostBatchJob(log_paths, result_dir, experiment);
+            }
+        }
+    }
+    delete dlg;
+    return;
 }
 
 QStringList OfflineLocalisationDialog::GetLogPaths(const QDir& directory)
@@ -254,7 +268,11 @@ QStringList OfflineLocalisationDialog::GetLogPaths(const QDir& directory)
 
 void OfflineLocalisationDialog::BeginSimulation()
 {
-    if(m_offline_loc->isRunning()) return;
+    if(m_offline_loc->isRunning())
+    {
+        qDebug() << "Localisation already running.";
+        return;
+    }
     m_progressBar->setRange(0, m_offline_loc->NumberOfLogFrames());
     m_progressBar->setValue(0);
     m_progressBar->setAutoClose(true);
@@ -268,13 +286,14 @@ void OfflineLocalisationDialog::BeginSimulation()
 //    connect(m_progressBar, SIGNAL(canceled()), this, SLOT(CancelProgress()));
 
     //m_offline_loc->Run();
+    emit ProcessingStateChanged(true);
     m_offline_loc->start();
 }
 
 void OfflineLocalisationDialog::CompleteSimulation()
 {
     m_progressBar->close();
-
+    emit ProcessingStateChanged(false);
 //    disconnect(m_offline_loc, SIGNAL(finished()), this, SLOT(CompleteSimulation()));
 //    disconnect(m_offline_loc, SIGNAL(updateProgress(int,int)), this, SLOT(DiplayProgress(int,int)));
     //delete m_progressBar;
@@ -333,12 +352,8 @@ void OfflineLocalisationDialog::SetFrame(int frameNumber, int total)
 {
     if(m_offline_loc->hasSimData())
     {
-        const Localisation* temp = m_offline_loc->GetFrame(frameNumber);
-        emit LocalisationChanged(temp);
         const SelfLocalisation* selfTemp = m_offline_loc->GetSelfFrame(frameNumber);
         emit SelfLocalisationChanged(selfTemp);
-        QString message = m_offline_loc->GetFrameInfo(frameNumber);
-        emit LocalisationInfoChanged(message);
         QString self_message = m_offline_loc->GetSelfFrameInfo(frameNumber);
         emit SelfLocalisationInfoChanged(self_message);
     }

@@ -29,7 +29,6 @@
 #include "NUPlatform/NUIO.h"
 #include "NUbot.h"
 #include "SeeThinkThread.h"
-#include "Localisation/LocWmFrame.h"
 #include "nubotdataconfig.h"
 
 //#define LOGGING_ENABLED 1
@@ -84,6 +83,7 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(std::string("Se
     m_logrecorder->SetLogging("gameinfo",true);
     m_logrecorder->SetLogging("teaminfo",true);
     m_logrecorder->SetLogging("object",true);
+    m_logrecorder->SetLogging("image",true);
 #endif
 }
 
@@ -121,7 +121,7 @@ void SeeThinkThread::run()
     {
         try
         {
-            #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
+            #if defined(TARGET_IS_NAOWEBOTS) or defined(TARGET_IS_DARWINWEBOTS) or (not defined(USE_VISION))
                 wait();
             #endif
             
@@ -134,7 +134,6 @@ void SeeThinkThread::run()
             // else 
             //     std::cout << "SeeThinkThread::run(): autoUpdateTest FAIL!" << std::endl;
             // // #endif
-            
             Blackboard->Config->UpdateConfiguration();
             // -----------------------------------------
 
@@ -203,8 +202,8 @@ void SeeThinkThread::run()
             #endif
 
 					
-			//std::cout << m_nubot->m_platform->getRealTime() << std::endl << Blackboard->Image->GetTimestamp() << std::endl << std::endl;
-            m_nubot->m_api->sendAll();
+            //std::cout << m_nubot->m_platform->getRealTime() << std::endl << Blackboard->Image->GetTimestamp() << std::endl << std::endl;
+            //m_nubot->m_api->sendAll();
 			
 #ifdef LOGGING_ENABLED
             locfile << *m_nubot->m_localisation;

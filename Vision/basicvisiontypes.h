@@ -3,7 +3,7 @@
 
 #include "../Tools/Math/Vector2.h"
 
-//#include "Vision/VisionTypes/groundpoint.h"
+//#include "Vision/VisionTypes/nupoint.h"
 typedef Vector2<double> Point;
 
 namespace Vision {

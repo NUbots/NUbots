@@ -7,6 +7,26 @@ using namespace ConfigSystem;
 
 extern ConfigManager* config;
 
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
+void get_time(struct timespec *time)
+{
+#ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    time->tv_sec = mts.tv_sec;
+    time->tv_nsec = mts.tv_nsec;
+#else
+    clock_gettime(CLOCK_REALTIME, time);
+#endif
+    return;
+}
 
 void initRandom()
 {
@@ -38,13 +58,13 @@ timespec diff(timespec start, timespec end)
 timespec tt_startTime;
 void startTimedTest()
 {
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tt_startTime);
+    get_time(&tt_startTime);
 }
 
 void endTimedTest()
 {
     timespec tt_endTime;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tt_endTime);
+    get_time(&tt_endTime);
 
     double tt = diff(tt_startTime, tt_endTime).tv_nsec / 1000000.0;
     double tt_Hz = 1.0 / (tt / 1000.0);

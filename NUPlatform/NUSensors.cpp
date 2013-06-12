@@ -41,6 +41,9 @@
 #include "debugverbositynusensors.h"
 #include "nubotdataconfig.h"
 
+#include "../Localisation/Filters/SeqUKF.h"
+#include "../Localisation/Filters/IMUModel.h"
+
 #include <math.h>
 #include <limits>
 
@@ -62,6 +65,21 @@ NUSensors::NUSensors(): m_initialised(false)
     m_kinematicModel->LoadModel();
     m_orientationFilter = new OrientationUKF();
     m_odometry = new OdometryEstimator();
+
+    IMUModel* imu_model = new IMUModel();
+    m_orientation_filter = new SeqUKF(imu_model);
+    Matrix init_imu_mean(IMUModel::kstates_total, 1, false);
+    init_imu_mean[IMUModel::kstates_gyro_offset_x][0] = 0.0;
+    init_imu_mean[IMUModel::kstates_gyro_offset_y][0] = 0.0;
+    init_imu_mean[IMUModel::kstates_body_angle_x][0] = 0.0;
+    init_imu_mean[IMUModel::kstates_body_angle_y][0] = 0.0;
+    Matrix init_imu_cov(IMUModel::kstates_total, IMUModel::kstates_total, false);
+    init_imu_cov[IMUModel::kstates_gyro_offset_x][IMUModel::kstates_gyro_offset_x] = 0.0001;
+    init_imu_cov[IMUModel::kstates_gyro_offset_y][IMUModel::kstates_gyro_offset_y] = 0.0001;
+    init_imu_cov[IMUModel::kstates_body_angle_x][IMUModel::kstates_body_angle_x] = 9.0;
+    init_imu_cov[IMUModel::kstates_body_angle_y][IMUModel::kstates_body_angle_y] = 9.0;
+    MultivariateGaussian init_imu_est(init_imu_mean, init_imu_cov);
+    m_orientation_filter->initialiseEstimate(init_imu_est);
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -79,6 +97,8 @@ NUSensors::~NUSensors()
     m_orientationFilter = 0;
     delete m_odometry;
     m_odometry = 0;
+    if(m_orientation_filter)
+        delete m_orientation_filter;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -229,6 +249,7 @@ void NUSensors::initialise()
  */
 void NUSensors::calculateOrientation()
 {
+    static double prev_time = 0.0;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "NUSensors::calculateOrientation()" << std::endl;
 #endif
@@ -245,38 +266,99 @@ void NUSensors::calculateOrientation()
     }
     else if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
     {
-        std::vector<float> supportLegTransformFlat;
-        bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
-        Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
-        if(validKinematics)
-            orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+//        std::vector<float> supportLegTransformFlat;
+//        bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
+//        Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
+//        if(validKinematics)
+//            orientation = Kinematics::OrientationFromTransform(supportLegTransform);
 
-        validKinematics = validKinematics && (fabs(acceleration[2]) > 2*fabs(acceleration[1]) && fabs(acceleration[2]) > 2*fabs(acceleration[0]));
+//        validKinematics = validKinematics && (fabs(acceleration[2]) > 2*fabs(acceleration[1]) && fabs(acceleration[2]) > 2*fabs(acceleration[0]));
 
-        if(!m_orientationFilter->Initialised()){
-            #if DEBUG_NUSENSORS_VERBOSITY > 4
-                debug << "NUSensors::calculateOrientation() NUSensorsData failed to initialise." << std::endl;
-            #endif
-            m_orientationFilter->initialise(m_current_time,gyros,acceleration,validKinematics,orientation);
+//        if(!m_orientationFilter->Initialised()){
+//            #if DEBUG_NUSENSORS_VERBOSITY > 4
+//                debug << "NUSensors::calculateOrientation() NUSensorsData failed to initialise." << std::endl;
+//            #endif
+//            m_orientationFilter->initialise(m_current_time,gyros,acceleration,validKinematics,orientation);
 
-        } else
-        {
-            m_orientationFilter->TimeUpdate(gyros, m_current_time);
-            m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
-            // Set orientation
-            orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
-            orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
-            orientation[2] = 0.0f;
+//        } else
+//        {
+//            m_orientationFilter->TimeUpdate(gyros, m_current_time);
+//            m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
+//            // Set orientation
+//            orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
+//            orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
+//            orientation[2] = 0.0f;
 
-            m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
+//            m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
 
-            // Set gyro offset values
-            gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
-            gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
-            gyroOffset[2] = 0.0f;
-            m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
-        }
+//            // Set gyro offset values
+//            gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
+//            gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
+//            gyroOffset[2] = 0.0f;
+//            m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
+//        }
+
+        Matrix gyro_matrix(2,1,false);
+        gyro_matrix[0][0] = gyros[0];
+        gyro_matrix[1][0] = gyros[1];
+
+        Matrix accel_matrix(3,1,false);
+        accel_matrix[0][0] = acceleration[0];
+        accel_matrix[1][0] = acceleration[1];
+        accel_matrix[2][0] = acceleration[2];
+
+        const double delta_t_ms = m_current_time - prev_time;
+        const double delta_t_s = delta_t_ms / 1000.0;
+
+        Matrix process_noise(4,4,false);
+        process_noise[0][0] = 1e-6;
+        process_noise[1][1] = 1e-6;
+        process_noise[2][2] = 1e-6;
+        process_noise[3][3] = 1e-6;
+
+        Matrix gyro_measurement_noise(2,2,false);
+        gyro_measurement_noise[0][0] = 0.25;
+        gyro_measurement_noise[1][1] = 0.25;
+
+        Matrix accel_measurement_noise(3,3,false);
+        accel_measurement_noise[0][0] = 10.0;
+        accel_measurement_noise[1][1] = 10.0;
+        accel_measurement_noise[2][2] = 10.0;
+
+        m_orientation_filter->timeUpdate(delta_t_s, gyro_matrix, process_noise*delta_t_s, gyro_measurement_noise);
+        m_orientation_filter->measurementUpdate(accel_matrix, accel_measurement_noise, Matrix(), IMUModel::kmeasurement_accelerometer);
+
+        MultivariateGaussian estimate = m_orientation_filter->estimate();
+//        std::cout << "## Sensor Values:" << std::endl;
+//        std::cout << "Gyros:\n" << gyro_matrix << std::endl;
+//        std::cout << "Accelerometers:\n" << accel_matrix << std::endl;
+
+//        std::cout << "## Old filter results:" << std::endl;
+//        std::cout << "X offset: " << m_orientationFilter->getMean(OrientationUKF::rollGyroOffset) << std::endl;
+//        std::cout << "Y offset: " << m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset) << std::endl;
+//        std::cout << "X angle: " << m_orientationFilter->getMean(OrientationUKF::rollAngle) << std::endl;
+//        std::cout << "Y angle: " << m_orientationFilter->getMean(OrientationUKF::pitchAngle) << std::endl;
+
+//        std::cout << "## New filter results:" << std::endl;
+//        std::cout << "X offset: " << estimate.mean(IMUModel::kstates_gyro_offset_x) << std::endl;
+//        std::cout << "Y offset: " << estimate.mean(IMUModel::kstates_gyro_offset_y) << std::endl;
+//        std::cout << "X angle: " << estimate.mean(IMUModel::kstates_body_angle_x) << std::endl;
+//        std::cout << "Y angle: " << estimate.mean(IMUModel::kstates_body_angle_y) << std::endl;
+
+        // Set orientation
+        orientation[0] = estimate.mean(IMUModel::kstates_body_angle_x);
+        orientation[1] = estimate.mean(IMUModel::kstates_body_angle_y);
+        orientation[2] = 0.0f;
+
+        m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
+
+        // Set gyro offset values
+        gyroOffset[0] = estimate.mean(IMUModel::kstates_gyro_offset_x);
+        gyroOffset[1] = estimate.mean(IMUModel::kstates_gyro_offset_y);
+        gyroOffset[2] = 0.0f;
+        m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
     }
+    prev_time = m_current_time;
 }
 
 /*! @brief Updates the Horizon Line using the current sensor data

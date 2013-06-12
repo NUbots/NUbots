@@ -1262,4 +1262,3 @@ std::istream& operator>> (std::istream& input, NUActionatorsData& p_sensor)
     //! @todo TODO: implement this function
     return input;
 }
-

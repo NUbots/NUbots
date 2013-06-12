@@ -136,6 +136,22 @@ int HeadLogic::getObjectType(int index){
 }
 
 /*! @brief
+     * Gets the index of the object in the list of interesting objects.
+     * */
+int HeadLogic::getObjectIndex(int object_type, int object_enum_value){
+    int stationary = (object_type==HeadLogic::STATIONARY_OBJECT ? 1:0);
+    int mobile = (object_type==HeadLogic::MOBILE_OBJECT ? 1:0);
+    int ambiguous = (object_type==HeadLogic::AMBIGUOUS_OBJECT ? 1:0);
+
+    return relevantObjects[HeadLogic::STATIONARY_OBJECT].size()*(mobile+ambiguous)+//If mobile or ambiguous add the length of the stationary list
+            relevantObjects[HeadLogic::MOBILE_OBJECT].size()*ambiguous+//
+            object_enum_value;
+
+}
+
+
+
+/*! @brief
      * Gets the ith object from the list of interesting objects. Self not gettable.
      * */
 Object* HeadLogic::getObject(int index){
@@ -600,7 +616,7 @@ std::vector<int> HeadLogic::getValidObjectsToLookAt()
     vector<int> validities;
 
     for(int i = 0;i<bearings.size();i++){
-        if(bearings[i]*bearings[i] <= 2.46/*(pi/2)^2*/)
+        if(bearings[i]*bearings[i] <= 2.46/*==(pi/2)^2*/)
             validities.push_back(1);
         else
             validities.push_back(0);

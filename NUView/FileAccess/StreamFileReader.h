@@ -219,8 +219,37 @@ private:
                 if(HasTime(timestamp))
                 {
                     qDebug("File: %s - Found duplicate frame time: %f", m_filename.c_str(),timestamp);
+
+                    if(m_timeIndex.back() == timestamp and m_timeIndex.size() >= 2)
+                    {
+                        int curr_buffer_pos =  m_file.tellg();
+                        try{
+                            m_file >> (*m_dataBuffer);
+                            double next_timestamp = (static_cast<TimestampedData*>(m_dataBuffer))->GetTimestamp();
+                            double prev_timestamp = m_timeIndex[m_timeIndex.size()-2];
+                            if(next_timestamp - timestamp < timestamp - prev_timestamp)
+                            {
+                                timestamp = 0.5 * (timestamp + prev_timestamp);
+                            }
+                            else
+                            {
+                                timestamp = 0.5 * (timestamp + next_timestamp);
+                            }
+                            qDebug("Entry Repaired to time: %f", timestamp);
+                        }
+                        catch(FileFormatException& e){
+                            qDebug("Unable to repair.");
+                            while(HasTime(timestamp)) timestamp+=1.0;
+                        }
+                        m_file.seekg(curr_buffer_pos,std::ios_base::beg);
+                    }
+                    else
+                    {
+                        while(HasTime(timestamp)) timestamp+=1.0;
+                    }
+
                     //continue;
-                    while(HasTime(timestamp)) timestamp+=1.0;
+
                 }
                 temp.frameSequenceNumber++;
                 m_index.insert(IndexEntry(timestamp,temp));

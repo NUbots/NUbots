@@ -1,11 +1,11 @@
 /*! @file NUData.cpp
     @brief Implementation of an abstract NUData class
     @author Jason Kulk
- 
+
     @author Jason Kulk
- 
+
   Copyright (c) 2009, 2010 Jason Kulk
- 
+
     This file is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -27,6 +27,7 @@
 #include "debug.h"
 #include "debugverbositynuactionators.h"
 #include "debugverbositynusensors.h"
+#include <iostream>
 
 /*! @brief Streaming operator for id_t* objects. Copies the object at the pointer location.
     @param output The output stream on which to write.
@@ -56,10 +57,10 @@ std::istream& operator >> (std::istream& input, NUData::id_t* id)
 int curr_id = 0;
 std::vector<NUData::id_t*> NUData::m_common_ids;
 const NUData::id_t NUData::All(curr_id++, "All", NUData::m_common_ids);							//0
-const NUData::id_t NUData::Head(curr_id++, "Head", NUData::m_common_ids);	
-const NUData::id_t NUData::Body(curr_id++, "Body", NUData::m_common_ids);	
-const NUData::id_t NUData::LArm(curr_id++, "LArm", NUData::m_common_ids);	
-const NUData::id_t NUData::RArm(curr_id++, "RArm", NUData::m_common_ids);	
+const NUData::id_t NUData::Head(curr_id++, "Head", NUData::m_common_ids);
+const NUData::id_t NUData::Body(curr_id++, "Body", NUData::m_common_ids);
+const NUData::id_t NUData::LArm(curr_id++, "LArm", NUData::m_common_ids);
+const NUData::id_t NUData::RArm(curr_id++, "RArm", NUData::m_common_ids);
 const NUData::id_t NUData::LHand(curr_id++, "LHand", NUData::m_common_ids);
 const NUData::id_t NUData::RHand(curr_id++, "RHand", NUData::m_common_ids);
 const NUData::id_t NUData::Torso(curr_id++, "Torso", NUData::m_common_ids);
@@ -71,10 +72,10 @@ const NUData::id_t NUData::NumCommonGroupIds(curr_id++, "NumCommonGroupIds", NUD
 
 const NUData::id_t NUData::HeadRoll(curr_id++, "HeadRoll", NUData::m_common_ids);				//13
 const NUData::id_t NUData::HeadPitch(curr_id++, "HeadPitch", NUData::m_common_ids);
-const NUData::id_t NUData::HeadYaw(curr_id++, "HeadYaw", NUData::m_common_ids);		
-const NUData::id_t NUData::NeckRoll(curr_id++, "NeckRoll", NUData::m_common_ids);	
-const NUData::id_t NUData::NeckPitch(curr_id++, "NeckPitch", NUData::m_common_ids);	
-const NUData::id_t NUData::NeckYaw(curr_id++, "NeckYaw", NUData::m_common_ids);		
+const NUData::id_t NUData::HeadYaw(curr_id++, "HeadYaw", NUData::m_common_ids);
+const NUData::id_t NUData::NeckRoll(curr_id++, "NeckRoll", NUData::m_common_ids);
+const NUData::id_t NUData::NeckPitch(curr_id++, "NeckPitch", NUData::m_common_ids);
+const NUData::id_t NUData::NeckYaw(curr_id++, "NeckYaw", NUData::m_common_ids);
 const NUData::id_t NUData::LShoulderRoll(curr_id++, "LShoulderRoll", NUData::m_common_ids);
 const NUData::id_t NUData::LShoulderPitch(curr_id++, "LShoulderPitch", NUData::m_common_ids);
 const NUData::id_t NUData::LShoulderYaw(curr_id++, "LShoulderYaw", NUData::m_common_ids);
@@ -112,7 +113,7 @@ void NUData::addDevices(const std::vector<std::string>& hardwarenames)
 {
     std::vector<std::string> names = standardiseNames(hardwarenames);
     std::vector<id_t*>& ids = m_ids_copy;
-    
+
     for (size_t i=0; i<names.size(); i++)
     {	// for each name compare it to the name of every id
         for (size_t j=NumCommonGroupIds.Id+1; j<ids.size(); j++)
@@ -131,7 +132,7 @@ void NUData::addDevices(const std::vector<std::string>& hardwarenames)
             }
         }
     }
-    
+
     for (size_t i=0; i<ids.size(); i++)
     {	// fill in the groups
         for (size_t j=0; j<ids.size(); j++)
@@ -143,14 +144,14 @@ void NUData::addDevices(const std::vector<std::string>& hardwarenames)
             }
         }
     }
-    
+
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0 or DEBUG_NUSENSORS_VERBOSITY > 0
         debug << "NUData::addDevices:" << std::endl;
         printMap(debug);
     #endif
 }
 
-/*! @brief Returns a vector containing the standardised versions of the vector containing hardware names 
+/*! @brief Returns a vector containing the standardised versions of the vector containing hardware names
     @param hardwarenames a list of hardwarenames
     @return a vector with the simplified names
  */
@@ -161,7 +162,7 @@ std::vector<std::string> NUData::standardiseNames(const std::vector<std::string>
     {
         std::string simplename = getStandardName(hardwarenames[i]);
         if (simplenames.empty())
-            simplenames.push_back(simplename);    
+            simplenames.push_back(simplename);
         else if (simplename.compare(simplenames.back()) != 0)
             simplenames.push_back(simplename);
     }
@@ -180,7 +181,7 @@ std::string NUData::getStandardName(const std::string& hardwarename)
     {
         currentletter = hardwarename.substr(j, 1);
         if (currentletter.compare(std::string(" ")) != 0 && currentletter.compare(std::string("_")) != 0 && currentletter.compare(std::string("/")) != 0 && currentletter.compare(std::string("\\")) != 0 && currentletter.compare(std::string(".")) != 0)
-            simplename += currentletter[0];            
+            simplename += currentletter[0];
     }
 
     // Replace "Left"/"Right" with L/R and move to front of name
@@ -196,7 +197,7 @@ std::string NUData::getStandardName(const std::string& hardwarename)
         simplename.erase(Right, 5);
         simplename.insert(0, "R");
     }
-    
+
     // Replace plurals (ears, eyes)
     size_t Ears = simplename.find("Ears");
     size_t Eyes = simplename.find("Eyes");
@@ -204,20 +205,20 @@ std::string NUData::getStandardName(const std::string& hardwarename)
         simplename.replace(Ears, 4, "Ear");
     if (Eyes != std::string::npos)
         simplename.replace(Ears, 4, "Eye");
-    
+
     // Replace ChestBoard with Chest
     size_t ChestBoard = simplename.find("ChestBoard");
     if (ChestBoard != std::string::npos)
         simplename.replace(ChestBoard, 10, "Chest");
-    
+
     // Replace LFace with LEye and RFace with REye
     size_t LFace = simplename.find("LFace");
     size_t RFace = simplename.find("RFace");
     if (LFace != std::string::npos)
-    	simplename.replace(LFace, 5, "LEye");
+        simplename.replace(LFace, 5, "LEye");
     if (RFace != std::string::npos)
-    	simplename.replace(RFace, 5, "REye");
-    
+        simplename.replace(RFace, 5, "REye");
+
     // Remove colours
     size_t Red = simplename.find("Red");
     if (Red != std::string::npos)
@@ -228,7 +229,7 @@ std::string NUData::getStandardName(const std::string& hardwarename)
     size_t Blue = simplename.find("Blue");
     if (Blue != std::string::npos)
         simplename.erase(Blue, 4);
-    
+
     // Remove everything after a number
     int index = -1;
     for (size_t i=simplename.size()-1; i>0; i--)
@@ -241,24 +242,24 @@ std::string NUData::getStandardName(const std::string& hardwarename)
     }
     if (index >= 0)
         simplename.erase(index);
-    
+
     return simplename;
 }
 
-/*! @brief Returns true if member belongs to group 
- 	@param member the single id
- 	@param group the group id
- 	@return true if member belongs to group 
+/*! @brief Returns true if member belongs to group
+    @param member the single id
+    @param group the group id
+    @return true if member belongs to group
  */
 bool NUData::belongsToGroup(const id_t& member, const id_t& group)
 {
     return t_belongsToGroup<id_t>(member, group);
 }
 
-/*! @brief Returns true if member belongs to group 
+/*! @brief Returns true if member belongs to group
     @param member the name of a single id. The name is case sensitive.
     @param group the group id
-    @return true if member belongs to group 
+    @return true if member belongs to group
  */
 bool NUData::belongsToGroup(const std::string& name, const id_t& group)
 {
@@ -266,9 +267,9 @@ bool NUData::belongsToGroup(const std::string& name, const id_t& group)
 }
 
 /*! @brief A templated function to determine whether a member belongs to a particular group
- 	@param member the single sensornator
- 	@param group the group of sensornators you want to see if member belongs to
- 	@return true if member belongs to group, false otherwise
+    @param member the single sensornator
+    @param group the group of sensornators you want to see if member belongs to
+    @return true if member belongs to group, false otherwise
  */
 template<typename T> bool NUData::t_belongsToGroup(const T& member, const id_t& group)
 {
@@ -297,21 +298,21 @@ template<typename T> bool NUData::t_belongsToGroup(const T& member, const id_t& 
     {
         if (LShoulderRoll == member or LShoulderPitch == member or LShoulderYaw == member or LElbowRoll == member or LElbowPitch == member or LElbowYaw == member)
             return true;
-        else 
+        else
             return false;
     }
     else if (group == RArm)
     {
         if (RShoulderRoll == member or RShoulderPitch == member or RShoulderYaw == member or RElbowRoll == member or RElbowPitch == member or RElbowYaw == member)
             return true;
-        else 
+        else
             return false;
     }
     else if (group == Torso)
     {
         if (TorsoRoll == member or TorsoPitch == member or TorsoYaw == member)
             return true;
-        else 
+        else
             return false;
     }
     else if (group == LLeg)
@@ -375,4 +376,3 @@ NUData::id_t* NUData::getId(const std::string& name)
     errorlog << "NUData::getId(): Name not found: " << name << std::endl;
     return NULL;
 }
-

@@ -119,8 +119,11 @@ void ObjectDetectionCH::detectObjects()
             }
             else {
                 if (count > VisionConstants::MIN_CONSECUTIVE_POINTS) {
-                    int centre = (object_points.at(i-1).x + object_points.at(start).x)*0.5;
-                    int width = object_points.at(i-1).x - object_points.at(start).x;
+                    int l = object_points.at(start).x - VisionConstants::VERTICAL_SCANLINE_SPACING;
+                    int r = object_points.at(i-1).x + VisionConstants::VERTICAL_SCANLINE_SPACING;
+
+                    int centre = (l + r)*0.5;
+                    int width = r - l;
                     int NO_HEIGHT = -1; // DOES NOTHING
 
                     // push to blackboard
