@@ -165,48 +165,79 @@
         Example Scenarios: Field Changes, Number of Players Change compare old/new system.
         
         \subsection{New Component Added to System}
-        	The robot is currently designed with a finite number of components integrated together
-			allowing it to play soccer. However, to enhance it's ability to play effectively, new
-			components may be added to the system to either augment existing abilities or provide
-			entirely new functionality.
-			
-			Due to recent rule changes in the RoboCup humanoid division
-			\cite[Section 1.2]{humanoid2013rules} the goal posts are no longer different colours.
-			Therefore, a new component must be added into the robots system that allows determining 
-			the direction it is facing in the event that it falls over. This component would be a
-			compass like system and to provide this service it would need to access existing sensor
-			input and provide it's output to the localisation system.
-			
-        	\todo[inline]{Write a description of the scenario}
-	
-        	\subsubsection{Current System}
-				\todo[inline]{Write how the current system would resolve this scenario}
-			\subsubsection{Proposed System}
-				\todo[inline]{Write how the proposed system would resolve this scenario}
+            The robot is currently designed with a finite number of components integrated together
+            allowing it to play soccer. However, to enhance it's ability to play effectively, new
+            components may be added to the system to either augment existing abilities or provide
+            entirely new functionality.
             
-        \subsection{Debugging When Bug is Found}
-        	\todo[inline]{Write a description of the scenario}
-	
-        	\subsubsection{Current System}
-				\todo[inline]{Write how the current system would resolve this scenario}
-			\subsubsection{Proposed System}
-				\todo[inline]{Write how the proposed system would resolve this scenario}
+            Due to recent rule changes in the RoboCup humanoid division
+            \cite[Section 1.2]{humanoid2013rules} the goal posts are no longer different colours.
+            Therefore, a new component must be added into the robots system that allows determining 
+            the direction it is facing in the event that it falls over. The component responsible
+            for finding the direction would be a compass like system. To provide this service it
+            would need to access existing sensor input and provide it's output to the localisation
+            system.
+    
+            \subsubsection{Current System}
+                \todo[inline]{As the system needs the vision frame, needs to understand the internals of vision to obtain the vision frame from it. Can't request from sense move again, needs to use a different method of obtaining the frame from vision}
+                \todo[inline]{The blackboard would need to be modified to hold the new information from this}
+                \todo[inline]{The localisation system would need to be modified to pull this information}
+            \subsubsection{Proposed System}
+                \todo[inline]{Write how the proposed system would resolve this scenario}
+                            
+        \subsection{Component expanded to use Networking with other Robots}
+            Many systems within the robots infrastructure can benefit from information gathered
+            by other robots on their team. This information includes things such as the position of
+            objects on the field and the behaviour of the robots such as their role and current
+            action. Sharing this information allows co-ordination as a team, and provides the
+            opportunity for distributed computing on difficult problems the team may face.
+            
+            The NUBots team have decided to improve their behaviour system to allow the robots to
+            better plan and make decisions together. To facilitate this, the robots need to be able
+            to easily communicate their intentions to each-other across the network. The networking
+            system would need to be able to convert the data from the behaviour system into a
+            serialised form that can be sent over the network, and deserialize this data at the
+            receiving end.
+    
+            \subsubsection{Current System}
+                \todo[inline]{Write how the current system would resolve or does resolve this scenario}
+            \subsubsection{Proposed System}
+                \todo[inline]{Write how the proposed system would resolve this scenario}
         
         \subsection{The System is moved to a new platform}
-        	\todo[inline]{Write a description of the scenario}
-	
-        	\subsubsection{Current System}
-				\todo[inline]{Write how the current system would resolve this scenario}
-			\subsubsection{Proposed System}
-				\todo[inline]{Write how the proposed system would resolve this scenario}
+            There are currently many robotic platforms that are available, the NUBots team alone
+            have in previous years made use of the \emph{Sony AIBO}, the \emph{Aldebaran Nao} and
+            the \emph{Robotis DARwIn-OP} platforms. It is highly likely that in the future,
+            additional robotic platforms will be used, and the cost of moving the code to the new
+            platform will result in alterations to the code base.
+            
+            After a number of years, the Darwin-OP platform has become obsolete and a new platform,
+            the Super Turbotron 5000, has been selected as its replacement in the RoboCup
+            competition. It has twenty additional degrees of freedom,stereo vision and two giant
+            laser cannons. The system must be adapted to be able to utilise these changes with a
+            minimal amount of impact to the existing codebase, as well as being able to still
+            operate on the Darwin-OP during the transition.
+            
+            \subsubsection{Current System}
+                \todo[inline]{Write how the current system would resolve this scenario}
+            \subsubsection{Proposed System}
+                \todo[inline]{Write how the proposed system would resolve this scenario}
+                            
+        \subsection{Debugging When Bug is Found}
+            \todo[inline]{Write a description of the scenario}
+    
+            \subsubsection{Current System}
+                \todo[inline]{Write how the current system would resolve this scenario}
+            \subsubsection{Proposed System}
+                \todo[inline]{Write how the proposed system would resolve this scenario}
             
         \subsection{The Robot is used to perform a new task}
-        	\todo[inline]{Write a description of the scenario}
-	
-        	\subsubsection{Current System}
-				\todo[inline]{Write how the current system would resolve this scenario}
-			\subsubsection{Proposed System}
-				\todo[inline]{Write how the proposed system would resolve this scenario}
+            \todo[inline]{Write a description of the scenario}
+    
+            \subsubsection{Current System}
+                \todo[inline]{Write how the current system would resolve this scenario}
+            \subsubsection{Proposed System}
+                \todo[inline]{Write how the proposed system would resolve this scenario}
         
     \section{Non-Goals}
         The architecture will not be making any modifications to the existing code base beyond the
@@ -859,6 +890,6 @@
             
             \todo[inline]{Improve/extend. Validate the claim about other Robocup teams}
             
-   	\bibliographystyle{plain}
+       \bibliographystyle{plain}
     \bibliography{references}
 \end{document}
