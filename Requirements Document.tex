@@ -518,15 +518,15 @@
             
             % Power Plant Threading Diagram
             \begin{figure}[b]
-                \begin{tabular}{l|l|l|l|l}
-                    Label & Trigger          & Task         & Emits            & Duration \\ \hline
-                    C     & Every 20ms       & Camera       & CameraImage      & 5ms      \\
-                    S     & Every 20ms       & Sensors      & SensorData       & 4ms      \\
-                    O     & SensorData       & Odometry     & OdometryData     & 3ms      \\
-                    V     & CameraImage      & Vision       & ProcessedImage   & 7ms      \\
-                    L     & ProcessedImage   & Localisation & LocalizationData & 3ms      \\
-                    B     & LocalizationData & Behaviour    & MotorTask        & 2ms      \\
-                    M     & MotorTask        & Motors       & Nothing          & 2ms      \\
+                \begin{tabular}{l|l|l|l}
+                    Trigger          & Task         & Emits            & Duration \\ \hline
+                    Every 20ms       & Camera       & CameraImage      & 5ms      \\
+                    Every 20ms       & Sensors      & SensorData       & 4ms      \\
+                    SensorData       & Odometry     & OdometryData     & 3ms      \\
+                    CameraImage      & Vision       & ProcessedImage   & 7ms      \\
+                    ProcessedImage   & Localisation & LocalizationData & 3ms      \\
+                    LocalizationData & Behaviour    & MotorTask        & 2ms      \\
+                    MotorTask        & Motors       & Nothing          & 2ms      \\
                 \end{tabular}
                 
                 \begin{tikzpicture}
@@ -562,8 +562,6 @@
                         \foreach \i in {1,...,20} {
                             \node[anchor=north, inner sep=0] at (\i + .5, .8) {\i};
                         }
-
-
                     \end{scope}
                      
                 \end{tikzpicture}
