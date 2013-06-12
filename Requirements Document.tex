@@ -14,6 +14,8 @@
 \usepackage{hyperref}
 % Lets us rotate figures 90 degrees
 \usepackage{rotating}
+% Make references appear in our table of contents
+\usepackage[nottoc,numbib]{tocbibind}
 
 % Gives us pretty diagrams
 \usepackage{tikz}
@@ -158,17 +160,48 @@
         Example Scenarios: Field Changes, Number of Players Change compare old/new system.
         
         \subsection{New Component Added to System}
-            \todo[inline]{Write the scenario for a new component added}
+        	The robot is currently designed with a finite number of components integrated together
+			allowing it to play soccer. However, to enhance it's ability to play effectively, new
+			components may be added to the system to either augment existing abilities or provide
+			entirely new functionality.
+			
+			Due to recent rule changes in the RoboCup humanoid division
+			\cite[Section 1.2]{humanoid2013rules} the goal posts are no longer different colours.
+			Therefore, a new component must be added into the robots system that allows determining 
+			the direction it is facing in the event that it falls over. This component would be a
+			compass like system and to provide this service it would need to access existing sensor
+			input and provide it's output to the localisation system.
+			
+        	\todo[inline]{Write a description of the scenario}
+	
+        	\subsubsection{Current System}
+				\todo[inline]{Write how the current system would resolve this scenario}
+			\subsubsection{Proposed System}
+				\todo[inline]{Write how the proposed system would resolve this scenario}
             
         \subsection{Debugging When Bug is Found}
-            \todo[inline]{Write the scenario for a bug occurring}
+        	\todo[inline]{Write a description of the scenario}
+	
+        	\subsubsection{Current System}
+				\todo[inline]{Write how the current system would resolve this scenario}
+			\subsubsection{Proposed System}
+				\todo[inline]{Write how the proposed system would resolve this scenario}
         
         \subsection{The System is moved to a new platform}
-            \todo[inline]{Write the scenario for the system is moved to a new platform}
+        	\todo[inline]{Write a description of the scenario}
+	
+        	\subsubsection{Current System}
+				\todo[inline]{Write how the current system would resolve this scenario}
+			\subsubsection{Proposed System}
+				\todo[inline]{Write how the proposed system would resolve this scenario}
             
         \subsection{The Robot is used to perform a new task}
-            \todo[inline]{Write the scenario for when the robot is given a new task
-            (e.g. catering for university)}
+        	\todo[inline]{Write a description of the scenario}
+	
+        	\subsubsection{Current System}
+				\todo[inline]{Write how the current system would resolve this scenario}
+			\subsubsection{Proposed System}
+				\todo[inline]{Write how the proposed system would resolve this scenario}
         
     \section{Non-Goals}
         The architecture will not be making any modifications to the existing code base beyond the
@@ -662,7 +695,7 @@
             
             The existing system has a lot of complicated logic that is used to support a few
             different platforms. It's currently not possible to easily swap out the Darwin motor
-            components for the AIBO motor component due to the tight coupling of systems.
+            components for an AIBO or Nao motor component due to the tight coupling of systems.
             
             The new architecture should provide a way to easily slot in platform dependant
             components. For example it should be possible to remove the hardware-dependant Darwin
@@ -677,8 +710,6 @@
             Technical Note: Obviously if the format of the data changes the systems that rely on
             that data need to change as well. We're looking to reduce unnecessary changes due to API
             bloat.
-            
-            \todo[inline]{Double check that AIBO is the appropriate name for the platform.}
         
         \subsection{Performance}
             \requirement{The architecture must have acceptable performance}
@@ -763,9 +794,8 @@
             be able to serialise packets of data into a binary format for the majority of cases, and
             allow the user to provide a serializer for any edge cases. The cases that should be
             covered by the system as a minimum are any data type that contains only Plain Old Data
-            (a container of basic data types only), or an instance of a Protocol Buffer. 
-            
-            \todo[inline]{Provide a citation for protocol buffers}
+            (a container of basic data types only), or an instance of a 
+            Protocol Buffer~\cite{protobuf}.
             
             This requirement is measured by the amount of code that is required to both send and
             receive network packets from other robots, as well as how efficient the binary
@@ -797,7 +827,10 @@
             the contents of those data packets should also be available in order to replay the
             scenario that caused the error.
             
-            \todo[inline]{Provide a measurable for the debugging tools}
+            These debugging tools can be measured by comparing the difficulty of tracing the source
+            of data from one system to another.
+            
+            \todo[inline]{Expand this measurable for the debugging tools}
 
         \subsection{Testing}
             \requirement{The architecture must provide tools for unit testing individual components}
@@ -837,4 +870,7 @@
             This goal can be measured by checking if we can integrate a ROS component.
             
             \todo[inline]{Improve/extend. Validate the claim about other Robocup teams}
+            
+   	\bibliographystyle{plain}
+    \bibliography{references}
 \end{document}
