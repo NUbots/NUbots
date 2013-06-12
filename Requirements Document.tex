@@ -229,8 +229,29 @@
 			receiving end.
 
 			\subsubsection{Current System}
+				The current system performs networking at the socket level. This means each component
+				that wants to communicate over the network needs to interact directly with sockets in order
+				to communicate information.
+				
+				To implement this behavior sharing mechanism a new packet type needs to be declared and a deep
+				understanding of Win32 sockets, POSIX sockets and the existing network code is needed. Once the new
+				packet is defined serialization methods need to be written to convert it to a network compatible representation
+				and back. Custom network code then needs to be written for the behavior system to handle sending/recieving the
+				networked data to ensure it is used correctly.
+				
+				Once the network transfer is complete the behavior system then needs to be modified to utilize the new information.
 				\todo[inline]{Write how the current system would resolve or does resolve this scenario}
 			\subsubsection{Proposed System}
+				The proposed architecture provides networking as part of the standard power plant interface.
+				The first step is to define a new packet which can be done with either raw C++ classes or 
+				google protocol buffers. Once that packet is defined you also need to add a network event handler
+				to the Behavior class which is a tiny modification in the proposed architecture.
+				
+				Once the handler is hooked up you simply use the standard api tools to send the networked packet
+				between the robots. The architecture will handle details like serialization, sockets and other network
+				issues.
+				
+				As with the existing architecture you still need to modify the behavior system to utilize the new data.
 				\todo[inline]{Write how the proposed system would resolve this scenario}
 
 		\subsection{The System is moved to a new platform}
