@@ -332,17 +332,21 @@
 
 			The NUBots team have been asked to add dancing capabilites to the robot to help market the 
 			university. The university wants the robot to be able to dance to a beat and compete in 
-			"So you think you can RoboDance".
-
-			The NUBots team have just won the latest RoboCup tournament and are about to celebrate
-			at their local establishment when the realise that they all left their ID back in the
-			car. Instead of walking back (It is really cold outside) they decide to adapt
-			their existing code to program the robot to go and obtain their wallets for them. They
-			realise that they already have code that will allow them to walk, identify objects and
-			move things (by kicking), but need new code to allow them to climb and use car keys.
+			"So you think you can RoboDance". The NUBots team realizes that some of their existing
+			code can be leveraged to build the dance subsystem.
 
 			\subsubsection{Current System}
+				In the existing architecture reuse of code is primarily achieved by copy+paste. This is 
+				espcially evident in places where there are multiple implementations of the same concept.
 				
+				Allowing the robot to dance requires a new behavior module that contains the dance state
+				machine. Additionally the sensor system will need to be modified to provide sound information
+				to the new dance component. 
+				
+				The kinematics model in the existing system is also very useful for dancing. Unfortunately access
+				to the kinematics model is very difficult in the current system requiring a lot of hoop jumping to
+				get access to the appropriate data. 
+				\todo[inline] {Properly describe the issues with accessing kinematics}
 				\todo[inline]{Write how the current system would resolve this scenario}
 			\subsubsection{Proposed System}
 				\todo[inline]{Write how the proposed system would resolve this scenario}
