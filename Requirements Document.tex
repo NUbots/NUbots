@@ -152,7 +152,7 @@
             \todo[inline]{Write the scenario for a new component added}
             
         \subsection{Debugging When Bug is Found}
-            \todo[inline]{Write the scenario for a bug occuring}
+            \todo[inline]{Write the scenario for a bug occurring}
         
         \subsection{The System is moved to a new platform}
             \todo[inline]{Write the scenario for the system is moved to a new platform}
@@ -179,10 +179,10 @@
         thinking "why haven't they addressed the *insert non-goal here* issue?"
         
         \subsection{Algorithm Changes}
-            \todo[inline]{Write the nongoal that we will not do changes to the algorithm}
+            \todo[inline]{Write the non-goal that we will not do changes to the algorithm}
             
         \subsection{Hardware Changes}
-            \todo[inline]{write the nongoal that states that the project will not cause hardware
+            \todo[inline]{write the non-goal that states that the project will not cause hardware
             changes}
         
     \section{Overview}
@@ -212,8 +212,8 @@
                     %%% Nodes
                     %% Left hand Side
                     \node at (0,3) [component] (vision) {Vision};
-                    \node at (0,2) [component] (localization) {Localization};
-                    \node at (0,1) [component] (behavior) {Behavior};
+                    \node at (0,2) [component] (localisation) {Localisation};
+                    \node at (0,1) [component] (behaviour) {Behaviour};
                     \node at (0,0) [component] (teamnetwork) {Team Network};
                     
                     %% Center
@@ -229,14 +229,14 @@
                     %%% Connections
                     %% Left hand blackboard connections
                     \path [readwrite] (vision) edge (blackboard);
-                    \path [readwrite] (localization) edge (blackboard);
-                    \path [read] (behavior) edge (blackboard);
+                    \path [readwrite] (localisation) edge (blackboard);
+                    \path [read] (behaviour) edge (blackboard);
                     \path [write] (teamnetwork) edge (blackboard);
 
                     %% Left hand jobs connections
                     \path [read] (vision) edge (jobs);
-                    \path [read] (localization) edge (jobs);
-                    \path [readwrite] (behavior) edge (jobs);
+                    \path [read] (localisation) edge (jobs);
+                    \path [readwrite] (behaviour) edge (jobs);
 
                     %% Right hand blackboard connections
                     \path [write] (sensors) edge (blackboard);
@@ -249,7 +249,7 @@
                     
                     %%% Decorations
                     %% SeeThink header
-                    \node[fit=(vision)(localization)(behavior)(teamnetwork)](leftgroup){};
+                    \node[fit=(vision)(localisation)(behaviour)(teamnetwork)](leftgroup){};
                     \draw[rounded corners] 
                         (leftgroup.north west)--(leftgroup.south west) -- ++(0.10,0);            
                     \draw[decorate,decoration={amplitude=7pt,brace}] % Header line
@@ -269,7 +269,7 @@
             \end{figure}
 
             The existing architecture is composed of a number of interconnected components that communicate through individually defined interfaces and mechanisms.
-            For example: The vision system communicates utilizing a two step process. First the vision system requests that the sensors retrieve a new frame. It then waits
+            For example: The vision system communicates utilising a two step process. First the vision system requests that the sensors retrieve a new frame. It then waits
             on the sensor system to place the frame information on blackboard. Once the frame information is placed on blackboard the vision system then reads the information
             from blackboard and continues it's processing. This is only one of the myriad of ways in which two components can communicate and we believe that this reduces
             the ability to both learn and modify the system.
@@ -282,7 +282,7 @@
                 \centering
                 \begin{tikzpicture}
                     \node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge Power Plant};
-                    \foreach [count=\i] \reactor in {Vision,Localization,Behavior,Sensors,Kinematics,Movement} {
+                    \foreach [count=\i] \reactor in {Vision,Localisation,Behaviour,Sensors,Kinematics,Movement} {
                         \node[draw,reactor] (reactorcircle) at ({360/6 * (\i - 1)}:6cm) {$\reactor$};
                         \path[readwrite] (reactorcircle) edge (powerplant);
                     };
@@ -296,9 +296,9 @@
             
             The point of interaction that most users will see is called a "Reactor". When a user wants to create a new feature they create a new class that inherits from Reactor. This
             gives them access to the two key functions of the proposed architecture: \textbf{On} and \textbf{Emit}. \emph{On} allows users to specify reactions which can be though
-            of as callbacks that are called when new data comes in. For example: A reaction that is called whenever new image data is retrived. \emph{Emit} allows reactors to
+            of as callbacks that are called when new data comes in. For example: A reaction that is called whenever new image data is retrieved. \emph{Emit} allows reactors to
             send out a new piece of data such as the sensor reactor using \emph{Emit} to send new image data every time it reads the camera hardware.
-            Reactors also provide one special type of event named \textbf{Every} which lets you subscribe to an event that is garunteed to tick at consistent intervals. 
+            Reactors also provide one special type of event named \textbf{Every} which lets you subscribe to an event that is guaranteed to tick at consistent intervals. 
             See Figure~\ref{fig:OnAndEmitExample} on page~\pageref{fig:OnAndEmitExample} for an example of how \emph{On}, \emph{Emit} and \emph{Every} are used.
             
             \begin{figure}[b]
@@ -372,14 +372,14 @@
             \end{figure}
             
             One of the key advantages of this design is that components are loosely coupled and only depend on the data format not changing. This means that you could replace the
-            hardware-dependant camera system with a completely different module that reads a preproduced video stream for testing purposes. It also means that adding a new
+            hardware-dependant camera system with a completely different module that reads a pre recorded video stream for testing purposes. It also means that adding a new
             component to the system merely requires that you know what sort of data you want to access. Gone are they days of frantically trying to track down the obscure
             method used to access the kinematics system. Instead you simply tell the system that you want the kinematics data and then you have it!
             
-            Unlike humans, computers are becoming exceptionally good at multitasking. Unfortutely the current system only takes advantage of at most two cores. You wouldn't 
-            ride horse that only used one of it's legs so it's equally important that the proposed architecture takes full advantage of the robots ever-improving multitaking 
+            Unlike humans, computers are becoming exceptionally good at multitasking. Unfortunately the current system only takes advantage of at most two cores. You wouldn't 
+            ride horse that only used one of it's legs so it's equally important that the proposed architecture takes full advantage of the robots ever-improving multitasking 
             capabilities. The proposed architecture takes care of multithreading transparently so the NUbots team can focus on figuring out the important questions such as
-            how to get the robot to deliver pizza to the lab. When a reaction is triggered it doesn't neccecarily run immediately. Instead the reaction is put into a blocking priority queue
+            how to get the robot to deliver pizza to the lab. When a reaction is triggered it doesn't necessarily run immediately. Instead the reaction is put into a blocking priority queue
             and then executed on a worker thread owned by the power plant. For an example of how this system works see 
             Figure~\ref{fig:PowerPlantThreadingOverviewDiagram} on page~\pageref{fig:PowerPlantThreadingOverviewDiagram}.
             
@@ -392,7 +392,7 @@
 
             The client has also expressed how important it is that the robots be able to easily communicate. Networking is a difficult and error-prone process which is why it's imperative
             that the architecture provide a simple mechanism for robots to communicate. The proposed architecture allows you to treat reactors on other robots as potential targets
-            for your data. This means you can emit data on one robot and recieve it on any of the other robots. 
+            for your data. This means you can emit data on one robot and receive it on any of the other robots. 
             See Figure~\ref{fig:NetworkExampleDiagram} on page~\pageref{fig:NetworkExampleDiagram} for an example of how the networking system allows robots to cooperate and share
             data.
 
@@ -650,7 +650,7 @@
             The proposed architecture could provide systems to make ROS component integration easy.
             Currently the existing system doesn't contain any facilities for ROS integration.
             
-            Additionally no other Robocop teams have any degree of ROS support. Having ROS support
+            Additionally no other RoboCup teams have any degree of ROS support. Having ROS support
             would give us a crippling advantage over the other teams. 
             
             This goal can be measured by checking if we can integrate a ROS component.
