@@ -6,6 +6,8 @@
 \usepackage[utf8]{inputenc}
 % Enables headers and footers
 \usepackage[]{scrpage2}
+% Lets us colour table cells
+\usepackage[table]{xcolor}
 % Allows todo list and todos
 \usepackage[]{todonotes}
 % Makes links in contents hyperlinked
@@ -453,28 +455,42 @@
             
             % Power Plant Threading Diagram
             \begin{figure}[b]
-                \begin{tabular}{l|l|l|l}
-                    Trigger          & Task                   & Emits            & Duration \\ \hline
-                    Every 20ms       & Read Camera Image      & CameraImage      & 5ms      \\
-                    Every 20ms       & Read Sensor Data       & SensorData       & 4ms      \\
-                    SensorData       & Calculate Odometry     & OdometryData     & 3ms      \\
-                    CameraImage      & Process Image          & ProcessedImage   & 7ms      \\
-                    ProcessedImage   & Calculate Localisation & LocalizationData & 3ms      \\
-                    LocalizationData & Behaviour              & MotorTask        & 2ms      \\
+                \begin{tabular}{l|l|l|l|l}
+                    Label & Trigger          & Task         & Emits            & Duration \\ \hline
+                    C     & Every 20ms       & Camera       & CameraImage      & 5ms      \\
+                    S     & Every 20ms       & Sensors      & SensorData       & 4ms      \\
+                    O     & SensorData       & Odometry     & OdometryData     & 3ms      \\
+                    V     & CameraImage      & Vision       & ProcessedImage   & 7ms      \\
+                    L     & ProcessedImage   & Localisation & LocalizationData & 3ms      \\
+                    B     & LocalizationData & Behaviour    & MotorTask        & 2ms      \\
+                    M     & MotorTask        & Motors       & Nothing          & 2ms      \\
                 \end{tabular}
                 
-                \begin{tikzpicture}
+                \begin{tikzpicture}[task/.style={rectangle,draw,anchor=west}]
+                    
+                    % Show 3 cycles of the system
                     
                     % Add headers for the three threads
-                    \node (everyThread) {Every Thread};
-                    \node [below=of everyThread] (t2header) {Thread 1};
-                    \node [below=of t2header] (t3header) {Thread 2};
-                    \node [below=of t3header] (t4header) {Thread 3};
+                    \node at (0,2) {Thread 1};
+                    \node at (0,1) {Thread 2};
+                    \node at (0,0) {Thread 3};
                     
-                    % Add nodes to represent tasks
+                    % Tasks Iteration
+                    \node[task,minimum width=5em] at (3em ,2) {C};
+                    \node[task,minimum width=4em] at (3em ,1) {S};
+                    \node[task,minimum width=3em] at (7em ,0) {O};
+                    \node[task,minimum width=7em] at (8em ,1) {V};
+                    \node[task,minimum width=3em] at (15em,2) {L};
+                    \node[task,minimum width=2em] at (18em,0) {B};
+                    \node[task,minimum width=2em] at (20em,1) {M};
+                    
+                    % Emission Lines
+                    
+                    
+                    
+                    % Add nodes to represent tasks with the correct width
                      
                 \end{tikzpicture}
-                \missingfigure {Power Plant Threading Overview Todo!}
                 \caption {An overview of the Power Plant threading system}
                 \label{fig:PowerPlantThreadingOverviewDiagram}
             \end{figure}
