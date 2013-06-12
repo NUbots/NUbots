@@ -517,12 +517,15 @@
             page~\pageref{fig:PowerPlantThreadingOverviewDiagram}.
             
             % Power Plant Threading Diagram
-            \begin{figure}[b]
+            \begin{sidewaysfigure}[b]
+                \centering
                 \begin{tabular}{l|l|l|l}
                     Trigger          & Task         & Emits            & Duration \\ \hline
                     Every 20ms       & Camera       & CameraImage      & 5ms      \\
                     Every 20ms       & Sensors      & SensorData       & 4ms      \\
                     SensorData       & Odometry     & OdometryData     & 3ms      \\
+                    OdometryData  & Field Mapper & MapData             & 4ms \\
+                    MapData & Map Combiner & Network\textless MapData\textgreater & 7ms \\
                     CameraImage      & Vision       & ProcessedImage   & 7ms      \\
                     ProcessedImage   & Localisation & LocalizationData & 3ms      \\
                     LocalizationData & Behaviour    & MotorTask        & 2ms      \\
@@ -541,7 +544,8 @@
                         \draw (1, 1) grid (21, 4);
 
                         %% Thread 1
-                        \draw[cameratriggered, task] (1, 3) rectangle node {Camera} (6, 4);             
+                        \draw[cameratriggered, task] (1, 3) rectangle node {Camera} (6, 4);
+                        \draw[sensortriggered, task] (8, 3) rectangle node {Field Mapper} (12, 4);
                         \draw[cameratriggered, task] (13, 3) rectangle node {Localisation} (17, 4);
                         \draw[cameratriggered, task] (19, 3) rectangle node {Motors} (21, 4);
                         
@@ -552,6 +556,7 @@
                        
                         %% Thread 3
                         \draw[sensortriggered, task] (5, 1) rectangle node {Odometry} (8, 2);
+                        \draw[sensortriggered, task] (12, 1) rectangle node {Map Combiner (Network)} (19, 2);
                         
                         % Row labels
                         \node[anchor=east, inner sep=0] at (.8, 3.5) {Thread 1};
@@ -567,7 +572,7 @@
                 \end{tikzpicture}
                 \caption {An overview of the Power Plant threading system}
                 \label{fig:PowerPlantThreadingOverviewDiagram}
-            \end{figure}
+            \end{sidewaysfigure}
 
             The client has also expressed how important it is that the robots be able to easily
             communicate. Networking is a difficult and error-prone process which is why it's
