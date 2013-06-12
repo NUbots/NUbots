@@ -399,8 +399,8 @@
            These types of architectural problems can have huge impacts on team productivity. 
            In order to make a modification to any component you must understand it's language, the language of anything
            it talks to and the language of anything new you want it to talk to. In the NUBots case it's common to have components
-           that needs to talk to more then five other components. 
-           That's a minimum of six different systems you need to understand before you can make even the smallest of changes.
+           that needs to talk to more then three other components. 
+           That's a minimum of four different systems you need to understand before you can make even the smallest of changes.
            
             For example: The vision system communicates utilising a two step process. 
             First the vision system accesses the sensor system through blackboard and asks it to process a new frame.
@@ -408,10 +408,8 @@
             Once the frame information is placed on blackboard the vision system then reads the information 
             from blackboard and continues it's processing. 
             While the vision system is waiting for a new frame the entire robot is blocked and cannot make any decisions.
-            This is only one of the myriad of ways in which two components can communicate and we believe that 
-            this reduces the ability to both learn and modify the system.
 
-            Another example of tightly coupled communication can be found in the Movement module.
+            Another example can be found in the Movement module.
             Each movement handler is responsible for a set of movements (kicking the ball, walking,
             etc..) and is defined as a class which is exposed to the system as a singleton. The
             Movement component then loops through all the jobs and sends them to each movement
@@ -428,8 +426,7 @@
             forget to check if you have ownership it's possible to break the currently executing
             motion which can cause the robot to fall down.
             
-            This example illustrates just a few of the issues in the existing architecture.
-            In order to add a new movement not only do you need to write the code for the movement
+            This means that in order to add a new movement not only do you need to write the code for the movement
             but you also need to understand how NUMotion, NUWalk, NUKick, NUHead work and interact.
             You need to understand all the cases where any of the managers might be triggered so you
             don't try to run a critical movement when the motors are locked. And you need to
