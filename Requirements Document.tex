@@ -10,6 +10,8 @@
 \usepackage[]{todonotes}
 % Makes links in contents hyperlinked
 \usepackage{hyperref}
+% Lets us rotate figures 90 degrees
+\usepackage{rotating}
 
 % Gives us pretty diagrams
 \usepackage{tikz}
@@ -87,7 +89,7 @@
     {\large
         \begin{description}
             \item [Status:] Draft 
-            \item [Version:] 0.6
+            \item [Version:] 0.7
         \end{description}}
  
     \clearpage
@@ -129,6 +131,11 @@
             0.6 &
             Updates and added more diagrams and massively extended the overview. &
             Jake Woods \\
+            \hline
+            
+            0.7 &
+            Started work on Threading Diagram, cleaned up the latex source and fixed spelling &
+            Trent Houliston \\
             \hline
         \end{tabular}
         
@@ -206,8 +213,6 @@
                         text centered
                     },
                     >=latex]
-                    
-                    %\node at (0.5,2.5) {$P_{1}$};
 
                     %%% Nodes
                     %% Left hand Side
@@ -265,14 +270,19 @@
                         (rightgroup.north west) -- (rightgroup.north east);
                     \node[above=1.1em of rightgroup,anchor=center]{SenseMove Loop};
                 \end{tikzpicture}
-                \caption {The existing architecture} \label {fig:HighLevelExistingArchitecture}
+                \caption {The existing architecture}
+                \label {fig:HighLevelExistingArchitecture}
             \end{figure}
 
-            The existing architecture is composed of a number of interconnected components that communicate through individually defined interfaces and mechanisms.
-            For example: The vision system communicates utilising a two step process. First the vision system requests that the sensors retrieve a new frame. It then waits
-            on the sensor system to place the frame information on blackboard. Once the frame information is placed on blackboard the vision system then reads the information
-            from blackboard and continues it's processing. This is only one of the myriad of ways in which two components can communicate and we believe that this reduces
-            the ability to both learn and modify the system.
+            The existing architecture is composed of a number of interconnected components that
+            communicate through individually defined interfaces and mechanisms. For example: The
+            vision system communicates utilising a two step process. First the vision system
+            requests that the sensors retrieve a new frame. It then waits on the sensor system to
+            place the frame information on blackboard. Once the frame information is placed on
+            blackboard the vision system then reads the information from blackboard and continues
+            it's processing. This is only one of the myriad of ways in which two components can
+            communicate and we believe that this reduces the ability to both learn and modify the
+            system.
 
             \todo[inline] {Expand the description of the Current Architecture}
             
@@ -281,26 +291,46 @@
             \begin{figure}[h]
                 \centering
                 \begin{tikzpicture}
-                    \node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge Power Plant};
-                    \foreach [count=\i] \reactor in {Vision,Localisation,Behaviour,Sensors,Kinematics,Movement} {
-                        \node[draw,reactor] (reactorcircle) at ({360/6 * (\i - 1)}:6cm) {$\reactor$};
+                
+                    % Draw our central Power Plant star
+                    \node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm]
+                    (powerplant) {\Huge Power Plant};
+                    
+                    % Loop through each of our reactors
+                    \foreach [count=\i] \reactor in
+                    {Vision,Localisation,Behaviour,Sensors,Kinematics,Movement} {
+                    
+                        % Draw the reactors around the central star
+                        \node[draw,reactor] (reactorcircle) at ({360/6 * (\i - 1)}:6cm)
+                        {$\reactor$};
+                        
+                        % Draw a line from our reactor to our powerplant
                         \path[readwrite] (reactorcircle) edge (powerplant);
                     };
                 \end{tikzpicture}
-                \caption {The proposed architecture} \label{fig:HighLevelProposedArchitecture}
+                \caption {The proposed architecture}
+                \label{fig:HighLevelProposedArchitecture}
             \end{figure}
 
-            The central authority of the proposed architecture is known as the "Power Plant" which is responsible for coordinating the various functions of the architecture and
-            works behind the scenes to provide message handling. Only one power plant exists can per program and the majority of the time the user won't even need to think
-            about it. 
+            The central authority of the proposed architecture is known as the "Power Plant" which
+            is responsible for coordinating the various functions of the architecture and works
+            behind the scenes to provide message handling. Only one power plant exists can per
+            program and the majority of the time the user won't even need to think about it. 
             
-            The point of interaction that most users will see is called a "Reactor". When a user wants to create a new feature they create a new class that inherits from Reactor. This
-            gives them access to the two key functions of the proposed architecture: \textbf{On} and \textbf{Emit}. \emph{On} allows users to specify reactions which can be though
-            of as callbacks that are called when new data comes in. For example: A reaction that is called whenever new image data is retrieved. \emph{Emit} allows reactors to
-            send out a new piece of data such as the sensor reactor using \emph{Emit} to send new image data every time it reads the camera hardware.
-            Reactors also provide one special type of event named \textbf{Every} which lets you subscribe to an event that is guaranteed to tick at consistent intervals. 
-            See Figure~\ref{fig:OnAndEmitExample} on page~\pageref{fig:OnAndEmitExample} for an example of how \emph{On}, \emph{Emit} and \emph{Every} are used.
+            The point of interaction that most users will see is called a "Reactor". When a user
+            wants to create a new feature they create a new class that inherits from Reactor. This
+            gives them access to the two key functions of the proposed architecture: \textbf{On} and
+            \textbf{Emit}. \emph{On} allows users to specify reactions which can be though of as
+            callbacks that are called when new data comes in. For example: A reaction that is called
+            whenever new image data is retrieved. \emph{Emit} allows reactors to send out a new
+            piece of data such as the sensor reactor using \emph{Emit} to send new image data every
+            time it reads the camera hardware. Reactors also provide one special type of event named
+            \textbf{Every} which lets you subscribe to an event that is guaranteed to tick at
+            consistent intervals. See Figure~\ref{fig:OnAndEmitExample} on
+            page~\pageref{fig:OnAndEmitExample} for an example of how \emph{On}, \emph{Emit} and
+            \emph{Every} are used.
             
+            % On Emit and Every flow diagram
             \begin{figure}[b]
                 \centering
                 \begin{tikzpicture}[>=latex,
@@ -322,92 +352,153 @@
                     every join/.style={->, thick},
                     chained/.style={every node/.style={on chain}}
                 ]
-                	\begin{scope}[start chain=going below, chained]
-                         \node [block,join] (register) {Register reaction from \\ Vision system};
-                         \begin{scope}[start branch=on going right, every join/.style={<-}]
-                             \node [block,join] (onimage) {on\textless \textbf{Image}\textgreater \\(processimage)};
-                         \end{scope}
-                         
-                         \begin{scope}[start branch=on going left, every join/.style={<-}]
-                             \node [block,join] (onevery) {on\textless \textbf{Every 30ms} \textgreater\\(getimage)};
-                         \end{scope}
-                         
-                         \node[block,join] (start) {Start game};
-                	    
-                	    \node [block, join] (runtimeStart) {Begin sending\\\textbf{Every\textless ...\textgreater} events};
-                         \node [block, join, on chain=going left] {Execute reaction(s) \\for \textbf{Every\textless 30ms\textgreater}};
-                         \node [block, join] {Get image\\from camera};
-                         \node [block, join] {Emit(\textbf{Image})};
-                         \node [block, join, on chain=going right] {Call all reactions\\interested in \textbf{Image}};
-                         \node [block, join, on chain=going right] {Execute reaction(s)\\for \textbf{Image}};
-                         \node [block, join] {Process image};
-                         \node [block, join] {Emit(ProcessedImage)};
-                         \node [block, join, on chain=going left] (final) {...\\(System continues)};
-                	\end{scope}
-                	
-                	\coordinate (setuplineA) at ([xshift=-18em]$ (start) !.5! (runtimeStart) $);
-                	\coordinate (setuplineB) at ([xshift=18em]$ (start) !.5! (runtimeStart) $);
-                	\coordinate (setupTextPoint) at ([xshift=11em]$ (start) !.5! (runtimeStart) $);
-                	
-                     %% Setup dividing line and text
-                     \node [above] at (setupTextPoint) {Pre-Game Setup};
-                     \node [below] at (setupTextPoint) {Game Time};
-                     \draw [dashed, ultra thick, shorten >= -0.4cm, shorten <= -0.4cm] (setuplineA) -- (setuplineB);
-                	
-                     %% Add headers for the three threads
-                     \node [header,above=of onevery] (sensorsHeader) {Sensors};
-                     \node [header,above=of register] {Power Plant};
-                     \node [header,above=of onimage] (visionHeader) {Vision};
+                    \begin{scope}[start chain=going below, chained]
+    
+                        % Draw the Register node and setup the following blocks to have arrows
+                        \node [block,join] (register) {Register reaction from \\ Vision system};
+                        \begin{scope}[start branch=on going right, every join/.style={<-}]
+                            \node [block,join] (onimage) {on\textless \textbf{Image}\textgreater 
+                            \\(processimage)};
+                        \end{scope}
+                        
+                        % Draw the on Every node
+                        \begin{scope}[start branch=on going left, every join/.style={<-}]
+                            \node [block,join] (onevery) {on\textless \textbf{Every 30ms}
+                            \textgreater\\(getimage)};
+                        \end{scope}
+                        
+                        % Start game node
+                        \node[block,join] (start) {Start game};
+                        
+                        % In Game every node
+                        \node [block, join] (runtimeStart) {Begin sending\\\textbf{Every
+                            \textless ...\textgreater} events};
+                        
+                        % Sensor Reactors node
+                        \node [block, join, on chain=going left] {Execute reaction(s) \\for
+                            \textbf{Every\textless 30ms\textgreater}};
+    
+                        % Get Camera Image Node
+                        \node [block, join] {Get image\\from camera};
+                        
+                        % Emit Node
+                        \node [block, join] {Emit(\textbf{Image})};
+                        
+                        % Image Call Node
+                        \node [block, join, on chain=going right] {Call all reactions\\interested
+                            in \textbf{Image}};
+    
+                        % Execute Reactions Node
+                        \node [block, join, on chain=going right] {Execute reaction(s)\\for
+                            \textbf{Image}};
+    
+                        % Process Image Node
+                        \node [block, join] {Process image};
+                        
+                        % Emit Processed Image node
+                        \node [block, join] {Emit(ProcessedImage)};
+                        
+                        % Continuation Node
+                        \node [block, join, on chain=going left] (final) {...\\(System continues)};
+                    \end{scope}
+                    
+                    \coordinate (setuplineA) at ([xshift=-18em]$ (start) !.5! (runtimeStart) $);
+                    \coordinate (setuplineB) at ([xshift=18em]$ (start) !.5! (runtimeStart) $);
+                    \coordinate (setupTextPoint) at ([xshift=11em]$ (start) !.5! (runtimeStart) $);
+                    
+                    %% Setup dividing line and text
+                    \node [above] at (setupTextPoint) {Pre-Game Setup};
+                    \node [below] at (setupTextPoint) {Game Time};
+                    \draw [dashed, ultra thick, shorten >= -0.4cm, shorten <= -0.4cm]
+                         (setuplineA) -- (setuplineB);
+                    
+                    %% Add headers for the three threads
+                    \node [header,above=of onevery] (sensorsHeader) {Sensors};
+                    \node [header,above=of register] {Power Plant};
+                    \node [header,above=of onimage] (visionHeader) {Vision};
                      
-                     %% Add the column backgrounds for Sensors and Vision
-                     \begin{scope}[on background layer]
-                         \filldraw [gray!15] (sensorsHeader.south west) rectangle (sensorsHeader.east |- final.south);
-                         \filldraw [gray!15] (visionHeader.south west) rectangle (visionHeader.east |- final.south);
+                    %% Add the column backgrounds for Sensors and Vision
+                    \begin{scope}[on background layer]
+                        \filldraw [gray!15] (sensorsHeader.south west) rectangle
+                            (sensorsHeader.east |- final.south);
+                        \filldraw [gray!15] (visionHeader.south west) rectangle
+                            (visionHeader.east |- final.south);
                      \end{scope}
-                     %\coordinate (sensorsBottom) at (sensorsHeader |- finalEmit);
-                     
-                     
                 \end{tikzpicture}
-                \caption {A flowchart example of how \textbf{On}, \textbf{Emit} and \textbf{Every} work} \label{fig:OnAndEmitExample}
+                \caption {A flowchart example of how \textbf{On}, \textbf{Emit} and \textbf{Every}
+                    work}
+                \label{fig:OnAndEmitExample}
             \end{figure}
             
-            One of the key advantages of this design is that components are loosely coupled and only depend on the data format not changing. This means that you could replace the
-            hardware-dependant camera system with a completely different module that reads a pre recorded video stream for testing purposes. It also means that adding a new
-            component to the system merely requires that you know what sort of data you want to access. Gone are they days of frantically trying to track down the obscure
-            method used to access the kinematics system. Instead you simply tell the system that you want the kinematics data and then you have it!
+            One of the key advantages of this design is that components are loosely coupled and only
+            depend on the data format not changing. This means that you could replace the
+            hardware-dependant camera system with a completely different module that reads a pre
+            recorded video stream for testing purposes. It also means that adding a new component to
+            the system merely requires that you know what sort of data you want to access. Gone are
+            they days of frantically trying to track down the obscure method used to access the
+            kinematics system. Instead you simply tell the system that you want the kinematics data
+            and then you have it!
             
-            Unlike humans, computers are becoming exceptionally good at multitasking. Unfortunately the current system only takes advantage of at most two cores. You wouldn't 
-            ride horse that only used one of it's legs so it's equally important that the proposed architecture takes full advantage of the robots ever-improving multitasking 
-            capabilities. The proposed architecture takes care of multithreading transparently so the NUbots team can focus on figuring out the important questions such as
-            how to get the robot to deliver pizza to the lab. When a reaction is triggered it doesn't necessarily run immediately. Instead the reaction is put into a blocking priority queue
-            and then executed on a worker thread owned by the power plant. For an example of how this system works see 
-            Figure~\ref{fig:PowerPlantThreadingOverviewDiagram} on page~\pageref{fig:PowerPlantThreadingOverviewDiagram}.
+            Unlike humans, computers are becoming exceptionally good at multitasking. Unfortunately
+            the current system only takes advantage of at most two cores. You wouldn't ride horse
+            that only used one of it's legs so it's equally important that the proposed architecture
+            takes full advantage of the robots ever-improving multitasking capabilities. The
+            proposed architecture takes care of multithreading transparently so the NUbots team can
+            focus on figuring out the important questions such as how to get the robot to deliver
+            pizza to the lab. When a reaction is triggered it doesn't necessarily run immediately.
+            Instead the reaction is put into a blocking priority queue and then executed on a worker
+            thread owned by the power plant. For an example of how this system works see
+            Figure~\ref{fig:PowerPlantThreadingOverviewDiagram} on
+            page~\pageref{fig:PowerPlantThreadingOverviewDiagram}.
             
+            % Power Plant Threading Diagram
             \begin{figure}[b]
+                \begin{tabular}{l|l|l|l}
+                    Trigger          & Task                   & Emits            & Duration \\ \hline
+                    Every 20ms       & Read Camera Image      & CameraImage      & 5ms      \\
+                    Every 20ms       & Read Sensor Data       & SensorData       & 4ms      \\
+                    SensorData       & Calculate Odometry     & OdometryData     & 3ms      \\
+                    CameraImage      & Process Image          & ProcessedImage   & 7ms      \\
+                    ProcessedImage   & Calculate Localisation & LocalizationData & 3ms      \\
+                    LocalizationData & Behaviour              & MotorTask        & 2ms      \\
+                \end{tabular}
+                
                 \begin{tikzpicture}
+                    
+                    % Add headers for the three threads
+                    \node (everyThread) {Every Thread};
+                    \node [below=of everyThread] (t2header) {Thread 1};
+                    \node [below=of t2header] (t3header) {Thread 2};
+                    \node [below=of t3header] (t4header) {Thread 3};
+                    
+                    % Add nodes to represent tasks
+                     
                 \end{tikzpicture}
                 \missingfigure {Power Plant Threading Overview Todo!}
-                \caption {An overview of the Power Plant threading system} \label{fig:PowerPlantThreadingOverviewDiagram}
+                \caption {An overview of the Power Plant threading system}
+                \label{fig:PowerPlantThreadingOverviewDiagram}
             \end{figure}
 
-            The client has also expressed how important it is that the robots be able to easily communicate. Networking is a difficult and error-prone process which is why it's imperative
-            that the architecture provide a simple mechanism for robots to communicate. The proposed architecture allows you to treat reactors on other robots as potential targets
-            for your data. This means you can emit data on one robot and receive it on any of the other robots. 
-            See Figure~\ref{fig:NetworkExampleDiagram} on page~\pageref{fig:NetworkExampleDiagram} for an example of how the networking system allows robots to cooperate and share
-            data.
+            The client has also expressed how important it is that the robots be able to easily
+            communicate. Networking is a difficult and error-prone process which is why it's
+            imperative that the architecture provide a simple mechanism for robots to communicate.
+            The proposed architecture allows you to treat reactors on other robots as potential
+            targets for your data. This means you can emit data on one robot and receive it on any
+            of the other robots. See Figure~\ref{fig:NetworkExampleDiagram} on 
+            page~\pageref{fig:NetworkExampleDiagram} for an example of how the networking system
+            allows robots to cooperate and share data.
 
+            % Networking diagram
             \begin{figure}[b]
                 \centering
                 \begin{tikzpicture}[x=15em,y=5em,>=latex,
-                    A/.style={
-                        red
-                    },
-                    B/.style={
-                        blue
-                    }]
+                    A/.style={red},
+                    B/.style={blue}]
                     
                     %%% Left Power Plant
-                    \node at (0, 0) [draw,star,star points=8,star point ratio=0.875,minimum width=3cm] (plantA) {Power Plant A};
+                    \node at (0, 0)
+                        [draw,star,star points=8,star point ratio=0.875,minimum width=3cm]
+                        (plantA) {Power Plant A};
                     \node [above=of plantA,reactor] (sensorsA) {Sensors};
                     \node [below=of plantA,reactor,align=center] (fieldmapperA) {2d Field\\Mapper};
                     \path [A, write] (sensorsA) edge node[A,left] {Image(A)} (plantA);
@@ -415,7 +506,9 @@
                     \path [B, read] (fieldmapperA.70) edge node[right] {Image(B)} (plantA.280);
 
                     %%% Right Power Plant
-                    \node at (2, 0) [draw,star,star points=8,star point ratio=0.875,minimum width=3cm] (plantB) {Power Plant B};
+                    \node at (2, 0)
+                        [draw,star,star points=8,star point ratio=0.875,minimum width=3cm]
+                        (plantB){Power Plant B};
                     \node [above=of plantB,reactor] (sensorsB) {Sensors};
                     \node [below=of plantB,reactor,align=center] (fieldmapperB) {2d Field\\Mapper};
                     \path [B, write] (sensorsB) edge node[left] {Image(B)} (plantB);
@@ -423,7 +516,8 @@
                     \path [B, read] (fieldmapperB.70) edge node[right] {Image(B)} (plantB.280);
 
                     %%% Network & Network Connections
-                    \node at (1, 0) [draw,cloud,cloud puffs=10,minimum width=3.5cm] (network) {Network};
+                    \node at (1, 0) [draw,cloud,cloud puffs=10,minimum width=3.5cm]
+                    (network) {Network};
                     
                     %% Plant A connections
                     \path [A, write] (plantA.10) edge node[A, above] {Image(A)} (network.169);
@@ -434,7 +528,9 @@
                     \path [B, write] (plantB.190) edge node[B, below] {Image(B)} (network.-11);
                     
                 \end{tikzpicture}
-                \caption {An example of how robots can communicate camera data over a network to build a 2d map of the field} \label{fig:NetworkExampleDiagram}
+                \caption {An example of how robots can communicate camera data over a network to
+                    build a 2d map of the field}
+                    \label{fig:NetworkExampleDiagram}
             \end{figure}
             
             \todo[inline] {Expand the description of the Proposed Architecture}
