@@ -376,21 +376,24 @@
                 \label {fig:HighLevelExistingArchitecture}
             \end{figure}
             
-            The existing architecture utilises both procedural and object-oriented style components
-            that communicate through a variety of custom mechanisms defined on a per-component
-            basis. As you can see in Figure~\ref{fig:HighLevelExistingArchitecture} the existing
-            architecture has a large number of inter-component dependencies. Each arrow on the
-            diagram is often a completely separate mechanism of interaction and a large amount of
-            system knowledge is required to modify any component.
+            When viewed from far away the existing architecture often resembles an intricate spider web
+            woven from good intentions and software engineer nightmares. Originally it was built as
+            
+            The existing architecture utilizes both procedural and object-oriented style components that
+            communicate through a variety of custom mechanisms defined on a per-component basis.
+            As you can see in Figure~\ref{fig:HighLevelExistingArchitecture} the existing architecture has
+            a large number of inter-component dependencies. 
+            Each arrow on the diagram is often a completely seperate mechanism of interaction and a large 
+            amount of system knowledge is required to modify any component.
 
-            For example: The vision system communicates utilising a two step process. First the
-            vision system accesses the sensor system through blackboard and asks it to process a new
-            frame. It then waits on the sensor system to place the frame information on blackboard.
-            Once the frame information is placed on blackboard the vision system then reads the
-            information from blackboard and continues it's processing. While the vision system is
-            waiting for a new frame the entire robot is blocked and cannot make any decisions. This
-            is only one of the myriad of ways in which two components can communicate and we believe
-            that this reduces the ability to both learn and modify the system.
+            For example: The vision system communicates utilising a two step process. 
+            First the vision system accesses the sensor system through blackboard and asks it to process a new frame.
+            It then waits on the sensor system to place the frame information on blackboard. 
+            Once the frame information is placed on blackboard the vision system then reads the information 
+            from blackboard and continues it's processing. 
+            While the vision system is waiting for a new frame the entire robot is blocked and cannot make any decisions.
+            This is only one of the myriad of ways in which two components can communicate and we believe that 
+            this reduces the ability to both learn and modify the system.
 
             Another example of tightly coupled communication can be found in the Movement module.
             Each movement handler is responsible for a set of movements (kicking the ball, walking,
