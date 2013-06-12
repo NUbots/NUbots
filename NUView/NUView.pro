@@ -3,6 +3,8 @@ QT += network \
 
 CONFIG += qwt
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/

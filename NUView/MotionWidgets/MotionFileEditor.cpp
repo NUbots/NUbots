@@ -78,7 +78,7 @@ MotionFileEditor::~MotionFileEditor()
 
 void MotionFileEditor::save()
 {
-    ofstream file(m_filepath.c_str());
+    std::ofstream file(m_filepath.c_str());
     if (file.is_open())
     {
         std::string buffer = m_editor->toPlainText().toStdString();
@@ -94,13 +94,13 @@ void MotionFileEditor::send()
 
 void MotionFileEditor::load()
 {
-    ifstream file(m_filepath.c_str(), ios::in|ios::binary|ios::ate);
+    std::ifstream file(m_filepath.c_str(), std::ios::in|std::ios::binary|std::ios::ate);
     if (file.is_open())
     {	// if the file opens successfully, just do a simple binary read of the entire contents
         int size = (int)file.tellg();
         char* buffer = new char[size+1];
         buffer[size] = '\0';				// make it a nice cstring by adding a null termination character
-		file.seekg(0, ios::beg);
+        file.seekg(0, std::ios::beg);
         file.read(buffer, size);
         file.close();
         m_editor->setText(buffer);		// set the contents of the editor to be the contents of the buffer

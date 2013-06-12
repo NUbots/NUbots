@@ -191,7 +191,7 @@ void PlotSelectionWidget::setStyleColour(const QColor &newColour)
     }
 }
 
-void PlotSelectionWidget::setStyleColour(const Qstd::string& newColourName)
+void PlotSelectionWidget::setStyleColour(const QString& newColourName)
 {
     setStyleColour(QColor(newColourName));
 }

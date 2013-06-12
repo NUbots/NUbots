@@ -306,7 +306,7 @@ void OfflineLocalisation::run()
     {
         temp_time = it->processingTime();
         total_time += temp_time;
-        max_time = max(max_time, temp_time);
+        max_time = std::max(max_time, temp_time);
         if(max_time == temp_time)
             max_frame = curr_frame;
         ++curr_frame;

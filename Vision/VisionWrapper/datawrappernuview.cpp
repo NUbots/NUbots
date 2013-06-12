@@ -30,7 +30,7 @@ DataWrapper::DataWrapper()
     camera_data.LoadFromConfigFile((std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg")).c_str());
     VisionConstants::loadFromFile(std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"));
 
-    string sen_calib_name = string(CONFIG_DIR) + string("SensorCalibration.cfg");
+    std::string sen_calib_name = std::string(CONFIG_DIR) + std::string("SensorCalibration.cfg");
 
     debug << "opening sensor calibration config: " << sen_calib_name << std::endl;
     if( ! m_sensor_calibration.ReadSettings(sen_calib_name)) {

@@ -37,8 +37,6 @@
 #include <iostream>
 #include "debugverbositybehaviour.h"
 
-//using namespace std;
-
 NUSoccerProvider::NUSoccerProvider(Behaviour* manager, bool pauseable) : BehaviourFSMProvider(manager)
 {
     m_state = new NUSoccerState(this);

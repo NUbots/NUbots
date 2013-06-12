@@ -520,7 +520,7 @@ void cameraSettingsWidget::readPendingData()
         static std::list<Job*>::iterator it;     // the iterator over the motion jobs
         for (it = Blackboard->Jobs->camera_begin(); it !=Blackboard->Jobs->camera_end(); ++it)
         {
-            qDebug()  << "CameraSettings - Processing Recieved Job" << std::endl;
+            qDebug()  << "CameraSettings - Processing Recieved Job" << endl;
             if ((*it)->getID() == Job::CAMERA_CHANGE_SETTINGS)
             {   // process a walk speed job
                 //CameraSettings settings;
@@ -569,7 +569,7 @@ void cameraSettingsWidget::readPendingData()
                         TopCameraSelected->setChecked(false);
                         BottomCameraSelected->setChecked(true);
                     }
-                    qDebug()  << "CameraSettings - Processed" << std::endl;
+                    qDebug()  << "CameraSettings - Processed" << endl;
                 }
             }
         }

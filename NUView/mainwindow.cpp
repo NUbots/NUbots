@@ -45,8 +45,8 @@
 #include "debug.h"
 
 
-ofstream debug("debug.log");
-ofstream errorlog("error.log");
+std::ofstream debug("debug.log");
+std::ofstream errorlog("error.log");
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -635,7 +635,7 @@ void MainWindow::PrintConnectionInfo(const QHostInfo &hostInfo, int port)
     if (!addresses.isEmpty())
     {
         QHostAddress address = addresses.first();
-        qDebug() << "Connect: " << address.toString() << " Port: " << port << std::endl;
+        qDebug() << "Connect: " << address.toString() << " Port: " << port << endl;
     }
 }
 

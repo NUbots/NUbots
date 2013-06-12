@@ -33,8 +33,6 @@
 #include "debugverbositynetwork.h"
 #include "ioconfig.h"
 
-using namespace std;
-
 #include "NUbot.h"
 
 /*! @brief Construct a DarwinWebotsIO object

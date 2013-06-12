@@ -247,7 +247,7 @@ void LabelEditor::renderFrame(const NUImage& frame, QImage& img, std::vector<Vis
 */
 void LabelEditor::addObject()
 {
-    Qstd::stringstd::list std::string_std::list;                //selection std::list
+    QStringList std::string_std::list;                //selection std::list
     VFO_ID new_id;       //id for the added object
     VisionFieldObject* new_object = NULL;   //new object
     bool ok;                                //to detect if the user hits cancel

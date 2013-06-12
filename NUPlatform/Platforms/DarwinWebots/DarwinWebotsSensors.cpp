@@ -27,20 +27,19 @@
 #include "debugverbositynusensors.h"
 
 #include <limits>
-using namespace std;
 using namespace webots;
 
 // Apparently the best way to initialise a vector like an array, is to initialise the vector from an array
 
 // init m_servo_names:
-static string temp_servo_names[] = {string("HeadPitch"), string("HeadYaw"), \
-                                    string("LShoulderRoll"), string("LShoulderPitch"), string("LElbowPitch"), \
-                                    string("RShoulderRoll"), string("RShoulderPitch"), string("RElbowPitch"), \
-                                    string("LHipRoll"),  string("LHipPitch"), string("LHipYaw"), \
-									string("LKneePitch"), string("LAnkleRoll"), string("LAnklePitch"), \
-                                    string("RHipRoll"),  string("RHipPitch"), string("RHipYaw"), \
-									string("RKneePitch"), string("RAnkleRoll"), string("RAnklePitch")};
-vector<string> DarwinWebotsSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
+static std::string temp_servo_names[] = {std::string("HeadPitch"), std::string("HeadYaw"), \
+                                    std::string("LShoulderRoll"), std::string("LShoulderPitch"), std::string("LElbowPitch"), \
+                                    std::string("RShoulderRoll"), std::string("RShoulderPitch"), std::string("RElbowPitch"), \
+                                    std::string("LHipRoll"),  std::string("LHipPitch"), std::string("LHipYaw"), \
+									std::string("LKneePitch"), std::string("LAnkleRoll"), std::string("LAnklePitch"), \
+                                    std::string("RHipRoll"),  std::string("RHipPitch"), std::string("RHipYaw"), \
+									std::string("RKneePitch"), std::string("RAnkleRoll"), std::string("RAnklePitch")};
+std::vector<std::string> DarwinWebotsSensors::m_servo_names(temp_servo_names, temp_servo_names + sizeof(temp_servo_names)/sizeof(*temp_servo_names));
 
 
 /*! @brief Constructs a nubot sensor class with Webots backend
@@ -57,8 +56,8 @@ DarwinWebotsSensors::DarwinWebotsSensors(DarwinWebotsPlatform* platform) : m_sim
     enableSensorsInWebots();
     m_data->addSensors(m_servo_names);
     m_joint_ids = m_data->mapIdToIds(NUSensorsData::All);
-    m_previous_positions = vector<float>(m_servo_names.size(), 0);
-    m_previous_velocities = vector<float>(m_servo_names.size(), 0);
+    m_previous_positions = std::vector<float>(m_servo_names.size(), 0);
+    m_previous_velocities = std::vector<float>(m_servo_names.size(), 0);
 }
 
 /*! @brief Gets pointers to each of the sensors in the simulated Darwin
@@ -151,7 +150,7 @@ void DarwinWebotsSensors::copyFromJoints()
     #endif
     static float NaN = numeric_limits<float>::quiet_NaN();
 
-    vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
+    std::vector<float> joint(NUSensorsData::NumJointSensorIndices, NaN);
     float delta_t = (m_current_time - m_previous_time)/1000;  
 	for (size_t i=0; i<m_servos.size(); i++)
     {
@@ -174,8 +173,8 @@ void DarwinWebotsSensors::copyFromJoints()
 void DarwinWebotsSensors::copyFromAccelerometerAndGyro()
 {
     const unsigned char numdimensions = 3;
-    static vector<float> accelerometerdata(numdimensions, 0);
-    static vector<float> gyrodata(numdimensions, 0);
+    static std::vector<float> accelerometerdata(numdimensions, 0);
+    static std::vector<float> gyrodata(numdimensions, 0);
 	
 	float VALUETORPS_RATIO = 18.3348;//512/27.925
     float VALUETOACCEL_RATIO = 0.1304; //512/4*981
@@ -207,8 +206,8 @@ void DarwinWebotsSensors::copyFromAccelerometerAndGyro()
  */
 void DarwinWebotsSensors::copyFromDistance()
 {
-    static vector<float> leftdistance(1,0);
-    static vector<float> rightdistance(1,0);
+    static std::vector<float> leftdistance(1,0);
+    static std::vector<float> rightdistance(1,0);
     
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "DarwinWebotsSensors::copyFromDistance()" << std::endl;
@@ -239,8 +238,8 @@ void DarwinWebotsSensors::copyFromDistance()
  */
 void DarwinWebotsSensors::copyFromFootSole()
 {
-    static vector<float> lfootsoledata(m_foot_sole_sensors.size()/2, 0);
-    static vector<float> rfootsoledata(m_foot_sole_sensors.size()/2, 0);
+    static std::vector<float> lfootsoledata(m_foot_sole_sensors.size()/2, 0);
+    static std::vector<float> rfootsoledata(m_foot_sole_sensors.size()/2, 0);
     
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "DarwinWebotsSensors::copyFromFootSole()" << std::endl;
@@ -276,7 +275,7 @@ void DarwinWebotsSensors::copyFromGPS()
     const unsigned char numdimensions = 3;
     if (m_gps != NULL)
     {
-        static vector<float> gpsdata(numdimensions, 0);
+        static std::vector<float> gpsdata(numdimensions, 0);
         static const double *buffer;
         
         #if DEBUG_NUSENSORS_VERBOSITY > 4

@@ -28,7 +28,6 @@
 
 #include <string>
 #include <sstream>
-using namespace std;
 
 #include "debug.h"
 
@@ -64,7 +63,7 @@ void DarwinWebotsNetworkThread::periodicFunction()
         }
         else if (memcmp(data, TEAM_PACKET_STRUCT_HEADER, sizeof(TEAM_PACKET_STRUCT_HEADER)-1) == 0 and m_receiver->getDataSize() == sizeof(TeamPacket))
         {   // if it is a team packet
-            stringstream ss;
+            std::stringstream ss;
             ss.write((char*) data, sizeof(TeamPacket));
             TeamPacket temp;
             ss >> temp;
@@ -76,7 +75,7 @@ void DarwinWebotsNetworkThread::periodicFunction()
     };
     
     // Do transmitting
-    stringstream ss;
+    std::stringstream ss;
     ss << m_team_info->generateTeamTransmissionPacket();
     m_emitter->send(ss.str().c_str(), ss.str().size());
 }

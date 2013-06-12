@@ -139,8 +139,8 @@ private:
     bool isSavingImages;
     bool isSavingImagesWithVaryingSettings;
     int numSavedImages;
-    ofstream imagefile;
-    ofstream sensorfile;
+    std::ofstream imagefile;
+    std::ofstream sensorfile;
     CameraSettings currentSettings;
 
     //! Shared data objects

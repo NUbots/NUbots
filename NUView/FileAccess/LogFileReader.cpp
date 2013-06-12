@@ -40,7 +40,7 @@ int LogFileReader::openFile(QString fileName)
             currentFileReader = new SplitStreamFileFormatReader(fileName);
         }
     }
-    catch(exception &e)
+    catch(std::exception &e)
     {
         qDebug() << "I/O Error:" << e.what();
     }
@@ -88,7 +88,7 @@ bool LogFileReader::closeFile()
         delete currentFileReader;
         currentFileReader = 0;
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -109,7 +109,7 @@ int LogFileReader::nextFrame()
             curr = currentFileReader->nextFrame();
             debug << "Processing Frame: " << curr << std::endl;
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -130,7 +130,7 @@ int LogFileReader::previousFrame()
         try{
             curr = currentFileReader->previousFrame();
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -149,7 +149,7 @@ int LogFileReader::firstFrame()
         try{
             curr = currentFileReader->firstFrame();
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -169,7 +169,7 @@ int LogFileReader::lastFrame()
         try{
             curr = currentFileReader->lastFrame();
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -188,7 +188,7 @@ int LogFileReader::setFrame(int frameNumber)
         try{
             curr = currentFileReader->setFrame(frameNumber);
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();

@@ -18,7 +18,6 @@
 #include <iomanip>
 #include <ctime>
 
-using namespace std;
 ofstream debug;
 ofstream errorlog;
 
@@ -32,7 +31,7 @@ int getLogNumber(int argc, const char *argv[])
 
 int main(int argc, const char *argv[]) 
 {
-    stringstream filename_prefix, filename_postfix;
+    std::stringstream filename_prefix, filename_postfix;
     time_t timenow;
     time(&timenow);
     struct tm* timeinfo = localtime(&timenow);

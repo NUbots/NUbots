@@ -333,7 +333,7 @@ void MainWindow::setDashedCurve(PLOTWINDOW win, QString name, std::vector<Vector
     plots[win]->replot();
 }
 
-void MainWindow::setHistogram(PLOTWINDOW win, Qstd::string name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style)
+void MainWindow::setHistogram(PLOTWINDOW win, QString name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style)
 {
     //set curve
     Qstd::vector<QwtIntervalSample> samples;
