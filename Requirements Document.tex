@@ -269,8 +269,21 @@
 			operate on the Darwin-OP during the transition.
 
 			\subsubsection{Current System}
+				The current system handles platform changes through a long and complicated chain of conditional compilation. There are
+				more then 10 different components that rely on compiler flags to determine what platform they are targeting. This is a 
+				complex change that affects the majority of the system and requires someone who understands the entire system.
+				
+				New components would need to be written to replace all of the hardware dependant components. This includes reading sensors,
+				moving motors, kinematics and anything else that talks to the robot hardware. Additionally all the systems that talk to the affected
+				components will also need to be modified. Typically this cascades to a system-wide modification.
 				\todo[inline]{Write how the current system would resolve this scenario}
 			\subsubsection{Proposed System}
+				Because of the loose coupling between components it's only neccecary to replace the components that directly depend on
+				robot hardware. All low-level conditional compilation is rendered obsolete in the proposed architecture with only a skeleton
+				remaining to tell the system which high-level components to activate.
+				
+				The majority of the system would remain unchanged. New components for hardware would still need to be written and
+				old components may need to be updated to take advantage of new hardware.
 				\todo[inline]{Write how the proposed system would resolve this scenario}
 
 		\subsection{Tracing data to aid debugging}
