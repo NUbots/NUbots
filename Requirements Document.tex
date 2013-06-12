@@ -51,9 +51,9 @@
 		/pgf/inner ysep=\oldinnerysep+#1,
 		alias=sourcenode,
 		append after command={
-		let	 \p1 = (sourcenode.center),
-				\p2 = (sourcenode.east),
-				\n1 = {\x2-\x1-#1-0.5*\pgflinewidth}
+		let \p1 = (sourcenode.center),
+		    \p2 = (sourcenode.east),
+		    \n1 = {\x2-\x1-#1-0.5*\pgflinewidth}
 		in
 			node [inner sep=0pt, draw, circle, minimum width=2*\n1,at=(\p1),#2] {}
 		}
@@ -605,17 +605,17 @@
 				\centering
 				\begin{tabular}{|l|l|l|l|}
 					\hline
-					Trigger                            & Task    & Emits    & Duration \\
+					Trigger                             & Task         & Emits            & Duration \\
 					\hline
-					\rowcolor{red!10}  Every 20ms      & Sensors	  & SensorData	   & 4ms	  \\
-					\rowcolor{red!10}  SensorData      & Odometry	 & OdometryData	 & 3ms	  \\
-					\rowcolor{red!10}  OdometryData    & Field Mapper & MapData			 & 4ms \\
-					\rowcolor{red!10}  MapData         & Map Combiner & Network\textless MapData\textgreater & 7ms \\
-					\rowcolor{blue!10} Every 20ms      & Camera	   & CameraImage	  & 5ms	  \\
-					\rowcolor{blue!10} CameraImage     & Vision	   & ProcessedImage   & 7ms	  \\
-					\rowcolor{blue!10} ProcessedImage   & Localisation & LocalizationData & 3ms	  \\
-					\rowcolor{blue!10} LocalizationData & Behaviour	& MotorTask		& 2ms	  \\
-					\rowcolor{blue!10} MotorTask		& Motors	   & Nothing		  & 2ms	  \\
+					\rowcolor{red!10}  Every 20ms       & Sensors      & SensorData       & 4ms \\
+					\rowcolor{red!10}  SensorData       & Odometry     & OdometryData     & 3ms \\
+					\rowcolor{red!10}  OdometryData     & Field Mapper & MapData          & 4ms \\
+					\rowcolor{red!10}  MapData          & Map Combiner & Network\textless MapData\textgreater & 7ms \\
+					\rowcolor{blue!10} Every 20ms       & Camera       & CameraImage      & 5ms \\
+					\rowcolor{blue!10} CameraImage      & Vision       & ProcessedImage   & 7ms \\
+					\rowcolor{blue!10} ProcessedImage   & Localisation & LocalizationData & 3ms \\
+					\rowcolor{blue!10} LocalizationData & Behaviour    & MotorTask        & 2ms \\
+					\rowcolor{blue!10} MotorTask        & Motors       & Nothing          & 2ms \\
 					\hline
 				\end{tabular}
 
@@ -627,7 +627,7 @@
 						task/.style={draw=black},
 						cameratriggered/.style={fill=blue!10},
 						sensortriggered/.style={fill=red!10}
-					 ]
+					]
 
 						\draw (1, 1) grid (21, 4);
 
@@ -638,9 +638,9 @@
 						\draw[cameratriggered, task] (19, 3) rectangle node {Motors} (21, 4);
 
 						%% Thread 2
-					   \draw[sensortriggered, task] (1, 2) rectangle node {Sensors} (5, 3);
-					   \draw[cameratriggered, task] (6, 2) rectangle node {Vision} (13, 3);
-					   \draw[cameratriggered, task] (17, 2) rectangle node {Behaviour} (19, 3);
+						\draw[sensortriggered, task] (1, 2) rectangle node {Sensors} (5, 3);
+						\draw[cameratriggered, task] (6, 2) rectangle node {Vision} (13, 3);
+						\draw[cameratriggered, task] (17, 2) rectangle node {Behaviour} (19, 3);
 
 						%% Thread 3
 						\draw[sensortriggered, task] (5, 1) rectangle node {Odometry} (8, 2);
@@ -937,6 +937,6 @@
 
 			\todo[inline]{Improve/extend. Validate the claim about other Robocup teams}
 
-	   \bibliographystyle{plain}
+	\bibliographystyle{plain}
 	\bibliography{references}
 \end{document}
