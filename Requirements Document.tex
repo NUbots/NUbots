@@ -376,16 +376,32 @@
                 \label {fig:HighLevelExistingArchitecture}
             \end{figure}
             
-            When viewed from far away the existing architecture often resembles an intricate spider web
-            woven from good intentions and software engineer nightmares. Originally it was built as
+            When viewed from far away the existing architecture resembles an intricate spider web
+            woven from good intentions and demonic pacts with the compiler. 
+            For a high level overview see Figure~\ref{fig:HighLevelExistingArchitecture} on page~\pageref{fig:HighLevelExistingArchitecture}.
+            It was originally concieved as a purely object-oriented system designed to be easy to understand and extend.
+            However, the ravages of time have taken it's toll and years of having no one responsible for
+            the architecture has heavily impacted the architecture quality.
+            New engineers working on the system had no one to turn to for advice and resorted to 
+            implementing unique architectures for their components.
+            The result is a system with components that look and behave with wildly different assumptions, patterns and
+            idioms. 
+            This causes massive duplication of effort for the NUBots team and it's not uncommon to see very similar classes be 
+            implemented multiple times by different people because of a lack of architecture.
             
-            The existing architecture utilizes both procedural and object-oriented style components that
-            communicate through a variety of custom mechanisms defined on a per-component basis.
-            As you can see in Figure~\ref{fig:HighLevelExistingArchitecture} the existing architecture has
-            a large number of inter-component dependencies. 
-            Each arrow on the diagram is often a completely seperate mechanism of interaction and a large 
-            amount of system knowledge is required to modify any component.
+            Imagine a group of people each of whom had come up with their own unique language. 
+            Now imagine them trying to communicate and you would have a good idea of what communication
+            between components looks like in the existing architecture.
+            Some components communicate through the blackboard or the jobs system, some components communicate throgh 
+            direct function calls, some components communicate through implicit or global state such as singletons and some
+            components communicate through other more arcane means such as inferring information indirectly. 
 
+           These types of architectural problems can have huge impacts on team productivity. 
+           In order to make a modification to any component you must understand it's language, the language of anything
+           it talks to and the language of anything new you want it to talk to. In the NUBots case it's common to have components
+           that needs to talk to more then five other components. 
+           That's a minimum of six different systems you need to understand before you can make even the smallest of changes.
+           
             For example: The vision system communicates utilising a two step process. 
             First the vision system accesses the sensor system through blackboard and asks it to process a new frame.
             It then waits on the sensor system to place the frame information on blackboard. 
