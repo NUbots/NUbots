@@ -185,7 +185,7 @@
 				We also need to understand how blackboard facilitates the communication between sensors and vision.
 				Additionally we need to add a new behavior because the robot needs to be able to look upwards and currently
 				there is no behavior for that.
-				To add a new behavior we also need to understand the Job system and the high level Behavior finite state machine.
+				To add a new behavior we also need to understand the Job and Motion system and the high level Behavior finite state machine.
 				Adding a new job involves modifying the core job system so we need to make sure we have an in-depth understanding
 				or we can break the entire robot AI.
 				Once we've developed the compass system we also need to integrate it with Localisation, this means we need to
@@ -204,8 +204,8 @@
 				the camera for the compass system. 
 				However adding new functionality in the proposed architecture doesn't require us to understand the sensor system.
 				We simply need to understand the data coming out of the sensor system.
-				We also still need to add a new behavior to look upwards. This requires us to change the job system and the behavior system in
-				the same way as the old architecture (changes to component internals are out-of-scope for the proposed architecture).
+				We also still need to add a new behavior to look upwards. We no longer need to change the job system as it's merged
+				in as part of the standard communication api. Instead we modify the motion reactor to handle the new type of movement.
 				Integration with localisation is much easier, we simply use the standard power plant emit/on mechanism to send the data to localization.
 				
 				All of the communication between components uses the consistent power plant interface. This means that if you
