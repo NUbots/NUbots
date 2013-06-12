@@ -496,23 +496,62 @@
                     M     & MotorTask        & Motors       & Nothing          & 2ms      \\
                 \end{tabular}
                 
-                \begin{tikzpicture}[task/.style={rectangle,draw,anchor=west}]
+                \begin{tikzpicture}%[task/.style={rectangle,draw,anchor=west,minimum width=2em}]
                     
                     % Show 3 cycles of the system
                     
                     % Add headers for the three threads
-                    \node at (0,2) {Thread 1};
-                    \node at (0,1) {Thread 2};
-                    \node at (0,0) {Thread 3};
+                    %\node at (0,2) (thread1) {Thread 1};
+                    %\node at (0,1) (thread2) {Thread 2};
+                    %\node at (0,0) (thread3) {Thread 3};
+
+                    \begin{scope}[task/.style={draw=black,fill=blue!10},scale=.80]
+                        \draw (1, 1) grid (21, 4);
+
+                        %% Thread 1
+                        \draw[task] (1, 3) rectangle node {Camera} (6, 4);             
+                        \draw[task] (13, 3) rectangle node {Localisation} (17, 4);
+                        \draw[task] (19, 3) rectangle node {Motors} (21, 4);
+                        
+                        %% Thread 2
+                       \draw[task] (1, 2) rectangle node {Sensors} (5, 3);
+                       \draw[task] (6, 2) rectangle node {Vision} (13, 3);
+                       \draw[task] (17, 2) rectangle node {Behavior} (19, 3);
+                       
+                        %% Thread 3
+                        \draw[task] (5, 1) rectangle node {Odometry} (8, 2);
+                        
+                        % Row labels
+                        \node[anchor=east, inner sep=0] at (.8, 3.5) {Thread 1};
+                        \node[anchor=east, inner sep=0] at (.8, 2.5) {Thread 2};
+                        \node[anchor=east, inner sep=0] at (.8, 1.5) {Thread 3};
+
+                        % Column Labels
+                        \foreach \i in {1,...,20} {
+                            \node[anchor=north, inner sep=0] at (\i + .5, .8) {\i};
+                        }
+
+
+                    \end{scope}
+                    
+%                    \node[task, minimum width=10em, right=1em of thread1] (C) {C};
+%                    \node[task, minimum width=8em, right=1em of thread2] (S)  {S};
+%                    \node[task, minimum width=6em,right=0 of S] {O};
+%                    \node[task, minimum width=14em, right=0 of C] {V};
+
+                    % Task Iteration
+                    %\node[task] at (
                     
                     % Tasks Iteration
-                    \node[task,minimum width=5em] at (3em ,2) {C};
-                    \node[task,minimum width=4em] at (3em ,1) {S};
-                    \node[task,minimum width=3em] at (7em ,0) {O};
-                    \node[task,minimum width=7em] at (8em ,1) {V};
-                    \node[task,minimum width=3em] at (15em,2) {L};
-                    \node[task,minimum width=2em] at (18em,0) {B};
-                    \node[task,minimum width=2em] at (20em,1) {M};
+%                    \node[task,minimum width=5em] at (3em ,2) {C};
+%                    \node[task,minimum width=4em] at (3em ,1) {S};
+%                    \node[task,minimum width=3em] at (7em ,0) {O};
+%                    \node[task,minimum width=7em] at (8em ,1) {V};
+%                    \node[task,minimum width=3em] at (15em,2) {L};
+%                    \node[task,minimum width=2em] at (18em,0) {B};
+%                    \node[task,minimum width=2em] at (20em,1) {M};
+                    %% Thread 1
+                    %\node[task]
                     
                     % Emission Lines
                     
