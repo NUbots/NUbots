@@ -143,12 +143,15 @@
             \hline
             
             0.8 &
-            Finished Threading Diagram, added bibtex references, extended existing architecture overview &
+            Finished Threading Diagram, added bibtex references, extended existing architecture
+            overview &
             Trent Houliston, Jake Woods \\
             \hline
         \end{tabular}
         
     \section{Scenarios}
+    	\todo[inline]{write an introduction to the scenarios section and remove the instructions}
+        {\em % This is a the instructions
         This is a high level overview of how the architecture will be used by the client. In our
         case the client is a programming team so we need to provide details of how the API will be
         used to implement existing features. We should also provide some examples of how new 
@@ -161,8 +164,9 @@
         also a good place to talk about how "here's how this would have worked in the old system. As
         you can see our system is a million times better because instead of being (impossible/a huge 
         pain in the ass/computationally infeasible) it only took 15 minutes of work!
-
+        
         Example Scenarios: Field Changes, Number of Players Change compare old/new system.
+        }
         
         \subsection{New Component Added to System}
             The robot is currently designed with a finite number of components integrated together
@@ -264,6 +268,9 @@
                 \todo[inline]{Write how the proposed system would resolve this scenario}
         
     \section{Non-Goals}
+    	\todo[inline]{add an introduction to non goals and remove the instructions}
+    	{
+		\em % This is the instructions
         The architecture will not be making any modifications to the existing code base beyond the
         changes necessary to integrate the existing code into the new architecture. This project
         isn't concerned about the specific algorithms used or the internal behaviour of the robot.
@@ -279,6 +286,7 @@
         rewriting modules, improving algorithms and other things that are out of scope for the
         project. It's important that we clarify these so clients don't go through this document
         thinking "why haven't they addressed the *insert non-goal here* issue?"
+        }
         
         \subsection{Algorithm Changes}
             \todo[inline]{Write the non-goal that we will not do changes to the algorithm}
@@ -368,46 +376,47 @@
                 \label {fig:HighLevelExistingArchitecture}
             \end{figure}
             
-            The existing architecture utilizes both procedural and object-oriented style components that
-            communicate through a variety of custom mechanisms defined on a per-component basis.
-            As you can see in Figure~\ref{fig:HighLevelExistingArchitecture} the existing architecture has
-            a large number of inter-component dependencies. 
-            Each arrow on the diagram is often a completely seperate mechanism of interaction and a large 
-            amount of system knowledge is required to modify any component.
+            The existing architecture utilises both procedural and object-oriented style components
+            that communicate through a variety of custom mechanisms defined on a per-component
+            basis. As you can see in Figure~\ref{fig:HighLevelExistingArchitecture} the existing
+            architecture has a large number of inter-component dependencies. Each arrow on the
+            diagram is often a completely separate mechanism of interaction and a large amount of
+            system knowledge is required to modify any component.
 
-            For example: The vision system communicates utilising a two step process. 
-            First the vision system accesses the sensor system through blackboard and asks it to process a new frame.
-            It then waits on the sensor system to place the frame information on blackboard. 
-            Once the frame information is placed on blackboard the vision system then reads the information 
-            from blackboard and continues it's processing. 
-            While the vision system is waiting for a new frame the entire robot is blocked and cannot make any decisions.
-            This is only one of the myriad of ways in which two components can communicate and we believe that 
-            this reduces the ability to both learn and modify the system.
+            For example: The vision system communicates utilising a two step process. First the
+            vision system accesses the sensor system through blackboard and asks it to process a new
+            frame. It then waits on the sensor system to place the frame information on blackboard.
+            Once the frame information is placed on blackboard the vision system then reads the
+            information from blackboard and continues it's processing. While the vision system is
+            waiting for a new frame the entire robot is blocked and cannot make any decisions. This
+            is only one of the myriad of ways in which two components can communicate and we believe
+            that this reduces the ability to both learn and modify the system.
 
             Another example of tightly coupled communication can be found in the Movement module.
-            Each movement handler is responsible for a set of movements (kicking the ball, walking, etc..) and
-            is defined as a class which is exposed to the system as a singleton.
-            The Movement component then loops through all the jobs and sends them to each movement 
-            handler.
-            The movement handler then talks to the action system to execute the selected action. 
-            However sometimes other classes can also talk to the movement handlers directly. 
-            This means that at any point in time any class in the system is a potential candidate for
-            triggering a movement. 
-            Additionally this means that it's very difficult to track down what class is responsible for causing what
-            movement in the robot further adding to the complexity of the system.
+            Each movement handler is responsible for a set of movements (kicking the ball, walking,
+            etc..) and is defined as a class which is exposed to the system as a singleton. The
+            Movement component then loops through all the jobs and sends them to each movement
+            handler. The movement handler then talks to the action system to execute the selected
+            action. However sometimes other classes can also talk to the movement handlers directly. 
+            This means that at any point in time any class in the system is a potential candidate
+            for triggering a movement. Additionally this means that it's very difficult to track
+            down what class is responsible for causing what movement in the robot further adding to
+            the complexity of the system.
 
-            The example gets worse when you consider the fact that each movement handler is indirectly dependant on
-            each other. 
-            Movement handlers can lock specific motors and if you try and use a motor that another system is using your action will fail.
-            If you forget to check if you have ownership it's possible to break the currently executing motion which can cause the robot to fall down.
+            The example gets worse when you consider the fact that each movement handler is
+            indirectly dependant on each other. Movement handlers can lock specific motors and if
+            you try and use a motor that another system is using your action will fail. If you
+            forget to check if you have ownership it's possible to break the currently executing
+            motion which can cause the robot to fall down.
             
             This example illustrates just a few of the issues in the existing architecture.
-            In order to add a new movement not only do you need to write the code for the movement but
-            you also need to understand how NUMotion, NUWalk, NUKick, NUHead work and interact. You need to
-            understand all the cases where any of the managers might be triggered so you don't try to run a critical
-            movement when the motors are locked. 
-            And you need to understand the locking model so you don't accidently try to move a motor you shouldn't.
-            This is only a tiny subset of the pitfalls that await you in the existing architecture.
+            In order to add a new movement not only do you need to write the code for the movement
+            but you also need to understand how NUMotion, NUWalk, NUKick, NUHead work and interact.
+            You need to understand all the cases where any of the managers might be triggered so you
+            don't try to run a critical movement when the motors are locked. And you need to
+            understand the locking model so you don't accidentally try to move a motor you
+            shouldn't. This is only a tiny subset of the pitfalls that await you in the existing
+            architecture.
 
             \todo[inline] {Expand the description of the Current Architecture}
             
@@ -436,7 +445,8 @@
                 \label{fig:HighLevelProposedArchitecture}
             \end{figure}
 
-            As you can see in Figure~\ref{fig:HighLevelProposedArchitecture} on page~\pageref{fig:HighLevelProposedArchitecture} 
+            As you can see in Figure~\ref{fig:HighLevelProposedArchitecture} on
+            page~\pageref{fig:HighLevelProposedArchitecture} 
             The central authority of the proposed architecture is known as the "Power Plant" which
             is responsible for coordinating the various functions of the architecture and works
             behind the scenes to provide message handling. Only one power plant exists can per
@@ -618,7 +628,7 @@
                         %% Thread 2
                        \draw[sensortriggered, task] (1, 2) rectangle node {Sensors} (5, 3);
                        \draw[cameratriggered, task] (6, 2) rectangle node {Vision} (13, 3);
-                       \draw[cameratriggered, task] (17, 2) rectangle node {Behavior} (19, 3);
+                       \draw[cameratriggered, task] (17, 2) rectangle node {Behaviour} (19, 3);
                        
                         %% Thread 3
                         \draw[sensortriggered, task] (5, 1) rectangle node {Odometry} (8, 2);
