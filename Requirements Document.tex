@@ -524,9 +524,10 @@
             % Power Plant Threading Diagram
             \begin{sidewaysfigure}[b]
                 \centering
-                \begin{tabular}{l|l|l|l}
+                \begin{tabular}{|l|l|l|l|}
+                    \hline
                     Trigger          & Task         & Emits            & Duration \\ \hline
-                    
+                    \hline
                     \rowcolor{red!10}  Every 20ms       & Sensors      & SensorData       & 4ms      \\
                     \rowcolor{red!10}  SensorData       & Odometry     & OdometryData     & 3ms      \\
                     \rowcolor{red!10}  OdometryData  & Field Mapper & MapData             & 4ms \\
@@ -536,7 +537,10 @@
                     \rowcolor{blue!10} ProcessedImage   & Localisation & LocalizationData & 3ms      \\
                     \rowcolor{blue!10} LocalizationData & Behaviour    & MotorTask        & 2ms      \\
                     \rowcolor{blue!10} MotorTask        & Motors       & Nothing          & 2ms      \\
+                    \hline
                 \end{tabular}
+                
+                \vspace*{1 cm}
                 
                 \begin{tikzpicture}
 
