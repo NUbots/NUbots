@@ -12,10 +12,10 @@
 \usepackage[]{todonotes}
 % Makes links in contents hyperlinked
 \usepackage{hyperref}
-% Lets us rotate figures 90 degrees
-\usepackage{rotating}
 % Make references appear in our table of contents
 \usepackage[nottoc,numbib]{tocbibind}
+% Allows us to put landscape sections of the document
+\usepackage{pdflscape} % \usepackage{lscape} %Use escape for printing (doesn't rotate the pdf page)
 
 % Gives us pretty diagrams
 \usepackage{tikz}
@@ -522,7 +522,8 @@
             page~\pageref{fig:PowerPlantThreadingOverviewDiagram}.
             
             % Power Plant Threading Diagram
-            \begin{sidewaysfigure}[b]
+            \begin{landscape}
+            \begin{figure}[b]
                 \centering
                 \begin{tabular}{|l|l|l|l|}
                     \hline
@@ -581,7 +582,8 @@
                 \end{tikzpicture}
                 \caption {An overview of the Power Plant threading system}
                 \label{fig:PowerPlantThreadingOverviewDiagram}
-            \end{sidewaysfigure}
+            \end{figure}
+            \end{landscape}
 
             The client has also expressed how important it is that the robots be able to easily
             communicate. Networking is a difficult and error-prone process which is why it's
