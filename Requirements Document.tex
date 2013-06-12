@@ -291,10 +291,34 @@
             This is only one of the myriad of ways in which two components can communicate and we believe that 
             this reduces the ability to both learn and modify the system.
 
+            Another example of tightly coupled communication can be found in the Movement module.
+            Each movement handler is responsible for a set of movements (kicking the ball, walking, etc..) and
+            is defined as a class which is exposed to the system as a singleton.
+            The Movement component then loops through all the jobs and sends them to each movement 
+            handler.
+            The movement handler then talks to the action system to execute the selected action. 
+            However sometimes other classes can also talk to the movement handlers directly. 
+            This means that at any point in time any class in the system is a potential candidate for
+            triggering a movement. 
+            Additionally this means that it's very difficult to track down what class is responsible for causing what
+            movement in the robot further adding to the complexity of the system.
+
+            The example gets worse when you consider the fact that each movement handler is indirectly dependant on
+            each other. 
+            Movement handlers can lock specific motors and if you try and use a motor that another system is using your action will fail.
+            If you forget to check if you have ownership it's possible to break the currently executing motion which can cause the robot to fall down.
+            
+            This example illustrates just a few of the issues in the existing architecture.
+            In order to add a new movement not only do you need to write the code for the movement but
+            you also need to understand how NUMotion, NUWalk, NUKick, NUHead work and interact. You need to
+            understand all the cases where any of the managers might be triggered so you don't try to run a critical
+            movement when the motors are locked. 
+            And you need to understand the locking model so you don't accidently try to move a motor you shouldn't.
+            This is only a tiny subset of the pitfalls that await you in the existing architecture.
+
             \todo[inline] {Expand the description of the Current Architecture}
             
         \subsection{Proposed Architecture}
-        
             \begin{figure}[h]
                 \centering
                 \begin{tikzpicture}
@@ -319,6 +343,7 @@
                 \label{fig:HighLevelProposedArchitecture}
             \end{figure}
 
+            As you can see in Figure~\ref{fig:HighLevelProposedArchitecture} on page~\pageref{fig:HighLevelProposedArchitecture} 
             The central authority of the proposed architecture is known as the "Power Plant" which
             is responsible for coordinating the various functions of the architecture and works
             behind the scenes to provide message handling. Only one power plant exists can per
