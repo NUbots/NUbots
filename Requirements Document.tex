@@ -525,15 +525,16 @@
                 \centering
                 \begin{tabular}{l|l|l|l}
                     Trigger          & Task         & Emits            & Duration \\ \hline
-                    Every 20ms       & Camera       & CameraImage      & 5ms      \\
-                    Every 20ms       & Sensors      & SensorData       & 4ms      \\
-                    SensorData       & Odometry     & OdometryData     & 3ms      \\
-                    OdometryData  & Field Mapper & MapData             & 4ms \\
-                    MapData & Map Combiner & Network\textless MapData\textgreater & 7ms \\
-                    CameraImage      & Vision       & ProcessedImage   & 7ms      \\
-                    ProcessedImage   & Localisation & LocalizationData & 3ms      \\
-                    LocalizationData & Behaviour    & MotorTask        & 2ms      \\
-                    MotorTask        & Motors       & Nothing          & 2ms      \\
+                    
+                    \rowcolor{red!10}  Every 20ms       & Sensors      & SensorData       & 4ms      \\
+                    \rowcolor{red!10}  SensorData       & Odometry     & OdometryData     & 3ms      \\
+                    \rowcolor{red!10}  OdometryData  & Field Mapper & MapData             & 4ms \\
+                    \rowcolor{red!10}  MapData & Map Combiner & Network\textless MapData\textgreater & 7ms \\
+                    \rowcolor{blue!10} Every 20ms       & Camera       & CameraImage      & 5ms      \\
+                    \rowcolor{blue!10} CameraImage      & Vision       & ProcessedImage   & 7ms      \\
+                    \rowcolor{blue!10} ProcessedImage   & Localisation & LocalizationData & 3ms      \\
+                    \rowcolor{blue!10} LocalizationData & Behaviour    & MotorTask        & 2ms      \\
+                    \rowcolor{blue!10} MotorTask        & Motors       & Nothing          & 2ms      \\
                 \end{tabular}
                 
                 \begin{tikzpicture}
