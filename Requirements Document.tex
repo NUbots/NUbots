@@ -551,17 +551,18 @@
             they days of frantically trying to track down the obscure method used to access the
             kinematics system. Instead you simply tell the system that you want the kinematics data
             and then you have it!
-            
-            Unlike humans, computers are becoming exceptionally good at multitasking. Unfortunately
-            the current system only takes advantage of at most two cores. You wouldn't ride horse
-            that only used one of it's legs so it's equally important that the proposed architecture
-            takes full advantage of the robots ever-improving multitasking capabilities. The
-            proposed architecture takes care of multithreading transparently so the NUbots team can
-            focus on figuring out the important questions such as how to get the robot to deliver
-            pizza to the lab. When a reaction is triggered it doesn't necessarily run immediately.
-            Instead the reaction is put into a blocking priority queue and then executed on a worker
-            thread owned by the power plant. For an example of how this system works see
-            Figure~\ref{fig:PowerPlantThreadingOverviewDiagram} on
+
+            Recent trends in computer hardware show that computational power increases are going
+            to come from increasing the number of cores available to the system. 
+            Unfortunately the current system only takes advantage of at most two cores. 
+            You wouldn't ride a horse that tried to gallop on a single leg and you wouldn't use an architecture
+            that didn't let you take full advantage of your processing resources.
+            The proposed architecture takes care of multithreading transparently so the NUbots team can
+            focus on figuring out the important questions such "can this robot fetch me a pizza?".
+            When a reaction is triggered it doesn't necessarily run immediately.
+            Instead the reaction is put into a blocking priority queue and then executed on one of the many threads
+            available to the power plant via a thread pool.
+            For an example of how this system works see Figure~\ref{fig:PowerPlantThreadingOverviewDiagram} on
             page~\pageref{fig:PowerPlantThreadingOverviewDiagram}.
             
             % Power Plant Threading Diagram
