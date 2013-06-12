@@ -268,8 +268,26 @@
 			of this logical error.
 
 			\subsubsection{Current System}
+				In the existing system tracing is done through manually adding print statements to the code in the 
+				affected areas. Some systems have the ability to write their data to the network to be viewed in real
+				time but this is provided on a per-component basis and the exact mechanism differs for each components.
+				
+				For this particular problem trace statements need to be added to the Behavior, Motion and Job systems to determine
+				why this particular job is called and why the robot is kicking it's own goal in the first place. After these statements are added
+				the NUBots team then needs identify the issue through the trace logs, write a fix and then run it live on the robot. If the 
+				fix fails it's back to step 1. Repeat until the bug is fixed.
 				\todo[inline]{Write how the current system would resolve this scenario}
 			\subsubsection{Proposed System}
+				In addition to standard logging capabilities the proposed architecture also provides the ability to capture
+				the entire input sequence for a particular component. This means you can capture the exact inputs that
+				caused the robot to kick an own goal and then breakdance. Once you've captured those inputs you can then
+				turn them into a unit test which in many cases can be run independantly from the robot. 
+				
+				Once you've translated the input into a unit test you then need to write your fix. However you don't
+				need to deploy your fix you can instead simply run the unit test and see if it passes. If the unit test passes
+				you simply deploy to the robot and the problem is solved.
+				
+				This approach also has the benifit of slowly building up a library of unit and regression tests against known bugs.
 				\todo[inline]{Write how the proposed system would resolve this scenario}
 
 		\subsection{The Robot is used to perform a new task}
