@@ -96,7 +96,7 @@ public:
         }
         else
         {
-            errorlog << "SensorCalibration::LoadFromConfigFile(). Unable to sensor calibration." << std::endl;
+            errorlog << "SensorCalibration::LoadFromConfigFile(). Unable to read sensor calibration." << std::endl;
         }
         file.close();
         return loaded;
@@ -118,7 +118,7 @@ public:
         }
         else
         {
-            errorlog << "SensorCalibration::LoadFromConfigFile(). Unable to sensor calibration." << std::endl;
+            errorlog << "SensorCalibration::LoadFromConfigFile(). Unable to write sensor calibration." << std::endl;
         }
         file.close();
         return written;

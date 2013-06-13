@@ -31,6 +31,5 @@ class AmbiguousObject : public Object{
         */
         friend std::istream& operator>> (std::istream& input, AmbiguousObject& p_amb);
 
-        //! width of an obstacle in angular terms
-        float arc_width;
+        
 };

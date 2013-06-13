@@ -161,7 +161,7 @@ void RLAgent::saveAgent(string agentName){
         }
         save_file <<"\n";
     }
-    cout<<"RLAgent Saved Successfully"<<endl;
+    //cout<<"RLAgent Saved Successfully"<<endl;
     save_file.close();
 
 }
@@ -306,7 +306,7 @@ void RLAgent::giveReward(float reward){
         Picks the action that will maximise reward based on the function approximator. Returns an int between 0 and num_outputs-1.
         By default this method stores data for learning: observations.
 */
-int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
+int RLAgent::getAction(vector<float> observation,   vector<int> valid_actions){
 
     if(valid_actions.size()!=num_outputs){
         cout<<"Throwing string RLAgent::getAction(..) ..."<<endl;
@@ -320,7 +320,7 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
     //Count the number of valid actions:
     int num_valid_actions = 0;
     for (int i = 0; i<valid_actions.size();i++){
-        num_valid_actions+=valid_actions.size();
+        num_valid_actions+=valid_actions[i];
     }
 
     //Logging:
@@ -337,9 +337,9 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
     last_values = FunctionApproximator->getValues(observation);
 
     //Beta-greedy or softmax action choice:
-    if (beta*RAND_MAX>rand() or use_soft_max){
+    if (beta*RAND_MAX>rand() or use_soft_max or num_valid_actions==0){
         //randomly select action with probability beta
-        if (use_soft_max){
+        if (use_soft_max and num_valid_actions!=0){
             BestAction = getSoftMaxAction(last_values, valid_actions);
         }else{
             //Choose randomly from the valid actions
@@ -378,16 +378,30 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
 
     //Otherwise choose best choice:
     //------------------------------------
+    //Select an initial value as the first of the available actions.
+    float BestReward =0;
+    int index =0;
+    bool not_assigned = true;
+    while(not_assigned){
+        if(valid_actions[index]!=0){
+            BestAction = index;
+            BestReward = last_values[index];
+            not_assigned = false;
+        }
+        index++;
+        if (index >= valid_actions.size()) break;
+    }
 
-    float BestReward = last_values[0];
 
-    //Check if all values equal:
+    //Check if all values equal while finding best action.
     bool allEqual = true;
     //Search for best action by finding largest value:
     for(int i = 0; i<last_values.size();i++){
-        if (BestReward<last_values[i] and valid_actions[i]!=0){
-            BestReward=last_values[i];
-            BestAction=i;
+        if (BestReward<last_values[i]){
+            if(valid_actions[i]!=0){
+                BestReward=last_values[i];
+                BestAction=i;
+            }
             allEqual=false;
         } else if (BestReward>last_values[i]){
             allEqual = false;
@@ -425,7 +439,7 @@ int RLAgent::getAction(vector<float> observation,vector<int> valid_actions){
     }
 
     actions.push_back(BestAction);
-
+   // cout<<"RLAgent::getAction - action chosen = "<< BestAction<<endl;
 
     //Logging:
     stringstream text2;

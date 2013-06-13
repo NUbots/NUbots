@@ -29,6 +29,7 @@
 #include "Vision/VisionTypes/RANSACTypes/ransacgoal.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/SensorCalibration.h"
 #include "NUPlatform/NUCamera/NUCameraData.h"
 
 #include "mainwindow.h"
@@ -64,18 +65,18 @@ public:
     //! RETRIEVAL METHODS
     NUImage* getFrame();
 
-    bool getCTGVector(vector<float>& ctgvector);    //for transforms
-    bool getCTVector(vector<float>& ctvector);    //for transforms
-    bool getCameraHeight(float& height);            //for transforms
-    bool getCameraPitch(float& pitch);              //for transforms
-    bool getCameraYaw(float& yaw);                  //for transforms
-    bool getBodyPitch(float& pitch);
+    float getCameraHeight() const;            //for transforms
+    float getHeadPitch() const;              //for transforms
+    float getHeadYaw() const;                  //for transforms
+    Vector3<float> getOrientation() const;
+    Vector3<double> getNeckPosition() const;
     Vector2<double> getCameraFOV() const;
 
     //! @brief Generates spoofed horizon line.
-    const Horizon& getKinematicsHorizon();
+    const Horizon& getKinematicsHorizon() const;
 
-    CameraSettings getCameraSettings();
+    CameraSettings getCameraSettings() const;
+    SensorCalibration getSensorCalibration() const;
 
     const LookUpTable& getLUT() const;
 
@@ -92,7 +93,7 @@ public:
     void debugPublish(const vector<CentreCircle>& data);
     void debugPublish(const vector<CornerPoint>& data);
     void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
-    void debugPublish(DEBUG_ID id, const vector<GroundPoint>& data_points);
+    void debugPublish(DEBUG_ID id, const vector<NUPoint>& data_points);
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     void debugPublish(DEBUG_ID id);
     void debugPublish(DEBUG_ID id, const NUImage *const img);
@@ -107,7 +108,7 @@ public:
 private:
     DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string istrm, string sstrm, string cfg, string lname);
     ~DataWrapper();
-    bool updateFrame();
+    bool updateFrame(bool forward = true);
     bool loadLUTFromFile(const string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
@@ -128,6 +129,13 @@ private:
 
     NUImage m_current_image;
     NUSensorsData m_sensor_data;
+    SensorCalibration m_sensor_calibration;
+
+    float m_camera_height;
+    float m_head_pitch;
+    float m_head_yaw;
+    Vector3<float> m_orientation;
+    Vector3<double> m_neck_position;
 
     string configname;
 

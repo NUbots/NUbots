@@ -2,7 +2,7 @@
 #define TRANSFORMER_H
 
 #include "Vision/basicvisiontypes.h"
-#include "Vision/VisionTypes/groundpoint.h"
+#include "Vision/VisionTypes/nupoint.h"
 #include "Tools/Math/Vector2.h"
 #include "Tools/Math/Vector3.h"
 #include "Tools/Math/Matrix.h"
@@ -28,48 +28,16 @@ public:
         sensor_calibration = calibration;
         preCalculateTransforms();
     }
-    SensorCalibration calibration(){return sensor_calibration;}
 
-    void preCalculateTransforms();
+    SensorCalibration getCalibration() {return sensor_calibration;}
 
     //2D distortion transform
     Vector2<double> correctDistortion(const Vector2<double>& pt);
 
-    //2D - 2D pixel to camera relative polar transforms
-    void screenToRadial2D(GroundPoint& pt) const;
-    void screenToRadial2D(vector<GroundPoint>& pts) const;
-    GroundPoint screenToRadial2D(const Point& pt) const;
-    vector<GroundPoint> screenToRadial2D(const vector<Point>& pts) const;
-
-
-    void radial2DToRadial3D(GroundPoint &pt, double distance) const;
-    void screenToRadial3D(GroundPoint &pt, double distance) const;
-    GroundPoint screenToRadial3D(const Point &pt, double distance) const;
-
-    //Distance to point - returns the distance of the camera from a point on the
-    //                    ground which would be visible at the given screen location.
-    bool isDistanceToPointValid() const;
-    double distanceToPoint(double bearing, double elevation) const;
-    double distanceToPoint(const GroundPoint& gp) const;
-    //double distanceToPoint(double bearing, double elevation) const;
-
-    /*!
-    * @brief Distance to point calculation. Calculates the distance, bearing and elevation of an point based
-    * on the position in the pixel in the image and the camera position.
-    * @param x pixel x-position.
-    * @param y pixel y-position.
-    * @param object_height The height of the object or point at the pixel we are measuring. (default = 0.0) ie ground level.
-    * @return The 3d vector containing the distance, bearing and elevation to the point.
-    */
-    Vector3<double> distanceToPoint(unsigned int x_pixel, unsigned int y_pixel, double object_height=0.0);
-
-    bool isScreenToGroundValid() const;
-
-    //2D pixel - 2D cartesian (feet relative) - assumes point is on the ground
-    void screenToGroundCartesian(GroundPoint& pt) const;
-    void screenToGroundCartesian(vector<GroundPoint>& pts) const;
-    GroundPoint screenToGroundCartesian(const Point& pt) const;
-    vector<GroundPoint> screenToGroundCartesian(const vector<Point>& pts) const;
+    void calculateRepresentations(NUPoint& pt, bool known_distance = false, double val = 0.0) const;
+    void calculateRepresentations(vector<NUPoint>& pts, bool known_distance = false, double val = 0.0) const;
+//    NUPoint calculateRepresentations(const Point& pt, bool ground = true, double val = 0.0) const;
+//    vector<NUPoint> calculateRepresentations(const vector<Point>& pts, bool ground = true, double val = 0.0) const;
 
     double getCameraDistanceInPixels() const { return effective_camera_dist_pixels; }
 
@@ -77,15 +45,28 @@ public:
 
 private:
     //! Calculate the field of view and effective camera distance in pixels.
-    void setKinematicParams(bool cam_pitch_valid, double cam_pitch,
-                            bool cam_yaw_valid, double cam_yaw,
-                            bool cam_height_valid, double cam_height,
-                            bool b_pitch_valid, double b_pitch,
-                            bool ctg_valid, vector<float> ctg_vector);
-    void setCamParams(Vector2<double> imagesize,
-                      Vector2<double> fov);
+    void setCamParams(Vector2<double> imagesize, Vector2<double> fov);
 
     void setSensors(double new_head_pitch, double new_head_yaw, double new_body_roll, double new_body_pitch, Vector3<double> new_neck_position);
+
+    void preCalculateTransforms();
+
+    void screenToRadial3D(NUPoint &pt, double distance) const;
+    NUPoint screenToRadial3D(const Point &pt, double distance) const;
+
+    //2D pixel - 2D cartesian (feet relative) - assumes point is on the ground
+//    void screenToGroundCartesian(NUPoint& pt) const;
+//    void screenToGroundCartesian(vector<NUPoint>& pts) const;
+//    NUPoint screenToGroundCartesian(const Point& pt) const;
+//    vector<NUPoint> screenToGroundCartesian(const vector<Point>& pts) const;
+
+    /**
+      * Calculates the distance to a point at a given height
+      * @param pixel The pixel location in the image relative to the top left of the screen.
+      * @param object_height The height of the point to be measured (from the ground).
+      * @return A 3 dimensional vector containing the distance, bearing and elevation to the point.
+      */
+    Vector3<double> distanceToPoint(Vector2<double> pixel, double object_height=0.0) const;
 
 private:
     Vector2<double> FOV;
@@ -100,14 +81,6 @@ private:
     Vector2<double> image_centre;
     Vector2<double> tan_half_FOV;
     Vector2<double> screen_to_radial_factor;
-    double camera_pitch;         //! @variable The camera pitch angle.
-    bool camera_pitch_valid;    //! @variable Whether the camera pitch is valid.
-    double camera_yaw;         //! @variable The camera yaw angle.
-    bool camera_yaw_valid;    //! @variable Whether the camera yaw is valid.
-    double camera_height;        //! @variable The height of the camera from the ground.
-    bool camera_height_valid;   //! @variable Whether the camera height is valid.
-    double body_pitch;           //! @variable The body pitch angle.
-    bool body_pitch_valid;      //! @variable Whether the body pitch is valid.
 
     // New for transforms.
     SensorCalibration sensor_calibration;
@@ -116,6 +89,7 @@ private:
     double head_pitch;
     double head_yaw;
     double body_roll;
+    double body_pitch;
     Vector3<double> neck_position;
 };
 

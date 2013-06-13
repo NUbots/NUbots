@@ -14,9 +14,9 @@ VisionFieldObject::VisionFieldObject()
 
 Vector2<double> VisionFieldObject::getLocationPixels() const
 {
-    return m_location.screen;
+    return m_location.screenCartesian;
 }
 Vector2<double> VisionFieldObject::getLocationAngular() const
 {
-    return m_location.angular;
+    return m_location.screenAngular;
 }

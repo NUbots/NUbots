@@ -14,7 +14,7 @@ public:
     void setTolerance(double tolerance);
 
 private:
-    CornerPoint::TYPE findCorner(Vector2<GroundPoint> ep1, Vector2<GroundPoint> ep2, GroundPoint intersection, double tolerance) const;
+    CornerPoint::TYPE findCorner(Vector2<NUPoint> ep1, Vector2<NUPoint> ep2, NUPoint intersection, double tolerance) const;
 
     double m_tolerance;
 };

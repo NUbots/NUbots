@@ -1,5 +1,16 @@
 # .gitignore for NUbot
 
+# Don't include compiled framework libraries in the repo
+/Framework/darwin/Linux/lib/darwin.a
+
+# Ignore Sublime Text project/workspace files
+*.sublime-project
+*.sublime-workspace
+
+# Ignore test output files
+/ConfigSystem/ConfigurationFiles/newConfig.json
+/ConfigSystem/ConfigurationFiles/testSaveLoadConfig.json
+
 # We don't want build files in the repo
 /Build/*
 *.xcodeproj
@@ -13,6 +24,7 @@
 /latex
 Doxyfile
 Doxyfile.bak
+/ConfigSystem/doc
 
 # Python Ignores:
 #we don't want to include .pyc files

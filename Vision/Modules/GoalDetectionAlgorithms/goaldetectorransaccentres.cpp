@@ -30,7 +30,7 @@ vector<Goal> GoalDetectorRANSACCentres::run()
 //    vector<ColourSegment> h_segments = vbb->getHorizontalTransitions(GOAL_COLOUR),
 //                          v_segments = vbb->getVerticalTransitions(GOAL_COLOUR);
 //    list<Quad> candidates;
-//    vector<Goal> posts;
+    vector<Goal> posts;
 
 //    //finds the centre lines and constructs goals from them
 //    vector<pair<RANSACGoal, vector<ColourSegment> > > ransac_results;
@@ -149,5 +149,5 @@ vector<Goal> GoalDetectorRANSACCentres::run()
 //    DataWrapper::getInstance()->debugPublish(DBID_GOALS_RANSAC_CENTRES, posts);
 //#endif
 
-//    return posts;
+    return posts;
 }

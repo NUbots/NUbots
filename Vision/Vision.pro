@@ -184,30 +184,55 @@ HEADERS += \
     ../Tools/Math/Circle.h \
     linesegmentscurve.h \
     Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.h \
-    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h \
+    VisionWrapper/startoptionsdialog.h
 
 SOURCES += \
-    ../Vision/VisionTypes/*.cpp \
-    ../Vision/VisionTypes/RANSACTypes/*.cpp \
-    ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
+    Modules/balldetector.cpp \
+    Modules/circledetector.cpp \
+    Modules/cornerdetector.cpp \
+    Modules/fieldpointdetector.cpp \
+    Modules/goaldetector.cpp \
+    Modules/greenhorizonch.cpp \
+    Modules/linedetector.cpp \
+    Modules/objectdetectionch.cpp \
+    Modules/scanlines.cpp \
+    Modules/segmentfilter.cpp \
+    Modules/LineDetectionAlgorithms/linedetectorransac.cpp \
+    Modules/LineDetectionAlgorithms/linedetectorsam.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp \
+    VisionTypes/colourreplacementrule.cpp \
+    VisionTypes/coloursegment.cpp \
+    VisionTypes/colourtransitionrule.cpp \
+    VisionTypes/greenhorizon.cpp \
+    VisionTypes/nupoint.cpp \
+    VisionTypes/histogram1d.cpp \
+    VisionTypes/quad.cpp \
+    VisionTypes/segmentedregion.cpp \
+    VisionTypes/RANSACTypes/ransacgoal.cpp \
+    VisionTypes/VisionFieldObjects/ball.cpp \
+    VisionTypes/VisionFieldObjects/centrecircle.cpp \
+    VisionTypes/VisionFieldObjects/cornerpoint.cpp \
+    VisionTypes/VisionFieldObjects/fieldline.cpp \
+    VisionTypes/VisionFieldObjects/goal.cpp \
+    VisionTypes/VisionFieldObjects/obstacle.cpp \
+    VisionTypes/VisionFieldObjects/visionfieldobject.cpp\
     VisionTools/lookuptable.cpp \
-    ../Vision/Modules/*.cpp \
     VisionTools/transformer.cpp \
     VisionTools/classificationcolours.cpp \
-    ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     visionblackboard.cpp \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     basicvisiontypes.cpp \
     GenericAlgorithms/ransac.template \
     VisionWrapper/mainwindow.cpp \
     #../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
     linesegmentscurve.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp
+    VisionWrapper/startoptionsdialog.cpp
 
 ##robocup
 HEADERS += \
@@ -262,4 +287,5 @@ SOURCES += \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
 
 FORMS += \
-    VisionWrapper/mainwindow.ui
+    VisionWrapper/mainwindow.ui \
+    VisionWrapper/startoptionsdialog.ui

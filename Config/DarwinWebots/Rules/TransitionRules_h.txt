@@ -1,14 +1,14 @@
 GOAL_COLOUR:
-before: (0, 320) []
-middle: (3, 320) [yellow, blue]
-after: (0, 320) []
+before: (0, -1) []
+middle: (3, -1) [yellow, blue]
+after: (0, -1) []
 
 BALL_COLOUR:
-before: (0, 320) []
-middle: (3, 320) [orange]
-after: (0, 320) []
+before: (0, -1) []
+middle: (3, -1) [orange]
+after: (0, -1) []
 
 LINE_COLOUR:
-before: (0, 320) []
-middle: (1, 320) [white]
-after: (0, 320) []
+before: (0, -1) []
+middle: (1, -1) [white]
+after: (0, -1) []

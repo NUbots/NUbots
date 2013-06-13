@@ -500,36 +500,19 @@ void VisionBlackboard::update()
         errorlog << "VisionBlackboard::update() - WARNING - Image height or width is zero - Camera may be disconnected or faulty." << endl;
     }
 
-    bool camera_pitch_valid, camera_yaw_valid, camera_height_valid, body_pitch_valid;
-    float camera_pitch, camera_yaw, camera_height, body_pitch;
-
     //get data copies from wrapper
-    camera_pitch_valid = wrapper->getCameraPitch(camera_pitch);
-    camera_yaw_valid = wrapper->getCameraYaw(camera_yaw);
-    camera_height_valid = wrapper->getCameraHeight(camera_height);
-    body_pitch_valid = wrapper->getBodyPitch(body_pitch);
-
-    bool ctg_valid;
-    vector<float> ctg_vector;
-
-    ctg_valid = wrapper->getCTGVector(ctg_vector);
+    float head_pitch = wrapper->getHeadPitch();
+    float head_yaw = wrapper->getHeadYaw();
+    Vector3<float> orientation = wrapper->getOrientation();
+    Vector3<double> neck_position = wrapper->getNeckPosition();
 
     //setup transformer
-    m_transformer.setKinematicParams(camera_pitch_valid, camera_pitch,
-                                     camera_yaw_valid, camera_yaw,
-                                     camera_height_valid, camera_height,
-                                     body_pitch_valid, body_pitch,
-                                     ctg_valid, ctg_vector);
+    m_transformer.setSensors(head_pitch, head_yaw, orientation.x, orientation.y, neck_position);
     m_transformer.setCamParams(Vector2<double>(original_image->getWidth(), original_image->getHeight()),
                                wrapper->getCameraFOV());
-
-    // ++++++++ TODO: SHANNON - MAKE THIS CORRECT +++++++++++
-    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    m_transformer.setSensors(camera_pitch, camera_yaw, 0.0, body_pitch, Vector3<double>(0.0, 0.0, 39.22));
     m_transformer.setCalibration(SensorCalibration());
-    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    //setup horizon
     kinematics_horizon = wrapper->getKinematicsHorizon();
     checkKinematicsHorizon();
         

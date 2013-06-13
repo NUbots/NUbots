@@ -64,6 +64,16 @@ GameInformation::TeamColour GameInformation::getTeamColour() const
         return BlueTeam;
 }
 
+/*! @brief Returns the team colour */
+GameInformation::TeamColour GameInformation::getPlayerUniformColour() const
+{
+    const TeamInfo* team = getMyTeamInfo();
+    if (team)
+        return static_cast<TeamColour>(team->teamColour);
+    else
+        return BlueTeam;
+}
+
 /*! @brief Returns the current state */
 GameInformation::RobotState GameInformation::getCurrentState() const 
 {

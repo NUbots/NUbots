@@ -8,7 +8,7 @@ class LineDetectorRANSAC : public LineDetector
 {
 public:
     LineDetectorRANSAC();
-    virtual vector<FieldLine> run(const vector<GroundPoint> &points);
+    virtual vector<FieldLine> run(const vector<NUPoint> &points);
 
 private:
     unsigned int m_n,

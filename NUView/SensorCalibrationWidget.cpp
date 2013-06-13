@@ -130,7 +130,7 @@ void SensorCalibrationWidget::setSensorData(NUSensorsData* new_sensordata)
 
 void SensorCalibrationWidget::select_pixel(int x, int y)
 {
-    Vector3<double> result = m_transformer->distanceToPoint(x, y);
+    Vector3<double> result = m_transformer->distanceToPoint(Vector2<double>(x, y));
 
     double flatDist = result.x * cos(result.z);
     double x_pos = flatDist * cos(result.y);

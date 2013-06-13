@@ -39,7 +39,7 @@ private:
     bool calculatePositions();
     
 private:
-    float d2p;                      //! @variable the distance of the obstacle in cm as found by the distance to point method
+//    float d2p;                      //! @variable the distance of the obstacle in cm as found by the distance to point method
     double m_arc_width;               //! @variable the angle subtended by the obstacle (based on the screen width)
 };
 

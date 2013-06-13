@@ -32,7 +32,7 @@ win32 {
 !macx{
     !win32{
         INCLUDEPATH += /usr/include/boost/
-        LIBS += -ldns_sd -lGLU
+        LIBS += -ldns_sd -lGLU -lzmq -lprotobuf
     }
 }
 
