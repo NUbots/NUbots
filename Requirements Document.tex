@@ -588,25 +588,6 @@
 		The proposed architecture will make no effort to address these issues directly however some out-of-scope
 		components will benifit indirectly from improved architectural consistency.
 		
-		{
-		\em % This is the instructions
-		The architecture will not be making any modifications to the existing code base beyond the
-		changes necessary to integrate the existing code into the new architecture. This project
-		isn't concerned about the specific algorithms used or the internal behaviour of the robot.
-		We are also not concerned with improving the physical architecture of the robot such as
-		improved motors or cameras.
-
-		For example the following goals are non-goals:
-		Changing any of the algorithms currently used in the system. Such as changing the vision
-		system from \emph{current algorithm} to \emph{some other algorithm} Improving the physical
-		architecture of the robot (adding new cameras, better motors, etc...)
-
-		Comment: We need to get non-goals out of the way as soon as possible. These are things like
-		rewriting modules, improving algorithms and other things that are out of scope for the
-		project. It's important that we clarify these so clients don't go through this document
-		thinking "why haven't they addressed the *insert non-goal here* issue?"
-		}
-
 		\subsection{Algorithm Changes}
 			The NUBots system contains a number of complicated mathematical systems that are used by the robot
 			to analyse the world, make decisions and perform other useful functions. 
