@@ -291,9 +291,7 @@
 			architecture.
 
 			\todo[inline] {Expand the description of the Current Architecture}
-
-
-
+			
 		\subsection{Proposed Architecture}
 			\begin{figure}[h]
 				\centering
@@ -583,7 +581,10 @@
 			\todo[inline]{Explain the diagram that all the components are loosely coupled}
 
 	\section{Non-Goals}
-		\todo[inline]{add an introduction to non goals and remove the instructions}
+		This section will address areas of the system that are out-of-scope for the proposed architecture.
+		This means that the proposed architecture will make no effort to address these issues directly however
+		they may benifit indirectly from improved architectural consistency.
+		
 		{
 		\em % This is the instructions
 		The architecture will not be making any modifications to the existing code base beyond the
@@ -604,11 +605,20 @@
 		}
 
 		\subsection{Algorithm Changes}
-			\todo[inline]{Write the non-goal that we will not do changes to the algorithm}
+			The NUBots system contains a number of complicated mathematical systems that are used by the robot
+			to analyse the world, make decisions and perform other useful functions. 
+			The proposed architecture will not change these algorithms beyond any neccecary changes required to
+			integrate them into the new architectural style.
+			
+			This means that while we might modify how the vision algorithm gets it's inputs we won't be modifying the
+			mathematical algorithm used to classify objects.
 
 		\subsection{Hardware Changes}
-			\todo[inline]{write the non-goal that states that the project will not cause hardware
-			changes}
+			As far as the proposed architecture is concerned it is targeting an abstract computing platform with no specific hardware
+			available to be identified. 
+			We assume that there is some form of networking and processing but beyond that we impose no requirements on the
+			existing or future hardware. Furthermore, the proposed architecture will not recommend or require any changes to the robotic
+			hardware in order to run.
 
 	\section{Scenarios}
 		\todo[inline]{write an introduction to the scenarios section and remove the instructions}
