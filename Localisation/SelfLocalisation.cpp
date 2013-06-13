@@ -774,8 +774,8 @@ ProcessingRequiredState SelfLocalisation::CheckGameState(bool currently_incapaci
     result.time = true;
     result.measurement = true;
 
-    //GameInformation::TeamColour team_colour = game_info->getTeamColour();
-    GameInformation::TeamColour team_colour = GameInformation::RedTeam;
+    GameInformation::TeamColour team_colour = game_info->getTeamColour();
+    m_team_colour = team_colour;
     GameInformation::RobotState current_state = game_info->getCurrentState();
     /*
     if (currently_incapacitated)
@@ -1090,12 +1090,16 @@ void SelfLocalisation::doPenaltyReset()
     MultivariateGaussian temp(3);
     temp.setCovariance(covariance_matrix(75.0f*75.0f, 25.0f*25.0f, 0.35f*0.35f));
 
+    float x_coord = 50.f;                           // Red is positive half of field. 50cm
+    if (m_team_colour == GameInformation::BlueTeam)
+        x_coord = -x_coord;                         // Blue is negative half of field. -50cm
+
     // setup model 0 as top 'T'
-    temp.setMean(mean_matrix(0.0f, 200.0, -PI/2.0f));
+    temp.setMean(mean_matrix(x_coord, 200.0f, -PI/2.0f));
     positions.push_back(temp);
     
     // setup model 1 as bottom 'T'
-    temp.setMean(mean_matrix(0.0f, -200.0f, PI/2.0f));
+    temp.setMean(mean_matrix(x_coord, -200.0f, PI/2.0f));
     positions.push_back(temp);
 
     InitialiseModels(positions);
