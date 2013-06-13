@@ -2832,9 +2832,6 @@ Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& ob
 
 bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall>& sharedBalls)
 {
-
-    // NOT IMPLEMENTED
-    return false;
     std::vector<TeamPacket::SharedBall>::const_iterator their_ball = sharedBalls.begin();
 
     const MultivariateGaussian& best_estimate = (*getBestModel()).estimate();
@@ -2868,10 +2865,11 @@ bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall
 
         // TODO: Do somehting that does the update.
         //m_ball_model->directUpdate(relativePosition, covariance);
-        m_ball_filter->measurementUpdate(relativePosition, covariance, Matrix(), MobileObjectModel::kshared_measurement)
+        m_ball_filter->measurementUpdate(relativePosition, covariance, Matrix(), MobileObjectModel::kshared_measurement);
 
         ++their_ball;
     }
+    return true;
 }
 
 std::vector<TeamPacket::SharedBall> SelfLocalisation::FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls)
