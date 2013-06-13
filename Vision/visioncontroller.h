@@ -53,7 +53,7 @@ private:
 
 
 #ifdef VISION_PROFILER_ON
-    ofstream m_profiling_stream;
+    std::ofstream m_profiling_stream;
 #endif
 };
 
