@@ -273,12 +273,6 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
     // Check if processing is required.
     ProcessingRequiredState processing_required = CheckGameState(sensor_data->isIncapacitated(), gameInfo);
 
-    // retrieve gps data
-    if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
-    {
-        m_hasGps = true;
-    }
-
     // Retrieve odometry data
     std::vector<float> odo;
     bool odom_ok = sensor_data->getOdometry(odo);
@@ -288,6 +282,15 @@ void SelfLocalisation::process(NUSensorsData* sensor_data, FieldObjects* fobs, c
         #if LOC_SUMMARY_LEVEL > 0
         m_frame_log << "Processing Cancelled." << std::endl;
         #endif
+        return;
+    }
+
+    // retrieve gps data
+    if (sensor_data->getGps(m_gps) and sensor_data->getCompass(m_compass))
+    {
+        m_hasGps = true;
+        fobs->self.updateLocationOfSelf(m_gps[0], m_gps[1], m_compass, 0.1, 0.1, 0.01, false);
+//        std::cout << "Position: " << m_gps[0] << ", " << m_gps[1] << ", " << m_compass << std::endl;
         return;
     }
 
@@ -772,8 +775,8 @@ ProcessingRequiredState SelfLocalisation::CheckGameState(bool currently_incapaci
     result.time = true;
     result.measurement = true;
 
-    //GameInformation::TeamColour team_colour = game_info->getTeamColour();
-    GameInformation::TeamColour team_colour = GameInformation::RedTeam;
+    GameInformation::TeamColour team_colour = game_info->getTeamColour();
+    m_team_colour = team_colour;
     GameInformation::RobotState current_state = game_info->getCurrentState();
     /*
     if (currently_incapacitated)
@@ -1088,12 +1091,16 @@ void SelfLocalisation::doPenaltyReset()
     MultivariateGaussian temp(3);
     temp.setCovariance(covariance_matrix(75.0f*75.0f, 25.0f*25.0f, 0.35f*0.35f));
 
+    float x_coord = 50.f;                           // Red is positive half of field. 50cm
+    if (m_team_colour == GameInformation::BlueTeam)
+        x_coord = -x_coord;                         // Blue is negative half of field. -50cm
+
     // setup model 0 as top 'T'
-    temp.setMean(mean_matrix(0.0f, 200.0, -PI/2.0f));
+    temp.setMean(mean_matrix(x_coord, 200.0f, -PI/2.0f));
     positions.push_back(temp);
     
     // setup model 1 as bottom 'T'
-    temp.setMean(mean_matrix(0.0f, -200.0f, PI/2.0f));
+    temp.setMean(mean_matrix(x_coord, -200.0f, PI/2.0f));
     positions.push_back(temp);
 
     InitialiseModels(positions);
@@ -2830,9 +2837,6 @@ Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& ob
 
 bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall>& sharedBalls)
 {
-
-    // NOT IMPLEMENTED
-    return false;
     std::vector<TeamPacket::SharedBall>::const_iterator their_ball = sharedBalls.begin();
 
     const MultivariateGaussian& best_estimate = (*getBestModel()).estimate();
@@ -2866,9 +2870,11 @@ bool SelfLocalisation::sharedBallUpdate(const std::vector<TeamPacket::SharedBall
 
         // TODO: Do somehting that does the update.
         //m_ball_model->directUpdate(relativePosition, covariance);
+        m_ball_filter->measurementUpdate(relativePosition, covariance, Matrix(), MobileObjectModel::kshared_measurement);
 
         ++their_ball;
     }
+    return true;
 }
 
 std::vector<TeamPacket::SharedBall> SelfLocalisation::FindNewSharedBalls(const std::vector<TeamPacket::SharedBall>& allSharedBalls)

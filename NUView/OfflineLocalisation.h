@@ -27,7 +27,7 @@ public:
     bool OpenLogs(const std::string& intialLogPath);
     bool Run();
     bool Running() {return m_running;}
-    bool WriteLog(const std::string& logPath){(void)(logPath);}
+    bool WriteLog(const std::string& logPath){(void)(logPath);return false;}
     bool WriteReport(const std::string& reportPath);
     bool WriteXML(const std::string& xmlPath);
     int NumberOfLogFrames();

@@ -54,7 +54,7 @@ vector<string> DarwinWebotsActionators::m_other_names(temp_other_names, temp_oth
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */ 
-DarwinWebotsActionators::DarwinWebotsActionators(DarwinWebotsPlatform* platform) : m_simulation_step(int(platform->getBasicTimeStep()))
+DarwinWebotsActionators::DarwinWebotsActionators(DarwinWebotsPlatform* platform) : m_simulation_step(int(4*platform->getBasicTimeStep()))
 {
 #if DEBUG_NUACTIONATORS_VERBOSITY > 4
     debug << "DarwinWebotsActionators::DarwinWebotsActionators()" << std::endl;

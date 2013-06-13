@@ -233,6 +233,8 @@ class SelfLocalisation: public TimestampedData
         bool m_previously_incapacitated;
         GameInformation::RobotState m_previous_game_state;
         std::stringstream m_frame_log;
+        GameInformation::TeamColour m_team_colour;
+
 
         std::vector<float> m_gps;
         float m_compass;
