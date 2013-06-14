@@ -149,16 +149,17 @@
 		\end{tabular}
 		
 	\section{Introduction}
-		Sometimes in software it's important to take a step back and evaluate your creation.
-		Thanks to a period of quiet meditation atop Mt. Newcastle the NUbots team, reaching enlightenment, have decided
-		to replace the existing horror masquerating as an architecture with a new, more effective, architecture.
+		Sometimes in software it is important to take a step back and evaluate your creation.
+		The University of Newcastle NUBots team have in previous years achieved success in the RoboCup competition, placing several times.
+		However in recent years the team has undergone a change in robotic platform from the \emph{Aldebaran Nao} to the \emph{Robotis DARwIn-OP}, as well as making continuous compromises in code quality to achieve deadlines.
+		As a result of this, the software architecture of the current system has become a bastardised version of its original intent.
+		The NUbots team, as a result of this have decided to replace the existing architecture with a new more effective architecture.
 		
-		This document outlines the existing architecture, what benifits can be gained from it's replacement the issues that
-		warrent it's replacement.
-		Additionally we also propose a new architecture designed to address these issues.
+		This document outlines the existing architecture, what benefits can be gained from its replacement as well as the issues that warrant its replacement.
+		Additionally we also propose a new architecture designed to address these issues as well as providing enhancements that will allow the system to perform effectively now and into the future.
 		
-		Finally this document outlines the criteria by which any proposed architecture will be measured. 
-		We achieve this by provoding a list of requirements that any proposed architecture must satisfy.
+		Finally this document outlines the criteria by which this proposed architecture will be measured. 
+		We achieve this by providing a list of requirements that the proposed architecture must satisfy.
 
 	\section{Overview}
 		This section provides an overview of the existing architecture and the proposed architecture.
@@ -240,67 +241,45 @@
 				\label {fig:HighLevelExistingArchitecture}
 			\end{figure}
 
-
-			When viewed from far away the existing architecture resembles an intricate spider web
+			From a distance, the existing architectures connections resemble an intricate spider web
 			woven from good intentions and demonic pacts with the compiler.
-			For a high level overview see Figure~\ref{fig:HighLevelExistingArchitecture} on page~\pageref{fig:HighLevelExistingArchitecture}.
-			It was originally conceived as a purely object-oriented system designed to be easy to understand and extend.
-			However, the ravages of time have taken it's toll and years of having no one responsible for
-			the architecture has heavily impacted it's quality.
-			New engineers working on the system had no one to turn to for advice and resorted to
-			implementing unique architectures for their components.
-			The result is a system with components that look and behave with wildly different assumptions, patterns and
-			idioms.
-			This causes massive duplication of effort for the NUBots team and it's not uncommon to see very similar classes be
-			implemented multiple times by different people due to the lack of architecture.
+			A highly simplified diagram of the architecture and flow of the existing system can be seen in Figure~\ref{fig:HighLevelExistingArchitecture} on page~\pageref{fig:HighLevelExistingArchitecture}.
+			The current system was originally designed as a purely object-oriented system designed to be easy to understand and extend.
+			However, the time, deadlines and a lack of understanding of the system have taken their toll. 
+			Years of having no one responsible for the architecture has resulted in it slowly fragmenting and has heavily impacted its quality.
+			New engineers working on the system had no one to turn to for advice and resorted to implementing unique architectures for their components.
+			These problems result in a system with components that use very different assumptions and design patterns.
+			This causes duplication of effort for the NUBots team and it is not uncommon to see very similar classes be implemented multiple times by different people due to the lack of clear architecture.
 
-			Imagine a group of people each of whom had come up with their own unique language.
-			Now imagine them trying to communicate and you would have a good idea of what inter-component communication
-			looks like in the existing architecture.
-			Some components communicate through the a global data store known as the blackboard,
-			others utilize a global queue known as the jobs system, most communicate through
-			direct function calls and some components even communicate through implicit or global state such as singletons. 
-
-			The myriad of ways in which components can communicate has a huge impact on team productivity.
-			In order to make modifications to any component you must understand it's language, the language of anything
-			it talks to and the language of anything new you want it to talk to. In the NUBots case it's common to have components
-			that need to talk to three or more other components.
-			That's a minimum of four different systems you need to understand before you can make even the smallest of changes.
+			Some components communicate through the a global data store known as the blackboard, others utilise a global queue known as the jobs system, most communicate through direct function calls and some components even communicate through implicit or global state such as singletons.
+			This myriad of ways in which components can communicate has a huge impact on team productivity.
+			In order to make modifications to a component you must understand its interface, the interface of anything it interacts with, and the interfaces of any new component to be used.
+			In the NUBots case it is common to have components that need to talk to three or more other components. This results in a minimum of four different systems you need to understand before you can make any change.
 
 			For example: The vision system communicates utilising a two step process.
 			First the vision system accesses the sensor system directly through blackboard and asks it to process a new frame.
 			It then waits on the sensor system to place the frame information on blackboard.
 			Once the frame information is placed on blackboard the vision system then reads the information
-			from blackboard and continues it's processing.
+			from blackboard and continues its processing.
 			While the vision system is waiting for a new frame the entire robot is blocked and cannot make any decisions.
-			It's also important to note that no other systems can request the latest frame.
+			It is also important to note that no other systems are intended to request the latest frame, and doing so would break the robots functionality.
 
-			Another example can be found in the Movement module:
-			The NUbots system defines a number of movement handlers each responsible for a set
-			of movements (kicking the ball, walking, etc...). 
-			The movement system periodically retrieves all of the jobs in the job queue and sends them to the appropriate 
-			movement handler. 
-			The movement handler's then talk to the action system to execute the selcted motions. 
-			This all sounds fine untill you consider that it's possible for any other component to talk
-			to the movement handlers directly.
-			This means that at any point in time any class in the system is a potential candidate
-			for triggering a movement.
-			Additionally this means that it's very difficult to track down what class is responsible for causing what 
-			movement in the robot further adding to the complexity of the system.
+			Another example of these architectural issues can be found in the Movement module:
+			The NUbots system defines a number of movement handlers each responsible for a set of movements such as kicking the ball or walking.
+			The movement system periodically retrieves all of the jobs in the job queue and sends them to the appropriate movement handler. 
+			The movement handlers then talk to the action system to execute the selected motions. 
+			This base case does not have any issues however it is also possible for any other component to talk to the movement handlers directly.
+			Therefore, at any point in time any class in the system is a potential candidate for triggering a movement making it very difficult to track down which class is responsible for an action, further adding to the complexity of the system.
 
-			The example gets worse when you consider the fact that each movement handler is
-			indirectly dependant on each other. Movement handlers can lock specific motors and if
-			you try and use a motor that another system is using your action will fail. If you
-			forget to check if you have ownership it's possible to break the currently executing
-			motion which can cause the robot to fall down.
+			The architecture of this section is worse considering that each movement handler is indirectly dependant on the others.
+			Movement handlers can lock specific motors and if they attempt to use a motor in use by another system, the action will fail.
+			Forgetting to check if you have ownership of a motor can break the currently executing motion causing the robot to fall down and possibly injure itself.
 
 			Thus, in order to add a new movement not only do you need to write the code for the movement
 			but you also need to understand how NUMotion, NUWalk, NUKick, NUHead work and interact.
-			You need to understand all the cases where any of the managers might be triggered so you
-			don't try to run a critical movement when the motors are locked. And you need to
-			understand the locking model so you don't accidentally try to move a motor you
-			shouldn't. This is only a tiny subset of the pitfalls that await you in the existing
-			architecture.
+			You need to understand all the cases where any of the managers might be triggered to avoid interrupting a critical movement when the motors are locked.
+			You need to understand the locking model to prevent accidentally trying to move a motor you shouldn't.
+			These two examples are only two of the pitfalls that await you in the existing architecture.
 
 			\todo[inline] {Expand the description of the Current Architecture}
 			
