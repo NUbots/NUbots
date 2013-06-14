@@ -800,15 +800,24 @@
 				The kinematics model in the existing system is also very useful for dancing. Unfortunately access
 				to the kinematics model is very difficult in the current system requiring a lot of hoop jumping to
 				get access to the appropriate data. 
-				\todo[inline] {Properly describe the issues with accessing kinematics}
-				\todo[inline]{Write how the current system would resolve this scenario}
+
+				Then both the blackboard and jobs systems need to be modified to accomodate the new data. 
+				Finally the two main threads will need to be modified to change from "play soccer" to "dance". 
+				This involves a difficult, error prone and dangerous process that requires unlinking all non-dance related
+				methods from the loop.
+				
 			\subsubsection{Proposed System}
-				Create a new sound \gls{reactor} that emits sound events. 
-				Create a new sound analysis \gls{reactor} that determines the beat and emits
-				the "feel" of the song.
-				Have behaviour react to the "feel" data and select an appropriate scripted dance move.
-				Motion runs the dance.
-				\todo[inline]{Write how the proposed system would resolve this scenario}
+				In the proposed architecture reuse of code is achieved by adding/removing modular \gls{reactor}s that
+				communicate through the \gls{powerplant}.
+				First you would need to create a new sound \gls{reactor} that buffers sound input and emits them 
+				periodically.
+				Then you need to create a sound analysis \gls{reactor} that determines the beat and emits the 
+				"feel of the song.
+				You then need a modified behavior \gls{reactor} that reactors to the beat of the song.
+				
+				Once you've created the components you simply need to tell the power plant to use them. You also need to
+				remove the old soccer-based behavior from the system but unlike the existing architecture this is a simple
+				one-line change.
 
 	\section{Requirements}
 		
