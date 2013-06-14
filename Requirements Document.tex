@@ -276,15 +276,17 @@
 			It's also important to note that no other systems can request the latest frame.
 
 			Another example can be found in the Movement module:
-			Each movement handler is responsible for a set of movements (kicking the ball, walking,
-			etc...) and is defined as a class which is exposed to the system as a singleton. The
-			Movement component then loops through all the jobs in the job queue and sends them to each movement
-			handler. The movement handler then talks to the action system to execute the selected
-			action. However sometimes other classes can also talk to the movement handlers directly.
+			The NUbots system defines a number of movement handlers each responsible for a set
+			of movements (kicking the ball, walking, etc...). 
+			The movement system periodically retrieves all of the jobs in the job queue and sends them to the appropriate 
+			movement handler. 
+			The movement handler's then talk to the action system to execute the selcted motions. 
+			This all sounds fine untill you consider that it's possible for any other component to talk
+			to the movement handlers directly.
 			This means that at any point in time any class in the system is a potential candidate
-			for triggering a movement. Additionally this means that it's very difficult to track
-			down what class is responsible for causing what movement in the robot further adding to
-			the complexity of the system.
+			for triggering a movement.
+			Additionally this means that it's very difficult to track down what class is responsible for causing what 
+			movement in the robot further adding to the complexity of the system.
 
 			The example gets worse when you consider the fact that each movement handler is
 			indirectly dependant on each other. Movement handlers can lock specific motors and if
@@ -292,7 +294,7 @@
 			forget to check if you have ownership it's possible to break the currently executing
 			motion which can cause the robot to fall down.
 
-			This means that in order to add a new movement not only do you need to write the code for the movement
+			Thus, in order to add a new movement not only do you need to write the code for the movement
 			but you also need to understand how NUMotion, NUWalk, NUKick, NUHead work and interact.
 			You need to understand all the cases where any of the managers might be triggered so you
 			don't try to run a critical movement when the motors are locked. And you need to
