@@ -255,30 +255,30 @@
 			implemented multiple times by different people due to the lack of architecture.
 
 			Imagine a group of people each of whom had come up with their own unique language.
-			Now imagine them trying to communicate and you would have a good idea of what communication
-			between components looks like in the existing architecture.
+			Now imagine them trying to communicate and you would have a good idea of what inter-component communication
+			looks like in the existing architecture.
 			Some components communicate through the a global data store known as the blackboard,
-			others utilize a global queue known as the jobs system, some components communicate through
-			direct function calls, some components communicate through implicit or global state such as singletons and some
-			components communicate through other more arcane means such as inferring information indirectly.
+			others utilize a global queue known as the jobs system, most communicate through
+			direct function calls and some components even communicate through implicit or global state such as singletons. 
 
-			These types of architectural problems can have huge impacts on team productivity.
-			In order to make a modification to any component you must understand it's language, the language of anything
+			The myriad of ways in which components can communicate has a huge impact on team productivity.
+			In order to make modifications to any component you must understand it's language, the language of anything
 			it talks to and the language of anything new you want it to talk to. In the NUBots case it's common to have components
-			that needs to talk to more then three other components.
+			that need to talk to three or more other components.
 			That's a minimum of four different systems you need to understand before you can make even the smallest of changes.
 
 			For example: The vision system communicates utilising a two step process.
-			First the vision system accesses the sensor system through blackboard and asks it to process a new frame.
+			First the vision system accesses the sensor system directly through blackboard and asks it to process a new frame.
 			It then waits on the sensor system to place the frame information on blackboard.
 			Once the frame information is placed on blackboard the vision system then reads the information
 			from blackboard and continues it's processing.
 			While the vision system is waiting for a new frame the entire robot is blocked and cannot make any decisions.
+			It's also important to note that no other systems can request the latest frame.
 
-			Another example can be found in the Movement module.
+			Another example can be found in the Movement module:
 			Each movement handler is responsible for a set of movements (kicking the ball, walking,
-			etc..) and is defined as a class which is exposed to the system as a singleton. The
-			Movement component then loops through all the jobs and sends them to each movement
+			etc...) and is defined as a class which is exposed to the system as a singleton. The
+			Movement component then loops through all the jobs in the job queue and sends them to each movement
 			handler. The movement handler then talks to the action system to execute the selected
 			action. However sometimes other classes can also talk to the movement handlers directly.
 			This means that at any point in time any class in the system is a potential candidate
