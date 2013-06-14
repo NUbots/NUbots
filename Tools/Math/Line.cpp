@@ -216,7 +216,7 @@ double Line::getYIntercept() const
 double Line::getLinePointDistance(Vector2<double> point) const
 {
   if(!isValid()) return 0.0;
-  return abs(m_A * point.x + m_B * point.y - m_C) / m_normaliser;
+  return std::abs(m_A * point.x + m_B * point.y - m_C) / m_normaliser;
 }
 
 double Line::getSignedLinePointDistance(Vector2<double> point) const
@@ -234,7 +234,7 @@ double Line::getNormaliser() const
 
 double Line::getAngleBetween(Line other) const
 {
-    double angle = abs(getAngle() - other.getAngle());
+    double angle = std::abs(getAngle() - other.getAngle());
 
     if(angle > mathGeneral::PI*0.5)
         angle = mathGeneral::PI - angle;
@@ -254,7 +254,7 @@ double Line::getPhi() const
 
 double Line::scalarProjection(Vector2<double> pt) const
 {
-    return abs((pt-a)*v);
+    return std::abs((pt-a)*v);
 }
 
 Vector2<double> Line::projectOnto(Vector2<double> pt) const

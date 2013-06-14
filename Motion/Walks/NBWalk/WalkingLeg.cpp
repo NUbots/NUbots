@@ -449,7 +449,7 @@ WalkingLeg::getHipHack(const float footAngleZ){
             stage++;
     }
     else {// stage 2, set the foot back down on the ground
-        hr_offset = max(0.0f,
+        hr_offset = std::max(0.0f,
                         MAX_HIP_ANGLE_OFFSET*
                         static_cast<float>(singleSupportFrames
                                            -frameCounter)/

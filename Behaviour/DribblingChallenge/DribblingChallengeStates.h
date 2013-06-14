@@ -110,8 +110,8 @@ public:
             rightobstacle = temp[0];
         
         // if the ball is too far away to kick and the obstable is closer than the ball we need to dodge!
-        if (ball.estimatedDistance() > 20 and min(leftobstacle, rightobstacle) < ball.estimatedDistance())
-            result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, min(ball.estimatedDistance(), 25.0f), 75);
+        if (ball.estimatedDistance() > 20 and std::min(leftobstacle, rightobstacle) < ball.estimatedDistance())
+            result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, std::min(ball.estimatedDistance(), 25.0f), 75);
         else
             result = speed;
         

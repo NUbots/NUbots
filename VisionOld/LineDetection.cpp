@@ -2889,7 +2889,7 @@ bool LineDetection::GetDistanceToPoint(Point point, Vector3<float> &relativePoin
 bool LineDetection::CheckGreenBetweenTwoPoints(int x0,int y0,int x1,int y1, Vision* vision)
 {
     bool foundColour = false;
-    bool steep = abs(y1 - y0) > abs(x1 - x0);
+    bool steep = std::abs(y1 - y0) > std::abs(x1 - x0);
     int temp;
     if(steep)
     {
@@ -2917,7 +2917,7 @@ bool LineDetection::CheckGreenBetweenTwoPoints(int x0,int y0,int x1,int y1, Visi
     }
     int deltax = x1 - x0;
 
-    int deltay = abs(y1 - y0);
+    int deltay = std::abs(y1 - y0);
 
     float error = 0;
     float deltaerr = (float)deltay / (float)deltax;

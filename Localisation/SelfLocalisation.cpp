@@ -2405,7 +2405,7 @@ void SelfLocalisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
             {
                 continue;
             }
-            mergeM = abs( MergeMetric(modelA,modelB) );
+            mergeM = std::abs( MergeMetric(modelA,modelB) );
             if (mergeM <= MergeMetricThreshold)
             { //0.5
 #if LOC_SUMMARY_LEVEL > 0
@@ -2801,7 +2801,7 @@ Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& ob
     {
         return p3;
     }
-    else if(d < abs(r0 - r1))
+    else if(d < std::abs(r0 - r1))
     {
         return p3;
     }
