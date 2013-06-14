@@ -137,9 +137,7 @@
 		\end{description}}
 
 	\clearpage
-	\listoftodos
 	\tableofcontents
-	\clearpage
 
 	\section{Document Notes}
 		\begin{tabular}{ p{0.1\textwidth} | p{0.6\textwidth} | p{0.3\textwidth} }
@@ -192,7 +190,14 @@
 			Added Scenario Descriptions and Examples. Large overview changes &
 			Trent Houliston, Jake Woods \\
 			\hline
+			
+			1.0 &
+			Added introduction, Improved wording of scenarios, proof read contents closed todos &
+			Trent Houliston, Jake Woods \\
+			\hline
 		\end{tabular}
+		
+	\clearpage
 		
 	\section{Introduction}
 		Sometimes in software it is important to take a step back and evaluate your creation.
@@ -211,8 +216,6 @@
 		This section provides an overview of the existing architecture and the proposed architecture.
 
 		\subsection{Existing Architecture}
-
-			\todo[inline]{Provide a high level overview of the old system and the way it works}
 
 			\begin{figure}
 				\begin{tikzpicture}[
@@ -317,7 +320,7 @@
 			This base case does not have any issues however it is also possible for any other component to talk to the movement handlers directly.
 			Therefore, at any point in time any class in the system is a potential candidate for triggering a movement making it very difficult to track down which class is responsible for an action, further adding to the complexity of the system.
 
-			The architecture of this section is worse considering that each movement handler is indirectly dependant on the others.
+			The architecture of this section is worse considering that each movement handler is indirectly dependent on the others.
 			Movement handlers can lock specific motors and if they attempt to use a motor in use by another system, the action will fail.
 			Forgetting to check if you have ownership of a motor can break the currently executing motion causing the robot to fall down and possibly injure itself.
 
@@ -326,8 +329,6 @@
 			You need to understand all the cases where any of the managers might be triggered to avoid interrupting a critical movement when the motors are locked.
 			You need to understand the locking model to prevent accidentally trying to move a motor you shouldn't.
 			These two examples are only two of the pitfalls that await you in the existing architecture.
-
-			\todo[inline] {Expand the description of the Current Architecture}
 			
 		\subsection{Proposed Architecture}
 			\begin{figure}[h]
@@ -606,30 +607,18 @@
 					\label{fig:NetworkExampleDiagram}
 			\end{figure}
 
-			\todo[inline] {Expand the description of the Proposed Architecture}
-			\todo[inline]{Explain the diagram that all the components are loosely coupled}
-
 	\section{Non-Goals}
 		This section addresses areas of the system that are out-of-scope for the proposed architecture.
-		The proposed architecture will make no effort to address these issues directly however some out-of-scope
-		components will benifit indirectly from improved architectural consistency.
+		The proposed architecture will make no effort to address these issues directly however some out-of-scope components will benefit indirectly from improved architectural consistency.
 		
 		\subsection{Algorithm Changes}
-			The \gls{nubots} system contains a number of complicated mathematical systems that are used by the robot
-			to analyse the world, make decisions and perform other useful functions. 
-			The proposed architecture will not change these algorithms beyond any neccecary changes required to
-			integrate them into the new architectural style.
+			The \gls{nubots} system contains a number of complicated mathematical systems that are used by the robot to analyse the world, make decisions and control its interactions within its environment. 
+			The proposed architecture will not change these algorithms beyond any necessary changes required to integrate them into the new architectural style. However the method by which an algorithm gets its inputs may be modified we won't be modifying the mathematical algorithm that it is based on.
 			
-			This means that while we might modify how the vision algorithm gets it's inputs we won't be modifying the
-			mathematical algorithm used to classify objects.
-
 		\subsection{Hardware Changes}
-			As far as the proposed architecture is concerned it is targeting an abstract computing platform with no specific hardware
-			available to be identified. 
-			
-			We assume that there is some form of networking and processing but beyond that we impose no requirements on the
-			existing or future hardware. Furthermore, the proposed architecture will not recommend or require any changes to the robotic
-			hardware in order to run.
+			As far as the proposed architecture is concerned it is targeting an abstract computing platform with no specific hardware available to be identified. However, the components of the existing system that are to be ported over, are currently based on the \emph{DARwIn-OP} platform.
+			We assume that there is some form of networking and processing However, we impose no requirements on the existing or future hardware.
+			Furthermore, the proposed architecture will not require any changes to the robotic hardware in order to run.
 
 	\section{Scenarios}
 		This section covers some common scenarios in robotics programming and how they would be resolved 
@@ -642,108 +631,112 @@
 
 			\paragraph{Scenario} Due to a recent rule changes in the 
 			\emph{\gls{robocup} humanoid division}~\cite[Section 1.2]{humanoid2013rules}, the goal posts are no longer different colours.
-			Therefore, a new component must be added to the robot's software allowing it to determine the
-			direction it is facing. In the event that the robot falls over this component would break the
-			field symmetry and reorient the robot. The component responsible for finding the direction would
-			require access to existing sensor input and its output would need to influence the localisation
-			system. The team has already developed a system that is able to determine the direction the
-			robot is facing by looking at features above it. All that remains is to integrate this with the current codebase.
+			Therefore, a new component must be added to the robot's software allowing it to determine the direction it is facing.
+			In the event that the robot falls over this component would break the field symmetry and reorient the robot.
+			The component responsible for finding the direction would require access to existing sensor input and its output would need to influence the localisation system.
+			The team has already developed a system that is able to determine the direction the robot is facing by looking at features above it.
+			All that remains is to integrate this with the current codebase.
 
 			\subsubsection{Current System}
-				To solve this problem we need to modify vision such that it can classify
-				new inputs from the camera for the compass system. 
-				We also need to add a new Behavior to allow the robot to look up.
+				In order to implement this in the proposed system, the following changes would be required
 				
-				Modifying vision also means we need to understand how sensors, vision and blackboard each interact
-				to retrieve the camera data. 
-				We then need to hook the compass component into the vision system which requires modifications to both vision
-				and blackboard.
-				Once the new compass component itegrated with vision we also need to integrate it with localisation. 
-				This involves a deep understanding of how localisation interacts with the blackboard and job systems and
-				requires us to modify localisation, blackboard and the compass component.
+				\begin{itemize}
+					\item Vision would need to be modified in order to allow the compass to use the image frame.
+					\item The compass code would need to be inserted into the global program flow following the current vision system so required image exists, but before localisation.
+					\item Behaviour would need to be modified to instruct the robot to look up.
+					\item The Job system would require a new Job class be created and new code in order to route this correctly.
+					\item Blackboard would need to be modified in order to provide a new location for the output of the Compass.
+					\item Localisation needs to be modified to read this information and apply it to the robots localisation.
+				\end{itemize}
+			
+				It is important to note that as vision is the only system that is set up to obtain images from the \emph{SenseMove} thread, the vision system would need to be modified to allow for multiple systems accessing the camera images.
+				This would require putting in safeguards to prevent vision from modifying the image on the blackboard and doing the same in the new compass system to ensure that they did not influence each others results.
+				As a result of the new compass system, it becomes less clear which components responsibility for requesting the new vision frame from sense/move is. If these two systems run on alternating frames, the system that requests the new frame must be carefully selected.
 				
-				We then need to add a new behavior to the system to allow the robot to look up.
-				This is no simple feat and involves modifying the core code of the Job, Motion and Behavior components while also understanding
-				how each of them interact with each other, the job queue and blackboard.
+				In order to integrate the compass the user needs an understanding of the following systems interactions \emph{Vision}, \emph{Behaviour}, \emph{Job System}, \emph{Blackboard} and\emph{Localization} as well as the global program flow in order to ensure that the correct system requests a vision frame.
+				
 			\subsubsection{Proposed System}
-				This problem still requires that we add a new behavior.
-				However we only need to modify vision's internals to add the new classification mechanism.
-				We don't need to modify sensors and both blackboard and jobs no longer exist.
+				In order to implement this in the proposed system, the following changes would be required				
+				\begin{itemize}
+					\item The compass code would need to be set up to use images as they arrive and emit its direction to the power plant.
+					\item Behaviour would need to be modified to instruct the robot to look up.
+					\item Localisation would need to be modified to utilise the new Compass information.
+				\end{itemize}
 				
-				Modifying the vision \gls{reactor} merely requires you to understand the incoming data and the vision system itself.
-				Additionally, modifying behavior no longer requires that you understand the job and blackboard systems. 
-				Instead you simply modify the motion component directly to be able to handle the new type of movement.
-
-				Integration with localisation is much easier, we simply use the standard \gls{powerplant} emit/on mechanism to send the data to localisation.
+				In order to integrate the compass the user needs an understanding of the following systems interactions \emph{Behaviour}, \emph{\glspl{reactor}} and\emph{Localization}
 				
-				All of the communication between components uses the consistent \gls{powerplant} interface. This means that if you
-				understand how to communicate with \gls{powerplant} then you understand how to communicate with every other component
-				in the system.
-
+				There are fewer systems that are affected by this change in the new architecture, and the consistent method of communication between them means that there is no longer a need to understand both blackboard and the job system.
+				The method by which messages are passed also means that no global state needs to be set up to hold the new information provided by the compass.
+				
 		\subsection{Networking with other Robots}
-			Many modules within the robots code can benefit from information gathered by other robots on their team. Sharing information such as the position of objects on the field and each robots current action allows better co-ordination of the team. Another advantage provided by networking
-			is the opportunity for distributed computing on computationally or spatially intensive problems.
+			Many modules within the robots code can benefit from information gathered by other robots on their team. Sharing information such as the position of objects on the field and each robots current action allows better co-operation.
+			Another advantage provided by networking is the opportunity for distributed computing on computationally or spatially intensive problems.
 			
-			\paragraph{Scenario} The \emph{\gls{nubots}} team have decided to improve their behaviour system to promote better teamwork between the robots. To facilitate this, the robots need an easy method to communicate their intentions to each-other across the network. The networking
-			system needs to serialise the data from the behaviour system and deserialize this data on the receiving robots.
+			\paragraph{Scenario} The \emph{\gls{nubots}} team have decided to improve their behaviour system to promote better teamwork between the robots.
+			To facilitate this, the robots need an easy method to communicate their intentions to each-other across the network.
+			The networking system needs to serialise the data from the behaviour system and deserialize this data on the receiving robots.
 			
 			\subsubsection{Current System}
-				The current system performs networking at the socket level. This means each component
-				that wants to communicate over the network needs to interact directly the operating system
-				to communicate information.
-
-				Adding any communication between the robots requires a deep understanding of both Windows and Linux style sockets.
-				You also need to understand how the existing network infrastructure works as you need to send information over
-				the same port as everything else. 
-
-				For each different type of information you want to share a new class needs to be defined and methods to serialize/deserialize it need to be written.
-				Custom network code also needs to be written for any classes that are interested in this information. 
-				For example if there are four classes interested in a particular set of information then each of them needs custom code to retrieve
-				the network data.
+				The current system does have a networking solution, however it is modified on a case by case basis to provide network traffic.
+				In order to implement this in the proposed modification the following changes would be required.
+								
+				\begin{itemize}
+					\item Behaviour would need to be modified to output its state.
+					\item A serialisation/deserialization method for the state would need to be written.
+					\item A new networking component for behaviour would need to be integrated with the existing network stack
+					\item Behaviour would need to be modified to search the incoming network traffic queue to find behaviour packets.
+					\item Behaviour would need to be modified to take advantage of information from other robots.
+				\end{itemize}
 				
-				In addition to the network code each system also needs to be modified to take advantage of the new information.
+				The current system performs networking at the socket level.
+				This means each component that wants to communicate over the network must interact directly with the operating system.
+				Adding any communication between the robots requires an understanding of both Windows and Linux style sockets.
+				It is also required to understand how the existing network traffic is sent so that all components send information over the same port.
+				As the information is sent over the same port, this means that when the behaviour system needs to read the new relevant information, it must read through all the incoming traffic to find behaviour data.
+				
 			\subsubsection{Proposed System}
 				The proposed architecture provides networking as part of the standard \gls{powerplant} interface.
-				The first step is to define a new packet which can be done with either raw C++ classes or 
-				google protocol buffers. Once that packet is defined you also need to add a network event handler
-				to the Behaviour class which is a tiny modification in the proposed architecture.
 				
-				Once the handler is hooked up you simply use the standard api tools to send the networked packet
-				between the robots. The architecture will handle details like serialisation, sockets and other network
-				issues.
+				In order to implement this in the proposed modification, the following changes would be required.
 				
-				As with the existing architecture you still need to modify the behaviour system to utilise the new data.
+				\begin{itemize}
+					\item Behaviour would need to be modified to output its state
+					\item Behaviour would need to be modified to take advantage of information from other robots.
+				\end{itemize}
+				
+				Once again, the amount of changes required in this scenario in the proposed architecture are reduced.
+				This is because the proposed architecture provides an abstraction over networking that simplifies the use of networked logic.
+				As this abstraction is built into the architecture, there is no additional effort required between sending packets between robots and using local information.
+				
 		\subsection{Moving to a new hardware platform}
 			Currently there are many robotic platforms that are available for the development of autonomous
 			robotic systems. In previous years the \emph{\gls{nubots}} team have made use of the \emph{Sony AIBO},
 			the \emph{Aldebaran Nao} and the \emph{Robotis DARwIn-OP} platforms. Additional robotic platforms will be used as technology progresses, requiring that the code be ported to the new platform.
 			Ideally this action will result in a minimal number of changes to the code base.
 
-			\paragraph{scenario} After a number of years, the Darwin-OP platform has become obsolete and a new platform, the Super Turbotron 5000, has been selected as its replacement. It has twenty
+			\paragraph{Scenario} After a number of years, the Darwin-OP platform has become obsolete and a new platform, the Super Turbotron 5000, has been selected as its replacement. It has twenty
 			additional degrees of freedom, stereo vision and two giant laser cannons. The system must be
 			adapted to be able to utilise these changes with a minimal amount of impact to the existing codebase, as well as being able to still operate on the Darwin-OP during the transition.
 
 			\subsubsection{Current System}
-				The current system handles platform changes through a long and complicated chain of conditional compilation. There are
-				more then 10 different components that rely on compiler flags to determine what platform they are targeting. This is a 
-				complex change that affects the majority of the system and requires someone who understands the entire system.
+				The current system handles platform changes through a series of conditional compilation flags throughout their source files.
+				There are more then 10 different components that rely on compiler flags to determine what platform they are targeting.
+				This is a complex change that affects the majority of the system and requires someone who understands the entire system.
 				
-				New components would need to be written to replace all of the hardware dependant components. This includes reading sensors,
-				moving motors, kinematics and anything else that talks to the robot hardware. Additionally all the systems that talk to the affected
-				components will also need to be modified. Typically this cascades to a system-wide modification.
-				\todo[inline]{Write how the current system would resolve this scenario}
+				New components would need to be written to replace all of the hardware dependent components. This includes reading sensors, moving motors, kinematics and any other components that incidentally talks to the robot's hardware.
+				Additionally all the systems that talk to the affected components may also need to be modified. Typically this cascades to a system-wide modification.
+
 			\subsubsection{Proposed System}
-				Because of the loose coupling between components it's only necessary to replace the components that directly depend on
-				robot hardware. All low-level conditional compilation is rendered obsolete in the proposed architecture with only a skeleton
-				remaining to tell the system which high-level components to activate.
+				Because of the loose coupling between components it's likely that it will only be necessary to replace the components that directly depend on the robot's hardware.
+				All low-level conditional compilation is rendered obsolete in the proposed architecture with only a skeleton remaining to tell the system which high-level components to activate.
 				
-				The majority of the system would remain unchanged. New components for hardware would still need to be written and
-				old components may need to be updated to take advantage of new hardware.
-				\todo[inline]{Write how the proposed system would resolve this scenario}
+				The majority of the system would remain unchanged. New components for hardware would still need to be written and old components may need to be updated to take advantage of new hardware.
+				
+				However the \gls{powerplant} itself is not a safeguard against this form of change. If the new system was used in such a way where low level hardware decisions were made in areas such as behaviour, rather then restricting this logic to motion, Then the new architecture will not provide as significant benefit over the existing system.
 
 		\subsection{Debugging bad Data}
 			\begin{quote}``Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'' - Brian Kernighan\end{quote}
-			One of the most useful techniques available for software debugging is being able to see inputs and outputs for a section of code. Once the data that enters a section
+			One of the most useful techniques available for software debugging is being able read inputs and outputs for a section of code. Once the data that enters a section
 			of code is known, the remainder of the code can be analysed by hand to ensure that each
 			step has the expected result. Tracing the data through the system to where the unexpected results start reveals the source of the problem.
 
@@ -754,27 +747,22 @@
 			of this logical error.
 
 			\subsubsection{Current System}
-				In the existing system tracing is done through manually adding print statements to the code in the 
-				affected areas. Some systems have the ability to write their data to the network to be viewed in real
-				time but this is provided on a per-component basis and the exact mechanism differs for each components.
+				In the existing system tracing is done through manually adding print statements to the code in the affected areas.
+				Some systems have the ability to write their data to the network to be viewed in real time but this is provided on a per-component basis and the exact mechanism differs for each components.
 				
-				For this particular problem trace statements need to be added to the Behaviour, Motion and Job systems to determine
-				why this particular job is called and why the robot is kicking it's own goal in the first place. After these statements are added
-				the \gls{nubots} team then needs identify the issue through the trace logs, write a fix and then run it live on the robot. If the 
-				fix fails it's back to step 1. Repeat until the bug is fixed.
-				\todo[inline]{Write how the current system would resolve this scenario}
+				For this particular problem trace statements need to be added to the Behaviour, Motion and Job systems to determine why this particular job is called and why the robot is kicking it's own goal in the first place.
+				After these statements are added the \gls{nubots} team then needs identify the issue through the trace logs, write a fix and then run it live on the robot.
+				If the fix fails then the process must be repeated until the bug is fixed.
+				
 			\subsubsection{Proposed System}
-				In addition to standard logging capabilities the proposed architecture also provides the ability to capture
-				the entire input sequence for a particular component. This means you can capture the exact inputs that
-				caused the robot to kick an own goal and then breakdance. Once you've captured those inputs you can then
-				turn them into a unit test which in many cases can be run independently from the robot. 
+				In addition to standard logging capabilities the proposed architecture also provides the ability to capture the entire input sequence for a particular component.
+				This means you can capture the exact inputs that caused the robot to kick an own goal and then breakdance.
+				Once you've captured those inputs you can then turn them into a unit test which in many cases can be run independently from the robot.
 				
-				Once you've translated the input into a unit test you then need to write your fix. However you don't
-				need to deploy your fix you can instead simply run the unit test and see if it passes. If the unit test passes
-				you simply deploy to the robot and the problem is solved.
-				
+				Once the system has provided a unit test, all that remains is to write a fix.
+				However in many cases this fix may be tested on the development machine instead of the robot.
+				If the unit test passes then the code can be deployed to the robot and tested to find if the problem is solved. THis greatly reduces development time as testing on the robot hardware is time consuming and intermittent.
 				This approach also has the benefit of slowly building up a library of unit and regression tests against known bugs.
-				\todo[inline]{Write how the proposed system would resolve this scenario}
 
 		\subsection{The Robot is used to perform a new task}
 			Robotics is an ever expanding field of research with robots being applied to an
@@ -801,38 +789,23 @@
 				to the kinematics model is very difficult in the current system requiring a lot of hoop jumping to
 				get access to the appropriate data. 
 
-				Then both the blackboard and jobs systems need to be modified to accomodate the new data. 
-				Finally the two main threads will need to be modified to change from "play soccer" to "dance". 
-				This involves a difficult, error prone and dangerous process that requires unlinking all non-dance related
-				methods from the loop.
+				Then both the blackboard and jobs systems need to be modified to accommodate the new data. 
+				Finally the two main threads will need to be modified to change from ``play soccer'' to ``dance''. 
+				This involves an, error prone process that requires unlinking all non-dance related methods from the loop.
 				
 			\subsubsection{Proposed System}
-				In the proposed architecture reuse of code is achieved by adding/removing modular \gls{reactor}s that
-				communicate through the \gls{powerplant}.
-				First you would need to create a new sound \gls{reactor} that buffers sound input and emits them 
-				periodically.
-				Then you need to create a sound analysis \gls{reactor} that determines the beat and emits the 
-				"feel of the song.
-				You then need a modified behavior \gls{reactor} that reactors to the beat of the song.
+				In the proposed architecture reuse of code is achieved by adding/removing modular \glspl{reactor} that communicate through the \gls{powerplant}.
+				Firsly a new sound \gls{reactor} that buffers sound input and emits it periodically would be created.
+				Then create a sound analysis \gls{reactor} that determines the beat and emits the ``feel of the song''.
+				Then a modified behaviour \gls{reactor} would react to the beat of the song and perform the dance.
 				
-				Once you've created the components you simply need to tell the power plant to use them. You also need to
-				remove the old soccer-based behavior from the system but unlike the existing architecture this is a simple
-				one-line change.
+				Once you've created the components you simply need to tell the power plant to use them.
+				You also need to remove the old soccer-based behaviour from the system but unlike the existing architecture this is a simple one-line change per component.
 
 	\section{Requirements}
+		The requirements defined in this section are used to provide a set of measurables to determine if the final architecture achieves the goals set out for it.
+		It also provides a baseline to compare this architecture against both the architecture it is replacing as well as other competing architectures.
 		
-		\todo[inline]{add an introduction to non goals and remove the instructions}
-		{
-		\em % This is the instructions
-		This is the nitty-gritty section of the document. You can expect this section to be many
-		times longer than any other section. Here we need to list every single requirement: What it
-		is, why it's important, how we can test if we've achieved it and any important details about
-		the requirement.
-
-		One of the most important things to include here are any decisions and assumptions that have
-		been made. For example:
-		}
-
 		\subsection{Multiprocessing}
 			\requirement{The architecture must take advantage of all CPU cores}
 
@@ -864,17 +837,17 @@
 			\requirement{The architecture must be portable to new platforms}
 
 			The existing system has a lot of complicated logic that is used to support a few
-			different platforms. It's currently not possible to easily swap out the Darwin motor
-			components for an AIBO or Nao motor component due to the tight coupling of systems.
+			different platforms. It's currently not possible to easily swap out the \emph{Darwin} motor
+			components for an \emph{AIBO} or \emph{Nao} motor component due to the tight coupling of systems.
 
-			The new architecture should provide a way to easily slot in platform dependant
-			components. For example it should be possible to remove the hardware-dependant Darwin
+			The new architecture should provide a way to easily slot in platform dependent
+			components. For example it should be possible to remove the hardware-dependent Darwin
 			camera component and replace it with an AIBO component with minimal to no modification
 			of other components.
 
 			Portability can be measured by determining the amount of code that depends on specific
 			hardware or platforms. For this exercise Unit Tests can be considered another platform
-			so we could determine the portability by replacing hardware-dependant components with
+			so we could determine the portability by replacing hardware-dependent components with
 			mock components.
 
 			Technical Note: Obviously if the format of the data changes the systems that rely on
@@ -946,8 +919,6 @@
 			understood and changed to add this new components we could also develop a metric for
 			analysing the extent of the changes.
 
-			\todo[inline]{Consider defining analysis metric in this document}
-
 		\subsection{Networking}
 			\requirement{The architecture must provide methods to easily perform network
 			communication}
@@ -997,10 +968,7 @@
 			the contents of those data packets should also be available in order to replay the
 			scenario that caused the error.
 
-			These debugging tools can be measured by comparing the difficulty of tracing the source
-			of data from one system to another.
-
-			\todo[inline]{Expand this measurable for the debugging tools}
+			These debugging tools can be measured by comparing the difficulty of tracing data through a system. It can also be measured by the ability to easily replay the data through the system to see the results.
 
 		\subsection{Testing}
 			\requirement{The architecture must provide tools for unit testing individual components}
@@ -1038,8 +1006,6 @@
 			would give us a crippling advantage over the other teams.
 
 			This goal can be measured by checking if we can integrate a ROS component.
-
-			\todo[inline]{Improve/extend. Validate the claim about other \gls{robocup} teams}
 
 	\bibliographystyle{plain}
 	\bibliography{references}
