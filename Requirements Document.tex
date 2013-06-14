@@ -355,9 +355,9 @@
 			This gives them access to the two key functions of the proposed architecture: \textbf{On} and
 			\textbf{Emit}.
 			\emph{On} allows users to specify reactions which behave as callbacks that are called when new data comes in.
-			For example: A reaction that is called when new image data is retrieved. \emph{Emit} allows \gls{reactor}s to send out a new
+			For example: A reaction that is called when new image data is retrieved. \emph{Emit} allows \glspl{reactor} to send out a new
 			piece of data such as the sensor \gls{reactor} using \emph{Emit} to send new image data every
-			time it reads the camera hardware. \gls{reactor}s also provide one special type of event named
+			time it reads the camera hardware. \glspl{reactor} also provide one special type of event named
 			\textbf{Every} which lets you subscribe to an event that is guaranteed to tick at
 			consistent intervals. See Figure~\ref{fig:OnAndEmitExample} on
 			page~\pageref{fig:OnAndEmitExample} for an example of how \emph{On}, \emph{Emit} and
@@ -552,7 +552,7 @@
 			The client has also expressed how important it is that the robots be able to easily
 			communicate. Networking is a difficult and error-prone process which is why it's
 			imperative that the architecture provide a simple mechanism for robots to communicate.
-			The proposed architecture allows you to treat \gls{reactor}s on other robots as potential
+			The proposed architecture allows you to treat \glspl{reactor} on other robots as potential
 			targets for your data. This means you can emit data on one robot and receive it on any
 			of the other robots. See Figure~\ref{fig:NetworkExampleDiagram} on
 			page~\pageref{fig:NetworkExampleDiagram} for an example of how the networking system
