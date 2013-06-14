@@ -149,11 +149,16 @@
 		\end{tabular}
 		
 	\section{Introduction}
-		Goals of this document:
-		1. Provide an overview of the existing and proposed NUBot architectures.
-		2. Explain the benifits and rational behind the proposed architecture.
-		3. Outline the requirements that any proposed system must satisfy to be considered a worthwhile architecture.
-		\todo[inline] {Write Introduction - Make into sentances and improve flow}
+		Sometimes in software it's important to take a step back and evaluate your creation.
+		Thanks to a period of quiet meditation atop Mt. Newcastle the NUbots team, reaching enlightenment, have decided
+		to replace the existing horror masquerating as an architecture with a new, more effective, architecture.
+		
+		This document outlines the existing architecture, what benifits can be gained from it's replacement the issues that
+		warrent it's replacement.
+		Additionally we also propose a new architecture designed to address these issues.
+		
+		Finally this document outlines the criteria by which any proposed architecture will be measured. 
+		We achieve this by provoding a list of requirements that any proposed architecture must satisfy.
 
 	\section{Overview}
 		This section provides an overview of the existing architecture and the proposed architecture.
@@ -235,6 +240,7 @@
 				\label {fig:HighLevelExistingArchitecture}
 			\end{figure}
 
+
 			When viewed from far away the existing architecture resembles an intricate spider web
 			woven from good intentions and demonic pacts with the compiler.
 			For a high level overview see Figure~\ref{fig:HighLevelExistingArchitecture} on page~\pageref{fig:HighLevelExistingArchitecture}.
@@ -246,12 +252,13 @@
 			The result is a system with components that look and behave with wildly different assumptions, patterns and
 			idioms.
 			This causes massive duplication of effort for the NUBots team and it's not uncommon to see very similar classes be
-			implemented multiple times by different people because of a lack of architecture.
+			implemented multiple times by different people due to the lack of architecture.
 
 			Imagine a group of people each of whom had come up with their own unique language.
 			Now imagine them trying to communicate and you would have a good idea of what communication
 			between components looks like in the existing architecture.
-			Some components communicate through the blackboard or the jobs system, some components communicate through
+			Some components communicate through the a global data store known as the blackboard,
+			others utilize a global queue known as the jobs system, some components communicate through
 			direct function calls, some components communicate through implicit or global state such as singletons and some
 			components communicate through other more arcane means such as inferring information indirectly.
 
