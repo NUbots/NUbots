@@ -1485,7 +1485,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
             colourBuff.push_back(tempTransition->getColour());
         }
 
-        int length = abs(tempTransition->getEndPoint().y - tempTransition->getStartPoint().y);
+        int length = std::abs(tempTransition->getEndPoint().y - tempTransition->getStartPoint().y);
         Vector2<int> tempSubEndPoint;
         Vector2<int> tempSubStartPoint;
         unsigned char subAfterColour;
@@ -1607,7 +1607,7 @@ void Vision::CloselyClassifyScanline(ScanLine* tempLine, TransitionSegment* temp
         boost::circular_buffer<unsigned char> colourBuff(bufferSize);
 
 
-        int length = abs(tempTransition->getEndPoint().x - tempTransition->getStartPoint().x);
+        int length = std::abs(tempTransition->getEndPoint().x - tempTransition->getStartPoint().x);
         Vector2<int> tempSubEndPoint;
         Vector2<int> tempSubStartPoint;
         unsigned char subAfterColour;

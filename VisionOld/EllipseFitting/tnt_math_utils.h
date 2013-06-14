@@ -19,7 +19,7 @@ Real hypot(const Real &a, const Real &b)
 {
 	
 	if (a== 0)
-		return abs(b);
+		return std::abs(b);
 	else
 	{
 		Real c = b/a;
