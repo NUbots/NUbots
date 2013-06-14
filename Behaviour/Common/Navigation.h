@@ -137,7 +137,11 @@ public:
     
     bool isStopped() {
         const float epsilon = 0.05;
-        return current_walk_command[0] < epsilon and mathGeneral::abs(current_walk_command[1]) < epsilon and mathGeneral::abs(current_walk_command[2]) < epsilon;
+        if (current_walk_command.size() > 0) {
+            return current_walk_command[0] < epsilon and mathGeneral::abs(current_walk_command[1]) < epsilon and mathGeneral::abs(current_walk_command[2]) < epsilon;
+        } else {
+            return false;
+        }
     }
         
     /*! @brief Go to a point and face a heading. Returned std::vector is walk command std::vector.
