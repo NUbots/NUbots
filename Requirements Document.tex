@@ -689,17 +689,19 @@
 			
 			\subsubsection{Current System}
 				The current system performs networking at the socket level. This means each component
-				that wants to communicate over the network needs to interact directly with sockets in order
+				that wants to communicate over the network needs to interact directly the operating system
 				to communicate information.
+
+				Adding any communication between the robots requires a deep understanding of both Windows and Linux style sockets.
+				You also need to understand how the existing network infrastructure works as you need to send information over
+				the same port as everything else. 
+
+				For each different type of information you want to share a new class needs to be defined and methods to serialize/deserialize it need to be written.
+				Custom network code also needs to be written for any classes that are interested in this information. 
+				For example if there are four classes interested in a particular set of information then each of them needs custom code to retrieve
+				the network data.
 				
-				To implement this behaviour sharing mechanism a new packet type needs to be declared and a deep
-				understanding of Win32 sockets, POSIX sockets and the existing network code is needed. Once the new
-				packet is defined serialisation methods need to be written to convert it to a network compatible representation
-				and back. Custom network code then needs to be written for the behaviour system to handle sending/receiving the
-				networked data to ensure it is used correctly.
-				
-				Once the network transfer is complete the behaviour system then needs to be modified to utilise the new information.
-				\todo[inline]{Write how the current system would resolve or does resolve this scenario}
+				In addition to the network code each system also needs to be modified to take advantage of the new information.
 			\subsubsection{Proposed System}
 				The proposed architecture provides networking as part of the standard \gls{powerplant} interface.
 				The first step is to define a new packet which can be done with either raw C++ classes or 
@@ -711,8 +713,6 @@
 				issues.
 				
 				As with the existing architecture you still need to modify the behaviour system to utilise the new data.
-				\todo[inline]{Write how the proposed system would resolve this scenario}
-
 		\subsection{Moving to a new hardware platform}
 			Currently there are many robotic platforms that are available for the development of autonomous
 			robotic systems. In previous years the \emph{\gls{nubots}} team have made use of the \emph{Sony AIBO},
