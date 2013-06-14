@@ -492,11 +492,11 @@ void DataWrapper::plotCurve(std::string name, std::vector< Point > pts)
 
     // FILE OUTPUT, REMOVE LATER
     static bool clear = true;
-    ofstream out;
+    std::ofstream out;
     if(clear)
         out.open("lines.txt");
     else
-        out.open("lines.txt", ios_base::app);
+        out.open("lines.txt", std::ios_base::app);
     clear = false;
     out << name << " = [" << name << " {[";
     BOOST_FOREACH(Point p, pts) {
@@ -591,7 +591,7 @@ bool DataWrapper::updateFrame(bool forward)
             }
             try {
                 if(!forward)
-                    imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), ios_base::cur);
+                    imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), std::ios_base::cur);
                 imagestrm >> m_current_image;
             }
             catch(std::exception& e) {
@@ -600,7 +600,7 @@ bool DataWrapper::updateFrame(bool forward)
             if(using_sensors) {
                 try {
                     if(!forward)
-                        imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), ios_base::cur);
+                        imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), std::ios_base::cur);
                     sensorstrm >> m_sensor_data;
                 }
                 catch(std::exception& e){
