@@ -16,6 +16,8 @@
 \usepackage[nottoc,numbib]{tocbibind}
 % Allows us to put landscape sections of the document
 \usepackage{pdflscape} % \usepackage{lscape} %Use escape for printing (doesn't rotate the pdf page)
+% Provides a glossary
+\usepackage[toc]{glossaries}
 
 % Gives us pretty diagrams
 \usepackage{tikz}
@@ -79,6 +81,42 @@
 % Skip line rather then indent paragraphs
 \setlength{\parindent}{0.0in}
 \setlength{\parskip}{0.1in}
+
+% Make our glossary
+\makeglossaries
+
+% Our glossary
+\newglossaryentry{powerplant}
+{
+	name=Power Plant,
+	description={
+		is the central component of the Proposed Architecture that links all other components together
+	}
+}
+
+\newglossaryentry{reactor}
+{
+	name=Reactor,
+	description={
+		is the reactor
+	}
+}
+
+\newglossaryentry{nubots}
+{
+	name=NUBots,
+	description={
+		is the NUBots
+	}
+}
+
+\newglossaryentry{robocup}
+{
+	name=RoboCup,
+	description={
+		is the robocup
+	}
+}
 
 % Start of document
 \begin{document}
@@ -150,10 +188,10 @@
 		
 	\section{Introduction}
 		Sometimes in software it is important to take a step back and evaluate your creation.
-		The University of Newcastle NUBots team have in previous years achieved success in the RoboCup competition, placing several times.
+		The University of Newcastle \gls{nubots} team have in previous years achieved success in the \gls{robocup} competition, placing several times.
 		However in recent years the team has undergone a change in robotic platform from the \emph{Aldebaran Nao} to the \emph{Robotis DARwIn-OP}, as well as making continuous compromises in code quality to achieve deadlines.
 		As a result of this, the software architecture of the current system has become a bastardised version of its original intent.
-		The NUbots team, as a result of this have decided to replace the existing architecture with a new more effective architecture.
+		The \gls{nubots} team, as a result of this have decided to replace the existing architecture with a new more effective architecture.
 		
 		This document outlines the existing architecture, what benefits can be gained from its replacement as well as the issues that warrant its replacement.
 		Additionally we also propose a new architecture designed to address these issues as well as providing enhancements that will allow the system to perform effectively now and into the future.
@@ -241,7 +279,7 @@
 				\label {fig:HighLevelExistingArchitecture}
 			\end{figure}
 
-			From a distance, the existing architectures connections resemble an intricate spider web
+			From a distance, the existing architecture's connections resemble an intricate spider web
 			woven from good intentions and demonic pacts with the compiler.
 			A highly simplified diagram of the architecture and flow of the existing system can be seen in Figure~\ref{fig:HighLevelExistingArchitecture} on page~\pageref{fig:HighLevelExistingArchitecture}.
 			The current system was originally designed as a purely object-oriented system designed to be easy to understand and extend.
@@ -249,12 +287,12 @@
 			Years of having no one responsible for the architecture has resulted in it slowly fragmenting and has heavily impacted its quality.
 			New engineers working on the system had no one to turn to for advice and resorted to implementing unique architectures for their components.
 			These problems result in a system with components that use very different assumptions and design patterns.
-			This causes duplication of effort for the NUBots team and it is not uncommon to see very similar classes be implemented multiple times by different people due to the lack of clear architecture.
+			This causes duplication of effort for the \gls{nubots} team and it is not uncommon to see very similar classes be implemented multiple times by different people due to the lack of clear architecture.
 
 			Some components communicate through the a global data store known as the blackboard, others utilise a global queue known as the jobs system, most communicate through direct function calls and some components even communicate through implicit or global state such as singletons.
 			This myriad of ways in which components can communicate has a huge impact on team productivity.
 			In order to make modifications to a component you must understand its interface, the interface of anything it interacts with, and the interfaces of any new component to be used.
-			In the NUBots case it is common to have components that need to talk to three or more other components. This results in a minimum of four different systems you need to understand before you can make any change.
+			In the \gls{nubots} case it is common to have components that need to talk to three or more other components. This results in a minimum of four different systems you need to understand before you can make any change.
 
 			For example: The vision system communicates utilising a two step process.
 			First the vision system accesses the sensor system directly through blackboard and asks it to process a new frame.
@@ -265,7 +303,7 @@
 			It is also important to note that no other systems are intended to request the latest frame, and doing so would break the robots functionality.
 
 			Another example of these architectural issues can be found in the Movement module:
-			The NUbots system defines a number of movement handlers each responsible for a set of movements such as kicking the ball or walking.
+			The \gls{nubots} system defines a number of movement handlers each responsible for a set of movements such as kicking the ball or walking.
 			The movement system periodically retrieves all of the jobs in the job queue and sends them to the appropriate movement handler. 
 			The movement handlers then talk to the action system to execute the selected motions. 
 			This base case does not have any issues however it is also possible for any other component to talk to the movement handlers directly.
@@ -290,7 +328,7 @@
 
 					% Draw our central Power Plant star
 					\node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm]
-					(powerplant) {\Huge Power Plant};
+					(powerplant) {\Huge \gls{powerplant}};
 
 					% Loop through each of our reactors
 					\foreach [count=\i] \reactor in
@@ -308,21 +346,18 @@
 				\label{fig:HighLevelProposedArchitecture}
 			\end{figure}
 
-			As you can see in Figure~\ref{fig:HighLevelProposedArchitecture} on
-			page~\pageref{fig:HighLevelProposedArchitecture}
-			The central authority of the proposed architecture is known as the "Power Plant" which
-			is responsible for coordinating the various functions of the architecture and works
-			behind the scenes to provide message handling. Only one power plant exists can per
-			program and the majority of the time the user won't even need to think about it.
+			As you can see in Figure~\ref{fig:HighLevelProposedArchitecture} on page~\pageref{fig:HighLevelProposedArchitecture} the central authority of the proposed architecture is known as the \gls{powerplant}.
+			The \gls{powerplant} is responsible for coordinating the various functions of the architecture and works behind the scenes to provide message handling.
+			Only one \gls{powerplant} exists can per program and the majority of the time the developers of the system will not directly interact with it.
 
-			The point of interaction that most users will see is called a "Reactor". When a user
-			wants to create a new feature they create a new class that inherits from Reactor. This
-			gives them access to the two key functions of the proposed architecture: \textbf{On} and
-			\textbf{Emit}. \emph{On} allows users to specify reactions which can be though of as
-			callbacks that are called when new data comes in. For example: A reaction that is called
-			whenever new image data is retrieved. \emph{Emit} allows reactors to send out a new
-			piece of data such as the sensor reactor using \emph{Emit} to send new image data every
-			time it reads the camera hardware. Reactors also provide one special type of event named
+			The point of interaction that most users will see is called a \emph{\gls{reactor}}.
+			When a user wants to create a new feature they create a new class that inherits from \gls{reactor}.
+			This gives them access to the two key functions of the proposed architecture: \textbf{On} and
+			\textbf{Emit}.
+			\emph{On} allows users to specify reactions which behave as callbacks that are called when new data comes in.
+			For example: A reaction that is called when new image data is retrieved. \emph{Emit} allows \gls{reactor}s to send out a new
+			piece of data such as the sensor \gls{reactor} using \emph{Emit} to send new image data every
+			time it reads the camera hardware. \gls{reactor}s also provide one special type of event named
 			\textbf{Every} which lets you subscribe to an event that is guaranteed to tick at
 			consistent intervals. See Figure~\ref{fig:OnAndEmitExample} on
 			page~\pageref{fig:OnAndEmitExample} for an example of how \emph{On}, \emph{Emit} and
@@ -412,7 +447,7 @@
 
 					%% Add headers for the three threads
 					\node [header,above=of onevery] (sensorsHeader) {Sensors};
-					\node [header,above=of register] {Power Plant};
+					\node [header,above=of register] {\gls{powerplant}};
 					\node [header,above=of onimage] (visionHeader) {Vision};
 
 					%% Add the column backgrounds for Sensors and Vision
@@ -442,11 +477,11 @@
 			Unfortunately the current system only takes advantage of at most two cores.
 			You wouldn't ride a horse that tried to gallop on a single leg and you wouldn't use an architecture
 			that didn't let you take full advantage of your processing resources.
-			The proposed architecture takes care of multithreading transparently so the NUbots team can
+			The proposed architecture takes care of multithreading transparently so the \gls{nubots} team can
 			focus on figuring out the important questions such "can this robot fetch me a pizza?".
 			When a reaction is triggered it doesn't necessarily run immediately.
 			Instead the reaction is put into a blocking priority queue and then executed on one of the many threads
-			available to the power plant via a thread pool.
+			available to the \gls{powerplant} via a thread pool.
 			For an example of how this system works see Figure~\ref{fig:PowerPlantThreadingOverviewDiagram} on
 			page~\pageref{fig:PowerPlantThreadingOverviewDiagram}.
 
@@ -509,7 +544,7 @@
 					\end{scope}
 
 				\end{tikzpicture}
-				\caption {An overview of the Power Plant threading system}
+				\caption {An overview of the \gls{powerplant} threading system}
 				\label{fig:PowerPlantThreadingOverviewDiagram}
 			\end{figure}
 			\end{landscape}
@@ -517,7 +552,7 @@
 			The client has also expressed how important it is that the robots be able to easily
 			communicate. Networking is a difficult and error-prone process which is why it's
 			imperative that the architecture provide a simple mechanism for robots to communicate.
-			The proposed architecture allows you to treat reactors on other robots as potential
+			The proposed architecture allows you to treat \gls{reactor}s on other robots as potential
 			targets for your data. This means you can emit data on one robot and receive it on any
 			of the other robots. See Figure~\ref{fig:NetworkExampleDiagram} on
 			page~\pageref{fig:NetworkExampleDiagram} for an example of how the networking system
@@ -533,7 +568,7 @@
 					%%% Left Power Plant
 					\node at (0, 0)
 						[draw,star,star points=8,star point ratio=0.875,minimum width=3cm]
-						(plantA) {Power Plant A};
+						(plantA) {\gls{powerplant} A};
 					\node [above=of plantA,reactor] (sensorsA) {Sensors};
 					\node [below=of plantA,reactor,align=center] (fieldmapperA) {2d Field\\Mapper};
 					\path [A, write] (sensorsA) edge node[A,left] {Image(A)} (plantA);
@@ -543,7 +578,7 @@
 					%%% Right Power Plant
 					\node at (2, 0)
 						[draw,star,star points=8,star point ratio=0.875,minimum width=3cm]
-						(plantB){Power Plant B};
+						(plantB){\gls{powerplant} B};
 					\node [above=of plantB,reactor] (sensorsB) {Sensors};
 					\node [below=of plantB,reactor,align=center] (fieldmapperB) {2d Field\\Mapper};
 					\path [B, write] (sensorsB) edge node[left] {Image(B)} (plantB);
@@ -577,7 +612,7 @@
 		components will benifit indirectly from improved architectural consistency.
 		
 		\subsection{Algorithm Changes}
-			The NUBots system contains a number of complicated mathematical systems that are used by the robot
+			The \gls{nubots} system contains a number of complicated mathematical systems that are used by the robot
 			to analyse the world, make decisions and perform other useful functions. 
 			The proposed architecture will not change these algorithms beyond any neccecary changes required to
 			integrate them into the new architectural style.
@@ -618,7 +653,7 @@
 			These components will either augment existing abilities or provide new functionality.
 
 			\paragraph{Scenario} Due to a recent rule changes in the 
-			\emph{RoboCup humanoid division}~\cite[Section 1.2]{humanoid2013rules}, the goal posts are no longer different colours.
+			\emph{\gls{robocup} humanoid division}~\cite[Section 1.2]{humanoid2013rules}, the goal posts are no longer different colours.
 			Therefore, a new component must be added to the robot's software allowing it to determine the
 			direction it is facing. In the event that the robot falls over this component would break the
 			field symmetry and reorient the robot. The component responsible for finding the direction would
@@ -653,11 +688,11 @@
 				However adding new functionality in the proposed architecture doesn't require us to understand the sensor system.
 				We simply need to understand the data coming out of the sensor system.
 				We also still need to add a new behaviour to look upwards. We no longer need to change the job system as it's merged
-				in as part of the standard communication api. Instead we modify the motion reactor to handle the new type of movement.
-				Integration with localisation is much easier, we simply use the standard power plant emit/on mechanism to send the data to localisation.
+				in as part of the standard communication api. Instead we modify the motion \gls{reactor} to handle the new type of movement.
+				Integration with localisation is much easier, we simply use the standard \gls{powerplant} emit/on mechanism to send the data to localisation.
 				
-				All of the communication between components uses the consistent power plant interface. This means that if you
-				understand how to communicate with power plant then you understand how to communicate with every other component
+				All of the communication between components uses the consistent \gls{powerplant} interface. This means that if you
+				understand how to communicate with \gls{powerplant} then you understand how to communicate with every other component
 				in the system.
 
 				\todo[inline]{Write how the proposed system would resolve this scenario}
@@ -666,7 +701,7 @@
 			Many modules within the robots code can benefit from information gathered by other robots on their team. Sharing information such as the position of objects on the field and each robots current action allows better co-ordination of the team. Another advantage provided by networking
 			is the opportunity for distributed computing computationally or spatially intensive problems.
 			
-			\paragraph{Scenario} The \emph{NUBots} team have decided to improve their behaviour system to promote better teamwork between the robots. To facilitate this, the robots need an easy method to communicate their intentions to each-other across the network. The networking
+			\paragraph{Scenario} The \emph{\gls{nubots}} team have decided to improve their behaviour system to promote better teamwork between the robots. To facilitate this, the robots need an easy method to communicate their intentions to each-other across the network. The networking
 			system needs to serialise the data from the behaviour system and deserialize this data on the receiving robots.
 			
 			\subsubsection{Current System}
@@ -683,7 +718,7 @@
 				Once the network transfer is complete the behaviour system then needs to be modified to utilise the new information.
 				\todo[inline]{Write how the current system would resolve or does resolve this scenario}
 			\subsubsection{Proposed System}
-				The proposed architecture provides networking as part of the standard power plant interface.
+				The proposed architecture provides networking as part of the standard \gls{powerplant} interface.
 				The first step is to define a new packet which can be done with either raw C++ classes or 
 				google protocol buffers. Once that packet is defined you also need to add a network event handler
 				to the Behaviour class which is a tiny modification in the proposed architecture.
@@ -697,7 +732,7 @@
 
 		\subsection{Moving to a new hardware platform}
 			Currently there are many robotic platforms that are available for the development of autonomous
-			robotic systems. In previous years the \emph{NUBots} team have made use of the \emph{Sony AIBO},
+			robotic systems. In previous years the \emph{\gls{nubots}} team have made use of the \emph{Sony AIBO},
 			the \emph{Aldebaran Nao} and the \emph{Robotis DARwIn-OP} platforms. Additional robotic platforms will be used as technology progresses, requiring that the code be ported to the new platform.
 			Ideally this action will result in a minimal number of changes to the code base.
 
@@ -729,7 +764,7 @@
 			of code is known, the remainder of the code can be analysed by hand to ensure that each
 			step has the expected result. Tracing the data through the system to where the unexpected results start reveals the source of the problem.
 
-			\paragraph{Scenario} The NUBots team have encountered a problem where the robot after
+			\paragraph{Scenario} The \gls{nubots} team have encountered a problem where the robot after
 			receiving a notification that it kicked an own goal, will proceed to breakdance instead
 			of hanging its head in shame. They have identified that this activity is due to the
 			\em{Breakdance} action being performed instead of the expected \em{SadRobot} action. However, they are unable to identify why this action is being performed and need to trace the source
@@ -742,7 +777,7 @@
 				
 				For this particular problem trace statements need to be added to the Behaviour, Motion and Job systems to determine
 				why this particular job is called and why the robot is kicking it's own goal in the first place. After these statements are added
-				the NUBots team then needs identify the issue through the trace logs, write a fix and then run it live on the robot. If the 
+				the \gls{nubots} team then needs identify the issue through the trace logs, write a fix and then run it live on the robot. If the 
 				fix fails it's back to step 1. Repeat until the bug is fixed.
 				\todo[inline]{Write how the current system would resolve this scenario}
 			\subsubsection{Proposed System}
@@ -766,9 +801,9 @@
 			from the surrounding code may be ignored in favour of rewriting the required
 			functionality.
 
-			The NUBots team have been asked to add dancing capabilities to the robot to help market the 
+			The \gls{nubots} team have been asked to add dancing capabilities to the robot to help market the 
 			university. The university wants the robot to be able to dance to a beat and compete in 
-			``So you think you can RoboDance''. The NUBots team realises that some of their existing
+			``So you think you can RoboDance''. The \gls{nubots} team realises that some of their existing
 			code can be leveraged to build the dance subsystem.
 
 			\subsubsection{Current System}
@@ -785,8 +820,8 @@
 				\todo[inline] {Properly describe the issues with accessing kinematics}
 				\todo[inline]{Write how the current system would resolve this scenario}
 			\subsubsection{Proposed System}
-				Create a new sound reactor that emits sound events. 
-				Create a new sound analysis reactor that determines the beat and emits
+				Create a new sound \gls{reactor} that emits sound events. 
+				Create a new sound analysis \gls{reactor} that determines the beat and emits
 				the "feel" of the song.
 				Have behaviour react to the "feel" data and select an appropriate scripted dance move.
 				Motion runs the dance.
@@ -873,7 +908,7 @@
 
 			The proposed architecture should be optimised to run efficiently so it doesn't take
 			valuable resources away from critical computations. Ideally the architecture should be
-			structured in such a way that it can assist the NUBots team in writing efficient code.
+			structured in such a way that it can assist the \gls{nubots} team in writing efficient code.
 			The first key indicator of performance is to determine the ratio of time used by the
 			architecture vs. the time taken by actual components. Ideally the ratio should be so
 			small as to be practically insignificant. A good architecture should also provide the
@@ -934,7 +969,7 @@
 			a networking solution. However it is difficult to use and this deters coders from using
 			it to better the team abilities of the robots. By providing a simple and intuitive
 			interface to send and receive networked data, a greater range of possibilities of team
-			behaviour and distributed computing become accessible to the NUBots team.
+			behaviour and distributed computing become accessible to the \gls{nubots} team.
 
 			The new architecture must be able to automatically find and communicate with any robots
 			that are currently on the network without configuration (auto discovery). It also must
@@ -1011,13 +1046,15 @@
 			The proposed architecture could provide systems to make ROS component integration easy.
 			Currently the existing system doesn't contain any facilities for ROS integration.
 
-			Additionally no other RoboCup teams have any degree of ROS support. Having ROS support
+			Additionally no other \gls{robocup} teams have any degree of ROS support. Having ROS support
 			would give us a crippling advantage over the other teams.
 
 			This goal can be measured by checking if we can integrate a ROS component.
 
-			\todo[inline]{Improve/extend. Validate the claim about other Robocup teams}
+			\todo[inline]{Improve/extend. Validate the claim about other \gls{robocup} teams}
 
 	\bibliographystyle{plain}
 	\bibliography{references}
+	
+	\printglossaries
 \end{document}
