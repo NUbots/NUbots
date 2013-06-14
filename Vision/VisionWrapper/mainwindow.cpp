@@ -102,7 +102,7 @@ MainWindow::~MainWindow()
         delete it->second;
     }
     plots.clear();
-    for(std::std::map<QString, QwtPlotCurve*>::iterator it = curves.begin(); it != curves.end(); it++) {
+    for(std::map<QString, QwtPlotCurve*>::iterator it = curves.begin(); it != curves.end(); it++) {
         delete it->second;
     }
     curves.clear();
@@ -336,7 +336,7 @@ void MainWindow::setDashedCurve(PLOTWINDOW win, QString name, std::vector<Vector
 void MainWindow::setHistogram(PLOTWINDOW win, QString name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style)
 {
     //set curve
-    Qstd::vector<QwtIntervalSample> samples;
+    QVector<QwtIntervalSample> samples;
     if(histograms.find(name) == histograms.end()) {
         //hist does not exist - create
         histograms[name] = new QwtPlotHistogram(name);

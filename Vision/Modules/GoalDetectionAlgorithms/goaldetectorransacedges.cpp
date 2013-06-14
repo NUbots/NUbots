@@ -30,7 +30,7 @@ std::vector<Goal> GoalDetectorRANSACEdges::run()
                           vsegments = vbb->getVerticalTransitions(GOAL_COLOUR);
     std::list<Quad> quads,
                post_candidates;
-    pair<bool, Quad> crossbar(false, Quad());
+    std::pair<bool, Quad> crossbar(false, Quad());
     std::vector<Goal> posts;
 
     std::vector<Point> start_points, end_points;
@@ -70,6 +70,7 @@ std::vector<Goal> GoalDetectorRANSACEdges::run()
     const double ANGLE_MARGIN = 0.25;
     BOOST_FOREACH(Quad& q, quads) {
         double angle = khorizon.getAngleBetween(Line(q.getTopCentre(), q.getBottomCentre()));
+
         if( angle  >= (1-ANGLE_MARGIN)*mathGeneral::PI*0.5 ) {
             post_candidates.push_back(q);
         }

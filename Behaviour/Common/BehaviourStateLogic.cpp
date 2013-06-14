@@ -39,7 +39,7 @@ void BehaviourStateLogic::checkGameState() {
         timeUnPenalised = Blackboard->Sensors->GetTimestamp();
     }
     states[GAME_STATE_PENALISED] = Blackboard->GameInfo->getCurrentState() == GameInformation::PenalisedState;
-    states[GAME_STATE_POSITIONING] = Blackboard->GameInfo->getCurrentState() == GameInformation::SetState;
+    states[GAME_STATE_SET] = Blackboard->GameInfo->getCurrentState() == GameInformation::SetState;
     states[GAME_STATE_READY] = Blackboard->GameInfo->getCurrentState() == GameInformation::ReadyState;
     
     //manage time since we've resumed play
@@ -53,13 +53,20 @@ void BehaviourStateLogic::checkGameState() {
 }
 
 void BehaviourStateLogic::checkMyMovement() {
+    
     Navigation* nav = Navigation::getInstance();
+    
     //XXX: not sure if in_position needs help
-    Blackboard->Sensors->get(NUSensorsDat a::MotionKickActive, states[IS_KICKING]);
+    Blackboard->Sensors->get(NUSensorsData::MotionKickActive, states[IS_KICKING]);
+
     states[IS_APPROACHING_BALL] =  nav->getCurrentCommand() == Navigation::GOTOOBJECT;
+    
     states[IS_IN_POSITION] = nav->getCurrentCommand() == Navigation::GOTOPOINT and
+                             (states[GAME_STATE_PLAYING] or states[GAME_STATE_READY] or states[GAME_STATE_SET]) and
                              nav->isStopped();
+    
     states[IS_GOAL_KEEPER] = Blackboard->GameInfo->getPlayerNumber() == m_GoalKeeper;
+    
 }
 
 void BehaviourStateLogic::checkFallen() {
