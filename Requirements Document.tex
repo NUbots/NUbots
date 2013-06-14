@@ -629,23 +629,8 @@
 			hardware in order to run.
 
 	\section{Scenarios}
-		\todo[inline]{write an introduction to the scenarios section and remove the instructions}
-		{\em % This is a the instructions
-		This is a high level overview of how the architecture will be used by the client. In our
-		case the client is a programming team so we need to provide details of how the API will be
-		used to implement existing features. We should also provide some examples of how new
-		features would be added. Because this document is targeted at a programming team we should
-		include some code examples. However we shouldn't clutter all the pages with piles of code so
-		please try and keep the examples simple!
-
-		Right now I'm arguing that scenarios and non-goals come first. This is so we can set the
-		scene in the readers mind and show them the problems that need to be solved. Scenarios is
-		also a good place to talk about how "here's how this would have worked in the old system. As
-		you can see our system is a million times better because instead of being (impossible/a huge
-		pain in the ass/computationally infeasible) it only took 15 minutes of work!
-
-		Example Scenarios: Field Changes, Number of Players Change compare old/new system.
-		}
+		This section covers some common scenarios in robotics programming and how they would be resolved 
+		using both the existing and proposed architecture.
 
 		\subsection{New Functionality Added to System}
 			The robot currently consists of several integrated components allowing it to play soccer.
@@ -662,44 +647,39 @@
 			robot is facing by looking at features above it. All that remains is to integrate this with the current codebase.
 
 			\subsubsection{Current System}
-				To solve this problem we need to modify the Vision system such that it can classify new inputs
-				from the camera for the compass system. 
-				Adding new functionality the vision means we need to understand how sensors interact with vision. 
-				We also need to understand how blackboard facilitates the communication between sensors and vision.
-				Additionally we need to add a new behaviour because the robot needs to be able to look upwards and currently
-				there is no behaviour for that.
-				To add a new behaviour we also need to understand the Job and Motion system and the high level Behaviour finite state machine.
-				Adding a new job involves modifying the core job system so we need to make sure we have an in-depth understanding
-				or we can break the entire robot AI.
-				Once we've developed the compass system we also need to integrate it with Localisation, this means we need to
-				modify the core of localisation to request the information from the appropriate modules. In order to modify
-				localisation we need to understand how it interacts with blackboard and jobs.
+				To solve this problem we need to modify vision such that it can classify
+				new inputs from the camera for the compass system. 
+				We also need to add a new Behavior to allow the robot to look up.
 				
-				In addition to all these steps we need to make sure that our changes don't accidentally break something another component
-				relies on. It's possible for any component in the system to indirectly rely on thousands of tiny details so we need to be extremely
-				careful with what we change.
+				Modifying vision also means we need to understand how sensors, vision and blackboard each interact
+				to retrieve the camera data. 
+				We then need to hook the compass component into the vision system which requires modifications to both vision
+				and blackboard.
+				Once the new compass component itegrated with vision we also need to integrate it with localisation. 
+				This involves a deep understanding of how localisation interacts with the blackboard and job systems and
+				requires us to modify localisation, blackboard and the compass component.
 				
-				\todo[inline]{As the system needs the vision frame, needs to understand the internals of vision to obtain the vision frame from it. Can't request from sense move again, needs to use a different method of obtaining the frame from vision}
-				\todo[inline]{The blackboard would need to be modified to hold the new information from this}
-				\todo[inline]{The localisation system would need to be modified to pull this information}
+				We then need to add a new behavior to the system to allow the robot to look up.
+				This is no simple feat and involves modifying the core code of the Job, Motion and Behavior components while also understanding
+				how each of them interact with each other, the job queue and blackboard.
 			\subsubsection{Proposed System}
-				As seen in the current system we still need to modify the Vision system so it can classify new inputs from
-				the camera for the compass system. 
-				However adding new functionality in the proposed architecture doesn't require us to understand the sensor system.
-				We simply need to understand the data coming out of the sensor system.
-				We also still need to add a new behaviour to look upwards. We no longer need to change the job system as it's merged
-				in as part of the standard communication api. Instead we modify the motion \gls{reactor} to handle the new type of movement.
+				This problem still requires that we add a new behavior.
+				However we only need to modify vision's internals to add the new classification mechanism.
+				We don't need to modify sensors and both blackboard and jobs no longer exist.
+				
+				Modifying the vision \gls{reactor} merely requires you to understand the incoming data and the vision system itself.
+				Additionally, modifying behavior no longer requires that you understand the job and blackboard systems. 
+				Instead you simply modify the motion component directly to be able to handle the new type of movement.
+
 				Integration with localisation is much easier, we simply use the standard \gls{powerplant} emit/on mechanism to send the data to localisation.
 				
 				All of the communication between components uses the consistent \gls{powerplant} interface. This means that if you
 				understand how to communicate with \gls{powerplant} then you understand how to communicate with every other component
 				in the system.
 
-				\todo[inline]{Write how the proposed system would resolve this scenario}
-
 		\subsection{Networking with other Robots}
 			Many modules within the robots code can benefit from information gathered by other robots on their team. Sharing information such as the position of objects on the field and each robots current action allows better co-ordination of the team. Another advantage provided by networking
-			is the opportunity for distributed computing computationally or spatially intensive problems.
+			is the opportunity for distributed computing on computationally or spatially intensive problems.
 			
 			\paragraph{Scenario} The \emph{\gls{nubots}} team have decided to improve their behaviour system to promote better teamwork between the robots. To facilitate this, the robots need an easy method to communicate their intentions to each-other across the network. The networking
 			system needs to serialise the data from the behaviour system and deserialize this data on the receiving robots.
