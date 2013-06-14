@@ -720,13 +720,13 @@ bool SAM::separateLS(std::vector<LinePoint*>& left, std::vector<LinePoint*>& rig
         //if either left or right contains entire point set then there will be an
         //infinite loop
 
-        //qDebug() << "Old line size: " << line.getPoints().size() << " Left size: " << left.size() << " Right size: " << right.size() << abs((int)left.size()-(int)right.size());
-        //qDebug() << "Old line size: " << line.getPoints().size() << " Above size: " << above.size() << " Below size: " << below.size() << "Centre Size: " << centre.size() << (abs((int)above.size()-(int)below.size()));
+        //qDebug() << "Old line size: " << line.getPoints().size() << " Left size: " << left.size() << " Right size: " << right.size() << std::abs((int)left.size()-(int)right.size());
+        //qDebug() << "Old line size: " << line.getPoints().size() << " Above size: " << above.size() << " Below size: " << below.size() << "Centre Size: " << centre.size() << (std::abs((int)above.size()-(int)below.size()));
 
 
         //Return the one with the least difference, in size as better "split"
         //bool useTripleSplit= false;
-        if((abs((int)above.size() - (int)below.size()) < abs((int)left.size() - (int)right.size())) && above.size() != 0 && below.size() !=0 && centre.size() !=0)
+        if((std::abs((int)above.size() - (int)below.size()) < std::abs((int)left.size() - (int)right.size())) && above.size() != 0 && below.size() !=0 && centre.size() !=0)
         {
             if((above.size() < points.size()) && (below.size() < points.size()) && (centre.size() < points.size()/2))
             {

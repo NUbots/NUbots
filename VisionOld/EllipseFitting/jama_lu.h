@@ -106,7 +106,7 @@ class LU
 
             // Most of the time is spent in the following dot product.
 
-            int kmax = min(i,j);
+            int kmax = std::min(i,j);
             double s = 0.0;
             for (int k = 0; k < kmax; k++) {
                s += LUrowi[k]*LUcolj[k];
@@ -119,7 +119,7 @@ class LU
 
          int p = j;
          for (int i = j+1; i < m; i++) {
-            if (abs(LUcolj[i]) > abs(LUcolj[p])) {
+            if (std::abs(LUcolj[i]) > std::abs(LUcolj[p])) {
                p = i;
             }
          }

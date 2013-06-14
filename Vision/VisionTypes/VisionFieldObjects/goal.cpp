@@ -253,7 +253,7 @@ bool Goal::calculatePositions()
 //            debug << "Goal::distanceToGoal: Method: Least" << std::endl;
 //        #endif
 //        distance_valid = d2pvalid && d2p > 0;
-//        result = (distance_valid ? min(d2p, width_dist) : width_dist);
+//        result = (distance_valid ? std::min(d2p, width_dist) : width_dist);
 //        break;
 //    }
 

@@ -1066,7 +1066,7 @@ bool Motors::request()
     lowerparam.sched_priority = 40;
     upperparam.sched_priority = 39;
     
-    unsigned char numblocks = max(MOTORS_NUM_LOWER_REQUEST_BLOCKS, MOTORS_NUM_UPPER_REQUEST_BLOCKS);
+    unsigned char numblocks = std::max(MOTORS_NUM_LOWER_REQUEST_BLOCKS, MOTORS_NUM_UPPER_REQUEST_BLOCKS);
     ThreadLowerWrite.Handle = lowerHandle;
     ThreadUpperWrite.Handle = upperHandle;
     for (unsigned char i=0; i<numblocks; i++)

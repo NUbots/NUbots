@@ -182,13 +182,13 @@ BallDetector::~BallDetector() {}
 //        Point center;
 
 //        if (left_edge && right_edge && top_edge && !bottom_edge)        // only bottom occluded
-//            center = Point((right+left)/2, min((top+(top+right-left))/2, height-1));
+//            center = Point((right+left)/2, std::min((top+(top+right-left))/2, height-1));
 //        else if (left_edge && right_edge && !top_edge && bottom_edge)   // only top occluded
-//            center = Point((right+left)/2, max((bottom+(bottom-right+left))/2, 0));
+//            center = Point((right+left)/2, std::max((bottom+(bottom-right+left))/2, 0));
 //        else if (left_edge && !right_edge && top_edge && bottom_edge)   // only right occluded
-//            center = Point(min((left+(left+bottom-top))/2, width-1),(top+bottom)/2);
+//            center = Point(std::min((left+(left+bottom-top))/2, width-1),(top+bottom)/2);
 //        else if (!left_edge && right_edge && top_edge && bottom_edge)   // only left occluded
-//            center = Point(max((right+(right-bottom+top))/2, 0),(top+bottom)/2);
+//            center = Point(std::max((right+(right-bottom+top))/2, 0),(top+bottom)/2);
 //        else
 //            center = Point((right+left)/2,(top+bottom)/2);
 
@@ -217,7 +217,7 @@ BallDetector::~BallDetector() {}
 //                //std::cout << "PERCENT ORANGE: " << float(count)/((min*2)*(min*2)) << std::endl;
 
 //                if (count/(min_dimension*min_dimension) >= VisionConstants::BALL_MIN_PERCENT_ORANGE) {
-//                    balls.push_back(Ball(center, max((right-left), (bottom-top))));
+//                    balls.push_back(Ball(center, std::max((right-left), (bottom-top))));
 //                }
 //                else {
 //                    //std::cout << "BALL THROWN OUT ON RATIO" << std::endl;
@@ -227,7 +227,7 @@ BallDetector::~BallDetector() {}
 //                }
 //            }
 //            else {
-//                balls.push_back(Ball(center, max((right-left), (bottom-top))));
+//                balls.push_back(Ball(center, std::max((right-left), (bottom-top))));
 //            }
 //        }
 //        else {
@@ -294,8 +294,8 @@ vector<Ball> BallDetector::run()
         int x_dev = 0,
             y_dev = 0;
         for (unsigned int i = 0; i < edges.size(); i++) {
-            x_dev += abs(edges.at(i).x - x_mean);
-            y_dev += abs(edges.at(i).y - y_mean);
+            x_dev += std::abs(edges.at(i).x - x_mean);
+            y_dev += std::abs(edges.at(i).y - y_mean);
         }
         x_dev /= edges.size();
         y_dev /= edges.size();
@@ -306,7 +306,7 @@ vector<Ball> BallDetector::run()
         // Statistical throw-out
         it = edges.begin();
         while (it < edges.end()) {
-            if (abs(it->x - x_mean) > x_dev || abs(it->y - y_mean) > y_dev)
+            if (std::abs(it->x - x_mean) > x_dev || std::abs(it->y - y_mean) > y_dev)
                 it = edges.erase(it);
             else
                 it++;
