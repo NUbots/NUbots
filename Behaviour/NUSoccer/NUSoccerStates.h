@@ -74,13 +74,14 @@ private:
     
     void goToStartDefensePositions(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) { //defensive fielding position
         std::vector<float> position = NavigationLogic::getStartDefensePosition();
-        movement->goToPoint(position[0],position[1],position[2]);
+        
+        movement->goToPoint(position);
         head->prioritiseLocalisation();
     }
     
     void goToStartOffensePositions(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) { //offensive fielding position
         std::vector<float> position = NavigationLogic::getStartOffensePosition();
-        movement->goToPoint(position[0],position[1],position[2]);
+        movement->goToPoint(position);
         head->prioritiseLocalisation();
     }
     
@@ -99,8 +100,9 @@ private:
     }
     
     void doBallApproachAndKick(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
+        
+        //movement->kick();
         movement->goToBall();
-        movement->kick();
         head->prioritiseBall();        
     }
     
@@ -121,16 +123,18 @@ public:
     BehaviourState* nextState() {return m_provider->m_state;}
     void doState()
     {   
+        //std::cout << "Beginning Behaviour" << std::endl;
         BehaviourStateLogic* logic = BehaviourStateLogic::getInstance();
         Navigation* movement = Navigation::getInstance();
         HeadBehaviour* head = HeadBehaviour::getInstance();
         
         //update our decision information
+        //std::cout << "about to update logic" << std::endl;
         logic->update();
         
         //printout for states
         //XXX: send to NUbugger
-        /*
+        
         std::cout <<"IS_CLOSEST_TO_BALL" << logic->states[0] << std::endl <<
                     "IS_SECOND_FROM_BALL" << logic->states[1] << std::endl <<
                     "IS_FURTHEST_FROM_BALL" << logic->states[2] << std::endl <<
@@ -146,19 +150,22 @@ public:
                     "GAME_STATE_READY" << logic->states[12] << std::endl <<
                     "GAME_STATE_KICKOFF" << logic->states[13] << std::endl <<
                     "GAME_STATE_END" << logic->states[14] << std::endl <<
+                    "GAME_STATE_PLAYING" << logic->states[19] << std::endl <<
                     "IS_KICKING" << logic->states[15] << std::endl <<
                     "IS_APPROACHING_BALL" << logic->states[16] << std::endl <<
                     "IS_IN_POSITION" << logic->states[17] << std::endl <<
                     "IS_GOAL_KEEPER" << logic->states[18] << std::endl <<
-                    "GAME_STATE_PLAYING" << logic->states[19] << std::endl <<
                     "JUST_PUT_DOWN" << logic->states[20] << std::endl <<
                     "JUST_UNPENALISED" << logic->states[21] << std::endl <<
                     "GAME_STATE_KICKING_OFF" << logic->states[22] << std::endl;
-        */
+        
         
         //do action selection logic:
         if (logic->states[BehaviourStateLogic::GAME_STATE_PENALISED] or
+            logic->states[BehaviourStateLogic::GAME_STATE_INITIAL] or
             logic->states[BehaviourStateLogic::GAME_STATE_SET] or
+            logic->states[BehaviourStateLogic::GAME_STATE_END] or
+            logic->states[BehaviourStateLogic::IS_FALLEN_OVER] or
             logic->states[BehaviourStateLogic::IS_PICKED_UP]) {
             
             //XXX: send to NUbugger
@@ -238,9 +245,10 @@ public:
             //XXX: see above
             goToDefensiveSupportPosition( logic,  movement, head);
             
+        } else {
+            //XXX: send to NUbugger
+            std::cout << "I Am Doing Nothing" << std::endl;
         } /*else if () {
-            
-        } else if () {
             
         } else if () {
             
@@ -260,8 +268,11 @@ public:
         
         
         //update movement and head:
+        //std::cout << "about to update movement" << std::endl;
         movement->update();
+        //std::cout << "about to update head" << std::endl;
         head->update();
+        //std::cout << "Finished Behaviour." << std::endl;
         
         
     };
