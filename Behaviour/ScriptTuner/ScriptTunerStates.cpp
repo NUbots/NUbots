@@ -3,6 +3,32 @@
 using std::vector;
 using std::string;
 
+
+
+ScriptTunerState(ScriptTunerProvider* provider) : ScriptTunerSubState(provider) :string_id_to_int_id() {
+    string_id_to_int_id["RSP"] = (int)JointData::ID_R_SHOULDER_PITCH;
+    string_id_to_int_id["LSP"] = (int)JointData::ID_L_SHOULDER_PITCH;
+    string_id_to_int_id["RSR"] = (int)JointData::ID_R_SHOULDER_ROLL;
+    string_id_to_int_id["LSR"] = (int)JointData::ID_L_SHOULDER_ROLL;
+    string_id_to_int_id["RE"] = (int)JointData::ID_R_ELBOW;
+    string_id_to_int_id["LE"] = (int)JointData::ID_L_ELBOW;
+    string_id_to_int_id["RHY"] = (int)JointData::ID_R_HIP_YAW;
+    string_id_to_int_id["LHY"] = (int)JointData::ID_L_HIP_YAW;
+    string_id_to_int_id["RHR"] = (int)JointData::ID_R_HIP_ROLL;
+    string_id_to_int_id["LHR"] = (int)JointData::ID_L_HIP_ROLL;
+    string_id_to_int_id["RHP"] = (int)JointData::ID_R_HIP_PITCH;
+    string_id_to_int_id["LHP"] = (int)JointData::ID_L_HIP_PITCH;
+    string_id_to_int_id["RK"] = (int)JointData::ID_R_KNEE;
+    string_id_to_int_id["LK"] = (int)JointData::ID_L_KNEE;
+    string_id_to_int_id["RAP"] = (int)JointData::ID_R_ANKLE_PITCH;
+    string_id_to_int_id["LAP"] = (int)JointData::ID_L_ANKLE_PITCH;
+    string_id_to_int_id["RAR"] = (int)JointData::ID_R_ANKLE_ROLL;
+    string_id_to_int_id["LAR"] = (int)JointData::ID_L_ANKLE_ROLL;
+    string_id_to_int_id["HP"] = (int)JointData::ID_HEAD_PAN;
+    string_id_to_int_id["HT"] = (int)JointData::ID_HEAD_TILT;
+}
+
+
 void ScriptTunerState::doState()
 {
 
@@ -19,7 +45,7 @@ void ScriptTunerState::doState()
         return;
     }
 
-    bool loaded = loadScript(filename);
+    auto loaded = loadScript(filename);
 
     if(loaded){
         while(script.isActive()){
@@ -51,7 +77,7 @@ void ScriptTunerState::editCurrentFrame(){
 
         if(first_argument.compare("saveframe")==0){
             std::cout << "Saving frame. It is recommended all torques are on during saving."<< std::endl;
-            saveCurrentFrame();
+            saveManuallyMovedMotors();
         }else if(first_argument.compare("savescript")==0){
             std::cout << "Script \""<< filename << "\" saving."<< std::endl;
             saveScriptToFile(filename);
@@ -89,7 +115,7 @@ void ScriptTunerState::applyFrameToRobot(){
     std::cout << "Oh wait this isn't implemented yet."<< std::endl;
 }
 
-void ScriptTunerState::saveCurrentFrame(){
+void ScriptTunerState::saveManuallyMovedMotors(){
     std::cout << "Oh wait this isn't implemented yet."<< std::endl;
 }
 
@@ -102,7 +128,7 @@ std::cout << "Oh wait this isn't implemented yet."<< std::endl;
 
 void ScriptTunerState::interpretSeekCommand(string command){
     int frame_number;
-    stringstream s;
+    std::stringstream s;
     s << command;
     if(!(s >>frame_number)){
         std::cout << "Please input an integer as the second argument."<< std::endl;
@@ -124,7 +150,14 @@ void ScriptTunerState::playScript(){
     std::cout << "Oh wait this isn't implemented yet."<< std::endl;
 }
 
-void ScriptTunerState::applyRequestToMotors(string motorID,string other_parameters){
-    std::cout << "Oh wait this isn't implemented yet."<< std::endl;
+void ScriptTunerState::applyRequestToMotors(string motor_id_string,string other_parameters){
+    std::stringstream command;
+    command << other_parameters;
+
+    int motor_id = string_id_to_int_id[motor_id_string];
+
+
+
+    
 }
 

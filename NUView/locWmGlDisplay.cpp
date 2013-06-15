@@ -34,7 +34,7 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(QGLFormat(QGL::Sample
     perspective = true;
     drawRobotModel = false;
     drawSigmaPoints = false;
-    drawBestModelOnly = false;
+    drawBestModelOnly = true;
     m_showBall = true;
     m_displayEnabled = true;
     setFont(QFont("Helvetica",12,QFont::Bold,false));

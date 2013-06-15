@@ -42,6 +42,7 @@
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include <thread>
 #include <chrono>
+#include "Framework/darwin/Framework/include/JointData.h"
 
 #include "Behaviour/Common/HeadBehaviour.h"
 
@@ -63,12 +64,9 @@ protected:
 class ScriptTunerState : public ScriptTunerSubState
 {
 public:
-    vector<vector<vector<float> > > frames;//(frames)_ij = [position,gain] of motor j at frame i.
-    vector<float> times;
+    std::map<string, int> string_id_to_int_id; 
 
-    ScriptTunerState(ScriptTunerProvider* provider) : ScriptTunerSubState(provider) {
-
-    }
+    ScriptTunerState(ScriptTunerProvider* provider);
 
     BehaviourState* nextState() {return m_provider->m_state;}
     void doState();
@@ -77,19 +75,20 @@ public:
     bool loadScript(string filename);
      /*! @brief Applies frame, given by frames[frame], to robot.*/
     void applyFrameToRobot();
-     /*! @brief Reads motor positions from robot and saves them to the current frame, frames[frame].*/
-    void saveCurrentFrame();
-     /*! @brief Writes the vector frames to script file.*/
+     /*! @brief Reads motor positions from robot and saves them to the current frame, frames[frame].
+        Only save motor positions which have had torque off and then back on.*/
+    void saveManuallyMovedMotors();
+     /*! @brief Writes the frames to script file.*/
     void saveScriptToFile(string filename);
      /*! @brief Adds a new frame to the vector of frames.*/
     void addFrame(string argument);
-
+    /*! @brief Moves to the frame indicated by the first argument of command string, if it is an integer.*/
     void interpretSeekCommand(string command);
-
+    /*! @brief Moves script to a given frame if it is a valid frame number.*/
     void moveToFrame(int frame_number);
-
+    /*! @brief Exit program and load a new script.*/
     void exitScript();
-
+    /*! @brief Play the script from the current frame.*/
     void playScript();
 
     /*! @brief Applies positional or torque settings to motors.
