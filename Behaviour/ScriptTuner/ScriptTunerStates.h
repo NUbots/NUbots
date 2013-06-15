@@ -94,6 +94,21 @@ public:
     /*! @brief Applies positional or torque settings to motors.
         @param other_parameters = "<position> <gain>". If gain is not specified a default value is used.*/
     void applyRequestToMotors(string motorID,string other_parameters);
+    
+    /*! @brief Motor fine tuning.
+        @param pos_change is change in angle in radians.*/
+    void changeMotorPostition(int motor_id,float pos_change);
+    
+    /*! @brief Motor fine tuning.
+        @param gain_change is change in gain.*/    
+    void changeMotorGain(int motor_id, float gain_change);
+    
+    /*! @brief Motor turn off torque method.*/    
+    void turnOffMotor(int motor_id);
+    
+    /*! @brief Motor turn on torque method.
+         Also marks motor for saving with save manually moved motors.*/    
+    void turnOnMotor(int motor_id);
 
 };
 

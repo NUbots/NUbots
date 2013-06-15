@@ -100,7 +100,7 @@ void ScriptTunerState::editCurrentFrame(){
             interpretSeekCommand(command.str());
             break;
         } else { //Otherwise we interpret it as a motor position request
-            std::cout << "Performing motor manipulation."<<first_argument<<" "<<command.str()<< std::endl;
+            std::cout << "Performing motor manipulation. "<<first_argument<<" "<<command.str()<< std::endl;
             applyRequestToMotors(first_argument,command.str());
         }
     }
@@ -153,11 +153,48 @@ void ScriptTunerState::playScript(){
 void ScriptTunerState::applyRequestToMotors(string motor_id_string,string other_parameters){
     std::stringstream command;
     command << other_parameters;
+    try {
+        int motor_id = string_id_to_int_id.at(motor_id_string); // map::at throws an out-of-range if no key (C++11 feature)
+        
+        int positional_change, gain_change;
+        if(command >> positional_change){
+            changeMotorPosition(motor_id, positional_change);
+            if(command >> gain_change){
+                changeMotorGain(motor_id, gain_change);
+            }
+            return;
+        } 
 
-    int motor_id = string_id_to_int_id[motor_id_string];
+        string instruction;
+        command >> instruction;
+        if(instruction.compare("on")){
+            turnOffMotor(motor_id);
+            return;
+        }else if(instruction.compare("off")){
+            turnOnMotor(motor_id);
+            return;
+        }
+        
+        std::cout<<"Invalid Manipulation. Try <Motor Name> (<\"on\"/\"off\">) or (<position_change> <gain_change>)"<<std::endl;
 
-
-
-    
+    } catch (const std::out_of_range& e) {
+        std::cout << "There is no such motor. Please try again"<< std::endl;
+    }    
 }
 
+
+void changeMotorPostition(int motor_id, float pos_change){
+    std::cout<< "Motor "<< motor_id << " changed by "<< pos_change << std::endl;
+}
+
+void changeMotorGain(int motor_id, float gain_change){
+    std::cout<< "Motor "<< motor_id << " gain changed by"<< gain_change<< std::endl;
+}
+
+void turnOffMotor(int motor_id){
+    std::cout<< "Motor "<< motor_id << " torque off."<< << std::endl;
+}
+
+void turnOnMotor(int motor_id){
+    std::cout<< "Motor "<< motor_id << " torque on."<< << std::endl;
+}
