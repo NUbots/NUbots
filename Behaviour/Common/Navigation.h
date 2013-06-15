@@ -72,13 +72,13 @@ private:
     static constexpr float m_acceleration_fraction = 0.5;
     
     //approach speeds
-    static constexpr float m_close_approach_speed = 0.2;
+    static constexpr float m_close_approach_speed = 0.3;
     static constexpr float m_close_approach_distance = 30.0;
-    static constexpr float m_mid_approach_speed = 0.6;
+    static constexpr float m_mid_approach_speed = 0.7;
     static constexpr float m_mid_approach_distance = 60.0;
     
     //turning values
-    static constexpr float m_turn_deviation = 0.1;
+    static constexpr float m_turn_deviation = 0.05;
     
     //hystereses
     static constexpr float m_distance_hysteresis = 10.0;

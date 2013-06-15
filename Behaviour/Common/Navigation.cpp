@@ -39,7 +39,7 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     //check what distance increment we're in:
     if (distance > m_mid_approach_distance+m_distance_hysteresis) {
         m_distance_increment = 3;
-        walk_speed = 1.f;
+        walk_speed = m_walk_speed;
     } else if (distance > m_close_approach_distance + m_distance_hysteresis and
                distance < m_mid_approach_distance) {
         m_distance_increment = 2;
@@ -57,19 +57,19 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     if (m_distance_increment > 0) {
         walk_bearing = relative_bearing;
     } else {
-        walk_bearing = relative_heading;
+        walk_bearing = relative_heading/2.;
     }
     
     //check turning hysteresis
-    if (m_turning < 0 and walk_bearing < -m_turn_deviation) {
-        walk_speed = std::min(walk_bearing,m_turn_speed);
+    /*if (m_turning < 0 and walk_bearing < -m_turn_deviation) {
+        //walk_speed = std::min(walk_bearing,m_turn_speed);
     } else if (m_turning > 0 and walk_bearing > m_turn_deviation) {
-        walk_speed = std::min(walk_bearing,m_turn_speed);
+        //walk_speed = std::min(walk_bearing,m_turn_speed);
     } else {
         walk_bearing = 0;
-    }
+    }*/
     
-    new_walk[0] = walk_speed;
+    new_walk[0] = walk_speed*1./(1.+std::exp(-2.*walk_bearing*walk_bearing));
     new_walk[2] = walk_bearing;
     return new_walk;
 }
@@ -168,6 +168,9 @@ std::vector<float> Navigation::goToPoint(const std::vector<float> point) {
     std::vector<float> self = NavigationLogic::getSelfPosition();
     std::vector<float> move = NavigationLogic::getPositionDifference(self,point);
     
+    //std::cout << "Self Position: (" << self[0] << ", " << self[1] << ", " << self[2] << ")" << std::endl;
+    //std::cout << "Target Position: (" << point[0] << ", " << point[1] << ", " << point[2] << ")" << std::endl;
+    //std::cout << "Point Position Offset: (" << move[0] << ", " << move[1] << ", " << move[2] << ")" << std::endl;
     
     //set continuing movement policy
     current_point = point;
@@ -175,8 +178,13 @@ std::vector<float> Navigation::goToPoint(const std::vector<float> point) {
         resetHystereses();
     current_command = GOTOPOINT;
     
+    
+    
     //must generate the walk last
-    current_walk_command = generateWalk(move[0],move[1],move[2]);
+    float turn = mathGeneral::normaliseAngle(atan2(move[1],move[0])-self[2]);
+    float dist = std::sqrt(move[0]*move[0]+move[1]*move[1]);
+    //std::cout << "Unfiltered Walk Command: (" << dist << ", " << turn << ", " << mathGeneral::normaliseAngle(point[2]-self[2]) << ")" << std::endl;
+    current_walk_command = generateWalk( dist,turn, mathGeneral::normaliseAngle(point[2]-self[2]) );
     return current_walk_command;
 }
 
@@ -240,14 +248,14 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
         float angleDifference = mathGeneral::normaliseAngle(std::atan2(direction[1],direction[0]) - self[2]);
         
         //set movement values - use a gaussian scaling to slow down movement when we are off-heading
-        move[0] = 1./(1.+std::exp(angleDifference)); 
-        move[2] = angleDifference;
+        move[0] = ballDistance; 
+        move[1] = angleDifference;
         
     } else if (ballDistance > m_close_approach_distance or true) { //else follow the circle
         float curvature = (2*3.14159/m_close_approach_distance)*20.; //XXX: (radians/radius) * walkspeed (estimated)
         float angle = curvature + (circleCentreDistance-m_close_approach_distance)/m_close_approach_distance; //we add a correction to turning to account for error in line following
-        move[0] = 1./(1.+std::exp(angle));
-        move[2] = angle*m_mid_approach_speed;
+        move[0] = ballDistance;
+        move[1] = angle*0.7;
     
     } else { //else line up the ball
     
@@ -261,7 +269,7 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
     current_command = GOTOBALL;
     
     //must generate the walk last
-    current_walk_command = generateWalk(move[0],move[2],move[2]);
+    current_walk_command = generateWalk(move[0],move[1],move[1]);
     return current_walk_command;
 }
     
@@ -285,6 +293,7 @@ void Navigation::update() {
         }
     
     //set the walkjob
+    //std::cout << "Sending Walk Command: (" << current_walk_command[0] << ", " << current_walk_command[1] << ", " << current_walk_command[2] << ")" << std::endl;
     Blackboard->Jobs->addMotionJob(new WalkJob(current_walk_command[0], current_walk_command[1], current_walk_command[2]));
 }
 
@@ -310,7 +319,10 @@ vector<float> Navigation::stop() {
 
 void Navigation::kick() {
     //set the kick
-    Blackboard->Jobs->addMotionJob(new KickJob(Blackboard->Sensors->GetTimestamp(),NavigationLogic::getBallPosition(), NavigationLogic::getOpponentGoalPosition()));
+    std::vector<float> position = NavigationLogic::getPositionDifference(NavigationLogic::getSelfPosition(),NavigationLogic::getBallPosition());
+    if (position[0]*position[0]+position[1]*position[1] < 100.) {
+        Blackboard->Jobs->addMotionJob(new KickJob(Blackboard->Sensors->GetTimestamp(),NavigationLogic::getBallPosition(), NavigationLogic::getOpponentGoalPosition()));
+    }
 }
 
 
