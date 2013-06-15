@@ -76,6 +76,8 @@ public:
         states[TEAM_SEES_BALL] = false;
         states[BALL_IS_LOST] = false;
         states[GAME_STATE_PENALISED] = false;
+        
+        states[GAME_STATE_INITIAL] = false;
         states[GAME_STATE_SET] = false;
         states[GAME_STATE_READY] = false;
         states[GAME_STATE_KICKOFF] = false;
@@ -106,7 +108,7 @@ public:
         TEAM_SEES_BALL = 8,
         BALL_IS_LOST = 9,
         GAME_STATE_PENALISED = 10,
-        GAME_STATE_POSITIONING = 11,
+        GAME_STATE_SET = 11,
         GAME_STATE_READY = 12,
         GAME_STATE_KICKOFF = 13,
         GAME_STATE_END = 14,
@@ -117,7 +119,8 @@ public:
         GAME_STATE_PLAYING = 19,
         JUST_PUT_DOWN = 20,
         JUST_UNPENALISED = 21,
-        GAME_STATE_KICKING_OFF = 22
+        GAME_STATE_KICKING_OFF = 22,
+        GAME_STATE_INITIAL = 23
     };
     
     double timeSinceFallen() {

@@ -50,6 +50,8 @@ void BehaviourStateLogic::checkGameState() {
     states[GAME_STATE_KICKOFF] = Blackboard->GameInfo->haveKickoff();
     states[GAME_STATE_KICKING_OFF] = Blackboard->GameInfo->haveKickoff() and timeSinceGameStarted() < 15000.0; //XXX: timing hack, magic number
     states[GAME_STATE_END] = Blackboard->GameInfo->getCurrentState() == GameInformation::FinishedState;
+    
+    states[GAME_STATE_INITIAL] = Blackboard->GameInfo->getCurrentState() == GameInformation::InitialState;
 }
 
 void BehaviourStateLogic::checkMyMovement() {
