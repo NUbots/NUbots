@@ -5,6 +5,8 @@ CONFIG += qwt
 
 DEFINES += QT_NO_DEBUG_STREAM
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 win32{
     INCLUDEPATH += 'C:\Program Files\Boost\boost_1_52_0'
     INCLUDEPATH += 'C:\Qwt\qwt-6.0.2\src'

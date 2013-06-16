@@ -9,7 +9,6 @@
 
 #include <limits>
 #include <stdlib.h>
-#include <boost/foreach.hpp>
 
 GoalDetectorRANSACEdges::GoalDetectorRANSACEdges()
 {
@@ -38,21 +37,21 @@ std::vector<Goal> GoalDetectorRANSACEdges::run()
     std::vector<LSFittedLine> start_lines, end_lines;
 
     //get edge points
-    BOOST_FOREACH(ColourSegment s, hsegments) {
+    for(ColourSegment s : hsegments) {
         start_points.push_back(s.getStart());
         end_points.push_back(s.getEnd());
     }
 
     //use generic ransac implementation to find start lines (left edges)
     ransac_results = RANSAC::findMultipleModels<RANSACLine<Point>, Point>(start_points, m_e, m_n, m_k, m_max_iterations, ransac_method);
-    for(size_t i=0; i<ransac_results.size(); i++) {
-        start_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    for(auto l : ransac_results) {
+        start_lines.push_back(LSFittedLine(l.second));
     }
 
     //use generic ransac implementation to find end lines (right edges)
     ransac_results = RANSAC::findMultipleModels<RANSACLine<Point>, Point>(end_points, m_e, m_n, m_k, m_max_iterations, ransac_method);
-    for(size_t i=0; i<ransac_results.size(); i++) {
-        end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    for(auto l : ransac_results) {
+        end_lines.push_back(LSFittedLine(l.second));
     }
 
     //publish these lines for debugging
@@ -68,7 +67,7 @@ std::vector<Goal> GoalDetectorRANSACEdges::run()
     // sort out potential crossbars and vertical posts (posts on too large of a lean will be removed)
     // edit ANGLE_MARGIN to affect this
     const double ANGLE_MARGIN = 0.25;
-    BOOST_FOREACH(Quad& q, quads) {
+    for(Quad q : quads) {
         double angle = khorizon.getAngleBetween(Line(q.getTopCentre(), q.getBottomCentre()));
 
         if( angle  >= (1-ANGLE_MARGIN)*mathGeneral::PI*0.5 ) {
@@ -100,11 +99,13 @@ std::vector<Goal> GoalDetectorRANSACEdges::run()
     }
 
     //Improves bottom centre estimate using vertical transitions
-    BOOST_FOREACH(ColourSegment v, vsegments) {
+    for(ColourSegment v : vsegments) {
         const Point& p = v.getEnd();
-        BOOST_FOREACH(Goal g, posts) {
+        for(Goal& g : posts) {
             if(p.x <= g.getQuad().getRight() && p.x >= g.getQuad().getLeft() && p.y > g.getLocationPixels().y)
+            {
                 g.setBase(p);
+            }
         }
     }
 

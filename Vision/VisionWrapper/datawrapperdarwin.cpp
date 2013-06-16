@@ -279,16 +279,17 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
 void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 {
     //! @todo better debug printing + Comment
-    switch(region.getDirection()) {
-    case HORIZONTAL:
-        Blackboard->horizontalScans = &region;
-        break;
-    case VERTICAL:
-        Blackboard->verticalScans = &region;
-        break;
+    if(id == DBID_FILTERED_SEGMENTS)
+    {
+        switch(region.getDirection()) {
+        case HORIZONTAL:
+            Blackboard->horizontalScans = &region;
+            break;
+        case VERTICAL:
+            Blackboard->verticalScans = &region;
+            break;
+        }
     }
-
-
 
     #if VISION_WRAPPER_VERBOSITY > 2
         debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << std::endl;

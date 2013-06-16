@@ -83,7 +83,6 @@ unsigned int VisionConstants::HORIZONTAL_SCANLINE_SPACING;
 unsigned int VisionConstants::VERTICAL_SCANLINE_SPACING;
 unsigned int VisionConstants::GREEN_HORIZON_SCAN_SPACING;
 unsigned int VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS;
-float VisionConstants::GREEN_HORIZON_LOWER_THRESHOLD_MULT;
 float VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT;
 //! Split and Merge constants
 unsigned int VisionConstants::SAM_MAX_LINES;
@@ -120,8 +119,7 @@ void VisionConstants::loadFromFile(std::string filename)
     VERTICAL_SCANLINE_SPACING = 5;
     GREEN_HORIZON_SCAN_SPACING = 11;
     GREEN_HORIZON_MIN_GREEN_PIXELS = 5;
-    GREEN_HORIZON_LOWER_THRESHOLD_MULT = 1;
-    GREEN_HORIZON_UPPER_THRESHOLD_MULT = 2.5;
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = 2.0;
     GOAL_HEIGHT_TO_WIDTH_RATIO_MIN = 1.5,
     MIN_GOAL_SEPARATION = 20;
     SAM_MAX_LINES = 100;
@@ -326,9 +324,6 @@ void VisionConstants::loadFromFile(std::string filename)
         }
         else if(name.compare("GREEN_HORIZON_MIN_GREEN_PIXELS") == 0) {
             in >> GREEN_HORIZON_MIN_GREEN_PIXELS;
-        }
-        else if(name.compare("GREEN_HORIZON_LOWER_THRESHOLD_MULT") == 0) {
-            in >> GREEN_HORIZON_LOWER_THRESHOLD_MULT;
         }
         else if(name.compare("GREEN_HORIZON_UPPER_THRESHOLD_MULT") == 0) {
             in >> GREEN_HORIZON_UPPER_THRESHOLD_MULT;
@@ -630,9 +625,6 @@ bool VisionConstants::setParameter(std::string name, float val)
     else if(name.compare("DISTANCE_BETWEEN_POSTS") == 0) {
         DISTANCE_BETWEEN_POSTS = val;
     }
-    else if(name.compare("GREEN_HORIZON_LOWER_THRESHOLD_MULT") == 0) {
-        GREEN_HORIZON_LOWER_THRESHOLD_MULT = val;
-    }
     else if(name.compare("GREEN_HORIZON_UPPER_THRESHOLD_MULT") == 0) {
         GREEN_HORIZON_UPPER_THRESHOLD_MULT = val;
     }
@@ -748,7 +740,6 @@ void VisionConstants::print(std::ostream& out)
     out << "VERTICAL_SCANLINE_SPACING: " << VERTICAL_SCANLINE_SPACING << std::endl;
     out << "GREEN_HORIZON_SCAN_SPACING: " << GREEN_HORIZON_SCAN_SPACING << std::endl;
     out << "GREEN_HORIZON_MIN_GREEN_PIXELS: " << GREEN_HORIZON_MIN_GREEN_PIXELS << std::endl;
-    out << "GREEN_HORIZON_LOWER_THRESHOLD_MULT: " << GREEN_HORIZON_LOWER_THRESHOLD_MULT << std::endl;
     out << "GREEN_HORIZON_UPPER_THRESHOLD_MULT: " << GREEN_HORIZON_UPPER_THRESHOLD_MULT << std::endl;
 
     out << "SAM_MAX_LINES: " << SAM_MAX_LINES << std::endl;
@@ -820,7 +811,6 @@ std::vector<Parameter> VisionConstants::getAllOptimisable()
     params.push_back(Parameter("MIN_DISTANCE_FROM_HORIZON", MIN_DISTANCE_FROM_HORIZON, 0, 240));
     params.push_back(Parameter("MIN_CONSECUTIVE_POINTS", MIN_CONSECUTIVE_POINTS, 0, 50));
     params.push_back(Parameter("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50));
-    params.push_back(Parameter("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20));
     params.push_back(Parameter("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20));
     //! Split and Merge constants
     params.push_back(Parameter("SAM_SPLIT_DISTANCE", SAM_SPLIT_DISTANCE, 0, 320));
@@ -903,7 +893,6 @@ std::vector<Parameter> VisionConstants::getGeneralParams()
 {
     std::vector<Parameter> params;
     params.push_back(Parameter("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50));
-    params.push_back(Parameter("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20));
     params.push_back(Parameter("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20));
 
     //! ScanLine options
@@ -915,7 +904,7 @@ std::vector<Parameter> VisionConstants::getGeneralParams()
 
 bool VisionConstants::setAllOptimisable(const std::vector<float>& params)
 {
-    if(params.size() != 30) {
+    if(params.size() != 29) {
         return false; //not a valid size
     }
     MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS = params.at(0);
@@ -937,19 +926,18 @@ bool VisionConstants::setAllOptimisable(const std::vector<float>& params)
     MIN_DISTANCE_FROM_HORIZON = params.at(14);
     MIN_CONSECUTIVE_POINTS = params.at(15);
     GREEN_HORIZON_MIN_GREEN_PIXELS = params.at(16);
-    GREEN_HORIZON_LOWER_THRESHOLD_MULT = params.at(17);
-    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(18);
-    SAM_SPLIT_DISTANCE = params.at(19);
-    SAM_MIN_POINTS_OVER = params.at(20);
-    SAM_MIN_POINTS_TO_LINE = params.at(21);
-    SAM_MAX_ANGLE_DIFF_TO_MERGE = params.at(22);
-    SAM_MAX_DISTANCE_TO_MERGE = params.at(23);
-    SAM_MIN_POINTS_TO_LINE_FINAL = params.at(24);
-    SAM_MIN_LINE_R2_FIT = params.at(25);
-    SAM_MAX_LINE_MSD = params.at(26);
-    HORIZONTAL_SCANLINE_SPACING = params.at(27);
-    VERTICAL_SCANLINE_SPACING = params.at(28);
-    GREEN_HORIZON_SCAN_SPACING = params.at(29);
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(17);
+    SAM_SPLIT_DISTANCE = params.at(18);
+    SAM_MIN_POINTS_OVER = params.at(19);
+    SAM_MIN_POINTS_TO_LINE = params.at(20);
+    SAM_MAX_ANGLE_DIFF_TO_MERGE = params.at(21);
+    SAM_MAX_DISTANCE_TO_MERGE = params.at(22);
+    SAM_MIN_POINTS_TO_LINE_FINAL = params.at(23);
+    SAM_MIN_LINE_R2_FIT = params.at(24);
+    SAM_MAX_LINE_MSD = params.at(25);
+    HORIZONTAL_SCANLINE_SPACING = params.at(26);
+    VERTICAL_SCANLINE_SPACING = params.at(27);
+    GREEN_HORIZON_SCAN_SPACING = params.at(28);
     return true;
 }
 
@@ -1015,15 +1003,14 @@ bool VisionConstants::setLineParams(const std::vector<float>& params)
 
 bool VisionConstants::setGeneralParams(const std::vector<float>& params)
 {
-    if(params.size() != 6) {
+    if(params.size() != 5) {
         return false; //not a valid size
     }
     GREEN_HORIZON_MIN_GREEN_PIXELS = params.at(0);
-    GREEN_HORIZON_LOWER_THRESHOLD_MULT = params.at(1);
-    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(2);
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(1);
     //! ScanLine options
-    HORIZONTAL_SCANLINE_SPACING = params.at(3);
-    VERTICAL_SCANLINE_SPACING = params.at(4);
-    GREEN_HORIZON_SCAN_SPACING = params.at(5);
+    HORIZONTAL_SCANLINE_SPACING = params.at(2);
+    VERTICAL_SCANLINE_SPACING = params.at(3);
+    GREEN_HORIZON_SCAN_SPACING = params.at(4);
     return true;
 }

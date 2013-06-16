@@ -34,8 +34,11 @@ public:
     //2D distortion transform
     Vector2<double> correctDistortion(const Vector2<double>& pt);
 
-    void calculateRepresentations(NUPoint& pt, bool known_distance = false, double val = 0.0) const;
-    void calculateRepresentations(std::vector<NUPoint>& pts, bool known_distance = false, double val = 0.0) const;
+    void calculateRepresentationsFromPixelLocation(NUPoint& pt, bool known_distance = false, double val = 0.0) const;
+    void calculateRepresentationsFromPixelLocation(std::vector<NUPoint>& pts, bool known_distance = false, double val = 0.0) const;
+    void calculateRepresentationsFromGroundCartesianLocation(NUPoint& pt) const;
+    void calculateRepresentationsFromGroundCartesianLocation(std::vector<NUPoint>& pts) const;
+
 //    NUPoint calculateRepresentations(const Point& pt, bool ground = true, double val = 0.0) const;
 //    std::vector<NUPoint> calculateRepresentations(const std::vector<Point>& pts, bool ground = true, double val = 0.0) const;
 
