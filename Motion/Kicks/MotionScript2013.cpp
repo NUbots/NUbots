@@ -32,26 +32,61 @@ void MotionScript2013::AdvanceToNextFrame()
     current_frame_index_++;
 }
 
-void MotionScript2013::ApplyCurrentFrameToRobot(m_actions)
+void MotionScript2013::ApplyCurrentFrameToRobot(NUActionatorsData* actionators_data)
 {
     auto& current_frame = script_frames_[current_frame_index_];
 
-    ++m_current_index;
-    std::vector<float> joints = m_joints.at(m_current_index);
-    std::vector<float> gains = m_gains.at(m_current_index);
-
-    float targetTime = m_script_start_time + m_current_script->m_times.back().at(m_current_index);
-
-    m_actions->add(NUActionatorsData::Head, targetTime, nu_nextHeadJoints, nu_nextHeadGains);
-    m_actions->add(NUActionatorsData::LArm, targetTime, nu_nextLeftArmJoints, nu_nextLeftArmGains);
-    m_actions->add(NUActionatorsData::RArm, targetTime, nu_nextRightArmJoints, nu_nextRightArmGains);
-    m_actions->add(NUActionatorsData::LLeg, targetTime, nu_nextLeftLegJoints, nu_nextLeftLegGains);
-    m_actions->add(NUActionatorsData::RLeg, targetTime, nu_nextRightLegJoints, nu_nextRightLegGains);
+    current_frame.ApplyToRobot(script_start_time_, actionators_data);
 }
 
-NUData::id_t 
 
 void MotionScript2013::Reset()
 {
     current_frame_index_ = 0;
+}
+
+NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
+{
+    switch(sensor_id)
+    {
+        case Robot::JointData::ID_R_SHOULDER_PITCH: return NUData::RShoulderPitch;
+        case Robot::JointData::ID_L_SHOULDER_PITCH: return NUData::LShoulderPitch;
+        case Robot::JointData::ID_R_SHOULDER_ROLL:  return NUData::RShoulderRoll;
+        case Robot::JointData::ID_L_SHOULDER_ROLL:  return NUData::LShoulderRoll;
+        case Robot::JointData::ID_R_ELBOW:          return NUData::RElbowPitch;
+        case Robot::JointData::ID_L_ELBOW:          return NUData::LElbowPitch;
+        case Robot::JointData::ID_R_HIP_YAW:        return NUData::RHipYaw;
+        case Robot::JointData::ID_L_HIP_YAW:        return NUData::LHipYaw;
+        case Robot::JointData::ID_R_HIP_ROLL:       return NUData::RHipRoll;
+        case Robot::JointData::ID_L_HIP_ROLL:       return NUData::LHipRoll;
+        case Robot::JointData::ID_R_HIP_PITCH:      return NUData::RHipPitch;
+        case Robot::JointData::ID_L_HIP_PITCH:      return NUData::LHipPitch;
+        case Robot::JointData::ID_R_KNEE:           return NUData::RKneePitch;
+        case Robot::JointData::ID_L_KNEE:           return NUData::LKneePitch;
+        case Robot::JointData::ID_R_ANKLE_PITCH:    return NUData::RAnklePitch;
+        case Robot::JointData::ID_L_ANKLE_PITCH:    return NUData::LAnklePitch;
+        case Robot::JointData::ID_R_ANKLE_ROLL:     return NUData::RAnkleRoll;
+        case Robot::JointData::ID_L_ANKLE_ROLL:     return NUData::LAnkleRoll;
+        case Robot::JointData::ID_HEAD_PAN:         return NUData::HeadYaw;
+        case Robot::JointData::ID_HEAD_TILT:        return NUData::HeadPitch;
+        default: {
+            std::cout << __PRETTY_FUNCTION__ 
+                      << " - Invalid sensor_id: " << sensor_id << ";";
+            return id_t();
+        }
+    }
+}
+
+void MotionScriptFrame::ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data)
+{
+    auto target_time = script_start_time + _time;
+
+    for(ScriptJointDescriptor* joint : joints_)
+    {
+        m_actions->add(
+            MapServoIdToNUDataId(joint->GetServoId(),
+            target_time,
+            joint->GetPosition(),
+            joint->GetGain());
+    }
 }
