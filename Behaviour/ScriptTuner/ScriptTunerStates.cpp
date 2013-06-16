@@ -140,7 +140,7 @@ void ScriptTunerState::editCurrentFrame(){
 }
 
 bool ScriptTunerState::loadScript(string filename){    
-    script = MotionScript2013::LoadFromConfigSystem(m_file_path,filename);
+    script = MotionScript2013::LoadFromConfigSystem(m_file_path+filename);
     return (bool)script;
 }
 
@@ -153,7 +153,7 @@ void ScriptTunerState::saveManuallyMovedMotors(){
 }
 
 bool ScriptTunerState::saveScriptToFile(string filename){
-    return MotionScript2013::SaveToConfigSystem(*(script)/*Dereference? Takes a Motionscript2013&*/,m_file_path,filename);
+    return MotionScript2013::SaveToConfigSystem(*(script)/*Dereference? Takes a Motionscript2013&*/,m_file_path+filename);
 }
 void ScriptTunerState::addFrame(string argument){
 std::cout << "Oh wait this isn't implemented yet."<< std::endl;
