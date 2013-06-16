@@ -6,11 +6,6 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Framework/darwin/Framework/include/JointData.h"
 
-MotionScript2013::MotionScript2013()
-{
-
-}
-
 MotionScript2013::~MotionScript2013()
 {
     for(MotionScriptFrame* frame : script_frames_)

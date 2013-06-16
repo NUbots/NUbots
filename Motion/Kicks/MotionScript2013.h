@@ -8,6 +8,8 @@
 class ScriptJointDescriptor
 {
 public:
+    ScriptJointDescriptor() : servo_id_(0), position_(0), gain_(0), disable_(0) {}
+
     int SetServoId(int servo_id) { servo_id_ = servo_id; }
     float SetPosition(float position) { position_ = position; }
     float SetGain(float gain) { gain_ = gain; }
@@ -25,6 +27,8 @@ private:
 class MotionScriptFrame
 {
 public:
+    MotionScriptFrame() : time_(0) {}
+
     //! Schedules all joint poitions in this frame using the given actionators.
     void ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data);
 
@@ -58,7 +62,10 @@ private:
 class MotionScript2013
 {
 public:
-    MotionScript2013();
+    MotionScript2013() : kick_enable_time_(0),
+                         script_start_time_(0),
+                         script_end_time_(0),
+                         current_frame_index_(0) { }
     ~MotionScript2013();
 
 
