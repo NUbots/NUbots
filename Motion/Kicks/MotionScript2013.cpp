@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <unordered_map>
 #include <iostream>
 #include "MotionScript2013.h"
@@ -100,9 +101,18 @@ MotionScriptFrame* MotionScript2013::GetCurrentFrame()
     return script_frames_[current_frame_index_];
 }
 
-void MotionScript2013::InsertFrame(int position, MotionScriptFrame* frame)
+void MotionScript2013::InsertFrame(int index, MotionScriptFrame* frame)
 {
-    
+    auto it = script_frames_.begin();
+
+    script_frames_.insert(it + index, frame);
+}
+
+void MotionScript2013::RemoveFrame(int index)
+{
+    auto it = script_frames_.begin();
+
+    script_frames_.erase(it + index);
 }
 
 
@@ -150,5 +160,31 @@ void MotionScriptFrame::ApplyToRobot(float script_start_time, NUActionatorsData*
             target_time,
             joint.GetPosition(),
             joint.GetGain());
+    }
+}
+
+void MotionScriptFrame::AddDescriptor(int servo_id, ScriptJointDescriptor descriptor)
+{
+    joints_[servo_id] = descriptor;
+}
+
+void MotionScriptFrame::DeleteDescriptor(int servo_id)
+{
+    joints_.erase(servo_id);
+}
+
+bool MotionScriptFrame::GetDescriptor(int servo_id, ScriptJointDescriptor* descriptor)
+{
+    if(descriptor == nullptr)
+        return nullptr;
+
+    try
+    {
+        *descriptor =  joints_.at(servo_id);
+        return true;
+    }
+    catch(std::out_of_range)
+    {
+        return false;
     }
 }
