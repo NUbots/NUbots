@@ -21,6 +21,10 @@ public:
     //! (does not apply the next frame)
     void AdvanceToNextFrame();
 
+    //! Seeks to the given frame, if it exists.
+    //! (does not apply the frame to the robot)
+    void SeekFrame(int frame);
+
     //! Schedules all joint poitions for the current frame using
     //! the given actionators.
     void ApplyCurrentFrameToRobot(NUActionatorsData* actionators_data);

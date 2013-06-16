@@ -32,6 +32,17 @@ void MotionScript2013::AdvanceToNextFrame()
     current_frame_index_++;
 }
 
+void MotionScript2013::SeekFrame(int frame)
+{
+    if(frame < 0 || frame >= script_frames_.size())
+    {
+        std::cout << "This script does not contain the frame: " 
+                  << frame << ";" << std::endl;
+        return;
+    }
+    current_frame_index_ = frame;
+}
+
 void MotionScript2013::ApplyCurrentFrameToRobot(NUActionatorsData* actionators_data)
 {
     auto& current_frame = script_frames_[current_frame_index_];
