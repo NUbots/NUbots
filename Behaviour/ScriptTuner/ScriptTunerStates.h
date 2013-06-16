@@ -69,7 +69,7 @@ class ScriptTunerState : public ScriptTunerSubState
 public:
     std::map<string, int> string_id_to_int_id; 
     string m_file_name;
-    static string m_file_path = CONFIG_DIR + std::string("/Motion/Scripts");
+    string m_file_path;
 
     MotionScript2013* script;
 
@@ -95,7 +95,7 @@ public:
     void saveManuallyMovedMotors();
 
      /*! @brief Writes the frames to script file.*/
-    void saveScriptToFile(string filename);
+    bool saveScriptToFile(string filename);
 
      /*! @brief Adds a new frame to the vector of frames.*/
     void addFrame(string argument);
@@ -150,6 +150,8 @@ public:
     /*! @brief Updates robot to have motor positions indicated by the current frame in the current script.
     */
     void applyCurrentFrameToRobot();
+
+    void setCurrentFrameDuration(string duration_string);
 };
 
 #endif
