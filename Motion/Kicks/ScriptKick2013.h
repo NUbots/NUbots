@@ -4,13 +4,13 @@
 #include "Motion/NUKick.h"
 #include "Tools/Math/Rectangle.h"
 
-class MotionScript;
+class MotionScript2013;
 
 class ScriptKick2013 : public NUKick
 {
 public:
-    ScriptKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
-    ~ScriptKick();
+    ScriptKick2013(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
+    ~ScriptKick2013();
 
     //! Called to tell the robot that it should begin a kick.
     //! The robot will start the first kick that it is correctly lined up for,

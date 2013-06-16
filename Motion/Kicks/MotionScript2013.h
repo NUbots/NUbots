@@ -1,13 +1,50 @@
 #ifndef MOTIONSCRIPT2013_H
 #define MOTIONSCRIPT2013_H
 
+#include <unordered_map>
+#include "Infrastructure/NUData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+
+class ScriptJointDescriptor
+{
+public:
+    int GetServoId() { return servo_id_; }
+    float GetPosition() { return position_; }
+    float GetGain() { return gain_; }
+
+private:
+    int servo_id_;
+    float position_;
+    float gain_;
+    bool disable_;
+};
+
+class MotionScriptFrame
+{
+public:
+    //! Schedules all joint poitions in this frame using the given actionators.
+    void ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data);
+
+    //! Returns the NUData id_t corresponding to the servo motor with the given
+    //! id.
+    static NUData::id_t MapServoIdToNUDataId(int sensor_id);
+
+    float GetTime() { return time_; }
+
+private:
+    std::unordered_map<int, ScriptJointDescriptor> joints_;
+
+    //! Time since the start of the motion script
+    float time_;
+};
+
 class MotionScript2013
 {
 public:
     MotionScript2013();
     ~MotionScript2013();
 
-    // Loads a 
+
     static MotionScript2013* LoadFromConfigSystem(
         const std::string& path,
         const std::string& name);
@@ -45,39 +82,6 @@ private:
     int current_frame_index_;
 
     std::vector<MotionScriptFrame*> script_frames_;
-};
-
-class MotionScriptFrame
-{
-public:
-    //! Schedules all joint poitions in this frame using the given actionators.
-    void ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data);
-
-    //! Returns the NUData id_t corresponding to the servo motor with the given
-    //! id.
-    static NUData::id_t MapServoIdToNUDataId(int sensor_id);
-
-    float GetTime() { return time_; }
-
-private:
-    std::unordered_map<int, ScriptJointDescriptor> joints_;
-
-    //! Time since the start of the motion script
-    float time_;
-};
-
-class ScriptJointDescriptor
-{
-public:
-    int GetServoId() { return servo_id_; }
-    float GetPosition() { return position_; }
-    float GetGain() { return gain_; }
-
-private:
-    int servo_id_;
-    float position_;
-    float gain_;
-    bool disable_;
 };
 
 #endif

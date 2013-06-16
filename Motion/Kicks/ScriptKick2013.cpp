@@ -8,7 +8,7 @@
 #include <boost/algorithm/string.hpp>
 
 
-ScriptKick2013(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUKick(walk, data, actions)
+ScriptKick2013::ScriptKick2013(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUKick(walk, data, actions)
 {
     // Load scripts for all kick types:
     const std::string script_path = "";
@@ -21,7 +21,7 @@ ScriptKick2013(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
     current_script_ = nullptr;
 }
 
-~ScriptKick2013()
+ScriptKick2013::~ScriptKick2013()
 {
     // Delete all scripts:
     delete left_kick_script_;

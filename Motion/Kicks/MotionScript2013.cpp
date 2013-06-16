@@ -1,5 +1,9 @@
+#include <unordered_map>
+#include <iostream>
 #include "MotionScript2013.h"
-#include "NUData.h"
+#include "Infrastructure/NUData.h"
+#include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+#include "Framework/darwin/Framework/include/JointData.h"
 
 MotionScript2013::MotionScript2013()
 {
@@ -12,7 +16,7 @@ MotionScript2013::~MotionScript2013()
         delete frame;
 }
 
-MotionScript2013::MotionScript2013* LoadFromConfigSystem(
+MotionScript2013* MotionScript2013::LoadFromConfigSystem(
     const std::string& path,
     const std::string& name)
 {
@@ -20,7 +24,7 @@ MotionScript2013::MotionScript2013* LoadFromConfigSystem(
 }
 
 bool MotionScript2013::SaveToConfigSystem(
-    const MotionScript& script,
+    const MotionScript2013& script,
     const std::string& path,
     const std::string& name)
 {
@@ -47,7 +51,7 @@ void MotionScript2013::ApplyCurrentFrameToRobot(NUActionatorsData* actionators_d
 {
     auto& current_frame = script_frames_[current_frame_index_];
 
-    current_frame.ApplyToRobot(script_start_time_, actionators_data);
+    current_frame->ApplyToRobot(script_start_time_, actionators_data);
 }
 
 
@@ -64,7 +68,7 @@ bool MotionScript2013::HasCompleted(float current_time)
     float script_time = current_time - script_start_time_;
     auto& current_frame = script_frames_[current_frame_index_];
 
-    if(script_time < current_frame.GetTime())
+    if(script_time < current_frame->GetTime())
         return false;
 
     return true;
@@ -97,21 +101,22 @@ NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
         default: {
             std::cout << __PRETTY_FUNCTION__ 
                       << " - Invalid sensor_id: " << sensor_id << ";";
-            return id_t();
+            return NUData::id_t();
         }
     }
 }
 
 void MotionScriptFrame::ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data)
 {
-    auto target_time = script_start_time + _time;
+    auto target_time = script_start_time + time_;
 
-    for(ScriptJointDescriptor* joint : joints_)
+    for(auto key_value : joints_)
     {
-        m_actions->add(
-            MapServoIdToNUDataId(joint->GetServoId(),
+        auto& joint = key_value.second;
+        actionators_data->add(
+            MapServoIdToNUDataId(joint.GetServoId()),
             target_time,
-            joint->GetPosition(),
-            joint->GetGain());
+            joint.GetPosition(),
+            joint.GetGain());
     }
 }

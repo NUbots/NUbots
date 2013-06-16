@@ -69,7 +69,7 @@ class ScriptTunerState : public ScriptTunerSubState
 public:
     std::map<string, int> string_id_to_int_id; 
     string m_file_name;
-    const string m_file_path = CONFIG_DIR + std::string("/Motion/Scripts")
+    const string m_file_path = CONFIG_DIR + "/Motion/Scripts";
     MotionScript2013* script;
 
 
