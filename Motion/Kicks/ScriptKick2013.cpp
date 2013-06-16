@@ -17,6 +17,9 @@ ScriptKick2013::ScriptKick2013(NUWalk* walk, NUSensorsData* data, NUActionatorsD
     side_left_kick_script_  = MotionScript2013::LoadFromConfigSystem("motion.scripts.side_left");
     side_right_kick_script_ = MotionScript2013::LoadFromConfigSystem("motion.scripts.side_right");
 
+    // Load the kickboxes
+    loadKickboxes();
+
     // Set to null while not kicking
     current_script_ = nullptr;
 }
@@ -141,4 +144,111 @@ bool ScriptKick2013::requiresLegs() { return true; }
 float ScriptKick2013::GetCurrentScriptTime()
 {
     return m_data->CurrentTime;
+}
+
+void ScriptKick2013::loadKickboxes()
+{
+    //defaults to guarantee at least old performance in case of bad file
+    float x_min_right_forward = 5.0f;
+    float x_max_right_forward = 11.0f;
+    float y_min_right_forward = -3.2f;
+    float y_max_right_forward = -9.5f;
+
+    float x_min_left_forward = 5.0f;
+    float x_max_left_forward = 11.0f;
+    float y_min_left_forward = 3.2f;
+    float y_max_left_forward = 9.5f;
+
+    float x_min_right_side = 5.0f;
+    float x_max_right_side = 11.0f;
+    float y_min_right_side = -3.2f;
+    float y_max_right_side = -6.5f;
+
+    float x_min_left_side= 5.0f;
+    float x_max_left_side = 11.0f;
+    float y_min_left_side = 3.2f;
+    float y_max_left_side = 6.5f;
+
+    std::string filename = CONFIG_DIR + std::string("kickboxes.cfg");
+    std::ifstream input(filename.c_str());
+    std::string id_str;
+    if(input.good()) {
+        float xmin, xmax, ymin, ymax;
+        while(input.good()) {
+            // read in the rule name
+            getline(input, id_str, ':');
+            boost::trim(id_str);
+            boost::to_lower(id_str);
+
+            input.ignore(30, '(');
+            input >> xmin;
+            input.ignore(10, ',');
+            input >> xmax;
+            input.ignore(10, ',');
+            input >> ymin;
+            input.ignore(10, ',');
+            input >> ymax;
+            input.ignore(10, ')');
+
+            // ignore the rest of the line
+            input.ignore(128, '\n');
+            input.peek();               //trigger eofbit being set in the case of this being the last rule
+
+            if(id_str.compare("rightforward") == 0) {
+                x_min_right_forward = xmin;
+                x_max_right_forward = xmax;
+                y_min_right_forward = ymin;
+                y_max_right_forward = ymax;
+            }
+            else if(id_str.compare("leftforward") == 0) {
+                x_min_left_forward = xmin;
+                x_max_left_forward = xmax;
+                y_min_left_forward = ymin;
+                y_max_left_forward = ymax;
+            }
+            else if(id_str.compare("rightside") == 0) {
+                x_min_right_side = xmin;
+                x_max_right_side = xmax;
+                y_min_right_side = ymin;
+                y_max_right_side = ymax;
+            }
+            else if(id_str.compare("leftside") == 0) {
+                x_min_left_side= xmin;
+                x_max_left_side = xmax;
+                y_min_left_side = ymin;
+                y_max_left_side = ymax;
+            }
+            else
+                errorlog << "ScriptKick::loadKickParameters - invalid kick name: " << id_str << std::endl;
+        }
+    }
+    else {
+        errorlog << "ScriptKick::loadKickParameters - failed to load kickboxes.cfg" << std::endl;
+    }
+
+    std::cout << " x_min_right_forward = " << x_min_right_forward << std::endl;
+    std::cout << " x_max_right_forward = " << x_max_right_forward << std::endl;
+    std::cout << " y_min_right_forward = " << y_min_right_forward << std::endl;
+    std::cout << " y_max_right_forward = " << y_max_right_forward << std::endl;
+
+    std::cout << " x_min_left_forward = " << x_min_left_forward << std::endl;
+    std::cout << " x_max_left_forward = " << x_max_left_forward << std::endl;
+    std::cout << " y_min_left_forward = " << y_min_left_forward << std::endl;
+    std::cout << " y_max_left_forward = " << y_max_left_forward << std::endl;
+
+    std::cout << " x_min_right_side = " << x_min_right_side << std::endl;
+    std::cout << " x_max_right_side = " << x_max_right_side << std::endl;
+    std::cout << " y_min_right_side = " << y_min_right_side << std::endl;
+    std::cout << " y_max_right_side = " << y_max_right_side << std::endl;
+
+    std::cout << " x_min_left_side = " << x_min_left_side << std::endl;
+    std::cout << " x_max_left_side = " << x_max_left_side << std::endl;
+    std::cout << " y_min_left_side = " << y_min_left_side << std::endl;
+    std::cout << " y_max_left_side = " << y_max_left_side << std::endl;
+
+    right_kick_area_ = Rectangle(x_min_right_forward, x_max_right_forward, y_min_right_forward, y_max_right_forward);
+    left_kick_area_ = Rectangle(x_min_left_forward, x_max_left_forward, y_min_left_forward, y_max_left_forward); //HACK: move right kick box three cm to right
+    side_right_kick_area_ = Rectangle(x_min_right_side, x_max_right_side, y_min_right_side, y_max_right_side); //HACK: kick box less wide for side kicks
+    side_left_kick_area_ = Rectangle(x_min_left_side, x_max_left_side, y_min_left_side, y_max_left_side);
+    return;
 }

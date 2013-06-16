@@ -43,6 +43,8 @@ private:
 
     void StartKick(MotionScript2013* kick_script, KickingLeg kicking_leg);
 
+    //! Loads the area for each kick
+    void loadKickboxes();
 
 protected:
     //! The currently executing script (or nullptr)
