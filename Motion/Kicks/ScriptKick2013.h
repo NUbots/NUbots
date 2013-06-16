@@ -41,7 +41,7 @@ public:
 private:
     float GetCurrentScriptTime();
 
-    void StartKick();
+    void StartKick(MotionScript2013* kick_script, KickingLeg kicking_leg);
 
 
 protected:

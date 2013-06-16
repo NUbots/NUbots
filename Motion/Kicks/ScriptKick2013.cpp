@@ -1,4 +1,5 @@
 #include "ScriptKick2013.h"
+#include "MotionScript2013.h"
 #include "debug.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Motion/NUWalk.h"
@@ -11,11 +12,10 @@
 ScriptKick2013::ScriptKick2013(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUKick(walk, data, actions)
 {
     // Load scripts for all kick types:
-    const std::string script_path = "";
-    left_kick_script_       = MotionScript2013.LoadFromConfigSystem(script_path, "left");
-    right_kick_script_      = MotionScript2013.LoadFromConfigSystem(script_path, "right");
-    side_left_kick_script_  = MotionScript2013.LoadFromConfigSystem(script_path, "side_left");
-    side_right_kick_script_ = MotionScript2013.LoadFromConfigSystem(script_path, "side_right");
+    left_kick_script_       = MotionScript2013::LoadFromConfigSystem("motion.scripts.left");
+    right_kick_script_      = MotionScript2013::LoadFromConfigSystem("motion.scripts.right");
+    side_left_kick_script_  = MotionScript2013::LoadFromConfigSystem("motion.scripts.side_left");
+    side_right_kick_script_ = MotionScript2013::LoadFromConfigSystem("motion.scripts.side_right");
 
     // Set to null while not kicking
     current_script_ = nullptr;
@@ -75,14 +75,14 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
 }
 
 void ScriptKick2013::StartKick(
-    MotionScript* kick_script, 
+    MotionScript2013* kick_script, 
     KickingLeg kicking_leg)
 {
     m_kicking_leg = kicking_leg;
     current_script_ = kick_script;
 
-    current_kick_->Reset();
-    m_kick_enable_time = m_data->CurrentTime;
+    current_script_->Reset();
+    current_script_->StartScript(m_actions);
 
     m_walk->stop();
     setArmEnabled(true, true);
@@ -97,15 +97,17 @@ void ScriptKick2013::doKick()
     if(!isActive())
         return;
 
+    float current_time = GetCurrentScriptTime();
+
     // If the current script is complete
-    if(current_script_->HasCompleted())
+    if(current_script_->HasCompleted(current_time))
     {
         kill();
         return;
     }
 
     // If it's time for the next frame
-    if(GetCurrentScriptTime() >= current_script_->GetNextFrameTime())
+    if(current_time >= current_script_->GetNextFrameTime(current_time))
     {
         // Schedule the next joint positions
         current_script_->AdvanceToNextFrame();
@@ -124,7 +126,7 @@ void ScriptKick2013::kill()
     m_kicking_leg = noLeg;
 }
 
-bool isActive()
+bool ScriptKick2013::isActive()
 {
     return current_script_ != nullptr;
 }

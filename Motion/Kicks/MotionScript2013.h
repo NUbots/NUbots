@@ -45,14 +45,11 @@ public:
     ~MotionScript2013();
 
 
-    static MotionScript2013* LoadFromConfigSystem(
-        const std::string& path,
-        const std::string& name);
+    static MotionScript2013* LoadFromConfigSystem(const std::string& path);
 
     static bool SaveToConfigSystem(
         const MotionScript2013& script,
-        const std::string& path,
-        const std::string& name);
+        const std::string& path);
 
     //! Advances this script to the next frame.
     //! (does not apply the next frame)
@@ -70,9 +67,13 @@ public:
     //! (this method is cheap and idempotent)
     void Reset();
 
+    void StartScript(NUActionatorsData* actionators_data);
+
     //! Returns true if the script has finished playing.
     bool HasCompleted(float current_time);
 
+    //! Returns the actual time at which the next frame should begin
+    float GetNextFrameTime(float current_time);
 
 private:
     float kick_enable_time_;

@@ -17,16 +17,14 @@ MotionScript2013::~MotionScript2013()
 }
 
 MotionScript2013* MotionScript2013::LoadFromConfigSystem(
-    const std::string& path,
-    const std::string& name)
+    const std::string& path)
 {
     return nullptr;
 }
 
 bool MotionScript2013::SaveToConfigSystem(
     const MotionScript2013& script,
-    const std::string& path,
-    const std::string& name)
+    const std::string& path)
 {
     return false;
 }
@@ -60,6 +58,11 @@ void MotionScript2013::Reset()
     current_frame_index_ = 0;
 }
 
+void MotionScript2013::StartScript(NUActionatorsData* actionators_data)
+{
+    kick_enable_time_ = actionators_data->CurrentTime;
+}
+
 bool MotionScript2013::HasCompleted(float current_time)
 {
     if(current_frame_index_ < script_frames_.size())
@@ -72,6 +75,12 @@ bool MotionScript2013::HasCompleted(float current_time)
         return false;
 
     return true;
+}
+
+float MotionScript2013::GetNextFrameTime(float current_time)
+{
+    #warning Stub
+    return 0;
 }
 
 NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
