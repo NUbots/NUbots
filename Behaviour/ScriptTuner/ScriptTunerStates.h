@@ -43,6 +43,9 @@
 #include <thread>
 #include <chrono>
 #include "Framework/darwin/Framework/include/JointData.h"
+#include "Motion/Kicks/MotionScript2013.h"
+
+#include "Autoconfig/nubotdataconfig.h"
 
 #include "Behaviour/Common/HeadBehaviour.h"
 
@@ -65,7 +68,11 @@ class ScriptTunerState : public ScriptTunerSubState
 {
 public:
     std::map<string, int> string_id_to_int_id; 
-    string filename;
+    string m_file_name;
+    const string m_file_path = CONFIG_DIR + std::string("/Motion/Scripts")
+    MotionScript2013* script;
+
+
 
     ScriptTunerState(ScriptTunerProvider* provider);
 

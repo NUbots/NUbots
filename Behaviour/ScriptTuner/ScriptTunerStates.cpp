@@ -7,7 +7,7 @@ using std::string;
 
 
 
-ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : ScriptTunerSubState(provider),string_id_to_int_id() {
+ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : ScriptTunerSubState(provider),string_id_to_int_id(), script() {
     string_id_to_int_id["RSP"] = (int)Robot::JointData::ID_R_SHOULDER_PITCH;
     string_id_to_int_id["LSP"] = (int)Robot::JointData::ID_L_SHOULDER_PITCH;
     string_id_to_int_id["RSR"] = (int)Robot::JointData::ID_R_SHOULDER_ROLL;
@@ -36,11 +36,11 @@ ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : ScriptTunerS
 
 void ScriptTunerState::doState()
 {
-    
-    std::cout<< "Load Script - Type File Name (Must be in ~/nubot/Config/Darwin/Motion/Scripts): "<< std::endl;
+    NUActionatorsData* m_actions = Blackboard->Actions;
+    std::cout<< "Load Script - Type File Name (Must be in "<<filepath"): "<< std::endl;
     char file[256];
     std::cin.getline(file,256);
-    filename = (string)file;
+    string filename = (string)file;
 
     if((filename.compare("exit") ==0) or (filename.compare("quit") == 0) ){
         std::cout<< "Shutting down script tuner."<< std::endl;
@@ -49,13 +49,13 @@ void ScriptTunerState::doState()
         return;
     }
 
-    auto loaded = loadScript(filename);
+    auto loaded = loadScript(filename);//Sets m_file_name, and use this afterwards.
 
 
     if(loaded){
         bool done = false;
         while(!done){
-            std::cout<<"Script \""<< filename << "\" loaded successfully."<< std::endl;
+            std::cout<<"Script \""<< m_file_name << "\" loaded successfully."<< std::endl;
             std::cout<< "Play script or edit? (Type \"play\" or \"edit\")"<< std::endl;
             std::stringstream command;
             char str[256];
@@ -68,7 +68,7 @@ void ScriptTunerState::doState()
                 std::cout << "Playing script from beginning in real time."<< std::endl;
                 playScript();
             }else if(first_argument.compare("edit")==0){
-                std::cout<<"Script \""<< filename << "\" loaded successfully for editing."<< std::endl;                    
+                std::cout<<"Script \""<< m_file_name << "\" loaded successfully for editing."<< std::endl;                    
                 
                 while(scriptIsActive()){
                     applyCurrentFrameToRobot();
@@ -104,8 +104,12 @@ void ScriptTunerState::editCurrentFrame(){
             std::cout << "Saving manually adjusted motor positions. It is recommended all torques are on during saving."<< std::endl;
             saveManuallyMovedMotors();
         }else if(first_argument.compare("savescript")==0){
-            std::cout << "Script \""<< filename << "\" saving."<< std::endl;
-            saveScriptToFile(filename);
+            if(saveScriptToFile(m_file_name)){
+                std::cout << "Script \""<< m_file_name << "\" saved."<< std::endl;
+            } else {
+                std::cout << "!!!!!!!!!!! SAVING FAILED !!!!!!!!!!!."<< std::endl;
+            }
+            
         }else if(first_argument.compare("exit")==0 or (first_argument.compare("quit") == 0) or (first_argument.compare("q") == 0) ){
             std::cout << "Exiting."<< std::endl;
             exitScript();
@@ -131,21 +135,21 @@ void ScriptTunerState::editCurrentFrame(){
     }
 }
 
-bool ScriptTunerState::loadScript(string filename){
-    std::cout << "Oh wait this isn't implemented yet."<< std::endl;
-    return true;
+bool ScriptTunerState::loadScript(string filename){    
+    script = MotionScript2013::Load(path,filename);
+    return (bool)script;
 }
 
 void ScriptTunerState::applyFrameToRobot(){
-    std::cout << "Oh wait this isn't implemented yet."<< std::endl;
+    script->ApplyCurrentFrameToRobot(m_actions);
 }
 
 void ScriptTunerState::saveManuallyMovedMotors(){
     std::cout << "Oh wait this isn't implemented yet."<< std::endl;
 }
 
-void ScriptTunerState::saveScriptToFile(string filename){
-    std::cout << "Oh wait this isn't implemented yet."<< std::endl;
+bool ScriptTunerState::saveScriptToFile(string filename){
+    return MotionScript2013::Save(script/*Dereference? Takes a Motionscript2013&*/,m_file_path,filename);
 }
 void ScriptTunerState::addFrame(string argument){
 std::cout << "Oh wait this isn't implemented yet."<< std::endl;
