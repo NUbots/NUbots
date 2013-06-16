@@ -56,6 +56,20 @@ void MotionScript2013::Reset()
     current_frame_index_ = 0;
 }
 
+bool MotionScript2013::HasCompleted(float current_time)
+{
+    if(current_frame_index_ < script_frames_.size())
+        return false;
+
+    float script_time = current_time - script_start_time_;
+    auto& current_frame = script_frames_[current_frame_index_];
+
+    if(script_time < current_frame.GetTime())
+        return false;
+
+    return true;
+}
+
 NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
 {
     switch(sensor_id)

@@ -13,7 +13,7 @@ public:
         const std::string& name);
 
     static bool SaveToConfigSystem(
-        const MotionScript& script,
+        const MotionScript2013& script,
         const std::string& path,
         const std::string& name);
 
@@ -32,6 +32,11 @@ public:
     //! Return the script to the first frame, and prepare it to be run again.
     //! (this method is cheap and idempotent)
     void Reset();
+
+    //! Returns true if the script has finished playing.
+    bool HasCompleted(float current_time);
+
+
 
 private:
     float kick_enable_time_;
@@ -52,12 +57,14 @@ public:
     //! Returns the NUData id_t corresponding to the servo motor with the given
     //! id.
     static NUData::id_t MapServoIdToNUDataId(int sensor_id);
-    
+
+    float GetTime() { return time_; }
+
 private:
     std::unordered_map<int, ScriptJointDescriptor> joints_;
 
     //! Time since the start of the motion script
-    double time_;
+    float time_;
 };
 
 class ScriptJointDescriptor
