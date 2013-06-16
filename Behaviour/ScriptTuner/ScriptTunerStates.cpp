@@ -32,13 +32,14 @@ ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : ScriptTunerS
     std::cout<< "--------------Welcome to Script Tuner--------------"<< std::endl;
     std::cout<< "==================================================="<< std::endl;
     m_script_active = false;
+    m_file_path = (CONFIG_DIR + std::string("/Motion/Scripts"));
 }
 
 
 void ScriptTunerState::doState()
 {
     NUActionatorsData* m_actions = Blackboard->Actions;
-    std::cout<< "Load Script - Type File Name (Must be in "<<filepath"): "<< std::endl;
+    std::cout<< "Load Script - Type File Name (Must be in "<<m_file_path<<"): "<< std::endl;
     char file[256];
     std::cin.getline(file,256);
     string filename = (string)file;
@@ -139,7 +140,7 @@ void ScriptTunerState::editCurrentFrame(){
 }
 
 bool ScriptTunerState::loadScript(string filename){    
-    script = MotionScript2013::LoadFromConfigSystem(path,filename);
+    script = MotionScript2013::LoadFromConfigSystem(m_file_path,filename);
     return (bool)script;
 }
 
@@ -152,7 +153,7 @@ void ScriptTunerState::saveManuallyMovedMotors(){
 }
 
 bool ScriptTunerState::saveScriptToFile(string filename){
-    return MotionScript2013::Save(script/*Dereference? Takes a Motionscript2013&*/,m_file_path,filename);
+    return MotionScript2013::SaveToConfigSystem(*(script)/*Dereference? Takes a Motionscript2013&*/,m_file_path,filename);
 }
 void ScriptTunerState::addFrame(string argument){
 std::cout << "Oh wait this isn't implemented yet."<< std::endl;
@@ -260,7 +261,7 @@ void ScriptTunerState::applyCurrentFrameToRobot(){
 
 }
 
-void setCurrentFrameDuration(string duration_string){
+void ScriptTunerState::setCurrentFrameDuration(string duration_string){
     std::stringstream stream;
     stream << duration_string;
     int duration;
