@@ -69,8 +69,10 @@ class ScriptTunerState : public ScriptTunerSubState
 public:
     std::map<string, int> string_id_to_int_id; 
     string m_file_name;
-    const string m_file_path = CONFIG_DIR + std::string("/Motion/Scripts")
+    static string m_file_path = CONFIG_DIR + std::string("/Motion/Scripts");
     MotionScript2013* script;
+
+    bool m_script_active;
 
 
 
@@ -138,7 +140,7 @@ public:
     
     /*! @brief Returns the time required for the current frame to complete.
     */    
-    float timeForCompletionOfCurrentFrame();
+    float durationOfCurrentFrame();
 
     /*! @brief Indicates state of script during editing.
     */

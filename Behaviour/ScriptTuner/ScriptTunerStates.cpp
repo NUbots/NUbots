@@ -31,6 +31,7 @@ ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : ScriptTunerS
     std::cout<< "==================================================="<< std::endl;
     std::cout<< "--------------Welcome to Script Tuner--------------"<< std::endl;
     std::cout<< "==================================================="<< std::endl;
+    m_script_active = false;
 }
 
 
@@ -70,10 +71,11 @@ void ScriptTunerState::doState()
             }else if(first_argument.compare("edit")==0){
                 std::cout<<"Script \""<< m_file_name << "\" loaded successfully for editing."<< std::endl;                    
                 
-                while(scriptIsActive()){
+                m_script_active =true;
+                while(m_script_active){
                     applyCurrentFrameToRobot();
                     std::cout<<"Frame number "<<getCurrentFrameNumber()<<" out of " << totalNumberOfFrames()<<" applied."<<std::endl;
-                    std::cout<<"Time period for frame to complete is "<< durationOfCurrentFrame()<< " seconds."<<std::endl;               
+                    std::cout<<"Frame duration is "<< durationOfCurrentFrame()<< " seconds."<<std::endl;               
                   
                     editCurrentFrame();
                 }
@@ -91,6 +93,7 @@ void ScriptTunerState::doState()
 }
 
 void ScriptTunerState::editCurrentFrame(){
+
     while(true){
         std::stringstream command;
         char str[256];
@@ -136,7 +139,7 @@ void ScriptTunerState::editCurrentFrame(){
 }
 
 bool ScriptTunerState::loadScript(string filename){    
-    script = MotionScript2013::Load(path,filename);
+    script = MotionScript2013::LoadFromConfigSystem(path,filename);
     return (bool)script;
 }
 
@@ -168,11 +171,11 @@ void ScriptTunerState::interpretSeekCommand(string frame_number_string){
 }
 
 void ScriptTunerState::moveToFrame(int frame_number){
-    std::cout << "Oh wait this isn't implemented yet."<< std::endl;
+    script->SeekFrame(frame_number);
 }
 
 void ScriptTunerState::exitScript(){
-    std::cout << "Oh wait this isn't implemented yet."<< std::endl;
+    m_script_active = false;
 }
 
 void ScriptTunerState::playScript(){
@@ -250,7 +253,7 @@ float ScriptTunerState::durationOfCurrentFrame(){
 }
 
 bool ScriptTunerState::scriptIsActive(){
-    return true;
+    return m_script_active;
 }
 
 void ScriptTunerState::applyCurrentFrameToRobot(){
