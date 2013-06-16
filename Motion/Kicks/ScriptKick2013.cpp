@@ -87,6 +87,8 @@ void ScriptKick2013::StartKick(
     m_walk->stop();
     setArmEnabled(true, true);
     setHeadEnabled(true);
+    m_kick_ready = true;
+    m_kick_enabled = true;
 }
 
 void ScriptKick2013::doKick()
@@ -98,7 +100,7 @@ void ScriptKick2013::doKick()
     // If the current script is complete
     if(current_script_->HasCompleted())
     {
-        
+        kill();
         return;
     }
 
@@ -112,17 +114,25 @@ void ScriptKick2013::doKick()
 }
 
 void ScriptKick2013::stop() { kill(); }
-void ScriptKick2013::kill() { current_script_ = nullptr; }
+void ScriptKick2013::kill() 
+{ 
+    current_script_ = nullptr;
+    m_kick_ready = false;
+    m_kick_enabled = false;
+    setArmEnabled(false, false);
+    setHeadEnabled(false);
+    m_kicking_leg = noLeg;
+}
 
 bool isActive()
 {
     return current_script_ != nullptr;
 }
 
-bool ScriptKick2013::isUsingHead() { return true; }
+bool ScriptKick2013::isUsingHead() { return false; }
 bool ScriptKick2013::isUsingArms() { return true; }
 bool ScriptKick2013::isUsingLegs() { return true; }
-bool ScriptKick2013::requiresHead() { return true; }
+bool ScriptKick2013::requiresHead() { return false; }
 bool ScriptKick2013::requiresArms() { return true; }
 bool ScriptKick2013::requiresLegs() { return true; }
 

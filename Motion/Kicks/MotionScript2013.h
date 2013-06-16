@@ -37,7 +37,6 @@ public:
     bool HasCompleted(float current_time);
 
 
-
 private:
     float kick_enable_time_;
     float script_start_time_;
