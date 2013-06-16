@@ -79,9 +79,32 @@ bool MotionScript2013::HasCompleted(float current_time)
 
 float MotionScript2013::GetNextFrameTime(float current_time)
 {
-    #warning Stub
-    return 0;
+    if(current_frame_index_ == GetFrameCount() - 1)
+        return script_frames_[current_frame_index_]->GetTime();
+    else
+        return script_frames_[current_frame_index_ + 1]->GetTime();
 }
+
+int MotionScript2013::GetFrameCount()
+{
+    return script_frames_.size();
+}
+
+int MotionScript2013::GetCurrentFrameIndex()
+{
+    return current_frame_index_;
+}
+
+MotionScriptFrame* MotionScript2013::GetCurrentFrame()
+{
+    return script_frames_[current_frame_index_];
+}
+
+void MotionScript2013::InsertFrame(int position, MotionScriptFrame* frame)
+{
+    
+}
+
 
 NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
 {

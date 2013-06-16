@@ -8,6 +8,9 @@
 class ScriptJointDescriptor
 {
 public:
+    int SetServoId(int servo_id) { servo_id_ = servo_id; }
+    float SetPosition(float position) { position_ = position; }
+    float SetGain(float gain) { gain_ = gain; }
     int GetServoId() { return servo_id_; }
     float GetPosition() { return position_; }
     float GetGain() { return gain_; }
@@ -30,6 +33,16 @@ public:
     static NUData::id_t MapServoIdToNUDataId(int sensor_id);
 
     float GetTime() { return time_; }
+    float SetTime(float new_time) { time_ = new_time; }
+
+    //! Adds a new descriptor for the servo with the given id, or replaces
+    //! the current one.
+    void AddDescriptor(int servo_id, ScriptJointDescriptor descriptor);
+
+    //! Deletes the descriptor for the given servo id from this script frame.
+    //! Servos without descriptors will not have their state changed by this
+    //! script frame when ApplyToRobot is called.
+    void DeleteDescriptor(int servo_id);
 
 private:
     std::unordered_map<int, ScriptJointDescriptor> joints_;
@@ -74,6 +87,18 @@ public:
 
     //! Returns the actual time at which the next frame should begin
     float GetNextFrameTime(float current_time);
+
+    int GetFrameCount();
+
+    int GetCurrentFrameIndex();
+
+    MotionScriptFrame* GetCurrentFrame();
+
+    //! Insert the given frame before the frame at the specified index
+    void InsertFrame(int index, MotionScriptFrame* frame);
+
+    //! Rmoves the frame at the given index from the script
+    void RemoveFrame(int index);
 
 private:
     float kick_enable_time_;
