@@ -7,11 +7,9 @@
 #include <QStringList>
 #include <vector>
 
-class Localisation;
 class SelfLocalisation;
 class NUSensorsData;
 class NUImage;
-class LocWmFrame;
 class FieldObjects;
 class GameInformation;
 class TeamInformation;
@@ -40,7 +38,6 @@ public:
     virtual bool isLastFrameAvailable(){return false;}
     virtual bool isSetFrameAvailable(){return false;}
 
-    virtual const Localisation* GetLocalisationData(){return NULL;}
     virtual const SelfLocalisation* GetSelfLocalisationData(){return NULL;}
     virtual const NUImage* GetImageData(){return NULL;}
     virtual const NUSensorsData* GetSensorData(){return NULL;}
@@ -52,9 +49,7 @@ public:
     virtual QStringList AvailableData() const {return QStringList(QString("None"));}
 
 signals:
-    void LocalisationDataChanged(const Localisation*);
     void SelfLocalisationDataChanged(const SelfLocalisation*);
-    void LocalisationFrameChanged(const LocWmFrame*);
     void ObjectDataChanged(const FieldObjects*);
     void rawImageChanged(const NUImage*);
     //void sensorDataChanged(const float*,const float*,const float*);

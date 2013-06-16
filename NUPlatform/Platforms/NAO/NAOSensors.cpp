@@ -86,7 +86,7 @@ std::vector<std::string> NAOSensors::m_ultrasonic_right_distances(temp_ulstrason
 NAOSensors::NAOSensors()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOSensors::NAOSensors()" << endl;
+    debug << "NAOSensors::NAOSensors()" << std::endl;
 #endif
     getSensorsFromALMemory();
     m_data->addSensors(m_jointposition_names);
@@ -99,7 +99,7 @@ NAOSensors::NAOSensors()
 NAOSensors::~NAOSensors()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOSensors::~NAOSensors()" << endl;
+    debug << "NAOSensors::~NAOSensors()" << std::endl;
 #endif
 }
 
@@ -110,7 +110,7 @@ NAOSensors::~NAOSensors()
 void NAOSensors::getSensorsFromALMemory()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOSensors::getSensorsFromALMemory()" << endl;
+    debug << "NAOSensors::getSensorsFromALMemory()" << std::endl;
 #endif
     m_al_positions_access = new ALMemoryFastAccess();
     m_al_positions_access->ConnectToVariables(NUNAO::m_broker, m_jointposition_names);
@@ -161,7 +161,7 @@ void NAOSensors::initBuffers()
 void NAOSensors::copyFromHardwareCommunications()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NAOSensors::copyFromHardwareCommunications()" << endl;
+    debug << "NAOSensors::copyFromHardwareCommunications()" << std::endl;
 #endif
     // This took 0.13ms to complete in 2010
     // This takes 0.24ms to complete (28/11/2011: There is very little scope for improvement)

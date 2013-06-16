@@ -40,7 +40,7 @@ int LogFileReader::openFile(QString fileName)
             currentFileReader = new SplitStreamFileFormatReader(fileName);
         }
     }
-    catch(exception &e)
+    catch(std::exception &e)
     {
         qDebug() << "I/O Error:" << e.what();
     }
@@ -53,7 +53,6 @@ int LogFileReader::openFile(QString fileName)
             //connect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
             //        this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
             connect(currentFileReader,SIGNAL(sensorDataChanged( NUSensorsData*)), this, SIGNAL(sensorDataChanged( NUSensorsData*)));
-            connect(currentFileReader,SIGNAL(LocalisationDataChanged(const Localisation*)), this, SIGNAL(LocalisationDataChanged(const Localisation*)));
             connect(currentFileReader,SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)), this, SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)));
             connect(currentFileReader,SIGNAL(ObjectDataChanged(const FieldObjects*)), this, SIGNAL(ObjectDataChanged(const FieldObjects*)));
             connect(currentFileReader,SIGNAL(GameInfoChanged(const GameInformation*)), this, SIGNAL(GameInfoChanged(const GameInformation*)));
@@ -81,7 +80,6 @@ bool LogFileReader::closeFile()
         //disconnect(currentFileReader,SIGNAL(sensorDataChanged(const float*, const float*, const float*)),
         //        this, SIGNAL(sensorDataChanged(const float*, const float*, const float*)));
         disconnect(currentFileReader,SIGNAL(sensorDataChanged( NUSensorsData*)), this, SIGNAL(sensorDataChanged( NUSensorsData*)));
-        disconnect(currentFileReader,SIGNAL(LocalisationDataChanged(const Localisation*)), this, SIGNAL(LocalisationDataChanged(const Localisation*)));
         disconnect(currentFileReader,SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)), this, SIGNAL(SelfLocalisationDataChanged(const SelfLocalisation*)));
         disconnect(currentFileReader,SIGNAL(ObjectDataChanged(const FieldObjects*)), this, SIGNAL(ObjectDataChanged(const FieldObjects*)));
         disconnect(currentFileReader,SIGNAL(frameChanged(int,int)), this, SIGNAL(frameChanged(int,int)));
@@ -90,7 +88,7 @@ bool LogFileReader::closeFile()
         delete currentFileReader;
         currentFileReader = 0;
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -111,7 +109,7 @@ int LogFileReader::nextFrame()
             curr = currentFileReader->nextFrame();
             debug << "Processing Frame: " << curr << std::endl;
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -132,7 +130,7 @@ int LogFileReader::previousFrame()
         try{
             curr = currentFileReader->previousFrame();
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -151,7 +149,7 @@ int LogFileReader::firstFrame()
         try{
             curr = currentFileReader->firstFrame();
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -171,7 +169,7 @@ int LogFileReader::lastFrame()
         try{
             curr = currentFileReader->lastFrame();
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();
@@ -190,7 +188,7 @@ int LogFileReader::setFrame(int frameNumber)
         try{
             curr = currentFileReader->setFrame(frameNumber);
         }
-        catch(exception e)
+        catch(std::exception e)
         {
             qDebug() << "I/O Error: " << e.what();
             closeFile();

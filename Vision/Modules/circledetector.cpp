@@ -27,18 +27,18 @@ void CircleDetector::setTolerance(double tolerance)
     m_tolerance = std::max(std::min(tolerance, 1.0), 0.0); //clamp
 }
 
-bool CircleDetector::run(std::vector<GroundPoint> &points, CentreCircle &result)
+bool CircleDetector::run(std::vector<NUPoint> &points, CentreCircle &result)
 {
-    RANSACCircle<GroundPoint> candidate;
-    std::vector<GroundPoint> consensus, remainder;
+    RANSACCircle<NUPoint> candidate;
+    std::vector<NUPoint> consensus, remainder;
     double variance;
-    int i=0;
+    unsigned int i=0;
     bool modelfound = false;
 
     // attemp multiple RANSAC fits
 
     // run first iterations
-    modelfound = RANSAC::findModel<RANSACCircle<GroundPoint>, GroundPoint>(points, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus);
+    modelfound = RANSAC::findModel<RANSACCircle<NUPoint>, NUPoint>(points, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus);
 
     //continue while models are found but not a final version
     while(modelfound && i < m_max_iterations) {
@@ -52,11 +52,11 @@ bool CircleDetector::run(std::vector<GroundPoint> &points, CentreCircle &result)
                    right = 0,
                    top = VisionBlackboard::getInstance()->getImageHeight() - 1,
                    bottom = 0;
-            BOOST_FOREACH(const GroundPoint& p, consensus) {
-                left = std::min(left, p.screen.x);
-                right = std::max(right, p.screen.x);
-                top = std::min(top, p.screen.y);
-                bottom = std::max(bottom, p.screen.y);
+            BOOST_FOREACH(const NUPoint& p, consensus) {
+                left = std::min(left, p.screenCartesian.x);
+                right = std::max(right, p.screenCartesian.x);
+                top = std::min(top, p.screenCartesian.y);
+                bottom = std::max(bottom, p.screenCartesian.y);
             }
 
             result = CentreCircle(candidate.getCentre(), candidate.getRadius(), Vector2<double>(right-left, bottom-top));
@@ -65,7 +65,7 @@ bool CircleDetector::run(std::vector<GroundPoint> &points, CentreCircle &result)
         }
         else {
             // model isn't good enough, reattempt with remainder
-            modelfound = RANSAC::findModel<RANSACCircle<GroundPoint>, GroundPoint>(remainder, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus);
+            modelfound = RANSAC::findModel<RANSACCircle<NUPoint>, NUPoint>(remainder, candidate, consensus, remainder, variance, m_e, m_n, m_k, RANSAC::LargestConsensus);
         }
 
         i++;

@@ -24,9 +24,12 @@
 #include "openglmanager.h"
 #include "Infrastructure/NUImage/NUImage.h"
 #include "Infrastructure/NUImage/ClassifiedImage.h"
+#include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Kinematics/Horizon.h"
 #include <QPainter>
 #include <QDebug>
+#include <QGLPixelBuffer>
+#include "SensorCalibrationWidget.h"
 
 // Apple has to be different...
 #if defined(__APPLE__) || defined(MACOSX)
@@ -35,13 +38,17 @@
   #include <GL/glu.h>
 #endif
 
-OpenglManager::OpenglManager(): width(320), height(240)
+#include <boost/foreach.hpp>
+
+OpenglManager::OpenglManager(): width(640), height(480)
 {
     for(int id = 0; id < GLDisplay::numDisplays; id++)
     {
         textureStored[id] = false;
         displayStored[id] = false;
     }
+    m_field_lines_draw_list = 0;
+    InitFieldLines();
 }
 
 OpenglManager::~OpenglManager()
@@ -51,6 +58,194 @@ OpenglManager::~OpenglManager()
         if(textureStored[id]) glDeleteTextures(1, &textures[id]);
         if(displayStored[id]) glDeleteLists(displays[id],1);
     }
+}
+
+typedef Vector2<float> point;
+typedef std::pair<point, point> line;
+class arc
+{
+public:
+    arc(float rad, float s_ang, float e_ang): r(rad), start_angle(s_ang), end_angle(e_ang) {}
+    float r;
+    float start_angle;
+    float end_angle;
+};
+void OpenglManager::InitFieldLines()
+{
+    makeCurrent();
+
+    std::vector<line> field_lines;
+    std::vector<arc> centre_circle_arcs;
+
+    // Make field - all done manually unfortunately
+    // Field dimensions in cm.
+    const float line_width = 5.f;
+    const float field_width = 400.f;
+    const float field_length = 600.f;
+    const float penalty_width = 220.f;
+    const float penalty_length = 60.f;
+    const float pen_spot_distance = 180.f;
+    const float pen_spot_length = 10.f;
+    const float center_circle_diameter = 120.f;
+
+    // Other measurements calculated from field dimensions.
+    const float lhw = 0.5f * line_width;        // line half width
+    const float hfw = 0.5f * field_width;       // half field width
+    const float hfl = 0.5f * field_length;      // half field length
+    const float hpw = 0.5f * penalty_width;     // half penalty width
+    const float hpl = 0.5f * penalty_length;    // half penalty length
+    const float center_circle_radius = 0.5f * center_circle_diameter;
+
+    // Base and side line positions.
+    const float inner_base = hfl - lhw;
+    const float outer_base = hfl + lhw;
+    const float inner_side = hfw - lhw;
+    const float outer_side = hfw + lhw;
+
+    // Clear vectors
+    field_lines.clear();
+    centre_circle_arcs.clear();
+
+    // border
+    field_lines.push_back(line(point(-outer_base,-outer_side),point(-outer_base, outer_side))); // Blue baseline
+    field_lines.push_back(line(point( outer_base,-outer_side),point( outer_base, outer_side))); // Yellow baseline
+    field_lines.push_back(line(point(-outer_base, outer_side),point( outer_base, outer_side))); // Sideline
+    field_lines.push_back(line(point(-outer_base,-outer_side),point( outer_base,-outer_side))); // Sideline
+
+    // penalty box positions.
+    const float inner_penalty_side = hpw - lhw;
+    const float outer_penalty_side = hpw + lhw;
+    const float inner_penalty_front = hfl - penalty_length + lhw;
+    const float outer_penalty_front = hfl - penalty_length - lhw;
+
+    // Inner baseline Blue
+    field_lines.push_back(line(point(-inner_base,-inner_side),point(-inner_base,-outer_penalty_side))); // Side
+    field_lines.push_back(line(point(-inner_base, inner_side),point(-inner_base, outer_penalty_side))); // Side
+    field_lines.push_back(line(point(-inner_base,-inner_penalty_side),point(-inner_base, inner_penalty_side))); // centre
+
+    // Inner baseline Yellow
+    field_lines.push_back(line(point( inner_base,-inner_side),point( inner_base,-outer_penalty_side))); // Side
+    field_lines.push_back(line(point( inner_base, inner_side),point( inner_base, outer_penalty_side))); // Side
+    field_lines.push_back(line(point( inner_base,-inner_penalty_side),point( inner_base, inner_penalty_side))); // centre
+
+    // Inner Sidelines
+    field_lines.push_back(line(point(-inner_base, inner_side),point(-lhw, inner_side))); // Sideline
+    field_lines.push_back(line(point( inner_base, inner_side),point( lhw, inner_side))); // Sideline
+    field_lines.push_back(line(point(-inner_base,-inner_side),point(-lhw,-inner_side))); // Sideline
+    field_lines.push_back(line(point( inner_base,-inner_side),point( lhw,-inner_side))); // Sideline
+
+    // Blue Penalty Box
+    field_lines.push_back(line(point(-inner_base,-inner_penalty_side),point(-inner_penalty_front,-inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point(-inner_base,-outer_penalty_side),point(-outer_penalty_front,-outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point(-inner_base, inner_penalty_side),point(-inner_penalty_front, inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point(-inner_base, outer_penalty_side),point(-outer_penalty_front, outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point(-inner_penalty_front,-inner_penalty_side),point(-inner_penalty_front, inner_penalty_side))); // Front inner
+    field_lines.push_back(line(point(-outer_penalty_front,-outer_penalty_side),point(-outer_penalty_front, outer_penalty_side))); // Front outer
+
+    // Yellow Penalty Box
+    field_lines.push_back(line(point( inner_base,-inner_penalty_side),point( inner_penalty_front,-inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point( inner_base,-outer_penalty_side),point( outer_penalty_front,-outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point( inner_base, inner_penalty_side),point( inner_penalty_front, inner_penalty_side))); // Side inner
+    field_lines.push_back(line(point( inner_base, outer_penalty_side),point( outer_penalty_front, outer_penalty_side))); // Side outer
+    field_lines.push_back(line(point( inner_penalty_front,-inner_penalty_side),point( inner_penalty_front, inner_penalty_side))); // Front inner
+    field_lines.push_back(line(point( outer_penalty_front,-outer_penalty_side),point( outer_penalty_front, outer_penalty_side))); // Front outer
+
+    // Center circle calculations.
+    const float inner_cc = center_circle_radius - lhw;
+    const float outer_cc = center_circle_radius + lhw;
+    const float inner_arc_start_angle = asin(lhw / inner_cc);   // work out where the inner center circle meets the edge of the halfway line.
+    const float outer_arc_start_angle = asin(lhw / outer_cc);   // work out where the outer center circle meets the edge of the halfway line.
+
+    // Penalty spot positions.
+    const float spot_hl = 0.5*pen_spot_length;
+    const float spot_center = hfl - pen_spot_distance;
+    const float spot_front = spot_center - spot_hl;
+    const float spot_back = spot_center + spot_hl;
+
+    // Halfway line
+    field_lines.push_back(line(point(-lhw, inner_side),point(-lhw, outer_cc)));
+    field_lines.push_back(line(point( lhw, inner_side),point( lhw, outer_cc)));
+    field_lines.push_back(line(point(-lhw,-inner_side),point(-lhw,-outer_cc)));
+    field_lines.push_back(line(point( lhw,-inner_side),point( lhw,-outer_cc)));
+    field_lines.push_back(line(point(-lhw,-inner_cc),point(-lhw,-lhw)));
+    field_lines.push_back(line(point( lhw,-inner_cc),point( lhw,-lhw)));
+    field_lines.push_back(line(point(-lhw, inner_cc),point(-lhw, lhw)));
+    field_lines.push_back(line(point( lhw, inner_cc),point( lhw, lhw)));
+
+    // Center marker
+    field_lines.push_back(line(point( spot_hl,-lhw),point( spot_hl, lhw)));
+    field_lines.push_back(line(point(-spot_hl,-lhw),point(-spot_hl, lhw)));
+    field_lines.push_back(line(point( spot_hl,-lhw),point( lhw,-lhw)));
+    field_lines.push_back(line(point(-spot_hl,-lhw),point(-lhw,-lhw)));
+    field_lines.push_back(line(point( spot_hl, lhw),point( lhw, lhw)));
+    field_lines.push_back(line(point(-spot_hl, lhw),point(-lhw, lhw)));
+
+    // outer
+    field_lines.push_back(line(point( spot_front,-lhw),point( spot_front, lhw)));
+    field_lines.push_back(line(point( spot_back,-lhw),point( spot_back, lhw)));
+    field_lines.push_back(line(point(spot_center-lhw, spot_hl),point(spot_center+lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center-lhw,-spot_hl),point(spot_center+lhw,-spot_hl)));
+    // vertical inner
+    field_lines.push_back(line(point(spot_center-lhw, lhw),point(spot_center-lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center+lhw, lhw),point(spot_center+lhw, spot_hl)));
+    field_lines.push_back(line(point(spot_center-lhw, -lhw),point(spot_center-lhw, -spot_hl)));
+    field_lines.push_back(line(point(spot_center+lhw, -lhw),point(spot_center+lhw, -spot_hl)));
+    // horizontal inner
+    field_lines.push_back(line(point( spot_front, lhw),point(spot_center-lhw, lhw)));
+    field_lines.push_back(line(point( spot_front,-lhw),point(spot_center-lhw,-lhw)));
+    field_lines.push_back(line(point( spot_back, lhw),point(spot_center+lhw, lhw)));
+    field_lines.push_back(line(point( spot_back,-lhw),point(spot_center+lhw,-lhw)));
+    // outer
+    field_lines.push_back(line(point(-spot_front,-lhw),point(-spot_front, lhw)));
+    field_lines.push_back(line(point(-spot_back,-lhw),point(-spot_back, lhw)));
+    field_lines.push_back(line(point(-(spot_center-lhw), spot_hl),point(-(spot_center+lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center-lhw),-spot_hl),point(-(spot_center+lhw),-spot_hl)));
+    // vertical inner
+    field_lines.push_back(line(point(-(spot_center-lhw), lhw),point(-(spot_center-lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center+lhw), lhw),point(-(spot_center+lhw), spot_hl)));
+    field_lines.push_back(line(point(-(spot_center-lhw), -lhw),point(-(spot_center-lhw), -spot_hl)));
+    field_lines.push_back(line(point(-(spot_center+lhw), -lhw),point(-(spot_center+lhw), -spot_hl)));
+    // horizontal inner
+    field_lines.push_back(line(point(-spot_front, lhw),point(-(spot_center-lhw), lhw)));
+    field_lines.push_back(line(point(-spot_front,-lhw),point(-(spot_center-lhw),-lhw)));
+    field_lines.push_back(line(point(-spot_back, lhw),point(-(spot_center+lhw), lhw)));
+    field_lines.push_back(line(point(-spot_back,-lhw),point(-(spot_center+lhw),-lhw)));
+
+    // Now do center circle
+    const float angle_offset = mathGeneral::deg2rad(90);
+    const float arc_base_length = mathGeneral::deg2rad(180);
+    centre_circle_arcs.push_back(arc(inner_cc, angle_offset+inner_arc_start_angle, arc_base_length-2*inner_arc_start_angle));
+    centre_circle_arcs.push_back(arc(inner_cc, angle_offset-inner_arc_start_angle, -arc_base_length+2*inner_arc_start_angle));
+    centre_circle_arcs.push_back(arc(outer_cc, angle_offset+outer_arc_start_angle, arc_base_length-2*outer_arc_start_angle));
+    centre_circle_arcs.push_back(arc(outer_cc,angle_offset-outer_arc_start_angle,-arc_base_length+2*outer_arc_start_angle));
+
+    point start;
+    point end;
+    if(m_field_lines_draw_list)
+    {
+        glDeleteLists(m_field_lines_draw_list,1);
+    }
+    m_field_lines_draw_list = glGenLists(1);
+    glNewList(m_field_lines_draw_list, GL_COMPILE);    // START OF LIST
+
+    glBegin(GL_LINES);                               // Start Lines
+    // Draw all of the lines.
+    BOOST_FOREACH(line curr_line, field_lines)
+    {
+        start = curr_line.first;
+        end = curr_line.second;
+        glVertex3f(start.x, start.y, 0.f);             // Starting point
+        glVertex3f(end.x, end.y, 0.f);             // Ending point
+    }
+    glEnd();  // End Lines
+
+    // Draw the center circle.
+    BOOST_FOREACH(arc curr_arc, centre_circle_arcs)
+    {
+        DrawArc(0,0,curr_arc.r, curr_arc.start_angle, curr_arc.end_angle, 100);
+    }
+
+    glEndList();                                    // END OF LIST
 }
 
 void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
@@ -68,9 +263,9 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
 
     // Create Nearest Filtered Texture
     glBindTexture(GL_TEXTURE_2D, textures[displayId]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex.width(), tex.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.bits());
 
     textureStored[displayId] = true;
 
@@ -84,15 +279,16 @@ void OpenglManager::createDrawTextureImage(const QImage& image, int displayId)
     displays[displayId] = glGenLists(1);
 
     glNewList(displays[displayId],GL_COMPILE);
-        glBindTexture(GL_TEXTURE_2D, textures[displayId]);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);    // Turn off filtering of textures
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);    // Turn off filtering of textures
-        glBegin(GL_QUADS);
-            glTexCoord2f(0.0f, 0.0f); glVertex3f(0.0f, (float)height,  1.0f);      // Bottom Left Of The Texture and Quad
-            glTexCoord2f(1.0f, 0.0f); glVertex3f( (float)width, (float)height,  1.0f);    // Bottom Right Of The Texture and Quad
-            glTexCoord2f(1.0f, 1.0f); glVertex3f( (float)width,  0.0f,  1.0f);     // Top Right Of The Texture and Quad
-            glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f,  0.0f,  1.0f);       // Top Left Of The Texture and Quad
-        glEnd();
+//        glBindTexture(GL_TEXTURE_2D, textures[displayId]);
+//        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);    // Turn off filtering of textures
+//        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);    // Turn off filtering of textures
+//        glBegin(GL_QUADS);
+//            glTexCoord2f(0.0f, 0.0f); glVertex3f(0.0f, (float)height,  1.0f);      // Bottom Left Of The Texture and Quad
+//            glTexCoord2f(1.0f, 0.0f); glVertex3f( (float)width, (float)height,  1.0f);    // Bottom Right Of The Texture and Quad
+//            glTexCoord2f(1.0f, 1.0f); glVertex3f( (float)width,  0.0f,  1.0f);     // Top Right Of The Texture and Quad
+//            glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f,  0.0f,  1.0f);       // Top Left Of The Texture and Quad
+//        glEnd();
+    drawTexture(QRectF(0,0,tex.width(),tex.height()), textures[displayId], GL_TEXTURE_2D);
     glEndList();
     displayStored[displayId] = true;
 }
@@ -133,9 +329,9 @@ void OpenglManager::writeClassImageToDisplay(ClassifiedImage* newImage, GLDispla
         imageLine = (QRgb*)image.scanLine(y);
         for (int x=0; x < width; x++)
         {
-            alpha = 255;
             tempIndex = newImage->image[y][x];
             if(tempIndex == Vision::unclassified) alpha = 0;
+            else alpha = 255;
             Vision::getColourAsRGB(Vision::getColourFromIndex(tempIndex), r, g, b);
             imageLine[x] = qRgba(r,g,b,alpha);
         }
@@ -424,15 +620,10 @@ void OpenglManager::clearAllDisplays()
 }
 
 void OpenglManager::drawHollowCircle(float cx, float cy, float r, int num_segments)
-{
+{    
     makeCurrent();
-    int stepSize = 360 / num_segments;
-    glBegin(GL_LINE_LOOP);
-    for(int angle = 0; angle < 360; angle += stepSize)
-    {
-        glVertex2f(cx + sinf(angle) * r, cy + cosf(angle) * r);
-    }
-    glEnd();
+    DrawArc(cx, cy, r, 0, 360, num_segments);
+    return;
 }
 
 void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segments)
@@ -449,28 +640,26 @@ void OpenglManager::drawSolidCircle(float cx, float cy, float r, int num_segment
 void OpenglManager::writeLinesPointsToDisplay(std::vector<Point> linepoints, GLDisplay::display displayId)
 {
     makeCurrent();
-    //glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
     glLineWidth(1.0);
     glColor3ub(255,255,0);
+    glBegin(GL_LINES);                              // Start Lines
     for(unsigned int i = 0; i < linepoints.size(); i++)
     {
-        glBegin(GL_LINES);                              // Start Lines
+
         glVertex2i( int(linepoints[i].x-2), int(linepoints[i].y+2));                 // Starting point
         glVertex2i( int(linepoints[i].x+2), int(linepoints[i].y-2));               // Ending point
-        glEnd();  // End Lines
-        glBegin(GL_LINES);                              // Start Lines
         glVertex2i( int(linepoints[i].x+2), int(linepoints[i].y+2));                 // Starting point
         glVertex2i( int(linepoints[i].x-2), int(linepoints[i].y-2));               // Ending point
-        glEnd();  // End Lines
-
     }
-    //glEnable(GL_TEXTURE_2D);
-    //glEndList();                                    // END OF LIST
+    glEnd();  // End Lines
+    glEnable(GL_TEXTURE_2D);
+    glEndList();                                    // END OF LIST
 
-    //displayStored[displayId] = true;
+    displayStored[displayId] = true;
 
-    //qDebug() << "Updating Linepoints:" << fieldLines.size();
-    //emit updatedDisplay(displayId, displays[displayId], width, height);
+//    qDebug() << "Updating Linepoints:" << fieldLines.size();
+    emit updatedDisplay(displayId, displays[displayId], width, height);
 }
 
 void OpenglManager::writeLinesToDisplay(std::vector< LSFittedLine > lines, GLDisplay::display displayId)
@@ -602,24 +791,23 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
     glLineWidth(2.0);       // Line width
 
     //! DRAW STATIONARY OBJECTS:
-    vector < StationaryObject > ::iterator statFOit;
-    for(statFOit = AllObjects->stationaryFieldObjects.begin(); statFOit  < AllObjects->stationaryFieldObjects.end(); )
+    BOOST_FOREACH(StationaryObject& stationary_object, AllObjects->stationaryFieldObjects)
     {
         //! Check if the object is seen, if seen then continue to next Object
-        if((*statFOit).isObjectVisible() == false)
+        if(stationary_object.isObjectVisible() == false)
         {
-            ++statFOit;
             continue;
         }
+        int object_id = stationary_object.getID();
         unsigned char r,g,b;
-        if(     (*statFOit).getID() == FieldObjects::FO_BLUE_LEFT_GOALPOST  ||
-                (*statFOit).getID() == FieldObjects::FO_BLUE_RIGHT_GOALPOST )
+        if(     object_id == FieldObjects::FO_BLUE_LEFT_GOALPOST  ||
+                object_id == FieldObjects::FO_BLUE_RIGHT_GOALPOST )
         {
             Vision::getColourAsRGB(Vision::blue,r,g,b);
             glColor3ub(r,g,b);
         }
-        else if(     (*statFOit).getID() == FieldObjects::FO_YELLOW_LEFT_GOALPOST ||
-                     (*statFOit).getID() == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
+        else if(     object_id == FieldObjects::FO_YELLOW_LEFT_GOALPOST ||
+                     object_id == FieldObjects::FO_YELLOW_RIGHT_GOALPOST )
         {
             Vision::getColourAsRGB(Vision::yellow,r,g,b);
             glColor3ub(r,g,b);
@@ -630,17 +818,16 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glColor3ub(r,g,b);
         }
 
-        if((*statFOit).getID() == FieldObjects::FO_CORNER_CENTRE_CIRCLE)
+        if(object_id == FieldObjects::FO_CORNER_CENTRE_CIRCLE)
         {
-            drawEllipse((*statFOit).ScreenX(),(*statFOit).ScreenY(), (*statFOit).getObjectWidth()/2, (*statFOit).getObjectHeight()/2);
-            ++statFOit;
+            drawEllipse(stationary_object.ScreenX(), stationary_object.ScreenY(), stationary_object.getObjectWidth()/2, stationary_object.getObjectHeight()/2);
             continue;
         }
 
-        int X = (*statFOit).ScreenX();
-        int Y = (*statFOit).ScreenY();
-        int ObjectWidth = (*statFOit).getObjectWidth();
-        int ObjectHeight = (*statFOit).getObjectHeight();
+        int X = stationary_object.ScreenX();
+        int Y = stationary_object.ScreenY();
+        int ObjectWidth = stationary_object.getObjectWidth();
+        int ObjectHeight = stationary_object.getObjectHeight();
 
         glBegin(GL_QUADS);                              // Start Lines
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2); //TOP LEFT
@@ -648,62 +835,56 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM RIGHT
             glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM LEFT
         glEnd();
-
-        //! Incrememnt to next object:
-        ++statFOit;
     }
 
     //! DRAW MOBILE OBJECTS:
-    std::vector < MobileObject > ::iterator mobileFOit;
-    for(mobileFOit = AllObjects->mobileFieldObjects.begin(); mobileFOit  < AllObjects->mobileFieldObjects.end(); )
+    BOOST_FOREACH(MobileObject& mobile_object, AllObjects->mobileFieldObjects)
     {
         //! Check if the object is seen, if seen then continue to next Object
-        if((*mobileFOit).isObjectVisible() == false)
+        if(mobile_object.isObjectVisible() == false)
         {
-            ++mobileFOit;
             continue;
         }
-        qDebug() << "Seen: Mobile: " <<(*mobileFOit).getID() ;
         unsigned char r,g,b;
+        int object_id = mobile_object.getID();
         //CHECK IF BALL: if so Draw a circle
-        if(     (*mobileFOit).getID() == FieldObjects::FO_BALL)
+        if(object_id == FieldObjects::FO_BALL)
         {
             Vision::getColourAsRGB(Vision::orange,r,g,b);
             glColor3ub(r,g,b);
 
-            int cx = (*mobileFOit).ScreenX();
-            int cy = (*mobileFOit).ScreenY();
-            int radius = (*mobileFOit).getObjectWidth()/2;
+            int cx = mobile_object.ScreenX();
+            int cy = mobile_object.ScreenY();
+            int radius = mobile_object.getObjectWidth()/2;
             int num_segments = 360;
 
             drawSolidCircle(cx, cy, radius, num_segments);
-            ++mobileFOit;
             continue;
         }
 
 
-        if(     (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_1  ||
-                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_2  ||
-                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_3  ||
-                (*mobileFOit).getID() == FieldObjects::FO_BLUE_ROBOT_4  )
+        if(     object_id == FieldObjects::FO_BLUE_ROBOT_1  ||
+                object_id == FieldObjects::FO_BLUE_ROBOT_2  ||
+                object_id == FieldObjects::FO_BLUE_ROBOT_3  ||
+                object_id == FieldObjects::FO_BLUE_ROBOT_4  )
         {
             Vision::getColourAsRGB(Vision::shadow_blue,r,g,b);
             glColor3ub(r,g,b);
         }
 
-        else if(     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_1 ||
-                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_2 ||
-                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_3 ||
-                     (*mobileFOit).getID() == FieldObjects::FO_PINK_ROBOT_4)
+        else if(     object_id == FieldObjects::FO_PINK_ROBOT_1 ||
+                     object_id == FieldObjects::FO_PINK_ROBOT_2 ||
+                     object_id == FieldObjects::FO_PINK_ROBOT_3 ||
+                     object_id == FieldObjects::FO_PINK_ROBOT_4)
         {
             Vision::getColourAsRGB(Vision::pink,r,g,b);
             glColor3ub(r,g,b);
         }
 
-        int X = (*mobileFOit).ScreenX();
-        int Y = (*mobileFOit).ScreenY();
-        int ObjectWidth = (*mobileFOit).getObjectWidth();
-        int ObjectHeight = (*mobileFOit).getObjectHeight();
+        int X = mobile_object.ScreenX();
+        int Y = mobile_object.ScreenY();
+        int ObjectWidth = mobile_object.getObjectWidth();
+        int ObjectHeight = mobile_object.getObjectHeight();
 
         glBegin(GL_LINE_STRIP);                              // Start Lines
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
@@ -712,42 +893,35 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
         glEnd();
-
-        //! Increment to next object
-        ++mobileFOit;
     }
 
-    //! DRAW AMBIGUOUS OBJECTS: Using itterator as size is unknown
-
-    std::vector < AmbiguousObject > ::iterator ambigFOit;
-    qDebug() <<"Size Of Ambig Objects: " <<  AllObjects->ambiguousFieldObjects.size();
-    for(ambigFOit = AllObjects->ambiguousFieldObjects.begin(); ambigFOit  < AllObjects->ambiguousFieldObjects.end(); )
+    //! DRAW AMBIGUOUS OBJECTS:
+    BOOST_FOREACH(AmbiguousObject& ambiguous_obj, AllObjects->ambiguousFieldObjects)
     {
         //! Check if the object is seen, if seen then continue to next Object
-        if((*ambigFOit).isObjectVisible() == false)
+        if(ambiguous_obj.isObjectVisible() == false)
         {
-            ++ambigFOit;
             continue;
         }
-        qDebug() <<"Ambig Objects seen: " <<  (*ambigFOit).getID();
         unsigned char r,g,b;
-        if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_ROBOT_UNKNOWN)
+        int object_id = ambiguous_obj.getID();
+        if(object_id == FieldObjects::FO_BLUE_ROBOT_UNKNOWN)
         {
             Vision::getColourAsRGB(Vision::shadow_blue,r,g,b);
             glColor3ub(r,g,b);
         }
 
-        else if(     (*ambigFOit).getID() == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
+        else if(object_id == FieldObjects::FO_PINK_ROBOT_UNKNOWN)
         {
             Vision::getColourAsRGB(Vision::pink,r,g,b);
             glColor3ub(r,g,b);
         }
-        else if(     (*ambigFOit).getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
+        else if(object_id == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN)
         {
             Vision::getColourAsRGB(Vision::blue,r,g,b);
             glColor3ub(r,g,b);
         }
-        else if(     (*ambigFOit).getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+        else if(object_id == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
         {
             Vision::getColourAsRGB(Vision::yellow,r,g,b);
             glColor3ub(r,g,b);
@@ -759,10 +933,10 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
 
         }
 
-        int X = (*ambigFOit).ScreenX();
-        int Y = (*ambigFOit).ScreenY();
-        int ObjectWidth = (*ambigFOit).getObjectWidth();
-        int ObjectHeight = (*ambigFOit).getObjectHeight();
+        int X = ambiguous_obj.ScreenX();
+        int Y = ambiguous_obj.ScreenY();
+        int ObjectWidth = ambiguous_obj.getObjectWidth();
+        int ObjectHeight = ambiguous_obj.getObjectHeight();
 
         glBegin(GL_LINE_STRIP);                              // Start Lines
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
@@ -771,9 +945,6 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
             glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
             glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
         glEnd();
-
-        //! Increment to next object
-        ++ambigFOit;
     }
 
 
@@ -784,42 +955,6 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
     displayStored[displayId] = true;
 
     emit updatedDisplay(displayId, displays[displayId], width, height);
-}
-
-void OpenglManager::setExpectedVision(const NUSensorsData* data, const KF* filter, GLDisplay::display displayId)
-{
-    makeCurrent();
-    glDisable(GL_TEXTURE_2D);
-    glLineWidth(4.0);
-    glColor3ub(255,0,0);
-
-    // Draw field and lines
-
-    // Green field border
-    glColor3ub(0,255,0);
-    glBegin(GL_LINES);                      // Start Lines
-    glVertex3i(-370, 270, 0);
-    glVertex3i( 370, 270, 0);
-    glVertex3i( 370,-270, 0);
-    glVertex3i(-370,-270, 0);
-    glEnd();  // End Lines
-
-    // Outside field lines border
-    glColor3ub(255,255,255);
-    glBegin(GL_LINES);                      // Start Lines
-    glVertex3i(-302.5, 202.5, 0);
-    glVertex3i( 302.5, 202.5, 0);
-    glVertex3i( 302.5,-202.5, 0);
-    glVertex3i(-302.5,-202.5, 0);
-    glEnd();  // End Lines
-
-    glEnable(GL_TEXTURE_2D);
-    glEndList();                                    // END OF LIST
-
-    displayStored[displayId] = true;
-
-    emit updatedDisplay(displayId, displays[displayId], width, height);
-
 }
 
 void  OpenglManager::drawEllipse(float cx, float cy, float xradius, float yradius)
@@ -843,4 +978,185 @@ void  OpenglManager::drawEllipse(float cx, float cy, float xradius, float yradiu
    }
 
    glEnd();
+}
+
+void OpenglManager::DrawArc(float cx, float cy, float r, float start_angle, float arc_angle, int num_segments)
+{
+    float theta = arc_angle / float(num_segments - 1);//theta is now calculated from the arc angle instead, the - 1 bit comes from the fact that the arc is open
+
+    float tangetial_factor = tanf(theta);
+
+    float radial_factor = cosf(theta);
+
+
+    float x = r * cosf(start_angle);//we now start at the start angle
+    float y = r * sinf(start_angle);
+
+    glBegin(GL_LINE_STRIP);//since the arc is not a closed curve, this is a strip now
+    for(int ii = 0; ii < num_segments; ii++)
+    {
+        glVertex2f(x + cx, y + cy);
+
+        float tx = -y;
+        float ty = x;
+
+        x += tx * tangetial_factor;
+        y += ty * tangetial_factor;
+
+        x *= radial_factor;
+        y *= radial_factor;
+    }
+    glEnd();
+}
+
+void OpenglManager::writeExpectedViewToDisplay(const NUSensorsData* SensorData, SensorCalibrationSettings* calibration, GLDisplay::display displayId)
+{
+    if(!SensorData or !calibration) return;
+    // From webots, need to change for robot image.
+    const float fov_horizontal = calibration->m_fov.x;
+    const float fov_vertical = calibration->m_fov.y;
+
+    // Varibles for orientations.
+    float camera_roll = calibration->m_calibration.m_camera_angle_offset.x;
+    float camera_pitch = calibration->m_calibration.m_camera_angle_offset.y;
+    float camera_yaw = calibration->m_calibration.m_camera_angle_offset.z;
+
+    float head_roll = 0.f;
+    float head_pitch = 0.f;
+    float head_yaw = 0.f;
+
+    float body_roll = calibration->m_calibration.m_body_angle_offset.x;
+    float body_pitch = calibration->m_calibration.m_body_angle_offset.y;
+    float body_yaw = 0.f;
+
+
+    // OpenGL coordinate system:
+    // x is horizontal going from left to right
+    // y is vertical from bottom to top
+    // z is depth, pointing toward the camera.
+
+    // Robot coordinate system:
+    // x is depth going from the robot forward
+    // y is vertical going from the right of the robot to the left.
+    // z is vertical going from the foot of the robot toward the head.
+
+    // OpenGL to Robot:
+    // x -> y
+    // z -> x
+    // y -> -z
+    // Note: the z axis is negative
+
+    // Offsets for rotations to change from OpenGL coords to Robot coords.
+    // These are hard-coded since they are the conversion from opengl to standard robot coordinated.
+    const float roll_offset = 0.f;
+    const float pitch_offset = -90;
+    const float yaw_offset = -90.f;
+
+
+    // Camera offset values. (These should not be hard-coded since they differ per robot type)
+    const float camera_x_offset = 3.32f;
+    const float camera_y_offset = 0.f;
+    const float camera_z_offset = 3.44f;
+
+    // Body offset values. (These should not be hard-coded since they differ per robot type)
+    const float body_x_offset = 0.f;
+    const float body_y_offset = 0.f;
+    const float body_z_offset = 39.22f;
+
+    // Get the sensor information.
+    float temp = 0.f;   // temp variable for fetching sensor values.
+    std::vector<float> temp_vec;
+    if(SensorData)  // Check if sensor data is available
+    {
+        // Head pitch
+        if(SensorData->getPosition(NUSensorsData::HeadPitch, temp))
+        {
+            head_pitch += temp;
+        }
+        // Head yaw
+        if(SensorData->getPosition(NUSensorsData::HeadYaw, temp))
+        {
+            head_yaw += temp;
+        }
+        // Head roll - Our robots do not have thus at the moment.
+        if(SensorData->getPosition(NUSensorsData::HeadRoll, temp))
+        {
+            head_roll += temp;
+        }
+        if(SensorData->getOrientation(temp_vec))
+        {
+            body_roll += temp_vec[0];
+            body_pitch += temp_vec[1];
+            body_yaw += temp_vec[2];
+        }
+        // Camera Height
+//        if(SensorData->getCameraHeight(temp))
+//        {
+//            std::cout << "Camera Height: " << temp << std::endl;
+//        }
+    }
+
+    // Setup opengl drawing buffer.
+    QGLPixelBuffer buffer(width, height, QGLFormat(QGL::Rgba), this);   // Initialise at correct resolution, shared with this widget.
+    buffer.makeCurrent();                   // Set buffer as target for OpenGL commands.
+
+    // Initialise OpenGL for drawing
+    glClearColor(0,0,0,0); // clear with no alpha for transparent background.
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Do clear
+    glLineWidth(1.f);       // Drawing line width
+
+    glMatrixMode(GL_PROJECTION);    // Set to projection to setup camera.
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // Use Best Perspective Calculations
+    glLoadIdentity();   // Initialise matrix
+    // Setup field of view
+    gluPerspective(fov_vertical,(GLfloat)(fov_horizontal/fov_vertical),0.1f,10000.0f);
+
+    glMatrixMode(GL_MODELVIEW); // Change back to model view matrix to render scene.
+
+    // Move to correct orientation to match robot coordinate system.
+    glRotatef(pitch_offset, 1.f, 0.f, 0.f);
+    glRotatef(yaw_offset, 0.f, 0.f, 1.0f);
+    glRotatef(roll_offset, 0.f, 1.f, 0.f);
+
+    // Apply camera orientation
+    glRotatef(mathGeneral::rad2deg(camera_pitch), 0.f, 1.f, 0.f);    //  Pitch
+    glRotatef(mathGeneral::rad2deg(camera_yaw), 0.f, 0.f, -1.f);   //  Yaw
+    glRotatef(mathGeneral::rad2deg(camera_roll), 1.f, 0.f, 0.f);   //  Roll
+
+    // Apply camera to neck translation
+    glTranslatef(camera_x_offset, camera_y_offset, -camera_z_offset);
+
+    // Apply head orientation
+    glRotatef(mathGeneral::rad2deg(head_pitch), 0.f, 1.f, 0.f);    //  Pitch
+    glRotatef(mathGeneral::rad2deg(head_yaw), 0.f, 0.f, -1.f);   //  Yaw
+    glRotatef(mathGeneral::rad2deg(head_roll), 1.f, 0.f, 0.f);   //  Roll
+
+    // Apply translation for body
+    glTranslatef(body_x_offset, body_y_offset, -body_z_offset);
+
+    // Apply Body Orientation
+    glRotatef(mathGeneral::rad2deg(body_pitch), 0.f, 1.f, 0.f);     // Pitch
+    glRotatef(mathGeneral::rad2deg(body_yaw), 0.f, 0.f, -1.f);     // Yaw
+    glRotatef(mathGeneral::rad2deg(body_roll), 1.f, 0.f, 0.f);   // Roll
+
+    // Apply the robot heading
+    glRotatef(mathGeneral::rad2deg(calibration->location_orientation), 0.f, 0.f, -1.f);
+    // Position on field
+    glTranslatef(calibration->location_x, calibration->location_y, 0.f); // Translation
+
+    // Draw expected field.
+    glColor3ub(255,255,255);    // Set draw colour (White)
+    glCallList(m_field_lines_draw_list);
+
+    // Get the drawn image from the buffer.
+    buffer.doneCurrent();
+    QImage image = buffer.toImage();
+
+    // Save as a layer and emit the change.
+    createDrawTextureImage(image, displayId);
+    emit updatedDisplay(displayId, displays[displayId], width, height);
+
+
+
+    return;
 }

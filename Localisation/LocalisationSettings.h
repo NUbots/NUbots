@@ -3,6 +3,8 @@
 #include <string>
 #include <iostream>
 
+#include "Localisation/Filters/KFBuilder.h"
+
 /*!
 @class The LocalisationSettings class is used to define settings for the loaclisation system.
 */
@@ -52,6 +54,30 @@ public:
     BranchMethod branchMethod() const {return m_branching_method;}
 
     /*!
+    @brief Returns the identifier for the current self localisation model.
+    @return The ID of the self localisation model.
+    */
+    KFBuilder::Model selfLocModel() const {return m_self_loc_model;}
+
+    /*!
+    @brief Returns the identifier for the current filter type for self localisation.
+    @return The ID of the filter type.
+    */
+    KFBuilder::Filter selfLocFilter() const {return m_self_loc_filter;}
+
+    /*!
+    @brief Returns the identifier for the current ball localisation model.
+    @return The ID of the model.
+    */
+    KFBuilder::Model ballLocModel() const {return m_ball_loc_model;}
+
+    /*!
+    @brief Returns the identifier for the current filter type for ball localisation.
+    @return The ID of the filter type.
+    */
+    KFBuilder::Filter ballLocFilter() const {return m_ball_loc_filter;}
+
+    /*!
     @brief Sets the current pruning method.
     @param newMethod The ID of the new pruning method.
     */
@@ -62,6 +88,30 @@ public:
     @param newMethod The ID of the new branching method.
     */
     void setBranchMethod(BranchMethod newMethod){m_branching_method = newMethod;}
+
+    /*!
+    @brief Sets the current self localisation model.
+    @param newModel The ID of the new model.
+    */
+    void setSelfLocModel(KFBuilder::Model newModel) {m_self_loc_model = newModel;}
+
+    /*!
+    @brief Sets the current self localisation filter.
+    @param newFilter The ID of the new filter.
+    */
+    void setSelfLocFilter(KFBuilder::Filter newFilter) {m_self_loc_filter = newFilter;}
+
+    /*!
+    @brief Sets the current ball localisation model.
+    @param newModel The ID of the new model.
+    */
+    void setBallLocModel(KFBuilder::Model newModel) {m_ball_loc_model = newModel;}
+
+    /*!
+    @brief Sets the current ball localisation filter.
+    @param newFilter The ID of the new filter.
+    */
+    void setBallLocFilter(KFBuilder::Filter newFilter) {m_ball_loc_filter = newFilter;}
 
     /*!
     @brief Retrieve the name of the current branching method.
@@ -90,6 +140,21 @@ public:
     std::string pruneMethodString(PruneMethod) const;
 
     /*!
+    @brief Retrieve the name of a given filter type.
+    @param The ID of the filter.
+    @return A string containing the name of the filter.
+    */
+    std::string filterString(KFBuilder::Filter filter) const;
+
+    /*!
+    @brief Retrieve the name of a given model type.
+    @param The ID of the model.
+    @return A string containing the name of the model.
+    */
+    std::string modelString(KFBuilder::Model model) const;
+
+
+    /*!
     @brief Outputs a binary representation of the loaclisationSettings object to a stream.
     @param output The output stream.
     @return The output stream.
@@ -116,6 +181,10 @@ public:
 protected:
     PruneMethod m_pruning_method;
     BranchMethod m_branching_method;
+    KFBuilder::Model m_self_loc_model;
+    KFBuilder::Model m_ball_loc_model;
+    KFBuilder::Filter m_self_loc_filter;
+    KFBuilder::Filter m_ball_loc_filter;
 };
 
 #endif // LOCALISATIONSETTINGS_H

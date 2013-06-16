@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include "startoptionsdialog.h"
 
 // FOR GOAL PAPER CODE
 //#include <boost/accumulators/accumulators.hpp>
@@ -139,7 +140,6 @@ VisionControlWrapper::VisionControlWrapper()
 
 //    return 0;
 //}
-// REPLACE ABOVE WITH BELOW
 
 int VisionControlWrapper::run()
 {
@@ -153,53 +153,77 @@ int VisionControlWrapper::run()
 
     getOptions(method, ok, istrm, sstrm, cfg, lname);
 
-    wrapper = new DataWrapper(&gui, ok, method, istrm, sstrm, cfg, lname);
-    DataWrapper::instance = wrapper;
+    if(ok) {
+        wrapper = new DataWrapper(&gui, ok, method, istrm, sstrm, cfg, lname);
+        DataWrapper::instance = wrapper;
 
-    //BEGIN
-    int frame = 1;
-    int error = 0;
-    bool finished = false;
-    bool next;
+        //BEGIN
+        int frame = 1;
+        int error = 0;
+        bool finished = false;
+        bool next = true;
+        bool prev;
 
-    gui.show();
-    while(!finished)
-    {
-        gui.resetFlags();
-        gui.setFrameNo(frame);
-        next = false;
-        error = runFrame();
-        if(error)
+        gui.show();
+        while(!finished)
         {
-            if(QMessageBox::question(&gui, "", "No more frames, reset stream?", QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok) {
-                delete wrapper;
-                wrapper = new DataWrapper(&gui, ok, method, istrm, sstrm, cfg, lname);
-                DataWrapper::instance = wrapper;
+            gui.resetFlags();
+            gui.setFrameNo(frame);
+
+            // don't run if prev was cancelled due to beginning of stream
+            if(next)
+                error = runFrame(true);
+            else if(prev)
+                error = runFrame(false);
+
+            next = false;
+            prev = false;
+            if(error)
+            {
+                if(QMessageBox::question(&gui, "", "No more frames, reset stream?", QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok) {
+                    delete wrapper;
+                    wrapper = new DataWrapper(&gui, ok, method, istrm, sstrm, cfg, lname);
+                    DataWrapper::instance = wrapper;
+                }
+                else {
+                    finished = true;
+                }
             }
             else {
-                finished = true;
-            }
-        }
-        else {
-            gui.refresh();
-            while(!next && !finished && error == 0)
-            {
+                gui.refresh();
+                while(!next && !prev && !finished && error == 0)
+                {
+                    QApplication::processEvents();
+                    next = gui.next();
+                    prev = gui.prev();
+                    finished = gui.finished();
+                }
                 QApplication::processEvents();
-                next = gui.next();
                 finished = gui.finished();
+
+                // advance
+                if(next) {
+                    frame++;
+                }
+                // only move back if we aren't at the beginning
+                else if(prev){
+                    if(frame == 1)
+                        prev = false;
+                    else
+                        frame--;
+                }
             }
-            QApplication::processEvents();
-            finished = gui.finished();
-            frame++;
         }
+        gui.hide();
+        return error;
     }
-    gui.hide();
-    return error;
+
+    return 0;
 }
 
-int VisionControlWrapper::runFrame()
+int VisionControlWrapper::runFrame(bool forward)
 {
-    if(!wrapper->updateFrame())
+    if(!wrapper->updateFrame(forward))
     {
         #if VISION_WRAPPER_VERBOSITY > 1
             debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << std::endl;
@@ -211,68 +235,137 @@ int VisionControlWrapper::runFrame()
 
 void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& ok, std::string& istrm, std::string& sstrm, std::string& cfg, std::string& lname)
 {
+    StartOptionsDialog d;
     bool using_sensors;
-    //frame grab methods
-    QString camoption("Camera"),
-            strmoption("Image stream");
-    QStringList l;
-    l.append(camoption);
-    l.append(strmoption);
-    //get the input choice from the user
-    QString s = QInputDialog::getItem(NULL, "Select Input Method", "Select input method", l, 0, false, &ok);
-    if(ok)
-    {
-        if(s.compare(camoption) == 0)
-            method = DataWrapper::CAMERA;
-        else if(s.compare(strmoption) == 0)
-            method = DataWrapper::STREAM;
-        else
-            method = DataWrapper::STREAM;
 
-        switch(method) {
-        case DataWrapper::CAMERA:
-            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-            {
+    d.exec();
+
+    ok = d.isValid();
+    if(ok) {
+        if(d.isInputCamera()) {
+            method = DataWrapper::CAMERA;
+            using_sensors = false;
+            if(d.isAutomatic()) {
+                lname = string(DATA_DIR) +  string("/default.lut");
+                cfg = string(CONFIG_DIR) + string("/VisionOptions.cfg");
+            }
+            else if(d.isFolderBased()) {
+                QString dir = QFileDialog::getExistingDirectory(NULL, "Select Configuration Folder", QString(getenv("HOME")) + QString("/nubot/"));
+                ok = !dir.isEmpty();
+                if(ok) {
+                    lname = dir.toStdString() + string("/default.lut");
+                    cfg = dir.toStdString() + string("/VisionOptions.cfg");
+                }
+            }
+            else {
                 ok = false;
                 lname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
                 if(!lname.empty()) {
                     cfg = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
-                    ok = true;
+                    ok = !cfg.empty();
                 }
             }
-            else
-            {
-                lname = std::string(DATA_DIR) +  std::string("/default.lut");
-                cfg = std::string(CONFIG_DIR) + std::string("VisionOptions.cfg");
-            }
-            break;
-        case DataWrapper::STREAM:
-            using_sensors = (QMessageBox::question(NULL, "", "Use sensor log?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
+        }
+        else {
+            //stream based
+            method = DataWrapper::STREAM;
+            using_sensors = d.isUsingSensors();
 
-            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-            {
+            if(d.isAutomatic()) {
+                istrm = string(DATA_DIR) + string("/image.strm");
+                if(using_sensors)
+                    sstrm = string(DATA_DIR) + string("/sensor.strm");
+                lname = std::string(DATA_DIR) +  std::string("/default.lut");
+                cfg = std::string(CONFIG_DIR) + std::string("/VisionOptions.cfg");
+            }
+            else if(d.isFolderBased()) {
+                QString dir = QFileDialog::getExistingDirectory(NULL, "Select Configuration Folder", QString(getenv("HOME")) + QString("/nubot/"));
+                ok = !dir.isEmpty();
+                if(ok) {
+                    istrm = dir.toStdString() + string("/image.strm");
+                    if(using_sensors)
+                        sstrm = dir.toStdString() + string("/sensor.strm");
+                    lname = dir.toStdString() + string("/default.lut");
+                    cfg = dir.toStdString() + string("/VisionOptions.cfg");
+                }
+            }
+            else {
                 ok = false;
                 istrm = QFileDialog::getOpenFileName(NULL, "Select image stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
                 if(!istrm.empty()) {
-                    if(using_sensors)
-                        sstrm = QFileDialog::getOpenFileName(NULL, "Select sensor stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
                     lname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
                     if(!lname.empty()) {
                         cfg = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
-                        ok = true;
+                        if(using_sensors)
+                            sstrm = QFileDialog::getOpenFileName(NULL, "Select sensor stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
+                        ok = !cfg.empty() && (!using_sensors || !sstrm.empty());
                     }
                 }
             }
-            else
-            {
-                istrm = std::string(DATA_DIR) + std::string("/image.strm");
-                if(using_sensors)
-                    sstrm = std::string(DATA_DIR) + std::string("/sensor.strm");
-                lname = std::string(DATA_DIR) + std::string("/default.lut");
-                cfg = std::string(CONFIG_DIR) + std::string("VisionOptions.cfg");
-            }
-            break;
         }
     }
+
+//    //frame grab methods
+//    QString camoption("Camera"),
+//            strmoption("Image stream");
+//    QStringList l;
+//    l.append(camoption);
+//    l.append(strmoption);
+//    //get the input choice from the user
+//    QString s = QInputDialog::getItem(NULL, "Select Input Method", "Select input method", l, 0, false, &ok);
+//    if(ok)
+//    {
+//        if(s.compare(camoption) == 0)
+//            method = DataWrapper::CAMERA;
+//        else if(s.compare(strmoption) == 0)
+//            method = DataWrapper::STREAM;
+//        else
+//            method = DataWrapper::STREAM;
+
+//        switch(method) {
+//        case DataWrapper::CAMERA:
+//            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+//            {
+//                ok = false;
+//                lname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
+//                if(!lname.empty()) {
+//                    cfg = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
+//                    ok = true;
+//                }
+//            }
+//            else
+//            {
+//                lname = string(DATA_DIR) +  string("/default.lut");
+//                cfg = string(CONFIG_DIR) + string("VisionOptions.cfg");
+//            }
+//            break;
+//        case DataWrapper::STREAM:
+//            using_sensors = (QMessageBox::question(NULL, "", "Use sensor log?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
+
+//            if(QMessageBox::question(NULL, "", "Manually select files?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+//            {
+//                ok = false;
+//                istrm = QFileDialog::getOpenFileName(NULL, "Select image stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
+//                if(!istrm.empty()) {
+//                    if(using_sensors)
+//                        sstrm = QFileDialog::getOpenFileName(NULL, "Select sensor stream", QString(getenv("HOME")) + QString("/nubot/"),  "Stream Files (*.strm)").toStdString();
+//                    lname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
+//                    if(!lname.empty()) {
+//                        cfg = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
+//                        ok = true;
+//                    }
+//                }
+//            }
+//            else
+//            {
+//                istrm = string(DATA_DIR) + string("/image.strm");
+//                if(using_sensors)
+//                    sstrm = string(DATA_DIR) + string("/sensor.strm");
+//                lname = string(DATA_DIR) + string("/default.lut");
+//                cfg = string(CONFIG_DIR) + string("VisionOptions.cfg");
+//            }
+//            break;
+//        }
+//    }
 }
 

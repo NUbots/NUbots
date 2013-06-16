@@ -63,6 +63,7 @@ public:
     int getPlayerNumber() const;
     int getTeamNumber() const;
     TeamColour getTeamColour() const;
+    TeamColour getPlayerUniformColour() const;
     RobotState getCurrentState() const;
     int getPenaltyReason() const;
     bool amIASubstitute() const;

@@ -3,6 +3,8 @@ QT += network \
 
 CONFIG += qwt
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 macx { 
     # Mac Specific Includes
     QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
@@ -32,7 +34,7 @@ win32 {
 !macx{
     !win32{
         INCLUDEPATH += /usr/include/boost/
-        LIBS += -ldns_sd -lGLU
+        LIBS += -ldns_sd -lGLU -lzmq -lprotobuf
     }
 }
 
@@ -98,8 +100,6 @@ HEADERS += ui_mainwindow.h \
     camerasettingswidget.h \
     ../NUPlatform/NUCamera/CameraSettings.h \
     ../Tools/FileFormats/Parse.h \
-    ../Localisation/KF.h \
-    ../Localisation/Localisation.h \
     ../Infrastructure/FieldObjects/WorldModelShareObject.h \
     ../Infrastructure/GameInformation/GameInformation.h \
     ../Tools/Threading/Thread.h \
@@ -152,8 +152,6 @@ HEADERS += ui_mainwindow.h \
 #    ../VisionOld/EllipseFitting/jama_lu.h \
 #    ../VisionOld/EllipseFitting/jama_eig.h \
 #    ../VisionOld/EllipseFitting/jama_cholesky.h \
-    ../Localisation/odometryMotionModel.h \
-    ../Localisation/probabilityUtils.h \
     FileAccess/SplitStreamFileFormatReader.h \
     SensorDisplayWidget.h \
     locwmstreamwidget.h \
@@ -184,11 +182,8 @@ HEADERS += ui_mainwindow.h \
     ../Tools/FileFormats/LogRecorder.h \
     ../Tools/FileFormats/FileFormatException.h \
     offlinelocalisationdialog.h \
-    ../Tools/Math/Moment.h \
-    ../Localisation/Models/SelfModel.h \
-    ../Localisation/Models/SelfUKF.h \
+    ../Tools/Math/MultivariateGaussian.h \
     ../Localisation/SelfLocalisation.h \
-    ../Localisation/Models/SelfSRUKF.h \
     ../Localisation/MeasurementError.h \
     ../Localisation/SelfLocalisationTests.h \
     OfflineLocalisationSettingsDialog.h \
@@ -198,10 +193,9 @@ HEADERS += ui_mainwindow.h \
     ../NUPlatform/NUCamera/NUCameraData.h \
     ../Tools/Math/statistics.h \
     OfflineLocBatch.h \
-    ../Tools/Math/Filters/UnscentedTransform.h \
-    ../Tools/Math/Filters/UKF.h \
-    ../Tools/Math/Filters/MobileObjectUKF.h \
-    ../Localisation/Models/WeightedModel.h \
+    ../Localisation/Filters/UnscentedTransform.h \
+    ../Localisation/Filters/UKF.h \
+    ../Localisation/Filters/MobileObjectUKF.h \
     ../Tools/Math/depUKF.h \
     ../Localisation/iotests.h \
     NUViewConfig/*.h \
@@ -213,7 +207,21 @@ HEADERS += ui_mainwindow.h \
     ../ConfigSystem/ConfigRange.h \
     ../ConfigSystem/ConfigStorageManager.h \
     ../ConfigSystem/ConfigTree.h \
-    ../ConfigSystem/Configurable.h
+    ../ConfigSystem/Configurable.h \
+    ../Localisation/Filters/IKalmanFilter.h \
+    ../Localisation/Filters/IKFModel.h \
+    ../Localisation/Filters/MobileObjectModel.h \
+    ../Localisation/Filters/RobotModel.h \
+    ../Localisation/Filters/KFBuilder.h \
+    BatchSelectDialog.h \
+    SensorCalibrationWidget.h \
+    ../Localisation/Filters/WBasicUKF.h \
+    ../Localisation/Filters/WSeqUKF.h \
+    ../Localisation/Filters/SeqUKF.h \
+    ../Localisation/Filters/WSrSeqUKF.h \
+    ../Localisation/Filters/WSrBasicUKF.h \
+    ../Localisation/Filters/IMUModel.h \
+    ../Infrastructure/SensorCalibration.h
 
 !win32 {
     HEADERS +=     ConnectionManager/ConnectionManager.h \
@@ -278,6 +286,7 @@ SOURCES += mainwindow.cpp \
     ../Localisation/sphere.cpp \
     ../Localisation/cylinder.cpp \
     ../Localisation/cameramatrix.cpp \
+    ../Tools/Math/depUKF.cpp \
     ../Tools/Math/matrix.cpp \
     localisationwidget.cpp \
     #../VisionOld/Ball.cpp \
@@ -290,9 +299,6 @@ SOURCES += mainwindow.cpp \
     camerasettingswidget.cpp \
     ../NUPlatform/NUCamera/CameraSettings.cpp \
     ../Tools/FileFormats/Parse.cpp \
-    ../Localisation/KF.cpp \
-    ../Localisation/Models/SelfUKF.cpp \
-    ../Localisation/Localisation.cpp \
     ../Infrastructure/FieldObjects/WorldModelShareObject.cpp \
     ../Infrastructure/GameInformation/GameInformation.cpp \
     ../Tools/Threading/Thread.cpp \
@@ -308,8 +314,6 @@ SOURCES += mainwindow.cpp \
     ../Motion/Tools/MotionScript.cpp \
     ../Motion/Tools/MotionCurves.cpp \
     #../VisionOld/EllipseFit.cpp \
-    ../Localisation/odometryMotionModel.cpp \
-    ../Localisation/probabilityUtils.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
     locwmstreamwidget.cpp \
@@ -317,7 +321,6 @@ SOURCES += mainwindow.cpp \
     ../Tools/Math/Rectangle.cpp \
     ../NUPlatform/NUCamera.cpp \
     #../VisionOld/fitellipsethroughcircle.cpp \
-    ../Localisation/LocWmFrame.cpp \
     FileAccess/IndexedFileReader.cpp \
     LUTGlDisplay.cpp \
     ../NUPlatform/NUSensors/EndEffectorTouch.cpp \
@@ -336,10 +339,8 @@ SOURCES += mainwindow.cpp \
     GameInformationDisplayWidget.cpp \
     ../Tools/FileFormats/LogRecorder.cpp \
     offlinelocalisationdialog.cpp \
-    ../Tools/Math/Moment.cpp \
-    ../Localisation/Models/SelfModel.cpp \
+    ../Tools/Math/MultivariateGaussian.cpp \
     ../Localisation/SelfLocalisation.cpp \
-    ../Localisation/Models/SelfSRUKF.cpp \
     ../Localisation/MeasurementError.cpp \
     ../Localisation/SelfLocalisationtests.cpp \
     OfflineLocalisationSettingsDialog.cpp \
@@ -349,10 +350,8 @@ SOURCES += mainwindow.cpp \
     ../NUPlatform/NUCamera/NUCameraData.cpp \
     ../Tools/Math/statistics.cpp \
     OfflineLocBatch.cpp \
-    ../Tools/Math/Filters/UKF.cpp \
-    ../Tools/Math/Filters/MobileObjectUKF.cpp \
-    ../Localisation/Models/WeightedModel.cpp \
-    ../Tools/Math/depUKF.cpp \
+    ../Localisation/Filters/UKF.cpp \
+    ../Localisation/Filters/MobileObjectUKF.cpp \
     ../Localisation/iotests.cpp \
     plotdisplay.cpp \
     plotselectionwidget.cpp \
@@ -361,7 +360,18 @@ SOURCES += mainwindow.cpp \
     ../ConfigSystem/ConfigParameter.cpp \
     ../ConfigSystem/ConfigStorageManager.cpp \
     ../ConfigSystem/ConfigTree.cpp \
-    ../ConfigSystem/Configurable.cpp
+    ../ConfigSystem/Configurable.cpp \
+    ../Localisation/Filters/MobileObjectModel.cpp \
+    ../Localisation/Filters/RobotModel.cpp \
+    ../Localisation/Filters/KFBuilder.cpp \
+    BatchSelectDialog.cpp \
+    SensorCalibrationWidget.cpp \
+    ../Localisation/Filters/WBasicUKF.cpp \
+    ../Localisation/Filters/WSeqUKF.cpp \
+    ../Localisation/Filters/SeqUKF.cpp \
+    ../Localisation/Filters/WSrSeqUKF.cpp \
+    ../Localisation/Filters/WSrBasicUKF.cpp \
+    ../Localisation/Filters/IMUModel.cpp
 
 !win32{
     SOURCES+= ConnectionManager/ConnectionManager.cpp \
@@ -378,7 +388,6 @@ HEADERS += \
     ../Vision/VisionWrapper/datawrappercurrent.h \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.h \
     ../Vision/VisionWrapper/datawrappernuview.h \
-    ../Vision/VisionTools/pccamera.h \
     ../Vision/VisionTools/lookuptable.h \
     ../Vision/VisionTools/classificationcolours.h \
     ../Vision/VisionTools/transformer.h \
@@ -391,7 +400,6 @@ SOURCES += \
     ../Vision/VisionTypes/*.cpp \
     ../Vision/VisionTypes/RANSACTypes/*.cpp \
     ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
-    ../Vision/VisionTools/pccamera.cpp \
     ../Vision/VisionTools/lookuptable.cpp \
     ../Vision/VisionTools/classificationcolours.cpp \
     ../Vision/VisionTools/transformer.cpp \
@@ -405,9 +413,17 @@ SOURCES += \
     ../Vision/VisionWrapper/visioncontrolwrappernuview.cpp \
     ../Vision/VisionWrapper/datawrappernuview.cpp \
 
+# pccamera uses Video4Linux, so only works on linux systems.
+!macx{
+    !win32{
+        HEADERS += ../Vision/VisionTools/pccamera.h \
+        SOURCES += ../Vision/VisionTools/pccamera.cpp \
+    }
+}
+
 RESOURCES = Resources/textures.qrc Resources/icons.qrc Resources/styles.qrc
 FORMS += \
     OfflineLocalisationSettingsDialog.ui \
-    createqwtsymboldialog.ui
-
+    createqwtsymboldialog.ui \
+    SensorCalibrationWidget.ui
 

@@ -2,7 +2,7 @@
 
 #ifdef TARGET_IS_RPI
     #include "VisionWrapper/visioncontrolwrapperrpi.h"
-#elif TARGET_IS_PC
+#elif TARGET_IS_PC || TARGET_IS_MAC || TARGET_IS_WINDOWS
     //#include "VisionWrapper/visioncontrolwrapperpc.h"
     #include "VisionWrapper/visioncontrolwrapperqt.h"
 #elif TARGET_IS_NUVIEW
@@ -22,7 +22,7 @@
 class MyApplication : public QApplication {
 public:
     MyApplication(int& argc, char ** argv) : QApplication(argc, argv) { }
-    MyApplication(Display* dpy, Qt::HANDLE visual = 0, Qt::HANDLE cmap = 0, int flags = ApplicationFlags) : QApplication(dpy, visual, cmap, flags) { }
+    //MyApplication(Display* dpy, Qt::HANDLE visual = 0, Qt::HANDLE cmap = 0, int flags = ApplicationFlags) : QApplication(dpy, visual, cmap, flags) { }
     virtual ~MyApplication() { }
 
     // reimplemented from QApplication so we can throw exceptions in slots
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
         return rpi(false, true);
     }
 
-    #elif TARGET_IS_PC
+    #elif TARGET_IS_PC || TARGET_IS_MAC || TARGET_IS_WINDOWS
     //return pc();
     return qt();
     #else
@@ -187,7 +187,9 @@ int rpi(bool disp_on, bool cam)
 int qt()
 {
 #ifndef TARGET_IS_RPI
-    MyApplication app(NULL);
+    int argc = 0;
+    char** argv;
+    MyApplication app(argc, argv);
 #endif
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();
 

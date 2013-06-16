@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 #include "nubotdataconfig.h"
+#include "Kinematics/Kinematics.h"
 
 #include "Vision/visionconstants.h"
 #include "Vision/VisionTypes/coloursegment.h"
@@ -28,6 +29,15 @@ DataWrapper::DataWrapper()
 {
     camera_data.LoadFromConfigFile((std::string(CONFIG_DIR) + std::string("CameraSpecs.cfg")).c_str());
     VisionConstants::loadFromFile(std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"));
+
+    std::string sen_calib_name = std::string(CONFIG_DIR) + std::string("SensorCalibration.cfg");
+
+    debug << "opening sensor calibration config: " << sen_calib_name << std::endl;
+    if( ! m_sensor_calibration.ReadSettings(sen_calib_name)) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load sensor calibration: " << sen_calib_name << ". Using default values." << std::endl;
+        m_sensor_calibration = SensorCalibration();
+    }
+
     numFramesDropped = numFramesProcessed = 0;
 }
 
@@ -55,53 +65,38 @@ const NUImage* DataWrapper::getFrame()
     return m_current_image;
 }
 
-bool DataWrapper::getCTGVector(std::vector<float>& ctgvector)
+//! @brief Retrieves the camera height returns it.
+float DataWrapper::getCameraHeight() const
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTGVector()" << std::endl;
-    #endif
-    return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    return m_camera_height;
 }
 
-/*! @brief Retrieves the camera transform vector returns it.
-*   @param ctgvector A reference to a float vector to fill.
-*   @return valid Whether the retrieved values are valid or not.
-*/
-bool DataWrapper::getCTVector(std::vector<float>& ctvector)
+//! @brief Retrieves the camera pitch returns it.
+float DataWrapper::getHeadPitch() const
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTVector()" << std::endl;
-    #endif
-    return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
+    return m_head_pitch;
 }
 
-bool DataWrapper::getCameraHeight(float& height)
+//! @brief Retrieves the camera yaw returns it.
+float DataWrapper::getHeadYaw() const
 {
-    return sensor_data->getCameraHeight(height);
+    return m_head_yaw;
 }
 
-bool DataWrapper::getCameraPitch(float& pitch)
+//! @brief Retrieves the body pitch returns it.
+Vector3<float> DataWrapper::getOrientation() const
 {
-    return sensor_data->getPosition(NUSensorsData::HeadPitch, pitch);
+    return m_orientation;
 }
 
-bool DataWrapper::getCameraYaw(float& yaw)
+Vector3<double> DataWrapper::getNeckPosition() const
 {
-    return sensor_data->getPosition(NUSensorsData::HeadYaw, yaw);
+    return m_neck_position;
 }
 
-bool DataWrapper::getBodyPitch(float& pitch)
+Vector2<double> DataWrapper::getCameraFOV() const
 {
-    std::vector<float> orientation;
-    bool valid = sensor_data->get(NUSensorsData::Orientation, orientation);
-    if(valid && orientation.size() > 2) {
-        pitch = orientation.at(1);
-        return true;
-    }
-    else {
-        pitch = 0;
-        return false;
-    }
+    return Vector2<double>(camera_data.m_horizontalFov, camera_data.m_verticalFov);
 }
 
 const Horizon& DataWrapper::getKinematicsHorizon()
@@ -284,8 +279,33 @@ bool DataWrapper::updateFrame()
         }
         return false;
     }
+
+    vector<float> orientation(3, 0);
+
+    //update kinematics snapshot
+    if(!sensor_data->getCameraHeight(m_camera_height))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get camera height from NUSensorsData" << std::endl;
+    if(!sensor_data->getPosition(NUSensorsData::HeadPitch, m_head_pitch))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get head pitch from NUSensorsData" << std::endl;
+    if(!sensor_data->getPosition(NUSensorsData::HeadYaw, m_head_yaw))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get head yaw from NUSensorsData" << std::endl;
+    if(!sensor_data->getOrientation(orientation))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get orientation from NUSensorsData" << std::endl;
+
+    vector<float> left, right;
+    if(sensor_data->get(NUSensorsData::LLegTransform, left) and sensor_data->get(NUSensorsData::RLegTransform, right))
+    {
+        m_neck_position = Kinematics::CalculateNeckPosition(Matrix4x4fromVector(left), Matrix4x4fromVector(right), m_sensor_calibration.m_neck_position_offset);
+    }
+    else
+    {
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get left or right leg transforms from NUSensorsData" << std::endl;
+        // Default in case kinemtaics not available. Base height of darwin.
+        m_neck_position = Vector3<double>(0.0, 0.0, 39.22);
+    }
+
     m_timestamp = m_current_image->GetTimestamp();
-    std::cout << "pre: " << m_timestamp << std::endl;
+    //cout << "pre: " << m_timestamp << std::endl;
     field_objects->preProcess(m_timestamp);
     return true;
 }
@@ -294,7 +314,7 @@ void DataWrapper::postProcess()
 {
     if (m_current_image != NULL && field_objects != NULL)
     {
-        std::cout << "post: " << m_current_image->GetTimestamp() << std::endl;
+        //cout << "post: " << m_current_image->GetTimestamp() << std::endl;
         field_objects->postProcess(m_current_image->GetTimestamp());
     }
 }

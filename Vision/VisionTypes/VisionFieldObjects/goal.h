@@ -28,7 +28,7 @@ public:
     bool check() const;
         
     //! @brief Stream output for labelling purposes
-    void printLabel(std::ostream& out) const {out << VFOName(m_id) << " " << m_location.screen << " " << m_size_on_screen;}
+    void printLabel(std::ostream& out) const {out << VFOName(m_id) << " " << m_location << " " << m_size_on_screen;}
 
     virtual double findScreenError(VisionFieldObject* other) const;
     virtual double findGroundError(VisionFieldObject* other) const;
@@ -50,14 +50,14 @@ private:
       @param elevation the angle between the goal and the image centre in the xz plane.
       @return the distance to the goal in cm.
       */
-    double distanceToGoal(double bearing, double elevation);
+//    double distanceToGoal(double bearing, double elevation);
     
 private:
     Quad m_corners;                 //! @variable pixel locations of the corners
 
-public:
-    double width_dist,
-           d2p;
+//public:
+//    double width_dist,
+//           d2p;
 };
 
 #endif // GOAL_H

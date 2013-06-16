@@ -13,7 +13,7 @@
 #include "Vision/VisionTools/pccamera.h"
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/VisionTools/transformer.h"
-#include "Vision/VisionTypes/groundpoint.h"
+#include "Vision/VisionTypes/nupoint.h"
 #include "Vision/VisionTypes/histogram1d.h"
 #include "Vision/VisionTypes/VisionFieldObjects/ball.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"

@@ -37,7 +37,7 @@
 QSBallisticController::QSBallisticController(const NUData::id_t& joint)
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 4
-        debug << "QSBallisticController::QSBallisticController" << endl;
+        debug << "QSBallisticController::QSBallisticController" << std::endl;
     #endif
     m_joint = joint;
     m_delay = new QSDelay(joint, this);
@@ -55,7 +55,7 @@ QSBallisticController::QSBallisticController(const NUData::id_t& joint)
 QSBallisticController::~QSBallisticController()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
-        debug << "QSBallisticController::~QSBallisticController" << endl;
+        debug << "QSBallisticController::~QSBallisticController" << std::endl;
     #endif
     delete m_delay;
     delete m_relax;

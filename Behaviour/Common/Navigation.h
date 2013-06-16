@@ -34,13 +34,13 @@
 
 
 class Navigation {
-private:
-    //classification so we know which foot to line the ball up with
+public:
+//classification so we know which foot to line the ball up with
     enum DIRECTION 
         {
         LEFT = 1,
         BOTH = 0,
-        RIGHT = -1;
+        RIGHT = -1
         };
     enum WALK_TYPE 
         {
@@ -49,59 +49,58 @@ private:
         GOTOOBJECT = 1,
         GOTOBALL = 2
         };
+
+private:
+    
     
 
 //XXX: load all these from central config ----------------------------------------
     //load these values from walk config
-    float m_turn_speed;
-    float m_walk_speed;
-    float m_feet_separation;
+    static constexpr float m_turn_speed = 0.4;
+    static constexpr float m_walk_speed = 0.9;
+    static constexpr float m_feet_separation = 14.0;
     
     //load from robot model
-    float m_foot_size;
+    static constexpr float m_foot_size = 10.0;
     
     //timers for starting turning and walking
-    double m_walk_start_time;
-    double m_walk_turn_time;
+    static constexpr double m_walk_start_time = 0.2;
+    static constexpr double m_walk_turn_time = 0.2;
     
     //walk accel/deccel controls
-    double m_acceleration_time;
-    float m_acceleration_fraction;
+    static constexpr double m_acceleration_time = 0.2;
+    static constexpr float m_acceleration_fraction = 0.5;
     
     //approach speeds
-    float m_close_approach_speed;
-    float m_close_approach_distance;
-    float m_mid_approach_speed;
-    float m_mid_approach_distance;
+    static constexpr float m_close_approach_speed = 0.2;
+    static constexpr float m_close_approach_distance = 30.0;
+    static constexpr float m_mid_approach_speed = 0.6;
+    static constexpr float m_mid_approach_distance = 60.0;
     
     //turning values
-    float m_turn_deviation;
-    float m_turn_speed;
-    
-    //state controls
-    int m_turning;
-    int m_approach_distance;
+    static constexpr float m_turn_deviation = 0.1;
     
     //hystereses
-    float m_distance_hysteresis;
-    float m_turning_hysteresis;
-    float m_position_hysteresis;
+    static constexpr float m_distance_hysteresis = 10.0;
+    static constexpr float m_turning_hysteresis = 0.1;
+    static constexpr float m_position_hysteresis = 30.0;
     
     //ball lineup
     std::vector<float> m_ball_approach_angle;
     std::vector<int> m_ball_kick_foot;
-    float m_ball_lineup_distance;
-    int m_ball_lineup_min_distance;
+    static constexpr float m_ball_lineup_distance = 15.0;
+    static constexpr int m_ball_lineup_min_distance = 12.0;
     
     //extra config options
-    bool m_use_localisation_avoidance;
-    float m_assumed_obstacle_width;
-    float m_avoid_distance;
+    static constexpr bool m_use_localisation_avoidance = false;
+    static constexpr float m_assumed_obstacle_width = 25.0;
+    static constexpr float m_avoid_distance = 50.0;
 //END config variables section-------------------------------------------------------------------
     
     //hysteresis variables
     int m_turning;
     int m_distance_increment;
+    int m_approach_distance;
     
     //info for the current walk
     Object* current_object;
@@ -116,7 +115,7 @@ private:
     
     /*! @brief Returns a new direction (bearing) to move that avoids all obstacles
      */
-    float avoidObstacles(const std::vector<float> position, float relative_bearing);
+    float avoidObstacles(const std::vector<float> position, float distance, float relative_bearing);
     
     /*! @brief Returns a new direction (bearing) to move that aligns the designated foot with the ball
      */
@@ -132,6 +131,14 @@ private:
     
 public:
     
+    int getCurrentCommand() {
+        return current_command;
+    }
+    
+    bool isStopped() {
+        const float epsilon = 0.05;
+        return current_walk_command[0] < epsilon and mathGeneral::abs(current_walk_command[1]) < epsilon and mathGeneral::abs(current_walk_command[2]) < epsilon;
+    }
         
     /*! @brief Go to a point and face a heading. Returned std::vector is walk command std::vector.
      */
@@ -139,7 +146,7 @@ public:
     
     /*! @brief Go to a point and face a heading. Returned std::vector is walk command std::vector.
      */
-    std::vector<float> goToPoint(Object fieldObject, float heading);
+    std::vector<float> goToPoint(Object* fieldObject, float heading);
     
     /*! @brief Go to a point and face a heading. Returned std::vector is walk command std::vector.
      */
@@ -147,11 +154,21 @@ public:
     
     /*! @brief Approach the ball with a good angle to kick from. Returned std::vector is walk command std::vector.
      */
-    std::vector<float> goToBall(Object kickTarget = NULL);
+    std::vector<float> goToBall(Object* kickTarget = NULL);
+
+    /*! @brief Stop the walk.
+     */
+    std::vector<float> stop();
+
+    /*! @brief A wrapper to send kick commands. The kick should decide whether to listen or not.
+     */
+    void kick();
     
     /*! @brief Update the goto calculations and send the walk commands (if actions are not active).
      */
     void update();
+    
+    static Navigation* getInstance();
     
 };
 

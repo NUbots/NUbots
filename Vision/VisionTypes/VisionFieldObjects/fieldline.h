@@ -11,14 +11,14 @@ class FieldLine : public VisionFieldObject
 {
 public:
     FieldLine(const LSFittedLine& screen_line, const LSFittedLine& ground_line);
-    FieldLine(const Vector2<GroundPoint>& end_points);
+    FieldLine(const Vector2<NUPoint>& end_points);
 
     void set(const LSFittedLine& screen_line, const LSFittedLine& ground_line);
-    void set(const Vector2<GroundPoint>& end_points);
+    void set(const Vector2<NUPoint>& end_points);
 
     Line getScreenLineEquation() const {return m_screen_line;}
     Line getGroundLineEquation() const {return m_ground_line;}
-    Vector2<GroundPoint> getEndPoints() const {return m_end_points;}
+    Vector2<NUPoint> getEndPoints() const {return m_end_points;}
     
     //! @brief Stream output for labelling purposes
     void printLabel(std::ostream& out) const;
@@ -38,7 +38,7 @@ public:
 private:
     Line m_screen_line,
          m_ground_line;
-    Vector2<GroundPoint> m_end_points;
+    Vector2<NUPoint> m_end_points;
 };
 
 #endif // FIELDLINE_H

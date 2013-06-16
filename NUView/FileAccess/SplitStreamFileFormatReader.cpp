@@ -59,11 +59,6 @@ const NUSensorsData* SplitStreamFileFormatReader::GetSensorData()
     return NULL;
 }
 
-const Localisation* SplitStreamFileFormatReader::GetLocalisationData()
-{
-    return locwmReader.ReadFrameNumber(m_currentFrameIndex);
-}
-
 FieldObjects* SplitStreamFileFormatReader::GetObjectData()
 {
     return objectReader.ReadFrameNumber(m_currentFrameIndex);
@@ -84,16 +79,14 @@ void SplitStreamFileFormatReader::setKnownDataTypes()
     m_dataIsSynced = true;
     m_extension = ".strm";
     m_knownDataTypes.clear();
-    m_knownDataTypes << "image" << "sensor" << "locsensor" << "selflocwm" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
+    m_knownDataTypes << "image" << "sensor" << "locsensor" << "selflocwm" << "object" << "teaminfo" << "gameinfo";
 
     // Add the file readers. (in the same order!)
     m_fileReaders.push_back(&imageReader);
     m_fileReaders.push_back(&sensorReader);
     m_fileReaders.push_back(&locsensorReader);
     m_fileReaders.push_back(&selflocwmReader);
-    m_fileReaders.push_back(&locwmReader);
     m_fileReaders.push_back(&objectReader);
-    m_fileReaders.push_back(&locmframeReader);
     m_fileReaders.push_back(&teaminfoReader);
     m_fileReaders.push_back(&gameinfoReader);
 }
@@ -102,7 +95,7 @@ std::vector<QFileInfo> SplitStreamFileFormatReader::FindValidFiles(const QDir& d
 {
     const QString extension = ".strm";
     QStringList knownDataTypes;
-    knownDataTypes << "image" << "sensor" << "locsensor" << "selflocwm" << "locwm" << "object" << "locWmFrame" << "teaminfo" << "gameinfo";
+    knownDataTypes << "image" << "sensor" << "locsensor" << "selflocwm" << "object" << "teaminfo" << "gameinfo";
     std::vector<QFileInfo> fileLocations;
 
     qDebug("Searching Path: %s", qPrintable(directory.path()));
@@ -276,11 +269,6 @@ int SplitStreamFileFormatReader::setFrame(int frameNumber)
                 emit sensorDataChanged(&m_tempSensors);
                 m_currentFrameIndex = locsensorReader.CurrentFrameSequenceNumber();
             }
-        }
-        if(locwmReader.IsValid())
-        {
-            emit LocalisationDataChanged(locwmReader.ReadFrameNumber(frameNumber));
-            m_currentFrameIndex = locwmReader.CurrentFrameSequenceNumber();
         }
         if(selflocwmReader.IsValid())
         {

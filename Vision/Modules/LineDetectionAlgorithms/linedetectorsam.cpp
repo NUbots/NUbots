@@ -14,7 +14,7 @@ LineDetectorSAM::~LineDetectorSAM()
     noisePoints.clear();
 }
 
-std::vector<FieldLine> LineDetectorSAM::run(const std::vector<GroundPoint>& points)
+std::vector<FieldLine> LineDetectorSAM::run(const std::vector<NUPoint>& points)
 {
     std::vector<std::pair<LSFittedLine, LSFittedLine> > linePairs = fitLines(points, true);
     std::vector<FieldLine> finalLines;
@@ -25,7 +25,7 @@ std::vector<FieldLine> LineDetectorSAM::run(const std::vector<GroundPoint>& poin
     return finalLines;
 }
 
-std::vector< std::pair<LSFittedLine, LSFittedLine> > LineDetectorSAM::fitLines(const std::vector<GroundPoint>& points, bool noise) {
+std::vector< std::pair<LSFittedLine, LSFittedLine> > LineDetectorSAM::fitLines(const std::vector<NUPoint>& points, bool noise) {
     //Performs split-and-merge algorithm with input consisting of a set of point clusters
     // and a set of unclustered points, putting the resulting lines into a reference
     // passed std::vector
@@ -73,7 +73,7 @@ std::vector< std::pair<LSFittedLine, LSFittedLine> > LineDetectorSAM::fitLines(c
 
 
 
-void LineDetectorSAM::split(std::vector< std::pair<LSFittedLine, LSFittedLine> >& lines, const std::vector<GroundPoint>& points) {
+void LineDetectorSAM::split(std::vector< std::pair<LSFittedLine, LSFittedLine> >& lines, const std::vector<NUPoint>& points) {
     // Recursive split algorithm
 
     //Assumes:
@@ -97,9 +97,9 @@ void LineDetectorSAM::split(std::vector< std::pair<LSFittedLine, LSFittedLine> >
 
     //generate new LSFittedLine
     std::pair<LSFittedLine, LSFittedLine> line;
-    BOOST_FOREACH(const GroundPoint& g, points) {
-        line.first.addPoint(g.ground);
-        line.second.addPoint(g.screen);
+    BOOST_FOREACH(const NUPoint& g, points) {
+        line.first.addPoint(g.groundCartesian);
+        line.second.addPoint(g.screenCartesian);
     }
 
     //check for points over threshold
@@ -108,8 +108,8 @@ void LineDetectorSAM::split(std::vector< std::pair<LSFittedLine, LSFittedLine> >
     //if num points over threshold > limit -> split at greatest distance point.
     if(points_over >= MIN_POINTS_OVER) {
         //there are enough points distant to justify a split
-        std::vector<GroundPoint> left;    //holder vectors
-        std::vector<GroundPoint> right;
+        std::vector<NUPoint> left;    //holder vectors
+        std::vector<NUPoint> right;
         if(separate(left, right, points[greatest_point], points, line.first)) {
             //split was valid - recursively split new lines
             split(lines, left);
@@ -117,7 +117,7 @@ void LineDetectorSAM::split(std::vector< std::pair<LSFittedLine, LSFittedLine> >
         }
         else {
             //remove furthest point and retry
-            vector<GroundPoint> newlist = points;
+            vector<NUPoint> newlist = points;
             addToNoise(newlist[greatest_point]);
             newlist.erase(newlist.begin() + greatest_point);
             split(lines, newlist);
@@ -128,7 +128,7 @@ void LineDetectorSAM::split(std::vector< std::pair<LSFittedLine, LSFittedLine> >
         //not enough points over to split so remove point as noisy, and regen line
         if(points.size() > MIN_POINTS_TO_LINE_FINAL) {
             //removal of a point will still leave enough to form a reasonable line
-            vector<GroundPoint> newlist = points;
+            vector<NUPoint> newlist = points;
             addToNoise(newlist[greatest_point]);
             for(unsigned int i=greatest_point; i<newlist.size()-1; i++) {
                 newlist[i] = newlist[i+1];
@@ -382,7 +382,7 @@ void LineDetectorSAM::splitNoise(std::vector<std::pair<LSFittedLine, LSFittedLin
     //the split algorithm on the copy
 
     if(noisePoints.size() >= MIN_POINTS_TO_LINE_FINAL) {
-        std::vector<GroundPoint> noiseCopy;
+        std::vector<NUPoint> noiseCopy;
 
         noiseCopy = noisePoints;
         noisePoints.clear();
@@ -391,7 +391,7 @@ void LineDetectorSAM::splitNoise(std::vector<std::pair<LSFittedLine, LSFittedLin
     }
 }
 
-bool LineDetectorSAM::separate(std::vector<GroundPoint> &left, std::vector<GroundPoint> &right, GroundPoint split_point, const std::vector<GroundPoint> &points, const LSFittedLine& line) {
+bool LineDetectorSAM::separate(std::vector<NUPoint> &left, std::vector<NUPoint> &right, NUPoint split_point, const std::vector<NUPoint> &points, const LSFittedLine& line) {
     /*splits a section of points around a splitting point by rotating and translating onto the line about the splitting point
      *Pre: left and right should be empty std::vectors
      *		points contains all the points to be split
@@ -403,16 +403,16 @@ bool LineDetectorSAM::separate(std::vector<GroundPoint> &left, std::vector<Groun
     */
 
     //temp holder vars
-    double x_split = split_point.ground.x;
-    double y_split = split_point.ground.y;
+    double x_split = split_point.groundCartesian.x;
+    double y_split = split_point.groundCartesian.y;
 
     left.push_back(split_point);    //splitting point should be included in both groups
     right.push_back(split_point);
     if(line.isHorizontal()) {
         //horizontal line - no rotation
-        BOOST_FOREACH(GroundPoint pt, points) {
-            if(pt.ground != split_point.ground) {
-                if(pt.ground.x < x_split) //point is to the left
+        BOOST_FOREACH(NUPoint pt, points) {
+            if(pt.groundCartesian != split_point.groundCartesian) {
+                if(pt.groundCartesian.x < x_split) //point is to the left
                     left.push_back(pt);
                 else
                     right.push_back(pt);
@@ -421,9 +421,9 @@ bool LineDetectorSAM::separate(std::vector<GroundPoint> &left, std::vector<Groun
     }
     else if(line.isVertical()) {
         //vertical line - 90 degree rotation
-        BOOST_FOREACH(GroundPoint pt, points) {
-            if(pt.ground != split_point.ground) {
-                if(pt.ground.y < y_split) //point is to the left
+        BOOST_FOREACH(NUPoint pt, points) {
+            if(pt.groundCartesian != split_point.groundCartesian) {
+                if(pt.groundCartesian.y < y_split) //point is to the left
                     left.push_back(pt);
                 else
                     right.push_back(pt);
@@ -431,12 +431,12 @@ bool LineDetectorSAM::separate(std::vector<GroundPoint> &left, std::vector<Groun
         }
     }
     else {
-        double xsplit = line.projectOnto(split_point.ground).x;
-        BOOST_FOREACH(GroundPoint pt, points) {
+        double xsplit = line.projectOnto(split_point.groundCartesian).x;
+        BOOST_FOREACH(NUPoint pt, points) {
             //check all points, calculate translated x coord
             //and place in appropriate std::vector
-            if(pt.ground != split_point.ground) {
-                if(line.projectOnto(pt.ground).x < xsplit) {
+            if(pt.groundCartesian != split_point.groundCartesian) {
+                if(line.projectOnto(pt.groundCartesian).x < xsplit) {
                     //point is to the left
                     left.push_back(pt);
                 }
@@ -450,32 +450,32 @@ bool LineDetectorSAM::separate(std::vector<GroundPoint> &left, std::vector<Groun
     return (left.size() < points.size() && right.size() < points.size());
 }
 
-void LineDetectorSAM::generateLines(std::pair<LSFittedLine, LSFittedLine>& lines, const std::vector<GroundPoint>& points) {
+void LineDetectorSAM::generateLines(std::pair<LSFittedLine, LSFittedLine>& lines, const std::vector<NUPoint>& points) {
     //creates a Least Squared Fitted line
 
     lines.first.clearPoints();
     lines.second.clearPoints();
-    BOOST_FOREACH(const GroundPoint& g, points) {
-        lines.first.addPoint(g.ground);
-        lines.second.addPoint(g.screen);
+    BOOST_FOREACH(const NUPoint& g, points) {
+        lines.first.addPoint(g.groundCartesian);
+        lines.second.addPoint(g.screenCartesian);
     }
 }
 
 //GENERIC
 
-void LineDetectorSAM::addToNoise(const GroundPoint& point) {
+void LineDetectorSAM::addToNoise(const NUPoint& point) {
     //NOT EFFICIENT
     //O(M) for every insertion - where M is the size of noisePoints
-    BOOST_FOREACH(GroundPoint pt, noisePoints) {
-        if(pt.ground == point.ground)
+    BOOST_FOREACH(NUPoint pt, noisePoints) {
+        if(pt.groundCartesian == point.groundCartesian)
             return;
     }
     //only occurs if there are not copies of the point in the noise std::list
     noisePoints.push_back(point);
 }
 
-void LineDetectorSAM::addToNoise(const std::vector<GroundPoint > &points) {
-    BOOST_FOREACH(GroundPoint pt, points) {
+void LineDetectorSAM::addToNoise(const std::vector<NUPoint > &points) {
+    BOOST_FOREACH(NUPoint pt, points) {
         addToNoise(pt);
     }
 }

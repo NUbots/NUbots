@@ -166,13 +166,13 @@ Matrix CameraMatrix::Rot(double bearing, char axis)
 Matrix CameraMatrix::Trans(double x, double y, double z)
 {
         // Create translation matrix for given x,y,z.
-        Matrix std::vector(4,1);
-        std::vector[0][0] = x;
-        std::vector[1][0] = y;
-        std::vector[2][0] = z;
-        std::vector[3][0] = 1;
+        Matrix vector(4,1);
+        vector[0][0] = x;
+        vector[1][0] = y;
+        vector[2][0] = z;
+        vector[3][0] = 1;
         Matrix TranslationMatrix = Matrix(4,4,true);
-        TranslationMatrix.setCol(3,std::vector);
+        TranslationMatrix.setCol(3, vector);
         return TranslationMatrix;
 
 }

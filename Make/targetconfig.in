@@ -38,7 +38,7 @@
 #endif
 
 // now define the os of the target robotic platform
-#if defined(TARGET_IS_NAOWEBOTS) or defined(TARGET_IS_DARWIN)            // If we are targeting webots, then the target os is my os
+#if defined(TARGET_IS_NAOWEBOTS) or defined(TARGET_IS_DARWINWEBOTS)            // If we are targeting webots, then the target os is my os
     #ifdef MY_OS_IS_WINDOWS
         #define TARGET_OS_IS_WINDOWS            //!< This will be defined if the target's os is Windows
     #else

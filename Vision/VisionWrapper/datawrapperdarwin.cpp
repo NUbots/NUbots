@@ -8,6 +8,7 @@
 
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "NUPlatform/NUActionators/NUSounds.h"
+#include "Kinematics/Kinematics.h"
 
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/basicvisiontypes.h"
@@ -34,7 +35,16 @@ DataWrapper::DataWrapper()
     Blackboard->lookForGoals = true; //initialise
     isSavingImages = false;
     isSavingImagesWithVaryingSettings = false;
+
     VisionConstants::loadFromFile(std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"));
+
+    std::string sen_calib_name = std::string(CONFIG_DIR) + std::string("SensorCalibration.cfg");
+
+    debug << "opening sensor calibration config: " << sen_calib_name << std::endl;
+    if( ! m_sensor_calibration.ReadSettings(sen_calib_name)) {
+        errorlog << "DataWrapper::DataWrapper() - failed to load sensor calibration: " << sen_calib_name << ". Using default values." << std::endl;
+        m_sensor_calibration = SensorCalibration();
+    }
 }
 
 DataWrapper::~DataWrapper()
@@ -64,18 +74,18 @@ NUImage* DataWrapper::getFrame()
 const Horizon& DataWrapper::getKinematicsHorizon()
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getKinematicsHorizon() - Begin" << endl;
+        debug << "DataWrapper::getKinematicsHorizon() - Begin" << std::endl;
     #endif
     if(sensor_data->getHorizon(m_horizon_coefficients)) {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::getKinematicsHorizon() - success" << endl;
+            debug << "DataWrapper::getKinematicsHorizon() - success" << std::endl;
         #endif
         m_kinematics_horizon.setLine(m_horizon_coefficients.at(0), m_horizon_coefficients.at(1), m_horizon_coefficients.at(2));
         m_kinematics_horizon.exists = true;
     }
     else {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::getKinematicsHorizon() - failed" << endl;
+            debug << "DataWrapper::getKinematicsHorizon() - failed" << std::endl;
         #endif
         m_kinematics_horizon.setLineFromPoints(Point(0, current_frame->getHeight()), Point(current_frame->getWidth(), current_frame->getHeight()));
         m_kinematics_horizon.exists = false;
@@ -84,73 +94,44 @@ const Horizon& DataWrapper::getKinematicsHorizon()
     return m_kinematics_horizon;
 }
 
-/*! @brief Retrieves the camera to ground vector returns it.
-*   @param ctgvector A reference to a float vector to fill.
-*   @return valid Whether the retrieved values are valid or not.
-*/
-bool DataWrapper::getCTGVector(vector<float>& ctgvector)
+//! @brief Retrieves the camera height returns it.
+float DataWrapper::getCameraHeight() const
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTGVector()" << endl;
-    #endif
-    return sensor_data->get(NUSensorsData::CameraToGroundTransform, ctgvector);
+    return m_camera_height;
 }
 
-/*! @brief Retrieves the camera transform vector returns it.
-*   @param ctgvector A reference to a float vector to fill.
-*   @return valid Whether the retrieved values are valid or not.
-*/
-bool DataWrapper::getCTVector(vector<float>& ctvector)
+//! @brief Retrieves the camera pitch returns it.
+float DataWrapper::getHeadPitch() const
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::getCTVector()" << endl;
-    #endif
-    return sensor_data->get(NUSensorsData::CameraTransform, ctvector);
+    return m_head_pitch;
 }
 
-/*! @brief Retrieves the camera height returns it.
-*   @param height A reference to a float to change.
-*   @return valid Whether the retrieved value is valid or not.
-*/
-bool DataWrapper::getCameraHeight(float& height)
+//! @brief Retrieves the camera yaw returns it.
+float DataWrapper::getHeadYaw() const
 {
-    return sensor_data->getCameraHeight(height);
+    return m_head_yaw;
 }
 
-/*! @brief Retrieves the camera pitch returns it.
-*   @param pitch A reference to a float to change.
-*   @return valid Whether the retrieved value is valid or not.
-*/
-bool DataWrapper::getCameraPitch(float& pitch)
+//! @brief Retrieves the body pitch returns it.
+Vector3<float> DataWrapper::getOrientation() const
 {
-    return sensor_data->getPosition(NUSensorsData::HeadPitch, pitch);
+    return m_orientation;
 }
 
-/*! @brief Retrieves the camera yaw returns it.
-*   @param yaw A reference to a float to change.
-*   @return valid Whether the retrieved value is valid or not.
-*/
-bool DataWrapper::getCameraYaw(float& yaw)
+//! @brief Returns the neck position snapshot.
+Vector3<double> DataWrapper::getNeckPosition() const
 {
-    return sensor_data->getPosition(NUSensorsData::HeadYaw, yaw);
+    return m_neck_position;
 }
 
-/*! @brief Retrieves the body pitch returns it.
-*   @param pitch A reference to a float to change.
-*   @return valid Whether the retrieved value is valid or not.
-*/
-bool DataWrapper::getBodyPitch(float& pitch)
+Vector2<double> DataWrapper::getCameraFOV() const
 {
-    vector<float> orientation;
-    bool valid = sensor_data->get(NUSensorsData::Orientation, orientation);
-    if(valid && orientation.size() > 2) {
-        pitch = orientation.at(1);
-        return true;
-    }
-    else {
-        pitch = 0;
-        return false;
-    }
+    return Vector2<double>(camera_data->m_horizontalFov, camera_data->m_verticalFov);
+}
+
+SensorCalibration DataWrapper::getSensorCalibration() const
+{
+    return m_sensor_calibration;
 }
 
 /*! @brief Returns a reference to the stored Lookup Table
@@ -181,18 +162,18 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
 
 void DataWrapper::debugPublish(vector<Ball> data) {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_BALLS) << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_BALLS) << std::endl;
         BOOST_FOREACH(Ball ball, data) {
-            debug << "DataWrapper::debugPublish - Ball = " << ball << endl;
+            debug << "DataWrapper::debugPublish - Ball = " << ball << std::endl;
         }
     #endif
 }
 
 //void DataWrapper::debugPublish(vector<Beacon> data) {
 //    #if VISION_WRAPPER_VERBOSITY > 1
-//        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_BEACONS) << endl;
+//        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_BEACONS) << std::endl;
 //        BOOST_FOREACH(Beacon beacon, data) {
-//            debug << "DataWrapper::debugPublish - Beacon = " << beacon << endl;
+//            debug << "DataWrapper::debugPublish - Beacon = " << beacon << std::endl;
 //        }
 //    #endif
 //}
@@ -202,7 +183,7 @@ void DataWrapper::debugPublish(vector<Goal> data) {
 //    static accumulator_set<double, stats<tag::mean, tag::variance> > acc_w;
 //    static int i=0;
 //    if(data.size() > 2) {
-//        cout << "3 or more posts found" << endl;
+//        cout << "3 or more posts found" << std::endl;
 //    }
 //    else if(data.size() == 2) {
 //        if(data[0].getID() == GOAL_R) {
@@ -216,7 +197,7 @@ void DataWrapper::debugPublish(vector<Goal> data) {
 //            i++;
 //        }
 //        else {
-//            cout << "two goals but no right one" << endl;
+//            cout << "two goals but no right one" << std::endl;
 //        }
 //    }
 //    else if(data.size() == 1) {
@@ -225,28 +206,28 @@ void DataWrapper::debugPublish(vector<Goal> data) {
 //        i++;
 //    }
 //    else {
-//        cout << "No goals" << endl;
+//        cout << "No goals" << std::endl;
 //    }
 
 //    if(i >= 30) {
-//        cout << "d2p: (" << mean(acc_d2p) << ", " << sqrt(variance(acc_d2p)) << ") width: " << "(" << mean(acc_w) << ", " << sqrt(variance(acc_w)) << ")" << endl;
+//        cout << "d2p: (" << mean(acc_d2p) << ", " << sqrt(variance(acc_d2p)) << ") width: " << "(" << mean(acc_w) << ", " << sqrt(variance(acc_w)) << ")" << std::endl;
 //        acc_d2p = accumulator_set<double, stats<tag::mean, tag::variance> >();
 //        acc_w = accumulator_set<double, stats<tag::mean, tag::variance> >();
 //        i=0;
 //    }
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_GOALS) << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_GOALS) << std::endl;
         BOOST_FOREACH(Goal post, data) {
-            debug << "DataWrapper::debugPublish - Goal = " << post << endl;
+            debug << "DataWrapper::debugPublish - Goal = " << post << std::endl;
         }
     #endif
 }
 
 void DataWrapper::debugPublish(vector<Obstacle> data) {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_OBSTACLES) << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(DBID_OBSTACLES) << std::endl;
         BOOST_FOREACH(Obstacle obst, data) {
-            debug << "DataWrapper::debugPublish - Obstacle = " << obst << endl;
+            debug << "DataWrapper::debugPublish - Obstacle = " << obst << std::endl;
         }
     #endif
 }
@@ -254,11 +235,11 @@ void DataWrapper::debugPublish(vector<Obstacle> data) {
 void DataWrapper::debugPublish(const vector<FieldLine> &data)
 {
     #if VISION_WRAPPER_VERBOSITY > 2
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << std::endl;
         BOOST_FOREACH(const FieldLine& l, data) {
             debug << "DataWrapper::debugPublish - Line = ";
             l.printLabel(debug);
-            debug << endl;
+            debug << std::endl;
         }
     #endif
 }
@@ -266,10 +247,10 @@ void DataWrapper::debugPublish(const vector<FieldLine> &data)
 void DataWrapper::debugPublish(const vector<CentreCircle> &data)
 {
     #if VISION_WRAPPER_VERBOSITY > 2
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << std::endl;
         BOOST_FOREACH(const CentreCircle& c, data) {
             debug << "DataWrapper::debugPublish - CentreCircle = ";
-            debug << c << endl;
+            debug << c << std::endl;
         }
     #endif
 }
@@ -277,10 +258,10 @@ void DataWrapper::debugPublish(const vector<CentreCircle> &data)
 void DataWrapper::debugPublish(const vector<CornerPoint> &data)
 {
     #if VISION_WRAPPER_VERBOSITY > 2
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << std::endl;
         BOOST_FOREACH(const CornerPoint& c, data) {
             debug << "DataWrapper::debugPublish - CornerPoint = ";
-            debug << c << endl;
+            debug << c << std::endl;
         }
     #endif
 }
@@ -289,9 +270,9 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<Point> &data_points)
 {
     //! @todo better debug printing + Comment
     #if VISION_WRAPPER_VERBOSITY > 2
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
-        debug << "\t" << id << endl;
-        debug << "\t" << data_points << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << std::endl;
+        debug << "\t" << id << std::endl;
+        debug << "\t" << data_points << std::endl;
     #endif
 }
 
@@ -310,12 +291,12 @@ void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
 
 
     #if VISION_WRAPPER_VERBOSITY > 2
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << std::endl;
         BOOST_FOREACH(const vector<ColourSegment>& line, region.getSegments()) {
             if(region.getDirection() == VisionID::HORIZONTAL)
-                debug << "y: " << line.front().getStart().y << endl;
+                debug << "y: " << line.front().getStart().y << std::endl;
             else
-                debug << "x: " << line.front().getStart().x << endl;
+                debug << "x: " << line.front().getStart().x << std::endl;
             BOOST_FOREACH(const ColourSegment& seg, line) {
                 debug << "\t" << seg;
             }
@@ -327,9 +308,9 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
 {
     //! @todo better debug printing + Comment
     #if VISION_WRAPPER_VERBOSITY > 2
-        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << endl;
+        debug << "DataWrapper::debugPublish - DEBUG_ID = " << getIDName(id) << std::endl;
         BOOST_FOREACH(const LSFittedLine& line, data) {
-            debug << "\t" << line << endl;
+            debug << "\t" << line << std::endl;
         }
     #endif
 }
@@ -337,7 +318,7 @@ void DataWrapper::debugPublish(DEBUG_ID id, const vector<LSFittedLine> &data)
 void DataWrapper::plotCurve(std::string name, vector<Vector2<double> > pts)
 {
 #if VISION_WRAPPER_VERBOSITY > 2
-    debug << "DataWrapper::plotCurve " << name << " " << pts << endl;
+    debug << "DataWrapper::plotCurve " << name << " " << pts << std::endl;
 #endif
 }
 
@@ -349,7 +330,7 @@ void DataWrapper::plotCurve(std::string name, vector<Vector2<double> > pts)
 bool DataWrapper::updateFrame()
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::updateFrame() - Begin" << endl;
+        debug << "DataWrapper::updateFrame() - Begin" << std::endl;
     #endif
     //! @todo Finish implementing & Comment
     actions = Blackboard->Actions;
@@ -365,7 +346,7 @@ bool DataWrapper::updateFrame()
     if (current_frame == NULL || sensor_data == NULL || actions == NULL || field_objects == NULL)
     {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "DataWrapper::updateFrame(): null reference from BB" << endl;
+            debug << "DataWrapper::updateFrame(): null reference from BB" << std::endl;
         #endif
         // keep object times updated.
         if(field_objects && sensor_data)
@@ -379,9 +360,32 @@ bool DataWrapper::updateFrame()
     //succesful
     field_objects->preProcess(m_timestamp);
 #if VISION_WRAPPER_VERBOSITY > 1
-    debug << "Frames dropped: " << numFramesDropped << endl;
+    debug << "Frames dropped: " << numFramesDropped << std::endl;
 #endif
 
+    vector<float> orientation(3, 0);
+
+    //update kinematics snapshot
+    if(!sensor_data->getCameraHeight(m_camera_height))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get camera height from NUSensorsData" << std::endl;
+    if(!sensor_data->getPosition(NUSensorsData::HeadPitch, m_head_pitch))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get head pitch from NUSensorsData" << std::endl;
+    if(!sensor_data->getPosition(NUSensorsData::HeadYaw, m_head_yaw))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get head yaw from NUSensorsData" << std::endl;
+    if(!sensor_data->getOrientation(orientation))
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get orientation from NUSensorsData" << std::endl;
+
+    vector<float> left, right;
+    if(sensor_data->get(NUSensorsData::LLegTransform, left) and sensor_data->get(NUSensorsData::RLegTransform, right))
+    {
+        m_neck_position = Kinematics::CalculateNeckPosition(Matrix4x4fromVector(left), Matrix4x4fromVector(right), m_sensor_calibration.m_neck_position_offset);
+    }
+    else
+    {
+        errorlog << "DataWrapperDarwin - updateFrame() - failed to get left or right leg transforms from NUSensorsData" << std::endl;
+        // Default in case kinemtaics not available. Base height of darwin.
+        m_neck_position = Vector3<double>(0.0, 0.0, 39.22);
+    }
 
     return current_frame->getWidth() > 0 && current_frame->getHeight() > 0;
 }
@@ -405,7 +409,7 @@ void DataWrapper::postProcess()
 bool DataWrapper::loadLUTFromFile(const std::string& fileName)
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::loadLUTFromFile() - " << fileName << endl;
+        debug << "DataWrapper::loadLUTFromFile() - " << fileName << std::endl;
     #endif
     return m_LUT.loadLUTFromFile(fileName);
 }
@@ -418,7 +422,7 @@ bool DataWrapper::loadLUTFromFile(const std::string& fileName)
 void DataWrapper::process(JobList* jobs)
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug  << "DataWrapper::Process - Begin" << endl;
+        debug  << "DataWrapper::Process - Begin" << std::endl;
     #endif
     static std::list<Job*>::iterator it;     // the iterator over the motion jobs
     
@@ -427,7 +431,7 @@ void DataWrapper::process(JobList* jobs)
         if ((*it)->getID() == Job::VISION_SAVE_IMAGES)
         {   
             #if VISION_WRAPPER_VERBOSITY > 1
-                debug << "DataWrapper::process(): Processing a save images job." << endl;
+                debug << "DataWrapper::process(): Processing a save images job." << std::endl;
             #endif
             static SaveImagesJob* job;
             job = (SaveImagesJob*) (*it);
@@ -470,7 +474,7 @@ void DataWrapper::process(JobList* jobs)
 void DataWrapper::saveAnImage()
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::SaveAnImage(). Starting..." << endl;
+        debug << "DataWrapper::SaveAnImage(). Starting..." << std::endl;
     #endif
 
     if (!imagefile.is_open())
@@ -541,6 +545,6 @@ void DataWrapper::saveAnImage()
         }
     }
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::SaveAnImage(). Finished" << endl;
+        debug << "DataWrapper::SaveAnImage(). Finished" << std::endl;
     #endif
 }

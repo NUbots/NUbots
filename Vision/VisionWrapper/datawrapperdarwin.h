@@ -8,6 +8,7 @@
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/Jobs/JobList.h"
 #include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
+#include "Infrastructure/SensorCalibration.h"
 #include "Kinematics/Horizon.h"
 
 #include "Vision/VisionTools/lookuptable.h"
@@ -38,13 +39,14 @@ public:
     //! Data access interface
     
     NUImage* getFrame();
-    bool getCTGVector(std::vector<float>& ctgvector);    //for transforms
-    bool getCTVector(std::vector<float>& ctvector);      //for transforms
-    bool getCameraHeight(float& height);            //for transforms
-    bool getCameraPitch(float& pitch);              //for transforms
-    bool getCameraYaw(float& yaw);                  //for transforms
-    bool getBodyPitch(float& pitch);
-    Vector2<double> getCameraFOV() const {return Vector2<double>(camera_data->m_horizontalFov, camera_data->m_verticalFov);}
+
+    float getCameraHeight() const;            //for transforms
+    float getHeadPitch() const;              //for transforms
+    float getHeadYaw() const;                  //for transforms
+    Vector3<float> getOrientation() const;
+    Vector3<double> getNeckPosition() const;
+    Vector2<double> getCameraFOV() const;
+    SensorCalibration getSensorCalibration() const;
     
     //! @brief Returns a reference to the kinematics horizon line.
     const Horizon& getKinematicsHorizon();
@@ -110,6 +112,8 @@ private:
     std::ofstream imagefile;
     std::ofstream sensorfile;
     CameraSettings currentSettings;
+
+    SensorCalibration m_sensor_calibration;
     
     //! Shared data objects
     NUImage* current_frame;
@@ -118,6 +122,12 @@ private:
     //NUSensorsData sensor_data_copy;
     NUActionatorsData* actions;             //! pointer to shared actionators data
     FieldObjects* field_objects;            //! pointer to shared fieldobject data
+
+    float m_camera_height;
+    float m_head_pitch;
+    float m_head_yaw;
+    Vector3<float> m_orientation;
+    Vector3<double> m_neck_position;
 };
 
 #endif // DATAWRAPPERDARWIN_H

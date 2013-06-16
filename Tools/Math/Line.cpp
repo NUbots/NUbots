@@ -309,5 +309,6 @@ std::ostream& operator<< (std::ostream& output, const Line& l)
 // isValid(float A, float B, float C): Check if the given values create a valid line.
 bool Line::isValid(double A, double B, double C) const
 {
-  return (A != 0.0) || (B != 0.0); // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
+    (void)(C); // To stop compiler warnings.
+    return (A != 0.0) || (B != 0.0); // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
 }

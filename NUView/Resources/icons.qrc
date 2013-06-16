@@ -14,5 +14,7 @@
         <file>icons/previous.png</file>
         <file>icons/select.png</file>
         <file>icons/Robot-icon.png</file>
+        <file>icons/check.png</file>
+        <file>icons/cross.png</file>
     </qresource>
 </RCC>

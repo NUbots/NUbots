@@ -18,7 +18,7 @@ FieldObjects::~FieldObjects()
 
 }
 
-FieldObjects::FieldObjects(const FieldObjects& source): m_timestamp(source.m_timestamp), self(source.self),
+FieldObjects::FieldObjects(const FieldObjects& source): TimestampedData(), m_timestamp(source.m_timestamp), self(source.self),
 stationaryFieldObjects(source.stationaryFieldObjects), mobileFieldObjects(source.mobileFieldObjects), ambiguousFieldObjects(source.ambiguousFieldObjects)
 {
 }
@@ -65,164 +65,174 @@ void FieldObjects::InitStationaryFieldObjects()
 	{
 		switch (ID)
 		{
-				// Blue Goal.
-				//case FO_BLUE_GOAL:
-				//    x = -300.0f;
-				//    y = 0.0f;
-				//    break;
-			case FO_BLUE_LEFT_GOALPOST:
-				x = -300.0f;
-				y = -70.0f;
-				objectName = "Left Blue Goal Post";
-				break;
-			case FO_BLUE_RIGHT_GOALPOST:
-				x = -300.0f;
-				y = 70.0f;
-				objectName = "Right Blue Goal Post";
-				break;
-				// Yellow Goal.
-				//case FO_YELLOW_GOAL:
-				//    x = 300.0f;
-				//    y = 0.0f;
-				//    break;
-			case FO_YELLOW_LEFT_GOALPOST:
-				x = 300.0f;
-				y = 70.0f;
-				objectName = "Left Yellow Goal Post";
-				break;
-			case FO_YELLOW_RIGHT_GOALPOST:
-				x = 300.0f;
-				y = -70.0f;
-				objectName = "Right Yellow Goal Post";
-				break;
-				// Corners
-				// Yellow half
-				// Back Line
-			case FO_CORNER_YELLOW_FIELD_LEFT:
-				x = 300.0f;
-				y = 200.0f;
-				objectName = "Left Yellow Field Corner";
-				break;
-			case FO_CORNER_YELLOW_T_LEFT:
-				x = 300.0f;
-				y = 150.0f;
-				objectName = "Left Yellow T Intersect";
-				break;
-			case FO_CORNER_YELLOW_T_RIGHT:
-				x = 300.0f;
-				y = -150.0f;
-				objectName = "Right Yellow T Intersect";
-				break;
-			case FO_CORNER_YELLOW_FIELD_RIGHT:
-				x = 300.0f;
-				y = -200.0f;
-				objectName = "Right Yellow Field Corner";
-				break;
-				// Yellow Penalty Box
-			case FO_CORNER_YELLOW_PEN_LEFT:
-				x = 237.5f;
-				y = 150.0f;
-				objectName = "Left Yellow Penalty Box Corner";
-				break;
-			case FO_CORNER_YELLOW_PEN_RIGHT:
-				x = 237.5f;
-				y = -150.0f;
-				objectName = "Right Yellow Penalty Box Corner";
-				break;
-				// Half-Way Line
-			case FO_CORNER_CENTRE_T_LEFT:
-				x = 0.0f;
-				y = 200.0f;
-				objectName = "Left Half-Way T Intersect";
-				y = 0.0f;
-				break;
-			case FO_CORNER_CENTRE_T_RIGHT:
-				x = 0.0f;
-				y = -200.0f;
-				objectName = "Right Half-Way T Intersect";
-				break;
-				// Blue half
-				// Back Line
-			case FO_CORNER_BLUE_FIELD_LEFT:
-				x = -300.0f;
-				y = -200.0f;
-				objectName = "Left Blue Field Corner";
-				break;
-			case FO_CORNER_BLUE_T_LEFT:
-				x = -300.0f;
-				y = -150.0f;
-				objectName = "Left Blue T intersect";
-				break;
-			case FO_CORNER_BLUE_T_RIGHT:
-				x = -300.0f;
-				y = 150.0f;
-				objectName = "Right Blue T intersect";
-				break;
-			case FO_CORNER_BLUE_FIELD_RIGHT:
-				x = -300.0f;
-				y = 200.0f;
-				objectName = "Left Blue Field Corner";
-				break;
-				// Yellow Penalty Box
-			case FO_CORNER_BLUE_PEN_LEFT:
-				x = -237.5f;
-				y = -150.0f;
-				objectName = "Left Blue Penalty Box Corner";
-				break;
-			case FO_CORNER_BLUE_PEN_RIGHT:
-				x = -237.5f;
-				y = 150.0f;
-				objectName = "Right Blue Penalty Box Corner";
-				break;
-			case FO_PENALTY_BLUE:
-				x = -120.0f;
-				y = 0.0f;
-				objectName = "Blue Penalty Spot";
-				break;
-			case FO_PENALTY_YELLOW:
-				x = 120.0f;
-				y = 0.0f;
-				objectName = "Yellow Penalty Spot";
-				break;
-			case FO_CORNER_CENTRE_CIRCLE:
-				x = 0.0f;
-				y = 0.0f;
-				objectName = "Centre Circle";
-				break;
-			case FO_CORNER_PROJECTED_T_YELLOW_LEFT:
-				x = 240.0f;
-				y = 200.0f;
-				objectName = "Projected T Yellow Left";
-				break;
-			case FO_CORNER_PROJECTED_T_YELLOW_RIGHT:
-				x = 240.0f;
-				y = -200.0f;
-				objectName = "Projected T Yellow Right";
-				break;
-			case FO_CORNER_PROJECTED_T_BLUE_LEFT:
-				x = -240.0f;
-				y = -200.0f;
-				objectName = "Projected T Blue Left";
-				break;
-			case FO_CORNER_PROJECTED_T_BLUE_RIGHT:
-				x = -240.0f;
-				y = 200.0f;
-				objectName = "Projected T Blue Right";
-				break;
-			case FO_BLUE_BEACON:
-				x = 0.0f;
-				y = -240.f; // NOTE: This is not to field spec - should be 240
-				objectName = "Blue Beacon";
-				break;
-			case FO_YELLOW_BEACON:
-				x = 0.0f;
-				y = 240.0f; // NOTE: This is not to field spec - should be 240
-				objectName = "Yellow Beacon";
-				break;
-			default:
-				x = y = 0.0f;
-				objectName = "Undefined";
-				break;
+		// Blue Goal.
+                //case FO_BLUE_GOAL:
+                //    x = -300.0f;
+                //    y = 0.0f;
+                //    break;
+		case FO_BLUE_LEFT_GOALPOST:
+                    x = -300.0f;
+                    y = -70.0f;
+                    objectName = "Left Blue Goal Post";
+                    break;
+		case FO_BLUE_RIGHT_GOALPOST:
+                    x = -300.0f;
+                    y = 70.0f;
+                    objectName = "Right Blue Goal Post";
+                    break;
+		// Yellow Goal.
+                //case FO_YELLOW_GOAL:
+                //    x = 300.0f;
+                //    y = 0.0f;
+                //    break;
+		case FO_YELLOW_LEFT_GOALPOST:
+                    x = 300.0f;
+                    y = 70.0f;
+                    objectName = "Left Yellow Goal Post";
+                    break;
+		case FO_YELLOW_RIGHT_GOALPOST:
+                    x = 300.0f;
+                    y = -70.0f;
+                    objectName = "Right Yellow Goal Post";
+                    break;
+		// Corners
+		// Yellow half
+		// Back Line
+		case FO_CORNER_YELLOW_FIELD_LEFT:
+                    x = 300.0f;
+                    y = 200.0f;
+                    objectName = "Left Yellow Field Corner";
+                    break;
+		case FO_CORNER_YELLOW_T_LEFT:
+                    x = 300.0f;
+                    y = 110.0f;
+                    objectName = "Left Yellow T Intersect";
+                    break;
+		case FO_CORNER_YELLOW_T_RIGHT:
+                    x = 300.0f;
+                    y = -110.0f;
+                    objectName = "Right Yellow T Intersect";
+                    break;
+		case FO_CORNER_YELLOW_FIELD_RIGHT:
+                    x = 300.0f;
+                    y = -200.0f;
+                    objectName = "Right Yellow Field Corner";
+                    break;
+		// Yellow Penalty Box
+		case FO_CORNER_YELLOW_PEN_LEFT:
+                    x = 240.f;
+                    y = 110.0f;
+                    objectName = "Left Yellow Penalty Box Corner";
+                    break;
+		case FO_CORNER_YELLOW_PEN_RIGHT:
+                    x = 240.f;
+                    y = -110.0f;
+                    objectName = "Right Yellow Penalty Box Corner";
+                    break;
+		// Half-Way Line
+		case FO_CORNER_CENTRE_T_LEFT:
+                    x = 0.0f;
+                    y = 200.0f;
+                    objectName = "Left Half-Way T Intersect";
+                    break;
+		case FO_CORNER_CENTRE_T_RIGHT:
+                    x = 0.0f;
+                    y = -200.0f;
+                    objectName = "Right Half-Way T Intersect";
+                    break;
+		// Blue half
+		// Back Line
+		case FO_CORNER_BLUE_FIELD_LEFT:
+                    x = -300.0f;
+                    y = -200.0f;
+                    objectName = "Left Blue Field Corner";
+                    break;
+		case FO_CORNER_BLUE_T_LEFT:
+                    x = -300.0f;
+                    y = -110.0f;
+                    objectName = "Left Blue T intersect";
+                    break;
+		case FO_CORNER_BLUE_T_RIGHT:
+                    x = -300.0f;
+                    y = 110.0f;
+                    objectName = "Right Blue T intersect";
+                    break;
+		case FO_CORNER_BLUE_FIELD_RIGHT:
+                    x = -300.0f;
+                    y = 200.0f;
+                    objectName = "Right Blue Field Corner";
+                    break;
+        // Blue Penalty Box
+		case FO_CORNER_BLUE_PEN_LEFT:
+                    x = -240.f;
+                    y = -110.0f;
+                    objectName = "Left Blue Penalty Box Corner";
+                    break;
+		case FO_CORNER_BLUE_PEN_RIGHT:
+                    x = -240.f;
+                    y = 110.0f;
+                    objectName = "Right Blue Penalty Box Corner";
+                    break;
+                case FO_PENALTY_BLUE:
+                    x = -120.0f;
+                    y = 0.0f;
+                    objectName = "Blue Penalty Spot";
+                    break;
+                case FO_PENALTY_YELLOW:
+                    x = 120.0f;
+                    y = 0.0f;
+                    objectName = "Yellow Penalty Spot";
+                    break;
+                case FO_CORNER_CENTRE_CIRCLE:
+                    x = 0.0f;
+                    y = 0.0f;
+                    objectName = "Centre Circle";
+                    break;
+                case FO_CORNER_PROJECTED_T_YELLOW_LEFT:
+                    x = 240.0f;
+                    y = 200.0f;
+                    objectName = "Projected T Yellow Left";
+                    break;
+                case FO_CORNER_PROJECTED_T_YELLOW_RIGHT:
+                    x = 240.0f;
+                    y = -200.0f;
+                    objectName = "Projected T Yellow Right";
+                    break;
+                case FO_CORNER_PROJECTED_T_BLUE_LEFT:
+                    x = -240.0f;
+                    y = -200.0f;
+                    objectName = "Projected T Blue Left";
+                    break;
+                case FO_CORNER_PROJECTED_T_BLUE_RIGHT:
+                    x = -240.0f;
+                    y = 200.0f;
+                    objectName = "Projected T Blue Right";
+                    break;
+                /*case FO_BLUE_BEACON:
+                    x = 0.0f;
+                    y = -240.f; // NOTE: This is not to field spec - should be 240
+                    objectName = "Blue Beacon";
+                    break;
+                case FO_YELLOW_BEACON:
+                    x = 0.0f;
+                    y = 240.0f; // NOTE: This is not to field spec - should be 240
+                    objectName = "Yellow Beacon";
+                    break;*/
+
+                case FO_CORNER_CENTRE_CIRCLE_INTERSECT_LEFT:
+                    x = 0.0f;
+                    y = 60.f;
+                    objectName = "Left Centre Circle Intersect";
+                    break;
+                case FO_CORNER_CENTRE_CIRCLE_INTERSECT_RIGHT:
+                    x = 0.0f;
+                    y = -60.f;
+                    objectName = "Right Centre Circle Intersect";
+                    break;
+                default:
+                    x = y = 0.0f;
+                    objectName = "Undefined";
+                    break;
 		}
 		stationaryFieldObjects.push_back(StationaryObject(x, y, ID, objectName));
 	}
@@ -439,27 +449,26 @@ int FieldObjects::getClosestStationaryOption(const Self& location, const Ambiguo
 
 		float total_error = sqrt(x_diff * x_diff + y_diff * y_diff);
 
-		//        std::cout << "option: " << obj->getName() << std::endl;
-		//        std::cout << "error: " << total_weighted_error << " curr min: " << min_err << std::endl;
-		// Get smalest value for error
-		if (total_error < min_err)
-		{
-			min_err_id = *option_it;
-			min_err = total_error;
-		}
-	}
-	return min_err_id;
+//        std::cout << "option: " << obj->getName() << std::endl;
+//        std::cout << "error: " << total_error << " curr min: " << min_err << std::endl;
+        // Get smalest value for error
+        if(total_error < min_err)
+        {
+            min_err_id = *option_it;
+            min_err = total_error;
+        }
+    }
+    return min_err_id;
 }
 
 std::vector<StationaryObject*> FieldObjects::filterToVisible(const Self& location, const AmbiguousObject& amb_object, float headPan, float fovX)
 {
-	const float c_view_direction = location.Heading() + headPan;
-	const float c_view_range = fovX + location.sdHeading();
-	const float c_minHeading = c_view_direction - c_view_range;
-	const float c_maxHeading = c_view_direction + c_view_range;
+    const float c_view_direction = location.Heading() + headPan;
+    const float c_view_range = fovX + 2 * location.sdHeading();
 
 	std::vector<int> poss_ids = amb_object.getPossibleObjectIDs();
 	std::vector<StationaryObject*> result;
+    result.reserve(poss_ids.size());
 
 	//    std::cout << "Ambiguous object: " << amb_object.getName() << std::endl;
 	//    std::cout << "View direction: " << c_view_direction << " heading: " << location.Heading() << " pan: " << headPan << std::endl;
@@ -607,18 +616,23 @@ std::istream& operator>>(std::istream& input, FieldObjects& p_fob)
 	input.read(reinterpret_cast<char*> (&p_fob.m_timestamp), sizeof (p_fob.m_timestamp));
 	input >> p_fob.self;
 
-	int size;
-	input.read(reinterpret_cast<char*> (&size), sizeof (size));
-	for (int i = 0; i < size; i++)
-	{
-		if (input.bad() || input.eof())
-		{
-			std::stringstream error_msg;
-			error_msg << "Error loading stationary object " << i << " of " << size << " - end of file reached." << std::endl;
-			throw FileFormatException(error_msg.str());
-		}
-		input >> p_fob.stationaryFieldObjects[i];
-	}
+    int size;
+    input.read(reinterpret_cast<char*>(&size), sizeof(size));
+    for(int i=0; i < size; i++)
+    {
+        if(input.bad() || input.eof())
+        {
+            std::stringstream error_msg;
+            error_msg << "Error loading stationary object " << i << " of " << size << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
+        input >> p_fob.stationaryFieldObjects[i];
+//        if(i == FieldObjects::FO_CORNER_CENTRE_T_LEFT)
+//        {
+//            p_fob.stationaryFieldObjects[i].fieldLocation.x = 0;
+//            p_fob.stationaryFieldObjects[i].fieldLocation.y = 200;
+//        }
+    }
 
 	input.read(reinterpret_cast<char*> (&size), sizeof (size));
 	for (int i = 0; i < size; i++)
@@ -632,17 +646,18 @@ std::istream& operator>>(std::istream& input, FieldObjects& p_fob)
 		input >> p_fob.mobileFieldObjects[i];
 	}
 
-	input.read(reinterpret_cast<char*> (&size), sizeof (size));
-	p_fob.ambiguousFieldObjects.resize(size);
-	for (int i = 0; i < size; i++)
-	{
-		if (input.bad() || input.eof())
-		{
-			std::stringstream error_msg;
-			error_msg << "Error loading ambiguous object " << i << " of " << size << " - end of file reached." << std::endl;
-			throw FileFormatException(error_msg.str());
-		}
-		input >> p_fob.ambiguousFieldObjects[i];
-	}
-	return input;
+    input.read(reinterpret_cast<char*>(&size), sizeof(size));
+    p_fob.ambiguousFieldObjects.resize(size);
+    for(int i=0; i < size; i++)
+    {
+        if(input.bad() || input.eof())
+        {
+            std::stringstream error_msg;
+            error_msg << "Error loading ambiguous object " << i << " of " << size << " - end of file reached." << std::endl;
+            throw FileFormatException(error_msg.str());
+        }
+        input >> p_fob.ambiguousFieldObjects[i];
+    }
+    //std::cout << p_fob.toString();
+    return input;
 }

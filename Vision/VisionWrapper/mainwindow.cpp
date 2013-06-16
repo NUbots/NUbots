@@ -44,7 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
         canvases.push_back(new QImage(QSize(320, 240), QImage::Format_RGB888));
         canvases.back()->fill(QColor(0,0,0));
         views.push_back(new QGraphicsView(ui->windowsScrollArea));
-        views.back()->setFixedSize(320,240);
+        //views.back()->setFixedSize(320,240);
+        views.back()->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        views.back()->setMinimumSize(320,340);
         views.back()->setContentsMargins(0,0,0,0);
         views.back()->setFrameShape(QFrame::NoFrame);
         windows_layout->addWidget(views.back(), 0, i);
@@ -54,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
         layer_selections.push_back(std::map<DEBUG_ID, bool>());
     }
 
-    for(int i = p1; i<NUM_PLOTS; i++) {
+    for(size_t i = p1; i<NUM_PLOTS; i++) {
         PLOTWINDOW win = winFromInt(i);
         plots[win] = new QwtPlot(ui->windowsScrollArea);
         plots[win]->setAxisAutoScale(QwtPlot::xBottom, true);
@@ -66,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     connect(ui->next_pb, SIGNAL(clicked()), this, SLOT(setNext()));
+    connect(ui->prev_pb, SIGNAL(clicked()), this, SLOT(setPrev()));
     connect(ui->contButton, SIGNAL(clicked()), this, SLOT(toggleContinuous()));
     connect(ui->exit_pb, SIGNAL(clicked()), this, SLOT(setFinished()));
     connect(ui->windowComboBox, SIGNAL(activated(int)), this, SLOT(setWindow(int)));
@@ -115,6 +118,7 @@ void MainWindow::setFrameNo(int n)
 void MainWindow::resetFlags()
 {
      m_next = m_continuous;
+     m_prev = false;
      m_finished = false;
 }
 
@@ -146,10 +150,23 @@ void MainWindow::refresh()
         layer_selections[current_window][id] = layer_boxes[id]->isChecked();
     }
 
+    //get size of largest image
+    QSize size(0,0);
+    for(int i=0; i<numDebugIDs(); i++) {
+        DEBUG_ID id = debugIDFromInt(i);
+        for(vector<pair<QImage, float> >::iterator it = images[id].begin(); it<images[id].end(); it++) {
+            size = QSize(std::max(size.width(), it->first.width()), std::max(size.height(), it->first.height()));
+        }
+    }
+
     for(size_t c=0; c<NUM_CANVASES; c++) {
         qDeleteAll( scenes[c]->items() );
+
         //reset image
+        delete canvases[c];
+        canvases[c] = new QImage(size, QImage::Format_RGB888);
         canvases[c]->fill(QColor(Qt::black));
+
         //draw over image
         QPainter painter(canvases[c]);
         for(int i=0; i<numDebugIDs(); i++) {
@@ -316,7 +333,7 @@ void MainWindow::setDashedCurve(PLOTWINDOW win, QString name, std::vector<Vector
     plots[win]->replot();
 }
 
-void MainWindow::setHistogram(PLOTWINDOW win, Qstd::string name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style)
+void MainWindow::setHistogram(PLOTWINDOW win, QString name, Histogram1D hist, QColor colour, QwtPlotHistogram::HistogramStyle style)
 {
     //set curve
     Qstd::vector<QwtIntervalSample> samples;
@@ -342,4 +359,5 @@ void MainWindow::toggleContinuous()
     m_continuous = !m_continuous;
     m_next = m_continuous;
     ui->next_pb->setEnabled(!m_continuous);
+    ui->prev_pb->setEnabled(!m_continuous);
 }

@@ -74,7 +74,7 @@ void ScanLines::classifyVerticalScanLines()
 std::vector<ColourSegment> ScanLines::classifyHorizontalScan(const LookUpTable& lut, const NUImage& img, unsigned int y)
 {
     std::vector<ColourSegment> result;
-	if(y < 0 || y >= img.getHeight()) {
+    if(y >= img.getHeight()) {
 		errorlog << "ScanLines::classifyHorizontalScan invalid y: " << y << std::endl;
 		return result;
 	}

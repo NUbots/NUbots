@@ -141,6 +141,39 @@
     </item>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="FilteTypeGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>140</y>
+     <width>141</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Filter Type</string>
+   </property>
+   <widget class="QComboBox" name="FilterTypeComboBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>121</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Basic UKF</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Sequential UKF</string>
+     </property>
+    </item>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections>

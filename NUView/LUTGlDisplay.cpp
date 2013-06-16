@@ -46,11 +46,14 @@ LUTGlDisplay::~LUTGlDisplay()
 
 void LUTGlDisplay::restoreState(const QByteArray & state)
 {
+    // TODO: Implement the state restoration.
+    (void)(state); // To stop compiler warnings.
     return;
 }
 
 QByteArray LUTGlDisplay::saveState() const
 {
+    // TODO: Implement the state saving.
     return QByteArray();
 }
 
