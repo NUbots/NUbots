@@ -50,7 +50,7 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
         DataWrapper::getInstance()->plotCurve("Screencoords", plotpts);
         #endif
         //map those points to the ground plane
-        transformer.calculateRepresentations(points);
+        transformer.calculateRepresentationsFromPixelLocation(points);
 
         #if VISION_FIELDPOINT_VERBOSITY > 1
         plotpts.clear();

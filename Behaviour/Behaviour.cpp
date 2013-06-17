@@ -43,6 +43,7 @@
 #include "GoalKeeperTest/TestKeeperProvider.h"
 #include "FootSlipTest/SlipTestProvider.h"
 #include "HeadBehaviourTester/HBTProvider.h"
+#include "NUSoccer/NUSoccerProvider.h"
 
 
 

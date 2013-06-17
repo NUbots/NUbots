@@ -95,7 +95,7 @@ std::vector<Goal> GoalDetector::assignGoals(const std::list<Quad>& candidates) c
     else {
         //unable to identify which post is which
         //setting all to unknown
-        BOOST_FOREACH(Quad q, candidates) {
+        for(Quad q : candidates) {
             goals.push_back(Goal(GOAL_U, q));
         }
     }

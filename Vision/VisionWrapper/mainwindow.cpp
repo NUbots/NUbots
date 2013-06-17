@@ -359,5 +359,5 @@ void MainWindow::toggleContinuous()
     m_continuous = !m_continuous;
     m_next = m_continuous;
     ui->next_pb->setEnabled(!m_continuous);
-    ui->prev_pb->setEnabled(!m_continuous);
+    //ui->prev_pb->setEnabled(!m_continuous);
 }

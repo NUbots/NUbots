@@ -72,8 +72,8 @@ void SensorCalibrationWidget::ValueChanged()
     if(ui->comboBox_camera_select->currentText().toLower() == "darwin")
     {
         // From CameraSpecs.cfg file.
-        m_calibration.m_fov.x = 60.f;
-        m_calibration.m_fov.y = 46.f;
+        m_calibration.m_fov.x = 62.8f;
+        m_calibration.m_fov.y = 48.8f;
         Vector2<double> rad_fov(mathGeneral::deg2rad(m_calibration.m_fov.x), mathGeneral::deg2rad(m_calibration.m_fov.y));
         m_transformer->setCamParams(Vector2<double>(640,480), rad_fov);
     }

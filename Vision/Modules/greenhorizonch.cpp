@@ -62,7 +62,6 @@ void GreenHorizonCH::calculateHorizon()
         kin_hor_y = std::max(0, kin_hor_y);
         kin_hor_y = std::min(height-1, kin_hor_y);
 
-
         for (int y = kin_hor_y; y < height; y++) {
 
             if (isPixelGreen(img, x, y)) {
@@ -113,10 +112,6 @@ void GreenHorizonCH::calculateHorizon()
 
     std::vector< Vector2<double> >::iterator p = horizon_points.begin();
     while(p < horizon_points.end()) {
-        //changing - I don't see any reason to remove pts that are too low if we are
-        //           doing a convex hull anyway.
-//        if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y ||
-//            p->y > mean_y + VisionConstants::GREEN_HORIZON_LOWER_THRESHOLD_MULT*std_dev_y) {
         if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y) {
             thrown_points.push_back(*p);
             p = horizon_points.erase(p);

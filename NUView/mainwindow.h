@@ -106,6 +106,7 @@ public slots:
       @brief Updates the selected colours.
       */
     void updateSelection();
+    void updateCalibrationDisplay(NUSensorsData* data);
 
     void imageFrameChanged(int currFrame, int totalFrames);
 protected slots:

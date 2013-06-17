@@ -25,17 +25,21 @@ Goal::Goal(VFO_ID id, const Quad &corners)
 
     //CALCULATE DISTANCE AND BEARING VALS
     valid = calculatePositions();
-    //valid = valid && check();
-    valid = check();
+    valid = valid && check();
 }
 
 void Goal::setBase(Point base)
 {
-    m_location.screenCartesian = base;
+    Line l_line(m_corners.getBottomLeft(), m_corners.getTopLeft());
+    Line r_line(m_corners.getBottomRight(), m_corners.getTopRight());
+
+    Point l_point = l_line.projectOnto(base);
+    Point r_point = r_line.projectOnto(base);
+
+    m_location.screenCartesian = Point( (l_point.x + r_point.x)*0.5, base.y );
 
     valid = calculatePositions();
-    //valid = valid && check();
-    valid = check();
+    valid = valid && check();
 }
 
 const Quad& Goal::getQuad() const
@@ -140,7 +144,6 @@ bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp
 bool Goal::check() const
 {
     //various throwouts here
-
     if(VisionConstants::THROWOUT_SHORT_GOALS) {
         if(m_corners.getAverageHeight() <= VisionConstants::MIN_GOAL_HEIGHT) {
             #if VISION_GOAL_VERBOSITY > 1
@@ -214,7 +217,7 @@ bool Goal::calculatePositions()
     const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
 
     // D2P
-    tran.calculateRepresentations(m_location);
+    tran.calculateRepresentationsFromPixelLocation(m_location);
 
 //    //get distance from width
 //    width_dist = VisionConstants::GOAL_WIDTH*tran.getCameraDistanceInPixels()/m_size_on_screen.x;
