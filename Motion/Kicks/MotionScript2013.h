@@ -123,6 +123,9 @@ public:
 
     MotionScriptFrame* GetCurrentFrame();
 
+    //! Adds the given frame to the end of the script
+    void AddFrame(MotionScriptFrame* frame);
+
     //! Insert the given frame before the frame at the specified index
     void InsertFrame(int index, MotionScriptFrame* frame);
 
