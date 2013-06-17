@@ -3,7 +3,7 @@
 
 NUAPI::NUAPI(): context(1), publisher(context, ZMQ_PUB)
 {
-	int64_t hwm = 1;
+	int64_t hwm = 3;
 	publisher.setsockopt(ZMQ_HWM, &hwm, sizeof (hwm));
 	publisher.bind("tcp://*:12000");
 
