@@ -167,7 +167,12 @@ public:
 
     /*! @brief Tests whether the motor torque is on.
     */
-    bool motorTorqueIsOn(int motor_id);
+    bool motorTorqueIsOff(int motor_id);
+
+    /*! @brief Turns on all motors and marks those without torque for saving.
+    */
+    void turnOnAllMotors();
+
 };
 
 #endif
