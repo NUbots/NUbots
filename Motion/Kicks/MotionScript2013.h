@@ -17,6 +17,7 @@ public:
     int GetServoId() { return servo_id_; }
     float GetPosition() { return position_; }
     float GetGain() { return gain_; }
+    bool GetDisable() { return disable_; }
 
 private:
     int servo_id_;
