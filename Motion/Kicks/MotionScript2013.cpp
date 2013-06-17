@@ -66,7 +66,7 @@ void MotionScript2013::SeekFrame(int frame)
 
 void MotionScript2013::ApplyCurrentFrameToRobot(NUActionatorsData* actionators_data)
 {
-    auto& current_frame = script_frames_[current_frame_index_];
+    auto current_frame = script_frames_[current_frame_index_];
 
     current_frame->ApplyToRobot(actionators_data);
 }

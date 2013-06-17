@@ -32,7 +32,7 @@ public:
     MotionScriptFrame() : duration_(0) {}
 
     //! Schedules all joint poitions in this frame using the given actionators.
-    void ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data);
+    void ApplyToRobot(NUActionatorsData* actionators_data);
 
     //! Returns the NUData id_t corresponding to the servo motor with the given
     //! id.
