@@ -10,9 +10,10 @@ class ScriptJointDescriptor
 public:
     ScriptJointDescriptor() : servo_id_(0), position_(0), gain_(0), disable_(0) {}
 
-    int SetServoId(int servo_id) { servo_id_ = servo_id; }
-    float SetPosition(float position) { position_ = position; }
-    float SetGain(float gain) { gain_ = gain; }
+    void SetServoId(int servo_id) { servo_id_ = servo_id; }
+    void SetPosition(float position) { position_ = position; }
+    void SetGain(float gain) { gain_ = gain; }
+    void SetDisable( bool disable) { disable_=disable; }
     int GetServoId() { return servo_id_; }
     float GetPosition() { return position_; }
     float GetGain() { return gain_; }

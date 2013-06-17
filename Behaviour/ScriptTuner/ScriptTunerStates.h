@@ -44,6 +44,7 @@
 #include <chrono>
 #include "Framework/darwin/Framework/include/JointData.h"
 #include "Motion/Kicks/MotionScript2013.h"
+#include "Infrastructure/NUData.h"
 
 #include "Autoconfig/nubotdataconfig.h"
 
@@ -75,7 +76,11 @@ public:
 
     bool m_script_active;
 
+    vector<int> motors_to_be_saved;//Contains motors which have had torque turned off and then on.
+    
 
+    NUActionatorsData* m_actionators_data;
+    NUSensorsData* m_sensors_data;
 
     ScriptTunerState(ScriptTunerProvider* provider);
 
@@ -128,7 +133,8 @@ public:
     void turnOffMotor(int motor_id);
     
     /*! @brief Motor turn on torque method.
-         Also marks motor for saving with save manually moved motors.*/    
+         Also marks motor for saving with save manually moved motors.
+         Adds motion job for motor at current position with gain given in script.*/    
     void turnOnMotor(int motor_id);
     
     /*! @brief Returns the current frame number.
@@ -151,7 +157,17 @@ public:
     */
     void applyCurrentFrameToRobot();
 
+    /*! @brief Sets the frame duration.
+    */
     void setCurrentFrameDuration(string duration_string);
+
+    /*! @brief Returns the MEASURED motor position.
+    */
+    float getMotorPosition(int motor_id);
+
+    /*! @brief Tests whether the motor torque is on.
+    */
+    bool motorTorqueIsOn(int motor_id);
 };
 
 #endif
