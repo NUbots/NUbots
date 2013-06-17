@@ -830,10 +830,14 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
         int ObjectHeight = stationary_object.getObjectHeight();
 
         glBegin(GL_QUADS);                              // Start Lines
-            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2); //TOP LEFT
-            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2); //TOP RIGHT
-            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM RIGHT
-            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM LEFT
+//            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2); //TOP LEFT
+//            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2); //TOP RIGHT
+//            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM RIGHT
+//            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2); //BOTTOM LEFT
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight); //TOP LEFT
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight); //TOP RIGHT
+            glVertex2i( X+ObjectWidth/2, Y); //BOTTOM RIGHT
+            glVertex2i( X-ObjectWidth/2, Y); //BOTTOM LEFT
         glEnd();
     }
 
@@ -887,11 +891,16 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
         int ObjectHeight = mobile_object.getObjectHeight();
 
         glBegin(GL_LINE_STRIP);                              // Start Lines
-            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
-            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2);
-            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2);
-            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
-            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+//            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+//            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2);
+//            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2);
+//            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
+//            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight);
+            glVertex2i( X-ObjectWidth/2, Y);
+            glVertex2i( X+ObjectWidth/2, Y);
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight);
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight);
         glEnd();
     }
 
@@ -939,11 +948,16 @@ void OpenglManager::writeFieldObjectsToDisplay(FieldObjects* AllObjects, GLDispl
         int ObjectHeight = ambiguous_obj.getObjectHeight();
 
         glBegin(GL_LINE_STRIP);                              // Start Lines
-            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
-            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2);
-            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2);
-            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
-            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+//            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+//            glVertex2i( X-ObjectWidth/2, Y+ObjectHeight/2);
+//            glVertex2i( X+ObjectWidth/2, Y+ObjectHeight/2);
+//            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight/2);
+//            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight/2);
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight);
+            glVertex2i( X-ObjectWidth/2, Y);
+            glVertex2i( X+ObjectWidth/2, Y);
+            glVertex2i( X+ObjectWidth/2, Y-ObjectHeight);
+            glVertex2i( X-ObjectWidth/2, Y-ObjectHeight);
         glEnd();
     }
 

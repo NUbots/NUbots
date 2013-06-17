@@ -24,9 +24,9 @@ VisionController::VisionController() : m_corner_detector(0.1), m_circle_detector
 {
     m_data_wrapper = DataWrapper::getInstance();
     m_blackboard = VisionBlackboard::getInstance();
+    //m_line_detector_sam = new LineDetectorSAM();
+    //m_goal_detector_hist = new GoalDetectorHistogram();
     m_line_detector_ransac = new LineDetectorRANSAC();
-    m_line_detector_sam = new LineDetectorSAM();
-    m_goal_detector_hist = new GoalDetectorHistogram();
     m_goal_detector_ransac_edges = new GoalDetectorRANSACEdges();
 
     //requires other detectors
@@ -43,8 +43,8 @@ VisionController::~VisionController()
     m_profiling_stream.close();
 #endif
     delete m_line_detector_ransac;
-    delete m_line_detector_sam;
-    delete m_goal_detector_hist;
+//    delete m_line_detector_sam;
+//    delete m_goal_detector_hist;
     delete m_goal_detector_ransac_edges;
 }
 

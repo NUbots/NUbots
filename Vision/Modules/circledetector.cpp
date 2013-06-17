@@ -47,7 +47,7 @@ bool CircleDetector::run(std::vector<NUPoint> &points, CentreCircle &result)
             candidate.getRadius() <= (1 + m_tolerance)*VisionConstants::CENTRE_CIRCLE_RADIUS &&
             candidate.getRadius() >= (1 - m_tolerance)*VisionConstants::CENTRE_CIRCLE_RADIUS)
         {
-            std::cout << __PRETTY_FUNCTION__ << " centre: " << candidate.getCentre() << " radius: " << candidate.getRadius() << std::endl;
+            //std::cout << __PRETTY_FUNCTION__ << " centre: " << candidate.getCentre() << " radius: " << candidate.getRadius() << std::endl;
             // get outer points to determine screen radius
             double left = VisionBlackboard::getInstance()->getImageWidth() - 1,
                    right = 0,

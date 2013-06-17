@@ -1,6 +1,6 @@
 GOAL_COLOUR:
 before: (0, -1) []
-middle: (3, -1) [yellow]
+middle: (3, -1) [yellow, blue]
 after: (0, -1) []
 
 BALL_COLOUR:
@@ -10,5 +10,5 @@ after: (0, -1) []
 
 LINE_COLOUR:
 before: (0, -1) []
-middle: (1, -1) [white]
+middle: (2, -1) [white]
 after: (0, -1) []

@@ -25,6 +25,11 @@ void ObjectDetectionCH::detectObjects()
     #if VISION_HORIZON_VERBOSITY > 1
         debug << "ObjectDetectionCH::detectObjects() - Begin" << std::endl;
     #endif
+
+    // CONSTANTS
+    const int VER_THRESHOLD = 2;                // number of consecutive green pixels required.
+    const double OBJECT_THRESHOLD_MULT = 1.5;   // standard deviation multiplier
+
     // get blackboard instance
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
