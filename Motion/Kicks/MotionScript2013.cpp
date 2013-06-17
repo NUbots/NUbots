@@ -40,8 +40,6 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
     }
     */
     
-    
-    
     return nullptr;
 }
 
@@ -157,9 +155,9 @@ void MotionScript2013::SeekFrame(int frame)
 
 void MotionScript2013::ApplyCurrentFrameToRobot(NUActionatorsData* actionators_data)
 {
-    auto& current_frame = script_frames_[current_frame_index_];
+    auto current_frame = script_frames_[current_frame_index_];
 
-    current_frame->ApplyToRobot(script_start_time_, actionators_data);
+    current_frame->ApplyToRobot(actionators_data);
 }
 
 
@@ -181,7 +179,7 @@ bool MotionScript2013::HasCompleted(float current_time)
     float script_time = current_time - script_start_time_;
     auto& current_frame = script_frames_[current_frame_index_];
 
-    if(script_time < current_frame->GetTime())
+    if(script_time < GetScriptDuration())
         return false;
 
     return true;
@@ -189,10 +187,7 @@ bool MotionScript2013::HasCompleted(float current_time)
 
 float MotionScript2013::GetNextFrameTime(float current_time)
 {
-    if(current_frame_index_ == GetFrameCount() - 1)
-        return script_frames_[current_frame_index_]->GetTime();
-    else
-        return script_frames_[current_frame_index_ + 1]->GetTime();
+    return current_time + script_frames_[current_frame_index_]->GetDuration();
 }
 
 int MotionScript2013::GetFrameCount()
@@ -233,6 +228,16 @@ void MotionScript2013::DuplicateFrame(int index)
     InsertFrame(index, current_frame);
 }
 
+float MotionScript2013::GetScriptDuration()
+{
+    float script_duration = 0;
+
+    for(auto* frame : script_frames_)
+        script_duration += frame->GetDuration();
+
+    return script_duration;
+}
+
 NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
 {
     switch(sensor_id)
@@ -264,6 +269,7 @@ NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
         }
     }
 }
+
 
 int MapRowIndexToServoId(int index)
 {
@@ -299,10 +305,8 @@ int MapRowIndexToServoId(int index)
 }
 
 
-void MotionScriptFrame::ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data)
+void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
 {
-    auto target_time = script_start_time + time_;
-
     for(auto key_value : joints_)
     {
         auto& joint = key_value.second;
@@ -311,7 +315,7 @@ void MotionScriptFrame::ApplyToRobot(float script_start_time, NUActionatorsData*
         {
             actionators_data->add(
                 MapServoIdToNUDataId(joint.GetServoId()),
-                target_time,
+                duration_,
                 joint.GetPosition(),
                 joint.GetGain());
         }
@@ -343,4 +347,3 @@ bool MotionScriptFrame::GetDescriptor(int servo_id, ScriptJointDescriptor* descr
         return false;
     }
 }
-
