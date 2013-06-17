@@ -54,9 +54,16 @@ public:
     //! Returns the duration of this frame
     float GetDuration() { return duration_; }
     //! Sets this frame's duration
-    float SetDuration(float duration)
+    void SetDuration(float duration)
     {
-        if()
+        if(duration < 0)
+        {
+            std::cout << __PRETTY_FUNCTION__ << " - "
+                      << "duration must be non-negative (not "
+                      << duration << ");";
+            return;
+        }
+
         duration_ = duration;
     }
 
