@@ -94,14 +94,14 @@ bool Obstacle::calculatePositions()
 {
     const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
     //To the bottom of the Goal Post.
-    transformer.calculateRepresentations(m_location);
+    transformer.calculateRepresentationsFromPixelLocation(m_location);
 
     // find arc width
     NUPoint gp1, gp2;
     gp1.screenCartesian = m_location.screenCartesian - Point(m_size_on_screen.x, 0);
     gp2.screenCartesian = m_location.screenCartesian + Point(m_size_on_screen.x, 0);
-    transformer.calculateRepresentations(gp1);
-    transformer.calculateRepresentations(gp2);
+    transformer.calculateRepresentationsFromPixelLocation(gp1);
+    transformer.calculateRepresentationsFromPixelLocation(gp2);
 
     m_arc_width = std::abs( gp1.screenAngular.x - gp2.screenAngular.x );
 

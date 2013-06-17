@@ -90,7 +90,6 @@ public:
     static unsigned int VERTICAL_SCANLINE_SPACING;      //! The spacing between vertical scans.
     static unsigned int GREEN_HORIZON_SCAN_SPACING;     //! The spacing between scans used to locate the GH.
     static unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS; //! Dave?
-    static float GREEN_HORIZON_LOWER_THRESHOLD_MULT;    //! Dave?
     static float GREEN_HORIZON_UPPER_THRESHOLD_MULT;    //! Dave?
 
     //! Split and Merge constants

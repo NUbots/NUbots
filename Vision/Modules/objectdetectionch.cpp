@@ -28,7 +28,7 @@ void ObjectDetectionCH::detectObjects()
     // get blackboard instance
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
-    unsigned int height = img.getHeight();
+    int height = img.getHeight();
     const GreenHorizon& green_horizon = vbb->getGreenHorizon();
     std::vector< Vector2<double> > horizon_points;
     std::vector<Point> object_points;
@@ -49,18 +49,20 @@ void ObjectDetectionCH::detectObjects()
     std_dev_y = sqrt(variance(acc));
 
     // for each point in interpolated list
-    for (unsigned int x = 0; x < horizon_points.size(); x++) {
-        unsigned int green_top = 0;
-        unsigned int green_count = 0;
+    for (Point p : horizon_points) {
+        int green_top = 0;
+        int green_count = 0;
 
         // if bottom of image, assume object
-        if (static_cast<unsigned int>(horizon_points.at(x).y) == height-1) {
-            object_points.push_back(Point(horizon_points.at(x).x, height-1));
+        if (p.y == height-1) {
+            if (p.y - green_horizon.getYFromX(p.x) >= VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
+                object_points.push_back(p);
+            }
         }
         else {
             // scan from point to bottom of image
-            for (unsigned int y = horizon_points.at(x).y; y < height; y++) {
-                if (isPixelGreen(img, horizon_points.at(x).x, y)){
+            for (int y = p.y; y < height; y++) {
+                if (isPixelGreen(img, p.x, y)){
                     if (green_count == 1) {
                         green_top = y;
                     }
@@ -68,40 +70,33 @@ void ObjectDetectionCH::detectObjects()
                     // if VER_THRESHOLD green pixels found outside of acceptable range, add point
                     if (green_count == VER_THRESHOLD) {
                         if (green_top > mean_y + OBJECT_THRESHOLD_MULT*std_dev_y + 1) {
-                            //std::cout << "OBJECT: (" << horizon_points->at(x).x << ", " << y << ")" << std::endl;
-                            object_points.push_back(Point(horizon_points.at(x).x, y));
+                            //only add point if it is outside of minimum distance
+                            if (y - green_horizon.getYFromX(p.x) >= VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
+                                object_points.push_back(Point(p.x, y));
+                            }
                         }
                         break;
                     }
                 }
-                // not green - reset
                 else {
-                    green_count = 0;
+                    green_count = 0; // not green - reset
                 }
 
                 // if bottom reached without green, add bottom point
                 if (y == height - 1) {
-                    object_points.push_back(Point(horizon_points.at(x).x, y));
+                    if (y - green_horizon.getYFromX(p.x) >= VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
+                        object_points.push_back(Point(p.x, y));
+                    }
                 }
             }
         }
     }
 
-    // ignore transitions very close to horizon
-    std::vector<Point>::iterator it;
-    it = object_points.begin();
-    while (it < object_points.end()) {
-//        std::cout << it->y - green_horizon.getYFromX(it->x) << std::endl;
-        if (it->y - green_horizon.getYFromX(it->x) < VisionConstants::MIN_DISTANCE_FROM_HORIZON) {
-            it = object_points.erase(it);
-        }
-        else {
-            it++;
-        }
-    }
+    vbb->setObstaclePoints(object_points);
 
     // update blackboard with object points
-    int start = 0, count = 0, bottom = 0;
+    int start = 0;
+    int count = 0, bottom = 0;
     bool scanning = false;
 
     for (unsigned int i = 0; i < object_points.size(); i++) {
@@ -112,13 +107,18 @@ void ObjectDetectionCH::detectObjects()
             bottom = 0;
         }
         else {
-            if (object_points.at(i).x - object_points.at(i-1).x == static_cast<int>(VisionConstants::VERTICAL_SCANLINE_SPACING) && (i < object_points.size()-1)) {
+            if (object_points.at(i).x - object_points.at(i-1).x == static_cast<int>(VisionConstants::VERTICAL_SCANLINE_SPACING) && (i < object_points.size()-1))
+            {
+                // count while there are consecutive points
                 count++;
                 if (object_points.at(i).y > bottom)
                     bottom = object_points.at(i).y;
             }
             else {
-                if (count > VisionConstants::MIN_CONSECUTIVE_POINTS) {
+                // non consecutive found
+                if (count > VisionConstants::MIN_CONSECUTIVE_POINTS)
+                {
+                    // if there are enough then make an obstacle
                     int l = object_points.at(start).x - VisionConstants::VERTICAL_SCANLINE_SPACING;
                     int r = object_points.at(i-1).x + VisionConstants::VERTICAL_SCANLINE_SPACING;
 
@@ -134,9 +134,6 @@ void ObjectDetectionCH::detectObjects()
             }
         }
     }
-
-
-    vbb->setObstaclePoints(object_points);
 }
 
 

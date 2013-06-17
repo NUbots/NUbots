@@ -42,8 +42,7 @@ Ball::Ball(Point centre, double diameter)
     m_location.screenCartesian = centre;
     m_size_on_screen = Vector2<double>(m_diameter, m_diameter);
     valid = calculatePositions();
-    //valid = valid && check();
-    valid = check();
+    valid = valid && check();
 }
 
 float Ball::getRadius() const
@@ -143,7 +142,7 @@ bool Ball::calculatePositions()
 {
     const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
     //To the bottom of the Goal Post.
-    tran.calculateRepresentations(m_location);
+    tran.calculateRepresentationsFromPixelLocation(m_location);
 
     #if VISION_BALL_VERBOSITY > 2
         debug << "Ball::calculatePositions: " << m_location << std::endl;
