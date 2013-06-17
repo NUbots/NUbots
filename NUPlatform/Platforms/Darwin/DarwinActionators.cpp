@@ -94,39 +94,6 @@ void DarwinActionators::copyToHardwareCommunications()
 }
 
 
-// int MapSensorIdToServoIndex(int sensor_id)
-// {
-//     switch(sensor_id)
-//     {
-//         case Robot::JointData::ID_HEAD_TILT       : return  0;
-//         case Robot::JointData::ID_HEAD_PAN        : return  1;
-//         case Robot::JointData::ID_L_SHOULDER_ROLL : return  2;
-//         case Robot::JointData::ID_L_SHOULDER_PITCH: return  3;
-//         case Robot::JointData::ID_L_ELBOW         : return  4;
-//         case Robot::JointData::ID_R_SHOULDER_ROLL : return  5;
-//         case Robot::JointData::ID_R_SHOULDER_PITCH: return  6;
-//         case Robot::JointData::ID_R_ELBOW         : return  7;
-//         case Robot::JointData::ID_L_HIP_ROLL      : return  8;
-//         case Robot::JointData::ID_L_HIP_PITCH     : return  9;
-//         case Robot::JointData::ID_L_HIP_YAW       : return 10;
-//         case Robot::JointData::ID_L_KNEE          : return 11;
-//         case Robot::JointData::ID_L_ANKLE_ROLL    : return 12;
-//         case Robot::JointData::ID_L_ANKLE_PITCH   : return 13;
-//         case Robot::JointData::ID_R_HIP_ROLL      : return 14;
-//         case Robot::JointData::ID_R_HIP_PITCH     : return 15;
-//         case Robot::JointData::ID_R_HIP_YAW       : return 16;
-//         case Robot::JointData::ID_R_KNEE          : return 17;
-//         case Robot::JointData::ID_R_ANKLE_ROLL    : return 18;
-//         case Robot::JointData::ID_R_ANKLE_PITCH   : return 19;
-//         default: {
-//             std::cout   << __PRETTY_FUNCTION__
-//                         << ": Invalid sensor_id: " << sensor_id << ";"
-//                         << std::endl;
-//             return -1;
-//         }
-//     }
-// }
-
 
 void DarwinActionators::copyToServos()
 {

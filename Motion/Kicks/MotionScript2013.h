@@ -72,6 +72,8 @@ public:
 
     static MotionScript2013* LoadFromConfigSystem(const std::string& path);
 
+    static MotionScript2013* LoadOldScript(const std::string& path);
+
     static bool SaveToConfigSystem(
         const MotionScript2013& script,
         const std::string& path);

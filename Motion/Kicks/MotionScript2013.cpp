@@ -5,6 +5,8 @@
 #include "Infrastructure/NUData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "Framework/darwin/Framework/include/JointData.h"
+#include "Motion/Tools/MotionFileTools.h"
+#include "debug.h"
 
 MotionScript2013::~MotionScript2013()
 {
@@ -41,6 +43,93 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
     
     
     return nullptr;
+}
+
+static MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path){
+    //Method modified from Motion/Tools/MotionScript.h
+    std::ifstream file(path);
+    if (!file.is_open())
+    {
+        errorlog << "MotionScript2013::LoadOldScript(). Unable to open. " << path << std::endl;
+        return false;
+    }
+    else
+    {
+        MotionFileTools::toFloat(file);
+        MotionFileTools::toBool(file);
+        labels = MotionFileTools::toStringVector(file);
+        if (labels.empty())
+        {
+            errorlog << "MotionScript::load(). Unable to load " << path << " the file labels are invalid " << std::endl;
+            return false;
+        }
+        playspeed = 1.0;
+        
+        int numjoints = labels.size() - 1;
+        times = vector<vector<double> >(numjoints, vector<double>());
+        positions = vector<vector<float> >(numjoints, vector<float>());
+        gains = vector<vector<float> >(numjoints, vector<float>());
+        
+        float time;
+        vector<vector<float> > row;
+        
+        while (!file.eof())
+        {
+            MotionFileTools::toFloatWithMatrix(file, time, row);
+            if (row.size() >= numjoints)
+            {   // discard rows that don't have enough joints
+                for (int i=0; i<numjoints; i++)
+                {
+                    if (row[i].size() > 0)
+                    {   // if there is an entry then the first must be a position
+                        times[i].push_back(1000*time);
+                        positions[i].push_back(row[i][0]);
+                        
+                        // because the way the joint actionators are designed we must also specify a gain
+                        if (row[i].size() > 1)
+                        {   // if there is a second entry then it is the gain
+                            gains[i].push_back(row[i][1]);
+                        }
+                        else
+                        {   // however if there is no second entry we reuse the previous entry or use 100% if this is the first one
+                            if (gains[i].empty())
+                                gains[i].push_back(100.0);
+                            else
+                                gains[i].push_back(gains[i].back());
+                        }
+                        
+                    }
+                }
+            }
+            row.clear();
+        }
+        file.close();        
+
+        return InitialiseScriptFromOld(times,positions,gains);
+    }
+
+}
+
+MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<float> times, vector<vector<float> > positions, vector<vector<float> > gains){
+    
+    MotionScript2013* script = new MotionScript2013();
+    for(int frame_number = 0; frame_number<times.size();frame_number++){
+
+        MotionScriptFrame new_frame();
+
+        for(int motor_index; motor_index<positions[frame_number].size();motor_index++){
+
+            ScriptJointDescriptor descriptor();
+            descriptor.SetServoId(MapRowIndexToServoId(motor_index));
+            descriptor.SetPosition(MapRowIndexToServoId(motor_index),positions[frame_number][motor_index]);
+            descriptor.SetPosition(MapRowIndexToServoId(motor_index),gains[frame_number][motor_index]);
+            new_frame.AddDescriptor(MapRowIndexToServoId(motor_index),descriptor);
+
+        }
+        script->AddFrame(&new_frame);
+    }
+    return script;
+
 }
 
 bool MotionScript2013::SaveToConfigSystem(
@@ -175,6 +264,40 @@ NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
         }
     }
 }
+
+int MapRowIndexToServoId(int index)
+{
+    switch(index)
+    {
+         case( 0): return Robot::JointData::ID_HEAD_TILT;        
+         case( 1): return Robot::JointData::ID_HEAD_PAN;         
+         case( 2): return Robot::JointData::ID_L_SHOULDER_ROLL;  
+         case( 3): return Robot::JointData::ID_L_SHOULDER_PITCH; 
+         case( 4): return Robot::JointData::ID_L_ELBOW;          
+         case( 5): return Robot::JointData::ID_R_SHOULDER_ROLL;  
+         case( 6): return Robot::JointData::ID_R_SHOULDER_PITCH; 
+         case( 7): return Robot::JointData::ID_R_ELBOW;          
+         case( 8): return Robot::JointData::ID_L_HIP_ROLL;       
+         case( 9): return Robot::JointData::ID_L_HIP_PITCH;      
+         case(10): return Robot::JointData::ID_L_HIP_YAW;        
+         case(11): return Robot::JointData::ID_L_KNEE;           
+         case(12): return Robot::JointData::ID_L_ANKLE_ROLL;     
+         case(13): return Robot::JointData::ID_L_ANKLE_PITCH;    
+         case(14): return Robot::JointData::ID_R_HIP_ROLL;       
+         case(15): return Robot::JointData::ID_R_HIP_PITCH;      
+         case(16): return Robot::JointData::ID_R_HIP_YAW;        
+         case(17): return Robot::JointData::ID_R_KNEE;           
+         case(18): return Robot::JointData::ID_R_ANKLE_ROLL;     
+         case(19): return Robot::JointData::ID_R_ANKLE_PITCH;    
+        default: {
+            std::cout   << __PRETTY_FUNCTION__
+                        << ": Invalid index: " << sensor_id << ";"
+                        << std::endl;
+            return -1;
+        }
+    }
+}
+
 
 void MotionScriptFrame::ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data)
 {
