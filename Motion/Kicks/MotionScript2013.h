@@ -64,7 +64,6 @@ class MotionScript2013
 public:
     MotionScript2013() : kick_enable_time_(0),
                          script_start_time_(0),
-                         script_end_time_(0),
                          current_frame_index_(0) { }
     ~MotionScript2013();
 
@@ -111,10 +110,13 @@ public:
     //! Rmoves the frame at the given index from the script
     void RemoveFrame(int index);
 
+    //! Creates a copy of the frame at the given index, and inserts it before
+    //! the given index.
+    void DuplicateFrame(int index);
+
 private:
     float kick_enable_time_;
     float script_start_time_;
-    float script_end_time_;
 
     int current_frame_index_;
 

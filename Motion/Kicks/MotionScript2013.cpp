@@ -15,6 +15,31 @@ MotionScript2013::~MotionScript2013()
 MotionScript2013* MotionScript2013::LoadFromConfigSystem(
     const std::string& path)
 {
+    /* Format:
+    'path.to.script': {
+        'frame_0': {
+            'time_': '1.5',
+            'servo_id_3': {
+                'position_': 1.0,
+                'gain_': 1.0,
+            }
+        },
+        'frame_1': {
+            'time_': '3.8',
+            'servo_id_5': {
+                'position_': 2.0,
+                'gain_': 32.0,
+            },
+            'servo_id_19': {
+                'position_': -1.5,
+                'gain_': 0.7,
+            }
+        }
+    }
+    */
+    
+    
+    
     return nullptr;
 }
 
