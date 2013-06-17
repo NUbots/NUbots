@@ -218,8 +218,8 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
     //rotate by 90 degrees and scale by our slowing distance (the circle radius)
     navCircleCentre[0] = targetVector[1]/targetDistance*m_close_approach_distance;
     navCircleCentre[1] = -targetVector[0]/targetDistance*m_close_approach_distance;
-    std::cout << "centre circle: " << navCircleCentre[0] << ", " << navCircleCentre[1] << std::endl;
-    std::cout << "target distance: " << targetDistance << std::endl;
+    //std::cout << "centre circle: " << navCircleCentre[0] << ", " << navCircleCentre[1] << std::endl;
+    //std::cout << "target distance: " << targetDistance << std::endl;
     //if the robot is the other side of the target vector, put the target circle on the other side of the ball
     if (navCircleCentre[0]*posDifference[0]+navCircleCentre[1]*posDifference[1]<0.f) {
         navCircleCentre[0] = -navCircleCentre[0];
@@ -233,14 +233,14 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
     
     //get the distance to the circle centre (this is our triangle hypotenuse)
     vector<float> selfToCircleCentre = NavigationLogic::getPositionDifference(self,navCirclePos);
-    std::cout << "centre circle offset: " << selfToCircleCentre[0] << ", " << selfToCircleCentre[1] << std::endl;
+    //std::cout << "centre circle offset: " << selfToCircleCentre[0] << ", " << selfToCircleCentre[1] << std::endl;
     float circleCentreDistance = std::sqrt(selfToCircleCentre[0]*selfToCircleCentre[0]+selfToCircleCentre[1]*selfToCircleCentre[1]);
     
     //XXX:do a distance check here and switch to line following (maybe)
     if (circleCentreDistance > m_close_approach_distance+m_distance_hysteresis) { //XXX: add hysteresis
         //the opposite side to what we want is our close approach distance (circle radius), so work out the angle of the final side
         float angle = std::asin(m_close_approach_distance/circleCentreDistance);
-        std::cout << "walking to tangent" << std::endl;
+        //std::cout << "walking to tangent" << std::endl;
         //rotate by the angle difference and normalise
         vector<float> direction(3,0);
         direction[0] = (selfToCircleCentre[0]*std::cos(angle)-selfToCircleCentre[1]*std::sin(angle))/circleCentreDistance;
@@ -256,7 +256,7 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
     } else if (ballDistance > m_close_approach_distance or true) { //else follow the circle
         float curvature = (2*3.14159/m_close_approach_distance)*20.; //XXX: (radians/radius) * walkspeed (estimated)
         float angle = curvature + (circleCentreDistance-m_close_approach_distance)/m_close_approach_distance; //we add a correction to turning to account for error in line following
-        std::cout << "walking to ball" << std::endl;
+        //std::cout << "walking to ball" << std::endl;
         //std::cout << "movement angle:" << angle << std::endl;
         //std::cout << "ball distance:" << ballDistance << std::endl;
         //std::cout << "circle distance:" << circleCentreDistance << std::endl;
@@ -279,7 +279,7 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
     //std::cout << "Point Position Offset: (" << move[0] << ", " << move[1] << ", " << move[2] << ")" << std::endl;
     
     //must generate the walk last
-    std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
+    //std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
     current_walk_command = generateWalk(move[0],move[1],move[1]);
     return current_walk_command;
 }

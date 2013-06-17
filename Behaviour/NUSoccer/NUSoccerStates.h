@@ -137,7 +137,7 @@ public:
         
         //printout for states
         //XXX: send to NUbugger
-        
+        /*
         std::cout <<"IS_CLOSEST_TO_BALL" << logic->states[0] << std::endl <<
                     "IS_SECOND_FROM_BALL" << logic->states[1] << std::endl <<
                     "IS_FURTHEST_FROM_BALL" << logic->states[2] << std::endl <<
@@ -162,7 +162,7 @@ public:
                     "JUST_PUT_DOWN" << logic->states[20] << std::endl <<
                     "JUST_UNPENALISED" << logic->states[21] << std::endl <<
                     "GAME_STATE_KICKING_OFF" << logic->states[22] << std::endl;
-        
+        */
         
         //do action selection logic:
         if (logic->states[BehaviourStateLogic::GAME_STATE_PENALISED] or
@@ -173,7 +173,7 @@ public:
             logic->states[BehaviourStateLogic::IS_PICKED_UP]) {
             
             //XXX: send to NUbugger
-            std::cout << "Stopping Movement" << std::endl;
+            //std::cout << "Stopping Movement" << std::endl;
             
             stopMoving( logic, movement, head);
             
@@ -181,7 +181,7 @@ public:
                    not logic->states[BehaviourStateLogic::GAME_STATE_KICKOFF]) {
             
             //XXX: send to NUbugger
-            std::cout << "Going To Start Position (Non Kickoff)" << std::endl;
+            //std::cout << "Going To Start Position (Non Kickoff)" << std::endl;
             
             goToStartDefensePositions( logic, movement, head);
             
@@ -189,7 +189,7 @@ public:
                    logic->states[BehaviourStateLogic::GAME_STATE_KICKOFF]) {
             
             //XXX: send to NUbugger
-            std::cout << "Going To Start Position (Kickoff)" << std::endl;
+            //std::cout << "Going To Start Position (Kickoff)" << std::endl;
             
             goToStartOffensePositions(logic, movement, head);
             
@@ -197,7 +197,7 @@ public:
             
             
             //XXX: send to NUbugger
-            std::cout << "Watching The Ball" << std::endl;
+            //std::cout << "Watching The Ball" << std::endl;
             
             watchTheBall( logic, movement, head);
             
@@ -207,7 +207,7 @@ public:
                    logic->states[BehaviourStateLogic::JUST_UNPENALISED]) {
             
             //XXX: send to NUbugger
-            std::cout << "Looking For Landmarks" << std::endl;
+            //std::cout << "Looking For Landmarks" << std::endl;
             
             doFieldLocalisation( logic, movement, head);
             
@@ -215,7 +215,7 @@ public:
                    not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]) {
             
             //XXX: send to NUbugger
-            std::cout << "Looking For Ball" << std::endl;
+            //std::cout << "Looking For Ball" << std::endl;
             
             doBallLocalisation( logic, movement, head);
             
@@ -224,7 +224,7 @@ public:
                    logic->states[BehaviourStateLogic::IS_CLOSEST_TO_BALL]) {
             
             //XXX: send to NUbugger
-            std::cout << "In Striker Mode" << std::endl;
+            //std::cout << "In Striker Mode" << std::endl;
             
             doBallApproachAndKick( logic, movement, head);
             
@@ -233,24 +233,24 @@ public:
             
             
             //XXX: send to NUbugger
-            std::cout << "In Offensive Support Mode" << std::endl;
+            //std::cout << "In Offensive Support Mode" << std::endl;
             
             //XXX: we need to know if it's not the closest to the ball but is the closest to the offensive position....
-            goToOffensiveSupportPosition(logic,  movement, head);
+            //goToOffensiveSupportPosition(logic,  movement, head);
             
         } else if (logic->states[BehaviourStateLogic::IS_SECOND_FROM_BALL] and
                    not logic->states[BehaviourStateLogic::IS_GOAL_KEEPER]) {
             
             
             //XXX: send to NUbugger
-            std::cout << "In Defensive Support Mode" << std::endl;
+            //std::cout << "In Defensive Support Mode" << std::endl;
             
             //XXX: see above
-            goToDefensiveSupportPosition( logic,  movement, head);
+            //goToDefensiveSupportPosition( logic,  movement, head);
             
         } else {
             //XXX: send to NUbugger
-            std::cout << "I Am Doing Nothing" << std::endl;
+            //std::cout << "I Am Doing Nothing" << std::endl;
         } /*else if () {
             
         } else if () {
