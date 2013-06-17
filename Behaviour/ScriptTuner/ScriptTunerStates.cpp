@@ -79,8 +79,9 @@ void ScriptTunerState::doState()
                 std::cout<< "---------------------------------------------------"<< std::endl;                   
                 
                 m_script_active =true;
-                applyFrameToRobot();
-                while(m_script_active){                    
+                
+                while(m_script_active){ 
+                    applyFrameToRobot();            
                     std::cout<<"Frame number "<<getCurrentFrameNumber()<<" out of " << totalNumberOfFrames()<<" applied."<<std::endl;
                     std::cout<<"Frame duration is "<< durationOfCurrentFrame()<< " seconds."<<std::endl;               
                     std::cout<< "---------------------------------------------------"<< std::endl;
@@ -115,7 +116,7 @@ void ScriptTunerState::editCurrentFrame(){
         if(first_argument.compare("saveframe")==0){
             std::cout << "Saving manually adjusted motor positions. It is recommended all torques are on during saving."<< std::endl;
             saveManuallyMovedMotors();
-            applyFrameToRobot();
+
         }else if(first_argument.compare("savescript")==0){
             if(motors_to_be_saved.size()!=0){
                 std::cout << "!SAVE FAILED - Save manually moved motors to script first!"<< std::endl;
@@ -132,16 +133,16 @@ void ScriptTunerState::editCurrentFrame(){
         }else if(first_argument.compare("next")==0){
             std::cout << "Moving to next frame."<< std::endl;
             moveToFrame(getCurrentFrameNumber()+1);
-            applyFrameToRobot();
+ 
             break;
         }else if(first_argument.compare("newframe")==0){
             std::cout << "Adding new frame."<< std::endl;
             addFrame(second_argument);//second_argument should be time to complete the new frame. New frame should be identical to previous.
-            applyFrameToRobot();
+            
             break;        
         }else if(first_argument.compare("seek")==0){
             interpretSeekCommand(second_argument);
-            applyFrameToRobot();
+            
             break;
         }else if(first_argument.compare("duration")==0){
             setCurrentFrameDuration(second_argument);
@@ -169,11 +170,11 @@ void ScriptTunerState::saveManuallyMovedMotors(){
     MotionScriptFrame* frame = script-> GetCurrentFrame();
     for(int i = 0; i<motors_to_be_saved.size();i++){      
 
-        if(motorTorqueIsOn(motors_to_be_saved[i])){
+        if(motorTorqueIsOff(motors_to_be_saved[i])){
             ScriptJointDescriptor descriptor;
             frame->GetDescriptor(motors_to_be_saved[i],&descriptor);//Sets descriptor pointer
             descriptor.SetPosition(getMotorPosition(motors_to_be_saved[i]));
-            script->AddDescriptor(motors_to_be_saved[i],descriptor);
+            frame->AddDescriptor(motors_to_be_saved[i],descriptor);
         }  else {
             std::cout<< "Motor "<< motors_to_be_saved[i]<< "still has torque off!"<<std::endl;
         }
@@ -185,7 +186,7 @@ bool ScriptTunerState::saveScriptToFile(string filename){
     return MotionScript2013::SaveToConfigSystem(*(script),m_file_path+filename);
 }
 void ScriptTunerState::addFrame(string argument){
-    script->InsertFrame(getCurrentFrameNumber(),>>>>>>>>>>>>>>>>>>>>>>>>>>>>);
+    script->DuplicateFrame(getCurrentFrameNumber());
 }
 
 void ScriptTunerState::interpretSeekCommand(string frame_number_string){
