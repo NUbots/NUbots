@@ -54,10 +54,10 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     }
     
     //decide between heading and bearing
-    if (m_distance_increment > 0) {
+    if (m_distance_increment > 1) {
         walk_bearing = relative_bearing;
-    } else {
-        walk_bearing = relative_heading/2.;
+    } else { //use scaling
+        walk_bearing = (relative_heading*(distance) + relative_bearing*(m_close_approach_distance-distance))/(m_close_approach_distance)/2.;
     }
     
     //check turning hysteresis
@@ -68,9 +68,9 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     } else {
         walk_bearing = 0;
     }*/
-    
-    new_walk[0] = walk_speed*1./(1.+std::exp(-2.*walk_bearing*walk_bearing));
-    new_walk[2] = walk_bearing;
+    float g = 1./(1.+std::exp(-2.*walk_bearing*walk_bearing));
+    new_walk[0] = walk_speed*g;
+    new_walk[2] = walk_bearing*(1.-g);
     return new_walk;
 }
 

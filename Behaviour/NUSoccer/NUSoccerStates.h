@@ -145,6 +145,7 @@ public:
                     "BALL_IS_SEEN" << logic->states[7] << std::endl <<
                     "TEAM_SEES_BALL" << logic->states[8] << std::endl <<
                     "BALL_IS_LOST" << logic->states[9] << std::endl <<
+                    "GAME_STATE_INITIAL" << logic->states[23] << std::endl <<
                     "GAME_STATE_PENALISED" << logic->states[10] << std::endl <<
                     "GAME_STATE_SET" << logic->states[11] << std::endl <<
                     "GAME_STATE_READY" << logic->states[12] << std::endl <<
@@ -197,8 +198,7 @@ public:
             
             watchTheBall( logic, movement, head);
             
-        } else if (logic->states[BehaviourStateLogic::IS_FALLEN_OVER] or
-                   logic->states[BehaviourStateLogic::IS_GETTING_UP] or
+        } else if (logic->states[BehaviourStateLogic::IS_GETTING_UP] or
                    logic->states[BehaviourStateLogic::JUST_GOT_UP] or
                    logic->states[BehaviourStateLogic::JUST_PUT_DOWN] or 
                    logic->states[BehaviourStateLogic::JUST_UNPENALISED]) {
@@ -264,6 +264,15 @@ public:
             
         }*/
         
+        /*
+        //XXX: messy
+        if (m_provider->singleChestClick()) {
+            while (m_game_info->getCurrentState() != GameInformation::PenalisedState) {
+                Blackboard->GameInfo->doManualStateChange();
+            }
+        } else if (m_provider->doubleChestClick() or m_provider->tripleChestClick()) {
+            //XXX: save images
+        }*/
         
         
         
