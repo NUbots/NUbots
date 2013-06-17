@@ -429,6 +429,9 @@ void MainWindow::createConnections()
     connect(LogReader,SIGNAL(GameInfoChanged(const GameInformation*)),gameInfoDisplay, SLOT(setGameInfo(const GameInformation*)));
     connect(LogReader,SIGNAL(TeamInfoChanged(const TeamInformation*)),teamInfoDisplay, SLOT(setTeamInfo(const TeamInformation*)));
 
+    connect(LogReader,SIGNAL(sensorDataChanged(NUSensorsData*)), this, SLOT(updateCalibrationDisplay(NUSensorsData*)));
+
+
     connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)),&glManager, SLOT(setRawImage(const NUImage*)));
     connect(LogReader,SIGNAL(rawImageChanged(const NUImage*)), frameInfo, SLOT(setRawImage(const NUImage*)));
 
@@ -449,6 +452,8 @@ void MainWindow::createConnections()
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),virtualRobot, SLOT(setSensorData(NUSensorsData*)));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorDisplay, SLOT(SetSensorData(NUSensorsData*)));
     connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)),sensorCalibrationTool, SLOT(setSensorData(NUSensorsData*)));
+    connect(VisionStreamer,SIGNAL(sensorsDataChanged(NUSensorsData*)), this, SLOT(updateCalibrationDisplay(NUSensorsData*)));
+
     // Setup navigation control enabling/disabling
     connect(LogReader,SIGNAL(firstFrameAvailable(bool)),firstFrameAction, SLOT(setEnabled(bool)));
     connect(LogReader,SIGNAL(nextFrameAvailable(bool)),nextFrameAction, SLOT(setEnabled(bool)));
@@ -784,7 +789,6 @@ void MainWindow::imageFrameChanged(int currFrame, int totalFrames)
     message.append("/");
     message.append(QString::number(totalFrames));
     statusBar()->showMessage(message, 10000);
-    glManager.writeExpectedViewToDisplay(LogReader->GetSensorData(), sensorCalibrationTool->Calibration(), GLDisplay::ExpectedProjection);
 }
 
 void MainWindow::selectFrame()
@@ -807,6 +811,11 @@ void MainWindow::SetSensorCalibration(SensorCalibrationSettings* new_calibration
     {
         glManager.writeExpectedViewToDisplay(LogReader->GetSensorData(), new_calibration, GLDisplay::ExpectedProjection);
     }
+}
+
+void MainWindow::updateCalibrationDisplay(NUSensorsData *data)
+{
+    glManager.writeExpectedViewToDisplay(data, sensorCalibrationTool->Calibration(), GLDisplay::ExpectedProjection);
 }
 
 int MainWindow::getNumMdiWindowType(const QString& windowType)
