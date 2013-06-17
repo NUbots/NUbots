@@ -120,7 +120,7 @@ void ScriptKick2013::doKick()
 
 void ScriptKick2013::stop() 
 { 
-    #warning This could cause issues. The original stop() method only 'stops' the kick if it's alreafy finished...
+    #warning This could cause issues. The original stop() method only 'stops' the kick if it's alreafy finished...'
     kill(); 
 }
 void ScriptKick2013::kill() 

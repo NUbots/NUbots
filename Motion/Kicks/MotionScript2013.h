@@ -13,10 +13,11 @@ public:
     void SetServoId(int servo_id) { servo_id_ = servo_id; }
     void SetPosition(float position) { position_ = position; }
     void SetGain(float gain) { gain_ = gain; }
-    void SetDisable( bool disable) { disable_=disable; }
+    void SetDisable( bool disable) { disable_= disable; }
     int GetServoId() { return servo_id_; }
     float GetPosition() { return position_; }
     float GetGain() { return gain_; }
+    bool GetDisable() { return disable_; }
 
 private:
     int servo_id_;

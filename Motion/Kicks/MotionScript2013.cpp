@@ -135,6 +135,14 @@ void MotionScript2013::RemoveFrame(int index)
     script_frames_.erase(it + index);
 }
 
+void MotionScript2013::DuplicateFrame(int index)
+{
+    auto* current_frame = script_frames_[current_frame_index_];
+
+    auto* new_frame = new MotionScriptFrame(*current_frame);
+
+    InsertFrame(index, current_frame);
+}
 
 NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
 {
@@ -175,11 +183,15 @@ void MotionScriptFrame::ApplyToRobot(float script_start_time, NUActionatorsData*
     for(auto key_value : joints_)
     {
         auto& joint = key_value.second;
-        actionators_data->add(
-            MapServoIdToNUDataId(joint.GetServoId()),
-            target_time,
-            joint.GetPosition(),
-            joint.GetGain());
+
+        if(!joint.GetDisable())
+        {
+            actionators_data->add(
+                MapServoIdToNUDataId(joint.GetServoId()),
+                target_time,
+                joint.GetPosition(),
+                joint.GetGain());
+        }
     }
 }
 
@@ -208,3 +220,4 @@ bool MotionScriptFrame::GetDescriptor(int servo_id, ScriptJointDescriptor* descr
         return false;
     }
 }
+
