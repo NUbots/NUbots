@@ -927,10 +927,10 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     float right_y = -200.0;
     float right_heading = PI/2;
 
-    float front_x = -300.0/4.0f;
-    float centre_x = -300.0/2.0f;
+    float front_x = -300.0/6.0f;
+    float centre_x = -300.0/3.0f;
     float centre_heading = 0;
-    float back_x = -300*(3.0f/4.0f);
+    float back_x = -300*(2.0f/6.0f);
     float goal_line_x = -300;
     if (team_colour == GameInformation::RedTeam)
     {   // flip the invert the x for the red team and set the heading to PI
@@ -967,7 +967,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     temp.setMean(mean_matrix(back_x, left_y, left_heading));
     positions.push_back(temp);
 
-    // Postition 5
+    /*// Postition 5
     temp.setMean(mean_matrix(2*centre_x, 95.0f, centre_heading));
     positions.push_back(temp);
 
@@ -982,7 +982,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
 
     // Postition 8
     temp.setMean(mean_matrix(2*centre_x, 0.0f, centre_heading));
-    positions.push_back(temp);
+    positions.push_back(temp);*/
 
     InitialiseModels(positions);
     initBallModel(m_ball_filter);
