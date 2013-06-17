@@ -15,6 +15,31 @@ MotionScript2013::~MotionScript2013()
 MotionScript2013* MotionScript2013::LoadFromConfigSystem(
     const std::string& path)
 {
+    /* Format:
+    'path.to.script': {
+        'frame_0': {
+            'time_': '1.5',
+            'servo_id_3': {
+                'position_': 1.0,
+                'gain_': 1.0,
+            }
+        },
+        'frame_1': {
+            'time_': '3.8',
+            'servo_id_5': {
+                'position_': 2.0,
+                'gain_': 32.0,
+            },
+            'servo_id_19': {
+                'position_': -1.5,
+                'gain_': 0.7,
+            }
+        }
+    }
+    */
+    
+    
+    
     return nullptr;
 }
 
@@ -110,6 +135,14 @@ void MotionScript2013::RemoveFrame(int index)
     script_frames_.erase(it + index);
 }
 
+void MotionScript2013::DuplicateFrame(int index)
+{
+    auto* current_frame = script_frames_[current_frame_index_];
+
+    auto* new_frame = new MotionScriptFrame(*current_frame);
+
+    InsertFrame(index, current_frame);
+}
 
 NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
 {
@@ -150,11 +183,15 @@ void MotionScriptFrame::ApplyToRobot(float script_start_time, NUActionatorsData*
     for(auto key_value : joints_)
     {
         auto& joint = key_value.second;
-        actionators_data->add(
-            MapServoIdToNUDataId(joint.GetServoId()),
-            target_time,
-            joint.GetPosition(),
-            joint.GetGain());
+
+        if(!joint.GetDisable())
+        {
+            actionators_data->add(
+                MapServoIdToNUDataId(joint.GetServoId()),
+                target_time,
+                joint.GetPosition(),
+                joint.GetGain());
+        }
     }
 }
 
@@ -183,3 +220,4 @@ bool MotionScriptFrame::GetDescriptor(int servo_id, ScriptJointDescriptor* descr
         return false;
     }
 }
+

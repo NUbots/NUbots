@@ -13,7 +13,7 @@ public:
     void SetServoId(int servo_id) { servo_id_ = servo_id; }
     void SetPosition(float position) { position_ = position; }
     void SetGain(float gain) { gain_ = gain; }
-    void SetDisable( bool disable) { disable_=disable; }
+    void SetDisable( bool disable) { disable_= disable; }
     int GetServoId() { return servo_id_; }
     float GetPosition() { return position_; }
     float GetGain() { return gain_; }
@@ -66,7 +66,6 @@ class MotionScript2013
 public:
     MotionScript2013() : kick_enable_time_(0),
                          script_start_time_(0),
-                         script_end_time_(0),
                          current_frame_index_(0) { }
     ~MotionScript2013();
 
@@ -113,10 +112,13 @@ public:
     //! Rmoves the frame at the given index from the script
     void RemoveFrame(int index);
 
+    //! Creates a copy of the frame at the given index, and inserts it before
+    //! the given index.
+    void DuplicateFrame(int index);
+
 private:
     float kick_enable_time_;
     float script_start_time_;
-    float script_end_time_;
 
     int current_frame_index_;
 

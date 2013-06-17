@@ -118,7 +118,11 @@ void ScriptKick2013::doKick()
     }
 }
 
-void ScriptKick2013::stop() { kill(); }
+void ScriptKick2013::stop() 
+{ 
+    #warning This could cause issues. The original stop() method only 'stops' the kick if it's alreafy finished...'
+    kill(); 
+}
 void ScriptKick2013::kill() 
 { 
     current_script_ = nullptr;
@@ -247,8 +251,8 @@ void ScriptKick2013::loadKickboxes()
     std::cout << " y_max_left_side = " << y_max_left_side << std::endl;
 
     right_kick_area_ = Rectangle(x_min_right_forward, x_max_right_forward, y_min_right_forward, y_max_right_forward);
-    left_kick_area_ = Rectangle(x_min_left_forward, x_max_left_forward, y_min_left_forward, y_max_left_forward); //HACK: move right kick box three cm to right
+    left_kick_area_  = Rectangle( x_min_left_forward,  x_max_left_forward,  y_min_left_forward,  y_max_left_forward); //HACK: move right kick box three cm to right
     side_right_kick_area_ = Rectangle(x_min_right_side, x_max_right_side, y_min_right_side, y_max_right_side); //HACK: kick box less wide for side kicks
-    side_left_kick_area_ = Rectangle(x_min_left_side, x_max_left_side, y_min_left_side, y_max_left_side);
+    side_left_kick_area_  = Rectangle( x_min_left_side,  x_max_left_side,  y_min_left_side,  y_max_left_side);
     return;
 }
