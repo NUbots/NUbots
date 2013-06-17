@@ -43,6 +43,7 @@
 #include "Infrastructure/Jobs/MotionJobs/HeadNodJob.h"
 #include "Infrastructure/Jobs/MotionJobs/MotionFreezeJob.h"
 #include "Infrastructure/GameInformation/GameInformation.h"
+#include "Infrastructure/Jobs/VisionJobs/SaveImagesJob.h"
 
 #include "debug.h"
 
@@ -52,9 +53,10 @@
 class NUSoccerSubState : public BehaviourState
 {
 public:
-    NUSoccerSubState(NUSoccerProvider* provider){m_provider = provider;}
+    NUSoccerSubState(NUSoccerProvider* provider){m_provider = provider; saving_images = false;}
 protected:
     NUSoccerProvider* m_provider;
+    bool saving_images;
 };
 
 // -----------------------------------------------------------------------------------------------------------------------
@@ -67,6 +69,7 @@ class NUSoccerState : public NUSoccerSubState
 
 //all private functions are simple soccer behaviours
 private:
+    
     
     void stopMoving(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) { //this is the freeze for penalised/pickup/initial
         movement->stop();
@@ -101,9 +104,9 @@ private:
     
     void doBallApproachAndKick(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         
-        //movement->kick();
         movement->goToBall();
-        head->prioritiseBall();        
+        head->prioritiseBall();
+        movement->kick();        
     }
     
     void goToOffensiveSupportPosition(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
@@ -264,15 +267,33 @@ public:
             
         }*/
         
-        /*
+        
         //XXX: messy
         if (m_provider->singleChestClick()) {
-            while (m_game_info->getCurrentState() != GameInformation::PenalisedState) {
-                Blackboard->GameInfo->doManualStateChange();
+            if (logic->states[BehaviourStateLogic::GAME_STATE_PENALISED]) {
+                while (m_game_info->getCurrentState() != GameInformation::PlayingState)
+                    Blackboard->GameInfo->doManualStateChange();
+            } else {
+                while (m_game_info->getCurrentState() != GameInformation::PenalisedState)
+                    Blackboard->GameInfo->doManualStateChange();
             }
-        } else if (m_provider->doubleChestClick() or m_provider->tripleChestClick()) {
-            //XXX: save images
-        }*/
+            
+            if (logic->states[BehaviourStateLogic::GAME_STATE_PENALISED]) {
+                Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Sensors->GetTimestamp(), "play_soccer.wav");
+            } else {
+                Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Sensors->GetTimestamp(), "penalised.wav");
+            }
+            
+        } else if (m_provider->doubleChestClick() or m_provider->tripleChestClick() or m_provider->longChestClick()) {
+            saving_images = not saving_images;
+            Blackboard->Jobs->addVisionJob(new SaveImagesJob(saving_images, true));
+            
+            if (saving_images) {
+                Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Sensors->GetTimestamp(), "start_saving_images.wav");
+            } else {
+                Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Sensors->GetTimestamp(), "stop_saving_images.wav");
+            }
+        }
         
         
         
