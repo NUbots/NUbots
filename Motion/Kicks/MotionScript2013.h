@@ -29,7 +29,7 @@ private:
 class MotionScriptFrame
 {
 public:
-    MotionScriptFrame() : time_(0) {}
+    MotionScriptFrame() : duration_(0) {}
 
     //! Schedules all joint poitions in this frame using the given actionators.
     void ApplyToRobot(float script_start_time, NUActionatorsData* actionators_data);
@@ -37,9 +37,6 @@ public:
     //! Returns the NUData id_t corresponding to the servo motor with the given
     //! id.
     static NUData::id_t MapServoIdToNUDataId(int sensor_id);
-
-    float GetTime() { return time_; }
-    float SetTime(float new_time) { time_ = new_time; }
 
     //! Adds a new descriptor for the servo with the given id, or replaces
     //! the current one.
@@ -54,11 +51,20 @@ public:
     //! Returns whether the operation succeeded.
     bool GetDescriptor(int servo_id, ScriptJointDescriptor* descriptor);
 
+    //! Returns the duration of this frame
+    float GetDuration() { return duration_; }
+    //! Sets this frame's duration
+    float SetDuration(float duration)
+    {
+        if()
+        duration_ = duration;
+    }
+
 private:
     std::unordered_map<int, ScriptJointDescriptor> joints_;
 
-    //! Time since the start of the motion script
-    float time_;
+    //! This frame's duration, in milliseconds
+    float duration_;
 };
 
 class MotionScript2013
@@ -99,6 +105,10 @@ public:
 
     //! Returns the actual time at which the next frame should begin
     float GetNextFrameTime(float current_time);
+
+    //! Returns the duration of the entire script
+    //! (i.e. the sum of the duration of its frames)
+    float GetScriptDuration();
 
     int GetFrameCount();
 
