@@ -95,6 +95,7 @@ public:
 
     const std::vector<ColourSegment>& getHorizontalTransitions(COLOUR_CLASS colour_class);
     const std::vector<ColourSegment>& getVerticalTransitions(COLOUR_CLASS colour_class);
+    std::vector<ColourSegment> getAllTransitions(COLOUR_CLASS colour_class);
     const map<COLOUR_CLASS, std::vector<ColourSegment> >& getHorizontalTransitionsMap() const;
     const map<COLOUR_CLASS, std::vector<ColourSegment> >& getVerticalTransitionsMap() const;
     

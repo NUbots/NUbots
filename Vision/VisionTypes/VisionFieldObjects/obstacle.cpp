@@ -8,11 +8,12 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-Obstacle::Obstacle(Point position, double width, double height)
+Obstacle::Obstacle(Point position, double width, double height, COLOUR_CLASS colour)
 {
     m_id = OBSTACLE;
     m_location.screenCartesian = position;
     m_size_on_screen = Vector2<double>(width, height);
+    m_colour = colour;
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
 //        Vector2<float> bottomcentre = Vector2<float>(position.x, position.y);

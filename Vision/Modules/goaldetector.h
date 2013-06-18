@@ -6,6 +6,7 @@
 
 #include "Vision/VisionTypes/quad.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
+#include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/VisionTypes/coloursegment.h"
 #include <list>
@@ -20,6 +21,8 @@ public:
     GoalDetector();
     virtual ~GoalDetector();
     virtual std::vector<Goal> run() = 0;
+
+    virtual void relabel(std::vector<Goal>& goals, std::vector<Obstacle> obstacles, COLOUR_CLASS team_colour, COLOUR_CLASS opponent_colour) const;
 
 protected:
     //checks

@@ -10,7 +10,7 @@ class Goal : public VisionFieldObject
 {
 public:
        
-    Goal(VFO_ID id=INVALID, const Quad& corners=Quad());
+    Goal(VFO_ID id=INVALID, const Quad& corners=Quad(), bool known=false);
 
     void setBase(Point base);
 
@@ -51,7 +51,10 @@ private:
       @return the distance to the goal in cm.
       */
 //    double distanceToGoal(double bearing, double elevation);
-    
+
+public:
+    bool m_known;
+
 private:
     Quad m_corners;                 //! @variable pixel locations of the corners
 
