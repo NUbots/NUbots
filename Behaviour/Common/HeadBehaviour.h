@@ -117,6 +117,12 @@ private:
     //Policy Parameters
     float prioritise_localisation_policy_bias;
     float prioritise_ball_policy_bias;
+
+    //NEWER JOB SYSTEM VAR
+    std::vector<Object*> m_objects_to_view;
+    int m_current_action;
+
+
     /*! @brief
     */
     bool ObjectNotSeen();
@@ -150,6 +156,7 @@ private:
 
     /*! @brief Gives a vector of ones which acts as a basis for indicating available objects to look at  */
 
+    void takeAction(int action);
 
 public:
 
@@ -169,6 +176,7 @@ public:
     void update();
 
     /*! @brief dispatchHeadJob methods. There are three, one for each object type.
+    These are old. Pending deletion.
     */
     void dispatchHeadJob(MobileObject *ObjectToTrack);
     
