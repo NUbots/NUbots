@@ -119,16 +119,16 @@ void Transformer::calculateRepresentationsFromPixelLocation(std::vector<NUPoint>
 
 void Transformer::calculateRepresentationsFromGroundCartesianLocation(NUPoint& pt) const
 {
-    //           (top down view)                (side view)
-    //                     /|                  __________
-    //                    / |                 |\e
-    //                   /  |                 | \
-    //      ground_dist /   |                 |  \
-    //                 /    | y        neck_h |   \ neck_dist
-    //                /     |                 |    \
-    //               /      |                 |     \
-    //              /B______|                 |______\
-    //                   x                   ground_dist
+    //           (top down view)                (side view)         //
+    //                     /|                  __________           //
+    //                    / |                 |\e                   //
+    //                   /  |                 | \                   //
+    //      ground_dist /   |                 |  \                  //
+    //                 /    | y        neck_h |   \ neck_dist       //
+    //                /     |                 |    \                //
+    //               /      |                 |     \               //
+    //              /B______|                 |______\              //
+    //                   x                   ground_dist            //
 
     // B - bearing
     // e - elevation

@@ -39,6 +39,9 @@ public:
     SensorCalibration(): m_body_angle_offset(), m_camera_angle_offset(), m_neck_position_offset(), m_body_position_offset(), m_camera_position_offset()
     {
         // Darwin default
+        m_neck_position_offset.x = 0.0;
+        m_neck_position_offset.y = 0.0;
+        m_neck_position_offset.z = 5.05;
         m_camera_position_offset.x = 3.32f;
         m_camera_position_offset.y = 0.f;
         m_camera_position_offset.z = 3.44f;

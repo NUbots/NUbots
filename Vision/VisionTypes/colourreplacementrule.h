@@ -46,7 +46,9 @@ public:
       @return Whether it is a match.
       */
     bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
-    
+
+    bool oneWayMatch(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
+
     /*!
       Returns the replacement method (before, after or split) for this rule.
        - before - the middle segment is given the colour of the first.
