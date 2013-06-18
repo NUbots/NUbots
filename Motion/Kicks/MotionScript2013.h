@@ -87,6 +87,8 @@ public:
 
     static MotionScript2013* LoadOldScript(const std::string& path);
 
+    static MotionScript2013* InitialiseScriptFromOld(std::vector<std::vector<double> > times, std::vector<std::vector<float> > positions, std::vector<std::vector<float> > gains);
+
     static bool SaveToConfigSystem(
         const MotionScript2013& script,
         const std::string& path);

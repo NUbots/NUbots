@@ -70,7 +70,7 @@ int MapRowIndexToServoId(int index)
          case(19): return Robot::JointData::ID_R_ANKLE_PITCH;    
         default: {
             std::cout   << __PRETTY_FUNCTION__
-                        << ": Invalid index: " << sensor_id << ";"
+                        << ": Invalid index: " << index << ";"
                         << std::endl;
             return -1;
         }
@@ -154,30 +154,30 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
     }
     */
 
-    ConfigSystem::ConfigManager* config = Blackboard->Config;
+    // ConfigSystem::ConfigManager* config = Blackboard->Config;
 
-    bool success;
+    // bool success;
 
-    int num_frames;
-    // success = config->ReadValue<int>(path, "num_frames", &num_frames);
-    config->ReadValue(path, path, nullptr);
+    // int num_frames;
+    // // success = config->ReadValue<int>(path, "num_frames", &num_frames);
+    // config->ReadValue(path, path, nullptr);
 
-    if(!success)
-        return nullptr;
+    // if(!success)
+    //     return nullptr;
 
-    auto* script = new MotionScript2013();
+    // auto* script = new MotionScript2013();
 
-    for(int i = 0; i < num_frames; i++)
-    {
-        auto* frame = new MotionScriptFrame();
+    // for(int i = 0; i < num_frames; i++)
+    // {
+    //     auto* frame = new MotionScriptFrame();
 
-        script->AddFrame(frame);
-    }
+    //     script->AddFrame(frame);
+    // }
     
     return nullptr;
 }
 
-static MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path){
+MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path){
     //Method modified from Motion/Tools/MotionScript.h
     std::ifstream file(path);
     if (!file.is_open())
@@ -189,18 +189,18 @@ static MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path
     {
         MotionFileTools::toFloat(file);
         MotionFileTools::toBool(file);
-        labels = MotionFileTools::toStringVector(file);
+        auto labels = MotionFileTools::toStringVector(file);
         if (labels.empty())
         {
             errorlog << "MotionScript::load(). Unable to load " << path << " the file labels are invalid " << std::endl;
             return false;
         }
-        playspeed = 1.0;
+        float playspeed = 1.0;
         
         int numjoints = labels.size() - 1;
-        times = vector<vector<double> >(numjoints, vector<double>());
-        positions = vector<vector<float> >(numjoints, vector<float>());
-        gains = vector<vector<float> >(numjoints, vector<float>());
+        std::vector<vector<double> > times = vector<vector<double> >(numjoints, vector<double>());
+        std::vector<vector<float> > positions = vector<vector<float> >(numjoints, vector<float>());
+        std::vector<vector<float> > gains = vector<vector<float> >(numjoints, vector<float>());
         
         float time;
         vector<vector<float> > row;
@@ -242,23 +242,24 @@ static MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path
 
 }
 
-MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<float> times, vector<vector<float> > positions, vector<vector<float> > gains){
+MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<vector<double> > times, vector<vector<float> > positions, vector<vector<float> > gains){
     
     MotionScript2013* script = new MotionScript2013();
     for(int frame_number = 0; frame_number<times.size();frame_number++){
 
-        MotionScriptFrame new_frame();
+        auto* new_frame = new MotionScriptFrame();
 
         for(int motor_index; motor_index<positions[frame_number].size();motor_index++){
 
-            ScriptJointDescriptor descriptor();
+            ScriptJointDescriptor descriptor;
             descriptor.SetServoId(MapRowIndexToServoId(motor_index));
-            descriptor.SetPosition(MapRowIndexToServoId(motor_index),positions[frame_number][motor_index]);
-            descriptor.SetPosition(MapRowIndexToServoId(motor_index),gains[frame_number][motor_index]);
-            new_frame.AddDescriptor(MapRowIndexToServoId(motor_index),descriptor);
+            descriptor.SetPosition(positions[frame_number][motor_index]);
+            descriptor.SetGain(gains[frame_number][motor_index]);
+            new_frame->AddDescriptor(MapRowIndexToServoId(motor_index),descriptor);
+            new_frame->SetDuration(times[motor_index][0]);
 
         }
-        script->AddFrame(&new_frame);
+        script->AddFrame(new_frame);
     }
     return script;
 
