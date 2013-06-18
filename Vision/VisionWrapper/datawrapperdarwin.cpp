@@ -375,6 +375,7 @@ bool DataWrapper::updateFrame()
         errorlog << "DataWrapperDarwin - updateFrame() - failed to get head yaw from NUSensorsData" << std::endl;
     if(!sensor_data->getOrientation(orientation))
         errorlog << "DataWrapperDarwin - updateFrame() - failed to get orientation from NUSensorsData" << std::endl;
+    m_orientation = Vector3<float>(orientation.at(0), orientation.at(1), orientation.at(2));
 
     vector<float> left, right;
     if(sensor_data->get(NUSensorsData::LLegTransform, left) and sensor_data->get(NUSensorsData::RLegTransform, right))
