@@ -70,7 +70,7 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     }*/
     float g = 1./(1.+std::exp(-2.*walk_bearing*walk_bearing));
     new_walk[0] = walk_speed*g;
-    new_walk[2] = walk_bearing*(1.-g);
+    new_walk[2] = walk_bearing*(1.-0.5*g);
     return new_walk;
 }
 
@@ -157,6 +157,7 @@ std::vector<float> Navigation::goToPoint(Object* fieldObject, float heading) {
     current_command = GOTOOBJECT;
     
     //must generate the walk last
+    std::cout << "Unfiltered Walk Command (gotopoint): (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
     current_walk_command = generateWalk(move[0],move[1],move[2]);
     return current_walk_command;
 }
@@ -183,7 +184,7 @@ std::vector<float> Navigation::goToPoint(const std::vector<float> point) {
     //must generate the walk last
     float turn = mathGeneral::normaliseAngle(atan2(move[1],move[0])-self[2]);
     float dist = std::sqrt(move[0]*move[0]+move[1]*move[1]);
-    //std::cout << "Unfiltered Walk Command: (" << dist << ", " << turn << ", " << mathGeneral::normaliseAngle(point[2]-self[2]) << ")" << std::endl;
+    std::cout << "Unfiltered Walk Command: (" << dist << ", " << turn << ", " << mathGeneral::normaliseAngle(point[2]-self[2]) << ")" << std::endl;
     current_walk_command = generateWalk( dist,turn, mathGeneral::normaliseAngle(point[2]-self[2]) );
     return current_walk_command;
 }
@@ -279,7 +280,7 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
     //std::cout << "Point Position Offset: (" << move[0] << ", " << move[1] << ", " << move[2] << ")" << std::endl;
     
     //must generate the walk last
-    //std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
+    std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
     current_walk_command = generateWalk(move[0],move[1],move[1]);
     return current_walk_command;
 }
@@ -304,7 +305,7 @@ void Navigation::update() {
         }
     
     //set the walkjob
-    //std::cout << "Sending Walk Command: (" << current_walk_command[0] << ", " << current_walk_command[1] << ", " << current_walk_command[2] << ")" << std::endl;
+    std::cout << "Sending Walk Command: (" << current_walk_command[0] << ", " << current_walk_command[1] << ", " << current_walk_command[2] << ")" << std::endl;
     Blackboard->Jobs->addMotionJob(new WalkJob(current_walk_command[0], current_walk_command[1], current_walk_command[2]));
 }
 
