@@ -636,6 +636,7 @@ void HeadBehaviour::lookForFieldObjects(){
 */
 void HeadBehaviour::update(){
     makeVisionChoice(current_policy);
+
 }
 
 

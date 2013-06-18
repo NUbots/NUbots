@@ -1,3 +1,4 @@
+#include <string>
 #include <stdexcept>
 #include <unordered_map>
 #include <iostream>
@@ -7,6 +8,118 @@
 #include "Framework/darwin/Framework/include/JointData.h"
 #include "Motion/Tools/MotionFileTools.h"
 #include "debug.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "ConfigSystem/ConfigManager.h"
+
+
+NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
+{
+    switch(sensor_id)
+    {
+        case Robot::JointData::ID_R_SHOULDER_PITCH: return NUData::RShoulderPitch;
+        case Robot::JointData::ID_L_SHOULDER_PITCH: return NUData::LShoulderPitch;
+        case Robot::JointData::ID_R_SHOULDER_ROLL:  return NUData::RShoulderRoll;
+        case Robot::JointData::ID_L_SHOULDER_ROLL:  return NUData::LShoulderRoll;
+        case Robot::JointData::ID_R_ELBOW:          return NUData::RElbowPitch;
+        case Robot::JointData::ID_L_ELBOW:          return NUData::LElbowPitch;
+        case Robot::JointData::ID_R_HIP_YAW:        return NUData::RHipYaw;
+        case Robot::JointData::ID_L_HIP_YAW:        return NUData::LHipYaw;
+        case Robot::JointData::ID_R_HIP_ROLL:       return NUData::RHipRoll;
+        case Robot::JointData::ID_L_HIP_ROLL:       return NUData::LHipRoll;
+        case Robot::JointData::ID_R_HIP_PITCH:      return NUData::RHipPitch;
+        case Robot::JointData::ID_L_HIP_PITCH:      return NUData::LHipPitch;
+        case Robot::JointData::ID_R_KNEE:           return NUData::RKneePitch;
+        case Robot::JointData::ID_L_KNEE:           return NUData::LKneePitch;
+        case Robot::JointData::ID_R_ANKLE_PITCH:    return NUData::RAnklePitch;
+        case Robot::JointData::ID_L_ANKLE_PITCH:    return NUData::LAnklePitch;
+        case Robot::JointData::ID_R_ANKLE_ROLL:     return NUData::RAnkleRoll;
+        case Robot::JointData::ID_L_ANKLE_ROLL:     return NUData::LAnkleRoll;
+        case Robot::JointData::ID_HEAD_PAN:         return NUData::HeadYaw;
+        case Robot::JointData::ID_HEAD_TILT:        return NUData::HeadPitch;
+        default: {
+            std::cout << __PRETTY_FUNCTION__ 
+                      << " - Invalid sensor_id: " << sensor_id << ";";
+            return NUData::id_t();
+        }
+    }
+}
+
+int MapRowIndexToServoId(int index)
+{
+    switch(index)
+    {
+         case( 0): return Robot::JointData::ID_HEAD_TILT;        
+         case( 1): return Robot::JointData::ID_HEAD_PAN;         
+         case( 2): return Robot::JointData::ID_L_SHOULDER_ROLL;  
+         case( 3): return Robot::JointData::ID_L_SHOULDER_PITCH; 
+         case( 4): return Robot::JointData::ID_L_ELBOW;          
+         case( 5): return Robot::JointData::ID_R_SHOULDER_ROLL;  
+         case( 6): return Robot::JointData::ID_R_SHOULDER_PITCH; 
+         case( 7): return Robot::JointData::ID_R_ELBOW;          
+         case( 8): return Robot::JointData::ID_L_HIP_ROLL;       
+         case( 9): return Robot::JointData::ID_L_HIP_PITCH;      
+         case(10): return Robot::JointData::ID_L_HIP_YAW;        
+         case(11): return Robot::JointData::ID_L_KNEE;           
+         case(12): return Robot::JointData::ID_L_ANKLE_ROLL;     
+         case(13): return Robot::JointData::ID_L_ANKLE_PITCH;    
+         case(14): return Robot::JointData::ID_R_HIP_ROLL;       
+         case(15): return Robot::JointData::ID_R_HIP_PITCH;      
+         case(16): return Robot::JointData::ID_R_HIP_YAW;        
+         case(17): return Robot::JointData::ID_R_KNEE;           
+         case(18): return Robot::JointData::ID_R_ANKLE_ROLL;     
+         case(19): return Robot::JointData::ID_R_ANKLE_PITCH;    
+        default: {
+            std::cout   << __PRETTY_FUNCTION__
+                        << ": Invalid index: " << sensor_id << ";"
+                        << std::endl;
+            return -1;
+        }
+    }
+}
+
+void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
+{
+    for(auto key_value : joints_)
+    {
+        auto& joint = key_value.second;
+
+        if(!joint.GetDisable())
+        {
+            actionators_data->add(
+                MapServoIdToNUDataId(joint.GetServoId()),
+                duration_,
+                joint.GetPosition(),
+                joint.GetGain());
+        }
+    }
+}
+
+void MotionScriptFrame::AddDescriptor(int servo_id, ScriptJointDescriptor descriptor)
+{
+    joints_[servo_id] = descriptor;
+}
+
+void MotionScriptFrame::DeleteDescriptor(int servo_id)
+{
+    joints_.erase(servo_id);
+}
+
+bool MotionScriptFrame::GetDescriptor(int servo_id, ScriptJointDescriptor* descriptor)
+{
+    if(descriptor == nullptr)
+        return nullptr;
+
+    try
+    {
+        *descriptor =  joints_.at(servo_id);
+        return true;
+    }
+    catch(std::out_of_range)
+    {
+        return false;
+    }
+}
+
 
 MotionScript2013::~MotionScript2013()
 {
@@ -19,6 +132,7 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
 {
     /* Format:
     'path.to.script': {
+        'num_frames': 2,
         'frame_0': {
             'time_': '1.5',
             'servo_id_3': {
@@ -39,6 +153,26 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
         }
     }
     */
+
+    ConfigSystem::ConfigManager* config = Blackboard->Config;
+
+    bool success;
+
+    int num_frames;
+    // success = config->ReadValue<int>(path, "num_frames", &num_frames);
+    config->ReadValue(path, path, nullptr);
+
+    if(!success)
+        return nullptr;
+
+    auto* script = new MotionScript2013();
+
+    for(int i = 0; i < num_frames; i++)
+    {
+        auto* frame = new MotionScriptFrame();
+
+        script->AddFrame(frame);
+    }
     
     return nullptr;
 }
@@ -238,112 +372,7 @@ float MotionScript2013::GetScriptDuration()
     return script_duration;
 }
 
-NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
+void MotionScript2013::AddFrame(MotionScriptFrame* frame)
 {
-    switch(sensor_id)
-    {
-        case Robot::JointData::ID_R_SHOULDER_PITCH: return NUData::RShoulderPitch;
-        case Robot::JointData::ID_L_SHOULDER_PITCH: return NUData::LShoulderPitch;
-        case Robot::JointData::ID_R_SHOULDER_ROLL:  return NUData::RShoulderRoll;
-        case Robot::JointData::ID_L_SHOULDER_ROLL:  return NUData::LShoulderRoll;
-        case Robot::JointData::ID_R_ELBOW:          return NUData::RElbowPitch;
-        case Robot::JointData::ID_L_ELBOW:          return NUData::LElbowPitch;
-        case Robot::JointData::ID_R_HIP_YAW:        return NUData::RHipYaw;
-        case Robot::JointData::ID_L_HIP_YAW:        return NUData::LHipYaw;
-        case Robot::JointData::ID_R_HIP_ROLL:       return NUData::RHipRoll;
-        case Robot::JointData::ID_L_HIP_ROLL:       return NUData::LHipRoll;
-        case Robot::JointData::ID_R_HIP_PITCH:      return NUData::RHipPitch;
-        case Robot::JointData::ID_L_HIP_PITCH:      return NUData::LHipPitch;
-        case Robot::JointData::ID_R_KNEE:           return NUData::RKneePitch;
-        case Robot::JointData::ID_L_KNEE:           return NUData::LKneePitch;
-        case Robot::JointData::ID_R_ANKLE_PITCH:    return NUData::RAnklePitch;
-        case Robot::JointData::ID_L_ANKLE_PITCH:    return NUData::LAnklePitch;
-        case Robot::JointData::ID_R_ANKLE_ROLL:     return NUData::RAnkleRoll;
-        case Robot::JointData::ID_L_ANKLE_ROLL:     return NUData::LAnkleRoll;
-        case Robot::JointData::ID_HEAD_PAN:         return NUData::HeadYaw;
-        case Robot::JointData::ID_HEAD_TILT:        return NUData::HeadPitch;
-        default: {
-            std::cout << __PRETTY_FUNCTION__ 
-                      << " - Invalid sensor_id: " << sensor_id << ";";
-            return NUData::id_t();
-        }
-    }
-}
-
-
-int MapRowIndexToServoId(int index)
-{
-    switch(index)
-    {
-         case( 0): return Robot::JointData::ID_HEAD_TILT;        
-         case( 1): return Robot::JointData::ID_HEAD_PAN;         
-         case( 2): return Robot::JointData::ID_L_SHOULDER_ROLL;  
-         case( 3): return Robot::JointData::ID_L_SHOULDER_PITCH; 
-         case( 4): return Robot::JointData::ID_L_ELBOW;          
-         case( 5): return Robot::JointData::ID_R_SHOULDER_ROLL;  
-         case( 6): return Robot::JointData::ID_R_SHOULDER_PITCH; 
-         case( 7): return Robot::JointData::ID_R_ELBOW;          
-         case( 8): return Robot::JointData::ID_L_HIP_ROLL;       
-         case( 9): return Robot::JointData::ID_L_HIP_PITCH;      
-         case(10): return Robot::JointData::ID_L_HIP_YAW;        
-         case(11): return Robot::JointData::ID_L_KNEE;           
-         case(12): return Robot::JointData::ID_L_ANKLE_ROLL;     
-         case(13): return Robot::JointData::ID_L_ANKLE_PITCH;    
-         case(14): return Robot::JointData::ID_R_HIP_ROLL;       
-         case(15): return Robot::JointData::ID_R_HIP_PITCH;      
-         case(16): return Robot::JointData::ID_R_HIP_YAW;        
-         case(17): return Robot::JointData::ID_R_KNEE;           
-         case(18): return Robot::JointData::ID_R_ANKLE_ROLL;     
-         case(19): return Robot::JointData::ID_R_ANKLE_PITCH;    
-        default: {
-            std::cout   << __PRETTY_FUNCTION__
-                        << ": Invalid index: " << sensor_id << ";"
-                        << std::endl;
-            return -1;
-        }
-    }
-}
-
-
-void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
-{
-    for(auto key_value : joints_)
-    {
-        auto& joint = key_value.second;
-
-        if(!joint.GetDisable())
-        {
-            actionators_data->add(
-                MapServoIdToNUDataId(joint.GetServoId()),
-                duration_,
-                joint.GetPosition(),
-                joint.GetGain());
-        }
-    }
-}
-
-void MotionScriptFrame::AddDescriptor(int servo_id, ScriptJointDescriptor descriptor)
-{
-    joints_[servo_id] = descriptor;
-}
-
-void MotionScriptFrame::DeleteDescriptor(int servo_id)
-{
-    joints_.erase(servo_id);
-}
-
-bool MotionScriptFrame::GetDescriptor(int servo_id, ScriptJointDescriptor* descriptor)
-{
-    if(descriptor == nullptr)
-        return nullptr;
-
-    try
-    {
-        *descriptor =  joints_.at(servo_id);
-        return true;
-    }
-    catch(std::out_of_range)
-    {
-        return false;
-    }
+    script_frames_.push_back(frame);
 }
