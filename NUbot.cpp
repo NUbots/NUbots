@@ -418,10 +418,11 @@ void NUbot::run()
     double previoussimtime;
     #if defined(TARGET_IS_NAOWEBOTS)
         NAOWebotsPlatform* webots = (NAOWebotsPlatform*) m_platform;
+        int timestep = int(webots->getBasicTimeStep());
     #else
         DarwinWebotsPlatform* webots = (DarwinWebotsPlatform*) m_platform;
+        int timestep = int(4*webots->getBasicTimeStep());
     #endif /*TARGET_IS_NAOWEBOTS*/
-    int timestep = int(webots->getBasicTimeStep());
     while (true)
     {
         previoussimtime = Platform->getTime();

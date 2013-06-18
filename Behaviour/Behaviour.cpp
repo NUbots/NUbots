@@ -26,6 +26,7 @@
 #include "BehaviourProvider.h"
 
 #include "MiscBehaviours/SelectBehaviourProvider.h"
+#include "NUSoccer/NUSoccerProvider.h"
 #include "Soccer/SoccerProvider.h"
 #include "MiscBehaviours/VisionCalibrationProvider.h"
 #include "ChaseBall/ChaseBallProvider.h"
@@ -42,6 +43,7 @@
 #include "GoalKeeperTest/TestKeeperProvider.h"
 #include "FootSlipTest/SlipTestProvider.h"
 #include "HeadBehaviourTester/HBTProvider.h"
+#include "NUSoccer/NUSoccerProvider.h"
 
 
 
@@ -68,15 +70,17 @@ Behaviour::Behaviour()
         m_behaviour = new IKTestProvider(this);
         //m_behaviour = new SoccerProvider(this);
     #elif defined(TARGET_IS_DARWINWEBOTS)
-        //m_behaviour = new SoccerProvider(this);
-        m_behaviour = new ZombieProvider(this);
+        m_behaviour = new SoccerProvider(this);
+        //m_behaviour = new ZombieProvider(this);
     #elif defined(TARGET_IS_BEAR)
         m_behaviour = new BearModeProvider(this);
     #elif defined(TARGET_IS_CYCLOID)
         m_behaviour = new QuietStanceProvider(this);
     #else
         //m_behaviour = new ScriptedPoseProvider(this);
-        m_behaviour = new SoccerProvider(this);
+        //m_behaviour = new SoccerProvider(this);
+        m_behaviour = new NUSoccerProvider(this);
+        //m_behaviour = new ScriptedPoseProvider
         //m_behaviour = new ZombieProvider(this);
         //m_behaviour = new HBTProvider(this);
         //m_behaviour = new RagdollProvider(this);

@@ -48,13 +48,6 @@ FOREACH (loop_var ${NUBOT_DIRS})
     INCLUDE(../${loop_var}/cmake/sources.cmake)
 ENDFOREACH (loop_var ${NUBOT_DIRS})
 
-# Include some libraries!
-LIST(APPEND NUBOT_LINK_LIBRARIES boost_filesystem-mt)
-LIST(APPEND NUBOT_LINK_LIBRARIES boost_iostreams-mt)
-LIST(APPEND NUBOT_LINK_LIBRARIES zmq)
-LIST(APPEND NUBOT_LINK_LIBRARIES protobuf)
-#LIST(APPEND NUBOT_LINK_LIBRARIES boost_date_time)
-
 # Specify c++11
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 

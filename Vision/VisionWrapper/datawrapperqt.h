@@ -149,10 +149,10 @@ private:
 
     //! Used when reading from strm
     std::string streamname;
-    ifstream imagestrm;
+    std::ifstream imagestrm;
     bool using_sensors;
     std::string sensorstreamname;
-    ifstream sensorstrm;
+    std::ifstream sensorstrm;
 
     //! Frame info
     int numFramesDropped;

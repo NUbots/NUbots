@@ -27,9 +27,11 @@ class VisionFieldObject : public Publishable, public Printable
 public:
 	VisionFieldObject();
 
-	virtual ~VisionFieldObject()
-	{
-	}
+    virtual ~VisionFieldObject() {}
+
+    VFO_ID getID() const {return m_id;}
+    std::string getName() const	{return VFOName(m_id);}
+    bool isValid() const {return valid;}
 
     const NUPoint& getLocation() const {return m_location;}
     //! @brief returns the screen location in pixels (relative to the top left).
@@ -40,11 +42,6 @@ public:
     Vector2<double> getScreenSize() const { return m_size_on_screen; }
     //! @brief returns the field position relative to the robot.
     virtual Vector3<double> getRelativeFieldCoords() const {return m_location.neckRelativeRadial;}
-
-	std::string getName() const
-	{
-		return VFOName(m_id);
-	}
 
 	virtual double findScreenError(VisionFieldObject* other) const = 0;
 	virtual double findGroundError(VisionFieldObject* other) const = 0;

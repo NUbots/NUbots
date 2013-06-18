@@ -128,18 +128,18 @@ public:
             case 2:
                 std::cout << "Testing Head Behaviour - lookAtBall"<< std::endl;
                 head_behaviour->lookAtBall();
-                break;
-            case 3:
-                std::cout << "Testing Head Behaviour - lookForBall"<< std::endl;
-                head_behaviour->lookForBall();
-                break;
-            case 4:
-                std::cout << "Testing Head Behaviour - lookForFieldObjects"<< std::endl;
-                head_behaviour->lookForFieldObjects();
-                break;
-        }
-        head_behaviour->update();
-    };
+            break;
+        case 3:
+            std::cout << "Testing Head Behaviour - lookForBall"<< std::endl;
+            head_behaviour->lookForBall();
+            break;
+        case 4:
+            std::cout << "Testing Head Behaviour - lookForFieldObjects"<< std::endl;
+            head_behaviour->lookForFieldObjects();
+            break;
+    }
+    head_behaviour->update();
+};
 };
 
 #endif

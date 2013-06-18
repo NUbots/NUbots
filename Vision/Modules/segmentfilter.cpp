@@ -258,24 +258,12 @@ void SegmentFilter::joinMatchingSegments(std::vector<ColourSegment> &line) const
 void SegmentFilter::loadTransitionRules(std::string filename)
 {
     //load the horizontal rules
-    std::string temp_filename = filename + "_h.txt";
+    std::string temp_filename = filename + ".txt";
     std::ifstream input(temp_filename.c_str());
     
     if(input.good()) {
         input >> rules_h;
-    }
-    else {
-        debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << std::endl;
-    }
-    input.close();
-
-
-    //load the vertical rules
-    temp_filename = filename + "_v.txt";
-    input.open(temp_filename.c_str());
-
-    if(input.good()) {
-        input >> rules_v;
+        rules_v = rules_h;
     }
     else {
         debug << "SegmentFilter::loadTransitionRules - failed to read from " << temp_filename << std::endl;
@@ -284,12 +272,12 @@ void SegmentFilter::loadTransitionRules(std::string filename)
 
     if(rules_h.size()  == 0 || rules_v.size() == 0){
         std::cout << std::endl
-             << "=========================WARNING=========================" << std::endl
-             << __PRETTY_FUNCTION__ << ":"                                  << std::endl
-             << "  " << filename << "  _v.txt and/or _h.txt are empty!"     << std::endl 
-             << ""                                                          << std::endl
-             << "  The robot may exhibit blindness."                        << std::endl
-             << "=========================WARNING=========================" << std::endl
+             << "=================WARNING=================" << std::endl
+             << __PRETTY_FUNCTION__ << ":"                  << std::endl
+             << "  " << filename << ".txt is empty!"        << std::endl
+             << ""                                          << std::endl
+             << "  The robot may exhibit blindness."        << std::endl
+             << "=================WARNING=================" << std::endl
              << std::endl;
     }
     //DEBUG

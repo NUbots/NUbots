@@ -54,6 +54,12 @@ public:
     bool singleRightBumperClick();
     bool doubleRightBumperClick();
     
+    bool doubleChestClick();
+    bool tripleChestClick();
+    void removeStiffness();
+    bool quadChestClick();
+    void restartBehaviour();
+    
     bool longClick(const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime);
     bool nClick(unsigned int n, const boost::circular_buffer<float>& times, const boost::circular_buffer<float>& durations, float& previoustime);
 protected:
@@ -62,11 +68,6 @@ protected:
     virtual void doBehaviour() = 0;
     virtual void postProcess();
 private:
-    bool doubleChestClick();
-    bool tripleChestClick();
-    void removeStiffness();
-    bool quadChestClick();
-    void restartBehaviour();
     
     void updateButtonValues();
 

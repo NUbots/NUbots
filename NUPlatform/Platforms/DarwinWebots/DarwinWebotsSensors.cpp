@@ -46,7 +46,7 @@ std::vector<std::string> DarwinWebotsSensors::m_servo_names(temp_servo_names, te
  
     @param platform a pointer to the nuplatform (this is required because webots needs to have nuplatform inherit from the Robot class)
  */
-DarwinWebotsSensors::DarwinWebotsSensors(DarwinWebotsPlatform* platform) : m_simulation_step(int(platform->getBasicTimeStep()))
+DarwinWebotsSensors::DarwinWebotsSensors(DarwinWebotsPlatform* platform) : m_simulation_step(int(4*platform->getBasicTimeStep()))
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
     debug << "DarwinWebotsSensors::DarwinWebotsSensors()" << std::endl;
@@ -73,13 +73,17 @@ void DarwinWebotsSensors::getSensorsFromWebots()
     m_gyro = m_platform->getGyro("gyro");
     // Get the gps if avaliable
     if (GPS::exists("gps"))
+    {
+        std::cout << "Has GPS" << std::endl;
         m_gps = m_platform->getGPS("gps");
+    }
     else
         m_gps = NULL;
     
     // Get the compass if avaliable
     if (Compass::exists("compass"))
     {
+        std::cout << "Has Compass" << std::endl;
         m_compass = m_platform->getCompass("compass");
     }
     else
@@ -137,8 +141,8 @@ void DarwinWebotsSensors::copyFromHardwareCommunications()
     //copyFromDistance();
     //copyFromFootSole();
     //copyFromFootBumper();
-    //copyFromGPS();
-    //copyFromCompass();
+    copyFromGPS();
+    copyFromCompass();
 }
 
 /*! @brief Copies the joint data into m_data
@@ -190,7 +194,7 @@ void DarwinWebotsSensors::copyFromAccelerometerAndGyro()
     //for (size_t i=0; i<numdimensions; i++)
     accelerometerdata[0] = (centrevalue-(buffer[1]))/VALUETOACCEL_RATIO;
 	accelerometerdata[1] = (centrevalue-(buffer[0]))/VALUETOACCEL_RATIO; 
-	accelerometerdata[2] = (centrevalue-(buffer[2]))/VALUETOACCEL_RATIO;  
+    accelerometerdata[2] = -(centrevalue-(buffer[2]))/VALUETOACCEL_RATIO;
 
 
 	// convert from m/s/s to cm/s/s, and swap sign as it is incorrect in webots
