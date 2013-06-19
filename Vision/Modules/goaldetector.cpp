@@ -34,7 +34,7 @@ void GoalDetector::mergeClose(std::list<Quad> &posts, double width_multiple_to_m
             // if the posts overlap
             // or if their centres are horizontally closer than the largest widths multiplied by width_multiple_to_merge
             if(a->overlapsHorizontally(*b) ||
-               abs( a->getCentre().x - b->getCentre().x ) <= std::max(a->getAverageWidth(), b->getAverageWidth())*width_multiple_to_merge) {
+               std::abs( a->getCentre().x - b->getCentre().x ) <= std::max(a->getAverageWidth(), b->getAverageWidth())*width_multiple_to_merge) {
                 // get outer lines
                 Point tl( std::min(a->getTopLeft().x, b->getTopLeft().x)         , std::min(a->getTopLeft().y, b->getTopLeft().y) ),
                       tr( std::max(a->getTopRight().x, b->getTopRight().x)       , std::min(a->getTopRight().y, b->getTopRight().y) ),

@@ -193,9 +193,9 @@ std::vector<BodyJointCommand *> WalkProvider::getGaitTransitionCommand(){
     int max_index = -1;
     for(unsigned int i = 0; i < gaitJoints->size(); i++){
 
-        if (max_change < abs(gaitJoints->at(i) - curJoints.at(i+HEAD_JOINTS)))
+        if (max_change < std::abs(gaitJoints->at(i) - curJoints.at(i+HEAD_JOINTS)))
             max_index = i;
-        max_change = max(max_change,
+        max_change = std::max(max_change,
 						 fabs(gaitJoints->at(i) - curJoints.at(i+HEAD_JOINTS)));
     }
 

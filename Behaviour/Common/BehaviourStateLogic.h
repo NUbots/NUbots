@@ -64,7 +64,32 @@ public:
         timeGameStarted = 0.0;
         timePutDown = -20000.0;
         timeUnPenalised = -20000.0;
-        m_GoalKeeper = 1;
+        m_GoalKeeper = -1;
+        states[IS_CLOSEST_TO_BALL] = false;
+        states[IS_SECOND_FROM_BALL] = false;
+        states[IS_FURTHEST_FROM_BALL] = false;
+        states[IS_FALLEN_OVER] = false;
+        states[IS_GETTING_UP] = false;
+        states[JUST_GOT_UP] = false;
+        states[IS_PICKED_UP] = false;
+        states[BALL_IS_SEEN] = false;
+        states[TEAM_SEES_BALL] = false;
+        states[BALL_IS_LOST] = false;
+        states[GAME_STATE_PENALISED] = false;
+        
+        states[GAME_STATE_INITIAL] = false;
+        states[GAME_STATE_SET] = false;
+        states[GAME_STATE_READY] = false;
+        states[GAME_STATE_KICKOFF] = false;
+        states[GAME_STATE_END] = false;
+        states[IS_KICKING] = false;
+        states[IS_APPROACHING_BALL] = false;
+        states[IS_IN_POSITION] = false;
+        states[IS_GOAL_KEEPER] = false;
+        states[GAME_STATE_PLAYING] = false;
+        states[JUST_PUT_DOWN] = false;
+        states[JUST_UNPENALISED] = false;
+        states[GAME_STATE_KICKING_OFF] = false;
     }
 
     static BehaviourStateLogic* getInstance();
@@ -83,7 +108,7 @@ public:
         TEAM_SEES_BALL = 8,
         BALL_IS_LOST = 9,
         GAME_STATE_PENALISED = 10,
-        GAME_STATE_POSITIONING = 11,
+        GAME_STATE_SET = 11,
         GAME_STATE_READY = 12,
         GAME_STATE_KICKOFF = 13,
         GAME_STATE_END = 14,
@@ -94,7 +119,8 @@ public:
         GAME_STATE_PLAYING = 19,
         JUST_PUT_DOWN = 20,
         JUST_UNPENALISED = 21,
-        GAME_STATE_KICKING_OFF = 22
+        GAME_STATE_KICKING_OFF = 22,
+        GAME_STATE_INITIAL = 23
     };
     
     double timeSinceFallen() {
@@ -134,7 +160,6 @@ public:
     
     //update everything.
     void update();
-    
     
 };
 

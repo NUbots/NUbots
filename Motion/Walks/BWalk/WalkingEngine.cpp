@@ -954,7 +954,7 @@ void WalkingEngine::generateJointRequest()
     reachable = m_ik->calculateLegJoints(Pose2Matrix(bodyToLeftAnkle), Pose2Matrix(bodyToRightAnkle), joint_positions);
     RobotModel robotModel(joint_positions, theMassCalibration);
 
-    if(abs(bodyToComOffset.x) < 0.05 && abs(bodyToComOffset.y) < 0.05 && abs(bodyToComOffset.z) < 0.05)
+    if(std::abs(bodyToComOffset.x) < 0.05 && std::abs(bodyToComOffset.y) < 0.05 && std::abs(bodyToComOffset.z) < 0.05)
     {
       break;
     }
@@ -1113,7 +1113,7 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
       case stand:
 //        if(theMotionRequest.motion == MotionRequest::bike && (nextSupportLeg == left) == theMotionRequest.bikeRequest.mirror)
 //          break;
-        if(abs(lastStepSize.translation.x) > p.speedMax.translation.x * 0.5f)
+        if(std::abs(lastStepSize.translation.x) > p.speedMax.translation.x * 0.5f)
           break;
         next.type = toStand;
         next.te = p.te;
@@ -1204,8 +1204,8 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
 //            requestedSpeed = Pose2D(walkTarget.rotation * 2.f / p.odometryUpcomingScale.rotation, walkTarget.translation.x * 2.f / p.odometryUpcomingScale.translation.x, walkTarget.translation.y * 2.f / p.odometryUpcomingScale.translation.y);
 
 //            // x-speed clipping to handle limited deceleration
-//            //float maxSpeedForTargetX = sqrt(2.f * abs(requestedSpeed.translation.x) * p.speedMaxChangeX);
-//            //if(abs(requestedSpeed.translation.x) > maxSpeedForTargetX)
+//            //float maxSpeedForTargetX = sqrt(2.f * std::abs(requestedSpeed.translation.x) * p.speedMaxChangeX);
+//            //if(std::abs(requestedSpeed.translation.x) > maxSpeedForTargetX)
 //            //requestedSpeed.translation.x = requestedSpeed.translation.x >= 0.f ? maxSpeedForTargetX : -maxSpeedForTargetX;
 //          }
 //          else if(theMotionRequest.walkRequest.mode == WalkRequest::percentageSpeedMode)
@@ -1236,16 +1236,16 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
 //          // x-speed clipping to handle limited deceleration
 //          if(theMotionRequest.walkRequest.mode == WalkRequest::targetMode)
 //          {
-//            float maxSpeedForTargetX = sqrt(2.f * abs(requestedSpeed.translation.x) * p.speedMaxChange.translation.x);
-//            if(abs(requestedSpeed.translation.x) > maxSpeedForTargetX)
+//            float maxSpeedForTargetX = sqrt(2.f * std::abs(requestedSpeed.translation.x) * p.speedMaxChange.translation.x);
+//            if(std::abs(requestedSpeed.translation.x) > maxSpeedForTargetX)
 //              requestedSpeed.translation.x = requestedSpeed.translation.x >= 0.f ? maxSpeedForTargetX : -maxSpeedForTargetX;
 
-//            float maxSpeedForTargetY = sqrt(2.f * abs(requestedSpeed.translation.y) * p.speedMaxChange.translation.y);
-//            if(abs(requestedSpeed.translation.y) > maxSpeedForTargetY)
+//            float maxSpeedForTargetY = sqrt(2.f * std::abs(requestedSpeed.translation.y) * p.speedMaxChange.translation.y);
+//            if(std::abs(requestedSpeed.translation.y) > maxSpeedForTargetY)
 //              requestedSpeed.translation.y = requestedSpeed.translation.y >= 0.f ? maxSpeedForTargetY : -maxSpeedForTargetY;
 
-//            float maxSpeedForTargetR = sqrt(2.f * abs(requestedSpeed.rotation) * p.speedMaxChange.rotation);
-//            if(abs(requestedSpeed.rotation) > maxSpeedForTargetR)
+//            float maxSpeedForTargetR = sqrt(2.f * std::abs(requestedSpeed.rotation) * p.speedMaxChange.rotation);
+//            if(std::abs(requestedSpeed.rotation) > maxSpeedForTargetR)
 //              requestedSpeed.rotation = requestedSpeed.rotation >= 0.f ? maxSpeedForTargetR : -maxSpeedForTargetR;
 //          }
 
@@ -1255,11 +1255,11 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
           requestedSpeed.rotation = Range<>(lastSelectedSpeed.rotation - p.speedMaxChange.rotation, lastSelectedSpeed.rotation + p.speedMaxChange.rotation).limit(requestedSpeed.rotation);
 
           // clip requested walk speed to the computed max speeds
-          if(abs(requestedSpeed.rotation) > maxSpeed.rotation)
+          if(std::abs(requestedSpeed.rotation) > maxSpeed.rotation)
             requestedSpeed.rotation = requestedSpeed.rotation > 0.f ? maxSpeed.rotation : -maxSpeed.rotation;
-          if(abs(requestedSpeed.translation.x) > maxSpeed.translation.x)
+          if(std::abs(requestedSpeed.translation.x) > maxSpeed.translation.x)
             requestedSpeed.translation.x = requestedSpeed.translation.x > 0.f ? maxSpeed.translation.x : -maxSpeed.translation.x;
-          if(abs(requestedSpeed.translation.y) > maxSpeed.translation.y)
+          if(std::abs(requestedSpeed.translation.y) > maxSpeed.translation.y)
             requestedSpeed.translation.y = requestedSpeed.translation.y > 0.f ? maxSpeed.translation.y : -maxSpeed.translation.y;
 
 //          // clip requested walk speed to a target walk speed limit
@@ -1282,14 +1282,14 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
             {
               const float xxSpeedFactor = (p.teAtFullSpeedX - p.te) / (p.speedMax.translation.x * 0.5f);
               const float yySpeedFactor = (p.teAtFullSpeedY - p.te) / p.speedMax.translation.y;
-              next.te += abs(next.s.translation.y) * yySpeedFactor;
-              next.te += abs(accClippedStepSizeX) * xxSpeedFactor;
+              next.te += std::abs(next.s.translation.y) * yySpeedFactor;
+              next.te += std::abs(accClippedStepSizeX) * xxSpeedFactor;
               next.tb = -next.te;
             }
 
             {
               float xSpeedFactor = (p.walkRefXAtFullSpeedX -  p.walkRefX) / (p.speedMax.translation.x * 0.5f);
-              next.r.x += abs(accClippedStepSizeX) * xSpeedFactor;
+              next.r.x += std::abs(accClippedStepSizeX) * xSpeedFactor;
               next.rXLimit.max = next.r.x + p.walkRefXSoftLimit.max;
               next.rXLimit.min = next.r.x + p.walkRefXSoftLimit.min;
             }
@@ -1299,18 +1299,18 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
               float walkRefYLimitMin = p.walkRefYLimit.min;
               {
                 float xSpeedFactor = (p.walkRefYLimitAtFullSpeedX.max -  p.walkRefYLimit.max) / (p.speedMax.translation.x * 0.5f);
-                walkRefYLimitMax += abs(accClippedStepSizeX) * xSpeedFactor;
+                walkRefYLimitMax += std::abs(accClippedStepSizeX) * xSpeedFactor;
               }
               {
                 float xSpeedFactor = (p.walkRefYLimitAtFullSpeedX.min -  p.walkRefYLimit.min) / (p.speedMax.translation.x * 0.5f);
-                walkRefYLimitMin += abs(accClippedStepSizeX) * xSpeedFactor;
+                walkRefYLimitMin += std::abs(accClippedStepSizeX) * xSpeedFactor;
               }
 
               float ySpeedFactor = (p.walkRefYAtFullSpeedY -  p.walkRefY) / p.speedMax.translation.y;
               float xSpeedFactor = (p.walkRefYAtFullSpeedX -  p.walkRefY) / (p.speedMax.translation.x * 0.5f);
-              next.r.y += (abs(requestedSpeed.translation.y) * ySpeedFactor + abs(accClippedStepSizeX) * xSpeedFactor) * (-sign);
-              next.rYLimit.max = abs(next.r.y) + walkRefYLimitMax;
-              next.rYLimit.min = abs(next.r.y) + walkRefYLimitMin;
+              next.r.y += (std::abs(requestedSpeed.translation.y) * ySpeedFactor + std::abs(accClippedStepSizeX) * xSpeedFactor) * (-sign);
+              next.rYLimit.max = std::abs(next.r.y) + walkRefYLimitMax;
+              next.rYLimit.min = std::abs(next.r.y) + walkRefYLimitMin;
             }
           }
 
@@ -1345,18 +1345,18 @@ void WalkingEngine::generateNextStepSize(SupportLeg nextSupportLeg, StepType las
           float xSpeedFactor = (p.walkLiftOffsetAtFullSpeedY.x - p.walkLiftOffset.x) / p.speedMax.translation.y;
           float ySpeedFactor = (p.walkLiftOffsetAtFullSpeedY.y - p.walkLiftOffset.y) / p.speedMax.translation.y;
           float zSpeedFactor = (p.walkLiftOffsetAtFullSpeedY.z - p.walkLiftOffset.z) / p.speedMax.translation.y;
-          next.l.x += abs(next.s.translation.y) * xSpeedFactor;
-          next.l.y += abs(next.s.translation.y) * ySpeedFactor * sign;
-          next.l.z += abs(next.s.translation.y) * zSpeedFactor;
+          next.l.x += std::abs(next.s.translation.y) * xSpeedFactor;
+          next.l.y += std::abs(next.s.translation.y) * ySpeedFactor * sign;
+          next.l.z += std::abs(next.s.translation.y) * zSpeedFactor;
         }
 
         {
           float xSpeedFactor = (p.walkAntiLiftOffsetAtFullSpeedY.x - p.walkAntiLiftOffset.x) / p.speedMax.translation.y;
           float ySpeedFactor = (p.walkAntiLiftOffsetAtFullSpeedY.y - p.walkAntiLiftOffset.y) / p.speedMax.translation.y;
           float zSpeedFactor = (p.walkAntiLiftOffsetAtFullSpeedY.z - p.walkAntiLiftOffset.z) / p.speedMax.translation.y;
-          next.al.x += abs(next.s.translation.y) * xSpeedFactor;
-          next.al.y += abs(next.s.translation.y) * ySpeedFactor * sign;
-          next.al.z += abs(next.s.translation.y) * zSpeedFactor;
+          next.al.x += std::abs(next.s.translation.y) * xSpeedFactor;
+          next.al.y += std::abs(next.s.translation.y) * ySpeedFactor * sign;
+          next.al.z += std::abs(next.s.translation.y) * zSpeedFactor;
         }
       }
 
@@ -1558,8 +1558,8 @@ void WalkingEngine::ObservedPendulumPlayer::applyCorrection(const Vector3<>& lef
     observerMeasurementDeviation = p.observerMeasurementDeviationWhenInstable;
   else if(next.s.translation.x > 0.f)
   {
-    observerMeasurementDeviation.x += (p.observerMeasurementDeviationAtFullSpeedX.x - p.observerMeasurementDeviation.x) * abs(next.s.translation.x) / (p.speedMax.translation.x * 0.5f);
-    observerMeasurementDeviation.y += (p.observerMeasurementDeviationAtFullSpeedX.y - p.observerMeasurementDeviation.y) * abs(next.s.translation.x) / (p.speedMax.translation.x * 0.5f);
+    observerMeasurementDeviation.x += (p.observerMeasurementDeviationAtFullSpeedX.x - p.observerMeasurementDeviation.x) * std::abs(next.s.translation.x) / (p.speedMax.translation.x * 0.5f);
+    observerMeasurementDeviation.y += (p.observerMeasurementDeviationAtFullSpeedX.y - p.observerMeasurementDeviation.y) * std::abs(next.s.translation.x) / (p.speedMax.translation.x * 0.5f);
   }
   covPlusSensorCov[0][0] += observerMeasurementDeviation[0]*observerMeasurementDeviation[0];
   covPlusSensorCov[1][1] += observerMeasurementDeviation[1]*observerMeasurementDeviation[1];

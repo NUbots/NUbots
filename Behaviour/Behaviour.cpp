@@ -26,6 +26,7 @@
 #include "BehaviourProvider.h"
 
 #include "MiscBehaviours/SelectBehaviourProvider.h"
+#include "NUSoccer/NUSoccerProvider.h"
 #include "Soccer/SoccerProvider.h"
 #include "MiscBehaviours/VisionCalibrationProvider.h"
 #include "ChaseBall/ChaseBallProvider.h"
@@ -79,6 +80,7 @@ Behaviour::Behaviour()
         //m_behaviour = new ScriptedPoseProvider(this);
         //m_behaviour = new SoccerProvider(this);
         m_behaviour = new ScriptTunerProvider(this);
+        //m_behaviour = new NUSoccerProvider(this);
         //m_behaviour = new ScriptedPoseProvider
         //m_behaviour = new ZombieProvider(this);
         //m_behaviour = new HBTProvider(this);

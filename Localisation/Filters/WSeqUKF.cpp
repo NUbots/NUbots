@@ -234,6 +234,8 @@ std::ostream& WSeqUKF::writeStreamBinary (std::ostream& output) const
     m_model->writeStreamBinary(output);
     m_unscented_transform.writeStreamBinary(output);
     m_estimate.writeStreamBinary(output);
+    output.write((char*)&m_weighting_enabled, sizeof(m_weighting_enabled));
+    output.write((char*)&m_filter_weight, sizeof(m_filter_weight));
     return output;
 }
 
@@ -243,6 +245,8 @@ std::istream& WSeqUKF::readStreamBinary (std::istream& input)
     m_unscented_transform.readStreamBinary(input);
     MultivariateGaussian temp;
     temp.readStreamBinary(input);
+    input.read((char*)&m_weighting_enabled, sizeof(m_weighting_enabled));
+    input.read((char*)&m_filter_weight, sizeof(m_filter_weight));
     initialiseEstimate(temp);
     return input;
 }
