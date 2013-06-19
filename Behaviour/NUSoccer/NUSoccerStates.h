@@ -236,7 +236,7 @@ public:
             //std::cout << "In Offensive Support Mode" << std::endl;
             
             //XXX: we need to know if it's not the closest to the ball but is the closest to the offensive position....
-            //goToOffensiveSupportPosition(logic,  movement, head);
+            goToOffensiveSupportPosition(logic,  movement, head);
             
         } else if (logic->states[BehaviourStateLogic::IS_SECOND_FROM_BALL] and
                    not logic->states[BehaviourStateLogic::IS_GOAL_KEEPER]) {
@@ -246,7 +246,7 @@ public:
             //std::cout << "In Defensive Support Mode" << std::endl;
             
             //XXX: see above
-            //goToDefensiveSupportPosition( logic,  movement, head);
+            goToDefensiveSupportPosition( logic,  movement, head);
             
         } else {
             //XXX: send to NUbugger
