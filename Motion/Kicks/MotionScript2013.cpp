@@ -11,7 +11,6 @@
 #include "Infrastructure/NUBlackboard.h"
 #include "ConfigSystem/ConfigManager.h"
 
-
 NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
 {
     switch(sensor_id)
@@ -133,49 +132,99 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
 {
     /* Format:
     'path.to.script': {
+        'script_format_version': 0,
         'num_frames': 2,
         'frame_0': {
-            'time_': '1.5',
+            'duration_': '1.5',
             'servo_id_3': {
                 'position_': 1.0,
-                'gain_': 1.0,
-            }
-        },
-        'frame_1': {
-            'time_': '3.8',
-            'servo_id_5': {
-                'position_': 2.0,
-                'gain_': 32.0,
-            },
-            'servo_id_19': {
-                'position_': -1.5,
-                'gain_': 0.7,
+                'gain_': 1.0
             }
         }
     }
     */
 
-    // ConfigSystem::ConfigManager* config = Blackboard->Config;
+    ConfigSystem::ConfigManager* config = Blackboard->Config;
 
-    // bool success;
+    bool success;
 
-    // int num_frames;
-    // // success = config->ReadValue<int>(path, "num_frames", &num_frames);
-    // config->ReadValue(path, path, nullptr);
+    long script_format_version;
+    success = config->ReadValue(path, "script_format_version", &script_format_version);
 
-    // if(!success)
-    //     return nullptr;
+    long num_frames;
+    success = config->ReadValue(path, "num_frames", &num_frames);
 
-    // auto* script = new MotionScript2013();
+    if(!success)
+        return nullptr;
 
-    // for(int i = 0; i < num_frames; i++)
-    // {
-    //     auto* frame = new MotionScriptFrame();
+    auto* script = new MotionScript2013();
 
-    //     script->AddFrame(frame);
-    // }
+    for(int i = 0; i < num_frames; i++)
+    {
+        auto* frame = MotionScriptFrame::LoadFromConfigSystem(path, i);
+        script->AddFrame(frame);
+    }
     
-    return nullptr;
+    return script;
+}
+
+MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
+    const std::string& path,
+    int frame_number)
+{
+    ConfigSystem::ConfigManager* config = Blackboard->Config;
+    
+    std::stringstream frame_path_ss;
+    frame_path_ss << path << "frame_" << frame_number;
+
+    double duration;
+    bool success = config->ReadValue(frame_path_ss.str(), "duration", &duration);
+
+    if(!success)
+        return nullptr;
+    
+    auto* frame = new MotionScriptFrame();
+    frame->SetDuration(duration);
+
+    for(int j = 0; j < Robot::JointData::NUMBER_OF_JOINTS; j++)
+    {
+        ScriptJointDescriptor descriptor;
+        success = MotionScriptFrame::LoadJointFromConfigSystem(
+            frame_path_ss.str(), j, &descriptor);
+
+        if(!success)
+            continue;
+
+        frame->AddDescriptor(j, descriptor);
+    }
+
+    return frame;
+}
+
+bool MotionScriptFrame::LoadJointFromConfigSystem(
+        const std::string& frame_path,
+        int servo_id,
+        ScriptJointDescriptor* descriptor)
+{
+    ConfigSystem::ConfigManager* config = Blackboard->Config;
+    
+    std::stringstream joint_path_ss;
+    joint_path_ss << frame_path << "joint_" << servo_id;
+
+    double position;
+    bool success = config->ReadValue(joint_path_ss.str(), "position", &position);
+
+    double gain;
+    success = config->ReadValue(joint_path_ss.str(), "gain", &gain);
+
+    if(!success)
+        return false;
+
+    descriptor->SetServoId(servo_id);
+    descriptor->SetPosition(position);
+    descriptor->SetGain(gain);
+
+    return true;
 }
 
 MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path){

@@ -31,6 +31,9 @@ class MotionScriptFrame
 public:
     MotionScriptFrame() : duration_(0) {}
 
+    static MotionScriptFrame* LoadFromConfigSystem(const std::string& path,
+                                                  int frame_number);
+
     //! Schedules all joint poitions in this frame using the given actionators.
     void ApplyToRobot(NUActionatorsData* actionators_data);
 
@@ -68,6 +71,12 @@ public:
     }
 
 private:
+    static bool LoadJointFromConfigSystem(
+        const std::string& frame_path,
+        int servo_id,
+        ScriptJointDescriptor* descriptor);
+
+
     std::unordered_map<int, ScriptJointDescriptor> joints_;
 
     //! This frame's duration, in milliseconds
