@@ -165,7 +165,7 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
         script->AddFrame(frame);
     }
     
-    return script;
+    return nullptr;//script;
 }
 
 MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
@@ -198,7 +198,7 @@ MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
         frame->AddDescriptor(j, descriptor);
     }
 
-    return frame;
+     return nullptr;//frame;
 }
 
 bool MotionScriptFrame::LoadJointFromConfigSystem(
@@ -224,7 +224,7 @@ bool MotionScriptFrame::LoadJointFromConfigSystem(
     descriptor->SetPosition(position);
     descriptor->SetGain(gain);
 
-    return true;
+     return true;
 }
 
 MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path){
@@ -333,12 +333,11 @@ MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<vector<double
         for(int frame_number = 0; frame_number<times[motor_index].size();frame_number++){
             if(positions[motor_index].empty()) 
                 continue;
-            if(new_frames.size()<times[0].size()){                
-                new_frames.push_back(new MotionScriptFrame());
-                //NOTE: DURATIONS STILL NOT SET PROPERLY!!
-                new_frames[frame_number]->SetDuration((frame_number==0 ?
+            if(new_frames.size()<times[0].size()){
+                new_frames.push_back(new MotionScriptFrame());                
+                new_frames[frame_number]->SetDuration(frame_number==0 ?
                                                          times[motor_index][frame_number]:
-                                                         times[motor_index][frame_number]-times[motor_index][frame_number-1]));
+                                                         times[motor_index][frame_number]-times[motor_index][frame_number-1]);
             }         
             std::cout<<"Loading script descriptor."<< std::endl;
             std::cout<<"Servo Number     "<<MapRowIndexToServoId(motor_index)<<std::endl;
