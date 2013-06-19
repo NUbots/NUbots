@@ -70,7 +70,7 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     }*/
     float g = 1./(1.+std::exp(-2.*walk_bearing*walk_bearing));
     new_walk[0] = walk_speed*g;
-    new_walk[2] = walk_bearing*(1.-0.5*g);
+    new_walk[2] = walk_bearing; //*(1.-0.5*g);
     return new_walk;
 }
 
