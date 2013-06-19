@@ -23,6 +23,7 @@ ENDIF()
 SET (YOUR_SRCS
 KFBuilder.cpp KFBuilder.h
 MobileObjectModel.h MobileObjectModel.cpp
+SharedMobileObjectModel.h SharedMobileObjectModel.cpp
 MobileObjectUKF.cpp MobileObjectUKF.h
 RobotModel.h RobotModel.cpp
 IMUModel.h IMUModel.cpp
