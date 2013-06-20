@@ -212,20 +212,21 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     //use a 90 degree rotation of the ball to target vector as the centre of our circle
     std::vector<float> targetVector = NavigationLogic::getPositionDifference(target,ball);
     float targetDistance = std::sqrt(targetVector[0]*targetVector[0]+targetVector[1]*targetVector[1]);
-    std::vector<float>[3] waypoints(2,0);
+    std::vector<float> waypoint[3];
     
     //rotate by 90 degrees to make our 3 ball approach waypoint offsets
+    waypoint[0] = std::vector<float>(2,0);
     waypoint[0][0] = targetVector[1]/targetDistance*ballDistance*0.3; //XXX: magic number
     waypoint[0][1] = -targetVector[0]/targetDistance*ballDistance*0.3;
-    
+    waypoint[1] = std::vector<float>(2,0);
     waypoint[1][0] = waypoint[0][1];
     waypoint[1][1] = -waypoint[0][0];
-    
+    waypoint[2] = std::vector<float>(2,0);
     waypoint[2][0] = waypoint[1][1];
     waypoint[2][1] = -waypoint[1][0];
     
     //using waypoint offsets, calculate the approach headings to kick the ball
-    float[3] headings;
+    float headings[3];
     headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2]);
     headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2]);
     headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2]);
@@ -240,18 +241,18 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     waypoint[2][1] += ball[1];
     
     //calculate difference to waypoints
-    std::vector<float>[3] selfToWaypoints;
+    std::vector<float> selfToWaypoints[3];
     
-    selfToWaypoints[0] = NavigationLogic::getPositionDifference(self,waypoints[0]);
-    selfToWaypoints[1] = NavigationLogic::getPositionDifference(self,waypoints[1]);
-    selfToWaypoints[2] = NavigationLogic::getPositionDifference(self,waypoints[2]);
+    selfToWaypoints[0] = NavigationLogic::getPositionDifference(self,waypoint[0]);
+    selfToWaypoints[1] = NavigationLogic::getPositionDifference(self,waypoint[1]);
+    selfToWaypoints[2] = NavigationLogic::getPositionDifference(self,waypoint[2]);
     
-    float[3] distances;
+    float distances[3];
     distances[0] = std::sqrt(selfToWaypoints[0][0]*selfToWaypoints[0][0]+selfToWaypoints[0][1]*selfToWaypoints[0][1]);
     distances[1] = std::sqrt(selfToWaypoints[1][0]*selfToWaypoints[1][0]+selfToWaypoints[1][1]*selfToWaypoints[1][1]);
     distances[2] = std::sqrt(selfToWaypoints[2][0]*selfToWaypoints[2][0]+selfToWaypoints[2][1]*selfToWaypoints[2][1]);
     
-    float[3] bearings;
+    float bearings[3];
     bearings[0] = mathGeneral::normaliseAngle(std::atan2(selfToWaypoints[0][1],selfToWaypoints[0][0]) - self[2]);
     bearings[1] = mathGeneral::normaliseAngle(std::atan2(selfToWaypoints[1][1],selfToWaypoints[1][0]) - self[2]);
     bearings[2] = mathGeneral::normaliseAngle(std::atan2(selfToWaypoints[2][1],selfToWaypoints[2][0]) - self[2]);
@@ -277,7 +278,7 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
         current_command = GOTOBALL;
         
         //calculate raw move differences to minimize change to the current strategy
-        float[3] differences;
+        float differences[3];
         differences[0] = distances[0]*distances[0]*0.6+bearings[0]*bearings[0]+headings[0]*headings[0];
         differences[1] = distances[1]*distances[1]*0.6+bearings[1]*bearings[1]+headings[1]*headings[1];
         differences[2] = distances[2]*distances[2]*0.6+bearings[2]*bearings[2]+headings[2]*headings[2];
