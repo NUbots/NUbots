@@ -31,6 +31,8 @@ class MotionScriptFrame
 public:
     MotionScriptFrame() : duration_(0) {}
 
+    bool SaveToConfigSystem(const std::string& frame_path);
+
     static MotionScriptFrame* LoadFromConfigSystem(const std::string& path,
                                                   int frame_number);
 
@@ -91,6 +93,7 @@ public:
                          current_frame_index_(0) { }
     ~MotionScript2013();
 
+    bool SaveToConfigSystem(const std::string& path);
 
     static MotionScript2013* LoadFromConfigSystem(const std::string& path);
 

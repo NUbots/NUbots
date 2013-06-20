@@ -126,6 +126,60 @@ MotionScript2013::~MotionScript2013()
         delete frame;
 }
 
+bool MotionScript2013::SaveToConfigSystem(const std::string& path)
+{
+    ConfigSystem::ConfigManager* config = Blackboard->Config;
+
+    bool success;
+
+    long script_format_version = 0;
+    config->CreateParam(path, "script_format_version", script_format_version);
+    config->SetValue(path, "script_format_version", script_format_version);
+
+    long num_frames = GetFrameCount();
+    config->CreateParam(path, "num_frames", num_frames);
+    config->SetValue(path, "num_frames", num_frames);
+
+    for(int i = 0; i < script_frames_.size(); i++)
+    {
+        auto *frame = script_frames_[i];
+
+        std::stringstream frame_ss;
+        frame_ss << path << "frame_" << i;
+        const std::string frame_path = frame_ss.str();
+
+        frame->SaveToConfigSystem(frame_path);
+    }
+
+    return true;
+}
+
+bool MotionScriptFrame::SaveToConfigSystem(const std::string& frame_path)
+{
+    ConfigSystem::ConfigManager* config = Blackboard->Config;
+
+    double duration = GetDuration();
+    config->CreateParam(frame_path, "duration", duration);
+    config->SetValue(frame_path, "duration", duration);
+
+    for(auto& key_value : joints_)
+    {
+        auto &joint = key_value.second;
+
+        std::stringstream joint_ss;
+        joint_ss << frame_path << "joint_" << joint.GetServoId();
+        const std::string joint_path = joint_ss.str();
+
+        double position = joint.GetPosition();
+        config->CreateParam(joint_path, "position", position);
+        config->SetValue(joint_path, "position", position);
+
+        double gain = joint.GetPosition();
+        config->CreateParam(joint_path, "gain", gain);
+        config->SetValue(joint_path, "gain", gain);
+    }
+}
+
 MotionScript2013* MotionScript2013::LoadFromConfigSystem(
     const std::string& path)
 {
