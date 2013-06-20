@@ -8,7 +8,8 @@
 class Obstacle : public VisionFieldObject
 {
 public:
-    Obstacle(Point position=Point(0,0), double width=0, double height=0);
+
+    Obstacle(Point position=Point(0,0), double width=0, double height=0, COLOUR_CLASS colour=UNKNOWN_COLOUR);
 
     /*!
       @brief pushes the obstacle to the external field objects.
@@ -38,6 +39,9 @@ private:
       */
     bool calculatePositions();
     
+public:
+    COLOUR_CLASS m_colour;
+
 private:
 //    float d2p;                      //! @variable the distance of the obstacle in cm as found by the distance to point method
     double m_arc_width;               //! @variable the angle subtended by the obstacle (based on the screen width)

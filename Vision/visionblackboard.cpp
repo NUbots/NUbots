@@ -416,6 +416,23 @@ const std::vector<ColourSegment> &VisionBlackboard::getVerticalTransitions(COLOU
 }
 
 /**
+*   @brief returns the horizontal and vertical transition rule matches for the given VFO
+*   @param vfo_if The identifier of the field object
+*   @return vertical_segments The horizontal and vertical transition rule matches
+*
+*   @note This method cannot be const as an element is accessed by the [] operator
+*   in the case that this does not find a mapping (using the default constructor). This
+*   is good as there is no need to worry about manually inserting a vector for each field object
+*   or doing any checks in this method for missing mappings.
+*/
+std::vector<ColourSegment> VisionBlackboard::getAllTransitions(COLOUR_CLASS colour_class)
+{
+    std::vector<ColourSegment> segments = matched_horizontal_segments[colour_class];
+    segments.insert(segments.end(), matched_vertical_segments[colour_class].begin(), matched_vertical_segments[colour_class].end());
+    return segments;
+}
+
+/**
 *   @brief returns the horizontal transition rule matches for all VFOs
 *   @return horizontal_segments The horizontal transition rule matches for all VFOs
 */

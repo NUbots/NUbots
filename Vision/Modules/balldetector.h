@@ -6,11 +6,9 @@
 
 //#include "Tools/Math/Line.h"
 #include "Vision/basicvisiontypes.h"
-#include "Vision/visionblackboard.h"
+#include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/VisionTools/classificationcolours.h"
-#include "Vision/VisionTypes/quad.h"
-
-
+#include "Vision/VisionTypes/VisionFieldObjects/ball.h"
 
 class BallDetector
 {

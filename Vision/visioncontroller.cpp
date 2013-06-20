@@ -8,7 +8,7 @@
 
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/Modules/greenhorizonch.h"
-#include "Vision/Modules/objectdetectionch.h"
+#include "Vision/Modules/obstacledetectionch.h"
 #include "Vision/Modules/scanlines.h"
 #include "Vision/visionconstants.h"
 #include "Vision/Modules/LineDetectionAlgorithms/linedetectorsam.h"
@@ -113,11 +113,11 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
 #endif
 
     //! DETECTION MODULES
+    std::vector<Goal> ransac_goals_edges;
 
     if(lookForGoals) {
 //       std::vector<Goal> hist_goals = m_goal_detector_hist->run();   // histogram method
-        std::vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
-        m_blackboard->addGoals(ransac_goals_edges);
+        ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
     }
     else {
         #if VISION_CONTROLLER_VERBOSITY > 2
@@ -169,11 +169,13 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     }
 
     //OBSTACLES
+    std::vector<Obstacle> obstacles;
     if(lookForObstacles)
     {
-        ObjectDetectionCH::detectObjects();
+        obstacles = ObstacleDetectionCH::run();
+        m_blackboard->addObstacles(obstacles);
         #if VISION_CONTROLLER_VERBOSITY > 2
-        debug << "\tdetectObjects done" << std::endl;
+        debug << "\tdetectObstacles done" << std::endl;
         #endif
     }
     else
@@ -183,10 +185,15 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
         #endif
     }
 
+    // ADD IN LABELLING OF GOALS BASED ON KEEPER COLOUR
 
     #ifdef VISION_PROFILER_ON
     prof.split("Obstacles");
     #endif
+
+    //m_goal_detector_ransac_edges->relabel(ransac_goals_edges, obstacles);
+
+    m_blackboard->addGoals(ransac_goals_edges);
 
     // publishing
     //force blackboard to publish results through wrapper

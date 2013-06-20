@@ -941,10 +941,10 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
         goal_line_x = -goal_line_x;
     }
 
-    float cov_x = pow(100.f,2);
-    float cov_y = pow(75.f,2);
+    float cov_x = pow(50.f,2);
+    float cov_y = pow(20.f,2);
     //float cov_head = pow(6.f,2);
-    float cov_head = pow(1.f,2);
+    float cov_head = pow(0.75,2);
     Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
     MultivariateGaussian temp(3);
     temp.setCovariance(cov_matrix);
@@ -1089,7 +1089,7 @@ void SelfLocalisation::doPenaltyReset()
     std::vector<MultivariateGaussian> positions;
     positions.reserve(2);
     MultivariateGaussian temp(3);
-    temp.setCovariance(covariance_matrix(75.0f*75.0f, 25.0f*25.0f, 0.35f*0.35f));
+    temp.setCovariance(covariance_matrix(50.0f*50.0f, 20.0f*20.0f, 0.35f*0.35f));
 
     float x_coord = 50.f;                           // Red is positive half of field. 50cm
     if (m_team_colour == GameInformation::BlueTeam)

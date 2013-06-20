@@ -61,7 +61,6 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
     NUCameraData cameraSpecs(std::string(CONFIG_DIR) + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
     m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
-    
     landmarkSeenFrequency = 1200;
     ballSeenFrequency = 800;
     lastVisionPolicy = -1;

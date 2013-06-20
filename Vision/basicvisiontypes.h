@@ -18,6 +18,8 @@ namespace Vision {
 //        GOAL_Y_COLOUR,
 //        GOAL_B_COLOUR,
         LINE_COLOUR,
+        TEAM_CYAN_COLOUR,
+        TEAM_MAGENTA_COLOUR,
         UNKNOWN_COLOUR
     };
 

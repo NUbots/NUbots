@@ -80,14 +80,14 @@ public:
     @param output The output stream.
     @return The output stream.
     */
-    std::ostream& writeStreamBinary (std::ostream& output) const;
+    virtual std::ostream& writeStreamBinary (std::ostream& output) const;
 
     /*!
     @brief Reads in a UKF object from the input stream.
     @param input The input stream.
     @return The input stream.
     */
-    std::istream& readStreamBinary (std::istream& input);
+    virtual std::istream& readStreamBinary (std::istream& input);
 
     // Weighting functions.
     void enableWeighting(bool enabled = true) {m_weighting_enabled = enabled;}

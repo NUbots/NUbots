@@ -197,7 +197,6 @@ SOURCES += \
     Modules/goaldetector.cpp \
     Modules/greenhorizonch.cpp \
     Modules/linedetector.cpp \
-    Modules/objectdetectionch.cpp \
     Modules/scanlines.cpp \
     Modules/segmentfilter.cpp \
     Modules/LineDetectionAlgorithms/linedetectorransac.cpp \
@@ -234,7 +233,8 @@ SOURCES += \
     #../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
     linesegmentscurve.cpp \
-    VisionWrapper/startoptionsdialog.cpp
+    VisionWrapper/startoptionsdialog.cpp \
+    Modules/obstacledetectionch.cpp
 
 ##robocup
 HEADERS += \
