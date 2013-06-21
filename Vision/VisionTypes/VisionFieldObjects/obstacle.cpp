@@ -103,7 +103,7 @@ bool Obstacle::calculatePositions()
     transformer.calculateRepresentations(gp1);
     transformer.calculateRepresentations(gp2);
 
-    m_arc_width = abs( gp1.screenAngular.x - gp2.screenAngular.x );
+    m_arc_width = std::abs( gp1.screenAngular.x - gp2.screenAngular.x );
 
     #if VISION_OBSTACLE_VERBOSITY > 2
         debug << "Obstacle::calculatePositions: " << m_location << std::endl;

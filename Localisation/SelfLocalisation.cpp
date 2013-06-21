@@ -56,7 +56,7 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
-const float SelfLocalisation::c_obj_theta_variance = 0.1f*0.1f;        // (0.1 rad)^2
+const float SelfLocalisation::c_obj_theta_variance = 0.02f*0.02f;        // (0.1 rad)^2
 
 const float SelfLocalisation::c_obj_range_offset_variance = 20.0f*20.0f;     // (25cm)^2
 const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
@@ -927,10 +927,10 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     float right_y = -200.0;
     float right_heading = PI/2;
 
-    float front_x = -300.0/4.0f;
-    float centre_x = -300.0/2.0f;
+    float front_x = -300.0/6.0f;
+    float centre_x = -300.0/3.0f;
     float centre_heading = 0;
-    float back_x = -300*(3.0f/4.0f);
+    float back_x = -300*(2.0f/6.0f);
     float goal_line_x = -300;
     if (team_colour == GameInformation::RedTeam)
     {   // flip the invert the x for the red team and set the heading to PI
@@ -941,10 +941,10 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
         goal_line_x = -goal_line_x;
     }
 
-    float cov_x = pow(100.f,2);
-    float cov_y = pow(75.f,2);
+    float cov_x = pow(50.f,2);
+    float cov_y = pow(20.f,2);
     //float cov_head = pow(6.f,2);
-    float cov_head = pow(1.f,2);
+    float cov_head = pow(0.75,2);
     Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
     MultivariateGaussian temp(3);
     temp.setCovariance(cov_matrix);
@@ -967,7 +967,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
     temp.setMean(mean_matrix(back_x, left_y, left_heading));
     positions.push_back(temp);
 
-    // Postition 5
+    /*// Postition 5
     temp.setMean(mean_matrix(2*centre_x, 95.0f, centre_heading));
     positions.push_back(temp);
 
@@ -982,7 +982,7 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
 
     // Postition 8
     temp.setMean(mean_matrix(2*centre_x, 0.0f, centre_heading));
-    positions.push_back(temp);
+    positions.push_back(temp);*/
 
     InitialiseModels(positions);
     initBallModel(m_ball_filter);
@@ -1089,7 +1089,7 @@ void SelfLocalisation::doPenaltyReset()
     std::vector<MultivariateGaussian> positions;
     positions.reserve(2);
     MultivariateGaussian temp(3);
-    temp.setCovariance(covariance_matrix(75.0f*75.0f, 25.0f*25.0f, 0.35f*0.35f));
+    temp.setCovariance(covariance_matrix(50.0f*50.0f, 20.0f*20.0f, 0.35f*0.35f));
 
     float x_coord = 50.f;                           // Red is positive half of field. 50cm
     if (m_team_colour == GameInformation::BlueTeam)
@@ -2412,7 +2412,7 @@ void SelfLocalisation::MergeModelsBelowThreshold(double MergeMetricThreshold)
             {
                 continue;
             }
-            mergeM = abs( MergeMetric(modelA,modelB) );
+            mergeM = std::abs( MergeMetric(modelA,modelB) );
             if (mergeM <= MergeMetricThreshold)
             { //0.5
 #if LOC_SUMMARY_LEVEL > 0
@@ -2808,7 +2808,7 @@ Vector2<float> SelfLocalisation::TriangulateTwoObject(const StationaryObject& ob
     {
         return p3;
     }
-    else if(d < abs(r0 - r1))
+    else if(d < std::abs(r0 - r1))
     {
         return p3;
     }

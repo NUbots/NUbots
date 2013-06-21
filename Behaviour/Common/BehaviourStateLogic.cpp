@@ -22,13 +22,13 @@ void BehaviourStateLogic::checkDistanceToBall() {
 }
     
 void BehaviourStateLogic::checkVisibilityOfBall() {
-    states[BALL_IS_SEEN] = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 90.0; //XXX: timing hack, magic number
+    states[BALL_IS_SEEN] = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 120.0; //XXX: timing hack, magic number
     
     //use this for seeing the ball as a team
     vector<TeamPacket::SharedBall> balls = Blackboard->TeamInfo->getSharedBalls();
     states[TEAM_SEES_BALL] = false;
     for (int i = 0; i < balls.size(); i++) {
-        states[TEAM_SEES_BALL] = states[TEAM_SEES_BALL] or balls[i].TimeSinceLastSeen < 90.0; //XXX: timing hack, magic number
+        states[TEAM_SEES_BALL] = states[TEAM_SEES_BALL] or balls[i].TimeSinceLastSeen < 120.0; //XXX: timing hack, magic number
     }
     
     states[BALL_IS_LOST] = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].lost();
@@ -39,7 +39,7 @@ void BehaviourStateLogic::checkGameState() {
         timeUnPenalised = Blackboard->Sensors->GetTimestamp();
     }
     states[GAME_STATE_PENALISED] = Blackboard->GameInfo->getCurrentState() == GameInformation::PenalisedState;
-    states[GAME_STATE_POSITIONING] = Blackboard->GameInfo->getCurrentState() == GameInformation::SetState;
+    states[GAME_STATE_SET] = Blackboard->GameInfo->getCurrentState() == GameInformation::SetState;
     states[GAME_STATE_READY] = Blackboard->GameInfo->getCurrentState() == GameInformation::ReadyState;
     
     //manage time since we've resumed play
@@ -48,18 +48,27 @@ void BehaviourStateLogic::checkGameState() {
     }
     states[GAME_STATE_PLAYING] = Blackboard->GameInfo->getCurrentState() == GameInformation::PlayingState;
     states[GAME_STATE_KICKOFF] = Blackboard->GameInfo->haveKickoff();
-    states[GAME_STATE_KICKING_OFF] = Blackboard->GameInfo->haveKickoff() and timeSinceGameStarted() < 15000.0; //XXX: timing hack, magic number
+    states[GAME_STATE_KICKING_OFF] = Blackboard->GameInfo->haveKickoff() and timeSinceGameStarted() < 8000.0; //XXX: timing hack, magic number
     states[GAME_STATE_END] = Blackboard->GameInfo->getCurrentState() == GameInformation::FinishedState;
+    
+    states[GAME_STATE_INITIAL] = Blackboard->GameInfo->getCurrentState() == GameInformation::InitialState;
 }
 
 void BehaviourStateLogic::checkMyMovement() {
+    
     Navigation* nav = Navigation::getInstance();
+    
     //XXX: not sure if in_position needs help
     Blackboard->Sensors->get(NUSensorsData::MotionKickActive, states[IS_KICKING]);
+    
     states[IS_APPROACHING_BALL] =  nav->getCurrentCommand() == Navigation::GOTOOBJECT;
+    
     states[IS_IN_POSITION] = nav->getCurrentCommand() == Navigation::GOTOPOINT and
+                             (states[GAME_STATE_PLAYING] or states[GAME_STATE_READY] or states[GAME_STATE_SET]) and
                              nav->isStopped();
+    
     states[IS_GOAL_KEEPER] = Blackboard->GameInfo->getPlayerNumber() == m_GoalKeeper;
+    
 }
 
 void BehaviourStateLogic::checkFallen() {
@@ -73,8 +82,8 @@ void BehaviourStateLogic::checkFallen() {
     
     //set all sensors
     states[IS_FALLEN_OVER] = Blackboard->Sensors->isFallen();
-    states[IS_GETTING_UP] = timeSinceFallen() < 7000.0; //XXX: timing hack, magic number
-    states[JUST_GOT_UP] = !states[IS_GETTING_UP] and timeSinceGetup() < 10000.0; //XXX: timing hack, magic number
+    states[IS_GETTING_UP] = timeSinceFallen() < 4500.0; //XXX: timing hack, magic number
+    states[JUST_GOT_UP] = !states[IS_GETTING_UP] and timeSinceGetup() < 3000.0; //XXX: timing hack, magic number
     
     states[IS_PICKED_UP] = false; //XXX: check with steve how to set this
 }

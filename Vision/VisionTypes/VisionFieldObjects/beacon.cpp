@@ -264,7 +264,7 @@
 //        #endif
 //        distance_valid = true;
 //        if(d2pvalid)
-//            return min(d2p, width_dist);
+//            return std::min(d2p, width_dist);
 //        else
 //            return width_dist;
 //    }

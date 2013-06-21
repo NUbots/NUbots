@@ -89,6 +89,7 @@ void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
                 duration_,
                 joint.GetPosition(),
                 joint.GetGain());
+            std::cout<< "Duration applied to robot:"<<duration_<<std::endl;
         }
     }
 }
@@ -218,7 +219,7 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
         script->AddFrame(frame);
     }
     
-    return script;
+    return nullptr;//script;
 }
 
 MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
@@ -251,7 +252,7 @@ MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
         frame->AddDescriptor(j, descriptor);
     }
 
-    return frame;
+     return nullptr;//frame;
 }
 
 bool MotionScriptFrame::LoadJointFromConfigSystem(
@@ -277,93 +278,139 @@ bool MotionScriptFrame::LoadJointFromConfigSystem(
     descriptor->SetPosition(position);
     descriptor->SetGain(gain);
 
-    return true;
+     return true;
 }
 
 MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path){
     //Method modified from Motion/Tools/MotionScript.h
+    std::cout<<"Loading script from old script file in location " << path << std::endl;
     std::ifstream file(path);
     if (!file.is_open())
     {
         errorlog << "MotionScript2013::LoadOldScript(). Unable to open. " << path << std::endl;
-        return false;
+        return nullptr;
     }
-    else
+    
+    MotionFileTools::toFloat(file);
+    MotionFileTools::toBool(file);
+    auto labels = MotionFileTools::toStringVector(file);
+    if (labels.empty())
     {
-        MotionFileTools::toFloat(file);
-        MotionFileTools::toBool(file);
-        auto labels = MotionFileTools::toStringVector(file);
-        if (labels.empty())
-        {
-            errorlog << "MotionScript::load(). Unable to load " << path << " the file labels are invalid " << std::endl;
-            return false;
-        }
-        float playspeed = 1.0;
-        
-        int numjoints = labels.size() - 1;
-        std::vector<vector<double> > times = vector<vector<double> >(numjoints, vector<double>());
-        std::vector<vector<float> > positions = vector<vector<float> >(numjoints, vector<float>());
-        std::vector<vector<float> > gains = vector<vector<float> >(numjoints, vector<float>());
-        
-        float time;
-        vector<vector<float> > row;
-        
-        while (!file.eof())
-        {
-            MotionFileTools::toFloatWithMatrix(file, time, row);
-            if (row.size() >= numjoints)
-            {   // discard rows that don't have enough joints
-                for (int i=0; i<numjoints; i++)
-                {
-                    if (row[i].size() > 0)
-                    {   // if there is an entry then the first must be a position
-                        times[i].push_back(1000*time);
-                        positions[i].push_back(row[i][0]);
-                        
-                        // because the way the joint actionators are designed we must also specify a gain
-                        if (row[i].size() > 1)
-                        {   // if there is a second entry then it is the gain
-                            gains[i].push_back(row[i][1]);
-                        }
-                        else
-                        {   // however if there is no second entry we reuse the previous entry or use 100% if this is the first one
-                            if (gains[i].empty())
-                                gains[i].push_back(100.0);
-                            else
-                                gains[i].push_back(gains[i].back());
-                        }
-                        
+        errorlog << "MotionScript::load(). Unable to load " << path << " the file labels are invalid " << std::endl;
+        return nullptr;
+    }
+    float playspeed = 1.0;
+    
+    int numjoints = labels.size() - 1;
+    std::vector<vector<double> > times = vector<vector<double> >(numjoints, vector<double>());
+    std::vector<vector<float> > positions = vector<vector<float> >(numjoints, vector<float>());
+    std::vector<vector<float> > gains = vector<vector<float> >(numjoints, vector<float>());
+    
+    float time;
+    vector<vector<float> > row;
+    
+    while (!file.eof())
+    {
+        MotionFileTools::toFloatWithMatrix(file, time, row);
+        if (row.size() >= numjoints)
+        {   // discard rows that don't have enough joints
+            for (int i=0; i<numjoints; i++)
+            {
+                if (row[i].size() > 0)
+                {   // if there is an entry then the first must be a position
+                    times[i].push_back(1000*time);
+                    positions[i].push_back(row[i][0]);
+                    
+                    // because the way the joint actionators are designed we must also specify a gain
+                    if (row[i].size() > 1)
+                    {   // if there is a second entry then it is the gain
+                        gains[i].push_back(row[i][1]);
                     }
+                    else
+                    {   // however if there is no second entry we reuse the previous entry or use 100% if this is the first one
+                        if (gains[i].empty())
+                            gains[i].push_back(100.0);
+                        else
+                            gains[i].push_back(gains[i].back());
+                    }
+                    
                 }
             }
-            row.clear();
         }
-        file.close();        
-
-        return InitialiseScriptFromOld(times,positions,gains);
+        row.clear();
     }
+    file.close();        
 
+    std::cout<<"Loading old script data."<< std::endl;
+    std::cout<<"Times = [ "<< std::endl;
+    for(int i = 0; i<times.size();i++){
+        if(times[i].empty()) 
+                continue;
+        for(int j = 0; j<times[i].size();j++){
+            std::cout<<" "<<times[i][j];
+        }
+        std::cout<<std::endl;
+    }
+    std::cout<<" ]"<<std::endl;
+
+    std::cout<<"Positions = [ "<< std::endl;
+    for(int i = 0; i<positions.size();i++){
+        if(positions[i].empty()) 
+                continue;
+        for(int j = 0; j<positions[i].size();j++){
+            std::cout<<" "<<positions[i][j];
+        }
+        std::cout<<std::endl;
+    }
+    std::cout<<" ]"<<std::endl;
+
+    std::cout<<"Gains = [ "<< std::endl;
+    for(int i = 0; i<gains.size();i++){
+        if(gains[i].empty()) 
+                continue;
+        for(int j = 0; j<gains[i].size();j++){
+            std::cout<<" "<<gains[i][j];
+        }
+        std::cout<<std::endl;
+    }
+    std::cout<<" ]"<<std::endl;
+
+    return InitialiseScriptFromOld(times,positions,gains);
+    
 }
 
 MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<vector<double> > times, vector<vector<float> > positions, vector<vector<float> > gains){
     
     MotionScript2013* script = new MotionScript2013();
-    for(int frame_number = 0; frame_number<times.size();frame_number++){
-
-        auto* new_frame = new MotionScriptFrame();
-
-        for(int motor_index; motor_index<positions[frame_number].size();motor_index++){
-
+    std::vector<MotionScriptFrame*> new_frames;
+    for(int motor_index = 0; motor_index < times.size(); motor_index++){
+        for(int frame_number = 0; frame_number<times[motor_index].size();frame_number++){
+            if(positions[motor_index].empty()) 
+                continue;
+            if(new_frames.size()<times[0].size()){
+                new_frames.push_back(new MotionScriptFrame());                
+                new_frames[frame_number]->SetDuration(frame_number==0 ?
+                                                         times[motor_index][frame_number]:
+                                                         times[motor_index][frame_number]-times[motor_index][frame_number-1]);
+            }         
+            std::cout<<"Loading script descriptor."<< std::endl;
+            std::cout<<"Servo Number     "<<MapRowIndexToServoId(motor_index)<<std::endl;
+            std::cout<<"Position         "<< positions[motor_index][frame_number] <<std::endl;
+            std::cout<<"Gain             "<< gains[motor_index][frame_number] <<std::endl;
+            std::cout<<"Time             "<< times[motor_index][frame_number] <<std::endl;                    
             ScriptJointDescriptor descriptor;
             descriptor.SetServoId(MapRowIndexToServoId(motor_index));
-            descriptor.SetPosition(positions[frame_number][motor_index]);
-            descriptor.SetGain(gains[frame_number][motor_index]);
-            new_frame->AddDescriptor(MapRowIndexToServoId(motor_index),descriptor);
-            new_frame->SetDuration(times[motor_index][0]);
-
+            descriptor.SetPosition(positions[motor_index][frame_number]);
+            descriptor.SetGain(gains[motor_index][frame_number]);
+            new_frames[frame_number]->AddDescriptor(MapRowIndexToServoId(motor_index),descriptor);
         }
-        script->AddFrame(new_frame);
+        
     }
+
+    for(int i = 0; i<new_frames.size();i++){
+        script->AddFrame(new_frames[i]);
+    }
+
     return script;
 
 }

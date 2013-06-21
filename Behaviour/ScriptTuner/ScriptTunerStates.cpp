@@ -33,7 +33,7 @@ ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : ScriptTunerS
     std::cout<< "--------------Welcome to Script Tuner--------------"<< std::endl;
     std::cout<< "==================================================="<< std::endl;
     m_script_active = false;
-    m_file_path = (CONFIG_DIR + std::string("/Motion/Scripts"));
+    m_file_path = (CONFIG_DIR + std::string("/Motion/Scripts/"));
     m_actionators_data = Blackboard->Actions;
     m_sensors_data = Blackboard->Sensors;
 }
@@ -45,16 +45,16 @@ void ScriptTunerState::doState()
     std::cout<< "Load Script - Type File Name (script must be in "<<m_file_path<<"): "<< std::endl;
     char file[256];
     std::cin.getline(file,256);
-    string filename = (string)file;
+    m_file_name = (string)file;
 
-    if((filename.compare("exit") ==0) or (filename.compare("quit") == 0) ){
+    if((m_file_name.compare("exit") ==0) or (m_file_name.compare("quit") == 0) ){
         std::cout<< "Shutting down script tuner."<< std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         std::cout<< "Just kidding. That would be useless."<< std::endl;
         return;
     }
 
-    auto loaded = loadScript(filename);//Sets m_file_name, and use this afterwards.
+    auto loaded = loadScript(m_file_name);//Sets m_file_name, and use this afterwards.
 
 
     if(loaded){
@@ -158,8 +158,8 @@ void ScriptTunerState::editCurrentFrame(){
 }
 
 bool ScriptTunerState::loadScript(string filename){    
-    script = MotionScript2013::LoadFromConfigSystem(m_file_path+filename);
-    return (bool)script;
+    script = MotionScript2013::LoadOldScript(m_file_path+filename);
+    return (script!=nullptr);
 }
 
 void ScriptTunerState::applyFrameToRobot(){
@@ -306,29 +306,29 @@ int ScriptTunerState::totalNumberOfFrames(){
     return script->GetFrameCount();
 }
     
-            float ScriptTunerState::durationOfCurrentFrame(){
-                MotionScriptFrame* current_frame = script->GetCurrentFrame();
-                float duration = current_frame->GetDuration();
-                return duration;
-            }
+float ScriptTunerState::durationOfCurrentFrame(){
+    MotionScriptFrame* current_frame = script->GetCurrentFrame();
+    float duration = current_frame->GetDuration();
+    return duration;
+}
 
 bool ScriptTunerState::scriptIsActive(){
     return m_script_active;
 }
 
-            void ScriptTunerState::setCurrentFrameDuration(string duration_string){
-                std::stringstream stream;
-                stream << duration_string;
-                float duration;
-                if(stream >> duration){
-                    std::cout<< "Setting current frame duration to "<< duration <<"."<< std::endl;
-                    MotionScriptFrame* current_frame = script->GetCurrentFrame();
-                    current_frame->SetDuration(duration);
+void ScriptTunerState::setCurrentFrameDuration(string duration_string){
+    std::stringstream stream;
+    stream << duration_string;
+    float duration;
+    if(stream >> duration){
+        std::cout<< "Setting current frame duration to "<< duration <<"."<< std::endl;
+        MotionScriptFrame* current_frame = script->GetCurrentFrame();
+        current_frame->SetDuration(duration);
 
-                } else {
-                    std::cout<< "Invalid duration time." << std::endl;
-                }
-            }
+    } else {
+        std::cout<< "Invalid duration time." << std::endl;
+    }
+}
 
 float ScriptTunerState::getMotorPosition(int motor_id){
     float current_position;
