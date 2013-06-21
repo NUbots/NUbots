@@ -52,7 +52,8 @@ public:
     //! script frame when ApplyToRobot is called.
     void DeleteDescriptor(int servo_id);
 
-    //! Returns the descriptor corresponding to the given id in descriptor.
+    //! Returns a copy of the descriptor corresponding to the given id in
+    //! descriptor.
     //! Returns whether the operation succeeded.
     bool GetDescriptor(int servo_id, ScriptJointDescriptor* descriptor);
 

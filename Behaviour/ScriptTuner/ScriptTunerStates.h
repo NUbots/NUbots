@@ -56,6 +56,213 @@
 using std::vector;
 using std::string;
 
+class ScriptTunerCommand
+{
+public:
+    enum class CommandType {
+        kUnknown,       //!< Unknown command.
+        kHelp,          //!< Prints help for the ScriptTuner.
+        kExit,          //!< Exit the script tuner.
+        kPlay,          //!< Plays the current script.
+        kEdit,          //!< Begin editing the current sctipr.
+        kNextFrame,     //!< Move to the next frame.
+        kNewFrame,      //!< Creates a new frame after the current frame.
+        kFrameSeek,     //!< Seek to a given frame.
+        kFrameDuration, //!< Set the duration of the current frame.
+        kAllOn,         //!< Turn on all motors.
+        kJointPosition, //!< Modify the position of a given joint.
+        kJointGain,     //!< Modify the gain of a given joint.
+        kJointPositionGain,     //!< Modify the gain of a given joint.
+        kJointOff,      //!< Temporarily turn off a given joint, for editing.
+        kJointOn,       //!< Turn on a given joint.
+        kSaveFrame,     //!< Save the current frame.
+        kSaveScript,    //!< Save the current script.
+    };
+
+    static int MapJointInitialismToServoId(const std::string& initials)
+    {
+        if(!initials.compare("RSP")) return Robot::JointData::ID_R_SHOULDER_PITCH;
+        if(!initials.compare("LSP")) return Robot::JointData::ID_L_SHOULDER_PITCH;
+        if(!initials.compare("RSR")) return Robot::JointData::ID_R_SHOULDER_ROLL;
+        if(!initials.compare("LSR")) return Robot::JointData::ID_L_SHOULDER_ROLL;
+        if(!initials.compare("RE" )) return Robot::JointData::ID_R_ELBOW;
+        if(!initials.compare("LE" )) return Robot::JointData::ID_L_ELBOW;
+        if(!initials.compare("RHY")) return Robot::JointData::ID_R_HIP_YAW;
+        if(!initials.compare("LHY")) return Robot::JointData::ID_L_HIP_YAW;
+        if(!initials.compare("RHR")) return Robot::JointData::ID_R_HIP_ROLL;
+        if(!initials.compare("LHR")) return Robot::JointData::ID_L_HIP_ROLL;
+        if(!initials.compare("RHP")) return Robot::JointData::ID_R_HIP_PITCH;
+        if(!initials.compare("LHP")) return Robot::JointData::ID_L_HIP_PITCH;
+        if(!initials.compare("RK" )) return Robot::JointData::ID_R_KNEE;
+        if(!initials.compare("LK" )) return Robot::JointData::ID_L_KNEE;
+        if(!initials.compare("RAP")) return Robot::JointData::ID_R_ANKLE_PITCH;
+        if(!initials.compare("LAP")) return Robot::JointData::ID_L_ANKLE_PITCH;
+        if(!initials.compare("RAR")) return Robot::JointData::ID_R_ANKLE_ROLL;
+        if(!initials.compare("LAR")) return Robot::JointData::ID_L_ANKLE_ROLL;
+        if(!initials.compare("HP" )) return Robot::JointData::ID_HEAD_PAN;
+        if(!initials.compare("HT" )) return Robot::JointData::ID_HEAD_TILT;
+        return Robot::JointData::ID_UNKNOWN;
+    }
+
+    static ScriptTunerCommand ParseCommand(const std::string& command)
+    {
+        std::stringstream command_ss;
+        command_ss << command;
+
+        std::string arg0;
+        command_ss >> arg0;
+
+        if(!arg0.compare("help")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kHelp);
+            return c;
+        } else if(!arg0.compare("play")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kPlay);
+            return c;
+        } else if(!arg0.compare("edit")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kEdit);
+            return c;
+        } else if(!arg0.compare("exit")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kExit);
+            return c;
+        } else if(!arg0.compare("quit")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kExit);
+            return c;
+        } else if(!arg0.compare("saveframe")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kSaveFrame);
+            return c;
+        } else if(!arg0.compare("savescript")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kSaveScript);
+            return c;
+        } else if(!arg0.compare("newframe")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kNewFrame);
+            return c;
+        } else if(!arg0.compare("seek")) {
+            int frame_number;
+            if(!command_ss >> frame_number)
+                return false;
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kFrameSeek);
+            c.set_frame_number(frame_number);
+            return c;
+        } else if(!arg0.compare("duration")) {
+            float duration;
+            if(!command_ss >> duration)
+                return false;
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kFrameDuration);
+            c.set_duration(duration);
+            return c;
+        } else if(!arg0.compare("allon")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kAllOn);
+            return c;
+        } else if(!arg0.compare("on")) {
+            int joint_id;
+            if(!command_ss >> joint_id)
+                return false;
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kJointOn);
+            c.set_joint_number(joint_id);
+            return c;
+        } else if(!arg0.compare("off")) {
+            int joint_id;
+            if(!command_ss >> joint_id)
+                return false;
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kJointOff);
+            c.set_joint_number(joint_id);
+            return c;
+        } else {
+            float position;
+            float duration;
+            bool set_duration = false;
+            if(!command_ss >> position)
+                return false;
+            if(command_ss >> duration)
+                set_duration = true;
+            int joint_id = MapJointInitialismToServoId(arg0);
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kJointPositionGain);
+            c.set_joint_number(joint_id);
+            c.set_position(position);
+            if(set_duration)
+                c.set_duration(duration);
+            return c;
+        }
+    }
+
+    static void PrintCommandsLongHelp()
+    {
+        std::cout << std::endl;
+        std::cout << "Script Tuner Command Help:" << std::endl;
+        std::cout << std::endl;
+        std::cout << "Note: When a command requires a joint to be specified, " << std::endl;
+        std::cout << "      it should be denoted using one of the following initialisms:" << std::endl;
+        std::cout << std::endl;
+        std::cout << "RSP = Right Shoulder Pitch;" << std::endl;
+        std::cout << "LSP = Left Shoulder Pitch;" << std::endl;
+        std::cout << "RSR = Right Shoulder Roll;" << std::endl;
+        std::cout << "LSR = Left Shoulder Roll;" << std::endl;
+        std::cout << "RE  = Right Elbow;" << std::endl;
+        std::cout << "LE  = Left Elbow;" << std::endl;
+        std::cout << "RHY = Right Hip Yaw;" << std::endl;
+        std::cout << "LHY = Left Hip Yaw;" << std::endl;
+        std::cout << "RHR = Right Hip Roll;" << std::endl;
+        std::cout << "LHR = Left Hip Roll;" << std::endl;
+        std::cout << "RHP = Right Hip Pitch;" << std::endl;
+        std::cout << "LHP = Left Hip Pitch;" << std::endl;
+        std::cout << "RK  = Right Knee;" << std::endl;
+        std::cout << "LK  = Left Knee;" << std::endl;
+        std::cout << "RAP = Right Ankle Pitch;" << std::endl;
+        std::cout << "LAP = Left Ankle Pitch;" << std::endl;
+        std::cout << "RAR = Right Ankle Roll;" << std::endl;
+        std::cout << "LAR = Left Ankle Roll;" << std::endl;
+        std::cout << "HP  = Head Pan;" << std::endl;
+        std::cout << "HT  = Head Tilt;" << std::endl;
+    }
+
+    ScriptTunerCommand() : command_type_(CommandType::kUnknown),
+                           position_(0),
+                           gain_(0),
+                           duration_(1000),
+                           disable_(false),
+                           joint_number_(0),
+                           frame_number_(0) {}
+
+    CommandType command_type() { return command_type_; }
+    float position() { return position_; }
+    float gain() { return gain_; }
+    float duration() { return duration_; }
+    bool disable() { return disable_; }
+    int joint_number() { return joint_number_; }
+    int frame_number() { return frame_number_; }
+
+    void set_command_type(CommandType command_type) { command_type_ = command_type; }
+    void set_position(float position) { position_ = position; }
+    void set_gain(float gain) { gain_ = gain; }
+    void set_duration(float duration) { duration_ = duration; }
+    void set_disable(bool disable) { disable_ = disable; }
+    void set_joint_number(int joint_number) { joint_number_ = joint_number; }
+    void set_frame_number(int frame_number) { frame_number_ = frame_number; }
+
+private:
+    CommandType command_type_;
+    float position_;
+    float gain_;
+    float duration_;
+    bool disable_;
+    int joint_number_;
+    int frame_number_;
+};
+
 class ScriptTunerSubState : public BehaviourState
 {
 public:
