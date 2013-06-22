@@ -145,18 +145,18 @@ public:
             c.set_command_type(CommandType::kNewFrame);
             return c;
         } else if(!arg0.compare("seek")) {
-            int frame_number;
-            if(!command_ss >> frame_number)
-                return false;
             ScriptTunerCommand c;
+            int frame_number;
+            if(!(command_ss >> frame_number))
+                return c;
             c.set_command_type(CommandType::kFrameSeek);
             c.set_frame_number(frame_number);
             return c;
         } else if(!arg0.compare("duration")) {
-            float duration;
-            if(!command_ss >> duration)
-                return false;
             ScriptTunerCommand c;
+            float duration;
+            if(!(command_ss >> duration))
+                return c;
             c.set_command_type(CommandType::kFrameDuration);
             c.set_duration(duration);
             return c;
@@ -165,31 +165,31 @@ public:
             c.set_command_type(CommandType::kAllOn);
             return c;
         } else if(!arg0.compare("on")) {
-            int joint_id;
-            if(!command_ss >> joint_id)
-                return false;
             ScriptTunerCommand c;
+            int joint_id;
+            if(!(command_ss >> joint_id))
+                return c;
             c.set_command_type(CommandType::kJointOn);
             c.set_joint_number(joint_id);
             return c;
         } else if(!arg0.compare("off")) {
-            int joint_id;
-            if(!command_ss >> joint_id)
-                return false;
             ScriptTunerCommand c;
+            int joint_id;
+            if(!(command_ss >> joint_id))
+                return c;
             c.set_command_type(CommandType::kJointOff);
             c.set_joint_number(joint_id);
             return c;
         } else {
+            ScriptTunerCommand c;
             float position;
             float duration;
             bool set_duration = false;
-            if(!command_ss >> position)
-                return false;
-            if(command_ss >> duration)
+            if(!(command_ss >> position))
+                return c;
+            if((command_ss >> duration))
                 set_duration = true;
             int joint_id = MapJointInitialismToServoId(arg0);
-            ScriptTunerCommand c;
             c.set_command_type(CommandType::kJointPositionGain);
             c.set_joint_number(joint_id);
             c.set_position(position);
@@ -274,7 +274,24 @@ protected:
 // ----------------------------------------------------------------------------------------------------------------------- PausedState
 class ScriptTunerState : public ScriptTunerSubState
 {
-public:
+private:
+    void HandleEditCommand(ScriptTunerCommand command);
+    void HandlePlayCommand(ScriptTunerCommand command);
+    void HandleSaveFrameCommand(ScriptTunerCommand command);
+    void HandleSaveScriptCommand(ScriptTunerCommand command);
+    void HandleExitScriptCommand(ScriptTunerCommand command);
+    void HandleNextFrameCommand(ScriptTunerCommand command);
+    void HandleNewFrameCommand(ScriptTunerCommand command);
+    void HandleFrameSeekCommand(ScriptTunerCommand command);
+    void HandleFrameDurationCommand(ScriptTunerCommand command);
+    void HandleAllOnCommand(ScriptTunerCommand command);
+    void HandleJointOffCommand(ScriptTunerCommand command);
+    void HandleJointOnCommand(ScriptTunerCommand command);
+    void HandleJointPositionCommand(ScriptTunerCommand command);
+    void HandleJointGainCommand(ScriptTunerCommand command);
+    void HandleJointPositionGainCommand(ScriptTunerCommand command);
+    void PrintCommandError(ScriptTunerCommand command);
+
     std::map<string, int> string_id_to_int_id; 
     string m_file_name;
     string m_file_path;
@@ -283,12 +300,13 @@ public:
 
     bool m_script_active;
 
-    vector<int> motors_to_be_saved;//Contains motors which have had torque turned off and then on.
-    
+    // Contains motors which have had torque turned off and then on.
+    std::vector<int> motors_to_be_saved;
 
     NUActionatorsData* m_actionators_data;
     NUSensorsData* m_sensors_data;
 
+public:
     ScriptTunerState(ScriptTunerProvider* provider);
 
     BehaviourState* nextState() {return m_provider->m_state;}
@@ -299,9 +317,6 @@ public:
     /*! @brief Loads a motion script from a file into the member variables frames and times */
     bool loadScript(string filename);
 
-     /*! @brief Applies frame, given by frames[frame], to robot.*/
-    void applyFrameToRobot();
-
      /*! @brief Reads motor positions from robot and saves them to the current frame, frames[frame].
         Only save motor positions which have had torque off and then back on.*/
     void saveManuallyMovedMotors();
@@ -309,25 +324,6 @@ public:
      /*! @brief Writes the frames to script file.*/
     bool saveScriptToFile(string filename);
 
-     /*! @brief Adds a new frame to the vector of frames.*/
-    void addFrame(string argument);
-
-    /*! @brief Moves to the frame indicated by the first argument of command string, if it is an integer.*/
-    void interpretSeekCommand(string command);
-
-    /*! @brief Moves script to a given frame if it is a valid frame number.*/
-    void moveToFrame(int frame_number);
-
-    /*! @brief Exit program and load a new script.*/
-    void exitScript();
-
-    /*! @brief Play the script from the current frame.*/
-    void playScript();
-
-    /*! @brief Applies positional or torque settings to motors.
-        @param other_parameters = "<position> <gain>". If gain is not specified a default value is used.*/
-    void applyRequestToMotors(string parameters);
-    
     /*! @brief Motor fine tuning.
         @param pos_change is change in angle in radians.*/
     void changeMotorPosition(int motor_id,float pos_change);
@@ -348,25 +344,9 @@ public:
     */
     int getCurrentFrameNumber();
     
-    /*! @brief Returns the total number of frames for the loaded script.
-    */    
-    int totalNumberOfFrames();
-    
     /*! @brief Returns the time required for the current frame to complete.
     */    
     float durationOfCurrentFrame();
-
-    /*! @brief Indicates state of script during editing.
-    */
-    bool scriptIsActive();
-    
-    /*! @brief Updates robot to have motor positions indicated by the current frame in the current script.
-    */
-    void applyCurrentFrameToRobot();
-
-    /*! @brief Sets the frame duration.
-    */
-    void setCurrentFrameDuration(string duration_string);
 
     /*! @brief Returns the MEASURED motor position.
     */
