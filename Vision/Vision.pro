@@ -173,6 +173,7 @@ HEADERS += \
     VisionTools/transformer.h \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
+    ../Vision/Modules/BallDetectionAlgorithms/*.h \
     basicvisiontypes.h \
     valgorithm.h \
     visionblackboard.h \
@@ -204,6 +205,8 @@ SOURCES += \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp \
+    Modules/BallDetectionAlgorithms/balldetectordave.cpp \
+    Modules/BallDetectionAlgorithms/balldetectorshannon.cpp \
     VisionTypes/colourreplacementrule.cpp \
     VisionTypes/coloursegment.cpp \
     VisionTypes/colourtransitionrule.cpp \

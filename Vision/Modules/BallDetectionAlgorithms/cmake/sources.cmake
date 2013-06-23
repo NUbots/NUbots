@@ -21,23 +21,13 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS
-greenhorizonch.cpp
-obstacledetectionch.cpp
-scanlines.cpp
-segmentfilter.cpp
-goaldetector.cpp
-balldetector.cpp
-linedetector.cpp
-cornerdetector.cpp
-circledetector.cpp
-fieldpointdetector.cpp
+balldetectordave.cpp
+balldetectorshannon.cpp
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
 SET (YOUR_DIRS
-BallDetectionAlgorithms
-GoalDetectionAlgorithms
-LineDetectionAlgorithms
+
 )
 ####################################################################################
 
