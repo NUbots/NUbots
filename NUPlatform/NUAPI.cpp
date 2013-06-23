@@ -1,4 +1,5 @@
 #include "NUAPI.h"
+#include "../Tools/Math/Vector3.h"
 #include <sstream>
 //#include <png++/png.hpp>
 #include <boost/foreach.hpp>
@@ -283,6 +284,10 @@ void NUAPI::sendLocalisationData()
 	api_ball->set_sr_xy(ball.srXY());
 	api_ball->set_sr_yy(ball.srYY());
 	api_ball->set_lost(ball.lost());
+	Vector3<float> measured_relative_position = ball.getRelativeMeasurementError();
+	api_ball->add_measured_relative_position(measured_relative_position[0]);
+	api_ball->add_measured_relative_position(measured_relative_position[1]);
+	api_ball->add_measured_relative_position(measured_relative_position[2]);
 
 	send(api_message);
 

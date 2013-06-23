@@ -1301,6 +1301,18 @@ class LocalisationFieldObject : public ::google::protobuf::Message {
   inline bool lost() const;
   inline void set_lost(bool value);
   
+  // repeated float measured_relative_position = 12;
+  inline int measured_relative_position_size() const;
+  inline void clear_measured_relative_position();
+  static const int kMeasuredRelativePositionFieldNumber = 12;
+  inline float measured_relative_position(int index) const;
+  inline void set_measured_relative_position(int index, float value);
+  inline void add_measured_relative_position(float value);
+  inline const ::google::protobuf::RepeatedField< float >&
+      measured_relative_position() const;
+  inline ::google::protobuf::RepeatedField< float >*
+      mutable_measured_relative_position();
+  
   // @@protoc_insertion_point(class_scope:API.LocalisationFieldObject)
  private:
   inline void set_has_name();
@@ -1339,9 +1351,10 @@ class LocalisationFieldObject : public ::google::protobuf::Message {
   float heading_;
   float sd_heading_;
   bool lost_;
+  ::google::protobuf::RepeatedField< float > measured_relative_position_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
   
   friend void  protobuf_AddDesc_NUAPI_2eproto();
   friend void protobuf_AssignDesc_NUAPI_2eproto();
@@ -2937,6 +2950,31 @@ inline bool LocalisationFieldObject::lost() const {
 inline void LocalisationFieldObject::set_lost(bool value) {
   set_has_lost();
   lost_ = value;
+}
+
+// repeated float measured_relative_position = 12;
+inline int LocalisationFieldObject::measured_relative_position_size() const {
+  return measured_relative_position_.size();
+}
+inline void LocalisationFieldObject::clear_measured_relative_position() {
+  measured_relative_position_.Clear();
+}
+inline float LocalisationFieldObject::measured_relative_position(int index) const {
+  return measured_relative_position_.Get(index);
+}
+inline void LocalisationFieldObject::set_measured_relative_position(int index, float value) {
+  measured_relative_position_.Set(index, value);
+}
+inline void LocalisationFieldObject::add_measured_relative_position(float value) {
+  measured_relative_position_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< float >&
+LocalisationFieldObject::measured_relative_position() const {
+  return measured_relative_position_;
+}
+inline ::google::protobuf::RepeatedField< float >*
+LocalisationFieldObject::mutable_measured_relative_position() {
+  return &measured_relative_position_;
 }
 
 // -------------------------------------------------------------------

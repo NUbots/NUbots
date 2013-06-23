@@ -159,17 +159,17 @@ void DarwinSensors::copyFromHardwareCommunications()
         }
         else
         {
-            std::vector<int> failing_sensors;
-            sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
-            std::cout << "The following "
-                      << failing_sensors.size()
-                      << " sensors may be disconnected:" << std::endl;
-            for (std::vector<int>::iterator it = failing_sensors.begin();
-                it != failing_sensors.end(); ++it)
-            {
-                int sensor_id = *it;
-                sensor_read_manager_->PrintSensorResponseRate(sensor_id);
-            }
+//            std::vector<int> failing_sensors;
+//            sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
+//            std::cout << "The following "
+//                      << failing_sensors.size()
+//                      << " sensors may be disconnected:" << std::endl;
+//            for (std::vector<int>::iterator it = failing_sensors.begin();
+//                it != failing_sensors.end(); ++it)
+//            {
+//                int sensor_id = *it;
+//                sensor_read_manager_->PrintSensorResponseRate(sensor_id);
+//            }
         }
     }
 

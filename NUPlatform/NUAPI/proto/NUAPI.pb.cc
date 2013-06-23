@@ -219,7 +219,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SensorData));
   LocalisationFieldObject_descriptor_ = file->message_type(8);
-  static const int LocalisationFieldObject_offsets_[11] = {
+  static const int LocalisationFieldObject_offsets_[12] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, wm_x_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, wm_y_),
@@ -231,6 +231,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, heading_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, sd_heading_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, lost_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, measured_relative_position_),
   };
   LocalisationFieldObject_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -373,15 +374,16 @@ void protobuf_AddDesc_NUAPI_2eproto() {
     "\n\013temperature\030\t \001(\002\"\210\001\n\nSensorData\022\031\n\005mo"
     "tor\030\001 \003(\0132\n.API.Motor\022\"\n\raccelerometer\030\002"
     " \001(\0132\013.API.Vector\022\031\n\004gyro\030\003 \001(\0132\013.API.Ve"
-    "ctor\022 \n\013orientation\030\004 \001(\0132\013.API.Vector\"\277"
+    "ctor\022 \n\013orientation\030\004 \001(\0132\013.API.Vector\"\343"
     "\001\n\027LocalisationFieldObject\022\014\n\004name\030\001 \001(\t"
     "\022\014\n\004wm_x\030\002 \001(\002\022\014\n\004wm_y\030\003 \001(\002\022\014\n\004sd_x\030\004 \001"
     "(\002\022\014\n\004sd_y\030\005 \001(\002\022\r\n\005sr_xx\030\006 \001(\002\022\r\n\005sr_xy"
     "\030\007 \001(\002\022\r\n\005sr_yy\030\010 \001(\002\022\017\n\007heading\030\t \001(\002\022\022"
-    "\n\nsd_heading\030\n \001(\002\022\014\n\004lost\030\013 \001(\010\"B\n\014Loca"
-    "lisation\0222\n\014field_object\030\001 \003(\0132\034.API.Loc"
-    "alisationFieldObject\"\035\n\006Vector\022\023\n\013float_"
-    "value\030\001 \003(\002", 1531);
+    "\n\nsd_heading\030\n \001(\002\022\014\n\004lost\030\013 \001(\010\022\"\n\032meas"
+    "ured_relative_position\030\014 \003(\002\"B\n\014Localisa"
+    "tion\0222\n\014field_object\030\001 \003(\0132\034.API.Localis"
+    "ationFieldObject\"\035\n\006Vector\022\023\n\013float_valu"
+    "e\030\001 \003(\002", 1567);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "NUAPI.proto", &protobuf_RegisterTypes);
   Message::default_instance_ = new Message();
@@ -3587,6 +3589,7 @@ const int LocalisationFieldObject::kSrYyFieldNumber;
 const int LocalisationFieldObject::kHeadingFieldNumber;
 const int LocalisationFieldObject::kSdHeadingFieldNumber;
 const int LocalisationFieldObject::kLostFieldNumber;
+const int LocalisationFieldObject::kMeasuredRelativePositionFieldNumber;
 #endif  // !_MSC_VER
 
 LocalisationFieldObject::LocalisationFieldObject()
@@ -3671,6 +3674,7 @@ void LocalisationFieldObject::Clear() {
     sd_heading_ = 0;
     lost_ = false;
   }
+  measured_relative_position_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -3853,6 +3857,28 @@ bool LocalisationFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(101)) goto parse_measured_relative_position;
+        break;
+      }
+      
+      // repeated float measured_relative_position = 12;
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
+         parse_measured_relative_position:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 1, 101, input, this->mutable_measured_relative_position())));
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 input, this->mutable_measured_relative_position())));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(101)) goto parse_measured_relative_position;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -3934,6 +3960,12 @@ void LocalisationFieldObject::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(11, this->lost(), output);
   }
   
+  // repeated float measured_relative_position = 12;
+  for (int i = 0; i < this->measured_relative_position_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(
+      12, this->measured_relative_position(i), output);
+  }
+  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -4000,6 +4032,12 @@ void LocalisationFieldObject::SerializeWithCachedSizes(
   // optional bool lost = 11;
   if (has_lost()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(11, this->lost(), target);
+  }
+  
+  // repeated float measured_relative_position = 12;
+  for (int i = 0; i < this->measured_relative_position_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteFloatToArray(12, this->measured_relative_position(i), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -4073,6 +4111,13 @@ int LocalisationFieldObject::ByteSize() const {
     }
     
   }
+  // repeated float measured_relative_position = 12;
+  {
+    int data_size = 0;
+    data_size = 4 * this->measured_relative_position_size();
+    total_size += 1 * this->measured_relative_position_size() + data_size;
+  }
+  
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -4098,6 +4143,7 @@ void LocalisationFieldObject::MergeFrom(const ::google::protobuf::Message& from)
 
 void LocalisationFieldObject::MergeFrom(const LocalisationFieldObject& from) {
   GOOGLE_CHECK_NE(&from, this);
+  measured_relative_position_.MergeFrom(from.measured_relative_position_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_name()) {
       set_name(from.name());
@@ -4168,6 +4214,7 @@ void LocalisationFieldObject::Swap(LocalisationFieldObject* other) {
     std::swap(heading_, other->heading_);
     std::swap(sd_heading_, other->sd_heading_);
     std::swap(lost_, other->lost_);
+    measured_relative_position_.Swap(&other->measured_relative_position_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

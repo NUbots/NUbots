@@ -105,6 +105,8 @@ message LocalisationFieldObject {
 	optional float sd_heading = 10;
 
 	optional bool lost = 11;
+
+	repeated float measured_relative_position = 12;
 }
 
 message Localisation {
