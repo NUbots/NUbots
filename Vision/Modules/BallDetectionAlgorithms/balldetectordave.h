@@ -9,7 +9,6 @@
 #include <vector>
 #include "Vision/basicvisiontypes.h"
 #include "Vision/Modules/balldetector.h"
-#include "Vision/VisionTypes/greenhorizon.h"
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/VisionTools/classificationcolours.h"
 #include "Vision/VisionTypes/VisionFieldObjects/ball.h"

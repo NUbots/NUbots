@@ -72,6 +72,26 @@ public:
 
     double creationTime() const {return m_creation_time;}
 
+    /*!
+    @brief Outputs a binary representation of the IWeightedKalmanFilter object to a stream.
+    @param output The output stream.
+    @return The output stream.
+    */
+    virtual std::ostream& writeStreamBinary (std::ostream& output) const
+    {
+
+    }
+
+    /*!
+    @brief Reads in a IWeightedKalmanFilter object from the input stream.
+    @param input The input stream.
+    @return The input stream.
+    */
+    virtual std::istream& readStreamBinary (std::istream& input)
+    {
+
+    }
+
     // Multiple model stuff
     unsigned int m_split_option;    //!< Most recent option used for split from parent.
     std::vector<unsigned int> m_previous_decisions; //!< Stores the last decision for each of the ambiguous object types.

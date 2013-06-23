@@ -213,8 +213,8 @@ class SelfLocalisation: public TimestampedData
         void init();
 
         // Multiple Models Stuff
-        static const int c_MAX_MODELS_AFTER_MERGE = 8; // Max models at the end of the frame
-        static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*8+2); // Total models
+        static const int c_MAX_MODELS_AFTER_MERGE = 6; // Max models at the end of the frame
+        static const int c_MAX_MODELS = (c_MAX_MODELS_AFTER_MERGE*6+2); // Total models
 //        ModelContainer m_models;
 
         std::list<IWeightedKalmanFilter*> m_robot_filters;

@@ -200,7 +200,6 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     #endif
 
     /// @todo GET TEAM AND OPPONENT COLOURS AND CALL BELOW
-
     //m_goal_detector_ransac_edges->relabel(ransac_goals_edges, obstacles);
 
     m_blackboard->addGoals(ransac_goals_edges);

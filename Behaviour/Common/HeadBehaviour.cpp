@@ -47,6 +47,7 @@ bool HeadBehaviour::ObjectNotSeen() {
 /*! @brief Constructor initialises all parameters and initialises head behaviour (motivated) reinforcement learning agent.
   */
 HeadBehaviour::HeadBehaviour():Mrlagent(){
+    head_logic = HeadLogic::getInstance();
     int number_of_interesting_objects = head_logic->relevantObjects[0].size()+head_logic->relevantObjects[1].size()+head_logic->relevantObjects[2].size();
     
     for(int action = 0; action<number_of_interesting_objects; action++){        
@@ -60,7 +61,6 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
     NUCameraData cameraSpecs(std::string(CONFIG_DIR) + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
     m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
-    head_logic = HeadLogic::getInstance();
     landmarkSeenFrequency = 1200;
     ballSeenFrequency = 800;
     lastVisionPolicy = -1;
@@ -584,6 +584,7 @@ void HeadBehaviour::lookForFieldObjects(){
 /*! @brief Performs post processing and adds a head job to the joblist
 */
 void HeadBehaviour::update(){
+    std::cout << "Head Behaviour Action: " << m_current_action << std::endl;
     makeVisionChoice(current_policy);
     if(m_objects_to_view[m_current_action]->isObjectVisible()){
 

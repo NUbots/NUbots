@@ -1,6 +1,7 @@
 #include "balldetectordave.h"
 #include "Vision/visionconstants.h"
 #include "Vision/visionblackboard.h"
+#include "Vision/VisionTypes/greenhorizon.h"
 #include "debug.h"
 #include "debugverbosityvision.h"
 
