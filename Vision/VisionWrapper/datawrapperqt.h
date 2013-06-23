@@ -108,7 +108,7 @@ public:
 private:
     DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, std::string istrm, std::string sstrm, std::string cfg, std::string lname);
     ~DataWrapper();
-    bool updateFrame(bool forward = true);
+    bool updateFrame(bool forward = true, int frame_no = 0);
     bool loadLUTFromFile(const std::string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.

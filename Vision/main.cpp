@@ -188,7 +188,7 @@ int qt()
 {
 #ifndef TARGET_IS_RPI
     int argc = 0;
-    char** argv;
+    char** argv = NULL;
     MyApplication app(argc, argv);
 #endif
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();

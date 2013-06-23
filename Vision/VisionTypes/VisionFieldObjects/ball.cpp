@@ -117,7 +117,7 @@ bool Ball::check() const
         m_location.neckRelativeRadial.x > VisionConstants::MAX_BALL_DISTANCE) {
         #if VISION_BALL_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: too far away" << std::endl;
-            debug << "\td2p: " << m_location.relativeRadial.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << std::endl;
+            debug << "\tdistance: " << m_location.neckRelativeRadial.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << std::endl;
         #endif
         return false;
     }

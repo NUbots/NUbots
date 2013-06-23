@@ -248,7 +248,8 @@ bool Goal::calculatePositions()
     else if(off_side)
     {
         // we can only use d2p
-        m_location = d2p_loc;
+        return false;
+        //m_location = d2p_loc;
     }
     else
     {

@@ -122,7 +122,7 @@
        <item>
         <widget class="QPushButton" name="prev_pb">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="text">
           <string>Previous</string>

@@ -32,8 +32,8 @@ void GoalDetector::relabel(std::vector<Goal>& goals, std::vector<Obstacle> obsta
         double avg_goal_dist = 0.5 * (goals[0].getLocation().neckRelativeRadial.x + goals[1].getLocation().neckRelativeRadial.x);
         // Count number of team or opponent obstacles in goals
         for(const Obstacle& obst : obstacles) {
-            if(obst.getLocationPixels().x > goals[left_index].getLocationPixels.x &&
-               obst.getLocationPixels().x < goals[right_index].getLocationPixels.x &&
+            if(obst.getLocationPixels().x > goals[left_index].getLocationPixels().x &&
+               obst.getLocationPixels().x < goals[right_index].getLocationPixels().x &&
                obst.getLocation().neckRelativeRadial.x < avg_goal_dist + 100 &&
                obst.getLocation().neckRelativeRadial.x > avg_goal_dist - 100 )
             {

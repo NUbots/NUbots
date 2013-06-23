@@ -37,7 +37,7 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, std::stri
     kinematics_horizon.setLine(0, 1, 0);
     numFramesDropped = numFramesProcessed = 0;
 
-    switch(method) {
+    switch(m_method) {
     case STREAM:
         streamname = istrm;
         debug << "openning image stream: " << streamname << std::endl;
@@ -92,6 +92,16 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, std::stri
 
 DataWrapper::~DataWrapper()
 {
+    switch(m_method) {
+    case STREAM:
+        imagestrm.close();
+        if(using_sensors)
+            sensorstrm.close();
+        break;
+    case CAMERA:
+        delete m_camera;
+        break;
+    }
 }
 
 DataWrapper* DataWrapper::getInstance()
@@ -634,7 +644,7 @@ void DataWrapper::plotHistogram(std::string name, const Histogram1D& hist, Colou
     }
 }
 
-bool DataWrapper::updateFrame(bool forward)
+bool DataWrapper::updateFrame(bool forward, int frame_no)
 {
     if(m_ok) {
         gui->clearLayers();
@@ -663,9 +673,14 @@ bool DataWrapper::updateFrame(bool forward)
             }
             if(using_sensors) {
                 try {
-                    if(!forward)
-                        imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), std::ios_base::cur);
-                    sensorstrm >> m_sensor_data;
+                    if(!forward) {
+                        sensorstrm.seekg(0, std::ios_base::beg);
+                        for(int i=0; i<frame_no; i++)
+                            sensorstrm >> m_sensor_data;
+                    }
+                    else {
+                        sensorstrm >> m_sensor_data;
+                    }
                 }
                 catch(std::exception& e){
                     errorlog << "Sensor stream error: " << e.what() << std::endl;

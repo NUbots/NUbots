@@ -177,17 +177,17 @@ std::vector<Obstacle> ObstacleDetectionCH::run()
         if(cyan_count >= MIN_COLOUR_THRESHOLD && magenta_count <= MAX_OTHER_COLOUR_THRESHOLD)
         {
             // cyan robot
-            obst.m_type = Obstacle::CYAN_ROBOT;
+            obst.m_colour = TEAM_CYAN_COLOUR;
         }
         else if(magenta_count >= MIN_COLOUR_THRESHOLD && cyan_count <= MAX_OTHER_COLOUR_THRESHOLD)
         {
             // magenta robot
-            obst.m_type = Obstacle::MAGENTA_ROBOT;
+            obst.m_colour = TEAM_MAGENTA_COLOUR;
         }
         else
         {
             // unknown obstacle
-            obst.m_type = Obstacle::UNKNOWN_OBSTACLE;
+            obst.m_colour = UNKNOWN_COLOUR;
         }
     }
 
