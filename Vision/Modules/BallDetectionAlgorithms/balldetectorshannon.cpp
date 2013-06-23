@@ -5,13 +5,13 @@
 #include "debugverbosityvision.h"
 
 ////for stat
-//#include <boost/foreach.hpp>
-//#include <boost/accumulators/accumulators.hpp>
-//#include <boost/accumulators/statistics/stats.hpp>
-//#include <boost/accumulators/statistics/mean.hpp>
-//#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/foreach.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
 
-//using namespace boost::accumulators;
+using namespace boost::accumulators;
 
 BallDetectorShannon::BallDetectorShannon() {}
 
