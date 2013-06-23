@@ -144,16 +144,18 @@ bool MotionScript2013::SaveToConfigSystem(const std::string& path)
 
     for(int i = 0; i < script_frames_.size(); i++)
     {
+        std::cout << "save frame " << i << std::endl;
+
         auto *frame = script_frames_[i];
 
         std::stringstream frame_ss;
-        frame_ss << path << "frame_" << i;
+        frame_ss << path << ".frame_" << i;
         const std::string frame_path = frame_ss.str();
-        std::cout<<"Saving Frame :" << frame_path << std::endl;
+        std::cout << "    saving to :" << frame_path << std::endl;
         frame->SaveToConfigSystem(frame_path);
     }
 
-    return true;
+    return config->SaveConfiguration("defaultConfig");
 }
 
 bool MotionScriptFrame::SaveToConfigSystem(const std::string& frame_path)
@@ -169,14 +171,14 @@ bool MotionScriptFrame::SaveToConfigSystem(const std::string& frame_path)
         auto &joint = key_value.second;
 
         std::stringstream joint_ss;
-        joint_ss << frame_path << "joint_" << joint.GetServoId();
+        joint_ss << frame_path << ".joint_" << joint.GetServoId();
         const std::string joint_path = joint_ss.str();
 
         double position = joint.GetPosition();
         config->CreateParam(joint_path, "position", position);
         config->SetValue(joint_path, "position", position);
 
-        double gain = joint.GetPosition();
+        double gain = joint.GetGain();
         config->CreateParam(joint_path, "gain", gain);
         config->SetValue(joint_path, "gain", gain);
     }
@@ -220,7 +222,7 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
         script->AddFrame(frame);
     }
     
-    return nullptr;//script;
+    return script;
 }
 
 MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
@@ -230,7 +232,7 @@ MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
     ConfigSystem::ConfigManager* config = Blackboard->Config;
     
     std::stringstream frame_path_ss;
-    frame_path_ss << path << "frame_" << frame_number;
+    frame_path_ss << path << ".frame_" << frame_number;
 
     double duration;
     bool success = config->ReadValue(frame_path_ss.str(), "duration", &duration);
@@ -253,7 +255,7 @@ MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
         frame->AddDescriptor(j, descriptor);
     }
 
-     return nullptr;//frame;
+     return frame;
 }
 
 bool MotionScriptFrame::LoadJointFromConfigSystem(
@@ -264,7 +266,7 @@ bool MotionScriptFrame::LoadJointFromConfigSystem(
     ConfigSystem::ConfigManager* config = Blackboard->Config;
     
     std::stringstream joint_path_ss;
-    joint_path_ss << frame_path << "joint_" << servo_id;
+    joint_path_ss << frame_path << ".joint_" << servo_id;
 
     double position;
     bool success = config->ReadValue(joint_path_ss.str(), "position", &position);

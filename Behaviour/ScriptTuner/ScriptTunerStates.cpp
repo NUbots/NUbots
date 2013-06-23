@@ -23,26 +23,35 @@ ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) :
 
 void ScriptTunerState::doState()
 {
-    std::cout<< "Load Script - Type File Name (script must be in "
-             << file_path_ << "): "<< std::endl;
-    char file[256];
-    std::cin.getline(file,256);
-    file_name_ = (string)file;
+    std::cout << "Load Script - Type File Name (script must be in "
+              << file_path_ << "): "<< std::endl;
 
-    if(!file_name_.compare("exit") or !file_name_.compare("quit")) {
-        std::cout<< "Shutting down script tuner."<< std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-        std::cout<< "Just kidding. That would be useless."<< std::endl;
-        return;
+    char str[256];
+    std::cin.getline(str, 256);
+    auto command = ScriptTunerCommand::ParseCommand(str);
+
+    switch(command.command_type())
+    {
+        case ScriptTunerCommand::CommandType::kLoadScript: {
+            HandleLoadScriptCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kLoadOldScript: {
+            HandleLoadOldScriptCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kExit: {
+            std::cout << "Shutting down script tuner." << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            std::cout << "Just kidding. That would be useless."<< std::endl;
+            return;
+        } break;
+        default: {
+            PrintCommandError(command);
+            return;
+        } break;
     }
 
-    //! Sets Left, and use this afterwards.
-    auto loaded = loadScript(file_name_);
-
-    if(!loaded) {
-        std::cout <<"File not found! Try again!" << std::endl;
+    if(script_ == nullptr)
         return;
-    }
 
     bool exit_script_loop = false;
     while(!exit_script_loop) {
@@ -56,6 +65,9 @@ void ScriptTunerState::doState()
 
         switch(command.command_type())
         {
+            case ScriptTunerCommand::CommandType::kPrintScript: {
+                HandlePrintScriptCommand(command);
+            } break;
             case ScriptTunerCommand::CommandType::kPlay: {
                 HandlePlayCommand(command);
             } break;
@@ -75,6 +87,63 @@ void ScriptTunerState::doState()
             } break;
         }
     }
+}
+
+void ScriptTunerState::HandlePrintScriptCommand(ScriptTunerCommand command)
+{
+    std::cout << "Name: '" << file_name_ << "'." <<  std::endl;
+    std::cout << "Duration = " << script_->GetScriptDuration() << "." <<  std::endl;
+    
+    int frame_count = script_->GetFrameCount();
+    std::cout << "FrameCount = " << frame_count << "." <<  std::endl;
+
+    for(int i = 0; i < frame_count; i++)
+    {
+        std::cout << "Frame " << i << ":" << std::endl;
+
+        script_->SeekFrame(i);
+        auto* frame = script_->GetCurrentFrame();
+
+        double duration = frame->GetDuration();
+        std::cout << "  Duration = " << duration << "." << std::endl;
+
+        for(int j = 0; j < Robot::JointData::NUMBER_OF_JOINTS; j++)
+        {
+            ScriptJointDescriptor descriptor;
+            bool success = frame->GetDescriptor(j, &descriptor);
+
+            if(!success)
+                continue;
+
+            float position = descriptor.GetPosition();
+            float gain = descriptor.GetGain();
+            float servo_id = descriptor.GetServoId();
+
+            std::cout << "  Joint " << j << ":" << std::endl;
+            std::cout << "    servo_id = " << servo_id << "." << std::endl;
+            std::cout << "    position = " << position << "." << std::endl;
+            std::cout << "    gain = " << gain << "." << std::endl;
+        }
+    }
+}
+
+void ScriptTunerState::HandleLoadOldScriptCommand(ScriptTunerCommand command)
+{
+    file_name_ = command.script_path();
+    script_ = MotionScript2013::LoadOldScript(file_path_ + file_name_);
+
+    if(script_ == nullptr)
+        std::cout << "File not found! Try again!" << std::endl;
+}
+
+void ScriptTunerState::HandleLoadScriptCommand(ScriptTunerCommand command)
+{
+    file_name_ = command.script_path();
+    script_ = MotionScript2013::LoadFromConfigSystem(
+        "motion.scripts." + file_name_);
+
+    if(script_ == nullptr)
+        std::cout << "Load from config system failed!" << std::endl;
 }
 
 void ScriptTunerState::PrintCommandError(ScriptTunerCommand command)
@@ -98,13 +167,13 @@ void ScriptTunerState::HandleEditCommand(ScriptTunerCommand command)
     
     while(script_active_) { 
         script_->ApplyCurrentFrameToRobot(actionators_data_);      
-
+        PrintFrameInfo();
         editCurrentFrame();
     }
 }
 
 void ScriptTunerState::editCurrentFrame() {
-    
+    std::cout<<"> ";
     char str[256];
     std::cin.getline(str, 256);
     auto command = ScriptTunerCommand::ParseCommand(str);
@@ -141,6 +210,9 @@ void ScriptTunerState::editCurrentFrame() {
         } break;
         case ScriptTunerCommand::CommandType::kJointOn: {
             HandleJointOnCommand(command);
+        } break;
+         case ScriptTunerCommand::CommandType::kAllOff: {
+            HandleAllOffCommand(command);
         } break;
         case ScriptTunerCommand::CommandType::kJointPosition: {
             HandleJointPositionCommand(command);
@@ -202,7 +274,7 @@ void ScriptTunerState::HandleNextFrameCommand(ScriptTunerCommand command)
 {
     std::cout << "Moving to next frame."<< std::endl;    
     script_->SeekFrame(script_->GetCurrentFrameIndex() + 1);
-    PrintFrameInfo();
+    
 }
 
 void ScriptTunerState::HandleNewFrameCommand(ScriptTunerCommand command)
@@ -217,7 +289,7 @@ void ScriptTunerState::HandleFrameSeekCommand(ScriptTunerCommand command)
 {
     std::cout << "Seek new frame."<< std::endl;
     script_->SeekFrame(command.frame_number());
-    PrintFrameInfo();
+    
 }
 
 void ScriptTunerState::HandleFrameDurationCommand(ScriptTunerCommand command)
@@ -233,6 +305,13 @@ void ScriptTunerState::HandleAllOnCommand(ScriptTunerCommand command)
     std::cout << "Turning all motor torques on."<< std::endl;
     turnOnAllMotors();
 }
+
+void ScriptTunerState::HandleAllOffCommand(ScriptTunerCommand command)
+{
+    std::cout << "Turning all motor torques off."<< std::endl;
+    turnOffAllMotors();
+}
+
 
 void ScriptTunerState::HandleJointOnCommand(ScriptTunerCommand command)
 {
@@ -270,13 +349,6 @@ void ScriptTunerState::HandleJointPositionGainCommand(ScriptTunerCommand command
     } catch (const std::out_of_range& e) {
         std::cout << "There is no such motor. Try again." << std::endl;
     }  
-}
-
-bool ScriptTunerState::loadScript(string filename)
-{    
-    script_ = MotionScript2013::LoadOldScript(file_path_+ filename);
-   // script_ = MotionScript2013::LoadToConfigSystem("motion.scripts."+ filename);
-    return script_ != nullptr;
 }
 
 void ScriptTunerState::saveManuallyMovedMotors()
@@ -374,5 +446,14 @@ void ScriptTunerState::turnOnAllMotors() {
         if(motorTorqueIsOff(motor_id)) {
             turnOnMotor(motor_id);
         }
+    }
+}
+
+void ScriptTunerState::turnOffAllMotors() {
+    for(auto key_value:string_id_to_int_id_) {
+        auto motor_id = key_value.second;
+
+        turnOffMotor(motor_id);
+        
     }
 }

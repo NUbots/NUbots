@@ -61,23 +61,27 @@ class ScriptTunerCommand
 {
 public:
     enum class CommandType {
-        kUnknown,       //!< Unknown command.
-        kHelp,          //!< Prints help for the ScriptTuner.
-        kExit,          //!< Exit the script tuner.
-        kPlay,          //!< Plays the current script.
-        kEdit,          //!< Begin editing the current sctipr.
-        kNextFrame,     //!< Move to the next frame.
-        kNewFrame,      //!< Creates a new frame after the current frame.
-        kFrameSeek,     //!< Seek to a given frame.
-        kFrameDuration, //!< Set the duration of the current frame.
-        kAllOn,         //!< Turn on all motors.
-        kJointPosition, //!< Modify the position of a given joint.
-        kJointGain,     //!< Modify the gain of a given joint.
-        kJointPositionGain,     //!< Modify the gain of a given joint.
-        kJointOff,      //!< Temporarily turn off a given joint, for editing.
-        kJointOn,       //!< Turn on a given joint.
-        kSaveFrame,     //!< Save the current frame.
-        kSaveScript,    //!< Save the current script.
+        kUnknown,           //!< Unknown command.
+        kHelp,              //!< Prints help for the ScriptTuner.
+        kExit,              //!< Exit the script tuner.
+        kPlay,              //!< Plays the current script.
+        kEdit,              //!< Begin editing the current sctipr.
+        kNextFrame,         //!< Move to the next frame.
+        kNewFrame,          //!< Creates a new frame after the current frame.
+        kFrameSeek,         //!< Seek to a given frame.
+        kFrameDuration,     //!< Set the duration of the current frame.
+        kAllOn,             //!< Turn on all motors.
+        kJointPosition,     //!< Modify the position of a given joint.
+        kJointGain,         //!< Modify the gain of a given joint.
+        kJointPositionGain, //!< Modify the gain of a given joint.
+        kJointOff,          //!< Temporarily turn off a given joint, for editing.
+        kJointOn,           //!< Turn on a given joint.
+        kSaveFrame,         //!< Save the current frame.
+        kSaveScript,        //!< Save the current script.
+        kLoadScript,        //!< Load a script from the specified path in the config system.
+        kLoadOldScript,     //!< Load an old script from the given path.
+        kPrintScript,       //!< Prints a text representation of the script.
+        kAllOff,            //!< Turns all torques off for manual editing.
     };
 
     static int MapJointInitialismToServoId(const std::string& initials)
@@ -109,7 +113,7 @@ public:
     {
         std::stringstream command_ss;
         command_ss << command;
-
+        
         std::string arg0;
         command_ss >> arg0;
 
@@ -117,10 +121,30 @@ public:
             ScriptTunerCommand c;
             c.set_command_type(CommandType::kHelp);
             return c;
-        } else if(!arg0.compare("play")) {
+        } else if(!arg0.compare("printscript")) {
             ScriptTunerCommand c;
-            c.set_command_type(CommandType::kPlay);
+            c.set_command_type(CommandType::kPrintScript);
             return c;
+        } else if(!arg0.compare("load")) {
+            ScriptTunerCommand c;
+            std::string script_path;
+            if(!(command_ss >> script_path))
+                return c;
+            c.set_command_type(CommandType::kLoadScript);
+            c.set_script_path(script_path);
+            return c;
+        } else if(!arg0.compare("loadold")) {
+            ScriptTunerCommand c;
+            std::string script_path;
+            if(!(command_ss >> script_path))
+                return c;
+            c.set_command_type(CommandType::kLoadOldScript);
+            c.set_script_path(script_path);
+            return c;
+        } else if(!arg0.compare("play")) {
+        ScriptTunerCommand c;
+        c.set_command_type(CommandType::kPlay);
+        return c;
         } else if(!arg0.compare("edit")) {
             ScriptTunerCommand c;
             c.set_command_type(CommandType::kEdit);
@@ -165,18 +189,28 @@ public:
             ScriptTunerCommand c;
             c.set_command_type(CommandType::kAllOn);
             return c;
+        } else if(!arg0.compare("alloff")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kAllOff);
+            return c;
         } else if(!arg0.compare("on")) {
             ScriptTunerCommand c;
-            int joint_id;
-            if(!(command_ss >> joint_id))
+            std::string joint_initials;
+            if(!(command_ss >> joint_initials))
+                return c;
+            int joint_id = MapJointInitialismToServoId(joint_initials);
+            if(joint_id==Robot::JointData::ID_UNKNOWN) 
                 return c;
             c.set_command_type(CommandType::kJointOn);
             c.set_joint_number(joint_id);
             return c;
         } else if(!arg0.compare("off")) {
             ScriptTunerCommand c;
-            int joint_id;
-            if(!(command_ss >> joint_id))
+            std::string joint_initials;
+            if(!(command_ss >> joint_initials))
+                return c;
+            int joint_id = MapJointInitialismToServoId(joint_initials);
+            if(joint_id==Robot::JointData::ID_UNKNOWN) 
                 return c;
             c.set_command_type(CommandType::kJointOff);
             c.set_joint_number(joint_id);
@@ -263,6 +297,7 @@ public:
     bool disable() { return disable_; }
     int joint_number() { return joint_number_; }
     int frame_number() { return frame_number_; }
+    std::string script_path() { return script_path_; }
 
     void set_command_type(CommandType command_type) { command_type_ = command_type; }
     void set_position(float position) { position_ = position; }
@@ -271,6 +306,7 @@ public:
     void set_disable(bool disable) { disable_ = disable; }
     void set_joint_number(int joint_number) { joint_number_ = joint_number; }
     void set_frame_number(int frame_number) { frame_number_ = frame_number; }
+    void set_script_path(std::string script_path) { script_path_ = script_path; }
 
 private:
     CommandType command_type_;
@@ -280,6 +316,7 @@ private:
     bool disable_;
     int joint_number_;
     int frame_number_;
+    std::string script_path_;
 };
 
 class ScriptTunerSubState : public BehaviourState
@@ -294,6 +331,9 @@ protected:
 class ScriptTunerState : public ScriptTunerSubState
 {
 private:
+    void HandlePrintScriptCommand(ScriptTunerCommand command);
+    void HandleLoadScriptCommand(ScriptTunerCommand command);
+    void HandleLoadOldScriptCommand(ScriptTunerCommand command);
     void HandleEditCommand(ScriptTunerCommand command);
     void HandlePlayCommand(ScriptTunerCommand command);
     void HandleSaveFrameCommand(ScriptTunerCommand command);
@@ -310,6 +350,7 @@ private:
     void HandleJointGainCommand(ScriptTunerCommand command);
     void HandleJointPositionGainCommand(ScriptTunerCommand command);
     void PrintCommandError(ScriptTunerCommand command);
+    void HandleAllOffCommand(ScriptTunerCommand command);
 
     std::map<string, int> string_id_to_int_id_; 
     std::string file_name_;
@@ -374,6 +415,10 @@ public:
     /*! @brief Turns on all motors and marks those without torque for saving.
     */
     void turnOnAllMotors();
+
+    /*! @brief Turns of all motors.
+    */
+    void turnOffAllMotors();
 
 
 
