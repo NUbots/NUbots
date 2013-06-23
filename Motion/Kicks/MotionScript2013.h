@@ -89,8 +89,7 @@ private:
 class MotionScript2013
 {
 public:
-    MotionScript2013() : kick_enable_time_(0),
-                         script_start_time_(0),
+    MotionScript2013() : script_start_time_(0),
                          current_frame_index_(0) { }
     ~MotionScript2013();
 
@@ -109,6 +108,9 @@ public:
     //! Advances this script to the next frame.
     //! (does not apply the next frame)
     void AdvanceToNextFrame();
+
+    //!Plays entire script from the current frame.
+    void PlayScript(NUActionatorsData* actionators_data);
 
     //! Seeks to the given frame, if it exists.
     //! (does not apply the frame to the robot)
@@ -154,7 +156,7 @@ public:
     void DuplicateFrame(int index);
 
 private:
-    float kick_enable_time_;
+    
     float script_start_time_;
 
     int current_frame_index_;

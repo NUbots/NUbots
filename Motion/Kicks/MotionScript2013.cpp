@@ -89,7 +89,7 @@ void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
                 duration_,
                 joint.GetPosition(),
                 joint.GetGain());
-            std::cout<< "Duration applied to robot:"<<duration_<<std::endl;
+            //std::cout<< "Duration applied to robot:"<<duration_<<std::endl;
         }
     }
 }
@@ -387,7 +387,7 @@ MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<vector<double
         for(int frame_number = 0; frame_number<times[motor_index].size();frame_number++){
             if(positions[motor_index].empty()) 
                 continue;
-            if(new_frames.size()<times[0].size()){
+            if(new_frames.size()<times[motor_index].size()){
                 new_frames.push_back(new MotionScriptFrame());                
                 new_frames[frame_number]->SetDuration(frame_number==0 ?
                                                          times[motor_index][frame_number]:
@@ -453,7 +453,23 @@ void MotionScript2013::Reset()
 
 void MotionScript2013::StartScript(NUActionatorsData* actionators_data)
 {
-    kick_enable_time_ = actionators_data->CurrentTime;
+    script_start_time_ = actionators_data->CurrentTime;    
+}
+
+void MotionScript2013::PlayScript(NUActionatorsData* actionators_data){
+    StartScript(actionators_data);
+    float current_time = actionators_data->CurrentTime;
+    while(!HasCompleted(current_time)){        
+        current_time = actionators_data->CurrentTime;       
+
+        // If it's time for the next frame
+        if(current_time >= GetNextFrameTime(current_time))
+        {
+            // Schedule the next joint positions
+            AdvanceToNextFrame();
+            ApplyCurrentFrameToRobot(actionators_data);
+        }
+    }
 }
 
 bool MotionScript2013::HasCompleted(float current_time)

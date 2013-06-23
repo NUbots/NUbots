@@ -94,74 +94,75 @@ void ScriptTunerState::HandleEditCommand(ScriptTunerCommand command)
     script_active_ = true;
     
     while(script_active_) { 
-        script_->ApplyCurrentFrameToRobot(actionators_data_);
-
-        std::cout << "Frame number " << script_->GetCurrentFrameIndex() 
-                  << " out of " << script_->GetFrameCount()
-                  << " applied." << std::endl;
-        auto* current_frame = script_->GetCurrentFrame();
-        std::cout << "Frame duration is "<< current_frame->GetDuration()
-                  << " seconds." << std::endl;               
-        std::cout << "---------------------------------------------------" << std::endl;
+        script_->ApplyCurrentFrameToRobot(actionators_data_);      
 
         editCurrentFrame();
     }
 }
 
 void ScriptTunerState::editCurrentFrame() {
-    while(true)
-    {
-        char str[256];
-        std::cin.getline(str, 256);
-        auto command = ScriptTunerCommand::ParseCommand(str);
+    
+    char str[256];
+    std::cin.getline(str, 256);
+    auto command = ScriptTunerCommand::ParseCommand(str);
 
-        switch(command.command_type())
-        {
-            case ScriptTunerCommand::CommandType::kSaveFrame: {
-                HandleSaveFrameCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kSaveScript: {
-                HandleSaveScriptCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kExit: {
-                HandleExitScriptCommand(command);
-                return;
-            } break;
-            case ScriptTunerCommand::CommandType::kNextFrame: {
-                HandleNextFrameCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kNewFrame: {
-                HandleNewFrameCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kFrameSeek: {
-                HandleFrameSeekCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kFrameDuration: {
-                HandleFrameDurationCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kAllOn: {
-                HandleAllOnCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kJointOff: {
-                HandleJointOffCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kJointOn: {
-                HandleJointOnCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kJointPosition: {
-                HandleJointPositionCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kJointGain: {
-                HandleJointGainCommand(command);
-            } break;
-            case ScriptTunerCommand::CommandType::kJointPositionGain: {
-                HandleJointPositionGainCommand(command);
-            } break;
-            default: {
-                PrintCommandError(command);
-            } break;
-        }
+    switch(command.command_type())
+    {
+        case ScriptTunerCommand::CommandType::kSaveFrame: {
+            HandleSaveFrameCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kSaveScript: {
+            HandleSaveScriptCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kExit: {
+            HandleExitScriptCommand(command);
+            return;
+        } break;
+        case ScriptTunerCommand::CommandType::kNextFrame: {
+            HandleNextFrameCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kNewFrame: {
+            HandleNewFrameCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kFrameSeek: {
+            HandleFrameSeekCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kFrameDuration: {
+            HandleFrameDurationCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kAllOn: {
+            HandleAllOnCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kJointOff: {
+            HandleJointOffCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kJointOn: {
+            HandleJointOnCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kJointPosition: {
+            HandleJointPositionCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kJointGain: {
+            HandleJointGainCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kJointPositionGain: {
+            HandleJointPositionGainCommand(command);
+        } break;
+        default: {
+            PrintCommandError(command);
+        } break;
     }
+    
+}
+
+void ScriptTunerState::PrintFrameInfo(){
+    std::cout << "Frame number " << script_->GetCurrentFrameIndex()+1
+              << " out of " << script_->GetFrameCount()
+              << " applied." << std::endl;
+    auto* current_frame = script_->GetCurrentFrame();
+    std::cout << "Frame duration is "<< current_frame->GetDuration()
+              << " seconds." << std::endl;               
+    std::cout << "---------------------------------------------------" << std::endl;
 }
 
 void ScriptTunerState::HandleSaveFrameCommand(ScriptTunerCommand command)
@@ -189,8 +190,9 @@ void ScriptTunerState::HandleExitScriptCommand(ScriptTunerCommand command)
 
 void ScriptTunerState::HandleNextFrameCommand(ScriptTunerCommand command)
 {
-    std::cout << "Moving to next frame."<< std::endl;
+    std::cout << "Moving to next frame."<< std::endl;    
     script_->SeekFrame(script_->GetCurrentFrameIndex() + 1);
+    PrintFrameInfo();
 }
 
 void ScriptTunerState::HandleNewFrameCommand(ScriptTunerCommand command)
@@ -203,7 +205,9 @@ void ScriptTunerState::HandleNewFrameCommand(ScriptTunerCommand command)
 
 void ScriptTunerState::HandleFrameSeekCommand(ScriptTunerCommand command)
 {
+    std::cout << "Seek new frame."<< std::endl;
     script_->SeekFrame(command.frame_number());
+    PrintFrameInfo();
 }
 
 void ScriptTunerState::HandleFrameDurationCommand(ScriptTunerCommand command)
@@ -287,7 +291,7 @@ void ScriptTunerState::HandlePlayCommand(ScriptTunerCommand command)
 {
     std::cout << "Playing script from beginning in real time."<< std::endl;
     std::cout<< "==================================================="<< std::endl;
-    script_->StartScript(actionators_data_);
+    script_->PlayScript(actionators_data_);
 }
 
 

@@ -180,6 +180,10 @@ public:
             c.set_command_type(CommandType::kJointOff);
             c.set_joint_number(joint_id);
             return c;
+        } else if(!arg0.compare("next")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kNextFrame);
+            return c;    
         } else {
             ScriptTunerCommand c;
             float position;
@@ -312,6 +316,8 @@ public:
     BehaviourState* nextState() {return m_provider->m_state;}
     void doState();
 
+    void PrintFrameInfo();
+
     void editCurrentFrame();
 
     /*! @brief Loads a motion script from a file into the member variables frames and times */
@@ -351,6 +357,8 @@ public:
     /*! @brief Turns on all motors and marks those without torque for saving.
     */
     void turnOnAllMotors();
+
+
 
 };
 
