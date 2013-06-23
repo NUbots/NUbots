@@ -89,8 +89,13 @@ void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
                 MapServoIdToNUDataId(joint.GetServoId()),
                 duration_,
                 joint.GetPosition(),
-                joint.GetGain());
-            //std::cout<< "Duration applied to robot:"<<duration_<<std::endl;
+                joint.GetGain());            
+        } else {
+            actionators_data->add(
+                MapServoIdToNUDataId(joint.GetServoId()),
+                duration_,
+                joint.GetPosition(),
+                0);
         }
     }
 }

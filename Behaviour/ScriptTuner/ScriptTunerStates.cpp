@@ -9,7 +9,7 @@ using std::string;
 
 
 ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : 
-    ScriptTunerSubState(provider), string_id_to_int_id_(), script_()
+    ScriptTunerSubState(provider), script_()
 {
     std::cout<< "==================================================="<< std::endl;
     std::cout<< "--------------Welcome to Script Tuner--------------"<< std::endl;
@@ -283,6 +283,7 @@ void ScriptTunerState::HandleNewFrameCommand(ScriptTunerCommand command)
     // Second_argument should be time to complete the new frame.
     // New frame should be identical to previous.
     script_->DuplicateFrame(script_->GetCurrentFrameIndex());
+    script_->AdvanceToNextFrame();
 }
 
 void ScriptTunerState::HandleFrameSeekCommand(ScriptTunerCommand command)
@@ -420,8 +421,9 @@ void ScriptTunerState::turnOnMotor(int  motor_id){
 
     MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
-    current_frame->GetDescriptor(motor_id, &descriptor);                
-    descriptor.SetGain(false);                
+    current_frame->GetDescriptor(motor_id, &descriptor);   
+    //Where is the read.             
+    descriptor.SetDisable(false);                
     current_frame->AddDescriptor(motor_id, descriptor);    
 }
 
@@ -440,20 +442,15 @@ bool ScriptTunerState::motorTorqueIsOff(int motor_id){
 }
 
 void ScriptTunerState::turnOnAllMotors() {
-    for(auto key_value:string_id_to_int_id_) {
-        auto motor_id = key_value.second;
-
-        if(motorTorqueIsOff(motor_id)) {
-            turnOnMotor(motor_id);
+    for(int i = 1; i<Robot::JointData::NUMBER_OF_JOINTS;i++){
+        if(motorTorqueIsOff(i)) {
+            turnOnMotor(i);
         }
     }
 }
 
 void ScriptTunerState::turnOffAllMotors() {
-    for(auto key_value:string_id_to_int_id_) {
-        auto motor_id = key_value.second;
-
-        turnOffMotor(motor_id);
-        
-    }
+    for(int i = 1; i<Robot::JointData::NUMBER_OF_JOINTS;i++){
+        turnOffMotor(i);
+    }        
 }

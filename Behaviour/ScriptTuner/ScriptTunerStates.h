@@ -113,7 +113,7 @@ public:
     {
         std::stringstream command_ss;
         command_ss << command;
-        
+
         std::string arg0;
         command_ss >> arg0;
 
@@ -142,9 +142,9 @@ public:
             c.set_script_path(script_path);
             return c;
         } else if(!arg0.compare("play")) {
-        ScriptTunerCommand c;
-        c.set_command_type(CommandType::kPlay);
-        return c;
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kPlay);
+            return c;
         } else if(!arg0.compare("edit")) {
             ScriptTunerCommand c;
             c.set_command_type(CommandType::kEdit);
@@ -175,7 +175,7 @@ public:
             if(!(command_ss >> frame_number))
                 return c;
             c.set_command_type(CommandType::kFrameSeek);
-            c.set_frame_number(frame_number);
+            c.set_frame_number(frame_number-1);
             return c;
         } else if(!arg0.compare("duration")) {
             ScriptTunerCommand c;
@@ -352,7 +352,7 @@ private:
     void PrintCommandError(ScriptTunerCommand command);
     void HandleAllOffCommand(ScriptTunerCommand command);
 
-    std::map<string, int> string_id_to_int_id_; 
+    
     std::string file_name_;
     std::string file_path_;
 
