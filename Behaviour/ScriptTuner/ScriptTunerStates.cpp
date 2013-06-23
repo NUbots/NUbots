@@ -9,35 +9,35 @@ using std::string;
 
 
 ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : 
-    ScriptTunerSubState(provider), string_id_to_int_id(), script()
+    ScriptTunerSubState(provider), string_id_to_int_id_(), script_()
 {
     std::cout<< "==================================================="<< std::endl;
     std::cout<< "--------------Welcome to Script Tuner--------------"<< std::endl;
     std::cout<< "==================================================="<< std::endl;
-    m_script_active = false;
-    m_file_path = (CONFIG_DIR + std::string("/Motion/Scripts/"));
-    m_actionators_data = Blackboard->Actions;
-    m_sensors_data = Blackboard->Sensors;
+    script_active_ = false;
+    file_path_ = (CONFIG_DIR + std::string("/Motion/Scripts/"));
+    actionators_data_ = Blackboard->Actions;
+    sensors_data_ = Blackboard->Sensors;
 }
 
 
 void ScriptTunerState::doState()
 {
     std::cout<< "Load Script - Type File Name (script must be in "
-             << m_file_path << "): "<< std::endl;
+             << file_path_ << "): "<< std::endl;
     char file[256];
     std::cin.getline(file,256);
-    m_file_name = (string)file;
+    file_name_ = (string)file;
 
-    if(!m_file_name.compare("exit") or !m_file_name.compare("quit")) {
+    if(!file_name_.compare("exit") or !file_name_.compare("quit")) {
         std::cout<< "Shutting down script tuner."<< std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         std::cout<< "Just kidding. That would be useless."<< std::endl;
         return;
     }
 
-    //! Sets m_file_name, and use this afterwards.
-    auto loaded = loadScript(m_file_name);
+    //! Sets Left, and use this afterwards.
+    auto loaded = loadScript(file_name_);
 
     if(!loaded) {
         std::cout <<"File not found! Try again!" << std::endl;
@@ -47,7 +47,7 @@ void ScriptTunerState::doState()
     bool exit_script_loop = false;
     while(!exit_script_loop) {
         std::cout<< "==================================================="<< std::endl;
-        std::cout<<"Script \""<< m_file_name << "\" loaded successfully."<< std::endl;
+        std::cout<<"Script \""<< file_name_ << "\" loaded successfully."<< std::endl;
         std::cout<< "Play script or edit? (Type \"play\" or \"edit\")"<< std::endl;
         
         char str[256];
@@ -88,18 +88,19 @@ void ScriptTunerState::PrintCommandError(ScriptTunerCommand command)
 
 void ScriptTunerState::HandleEditCommand(ScriptTunerCommand command)
 {
-    std::cout<<"Script \""<< m_file_name << "\" loaded successfully for editing."<< std::endl; 
+    std::cout<<"Script \""<< file_name_ << "\" loaded successfully for editing."<< std::endl; 
     std::cout<< "---------------------------------------------------"<< std::endl;                   
     
-    m_script_active = true;
+    script_active_ = true;
     
-    while(m_script_active) { 
-        script->ApplyCurrentFrameToRobot(m_actionators_data);
+    while(script_active_) { 
+        script_->ApplyCurrentFrameToRobot(actionators_data_);
 
-        std::cout << "Frame number " << getCurrentFrameNumber() 
-                  << " out of " << script->GetFrameCount()
+        std::cout << "Frame number " << script_->GetCurrentFrameIndex() 
+                  << " out of " << script_->GetFrameCount()
                   << " applied." << std::endl;
-        std::cout << "Frame duration is "<< durationOfCurrentFrame()
+        auto* current_frame = script_->GetCurrentFrame();
+        std::cout << "Frame duration is "<< current_frame->GetDuration()
                   << " seconds." << std::endl;               
         std::cout << "---------------------------------------------------" << std::endl;
 
@@ -171,10 +172,10 @@ void ScriptTunerState::HandleSaveFrameCommand(ScriptTunerCommand command)
 
 void ScriptTunerState::HandleSaveScriptCommand(ScriptTunerCommand command)
 {
-    if(motors_to_be_saved.size() != 0){
+    if(motors_to_be_saved_.size() != 0){
         std::cout << "!SAVE FAILED - Save manually moved motors to script first!"<< std::endl;
-    }else if(saveScriptToFile(m_file_name)){
-        std::cout << "Script \""<< m_file_name << "\" saved."<< std::endl;
+    }else if(saveScriptToFile(file_name_)){
+        std::cout << "Script \""<< file_name_ << "\" saved."<< std::endl;
     } else {
         std::cout << "!!!!!!!!!!! SAVING FAILED !!!!!!!!!!!."<< std::endl;
     }
@@ -183,13 +184,13 @@ void ScriptTunerState::HandleSaveScriptCommand(ScriptTunerCommand command)
 void ScriptTunerState::HandleExitScriptCommand(ScriptTunerCommand command)
 {
     std::cout << "Exiting." << std::endl;
-    m_script_active = false;
+    script_active_ = false;
 }
 
 void ScriptTunerState::HandleNextFrameCommand(ScriptTunerCommand command)
 {
     std::cout << "Moving to next frame."<< std::endl;
-    script->SeekFrame(getCurrentFrameNumber() +1);
+    script_->SeekFrame(script_->GetCurrentFrameIndex() + 1);
 }
 
 void ScriptTunerState::HandleNewFrameCommand(ScriptTunerCommand command)
@@ -197,19 +198,19 @@ void ScriptTunerState::HandleNewFrameCommand(ScriptTunerCommand command)
     std::cout << "Adding new frame."<< std::endl;
     // Second_argument should be time to complete the new frame.
     // New frame should be identical to previous.
-    script->DuplicateFrame(getCurrentFrameNumber());
+    script_->DuplicateFrame(script_->GetCurrentFrameIndex());
 }
 
 void ScriptTunerState::HandleFrameSeekCommand(ScriptTunerCommand command)
 {
-    script->SeekFrame(command.frame_number());
+    script_->SeekFrame(command.frame_number());
 }
 
 void ScriptTunerState::HandleFrameDurationCommand(ScriptTunerCommand command)
 {
     std::cout << "Setting current frame duration to " << command.duration() 
               << "." << std::endl;
-    auto* current_frame = script->GetCurrentFrame();
+    auto* current_frame = script_->GetCurrentFrame();
     current_frame->SetDuration(command.duration());
 }
 
@@ -259,36 +260,34 @@ void ScriptTunerState::HandleJointPositionGainCommand(ScriptTunerCommand command
 
 bool ScriptTunerState::loadScript(string filename)
 {    
-    script = MotionScript2013::LoadOldScript(m_file_path + filename);
-    return script != nullptr;
+    script_ = MotionScript2013::LoadOldScript(file_path_ + filename);
+    return script_ != nullptr;
 }
 
 void ScriptTunerState::saveManuallyMovedMotors()
 {
-    MotionScriptFrame* frame = script-> GetCurrentFrame();
-    for(int i = 0; i<motors_to_be_saved.size();i++){      
-
-        if(motorTorqueIsOff(motors_to_be_saved[i])){
+    MotionScriptFrame* frame = script_-> GetCurrentFrame();
+    for(int i = 0; i < motors_to_be_saved_.size(); i++){      
+        if(motorTorqueIsOff(motors_to_be_saved_[i])){
             ScriptJointDescriptor descriptor;
-            frame->GetDescriptor(motors_to_be_saved[i],&descriptor);//Sets descriptor pointer
-            descriptor.SetPosition(getMotorPosition(motors_to_be_saved[i]));
-            frame->AddDescriptor(motors_to_be_saved[i],descriptor);
+            frame->GetDescriptor(motors_to_be_saved_[i],&descriptor);//Sets descriptor pointer
+            descriptor.SetPosition(getMotorPosition(motors_to_be_saved_[i]));
+            frame->AddDescriptor(motors_to_be_saved_[i],descriptor);
         }  else {
-            std::cout<< "Motor "<< motors_to_be_saved[i]<< "still has torque off!"<<std::endl;
+            std::cout<< "Motor "<< motors_to_be_saved_[i]<< "still has torque off!"<<std::endl;
         }
-
     }
 }
 
 bool ScriptTunerState::saveScriptToFile(string filename){
-    return MotionScript2013::SaveToConfigSystem(*(script),m_file_path+filename);
+    return MotionScript2013::SaveToConfigSystem(*(script_),file_path_+filename);
 }
 
 void ScriptTunerState::HandlePlayCommand(ScriptTunerCommand command)
 {
     std::cout << "Playing script from beginning in real time."<< std::endl;
     std::cout<< "==================================================="<< std::endl;
-    script->StartScript(m_actionators_data);
+    script_->StartScript(actionators_data_);
 }
 
 
@@ -296,7 +295,7 @@ void ScriptTunerState::changeMotorPosition(int  motor_id, float pos_change){
     //DEBUG TEXT:
     std::cout<< "Motor "<< motor_id <<" position changed by "<< pos_change <<" radians."<< std::endl;
 
-    MotionScriptFrame* current_frame = script->GetCurrentFrame();
+    MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
     current_frame->GetDescriptor(motor_id, &descriptor);                
     descriptor.SetPosition(descriptor.GetPosition()+pos_change);                
@@ -309,7 +308,7 @@ void ScriptTunerState::changeMotorGain(int  motor_id, float gain_change){
     //DEBUG TEXT:
     std::cout<< "Motor "<< motor_id << " gain changed by "<< gain_change<< std::endl;
 
-    MotionScriptFrame* current_frame = script->GetCurrentFrame();
+    MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
     current_frame->GetDescriptor(motor_id, &descriptor);                
     descriptor.SetGain(descriptor.GetGain()+gain_change);                
@@ -319,7 +318,7 @@ void ScriptTunerState::changeMotorGain(int  motor_id, float gain_change){
 void ScriptTunerState::turnOffMotor(int  motor_id){
     //DEBUG TEXT:
     std::cout<< "Motor "<< motor_id << " torque off."<< std::endl;
-    MotionScriptFrame* current_frame = script->GetCurrentFrame();
+    MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
     current_frame->GetDescriptor(motor_id, &descriptor);                
     descriptor.SetDisable(true);                
@@ -330,42 +329,31 @@ void ScriptTunerState::turnOffMotor(int  motor_id){
 void ScriptTunerState::turnOnMotor(int  motor_id){
     //DEBUG TEXT:
     std::cout<< "Motor "<< motor_id << " torque on."<< std::endl;
-    motors_to_be_saved.push_back(motor_id);
+    motors_to_be_saved_.push_back(motor_id);
 
-    MotionScriptFrame* current_frame = script->GetCurrentFrame();
+    MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
     current_frame->GetDescriptor(motor_id, &descriptor);                
     descriptor.SetGain(false);                
-    current_frame->AddDescriptor(motor_id,descriptor);    
-}
-    
-int ScriptTunerState::getCurrentFrameNumber(){
-    return script->GetCurrentFrameIndex();
-}
-
-float ScriptTunerState::durationOfCurrentFrame(){
-    MotionScriptFrame* current_frame = script->GetCurrentFrame();
-    float duration = current_frame->GetDuration();
-    return duration;
+    current_frame->AddDescriptor(motor_id, descriptor);    
 }
 
 float ScriptTunerState::getMotorPosition(int motor_id){
     float current_position;
-    m_sensors_data->getPosition(
-        MotionScriptFrame::MapServoIdToNUDataId(motor_id),
-        current_position);
+    auto nudata_id = MotionScriptFrame::MapServoIdToNUDataId(motor_id);
+    sensors_data_->getPosition(nudata_id, current_position);
     return current_position;
 }
 
 bool ScriptTunerState::motorTorqueIsOff(int motor_id){
-    auto* current_frame = script->GetCurrentFrame();
+    auto* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
+    current_frame->GetDescriptor(motor_id, &descriptor);
     return descriptor.GetDisable(); 
 }
 
-void ScriptTunerState::turnOnAllMotors(){
-
-    for(auto key_value:string_id_to_int_id) {
+void ScriptTunerState::turnOnAllMotors() {
+    for(auto key_value:string_id_to_int_id_) {
         auto motor_id = key_value.second;
 
         if(motorTorqueIsOff(motor_id)) {

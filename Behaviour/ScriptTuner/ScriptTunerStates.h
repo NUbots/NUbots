@@ -292,19 +292,19 @@ private:
     void HandleJointPositionGainCommand(ScriptTunerCommand command);
     void PrintCommandError(ScriptTunerCommand command);
 
-    std::map<string, int> string_id_to_int_id; 
-    string m_file_name;
-    string m_file_path;
+    std::map<string, int> string_id_to_int_id_; 
+    std::string file_name_;
+    std::string file_path_;
 
-    MotionScript2013* script;
+    MotionScript2013* script_;
 
-    bool m_script_active;
+    bool script_active_;
 
     // Contains motors which have had torque turned off and then on.
-    std::vector<int> motors_to_be_saved;
+    std::vector<int> motors_to_be_saved_;
 
-    NUActionatorsData* m_actionators_data;
-    NUSensorsData* m_sensors_data;
+    NUActionatorsData* actionators_data_;
+    NUSensorsData* sensors_data_;
 
 public:
     ScriptTunerState(ScriptTunerProvider* provider);
@@ -315,14 +315,14 @@ public:
     void editCurrentFrame();
 
     /*! @brief Loads a motion script from a file into the member variables frames and times */
-    bool loadScript(string filename);
+    bool loadScript(std::string filename);
 
      /*! @brief Reads motor positions from robot and saves them to the current frame, frames[frame].
         Only save motor positions which have had torque off and then back on.*/
     void saveManuallyMovedMotors();
 
      /*! @brief Writes the frames to script file.*/
-    bool saveScriptToFile(string filename);
+    bool saveScriptToFile(std::string filename);
 
     /*! @brief Motor fine tuning.
         @param pos_change is change in angle in radians.*/
@@ -340,14 +340,6 @@ public:
          Adds motion job for motor at current position with gain given in script.*/    
     void turnOnMotor(int motor_id);
     
-    /*! @brief Returns the current frame number.
-    */
-    int getCurrentFrameNumber();
-    
-    /*! @brief Returns the time required for the current frame to complete.
-    */    
-    float durationOfCurrentFrame();
-
     /*! @brief Returns the MEASURED motor position.
     */
     float getMotorPosition(int motor_id);
