@@ -35,25 +35,14 @@ ColourReplacementRule::ColourReplacementRule()
 {
 }
 
-bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const
+bool ColourReplacementRule::match(const ColourSegment &before, const ColourSegment& middle, const ColourSegment &after) const
 {
-//    int multiplier;
-//    switch(dir) {
-//    case HORIZONTAL:
-//        multiplier = VisionBlackboard::getInstance()->getImageWidth();
-//        break;
-//    case VERTICAL:
-//        multiplier = VisionBlackboard::getInstance()->getImageHeight();
-//        break;
-//    }
-//    if(!(m_middle_min*multiplier <= middle.getLengthPixels() && m_middle_max*multiplier >= middle.getLengthPixels() &&
-//         m_before_min*multiplier <= before.getLengthPixels() && m_before_max*multiplier >= before.getLengthPixels() &&
-//         m_after_min*multiplier <= after.getLengthPixels() && m_after_max*multiplier >= after.getLengthPixels()))
-//    {
-//        return false;   //did not match size requirements
-//    }
+    return oneWayMatch(before, middle, after) || oneWayMatch(after, middle, before); //test both directions
+}
 
-//check lengths first to save iterating over colour vectors pointlessly as this method is majority false
+bool ColourReplacementRule::oneWayMatch(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const
+{
+    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
     if(!(m_middle_min <= middle.getLength() && m_middle_max >= middle.getLength() &&
          m_before_min <= before.getLength() && m_before_max >= before.getLength() &&
          m_after_min <= after.getLength() && m_after_max >= after.getLength())) {

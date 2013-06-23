@@ -8,7 +8,7 @@
 
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/Modules/greenhorizonch.h"
-#include "Vision/Modules/objectdetectionch.h"
+#include "Vision/Modules/obstacledetectionch.h"
 #include "Vision/Modules/scanlines.h"
 #include "Vision/visionconstants.h"
 #include "Vision/Modules/LineDetectionAlgorithms/linedetectorsam.h"
@@ -16,6 +16,8 @@
 #include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorhistogram.h"
 #include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h"
 #include "Vision/Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.h"
+#include "Vision/Modules/BallDetectionAlgorithms/balldetectordave.h"
+#include "Vision/Modules/BallDetectionAlgorithms/balldetectorshannon.h"
 
 #include <boost/foreach.hpp>
 #include <limits>
@@ -32,6 +34,9 @@ VisionController::VisionController() : m_corner_detector(0.1), m_circle_detector
     //requires other detectors
     m_field_point_detector = new FieldPointDetector(m_line_detector_ransac, &m_circle_detector, &m_corner_detector);
 
+    m_ball_detector_dave = new BallDetectorDave;
+    m_ball_detector_shannon = new BallDetectorShannon;
+
 #ifdef VISION_PROFILER_ON
     m_profiling_stream.open("VisionProfiling.txt");
 #endif
@@ -42,6 +47,8 @@ VisionController::~VisionController()
 #ifdef VISION_PROFILER_ON
     m_profiling_stream.close();
 #endif
+    delete m_ball_detector_shannon;
+    delete m_ball_detector_dave;
     delete m_line_detector_ransac;
 //    delete m_line_detector_sam;
 //    delete m_goal_detector_hist;
@@ -113,11 +120,11 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
 #endif
 
     //! DETECTION MODULES
+    std::vector<Goal> ransac_goals_edges;
 
     if(lookForGoals) {
 //       std::vector<Goal> hist_goals = m_goal_detector_hist->run();   // histogram method
-        std::vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
-        m_blackboard->addGoals(ransac_goals_edges);
+        ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
     }
     else {
         #if VISION_CONTROLLER_VERBOSITY > 2
@@ -154,7 +161,8 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
 
     //find balls and publish to BB
     if(lookForBall) {
-        m_blackboard->addBalls(m_ball_detector.run());
+        //m_blackboard->addBalls(m_ball_detector_dave->run());
+        m_blackboard->addBalls(m_ball_detector_shannon->run());
         #if VISION_CONTROLLER_VERBOSITY > 2
             debug << "\tball detection done" << std::endl;
         #endif
@@ -169,11 +177,13 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     }
 
     //OBSTACLES
+    std::vector<Obstacle> obstacles;
     if(lookForObstacles)
     {
-        ObjectDetectionCH::detectObjects();
+        obstacles = ObstacleDetectionCH::run();
+        m_blackboard->addObstacles(obstacles);
         #if VISION_CONTROLLER_VERBOSITY > 2
-        debug << "\tdetectObjects done" << std::endl;
+        debug << "\tdetectObstacles done" << std::endl;
         #endif
     }
     else
@@ -183,10 +193,16 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
         #endif
     }
 
+    // ADD IN LABELLING OF GOALS BASED ON KEEPER COLOUR
 
     #ifdef VISION_PROFILER_ON
     prof.split("Obstacles");
     #endif
+
+    /// @todo GET TEAM AND OPPONENT COLOURS AND CALL BELOW
+    //m_goal_detector_ransac_edges->relabel(ransac_goals_edges, obstacles);
+
+    m_blackboard->addGoals(ransac_goals_edges);
 
     // publishing
     //force blackboard to publish results through wrapper

@@ -226,5 +226,7 @@ std::istream& WSrSeqUKF::readStreamBinary (std::istream& input)
     MultivariateGaussian temp;
     temp.readStreamBinary(input);
     initialiseEstimate(temp);
+    input.read((char*)&m_weighting_enabled, sizeof(m_weighting_enabled));
+    input.read((char*)&m_filter_weight, sizeof(m_filter_weight));
     return input;
 }

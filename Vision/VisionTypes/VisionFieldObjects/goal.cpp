@@ -8,10 +8,11 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-Goal::Goal(VFO_ID id, const Quad &corners)
+Goal::Goal(VFO_ID id, const Quad &corners, bool known)
 {
     m_id = id;
     m_corners = corners;
+    m_known = known;
 
     m_location.screenCartesian = corners.getBottomCentre();
     m_size_on_screen = Vector2<double>(corners.getAverageWidth(), corners.getAverageHeight());
@@ -186,7 +187,7 @@ bool Goal::check() const
         m_location.neckRelativeRadial.x > VisionConstants::MAX_GOAL_DISTANCE) {
         #if VISION_GOAL_VERBOSITY > 1
             debug << "Goal::check - Goal thrown out: too far away" << std::endl;
-            debug << "\td2p: " << m_location.relativeRadial.x << " MAX_GOAL_DISTANCE: " << VisionConstants::MAX_GOAL_DISTANCE << std::endl;
+            debug << "\td2p: " << m_location.neckRelativeRadial.x << " MAX_GOAL_DISTANCE: " << VisionConstants::MAX_GOAL_DISTANCE << std::endl;
         #endif
         return false;
     }
@@ -215,51 +216,63 @@ double Goal::findGroundError(VisionFieldObject* other) const
 bool Goal::calculatePositions()
 {
     const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
+    int img_width = VisionBlackboard::getInstance()->getImageWidth();
+    int img_height = VisionBlackboard::getInstance()->getImageHeight();
+    NUPoint d2p_loc, width_loc;
+    d2p_loc.screenCartesian = m_location.screenCartesian;
+    width_loc.screenCartesian = m_location.screenCartesian;
+
+    //get distance from width
+    double width_dist = VisionConstants::GOAL_WIDTH*tran.getCameraDistanceInPixels()/m_size_on_screen.x;
 
     // D2P
-    tran.calculateRepresentationsFromPixelLocation(m_location);
+    tran.calculateRepresentationsFromPixelLocation(d2p_loc);
+    // WIDTH
+    tran.calculateRepresentationsFromPixelLocation(width_loc, true, width_dist);
 
-//    //get distance from width
-//    width_dist = VisionConstants::GOAL_WIDTH*tran.getCameraDistanceInPixels()/m_size_on_screen.x;
+    // check if we are off the edge of the screen by a certain margin
+    int EDGE_OF_SCREEN_MARGIN = 5;
+    bool off_bottom = m_location.screenCartesian.y >= img_height - EDGE_OF_SCREEN_MARGIN;
+    bool off_side = m_location.screenCartesian.x <= EDGE_OF_SCREEN_MARGIN || m_location.screenCartesian.x >= img_width - EDGE_OF_SCREEN_MARGIN;
 
-//    #if VISION_GOAL_VERBOSITY > 1
-//        debug << "Goal::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << std::endl;
-//        debug << "Goal::distanceToGoal: d2p: " << d2p << std::endl;
-//        debug << "Goal::distanceToGoal: m_size_on_screen.x: " << m_size_on_screen.x << std::endl;
-//        debug << "Goal::distanceToGoal: width_dist: " << width_dist << std::endl;
-//    #endif
-//    switch(VisionConstants::GOAL_DISTANCE_METHOD) {
-//    case D2P:
-//        #if VISION_GOAL_VERBOSITY > 1
-//            debug << "Goal::distanceToGoal: Method: D2P" << std::endl;
-//        #endif
-//        distance_valid = d2pvalid && d2p > 0;
-//        result = d2p;
-//        break;
-//    case Width:
-//        #if VISION_GOAL_VERBOSITY > 1
-//            debug << "Goal::distanceToGoal: Method: Width" << std::endl;
-//        #endif
-//        distance_valid = true;
-//        result = width_dist;
-//        break;
-//    case Average:
-//        #if VISION_GOAL_VERBOSITY > 1
-//            debug << "Goal::distanceToGoal: Method: Average" << std::endl;
-//        #endif
-//        //average distances
-//        distance_valid = d2pvalid && d2p > 0;
-//        result = (d2p + width_dist) * 0.5;
-//        break;
-//    case Least:
-//        #if VISION_GOAL_VERBOSITY > 1
-//            debug << "Goal::distanceToGoal: Method: Least" << std::endl;
-//        #endif
-//        distance_valid = d2pvalid && d2p > 0;
-//        result = (distance_valid ? std::min(d2p, width_dist) : width_dist);
-//        break;
-//    }
-
+    if(off_bottom && off_side)
+    {
+        // we can't tell distance to these goals
+        m_location.neckRelativeRadial = Vector3<double>();
+    }
+    else if(off_bottom)
+    {
+        // we can only use width
+        m_location = width_loc;
+    }
+    else if(off_side)
+    {
+        // we can only use d2p
+        return false;
+        //m_location = d2p_loc;
+    }
+    else
+    {
+        // use method of choice
+        switch(VisionConstants::GOAL_DISTANCE_METHOD) {
+            case D2P:
+                m_location = d2p_loc;
+                break;
+            case Width:
+                m_location = width_loc;
+                break;
+            case Average:
+                //average distances
+                m_location.screenCartesian = (d2p_loc.screenCartesian + width_loc.screenCartesian) * 0.5;
+                m_location.neckRelativeRadial = (d2p_loc.neckRelativeRadial + width_loc.neckRelativeRadial) * 0.5;
+                m_location.screenAngular = (d2p_loc.screenAngular + width_loc.screenAngular) * 0.5;
+                m_location.groundCartesian = (d2p_loc.groundCartesian + width_loc.groundCartesian) * 0.5;
+                break;
+            case Least:
+                m_location = (d2p_loc.neckRelativeRadial.x < width_loc.neckRelativeRadial.x ? d2p_loc : width_loc);
+                break;
+        }
+    }
 
     #if VISION_GOAL_VERBOSITY > 2
         debug << "Goal::calculatePositions: " << m_location << std::endl;

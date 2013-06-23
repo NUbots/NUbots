@@ -169,6 +169,8 @@ namespace Vision {
     //    case GOAL_Y_COLOUR:        return "GOAL_Y_COLOUR";
     //    case GOAL_B_COLOUR:        return "GOAL_B_COLOUR";
         case LINE_COLOUR:          return "LINE_COLOUR";
+        case TEAM_CYAN_COLOUR:     return "TEAM_CYAN_COLOUR";
+        case TEAM_MAGENTA_COLOUR:  return "TEAM_MAGENTA_COLOUR";
         default:                   return "UNKNOWN_COLOUR";
         }
     }
@@ -185,6 +187,10 @@ namespace Vision {
     //        return GOAL_B_COLOUR;
         else if(name.compare("LINE_COLOUR") == 0)
             return LINE_COLOUR;
+        else if(name.compare("TEAM_CYAN_COLOUR") == 0)
+            return TEAM_CYAN_COLOUR;
+        else if(name.compare("TEAM_MAGENTA_COLOUR") == 0)
+            return TEAM_MAGENTA_COLOUR;
         else
             return UNKNOWN_COLOUR;
     }

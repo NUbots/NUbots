@@ -56,7 +56,7 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
-const float SelfLocalisation::c_obj_theta_variance = 0.1f*0.1f;        // (0.1 rad)^2
+const float SelfLocalisation::c_obj_theta_variance = 0.05f*0.05f;        // (0.1 rad)^2
 
 const float SelfLocalisation::c_obj_range_offset_variance = 20.0f*20.0f;     // (25cm)^2
 const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
@@ -665,7 +665,7 @@ void SelfLocalisation::WriteModelToObjects(const IWeightedKalmanFilter* model, F
 
     // Update the robots location.
     fieldObjects->self.updateLocationOfSelf(est.mean(0), est.mean(1), est.mean(2), est.sd(0), est.sd(1), est.sd(2), false);
-
+    fieldObjects->self.covariance = est.covariance();
     Self& self = fieldObjects->self;
 
     // Now update the ball
@@ -941,10 +941,10 @@ void SelfLocalisation::doInitialReset(GameInformation::TeamColour team_colour)
         goal_line_x = -goal_line_x;
     }
 
-    float cov_x = pow(100.f,2);
-    float cov_y = pow(75.f,2);
+    float cov_x = pow(50.f,2);
+    float cov_y = pow(20.f,2);
     //float cov_head = pow(6.f,2);
-    float cov_head = pow(1.f,2);
+    float cov_head = pow(0.75,2);
     Matrix cov_matrix = covariance_matrix(cov_x, cov_y, cov_head);
     MultivariateGaussian temp(3);
     temp.setCovariance(cov_matrix);
@@ -1089,7 +1089,7 @@ void SelfLocalisation::doPenaltyReset()
     std::vector<MultivariateGaussian> positions;
     positions.reserve(2);
     MultivariateGaussian temp(3);
-    temp.setCovariance(covariance_matrix(75.0f*75.0f, 25.0f*25.0f, 0.35f*0.35f));
+    temp.setCovariance(covariance_matrix(50.0f*50.0f, 20.0f*20.0f, 0.35f*0.35f));
 
     float x_coord = 50.f;                           // Red is positive half of field. 50cm
     if (m_team_colour == GameInformation::BlueTeam)

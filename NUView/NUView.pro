@@ -394,6 +394,7 @@ HEADERS += \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
     ../Vision/Modules/GoalDetectionAlgorithms/*.h \
+    ../Vision/Modules/BallDetectionAlgorithms/*.h \
     ../Vision/*.h \
 
 SOURCES += \
@@ -406,6 +407,7 @@ SOURCES += \
     ../Vision/Modules/*.cpp \
     ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     ../Vision/Modules/GoalDetectionAlgorithms/*.cpp \
+    ../Vision/Modules/BallDetectionAlgorithms/*.cpp \
     ../Vision/visionblackboard.cpp \
     ../Vision/visioncontroller.cpp \
     ../Vision/visionconstants.cpp \
