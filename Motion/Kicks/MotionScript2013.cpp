@@ -383,28 +383,57 @@ MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<vector<double
     
     MotionScript2013* script = new MotionScript2013();
     std::vector<MotionScriptFrame*> new_frames;
-    for(int motor_index = 0; motor_index < times.size(); motor_index++){
-        for(int frame_number = 0; frame_number<times[motor_index].size();frame_number++){
+    size_t num_frames = 0;
+    size_t first_non_empty_motor;
+    size_t num_motors = times.size();
+
+    if(positions.size() != num_motors || gains.size() != num_motors)
+    {
+        std::cout << "Error: times, positions and size matrices not equal in number of motors!" << std::endl;
+        return script;
+    }
+
+    for(int motor_index = 0; motor_index < num_motors; motor_index++)
+    {
+        if(times[motor_index].size() > 0) {
+            first_non_empty_motor = motor_index;
+            num_frames = times[motor_index].size();
+            if(positions[motor_index].size() != num_frames || gains[motor_index].size() != num_frames)
+            {
+                std::cout << "Error: first non-empty times, positions and gains vector not equal in number of frames." << std::endl;
+                return script;
+            }
+            break;
+        }
+    }
+
+	for(int frame_number = 0; frame_number < num_frames; frame_number++)
+    {
+        new_frames.push_back(new MotionScriptFrame());
+        new_frames[frame_number]->SetDuration(frame_number==0 ?
+                                              times[first_non_empty_motor][frame_number]:
+                                              times[first_non_empty_motor][frame_number] - times[first_non_empty_motor][frame_number-1]);
+        
+		for(int motor_index = 0; motor_index < num_motors; motor_index++)
+        {
             if(positions[motor_index].empty()) 
                 continue;
-            if(new_frames.size()<times[motor_index].size()){
-                new_frames.push_back(new MotionScriptFrame());                
-                new_frames[frame_number]->SetDuration(frame_number==0 ?
-                                                         times[motor_index][frame_number]:
-                                                         times[motor_index][frame_number]-times[motor_index][frame_number-1]);
-            }         
-            std::cout<<"Loading script descriptor."<< std::endl;
-            std::cout<<"Servo Number     "<<MapRowIndexToServoId(motor_index)<<std::endl;
-            std::cout<<"Position         "<< positions[motor_index][frame_number] <<std::endl;
-            std::cout<<"Gain             "<< gains[motor_index][frame_number] <<std::endl;
-            std::cout<<"Time             "<< times[motor_index][frame_number] <<std::endl;                    
+            int servo_id = MapRowIndexToServoId(motor_index);
+            float pos = positions[motor_index][frame_number];
+            float gain = gains[motor_index][frame_number];
+
+            std::cout<<"Loading script descriptor." << std::endl;
+            std::cout<<"Servo Number     " << servo_id << std::endl;
+            std::cout<<"Position         " << pos << std::endl;
+            std::cout<<"Gain             " << gain << std::endl;
+            std::cout<<"Time             " << times[motor_index][frame_number] << std::endl; 
+                   
             ScriptJointDescriptor descriptor;
-            descriptor.SetServoId(MapRowIndexToServoId(motor_index));
-            descriptor.SetPosition(positions[motor_index][frame_number]);
-            descriptor.SetGain(gains[motor_index][frame_number]);
-            new_frames[frame_number]->AddDescriptor(MapRowIndexToServoId(motor_index),descriptor);
+            descriptor.SetServoId(servo_id);
+            descriptor.SetPosition(pos);
+            descriptor.SetGain(gain);
+            new_frames[frame_number]->AddDescriptor(servo_id, descriptor);
         }
-        
     }
 
     for(int i = 0; i<new_frames.size();i++){
