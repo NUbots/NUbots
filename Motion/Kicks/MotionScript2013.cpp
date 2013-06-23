@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "Infrastructure/NUBlackboard.h"
 #include "ConfigSystem/ConfigManager.h"
+#include "NUPlatform/NUPlatform.h"
 
 NUData::id_t MotionScriptFrame::MapServoIdToNUDataId(int sensor_id)
 {
@@ -148,7 +149,7 @@ bool MotionScript2013::SaveToConfigSystem(const std::string& path)
         std::stringstream frame_ss;
         frame_ss << path << "frame_" << i;
         const std::string frame_path = frame_ss.str();
-
+        std::cout<<"Saving Frame :" << frame_path << std::endl;
         frame->SaveToConfigSystem(frame_path);
     }
 
@@ -444,12 +445,7 @@ MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<vector<double
 
 }
 
-bool MotionScript2013::SaveToConfigSystem(
-    const MotionScript2013& script,
-    const std::string& path)
-{
-    return false;
-}
+
 
 void MotionScript2013::AdvanceToNextFrame()
 {
@@ -469,8 +465,11 @@ void MotionScript2013::SeekFrame(int frame)
 
 void MotionScript2013::ApplyCurrentFrameToRobot(NUActionatorsData* actionators_data)
 {
-    auto current_frame = script_frames_[current_frame_index_];
+    if(current_frame_index_ >= script_frames_.size()){
+        return;
+    }
 
+    auto current_frame = script_frames_[current_frame_index_];
     current_frame->ApplyToRobot(actionators_data);
 }
 
@@ -480,44 +479,64 @@ void MotionScript2013::Reset()
     current_frame_index_ = 0;
 }
 
-void MotionScript2013::StartScript(NUActionatorsData* actionators_data)
+void MotionScript2013::StartScript()
 {
-    script_start_time_ = actionators_data->CurrentTime;    
+    script_start_time_ = Platform->getTime();
+    current_frame_index_ = 0;    
 }
 
 void MotionScript2013::PlayScript(NUActionatorsData* actionators_data){
-    StartScript(actionators_data);
-    float current_time = actionators_data->CurrentTime;
-    while(!HasCompleted(current_time)){        
-        current_time = actionators_data->CurrentTime;       
-
+    StartScript();
+    double current_time = Platform->getTime();
+    while(!HasCompleted(current_time)){ 
         // If it's time for the next frame
-        if(current_time >= GetNextFrameTime(current_time))
+        current_time = Platform->getTime();
+        double next_frame_time = GetNextFrameTime();
+        // std::cout<<"Frame number "<< GetCurrentFrameIndex() << std::endl;
+        // std::cout <<"Current time = "<< current_time<< std::endl;
+        // std::cout <<"Next Frame time = "<< next_frame_time<< std::endl;
+
+        if(current_time >= next_frame_time)
         {
             // Schedule the next joint positions
             AdvanceToNextFrame();
             ApplyCurrentFrameToRobot(actionators_data);
+            std::cout << "Frame number "<< GetCurrentFrameIndex()<<std::endl;
         }
     }
+    std::cout <<"Script Finished in "<< (current_time-script_start_time_) << "ms."<< std::endl;
 }
 
 bool MotionScript2013::HasCompleted(float current_time)
 {
-    if(current_frame_index_ < script_frames_.size())
+
+    if(current_frame_index_ >= script_frames_.size()){
+        return true;
+    } else {
         return false;
+    }
+        
 
-    float script_time = current_time - script_start_time_;
-    auto& current_frame = script_frames_[current_frame_index_];
+    
+    // if(current_frame_index_ < script_frames_.size())
+    //     return false;
 
-    if(script_time < GetScriptDuration())
-        return false;
+    // float script_time = current_time - script_start_time_;
+    // auto& current_frame = script_frames_[current_frame_index_];
 
-    return true;
+    // if(script_time < GetScriptDuration())
+    //     return false;
+
+    // return true;
 }
 
-float MotionScript2013::GetNextFrameTime(float current_time)
+float MotionScript2013::GetNextFrameTime()
 {
-    return current_time + script_frames_[current_frame_index_]->GetDuration();
+    float next_frame_time = script_start_time_;
+    for(int i = 0; i<=current_frame_index_;i++){
+        next_frame_time += script_frames_[i]->GetDuration();
+    }
+    return next_frame_time;
 }
 
 int MotionScript2013::GetFrameCount()

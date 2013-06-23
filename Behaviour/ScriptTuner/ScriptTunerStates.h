@@ -45,7 +45,8 @@
 #include "Framework/darwin/Framework/include/JointData.h"
 #include "Motion/Kicks/MotionScript2013.h"
 #include "Infrastructure/NUData.h"
-
+#include "NUPlatform/NUPlatform.h"
+    
 #include "Autoconfig/nubotdataconfig.h"
 
 #include "Behaviour/Common/HeadBehaviour.h"
@@ -205,6 +206,20 @@ public:
 
     static void PrintCommandsLongHelp()
     {
+        std::cout << "Command List While Editing:" << std::endl;
+        std::cout << "next" << std::endl;
+        std::cout << "<motor name> off" << std::endl;
+        std::cout << "<motor name> on" << std::endl;
+        std::cout << "allon" << std::endl;
+        std::cout << "duration <duration value in ms>" << std::endl;
+        std::cout << "seek <frame number>" << std::endl;
+        std::cout << "play"<< std::endl;
+        std::cout << "edit"<< std::endl;
+        std::cout << "exit"<< std::endl;
+        std::cout << "quit"<< std::endl;
+        std::cout << "saveframe"<< std::endl;
+        std::cout << "savescript"<< std::endl;
+        std::cout << "newframe <duration>"<< std::endl;
         std::cout << std::endl;
         std::cout << "Script Tuner Command Help:" << std::endl;
         std::cout << std::endl;
@@ -315,6 +330,8 @@ public:
 
     BehaviourState* nextState() {return m_provider->m_state;}
     void doState();
+
+    void HandleHelpCommand(ScriptTunerCommand command);
 
     void PrintFrameInfo();
 

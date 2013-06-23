@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Motion/NUWalk.h"
+#include "NUPlatform/NUPlatform.h"
 
 //for configs
 #include "nubotdataconfig.h"
@@ -85,7 +86,7 @@ void ScriptKick2013::StartKick(
     current_script_ = kick_script;
 
     current_script_->Reset();
-    current_script_->StartScript(m_actions);
+    current_script_->StartScript();
 
     m_walk->stop();
     setArmEnabled(true, true);
@@ -110,7 +111,7 @@ void ScriptKick2013::doKick()
     }
 
     // If it's time for the next frame
-    if(current_time >= current_script_->GetNextFrameTime(current_time))
+    if(current_time >= current_script_->GetNextFrameTime())
     {
         // Schedule the next joint positions
         current_script_->AdvanceToNextFrame();
@@ -147,7 +148,7 @@ bool ScriptKick2013::requiresLegs() { return true; }
 
 float ScriptKick2013::GetCurrentScriptTime()
 {
-    return m_data->CurrentTime;
+    return Platform->getTime()-current_script_->GetStartTime();
 }
 
 void ScriptKick2013::loadKickboxes()

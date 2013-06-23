@@ -59,6 +59,9 @@ void ScriptTunerState::doState()
             case ScriptTunerCommand::CommandType::kPlay: {
                 HandlePlayCommand(command);
             } break;
+            case ScriptTunerCommand::CommandType::kHelp: {
+                HandleHelpCommand(command);
+            } break;
             case ScriptTunerCommand::CommandType::kEdit: {
                 HandleEditCommand(command);
             } break;
@@ -148,6 +151,9 @@ void ScriptTunerState::editCurrentFrame() {
         case ScriptTunerCommand::CommandType::kJointPositionGain: {
             HandleJointPositionGainCommand(command);
         } break;
+        case ScriptTunerCommand::CommandType::kHelp: {
+            HandleHelpCommand(command);
+        } break;
         default: {
             PrintCommandError(command);
         } break;
@@ -161,8 +167,12 @@ void ScriptTunerState::PrintFrameInfo(){
               << " applied." << std::endl;
     auto* current_frame = script_->GetCurrentFrame();
     std::cout << "Frame duration is "<< current_frame->GetDuration()
-              << " seconds." << std::endl;               
+              << " milliseconds." << std::endl;               
     std::cout << "---------------------------------------------------" << std::endl;
+}
+
+void ScriptTunerState::HandleHelpCommand(ScriptTunerCommand command){
+    ScriptTunerCommand::PrintCommandsLongHelp();
 }
 
 void ScriptTunerState::HandleSaveFrameCommand(ScriptTunerCommand command)
@@ -264,7 +274,8 @@ void ScriptTunerState::HandleJointPositionGainCommand(ScriptTunerCommand command
 
 bool ScriptTunerState::loadScript(string filename)
 {    
-    script_ = MotionScript2013::LoadOldScript(file_path_ + filename);
+    script_ = MotionScript2013::LoadOldScript(file_path_+ filename);
+   // script_ = MotionScript2013::LoadToConfigSystem("motion.scripts."+ filename);
     return script_ != nullptr;
 }
 
@@ -284,7 +295,7 @@ void ScriptTunerState::saveManuallyMovedMotors()
 }
 
 bool ScriptTunerState::saveScriptToFile(string filename){
-    return MotionScript2013::SaveToConfigSystem(*(script_),file_path_+filename);
+    return script_->SaveToConfigSystem("motion.scripts." + filename);
 }
 
 void ScriptTunerState::HandlePlayCommand(ScriptTunerCommand command)
