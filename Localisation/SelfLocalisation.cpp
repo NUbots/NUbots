@@ -665,7 +665,7 @@ void SelfLocalisation::WriteModelToObjects(const IWeightedKalmanFilter* model, F
 
     // Update the robots location.
     fieldObjects->self.updateLocationOfSelf(est.mean(0), est.mean(1), est.mean(2), est.sd(0), est.sd(1), est.sd(2), false);
-
+    fieldObjects->self.covariance = est.covariance();
     Self& self = fieldObjects->self;
 
     // Now update the ball
