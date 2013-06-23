@@ -248,7 +248,5 @@ std::istream& WSeqUKF::readStreamBinary (std::istream& input)
     input.read((char*)&m_weighting_enabled, sizeof(m_weighting_enabled));
     input.read((char*)&m_filter_weight, sizeof(m_filter_weight));
     initialiseEstimate(temp);
-    input.read((char*)&m_weighting_enabled, sizeof(m_weighting_enabled));
-    input.read((char*)&m_filter_weight, sizeof(m_filter_weight));
     return input;
 }
