@@ -10,7 +10,9 @@ using std::string;
 
 
 ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : 
-    ScriptTunerSubState(provider),kSetPoseCommandGains(10), script_()
+    ScriptTunerSubState(provider), 
+    kSetPoseCommandGains(10), 
+    script_()
 {
     std::cout<< "==================================================="<< std::endl;
     std::cout<< "--------------Welcome to Script Tuner--------------"<< std::endl;
@@ -26,7 +28,7 @@ void ScriptTunerState::doState()
 {
     std::cout << "Load Script - Type File Name (script must be in "
               << file_path_ << "): "<< std::endl;
-
+    std::cout << "> ";
     char str[256];
     std::cin.getline(str, 256);
     auto command = ScriptTunerCommand::ParseCommand(str);
@@ -62,7 +64,8 @@ void ScriptTunerState::doState()
         std::cout<< "==================================================="<< std::endl;
         std::cout<<"Script \""<< file_name_ << "\" loaded successfully."<< std::endl;
         std::cout<< "Play script or edit? (Type \"play\" or \"edit\")"<< std::endl;
-        
+        std::cout << "> ";
+
         char str[256];
         std::cin.getline(str, 256);
         auto command = ScriptTunerCommand::ParseCommand(str);
@@ -177,7 +180,7 @@ void ScriptTunerState::HandleEditCommand(ScriptTunerCommand command)
 }
 
 void ScriptTunerState::editCurrentFrame() {
-    std::cout<<"> ";
+    std::cout << "> ";
     char str[256];
     std::cin.getline(str, 256);
     auto command = ScriptTunerCommand::ParseCommand(str);
@@ -253,9 +256,9 @@ void ScriptTunerState::HandleSetPoseCommand(ScriptTunerCommand command){
     MotionScriptFrame* frame = script_->GetCurrentFrame();
     MotionScriptFrame temp_frame(*frame);//Copy constructor
     
-    while(button_state <= 0){        
-        UpdateScriptMotorGoalsToCurrentPosition(&temp_frame); 
-        temp_frame.ApplyToRobot(actionators_data_);      
+    while(button_state <= 0){
+        UpdateScriptMotorGoalsToCurrentPosition(&temp_frame);
+        temp_frame.ApplyToRobot(actionators_data_);
         Blackboard->Sensors->getButton(NUSensorsData::MainButton,button_state);         
     }
     CopyPositionsFromTempScript(&temp_frame);
@@ -281,18 +284,23 @@ void ScriptTunerState::CopyPositionsFromTempScript(MotionScriptFrame* temp_frame
     MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     for(int motor_id = 1; motor_id<Robot::JointData::NUMBER_OF_JOINTS;motor_id++){
         ScriptJointDescriptor descriptor, temp_descriptor;
-        if (!current_frame->GetDescriptor(motor_id,&descriptor)){
+        if (!current_frame->GetDescriptor(motor_id, &descriptor)){
             std::cout << "Descriptor doesn't exist for this frame for motor "<<motor_id<< ". Not saving." << std::endl;
             continue;    
         }      
 
-        temp_frame->GetDescriptor(motor_id,&temp_descriptor);
+        temp_frame->GetDescriptor(motor_id, &temp_descriptor);
         float new_position = temp_descriptor.GetPosition();
-        float old_position = descriptor.GetPosition();       
+        float old_position = descriptor.GetPosition();
         descriptor.SetPosition(new_position);
-        current_frame->AddDescriptor(descriptor);
 
-        std::cout << "Saving motor "<< motor_id<<"."<<" Change in position is "<<new_position-old_position<<" rad." <<std::endl;
+        std::cout << "Saving motor " << motor_id << "."
+                  << " Change in position is " << new_position - old_position << " rad" 
+                  // << " with gain " << descriptor.GetGain()
+                  // << " and temp_gain " << temp_descriptor.GetGain()
+                  << std::endl;
+        
+        current_frame->AddDescriptor(descriptor);
     }
 }
 

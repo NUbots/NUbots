@@ -292,7 +292,7 @@ bool MotionScriptFrame::LoadJointFromConfigSystem(
 MotionScript2013* MotionScript2013::LoadOldScript(const std::string& path){
     //Method modified from Motion/Tools/MotionScript.h
     std::cout<<"Loading script from old script file in location " << path << std::endl;
-    std::ifstream file(path);
+    std::ifstream file(path + ".num");
     if (!file.is_open())
     {
         errorlog << "MotionScript2013::LoadOldScript(). Unable to open. " << path << std::endl;
@@ -582,6 +582,8 @@ void MotionScript2013::RemoveFrame(int index)
     auto it = script_frames_.begin();
 
     script_frames_.erase(it + index);
+
+    current_frame_index_ = std::min(current_frame_index_, GetFrameCount() - 1);
 }
 
 void MotionScript2013::DuplicateFrame(int index)
