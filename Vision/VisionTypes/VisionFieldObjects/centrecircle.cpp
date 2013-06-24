@@ -7,6 +7,7 @@ CentreCircle::CentreCircle()
 {
     m_size_on_screen = Vector2<double>(0,0),
     m_ground_radius = 0;
+    valid = false;
     //need more here
 }
 
@@ -15,10 +16,7 @@ CentreCircle::CentreCircle(NUPoint centre, double ground_radius, Vector2<double>
     m_location = centre;
     m_size_on_screen = screen_size,
     m_ground_radius =ground_radius;
-    //need more here
-    const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
-
-    tran.calculateRepresentations(m_location);
+    valid = m_location.neckRelativeRadial.x > 0;
 }
 
 CentreCircle::~CentreCircle()

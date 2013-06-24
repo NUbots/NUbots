@@ -5,6 +5,8 @@ CONFIG += qwt
 
 DEFINES += QT_NO_DEBUG_STREAM
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 win32{
     INCLUDEPATH += 'C:\Program Files\Boost\boost_1_52_0'
     INCLUDEPATH += 'C:\Qwt\qwt-6.0.2\src'
@@ -171,6 +173,7 @@ HEADERS += \
     VisionTools/transformer.h \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
+    ../Vision/Modules/BallDetectionAlgorithms/*.h \
     basicvisiontypes.h \
     valgorithm.h \
     visionblackboard.h \
@@ -195,7 +198,6 @@ SOURCES += \
     Modules/goaldetector.cpp \
     Modules/greenhorizonch.cpp \
     Modules/linedetector.cpp \
-    Modules/objectdetectionch.cpp \
     Modules/scanlines.cpp \
     Modules/segmentfilter.cpp \
     Modules/LineDetectionAlgorithms/linedetectorransac.cpp \
@@ -203,6 +205,8 @@ SOURCES += \
     Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
     Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp \
+    Modules/BallDetectionAlgorithms/balldetectordave.cpp \
+    Modules/BallDetectionAlgorithms/balldetectorshannon.cpp \
     VisionTypes/colourreplacementrule.cpp \
     VisionTypes/coloursegment.cpp \
     VisionTypes/colourtransitionrule.cpp \
@@ -232,7 +236,8 @@ SOURCES += \
     #../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
     linesegmentscurve.cpp \
-    VisionWrapper/startoptionsdialog.cpp
+    VisionWrapper/startoptionsdialog.cpp \
+    Modules/obstacledetectionch.cpp
 
 ##robocup
 HEADERS += \

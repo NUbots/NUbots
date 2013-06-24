@@ -40,14 +40,14 @@ private:
     // 2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
     // Returns a positive value, if OAB makes a counter-clockwise turn,
     // negative for clockwise turn, and zero if the points are collinear.
-    static double cross(const Vector2<double> &O, const Vector2<double> &A, const Vector2<double> &B)
+    static double cross(const Point& O, const Point& A, const Point& B)
     {
         return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
     }
 
     // Returns a std::list of points on the convex hull in counter-clockwise order.
     // Note: the last point in the returned std::list is the same as the first one.
-    static std::vector< Vector2<double> > upperConvexHull(const std::vector< Vector2<double> >& points);
+    static std::vector<Point> upperConvexHull(const std::vector<Point>& points);
     //! CONSTANTS
     //static const unsigned int VER_SEGMENTS = 30;            //! @variable number of vertical scan segments.
     //static const unsigned int VER_THRESHOLD = 5;            //! @variable number of consecutive green pixels required.

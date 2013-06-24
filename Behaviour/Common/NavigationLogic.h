@@ -194,12 +194,13 @@ public:
      */
     static vector<float> getStartOffensePosition() {
         //XXX: hardcoded starting positions
-        const float positions[][3] ={{-20,0,3.14159}, //robot 1 - kickoff robot!
-                                   {-20,90,3.14159}, //robot 2
-                                   {-50,-90,3.14159}, //etc
+
+        const float positions[][3] ={{20,0,3.14159}, //robot 1 - kickoff robot!
+                                   {20,90,3.14159}, //robot 2
+                                   {50,-90,3.14159}, //etc
                                    {20,-90,3.14159},
-                                   {-50,90,3.14159},
-                                   {-150,0,3.14159}};
+                                   {50,90,3.14159},
+                                   {150,0,3.14159}};
         vector<float> result(3,0);
         int teamPosition = Blackboard->GameInfo->getPlayerNumber();
         
@@ -215,12 +216,13 @@ public:
      */
     static vector<float> getStartDefensePosition() {
         //XXX: hardcoded starting positions
-        const float positions[][3]={{-70,0,3.14159}, //robot 1 - kickoff robot!
-                                   {-20,90,3.14159}, //robot 2
-                                   {-50,-90,3.14159}, //etc
+
+        const float positions[][3]={{70,0,3.14159}, //robot 1 - kickoff robot!
+                                   {20,90,3.14159}, //robot 2
+                                   {50,-90,3.14159}, //etc
                                    {20,-90,3.14159},
-                                   {-50,90,3.14159},
-                                   {-150,0,3.14159}};
+                                   {50,90,3.14159},
+                                   {150,0,3.14159}};
         vector<float> result(3,0);
         int teamPosition = Blackboard->GameInfo->getPlayerNumber();
         

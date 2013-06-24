@@ -8,9 +8,8 @@ CornerPoint::CornerPoint(TYPE type, NUPoint location)
     m_size_on_screen = Vector2<double>(3,3);
     m_type = type;
     m_location = location;
-    const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
 
-    tran.calculateRepresentations(m_location);
+    valid = m_location.neckRelativeRadial.x > 0;
 }
 
 bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const

@@ -42,8 +42,7 @@ Ball::Ball(Point centre, double diameter)
     m_location.screenCartesian = centre;
     m_size_on_screen = Vector2<double>(m_diameter, m_diameter);
     valid = calculatePositions();
-    //valid = valid && check();
-    valid = check();
+    valid = valid && check();
 }
 
 float Ball::getRadius() const
@@ -118,7 +117,7 @@ bool Ball::check() const
         m_location.neckRelativeRadial.x > VisionConstants::MAX_BALL_DISTANCE) {
         #if VISION_BALL_VERBOSITY > 1
             debug << "Ball::check - Ball thrown out: too far away" << std::endl;
-            debug << "\td2p: " << m_location.relativeRadial.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << std::endl;
+            debug << "\tdistance: " << m_location.neckRelativeRadial.x << " MAX_BALL_DISTANCE: " << VisionConstants::MAX_BALL_DISTANCE << std::endl;
         #endif
         return false;
     }
@@ -142,9 +141,34 @@ double Ball::findGroundError(VisionFieldObject *other) const
 bool Ball::calculatePositions()
 {
     const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
-    //To the bottom of the Goal Post.
-    tran.calculateRepresentations(m_location);
+    //To the bottom of the Goal Post
+    NUPoint d2p_loc, width_loc;
+    d2p_loc.screenCartesian = m_location.screenCartesian;
+    width_loc.screenCartesian = m_location.screenCartesian;
 
+    double width_dist = VisionConstants::BALL_WIDTH*tran.getCameraDistanceInPixels()/m_size_on_screen.x;
+
+    tran.calculateRepresentationsFromPixelLocation(d2p_loc);
+    tran.calculateRepresentationsFromPixelLocation(width_loc, true, width_dist);
+
+    switch(VisionConstants::BALL_DISTANCE_METHOD) {
+        case D2P:
+            m_location = d2p_loc;
+            break;
+        case Width:
+            m_location = width_loc;
+            break;
+        case Average:
+            //average distances
+            m_location.screenCartesian = (d2p_loc.screenCartesian + width_loc.screenCartesian) * 0.5;
+            m_location.neckRelativeRadial = (d2p_loc.neckRelativeRadial + width_loc.neckRelativeRadial) * 0.5;
+            m_location.screenAngular = (d2p_loc.screenAngular + width_loc.screenAngular) * 0.5;
+            m_location.groundCartesian = (d2p_loc.groundCartesian + width_loc.groundCartesian) * 0.5;
+            break;
+        case Least:
+            m_location = (d2p_loc.neckRelativeRadial.x < width_loc.neckRelativeRadial.x ? d2p_loc : width_loc);
+            break;
+    }
     #if VISION_BALL_VERBOSITY > 2
         debug << "Ball::calculatePositions: " << m_location << std::endl;
     #endif

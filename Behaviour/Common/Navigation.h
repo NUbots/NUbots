@@ -107,6 +107,7 @@ private:
     std::vector<float> current_point;
     int current_command;
     std::vector<float> current_walk_command;
+    std::vector<float> m_raw_move;
     float current_heading;
     
     /*! @brief Given a distance, and relative bearing and heading, returns a new walk command based on the navigation parameters
@@ -156,9 +157,13 @@ public:
      */
     std::vector<float> goToPoint(const std::vector<float> point);
     
-    /*! @brief Approach the ball with a good angle to kick from. Returned std::vector is walk command std::vector.
+    /*! @brief Approach the ball with a good angle to kick from. Returned std::vector is walk command std::vector. Buggy.
      */
     std::vector<float> goToBall(Object* kickTarget = NULL);
+    
+    /*! @brief Approach the ball with a good angle to kick from. Returned std::vector is walk command std::vector. Fixed version.
+     */
+    std::vector<float> goToBall2(Object* kickTarget = NULL);
 
     /*! @brief Stop the walk.
      */

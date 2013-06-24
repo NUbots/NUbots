@@ -59,9 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     for(size_t i = p1; i<NUM_PLOTS; i++) {
         PLOTWINDOW win = winFromInt(i);
         plots[win] = new QwtPlot(ui->windowsScrollArea);
-        plots[win]->setAxisAutoScale(QwtPlot::xBottom, true);
-        plots[win]->setAxisAutoScale(QwtPlot::yLeft, true);
-        plots[win]->setFixedSize(320,240);
+        plots[win]->setFixedSize(320,320);
         plots[win]->insertLegend(new QwtLegend(), QwtPlot::BottomLegend);
         windows_layout->addWidget(plots[win], (i + NUM_CANVASES)/2, (i+NUM_CANVASES)%2);
         zoomers[win] = new QwtPlotZoomer(plots[win]->canvas());
@@ -308,6 +306,8 @@ void MainWindow::setCurve(PLOTWINDOW win, QString name, std::vector< Vector2<dou
     curves[name]->setSymbol(new QwtSymbol(symbol));
     curves[name]->attach(plots[win]);
 
+    plots[win]->setAxisScale(QwtPlot::xBottom, -300, 300, 1);
+    plots[win]->setAxisScale(QwtPlot::yLeft, 0, 600, 1);
     plots[win]->replot();
 }
 
@@ -329,6 +329,9 @@ void MainWindow::setDashedCurve(PLOTWINDOW win, QString name, std::vector<Vector
     curves[name]->setPen(colour);
     curves[name]->setSymbol(new QwtSymbol(symbol));
     curves[name]->attach(plots[win]);
+
+    plots[win]->setAxisScale(QwtPlot::xBottom, -300, 300, 100);
+    plots[win]->setAxisScale(QwtPlot::yLeft, 0, 600, 100);
 
     plots[win]->replot();
 }

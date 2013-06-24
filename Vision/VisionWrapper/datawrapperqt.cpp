@@ -37,7 +37,7 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, std::stri
     kinematics_horizon.setLine(0, 1, 0);
     numFramesDropped = numFramesProcessed = 0;
 
-    switch(method) {
+    switch(m_method) {
     case STREAM:
         streamname = istrm;
         debug << "openning image stream: " << streamname << std::endl;
@@ -92,6 +92,16 @@ DataWrapper::DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, std::stri
 
 DataWrapper::~DataWrapper()
 {
+    switch(m_method) {
+    case STREAM:
+        imagestrm.close();
+        if(using_sensors)
+            sensorstrm.close();
+        break;
+    case CAMERA:
+        delete m_camera;
+        break;
+    }
 }
 
 DataWrapper* DataWrapper::getInstance()
@@ -188,23 +198,26 @@ void DataWrapper::publish(const VisionFieldObject* visual_object)
 }
 
 void DataWrapper::debugPublish(const std::vector<Ball>& data) {
-    BOOST_FOREACH(const Ball& b, data) {
-        gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
+    for(Ball b : data) {
+        if(b.isValid())
+            gui->addToLayer(DBID_BALLS, QCircle(QPointF(b.getLocationPixels().x, b.getLocationPixels().y), b.getRadius()), QColor(255, 160, 0));
     }
 }
 
 void DataWrapper::debugPublish(const std::vector<CentreCircle>& data)
 {
-    BOOST_FOREACH(const CentreCircle& c, data) {
+    for(CentreCircle c : data) {
         //need to change to display as ellipse - but for now just centre
-        gui->addToLayer(DBID_CENTRE_CIRCLES, QPointF(c.getLocationPixels().x, c.getLocationPixels().y), QPen(Qt::magenta, 5));
+        if(c.isValid())
+            gui->addToLayer(DBID_CENTRE_CIRCLES, QPointF(c.getLocationPixels().x, c.getLocationPixels().y), QPen(Qt::magenta, 5));
     }
 }
 
 void DataWrapper::debugPublish(const std::vector<CornerPoint>& data)
 {
-    BOOST_FOREACH(const CornerPoint& c, data) {
-        gui->addToLayer(DBID_CORNERS, QPointF(c.getLocationPixels().x, c.getLocationPixels().y), QPen(Qt::cyan, 5));
+    for(CornerPoint c : data) {
+        if(c.isValid())
+            gui->addToLayer(DBID_CORNERS, QPointF(c.getLocationPixels().x, c.getLocationPixels().y), QPen(Qt::cyan, 5));
     }
 }
 
@@ -214,17 +227,32 @@ void DataWrapper::debugPublish(const std::vector<CornerPoint>& data)
 
 void DataWrapper::debugPublish(const std::vector<Goal>& data)
 {
-    BOOST_FOREACH(const Goal& g, data) {
-        QPolygonF p;
-        const Quad& q = g.getQuad();
-        p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
-        p.append(QPointF(q.getTopLeft().x, q.getTopLeft().y));
-        p.append(QPointF(q.getTopRight().x, q.getTopRight().y));
-        p.append(QPointF(q.getBottomRight().x, q.getBottomRight().y));
-        p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
+    for(Goal g : data)
+    {
+//        static std::vector<Point> dist_history, dist_history_width, bearing_history, elevation_history;
+//        static int t=0;
+//        t++;
+        if(g.isValid()) {
+//            dist_history.push_back(Point(t, g.getLocation().neckRelativeRadial.x));
+//            dist_history_width.push_back(Point(t, g.width_pos.neckRelativeRadial.x));
+//            bearing_history.push_back(Point(t, g.getLocation().neckRelativeRadial.y));
+//            elevation_history.push_back(Point(t, g.getLocation().neckRelativeRadial.z));
+//            plotCurve("dist_history", dist_history);
+//            plotCurve("dist_history_width", dist_history_width);
+//            plotCurve("bearing_history", bearing_history);
+//            plotCurve("elevation_history", elevation_history);
 
-        gui->addToLayer(DBID_GOALS, Polygon(p, g.getID() != GOAL_U), QPen(Qt::yellow));
-        gui->addToLayer(DBID_GOALS, QPointF(g.getLocationPixels().x, g.getLocationPixels().y), QPen(QColor(Qt::blue), 3));
+            QPolygonF p;
+            const Quad& q = g.getQuad();
+            p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
+            p.append(QPointF(q.getTopLeft().x, q.getTopLeft().y));
+            p.append(QPointF(q.getTopRight().x, q.getTopRight().y));
+            p.append(QPointF(q.getBottomRight().x, q.getBottomRight().y));
+            p.append(QPointF(q.getBottomLeft().x, q.getBottomLeft().y));
+
+            gui->addToLayer(DBID_GOALS, Polygon(p, g.getID() != GOAL_U), QPen(Qt::yellow));
+            gui->addToLayer(DBID_GOALS, QPointF(g.getLocationPixels().x, g.getLocationPixels().y), QPen(QColor(Qt::blue), 3));
+        }
     }
 }
 
@@ -325,25 +353,29 @@ void DataWrapper::debugPublish(const std::vector<Goal>& data)
 
 void DataWrapper::debugPublish(const std::vector<Obstacle>& data)
 {
-    BOOST_FOREACH(const Obstacle& o, data) {
-        QPolygonF p;
-        Point loc = o.getLocationPixels();
-        Point size = o.getScreenSize();
+    for(Obstacle o : data) {
+        if(o.isValid()) {
+            QPolygonF p;
+            Point loc = o.getLocationPixels();
+            Point size = o.getScreenSize();
 
-        p.append(QPointF(loc.x - size.x*0.5, loc.y - size.y));
-        p.append(QPointF(loc.x - size.x*0.5, loc.y));
-        p.append(QPointF(loc.x + size.x*0.5, loc.y));
-        p.append(QPointF(loc.x + size.x*0.5, loc.y - size.y));
+            p.append(QPointF(loc.x - size.x*0.5, loc.y - size.y));
+            p.append(QPointF(loc.x - size.x*0.5, loc.y));
+            p.append(QPointF(loc.x + size.x*0.5, loc.y));
+            p.append(QPointF(loc.x + size.x*0.5, loc.y - size.y));
 
-        gui->addToLayer(DBID_OBSTACLES, Polygon(p, false), QColor(Qt::white));
+            gui->addToLayer(DBID_OBSTACLES, Polygon(p, false), QColor(Qt::white));
+        }
     }
 }
 
 void DataWrapper::debugPublish(const std::vector<FieldLine> &data)
 {
-    BOOST_FOREACH(const FieldLine& l, data) {
-        Vector2<NUPoint> endpts = l.getEndPoints();
-        gui->addToLayer(DBID_LINES, QLineF( endpts[0].screenCartesian.x, endpts[0].screenCartesian.y, endpts[1].screenCartesian.x, endpts[1].screenCartesian.y ), QColor(Qt::red));
+    for(FieldLine l : data) {
+        if(l.isValid()) {
+            Vector2<NUPoint> endpts = l.getEndPoints();
+            gui->addToLayer(DBID_LINES, QLineF( endpts[0].screenCartesian.x, endpts[0].screenCartesian.y, endpts[1].screenCartesian.x, endpts[1].screenCartesian.y ), QColor(Qt::red));
+        }
     }
 }
 
@@ -490,20 +522,21 @@ void DataWrapper::plotCurve(std::string name, std::vector< Point > pts)
     QColor colour;
     QwtSymbol symbol(QwtSymbol::NoSymbol);
 
-    // FILE OUTPUT, REMOVE LATER
-    static bool clear = true;
-    std::ofstream out;
-    if(clear)
-        out.open("lines.txt");
-    else
-        out.open("lines.txt", std::ios_base::app);
-    clear = false;
-    out << name << " = [" << name << " {[";
-    BOOST_FOREACH(Point p, pts) {
-        out << p.x << " " << p.y << ";";
-    }
-    out << "]}];" << std::endl;
-    out.close();
+
+//    // FILE OUTPUT, REMOVE LATER
+//    static bool clear = true;
+//    std::ofstream out;
+//    if(clear)
+//        out.open("lines.txt");
+//    else
+//        out.open("lines.txt", std::ios_base::app);
+//    clear = false;
+//    out << name << " = [" << name << " {[";
+//    BOOST_FOREACH(Point p, pts) {
+//        out << p.x << " " << p.y << ";";
+//    }
+//    out << "]}];" << std::endl;
+//    out.close();
 
     //hackalicious
     if(name.compare("Centrecircle") == 0) {
@@ -530,9 +563,51 @@ void DataWrapper::plotCurve(std::string name, std::vector< Point > pts)
                            QPen(Qt::blue),
                            QSize(5,5));
     }
-    else {
+    else if(name.compare("Screencoords") == 0) {
+        //use a symbol and no line
+        style = QwtPlotCurve::NoCurve;
         win = MainWindow::p2;
-        colour = Qt::black;
+        colour = Qt::white;
+        symbol = QwtSymbol(QwtSymbol::XCross,
+                           QBrush(Qt::black),
+                           QPen(Qt::black),
+                           QSize(5,5));
+    }
+    else if(name.compare("dist_history") == 0) {
+        style = QwtPlotCurve::NoCurve;
+        win = MainWindow::p3;
+        colour = Qt::white;
+        symbol = QwtSymbol(QwtSymbol::Ellipse,
+                           QBrush(Qt::black),
+                           QPen(Qt::black),
+                           QSize(3,3));
+    }
+    else if(name.compare("dist_history_width") == 0) {
+        style = QwtPlotCurve::NoCurve;
+        win = MainWindow::p3;
+        colour = Qt::white;
+        symbol = QwtSymbol(QwtSymbol::Ellipse,
+                           QBrush(Qt::black),
+                           QPen(Qt::red),
+                           QSize(3,3));
+    }
+    else if(name.compare("bearing_history") == 0){
+        style = QwtPlotCurve::NoCurve;
+        win = MainWindow::p4;
+        colour = Qt::white;
+        symbol = QwtSymbol(QwtSymbol::Ellipse,
+                           QBrush(Qt::black),
+                           QPen(Qt::red),
+                           QSize(3,3));
+    }
+    else if(name.compare("elevation_history") == 0) {
+            style = QwtPlotCurve::NoCurve;
+            win = MainWindow::p4;
+            colour = Qt::white;
+            symbol = QwtSymbol(QwtSymbol::Ellipse,
+                               QBrush(Qt::black),
+                               QPen(Qt::blue),
+                               QSize(3,3));
     }
 
     gui->setCurve(win, QString(name.c_str()), pts, colour, style, symbol);
@@ -570,7 +645,7 @@ void DataWrapper::plotHistogram(std::string name, const Histogram1D& hist, Colou
     }
 }
 
-bool DataWrapper::updateFrame(bool forward)
+bool DataWrapper::updateFrame(bool forward, int frame_no)
 {
     if(m_ok) {
         gui->clearLayers();
@@ -599,9 +674,15 @@ bool DataWrapper::updateFrame(bool forward)
             }
             if(using_sensors) {
                 try {
-                    if(!forward)
-                        imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), std::ios_base::cur);
-                    sensorstrm >> m_sensor_data;
+
+                    if(!forward) {
+                        sensorstrm.seekg(0, std::ios_base::beg);
+                        for(int i=0; i<frame_no; i++)
+                            sensorstrm >> m_sensor_data;
+                    }
+                    else {
+                        sensorstrm >> m_sensor_data;
+                    }
                 }
                 catch(std::exception& e){
                     errorlog << "Sensor stream error: " << e.what() << std::endl;

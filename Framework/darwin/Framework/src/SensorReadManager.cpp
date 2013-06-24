@@ -67,18 +67,19 @@ SensorReadManager::SensorReadManager()
         descriptor_list_.push_back(servo_read);
     }
 
-    //    // //   - Force-sensitive resistors:
-    //    SensorReadDescriptor* fsr_l_read = new SensorReadDescriptor();
-    //    fsr_l_read->set_sensor_id(FSR::ID_L_FSR);
-    //    fsr_l_read->set_start_address(FSR::P_FSR1_L);
-    //    fsr_l_read->set_num_bytes(10);
-    //    descriptor_list_.push_back(fsr_l_read);
 
-    //    SensorReadDescriptor* fsr_r_read = new SensorReadDescriptor();
-    //    fsr_r_read->set_sensor_id(Robot::FSR::ID_R_FSR);
-    //    fsr_r_read->set_start_address(FSR::P_FSR1_L);
-    //    fsr_r_read->set_num_bytes(10);
-    //    descriptor_list_.push_back(fsr_r_read);
+    // //   - Force-sensitive resistors:
+    /* SensorReadDescriptor* fsr_l_read = new SensorReadDescriptor();
+    fsr_l_read->set_sensor_id(FSR::ID_L_FSR);
+    fsr_l_read->set_start_address(FSR::P_FSR1_L);
+    fsr_l_read->set_num_bytes(10);
+    descriptor_list_.push_back(fsr_l_read);
+
+    SensorReadDescriptor* fsr_r_read = new SensorReadDescriptor();
+    fsr_r_read->set_sensor_id(Robot::FSR::ID_R_FSR);
+    fsr_r_read->set_start_address(FSR::P_FSR1_L);
+    fsr_r_read->set_num_bytes(10);
+    descriptor_list_.push_back(fsr_r_read); */
 
 
     // Populate the map and the heap with the same descriptors:

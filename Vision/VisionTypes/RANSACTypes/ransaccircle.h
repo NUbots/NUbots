@@ -90,7 +90,8 @@ public:
     NUPoint getCentre() const {return m_centre;}
 
 private:
-    bool constructFromPoints(NUPoint p1, NUPoint p2, NUPoint p3, double tolerance = 1.0e-6) {
+    bool constructFromPoints(NUPoint p1, NUPoint p2, NUPoint p3, double tolerance = 1.0e-6)
+    {
         Point pa = p1.groundCartesian,
               pb = p2.groundCartesian,
               pc = p3.groundCartesian;
@@ -107,11 +108,12 @@ private:
         double ab_norm = (pa.squareAbs() - b_len_sqr)/2.0;
         double bc_norm = (b_len_sqr - pc.squareAbs())/2.0;
 
-        det = 1/det;
+        det = 1.0/det;
         m_centre.groundCartesian.x = (ab_norm*(bc.y)-bc_norm*(ab.y))*det;
         m_centre.groundCartesian.y = ((ab.x)*bc_norm-(bc.x)*ab_norm)*det;
 
         m_radius = (m_centre.groundCartesian - pa).abs();
+
         return true;
     }
 

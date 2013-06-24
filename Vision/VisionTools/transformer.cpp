@@ -88,7 +88,7 @@ void Transformer::preCalculateTransforms()
     camV2RobotRotation = headV2RobotRotation * camera_pitch_rot * camera_roll_rot * camera_yaw_rot;
 }
 
-void Transformer::calculateRepresentations(NUPoint& pt, bool known_distance, double val) const
+void Transformer::calculateRepresentationsFromPixelLocation(NUPoint& pt, bool known_distance, double val) const
 {
     // Calculate the radial position (relative to the camera vector) from the pixel position.
     pt.screenAngular.x = atan( (image_centre.x-pt.screenCartesian.x)  * screen_to_radial_factor.x);
@@ -110,10 +110,46 @@ void Transformer::calculateRepresentations(NUPoint& pt, bool known_distance, dou
     pt.groundCartesian.y = cos(pt.neckRelativeRadial.z) * sin(pt.neckRelativeRadial.y) * pt.neckRelativeRadial.x;
 }
 
-void Transformer::calculateRepresentations(std::vector<NUPoint>& pts, bool known_distance, double val) const
+void Transformer::calculateRepresentationsFromPixelLocation(std::vector<NUPoint>& pts, bool known_distance, double val) const
 {
     BOOST_FOREACH(NUPoint& p, pts) {
-        calculateRepresentations(p, known_distance, val);
+        calculateRepresentationsFromPixelLocation(p, known_distance, val);
+    }
+}
+
+void Transformer::calculateRepresentationsFromGroundCartesianLocation(NUPoint& pt) const
+{
+    //           (top down view)                (side view)         //
+    //                     /|                  __________           //
+    //                    / |                 |\e                   //
+    //                   /  |                 | \                   //
+    //      ground_dist /   |                 |  \                  //
+    //                 /    | y        neck_h |   \ neck_dist       //
+    //                /     |                 |    \                //
+    //               /      |                 |     \               //
+    //              /B______|                 |______\              //
+    //                   x                   ground_dist            //
+
+    // B - bearing
+    // e - elevation
+
+
+    // get bearing from ground pos
+    pt.neckRelativeRadial.y = atan2(pt.groundCartesian.y, pt.groundCartesian.x);
+    // get distance along ground
+    double ground_dist = sqrt(pt.groundCartesian.x*pt.groundCartesian.x + pt.groundCartesian.y*pt.groundCartesian.y);
+    // use this and the known neck height to determine the neck distance
+    pt.neckRelativeRadial.x = sqrt(ground_dist*ground_dist + neck_position.z * neck_position.z);
+    // and the neck bearing
+    pt.neckRelativeRadial.y = atan2(ground_dist, neck_position.z);
+
+    /// @todo We need to find the screen relative coordinates
+}
+
+void Transformer::calculateRepresentationsFromGroundCartesianLocation(std::vector<NUPoint>& pts) const
+{
+    for(NUPoint& p : pts) {
+        calculateRepresentationsFromGroundCartesianLocation(p);
     }
 }
 

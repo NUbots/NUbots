@@ -56,7 +56,8 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
-const float SelfLocalisation::c_obj_theta_variance = 0.02f*0.02f;        // (0.1 rad)^2
+
+const float SelfLocalisation::c_obj_theta_variance = 0.05f*0.05f;        // (0.1 rad)^2
 
 const float SelfLocalisation::c_obj_range_offset_variance = 20.0f*20.0f;     // (25cm)^2
 const float SelfLocalisation::c_obj_range_relative_variance = 0.20f*0.20f;   // 20% of range added
@@ -665,7 +666,7 @@ void SelfLocalisation::WriteModelToObjects(const IWeightedKalmanFilter* model, F
 
     // Update the robots location.
     fieldObjects->self.updateLocationOfSelf(est.mean(0), est.mean(1), est.mean(2), est.sd(0), est.sd(1), est.sd(2), false);
-
+    fieldObjects->self.covariance = est.covariance();
     Self& self = fieldObjects->self;
 
     // Now update the ball

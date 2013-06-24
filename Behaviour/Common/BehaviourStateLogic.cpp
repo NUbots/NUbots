@@ -60,7 +60,7 @@ void BehaviourStateLogic::checkMyMovement() {
     
     //XXX: not sure if in_position needs help
     Blackboard->Sensors->get(NUSensorsData::MotionKickActive, states[IS_KICKING]);
-    
+
     states[IS_APPROACHING_BALL] =  nav->getCurrentCommand() == Navigation::GOTOOBJECT;
     
     states[IS_IN_POSITION] = nav->getCurrentCommand() == Navigation::GOTOPOINT and

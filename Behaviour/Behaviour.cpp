@@ -44,7 +44,7 @@
 #include "FootSlipTest/SlipTestProvider.h"
 #include "HeadBehaviourTester/HBTProvider.h"
 #include "ScriptTuner/ScriptTunerProvider.h"
-
+#include "NUSoccer/NUSoccerProvider.h"
 
 
 #include "CameraCalibration/CameraCalibrationProvider.h"

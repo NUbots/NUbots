@@ -8,11 +8,12 @@
 #include "Kinematics/Kinematics.h"
 #include "Tools/Math/Matrix.h"
 
-Obstacle::Obstacle(Point position, double width, double height)
+Obstacle::Obstacle(Point position, double width, double height, COLOUR_CLASS colour)
 {
     m_id = OBSTACLE;
     m_location.screenCartesian = position;
     m_size_on_screen = Vector2<double>(width, height);
+    m_colour = colour;
 //    if(VisionConstants::DO_RADIAL_CORRECTION) {
 //        VisionBlackboard* vbb = VisionBlackboard::getInstance();
 //        Vector2<float> bottomcentre = Vector2<float>(position.x, position.y);
@@ -94,14 +95,14 @@ bool Obstacle::calculatePositions()
 {
     const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
     //To the bottom of the Goal Post.
-    transformer.calculateRepresentations(m_location);
+    transformer.calculateRepresentationsFromPixelLocation(m_location);
 
     // find arc width
     NUPoint gp1, gp2;
     gp1.screenCartesian = m_location.screenCartesian - Point(m_size_on_screen.x, 0);
     gp2.screenCartesian = m_location.screenCartesian + Point(m_size_on_screen.x, 0);
-    transformer.calculateRepresentations(gp1);
-    transformer.calculateRepresentations(gp2);
+    transformer.calculateRepresentationsFromPixelLocation(gp1);
+    transformer.calculateRepresentationsFromPixelLocation(gp2);
 
     m_arc_width = std::abs( gp1.screenAngular.x - gp2.screenAngular.x );
 

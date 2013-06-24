@@ -11,6 +11,49 @@ using namespace boost::accumulators;
 GoalDetector::GoalDetector() {}
 GoalDetector::~GoalDetector() {}
 
+void GoalDetector::relabel(std::vector<Goal>& goals, std::vector<Obstacle> obstacles, COLOUR_CLASS team_colour, COLOUR_CLASS opponent_colour) const
+{
+    if(goals.size() == 2) {
+        int left_index, right_index;
+        if(goals[0].getID() == GOAL_L && goals[0].getID() == GOAL_R) {
+            left_index = 0;
+            right_index = 1;
+        }
+        else if(goals[0].getID() == GOAL_R && goals[0].getID() == GOAL_L) {
+            left_index = 1;
+            right_index = 0;
+        }
+        else {
+            return;
+        }
+
+        int team_count = 0;
+        int opponent_count = 0;
+        double avg_goal_dist = 0.5 * (goals[0].getLocation().neckRelativeRadial.x + goals[1].getLocation().neckRelativeRadial.x);
+        // Count number of team or opponent obstacles in goals
+        for(const Obstacle& obst : obstacles) {
+            if(obst.getLocationPixels().x > goals[left_index].getLocationPixels().x &&
+               obst.getLocationPixels().x < goals[right_index].getLocationPixels().x &&
+               obst.getLocation().neckRelativeRadial.x < avg_goal_dist + 100 &&
+               obst.getLocation().neckRelativeRadial.x > avg_goal_dist - 100 )
+            {
+                //obstacle is within reasonable distance of goal centre
+                if(obst.m_colour == team_colour)
+                    team_count++;
+                else if(obst.m_colour == opponent_colour)
+                    opponent_count++;
+            }
+        }
+
+        if(team_count == 1 && opponent_count == 0) {
+            //own goal
+        }
+        else if(team_count == 0 && opponent_count == 1) {
+            //opponent goal
+        }
+    }
+}
+
 void GoalDetector::removeInvalid(std::list<Quad>& posts)
 {
     std::list<Quad>::iterator it = posts.begin();
@@ -95,7 +138,7 @@ std::vector<Goal> GoalDetector::assignGoals(const std::list<Quad>& candidates) c
     else {
         //unable to identify which post is which
         //setting all to unknown
-        BOOST_FOREACH(Quad q, candidates) {
+        for(Quad q : candidates) {
             goals.push_back(Goal(GOAL_U, q));
         }
     }

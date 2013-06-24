@@ -60,14 +60,19 @@ namespace RANSAC
             //determine consensus set
             for (size_t i = 0; i < points.size(); i++) {
                 double dist = m.calculateError(points.at(i));
-                if (dist < e) {
-                    cur_variance += dist;
-                    concensus_size++;
-                    cur_concensus[i] = true;
-                }
-                else {
-                    cur_concensus[i] = false;
-                }
+                // cheap and nasty - assuming that tru
+                bool in = dist < e;
+                cur_variance += dist*in;
+                concensus_size += in;
+                cur_concensus[i] = in;
+//                if (dist < e) {
+//                    cur_variance += dist;
+//                    concensus_size++;
+//                    cur_concensus[i] = true;
+//                }
+//                else {
+//                    cur_concensus[i] = false;
+//                }
             }
 
             cur_variance /= concensus_size; //normalise the variance
