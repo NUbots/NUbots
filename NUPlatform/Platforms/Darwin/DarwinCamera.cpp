@@ -351,7 +351,7 @@ NUImage* DarwinCamera::grabNewImage()
 void DarwinCamera::readCameraSettings()
 {
     m_settings.exposureAuto               = readSetting(V4L2_CID_EXPOSURE_AUTO);
-    m_settings.autoWhiteBalance           = readSetting(V4L2_CID_AUTO_WHITE_BALANCE);
+    m_settings.autoWhiteBalance           = readSetting(V4L2_CID_CAMERA_CLASS_BASE+12 );//V4L2_CID_AUTO_WHITE_BALANCE); //XXX: this is the address for c905
     m_settings.whiteBalanceTemperature    = readSetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE);
     m_settings.exposureAutoPriority       = readSetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY);
     m_settings.brightness                 = readSetting(V4L2_CID_BRIGHTNESS);
