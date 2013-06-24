@@ -42,6 +42,10 @@ public:
     //! Schedules all joint poitions in this frame using the given actionators.
     void ApplyToRobot(NUActionatorsData* actionators_data);
 
+    //! Causes this frame to be applied to the robot at the given time.
+    void ApplyToRobotAtTime(double start_time,
+                            NUActionatorsData* actionators_data);
+
     //! Returns the NUData id_t corresponding to the servo motor with the given
     //! id.
     static NUData::id_t MapServoIdToNUDataId(int sensor_id);
@@ -177,7 +181,6 @@ public:
     float TimeFinishedWithRArm();
 
 private:
-    
     float script_start_time_;
 
     int current_frame_index_;

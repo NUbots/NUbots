@@ -79,6 +79,13 @@ int MapRowIndexToServoId(int index)
 
 void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
 {
+    ApplyToRobotAtTime(Platform->getTime(), actionators_data);
+}
+
+void MotionScriptFrame::ApplyToRobotAtTime(
+    double start_time,
+    NUActionatorsData* actionators_data)
+{
     for(auto key_value : joints_)
     {
         auto& joint = key_value.second;
@@ -87,13 +94,13 @@ void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
         {
             actionators_data->add(
                 MapServoIdToNUDataId(joint.GetServoId()),
-                duration_  + Platform->getTime(),
+                duration_  + start_time,
                 joint.GetPosition(),
-                joint.GetGain());            
+                joint.GetGain());
         } else {
             actionators_data->add(
                 MapServoIdToNUDataId(joint.GetServoId()),
-                duration_  + Platform->getTime(),
+                duration_  + start_time,
                 joint.GetPosition(),
                 0);
         }
@@ -652,7 +659,16 @@ bool MotionScript2013::RequiresHead(){
 void MotionScript2013::ScheduleEntireScript(NUSensorsData* sensors_data,
                               NUActionatorsData* actionators_data)
 {
+    StartScript();
 
+    double frame_start_time = script_start_time_;
+
+    for(auto* frame : script_frames_)
+    {
+        frame->ApplyToRobotAtTime(frame_start_time, actionators_data);
+
+        frame_start_time += frame->GetDuration();
+    }
 }
 
 float MotionScript2013::TimeFinished() {
