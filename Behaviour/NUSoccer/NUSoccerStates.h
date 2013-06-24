@@ -104,8 +104,9 @@ private:
     
     void doBallApproachAndKick(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
         
-        movement->goToBall();
-        head->prioritiseBall();
+        movement->goToBall2();
+        //head->prioritiseBall();
+        head->lookAtBall();
         movement->kick();        
     }
     
