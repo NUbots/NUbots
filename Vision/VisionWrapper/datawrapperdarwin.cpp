@@ -30,7 +30,7 @@ DataWrapper::DataWrapper()
     numFramesDropped = 0;
     numFramesProcessed = 0;
     numSavedImages = 0;
-    loadLUTFromFile(std::string(DATA_DIR) + std::string("default.lut"));
+    loadLUTFromFile(std::string(CONFIG_DIR) + std::string("default.lut"));
     Blackboard->lookForBall = true; //initialise
     Blackboard->lookForGoals = true; //initialise
     isSavingImages = false;
