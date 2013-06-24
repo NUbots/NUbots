@@ -67,6 +67,7 @@ public:
         kPlay,              //!< Plays the current script.
         kEdit,              //!< Begin editing the current sctipr.
         kNextFrame,         //!< Move to the next frame.
+        kPreviousFrame,     //!< Move to the previous frame.
         kNewFrame,          //!< Creates a new frame after the current frame.
         kFrameSeek,         //!< Seek to a given frame.
         kFrameDuration,     //!< Set the duration of the current frame.
@@ -82,6 +83,8 @@ public:
         kLoadOldScript,     //!< Load an old script from the given path.
         kPrintScript,       //!< Prints a text representation of the script.
         kAllOff,            //!< Turns all torques off for manual editing.
+        kSetPose,           //!< Turns torque to low value 
+        kDeleteFrame,       //!< Deletes current frame
     };
 
     static int MapJointInitialismToServoId(const std::string& initials)
@@ -218,7 +221,19 @@ public:
         } else if(!arg0.compare("next")) {
             ScriptTunerCommand c;
             c.set_command_type(CommandType::kNextFrame);
-            return c;    
+            return c;
+        } else if(!arg0.compare("prev") || !arg0.compare("previous")) {
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kPreviousFrame);
+            return c; 
+        } else if (!arg0.compare("setpose")){
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kSetPose);
+            return c;
+        } else if (!arg0.compare("delete")){
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kDeleteFrame);
+            return c;
         } else {
             ScriptTunerCommand c;
             float position;
@@ -242,6 +257,7 @@ public:
     {
         std::cout << "Command List While Editing:" << std::endl;
         std::cout << "next" << std::endl;
+        std::cout << "delete" << std::endl;
         std::cout << "<motor name> off" << std::endl;
         std::cout << "<motor name> on" << std::endl;
         std::cout << "allon" << std::endl;
@@ -250,6 +266,7 @@ public:
         std::cout << "play"<< std::endl;
         std::cout << "edit"<< std::endl;
         std::cout << "exit"<< std::endl;
+        std::cout << "setpose"<< std::endl;
         std::cout << "quit"<< std::endl;
         std::cout << "saveframe"<< std::endl;
         std::cout << "savescript"<< std::endl;
@@ -331,6 +348,10 @@ protected:
 class ScriptTunerState : public ScriptTunerSubState
 {
 private:
+    const float kSetPoseCommandGains;
+
+    void HandleDeleteFrameCommand(ScriptTunerCommand command);
+    void HandleSetPoseCommand(ScriptTunerCommand command);
     void HandlePrintScriptCommand(ScriptTunerCommand command);
     void HandleLoadScriptCommand(ScriptTunerCommand command);
     void HandleLoadOldScriptCommand(ScriptTunerCommand command);
@@ -340,6 +361,7 @@ private:
     void HandleSaveScriptCommand(ScriptTunerCommand command);
     void HandleExitScriptCommand(ScriptTunerCommand command);
     void HandleNextFrameCommand(ScriptTunerCommand command);
+    void HandlePreviousFrameCommand(ScriptTunerCommand command);
     void HandleNewFrameCommand(ScriptTunerCommand command);
     void HandleFrameSeekCommand(ScriptTunerCommand command);
     void HandleFrameDurationCommand(ScriptTunerCommand command);
@@ -351,6 +373,7 @@ private:
     void HandleJointPositionGainCommand(ScriptTunerCommand command);
     void PrintCommandError(ScriptTunerCommand command);
     void HandleAllOffCommand(ScriptTunerCommand command);
+
 
     
     std::string file_name_;
@@ -388,6 +411,11 @@ public:
      /*! @brief Writes the frames to script file.*/
     bool saveScriptToFile(std::string filename);
 
+    void UpdateScriptMotorGoalsToCurrentPosition(MotionScriptFrame* frame);
+
+
+    void CopyPositionsFromTempScript(MotionScriptFrame* temp_frame);
+    
     /*! @brief Motor fine tuning.
         @param pos_change is change in angle in radians.*/
     void changeMotorPosition(int motor_id,float pos_change);

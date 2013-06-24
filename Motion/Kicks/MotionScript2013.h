@@ -45,7 +45,7 @@ public:
 
     //! Adds a new descriptor for the servo with the given id, or replaces
     //! the current one.
-    void AddDescriptor(int servo_id, ScriptJointDescriptor descriptor);
+    void AddDescriptor(ScriptJointDescriptor descriptor);
 
     //! Deletes the descriptor for the given servo id from this script frame.
     //! Servos without descriptors will not have their state changed by this

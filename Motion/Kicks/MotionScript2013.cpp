@@ -87,22 +87,22 @@ void MotionScriptFrame::ApplyToRobot(NUActionatorsData* actionators_data)
         {
             actionators_data->add(
                 MapServoIdToNUDataId(joint.GetServoId()),
-                duration_,
+                duration_  + Platform->getTime(),
                 joint.GetPosition(),
                 joint.GetGain());            
         } else {
             actionators_data->add(
                 MapServoIdToNUDataId(joint.GetServoId()),
-                duration_,
+                duration_  + Platform->getTime(),
                 joint.GetPosition(),
                 0);
         }
     }
 }
 
-void MotionScriptFrame::AddDescriptor(int servo_id, ScriptJointDescriptor descriptor)
+void MotionScriptFrame::AddDescriptor(ScriptJointDescriptor descriptor)
 {
-    joints_[servo_id] = descriptor;
+    joints_[descriptor.GetServoId()] = descriptor;
 }
 
 void MotionScriptFrame::DeleteDescriptor(int servo_id)
@@ -257,7 +257,7 @@ MotionScriptFrame* MotionScriptFrame::LoadFromConfigSystem(
         if(!success)
             continue;
 
-        frame->AddDescriptor(j, descriptor);
+        frame->AddDescriptor(descriptor);
     }
 
      return frame;
@@ -440,7 +440,7 @@ MotionScript2013* MotionScript2013::InitialiseScriptFromOld(vector<vector<double
             descriptor.SetServoId(servo_id);
             descriptor.SetPosition(pos);
             descriptor.SetGain(gain);
-            new_frames[frame_number]->AddDescriptor(servo_id, descriptor);
+            new_frames[frame_number]->AddDescriptor(descriptor);
         }
     }
 
@@ -472,7 +472,10 @@ void MotionScript2013::SeekFrame(int frame)
 
 void MotionScript2013::ApplyCurrentFrameToRobot(NUActionatorsData* actionators_data)
 {
-    if(current_frame_index_ >= script_frames_.size()){
+    if(current_frame_index_ >= script_frames_.size() ||
+       current_frame_index_ < 0) {
+        std::cout << "Frame index " << current_frame_index_+1 
+                  << " is out of range" << std::endl;
         return;
     }
 
@@ -495,6 +498,8 @@ void MotionScript2013::StartScript()
 void MotionScript2013::PlayScript(NUActionatorsData* actionators_data){
     StartScript();
     double current_time = Platform->getTime();
+    ApplyCurrentFrameToRobot(actionators_data);
+    std::cout << "Frame number "<< GetCurrentFrameIndex()+1<<std::endl;
     while(!HasCompleted(current_time)){ 
         // If it's time for the next frame
         current_time = Platform->getTime();
@@ -508,9 +513,13 @@ void MotionScript2013::PlayScript(NUActionatorsData* actionators_data){
             // Schedule the next joint positions
             AdvanceToNextFrame();
             ApplyCurrentFrameToRobot(actionators_data);
-            std::cout << "Frame number "<< GetCurrentFrameIndex()<<std::endl;
+            std::cout << "Frame number "<< GetCurrentFrameIndex()+1<<std::endl;
         }
     }
+
+    // Go back to start of script.
+    SeekFrame(0);
+
     std::cout <<"Script Finished in "<< (current_time-script_start_time_) << "ms."<< std::endl;
 }
 
@@ -580,8 +589,8 @@ void MotionScript2013::DuplicateFrame(int index)
     auto* current_frame = script_frames_[current_frame_index_];
 
     auto* new_frame = new MotionScriptFrame(*current_frame);
-
-    InsertFrame(index, current_frame);
+    
+    InsertFrame(index, new_frame);
 }
 
 float MotionScript2013::GetScriptDuration()

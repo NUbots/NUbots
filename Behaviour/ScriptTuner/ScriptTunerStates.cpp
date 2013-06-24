@@ -3,13 +3,14 @@
 #include "Framework/darwin/Framework/include/JointData.h"
 #include "Motion/Kicks/MotionScript2013.h"
 
+
 using std::vector;
 using std::string;
 
 
 
 ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) : 
-    ScriptTunerSubState(provider), script_()
+    ScriptTunerSubState(provider),kSetPoseCommandGains(10), script_()
 {
     std::cout<< "==================================================="<< std::endl;
     std::cout<< "--------------Welcome to Script Tuner--------------"<< std::endl;
@@ -38,6 +39,9 @@ void ScriptTunerState::doState()
         case ScriptTunerCommand::CommandType::kLoadOldScript: {
             HandleLoadOldScriptCommand(command);
         } break;
+        case ScriptTunerCommand::CommandType::kHelp: {
+                HandleHelpCommand(command);
+            } break;
         case ScriptTunerCommand::CommandType::kExit: {
             std::cout << "Shutting down script tuner." << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(2000));
@@ -193,6 +197,9 @@ void ScriptTunerState::editCurrentFrame() {
         case ScriptTunerCommand::CommandType::kNextFrame: {
             HandleNextFrameCommand(command);
         } break;
+        case ScriptTunerCommand::CommandType::kPreviousFrame: {
+            HandlePreviousFrameCommand(command);
+        } break;
         case ScriptTunerCommand::CommandType::kNewFrame: {
             HandleNewFrameCommand(command);
         } break;
@@ -226,11 +233,67 @@ void ScriptTunerState::editCurrentFrame() {
         case ScriptTunerCommand::CommandType::kHelp: {
             HandleHelpCommand(command);
         } break;
+        case ScriptTunerCommand::CommandType::kSetPose: {
+            HandleSetPoseCommand(command);
+        } break;
+        case ScriptTunerCommand::CommandType::kDeleteFrame: {
+            HandleDeleteFrameCommand(command);
+        } break;
         default: {
             PrintCommandError(command);
         } break;
     }
     
+}
+
+void ScriptTunerState::HandleSetPoseCommand(ScriptTunerCommand command){
+    float button_state;
+    std::cout<<"Torques set to low. Manually set position and press centre button to save to script."<<std::endl;
+    Blackboard->Sensors->getButton(NUSensorsData::MainButton,button_state);
+    MotionScriptFrame* frame = script_->GetCurrentFrame();
+    MotionScriptFrame temp_frame(*frame);//Copy constructor
+    
+    while(button_state <= 0){        
+        UpdateScriptMotorGoalsToCurrentPosition(&temp_frame); 
+        temp_frame.ApplyToRobot(actionators_data_);      
+        Blackboard->Sensors->getButton(NUSensorsData::MainButton,button_state);         
+    }
+    CopyPositionsFromTempScript(&temp_frame);
+    std::cout<<"Pose saved."<<std::endl;
+}
+
+void ScriptTunerState::HandleDeleteFrameCommand(ScriptTunerCommand command){
+    script_->RemoveFrame(script_->GetCurrentFrameIndex());
+}
+
+void ScriptTunerState::UpdateScriptMotorGoalsToCurrentPosition(MotionScriptFrame* frame){
+    for(int motor_id = 1; motor_id<Robot::JointData::NUMBER_OF_JOINTS;motor_id++){
+        ScriptJointDescriptor descriptor;          
+        descriptor.SetGain(kSetPoseCommandGains);       
+        // motors_to_be_saved_.push_back(motor_id);                     
+        descriptor.SetPosition(getMotorPosition(motor_id));
+        descriptor.SetServoId(motor_id);                
+        frame->AddDescriptor(descriptor);    
+    }
+}
+
+void ScriptTunerState::CopyPositionsFromTempScript(MotionScriptFrame* temp_frame){
+    MotionScriptFrame* current_frame = script_->GetCurrentFrame();
+    for(int motor_id = 1; motor_id<Robot::JointData::NUMBER_OF_JOINTS;motor_id++){
+        ScriptJointDescriptor descriptor, temp_descriptor;
+        if (!current_frame->GetDescriptor(motor_id,&descriptor)){
+            std::cout << "Descriptor doesn't exist for this frame for motor "<<motor_id<< ". Not saving." << std::endl;
+            continue;    
+        }      
+
+        temp_frame->GetDescriptor(motor_id,&temp_descriptor);
+        float new_position = temp_descriptor.GetPosition();
+        float old_position = descriptor.GetPosition();       
+        descriptor.SetPosition(new_position);
+        current_frame->AddDescriptor(descriptor);
+
+        std::cout << "Saving motor "<< motor_id<<"."<<" Change in position is "<<new_position-old_position<<" rad." <<std::endl;
+    }
 }
 
 void ScriptTunerState::PrintFrameInfo(){
@@ -274,7 +337,12 @@ void ScriptTunerState::HandleNextFrameCommand(ScriptTunerCommand command)
 {
     std::cout << "Moving to next frame."<< std::endl;    
     script_->SeekFrame(script_->GetCurrentFrameIndex() + 1);
-    
+}
+
+void ScriptTunerState::HandlePreviousFrameCommand(ScriptTunerCommand command)
+{
+    std::cout << "Moving to previous frame."<< std::endl;    
+    script_->SeekFrame(script_->GetCurrentFrameIndex() - 1);
 }
 
 void ScriptTunerState::HandleNewFrameCommand(ScriptTunerCommand command)
@@ -289,8 +357,7 @@ void ScriptTunerState::HandleNewFrameCommand(ScriptTunerCommand command)
 void ScriptTunerState::HandleFrameSeekCommand(ScriptTunerCommand command)
 {
     std::cout << "Seek new frame."<< std::endl;
-    script_->SeekFrame(command.frame_number());
-    
+    script_->SeekFrame(command.frame_number());    
 }
 
 void ScriptTunerState::HandleFrameDurationCommand(ScriptTunerCommand command)
@@ -360,7 +427,7 @@ void ScriptTunerState::saveManuallyMovedMotors()
             ScriptJointDescriptor descriptor;
             frame->GetDescriptor(motors_to_be_saved_[i],&descriptor);//Sets descriptor pointer
             descriptor.SetPosition(getMotorPosition(motors_to_be_saved_[i]));
-            frame->AddDescriptor(motors_to_be_saved_[i],descriptor);
+            frame->AddDescriptor(descriptor);
         }  else {
             std::cout<< "Motor "<< motors_to_be_saved_[i]<< "still has torque off!"<<std::endl;
         }
@@ -376,6 +443,7 @@ void ScriptTunerState::HandlePlayCommand(ScriptTunerCommand command)
     std::cout << "Playing script from beginning in real time."<< std::endl;
     std::cout<< "==================================================="<< std::endl;
     script_->PlayScript(actionators_data_);
+    script_->Reset();
 }
 
 
@@ -387,7 +455,7 @@ void ScriptTunerState::changeMotorPosition(int  motor_id, float pos_change){
     ScriptJointDescriptor descriptor;
     current_frame->GetDescriptor(motor_id, &descriptor);                
     descriptor.SetPosition(descriptor.GetPosition()+pos_change);                
-    current_frame->AddDescriptor(motor_id,descriptor);
+    current_frame->AddDescriptor(descriptor);
 }
 
 
@@ -400,7 +468,7 @@ void ScriptTunerState::changeMotorGain(int  motor_id, float gain_change){
     ScriptJointDescriptor descriptor;
     current_frame->GetDescriptor(motor_id, &descriptor);                
     descriptor.SetGain(descriptor.GetGain()+gain_change);                
-    current_frame->AddDescriptor(motor_id,descriptor);
+    current_frame->AddDescriptor(descriptor);
 }
 
 void ScriptTunerState::turnOffMotor(int  motor_id){
@@ -408,9 +476,9 @@ void ScriptTunerState::turnOffMotor(int  motor_id){
     std::cout<< "Motor "<< motor_id << " torque off."<< std::endl;
     MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
-    current_frame->GetDescriptor(motor_id, &descriptor);                
+    current_frame->GetDescriptor(motor_id,&descriptor);                
     descriptor.SetDisable(true);                
-    current_frame->AddDescriptor(motor_id,descriptor);
+    current_frame->AddDescriptor(descriptor);
 
 }
 
@@ -418,13 +486,11 @@ void ScriptTunerState::turnOnMotor(int  motor_id){
     //DEBUG TEXT:
     std::cout<< "Motor "<< motor_id << " torque on."<< std::endl;
     motors_to_be_saved_.push_back(motor_id);
-
     MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
-    current_frame->GetDescriptor(motor_id, &descriptor);   
-    //Where is the read.             
-    descriptor.SetDisable(false);                
-    current_frame->AddDescriptor(motor_id, descriptor);    
+    current_frame->GetDescriptor(motor_id, &descriptor);      
+    descriptor.SetPosition(getMotorPosition(motor_id));                
+    current_frame->AddDescriptor( descriptor);    
 }
 
 float ScriptTunerState::getMotorPosition(int motor_id){
