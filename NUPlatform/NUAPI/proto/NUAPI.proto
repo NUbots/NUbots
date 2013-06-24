@@ -44,6 +44,8 @@ message VisionFieldObject {
 	optional uint32 width = 9;
 	optional uint32 height = 10;
 	repeated uint32 points = 11;
+
+	repeated float measured_relative_position = 12;
 }
 
 message VisionClassifiedSegment {
@@ -105,8 +107,6 @@ message LocalisationFieldObject {
 	optional float sd_heading = 10;
 
 	optional bool lost = 11;
-
-	repeated float measured_relative_position = 12;
 }
 
 message Localisation {

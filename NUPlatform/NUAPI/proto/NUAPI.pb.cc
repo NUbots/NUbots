@@ -100,7 +100,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Image));
   VisionFieldObject_descriptor_ = file->message_type(2);
-  static const int VisionFieldObject_offsets_[11] = {
+  static const int VisionFieldObject_offsets_[12] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, name_),
@@ -112,6 +112,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, width_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, height_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, points_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(VisionFieldObject, measured_relative_position_),
   };
   VisionFieldObject_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -219,7 +220,7 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SensorData));
   LocalisationFieldObject_descriptor_ = file->message_type(8);
-  static const int LocalisationFieldObject_offsets_[12] = {
+  static const int LocalisationFieldObject_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, wm_x_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, wm_y_),
@@ -231,7 +232,6 @@ void protobuf_AssignDesc_NUAPI_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, heading_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, sd_heading_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, lost_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LocalisationFieldObject, measured_relative_position_),
   };
   LocalisationFieldObject_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -351,36 +351,36 @@ void protobuf_AddDesc_NUAPI_2eproto() {
     "alisation\030\005 \001(\0132\021.API.Localisation\"5\n\004Ty"
     "pe\022\017\n\013SENSOR_DATA\020\001\022\n\n\006VISION\020\002\022\020\n\014LOCAL"
     "ISATION\020\003\"4\n\005Image\022\r\n\005width\030\001 \001(\r\022\016\n\006hei"
-    "ght\030\002 \001(\r\022\014\n\004data\030\003 \001(\014\"\233\002\n\021VisionFieldO"
+    "ght\030\002 \001(\r\022\014\n\004data\030\003 \001(\014\"\277\002\n\021VisionFieldO"
     "bject\022)\n\004type\030\001 \001(\0162\033.API.VisionFieldObj"
     "ect.Type\022\n\n\002id\030\002 \001(\r\022\014\n\004name\030\003 \001(\t\022\017\n\007vi"
     "sible\030\004 \001(\010\022\020\n\010screen_x\030\005 \001(\002\022\020\n\010screen_"
     "y\030\006 \001(\002\022\020\n\010rotation\030\007 \001(\002\022\016\n\006radius\030\010 \001("
     "\r\022\r\n\005width\030\t \001(\r\022\016\n\006height\030\n \001(\r\022\016\n\006poin"
-    "ts\030\013 \003(\r\";\n\004Type\022\n\n\006CIRCLE\020\001\022\r\n\tRECTANGL"
-    "E\020\002\022\013\n\007POLYGON\020\003\022\013\n\007UNKNOWN\020\004\"i\n\027VisionC"
-    "lassifiedSegment\022\017\n\007start_x\030\001 \001(\r\022\017\n\007sta"
-    "rt_y\030\002 \001(\r\022\r\n\005end_x\030\003 \001(\r\022\r\n\005end_y\030\004 \001(\r"
-    "\022\016\n\006colour\030\005 \001(\r\"\\\n\025VisionClassifiedImag"
-    "e\022\024\n\014num_segments\030\001 \001(\r\022-\n\007segment\030\002 \003(\013"
-    "2\034.API.VisionClassifiedSegment\"\207\001\n\006Visio"
-    "n\022\031\n\005image\030\001 \001(\0132\n.API.Image\022,\n\014field_ob"
-    "ject\030\002 \003(\0132\026.API.VisionFieldObject\0224\n\020cl"
-    "assified_image\030\003 \001(\0132\032.API.VisionClassif"
-    "iedImage\"\250\001\n\005Motor\022\014\n\004name\030\001 \001(\t\022\020\n\010posi"
-    "tion\030\002 \001(\002\022\020\n\010velocity\030\003 \001(\002\022\024\n\014accelera"
-    "tion\030\004 \001(\002\022\016\n\006target\030\005 \001(\002\022\021\n\tstiffness\030"
-    "\006 \001(\002\022\017\n\007current\030\007 \001(\002\022\016\n\006torque\030\010 \001(\002\022\023"
-    "\n\013temperature\030\t \001(\002\"\210\001\n\nSensorData\022\031\n\005mo"
-    "tor\030\001 \003(\0132\n.API.Motor\022\"\n\raccelerometer\030\002"
-    " \001(\0132\013.API.Vector\022\031\n\004gyro\030\003 \001(\0132\013.API.Ve"
-    "ctor\022 \n\013orientation\030\004 \001(\0132\013.API.Vector\"\343"
-    "\001\n\027LocalisationFieldObject\022\014\n\004name\030\001 \001(\t"
-    "\022\014\n\004wm_x\030\002 \001(\002\022\014\n\004wm_y\030\003 \001(\002\022\014\n\004sd_x\030\004 \001"
-    "(\002\022\014\n\004sd_y\030\005 \001(\002\022\r\n\005sr_xx\030\006 \001(\002\022\r\n\005sr_xy"
-    "\030\007 \001(\002\022\r\n\005sr_yy\030\010 \001(\002\022\017\n\007heading\030\t \001(\002\022\022"
-    "\n\nsd_heading\030\n \001(\002\022\014\n\004lost\030\013 \001(\010\022\"\n\032meas"
-    "ured_relative_position\030\014 \003(\002\"B\n\014Localisa"
+    "ts\030\013 \003(\r\022\"\n\032measured_relative_position\030\014"
+    " \003(\002\";\n\004Type\022\n\n\006CIRCLE\020\001\022\r\n\tRECTANGLE\020\002\022"
+    "\013\n\007POLYGON\020\003\022\013\n\007UNKNOWN\020\004\"i\n\027VisionClass"
+    "ifiedSegment\022\017\n\007start_x\030\001 \001(\r\022\017\n\007start_y"
+    "\030\002 \001(\r\022\r\n\005end_x\030\003 \001(\r\022\r\n\005end_y\030\004 \001(\r\022\016\n\006"
+    "colour\030\005 \001(\r\"\\\n\025VisionClassifiedImage\022\024\n"
+    "\014num_segments\030\001 \001(\r\022-\n\007segment\030\002 \003(\0132\034.A"
+    "PI.VisionClassifiedSegment\"\207\001\n\006Vision\022\031\n"
+    "\005image\030\001 \001(\0132\n.API.Image\022,\n\014field_object"
+    "\030\002 \003(\0132\026.API.VisionFieldObject\0224\n\020classi"
+    "fied_image\030\003 \001(\0132\032.API.VisionClassifiedI"
+    "mage\"\250\001\n\005Motor\022\014\n\004name\030\001 \001(\t\022\020\n\010position"
+    "\030\002 \001(\002\022\020\n\010velocity\030\003 \001(\002\022\024\n\014acceleration"
+    "\030\004 \001(\002\022\016\n\006target\030\005 \001(\002\022\021\n\tstiffness\030\006 \001("
+    "\002\022\017\n\007current\030\007 \001(\002\022\016\n\006torque\030\010 \001(\002\022\023\n\013te"
+    "mperature\030\t \001(\002\"\210\001\n\nSensorData\022\031\n\005motor\030"
+    "\001 \003(\0132\n.API.Motor\022\"\n\raccelerometer\030\002 \001(\013"
+    "2\013.API.Vector\022\031\n\004gyro\030\003 \001(\0132\013.API.Vector"
+    "\022 \n\013orientation\030\004 \001(\0132\013.API.Vector\"\277\001\n\027L"
+    "ocalisationFieldObject\022\014\n\004name\030\001 \001(\t\022\014\n\004"
+    "wm_x\030\002 \001(\002\022\014\n\004wm_y\030\003 \001(\002\022\014\n\004sd_x\030\004 \001(\002\022\014"
+    "\n\004sd_y\030\005 \001(\002\022\r\n\005sr_xx\030\006 \001(\002\022\r\n\005sr_xy\030\007 \001"
+    "(\002\022\r\n\005sr_yy\030\010 \001(\002\022\017\n\007heading\030\t \001(\002\022\022\n\nsd"
+    "_heading\030\n \001(\002\022\014\n\004lost\030\013 \001(\010\"B\n\014Localisa"
     "tion\0222\n\014field_object\030\001 \003(\0132\034.API.Localis"
     "ationFieldObject\"\035\n\006Vector\022\023\n\013float_valu"
     "e\030\001 \003(\002", 1567);
@@ -1165,6 +1165,7 @@ const int VisionFieldObject::kRadiusFieldNumber;
 const int VisionFieldObject::kWidthFieldNumber;
 const int VisionFieldObject::kHeightFieldNumber;
 const int VisionFieldObject::kPointsFieldNumber;
+const int VisionFieldObject::kMeasuredRelativePositionFieldNumber;
 #endif  // !_MSC_VER
 
 VisionFieldObject::VisionFieldObject()
@@ -1248,6 +1249,7 @@ void VisionFieldObject::Clear() {
     height_ = 0u;
   }
   points_.Clear();
+  measured_relative_position_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -1441,6 +1443,28 @@ bool VisionFieldObject::MergePartialFromCodedStream(
           goto handle_uninterpreted;
         }
         if (input->ExpectTag(88)) goto parse_points;
+        if (input->ExpectTag(101)) goto parse_measured_relative_position;
+        break;
+      }
+      
+      // repeated float measured_relative_position = 12;
+      case 12: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
+         parse_measured_relative_position:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 1, 101, input, this->mutable_measured_relative_position())));
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 input, this->mutable_measured_relative_position())));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(101)) goto parse_measured_relative_position;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1524,6 +1548,12 @@ void VisionFieldObject::SerializeWithCachedSizes(
       11, this->points(i), output);
   }
   
+  // repeated float measured_relative_position = 12;
+  for (int i = 0; i < this->measured_relative_position_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(
+      12, this->measured_relative_position(i), output);
+  }
+  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1592,6 +1622,12 @@ void VisionFieldObject::SerializeWithCachedSizes(
   for (int i = 0; i < this->points_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteUInt32ToArray(11, this->points(i), target);
+  }
+  
+  // repeated float measured_relative_position = 12;
+  for (int i = 0; i < this->measured_relative_position_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteFloatToArray(12, this->measured_relative_position(i), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -1679,6 +1715,13 @@ int VisionFieldObject::ByteSize() const {
     total_size += 1 * this->points_size() + data_size;
   }
   
+  // repeated float measured_relative_position = 12;
+  {
+    int data_size = 0;
+    data_size = 4 * this->measured_relative_position_size();
+    total_size += 1 * this->measured_relative_position_size() + data_size;
+  }
+  
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -1705,6 +1748,7 @@ void VisionFieldObject::MergeFrom(const ::google::protobuf::Message& from) {
 void VisionFieldObject::MergeFrom(const VisionFieldObject& from) {
   GOOGLE_CHECK_NE(&from, this);
   points_.MergeFrom(from.points_);
+  measured_relative_position_.MergeFrom(from.measured_relative_position_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_type()) {
       set_type(from.type());
@@ -1772,6 +1816,7 @@ void VisionFieldObject::Swap(VisionFieldObject* other) {
     std::swap(width_, other->width_);
     std::swap(height_, other->height_);
     points_.Swap(&other->points_);
+    measured_relative_position_.Swap(&other->measured_relative_position_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -3589,7 +3634,6 @@ const int LocalisationFieldObject::kSrYyFieldNumber;
 const int LocalisationFieldObject::kHeadingFieldNumber;
 const int LocalisationFieldObject::kSdHeadingFieldNumber;
 const int LocalisationFieldObject::kLostFieldNumber;
-const int LocalisationFieldObject::kMeasuredRelativePositionFieldNumber;
 #endif  // !_MSC_VER
 
 LocalisationFieldObject::LocalisationFieldObject()
@@ -3674,7 +3718,6 @@ void LocalisationFieldObject::Clear() {
     sd_heading_ = 0;
     lost_ = false;
   }
-  measured_relative_position_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -3857,28 +3900,6 @@ bool LocalisationFieldObject::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(101)) goto parse_measured_relative_position;
-        break;
-      }
-      
-      // repeated float measured_relative_position = 12;
-      case 12: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED32) {
-         parse_measured_relative_position:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
-                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
-                 1, 101, input, this->mutable_measured_relative_position())));
-        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
-                   == ::google::protobuf::internal::WireFormatLite::
-                      WIRETYPE_LENGTH_DELIMITED) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
-                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
-                 input, this->mutable_measured_relative_position())));
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(101)) goto parse_measured_relative_position;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -3960,12 +3981,6 @@ void LocalisationFieldObject::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(11, this->lost(), output);
   }
   
-  // repeated float measured_relative_position = 12;
-  for (int i = 0; i < this->measured_relative_position_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(
-      12, this->measured_relative_position(i), output);
-  }
-  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -4032,12 +4047,6 @@ void LocalisationFieldObject::SerializeWithCachedSizes(
   // optional bool lost = 11;
   if (has_lost()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(11, this->lost(), target);
-  }
-  
-  // repeated float measured_relative_position = 12;
-  for (int i = 0; i < this->measured_relative_position_size(); i++) {
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteFloatToArray(12, this->measured_relative_position(i), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -4111,13 +4120,6 @@ int LocalisationFieldObject::ByteSize() const {
     }
     
   }
-  // repeated float measured_relative_position = 12;
-  {
-    int data_size = 0;
-    data_size = 4 * this->measured_relative_position_size();
-    total_size += 1 * this->measured_relative_position_size() + data_size;
-  }
-  
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -4143,7 +4145,6 @@ void LocalisationFieldObject::MergeFrom(const ::google::protobuf::Message& from)
 
 void LocalisationFieldObject::MergeFrom(const LocalisationFieldObject& from) {
   GOOGLE_CHECK_NE(&from, this);
-  measured_relative_position_.MergeFrom(from.measured_relative_position_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_name()) {
       set_name(from.name());
@@ -4214,7 +4215,6 @@ void LocalisationFieldObject::Swap(LocalisationFieldObject* other) {
     std::swap(heading_, other->heading_);
     std::swap(sd_heading_, other->sd_heading_);
     std::swap(lost_, other->lost_);
-    measured_relative_position_.Swap(&other->measured_relative_position_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

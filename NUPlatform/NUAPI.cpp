@@ -284,10 +284,6 @@ void NUAPI::sendLocalisationData()
 	api_ball->set_sr_xy(ball.srXY());
 	api_ball->set_sr_yy(ball.srYY());
 	api_ball->set_lost(ball.lost());
-	Vector3<float> measured_relative_position = ball.getRelativeMeasurementError();
-	api_ball->add_measured_relative_position(measured_relative_position[0]);
-	api_ball->add_measured_relative_position(measured_relative_position[1]);
-	api_ball->add_measured_relative_position(measured_relative_position[2]);
 
 	send(api_message);
 
@@ -310,6 +306,11 @@ void NUAPI::populate_vision_field_object(std::string name, Object& field_object,
 	api_field_object->set_screen_x(field_object.ScreenX());
 	api_field_object->set_screen_y(field_object.ScreenY());
 	api_field_object->set_type(type);
+	
+	Vector3<float> measured_relative_position = field_object.getMeasuredRelativeLocation();
+	api_field_object->add_measured_relative_position(measured_relative_position.x);
+	api_field_object->add_measured_relative_position(measured_relative_position.y);
+	api_field_object->add_measured_relative_position(measured_relative_position.z);
 
 	switch (type)
 	{
