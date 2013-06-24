@@ -21,7 +21,7 @@
 
 #include "Getup.h"
 #include "NUWalk.h"
-#include "Tools/MotionScript.h"
+#include "Motion/Kicks/MotionScript2013.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
@@ -47,20 +47,20 @@ Getup::Getup(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NU
     m_completion_time = 0;
     m_head_completion_time = 0;
     m_arm_completion_time = 0;
-    m_on_back = new MotionScript("StandUpBack");
-    m_on_front = new MotionScript("StandUpFront");
-    m_on_left = new MotionScript("OnLeftRoll");
-    m_on_right = new MotionScript("OnRightRoll");
+    getup_back_script_ = MotionScript2013::LoadFromConfigSystem("StandUpBack");
+    getup_front_script_ = MotionScript2013::LoadFromConfigSystem("StandUpFront");
+    getup_left_script_ = MotionScript2013::LoadFromConfigSystem("OnLeftRoll");
+    getup_right_script_ = MotionScript2013::LoadFromConfigSystem("OnRightRoll");
 }
 
 /*! @brief Destructor for FallProtection module
  */
 Getup::~Getup()
 {
-    delete m_on_back;
-    delete m_on_front;
-    delete m_on_left;
-    delete m_on_right;
+    delete getup_back_script_;
+    delete getup_front_script_;
+    delete getup_left_script_;
+    delete getup_right_script_;
 }
 
 /*! @brief Enable the getup */
@@ -210,19 +210,21 @@ void Getup::playGetup()
     std::vector<float> fallen;
     if (m_data->get(NUSensorsData::Fallen, fallen))
     {
-        MotionScript* getup = m_on_front;
+        MotionScript2013* getup = getup_front_script_;
         if (fallen[1])
-            getup = m_on_left;
+            getup = getup_left_script_;
         else if (fallen[2])
-            getup = m_on_right;
+            getup = getup_right_script_;
         else if (fallen[3])
-            getup = m_on_front;
+            getup = getup_front_script_;
         else if (fallen[4])
-            getup = m_on_back;
-        getup->play(m_data, m_actions);
-        m_completion_time = getup->timeFinished();
-        m_head_completion_time = getup->timeFinishedWithHead();
-        m_arm_completion_time = std::max(getup->timeFinishedWithLArm(), getup->timeFinishedWithRArm());
+            getup = getup_back_script_;
+        getup->ScheduleEntireScript(m_data, m_actions);
+
+        m_completion_time = getup->TimeFinished();
+        m_head_completion_time = getup->TimeFinishedWithHead();
+        m_arm_completion_time = std::max(getup->TimeFinishedWithLArm(),
+                                         getup->TimeFinishedWithRArm());
     }
 }
 

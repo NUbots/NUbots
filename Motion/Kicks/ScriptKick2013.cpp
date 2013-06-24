@@ -85,14 +85,15 @@ void ScriptKick2013::StartKick(
     m_kicking_leg = kicking_leg;
     current_script_ = kick_script;
 
-    current_script_->Reset();
-    current_script_->StartScript();
-
     m_walk->stop();
     setArmEnabled(true, true);
     setHeadEnabled(true);
     m_kick_ready = true;
     m_kick_enabled = true;
+
+    // Begin the kick script
+    current_script_->StartScript();
+    current_script_->ApplyCurrentFrameToRobot(m_actions);
 }
 
 void ScriptKick2013::doKick()
@@ -139,16 +140,16 @@ bool ScriptKick2013::isActive()
     return current_script_ != nullptr;
 }
 
-bool ScriptKick2013::isUsingHead() { return false; }
+bool ScriptKick2013::isUsingHead() { return current_script_->IsUsingHead(); }
 bool ScriptKick2013::isUsingArms() { return true; }
 bool ScriptKick2013::isUsingLegs() { return true; }
-bool ScriptKick2013::requiresHead() { return false; }
+bool ScriptKick2013::requiresHead() { return current_script_->RequiresHead(); }
 bool ScriptKick2013::requiresArms() { return true; }
 bool ScriptKick2013::requiresLegs() { return true; }
 
 float ScriptKick2013::GetCurrentScriptTime()
 {
-    return Platform->getTime()-current_script_->GetStartTime();
+    return Platform->getTime() - current_script_->GetStartTime();
 }
 
 void ScriptKick2013::loadKickboxes()

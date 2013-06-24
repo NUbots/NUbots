@@ -113,7 +113,7 @@ void MotionScriptFrame::DeleteDescriptor(int servo_id)
 bool MotionScriptFrame::GetDescriptor(int servo_id, ScriptJointDescriptor* descriptor)
 {
     if(descriptor == nullptr)
-        return nullptr;
+        return false;
 
     try
     {
@@ -492,7 +492,7 @@ void MotionScript2013::Reset()
 void MotionScript2013::StartScript()
 {
     script_start_time_ = Platform->getTime();
-    current_frame_index_ = 0;    
+    Reset();
 }
 
 void MotionScript2013::PlayScript(NUActionatorsData* actionators_data){
@@ -609,3 +609,96 @@ void MotionScript2013::AddFrame(MotionScriptFrame* frame)
 {
     script_frames_.push_back(frame);
 }
+
+
+bool MotionScript2013::IsActive(){
+    double current_time = Platform->getTime();
+    double duration = GetScriptDuration();
+    double end_time = script_start_time_+duration;
+    return  (current_time >= script_start_time_) && 
+            (current_time < end_time); 
+}
+
+bool MotionScript2013::IsUsingHead(){
+    for(int i = current_frame_index_; i < GetFrameCount(); i++) {
+        auto* frame = script_frames_[i];
+
+        ScriptJointDescriptor descriptor;
+        if(frame->GetDescriptor(Robot::JointData::ID_HEAD_TILT, &descriptor)
+            || frame->GetDescriptor(Robot::JointData::ID_HEAD_PAN, &descriptor))
+            return true;
+    }
+    return false;
+}
+
+bool MotionScript2013::IsReady(){
+    return !IsActive();
+}
+
+bool MotionScript2013::RequiresHead(){
+    for( auto* frame : script_frames_){
+        ScriptJointDescriptor descriptor;
+        if(frame->GetDescriptor(Robot::JointData::ID_HEAD_TILT, &descriptor)
+            || frame->GetDescriptor(Robot::JointData::ID_HEAD_PAN, &descriptor))
+            return true;
+    }
+    return false;
+}
+
+void MotionScript2013::ScheduleEntireScript(NUSensorsData* sensors_data,
+                              NUActionatorsData* actionators_data)
+{
+
+}
+
+float MotionScript2013::TimeFinished() {
+    return script_start_time_ + GetScriptDuration();
+}
+
+float MotionScript2013::TimeFinishedWithHead() {
+    float head_time = TimeFinished();
+    for(int i = GetFrameCount() - 1; i >= current_frame_index_; i--) {
+        auto* frame = script_frames_[i];
+
+        ScriptJointDescriptor descriptor;
+        if(frame->GetDescriptor(Robot::JointData::ID_HEAD_TILT, &descriptor)
+            || frame->GetDescriptor(Robot::JointData::ID_HEAD_PAN, &descriptor))
+            return head_time;
+
+        head_time -= frame->GetDuration();
+    }
+    return script_start_time_;
+}
+
+float MotionScript2013::TimeFinishedWithLArm() {
+    float arm_time = TimeFinished();
+    for(int i = GetFrameCount() - 1; i >= current_frame_index_; i--) {
+        auto* frame = script_frames_[i];
+
+        ScriptJointDescriptor descriptor;
+        if(frame->GetDescriptor(Robot::JointData::ID_R_ELBOW, &descriptor)
+            || frame->GetDescriptor(Robot::JointData::ID_R_SHOULDER_ROLL, &descriptor)
+            || frame->GetDescriptor(Robot::JointData::ID_R_SHOULDER_PITCH, &descriptor))
+            return arm_time;
+
+        arm_time -= frame->GetDuration();
+    }
+    return script_start_time_;
+}
+
+float MotionScript2013::TimeFinishedWithRArm() {
+    float arm_time = TimeFinished();
+    for(int i = GetFrameCount() - 1; i >= current_frame_index_; i--) {
+        auto* frame = script_frames_[i];
+
+        ScriptJointDescriptor descriptor;
+        if(frame->GetDescriptor(Robot::JointData::ID_L_ELBOW, &descriptor)
+            || frame->GetDescriptor(Robot::JointData::ID_L_SHOULDER_ROLL, &descriptor)
+            || frame->GetDescriptor(Robot::JointData::ID_L_SHOULDER_PITCH, &descriptor))
+            return arm_time;
+
+        arm_time -= frame->GetDuration();
+    }
+    return script_start_time_;
+}
+

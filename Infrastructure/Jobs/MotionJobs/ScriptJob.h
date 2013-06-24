@@ -29,17 +29,17 @@
 #include "Motion/Tools/MotionScript.h"
 #include <vector>
 #include <string>
-
+#include "Motion/Kicks/MotionScript2013.h"
 
 class ScriptJob : public MotionJob
 {
 public:
-    ScriptJob(double time, const MotionScript& script);
+    ScriptJob(double time, const MotionScript2013* script);
     ScriptJob(double time, const std::string& name);
     ScriptJob(double time, std::istream& input);
     ~ScriptJob();
     
-    void getScript(double& time, MotionScript& script);
+    void getScript(double& time, MotionScript2013* script);
     std::string& getName();
     
     virtual void summaryTo(std::ostream& output);
@@ -51,7 +51,7 @@ protected:
     virtual void toStream(std::ostream& output) const;
 private:
     std::string m_name;
-    MotionScript m_script;                  // the motion script attached to the job
+    MotionScript2013* m_script;                  // the motion script attached to the job
 };
 
 #endif

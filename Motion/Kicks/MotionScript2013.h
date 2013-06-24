@@ -2,8 +2,11 @@
 #define MOTIONSCRIPT2013_H
 
 #include <unordered_map>
+#include <iostream>
 #include "Infrastructure/NUData.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
+
+class NUSensorsData;
 
 class ScriptJointDescriptor
 {
@@ -152,7 +155,26 @@ public:
     //! the given index.
     void DuplicateFrame(int index);
 
+
+    void ScheduleEntireScript(NUSensorsData* sensors_data,
+                              NUActionatorsData* actionators_data);
+
     float GetStartTime(){return script_start_time_;}
+
+    bool IsActive();
+    bool IsUsingHead();
+    bool IsUsingArms(){return true;}
+    bool IsUsingLegs(){return true;}
+    bool IsReady();
+    
+    bool RequiresHead();
+    bool RequiresArms(){return true;}
+    bool RequiresLegs(){return true;}
+
+    float TimeFinished();
+    float TimeFinishedWithHead();
+    float TimeFinishedWithLArm();
+    float TimeFinishedWithRArm();
 
 private:
     
