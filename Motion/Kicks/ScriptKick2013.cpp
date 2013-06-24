@@ -13,10 +13,10 @@
 ScriptKick2013::ScriptKick2013(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUKick(walk, data, actions)
 {
     // Load scripts for all kick types:
-    left_kick_script_       = MotionScript2013::LoadFromConfigSystem("motion.scripts.left");
-    right_kick_script_      = MotionScript2013::LoadFromConfigSystem("motion.scripts.right");
-    side_left_kick_script_  = MotionScript2013::LoadFromConfigSystem("motion.scripts.side_left");
-    side_right_kick_script_ = MotionScript2013::LoadFromConfigSystem("motion.scripts.side_right");
+    left_kick_script_       = MotionScript2013::LoadFromConfigSystem("motion.scripts.KickLeft");
+    right_kick_script_      = MotionScript2013::LoadFromConfigSystem("motion.scripts.KickRight");
+    side_left_kick_script_  = MotionScript2013::LoadFromConfigSystem("motion.scripts.SideKickLeft");
+    side_right_kick_script_ = MotionScript2013::LoadFromConfigSystem("motion.scripts.SideKickRight");
 
     // Load the kickboxes
     loadKickboxes();

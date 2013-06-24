@@ -217,7 +217,11 @@ MotionScript2013* MotionScript2013::LoadFromConfigSystem(
     success = config->ReadValue(path, "num_frames", &num_frames);
 
     if(!success)
+    {
+        std::cout << "Load of script " << path
+                  <<" from Config System failed" << std::endl;
         return nullptr;
+    }
 
     auto* script = new MotionScript2013();
 

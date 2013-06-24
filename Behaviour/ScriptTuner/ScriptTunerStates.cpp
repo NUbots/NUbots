@@ -271,12 +271,11 @@ void ScriptTunerState::HandleDeleteFrameCommand(ScriptTunerCommand command){
 
 void ScriptTunerState::UpdateScriptMotorGoalsToCurrentPosition(MotionScriptFrame* frame){
     for(int motor_id = 1; motor_id<Robot::JointData::NUMBER_OF_JOINTS;motor_id++){
-        ScriptJointDescriptor descriptor;          
-        descriptor.SetGain(kSetPoseCommandGains);       
-        // motors_to_be_saved_.push_back(motor_id);                     
+        ScriptJointDescriptor descriptor;
+        descriptor.SetGain(kSetPoseCommandGains);
         descriptor.SetPosition(getMotorPosition(motor_id));
-        descriptor.SetServoId(motor_id);                
-        frame->AddDescriptor(descriptor);    
+        descriptor.SetServoId(motor_id);
+        frame->AddDescriptor(descriptor);
     }
 }
 
@@ -433,7 +432,7 @@ void ScriptTunerState::saveManuallyMovedMotors()
     for(int i = 0; i < motors_to_be_saved_.size(); i++){      
         if(motorTorqueIsOff(motors_to_be_saved_[i])){
             ScriptJointDescriptor descriptor;
-            frame->GetDescriptor(motors_to_be_saved_[i],&descriptor);//Sets descriptor pointer
+            frame->GetDescriptor(motors_to_be_saved_[i], &descriptor); //Sets descriptor pointer
             descriptor.SetPosition(getMotorPosition(motors_to_be_saved_[i]));
             frame->AddDescriptor(descriptor);
         }  else {
@@ -487,7 +486,6 @@ void ScriptTunerState::turnOffMotor(int  motor_id){
     current_frame->GetDescriptor(motor_id,&descriptor);                
     descriptor.SetDisable(true);                
     current_frame->AddDescriptor(descriptor);
-
 }
 
 void ScriptTunerState::turnOnMotor(int  motor_id){
@@ -498,7 +496,7 @@ void ScriptTunerState::turnOnMotor(int  motor_id){
     ScriptJointDescriptor descriptor;
     current_frame->GetDescriptor(motor_id, &descriptor);      
     descriptor.SetPosition(getMotorPosition(motor_id));                
-    current_frame->AddDescriptor( descriptor);    
+    current_frame->AddDescriptor(descriptor);    
 }
 
 float ScriptTunerState::getMotorPosition(int motor_id){

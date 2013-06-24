@@ -32,7 +32,9 @@
 
 /*! @brief Constructor for Getup module
  */
-Getup::Getup(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("Getup", data, actions)
+Getup::Getup(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) :
+    NUMotionProvider("Getup", data, actions)
+
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "Getup::Getup()" << std::endl;
@@ -47,10 +49,10 @@ Getup::Getup(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NU
     m_completion_time = 0;
     m_head_completion_time = 0;
     m_arm_completion_time = 0;
-    getup_back_script_ = MotionScript2013::LoadFromConfigSystem("StandUpBack");
-    getup_front_script_ = MotionScript2013::LoadFromConfigSystem("StandUpFront");
-    getup_left_script_ = MotionScript2013::LoadFromConfigSystem("OnLeftRoll");
-    getup_right_script_ = MotionScript2013::LoadFromConfigSystem("OnRightRoll");
+    getup_back_script_ = MotionScript2013::LoadFromConfigSystem("motion.scripts.StandUpBack");
+    getup_front_script_ = MotionScript2013::LoadFromConfigSystem("motion.scripts.StandUpFront");
+    getup_left_script_ = MotionScript2013::LoadFromConfigSystem("motion.scripts.OnLeftRoll");
+    getup_right_script_ = MotionScript2013::LoadFromConfigSystem("motion.scripts.OnRightRoll");
 }
 
 /*! @brief Destructor for FallProtection module
@@ -220,6 +222,8 @@ void Getup::playGetup()
         else if (fallen[4])
             getup = getup_back_script_;
         getup->ScheduleEntireScript(m_data, m_actions);
+
+        std::cout << __PRETTY_FUNCTION__ << ": getup = " << getup << std::endl;
 
         m_completion_time = getup->TimeFinished();
         m_head_completion_time = getup->TimeFinishedWithHead();

@@ -69,10 +69,11 @@ ScriptJob::~ScriptJob()
 void ScriptJob::getScript(double& time, MotionScript2013* script)
 {
     time = m_job_time;
-    // if (not m_script.isValid())
-    //     script = MotionScript2013::LoadFromConfigSystem(m_name);
-    // else
-    script = m_script;
+    
+    if (m_script == nullptr)
+        script = MotionScript2013::LoadFromConfigSystem(m_name);
+    else
+        script = m_script;
 }
 
 /*! @brief Returns the name of the associated script

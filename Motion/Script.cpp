@@ -30,7 +30,12 @@
 
 /*! @brief Constructor for Script module
  */
-Script::Script(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("Script", data, actions)
+Script::Script(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
+    NUMotionProvider("Script", data, actions),
+    m_walk(nullptr),
+    m_script_start_time(0),
+    m_script_pending(0),
+    m_script(nullptr)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "Script::Script()" << std::endl;
@@ -85,42 +90,66 @@ void Script::kill()
 /*! @brief Returns true is a script is currently being executed */
 bool Script::isActive()
 {
+    if(m_script == nullptr)
+        return false;
+
     return m_script->IsActive();
 }
 
 bool Script::isUsingHead()
 {
+    if(m_script == nullptr)
+        return false;
+
     return m_script->IsUsingHead();
 }
 
 bool Script::isUsingArms()
 {
+    if(m_script == nullptr)
+        return false;
+
     return m_script->IsUsingArms();
 }
 
 /*! @brief Returns true if a script uses the legs */
 bool Script::isUsingLegs()
 {
+    if(m_script == nullptr)
+        return false;
+
     return m_script->IsUsingLegs(); 
 }
 
 bool Script::isReady()
 {
+    if(m_script == nullptr)
+        return false;
+
     return m_script->IsReady();
 }
 
 bool Script::requiresHead()
 {
+    if(m_script == nullptr)
+        return false;
+
     return m_script->RequiresHead();
 }
 
 bool Script::requiresArms()
 {
+    if(m_script == nullptr)
+        return false;
+
     return m_script->RequiresArms();
 }
 
 bool Script::requiresLegs()
 {
+    if(m_script == nullptr)
+        return false;
+    
     return m_script->RequiresLegs();
 }
 
