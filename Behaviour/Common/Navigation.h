@@ -88,8 +88,8 @@ private:
     //ball lineup
     std::vector<float> m_ball_approach_angle;
     std::vector<int> m_ball_kick_foot;
-    static constexpr float m_ball_lineup_distance = 15.0;
-    static constexpr int m_ball_lineup_min_distance = 12.0;
+    static constexpr float m_ball_lineup_distance = 10.0;
+    static constexpr int m_ball_lineup_min_distance = 6.0;
     
     //extra config options
     static constexpr bool m_use_localisation_avoidance = false;

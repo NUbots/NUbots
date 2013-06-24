@@ -68,7 +68,7 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     } else {
         walk_bearing = 0;
     }*/
-    float g = 1./(1.+std::exp(-2.*walk_bearing*walk_bearing));
+    float g = 1./(1.+std::exp(-8.*walk_bearing*walk_bearing));
     new_walk[0] = walk_speed*g;
     new_walk[2] = walk_bearing; //*(1.-0.5*g);
     return new_walk;
@@ -227,9 +227,9 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     
     //using waypoint offsets, calculate the approach headings to kick the ball
     float headings[3];
-    headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2]);
-    headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2]);
-    headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2]);
+    headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2] + 3.14159);
+    headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2] + 3.14159);
+    headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2] + 3.14159);
     
     
     //add in the ball location, since we have the offsets
