@@ -647,7 +647,13 @@ bool MotionScript2013::IsReady(){
 }
 
 bool MotionScript2013::RequiresHead(){
-    for( auto* frame : script_frames_){
+    for(auto* frame : script_frames_){
+        if(frame == nullptr)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": frame cannot be nullptr." << std::endl;
+            return false;
+        }
+
         ScriptJointDescriptor descriptor;
         if(frame->GetDescriptor(Robot::JointData::ID_HEAD_TILT, &descriptor)
             || frame->GetDescriptor(Robot::JointData::ID_HEAD_PAN, &descriptor))
@@ -665,6 +671,12 @@ void MotionScript2013::ScheduleEntireScript(NUSensorsData* sensors_data,
 
     for(auto* frame : script_frames_)
     {
+        if(frame == nullptr)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": frame cannot be nullptr." << std::endl;
+            return false;
+        }
+
         frame->ApplyToRobotAtTime(frame_start_time, actionators_data);
 
         frame_start_time += frame->GetDuration();
@@ -679,6 +691,12 @@ float MotionScript2013::TimeFinishedWithHead() {
     float head_time = TimeFinished();
     for(int i = GetFrameCount() - 1; i >= current_frame_index_; i--) {
         auto* frame = script_frames_[i];
+
+        if(frame == nullptr)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": frame cannot be nullptr." << std::endl;
+            return false;
+        }
 
         ScriptJointDescriptor descriptor;
         if(frame->GetDescriptor(Robot::JointData::ID_HEAD_TILT, &descriptor)
@@ -695,6 +713,12 @@ float MotionScript2013::TimeFinishedWithLArm() {
     for(int i = GetFrameCount() - 1; i >= current_frame_index_; i--) {
         auto* frame = script_frames_[i];
 
+        if(frame == nullptr)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": frame cannot be nullptr." << std::endl;
+            return false;
+        }
+
         ScriptJointDescriptor descriptor;
         if(frame->GetDescriptor(Robot::JointData::ID_R_ELBOW, &descriptor)
             || frame->GetDescriptor(Robot::JointData::ID_R_SHOULDER_ROLL, &descriptor)
@@ -710,6 +734,12 @@ float MotionScript2013::TimeFinishedWithRArm() {
     float arm_time = TimeFinished();
     for(int i = GetFrameCount() - 1; i >= current_frame_index_; i--) {
         auto* frame = script_frames_[i];
+
+        if(frame == nullptr)
+        {
+            std::cout << __PRETTY_FUNCTION__ << ": frame cannot be nullptr." << std::endl;
+            return false;
+        }
 
         ScriptJointDescriptor descriptor;
         if(frame->GetDescriptor(Robot::JointData::ID_L_ELBOW, &descriptor)
