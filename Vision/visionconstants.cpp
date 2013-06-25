@@ -11,6 +11,8 @@
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 
+//HACK FOR RC2013
+int VisionConstants::WHITE_SIDE_IS_BLUE;
 //! Distortion Correction
 bool VisionConstants::DO_RADIAL_CORRECTION;
 float VisionConstants::RADIAL_CORRECTION_COEFFICIENT;
@@ -52,7 +54,6 @@ bool VisionConstants::THROWOUT_DISTANT_BALLS;
 float VisionConstants::MAX_BALL_DISTANCE;
 //! Distance calculation options
 bool VisionConstants::D2P_INCLUDE_BODY_PITCH;
-float VisionConstants::D2P_ANGLE_CORRECTION;
 bool VisionConstants::BALL_DISTANCE_POSITION_BOTTOM;
 //! Distance method options
 DistanceMethod VisionConstants::BALL_DISTANCE_METHOD;
@@ -73,7 +74,7 @@ int VisionConstants::MIN_DISTANCE_FROM_HORIZON;
 int VisionConstants::MIN_CONSECUTIVE_POINTS;
 //! Field dimension constants
 float VisionConstants::GOAL_WIDTH;
-float VisionConstants::GOAL_HEIGHT_INTERNAL;
+float VisionConstants::GOAL_HEIGHT;
 float VisionConstants::DISTANCE_BETWEEN_POSTS;
 float VisionConstants::BALL_WIDTH;
 float VisionConstants::CENTRE_CIRCLE_RADIUS;
@@ -109,9 +110,10 @@ VisionConstants::VisionConstants()
   */
 void VisionConstants::loadFromFile(std::string filename) 
 {
+    WHITE_SIDE_IS_BLUE = -1;
     GOAL_WIDTH = 10;
-    GOAL_HEIGHT_INTERNAL = 80;
-    DISTANCE_BETWEEN_POSTS = 150;
+    GOAL_HEIGHT = 90;
+    DISTANCE_BETWEEN_POSTS = 160;
     BALL_WIDTH = 6.5;
     CENTRE_CIRCLE_RADIUS = 60;
 
@@ -151,7 +153,10 @@ void VisionConstants::loadFromFile(std::string filename)
         getline(in, name, ':');
         boost::trim(name);
         boost::to_upper(name);
-        if(name.compare("DO_RADIAL_CORRECTION") == 0) {
+        if(name.compare("WHITE_SIDE_IS_BLUE") == 0) {
+            in >> WHITE_SIDE_IS_BLUE;
+        }
+        else if(name.compare("DO_RADIAL_CORRECTION") == 0) {
             in >> DO_RADIAL_CORRECTION;
         }
         else if(name.compare("RADIAL_CORRECTION_COEFFICIENT") == 0) {
@@ -172,21 +177,6 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("MAX_GOAL_DISTANCE") == 0) {
             in >> MAX_GOAL_DISTANCE;
         }
-//        else if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_BEACONS") == 0) {
-//            in >> THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;
-//        }
-//        else if(name.compare("THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS") == 0) {
-//            in >> THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;
-//        }
-//        else if(name.compare("THROWOUT_DISTANT_BEACONS") == 0) {
-//            in >> THROWOUT_DISTANT_BEACONS;
-//        }
-//        else if(name.compare("MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS") == 0) {
-//            in >> MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS;
-//        }
-//        else if(name.compare("MAX_BEACON_DISTANCE") == 0) {
-//            in >> MAX_BEACON_DISTANCE;
-//        }
         else if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_BALL") == 0) {
             in >> THROWOUT_ON_ABOVE_KIN_HOR_BALL;
         }
@@ -211,18 +201,6 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("D2P_INCLUDE_BODY_PITCH") == 0) {
             in >> D2P_INCLUDE_BODY_PITCH;
         }
-        else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
-            #if (defined TARGET_IS_PC || defined TARGET_IS_TRAINING || defined TARGET_IS_RPI || defined TARGET_IS_MAC || defined TARGET_IS_WINDOWS)
-                in >> D2P_ANGLE_CORRECTION;
-                D2P_ANGLE_CORRECTION = 0;   //discard the value
-            #else
-                int config_player;
-                in >> config_player;
-                if(config_player == Blackboard->GameInfo->getPlayerNumber()) {
-                    in >> D2P_ANGLE_CORRECTION;
-                }
-            #endif
-        }
         else if(name.compare("BALL_DISTANCE_POSITION_BOTTOM") == 0) {
             in >> BALL_DISTANCE_POSITION_BOTTOM;
         }
@@ -238,12 +216,6 @@ void VisionConstants::loadFromFile(std::string filename)
             boost::to_upper(sval);
             GOAL_DISTANCE_METHOD = getDistanceMethodFromName(sval);
         }
-//        else if(name.compare("BEACON_DISTANCE_METHOD") == 0) {
-//            in >> sval;
-//            boost::trim(sval);
-//            boost::to_upper(sval);
-//            BEACON_DISTANCE_METHOD = getDistanceMethodFromName(sval);
-//        }
         else if(name.compare("LINE_METHOD") == 0) {
             in >> sval;
             boost::trim(sval);
@@ -265,12 +237,6 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("GOAL_MIN_PERCENT_BLUE") == 0) {
             in >> GOAL_MIN_PERCENT_BLUE;
         }
-//        else if(name.compare("BEACON_MIN_PERCENT_YELLOW") == 0) {
-//            in >> BEACON_MIN_PERCENT_YELLOW;
-//        }
-//        else if(name.compare("BEACON_MIN_PERCENT_BLUE") == 0) {
-//            in >> BEACON_MIN_PERCENT_BLUE;
-//        }
         else if(name.compare("MIN_DISTANCE_FROM_HORIZON") == 0) {
             in >> MIN_DISTANCE_FROM_HORIZON;
         }
@@ -280,8 +246,8 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("GOAL_WIDTH") == 0) {
             in >> GOAL_WIDTH;
         }
-        else if(name.compare("GOAL_HEIGHT_INTERNAL") == 0) {
-            in >> GOAL_HEIGHT_INTERNAL;
+        else if(name.compare("GOAL_HEIGHT") == 0) {
+            in >> GOAL_HEIGHT;
         }
         else if(name.compare("DISTANCE_BETWEEN_POSTS") == 0) {
             in >> DISTANCE_BETWEEN_POSTS;
@@ -292,21 +258,12 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("CENTRE_CIRCLE_RADIUS") == 0) {
             in >> CENTRE_CIRCLE_RADIUS;
         }
-//        else if(name.compare("BEACON_WIDTH") == 0) {
-//            in >> BEACON_WIDTH;
-//        }
         else if(name.compare("THROWOUT_INSIGNIFICANT_GOALS") == 0) {
             in >> THROWOUT_INSIGNIFICANT_GOALS;
         }
         else if(name.compare("MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS") == 0) {
             in >> MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;
         }
-//        else if(name.compare("THROWOUT_INSIGNIFICANT_BEACONS") == 0) {
-//            in >> THROWOUT_INSIGNIFICANT_BEACONS;
-//        }
-//        else if(name.compare("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS") == 0) {
-//            in >> MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS;
-//        }
         else if(name.compare("THROWOUT_INSIGNIFICANT_BALLS") == 0) {
             in >> THROWOUT_INSIGNIFICANT_BALLS;
         }
@@ -589,9 +546,6 @@ bool VisionConstants::setParameter(std::string name, float val)
     else if(name.compare("MAX_BALL_DISTANCE") == 0) {
         MAX_BALL_DISTANCE = val;
     }
-    else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
-        D2P_ANGLE_CORRECTION = val;
-    }
     else if(name.compare("BALL_MIN_PERCENT_ORANGE") == 0) {
         BALL_MIN_PERCENT_ORANGE = val;
     }
@@ -610,8 +564,8 @@ bool VisionConstants::setParameter(std::string name, float val)
     else if(name.compare("GOAL_WIDTH") == 0) {
         GOAL_WIDTH = val;
     }
-    else if(name.compare("GOAL_HEIGHT_INTERNAL") == 0) {
-        GOAL_HEIGHT_INTERNAL = val;
+    else if(name.compare("GOAL_HEIGHT") == 0) {
+        GOAL_HEIGHT = val;
     }
     else if(name.compare("BALL_WIDTH") == 0) {
         BALL_WIDTH = val;
@@ -683,6 +637,8 @@ bool VisionConstants::setParameter(std::string name, DistanceMethod val)
 
 void VisionConstants::print(std::ostream& out)
 {
+    out << "WHITE_SIDE_IS_BLUE: " << WHITE_SIDE_IS_BLUE << std::endl;
+
     out << "DO_RADIAL_CORRECTION: " << DO_RADIAL_CORRECTION << std::endl;
     out << "RADIAL_CORRECTION_COEFFICIENT: " << RADIAL_CORRECTION_COEFFICIENT << std::endl;
 
@@ -714,7 +670,6 @@ void VisionConstants::print(std::ostream& out)
     out << "MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL: " << MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL << std::endl;
 
     out << "D2P_INCLUDE_BODY_PITCH: " << D2P_INCLUDE_BODY_PITCH << std::endl;
-    out << "D2P_ANGLE_CORRECTION: " << D2P_ANGLE_CORRECTION << std::endl;
     out << "BALL_DISTANCE_POSITION_BOTTOM: " << BALL_DISTANCE_POSITION_BOTTOM << std::endl;
 
     out << "BALL_DISTANCE_METHOD: " << getDistanceMethodName(BALL_DISTANCE_METHOD) << std::endl;
@@ -731,7 +686,7 @@ void VisionConstants::print(std::ostream& out)
     out << "MIN_CONSECUTIVE_POINTS: " << MIN_CONSECUTIVE_POINTS << std::endl;
 
     out << "GOAL_WIDTH: " << GOAL_WIDTH << std::endl;
-    out << "GOAL_HEIGHT_INTERNAL: " << GOAL_HEIGHT_INTERNAL << std::endl;
+    out << "GOAL_HEIGHT: " << GOAL_HEIGHT << std::endl;
     out << "DISTANCE_BETWEEN_POSTS: " << DISTANCE_BETWEEN_POSTS << std::endl;
     out << "BALL_WIDTH: " << BALL_WIDTH << std::endl;
     out << "CENTRE_CIRCLE_RADIUS: " << CENTRE_CIRCLE_RADIUS << std::endl;

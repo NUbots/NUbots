@@ -120,11 +120,14 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
 #endif
 
     //! DETECTION MODULES
-    std::vector<Goal> ransac_goals_edges;
 
     if(lookForGoals) {
 //       std::vector<Goal> hist_goals = m_goal_detector_hist->run();   // histogram method
-        ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
+        std::vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
+
+        m_goal_detector_ransac_edges->relabel(ransac_goals_edges);
+
+        m_blackboard->addGoals(ransac_goals_edges);
     }
     else {
         #if VISION_CONTROLLER_VERBOSITY > 2
@@ -140,16 +143,17 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     debug << "\tgoal detection done" << std::endl;
     #endif
 
-    if(lookForFieldPoints) {
-        // Edit here to change whether centre circles, lines or corners are found
-        //      (note lines cannot be published yet)
-        m_field_point_detector->run(true, true, true);
-    }
-    else {
-        #if VISION_CONTROLLER_VERBOSITY > 2
-            debug << "\tnot looking for lines, corners or the centre circle" << std::endl;
-        #endif
-    }
+    // REMOVED FOR RC2013
+//    if(lookForFieldPoints) {
+//        // Edit here to change whether centre circles, lines or corners are found
+//        //      (note lines cannot be published yet)
+//        m_field_point_detector->run(true, true, true);
+//    }
+//    else {
+//        #if VISION_CONTROLLER_VERBOSITY > 2
+//            debug << "\tnot looking for lines, corners or the centre circle" << std::endl;
+//        #endif
+//    }
 
     #ifdef VISION_PROFILER_ON
     prof.split("Field Points");
@@ -177,10 +181,9 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     }
 
     //OBSTACLES
-    std::vector<Obstacle> obstacles;
     if(lookForObstacles)
     {
-        obstacles = ObstacleDetectionCH::run();
+        std::vector<Obstacle> obstacles = ObstacleDetectionCH::run();
         m_blackboard->addObstacles(obstacles);
         #if VISION_CONTROLLER_VERBOSITY > 2
         debug << "\tdetectObstacles done" << std::endl;
@@ -198,11 +201,6 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     #ifdef VISION_PROFILER_ON
     prof.split("Obstacles");
     #endif
-
-    /// @todo GET TEAM AND OPPONENT COLOURS AND CALL BELOW
-    //m_goal_detector_ransac_edges->relabel(ransac_goals_edges, obstacles);
-
-    m_blackboard->addGoals(ransac_goals_edges);
 
     // publishing
     //force blackboard to publish results through wrapper

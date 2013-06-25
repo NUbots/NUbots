@@ -22,7 +22,7 @@ public:
     virtual ~GoalDetector();
     virtual std::vector<Goal> run() = 0;
 
-    virtual void relabel(std::vector<Goal>& goals, std::vector<Obstacle> obstacles, COLOUR_CLASS team_colour, COLOUR_CLASS opponent_colour) const;
+    virtual void relabel(std::vector<Goal>& goals) const;
 
 protected:
     //checks
