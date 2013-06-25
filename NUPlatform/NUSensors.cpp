@@ -499,7 +499,7 @@ void NUSensors::calculateFallSense()
 {
     static const float Fallen = 1.0;
     static const float Falling = 1.0;
-    static const float FallenThreshold = 1.1;  
+    static const float FallenThreshold = 1.4;  //1.1;
     static const float RollFallingThreshold = 0.55;
     static const float ForwardFallingThreshold = 0.55;
     static const float BackwardFallingThreshold = 0.45;
@@ -516,7 +516,9 @@ void NUSensors::calculateFallSense()
         float acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
         // check if the robot has fallen over
         std::vector<float> fallen(5,0);
-        if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+        //std::cout << acceleration_mag << "," << fabs(orientation[0]) << "," << fabs(orientation[1]) << std::endl;
+        //if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+        if (fabs(acceleration_mag - 981) < 0.5*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
             fallen_time += m_current_time - m_previous_time;
         else
             fallen_time = 0;

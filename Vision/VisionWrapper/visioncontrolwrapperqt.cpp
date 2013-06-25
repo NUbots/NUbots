@@ -261,7 +261,7 @@ void VisionControlWrapper::getOptions(DataWrapper::INPUT_METHOD& method, bool& o
                 ok = false;
                 lname = QFileDialog::getOpenFileName(NULL, "Select Lookup Table", QString(getenv("HOME")) + QString("/nubot/"),  "LUT Files (*.lut)").toStdString();
                 if(!lname.empty()) {
-                    cfg = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/Config/Darwin/"), "config Files (*.cfg)").toStdString();
+                    cfg = QFileDialog::getOpenFileName(NULL, "Select Configuration File", QString(getenv("HOME")) + QString("/nubot/"), "config Files (*.cfg)").toStdString();
                     ok = !cfg.empty();
                 }
             }
