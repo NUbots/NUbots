@@ -55,7 +55,7 @@ namespace ConfigSystem
         CONFIGSYS_DEBUG_CALLS;
 
         // get the path to load from
-        std::string loadPath = "nubot/" + configName + ".json";
+        std::string loadPath = "nubot/Config/Darwin/" + configName + ".json";
         // load tree from file(s) as ptree<string>
         ptree rawTree;
         
