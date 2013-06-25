@@ -603,11 +603,20 @@ bool NUMotion::isNextProviderReady(NUMotionProvider* provider)
         return true;
     else
     {
-        if (provider == m_current_head_provider and m_current_head_provider != m_next_head_provider and m_next_head_provider->isReady())
+        if (m_next_head_provider != nullptr 
+            and provider == m_current_head_provider 
+            and m_current_head_provider != m_next_head_provider 
+            and m_next_head_provider->isReady())
             return true;
-        if (provider == m_current_arm_provider and m_current_arm_provider != m_next_arm_provider and m_next_arm_provider->isReady())
+        if (m_next_arm_provider != nullptr
+            and provider == m_current_arm_provider 
+            and m_current_arm_provider != m_next_arm_provider 
+            and m_next_arm_provider->isReady())
             return true;
-        if (provider == m_current_leg_provider and m_current_leg_provider != m_next_leg_provider and m_next_leg_provider->isReady())
+        if (m_next_leg_provider != nullptr
+            and provider == m_current_leg_provider 
+            and m_current_leg_provider != m_next_leg_provider 
+            and m_next_leg_provider->isReady())
             return true;
 
         return false;
