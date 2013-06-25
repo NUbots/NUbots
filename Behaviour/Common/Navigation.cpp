@@ -198,7 +198,7 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
 
     //calculate the desired move
     std::vector<float> self = NavigationLogic::getSelfPosition();
-    
+    current_object = kickTarget;
     std::vector<float> target;
     if (kickTarget != NULL) {
         target = NavigationLogic::getObjectPosition(*kickTarget); //XXX: wrong
@@ -218,6 +218,7 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     float targetDistance = std::sqrt(targetVector[0]*targetVector[0]+targetVector[1]*targetVector[1]);
     std::vector<float> waypoint[3];
     
+    std::cout << "initial start gotoball calculations" << std::endl;
     //rotate by 90 degrees to make our 3 ball approach waypoint offsets
     waypoint[0] = std::vector<float>(2,0);
     waypoint[0][0] = targetVector[1]/targetDistance*ballDistance*0.3; //XXX: magic number
@@ -231,12 +232,12 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     
     //using waypoint offsets, calculate the approach headings to kick the ball
     float headings[3];
-    headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2] + 3.14159);
-    //headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2]);
-    headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2] + 3.14159);
-    //headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2]);
-    headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2] + 3.14159);
-    //headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2]);
+    //headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2] + 3.14159);
+    headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2]);
+    //headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2] + 3.14159);
+    headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2]);
+    //headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2] + 3.14159);
+    headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2]);
     
     
     //add in the ball location, since we have the offsets
@@ -267,7 +268,7 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     
     //second attempt at gotoball, using side kicks
     if (current_command != GOTOBALL) {
-        
+        std::cout << "initial gotoball" << std::endl;
         resetHystereses();
         if (distances[0] < distances[1] and distances[0] < distances[2]) {
             move[0] = distances[0];
@@ -283,6 +284,7 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
             move[2] = headings[2];
         }
     } else {
+        std::cout << "other gotoball" << std::endl;
         
         //calculate raw move differences to minimize change to the current strategy
         float differences[3];
@@ -304,6 +306,8 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
             move[2] = headings[2];
         }
     }
+    
+    std::cout << "finished gotoball" << std::endl;
     current_command = GOTOBALL;
     m_raw_move = move;
     //std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
@@ -311,6 +315,7 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     move[2] = move[1]*0.8;
     move[1] = 0.;
     current_walk_command = move;
+    std::cout << "set gotoball moves" << std::endl;
     return current_walk_command;
 }
 
