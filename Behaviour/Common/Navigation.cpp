@@ -32,9 +32,9 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     float walk_speed;
     float walk_bearing;
     
-    if (avoidObstacles) {
+    /*if (avoidObstacles) {
         relative_bearing = this->avoidObstacles(NavigationLogic::getSelfPosition(),distance, relative_bearing);
-    }
+    }*/
     
     //check what distance increment we're in:
     if (distance > m_mid_approach_distance+m_distance_hysteresis) {
@@ -57,7 +57,7 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     if (m_distance_increment > 1) {
         walk_bearing = relative_bearing;
     } else { //use scaling
-        walk_bearing = (relative_heading*(distance) + relative_bearing*(m_close_approach_distance-distance))/(m_close_approach_distance)/2.;
+        walk_bearing = relative_heading*0.75;
     }
     
     //check turning hysteresis
@@ -68,7 +68,7 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     } else {
         walk_bearing = 0;
     }*/
-    float g = 1./(1.+std::exp(-8.*walk_bearing*walk_bearing));
+    float g = 1./(1.+std::exp(-6.*walk_bearing*walk_bearing));
     new_walk[0] = walk_speed*g;
     new_walk[2] = walk_bearing; //*(1.-0.5*g);
     return new_walk;
@@ -157,7 +157,7 @@ std::vector<float> Navigation::goToPoint(Object* fieldObject, float heading) {
     current_command = GOTOOBJECT;
     
     //must generate the walk last
-    std::cout << "Unfiltered Walk Command (gotopoint): (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
+    //std::cout << "Unfiltered Walk Command (gotopoint): (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
     current_walk_command = generateWalk(move[0],move[1],move[2]);
     return current_walk_command;
 }
@@ -184,14 +184,14 @@ std::vector<float> Navigation::goToPoint(const std::vector<float> point) {
     //must generate the walk last
     float turn = mathGeneral::normaliseAngle(atan2(move[1],move[0])-self[2]);
     float dist = std::sqrt(move[0]*move[0]+move[1]*move[1]);
-    std::cout << "Unfiltered Walk Command: (" << dist << ", " << turn << ", " << mathGeneral::normaliseAngle(point[2]-self[2]) << ")" << std::endl;
+    //std::cout << "Unfiltered Walk Command: (" << dist << ", " << turn << ", " << mathGeneral::normaliseAngle(point[2]-self[2]) << ")" << std::endl;
     current_walk_command = generateWalk( dist,turn, mathGeneral::normaliseAngle(point[2]-self[2]) );
     return current_walk_command;
 }
 
 
 std::vector<float> Navigation::goToBall2(Object* kickTarget) {
-    
+    //std::cout << "new gotoball" << std::endl;
     std::vector<float> move(3,0);    
 
     //calculate the desired move
@@ -199,11 +199,13 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     
     std::vector<float> target;
     if (kickTarget != NULL) {
-        target = NavigationLogic::getObjectPosition(*kickTarget);
+        target = NavigationLogic::getObjectPosition(*kickTarget); //XXX: wrong
     } else {
         target = NavigationLogic::getOpponentGoalPosition();
     }
-    std::vector<float> ball = NavigationLogic::getBallPosition();
+    std::vector<float> ball(3,0);
+    ball[0] = (Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]).getEstimatedFieldLocation()[0];// = NavigationLogic::getBallPosition();
+    ball[1] = (Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL]).getEstimatedFieldLocation()[1];
     
     //get my position difference to the ball
     std::vector<float> posDifference = NavigationLogic::getPositionDifference(self,ball);
@@ -228,8 +230,11 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     //using waypoint offsets, calculate the approach headings to kick the ball
     float headings[3];
     headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2] + 3.14159);
+    //headings[0] = mathGeneral::normaliseAngle(std::atan2(waypoint[0][1],waypoint[0][0]) - self[2]);
     headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2] + 3.14159);
+    //headings[1] = mathGeneral::normaliseAngle(std::atan2(waypoint[1][1],waypoint[1][0]) - self[2]);
     headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2] + 3.14159);
+    //headings[2] = mathGeneral::normaliseAngle(std::atan2(waypoint[2][1],waypoint[2][0]) - self[2]);
     
     
     //add in the ball location, since we have the offsets
@@ -260,6 +265,7 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     
     //second attempt at gotoball, using side kicks
     if (current_command != GOTOBALL) {
+        
         resetHystereses();
         if (distances[0] < distances[1] and distances[0] < distances[2]) {
             move[0] = distances[0];
@@ -275,7 +281,6 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
             move[2] = headings[2];
         }
     } else {
-        current_command = GOTOBALL;
         
         //calculate raw move differences to minimize change to the current strategy
         float differences[3];
@@ -297,13 +302,18 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
             move[2] = headings[2];
         }
     }
+    current_command = GOTOBALL;
     m_raw_move = move;
-    current_walk_command = generateWalk(move[0],move[1],move[1]);
+    //std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
+    //current_walk_command = generateWalk(move[0],move[1],move[1]);
+    move[2] = move[1]*0.8;
+    move[1] = 0.;
+    current_walk_command = move;
     return current_walk_command;
 }
 
 std::vector<float> Navigation::goToBall(Object* kickTarget) {
-    if (current_command != GOTOBALL)
+    /*if (current_command != GOTOBALL)
         resetHystereses();
     current_command = GOTOBALL;
     std::vector<float> move(3,0);    
@@ -317,6 +327,7 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
     } else {
         target = NavigationLogic::getOpponentGoalPosition();
     }
+    current_object = kickTarget;
     vector<float> ball = NavigationLogic::getBallPosition();
     
     //get my position difference to the ball
@@ -392,9 +403,9 @@ std::vector<float> Navigation::goToBall(Object* kickTarget) {
     //std::cout << "Point Position Offset: (" << move[0] << ", " << move[1] << ", " << move[2] << ")" << std::endl;
     
     //must generate the walk last
-    std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
+    //std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
     current_walk_command = generateWalk(move[0],move[1],move[1]);
-    return current_walk_command;
+    return current_walk_command;*/
 }
     
 
@@ -404,20 +415,24 @@ void Navigation::update() {
     switch (current_command) 
         {
         case USELASTCOMMAND:
+            //std::cout << "uselastcommand" << std::endl;
             break;
         case GOTOPOINT:
+            //std::cout << "gotopoint" << std::endl;
             goToPoint(current_point);
             break;
         case GOTOOBJECT:
+            //std::cout << "gotoobject" << std::endl;
             goToPoint(current_object,current_heading);
             break;
         case GOTOBALL:
-            goToBall(current_object);
+            //std::cout << "gotoball2" << std::endl;
+            goToBall2(current_object);
             break;
         }
     
     //set the walkjob
-    std::cout << "Sending Walk Command: (" << current_walk_command[0] << ", " << current_walk_command[1] << ", " << current_walk_command[2] << ")" << std::endl;
+    //std::cout << "Sending Walk Command: (" << current_walk_command[0] << ", " << current_walk_command[1] << ", " << current_walk_command[2] << ")" << std::endl;
     Blackboard->Jobs->addMotionJob(new WalkJob(current_walk_command[0], current_walk_command[1], current_walk_command[2]));
 }
 
