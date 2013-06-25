@@ -78,7 +78,8 @@ bool Rectangle::PointInside(float x, float y)
     float dotvpvlx = vpx*vlx + vpy*vly;
     float dotvlvlx = vlx*vlx + vly*vly;
 
-    bool inside = (0.0f < dotvpvbx) && (dotvpvbx < dotvbvbx) && (0.0f < dotvpvlx) && (dotvpvlx < dotvlvlx);
+    bool inside = (0.0f < dotvpvbx) && (dotvpvbx < dotvbvbx) &&
+                  (0.0f < dotvpvlx) && (dotvpvlx < dotvlvlx);
     return inside;
 }
 

@@ -109,6 +109,10 @@ private:
     std::vector<float> current_walk_command;
     std::vector<float> m_raw_move;
     float current_heading;
+
+    bool kick_;
+
+    Navigation() : kick_(false) {}
     
     /*! @brief Given a distance, and relative bearing and heading, returns a new walk command based on the navigation parameters
      */

@@ -28,12 +28,12 @@
     @param time the time in ms to perform the save
     @param position the position at which to perform the save
  */
-ScriptJob::ScriptJob(double time, const MotionScript& script) : MotionJob(Job::MOTION_SCRIPT)
-{
-    m_job_time = time;     
-    m_script = script;
-    m_name = m_script.getName();
-}
+// ScriptJob::ScriptJob(double time, const MotionScript2013* script) : MotionJob(Job::MOTION_SCRIPT)
+// {
+//     m_job_time = time;     
+//     m_script = script;
+//     m_name = m_script->getName();
+// }
 
 /*! @brief Constructs a ScriptJob at the given time
     @param time the time in ms to perform the save
@@ -53,7 +53,7 @@ ScriptJob::ScriptJob(double time, std::istream& input) : MotionJob(Job::MOTION_S
 {
     m_job_time = time;
     input >> m_name; 
-    input >> m_script;
+    //input >> m_script;
 }
 
 /*! @brief WalkJob destructor
@@ -66,11 +66,12 @@ ScriptJob::~ScriptJob()
     @param time will be updated with the time to play the script
     @param script the motion script to be played
  */
-void ScriptJob::getScript(double& time, MotionScript& script)
+void ScriptJob::getScript(double& time, MotionScript2013* script)
 {
     time = m_job_time;
-    if (not m_script.isValid())
-        script = MotionScript(m_name);
+    
+    if (m_script == nullptr)
+        script = MotionScript2013::LoadFromConfigSystem(m_name);
     else
         script = m_script;
 }
@@ -114,7 +115,7 @@ void ScriptJob::toStream(std::ostream& output) const
     MotionJob::toStream(output);            // This writes data introduced at the motion level
     // Then we write ScriptJob specific data
     output << m_name;
-    output << m_script;
+    // output << m_script;
 }
 
 /*! @relates ScriptJob

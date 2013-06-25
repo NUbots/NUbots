@@ -31,6 +31,7 @@ public:
 
     VFO_ID getID() const {return m_id;}
     std::string getName() const	{return VFOName(m_id);}
+
     bool isValid() const {return valid;}
 
     const NUPoint& getLocation() const {return m_location;}
