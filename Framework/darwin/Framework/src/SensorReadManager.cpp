@@ -67,6 +67,7 @@ SensorReadManager::SensorReadManager()
         descriptor_list_.push_back(servo_read);
     }
 
+
     // //   - Force-sensitive resistors:
     /* SensorReadDescriptor* fsr_l_read = new SensorReadDescriptor();
     fsr_l_read->set_sensor_id(FSR::ID_L_FSR);

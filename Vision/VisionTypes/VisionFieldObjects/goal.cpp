@@ -230,6 +230,7 @@ bool Goal::calculatePositions()
     // WIDTH
     tran.calculateRepresentationsFromPixelLocation(width_loc, true, width_dist);
 
+
     // check if we are off the edge of the screen by a certain margin
     int EDGE_OF_SCREEN_MARGIN = 5;
     bool off_bottom = m_location.screenCartesian.y >= img_height - EDGE_OF_SCREEN_MARGIN;

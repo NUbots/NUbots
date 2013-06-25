@@ -31,6 +31,7 @@ class ScriptJob;
 class NUWalk;
 #include "Motion/NUMotionProvider.h"
 #include "Motion/Tools/MotionScript.h"
+#include "Motion/Kicks/MotionScript2013.h"
 
 class Script : public NUMotionProvider
 {
@@ -56,13 +57,12 @@ public:
     
     void process(NUSensorsData* data, NUActionatorsData* actions);
     void process(ScriptJob* job);
-private:
-public:
+
 private:
     NUWalk* m_walk;
     double m_script_start_time;
     bool m_script_pending;
-    MotionScript m_script;
+    MotionScript2013* m_script;
 };
 
 #endif

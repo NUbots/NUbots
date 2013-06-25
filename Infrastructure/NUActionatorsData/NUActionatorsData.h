@@ -25,7 +25,6 @@
 
 #ifndef NUACTIONATORSDATA_H
 #define NUACTIONATORSDATA_H
-
 class Actionator;
 #include "Infrastructure/NUData.h"
 

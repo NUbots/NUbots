@@ -412,5 +412,3 @@ std::istream& operator>> (std::istream& input, MotionScript* p_script)
 {
     return input;
 }
-
-

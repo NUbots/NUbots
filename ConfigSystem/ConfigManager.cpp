@@ -33,7 +33,6 @@ namespace ConfigSystem
         delete _configStore     ; _configStore     = NULL;
         delete _currConfigTree  ; _currConfigTree  = NULL;
     }
-    
 
     bool ConfigManager::LoadConfiguration(std::string configName)
     {

@@ -235,6 +235,7 @@ namespace ConfigSystem
          *  If a change is made to a parameter within the base path of one of
          *  these objects, the ConfigManager will notify that object of the
          *  change (by calling that object's 'updateConfig()' method). */
+         // This should be a std::unordered_set
         std::vector<Configurable*> _configObjects;
 
         /*! @brief     Update all config_objects that depend on the given 

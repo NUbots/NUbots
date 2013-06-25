@@ -30,7 +30,12 @@
 
 /*! @brief Constructor for Script module
  */
-Script::Script(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("Script", data, actions)
+Script::Script(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
+    NUMotionProvider("Script", data, actions),
+    m_walk(nullptr),
+    m_script_start_time(0),
+    m_script_pending(0),
+    m_script(nullptr)
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "Script::Script()" << std::endl;
@@ -85,43 +90,67 @@ void Script::kill()
 /*! @brief Returns true is a script is currently being executed */
 bool Script::isActive()
 {
-    return m_data->CurrentTime <= m_script.timeFinished() + m_script_start_time;
+    if(m_script == nullptr)
+        return false;
+
+    return m_script->IsActive();
 }
 
 bool Script::isUsingHead()
 {
-    return m_data->CurrentTime <= m_script.timeFinishedWithHead() + m_script_start_time;
+    if(m_script == nullptr)
+        return false;
+
+    return m_script->IsUsingHead();
 }
 
 bool Script::isUsingArms()
 {
-    return m_data->CurrentTime <= std::max(m_script.timeFinishedWithLArm(),m_script.timeFinishedWithRArm()) + m_script_start_time;
+    if(m_script == nullptr)
+        return false;
+
+    return m_script->IsUsingArms();
 }
 
 /*! @brief Returns true if a script uses the legs */
 bool Script::isUsingLegs()
 {
-    return m_data->CurrentTime <= std::max(m_script.timeFinishedWithLLeg(),m_script.timeFinishedWithRLeg()) + m_script_start_time;
+    if(m_script == nullptr)
+        return false;
+
+    return m_script->IsUsingLegs(); 
 }
 
 bool Script::isReady()
 {
-    return m_script.isValid();
+    if(m_script == nullptr)
+        return false;
+
+    return m_script->IsReady();
 }
 
 bool Script::requiresHead()
 {
-    return m_script.usesHead();
+    if(m_script == nullptr)
+        return false;
+
+    return m_script->RequiresHead();
 }
 
 bool Script::requiresArms()
 {
-    return m_script.usesLArm() or m_script.usesRArm();
+    if(m_script == nullptr)
+        return false;
+
+    return m_script->RequiresArms();
 }
 
 bool Script::requiresLegs()
 {
-    return m_script.usesLLeg() or m_script.usesRLeg();
+    if(m_script == nullptr)
+        return false;
+    
+    return m_script->RequiresLegs();
 }
 
 /*! @brief Produce actions from the data to move the robot into a standing position
@@ -130,16 +159,16 @@ bool Script::requiresLegs()
     @param actions a pointer to the actionators data storage class. This variable will be filled
                    with the desired actions to move into the protection pose.
  */
-void Script::process(NUSensorsData* data, NUActionatorsData* actions)
+void Script::process(NUSensorsData* sensors_data, NUActionatorsData* actionators_data)
 {
-    if (data == NULL || actions == NULL)
+    if (sensors_data == nullptr || actionators_data == nullptr)
         return;
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "Script::process()" << std::endl;
     #endif
     if (m_script_pending and m_script_start_time < m_data->CurrentTime)
     {
-        m_script.play(data, actions);
+        m_script->ScheduleEntireScript(sensors_data, actionators_data);
         m_script_start_time = m_data->CurrentTime;
         m_script_pending = false;
     }
@@ -154,7 +183,7 @@ void Script::process(ScriptJob* job)
         job->summaryTo(debug);
     #endif
     job->getScript(m_script_start_time, m_script);
-    if (not m_script.isValid())
+    if (not m_script->IsReady())
         m_script_start_time = -1;
     else
         m_script_pending = true;

@@ -56,6 +56,7 @@ typedef AmbiguousObjects::const_iterator AmbiguousObjectsConstIt;
 const float SelfLocalisation::c_LargeAngleSD = PI/2;   //For variance check
 
 // Object distance measurement error weightings (Constant)
+
 const float SelfLocalisation::c_obj_theta_variance = 0.05f*0.05f;        // (0.1 rad)^2
 
 const float SelfLocalisation::c_obj_range_offset_variance = 20.0f*20.0f;     // (25cm)^2
