@@ -4,6 +4,8 @@
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Motion/NUWalk.h"
 #include "NUPlatform/NUPlatform.h"
+#include "Infrastructure/NUBlackboard.h"
+#include "Infrastructure/FieldObjects/FieldObjects.h"
 
 //for configs
 #include "nubotdataconfig.h"
@@ -40,40 +42,86 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     if(isActive())
         return;
 
-    float ball_x = position[0];
-    float ball_y = position[1];
-    float target_x = target[0];
-    float target_y = target[1];
-    float theta = atan2f(target_y - ball_y, target_x - ball_x);
+    // Robot world coordinates:
+    float robot_x = Blackboard->Objects->self.wmX();
+    float robot_y = Blackboard->Objects->self.wmY();
+    float robot_heading = Blackboard->Objects->self.Heading();
 
-    // triggers sidekick too often with -45 deg to 45 deg front kick zone
-    float angle_margin = mathGeneral::PI / 4.0f; 
+    // // Ball world coordinates:
+    // float ball_x = ball_r_x + robot_x;
+    // float ball_y = ball_r_y + robot_y;
 
-    if((side_left_kick_script_ != nullptr
-        && theta > angle_margin 
-        && side_left_kick_area_.PointInside(ball_x, ball_y)) 
-        ) {
-        StartKick(side_left_kick_script_, rightLeg);
-    } else if(left_kick_script_ != nullptr
-              && theta <= angle_margin 
-              && theta >= -angle_margin
-              && left_kick_area_.PointInside(ball_x, ball_y)
-              ) {
-        StartKick(left_kick_script_, leftLeg);
-    } else if(side_right_kick_script_ != nullptr
-              && theta < -angle_margin
-              && side_right_kick_area_.PointInside(ball_x, ball_y)
-              ) {
-        StartKick(side_right_kick_script_, leftLeg);
-    } else if(right_kick_script_ != nullptr
-              && theta >= -angle_margin
-              && theta <= angle_margin
-              && right_kick_area_.PointInside(ball_x, ball_y)
-              ) {
-        StartKick(right_kick_script_, rightLeg);
-    } else {
-        //std::cout << "No kick available for position: (" << ball_x << ", " << ball_y << ")" << std::endl;
-        return;
+    // Target world coordinates: 
+    float target_w_x = target[0];
+    float target_w_y = target[1];
+
+    // Note: use robot relative space (i.e. Robot = (0,0), x = forward, y = right )
+
+    // Ball coords relative to robot:
+    float b_x = position[0];
+    float b_y = position[1];
+
+    // Target relative coordinates:
+    float t_x = target_w_x - robot_x;
+    float t_y = target_w_y - robot_y;
+
+    // World relative target heading
+    float target_heading = atan2f(t_y, t_x);
+
+    // // Robot relative target heading:
+    float t_theta = mathGeneral::normaliseAngle(target_heading - robot_heading);
+    // float kickbox_ball_x = std::cos(-robot_heading) * ball_r_x - std::sin(-robot_heading) * ball_r_y;
+    // float kickbox_ball_y = std::cos(-robot_heading) * ball_r_y + std::sin(-robot_heading) * ball_r_x;
+
+    std::cout << __PRETTY_FUNCTION__ << ": b_x = " << b_x << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << ": b_y = " << b_y << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << ": t_x = " << t_x << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << ": t_y = " << t_y << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << ": t_theta = " << t_theta << std::endl;
+
+    std::cout << __PRETTY_FUNCTION__ << ": side_left = " << side_left_kick_area_.PointInside(b_x, b_y) << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << ": left_kick = " << left_kick_area_.PointInside(b_x, b_y) << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << ": side_right = " << side_right_kick_area_.PointInside(b_x, b_y) << std::endl;
+    std::cout << __PRETTY_FUNCTION__ << ": right_kick = " << right_kick_area_.PointInside(b_x, b_y) << std::endl;
+
+
+
+    // std::cout << __PRETTY_FUNCTION__ << "robot_x = " << robot_x << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "robot_y = " << robot_y << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "robot_heading = " << robot_heading << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "ball_x = " << ball_x << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "ball_y = " << ball_y << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "ball_r_x = " << ball_r_x  << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "ball_r_y = " << ball_r_y  << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "target_x = " << target_x << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "target_y = " << target_y << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "kickbox_ball_x = " << kickbox_ball_x << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "kickbox_ball_y = " << kickbox_ball_y << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << "kicktarget_heading = " << kicktarget_heading << std::endl;
+
+    // The tolerance for whether the robot is considered to be facing the target.
+    float target_angle_tolerance = mathGeneral::PI / 4.0f;
+
+    double pi_3_4 = mathGeneral::PI * 3.0 / 4.0;
+
+    // Don't kick if robot is not facing the target:
+    if(-target_angle_tolerance < t_theta && t_theta < target_angle_tolerance)
+    {
+        if(left_kick_script_ != nullptr &&
+           left_kick_area_.PointInside(b_x, b_y)) {
+            StartKick(left_kick_script_, leftLeg);
+        } else if(right_kick_script_ != nullptr &&
+                  right_kick_area_.PointInside(b_x, b_y)) {
+            StartKick(right_kick_script_, rightLeg);
+        }
+    } else if(-pi_3_4 < t_theta && t_theta < pi_3_4) {
+        if((side_left_kick_script_ != nullptr &&
+            side_left_kick_area_.PointInside(b_x, b_y))) {
+            StartKick(side_left_kick_script_, rightLeg);
+        } else if(side_right_kick_script_ != nullptr &&
+                  side_right_kick_area_.PointInside(b_x, b_y)) {
+            StartKick(side_right_kick_script_, leftLeg);
+        }
     }
 }
 

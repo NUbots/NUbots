@@ -437,8 +437,6 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
  */
 void NUMotion::process(JobList* jobs)
 {
-    std::cout << "NUMotion::process(jobs): Start" << std::endl;
-
     #if DEBUG_NUMOTION_VERBOSITY > 0
         debug << "NUMotion::process(jobs): Start" << std::endl;
     #endif
@@ -532,8 +530,6 @@ void NUMotion::process(JobList* jobs)
         setNextProviders(next_provider);
     }
     
-    std::cout << "NUMotion::process(jobs): Finished" << std::endl;
-
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NUMotion::process(jobs): Finished" << std::endl;
     #endif
