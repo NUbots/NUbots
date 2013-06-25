@@ -37,6 +37,9 @@
 
 #include "Infrastructure/GameInformation/GameInformation.h"
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
+#include "NavigationLogic.h"
+#include "Tools/Math/General.h"
+ #include "Autoconfig/nubotdataconfig.h"
 
 
 #include "Tools/Math/General.h"
@@ -107,9 +110,9 @@ public:
 
     /*! @brief Checks if a quick scan is necessary to relocalise and find desired object.
     */    
-    bool objectIsLost(Object* object);
+    bool objectIsLost(int object_index);
 
-    bool objectShouldBeVisible(Object* object);
+    bool objectShouldBeVisible(int object_index);
     
 
 private:

@@ -122,6 +122,10 @@ private:
     std::vector<Object*> m_objects_to_view;
     int m_current_action;
 
+    double time_last_tracked;
+    bool last_job_was_trackjob;
+    double time_last_quick_panned;
+
 
     /*! @brief
     */
