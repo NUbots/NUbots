@@ -628,7 +628,59 @@ std::vector<int> HeadLogic::getValidObjectsToLookAt()
 
 
 
+bool HeadLogic::objectIsLost(Object* object){    
+    bool result = !(object->isObjectVisible()) && objectShouldBeVisible(object);
+    std::cout<<__PRETTY_FUNCTION__<< " result = "<<result<<std::endl;
+    return result;
+}
 
 
+bool HeadLogic::objectShouldBeVisible(Object* object){
+    std::cout<<__PRETTY_FUNCTION__<< " Checking if localisation thinks object should be visible." <<std::endl;
+    Self* self =&(Blackboard->Objects->self);
+    NUSensorsData* sensors_data = Blackboard->Sensors;
+    float x = self->wmX();
+    float y = self->wmY();
+    float heading = self->Heading();
+    float headYaw;
+    sensors_data->getPosition(NUData::HeadYaw, headYaw);
+    float headPitch;
+    sensors_data->getPosition(NUData::HeadPitch, headPitch);
 
+    float fov_multiplier = 1;
+    float FoV_x = fov_multiplier*m_CAMERA_FOV_X;
+    float FoV_y = fov_multiplier*m_CAMERA_FOV_Y;
+
+    std::vector<FieldObjects::StationaryFieldObjectID> stat_objects_in_view = 
+                    Blackboard->Objects->GetPossibleObservationIds
+                    (
+                    x, y, heading,
+                    headYaw, headPitch,
+                    FoV_x, FoV_y
+                    );
+    std::vector<FieldObjects::MobileFieldObjectID> mobile_objects_in_view = 
+                    Blackboard->Objects->GetPossibleMobileObservationIds
+                    (
+                    x, y, heading,
+                    headYaw, headPitch,
+                    FoV_x, FoV_y
+                    );
+    std::vector<Object*> objects_in_view;
+    for(size_t i = 0; i<stat_objects_in_view.size() ;i++){
+        objects_in_view.push_back(getObject(STATIONARY_OBJECT,stat_objects_in_view[i]));
+    }
+    for(size_t i = 0; i<mobile_objects_in_view.size() ;i++){
+        objects_in_view.push_back(getObject(MOBILE_OBJECT,mobile_objects_in_view[i]));
+    }
+    std::cout<<__PRETTY_FUNCTION__<< " Object pointer = "<<object<<std::endl;
+    for(size_t i = 0; i<objects_in_view.size() ;i++){
+        std::cout<<__PRETTY_FUNCTION__<< " Object pointer = "<<objects_in_view[i]<<std::endl;
+        if(objects_in_view[i] == object) return true;
+    }
+    std::cout<<__PRETTY_FUNCTION__<< " No matching objects which should be visible found."<<std::endl;
+    return false;
+    
+
+
+}
 

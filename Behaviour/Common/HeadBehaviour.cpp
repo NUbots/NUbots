@@ -586,6 +586,12 @@ void HeadBehaviour::lookForFieldObjects(){
 void HeadBehaviour::update(){
     std::cout << "Head Behaviour Action: " << m_current_action << std::endl;
     makeVisionChoice(current_policy);
+
+    if(head_logic->objectIsLost(m_objects_to_view[m_current_action])){
+        performQuickScan();
+        return;
+    }
+
     if(m_objects_to_view[m_current_action]->isObjectVisible()){
 
         if (m_current_action < head_logic->relevantObjects[0].size()){    
@@ -646,3 +652,11 @@ void HeadBehaviour::takeAction(int action){
     actionStartTime = Blackboard->Sensors->GetTimestamp();
     m_current_action = action;
 }
+
+
+void HeadBehaviour::performQuickScan(){
+    std::cout<<__PRETTY_FUNCTION__<< " Performing quick scan." <<std::endl;
+}
+
+
+

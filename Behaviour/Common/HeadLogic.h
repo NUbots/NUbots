@@ -104,11 +104,15 @@ public:
     std::vector<std::vector<float> > getPolarObLocSummary();
 
     std::vector<int> getValidObjectsToLookAt();
+
+    /*! @brief Checks if a quick scan is necessary to relocalise and find desired object.
+    */    
+    bool objectIsLost(Object* object);
+
+    bool objectShouldBeVisible(Object* object);
+    
+
 private:
-
-
-
-
     //Camera field of view constants
     float m_CAMERA_FOV_X;//rad
     float m_CAMERA_FOV_Y;

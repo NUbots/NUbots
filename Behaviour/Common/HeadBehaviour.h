@@ -118,7 +118,7 @@ private:
     float prioritise_localisation_policy_bias;
     float prioritise_ball_policy_bias;
 
-    //NEWER JOB SYSTEM VAR
+    //NEWER JOB SYSTEM VARIABLES
     std::vector<Object*> m_objects_to_view;
     int m_current_action;
 
@@ -188,8 +188,11 @@ public:
     /*void fieldXYToHeadingElevation(Vector2<float>* fieldposition, Vector2<float>* cameraposition) {
         
     }*/
+
     
-    
+    /*! @brief Performs a quick scan of the area near the expected location of the object.
+    */
+    void performQuickScan();
 
 };
 
