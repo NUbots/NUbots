@@ -36,6 +36,8 @@ ScriptKick2013::~ScriptKick2013()
 
 void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::vector<float>& target)
 {
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+
     // Ignore calls to this method while a kick is in progress
     if(isActive())
         return;
@@ -50,38 +52,42 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     float angle_margin = mathGeneral::PI / 4.0f; 
 
 
-    if((side_left_kick_script_ != nullptr
-        && theta > angle_margin 
-        && side_left_kick_area_.PointInside(ball_x, ball_y)) 
-        ) {
-        StartKick(side_left_kick_script_, rightLeg);
-    } else if(left_kick_script_ != nullptr
-              && theta <= angle_margin 
-              && theta >= -angle_margin
-              && left_kick_area_.PointInside(ball_x, ball_y)
-              ) {
-        StartKick(left_kick_script_, leftLeg);
-    } else if(side_right_kick_script_ != nullptr
-              && theta < -angle_margin
-              && side_right_kick_area_.PointInside(ball_x, ball_y)
-              ) {
-        StartKick(side_right_kick_script_, leftLeg);
-    } else if(right_kick_script_ != nullptr
-              && theta >= -angle_margin
-              && theta <= angle_margin
-              && right_kick_area_.PointInside(ball_x, ball_y)
-              ) {
-        StartKick(right_kick_script_, rightLeg);
-    } else {
-        //std::cout << "No kick available for position: (" << ball_x << ", " << ball_y << ")" << std::endl;
-        return;
-    }
+    std::cout << __PRETTY_FUNCTION__ << ": KickLeft" << std::endl;
+    StartKick(side_left_kick_script_, rightLeg);
+
+    // if((side_left_kick_script_ != nullptr
+    //     && theta > angle_margin 
+    //     && side_left_kick_area_.PointInside(ball_x, ball_y)) 
+    //     ) {
+    //     StartKick(side_left_kick_script_, rightLeg);
+    // } else if(left_kick_script_ != nullptr
+    //           && theta <= angle_margin 
+    //           && theta >= -angle_margin
+    //           && left_kick_area_.PointInside(ball_x, ball_y)
+    //           ) {
+    //     StartKick(left_kick_script_, leftLeg);
+    // } else if(side_right_kick_script_ != nullptr
+    //           && theta < -angle_margin
+    //           && side_right_kick_area_.PointInside(ball_x, ball_y)
+    //           ) {
+    //     StartKick(side_right_kick_script_, leftLeg);
+    // } else if(right_kick_script_ != nullptr
+    //           && theta >= -angle_margin
+    //           && theta <= angle_margin
+    //           && right_kick_area_.PointInside(ball_x, ball_y)
+    //           ) {
+    //     StartKick(right_kick_script_, rightLeg);
+    // } else {
+    //     //std::cout << "No kick available for position: (" << ball_x << ", " << ball_y << ")" << std::endl;
+    //     return;
+    // }
 }
 
 void ScriptKick2013::StartKick(
     MotionScript2013* kick_script, 
     KickingLeg kicking_leg)
 {
+    std::cout << __PRETTY_FUNCTION__<<"kick_script = "<< kick_script<<  std::endl;
     m_kicking_leg = kicking_leg;
     current_script_ = kick_script;
 
@@ -98,11 +104,12 @@ void ScriptKick2013::StartKick(
 
 void ScriptKick2013::doKick()
 {
+    std::cout << __PRETTY_FUNCTION__  << std::endl;
     // If doKick is called while the robot is not kicking, just return.
     if(!isActive())
         return;
 
-    float current_time = GetCurrentScriptTime();
+    float current_time = Platform->getTime();
 
     // If the current script is complete
     if(current_script_->HasCompleted(current_time))
@@ -137,7 +144,7 @@ void ScriptKick2013::kill()
 
 bool ScriptKick2013::isActive()
 {
-    return current_script_ != nullptr;
+    return current_script_ != nullptr && current_script_->IsActive();
 }
 
 bool ScriptKick2013::isUsingHead() { return current_script_->IsUsingHead(); }

@@ -19,6 +19,7 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #include "NUKick.h"
 #include "NUPlatform/NUPlatform.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
@@ -26,6 +27,7 @@
 #include "Infrastructure/Jobs/MotionJobs/KickJob.h"
 #include "Infrastructure/Jobs/MotionJobs/WalkJob.h"
 #include "Motion/Tools/MotionCurves.h"
+#include "Motion/Kicks/ScriptKick2013.h"
 
 #include "motionconfig.h"
 #include "debugverbositynumotion.h"
@@ -42,7 +44,7 @@ using namespace mathGeneral;
 NUKick* NUKick::getKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions)
 {
     //return new NAOKick(walk, data, actions);
-    return new ScriptKick(walk, data, actions);
+    return new ScriptKick2013(walk, data, actions);
 }
 
 NUKick::NUKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUKick", data, actions)
@@ -191,20 +193,24 @@ void NUKick::setHeadEnabled(bool head)
 */
 void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
 {
+    std::cout << __PRETTY_FUNCTION__  << std::endl;
     if (actions == NULL || data == NULL)
         return;
     #if DEBUG_NUMOTION_VERBOSITY > 3
         debug << "NUKick::process(" << data << ", " << actions << ")" << std::endl;
         debug << "NUKick::process " << " ready: " << m_kick_ready << " active: " << m_kick_enabled << std::endl;
     #endif
-    
     m_data = data;
     m_actions = actions;
     m_previousTimestamp = m_currentTimestamp;
     m_currentTimestamp = data->CurrentTime;
 
+    std::cout << __PRETTY_FUNCTION__  << ": isActive() = " << isActive()
+              << ", isReady() = " << isReady() << std::endl;
+
     if(!isActive() && !isReady())
         return;
+    std::cout << __PRETTY_FUNCTION__<<"sdasd"<<  std::endl;
     doKick();
 }
 

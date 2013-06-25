@@ -456,11 +456,12 @@ vector<float> Navigation::stop() {
 }
 
 void Navigation::kick() {
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
     //set the kick
     std::vector<float> position = NavigationLogic::getPositionDifference(NavigationLogic::getSelfPosition(),NavigationLogic::getBallPosition());
-    if (position[0]*position[0]+position[1]*position[1] < 100.) {
-        Blackboard->Jobs->addMotionJob(new KickJob(Blackboard->Sensors->GetTimestamp(),NavigationLogic::getBallPosition(), NavigationLogic::getOpponentGoalPosition()));
-    }
+    //if (position[0]*position[0]+position[1]*position[1] < 100.) {
+    Blackboard->Jobs->addMotionJob(new KickJob(Blackboard->Sensors->GetTimestamp(),NavigationLogic::getBallPosition(), NavigationLogic::getOpponentGoalPosition()));
+    //}
 }
 
 
