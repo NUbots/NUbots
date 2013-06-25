@@ -36,6 +36,7 @@ DataWrapper::DataWrapper()
     isSavingImages = false;
     isSavingImagesWithVaryingSettings = false;
 
+    debug << "Loading from: " << std::string(CONFIG_DIR) + std::string("VisionOptions.cfg") << std::endl;
     VisionConstants::loadFromFile(std::string(CONFIG_DIR) + std::string("VisionOptions.cfg"));
 
     std::string sen_calib_name = std::string(CONFIG_DIR) + std::string("SensorCalibration.cfg");
@@ -410,9 +411,7 @@ void DataWrapper::postProcess()
 */
 bool DataWrapper::loadLUTFromFile(const std::string& fileName)
 {
-    #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "DataWrapper::loadLUTFromFile() - " << fileName << std::endl;
-    #endif
+    debug << "DataWrapper::loadLUTFromFile() - " << fileName << std::endl;
     return m_LUT.loadLUTFromFile(fileName);
 }
 

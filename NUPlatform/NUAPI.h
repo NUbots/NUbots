@@ -62,6 +62,9 @@ public:
 	void sendSensorData();
 	void sendVisionData();
 	void sendLocalisationData();
+	
+	//void get_jpeg_image(void*& image, unsigned int& size);
+	//void get_png_image(std::stringstream& image, unsigned int& size);
 
 	void send(API::Message api_message);
 private:

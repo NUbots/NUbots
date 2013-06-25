@@ -49,9 +49,7 @@ FOREACH (loop_var ${NUBOT_DIRS})
 ENDFOREACH (loop_var ${NUBOT_DIRS})
 
 # Specify c++11
-#if(UNIX)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-#endif()
 
 # Build protocol buffer classes
 #find_package(Protobuf REQUIRED)
