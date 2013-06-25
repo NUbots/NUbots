@@ -53,10 +53,12 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
     for(int action = 0; action<number_of_interesting_objects; action++){        
         m_objects_to_view.push_back(head_logic->getObject(action));
     }
-    m_current_action = 0;
+    m_current_action = 4;
 
 
-
+    time_last_quick_panned=0;
+    time_last_tracked=0;
+    last_job_was_trackjob=false;
     MAX_PERCEPT_RANGESIZE = 10;
     NUCameraData cameraSpecs(std::string(CONFIG_DIR) + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
@@ -233,7 +235,7 @@ void HeadBehaviour::makeVisionChoice(VisionPolicyID fieldVisionPolicy) {
     //If we are still moving to look at something else, don't make a new decision
     if (
         current_time < actionStartTime+maximumSearchTime &&
-        fieldVisionPolicy == lastVisionPolicy and
+        fieldVisionPolicy == lastVisionPolicy &&
         ObjectNotSeen()
        )
     {
@@ -584,34 +586,47 @@ void HeadBehaviour::lookForFieldObjects(){
 /*! @brief Performs post processing and adds a head job to the joblist
 */
 void HeadBehaviour::update(){
-    std::cout << "Head Behaviour Action: " << m_current_action << std::endl;
+    
     makeVisionChoice(current_policy);
+    std::cout << "Head Behaviour Action: " << m_current_action << std::endl;
 
-    if(head_logic->objectIsLost(m_objects_to_view[m_current_action])){
+    if(head_logic->objectIsLost(m_current_action) and Blackboard->Sensors->GetTimestamp()-time_last_quick_panned > 500 ){
         performQuickScan();
+        time_last_quick_panned = Blackboard->Sensors->GetTimestamp();
         return;
     }
-
+    
     if(m_objects_to_view[m_current_action]->isObjectVisible()){
-
-        if (m_current_action < head_logic->relevantObjects[0].size()){    
-            Blackboard->Jobs->addMotionJob(  new HeadTrackJob(  *m_objects_to_view[m_current_action]  )  );
-        } else if (m_current_action < head_logic->relevantObjects[1].size()+head_logic->relevantObjects[0].size()){
-            Blackboard->Jobs->addMotionJob(  new HeadTrackJob(  *m_objects_to_view[m_current_action]  )  );
-        } else {
-            Blackboard->Jobs->addMotionJob(  new HeadTrackJob(  *m_objects_to_view[m_current_action]  )  );
-        }
-    } else {
+        Blackboard->Jobs->addMotionJob(  new HeadTrackJob(  *m_objects_to_view[m_current_action]  )  );
+        time_last_tracked=Blackboard->Sensors->GetTimestamp();
+        last_job_was_trackjob = true;
+        // if (m_current_action < head_logic->relevantObjects[0].size()){    
+        //     Blackboard->Jobs->addMotionJob(  new HeadTrackJob(  *m_objects_to_view[m_current_action]  )  );
+        //     time_last_tracked=Blackboard->Sensors->GetTimestamp();
+        //     last_job_was_trackjob = true;
+        // } else if (m_current_action < head_logic->relevantObjects[1].size()+head_logic->relevantObjects[0].size()){
+        //     Blackboard->Jobs->addMotionJob(  new HeadTrackJob(  *m_objects_to_view[m_current_action]  )  );
+        //     time_last_tracked=Blackboard->Sensors->GetTimestamp();
+        //     last_job_was_trackjob = true;
+        // } else {
+        //     Blackboard->Jobs->addMotionJob(  new HeadTrackJob(  *m_objects_to_view[m_current_action]  )  );
+        //     time_last_tracked=Blackboard->Sensors->GetTimestamp();
+        //     last_job_was_trackjob = true;
+        // }
+    } else if(Blackboard->Sensors->GetTimestamp()-time_last_tracked < 500 and last_job_was_trackjob){
+        return;
+    } else {   
         if (m_current_action < head_logic->relevantObjects[0].size()){    
             Blackboard->Jobs->addMotionJob(  new HeadPanJob(*(StationaryObject*)m_objects_to_view[m_current_action])  );
+            last_job_was_trackjob = false;
         } else if (m_current_action < head_logic->relevantObjects[1].size()+head_logic->relevantObjects[0].size()){
             Blackboard->Jobs->addMotionJob(  new HeadPanJob(*(MobileObject*)m_objects_to_view[m_current_action])  );
+            last_job_was_trackjob = false;
         }
-    }   
+    }
     
     
 }
-
 
 
 void HeadBehaviour::dispatchHeadJob(StationaryObject* ObjectToTrack) {
@@ -656,6 +671,7 @@ void HeadBehaviour::takeAction(int action){
 
 void HeadBehaviour::performQuickScan(){
     std::cout<<__PRETTY_FUNCTION__<< " Performing quick scan." <<std::endl;
+    Blackboard->Jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
 }
 
 

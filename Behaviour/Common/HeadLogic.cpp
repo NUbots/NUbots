@@ -22,6 +22,7 @@
 
 
 #include "HeadLogic.h"
+#include "Autoconfig/nubotdataconfig.h"
 
 #include <cmath>
 #include <vector>
@@ -36,7 +37,7 @@ HeadLogic* HeadLogic::getInstance(){
 
 HeadLogic::HeadLogic(){
     //cout<<"Head logic constructor start"<<endl;
-    NUCameraData cameraSpecs(std::string(/*CONFIG_DIR*/ "Config/Darwin") + "CameraSpecs.cfg");
+    NUCameraData cameraSpecs(std::string(CONFIG_DIR) + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
     m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
 
@@ -628,58 +629,59 @@ std::vector<int> HeadLogic::getValidObjectsToLookAt()
 
 
 
-bool HeadLogic::objectIsLost(Object* object){    
-    bool result = !(object->isObjectVisible()) && objectShouldBeVisible(object);
-    std::cout<<__PRETTY_FUNCTION__<< " result = "<<result<<std::endl;
+bool HeadLogic::objectIsLost(int object_index){    
+    Object* object = getObject(object_index);
+    bool should_be_visible = objectShouldBeVisible(object_index);
+    bool result = !(object->isObjectVisible()) && should_be_visible;
+    //std::cout<<__PRETTY_FUNCTION__<< " should_be_visible = "<<should_be_visible<<std::endl;
     return result;
 }
 
 
-bool HeadLogic::objectShouldBeVisible(Object* object){
-    std::cout<<__PRETTY_FUNCTION__<< " Checking if localisation thinks object should be visible." <<std::endl;
-    Self* self =&(Blackboard->Objects->self);
+bool HeadLogic::objectShouldBeVisible(int object_index){
+    Object* object = getObject(object_index);
     NUSensorsData* sensors_data = Blackboard->Sensors;
-    float x = self->wmX();
-    float y = self->wmY();
-    float heading = self->Heading();
+    //float diff = getRequiredHeadMovementAngle(getSelfLocation(), getObjectType(object_index), object->getID(), 1, 1);
+    std::vector<float> object_position(3,0);
+    float camera_height = 38.;
+    if(getObjectType(object_index) == STATIONARY_OBJECT){
+        StationaryObject* stat_object = (StationaryObject*)object;
+        object_position[0] = stat_object->X();
+        object_position[1] = stat_object->Y();
+        object_position[2] = atan2(object_position[1],object_position[0]);
+    } else {        
+        object_position = NavigationLogic::getObjectPosition(*object);
+    }
+    
+    std::vector<float> self_position = NavigationLogic::getSelfPosition();
+    std::vector<float> self_to_ball = NavigationLogic::getPositionDifference(self_position,object_position);
+    float abs_bearing = std::atan2(self_to_ball[1],self_to_ball[0]);
+
+    float rel_bearing = mathGeneral::normaliseAngle(abs_bearing-self_position[2]);
+
+    float distance = std::sqrt(self_to_ball[0]*self_to_ball[0]+self_to_ball[1]*self_to_ball[1]);
+
+    float elevation = -(std::atan2(camera_height,distance));
+
     float headYaw;
     sensors_data->getPosition(NUData::HeadYaw, headYaw);
+
     float headPitch;
     sensors_data->getPosition(NUData::HeadPitch, headPitch);
 
-    float fov_multiplier = 1;
-    float FoV_x = fov_multiplier*m_CAMERA_FOV_X;
-    float FoV_y = fov_multiplier*m_CAMERA_FOV_Y;
+    float pitch_to_head = std::fabs(headPitch+elevation);
+    float bearing_to_head = std::fabs(headYaw+rel_bearing);
 
-    std::vector<FieldObjects::StationaryFieldObjectID> stat_objects_in_view = 
-                    Blackboard->Objects->GetPossibleObservationIds
-                    (
-                    x, y, heading,
-                    headYaw, headPitch,
-                    FoV_x, FoV_y
-                    );
-    std::vector<FieldObjects::MobileFieldObjectID> mobile_objects_in_view = 
-                    Blackboard->Objects->GetPossibleMobileObservationIds
-                    (
-                    x, y, heading,
-                    headYaw, headPitch,
-                    FoV_x, FoV_y
-                    );
-    std::vector<Object*> objects_in_view;
-    for(size_t i = 0; i<stat_objects_in_view.size() ;i++){
-        objects_in_view.push_back(getObject(STATIONARY_OBJECT,stat_objects_in_view[i]));
-    }
-    for(size_t i = 0; i<mobile_objects_in_view.size() ;i++){
-        objects_in_view.push_back(getObject(MOBILE_OBJECT,mobile_objects_in_view[i]));
-    }
-    std::cout<<__PRETTY_FUNCTION__<< " Object pointer = "<<object<<std::endl;
-    for(size_t i = 0; i<objects_in_view.size() ;i++){
-        std::cout<<__PRETTY_FUNCTION__<< " Object pointer = "<<objects_in_view[i]<<std::endl;
-        if(objects_in_view[i] == object) return true;
-    }
-    std::cout<<__PRETTY_FUNCTION__<< " No matching objects which should be visible found."<<std::endl;
-    return false;
+    // std::cout<<__PRETTY_FUNCTION__<< " Head angle difference: Pitch " <<
+    //             pitch_to_head<<" Bearing "<<bearing_to_head<<
+    //              "Field of view "<< m_CAMERA_FOV_X<<" " << m_CAMERA_FOV_Y<<std::endl;
+
+    return ((pitch_to_head)<m_CAMERA_FOV_Y) && ((bearing_to_head)<m_CAMERA_FOV_X);
+
+
+
     
+
 
 
 }
