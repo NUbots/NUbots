@@ -49,35 +49,32 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     // triggers sidekick too often with -45 deg to 45 deg front kick zone
     float angle_margin = mathGeneral::PI / 4.0f; 
 
-
-    StartKick(side_left_kick_script_, rightLeg);
-
-    // if((side_left_kick_script_ != nullptr
-    //     && theta > angle_margin 
-    //     && side_left_kick_area_.PointInside(ball_x, ball_y)) 
-    //     ) {
-    //     StartKick(side_left_kick_script_, rightLeg);
-    // } else if(left_kick_script_ != nullptr
-    //           && theta <= angle_margin 
-    //           && theta >= -angle_margin
-    //           && left_kick_area_.PointInside(ball_x, ball_y)
-    //           ) {
-    //     StartKick(left_kick_script_, leftLeg);
-    // } else if(side_right_kick_script_ != nullptr
-    //           && theta < -angle_margin
-    //           && side_right_kick_area_.PointInside(ball_x, ball_y)
-    //           ) {
-    //     StartKick(side_right_kick_script_, leftLeg);
-    // } else if(right_kick_script_ != nullptr
-    //           && theta >= -angle_margin
-    //           && theta <= angle_margin
-    //           && right_kick_area_.PointInside(ball_x, ball_y)
-    //           ) {
-    //     StartKick(right_kick_script_, rightLeg);
-    // } else {
-    //     //std::cout << "No kick available for position: (" << ball_x << ", " << ball_y << ")" << std::endl;
-    //     return;
-    // }
+    if((side_left_kick_script_ != nullptr
+        && theta > angle_margin 
+        && side_left_kick_area_.PointInside(ball_x, ball_y)) 
+        ) {
+        StartKick(side_left_kick_script_, rightLeg);
+    } else if(left_kick_script_ != nullptr
+              && theta <= angle_margin 
+              && theta >= -angle_margin
+              && left_kick_area_.PointInside(ball_x, ball_y)
+              ) {
+        StartKick(left_kick_script_, leftLeg);
+    } else if(side_right_kick_script_ != nullptr
+              && theta < -angle_margin
+              && side_right_kick_area_.PointInside(ball_x, ball_y)
+              ) {
+        StartKick(side_right_kick_script_, leftLeg);
+    } else if(right_kick_script_ != nullptr
+              && theta >= -angle_margin
+              && theta <= angle_margin
+              && right_kick_area_.PointInside(ball_x, ball_y)
+              ) {
+        StartKick(right_kick_script_, rightLeg);
+    } else {
+        //std::cout << "No kick available for position: (" << ball_x << ", " << ball_y << ")" << std::endl;
+        return;
+    }
 }
 
 void ScriptKick2013::StartKick(
