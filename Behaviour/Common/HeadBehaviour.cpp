@@ -56,7 +56,9 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
     m_current_action = 4;
 
 
-
+    time_last_quick_panned=0;
+    time_last_tracked=0;
+    last_job_was_trackjob=false;
     MAX_PERCEPT_RANGESIZE = 10;
     NUCameraData cameraSpecs(std::string(CONFIG_DIR) + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
