@@ -134,7 +134,7 @@ void DarwinSensors::copyFromHardwareCommunications()
     int bulk_read_error_code = 0;
     bool significant_bulk_read_error_occurred = cm730->BulkRead(&bulk_read_error_code);
     
-    //ERROR REPORTING? (wrote jake as he attempts to figure mitchells code)
+
     if(bulk_read_error_code == Robot::CM730::SUCCESS)
     {
         if(!last_read_was_successful)
@@ -159,20 +159,19 @@ void DarwinSensors::copyFromHardwareCommunications()
         }
         else
         {
-            std::vector<int> failing_sensors;
-            sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
-            std::cout << "The following "
-                      << failing_sensors.size()
-                      << " sensors may be disconnected:" << std::endl;
-            for (std::vector<int>::iterator it = failing_sensors.begin();
-                it != failing_sensors.end(); ++it)
-            {
-                int sensor_id = *it;
-                sensor_read_manager_->PrintSensorResponseRate(sensor_id);
-            }
+//            std::vector<int> failing_sensors;
+//            sensor_read_manager_->GetFilteredLikelySensorFailures(&failing_sensors);
+//            std::cout << "The following "
+//                      << failing_sensors.size()
+//                      << " sensors may be disconnected:" << std::endl;
+//            for (std::vector<int>::iterator it = failing_sensors.begin();
+//                it != failing_sensors.end(); ++it)
+//            {
+//                int sensor_id = *it;
+//                sensor_read_manager_->PrintSensorResponseRate(sensor_id);
+//            }
         }
     }
-
 }
 
 /*! @brief Copys the joint sensor data
