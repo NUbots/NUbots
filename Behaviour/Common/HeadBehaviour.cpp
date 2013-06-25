@@ -626,7 +626,7 @@ void HeadBehaviour::update(){
             }
         }   
     }
-
+}
 
 void HeadBehaviour::dispatchHeadJob(StationaryObject* ObjectToTrack) {
     //initiate a new pan job using the robots estimated standard deviation of heading as the pan width
