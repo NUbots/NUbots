@@ -53,9 +53,12 @@ float Ball::getRadius() const
 bool Ball::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const
 {
     #if VISION_BALL_VERBOSITY > 1
-        debug << "Ball::addToExternalFieldObjects:" << std::endl;
-        debug << *this << std::endl;
+    debug << "Ball::addToExternalFieldObjects:" << std::endl;
+    debug << *this << std::endl;
     #endif
+
+    //std::cout << __PRETTY_FUNCTION__ << " valid: " << valid << std::endl;
+
     if(valid) {
         //add ball to mobileFieldObjects
         //std::cout << m_transformed_spherical_pos.x << " " << m_transformed_spherical_pos.y << " " << m_transformed_spherical_pos.z << std::endl;

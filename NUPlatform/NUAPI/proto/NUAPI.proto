@@ -44,6 +44,8 @@ message VisionFieldObject {
 	optional uint32 width = 9;
 	optional uint32 height = 10;
 	repeated uint32 points = 11;
+
+	repeated float measured_relative_position = 12;
 }
 
 message VisionClassifiedSegment {
