@@ -72,6 +72,8 @@ public:
             y = 0.5f*(Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].Y()+Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].Y());
         }
         
+        result[0] = x;
+        result[1] = y;
         return result;
     }
     
@@ -89,6 +91,8 @@ public:
             y = 0.5f*(Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].Y()+Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].Y());
         }
         
+        result[0] = x;
+        result[1] = y;
         return result;
     }
     
