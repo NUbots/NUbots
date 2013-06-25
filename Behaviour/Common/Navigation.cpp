@@ -55,9 +55,9 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     
     //decide between heading and bearing
     if (m_distance_increment > 1) {
-        walk_bearing = relative_bearing;
+        walk_bearing = relative_bearing*0.6;
     } else { //use scaling
-        walk_bearing = relative_heading*0.75;
+        walk_bearing = relative_heading*0.4;
     }
     
     //check turning hysteresis
@@ -68,10 +68,10 @@ std::vector<float> Navigation::generateWalk(float distance, float relative_beari
     } else {
         walk_bearing = 0;
     }*/
-    float g = 1./(1.+std::exp(-6.*walk_bearing*walk_bearing));
-    new_walk[0] = walk_speed*g;
+    float g = 1./(1.+std::exp(-3.*walk_bearing*walk_bearing));
+    new_walk[0] = walk_speed*(1.-g);
 
-    new_walk[2] = walk_bearing; //*(1.-0.5*g);
+    new_walk[2] = walk_bearing*g;
 
     return new_walk;
 }
@@ -311,10 +311,10 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     current_command = GOTOBALL;
     m_raw_move = move;
     //std::cout << "Unfiltered Walk Command: (" << move[0] << ", " << move[1] << ", " << move[1] << ")" << std::endl;
-    //current_walk_command = generateWalk(move[0],move[1],move[1]);
-    move[2] = move[1]*0.8;
-    move[1] = 0.;
-    current_walk_command = move;
+    current_walk_command = generateWalk(move[0],move[1],move[1]);
+    //move[2] = move[1]*0.8;
+    //move[1] = 0.;
+    //current_walk_command = move;
     //std::cout << "set gotoball moves" << std::endl;
     return current_walk_command;
 }
@@ -458,7 +458,12 @@ void Navigation::update() {
     
     bool iskicking = false;
     Blackboard->Sensors->get(NUSensorsData::MotionKickActive, iskicking);
+    
+    if (!iskicking) {
+        Blackboard->Jobs->addMotionJob(new WalkJob(current_walk_command[0], current_walk_command[1], current_walk_command[2]));
+    }
 
+    
     // if (position[0]*position[0]+position[1]*position[1] < 100.) {
     if(!iskicking && kick_)
     {
@@ -466,10 +471,8 @@ void Navigation::update() {
             new KickJob(Blackboard->Sensors->GetTimestamp(),
             NavigationLogic::getBallPosition(), 
             NavigationLogic::getOpponentGoalPosition()));
-    } else if (!iskicking) {
-        Blackboard->Jobs->addMotionJob(new WalkJob(current_walk_command[0], current_walk_command[1], current_walk_command[2]));
     }
-
+    
     kick_ = false;
 
 }
