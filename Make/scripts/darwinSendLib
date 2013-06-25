@@ -15,6 +15,6 @@ do
     echo Sending darwin.a to $robot_ip
     scp -pC ./Framework/darwin/Linux/lib/darwin.a darwin@$robot_ip:/home/darwin/nubot/Framework/darwin.a
 
-    echo Sending darwinNUbotStart to $robot_ip
-    scp -pC ./Make/scripts/darwinNUbotStart darwin@$robot_ip:/home/darwin/darwinNUbotStart
+    echo Sending run to $robot_ip
+    scp -pC ./Make/scripts/run darwin@$robot_ip:/home/darwin/run
 done

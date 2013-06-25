@@ -72,6 +72,8 @@ public:
             y = 0.5f*(Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].Y()+Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].Y());
         }
         
+        result[0] = x;
+        result[1] = y;
         return result;
     }
     
@@ -89,6 +91,8 @@ public:
             y = 0.5f*(Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].Y()+Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].Y());
         }
         
+        result[0] = x;
+        result[1] = y;
         return result;
     }
     
@@ -194,6 +198,7 @@ public:
      */
     static vector<float> getStartOffensePosition() {
         //XXX: hardcoded starting positions
+
         const float positions[][3] ={{20,0,3.14159}, //robot 1 - kickoff robot!
                                    {20,90,3.14159}, //robot 2
                                    {50,-90,3.14159}, //etc
@@ -215,6 +220,7 @@ public:
      */
     static vector<float> getStartDefensePosition() {
         //XXX: hardcoded starting positions
+
         const float positions[][3]={{70,0,3.14159}, //robot 1 - kickoff robot!
                                    {20,90,3.14159}, //robot 2
                                    {50,-90,3.14159}, //etc

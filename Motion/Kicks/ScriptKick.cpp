@@ -139,25 +139,25 @@ void ScriptKick::loadKickParameters()
         errorlog << "ScriptKick::loadKickParameters - failed to load kickboxes.cfg" << std::endl;
     }
 
-    std::cout << " x_min_right_forward = " << x_min_right_forward << std::endl;
-    std::cout << " x_max_right_forward = " << x_max_right_forward << std::endl;
-    std::cout << " y_min_right_forward = " << y_min_right_forward << std::endl;
-    std::cout << " y_max_right_forward = " << y_max_right_forward << std::endl;
+    // std::cout << " x_min_right_forward = " << x_min_right_forward << std::endl;
+    // std::cout << " x_max_right_forward = " << x_max_right_forward << std::endl;
+    // std::cout << " y_min_right_forward = " << y_min_right_forward << std::endl;
+    // std::cout << " y_max_right_forward = " << y_max_right_forward << std::endl;
 
-    std::cout << " x_min_left_forward = " << x_min_left_forward << std::endl;
-    std::cout << " x_max_left_forward = " << x_max_left_forward << std::endl;
-    std::cout << " y_min_left_forward = " << y_min_left_forward << std::endl;
-    std::cout << " y_max_left_forward = " << y_max_left_forward << std::endl;
+    // std::cout << " x_min_left_forward = " << x_min_left_forward << std::endl;
+    // std::cout << " x_max_left_forward = " << x_max_left_forward << std::endl;
+    // std::cout << " y_min_left_forward = " << y_min_left_forward << std::endl;
+    // std::cout << " y_max_left_forward = " << y_max_left_forward << std::endl;
 
-    std::cout << " x_min_right_side = " << x_min_right_side << std::endl;
-    std::cout << " x_max_right_side = " << x_max_right_side << std::endl;
-    std::cout << " y_min_right_side = " << y_min_right_side << std::endl;
-    std::cout << " y_max_right_side = " << y_max_right_side << std::endl;
+    // std::cout << " x_min_right_side = " << x_min_right_side << std::endl;
+    // std::cout << " x_max_right_side = " << x_max_right_side << std::endl;
+    // std::cout << " y_min_right_side = " << y_min_right_side << std::endl;
+    // std::cout << " y_max_right_side = " << y_max_right_side << std::endl;
 
-    std::cout << " x_min_left_side = " << x_min_left_side << std::endl;
-    std::cout << " x_max_left_side = " << x_max_left_side << std::endl;
-    std::cout << " y_min_left_side = " << y_min_left_side << std::endl;
-    std::cout << " y_max_left_side = " << y_max_left_side << std::endl;
+    // std::cout << " x_min_left_side = " << x_min_left_side << std::endl;
+    // std::cout << " x_max_left_side = " << x_max_left_side << std::endl;
+    // std::cout << " y_min_left_side = " << y_min_left_side << std::endl;
+    // std::cout << " y_max_left_side = " << y_max_left_side << std::endl;
 
     m_right_kick_area = Rectangle(x_min_right_forward, x_max_right_forward, y_min_right_forward, y_max_right_forward);
     m_left_kick_area = Rectangle(x_min_left_forward, x_max_left_forward, y_min_left_forward, y_max_left_forward); //HACK: move right kick box three cm to right

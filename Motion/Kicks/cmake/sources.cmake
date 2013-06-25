@@ -20,9 +20,12 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS	IK.cpp IK.h
-		NAOKick.cpp NAOKick.h
-		ScriptKick.cpp ScriptKick.h
+SET (YOUR_SRCS	
+		IK.cpp 					IK.h
+		NAOKick.cpp 			NAOKick.h
+		ScriptKick.cpp 			ScriptKick.h
+		ScriptKick2013.cpp 		ScriptKick2013.h
+		MotionScript2013.cpp 	MotionScript2013.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

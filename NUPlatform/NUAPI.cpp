@@ -1,7 +1,13 @@
 #include "NUAPI.h"
+#include "../Tools/Math/Vector3.h"
+#include <sstream>
+//#include <png++/png.hpp>
 #include <boost/foreach.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
-NUAPI::NUAPI(): context(1), publisher(context, ZMQ_PUB)
+using boost::posix_time::microsec_clock;
+
+NUAPI::NUAPI() : context(1), publisher(context, ZMQ_PUB)
 {
 	int64_t hwm = 3;
 	publisher.setsockopt(ZMQ_HWM, &hwm, sizeof (hwm));
@@ -15,18 +21,29 @@ NUAPI::~NUAPI()
 
 void NUAPI::sendAll()
 {
-	//int now = clock();
+	//static unsigned int counter = 0;
+	//static unsigned int sum = 0;
+
+	//boost::posix_time::ptime t1 = microsec_clock::local_time();
 	sendVisionData();
 	sendSensorData();
 	sendLocalisationData();
-	//double diff = (clock()-now);
-	//double diffms = diff/(CLOCKS_PER_SEC/1000);
-	//std::cout << diffms << std::endl;
-
+	/*boost::posix_time::ptime t2 = microsec_clock::local_time();
+	boost::posix_time::time_duration diff = t2 - t1;
+	sum += diff.total_microseconds();
+	if (counter >= 50)
+	{
+		std::cout << (sum / (double) counter) / 1000.0 << std::endl;
+		counter = 0;
+		sum = 0;
+	}
+	counter++;*/
 }
 
 void NUAPI::sendVisionData()
 {
+	static unsigned char* pBuf[320 * 240 * 3];
+
 	NUImage* image = Blackboard->Image;
 	FieldObjects* fieldObjects = Blackboard->Objects;
 
@@ -36,10 +53,12 @@ void NUAPI::sendVisionData()
 	api_message.set_utc_timestamp(std::time(0));
 
 	API::Vision* api_vision = api_message.mutable_vision();
-	API::Image* api_image = api_vision->mutable_image();
+	/*API::Image* api_image = api_vision->mutable_image();
 
-	int image_width = image->getWidth();
-	int image_height = image->getHeight();
+	unsigned int image_width = image->getWidth();
+	unsigned int image_height = image->getHeight();
+	
+	unsigned int image_size = 0;
 
 	jpge::uint8* data = new jpge::uint8[image_width * image_height * 3]();
 
@@ -61,31 +80,59 @@ void NUAPI::sendVisionData()
 		}
 	}
 
-	int orig_buf_size = image_width * image_height * 3; // allocate a buffer that's hopefully big enough (this is way overkill for jpeg)
-	if (orig_buf_size < 1024) orig_buf_size = 1024;
-	void *pBuf = malloc(orig_buf_size);
-	int c_size = orig_buf_size;
-	jpge::compress_image_to_jpeg_file_in_memory(pBuf, c_size, image_width, image_height, 3, data);
+	//int orig_buf_size = image_width * image_height * 3; // allocate a buffer that's hopefully big enough (this is way overkill for jpeg)
+	//if (orig_buf_size < 1024) orig_buf_size = 1024;
+	//void *pBuf = malloc(orig_buf_size);
+	int c_size = sizeof(pBuf);
+	jpge::params params;
+	params.m_quality = 100;
+	jpge::compress_image_to_jpeg_file_in_memory(pBuf, c_size, image_width, image_height, 3, data, params);
 
 	delete[] data;
+	
+	image_size = c_size;
 
-	api_image->set_width(image_width);
+	//free(pBuf);*/
+
+	/*png::image< png::rgb_pixel > png_image(image_width, image_height);
+	for (int y = 0; y < image_height; y++) {
+		for (int x = 0; x< image_width; x++) {
+			Pixel pixel = image->at(x, y);
+
+			unsigned char r, g, b;
+			ColorModelConversions::fromYCbCrToRGB(
+					(unsigned char) pixel.y,
+					(unsigned char) pixel.cb,
+					(unsigned char) pixel.cr, r, g, b);
+			
+			png_image[image_height-1-y][image_width-1-x] = png::rgb_pixel(r, g, b);
+		}
+	}
+	std::stringstream image_data;
+	
+	png_image.write_stream(image_data);
+	image_data.seekg(0, std::ios::end);
+	image_size = image_data.tellg();
+	//std::cout << image_data.tellp() << " ";*/
+
+	/*api_image->set_width(image_width);
 	api_image->set_height(image_height);
-	api_image->set_data(pBuf, c_size);
-
-	free(pBuf);
+	api_image->set_data(pBuf, image_size);
+	//api_image->set_data(image_data.str().c_str(), image_size);
+	
+	//std::cout << image_size << std::endl;*/
 
 	MobileObject& ball = fieldObjects->mobileFieldObjects[FieldObjects::FO_BALL];
 
 	populate_vision_field_object("ball", ball, api_vision->add_field_object(), API::VisionFieldObject::CIRCLE);
-	
-	
+
+
 	if (Blackboard->horizontalScans != NULL && Blackboard->verticalScans != NULL)
 	{
 		const vector<vector<ColourSegment> >& hColourSegments = Blackboard->horizontalScans->getSegments();
 		const vector<vector<ColourSegment> >& vColourSegments = Blackboard->verticalScans->getSegments();
 
-		for (auto& ambiguous_object: fieldObjects->ambiguousFieldObjects)
+		for (auto& ambiguous_object : fieldObjects->ambiguousFieldObjects)
 		{
 			API::VisionFieldObject* api_field_object = api_vision->add_field_object();
 			populate_vision_field_object(ambiguous_object.getName(), ambiguous_object, api_field_object, API::VisionFieldObject::RECTANGLE);
@@ -95,10 +142,10 @@ void NUAPI::sendVisionData()
 
 		API::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
 
-		for (auto& rowColourSegments: hColourSegments)
+		for (auto& rowColourSegments : hColourSegments)
 		{
 
-			for (auto& colorSegment: rowColourSegments)
+			for (auto& colorSegment : rowColourSegments)
 			{
 				const Point& start = colorSegment.getStart();
 				const Point& end = colorSegment.getEnd();
@@ -113,9 +160,9 @@ void NUAPI::sendVisionData()
 			}
 		}
 
-		for (auto& columnColourSegments: vColourSegments)
+		for (auto& columnColourSegments : vColourSegments)
 		{
-			for (auto& colorSegment: columnColourSegments)
+			for (auto& colorSegment : columnColourSegments)
 			{
 				const Point& start = colorSegment.getStart();
 				const Point& end = colorSegment.getEnd();
@@ -259,6 +306,11 @@ void NUAPI::populate_vision_field_object(std::string name, Object& field_object,
 	api_field_object->set_screen_x(field_object.ScreenX());
 	api_field_object->set_screen_y(field_object.ScreenY());
 	api_field_object->set_type(type);
+	
+	Vector3<float> measured_relative_position = field_object.getMeasuredRelativeLocation();
+	api_field_object->add_measured_relative_position(measured_relative_position.x);
+	api_field_object->add_measured_relative_position(measured_relative_position.y);
+	api_field_object->add_measured_relative_position(measured_relative_position.z);
 
 	switch (type)
 	{
@@ -276,7 +328,7 @@ template <typename T>
 void NUAPI::api_add_vector(API::Vector* api_vector, vector<T>& vec)
 {
 
-	for (T& value: vec)
+	for (T& value : vec)
 	{
 		api_vector->add_float_value(value);
 	}

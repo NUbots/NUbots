@@ -522,6 +522,7 @@ void DataWrapper::plotCurve(std::string name, std::vector< Point > pts)
     QColor colour;
     QwtSymbol symbol(QwtSymbol::NoSymbol);
 
+
 //    // FILE OUTPUT, REMOVE LATER
 //    static bool clear = true;
 //    std::ofstream out;
@@ -673,6 +674,7 @@ bool DataWrapper::updateFrame(bool forward, int frame_no)
             }
             if(using_sensors) {
                 try {
+
                     if(!forward) {
                         sensorstrm.seekg(0, std::ios_base::beg);
                         for(int i=0; i<frame_no; i++)

@@ -228,6 +228,7 @@ bool Goal::calculatePositions()
     // HEIGHT
     tran.calculateRepresentationsFromPixelLocation(height_loc, true, height_dist);
 
+
     // check if we are off the edge of the screen by a certain margin
     int EDGE_OF_SCREEN_MARGIN = 5;
     off_top = m_location.screenCartesian.y - m_size_on_screen.y < EDGE_OF_SCREEN_MARGIN;
