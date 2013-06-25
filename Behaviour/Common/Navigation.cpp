@@ -429,10 +429,30 @@ void Navigation::update() {
         }
     
     //set the walkjob
+    std::cout << "Sending Walk Command: ("
+              << current_walk_command[0] << ", "
+              << current_walk_command[1] << ", "
+              << current_walk_command[2] << ")"
+              << std::endl;
 
-    std::cout << "Sending Walk Command: (" << current_walk_command[0] << ", " << current_walk_command[1] << ", " << current_walk_command[2] << ")" << std::endl;
+    //set the kick
+    std::vector<float> position = NavigationLogic::getPositionDifference(NavigationLogic::getSelfPosition(),NavigationLogic::getBallPosition());
+    
+    bool iskicking = false;
+    Blackboard->Sensors->get(NUSensorsData::MotionKickActive, iskicking);
 
-    Blackboard->Jobs->addMotionJob(new WalkJob(current_walk_command[0], current_walk_command[1], current_walk_command[2]));
+    // if (position[0]*position[0]+position[1]*position[1] < 100.) {
+    if(!iskicking && kick_)
+    {
+        Blackboard->Jobs->addMotionJob(
+            new KickJob(Blackboard->Sensors->GetTimestamp(),
+            NavigationLogic::getBallPosition(), 
+            NavigationLogic::getOpponentGoalPosition()));
+    } else if (!iskicking) {
+        Blackboard->Jobs->addMotionJob(new WalkJob(current_walk_command[0], current_walk_command[1], current_walk_command[2]));
+    }
+
+    kick_ = false;
 }
 
 Navigation* Navigation::getInstance() {
@@ -456,18 +476,13 @@ vector<float> Navigation::stop() {
 }
 
 void Navigation::kick() {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     //set the kick
     std::vector<float> position = NavigationLogic::getPositionDifference(NavigationLogic::getSelfPosition(),NavigationLogic::getBallPosition());
     
     bool iskicking = false;
     Blackboard->Sensors->get(NUSensorsData::MotionKickActive, iskicking);
-    // if (position[0]*position[0]+position[1]*position[1] < 100.) {
-    if(!iskicking)
-        Blackboard->Jobs->addMotionJob(
-            new KickJob(Blackboard->Sensors->GetTimestamp(),
-            NavigationLogic::getBallPosition(), 
-            NavigationLogic::getOpponentGoalPosition()));
+
+    kick_ = true;
 }
 
 

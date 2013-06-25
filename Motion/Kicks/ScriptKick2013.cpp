@@ -36,8 +36,6 @@ ScriptKick2013::~ScriptKick2013()
 
 void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::vector<float>& target)
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
-
     // Ignore calls to this method while a kick is in progress
     if(isActive())
         return;
@@ -52,7 +50,6 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     float angle_margin = mathGeneral::PI / 4.0f; 
 
 
-    std::cout << __PRETTY_FUNCTION__ << ": KickLeft" << std::endl;
     StartKick(side_left_kick_script_, rightLeg);
 
     // if((side_left_kick_script_ != nullptr
@@ -87,7 +84,6 @@ void ScriptKick2013::StartKick(
     MotionScript2013* kick_script, 
     KickingLeg kicking_leg)
 {
-    std::cout << __PRETTY_FUNCTION__<<"kick_script = "<< kick_script<<  std::endl;
     m_kicking_leg = kicking_leg;
     current_script_ = kick_script;
 
@@ -104,7 +100,8 @@ void ScriptKick2013::StartKick(
 
 void ScriptKick2013::doKick()
 {
-    std::cout << __PRETTY_FUNCTION__  << std::endl;
+    m_kick_ready = false;
+
     // If doKick is called while the robot is not kicking, just return.
     if(!isActive())
         return;
@@ -135,7 +132,7 @@ void ScriptKick2013::stop()
 void ScriptKick2013::kill() 
 { 
     current_script_ = nullptr;
-    m_kick_ready = false;
+    m_kick_ready = true;
     m_kick_enabled = false;
     setArmEnabled(false, false);
     setHeadEnabled(false);

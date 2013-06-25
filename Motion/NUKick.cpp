@@ -193,7 +193,6 @@ void NUKick::setHeadEnabled(bool head)
 */
 void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
 {
-    std::cout << __PRETTY_FUNCTION__  << std::endl;
     if (actions == NULL || data == NULL)
         return;
     #if DEBUG_NUMOTION_VERBOSITY > 3
@@ -205,12 +204,12 @@ void NUKick::process(NUSensorsData* data, NUActionatorsData* actions)
     m_previousTimestamp = m_currentTimestamp;
     m_currentTimestamp = data->CurrentTime;
 
-    std::cout << __PRETTY_FUNCTION__  << ": isActive() = " << isActive()
-              << ", isReady() = " << isReady() << std::endl;
+    // std::cout << __PRETTY_FUNCTION__  << ": isActive() = " << isActive()
+    //           << ", isReady() = " << isReady() << std::endl;
 
     if(!isActive() && !isReady())
         return;
-    std::cout << __PRETTY_FUNCTION__<<"sdasd"<<  std::endl;
+    
     doKick();
 }
 

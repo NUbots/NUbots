@@ -437,6 +437,8 @@ void NUMotion::process(NUSensorsData* data, NUActionatorsData* actions)
  */
 void NUMotion::process(JobList* jobs)
 {
+    std::cout << "NUMotion::process(jobs): Start" << std::endl;
+
     #if DEBUG_NUMOTION_VERBOSITY > 0
         debug << "NUMotion::process(jobs): Start" << std::endl;
     #endif
@@ -469,8 +471,14 @@ void NUMotion::process(JobList* jobs)
         #endif
         #ifdef USE_KICK
             case Job::MOTION_KICK:
+                // std::cout << __PRETTY_FUNCTION__ << ": case Job::MOTION_KICK" << std::endl;
                 next_provider = m_kick;
                 m_kick->process(reinterpret_cast<KickJob*> (*it));
+                // std::cout << "KickJob processed:" << std::endl;
+                // std::cout << "  isActive() = " << m_kick->isActive() << std::endl;
+                // std::cout << "  isReady() = " << m_kick->isReady() << std::endl;
+                // std::cout << "  isUsingLegs() = " << m_kick->isUsingLegs() << std::endl;
+                // std::cout << "  isUsingArms() = " << m_kick->isUsingArms() << std::endl;
                 break;
         #endif
         #ifdef USE_HEAD
@@ -524,6 +532,8 @@ void NUMotion::process(JobList* jobs)
         setNextProviders(next_provider);
     }
     
+    std::cout << "NUMotion::process(jobs): Finished" << std::endl;
+
     #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "NUMotion::process(jobs): Finished" << std::endl;
     #endif
@@ -532,6 +542,12 @@ void NUMotion::process(JobList* jobs)
 /*! @brief Sets the m_next_*_providers depending on which limbs next_provider requires */
 void NUMotion::setNextProviders(NUMotionProvider* next_provider)
 {
+    // if(next_provider)
+    //     std::cout << __PRETTY_FUNCTION__ 
+    //               << ": next_provider = " << next_provider->getName() 
+    //               << ", next_provider->isReady() = " << next_provider->isReady()
+    //               << std::endl;
+
     if (next_provider and next_provider->isReady() and (m_current_time > m_last_kill_time + 2000))
     {
         if (next_provider->requiresHead())
@@ -541,6 +557,15 @@ void NUMotion::setNextProviders(NUMotionProvider* next_provider)
         if (next_provider->requiresLegs())
             m_next_leg_provider = next_provider;
         
+        // std::cout << "NUMotion::setNextProviders: ";
+        //     if (m_next_head_provider)
+        //         std::cout << m_next_head_provider->getName() << " ";
+        //     if (m_next_arm_provider)
+        //         std::cout << m_next_arm_provider->getName() << " ";
+        //     if (m_next_leg_provider)
+        //         std::cout << m_next_leg_provider->getName() << " ";
+        //     std::cout << std::endl;
+
         #if DEBUG_NUMOTION_VERBOSITY > 4
             debug << "NUMotion::setNextProviders: ";
             if (m_next_head_provider)
