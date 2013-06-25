@@ -134,7 +134,7 @@ void DarwinSensors::copyFromHardwareCommunications()
     int bulk_read_error_code = 0;
     bool significant_bulk_read_error_occurred = cm730->BulkRead(&bulk_read_error_code);
     
-    //ERROR REPORTING? (wrote jake as he attempts to figure mitchells code)
+
     if(bulk_read_error_code == Robot::CM730::SUCCESS)
     {
         if(!last_read_was_successful)
@@ -172,7 +172,6 @@ void DarwinSensors::copyFromHardwareCommunications()
             }
         }
     }
-
 }
 
 /*! @brief Copys the joint sensor data
