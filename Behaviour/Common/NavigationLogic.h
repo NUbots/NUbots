@@ -64,7 +64,7 @@ public:
         std::vector<float> result(3,0);
         float x,y;
         
-        if (Blackboard->TeamInfo->getTeamNumber() == 0) { //team blue = 0
+        if (Blackboard->GameInfo->getTeamColour() == 0) { //team blue = 0
             x = 0.5f*(Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].X()+Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].X());
             y = 0.5f*(Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].Y()+Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].Y());
         } else {
@@ -83,7 +83,7 @@ public:
         std::vector<float> result(3,0);
         float x,y;
         
-        if (not Blackboard->TeamInfo->getTeamNumber() == 0) { //team blue = 0
+        if (not Blackboard->GameInfo->getTeamColour() == 0) { //team blue = 0
             x = 0.5f*(Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].X()+Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].X());
             y = 0.5f*(Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].Y()+Blackboard->Objects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].Y());
         } else {
@@ -212,7 +212,7 @@ public:
         result[1] = positions[teamPosition][1];
         result[2] = positions[teamPosition][2];
         
-        if (Blackboard->TeamInfo->getTeamNumber() == 1) { //team blue = 0
+        if (Blackboard->GameInfo->getTeamColour() == 0) { //team blue = 0
             result[0] = -result[0];
             result[2] = 0.;
         }
@@ -238,7 +238,7 @@ public:
         result[1] = positions[teamPosition][1];
         result[2] = positions[teamPosition][2];
         
-        if (Blackboard->TeamInfo->getTeamNumber() == 1) { //team blue = 0
+        if (Blackboard->GameInfo->getTeamColour() == 0) { //team blue = 0
             result[0] = -result[0];
             result[2] = 0.;
         }

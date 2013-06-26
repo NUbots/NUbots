@@ -73,6 +73,7 @@ private:
     
     void stopMoving(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) { //this is the freeze for penalised/pickup/initial
         movement->stop();
+        head->prioritiseLocalisation();
     }
     
     void goToStartDefensePositions(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) { //defensive fielding position
@@ -218,8 +219,9 @@ public:
             
             doFieldLocalisation( logic, movement, head);
             
-        } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] and
-                   not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]) {
+        } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] //and
+                   //not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]
+                   ) {
             
             //XXX: send to NUbugger
 
@@ -229,7 +231,7 @@ public:
             
         } else if ((logic->states[BehaviourStateLogic::IS_APPROACHING_BALL] and
                    not logic->states[BehaviourStateLogic::IS_FURTHEST_FROM_BALL]) or
-                   logic->states[BehaviourStateLogic::IS_CLOSEST_TO_BALL]) {
+                   logic->states[BehaviourStateLogic::IS_CLOSEST_TO_BALL] or true) {
             
             //XXX: send to NUbugger
 

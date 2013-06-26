@@ -472,7 +472,7 @@ void Navigation::update() {
             NavigationLogic::getBallPosition(), 
             NavigationLogic::getOpponentGoalPosition()));
     }
-    
+    //std::cout << Blackboard->GameInfo->getTeamColour() << std::endl;
     kick_ = false;
 
 }

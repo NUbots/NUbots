@@ -73,16 +73,16 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     // float kickbox_ball_x = std::cos(-robot_heading) * ball_r_x - std::sin(-robot_heading) * ball_r_y;
     // float kickbox_ball_y = std::cos(-robot_heading) * ball_r_y + std::sin(-robot_heading) * ball_r_x;
 
-    std::cout << __PRETTY_FUNCTION__ << ": b_x = " << b_x << std::endl;
-    std::cout << __PRETTY_FUNCTION__ << ": b_y = " << b_y << std::endl;
-    std::cout << __PRETTY_FUNCTION__ << ": t_x = " << t_x << std::endl;
-    std::cout << __PRETTY_FUNCTION__ << ": t_y = " << t_y << std::endl;
-    std::cout << __PRETTY_FUNCTION__ << ": t_theta = " << t_theta << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": b_x = " << b_x << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": b_y = " << b_y << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": t_x = " << t_x << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": t_y = " << t_y << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": t_theta = " << t_theta << std::endl;
 
-    std::cout << __PRETTY_FUNCTION__ << ": side_left = " << side_left_kick_area_.PointInside(b_x, b_y) << std::endl;
-    std::cout << __PRETTY_FUNCTION__ << ": left_kick = " << left_kick_area_.PointInside(b_x, b_y) << std::endl;
-    std::cout << __PRETTY_FUNCTION__ << ": side_right = " << side_right_kick_area_.PointInside(b_x, b_y) << std::endl;
-    std::cout << __PRETTY_FUNCTION__ << ": right_kick = " << right_kick_area_.PointInside(b_x, b_y) << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": side_left = " << side_left_kick_area_.PointInside(b_x, b_y) << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": left_kick = " << left_kick_area_.PointInside(b_x, b_y) << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": side_right = " << side_right_kick_area_.PointInside(b_x, b_y) << std::endl;
+    // std::cout << __PRETTY_FUNCTION__ << ": right_kick = " << right_kick_area_.PointInside(b_x, b_y) << std::endl;
 
 
 
