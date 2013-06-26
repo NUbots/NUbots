@@ -200,7 +200,7 @@ float ScriptKick2013::GetCurrentScriptTime()
 {
     if(current_script_ == nullptr)
     {
-        std::cout << __PRETTY_FUNCTION__ << ": WARNING: current_script_ == nullptr;"
+        std::cout << __PRETTY_FUNCTION__ << ": WARNING: current_script_ == nullptr;" << std::cout;
         return 0;
     } 
 
