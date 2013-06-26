@@ -784,14 +784,14 @@ bool DataWrapper::debugPublish(DEBUG_ID id, const std::vector<LSFittedLine>& dat
             }
 
             Vector2<Point> pts = l.getEndPoints();
-            std::cout << pts << std::endl;
+            //std::cout << pts << std::endl;
             cv::circle(img, cv::Point2i(pts[0].x, pts[0].y), 1, cv::Scalar(0,255,255));
             cv::circle(img, cv::Point2i(pts[1].x, pts[1].y), 1, cv::Scalar(0,255,255));
 
             Point t1 = l.projectOnto(pts[0]),
                   t2 = l.projectOnto(pts[1]);
 
-            std::cout << t1 << " " << t2 << std::endl;
+            //std::cout << t1 << " " << t2 << std::endl;
 
             cv::circle(img, cv::Point2i(t1.x, t1.y), 3, cv::Scalar(0,0,255));
             cv::circle(img, cv::Point2i(t2.x, t2.y), 3, cv::Scalar(0,0,255));

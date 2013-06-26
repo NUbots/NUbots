@@ -84,9 +84,15 @@ void GreenHorizonCH::calculateHorizon()
 //            }
         }
     }
-
+    static int num_no_green = 0;
     if(horizon_points.size() < 2) {
-        std::cout << "NO GREEN HORIZON FOUND - VERY POOR LUT" << std::endl;
+        if(num_no_green < 150) {
+            num_no_green++;
+        }
+        else {
+            num_no_green = 0;
+            std::cout << "150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT" << std::endl;
+        }
         horizon_points.clear();
         horizon_points.push_back(Point(0, height-1));
         horizon_points.push_back(Point(width-1, height-1));
