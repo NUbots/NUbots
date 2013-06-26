@@ -667,7 +667,7 @@ void HeadBehaviour::takeAction(int action){
 
 
 void HeadBehaviour::performQuickScan(){
-    std::cout<<__PRETTY_FUNCTION__<< " Performing quick scan." <<std::endl;
+   // std::cout<<__PRETTY_FUNCTION__<< " Performing quick scan." <<std::endl;
     if(head_logic->getObjectType(m_current_action) == HeadLogic::MOBILE_OBJECT){
         Blackboard->Jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
     } else {
