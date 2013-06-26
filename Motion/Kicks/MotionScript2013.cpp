@@ -674,7 +674,7 @@ void MotionScript2013::ScheduleEntireScript(NUSensorsData* sensors_data,
         if(frame == nullptr)
         {
             std::cout << __PRETTY_FUNCTION__ << ": frame cannot be nullptr." << std::endl;
-            return false;
+            return;
         }
 
         frame->ApplyToRobotAtTime(frame_start_time, actionators_data);
