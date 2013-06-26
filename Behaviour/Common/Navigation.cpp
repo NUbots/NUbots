@@ -447,11 +447,11 @@ void Navigation::update() {
         }
     
     //set the walkjob
-    std::cout << "Sending Walk Command: ("
+    /*std::cout << "Sending Walk Command: ("
               << current_walk_command[0] << ", "
               << current_walk_command[1] << ", "
               << current_walk_command[2] << ")"
-              << std::endl;
+              << std::endl;*/
 
     //set the kick
     std::vector<float> position = NavigationLogic::getPositionDifference(NavigationLogic::getSelfPosition(),NavigationLogic::getBallPosition());
