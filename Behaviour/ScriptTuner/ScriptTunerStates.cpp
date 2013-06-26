@@ -1,3 +1,6 @@
+#include <iostream>
+#include <iomanip>
+
 #include "ScriptTunerStates.h"
 #include "ScriptTunerProvider.h"
 #include "Framework/darwin/Framework/include/JointData.h"
@@ -15,7 +18,7 @@ ScriptTunerState::ScriptTunerState(ScriptTunerProvider* provider) :
     script_()
 {
     std::cout<< "==================================================="<< std::endl;
-    std::cout<< "--------------Welcome to Script Tuner--------------"<< std::endl;
+    std::cout<< "------------- Welcome to Script Tuner -------------"<< std::endl;
     std::cout<< "==================================================="<< std::endl;
     script_active_ = false;
     file_path_ = (CONFIG_DIR + std::string("/Motion/Scripts/"));
@@ -84,6 +87,9 @@ void ScriptTunerState::doState()
             case ScriptTunerCommand::CommandType::kEdit: {
                 HandleEditCommand(command);
             } break;
+            case ScriptTunerCommand::CommandType::kSaveScript: {
+                HandleSaveScriptCommand(command);
+            } break;
             case ScriptTunerCommand::CommandType::kExit: {
                 std::cout<< "Exiting Script..."<< std::endl;  
                 std::cout<< "==================================================="<< std::endl;              
@@ -124,13 +130,45 @@ void ScriptTunerState::HandlePrintScriptCommand(ScriptTunerCommand command)
 
             float position = descriptor.GetPosition();
             float gain = descriptor.GetGain();
+            float is_disabled = descriptor.GetDisable();
             float servo_id = descriptor.GetServoId();
 
-            std::cout << "  Joint " << j << ":" << std::endl;
-            std::cout << "    servo_id = " << servo_id << "." << std::endl;
-            std::cout << "    position = " << position << "." << std::endl;
-            std::cout << "    gain = " << gain << "." << std::endl;
+            std::cout << "  servo_id = " << std::setw(3) << servo_id
+                      << ": position = " << std::setw(7) << position
+                      << ", gain = "     << std::setw(7) << gain
+                      << ", disabled = " << std::setw(7) << is_disabled
+                      << std::endl;
         }
+    }
+}
+
+void ScriptTunerState::HandlePrintFrameCommand(ScriptTunerCommand command)
+{
+    std::cout << "Frame " << script_->GetCurrentFrameIndex() << ":" << std::endl;
+
+    auto* frame = script_->GetCurrentFrame();
+
+    double duration = frame->GetDuration();
+    std::cout << "  Duration = " << duration << "." << std::endl;
+
+    for(int j = 0; j < Robot::JointData::NUMBER_OF_JOINTS; j++)
+    {
+        ScriptJointDescriptor descriptor;
+        bool success = frame->GetDescriptor(j, &descriptor);
+
+        if(!success)
+            continue;
+
+        float position = descriptor.GetPosition();
+        float gain = descriptor.GetGain();
+        float is_disabled = descriptor.GetDisable();
+        float servo_id = descriptor.GetServoId();
+
+        std::cout << "  servo_id = " << std::setw(3) << servo_id
+                  << ": position = " << std::setw(7) << position
+                  << ", gain = "     << std::setw(7) << gain
+                  << ", disabled = " << std::setw(7) << is_disabled
+                  << std::endl;
     }
 }
 
@@ -230,6 +268,9 @@ void ScriptTunerState::editCurrentFrame() {
         case ScriptTunerCommand::CommandType::kJointGain: {
             HandleJointGainCommand(command);
         } break;
+        case ScriptTunerCommand::CommandType::kSetAllGains: {
+            HandleSetAllGainsCommand(command);
+        } break;
         case ScriptTunerCommand::CommandType::kJointPositionGain: {
             HandleJointPositionGainCommand(command);
         } break;
@@ -242,11 +283,13 @@ void ScriptTunerState::editCurrentFrame() {
         case ScriptTunerCommand::CommandType::kDeleteFrame: {
             HandleDeleteFrameCommand(command);
         } break;
+        case ScriptTunerCommand::CommandType::kPrint: {
+            HandlePrintFrameCommand(command);
+        } break;
         default: {
             PrintCommandError(command);
         } break;
     }
-    
 }
 
 void ScriptTunerState::HandleSetPoseCommand(ScriptTunerCommand command){
@@ -416,6 +459,24 @@ void ScriptTunerState::HandleJointGainCommand(ScriptTunerCommand command)
     }  
 }
 
+void ScriptTunerState::HandleSetAllGainsCommand(ScriptTunerCommand command)
+{
+    auto* frame = script_->GetCurrentFrame();
+
+    for(int j = 0; j < Robot::JointData::NUMBER_OF_JOINTS; j++)
+    {
+        ScriptJointDescriptor descriptor;
+        bool success = frame->GetDescriptor(j, &descriptor);
+
+        if(!success)
+            continue;
+
+        float servo_id = descriptor.GetServoId();
+
+        changeMotorGain(servo_id, command.gain());
+    }
+}
+
 void ScriptTunerState::HandleJointPositionGainCommand(ScriptTunerCommand command)
 {
     try {
@@ -484,7 +545,7 @@ void ScriptTunerState::turnOffMotor(int  motor_id){
     MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
     current_frame->GetDescriptor(motor_id,&descriptor);                
-    descriptor.SetDisable(true);                
+    descriptor.SetDisable(true);
     current_frame->AddDescriptor(descriptor);
 }
 
@@ -494,10 +555,9 @@ void ScriptTunerState::turnOnMotor(int  motor_id){
     motors_to_be_saved_.push_back(motor_id);
     MotionScriptFrame* current_frame = script_->GetCurrentFrame();
     ScriptJointDescriptor descriptor;
-    current_frame->GetDescriptor(motor_id, &descriptor);      
-    descriptor.SetPosition(getMotorPosition(motor_id));                
-    current_frame->AddDescriptor(descriptor);    
-}
+    current_frame->GetDescriptor(motor_id, &descriptor);
+    descriptor.SetDisable(false);
+    current_frame->AddDescriptor(descriptor);}
 
 float ScriptTunerState::getMotorPosition(int motor_id){
     float current_position;
