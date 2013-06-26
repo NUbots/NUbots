@@ -45,7 +45,8 @@ public:
     {
         Ball,
         BallAndLocalisation,
-        Localisation
+        Localisation,
+        
     };
 public:
     HeadPanJob(head_pan_t pantype);
