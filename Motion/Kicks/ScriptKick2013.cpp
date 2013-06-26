@@ -190,7 +190,7 @@ bool ScriptKick2013::isActive()
 }
 
 bool ScriptKick2013::isUsingHead() { return current_script_ != nullptr && current_script_->IsUsingHead(); }
-bool ScriptKick2013::isUsingArms() { return current_script_ != nullptr && current_script_->IsUsnigLegs(); }
+bool ScriptKick2013::isUsingArms() { return current_script_ != nullptr && current_script_->IsUsingLegs(); }
 bool ScriptKick2013::isUsingLegs() { return current_script_ != nullptr && current_script_->IsUsingArms(); }
 bool ScriptKick2013::requiresHead() { return current_script_ != nullptr && current_script_->RequiresHead(); }
 bool ScriptKick2013::requiresArms() { return true; }
