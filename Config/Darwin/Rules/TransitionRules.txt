@@ -5,21 +5,11 @@ after: (0, -1) []
 
 BALL_COLOUR:
 before: (0, -1) []
-middle: (3, -1) [orange]
+middle: (1, -1) [orange]
 after: (0, -1) []
 
 LINE_COLOUR:
 before: (0, -1) []
 middle: (2, -1) [white]
-after: (0, -1) []
-
-TEAM_CYAN_COLOUR:
-before: (0, -1) []
-middle: (2, 50) [cyan]
-after: (0, -1) []
-
-TEAM_MAGENTA_COLOUR:
-before: (0, -1) []
-middle: (2, 50) [magenta]
 after: (0, -1) []
 

@@ -85,22 +85,30 @@ void GreenHorizonCH::calculateHorizon()
         }
     }
 
-    if(horizon_points.empty()) {
-        horizon_points.push_back(Point(0, 0));
-        horizon_points.push_back(Point(width, 0));
+    if(horizon_points.size() < 2) {
+        std::cout << "NO GREEN HORIZON FOUND - VERY POOR LUT" << std::endl;
+        horizon_points.clear();
+        horizon_points.push_back(Point(0, height-1));
+        horizon_points.push_back(Point(width-1, height-1));
+        vbb->setGreenHullPoints(horizon_points);
+        return;
     }
-    else if(horizon_points.size() == 1) {
-        if(horizon_points.front() == Point(0, 0)) {
-            horizon_points.push_back(Point(width, 0));
-        }
-        else if(horizon_points.front() == Point(width, 0)) {
-            horizon_points.insert(horizon_points.begin(), 1, Point(0,0));
-        }
-        else {
-            horizon_points.insert(horizon_points.begin(), 1, Point(0, 0));
-            horizon_points.push_back(Point(width, 0));
-        }
-    }
+//    if(horizon_points.empty()) {
+//        horizon_points.push_back(Point(0, 0));
+//        horizon_points.push_back(Point(width-1, 0));
+//    }
+//    else if(horizon_points.size() == 1) {
+//        if(horizon_points.front() == Point(0, 0)) {
+//            horizon_points.push_back(Point(width-1, 0));
+//        }
+//        else if(horizon_points.front() == Point(width-1, 0)) {
+//            horizon_points.insert(horizon_points.begin(), 1, Point(0,0));
+//        }
+//        else {
+//            horizon_points.insert(horizon_points.begin(), 1, Point(0, 0));
+//            horizon_points.push_back(Point(width-1, 0));
+//        }
+//    }
 
 #if VISION_HORIZON_VERBOSITY > 2
     debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << std::endl;
