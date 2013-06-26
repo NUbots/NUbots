@@ -61,7 +61,7 @@ void GoalDetector::relabel(std::vector<Goal>& goals) const
 {
     // we can only do this stuff if we have two goals
     if(goals.size() == 2) {
-        std::cout << "GOAL HACK STARTING" << std::endl;
+        //std::cout << "GOAL HACK STARTING" << std::endl;
         // find left from right
         int left_index, right_index;
         if(goals[0].getID() == GOAL_L && goals[1].getID() == GOAL_R) {
@@ -73,13 +73,13 @@ void GoalDetector::relabel(std::vector<Goal>& goals) const
             right_index = 0;
         }
         else {
-            std::cout << "GOAL HACK LEFT AND RIGHT NOT SET - EXITTING" << std::endl;
+            //std::cout << "GOAL HACK LEFT AND RIGHT NOT SET - EXITTING" << std::endl;
             return;
         }
 
         double avg_dist = 0.5 * (goals[0].width_dist + goals[1].width_dist);
 
-        std::cout << "GOAL HACK avg_dist: " << avg_dist << std::endl;
+        //std::cout << "GOAL HACK avg_dist: " << avg_dist << std::endl;
         // only apply for distance goals
         if(avg_dist > 250) {
             const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
@@ -88,8 +88,8 @@ void GoalDetector::relabel(std::vector<Goal>& goals) const
             double d0 = between_dist + goals[0].width_dist - avg_dist;
             double d1 = between_dist + goals[1].width_dist - avg_dist;
 
-            std::cout << "GOAL HACK relabelling original. d0: " << goals[0].width_dist << " d1: " << goals[1].width_dist << std::endl;
-            std::cout << "GOAL HACK relabelling new. d0: " << d0 << " d1: " << d1 << std::endl;
+            //std::cout << "GOAL HACK relabelling original. d0: " << goals[0].width_dist << " d1: " << goals[1].width_dist << std::endl;
+            //std::cout << "GOAL HACK relabelling new. d0: " << d0 << " d1: " << d1 << std::endl;
             // check the below is actually changing the vals
             tran.calculateRepresentationsFromPixelLocation(goals[0].m_location, true, d0);
             tran.calculateRepresentationsFromPixelLocation(goals[1].m_location, true, d1);
@@ -98,7 +98,7 @@ void GoalDetector::relabel(std::vector<Goal>& goals) const
         // now label blue and yellow based on white background
         // only if the config parameter is set to
         if(VisionConstants::WHITE_SIDE_IS_BLUE >= 0) {
-            std::cout << "GOAL HACK WHITE PART STARTING" << std::endl;
+            //std::cout << "GOAL HACK WHITE PART STARTING" << std::endl;
 //            Goal& left_goal = goals[left_index];
 //            Goal& right_goal = goals[right_index];
 //            double left = left_goal.m_location.screenCartesian.x;
@@ -119,17 +119,17 @@ void GoalDetector::relabel(std::vector<Goal>& goals) const
                     white_count += s.getLength();
                 }
             }
-            std::cout << "GOAL HACK WHITE count: " << white_count << std::endl;
+            //std::cout << "GOAL HACK WHITE count: " << white_count << std::endl;
 
             double THRESHOLD = 500;
             if(white_count > THRESHOLD) {
                 if(VisionConstants::WHITE_SIDE_IS_BLUE) {
-                    std::cout << "GOAL HACK WHITE labelling blue: " << white_count << std::endl;
+                    //std::cout << "GOAL HACK WHITE labelling blue: " << white_count << std::endl;
                     goals[left_index].m_id = GOAL_B_L;
                     goals[right_index].m_id = GOAL_B_R;
                 }
                 else {
-                    std::cout << "GOAL HACK WHITE labelling yellow: " << white_count << std::endl;
+                    //std::cout << "GOAL HACK WHITE labelling yellow: " << white_count << std::endl;
                     goals[left_index].m_id = GOAL_Y_L;
                     goals[right_index].m_id = GOAL_Y_R;
                 }
