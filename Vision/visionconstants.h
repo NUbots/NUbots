@@ -10,6 +10,9 @@ using namespace Vision;
 class VisionConstants
 {
 public:
+    // HACK FOR RC2013
+    static int WHITE_SIDE_IS_BLUE;  // 1=yes    0=no   -1=don't use
+
     //! Distortion Correction
     static bool DO_RADIAL_CORRECTION;           //! Whether to perform radial distortion correction.
     static float RADIAL_CORRECTION_COEFFICIENT; //! The radial distortion correction coefficient.
@@ -55,7 +58,6 @@ public:
 
     //! Distance calculation options
     static bool D2P_INCLUDE_BODY_PITCH;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
-    static float D2P_ANGLE_CORRECTION;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
     static bool BALL_DISTANCE_POSITION_BOTTOM;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
 
     //! Distance method options
@@ -70,8 +72,6 @@ public:
     static float BALL_MIN_PERCENT_ORANGE;   //! Dave?
     static float GOAL_MIN_PERCENT_YELLOW;   //! Dave?
     static float GOAL_MIN_PERCENT_BLUE;     //! Dave?
-//    static float BEACON_MIN_PERCENT_YELLOW; //! Dave?
-//    static float BEACON_MIN_PERCENT_BLUE;   //! Dave?
     static int MIN_GOAL_SEPARATION;
 
     //! Obstacle detection constants
@@ -80,7 +80,7 @@ public:
 
     //! Field dimension constants
     static float GOAL_WIDTH;                //! The physical width of the goal posts in cm
-    static float GOAL_HEIGHT_INTERNAL;
+    static float GOAL_HEIGHT;
     static float DISTANCE_BETWEEN_POSTS;    //! The physical distance between the posts in cm
     static float BALL_WIDTH;                //! The physical width of the ball in cm
     static float CENTRE_CIRCLE_RADIUS;

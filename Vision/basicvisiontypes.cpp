@@ -48,15 +48,12 @@ namespace Vision {
                 (*this)[GOAL_L]         = std::pair<int, std::string>(5, "GOAL_L");
                 (*this)[GOAL_R]         = std::pair<int, std::string>(6, "GOAL_R");
                 (*this)[GOAL_U]         = std::pair<int, std::string>(7, "GOAL_U");
-                //        GOAL_Y_L=1,
-                //        GOAL_Y_R=2,
-                //        GOAL_Y_U=3,
-                //        GOAL_B_L=4,
-                //        GOAL_B_R=5,
-                //        GOAL_B_U=6,
-                //        BEACON_Y=7,
-                //        BEACON_B=8,
-                //        BEACON_U=9,
+                (*this)[GOAL_Y_L]       = std::pair<int, std::string>(5, "GOAL_Y_L");
+                (*this)[GOAL_Y_R]       = std::pair<int, std::string>(6, "GOAL_Y_R");
+                (*this)[GOAL_Y_U]       = std::pair<int, std::string>(7, "GOAL_Y_U");
+                (*this)[GOAL_B_L]       = std::pair<int, std::string>(5, "GOAL_B_L");
+                (*this)[GOAL_B_R]       = std::pair<int, std::string>(6, "GOAL_B_R");
+                (*this)[GOAL_B_U]       = std::pair<int, std::string>(7, "GOAL_B_U");
             }
         };
 
