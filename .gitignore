@@ -76,7 +76,7 @@ NUView-build*/*
 /BWalkMaker/BWalkMaker.pro.user
 
 # Ignore our data file formats
-*.lut
+#*.lut
 *.nif
 *.nul
 *.strm
