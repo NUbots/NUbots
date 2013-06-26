@@ -125,6 +125,7 @@ HEADERS += ui_mainwindow.h \
     FileAccess/ImageStreamFileReader.h \
     ../Motion/Tools/MotionScript.h \
     ../Motion/Tools/MotionCurves.h \
+    ../Motion/Kicks/MotionScript2013.h \
 #    ../VisionOld/EllipseFit.h \
 #    ../VisionOld/EllipseFitting/tnt_version.h \
 #    ../VisionOld/EllipseFitting/tnt_vec.h \
@@ -313,6 +314,7 @@ SOURCES += mainwindow.cpp \
     ../Kinematics/OrientationUKF.cpp \
     ../Motion/Tools/MotionScript.cpp \
     ../Motion/Tools/MotionCurves.cpp \
+    ../Motion/Kicks/MotionScript2013.cpp \
     #../VisionOld/EllipseFit.cpp \
     FileAccess/SplitStreamFileFormatReader.cpp \
     SensorDisplayWidget.cpp \
