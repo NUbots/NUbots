@@ -647,18 +647,18 @@ bool MotionScript2013::IsReady(){
 }
 
 bool MotionScript2013::RequiresHead(){
-    for(auto* frame : script_frames_){
-        if(frame == nullptr)
-        {
-            std::cout << __PRETTY_FUNCTION__ << ": frame cannot be nullptr." << std::endl;
-            return false;
-        }
+    // for(auto* frame : script_frames_){
+    //     if(frame == nullptr)
+    //     {
+    //         std::cout << __PRETTY_FUNCTION__ << ": frame cannot be nullptr." << std::endl;
+    //         return false;
+    //     }
 
-        ScriptJointDescriptor descriptor;
-        if(frame->GetDescriptor(Robot::JointData::ID_HEAD_TILT, &descriptor)
-            || frame->GetDescriptor(Robot::JointData::ID_HEAD_PAN, &descriptor))
-            return true;
-    }
+    //     ScriptJointDescriptor descriptor;
+    //     if(frame->GetDescriptor(Robot::JointData::ID_HEAD_TILT, &descriptor)
+    //         || frame->GetDescriptor(Robot::JointData::ID_HEAD_PAN, &descriptor))
+    //         return true;
+    // }
     return false;
 }
 
