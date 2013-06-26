@@ -589,7 +589,7 @@ void HeadBehaviour::update(){
     makeVisionChoice(current_policy);
     //std::cout << "Head Behaviour Action: " << m_current_action << std::endl;
 
-    if(head_logic->objectIsLost(m_current_action) and Blackboard->Sensors->GetTimestamp()-time_last_quick_panned > 500 ){
+    if(head_logic->objectIsLost(m_current_action) and Blackboard->Sensors->GetTimestamp()-time_last_quick_panned > 2000 ){
         performQuickScan();
         time_last_quick_panned = Blackboard->Sensors->GetTimestamp();
         return;
@@ -668,7 +668,11 @@ void HeadBehaviour::takeAction(int action){
 
 void HeadBehaviour::performQuickScan(){
     std::cout<<__PRETTY_FUNCTION__<< " Performing quick scan." <<std::endl;
-    Blackboard->Jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
+    if(head_logic->getObjectType(m_current_action) == HeadLogic::MOBILE_OBJECT){
+        Blackboard->Jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
+    } else {
+        Blackboard->Jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
+    }
 }
 
 
