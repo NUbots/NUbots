@@ -167,8 +167,8 @@ public:
 
     bool IsActive();
     bool IsUsingHead();
-    bool IsUsingArms(){return true;}
-    bool IsUsingLegs(){return true;}
+    bool IsUsingArms(){return IsActive();}
+    bool IsUsingLegs(){return IsActive();}
     bool IsReady();
     
     bool RequiresHead();
