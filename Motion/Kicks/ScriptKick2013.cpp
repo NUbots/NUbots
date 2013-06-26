@@ -68,7 +68,7 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     // World relative target heading
     float target_heading = atan2f(t_y, t_x);
 
-    // // Robot relative target heading:
+    // Robot relative target heading:
     float t_theta = mathGeneral::normaliseAngle(target_heading - robot_heading);
     // float kickbox_ball_x = std::cos(-robot_heading) * ball_r_x - std::sin(-robot_heading) * ball_r_y;
     // float kickbox_ball_y = std::cos(-robot_heading) * ball_r_y + std::sin(-robot_heading) * ball_r_x;
@@ -189,15 +189,21 @@ bool ScriptKick2013::isActive()
     return current_script_ != nullptr && current_script_->IsActive();
 }
 
-bool ScriptKick2013::isUsingHead() { return current_script_->IsUsingHead(); }
+bool ScriptKick2013::isUsingHead() { return current_script_ != nullptr && current_script_->IsUsingHead(); }
 bool ScriptKick2013::isUsingArms() { return true; }
 bool ScriptKick2013::isUsingLegs() { return true; }
-bool ScriptKick2013::requiresHead() { return current_script_->RequiresHead(); }
+bool ScriptKick2013::requiresHead() { return current_script_ != nullptr && current_script_->RequiresHead(); }
 bool ScriptKick2013::requiresArms() { return true; }
 bool ScriptKick2013::requiresLegs() { return true; }
 
 float ScriptKick2013::GetCurrentScriptTime()
 {
+    if(current_script_ == nullptr)
+    {
+        std::cout << __PRETTY_FUNCTION__ << ": WARNING: current_script_ == nullptr;"
+        return 0;
+    } 
+
     return Platform->getTime() - current_script_->GetStartTime();
 }
 
