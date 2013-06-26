@@ -75,7 +75,7 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
     actions_taken_this_state = 0;
 
     rewards_log_pathname = "nubot/Config/Darwin/HeadRewards.csv";//Rewards are not recorded unless uncommented in calculateReward() method
-    agent_filename = "Order30_CombinedAgent";
+    agent_filename = "Order30_HeadBehaviourRL";
     give_rew_to_mot = true;
 
 
@@ -667,7 +667,7 @@ void HeadBehaviour::takeAction(int action){
 
 
 void HeadBehaviour::performQuickScan(){
-    std::cout<<__PRETTY_FUNCTION__<< " Performing quick scan." <<std::endl;
+   // std::cout<<__PRETTY_FUNCTION__<< " Performing quick scan." <<std::endl;
     if(head_logic->getObjectType(m_current_action) == HeadLogic::MOBILE_OBJECT){
         Blackboard->Jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball));
     } else {
