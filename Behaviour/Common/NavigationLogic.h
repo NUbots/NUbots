@@ -214,7 +214,7 @@ public:
         
         if (Blackboard->TeamInfo->getTeamNumber() == 1) { //team blue = 0
             result[0] = -result[0];
-            result[2] = 0.
+            result[2] = 0.;
         }
         
         return result;
@@ -240,7 +240,7 @@ public:
         
         if (Blackboard->TeamInfo->getTeamNumber() == 1) { //team blue = 0
             result[0] = -result[0];
-            result[2] = 0.
+            result[2] = 0.;
         }
         
         return result;
