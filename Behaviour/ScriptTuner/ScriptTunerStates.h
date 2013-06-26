@@ -74,6 +74,7 @@ public:
         kAllOn,             //!< Turn on all motors.
         kJointPosition,     //!< Modify the position of a given joint.
         kJointGain,         //!< Modify the gain of a given joint.
+        kSetAllGains,       //!< Set the gain of all joints to the same value.
         kJointPositionGain, //!< Modify the gain of a given joint.
         kJointOff,          //!< Temporarily turn off a given joint, for editing.
         kJointOn,           //!< Turn on a given joint.
@@ -82,6 +83,7 @@ public:
         kLoadScript,        //!< Load a script from the specified path in the config system.
         kLoadOldScript,     //!< Load an old script from the given path.
         kPrintScript,       //!< Prints a text representation of the script.
+        kPrint,             //!< Prints the current frame.
         kAllOff,            //!< Turns all torques off for manual editing.
         kSetPose,           //!< Turns torque to low value 
         kDeleteFrame,       //!< Deletes current frame
@@ -234,21 +236,44 @@ public:
             ScriptTunerCommand c;
             c.set_command_type(CommandType::kDeleteFrame);
             return c;
+        } else if (!arg0.compare("print")){
+            ScriptTunerCommand c;
+            c.set_command_type(CommandType::kPrint);
+            return c;
+        } else if (!arg0.compare("gain")){
+            ScriptTunerCommand c;
+            float gain;
+            if((command_ss >> gain))
+                return c;
+            int joint_id = MapJointInitialismToServoId(arg0);
+            c.set_command_type(CommandType::kJointGain);
+            c.set_joint_number(joint_id);
+            c.set_gain(gain);
+            return c;
+        } else if (!arg0.compare("setgains")){
+            ScriptTunerCommand c;
+            float gain;
+            if((command_ss >> gain))
+                return c;
+            int joint_id = MapJointInitialismToServoId(arg0);
+            c.set_command_type(CommandType::kSetAllGains);
+            c.set_gain(gain);
+            return c;
         } else {
             ScriptTunerCommand c;
             float position;
-            float duration;
-            bool set_duration = false;
+            float gain;
+            bool set_gain = false;
             if(!(command_ss >> position))
                 return c;
-            if((command_ss >> duration))
-                set_duration = true;
+            if((command_ss >> gain))
+                set_gain = true;
             int joint_id = MapJointInitialismToServoId(arg0);
             c.set_command_type(CommandType::kJointPositionGain);
             c.set_joint_number(joint_id);
             c.set_position(position);
-            if(set_duration)
-                c.set_duration(duration);
+            if(set_gain)
+                c.set_gain(gain);
             return c;
         }
     }
@@ -353,6 +378,7 @@ private:
     void HandleDeleteFrameCommand(ScriptTunerCommand command);
     void HandleSetPoseCommand(ScriptTunerCommand command);
     void HandlePrintScriptCommand(ScriptTunerCommand command);
+    void HandlePrintFrameCommand(ScriptTunerCommand command);
     void HandleLoadScriptCommand(ScriptTunerCommand command);
     void HandleLoadOldScriptCommand(ScriptTunerCommand command);
     void HandleEditCommand(ScriptTunerCommand command);
@@ -370,6 +396,7 @@ private:
     void HandleJointOnCommand(ScriptTunerCommand command);
     void HandleJointPositionCommand(ScriptTunerCommand command);
     void HandleJointGainCommand(ScriptTunerCommand command);
+    void HandleSetAllGainsCommand(ScriptTunerCommand command);
     void HandleJointPositionGainCommand(ScriptTunerCommand command);
     void PrintCommandError(ScriptTunerCommand command);
     void HandleAllOffCommand(ScriptTunerCommand command);

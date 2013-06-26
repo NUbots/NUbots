@@ -87,7 +87,7 @@ namespace ConfigSystem
     {
         CONFIGSYS_DEBUG_CALLS;
 
-        std::string savePath = "ConfigurationFiles/" + configName + ".json";
+        std::string savePath = "nubot/Config/Darwin/" + configName + ".json";
 
         // save tree to file(s) as ptree<string>
         try
