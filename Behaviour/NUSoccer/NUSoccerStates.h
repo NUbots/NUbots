@@ -219,7 +219,8 @@ public:
             
             doFieldLocalisation( logic, movement, head);
             
-        } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] //and
+        } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] or not
+                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible() //and
                    //not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]
                    ) {
             
