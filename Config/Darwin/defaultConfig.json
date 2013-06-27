@@ -6183,7 +6183,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "2.64355993270874",
+                            "value": "2.689341306686401",
                             "range":
                             {
                                 "min": "0",
@@ -6220,7 +6220,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "2.64355993270874",
+                            "value": "2.709287881851196",
                             "range":
                             {
                                 "min": "0",
@@ -6257,7 +6257,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.08692560344934464",
+                            "value": "-0.0535106286406517",
                             "range":
                             {
                                 "min": "0",
@@ -6294,7 +6294,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.08692560344934464",
+                            "value": "0.0565793402493",
                             "range":
                             {
                                 "min": "0",
@@ -6331,7 +6331,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.02556630037724972",
+                            "value": "0.04487992078065872",
                             "range":
                             {
                                 "min": "0",
@@ -6368,7 +6368,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.02556630037724972",
+                            "value": "0.02953636646270752",
                             "range":
                             {
                                 "min": "0",
@@ -6405,7 +6405,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0",
+                            "value": "-0.01841226406395435",
                             "range":
                             {
                                 "min": "0",
@@ -6442,7 +6442,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0",
+                            "value": "0.02301532961428165",
                             "range":
                             {
                                 "min": "0",
@@ -6479,7 +6479,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0",
+                            "value": "-0.0168779082596302",
                             "range":
                             {
                                 "min": "0",
@@ -6516,7 +6516,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0",
+                            "value": "-0.02608404122292995",
                             "range":
                             {
                                 "min": "0",
@@ -6553,7 +6553,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.5266669988632202",
+                            "value": "0.2915275096893311",
                             "range":
                             {
                                 "min": "0",
@@ -6590,7 +6590,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.557345986366272",
+                            "value": "0.2915275096893311",
                             "range":
                             {
                                 "min": "0",
@@ -6627,7 +6627,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "1.646469950675964",
+                            "value": "1.927150249481201",
                             "range":
                             {
                                 "min": "0",
@@ -6664,7 +6664,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "1.64136004447937",
+                            "value": "1.919478535652161",
                             "range":
                             {
                                 "min": "0",
@@ -6701,7 +6701,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.9561809897422791",
+                            "value": "-1.232087373733521",
                             "range":
                             {
                                 "min": "0",
@@ -6738,7 +6738,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.9919739961624146",
+                            "value": "-1.219812512397766",
                             "range":
                             {
                                 "min": "0",
@@ -6775,7 +6775,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.08692560344934464",
+                            "value": "-0.009206132031977177",
                             "range":
                             {
                                 "min": "0",
@@ -6812,7 +6812,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.09203880280256271",
+                            "value": "0.02301532961428165",
                             "range":
                             {
                                 "min": "0",
@@ -6849,7 +6849,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0",
+                            "value": "0.001534355338662863",
                             "range":
                             {
                                 "min": "0",
@@ -6886,7 +6886,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.6100000143051147",
+                            "value": "0.6079846620559692",
                             "range":
                             {
                                 "min": "0",
@@ -26170,7 +26170,7 @@
                     "modified": "true",
                     "locked": "false",
                     "type": "long",
-                    "value": "9",
+                    "value": "8",
                     "range":
                     {
                         "min": "0",
@@ -26356,7 +26356,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -26393,7 +26393,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -26820,7 +26820,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -26857,7 +26857,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -27284,7 +27284,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -27321,7 +27321,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.6000000238418579",
+                            "value": "-0.800000011920929",
                             "range":
                             {
                                 "min": "0",
@@ -27933,7 +27933,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.4000000059604645",
+                            "value": "-0.800000011920929",
                             "range":
                             {
                                 "min": "0",
@@ -28045,7 +28045,7 @@
                         "modified": "true",
                         "locked": "false",
                         "type": "double",
-                        "value": "9.999990463256836",
+                        "value": "100",
                         "range":
                         {
                             "min": "0",
@@ -28397,7 +28397,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "1",
+                            "value": "0.5",
                             "range":
                             {
                                 "min": "0",
@@ -28502,470 +28502,6 @@
                     }
                 },
                 "frame_5":
-                {
-                    "duration":
-                    {
-                        "desc": "",
-                        "modified": "true",
-                        "locked": "false",
-                        "type": "double",
-                        "value": "120.0000076293945",
-                        "range":
-                        {
-                            "min": "0",
-                            "max": "0",
-                            "lBound": "none",
-                            "uBound": "none",
-                            "outside": "false",
-                            "autoClip": "false"
-                        }
-                    },
-                    "joint_7":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_8":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_9":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.3199999928474426",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_10":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.4199999868869781",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_11":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.25",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_12":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-1.5",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_13":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.5",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_14":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.5",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_15":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.25",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_16":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.1599999964237213",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_17":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.3199999928474426",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_18":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.4199999868869781",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    }
-                },
-                "frame_6":
                 {
                     "duration":
                     {
@@ -29140,7 +28676,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -29177,7 +28713,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.6000000238418579",
+                            "value": "-0.800000011920929",
                             "range":
                             {
                                 "min": "0",
@@ -29429,7 +28965,7 @@
                         }
                     }
                 },
-                "frame_7":
+                "frame_6":
                 {
                     "duration":
                     {
@@ -29604,7 +29140,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.3500000238418579",
+                            "value": "-0.550000011920929",
                             "range":
                             {
                                 "min": "0",
@@ -29641,7 +29177,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.3499999940395355",
+                            "value": "-0.550000011920929",
                             "range":
                             {
                                 "min": "0",
@@ -29881,6 +29417,470 @@
                             "locked": "false",
                             "type": "double",
                             "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    }
+                },
+                "frame_7":
+                {
+                    "duration":
+                    {
+                        "desc": "",
+                        "modified": "true",
+                        "locked": "false",
+                        "type": "double",
+                        "value": "500",
+                        "range":
+                        {
+                            "min": "0",
+                            "max": "0",
+                            "lBound": "none",
+                            "uBound": "none",
+                            "outside": "false",
+                            "autoClip": "false"
+                        }
+                    },
+                    "joint_7":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.003068710677325726",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_8":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.0122748427093029",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_9":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.001534355338662863",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_10":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.06597728282213211",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_11":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.3393594324588776",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_12":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.336290717124939",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_13":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.4265507757663727",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_14":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.4265507757663727",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_15":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.2807870209217072",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_16":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.2531686425209045",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_17":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.001534355338662863",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_18":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.05677114799618721",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "80",
                             "range":
                             {
                                 "min": "0",
@@ -31311,7 +31311,7 @@
                     "modified": "true",
                     "locked": "false",
                     "type": "long",
-                    "value": "11",
+                    "value": "7",
                     "range":
                     {
                         "min": "0",
@@ -31497,7 +31497,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.3499999940395355",
                             "range":
                             {
                                 "min": "0",
@@ -31534,7 +31534,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.3499999940395355",
                             "range":
                             {
                                 "min": "0",
@@ -31961,7 +31961,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -31998,7 +31998,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -32425,7 +32425,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.6000000238418579",
+                            "value": "-0.800000011920929",
                             "range":
                             {
                                 "min": "0",
@@ -32462,7 +32462,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -32712,6 +32712,43 @@
                                 "autoClip": "false"
                             }
                         }
+                    },
+                    "joint_0":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.2000000029802322",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
                     }
                 },
                 "frame_3":
@@ -32722,7 +32759,7 @@
                         "modified": "true",
                         "locked": "false",
                         "type": "double",
-                        "value": "179.9999542236328",
+                        "value": "100",
                         "range":
                         {
                             "min": "0",
@@ -32889,7 +32926,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.6000000238418579",
+                            "value": "-0.85999995470047",
                             "range":
                             {
                                 "min": "0",
@@ -32926,7 +32963,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.1499999910593033",
                             "range":
                             {
                                 "min": "0",
@@ -32963,7 +33000,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "1.399999976158142",
+                            "value": "0.5",
                             "range":
                             {
                                 "min": "0",
@@ -33037,7 +33074,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.4000000059604645",
+                            "value": "0.5",
                             "range":
                             {
                                 "min": "0",
@@ -33216,934 +33253,6 @@
                     }
                 },
                 "frame_4":
-                {
-                    "duration":
-                    {
-                        "desc": "",
-                        "modified": "true",
-                        "locked": "false",
-                        "type": "double",
-                        "value": "9.999990463256836",
-                        "range":
-                        {
-                            "min": "0",
-                            "max": "0",
-                            "lBound": "none",
-                            "uBound": "none",
-                            "outside": "false",
-                            "autoClip": "false"
-                        }
-                    },
-                    "joint_7":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_8":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_9":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.4199999868869781",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_10":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.3199999928474426",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_11":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.9599999785423279",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_12":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.25",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_13":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.5",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_14":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.5",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_15":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "1",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_16":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.25",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_17":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.4199999868869781",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_18":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.3199999928474426",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    }
-                },
-                "frame_5":
-                {
-                    "duration":
-                    {
-                        "desc": "",
-                        "modified": "true",
-                        "locked": "false",
-                        "type": "double",
-                        "value": "120.0000076293945",
-                        "range":
-                        {
-                            "min": "0",
-                            "max": "0",
-                            "lBound": "none",
-                            "uBound": "none",
-                            "outside": "false",
-                            "autoClip": "false"
-                        }
-                    },
-                    "joint_7":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_8":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_9":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.4199999868869781",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_10":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.3199999928474426",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_11":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-1.5",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_12":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.25",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_13":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.5",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_14":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.5",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_15":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.1599999964237213",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_16":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "-0.25",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_17":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.4199999868869781",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    },
-                    "joint_18":
-                    {
-                        "position":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "0.3199999928474426",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        },
-                        "gain":
-                        {
-                            "desc": "",
-                            "modified": "true",
-                            "locked": "false",
-                            "type": "double",
-                            "value": "100",
-                            "range":
-                            {
-                                "min": "0",
-                                "max": "0",
-                                "lBound": "none",
-                                "uBound": "none",
-                                "outside": "false",
-                                "autoClip": "false"
-                            }
-                        }
-                    }
-                },
-                "frame_6":
                 {
                     "duration":
                     {
@@ -34578,6 +33687,934 @@
                             "locked": "false",
                             "type": "double",
                             "value": "0.3199999928474426",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    }
+                },
+                "frame_5":
+                {
+                    "duration":
+                    {
+                        "desc": "",
+                        "modified": "true",
+                        "locked": "false",
+                        "type": "double",
+                        "value": "750",
+                        "range":
+                        {
+                            "min": "0",
+                            "max": "0",
+                            "lBound": "none",
+                            "uBound": "none",
+                            "outside": "false",
+                            "autoClip": "false"
+                        }
+                    },
+                    "joint_7":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_8":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.0214809738099575",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_9":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.3985655605792999",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_10":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.2025348991155624",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_11":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.5206802487373352",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_12":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.4316876530647278",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_13":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.7748494744300842",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_14":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.5692458152770996",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_15":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.4986654818058014",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_16":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.3283520340919495",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_17":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.3084054291248322",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_18":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.302267998456955",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    }
+                },
+                "frame_6":
+                {
+                    "duration":
+                    {
+                        "desc": "",
+                        "modified": "true",
+                        "locked": "false",
+                        "type": "double",
+                        "value": "549.9999389648438",
+                        "range":
+                        {
+                            "min": "0",
+                            "max": "0",
+                            "lBound": "none",
+                            "uBound": "none",
+                            "outside": "false",
+                            "autoClip": "false"
+                        }
+                    },
+                    "joint_7":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_8":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_9":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_10":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_11":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.449999988079071",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_12":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.449999988079071",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_13":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.5",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_14":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.5",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_15":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.25",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_16":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "-0.25",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_17":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_18":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0",
                             "range":
                             {
                                 "min": "0",
@@ -38215,7 +38252,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.4000000059604645",
+                            "value": "-0.7000000476837158",
                             "range":
                             {
                                 "min": "0",
@@ -38679,7 +38716,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.1599999964237213",
+                            "value": "0.5600000023841858",
                             "range":
                             {
                                 "min": "0",
@@ -38753,7 +38790,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.4199999868869781",
+                            "value": "0.02000004053115845",
                             "range":
                             {
                                 "min": "0",
@@ -39143,7 +39180,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.3600000143051147",
+                            "value": "0.5600000023841858",
                             "range":
                             {
                                 "min": "0",
@@ -39217,7 +39254,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.3199999928474426",
+                            "value": "0.01999996602535248",
                             "range":
                             {
                                 "min": "0",
@@ -39681,7 +39718,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.5800000429153442",
+                            "value": "-0.2800000309944153",
                             "range":
                             {
                                 "min": "0",
@@ -40071,7 +40108,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.1599999964237213",
+                            "value": "0.5600000023841858",
                             "range":
                             {
                                 "min": "0",
@@ -40145,7 +40182,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.4199999868869781",
+                            "value": "0.3199999928474426",
                             "range":
                             {
                                 "min": "0",
@@ -40182,7 +40219,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.3199999928474426",
+                            "value": "0.320000022649765",
                             "range":
                             {
                                 "min": "0",
@@ -40387,7 +40424,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.6000000238418579",
+                            "value": "-0.800000011920929",
                             "range":
                             {
                                 "min": "0",
@@ -40424,7 +40461,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -40684,7 +40721,7 @@
                         "modified": "true",
                         "locked": "false",
                         "type": "double",
-                        "value": "250",
+                        "value": "400",
                         "range":
                         {
                             "min": "0",
@@ -40851,7 +40888,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.6045359969139099",
+                            "value": "-0.804535984992981",
                             "range":
                             {
                                 "min": "0",
@@ -40888,7 +40925,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.5631083846092224",
+                            "value": "-0.7631083726882935",
                             "range":
                             {
                                 "min": "0",
@@ -41148,7 +41185,7 @@
                         "modified": "true",
                         "locked": "false",
                         "type": "double",
-                        "value": "449.9998168945312",
+                        "value": "750",
                         "range":
                         {
                             "min": "0",
@@ -44637,7 +44674,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-1.100000023841858",
+                            "value": "-0.9000000357627869",
                             "range":
                             {
                                 "min": "0",
@@ -44785,7 +44822,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.1599999964237213",
+                            "value": "0.3600001037120819",
                             "range":
                             {
                                 "min": "0",
@@ -45249,7 +45286,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.1599999964237213",
+                            "value": "0.5600000023841858",
                             "range":
                             {
                                 "min": "0",
@@ -45323,7 +45360,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.4199999868869781",
+                            "value": "-0.2199999839067459",
                             "range":
                             {
                                 "min": "0",
@@ -45639,7 +45676,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.5",
+                            "value": "0.6000000238418579",
                             "range":
                             {
                                 "min": "0",
@@ -45713,7 +45750,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.1599999964237213",
+                            "value": "0.4600000083446503",
                             "range":
                             {
                                 "min": "0",
@@ -45787,7 +45824,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.4199999868869781",
+                            "value": "0.5800000429153442",
                             "range":
                             {
                                 "min": "0",
@@ -45805,6 +45842,43 @@
                             "locked": "false",
                             "type": "double",
                             "value": "100",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        }
+                    },
+                    "joint_0":
+                    {
+                        "position":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0.1000000014901161",
+                            "range":
+                            {
+                                "min": "0",
+                                "max": "0",
+                                "lBound": "none",
+                                "uBound": "none",
+                                "outside": "false",
+                                "autoClip": "false"
+                            }
+                        },
+                        "gain":
+                        {
+                            "desc": "",
+                            "modified": "true",
+                            "locked": "false",
+                            "type": "double",
+                            "value": "0",
                             "range":
                             {
                                 "min": "0",
@@ -46177,7 +46251,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "0.1599999964237213",
+                            "value": "0.5600000023841858",
                             "range":
                             {
                                 "min": "0",
@@ -46456,7 +46530,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.25",
+                            "value": "-0.449999988079071",
                             "range":
                             {
                                 "min": "0",
@@ -46493,7 +46567,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.6000000238418579",
+                            "value": "-0.800000011920929",
                             "range":
                             {
                                 "min": "0",
@@ -46920,7 +46994,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.3682452738285065",
+                            "value": "-0.5682452917098999",
                             "range":
                             {
                                 "min": "0",
@@ -46957,7 +47031,7 @@
                             "modified": "true",
                             "locked": "false",
                             "type": "double",
-                            "value": "-0.3390925228595734",
+                            "value": "-0.5390925407409668",
                             "range":
                             {
                                 "min": "0",
@@ -47217,7 +47291,7 @@
                         "modified": "true",
                         "locked": "false",
                         "type": "double",
-                        "value": "399.9998474121094",
+                        "value": "150",
                         "range":
                         {
                             "min": "0",
