@@ -160,8 +160,7 @@ public:
     void DuplicateFrame(int index);
 
 
-    void ScheduleEntireScript(NUSensorsData* sensors_data,
-                              NUActionatorsData* actionators_data);
+    void ScheduleEntireScript(NUActionatorsData* actionators_data);
 
     float GetStartTime(){return script_start_time_;}
 

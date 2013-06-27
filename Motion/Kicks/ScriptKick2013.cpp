@@ -139,12 +139,20 @@ void ScriptKick2013::StartKick(
     m_kick_enabled = true;
 
     // Begin the kick script
-    current_script_->StartScript();
-    current_script_->ApplyCurrentFrameToRobot(m_actions);
+    // current_script_->StartScript();
+    // current_script_->ApplyCurrentFrameToRobot(m_actions);
+    // std::cout << std::endl;
+    // std::cout << Platform->getTime() << std::endl;
+    // current_script_->ScheduleEntireScript(m_actions);
+    // std::cout << Platform->getTime() << std::endl;
+
 }
 
 void ScriptKick2013::doKick()
 {
+    if(m_kick_ready && current_script_ != nullptr && !current_script_->IsActive())
+        current_script_->ScheduleEntireScript(m_actions);
+
     m_kick_ready = false;
 
     // If doKick is called while the robot is not kicking, just return.
@@ -165,7 +173,7 @@ void ScriptKick2013::doKick()
     {
         // Schedule the next joint positions
         current_script_->AdvanceToNextFrame();
-        current_script_->ApplyCurrentFrameToRobot(m_actions);
+        // current_script_->ApplyCurrentFrameToRobot(m_actions);
     }
 }
 

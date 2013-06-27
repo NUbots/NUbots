@@ -221,7 +221,7 @@ void Getup::playGetup()
             getup = getup_front_script_;
         else if (fallen[4])
             getup = getup_back_script_;
-        getup->ScheduleEntireScript(m_data, m_actions);
+        getup->ScheduleEntireScript(m_actions);
 
         std::cout << __PRETTY_FUNCTION__ << ": getup = " << getup << std::endl;
 

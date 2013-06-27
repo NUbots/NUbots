@@ -168,7 +168,7 @@ void Script::process(NUSensorsData* sensors_data, NUActionatorsData* actionators
     #endif
     if (m_script_pending and m_script_start_time < m_data->CurrentTime)
     {
-        m_script->ScheduleEntireScript(sensors_data, actionators_data);
+        m_script->ScheduleEntireScript(actionators_data);
         m_script_start_time = m_data->CurrentTime;
         m_script_pending = false;
     }

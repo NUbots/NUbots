@@ -102,7 +102,8 @@ Behaviour::~Behaviour()
 
 /*! @brief The main behaviour process function.
         
-    Calls the process function of the current behaviour provider and handles change of provider when there is a next one.
+    Calls the process function of the current behaviour provider and handles 
+    change of provider when there is a next one.
 
     @param jobs the nubot job std::list
     @param data the nubot sensor data
@@ -111,7 +112,9 @@ Behaviour::~Behaviour()
     @param gameinfo the nubot game information
     @param teaminfo the nubot team information
 */
-void Behaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, FieldObjects* fieldobjects, GameInformation* gameinfo, TeamInformation* teaminfo)
+void Behaviour::process(JobList* jobs, NUSensorsData* data, NUActionatorsData* actions, 
+                        FieldObjects* fieldobjects, GameInformation* gameinfo, 
+                        TeamInformation* teaminfo)
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 0
         debug << "Behaviour::process()" << std::endl;
@@ -169,7 +172,9 @@ BehaviourProvider* Behaviour::nameToProvider(std::string name)
 }
 
 
-/*! @brief Simplifies a name. The name is converted to lowercase, and spaces, underscores, forward slash, backward slash and dots are removed from the name.
+/*! @brief Simplifies a name. The name is converted to lowercase, and spaces, 
+           underscores, forward slash, backward slash and dots are removed
+           from the name.
     @param input the name to be simplified
     @return the simplified std::string
  */
@@ -180,7 +185,11 @@ std::string Behaviour::simplifyName(const std::string& input)
     for (unsigned int j=0; j<input.size(); j++)
     {
         currentletter = input.substr(j, 1);
-        if (currentletter.compare(std::string(" ")) != 0 && currentletter.compare(std::string("_")) != 0 && currentletter.compare(std::string("/")) != 0 && currentletter.compare(std::string("\\")) != 0 && currentletter.compare(std::string(".")) != 0)
+        if (currentletter.compare(std::string(" ")) != 0 &&
+            currentletter.compare(std::string("_")) != 0 && 
+            currentletter.compare(std::string("/")) != 0 && 
+            currentletter.compare(std::string("\\")) != 0 && 
+            currentletter.compare(std::string(".")) != 0)
             namebuffer += tolower(currentletter[0]);            
     }
     return namebuffer;

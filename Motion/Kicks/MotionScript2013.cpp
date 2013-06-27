@@ -507,10 +507,12 @@ void MotionScript2013::StartScript()
 }
 
 void MotionScript2013::PlayScript(NUActionatorsData* actionators_data){
-    StartScript();
+    ScheduleEntireScript(actionators_data);
+
+    // StartScript();
     double current_time = Platform->getTime();
-    ApplyCurrentFrameToRobot(actionators_data);
-    std::cout << "Frame number "<< GetCurrentFrameIndex()+1<<std::endl;
+    // ApplyCurrentFrameToRobot(actionators_data);
+    std::cout << "Frame number "<< GetCurrentFrameIndex() + 1 <<std::endl;
     while(!HasCompleted(current_time)){ 
         // If it's time for the next frame
         current_time = Platform->getTime();
@@ -523,15 +525,15 @@ void MotionScript2013::PlayScript(NUActionatorsData* actionators_data){
         {
             // Schedule the next joint positions
             AdvanceToNextFrame();
-            ApplyCurrentFrameToRobot(actionators_data);
-            std::cout << "Frame number "<< GetCurrentFrameIndex()+1<<std::endl;
+            // ApplyCurrentFrameToRobot(actionators_data);
+            std::cout << "Frame number "<< GetCurrentFrameIndex() + 1 <<std::endl;
         }
     }
 
     // Go back to start of script.
-    SeekFrame(0);
+    Reset();
 
-    std::cout <<"Script Finished in "<< (current_time-script_start_time_) << "ms."<< std::endl;
+    std::cout <<"Script Finished in "<< (current_time - script_start_time_) << "ms."<< std::endl;
 }
 
 bool MotionScript2013::HasCompleted(float current_time)
@@ -662,8 +664,7 @@ bool MotionScript2013::RequiresHead(){
     return false;
 }
 
-void MotionScript2013::ScheduleEntireScript(NUSensorsData* sensors_data,
-                              NUActionatorsData* actionators_data)
+void MotionScript2013::ScheduleEntireScript(NUActionatorsData* actionators_data)
 {
     StartScript();
 
