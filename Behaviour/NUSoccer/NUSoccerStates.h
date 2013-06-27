@@ -99,7 +99,8 @@ private:
     }
     
     void doBallLocalisation(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
-        movement->goToPoint(NavigationLogic::ballLocalisationPosition());
+        //movement->goToPoint(NavigationLogic::ballLocalisationPosition());
+        movement->goToPoint(0.,0.,0.28);
         head->lookForBall();
     }
     
@@ -220,7 +221,7 @@ public:
             doFieldLocalisation( logic, movement, head);
             
         } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] or not
-                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].isObjectVisible() //and
+                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 90. //and //XXX: hack, remove this
                    //not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]
                    ) {
             
