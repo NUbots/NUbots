@@ -359,7 +359,7 @@ int RLAgent::getAction(std::vector<float> observation, std::vector<int> valid_ac
             }
             else
             {
-                std::cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<std::endl;
+                //std::cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<std::endl;
                 BestAction = rand()%(num_outputs);
             }
         }
@@ -424,7 +424,7 @@ int RLAgent::getAction(std::vector<float> observation, std::vector<int> valid_ac
             }
         }
         else{
-            std::cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<std::endl;
+            //std::cout<< "RLAgent::getAction - warning: num_valid_actions is zero. Choosing Randomly"<<std::endl;
             BestAction = rand()%(num_outputs);
         }
 

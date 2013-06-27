@@ -107,8 +107,25 @@ private:
     void doBallApproachAndKick(BehaviourStateLogic* logic, Navigation* movement,HeadBehaviour* head) {
 
         movement->goToBall2();
+        // Before change by shannon
         //head->prioritiseBall();
-        head->prioritiseBall();
+        // After
+        if(Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 200)
+        {
+            Vector3<float> ball_loc = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].getMeasuredRelativeLocation();
+            float distance = ball_loc.x * std::cos(ball_loc.z);
+
+            if(distance * std::cos(ball_loc.y) > 25) {
+                head->prioritiseBall();
+            }
+            else {
+                head->lookAtBall();
+            }
+        }
+        else {
+            head->lookForBall();
+        }
+        //run kick
         movement->kick();        
     }
     
@@ -220,7 +237,7 @@ public:
             
             doFieldLocalisation( logic, movement, head);            
         } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] or
-                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 90. //and //XXX: hack, remove this
+                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 1200. //and //XXX: hack, remove this
 
                    //not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]
                    ) {

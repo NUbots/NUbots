@@ -13,6 +13,7 @@
 
 //HACK FOR RC2013
 int VisionConstants::WHITE_SIDE_IS_BLUE;
+bool VisionConstants::NON_WHITE_SIDE_CHECK;
 //! Distortion Correction
 bool VisionConstants::DO_RADIAL_CORRECTION;
 float VisionConstants::RADIAL_CORRECTION_COEFFICIENT;
@@ -111,6 +112,7 @@ VisionConstants::VisionConstants()
 void VisionConstants::loadFromFile(std::string filename) 
 {
     WHITE_SIDE_IS_BLUE = -1;
+    NON_WHITE_SIDE_CHECK = false;
     GOAL_WIDTH = 10;
     GOAL_HEIGHT = 90;
     DISTANCE_BETWEEN_POSTS = 160;
@@ -155,6 +157,9 @@ void VisionConstants::loadFromFile(std::string filename)
         boost::to_upper(name);
         if(name.compare("WHITE_SIDE_IS_BLUE") == 0) {
             in >> WHITE_SIDE_IS_BLUE;
+        }
+        else if(name.compare("NON_WHITE_SIDE_CHECK") == 0) {
+            in >> NON_WHITE_SIDE_CHECK;
         }
         else if(name.compare("DO_RADIAL_CORRECTION") == 0) {
             in >> DO_RADIAL_CORRECTION;
@@ -638,6 +643,7 @@ bool VisionConstants::setParameter(std::string name, DistanceMethod val)
 void VisionConstants::print(std::ostream& out)
 {
     out << "WHITE_SIDE_IS_BLUE: " << WHITE_SIDE_IS_BLUE << std::endl;
+    out << "NON_WHITE_SIDE_CHECK: " << NON_WHITE_SIDE_CHECK << std::endl;
 
     out << "DO_RADIAL_CORRECTION: " << DO_RADIAL_CORRECTION << std::endl;
     out << "RADIAL_CORRECTION_COEFFICIENT: " << RADIAL_CORRECTION_COEFFICIENT << std::endl;

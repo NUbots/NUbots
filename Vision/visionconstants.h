@@ -12,6 +12,7 @@ class VisionConstants
 public:
     // HACK FOR RC2013
     static int WHITE_SIDE_IS_BLUE;  // 1=yes    0=no   -1=don't use
+    static bool NON_WHITE_SIDE_CHECK;  // 1=yes    0=no   -1=don't use
 
     //! Distortion Correction
     static bool DO_RADIAL_CORRECTION;           //! Whether to perform radial distortion correction.

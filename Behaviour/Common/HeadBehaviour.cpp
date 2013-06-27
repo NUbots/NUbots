@@ -81,7 +81,7 @@ HeadBehaviour::HeadBehaviour():Mrlagent(){
 
     //Policy Parameters:
     prioritise_localisation_policy_bias = 0.5;//Probability prioritising localisation will give no looking at mobile objects
-    prioritise_ball_policy_bias = 0.7; //Probability prioritising localisation will give no looking at stationary objects
+    prioritise_ball_policy_bias = 0.5; //Probability prioritising localisation will give no looking at stationary objects
     srand(Blackboard->Sensors->GetTimestamp());
 
     //MRL Agent

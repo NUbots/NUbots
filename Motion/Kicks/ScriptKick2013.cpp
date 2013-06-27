@@ -110,7 +110,7 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     // std::cout << __PRETTY_FUNCTION__ << "kicktarget_heading = " << kicktarget_heading << std::endl;
 
     // The tolerance for whether the robot is considered to be facing the target.
-    float target_angle_tolerance = mathGeneral::PI / 3.0f;
+    float target_angle_tolerance = mathGeneral::PI / 3.5f;
 
     double pi_3_4 = mathGeneral::PI * 3.0 / 4.0;
 
@@ -125,15 +125,15 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
             StartKick(right_kick_script_, rightLeg);
         }
     } else if(-pi_3_4 < t_theta  && t_theta < 0) {
-        if((side_left_kick_script_ != nullptr &&
-            side_left_kick_area_.PointInside(b_x, b_y))) {
-            StartKick(side_left_kick_script_, rightLeg);
-        }
-    }
-    else if(0 < t_theta && t_theta < pi_3_4) {
         if(side_right_kick_script_ != nullptr &&
                   side_right_kick_area_.PointInside(b_x, b_y)) {
             StartKick(side_right_kick_script_, leftLeg);
+        }
+    }
+    else if(0 < t_theta && t_theta < pi_3_4) {
+        if((side_left_kick_script_ != nullptr &&
+            side_left_kick_area_.PointInside(b_x, b_y))) {
+            StartKick(side_left_kick_script_, rightLeg);
         }
     }
 }
