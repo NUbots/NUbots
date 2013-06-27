@@ -219,14 +219,14 @@ bool Goal::calculatePositions()
 
     //get distance from width
     width_dist = VisionConstants::GOAL_WIDTH*tran.getCameraDistanceInPixels()/m_size_on_screen.x;
-    height_dist = VisionConstants::GOAL_HEIGHT*tran.getCameraDistanceInPixels()/m_size_on_screen.y;
+    //height_dist = VisionConstants::GOAL_HEIGHT*tran.getCameraDistanceInPixels()/m_size_on_screen.y;
 
     // D2P
     tran.calculateRepresentationsFromPixelLocation(d2p_loc);
     // WIDTH
     tran.calculateRepresentationsFromPixelLocation(width_loc, true, width_dist);
     // HEIGHT
-    tran.calculateRepresentationsFromPixelLocation(height_loc, true, height_dist);
+    //tran.calculateRepresentationsFromPixelLocation(height_loc, true, height_dist);
 
 
     // check if we are off the edge of the screen by a certain margin

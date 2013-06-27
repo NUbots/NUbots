@@ -31,12 +31,8 @@ void FieldPointDetector::run(bool find_circle, bool find_lines, bool find_corner
         const GreenHorizon& gh = vbb->getGreenHorizon();
 
         // collect all vertical and horizontal line transition centres that exist under the green horizon
-        BOOST_FOREACH(const ColourSegment& s, vbb->getVerticalTransitions(LINE_COLOUR)) {
-            temp.screenCartesian = s.getCentre();
-            if(gh.isBelowHorizon(temp.screenCartesian))
-                points.push_back(temp);
-        }
-        BOOST_FOREACH(const ColourSegment& s, vbb->getHorizontalTransitions(LINE_COLOUR)) {
+        const std::vector<ColourSegment>& segments = vbb->getAllTransitions(LINE_COLOUR);
+        for(const ColourSegment& s: segments) {
             temp.screenCartesian = s.getCentre();
             if(gh.isBelowHorizon(temp.screenCartesian))
                 points.push_back(temp);
