@@ -100,7 +100,7 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     // std::cout << __PRETTY_FUNCTION__ << "kicktarget_heading = " << kicktarget_heading << std::endl;
 
     // The tolerance for whether the robot is considered to be facing the target.
-    float target_angle_tolerance = mathGeneral::PI / 4.0f;
+    float target_angle_tolerance = mathGeneral::PI / 3.0f;
 
     double pi_3_4 = mathGeneral::PI * 3.0 / 4.0;
 
@@ -139,8 +139,8 @@ void ScriptKick2013::StartKick(
     m_kick_enabled = true;
 
     // Begin the kick script
-    // current_script_->StartScript();
-    // current_script_->ApplyCurrentFrameToRobot(m_actions);
+    current_script_->StartScript();
+    current_script_->ApplyCurrentFrameToRobot(m_actions);
     // std::cout << std::endl;
     // std::cout << Platform->getTime() << std::endl;
     // current_script_->ScheduleEntireScript(m_actions);
@@ -150,7 +150,7 @@ void ScriptKick2013::StartKick(
 
 void ScriptKick2013::doKick()
 {
-    if(m_kick_ready && current_script_ != nullptr && !current_script_->IsActive())
+    if(m_kick_ready && current_script_ != nullptr && current_script_->IsActive())
         current_script_->ScheduleEntireScript(m_actions);
 
     m_kick_ready = false;
