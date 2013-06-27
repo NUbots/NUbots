@@ -108,7 +108,7 @@ private:
 
         movement->goToBall2();
         //head->prioritiseBall();
-        head->lookAtBall();
+        head->prioritiseBall();
         movement->kick();        
     }
     
@@ -221,7 +221,7 @@ public:
             doFieldLocalisation( logic, movement, head);
             
         } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] or not
-                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 90. //and //XXX: hack, remove this
+                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 90. //and //XXX: //HACK RC2013
                    //not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]
                    ) {
             
