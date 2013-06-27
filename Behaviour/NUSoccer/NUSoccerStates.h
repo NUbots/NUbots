@@ -220,8 +220,8 @@ public:
             
             doFieldLocalisation( logic, movement, head);
             
-        } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] or not
-                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 90. //and //XXX: hack, remove this
+        } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] or
+                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 90. //and //XXX: hack, remove this
                    //not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]
                    ) {
             

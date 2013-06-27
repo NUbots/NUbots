@@ -42,6 +42,7 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     if(isActive())
         return;
 
+
     // Robot world coordinates:
     float robot_x = Blackboard->Objects->self.wmX();
     float robot_y = Blackboard->Objects->self.wmY();
@@ -51,15 +52,23 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
     // float ball_x = ball_r_x + robot_x;
     // float ball_y = ball_r_y + robot_y;
 
-    // Target world coordinates: 
+    // Target world coordinates:
     float target_w_x = target[0];
     float target_w_y = target[1];
 
     // Note: use robot relative space (i.e. Robot = (0,0), x = forward, y = right )
 
+    // RC2013 HACK TO USE VISION INSTEAD OF LOCALISATION BALL
     // Ball coords relative to robot:
     float b_x = position[0];
     float b_y = position[1];
+    if(Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 90)
+    {
+        Vector3<float> ball_loc = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].getMeasuredRelativeLocation();
+        float distance = ball_loc.x * std::cos(ball_loc.z);
+        b_x = distance * std::cos(ball_loc.y);
+        b_y = distance * std::sin(ball_loc.y);
+    }
 
     // Target relative coordinates:
     float t_x = target_w_x - robot_x;
@@ -70,6 +79,7 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
 
     // Robot relative target heading:
     float t_theta = mathGeneral::normaliseAngle(target_heading - robot_heading);
+
     // float kickbox_ball_x = std::cos(-robot_heading) * ball_r_x - std::sin(-robot_heading) * ball_r_y;
     // float kickbox_ball_y = std::cos(-robot_heading) * ball_r_y + std::sin(-robot_heading) * ball_r_x;
 
@@ -114,11 +124,14 @@ void ScriptKick2013::kickToPoint(const std::vector<float>& position, const std::
                   right_kick_area_.PointInside(b_x, b_y)) {
             StartKick(right_kick_script_, rightLeg);
         }
-    } else if(-pi_3_4 < t_theta && t_theta < pi_3_4) {
+    } else if(-pi_3_4 < t_theta  && t_theta < 0) {
         if((side_left_kick_script_ != nullptr &&
             side_left_kick_area_.PointInside(b_x, b_y))) {
             StartKick(side_left_kick_script_, rightLeg);
-        } else if(side_right_kick_script_ != nullptr &&
+        }
+    }
+    else if(0 < t_theta && t_theta < pi_3_4) {
+        if(side_right_kick_script_ != nullptr &&
                   side_right_kick_area_.PointInside(b_x, b_y)) {
             StartKick(side_right_kick_script_, leftLeg);
         }

@@ -121,8 +121,7 @@ void GoalDetector::relabel(std::vector<Goal>& goals) const
             }
             //std::cout << "GOAL HACK WHITE count: " << white_count << std::endl;
 
-            double THRESHOLD = 500;
-            if(white_count > THRESHOLD) {
+            if(white_count > 500) {
                 if(VisionConstants::WHITE_SIDE_IS_BLUE) {
                     //std::cout << "GOAL HACK WHITE labelling blue: " << white_count << std::endl;
                     goals[left_index].m_id = GOAL_B_L;
@@ -132,6 +131,18 @@ void GoalDetector::relabel(std::vector<Goal>& goals) const
                     //std::cout << "GOAL HACK WHITE labelling yellow: " << white_count << std::endl;
                     goals[left_index].m_id = GOAL_Y_L;
                     goals[right_index].m_id = GOAL_Y_R;
+                }
+            }
+            else if(white_count < 100){
+                if(VisionConstants::WHITE_SIDE_IS_BLUE) {
+                    //std::cout << "GOAL HACK WHITE labelling blue: " << white_count << std::endl;
+                    goals[left_index].m_id = GOAL_Y_L;
+                    goals[right_index].m_id = GOAL_Y_R;
+                }
+                else {
+                    //std::cout << "GOAL HACK WHITE labelling yellow: " << white_count << std::endl;
+                    goals[left_index].m_id = GOAL_B_L;
+                    goals[right_index].m_id = GOAL_B_R;
                 }
             }
         }

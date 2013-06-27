@@ -221,14 +221,14 @@ std::vector<float> Navigation::goToBall2(Object* kickTarget) {
     //std::cout << "initial start gotoball calculations" << std::endl;
     //rotate by 90 degrees to make our 3 ball approach waypoint offsets
     waypoint[0] = std::vector<float>(2,0);
-    waypoint[0][0] = targetVector[1]/targetDistance*ballDistance*0.3; //XXX: magic number
-    waypoint[0][1] = -targetVector[0]/targetDistance*ballDistance*0.3;
+    waypoint[0][0] = targetVector[0]/targetDistance*ballDistance*0.45; //XXX: magic number
+    waypoint[0][1] = targetVector[1]/targetDistance*ballDistance*0.45;
     waypoint[1] = std::vector<float>(2,0);
     waypoint[1][0] = waypoint[0][1];
     waypoint[1][1] = -waypoint[0][0];
     waypoint[2] = std::vector<float>(2,0);
-    waypoint[2][0] = waypoint[1][1];
-    waypoint[2][1] = -waypoint[1][0];
+    waypoint[2][0] = -waypoint[1][1];
+    waypoint[2][1] = waypoint[1][0];
     
     //using waypoint offsets, calculate the approach headings to kick the ball
     float headings[3];
