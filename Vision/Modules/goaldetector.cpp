@@ -133,18 +133,6 @@ void GoalDetector::relabel(std::vector<Goal>& goals) const
                     goals[right_index].m_id = GOAL_Y_R;
                 }
             }
-            else if(VisionConstants::NON_WHITE_SIDE_CHECK && white_count < VisionConstants::LOWER_WHITE_THRESHOLD){
-                if(VisionConstants::WHITE_SIDE_IS_BLUE) {
-                    //std::cout << "GOAL HACK WHITE labelling blue: " << white_count << std::endl;
-                    goals[left_index].m_id = GOAL_Y_L;
-                    goals[right_index].m_id = GOAL_Y_R;
-                }
-                else {
-                    //std::cout << "GOAL HACK WHITE labelling yellow: " << white_count << std::endl;
-                    goals[left_index].m_id = GOAL_B_L;
-                    goals[right_index].m_id = GOAL_B_R;
-                }
-            }
         }
     }
 }
