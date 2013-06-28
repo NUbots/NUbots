@@ -110,7 +110,7 @@ private:
         // Before change by shannon
         //head->prioritiseBall();
         // After
-        if(Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 200)
+        if(Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() < 500)
         {
             Vector3<float> ball_loc = Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].getMeasuredRelativeLocation();
             float distance = ball_loc.x * std::cos(ball_loc.z);
@@ -238,7 +238,7 @@ public:
             
             doFieldLocalisation( logic, movement, head);            
         } else if (logic->states[BehaviourStateLogic::BALL_IS_LOST] or
-                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 1200. //and //XXX: hack, remove this
+                    Blackboard->Objects->mobileFieldObjects[FieldObjects::FO_BALL].TimeSinceLastSeen() > 2500. //and //XXX: hack, remove this
 
                    //not logic->states[BehaviourStateLogic::TEAM_SEES_BALL]
                    ) {

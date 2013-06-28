@@ -616,11 +616,11 @@ void HeadBehaviour::update(){
     } else if(Blackboard->Sensors->GetTimestamp()-time_last_tracked < 100 and last_job_was_trackjob){
         return;
     } else {   
-        if(Blackboard->Sensors->GetTimestamp()-time_last_quick_panned > 2000 ){
-            performQuickScan();
-            time_last_quick_panned = Blackboard->Sensors->GetTimestamp();
-            return;
-        }
+        //if(Blackboard->Sensors->GetTimestamp()-time_last_quick_panned > 2000 ){
+        performQuickScan();
+        time_last_quick_panned = Blackboard->Sensors->GetTimestamp();
+        return;
+       // }
         // if (m_current_action < head_logic->relevantObjects[0].size()){    
         //     Blackboard->Jobs->addMotionJob(  new HeadPanJob(*(StationaryObject*)m_objects_to_view[m_current_action])  );
         //     last_job_was_trackjob = false;
