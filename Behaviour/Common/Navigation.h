@@ -57,7 +57,6 @@ private:
 //XXX: load all these from central config ----------------------------------------
     //load these values from walk config
     static constexpr float m_turn_speed = 0.4;
-    static constexpr float m_walk_speed = 0.95;
     static constexpr float m_feet_separation = 14.0;
     
     //load from robot model
@@ -72,9 +71,10 @@ private:
     static constexpr float m_acceleration_fraction = 0.5;
     
     //approach speeds
-    static constexpr float m_close_approach_speed = 0.8;
+    static constexpr float m_walk_speed = 1.0;
+    static constexpr float m_close_approach_speed = 1.0;
     static constexpr float m_close_approach_distance = 30.0;
-    static constexpr float m_mid_approach_speed = 0.85;
+    static constexpr float m_mid_approach_speed = 1.0;
     static constexpr float m_mid_approach_distance = 60.0;
     
     //turning values
