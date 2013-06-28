@@ -319,7 +319,7 @@ void NUHead::calculatePan()
 void NUHead::calculateBallPan()
 {
     if (m_pan_default_values)
-        calculateGenericPan(m_BALL_SIZE, 0.7*m_FIELD_DIAGONAL, m_yaw_limits[0], m_yaw_limits[1], m_pan_ball_speed);
+        calculateGenericPan(m_BALL_SIZE, 1.0*m_FIELD_DIAGONAL, m_yaw_limits[0], m_yaw_limits[1], m_pan_ball_speed);
     else
         calculateGenericPan(m_x_min, m_x_max, m_yaw_min, m_yaw_max, m_pan_ball_speed);
 }
@@ -335,7 +335,7 @@ void NUHead::calculateBallAndLocalisationPan()
 void NUHead::calculateLocalisationPan()
 {
     if (m_pan_default_values)
-        calculateGenericPan(300, 1e10, m_yaw_limits[0], m_yaw_limits[1], m_pan_localisation_speed);
+        calculateGenericPan(600, 1e10, m_yaw_limits[0], m_yaw_limits[1], m_pan_localisation_speed);
     else
         calculateGenericPan(m_x_min, m_x_max, m_yaw_min, m_yaw_max, m_pan_localisation_speed);
 }
