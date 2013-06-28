@@ -13,6 +13,8 @@ public:
     // HACK FOR RC2013
     static int WHITE_SIDE_IS_BLUE;  // 1=yes    0=no   -1=don't use
     static bool NON_WHITE_SIDE_CHECK;  // 1=yes    0=no   -1=don't use
+    static int UPPER_WHITE_THRESHOLD;
+    static int LOWER_WHITE_THRESHOLD;
 
     //! Distortion Correction
     static bool DO_RADIAL_CORRECTION;           //! Whether to perform radial distortion correction.
