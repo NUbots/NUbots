@@ -25,8 +25,8 @@ void NUAPI::sendAll()
 	//static unsigned int sum = 0;
 
 	//boost::posix_time::ptime t1 = microsec_clock::local_time();
-	sendVisionData();
-	sendSensorData();
+    //sendVisionData();
+    //sendSensorData();
 	sendLocalisationData();
 	/*boost::posix_time::ptime t2 = microsec_clock::local_time();
 	boost::posix_time::time_duration diff = t2 - t1;
