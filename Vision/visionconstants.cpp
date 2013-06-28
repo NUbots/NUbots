@@ -14,6 +14,8 @@
 //HACK FOR RC2013
 int VisionConstants::WHITE_SIDE_IS_BLUE;
 bool VisionConstants::NON_WHITE_SIDE_CHECK;
+int VisionConstants::UPPER_WHITE_THRESHOLD;
+int VisionConstants::LOWER_WHITE_THRESHOLD;
 //! Distortion Correction
 bool VisionConstants::DO_RADIAL_CORRECTION;
 float VisionConstants::RADIAL_CORRECTION_COEFFICIENT;
@@ -113,6 +115,8 @@ void VisionConstants::loadFromFile(std::string filename)
 {
     WHITE_SIDE_IS_BLUE = -1;
     NON_WHITE_SIDE_CHECK = false;
+    UPPER_WHITE_THRESHOLD = 1000;
+    LOWER_WHITE_THRESHOLD = 100;
     GOAL_WIDTH = 10;
     GOAL_HEIGHT = 90;
     DISTANCE_BETWEEN_POSTS = 160;
@@ -163,6 +167,12 @@ void VisionConstants::loadFromFile(std::string filename)
         }
         else if(name.compare("DO_RADIAL_CORRECTION") == 0) {
             in >> DO_RADIAL_CORRECTION;
+        }
+        else if(name.compare("UPPER_WHITE_THRESHOLD") == 0) {
+            in >> UPPER_WHITE_THRESHOLD;
+        }
+        else if(name.compare("LOWER_WHITE_THRESHOLD") == 0) {
+            in >> LOWER_WHITE_THRESHOLD;
         }
         else if(name.compare("RADIAL_CORRECTION_COEFFICIENT") == 0) {
             in >> RADIAL_CORRECTION_COEFFICIENT;
@@ -644,6 +654,8 @@ void VisionConstants::print(std::ostream& out)
 {
     out << "WHITE_SIDE_IS_BLUE: " << WHITE_SIDE_IS_BLUE << std::endl;
     out << "NON_WHITE_SIDE_CHECK: " << NON_WHITE_SIDE_CHECK << std::endl;
+    out << "UPPER_WHITE_THRESHOLD: " << UPPER_WHITE_THRESHOLD << std::endl;
+    out << "LOWER_WHITE_THRESHOLD: " << LOWER_WHITE_THRESHOLD << std::endl;
 
     out << "DO_RADIAL_CORRECTION: " << DO_RADIAL_CORRECTION << std::endl;
     out << "RADIAL_CORRECTION_COEFFICIENT: " << RADIAL_CORRECTION_COEFFICIENT << std::endl;

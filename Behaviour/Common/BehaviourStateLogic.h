@@ -64,7 +64,7 @@ public:
         timeGameStarted = 0.0;
         timePutDown = -20000.0;
         timeUnPenalised = -20000.0;
-        m_GoalKeeper = -1;
+        m_GoalKeeper = 1;
         states[IS_CLOSEST_TO_BALL] = false;
         states[IS_SECOND_FROM_BALL] = false;
         states[IS_FURTHEST_FROM_BALL] = false;
