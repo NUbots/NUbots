@@ -187,6 +187,7 @@ public:
         
         //do action selection logic:
         if (logic->states[BehaviourStateLogic::GAME_STATE_PENALISED] or
+            logic->states[BehaviourStateLogic::IS_GOAL_KEEPER] or
             logic->states[BehaviourStateLogic::GAME_STATE_INITIAL] or
             logic->states[BehaviourStateLogic::GAME_STATE_SET] or
             logic->states[BehaviourStateLogic::GAME_STATE_END] or
@@ -326,7 +327,7 @@ public:
                 Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Sensors->GetTimestamp(), "penalised.wav");
             }
             
-        } else if (m_provider->doubleChestClick() or m_provider->tripleChestClick() or m_provider->longChestClick()) {
+        }/* else if (m_provider->doubleChestClick() or m_provider->tripleChestClick() or m_provider->longChestClick()) {
             saving_images = not saving_images;
             Blackboard->Jobs->addVisionJob(new SaveImagesJob(saving_images, true));
             
@@ -335,7 +336,7 @@ public:
             } else {
                 Blackboard->Actions->add(NUActionatorsData::Sound, Blackboard->Sensors->GetTimestamp(), "stop_saving_images.wav");
             }
-        }
+        }*/
         
         
         
