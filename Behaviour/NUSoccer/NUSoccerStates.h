@@ -187,6 +187,7 @@ public:
         
         //do action selection logic:
         if (logic->states[BehaviourStateLogic::GAME_STATE_PENALISED] or
+            logic->states[BehaviourStateLogic::IS_GOAL_KEEPER] or
             logic->states[BehaviourStateLogic::GAME_STATE_INITIAL] or
             logic->states[BehaviourStateLogic::GAME_STATE_SET] or
             logic->states[BehaviourStateLogic::GAME_STATE_END] or
