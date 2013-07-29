@@ -63,6 +63,7 @@ DistanceMethod VisionConstants::BALL_DISTANCE_METHOD;
 DistanceMethod VisionConstants::GOAL_DISTANCE_METHOD;
 //DistanceMethod VisionConstants::BEACON_DISTANCE_METHOD;
 LineDetectionMethod VisionConstants::LINE_METHOD;
+GoalDetectionMethod VisionConstants::GOAL_METHOD;
 //! Field-object detection constants
 int VisionConstants::BALL_EDGE_THRESHOLD;
 int VisionConstants::BALL_ORANGE_TOLERANCE;
@@ -142,6 +143,7 @@ void VisionConstants::loadFromFile(std::string filename)
     SAM_CLEAR_SMALL = true;
     SAM_CLEAR_DIRTY = true;
     LINE_METHOD = RANSAC;
+    GOAL_METHOD = RANSAC_G;
     GOAL_MAX_OBJECTS = 8;
     GOAL_BINS = 20;
     GOAL_MIN_THRESHOLD = 1;
@@ -236,6 +238,12 @@ void VisionConstants::loadFromFile(std::string filename)
             boost::trim(sval);
             boost::to_upper(sval);
             LINE_METHOD = getLineMethodFromName(sval);
+        }
+        else if(name.compare("GOAL_METHOD") == 0) {
+            in >> sval;
+            boost::trim(sval);
+            boost::to_upper(sval);
+            GOAL_METHOD = getGoalMethodFromName(sval);
         }
         else if(name.compare("BALL_EDGE_THRESHOLD") == 0) {
             in >> BALL_EDGE_THRESHOLD;
@@ -382,7 +390,7 @@ void VisionConstants::loadFromFile(std::string filename)
         in.peek();
     }
     in.close();
-    
+
     //debug << "VisionConstants::loadFromFile-" << std::endl;
     //print(debug);
 }
@@ -730,6 +738,8 @@ void VisionConstants::print(std::ostream& out)
     out << "RANSAC_MAX_ANGLE_DIFF_TO_MERGE: " << RANSAC_MAX_ANGLE_DIFF_TO_MERGE << std::endl;
     out << "RANSAC_MAX_DISTANCE_TO_MERGE: " << RANSAC_MAX_DISTANCE_TO_MERGE << std::endl;
 
+    out << "LINE_METHOD: " << getLineMethodName(LINE_METHOD) << std::endl;
+    out << "GOAL_METHOD: " << getGoalMethodName(GOAL_METHOD) << std::endl;
 }
 
 void VisionConstants::setFlags(bool val)

@@ -86,6 +86,11 @@ namespace Vision {
         Least
     };
 
+    enum GoalDetectionMethod {
+        HIST,
+        RANSAC_G
+    };
+
     enum LineDetectionMethod {
         SAM,
         RANSAC
@@ -132,6 +137,10 @@ namespace Vision {
     LineDetectionMethod getLineMethodFromName(std::string name);
 
     std::string getLineMethodName(LineDetectionMethod method);
+
+    GoalDetectionMethod getGoalMethodFromName(std::string name);
+
+    std::string getGoalMethodName(GoalDetectionMethod method);
 }
 
 #endif // BASICVISIONTYPES_H

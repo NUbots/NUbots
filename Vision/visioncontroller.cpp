@@ -27,7 +27,7 @@ VisionController::VisionController() : m_corner_detector(0.1), m_circle_detector
     m_data_wrapper = DataWrapper::getInstance();
     m_blackboard = VisionBlackboard::getInstance();
     //m_line_detector_sam = new LineDetectorSAM();
-    //m_goal_detector_hist = new GoalDetectorHistogram();
+    m_goal_detector_hist = new GoalDetectorHistogram();
     m_line_detector_ransac = new LineDetectorRANSAC();
     m_goal_detector_ransac_edges = new GoalDetectorRANSACEdges();
 
@@ -51,7 +51,7 @@ VisionController::~VisionController()
     delete m_ball_detector_dave;
     delete m_line_detector_ransac;
 //    delete m_line_detector_sam;
-//    delete m_goal_detector_hist;
+    delete m_goal_detector_hist;
     delete m_goal_detector_ransac_edges;
 }
 
@@ -122,12 +122,17 @@ int VisionController::runFrame(bool lookForBall, bool lookForGoals, bool lookFor
     //! DETECTION MODULES
 
     if(lookForGoals) {
-//       std::vector<Goal> hist_goals = m_goal_detector_hist->run();   // histogram method
-        std::vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();  //ransac method
-
-        m_goal_detector_ransac_edges->relabel(ransac_goals_edges);
-
-        m_blackboard->addGoals(ransac_goals_edges);
+        if(VisionConstants::GOAL_METHOD == HIST) {
+            // histogram method
+            std::vector<Goal> hist_goals = m_goal_detector_hist->run();
+            m_blackboard->addGoals(hist_goals);
+        }
+        else {
+            //ransac method
+            std::vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();
+            //m_goal_detector_ransac_edges->relabel(ransac_goals_edges);
+            m_blackboard->addGoals(ransac_goals_edges);
+        }
     }
     else {
         #if VISION_CONTROLLER_VERBOSITY > 2

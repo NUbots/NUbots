@@ -69,6 +69,7 @@ public:
 //    static DistanceMethod BEACON_DISTANCE_METHOD;   //! The preferred method for calculating the distance to the beacons
     
     static LineDetectionMethod LINE_METHOD;
+    static GoalDetectionMethod GOAL_METHOD;
     //! Field-object detection constants
     static int BALL_EDGE_THRESHOLD;         //! Dave?
     static int BALL_ORANGE_TOLERANCE;       //! Dave?

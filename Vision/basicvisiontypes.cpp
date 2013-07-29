@@ -243,4 +243,28 @@ namespace Vision {
         default:        return "INVALID";
         }
     }
+
+
+    GoalDetectionMethod getGoalMethodFromName(std::string name)
+    {
+        if(name.compare("HIST") == 0)
+            return HIST;
+        else if(name.compare("RANSAC") == 0)
+            return RANSAC_G;
+
+        //no match - return default
+        #ifdef DEBUG_VISION_VERBOSITY_ON
+            debug << "VisionConstants::getLineMethodFromName - unmatched method name: " << name << " used RANSAC instead" << std::endl;
+        #endif
+        return RANSAC_G; //default
+    }
+
+    std::string getGoalMethodName(GoalDetectionMethod method)
+    {
+        switch(method) {
+        case HIST:       return "HIST";
+        case RANSAC_G:    return "RANSAC";
+        default:        return "INVALID";
+        }
+    }
 }
