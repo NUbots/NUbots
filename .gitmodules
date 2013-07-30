@@ -1,0 +1,3 @@
+[submodule "NUClear"]
+	path = NUClear
+	url = https://github.com/Fastcode/NUClear.git
