@@ -1,4 +1,4 @@
-SET(module_name "DarwinMotors")
+SET(module_name "DarwinCamera")
 
 FILE(GLOB src "src/*.cpp" "src/*.h")
 

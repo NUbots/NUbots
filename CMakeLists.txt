@@ -37,11 +37,30 @@ ELSE()
     MESSAGE(FATAL_ERROR "Unsupported compiler!")
 ENDIF()
 
+FIND_PACKAGE(NUClear REQUIRED)
+FIND_PACKAGE(ZMQ REQUIRED)
+FIND_PACKAGE(Protobuf REQUIRED)
+INCLUDE_DIRECTORIES(${NUCLEAR_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
+
 # This will generate any .proto files in the messages folder
 ADD_SUBDIRECTORY(shared/messages)
 
 # Add the subdirectories
 ADD_SUBDIRECTORY(modules/DarwinMotors)
+INCLUDE_DIRECTORIES(modules/DarwinMotors/src)
+ADD_SUBDIRECTORY(modules/DarwinCamera)
+INCLUDE_DIRECTORIES(modules/DarwinCamera/src)
+ADD_SUBDIRECTORY(modules/DarwinSensors)
+INCLUDE_DIRECTORIES(modules/DarwinSensors/src)
 
 ADD_EXECUTABLE(robocup main.cpp)
-TARGET_LINK_LIBRARIES(robocup messages)
+TARGET_LINK_LIBRARIES(robocup
+    messages
+    DarwinMotors
+    DarwinCamera
+    DarwinSensors
+    ${NUCLEAR_LIBRARIES}
+    ${ZMQ_LIBRARIES}
+    ${PROTOBUF_LIBRARIES})
