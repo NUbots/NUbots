@@ -5,6 +5,8 @@ SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 2)
 SET(VERSION_PATCH 0)
 
+OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)
+
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -44,16 +46,24 @@ INCLUDE_DIRECTORIES(${NUCLEAR_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
 
+IF(BUILD_TESTS)
+    ENABLE_TESTING()
+ENDIF()
+
 # This will generate any .proto files in the messages folder
 ADD_SUBDIRECTORY(shared/messages)
 
-# Add the subdirectories
-ADD_SUBDIRECTORY(modules/DarwinMotors)
-INCLUDE_DIRECTORIES(modules/DarwinMotors/src)
-ADD_SUBDIRECTORY(modules/DarwinCamera)
-INCLUDE_DIRECTORIES(modules/DarwinCamera/src)
-ADD_SUBDIRECTORY(modules/DarwinSensors)
-INCLUDE_DIRECTORIES(modules/DarwinSensors/src)
+SET(modules
+    DarwinMotors
+    DarwinCamera
+    DarwinSensors)
+
+FOREACH(module ${modules})
+    # Add the subdirectories
+    ADD_SUBDIRECTORY(modules/${module})
+    INCLUDE_DIRECTORIES(modules/${module}/src)
+    ADD_TEST(DarwinMotorsTests modules/${module}/${module}Tests)
+ENDFOREACH()
 
 ADD_EXECUTABLE(robocup main.cpp)
 TARGET_LINK_LIBRARIES(robocup

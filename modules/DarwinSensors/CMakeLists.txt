@@ -12,3 +12,16 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared)
 
 # Add all our code to a library
 ADD_LIBRARY(${module_name} ${src})
+
+# If we are doing tests, then build the test for this
+IF(BUILD_TESTS)
+    FILE(GLOB test_src "tests/**.cpp", "tests/**.h")
+    ADD_EXECUTABLE(${module_name}Tests ${test_src})
+    
+    TARGET_LINK_LIBRARIES(${module_name}Tests
+        messages
+        ${NUCLEAR_LIBRARIES}
+        ${ZMQ_LIBRARIES}
+        ${PROTOBUF_LIBRARIES})
+    ADD_TEST(${module_name}Tests ${module_name}Tests)
+ENDIF()
