@@ -54,6 +54,7 @@ ENDIF()
 ADD_SUBDIRECTORY(shared/messages)
 
 SET(modules
+    DarwinPlatform
     DarwinMotors
     DarwinCamera
     DarwinSensors)
@@ -68,9 +69,7 @@ ENDFOREACH()
 ADD_EXECUTABLE(robocup main.cpp)
 TARGET_LINK_LIBRARIES(robocup
     messages
-    DarwinMotors
-    DarwinCamera
-    DarwinSensors
+    ${modules}
     ${NUCLEAR_LIBRARIES}
     ${ZMQ_LIBRARIES}
     ${PROTOBUF_LIBRARIES})

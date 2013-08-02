@@ -3,6 +3,8 @@
 
 #include <NUClear.h>
 
+#include "Darwin.h"
+
 namespace modules {
 
     class DarwinSensors : public NUClear::Reactor {
