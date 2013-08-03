@@ -6,8 +6,12 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <stdint.h>
+#include <cstring>
 #include <mutex>
 #include <vector>
+#ifdef __linux__
+#include <linux/serial.h>
+#endif
 
 namespace Darwin
 {
@@ -64,6 +68,7 @@ namespace Darwin
     
     class UART {
     private:
+        int m_byteTransferTime;
         int m_fd;
         std::mutex m_mutex;
         

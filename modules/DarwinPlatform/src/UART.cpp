@@ -61,7 +61,7 @@ Darwin::UART::UART(const char* name) {
     serinfo.flags |= ASYNC_SPD_CUST;
     serinfo.custom_divisor = serinfo.baud_base / baudrate;
 	
-    if(ioctl(m_Socket_fd, TIOCSSERIAL, &serinfo) < 0) {
+    if(ioctl(m_fd, TIOCSSERIAL, &serinfo) < 0) {
         // TODO error "Cannot set serial info"
 	}
     
