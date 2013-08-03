@@ -29,13 +29,6 @@ namespace Darwin
             BULK_READ = 146
         };
         
-/*
- * This pragma option disables cache allignment until the following pragma pack option. This is used so that the
- * datatypes specified here do not have any padding added to them. This results in them being directly mappable
- * to the data that we send and receive from the UART
- */
-#pragma pack(push, 1)
-        
         /**
          * @brief This struct mimics the expected data structure for a Write command.
          *
@@ -49,6 +42,7 @@ namespace Darwin
          *
          * @author Trent Houliston
          */
+        #pragma pack(push, 1) // Make it so that the compiler reads this struct "as is" (no padding bytes)
         template <typename TType>
         struct ReadCommand {
             
@@ -69,6 +63,7 @@ namespace Darwin
             /// Our checksum for this command
             const uint8_t checksum = calculateChecksum(this);
         };
+        #pragma pack(pop)
         
         /**
          * @brief This struct mimics the expected data structure for a Write command.
@@ -84,6 +79,7 @@ namespace Darwin
          *
          * @author Trent Houliston
          */
+        #pragma pack(push, 1) // Make it so that the compiler reads this struct "as is" (no padding bytes)
         template <typename TType>
         struct WriteCommand {
             
@@ -104,29 +100,7 @@ namespace Darwin
             /// Our checksum for this command
             const uint8_t checksum = calculateChecksum(this);
         };
-        
-        /**
-         * @brief This template is used to extend as it will work for any command that contains an instruction only.
-         *
-         * @details
-         *  This struct imitates exactly the structure for an instruction only command. Because of this, other types
-         *  can extend from it with their specific command to make a type that will work for that command.
-         */
-        template <int Instruction>
-        struct InstructionOnly {
-            InstructionOnly(uint8_t id) : id(id) {};
-            
-            /// Magic number that heads up every packet
-            const uint16_t magic = 0xFFFF;
-            /// The ID of the device that we are communicating with
-            const uint8_t id;
-            /// The total length of the data packet (always 2)
-            const uint8_t length = 2;
-            /// The instruction that we will be executing (The PING instruction)
-            const uint8_t instruction = Instruction;
-            /// Our checksum for this command
-            const uint8_t checksum = calculateChecksum(this);
-        };
+        #pragma pack(pop)
         
         /**
          * @brief This struct mimics the expected data structure for a Ping command.
@@ -137,25 +111,25 @@ namespace Darwin
          *
          * @author Trent Houliston
          */
-        struct PingCommand : public InstructionOnly<Instruction::PING> {
-            PingCommand(uint8_t id) : InstructionOnly<Instruction::PING>(id) {};
-        };
+        #pragma pack(push, 1) // Make it so that the compiler reads this struct "as is" (no padding bytes)
+        struct PingCommand {
+            PingCommand(uint8_t id) : id(id) {};
+            
+            /// Magic number that heads up every packet
+            const uint16_t magic = 0xFFFF;
+            /// The ID of the device that we are communicating with
+            const uint8_t id;
+            /// The total length of the data packet (always 2)
+            const uint8_t length = 2;
+            /// The instruction that we will be executing (The PING instruction)
+            const uint8_t instruction = Instruction::PING;
+            /// Our checksum for this command
+            const uint8_t checksum = calculateChecksum(this);
         
-        /**
-         * @brief This struct mimics the expected data structure for a Reset command.
-         *
-         * @details
-         *  This type has it's members arranged in the same way as a raw array of this command would. Because of this
-         *  you cannot add or remove members from this type (unless for some reason the API to the CM730 changes).
-         *
-         * @author Trent Houliston
-         */
-        struct ResetCommand : public InstructionOnly<Instruction::RESET> {
-            ResetCommand(uint8_t id) : InstructionOnly<Instruction::RESET>(id) {};
         };
-        
-// End our cache allignment options
-# pragma pack(pop)
+        // Check that this struct is not cache alligned
+        static_assert(sizeof(PingCommand) == 6, "The compiler is adding padding to this struct, Bad compiler!");
+        #pragma pack(pop)
         
     private:
         UART& m_coms;
@@ -180,6 +154,9 @@ namespace Darwin
          */
         template <typename TType>
         TType read(uint8_t address) {
+            
+            // Check that this struct is not cache alligned
+            static_assert(sizeof(ReadCommand<TType>) == 8, "The compiler is adding padding to this struct, Bad compiler!");
             
             // Execute our Read command through the uart
             CommandResult result = m_coms.execute(ReadCommand<TType>(m_id, address));
@@ -210,6 +187,9 @@ namespace Darwin
         template <typename TType>
         uint8_t write(uint8_t address, TType data) {
             
+            // Check that this struct is not cache alligned
+            static_assert(sizeof(WriteCommand<TType>) == 7 + sizeof(TType), "The compiler is adding padding to this struct, Bad compiler!");
+            
             // Write our data over the UART
             CommandResult result = m_coms.execute(WriteCommand<TType>(m_id, address, data));
             
@@ -223,13 +203,6 @@ namespace Darwin
          * @returns true if the device is working, false if the device is not working
          */
         bool ping();
-        
-        /**
-         * @brief This will send a reset command to the device.
-         *
-         * @returns true if the command worked, false if it did not
-         */
-        bool reset();
     };
 }
 

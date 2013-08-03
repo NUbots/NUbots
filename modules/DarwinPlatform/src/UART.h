@@ -40,14 +40,16 @@ namespace Darwin
         };
     }
     
-#pragma pack(push, 1)
     // This is the header that is contained in the CommandResult
+    #pragma pack(push, 1)// Make sure that this struct is not cache alligned
     struct Header {
         uint8_t id;
         uint8_t length = 0;
         uint8_t errorcode = -1;
     };
-#pragma pack(pop, 1)
+    // Check that this struct is not cache alligned
+    static_assert(sizeof(Header) == 3, "The compiler is adding padding to this struct, Bad compiler!");
+    #pragma pack(pop)
     
     // This is the object that is returned when a command is run
     struct CommandResult {

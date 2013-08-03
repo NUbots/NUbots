@@ -8,10 +8,3 @@ bool Darwin::DarwinDevice::ping() {
     
     return result.header.errorcode == ErrorCode::NONE;
 }
-
-bool Darwin::DarwinDevice::reset() {
-    
-    CommandResult result = m_coms.execute(ResetCommand(m_id));
-    
-    return result.header.errorcode == ErrorCode::NONE;
-}

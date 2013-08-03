@@ -5,7 +5,7 @@
 
 namespace Darwin {
     
-#pragma pack(push, 1)
+#pragma pack(push, 1) // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
     namespace Types {
         
         struct Gyro {
@@ -59,8 +59,16 @@ namespace Darwin {
         };
         
         struct MotorValues {
-            
+            bool torqueEnabled;
+            bool ledOn;
+            uint8_t dGain;
+            uint8_t iGain;
+            uint8_t pGain;
+            uint16_t goalPostion;
+            uint16_t movingSpeed;
+            uint16_t torqueLimit;
         };
+#pragma pack(pop)
     }
     
     struct BulkReadResults {
@@ -69,7 +77,6 @@ namespace Darwin {
         Types::FSRData fsr[2];
     };
     
-#pragma pack(pop)
 }
 
 #endif
