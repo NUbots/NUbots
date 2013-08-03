@@ -12,6 +12,11 @@
 
 namespace Darwin
 {
+    template <typename TType>
+    constexpr uint8_t getSize() {
+        return sizeof(TType);
+    }
+    
     class DarwinDevice {
         
     public:
@@ -59,7 +64,7 @@ namespace Darwin
             /// The address to read from
             const uint8_t address;
             /// The number of bytes to read
-            const uint8_t size = sizeof(TType);
+            const uint8_t size = getSize<TType>();
             /// Our checksum for this command
             const uint8_t checksum = calculateChecksum(this);
         };
@@ -90,7 +95,7 @@ namespace Darwin
             /// The ID of the device that we are communicating with
             const uint8_t id;
             /// The total length of the data packet (3 plus however many bytes we are writing)
-            const uint8_t length = 3 + sizeof(TType);
+            const uint8_t length = 3 + getSize<TType>();
             /// The instruction that we will be executing (The WRITE instruction)
             const uint8_t instruction = Instruction::WRITE;
             /// The address we are writing to

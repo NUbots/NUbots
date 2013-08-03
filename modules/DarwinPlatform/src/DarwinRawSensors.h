@@ -5,7 +5,7 @@
 
 namespace Darwin {
     
-#pragma pack(push, 1) // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
+    #pragma pack(push, 1) // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
     namespace Types {
         
         struct Gyro {
@@ -68,8 +68,8 @@ namespace Darwin {
             uint16_t movingSpeed;
             uint16_t torqueLimit;
         };
-#pragma pack(pop)
     }
+    #pragma pack(pop)
     
     struct BulkReadResults {
         Types::CM730Data cm730;
