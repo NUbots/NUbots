@@ -12,11 +12,6 @@
 
 namespace Darwin
 {
-    template <typename TType>
-    constexpr uint8_t getSize() {
-        return sizeof(TType);
-    }
-    
     class DarwinDevice {
         
     public:
@@ -51,7 +46,7 @@ namespace Darwin
         template <typename TType>
         struct ReadCommand {
             
-            ReadCommand(uint8_t id, uint8_t address) : id(id), address(address) {};
+            ReadCommand(uint8_t id, uint8_t address) : id(id), address(address), size(sizeof(TType)) {};
             
             /// Magic number that heads up every packet
             const uint16_t magic = 0xFFFF;
@@ -64,7 +59,7 @@ namespace Darwin
             /// The address to read from
             const uint8_t address;
             /// The number of bytes to read
-            const uint8_t size = getSize<TType>();
+            const uint8_t size;
             /// Our checksum for this command
             const uint8_t checksum = calculateChecksum(this);
         };
@@ -88,14 +83,14 @@ namespace Darwin
         template <typename TType>
         struct WriteCommand {
             
-            WriteCommand(uint8_t id, uint8_t address, TType data) : id(id), address(address), data(data) {};
+            WriteCommand(uint8_t id, uint8_t address, TType data) : id(id), length(3 + sizeof(TType)), address(address), data(data) {};
             
             /// Magic number that heads up every packet
             const uint16_t magic = 0xFFFF;
             /// The ID of the device that we are communicating with
             const uint8_t id;
             /// The total length of the data packet (3 plus however many bytes we are writing)
-            const uint8_t length = 3 + getSize<TType>();
+            const uint8_t length;
             /// The instruction that we will be executing (The WRITE instruction)
             const uint8_t instruction = Instruction::WRITE;
             /// The address we are writing to
