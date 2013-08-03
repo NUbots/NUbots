@@ -19,7 +19,7 @@ uint8_t Darwin::calculateChecksum(const CommandResult& result) {
     checksum += result.header.length;
     checksum += result.header.errorcode;
     
-    for(int i = 0; i < result.data.size() - 1; ++i) {
+    for(int i = 0; i < result.data.size(); ++i) {
         checksum += result.data[i];
     }
     
@@ -70,4 +70,91 @@ Darwin::UART::UART(const char* name) {
     m_ByteTransferTime = (1000.0 / baudrate) * 12.0;
 #endif
 
+}
+
+Darwin::CommandResult Darwin::UART::readPacket() {
+    
+    // Our result
+    CommandResult result;
+    
+    // Record the time we start working on this so we can timeout
+    auto start = std::chrono::steady_clock::now();
+    
+    // Keep attempting to read until we either timeout or see two consecutive 0xFF bytes
+    for(int sync = 0, byte = 0;
+        sync < 2;
+        read(m_fd, &byte, 1), sync = byte == 0xFF ? sync + 1 : 0) {
+        
+        // Timeout if we have taken too long
+        if (std::chrono::steady_clock::now() - start > TIMEOUT)
+            return CommandResult();
+    }
+    
+    // Read our remaining 4 byte packet header
+    uint8_t headerBytes[4];
+    for(int done = 0; done < 4; done += read(m_fd, &headerBytes[done], 4 - done)) {
+        
+        // Timeout if we have taken too long
+        if (std::chrono::steady_clock::now() - start > TIMEOUT)
+            return CommandResult();
+    }
+    
+    // Make our Header object
+    result.header = *reinterpret_cast<Header*>(headerBytes);
+    
+    // Here we adjust our "length" to mean the length of the payload rather then the length of bytes after the length
+    result.header.length = result.header.length - 2;
+    result.data.resize(result.header.length);
+    
+    // Read our payload
+    for(int done = 0;
+        done < result.header.length;
+        done += read(m_fd, &result.data.data()[done], (result.header.length) - done)) {
+        
+        // Timeout if we have taken too long
+        if (std::chrono::steady_clock::now() - start > TIMEOUT)
+            return CommandResult();
+    }
+    
+    // Read our checksum
+    for(int done = 0;
+        done < 1;
+        done += read(m_fd, &result.checksum, 1)) {
+        
+        // Timeout if we have taken too long
+        if (std::chrono::steady_clock::now() - start > TIMEOUT)
+            return CommandResult();
+    }
+    
+    // Validate our checksum
+    if(result.checksum == calculateChecksum(result)) {
+        CommandResult result;
+        result.header.errorcode = ErrorCode::CORRUPT_DATA;
+        return result;
+    }
+    
+    // Return the packet we recieved
+    return result;
+}
+
+std::vector<Darwin::CommandResult> Darwin::UART::executeBulk(const std::vector<uint8_t>& command) {
+    
+    int responses = (command[Packet::LENGTH]-3) / 3;
+    std::vector<CommandResult> results(responses);
+    
+    // Lock our mutex
+    std::unique_lock<std::mutex>(m_mutex);
+    
+    // We flush our buffer, just in case there was anything random in it
+    tcflush(m_fd,TCIOFLUSH);
+    
+    // Write the command as usual
+    write(m_fd, command.data(), command.size());
+    
+    // Read our responses for each of the packets
+    for (int i = 0; i < responses; ++i) {
+        results[i] = readPacket();
+    }
+    
+    return results;
 }

@@ -14,7 +14,7 @@ namespace Darwin
 {
     class DarwinDevice {
         
-    private:
+    public:
         /**
          * @brief This is the list of valid instructions for the CM730 and related components.
          */
@@ -28,6 +28,13 @@ namespace Darwin
             SYNC_WRITE = 83,
             BULK_READ = 146
         };
+        
+/*
+ * This pragma option disables cache allignment until the following pragma pack option. This is used so that the
+ * datatypes specified here do not have any padding added to them. This results in them being directly mappable
+ * to the data that we send and receive from the UART
+ */
+#pragma pack(push, 1)
         
         /**
          * @brief This struct mimics the expected data structure for a Write command.
@@ -147,7 +154,10 @@ namespace Darwin
             ResetCommand(uint8_t id) : InstructionOnly<Instruction::RESET>(id) {};
         };
         
+// End our cache allignment options
+# pragma pack(pop)
         
+    private:
         UART& m_coms;
         int m_id;
         
