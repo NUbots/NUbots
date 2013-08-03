@@ -68,7 +68,7 @@ namespace Darwin
     
     class UART {
     private:
-        int m_byteTransferTime;
+        int m_ByteTransferTime;
         int m_fd;
         std::mutex m_mutex;
         

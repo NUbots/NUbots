@@ -65,7 +65,7 @@ Darwin::UART::UART(const char* name) {
         // TODO error "Cannot set serial info"
 	}
     
-	tcflush(m_Socket_fd, TCIFLUSH);
+	tcflush(m_fd, TCIFLUSH);
     
     m_ByteTransferTime = (1000.0 / baudrate) * 12.0;
 #endif
