@@ -67,7 +67,8 @@ Darwin::UART::UART(const char* name) {
     
     // If we have a valid file handle, and were able to configure it correctly (custom baud)
     if(m_fd < 0 || !configure(baud)) {
-        // TODO there was an error connecting to the serial port
+        // There was an exception connecting
+        throw std::runtime_error("There was an error setting up the serial connection to the CM730");
     }
 }
 

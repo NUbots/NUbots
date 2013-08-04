@@ -14,7 +14,7 @@
 #endif
 
 namespace Darwin
-{   
+{
     namespace Packet {
         enum Packet {
             MAGIC       = 0,
