@@ -3,32 +3,6 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-uint8_t Darwin::calculateChecksum(void* command) {
-    
-    uint8_t* data = static_cast<uint8_t*>(command);
-    uint8_t checksum = 0x00;
-    // Skip over the magic numbers and checksum the rest of the packet
-    for(int i=2; i < data[3] + 3; ++i) {
-        checksum += data[i];
-    }
-    return (~checksum);
-}
-
-uint8_t Darwin::calculateChecksum(const CommandResult& result) {
-    
-    uint8_t checksum = 0x00;
-    
-    checksum += result.header.id;
-    checksum += result.header.length;
-    checksum += result.header.errorcode;
-    
-    for(size_t i = 0; i < result.data.size(); ++i) {
-        checksum += result.data[i];
-    }
-    
-    return (~checksum);
-}
-
 #ifndef __linux__
 
 // This is only defined here so it will compile in xcode during testing
@@ -60,7 +34,31 @@ struct serial_struct {
 
 #endif
 
-#include <iostream>
+uint8_t Darwin::calculateChecksum(void* command) {
+    
+    uint8_t* data = static_cast<uint8_t*>(command);
+    uint8_t checksum = 0x00;
+    // Skip over the magic numbers and checksum the rest of the packet
+    for(int i=2; i < data[3] + 3; ++i) {
+        checksum += data[i];
+    }
+    return (~checksum);
+}
+
+uint8_t Darwin::calculateChecksum(const CommandResult& result) {
+    
+    uint8_t checksum = 0x00;
+    
+    checksum += result.header.id;
+    checksum += result.header.length;
+    checksum += result.header.errorcode;
+    
+    for(size_t i = 0; i < result.data.size(); ++i) {
+        checksum += result.data[i];
+    }
+    
+    return (~checksum);
+}
 
 Darwin::UART::UART(const char* name) {
     

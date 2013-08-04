@@ -4,7 +4,7 @@ SET(module_name "DarwinPlatform")
 # YOU SHOULD NOT HAVE TO TOUCH ANYTHING BELOW THIS LINE
 
 # Find all our files
-FILE(GLOB src "src/**.cpp", "src/**.h")
+FILE(GLOB src "src/*.cpp", "src/*.h")
 
 # Include our own src dir and the shared dir
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
