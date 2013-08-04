@@ -14,10 +14,7 @@
 #endif
 
 namespace Darwin
-{
-    // If a command takes more then 10µs to complete then it has timedout
-    const std::chrono::microseconds TIMEOUT(10);
-    
+{   
     namespace Packet {
         enum Packet {
             MAGIC       = 0,
@@ -68,9 +65,10 @@ namespace Darwin
     
     class UART {
     private:
-        int m_ByteTransferTime;
         int m_fd;
         std::mutex m_mutex;
+        
+        int configure(double baud);
         
     public:
         UART(const char* name);
@@ -84,7 +82,7 @@ namespace Darwin
             std::unique_lock<std::mutex> lock(m_mutex);
             
             // We flush our buffer, just in case there was anything random in it
-            tcflush(m_fd,TCIOFLUSH);
+            tcflush(m_fd, TCIFLUSH);
             
             // Write our command to the UART
             write(m_fd, &command, sizeof(TPacket));
