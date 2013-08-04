@@ -67,7 +67,7 @@ void Darwin::Darwin::buildBulkReadPacket() {
     
     // Double check that our type is big enough to hold the result
     static_assert(sizeof(Types::MX28Data) == MX28::Address::PRESENT_TEMPERATURE - MX28::Address::TORQUE_ENABLE + 1,
-                  "The Motor type is the wrong size");
+                  "The MX28 type is the wrong size");
     
     // The Two FSRs
     request.push_back(std::make_tuple(111, FSR::Address::FSR1_L, FSR::Address::FSR_Y - FSR::Address::FSR1_L + 1));
@@ -133,18 +133,41 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
     return data;
 }
 
-void Darwin::Darwin::writeMotors() {
-    // TODO work out how a syncwrite packet works
-    // TODO do a sync write packet
+void Darwin::Darwin::writeMotors(const std::vector<Types::MotorValues>& motors) {
     
-    // TODO sync write packet looks like so
-    // magic
-    // magic
-    // broadcast id
-    // length
-    // syncwrite instruction
-    // all motors startaddr
-    // all motors byte length (minus one for some reason)
-    // params in order (as id, params)
-    // checksum
+    // Check that our MotorValues object is the correct size (the difference + 1 + another for the id)
+    static_assert(sizeof(Types::MotorValues) == MX28::Address::TORQUE_LIMIT_H - MX28::Address::TORQUE_ENABLE + 2,
+                  "The MotorValues type is the wrong size");
+    
+    std::vector<uint8_t> packet;
+    
+    // We allocate 8 bytes for normal things, and then space for all the motor values
+    packet.resize(8 + (motors.size() * sizeof(Types::MotorValues)));
+    
+    // Our magic bytes
+    packet[Packet::MAGIC] = 0xFF;
+    packet[Packet::MAGIC + 1] = 0xFF;
+    
+    // Our target id
+    packet[Packet::ID] = 254; // Broadcast id
+    
+    // Our data length
+    packet[Packet::LENGTH] = 4 + (motors.size() * sizeof(Types::MotorValues));
+    
+    // Our instruction
+    packet[Packet::INSTRUCTION] = DarwinDevice::Instruction::SYNC_WRITE;
+    
+    // Our start address (we start at torque enable)
+    packet[Packet::PARAMETER] = MX28::Address::TORQUE_ENABLE;
+    // Our data length
+    packet[Packet::PARAMETER + 1] = sizeof(Types::MotorValues);
+    
+    // Our motor values
+    memcpy(&packet[Packet::PARAMETER + 2], motors.data(), motors.size());
+    
+    // Our checksum
+    packet.back() = calculateChecksum(packet.data());
+    
+    // Execute the command
+    m_uart.executeBroadcast(packet);
 }

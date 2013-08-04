@@ -151,7 +151,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     // We now are now waiting for 4 bytes
     timeout.tv_usec = BYTE_WAIT * sizeof(Header);
     uint8_t headerBytes[sizeof(Header)];
-    for(int done = 0; done < sizeof(Header);) {
+    for(size_t done = 0; done < sizeof(Header);) {
         if(select(m_fd + 1, & connectionset, nullptr, nullptr, &timeout) == 1) {
             
             done += read(m_fd, &headerBytes[done], sizeof(Header) - done);
@@ -208,6 +208,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
 
 std::vector<Darwin::CommandResult> Darwin::UART::executeBulk(const std::vector<uint8_t>& command) {
     
+    // We can work out how many responses to expect based on our packets length
     int responses = (command[Packet::LENGTH]-3) / 3;
     std::vector<CommandResult> results(responses);
     
@@ -215,7 +216,7 @@ std::vector<Darwin::CommandResult> Darwin::UART::executeBulk(const std::vector<u
     std::unique_lock<std::mutex>(m_mutex);
     
     // We flush our buffer, just in case there was anything random in it
-    tcflush(m_fd,TCIOFLUSH);
+    tcflush(m_fd,TCIFLUSH);
     
     // Write the command as usual
     write(m_fd, command.data(), command.size());
@@ -226,4 +227,18 @@ std::vector<Darwin::CommandResult> Darwin::UART::executeBulk(const std::vector<u
     }
     
     return results;
+}
+
+void Darwin::UART::executeBroadcast(const std::vector<uint8_t>& command) {
+    
+    // Lock our mutex
+    std::unique_lock<std::mutex>(m_mutex);
+    
+    // We flush our buffer, just in case there was anything random in it
+    tcflush(m_fd,TCIFLUSH);
+    
+    // Write the command as usual
+    write(m_fd, command.data(), command.size());
+
+    // There are no responses for broadcast commands
 }

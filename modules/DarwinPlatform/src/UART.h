@@ -91,6 +91,7 @@ namespace Darwin
         }
         
         std::vector<CommandResult> executeBulk(const std::vector<uint8_t>& command);
+        void executeBroadcast(const std::vector<uint8_t>& command);
     };
 }
 

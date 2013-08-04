@@ -59,11 +59,13 @@ namespace Darwin {
         };
         
         struct MotorValues {
+            uint8_t motorId;
             bool torqueEnabled;
             bool ledOn;
             uint8_t dGain;
             uint8_t iGain;
             uint8_t pGain;
+            uint8_t reserved;
             uint16_t goalPostion;
             uint16_t movingSpeed;
             uint16_t torqueLimit;

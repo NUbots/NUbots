@@ -76,7 +76,7 @@ public:
     
     void selfTest();
     BulkReadResults bulkRead();
-    void writeMotors();
+    void writeMotors(const std::vector<Types::MotorValues>& motors);
 };
 }
 
