@@ -8,6 +8,12 @@ namespace Darwin
     class CM730 : public DarwinDevice {
     public:
         
+        /**
+         * @brief Holds the addresses of the various bytes in the CM730.
+         *
+         * @details
+         *  for additional details see http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/sub_controller_(cm-730).htm
+         */
         enum Address
         {
             MODEL_NUMBER_L      = 0,
@@ -71,6 +77,9 @@ namespace Darwin
         
         CM730(UART& coms, int id);
         
+        /**
+         * @brief turns on the Dynamixel power (motors and foot sensors)
+         */
         void turnOnDynamixel();
     };
 }

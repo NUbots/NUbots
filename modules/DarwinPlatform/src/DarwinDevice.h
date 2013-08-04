@@ -1,22 +1,26 @@
 #ifndef DARWINDEVICE_H
 #define DARWINDEVICE_H
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <termios.h>
-#include <sys/ioctl.h>
 #include <stdint.h>
-#include <mutex>
 
 #include "UART.h"
 
 namespace Darwin
 {
+    /**
+     * @brief The darwin device is a device on the serial port that will respond to the command types.
+     *
+     * @details
+     *  This class is extended by the CM730, MX28 and FSR's, this allows them to access various memory locations
+     *  using the common functionality provided by this class
+     *
+     * @author Trent Houliston
+     */
     class DarwinDevice {
         
     public:
         /**
-         * @brief This is the list of valid instructions for the CM730 and related components.
+         * @brief The list of valid instructions for the CM730 and related components.
          */
         enum Instruction {
             PING = 1,
@@ -139,7 +143,7 @@ namespace Darwin
         DarwinDevice(UART& coms, int id);
         
         /**
-         * @brief This function reads from this device at the given memory address.
+         * @brief Reads from this device at the given memory address.
          *
          * @details
          *  This will read from the current device at the given memory address, and return an object of type TType.
@@ -170,7 +174,7 @@ namespace Darwin
         }
         
         /**
-         * @brief This function writes data to this device at the given memory address.
+         * @brief Writes data to this device at the given memory address.
          *
          * @details
          *  This will write the passed object to the current device at the given memory address. It will write

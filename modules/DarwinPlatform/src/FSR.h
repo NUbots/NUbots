@@ -9,6 +9,12 @@ namespace Darwin
         
     public:
         
+        /**
+         * @brief This enum holds the addresses of the various bytes in the FSR (Force Sensitive Resistors in the feet).
+         *
+         * @details
+         *  for additional details see http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
+         */
         enum Address
         {
             MODEL_NUMBER_L            = 0,

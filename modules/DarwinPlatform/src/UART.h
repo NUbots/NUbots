@@ -1,10 +1,8 @@
 #ifndef UART_H
 #define UART_H
 
-#include <fcntl.h>
 #include <unistd.h>
 #include <termios.h>
-#include <sys/ioctl.h>
 #include <stdint.h>
 #include <cstring>
 #include <mutex>
@@ -16,7 +14,7 @@
 namespace Darwin
 {
     namespace Packet {
-        enum Packet {
+        enum {
             MAGIC       = 0,
             ID          = 2,
             LENGTH      = 3,
@@ -27,7 +25,7 @@ namespace Darwin
     }
     
     namespace ErrorCode {
-        enum ErrorCode {
+        enum {
             NO_RESPONSE     = -1,
             NONE            = 0x0000,
             INPUT_VOLTAGE   = 0x0001,

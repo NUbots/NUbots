@@ -9,6 +9,12 @@ namespace Darwin
         
     public:
         
+        /**
+         * @brief This enum holds the addresses of the various bytes in the MX28.
+         *
+         * @details
+         *  for additional details see http://support.robotis.com/en/product/dynamixel/mx_series/mx-28.htm
+         */
         enum Address
         {
             MODEL_NUMBER_L          = 0,

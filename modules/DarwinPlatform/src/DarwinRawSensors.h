@@ -5,21 +5,33 @@
 
 namespace Darwin {
     
+    /**
+     * TODO
+     */
     #pragma pack(push, 1) // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
     namespace Types {
         
+        /**
+         * TODO
+         */
         struct Gyro {
             int16_t z;
             int16_t y;
             int16_t x;
         };
         
+        /**
+         * TODO
+         */
         struct Accelerometer {
             int16_t x;
             int16_t y;
             int16_t z;
         };
         
+        /**
+         * TODO
+         */
         struct MX28Data {
             bool torqueEnabled;
             bool LED;
@@ -37,6 +49,9 @@ namespace Darwin {
             uint8_t temperature;
         };
         
+        /**
+         * TODO
+         */
         struct FSRData {
             uint16_t fsr1;
             uint16_t fsr2;
@@ -46,6 +61,9 @@ namespace Darwin {
             uint8_t centreY;
         };
         
+        /**
+         * TODO
+         */
         struct CM730Data {
             uint8_t ledPanel;
             uint16_t headLED;
@@ -58,6 +76,9 @@ namespace Darwin {
             uint16_t adc[15];
         };
         
+        /**
+         * TODO
+         */
         struct MotorValues {
             uint8_t motorId;
             bool torqueEnabled;
@@ -73,6 +94,9 @@ namespace Darwin {
     }
     #pragma pack(pop)
     
+    /**
+     * TODO
+     */
     struct BulkReadResults {
         Types::CM730Data cm730;
         Types::MX28Data motors[20];

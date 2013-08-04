@@ -1,5 +1,8 @@
 #include "UART.h"
 
+#include <sys/ioctl.h>
+#include <fcntl.h>
+
 uint8_t Darwin::calculateChecksum(void* command) {
     
     uint8_t* data = static_cast<uint8_t*>(command);
