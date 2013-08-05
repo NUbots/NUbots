@@ -48,8 +48,6 @@ namespace modules {
                 (data.cm730.acceleronometer.z - 512) * ACCELERONOMETER_CONVERSION
             };
             
-            // 1023 is 1600 degrees per second, 512 is 0 degrees per second 0 is -1600 degrees per second
-            
             // Gyroscope (measured in Radians per second)
             const double GYROSCOPE_CONVERSION = 0.0545415391248228; // 512 * x = 80PI/9 (1600 degrees in radians)
             arma::vec3 gyroscope = {
@@ -60,8 +58,8 @@ namespace modules {
             
             
             // In normalized value (0-1)
-            float rightMic = data.cm730.adc[0] / 1024.0;
-            float leftMic = data.cm730.adc[8] / 1024.0;
+            float leftMic = data.cm730.adc[0] / 1024.0;
+            float rightMic = data.cm730.adc[8] / 1024.0;
             
             // TODO before every read, check to see if all the values are 0xFF, this means an error
             
