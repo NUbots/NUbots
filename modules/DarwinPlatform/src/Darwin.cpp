@@ -1,6 +1,7 @@
 #include "Darwin.h"
 
 #include <thread>
+#include <algorithm>
 
 // Initialize all of the sensor handler objects using the passed uart
 Darwin::Darwin::Darwin(const char* name) :
@@ -43,6 +44,9 @@ std::vector<std::pair<uint8_t, bool>> Darwin::Darwin::selfTest() {
     
     std::vector<std::pair<uint8_t, bool>> results;
     
+    // Ping our CM730
+    results.push_back(std::make_pair(ID::CM730, m_cm730.ping()));
+    
     // Ping all our motors
     for (int i = 0; i < 20; ++i) {
         results.push_back(std::make_pair(i + 1, (&m_rShoulderPitch)[i].ping()));
@@ -58,7 +62,7 @@ std::vector<std::pair<uint8_t, bool>> Darwin::Darwin::selfTest() {
 void Darwin::Darwin::buildBulkReadPacket() {
     
     // Double check that our type is big enough to hold the result
-    static_assert(sizeof(Types::CM730Data) == CM730::Address::ADC15_H - CM730::Address::LED_PANNEL + 1,
+    static_assert(sizeof(Types::CM730Data) == CM730::Address::VOLTAGE - CM730::Address::LED_PANNEL + 1,
                   "The CM730 type is the wrong size");
     
     // Double check that our type is big enough to hold the result
@@ -86,18 +90,18 @@ void Darwin::Darwin::buildBulkReadPacket() {
                 
             // If it's the CM730
             case ID::CM730:
-                request.push_back(std::make_tuple(ID::CM730, CM730::Address::LED_PANNEL, sizeof(Types::CM730Data)));
+                request.push_back(std::make_tuple(CM730::Address::LED_PANNEL, ID::CM730, sizeof(Types::CM730Data)));
                 break;
                 
             // If it's the FSRs
             case ID::L_FSR:
             case ID::R_FSR:
-                request.push_back(std::make_tuple(sensor.first, FSR::Address::FSR1_L, sizeof(Types::FSRData)));
+                request.push_back(std::make_tuple(FSR::Address::FSR1_L, sensor.first, sizeof(Types::FSRData)));
                 break;
             
             // Otherwise we assume that it's a motor
             default:
-                request.push_back(std::make_tuple(sensor.first, MX28::Address::TORQUE_ENABLE, sizeof(Types::MX28Data)));
+                request.push_back(std::make_tuple(MX28::Address::TORQUE_ENABLE, sensor.first, sizeof(Types::MX28Data)));
                 break;
         }
     }
@@ -106,13 +110,13 @@ void Darwin::Darwin::buildBulkReadPacket() {
     std::vector<uint8_t> command(7 + (request.size() * 3));
     command[Packet::MAGIC] = 0xFF;
     command[Packet::MAGIC + 1] = 0xFF;
-    command[Packet::ID] = 254;
+    command[Packet::ID] = ID::BROADCAST;
     command[Packet::LENGTH] = 3 + (request.size() * 3);
     command[Packet::INSTRUCTION] = DarwinDevice::Instruction::BULK_READ;
     command[Packet::PARAMETER] = 0x00;
     
     // Copy our parameters in
-    memcpy(&command.data()[Packet::PARAMETER + 1], request.data(), request.size() * 3);
+    memcpy(&command[Packet::PARAMETER + 1], request.data(), request.size() * 3);
     
     // Calculate our checksum
     command.back() = calculateChecksum(command.data());
@@ -210,14 +214,14 @@ void Darwin::Darwin::writeMotors(const std::vector<Types::MotorValues>& motors) 
     // Build our packet
     packet[Packet::MAGIC] = 0xFF;
     packet[Packet::MAGIC + 1] = 0xFF;
-    packet[Packet::ID] = 254; // Broadcast id
+    packet[Packet::ID] = ID::BROADCAST; // Broadcast id
     packet[Packet::LENGTH] = 4 + (motors.size() * sizeof(Types::MotorValues));
     packet[Packet::INSTRUCTION] = DarwinDevice::Instruction::SYNC_WRITE;
     
     // Our start address (we start at torque enable)
     packet[Packet::PARAMETER] = MX28::Address::TORQUE_ENABLE;
-    // Our data length
-    packet[Packet::PARAMETER + 1] = sizeof(Types::MotorValues);
+    // Our data length (not including our ID)
+    packet[Packet::PARAMETER + 1] = sizeof(Types::MotorValues) - 1;
     
     // Our motor values
     memcpy(&packet[Packet::PARAMETER + 2], motors.data(), motors.size());

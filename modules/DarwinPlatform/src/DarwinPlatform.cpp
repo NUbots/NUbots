@@ -87,6 +87,8 @@ namespace modules {
             
         // MOTORS
             
+            // TODO we are using the better motors, and have 4096 range rather then 1024
+            
             bool motorTorqueEnabled = data.motors[0].torqueEnabled;
             bool motorLED = data.motors[0].LED;
             

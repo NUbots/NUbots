@@ -15,18 +15,18 @@ namespace Darwin {
          * TODO
          */
         struct Gyro {
-            int16_t z;
-            int16_t y;
-            int16_t x;
+            uint16_t z;
+            uint16_t y;
+            uint16_t x;
         };
         
         /**
          * TODO
          */
         struct Accelerometer {
-            int16_t x;
-            int16_t y;
-            int16_t z;
+            uint16_t x;
+            uint16_t y;
+            uint16_t z;
         };
         
         /**
@@ -73,7 +73,6 @@ namespace Darwin {
             Gyro gyroscope;
             Accelerometer acceleronometer;
             uint8_t voltage;
-            uint16_t adc[15];
         };
         
         /**

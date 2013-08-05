@@ -39,7 +39,8 @@ namespace Darwin {
             HEAD_PAN = 19,
             HEAD_TILT = 20,
             R_FSR = 111,
-            L_FSR = 112
+            L_FSR = 112,
+            BROADCAST = 254
         };
     }
     

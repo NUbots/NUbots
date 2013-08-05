@@ -39,7 +39,7 @@ uint8_t Darwin::calculateChecksum(void* command) {
     uint8_t* data = static_cast<uint8_t*>(command);
     uint8_t checksum = 0x00;
     // Skip over the magic numbers and checksum the rest of the packet
-    for(int i=2; i < data[3] + 3; ++i) {
+    for(int i=2; i < data[Packet::LENGTH] + 3; ++i) {
         checksum += data[i];
     }
     return (~checksum);
@@ -121,9 +121,9 @@ int Darwin::UART::configure(double baud) {
 Darwin::CommandResult Darwin::UART::readPacket() {
     
     // We will wait this long for an initial packet header
-    int PACKET_WAIT = 100;
-    // We will only wait a maximum of 12 microseconds between bytes in a packet (assumes baud of 1000000bps)
-    int BYTE_WAIT = 12;
+    int PACKET_WAIT = 10000;
+    // We will only wait a maximum of 100 microseconds between bytes in a packet
+    int BYTE_WAIT = 100;
     
     // Our result
     CommandResult result;
@@ -168,15 +168,15 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     result.header = *reinterpret_cast<Header*>(headerBytes);
     
     // Here we adjust our "length" to mean the length of the payload rather then the length of bytes after the length
-    result.header.length = result.header.length - 2;
+    int length = result.header.length - 2;
     
     // We now are now waiting for our data
-    timeout.tv_usec = BYTE_WAIT * result.header.length;
-    result.data.resize(result.header.length);
-    for(int done = 0; done < result.header.length;) {
+    timeout.tv_usec = BYTE_WAIT * length;
+    result.data.resize(length);
+    for(int done = 0; done < length;) {
         if(select(m_fd + 1, & connectionset, nullptr, nullptr, &timeout) == 1) {
             
-            done += read(m_fd, &result.data[done], result.header.length - done);
+            done += read(m_fd, &result.data[done], length - done);
         }
         else {
             // Set our packet header to timeout and return it
@@ -186,7 +186,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     }
     
     // We just read the checksum now
-    timeout.tv_usec = BYTE_WAIT * 1;
+    timeout.tv_usec = 500;
     if(select(m_fd + 1, & connectionset, nullptr, nullptr, &timeout) == 1) {
         
         read(m_fd, &result.checksum, 1);

@@ -42,7 +42,7 @@ namespace Darwin
     // This is the header that is contained in the CommandResult
     #pragma pack(push, 1)// Make sure that this struct is not cache alligned
     struct Header {
-        uint8_t id;
+        uint8_t id = -1;
         uint8_t length = 0;
         uint8_t errorcode = -1;
     };

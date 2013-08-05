@@ -165,6 +165,16 @@ namespace Darwin
             // Execute our Read command through the uart
             CommandResult result = m_coms.execute(ReadCommand<TType>(m_id, address));
             
+            // If there was an error then try reading again
+            if(result.data.size() != sizeof(TType)) {
+                result = m_coms.execute(ReadCommand<TType>(m_id, address));
+            }
+            
+            // If it's still bad then throw a runtime error
+            if(result.data.size() != sizeof(TType)) {
+                throw std::runtime_error("There was an error while trying to read from the device");
+            }
+            
             // Copy our resulting data into our return type
             TType data;
             memcpy(&data, result.data.data(), sizeof(TType));
