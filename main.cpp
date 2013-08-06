@@ -1,7 +1,6 @@
 #include <NUClear.h>
 #include <signal.h>
-#include "DarwinMotors.h"
-#include "DarwinSensors.h"
+#include "DarwinPlatform.h"
 #include "DarwinCamera.h"
 
 struct SegmentationFault : public std::exception {};
@@ -46,8 +45,7 @@ int main(int argc, char *argv[]) {
     signal(SIGSEGV, segfaultConverter);
     signal(SIGABRT, abortfaultConverter);
     
-    plant.install<modules::DarwinMotors>();
-    plant.install<modules::DarwinSensors>();
+    plant.install<modules::DarwinPlatform>();
     plant.install<modules::DarwinCamera>();
     
     plant.start();

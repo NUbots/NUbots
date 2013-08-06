@@ -47,7 +47,7 @@ std::vector<std::pair<uint8_t, bool>> Darwin::Darwin::selfTest() {
     // Ping our CM730
     results.push_back(std::make_pair(ID::CM730, m_cm730.ping()));
     
-    // Ping all our motors
+    // Ping all our servos
     for (int i = 0; i < 20; ++i) {
         results.push_back(std::make_pair(i + 1, (&m_rShoulderPitch)[i].ping()));
     }
@@ -99,7 +99,7 @@ void Darwin::Darwin::buildBulkReadPacket() {
                 request.push_back(std::make_tuple(FSR::Address::FSR1_L, sensor.first, sizeof(Types::FSRData)));
                 break;
             
-            // Otherwise we assume that it's a motor
+            // Otherwise we assume that it's a servo
             default:
                 request.push_back(std::make_tuple(MX28::Address::TORQUE_ENABLE, sensor.first, sizeof(Types::MX28Data)));
                 break;
@@ -139,9 +139,9 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
         auto& r = results[i];
         if(r.header.errorcode == ErrorCode::NONE) {
             
-            // Copy for motor data
+            // Copy for servo data
             if(r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT)
-                memcpy(&data.motors[r.header.id - 1], r.data.data(), sizeof(Types::MX28Data));
+                memcpy(&data.servos[r.header.id - 1], r.data.data(), sizeof(Types::MX28Data));
             
             // Copy for FSR data
             else if(r.header.id == ID::R_FSR || r.header.id == ID::L_FSR)
@@ -169,9 +169,9 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
             
             firstError = false;
             
-            // Set for motor data
+            // Set for servo data
             if(r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT)
-                memset(&data.motors[r.header.id - 1], 0xFF, sizeof(Types::MX28Data));
+                memset(&data.servos[r.header.id - 1], 0xFF, sizeof(Types::MX28Data));
             
             // Set for FSR data
             else if(r.header.id == ID::R_FSR || r.header.id == ID::L_FSR)
@@ -184,9 +184,9 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
         
         // This data could just be bad data because of previous sensor errors, only the first is reliable
         else {
-            // Set for motor data
+            // Set for servo data
             if(r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT)
-                memset(&data.motors[r.header.id - 1], 0xFF, sizeof(Types::MX28Data));
+                memset(&data.servos[r.header.id - 1], 0xFF, sizeof(Types::MX28Data));
             
             // Set for FSR data
             else if(r.header.id == ID::R_FSR || r.header.id == ID::L_FSR)
@@ -201,30 +201,30 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
     return data;
 }
 
-void Darwin::Darwin::writeMotors(const std::vector<Types::MotorValues>& motors) {
+void Darwin::Darwin::writeServos(const std::vector<Types::ServoValues>& servos) {
     
-    // Check that our MotorValues object is the correct size (the difference + 1 + another for the id)
-    static_assert(sizeof(Types::MotorValues) == MX28::Address::TORQUE_LIMIT_H - MX28::Address::TORQUE_ENABLE + 2,
-                  "The MotorValues type is the wrong size");
+    // Check that our ServoValues object is the correct size (the difference + 1 + another for the id)
+    static_assert(sizeof(Types::ServoValues) == MX28::Address::MOVING_SPEED_H - MX28::Address::D_GAIN + 2,
+                  "The ServoValues type is the wrong size");
     
-    // We allocate 8 bytes for normal things, and then space for all the motor values
+    // We allocate 8 bytes for normal things, and then space for all the servo values
     std::vector<uint8_t> packet;
-    packet.resize(8 + (motors.size() * sizeof(Types::MotorValues)));
+    packet.resize(8 + (servos.size() * sizeof(Types::ServoValues)));
     
     // Build our packet
     packet[Packet::MAGIC] = 0xFF;
     packet[Packet::MAGIC + 1] = 0xFF;
     packet[Packet::ID] = ID::BROADCAST; // Broadcast id
-    packet[Packet::LENGTH] = 4 + (motors.size() * sizeof(Types::MotorValues));
+    packet[Packet::LENGTH] = 4 + (servos.size() * sizeof(Types::ServoValues));
     packet[Packet::INSTRUCTION] = DarwinDevice::Instruction::SYNC_WRITE;
     
     // Our start address (we start at torque enable)
     packet[Packet::PARAMETER] = MX28::Address::TORQUE_ENABLE;
     // Our data length (not including our ID)
-    packet[Packet::PARAMETER + 1] = sizeof(Types::MotorValues) - 1;
+    packet[Packet::PARAMETER + 1] = sizeof(Types::ServoValues) - 1;
     
-    // Our motor values
-    memcpy(&packet[Packet::PARAMETER + 2], motors.data(), motors.size());
+    // Our servo values
+    memcpy(&packet[Packet::PARAMETER + 2], servos.data(), servos.size());
     
     // Our checksum
     packet.back() = calculateChecksum(packet.data());

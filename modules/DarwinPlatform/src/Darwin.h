@@ -137,11 +137,11 @@ namespace Darwin {
         BulkReadResults bulkRead();
         
         /**
-         * @brief This writes a series of motor values to the device
+         * @brief This writes a series of servo values to the device
          *
-         * @param motors The motor objects to write
+         * @param servos The servo objects to write
          */
-        void writeMotors(const std::vector<Types::MotorValues>& motors);
+        void writeServos(const std::vector<Types::ServoValues>& servos);
     };
 }
 

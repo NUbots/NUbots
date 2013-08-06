@@ -55,15 +55,13 @@ ADD_SUBDIRECTORY(shared/messages)
 
 SET(modules
     DarwinPlatform
-    DarwinMotors
-    DarwinCamera
-    DarwinSensors)
+    DarwinCamera)
 
 FOREACH(module ${modules})
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${module})
     INCLUDE_DIRECTORIES(modules/${module}/src)
-    ADD_TEST(DarwinMotorsTests modules/${module}/${module}Tests)
+    ADD_TEST(${module}Tests modules/${module}/${module}Tests)
 ENDFOREACH()
 
 ADD_EXECUTABLE(robocup main.cpp)

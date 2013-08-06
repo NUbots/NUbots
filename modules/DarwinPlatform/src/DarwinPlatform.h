@@ -5,9 +5,6 @@
 
 #include "Darwin.h"
 
-#include "messages/DarwinMotors.h"
-#include "messages/DarwinSensors.h"
-
 namespace modules {
     
     class DarwinPlatform : public NUClear::Reactor {

@@ -78,17 +78,14 @@ namespace Darwin {
         /**
          * TODO
          */
-        struct MotorValues {
-            uint8_t motorId;
-            bool torqueEnabled;
-            bool ledOn;
+        struct ServoValues {
+            uint8_t servoId;
             uint8_t dGain;
             uint8_t iGain;
             uint8_t pGain;
             uint8_t reserved;
             uint16_t goalPostion;
             uint16_t movingSpeed;
-            uint16_t torqueLimit;
         };
     }
     #pragma pack(pop)
@@ -98,7 +95,7 @@ namespace Darwin {
      */
     struct BulkReadResults {
         Types::CM730Data cm730;
-        Types::MX28Data motors[20];
+        Types::MX28Data servos[20];
         Types::FSRData fsr[2];
     };
     

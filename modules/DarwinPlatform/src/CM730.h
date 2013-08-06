@@ -78,7 +78,7 @@ namespace Darwin
         CM730(UART& coms, int id);
         
         /**
-         * @brief turns on the Dynamixel power (motors and foot sensors)
+         * @brief turns on the Dynamixel power (servos and foot sensors)
          */
         void turnOnDynamixel();
     };
