@@ -1,22 +1,36 @@
-#ifndef FSR_H
-#define FSR_H
+/*
+ * This file is part of DarwinPlatform.
+ *
+ * DarwinPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * DarwinPlatform is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with DarwinPlatform.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 Trent Houliston <trent@houliston.me>
+ */
+
+#ifndef DARWIN_FSR_H
+#define DARWIN_FSR_H
 
 #include "DarwinDevice.h"
 
-namespace Darwin
-{
-	class FSR : public DarwinDevice {
-        
+namespace Darwin {
+    class FSR : public DarwinDevice {
+
     public:
-        
         /**
          * @brief This enum holds the addresses of the various bytes in the FSR (Force Sensitive Resistors in the feet).
          *
          * @details
          *  for additional details see http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
          */
-        enum Address
-        {
+        enum Address {
             MODEL_NUMBER_L            = 0,
             MODEL_NUMBER_H            = 1,
             VERSION                   = 2,
@@ -40,9 +54,9 @@ namespace Darwin
             REGISTERED_INSTRUCTION    = 44,
             LOCK                      = 47
         };
-        
+
         FSR(UART& coms, int id);
     };
-}
+}  // namespace Darwin
 
 #endif

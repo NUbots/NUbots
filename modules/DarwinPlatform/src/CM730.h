@@ -1,21 +1,36 @@
-#ifndef CM730_H
-#define CM730_H
+/*
+ * This file is part of DarwinPlatform.
+ *
+ * DarwinPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * DarwinPlatform is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with DarwinPlatform.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 Trent Houliston <trent@houliston.me>
+ */
+
+#ifndef DARWIN_CM730_H_
+#define DARWIN_CM730_H_
 
 #include "DarwinDevice.h"
 
-namespace Darwin
-{
+namespace Darwin {
+
     class CM730 : public DarwinDevice {
     public:
-        
         /**
          * @brief Holds the addresses of the various bytes in the CM730.
          *
          * @details
          *  for additional details see http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/sub_controller_(cm-730).htm
          */
-        enum Address
-        {
+        enum Address {
             MODEL_NUMBER_L      = 0,
             MODEL_NUMBER_H      = 1,
             VERSION             = 2,
@@ -74,14 +89,14 @@ namespace Darwin
             ADC15_L             = 79,
             ADC15_H             = 80
         };
-        
+
         CM730(UART& coms, int id);
-        
+
         /**
          * @brief turns on the Dynamixel power (servos and foot sensors)
          */
         void turnOnDynamixel();
     };
-}
+}  // namespace Darwin
 
 #endif

@@ -1,7 +1,25 @@
-#ifndef DARWIN_H
-#define DARWIN_H
+/*
+ * This file is part of DarwinPlatform.
+ *
+ * DarwinPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * DarwinPlatform is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with DarwinPlatform.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 Trent Houliston <trent@houliston.me>
+ */
+
+#ifndef DARWIN_DARWIN_H
+#define DARWIN_DARWIN_H
 
 #include <stdint.h>
+#include <utility>
 #include <vector>
 
 #include "CM730.h"
@@ -11,7 +29,7 @@
 #include "DarwinRawSensors.h"
 
 namespace Darwin {
-    
+
     /**
      * Contains all of the dynamixel IDs in the system
      */
@@ -42,8 +60,8 @@ namespace Darwin {
             L_FSR = 112,
             BROADCAST = 254
         };
-    }
-    
+    }  // namespace ID
+
     /**
      * @brief The main class that others will use to interact with the CM730 and attached devices.
      *
@@ -57,85 +75,85 @@ namespace Darwin {
     class Darwin {
     private:
         /// Our UART class that we will communicate through
-        UART m_uart;
+        UART uart;
         /// Our Prebuilt bulk read command
-        std::vector<uint8_t> m_bulkReadCommand;
-        
+        std::vector<uint8_t> bulkReadCommand;
+
         /**
          * @brief Builds a bulk read packet to read all of the sensors.
          */
         void buildBulkReadPacket();
-        
+
     public:
         /// The CM730
-        CM730 m_cm730;
+        CM730 cm730;
         /// The Right Shoulder Pitch MX28
-        MX28 m_rShoulderPitch;
+        MX28 rShoulderPitch;
         /// The Left Shoulder Pitch MX28
-        MX28 m_lShoulderPitch;
+        MX28 lShoulderPitch;
         /// The Right Shoulder Roll MX28
-        MX28 m_rShoulderRoll;
+        MX28 rShoulderRoll;
         /// The Left Shoulder Roll MX28
-        MX28 m_lShoulderRoll;
+        MX28 lShoulderRoll;
         /// The Right Elbow MX28
-        MX28 m_rElbow;
+        MX28 rElbow;
         /// The Left Elbow MX28
-        MX28 m_lElbow;
+        MX28 lElbow;
         /// The Right Hip Yaw MX28
-        MX28 m_rHipYaw;
+        MX28 rHipYaw;
         /// The Left Hip Yaw MX28
-        MX28 m_lHipYaw;
+        MX28 lHipYaw;
         /// The Right Hip Roll MX28
-        MX28 m_rHipRoll;
+        MX28 rHipRoll;
         /// The Left Hip Roll MX28
-        MX28 m_lHipRoll;
+        MX28 lHipRoll;
         /// The Right Hip Pitch MX28
-        MX28 m_rHipPitch;
+        MX28 rHipPitch;
         /// The Left Hip Pitch MX28
-        MX28 m_lHipPitch;
+        MX28 lHipPitch;
         /// The Right Knee MX28
-        MX28 m_rKnee;
+        MX28 rKnee;
         /// The Left Knee MX28
-        MX28 m_lKnee;
+        MX28 lKnee;
         /// The Right Ankle Pitch MX28
-        MX28 m_rAnklePitch;
+        MX28 rAnklePitch;
         /// The Left Ankle Pitch MX28
-        MX28 m_lAnklePitch;
+        MX28 lAnklePitch;
         /// The Right Ankle Roll MX28
-        MX28 m_rAnkleRoll;
+        MX28 rAnkleRoll;
         /// The Left Ankle Roll MX28
-        MX28 m_lAnkleRoll;
+        MX28 lAnkleRoll;
         /// The Head Pan MX28
-        MX28 m_headPan;
+        MX28 headPan;
         /// The Head Tilt MX28
-        MX28 m_headTilt;
+        MX28 headTilt;
         /// The Right Foot FSR
-        FSR m_rFSR;
+        FSR rFSR;
         /// The Left Foot FSR
-        FSR m_lFSR;
-        
+        FSR lFSR;
+
     public:
         /**
          * @brief Constructs a new Darwin instance and sets up communication with the CM730.
-         * 
+         *
          * @param name the file handle for the device the CM730 is connected to (e.g. /dev/ttyUSB0)
          */
-        Darwin(const char* name);
-        
+        explicit Darwin(const char* name);
+
         /**
          * @brief Pings all of the attached devices, and returns a map containing their ID and if they were contactable.
          *
          * @returns a map containing IDs and if they were contactable (returned no error code)
          */
         std::vector<std::pair<uint8_t, bool>> selfTest();
-        
+
         /**
          * @brief This reads all of the sensors in a predefined pattern of what is considered "Interesting"
          *
          * @returns A BulkReadResuts object containing all of the sensor data as it was read from the device (no trasforms)
          */
         BulkReadResults bulkRead();
-        
+
         /**
          * @brief This writes a series of servo values to the device
          *
@@ -143,6 +161,6 @@ namespace Darwin {
          */
         void writeServos(const std::vector<Types::ServoValues>& servos);
     };
-}
+}  // namespace Darwin
 
 #endif

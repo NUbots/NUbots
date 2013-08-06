@@ -1,12 +1,28 @@
-#ifndef DARWINDEVICE_H
-#define DARWINDEVICE_H
+/*
+ * This file is part of DarwinPlatform.
+ *
+ * DarwinPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * DarwinPlatform is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with DarwinPlatform.  If not, see
+ * <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 Trent Houliston <trent@houliston.me>
+ */
+
+#ifndef DARWIN_DARWINDEVICE_H
+#define DARWIN_DARWINDEVICE_H
 
 #include <stdint.h>
 
 #include "UART.h"
 
-namespace Darwin
-{
+namespace Darwin {
     /**
      * @brief The darwin device is a device on the serial port that will respond to the command types.
      *
@@ -17,7 +33,7 @@ namespace Darwin
      * @author Trent Houliston
      */
     class DarwinDevice {
-        
+
     public:
         /**
          * @brief The list of valid instructions for the CM730 and related components.
@@ -32,7 +48,7 @@ namespace Darwin
             SYNC_WRITE = 131,
             BULK_READ = 146
         };
-        
+
         /**
          * @brief This struct mimics the expected data structure for a Write command.
          *
@@ -46,12 +62,12 @@ namespace Darwin
          *
          * @author Trent Houliston
          */
-        #pragma pack(push, 1) // Make it so that the compiler reads this struct "as is" (no padding bytes)
+        #pragma pack(push, 1)  // Make it so that the compiler reads this struct "as is" (no padding bytes)
         template <typename TType>
         struct ReadCommand {
-            
-            ReadCommand(uint8_t id, uint8_t address) : id(id), address(address), size(sizeof(TType)) {};
-            
+
+            ReadCommand(uint8_t id, uint8_t address) : id(id), address(address), size(sizeof(TType)) {}
+
             /// Magic number that heads up every packet
             const uint16_t magic = 0xFFFF;
             /// The ID of the device that we are communicating with
@@ -68,7 +84,7 @@ namespace Darwin
             const uint8_t checksum = calculateChecksum(this);
         };
         #pragma pack(pop)
-        
+
         /**
          * @brief This struct mimics the expected data structure for a Write command.
          *
@@ -83,12 +99,12 @@ namespace Darwin
          *
          * @author Trent Houliston
          */
-        #pragma pack(push, 1) // Make it so that the compiler reads this struct "as is" (no padding bytes)
+        #pragma pack(push, 1)  // Make it so that the compiler reads this struct "as is" (no padding bytes)
         template <typename TType>
         struct WriteCommand {
-            
-            WriteCommand(uint8_t id, uint8_t address, TType data) : id(id), length(3 + sizeof(TType)), address(address), data(data) {};
-            
+
+            WriteCommand(uint8_t id, uint8_t address, TType data) : id(id), length(3 + sizeof(TType)), address(address), data(data) {}
+
             /// Magic number that heads up every packet
             const uint16_t magic = 0xFFFF;
             /// The ID of the device that we are communicating with
@@ -105,7 +121,7 @@ namespace Darwin
             const uint8_t checksum = calculateChecksum(this);
         };
         #pragma pack(pop)
-        
+
         /**
          * @brief This struct mimics the expected data structure for a Ping command.
          *
@@ -115,10 +131,10 @@ namespace Darwin
          *
          * @author Trent Houliston
          */
-        #pragma pack(push, 1) // Make it so that the compiler reads this struct "as is" (no padding bytes)
+        #pragma pack(push, 1)  // Make it so that the compiler reads this struct "as is" (no padding bytes)
         struct PingCommand {
-            PingCommand(uint8_t id) : id(id) {};
-            
+            explicit PingCommand(uint8_t id) : id(id) {}
+
             /// Magic number that heads up every packet
             const uint16_t magic = 0xFFFF;
             /// The ID of the device that we are communicating with
@@ -129,19 +145,19 @@ namespace Darwin
             const uint8_t instruction = Instruction::PING;
             /// Our checksum for this command
             const uint8_t checksum = calculateChecksum(this);
-        
+
         };
         // Check that this struct is not cache alligned
         static_assert(sizeof(PingCommand) == 6, "The compiler is adding padding to this struct, Bad compiler!");
         #pragma pack(pop)
-        
+
     private:
-        UART& m_coms;
-        int m_id;
-        
+        UART& coms;
+        int id;
+
     public:
         DarwinDevice(UART& coms, int id);
-        
+
         /**
          * @brief Reads from this device at the given memory address.
          *
@@ -158,31 +174,31 @@ namespace Darwin
          */
         template <typename TType>
         TType read(uint8_t address) {
-            
+
             // Check that this struct is not cache alligned
             static_assert(sizeof(ReadCommand<TType>) == 8, "The compiler is adding padding to this struct, Bad compiler!");
-            
+
             // Execute our Read command through the uart
-            CommandResult result = m_coms.execute(ReadCommand<TType>(m_id, address));
-            
+            CommandResult result = coms.execute(ReadCommand<TType> (id, address));
+
             // If there was an error then try reading again
-            if(result.data.size() != sizeof(TType)) {
-                result = m_coms.execute(ReadCommand<TType>(m_id, address));
+            if (result.data.size() != sizeof(TType)) {
+                result = coms.execute(ReadCommand<TType> (id, address));
             }
-            
+
             // If it's still bad then throw a runtime error
-            if(result.data.size() != sizeof(TType)) {
+            if (result.data.size() != sizeof(TType)) {
                 throw std::runtime_error("There was an error while trying to read from the device");
             }
-            
+
             // Copy our resulting data into our return type
             TType data;
             memcpy(&data, result.data.data(), sizeof(TType));
-            
+
             // Return our data
             return data;
         }
-        
+
         /**
          * @brief Writes data to this device at the given memory address.
          *
@@ -200,17 +216,17 @@ namespace Darwin
          */
         template <typename TType>
         uint8_t write(uint8_t address, TType data) {
-            
+
             // Check that this struct is not cache alligned
             static_assert(sizeof(WriteCommand<TType>) == 7 + sizeof(TType), "The compiler is adding padding to this struct, Bad compiler!");
-            
+
             // Write our data over the UART
-            CommandResult result = m_coms.execute(WriteCommand<TType>(m_id, address, data));
-            
+            CommandResult result = coms.execute(WriteCommand<TType> (id, address, data));
+
             // Return our resulting error code
             return result.header.errorcode;
         }
-        
+
         /**
          * @brief This will send a ping request to the device.
          *
@@ -218,6 +234,6 @@ namespace Darwin
          */
         bool ping();
     };
-}
+}  // namespace Darwin
 
 #endif
