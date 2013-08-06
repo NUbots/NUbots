@@ -121,9 +121,9 @@ int Darwin::UART::configure(double baud) {
 Darwin::CommandResult Darwin::UART::readPacket() {
     
     // We will wait this long for an initial packet header
-    int PACKET_WAIT = 10000;
-    // We will only wait a maximum of 100 microseconds between bytes in a packet
-    int BYTE_WAIT = 100;
+    int PACKET_WAIT = 20000;
+    // We will only wait a maximum of 1000 microseconds between bytes in a packet (assumes baud of 1000000bps)
+    int BYTE_WAIT = 1000;
     
     // Our result
     CommandResult result;
@@ -186,7 +186,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     }
     
     // We just read the checksum now
-    timeout.tv_usec = 500;
+    timeout.tv_usec = 2000;
     if(select(m_fd + 1, & connectionset, nullptr, nullptr, &timeout) == 1) {
         
         read(m_fd, &result.checksum, 1);

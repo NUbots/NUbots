@@ -88,7 +88,6 @@ namespace Darwin {
             uint16_t movingSpeed;
         };
     }
-    #pragma pack(pop)
     
     /**
      * TODO
@@ -98,7 +97,7 @@ namespace Darwin {
         Types::MX28Data servos[20];
         Types::FSRData fsr[2];
     };
-    
+    #pragma pack(pop)
 }
 
 #endif

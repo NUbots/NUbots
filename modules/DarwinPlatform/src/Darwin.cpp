@@ -222,9 +222,12 @@ void Darwin::Darwin::writeServos(const std::vector<Types::ServoValues>& servos) 
     packet[Packet::PARAMETER] = MX28::Address::TORQUE_ENABLE;
     // Our data length (not including our ID)
     packet[Packet::PARAMETER + 1] = sizeof(Types::ServoValues) - 1;
+    packet[Packet::PARAMETER] = MX28::Address::D_GAIN;
+    // Our data length
+    packet[Packet::PARAMETER + 1] = sizeof(Types::ServoValues) - 1;
     
-    // Our servo values
-    memcpy(&packet[Packet::PARAMETER + 2], servos.data(), servos.size());
+    // Our motor values
+    memcpy(&packet[Packet::PARAMETER + 2], servos.data(), sizeof(Types::ServoValues));
     
     // Our checksum
     packet.back() = calculateChecksum(packet.data());
