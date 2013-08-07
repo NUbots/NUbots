@@ -169,48 +169,41 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
         }
 
         // If it is the first error we have encountered, and it is not the end of the list
-        else if (firstError && i != results.size() - 1) {
-
-            uint8_t bytes[3];
-            bytes[0] = bulkReadCommand[Packet::PARAMETER + 1 + (i * 3) + 0];
-            bytes[1] = bulkReadCommand[Packet::PARAMETER + 1 + (i * 3) + 1];
-            bytes[2] = bulkReadCommand[Packet::PARAMETER + 1 + (i * 3) + 2];
-
-            // Erase our 3 bytes for this packet
-            bulkReadCommand.erase(std::begin(bulkReadCommand) + Packet::PARAMETER + 1 + (i * 3),
-                                    std::begin(bulkReadCommand) + Packet::PARAMETER + 1 + (i * 3) + 3);
-
-            // Insert our 3 bytes at the end
-            bulkReadCommand.insert(std::end(bulkReadCommand) - 1, bytes, bytes + 3);
-
-            firstError = false;
-
-            // Set for servo data
-            if (r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT)
-                memset(&data.servos[r.header.id - 1], 0xFF, sizeof(Types::MX28Data));
-
-            // Set for FSR data
-            else if (r.header.id == ID::R_FSR || r.header.id == ID::L_FSR)
-                memset(data.fsr + (r.header.id - ID::R_FSR), 0xFF, sizeof(Types::FSRData));
-
-            // Set CM730 data
-            else if (r.header.id == ID::CM730)
-                memset(&data, 0xFF, sizeof(Types::CM730Data));
-        }
-
-        // This data could just be bad data because of previous sensor errors, only the first is reliable
         else {
+
+            // We only move the first error code to the end of the list
+            if (firstError && i != results.size() - 1) {
+
+                uint8_t bytes[3];
+                memcpy(bytes, &bulkReadCommand[Packet::PARAMETER + 1 + (i * 3)], 3);
+
+                // Erase our 3 bytes for this packet
+                bulkReadCommand.erase(std::begin(bulkReadCommand) + Packet::PARAMETER + 1 + (i * 3),
+                                      std::begin(bulkReadCommand) + Packet::PARAMETER + 1 + (i * 3) + 3);
+
+                // Insert our 3 bytes at the end
+                bulkReadCommand.insert(std::end(bulkReadCommand) - 1, bytes, bytes + 3);
+                
+                firstError = false;
+            }
+
             // Set for servo data
-            if (r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT)
+            if (r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT) {
                 memset(&data.servos[r.header.id - 1], 0xFF, sizeof(Types::MX28Data));
+                data.servoErrorCodes[r.header.id - 1] = r.header.errorcode;
+            }
 
             // Set for FSR data
-            else if (r.header.id == ID::R_FSR || r.header.id == ID::L_FSR)
-                memset(data.fsr + (r.header.id - ID::R_FSR), 0xFF, sizeof(Types::FSRData));
+            else if (r.header.id == ID::R_FSR || r.header.id == ID::L_FSR) {
+                memset(&data.fsr[r.header.id - ID::R_FSR], 0xFF, sizeof(Types::FSRData));
+                data.fsrErrorCodes[r.header.id - ID::R_FSR] = r.header.errorcode;
+            }
 
             // Set CM730 data
-            else if (r.header.id == ID::CM730)
+            else if (r.header.id == ID::CM730) {
                 memset(&data, 0xFF, sizeof(Types::CM730Data));
+                data.cm730ErrorCode = r.header.errorcode;
+            }
         }
     }
 

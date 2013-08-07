@@ -59,8 +59,8 @@ namespace Darwin {
             uint16_t goalPosition;
             uint16_t movingSpeed;
             uint16_t torqueLimit;
-            uint16_t position;
-            uint16_t speed;
+            uint16_t presentPosition;
+            uint16_t presentSpeed;
             uint16_t load;
             uint8_t voltage;
             uint8_t temperature;
@@ -113,6 +113,10 @@ namespace Darwin {
         Types::CM730Data cm730;
         Types::MX28Data servos[20];
         Types::FSRData fsr[2];
+
+        uint8_t cm730ErrorCode = 0;
+        uint8_t servoErrorCodes[20] = { 0 };
+        uint8_t fsrErrorCodes[2] = { 0 };
     };
     #pragma pack(pop)
 }  // namespace Darwin

@@ -179,14 +179,14 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     }
     else {
         // If all we are missing is the checksum, just assume the data is corrupt
-        result.header.errorcode = ErrorCode::CORRUPT_DATA;
+        result.header.errorcode |= ErrorCode::CORRUPT_DATA;
         return result;
     }
 
     // Validate our checksum
     if (result.checksum != calculateChecksum(result)) {
         CommandResult result;
-        result.header.errorcode = ErrorCode::CORRUPT_DATA;
+        result.header.errorcode |= ErrorCode::CORRUPT_DATA;
         return result;
     }
 
