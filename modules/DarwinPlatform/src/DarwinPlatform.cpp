@@ -27,7 +27,15 @@ namespace modules {
     /// This namespace contains all the functions that are required to convert the raw sensors into useful values
     namespace Convert {
 
-        const float direction[20] = {
+        constexpr bool isClose(const int a, const int b) {
+            return (a - b) < (1 + a * 0.01) && (a - b) > -(1 + a * 0.01);
+        }
+
+        constexpr bool isClose(const float a, const float b) {
+            return a - b < 0.00001 && a - b > -0.00001;
+        }
+
+        constexpr int8_t direction[20] = {
             -1,             // [0]  R_SHOULDER_PITCH
             1,              // [1]  L_SHOULDER_PITCH
             -1,             // [2]  R_SHOULDER_ROLL
@@ -50,7 +58,7 @@ namespace modules {
             -1,             // [19]  HEAD_PITCH
         };
 
-        const float offset[20] = {
+        constexpr float offset[20] = {
             -1.5707963f,    // [0]  R_SHOULDER_PITCH
             1.5707963f,     // [1]  L_SHOULDER_PITCH
             0.7853981f,     // [2]  R_SHOULDER_ROLL
@@ -97,6 +105,19 @@ namespace modules {
         constexpr uint8_t COLOURED_LED_G(const uint16_t value) { return static_cast<uint8_t>((value & 0x03E0) >> 2); };
         /// Extracts the B value from an RGB led
         constexpr uint8_t COLOURED_LED_B(const uint16_t value) { return static_cast<uint8_t>((value & 0x7C00) >> 7); };
+        constexpr uint16_t COLOURED_LED_INVERSE(const uint8_t r, const uint8_t g, const uint8_t b) {
+            return ((r >> 3))
+                 | ((g >> 3) << 5)
+                 | ((b >> 3) << 10);
+        }
+
+        // Check that the colour inverse works
+        static_assert(isClose(COLOURED_LED_INVERSE(COLOURED_LED_R(0x1402),
+                                                   COLOURED_LED_G(0x1402),
+                                                   COLOURED_LED_B(0x1402)), 0x1402), "There is a problem with the Inverse operation for colour");
+        static_assert(isClose(COLOURED_LED_INVERSE(COLOURED_LED_R(0x7100),
+                                                   COLOURED_LED_G(0x7100),
+                                                   COLOURED_LED_B(0x7100)), 0x7100), "There is a problem with the Inverse operation for colour");
 
         /// Converts the acceleronometer value from between 0-1024 (-4g to +4g) to m/s^2
         constexpr float ACCELERONOMETER(const uint16_t value) { return float(value - 512) * 0.07661445312; }
@@ -115,27 +136,53 @@ namespace modules {
 
         /// Normalizes gain from 0-254 to between 0 and 1
         constexpr float GAIN(const uint8_t value) { return NORMALIZE<0, 1, 254>(value); }
+        constexpr uint8_t GAIN_INVERSE(const float value) { return static_cast<uint8_t>(value * 254); }
+
+        /// Check that our Gain and Gain Inverse are actuall inverses of eachother
+        static_assert(isClose(GAIN_INVERSE(GAIN(10)), 10), "There is a problem with the Inverse operation for gain");
+        static_assert(isClose(GAIN_INVERSE(GAIN(254)), 254), "There is a problem with the Inverse operation for gain");
+        static_assert(isClose(GAIN(GAIN_INVERSE(0.5)), 0.5), "There is a problem with the Inverse operation for gain");
+        static_assert(isClose(GAIN(GAIN_INVERSE(1)), 1.0), "There is a problem with the Inverse operation for gain");
 
         /// Converts a servo position from 0-4095 (-pi to pi) to radians
-        constexpr float SERVO_POSITION(const uint16_t value) { return float(value - 2048) / (2 * M_PI / 4095); }
+        constexpr float SERVO_POSITION(const uint8_t servoID, const uint16_t value) {
+
+            return direction[servoID] * (offset[servoID] + (2 * M_PI * float(value-2048)) / 4095);
+        }
+        constexpr uint16_t SERVO_POSITION_INVERSE(const uint8_t servoID, const float value) {
+
+            return (direction[servoID] * ((-4095 * offset[servoID]) + (4096 * M_PI)) + (4095 * value))/(direction[servoID] * 2 * M_PI);
+        }
+
+        // Check that our Servo position conversion is working properly
+        static_assert(isClose(SERVO_POSITION_INVERSE(0, SERVO_POSITION(0, 2600)), 2600),    "There is a problem with the Inverse operation for Position");
+        static_assert(isClose(SERVO_POSITION_INVERSE(3, SERVO_POSITION(3, 2100)), 2100),    "There is a problem with the Inverse operation for Position");
+        static_assert(isClose(SERVO_POSITION_INVERSE(10, SERVO_POSITION(10, 2600)), 2600),  "There is a problem with the Inverse operation for Position");
 
         /// Converts a servo speed from its signed format into radians/second
-        constexpr float SERVO_SPEED(const uint16_t value) { return SIGNBIT<10>(value) * float(value & 0x3FF) * 0.01193805208; }
+        constexpr float SERVO_SPEED(const uint8_t servoID, const uint16_t value) {
+            return direction[servoID] * SIGNBIT<10>(value) * float(value & 0x3FF) * 0.01193805208;
+        }
+        constexpr uint16_t SERVO_SPEED_INVERSE(const float value) {
+            return ((value / 0.01193805208) < 0 ? -(value / 0.01193805208) : (value / 0.01193805208)) > 1023 ? 0 :
+            ((value / 0.01193805208) < 0 ? -(value / 0.01193805208) : (value / 0.01193805208));
+        }
+
+        // Check that our Servo speed conversion is working properly
+        static_assert(isClose(SERVO_SPEED_INVERSE(SERVO_SPEED(0, 900)), 900), "There is a problem with the Inverse operation for Speed");
+        static_assert(isClose(SERVO_SPEED_INVERSE(SERVO_SPEED(3, 1000)), 1000), "There is a problem with the Inverse operation for Speed");
+        static_assert(isClose(SERVO_SPEED_INVERSE(200), 0), "There is a problem with the Inverse operation for Speed");
 
         /// Normalizes torque limit from 0-1023 to between 0 and 1
         constexpr float TORQUE_LIMIT(const uint16_t value) { return NORMALIZE<0, 1, 1023>(value); }
 
         /// Normalizes a Servo load to between -1 and 1 (dependant on direction)
-        constexpr float SERVO_LOAD(const uint16_t value) { return SIGNBIT<10>(value) * NORMALIZE<-1, 1, 1023>(value & 0x3FF); }
+        constexpr float SERVO_LOAD(const uint8_t servoID, const uint16_t value) {
+            return direction[servoID] * SIGNBIT<10>(value) * NORMALIZE<-1, 1, 1023>(value & 0x3FF);
+        }
 
         /// Temperature is already in degrees celsius
         constexpr uint8_t TEMPERATURE(const uint8_t value) { return value; }
-
-        /// Converts a motor direction value (e.g. moving speed or load) into one in the NUBots Joint Space
-        constexpr float SERVO_DIRECTION(const uint8_t servoID, const float value) { return direction[servoID] * value; }
-
-        /// Converts a motor angle value (absolute position) into one in the NUBots Joint Space
-        constexpr float SERVO_OFFSET(const uint8_t servoID, const float value) { return SERVO_DIRECTION(servoID, value) + offset[servoID]; }
     };
 
     DarwinPlatform::DarwinPlatform(NUClear::PowerPlant& plant) : Reactor(plant), darwin("/dev/ttyUSB0") {
@@ -224,9 +271,8 @@ namespace modules {
              */
 
             for(int i = 0; i < 20; ++i) {
-
-                // Convert from the Darwin ID space into the NUBots ID space (Head is first element)
-                Messages::DarwinSensors::Servo& servo = sensors->servo[(i + 2) % 20];
+                // Get a reference to the servo we are populating
+                Messages::DarwinSensors::Servo& servo = sensors->servo[i];
 
                 // Error code
                 servo.errorFlags = Convert::ERROR_FLAGS(data.servoErrorCodes[i]);
@@ -241,39 +287,54 @@ namespace modules {
                 servo.pGain = Convert::GAIN(data.servos[i].pGain);
 
                 // Targets
-                servo.goalPosition = Convert::SERVO_OFFSET(i, Convert::SERVO_POSITION(data.servos[i].goalPosition));
-                servo.movingSpeed = Convert::SERVO_DIRECTION(i, Convert::SERVO_SPEED(data.servos[i].movingSpeed));
+                servo.goalPosition = Convert::SERVO_POSITION(i, data.servos[i].goalPosition);
+                servo.movingSpeed = Convert::SERVO_SPEED(i, data.servos[i].movingSpeed);
                 servo.torqueLimit = Convert::TORQUE_LIMIT(data.servos[i].torqueLimit);
 
                 // Present Data
-                servo.presentPosition = Convert::SERVO_OFFSET(i, Convert::SERVO_POSITION(data.servos[i].presentPosition));
-                servo.presentSpeed = Convert::SERVO_DIRECTION(i, Convert::SERVO_SPEED(data.servos[i].presentSpeed));
-                servo.load = Convert::SERVO_DIRECTION(i, Convert::SERVO_LOAD(data.servos[i].load));
+                servo.presentPosition = Convert::SERVO_POSITION(i, data.servos[i].presentPosition);
+                servo.presentSpeed = Convert::SERVO_SPEED(i, data.servos[i].presentSpeed);
+                servo.load = Convert::SERVO_LOAD(i, data.servos[i].load);
 
                 // Diagnostic Information
                 servo.voltage = Convert::VOLTAGE(data.servos[i].voltage);
                 servo.temperature = Convert::TEMPERATURE(data.servos[i].temperature);
             }
 
+            // Send our nicely computed sensor data out to the world
             emit(sensors);
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<Every<20, std::chrono::milliseconds>>, With<Messages::DarwinServos>>([](const time_t& time, const Messages::DarwinServos& servos) {
-
-            // TODO convert DarwinMotors into our motor type
+        on<Trigger<Messages::DarwinServoCommands>>([this](const Messages::DarwinServoCommands& servos) {
 
             std::vector<Darwin::Types::ServoValues> values;
 
-            values.push_back({
-                0, // Motor ID
-                0 * 254, // D Gain
-                0 * 254, // I Gain
-                0 * 254, // P Gain
-                0x00,   // Reserved Byte
-                0 ,// / POSITION_CONVERSION, // Goal Position
-                0 ,// / SPEED_CONVERSION, // TODO factor in movement direction
-            });
+            // Loop through each of our commands
+            for (const auto& command : servos.commands) {
+                values.push_back({
+                    static_cast<uint8_t>(command.servoId + 1),  // The id's on the robot start with ID 1
+                    Convert::GAIN_INVERSE(command.dGain),
+                    Convert::GAIN_INVERSE(command.iGain),
+                    Convert::GAIN_INVERSE(command.pGain),
+                    0,
+                    Convert::SERVO_POSITION_INVERSE(command.servoId, command.goalPosition),
+                    Convert::SERVO_SPEED_INVERSE(command.goalPosition)
+                });
+            }
+
+            // Syncwrite our values
+            darwin.writeServos(values);
+        });
+
+        // If we get a HeadLED command then write it
+        on<Trigger<Messages::DarwinSensors::HeadLED>>([this](const Messages::DarwinSensors::HeadLED& led) {
+            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::COLOURED_LED_INVERSE(led.r, led.g, led.b));
+        });
+
+        // If we get a HeadLED command then write it
+        on<Trigger<Messages::DarwinSensors::EyeLED>>([this](const Messages::DarwinSensors::EyeLED& led) {
+            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::COLOURED_LED_INVERSE(led.r, led.g, led.b));
         });
     }
 }

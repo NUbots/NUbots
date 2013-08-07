@@ -72,26 +72,26 @@ namespace Messages {
 
         struct Servo {
             enum ID {
-                HEAD_PAN = 0,
-                HEAD_TILT = 1,
-                R_SHOULDER_PITCH = 2,
-                L_SHOULDER_PITCH = 3,
-                R_SHOULDER_ROLL = 4,
-                L_SHOULDER_ROLL = 5,
-                R_ELBOW = 6,
-                L_ELBOW = 7,
-                R_HIP_YAW = 8,
-                L_HIP_YAW = 9,
-                R_HIP_ROLL = 10,
-                L_HIP_ROLL = 11,
-                R_HIP_PITCH = 12,
-                L_HIP_PITCH = 13,
-                R_KNEE = 14,
-                L_KNEE = 15,
-                R_ANKLE_PITCH = 16,
-                L_ANKLE_PITCH = 17,
-                R_ANKLE_ROLL = 18,
-                L_ANKLE_ROLL = 19
+                R_SHOULDER_PITCH    = 0,
+                L_SHOULDER_PITCH    = 1,
+                R_SHOULDER_ROLL     = 2,
+                L_SHOULDER_ROLL     = 3,
+                R_ELBOW             = 4,
+                L_ELBOW             = 5,
+                R_HIP_YAW           = 6,
+                L_HIP_YAW           = 7,
+                R_HIP_ROLL          = 8,
+                L_HIP_ROLL          = 9,
+                R_HIP_PITCH         = 10,
+                L_HIP_PITCH         = 11,
+                R_KNEE              = 12,
+                L_KNEE              = 13,
+                R_ANKLE_PITCH       = 14,
+                L_ANKLE_PITCH       = 15,
+                R_ANKLE_ROLL        = 16,
+                L_ANKLE_ROLL        = 17,
+                HEAD_PAN            = 18,
+                HEAD_TILT           = 19
             };
 
             uint8_t errorFlags;

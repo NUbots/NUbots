@@ -3,8 +3,6 @@
 Messages::DarwinSensors::Servo& Messages::DarwinSensors::Servos::operator[](int index) {
 
     switch (index) {
-        case Servo::ID::HEAD_PAN:           return headPan;
-        case Servo::ID::HEAD_TILT:          return headTilt;
         case Servo::ID::R_SHOULDER_PITCH:   return rShoulderPitch;
         case Servo::ID::L_SHOULDER_PITCH:   return lShoulderPitch;
         case Servo::ID::R_SHOULDER_ROLL:    return rShoulderRoll;
@@ -23,6 +21,8 @@ Messages::DarwinSensors::Servo& Messages::DarwinSensors::Servos::operator[](int 
         case Servo::ID::L_ANKLE_PITCH:      return lAnklePitch;
         case Servo::ID::R_ANKLE_ROLL:       return rAnkleRoll;
         case Servo::ID::L_ANKLE_ROLL:       return lAnkleRoll;
+        case Servo::ID::HEAD_PAN:           return headPan;
+        case Servo::ID::HEAD_TILT:          return headTilt;
     }
 
     throw std::runtime_error("Out of bounds");
