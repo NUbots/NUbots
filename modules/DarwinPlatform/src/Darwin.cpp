@@ -54,6 +54,9 @@ lFSR(uart, ID::L_FSR) {
 
     // Build our bulk read packet
     buildBulkReadPacket();
+
+    // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been configured before)
+    uart.execute(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_DELAY_TIME, 0));
 }
 
 std::vector<std::pair<uint8_t, bool>> Darwin::Darwin::selfTest() {
@@ -153,22 +156,29 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
     for (size_t i = 0; i < results.size(); ++i) {
 
         auto& r = results[i];
-        if (r.header.errorcode == ErrorCode::NONE) {
+        
+        // If we got data back
+        if (!r.data.empty()) {
 
             // Copy for servo data
-            if(r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT)
+            if(r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT) {
                 memcpy(&data.servos[r.header.id - 1], r.data.data(), sizeof(Types::MX28Data));
+                data.servoErrorCodes[r.header.id - 1] = r.header.errorcode;
+            }
 
             // Copy for FSR data
-            else if(r.header.id == ID::R_FSR || r.header.id == ID::L_FSR)
+            else if(r.header.id == ID::R_FSR || r.header.id == ID::L_FSR) {
                 memcpy(data.fsr + (r.header.id - ID::R_FSR), r.data.data(), sizeof(Types::FSRData));
+                data.fsrErrorCodes[r.header.id - ID::R_FSR] = r.header.errorcode;
+            }
 
             // Copy CM730 data
-            else if(r.header.id == ID::CM730)
+            else if(r.header.id == ID::CM730) {
                 memcpy(&data, r.data.data(), sizeof(Types::CM730Data));
+                data.cm730ErrorCode = r.header.errorcode;
+            }
         }
-
-        // If it is the first error we have encountered, and it is not the end of the list
+        // If we got an error that caused us to have no data
         else {
 
             // We only move the first error code to the end of the list
