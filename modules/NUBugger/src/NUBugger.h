@@ -17,8 +17,8 @@
  * Copyright 2013 Trent Houliston <trent@houliston.me>
  */
 
-#ifndef MODULES_DARWINPLATFORM_H
-#define MODULES_DARWINPLATFORM_H
+#ifndef MODULES_NUBUGGER_H
+#define MODULES_NUBUGGER_H
 
 #include <NUClear.h>
 #include <zmq.hpp>

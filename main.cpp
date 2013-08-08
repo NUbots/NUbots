@@ -1,5 +1,6 @@
 #include <NUClear.h>
 #include <signal.h>
+
 #include "DarwinPlatform.h"
 #include "NUBugger.h"
 
