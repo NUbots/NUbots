@@ -53,9 +53,11 @@ namespace modules {
                 servo->set_torque(sensors.servo[i].torqueLimit);
                 servo->set_temperature(sensors.servo[i].temperature);
             }
-
+            
             auto serialized = message.SerializeAsString();
-            pub.send(serialized.data(), serialized.size());
+            zmq::message_t packet(serialized.size());
+            memcpy(packet.data(), serialized.data(), serialized.size());
+            pub.send(packet);
         });
     }
 }
