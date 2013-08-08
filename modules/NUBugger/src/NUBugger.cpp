@@ -53,6 +53,21 @@ namespace modules {
                 servo->set_torque(sensors.servo[i].torqueLimit);
                 servo->set_temperature(sensors.servo[i].temperature);
             }
+
+            auto* gyro = sensorData->mutable_gyro();
+            gyro->add_float_value(sensors.gyroscope.x);
+            gyro->add_float_value(sensors.gyroscope.y);
+            gyro->add_float_value(sensors.gyroscope.z);
+            
+            auto* accel = sensorData->mutable_accelerometer();
+            accel->add_float_value(sensors.acceleronometer.x);
+            accel->add_float_value(sensors.acceleronometer.y);
+            accel->add_float_value(sensors.acceleronometer.z);
+            
+            auto* orient = sensorData->mutable_orientation();
+            orient->add_float_value(0);
+            orient->add_float_value(0);
+            orient->add_float_value(0);
             
             auto serialized = message.SerializeAsString();
             zmq::message_t packet(serialized.size());
