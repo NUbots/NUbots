@@ -54,23 +54,19 @@ ENDIF()
 ADD_SUBDIRECTORY(shared/messages)
 
 SET(modules
-    DarwinMotors
-    DarwinCamera
-    DarwinSensors)
+    DarwinPlatform)
 
 FOREACH(module ${modules})
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${module})
     INCLUDE_DIRECTORIES(modules/${module}/src)
-    ADD_TEST(DarwinMotorsTests modules/${module}/${module}Tests)
+    ADD_TEST(${module}Tests modules/${module}/${module}Tests)
 ENDFOREACH()
 
 ADD_EXECUTABLE(robocup main.cpp)
 TARGET_LINK_LIBRARIES(robocup
     messages
-    DarwinMotors
-    DarwinCamera
-    DarwinSensors
+    ${modules}
     ${NUCLEAR_LIBRARIES}
     ${ZMQ_LIBRARIES}
     ${PROTOBUF_LIBRARIES})

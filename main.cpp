@@ -1,8 +1,6 @@
 #include <NUClear.h>
 #include <signal.h>
-#include "DarwinMotors.h"
-#include "DarwinSensors.h"
-#include "DarwinCamera.h"
+#include "DarwinPlatform.h"
 
 struct SegmentationFault : public std::exception {};
 struct AbortSignal : public std::exception {};
@@ -13,6 +11,9 @@ namespace {
     bool run = false;
     
     void signalHandler(int signal) {
+
+        std::cout << "Shutdown Command Sent" << std::endl;
+
         // On our first interrupt, tell the system to shutdown
         if(!run) {
             powerplant->shutdown();
@@ -46,9 +47,7 @@ int main(int argc, char *argv[]) {
     signal(SIGSEGV, segfaultConverter);
     signal(SIGABRT, abortfaultConverter);
     
-    plant.install<modules::DarwinMotors>();
-    plant.install<modules::DarwinSensors>();
-    plant.install<modules::DarwinCamera>();
+    plant.install<modules::DarwinPlatform>();
     
     plant.start();
 }
