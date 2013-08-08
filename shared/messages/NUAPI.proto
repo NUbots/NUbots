@@ -1,0 +1,118 @@
+package API;
+
+message Message {
+	enum Type {
+		SENSOR_DATA = 1;
+		VISION = 2;
+		LOCALISATION = 3;
+	}
+
+	required Type type = 1;
+	required uint64 utc_timestamp = 2;
+
+	optional SensorData sensor_data = 3;
+	optional Vision vision = 4;
+	optional Localisation localisation = 5;
+}
+
+message Image {
+	optional uint32 width = 1;
+	optional uint32 height = 2;
+	optional bytes data = 3;
+}
+
+message VisionFieldObject {
+	enum Type {
+		CIRCLE = 1;
+		RECTANGLE = 2;
+		POLYGON = 3;
+		UNKNOWN = 4;
+	}
+
+	optional Type type = 1;
+
+	optional uint32 id = 2;
+	optional string name = 3;
+	optional bool visible = 4;
+
+	optional float screen_x = 5;
+	optional float screen_y = 6;
+
+	optional float rotation = 7;
+
+	optional uint32 radius = 8;
+	optional uint32 width = 9;
+	optional uint32 height = 10;
+	repeated uint32 points = 11;
+
+	repeated float measured_relative_position = 12;
+}
+
+message VisionClassifiedSegment {
+	optional uint32 start_x = 1;
+	optional uint32 start_y = 2;
+
+	optional uint32 end_x = 3;
+	optional uint32 end_y = 4;
+
+	optional uint32 colour = 5;
+}
+
+message VisionClassifiedImage {
+	optional uint32 num_segments = 1;
+	repeated VisionClassifiedSegment segment = 2;
+}
+
+message Vision {
+	optional Image image = 1;
+	repeated VisionFieldObject field_object = 2;
+	optional VisionClassifiedImage classified_image = 3;
+}
+
+message Motor {
+	optional string name = 1;
+
+	optional float position = 2;
+	optional float velocity = 3;
+	optional float acceleration = 4;
+	optional float target = 5;
+	optional float stiffness = 6;
+	optional float current = 7;
+	optional float torque = 8;
+	optional float temperature = 9;
+}
+
+message SensorData {
+	repeated Motor motor = 1;
+	
+	optional Vector accelerometer = 2;
+	optional Vector gyro = 3;
+	optional Vector orientation = 4;
+}
+
+message LocalisationFieldObject {
+	optional string name = 1;
+
+	optional float wm_x = 2;
+	optional float wm_y = 3;
+
+	optional float sd_x = 4;
+	optional float sd_y = 5;
+
+	optional float sr_xx = 6;
+	optional float sr_xy = 7;
+	optional float sr_yy = 8;
+
+	optional float heading = 9;
+	optional float sd_heading = 10;
+
+	optional bool lost = 11;
+}
+
+message Localisation {
+	repeated LocalisationFieldObject field_object = 1;
+}
+
+message Vector {
+	repeated float float_value = 1;
+}

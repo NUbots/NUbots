@@ -1,6 +1,6 @@
 #include "DarwinSensors.h"
 
-Messages::DarwinSensors::Servo& Messages::DarwinSensors::Servos::operator[](int index) {
+const Messages::DarwinSensors::Servo& Messages::DarwinSensors::Servos::operator[](int index) const {
 
     switch (index) {
         case Servo::ID::R_SHOULDER_PITCH:   return rShoulderPitch;

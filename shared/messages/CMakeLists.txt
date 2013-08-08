@@ -27,7 +27,8 @@ IF(protobufs)
 
 ENDIF()
 
-SOURCE_GROUP("Protocol Buffers" ${protobufs})
+SOURCE_GROUP("Protocol Buffers" FILES ${protobufs})
+SOURCE_GROUP("Protocol Buffer Generated Files" FILES ${proto_src} ${proto_h})
 
 # Build a library from these files
 ADD_LIBRARY(messages ${protobufs} ${src})

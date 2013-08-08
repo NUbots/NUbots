@@ -147,7 +147,7 @@ namespace Messages {
             Servo headPan;
             Servo headTilt;
 
-            Servo& operator[](int index);
+            const Servo& operator[](int index) const;
         } servo;
     };
 };
