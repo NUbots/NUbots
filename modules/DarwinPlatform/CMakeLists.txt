@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared)
 
 # Add all our code to a library
 ADD_LIBRARY(${module_name} ${src})
+TARGET_LINK_LIBRARIES(${module_name} messages)
 
 # If we are doing tests, then build the test for this
 IF(BUILD_TESTS)

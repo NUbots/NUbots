@@ -1,7 +1,6 @@
 #include <NUClear.h>
 #include <signal.h>
 #include "DarwinPlatform.h"
-#include "DarwinCamera.h"
 
 struct SegmentationFault : public std::exception {};
 struct AbortSignal : public std::exception {};
@@ -46,7 +45,6 @@ int main(int argc, char *argv[]) {
     signal(SIGABRT, abortfaultConverter);
     
     plant.install<modules::DarwinPlatform>();
-    plant.install<modules::DarwinCamera>();
     
     plant.start();
 }
