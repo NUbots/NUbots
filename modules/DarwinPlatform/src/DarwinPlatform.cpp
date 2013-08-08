@@ -225,14 +225,14 @@ namespace modules {
             sensors->voltage = Convert::VOLTAGE(data.cm730.voltage);
 
             // Acceleronometer (in m/s^2)
-            sensors->acceleronometer[0] = Convert::ACCELERONOMETER(data.cm730.acceleronometer.x);
-            sensors->acceleronometer[1] = Convert::ACCELERONOMETER(data.cm730.acceleronometer.y);
-            sensors->acceleronometer[2] = Convert::ACCELERONOMETER(data.cm730.acceleronometer.z);
+            sensors->acceleronometer.x = Convert::ACCELERONOMETER(data.cm730.acceleronometer.x);
+            sensors->acceleronometer.y = Convert::ACCELERONOMETER(data.cm730.acceleronometer.y);
+            sensors->acceleronometer.z = Convert::ACCELERONOMETER(data.cm730.acceleronometer.z);
 
             // Gyroscope (in radians/second)
-            sensors->gyroscope[0] = Convert::GYROSCOPE(data.cm730.gyroscope.x);
-            sensors->gyroscope[1] = Convert::GYROSCOPE(data.cm730.gyroscope.y);
-            sensors->gyroscope[2] = Convert::GYROSCOPE(data.cm730.gyroscope.z);
+            sensors->gyroscope.x = Convert::GYROSCOPE(data.cm730.gyroscope.x);
+            sensors->gyroscope.y = Convert::GYROSCOPE(data.cm730.gyroscope.y);
+            sensors->gyroscope.z = Convert::GYROSCOPE(data.cm730.gyroscope.z);
 
             /*
              Force Sensitive Resistor Data

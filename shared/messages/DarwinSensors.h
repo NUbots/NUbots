@@ -1,7 +1,8 @@
 #ifndef MESSAGES_DARWINSENSORS_H
 #define MESSAGES_DARWINSENSORS_H
 
-#include <armadillo>
+#include <stdint.h>
+#include <stdexcept>
 
 namespace Messages {
 
@@ -50,8 +51,17 @@ namespace Messages {
 
         float voltage;
 
-        arma::vec3 acceleronometer;
-        arma::vec3 gyroscope;
+        struct Acceleronometer {
+            float x;
+            float y;
+            float z;
+        } acceleronometer;
+
+        struct Gyroscope {
+            float x;
+            float y;
+            float z;
+        } gyroscope;
 
         struct FSR {
             float fsr1;
