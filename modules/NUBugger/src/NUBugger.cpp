@@ -59,5 +59,10 @@ namespace modules {
             memcpy(packet.data(), serialized.data(), serialized.size());
             pub.send(packet);
         });
+
+        // When we shutdown, close our publisher
+        on<Trigger<Shutdown>>([this](const Shutdown&) {
+            pub.close();
+        });
     }
 }
