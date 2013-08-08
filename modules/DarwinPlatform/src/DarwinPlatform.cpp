@@ -17,8 +17,6 @@
 
 #include "DarwinPlatform.h"
 
-#include <armadillo>
-
 #include "messages/DarwinServos.h"
 #include "messages/DarwinSensors.h"
 
