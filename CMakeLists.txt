@@ -54,6 +54,7 @@ ENDIF()
 ADD_SUBDIRECTORY(shared/messages)
 
 SET(modules
+    DarwinCamera
     DarwinPlatform)
 
 FOREACH(module ${modules})
