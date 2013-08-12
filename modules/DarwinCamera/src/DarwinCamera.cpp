@@ -20,6 +20,8 @@
  */
 
 #include "DarwinCamera.h"
+#include "messages/CameraSettings.h"
+#include "messages/NUImage.h"
 
 #include <cstring>
 #include <sstream>
@@ -142,7 +144,7 @@ namespace modules {
 
     DarwinCamera::DarwinCamera(NUClear::PowerPlant& plant):
 		Reactor(plant),
-		currentBuf(nullptr),
+		bufQueued(false),
 		timeStamp(0)
 	{
         on<Trigger<Every<1000 / FRAMERATE, std::chrono::milliseconds>>>([this](const time_t& time)
@@ -152,9 +154,6 @@ namespace modules {
 
 		on<Trigger<Shutdown>>([this](const Shutdown& shutdown)
 		{
-#if DEBUG_NUCAMERA_VERBOSITY > 4
-			debug << "DarwinCamera::~DarwinCamera()" << endl;
-#endif
 			// disable streaming
 			setStreaming(false);
 
@@ -164,7 +163,6 @@ namespace modules {
 
 			// close the device
 			close(fd);
-			free(buf);
 		});
 
 		on<Trigger<messages::CameraSettings>>([this](const messages::CameraSettings& settings)
@@ -172,16 +170,13 @@ namespace modules {
 			applySettings(settings);
 		});
 
-#if DEBUG_NUCAMERA_VERBOSITY > 4
-		debug << "DarwinCamera::DarwinCamera()" << endl;
-#endif
 		storedTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now().time_since_epoch()).count();
-
+		settings.reset(new messages::CameraSettings);
 
 		// Read camera settings from file.
 		/*
 		CameraSettings fileSettings;
-		fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
+		filesettings->LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
 		debug << "Loading settings from " << CONFIG_DIR + string("Camera.cfg") << endl;
 		*/
 
@@ -190,10 +185,10 @@ namespace modules {
 
 		//Initialise
 		initialiseCamera();
-		//readCameraSettings();
+		readCameraSettings();
 		//forceApplySettings(fileSettings);
 
-		readCameraSettings();
+		//readCameraSettings();
 
 		//loadCameraOffset();
 
@@ -209,15 +204,8 @@ namespace modules {
 	{
 		// open device
 		fd = open(device_name.c_str(), O_RDWR);
-#if DEBUG_NUCAMERA_VERBOSITY > 4
-		if(fd != -1)
-		{
-			debug << "DarwinCamera::DarwinCamera(): " << device_name << " Opened Successfully." << endl;
-		}
-		else {
-			debug << "DarwinCamera::DarwinCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << endl;
-		}
-#endif
+		if(fd == -1)
+			throw std::runtime_error("Unable to open camera device");
 	}
 
 	void DarwinCamera::setStreaming(bool streaming_on)
@@ -225,38 +213,22 @@ namespace modules {
 		int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		int instruction = streaming_on ? VIDIOC_STREAMON: VIDIOC_STREAMOFF;
 		if(ioctl(fd, instruction, &type) == -1)
-			throw std::exception();
-
-		//debug << "DarwinCamera: streaming - " << streaming_on << endl;
+			throw std::runtime_error(streaming_on ? "Unable to start camera streaming" : "Unable to stop camera streaming");
 	}
 
 	void DarwinCamera::initialiseCamera()
 	{
-		int returnValue;
 		// set default parameters
 		struct v4l2_control control;
 		memset(&control, 0, sizeof(control));
 		control.id = V4L2_CID_CAM_INIT;
-		control.value = 0;
+		//control.value = 0;
 		if(ioctl(fd, VIDIOC_S_CTRL, &control) < 0)
-			throw std::exception();
+			throw std::runtime_error("DarwinCamera::initialiseCamera(): V4L2_CID_CAM_INIT failed");
 
 		v4l2_std_id esid0 = (WIDTH == 320 ? 0x04000000UL : 0x08000000UL);
-		returnValue = ioctl(fd, VIDIOC_S_STD, &esid0);
-
-#if DEBUG_NUCAMERA_VERBOSITY > 4
-		if(returnValue)
-		{
-			debug << "DarwinCamera::DarwinCamera(): Error Setting Video Mode: " << strerror(errno) << endl;
-		}
-		else
-		{
-			debug << "DarwinCamera::DarwinCamera(): Video Mode set to " << (WIDTH == 320 ? "QVGA" : "VGA") << endl;
-		}
-#else
-		if(returnValue)
-			throw std::exception();
-#endif
+		if(ioctl(fd, VIDIOC_S_STD, &esid0))
+			throw std::runtime_error("DarwinCamera::initialiseCamera(): Error setting video mode");
 
 		// set format
 		struct v4l2_format fmt;
@@ -267,34 +239,22 @@ namespace modules {
 		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 		fmt.fmt.pix.field = V4L2_FIELD_NONE;
 
-		returnValue = ioctl(fd, VIDIOC_S_FMT, &fmt);
-#if DEBUG_NUCAMERA_VERBOSITY > 4
-		if(returnValue)
-		{
-			debug << "DarwinCamera::DarwinCamera(): Error Setting Format: " << strerror(errno) << endl;
-		}
-		else
-		{
-			debug << "DarwinCamera::DarwinCamera(): Format set" << endl;
-		}
-#else
-		if(returnValue)
-			throw std::exception();
-#endif
+		if(ioctl(fd, VIDIOC_S_FMT, &fmt))
+			throw std::runtime_error("DarwinCamera::initialiseCamera(): error setting format");
 
 		if(fmt.fmt.pix.sizeimage != SIZE)
-			throw std::exception();
+			throw std::runtime_error("DarwinCamera::initialiseCamera(): image size incorrect");
 
 		// set frame rate
 		struct v4l2_streamparm fps;
 		memset(&fps, 0, sizeof(fps));
 		fps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(ioctl(fd, VIDIOC_G_PARM, &fps))
-			throw std::exception();
+			throw std::runtime_error("DarwinCamera::initialiseCamera(): error setting FPS");
 		fps.parm.capture.timeperframe.numerator = 1;
 		fps.parm.capture.timeperframe.denominator = FRAMERATE;
 		if(ioctl(fd, VIDIOC_S_PARM, &fps) == -1)
-			throw std::exception();
+			throw std::runtime_error("DarwinCamera::initialiseCamera(): error setting FPS");
 
 		// request buffers
 		struct v4l2_requestbuffers rb;
@@ -303,21 +263,21 @@ namespace modules {
 		rb.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		rb.memory = V4L2_MEMORY_MMAP;
 		if(ioctl(fd, VIDIOC_REQBUFS, &rb) == -1)
-			throw std::exception();
+			throw std::runtime_error("DarwinCamera::initialiseCamera(): error requesting buffers");
 
 		// map the buffers
-		buf = static_cast<struct v4l2_buffer*>(calloc(1, sizeof(struct v4l2_buffer)));
+		buf.reset(new v4l2_buffer);
 		for(int i = 0; i < frameBufferCount; ++i)
 		{
 			buf->index = i;
 			buf->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			buf->memory = V4L2_MEMORY_MMAP;
-			if(ioctl(fd, VIDIOC_QUERYBUF, buf) == -1)
-				throw std::exception();
+			if(ioctl(fd, VIDIOC_QUERYBUF, buf.get()) == -1)
+				throw std::runtime_error("DarwinCamera::initialiseCamera(): error mapping buffers");
 			memLength[i] = buf->length;
 			mem[i] = mmap(0, buf->length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf->m.offset);
 			if(mem[i] == MAP_FAILED)
-				throw std::exception();
+				throw std::runtime_error("DarwinCamera::initialiseCamera(): error mapping buffers");
 		}
 
 		// queue the buffers
@@ -326,92 +286,90 @@ namespace modules {
 			buf->index = i;
 			buf->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			buf->memory = V4L2_MEMORY_MMAP;
-			if(ioctl(fd, VIDIOC_QBUF, buf) == -1)
-				throw std::exception();
+			if(ioctl(fd, VIDIOC_QBUF, buf.get()) == -1)
+				throw std::runtime_error("DarwinCamera::initialiseCamera(): error queueing buffers");
 		}
 	}
 
 	bool DarwinCamera::capturedNew()
 	{
 		// requeue the buffer of the last captured image which is obselete now
-		if(currentBuf && ioctl(fd, VIDIOC_QBUF, currentBuf) == -1)
-			throw std::exception();
+		if(bufQueued && ioctl(fd, VIDIOC_QBUF, buf.get()) == -1)
+			throw std::runtime_error("DarwinCamera::captureNew(): error re-queueing buffer");
 
 		// dequeue a frame buffer (this call blocks when there is no new image available) */
-		if(ioctl(fd, VIDIOC_DQBUF, buf) == -1)
-			throw std::exception();
+		if(ioctl(fd, VIDIOC_DQBUF, buf.get()) == -1)
+			throw std::runtime_error("DarwinCamera::captureNew(): error de-queueing buffer");
+		bufQueued = true;
 
 		if(buf->bytesused != SIZE)
-			throw std::exception();
+			throw std::runtime_error("DarwinCamera::captureNew(): image size incorrect");
 
-		currentBuf = buf;
-		timeStamp = storedTimeStamp + 33.0;
+		timeStamp = storedTimeStamp + (1000 / FRAMERATE);
 		storedTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now().time_since_epoch()).count();
 		return true;
 	}
 
 	const unsigned char* DarwinCamera::getImage() const
 	{
-		if(currentBuf == nullptr)
-			throw std::exception();
-		return static_cast<unsigned char*>(mem[currentBuf->index]);
+		return static_cast<unsigned char*>(mem[buf->index]);
 	}
 
 	double DarwinCamera::getTimeStamp() const
 	{
-		if(currentBuf == nullptr)
-			throw std::exception();
 		return timeStamp;
 	}
 
 	messages::NUImage* DarwinCamera::grabNewImage()
 	{
 		while(!capturedNew());
-		currentBufferedImage.MapYUV422BufferToImage(getImage(), WIDTH, HEIGHT, true);
-		currentBufferedImage.setTimestamp(getTimeStamp());
-		currentBufferedImage.setCameraSettings(settings);
-		return &currentBufferedImage;
+		messages::NUImage* image = new messages::NUImage;
+		image->CopyFromYUV422Buffer(getImage(), WIDTH, HEIGHT);
+		image->flipped = true;
+		image->setTimestamp(getTimeStamp());
+		image->setCameraSettings(*settings);
+		return image;
 	}
 
 	void DarwinCamera::readCameraSettings()
 	{
-		settings.exposureAuto               = readSetting(V4L2_CID_EXPOSURE_AUTO);
-		settings.autoWhiteBalance           = readSetting(V4L2_CID_AUTO_WHITE_BALANCE);
-		settings.whiteBalanceTemperature    = readSetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE);
-		settings.exposureAutoPriority       = readSetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY);
-		settings.brightness                 = readSetting(V4L2_CID_BRIGHTNESS);
-		settings.contrast                   = readSetting(V4L2_CID_CONTRAST);
-		settings.saturation                 = readSetting(V4L2_CID_SATURATION);
-		settings.gain                       = readSetting(V4L2_CID_GAIN);
-		settings.exposureAbsolute           = readSetting(V4L2_CID_EXPOSURE_ABSOLUTE);
-		settings.powerLineFrequency         = readSetting(V4L2_CID_POWER_LINE_FREQUENCY);
-		settings.sharpness                  = readSetting(V4L2_CID_SHARPNESS);
+		settings->exposureAuto               = readSetting(V4L2_CID_EXPOSURE_AUTO);
+		settings->autoWhiteBalance           = readSetting(V4L2_CID_AUTO_WHITE_BALANCE);
+		settings->whiteBalanceTemperature    = readSetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE);
+		settings->exposureAutoPriority       = readSetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY);
+		settings->brightness                 = readSetting(V4L2_CID_BRIGHTNESS);
+		settings->contrast                   = readSetting(V4L2_CID_CONTRAST);
+		settings->saturation                 = readSetting(V4L2_CID_SATURATION);
+		settings->gain                       = readSetting(V4L2_CID_GAIN);
+		settings->exposureAbsolute           = readSetting(V4L2_CID_EXPOSURE_ABSOLUTE);
+		settings->powerLineFrequency         = readSetting(V4L2_CID_POWER_LINE_FREQUENCY);
+		settings->sharpness                  = readSetting(V4L2_CID_SHARPNESS);
 
-		settings.p_exposureAuto.set(settings.exposureAuto);
-		settings.p_autoWhiteBalance.set(settings.autoWhiteBalance);
-		settings.p_whiteBalanceTemperature.set(settings.whiteBalanceTemperature);
-		settings.p_exposureAutoPriority.set(settings.exposureAutoPriority);
-		settings.p_brightness.set(settings.brightness);
-		settings.p_contrast.set(settings.contrast);
-		settings.p_saturation.set(settings.saturation);
-		settings.p_gain.set(settings.gain);
-		settings.p_exposureAbsolute.set(settings.exposureAbsolute);
-		settings.p_powerLineFrequency.set(settings.powerLineFrequency);
-		settings.p_sharpness.set(settings.sharpness);
+		settings->p_exposureAuto.set(settings->exposureAuto);
+		settings->p_autoWhiteBalance.set(settings->autoWhiteBalance);
+		settings->p_whiteBalanceTemperature.set(settings->whiteBalanceTemperature);
+		settings->p_exposureAutoPriority.set(settings->exposureAutoPriority);
+		settings->p_brightness.set(settings->brightness);
+		settings->p_contrast.set(settings->contrast);
+		settings->p_saturation.set(settings->saturation);
+		settings->p_gain.set(settings->gain);
+		settings->p_exposureAbsolute.set(settings->exposureAbsolute);
+		settings->p_powerLineFrequency.set(settings->powerLineFrequency);
+		settings->p_sharpness.set(settings->sharpness);
 
 #if DEBUG_NUCAMERA_VERBOSITY > 1
 		debug << "DarwinCamera::readCameraSettings()" << endl;
-		debug << "\texposureAuto " << m_settings.exposureAuto  << endl;
-		debug << "autoWhiteBalance " << m_settings.autoWhiteBalance  << endl;
-		debug << "whiteBalanceTemperature " << m_settings.whiteBalanceTemperature  << endl;
-		debug << "exposureAutoPriority " << m_settings.exposureAutoPriority  << endl;
-		debug << "brightness " << m_settings.brightness  << endl;
-		debug << "contrast " << m_settings.contrast  << endl;
-		debug << "saturation " << m_settings.saturation  << endl;
-		debug << "gain " << m_settings.gain  << endl;
-		debug << "exposureAbsolute " << m_settings.exposureAbsolute  << endl;
-		debug << "powerLineFrequency " << m_settings.powerLineFrequency  << endl;
-		debug << "sharpness " << m_settings.sharpness  << endl;
+		debug << "\texposureAuto " << m_settings->exposureAuto  << endl;
+		debug << "autoWhiteBalance " << m_settings->autoWhiteBalance  << endl;
+		debug << "whiteBalanceTemperature " << m_settings->whiteBalanceTemperature  << endl;
+		debug << "exposureAutoPriority " << m_settings->exposureAutoPriority  << endl;
+		debug << "brightness " << m_settings->brightness  << endl;
+		debug << "contrast " << m_settings->contrast  << endl;
+		debug << "saturation " << m_settings->saturation  << endl;
+		debug << "gain " << m_settings->gain  << endl;
+		debug << "exposureAbsolute " << m_settings->exposureAbsolute  << endl;
+		debug << "powerLineFrequency " << m_settings->powerLineFrequency  << endl;
+		debug << "sharpness " << m_settings->sharpness  << endl;
 #endif
 	}
 
@@ -464,67 +422,67 @@ namespace modules {
 	void DarwinCamera::applySettings(const messages::CameraSettings& newset)
 	{
 		// AutoSettings
-		if(newset.p_exposureAuto.get() != settings.p_exposureAuto.get())
+		if(newset.p_exposureAuto.get() != settings->p_exposureAuto.get())
 		{
-			settings.p_exposureAuto.set(newset.p_exposureAuto.get());
-			applySetting(V4L2_CID_EXPOSURE_AUTO, (settings.p_exposureAuto.get()));
+			settings->p_exposureAuto.set(newset.p_exposureAuto.get());
+			applySetting(V4L2_CID_EXPOSURE_AUTO, (settings->p_exposureAuto.get()));
 		}
-		if(newset.p_autoWhiteBalance.get() != settings.p_autoWhiteBalance.get())
+		if(newset.p_autoWhiteBalance.get() != settings->p_autoWhiteBalance.get())
 		{
-			settings.p_autoWhiteBalance.set(newset.p_autoWhiteBalance.get());
-			applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (settings.p_autoWhiteBalance.get()));
+			settings->p_autoWhiteBalance.set(newset.p_autoWhiteBalance.get());
+			applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (settings->p_autoWhiteBalance.get()));
 		}
-		if(newset.p_whiteBalanceTemperature.get() != settings.p_whiteBalanceTemperature.get())
+		if(newset.p_whiteBalanceTemperature.get() != settings->p_whiteBalanceTemperature.get())
 		{
-			settings.p_whiteBalanceTemperature.set(newset.p_whiteBalanceTemperature.get());
-			applySetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE, (settings.p_whiteBalanceTemperature.get()));
+			settings->p_whiteBalanceTemperature.set(newset.p_whiteBalanceTemperature.get());
+			applySetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE, (settings->p_whiteBalanceTemperature.get()));
 		}
-		if(newset.p_exposureAutoPriority.get() != settings.p_exposureAutoPriority.get())
+		if(newset.p_exposureAutoPriority.get() != settings->p_exposureAutoPriority.get())
 		{
-			settings.p_exposureAutoPriority.set(newset.p_exposureAutoPriority.get());
-			applySetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY, (settings.p_exposureAutoPriority.get()));
+			settings->p_exposureAutoPriority.set(newset.p_exposureAutoPriority.get());
+			applySetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY, (settings->p_exposureAutoPriority.get()));
 		}
 
 		//Other controls
-		if(newset.p_brightness.get() != settings.p_brightness.get())
+		if(newset.p_brightness.get() != settings->p_brightness.get())
 		{
-			settings.p_brightness.set(newset.p_brightness.get());
-			applySetting(V4L2_CID_BRIGHTNESS, (settings.p_brightness.get()));
+			settings->p_brightness.set(newset.p_brightness.get());
+			applySetting(V4L2_CID_BRIGHTNESS, (settings->p_brightness.get()));
 		}
-		if(newset.p_contrast.get() != settings.p_contrast.get())
+		if(newset.p_contrast.get() != settings->p_contrast.get())
 		{
-			settings.p_contrast.set(newset.p_contrast.get());
-			applySetting(V4L2_CID_CONTRAST, (settings.p_contrast.get()));
+			settings->p_contrast.set(newset.p_contrast.get());
+			applySetting(V4L2_CID_CONTRAST, (settings->p_contrast.get()));
 		}
-		if(newset.p_saturation.get() != settings.p_saturation.get())
+		if(newset.p_saturation.get() != settings->p_saturation.get())
 		{
-			settings.p_saturation.set(newset.p_saturation.get());
-			applySetting(V4L2_CID_SATURATION, (settings.p_saturation.get()));
+			settings->p_saturation.set(newset.p_saturation.get());
+			applySetting(V4L2_CID_SATURATION, (settings->p_saturation.get()));
 		}
-		if(newset.p_gain.get() != settings.p_gain.get())
+		if(newset.p_gain.get() != settings->p_gain.get())
 		{
-			settings.p_gain.set(newset.p_gain.get());
-			applySetting(V4L2_CID_GAIN, (settings.p_gain.get()));
+			settings->p_gain.set(newset.p_gain.get());
+			applySetting(V4L2_CID_GAIN, (settings->p_gain.get()));
 		}
-		if(newset.p_exposureAbsolute.get() != settings.p_exposureAbsolute.get())
+		if(newset.p_exposureAbsolute.get() != settings->p_exposureAbsolute.get())
 		{
-			settings.p_exposureAbsolute.set(newset.p_exposureAbsolute.get());
-			applySetting(V4L2_CID_EXPOSURE_ABSOLUTE, (settings.p_exposureAbsolute.get()));
+			settings->p_exposureAbsolute.set(newset.p_exposureAbsolute.get());
+			applySetting(V4L2_CID_EXPOSURE_ABSOLUTE, (settings->p_exposureAbsolute.get()));
 		}
 
-		if(newset.p_powerLineFrequency.get() != settings.p_powerLineFrequency.get())
+		if(newset.p_powerLineFrequency.get() != settings->p_powerLineFrequency.get())
 		{
-			settings.p_powerLineFrequency.set(newset.p_powerLineFrequency.get());
-			applySetting(V4L2_CID_POWER_LINE_FREQUENCY, (settings.p_powerLineFrequency.get()));
+			settings->p_powerLineFrequency.set(newset.p_powerLineFrequency.get());
+			applySetting(V4L2_CID_POWER_LINE_FREQUENCY, (settings->p_powerLineFrequency.get()));
 		}
-		if(newset.p_sharpness.get() != settings.p_sharpness.get())
+		if(newset.p_sharpness.get() != settings->p_sharpness.get())
 		{
-			settings.p_sharpness.set(newset.p_sharpness.get());
-			applySetting(V4L2_CID_SHARPNESS, (settings.p_sharpness.get()));
+			settings->p_sharpness.set(newset.p_sharpness.get());
+			applySetting(V4L2_CID_SHARPNESS, (settings->p_sharpness.get()));
 		}
 
 		//COPIES INTO OLD FORMAT:
-		settings.copyParams();
+		settings->copyParams();
 	}
 
 	void DarwinCamera::forceApplySettings(const messages::CameraSettings& newset)
@@ -544,24 +502,24 @@ namespace modules {
 		debug << "p_sharpness" << newset.p_sharpness.get() << endl;
 #endif
 		//Copying the new Paramters into m_settings
-		settings = newset;
+		*settings = newset;
 
 		// Auto Controls
-		applySetting(V4L2_CID_EXPOSURE_AUTO, (settings.p_exposureAuto.get()));
-		applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (settings.p_autoWhiteBalance.get()));
-		applySetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE, (settings.p_whiteBalanceTemperature.get()));
-		applySetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY, (settings.p_exposureAutoPriority.get()));
+		applySetting(V4L2_CID_EXPOSURE_AUTO, (settings->p_exposureAuto.get()));
+		applySetting(V4L2_CID_AUTO_WHITE_BALANCE, (settings->p_autoWhiteBalance.get()));
+		applySetting(V4L2_CID_WHITE_BALANCE_TEMPERATURE, (settings->p_whiteBalanceTemperature.get()));
+		applySetting(V4L2_CID_EXPOSURE_AUTO_PRIORITY, (settings->p_exposureAutoPriority.get()));
 		//Other controls
-		applySetting(V4L2_CID_BRIGHTNESS, (settings.p_brightness.get()));
-		applySetting(V4L2_CID_CONTRAST, (settings.p_contrast.get()));
-		applySetting(V4L2_CID_SATURATION, (settings.p_saturation.get()));
-		applySetting(V4L2_CID_GAIN, (settings.p_gain.get()));
-		applySetting(V4L2_CID_EXPOSURE_ABSOLUTE, (settings.p_exposureAbsolute.get()));
-		applySetting(V4L2_CID_POWER_LINE_FREQUENCY, (settings.p_powerLineFrequency.get()));
-		applySetting(V4L2_CID_SHARPNESS, (settings.p_sharpness.get()));
+		applySetting(V4L2_CID_BRIGHTNESS, (settings->p_brightness.get()));
+		applySetting(V4L2_CID_CONTRAST, (settings->p_contrast.get()));
+		applySetting(V4L2_CID_SATURATION, (settings->p_saturation.get()));
+		applySetting(V4L2_CID_GAIN, (settings->p_gain.get()));
+		applySetting(V4L2_CID_EXPOSURE_ABSOLUTE, (settings->p_exposureAbsolute.get()));
+		applySetting(V4L2_CID_POWER_LINE_FREQUENCY, (settings->p_powerLineFrequency.get()));
+		applySetting(V4L2_CID_SHARPNESS, (settings->p_sharpness.get()));
 
 		//COPIES INTO OLD FORMAT:
-		settings.copyParams();
+		settings->copyParams();
 	}
 
 	/*

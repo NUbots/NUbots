@@ -2,10 +2,13 @@
 #define MODULES_DARWINCAMERA_H
 
 #include <NUClear.h>
-#include "messages/NUImage.h"
-#include "messages/CameraSettings.h"
 
+// Forward declarations
 struct v4l2_buffer;
+namespace messages {
+	class NUImage;
+	class CameraSettings;
+}
 
 namespace modules {
 
@@ -37,15 +40,14 @@ namespace modules {
 		void openCameraDevice(const std::string& device_name);
 		void setStreaming(bool streaming_on);
 
-		int fd;                             //!< The file descriptor for the video device.
-		void* mem[frameBufferCount];        //!< Frame buffer addresses.
-		int memLength[frameBufferCount]; 	//!< The length of each frame buffer.
-		struct v4l2_buffer* buf;            //!< Reusable parameter struct for some ioctl calls.
-		struct v4l2_buffer* currentBuf; 	//!< The last dequeued frame buffer.
-		double timeStamp,                   //!< Timestamp of the last captured image.
-			   storedTimeStamp;             //!< Timestamp when the next image recording starts.
-		messages::NUImage currentBufferedImage;
-		messages::CameraSettings settings;
+		int fd;                                             //!< The file descriptor for the video device.
+		void* mem[frameBufferCount];                        //!< Frame buffer addresses.
+		int memLength[frameBufferCount];                   	//!< The length of each frame buffer.
+		std::unique_ptr<struct v4l2_buffer> buf;            //!< Reusable parameter struct for some ioctl calls.
+		bool bufQueued;                                     //!< Whether 'buf' points to a currently queued buffer
+		double timeStamp;                                   //!< Timestamp of the last captured image.
+		double storedTimeStamp;                             //!< Timestamp when the next image recording starts.
+		std::unique_ptr<messages::CameraSettings> settings; //!< The current camera settings
 
 	    bool capturedNew();
 		const unsigned char* getImage() const;
