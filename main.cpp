@@ -1,6 +1,8 @@
 #include <NUClear.h>
 #include <signal.h>
+
 #include "DarwinPlatform.h"
+#include "NUBugger.h"
 
 struct SegmentationFault : public std::exception {};
 struct AbortSignal : public std::exception {};
@@ -46,8 +48,9 @@ int main(int argc, char *argv[]) {
     // For segfaults and abort signals, convert them to exceptions and throw them, they will then be caught and not cause errors
     signal(SIGSEGV, segfaultConverter);
     signal(SIGABRT, abortfaultConverter);
-    
+
     plant.install<modules::DarwinPlatform>();
+    plant.install<modules::NUBugger>();
     
     plant.start();
 }

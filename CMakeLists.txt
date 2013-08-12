@@ -54,7 +54,8 @@ ENDIF()
 ADD_SUBDIRECTORY(shared/messages)
 
 SET(modules
-    DarwinPlatform)
+    DarwinPlatform
+    NUBugger)
 
 FOREACH(module ${modules})
     # Add the subdirectories
