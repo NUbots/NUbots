@@ -147,7 +147,7 @@ namespace modules {
 		bufQueued(false),
 		timeStamp(0)
 	{
-        on<Trigger<Every<1000 / FRAMERATE, std::chrono::milliseconds>>>([this](const time_t& time)
+        on<Trigger<Every<1000 / FRAMERATE, std::chrono::milliseconds>>, Options<Single>>([this](const time_t& time)
 		{
 			emit(grabNewImage());
         });
