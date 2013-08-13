@@ -24,5 +24,7 @@ IF(BUILD_TESTS)
         messages
         ${NUCLEAR_LIBRARIES}
         ${ZMQ_LIBRARIES}
-        ${PROTOBUF_LIBRARIES})
+        ${PROTOBUF_LIBRARIES}
+        ${UUID_LIBRARIES}
+        ${OPENPGM_LIBRARIES})
 ENDIF()
