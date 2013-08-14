@@ -35,8 +35,8 @@ namespace modules {
             // Find or add our path
             auto& path = configurations[command.path];
 
-            // Find our type and add if nessacary
-            auto type = std::find(std::begin(path), std::end(path), command.requester);
+            // Find our type and add our emitter if it's not already there
+            auto type = path.find(command.requester);
             if (type == std::end(path)) {
                 path.insert(std::make_pair(command.requester, command.emitter));
             }
