@@ -18,46 +18,64 @@
 #include "ConfigSystem.h"
 
 #include <sys/inotify.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 namespace modules {
+
+    Messages::ConfigurationNode* buildConfigurationNode(int fileDescriptor) {
+        
+        // TODO using the file descriptor provided, read it and build a configurationnode tree
+
+        return nullptr;
+    }
 
     ConfigSystem::ConfigSystem(NUClear::PowerPlant& plant) : Reactor(plant) {
 
         watcherFd = inotify_init();
 
-        on<Trigger<AddConfiguration>>([](const AddConfiguration& command) {
+        on<Trigger<AddConfiguration>>([this](const AddConfiguration& command) {
 
             // Attempt to open our path as a file (before we get carried away adding it)
-            int fd = open(command.path);
+            int fd = open(command.path.c_str(), O_RDWR);
 
-            
-
-            // Find or add our path
-            auto& path = configurations[command.path];
-
-            // Find our type and add our emitter if it's not already there
-            auto type = path.find(command.requester);
-            if (type == std::end(path)) {
-                path.insert(std::make_pair(command.requester, command.emitter));
+            if (fd < 0) {
+                // TODO error that this config is unable to be found emit a bad node (nullptr node)
             }
+            else {
+                // Find or add our path
+                auto& path = configurations[command.path];
 
-            // Open the file descriptor shown by command.path
+                // Find our type and add our emitter if it's not already there
+                auto type = path.find(command.requester);
+                if (type == std::end(path)) {
+                    path.insert(std::make_pair(command.requester, command.emitter));
+                }
 
-            // Parse the file and use the emitter to emit it
+                // Insert our file descriptor into our list of files
+                fileDescriptors.insert(std::make_pair(fd, command.path));
 
-            // Add this to our "Select" list
+                // TODO read our configuration file and then emit it using the emitter
+                Messages::ConfigurationNode* data = buildConfigurationNode(fd);
+                command.emitter(this, data);
 
-            // We need a map that maps paths to a vector of emittiers
+                // Add our file descriptor to the selector
+                FD_SET(fd, &selectorSet);
 
-            // We need to only add a new emitter when we don't have that typeindex
 
+
+                // Open the file descriptor shown by command.path
+
+                // Parse the file and use the emitter to emit it
+
+                // Add this to our "Select" list
+
+                // We need a map that maps paths to a vector of emittiers
+
+                // We need to only add a new emitter when we don't have that typeindex
+            }
         });
 
-        // TODO on the Exists call, emit a lambda and path pair
-
-        // Add an On call here which listens for ConfigurationHandler events
-
-        // When we get one then start listening to that path for changes and when they happen
-        // use our handler to fire an event
+/home/trent/Port/modules/ConfigSystem/src
     }
 }

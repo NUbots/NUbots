@@ -30,22 +30,24 @@ struct AddConfiguration {
     std::function<void (NUClear::Reactor*, Messages::ConfigurationNode*)> emitter;
 };
 
-template <typename TConfiguration>
-struct NUClear::Reactor::Exists<Messages::Configuration<TConfiguration>> {
-    static void exists(NUClear::Reactor* context) {
+namespace NUClear {
+    template <typename TConfiguration>
+    struct NUClear::Reactor::Exists<Messages::Configuration<TConfiguration>> {
+        static void exists(NUClear::Reactor* context) {
 
-        // Build our lambda we will use to trigger this reaction
-        std::function<void (Reactor*, Messages::ConfigurationNode*)> emitter =
-        [](Reactor* configReactor, Messages::ConfigurationNode* node) {
+            // Build our lambda we will use to trigger this reaction
+            std::function<void (Reactor*, Messages::ConfigurationNode*)> emitter =
+            [](Reactor* configReactor, Messages::ConfigurationNode* node) {
 
-            // We cast our node to be the correct type (to trigger the correct reaction) and emit it
-            configReactor->emit(static_cast<Messages::Configuration<TConfiguration>*>(node));
-        };
+                // We cast our node to be the correct type (to trigger the correct reaction) and emit it
+                configReactor->emit(static_cast<Messages::Configuration<TConfiguration>*>(node));
+            };
 
-        // Emit it from our reactor
-        context->emit(new AddConfiguration(typeid(TConfiguration), TConfiguration::CONFIGURATION_PATH, emitter));
-    }
-};
+            // Emit it from our reactor
+            context->emit(new AddConfiguration(typeid(TConfiguration), TConfiguration::CONFIGURATION_PATH, emitter));
+        }
+    };
+}
 
 namespace modules {
 
