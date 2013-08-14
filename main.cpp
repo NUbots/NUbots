@@ -1,6 +1,7 @@
 #include <NUClear.h>
 #include <signal.h>
 
+#include "ConfigSystem.h"
 #include "DarwinPlatform.h"
 #include "NUBugger.h"
 
@@ -49,6 +50,7 @@ int main(int argc, char *argv[]) {
     signal(SIGSEGV, segfaultConverter);
     signal(SIGABRT, abortfaultConverter);
 
+    plant.install<modules::ConfigSystem>();
     plant.install<modules::DarwinPlatform>();
     plant.install<modules::NUBugger>();
     
