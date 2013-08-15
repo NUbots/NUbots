@@ -7,11 +7,6 @@ SET(VERSION_PATCH 0)
 
 OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)
 
-# These are the modules that we will build with
-SET(modules
-    DarwinPlatform
-    NUBugger)
-
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -20,19 +15,11 @@ SET(CMAKE_CXX_FLAGS "-std=c++11")
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 
-# We want to statically link everying (for speed and portability)
-SET(CMAKE_EXE_LINKER_FLAGS "-static -shared-libgcc")
-# We want to use static libraries for speed
-SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-
-# Set our compile to tune for an intel atom (until we get another chip)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mtune=atom -march=atom")
-
 # XCode support
 IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
-    MESSAGE("Enabling xcode support")
-    SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
-    SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
+    message("Enabling xcode support")
+    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
 ENDIF()
 
 IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
@@ -40,7 +27,7 @@ IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     EXECUTE_PROCESS(
         COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
     IF(GCC_VERSION VERSION_LESS ${GCC_MINIMUM_VERSION})
-        MESSAGE(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.7.2 or greater.")
+        message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.7.2 or greater.")
     ENDIF()
 
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
@@ -52,12 +39,9 @@ ELSE()
     MESSAGE(FATAL_ERROR "Unsupported compiler!")
 ENDIF()
 
-FIND_PACKAGE(NUClear REQUIRED)  # The NUClear messaging api
-FIND_PACKAGE(ZMQ REQUIRED)      # The ZeroMQ networking library
-FIND_PACKAGE(Protobuf REQUIRED) # For using protocol buffers
-FIND_PACKAGE(UUID REQUIRED)     # For linking with ZMQ statically
-FIND_PACKAGE(OpenPGM REQUIRED)  # For linking with ZMQ statically
-MESSAGE(STATUS ${OPENPGM_FOUND})
+FIND_PACKAGE(NUClear REQUIRED)
+FIND_PACKAGE(ZMQ REQUIRED)
+FIND_PACKAGE(Protobuf REQUIRED)
 INCLUDE_DIRECTORIES(${NUCLEAR_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
@@ -69,6 +53,10 @@ ENDIF()
 # This will generate any .proto files in the messages folder
 ADD_SUBDIRECTORY(shared/messages)
 
+SET(modules
+    DarwinPlatform
+    NUBugger)
+
 FOREACH(module ${modules})
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${module})
@@ -77,13 +65,9 @@ FOREACH(module ${modules})
 ENDFOREACH()
 
 ADD_EXECUTABLE(robocup main.cpp)
-
 TARGET_LINK_LIBRARIES(robocup
     messages
     ${modules}
     ${NUCLEAR_LIBRARIES}
     ${ZMQ_LIBRARIES}
-    ${PROTOBUF_LIBRARIES}
-    ${UUID_LIBRARIES}
-    ${OPENPGM_LIBRARIES})
-
+    ${PROTOBUF_LIBRARIES})
