@@ -3,6 +3,7 @@
 
 #include "DarwinPlatform.h"
 #include "DarwinCamera.h"
+#include "eSpeak.h"
 #include "NUBugger.h"
 
 struct SegmentationFault : public std::exception {};
@@ -52,6 +53,7 @@ int main(int argc, char *argv[]) {
 
     plant.install<modules::DarwinPlatform>();
     plant.install<modules::DarwinCamera>();
+    plant.install<modules::eSpeak>();
     plant.install<modules::NUBugger>();
     
     plant.start();

@@ -1,6 +1,13 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(Robocup)
 
+# These define which modules will be installed
+SET(modules
+    DarwinPlatform
+    DarwinCamera
+    eSpeak
+    NUBugger)
+
 SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 2)
 SET(VERSION_PATCH 0)
@@ -63,11 +70,6 @@ ADD_SUBDIRECTORY(shared/utility)
 SET(NUBOTS_SHARED_LIBRARIES 
     messages 
     utility)
-
-SET(modules
-    DarwinPlatform
-    DarwinCamera
-    NUBugger)
 
 FOREACH(module ${modules})
     # Add the subdirectories
