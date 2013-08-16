@@ -127,7 +127,7 @@ namespace modules {
 
             delete[] data;
 
-            imageData->set_width(imageWidth)
+            imageData->set_width(imageWidth);
             imageData->set_height(imageHeight);
             imageData->set_data(pBuf, c_size);
 

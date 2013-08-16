@@ -60,7 +60,9 @@ ENDIF()
 # This will generate any .proto files in the messages folder
 ADD_SUBDIRECTORY(shared/messages)
 ADD_SUBDIRECTORY(shared/utility)
-SET(NUBOTS_SHARED_LIBRARIES messages utility)
+SET(NUBOTS_SHARED_LIBRARIES 
+    messages 
+    utility)
 
 SET(modules
     DarwinPlatform
