@@ -5,7 +5,7 @@ namespace {
 
     class ImageReactor : public NUClear::Reactor {
     public:
-        ImageReactor(NUClear::PowerPlant& plant): Reactor(plant) {
+        ImageReactor(NUClear::PowerPlant* plant): Reactor(plant) {
             on<Trigger<messages::Image>>([this](const messages::Image& image) {
                 std::cout << "Successfully retrieved an image in ";
                 std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - last).count();
