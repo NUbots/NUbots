@@ -56,8 +56,11 @@ IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
 
+
 # This will generate any .proto files in the messages folder
 ADD_SUBDIRECTORY(shared/messages)
+ADD_SUBDIRECTORY(shared/utility)
+SET(NUBOTS_SHARED_LIBRARIES messages utility)
 
 SET(modules
     DarwinPlatform
@@ -73,7 +76,7 @@ ENDFOREACH()
 
 ADD_EXECUTABLE(robocup main.cpp)
 TARGET_LINK_LIBRARIES(robocup
-    messages
+    ${NUBOTS_SHARED_LIBRARIES}
     ${modules}
     ${NUCLEAR_LIBRARIES}
     ${ZMQ_LIBRARIES}
