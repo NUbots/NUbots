@@ -52,7 +52,7 @@
 
 namespace modules {
 
-    DarwinCamera::DarwinCamera(NUClear::PowerPlant& plant): Reactor(plant), bufQueued(false), settings(new messages::CameraSettings) {
+    DarwinCamera::DarwinCamera(NUClear::PowerPlant* plant): Reactor(plant), bufQueued(false), settings(new messages::CameraSettings) {
         // Open device
         openCameraDevice("/dev/video0");
 

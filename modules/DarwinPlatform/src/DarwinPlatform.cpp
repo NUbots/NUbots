@@ -183,7 +183,7 @@ namespace modules {
         constexpr uint8_t TEMPERATURE(const uint8_t value) { return value; }
     };
 
-    DarwinPlatform::DarwinPlatform(NUClear::PowerPlant& plant) : Reactor(plant), darwin("/dev/ttyUSB0") {
+    DarwinPlatform::DarwinPlatform(NUClear::PowerPlant* plant) : Reactor(plant), darwin("/dev/ttyUSB0") {
 
         // This trigger gets the sensor data from the CM730
         on<Trigger<Every<20, std::chrono::milliseconds>>>([this](const time_t& time) {

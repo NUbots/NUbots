@@ -18,7 +18,7 @@
 #ifndef DARWIN_DARWIN_H
 #define DARWIN_DARWIN_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <utility>
 #include <vector>
 

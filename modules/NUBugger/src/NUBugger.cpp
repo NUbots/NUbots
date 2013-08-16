@@ -30,7 +30,7 @@ using utility::image::YCbCr;
 
 namespace modules {
 
-    NUBugger::NUBugger(NUClear::PowerPlant& plant) : Reactor(plant), pub(plant.getZMQContext(), ZMQ_PUB) {
+    NUBugger::NUBugger(NUClear::PowerPlant* plant) : Reactor(plant), pub(NUClear::Extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
 
         // Set our high water mark
         int64_t hwm = 3;
