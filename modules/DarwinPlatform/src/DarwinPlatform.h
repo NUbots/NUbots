@@ -31,7 +31,7 @@ namespace modules {
         Darwin::Darwin darwin;
 
     public:
-        explicit DarwinPlatform(NUClear::PowerPlant& plant);
+        explicit DarwinPlatform(NUClear::PowerPlant* plant);
     };
 }
 #endif

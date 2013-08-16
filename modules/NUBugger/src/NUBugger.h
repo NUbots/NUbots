@@ -31,7 +31,7 @@ namespace modules {
         zmq::socket_t pub;
         
     public:
-        explicit NUBugger(NUClear::PowerPlant& plant);
+        explicit NUBugger(NUClear::PowerPlant* plant);
     };
 }
 #endif

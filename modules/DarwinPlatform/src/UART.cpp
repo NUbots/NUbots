@@ -201,7 +201,7 @@ std::vector<Darwin::CommandResult> Darwin::UART::executeBulk(const std::vector<u
     std::vector<CommandResult> results(responses);
 
     // Lock our mutex
-    std::unique_lock<std::mutex> (mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     // We flush our buffer, just in case there was anything random in it
     tcflush(fd, TCIFLUSH);
@@ -220,7 +220,7 @@ std::vector<Darwin::CommandResult> Darwin::UART::executeBulk(const std::vector<u
 void Darwin::UART::executeBroadcast(const std::vector<uint8_t>& command) {
 
     // Lock our mutex
-    std::unique_lock<std::mutex> (mutex);
+    std::lock_guard<std::mutex> lock(mutex);
 
     // We flush our buffer, just in case there was anything random in it
     tcflush(fd,TCIFLUSH);

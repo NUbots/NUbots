@@ -46,16 +46,28 @@ INCLUDE_DIRECTORIES(${NUCLEAR_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
 
+# Add our libraries. Each ADD_SUBDIRECTORY is equivalent to FIND_PACKAGE for us.
+ADD_SUBDIRECTORY(lib/jpge)
+INCLUDE_DIRECTORIES(${JPGE_INCLUDE_DIRS})
+
+MESSAGE("JPGE Dir: ${JPGE_INCLUDE_DIRS}")
+
 IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
 
+
 # This will generate any .proto files in the messages folder
 ADD_SUBDIRECTORY(shared/messages)
+ADD_SUBDIRECTORY(shared/utility)
+SET(NUBOTS_SHARED_LIBRARIES 
+    messages 
+    utility)
 
 SET(modules
     ConfigSystem
     DarwinPlatform
+    DarwinCamera
     NUBugger)
 
 FOREACH(module ${modules})
@@ -67,8 +79,9 @@ ENDFOREACH()
 
 ADD_EXECUTABLE(robocup main.cpp)
 TARGET_LINK_LIBRARIES(robocup
-    messages
+    ${NUBOTS_SHARED_LIBRARIES}
     ${modules}
     ${NUCLEAR_LIBRARIES}
     ${ZMQ_LIBRARIES}
-    ${PROTOBUF_LIBRARIES})
+    ${PROTOBUF_LIBRARIES}
+    ${JPGE_LIBRARIES})

@@ -15,14 +15,22 @@
  * Copyright 2013 Trent Houliston <trent@houliston.me>
  */
 
+
 #include "NUBugger.h"
+#include "jpge.h"
 
 #include "messages/NUAPI.pb.h"
 #include "messages/DarwinSensors.h"
+#include "messages/Image.h"
+
+#include "utility/image/ColorModelConversions.h"
+
+using utility::image::RGB;
+using utility::image::YCbCr;
 
 namespace modules {
 
-    NUBugger::NUBugger(NUClear::PowerPlant& plant) : Reactor(plant), pub(plant.getZMQContext(), ZMQ_PUB) {
+    NUBugger::NUBugger(NUClear::PowerPlant* plant) : Reactor(plant), pub(NUClear::Extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
 
         // Set our high water mark
         int64_t hwm = 3;
@@ -74,6 +82,62 @@ namespace modules {
             memcpy(packet.data(), serialized.data(), serialized.size());
             pub.send(packet);
         });
+
+        on<Trigger<messages::Image>>([this](const messages::Image& image) {
+            API::Message message;
+            message.set_type(API::Message::VISION);
+            message.set_utc_timestamp(std::time(0));
+            auto* visionData = message.mutable_vision();
+            auto* imageData = visionData->mutable_image();
+
+            int imageWidth = imageData->width();
+            int imageHeight = imageData->height();
+            jpge::uint8* data = new jpge::uint8[imageWidth * imageHeight * 3]();
+            
+            int index = 0;
+            for (int y = imageHeight - 1; y >= 0; y--) {
+                for (int x = imageWidth - 1; x >= 0; x--) {
+                messages::Image::Pixel pixel = image(x, y);
+                RGB rgb = toRGB(YCbCr{ pixel.y, pixel.cb, pixel.cr });
+                    /*unsigned char r, g, b;
+                    ColorModelConversions::fromYCbCrToRGB(
+                        (unsigned char) pixel.y, 
+                        (unsigned char) pixel.cb, 
+                        (unsigned char) pixel.cr, 
+                        r, 
+                        g, 
+                        b
+                    );*/
+
+                    data[index] = rgb.r;
+                    data[index + 1] = rgb.g;
+                    data[index + 2] = rgb.b;
+
+                    index += 3;
+                }
+            }
+
+            // allocate a buffer that's hopefully big enough (this is way overkill for jpeg)
+            int orig_buf_size = imageWidth * imageHeight * 3; 
+            if (orig_buf_size < 1024) orig_buf_size = 1024;
+            void *pBuf = malloc(orig_buf_size);
+            int c_size = orig_buf_size;
+            jpge::compress_image_to_jpeg_file_in_memory(pBuf, c_size, imageWidth, imageHeight, 3, data);
+
+            delete[] data;
+
+            imageData->set_width(imageWidth);
+            imageData->set_height(imageHeight);
+            imageData->set_data(pBuf, c_size);
+
+            free(pBuf);
+
+            auto serialized = message.SerializeAsString();
+            zmq::message_t packet(serialized.size());
+            memcpy(packet.data(), serialized.data(), serialized.size());
+            pub.send(packet);
+        });
+
 
         // When we shutdown, close our publisher
         on<Trigger<Shutdown>>([this](const Shutdown&) {
