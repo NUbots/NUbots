@@ -55,6 +55,7 @@ ADD_SUBDIRECTORY(shared/messages)
 
 SET(modules
     DarwinPlatform
+    DarwinCamera
     NUBugger)
 
 FOREACH(module ${modules})
