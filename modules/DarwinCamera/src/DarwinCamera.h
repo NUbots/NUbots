@@ -35,7 +35,7 @@ namespace modules {
 
     class DarwinCamera : public NUClear::Reactor {
     public:
-        DarwinCamera(NUClear::PowerPlant& plant);
+        DarwinCamera(NUClear::PowerPlant* plant);
         ~DarwinCamera();
 
         messages::Image* grabNewImage();
