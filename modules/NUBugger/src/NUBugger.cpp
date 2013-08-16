@@ -21,8 +21,7 @@
 
 #include "messages/NUAPI.pb.h"
 #include "messages/DarwinSensors.h"
-#include "messages/NUImage.h"
-#include "messages/Pixel.h"
+#include "messages/Image.h"
 
 #include "utility/image/ColorModelConversions.h"
 
@@ -84,7 +83,7 @@ namespace modules {
             pub.send(packet);
         });
 
-        on<Trigger<messages::NUImage>>([this](const messages::NUImage& image) {
+        on<Trigger<messages::Image>>([this](const messages::Image& image) {
             API::Message message;
             message.set_type(API::Message::VISION);
             message.set_utc_timestamp(std::time(0));
@@ -98,7 +97,7 @@ namespace modules {
             int index = 0;
             for (int y = imageHeight - 1; y >= 0; y--) {
                 for (int x = imageWidth - 1; x >= 0; x--) {
-                messages::Pixel pixel = image.at(x, y);
+                messages::Image::Pixel pixel = image(x, y);
                 RGB rgb = toRGB(YCbCr{ pixel.y, pixel.cb, pixel.cr });
                     /*unsigned char r, g, b;
                     ColorModelConversions::fromYCbCrToRGB(
