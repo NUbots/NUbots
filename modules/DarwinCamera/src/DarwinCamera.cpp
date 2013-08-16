@@ -21,7 +21,7 @@
 
 #include "DarwinCamera.h"
 #include "messages/CameraSettings.h"
-#include "messages/NUImage.h"
+#include "messages/Image.h"
 
 #include <cstring>
 #include <sstream>
@@ -52,7 +52,7 @@
 
 namespace modules {
 
-    DarwinCamera::DarwinCamera(NUClear::PowerPlant& plant): Reactor(plant), bufQueued(false), timeStamp(0) {
+    DarwinCamera::DarwinCamera(NUClear::PowerPlant& plant): Reactor(plant), bufQueued(false) {
         on<Trigger<Every<1000 / FRAMERATE, std::chrono::milliseconds>>, Options<Single>>([this](const time_t& time) {
             emit(grabNewImage());
         });
@@ -74,7 +74,6 @@ namespace modules {
             applySettings(settings);
         });
 
-        storedTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now().time_since_epoch()).count();
         settings.reset(new messages::CameraSettings);
 
         // Open device
@@ -109,18 +108,20 @@ namespace modules {
 
     void DarwinCamera::initialiseCamera() {
         // set default parameters
+        /*
         struct v4l2_control control;
         memset(&control, 0, sizeof(control));
         control.id = V4L2_CID_CAM_INIT;
-        //control.value = 0;
+        control.value = 0;
         if(ioctl(fd, VIDIOC_S_CTRL, &control) < 0) {
             throw std::runtime_error("DarwinCamera::initialiseCamera(): V4L2_CID_CAM_INIT failed");
         }
-
+        
         v4l2_std_id esid0 = (WIDTH == 320 ? 0x04000000UL : 0x08000000UL);
         if(ioctl(fd, VIDIOC_S_STD, &esid0)) {
             throw std::runtime_error("DarwinCamera::initialiseCamera(): Error setting video mode");
         }
+        */
 
         // set format
         struct v4l2_format fmt;
@@ -179,8 +180,7 @@ namespace modules {
         }
 
         // queue the buffers
-        for(int i = 0; i < frameBufferCount; ++i)
-        {
+        for(int i = 0; i < frameBufferCount; ++i) {
             buf->index = i;
             buf->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buf->memory = V4L2_MEMORY_MMAP;
@@ -192,6 +192,7 @@ namespace modules {
 
     bool DarwinCamera::capturedNew() {
         // requeue the buffer of the last captured image which is obselete now
+        auto start = std::chrono::high_resolution_clock::now();
         if(bufQueued && ioctl(fd, VIDIOC_QBUF, buf.get()) == -1) {
             throw std::runtime_error("DarwinCamera::captureNew(): error re-queueing buffer");
         }
@@ -201,30 +202,20 @@ namespace modules {
             throw std::runtime_error("DarwinCamera::captureNew(): error de-queueing buffer");
         }
         bufQueued = true;
+        std::cout << "Dequeueing buffer took " << std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::high_resolution_clock::now() - start).count() << "ms." << std::endl;
 
         if(buf->bytesused != SIZE) {
             throw std::runtime_error("DarwinCamera::captureNew(): image size incorrect");
         }
 
-        timeStamp = storedTimeStamp + (1000 / FRAMERATE);
-        storedTimeStamp = std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now().time_since_epoch()).count();
         return true;
     }
 
-    const unsigned char* DarwinCamera::getImage() const {
-        return static_cast<unsigned char*>(mem[buf->index]);
-    }
-
-    double DarwinCamera::getTimeStamp() const {
-        return timeStamp;
-    }
-
-    messages::NUImage* DarwinCamera::grabNewImage() {
+    messages::Image* DarwinCamera::grabNewImage() {
         while(!capturedNew());
-        messages::NUImage* image = new messages::NUImage;
-        image->copyFromYUV422Buffer(getImage(), WIDTH, HEIGHT, true);
-        image->setTimestamp(getTimeStamp());
-        image->setCameraSettings(*settings);
+        messages::Image* image = new messages::Image;
+        image->copyFromYUV422Buffer(static_cast<messages::Image::Pixel*>(mem[buf->index]), WIDTH, HEIGHT, true);
         return image;
     }
 
