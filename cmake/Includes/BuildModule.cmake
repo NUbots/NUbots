@@ -20,6 +20,7 @@ IF(BUILD_TESTS)
 
     TARGET_LINK_LIBRARIES(${module_name}Tests
         ${NUBOTS_SHARED_LIBRARIES}
+        ${JPGE_LIBRARIES}
         ${NUCLEAR_LIBRARIES}
         ${ZMQ_LIBRARIES}
         ${PROTOBUF_LIBRARIES})
