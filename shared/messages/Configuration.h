@@ -3,28 +3,9 @@
 
 #include <NUClear.h>
 
+#include "ConfigurationNode.h"
+
 namespace Messages {
-
-    class ConfigurationNode {
-
-        /// This holds our data
-        std::unique_ptr<void> data;
-        
-        enum class DataType {
-            STRING,
-            INTEGER,
-            FLOAT,
-            ARRAY,
-            OBJECT,
-            NULLPTR
-        } datatype;
-
-        template <typename TType>
-        operator TType();
-
-        template <typename TType>
-        ConfigurationNode operator=(TType from);
-    };
 
     using namespace NUClear::Internal::Magic::MetaProgramming;
 
