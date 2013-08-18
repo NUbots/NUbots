@@ -4,7 +4,7 @@
 #include "../ConfigurationNode.h"
 
 template<>
-struct ConfigurationNode::ConvertNode<bool> {
+struct Messages::ConfigurationNode::ConvertNode<bool> {
     
     static ConfigurationNode makeNode(const bool input) {
         return ConfigurationNode(DataType::BOOLEAN, std::shared_ptr<bool>(new bool(input)));

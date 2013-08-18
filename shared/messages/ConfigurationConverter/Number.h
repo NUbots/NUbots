@@ -4,7 +4,7 @@
 #include "../ConfigurationNode.h"
 
 template <typename TType>
-struct ConfigurationNode::ConvertNode {
+struct Messages::ConfigurationNode::ConvertNode {
 
     // FOR INTEGERS
 

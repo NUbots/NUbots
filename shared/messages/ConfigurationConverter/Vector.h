@@ -4,7 +4,7 @@
 #include "../ConfigurationNode.h"
 
 template <>
-struct ConfigurationNode::ConvertNode<std::vector<ConfigurationNode>> {
+struct Messages::ConfigurationNode::ConvertNode<std::vector<Messages::ConfigurationNode>> {
 
     static ConfigurationNode makeNode(const std::vector<ConfigurationNode>& input) {
         return ConfigurationNode(DataType::ARRAY, std::shared_ptr<std::vector<ConfigurationNode>>(new std::vector<ConfigurationNode>(std::move(input))));
@@ -22,7 +22,7 @@ struct ConfigurationNode::ConvertNode<std::vector<ConfigurationNode>> {
 };
 
 template <typename TType>
-struct ConfigurationNode::ConvertNode<std::vector<TType>> {
+struct Messages::ConfigurationNode::ConvertNode<std::vector<TType>> {
     
     static ConfigurationNode makeNode(const std::vector<TType>& input) {
 

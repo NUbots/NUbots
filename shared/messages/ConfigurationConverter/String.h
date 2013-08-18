@@ -4,7 +4,7 @@
 #include "../ConfigurationNode.h"
 
 template<>
-struct ConfigurationNode::ConvertNode<std::string> {
+struct Messages::ConfigurationNode::ConvertNode<std::string> {
 
     static ConfigurationNode makeNode(const std::string input) {
         return ConfigurationNode(DataType::STRING, std::shared_ptr<std::string>(new std::string(input)));
@@ -28,7 +28,7 @@ struct ConfigurationNode::ConvertNode<std::string> {
 };
 
 template<>
-struct ConfigurationNode::ConvertNode<const char*> {
+struct Messages::ConfigurationNode::ConvertNode<const char*> {
     
     static ConfigurationNode makeNode(const char* input) {
         return ConvertNode<std::string>::makeNode(std::string(input));

@@ -4,7 +4,7 @@
 #include "../ConfigurationNode.h"
 
 template <>
-struct ConfigurationNode::ConvertNode<std::map<std::string, ConfigurationNode>> {
+struct Messages::ConfigurationNode::ConvertNode<std::map<std::string, Messages::ConfigurationNode>> {
 
     static ConfigurationNode makeNode(const std::map<std::string, ConfigurationNode>& input) {
         return ConfigurationNode(DataType::OBJECT, std::shared_ptr<std::map<std::string, ConfigurationNode>>(new std::map<std::string, ConfigurationNode>(std::move(input))));
@@ -22,7 +22,7 @@ struct ConfigurationNode::ConvertNode<std::map<std::string, ConfigurationNode>> 
 };
 
 template <typename TType>
-struct ConfigurationNode::ConvertNode<std::map<std::string, TType>> {
+struct Messages::ConfigurationNode::ConvertNode<std::map<std::string, TType>> {
 
     static ConfigurationNode makeNode(const std::map<std::string, TType>& input) {
 
