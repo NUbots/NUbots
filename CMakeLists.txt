@@ -64,6 +64,8 @@ SET(NUBOTS_SHARED_LIBRARIES
     messages 
     utility)
 
+INCLUDE_DIRECTORIES("shared")
+
 SET(modules
     ConfigSystem
     DarwinPlatform

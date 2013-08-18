@@ -60,7 +60,7 @@ namespace modules {
 
     class ConfigSystem : public NUClear::Reactor {
     public:
-        explicit ConfigSystem(NUClear::PowerPlant& plant);
+        explicit ConfigSystem(NUClear::PowerPlant* plant);
     };
 }
 #endif

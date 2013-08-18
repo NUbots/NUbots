@@ -30,7 +30,7 @@ namespace modules {
         return nullptr;
     }
 
-    ConfigSystem::ConfigSystem(NUClear::PowerPlant& plant) : Reactor(plant) {
+    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant) {
 
         watcherFd = inotify_init();
 
@@ -60,7 +60,7 @@ namespace modules {
                 command.emitter(this, data);
 
                 // Add our file descriptor to the selector
-                FD_SET(fd, &selectorSet);
+                //FD_SET(fd, &selectorSet);
 
 
 
@@ -75,7 +75,5 @@ namespace modules {
                 // We need to only add a new emitter when we don't have that typeindex
             }
         });
-
-/home/trent/Port/modules/ConfigSystem/src
     }
 }
