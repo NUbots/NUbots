@@ -2,7 +2,6 @@
 #define MESSAGES_CONFIGURATION_H_
 
 #include <NUClear.h>
-
 #include "ConfigurationNode.h"
 
 namespace Messages {
@@ -43,6 +42,35 @@ namespace Messages {
     template <typename TType>
     struct Configuration : public ConfigurationNode {
         static_assert(HasConfiguration<TType>::value, "The passed type does not have a CONFIGURATION_PATH variable");
+    };
+
+	// TODO this is used to tell the config system what to do
+	struct ConfigurationConfiguration {
+		std::type_index requester;
+		std::string configPath;
+		std::function<void (NUClear::Reactor*, Messages::ConfigurationNode*)> emitter;
+	};
+}
+
+// Our extension
+namespace NUClear {
+    template <typename TConfiguration>
+    struct NUClear::Reactor::Exists<Messages::Configuration<TConfiguration>> {
+        static void exists(NUClear::Reactor* context) {
+
+            // Build our lambda we will use to trigger this reaction
+            std::function<void (Reactor*, Messages::ConfigurationNode*)> emitter =
+            [](Reactor* configReactor, Messages::ConfigurationNode* node) {
+
+                // We cast our node to be the correct type (to trigger the correct reaction) and emit it
+                configReactor->emit(static_cast<Messages::Configuration<TConfiguration>*>(node));
+            };
+
+            // Emit it from our reactor to the config system
+            context->emit<Scope::DIRECT>(new Messages::ConfigurationConfiguration(typeid(TConfiguration),
+                                                                                  TConfiguration::CONFIGURATION_PATH,
+                                                                                  emitter));
+        }
     };
 }
 

@@ -20,48 +20,23 @@
 #ifndef MODULES_CONFIGSYSTEM_H_
 #define MODULES_CONFIGSYSTEM_H_
 
-#include <map>
 #include <NUClear.h>
 #include "messages/Configuration.h"
 
-struct AddConfiguration {
-    std::type_index requester;
-    std::string path;
-    std::function<void (NUClear::Reactor*, Messages::ConfigurationNode*)> emitter;
-};
-
-namespace NUClear {
-    template <typename TConfiguration>
-    struct NUClear::Reactor::Exists<Messages::Configuration<TConfiguration>> {
-        static void exists(NUClear::Reactor* context) {
-
-            // Build our lambda we will use to trigger this reaction
-            std::function<void (Reactor*, Messages::ConfigurationNode*)> emitter =
-            [](Reactor* configReactor, Messages::ConfigurationNode* node) {
-
-                // We cast our node to be the correct type (to trigger the correct reaction) and emit it
-                configReactor->emit(static_cast<Messages::Configuration<TConfiguration>*>(node));
-            };
-
-            // Emit it from our reactor
-            context->emit(new AddConfiguration(typeid(TConfiguration), TConfiguration::CONFIGURATION_PATH, emitter));
-        }
-    };
-}
-
 namespace modules {
 
-    std::map<std::string, std::map<std::type_index,
-    std::function<void (NUClear::Reactor*, Messages::ConfigurationNode*)>>> configurations;
+	class ConfigSystem : public NUClear::Reactor {
 
-    std::map<int, std::string> fileDescriptors;
+	private:
+		std::map<std::string, std::map<std::type_index,
+		std::function<void (NUClear::Reactor*, Messages::ConfigurationNode*)>>> configurations;
 
-    int watcherFd;
+		std::map<int, std::string> wdMap;
 
-    class ConfigSystem : public NUClear::Reactor {
-    public:
-        explicit ConfigSystem(NUClear::PowerPlant* plant);
-    };
+		int watcherFd;
+	public:
+		explicit ConfigSystem(NUClear::PowerPlant* plant);
+	} ;
 }
 #endif
 

@@ -23,57 +23,41 @@
 
 namespace modules {
 
-    Messages::ConfigurationNode* buildConfigurationNode(int fileDescriptor) {
+    Messages::ConfigurationNode* buildConfigurationNode(std::string filePath) {
+		
+		Messages::ConfigurationNode* node = new Messages::ConfigurationNode();
+		
+		// Read the file as JSON using some lib or something
+		
         
         // TODO using the file descriptor provided, read it and build a configurationnode tree
 
-        return nullptr;
+        return node;
     }
 
-    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant) {
+    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), watcherFd(inotify_init()) {
 
-        watcherFd = inotify_init();
+        on<Trigger<Messages::ConfigurationConfiguration>>([this](const Messages::ConfigurationConfiguration& command) {
 
-        on<Trigger<AddConfiguration>>([this](const AddConfiguration& command) {
-
-            // Attempt to open our path as a file (before we get carried away adding it)
-            int fd = open(command.path.c_str(), O_RDWR);
-
-            if (fd < 0) {
-                // TODO error that this config is unable to be found emit a bad node (nullptr node)
-            }
-            else {
-                // Find or add our path
-                auto& path = configurations[command.path];
-
-                // Find our type and add our emitter if it's not already there
-                auto type = path.find(command.requester);
-                if (type == std::end(path)) {
-                    path.insert(std::make_pair(command.requester, command.emitter));
-                }
-
-                // Insert our file descriptor into our list of files
-                fileDescriptors.insert(std::make_pair(fd, command.path));
-
-                // TODO read our configuration file and then emit it using the emitter
-                Messages::ConfigurationNode* data = buildConfigurationNode(fd);
-                command.emitter(this, data);
-
-                // Add our file descriptor to the selector
-                //FD_SET(fd, &selectorSet);
-
-
-
-                // Open the file descriptor shown by command.path
-
-                // Parse the file and use the emitter to emit it
-
-                // Add this to our "Select" list
-
-                // We need a map that maps paths to a vector of emittiers
-
-                // We need to only add a new emitter when we don't have that typeindex
-            }
+			// Check if we already have this path loaded
+			if (configurations.find(command.configPath) == std::end(configurations)) {
+				
+				// We are interested when a file is modified or deleted
+				int wd = inotify_add_watch(watcherFd, command.configPath.c_str(), IN_MODIFY | IN_DELETE_SELF);
+				
+				// Store our watch descriptor so we can look it up later
+				wdMap[wd] = command.configPath;
+			}
+			
+			// Check if we have loaded this type
+			if (configurations[command.configPath].find(command.requester) == std::end(configurations[command.configPath])) {
+				
+				// Add this emitter to the list
+				configurations[command.configPath][command.requester] = command.emitter;
+				
+				// Run our emitter to emit the initial object
+				command.emitter(this, buildConfigurationNode(command.configPath));
+			}
         });
     }
 }
