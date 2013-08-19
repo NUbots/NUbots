@@ -22,17 +22,36 @@
 
 namespace modules {
 
-    /// This namespace contains all the functions that are required to convert the raw sensors into useful values
+    /// @brief This namespace contains all the functions that are required to convert the raw sensors into useful values
     namespace Convert {
 
+        /**
+         * This function is used in the static asserts to test that all the conversions work properly, it checks two
+         * values are close.
+         * 
+         * @param a the first value
+         * @param b the second value
+         * 
+         * @return if the two values are close (within 1% of eachother)
+         */
         constexpr bool isClose(const int a, const int b) {
             return (a - b) < (1 + a * 0.01) && (a - b) > -(1 + a * 0.01);
         }
 
+        /**
+         * This function is used in the static asserts to test that all the conversions work properly, it checks two
+         * values are close.
+         * 
+         * @param a the first value
+         * @param b the second value
+         * 
+         * @return if the two values are close (within 1% of eachother)
+         */
         constexpr bool isClose(const float a, const float b) {
             return a - b < 0.00001 && a - b > -0.00001;
         }
 
+		/// Picks which direction a motor should be measured in (forward or reverse)
         constexpr int8_t direction[20] = {
             -1,             // [0]  R_SHOULDER_PITCH
             1,              // [1]  L_SHOULDER_PITCH
@@ -56,6 +75,7 @@ namespace modules {
             -1,             // [19]  HEAD_PITCH
         };
 
+		/// Offsets the radian angles of motors to change their 0 position
         constexpr float offset[20] = {
             -1.5707963f,    // [0]  R_SHOULDER_PITCH
             1.5707963f,     // [1]  L_SHOULDER_PITCH
@@ -103,6 +123,7 @@ namespace modules {
         constexpr uint8_t COLOURED_LED_G(const uint16_t value) { return static_cast<uint8_t>((value & 0x03E0) >> 2); };
         /// Extracts the B value from an RGB led
         constexpr uint8_t COLOURED_LED_B(const uint16_t value) { return static_cast<uint8_t>((value & 0x7C00) >> 7); };
+		/// Creates a value that will work on the darwin from an RGB set
         constexpr uint16_t COLOURED_LED_INVERSE(const uint8_t r, const uint8_t g, const uint8_t b) {
             return ((r >> 3))
                  | ((g >> 3) << 5)
@@ -134,6 +155,7 @@ namespace modules {
 
         /// Normalizes gain from 0-254 to between 0 and 1
         constexpr float GAIN(const uint8_t value) { return NORMALIZE<0, 1, 254>(value); }
+		/// Calculates the gain between 0-254 from a value between 0 and 1
         constexpr uint8_t GAIN_INVERSE(const float value) { return static_cast<uint8_t>(value * 254); }
 
         /// Check that our Gain and Gain Inverse are actuall inverses of eachother
@@ -142,11 +164,12 @@ namespace modules {
         static_assert(isClose(GAIN(GAIN_INVERSE(0.5)), 0.5), "There is a problem with the Inverse operation for gain");
         static_assert(isClose(GAIN(GAIN_INVERSE(1)), 1.0), "There is a problem with the Inverse operation for gain");
 
-        /// Converts a servo position from 0-4095 (-pi to pi) to radians
+        /// Converts a servo position from 0-4095 (-pi to pi) to radians (factoring in motor direction and offset)
         constexpr float SERVO_POSITION(const uint8_t servoID, const uint16_t value) {
 
             return direction[servoID] * (offset[servoID] + (2 * M_PI * float(value-2048)) / 4095);
         }
+		/// Converts a servo position from -pi to pi to 0-4095 (factoring in motor direction and offset)
         constexpr uint16_t SERVO_POSITION_INVERSE(const uint8_t servoID, const float value) {
 
             return (direction[servoID] * ((-4095 * offset[servoID]) + (4096 * M_PI)) + (4095 * value))/(direction[servoID] * 2 * M_PI);
@@ -161,6 +184,7 @@ namespace modules {
         constexpr float SERVO_SPEED(const uint8_t servoID, const uint16_t value) {
             return direction[servoID] * SIGNBIT<10>(value) * float(value & 0x3FF) * 0.01193805208;
         }
+		/// Converts a servo speed from radians/second to it's signed format
         constexpr uint16_t SERVO_SPEED_INVERSE(const float value) {
             return ((value / 0.01193805208) < 0 ? -(value / 0.01193805208) : (value / 0.01193805208)) > 1023 ? 0 :
             ((value / 0.01193805208) < 0 ? -(value / 0.01193805208) : (value / 0.01193805208));

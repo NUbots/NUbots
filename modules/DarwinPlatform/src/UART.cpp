@@ -59,7 +59,7 @@ Darwin::UART::UART(const char* name) {
     }
 }
 
-int Darwin::UART::configure(double baud) {
+bool Darwin::UART::configure(double baud) {
 
     // Do our setup for the tio settings, you must set BS38400 in order to set custom baud using "baud rate aliasing"
     // http://stackoverflow.com/questions/4968529/how-to-set-baud-rate-to-307200-on-linux

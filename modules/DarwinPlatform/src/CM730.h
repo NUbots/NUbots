@@ -22,6 +22,11 @@
 
 namespace Darwin {
 
+    /**
+     * @brief This represents, and gives access to the darwin's CM730 subboard
+     * 
+     * @author Trent Houliston
+     */
     class CM730 : public DarwinDevice {
     public:
         /**

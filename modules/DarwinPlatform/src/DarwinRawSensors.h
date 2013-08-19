@@ -23,13 +23,13 @@
 namespace Darwin {
 
     /**
-     * TODO
+     * This namespace contains all of the raw Datatypes that we will use for reading and writing from the hardware
      */
     #pragma pack(push, 1) // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
     namespace Types {
 
         /**
-         * TODO
+         * @brief This represents the raw gyro values from the CM730 (they are read from the board in ZYX)
          */
         struct Gyro {
             uint16_t z;
@@ -38,7 +38,7 @@ namespace Darwin {
         };
 
         /**
-         * TODO
+         * @brief This represents the raw acceleronometer values from the CM730
          */
         struct Accelerometer {
             uint16_t x;
@@ -47,7 +47,7 @@ namespace Darwin {
         };
 
         /**
-         * TODO
+         * @brief This represents the data that comes from one of the MX28 motors
          */
         struct MX28Data {
             bool torqueEnabled;
@@ -67,7 +67,7 @@ namespace Darwin {
         };
 
         /**
-         * TODO
+         * This represents data that comes from the Force Sensitive Resistors
          */
         struct FSRData {
             uint16_t fsr1;
@@ -79,7 +79,7 @@ namespace Darwin {
         };
 
         /**
-         * TODO
+         * @brief This represents data that comes from the CM730
          */
         struct CM730Data {
             uint8_t ledPanel;
@@ -93,7 +93,7 @@ namespace Darwin {
         };
 
         /**
-         * TODO
+         * This is a type that is used control the motors, It is sent to the motors to cause a change
          */
         struct ServoValues {
             uint8_t servoId;
@@ -107,18 +107,24 @@ namespace Darwin {
     }  // namespace Types
 
     /**
-     * TODO
+     * @brief This represents the bulk read results we get when we do one
      */
     struct BulkReadResults {
+		/// @brief Holds data from the CM730
         Types::CM730Data cm730;
+		/// @brief Holds data from the 20 servos (stored in location ServoID - 1)
         Types::MX28Data servos[20];
+		/// @brief Holds data from the 2 FSR (stored as Right Left)
         Types::FSRData fsr[2];
 
+		/// @brief Holds the error code (if any) from the CM730
         uint8_t cm730ErrorCode = 0;
+		/// @brief Holds the error code from the Servos (ServoID - 1)
         uint8_t servoErrorCodes[20] = { 0 };
+		/// @brief Holds the error code from the FSR (right then left)
         uint8_t fsrErrorCodes[2] = { 0 };
     };
-    #pragma pack(pop)
+    #pragma pack(pop) // Stop bitpacking our results
 }  // namespace Darwin
 
 #endif
