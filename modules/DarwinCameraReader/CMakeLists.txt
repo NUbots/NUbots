@@ -1,5 +1,5 @@
 # Set our module name so that the rest of this file can be generated
-SET(module_name "DarwinCamera")
+SET(module_name "DarwinCameraReader")
 
 # YOU SHOULD NOT HAVE TO TOUCH ANYTHING BELOW THIS LINE
 INCLUDE(${CMAKE_SOURCE_DIR}/cmake/Includes/BuildModule.cmake)

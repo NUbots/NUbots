@@ -88,8 +88,8 @@ namespace modules {
             auto* visionData = message.mutable_vision();
             auto* imageData = visionData->mutable_image();
 
-            int imageWidth = image.getWidth();
-            int imageHeight = image.getHeight();
+            int imageWidth = image.width();
+            int imageHeight = image.height();
             jpge::uint8* data = new jpge::uint8[imageWidth * imageHeight * 3]();
             
             int index = 0;

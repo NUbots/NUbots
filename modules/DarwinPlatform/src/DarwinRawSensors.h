@@ -110,18 +110,18 @@ namespace Darwin {
      * @brief This represents the bulk read results we get when we do one
      */
     struct BulkReadResults {
-		/// @brief Holds data from the CM730
+        /// @brief Holds data from the CM730
         Types::CM730Data cm730;
-		/// @brief Holds data from the 20 servos (stored in location ServoID - 1)
+        /// @brief Holds data from the 20 servos (stored in location ServoID - 1)
         Types::MX28Data servos[20];
-		/// @brief Holds data from the 2 FSR (stored as Right Left)
+        /// @brief Holds data from the 2 FSR (stored as Right Left)
         Types::FSRData fsr[2];
 
-		/// @brief Holds the error code (if any) from the CM730
+        /// @brief Holds the error code (if any) from the CM730
         uint8_t cm730ErrorCode = 0;
-		/// @brief Holds the error code from the Servos (ServoID - 1)
+        /// @brief Holds the error code from the Servos (ServoID - 1)
         uint8_t servoErrorCodes[20] = { 0 };
-		/// @brief Holds the error code from the FSR (right then left)
+        /// @brief Holds the error code from the FSR (right then left)
         uint8_t fsrErrorCodes[2] = { 0 };
     };
     #pragma pack(pop) // Stop bitpacking our results

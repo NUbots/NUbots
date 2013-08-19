@@ -32,107 +32,107 @@
 namespace messages
 {
 
-	class Parameter 
-	{
-	public:
-		Parameter();
-		Parameter(float value, float min, float max);
-		Parameter(const std::string& name, float value, float min, float max);
-		Parameter(const std::string& name, float value, float min, float max, const std::string& desc);
-		~Parameter();
+    class Parameter 
+    {
+    public:
+        Parameter();
+        Parameter(float value, float min, float max);
+        Parameter(const std::string& name, float value, float min, float max);
+        Parameter(const std::string& name, float value, float min, float max, const std::string& desc);
+        ~Parameter();
     
-		/*! @brief Gets the parameter's currrent value 
-			@return the current value
-		*/
-		float get() const
-		{
-			return Value;
-		}
+        /*! @brief Gets the parameter's currrent value 
+            @return the current value
+        */
+        float get() const
+        {
+            return Value;
+        }
 
-		/*! @brief Gets the parameter's minimum value 
- 			@return the min
-		 */
-		float min() const
-		{
-			return Min;
-		}
+        /*! @brief Gets the parameter's minimum value 
+             @return the min
+         */
+        float min() const
+        {
+            return Min;
+        }
 
-		/*! @brief Gets the parameter's minimum value 
- 			@return the min
-		 */
-		float max() const
-		{
-			return Max;
-		}
+        /*! @brief Gets the parameter's minimum value 
+             @return the min
+         */
+        float max() const
+        {
+            return Max;
+        }
 
-		/*! @brief Gets the parameter's name 
- 			@return the name
-		 */
-		const std::string& name() const
-		{
-			return Name;
-		}
+        /*! @brief Gets the parameter's name 
+             @return the name
+         */
+        const std::string& name() const
+        {
+            return Name;
+        }
 
-		/*! @brief Returns whether this parameters name matches n
-			@return whether Name matches n
-		 */
-		bool compareName(const std::string& n) const
-		{
-			return Name.compare(n) == 0;
-		}
+        /*! @brief Returns whether this parameters name matches n
+            @return whether Name matches n
+         */
+        bool compareName(const std::string& n) const
+        {
+            return Name.compare(n) == 0;
+        }
 
-		/*! @brief Gets the description of the parameter
- 			@return the description
-		 */
-		const std::string& desc() const
-		{
-			return Description;
-		}
+        /*! @brief Gets the description of the parameter
+             @return the description
+         */
+        const std::string& desc() const
+        {
+            return Description;
+        }
 
-		void set(float value);
-		void set(float value, float min, float max, const std::string& desc);
+        void set(float value);
+        void set(float value, float min, float max, const std::string& desc);
     
-		void summaryTo(std::ostream& output);
-		void csvTo(std::ostream& output);
+        void summaryTo(std::ostream& output);
+        void csvTo(std::ostream& output);
     
-		friend float operator-(const Parameter& p, const float& f);
-		friend float operator-(const float& f, const Parameter& p);
-		friend float operator-(const Parameter& p1, const Parameter& p2);
-		friend float operator+(const Parameter& p, const float& f);
-		friend float operator+(const float& f, const Parameter& p);
-		friend float operator+(const Parameter& p1, const Parameter& p2);
-		friend void operator+=(Parameter& p, const float& f);
-		friend float operator*(const float& f, const Parameter& p);
-		friend float operator*(const Parameter& p, const float& f);
-		friend float operator*(const Parameter& p1, const Parameter& p2);
+        friend float operator-(const Parameter& p, const float& f);
+        friend float operator-(const float& f, const Parameter& p);
+        friend float operator-(const Parameter& p1, const Parameter& p2);
+        friend float operator+(const Parameter& p, const float& f);
+        friend float operator+(const float& f, const Parameter& p);
+        friend float operator+(const Parameter& p1, const Parameter& p2);
+        friend void operator+=(Parameter& p, const float& f);
+        friend float operator*(const float& f, const Parameter& p);
+        friend float operator*(const Parameter& p, const float& f);
+        friend float operator*(const Parameter& p1, const Parameter& p2);
     
-		friend std::vector<float> operator-(const std::vector<float>& f, const std::vector<Parameter>& p);
-		friend std::vector<float> operator-(const std::vector<Parameter>& p, const std::vector<float>& f);
-		friend std::vector<float> operator-(const std::vector<Parameter>& p1, const std::vector<Parameter>& p2);
-		friend std::vector<float> operator+(const std::vector<float>& f, const std::vector<Parameter>& p);
-		friend std::vector<float> operator+(const std::vector<Parameter>& p, const std::vector<float>& f);
-		friend std::vector<float> operator+(const std::vector<Parameter>& p1, const std::vector<Parameter>& p2);
-		friend void operator+=(std::vector<Parameter>& p, const std::vector<float>& f);
-		friend std::vector<float> operator*(const std::vector<float>& f, const std::vector<Parameter>& p);
-		friend std::vector<float> operator*(const std::vector<Parameter>& p, const std::vector<float>& f);
-		friend std::vector<float> operator*(const float& f, const std::vector<Parameter>& p);
-		friend std::vector<float> operator*(const std::vector<Parameter>& p, const float& f);
+        friend std::vector<float> operator-(const std::vector<float>& f, const std::vector<Parameter>& p);
+        friend std::vector<float> operator-(const std::vector<Parameter>& p, const std::vector<float>& f);
+        friend std::vector<float> operator-(const std::vector<Parameter>& p1, const std::vector<Parameter>& p2);
+        friend std::vector<float> operator+(const std::vector<float>& f, const std::vector<Parameter>& p);
+        friend std::vector<float> operator+(const std::vector<Parameter>& p, const std::vector<float>& f);
+        friend std::vector<float> operator+(const std::vector<Parameter>& p1, const std::vector<Parameter>& p2);
+        friend void operator+=(std::vector<Parameter>& p, const std::vector<float>& f);
+        friend std::vector<float> operator*(const std::vector<float>& f, const std::vector<Parameter>& p);
+        friend std::vector<float> operator*(const std::vector<Parameter>& p, const std::vector<float>& f);
+        friend std::vector<float> operator*(const float& f, const std::vector<Parameter>& p);
+        friend std::vector<float> operator*(const std::vector<Parameter>& p, const float& f);
 
-		static std::vector<float> getAsVector(const std::vector<Parameter>& p);
+        static std::vector<float> getAsVector(const std::vector<Parameter>& p);
     
-		friend std::ostream& operator<< (std::ostream& output, const Parameter& p);
-		friend std::ostream& operator<< (std::ostream& output, const std::vector<Parameter>& p);
+        friend std::ostream& operator<< (std::ostream& output, const Parameter& p);
+        friend std::ostream& operator<< (std::ostream& output, const std::vector<Parameter>& p);
     
-		friend std::istream& operator>> (std::istream& input, Parameter& p);
-		friend std::istream& operator>> (std::istream& input, std::vector<Parameter>& p);
+        friend std::istream& operator>> (std::istream& input, Parameter& p);
+        friend std::istream& operator>> (std::istream& input, std::vector<Parameter>& p);
 
-	private:
-		std::string Name;
-		float Value;
-		float Min;
-		float Max;
-		std::string Description;
-	};
+    private:
+        std::string Name;
+        float Value;
+        float Min;
+        float Max;
+        std::string Description;
+    };
 
 }
 #endif

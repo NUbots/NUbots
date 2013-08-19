@@ -23,8 +23,8 @@
 namespace Darwin {
     /**
      * @brief This represents, and gives access to the darwin's two Force Sensitive Resistor boards
-	 * 
-	 * @author Trent Houliston
+     * 
+     * @author Trent Houliston
      */
     class FSR : public DarwinDevice {
 

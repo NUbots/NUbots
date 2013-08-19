@@ -24,27 +24,29 @@
 
 namespace messages {
 
-    void Image::copyFromYUV422Buffer(const Pixel* buffer, std::size_t width, std::size_t height, bool flip) {
-        imageWidth = width / 2;
-        imageHeight = height / 2;
-        image.reset(new Pixel[imageWidth * imageHeight]);
-        if(flip) {
-            Pixel* dest = image.get() + imageWidth * imageHeight - 1;
-            for(size_t y = 0; y < imageHeight; y++) {
-                for(size_t x = 0; x < imageWidth; x++) {
-                    *dest-- = *buffer++;
-                }
-                buffer += imageWidth;
-            }
-        } else {
-            Pixel* dest = image.get();
-            for(size_t y = 0; y < imageHeight; y++) {
-                for(size_t x = 0; x < imageWidth; x++) {
-                    *dest++ = *buffer++;
-                }
-                buffer += imageWidth;
-            }
-        }
+    Image::Image(size_t width, size_t height, std::unique_ptr<Pixel[]>&& data) :
+    imgWidth(width),
+    imgHeight(height),
+    data(std::move(data)) {
     }
 
+    Image::Pixel& Image::operator ()(size_t x, size_t y) {
+        return data.get()[y * imgWidth + x];
+    }
+
+    const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
+        return data.get()[y * imgWidth + x];
+    }
+
+    const size_t Image::width() const {
+        return imgWidth;
+    }
+
+    const size_t Image::height() const {
+        return imgHeight;
+    }
+
+    const size_t Image::size() const {
+        return imgWidth * imgHeight;
+    }
 }
