@@ -29,6 +29,15 @@ namespace modules {
     private:
         /// @brief our zmq pub socket
         zmq::socket_t pub;
+
+        std::mutex mutex;
+
+        /**
+         * This method needs to be used over pub.send as all calls to
+         * pub.send need to be synchronized with a concurrency primative 
+         * (such as a mutex)
+         */
+        void send(zmq::message_t& packet);
         
     public:
         explicit NUBugger(NUClear::PowerPlant* plant);

@@ -31,7 +31,6 @@ using utility::image::YCbCr;
 namespace modules {
 
     NUBugger::NUBugger(NUClear::PowerPlant* plant) : Reactor(plant), pub(NUClear::Extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
-
         // Set our high water mark
         int64_t hwm = 3;
         pub.setsockopt(ZMQ_HWM, &hwm, sizeof(hwm));
@@ -41,7 +40,6 @@ namespace modules {
 
         // This trigger gets the output from the sensors (unfiltered)
         on<Trigger<Messages::DarwinSensors>>([this](const Messages::DarwinSensors& sensors) {
-
             API::Message message;
 
             message.set_type(API::Message::SENSOR_DATA);
@@ -80,7 +78,7 @@ namespace modules {
             auto serialized = message.SerializeAsString();
             zmq::message_t packet(serialized.size());
             memcpy(packet.data(), serialized.data(), serialized.size());
-            pub.send(packet);
+            send(packet);
         });
 
         on<Trigger<messages::Image>>([this](const messages::Image& image) {
@@ -90,8 +88,8 @@ namespace modules {
             auto* visionData = message.mutable_vision();
             auto* imageData = visionData->mutable_image();
 
-            int imageWidth = imageData->width();
-            int imageHeight = imageData->height();
+            int imageWidth = image.getWidth();
+            int imageHeight = image.getHeight();
             jpge::uint8* data = new jpge::uint8[imageWidth * imageHeight * 3]();
             
             int index = 0;
@@ -135,13 +133,18 @@ namespace modules {
             auto serialized = message.SerializeAsString();
             zmq::message_t packet(serialized.size());
             memcpy(packet.data(), serialized.data(), serialized.size());
-            pub.send(packet);
+            send(packet);
         });
-
 
         // When we shutdown, close our publisher
         on<Trigger<Shutdown>>([this](const Shutdown&) {
             pub.close();
         });
+    }
+
+    void NUBugger::send(zmq::message_t& packet) {
+        std::lock_guard<std::mutex> lock(mutex);
+
+        pub.send(packet);
     }
 }
