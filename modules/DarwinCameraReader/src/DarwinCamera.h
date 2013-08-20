@@ -75,7 +75,7 @@ namespace modules {
             /// @brief the height of the image we are requesting
             HEIGHT = 480,
             /// @brief the total number of pixels we are requesting
-            SIZE = WIDTH * HEIGHT,
+            SIZE = WIDTH * HEIGHT * 2,
             /// @brief the framerate we are requesting
             FRAMERATE = 30
         };
