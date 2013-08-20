@@ -45,8 +45,8 @@ namespace modules {
         format.fmt.pix.height = HEIGHT;
         format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
         format.fmt.pix.field = V4L2_FIELD_NONE;
-        if (ioctl(fd, VIDIOC_S_FMT, &format)) {
-            throw std::runtime_error("There was an error while setting the cameras format");
+        if (ioctl(fd, VIDIOC_S_FMT, &format) == -1) {
+            throw std::system_error(errno, std::system_category(), "There was an error while setting the cameras format");
         }
 
         if(format.fmt.pix.sizeimage != SIZE) {
@@ -65,13 +65,13 @@ namespace modules {
         memset(&param, 0, sizeof(param));
         param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         // Get the current parameters (populate our fields)
-        if(ioctl(fd, VIDIOC_G_PARM, &param)) {
-            throw std::runtime_error("We were unable to get the current camera FPS parameters");
+        if(ioctl(fd, VIDIOC_G_PARM, &param) == -1) {
+            throw std::system_error(errno, std::system_category(), "We were unable to get the current camera FPS parameters");
         }
         param.parm.capture.timeperframe.numerator = 1;
         param.parm.capture.timeperframe.denominator = FRAMERATE;
         if(ioctl(fd, VIDIOC_S_PARM, &param) == -1) {
-            throw std::runtime_error("We were unable to get the current camera FPS parameters");
+            throw std::system_error(errno, std::system_category(), "We were unable to get the current camera FPS parameters");
         }
         
         // Request 2 kernel space buffers to read the data from the camera into
@@ -81,7 +81,7 @@ namespace modules {
         rb.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         rb.memory = V4L2_MEMORY_MMAP;
         if(ioctl(fd, VIDIOC_REQBUFS, &rb) == -1) {
-            throw std::runtime_error("There was an error requesting the buffer");
+            throw std::system_error(errno, std::system_category(), "There was an error requesting the buffer");
         }
         
         // Map those two buffers into our user space so we can access them
@@ -90,7 +90,7 @@ namespace modules {
             buff[i].v4l2.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buff[i].v4l2.memory = V4L2_MEMORY_MMAP;
             if(ioctl(fd, VIDIOC_QUERYBUF, &buff[i]) == -1) {
-                throw std::runtime_error("There was an error mapping the video buffer into user space");
+                throw std::system_error(errno, std::system_category(), "There was an error mapping the video buffer into user space");
             }
             
             buff[i].data.length = buff[i].v4l2.length;
@@ -121,7 +121,7 @@ namespace modules {
         // Start streaming data
         int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if(ioctl(fd, VIDIOC_STREAMON, &command) == -1) {
-            throw std::runtime_error("Unable to start camera streaming");
+            throw std::system_error(errno, std::system_category(), "Unable to start camera streaming");
         }
     }
 
@@ -129,16 +129,16 @@ namespace modules {
         
         // Enqueue our next buffer so it can be written to
         if(ioctl(fd, VIDIOC_QBUF, &buff[!activeBuffer].v4l2) == -1) {
-            throw std::runtime_error("There was an error while re-queuing a buffer");
+            throw std::system_error(errno, std::system_category(), "There was an error while re-queuing a buffer");
         }
 
         // Get our frame buffer with data in it
         if(ioctl(fd, VIDIOC_DQBUF, &buff[activeBuffer].v4l2) == -1) {
-            throw std::runtime_error("There was an error while de-queuing a buffer");
+            throw std::system_error(errno, std::system_category(), "There was an error while de-queuing a buffer");
         }
         
         if(buff[activeBuffer].v4l2.bytesused != SIZE) {
-            throw std::runtime_error("A bad camera frame was returned (incorrect size)");
+            throw std::system_error(errno, std::system_category(), "A bad camera frame was returned (incorrect size)");
         }
 
         // Memcpy our data directly from the buffer
@@ -164,7 +164,7 @@ namespace modules {
         int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         // Start streaming data
         if(ioctl(fd, VIDIOC_STREAMOFF, &command) == -1) {
-            throw std::runtime_error("Unable to stop camera streaming");
+            throw std::system_error(errno, std::system_category(), "Unable to stop camera streaming");
         }
         
         close(fd);

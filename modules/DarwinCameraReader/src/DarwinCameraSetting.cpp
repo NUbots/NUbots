@@ -19,6 +19,7 @@
 #include "DarwinCameraSetting.h"
 
 #include <stdexcept>
+#include <system_error>
 
 #include <linux/videodev2.h>
 #include <sys/ioctl.h>
@@ -33,8 +34,8 @@ namespace modules {
         // Check if we can access the value
         struct v4l2_queryctrl queryctrl;
         queryctrl.id = id;
-        if (ioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) < 0) {
-            throw std::runtime_error("There was an error while attempting to get the status of this camera value");
+        if (ioctl(fd, VIDIOC_QUERYCTRL, &queryctrl) == -1) {
+            throw std::system_error(errno, std::system_category(), "There was an error while attempting to get the status of this camera value");
         }
         if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED) {
             throw std::runtime_error("Requested camera value is not available");
@@ -47,7 +48,7 @@ namespace modules {
         struct v4l2_control control_s;
         control_s.id = id;
         if (ioctl(fd, VIDIOC_G_CTRL, &control_s) < 0) {
-            throw std::runtime_error("There was an error while trying to get the current value");
+            throw std::system_error(errno, std::system_category(), "There was an error while trying to get the current value");
         }
         
         return control_s.value;
