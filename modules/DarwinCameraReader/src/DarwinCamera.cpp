@@ -145,8 +145,9 @@ namespace modules {
         std::unique_ptr<messages::Image::Pixel[]> data =
                 std::unique_ptr<messages::Image::Pixel[]>(new messages::Image::Pixel[SIZE / 2]);
 	// Create the image at quarter resolution
+	messages::Image::Pixel* v4lbuff = static_cast<messages::Image::Pixel*>(buff[activeBuffer].data.payload);
         for(size_t i = 0; i < HEIGHT / 2; ++i) {
-            std::copy(&data.get()[i * WIDTH / 2], &data.get()[(i + 1) * WIDTH / 2], &buff[activeBuffer].data.payload[i * WIDTH]);
+            std::copy(&data.get()[i * WIDTH / 2], &data.get()[(i + 1) * WIDTH / 2], &v4lbuff[i * WIDTH]);
         }
         
         // Move this data into the image
