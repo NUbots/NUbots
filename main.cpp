@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     
     // For segfaults and abort signals, convert them to exceptions and throw them, they will then be caught and not cause errors
     signal(SIGSEGV, segfaultConverter);
-    signal(SIGABRT, abortfaultConverter);
+    //signal(SIGABRT, abortfaultConverter);
 
     plant.install<modules::ConfigSystem>();
     plant.install<modules::DarwinPlatform>();

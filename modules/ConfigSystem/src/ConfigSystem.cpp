@@ -16,6 +16,7 @@
  */
 
 #include "ConfigSystem.h"
+#include "json/parse.h"
 
 #include <sys/inotify.h>
 #include <fcntl.h>
@@ -36,6 +37,7 @@ namespace modules {
     }
 
     ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), watcherFd(inotify_init()) {
+        json::parse("{ hi: [1, 2, 3, 4, 5], hello: [1, 2, 3] }");
 
         on<Trigger<Messages::ConfigurationConfiguration>>([this](const Messages::ConfigurationConfiguration& command) {
 
