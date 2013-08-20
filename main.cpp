@@ -2,11 +2,10 @@
 #include <signal.h>
 
 #include "DarwinPlatform.h"
-#include "DarwinCamera.h"
+#include "DarwinCameraReader.h"
 #include "NUBugger.h"
 
 struct SegmentationFault : public std::exception {};
-struct AbortSignal : public std::exception {};
 
 // This namespace holds our signal handling code
 namespace {
@@ -32,10 +31,6 @@ namespace {
         std::cout << "Segmentation Fault" << std::endl;
         throw SegmentationFault();
     }
-    
-    void abortfaultConverter(int signal) {
-        throw AbortSignal();
-    }
 }
 
 int main(int argc, char *argv[]) {
@@ -50,7 +45,7 @@ int main(int argc, char *argv[]) {
     signal(SIGSEGV, segfaultConverter);
 
     plant.install<modules::DarwinPlatform>();
-    plant.install<modules::DarwinCamera>();
+    plant.install<modules::DarwinCameraReader>();
     plant.install<modules::NUBugger>();
     
     plant.start();

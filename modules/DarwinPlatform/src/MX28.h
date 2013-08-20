@@ -23,7 +23,7 @@
 namespace Darwin {
     /**
      * @brief This represents, and gives access to the darwin's MX28 motors
-	 *  
+     * 
      * @author Trent Houliston
      */
     class MX28 : public DarwinDevice {

@@ -26,19 +26,19 @@
 
 namespace modules {
 
-	/**
-	 * This NUClear Reactor is responsible for reading in the data for the DarwinPlatform and emitting it to the rest
-	 * of the system
-	 * 
-	 * @author Trent Houliston
-	 */
+    /**
+     * This NUClear Reactor is responsible for reading in the data for the DarwinPlatform and emitting it to the rest
+     * of the system
+     * 
+     * @author Trent Houliston
+     */
     class DarwinPlatform : public NUClear::Reactor {
     private:
-		/// @brief Our internal darwin class that is used for interacting with the hardware
+        /// @brief Our internal darwin class that is used for interacting with the hardware
         Darwin::Darwin darwin;
 
     public:
-		/// @brief called by a Powerplant to construct this reactor
+        /// @brief called by a Powerplant to construct this reactor
         explicit DarwinPlatform(NUClear::PowerPlant* plant);
     };
 }

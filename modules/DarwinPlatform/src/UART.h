@@ -77,53 +77,53 @@ namespace Darwin {
     uint8_t calculateChecksum(void* command);
     uint8_t calculateChecksum(const CommandResult& result);
 
-	/**
-	 * @brief Communicates with the components via the UART (through a USB TTY device)
-	 * 
-	 * @details
-	 *  This class handles the communication with the hardware, It has methods that implement the ZigBee protocol used
-	 *	in the darwin in order to communicate with the various devices.
-	 * 
-	 * @author Trent Houliston
-	 */
+    /**
+     * @brief Communicates with the components via the UART (through a USB TTY device)
+     * 
+     * @details
+     *  This class handles the communication with the hardware, It has methods that implement the ZigBee protocol used
+     *    in the darwin in order to communicate with the various devices.
+     * 
+     * @author Trent Houliston
+     */
     class UART {
     private:
-		/// @brief The file descriptor for the USB TTY device we use to communicate with the devices
+        /// @brief The file descriptor for the USB TTY device we use to communicate with the devices
         int fd;
-		/// @brief A mutex which is used for flow control on the USB TTY device
+        /// @brief A mutex which is used for flow control on the USB TTY device
         std::mutex mutex;
 
-		/**
-		 * @brief Configures our serial port to use the passed Baud rate
-		 * 
+        /**
+         * @brief Configures our serial port to use the passed Baud rate
+         * 
          * @param baud the baud rate to use
-		 * 
+         * 
          * @return if the configuration was successful
          */
         bool configure(double baud);
 
     public:
-		/**
-		 * @brief Constructs a new UART instance using the passed device path as the TTY device
-		 * 
+        /**
+         * @brief Constructs a new UART instance using the passed device path as the TTY device
+         * 
          * @param name the path to the USB TTY device
          */
         explicit UART(const char* name);
 
-		/**
-		 * @brief reads a single packet back from the uart, and returns error codes if they timeout
-		 * 
+        /**
+         * @brief reads a single packet back from the uart, and returns error codes if they timeout
+         * 
          * @return The command result, or a command result with an error flag if there was an error
          */
         CommandResult readPacket();
 
-		/**
-		 * @brief Executes a passed packet and then waits for a response, Used for single commands (read write ping)
-		 * 
-		 * @tparam TPacket the type of packet we are executing
-		 * 
+        /**
+         * @brief Executes a passed packet and then waits for a response, Used for single commands (read write ping)
+         * 
+         * @tparam TPacket the type of packet we are executing
+         * 
          * @param command the command we are executing
-		 * 
+         * 
          * @return the return value from executing this command
          */
         template <typename TPacket>
@@ -138,22 +138,22 @@ namespace Darwin {
             // Write our command to the UART
             write(fd, &command, sizeof(TPacket));
 
-			// Read the packet that we get in response
+            // Read the packet that we get in response
             return readPacket();
         }
 
-		/**
-		 * @brief This is used to execute a bulk read request.
-		 * 
+        /**
+         * @brief This is used to execute a bulk read request.
+         * 
          * @param command the packet that we are going to send to get the response
-		 * 
+         * 
          * @return a vector of command results, one for each of the responding devices
          */
         std::vector<CommandResult> executeBulk(const std::vector<uint8_t>& command);
-		
-		/**
-		 * @brief This is used to execute a broadcast command (to the broadcast address), these expect no response
-		 * 
+        
+        /**
+         * @brief This is used to execute a broadcast command (to the broadcast address), these expect no response
+         * 
          * @param command the command to execute
          */
         void executeBroadcast(const std::vector<uint8_t>& command);

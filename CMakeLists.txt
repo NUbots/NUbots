@@ -67,7 +67,7 @@ SET(NUBOTS_SHARED_LIBRARIES
 
 SET(modules
     DarwinPlatform
-    DarwinCamera
+    DarwinCameraReader
     NUBugger)
 
 FOREACH(module ${modules})
