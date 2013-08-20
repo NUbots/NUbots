@@ -20,9 +20,12 @@
 
 #include <string>
 
-namespace Messages {
+namespace messages {
 
-    class Say : public std::string {};
+    struct Say : public std::string {
+        Say(std::string message) : message(message) {};
+        const std::string message;
+    };
 };
 
 #endif

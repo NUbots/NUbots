@@ -17,15 +17,37 @@
 
 #include "eSpeak.h"
 
-#include <cstdlib>
-
-#include "Messages/Say.h"
+#include <espeak/speak_lib.h>
+#include "messages/Say.h"
 
 namespace modules {
 
     eSpeak::eSpeak(NUClear::PowerPlant* plant) : Reactor(plant) {
-        on<Trigger<Say>>([](const Say& message) {
-            system("espeak -k6 -a1000 -ven '" + message + "'");
+        
+        // Initialize espeak, and set it to play out the speakers, and not exit if it can't find it's directory
+        espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 500, nullptr, 1 << 15);
+        espeak_SetVoiceByName("default");
+        espeak_SetParameter(espeakVOLUME, 200, 0);
+        espeak_SetParameter(espeakCAPITALS, 6, 0);
+    
+        on<Trigger<messages::Say>, Options<Single>>([](const messages::Say& message) {
+            // Wait to finish the current message (if any)
+            espeak_Synchronize();
+            // Say the new message
+            espeak_Synth(message.c_str(),       // Text
+                         message.size() + 1,    // Size (including null at end)
+                         0,                     // Start position
+                         POS_CHARACTER,         // Position Type (irrelevant since we start at the beginning)
+                         0,                     // End position (0 means no end position)
+                         espeakCHARS_AUTO,      // Flags (auto encoding)
+                         nullptr,               // User identifier for callback
+                         nullptr                // Callback             
+                    );
+        });
+        
+        on<Trigger<Shutdown>>([](const Shutdown&) {
+            // Stop espeak
+            espeak_Terminate();
         });
     }
 }
