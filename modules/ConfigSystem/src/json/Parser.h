@@ -8,8 +8,12 @@ namespace json {
         public:
             message::ConfigurationNode parseJson(const std::string& input);
         private:
+            std::string::iterator begin;
+            std::string::iterator end;
+
             char peek(std::string::iterator current);
             char read(std::string::iterator current);
+            bool readif(std::string::iterator current, char target);
 
             message::ConfigurationNode parseObject(std::string::iterator current, std::string::iterator end);
             message::ConfigurationNode parseMembers(std::string::iterator current, std::string::iterator end);

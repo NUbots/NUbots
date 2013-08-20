@@ -11,13 +11,22 @@ namespace json {
         return *(current++);
     }
 
-    message::ConfigurationNode Parser::parseJson(const std::string& input) {
-        auto begin = std::begin(input);
-        auto end = std::end(input);
+    bool Parser::readif(std::string::iterator current, char target) {
+        if(*current == target) {
+            ++current;
+            return true;
+        }
 
-        if(*begin == '{') {
+        return false;
+    }
+
+    message::ConfigurationNode Parser::parseJson(const std::string& input) {
+        begin = std::begin(input);
+        end = std::end(input);
+
+        if(peek(begin) == '{') {
             return parseObject(begin, end);
-        } else if(*begin == '[') {
+        } else if(peek(begin) == '[') {
             return parseArray(begin, end);
         } else {
             throw new std::runtime_exception("Expected { or [ as starting token but found: " + *begin);
@@ -25,17 +34,15 @@ namespace json {
     }
 
     message::ConfigurationNode Parser::parseObject(std::string::iterator current, std::string::iterator end) {
-        if(*current == '{') {
-            ++current;
-            if(*current == '}') {
+        if(readif(current, '{')) {
+            if(readif(current, '}')) {
                 return message::ConfigurationNode;
             }
         }
 
         message::ConfigurationNode members(parseMembers(current, end));
 
-        if(*current == '}') {
-            ++current;
+        if(readif(current, '}')) {
             return members;
         } else {
             throw new std::runtime_exception("Expected } in object but found " + *current);
