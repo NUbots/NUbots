@@ -144,10 +144,10 @@ namespace modules {
         // Memcpy our data directly from the buffer
         std::unique_ptr<messages::Image::Pixel[]> data =
                 std::unique_ptr<messages::Image::Pixel[]>(new messages::Image::Pixel[SIZE / 2]);
-	// Create the image at quarter resolution
-	messages::Image::Pixel* v4lbuff = static_cast<messages::Image::Pixel*>(buff[activeBuffer].data.payload);
+        // Create the image at quarter resolution
+        messages::Image::Pixel* v4lbuff = static_cast<messages::Image::Pixel*>(buff[activeBuffer].data.payload);
         for(size_t i = 0; i < HEIGHT / 2; ++i) {
-            std::copy(&data.get()[i * WIDTH / 2], &data.get()[(i + 1) * WIDTH / 2], &v4lbuff[i * WIDTH]);
+            std::copy(&v4lbuff[i * WIDTH], &v4lbuff[i * WIDTH + WIDTH / 2], &data.get()[i * WIDTH / 2]);
         }
         
         // Move this data into the image
