@@ -24,11 +24,11 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdexcept>
+#include <sstream>
 
 namespace modules {
 
     DarwinCamera::DarwinCamera(const std::string& device) : activeBuffer(false), fd(open(device.c_str(), O_RDWR)) {
-
         // Check if we managed to open our file descriptor
         if (fd < 0) {
             throw std::runtime_error(std::string("We were unable to access the camera device on ") + device);
@@ -47,8 +47,16 @@ namespace modules {
         if (ioctl(fd, VIDIOC_S_FMT, &format)) {
             throw std::runtime_error("There was an error while setting the cameras format");
         }
+
         if(format.fmt.pix.sizeimage != SIZE) {
-            throw std::runtime_error("The camera returned an image size that made no sense");
+            std::stringstream errorStream;
+            errorStream 
+                << "The camera returned an image size that made no sense (" 
+                << "Expected: " << SIZE
+                << ", "
+                << "Found: " << format.fmt.pix.sizeimage 
+                << ")";
+            throw std::runtime_error(errorStream.str());
         }
         
         // Set the frame rate
