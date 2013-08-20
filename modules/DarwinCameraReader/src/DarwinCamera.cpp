@@ -24,6 +24,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdexcept>
+#include <system_error>
 #include <sstream>
 
 namespace modules {
@@ -101,8 +102,8 @@ namespace modules {
         }
 
         // Enqueue our first buffer so that the kernel can write data to it
-        if(ioctl(fd, VIDIOC_QBUF, &buff[0].data) == -1) {
-            throw std::runtime_error("There was an error queuing buffers for the kernel to write to");
+        if(ioctl(fd, VIDIOC_QBUF, &buff[0].v4l2) == -1) {
+            //throw std::system_error(errno, "There was an error queuing buffers for the kernel to write to");
         }
         
         // Populate our settings table
