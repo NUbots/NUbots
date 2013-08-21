@@ -4,6 +4,7 @@
 #include "DarwinPlatform.h"
 #include "DarwinCameraReader.h"
 #include "NUBugger.h"
+#include "AudioInput.h"
 
 struct SegmentationFault : public std::exception {};
 
@@ -46,6 +47,7 @@ int main(int argc, char *argv[]) {
 
     plant.install<modules::DarwinPlatform>();
     plant.install<modules::DarwinCameraReader>();
+    plant.install<modules::AudioInput>();
     plant.install<modules::NUBugger>();
     
     plant.start();

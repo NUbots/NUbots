@@ -68,7 +68,8 @@ SET(NUBOTS_SHARED_LIBRARIES
 SET(modules
     DarwinPlatform
     DarwinCameraReader
-    NUBugger)
+    NUBugger
+    AudioInput)
 
 FOREACH(module ${modules})
     # Add the subdirectories
