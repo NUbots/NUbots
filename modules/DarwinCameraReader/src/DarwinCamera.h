@@ -20,7 +20,6 @@
 #define MODULES_DARWINCAMERA_H
 
 #include <map>
-#include <linux/videodev2.h>
 
 #include "messages/Image.h"
 #include "DarwinCameraSetting.h"
@@ -46,36 +45,30 @@ namespace modules {
     private:
         /// @brief This struct holds all of the variables we need for interaction with the kernel space buffers
         struct KernelBuffers {
-            /// @brief this is the v4l2 buffer object that we use to request data be sent to this buffer
-            v4l2_buffer v4l2;
-            
-            /// @brief when using the kernel space buffers, they must be mapped into this programs virtual address space
-            struct Data {
-                /// @brief the size of the kernel space buffer
-                size_t length;
-                /// @brief a pointer to the first address of the virtual mapped kernel space
-                void* payload;
-            } data;
+            /// @brief the size of the kernel space buffer
+            size_t length;
+            /// @brief a pointer to the first address of the virtual mapped kernel space
+            void* payload;
         } buff[2];
-
-        /// @brief although this is a bool, it is used as an array index to swap between two buffers (0 and 1)
-        bool activeBuffer;
 
         /// @brief this file descriptor points to the camera object
         int fd;
         
+        /// @brief the width of the image being retrieved from the camera
+        size_t width;
+        
+        /// @brief the height of the image being retrieved from the camera
+        size_t height;
+        
         /// @brief this map is used to hold several ioctl wrappers that let us set settings easily
         std::map<std::string, DarwinCameraSetting> settings;
+        
+        /// @brief The name of the device to read camera data from
+        std::string deviceName;
     public:
 
         /// @brief this enum holds important constants (we are c++ we don't use defines for this kind of thing)
         enum {
-            /// @brief the width of the image we are requesting
-            WIDTH = 640,
-            /// @brief the height of the image we are requesting
-            HEIGHT = 480,
-            /// @brief the total number of pixels we are requesting
-            SIZE = WIDTH * HEIGHT * 2,
             /// @brief the framerate we are requesting
             FRAMERATE = 30
         };
@@ -95,10 +88,18 @@ namespace modules {
         messages::Image* getImage();
         
         /**
+         * @brief Sets up the camera at a given resolution
+         * 
+         * @param w the image's width
+         * @param h the image's height
+         */
+        void resetCamera(size_t w, size_t h);
+        
+        /**
          * @brief This method is to be called when shutting down the system. It does cleanup on the cameras resources
          */
         void closeCamera();
-    } ;
+    };
 }
 
 #endif /* MODULES_DARWINCAMERA_H */

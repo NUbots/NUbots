@@ -26,34 +26,83 @@
 #include <stdexcept>
 #include <system_error>
 #include <sstream>
+#include <linux/videodev2.h>
 
 namespace modules {
 
-    DarwinCamera::DarwinCamera(const std::string& device) : activeBuffer(false), fd(open(device.c_str(), O_RDWR)) {
-        // Check if we managed to open our file descriptor
+    DarwinCamera::DarwinCamera(const std::string& device) : fd(-1), deviceName(device) {
+        // initialise the camera with default resolution
+        resetCamera(640, 480);
+    }
+
+    messages::Image* DarwinCamera::getImage() {
         if (fd < 0) {
-            throw std::runtime_error(std::string("We were unable to access the camera device on ") + device);
+            return nullptr;
         }
 
-        // Do our configuration of the camera
+        v4l2_buffer current;
+        memset(&current, 0, sizeof(current));
+        current.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        current.memory = V4L2_MEMORY_MMAP;
+        
+        // Get our frame buffer with data in it
+        if (ioctl(fd, VIDIOC_DQBUF, &current) == -1) {
+            throw std::system_error(errno, std::system_category(), "There was an error while de-queuing a buffer");
+        }
+        
+        if (current.bytesused != width * height * 2) {
+            throw std::system_error(errno, std::system_category(), "A bad camera frame was returned (incorrect size)");
+        }
 
+        // Memcpy our data directly from the buffer
+        std::unique_ptr<messages::Image::Pixel[]> data =
+                std::unique_ptr<messages::Image::Pixel[]>(new messages::Image::Pixel[current.bytesused]);
+        memcpy(data.get(), buff[current.index].payload, current.bytesused);
+        
+        // Move this data into the image
+        messages::Image* image = new messages::Image(width, height, std::move(data));
+        
+        // Enqueue our next buffer so it can be written to
+        if (ioctl(fd, VIDIOC_QBUF, &current) == -1) {
+            throw std::system_error(errno, std::system_category(), "There was an error while re-queuing a buffer");
+        }
+        
+        // Return our image
+        return image;
+    }
+    
+    void DarwinCamera::resetCamera(size_t w, size_t h) {
+        if (fd != -1) {
+            closeCamera();
+        }
+
+        width = w;
+        height = h;
+        
+        // Open the camera device
+        fd = open(deviceName.c_str(), O_RDWR);
+        // Check if we managed to open our file descriptor
+        if (fd < 0) {
+            throw std::runtime_error(std::string("We were unable to access the camera device on ") + deviceName);
+        }
+        
         // Here we set the "Format" of the device (the type of data we are getting)
         v4l2_format format;
         memset(&format, 0, sizeof (format));
         format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        format.fmt.pix.width = WIDTH;
-        format.fmt.pix.height = HEIGHT;
+        format.fmt.pix.width = width;
+        format.fmt.pix.height = height;
         format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
         format.fmt.pix.field = V4L2_FIELD_NONE;
         if (ioctl(fd, VIDIOC_S_FMT, &format) == -1) {
             throw std::system_error(errno, std::system_category(), "There was an error while setting the cameras format");
         }
 
-        if(format.fmt.pix.sizeimage != SIZE) {
+        if (format.fmt.pix.sizeimage != width * height * 2) {
             std::stringstream errorStream;
             errorStream 
                 << "The camera returned an image size that made no sense (" 
-                << "Expected: " << SIZE
+                << "Expected: " << (width * height * 2)
                 << ", "
                 << "Found: " << format.fmt.pix.sizeimage 
                 << ")";
@@ -65,45 +114,46 @@ namespace modules {
         memset(&param, 0, sizeof(param));
         param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         // Get the current parameters (populate our fields)
-        if(ioctl(fd, VIDIOC_G_PARM, &param) == -1) {
+        if (ioctl(fd, VIDIOC_G_PARM, &param) == -1) {
             throw std::system_error(errno, std::system_category(), "We were unable to get the current camera FPS parameters");
         }
         param.parm.capture.timeperframe.numerator = 1;
         param.parm.capture.timeperframe.denominator = FRAMERATE;
-        if(ioctl(fd, VIDIOC_S_PARM, &param) == -1) {
+        if (ioctl(fd, VIDIOC_S_PARM, &param) == -1) {
             throw std::system_error(errno, std::system_category(), "We were unable to get the current camera FPS parameters");
         }
         
         // Request 2 kernel space buffers to read the data from the camera into
-        struct v4l2_requestbuffers rb;
+        v4l2_requestbuffers rb;
         memset(&rb, 0, sizeof(rb));
         rb.count = 2; // 2 buffers, one to queue one to read
         rb.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         rb.memory = V4L2_MEMORY_MMAP;
-        if(ioctl(fd, VIDIOC_REQBUFS, &rb) == -1) {
+        if (ioctl(fd, VIDIOC_REQBUFS, &rb) == -1) {
             throw std::system_error(errno, std::system_category(), "There was an error requesting the buffer");
         }
         
         // Map those two buffers into our user space so we can access them
-        for(int i = 0; i < 2; ++i) {
-            buff[i].v4l2.index = i;
-            buff[i].v4l2.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            buff[i].v4l2.memory = V4L2_MEMORY_MMAP;
-            if(ioctl(fd, VIDIOC_QUERYBUF, &buff[i]) == -1) {
+        for (int i = 0; i < 2; ++i) {
+            v4l2_buffer buffer;
+            buffer.index = i;
+            buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            buffer.memory = V4L2_MEMORY_MMAP;
+            if (ioctl(fd, VIDIOC_QUERYBUF, &buffer) == -1) {
                 throw std::system_error(errno, std::system_category(), "There was an error mapping the video buffer into user space");
             }
             
-            buff[i].data.length = buff[i].v4l2.length;
-            buff[i].data.payload = mmap(0, buff[i].v4l2.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buff[i].v4l2.m.offset);
+            buff[i].length = buffer.length;
+            buff[i].payload = mmap(0, buffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buffer.m.offset);
             
-            if(buff[i].data.payload == MAP_FAILED) {
+            if (buff[i].payload == MAP_FAILED) {
                 throw std::runtime_error("There was an error mapping the video buffer into user space");
             }
-        }
 
-        // Enqueue our first buffer so that the kernel can write data to it
-        if(ioctl(fd, VIDIOC_QBUF, &buff[0].v4l2) == -1) {
-            throw std::system_error(errno, std::system_category(), "There was an error queuing buffers for the kernel to write to");
+            // Enqueue our buffer so that the kernel can write data to it
+            if (ioctl(fd, VIDIOC_QBUF, &buffer) == -1) {
+                throw std::system_error(errno, std::system_category(), "There was an error queuing buffers for the kernel to write to");
+            }
         }
         
         // Populate our settings table
@@ -120,53 +170,24 @@ namespace modules {
         
         // Start streaming data
         int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        if(ioctl(fd, VIDIOC_STREAMON, &command) == -1) {
+        if (ioctl(fd, VIDIOC_STREAMON, &command) == -1) {
             throw std::system_error(errno, std::system_category(), "Unable to start camera streaming");
         }
     }
-
-    messages::Image* DarwinCamera::getImage() {
-        
-        // Enqueue our next buffer so it can be written to
-        if(ioctl(fd, VIDIOC_QBUF, &buff[!activeBuffer].v4l2) == -1) {
-            throw std::system_error(errno, std::system_category(), "There was an error while re-queuing a buffer");
-        }
-
-        // Get our frame buffer with data in it
-        if(ioctl(fd, VIDIOC_DQBUF, &buff[activeBuffer].v4l2) == -1) {
-            throw std::system_error(errno, std::system_category(), "There was an error while de-queuing a buffer");
-        }
-        
-        if(buff[activeBuffer].v4l2.bytesused != SIZE) {
-            throw std::system_error(errno, std::system_category(), "A bad camera frame was returned (incorrect size)");
-        }
-
-        // Memcpy our data directly from the buffer
-        std::unique_ptr<messages::Image::Pixel[]> data =
-                std::unique_ptr<messages::Image::Pixel[]>(new messages::Image::Pixel[SIZE / 2]);
-        // Create the image at quarter resolution
-        messages::Image::Pixel* v4lbuff = static_cast<messages::Image::Pixel*>(buff[activeBuffer].data.payload);
-        for(size_t i = 0; i < HEIGHT / 2; ++i) {
-            std::copy(&v4lbuff[i * WIDTH], &v4lbuff[i * WIDTH + WIDTH / 2], &data.get()[i * WIDTH / 2]);
-        }
-        
-        // Move this data into the image
-        messages::Image* image = new messages::Image(WIDTH / 2, HEIGHT / 2, std::move(data));
-        
-        // Swap our buffers
-        activeBuffer = !activeBuffer;
-        
-        // Return our image
-        return image;
-    }
-
+    
     void DarwinCamera::closeCamera() {
         int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         // Start streaming data
-        if(ioctl(fd, VIDIOC_STREAMOFF, &command) == -1) {
+        if (ioctl(fd, VIDIOC_STREAMOFF, &command) == -1) {
             throw std::system_error(errno, std::system_category(), "Unable to stop camera streaming");
         }
         
+        // unmap buffers                                 
+        for (int i = 0; i < 2; ++i) {
+            munmap(buff[i].payload, buff[i].length);
+        }
+        
         close(fd);
+        fd = -1;
     }
 }
