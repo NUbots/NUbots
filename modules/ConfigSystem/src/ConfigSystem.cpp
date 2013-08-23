@@ -56,9 +56,11 @@ namespace modules {
 				
 				// Add this emitter to the list
 				configurations[command.configPath][command.requester] = command.emitter;
+                
+                Messages::ConfigurationNode* node = new Messages::ConfigurationNode(buildConfigurationNode(command.configPath));
 				
 				// Run our emitter to emit the initial object
-				command.emitter(this, buildConfigurationNode(command.configPath));
+				command.emitter(this, node);
 			}
         });
     }
