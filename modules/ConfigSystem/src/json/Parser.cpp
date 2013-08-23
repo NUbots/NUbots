@@ -11,7 +11,7 @@ using namespace json;
 namespace {
     class ParseImpl {
         public:
-            ParseImpl(std::string input ,std::vector<jsmntok_t> tokens) :
+            ParseImpl(std::string input, std::vector<jsmntok_t> tokens) :
                 input(input),
                 tokens(tokens),
                 curTok(0) {
@@ -148,15 +148,4 @@ Messages::ConfigurationNode Parser::parse(std::string input) {
     // we have an array-backed tree which we need to recurse.
     ParseImpl parseImpl(input, tokens);
     return parseImpl.parse();
-
-    // Parse each of the tokens into our configuration node.
-    /*int numTokens = tokens[0].size;
-    std::cout << "NumTokens: " << numTokens << std::endl;
-    for(unsigned int i = 0; i <= tokens.size(); ++i) {
-        jsmntok_t token = tokens[i];
-        std::string val(input, token.start, token.end - token.start);
-        std::cout << "Token " << i << ": " << val << std::endl;
-    }
-
-    return Messages::ConfigurationNode{};*/
 }

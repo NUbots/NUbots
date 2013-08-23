@@ -21,37 +21,24 @@
 #include <sys/inotify.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <fstream>
 
 namespace modules {
 
-    Messages::ConfigurationNode* buildConfigurationNode(std::string filePath) {
-		
-		Messages::ConfigurationNode* node = new Messages::ConfigurationNode();
-		
-		// Read the file as JSON using some lib or something
-		
-        
-        // TODO using the file descriptor provided, read it and build a configurationnode tree
+    Messages::ConfigurationNode buildConfigurationNode(std::string filePath) {
+        // Read the data from the file into a string.
 
-        return node;
+        std::ifstream data;
+
+        // There are lots of nice ways to read a file into a string but this is one of the quickest.
+        // See: http://stackoverflow.com/a/116220
+        std::stringstream stream;
+        stream << data.rdbuf();
+
+        return json::Parser::parse(stream.str());
     }
 
     ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), watcherFd(inotify_init()) {
-        json::Parser parser;
-        Messages::ConfigurationNode config = parser.parse("{ \"hi\": [1, 2, 3, 4, 5], \"hello\": [1, 2, 3] }");
-        std::vector<int> hi = config["hi"];
-        std::vector<int> hello = config["hello"];
-
-        std::cout << "Doing hi" << std::endl;
-        for(auto v : hi) {
-            std::cout << "\t" << v << std::endl;
-        }
-
-        std::cout << "Doing hello" << std::endl;
-        for(auto v : hello) {
-            std::cout << "\t" << v << std::endl;
-        }
-
         on<Trigger<Messages::ConfigurationConfiguration>>([this](const Messages::ConfigurationConfiguration& command) {
 
 			// Check if we already have this path loaded
