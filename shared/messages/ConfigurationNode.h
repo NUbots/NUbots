@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <map>
 
@@ -81,7 +82,9 @@ namespace Messages {
                 return (*std::static_pointer_cast<std::map<std::string, ConfigurationNode>>(value))[key];
             }
             else {
-                throw std::runtime_error("The datatype in this node was not an object");
+                std::stringstream error;
+                error << "The datatype in this node was not an object. Found: " << (int)datatype;
+                throw std::runtime_error(error.str());
             }
         }
 
