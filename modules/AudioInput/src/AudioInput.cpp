@@ -23,6 +23,10 @@
 #include <AL/alc.h>
 #include <stdexcept>
 
+// Errors
+#include <system_error>
+#include "utility/error/openal_error_category.h"
+
 namespace modules {
 
     AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {
@@ -33,7 +37,10 @@ namespace modules {
         // Open a capture device
         ALCdevice* device = alcCaptureOpenDevice(nullptr, SAMPLE_RATE, AL_FORMAT_STEREO16, SAMPLE_SIZE);
         if (alGetError() != AL_NO_ERROR) {
-            throw std::runtime_error("There was an error while attempting to access the microphone");
+            throw std::system_error(
+                    alGetError(), 
+                    utility::error::openal_error_category(), 
+                    "There was an error while attempting to access the microphone");
         }
         
         // Start capturing
