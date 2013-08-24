@@ -1,6 +1,6 @@
 #include "DarwinSensors.h"
 
-const Messages::DarwinSensors::Servo& Messages::DarwinSensors::Servos::operator[](int index) const {
+const messages::DarwinSensors::Servo& messages::DarwinSensors::Servos::operator[](int index) const {
 
     switch (index) {
         case Servo::ID::R_SHOULDER_PITCH:   return rShoulderPitch;
@@ -28,7 +28,7 @@ const Messages::DarwinSensors::Servo& Messages::DarwinSensors::Servos::operator[
     throw std::runtime_error("Out of bounds");
 }
 
-Messages::DarwinSensors::Servo& Messages::DarwinSensors::Servos::operator[](int index) {
+messages::DarwinSensors::Servo& messages::DarwinSensors::Servos::operator[](int index) {
 
     switch (index) {
         case Servo::ID::R_SHOULDER_PITCH:   return rShoulderPitch;

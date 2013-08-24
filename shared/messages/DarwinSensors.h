@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdexcept>
 
-namespace Messages {
+namespace messages {
 
     /**
      * TODO

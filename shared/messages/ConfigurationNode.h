@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 
-namespace Messages {
+namespace messages {
     class ConfigurationNode {
     private:
         enum class DataType {

@@ -25,7 +25,7 @@
 
 namespace modules {
 
-    Messages::ConfigurationNode buildConfigurationNode(std::string filePath) {
+    messages::ConfigurationNode buildConfigurationNode(std::string filePath) {
         // Read the data from the file into a string.
 
         std::ifstream data;
@@ -39,7 +39,7 @@ namespace modules {
     }
 
     ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), watcherFd(inotify_init()) {
-        on<Trigger<Messages::ConfigurationConfiguration>>([this](const Messages::ConfigurationConfiguration& command) {
+        on<Trigger<messages::ConfigurationConfiguration>>([this](const messages::ConfigurationConfiguration& command) {
 
 			// Check if we already have this path loaded
 			if (configurations.find(command.configPath) == std::end(configurations)) {
@@ -57,7 +57,7 @@ namespace modules {
 				// Add this emitter to the list
 				configurations[command.configPath][command.requester] = command.emitter;
                 
-                Messages::ConfigurationNode* node = new Messages::ConfigurationNode(buildConfigurationNode(command.configPath));
+                messages::ConfigurationNode* node = new messages::ConfigurationNode(buildConfigurationNode(command.configPath));
 				
 				// Run our emitter to emit the initial object
 				command.emitter(this, node);

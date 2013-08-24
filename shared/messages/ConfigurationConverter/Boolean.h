@@ -3,7 +3,7 @@
 
 #include "../ConfigurationNode.h"
 
-namespace Messages {
+namespace messages {
     template<>
     struct ConfigurationNode::ConvertNode<bool> {
 

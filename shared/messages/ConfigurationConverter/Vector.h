@@ -3,9 +3,9 @@
 
 #include "../ConfigurationNode.h"
 
-namespace Messages {
+namespace messages {
     template <>
-    struct ConfigurationNode::ConvertNode<std::vector<Messages::ConfigurationNode>> {
+    struct ConfigurationNode::ConvertNode<std::vector<messages::ConfigurationNode>> {
 
         static ConfigurationNode makeNode(const std::vector<ConfigurationNode>& input) {
             return ConfigurationNode(DataType::ARRAY, std::shared_ptr<std::vector<ConfigurationNode>>(new std::vector<ConfigurationNode>(std::move(input))));

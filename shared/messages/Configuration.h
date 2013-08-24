@@ -4,7 +4,7 @@
 #include <NUClear.h>
 #include "ConfigurationNode.h"
 
-namespace Messages {
+namespace messages {
 
     using namespace NUClear::Internal::Magic::MetaProgramming;
 
@@ -48,26 +48,26 @@ namespace Messages {
 	struct ConfigurationConfiguration {
 		std::type_index requester;
 		std::string configPath;
-		std::function<void (NUClear::Reactor*, Messages::ConfigurationNode*)> emitter;
+		std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)> emitter;
 	};
 }
 
 // Our extension
 namespace NUClear {
     template <typename TConfiguration>
-    struct NUClear::Reactor::Exists<Messages::Configuration<TConfiguration>> {
+    struct NUClear::Reactor::Exists<messages::Configuration<TConfiguration>> {
         static void exists(NUClear::Reactor* context) {
 
             // Build our lambda we will use to trigger this reaction
-            std::function<void (Reactor*, Messages::ConfigurationNode*)> emitter =
-            [](Reactor* configReactor, Messages::ConfigurationNode* node) {
+            std::function<void (Reactor*, messages::ConfigurationNode*)> emitter =
+            [](Reactor* configReactor, messages::ConfigurationNode* node) {
 
                 // We cast our node to be the correct type (to trigger the correct reaction) and emit it
-                configReactor->emit(static_cast<Messages::Configuration<TConfiguration>*>(node));
+                configReactor->emit(static_cast<messages::Configuration<TConfiguration>*>(node));
             };
 
             // Emit it from our reactor to the config system
-            context->emit<Scope::DIRECT>(new Messages::ConfigurationConfiguration(typeid(TConfiguration),
+            context->emit<Scope::DIRECT>(new messages::ConfigurationConfiguration(typeid(TConfiguration),
                                                                                   TConfiguration::CONFIGURATION_PATH,
                                                                                   emitter));
         }

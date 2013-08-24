@@ -29,7 +29,7 @@ namespace modules {
 
 	private:
 		std::map<std::string, std::map<std::type_index,
-		std::function<void (NUClear::Reactor*, Messages::ConfigurationNode*)>>> configurations;
+		std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)>>> configurations;
 
 		std::map<int, std::string> wdMap;
 

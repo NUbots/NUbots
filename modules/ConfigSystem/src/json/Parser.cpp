@@ -17,11 +17,11 @@ namespace {
                 curTok(0) {
             }
 
-            Messages::ConfigurationNode parse() {
+            messages::ConfigurationNode parse() {
                 return parseImpl(read());
             }
         private:
-            Messages::ConfigurationNode parseImpl(jsmntok_t root) {
+            messages::ConfigurationNode parseImpl(jsmntok_t root) {
                 std::cout << "parseImpl " << getData(root) << " Type: " << root.type << std::endl;
                 switch(root.type) {
                     case JSMN_OBJECT:
@@ -42,9 +42,9 @@ namespace {
                 throw std::runtime_error(std::string("Bad node found: ") + getData(root));
             }
 
-            Messages::ConfigurationNode parseObject(jsmntok_t token) {
+            messages::ConfigurationNode parseObject(jsmntok_t token) {
                 std::cout << "parseObject " << getData(token) << std::endl;
-                Messages::ConfigurationNode object;
+                messages::ConfigurationNode object;
                 for(int i = 0; i < token.size; ++++i) {
                     auto key = getData(read());
                     auto valnode = parseImpl(read());
@@ -55,23 +55,23 @@ namespace {
                 return std::move(object);
             }
 
-            Messages::ConfigurationNode parseArray(jsmntok_t token) {
+            messages::ConfigurationNode parseArray(jsmntok_t token) {
                 std::cout << "parseArray " << getData(token) << std::endl;
-                std::vector<Messages::ConfigurationNode> array;
+                std::vector<messages::ConfigurationNode> array;
                 for(int i = 0; i < token.size; ++i) {
                     array.push_back(parseImpl(read()));
                 }
                 std::cout << "/parseArray" << std::endl;
-                return Messages::ConfigurationNode(array);
+                return messages::ConfigurationNode(array);
             }
 
-            Messages::ConfigurationNode parseString(jsmntok_t token) {
+            messages::ConfigurationNode parseString(jsmntok_t token) {
                 std::string value = getData(token);
 
-                return std::move(Messages::ConfigurationNode(value));
+                return std::move(messages::ConfigurationNode(value));
             }
 
-            Messages::ConfigurationNode parsePrimative(jsmntok_t token) {
+            messages::ConfigurationNode parsePrimative(jsmntok_t token) {
                 // First we need to figure out the data type of the primative based
                 // on it's value.
                 std::string value = getData(token);
@@ -80,11 +80,11 @@ namespace {
                 // see: https://bitbucket.org/zserge/jsmn/src
                 char first = value[0];
                 if(first == 't') {
-                    return Messages::ConfigurationNode(true);
+                    return messages::ConfigurationNode(true);
                 } else if(first == 'f') {
-                    return Messages::ConfigurationNode(false);
+                    return messages::ConfigurationNode(false);
                 } else if(first == 'n') {
-                    return Messages::ConfigurationNode();
+                    return messages::ConfigurationNode();
                 } else if(first == '-' || isdigit(first)) {
                     // If the string contains a dot then it's a float
                     if(value.find('.') != std::string::npos) {
@@ -92,13 +92,13 @@ namespace {
                         float valueAsFloat;
                         stream >> valueAsFloat;
 
-                        return Messages::ConfigurationNode(valueAsFloat);
+                        return messages::ConfigurationNode(valueAsFloat);
                     } else {
                         std::stringstream stream(value);
                         int valueAsInt;
                         stream >> valueAsInt;
 
-                        return Messages::ConfigurationNode(valueAsInt);
+                        return messages::ConfigurationNode(valueAsInt);
                     }
                 }
 
@@ -124,7 +124,7 @@ namespace {
     };
 }
 
-Messages::ConfigurationNode Parser::parse(std::string input) {
+messages::ConfigurationNode Parser::parse(std::string input) {
     jsmn_parser parser; 
     jsmn_init(&parser);
 
