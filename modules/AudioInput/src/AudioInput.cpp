@@ -61,7 +61,6 @@ namespace modules {
     }
 
     AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {
-
         // We need to set up the audio context.
         if(audioContext.getDeviceCount() < 1) {
             // TODO: Throw error here and skip all our setup
@@ -100,9 +99,5 @@ namespace modules {
             e.printMessage();
             return;
         }
-
-        on<Trigger<Shutdown>>([this](const Shutdown&) {
-            audioContext.stopStream();    
-        });
     }
 }
