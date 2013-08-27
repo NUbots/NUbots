@@ -19,12 +19,18 @@
 #define MODULES_AUDIOINPUT_H
 
 #include <NUClear.h>
+#include "RtAudio.h"
 
 namespace modules {
 
     class AudioInput : public NUClear::Reactor {
-    public:
-        explicit AudioInput(NUClear::PowerPlant* plant);
+        public:
+            explicit AudioInput(NUClear::PowerPlant* plant);
+        private:
+            // TODO: Consider replacing this with the PIMPL idiom to remove
+            // the RtAudio header dependency.
+            RtAudio audioContext;
+            RtAudio::StreamParameters inputStreamParameters;
     };
 }
 #endif

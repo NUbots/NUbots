@@ -15,55 +15,94 @@
  * Copyright 2013 Trent Houliston <trent@houliston.me>
  */
 
+#include <algorithm>
+
 #include "AudioInput.h"
 #include "messages/SoundChunk.h"
 
-// OpenAL
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <stdexcept>
-
-// Errors
-#include <system_error>
-#include "utility/error/openal_error_category.h"
+#include "RtAudio.h"
 
 namespace modules {
+    namespace {
+        int audioCallback(
+                void* outputBuffer, 
+                void* inputBuffer, 
+                unsigned int nBufferFrames, 
+                double streamTime, 
+                RtAudioStreamStatus status, 
+                void* userData ) {
+            
+            if(status) {
+                // If status is false then we've detected a stream overflow.
+                // TODO: Add some error handling here
+            }
+
+            int16_t* data = (int16_t*)inputBuffer;
+
+            // This is a horrible hack but we know the userData
+            // is actually our PowerPlant.
+            auto powerPlant = (NUClear::PowerPlant*)userData;
+
+            messages::SoundChunk* chunk = new messages::SoundChunk();
+
+            // Sound is split up into left and right channels which are 16 bytes
+            // (for the darwin) each. This means a single frame actually compromises
+            // 32 bits and we need to allocate data appropriately.
+            const int INTS_PER_FRAME = 2;
+            
+            chunk->data.resize(nBufferFrames * INTS_PER_FRAME);
+            chunk->data.assign(data, data + (nBufferFrames * INTS_PER_FRAME));
+            
+            powerPlant->emit(chunk);
+
+            return 0;
+        }
+
+    }
 
     AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {
-        
-        const int SAMPLE_RATE = 44100;
-        const int SAMPLE_SIZE = 1024;
-        
-        // Open a capture device
-        ALCdevice* device = alcCaptureOpenDevice(nullptr, SAMPLE_RATE, AL_FORMAT_STEREO16, SAMPLE_SIZE);
-        if (alGetError() != AL_NO_ERROR) {
-            throw std::system_error(
-                    alGetError(), 
-                    utility::error::openal_error_category(), 
-                    "There was an error while attempting to access the microphone");
+
+        // We need to set up the audio context.
+        if(audioContext.getDeviceCount() < 1) {
+            // TODO: Throw error here and skip all our setup
+            return;
         }
-        
-        // Start capturing
-        alcCaptureStart(device);
-        
-        on<Trigger<Every<100, std::chrono::milliseconds>>>([this, device](const time_t&) {
-            
-            messages::SoundChunk* chunk = new messages::SoundChunk();
-            
-            int available = 0;
-            alcGetIntegerv(device, ALC_CAPTURE_SAMPLES, sizeof(ALint), &available);
-            
-            chunk->data.resize(available);
-            alcCaptureSamples(device, chunk->data.data(), available);
-            
-            emit(chunk);
-        });
-        
-        on<Trigger<Shutdown>>([device] (const Shutdown&) {
-            
-            // Stop capturing and close the device
-            alcCaptureStop(device);
-            alcCloseDevice(device);
+
+        // We're going to look for our device by name. In the future this should
+        // pull from the config system and use on<Initialize>().
+        int deviceNumber = audioContext.getDefaultInputDevice();
+        RtAudio::DeviceInfo info = audioContext.getDeviceInfo(deviceNumber);
+        for(unsigned int i = 0; i < audioContext.getDeviceCount(); ++i) {
+            info = audioContext.getDeviceInfo(i);
+            if(info.name == "hw:USB Device 0x46d:0x80a,0") {
+                deviceNumber = i;
+                break;
+            }
+        }
+
+        // Use the DeviceInfo we retrieved in the previous section to determine our
+        // sampling, channels and other things.
+        inputStreamParameters.deviceId = deviceNumber;
+        inputStreamParameters.nChannels = info.inputChannels;
+        inputStreamParameters.firstChannel = 0;
+
+        unsigned int sampleRate = *(std::max_element(info.sampleRates.begin(), info.sampleRates.end()));
+        unsigned int bufferFrames = 256; // 256 sample frames.
+
+        try {
+            /**
+             * We're assuming that the input will be a signed 16 bit integer but this may
+             * not be supported on all input devices. Auto-detection or configuration would
+             * be useful here.
+             */
+            audioContext.openStream(NULL, &inputStreamParameters, RTAUDIO_SINT16, sampleRate, &bufferFrames, &audioCallback);
+        } catch( RtError& e) {
+            e.printMessage();
+            return;
+        }
+
+        on<Trigger<Shutdown>>([this](const Shutdown&) {
+            audioContext.stopStream();    
         });
     }
 }

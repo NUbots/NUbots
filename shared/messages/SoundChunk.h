@@ -2,12 +2,14 @@
 #define	MESSAGES_SOUNDCHUNK_H
 
 #include <NUClear.h>
+#include <vector>
+#include <cstdint>
 
 namespace messages {
     struct SoundChunk {
         
         NUClear::clock::time_point endTime;
-        std::vector<int8_t> data;
+        std::vector<int16_t> data;
     };
 }
 
