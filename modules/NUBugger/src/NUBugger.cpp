@@ -39,7 +39,7 @@ namespace modules {
         pub.bind("tcp://*:12000");
 
         // This trigger gets the output from the sensors (unfiltered)
-        on<Trigger<Messages::DarwinSensors>>([this](const Messages::DarwinSensors& sensors) {
+        on<Trigger<messages::DarwinSensors>>([this](const messages::DarwinSensors& sensors) {
             API::Message message;
 
             message.set_type(API::Message::SENSOR_DATA);

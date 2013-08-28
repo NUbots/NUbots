@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace Messages {
+namespace messages {
 
     /**
      * TODO

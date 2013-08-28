@@ -115,7 +115,7 @@ namespace modules {
         }
 
         /// Converts a timeout error flag into a regular error flag
-        constexpr uint8_t ERROR_FLAGS(const uint8_t value) { return value == -1 ? Messages::DarwinSensors::Error::TIMEOUT : value; };
+        constexpr uint8_t ERROR_FLAGS(const uint8_t value) { return value == -1 ? messages::DarwinSensors::Error::TIMEOUT : value; };
 
         /// Extracts the R value from an RGB led
         constexpr uint8_t COLOURED_LED_R(const uint16_t value) { return static_cast<uint8_t>((value & 0x001F) << 3); };
@@ -215,7 +215,7 @@ namespace modules {
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();
 
-            Messages::DarwinSensors* sensors = new Messages::DarwinSensors;
+            messages::DarwinSensors* sensors = new messages::DarwinSensors;
 
             /*
              CM730 Data
@@ -294,7 +294,7 @@ namespace modules {
 
             for(int i = 0; i < 20; ++i) {
                 // Get a reference to the servo we are populating
-                Messages::DarwinSensors::Servo& servo = sensors->servo[i];
+                messages::DarwinSensors::Servo& servo = sensors->servo[i];
 
                 // Error code
                 servo.errorFlags = Convert::ERROR_FLAGS(data.servoErrorCodes[i]);
@@ -328,7 +328,7 @@ namespace modules {
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<Messages::DarwinServoCommands>>([this](const Messages::DarwinServoCommands& servos) {
+        on<Trigger<messages::DarwinServoCommands>>([this](const messages::DarwinServoCommands& servos) {
 
             std::vector<Darwin::Types::ServoValues> values;
 
@@ -350,12 +350,12 @@ namespace modules {
         });
 
         // If we get a HeadLED command then write it
-        on<Trigger<Messages::DarwinSensors::HeadLED>>([this](const Messages::DarwinSensors::HeadLED& led) {
+        on<Trigger<messages::DarwinSensors::HeadLED>>([this](const messages::DarwinSensors::HeadLED& led) {
             darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::COLOURED_LED_INVERSE(led.r, led.g, led.b));
         });
 
         // If we get a HeadLED command then write it
-        on<Trigger<Messages::DarwinSensors::EyeLED>>([this](const Messages::DarwinSensors::EyeLED& led) {
+        on<Trigger<messages::DarwinSensors::EyeLED>>([this](const messages::DarwinSensors::EyeLED& led) {
             darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::COLOURED_LED_INVERSE(led.r, led.g, led.b));
         });
     }

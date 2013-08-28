@@ -47,15 +47,15 @@ INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES("shared")
 
-# Add our libraries. Each ADD_SUBDIRECTORY is equivalent to FIND_PACKAGE for us.
-ADD_SUBDIRECTORY(lib/jpge)
-INCLUDE_DIRECTORIES(${JPGE_INCLUDE_DIRS})
-
-MESSAGE("JPGE Dir: ${JPGE_INCLUDE_DIRS}")
-
 IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
+
+# Add our libraries. Each ADD_SUBDIRECTORY is equivalent to FIND_PACKAGE for us.
+ADD_SUBDIRECTORY(lib/jpge)
+ADD_SUBDIRECTORY(lib/jsmn)
+INCLUDE_DIRECTORIES(${JPGE_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${JSMN_INCLUDE_DIRS})
 
 
 # This will generate any .proto files in the messages folder
@@ -65,7 +65,10 @@ SET(NUBOTS_SHARED_LIBRARIES
     messages 
     utility)
 
+INCLUDE_DIRECTORIES("shared")
+
 SET(modules
+    ConfigSystem
     DarwinPlatform
     DarwinCameraReader
     NUBugger)
@@ -84,4 +87,5 @@ TARGET_LINK_LIBRARIES(robocup
     ${NUCLEAR_LIBRARIES}
     ${ZMQ_LIBRARIES}
     ${PROTOBUF_LIBRARIES}
-    ${JPGE_LIBRARIES})
+    ${JPGE_LIBRARIES}
+    ${JSMN_LIBRARIES})

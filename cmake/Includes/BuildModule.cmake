@@ -2,7 +2,7 @@
 # We assume that module_name is defined by the including file
 
 # Find all our files
-FILE(GLOB src "src/*.cpp", "src/*.h")
+FILE(GLOB_RECURSE src "src/**.cpp", "src/**.h")
 
 # Include our own src dir and shared dir
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -21,6 +21,7 @@ IF(BUILD_TESTS)
     TARGET_LINK_LIBRARIES(${module_name}Tests
         ${NUBOTS_SHARED_LIBRARIES}
         ${JPGE_LIBRARIES}
+        ${JSMN_LIBRARIES}
         ${NUCLEAR_LIBRARIES}
         ${ZMQ_LIBRARIES}
         ${PROTOBUF_LIBRARIES})

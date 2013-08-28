@@ -1,6 +1,7 @@
 #include <NUClear.h>
 #include <signal.h>
 
+#include "ConfigSystem.h"
 #include "DarwinPlatform.h"
 #include "DarwinCameraReader.h"
 #include "NUBugger.h"
@@ -14,7 +15,7 @@ namespace {
     
     void signalHandler(int signal) {
 
-        std::cout << "Shutdown Command Sent" << std::endl;
+        std::cout << std::endl << "Shutdown Command Sent" << std::endl;
 
         // On our first interrupt, tell the system to shutdown
         if(!run) {
@@ -44,6 +45,7 @@ int main(int argc, char *argv[]) {
     // For segfaults and abort signals, convert them to exceptions and throw them, they will then be caught and not cause errors
     signal(SIGSEGV, segfaultConverter);
 
+    plant.install<modules::ConfigSystem>();
     plant.install<modules::DarwinPlatform>();
     plant.install<modules::DarwinCameraReader>();
     plant.install<modules::NUBugger>();
