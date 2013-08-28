@@ -39,14 +39,14 @@ namespace messages {
     }
 
     const size_t Image::width() const {
-        return imgWidth;
+        return imgWidth / 2;
     }
 
     const size_t Image::height() const {
-        return imgHeight;
+        return imgHeight / 2;
     }
 
     const size_t Image::size() const {
-        return imgWidth * imgHeight;
+        return imgWidth * imgHeight / 4;
     }
 }
