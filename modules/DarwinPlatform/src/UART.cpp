@@ -140,7 +140,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     timeout.tv_usec = BYTE_WAIT * sizeof(Header);
     uint8_t headerBytes[sizeof(Header)];
     for (size_t done = 0; done < sizeof(Header);) {
-        if (select(fd + 1, & connectionset, nullptr, nullptr, &timeout) == 1) {
+        if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
 
             done += read(fd, &headerBytes[done], sizeof(Header) - done);
         }
@@ -160,7 +160,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     timeout.tv_usec = BYTE_WAIT * length;
     result.data.resize(length);
     for (int done = 0; done < length;) {
-        if (select(fd + 1, & connectionset, nullptr, nullptr, &timeout) == 1) {
+        if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
 
             done += read(fd, &result.data[done], length - done);
         }
@@ -173,7 +173,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
 
     // We just read the checksum now
     timeout.tv_usec = 2000;
-    if (select(fd + 1, & connectionset, nullptr, nullptr, &timeout) == 1) {
+    if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
 
         read(fd, &result.checksum, 1);
     }

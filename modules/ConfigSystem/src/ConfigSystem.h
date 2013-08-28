@@ -21,6 +21,10 @@
 #define MODULES_CONFIGSYSTEM_H_
 
 #include <NUClear.h>
+#include <vector>
+#include <set>
+#include <map>
+
 #include "messages/Configuration.h"
 
 namespace modules {
@@ -28,15 +32,20 @@ namespace modules {
 	class ConfigSystem : public NUClear::Reactor {
 
 	private:
-		std::map<std::string, std::map<std::type_index,
-		std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)>>> configurations;
+        static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
+        
+        std::set<std::type_index> loaded;
+		std::map<std::string, std::vector<std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)>>> handler;
 
-		std::map<int, std::string> wdMap;
+        volatile bool running;
+        void run();
+        void kill();
 
 		int watcherFd;
+        int killFd;
 	public:
 		explicit ConfigSystem(NUClear::PowerPlant* plant);
-	} ;
+	};
 }
 #endif
 

@@ -16,7 +16,7 @@ namespace {
     
     void signalHandler(int signal) {
 
-        std::cout << "Shutdown Command Sent" << std::endl;
+        std::cout << std::endl << "Shutdown Command Sent" << std::endl;
 
         // On our first interrupt, tell the system to shutdown
         if(!run) {
