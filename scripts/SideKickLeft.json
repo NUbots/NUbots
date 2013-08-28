@@ -1,0 +1,223 @@
+[
+ {
+ "duration": 500,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": 0, "gain": 100 },
+             { "id": 10, "position": 0, "gain": 100 },
+             { "id": 11, "position": -0.25, "gain": 100 },
+             { "id": 12, "position": -0.25, "gain": 100 },
+             { "id": 13, "position": 0.5, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": -0.25, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": 0, "gain": 100 },
+             { "id": 18, "position": 0, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 800,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": -0.2700000107288361, "gain": 100 },
+             { "id": 10, "position": -0.2700000107288361, "gain": 100 },
+             { "id": 11, "position": -0.25, "gain": 100 },
+             { "id": 12, "position": -0.25, "gain": 100 },
+             { "id": 13, "position": 0.5, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": -0.25, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": 0.2700000107288361, "gain": 100 },
+             { "id": 18, "position": 0.2700000107288361, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 300,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": -0.4199999868869781, "gain": 100 },
+             { "id": 10, "position": -0.3199999928474426, "gain": 100 },
+             { "id": 11, "position": -0.6000000238418579, "gain": 100 },
+             { "id": 12, "position": -0.25, "gain": 100 },
+             { "id": 13, "position": 1.399999976158142, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": -0.800000011920929, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": 0.4199999868869781, "gain": 100 },
+             { "id": 18, "position": 0.3199999928474426, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 180,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": -0.4199999868869781, "gain": 100 },
+             { "id": 10, "position": -0.3199999928474426, "gain": 100 },
+             { "id": 11, "position": -0.6000000238418579, "gain": 100 },
+             { "id": 12, "position": -0.25, "gain": 100 },
+             { "id": 13, "position": 1.399999976158142, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": -0.7000000476837158, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": 0.4199999868869781, "gain": 100 },
+             { "id": 18, "position": 0.3199999928474426, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 130,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": -0.4199999868869781, "gain": 100 },
+             { "id": 10, "position": -0.3199999928474426, "gain": 100 },
+             { "id": 11, "position": -1.100000023841858, "gain": 100 },
+             { "id": 12, "position": -0.25, "gain": 100 },
+             { "id": 13, "position": 0.5, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": 0.5600000023841858, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": 0.02000004053115845, "gain": 100 },
+             { "id": 18, "position": 0.3199999928474426, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 80,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": -0.4199999868869781, "gain": 100 },
+             { "id": 10, "position": -0.3199999928474426, "gain": 100 },
+             { "id": 11, "position": -1.100000023841858, "gain": 100 },
+             { "id": 12, "position": -0.25, "gain": 100 },
+             { "id": 13, "position": 0.5, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": 0.5600000023841858, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": 0.01999996602535248, "gain": 100 },
+             { "id": 18, "position": 0.3199999928474426, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 50,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": 0.1700000166893005, "gain": 100 },
+             { "id": 10, "position": -0.3199999928474426, "gain": 100 },
+             { "id": 11, "position": -1, "gain": 100 },
+             { "id": 12, "position": -0.25, "gain": 100 },
+             { "id": 13, "position": 0.5, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": 0.3599999845027924, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": -0.2800000309944153, "gain": 100 },
+             { "id": 18, "position": 0.3199999928474426, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 170,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": -0.4199999868869781, "gain": 100 },
+             { "id": 10, "position": -0.3199999928474426, "gain": 100 },
+             { "id": 11, "position": -1.100000023841858, "gain": 100 },
+             { "id": 12, "position": -0.25, "gain": 100 },
+             { "id": 13, "position": 0.5, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": 0.5600000023841858, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": 0.3199999928474426, "gain": 100 },
+             { "id": 18, "position": 0.320000022649765, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 400,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 100 },
+             { "id": 8, "position": 0, "gain": 100 },
+             { "id": 9, "position": -0.5199999809265137, "gain": 100 },
+             { "id": 10, "position": -0.3199999928474426, "gain": 100 },
+             { "id": 11, "position": -0.800000011920929, "gain": 100 },
+             { "id": 12, "position": -0.449999988079071, "gain": 100 },
+             { "id": 13, "position": 1.399999976158142, "gain": 100 },
+             { "id": 14, "position": 0.5, "gain": 100 },
+             { "id": 15, "position": -0.800000011920929, "gain": 100 },
+             { "id": 16, "position": -0.25, "gain": 100 },
+             { "id": 17, "position": 0.4199999868869781, "gain": 100 },
+             { "id": 18, "position": 0.3199999928474426, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 400,
+ "targets": [
+             { "id": 7, "position": 0.09973309934139252, "gain": 100 },
+             { "id": 8, "position": 0.04296194761991501, "gain": 100 },
+             { "id": 9, "position": -0.2685121893882751, "gain": 100 },
+             { "id": 10, "position": -0.07058034837245941, "gain": 100 },
+             { "id": 11, "position": -0.804535984992981, "gain": 100 },
+             { "id": 12, "position": -0.7631083726882935, "gain": 100 },
+             { "id": 13, "position": 1.244362235069275, "gain": 100 },
+             { "id": 14, "position": 1.212140679359436, "gain": 100 },
+             { "id": 15, "position": -0.6628414988517761, "gain": 100 },
+             { "id": 16, "position": -0.6474979519844055, "gain": 100 },
+             { "id": 17, "position": 0.1948631256818771, "gain": 100 },
+             { "id": 18, "position": 0.03989323973655701, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 750,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 80 },
+             { "id": 8, "position": 0, "gain": 80 },
+             { "id": 9, "position": 0, "gain": 80 },
+             { "id": 10, "position": 0, "gain": 80 },
+             { "id": 11, "position": -0.3500000238418579, "gain": 80 },
+             { "id": 12, "position": -0.3499999940395355, "gain": 80 },
+             { "id": 13, "position": 0.5, "gain": 80 },
+             { "id": 14, "position": 0.5, "gain": 80 },
+             { "id": 15, "position": -0.25, "gain": 80 },
+             { "id": 16, "position": -0.25, "gain": 80 },
+             { "id": 17, "position": 0, "gain": 80 },
+             { "id": 18, "position": 0, "gain": 80 }
+             ]
+ },
+ {
+ "duration": 450,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 80 },
+             { "id": 8, "position": 0, "gain": 80 },
+             { "id": 9, "position": 0, "gain": 80 },
+             { "id": 10, "position": 0, "gain": 80 },
+             { "id": 11, "position": -0.25, "gain": 80 },
+             { "id": 12, "position": -0.25, "gain": 80 },
+             { "id": 13, "position": 0.5, "gain": 80 },
+             { "id": 14, "position": 0.5, "gain": 80 },
+             { "id": 15, "position": -0.25, "gain": 80 },
+             { "id": 16, "position": -0.25, "gain": 80 },
+             { "id": 17, "position": 0, "gain": 80 },
+             { "id": 18, "position": 0, "gain": 80 }
+             ]
+ },
+ {
+ "duration": 500,
+ "targets": [
+             { "id": 7, "position": 0, "gain": 80 },
+             { "id": 8, "position": 0, "gain": 80 },
+             { "id": 9, "position": 0, "gain": 80 },
+             { "id": 10, "position": 0, "gain": 80 },
+             { "id": 11, "position": -0.25, "gain": 80 },
+             { "id": 12, "position": -0.25, "gain": 80 },
+             { "id": 13, "position": 0.5, "gain": 80 },
+             { "id": 14, "position": 0.5, "gain": 80 },
+             { "id": 15, "position": -0.25, "gain": 80 },
+             { "id": 16, "position": -0.25, "gain": 80 },
+             { "id": 17, "position": 0, "gain": 80 },
+             { "id": 18, "position": 0, "gain": 80 }
+             ]
+ }
+ ]
