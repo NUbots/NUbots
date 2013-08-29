@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     plant.install<modules::DarwinCameraReader>();
     plant.install<modules::eSpeak>();
     plant.install<modules::NUBugger>();
-    //plant.install<modules::PartyDarwin>();
+    plant.install<modules::PartyDarwin>();
     
     plant.start();
 }

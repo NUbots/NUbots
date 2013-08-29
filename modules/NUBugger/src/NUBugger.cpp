@@ -17,7 +17,8 @@
 
 
 #include "NUBugger.h"
-#include "jpge.h"
+
+#include <jpeglib.h>
 
 #include "messages/NUAPI.pb.h"
 #include "messages/DarwinSensors.h"
@@ -82,53 +83,75 @@ namespace modules {
         });
 
         on<Trigger<messages::Image>>([this](const messages::Image& image) {
+            
             API::Message message;
             message.set_type(API::Message::VISION);
             message.set_utc_timestamp(std::time(0));
             auto* visionData = message.mutable_vision();
             auto* imageData = visionData->mutable_image();
-
-            int imageWidth = image.width();
-            int imageHeight = image.height();
-            jpge::uint8* data = new jpge::uint8[imageWidth * imageHeight * 3]();
+            std::string* imageBytes = imageData->mutable_data();
             
-            int index = 0;
-            for (int y = imageHeight - 1; y >= 0; y--) {
-                for (int x = imageWidth - 1; x >= 0; x--) {
-                messages::Image::Pixel pixel = image(x, y);
-                RGB rgb = toRGB(YCbCr{ pixel.y, pixel.cb, pixel.cr });
-                    /*unsigned char r, g, b;
-                    ColorModelConversions::fromYCbCrToRGB(
-                        (unsigned char) pixel.y, 
-                        (unsigned char) pixel.cb, 
-                        (unsigned char) pixel.cr, 
-                        r, 
-                        g, 
-                        b
-                    );*/
-
-                    data[index] = rgb.r;
-                    data[index + 1] = rgb.g;
-                    data[index + 2] = rgb.b;
-
-                    index += 3;
+            // Reserve enough space in the image data to store the output
+            imageBytes->resize(image.size());
+            imageData->set_width(image.width());
+            imageData->set_height(image.height());
+            
+            // Open the memory of the string as a file (using some dastardly hackery)
+            auto memFile = fmemopen(const_cast<char*>(imageBytes->data()), imageBytes->size(), "wb");
+            
+            // Our jpeg compression structures
+            jpeg_compress_struct jpegC;
+            jpeg_error_mgr jpegErr;
+            
+            // Set our error handler on our Config object
+            jpegC.err = jpeg_std_error(&jpegErr);
+            
+            // Create our compression object
+            jpeg_create_compress(&jpegC);
+            
+            // Set our output to the file
+            jpeg_stdio_dest(&jpegC, memFile);
+            
+            // Set information about our image
+            jpegC.image_width = image.width();
+            jpegC.image_height = image.height();
+            jpegC.input_components = 3;
+            jpegC.in_color_space = JCS_YCbCr;
+            
+            // Set the default compression parameters
+            jpeg_set_defaults(&jpegC);
+            
+            // Start compression
+            jpeg_start_compress(&jpegC, true);
+            
+            // Read in each scanline
+            while (jpegC.next_scanline < jpegC.image_height) {
+                // Allocate some space for our row data
+                std::unique_ptr<JSAMPLE[]> row = std::unique_ptr<JSAMPLE[]>(new JSAMPLE[image.width() * 3]);
+                
+                // Allocate a pointer to our row (since it likes to have them sparse)
+                JSAMPLE* rowPtr = row.get();
+                JSAMPARRAY ptr = &rowPtr;
+                
+                // Now load the data into the row from image
+                for(size_t i = 0; i < image.width(); ++i) {
+                    row[i * 3 + 0] = image(jpegC.next_scanline, i).y;
+                    row[i * 3 + 1] = image(jpegC.next_scanline, i).cb;
+                    row[i * 3 + 2] = image(jpegC.next_scanline, i).cr;
                 }
+                
+                // Write this scanline in
+                jpeg_write_scanlines(&jpegC, ptr, 1);
             }
-
-            // allocate a buffer that's hopefully big enough (this is way overkill for jpeg)
-            int orig_buf_size = imageWidth * imageHeight * 3; 
-            if (orig_buf_size < 1024) orig_buf_size = 1024;
-            void *pBuf = malloc(orig_buf_size);
-            int c_size = orig_buf_size;
-            jpge::compress_image_to_jpeg_file_in_memory(pBuf, c_size, imageWidth, imageHeight, 3, data);
-
-            delete[] data;
-
-            imageData->set_width(imageWidth);
-            imageData->set_height(imageHeight);
-            imageData->set_data(pBuf, c_size);
-
-            free(pBuf);
+            
+            // Finish our compression
+            jpeg_finish_compress(&jpegC);
+            
+            // Close the memory file)
+            fclose(memFile);
+                    
+            // Destroy the compression object (free memory)
+            jpeg_destroy_compress(&jpegC);
 
             auto serialized = message.SerializeAsString();
             zmq::message_t packet(serialized.size());
