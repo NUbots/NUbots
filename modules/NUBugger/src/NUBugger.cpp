@@ -82,7 +82,7 @@ namespace modules {
             send(packet);
         });
 
-        on<Trigger<messages::Image>>([this](const messages::Image& image) {
+        on<Trigger<messages::Image>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::Image& image) {
             
             API::Message message;
             message.set_type(API::Message::VISION);
