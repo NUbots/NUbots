@@ -7,6 +7,7 @@ SET(modules
     DarwinPlatform
     DarwinCameraReader
     eSpeak
+    PartyDarwin
     NUBugger)
 
 SET(VERSION_MAJOR 0)
