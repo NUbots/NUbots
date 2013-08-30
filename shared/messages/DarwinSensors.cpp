@@ -1,5 +1,30 @@
 #include "DarwinSensors.h"
 
+const messages::DarwinSensors::Servo::ID messages::DarwinSensors::Servo::idFromString(const std::string str) {
+    
+    return    str == "R_SHOULDER_PITCH" ? ID::R_SHOULDER_PITCH
+            : str == "L_SHOULDER_PITCH" ? ID::L_SHOULDER_PITCH
+            : str == "R_SHOULDER_ROLL"  ? ID::R_SHOULDER_ROLL
+            : str == "L_SHOULDER_ROLL"  ? ID::L_SHOULDER_ROLL
+            : str == "R_ELBOW"          ? ID::R_ELBOW
+            : str == "L_ELBOW"          ? ID::L_ELBOW
+            : str == "R_HIP_YAW"        ? ID::R_HIP_YAW
+            : str == "L_HIP_YAW"        ? ID::L_HIP_YAW
+            : str == "R_HIP_ROLL"       ? ID::R_HIP_ROLL
+            : str == "L_HIP_ROLL"       ? ID::L_HIP_ROLL
+            : str == "R_HIP_PITCH"      ? ID::R_HIP_PITCH
+            : str == "L_HIP_PITCH"      ? ID::L_HIP_PITCH
+            : str == "R_KNEE"           ? ID::R_KNEE
+            : str == "L_KNEE"           ? ID::L_KNEE
+            : str == "R_ANKLE_PITCH"    ? ID::R_ANKLE_PITCH
+            : str == "L_ANKLE_PITCH"    ? ID::L_ANKLE_PITCH
+            : str == "R_ANKLE_ROLL"     ? ID::R_ANKLE_ROLL
+            : str == "L_ANKLE_ROLL"     ? ID::L_ANKLE_ROLL
+            : str == "HEAD_PAN"         ? ID::HEAD_PAN
+            : str == "HEAD_TILT"        ? ID::HEAD_TILT
+            : static_cast<ID>(-1);
+}
+
 const messages::DarwinSensors::Servo& messages::DarwinSensors::Servos::operator[](int index) const {
 
     switch (index) {

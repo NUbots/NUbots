@@ -18,7 +18,8 @@
 #ifndef MESSAGES_DARWINSENSORS_H
 #define MESSAGES_DARWINSENSORS_H
 
-#include <stdint.h>
+#include <cstdint>
+#include <string>
 #include <stdexcept>
 
 namespace messages {
@@ -120,6 +121,8 @@ namespace messages {
                 HEAD_PAN            = 18,
                 HEAD_TILT           = 19
             };
+            
+            static const ID idFromString(const std::string str);
 
             uint8_t errorFlags;
 
