@@ -4,7 +4,6 @@
  "targets": [
              { "id": 11, "position": 0, "gain": 50 },
              { "id": 13, "position": 0, "gain": 50 },
-             { "id": -1, "position": 0, "gain": 50 },
              { "id": 14, "position": 0, "gain": 75 },
              { "id": 15, "position": 0, "gain": 50 },
              { "id": 16, "position": 0, "gain": 75 },
@@ -20,7 +19,6 @@
  "targets": [
              { "id": 11, "position": 0, "gain": 50 },
              { "id": 13, "position": 0, "gain": 50 },
-             { "id": -1, "position": 0, "gain": 50 },
              { "id": 14, "position": 0.5, "gain": 75 },
              { "id": 15, "position": 0, "gain": 50 },
              { "id": 16, "position": 0.5, "gain": 75 },
