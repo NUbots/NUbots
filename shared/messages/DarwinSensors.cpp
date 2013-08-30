@@ -27,7 +27,7 @@ const messages::DarwinSensors::Servo::ID messages::DarwinSensors::Servo::idFromS
 
 const messages::DarwinSensors::Servo& messages::DarwinSensors::Servos::operator[](int index) const {
 
-    switch (index) {
+    switch (static_cast<Servo::ID>(index)) {
         case Servo::ID::R_SHOULDER_PITCH:   return rShoulderPitch;
         case Servo::ID::L_SHOULDER_PITCH:   return lShoulderPitch;
         case Servo::ID::R_SHOULDER_ROLL:    return rShoulderRoll;
@@ -55,7 +55,7 @@ const messages::DarwinSensors::Servo& messages::DarwinSensors::Servos::operator[
 
 messages::DarwinSensors::Servo& messages::DarwinSensors::Servos::operator[](int index) {
 
-    switch (index) {
+    switch (static_cast<Servo::ID>(index)) {
         case Servo::ID::R_SHOULDER_PITCH:   return rShoulderPitch;
         case Servo::ID::L_SHOULDER_PITCH:   return lShoulderPitch;
         case Servo::ID::R_SHOULDER_ROLL:    return rShoulderRoll;

@@ -99,7 +99,7 @@ namespace messages {
         } fsr;
 
         struct Servo {
-            enum ID {
+            enum class ID {
                 R_SHOULDER_PITCH    = 0,
                 L_SHOULDER_PITCH    = 1,
                 R_SHOULDER_ROLL     = 2,
