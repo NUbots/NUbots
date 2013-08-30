@@ -135,9 +135,9 @@ namespace modules {
                 
                 // Now load the data into the row from image
                 for(size_t i = 0; i < image.width(); ++i) {
-                    row[i * 3 + 0] = image(jpegC.next_scanline, i).y;
-                    row[i * 3 + 1] = image(jpegC.next_scanline, i).cb;
-                    row[i * 3 + 2] = image(jpegC.next_scanline, i).cr;
+                    row[i * 3 + 0] = image(i, jpegC.next_scanline).y;
+                    row[i * 3 + 1] = image(i, jpegC.next_scanline).cb;
+                    row[i * 3 + 2] = image(i, jpegC.next_scanline).cr;
                 }
                 
                 // Write this scanline in
