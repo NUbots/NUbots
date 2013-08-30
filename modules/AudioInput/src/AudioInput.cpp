@@ -86,7 +86,7 @@ namespace modules {
         inputStreamParameters.firstChannel = 0;
 
         unsigned int sampleRate = *(std::max_element(info.sampleRates.begin(), info.sampleRates.end()));
-        unsigned int bufferFrames = 256; // 256 sample frames.
+        unsigned int bufferFrames = sampleRate / 10;//256; // 256 sample frames.
 
         try {
             /**
