@@ -8,7 +8,6 @@
 #include "NUBugger.h"
 #include "PartyDarwin.h"
 #include "AudioInput.h"
->>>>>>> feature/AudioInput
 
 struct SegmentationFault : public std::exception {};
 

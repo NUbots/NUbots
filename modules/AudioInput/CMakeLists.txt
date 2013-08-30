@@ -1,10 +1,7 @@
-# Set our module name so that the rest of this file can be generated
-SET(module_name "AudioInput")
-
-# YOU SHOULD NOT HAVE TO TOUCH ANYTHING BELOW THIS LINE
-INCLUDE(${CMAKE_SOURCE_DIR}/cmake/Includes/BuildModule.cmake)
-
+# Find the RtAudio Library
 FIND_PACKAGE(RtAudio REQUIRED)
-INCLUDE_DIRECTORIES(${RTAUDIO_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(${module_name} ${RTAUDIO_LIBRARY})
-TARGET_LINK_LIBRARIES(${module_name}Tests ${RTAUDIO_LIBRARY})
+
+# Build our NUClear module
+NUCLEAR_MODULE(INCLUDES ${RTAUDIO_INCLUDE_DIR}
+               LIBRARIES ${RTAUDIO_LIBRARY})
+

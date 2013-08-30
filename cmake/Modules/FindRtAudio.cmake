@@ -1,9 +1,9 @@
-# - Try to find NUClear
+# - Try to find RtAudio
 # Once done this will define
 #
-#  RTAUDIO_FOUND - system has NUClear
-#  RTAUDIO_INCLUDE_DIRS - the NUClear include directory
-#  RTAUDIO_LIBRARIES - Link these to use NUClear
+#  RTAUDIO_FOUND - system has RtAudio
+#  RTAUDIO_INCLUDE_DIRS - the RtAudio include directory
+#  RTAUDIO_LIBRARIES - Link these to use RtAudio
 #
 #  Copyright (c) 2013 Trent Houliston <trent@houliston.me>
 #
@@ -50,7 +50,7 @@ else (RTAUDIO_LIBRARIES AND RTAUDIO_INCLUDE_DIRS)
   endif (RTAUDIO_LIBRARY)
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(NUClear DEFAULT_MSG RTAUDIO_LIBRARIES RTAUDIO_INCLUDE_DIRS)
+  find_package_handle_standard_args(RtAudio DEFAULT_MSG RTAUDIO_LIBRARIES RTAUDIO_INCLUDE_DIRS)
 
   # show the RTAUDIO_INCLUDE_DIRS and RTAUDIO_LIBRARIES variables only in the advanced view
   mark_as_advanced(RTAUDIO_INCLUDE_DIRS RTAUDIO_LIBRARIES)

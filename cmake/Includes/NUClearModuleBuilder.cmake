@@ -46,6 +46,9 @@ FUNCTION(NUCLEAR_MODULE)
     ADD_LIBRARY(${module_name} ${src})
     TARGET_LINK_LIBRARIES(${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
 
+    ADD_CUSTOM_COMMAND(TARGET ${module_name} PRE_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/config ${CMAKE_BINARY_DIR}/config)
+
     # If we are doing tests then build the tests for this
     IF(BUILD_TESTS)
         # Set a different name for our test module
