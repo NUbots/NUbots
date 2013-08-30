@@ -12,6 +12,7 @@ SET(modules
     DarwinCameraReader
     eSpeak
     PartyDarwin
+    AudioInput
     NUBugger)
 
 # Set to off to ignore building tests
