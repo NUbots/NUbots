@@ -2,10 +2,10 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/)
 
 # This gets all of our source messages
-FILE(GLOB src "*.cpp" "*.h")
+FILE(GLOB_RECURSE src "**.cpp" "**.h")
 
 # Get all protocol buffers
-FILE(GLOB protobufs "*.proto")
+FILE(GLOB_RECURSE protobufs "**.proto")
 
 # If we have any protocol buffers
 IF(protobufs)

@@ -29,6 +29,9 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/SharedLibraries.cmake")
 # Include our module builder
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/NUClearModuleBuilder.cmake")
 
+# Include our scp darwin sender
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")
+
 # Include our shared messages etc headers
 INCLUDE_DIRECTORIES("shared")
 INCLUDE_DIRECTORIES("build/shared")
