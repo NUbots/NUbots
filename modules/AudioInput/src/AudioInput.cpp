@@ -31,6 +31,8 @@ namespace modules {
                 double streamTime, 
                 RtAudioStreamStatus status, 
                 void* userData ) {
+
+            std::cout << "AudioCallback" << std::endl;
             
             if(status) {
                 // If status is false then we've detected a stream overflow.
@@ -94,7 +96,16 @@ namespace modules {
              * not be supported on all input devices. Auto-detection or configuration would
              * be useful here.
              */
-            audioContext.openStream(NULL, &inputStreamParameters, RTAUDIO_SINT16, sampleRate, &bufferFrames, &audioCallback);
+            audioContext.openStream(
+                    NULL, 
+                    &inputStreamParameters, 
+                    RTAUDIO_SINT16, 
+                    sampleRate, 
+                    &bufferFrames, 
+                    &audioCallback,
+                    powerPlant
+            );
+            audioContext.startStream();
         } catch( RtError& e) {
             e.printMessage();
             return;
