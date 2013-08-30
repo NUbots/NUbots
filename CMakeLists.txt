@@ -5,74 +5,51 @@ SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 2)
 SET(VERSION_PATCH 0)
 
+# These define which modules will be installed
+SET(modules
+    ConfigSystem
+    DarwinPlatform
+    DarwinCameraReader
+    eSpeak
+    PartyDarwin
+    AudioInput
+    NUBugger)
+
+# Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)
 
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# Common C++ Flags
-SET(CMAKE_CXX_FLAGS "-std=c++11")
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+# Setup our compiler settings
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/Compiler.cmake")
 
-# XCode support
-IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
-    message("Enabling xcode support")
-    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
-    set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++0x")
-ENDIF()
+# Setup our shared includes
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/SharedLibraries.cmake")
 
-IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-    SET(GCC_MINIMUM_VERSION 4.7)
-    EXECUTE_PROCESS(
-        COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-    IF(GCC_VERSION VERSION_LESS ${GCC_MINIMUM_VERSION})
-        message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.7.2 or greater.")
-    ENDIF()
+# Include our module builder
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/NUClearModuleBuilder.cmake")
 
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
-    
-ELSEIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -stdlib=libc++")
-    
-ELSE()
-    MESSAGE(FATAL_ERROR "Unsupported compiler!")
-ENDIF()
+# Include our scp darwin sender
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")
 
-FIND_PACKAGE(NUClear REQUIRED)
-FIND_PACKAGE(ZMQ REQUIRED)
-FIND_PACKAGE(Protobuf REQUIRED)
-INCLUDE_DIRECTORIES(${NUCLEAR_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${ZMQ_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
+# Include our shared messages etc headers
 INCLUDE_DIRECTORIES("shared")
+INCLUDE_DIRECTORIES("build/shared")
 
 IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
 
-# Add our libraries. Each ADD_SUBDIRECTORY is equivalent to FIND_PACKAGE for us.
-ADD_SUBDIRECTORY(lib/jpge)
-ADD_SUBDIRECTORY(lib/jsmn)
-INCLUDE_DIRECTORIES(${JPGE_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${JSMN_INCLUDE_DIRS})
-
-
 # This will generate any .proto files in the messages folder
 ADD_SUBDIRECTORY(shared/messages)
+# This will build our Utilities library (common functionality)
 ADD_SUBDIRECTORY(shared/utility)
-SET(NUBOTS_SHARED_LIBRARIES 
-    messages 
-    utility)
 
-INCLUDE_DIRECTORIES("shared")
+# Add these to our shared libraries (started in our shared libraries cmake)
+SET(NUBOTS_SHARED_LIBRARIES ${NUBOTS_SHARED_LIBRARIES} messages utility)
 
-SET(modules
-    ConfigSystem
-    DarwinPlatform
-    DarwinCameraReader
-    NUBugger)
-
+# Build each of our modules and their corresponding tests
 FOREACH(module ${modules})
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${module})
@@ -83,9 +60,4 @@ ENDFOREACH()
 ADD_EXECUTABLE(robocup main.cpp)
 TARGET_LINK_LIBRARIES(robocup
     ${NUBOTS_SHARED_LIBRARIES}
-    ${modules}
-    ${NUCLEAR_LIBRARIES}
-    ${ZMQ_LIBRARIES}
-    ${PROTOBUF_LIBRARIES}
-    ${JPGE_LIBRARIES}
-    ${JSMN_LIBRARIES})
+    ${modules})

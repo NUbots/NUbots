@@ -1,5 +1,6 @@
-# Set our module name so that the rest of this file can be generated
-SET(module_name "NUBugger")
+# Find libjpeg library
+FIND_PACKAGE(JPEG REQUIRED)
 
-# YOU SHOULD NOT HAVE TO TOUCH ANYTHING BELOW THIS LINE
-INCLUDE(${CMAKE_SOURCE_DIR}/cmake/Includes/BuildModule.cmake)
+# Build our NUClear module
+NUCLEAR_MODULE(INCLUDES ${JPEG_INCLUDE_DIR}
+               LIBRARIES ${JPEG_LIBRARIES})

@@ -17,7 +17,7 @@
 
 #include "DarwinPlatform.h"
 
-#include "messages/DarwinServos.h"
+#include "messages/DarwinServoCommand.h"
 #include "messages/DarwinSensors.h"
 
 namespace modules {
