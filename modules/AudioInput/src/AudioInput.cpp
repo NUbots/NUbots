@@ -31,8 +31,6 @@ namespace modules {
                 double streamTime, 
                 RtAudioStreamStatus status, 
                 void* userData ) {
-
-            std::cout << "AudioCallback" << std::endl;
             
             if(status) {
                 // If status is false then we've detected a stream overflow.

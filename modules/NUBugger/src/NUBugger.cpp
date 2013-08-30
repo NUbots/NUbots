@@ -123,12 +123,12 @@ namespace modules {
             
             // Start compression
             jpeg_start_compress(&jpegC, true);
+
+            // Allocate some space for our row data
+            std::unique_ptr<JSAMPLE[]> row = std::unique_ptr<JSAMPLE[]>(new JSAMPLE[image.width() * 3]);
             
             // Read in each scanline
             while (jpegC.next_scanline < jpegC.image_height) {
-                // Allocate some space for our row data
-                std::unique_ptr<JSAMPLE[]> row = std::unique_ptr<JSAMPLE[]>(new JSAMPLE[image.width() * 3]);
-                
                 // Allocate a pointer to our row (since it likes to have them sparse)
                 JSAMPLE* rowPtr = row.get();
                 JSAMPARRAY ptr = &rowPtr;
