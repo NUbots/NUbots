@@ -17,17 +17,20 @@ else
     config=""
 fi
 
+# Copy our robocup binary over
+scp robocup "darwin@$robotIP:/home/darwin/"
+
 # Overwrite configuration files
 if [ "$config" == "update" ] || [ "$config" == "u" ] ;
 then
     echo "Updating configuration files"
-    rsync -avz -e ssh config darwin@$robotIP:/home/darwin/
+    rsync -avz -e ssh config "darwin@$robotIP:/home/darwin/"
 
 # Update configuration files
 elif [ "$config" == "new" ] || [ "$config" == "n" ] || [ "$config" == "" ] ;
 then
     echo "Adding new configuration files only"
-    rsync -avz -ignore-existing -e ssh config darwin@10.0.1.42:/home/darwin/
+    rsync -avz --ignore-existing -e ssh config "darwin@$robotIP:/home/darwin/"
 
 # Ignore configuration files
 elif [ "$config" == "ignore" ] || [ "$config" == "i" ] ;
