@@ -10,6 +10,7 @@ SET(modules
     ConfigSystem
     DarwinPlatform
     DarwinCameraReader
+    ScriptEngine
     eSpeak
     PartyDarwin
     AudioInput
