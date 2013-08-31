@@ -328,12 +328,12 @@ namespace modules {
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<messages::DarwinServoCommands>>([this](const messages::DarwinServoCommands& servos) {
+        on<Trigger<std::vector<messages::DarwinServoCommand>>>([this](const std::vector<messages::DarwinServoCommand>& commands) {
 
             std::vector<Darwin::Types::ServoValues> values;
 
             // Loop through each of our commands
-            for (const auto& command : servos.commands) {
+            for (const auto& command : commands) {
                 values.push_back({
                     static_cast<uint8_t>(command.servoId + 1),  // The id's on the robot start with ID 1
                     Convert::GAIN_INVERSE(command.dGain),
@@ -347,6 +347,14 @@ namespace modules {
 
             // Syncwrite our values
             darwin.writeServos(values);
+        });
+        
+        on<Trigger<messages::DarwinServoCommand>>([this](const messages::DarwinServoCommand command) {
+            std::vector<messages::DarwinServoCommand>* commandList = new std::vector<messages::DarwinServoCommand>();
+            commandList->push_back(command);
+            
+            // Emit it so it's captured by the reaction above
+            emit(commandList);
         });
 
         // If we get a HeadLED command then write it

@@ -4,6 +4,7 @@
 #include "ConfigSystem.h"
 #include "DarwinPlatform.h"
 #include "DarwinCameraReader.h"
+#include "DarwinMotionManager.h"
 #include "ScriptEngine.h"
 #include "eSpeak.h"
 #include "NUBugger.h"
@@ -52,6 +53,7 @@ int main(int argc, char *argv[]) {
     plant.install<modules::ConfigSystem>();
     plant.install<modules::DarwinPlatform>();
     plant.install<modules::DarwinCameraReader>();
+    plant.install<modules::DarwinMotionManager>();
     plant.install<modules::ScriptEngine>();
     plant.install<modules::eSpeak>();
     plant.install<modules::AudioInput>();
