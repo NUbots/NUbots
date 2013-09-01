@@ -215,7 +215,7 @@ namespace modules {
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();
 
-            messages::DarwinSensors* sensors = new messages::DarwinSensors;
+            auto sensors = std::make_unique<messages::DarwinSensors>();
 
             /*
              CM730 Data
@@ -324,7 +324,7 @@ namespace modules {
             }
 
             // Send our nicely computed sensor data out to the world
-            emit(sensors);
+            emit(std::move(sensors));
         });
 
         // This trigger writes the servo positions to the hardware
@@ -335,12 +335,12 @@ namespace modules {
             // Loop through each of our commands
             for (const auto& command : commands) {
                 values.push_back({
-                    static_cast<uint8_t>(static_cast<int>(command.servoId) + 1),  // The id's on the robot start with ID 1
+                    static_cast<uint8_t>(static_cast<int>(command.id) + 1),  // The id's on the robot start with ID 1
                     Convert::GAIN_INVERSE(command.dGain),
                     Convert::GAIN_INVERSE(command.iGain),
                     Convert::GAIN_INVERSE(command.pGain),
                     0,
-                    Convert::SERVO_POSITION_INVERSE(static_cast<int>(command.servoId), command.goalPosition),
+                    Convert::SERVO_POSITION_INVERSE(static_cast<int>(command.id), command.goalPosition),
                     Convert::SERVO_SPEED_INVERSE(command.goalPosition)
                 });
             }
@@ -350,11 +350,11 @@ namespace modules {
         });
 
         on<Trigger<messages::DarwinServoCommand>>([this](const messages::DarwinServoCommand command) {
-            std::vector<messages::DarwinServoCommand>* commandList = new std::vector<messages::DarwinServoCommand>();
+            auto commandList = std::make_unique<std::vector<messages::DarwinServoCommand>>();
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit(commandList);
+            emit(std::move(commandList));
         });
 
         // If we get a HeadLED command then write it

@@ -122,7 +122,7 @@ namespace modules {
             else {
 
                 // Wrap our raw pointer in a unique pointer, this way if an exception/error happens it will be deallocated
-                auto waypoints = std::unique_ptr<std::vector<messages::ServoWaypoint>>(new std::vector<messages::ServoWaypoint>());
+                auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
 
                 auto time = command.start;
 
@@ -142,7 +142,7 @@ namespace modules {
                 }
 
                 // Release from the unique pointer and emit it
-                emit(waypoints.release());
+                emit(std::move(waypoints));
             }
         });
     }

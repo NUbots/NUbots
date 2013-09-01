@@ -27,7 +27,7 @@ namespace messages {
      * TODO
      */
     struct DarwinServoCommand {
-        DarwinSensors::Servo::ID servoId;
+        DarwinSensors::Servo::ID id;
         float pGain;
         float iGain;
         float dGain;

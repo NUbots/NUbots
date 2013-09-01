@@ -21,21 +21,21 @@
 namespace modules {
 
     PartyDarwin::PartyDarwin(NUClear::PowerPlant* plant) : Reactor(plant) {
-        
+
         on<Trigger<Every<125, std::chrono::milliseconds>>>([this](const time_t&) {
-            
-            auto* eyes = new messages::DarwinSensors::EyeLED();
+
+            auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
             eyes->r = rand();
             eyes->g = rand();
             eyes->b = rand();
-            
-            auto* head = new messages::DarwinSensors::HeadLED();
+
+            auto head = std::make_unique<messages::DarwinSensors::HeadLED>();
             head->r = rand();
             head->g = rand();
             head->b = rand();
-            
-            emit(eyes);
-            emit(head);
+
+            emit(std::move(eyes));
+            emit(std::move(head));
         });
     }
 }

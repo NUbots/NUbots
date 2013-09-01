@@ -26,7 +26,15 @@ namespace modules {
 
     class DarwinMotionManager : public NUClear::Reactor {
     private:
-        std::list<messages::ServoWaypoint> waypoints[20];
+        struct Motion {
+            NUClear::clock::time_point start;
+            NUClear::clock::time_point end;
+            float position;
+            float gain;
+            bool executed = false;
+        };
+
+        std::list<Motion> waypoints[20];
     public:
         explicit DarwinMotionManager(NUClear::PowerPlant* plant);
     };

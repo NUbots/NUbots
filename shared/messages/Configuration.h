@@ -62,14 +62,21 @@ namespace NUClear {
             std::function<void (Reactor*, messages::ConfigurationNode*)> emitter =
             [](Reactor* configReactor, messages::ConfigurationNode* node) {
 
+                // Cast our node to be the correct type (and wrap it in a unique pointer)
+                auto event = std::unique_ptr<messages::Configuration<TConfiguration>>(
+                static_cast<messages::Configuration<TConfiguration>*>(node));
+
                 // We cast our node to be the correct type (to trigger the correct reaction) and emit it
-                configReactor->emit(static_cast<messages::Configuration<TConfiguration>*>(node));
+                configReactor->emit(std::move(event));
             };
 
             // Emit it from our reactor to the config system
-            context->emit<Scope::DIRECT>(new messages::ConfigurationConfiguration{typeid(TConfiguration),
-                                                                                  TConfiguration::CONFIGURATION_PATH,
-                                                                                  emitter});
+            context->emit<Scope::DIRECT>(std::unique_ptr<messages::ConfigurationConfiguration>(
+                new messages::ConfigurationConfiguration {
+                    typeid(TConfiguration),
+                    TConfiguration::CONFIGURATION_PATH,
+                    emitter
+            }));
         }
     };
 }

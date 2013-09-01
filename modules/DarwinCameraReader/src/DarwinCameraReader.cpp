@@ -26,13 +26,12 @@ namespace modules {
 
     // We assume that the device will always be video0, if not then change this
     DarwinCameraReader::DarwinCameraReader(NUClear::PowerPlant* plant) : Reactor(plant), camera("/dev/video0") {
-        
+
         // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
         on<Trigger<Every<NUClear::clock::period::den / DarwinCamera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
-            
+
             // Get an image and emit it
-            messages::Image* image = camera.getImage();
-            emit(image);
+            emit(std::unique_ptr<messages::Image>(camera.getImage()));
         });
 
         // When we shutdown, we must tell our camera class to close (stop streaming)
@@ -42,11 +41,11 @@ namespace modules {
 
         // TODO THIS GETS REPLACED WITH A CONFIGURATION WHEN IT'S MERGED IN
         on<Trigger<messages::CameraSettings>>([this](const messages::CameraSettings& settings) {
-            
+
             // TODO loop through the configuration for the camera settings
-            
+
             // TODO apply the settings to the camera using the map
-            
+
             //camera.applySettings(settings);
         });
     }
