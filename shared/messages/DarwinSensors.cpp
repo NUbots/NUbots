@@ -1,7 +1,7 @@
 #include "DarwinSensors.h"
 
 const messages::DarwinSensors::Servo::ID messages::DarwinSensors::Servo::idFromString(const std::string str) {
-    
+
     return    str == "R_SHOULDER_PITCH" ? ID::R_SHOULDER_PITCH
             : str == "L_SHOULDER_PITCH" ? ID::L_SHOULDER_PITCH
             : str == "R_SHOULDER_ROLL"  ? ID::R_SHOULDER_ROLL
@@ -23,6 +23,33 @@ const messages::DarwinSensors::Servo::ID messages::DarwinSensors::Servo::idFromS
             : str == "HEAD_PAN"         ? ID::HEAD_PAN
             : str == "HEAD_TILT"        ? ID::HEAD_TILT
             : static_cast<ID>(-1);
+}
+
+const std::string messages::DarwinSensors::Servo::stringFromId(const messages::DarwinSensors::Servo::ID id) {
+
+    switch(id) {
+        case ID::R_SHOULDER_PITCH:  return "R_SHOULDER_PITCH";
+        case ID::L_SHOULDER_PITCH:  return "L_SHOULDER_PITCH";
+        case ID::R_SHOULDER_ROLL:   return "R_SHOULDER_ROLL";
+        case ID::L_SHOULDER_ROLL:   return "L_SHOULDER_ROLL";
+        case ID::R_ELBOW:           return "R_ELBOW";
+        case ID::L_ELBOW:           return "L_ELBOW";
+        case ID::R_HIP_YAW:         return "R_HIP_YAW";
+        case ID::L_HIP_YAW:         return "L_HIP_YAW";
+        case ID::R_HIP_ROLL:        return "R_HIP_ROLL";
+        case ID::L_HIP_ROLL:        return "L_HIP_ROLL";
+        case ID::R_HIP_PITCH:       return "R_HIP_PITCH";
+        case ID::L_HIP_PITCH:       return "L_HIP_PITCH";
+        case ID::R_KNEE:            return "R_KNEE";
+        case ID::L_KNEE:            return "L_KNEE";
+        case ID::R_ANKLE_PITCH:     return "R_ANKLE_PITCH";
+        case ID::L_ANKLE_PITCH:     return "L_ANKLE_PITCH";
+        case ID::R_ANKLE_ROLL:      return "R_ANKLE_ROLL";
+        case ID::L_ANKLE_ROLL:      return "L_ANKLE_ROLL";
+        case ID::HEAD_PAN:          return "HEAD_PAN";
+        case ID::HEAD_TILT:         return "HEAD_TILT";
+        default:                    return "UNKNOWN";
+    }
 }
 
 const messages::DarwinSensors::Servo& messages::DarwinSensors::Servos::operator[](int index) const {

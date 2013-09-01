@@ -25,22 +25,23 @@
 namespace modules {
 
     class ScriptEngine : public NUClear::Reactor {
-    private:
+    public:
         struct Script {
             struct Frame {
-                struct Point {
+                struct Target {
                     messages::DarwinSensors::Servo::ID id;
                     float position;
                     float gain;
                 };
 
                 NUClear::clock::duration duration;
-                std::vector<Point> points;
+                std::vector<Target> points;
             };
 
             std::vector<Frame> frames;
         };
 
+    private:
         std::map<std::string, Script> scripts;
     public:
         explicit ScriptEngine(NUClear::PowerPlant* plant);

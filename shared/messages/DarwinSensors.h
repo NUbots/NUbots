@@ -89,7 +89,7 @@ namespace messages {
 
             float centreX;
             float centreY;
-            
+
             uint8_t errorFlags;
         };
 
@@ -121,8 +121,9 @@ namespace messages {
                 HEAD_PAN            = 18,
                 HEAD_TILT           = 19
             };
-            
+
             static const ID idFromString(const std::string str);
+            static const std::string stringFromId(const ID);
 
             uint8_t errorFlags;
 
@@ -144,7 +145,7 @@ namespace messages {
             float voltage;
             uint8_t temperature;
         };
-        
+
         struct Servos {
             Servo rShoulderPitch;
             Servo lShoulderPitch;
