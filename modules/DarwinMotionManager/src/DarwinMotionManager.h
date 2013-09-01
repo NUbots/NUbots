@@ -35,6 +35,9 @@ namespace modules {
         };
 
         std::list<Motion> waypoints[20];
+
+        void queueEnd(size_t queue);
+        void allQueueEnd();
     public:
         explicit DarwinMotionManager(NUClear::PowerPlant* plant);
     };

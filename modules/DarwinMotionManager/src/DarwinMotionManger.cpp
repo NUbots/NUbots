@@ -15,6 +15,9 @@
  * Copyright 2013 Trent Houliston <trent@houliston.me>
  */
 
+#include "messages/ServoWaypoint.h"
+
+
 #include "DarwinMotionManager.h"
 
 namespace modules {
@@ -23,13 +26,35 @@ namespace modules {
 
         on<Trigger<Every<20, std::chrono::milliseconds>>, With<messages::DarwinSensors>>([this](const time_t& time, const messages::DarwinSensors& sensors) {
 
+            bool emptiedQueue = false;
+
             // Firstly see if there are any old motions that have expired and remove them
-            for (auto& queue : waypoints) {
+            for (size_t i = 0; i < 20; ++i) {
+                auto& queue = waypoints[i];
+
                 while(!queue.empty() && queue.front().executed && queue.front().end < time) {
                     queue.pop_front();
 
-                    // If we just completely  emptied this queue then emit an event to say so
-                    // TODO
+                    // If we just totally emptied this event queue, emit an event that we finished this motor
+                    if(queue.empty()) {
+                        // Emit that we finished this queue
+                        emptiedQueue = true;
+                        queueEnd(i);
+                    }
+                }
+            }
+
+            // If we emptied a queue, check if they are all empty
+            if(emptiedQueue) {
+                // Check if we have emptied all queues
+                bool allEmptied = true;
+
+                for(const auto& queue : waypoints) {
+                    emptiedQueue &= queue.empty();
+                }
+
+                if(allEmptied) {
+                    allQueueEnd();
                 }
             }
 
@@ -87,14 +112,68 @@ namespace modules {
             }
         });
 
+        // For single waypoints
         on<Trigger<messages::ServoWaypoint>>([this](const messages::ServoWaypoint& waypoint) {
 
-            // TODO take this waypoint and append it to where it fits in the queue
-
-            // If it is before the last event in the queue, keep removing the final element until we are back to 0
-
-            // Then make a motion based on this element
-
+            // Make a vector of the command
+            auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
+            waypoints->push_back(waypoint);
+            emit(std::move(waypoints));
         });
+
+        on<Trigger<std::vector<messages::ServoWaypoint>>>([this](const std::vector<messages::ServoWaypoint>& points) {
+
+            for(const auto& point : points) {
+
+                // Get an easy reference to our queue
+                auto& queue = waypoints[static_cast<int>(point.id)];
+
+                // Remove all events that start after this event ends
+                while(!queue.empty() && queue.back().start <= point.time) {
+                    queue.pop_back();
+                }
+
+                // Add this point to our queue
+                Motion m;
+                m.end = point.time;
+                m.gain = point.gain;
+                m.position = point.position;
+
+                // If we have an event in the queue, then we start when this event starts otherwise we start now
+                m.start = queue.empty() ? NUClear::clock::now() : queue.back().end;
+                m.executed = false;
+
+                waypoints[static_cast<int>(point.id)].push_back(std::move(m));
+            }
+        });
+    }
+
+    void DarwinMotionManager::queueEnd(size_t queue) {
+        switch(queue) {
+            case 0: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_SHOULDER_PITCH>>()); break;
+            case 1: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_SHOULDER_PITCH>>()); break;
+            case 2: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_SHOULDER_ROLL>>()); break;
+            case 3: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_SHOULDER_ROLL>>()); break;
+            case 4: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_ELBOW>>()); break;
+            case 5: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_ELBOW>>()); break;
+            case 6: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_HIP_YAW>>()); break;
+            case 7: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_HIP_YAW>>()); break;
+            case 8: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_HIP_ROLL>>()); break;
+            case 9: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_HIP_ROLL>>()); break;
+            case 10: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_HIP_PITCH>>()); break;
+            case 11: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_HIP_PITCH>>()); break;
+            case 12: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_KNEE>>()); break;
+            case 13: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_KNEE>>()); break;
+            case 14: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_ANKLE_PITCH>>()); break;
+            case 15: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_ANKLE_PITCH>>()); break;
+            case 16: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_ANKLE_ROLL>>()); break;
+            case 17: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_ANKLE_ROLL>>()); break;
+            case 18: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::HEAD_PAN>>()); break;
+            case 19: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::HEAD_TILT>>()); break;
+        }
+    }
+
+    void DarwinMotionManager::allQueueEnd() {
+        emit(std::make_unique<messages::AllServoWaypointsComplete>());
     }
 }

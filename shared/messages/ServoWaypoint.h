@@ -23,12 +23,16 @@
 
 namespace messages {
 
+    template<enum DarwinSensors::Servo::ID>
+    struct ServoWaypointsComplete {};
+
+    struct AllServoWaypointsComplete {};
+
     struct ServoWaypoint {
         NUClear::clock::time_point time;
         DarwinSensors::Servo::ID id;
         float position;
         float gain;
-        
     };
 };
 
