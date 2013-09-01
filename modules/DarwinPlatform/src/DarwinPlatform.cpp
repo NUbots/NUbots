@@ -28,10 +28,10 @@ namespace modules {
         /**
          * This function is used in the static asserts to test that all the conversions work properly, it checks two
          * values are close.
-         * 
+         *
          * @param a the first value
          * @param b the second value
-         * 
+         *
          * @return if the two values are close (within 1% of eachother)
          */
         constexpr bool isClose(const int a, const int b) {
@@ -41,10 +41,10 @@ namespace modules {
         /**
          * This function is used in the static asserts to test that all the conversions work properly, it checks two
          * values are close.
-         * 
+         *
          * @param a the first value
          * @param b the second value
-         * 
+         *
          * @return if the two values are close (within 1% of eachother)
          */
         constexpr bool isClose(const float a, const float b) {
@@ -335,12 +335,12 @@ namespace modules {
             // Loop through each of our commands
             for (const auto& command : commands) {
                 values.push_back({
-                    static_cast<uint8_t>(command.servoId + 1),  // The id's on the robot start with ID 1
+                    static_cast<uint8_t>(static_cast<int>(command.servoId) + 1),  // The id's on the robot start with ID 1
                     Convert::GAIN_INVERSE(command.dGain),
                     Convert::GAIN_INVERSE(command.iGain),
                     Convert::GAIN_INVERSE(command.pGain),
                     0,
-                    Convert::SERVO_POSITION_INVERSE(command.servoId, command.goalPosition),
+                    Convert::SERVO_POSITION_INVERSE(static_cast<int>(command.servoId), command.goalPosition),
                     Convert::SERVO_SPEED_INVERSE(command.goalPosition)
                 });
             }
@@ -348,11 +348,11 @@ namespace modules {
             // Syncwrite our values
             darwin.writeServos(values);
         });
-        
+
         on<Trigger<messages::DarwinServoCommand>>([this](const messages::DarwinServoCommand command) {
             std::vector<messages::DarwinServoCommand>* commandList = new std::vector<messages::DarwinServoCommand>();
             commandList->push_back(command);
-            
+
             // Emit it so it's captured by the reaction above
             emit(commandList);
         });

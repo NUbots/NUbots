@@ -16,6 +16,7 @@
  */
 
 #include "ScriptEngine.h"
+#include "messages/Configuration.h"
 
 // TODO extend the ConfigurationEditor in order to make ServoWaypoint objects
 

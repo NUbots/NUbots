@@ -67,9 +67,9 @@ namespace NUClear {
             };
 
             // Emit it from our reactor to the config system
-            context->emit<Scope::DIRECT>(new messages::ConfigurationConfiguration(typeid(TConfiguration),
+            context->emit<Scope::DIRECT>(new messages::ConfigurationConfiguration{typeid(TConfiguration),
                                                                                   TConfiguration::CONFIGURATION_PATH,
-                                                                                  emitter));
+                                                                                  emitter});
         }
     };
 }

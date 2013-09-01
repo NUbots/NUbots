@@ -20,12 +20,28 @@
 
 #include <map>
 #include <NUClear.h>
+#include <messages/DarwinServoCommand.h>
 
 namespace modules {
 
     class ScriptEngine : public NUClear::Reactor {
     private:
-        std::map<std::string, ScriptPosition> scripts;
+        struct Script {
+            struct Frame {
+                struct Point {
+                    messages::DarwinSensors::Servo::ID id;
+                    float position;
+                    float gain;
+                };
+
+                NUClear::clock::duration duration;
+                std::vector<Point> points;
+            };
+
+            std::vector<Frame> frames;
+        };
+
+        std::map<std::string, Script> scripts;
     public:
         explicit ScriptEngine(NUClear::PowerPlant* plant);
     };
