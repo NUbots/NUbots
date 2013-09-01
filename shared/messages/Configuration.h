@@ -44,12 +44,12 @@ namespace messages {
         static_assert(HasConfiguration<TType>::value, "The passed type does not have a CONFIGURATION_PATH variable");
     };
 
-	// TODO this is used to tell the config system what to do
-	struct ConfigurationConfiguration {
-		std::type_index requester;
-		std::string configPath;
-		std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)> emitter;
-	};
+    // TODO this is used to tell the config system what to do
+    struct ConfigurationConfiguration {
+        std::type_index requester;
+        std::string configPath;
+        std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)> emitter;
+    };
 }
 
 // Our extension

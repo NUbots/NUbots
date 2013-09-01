@@ -35,7 +35,7 @@ namespace modules {
                 };
 
                 NUClear::clock::duration duration;
-                std::vector<Target> points;
+                std::vector<Target> targets;
             };
 
             std::vector<Frame> frames;

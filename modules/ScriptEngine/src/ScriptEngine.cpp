@@ -17,6 +17,8 @@
 
 #include "ScriptEngine.h"
 #include "messages/Configuration.h"
+#include "messages/ExecuteScript.h"
+#include "messages/ServoWaypoint.h"
 
 namespace messages {
 
@@ -52,7 +54,7 @@ namespace messages {
             ConfigurationNode node;
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(input.duration).count();
-            node["targets"] = input.points;
+            node["targets"] = input.targets;
 
             return node;
         }
@@ -103,8 +105,45 @@ namespace modules {
 
     ScriptEngine::ScriptEngine(NUClear::PowerPlant* plant) : Reactor(plant) {
 
-        on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& scripts) {
+        on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& script) {
+
             // Add this script to our list of scripts
+            // TODO get the actual name of the script
+            scripts.insert(std::make_pair("some string", script));
+        });
+
+        on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {
+
+            auto script = scripts.find(command.script);
+
+            if(script == std::end(scripts)) {
+                throw std::runtime_error("The script " + command.script + " is not loaded in the system");
+            }
+            else {
+
+                // Wrap our raw pointer in a unique pointer, this way if an exception/error happens it will be deallocated
+                auto waypoints = std::unique_ptr<std::vector<messages::ServoWaypoint>>(new std::vector<messages::ServoWaypoint>());
+
+                auto time = command.start;
+
+                for(const auto& frame : script->second.frames) {
+                    // Move along our duration in time
+                    time += frame.duration;
+
+                    // Loop through all the motors and make a servo waypoint for it
+                    for(const auto& target : frame.targets) {
+                        waypoints->push_back({
+                            time,
+                            target.id,
+                            target.position,
+                            target.gain
+                        });
+                    }
+                }
+
+                // Release from the unique pointer and emit it
+                emit(waypoints.release());
+            }
         });
     }
 }
