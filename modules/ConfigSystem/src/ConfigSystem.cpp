@@ -130,14 +130,14 @@ namespace modules {
 
                     for(const auto& element : elements) {
                         if(!isDir(fullPath + element)) {
-                            command.emitter(this, element, messages::ConfigurationNode(buildConfigurationNode(fullPath + "/" + element)));
+                            command.initialEmitter(this, element, messages::ConfigurationNode(buildConfigurationNode(fullPath + "/" + element)));
                         }
                     }
                 }
                 else {
                     auto lastSlashIndex = fullPath.rfind('/');
                     auto fileName = fullPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
-                    command.emitter(this, fileName, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                    command.initialEmitter(this, fileName, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
                 }
             }
         });

@@ -106,10 +106,8 @@ namespace modules {
     ScriptEngine::ScriptEngine(NUClear::PowerPlant* plant) : Reactor(plant) {
 
         on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& script) {
-
             // Add this script to our list of scripts
-            // TODO get the actual name of the script
-            scripts.insert(std::make_pair("some string", script.config));
+            scripts.insert(std::make_pair(script.name, script.config));
         });
 
         on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {

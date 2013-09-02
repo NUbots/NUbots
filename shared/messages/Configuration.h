@@ -53,6 +53,7 @@ namespace messages {
         std::type_index requester;
         std::string configPath;
         std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)> emitter;
+        std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)> initialEmitter;
     };
 }
 
@@ -65,9 +66,18 @@ namespace NUClear {
             // Build our lambda we will use to trigger this reaction
             std::function<void (Reactor*, const std::string&, const messages::ConfigurationNode&)> emitter =
             [](Reactor* configReactor, const std::string& name, const messages::ConfigurationNode& node) {
-
+                std::cout << typeid(TConfiguration).name() << std::endl;
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
                 configReactor->emit(std::make_unique<messages::Configuration<TConfiguration>>(name, node));
+            };
+
+            // We need to emit our initial configuration directly in order to avoid race conditions where
+            // a main reactor tries to load configuration information before the configurations are loaded.
+            std::function<void (Reactor*, const std::string&, const messages::ConfigurationNode&)> initialEmitter =
+            [](Reactor* configReactor, const std::string& name, const messages::ConfigurationNode& node) {
+                std::cout << typeid(TConfiguration).name() << std::endl;
+                // Cast our node to be the correct type (and wrap it in a unique pointer)
+                configReactor->emit<Scope::DIRECT>(std::make_unique<messages::Configuration<TConfiguration>>(name, node));
             };
 
             // Emit it from our reactor to the config system
@@ -75,7 +85,8 @@ namespace NUClear {
                 new messages::ConfigurationConfiguration {
                     typeid(TConfiguration),
                     TConfiguration::CONFIGURATION_PATH,
-                    emitter
+                    emitter,
+                    initialEmitter
             }));
         }
     };

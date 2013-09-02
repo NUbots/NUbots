@@ -117,7 +117,7 @@ namespace modules {
             // Make a vector of the command
             auto points = std::make_unique<std::vector<messages::ServoWaypoint>>();
             points->push_back(point);
-            emit(std::move(points));
+            emit<Scope::DIRECT>(std::move(points));
         });
 
         on<Trigger<std::vector<messages::ServoWaypoint>>>([this](const std::vector<messages::ServoWaypoint>& points) {
