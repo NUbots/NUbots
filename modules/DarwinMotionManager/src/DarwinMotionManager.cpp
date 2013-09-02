@@ -30,6 +30,9 @@ namespace modules {
             // Firstly see if there are any old motions that have expired and remove them
             for (size_t i = 0; i < 20; ++i) {
                 auto& queue = waypoints[i];
+                if(i == 18) {
+                    std::cout << "Head queue size: " << queue.size() << std::endl;
+                }
 
                 while(!queue.empty() && queue.front().executed && queue.front().end < time) {
                     queue.pop_front();
@@ -104,11 +107,10 @@ namespace modules {
             }
 
             // If we have commands to execute then emit them
+            //std::cout << "Sending " << commands->size() << " commands to servos" << std::endl;
             if(!commands->empty()) {
-                std::cout << "Sending commands to servos" << std::endl;
                 //emit(std::move(commands));
-
-                std::cout << "Sent commands to servos" << std::endl;
+                //std::cout << "Sent commands to servos" << std::endl;
             }
         });
 
