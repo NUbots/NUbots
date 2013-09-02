@@ -40,15 +40,19 @@ namespace messages {
     }
 
     template <typename TType>
-    struct Configuration : public ConfigurationNode {
+    struct Configuration {
         static_assert(HasConfiguration<TType>::value, "The passed type does not have a CONFIGURATION_PATH variable");
+
+        Configuration(const std::string& name, ConfigurationNode config) : name(name), config(config) {};
+        std::string name;
+        ConfigurationNode config;
     };
 
     // TODO this is used to tell the config system what to do
     struct ConfigurationConfiguration {
         std::type_index requester;
         std::string configPath;
-        std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)> emitter;
+        std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)> emitter;
     };
 }
 
@@ -59,15 +63,11 @@ namespace NUClear {
         static void exists(NUClear::Reactor* context) {
 
             // Build our lambda we will use to trigger this reaction
-            std::function<void (Reactor*, messages::ConfigurationNode*)> emitter =
-            [](Reactor* configReactor, messages::ConfigurationNode* node) {
+            std::function<void (Reactor*, const std::string&, const messages::ConfigurationNode&)> emitter =
+            [](Reactor* configReactor, const std::string& name, const messages::ConfigurationNode& node) {
 
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
-                auto event = std::unique_ptr<messages::Configuration<TConfiguration>>(
-                static_cast<messages::Configuration<TConfiguration>*>(node));
-
-                // We cast our node to be the correct type (to trigger the correct reaction) and emit it
-                configReactor->emit(std::move(event));
+                configReactor->emit(std::make_unique<messages::Configuration<TConfiguration>>(name, node));
             };
 
             // Emit it from our reactor to the config system

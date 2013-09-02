@@ -33,9 +33,9 @@ namespace modules {
 
     private:
         static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
-        
+
         std::set<std::type_index> loaded;
-        std::map<std::string, std::vector<std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)>>> handler;
+        std::map<std::string, std::vector<std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)>>> handler;
 
         volatile bool running;
         void run();
