@@ -12,6 +12,7 @@
 #include "PartyDarwin.h"
 #include "AudioInput.h"
 
+#include "messages/ExecuteScript.h"
 #include "messages/ServoWaypoint.h"
 
 struct SegmentationFault : public std::exception {};
@@ -67,18 +68,7 @@ int main(int argc, char *argv[]) {
     plant.install<modules::NUBugger>();
     plant.install<modules::PartyDarwin>();
 
-    std::vector<messages::ServoWaypoint> waypoints = {
-        { NUClear::clock::now() + std::chrono::seconds(1), messages::DarwinSensors::Servo::ID::HEAD_PAN, M_PI_4, 0.2 },
-        { NUClear::clock::now() + std::chrono::seconds(2), messages::DarwinSensors::Servo::ID::HEAD_PAN, -M_PI_4, 0.2 },
-        { NUClear::clock::now() + std::chrono::seconds(3), messages::DarwinSensors::Servo::ID::HEAD_PAN, M_PI_4, 0.2 },
-        { NUClear::clock::now() + std::chrono::seconds(4), messages::DarwinSensors::Servo::ID::HEAD_PAN, -M_PI_4, 0.2 },
-    };
-
-    auto emit = std::make_unique<std::vector<messages::ServoWaypoint>>();
-
-    emit->swap(waypoints);
-
-    plant.emit(std::move(emit));
+    plant.emit(std::make_unique<messages::ExecuteScript>("StandUpFront.json"));
 
     plant.start();
 }
