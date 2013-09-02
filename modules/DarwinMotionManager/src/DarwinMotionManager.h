@@ -19,6 +19,7 @@
 #define MODULES_DARWINMOTIONMANAGER_H
 
 #include <list>
+#include <thread>
 #include <NUClear.h>
 #include "messages/ServoWaypoint.h"
 
@@ -34,6 +35,7 @@ namespace modules {
             bool executed = false;
         };
 
+        std::mutex waypointMutex;
         std::list<Motion> waypoints[20];
 
         void queueEnd(size_t queue);

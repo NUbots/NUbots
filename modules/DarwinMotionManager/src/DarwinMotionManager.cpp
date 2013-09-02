@@ -25,14 +25,13 @@ namespace modules {
 
         on<Trigger<Every<20, std::chrono::milliseconds>>, With<messages::DarwinSensors>>([this](const time_t& time, const messages::DarwinSensors& sensors) {
 
+                std::lock_guard<std::mutex> waypointLock(waypointMutex);
+
             bool emptiedQueue = false;
 
             // Firstly see if there are any old motions that have expired and remove them
             for (size_t i = 0; i < 20; ++i) {
                 auto& queue = waypoints[i];
-                if(i == 18) {
-                    std::cout << "Head queue size: " << queue.size() << std::endl;
-                }
 
                 while(!queue.empty() && queue.front().executed && queue.front().end < time) {
                     queue.pop_front();
@@ -79,7 +78,7 @@ namespace modules {
 
                     // Work out our radians per second speed to get there
                     float movingSpeed = abs(targetPosition - presentPosition) /
-                    (float((waypoints[i].front().end - time).count()) / float(NUClear::clock::period::den));
+                        (float((waypoints[i].front().end - time).count()) / float(NUClear::clock::period::den));
 
                     // If it's less then 0 make it 0 (negative movings speeds would be bad)
                     movingSpeed = movingSpeed < 0 ? 0 : movingSpeed;
@@ -107,30 +106,33 @@ namespace modules {
             }
 
             // If we have commands to execute then emit them
-            //std::cout << "Sending " << commands->size() << " commands to servos" << std::endl;
             if(!commands->empty()) {
-                //emit(std::move(commands));
-                //std::cout << "Sent commands to servos" << std::endl;
+                emit(std::move(commands));
             }
         });
 
         // For single waypoints
-        on<Trigger<messages::ServoWaypoint>>([this](const messages::ServoWaypoint& waypoint) {
+        on<Trigger<messages::ServoWaypoint>>([this](const messages::ServoWaypoint& point) {
 
             // Make a vector of the command
-            auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
-            waypoints->push_back(waypoint);
-            emit(std::move(waypoints));
+            auto points = std::make_unique<std::vector<messages::ServoWaypoint>>();
+            points->push_back(point);
+            emit(std::move(points));
         });
 
         on<Trigger<std::vector<messages::ServoWaypoint>>>([this](const std::vector<messages::ServoWaypoint>& points) {
+            std::lock_guard<std::mutex> waypointLock(waypointMutex);
+
             for(const auto& point : points) {
 
                 // Get an easy reference to our queue
                 auto& queue = waypoints[static_cast<int>(point.id)];
 
-                // Remove all events that start after this event ends
-                while(!queue.empty() && queue.back().start <= point.time) {
+                // Remove all events that start after this event ends:
+                // We want to remove all the events that start after our new
+                // event in order to avoid running multiple scripts over the
+                // top of each other.
+                while(!queue.empty() && queue.back().start >= point.time) {
                     queue.pop_back();
                 }
 
@@ -144,7 +146,7 @@ namespace modules {
                 m.start = queue.empty() ? NUClear::clock::now() : queue.back().end;
                 m.executed = false;
 
-                waypoints[static_cast<int>(point.id)].push_back(std::move(m));
+                queue.push_back(std::move(m));
             }
         });
     }
