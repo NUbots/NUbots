@@ -2,7 +2,6 @@
 #include "jsmn.h"
 
 #include <vector>
-#include <iostream>
 #include <cctype>
 #include <sstream>
 using namespace modules;
@@ -22,7 +21,6 @@ namespace {
             }
         private:
             messages::ConfigurationNode parseImpl(jsmntok_t root) {
-                std::cout << "parseImpl " << getData(root) << " Type: " << root.type << std::endl;
                 switch(root.type) {
                     case JSMN_OBJECT:
                         return parseObject(root);
@@ -37,13 +35,11 @@ namespace {
                         return parsePrimative(root);
                         break;
                 }
-                std::cout << "/parseImpl " << std::endl;
 
                 throw std::runtime_error(std::string("Bad node found: ") + getData(root));
             }
 
             messages::ConfigurationNode parseObject(jsmntok_t token) {
-                std::cout << "parseObject " << getData(token) << std::endl;
                 messages::ConfigurationNode object;
                 for(int i = 0; i < token.size; ++++i) {
                     auto key = getData(read());
@@ -51,17 +47,14 @@ namespace {
 
                     object.add(key, valnode);
                 }
-                std::cout << "/parseObject";
                 return std::move(object);
             }
 
             messages::ConfigurationNode parseArray(jsmntok_t token) {
-                std::cout << "parseArray " << getData(token) << std::endl;
                 std::vector<messages::ConfigurationNode> array;
                 for(int i = 0; i < token.size; ++i) {
                     array.push_back(parseImpl(read()));
                 }
-                std::cout << "/parseArray" << std::endl;
                 return messages::ConfigurationNode(array);
             }
 
@@ -110,7 +103,6 @@ namespace {
             }
 
             jsmntok_t read() {
-                std::cout << "Reading: " << getData(tokens[curTok]) << std::endl;
                 return tokens[curTok++];
             }
 
@@ -125,7 +117,7 @@ namespace {
 }
 
 messages::ConfigurationNode Parser::parse(std::string input) {
-    jsmn_parser parser; 
+    jsmn_parser parser;
     jsmn_init(&parser);
 
     int tokenBufferSize = input.size();
@@ -136,12 +128,12 @@ messages::ConfigurationNode Parser::parse(std::string input) {
     while(true) {
         jsmnerr_t result = jsmn_parse(&parser, input.c_str(), tokens.data(), tokenBufferSize);
 
-        if(result == JSMN_SUCCESS) { 
+        if(result == JSMN_SUCCESS) {
             break;
         } else if(result == JSMN_ERROR_NOMEM) {
             tokenBufferSize *= 2;
             tokens.resize(tokenBufferSize);
-        } 
+        }
     }
 
     // From this point down the size parameter of tokens is unreliazble. Effectively

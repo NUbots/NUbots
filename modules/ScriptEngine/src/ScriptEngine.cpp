@@ -109,7 +109,7 @@ namespace modules {
 
             // Add this script to our list of scripts
             // TODO get the actual name of the script
-            scripts.insert(std::make_pair("some string", script));
+            scripts.insert(std::make_pair("some string", script.config));
         });
 
         on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {

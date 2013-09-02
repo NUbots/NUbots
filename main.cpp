@@ -1,5 +1,6 @@
 #include <NUClear.h>
 #include <signal.h>
+#include <math.h>
 
 #include "ConfigSystem.h"
 #include "DarwinPlatform.h"
@@ -10,6 +11,8 @@
 #include "NUBugger.h"
 #include "PartyDarwin.h"
 #include "AudioInput.h"
+
+#include "messages/ServoWaypoint.h"
 
 struct SegmentationFault : public std::exception {};
 
@@ -41,7 +44,11 @@ namespace {
 
 int main(int argc, char *argv[]) {
 
-    NUClear::PowerPlant plant;
+    NUClear::PowerPlant::Configuration config;
+
+    config.threadCount = 4;
+
+    NUClear::PowerPlant plant(config);
     powerplant = &plant;
 
     // If we get interrupted (ctrl c) then tell the system to shutdown gracefully, on the second time just kill it
@@ -56,9 +63,22 @@ int main(int argc, char *argv[]) {
     plant.install<modules::DarwinMotionManager>();
     plant.install<modules::ScriptEngine>();
     plant.install<modules::eSpeak>();
-    plant.install<modules::AudioInput>();
+    //plant.install<modules::AudioInput>();
     plant.install<modules::NUBugger>();
     plant.install<modules::PartyDarwin>();
+
+    std::vector<messages::ServoWaypoint> waypoints = {
+        { NUClear::clock::now() + std::chrono::seconds(1), messages::DarwinSensors::Servo::ID::HEAD_PAN, M_PI_4, 0.2 },
+        { NUClear::clock::now() + std::chrono::seconds(2), messages::DarwinSensors::Servo::ID::HEAD_PAN, -M_PI_4, 0.2 },
+        { NUClear::clock::now() + std::chrono::seconds(3), messages::DarwinSensors::Servo::ID::HEAD_PAN, M_PI_4, 0.2 },
+        { NUClear::clock::now() + std::chrono::seconds(4), messages::DarwinSensors::Servo::ID::HEAD_PAN, -M_PI_4, 0.2 },
+    };
+
+    auto emit = std::make_unique<std::vector<messages::ServoWaypoint>>();
+
+    emit->swap(waypoints);
+
+    plant.emit(std::move(emit));
 
     plant.start();
 }

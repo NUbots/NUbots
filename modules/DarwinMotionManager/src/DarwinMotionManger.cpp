@@ -17,7 +17,6 @@
 
 #include "messages/ServoWaypoint.h"
 
-
 #include "DarwinMotionManager.h"
 
 namespace modules {
@@ -58,13 +57,11 @@ namespace modules {
                 }
             }
 
-            // If we removed the final element of a queue and now all queues are empty, emit a total finish event
-
             auto commands = std::make_unique<std::vector<messages::DarwinServoCommand>>();
 
             // Check if there are any unexecuted motions that are in our current window and execute them if they are in range
             for(size_t i = 0; i < 20; ++i) {
-                if(waypoints[i].empty()
+                if(!waypoints[i].empty()
                    && !waypoints[i].front().executed
                    && waypoints[i].front().start < time) {
 
@@ -108,7 +105,10 @@ namespace modules {
 
             // If we have commands to execute then emit them
             if(!commands->empty()) {
-                emit(std::move(commands));
+                std::cout << "Sending commands to servos" << std::endl;
+                //emit(std::move(commands));
+
+                std::cout << "Sent commands to servos" << std::endl;
             }
         });
 
@@ -122,7 +122,6 @@ namespace modules {
         });
 
         on<Trigger<std::vector<messages::ServoWaypoint>>>([this](const std::vector<messages::ServoWaypoint>& points) {
-
             for(const auto& point : points) {
 
                 // Get an easy reference to our queue
