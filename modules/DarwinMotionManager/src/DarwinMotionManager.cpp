@@ -77,7 +77,7 @@ namespace modules {
                     messages::DarwinSensors::Servo::ID id = static_cast<messages::DarwinSensors::Servo::ID>(i);
 
                     // Work out our radians per second speed to get there
-                    float movingSpeed = abs(targetPosition - presentPosition) /
+                    float movingSpeed = fabs(targetPosition - presentPosition) /
                         (float((waypoints[i].front().end - time).count()) / float(NUClear::clock::period::den));
 
                     // If it's less then 0 make it 0 (negative movings speeds would be bad)

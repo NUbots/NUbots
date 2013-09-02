@@ -180,14 +180,23 @@ namespace modules {
         static_assert(isClose(SERVO_POSITION_INVERSE(3, SERVO_POSITION(3, 2100)), 2100),    "There is a problem with the Inverse operation for Position");
         static_assert(isClose(SERVO_POSITION_INVERSE(10, SERVO_POSITION(10, 2600)), 2600),  "There is a problem with the Inverse operation for Position");
 
+        constexpr double SPEED_CONVERSION_FACTOR = 0.00596902604;
+
         /// Converts a servo speed from its signed format into radians/second
         constexpr float SERVO_SPEED(const uint8_t servoID, const uint16_t value) {
-            return direction[servoID] * SIGNBIT<10>(value) * float(value & 0x3FF) * 0.01193805208;
+            return direction[servoID] * SIGNBIT<10>(value) * float(value & 0x3FF) * SPEED_CONVERSION_FACTOR;
         }
+
         /// Converts a servo speed from radians/second to it's signed format
         constexpr uint16_t SERVO_SPEED_INVERSE(const float value) {
-            return ((value / 0.01193805208) < 0 ? -(value / 0.01193805208) : (value / 0.01193805208)) > 1023 ? 0 :
-            ((value / 0.01193805208) < 0 ? -(value / 0.01193805208) : (value / 0.01193805208));
+            return (
+                (value / SPEED_CONVERSION_FACTOR) < 0 
+                    ? - (value / SPEED_CONVERSION_FACTOR) 
+                    : (value / SPEED_CONVERSION_FACTOR)) > 1023 
+                        ? 0 
+                        : ((value / SPEED_CONVERSION_FACTOR) < 0 
+                            ? -(value / SPEED_CONVERSION_FACTOR) 
+                            : (value / SPEED_CONVERSION_FACTOR));
         }
 
         // Check that our Servo speed conversion is working properly
