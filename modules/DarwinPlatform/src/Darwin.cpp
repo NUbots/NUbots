@@ -219,8 +219,14 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
 
     return data;
 }
+#include <iostream>
 
 void Darwin::Darwin::writeServos(const std::vector<Types::ServoValues>& servos) {
+
+    std::cout << "SyncWriting" << std::endl;
+    for(auto& servo : servos) {
+        std::cout << "\tServo: [" << (int)servo.servoId << ", " << servo.goalPostion << "]" << std::endl;
+    }
 
     // Check that our ServoValues object is the correct size (the difference + 1 + another for the id)
     static_assert(sizeof(Types::ServoValues) == MX28::Address::MOVING_SPEED_H - MX28::Address::D_GAIN + 2,
@@ -237,16 +243,12 @@ void Darwin::Darwin::writeServos(const std::vector<Types::ServoValues>& servos) 
     packet[Packet::LENGTH] = 4 + (servos.size() * sizeof(Types::ServoValues));
     packet[Packet::INSTRUCTION] = DarwinDevice::Instruction::SYNC_WRITE;
 
-    // Our start address (we start at torque enable)
-    packet[Packet::PARAMETER] = MX28::Address::TORQUE_ENABLE;
     // Our data length (not including our ID)
-    packet[Packet::PARAMETER + 1] = sizeof(Types::ServoValues) - 1;
     packet[Packet::PARAMETER] = MX28::Address::D_GAIN;
-    // Our data length
     packet[Packet::PARAMETER + 1] = sizeof(Types::ServoValues) - 1;
 
     // Our motor values
-    memcpy(&packet[Packet::PARAMETER + 2], servos.data(), sizeof(Types::ServoValues));
+    memcpy(&packet[Packet::PARAMETER + 2], servos.data(), servos.size() * sizeof(Types::ServoValues));
 
     // Our checksum
     packet.back() = calculateChecksum(packet.data());

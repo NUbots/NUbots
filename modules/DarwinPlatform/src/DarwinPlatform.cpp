@@ -180,7 +180,8 @@ namespace modules {
         static_assert(isClose(SERVO_POSITION_INVERSE(3, SERVO_POSITION(3, 2100)), 2100),    "There is a problem with the Inverse operation for Position");
         static_assert(isClose(SERVO_POSITION_INVERSE(10, SERVO_POSITION(10, 2600)), 2600),  "There is a problem with the Inverse operation for Position");
 
-        constexpr double SPEED_CONVERSION_FACTOR = 0.00596902604;
+        constexpr double SPEED_CONVERSION_FACTOR = 0.005969026042 * 2;
+        //constexpr double SPEED_CONVERSION_FACTOR = 0.00596902604;
 
         /// Converts a servo speed from its signed format into radians/second
         constexpr float SERVO_SPEED(const uint8_t servoID, const uint16_t value) {
