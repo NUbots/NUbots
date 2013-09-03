@@ -351,7 +351,7 @@ namespace modules {
                     Convert::GAIN_INVERSE(command.pGain),
                     0,
                     Convert::SERVO_POSITION_INVERSE(static_cast<int>(command.id), command.goalPosition),
-                    Convert::SERVO_SPEED_INVERSE(command.goalPosition)
+                    Convert::SERVO_SPEED_INVERSE(command.movingSpeed)
                 });
             }
 

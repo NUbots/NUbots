@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     plant.install<modules::NUBugger>();
     plant.install<modules::PartyDarwin>();
 
-    plant.emit(std::make_unique<messages::ExecuteScript>("StandUpFront.json"));
+    plant.emit(std::make_unique<messages::ExecuteScript>("StandUpBack.json"));
 
     plant.start();
 }
