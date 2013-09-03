@@ -203,6 +203,10 @@ namespace modules {
                 }
             }
         }
+
+        // Close our file descriptors
+        close(watcherFd);
+        close(killFd);
     }
 
     void ConfigSystem::kill() {
@@ -216,9 +220,5 @@ namespace modules {
         int written = write(killFd, &val, sizeof (eventfd_t));
         assert(written == sizeof(eventfd_t));
         (void) written; // Stop gcc from complaining about it being unused when NDEBUG is set
-
-        // Close our file descriptors
-        close(watcherFd);
-        close(killFd);
     }
 }
