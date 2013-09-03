@@ -77,10 +77,6 @@ namespace modules {
             }
 
             closedir(dir);
-
-            for(auto& s : result) {
-                std::cout << s << std::endl;
-            }
         }
         else {
             // TODO Throw an error or something
@@ -93,8 +89,6 @@ namespace modules {
 
         // Read the data from the file into a string.
         std::ifstream data(filePath, std::ios::in);
-
-        std::cout << "Reading file " << filePath << std::endl;
 
         // There are lots of nice ways to read a file into a string but this is one of the quickest.
         // See: http://stackoverflow.com/a/116220

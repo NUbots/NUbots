@@ -66,7 +66,6 @@ namespace NUClear {
             // Build our lambda we will use to trigger this reaction
             std::function<void (Reactor*, const std::string&, const messages::ConfigurationNode&)> emitter =
             [](Reactor* configReactor, const std::string& name, const messages::ConfigurationNode& node) {
-                std::cout << typeid(TConfiguration).name() << std::endl;
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
                 configReactor->emit(std::make_unique<messages::Configuration<TConfiguration>>(name, node));
             };
@@ -75,7 +74,6 @@ namespace NUClear {
             // a main reactor tries to load configuration information before the configurations are loaded.
             std::function<void (Reactor*, const std::string&, const messages::ConfigurationNode&)> initialEmitter =
             [](Reactor* configReactor, const std::string& name, const messages::ConfigurationNode& node) {
-                std::cout << typeid(TConfiguration).name() << std::endl;
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
                 configReactor->emit<Scope::DIRECT>(std::make_unique<messages::Configuration<TConfiguration>>(name, node));
             };

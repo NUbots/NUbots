@@ -156,7 +156,7 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
     for (size_t i = 0; i < results.size(); ++i) {
 
         auto& r = results[i];
-        
+
         // If we got data back
         if (!r.data.empty()) {
 
@@ -193,7 +193,7 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
 
                 // Insert our 3 bytes at the end
                 bulkReadCommand.insert(std::end(bulkReadCommand) - 1, bytes, bytes + 3);
-                
+
                 firstError = false;
             }
 
@@ -222,11 +222,6 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
 #include <iostream>
 
 void Darwin::Darwin::writeServos(const std::vector<Types::ServoValues>& servos) {
-
-    std::cout << "SyncWriting" << std::endl;
-    for(auto& servo : servos) {
-        std::cout << "\tServo: [" << (int)servo.servoId << ", " << servo.goalPostion << "]" << std::endl;
-    }
 
     // Check that our ServoValues object is the correct size (the difference + 1 + another for the id)
     static_assert(sizeof(Types::ServoValues) == MX28::Address::MOVING_SPEED_H - MX28::Address::D_GAIN + 2,

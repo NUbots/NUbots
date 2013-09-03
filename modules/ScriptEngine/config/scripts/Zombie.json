@@ -1,0 +1,27 @@
+[
+ {
+ "duration": 1000,
+ "targets": [
+             { "id": "R_SHOULDER_PITCH", "position": 0, "gain": 100 },
+             { "id": "L_SHOULDER_PITCH", "position": 0, "gain": 100 },
+             { "id": "R_SHOULDER_ROLL", "position": 0, "gain": 100 },
+             { "id": "L_SHOULDER_ROLL", "position": 0, "gain": 100 },
+             { "id": "R_ELBOW", "position": 0, "gain": 100 },
+             { "id": "L_ELBOW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": 0, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": 0, "gain": 100 },
+             { "id": "R_KNEE", "position": 0, "gain": 100 },
+             { "id": "L_KNEE", "position": 0, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": 0, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": 0, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": 0, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": 0, "gain": 100 },
+             { "id": "HEAD_PAN", "position": 0, "gain": 0 },
+             { "id": "HEAD_TILT", "position": 0, "gain": 0 }
+             ]
+ }
+]
