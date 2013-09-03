@@ -29,23 +29,23 @@
 
 namespace modules {
 
-	class ConfigSystem : public NUClear::Reactor {
+    class ConfigSystem : public NUClear::Reactor {
 
-	private:
+    private:
         static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
-        
+
         std::set<std::type_index> loaded;
-		std::map<std::string, std::vector<std::function<void (NUClear::Reactor*, messages::ConfigurationNode*)>>> handler;
+        std::map<std::string, std::vector<std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)>>> handler;
 
         volatile bool running;
         void run();
         void kill();
 
-		int watcherFd;
+        int watcherFd;
         int killFd;
-	public:
-		explicit ConfigSystem(NUClear::PowerPlant* plant);
-	};
+    public:
+        explicit ConfigSystem(NUClear::PowerPlant* plant);
+    };
 }
 #endif
 

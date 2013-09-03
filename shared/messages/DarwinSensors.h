@@ -18,7 +18,8 @@
 #ifndef MESSAGES_DARWINSENSORS_H
 #define MESSAGES_DARWINSENSORS_H
 
-#include <stdint.h>
+#include <cstdint>
+#include <string>
 #include <stdexcept>
 
 namespace messages {
@@ -88,7 +89,7 @@ namespace messages {
 
             float centreX;
             float centreY;
-            
+
             uint8_t errorFlags;
         };
 
@@ -98,7 +99,7 @@ namespace messages {
         } fsr;
 
         struct Servo {
-            enum ID {
+            enum class ID {
                 R_SHOULDER_PITCH    = 0,
                 L_SHOULDER_PITCH    = 1,
                 R_SHOULDER_ROLL     = 2,
@@ -121,6 +122,9 @@ namespace messages {
                 HEAD_TILT           = 19
             };
 
+            static const ID idFromString(const std::string str);
+            static const std::string stringFromId(const ID);
+
             uint8_t errorFlags;
 
             bool torqueEnabled;
@@ -141,7 +145,7 @@ namespace messages {
             float voltage;
             uint8_t temperature;
         };
-        
+
         struct Servos {
             Servo rShoulderPitch;
             Servo lShoulderPitch;

@@ -127,7 +127,11 @@ Darwin::CommandResult Darwin::UART::readPacket() {
         if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
 
             uint8_t byte;
-            read(fd, &byte, 1);
+            int bytesRead = read(fd, &byte, 1);
+
+            assert(bytesRead == 1);
+            (void) bytesRead; // Make the compiler happy when NDEBUG is set
+
             sync = byte == 0xFF ? sync + 1 : 0;
         }
         else {
@@ -175,7 +179,9 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     timeout.tv_usec = 2000;
     if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
 
-        read(fd, &result.checksum, 1);
+        int bytesRead = read(fd, &result.checksum, 1);
+        assert(bytesRead == 1);
+        (void)bytesRead; // Make the compiler happy when NDEBUG is set
     }
     else {
         // If all we are missing is the checksum, just assume the data is corrupt
@@ -207,7 +213,9 @@ std::vector<Darwin::CommandResult> Darwin::UART::executeBulk(const std::vector<u
     tcflush(fd, TCIFLUSH);
 
     // Write the command as usual
-    write(fd, command.data(), command.size());
+    int written = write(fd, command.data(), command.size());
+    assert(written == command.size());
+    (void)written; // Keep the compiler happy when NDEBUG is set
 
     // Read our responses for each of the packets
     for (int i = 0; i < responses; ++i) {
@@ -226,7 +234,9 @@ void Darwin::UART::executeBroadcast(const std::vector<uint8_t>& command) {
     tcflush(fd,TCIFLUSH);
 
     // Write the command as usual
-    write(fd, command.data(), command.size());
+    int written = write(fd, command.data(), command.size());
+    assert(written == command.size());
+    (void) written; // Make the compiler happy when NDEBUG is set
 
     // There are no responses for broadcast commands
 }

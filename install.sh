@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # File:   install.sh
 # Author: Trent Houliston <trent@houliston.me>
 #
@@ -18,7 +18,7 @@ else
 fi
 
 # Copy our robocup binary over
-scp robocup "darwin@$robotIP:/home/darwin/"
+scp -C robocup "darwin@$robotIP:/home/darwin/"
 
 # Overwrite configuration files
 if [ "$config" == "update" ] || [ "$config" == "u" ] ;

@@ -25,13 +25,13 @@
 namespace modules {
     namespace {
         int audioCallback(
-                void* outputBuffer, 
-                void* inputBuffer, 
-                unsigned int nBufferFrames, 
-                double streamTime, 
-                RtAudioStreamStatus status, 
+                void* outputBuffer,
+                void* inputBuffer,
+                unsigned int nBufferFrames,
+                double streamTime,
+                RtAudioStreamStatus status,
                 void* userData ) {
-            
+
             if(status) {
                 // If status is false then we've detected a stream overflow.
                 // TODO: Add some error handling here
@@ -43,17 +43,17 @@ namespace modules {
             // is actually our PowerPlant.
             auto powerPlant = (NUClear::PowerPlant*)userData;
 
-            messages::SoundChunk* chunk = new messages::SoundChunk();
+            auto chunk = std::make_unique<messages::SoundChunk>();
 
             // Sound is split up into left and right channels which are 16 bytes
             // (for the darwin) each. This means a single frame actually compromises
             // 32 bits and we need to allocate data appropriately.
             const int INTS_PER_FRAME = 2;
-            
+
             chunk->data.resize(nBufferFrames * INTS_PER_FRAME);
             chunk->data.assign(data, data + (nBufferFrames * INTS_PER_FRAME));
-            
-            powerPlant->emit(chunk);
+
+            powerPlant->emit(std::move(chunk));
 
             return 0;
         }
@@ -95,11 +95,11 @@ namespace modules {
              * be useful here.
              */
             audioContext.openStream(
-                    NULL, 
-                    &inputStreamParameters, 
-                    RTAUDIO_SINT16, 
-                    sampleRate, 
-                    &bufferFrames, 
+                    NULL,
+                    &inputStreamParameters,
+                    RTAUDIO_SINT16,
+                    sampleRate,
+                    &bufferFrames,
                     &audioCallback,
                     powerPlant
             );

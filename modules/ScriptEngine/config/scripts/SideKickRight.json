@@ -1,0 +1,223 @@
+[
+ {
+ "duration": 500,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": 0, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": 0, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 800,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.2700000107288361, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.2700000107288361, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.2700000107288361, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.2700000107288361, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 300,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.3199999928474426, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.4199999868869781, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -0.6000000238418579, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 1.399999976158142, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": -0.800000011920929, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.3199999928474426, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.4199999868869781, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 180,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.3199999928474426, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.4199999868869781, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -0.6000000238418579, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 1.399999976158142, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": -0.4000000059604645, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.3199999928474426, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.4199999868869781, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 130,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.3199999928474426, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.4199999868869781, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -0.9000000357627869, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": 0.3600001037120819, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.3199999928474426, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.4199999868869781, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 80,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.3199999928474426, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.4199999868869781, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -1.100000023841858, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": 0.5600000023841858, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.3199999928474426, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.2199999839067459, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 50,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.3199999928474426, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": -0.2800000011920929, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -1.100000023841858, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 0.6000000238418579, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": 0.4600000083446503, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.3199999928474426, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": 0.5800000429153442, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 170,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.3199999928474426, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.4199999868869781, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -1.100000023841858, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": 0.5600000023841858, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.3199999928474426, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.4199999868869781, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 400,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.3199999928474426, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.5199999809265137, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.449999988079071, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -0.800000011920929, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 100 },
+             { "id": "L_KNEE", "position": 1.399999976158142, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": -0.800000011920929, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.3199999928474426, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.4199999868869781, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 400,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0.03529017418622971, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0.0245496854186058, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": 0.1350232660770416, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.4066041707992554, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.5682452917098999, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -0.5390925407409668, "gain": 100 },
+             { "id": "R_KNEE", "position": 1.018811941146851, "gain": 100 },
+             { "id": "L_KNEE", "position": 1.167644381523132, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.55697101354599, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": -0.7012003660202026, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": -0.1442293971776962, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.4188790023326874, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 150,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0.007671776693314314, "gain": 100 },
+             { "id": "L_HIP_YAW", "position": 0.004603066015988588, "gain": 100 },
+             { "id": "R_HIP_ROLL", "position": -0.03682452812790871, "gain": 100 },
+             { "id": "L_HIP_ROLL", "position": 0.1503668278455734, "gain": 100 },
+             { "id": "R_HIP_PITCH", "position": -0.449566125869751, "gain": 100 },
+             { "id": "L_HIP_PITCH", "position": -0.4587722420692444, "gain": 100 },
+             { "id": "R_KNEE", "position": 0.7027347683906555, "gain": 100 },
+             { "id": "L_KNEE", "position": 0.7748494744300842, "gain": 100 },
+             { "id": "R_ANKLE_PITCH", "position": -0.3498330116271973, "gain": 100 },
+             { "id": "L_ANKLE_PITCH", "position": -0.3805201351642609, "gain": 100 },
+             { "id": "R_ANKLE_ROLL", "position": 0.07211469858884811, "gain": 100 },
+             { "id": "L_ANKLE_ROLL", "position": -0.08745825290679932, "gain": 100 }
+             ]
+ },
+ {
+ "duration": 450,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 80 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 80 },
+             { "id": "R_HIP_ROLL", "position": 0, "gain": 80 },
+             { "id": "L_HIP_ROLL", "position": 0, "gain": 80 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 80 },
+             { "id": "L_HIP_PITCH", "position": -0.25, "gain": 80 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 80 },
+             { "id": "L_KNEE", "position": 0.5, "gain": 80 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 80 },
+             { "id": "L_ANKLE_PITCH", "position": -0.25, "gain": 80 },
+             { "id": "R_ANKLE_ROLL", "position": 0, "gain": 80 },
+             { "id": "L_ANKLE_ROLL", "position": 0, "gain": 80 }
+             ]
+ },
+ {
+ "duration": 500,
+ "targets": [
+             { "id": "R_HIP_YAW", "position": 0, "gain": 80 },
+             { "id": "L_HIP_YAW", "position": 0, "gain": 80 },
+             { "id": "R_HIP_ROLL", "position": 0, "gain": 80 },
+             { "id": "L_HIP_ROLL", "position": 0, "gain": 80 },
+             { "id": "R_HIP_PITCH", "position": -0.25, "gain": 80 },
+             { "id": "L_HIP_PITCH", "position": -0.25, "gain": 80 },
+             { "id": "R_KNEE", "position": 0.5, "gain": 80 },
+             { "id": "L_KNEE", "position": 0.5, "gain": 80 },
+             { "id": "R_ANKLE_PITCH", "position": -0.25, "gain": 80 },
+             { "id": "L_ANKLE_PITCH", "position": -0.25, "gain": 80 },
+             { "id": "R_ANKLE_ROLL", "position": 0, "gain": 80 },
+             { "id": "L_ANKLE_ROLL", "position": 0, "gain": 80 }
+             ]
+ }
+ ]

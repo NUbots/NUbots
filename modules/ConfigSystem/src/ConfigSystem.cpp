@@ -16,27 +16,79 @@
  */
 
 #include "ConfigSystem.h"
-#include "json/Parser.h"
 
-#include <sys/inotify.h>
-#include <sys/eventfd.h>
-#include <fcntl.h>
-#include <unistd.h>
+extern "C" {
+    #include <sys/inotify.h>
+    #include <sys/eventfd.h>
+    #include <sys/stat.h>
+    #include <fcntl.h>
+    #include <dirent.h>
+    #include <unistd.h>
+}
+
 #include <fstream>
+#include <system_error>
+
+#include "json/Parser.h"
+#include "utility/strutil/strutil.h"
 
 namespace modules {
-    
+
     // Lots of space for events (definitely more then needed)
     const size_t MAX_EVENT_LEN = sizeof (inotify_event) * 1024 + 16;
 
-    messages::ConfigurationNode buildConfigurationNode(std::string filePath) {
-        
-        std::cout << "I Totally entered this function " << filePath << std::endl;
+    // Test if a passed path is a directory
+    bool isDir(const std::string& path) {
+
+        int status;
+        struct stat st_buf;
+
+        // Get the status of the file system object.
+        status = stat(path.c_str(), &st_buf);
+        if (status != 0) {
+            throw std::system_error(errno, std::system_category(), "Error checking if path is file or directory");
+        }
+
+        // Return if our varible is a directory
+        return S_ISDIR(st_buf.st_mode);
+    }
+
+    bool isDir(dirent* ent) {
+        return ent->d_type & DT_DIR;
+    }
+
+    std::vector<std::string> listContents(const std::string& path) {
+
+        auto dir = opendir(path.c_str());
+        std::vector<std::string> result;
+
+        if(dir != nullptr) {
+            for(dirent* ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
+
+                auto file = std::string(ent->d_name);
+
+                if(file == "." || file == "..") {
+                    continue;
+                }
+
+                if(isDir(ent) || utility::strutil::endsWith(file, ".json")) {
+                    result.push_back(std::string(ent->d_name));
+                }
+            }
+
+            closedir(dir);
+        }
+        else {
+            // TODO Throw an error or something
+        }
+
+        return result;
+    }
+
+    messages::ConfigurationNode buildConfigurationNode(const std::string& filePath) {
 
         // Read the data from the file into a string.
         std::ifstream data(filePath, std::ios::in);
-        
-        std::cout << "Reading file " << filePath << std::endl;
 
         // There are lots of nice ways to read a file into a string but this is one of the quickest.
         // See: http://stackoverflow.com/a/116220
@@ -49,9 +101,11 @@ namespace modules {
     ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), running(true), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
 
         // TODO get the directories file descriptor here and put it in
-        inotify_add_watch(watcherFd, BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF);
+        int rWd = inotify_add_watch(watcherFd, BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF);
 
-        on <Trigger<messages::ConfigurationConfiguration>>([this](const messages::ConfigurationConfiguration& command) {
+        // TODO recurse the base configuration path grabbing all directories and adding them to the watch
+
+        on<Trigger<messages::ConfigurationConfiguration>>([this](const messages::ConfigurationConfiguration& command) {
 
             // Check if we have already loaded this type's handler
             if (loaded.find(command.requester) == std::end(loaded)) {
@@ -64,7 +118,21 @@ namespace modules {
                 // Run our emitter to emit the initial object
                 std::string fullPath = BASE_CONFIGURATION_PATH + command.configPath;
 
-                command.emitter(this, new messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                // Check if the configuration request is a directory
+                if(isDir(fullPath)) {
+                    auto elements = listContents(fullPath);
+
+                    for(const auto& element : elements) {
+                        if(!isDir(fullPath + element)) {
+                            command.initialEmitter(this, element, messages::ConfigurationNode(buildConfigurationNode(fullPath + "/" + element)));
+                        }
+                    }
+                }
+                else {
+                    auto lastSlashIndex = fullPath.rfind('/');
+                    auto fileName = fullPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
+                    command.initialEmitter(this, fileName, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                }
             }
         });
 
@@ -81,45 +149,55 @@ namespace modules {
 
         // Zero our set
         FD_ZERO(&fdset);
-        
+
         while (running) {
             // Add our two File descriptors to the set
             FD_SET(watcherFd, &fdset);
             FD_SET(killFd, &fdset);
-            
+
             // This means wait indefinitely until something happens
             int result = select(killFd + 1, &fdset, nullptr, nullptr, nullptr);
             uint8_t buffer[MAX_EVENT_LEN];
-            
+
             // We have events (0 if timeout, n (one for ready sockets) and -1 for error)
             if(result > 0) {
                 // If we have been told to die then killFd will be set
                 if(!FD_ISSET(killFd, &fdset)) {
-                    
+
                     // Read events into our buffer
                     int length = read(watcherFd, buffer, MAX_EVENT_LEN);
-                    
+
                     // Read our events
                     for (int i = 0; i < length;) {
                         inotify_event* event = reinterpret_cast<inotify_event*>(&buffer[i]);
-                        
+
                         // If a config file was modified touched or created (not a directory)
                         if (event->mask & (IN_ATTRIB | IN_MODIFY | IN_CREATE) && !(event->mask & IN_ISDIR)) {
-                            
+
+                            // todo get our relative path
+
                             std::string path = std::string(event->name);
                             std::string fullPath = BASE_CONFIGURATION_PATH + path;
-                            
+
                             std::cout << "Reloaded " << fullPath << std::endl;
-                            
+
                             for(auto& emitter : handler[path]) {
-                                emitter(this, new messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                                emitter(this, path, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
                             }
+                        }
+                        // If a directory is created
+                        if (event->mask & (IN_CREATE | IN_ISDIR)) {
+                            // TODO Add it to our watcher
+                        }
+                        if (event->mask & (IN_DELETE_SELF | IN_ISDIR)) {
+                            // TODO If our main directory was deleted then you broke config! otherwise just the elements in it
+                            // TODO in which case remove it from our WD map
                         }
                         // If our directory was deleted then you broke the config system!
                         if (event->mask & IN_DELETE_SELF) {
                             // TODO throw an error of some sort here, the configuration system will no longer respond to events!
                         }
-                        
+
                         i += sizeof(inotify_event) + event->len;
                     }
                 }
@@ -133,7 +211,11 @@ namespace modules {
 
         // Signal the event file descriptor
         eventfd_t val = 1337;
-        write(killFd, &val, sizeof (eventfd_t));
+
+        // This hides the fact we don't use this variable (if it doesn't work who cares, we're trying to kill the system)
+        int written = write(killFd, &val, sizeof (eventfd_t));
+        assert(written == sizeof(eventfd_t));
+        (void) written; // Stop gcc from complaining about it being unused when NDEBUG is set
 
         // Close our file descriptors
         close(watcherFd);

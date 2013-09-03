@@ -53,7 +53,7 @@ namespace messages {
         }
 
         template <typename TType>
-        void add(std::string key, TType input) {
+        void add(const std::string& key, TType input) {
             if (datatype == DataType::NULLPOINTER) {
                 datatype = DataType::OBJECT;
                 value = std::shared_ptr<std::map<std::string, ConfigurationNode>>(new std::map<std::string, ConfigurationNode>());

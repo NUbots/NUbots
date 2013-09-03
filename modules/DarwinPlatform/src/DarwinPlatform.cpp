@@ -28,10 +28,10 @@ namespace modules {
         /**
          * This function is used in the static asserts to test that all the conversions work properly, it checks two
          * values are close.
-         * 
+         *
          * @param a the first value
          * @param b the second value
-         * 
+         *
          * @return if the two values are close (within 1% of eachother)
          */
         constexpr bool isClose(const int a, const int b) {
@@ -41,10 +41,10 @@ namespace modules {
         /**
          * This function is used in the static asserts to test that all the conversions work properly, it checks two
          * values are close.
-         * 
+         *
          * @param a the first value
          * @param b the second value
-         * 
+         *
          * @return if the two values are close (within 1% of eachother)
          */
         constexpr bool isClose(const float a, const float b) {
@@ -180,14 +180,24 @@ namespace modules {
         static_assert(isClose(SERVO_POSITION_INVERSE(3, SERVO_POSITION(3, 2100)), 2100),    "There is a problem with the Inverse operation for Position");
         static_assert(isClose(SERVO_POSITION_INVERSE(10, SERVO_POSITION(10, 2600)), 2600),  "There is a problem with the Inverse operation for Position");
 
+        constexpr double SPEED_CONVERSION_FACTOR = 0.005969026042 * 2;
+        //constexpr double SPEED_CONVERSION_FACTOR = 0.00596902604;
+
         /// Converts a servo speed from its signed format into radians/second
         constexpr float SERVO_SPEED(const uint8_t servoID, const uint16_t value) {
-            return direction[servoID] * SIGNBIT<10>(value) * float(value & 0x3FF) * 0.01193805208;
+            return direction[servoID] * SIGNBIT<10>(value) * float(value & 0x3FF) * SPEED_CONVERSION_FACTOR;
         }
+
         /// Converts a servo speed from radians/second to it's signed format
         constexpr uint16_t SERVO_SPEED_INVERSE(const float value) {
-            return ((value / 0.01193805208) < 0 ? -(value / 0.01193805208) : (value / 0.01193805208)) > 1023 ? 0 :
-            ((value / 0.01193805208) < 0 ? -(value / 0.01193805208) : (value / 0.01193805208));
+            return (
+                (value / SPEED_CONVERSION_FACTOR) < 0 
+                    ? - (value / SPEED_CONVERSION_FACTOR) 
+                    : (value / SPEED_CONVERSION_FACTOR)) > 1023 
+                        ? 0 
+                        : ((value / SPEED_CONVERSION_FACTOR) < 0 
+                            ? -(value / SPEED_CONVERSION_FACTOR) 
+                            : (value / SPEED_CONVERSION_FACTOR));
         }
 
         // Check that our Servo speed conversion is working properly
@@ -215,7 +225,7 @@ namespace modules {
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();
 
-            messages::DarwinSensors* sensors = new messages::DarwinSensors;
+            auto sensors = std::make_unique<messages::DarwinSensors>();
 
             /*
              CM730 Data
@@ -324,29 +334,37 @@ namespace modules {
             }
 
             // Send our nicely computed sensor data out to the world
-            emit(sensors);
+            emit(std::move(sensors));
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<messages::DarwinServoCommands>>([this](const messages::DarwinServoCommands& servos) {
+        on<Trigger<std::vector<messages::DarwinServoCommand>>>([this](const std::vector<messages::DarwinServoCommand>& commands) {
 
             std::vector<Darwin::Types::ServoValues> values;
 
             // Loop through each of our commands
-            for (const auto& command : servos.commands) {
+            for (const auto& command : commands) {
                 values.push_back({
-                    static_cast<uint8_t>(command.servoId + 1),  // The id's on the robot start with ID 1
+                    static_cast<uint8_t>(static_cast<int>(command.id) + 1),  // The id's on the robot start with ID 1
                     Convert::GAIN_INVERSE(command.dGain),
                     Convert::GAIN_INVERSE(command.iGain),
                     Convert::GAIN_INVERSE(command.pGain),
                     0,
-                    Convert::SERVO_POSITION_INVERSE(command.servoId, command.goalPosition),
-                    Convert::SERVO_SPEED_INVERSE(command.goalPosition)
+                    Convert::SERVO_POSITION_INVERSE(static_cast<int>(command.id), command.goalPosition),
+                    Convert::SERVO_SPEED_INVERSE(command.movingSpeed)
                 });
             }
 
             // Syncwrite our values
             darwin.writeServos(values);
+        });
+
+        on<Trigger<messages::DarwinServoCommand>>([this](const messages::DarwinServoCommand command) {
+            auto commandList = std::make_unique<std::vector<messages::DarwinServoCommand>>();
+            commandList->push_back(command);
+
+            // Emit it so it's captured by the reaction above
+            emit(std::move(commandList));
         });
 
         // If we get a HeadLED command then write it

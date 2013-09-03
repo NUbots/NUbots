@@ -10,6 +10,8 @@ SET(modules
     ConfigSystem
     DarwinPlatform
     DarwinCameraReader
+    DarwinMotionManager
+    ScriptEngine
     eSpeak
     PartyDarwin
     AudioInput
@@ -54,7 +56,7 @@ FOREACH(module ${modules})
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${module})
     INCLUDE_DIRECTORIES(modules/${module}/src)
-    ADD_TEST(${module}Tests modules/${module}/${module}Tests)
+    ADD_TEST(Test${module} modules/${module}/Test${module})
 ENDFOREACH()
 
 ADD_EXECUTABLE(robocup main.cpp)

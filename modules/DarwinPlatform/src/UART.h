@@ -18,6 +18,7 @@
 #ifndef DARWIN_UART_H
 #define DARWIN_UART_H
 
+#include <cassert>
 #include <unistd.h>
 #include <termios.h>
 #include <stdint.h>
@@ -79,11 +80,11 @@ namespace Darwin {
 
     /**
      * @brief Communicates with the components via the UART (through a USB TTY device)
-     * 
+     *
      * @details
      *  This class handles the communication with the hardware, It has methods that implement the ZigBee protocol used
      *    in the darwin in order to communicate with the various devices.
-     * 
+     *
      * @author Trent Houliston
      */
     class UART {
@@ -95,9 +96,9 @@ namespace Darwin {
 
         /**
          * @brief Configures our serial port to use the passed Baud rate
-         * 
+         *
          * @param baud the baud rate to use
-         * 
+         *
          * @return if the configuration was successful
          */
         bool configure(double baud);
@@ -105,25 +106,25 @@ namespace Darwin {
     public:
         /**
          * @brief Constructs a new UART instance using the passed device path as the TTY device
-         * 
+         *
          * @param name the path to the USB TTY device
          */
         explicit UART(const char* name);
 
         /**
          * @brief reads a single packet back from the uart, and returns error codes if they timeout
-         * 
+         *
          * @return The command result, or a command result with an error flag if there was an error
          */
         CommandResult readPacket();
 
         /**
          * @brief Executes a passed packet and then waits for a response, Used for single commands (read write ping)
-         * 
+         *
          * @tparam TPacket the type of packet we are executing
-         * 
+         *
          * @param command the command we are executing
-         * 
+         *
          * @return the return value from executing this command
          */
         template <typename TPacket>
@@ -136,7 +137,10 @@ namespace Darwin {
             tcflush(fd, TCIFLUSH);
 
             // Write our command to the UART
-            write(fd, &command, sizeof(TPacket));
+            int written = write(fd, &command, sizeof(TPacket));
+            assert(written == sizeof(TPacket));
+            // If compiled with NDEBUG then technically written is unused, suppress that warning
+            (void) written;
 
             // Read the packet that we get in response
             return readPacket();
@@ -144,16 +148,16 @@ namespace Darwin {
 
         /**
          * @brief This is used to execute a bulk read request.
-         * 
+         *
          * @param command the packet that we are going to send to get the response
-         * 
+         *
          * @return a vector of command results, one for each of the responding devices
          */
         std::vector<CommandResult> executeBulk(const std::vector<uint8_t>& command);
-        
+
         /**
          * @brief This is used to execute a broadcast command (to the broadcast address), these expect no response
-         * 
+         *
          * @param command the command to execute
          */
         void executeBroadcast(const std::vector<uint8_t>& command);

@@ -19,6 +19,7 @@
 #define MESSAGES_DARWINSERVOS_H
 
 #include <vector>
+#include "DarwinSensors.h"
 
 namespace messages {
 
@@ -26,19 +27,12 @@ namespace messages {
      * TODO
      */
     struct DarwinServoCommand {
-        uint8_t servoId;
+        DarwinSensors::Servo::ID id;
         float pGain;
         float iGain;
         float dGain;
         float goalPosition;
         float movingSpeed;
-    };
-
-    /**
-     * TODO this is the commands for the sensors in "Standard Space"
-     */
-    struct DarwinServoCommands {
-        std::vector<DarwinServoCommand> commands;
     };
 };
 
