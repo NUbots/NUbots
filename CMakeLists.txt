@@ -15,7 +15,9 @@ SET(modules
     eSpeak
     PartyDarwin
     AudioInput
-    NUBugger)
+    NUBugger
+    NCursesReactor
+    ScriptTuner)
 
 # Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)

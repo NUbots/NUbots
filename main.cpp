@@ -10,10 +10,9 @@
 #include "eSpeak.h"
 #include "NUBugger.h"
 #include "PartyDarwin.h"
+#include "NCursesReactor.h"
+#include "ScriptTuner.h"
 #include "AudioInput.h"
-
-#include "messages/ExecuteScript.h"
-#include "messages/ServoWaypoint.h"
 
 struct SegmentationFault : public std::exception {};
 
@@ -59,16 +58,16 @@ int main(int argc, char *argv[]) {
     signal(SIGSEGV, segfaultConverter);
 
     plant.install<modules::ConfigSystem>();
-    plant.install<modules::DarwinPlatform>();
-    plant.install<modules::DarwinCameraReader>();
+    //plant.install<modules::DarwinPlatform>();
+    //plant.install<modules::DarwinCameraReader>();
     plant.install<modules::DarwinMotionManager>();
     plant.install<modules::ScriptEngine>();
     plant.install<modules::eSpeak>();
     //plant.install<modules::AudioInput>();
     plant.install<modules::NUBugger>();
+    plant.install<modules::NCursesReactor>();
+    plant.install<modules::ScriptTuner>();
     plant.install<modules::PartyDarwin>();
-
-    plant.emit(std::make_unique<messages::ExecuteScript>("StandUpBack.json"));
 
     plant.start();
 }
