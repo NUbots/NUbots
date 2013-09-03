@@ -99,6 +99,16 @@ namespace modules {
          * @brief Returns a map of all configurable settings
          */
         std::map<std::string, DarwinCameraSetting>& getSettings();
+
+        /**
+         * @brief Returns the horizontal resolution the camera is currently set to
+         */
+        size_t getWidth() const;
+
+        /**
+         * @brief Returns the vertical resolution the camera is currently set to
+         */
+        size_t getHeight() const;
         
         /**
          * @brief This method is to be called when shutting down the system. It does cleanup on the cameras resources

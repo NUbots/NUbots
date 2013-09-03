@@ -30,7 +30,7 @@
 
 namespace modules {
 
-    DarwinCamera::DarwinCamera(const std::string& device) : fd(-1), deviceName(device) {
+    DarwinCamera::DarwinCamera(const std::string& device) : fd(-1), width(0), height(0), deviceName(device) {
     }
 
     messages::Image* DarwinCamera::getImage() {
@@ -179,6 +179,14 @@ namespace modules {
         return settings;
     }
     
+    size_t DarwinCamera::getWidth() const {
+        return width;
+    }
+
+    size_t DarwinCamera::getHeight() const {
+        return height;
+    }
+
     void DarwinCamera::closeCamera() {
         int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         // Start streaming data
