@@ -46,7 +46,7 @@ namespace modules {
         return json::Parser::parse(stream.str());
     }
 
-    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
+    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), running(true), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
 
         // TODO get the directories file descriptor here and put it in
         inotify_add_watch(watcherFd, BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF);

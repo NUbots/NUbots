@@ -71,7 +71,7 @@ namespace messages {
 
         // TODO add the stream operators
 
-        ConfigurationNode& operator [] (std::string key) {
+        ConfigurationNode& operator [] (const std::string& key) {
 
             if (datatype == DataType::NULLPOINTER) {
                 datatype = DataType::OBJECT;
@@ -88,7 +88,7 @@ namespace messages {
             }
         }
 
-        const ConfigurationNode& operator [] (std::string key) const {
+        const ConfigurationNode& operator [] (const std::string& key) const {
 
             if (datatype == DataType::OBJECT) {
                 return (*std::static_pointer_cast<std::map<std::string, ConfigurationNode>>(value))[key];

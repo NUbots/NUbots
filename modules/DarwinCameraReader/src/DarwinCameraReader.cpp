@@ -19,8 +19,8 @@
 #include "DarwinCameraReader.h"
 
 #include "DarwinCamera.h"
-#include "messages/CameraSettings.h"
 #include "messages/Image.h"
+#include "messages/Configuration.h"
 
 namespace modules {
 
@@ -40,14 +40,20 @@ namespace modules {
             camera.closeCamera();
         });
 
-        // TODO THIS GETS REPLACED WITH A CONFIGURATION WHEN IT'S MERGED IN
-        on<Trigger<messages::CameraSettings>>([this](const messages::CameraSettings& settings) {
+        on<Trigger<messages::Configuration<DarwinCameraReader>>>([this](const messages::Configuration<DarwinCameraReader>& settings) {
+            try {
+                // Recreate the camera device at the required resolution
+                camera.resetCamera(settings["imageWidth"], settings["imageHeight"]);
             
-            // TODO loop through the configuration for the camera settings
-            
-            // TODO apply the settings to the camera using the map
-            
-            //camera.applySettings(settings);
+                // Set all other camera settings
+                for(auto& setting : camera.getSettings()) {
+                    int value = settings[setting.first];
+                    setting.second.set(value);
+                }
+                std::cout << "Camera configuration applied." << std::endl;
+            } catch(const std::exception& e) {
+                std::cout << "Exception while setting camera configuration: " << e.what() << std::endl;
+            }
         });
     }
 }

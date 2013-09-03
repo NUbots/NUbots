@@ -94,6 +94,11 @@ namespace modules {
          * @param h the image's height
          */
         void resetCamera(size_t w, size_t h);
+
+        /**
+         * @brief Returns a map of all configurable settings
+         */
+        std::map<std::string, DarwinCameraSetting>& getSettings();
         
         /**
          * @brief This method is to be called when shutting down the system. It does cleanup on the cameras resources

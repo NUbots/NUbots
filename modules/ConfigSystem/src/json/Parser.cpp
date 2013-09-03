@@ -11,7 +11,7 @@ using namespace json;
 namespace {
     class ParseImpl {
         public:
-            ParseImpl(std::string input, std::vector<jsmntok_t> tokens) :
+            ParseImpl(const std::string& input, const std::vector<jsmntok_t>& tokens) :
                 input(input),
                 tokens(tokens),
                 curTok(0) {
@@ -34,7 +34,7 @@ namespace {
                         return parseString(root);
                         break;
                     case JSMN_PRIMITIVE:
-                        return parsePrimative(root);
+                        return parsePrimitive(root);
                         break;
                 }
                 std::cout << "/parseImpl " << std::endl;
@@ -51,7 +51,7 @@ namespace {
 
                     object.add(key, valnode);
                 }
-                std::cout << "/parseObject";
+                std::cout << "/parseObject" << std::endl;
                 return std::move(object);
             }
 
@@ -71,8 +71,8 @@ namespace {
                 return std::move(messages::ConfigurationNode(value));
             }
 
-            messages::ConfigurationNode parsePrimative(jsmntok_t token) {
-                // First we need to figure out the data type of the primative based
+            messages::ConfigurationNode parsePrimitive(jsmntok_t token) {
+                // First we need to figure out the data type of the primitive based
                 // on it's value.
                 std::string value = getData(token);
 
@@ -102,7 +102,7 @@ namespace {
                     }
                 }
 
-                throw std::runtime_error(std::string("Bad primative: ") + value);
+                throw std::runtime_error(std::string("Bad primitive: ") + value);
             }
 
             jsmntok_t peek() {
@@ -110,6 +110,9 @@ namespace {
             }
 
             jsmntok_t read() {
+                if (curTok == tokens.size()) {
+                    throw std::runtime_error("reached end of file while parsing json");
+                }
                 std::cout << "Reading: " << getData(tokens[curTok]) << std::endl;
                 return tokens[curTok++];
             }
@@ -120,11 +123,11 @@ namespace {
 
             std::string input;
             std::vector<jsmntok_t> tokens;
-            int curTok;
+            size_t curTok;
     };
 }
 
-messages::ConfigurationNode Parser::parse(std::string input) {
+messages::ConfigurationNode Parser::parse(const std::string& input) {
     jsmn_parser parser; 
     jsmn_init(&parser);
 
