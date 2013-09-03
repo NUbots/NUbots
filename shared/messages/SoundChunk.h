@@ -1,5 +1,5 @@
 #ifndef MESSAGES_SOUNDCHUNK_H
-#define	MESSAGES_SOUNDCHUNK_H
+#define    MESSAGES_SOUNDCHUNK_H
 
 #include <NUClear.h>
 #include <vector>
@@ -13,5 +13,5 @@ namespace messages {
     };
 }
 
-#endif	/* MODULES_SOUNDCHUNK_H */
+#endif    /* MODULES_SOUNDCHUNK_H */
 
