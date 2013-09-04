@@ -30,9 +30,7 @@
 
 namespace modules {
 
-    DarwinCamera::DarwinCamera(const std::string& device) : fd(-1), deviceName(device) {
-        // initialise the camera with default resolution
-        resetCamera(640, 480);
+    DarwinCamera::DarwinCamera(const std::string& device) : fd(-1), width(0), height(0), deviceName(device) {
     }
 
     messages::Image* DarwinCamera::getImage() {
@@ -164,7 +162,9 @@ namespace modules {
         settings.insert(std::make_pair("contrast",                DarwinCameraSetting(fd, V4L2_CID_CONTRAST)));
         settings.insert(std::make_pair("saturation",              DarwinCameraSetting(fd, V4L2_CID_SATURATION)));
         settings.insert(std::make_pair("gain",                    DarwinCameraSetting(fd, V4L2_CID_GAIN)));
-        settings.insert(std::make_pair("absoulteExposure",        DarwinCameraSetting(fd, V4L2_CID_EXPOSURE_ABSOLUTE)));
+        settings.insert(std::make_pair("autoExposure",            DarwinCameraSetting(fd, V4L2_CID_EXPOSURE_AUTO)));
+        settings.insert(std::make_pair("autoExposurePriority",    DarwinCameraSetting(fd, V4L2_CID_EXPOSURE_AUTO_PRIORITY)));
+        settings.insert(std::make_pair("absoluteExposure",        DarwinCameraSetting(fd, V4L2_CID_EXPOSURE_ABSOLUTE)));
         settings.insert(std::make_pair("powerLineFrequency",      DarwinCameraSetting(fd, V4L2_CID_POWER_LINE_FREQUENCY)));
         settings.insert(std::make_pair("sharpness",               DarwinCameraSetting(fd, V4L2_CID_SHARPNESS)));
 
@@ -173,6 +173,18 @@ namespace modules {
         if (ioctl(fd, VIDIOC_STREAMON, &command) == -1) {
             throw std::system_error(errno, std::system_category(), "Unable to start camera streaming");
         }
+    }
+
+    std::map<std::string, DarwinCameraSetting>& DarwinCamera::getSettings() {
+        return settings;
+    }
+    
+    size_t DarwinCamera::getWidth() const {
+        return width;
+    }
+
+    size_t DarwinCamera::getHeight() const {
+        return height;
     }
 
     void DarwinCamera::closeCamera() {

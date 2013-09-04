@@ -85,7 +85,7 @@ namespace modules {
         return result;
     }
 
-    messages::ConfigurationNode buildConfigurationNode(std::string filePath) {
+    messages::ConfigurationNode buildConfigurationNode(const std::string& filePath) {
 
         // Read the data from the file into a string.
         std::ifstream data(filePath, std::ios::in);
@@ -98,7 +98,7 @@ namespace modules {
         return json::Parser::parse(stream.str());
     }
 
-    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
+    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), running(true), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
 
         // TODO get the directories file descriptor here and put it in
         int rWd = inotify_add_watch(watcherFd, BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF);
@@ -203,6 +203,10 @@ namespace modules {
                 }
             }
         }
+
+        // Close our file descriptors
+        close(watcherFd);
+        close(killFd);
     }
 
     void ConfigSystem::kill() {
@@ -216,9 +220,5 @@ namespace modules {
         int written = write(killFd, &val, sizeof (eventfd_t));
         assert(written == sizeof(eventfd_t));
         (void) written; // Stop gcc from complaining about it being unused when NDEBUG is set
-
-        // Close our file descriptors
-        close(watcherFd);
-        close(killFd);
     }
 }
