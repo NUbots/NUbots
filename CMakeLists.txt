@@ -15,6 +15,7 @@ SET(modules
     eSpeak
     PartyDarwin
     AudioInput
+    BeatDetector
     NUBugger)
 
 # Set to off to ignore building tests

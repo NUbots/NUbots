@@ -11,6 +11,7 @@
 #include "NUBugger.h"
 #include "PartyDarwin.h"
 #include "AudioInput.h"
+#include "BeatDetector.h"
 
 #include "messages/ExecuteScript.h"
 #include "messages/ServoWaypoint.h"
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]) {
     //plant.install<modules::AudioInput>();
     plant.install<modules::NUBugger>();
     plant.install<modules::PartyDarwin>();
+    plant.install<modules::BeatDetector>();
 
     plant.emit(std::make_unique<messages::ExecuteScript>("StandUpBack.json"));
 
