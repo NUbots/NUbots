@@ -1,7 +1,0 @@
-# Find Curses (we need ncurses)
-SET(CURSES_NEED_NCURSES TRUE)
-FIND_PACKAGE(Curses REQUIRED)
-
-# Build our NUClear module
-NUCLEAR_MODULE(INCLUDES ${CURSES_INCLUDE_DIR}
-               LIBRARIES ${CURSES_LIBRARIES})

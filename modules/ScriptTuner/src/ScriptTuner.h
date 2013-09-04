@@ -23,6 +23,10 @@
 namespace modules {
 
     class ScriptTuner : public NUClear::Reactor {
+    private:
+        volatile bool running;
+        void run();
+        void kill();
     public:
         explicit ScriptTuner(NUClear::PowerPlant* plant);
     };

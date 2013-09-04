@@ -10,7 +10,6 @@
 #include "eSpeak.h"
 #include "NUBugger.h"
 #include "PartyDarwin.h"
-#include "NCursesReactor.h"
 #include "ScriptTuner.h"
 #include "AudioInput.h"
 
@@ -65,7 +64,6 @@ int main(int argc, char *argv[]) {
     plant.install<modules::eSpeak>();
     //plant.install<modules::AudioInput>();
     plant.install<modules::NUBugger>();
-    plant.install<modules::NCursesReactor>();
     plant.install<modules::ScriptTuner>();
     plant.install<modules::PartyDarwin>();
 

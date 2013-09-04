@@ -16,7 +16,6 @@ SET(modules
     PartyDarwin
     AudioInput
     NUBugger
-    NCursesReactor
     ScriptTuner)
 
 # Set to off to ignore building tests
