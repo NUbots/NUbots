@@ -23,7 +23,35 @@
 namespace modules {
 
     class ScriptTuner : public NUClear::Reactor {
+
     private:
+        enum Selection {
+            SCRIPTNAME       = 2,
+            FRAME            = 3,
+            DURATION         = 4,
+            HEAD_PAN         = 6,
+            HEAD_TILT        = 7,
+            R_SHOULDER_PITCH = 8,
+            L_SHOULDER_PITCH = 9,
+            R_SHOULDER_ROLL  = 10,
+            L_SHOULDER_ROLL  = 11,
+            R_ELBOW          = 12,
+            L_ELBOW          = 13,
+            R_HIP_YAW        = 14,
+            L_HIP_YAW        = 15,
+            R_HIP_ROLL       = 16,
+            L_HIP_ROLL       = 17,
+            R_HIP_PITCH      = 18,
+            L_HIP_PITCH      = 19,
+            R_KNEE           = 20,
+            L_KNEE           = 21,
+            R_ANKLE_PITCH    = 22,
+            L_ANKLE_PITCH    = 23,
+            R_ANKLE_ROLL     = 24,
+            L_ANKLE_ROLL     = 25
+        };
+
+
         volatile bool running;
         void run();
         void kill();

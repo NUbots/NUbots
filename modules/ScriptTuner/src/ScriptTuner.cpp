@@ -20,17 +20,17 @@
 #include "messages/ServoWaypoint.h"
 
 #include <ncurses.h>
+#include <sstream>
 
 namespace modules {
 
     ScriptTuner::ScriptTuner(NUClear::PowerPlant* plant) : Reactor(plant) {
 
-        on < Trigger < messages::DarwinSensors >> ([this](const messages::DarwinSensors & sensors) {
+        on<Trigger<messages::DarwinSensors>>([this](const messages::DarwinSensors& sensors) {
             // Update our curses display
         });
 
-        powerPlant->addServiceTask(
-                                   NUClear::Internal::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
+        powerPlant->addServiceTask(NUClear::Internal::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
                                                                                 std::bind(std::mem_fn(&ScriptTuner::kill), this)));
 
 
@@ -65,32 +65,7 @@ namespace modules {
 
     }
 
-    enum class Selection {
 
-        SCRIPTNAME,
-        FRAME,
-        DURATION,
-        HEAD_PAN,
-        HEAD_TILT,
-        R_SHOULDER_PITCH,
-        L_SHOULDER_PITCH,
-        R_SHOULDER_ROLL,
-        L_SHOULDER_ROLL,
-        R_ELBOW,
-        L_ELBOW,
-        R_HIP_YAW,
-        L_HIP_YAW,
-        R_HIP_ROLL,
-        L_HIP_ROLL,
-        R_HIP_PITCH,
-        L_HIP_PITCH,
-        R_KNEE,
-        L_KNEE,
-        R_ANKLE_PITCH,
-        L_ANKLE_PITCH,
-        R_ANKLE_ROLL,
-        L_ANKLE_ROLL
-    };
 
     void ScriptTuner::run() {
 
@@ -116,9 +91,9 @@ namespace modules {
         attroff(A_BOLD);
 
         // Top sections
-        mvprintw(2, 2, "Script: NEW");
-        mvprintw(3, 2, "Frames: 1");
-        mvprintw(4, 2, "Duration: 1000");
+        mvprintw(SCRIPT_NAME, 2, "Script: NEW");
+        mvprintw(FRAMES, 2, "Frames: 1");
+        mvprintw(DURATION, 2, "Duration: 1000");
 
         // Each motor
         const char* motors[] = {
@@ -161,6 +136,7 @@ namespace modules {
         // Setup our state variables
         Selection selection = Selection::SCRIPTNAME;
         bool editing;
+        std::stringstream chars;
 
         // Now we just loop forever
         while (running) {
@@ -174,20 +150,36 @@ namespace modules {
                     case KEY_ENTER:
                         // Save the value
                         break;
+                    default:
+                        // Append this value to our string we are building
+                        // Echo this to the display
+                        break;
                 }
             }
             else {
                 // This is our normal mode
                 switch(ch) {
-                    // Up down selection
-                    case KEY_UP:
-                    case KEY_DOWN:
-                    // Left right frame
-                    case KEY_LEFT:
-                    case KEY_RIGHT:
-                    case 'n': // New frame after
-                    case 'N': // New frame before
-                    case 'd': // Delete frame
+                    case KEY_UP:        // Change selection up
+                        break;
+                    case KEY_DOWN:      // Change selection down
+                        break;
+                    case KEY_LEFT:      // Change selection left
+                        break;
+                    case KEY_RIGHT:     // Change selection right
+                        break;
+                    case KEY_ENTER:     // Edit selected field
+                        break;
+                    case KEY_SPACE:     // Toggle lock mode
+                        break;
+                    case '.':           // Move right a frame
+                        break;
+                    case ',':           // Move left a frame
+                        break;
+                    case 'n':           // New frame after
+                        break;
+                    case 'N':           // New frame before
+                        break;
+                    case 'd':           // Delete frame
                         break;
                 }
             }
