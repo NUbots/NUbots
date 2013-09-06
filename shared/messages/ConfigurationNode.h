@@ -9,7 +9,7 @@
 
 namespace messages {
     class ConfigurationNode {
-    private:
+    public:
         enum class DataType {
             STRING,
             INTEGER,
@@ -18,7 +18,9 @@ namespace messages {
             ARRAY,
             OBJECT,
             NULLPOINTER
-        } datatype;
+        }    
+    private:
+        DataType datatype;
 
         std::shared_ptr<void> value;
 
@@ -35,6 +37,10 @@ namespace messages {
         template <typename TType>
         ConfigurationNode(TType source) {
             *this = std::move(ConfigurationNode::ConvertNode<TType>::makeNode(source));
+        }
+
+        DataType nativeType() {
+            return datatype;
         }
 
         template <typename TType>
