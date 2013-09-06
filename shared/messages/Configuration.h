@@ -48,6 +48,11 @@ namespace messages {
         ConfigurationNode config;
     };
 
+    struct SaveConfiguration {
+        std::string configPath;
+        ConfigurationNode config;
+    };
+
     // TODO this is used to tell the config system what to do
     struct ConfigurationConfiguration {
         std::type_index requester;
