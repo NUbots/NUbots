@@ -24,10 +24,50 @@
 
 namespace modules {
 
-    ScriptTuner::ScriptTuner(NUClear::PowerPlant* plant) : Reactor(plant) {
+    enum class Command {
+        LockServo
+    };
+
+    template <enum Command command>
+    struct ScriptTunerCommand {
+    };
+
+    ScriptTuner::ScriptTuner(NUClear::PowerPlant* plant) : Reactor(plant),
+            frame(0),
+            selection(0),
+            angleOrGain(true),
+            editing(false),
+            running(true) {
+
+        // Add a blank frame to start with
+        script.frames.emplace_back();
 
         on<Trigger<messages::DarwinSensors>>([this](const messages::DarwinSensors& sensors) {
             // Update our curses display
+        });
+
+        // TODO REMOVE Hackidy to get it to do what i want
+        emit(std::make_unique<messages::DarwinSensors>());
+
+        on<Trigger<ScriptTunerCommand<Command::LockServo>>, With<messages::DarwinSensors>>([this](const ScriptTunerCommand<Command::LockServo>&, const messages::DarwinSensors& sensors) {
+
+            auto id = selection < 2 ? 18 + selection : selection - 2;
+
+            messages::Script::Frame::Target target;
+
+            target.id = static_cast<messages::DarwinSensors::Servo::ID>(id);
+            target.position = sensors.servo[id].presentPosition;
+            target.gain = 100;
+
+            script.frames[frame].targets.push_back(target);
+
+            // Emit a waypoint so that the motor will go rigid at this angle
+            auto waypoint = std::make_unique<messages::ServoWaypoint>();
+            waypoint->time = NUClear::clock::now();
+            waypoint->id = target.id;
+            waypoint->gain = target.gain;
+            waypoint->position = target.position;
+            emit(std::move(waypoint));
         });
 
         powerPlant->addServiceTask(NUClear::Internal::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
@@ -80,7 +120,86 @@ namespace modules {
         // Hide the cursor
         curs_set(false);
 
-        // Build our window
+        // Setup our state variables
+        std::stringstream chars;
+
+        // Build our initial GUI
+        refreshView();
+
+        // Now we just loop forever
+        while (running) {
+            int ch = getch();
+
+            if(editing) {
+                switch(ch) {
+                    case KEY_EXIT:
+                        chars.str("");
+                        // stop editing without saving
+                        break;
+                    case KEY_ENTER:
+                        chars.str("");
+                        // Save the value
+                        break;
+                    default:
+                        chars << static_cast<char>(ch);
+                        // Append this value to our string we are building
+                        // Echo this to the display
+                        break;
+                }
+            }
+            else {
+                // This is our normal mode
+                switch(ch) {
+                    case KEY_UP:        // Change selection up
+                        selection = selection == 0 ? 19 : selection - 1;
+                        break;
+                    case KEY_DOWN:      // Change selection down
+                        selection = (selection + 1) % 20;
+                        break;
+                    case 9:             // Swap between angle and gain
+                    case KEY_LEFT:      // Swap between angle and gain
+                    case KEY_RIGHT:     // Swap between angle and gain
+                        angleOrGain = !angleOrGain;
+                        break;
+                    case ',':           // Move left a frame
+                        frame = frame == 0 ? frame : frame - 1;
+                        break;
+                    case '.':           // Move right a frame
+                        frame = frame == script.frames.size() - 1 ? frame : frame + 1;
+                        break;
+                    case KEY_ENTER:     // Edit selected field
+                        editSelection();
+                        break;
+                    case ' ':           // Toggle lock mode
+                        toggleLockMotor();
+                        break;
+                    case 'S':           // Edit the script we are using
+                        editTargetScript();
+                        break;
+                    case 'D':           // Edit this frames duration
+                        editDuration();
+                        break;
+                    case 'n':           // New frame after
+                        newFrameAfter();
+                        break;
+                    case 'N':           // New frame before
+                        newFrameBefore();
+                        break;
+                    case 'd':           // Delete frame
+                        deleteFrame();
+                        break;
+                }
+
+                // Update whatever visual changes we made
+                refreshView();
+            }
+        }
+    }
+
+    void ScriptTuner::refreshView() {
+
+        // Clear our window
+        erase();
 
         // Outer box
         box(stdscr, 0, 0);
@@ -91,98 +210,143 @@ namespace modules {
         attroff(A_BOLD);
 
         // Top sections
-        mvprintw(SCRIPT_NAME, 2, "Script: NEW");
-        mvprintw(FRAMES, 2, "Frames: 1");
-        mvprintw(DURATION, 2, "Duration: 1000");
+        mvprintw(2, 2, "Script: %s", "Script Name Here");   // Output our scripts name
+        mvprintw(3, 2, "Frames:");  // The frames section is filled out after this
+        mvprintw(4, 2, "Duration: %d", // Output the selected frames duration
+                 std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
+
+        // Output all of our frame numbers and highlight the selected frame
+        move(3, 10);
+        for(size_t i = 0; i < script.frames.size(); ++i) {
+            if(i == frame) {
+                // Turn on highlighting to show this frame is selected
+                attron(A_STANDOUT);
+            }
+            printw(std::to_string(i + 1).c_str());
+            if(i == frame) {
+                // Turn off highlighting
+                attroff(A_STANDOUT);
+            }
+            printw(" ");
+        }
 
         // Each motor
-        const char* motors[] = {
-                                "Head Pan",
-                                "Head Tilt",
-                                "Right Shoulder Pitch",
-                                "Left Shoulder Pitch",
-                                "Right Shoulder Roll",
-                                "Left Shoulder Roll",
-                                "Right Elbow",
-                                "Left Elbow",
-                                "Right Hip Yaw",
-                                "Left Hip Yaw",
-                                "Right Hip Roll",
-                                "Left Hip Roll",
-                                "Right Hip Pitch",
-                                "Left Hip Pitch",
-                                "Right Knee",
-                                "Left Knee",
-                                "Right Ankle Pitch",
-                                "Left Ankle Pitch",
-                                "Right Ankle Roll",
-                                "Left Ankle Roll"
-        };
-        for (int i = 0; i < 20; ++i) {
+        const char* MOTOR_NAMES[] = {"Head Pan",
+                                     "Head Tilt",
+                                     "Right Shoulder Pitch",
+                                     "Left Shoulder Pitch",
+                                     "Right Shoulder Roll",
+                                     "Left Shoulder Roll",
+                                     "Right Elbow",
+                                     "Left Elbow",
+                                     "Right Hip Yaw",
+                                     "Left Hip Yaw",
+                                     "Right Hip Roll",
+                                     "Left Hip Roll",
+                                     "Right Hip Pitch",
+                                     "Left Hip Pitch",
+                                     "Right Knee",
+                                     "Left Knee",
+                                     "Right Ankle Pitch",
+                                     "Left Ankle Pitch",
+                                     "Right Ankle Roll",
+                                     "Left Ankle Roll"};
 
-            mvprintw(i + 6, 2, "L");
+        // Loop through all our motors
+        for (size_t i = 0; i < 20; ++i) {
+            // Everything defaults to unlocked, we add locks as we find them
+            mvprintw(i + 6, 2, "U");
+
+            // Output the motor name
             attron(A_BOLD);
-            mvprintw(i + 6, 4, motors[i]);
+            mvprintw(i + 6, 4, MOTOR_NAMES[i]);
             attroff(A_BOLD);
 
-
-            mvprintw(i + 6, 26, "Angle: 0.000  Gain: 0.0");
+            // Everything defaults to 0 angle and gain (unless we find one)
+            mvprintw(i + 6, 26, "Angle: -.---  Gain: ---.-");
         }
+
+        for(auto& target : script.frames[frame].targets) {
+            // Output that this frame is locked (we shuffle the head to the top of the list)
+            mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 2, "L");
+
+            // Output this frames gain and angle
+            mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 26, "Angle: %.3f  Gain: %5.1f", target.position, target.gain);
+        }
+
+        // Highlight our selected point
+        mvchgat(selection + 6, angleOrGain ? 26 : 40, angleOrGain ? 12 : 9, A_STANDOUT, 0, nullptr);
 
         // We finished building
         refresh();
+    }
 
+    void ScriptTuner::editSelection() {
+        // Go into editing mode
+        // Store what we are editing so we can save it after
+    }
 
-        // Setup our state variables
-        Selection selection = Selection::SCRIPTNAME;
-        bool editing;
-        std::stringstream chars;
+    void ScriptTuner::toggleLockMotor() {
 
-        // Now we just loop forever
-        while (running) {
-            int ch = getch();
+        // This finds if we have this particular motor stored in the frame
+        auto targetFinder = [=](const messages::Script::Frame::Target& target) {
+                                    return (static_cast<size_t>(target.id) + 2) % 20 == selection;
+        };
 
-            if(editing) {
-                switch(ch) {
-                    case KEY_EXIT:
-                        // stop editing without saving
-                        break;
-                    case KEY_ENTER:
-                        // Save the value
-                        break;
-                    default:
-                        // Append this value to our string we are building
-                        // Echo this to the display
-                        break;
-                }
-            }
-            else {
-                // This is our normal mode
-                switch(ch) {
-                    case KEY_UP:        // Change selection up
-                        break;
-                    case KEY_DOWN:      // Change selection down
-                        break;
-                    case KEY_LEFT:      // Change selection left
-                        break;
-                    case KEY_RIGHT:     // Change selection right
-                        break;
-                    case KEY_ENTER:     // Edit selected field
-                        break;
-                    case KEY_SPACE:     // Toggle lock mode
-                        break;
-                    case '.':           // Move right a frame
-                        break;
-                    case ',':           // Move left a frame
-                        break;
-                    case 'n':           // New frame after
-                        break;
-                    case 'N':           // New frame before
-                        break;
-                    case 'd':           // Delete frame
-                        break;
-                }
-            }
+        // See if we have this target in our frame
+        auto it = std::find_if(std::begin(script.frames[frame].targets),
+                               std::end(script.frames[frame].targets),
+                               targetFinder);
+
+        // If we don't then save our current motor position as the position
+        if(it == std::end(script.frames[frame].targets)) {
+
+            emit<Scope::DIRECT>(std::make_unique<ScriptTunerCommand<Command::LockServo>>());
+        }
+        else {
+            // Remove this frame
+            script.frames[frame].targets.erase(it);
+
+            // Emit a waypoint so that the motor will turn off gain (go limp)
+            auto waypoint = std::make_unique<messages::ServoWaypoint>();
+            waypoint->time = NUClear::clock::now();
+            waypoint->id = static_cast<messages::DarwinSensors::Servo::ID>(selection < 2 ? 18 + selection : selection - 2);
+            waypoint->gain = 0;
+            waypoint->position = 0;
+            emit(std::move(waypoint));
+        }
+    }
+
+    void ScriptTuner::editTargetScript() {
+        // Start editing our script
+    }
+
+    void ScriptTuner::editDuration() {
+        // Start editing our duration
+    }
+
+    void ScriptTuner::newFrameBefore() {
+        // Make a new frame before our current with our current set of motor angles and unlocked/locked status
+        auto newFrame = script.frames[frame];
+        script.frames.insert(script.frames.begin() + frame, newFrame);
+    }
+
+    void ScriptTuner::newFrameAfter() {
+        // Make a new frame with our current set of motor angles and unlocked/locked status
+        auto newFrame = script.frames[frame];
+        script.frames.insert(script.frames.begin() + frame + 1, newFrame);
+    }
+
+    void ScriptTuner::deleteFrame() {
+        // Delete our current frame and go to the one before this one, if this is the last frame then ignore
+        if(script.frames.size() > 1) {
+            script.frames.erase(std::begin(script.frames) + frame);
+            frame = frame < script.frames.size() ? frame : frame - 1;
+        }
+        else {
+            script.frames.erase(std::begin(script.frames));
+            script.frames.emplace_back();
+            frame = 0;
         }
     }
 
