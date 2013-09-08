@@ -5,7 +5,7 @@ namespace modules {
 namespace json {
     class Parser {
         public:
-            static messages::ConfigurationNode parse(std::string input); 
+            static messages::ConfigurationNode parse(const std::string& input); 
     };
 }
 }

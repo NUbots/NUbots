@@ -142,7 +142,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
 
     // We now are now waiting for 4 bytes
     timeout.tv_usec = BYTE_WAIT * sizeof(Header);
-    uint8_t headerBytes[sizeof(Header)];
+    uint8_t* headerBytes = reinterpret_cast<uint8_t*>(&result.header);
     for (size_t done = 0; done < sizeof(Header);) {
         if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
 
@@ -153,9 +153,6 @@ Darwin::CommandResult Darwin::UART::readPacket() {
             return result;
         }
     }
-
-    // Make our Header object
-    result.header = *reinterpret_cast<Header*>(headerBytes);
 
     // Here we adjust our "length" to mean the length of the payload rather then the length of bytes after the length
     int length = result.header.length - 2;
@@ -192,6 +189,7 @@ Darwin::CommandResult Darwin::UART::readPacket() {
     // Validate our checksum
     if (result.checksum != calculateChecksum(result)) {
         CommandResult result;
+        result.checksum = 0; // GCC doesn't like that this isn't initalized
         result.header.errorcode |= ErrorCode::CORRUPT_DATA;
         return result;
     }

@@ -1,6 +1,7 @@
 #ifndef MESSAGES_IMAGE_H
 #define MESSAGES_IMAGE_H
 
+#include <cstdint>
 #include <memory>
 
 namespace messages {
