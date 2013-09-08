@@ -25,20 +25,22 @@ namespace modules {
 
     class ScriptTuner : public NUClear::Reactor {
     private:
+        std::string scriptName;
         messages::Script script;
         size_t frame;
         size_t selection;
         bool angleOrGain;
-        bool editing;
 
         void refreshView();
-        
-        void editSelection();
-        void toggleLockMotor();
-        void editTargetScript();
+
+        std::string userInput();
+        void loadScript();
+        void saveScript();
         void editDuration();
-        void newFrameAfter();
-        void newFrameBefore();
+        void editSelection();
+
+        void toggleLockMotor();
+        void newFrame();
         void deleteFrame();
 
         volatile bool running;

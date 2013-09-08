@@ -49,7 +49,7 @@ namespace messages {
     };
 
     struct SaveConfiguration {
-        std::string configPath;
+        std::string path;
         ConfigurationNode config;
     };
 

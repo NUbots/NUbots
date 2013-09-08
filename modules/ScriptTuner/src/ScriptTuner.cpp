@@ -16,6 +16,7 @@
  */
 
 #include "ScriptTuner.h"
+#include "messages/Configuration.h"
 #include "messages/DarwinSensors.h"
 #include "messages/ServoWaypoint.h"
 
@@ -24,32 +25,22 @@
 
 namespace modules {
 
-    enum class Command {
-        LockServo
-    };
-
-    template <enum Command command>
-    struct ScriptTunerCommand {
-    };
+    struct LockServo {};
 
     ScriptTuner::ScriptTuner(NUClear::PowerPlant* plant) : Reactor(plant),
+            scriptName("NEW SCRIPT"),
             frame(0),
             selection(0),
             angleOrGain(true),
-            editing(false),
             running(true) {
 
         // Add a blank frame to start with
         script.frames.emplace_back();
 
-        on<Trigger<messages::DarwinSensors>>([this](const messages::DarwinSensors& sensors) {
-            // Update our curses display
-        });
-
         // TODO REMOVE Hackidy to get it to do what i want
         emit(std::make_unique<messages::DarwinSensors>());
 
-        on<Trigger<ScriptTunerCommand<Command::LockServo>>, With<messages::DarwinSensors>>([this](const ScriptTunerCommand<Command::LockServo>&, const messages::DarwinSensors& sensors) {
+        on<Trigger<LockServo>, With<messages::DarwinSensors>>([this](const LockServo&, const messages::DarwinSensors& sensors) {
 
             auto id = selection < 2 ? 18 + selection : selection - 2;
 
@@ -72,40 +63,7 @@ namespace modules {
 
         powerPlant->addServiceTask(NUClear::Internal::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
                                                                                 std::bind(std::mem_fn(&ScriptTuner::kill), this)));
-
-
-        /*
-         *                      SCRIPT TUNER
-         * Script   Script name
-         * FRAME 1 2 3 4 5 6 7 8 9 10
-         * [Run] [Step]
-         * Duration: 1000
-         *
-         * U Head Pan               0.00 radians
-         * U Head Tilt              0.00 radians
-         * L Right Shoulder Pitch   0.00 radians
-         * U Left Shoulder Pitch    0.00 radians
-         * L Right Shoulder Roll    0.00 radians
-         * L Left Shoulder Roll     0.00 radians
-         * L Right Elbow            0.00 radians
-         * L Left Elbow             0.00 radians
-         * L Right Hip Yaw          0.00 radians
-         * L Left Hip Yaw           0.00 radians
-         * L Right Hip Roll         0.00 radians
-         * L Left Hip Roll          0.00 radians
-         * L Right Hip Pitch        0.00 radians
-         * L Left Hip Pitch         0.00 radians
-         * L Right Knee             0.00 radians
-         * L Left Knee              0.00 radians
-         * L Right Ankle Pitch      0.00 radians
-         * L Left Ankle Pitch       0.00 radians
-         * L Right Ankle Roll       0.00 radians
-         * L Left Ankle Roll        0.00 radians
-         */
-
     }
-
-
 
     void ScriptTuner::run() {
 
@@ -120,79 +78,56 @@ namespace modules {
         // Hide the cursor
         curs_set(false);
 
-        // Setup our state variables
-        std::stringstream chars;
-
         // Build our initial GUI
         refreshView();
 
         // Now we just loop forever
         while (running) {
-            int ch = getch();
-
-            if(editing) {
-                switch(ch) {
-                    case KEY_EXIT:
-                        chars.str("");
-                        // stop editing without saving
-                        break;
-                    case KEY_ENTER:
-                        chars.str("");
-                        // Save the value
-                        break;
-                    default:
-                        chars << static_cast<char>(ch);
-                        // Append this value to our string we are building
-                        // Echo this to the display
-                        break;
-                }
+            // Get the character the user has typed
+            switch(getch()) {
+                case KEY_UP:        // Change selection up
+                    selection = selection == 0 ? 19 : selection - 1;
+                    break;
+                case KEY_DOWN:      // Change selection down
+                    selection = (selection + 1) % 20;
+                    break;
+                case 9:             // Swap between angle and gain
+                case KEY_LEFT:      // Swap between angle and gain
+                case KEY_RIGHT:     // Swap between angle and gain
+                    angleOrGain = !angleOrGain;
+                    break;
+                case ',':           // Move left a frame
+                    frame = frame == 0 ? frame : frame - 1;
+                    break;
+                case '.':           // Move right a frame
+                    frame = frame == script.frames.size() - 1 ? frame : frame + 1;
+                    break;
+                case '\n':          // Edit selected field
+                case KEY_ENTER:     // Edit selected field
+                    editSelection();
+                    break;
+                case ' ':           // Toggle lock mode
+                    toggleLockMotor();
+                    break;
+                case 'L':           // Load script
+                    loadScript();
+                    break;
+                case 'S':           // Save the current script
+                    saveScript();
+                    break;
+                case 'T':           // Edit this frames duration
+                    editDuration();
+                    break;
+                case 'N':           // New frame
+                    newFrame();
+                    break;
+                case 'D':           // Delete frame
+                    deleteFrame();
+                    break;
             }
-            else {
-                // This is our normal mode
-                switch(ch) {
-                    case KEY_UP:        // Change selection up
-                        selection = selection == 0 ? 19 : selection - 1;
-                        break;
-                    case KEY_DOWN:      // Change selection down
-                        selection = (selection + 1) % 20;
-                        break;
-                    case 9:             // Swap between angle and gain
-                    case KEY_LEFT:      // Swap between angle and gain
-                    case KEY_RIGHT:     // Swap between angle and gain
-                        angleOrGain = !angleOrGain;
-                        break;
-                    case ',':           // Move left a frame
-                        frame = frame == 0 ? frame : frame - 1;
-                        break;
-                    case '.':           // Move right a frame
-                        frame = frame == script.frames.size() - 1 ? frame : frame + 1;
-                        break;
-                    case KEY_ENTER:     // Edit selected field
-                        editSelection();
-                        break;
-                    case ' ':           // Toggle lock mode
-                        toggleLockMotor();
-                        break;
-                    case 'S':           // Edit the script we are using
-                        editTargetScript();
-                        break;
-                    case 'D':           // Edit this frames duration
-                        editDuration();
-                        break;
-                    case 'n':           // New frame after
-                        newFrameAfter();
-                        break;
-                    case 'N':           // New frame before
-                        newFrameBefore();
-                        break;
-                    case 'd':           // Delete frame
-                        deleteFrame();
-                        break;
-                }
 
-                // Update whatever visual changes we made
-                refreshView();
-            }
+            // Update whatever visual changes we made
+            refreshView();
         }
     }
 
@@ -210,7 +145,7 @@ namespace modules {
         attroff(A_BOLD);
 
         // Top sections
-        mvprintw(2, 2, "Script: %s", "Script Name Here");   // Output our scripts name
+        mvprintw(2, 2, "Script: %s", scriptName.c_str());   // Output our scripts name
         mvprintw(3, 2, "Frames:");  // The frames section is filled out after this
         mvprintw(4, 2, "Duration: %d", // Output the selected frames duration
                  std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
@@ -263,7 +198,7 @@ namespace modules {
             attroff(A_BOLD);
 
             // Everything defaults to 0 angle and gain (unless we find one)
-            mvprintw(i + 6, 26, "Angle: -.---  Gain: ---.-");
+            mvprintw(i + 6, 26, "Angle:  -.---  Gain: ---.-");
         }
 
         for(auto& target : script.frames[frame].targets) {
@@ -271,19 +206,14 @@ namespace modules {
             mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 2, "L");
 
             // Output this frames gain and angle
-            mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 26, "Angle: %.3f  Gain: %5.1f", target.position, target.gain);
+            mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 26, "Angle: %+.3f  Gain: %5.1f", target.position, target.gain);
         }
 
         // Highlight our selected point
-        mvchgat(selection + 6, angleOrGain ? 26 : 40, angleOrGain ? 12 : 9, A_STANDOUT, 0, nullptr);
+        mvchgat(selection + 6, angleOrGain ? 26 : 41, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
 
         // We finished building
         refresh();
-    }
-
-    void ScriptTuner::editSelection() {
-        // Go into editing mode
-        // Store what we are editing so we can save it after
     }
 
     void ScriptTuner::toggleLockMotor() {
@@ -301,7 +231,7 @@ namespace modules {
         // If we don't then save our current motor position as the position
         if(it == std::end(script.frames[frame].targets)) {
 
-            emit<Scope::DIRECT>(std::make_unique<ScriptTunerCommand<Command::LockServo>>());
+            emit<Scope::DIRECT>(std::make_unique<LockServo>());
         }
         else {
             // Remove this frame
@@ -317,24 +247,10 @@ namespace modules {
         }
     }
 
-    void ScriptTuner::editTargetScript() {
-        // Start editing our script
-    }
-
-    void ScriptTuner::editDuration() {
-        // Start editing our duration
-    }
-
-    void ScriptTuner::newFrameBefore() {
+    void ScriptTuner::newFrame() {
         // Make a new frame before our current with our current set of motor angles and unlocked/locked status
         auto newFrame = script.frames[frame];
         script.frames.insert(script.frames.begin() + frame, newFrame);
-    }
-
-    void ScriptTuner::newFrameAfter() {
-        // Make a new frame with our current set of motor angles and unlocked/locked status
-        auto newFrame = script.frames[frame];
-        script.frames.insert(script.frames.begin() + frame + 1, newFrame);
     }
 
     void ScriptTuner::deleteFrame() {
@@ -347,6 +263,150 @@ namespace modules {
             script.frames.erase(std::begin(script.frames));
             script.frames.emplace_back();
             frame = 0;
+        }
+    }
+
+    std::string ScriptTuner::userInput() {
+        // Read characters until we see either esc or enter
+        std::stringstream chars;
+
+        // Keep reading until our termination case is reached
+        while(true) {
+            auto ch = getch();
+            switch(ch) {
+                case 27:
+                    return "";
+                case '\n':
+                case KEY_ENTER:
+                    return chars.str();
+                    break;
+                default:
+                    chars << static_cast<char>(ch);
+                    addch(ch);
+                    break;
+            }
+        }
+    }
+
+    void ScriptTuner::loadScript() {
+        // Move to the correct position and erase the current text
+        move(2, 10);
+        for(size_t i = 0; i < scriptName.size(); ++i) addch(' ');
+        move(2, 10);
+
+        std::string result = userInput();
+
+        if(!result.empty()) {
+            auto save = std::make_unique<messages::SaveConfiguration>();
+            save->path = "scripts/" + result;
+            save->config = script;
+            emit(std::move(save));
+            // TODO save the script here
+            scriptName = result;
+        }
+    }
+
+    void ScriptTuner::saveScript() {
+        // Move to the correct position and erase the current text
+        move(2, 10);
+        for(size_t i = 0; i < scriptName.size(); ++i) addch(' ');
+        move(2, 10);
+
+        std::string result = userInput();
+
+        if(!result.empty()) {
+            // TODO save the script here
+            scriptName = result;
+        }
+    }
+
+    void ScriptTuner::editDuration() {
+
+        // Move to the correct position and erase the old duration
+        move(4, 12);
+        for(int i = 0; i < 10; ++i) {
+            addch(' ');
+        }
+        move(4, 12);
+
+        // Get the users input
+        std::string result = userInput();
+
+        // If we have a result
+        if(!result.empty()) {
+            try {
+                int num = stoi(result);
+                script.frames[frame].duration = std::chrono::milliseconds(num);
+            }
+            // If it's not a number then ignore and beep
+            catch(std::invalid_argument) {
+                beep();
+            }
+        }
+    }
+
+    void ScriptTuner::editSelection() {
+
+        // Erase our old text
+        mvprintw(selection + 6, angleOrGain ? 33 : 46, "      ");
+
+        // Move to our point
+        move(selection + 6, angleOrGain ? 33 : 46);
+
+        // Get the users input
+        std::string result = userInput();
+
+        // If we have a result
+        if(!result.empty()) {
+            try {
+                double num = stod(result);
+
+                // This finds if we have this particular motor stored in the frame
+                auto targetFinder = [=](const messages::Script::Frame::Target& target) {
+                                            return (static_cast<size_t>(target.id) + 2) % 20 == selection;
+                };
+
+                // See if we have this target in our frame
+                auto it = std::find_if(std::begin(script.frames[frame].targets),
+                                       std::end(script.frames[frame].targets),
+                                       targetFinder);
+
+                // If we don't have this frame
+                if(it == std::end(script.frames[frame].targets)) {
+                    it = script.frames[frame].targets.emplace(std::end(script.frames[frame].targets));
+                    auto id = selection < 2 ? 18 + selection : selection - 2;
+                    it->id = static_cast<messages::DarwinSensors::Servo::ID>(id);
+                    it->position = 0;
+                    it->gain = 0;
+                }
+
+                // If we are entering an angle
+                if (angleOrGain) {
+
+                    // Normalize our angle to be between -pi and pi
+                    num = fmod(num + M_PI, M_PI * 2);
+                    if (num < 0)
+                        num += M_PI * 2;
+                    num -= M_PI;
+
+                    it->position = num;
+                    // Convert our angle to be between -pi and pi
+                }
+                // If it is a gain
+                else {
+                    if(num >= 0 && num <= 100) {
+                        it->gain = num;
+                    }
+                    else {
+                        beep();
+                    }
+                    // Check if the value is < 0 or > 100
+                }
+            }
+            // If it's not a number then ignore and beep
+            catch(std::invalid_argument) {
+                beep();
+            }
         }
     }
 
