@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <stdexcept>
 
 namespace messages {
     class ConfigurationNode {
@@ -18,7 +19,7 @@ namespace messages {
             ARRAY,
             OBJECT,
             NULLPOINTER
-        }    
+        };
     private:
         DataType datatype;
 
@@ -39,7 +40,7 @@ namespace messages {
             *this = std::move(ConfigurationNode::ConvertNode<TType>::makeNode(source));
         }
 
-        DataType nativeType() {
+        DataType nativeType() const {
             return datatype;
         }
 
