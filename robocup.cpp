@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
     config.threadCount = 4;
 
-    NUClear::PowerPlant plant(config);
+    NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
     powerplant = &plant;
 
     // If we get interrupted (ctrl c) then tell the system to shutdown gracefully, on the second time just kill it
