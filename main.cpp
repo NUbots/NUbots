@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
     signal(SIGSEGV, segfaultConverter);
 
     plant.install<modules::ConfigSystem>();
-    //plant.install<modules::DarwinPlatform>();
-    //plant.install<modules::DarwinCameraReader>();
+    plant.install<modules::DarwinPlatform>();
+    plant.install<modules::DarwinCameraReader>();
     plant.install<modules::DarwinMotionManager>();
     plant.install<modules::ScriptEngine>();
     plant.install<modules::eSpeak>();

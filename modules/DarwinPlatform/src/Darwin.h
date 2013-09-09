@@ -132,7 +132,15 @@ namespace Darwin {
         /// The Left Foot FSR
         FSR lFSR;
 
-    public:
+        /**
+         * @brief Gets the darwin device with the given sensor id
+         *
+         * @param id the ID of the device to get (e.g. 200 for the CM730)
+         *
+         * @return the DarwinDevice object that controls this id
+         */
+        DarwinDevice& operator [](int id);
+
         /**
          * @brief Constructs a new Darwin instance and sets up communication with the CM730.
          *
