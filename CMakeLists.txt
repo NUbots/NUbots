@@ -12,11 +12,13 @@ SET(modules
     DarwinCameraReader
     DarwinMotionManager
     ScriptEngine
+    ScriptTuner
+    ScriptRunner
     eSpeak
     PartyDarwin
     AudioInput
     NUBugger
-    ScriptTuner)
+)
 
 # Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)
@@ -60,7 +62,12 @@ FOREACH(module ${modules})
     ADD_TEST(Test${module} modules/${module}/Test${module})
 ENDFOREACH()
 
-ADD_EXECUTABLE(robocup main.cpp)
+ADD_EXECUTABLE(robocup robocup.cpp)
 TARGET_LINK_LIBRARIES(robocup
+    ${NUBOTS_SHARED_LIBRARIES}
+    ${modules})
+
+ADD_EXECUTABLE(scriptrunner scriptrunner.cpp)
+TARGET_LINK_LIBRARIES(scriptrunner
     ${NUBOTS_SHARED_LIBRARIES}
     ${modules})
