@@ -2,10 +2,11 @@
 #define MESSAGES_CONFIGURATION_H_
 
 #include <NUClear.h>
-#include "ConfigurationNode.h"
+#include "utility/configuration/ConfigurationNode.h"
 
 namespace messages {
 
+    using namespace utility::configuration;
     using namespace NUClear::Internal::Magic::MetaProgramming;
 
     // Anonymous namespace to hide details

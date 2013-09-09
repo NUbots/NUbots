@@ -19,7 +19,7 @@
 #define MESSAGES_SCRIPT_H
 
 #include <chrono>
-#include "ConfigurationNode.h"
+#include "utility/configuration/ConfigurationNode.h"
 #include "DarwinSensors.h"
 
 namespace messages {
@@ -36,15 +36,19 @@ namespace messages {
         };
         std::vector<Frame> frames;
     };
+} // \namespace messages
 
-    // These convert Script objects into ConfigurationNode objects and visa versa
+namespace utility {
+namespace configuration {
+
+    // These convert Script objects into utility::configuration::ConfigurationNode objects and visa versa
 
     template<>
-    struct ConfigurationNode::ConvertNode<Script::Frame::Target> {
+    struct utility::configuration::ConfigurationNode::ConvertNode<messages::Script::Frame::Target> {
 
-        static ConfigurationNode makeNode(const Script::Frame::Target input) {
+        static utility::configuration::ConfigurationNode makeNode(const messages::Script::Frame::Target input) {
 
-            ConfigurationNode node;
+            utility::configuration::ConfigurationNode node;
 
             node["id"] = messages::DarwinSensors::Servo::stringFromId(input.id);
             node["position"] = input.position;
@@ -53,7 +57,7 @@ namespace messages {
             return node;
         }
 
-        static Script::Frame::Target makeValue(const ConfigurationNode& node) {
+        static messages::Script::Frame::Target makeValue(const utility::configuration::ConfigurationNode& node) {
 
             return
             {
@@ -65,11 +69,11 @@ namespace messages {
     };
 
     template<>
-    struct ConfigurationNode::ConvertNode<Script::Frame> {
+    struct utility::configuration::ConfigurationNode::ConvertNode<messages::Script::Frame> {
 
-        static ConfigurationNode makeNode(const Script::Frame input) {
+        static utility::configuration::ConfigurationNode makeNode(const messages::Script::Frame input) {
 
-            ConfigurationNode node;
+            utility::configuration::ConfigurationNode node;
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(input.duration).count();
             node["targets"] = input.targets;
@@ -77,31 +81,32 @@ namespace messages {
             return node;
         }
 
-        static Script::Frame makeValue(const ConfigurationNode& node) {
+        static messages::Script::Frame makeValue(const utility::configuration::ConfigurationNode& node) {
 
             int millis = node["duration"];
             std::chrono::milliseconds duration(millis);
 
-            std::vector<Script::Frame::Target> targets = node["targets"];
+            std::vector<messages::Script::Frame::Target> targets = node["targets"];
 
             return {duration, std::move(targets)};
         }
     };
 
     template<>
-    struct ConfigurationNode::ConvertNode<Script> {
+    struct utility::configuration::ConfigurationNode::ConvertNode<messages::Script> {
 
-        static ConfigurationNode makeNode(const Script input) {
-            ConfigurationNode node;
+        static utility::configuration::ConfigurationNode makeNode(const messages::Script input) {
+            utility::configuration::ConfigurationNode node;
             node = input.frames;
             return node;
         }
 
-        static Script makeValue(const ConfigurationNode& node) {
-            std::vector<Script::Frame> frames = node;
+        static messages::Script makeValue(const utility::configuration::ConfigurationNode& node) {
+            std::vector<messages::Script::Frame> frames = node;
             return {std::move(frames)};
         }
     };
-};
+} // \namespace configuration
+} // \namespace utility
 
 #endif

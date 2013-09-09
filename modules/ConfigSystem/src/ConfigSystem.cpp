@@ -29,8 +29,10 @@ extern "C" {
 #include <fstream>
 #include <system_error>
 
-#include "json/Parser.h"
 #include "utility/strutil/strutil.h"
+#include "utility/configuration/ConfigurationNode.h"
+#include "utility/configuration/json/Parser.h"
+#include "utility/configuration/json/Serializer.h"
 
 namespace modules {
 
@@ -95,7 +97,7 @@ namespace modules {
         std::stringstream stream;
         stream << data.rdbuf();
 
-        return json::Parser::parse(stream.str());
+        return utility::configuration::json::parse(stream.str());
     }
 
     ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), running(true), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
