@@ -181,7 +181,7 @@ namespace modules {
                             std::string path = std::string(event->name);
                             std::string fullPath = BASE_CONFIGURATION_PATH + path;
 
-                            std::cout << "Reloaded " << fullPath << std::endl;
+                            log("Reloaded ", fullPath, std::endl);
 
                             for(auto& emitter : handler[path]) {
                                 emitter(this, path, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
