@@ -19,6 +19,10 @@
 #include "messages/Configuration.h"
 #include "messages/DarwinSensors.h"
 #include "messages/ServoWaypoint.h"
+#include "utility/math/angle.h"
+#include "utility/file/fileutil.h"
+#include "utility/configuration/json/parser.h"
+#include "utility/configuration/json/serializer.h"
 
 #include <ncurses.h>
 #include <sstream>
@@ -28,7 +32,7 @@ namespace modules {
     struct LockServo {};
 
     ScriptTuner::ScriptTuner(NUClear::PowerPlant* plant) : Reactor(plant),
-            scriptName("NEW SCRIPT"),
+            scriptPath("ERROR"),
             frame(0),
             selection(0),
             angleOrGain(true),
@@ -37,8 +41,21 @@ namespace modules {
         // Add a blank frame to start with
         script.frames.emplace_back();
 
-        // TODO REMOVE Hackidy to get it to do what i want
-        emit(std::make_unique<messages::DarwinSensors>());
+        on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
+            if(args.size() == 2) {
+                scriptPath = args[1];
+
+                // Check if the script exists and load it if it does.
+                if(utility::file::exists(scriptPath)) {
+                    log("Loading script: ", scriptPath, '\n');
+                    loadScript(scriptPath);
+                }
+            } 
+            else {
+                log("Error: Expected 2 arguments on argv found ", args.size(), '\n');
+                powerPlant->shutdown();
+            }
+        });
 
         on<Trigger<LockServo>, With<messages::DarwinSensors>>([this](const LockServo&, const messages::DarwinSensors& sensors) {
 
@@ -97,10 +114,10 @@ namespace modules {
                     angleOrGain = !angleOrGain;
                     break;
                 case ',':           // Move left a frame
-                    frame = frame == 0 ? frame : frame - 1;
+                    activateFrame(frame == 0 ? frame : frame - 1);
                     break;
                 case '.':           // Move right a frame
-                    frame = frame == script.frames.size() - 1 ? frame : frame + 1;
+                    activateFrame(frame == script.frames.size() - 1 ? frame : frame + 1);
                     break;
                 case '\n':          // Edit selected field
                 case KEY_ENTER:     // Edit selected field
@@ -108,9 +125,6 @@ namespace modules {
                     break;
                 case ' ':           // Toggle lock mode
                     toggleLockMotor();
-                    break;
-                case 'L':           // Load script
-                    loadScript();
                     break;
                 case 'S':           // Save the current script
                     saveScript();
@@ -131,6 +145,22 @@ namespace modules {
         }
     }
 
+    void ScriptTuner::activateFrame(int frame) {
+        this->frame = frame;
+
+        auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
+        for(auto& target : script.frames[frame].targets) {
+            waypoints->push_back(messages::ServoWaypoint {
+                NUClear::clock::now() + std::chrono::milliseconds(500)
+                , target.id
+                , target.position
+                , target.gain
+            });
+        }
+
+        emit(std::move(waypoints));
+    }
+
     void ScriptTuner::refreshView() {
 
         // Clear our window
@@ -145,7 +175,7 @@ namespace modules {
         attroff(A_BOLD);
 
         // Top sections
-        mvprintw(2, 2, "Script: %s", scriptName.c_str());   // Output our scripts name
+        mvprintw(2, 2, "Script: %s", scriptPath.c_str());   // Output our scripts name
         mvprintw(3, 2, "Frames:");  // The frames section is filled out after this
         mvprintw(4, 2, "Duration: %d", // Output the selected frames duration
                  std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
@@ -288,36 +318,12 @@ namespace modules {
         }
     }
 
-    void ScriptTuner::loadScript() {
-        // Move to the correct position and erase the current text
-        move(2, 10);
-        for(size_t i = 0; i < scriptName.size(); ++i) addch(' ');
-        move(2, 10);
-
-        std::string result = userInput();
-
-        if(!result.empty()) {
-            auto save = std::make_unique<messages::SaveConfiguration>();
-            save->path = "scripts/" + result;
-            save->config = script;
-            emit(std::move(save));
-            // TODO save the script here
-            scriptName = result;
-        }
+    void ScriptTuner::loadScript(const std::string& path) {
+        script = utility::configuration::json::parse(utility::file::loadFromFile(path));
     }
 
     void ScriptTuner::saveScript() {
-        // Move to the correct position and erase the current text
-        move(2, 10);
-        for(size_t i = 0; i < scriptName.size(); ++i) addch(' ');
-        move(2, 10);
-
-        std::string result = userInput();
-
-        if(!result.empty()) {
-            // TODO save the script here
-            scriptName = result;
-        }
+        utility::file::writeToFile(scriptPath, utility::configuration::json::serialize(script));
     }
 
     void ScriptTuner::editDuration() {
@@ -384,10 +390,11 @@ namespace modules {
                 if (angleOrGain) {
 
                     // Normalize our angle to be between -pi and pi
-                    num = fmod(num + M_PI, M_PI * 2);
+                    num = utility::math::angle::normalizeAngle(num);
+                    /*num = fmod(num + M_PI, M_PI * 2);
                     if (num < 0)
                         num += M_PI * 2;
-                    num -= M_PI;
+                    num -= M_PI;*/
 
                     it->position = num;
                     // Convert our angle to be between -pi and pi
