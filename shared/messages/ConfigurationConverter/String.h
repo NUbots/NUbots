@@ -14,9 +14,9 @@ namespace messages {
         static std::string makeValue(const ConfigurationNode& node) {
             switch(node.datatype) {
                 case DataType::INTEGER:
-                    std::to_string(*std::static_pointer_cast<int>(node.value));
+                    return std::to_string(*std::static_pointer_cast<int>(node.value));
                 case DataType::FLOATINGPOINT:
-                    std::to_string(*std::static_pointer_cast<double>(node.value));
+                    return std::to_string(*std::static_pointer_cast<double>(node.value));
                 case DataType::BOOLEAN:
                     return *std::static_pointer_cast<bool>(node.value) ? "true" : "false";
                 case DataType::STRING:
