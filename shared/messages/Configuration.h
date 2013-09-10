@@ -85,7 +85,7 @@ namespace NUClear {
             };
 
             // Emit it from our reactor to the config system
-            context->emit<Scope::DIRECT>(std::unique_ptr<messages::ConfigurationConfiguration>(
+            context->emit<Scope::INITIALIZE>(std::unique_ptr<messages::ConfigurationConfiguration>(
                 new messages::ConfigurationConfiguration {
                     typeid(TConfiguration),
                     TConfiguration::CONFIGURATION_PATH,
