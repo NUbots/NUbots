@@ -15,15 +15,6 @@
  * Copyright 2013 Trent Houliston <trent@houliston.me>
  */
 
-#include "DarwinDevice.h"
-
-Darwin::DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
-
-bool Darwin::DarwinDevice::ping() {
-
-    // Ping and get the result
-    CommandResult result = coms.execute(PingCommand(id));
-
-    // Check if there was an error code
-    return result.header.errorcode == ErrorCode::NONE;
+int main(int argc, char *argv[]) {
+    return 0;
 }

@@ -10,7 +10,7 @@ FUNCTION(ADD_HAT)
         COMMAND "${NUBOTS_SCRIPTS_DIR}/generate.sh" "${CMAKE_BINARY_DIR}/hats/${HAT_NAME}.cpp" ${HAT_MODULES}
         COMMENT "Generating the ${HAT_NAME} hat"
         DEPENDS "${NUBOTS_SCRIPTS_DIR}/generate.sh")
-    
+
     # Each hat wants to access a number of modules. We're going to set our
     # include directories to include the source directory of each module
     # avoid relative paths in our modules which makes them easier

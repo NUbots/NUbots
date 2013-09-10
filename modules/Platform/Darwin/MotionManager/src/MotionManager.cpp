@@ -17,11 +17,13 @@
 
 #include "messages/ServoWaypoint.h"
 
-#include "DarwinMotionManager.h"
+#include "MotionManager.h"
 
 namespace modules {
+namespace Platform {
+namespace Darwin {
 
-    DarwinMotionManager::DarwinMotionManager(NUClear::PowerPlant* plant) : Reactor(plant) {
+    MotionManager::MotionManager(NUClear::PowerPlant* plant) : Reactor(plant) {
 
         on<Trigger<Every<20, std::chrono::milliseconds>>, With<messages::DarwinSensors>>([this](const time_t& time, const messages::DarwinSensors& sensors) {
 
@@ -151,7 +153,7 @@ namespace modules {
         });
     }
 
-    void DarwinMotionManager::queueEnd(size_t queue) {
+    void MotionManager::queueEnd(size_t queue) {
         switch(queue) {
             case 0: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_SHOULDER_PITCH>>()); break;
             case 1: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_SHOULDER_PITCH>>()); break;
@@ -176,7 +178,9 @@ namespace modules {
         }
     }
 
-    void DarwinMotionManager::allQueueEnd() {
+    void MotionManager::allQueueEnd() {
         emit(std::make_unique<messages::AllServoWaypointsComplete>());
     }
+}
+}
 }

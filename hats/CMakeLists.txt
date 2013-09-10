@@ -6,10 +6,10 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/AddHat.cmake")
 # they won't get any data and things will break.
 ADD_HAT(
     NAME robocup
-    MODULES 
+    MODULES
         ConfigSystem
-        Platform::Darwin::DarwinPlatform
-        Platform::Darwin::DarwinMotionManager
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
         DarwinCameraReader
         ScriptEngine
         eSpeak
@@ -21,8 +21,8 @@ ADD_HAT(
     NAME scriptrunner
     MODULES
         ConfigSystem
-        Platform::Darwin::DarwinPlatform
-        Platform::Darwin::DarwinMotionManager
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
         ScriptEngine
         ScriptRunner
         NUBugger
@@ -31,8 +31,8 @@ ADD_HAT(
 ADD_HAT(
     NAME scripttuner
     MODULES
-        Platform::Darwin::DarwinPlatform
-        Platform::Darwin::DarwinMotionManager
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
         NUBugger
         ScriptTuner
         PartyDarwin)

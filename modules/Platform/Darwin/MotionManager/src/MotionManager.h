@@ -15,8 +15,8 @@
  * Copyright 2013 Trent Houliston <trent@houliston.me>
  */
 
-#ifndef MODULES_DARWINMOTIONMANAGER_H
-#define MODULES_DARWINMOTIONMANAGER_H
+#ifndef MODULES_PLATFORM_DARWIN_MOTIONMANAGER_H
+#define MODULES_PLATFORM_DARWIN_MOTIONMANAGER_H
 
 #include <list>
 #include <thread>
@@ -24,8 +24,10 @@
 #include "messages/ServoWaypoint.h"
 
 namespace modules {
+namespace Platform {
+namespace Darwin {
 
-    class DarwinMotionManager : public NUClear::Reactor {
+    class MotionManager : public NUClear::Reactor {
     private:
         struct Motion {
             NUClear::clock::time_point start;
@@ -41,8 +43,10 @@ namespace modules {
         void queueEnd(size_t queue);
         void allQueueEnd();
     public:
-        explicit DarwinMotionManager(NUClear::PowerPlant* plant);
+        explicit MotionManager(NUClear::PowerPlant* plant);
     };
+}
+}
 }
 #endif
 

@@ -1,26 +1,30 @@
 /*
- * This file is part of DarwinPlatform.
+ * This file is part of Darwin Hardware IO.
  *
- * DarwinPlatform is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * Darwin Hardware IO is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * DarwinPlatform is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * Darwin Hardware IO is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with DarwinPlatform.  If not, see
- * <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with Darwin Hardware IO.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 Trent Houliston <trent@houliston.me>
  */
 
-#include "DarwinPlatform.h"
+#include "HardwareIO.h"
 
 #include "messages/DarwinServoCommand.h"
 #include "messages/DarwinSensors.h"
 
 namespace modules {
+namespace Platform {
+namespace Darwin {
 
     /// @brief This namespace contains all the functions that are required to convert the raw sensors into useful values
     namespace Convert {
@@ -218,13 +222,13 @@ namespace modules {
         constexpr uint8_t TEMPERATURE(const uint8_t value) { return value; }
     };
 
-    DarwinPlatform::DarwinPlatform(NUClear::PowerPlant* plant) : Reactor(plant), darwin("/dev/ttyUSB0") {
+    HardwareIO::HardwareIO(NUClear::PowerPlant* plant) : Reactor(plant), darwin("/dev/ttyUSB0") {
 
         // This trigger gets the sensor data from the CM730
         on<Trigger<Every<20, std::chrono::milliseconds>>>([this](const time_t& time) {
 
             // Read our data
-            Darwin::BulkReadResults data = darwin.bulkRead();
+            darwin::BulkReadResults data = darwin.bulkRead();
 
             auto sensors = std::make_unique<messages::DarwinSensors>();
 
@@ -341,13 +345,13 @@ namespace modules {
         // This trigger writes the servo positions to the hardware
         on<Trigger<std::vector<messages::DarwinServoCommand>>>([this](const std::vector<messages::DarwinServoCommand>& commands) {
 
-            std::vector<Darwin::Types::ServoValues> values;
+            std::vector<darwin::Types::ServoValues> values;
 
             // Loop through each of our commands
             for (const auto& command : commands) {
                 // If all our gains are 0 then do a normal write to disable torque (syncwrite won't write to torqueEnable)
                 if(command.pGain == 0 && command.iGain == 0 && command.dGain == 0) {
-                    darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                    darwin[static_cast<int>(command.id) + 1].write(darwin::MX28::Address::TORQUE_ENABLE, false);
                 }
                 // Otherwise write the command using sync write
                 else {
@@ -377,12 +381,14 @@ namespace modules {
 
         // If we get a HeadLED command then write it
         on<Trigger<messages::DarwinSensors::HeadLED>>([this](const messages::DarwinSensors::HeadLED& led) {
-            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::COLOURED_LED_INVERSE(led.r, led.g, led.b));
+            darwin.cm730.write(darwin::CM730::Address::LED_HEAD_L, Convert::COLOURED_LED_INVERSE(led.r, led.g, led.b));
         });
 
         // If we get a HeadLED command then write it
         on<Trigger<messages::DarwinSensors::EyeLED>>([this](const messages::DarwinSensors::EyeLED& led) {
-            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::COLOURED_LED_INVERSE(led.r, led.g, led.b));
+            darwin.cm730.write(darwin::CM730::Address::LED_EYE_L, Convert::COLOURED_LED_INVERSE(led.r, led.g, led.b));
         });
     }
+}
+}
 }
