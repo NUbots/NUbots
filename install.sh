@@ -19,6 +19,7 @@ fi
 
 # Copy our robocup binary over
 scp -C robocup "darwin@$robotIP:/home/darwin/"
+scp -C scriptrunner "darwin@$robotIP:/home/darwin/"
 
 # Overwrite configuration files
 if [ "$config" == "update" ] || [ "$config" == "u" ] ;

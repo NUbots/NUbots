@@ -1,11 +1,12 @@
-#ifndef MESSAGES_CONFIGURATIONNODE_VECTOR_H
-#define MESSAGES_CONFIGURATIONNODE_VECTOR_H
+#ifndef UTILITY_CONFIGURATION_CONFIGURATIONNODE_VECTOR_H
+#define UTILITY_CONFIGURATION_CONFIGURATIONNODE_VECTOR_H
 
 #include "../ConfigurationNode.h"
 
-namespace messages {
+namespace utility {
+namespace configuration {
     template <>
-    struct ConfigurationNode::ConvertNode<std::vector<messages::ConfigurationNode>> {
+    struct ConfigurationNode::ConvertNode<std::vector<ConfigurationNode>> {
 
         static ConfigurationNode makeNode(const std::vector<ConfigurationNode>& input) {
             return ConfigurationNode(DataType::ARRAY, std::shared_ptr<std::vector<ConfigurationNode>>(new std::vector<ConfigurationNode>(std::move(input))));
@@ -51,6 +52,7 @@ namespace messages {
             }
         }
     };
+}
 }
 
 #endif

@@ -1,9 +1,10 @@
-#ifndef MESSAGES_CONFIGURATIONNODE_NUMBER_H
-#define MESSAGES_CONFIGURATIONNODE_NUMBER_H
+#ifndef UTILITY_CONFIGURATION_CONFIGURATIONNODE_NUMBER_H
+#define UTILITY_CONFIGURATION_CONFIGURATIONNODE_NUMBER_H
 
 #include "../ConfigurationNode.h"
 
-namespace messages {
+namespace utility {
+namespace configuration {
     template <typename TType>
     struct ConfigurationNode::ConvertNode {
 
@@ -65,6 +66,7 @@ namespace messages {
             }
         }
     };
+}
 }
 
 #endif

@@ -21,6 +21,7 @@
 #include <algorithm>
 
 // Initialize all of the sensor handler objects using the passed uart
+
 Darwin::Darwin::Darwin(const char* name) : uart(name),
 cm730(uart, ID::CM730),
 rShoulderPitch(uart, ID::R_SHOULDER_PITCH),
@@ -219,7 +220,59 @@ Darwin::BulkReadResults Darwin::Darwin::bulkRead() {
 
     return data;
 }
-#include <iostream>
+
+Darwin::DarwinDevice& Darwin::Darwin::operator [](int id) {
+    switch (id) {
+        case ID::CM730:
+            return cm730;
+        case ID::R_SHOULDER_PITCH:
+            return rShoulderPitch;
+        case ID::L_SHOULDER_PITCH:
+            return lShoulderPitch;
+        case ID::R_SHOULDER_ROLL:
+            return rShoulderRoll;
+        case ID::L_SHOULDER_ROLL:
+            return lShoulderRoll;
+        case ID::R_ELBOW:
+            return rElbow;
+        case ID::L_ELBOW:
+            return lElbow;
+        case ID::R_HIP_YAW:
+            return rHipYaw;
+        case ID::L_HIP_YAW:
+            return lHipYaw;
+        case ID::R_HIP_ROLL:
+            return rHipRoll;
+        case ID::L_HIP_ROLL:
+            return lHipRoll;
+        case ID::R_HIP_PITCH:
+            return rHipPitch;
+        case ID::L_HIP_PITCH:
+            return lHipPitch;
+        case ID::R_KNEE:
+            return rKnee;
+        case ID::L_KNEE:
+            return lKnee;
+        case ID::R_ANKLE_PITCH:
+            return rAnklePitch;
+        case ID::L_ANKLE_PITCH:
+            return lAnklePitch;
+        case ID::R_ANKLE_ROLL:
+            return rAnkleRoll;
+        case ID::L_ANKLE_ROLL:
+            return lAnkleRoll;
+        case ID::HEAD_PAN:
+            return headPan;
+        case ID::HEAD_TILT:
+            return headTilt;
+        case ID::R_FSR:
+            return rFSR;
+        case ID::L_FSR:
+            return lFSR;
+        default:
+            throw std::runtime_error("Unknown device id");
+    }
+}
 
 void Darwin::Darwin::writeServos(const std::vector<Types::ServoValues>& servos) {
 

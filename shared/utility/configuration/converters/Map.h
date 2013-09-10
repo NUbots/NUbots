@@ -1,11 +1,12 @@
-#ifndef MESSAGES_CONFIGURATIONNODE_MAP_H
-#define MESSAGES_CONFIGURATIONNODE_MAP_H
+#ifndef UTILITY_CONFIGURATION_CONFIGURATIONNODE_MAP_H
+#define UTILITY_CONFIGURATION_CONFIGURATIONNODE_MAP_H
 
 #include "../ConfigurationNode.h"
 
-namespace messages {
+namespace utility {
+namespace configuration {
     template <>
-    struct ConfigurationNode::ConvertNode<std::map<std::string, messages::ConfigurationNode>> {
+    struct ConfigurationNode::ConvertNode<std::map<std::string, ConfigurationNode>> {
 
         static ConfigurationNode makeNode(const std::map<std::string, ConfigurationNode>& input) {
             return ConfigurationNode(DataType::OBJECT, std::shared_ptr<std::map<std::string, ConfigurationNode>>(new std::map<std::string, ConfigurationNode>(std::move(input))));
@@ -52,6 +53,6 @@ namespace messages {
         }
     };
 }
-
+}
 
 #endif

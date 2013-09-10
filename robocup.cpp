@@ -10,10 +10,8 @@
 #include "eSpeak.h"
 #include "NUBugger.h"
 #include "PartyDarwin.h"
+#include "ScriptTuner.h"
 #include "AudioInput.h"
-
-#include "messages/ExecuteScript.h"
-#include "messages/ServoWaypoint.h"
 
 struct SegmentationFault : public std::exception {};
 
@@ -49,7 +47,7 @@ int main(int argc, char *argv[]) {
 
     config.threadCount = 4;
 
-    NUClear::PowerPlant plant(config);
+    NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
     powerplant = &plant;
 
     // If we get interrupted (ctrl c) then tell the system to shutdown gracefully, on the second time just kill it
@@ -66,9 +64,8 @@ int main(int argc, char *argv[]) {
     plant.install<modules::eSpeak>();
     //plant.install<modules::AudioInput>();
     plant.install<modules::NUBugger>();
+    plant.install<modules::ScriptTuner>();
     plant.install<modules::PartyDarwin>();
-
-    plant.emit(std::make_unique<messages::ExecuteScript>("StandUpBack.json"));
 
     plant.start();
 }

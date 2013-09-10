@@ -1,9 +1,10 @@
-#ifndef MESSAGES_CONFIGURATIONNODE_BOOLEAN_H
-#define MESSAGES_CONFIGURATIONNODE_BOOLEAN_H
+#ifndef UTILITY_CONFIGURATION_CONFIGURATIONNODE_BOOLEAN_H
+#define UTILITY_CONFIGURATION_CONFIGURATIONNODE_BOOLEAN_H
 
 #include "../ConfigurationNode.h"
 
-namespace messages {
+namespace utility {
+namespace configuration {
     template<>
     struct ConfigurationNode::ConvertNode<bool> {
 
@@ -29,6 +30,7 @@ namespace messages {
             }
         }
     };
+}
 }
 
 #endif

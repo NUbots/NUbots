@@ -1,5 +1,5 @@
-#ifndef MESSAGES_CONFIGURATIONNODE_H
-#define MESSAGES_CONFIGURATIONNODE_H
+#ifndef UTILITY_CONFIGURATION_CONFIGURATIONNODE_H
+#define UTILITY_CONFIGURATION_CONFIGURATIONNODE_H
 
 #include <memory>
 #include <string>
@@ -8,7 +8,8 @@
 #include <map>
 #include <stdexcept>
 
-namespace messages {
+namespace utility {
+namespace configuration {
     class ConfigurationNode {
     public:
         enum class DataType {
@@ -138,12 +139,12 @@ namespace messages {
             return static_cast<TType>(ConvertNode<TType>::makeValue(*this));
         }
     };
-}
+}}
 
-#include "ConfigurationConverter/String.h"
-#include "ConfigurationConverter/Number.h"
-#include "ConfigurationConverter/Boolean.h"
-#include "ConfigurationConverter/Vector.h"
-#include "ConfigurationConverter/Map.h"
+#include "converters/String.h"
+#include "converters/Number.h"
+#include "converters/Boolean.h"
+#include "converters/Vector.h"
+#include "converters/Map.h"
 
 #endif

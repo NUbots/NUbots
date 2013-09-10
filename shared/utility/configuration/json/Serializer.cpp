@@ -4,19 +4,18 @@
 #include <cctype>
 #include <sstream>
 
-using namespace messages;
-
-using namespace modules;
+using namespace utility;
+using namespace configuration;
 using namespace json;
 
 namespace {
     class SerializerImpl {
         public:
-            std::string serialize(const messages::ConfigurationNode& root) {
+            std::string serialize(const ConfigurationNode& root) {
                 return serializeImpl(root);
             }
         private:
-            std::string serializeImpl(const messages::ConfigurationNode& node) {
+            std::string serializeImpl(const ConfigurationNode& node) {
                 switch(node.nativeType()) {
                     case ConfigurationNode::DataType::STRING: 
                     case ConfigurationNode::DataType::INTEGER:
@@ -39,7 +38,7 @@ namespace {
                 throw std::runtime_error(std::string("Bad node found: "));
             }
 
-            std::string serializePrimative(const messages::ConfigurationNode& node) {
+            std::string serializePrimative(const ConfigurationNode& node) {
                 
                 std::string nodeAsString = node;
 
@@ -51,11 +50,11 @@ namespace {
                 return nodeAsString;
             }
 
-            std::string serializeNullpointer(const messages::ConfigurationNode& node) {
+            std::string serializeNullpointer(const ConfigurationNode& node) {
                 return "null";
             }
 
-            std::string serializeArray(const messages::ConfigurationNode& node) {
+            std::string serializeArray(const ConfigurationNode& node) {
                 std::string nodeAsString = "[";
                 std::vector<ConfigurationNode> children = node;
 
@@ -70,7 +69,7 @@ namespace {
                 return nodeAsString + "]";
             }
 
-            std::string serializeObject(const messages::ConfigurationNode& node) {
+            std::string serializeObject(const ConfigurationNode& node) {
                 std::string nodeAsString = "{";
                 std::map<std::string, ConfigurationNode> children = node;
 
@@ -87,7 +86,7 @@ namespace {
     };
 }
 
-std::string Serializer::serialize(const messages::ConfigurationNode& root) {
+std::string utility::configuration::json::serialize(const ConfigurationNode& root) {
     SerializerImpl serializerImpl;
     return serializerImpl.serialize(root);
 }

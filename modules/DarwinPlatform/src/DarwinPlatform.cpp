@@ -154,15 +154,16 @@ namespace modules {
         constexpr float FSR_CENTRE(const uint8_t value) { return value == 0xFF ? NAN : NORMALIZE<-1, 1, 127>(value); }
 
         /// Normalizes gain from 0-254 to between 0 and 1
-        constexpr float GAIN(const uint8_t value) { return NORMALIZE<0, 1, 254>(value); }
+        constexpr float GAIN(const uint8_t value) { return NORMALIZE<0, 100, 254>(value); }
         /// Calculates the gain between 0-254 from a value between 0 and 1
-        constexpr uint8_t GAIN_INVERSE(const float value) { return static_cast<uint8_t>(value * 254); }
+        constexpr uint8_t GAIN_INVERSE(const float value) { return static_cast<uint8_t>((value/100) * 254); }
 
-        /// Check that our Gain and Gain Inverse are actuall inverses of eachother
-        static_assert(isClose(GAIN_INVERSE(GAIN(10)), 10), "There is a problem with the Inverse operation for gain");
-        static_assert(isClose(GAIN_INVERSE(GAIN(254)), 254), "There is a problem with the Inverse operation for gain");
-        static_assert(isClose(GAIN(GAIN_INVERSE(0.5)), 0.5), "There is a problem with the Inverse operation for gain");
-        static_assert(isClose(GAIN(GAIN_INVERSE(1)), 1.0), "There is a problem with the Inverse operation for gain");
+        /// Check that our Gain and Gain Inverse are actual inverses of eachother
+        static_assert(isClose(GAIN_INVERSE(GAIN(100)), 100), "There is a problem with the Inverse operation for gain");
+        static_assert(isClose(GAIN_INVERSE(GAIN(50)), 50), "There is a problem with the Inverse operation for gain");
+        static_assert(isClose(GAIN_INVERSE(GAIN(0)), 0), "There is a problem with the Inverse operation for gain");
+        static_assert(isClose(GAIN(GAIN_INVERSE(100)), 100.0), "There is a problem with the Inverse operation for gain");
+        static_assert(isClose(GAIN(GAIN_INVERSE(0)), 0.0), "There is a problem with the Inverse operation for gain");
 
         /// Converts a servo position from 0-4095 (-pi to pi) to radians (factoring in motor direction and offset)
         constexpr float SERVO_POSITION(const uint8_t servoID, const uint16_t value) {
@@ -191,12 +192,12 @@ namespace modules {
         /// Converts a servo speed from radians/second to it's signed format
         constexpr uint16_t SERVO_SPEED_INVERSE(const float value) {
             return (
-                (value / SPEED_CONVERSION_FACTOR) < 0 
-                    ? - (value / SPEED_CONVERSION_FACTOR) 
-                    : (value / SPEED_CONVERSION_FACTOR)) > 1023 
-                        ? 0 
-                        : ((value / SPEED_CONVERSION_FACTOR) < 0 
-                            ? -(value / SPEED_CONVERSION_FACTOR) 
+                (value / SPEED_CONVERSION_FACTOR) < 0
+                    ? - (value / SPEED_CONVERSION_FACTOR)
+                    : (value / SPEED_CONVERSION_FACTOR)) > 1023
+                        ? 0
+                        : ((value / SPEED_CONVERSION_FACTOR) < 0
+                            ? -(value / SPEED_CONVERSION_FACTOR)
                             : (value / SPEED_CONVERSION_FACTOR));
         }
 
@@ -344,15 +345,22 @@ namespace modules {
 
             // Loop through each of our commands
             for (const auto& command : commands) {
-                values.push_back({
-                    static_cast<uint8_t>(static_cast<int>(command.id) + 1),  // The id's on the robot start with ID 1
-                    Convert::GAIN_INVERSE(command.dGain),
-                    Convert::GAIN_INVERSE(command.iGain),
-                    Convert::GAIN_INVERSE(command.pGain),
-                    0,
-                    Convert::SERVO_POSITION_INVERSE(static_cast<int>(command.id), command.goalPosition),
-                    Convert::SERVO_SPEED_INVERSE(command.movingSpeed)
-                });
+                // If all our gains are 0 then do a normal write to disable torque (syncwrite won't write to torqueEnable)
+                if(command.pGain == 0 && command.iGain == 0 && command.dGain == 0) {
+                    darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                }
+                // Otherwise write the command using sync write
+                else {
+                    values.push_back({
+                        static_cast<uint8_t>(static_cast<int>(command.id) + 1),  // The id's on the robot start with ID 1
+                        Convert::GAIN_INVERSE(command.dGain),
+                        Convert::GAIN_INVERSE(command.iGain),
+                        Convert::GAIN_INVERSE(command.pGain),
+                        0,
+                        Convert::SERVO_POSITION_INVERSE(static_cast<int>(command.id), command.goalPosition),
+                        Convert::SERVO_SPEED_INVERSE(command.movingSpeed)
+                    });
+                }
             }
 
             // Syncwrite our values
