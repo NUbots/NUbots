@@ -35,7 +35,7 @@ namespace modules {
     ScriptRunner::ScriptRunner(NUClear::PowerPlant* plant) : Reactor(plant) {
         on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
             std::cout << "Args: " << args.size() << std::endl;
-            for(int i = 1; i < args.size(); ++i) {
+            for(size_t i = 1; i < args.size(); ++i) {
                 std::cout << "Found script to run: " << args[i] << std::endl;
                 scripts.push(args[i]);
             }
