@@ -26,6 +26,10 @@ OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+# Our scripts directory contains shell scripts for running, generating, installing, etc
+# not to be confused with robot scripts.
+SET(NUBOTS_SCRIPTS_DIR "${CMAKE_SOURCE_DIR}/scripts/")
+
 # Setup our compiler settings
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/Compiler.cmake")
 

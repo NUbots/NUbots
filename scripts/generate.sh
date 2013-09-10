@@ -41,7 +41,7 @@ cat >> $hat_name << EOF
 
 int main(int argc, char** argv) {
     NUClear::PowerPlant::Configuration config;
-    config.numThreads = 4;
+    config.threadCount = 4;
 
     NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
 EOF
