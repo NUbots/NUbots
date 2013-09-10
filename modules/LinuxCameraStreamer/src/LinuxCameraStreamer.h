@@ -21,32 +21,32 @@
 
 #include <NUClear.h>
 
-#include "DarwinCamera.h"
+#include "V4L2Camera.h"
 
 namespace modules {
     /**
      * @breif This module is responsible for reading data from the darwins Camera and emitting the resulting images.
-     * 
+     *
      * @details
      *    This Reactor uses it's DarwinCamera class in order to read a stream of images from the darwin's camera and
      *    emit them out to the rest of the system. It does this using the Video4Linux2 drivers that are built into
      *    the kernel.
-     * 
+     *
      * @author Michael Burton
      * @author Jake Woods
      * @author Trent Houliston
      */
-    class DarwinCameraReader : public NUClear::Reactor {
+    class LinuxCameraStreamer : public NUClear::Reactor {
 
     private:
         /// @brief Our internal camera class that interacts with the physical device
-        DarwinCamera camera;
+        V4L2Camera camera;
     public:
         /// @brief Our configuration file for this class
-        static constexpr const char* CONFIGURATION_PATH = "DarwinCameraReader.json";
-        
+        static constexpr const char* CONFIGURATION_PATH = "LinuxCameraStreamer.json";
+
         /// @brief Called by the powerplant to build and setup our CameraReader
-        DarwinCameraReader(NUClear::PowerPlant* plant);
+        LinuxCameraStreamer(NUClear::PowerPlant* plant);
     };
 }
 #endif

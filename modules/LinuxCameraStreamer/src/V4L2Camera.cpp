@@ -16,7 +16,7 @@
  * Trent Houliston <trent@houliston.me>
  */
 
-#include "DarwinCamera.h"
+#include "V4L2Camera.h"
 
 #include <cstring>
 #include <fcntl.h>
@@ -30,10 +30,10 @@
 
 namespace modules {
 
-    DarwinCamera::DarwinCamera(const std::string& device) : fd(-1), width(0), height(0), deviceID("") {
+    V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID("") {
     }
 
-    messages::Image* DarwinCamera::getImage() {
+    messages::Image* V4L2Camera::getImage() {
         if (fd < 0) {
             return nullptr;
         }
@@ -69,7 +69,7 @@ namespace modules {
         return image;
     }
 
-    void DarwinCamera::resetCamera(std::string device, size_t w, size_t h) {
+    void V4L2Camera::resetCamera(std::string device, size_t w, size_t h) {
         if (fd != -1) {
             closeCamera();
         }
@@ -157,18 +157,18 @@ namespace modules {
         }
 
         // Populate our settings table
-        settings.insert(std::make_pair("autoWhiteBalance",        DarwinCameraSetting(fd, V4L2_CID_AUTO_WHITE_BALANCE)));
-        settings.insert(std::make_pair("whiteBalanceTemperature", DarwinCameraSetting(fd, V4L2_CID_WHITE_BALANCE_TEMPERATURE)));
-        settings.insert(std::make_pair("autoExposurePriority",    DarwinCameraSetting(fd, V4L2_CID_EXPOSURE_AUTO_PRIORITY)));
-        settings.insert(std::make_pair("brightness",              DarwinCameraSetting(fd, V4L2_CID_BRIGHTNESS)));
-        settings.insert(std::make_pair("contrast",                DarwinCameraSetting(fd, V4L2_CID_CONTRAST)));
-        settings.insert(std::make_pair("saturation",              DarwinCameraSetting(fd, V4L2_CID_SATURATION)));
-        settings.insert(std::make_pair("gain",                    DarwinCameraSetting(fd, V4L2_CID_GAIN)));
-        settings.insert(std::make_pair("autoExposure",            DarwinCameraSetting(fd, V4L2_CID_EXPOSURE_AUTO)));
-        settings.insert(std::make_pair("autoExposurePriority",    DarwinCameraSetting(fd, V4L2_CID_EXPOSURE_AUTO_PRIORITY)));
-        settings.insert(std::make_pair("absoluteExposure",        DarwinCameraSetting(fd, V4L2_CID_EXPOSURE_ABSOLUTE)));
-        settings.insert(std::make_pair("powerLineFrequency",      DarwinCameraSetting(fd, V4L2_CID_POWER_LINE_FREQUENCY)));
-        settings.insert(std::make_pair("sharpness",               DarwinCameraSetting(fd, V4L2_CID_SHARPNESS)));
+        settings.insert(std::make_pair("autoWhiteBalance",        V4L2CameraSetting(fd, V4L2_CID_AUTO_WHITE_BALANCE)));
+        settings.insert(std::make_pair("whiteBalanceTemperature", V4L2CameraSetting(fd, V4L2_CID_WHITE_BALANCE_TEMPERATURE)));
+        settings.insert(std::make_pair("autoExposurePriority",    V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_AUTO_PRIORITY)));
+        settings.insert(std::make_pair("brightness",              V4L2CameraSetting(fd, V4L2_CID_BRIGHTNESS)));
+        settings.insert(std::make_pair("contrast",                V4L2CameraSetting(fd, V4L2_CID_CONTRAST)));
+        settings.insert(std::make_pair("saturation",              V4L2CameraSetting(fd, V4L2_CID_SATURATION)));
+        settings.insert(std::make_pair("gain",                    V4L2CameraSetting(fd, V4L2_CID_GAIN)));
+        settings.insert(std::make_pair("autoExposure",            V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_AUTO)));
+        settings.insert(std::make_pair("autoExposurePriority",    V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_AUTO_PRIORITY)));
+        settings.insert(std::make_pair("absoluteExposure",        V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_ABSOLUTE)));
+        settings.insert(std::make_pair("powerLineFrequency",      V4L2CameraSetting(fd, V4L2_CID_POWER_LINE_FREQUENCY)));
+        settings.insert(std::make_pair("sharpness",               V4L2CameraSetting(fd, V4L2_CID_SHARPNESS)));
 
         // Start streaming data
         int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -177,23 +177,23 @@ namespace modules {
         }
     }
 
-    std::map<std::string, DarwinCameraSetting>& DarwinCamera::getSettings() {
+    std::map<std::string, V4L2CameraSetting>& V4L2Camera::getSettings() {
         return settings;
     }
 
-    size_t DarwinCamera::getWidth() const {
+    size_t V4L2Camera::getWidth() const {
         return width;
     }
 
-    size_t DarwinCamera::getHeight() const {
+    size_t V4L2Camera::getHeight() const {
         return height;
     }
 
-    std::string DarwinCamera::getDeviceID() const {
+    std::string V4L2Camera::getDeviceID() const {
         return deviceID;
     }
 
-    void DarwinCamera::closeCamera() {
+    void V4L2Camera::closeCamera() {
         int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         // Start streaming data
         if (ioctl(fd, VIDIOC_STREAMOFF, &command) == -1) {

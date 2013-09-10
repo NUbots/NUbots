@@ -16,19 +16,19 @@
  * Trent Houliston <trent@houliston.me>
  */
 
-#include "DarwinCameraReader.h"
+#include "LinuxCameraStreamer.h"
 
-#include "DarwinCamera.h"
+#include "V4L2Camera.h"
 #include "messages/Image.h"
 #include "messages/Configuration.h"
 
 namespace modules {
 
     // We assume that the device will always be video0, if not then change this
-    DarwinCameraReader::DarwinCameraReader(NUClear::PowerPlant* plant) : Reactor(plant), camera("/dev/video0") {
+    LinuxCameraStreamer::LinuxCameraStreamer(NUClear::PowerPlant* plant) : Reactor(plant) {
 
         // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
-        on<Trigger<Every<NUClear::clock::period::den / DarwinCamera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
+        on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
 
             // Get an image and emit it
             emit(std::unique_ptr<messages::Image>(camera.getImage()));
@@ -39,7 +39,7 @@ namespace modules {
             camera.closeCamera();
         });
 
-        on<Trigger<messages::Configuration<DarwinCameraReader>>>([this](const messages::Configuration<DarwinCameraReader>& settings) {
+        on<Trigger<messages::Configuration<LinuxCameraStreamer>>>([this](const messages::Configuration<LinuxCameraStreamer>& settings) {
             try {
                 // Recreate the camera device at the required resolution
                 int width = settings.config["imageWidth"];

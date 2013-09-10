@@ -16,13 +16,13 @@
  * Trent Houliston <trent@houliston.me>
  */
 
-#ifndef MODULES_DARWINCAMERA_H
-#define MODULES_DARWINCAMERA_H
+#ifndef MODULES_V4L2CAMERA_H
+#define MODULES_V4L2CAMERA_H
 
 #include <map>
 
 #include "messages/Image.h"
-#include "DarwinCameraSetting.h"
+#include "V4L2CameraSetting.h"
 
 namespace modules {
 
@@ -41,10 +41,10 @@ namespace modules {
      * @author Jake Woods
      * @author Trent Houliston
      */
-    class DarwinCamera {
+    class V4L2Camera {
     private:
         /// @brief This struct holds all of the variables we need for interaction with the kernel space buffers
-        struct KernelBuffers {
+        struct KernelBuffer {
             /// @brief the size of the kernel space buffer
             size_t length;
             /// @brief a pointer to the first address of the virtual mapped kernel space
@@ -61,7 +61,7 @@ namespace modules {
         size_t height;
 
         /// @brief this map is used to hold several ioctl wrappers that let us set settings easily
-        std::map<std::string, DarwinCameraSetting> settings;
+        std::map<std::string, V4L2CameraSetting> settings;
 
         /// @brief The name of the device to read camera data from
         std::string deviceID;
@@ -78,7 +78,7 @@ namespace modules {
          *
          * @param device the path to the video device to use (e.g. /dev/video0)
          */
-        DarwinCamera(const std::string& device);
+        V4L2Camera();
 
         /**
          * @brief Gets a pointer to the latest image from the camera so that it can be sent out to the rest of the system
@@ -98,7 +98,7 @@ namespace modules {
         /**
          * @brief Returns a map of all configurable settings
          */
-        std::map<std::string, DarwinCameraSetting>& getSettings();
+        std::map<std::string, V4L2CameraSetting>& getSettings();
 
         /**
          * @brief Returns the horizontal resolution the camera is currently set to

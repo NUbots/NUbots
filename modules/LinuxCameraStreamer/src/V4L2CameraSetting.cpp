@@ -16,7 +16,7 @@
  * Trent Houliston <trent@houliston.me>
  */
 
-#include "DarwinCameraSetting.h"
+#include "V4L2CameraSetting.h"
 
 #include <stdexcept>
 #include <system_error>
@@ -26,10 +26,10 @@
 
 namespace modules {
 
-    DarwinCameraSetting::DarwinCameraSetting(int fileDescriptor, unsigned int id) : fd(fileDescriptor), id(id) {
+    V4L2CameraSetting::V4L2CameraSetting(int fileDescriptor, unsigned int id) : fd(fileDescriptor), id(id) {
     }
 
-    int32_t DarwinCameraSetting::get() {
+    int32_t V4L2CameraSetting::get() {
 
         // Check if we can access the value
         struct v4l2_queryctrl queryctrl;
@@ -50,12 +50,12 @@ namespace modules {
         if (ioctl(fd, VIDIOC_G_CTRL, &control_s) < 0) {
             throw std::system_error(errno, std::system_category(), "There was an error while trying to get the current value");
         }
-        
+
         return control_s.value;
     }
 
-    bool DarwinCameraSetting::set(int32_t value) {
-        
+    bool V4L2CameraSetting::set(int32_t value) {
+
         // Check if we can access the value
         struct v4l2_queryctrl queryctrl;
         queryctrl.id = id;
@@ -68,7 +68,7 @@ namespace modules {
         if (queryctrl.type != V4L2_CTRL_TYPE_BOOLEAN && queryctrl.type != V4L2_CTRL_TYPE_INTEGER && queryctrl.type != V4L2_CTRL_TYPE_MENU) {
             return false;
         }
-        
+
         // Shape the value if it's above or below our limits
         if (value < queryctrl.minimum) {
             value = queryctrl.minimum;
@@ -84,7 +84,7 @@ namespace modules {
         if (ioctl(fd, VIDIOC_S_CTRL, &control_s) < 0) {
             return false;
         }
-        
+
         // We succeeded
         return true;
     }

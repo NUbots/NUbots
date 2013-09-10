@@ -11,7 +11,7 @@ ADD_HAT(
         ConfigSystem
         Platform::Darwin::HardwareIO
         Platform::Darwin::MotionManager
-        DarwinCameraReader
+        LinuxCameraStreamer
         ScriptEngine
         eSpeak
         PartyDarwin

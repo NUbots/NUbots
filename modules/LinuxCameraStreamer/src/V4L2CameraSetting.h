@@ -25,10 +25,10 @@ namespace modules {
 
     /**
      * @brief Holds an individual camera setting encapsulating the ioctl calls needed to get and set it
-     * 
+     *
      * @author Trent Houliston
      */
-    class DarwinCameraSetting {
+    class V4L2CameraSetting {
     private:
         /// @brief the file descriptor for our camera
         int fd;
@@ -37,24 +37,24 @@ namespace modules {
     public:
         /**
          * Builds a new camera setting, encapsulating the setting of setting "id" for file descriptor "fileDescriptor"
-         * 
+         *
          * @param fileDescriptor    the file descriptor to the camera we are setting for
          * @param id                the id for the setting we are setting
          */
-        DarwinCameraSetting(int fileDescriptor, unsigned int id);
-        
+        V4L2CameraSetting(int fileDescriptor, unsigned int id);
+
         /**
          * Gets the current value of this setting
-         * 
+         *
          * @return the current value for this setting
          */
         int32_t get();
-        
+
         /**
          * Sets the current value for this setting
-         * 
+         *
          * @param the value to set this setting to
-         * 
+         *
          * @return true if we succeeded in setting this value, false otherwise
          */
         bool set(int32_t);
