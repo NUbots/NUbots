@@ -30,7 +30,7 @@
 
 namespace modules {
 
-    DarwinCamera::DarwinCamera(const std::string& device) : fd(-1), width(0), height(0), deviceName(device) {
+    DarwinCamera::DarwinCamera(const std::string& device) : fd(-1), width(0), height(0), deviceID("") {
     }
 
     messages::Image* DarwinCamera::getImage() {
@@ -69,19 +69,21 @@ namespace modules {
         return image;
     }
 
-    void DarwinCamera::resetCamera(size_t w, size_t h) {
+    void DarwinCamera::resetCamera(std::string device, size_t w, size_t h) {
         if (fd != -1) {
             closeCamera();
         }
 
+        // Store our new state
+        deviceID = device;
         width = w;
         height = h;
 
         // Open the camera device
-        fd = open(deviceName.c_str(), O_RDWR);
+        fd = open(deviceID.c_str(), O_RDWR);
         // Check if we managed to open our file descriptor
         if (fd < 0) {
-            throw std::runtime_error(std::string("We were unable to access the camera device on ") + deviceName);
+            throw std::runtime_error(std::string("We were unable to access the camera device on ") + deviceID);
         }
 
         // Here we set the "Format" of the device (the type of data we are getting)
@@ -178,13 +180,17 @@ namespace modules {
     std::map<std::string, DarwinCameraSetting>& DarwinCamera::getSettings() {
         return settings;
     }
-    
+
     size_t DarwinCamera::getWidth() const {
         return width;
     }
 
     size_t DarwinCamera::getHeight() const {
         return height;
+    }
+
+    std::string DarwinCamera::getDeviceID() const {
+        return deviceID;
     }
 
     void DarwinCamera::closeCamera() {

@@ -1,4 +1,5 @@
 {
+    "deviceID": "/dev/video0",
     "autoWhiteBalance": 0,
     "whiteBalanceTemperature": 2000,
     "brightness": 143,

@@ -44,10 +44,13 @@ namespace modules {
                 // Recreate the camera device at the required resolution
                 int width = settings.config["imageWidth"];
                 int height = settings.config["imageHeight"];
-                if (camera.getWidth() != static_cast<size_t>(width) || camera.getHeight() != static_cast<size_t>(height)) {
-                    camera.resetCamera(width, height);
+                std::string deviceID = settings.config["deviceID"];
+                if (camera.getWidth() != static_cast<size_t>(width)
+                    || camera.getHeight() != static_cast<size_t>(height)
+                    || camera.getDeviceID() != deviceID) {
+                    camera.resetCamera(deviceID, width, height);
                 }
-            
+
                 // Set all other camera settings
                 for(auto& setting : camera.getSettings()) {
                     int value = settings.config[setting.first];

@@ -27,16 +27,16 @@
 namespace modules {
 
     /**
-     * @brief This class encapsulates the physical camera device. It will setup a camera device and begin streaming 
+     * @brief This class encapsulates the physical camera device. It will setup a camera device and begin streaming
      *    images
-     * 
+     *
      * @details
      *    This class uses the Video4Linux2 kernel drivers in order to connect to and get data from the darwins built in
      *    webcam. It allocates 2 kernel mode buffers which are mapped into user space. These buffers are alternated and
      *  the data from the most recently filled one is used to construct an image object. This class also provides easy
      *  access to all the settings that are available on the camera. It is provided as a map in order to make accessing
      *  the paramters by name (from a config file) easier
-     * 
+     *
      * @author Michael Burton
      * @author Jake Woods
      * @author Trent Houliston
@@ -53,18 +53,18 @@ namespace modules {
 
         /// @brief this file descriptor points to the camera object
         int fd;
-        
+
         /// @brief the width of the image being retrieved from the camera
         size_t width;
-        
+
         /// @brief the height of the image being retrieved from the camera
         size_t height;
-        
+
         /// @brief this map is used to hold several ioctl wrappers that let us set settings easily
         std::map<std::string, DarwinCameraSetting> settings;
-        
+
         /// @brief The name of the device to read camera data from
-        std::string deviceName;
+        std::string deviceID;
     public:
 
         /// @brief this enum holds important constants (we are c++ we don't use defines for this kind of thing)
@@ -72,28 +72,28 @@ namespace modules {
             /// @brief the framerate we are requesting
             FRAMERATE = 30
         };
-        
+
         /**
          * @brief Constructs a new DarwinCamera class using the passed string as the device
-         * 
+         *
          * @param device the path to the video device to use (e.g. /dev/video0)
          */
         DarwinCamera(const std::string& device);
-        
+
         /**
          * @brief Gets a pointer to the latest image from the camera so that it can be sent out to the rest of the system
-         * 
+         *
          * @return a pointer to the latest image from the camera
          */
         messages::Image* getImage();
-        
+
         /**
          * @brief Sets up the camera at a given resolution
-         * 
+         *
          * @param w the image's width
          * @param h the image's height
          */
-        void resetCamera(size_t w, size_t h);
+        void resetCamera(std::string name, size_t w, size_t h);
 
         /**
          * @brief Returns a map of all configurable settings
@@ -109,7 +109,12 @@ namespace modules {
          * @brief Returns the vertical resolution the camera is currently set to
          */
         size_t getHeight() const;
-        
+
+        /**
+         * @brief Returns the device id that is currently used as the camera
+         */
+        std::string getDeviceID() const;
+
         /**
          * @brief This method is to be called when shutting down the system. It does cleanup on the cameras resources
          */
