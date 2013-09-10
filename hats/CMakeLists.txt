@@ -8,9 +8,9 @@ ADD_HAT(
     NAME robocup
     MODULES 
         ConfigSystem
-        DarwinPlatform
+        Platform::Darwin::DarwinPlatform
+        Platform::Darwin::DarwinMotionManager
         DarwinCameraReader
-        DarwinMotionManager
         ScriptEngine
         eSpeak
         PartyDarwin
@@ -21,8 +21,8 @@ ADD_HAT(
     NAME scriptrunner
     MODULES
         ConfigSystem
-        DarwinPlatform
-        DarwinMotionManager
+        Platform::Darwin::DarwinPlatform
+        Platform::Darwin::DarwinMotionManager
         ScriptEngine
         ScriptRunner
         NUBugger
@@ -31,8 +31,8 @@ ADD_HAT(
 ADD_HAT(
     NAME scripttuner
     MODULES
-        DarwinPlatform
-        DarwinMotionManager
+        Platform::Darwin::DarwinPlatform
+        Platform::Darwin::DarwinMotionManager
         NUBugger
         ScriptTuner
         PartyDarwin)

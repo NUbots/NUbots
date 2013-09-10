@@ -15,12 +15,17 @@ FUNCTION(ADD_HAT)
     # include directories to include the source directory of each module
     # avoid relative paths in our modules which makes them easier
     # to move around.
-    FOREACH(module ${HAT_MODULES})
-        INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/modules/${module}/src")
-    ENDFOREACH()
+    #FOREACH(module ${HAT_MODULES})
+    #    STRING(REPLACE "::" "/" module "${module}")
+    #    INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/modules/${module}/src")
+    #ENDFOREACH()
+
+    INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/modules/")
+
+    STRING(REPLACE "::" "" HAT_MODULES_TARGETS "${HAT_MODULES}")
 
     ADD_EXECUTABLE("${HAT_NAME}" "${CMAKE_BINARY_DIR}/hats/${HAT_NAME}.cpp")
-    TARGET_LINK_LIBRARIES(${HAT_NAME} ${HAT_MODULES} ${NUBOTS_SHARED_LIBRARIES})
+    TARGET_LINK_LIBRARIES(${HAT_NAME} ${HAT_MODULES_TARGETS} ${NUBOTS_SHARED_LIBRARIES})
 
     SET(hats ${hats} ${HAT_NAME} PARENT_SCOPE)
     SET(modules ${modules} ${HAT_MODULES} PARENT_SCOPE)

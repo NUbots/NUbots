@@ -33,7 +33,9 @@ echo "#include <NUClear.h>" >> "$hat_name";
 
 # Add our module headers
 for module in ${@:2}; do
-    echo "#include \"${module}.h\"" >> "$hat_name";
+    # Each module is given to us as Namespace::Namespace::Name.
+    # we need to replace the ::'s with /'s so we can include them.
+    echo "#include \"`echo "${module}" | sed -e \"s/::/\//g\"`.h\"" >> "$hat_name";
 done
 
 # Add our main function.

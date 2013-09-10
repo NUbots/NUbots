@@ -49,6 +49,8 @@ LIST(REMOVE_DUPLICATES modules ${modules})
 
 # Build each of our modules and their corresponding tests
 FOREACH(module ${modules})
+    STRING(REPLACE "::" "/" module "${module}")
+
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${module})
     # Add the test
