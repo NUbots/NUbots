@@ -8,10 +8,20 @@ FUNCTION(ADD_HAT)
     ADD_CUSTOM_COMMAND(
         OUTPUT "${CMAKE_BINARY_DIR}/hats/${HAT_NAME}.cpp"
         COMMAND "${NUBOTS_SCRIPTS_DIR}/generate.sh" "${CMAKE_BINARY_DIR}/hats/${HAT_NAME}.cpp" ${HAT_MODULES}
-        COMMENT "Generating hat \"${HAT_NAME}\" with modules \"${HAT_MODULES}\""
+        COMMENT "Generating the ${HAT_NAME} hat"
         DEPENDS "${NUBOTS_SCRIPTS_DIR}/generate.sh")
+    
+    # Each hat wants to access a number of modules. We're going to set our
+    # include directories to include the source directory of each module
+    # avoid relative paths in our modules which makes them easier
+    # to move around.
+    FOREACH(module ${HAT_MODULES})
+        INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/modules/${module}/src")
+    ENDFOREACH()
 
     ADD_EXECUTABLE("${HAT_NAME}" "${CMAKE_BINARY_DIR}/hats/${HAT_NAME}.cpp")
     TARGET_LINK_LIBRARIES(${HAT_NAME} ${HAT_MODULES} ${NUBOTS_SHARED_LIBRARIES})
 
+    SET(hats ${hats} ${HAT_NAME} PARENT_SCOPE)
+    SET(modules ${modules} ${HAT_MODULES} PARENT_SCOPE)
 ENDFUNCTION(ADD_HAT)

@@ -5,21 +5,6 @@ SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 2)
 SET(VERSION_PATCH 0)
 
-# These define which modules will be installed
-SET(modules
-    ConfigSystem
-    DarwinPlatform
-    DarwinCameraReader
-    DarwinMotionManager
-    ScriptEngine
-    ScriptTuner
-    ScriptRunner
-    eSpeak
-    PartyDarwin
-    AudioInput
-    NUBugger
-)
-
 # Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)
 
@@ -43,6 +28,7 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/NUClearModuleBuilder.cmake")
 INCLUDE_DIRECTORIES("shared")
 INCLUDE_DIRECTORIES("build/shared")
 
+# Build tests in test mode
 IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
@@ -55,15 +41,19 @@ ADD_SUBDIRECTORY(shared/utility)
 # Add these to our shared libraries (started in our shared libraries cmake)
 SET(NUBOTS_SHARED_LIBRARIES ${NUBOTS_SHARED_LIBRARIES} messages utility)
 
+# Find and build all our hats
+ADD_SUBDIRECTORY(hats)
+
+# Remove any duplicate modules (used in more then one hat)
+LIST(REMOVE_DUPLICATES modules ${modules})
+
 # Build each of our modules and their corresponding tests
 FOREACH(module ${modules})
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${module})
-    INCLUDE_DIRECTORIES(modules/${module}/src)
+    # Add the test
     ADD_TEST(Test${module} modules/${module}/Test${module})
 ENDFOREACH()
-
-ADD_SUBDIRECTORY(hats)
 
 # Include our scp darwin sender
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")

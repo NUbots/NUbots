@@ -1,17 +1,17 @@
 #!/bin/bash
 #
-# File:   install.sh
+# File:   generate.sh
 # Authors: 
 #   Jake Woods <jake.f.woods@gmail.com>
 #   Trent Houliston <trent@houliston.me>
 #
 
 # Ensure we have specified a name
-if [ -z "$1" ] ; then
+if [ -n "$1" ] ; then
+    hat_name=$1;
+else
     echo "You must specify a name";
     exit 1;
-else
-    hat_name=$1;
 fi
 
 # Ensure we've got at least one module
@@ -25,19 +25,19 @@ fi
 # Delete the old hat if it exists. We pipe to
 # /dev/null to supress a message if it doesn't
 # exist.
-rm $hat_name 2> /dev/null;
+rm "$hat_name" 2> /dev/null;
 
 # Build up our headers.
 # We always need NUClear.h
-echo "#include <NUClear.h>" >> $hat_name;
+echo "#include <NUClear.h>" >> "$hat_name";
 
 # Add our module headers
 for module in ${@:2}; do
-    echo "#include \"${module}.h\"" >> $hat_name;
+    echo "#include \"${module}.h\"" >> "$hat_name";
 done
 
 # Add our main function.
-cat >> $hat_name << EOF
+cat >> "$hat_name" << EOF
 
 int main(int argc, char** argv) {
     NUClear::PowerPlant::Configuration config;
@@ -48,10 +48,10 @@ EOF
 
 # Add our installs
 for module in ${@:2}; do
-    echo -e "\tplant.install<modules::${module}>();" >> $hat_name;
+    echo -e "\tplant.install<modules::${module}>();" >> "$hat_name";
 done
 
-cat >> $hat_name << EOF
+cat >> "$hat_name" << EOF
 
     plant.start();
     return 0;

@@ -16,18 +16,30 @@ ADD_HAT(
         PartyDarwin
         AudioInput
         NUBugger)
-        
 
-ADD_EXECUTABLE(scripttuner scripttuner.cpp)
-TARGET_LINK_LIBRARIES(scripttuner
-    ${NUBOTS_SHARED_LIBRARIES}
-    ${modules})
+ADD_HAT(
+    NAME scriptrunner
+    MODULES
+        ConfigSystem
+        DarwinPlatform
+        DarwinMotionManager
+        ScriptEngine
+        ScriptRunner
+        NUBugger
+        PartyDarwin)
 
-ADD_EXECUTABLE(scriptrunner scriptrunner.cpp)
-TARGET_LINK_LIBRARIES(scriptrunner
-    ${NUBOTS_SHARED_LIBRARIES}
-    ${modules})
+ADD_HAT(
+    NAME scripttuner
+    MODULES
+        DarwinPlatform
+        DarwinMotionManager
+        NUBugger
+        ScriptTuner
+        PartyDarwin)
 
-SET(hats
-    scripttuner
-    scriptrunner)
+# The ADD_HAT function appends itself to the ${hats} variable.
+# We need to expose this to our parent scope so the DarwinSend.cmake
+# file knows what binaries it depends on. We do this so that "make install"
+# and "make run" will properly update when binaries are regenerated.
+SET(hats ${hats} PARENT_SCOPE)
+SET(modules ${modules} PARENT_SCOPE)
