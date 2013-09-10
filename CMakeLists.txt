@@ -35,9 +35,6 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/SharedLibraries.cmake")
 # Include our module builder
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/NUClearModuleBuilder.cmake")
 
-# Include our scp darwin sender
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")
-
 # Include our shared messages etc headers
 INCLUDE_DIRECTORIES("shared")
 INCLUDE_DIRECTORIES("build/shared")
@@ -62,12 +59,7 @@ FOREACH(module ${modules})
     ADD_TEST(Test${module} modules/${module}/Test${module})
 ENDFOREACH()
 
-ADD_EXECUTABLE(robocup robocup.cpp)
-TARGET_LINK_LIBRARIES(robocup
-    ${NUBOTS_SHARED_LIBRARIES}
-    ${modules})
+ADD_SUBDIRECTORY(hats)
 
-ADD_EXECUTABLE(scriptrunner scriptrunner.cpp)
-TARGET_LINK_LIBRARIES(scriptrunner
-    ${NUBOTS_SHARED_LIBRARIES}
-    ${modules})
+# Include our scp darwin sender
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")

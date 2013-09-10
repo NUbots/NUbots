@@ -1,7 +1,9 @@
 #!/bin/bash
 #
 # File:   install.sh
-# Author: Trent Houliston <trent@houliston.me>
+# Authors: 
+#   Trent Houliston <trent@houliston.me>
+#   Jake Woods <jake.f.woods@gmail.com>
 #
 
 if [ -z "$1" ] ; then
@@ -18,8 +20,9 @@ else
 fi
 
 # Copy our robocup binary over
-scp -C robocup "darwin@$robotIP:/home/darwin/"
-scp -C scriptrunner "darwin@$robotIP:/home/darwin/"
+for file in `find hats -executable -type f`; do
+    scp -C "$file" "darwin@$robotIP:/home/darwin/"
+done
 
 # Overwrite configuration files
 if [ "$config" == "update" ] || [ "$config" == "u" ] ;
