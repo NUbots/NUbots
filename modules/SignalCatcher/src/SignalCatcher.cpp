@@ -16,32 +16,45 @@
  */
 
 #include "SignalCatcher.h"
-#include <signal.h>
+#include <csignal>
 
 namespace modules {
 
-    SignalCatcher::SignalCatcher(NUClear::PowerPlant* plant) : Reactor(plant) {
-        powerPlant = plant;
+    // Set our initial shutdown request state
+    volatile bool SignalCatcher::userRequestedShutdown = false;
 
-        signal(SIGINT, &SignalCatcher::sigintHandler);
-        signal(SIGSEGV, &SignalCatcher::segfaultConverter);
+    SignalCatcher::SignalCatcher(NUClear::PowerPlant* plant) : Reactor(plant) {
+
+        // Store our powerplant in the static variable
+        POWER_PLANT = plant;
+
+        // On sigint run the sigint handler
+        std::signal(SIGINT, &SignalCatcher::sigintHandler);
+
+        // On a segfault run the sigsev handler
+        std::signal(SIGSEGV, &SignalCatcher::segfaultConverter);
     }
 
     void SignalCatcher::sigintHandler(int signal) {
+
+        // Output that a shutdown command was sent (so the user knows the ctrl-c worked)
         std::cout << std::endl << "Shutdown Command Sent" << std::endl;
 
-        if(!run) {
-            powerPlant->shutdown();
-            run = true;
-        } 
+        // If this is the first time they asked
+        if(!userRequestedShutdown) {
+
+            // Ask the system to shutdown, and flag that the user has asked once
+            POWER_PLANT->shutdown();
+            userRequestedShutdown = true;
+        }
+        // If this is the second time, kill everything
         else {
             exit(1);
         }
     }
 
     void SignalCatcher::segfaultConverter(int signal) {
-        std::cout << "Segmentation Fault" << std::endl;
-        throw SegmentationFault();
+        throw messages::SegmentationFault();
     }
 
 }
