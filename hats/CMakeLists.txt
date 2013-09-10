@@ -7,6 +7,7 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/AddHat.cmake")
 ADD_HAT(
     NAME robocup
     MODULES
+        SignalCatcher
         ConfigSystem
         Platform::Darwin::HardwareIO
         Platform::Darwin::MotionManager
