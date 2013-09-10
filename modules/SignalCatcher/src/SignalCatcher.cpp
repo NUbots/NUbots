@@ -23,6 +23,9 @@ namespace modules {
     // Set our initial shutdown request state
     volatile bool SignalCatcher::userRequestedShutdown = false;
 
+    // Initialize our powerplant variable
+    NUClear::PowerPlant* SignalCatcher::POWER_PLANT = nullptr;
+
     SignalCatcher::SignalCatcher(NUClear::PowerPlant* plant) : Reactor(plant) {
 
         // Store our powerplant in the static variable
