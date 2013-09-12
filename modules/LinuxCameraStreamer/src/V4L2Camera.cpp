@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <stdexcept>
 #include <system_error>
+#include <string>
 #include <sstream>
 #include <linux/videodev2.h>
 
