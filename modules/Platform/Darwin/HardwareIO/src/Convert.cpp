@@ -165,7 +165,7 @@ namespace Darwin {
         return (angle / POSITION_CONVERSION_FACTOR) + 2048;
     }
 
-    float Convert::speed(const uint8_t id, const uint16_t value) {
+    float Convert::servoSpeed(const uint8_t id, const uint16_t value) {
 
         // We only care about the lower bits
         float raw = (value & 0x3FF) * SPEED_CONVERSION_FACTOR[id];
@@ -178,7 +178,7 @@ namespace Darwin {
 
         return raw;
     }
-    uint16_t Convert::speedInverse(const uint8_t id, const float value) {
+    uint16_t Convert::servoSpeedInverse(const uint8_t id, const float value) {
         uint16_t raw = (value * SERVO_DIRECTION[id]) / SPEED_CONVERSION_FACTOR[id];
 
         // If the value is greater then 1023, then set to max speed (0)
@@ -189,7 +189,7 @@ namespace Darwin {
         return value * TORQUE_LIMIT_CONVERSION_FACTOR;
     }
 
-    float Convert::load(const uint8_t id, const uint16_t value) {
+    float Convert::servoLoad(const uint8_t id, const uint16_t value) {
          // We only care about the lower bits if bit 10 is set then we are moving clockwise
         float raw = (value & 0x3FF) * (value & 0x400 ? -1 : 1);
         raw *= LOAD_CONVERSION_FACTOR;

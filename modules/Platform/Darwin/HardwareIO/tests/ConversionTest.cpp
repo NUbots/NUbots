@@ -206,10 +206,10 @@ TEST_CASE("Testing the hardware torque limit conversions to between 0 and 100", 
 TEST_CASE("Testing the hardware load conversions to between -100 and 100", "[hardware][conversion][load]") {
 
     for (int i = 0; i < 20; ++i) {
-        REQUIRE(Convert::load(i, 0)    == Approx(0    * Convert::SERVO_DIRECTION[i]));
-        REQUIRE(Convert::load(i, 1024) == Approx(0    * Convert::SERVO_DIRECTION[i]));
-        REQUIRE(Convert::load(i, 2047) == Approx(-100 * Convert::SERVO_DIRECTION[i]));
-        REQUIRE(Convert::load(i, 1023) == Approx(100  * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(i, 0)    == Approx(0    * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(i, 1024) == Approx(0    * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(i, 2047) == Approx(-100 * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(i, 1023) == Approx(100  * Convert::SERVO_DIRECTION[i]));
     }
 }
 

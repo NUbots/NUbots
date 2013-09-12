@@ -75,6 +75,11 @@ namespace Darwin {
          */
         static double SPEED_CONVERSION_FACTOR[];
 
+        template <int bit>
+        static bool getBit(const uint16_t value) {
+            return (value & (1 << bit)) == (1 << bit);
+        }
+
         static float accelerometer(const uint16_t value);
         static float gyroscope(const uint16_t value);
         static float voltage(const uint8_t value);
@@ -90,12 +95,12 @@ namespace Darwin {
         static float servoPosition(const uint8_t id, const uint16_t value);
         static uint16_t servoPositionInverse(const uint8_t id, const float value);
 
-        static float speed(const uint8_t id, const uint16_t value);
-        static uint16_t speedInverse(const uint8_t id, const float value);
+        static float servoSpeed(const uint8_t id, const uint16_t value);
+        static uint16_t servoSpeedInverse(const uint8_t id, const float value);
 
         static float torqueLimit(const uint16_t value);
 
-        static float load(const uint8_t id, const uint16_t value);
+        static float servoLoad(const uint8_t id, const uint16_t value);
 
         static float temperature(const uint8_t value);
     };
