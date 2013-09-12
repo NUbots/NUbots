@@ -78,83 +78,104 @@ TEST_CASE("Testing the hardware FSR conversions to SI units", "[hardware][conver
 
 TEST_CASE("Testing the hardware coloured LED conversions to 24bit rgb", "[hardware][conversion][led]") {
 
-    INFO("Testing the forward coloured LED conversions");
-    REQUIRE(Convert::colourLED(0)      == std::make_tuple(0, 0, 0));            // Should be black
-    REQUIRE(Convert::colourLED(0x1F)   == std::make_tuple(0xF8, 0, 0));         // Should be red
-    REQUIRE(Convert::colourLED(0x3E0)  == std::make_tuple(0, 0xF8, 0));         // Should be green
-    REQUIRE(Convert::colourLED(0x7C00) == std::make_tuple(0, 0, 0xF8));         // Should be blue
-    REQUIRE(Convert::colourLED(0x7FFF) == std::make_tuple(0xF8, 0xF8, 0xF8));   // Should be white
-    REQUIRE(Convert::colourLED(0x7C1F) == std::make_tuple(0xF8, 0, 0xF8));      // Should be red and blue
+    // This scope gets rid of the INFO messages once we pass this section
+    {
+        INFO("Testing the forward coloured LED conversions");
+        REQUIRE(Convert::colourLED(0)      == std::make_tuple(0, 0, 0));            // Should be black
+        REQUIRE(Convert::colourLED(0x1F)   == std::make_tuple(0xF8, 0, 0));         // Should be red
+        REQUIRE(Convert::colourLED(0x3E0)  == std::make_tuple(0, 0xF8, 0));         // Should be green
+        REQUIRE(Convert::colourLED(0x7C00) == std::make_tuple(0, 0, 0xF8));         // Should be blue
+        REQUIRE(Convert::colourLED(0x7FFF) == std::make_tuple(0xF8, 0xF8, 0xF8));   // Should be white
+        REQUIRE(Convert::colourLED(0x7C1F) == std::make_tuple(0xF8, 0, 0xF8));      // Should be red and blue
+    }
 
-    INFO("Testing the inverse coloured LED conversions");
-    REQUIRE(Convert::colourLEDInverse(0, 0, 0)          == 0);      // Should be black
-    REQUIRE(Convert::colourLEDInverse(0xFF, 0, 0)       == 0x1F);   // Should be red
-    REQUIRE(Convert::colourLEDInverse(0, 0xFF, 0)       == 0x3E0);  // Should be green
-    REQUIRE(Convert::colourLEDInverse(0, 0, 0xFF)       == 0x7C00); // Should be blue
-    REQUIRE(Convert::colourLEDInverse(0xFF, 0xFF, 0xFF) == 0x7FFF); // Should be white
-    REQUIRE(Convert::colourLEDInverse(0xFF, 0, 0xFF)    == 0x7C1F); // Should be red and blue
+    // This scope gets rid of the INFO messages once we pass this section
+    {
+        INFO("Testing the inverse coloured LED conversions");
+        REQUIRE(Convert::colourLEDInverse(0, 0, 0)          == 0);      // Should be black
+        REQUIRE(Convert::colourLEDInverse(0xFF, 0, 0)       == 0x1F);   // Should be red
+        REQUIRE(Convert::colourLEDInverse(0, 0xFF, 0)       == 0x3E0);  // Should be green
+        REQUIRE(Convert::colourLEDInverse(0, 0, 0xFF)       == 0x7C00); // Should be blue
+        REQUIRE(Convert::colourLEDInverse(0xFF, 0xFF, 0xFF) == 0x7FFF); // Should be white
+        REQUIRE(Convert::colourLEDInverse(0xFF, 0, 0xFF)    == 0x7C1F); // Should be red and blue
+    }
 }
 
 TEST_CASE("Testing the hardware gain conversions to SI units", "[hardware][conversion][gain]") {
 
-    INFO("Testing the forward gain conversions");
-    REQUIRE(Convert::gain(254) == Approx(100)); // Should be 100
-    REQUIRE(Convert::gain(127) == Approx(50));  // Should be 50
-    REQUIRE(Convert::gain(0)   == Approx(0));   // Should be 0
+    // This scope gets rid of the INFO messages once we pass this section
+    {
+        INFO("Testing the forward gain conversions");
+        REQUIRE(Convert::gain(254) == Approx(100)); // Should be 100
+        REQUIRE(Convert::gain(127) == Approx(50));  // Should be 50
+        REQUIRE(Convert::gain(0)   == Approx(0));   // Should be 0
+    }
 
-    INFO("Testing the inverse gain conversions");
-    REQUIRE(Convert::gainInverse(100)  == 254);     // Should be max
-    REQUIRE(Convert::gainInverse(0)    == 0);       // Should be min
-    REQUIRE(Convert::gainInverse(50)   == 127);     // Should be the middle
-    REQUIRE(Convert::gainInverse(1000) == 254);     // Should cap to max
-    REQUIRE(Convert::gainInverse(-10)  == 0);       // Should cap to min
+    // This scope gets rid of the INFO messages once we pass this section
+    {
+        INFO("Testing the inverse gain conversions");
+        REQUIRE(Convert::gainInverse(100)  == 254);     // Should be max
+        REQUIRE(Convert::gainInverse(0)    == 0);       // Should be min
+        REQUIRE(Convert::gainInverse(50)   == 127);     // Should be the middle
+        REQUIRE(Convert::gainInverse(1000) == 254);     // Should cap to max
+        REQUIRE(Convert::gainInverse(-10)  == 0);       // Should cap to min
+    }
 }
 
 TEST_CASE("Testing the hardware position conversions to radians", "[hardware][conversion][position]") {
 
-    INFO("Testing the forward position conversions");
+    // This scope gets rid of the INFO messages once we pass this section
+    {
+        INFO("Testing the forward position conversions");
 
-    const std::pair<uint16_t, float> forwardTests[] = {
-        { 0,    -M_PI },
-        { 1024, -M_PI_2 },
-        { 2048, 0 },
-        { 4095, M_PI }
-    };
+        const std::pair<uint16_t, float> forwardTests[] = {
+            { 0,    -M_PI },
+            { 1024, -M_PI_2 },
+            { 2048, 0 },
+            { 3074, M_PI_2 },
+            { 4095, M_PI }
+        };
 
-    for(size_t i = 0; i < 20; ++i) {
-        INFO("Testing forward motor " << i);
+        for (size_t i = 0; i < 20; ++i) {
+            INFO("Testing forward motor " << i);
 
-        for(auto& test : forwardTests) {
-            float expected = utility::math::angle::normalizeAngle((test.second + Convert::SERVO_OFFSET[i]) * Convert::SERVO_DIRECTION[i]);
-            float actual = Convert::servoPosition(i, test.first);
+            for (auto& test : forwardTests) {
+                float expected = utility::math::angle::normalizeAngle((test.second + Convert::SERVO_OFFSET[i]) * Convert::SERVO_DIRECTION[i]);
+                float actual = Convert::servoPosition(i, test.first);
 
-            INFO("Input: " << test.first);
-            INFO("Expected: " << expected << " Actual: " << actual);
+                INFO("Expected: " << expected << " Actual: " << actual);
 
-            REQUIRE(utility::math::angle::difference(expected, actual) < std::numeric_limits<float>::epsilon());
+                // The actual results from this are pretty loose (~0.005 radians) compared to floating point error due to
+                // the discrete nature of the data
+                REQUIRE(utility::math::angle::difference(expected, actual) < 0.005);
+            }
         }
     }
 
-    const std::pair<float, uint16_t> inverseTests[] {
-        { 0.0, 2048 },
-        { M_PI, 1},
-        { -M_PI, 1},
-        { M_PI * 2, 1},
-        { M_PI * 4, 1},
-        { -M_PI * 3, 1},
-        { 4, 1}
-    };
+    // This scope gets rid of the INFO messages once we pass this section
+    {
+        INFO("Testing the inverse position conversions");
 
-    INFO("Testing the inverse position conversions");
-    for(size_t i = 0; i < 20; ++i) {
-        INFO("Testing inverse motor " << i);
+        const std::pair<float, uint16_t> inverseTests[] {
+            { 0.0, 2048 },
+            { M_PI, 1 },
+            { -M_PI, 1 },
+            { M_PI * 2, 1 },
+            { M_PI * 4, 1 },
+            { -M_PI * 3, 1 },
+            { 4, 1 }
+        };
 
-        for(auto& tests : inverseTests) {
+        for (size_t i = 0; i < 20; ++i) {
+            INFO("Testing inverse motor " << i);
 
-            int16_t expected = 1;
-            int16_t actual = 2;
+            for (auto& tests : inverseTests) {
 
-            REQUIRE(expected == actual);
+                int16_t expected = 1;
+                int16_t actual = 2;
+
+                REQUIRE(expected == actual);
+            }
         }
     }
 }
@@ -165,12 +186,12 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
 
     FAIL("Write the test");
     INFO("Testing the forward speed conversions");
-    for(size_t i = 0; i < 20; ++i) {
+    for (size_t i = 0; i < 20; ++i) {
         // TODO test directions
     }
 
     INFO("Testing the inverse speed conversions");
-    for(size_t i = 0; i < 20; ++i) {
+    for (size_t i = 0; i < 20; ++i) {
         // TODO test directions
         // TODO test
     }
@@ -184,7 +205,7 @@ TEST_CASE("Testing the hardware torque limit conversions to between 0 and 100", 
 
 TEST_CASE("Testing the hardware load conversions to between -100 and 100", "[hardware][conversion][load]") {
 
-    for(int i = 0; i < 20; ++i) {
+    for (int i = 0; i < 20; ++i) {
         REQUIRE(Convert::load(i, 0)    == Approx(0    * Convert::SERVO_DIRECTION[i]));
         REQUIRE(Convert::load(i, 1024) == Approx(0    * Convert::SERVO_DIRECTION[i]));
         REQUIRE(Convert::load(i, 2047) == Approx(-100 * Convert::SERVO_DIRECTION[i]));

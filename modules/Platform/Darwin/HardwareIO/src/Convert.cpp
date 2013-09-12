@@ -49,26 +49,26 @@ namespace Darwin {
     };
 
     /// Offsets the radian angles of motors to change their 0 position
-    const float Convert::SERVO_OFFSET[] = {
-        -1.5707963f,    // [0]  R_SHOULDER_PITCH
-        1.5707963f,     // [1]  L_SHOULDER_PITCH
-        0.7853981f,     // [2]  R_SHOULDER_ROLL
-        -0.7853981f,    // [3]  L_SHOULDER_ROLL
-        1.5707963,      // [4]  R_ELBOW
-        -1.5707963f,    // [5]  L_ELBOW
-        0.0f,           // [6]  R_HIP_YAW
-        0.0f,           // [7]  L_HIP_YAW
-        0.0f,           // [8]  R_HIP_ROLL
-        0.0f,           // [9]  L_HIP_ROLL
-        0.0f,           // [10] R_HIP_PITCH
-        0.0f,           // [11] L_HIP_PITCH
-        0.0f,           // [12] R_KNEE
-        0.0f,           // [13] L_KNEE
-        0.0f,           // [14] R_ANKLE_PITCH
-        0.0f,           // [15] L_ANKLE_PITCH
-        0.0f,           // [16] R_ANKLE_ROLL
-        0.0f,           // [17] L_ANKLE_ROLL
-        0.0f,           // [18] HEAD_YAW
+    const double Convert::SERVO_OFFSET[] = {
+        -M_PI_2,       // [0]  R_SHOULDER_PITCH
+        M_PI_2,        // [1]  L_SHOULDER_PITCH
+        M_PI_4,        // [2]  R_SHOULDER_ROLL
+        -M_PI_4,       // [3]  L_SHOULDER_ROLL
+        M_PI_2,        // [4]  R_ELBOW
+        -M_PI_2,       // [5]  L_ELBOW
+        0.0,           // [6]  R_HIP_YAW
+        0.0,           // [7]  L_HIP_YAW
+        0.0,           // [8]  R_HIP_ROLL
+        0.0,           // [9]  L_HIP_ROLL
+        0.0,           // [10] R_HIP_PITCH
+        0.0,           // [11] L_HIP_PITCH
+        0.0,           // [12] R_KNEE
+        0.0,           // [13] L_KNEE
+        0.0,           // [14] R_ANKLE_PITCH
+        0.0,           // [15] L_ANKLE_PITCH
+        0.0,           // [16] R_ANKLE_ROLL
+        0.0,           // [17] L_ANKLE_ROLL
+        0.0,           // [18] HEAD_YAW
         -0.631,         // [19] HEAD_PITCH
     };
 

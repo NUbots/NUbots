@@ -66,7 +66,7 @@ namespace Darwin {
         static const int8_t SERVO_DIRECTION[];
 
         /// Offsets the radian angles of motors to change their 0 position
-        static const float SERVO_OFFSET[];
+        static const double SERVO_OFFSET[];
 
         /**
          * The speed conversion factor cannot be const, as at startup we have to work out if each motor is an
