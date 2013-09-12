@@ -162,7 +162,7 @@ namespace Darwin {
         // Undo our conversion operations
         angle *= SERVO_DIRECTION[id];
         angle -= SERVO_OFFSET[id];
-        return (angle / POSITION_CONVERSION_FACTOR) + 2048;
+        return std::round(angle / POSITION_CONVERSION_FACTOR) + 2048;
     }
 
     float Convert::servoSpeed(const uint8_t id, const uint16_t value) {

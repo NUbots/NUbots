@@ -124,6 +124,8 @@ TEST_CASE("Testing the hardware gain conversions to SI units", "[hardware][conve
 
 TEST_CASE("Testing the hardware position conversions to radians", "[hardware][conversion][position]") {
 
+    std::vector<std::vector<std::pair<float, uint16_t>>> inverseTests;
+
     // This scope gets rid of the INFO messages once we pass this section
     {
         INFO("Testing the forward position conversions");
@@ -139,16 +141,22 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
         for (size_t i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
 
+            std::vector<std::pair<float, uint16_t>> inverseTest;
+
             for (auto& test : forwardTests) {
                 float expected = utility::math::angle::normalizeAngle((test.second + Convert::SERVO_OFFSET[i]) * Convert::SERVO_DIRECTION[i]);
                 float actual = Convert::servoPosition(i, test.first);
 
                 INFO("Expected: " << expected << " Actual: " << actual);
 
+                inverseTest.push_back({ actual, test.first });
+
                 // The actual results from this are pretty loose (~0.005 radians) compared to floating point error due to
                 // the discrete nature of the data
                 REQUIRE(utility::math::angle::difference(expected, actual) < 0.005);
             }
+
+            inverseTests.push_back(std::move(inverseTest));
         }
     }
 
@@ -156,25 +164,25 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
     {
         INFO("Testing the inverse position conversions");
 
-        const std::pair<float, uint16_t> inverseTests[] {
-            { 0.0, 2048 },
-            { M_PI, 1 },
-            { -M_PI, 1 },
-            { M_PI * 2, 1 },
-            { M_PI * 4, 1 },
-            { -M_PI * 3, 1 },
-            { 4, 1 }
-        };
-
         for (size_t i = 0; i < 20; ++i) {
+
             INFO("Testing inverse motor " << i);
 
-            for (auto& tests : inverseTests) {
+            for (auto& test : inverseTests[i]) {
+                INFO("Testing Input:" << test.first << " Expected: " << test.second)
+                REQUIRE(Convert::servoPositionInverse(i, test.first)  == test.second);
 
-                int16_t expected = 1;
-                int16_t actual = 2;
+                INFO("Testing Input:" << test.first + 2 * M_PI << " Expected: " << test.second)
+                REQUIRE(Convert::servoPositionInverse(i, test.first + 2 * M_PI) == test.second);
 
-                REQUIRE(expected == actual);
+                INFO("Testing Input:" << test.first - 2 * M_PI << " Expected: " << test.second)
+                REQUIRE(Convert::servoPositionInverse(i, test.first - 2 * M_PI) == test.second);
+
+                INFO("Testing Input:" << test.first + M_PI << " Expected: " << test.second)
+                REQUIRE(Convert::servoPositionInverse(i, test.first - M_PI) == 4095 - test.second);
+
+                INFO("Testing Input:" << test.first - M_PI << " Expected: " << test.second)
+                REQUIRE(Convert::servoPositionInverse(i, test.first - M_PI) == 4095 - test.second);
             }
         }
     }
