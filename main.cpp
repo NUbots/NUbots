@@ -11,7 +11,9 @@
 #include "NUBugger.h"
 #include "PartyDarwin.h"
 #include "AudioInput.h"
+#include "AudioFileInput.h"
 #include "BeatDetector.h"
+//#include "modules/BeatDetector/src/BeatDetector.h"
 
 #include "messages/ExecuteScript.h"
 #include "messages/ServoWaypoint.h"
@@ -60,12 +62,13 @@ int main(int argc, char *argv[]) {
     signal(SIGSEGV, segfaultConverter);
 
     plant.install<modules::ConfigSystem>();
-    plant.install<modules::DarwinPlatform>();
-    plant.install<modules::DarwinCameraReader>();
+    //plant.install<modules::DarwinPlatform>();
+    //plant.install<modules::DarwinCameraReader>();
     plant.install<modules::DarwinMotionManager>();
     plant.install<modules::ScriptEngine>();
     plant.install<modules::eSpeak>();
     //plant.install<modules::AudioInput>();
+    plant.install<modules::AudioFileInput>();
     plant.install<modules::NUBugger>();
     plant.install<modules::PartyDarwin>();
     plant.install<modules::BeatDetector>();

@@ -31,6 +31,8 @@ namespace modules {
                 double streamTime,
                 RtAudioStreamStatus status,
                 void* userData ) {
+            
+            std::cout<<"Audio Input Callback";
 
             if(status) {
                 // If status is false then we've detected a stream overflow.
@@ -52,6 +54,9 @@ namespace modules {
 
             chunk->data.resize(nBufferFrames * INTS_PER_FRAME);
             chunk->data.assign(data, data + (nBufferFrames * INTS_PER_FRAME));
+            
+            //chunk->sampleRate = sampleRate;
+            //chunk->numChannels = inputStreamParameters.nChannels;
 
             powerPlant->emit(std::move(chunk));
 

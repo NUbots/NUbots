@@ -15,6 +15,7 @@ SET(modules
     eSpeak
     PartyDarwin
     AudioInput
+    AudioFileInput
     BeatDetector
     NUBugger)
 
