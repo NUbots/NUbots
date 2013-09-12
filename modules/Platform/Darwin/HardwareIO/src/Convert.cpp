@@ -30,7 +30,7 @@ namespace Darwin {
 
     /// The Gyrosocope value from the Darwin is between 0 and 1023, representing a value between -1600 and 1600
     /// degrees per second. This means 512 = 0
-    constexpr double GYROSCOPE_CONVERSION_FACTOR = (1600 * (M_PI / 180.0)) / 512;
+    constexpr double GYROSCOPE_CONVERSION_FACTOR = (1600.0 * (M_PI / 180.0)) / 512.0;
 
     /// The value that comes from the darwin is measured in decivolts (0.1 of a volt)
     constexpr double VOLTAGE_CONVERSION_FACTOR = 0.1;
@@ -38,26 +38,26 @@ namespace Darwin {
     /// The FSR values that are measured by the darwins feet are measured in millinewtons
     constexpr double FSR_FORCE_CONVERSION_FACTOR = 0.001;
 
-    /// The gain is a value betwen 0 and 254, we want a value between 0 and 100
-    constexpr double GAIN_CONVERSION_FACTOR = 100 / 254;
+    /// The gain is a value between 0 and 254, we want a value between 0 and 100
+    constexpr double GAIN_CONVERSION_FACTOR = 100.0 / 254.0;
 
     /// The angle is given as a value between 0 and 4095
-    constexpr double POSITION_CONVERSION_FACTOR = (2 * M_PI) / 4095;
+    constexpr double POSITION_CONVERSION_FACTOR = (2.0 * M_PI) / 4095.0;
 
     /// The load is measured as a value between 0 and 2047 where the 10th bit specifies direction and 1024 = 0
     /// We convert it to a value between -100 and 100 (percentage)
-    constexpr double LOAD_CONVERSION_FACTOR = 100 / 1023;
+    constexpr double LOAD_CONVERSION_FACTOR = 100.0 / 1023.0;
 
     /// The torque limit is measured as a value between 0 and 1023
-    constexpr double TORQUE_LIMIT_CONVERSION_FACTOR = 100 / 1023;
+    constexpr double TORQUE_LIMIT_CONVERSION_FACTOR = 100.0 / 1023.0;
 
     /// The temperatures are given in degrees anyway
-    constexpr double TEMPERATURE_CONVERSION_FACTOR = 1;
+    constexpr double TEMPERATURE_CONVERSION_FACTOR = 1.0;
 
     /// The MX28 measures its speed between 0 and 1023 where 1023 means a speed of 117.07rpm
-    constexpr double MX28_SPEED_CONVERSION_FACTOR = (117.07 * 2 * M_PI) / 1023;
+    constexpr double MX28_SPEED_CONVERSION_FACTOR = (117.07 * 2.0 * M_PI) / 1023.0;
     /// The RX28 measures its speed between 0 and 1023 where 1023 means a speed of 54rpm
-    constexpr double RX28_SPEED_CONVERSION_FACTOR = (54 * 2 * M_PI) / 1023;
+    constexpr double RX28_SPEED_CONVERSION_FACTOR = (54 * 2.0 * M_PI) / 1023.0;
 
     /// Picks which direction a motor should be measured in (forward or reverse)
     constexpr const int8_t SERVO_DIRECTION[20] = {
@@ -135,7 +135,7 @@ namespace Darwin {
         MX28_SPEED_CONVERSION_FACTOR,   // [19] HEAD_PITCH
     };
 
-    float Convert::acceleronometer(uint16_t value) {
+    float Convert::accelerometer(uint16_t value) {
         return (value - 512) * ACCELERONOMETER_CONVERSION_FACTOR;
     }
 
@@ -156,12 +156,14 @@ namespace Darwin {
             // Return NaN if there is no centre
             return std::numeric_limits<float>::quiet_NaN();
         }
-        // This implements an XOR (since those are the cases where the value is flipped)
+        // On the right foot, the X is the correct way around while the Y is flipped
+        // On the left foot, the X is flipped and the Y is the correct way around
+        // Because of this, we can implement the resulting logic using an xor
         else if(left ^ x) {
-            return (126 - value) / 127;
+            return double(value - 127) / 127.0;
         }
         else {
-            return (value - 128) / 127;
+            return double(127 - value) / 127.0;
         }
     }
 
@@ -182,9 +184,9 @@ namespace Darwin {
     }
 
     uint8_t Convert::gainInverse(const float value) {
-        return value > 100 ? 254 // If we are greater then 100, then set to 100
+        return value >= 100 ? 254 // If we are greater then 100, then set to 100
                 : value < 0 ? 0  // If we are less then 0, then set to 0
-                : value / GAIN_CONVERSION_FACTOR; // Otherwise do our conversion
+                : std::round(value / GAIN_CONVERSION_FACTOR); // Otherwise do our conversion
     }
 
     float Convert::servoPosition(const uint8_t id, const uint16_t value) {

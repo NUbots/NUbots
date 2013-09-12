@@ -27,7 +27,7 @@ namespace Platform {
 namespace Darwin {
     struct Convert {
 
-        static float acceleronometer(const uint16_t value);
+        static float accelerometer(const uint16_t value);
         static float gyroscope(const uint16_t value);
         static float voltage(const uint8_t value);
         static float fsrForce(const uint16_t value);
