@@ -71,8 +71,11 @@ namespace modules {
                     continue;
                 }
 
-                if(isDir(ent) || utility::strutil::endsWith(file, ".json")) {
-                    result.push_back(std::string(ent->d_name));
+                if(isDir(ent)) {
+                    result.push_back(file + "/");
+                }
+                else if (utility::strutil::endsWith(file, ".json")) {
+                    result.push_back(file);
                 }
             }
 
@@ -100,10 +103,8 @@ namespace modules {
 
     ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), running(true), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
 
-        // TODO get the directories file descriptor here and put it in
-        int rWd = inotify_add_watch(watcherFd, BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF);
-
-        // TODO recurse the base configuration path grabbing all directories and adding them to the watch
+        int wd = inotify_add_watch(watcherFd, BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE_SELF | IN_MOVED_TO);
+        watchPath[wd] = BASE_CONFIGURATION_PATH;
 
         on<Trigger<messages::ConfigurationConfiguration>>([this](const messages::ConfigurationConfiguration& command) {
 
@@ -112,27 +113,8 @@ namespace modules {
                 // We have now loaded the type
                 loaded.insert(command.requester);
 
-                // Add this emitter to our handler for this path
-                handler[command.configPath].push_back(command.emitter);
-
-                // Run our emitter to emit the initial object
-                std::string fullPath = BASE_CONFIGURATION_PATH + command.configPath;
-
-                // Check if the configuration request is a directory
-                if(isDir(fullPath)) {
-                    auto elements = listContents(fullPath);
-
-                    for(const auto& element : elements) {
-                        if(!isDir(fullPath + element)) {
-                            command.initialEmitter(this, element, messages::ConfigurationNode(buildConfigurationNode(fullPath + "/" + element)));
-                        }
-                    }
-                }
-                else {
-                    auto lastSlashIndex = fullPath.rfind('/');
-                    auto fileName = fullPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
-                    command.initialEmitter(this, fileName, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
-                }
+                // Recursively load and watch all config files
+                watch(BASE_CONFIGURATION_PATH + command.configPath, command.emitter, command.initialEmitter);
             }
         });
 
@@ -140,6 +122,32 @@ namespace modules {
         std::function<void ()> kill = std::bind(std::mem_fn(&ConfigSystem::kill), this);
 
         powerPlant->addServiceTask(NUClear::Internal::ThreadWorker::ServiceTask(run, kill));
+    }
+
+    void ConfigSystem::watch(const std::string& filePath, ConfigSystem::HandlerFunction emitter, ConfigSystem::HandlerFunction emitNow) {
+        // Add this emitter to our handler for this path
+        auto& handlers = handler[filePath];
+        handlers.push_back(emitter); 
+
+        // Check if the configuration request is a directory
+        if(isDir(filePath)) {
+            auto elements = listContents(filePath);
+
+            for(const auto& element : elements) {
+                watch(filePath + element, emitter, emitNow);
+            }
+
+            // Add a watch on this directory if we're the first handler to be added to it
+            if(handlers.size() == 1) {
+                int wd = inotify_add_watch(watcherFd, filePath.c_str(), IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE_SELF | IN_MOVED_TO);
+                watchPath[wd] = filePath;
+            }
+        }
+        else {
+            auto lastSlashIndex = filePath.rfind('/');
+            auto fileName = filePath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
+            emitNow(this, fileName, messages::ConfigurationNode(buildConfigurationNode(filePath)));
+        }
     }
 
     void ConfigSystem::run() {
@@ -172,30 +180,72 @@ namespace modules {
                         inotify_event* event = reinterpret_cast<inotify_event*>(&buffer[i]);
 
                         // If a config file was modified touched or created (not a directory)
-                        if (event->mask & (IN_ATTRIB | IN_MODIFY | IN_CREATE) && !(event->mask & IN_ISDIR)) {
+                        if (event->mask & (IN_ATTRIB | IN_CREATE | IN_MODIFY | IN_MOVED_TO) && !(event->mask & IN_ISDIR)) {
+                            std::string name = std::string(event->name);
+                            if (utility::strutil::endsWith(name, ".json")) {
+                                const std::string& parent = watchPath[event->wd];
+                                std::string fullPath = parent + name;
 
-                            // todo get our relative path
+                                std::cout << "Reloaded " << fullPath << std::endl;
 
-                            std::string path = std::string(event->name);
-                            std::string fullPath = BASE_CONFIGURATION_PATH + path;
+                                auto handlers = handler.find(fullPath);
+                                // if this is a new file it may not have a handler registered,
+                                // use the parent directory's handler instead
+                                if (handlers == std::end(handler)) {
+                                    handlers = handler.find(parent);
+                                }
+                                // if there's still no handler then this is an unknown JSON file in
+                                // the root of the config dir, just ignore it
 
-                            std::cout << "Reloaded " << fullPath << std::endl;
-
-                            for(auto& emitter : handler[path]) {
-                                emitter(this, path, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                                if (handlers != std::end(handler)) {
+                                    try {
+                                        for (auto& emitter : handlers->second) {
+                                            emitter(this, name, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                                        }
+                                    }
+                                    catch(const std::exception& e) {
+                                        // so that an error reading/applying config doesn't crash
+                                        // the whole config thread
+                                        std::cout << "Exception thrown while configuring " << fullPath << ": " << e.what() << std::endl;
+                                    }
+                                }
                             }
                         }
                         // If a directory is created
-                        if (event->mask & (IN_CREATE | IN_ISDIR)) {
-                            // TODO Add it to our watcher
+                        else if (event->mask & (IN_CREATE | IN_MOVED_TO) && event->mask & IN_ISDIR) {
+                            const std::string& parent = watchPath[event->wd];
+                            std::string fullPath = parent + event->name + "/";
+
+                            // make sure we have a handler for the new directory
+                            auto handlers = handler.find(parent);
+                            if (handlers != std::end(handler)) {
+                                // add the directory to the watch list, load any configs in it
+                                for (auto& emitter : handlers->second) {
+                                    watch(fullPath, emitter, emitter);
+                                }
+                            }
                         }
-                        if (event->mask & (IN_DELETE_SELF | IN_ISDIR)) {
-                            // TODO If our main directory was deleted then you broke config! otherwise just the elements in it
-                            // TODO in which case remove it from our WD map
-                        }
-                        // If our directory was deleted then you broke the config system!
-                        if (event->mask & IN_DELETE_SELF) {
-                            // TODO throw an error of some sort here, the configuration system will no longer respond to events!
+                        // If a watched directory is deleted
+                        else if (event->mask & (IN_DELETE_SELF | IN_MOVE_SELF)) {
+                            auto pathIter = watchPath.find(event->wd);
+                            const std::string& path = pathIter->second;
+
+                            // throw an error and stop watching if the root config directory was deleted
+                            if (path == BASE_CONFIGURATION_PATH) {
+                                throw std::runtime_error("config directory deleted!");
+                            }
+
+                            // Delete all the handlers registered for this dir and its files
+                            for (auto handlerIter = std::begin(handler); handlerIter != std::end(handler);) {
+                                if (utility::strutil::startsWith(handlerIter->first, path)) {
+                                    handler.erase(handlerIter++);
+                                }
+                                else {
+                                    ++handlerIter;
+                                }
+                            }
+
+                            watchPath.erase(pathIter);
                         }
 
                         i += sizeof(inotify_event) + event->len;

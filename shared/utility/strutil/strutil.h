@@ -16,6 +16,16 @@ namespace utility {
                 return false;
             }
         }
+
+        bool startsWith(const std::string& str, const std::string& start) {
+
+            if (str.length() >= start.length()) {
+                return (0 == str.compare (0, start.length(), start));
+            }
+            else {
+                return false;
+            }
+        }
     }
 }
 #endif

@@ -32,14 +32,18 @@ namespace modules {
     class ConfigSystem : public NUClear::Reactor {
 
     private:
+        using HandlerFunction = std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)>;
+
         static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
 
         std::set<std::type_index> loaded;
-        std::map<std::string, std::vector<std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)>>> handler;
+        std::map<std::string, std::vector<HandlerFunction>> handler;
+        std::map<int, std::string> watchPath;
 
         volatile bool running;
         void run();
         void kill();
+        void watch(const std::string& filePath, HandlerFunction emitter, HandlerFunction emitNow);
 
         int watcherFd;
         int killFd;
