@@ -45,7 +45,7 @@ SET(NUBOTS_SHARED_LIBRARIES ${NUBOTS_SHARED_LIBRARIES} messages utility)
 ADD_SUBDIRECTORY(hats)
 
 # Remove any duplicate modules (used in more then one hat)
-LIST(REMOVE_DUPLICATES modules ${modules})
+LIST(REMOVE_DUPLICATES modules)
 
 # Build each of our modules and their corresponding tests
 FOREACH(module ${modules})
