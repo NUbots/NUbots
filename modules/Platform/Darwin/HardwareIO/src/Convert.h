@@ -95,7 +95,7 @@ namespace Darwin {
 
         static float torqueLimit(const uint16_t value);
 
-        static float load(const uint8_t id, const uint8_t value);
+        static float load(const uint8_t id, const uint16_t value);
 
         static float temperature(const uint8_t value);
     };

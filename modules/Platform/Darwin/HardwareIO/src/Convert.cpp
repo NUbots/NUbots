@@ -151,12 +151,8 @@ namespace Darwin {
     }
 
     float Convert::servoPosition(const uint8_t id, const uint16_t value) {
-        float raw = (value * POSITION_CONVERSION_FACTOR);
-        raw += SERVO_OFFSET[id];
-        raw *= SERVO_DIRECTION[id];
-
-        // Normalize the angle
-        return utility::math::angle::normalizeAngle(raw);
+        // offset and normalize the angle
+        return utility::math::angle::normalizeAngle(((value * POSITION_CONVERSION_FACTOR) + SERVO_OFFSET[id]) * SERVO_DIRECTION[id]);
     }
 
     uint16_t Convert::servoPositionInverse(const uint8_t id, const float value) {
@@ -193,7 +189,7 @@ namespace Darwin {
         return value * TORQUE_LIMIT_CONVERSION_FACTOR;
     }
 
-    float Convert::load(const uint8_t id, const uint8_t value) {
+    float Convert::load(const uint8_t id, const uint16_t value) {
          // We only care about the lower bits if bit 10 is set then we are moving clockwise
         float raw = (value & 0x3FF) * (value & 0x400 ? -1 : 1);
         raw *= LOAD_CONVERSION_FACTOR;

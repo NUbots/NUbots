@@ -17,6 +17,7 @@
 
 #include <catch.hpp>
 #include "Convert.h"
+#include "utility/math/angle.h"
 
 using namespace modules::Platform::Darwin;
 
@@ -111,23 +112,50 @@ TEST_CASE("Testing the hardware gain conversions to SI units", "[hardware][conve
 
 TEST_CASE("Testing the hardware position conversions to radians", "[hardware][conversion][position]") {
 
-    FAIL("Write the test");
-
     INFO("Testing the forward position conversions");
+
+    const std::pair<uint16_t, float> forwardTests[] = {
+        { 0,    -M_PI },
+        { 1024, -M_PI_2 },
+        { 2048, 0 },
+        { 4095, M_PI }
+    };
+
     for(size_t i = 0; i < 20; ++i) {
-        REQUIRE(Convert::servoPosition(i, 0) == Approx(0));
-        REQUIRE(Convert::servoPosition(i, 1024) == Approx(0));
-        REQUIRE(Convert::servoPosition(i, 2048) == Approx(0));
-        REQUIRE(Convert::servoPosition(i, 4096) == Approx(0));
+        INFO("Testing forward motor " << i);
+
+        for(auto& test : forwardTests) {
+            float expected = utility::math::angle::normalizeAngle((test.second + Convert::SERVO_OFFSET[i]) * Convert::SERVO_DIRECTION[i]);
+            float actual = Convert::servoPosition(i, test.first);
+
+            INFO("Input: " << test.first);
+            INFO("Expected: " << expected << " Actual: " << actual);
+
+            REQUIRE(utility::math::angle::difference(expected, actual) < std::numeric_limits<float>::epsilon());
+        }
     }
+
+    const std::pair<float, uint16_t> inverseTests[] {
+        { 0.0, 2048 },
+        { M_PI, 1},
+        { -M_PI, 1},
+        { M_PI * 2, 1},
+        { M_PI * 4, 1},
+        { -M_PI * 3, 1},
+        { 4, 1}
+    };
 
     INFO("Testing the inverse position conversions");
     for(size_t i = 0; i < 20; ++i) {
-        REQUIRE(Convert::servoPositionInverse(i, 0) == Approx(0));
-        REQUIRE(Convert::servoPositionInverse(i, 1024) == Approx(0));
-        REQUIRE(Convert::servoPositionInverse(i, 2048) == Approx(0));
-        REQUIRE(Convert::servoPositionInverse(i, 4096) == Approx(0));
-        // TODO test values that are too large
+        INFO("Testing inverse motor " << i);
+
+        for(auto& tests : inverseTests) {
+
+            int16_t expected = 1;
+            int16_t actual = 2;
+
+            REQUIRE(expected == actual);
+        }
     }
 }
 
@@ -148,15 +176,20 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
     }
 }
 
-TEST_CASE("Testing the hardware torque limit conversions to between 0 and 1", "[hardware][conversion][torquelimit]") {
+TEST_CASE("Testing the hardware torque limit conversions to between 0 and 100", "[hardware][conversion][torquelimit]") {
 
     REQUIRE(Convert::torqueLimit(0)  == Approx(0));
     REQUIRE(Convert::torqueLimit(1023) == Approx(100));
 }
 
-TEST_CASE("Testing the hardware load conversions to between -1 and 1", "[hardware][conversion][load]") {
+TEST_CASE("Testing the hardware load conversions to between -100 and 100", "[hardware][conversion][load]") {
 
-    FAIL("Write the test");
+    for(int i = 0; i < 20; ++i) {
+        REQUIRE(Convert::load(i, 0)    == Approx(0    * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::load(i, 1024) == Approx(0    * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::load(i, 2047) == Approx(-100 * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::load(i, 1023) == Approx(100  * Convert::SERVO_DIRECTION[i]));
+    }
 }
 
 TEST_CASE("Testing the hardware temperature conversions to SI units", "[hardware][conversion][temperature]") {
