@@ -20,6 +20,7 @@
 #define MODULES_V4L2CAMERA_H
 
 #include <map>
+#include <string>
 
 #include "messages/Image.h"
 #include "V4L2CameraSetting.h"
