@@ -24,6 +24,78 @@ namespace modules {
 namespace Platform {
 namespace Darwin {
 
+    /// Picks which direction a motor should be measured in (forward or reverse)
+    const int8_t Convert::SERVO_DIRECTION[] = {
+        -1,             // [0]  R_SHOULDER_PITCH
+        1,              // [1]  L_SHOULDER_PITCH
+        -1,             // [2]  R_SHOULDER_ROLL
+        -1,             // [3]  L_SHOULDER_ROLL
+        -1,             // [4]  R_ELBOW
+        1,              // [5]  L_ELBOW
+        -1,             // [6]  R_HIP_YAW
+        -1,             // [7]  L_HIP_YAW
+        -1,             // [8]  R_HIP_ROLL
+        -1,             // [9]  L_HIP_ROLL
+        1,              // [10] R_HIP_PITCH
+        -1,             // [11] L_HIP_PITCH
+        1,              // [12] R_KNEE
+        -1,             // [13] L_KNEE
+        -1,             // [14] R_ANKLE_PITCH
+        1,              // [15] L_ANKLE_PITCH
+        1,              // [16] R_ANKLE_ROLL
+        1,              // [17] L_ANKLE_ROLL
+        1,              // [18]  HEAD_YAW
+        -1,             // [19]  HEAD_PITCH
+    };
+
+    /// Offsets the radian angles of motors to change their 0 position
+    const float Convert::SERVO_OFFSET[] = {
+        -1.5707963f,    // [0]  R_SHOULDER_PITCH
+        1.5707963f,     // [1]  L_SHOULDER_PITCH
+        0.7853981f,     // [2]  R_SHOULDER_ROLL
+        -0.7853981f,    // [3]  L_SHOULDER_ROLL
+        1.5707963,      // [4]  R_ELBOW
+        -1.5707963f,    // [5]  L_ELBOW
+        0.0f,           // [6]  R_HIP_YAW
+        0.0f,           // [7]  L_HIP_YAW
+        0.0f,           // [8]  R_HIP_ROLL
+        0.0f,           // [9]  L_HIP_ROLL
+        0.0f,           // [10] R_HIP_PITCH
+        0.0f,           // [11] L_HIP_PITCH
+        0.0f,           // [12] R_KNEE
+        0.0f,           // [13] L_KNEE
+        0.0f,           // [14] R_ANKLE_PITCH
+        0.0f,           // [15] L_ANKLE_PITCH
+        0.0f,           // [16] R_ANKLE_ROLL
+        0.0f,           // [17] L_ANKLE_ROLL
+        0.0f,           // [18] HEAD_YAW
+        -0.631,         // [19] HEAD_PITCH
+    };
+
+    double Convert::SPEED_CONVERSION_FACTOR[] = {
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [0]  R_SHOULDER_PITCH
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [1]  L_SHOULDER_PITCH
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [2]  R_SHOULDER_ROLL
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [3]  L_SHOULDER_ROLL
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [4]  R_ELBOW
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [5]  L_ELBOW
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [6]  R_HIP_YAW
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [7]  L_HIP_YAW
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [8]  R_HIP_ROLL
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [9]  L_HIP_ROLL
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [10] R_HIP_PITCH
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [11] L_HIP_PITCH
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [12] R_KNEE
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [13] L_KNEE
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [14] R_ANKLE_PITCH
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [15] L_ANKLE_PITCH
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [16] R_ANKLE_ROLL
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [17] L_ANKLE_ROLL
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [18] HEAD_YAW
+        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [19] HEAD_PITCH
+    };
+
+
     float Convert::accelerometer(uint16_t value) {
         return (value - 512) * ACCELERONOMETER_CONVERSION_FACTOR;
     }
