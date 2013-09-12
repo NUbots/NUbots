@@ -152,7 +152,7 @@ namespace Darwin {
 
     float Convert::servoPosition(const uint8_t id, const uint16_t value) {
         // offset and normalize the angle
-        return utility::math::angle::normalizeAngle(((value * POSITION_CONVERSION_FACTOR) + SERVO_OFFSET[id]) * SERVO_DIRECTION[id]);
+        return utility::math::angle::normalizeAngle((((value - 2048) * POSITION_CONVERSION_FACTOR) + SERVO_OFFSET[id]) * SERVO_DIRECTION[id]);
     }
 
     uint16_t Convert::servoPositionInverse(const uint8_t id, const float value) {
@@ -162,7 +162,7 @@ namespace Darwin {
         // Undo our conversion operations
         angle *= SERVO_DIRECTION[id];
         angle -= SERVO_OFFSET[id];
-        return angle / POSITION_CONVERSION_FACTOR;
+        return (angle / POSITION_CONVERSION_FACTOR) + 2048;
     }
 
     float Convert::speed(const uint8_t id, const uint16_t value) {
