@@ -124,17 +124,22 @@ TEST_CASE("Testing the hardware gain conversions to SI units", "[hardware][conve
 
 TEST_CASE("Testing the hardware position conversions to radians", "[hardware][conversion][position]") {
 
+    // We allow it to be within 2 steps (as it could step the opposite directions on conversion)
+    const double maxForwardError = ((2 * M_PI) / 4095.0) * 2;
+    // On converting back it should never stray more then 1 value
+    const double maxInverseError = 1;
+
     std::vector<std::vector<std::pair<float, uint16_t>>> inverseTests;
 
-    // This scope gets rid of the INFO messages once we pass this section
+    // This scope gets rid of the old INFO messages once we pass this section
     {
         INFO("Testing the forward position conversions");
 
         const std::pair<uint16_t, float> forwardTests[] = {
             { 0,    -M_PI },
-            { 1024, -M_PI_2 },
+            { 1023, -M_PI_2 },
             { 2048, 0 },
-            { 3074, M_PI_2 },
+            { 3073, M_PI_2 },
             { 4095, M_PI }
         };
 
@@ -151,16 +156,15 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
 
                 inverseTest.push_back({ actual, test.first });
 
-                // The actual results from this are pretty loose (~0.005 radians) compared to floating point error due to
-                // the discrete nature of the data
-                REQUIRE(utility::math::angle::difference(expected, actual) < 0.005);
+                // Test that the error is within 1 radian unit
+                REQUIRE(utility::math::angle::difference(expected, actual) <= maxForwardError);
             }
 
             inverseTests.push_back(std::move(inverseTest));
         }
     }
 
-    // This scope gets rid of the INFO messages once we pass this section
+    // This scope gets rid of the old INFO messages once we pass this section
     {
         INFO("Testing the inverse position conversions");
 
@@ -169,20 +173,37 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
             INFO("Testing inverse motor " << i);
 
             for (auto& test : inverseTests[i]) {
-                INFO("Testing Input:" << test.first << " Expected: " << test.second)
-                REQUIRE(Convert::servoPositionInverse(i, test.first)  == test.second);
+                int distance, expected, actual;
 
-                INFO("Testing Input:" << test.first + 2 * M_PI << " Expected: " << test.second)
-                REQUIRE(Convert::servoPositionInverse(i, test.first + 2 * M_PI) == test.second);
+                actual = Convert::servoPositionInverse(i, test.first);
+                INFO("Testing Input:" << test.first << " Expected: " << test.second << " Actual: " << actual)
+                expected = test.second;
+                distance = (((actual - expected) + 2048) % 4095) - 2048;
+                REQUIRE(distance <= maxInverseError);
 
-                INFO("Testing Input:" << test.first - 2 * M_PI << " Expected: " << test.second)
-                REQUIRE(Convert::servoPositionInverse(i, test.first - 2 * M_PI) == test.second);
+                actual = Convert::servoPositionInverse(i, test.first + 2 * M_PI);
+                INFO("Testing Input:" << test.first - 2 * M_PI << " Expected: " << test.second << " Actual: " << actual)
+                expected = test.second;
+                distance = (((actual - expected) + 2048) % 4095) - 2048;
+                REQUIRE(distance <= maxInverseError);
 
-                INFO("Testing Input:" << test.first + M_PI << " Expected: " << test.second)
-                REQUIRE(Convert::servoPositionInverse(i, test.first - M_PI) == 4095 - test.second);
+                actual = Convert::servoPositionInverse(i, test.first - 2 * M_PI);
+                INFO("Testing Input:" << test.first + 2 * M_PI << " Expected: " << test.second << " Actual: " << actual)
+                expected = test.second;
+                distance = (((actual - expected) + 2048) % 4095) - 2048;
+                REQUIRE(distance <= maxInverseError);
 
-                INFO("Testing Input:" << test.first - M_PI << " Expected: " << test.second)
-                REQUIRE(Convert::servoPositionInverse(i, test.first - M_PI) == 4095 - test.second);
+                actual = Convert::servoPositionInverse(i, test.first + M_PI);
+                INFO("Testing Input:" << test.first + M_PI << " Expected: " << test.second - 2048 << " Actual: " << actual)
+                expected = test.second - 2048;
+                distance = (((actual - expected) + 2048) % 4095) - 2048;
+                REQUIRE(distance <= maxInverseError);
+
+                actual = Convert::servoPositionInverse(i, test.first - M_PI);
+                INFO("Testing Input:" << test.first - M_PI << " Expected: " << test.second - 2048 <<  " Actual: " << actual)
+                expected = test.second - 2048;
+                distance = (((actual - expected) + 2048) % 4095) - 2048;
+                REQUIRE(distance <= maxInverseError);
             }
         }
     }
@@ -193,15 +214,32 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
     // TODO test changing the motor sensor speed conversion values
 
     FAIL("Write the test");
-    INFO("Testing the forward speed conversions");
-    for (size_t i = 0; i < 20; ++i) {
-        // TODO test directions
+
+    // This scope gets rid of the old INFO messages once we pass this section
+    {
+        const std::pair<uint16_t, float> forwardTests[] = {
+            { 0,    -M_PI },
+            { 1023, -M_PI_2 },
+            { 2048, 0 },
+            { 3073, M_PI_2 },
+            { 4095, M_PI }
+        };
+
+        INFO("Testing the forward speed conversions");
+        for (size_t i = 0; i < 20; ++i) {
+            float expected;
+            float actual;
+            // TODO test directions
+        }
     }
 
-    INFO("Testing the inverse speed conversions");
-    for (size_t i = 0; i < 20; ++i) {
-        // TODO test directions
-        // TODO test
+    // This scope gets rid of the old INFO messages once we pass this section
+    {
+        INFO("Testing the inverse speed conversions");
+        for (size_t i = 0; i < 20; ++i) {
+            // TODO test directions
+            // TODO test
+        }
     }
 }
 
