@@ -2,10 +2,11 @@
 #define MESSAGES_CONFIGURATION_H_
 
 #include <NUClear.h>
-#include "ConfigurationNode.h"
+#include "utility/configuration/ConfigurationNode.h"
 
 namespace messages {
 
+    using namespace utility::configuration;
     using namespace NUClear::Internal::Magic::MetaProgramming;
 
     // Anonymous namespace to hide details
@@ -49,7 +50,7 @@ namespace messages {
     };
 
     struct SaveConfiguration {
-        std::string configPath;
+        std::string path;
         ConfigurationNode config;
     };
 
@@ -84,7 +85,7 @@ namespace NUClear {
             };
 
             // Emit it from our reactor to the config system
-            context->emit<Scope::DIRECT>(std::unique_ptr<messages::ConfigurationConfiguration>(
+            context->emit<Scope::INITIALIZE>(std::unique_ptr<messages::ConfigurationConfiguration>(
                 new messages::ConfigurationConfiguration {
                     typeid(TConfiguration),
                     TConfiguration::CONFIGURATION_PATH,

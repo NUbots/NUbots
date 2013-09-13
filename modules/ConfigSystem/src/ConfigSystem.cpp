@@ -29,8 +29,11 @@ extern "C" {
 #include <fstream>
 #include <system_error>
 
-#include "json/Parser.h"
 #include "utility/strutil/strutil.h"
+#include "utility/configuration/ConfigurationNode.h"
+#include "utility/configuration/json/Parser.h"
+#include "utility/configuration/json/Serializer.h"
+#include "utility/file/fileutil.h"
 
 namespace modules {
 
@@ -89,16 +92,7 @@ namespace modules {
     }
 
     messages::ConfigurationNode buildConfigurationNode(const std::string& filePath) {
-
-        // Read the data from the file into a string.
-        std::ifstream data(filePath, std::ios::in);
-
-        // There are lots of nice ways to read a file into a string but this is one of the quickest.
-        // See: http://stackoverflow.com/a/116220
-        std::stringstream stream;
-        stream << data.rdbuf();
-
-        return json::Parser::parse(stream.str());
+        return utility::configuration::json::parse(utility::file::loadFromFile(filePath));
     }
 
     ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), running(true), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
