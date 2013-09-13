@@ -43,7 +43,7 @@ namespace modules {
         volatile bool running;
         void run();
         void kill();
-        void watch(const std::string& filePath, HandlerFunction emitter, HandlerFunction emitNow);
+        void watchDir(const std::string& path, HandlerFunction emitter, HandlerFunction emitNow);
 
         int watcherFd;
         int killFd;

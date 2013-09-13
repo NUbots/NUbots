@@ -27,7 +27,6 @@ extern "C" {
 }
 
 #include <fstream>
-#include <system_error>
 
 #include "utility/strutil/strutil.h"
 #include "utility/configuration/ConfigurationNode.h"
@@ -39,57 +38,6 @@ namespace modules {
 
     // Lots of space for events (definitely more then needed)
     const size_t MAX_EVENT_LEN = sizeof (inotify_event) * 1024 + 16;
-
-    // Test if a passed path is a directory
-    bool isDir(const std::string& path) {
-
-        int status;
-        struct stat st_buf;
-
-        // Get the status of the file system object.
-        status = stat(path.c_str(), &st_buf);
-        if (status != 0) {
-            throw std::system_error(errno, std::system_category(), "Error checking if path is file or directory");
-        }
-
-        // Return if our varible is a directory
-        return S_ISDIR(st_buf.st_mode);
-    }
-
-    bool isDir(dirent* ent) {
-        return ent->d_type & DT_DIR;
-    }
-
-    std::vector<std::string> listContents(const std::string& path) {
-
-        auto dir = opendir(path.c_str());
-        std::vector<std::string> result;
-
-        if(dir != nullptr) {
-            for(dirent* ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
-
-                auto file = std::string(ent->d_name);
-
-                if(file == "." || file == "..") {
-                    continue;
-                }
-
-                if(isDir(ent)) {
-                    result.push_back(file + "/");
-                }
-                else if (utility::strutil::endsWith(file, ".json")) {
-                    result.push_back(file);
-                }
-            }
-
-            closedir(dir);
-        }
-        else {
-            // TODO Throw an error or something
-        }
-
-        return result;
-    }
 
     messages::ConfigurationNode buildConfigurationNode(const std::string& filePath) {
         return utility::configuration::json::parse(utility::file::loadFromFile(filePath));
@@ -107,8 +55,19 @@ namespace modules {
                 // We have now loaded the type
                 loaded.insert(command.requester);
 
-                // Recursively load and watch all config files
-                watch(BASE_CONFIGURATION_PATH + command.configPath, command.emitter, command.initialEmitter);
+                std::string fullPath = BASE_CONFIGURATION_PATH + command.configPath;
+                if (utility::file::isDir(fullPath)) {
+                    // Recursively load and watch all config files
+                    watchDir(fullPath, command.emitter, command.initialEmitter);
+                }
+                else {
+                    // Register and load just the one file
+                    handler[fullPath].push_back(command.emitter);
+
+                    auto lastSlashIndex = command.configPath.rfind('/');
+                    auto fileName = command.configPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
+                   command.initialEmitter(this, fileName, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                }
             }
         });
 
@@ -118,29 +77,26 @@ namespace modules {
         powerPlant->addServiceTask(NUClear::Internal::ThreadWorker::ServiceTask(run, kill));
     }
 
-    void ConfigSystem::watch(const std::string& filePath, ConfigSystem::HandlerFunction emitter, ConfigSystem::HandlerFunction emitNow) {
-        // Add this emitter to our handler for this path
-        auto& handlers = handler[filePath];
+    void ConfigSystem::watchDir(const std::string& path, ConfigSystem::HandlerFunction emitter, ConfigSystem::HandlerFunction emitNow) {
+        // Add a handler for all json files in this directory...
+        auto& handlers = handler[path];
+        if (handlers.empty()) {
+            // Add a watch on this directory
+            int wd = inotify_add_watch(watcherFd, path.c_str(), IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE_SELF | IN_MOVED_TO);
+            watchPath[wd] = path;
+        }
         handlers.push_back(emitter); 
 
-        // Check if the configuration request is a directory
-        if(isDir(filePath)) {
-            auto elements = listContents(filePath);
+        // List the directory and recursively walk its tree
+        auto elements = utility::file::listDir(path);
 
-            for(const auto& element : elements) {
-                watch(filePath + element, emitter, emitNow);
+        for (const auto& element : elements) {
+            if (utility::strutil::endsWith(element, "/")) { // listDir always adds / to dirs
+                watchDir(path + element, emitter, emitNow);
             }
-
-            // Add a watch on this directory if we're the first handler to be added to it
-            if(handlers.size() == 1) {
-                int wd = inotify_add_watch(watcherFd, filePath.c_str(), IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE_SELF | IN_MOVED_TO);
-                watchPath[wd] = filePath;
+            else if (utility::strutil::endsWith(element, ".json")) {
+                emitNow(this, element, messages::ConfigurationNode(buildConfigurationNode(path + element)));
             }
-        }
-        else {
-            auto lastSlashIndex = filePath.rfind('/');
-            auto fileName = filePath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
-            emitNow(this, fileName, messages::ConfigurationNode(buildConfigurationNode(filePath)));
         }
     }
 
@@ -183,8 +139,8 @@ namespace modules {
                                 std::cout << "Reloaded " << fullPath << std::endl;
 
                                 auto handlers = handler.find(fullPath);
-                                // if this is a new file it may not have a handler registered,
-                                // use the parent directory's handler instead
+                                // If there was no handler for this specific file, check if there's
+                                // one for its parent directory
                                 if (handlers == std::end(handler)) {
                                     handlers = handler.find(parent);
                                 }
@@ -210,12 +166,13 @@ namespace modules {
                             const std::string& parent = watchPath[event->wd];
                             std::string fullPath = parent + event->name + "/";
 
-                            // make sure we have a handler for the new directory
+                            // give the new dir the same handlers as its parents, or ignore it if
+                            // there are none
                             auto handlers = handler.find(parent);
                             if (handlers != std::end(handler)) {
                                 // add the directory to the watch list, load any configs in it
                                 for (auto& emitter : handlers->second) {
-                                    watch(fullPath, emitter, emitter);
+                                    watchDir(fullPath, emitter, emitter);
                                 }
                             }
                         }
