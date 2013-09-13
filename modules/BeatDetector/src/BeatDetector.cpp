@@ -21,6 +21,7 @@
 #include <ctime>
 #include "messages/SoundChunk.h"
 #include "messages/BeatLocations.h"
+#include "tempo.h";
 
 
 static const int NUM_CHUNKS = 50;
@@ -52,38 +53,45 @@ namespace modules {
 
             //int NUM_CHANNELS = 2;
             //int NUM_MILLISECONDS = 2;//(std::chrono::milliseconds) 2;
-            fvec_t * out;
-            fvec_t * beat_input_data;
-            aubio_beattracking_t * abt;
+            fvec_t * out = new_fvec(2,numChannels);
+            fvec_t * tempo_input_data;
             //struct messages::BeatLocations * beatLocations;
             
             //messages::BeatLocations * beatLocations = new messages::BeatLocations;
            auto beatLocations = std::make_unique<messages::BeatLocations>();
             
-            //NUClear::clock::time_point firstBeatTime;
-            int beatPeriodFrames;
-            float beatPeriodMilliseconds;
-            //NUClear::clock::duration beatPeriod;
-            int numBeats;
-            //NUClear::clock::time_point firstBeatTime;
-            
-            
-            beat_input_data = new_fvec(chunk.size()/numChannels , numChannels);
-            //new_fvec();
-                        //data.recordedSamples;
-           //chunk.data.at(0);
-
+            tempo_input_data = new_fvec(chunk.size()/numChannels , numChannels);
 
            for (int i = 0; i < (int) chunk.size()/numChannels; ++i)
             {
                for (int j = 0; j < numChannels; ++j)
                {
-                   fvec_write_sample(beat_input_data,  chunk.at(2*i + j), j, i); //for channel j
+                   fvec_write_sample(tempo_input_data,  chunk.at(2*i + j), j, i); //for channel j
                }
                 //fvec_write_sample(beat_input_data,  chunk.at(2*i), 0, i);
                 //fvec_write_sample(beat_input_data, chunk.at(2*i + 1), 1, i);
             }
+            
+              int buffer_size = chunk.size()/numChannels;//1024;
+              int overlap_size = 512;
+            
+            aubio_tempo_t * att = new_aubio_tempo (aubio_onset_kl, buffer_size, overlap_size, numChannels);
  
+            aubio_tempo(att, tempo_input_data, out);
+            
+            
+            
+            for (int i = 0; i <= out->data[0][0] -1; ++i)
+            {
+                std::cout << "out->data:i= " << out->data[0][i] <<"\n";
+                //std::cout << "Beat value " << i << " : " << (out->data[0][i])/(chunk.size()/ numChannels) * numMilliseconds/1000 << "s \n";
+                //std::cout << "Beat value " << i << " : " << "Position in array: " << (out->data[0][i]) << " Size of array: " <<(chunk.size()/numChannels) << " # Seconds of recording: " << numMilliseconds/1000 << "s \n";
+
+            }
+            
+            del_aubio_tempo(att);
+            
+            /*
             abt = new_aubio_beattracking(chunk.size()/numChannels, numChannels);
             //abt = new_aubio_beattracking(sizeof(SAMPLE), NUM_CHANNELS);
 
@@ -120,12 +128,12 @@ namespace modules {
             std::time_t t = std::chrono::system_clock::to_time_t(firstBeatTime);
             //std::cout << 
             std::cout <<"First beat time: " << std::ctime(&t) << "\n";
-            
-            beatLocations->firstBeatTime = firstBeatTime;
-            beatLocations->beatPeriod = std::chrono::milliseconds( (int) beatPeriodMilliseconds);
-            beatLocations->numBeats = numBeats;
+            */
+            //beatLocations->firstBeatTime = firstBeatTime;
+            //beatLocations->beatPeriod = std::chrono::milliseconds( (int) beatPeriodMilliseconds);
+            //beatLocations->numBeats = numBeats;
 
-            powerPlant->emit(std::move(beatLocations));
+            //powerPlant->emit(std::move(beatLocations));
             //powerPlant->emit(std::move(chunk));
              
         });    
