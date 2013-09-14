@@ -183,7 +183,7 @@ namespace Darwin {
         return raw;
     }
     uint16_t Convert::servoSpeedInverse(const uint8_t id, const float value) {
-        uint16_t raw = (value * SERVO_DIRECTION[id]) / SPEED_CONVERSION_FACTOR[id];
+        uint16_t raw = round(value / SPEED_CONVERSION_FACTOR[id]);
 
         // If the value is greater then 1023, then set to max speed (0)
         return raw > 1023 ? 0 : raw;

@@ -129,7 +129,7 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
     // On converting back it should never stray more then 1 value
     const double maxInverseError = 1;
 
-    std::vector<std::vector<std::pair<float, uint16_t>>> inverseTests;
+    std::vector < std::vector < std::pair<float, uint16_t >> > inverseTests;
 
     // This scope gets rid of the old INFO messages once we pass this section
     {
@@ -146,7 +146,7 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
         for (size_t i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
 
-            std::vector<std::pair<float, uint16_t>> inverseTest;
+            std::vector < std::pair<float, uint16_t >> inverseTest;
 
             for (auto& test : forwardTests) {
                 float expected = utility::math::angle::normalizeAngle((test.second + Convert::SERVO_OFFSET[i]) * Convert::SERVO_DIRECTION[i]);
@@ -154,7 +154,7 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
 
                 INFO("Expected: " << expected << " Actual: " << actual);
 
-                inverseTest.push_back({ actual, test.first });
+                inverseTest.push_back( { actual, test.first });
 
                 // Test that the error is within 1 radian unit
                 REQUIRE(utility::math::angle::difference(expected, actual) <= maxForwardError);
@@ -211,34 +211,76 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
 
 TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware][conversion][speed]") {
 
-    // TODO test changing the motor sensor speed conversion values
-
-    FAIL("Write the test");
-
     // This scope gets rid of the old INFO messages once we pass this section
     {
-        const std::pair<uint16_t, float> forwardTests[] = {
-            { 0,    -M_PI },
-            { 1023, -M_PI_2 },
-            { 2048, 0 },
-            { 3073, M_PI_2 },
-            { 4095, M_PI }
+        INFO("Testing the forward position conversions");
+
+        const std::pair<uint16_t, float> tests[] = {
+            { 0,    0 },
+            { 1023, 1.0 },
+            { 1024, 0 },
+            { 2047, -1.0 }
         };
 
-        INFO("Testing the forward speed conversions");
         for (size_t i = 0; i < 20; ++i) {
-            float expected;
-            float actual;
-            // TODO test directions
-        }
-    }
+            INFO("Testing forward motor " << i);
 
-    // This scope gets rid of the old INFO messages once we pass this section
-    {
-        INFO("Testing the inverse speed conversions");
-        for (size_t i = 0; i < 20; ++i) {
-            // TODO test directions
-            // TODO test
+            // Test with MX28s
+            INFO("Testing with MX28s");
+            for (auto& test : tests) {
+                float expected = test.second * (Convert::MX28_SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
+                float actual = Convert::servoSpeed(i, test.first);
+
+                INFO("Input: " << test.first << " Expected: " << test.second << " Actual: " << actual);
+
+                REQUIRE(expected == Approx(actual));
+            }
+
+            // Test with RX28s it fails
+            INFO("Testing with RX28s");
+            for (auto& test : tests) {
+                float expected = test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
+                float actual = Convert::servoSpeed(i, test.first);
+
+                INFO("Input: " << test.first << " Expected: " << test.second << " Actual: " << actual);
+
+                // Test that if they're not both equal to 0, they are unequal
+                if((expected + actual) != 0) {
+                    REQUIRE(expected != Approx(actual));
+                }
+            }
+
+            // Change this motor to be an RX28
+            Convert::SPEED_CONVERSION_FACTOR[i] = Convert::RX28_SPEED_CONVERSION_FACTOR;
+
+            // Check with an RX28 it now succeeds
+            INFO("Testing with converted RX28s");
+            for (auto& test : tests) {
+                float expected = test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
+                float actual = Convert::servoSpeed(i, test.first);
+
+                INFO("Input: " << test.first << " Expected: " << test.second << " Actual: " << actual);
+
+                // It should now succeed
+                REQUIRE(expected == Approx(actual));
+            }
+
+            // Test our inverse case
+            INFO("Testing inverse operations");
+            for (auto& test : tests) {
+                uint16_t expected = test.first % 1024;
+                uint16_t actual = Convert::servoSpeedInverse(i, fabs(test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023)));
+
+                INFO("Input: " << fabs(test.second * (Convert::RX28_SPEED_CONVERSION_FACTOR * 1023))
+                        << " Expected: " << test.first << " Actual: " << actual);
+
+                // These should be equal
+                REQUIRE(expected == actual);
+
+                // Test that going over the max speed makes it go to 0
+                REQUIRE(Convert::servoSpeedInverse(i, Convert::RX28_SPEED_CONVERSION_FACTOR * 1024) == 0);
+
+            }
         }
     }
 }
