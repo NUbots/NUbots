@@ -31,8 +31,8 @@ extern "C" {
 
 #include "utility/strutil/strutil.h"
 #include "utility/configuration/ConfigurationNode.h"
-#include "utility/configuration/json/Parser.h"
-#include "utility/configuration/json/Serializer.h"
+#include "utility/configuration/json/parse.h"
+#include "utility/configuration/json/serialize.h"
 #include "utility/file/fileutil.h"
 
 namespace modules {

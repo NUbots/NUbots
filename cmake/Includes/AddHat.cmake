@@ -11,15 +11,6 @@ FUNCTION(ADD_HAT)
         COMMENT "Generating the ${HAT_NAME} hat"
         DEPENDS "${NUBOTS_SCRIPTS_DIR}/generate.sh")
 
-    # Each hat wants to access a number of modules. We're going to set our
-    # include directories to include the source directory of each module
-    # avoid relative paths in our modules which makes them easier
-    # to move around.
-    #FOREACH(module ${HAT_MODULES})
-    #    STRING(REPLACE "::" "/" module "${module}")
-    #    INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/modules/${module}/src")
-    #ENDFOREACH()
-
     INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/modules/")
 
     STRING(REPLACE "::" "" HAT_MODULES_TARGETS "${HAT_MODULES}")

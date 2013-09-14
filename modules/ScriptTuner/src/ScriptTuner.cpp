@@ -21,8 +21,8 @@
 #include "messages/ServoWaypoint.h"
 #include "utility/math/angle.h"
 #include "utility/file/fileutil.h"
-#include "utility/configuration/json/parser.h"
-#include "utility/configuration/json/serializer.h"
+#include "utility/configuration/json/parse.h"
+#include "utility/configuration/json/serialize.h"
 
 #include <ncurses.h>
 #include <sstream>
