@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODUlES_DARWINCAMERASETTING_H
-#define MODULES_DARWINCAMERASETTING_H
+#ifndef MODUlES_V4L2CAMERASETTING_H
+#define MODUlES_V4L2CAMERASETTING_H
 
 #include <cstdint>
 
@@ -62,5 +62,5 @@ namespace modules {
     };
 }
 
-#endif /* MODULES_DARWINCAMERASETTING_H */
+#endif  // MODUlES_V4L2CAMERASETTING_H
 

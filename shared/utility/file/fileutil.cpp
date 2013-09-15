@@ -23,6 +23,7 @@ extern "C" {
 
 #include <sstream>
 #include <fstream>
+
 namespace utility {
 namespace file {
     std::string loadFromFile(const std::string& path) {

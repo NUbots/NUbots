@@ -23,6 +23,12 @@
 #include <string>
 
 namespace utility {
+
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
     namespace strutil {
 
         // http://stackoverflow.com/a/874160/1387006

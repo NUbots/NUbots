@@ -37,5 +37,5 @@ namespace messages {
     };
 }
 
-#endif /* MESSAGES_SOUNDCHUNK_H */
+#endif  // MESSAGES_SOUNDCHUNK_H
 

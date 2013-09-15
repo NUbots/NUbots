@@ -21,6 +21,12 @@
 #define UTILITY_IMAGE_RGB_H
 namespace utility {
 namespace image {
+    
+    /**
+     * TODO document
+     *
+     * @author Jake Woods
+     */
     struct RGB {
         public:
             unsigned char r;

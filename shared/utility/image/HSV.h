@@ -21,6 +21,12 @@
 #define UTILITY_IMAGE_HSV_H
 namespace utility {
 namespace image {
+
+    /**
+     * TODO document
+     *
+     * @author Jake Woods
+     */
     struct HSV {
         public:
             unsigned char h;

@@ -124,5 +124,5 @@ namespace modules {
     };
 }
 
-#endif /* MODULES_DARWINCAMERA_H */
+#endif  // MODULES_V4L2CAMERA_H
 

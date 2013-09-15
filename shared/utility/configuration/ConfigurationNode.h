@@ -29,6 +29,12 @@
 
 namespace utility {
 namespace configuration {
+
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
     class ConfigurationNode {
     public:
         enum class DataType {

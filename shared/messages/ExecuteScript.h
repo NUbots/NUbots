@@ -36,5 +36,5 @@ namespace messages {
     };
 }
 
-#endif    /* MODULES_EXECUTESCRIPT_H */
+#endif  // MESSAGES_EXECUTESCRIPT_H
 

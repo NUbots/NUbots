@@ -23,13 +23,18 @@
 #include "HSV.h"
 #include "YCbCr.h"
 namespace utility {
-namespace image {
-     RGB toRGB(YCbCr ycbcr);
-     RGB toRGB(HSV hsv);
-     HSV toHSV(RGB rgb);
-     HSV toHSV(YCbCr ycbcr);
-     YCbCr toYCbCr(RGB rgb);
-     YCbCr toYCbCr(HSV hsv);
-}
+    /**
+     * TODO document
+     *
+     * @author Jake Woods
+     */
+    namespace image {
+         RGB toRGB(YCbCr ycbcr);
+         RGB toRGB(HSV hsv);
+         HSV toHSV(RGB rgb);
+         HSV toHSV(YCbCr ycbcr);
+         YCbCr toYCbCr(RGB rgb);
+         YCbCr toYCbCr(HSV hsv);
+    }
 }
 #endif

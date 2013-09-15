@@ -23,6 +23,12 @@
 namespace utility {
 namespace configuration {
 namespace json {
+    
+    /**
+     * TODO document
+     *
+     * @author Jake Woods
+     */
     std::string serialize(const ConfigurationNode& node);
 }
 }

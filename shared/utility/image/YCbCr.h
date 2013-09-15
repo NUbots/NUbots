@@ -21,6 +21,12 @@
 #define UTILITY_IMAGE_YCBCR_H
 namespace utility {
 namespace image {
+    
+    /**
+     * TODO document
+     *
+     * @author Jake Woods
+     */
     struct YCbCr {
         public:
             unsigned char Y;
