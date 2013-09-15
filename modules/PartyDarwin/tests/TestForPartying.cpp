@@ -17,22 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PARTYDARWIN_H
-#define MODULES_PARTYDARWIN_H
+#include <catch.hpp>
 
-#include <NUClear.h>
+TEST_CASE("Test that the darwin will party", "[party][darwin]") {
 
-namespace modules {
+    // Conditions
+    bool darwinWillParty = true;
+    bool darwinWillStopPartying = false;
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    class PartyDarwin : public NUClear::Reactor {
-    public:
-        explicit PartyDarwin(NUClear::PowerPlant* plant);
-    };
+    // Test case
+    REQUIRE(darwinWillParty != darwinWillStopPartying);
 }
-#endif
-

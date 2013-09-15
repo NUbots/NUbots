@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ConfigSystem.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 Trent Houliston <trent@houliston.me>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #ifndef MODULES_CONFIGSYSTEM_H_
@@ -29,6 +29,12 @@
 
 namespace modules {
 
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     * @author Michael Burton
+     */
     class ConfigSystem : public NUClear::Reactor {
 
     private:

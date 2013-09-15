@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Darwin Hardware IO.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 Trent Houliston <trent@houliston.me>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #ifndef MODULES_PLATFORM_DARWIN_CONVERT_H
@@ -25,6 +25,12 @@
 namespace modules {
 namespace Platform {
 namespace Darwin {
+
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
     struct Convert {
 
         /// The value from the Darwin is between 0 and 1023, representing a value between -4g and 4g.

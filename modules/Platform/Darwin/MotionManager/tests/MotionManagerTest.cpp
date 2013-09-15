@@ -1,32 +1,21 @@
 /*
- * This file is part of NUBots Utility.
+ * This file is part of Darwin MotionManager.
  *
- * NUBots Utility is free software: you can redistribute it and/or modify
+ * Darwin MotionManager is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * NUBots Utility is distributed in the hope that it will be useful,
+ * Darwin MotionManager is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NUBots Utility.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Darwin MotionManager.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_IMAGE_RGB_H
-#define UTILITY_IMAGE_RGB_H
-namespace utility {
-namespace image {
-    struct RGB {
-        public:
-            unsigned char r;
-            unsigned char g;
-            unsigned char b;
-    };
-}
-}
-#endif
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>

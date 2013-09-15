@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Darwin Hardware IO.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 Trent Houliston <trent@houliston.me>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
