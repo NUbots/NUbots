@@ -20,6 +20,7 @@
 #include "messages/ServoWaypoint.h"
 
 #include "MotionManager.h"
+#include "utility/math/angle.h"
 
 namespace modules {
 namespace Platform {
@@ -141,14 +142,38 @@ namespace Darwin {
                     queue.pop_back();
                 }
 
-                // Add this point to our queue
+                // Normalize the angle to between -pi and pi
+                auto position = utility::math::angle::normalizeAngle(point.position);
+
+                // Check to see if the distance that would be traveled is greater then PI radians, if so the motor
+                // will attempt to move around backwards (potentially causing damage) to stop this, we will split the
+                // single motion into two half motions (with angles less then pi). And just to be sure we will do it if
+                // it is greater then 75% of pi.
+                float distance = utility::math::angle::difference(position,
+                                                                  queue.empty() ? sensors.servo[static_cast<int>(point.id)].presentPosition
+                                                                                : queue.back().position);
+
+                // Find out if we need a midpoint
+                if(distance >= M_PI * 0.75) {
+                    Motion midpoint;
+
+                    midpoint.start = queue.empty() ? NUClear::clock::now() : queue.back().end;
+                    midpoint.end = midpoint.start + ((point.time - midpoint.start) / 2); // Half the time start + ((time - start) / 2)
+                    midpoint.position = position - distance / 2;
+                    midpoint.gain = point.gain;
+                    midpoint.executed = false;
+
+                    // This will now be the new start point for the rest of the operation, halving the speed of the next step
+                    queue.push_back(std::move(midpoint));
+                }
+
                 Motion m;
-                m.end = point.time;
-                m.gain = point.gain;
-                m.position = point.position;
 
                 // If we have an event in the queue, then we start when this event starts otherwise we start now
                 m.start = queue.empty() ? NUClear::clock::now() : queue.back().end;
+                m.end = point.time;
+                m.position = position;
+                m.gain = point.gain;
                 m.executed = false;
 
                 queue.push_back(std::move(m));
