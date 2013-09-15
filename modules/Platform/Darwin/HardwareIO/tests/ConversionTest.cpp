@@ -40,7 +40,6 @@ TEST_CASE("Testing the hardware gyroscope conversions to SI units", "[hardware][
 
 TEST_CASE("Testing the hardware voltage conversions to SI units", "[hardware][conversion][voltage]") {
 
-    INFO("Testing the voltage conversion");
     REQUIRE(Convert::voltage(0)    == Approx(0));   // Should be 0 volts
     REQUIRE(Convert::voltage(120)  == Approx(12)); // Should be 12 volts
     REQUIRE(Convert::voltage(96)   == Approx(9.6)); // Should be 9.6 volts
@@ -48,7 +47,6 @@ TEST_CASE("Testing the hardware voltage conversions to SI units", "[hardware][co
 
 TEST_CASE("Testing the hardware FSR conversions to SI units", "[hardware][conversion][fsr]") {
 
-    INFO("Testing the FSR force conversion");
     REQUIRE(Convert::fsrForce(670)   == Approx(0.67));   // Should be 0.67 newtons
     REQUIRE(Convert::fsrForce(1100)  == Approx(1.1));    // Should be 1.1 newtons
     REQUIRE(Convert::fsrForce(12345) == Approx(12.345)); // Should be 12.345 newtons
@@ -178,31 +176,31 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
                 int distance, expected, actual;
 
                 actual = Convert::servoPositionInverse(i, test.first);
-                INFO("Testing Input:" << test.first << " Expected: " << test.second << " Actual: " << actual)
+                INFO("Testing Input:" << test.first << " Expected: " << test.second << " Actual: " << actual);
                 expected = test.second;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
                 actual = Convert::servoPositionInverse(i, test.first + 2 * M_PI);
-                INFO("Testing Input:" << test.first - 2 * M_PI << " Expected: " << test.second << " Actual: " << actual)
+                INFO("Testing Input:" << test.first - 2 * M_PI << " Expected: " << test.second << " Actual: " << actual);
                 expected = test.second;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
                 actual = Convert::servoPositionInverse(i, test.first - 2 * M_PI);
-                INFO("Testing Input:" << test.first + 2 * M_PI << " Expected: " << test.second << " Actual: " << actual)
+                INFO("Testing Input:" << test.first + 2 * M_PI << " Expected: " << test.second << " Actual: " << actual);
                 expected = test.second;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
                 actual = Convert::servoPositionInverse(i, test.first + M_PI);
-                INFO("Testing Input:" << test.first + M_PI << " Expected: " << test.second - 2048 << " Actual: " << actual)
+                INFO("Testing Input:" << test.first + M_PI << " Expected: " << test.second - 2048 << " Actual: " << actual);
                 expected = test.second - 2048;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
                 actual = Convert::servoPositionInverse(i, test.first - M_PI);
-                INFO("Testing Input:" << test.first - M_PI << " Expected: " << test.second - 2048 <<  " Actual: " << actual)
+                INFO("Testing Input:" << test.first - M_PI << " Expected: " << test.second - 2048 <<  " Actual: " << actual);
                 expected = test.second - 2048;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
