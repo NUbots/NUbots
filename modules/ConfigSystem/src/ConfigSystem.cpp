@@ -22,73 +22,96 @@
 extern "C" {
     #include <sys/inotify.h>
     #include <sys/eventfd.h>
-    #include <sys/stat.h>
     #include <fcntl.h>
     #include <dirent.h>
     #include <unistd.h>
 }
-
-#include <fstream>
 
 #include "utility/strutil/strutil.h"
 #include "utility/configuration/ConfigurationNode.h"
 #include "utility/configuration/json/parse.h"
 #include "utility/configuration/json/serialize.h"
 #include "utility/file/fileutil.h"
+#include "utility/idiom/pimpl_impl.h"
+
+#include "messages/Configuration.h"
 
 namespace modules {
 
-    // Lots of space for events (definitely more then needed)
-    const size_t MAX_EVENT_LEN = sizeof (inotify_event) * 1024 + 16;
+    class ConfigSystem::impl {
+    public:
+        using HandlerFunction = std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)>;
 
-    messages::ConfigurationNode ConfigSystem::buildConfigurationNode(const std::string& filePath) {
-        std::cout << "Loading config " << filePath << std::endl;
-        timestamp[filePath] = NUClear::clock::now();
-        return utility::configuration::json::parse(utility::file::loadFromFile(filePath));
-    }
+        std::set<std::type_index> loaded;
+        std::map<std::string, std::vector<HandlerFunction>> handler;
+        std::map<int, std::string> watchPath;
+        std::map<std::string, NUClear::clock::time_point> timestamp;
+        int watcherFd;
+        int killFd;
+        ConfigSystem* reactor;
 
-    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), running(true), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
+        volatile bool running;
 
-        int wd = inotify_add_watch(watcherFd, BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE);
-        watchPath[wd] = BASE_CONFIGURATION_PATH;
+        void run();
+        void kill();
+        void watchDir(const std::string& path, HandlerFunction emitter, HandlerFunction emitNow);
+        messages::ConfigurationNode buildConfigurationNode(const std::string& filePath);
+ 
+        // Lots of space for events (definitely more then needed)
+        static constexpr size_t MAX_EVENT_LEN = sizeof (inotify_event) * 1024 + 16;
+        static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
+    };
+
+    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant) {
+
+        m->running = true;
+        m->watcherFd = inotify_init();
+        m->killFd = eventfd(0, EFD_NONBLOCK);
+        int wd = inotify_add_watch(m->watcherFd, impl::BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE);
+        m->watchPath[wd] = impl::BASE_CONFIGURATION_PATH;
+        m->reactor = this;
 
         on<Trigger<messages::ConfigurationConfiguration>>([this](const messages::ConfigurationConfiguration& command) {
 
             // Check if we have already loaded this type's handler
-            if (loaded.find(command.requester) == std::end(loaded)) {
+            if (m->loaded.find(command.requester) == std::end(m->loaded)) {
                 // We have now loaded the type
-                loaded.insert(command.requester);
+                m->loaded.insert(command.requester);
 
-                std::string fullPath = BASE_CONFIGURATION_PATH + command.configPath;
+                std::string fullPath = impl::BASE_CONFIGURATION_PATH + command.configPath;
                 if (utility::file::isDir(fullPath)) {
                     // Recursively load and watch all config files
-                    watchDir(fullPath, command.emitter, command.initialEmitter);
+                    m->watchDir(fullPath, command.emitter, command.initialEmitter);
                 }
                 else {
                     // Register and load just the one file
-                    handler[fullPath].push_back(command.emitter);
+                    m->handler[fullPath].push_back(command.emitter);
 
                     auto lastSlashIndex = command.configPath.rfind('/');
                     auto fileName = command.configPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
-                    command.initialEmitter(this, fileName, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                    command.initialEmitter(this, fileName, messages::ConfigurationNode(m->buildConfigurationNode(fullPath)));
                 }
             }
         });
 
-        std::function<void ()> run = std::bind(std::mem_fn(&ConfigSystem::run), this);
-        std::function<void ()> kill = std::bind(std::mem_fn(&ConfigSystem::kill), this);
+        std::function<void ()> run = std::bind(std::mem_fn(&impl::run), &*m);
+        std::function<void ()> kill = std::bind(std::mem_fn(&impl::kill), &*m);
 
         powerPlant->addServiceTask(NUClear::Internal::ThreadWorker::ServiceTask(run, kill));
     }
 
-    void ConfigSystem::watchDir(const std::string& path, ConfigSystem::HandlerFunction emitter, ConfigSystem::HandlerFunction emitNow) {
+    messages::ConfigurationNode ConfigSystem::impl::buildConfigurationNode(const std::string& filePath) {
+        timestamp[filePath] = NUClear::clock::now();
+        return utility::configuration::json::parse(utility::file::loadFromFile(filePath));
+    }
+ 
+    void ConfigSystem::impl::watchDir(const std::string& path, ConfigSystem::impl::HandlerFunction emitter, ConfigSystem::impl::HandlerFunction emitNow) {
         // Add a handler for all json files in this directory...
         auto& handlers = handler[path];
         if (handlers.empty()) {
             // Add a watch on this directory
             int wd = inotify_add_watch(watcherFd, path.c_str(), IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE);
             watchPath[wd] = path;
-            std::cout << "Watching " << path << std::endl;
         }
         handlers.push_back(emitter); 
 
@@ -100,12 +123,12 @@ namespace modules {
                 watchDir(path + element, emitter, emitNow);
             }
             else if (utility::strutil::endsWith(element, ".json")) {
-                emitNow(this, element, messages::ConfigurationNode(buildConfigurationNode(path + element)));
+                emitNow(reactor, element, messages::ConfigurationNode(buildConfigurationNode(path + element)));
             }
         }
     }
 
-    void ConfigSystem::run() {
+    void ConfigSystem::impl::run() {
 
         // Build our descriptor set with the watcherFd and an event FD to terminate on demand
         fd_set fdset;
@@ -140,17 +163,6 @@ namespace modules {
                             const std::string& parent = watchPath[event->wd];
                             std::string fullPath = parent + name;
 
-                            if (event->mask & IN_ATTRIB) {
-                                std::cout << "Attrib ";
-                            } else if (event->mask & IN_CREATE) {
-                                std::cout << "Create ";
-                            } else if(event->mask & IN_MODIFY) {
-                                std::cout << "Modify ";
-                            } else {
-                                std::cout << "Move to ";
-                            }
-                            std::cout << fullPath << std::endl;
-
                             // Depending on which text editor is being used, and whether
                             // a file is new or has just been modified, several events
                             // may occur on the same file in quick succession. To prevent
@@ -170,7 +182,7 @@ namespace modules {
                                 if (handlers != std::end(handler)) {
                                     try {
                                         for (auto& emitter : handlers->second) {
-                                            emitter(this, name, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                                            emitter(reactor, name, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
                                         }
                                     }
                                     catch(const std::exception& e) {
@@ -186,8 +198,6 @@ namespace modules {
                     else if (event->mask & (IN_CREATE | IN_MOVED_TO) && event->mask & IN_ISDIR) {
                         const std::string& parent = watchPath[event->wd];
                         std::string fullPath = parent + event->name + "/";
-
-                        std::cout << "Created dir " << fullPath << std::endl;
 
                         // give the new dir the same handlers as its parents, or ignore
                         // it if there are none
@@ -209,7 +219,6 @@ namespace modules {
                     // If a watched directory is moved/renamed
                     else if (event->mask & IN_MOVED_FROM && event->mask & IN_ISDIR) {
                         std::string fullPath = watchPath[event->wd] + event->name + "/";
-                        std::cout << "Moving away " << fullPath << std::endl;
 
                         // Deregister all handlers for the directory and its subdirs
                         for (auto handlerIter = std::begin(handler); handlerIter != std::end(handler);) {
@@ -237,7 +246,6 @@ namespace modules {
                         auto pathIter = watchPath.find(event->wd);
                         const std::string& path = pathIter->second;
 
-                        std::cout << "Deleted dir " << path << std::endl;
                         // throw an error and stop watching if the root config directory was deleted
                         if (path == BASE_CONFIGURATION_PATH) {
                             throw std::runtime_error("config directory deleted!");
@@ -267,7 +275,7 @@ namespace modules {
         close(killFd);
     }
 
-    void ConfigSystem::kill() {
+    void ConfigSystem::impl::kill() {
         // Stop running
         running = false;
 
