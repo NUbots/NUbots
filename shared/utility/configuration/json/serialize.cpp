@@ -1,4 +1,23 @@
-#include "Serializer.h"
+/*
+ * This file is part of ConfigurationNode.
+ *
+ * ConfigurationNode is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ConfigurationNode is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ConfigurationNode.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 Trent Houliston <trent@houliston.me>
+ */
+
+#include "serialize.h"
 
 #include <vector>
 #include <cctype>
@@ -17,7 +36,7 @@ namespace {
         private:
             std::string serializeImpl(const ConfigurationNode& node) {
                 switch(node.nativeType()) {
-                    case ConfigurationNode::DataType::STRING: 
+                    case ConfigurationNode::DataType::STRING:
                     case ConfigurationNode::DataType::INTEGER:
                     case ConfigurationNode::DataType::FLOATINGPOINT:
                     case ConfigurationNode::DataType::BOOLEAN:
@@ -39,7 +58,7 @@ namespace {
             }
 
             std::string serializePrimative(const ConfigurationNode& node) {
-                
+
                 std::string nodeAsString = node;
 
                 // Serialize the value
@@ -76,7 +95,7 @@ namespace {
                 std::string sep = "";
                 for(auto pair : children) {
                     nodeAsString += sep;
-                    nodeAsString += "\"" + pair.first + "\": "; 
+                    nodeAsString += "\"" + pair.first + "\": ";
                     nodeAsString += serializeImpl(pair.second);
                     sep = ", ";
                 }

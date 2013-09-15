@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ConfigSystem.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 Trent Houliston <trent@houliston.me>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #ifndef MODULES_CONFIGSYSTEM_H_
@@ -29,6 +29,12 @@
 
 namespace modules {
 
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     * @author Michael Burton
+     */
     class ConfigSystem : public NUClear::Reactor {
 
     private:
@@ -39,11 +45,13 @@ namespace modules {
         std::set<std::type_index> loaded;
         std::map<std::string, std::vector<HandlerFunction>> handler;
         std::map<int, std::string> watchPath;
+        std::map<std::string, NUClear::clock::time_point> timestamp;
 
         volatile bool running;
         void run();
         void kill();
         void watchDir(const std::string& path, HandlerFunction emitter, HandlerFunction emitNow);
+        messages::ConfigurationNode buildConfigurationNode(const std::string& filePath);
 
         int watcherFd;
         int killFd;

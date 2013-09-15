@@ -49,12 +49,13 @@ LIST(REMOVE_DUPLICATES modules)
 
 # Build each of our modules and their corresponding tests
 FOREACH(module ${modules})
-    STRING(REPLACE "::" "/" module "${module}")
+    STRING(REPLACE "::" "/" modulepath "${module}")
+    STRING(REPLACE "::" "" modulename "${module}")
 
     # Add the subdirectories
-    ADD_SUBDIRECTORY(modules/${module})
+    ADD_SUBDIRECTORY(modules/${modulepath})
     # Add the test
-    ADD_TEST(Test${module} modules/${module}/Test${module})
+    ADD_TEST(Test${modulename} modules/${modulepath}/Test${modulename})
 ENDFOREACH()
 
 # Include our scp darwin sender

@@ -1,18 +1,20 @@
 /*
- * This file is part of DarwinMotionManager.
+ * This file is part of Darwin Motion Manager.
  *
- * DarwinMotionManager is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * Darwin Motion Manager is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * DarwinMotionManager is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * Darwin Motion Manager is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with DarwinMotionManager.  If not, see
- * <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with Darwin Motion Manager.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 Trent Houliston <trent@houliston.me>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "messages/ServoWaypoint.h"
@@ -56,6 +58,7 @@ namespace Darwin {
                     emptiedQueue &= queue.empty();
                 }
 
+                // If we emptied all queues, then emit an event that we are all finished
                 if(allEmptied) {
                     allQueueEnd();
                 }
@@ -122,7 +125,7 @@ namespace Darwin {
             emit<Scope::DIRECT>(std::move(points));
         });
 
-        on<Trigger<std::vector<messages::ServoWaypoint>>>([this](const std::vector<messages::ServoWaypoint>& points) {
+        on<Trigger<std::vector<messages::ServoWaypoint>>, With<messages::DarwinSensors>>([this](const std::vector<messages::ServoWaypoint>& points, const messages::DarwinSensors& sensors) {
             std::lock_guard<std::mutex> waypointLock(waypointMutex);
 
             for(const auto& point : points) {

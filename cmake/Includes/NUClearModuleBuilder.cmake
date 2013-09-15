@@ -1,5 +1,5 @@
 FUNCTION(NUCLEAR_MODULE)
-    
+
     STRING(REGEX REPLACE "^.*modules/(.+)$" "\\1;" module_name "${CMAKE_CURRENT_SOURCE_DIR}")
     STRING(REPLACE "\\" "" module_name "${module_name}")
     STRING(REPLACE "/" "" module_name "${module_name}")
@@ -58,8 +58,8 @@ FUNCTION(NUCLEAR_MODULE)
 
         # Rebuild our sources using the test module
         FILE(GLOB_RECURSE test_src "tests/**.cpp", "tests/**.h")
-        ADD_EXECUTABLE(${test_module_name} ${src} ${test_src})
-        TARGET_LINK_LIBRARIES(${test_module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
+        ADD_EXECUTABLE(${test_module_name} ${test_src})
+        TARGET_LINK_LIBRARIES(${test_module_name} ${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
     ENDIF()
 
 ENDFUNCTION(NUCLEAR_MODULE)

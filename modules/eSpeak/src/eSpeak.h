@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with eSpeakReactor.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 Trent Houliston <trent@houliston.me>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #ifndef MODULES_ESPEAK_H
@@ -24,6 +24,11 @@
 
 namespace modules {
 
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
     class eSpeak : public NUClear::Reactor {
     public:
         explicit eSpeak(NUClear::PowerPlant* plant);
