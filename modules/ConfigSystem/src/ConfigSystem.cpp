@@ -54,7 +54,8 @@ namespace modules {
 
         void run();
         void kill();
-        void watchDir(const std::string& path, HandlerFunction emitter, HandlerFunction emitNow);
+        void loadDir(const std::string& path, HandlerFunction emit);
+        void watchDir(const std::string& path);
         messages::ConfigurationNode buildConfigurationNode(const std::string& filePath);
  
         // Lots of space for events (definitely more then needed)
@@ -67,9 +68,8 @@ namespace modules {
         m->running = true;
         m->watcherFd = inotify_init();
         m->killFd = eventfd(0, EFD_NONBLOCK);
-        int wd = inotify_add_watch(m->watcherFd, impl::BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE);
-        m->watchPath[wd] = impl::BASE_CONFIGURATION_PATH;
         m->reactor = this;
+        m->watchDir(impl::BASE_CONFIGURATION_PATH);
 
         on<Trigger<messages::ConfigurationConfiguration>>([this](const messages::ConfigurationConfiguration& command) {
 
@@ -79,18 +79,30 @@ namespace modules {
                 m->loaded.insert(command.requester);
 
                 std::string fullPath = impl::BASE_CONFIGURATION_PATH + command.configPath;
+                auto& handlers = m->handler[fullPath];
+
                 if (utility::file::isDir(fullPath)) {
-                    // Recursively load and watch all config files
-                    m->watchDir(fullPath, command.emitter, command.initialEmitter);
+                    // Make sure fullPath has a trailing /
+                    if (!utility::strutil::endsWith(fullPath, "/")) {
+                        fullPath += "/";
+                    }
+
+                    // If this is the first type watching this config dir, add a watch
+                    // on the directory
+                    if (handlers.empty()) {
+                        m->watchDir(fullPath);
+                    }
+
+                    // Load all the config files in the given directory
+                    m->loadDir(fullPath, command.initialEmitter);
                 }
                 else {
-                    // Register and load just the one file
-                    m->handler[fullPath].push_back(command.emitter);
-
                     auto lastSlashIndex = command.configPath.rfind('/');
                     auto fileName = command.configPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
                     command.initialEmitter(this, fileName, messages::ConfigurationNode(m->buildConfigurationNode(fullPath)));
                 }
+                
+                handlers.push_back(command.emitter);
             }
         });
 
@@ -105,27 +117,20 @@ namespace modules {
         return utility::configuration::json::parse(utility::file::loadFromFile(filePath));
     }
  
-    void ConfigSystem::impl::watchDir(const std::string& path, ConfigSystem::impl::HandlerFunction emitter, ConfigSystem::impl::HandlerFunction emitNow) {
-        // Add a handler for all json files in this directory...
-        auto& handlers = handler[path];
-        if (handlers.empty()) {
-            // Add a watch on this directory
-            int wd = inotify_add_watch(watcherFd, path.c_str(), IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE);
-            watchPath[wd] = path;
-        }
-        handlers.push_back(emitter); 
-
+    void ConfigSystem::impl::loadDir(const std::string& path, ConfigSystem::impl::HandlerFunction emit) {
         // List the directory and recursively walk its tree
         auto elements = utility::file::listDir(path);
 
         for (const auto& element : elements) {
-            if (utility::strutil::endsWith(element, "/")) { // listDir always adds / to dirs
-                watchDir(path + element, emitter, emitNow);
-            }
-            else if (utility::strutil::endsWith(element, ".json")) {
-                emitNow(reactor, element, messages::ConfigurationNode(buildConfigurationNode(path + element)));
+            if (utility::strutil::endsWith(element, ".json")) {
+                emit(reactor, element, messages::ConfigurationNode(buildConfigurationNode(path + element)));
             }
         }
+    }
+
+    void ConfigSystem::impl::watchDir(const std::string& path) {
+        int wd = inotify_add_watch(watcherFd, path.c_str(), IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE);
+        watchPath[wd] = path;
     }
 
     void ConfigSystem::impl::run() {
@@ -180,6 +185,7 @@ namespace modules {
                                 // file in the root of the config dir, just ignore it
 
                                 if (handlers != std::end(handler)) {
+                                    std::cout << "Loading " << fullPath << " with handler for " << handlers->first << std::endl;
                                     try {
                                         for (auto& emitter : handlers->second) {
                                             emitter(reactor, name, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
@@ -196,19 +202,20 @@ namespace modules {
                     }
                     // If a directory is created or moved/renamed
                     else if (event->mask & (IN_CREATE | IN_MOVED_TO) && event->mask & IN_ISDIR) {
-                        const std::string& parent = watchPath[event->wd];
-                        std::string fullPath = parent + event->name + "/";
+                        std::string fullPath = watchPath[event->wd] + event->name + "/";
 
                         // give the new dir the same handlers as its parents, or ignore
                         // it if there are none
-                        auto handlers = handler.find(parent);
+                        auto handlers = handler.find(fullPath);
                         if (handlers != std::end(handler)) {
+                            watchDir(fullPath);
+
                             // as above, catch exceptions so that a bad config file won't
                             // crash the whole thread
                             try {
                                 // add the directory to the watch list, load any configs in it
                                 for (auto& emitter : handlers->second) {
-                                    watchDir(fullPath, emitter, emitter);
+                                    loadDir(fullPath, emitter);
                                 }
                             }
                             catch(const std::exception& e) {
@@ -220,24 +227,12 @@ namespace modules {
                     else if (event->mask & IN_MOVED_FROM && event->mask & IN_ISDIR) {
                         std::string fullPath = watchPath[event->wd] + event->name + "/";
 
-                        // Deregister all handlers for the directory and its subdirs
-                        for (auto handlerIter = std::begin(handler); handlerIter != std::end(handler);) {
-                            if (utility::strutil::startsWith(handlerIter->first, fullPath)) {
-                                handler.erase(handlerIter++);
-                            }
-                            else {
-                                ++handlerIter;
-                            }
-                        }
-
-                        // and unwatch them too
-                        for (auto wdIter = std::begin(watchPath); wdIter != std::end(watchPath);) {
-                            if (utility::strutil::startsWith(wdIter->second, fullPath)) {
+                        // find the moved directory in the path list and unwatch it
+                        for (auto wdIter = std::begin(watchPath); wdIter != std::end(watchPath); ++wdIter) {
+                            if (wdIter->second == fullPath) {
                                 inotify_rm_watch(watcherFd, wdIter->first);
-                                watchPath.erase(wdIter++);
-                            }
-                            else {
-                                ++wdIter;
+                                watchPath.erase(wdIter);
+                                break;
                             }
                         }
                     }
@@ -249,16 +244,6 @@ namespace modules {
                         // throw an error and stop watching if the root config directory was deleted
                         if (path == BASE_CONFIGURATION_PATH) {
                             throw std::runtime_error("config directory deleted!");
-                        }
-
-                        // Delete all the handlers registered for this dir and its files
-                        for (auto handlerIter = std::begin(handler); handlerIter != std::end(handler);) {
-                            if (utility::strutil::startsWith(handlerIter->first, path)) {
-                                handler.erase(handlerIter++);
-                            }
-                            else {
-                                ++handlerIter;
-                            }
                         }
 
                         inotify_rm_watch(watcherFd, event->wd);
