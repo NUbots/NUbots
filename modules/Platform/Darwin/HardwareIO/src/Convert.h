@@ -64,9 +64,9 @@ namespace Darwin {
         static constexpr double TEMPERATURE_CONVERSION_FACTOR = 1.0;
 
         /// The MX28 measures its speed between 0 and 1023 where 1023 means a speed of 117.07rpm
-        static constexpr double MX28_SPEED_CONVERSION_FACTOR = (117.07 * 2.0 * M_PI) / 1023.0;
+        static constexpr double MX28_SPEED_CONVERSION_FACTOR = (117.07 * 2.0 * M_PI) / (1023.0 * 60);
         /// The RX28 measures its speed between 0 and 1023 where 1023 means a speed of 54rpm
-        static constexpr double RX28_SPEED_CONVERSION_FACTOR = (54 * 2.0 * M_PI) / 1023.0;
+        static constexpr double RX28_SPEED_CONVERSION_FACTOR = (54 * 2.0 * M_PI) / (1023.0 * 60);
 
         /// Picks which direction a motor should be measured in (forward or reverse)
         static const int8_t SERVO_DIRECTION[];
