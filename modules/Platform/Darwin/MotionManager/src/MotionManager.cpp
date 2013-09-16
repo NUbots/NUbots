@@ -80,11 +80,35 @@ namespace Darwin {
                     float gain = waypoints[i].front().gain;
                     float presentPosition = sensors.servo[i].presentPosition;
                     float targetPosition = waypoints[i].front().position;
+                    auto end = waypoints[i].front().end;
+                    auto time = NUClear::clock::now();
                     messages::DarwinSensors::Servo::ID id = static_cast<messages::DarwinSensors::Servo::ID>(i);
+
+                    // If the distance we would travel is greater then 75% of pi, we have to split this waypoint.
+                    // Otherwise the robot will take the "shortest" path to the goal. This will result in it potentially
+                    // damaging itself as the motor moves around the wrong way.
+                    float distance = utility::math::angle::difference(presentPosition, targetPosition);
+                    if(distance >= M_PI * 0.75) {
+
+                        // Create our midpoint waypoint
+                        Motion midpoint;
+                        midpoint.start = time + (end - time) / 2;
+                        midpoint.end = waypoints[i].front().end;
+                        midpoint.position = targetPosition;
+                        midpoint.gain = gain;
+                        midpoint.executed = false;
+
+                        // Insert this waypoint as the next instruction
+                        waypoints[i].insert(++waypoints[i].begin(), std::move(midpoint));
+
+                        // Adjust our existing point
+                        end = waypoints[i].front().end = midpoint.start;
+                        targetPosition = waypoints[i].front().position = targetPosition - (distance / 2);
+                    }
 
                     // Work out our radians per second speed to get there
                     float movingSpeed = fabs(targetPosition - presentPosition) /
-                        (float((waypoints[i].front().end - time).count()) / float(NUClear::clock::period::den));
+                        (float((end - time).count()) / float(NUClear::clock::period::den));
 
                     // If it's less then 0 make it 0 (negative movings speeds would be bad)
                     movingSpeed = movingSpeed < 0 ? 0 : movingSpeed;
@@ -126,7 +150,7 @@ namespace Darwin {
             emit<Scope::DIRECT>(std::move(points));
         });
 
-        on<Trigger<std::vector<messages::ServoWaypoint>>, With<messages::DarwinSensors>>([this](const std::vector<messages::ServoWaypoint>& points, const messages::DarwinSensors& sensors) {
+        on<Trigger<std::vector<messages::ServoWaypoint>>>([this](const std::vector<messages::ServoWaypoint>& points) {
             std::lock_guard<std::mutex> waypointLock(waypointMutex);
 
             for(const auto& point : points) {
@@ -142,37 +166,12 @@ namespace Darwin {
                     queue.pop_back();
                 }
 
-                // Normalize the angle to between -pi and pi
-                auto position = utility::math::angle::normalizeAngle(point.position);
-
-                // Check to see if the distance that would be traveled is greater then PI radians, if so the motor
-                // will attempt to move around backwards (potentially causing damage) to stop this, we will split the
-                // single motion into two half motions (with angles less then pi). And just to be sure we will do it if
-                // it is greater then 75% of pi.
-                float distance = utility::math::angle::difference(position,
-                                                                  queue.empty() ? sensors.servo[static_cast<int>(point.id)].presentPosition
-                                                                                : queue.back().position);
-
-                // Find out if we need a midpoint
-                if(distance >= M_PI * 0.75) {
-                    Motion midpoint;
-
-                    midpoint.start = queue.empty() ? NUClear::clock::now() : queue.back().end;
-                    midpoint.end = midpoint.start + ((point.time - midpoint.start) / 2); // Half the time start + ((time - start) / 2)
-                    midpoint.position = position - distance / 2;
-                    midpoint.gain = point.gain;
-                    midpoint.executed = false;
-
-                    // This will now be the new start point for the rest of the operation, halving the speed of the next step
-                    queue.push_back(std::move(midpoint));
-                }
-
                 Motion m;
 
                 // If we have an event in the queue, then we start when this event starts otherwise we start now
                 m.start = queue.empty() ? NUClear::clock::now() : queue.back().end;
                 m.end = point.time;
-                m.position = position;
+                m.position = utility::math::angle::normalizeAngle(point.position);;
                 m.gain = point.gain;
                 m.executed = false;
 
