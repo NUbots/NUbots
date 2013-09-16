@@ -23,7 +23,7 @@
 #include "messages/BeatLocations.h"
 
 
-static const int NUM_CHUNKS = 50;
+static const int NUM_CHUNKS = 1;
 
 
 namespace modules {
@@ -32,6 +32,9 @@ namespace modules {
         on<Trigger<Last<NUM_CHUNKS, messages::SoundChunk>>> ([this](const std::vector<std::shared_ptr<const messages::SoundChunk>>& chunks) {
             // The last NUM_CHUNKS (50) chunks of sound data that were recorded (or from a file) are received
             
+            const int WINDOW_SIZE = 1024;
+            const int HOP_SIZE = 512; //number of frames to input to beat detection at one time
+            
             std::vector<int16_t> chunk;
             //The audio chunks are combined into a single vector
             for (int i = 0; i < NUM_CHUNKS; ++i)
@@ -39,49 +42,70 @@ namespace modules {
                 chunk.insert( chunk.end(), chunks.at(i)->data.begin(), chunks.at(i)->data.end() );
             }
             
+            //std::cout << "chunk size: " << chunk.size() << "\n";
+            
             int numChannels = chunks.at(0)->numChannels;
             //Calculate length of recording in milliseconds
             int numMilliseconds = (int) (chunk.size() + 0.0/ numChannels) / chunks.at(0)->sampleRate * 1000 ;
             NUClear::clock::time_point endTime = chunks.at(0)->endTime;
 
+            std::vector<int> results;
+            int numBeats = 0;
             fvec_t * out;
+            out = new_fvec(HOP_SIZE , numChannels);
             fvec_t * beat_input_data;
             aubio_beattracking_t * abt;
             
-
+            std::string test = "";
             
-            //Audio data is written to a fvec
-            beat_input_data = new_fvec(chunk.size()/numChannels , numChannels);
-            for (int i = 0; i < (int) chunk.size()/numChannels; ++i)
+            //For each 512 frame chunk run the beat detection algorithm (it remembers the results of the previous section)
+            for (int i = 0; i < (int) chunk.size() / WINDOW_SIZE; ++i)
             {
-               for (int j = 0; j < numChannels; ++j)
-               {
-                   fvec_write_sample(beat_input_data,  chunk.at(2*i + j), j, i); //for channel j
-               }
+                test = "";
+                //Audio data is written to a fvec
+                beat_input_data = new_fvec(HOP_SIZE , numChannels);
+                for (int j = 0; j < HOP_SIZE; ++j)
+                {
+                   for (int k = 0; k < numChannels; ++k)
+                   {
+                       fvec_write_sample(beat_input_data,  chunk.at(WINDOW_SIZE* i + 2*j + k), k, j); //for channel k
+                       //test += chunk.at(WINDOW_SIZE* i + 2*j + k) + " ";
+                   }
+                }
+                
+                //std::cout << "input: " << test << "\n";
+                
+                abt = new_aubio_beattracking(WINDOW_SIZE, numChannels);
+
+                //out = new_fvec(WINDOW_SIZE , numChannels);
+
+                aubio_beattracking_do(abt, beat_input_data, out);     
+                
+                numBeats += out->data[0][0];
+                for (int j = 1; j <= out->data[0][0] -1; ++j)
+                {
+                    results.push_back(out->data[0][j] /** 2 + HOP_SIZE * i*/);
+                }
             }
- 
-            abt = new_aubio_beattracking(chunk.size()/numChannels, numChannels);
-            
-            out = new_fvec(chunk.size()/numChannels , numChannels);
 
-            aubio_beattracking_do(abt, beat_input_data, out);
 
-            del_aubio_beattracking(abt);
+            //del_aubio_beattracking(abt);
 
             //Display the results of the beat detection algorithm
-            std::cout << "found " << (out->data[0][0] -1) << " beats\n";
+            std::cout << "found " << (numBeats) << " beats\n";
             
-            for (int i = 1; i <= out->data[0][0] -1; ++i)
+            for (int i = 0; i < results.size(); ++i)
             {
-                std::cout << "Beat value " << i << " : " << (out->data[0][i])/(chunk.size()/ numChannels) * numMilliseconds/1000 << "s \n";
-                std::cout << "Beat value " << i << " : " << "Position in array: " << (out->data[0][i]) << " Size of array: " <<(chunk.size()/numChannels) << " # Seconds of recording: " << numMilliseconds/1000 << "s \n";
+                std::cout << "Beat value " << i << " : " << (0.0 + results.at(i))/(chunk.size()/ numChannels) * numMilliseconds/1000 << "s \n";
+                std::cout << "Beat value " << i << " : " << "Position in array: " << (results.at(i)) << " Size of array: " <<(chunk.size()/numChannels) << " # Seconds of recording: " << numMilliseconds/1000 << "s \n";
             }
             
             auto beatLocations = std::make_unique<messages::BeatLocations>();
             int beatPeriodFrames;
             float beatPeriodMilliseconds;
-            int numBeats;
+            //int numBeats;
 
+            /*
             numBeats = out->data[0][0];
             //beatPeriod = (out->data[0][1]*4)/(chunk.data.size()/NUM_CHANNELS) * (NUM_SECONDS - out->data[0][2]*4)/(chunk.data.size()/NUM_CHANNELS) * NUM_SECONDS;
             beatPeriodFrames = out->data[0][1] - out->data[0][2];
@@ -98,7 +122,7 @@ namespace modules {
             beatLocations->numBeats = numBeats;
 
             powerPlant->emit(std::move(beatLocations));
-             
+             */
         });    
     
     }

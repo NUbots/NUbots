@@ -38,7 +38,7 @@ namespace modules {
             const int FRAME_RATE = 44000;
             const int NUM_CHANNELS = 2;
             const int INTS_PER_FRAME = 2;
-            const float CHUNK_TIME = 0.1; //how long each chunk is in seconds
+            const float CHUNK_TIME = 25.6; //how long each chunk is in seconds
 
             int framesPerChunk = (int) FRAME_RATE * CHUNK_TIME;
 
@@ -72,7 +72,7 @@ namespace modules {
                 chunk->endTime = std::chrono::system_clock::now();
                 emit(std::move(chunk));
                 
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds((int)CHUNK_TIME * 1000));
                 
             }
         
