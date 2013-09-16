@@ -21,8 +21,7 @@
 #define MODULES_DARWINCAMERAREADER_H
 
 #include <NUClear.h>
-
-#include "V4L2Camera.h"
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
 
@@ -41,8 +40,8 @@ namespace modules {
     class LinuxCameraStreamer : public NUClear::Reactor {
 
     private:
-        /// @brief Our internal camera class that interacts with the physical device
-        V4L2Camera camera;
+        class impl;
+        utility::idiom::pimpl<impl> m;
     public:
         /// @brief Our configuration file for this class
         static constexpr const char* CONFIGURATION_PATH = "LinuxCameraStreamer.json";

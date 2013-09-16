@@ -18,12 +18,20 @@
  */
 
 #include "LinuxCameraStreamer.h"
+#include "utility/idiom/pimpl_impl.h"
 
 #include "V4L2Camera.h"
 #include "messages/Image.h"
 #include "messages/Configuration.h"
 
 namespace modules {
+    // Create our impl class as per the pimpl idiom.
+    class LinuxCameraStreamer::impl {
+        public:
+            /// @brief Our internal camera class that interacts with the physical device
+            V4L2Camera camera;
+    };
+
 
     // We assume that the device will always be video0, if not then change this
     LinuxCameraStreamer::LinuxCameraStreamer(NUClear::PowerPlant* plant) : Reactor(plant) {
@@ -32,15 +40,17 @@ namespace modules {
         on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
 
             // Get an image and emit it
-            emit(std::unique_ptr<messages::Image>(camera.getImage()));
+            emit(std::unique_ptr<messages::Image>(m->camera.getImage()));
         });
 
         // When we shutdown, we must tell our camera class to close (stop streaming)
         on<Trigger<Shutdown>>([this](const Shutdown& shutdown) {
-            camera.closeCamera();
+            m->camera.closeCamera();
         });
 
         on<Trigger<messages::Configuration<LinuxCameraStreamer>>>([this](const messages::Configuration<LinuxCameraStreamer>& settings) {
+            auto& camera = m->camera;
+
             try {
                 // Recreate the camera device at the required resolution
                 int width = settings.config["imageWidth"];

@@ -18,26 +18,36 @@
  */
 
 #include "ScriptEngine.h"
+#include "utility/idiom/pimpl_impl.h"
+
 #include "messages/Configuration.h"
 #include "messages/ExecuteScript.h"
 #include "messages/ServoWaypoint.h"
+#include "messages/DarwinServoCommand.h"
+#include "messages/Script.h"
+
+#include <map>
 
 namespace modules {
-
     struct Scripts {
         // For scripts we want updates on the whole scripts directory
         static constexpr const char* CONFIGURATION_PATH = "scripts/";
+    };
+
+    class ScriptEngine::impl {
+        public:
+            std::map<std::string, messages::Script> scripts;
     };
 
     ScriptEngine::ScriptEngine(NUClear::PowerPlant* plant) : Reactor(plant) {
 
         on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& script) {
             // Add this script to our list of scripts
-            scripts.insert(std::make_pair(script.name, script.config));
+            m->scripts.insert(std::make_pair(script.name, script.config));
         });
 
         on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {
-
+            auto& scripts = m->scripts;
             auto script = scripts.find(command.script);
 
             if(script == std::end(scripts)) {

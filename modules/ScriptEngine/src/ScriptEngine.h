@@ -20,16 +20,16 @@
 #ifndef MODULES_SCRIPTENGINE_H
 #define MODULES_SCRIPTENGINE_H
 
-#include <map>
 #include <NUClear.h>
-#include "messages/DarwinServoCommand.h"
-#include "messages/Script.h"
+#include "utility/idiom/pimpl.h"
+
 
 namespace modules {
 
     class ScriptEngine : public NUClear::Reactor {
     private:
-        std::map<std::string, messages::Script> scripts;
+        class impl;
+        utility::idiom::pimpl<impl> m;
     public:
         explicit ScriptEngine(NUClear::PowerPlant* plant);
     };
