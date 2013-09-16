@@ -23,8 +23,6 @@
 #include <NUClear.h>
 #include "utility/idiom/pimpl.h"
 
-#include "V4L2Camera.h"
-
 namespace modules {
 
     /**
