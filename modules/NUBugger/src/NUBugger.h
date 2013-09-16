@@ -21,7 +21,7 @@
 #define MODULES_NUBUGGER_H
 
 #include <NUClear.h>
-#include <zmq.hpp>
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
 
@@ -33,17 +33,20 @@ namespace modules {
      */
     class NUBugger : public NUClear::Reactor {
     private:
-        /// @brief our zmq pub socket
-        zmq::socket_t pub;
+        class impl;
+        utility::idiom::pimpl<impl> m;
 
-        std::mutex mutex;
+        /// @brief our zmq pub socket
+        /*zmq::socket_t pub;
+
+        std::mutex mutex;*/
 
         /**
          * This method needs to be used over pub.send as all calls to
          * pub.send need to be synchronized with a concurrency primative
          * (such as a mutex)
          */
-        void send(zmq::message_t& packet);
+        //void send(zmq::message_t& packet);
 
     public:
         explicit NUBugger(NUClear::PowerPlant* plant);

@@ -18,7 +18,9 @@
  */
 
 #include "NUBugger.h"
+#include "utility/idiom/pimpl_impl.h"
 
+#include <zmq.hpp>
 #include <jpeglib.h>
 
 #include "messages/NUAPI.pb.h"
@@ -31,14 +33,33 @@ using utility::image::RGB;
 using utility::image::YCbCr;
 
 namespace modules {
+    // Implement our impl class as per the pimpl idiom.
+    class NUBugger::impl {
+        public:
+            zmq::socket_t pub;
 
-    NUBugger::NUBugger(NUClear::PowerPlant* plant) : Reactor(plant), pub(NUClear::Extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
+            std::mutex mutex;
+
+            impl() : pub(NUClear::Extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {}
+
+            /**
+             * This method needs to be used over pub.send as all calls to
+             * pub.send need to be synchronized with a concurrency primative
+             * (such as a mutex)
+             */
+            void send(zmq::message_t& packet) {
+                std::lock_guard<std::mutex> lock(mutex);
+                pub.send(packet);
+            }
+    };
+
+    NUBugger::NUBugger(NUClear::PowerPlant* plant) : Reactor(plant) {
         // Set our high water mark
         int64_t hwm = 3;
-        pub.setsockopt(ZMQ_HWM, &hwm, sizeof(hwm));
+        m->pub.setsockopt(ZMQ_HWM, &hwm, sizeof(hwm));
 
         // Bind to port 12000
-        pub.bind("tcp://*:12000");
+        m->pub.bind("tcp://*:12000");
 
         // This trigger gets the output from the sensors (unfiltered)
         on<Trigger<messages::DarwinSensors>>([this](const messages::DarwinSensors& sensors) {
@@ -80,7 +101,7 @@ namespace modules {
             auto serialized = message.SerializeAsString();
             zmq::message_t packet(serialized.size());
             memcpy(packet.data(), serialized.data(), serialized.size());
-            send(packet);
+            m->send(packet);
         });
 
         on<Trigger<messages::Image>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::Image& image) {
@@ -157,18 +178,13 @@ namespace modules {
             auto serialized = message.SerializeAsString();
             zmq::message_t packet(serialized.size());
             memcpy(packet.data(), serialized.data(), serialized.size());
-            send(packet);
+            m->send(packet);
         });
 
         // When we shutdown, close our publisher
         on<Trigger<Shutdown>>([this](const Shutdown&) {
-            pub.close();
+            m->pub.close();
         });
     }
 
-    void NUBugger::send(zmq::message_t& packet) {
-        std::lock_guard<std::mutex> lock(mutex);
-
-        pub.send(packet);
-    }
 }

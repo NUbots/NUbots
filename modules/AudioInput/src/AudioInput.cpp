@@ -20,6 +20,8 @@
 #include <algorithm>
 
 #include "AudioInput.h"
+#include "utility/idiom/pimpl_impl.h"
+
 #include "messages/SoundChunk.h"
 
 #include "RtAudio.h"
@@ -62,7 +64,17 @@ namespace modules {
 
     }
 
+    // Implement our impl class.
+    class AudioInput::impl {
+        public:
+            RtAudio audioContext;
+            RtAudio::StreamParameters inputStreamParameters;
+    };
+
     AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {
+        auto& audioContext = m->audioContext;
+        auto& inputStreamParameters = m->inputStreamParameters;
+
         // We need to set up the audio context.
         if(audioContext.getDeviceCount() < 1) {
             // TODO: Throw error here and skip all our setup

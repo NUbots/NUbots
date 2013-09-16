@@ -21,7 +21,7 @@
 #define MODULES_AUDIOINPUT_H
 
 #include <NUClear.h>
-#include "RtAudio.h"
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
 
@@ -36,8 +36,10 @@ namespace modules {
         private:
             // TODO: Consider replacing this with the PIMPL idiom to remove
             // the RtAudio header dependency.
-            RtAudio audioContext;
-            RtAudio::StreamParameters inputStreamParameters;
+            class impl;
+            utility::idiom::pimpl<impl> m;
+            /*RtAudio audioContext;
+            RtAudio::StreamParameters inputStreamParameters;*/
     };
 }
 #endif
