@@ -1,11 +1,31 @@
+/*
+ * This file is part of ConfigSystem.
+ *
+ * ConfigSystem is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ConfigSystem is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ConfigSystem.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
 #ifndef MESSAGES_CONFIGURATION_H_
 #define MESSAGES_CONFIGURATION_H_
 
 #include <NUClear.h>
-#include "ConfigurationNode.h"
+#include "utility/configuration/ConfigurationNode.h"
 
 namespace messages {
 
+    using namespace utility::configuration;
     using namespace NUClear::Internal::Magic::MetaProgramming;
 
     // Anonymous namespace to hide details
@@ -39,6 +59,11 @@ namespace messages {
         public Meta::If<std::is_void<decltype(doTest<T>(0))>, ConfigurationIsString<T>, std::false_type> {};
     }
 
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
     template <typename TType>
     struct Configuration {
         static_assert(HasConfiguration<TType>::value, "The passed type does not have a CONFIGURATION_PATH variable");
@@ -48,7 +73,21 @@ namespace messages {
         ConfigurationNode config;
     };
 
-    // TODO this is used to tell the config system what to do
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
+    struct SaveConfiguration {
+        std::string path;
+        ConfigurationNode config;
+    };
+
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
     struct ConfigurationConfiguration {
         std::type_index requester;
         std::string configPath;
@@ -59,6 +98,12 @@ namespace messages {
 
 // Our extension
 namespace NUClear {
+
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
     template <typename TConfiguration>
     struct NUClear::Reactor::Exists<messages::Configuration<TConfiguration>> {
         static void exists(NUClear::Reactor* context) {
@@ -79,7 +124,7 @@ namespace NUClear {
             };
 
             // Emit it from our reactor to the config system
-            context->emit<Scope::DIRECT>(std::unique_ptr<messages::ConfigurationConfiguration>(
+            context->emit<Scope::INITIALIZE>(std::unique_ptr<messages::ConfigurationConfiguration>(
                 new messages::ConfigurationConfiguration {
                     typeid(TConfiguration),
                     TConfiguration::CONFIGURATION_PATH,

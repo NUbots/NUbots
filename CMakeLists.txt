@@ -5,25 +5,15 @@ SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 2)
 SET(VERSION_PATCH 0)
 
-# These define which modules will be installed
-SET(modules
-    ConfigSystem
-    DarwinPlatform
-    DarwinCameraReader
-    DarwinMotionManager
-    ScriptEngine
-    eSpeak
-    PartyDarwin
-    AudioInput
-    AudioFileInput
-    BeatDetector
-    NUBugger)
-
 # Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)
 
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+# Our scripts directory contains shell scripts for running, generating, installing, etc
+# not to be confused with robot scripts.
+SET(NUBOTS_SCRIPTS_DIR "${CMAKE_SOURCE_DIR}/scripts/")
 
 # Setup our compiler settings
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/Compiler.cmake")
@@ -34,13 +24,11 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/SharedLibraries.cmake")
 # Include our module builder
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/NUClearModuleBuilder.cmake")
 
-# Include our scp darwin sender
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")
-
 # Include our shared messages etc headers
 INCLUDE_DIRECTORIES("shared")
 INCLUDE_DIRECTORIES("build/shared")
 
+# Build tests in test mode
 IF(BUILD_TESTS)
     ENABLE_TESTING()
 ENDIF()
@@ -53,15 +41,22 @@ ADD_SUBDIRECTORY(shared/utility)
 # Add these to our shared libraries (started in our shared libraries cmake)
 SET(NUBOTS_SHARED_LIBRARIES ${NUBOTS_SHARED_LIBRARIES} messages utility)
 
+# Find and build all our hats
+ADD_SUBDIRECTORY(hats)
+
+# Remove any duplicate modules (used in more then one hat)
+LIST(REMOVE_DUPLICATES modules)
+
 # Build each of our modules and their corresponding tests
 FOREACH(module ${modules})
+    STRING(REPLACE "::" "/" modulepath "${module}")
+    STRING(REPLACE "::" "" modulename "${module}")
+
     # Add the subdirectories
-    ADD_SUBDIRECTORY(modules/${module})
-    INCLUDE_DIRECTORIES(modules/${module}/src)
-    ADD_TEST(Test${module} modules/${module}/Test${module})
+    ADD_SUBDIRECTORY(modules/${modulepath})
+    # Add the test
+    ADD_TEST(Test${modulename} modules/${modulepath}/Test${modulename})
 ENDFOREACH()
 
-ADD_EXECUTABLE(robocup main.cpp)
-TARGET_LINK_LIBRARIES(robocup
-    ${NUBOTS_SHARED_LIBRARIES}
-    ${modules})
+# Include our scp darwin sender
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")

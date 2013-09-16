@@ -82,7 +82,7 @@ namespace error {
             case AL_OUT_OF_MEMORY: return "Out of memory";
             default: return "Unknown error";
         }
-    } 
+    }
 }
 }
 #endif

@@ -1,5 +1,0 @@
-package messages.Example;
-
-message NetworkMessage {
-  required string example = 1;
-}

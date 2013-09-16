@@ -1,7 +1,8 @@
 FUNCTION(NUCLEAR_MODULE)
-    
+
     STRING(REGEX REPLACE "^.*modules/(.+)$" "\\1;" module_name "${CMAKE_CURRENT_SOURCE_DIR}")
-    STRING(REPLACE "\\" "_" module_name "${module_name}")
+    STRING(REPLACE "\\" "" module_name "${module_name}")
+    STRING(REPLACE "/" "" module_name "${module_name}")
 
     # Set our variables initial values
     SET(INCLUDES "")
@@ -47,7 +48,8 @@ FUNCTION(NUCLEAR_MODULE)
     TARGET_LINK_LIBRARIES(${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
 
     ADD_CUSTOM_COMMAND(TARGET ${module_name} PRE_BUILD
-                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/config ${CMAKE_BINARY_DIR}/config)
+                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/config ${CMAKE_BINARY_DIR}/config
+                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/..)
 
     # If we are doing tests then build the tests for this
     IF(BUILD_TESTS)
@@ -56,8 +58,8 @@ FUNCTION(NUCLEAR_MODULE)
 
         # Rebuild our sources using the test module
         FILE(GLOB_RECURSE test_src "tests/**.cpp", "tests/**.h")
-        ADD_EXECUTABLE(${test_module_name} ${src} ${test_src})
-        TARGET_LINK_LIBRARIES(${test_module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
+        ADD_EXECUTABLE(${test_module_name} ${test_src})
+        TARGET_LINK_LIBRARIES(${test_module_name} ${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
     ENDIF()
 
 ENDFUNCTION(NUCLEAR_MODULE)

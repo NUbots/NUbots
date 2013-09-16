@@ -1,18 +1,20 @@
 /*
  * This file is part of ConfigSystem.
  *
- * ConfigSystem is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * ConfigSystem is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * ConfigSystem is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * ConfigSystem is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with ConfigSystem.  If not, see
- * <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with ConfigSystem.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 Trent Houliston <trent@houliston.me>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "ConfigSystem.h"
@@ -29,8 +31,11 @@ extern "C" {
 #include <fstream>
 #include <system_error>
 
-#include "json/Parser.h"
 #include "utility/strutil/strutil.h"
+#include "utility/configuration/ConfigurationNode.h"
+#include "utility/configuration/json/parse.h"
+#include "utility/configuration/json/serialize.h"
+#include "utility/file/fileutil.h"
 
 namespace modules {
 
@@ -85,20 +90,11 @@ namespace modules {
         return result;
     }
 
-    messages::ConfigurationNode buildConfigurationNode(std::string filePath) {
-
-        // Read the data from the file into a string.
-        std::ifstream data(filePath, std::ios::in);
-
-        // There are lots of nice ways to read a file into a string but this is one of the quickest.
-        // See: http://stackoverflow.com/a/116220
-        std::stringstream stream;
-        stream << data.rdbuf();
-
-        return json::Parser::parse(stream.str());
+    messages::ConfigurationNode buildConfigurationNode(const std::string& filePath) {
+        return utility::configuration::json::parse(utility::file::loadFromFile(filePath));
     }
 
-    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
+    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant), running(true), watcherFd(inotify_init()), killFd(eventfd(0, EFD_NONBLOCK)) {
 
         // TODO get the directories file descriptor here and put it in
         int rWd = inotify_add_watch(watcherFd, BASE_CONFIGURATION_PATH, IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF);
@@ -179,7 +175,7 @@ namespace modules {
                             std::string path = std::string(event->name);
                             std::string fullPath = BASE_CONFIGURATION_PATH + path;
 
-                            std::cout << "Reloaded " << fullPath << std::endl;
+                            log("Reloaded ", fullPath, '\n');
 
                             for(auto& emitter : handler[path]) {
                                 emitter(this, path, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
@@ -203,6 +199,10 @@ namespace modules {
                 }
             }
         }
+
+        // Close our file descriptors
+        close(watcherFd);
+        close(killFd);
     }
 
     void ConfigSystem::kill() {
@@ -216,9 +216,5 @@ namespace modules {
         int written = write(killFd, &val, sizeof (eventfd_t));
         assert(written == sizeof(eventfd_t));
         (void) written; // Stop gcc from complaining about it being unused when NDEBUG is set
-
-        // Close our file descriptors
-        close(watcherFd);
-        close(killFd);
     }
 }
