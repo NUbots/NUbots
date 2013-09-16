@@ -33,8 +33,6 @@ namespace modules {
                 double streamTime,
                 RtAudioStreamStatus status,
                 void* userData ) {
-            
-            std::cout<<"Audio Input Callback";
 
             if(status) {
                 // If status is false then we've detected a stream overflow.
@@ -52,19 +50,17 @@ namespace modules {
             // Sound is split up into left and right channels which are 16 bytes
             // (for the darwin) each. This means a single frame actually compromises
             // 32 bits and we need to allocate data appropriately.
-            const int INTS_PER_FRAME = 2;
+            const int CHANNELS = 2;
 
-            chunk->data.resize(nBufferFrames * INTS_PER_FRAME);
-            chunk->data.assign(data, data + (nBufferFrames * INTS_PER_FRAME));
-            
-            //chunk->sampleRate = sampleRate;
-            //chunk->numChannels = inputStreamParameters.nChannels;
+            chunk->data.resize(nBufferFrames * CHANNELS);
+            chunk->data.assign(data, data + (nBufferFrames * CHANNELS));
+            chunk->channels = CHANNELS;
+            chunk->sampleRate = 96000;
 
             powerPlant->emit(std::move(chunk));
 
             return 0;
         }
-
     }
 
     AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {

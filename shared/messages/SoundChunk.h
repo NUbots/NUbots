@@ -35,7 +35,7 @@ namespace messages {
         NUClear::clock::time_point endTime;
         std::vector<int16_t> data;
         int sampleRate;
-        int numChannels;
+        int channels;
     };
 }
 
