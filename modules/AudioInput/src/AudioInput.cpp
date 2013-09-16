@@ -66,12 +66,12 @@ namespace modules {
             // Sound is split up into left and right channels which are 16 bytes
             // (for the darwin) each. This means a single frame actually compromises
             // 32 bits and we need to allocate data appropriately.
-            const int CHANNELS = 2;
+            const int CHANNELS = udata->inputStreamParameters.nChannels;
 
-            chunk->data.resize(nBufferFrames * INTS_PER_FRAME);
-            chunk->data.assign(data, data + (nBufferFrames * INTS_PER_FRAME));
+            chunk->data.resize(nBufferFrames * CHANNELS);
+            chunk->data.assign(data, data + (nBufferFrames * CHANNELS));
             chunk->sampleRate = udata->sampleRate;
-            chunk->numChannels = udata->inputStreamParameters.nChannels;
+            chunk->channels = CHANNELS;
 
             udata->powerPlant->emit(std::move(chunk));
 
