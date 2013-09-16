@@ -28,6 +28,20 @@
 
 namespace modules {
     namespace {
+        // Holds the various user data we're passing to our audio callback.
+        struct UserData {
+            UserData(NUClear::PowerPlant* powerPlant, 
+                    RtAudio::StreamParameters& inputStreamParameters, 
+                    unsigned int sampleRate) :
+                powerPlant(powerPlant),
+                inputStreamParameters(inputStreamParameters),
+                sampleRate(sampleRate) {}
+
+            NUClear::PowerPlant* powerPlant; 
+            RtAudio::StreamParameters& inputStreamParameters;
+            unsigned int sampleRate;
+        };
+
         int audioCallback(
                 void* outputBuffer,
                 void* inputBuffer,
@@ -43,9 +57,9 @@ namespace modules {
 
             int16_t* data = (int16_t*)inputBuffer;
 
-            // This is a horrible hack but we know the userData
-            // is actually our PowerPlant.
-            auto powerPlant = (NUClear::PowerPlant*)userData;
+            // This is a horrible hack to get some C++-space data 
+            // into this function.
+            UserData* udata = static_cast<UserData*>(userData);
 
             auto chunk = std::make_unique<messages::SoundChunk>();
 
@@ -54,12 +68,12 @@ namespace modules {
             // 32 bits and we need to allocate data appropriately.
             const int CHANNELS = 2;
 
-            chunk->data.resize(nBufferFrames * CHANNELS);
-            chunk->data.assign(data, data + (nBufferFrames * CHANNELS));
-            chunk->channels = CHANNELS;
-            chunk->sampleRate = 96000;
+            chunk->data.resize(nBufferFrames * INTS_PER_FRAME);
+            chunk->data.assign(data, data + (nBufferFrames * INTS_PER_FRAME));
+            chunk->sampleRate = udata->sampleRate;
+            chunk->numChannels = udata->inputStreamParameters.nChannels;
 
-            powerPlant->emit(std::move(chunk));
+            udata->powerPlant->emit(std::move(chunk));
 
             return 0;
         }
@@ -70,6 +84,7 @@ namespace modules {
         public:
             RtAudio audioContext;
             RtAudio::StreamParameters inputStreamParameters;
+            std::unique_ptr<UserData> userData;
     };
 
     AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {
@@ -78,7 +93,7 @@ namespace modules {
 
         // We need to set up the audio context.
         if(audioContext.getDeviceCount() < 1) {
-            // TODO: Throw error here and skip all our setup
+            log("No audio devices found");
             return;
         }
 
@@ -101,7 +116,9 @@ namespace modules {
         inputStreamParameters.firstChannel = 0;
 
         unsigned int sampleRate = *(std::max_element(info.sampleRates.begin(), info.sampleRates.end()));
-        unsigned int bufferFrames = sampleRate / 10;//256; // 256 sample frames.
+        unsigned int bufferFrames = sampleRate / 10; // 256 sample frames.
+
+        m->userData = std::make_unique<UserData>(powerPlant, inputStreamParameters, sampleRate);
 
         try {
             /**
@@ -116,7 +133,7 @@ namespace modules {
                     sampleRate,
                     &bufferFrames,
                     &audioCallback,
-                    powerPlant
+                    m->userData.get()
             );
             audioContext.startStream();
         } catch( RtError& e) {
