@@ -25,7 +25,7 @@
 #include "messages/BeatLocations.h"
 
 
-const int WINDOW_SIZE = 1024;
+const int WINDOW_SIZE = 1600;
 const int CHANNELS = 1;
 
 namespace modules {
@@ -39,15 +39,13 @@ namespace modules {
 
         on<Trigger<messages::SoundChunk>>([this, tracker, in, out](const messages::SoundChunk& chunk) {
 
-            std::cout << "Size: " << chunk.data.size() << std::endl;
-
-            for(size_t i = 0; i < chunk.data.size(); i += chunk.channels) {
-                in->data[0][(i / chunk.channels) % WINDOW_SIZE] = chunk.data[i];
-                if((i / chunk.channels % WINDOW_SIZE) == WINDOW_SIZE - 1) {
-                    std::cout << "Process Chunk" << std::endl;
-                }
+            for(size_t i = 0; i < chunk.data.size(); ++i) {
+                in->data[0][i] = chunk.data[i];
             }
-            std::cout << "Got Chunk" << std::endl;
+
+            aubio_beattracking_do(tracker, in, out);
+
+            std::cout << out->data[0][0] << std::endl;
         });
     }
 }
