@@ -18,66 +18,46 @@
 //#include <algorithm>
 
 #include "AudioFileInput.h"
-#include <sndfile.hh>
-#include "messages/SoundChunk.h"
-#include <vector>
-#include <iostream>
-#include <chrono>
+#include "utility/idiom/pimpl_impl.h"
 
+#include "messages/SoundChunk.h"
+#include "messages/Configuration.h"
+#include <chrono>
+#include <string>
+#include <sndfile.hh>
 
 namespace modules {
+
+    class AudioFileInput::impl {
+        public:
+            SndfileHandle file;
+    };
+
+    struct AudioFileConfiguration {
+        static constexpr const char* CONFIGURATION_PATH = "AudioFileInput.json";
+    };
+
     AudioFileInput::AudioFileInput(NUClear::PowerPlant* plant) : Reactor(plant) {
-        //struct SoundChunk& chunk;
-        
-        //on<Trigger<Every<10000, std::chrono::milliseconds>>> ([this](const time_t&) {
-        on<Trigger<Every<100, std::chrono::milliseconds>>, Options<Single>> ([this](const time_t&) {
-            //every 100 milliseconds it will check if it is not already running, if it isn't it will start a new one
-            
-            
-            const int NUM_FRAMES = 15000000; //if this is too big it will cause a segmentation fault. 300000000 is certainly too big
-            const int FRAME_RATE = 44000;
-            const int NUM_CHANNELS = 2;
-            const int INTS_PER_FRAME = 2;
-            const float CHUNK_TIME = 25.6; //how long each chunk is in seconds
-
-            int framesPerChunk = (int) FRAME_RATE * CHUNK_TIME;
-
-            sf_count_t num_frames = (sf_count_t) NUM_FRAMES;
-
-            SF_INFO  info = {num_frames, FRAME_RATE, NUM_CHANNELS, SF_FORMAT_WAV, 1, 1};
-            
-            
-            std::string loc = "recorded.wav";//"/NuclearPort2Shortcut/NUClearPort2/recorded.wav";
-            SNDFILE* sndfile = sf_open(loc.c_str(), SFM_READ, &info);
-            
-            short* frames = new short[NUM_FRAMES];//short frames[NUM_FRAMES];// = short[NUM_FRAMES];
-
-            sf_count_t framesRead = sf_read_short (sndfile, frames, (sf_count_t) NUM_FRAMES) ;
-            
-            sf_close(sndfile);
-            //std::cout << "number of frames: " << framesRead << "\n";
-       
-            int startPos = 0;
-            
-            while (startPos + framesPerChunk < framesRead)
-            {
-                auto chunk = std::make_unique<messages::SoundChunk>();
-                chunk->data.resize(framesPerChunk); 
-                chunk->data.assign(frames + startPos, frames + startPos + framesPerChunk ); //first item and last item to be read 
-                startPos += framesPerChunk;
-
-                //std::cout << "StartPos: " << startPos << "\n";
-                chunk->numChannels = NUM_CHANNELS;
-                chunk->sampleRate = FRAME_RATE;
-                chunk->endTime = std::chrono::system_clock::now();
-                emit(std::move(chunk));
-                
-                std::this_thread::sleep_for(std::chrono::milliseconds((int)CHUNK_TIME * 1000));
-                
-            }
-        
+        // Load our file name configuration.
+        on<Trigger<messages::Configuration<AudioFileConfiguration>>>([this](const messages::Configuration<AudioFileConfiguration>& configfile) {
+                std::string filePath = configfile.config["file"];
+                log("Loading sound file: ", filePath);
+                m->file = SndfileHandle(filePath.c_str());
         });
-    
-    }
 
+        on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
+            auto& file = m->file;
+
+            auto chunk = std::make_unique<messages::SoundChunk>();
+
+            // Find out how much of our file to read to get a 100ms sample
+            size_t chunkSize = (file.samplerate() / 10) * file.channels();
+
+            chunk->data.resize(chunkSize);
+            file.read(chunk->data.data(), chunkSize);
+            chunk->channels = file.channels();
+            chunk->sampleRate = file.samplerate();
+            emit(std::move(chunk));
+        });
+    }
 }

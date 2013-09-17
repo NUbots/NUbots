@@ -1,4 +1,4 @@
-/*
+/** 
  * This file is part of AudioFileInput.
  *
  * AudioFileInput is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -19,18 +19,16 @@
 #define MODULES_AUDIOFILEINPUT_H
 
 #include <NUClear.h>
-//#include "RtAudio.h"
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
 
     class AudioFileInput : public NUClear::Reactor {
+        private:
+            class impl;
+            utility::idiom::pimpl<impl> m;
         public:
             explicit AudioFileInput(NUClear::PowerPlant* plant);
-        //private:
-            // TODO: Consider replacing this with the PIMPL idiom to remove
-            // the RtAudio header dependency.
-            //RtAudio audioContext;
-            //RtAudio::StreamParameters inputStreamParameters;
     };
 }
 #endif

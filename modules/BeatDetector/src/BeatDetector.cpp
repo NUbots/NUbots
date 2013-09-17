@@ -18,6 +18,8 @@
  */
 
 #include "BeatDetector.h"
+#include "utility/idiom/pimpl_impl.h"
+
 #include <aubio/aubio.h>
 #include <chrono>
 #include <ctime>
@@ -29,23 +31,31 @@ const int WINDOW_SIZE = 1600;
 const int CHANNELS = 1;
 
 namespace modules {
+    class BeatDetector::impl {
+        public:
+
+    };
+
     BeatDetector::BeatDetector(NUClear::PowerPlant* plant) : Reactor(plant) {
+        on<Trigger<messages::SoundChunk>>([this](const messages::SoundChunk& chunk) {
+            log("Got chunk: ", chunk.data.size());
+        });
 
-        aubio_beattracking_t* tracker = new_aubio_beattracking(WINDOW_SIZE, CHANNELS);
+        // Parameters are, onset detection type, buffer size, overlap size, channels
+        /*aubio_tempo_t* tempo = new_aubio_tempo(aubio_onset_kl, WINDOW_SIZE, WINDOW_SIZE / 2, CHANNELS);
+
         fvec_t* in = new_fvec(WINDOW_SIZE, CHANNELS);
-        fvec_t* out = new_fvec(WINDOW_SIZE/4, CHANNELS);
+        fvec_t* out = new_fvec(2, CHANNELS);
 
-        aubio_beattracking_do(tracker, in, out);
-
-        on<Trigger<messages::SoundChunk>>([this, tracker, in, out](const messages::SoundChunk& chunk) {
+        on<Trigger<messages::SoundChunk>>([this, tempo, in, out](const messages::SoundChunk& chunk) {
 
             for(size_t i = 0; i < chunk.data.size(); ++i) {
                 in->data[0][i] = chunk.data[i];
             }
 
-            aubio_beattracking_do(tracker, in, out);
+            aubio_tempo(tempo, in, out);
 
-            std::cout << out->data[0][0] << std::endl;
-        });
+            std::cout << out->data[0][1] << std::endl;
+        });*/
     }
 }

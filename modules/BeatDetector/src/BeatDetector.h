@@ -21,7 +21,7 @@
 #define	MODULES_BEATDETECTOR_H
 
 #include <NUClear.h>
-
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
 
@@ -30,8 +30,12 @@ namespace modules {
      *
      * @author Joshua Kearns
      * @author Trent Houliston
+     * @author Jake Woods
      */
     class BeatDetector : public NUClear::Reactor {
+    private:
+        class impl;
+        utility::idiom::pimpl<impl> m;
     public:
         explicit BeatDetector(NUClear::PowerPlant* plant);
     };
