@@ -28,14 +28,26 @@ namespace messages {
     /**
      * TODO document
      *
+     * @author Trent Houliston
+     */
+    struct SoundChunkSettings {
+        /// The number of samples that are taken each second for the sound chunks
+        size_t sampleRate;
+        /// The number of channels that the sound chunks will have
+        size_t channels;
+        /// The number of frames (a frame is a single sample for all channels) that each emitted chunk will have
+        size_t chunkSize;
+    };
+
+    /**
+     * TODO document
+     *
      * @author Jake Woods
      */
     struct SoundChunk {
 
         NUClear::clock::time_point endTime;
         std::vector<int16_t> data;
-        int sampleRate;
-        int channels;
     };
 }
 

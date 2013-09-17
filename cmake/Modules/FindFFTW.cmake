@@ -19,7 +19,7 @@ else (FFTW_LIBRARIES AND FFTW_INCLUDE_DIRS)
 
   find_path(FFTW_INCLUDE_DIR
     NAMES
-      fftw.h
+      fftw3.h
     PATHS
       /usr/include
       /usr/local/include
@@ -29,7 +29,7 @@ else (FFTW_LIBRARIES AND FFTW_INCLUDE_DIRS)
 
   find_library(FFTW_LIBRARY
     NAMES
-      fftw
+      fftw3
     PATHS
       /usr/lib
       /usr/lib/i386-linux-gnu

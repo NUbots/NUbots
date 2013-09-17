@@ -27,17 +27,20 @@
 #include "RtAudio.h"
 
 namespace modules {
+
+    const int CHUNKS_PER_SECOND = 10;
+
     namespace {
         // Holds the various user data we're passing to our audio callback.
         struct UserData {
-            UserData(NUClear::PowerPlant* powerPlant, 
-                    RtAudio::StreamParameters& inputStreamParameters, 
+            UserData(NUClear::PowerPlant* powerPlant,
+                    RtAudio::StreamParameters& inputStreamParameters,
                     unsigned int sampleRate) :
                 powerPlant(powerPlant),
                 inputStreamParameters(inputStreamParameters),
                 sampleRate(sampleRate) {}
 
-            NUClear::PowerPlant* powerPlant; 
+            NUClear::PowerPlant* powerPlant;
             RtAudio::StreamParameters& inputStreamParameters;
             unsigned int sampleRate;
         };
@@ -57,7 +60,7 @@ namespace modules {
 
             int16_t* data = (int16_t*)inputBuffer;
 
-            // This is a horrible hack to get some C++-space data 
+            // This is a horrible hack to get some C++-space data
             // into this function.
             UserData* udata = static_cast<UserData*>(userData);
 
@@ -70,9 +73,6 @@ namespace modules {
 
             chunk->data.resize(nBufferFrames * CHANNELS);
             chunk->data.assign(data, data + (nBufferFrames * CHANNELS));
-            chunk->sampleRate = udata->sampleRate;
-            chunk->channels = CHANNELS;
-
             udata->powerPlant->emit(std::move(chunk));
 
             return 0;
@@ -116,9 +116,16 @@ namespace modules {
         inputStreamParameters.firstChannel = 0;
 
         unsigned int sampleRate = *(std::max_element(info.sampleRates.begin(), info.sampleRates.end()));
-        unsigned int bufferFrames = sampleRate / 10; // 256 sample frames.
+        unsigned int bufferFrames = sampleRate / CHUNKS_PER_SECOND; // 256 sample frames.
 
         m->userData = std::make_unique<UserData>(powerPlant, inputStreamParameters, sampleRate);
+
+        auto settings = std::make_unique<messages::SoundChunkSettings>();
+        settings->sampleRate = sampleRate;
+        settings->channels = info.inputChannels;
+        settings->chunkSize = sampleRate / CHUNKS_PER_SECOND;
+
+        emit<Scope::INITIALIZE>(std::move(settings));
 
         try {
             /**

@@ -28,6 +28,8 @@
 
 namespace modules {
 
+    const int CHUNKS_PER_SECOND = 10;
+
     class AudioFileInput::impl {
         public:
             SndfileHandle file;
@@ -43,6 +45,15 @@ namespace modules {
                 std::string filePath = configfile.config["file"];
                 log("Loading sound file: ", filePath);
                 m->file = SndfileHandle(filePath.c_str());
+
+                auto settings = std::make_unique<messages::SoundChunkSettings>();
+
+                settings->sampleRate = m->file.samplerate();
+                settings->sampleRate = m->file.channels();
+
+                settings->chunkSize = m->file.samplerate() / CHUNKS_PER_SECOND;
+
+                emit<Scope::DIRECT>(std::move(settings));
         });
 
         on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
@@ -51,12 +62,10 @@ namespace modules {
             auto chunk = std::make_unique<messages::SoundChunk>();
 
             // Find out how much of our file to read to get a 100ms sample
-            size_t chunkSize = (file.samplerate() / 10) * file.channels();
+            size_t chunkSize = (file.samplerate() / CHUNKS_PER_SECOND) * file.channels();
 
             chunk->data.resize(chunkSize);
             file.read(chunk->data.data(), chunkSize);
-            chunk->channels = file.channels();
-            chunk->sampleRate = file.samplerate();
             emit(std::move(chunk));
         });
     }

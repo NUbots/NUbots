@@ -19,43 +19,143 @@
 
 #include "BeatDetector.h"
 #include "utility/idiom/pimpl_impl.h"
+#include <complex>
 
-#include <aubio/aubio.h>
-#include <chrono>
-#include <ctime>
+extern "C" {
+    #include <fftw3.h>
+}
+
 #include "messages/SoundChunk.h"
 #include "messages/BeatLocations.h"
 
-
-const int WINDOW_SIZE = 1600;
-const int CHANNELS = 1;
-
 namespace modules {
+
+    struct Buckets {
+        std::vector<double> buckets;
+    };
+    struct DiffBuckets {
+        std::vector<double> buckets;
+    };
+
     class BeatDetector::impl {
-        public:
+    public:
+        size_t channels;
+        size_t sampleRate;
+        size_t chunkSize;
+
+        fftw_plan plan;
+        std::unique_ptr<double[]> input;
+        std::unique_ptr<std::complex<double>[]> output;
+
+        std::vector<double> getBuckets(const messages::SoundChunk& chunk);
+        std::vector<double> findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& diffbuckets);
 
     };
 
-    BeatDetector::BeatDetector(NUClear::PowerPlant* plant) : Reactor(plant) {
-        on<Trigger<messages::SoundChunk>>([this](const messages::SoundChunk& chunk) {
-            log("Got chunk: ", chunk.data.size());
-        });
+    const size_t BUCKET_BOUNDRY[] = {
+            200,
+            400,
+            800,
+            1600,
+            3200
+    };
 
-        // Parameters are, onset detection type, buffer size, overlap size, channels
-        /*aubio_tempo_t* tempo = new_aubio_tempo(aubio_onset_kl, WINDOW_SIZE, WINDOW_SIZE / 2, CHANNELS);
+    std::vector<double> BeatDetector::impl::getBuckets(const messages::SoundChunk& chunk) {
 
-        fvec_t* in = new_fvec(WINDOW_SIZE, CHANNELS);
-        fvec_t* out = new_fvec(2, CHANNELS);
+        // Copy our sound data from the first channel into the input buffer (we only care about the first channel)
+        for (size_t i = 0; i < chunkSize; ++i) {
+            input[i] = double(chunk.data[i * channels]) / double(std::numeric_limits<short>::max());
+        }
 
-        on<Trigger<messages::SoundChunk>>([this, tempo, in, out](const messages::SoundChunk& chunk) {
+        // Execute our FFT
+        fftw_execute(plan);
 
-            for(size_t i = 0; i < chunk.data.size(); ++i) {
-                in->data[0][i] = chunk.data[i];
+        std::vector<double> values(sizeof(BUCKET_BOUNDRY) / sizeof(int), 0);
+
+        size_t bucket = 0;
+        for(size_t i = 0; i < chunkSize/2; ++i) {
+
+            if(i * sampleRate / chunkSize > BUCKET_BOUNDRY[i]) {
+                if(++i > sizeof(BUCKET_BOUNDRY) / sizeof(int)) {
+                    break;
+                };
             }
 
-            aubio_tempo(tempo, in, out);
+            values[bucket] += abs(output[i]);
+        }
 
-            std::cout << out->data[0][1] << std::endl;
-        });*/
+        return values;
+    }
+
+    std::vector<double> BeatDetector::impl::findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
+
+
+
+        return std::vector<double>();
+    }
+
+    BeatDetector::BeatDetector(NUClear::PowerPlant* plant) : Reactor(plant) {
+
+        on<Trigger<messages::SoundChunkSettings>>([this](const messages::SoundChunkSettings& settings) {
+
+            // Store the settings
+            m->sampleRate = settings.sampleRate;
+            m->channels = settings.channels;
+            m->chunkSize = settings.chunkSize;
+
+            // Allocate our memory for input and output
+            m->input = std::unique_ptr<double[]>(new double[m->chunkSize]);
+            m->output = std::unique_ptr<std::complex<double>[]>(new std::complex<double>[(m->chunkSize/2) + 1]);
+
+            // Build our plan for FFT
+            m->plan = fftw_plan_dft_r2c_1d(m->chunkSize, m->input.get(), reinterpret_cast<fftw_complex*>(m->output.get()), 0);
+        });
+
+
+        on<Trigger<messages::SoundChunk>>([this](const messages::SoundChunk& chunk) {
+
+            auto buckets = std::make_unique<Buckets>();
+            buckets->buckets = m->getBuckets(chunk);
+
+            emit(std::move(buckets));
+        });
+
+        on<Trigger<Last<2, Buckets>>>([this](const std::vector<std::shared_ptr<const Buckets>>& buckets) {
+
+            if(buckets.size() > 1) {
+
+                auto dbucket = std::make_unique<DiffBuckets>();
+                dbucket->buckets.resize(5);
+
+                for(int i = 0; i < 5; ++i) {
+                    dbucket->buckets[i] = buckets[1]->buckets[i] - buckets[0]->buckets[i];
+                    dbucket->buckets[i] = dbucket->buckets[i] < 0 ? 0 : dbucket->buckets[i];
+                }
+
+                emit(std::move(dbucket));
+            }
+        });
+
+        on<Trigger<Last<10, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
+
+            if(buckets.size() == 10) {
+                std::cout << buckets.size() << std::endl;
+                m->findBeat(buckets);
+            }
+            // Do an FFT
+            // Loop through each element and complex conjugate it
+            // Do an IFFT
+
+
+            // Get the last 90 frames (last 9 seconds)
+
+            // Do a FFT on slices of 30 frames
+
+            // Sum all of the data together (hopefully the common frequencies get big?)
+
+            // Pick the largest as our tempo
+
+            // TODO comb filter or something?
+        });
     }
 }
