@@ -30,6 +30,8 @@ extern "C" {
 
 namespace modules {
 
+    const int NUM_BEAT_SAMPLES = 1000;
+
     struct Buckets {
         std::vector<double> buckets;
     };
@@ -47,10 +49,11 @@ namespace modules {
         std::unique_ptr<double[]> input;
         std::unique_ptr<std::complex<double>[]> output;
 
-
         fftw_plan beatPlan;
         std::unique_ptr<double[]> beatInput;
         std::unique_ptr<std::complex<double>[]> beatOutput;
+
+        double frequency(const size_t& index, const size_t& sampleRate, const size_t& fftSize);
 
         std::vector<double> getBuckets(const messages::SoundChunk& chunk);
         double findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& diffbuckets);
@@ -64,6 +67,11 @@ namespace modules {
             1600,
             3200
     };
+
+
+    double BeatDetector::impl::frequency(const size_t& index, const size_t& sampleRate, const size_t& fftSize) {
+        return double(index) * double(sampleRate) / double(fftSize);
+    }
 
     std::vector<double> BeatDetector::impl::getBuckets(const messages::SoundChunk& chunk) {
 
@@ -79,7 +87,7 @@ namespace modules {
 
         size_t bucket = 0;
         for(size_t i = 0; i < chunkSize/2; ++i) {
-            if((i * sampleRate / chunkSize) > BUCKET_BOUNDRY[bucket]) {
+            if(frequency(i, sampleRate, chunkSize) > BUCKET_BOUNDRY[bucket]) {
                 if(++bucket >= sizeof(BUCKET_BOUNDRY) / sizeof(int)) {
                     break;
                 }
@@ -93,19 +101,86 @@ namespace modules {
 
     double BeatDetector::impl::findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
 
-        std::vector<std::complex<double>> values(500, 0);
+        std::vector<std::complex<double>> values(NUM_BEAT_SAMPLES / 2, 0);
 
         for (size_t b = 0; b < buckets[0]->buckets.size(); ++b) {
-            for (size_t i = 0; i < 1000; ++i) {
+            for (size_t i = 0; i < NUM_BEAT_SAMPLES; ++i) {
                 beatInput[i] = buckets[i]->buckets[b];
             }
 
             fftw_execute(beatPlan);
 
-            for(int i = 0; i < 500; ++i) {
+            for(int i = 0; i < NUM_BEAT_SAMPLES / 2; ++i) {
                 values[i] += beatOutput[i];
             }
         }
+
+        // We start at 60bpm
+        size_t start = (60 * NUM_BEAT_SAMPLES) / 6000;
+        // and end at 200bpm
+        size_t end = (200 * NUM_BEAT_SAMPLES) / 6000;
+        double average = 0;
+
+        // Get our average
+        for(size_t i = start; i < end + 1; ++i) {
+            average += abs(values[i]);
+        }
+
+        // Normalize our average
+        average /= (end - start) + 1;
+
+        struct CandidateData {
+            double quality;
+            double frequency;
+        };
+
+        // Find the candidates
+        std::vector<CandidateData> candidates;
+        for(size_t i = start; i < end + 1; ++i) {
+            if(abs(values[i]) > average) {
+                CandidateData data;
+
+                // If we want to move to our left
+                if(abs(values[i - 1]) > abs(values[i + 1])) {
+                    data.frequency = (frequency(i - 1, 100, NUM_BEAT_SAMPLES) * abs(values[i - 1]) + frequency(i, 100, NUM_BEAT_SAMPLES) * abs(values[i])) / (abs(values[i - 1]) + abs(values[i]));
+                    data.quality = 0;
+                }
+                // Otherwise moving to the right
+                else {
+                    data.frequency = (frequency(i + 1, 100, NUM_BEAT_SAMPLES) * abs(values[i + 1]) + frequency(i, 100, NUM_BEAT_SAMPLES) * abs(values[i])) / (abs(values[i + 1]) + abs(values[i]));
+                    data.quality = 0;
+                }
+
+                candidates.push_back(std::move(data));
+            }
+        }
+
+        // Now we need to build up the quality of each candidate by searching multiples of its beat
+        for(auto& candidate : candidates) {
+            for(int i = 0; i < 5; ++i) {
+                double checkFrequency = candidate.frequency * (1 << i);
+
+                // Work out the two indicies and the relative influence
+                size_t indexA = floor((checkFrequency * NUM_BEAT_SAMPLES) / 100);
+                size_t indexB = ceil((checkFrequency * NUM_BEAT_SAMPLES) / 100);
+                double influenceA = abs(checkFrequency - frequency(indexA, NUM_BEAT_SAMPLES, 100));
+                double influenceB = abs(checkFrequency - frequency(indexB, NUM_BEAT_SAMPLES, 100));
+                double scale = 1 / (influenceA * influenceB);
+                influenceA *= scale;
+                influenceB *= scale;
+
+                candidate.quality += abs(values[indexA]) * influenceA;
+                candidate.quality += abs(values[indexB]) * influenceB;
+            }
+        }
+
+        std::sort(std::begin(candidates), std::end(candidates), [](const CandidateData& a, const CandidateData& b) {
+            return a.quality > b.quality;
+        });
+
+        std::cout << "Frequency: " << candidates.front().frequency * 60 << " Quality: " << candidates.front().quality << std::endl;
+
+        // For each of our candidates,
 
         // Now we look though the frequencies from 50hz to 200hz (bpm of music) and find our average
 
@@ -117,11 +192,6 @@ namespace modules {
         // Now we go skipping through the array trying to find the best multiples see how big freq*2, freq*4 etc is for our candidate
 
         // The lowest candidate with good multiples is our frequency
-
-        for(int i = 0; i < 500; ++i) {
-            std::cout << abs(values[i]) << " ";
-        }
-        std::cout << std::endl;
 
         return 0;
     }
@@ -143,11 +213,11 @@ namespace modules {
             m->plan = fftw_plan_dft_r2c_1d(m->chunkSize, m->input.get(), reinterpret_cast<fftw_complex*>(m->output.get()), 0);
 
             // Allocate our memory for our beat fft
-            m->beatInput = std::unique_ptr<double[]>(new double[1000]);
-            m->beatOutput = std::unique_ptr<std::complex<double>[]>(new std::complex<double>[501]);
+            m->beatInput = std::unique_ptr<double[]>(new double[NUM_BEAT_SAMPLES]);
+            m->beatOutput = std::unique_ptr<std::complex<double>[]>(new std::complex<double>[(NUM_BEAT_SAMPLES / 2) + 1]);
 
             // Build our plan for Beat FFT
-            m->beatPlan = fftw_plan_dft_r2c_1d(1000, m->beatInput.get(), reinterpret_cast<fftw_complex*>(m->beatOutput.get()), 0);
+            m->beatPlan = fftw_plan_dft_r2c_1d(NUM_BEAT_SAMPLES, m->beatInput.get(), reinterpret_cast<fftw_complex*>(m->beatOutput.get()), 0);
         });
 
 
@@ -175,9 +245,9 @@ namespace modules {
             }
         });
 
-        on<Trigger<Last<1000, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
+        on<Trigger<Last<NUM_BEAT_SAMPLES, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
 
-            if(buckets.size() == 1000) {
+            if(buckets.size() == NUM_BEAT_SAMPLES) {
                 auto data = m->findBeat(buckets);
             }
         });
