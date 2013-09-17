@@ -28,7 +28,7 @@
 
 namespace modules {
 
-    const int CHUNKS_PER_SECOND = 10;
+    const int CHUNKS_PER_SECOND = 100;
 
     class AudioFileInput::impl {
         public:
@@ -49,7 +49,7 @@ namespace modules {
                 auto settings = std::make_unique<messages::SoundChunkSettings>();
 
                 settings->sampleRate = m->file.samplerate();
-                settings->sampleRate = m->file.channels();
+                settings->channels = m->file.channels();
 
                 settings->chunkSize = m->file.samplerate() / CHUNKS_PER_SECOND;
 

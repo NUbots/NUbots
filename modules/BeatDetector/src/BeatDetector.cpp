@@ -47,8 +47,13 @@ namespace modules {
         std::unique_ptr<double[]> input;
         std::unique_ptr<std::complex<double>[]> output;
 
+
+        fftw_plan beatPlan;
+        std::unique_ptr<double[]> beatInput;
+        std::unique_ptr<std::complex<double>[]> beatOutput;
+
         std::vector<double> getBuckets(const messages::SoundChunk& chunk);
-        std::vector<double> findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& diffbuckets);
+        double findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& diffbuckets);
 
     };
 
@@ -74,11 +79,10 @@ namespace modules {
 
         size_t bucket = 0;
         for(size_t i = 0; i < chunkSize/2; ++i) {
-
-            if(i * sampleRate / chunkSize > BUCKET_BOUNDRY[i]) {
-                if(++i > sizeof(BUCKET_BOUNDRY) / sizeof(int)) {
+            if((i * sampleRate / chunkSize) > BUCKET_BOUNDRY[bucket]) {
+                if(++bucket >= sizeof(BUCKET_BOUNDRY) / sizeof(int)) {
                     break;
-                };
+                }
             }
 
             values[bucket] += abs(output[i]);
@@ -87,11 +91,39 @@ namespace modules {
         return values;
     }
 
-    std::vector<double> BeatDetector::impl::findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
+    double BeatDetector::impl::findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
 
+        std::vector<std::complex<double>> values(500, 0);
 
+        for (size_t b = 0; b < buckets[0]->buckets.size(); ++b) {
+            for (size_t i = 0; i < 1000; ++i) {
+                beatInput[i] = buckets[i]->buckets[b];
+            }
 
-        return std::vector<double>();
+            fftw_execute(beatPlan);
+
+            for(int i = 0; i < 500; ++i) {
+                values[i] += beatOutput[i];
+            }
+        }
+
+        // Now we look though the frequencies from 50hz to 200hz (bpm of music) and find our average
+
+        // Now we look for any of those values that are significantly above average, these are our candidates
+
+        // First we try to get a better value for our candidates, see which bucket around it is largest (left or right)
+        // and normalize based off this (to get closer to the "real" value)
+
+        // Now we go skipping through the array trying to find the best multiples see how big freq*2, freq*4 etc is for our candidate
+
+        // The lowest candidate with good multiples is our frequency
+
+        for(int i = 0; i < 500; ++i) {
+            std::cout << abs(values[i]) << " ";
+        }
+        std::cout << std::endl;
+
+        return 0;
     }
 
     BeatDetector::BeatDetector(NUClear::PowerPlant* plant) : Reactor(plant) {
@@ -109,6 +141,13 @@ namespace modules {
 
             // Build our plan for FFT
             m->plan = fftw_plan_dft_r2c_1d(m->chunkSize, m->input.get(), reinterpret_cast<fftw_complex*>(m->output.get()), 0);
+
+            // Allocate our memory for our beat fft
+            m->beatInput = std::unique_ptr<double[]>(new double[1000]);
+            m->beatOutput = std::unique_ptr<std::complex<double>[]>(new std::complex<double>[501]);
+
+            // Build our plan for Beat FFT
+            m->beatPlan = fftw_plan_dft_r2c_1d(1000, m->beatInput.get(), reinterpret_cast<fftw_complex*>(m->beatOutput.get()), 0);
         });
 
 
@@ -136,26 +175,11 @@ namespace modules {
             }
         });
 
-        on<Trigger<Last<10, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
+        on<Trigger<Last<1000, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
 
-            if(buckets.size() == 10) {
-                std::cout << buckets.size() << std::endl;
-                m->findBeat(buckets);
+            if(buckets.size() == 1000) {
+                auto data = m->findBeat(buckets);
             }
-            // Do an FFT
-            // Loop through each element and complex conjugate it
-            // Do an IFFT
-
-
-            // Get the last 90 frames (last 9 seconds)
-
-            // Do a FFT on slices of 30 frames
-
-            // Sum all of the data together (hopefully the common frequencies get big?)
-
-            // Pick the largest as our tempo
-
-            // TODO comb filter or something?
         });
     }
 }
