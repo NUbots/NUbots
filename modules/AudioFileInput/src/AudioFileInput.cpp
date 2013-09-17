@@ -56,12 +56,12 @@ namespace modules {
                 emit<Scope::DIRECT>(std::move(settings));
         });
 
-        on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<(NUClear::clock::period::den / CHUNKS_PER_SECOND), NUClear::clock::duration>>>([this](const time_t&) {
             auto& file = m->file;
 
             auto chunk = std::make_unique<messages::SoundChunk>();
 
-            // Find out how much of our file to read to get a 100ms sample
+            // Find out how much of our file to read to get our sample
             size_t chunkSize = (file.samplerate() / CHUNKS_PER_SECOND) * file.channels();
 
             chunk->data.resize(chunkSize);
