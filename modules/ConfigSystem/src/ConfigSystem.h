@@ -21,11 +21,8 @@
 #define MODULES_CONFIGSYSTEM_H_
 
 #include <NUClear.h>
-#include <vector>
-#include <set>
-#include <map>
 
-#include "messages/Configuration.h"
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
 
@@ -38,18 +35,10 @@ namespace modules {
     class ConfigSystem : public NUClear::Reactor {
 
     private:
-        static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
+        class impl;
+        utility::idiom::pimpl<impl> m;
 
-        std::set<std::type_index> loaded;
-        std::map<std::string, std::vector<std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)>>> handler;
-
-        volatile bool running;
-        void run();
-        void kill();
-
-        int watcherFd;
-        int killFd;
-    public:
+   public:
         explicit ConfigSystem(NUClear::PowerPlant* plant);
     };
 }
