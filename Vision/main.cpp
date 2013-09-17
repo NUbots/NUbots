@@ -53,43 +53,8 @@ int qt();
 int pc();
 int rpi(bool disp_on, bool cam);
 
-//#include "Infrastructure/NUSensorsData/NUSensorsData.h"
-//#include "Infrastructure/NUImage/NUImage.h"
-//#include <vector>
 int main(int argc, char** argv)
 {
-//    std::vector<NUImage> imgs;
-//    std::vector<NUSensorsData> sensors;
-//    ifstream i((std::string(getenv("HOME")) + "/nubot/image.strm").c_str()),
-//            s((std::string(getenv("HOME")) + "/nubot/sensor.strm").c_str());
-
-//    while(i.good()) {
-//        NUImage im;
-//        try {
-//            i >> im;
-//        }
-//        catch(exception e) {
-//            break;
-//        }
-//        imgs.push_back(im);
-//    }
-
-//    while(s.good()) {
-//        NUSensorsData sd;
-//        try {
-//            s >> sd;
-//        }
-//        catch(exception e) {
-//            break;
-//        }
-
-//        sensors.push_back(sd);
-//    }
-
-//    std::cout << imgs.size() << " " << sensors.size() << std::endl;
-
-//    return 0;
-
     #ifdef TARGET_IS_RPI
     //run with user option if given or display off by default
     switch(argc) {
