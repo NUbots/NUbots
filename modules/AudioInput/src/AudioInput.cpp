@@ -28,7 +28,7 @@
 
 namespace modules {
 
-    const int CHUNKS_PER_SECOND = 10;
+    const int CHUNKS_PER_SECOND = 100;
 
     namespace {
         // Holds the various user data we're passing to our audio callback.
@@ -103,7 +103,7 @@ namespace modules {
         RtAudio::DeviceInfo info = audioContext.getDeviceInfo(deviceNumber);
         for(unsigned int i = 0; i < audioContext.getDeviceCount(); ++i) {
             info = audioContext.getDeviceInfo(i);
-            if(info.name == "hw:USB Device 0x46d:0x80a,0") {
+            if(info.isDefaultInput) {
                 deviceNumber = i;
                 break;
             }
@@ -142,6 +142,7 @@ namespace modules {
                     &audioCallback,
                     m->userData.get()
             );
+
             audioContext.startStream();
         } catch( RtError& e) {
             e.printMessage();

@@ -34,12 +34,8 @@ namespace modules {
         public:
             explicit AudioInput(NUClear::PowerPlant* plant);
         private:
-            // TODO: Consider replacing this with the PIMPL idiom to remove
-            // the RtAudio header dependency.
             class impl;
             utility::idiom::pimpl<impl> m;
-            /*RtAudio audioContext;
-            RtAudio::StreamParameters inputStreamParameters;*/
     };
 }
 #endif

@@ -43,7 +43,7 @@ ADD_HAT(
     MODULES
         ConfigSystem
         Platform::Darwin::HardwareIO
-        AudioFileInput
+        AudioInput
         BeatDetector)
 
 # The ADD_HAT function appends itself to the ${hats} variable.
