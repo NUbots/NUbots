@@ -26,6 +26,7 @@ extern "C" {
 }
 
 #include "messages/SoundChunk.h"
+#include "messages/DarwinSensors.h"
 #include "messages/BeatLocations.h"
 
 namespace modules {
@@ -37,6 +38,11 @@ namespace modules {
     };
     struct DiffBuckets {
         std::vector<double> buckets;
+    };
+    struct BeatDetection {
+        double phase;
+        double quality;
+        double frequency;
     };
 
     class BeatDetector::impl {
@@ -56,7 +62,7 @@ namespace modules {
         double frequency(const size_t& index, const size_t& sampleRate, const size_t& fftSize);
 
         std::vector<double> getBuckets(const messages::SoundChunk& chunk);
-        double findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& diffbuckets);
+        BeatDetection findBeat(const std::vector<DiffBuckets>& diffbuckets);
 
     };
 
@@ -67,7 +73,6 @@ namespace modules {
             1600,
             3200
     };
-
 
     double BeatDetector::impl::frequency(const size_t& index, const size_t& sampleRate, const size_t& fftSize) {
         return double(index) * double(sampleRate) / double(fftSize);
@@ -99,13 +104,13 @@ namespace modules {
         return values;
     }
 
-    double BeatDetector::impl::findBeat(const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
+    BeatDetection BeatDetector::impl::findBeat(const std::vector<DiffBuckets>& buckets) {
 
         std::vector<std::complex<double>> values(NUM_BEAT_SAMPLES / 2, 0);
 
-        for (size_t b = 0; b < buckets[0]->buckets.size(); ++b) {
+        for (size_t b = 0; b < buckets[0].buckets.size(); ++b) {
             for (size_t i = 0; i < NUM_BEAT_SAMPLES; ++i) {
-                beatInput[i] = buckets[i]->buckets[b];
+                beatInput[i] = buckets[i].buckets[b];
             }
 
             fftw_execute(beatPlan);
@@ -129,24 +134,21 @@ namespace modules {
         // Normalize our average
         average /= (end - start) + 1;
 
-        struct CandidateData {
-            double quality;
-            double frequency;
-        };
-
         // Find the candidates
-        std::vector<CandidateData> candidates;
+        std::vector<BeatDetection> candidates;
         for(size_t i = start; i < end + 1; ++i) {
             if(abs(values[i]) > average) {
-                CandidateData data;
+                BeatDetection data;
 
                 // If we want to move to our left
                 if(abs(values[i - 1]) > abs(values[i + 1])) {
+                    data.phase = std::arg(values[i]);
                     data.frequency = (frequency(i - 1, 100, NUM_BEAT_SAMPLES) * abs(values[i - 1]) + frequency(i, 100, NUM_BEAT_SAMPLES) * abs(values[i])) / (abs(values[i - 1]) + abs(values[i]));
                     data.quality = 0;
                 }
                 // Otherwise moving to the right
                 else {
+                    data.phase = std::arg(values[i]);
                     data.frequency = (frequency(i + 1, 100, NUM_BEAT_SAMPLES) * abs(values[i + 1]) + frequency(i, 100, NUM_BEAT_SAMPLES) * abs(values[i])) / (abs(values[i + 1]) + abs(values[i]));
                     data.quality = 0;
                 }
@@ -173,27 +175,20 @@ namespace modules {
                 candidate.quality += abs(values[indexB]) * influenceB;
             }
         }
-
-        std::sort(std::begin(candidates), std::end(candidates), [](const CandidateData& a, const CandidateData& b) {
+        
+        std::sort(std::begin(candidates), std::end(candidates), [](const BeatDetection& a, const BeatDetection& b) {
             return a.quality > b.quality;
         });
 
-        std::cout << "Frequency: " << candidates.front().frequency * 60 << " Quality: " << candidates.front().quality << std::endl;
+        // If we have candidates
+        if(!candidates.empty()) {
+            //std::cout << "Frequency: " << candidates.front().frequency * 60 << " Phase: " << candidates.front().phase << " Quality: " << candidates.front().quality << std::endl;
 
-        // For each of our candidates,
-
-        // Now we look though the frequencies from 50hz to 200hz (bpm of music) and find our average
-
-        // Now we look for any of those values that are significantly above average, these are our candidates
-
-        // First we try to get a better value for our candidates, see which bucket around it is largest (left or right)
-        // and normalize based off this (to get closer to the "real" value)
-
-        // Now we go skipping through the array trying to find the best multiples see how big freq*2, freq*4 etc is for our candidate
-
-        // The lowest candidate with good multiples is our frequency
-
-        return 0;
+            return candidates.front();
+        }
+        else {
+            return BeatDetection();
+        }
     }
 
     BeatDetector::BeatDetector(NUClear::PowerPlant* plant) : Reactor(plant) {
@@ -245,10 +240,35 @@ namespace modules {
             }
         });
 
-        on<Trigger<Last<NUM_BEAT_SAMPLES, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& buckets) {
+        on<Trigger<Last<NUM_BEAT_SAMPLES, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& input) {
 
-            if(buckets.size() == NUM_BEAT_SAMPLES) {
-                auto data = m->findBeat(buckets);
+            std::vector<DiffBuckets> buckets;
+            buckets.reserve(NUM_BEAT_SAMPLES);
+
+            for(size_t i = 0; i < input.size(); ++i) {
+                buckets.push_back(*input[i]);
+            }
+            for(size_t i = input.size(); i < NUM_BEAT_SAMPLES; ++i) {
+                DiffBuckets empty;
+                empty.buckets.resize(buckets.front().buckets.size(), 0);
+                buckets.push_back(empty);
+            }
+
+            auto beat = std::make_unique<BeatDetection>();
+            *beat = m->findBeat(buckets);
+            emit(std::move(beat));
+        });
+
+        on<Trigger<Last<2, BeatDetection>>>([this](const std::vector<std::shared_ptr<const BeatDetection>>& beats) {
+            if(beats.size() == 2) {
+                if(beats[0]->phase < 0 && beats[1]->phase > 0) {
+                    auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
+                    eyes->r = 0xFF * (double(rand()) / double(RAND_MAX));
+                    eyes->g = 0xFF * (double(rand()) / double(RAND_MAX));
+                    eyes->b = 0xFF * (double(rand()) / double(RAND_MAX));
+
+                    emit(std::move(eyes));
+                }
             }
         });
     }
