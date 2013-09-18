@@ -28,6 +28,7 @@ extern "C" {
 #include "messages/SoundChunk.h"
 #include "messages/DarwinSensors.h"
 #include "messages/BeatLocations.h"
+#include "utility/math/angle.h"
 
 namespace modules {
 
@@ -39,9 +40,13 @@ namespace modules {
     struct DiffBuckets {
         std::vector<double> buckets;
     };
-    struct BeatDetection {
-        double phase;
+    struct Beat {
         double quality;
+        double phase;
+        double frequency;
+    };
+    struct FilteredBeat {
+        double phase;
         double frequency;
     };
 
@@ -50,6 +55,7 @@ namespace modules {
         size_t channels;
         size_t sampleRate;
         size_t chunkSize;
+        volatile bool allowBeat;
 
         fftw_plan plan;
         std::unique_ptr<double[]> input;
@@ -62,7 +68,7 @@ namespace modules {
         double frequency(const size_t& index, const size_t& sampleRate, const size_t& fftSize);
 
         std::vector<double> getBuckets(const messages::SoundChunk& chunk);
-        BeatDetection findBeat(const std::vector<DiffBuckets>& diffbuckets);
+        Beat findBeat(const std::vector<DiffBuckets>& diffbuckets);
 
     };
 
@@ -104,7 +110,7 @@ namespace modules {
         return values;
     }
 
-    BeatDetection BeatDetector::impl::findBeat(const std::vector<DiffBuckets>& buckets) {
+    Beat BeatDetector::impl::findBeat(const std::vector<DiffBuckets>& buckets) {
 
         std::vector<std::complex<double>> values(NUM_BEAT_SAMPLES / 2, 0);
 
@@ -135,10 +141,10 @@ namespace modules {
         average /= (end - start) + 1;
 
         // Find the candidates
-        std::vector<BeatDetection> candidates;
+        std::vector<Beat> candidates;
         for(size_t i = start; i < end + 1; ++i) {
             if(abs(values[i]) > average) {
-                BeatDetection data;
+                Beat data;
 
                 // If we want to move to our left
                 if(abs(values[i - 1]) > abs(values[i + 1])) {
@@ -175,8 +181,8 @@ namespace modules {
                 candidate.quality += abs(values[indexB]) * influenceB;
             }
         }
-        
-        std::sort(std::begin(candidates), std::end(candidates), [](const BeatDetection& a, const BeatDetection& b) {
+
+        std::sort(std::begin(candidates), std::end(candidates), [](const Beat& a, const Beat& b) {
             return a.quality > b.quality;
         });
 
@@ -187,7 +193,7 @@ namespace modules {
             return candidates.front();
         }
         else {
-            return BeatDetection();
+            return Beat();
         }
     }
 
@@ -199,6 +205,7 @@ namespace modules {
             m->sampleRate = settings.sampleRate;
             m->channels = settings.channels;
             m->chunkSize = settings.chunkSize;
+            m->allowBeat = true;
 
             // Allocate our memory for input and output
             m->input = std::unique_ptr<double[]>(new double[m->chunkSize]);
@@ -254,20 +261,56 @@ namespace modules {
                 buckets.push_back(empty);
             }
 
-            auto beat = std::make_unique<BeatDetection>();
+            auto beat = std::make_unique<Beat>();
             *beat = m->findBeat(buckets);
             emit(std::move(beat));
         });
 
-        on<Trigger<Last<2, BeatDetection>>>([this](const std::vector<std::shared_ptr<const BeatDetection>>& beats) {
-            if(beats.size() == 2) {
-                if(beats[0]->phase < 0 && beats[1]->phase > 0) {
+        on<Trigger<Last<100, Beat>>>([this](const std::vector<std::shared_ptr<const Beat>>& input) {
+
+            std::vector<Beat> beats;
+            std::vector<size_t> indexes;
+
+            for(size_t i = 0; i < input.size(); ++i) {
+                beats.push_back(*input[i]);
+                indexes.push_back(i);
+            }
+
+            std::sort(std::begin(indexes), std::end(indexes), [beats](const size_t& a, const size_t& b) {
+                return beats[a].frequency < beats[b].frequency;
+            });
+
+            size_t index = indexes[indexes.size() / 2];
+            Beat beat = beats[index];
+
+            double phaseOffset = (indexes.size() - index) * ((2 * M_PI) / (100.0 / beat.frequency));
+            double phase = utility::math::angle::normalizeAngle(beat.phase + phaseOffset);
+
+            auto filtered = std::make_unique<FilteredBeat>();
+            filtered->frequency = beat.frequency;
+            filtered->phase = phase;
+
+            emit(std::move(filtered));
+        });
+
+        on<Trigger<Last<2, FilteredBeat>>>([this](const std::vector<std::shared_ptr<const FilteredBeat>>& input) {
+            if(input.size() == 2) {
+                if(m->allowBeat
+                   && input[1]->phase > 0
+                   && input[1]->phase < M_PI_2
+                   && input[0]->phase < 0
+                   && input[0]->phase > -M_PI_2) {
+
                     auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
                     eyes->r = 0xFF * (double(rand()) / double(RAND_MAX));
                     eyes->g = 0xFF * (double(rand()) / double(RAND_MAX));
                     eyes->b = 0xFF * (double(rand()) / double(RAND_MAX));
-
                     emit(std::move(eyes));
+
+                    m->allowBeat = false;
+                }
+                else if(input[0]->phase > M_PI_2 && input[1]->phase < -M_PI_2) {
+                    m->allowBeat = true;
                 }
             }
         });
