@@ -27,7 +27,7 @@ extern "C" {
 
 #include "messages/SoundChunk.h"
 #include "messages/DarwinSensors.h"
-#include "messages/BeatLocations.h"
+#include "messages/Beat.h"
 #include "utility/math/angle.h"
 
 namespace modules {
@@ -301,11 +301,14 @@ namespace modules {
                    && input[0]->phase < 0
                    && input[0]->phase > -M_PI_2) {
 
-                    auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
-                    eyes->r = 0xFF * (double(rand()) / double(RAND_MAX));
-                    eyes->g = 0xFF * (double(rand()) / double(RAND_MAX));
-                    eyes->b = 0xFF * (double(rand()) / double(RAND_MAX));
-                    emit(std::move(eyes));
+                    // Make our beat object
+                    auto beat = std::make_unique<messages::Beat>();
+                    beat->time = NUClear::clock::now();
+                    beat->period = NUClear::clock::duration(static_cast<long>((1 / input[0]->frequency) * NUClear::clock::period::den));
+
+                    emit(std::move(beat));
+
+                    std::cout << "Emitted beat " << std::endl;
 
                     m->allowBeat = false;
                 }
