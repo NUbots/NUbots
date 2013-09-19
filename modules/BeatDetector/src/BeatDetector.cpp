@@ -308,8 +308,6 @@ namespace modules {
 
                     emit(std::move(beat));
 
-                    std::cout << "Emitted beat " << std::endl;
-
                     m->allowBeat = false;
                 }
                 else if(input[0]->phase > M_PI_2 && input[1]->phase < -M_PI_2) {
