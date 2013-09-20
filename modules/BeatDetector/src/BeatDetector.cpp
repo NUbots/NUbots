@@ -32,19 +32,27 @@ extern "C" {
 
 namespace modules {
 
+    /// This is the number of samples that we will consider while caclculating the beat
     const int NUM_BEAT_SAMPLES = 1000;
 
+    /// Holds a set of buckets for us to use (fft slices)
     struct Buckets {
         std::vector<double> buckets;
     };
+
+    /// Holds the derivitive of a stream of incoming buckets
     struct DiffBuckets {
         std::vector<double> buckets;
     };
+
+    // Contains a beat that was detected in our sliding window
     struct Beat {
         double quality;
         double phase;
         double frequency;
     };
+
+    /// Contains a beat after it has been filtered using the median filter
     struct FilteredBeat {
         double phase;
         double frequency;
@@ -52,26 +60,62 @@ namespace modules {
 
     class BeatDetector::impl {
     public:
+        /// The number of channels in our input data (we only consider the first channel)
         size_t channels;
+        /// The sample rate of our incoming data
         size_t sampleRate;
+        /// How large each chunk of data that comes in will be (in frames not shorts)
         size_t chunkSize;
+        /// If we will allow the emission of another beat
         volatile bool allowBeat;
 
+        /// The fft plan that will be used for our audio input
         fftw_plan plan;
+        /// The input for our audio fft
         std::unique_ptr<double[]> input;
+        /// The output for our audio fft
         std::unique_ptr<std::complex<double>[]> output;
 
+        /// The fft plan that will be used for our beats
         fftw_plan beatPlan;
+        /// The input for our beat fft
         std::unique_ptr<double[]> beatInput;
+        /// The output for our beat fft
         std::unique_ptr<std::complex<double>[]> beatOutput;
 
+        /**
+         * Calculates the central frequency for this input bucket.
+         *
+         * @param index         the fft array index
+         * @param sampleRate    the sample rate of the incoming data to the fft
+         * @param fftSize       the number of elements in the fft output (full array size, even
+         *                      if it is halved by a real input)
+         *
+         * @return the central frequency for the fft bucket of the passed index
+         */
         double frequency(const size_t& index, const size_t& sampleRate, const size_t& fftSize);
 
+        /**
+         * Gets the fft buckets (split into divisions of BUCKET_BOUNDRY) for the given sound chunk
+         *
+         * @param chunk the sound chunk to perform the fft on
+         *
+         * @return the summation of the absolute value of frequency buckets in the fft between the requested frequencies
+         */
         std::vector<double> getBuckets(const messages::SoundChunk& chunk);
+
+        /**
+         * Finds the most likely beat frequency given an array of differentiated input
+         *
+         * @param diffBuckets the stream of differentiated frequency buckets of the input
+         *
+         * @return A beat object of the most likely beat from the input
+         */
         Beat findBeat(const std::vector<DiffBuckets>& diffbuckets);
 
     };
 
+    /// The boundaries of each bucket
     const size_t BUCKET_BOUNDRY[] = {
             200,
             400,
@@ -96,6 +140,7 @@ namespace modules {
 
         std::vector<double> values(sizeof(BUCKET_BOUNDRY) / sizeof(int), 0);
 
+        // Loop through each bucket summing the values in for our ranges
         size_t bucket = 0;
         for(size_t i = 0; i < chunkSize/2; ++i) {
             if(frequency(i, sampleRate, chunkSize) > BUCKET_BOUNDRY[bucket]) {
@@ -104,6 +149,7 @@ namespace modules {
                 }
             }
 
+            // Add in our absolute value (magnitude) of the imaginary number
             values[bucket] += abs(output[i]);
         }
 
@@ -117,6 +163,7 @@ namespace modules {
         // Calculate the FFT sample rate that we are using
         size_t fftSampleRate = sampleRate / chunkSize;
 
+        // Perform the FFT on each bucket and sum their outputs
         for (size_t b = 0; b < buckets[0].buckets.size(); ++b) {
             for (size_t i = 0; i < NUM_BEAT_SAMPLES; ++i) {
                 beatInput[i] = buckets[i].buckets[b];
@@ -255,70 +302,91 @@ namespace modules {
             }
         });
 
+        // This takes in the last 10 seconds (assuming 100 chunks per second) of differentiated buckets and finds the
+        // most likely beat from it
         on<Trigger<Last<NUM_BEAT_SAMPLES, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& input) {
 
+            // Allocate an array of buckets
             std::vector<DiffBuckets> buckets;
+
+            // Make it the correct size
             buckets.reserve(NUM_BEAT_SAMPLES);
 
+            // Put all the data we actually have into the array (will initially be 0)
             for(size_t i = 0; i < input.size(); ++i) {
                 buckets.push_back(*input[i]);
             }
+            // Fill the remainder of the array with 0s
             for(size_t i = input.size(); i < NUM_BEAT_SAMPLES; ++i) {
                 DiffBuckets empty;
                 empty.buckets.resize(buckets.front().buckets.size(), 0);
                 buckets.push_back(empty);
             }
 
+            // Find and emit the beat
             auto beat = std::make_unique<Beat>();
             *beat = m->findBeat(buckets);
             emit(std::move(beat));
         });
 
+        // This takes the last 100 estimated beat locations and and gets the median. This will get rid of most of
+        // the random outlier beats that are detected
         on<Trigger<Last<100, Beat>>>([this](const std::vector<std::shared_ptr<const Beat>>& input) {
 
+            // Make vectors for our beats and the indexes to the beats (so we can calculate our phase offset)
             std::vector<Beat> beats;
             std::vector<size_t> indexes;
 
+            // Fill the beats and indexes
             for(size_t i = 0; i < input.size(); ++i) {
                 beats.push_back(*input[i]);
                 indexes.push_back(i);
             }
 
+            // Sort the indexes array based on the frequency of the beats
             std::sort(std::begin(indexes), std::end(indexes), [beats](const size_t& a, const size_t& b) {
                 return beats[a].frequency < beats[b].frequency;
             });
 
+            // Get our median index and the beat for that index
             size_t index = indexes[indexes.size() / 2];
             Beat beat = beats[index];
 
+            // Calculate our phase offset between when this median beat was and now
             double phaseOffset = (indexes.size() - index) * ((2 * M_PI) / ((m->sampleRate / m->chunkSize) / beat.frequency));
             double phase = utility::math::angle::normalizeAngle(beat.phase + phaseOffset);
 
+            // Make and emit our filtered beat with the frequency and calculated phase offset
             auto filtered = std::make_unique<FilteredBeat>();
             filtered->frequency = beat.frequency;
             filtered->phase = phase;
-
             emit(std::move(filtered));
         });
 
+        // This takes the last two filtered beats and emits a beat message every full phase revolution)
         on<Trigger<Last<2, FilteredBeat>>>([this](const std::vector<std::shared_ptr<const FilteredBeat>>& input) {
+
+            // Make sure we have 2 elements
             if(input.size() == 2) {
+
+                // If we are allowed to emit another beat and we have two beat values that cross between -tive and +tive
                 if(m->allowBeat
                    && input[1]->phase > 0
                    && input[1]->phase < M_PI_2
                    && input[0]->phase < 0
                    && input[0]->phase > -M_PI_2) {
 
-                    // Make our beat object
+                    // Make our beat object and emit it
                     auto beat = std::make_unique<messages::Beat>();
                     beat->time = NUClear::clock::now();
                     beat->period = NUClear::clock::duration(static_cast<long>((1 / input[0]->frequency) * NUClear::clock::period::den));
-
                     emit(std::move(beat));
 
+                    // We cannot emit another beat until we have crossed into the other half of the phase (to remove noise)
                     m->allowBeat = false;
                 }
-                else if(input[0]->phase > M_PI_2 && input[1]->phase < -M_PI_2) {
+                // If we cross into the other half of the phase, then we reset that we can emit a beat
+                else if(!m->allowBeat && input[0]->phase > M_PI_2 && input[1]->phase < -M_PI_2) {
                     m->allowBeat = true;
                 }
             }
