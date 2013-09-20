@@ -172,7 +172,7 @@ namespace darwin {
          *
          * @param address the address of the data that we are reading
          *
-         * @returns the data that was read from the device
+         * @return the data that was read from the device
          */
         template <typename TType>
         TType read(uint8_t address) {
@@ -214,7 +214,7 @@ namespace darwin {
          * @param address   the address of the data that we are reading
          * @param data      the data that we are writing to the device
          *
-         * @returns the ErrorCode that was returned by the device
+         * @return the ErrorCode that was returned by the device
          */
         template <typename TType>
         uint8_t write(uint8_t address, TType data) {
@@ -232,7 +232,7 @@ namespace darwin {
         /**
          * @brief This will send a ping request to the device.
          *
-         * @returns true if the device is working, false if the device is not working
+         * @return true if the device is working, false if the device is not working
          */
         bool ping();
     };

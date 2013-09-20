@@ -153,14 +153,14 @@ namespace darwin {
         /**
          * @brief Pings all of the attached devices, and returns a map containing their ID and if they were contactable.
          *
-         * @returns a map containing IDs and if they were contactable (returned no error code)
+         * @return a map containing IDs and if they were contactable (returned no error code)
          */
         std::vector<std::pair<uint8_t, bool>> selfTest();
 
         /**
          * @brief This reads all of the sensors in a predefined pattern of what is considered "Interesting"
          *
-         * @returns A BulkReadResuts object containing all of the sensor data as it was read from the device (no trasforms)
+         * @return A BulkReadResuts object containing all of the sensor data as it was read from the device (no trasforms)
          */
         BulkReadResults bulkRead();
 
