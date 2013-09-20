@@ -38,6 +38,14 @@ ADD_HAT(
         ScriptTuner
         PartyDarwin)
 
+ADD_HAT(
+    NAME beatdetector
+    MODULES
+        ConfigSystem
+        Platform::Darwin::HardwareIO
+        AudioInput
+        BeatDetector)
+
 # The ADD_HAT function appends itself to the ${hats} variable.
 # We need to expose this to our parent scope so the DarwinSend.cmake
 # file knows what binaries it depends on. We do this so that "make install"

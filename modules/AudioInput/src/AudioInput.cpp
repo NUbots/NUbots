@@ -27,7 +27,24 @@
 #include "RtAudio.h"
 
 namespace modules {
+
+    const int CHUNKS_PER_SECOND = 100;
+
     namespace {
+        // Holds the various user data we're passing to our audio callback.
+        struct UserData {
+            UserData(NUClear::PowerPlant* powerPlant,
+                    RtAudio::StreamParameters& inputStreamParameters,
+                    unsigned int sampleRate) :
+                powerPlant(powerPlant),
+                inputStreamParameters(inputStreamParameters),
+                sampleRate(sampleRate) {}
+
+            NUClear::PowerPlant* powerPlant;
+            RtAudio::StreamParameters& inputStreamParameters;
+            unsigned int sampleRate;
+        };
+
         int audioCallback(
                 void* outputBuffer,
                 void* inputBuffer,
@@ -43,25 +60,23 @@ namespace modules {
 
             int16_t* data = (int16_t*)inputBuffer;
 
-            // This is a horrible hack but we know the userData
-            // is actually our PowerPlant.
-            auto powerPlant = (NUClear::PowerPlant*)userData;
+            // This is a horrible hack to get some C++-space data
+            // into this function.
+            UserData* udata = static_cast<UserData*>(userData);
 
             auto chunk = std::make_unique<messages::SoundChunk>();
 
             // Sound is split up into left and right channels which are 16 bytes
             // (for the darwin) each. This means a single frame actually compromises
             // 32 bits and we need to allocate data appropriately.
-            const int INTS_PER_FRAME = 2;
+            const int CHANNELS = udata->inputStreamParameters.nChannels;
 
-            chunk->data.resize(nBufferFrames * INTS_PER_FRAME);
-            chunk->data.assign(data, data + (nBufferFrames * INTS_PER_FRAME));
-
-            powerPlant->emit(std::move(chunk));
+            chunk->data.resize(nBufferFrames * CHANNELS);
+            chunk->data.assign(data, data + (nBufferFrames * CHANNELS));
+            udata->powerPlant->emit(std::move(chunk));
 
             return 0;
         }
-
     }
 
     // Implement our impl class.
@@ -69,6 +84,7 @@ namespace modules {
         public:
             RtAudio audioContext;
             RtAudio::StreamParameters inputStreamParameters;
+            std::unique_ptr<UserData> userData;
     };
 
     AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {
@@ -77,7 +93,7 @@ namespace modules {
 
         // We need to set up the audio context.
         if(audioContext.getDeviceCount() < 1) {
-            // TODO: Throw error here and skip all our setup
+            log("No audio devices found");
             return;
         }
 
@@ -87,7 +103,7 @@ namespace modules {
         RtAudio::DeviceInfo info = audioContext.getDeviceInfo(deviceNumber);
         for(unsigned int i = 0; i < audioContext.getDeviceCount(); ++i) {
             info = audioContext.getDeviceInfo(i);
-            if(info.name == "hw:USB Device 0x46d:0x80a,0") {
+            if(info.isDefaultInput) {
                 deviceNumber = i;
                 break;
             }
@@ -100,7 +116,16 @@ namespace modules {
         inputStreamParameters.firstChannel = 0;
 
         unsigned int sampleRate = *(std::max_element(info.sampleRates.begin(), info.sampleRates.end()));
-        unsigned int bufferFrames = sampleRate / 10;//256; // 256 sample frames.
+        unsigned int bufferFrames = sampleRate / CHUNKS_PER_SECOND; // 256 sample frames.
+
+        m->userData = std::make_unique<UserData>(powerPlant, inputStreamParameters, sampleRate);
+
+        auto settings = std::make_unique<messages::SoundChunkSettings>();
+        settings->sampleRate = sampleRate;
+        settings->channels = info.inputChannels;
+        settings->chunkSize = sampleRate / CHUNKS_PER_SECOND;
+
+        emit<Scope::INITIALIZE>(std::move(settings));
 
         try {
             /**
@@ -115,8 +140,9 @@ namespace modules {
                     sampleRate,
                     &bufferFrames,
                     &audioCallback,
-                    powerPlant
+                    m->userData.get()
             );
+
             audioContext.startStream();
         } catch( RtError& e) {
             e.printMessage();
