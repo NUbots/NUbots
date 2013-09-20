@@ -163,35 +163,38 @@ namespace modules {
             }
         }
 
-        // Now we need to build up the quality of each candidate by searching multiples of its beat
+        // Now we need to build up the quality of each candidate by searching two multiples above and two below the beat
         for(auto& candidate : candidates) {
             for(int i = 0; i < 5; ++i) {
-                double checkFrequency = candidate.frequency * (1 << i);
+                double checkFrequency = candidate.frequency * pow(2, i - 2);
 
                 // Work out the two indicies and the relative influence
                 size_t indexA = floor((checkFrequency * NUM_BEAT_SAMPLES) / 100);
                 size_t indexB = ceil((checkFrequency * NUM_BEAT_SAMPLES) / 100);
+
+                // We work out how different from our target frequency the two indexes are
                 double influenceA = abs(checkFrequency - frequency(indexA, NUM_BEAT_SAMPLES, 100));
                 double influenceB = abs(checkFrequency - frequency(indexB, NUM_BEAT_SAMPLES, 100));
-                double scale = 1 / (influenceA * influenceB);
-                influenceA *= scale;
-                influenceB *= scale;
 
-                candidate.quality += abs(values[indexA]) * influenceA;
-                candidate.quality += abs(values[indexB]) * influenceB;
+                // Now we want to work out how much of each bucket makes up this frequency, this means that
+                // the sum of the two scaling factors should be 1, we swap this so b=a and a=b as a smaller
+                // difference in frequency should actually result in a larger ratio
+                double scaleA = influenceB / (influenceA + influenceB);
+                double scaleB = influenceA / (influenceA + influenceB);
+
+                // Multiply in the values for this skewed by the frequency
+                candidate.quality += abs(values[indexA]) * scaleA;
+                candidate.quality += abs(values[indexB]) * scaleB;
             }
         }
 
-        std::sort(std::begin(candidates), std::end(candidates), [](const Beat& a, const Beat& b) {
-            return a.quality > b.quality;
-        });
-
-        // If we have candidates
+        // Find the element with the highest quality
         if(!candidates.empty()) {
-            //std::cout << "Frequency: " << candidates.front().frequency * 60 << " Phase: " << candidates.front().phase << " Quality: " << candidates.front().quality << std::endl;
-
-            return candidates.front();
+            return *(std::max_element(std::begin(candidates), std::end(candidates), [](const Beat& a, const Beat& b) {
+                return a.quality > b.quality;
+            }));
         }
+        // Return an empty beat object (this will happen when our average is 0 (because all elements are 0))
         else {
             return Beat();
         }
@@ -222,22 +225,24 @@ namespace modules {
             m->beatPlan = fftw_plan_dft_r2c_1d(NUM_BEAT_SAMPLES, m->beatInput.get(), reinterpret_cast<fftw_complex*>(m->beatOutput.get()), 0);
         });
 
-
+        // This triggers on every sound chunk we get
         on<Trigger<messages::SoundChunk>>([this](const messages::SoundChunk& chunk) {
-
+            // Split the sound into frequency buckets and emit
             auto buckets = std::make_unique<Buckets>();
             buckets->buckets = m->getBuckets(chunk);
-
             emit(std::move(buckets));
         });
 
+        // This triggers on every 2 buckets we make, it does the derivative of the value
         on<Trigger<Last<2, Buckets>>>([this](const std::vector<std::shared_ptr<const Buckets>>& buckets) {
 
+            // If we have at least two buckets (we can't do derivative on 1)
             if(buckets.size() > 1) {
-
+                // Make a bucket the correct size
                 auto dbucket = std::make_unique<DiffBuckets>();
-                dbucket->buckets.resize(5);
+                dbucket->buckets.resize(buckets[0]->buckets.size());
 
+                // Differentiate the buckets
                 for(int i = 0; i < 5; ++i) {
                     dbucket->buckets[i] = buckets[1]->buckets[i] - buckets[0]->buckets[i];
                     dbucket->buckets[i] = dbucket->buckets[i] < 0 ? 0 : dbucket->buckets[i];
