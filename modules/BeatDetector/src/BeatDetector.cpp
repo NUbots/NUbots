@@ -114,6 +114,9 @@ namespace modules {
 
         std::vector<std::complex<double>> values(NUM_BEAT_SAMPLES / 2, 0);
 
+        // Calculate the FFT sample rate that we are using
+        size_t fftSampleRate = sampleRate / chunkSize;
+
         for (size_t b = 0; b < buckets[0].buckets.size(); ++b) {
             for (size_t i = 0; i < NUM_BEAT_SAMPLES; ++i) {
                 beatInput[i] = buckets[i].buckets[b];
@@ -149,13 +152,13 @@ namespace modules {
                 // If we want to move to our left
                 if(abs(values[i - 1]) > abs(values[i + 1])) {
                     data.phase = std::arg(values[i]);
-                    data.frequency = (frequency(i - 1, 100, NUM_BEAT_SAMPLES) * abs(values[i - 1]) + frequency(i, 100, NUM_BEAT_SAMPLES) * abs(values[i])) / (abs(values[i - 1]) + abs(values[i]));
+                    data.frequency = (frequency(i - 1, fftSampleRate, NUM_BEAT_SAMPLES) * abs(values[i - 1]) + frequency(i, fftSampleRate, NUM_BEAT_SAMPLES) * abs(values[i])) / (abs(values[i - 1]) + abs(values[i]));
                     data.quality = 0;
                 }
                 // Otherwise moving to the right
                 else {
                     data.phase = std::arg(values[i]);
-                    data.frequency = (frequency(i + 1, 100, NUM_BEAT_SAMPLES) * abs(values[i + 1]) + frequency(i, 100, NUM_BEAT_SAMPLES) * abs(values[i])) / (abs(values[i + 1]) + abs(values[i]));
+                    data.frequency = (frequency(i + 1, fftSampleRate, NUM_BEAT_SAMPLES) * abs(values[i + 1]) + frequency(i, fftSampleRate, NUM_BEAT_SAMPLES) * abs(values[i])) / (abs(values[i + 1]) + abs(values[i]));
                     data.quality = 0;
                 }
 
@@ -169,12 +172,12 @@ namespace modules {
                 double checkFrequency = candidate.frequency * pow(2, i - 2);
 
                 // Work out the two indicies and the relative influence
-                size_t indexA = floor((checkFrequency * NUM_BEAT_SAMPLES) / 100);
-                size_t indexB = ceil((checkFrequency * NUM_BEAT_SAMPLES) / 100);
+                size_t indexA = floor((checkFrequency * NUM_BEAT_SAMPLES) / fftSampleRate);
+                size_t indexB = ceil((checkFrequency * NUM_BEAT_SAMPLES) / fftSampleRate);
 
                 // We work out how different from our target frequency the two indexes are
-                double influenceA = abs(checkFrequency - frequency(indexA, NUM_BEAT_SAMPLES, 100));
-                double influenceB = abs(checkFrequency - frequency(indexB, NUM_BEAT_SAMPLES, 100));
+                double influenceA = abs(checkFrequency - frequency(indexA, fftSampleRate, NUM_BEAT_SAMPLES));
+                double influenceB = abs(checkFrequency - frequency(indexB, fftSampleRate, NUM_BEAT_SAMPLES));
 
                 // Now we want to work out how much of each bucket makes up this frequency, this means that
                 // the sum of the two scaling factors should be 1, we swap this so b=a and a=b as a smaller
@@ -288,7 +291,7 @@ namespace modules {
             size_t index = indexes[indexes.size() / 2];
             Beat beat = beats[index];
 
-            double phaseOffset = (indexes.size() - index) * ((2 * M_PI) / (100.0 / beat.frequency));
+            double phaseOffset = (indexes.size() - index) * ((2 * M_PI) / ((m->sampleRate / m->chunkSize) / beat.frequency));
             double phase = utility::math::angle::normalizeAngle(beat.phase + phaseOffset);
 
             auto filtered = std::make_unique<FilteredBeat>();
