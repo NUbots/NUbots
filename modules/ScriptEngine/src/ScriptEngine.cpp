@@ -18,13 +18,10 @@
  */
 
 #include "ScriptEngine.h"
-#include "utility/idiom/pimpl_impl.h"
 
 #include "messages/Configuration.h"
-#include "messages/ExecuteScript.h"
 #include "messages/ServoWaypoint.h"
 #include "messages/DarwinServoCommand.h"
-#include "messages/Script.h"
 
 #include <map>
 
@@ -34,50 +31,46 @@ namespace modules {
         static constexpr const char* CONFIGURATION_PATH = "scripts/";
     };
 
-    class ScriptEngine::impl {
-        public:
-            std::map<std::string, messages::Script> scripts;
-    };
-
     ScriptEngine::ScriptEngine(NUClear::PowerPlant* plant) : Reactor(plant) {
 
         on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& script) {
             // Add this script to our list of scripts
-            m->scripts.insert(std::make_pair(script.name, script.config));
+            scripts.insert(std::make_pair(script.name, script.config));
         });
 
-        on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {
-            auto& scripts = m->scripts;
+        on<Trigger<messages::ExecuteScriptByName>>([this](const messages::ExecuteScriptByName& command) {
             auto script = scripts.find(command.script);
 
             if(script == std::end(scripts)) {
                 throw std::runtime_error("The script " + command.script + " is not loaded in the system");
             }
             else {
-
-                // Wrap our raw pointer in a unique pointer, this way if an exception/error happens it will be deallocated
-                auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
-
-                auto time = command.start;
-
-                for(const auto& frame : script->second.frames) {
-                    // Move along our duration in time
-                    time += frame.duration;
-
-                    // Loop through all the motors and make a servo waypoint for it
-                    for(const auto& target : frame.targets) {
-                        waypoints->push_back({
-                            time,
-                            target.id,
-                            target.position,
-                            target.gain
-                        });
-                    }
-                }
-
-                // Release from the unique pointer and emit it
-                emit(std::move(waypoints));
+                emit(std::make_unique<messages::ExecuteScript>(script->second, command.start));
             }
+        });
+
+        on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {
+
+            auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
+
+            auto time = command.start;
+            for(const auto& frame : command.script.frames) {
+                // Move along our duration in time
+                time += frame.duration;
+
+                // Loop through all the motors and make a servo waypoint for it
+                for(const auto& target : frame.targets) {
+                    waypoints->push_back({
+                        time,
+                        target.id,
+                        target.position,
+                        target.gain
+                    });
+                }
+            }
+
+            // Emit our waypoints
+            emit(std::move(waypoints));
         });
     }
 }
