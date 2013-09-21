@@ -19,6 +19,7 @@
 
 #include "DanceEngine.h"
 
+#include "messages/ServoWaypoint.h"
 #include "messages/Configuration.h"
 #include "messages/Beat.h"
 
@@ -35,12 +36,38 @@ namespace modules {
             scripts.insert(std::make_pair(script.name, script.config));
         });
 
-        on<Trigger<messages::Beat>>([this](const messages::Beat& beat) {
+        on<Trigger<messages::AllServoWaypointsComplete>, With<messages::Beat>>([this](const messages::AllServoWaypointsComplete&, const messages::Beat& beat) {
 
-            // If we are currently not dancing
-            // Pick a dance script to execute
-            // Scale that dance script to a number of beats
-            // Emit an execute script command that will finish on a beat
+            // Here we pick a random element. Note that the random selection is bias here however until the number
+            // of scripts in the system is statistically significant compared to RAND_MAX, this should give decent results
+            auto item = scripts.begin();
+            std::advance(item, rand() % scripts.size());
+
+            // Get the total duration of this script
+            NUClear::clock::duration duration(0);
+            for(const auto& frame : item->second.frames) {
+                duration += frame.duration;
+            }
+
+            // Work out how many periods we need to add to beat.time to make it the one before now (could be 0)
+            auto start = beat.time + (beat.period * ((NUClear::clock::now() - beat.time) / beat.period));
+
+            // Work out the smallest multiple of 2 multiplied by period that is greater then duration
+            // By using a power of two, we assume that the songs time signature is even (3/4 songs will look strange)
+            auto length = exp2(ceil(log2(double(duration.count())/double(beat.period.count())))) * beat.period;
+
+            // Work out how much we need to scale our script by to make it fit into our beat
+            double scale = double(duration.count()) / double(length.count());
+
+            // Scale our script
+            messages::Script script;
+            for(const auto& frame : item->second.frames) {
+                script.frames.push_back(frame);
+                script.frames.back().duration *= scale;
+            }
+
+            // Emit our scaled script to start at our start time (normally in the past)
+            emit(std::make_unique<messages::ExecuteScript>(script, start));
         });
     }
 }
