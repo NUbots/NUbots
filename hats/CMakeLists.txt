@@ -39,12 +39,15 @@ ADD_HAT(
         PartyDarwin)
 
 ADD_HAT(
-    NAME beatdetector
+    NAME dancedarwin
     MODULES
         ConfigSystem
         Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
         AudioInput
-        BeatDetector)
+        BeatDetector
+        ScriptEngine
+        DanceEngine)
 
 # The ADD_HAT function appends itself to the ${hats} variable.
 # We need to expose this to our parent scope so the DarwinSend.cmake

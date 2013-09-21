@@ -28,14 +28,14 @@ namespace modules {
         static constexpr const char* CONFIGURATION_PATH = "scripts/dance/";
     };
 
-    ScriptEngine::ScriptEngine(NUClear::PowerPlant* plant) : Reactor(plant) {
+    DanceEngine::DanceEngine(NUClear::PowerPlant* plant) : Reactor(plant) {
 
-        on<Trigger<messages::Configuration<DanceScripts>>>([this](const messages::Configuration<Scripts>& script) {
+        on<Trigger<messages::Configuration<DanceScripts>>>([this](const messages::Configuration<DanceScripts>& script) {
             // Add this script to our list of scripts
             scripts.insert(std::make_pair(script.name, script.config));
         });
 
-        on<Trigger<messages::ExecuteScriptByName>>([this](const messages::Beat& beat) {
+        on<Trigger<messages::Beat>>([this](const messages::Beat& beat) {
 
             // If we are currently not dancing
             // Pick a dance script to execute
