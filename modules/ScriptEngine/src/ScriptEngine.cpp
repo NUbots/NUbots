@@ -23,8 +23,6 @@
 #include "messages/ServoWaypoint.h"
 #include "messages/DarwinServoCommand.h"
 
-#include <map>
-
 namespace modules {
     struct Scripts {
         // For scripts we want updates on the whole scripts directory
