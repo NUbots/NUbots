@@ -69,5 +69,9 @@ namespace modules {
             // Emit our scaled script to start at our start time (normally in the past)
             emit(std::make_unique<messages::ExecuteScript>(script, start));
         });
+
+        on<Trigger<messages::Beat>>([this](const messages::Beat& beat) {
+            // TODO think about how to strobe the LEDs
+        });
     }
 }
