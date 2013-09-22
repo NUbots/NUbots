@@ -20,6 +20,16 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+# LaTeX stuff
+doc/*.aux
+doc/*.log
+doc/*.nav
+doc/*.out
+doc/*.pdf
+doc/*.snm
+doc/*.synctex.gz
+doc/*.toc
+
 .exe
 tags
 *.swp
