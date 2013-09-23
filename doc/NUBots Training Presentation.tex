@@ -10,6 +10,8 @@
 \usepackage{booktabs} 	% Allows the use of \toprule, \midrule and \bottomrule in tables
 \usepackage{tikz} 		% Pretty diagrams.
 \usepackage{adjustbox}	% Scale images/diagrams to slide
+\usepackage{color}
+\usepackage{listings}
 \usetikzlibrary{
     positioning				% Allows 5px above/below of x style positioning
     , arrows				% Allows <-, ->, <-> style arrows.
@@ -18,6 +20,38 @@
 	, shapes
     , shapes.multipart
 	, calc
+}
+
+\definecolor{dblue}{rgb}{0,0,0.545}
+\definecolor{lgrey}{rgb}{0.9,0.9,0.9}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\lstdefinelanguage{nuclear}{
+	backgroundcolor=\color{grey!10},  
+	basicstyle=\footnotesize \ttfamily \color{black} \bfseries,   
+	breakatwhitespace=false,       
+	breaklines=true,               
+	captionpos=b,                   
+	commentstyle=\color{green!50!black},   
+	deletekeywords={...},          
+	escapeinside={\%*}{*)},                  
+	frame=single,                  
+	language=C++,                
+	keywordstyle=\color{violet},  
+	morekeywords={constexpr}, 
+	identifierstyle=\color{black},
+	stringstyle=\color{red},      
+	numbers=left,                 
+	numbersep=5pt,                  
+	numberstyle=\tiny\color{black}, 
+	rulecolor=\color{black},        
+	showspaces=false,               
+	showstringspaces=false,        
+	showtabs=false,                
+	stepnumber=1,                   
+	tabsize=5,                     
+	title=\lstname, 
+	emph={on, emit, Trigger, With},
+	emphstyle={\color{blue}}
 }
 
 %----------------------------------------------------------------------------------------
@@ -282,7 +316,7 @@
 		}
 		, double circle/.default={-3pt}{black!80}
 		, reactor/.style={draw,double circle}
-	]
+		, readwrite/.style={<->, thick}]
 	
 		% Draw our central Power Plant star
 		\node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge \gls{Powerplant}};
@@ -292,8 +326,7 @@
 		{Vision,Localisation,Behaviour,Sensors,Kinematics,Movement} {
 	
 			% Draw the reactors around the central star
-			\node[draw,reactor] (reactorcircle) at ({360/6 * (\i - 1)}:6cm)
-			{$\reactor$};
+			\node[draw,reactor] (reactorcircle) at ({360/6 * (\i - 1)}:6cm) {$\reactor$};
 	
 			% Draw a line from our reactor to our powerplant
 			\path[readwrite] (reactorcircle) edge (powerplant);
@@ -316,12 +349,35 @@
 	Service Threads
 \end{frame}
 
-\subsection{Key Functions}
 \begin{frame}
-    \frametitle{Key Functions On}
+	High Level On Description
+\end{frame}
+
+\begin{frame}
 	Trigger
+\end{frame}
+
+\begin{frame}
 	With
-	Code Example
+\end{frame}
+
+\begin{frame}
+	Options
+\end{frame}
+
+\subsection{Key Functions}
+\begin{frame}[fragile]
+    \frametitle{Key Functions: On}
+	\begin{lstlisting}[language=nuclear]
+	// Vision.cpp
+	Vision::Vision() {
+	    using messages::Image;
+	    on<Trigger<Image>>([this](const Image& image) {
+	        auto classifedImage = classifyImage(image);
+	        emit(std::move(classifiedImage));
+	    });
+	}
+	\end{lstlisting}
 \end{frame}
 
 \begin{frame}
@@ -339,13 +395,31 @@
 \end{frame}
 
 \begin{frame}
+    \frametitle{Key Functions Log}
+	Every
+\end{frame}
+
+\begin{frame}
+    \frametitle{Key Functions Log}
+	Last
+\end{frame}
+
+\begin{frame}
+    \frametitle{Key Functions Log}
+	Configuration
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Key Functions Log}
+	Project Directory Structure
+\end{frame}
+
+\begin{frame}
     \frametitle{Antipatterns}
 	unending loops in reactions
 \end{frame}
 
-%----------------------------------------------------------------------------------------
-\section{NUClear in NUBots}
-%----------------------------------------------------------------------------------------
 \subsection{Module Examples}
 \begin{frame}
     \frametitle{Some title}
