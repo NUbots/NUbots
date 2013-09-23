@@ -36,8 +36,9 @@ namespace modules {
             scripts.insert(std::make_pair(script.name, script.config));
         });
 
-        on<Trigger<messages::AllServoWaypointsComplete>, With<messages::Beat>>([this](const messages::AllServoWaypointsComplete&, const messages::Beat& beat) {
 
+        on<Trigger<messages::AllServoWaypointsComplete>, With<messages::Beat>>([this](const messages::AllServoWaypointsComplete&, const messages::Beat& beat) {
+            std::cout << "ServoWaypointsComplete" << std::endl;
             // Here we pick a random element. Note that the random selection is bias here however until the number
             // of scripts in the system is statistically significant compared to RAND_MAX, this should give decent results
             auto item = scripts.begin();
@@ -50,14 +51,24 @@ namespace modules {
             }
 
             // Work out how many periods we need to add to beat.time to make it the one before now (could be 0)
-            auto start = beat.time + (beat.period * ((NUClear::clock::now() - beat.time) / beat.period));
+            auto start1 = beat.time + beat.period + (beat.period * (std::chrono::duration_cast<std::chrono::nanoseconds>(NUClear::clock::now() - beat.time).count() / std::chrono::duration_cast<std::chrono::nanoseconds>(beat.period).count()));
+            auto start2 = beat.time + (beat.period * (std::chrono::duration_cast<std::chrono::nanoseconds>(NUClear::clock::now() - beat.time).count() / std::chrono::duration_cast<std::chrono::nanoseconds>(beat.period).count()));
+
+            auto start = abs(std::chrono::duration_cast<std::chrono::nanoseconds>(beat.time - start1).count()) > abs(std::chrono::duration_cast<std::chrono::nanoseconds>(beat.time - start2).count()) ? start2 : start1;
+            start = start1;
 
             // Work out the smallest multiple of 2 multiplied by period that is greater then duration
             // By using a power of two, we assume that the songs time signature is even (3/4 songs will look strange)
-            auto length = exp2(ceil(log2(double(duration.count())/double(beat.period.count())))) * beat.period;
+            auto durationInNanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
+            auto beatInNanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(beat.period);
+            auto targetLengthInNanoseconds = exp2(ceil(log2(
+                double(durationInNanoseconds.count()) /
+                double(beatInNanoseconds.count())
+            ))) * beatInNanoseconds;
 
             // Work out how much we need to scale our script by to make it fit into our beat
-            double scale = double(duration.count()) / double(length.count());
+            double scale = double(targetLengthInNanoseconds.count()) / double(durationInNanoseconds.count());
+            std::cout << "Scaling script by: " << scale << std::endl;
 
             // Scale our script
             messages::Script script;
@@ -70,8 +81,12 @@ namespace modules {
             emit(std::make_unique<messages::ExecuteScript>(script, start));
         });
 
+        // Awful hack do not use.
         on<Trigger<messages::Beat>>([this](const messages::Beat& beat) {
-            // TODO think about how to strobe the LEDs
+            if(!startedDancing) {
+                emit(std::make_unique<messages::ExecuteScriptByName>("Stand.json"));
+                startedDancing = true;
+            }
         });
     }
 }

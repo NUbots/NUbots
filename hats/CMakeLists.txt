@@ -44,7 +44,7 @@ ADD_HAT(
         ConfigSystem
         Platform::Darwin::HardwareIO
         Platform::Darwin::MotionManager
-        AudioInput
+        AudioFileInput
         BeatDetector
         ScriptEngine
         DanceEngine)

@@ -28,6 +28,7 @@ namespace modules {
     class DanceEngine : public NUClear::Reactor {
     private:
         std::map<std::string, messages::Script> scripts;
+        bool startedDancing;
     public:
         explicit DanceEngine(NUClear::PowerPlant* plant);
     };
