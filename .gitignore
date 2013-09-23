@@ -47,7 +47,10 @@ doc/*.mtc
 doc/*.mtc1
 doc/*.snm
 doc/*.synctex.gz
+doc/*.synctex
+doc/*.vrb
 doc/*.tdo
+doc/TSWLatexianTemp*
 
 # Misc
 .exe
