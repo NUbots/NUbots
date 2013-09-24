@@ -60,7 +60,7 @@
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\title[Short title]{NUClear in the NUBots code}
+\title[Short title]{Project NUClear - NUBots Training}
 
 \author{
     Trent Houliston \and Jake Woods
@@ -155,7 +155,8 @@
 			\begin{itemize}
 				\item Takes input images and finds objects
 				\item Classifies images into colour classifications
-				\item Uses RANSAC to find lines and circles in the classified image
+				\item Uses RANSAC to find lines in the classified image
+				\item Uses a highly optimized circle finder (relying on 
 			\end{itemize}
 		\item Localisation
 			\begin{itemize}
@@ -179,6 +180,7 @@
 			\begin{itemize}
 				\item Describes the robots model of itself
 				\item Is used to go from motor angles to a self model
+				\item Contains a model of the robots mass distribution along its joints
 				\item Also contains reverse kinematics which go from a self model to motor angles
 			\end{itemize}
 		\item Configuration System
@@ -198,18 +200,17 @@
 				\item Scripts
 					\begin{itemize}
 						\item Handles execution of Scripts (a series of waypoints)
-						\item Sends these to the Actionators to be executed
+						\item Can select from the scripts loaded in the config file
 					\end{itemize}
 				\item Head Motion
 					\begin{itemize}
 						\item Handles controlling where the head is looking
-						\item Uses machine learning to optimise where it looks
+						\item Is able to either pan the head in a search or focus on a specific object
 					\end{itemize}
 				\item Walk Engine
 					\begin{itemize}
 						\item Handles all of the motor positions required to walk
-						\item Logically part of motion but technically implemented separately
-						\item Motion instead of running the walk engine, hands over control to it
+						\item Takes higher priority then the other motion modules
 					\end{itemize}
 			\end{itemize}
 	\end{itemize}
