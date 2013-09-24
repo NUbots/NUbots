@@ -466,12 +466,80 @@
 	\end{adjustbox}
 \end{frame}
 
-\subsection{Pain Points}
+\subsection{Justification for Change}
 \begin{frame}
-    \frametitle{Pain Points}
-	Multiple ways to do the same thing
-	Mix of different communication methods
-	Threading
+    \frametitle{Problems in Existing System}
+	\begin{itemize}
+		\item Hidden Dependencies
+			\begin{itemize}
+				\item The existing systems dependencies are very poorly defined
+				\item For example, localizations dependency on the Stationary/Mobile object system.
+				\item These hidden dependencies make it difficult to work on a system without understanding the whole ssytem
+			\end{itemize}
+	
+		\item Threading Issues
+			\begin{itemize}
+				\item Current system does not handle synchronisation between the two threads well
+				\item e.g. The kick system can be prompted mid way by the walk engine, the two can even run together resulting in the robot standing still for prolonged periods.
+				\item Happens because the interactions between the two threads is undefined in most cases
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Problems in Existing System}
+	\begin{itemize}			
+		\item Network Communication
+			\begin{itemize}
+				\item Network communication is currently entirely through Localisation and Behaviour
+				\item Adding new network communication requires modifying these two systems
+				\item Because of the difficult of adding new networking, no new networking will be added
+			\end{itemize}
+			
+		\item Build System
+			\begin{itemize}
+				\item The current build system uses a make file that calls cmake that builds a make file that is called by the original make file
+				\item This makes adding and removing components to the system in a meaningful way difficult
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Useful Features}
+	\begin{itemize}
+		\item Modular Design
+			\begin{itemize}
+				\item Many modules that are made for robotics (walk engine, script engine) are useful for more then just soccer.
+				\item Being able to use Mock inputs allows the system to be tested without access to a robot
+				\item Being able to compose various modules into a binary would allow the robot to do more
+				\item Enabling the sharing of these modules between researchers would result in better development (more people using the same code)
+			\end{itemize}
+			
+		\item Transparent Multithreading
+			\begin{itemize}
+				\item Modern CPUs are getting more cores, rather then becoming faster
+				\item Threading is difficult and can almost never be sensibly done at the module level
+				\item Threading should be handled by the architecture in a way that can scale up to many cores
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+			
+\begin{frame}
+    \frametitle{Useful Features}
+	\begin{itemize}
+		\item Runtime Statistics
+			\begin{itemize}
+				\item When optimising programs for speed it is useful to see how long each section of the code took
+				\item Breaking up the modules and timing their execution better shows where CPU time is being used
+			\end{itemize}
+			
+		\item Fine Grained Debugging
+			\begin{itemize}
+				\item When debugging a large system, there is often a low signal to noise ratio as a lot of debug lines are not useful
+				\item Splitting up log lines based on source can help identify problems
+				\item Being able to view the call graph in real time on a repeated process helps to identify links
+			\end{itemize}
+	\end{itemize}
 \end{frame}
 
 %----------------------------------------------------------------------------------------
