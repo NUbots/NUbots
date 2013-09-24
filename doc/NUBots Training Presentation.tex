@@ -710,24 +710,41 @@
 \begin{frame}[fragile]
 	\frametitle{Auto}
 	\begin{itemize}
-		\item C++11 repurposed auto to do automatic type deduction.
+		\item Automatically get somethings type.
 		\item Similar to javascript or C\#'s var.
 		\item You should almost always use auto.
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
-		int main() {
-		    std::vector<int> vec = {1,2,3,4,5};
+		std::map<std::complex, SomeLongThing<int>> getSomeComplexType() {
+		    ...
+		    return complexType;
+		}
 
-		    // No more std::vector<int>::iterator!
-		    // Not with auto though!
-		    for(auto v = vec.begin(); v != vec.end(); ++v) {
-		        // Do stuff with v.
-		    }
+		// Auto finds the type and saves you the hassle!
+		// Normally you'd need to type std::map<std::complex, SomeLongThing<int>>
+		auto complexType = getSomeComplexType();
 
-		    // Auto finds the type and saves you the hassle!
-		    // Normally you'd need to type std::map<std::complex, SomeLongTemplateType<int>>
-		    auto complexType = getSomeComplexType();
+		// Get something by reference.
+		auto& something = someClass.something;
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Range-Based For}
+	\begin{itemize}
+		\item Finally a for-loop that doesn't suck.
+		\item Anything that provides a begin() and end() function can be used with range-based for.
+		\item Also arrays.
+		\item If you don't need to modify the list then you should use range-based for.
+		\item Otherwise use a regular iterator (with auto!).
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		std::vector<int> vec = {1,2,3,4,5};
+		// You can also use auto& to get by reference.
+		for(auto v : vec) {
+		    // Do stuff with v
 		}
 	\end{lstlisting}
 \end{frame}
