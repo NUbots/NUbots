@@ -266,15 +266,15 @@
         %% Right hand side
         \node at(2,3) [component] (sensors) {Sensors (Hardware)};
         \node at(2,2) [component] (camera) {Camera (Hardware)};
-        \node at(2,1) [splitcomponent] (motion) {Motion \nodepart{two} Scripts\\Head Motion};
-        \node at(2,0) [component] (walkengine) {Walk Engine};
+        \node at(2,1) [splitcomponent] (motion) {Motion \nodepart{two} Scripts\\Head Motion\\Walk Engine};
 
         %%% Connections
         %% Left side connections
         \path [readwrite, out=10, in=170] (vision) edge (blackboard);
         \path [readwrite, out=20, in=185] (localization) edge (blackboard);
         \path [read, out=10, in=200] (behavior) edge (blackboard);
-		\path [write, out=-10, in=190] (behavior) edge (jobs);
+		\path [write, out=5, in=185] (behavior) edge (jobs);
+		\path [write, out=-5, in=160] (behavior) edge (actionators);
 		
 		%% Center connections
         \path [readwrite] (kinematics) edge (blackboard);
@@ -283,11 +283,9 @@
         \path [write, out=170, in=10] (sensors) edge (blackboard);
 		\path [write, out=185, in=-20] (camera) edge (blackboard);
 		\path [write, out=-10, in=190] (jobs) edge (motion);
-		\path [write] (motion) edge (walkengine);
+		\path [write, out=10, in=190] (jobs) edge (camera);
 		\path [write, out=200, in=20] (motion) edge (actionators);
-		\path [write, out=190, in=-10] (walkengine) edge (actionators);
 		\path [read, out=150, in=0] (motion) edge (kinematics);
-		\path [read, out=170, in=-10] (walkengine) edge (kinematics);
 		
 		%%% Configuration Colours
 		%% Vision
@@ -330,10 +328,7 @@
 		\filldraw[hardcodedconfig] ([yshift=-.5em,xshift=.5em]motion.north west) circle (3pt);
 		\filldraw[configsystemconfig] ([yshift=-2.25em,xshift=.5em]motion.north west) circle (3pt);
 		\filldraw[fileconfig] ([yshift=-3.5em,xshift=.5em]motion.north west) circle(3pt);
-		
-		%% Walk Engine
-		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]walkengine.north west) circle(3pt);
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]walkengine.north east) rectangle ++(6pt, 6pt);
+		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]motion.north east) rectangle ++(6pt, 6pt);
 		
 		%%% Legend
 		\coordinate (legendpoint) at (.55, .35);
@@ -369,7 +364,7 @@
         \node[above=1.1em of leftgroup,anchor=center]{SeeThink Loop};
 
         %% SenseMove header
-        \node[fit=(sensors)(camera)(motion)(walkengine)](rightgroup){};
+        \node[fit=(sensors)(camera)(motion)](rightgroup){};
         \draw[rounded corners] 
         (rightgroup.north east) -- (rightgroup.south east) -- ++(-0.10,0);
         \draw[decorate,decoration={amplitude=7pt,brace}]
