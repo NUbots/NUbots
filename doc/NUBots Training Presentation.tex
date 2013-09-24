@@ -408,14 +408,14 @@
 
 		%% Dependancy Type: Depends on
 		\node[below=20pt of joblabel.south west,anchor=south west] (dependencylabel) {\small X depends on Y};
-		\node (dependencynodeY) at ([yshift=1pt]dependencylabel.mid west) {\tiny Y};
-		\node[left=24pt of dependencynodeY] (dependencynodeX) {\tiny X};
+		\node[circle, draw, inner sep=0.5pt] (dependencynodeY) at ([yshift=1pt,xshift=-2pt]dependencylabel.mid west) {\tiny Y};
+		\node[circle, draw, inner sep=0.5pt, left=24pt of dependencynodeY] (dependencynodeX) {\tiny X};
 		\draw[basearrow, dependent] (dependencynodeX) edge (dependencynodeY);
 
 		%% Dependancy Type: Codependent
 		\node[below=12pt of dependencylabel.south west,anchor=south west] (codependencylabel) {\small X, Y depend on each other};
-		\node (codependencynodeY) at ([yshift=1pt]codependencylabel.mid west) {\tiny Y};
-		\node[left=24pt of codependencynodeY] (codependencynodeX) {\tiny X};
+		\node[circle, draw, inner sep=0.5pt] (codependencynodeY) at ([yshift=1pt,xshift=-2pt]codependencylabel.mid west) {\tiny Y};
+		\node[circle, draw, inner sep=0.5pt, left=24pt of codependencynodeY] (codependencynodeX) {\tiny X};
 		\draw[basearrow, codependent] (codependencynodeX) edge (codependencynodeY);
 
 		%% Legend Header
