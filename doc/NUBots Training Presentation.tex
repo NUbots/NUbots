@@ -1156,7 +1156,7 @@
 		}
 
 		// We can also set priority to LOW DEFAULT or HIGH
-		on<Trigger<Image>, 
+		on<Trigger<Image>,
 		   Options<Priority<NUClear::REALTIME>>>(processData);
 	\end{lstlisting}
 \end{frame}
@@ -1493,8 +1493,8 @@
 
 	\begin{lstlisting}[language=nuclear]
 	using std::chrono::milliseconds;
-	on<Trigger<Every<100, milliseconds>>>(
-	[](const time_t& t) {
+	on<Trigger<Every<100, milliseconds>>>
+	([](const time_t& t) {
 	    // Do something every 100 milliseconds!
 	});
 	\end{lstlisting}
@@ -1511,8 +1511,8 @@
 	\end{itemize}
 	
 	\begin{lstlisting}[language=nuclear]
-	on<Trigger<Last<5, Image>>>(
-	[](const LastList<Image>& list) {
+	on<Trigger<Last<5, Image>>>
+	([](const LastList<Image>& list) {
 	    // LastList is a vector of pointers to the last 5 Images
 	});
 	\end{lstlisting}
@@ -1527,8 +1527,8 @@
 	\end{itemize}
 	
 	\begin{lstlisting}[language=nuclear]
-	on<Trigger<Network<BallLocation>>>(
-	[](const Network<BallLocation>& ball) {
+	on<Trigger<Network<BallLocation>>>
+	([](const Network<BallLocation>& ball) {
 	    // We get all the ball locations emitted to the network
 	});
 	\end{lstlisting}
@@ -1547,8 +1547,8 @@
 	    static constexpr char* path = "Mine.json";
 	}
 	
-	on<Trigger<Configuration<MyConfigPath>>>(
-	[](const Configuration<MyConfigPath>& config) {
+	on<Trigger<Configuration<MyConfigPath>>>
+	([](const Configuration<MyConfigPath>& config) {
 	    // config.name has the name of the file
 	    // config.config has our configuration
 	});
@@ -1569,8 +1569,8 @@
 	    static constexpr char* path = "scripts/";
 	}
 	
-	on<Trigger<Configuration<Scripts>>>(
-	[](const Configuration<MyConfigPath>& config) {
+	on<Trigger<Configuration<Scripts>>>
+	([](const Configuration<MyConfigPath>& config) {
 	    // config.name has the name of the script
 	    // config.config has the script configuration
 	});
