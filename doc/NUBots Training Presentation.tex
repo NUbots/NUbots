@@ -474,7 +474,7 @@
 			\begin{itemize}
 				\item The existing systems dependencies are very poorly defined
 				\item For example, localizations dependency on the Stationary/Mobile object system.
-				\item These hidden dependencies make it difficult to work on a system without understanding the whole ssytem
+				\item These hidden dependencies make it difficult to work on a system without understanding the whole system
 			\end{itemize}
 	
 		\item Threading Issues
@@ -493,7 +493,7 @@
 			\begin{itemize}
 				\item Network communication is currently entirely through Localisation and Behaviour
 				\item Adding new network communication requires modifying these two systems
-				\item Because of the difficult of adding new networking, no new networking will be added
+				\item Because of the difficulty of adding new networking, no new networking will be added
 			\end{itemize}
 			
 		\item Build System
@@ -808,9 +808,47 @@
 	Project Directory Structure
 \end{frame}
 
-\begin{frame}
-    \frametitle{Antipatterns}
-	unending loops in reactions
+\subsection{Antipatterns}
+\begin{frame}[fragile]
+    \frametitle{Infinite Looping Reaction}
+
+	\begin{itemize}
+		\item Never do an infinite loop in a reaction
+		\item It ties up a thread pool thread and can eventually kill the system
+		\item You should always be able to trigger on either an every or another event
+		\item In the rare case that you do need to loop forever, use a service thread
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+	on<Trigger<MyData>>([](const MyData& data) {
+	    // Bad! You've killed a thread pool thread!
+	    while(true) {
+	        doSomething(data);
+	    }
+	}
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Data Hog}
+
+	\begin{itemize}
+		\item Whenever it makes sense, emit data rather then using it
+		\item For example, if vision makes a classified image, this could be useful
+		\item Rather then immediately using this classified image, we can emit and trigger on it
+		\item This way others can use this data as well as us
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+	on<Trigger<Image>>([](const Image& image) {
+	
+	    // This could be emitted for others to use
+	    // Saving them the trouble of recoding or copying code
+	    auto classified = makeClassifiedImage(image);
+		
+	    auto seenObjects = findObjects(classified)
+	}
+	\end{lstlisting}
 \end{frame}
 
 \subsection{Module Examples}
