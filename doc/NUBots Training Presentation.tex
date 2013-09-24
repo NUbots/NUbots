@@ -1359,10 +1359,38 @@
 	\end{adjustbox}
 \end{frame}
 
-\begin{frame}
-	\frametitle{Key Functions Log}
-	Stream operator overload
-	variardic
+\begin{frame}[fragile]
+	\frametitle{Key Functions - Log}
+	\begin{itemize}
+		\item NUClear provides logging out of the box.
+		\item The major benifit is you can see logs on a per-reaction basis.
+		\item If you use std::cout/std::clog you'll get garbled output (thansk threading!)
+		\item Luckily log is easy to use! It supports anything that std::cout can stream.
+			Including classes with custom operator<<'s
+		\item Log levels are set at compile time using a CMake flag.
+		\item If you're not using a particular log level there is no performance hit.
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		int number = 5;
+		log<Debug>("Your number is: ", number); 
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Key Functions - Log}
+	\begin{itemize}
+		\item Five Log Levels: TRACE, DEBUG, INFO, WARN, ERROR, FATAL
+		\item When log is called NUClear emits a NUClear::LogMessage that you can Trigger on.
+		\item Log takes an infinite number of arguments and simply concatenates them together.
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// Assume example has operator<< defined for istream
+		MyClass example;
+		log<INFO>("Running function with: ", example, 
+		    " with param ", example.height);
+	\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
