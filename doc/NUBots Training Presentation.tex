@@ -692,6 +692,21 @@
 
 \end{frame}
 
+\subsection{C++ Smart Pointers and Templates Recap}
+\begin{frame}
+	\frametitle{Smart Pointers}
+	\begin{itemize}
+		\item Smart Pointers automatically handle releasing pointer memory for you.
+		\item Different Smart Pointers mean different things regarding memory ownership (who is responsible for deleting this pointer).
+		\item As of C++11 there is almost never a reason to use new/delete or raw pointers.
+		\item Instead you should use std::unique\_ptr and std::shared\_ptr
+		\item In NUClear you will primarily use std::unique\_ptr to send messages.
+	\end{itemize}
+\end{frame}
+
+
+
+\subsection{Key Functions}
 \begin{frame}[fragile]
 	\frametitle {Key Functions: On and Trigger}
 	\begin{itemize}
@@ -744,7 +759,6 @@
 	Options
 \end{frame}
 
-\subsection{Key Functions}
 \begin{frame}[fragile]
     \frametitle{Key Functions: On}
 	\begin{lstlisting}[language=nuclear]
