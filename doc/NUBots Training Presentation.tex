@@ -907,6 +907,29 @@
 	\end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]
+	\frametitle {Key Functions: With}
+	\begin{itemize}
+		\item Q: "I need more then one data!"
+		\item A: With can take multiple arguments!
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		void processData(
+		    const Image& image,
+		    const SensorData& sensors,
+		    const AudioData& audio) {
+		    // Do stuff with image, sensors and audio.
+		}
+
+		// We can either use With multiple times or With<A,B>
+		on<Trigger<Image>, 
+		   With<SensorData, AudioData>>(processData);
+		on<Trigger<Image>, 
+		   With<SensorData>, With<AudioData>>(processData);
+	\end{lstlisting}
+\end{frame}
+
 \begin{frame}
 	\frametitle {Key Functions: Options}
 \end{frame}
