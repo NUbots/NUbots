@@ -52,7 +52,7 @@
 	stepnumber=1,                   
 	tabsize=5,                     
 	title=\lstname, 
-	emph={on, emit, Trigger, With},
+	emph={on, emit, Trigger, With, Options},
 	emphstyle={\color{blue}}
 }
 
@@ -624,12 +624,48 @@
 
 \end{frame}
 
-\begin{frame}
-	High Level On Description
+\begin{frame}[fragile]
+	\frametitle {Key Functions: On and Trigger}
+	\begin{itemize}
+		\item Q: "I want to do something when new data is available"
+		\item A: Use On and Trigger!
+		\item Notifies Power Plant that you are interested in specific data and triggers a callback when new data is available.
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// Make sure to take arguments by const reference!
+		void processImage(const Image& data) {
+		    // Do something with the image data here.
+		}
+
+		// Tells PowerPlant to call processImage when new
+		// image data is available.
+		on<Trigger<Image>>(processImage);
+	\end{lstlisting}
 \end{frame}
 
-\begin{frame}
-	Trigger
+\begin{frame}[fragile]
+	\frametitle {Key Functions: With}
+	\begin{itemize}
+		\item Q: "I want to access data other then the one I triggered on"
+		\item A: Use With!
+		\item Notifies Power Plant that you want the latest version of some other data when your trigger function is called.
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// Order of arguments needs to match the order of 
+		// Trigger and With arguments.
+		void processData(
+		    const Image& image,
+		    const SensorData& sensors) {
+		    // Do something with image and sensors
+		}
+
+		// Calls process data when a new image frame is 
+		// captured. Also passes the most recent sensordata
+		// to processData.
+		on<Trigger<Image>, With<SensorData>>(processData);
+	\end{lstlisting}
 \end{frame}
 
 \begin{frame}
