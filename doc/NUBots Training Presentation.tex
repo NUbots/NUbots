@@ -1150,12 +1150,115 @@
 	Options
 \end{frame}
 
-\begin{frame}
-	\frametitle{Key Functions Emit}
-	Default
-	Scopes
-	Unique Pointers
-	Code Example
+\begin{frame}[fragile]
+	\frametitle{Key Functions - Emit}
+	\begin{itemize}
+		\item Q: "I have some data that I want to send to the world"
+		\item A: Use emit!
+		\item Sends the data that you emit out to the rest of the system.
+		\item Takes a unique pointer (this means you have to std::move it!)
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// We have a unique pointer to the data we want to send
+		std::unique_ptr<MyData> myData = 
+		    std::make_unique<MyData>();
+		
+		// Send the data out to the world!
+		emit(std::move(myData));
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Key Functions - Emit}
+	\begin{itemize}
+		\item Q: "No seriously... I meant "The Word", like all of it"
+		\item A: You mean the network? Then you need a scope!
+		\item When you emit, you can specify scopes. These define where the messages go.
+		\item For example, we will demonstrate the network scope
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// We have a unique pointer to the data we want to send
+		std::unique_ptr<MyData> myData = 
+		    std::make_unique<MyData>();
+		
+		// Send the data out to the world! like all of it
+		emit<Scope::NETWORK>(std::move(myData));
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Key Functions - Emit}
+	\begin{itemize}
+		\item Q: "But I wanted to emit it to my own reactors to?"
+		\item A: You can use multiple scopes when you emit and it will go to all of them
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// We have a unique pointer to the data we want to send
+		std::unique_ptr<MyData> myData = 
+		    std::make_unique<MyData>();
+		
+		// Send the data out to the world! like all of it
+		emit<Scope::NETWORK, Scope::LOCAL>(std::move(myData));
+	\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+	\frametitle{Key Functions - Emit}
+	\begin{itemize}
+		\item Q: "I want to emit some data that others can use to configure themselves"
+		\item A: If you want to emit some data in your constructor, before the system is started that others can use to configure themselves, then you need the INITIALIZE scope
+		\item This scope will run all the reactions before the system starts but after the modules are installed
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// We have a unique pointer to the data we want to send
+		std::unique_ptr<MyData> myData = 
+		    std::make_unique<MyData>();
+		
+		// Send the data out to the world! like all of it
+		emit<Scope::INITIALIZE>(std::move(myData));
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Key Functions - Emit}
+	\begin{itemize}
+		\item Q: "I want to emit data, but I don't want to go through the thread pool"
+		\item A: If you use the DIRECT scope, then rather then sending all the events to the thread pool. You will block and run each reaction in sequence in your current thread.
+		\item This will also hide their runtime stats and bundle them into your function
+		\item The use case for this is often in extensions, before the threading system is started up
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// We have a unique pointer to the data we want to send
+		std::unique_ptr<MyData> myData = 
+		    std::make_unique<MyData>();
+		
+		// Send the data out to the world! like all of it
+		emit<Scope::DIRECT>(std::move(myData));
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Key Functions - Emit}
+	\begin{itemize}
+		\item Q: "I want to emit data to a database!"
+		\item A: This is something that NUClear does not do on its own. However, you can write an extension which allows you to define your own scopes.
+		\item These scopes will run any time your scope is triggered. For more information read up on NUClear extensions (not in this presentation)
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		// We have a unique pointer to the data we want to send
+		std::unique_ptr<MyData> myData = 
+		    std::make_unique<MyData>();
+		
+		// Send the data out to the world! like all of it
+		emit<MyAwesomeDatabaseScope>(std::move(myData));
+	\end{lstlisting}
 \end{frame}
 
 \begin{frame}
