@@ -217,6 +217,11 @@
 
 \subsection{Existing Architecture - Diagrams}
 \begin{frame}
+    \frametitle{Existing Architecture}
+    TODO Description of Existing Architecture
+\end{frame}
+
+\begin{frame}
     \frametitle{Existing Architecture - Data Flow Diagram}
     \begin{tikzpicture}[
             x=10.5em,y=4.75em,
@@ -469,6 +474,109 @@
 \section{NUClear Architecture}
 %----------------------------------------------------------------------------------------
 \subsection{Architectural Overview}
+\begin{frame}
+    \frametitle{Message Passing}
+	\begin{itemize}
+		\item NUClear is a message passing system
+		\item Rather then directly interacting with each-other, indirectly interact through common data
+		\item Results in very loose coupling making it easy to add remove or change components
+		\item Makes it easy to have multiple components using the same input data
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Multi Threading}
+	\begin{itemize}
+		\item NUClear is a multi threaded framework
+		\item It will transparently multithread any code that is given to it
+		\item This allows it to make use of all of the resources in the system
+		\item Synchronisation needs to be taken into account if multiple threads could access the same data
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Powerplant}
+	\begin{itemize}
+		\item The Powerplant is the core component of the NUClear system
+		\item It is the central datapoint for the whole system
+		\item It holds the functionality for doing the following:
+			\begin{itemize}
+				\item Install a new reactor
+				\item Start up the system
+				\item Shutdown the system
+			\end{itemize}
+		\item You are also able to directly send messages from it (for injecting messages)
+		\item Most of the time, you will never directly interact with it
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Reactor}
+	\begin{itemize}
+		\item A Reactor is the primary method that you will interact with the system
+		\item It is a class that extends from NUClear::Reactor
+		\item It has all of the methods on it that are used to listen for and emit messages, these being:
+			\begin{itemize}
+				\item on
+				\item emit
+				\item log
+			\end{itemize}
+		\item You then install these reactors into the Powerplant
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Reaction}
+	\begin{itemize}
+		\item A reaction is a single function that is run in response to new data
+		\item They take as arguments constant references to the data that they use
+		\item The data that is passed into a reaction function can be considered thread safe
+		\item The lifetime of the data used is managed by the Powerplant 
+			\begin{itemize}
+				\item If you really need to save the data, you will need to save a copy
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Smart Types}
+	\begin{itemize}
+		\item Smart Types are special types that when used in an on statement will cause different behaviour
+		\item Built into NUClear there are the smart types Every, Last, and Network
+		\item The Configuration System also provides the Configuration smart type
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Extension}
+	\begin{itemize}
+		\item The creation of new Smart Types is done through extension
+		\item Extension allows you to change the way specific datatypes are handled when:
+			\begin{itemize}
+				\item Exists: The data type is used in an on statement
+				\item Emit: Data is emitted (particular data types and whole scopes)
+				\item TriggerType: What datatype will cause a reaction to run
+				\item Get: Data is retrieved (can even return a different datatype)
+			\end{itemize}
+		\item Extensions are generally for when system wide common functionality is needed
+		\item They are advanced usage and should not be the normal usage pattern
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Service Thread}
+	\begin{itemize}
+		\item Sometimes a whole thread is needed to listen to an external blocking source
+			\begin{itemize}
+				\item An example would be a user interface
+			\end{itemize}
+		\item However having NUClear manage the lifetime of the program is beneficial
+		\item To allow this you can create service threads
+		\item These threads have a run() and kill() method which start and stop the thread respectively
+		\item Most use cases should not need these and should be triggered by events if possible
+	\end{itemize}
+\end{frame}
+
 \begin{frame}[fragile]
     \frametitle{NUClear Architecure}
 	\begin{adjustbox}{max totalsize={\textwidth}{.9\textheight},center}
@@ -496,7 +604,7 @@
 	]
 	
 	% Draw our central Power Plant star
-	\node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge powerplant};
+	\node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge Powerplant};
 	
 	% Loop through each of our reactors
 	\foreach [count=\i] \reactor in {Vision,Localisation,Behaviour,Sensors,Kinematics,Movement} {
@@ -510,19 +618,6 @@
 	\end{tikzpicture}
 	\end{adjustbox}
 
-\end{frame}
-
-\begin{frame}
-    \frametitle{NUClear Architecure}
-	Message passing system,
-	Multi Threading,
-	Networking,
-	Power Plant,
-	Reactors,
-	Reactions
-	Smart Types
-	Extensions
-	Service Threads
 \end{frame}
 
 \begin{frame}
