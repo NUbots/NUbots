@@ -1131,7 +1131,7 @@
 		    const Image& image,
 		    const SensorData& sensors,
 		    const AudioData& audio) {
-		    // Do stuff with image, sensors and audio.
+		    // Do stuff with the image
 		}
 
 		// We can either use With multiple times or With<A,B>
@@ -1142,12 +1142,72 @@
 	\end{lstlisting}
 \end{frame}
 
-\begin{frame}
-	\frametitle {Key Functions - Options}
+\begin{frame}[fragile]
+	\frametitle {Key Functions - Options Priority}
+	\begin{itemize}
+		\item Q: "My Reaction is much more important then everyone else's!"
+		\item A: Using an Options and Priority at the end of your reaction!
+		\item Reactions with higher priority will get first access to free threads in the thread pool
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		void processData(const Image& image) {
+		    // Do stuff with the image
+		}
+
+		// We can also set priority to LOW DEFAULT or HIGH
+		on<Trigger<Image>, 
+		   Options<Priority<NUClear::REALTIME>>>(processData);
+	\end{lstlisting}
 \end{frame}
 
-\begin{frame}
-	Options
+\begin{frame}[fragile]
+	\frametitle {Key Functions - Options Single}
+	\begin{itemize}
+		\item Q: "If I'm already processing an Image, I don't want a new one till I'm done!"
+		\item A: Use the Single argument in Options
+		\item This will drop any new events of the same kind until yours is done
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		void processData(const Image& image) {
+		    // Do stuff with the image
+		}
+
+		// Now only one Image will be processed at a time.
+		// If new ones come they'll be dropped
+		on<Trigger<Image>, 
+		   Options<Single>>(processData);
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle {Key Functions - Options Sync}
+	\begin{itemize}
+		\item Q: "I have several state dependant reactions that can't be multithreaded! If they are then they won't run properly! But I know that if I use mutexes on them all I'll be really mean to everyone else by blocking up all the pool threads!"
+		\item A: Use the Sync argument in Options
+		\item This will only allow a single event from a sync group to execute at a time (the rest queuing up and running after)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle {Key Functions - Options Sync (cont.)}
+	\begin{lstlisting}[language=nuclear]
+		void processData(const Image& image) {
+		    // Do some thread unsafe operations!
+		}
+		
+		void processMoarData(const Duck& duck) {
+		    // Do some more thread unsafe operations!
+		}
+
+		// The no two reactions with the same type in the Sync template
+		// will execute at the same time
+		on<Trigger<Image>, 
+		   Options<Sync<MyReactor>>>(processData);
+		on<Trigger<Duck>, 
+		   Options<Sync<MyReactor>>>(processMoarData);
+	\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
