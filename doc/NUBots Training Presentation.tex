@@ -715,28 +715,6 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]
-	\frametitle{C++ Review: std::unique\_ptr}
-	
-	\begin{lstlisting}[language=nuclear]
-		#include <memory> // unique_ptr & shared_ptr
-
-		void processImage(const Image& image) {
-		    std::unique_ptr<MyData> data = 
-		        std::make_unique<MyData>();
-
-		    data->something; // Access like a pointer * or ->.
-		    
-		    // theif now owns the data pointed at by data.
-		    // data is now invalid. unique_ptr can only be
-		    // copied using std::move(...).
-		    std::unique_ptr<MyData> thief = std::move(data); 
-		    thief->something; // Fine
-		    data->something; // Error and very bad!
-		} // thief releases memory here. 
-	\end{lstlisting}
-\end{frame}
-
 \begin{frame}
 	\frametitle{C++ Review: std::move}
 	\begin{itemize}
@@ -747,6 +725,50 @@
 		\item Some classes can only be constructed by moving data into them. Like std::unique\_ptr!
 		\item When something has a name you use std::move(...) to move it!
 	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{C++ Review: std::move}
+	\begin{lstlisting}[language=nuclear]
+		// We don't use raw pointers but this is a slide!
+		int* chump = new data(5);
+
+		// Prints 5.
+		std::cout << *chump << std::endl;
+
+		// theif steals 5 from chump.
+		int* thief = std::move(chump);
+
+		// Error: Chump doesn't have 5 anymore.
+		std::cout << *chump << std::endl;
+
+		// No problem: Thief stole 5.
+		std::cout << *thief << std::endl;
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{C++ Review: std::unique\_ptr}
+
+	std::unique\_ptr uses move semantics!	
+
+	\begin{lstlisting}[language=nuclear]
+		#include <memory> // unique_ptr & shared_ptr
+
+		void processImage(const Image& image) {
+		    std::unique_ptr<MyData> chump = 
+		        std::make_unique<MyData>();
+
+		    chump->something; // Access pointer-style:* and ->
+		    
+		    // theif has stolen chump's pointer.
+		    // you can't use chump to get to the
+		    // data since he doesn't have it.
+		    std::unique_ptr<MyData> thief = std::move(data); 
+		    thief->something; // No problem!
+		    chump->something; // Error. Bad chump!
+		} // thief automatically releases memory here. 
+	\end{lstlisting}
 \end{frame}
 
 \subsection{Key Functions}
