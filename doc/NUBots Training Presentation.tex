@@ -688,7 +688,7 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
 	\frametitle{C++ Review: Calling template functions}
 	\begin{itemize}
 		\item NUClear's On and Emit functions look weird to new C++ programmers as they contain a lot of arguments in angle brackets 
@@ -696,10 +696,7 @@
 		\item The easiest way to think about this is angle bracket arguments are evaluated at compile time while round braces are
 			evalutaed at runtime. 
 	\end{itemize}
-\end{frame}
 
-\begin{frame}[fragile]
-	\frametitle{C++ Review: Calling template functions}
 	\begin{lstlisting}[language=nuclear]
 		//	      <Compile>(Runtime)
 		something<1, 2, 3>(4, 5, 6);
