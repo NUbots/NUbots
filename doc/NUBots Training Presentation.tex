@@ -771,6 +771,80 @@
 	\end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]
+	\frametitle{C++ Review: std::shared\_ptr}
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{C++ Review: Templates}
+	\begin{itemize}
+		\item Templates let you write type-agnostic code.
+		\item Covered (poorly) in SENG1120.
+		\item Templates let you provide a "blueprint" for a function or class allowing you to generate
+			copies of the same class that vary based on what types they take. 
+		\item For example the std::vector class is a template which lets the compiler generate a concrete
+			std::vector<int> or std::vector<MyClass> on demand when a user tries to use those classes 
+			in a vector.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{C++ Review: Templates}
+	\begin{lstlisting}[language=nuclear]
+		// Works on anything that has an operator+
+		template <typename T>
+		T add(const T& first, const T& second) {
+		    return first + second;
+		}
+		
+		// Generates a "int" version of add at compile time.
+		std::cout << add<int>(1, 2) << std::endl;
+
+		// C++ can also automatically work out the T.
+		std::cout << add(1.0, 5.0) << std::endl;
+
+		// Behind the scenes C++ generates something like this
+		// for add<int>
+		int add(const int& first, const int& second) {
+		    return first + second;
+		}
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+	\frametitle{C++ Review: Template Metaprogramming}
+	\begin{itemize}
+		\item Clever people realized that templates are actually turing complete.
+		\item You can write some really interesting programs with templates and perform logic at compile time.
+		\item Since this was an accident the syntax isn't super-friendly.
+		\item However you can use Template Metaprogramming to express complex problems with no runtime cost.
+		\item We use this extensively in NUClear but avoid it in the robocup code.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{C++ Review: Calling template functions}
+	\begin{itemize}
+		\item NUClear's On and Emit functions look weird to new C++ programmers as they contain a lot of arguments in angle brackets 
+			$<>$ instead of the expected round braces ().
+		\item The easiest way to think about this is angle bracket arguments are evaluated at compile time while round braces are
+			evalutaed at runtime. 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{C++ Review: Calling template functions}
+	\begin{lstlisting}[language=nuclear]
+		//       <Compile>(Runtime)
+		something<1, 2, 3>(4, 5, 6);
+
+		// 1, 2 and 3 will be evaluated when the program 
+		// is compiled and as such can't change based on
+		// user input. 4, 5 and 6 are regular parameters.
+	\end{lstlisting}
+\end{frame}
+
 \subsection{Key Functions}
 \begin{frame}[fragile]
 	\frametitle {Key Functions: On and Trigger}
@@ -817,7 +891,7 @@
 \end{frame}
 
 \begin{frame}
-	With
+	\frametitle {Key Functions: Options}
 \end{frame}
 
 \begin{frame}
