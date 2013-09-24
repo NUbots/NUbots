@@ -1626,7 +1626,37 @@
 \subsection{Project}
 \begin{frame}
 	\frametitle{Project Directory Structure}
-	Project Directory Structure! (TODO)
+	\footnotesize
+	\begin{itemize}
+		\item cmake
+		\begin{itemize}
+			\footnotesize
+			\item Includes - Contains shared CMake functions.
+			\item Modules -  Code to help CMake find our dependencies.
+			\item Scripts - Scripts used by cmake for build/deploying
+		\end{itemize}
+		
+		\item doc - Documentation like this one! Mostly LaTeX.
+		\item hats - Defines the executable payloads and their modules.
+		\item lib - Library dependencies that aren't on apt-get and are easy to build.
+		\item modules - NUClear modules/reactors. Subfolders for grouping.
+
+		\item shared
+		\begin{itemize}
+			\footnotesize
+			\item messages - The messages used by modules to communicate.
+			\item utility - Shared utility code
+			\begin{itemize}
+				\footnotesize
+				\item configuration - Configuration system tools. New serializable types can be defined here.
+				\item file - File utilities
+				\item idiom - Classes to assist with implementing C++ idioms
+				\item image - Image processing utilities
+				\item math - Math utilities
+				\item strutil - String utilities
+			\end{itemize}
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
