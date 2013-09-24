@@ -857,8 +857,6 @@
 
 \end{frame}
 
-
-
 \subsection{Key Functions}
 \begin{frame}[fragile]
 	\frametitle {Key Functions: On and Trigger}
@@ -935,20 +933,6 @@
 	Options
 \end{frame}
 
-\begin{frame}[fragile]
-	\frametitle{Key Functions: On}
-	\begin{lstlisting}[language=nuclear]
-	// Vision.cpp
-	Vision::Vision() {
-	    using messages::Image;
-	    on<Trigger<Image>>([this](const Image& image) {
-	        auto classifedImage = classifyImage(image);
-	        emit(std::move(classifiedImage));
-	    });
-	};
-	\end{lstlisting}
-\end{frame}
-
 \begin{frame}
 	\frametitle{Key Functions Emit}
 	Default
@@ -961,6 +945,31 @@
 	\frametitle{Key Functions Log}
 	Stream operator overload
 	variardic
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Complete Reactor Example}
+		
+	\begin{lstlisting}[language=nuclear]
+	// Vision.h
+	class Vision : public NUClear::Reactor {
+	public:
+	    Vision(NUClear::PowerPlant* plant);
+	};
+	\end{lstlisting}
+	
+	\begin{lstlisting}[language=nuclear]
+	// Vision.cpp
+	Vision::Vision(NUClear::PowerPlant* plant)
+	: Reactor(plant) {        
+	    on<Trigger<Image>>
+	    ([this](const Image& image) {
+	        // Make a classified image and emit it
+	        auto classified = std::make_unique<ClassifiedImage>(makeClassified(image));
+	        emit(std::move(classified));
+	    });
+	}
+	\end{lstlisting}
 \end{frame}
 
 \subsection{Smart Types}
