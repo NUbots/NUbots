@@ -971,10 +971,10 @@
 	\node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge Powerplant};
 	
 	% Loop through each of our reactors
-	\foreach [count=\i] \reactor in {Vision,Localisation,Behaviour,Sensors,Kinematics,Movement} {
+	\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Sensors, Kinematics, Motion Manager} {
 	
 		% Draw the reactors around the central star
-		\node[draw,reactor] (reactorcircle) at ({360/6 * (\i - 1)}:6cm) {$\reactor$};
+		\node[draw,reactor] (reactorcircle) at ({360/7 * (\i - 1)}:6cm) {$\reactor$};
 	
 		% Draw a line from our reactor to our powerplant
 		\path[readwrite] (reactorcircle) edge (powerplant);
