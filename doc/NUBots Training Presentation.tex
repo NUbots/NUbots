@@ -384,38 +384,38 @@
 	\begin{adjustbox}{max totalsize={\textwidth}{.9\textheight},center}
 	\begin{tikzpicture}[
 		reactor/.style={draw, circle, ultra thick}
-		, basearrow/.style={>=triangle 45, thick}
+		, basearrow/.style={>=triangle 45, ultra thick}
 		, blackboard/.style={basearrow, dashed}
-		, publicinterface/.style={basearrow}
-		, jobs/.style={basearrow, dotted}
+		, publicinterface/.style={basearrow, color=red!75!black}
+		, jobs/.style={basearrow, dotted, color=blue!75!black}
 		, dependent/.style={->}
 		, codependent/.style={<->}]
 
 		%%% Legend
-		\coordinate (legendpoint) at (4.6, 2);
+		\coordinate (legendpoint) at (4.9, 1);
 
 		%% Public Interface Dependency
 		\node [below=of legendpoint,anchor=east] (publicinterfacelabel) {\small Public Interface Dependency};
-		\draw [publicinterface] (publicinterfacelabel.mid west) -- ++(-33pt, 0pt);
+		\draw [publicinterface] (publicinterfacelabel.mid west) -- ++(-38pt, 0pt);
 
 		%% Blackboard Dependency
 		\node [below=12pt of publicinterfacelabel.south west,anchor=south west] (blackboardlabel) {\small Dependency through Blackboard};
-		\draw[blackboard] (blackboardlabel.mid west) -- ++(-33pt, 0pt);
+		\draw[blackboard] (blackboardlabel.mid west) -- ++(-38pt, 0pt);
 
 		%% Jobs Dependency
 		\node [below=12pt of blackboardlabel.south west,anchor=south west] (joblabel) {\small Dependency through Job System};
-		\draw[jobs] (joblabel.mid west) -- ++(-33pt, 0pt);
+		\draw[jobs] (joblabel.mid west) -- ++(-38pt, 0pt);
 
 		%% Dependancy Type: Depends on
 		\node[below=20pt of joblabel.south west,anchor=south west] (dependencylabel) {\small X depends on Y};
 		\node (dependencynodeY) at ([yshift=1pt]dependencylabel.mid west) {\tiny Y};
-		\node[left=19pt of dependencynodeY] (dependencynodeX) {\tiny X};
+		\node[left=24pt of dependencynodeY] (dependencynodeX) {\tiny X};
 		\draw[basearrow, dependent] (dependencynodeX) edge (dependencynodeY);
 
 		%% Dependancy Type: Codependent
 		\node[below=12pt of dependencylabel.south west,anchor=south west] (codependencylabel) {\small X, Y depend on each other};
 		\node (codependencynodeY) at ([yshift=1pt]codependencylabel.mid west) {\tiny Y};
-		\node[left=19pt of codependencynodeY] (codependencynodeX) {\tiny X};
+		\node[left=24pt of codependencynodeY] (codependencynodeX) {\tiny X};
 		\draw[basearrow, codependent] (codependencynodeX) edge (codependencynodeY);
 
 		%% Legend Header
@@ -436,6 +436,7 @@
 		%% Vision
 		\path[blackboard, dependent] (Vision.305) edge (Camera.95);
 		\path[publicinterface, dependent] (Vision.275) edge (Camera.120);
+		\path[blackboard, dependent] (Vision) edge (Sensors);
 
 		%% Localization
 		\path[blackboard, dependent] (Localization) edge (Sensors);
