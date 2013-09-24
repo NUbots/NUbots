@@ -11,6 +11,7 @@
 \usepackage{tikz} 		% Pretty diagrams.
 \usepackage{adjustbox}	% Scale images/diagrams to slide
 \usepackage{color}
+\usepackage{colortbl}
 \usepackage{listings}
 \usetikzlibrary{
 	positioning				% Allows 5px above/below of x style positioning
@@ -856,6 +857,48 @@
 		\item This allows it to make use of all of the resources in the system
 		\item Synchronisation needs to be taken into account if multiple threads could access the same data
 	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle {Multi Threading}
+	\begin{adjustbox}{max totalsize={\textwidth}{\textheight},center}
+		\centering
+		\begin{tikzpicture}
+			\begin{scope}[
+				task/.style={draw=black},
+				cameratriggered/.style={fill=blue!10},
+				sensortriggered/.style={fill=red!10}
+			]
+			
+				\draw (1, 1) grid (21, 4);
+				
+				%% Thread 1
+				\draw[cameratriggered, task] (1, 3) rectangle node {Camera} (6, 4);
+				\draw[sensortriggered, task] (8, 3) rectangle node {Field Mapper} (12, 4);
+				\draw[cameratriggered, task] (13, 3) rectangle node {Localisation} (17, 4);
+				\draw[cameratriggered, task] (19, 3) rectangle node {Motion} (21, 4);
+				
+				%% Thread 2
+				\draw[sensortriggered, task] (1, 2) rectangle node {Sensors} (5, 3);
+				\draw[cameratriggered, task] (6, 2) rectangle node {Vision} (13, 3);
+				\draw[cameratriggered, task] (17, 2) rectangle node {Behaviour} (19, 3);
+				
+				%% Thread 3
+				\draw[sensortriggered, task] (5, 1) rectangle node {Odometry} (8, 2);
+				\draw[sensortriggered, task] (12, 1) rectangle node {Map Combiner (Network)} (19, 2);
+				
+				% Row labels
+				\node[anchor=east, inner sep=0] at (.8, 3.5) {Thread 1};
+				\node[anchor=east, inner sep=0] at (.8, 2.5) {Thread 2};
+				\node[anchor=east, inner sep=0] at (.8, 1.5) {Thread 3};
+				
+				% Column Labels
+				\foreach \i in {1,...,20} {
+				\node[anchor=north, inner sep=0] at (\i + .5, .8) {\i};
+				}
+			\end{scope}
+		\end{tikzpicture}
+	\end{adjustbox}
 \end{frame}
 
 \begin{frame}
