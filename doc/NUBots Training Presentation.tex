@@ -1660,8 +1660,60 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Build System}
-	Build System! (TODO)
+	\frametitle{Build System - Modules}
+	\begin{itemize}
+		\item The new NUBots system uses CMake as it's build system
+		\item It uses it properly unlike the old build system
+		\item Each module goes into a directory according to its namespace
+		\item A single CMakeLists.txt file is included in the module directory
+		\item For most use cases this will contain a single function NUCLEAR\_MODULE()
+		\item This will handle everything about the modules construction
+		\item In the event that you need access to a library, you pass in the Includes and Libraries
+		\begin{itemize}
+			\item NUCLEAR\_MODULE(INCLUDES \$\{MY\_INCLUDE\_DIR\} LIBRARIES \$\{MY\_LIBRARY\})
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Build System - Setup}
+	\begin{itemize}
+		\item The NUBots code is setup to be used in an out of source build
+		\item This means that the build directory is separate from the main directory
+		\item Make a directory in the source directory (normally called build)
+		\item Change to this directory and run CMake ..
+		\item This should build a make file (or tell you why it can't)
+		\begin{itemize}
+			\item The most common reason it will fail is that you are missing a dependency
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Build System - Make}
+	\begin{itemize}
+		\item There are 3 main make targets that can be called
+		\item make
+		\begin{itemize}
+			\item This will build all of the targets in the project
+		\end{itemize}
+		
+		\item make install
+		\begin{itemize}
+			\item You need set the arguments robot=robotip
+			\item You can also set config= to one of 3 values
+			\begin{itemize}
+				\item n or new sends only new configuration files to the robot (the default)
+				\item u or update overwrites and sends any new config files to the robot
+				\item i or ignore does not try to send configuration files at all
+			\end{itemize}
+		\end{itemize}
+		
+		\item make test
+		\begin{itemize}
+			\item Runs the unit test for every used module in the system
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -1742,7 +1794,7 @@
 			
 		\item NUBugger
 			\begin{itemize}
-				\item Streams NUBugger events the the NUBugger web ui
+				\item Streams NUBugger events the the NUBugger web UI
 				\item This is a port of the NUBugger system in the existing code
 			\end{itemize}
 		\end{itemize}
@@ -1760,7 +1812,7 @@
 		\item ScriptTuner
 			\begin{itemize}
 				\item By running this you are able to move the
-				\item This is a port of the Script Tuner in the existing system to an NCurses ui
+				\item This is a port of the Script Tuner in the existing system to an NCurses UI
 			\end{itemize}
 			
 		\item SignalCatcher
