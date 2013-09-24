@@ -219,7 +219,17 @@
 \subsection{Existing Architecture - Diagrams}
 \begin{frame}
     \frametitle{Existing Architecture}
-    TODO Description of Existing Architecture
+	\begin{itemize}
+		\item The system runs in a synchronised dual pipeline architecture
+			\begin{itemize}
+				\item The See Think loop holds most of the logic and decision making code
+				\item The Sense Move loop is a much smaller loop that simply reads from the sensor and camera, and writes motor actions to the motors
+			\end{itemize}
+		\item The threads are synchronised to run at regular intervals
+		\item Most of these systems read in from the Blackboard and write back to it
+		\item Some of them will communicate using a message system called Jobs
+		\item The remainder of the communication is done using direct function calls on singletons
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
