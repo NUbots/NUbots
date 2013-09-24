@@ -712,6 +712,7 @@
 		\item When you pass a unique\_ptr to a function you are giving away it's ownership.
 		\item Don't use a unique\_ptr after it has been passed or copied. It will be null!
 		\item unique\_ptr deletes it's data when it goes out of scope. 
+		\item This should be your go-to pointer unless you have a good reason otherwise.
 	\end{itemize}
 \end{frame}
 
@@ -773,7 +774,15 @@
 
 \begin{frame}[fragile]
 	\frametitle{C++ Review: std::shared\_ptr}
-	
+	\begin{itemize}
+		\item shared\_ptr is a reference counting pointer.
+		\item When no shared\_ptr's point to a particular bit of data it will be deleted.
+		\item When you copy a shared\_ptr it increments a shared reference counter. 
+		\item When a shared\_ptr falls out of scope is decrements the shared reference counter.
+		\item When the counter is zero your data is deleted.
+		\item shared\_ptr should be used when you truly need to share data and there is no clear single-owner. 
+			This is more rare then people might like to believe.
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -781,10 +790,10 @@
 	\begin{itemize}
 		\item Templates let you write type-agnostic code.
 		\item Covered (poorly) in SENG1120.
-		\item Templates let you provide a "blueprint" for a function or class allowing you to generate
-			copies of the same class that vary based on what types they take. 
+		\item Templates let you provide a "blueprint" for a function or class allowing the compiler to generate
+			copies of the same class that vary based on what type they are templated with.
 		\item For example the std::vector class is a template which lets the compiler generate a concrete
-			std::vector<int> or std::vector<MyClass> on demand when a user tries to use those classes 
+			std::vector$<$int$>$ or std::vector$<$MyClass$>$ on demand when a user tries to use those classes 
 			in a vector.
 	\end{itemize}
 \end{frame}
