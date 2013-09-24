@@ -387,7 +387,7 @@
 		, codependent/.style={<->}]
 
 		%%% Legend
-		\coordinate (legendpoint) at (4.9, 1);
+		\coordinate (legendpoint) at (13, -2);
 
 		%% Public Interface Dependency
 		\node [below=of legendpoint,anchor=east] (publicinterfacelabel) {\small Public Interface Dependency};
@@ -417,10 +417,10 @@
 		\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
 
 		%%% Draw all of our components in a circle
-		\foreach [count=\i] \reactor in {Camera, Vision, Localization, Behavior, Network, Sensors, Kinematics, Motion, Actionators, Walk Engine} {
+		\foreach [count=\i] \reactor in {Camera, Vision, Localization, Behavior, Network, Sensors, Kinematics, Motion, Actionators} {
 		
 			% Draw the reactors around the central star
-			\node[reactor] (\reactor) at ({360/10 * (\i - 1)}:7cm) {$\reactor$};
+			\node[reactor] (\reactor) at ({360/9 * (\i - 1)}:7cm) {$\reactor$};
 		};
 
 		%% Legend Border
@@ -442,18 +442,15 @@
 		\path[blackboard, dependent] (Behavior) edge (Kinematics);
 		\path[blackboard, dependent] (Behavior) edge (Vision);
 		\path[blackboard, dependent] (Behavior) edge (Sensors);
+		\path[publicinterface, dependent] (Behavior) edge (Actionators);
 		\path[publicinterface, codependent] (Behavior) edge (Network);
+		\path[jobs, dependent] (Behavior) edge (Camera);
 
 		%% Motion
 		\path[blackboard, codependent] (Motion.65) edge (Behavior.285);
 		\path[jobs, dependent] (Motion.100) edge (Behavior.260);
 		\path[publicinterface, dependent] (Motion) edge  (Actionators);
 		\path[publicinterface, dependent] (Motion) edge (Kinematics);
-
-		%% Walk Engine
-		\path[publicinterface, dependent] (Walk Engine) edge (Motion);
-		\path[publicinterface, dependent] (Walk Engine) edge (Actionators);
-		\path[publicinterface, dependent] (Walk Engine) edge (Kinematics);
 	\end{tikzpicture}
 	\end{adjustbox}
 \end{frame}
