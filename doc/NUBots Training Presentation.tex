@@ -215,9 +215,9 @@
 	\end{itemize}
 \end{frame}
 
-\subsection{Existing Architecture}
+\subsection{Existing Architecture - Diagrams}
 \begin{frame}
-    \frametitle{Existing Architecture}
+    \frametitle{Existing Architecture - Data Flow Diagram}
     \begin{tikzpicture}[
             x=10.5em,y=4.75em,
             component/.style={
@@ -375,8 +375,52 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Existing Architecture}
-    Description of Existing Architecture
+	\frametitle{Existing Architecture - Dependency Diagram}
+	\begin{adjustbox}{max totalsize={\textwidth}{.9\textheight},center}
+	\begin{tikzpicture}[
+		reactor/.style={draw, circle, ultra thick}
+		, basearrow/.style={>=triangle 45, thick}
+		, blackboard/.style={basearrow, dashed}
+		, publicinterface/.style={basearrow}
+		, jobs/.style={basearrow, dotted}
+		, dependent/.style={->}
+		, codependent/.style={<->}]
+
+		%% Draw all of our components in a circle
+		\foreach [count=\i] \reactor in {Camera, Vision, Localization, Behavior, Network, Sensors, Kinematics, Motion, Actionators, Walk Engine} {
+		
+			% Draw the reactors around the central star
+			\node[reactor] (\reactor) at ({360/10 * (\i - 1)}:7cm) {$\reactor$};
+		};
+
+		%%% Dependencies
+		%% Vision
+		\path[blackboard, dependent] (Vision.305) edge (Camera.95);
+		\path[publicinterface, dependent] (Vision.275) edge (Camera.120);
+
+		%% Localization
+		\path[blackboard, dependent] (Localization) edge (Sensors);
+		\path[blackboard, dependent] (Localization) edge (Vision);
+
+		%% Behavior
+		\path[blackboard, dependent] (Behavior) edge (Localization);
+		\path[blackboard, dependent] (Behavior) edge (Kinematics);
+		\path[blackboard, dependent] (Behavior) edge (Vision);
+		\path[blackboard, dependent] (Behavior) edge (Sensors);
+		\path[publicinterface, codependent] (Behavior) edge (Network);
+
+		%% Motion
+		\path[blackboard, codependent] (Motion.65) edge (Behavior.285);
+		\path[jobs, dependent] (Motion.100) edge (Behavior.260);
+		\path[publicinterface, dependent] (Motion) edge  (Actionators);
+		\path[publicinterface, dependent] (Motion) edge (Kinematics);
+
+		%% Walk Engine
+		\path[publicinterface, dependent] (Walk Engine) edge (Motion);
+		\path[publicinterface, dependent] (Walk Engine) edge (Actionators);
+		\path[publicinterface, dependent] (Walk Engine) edge (Kinematics);
+	\end{tikzpicture}
+	\end{adjustbox}
 \end{frame}
 
 \subsection{Pain Points}
