@@ -1291,10 +1291,119 @@
 	\end{itemize}
 \end{frame}
 
-\subsection{Current Porting Status}
+\subsection{FYP Final Porting Status}
 \begin{frame}
-	\frametitle{Current Porting Status}
-	What has been ported
+	\frametitle{Ported Modules}
+	\begin{itemize}
+		\item Platform::Darwin::HardwareIO
+			\begin{itemize}
+				\item This is the reactor that communicates directly with the hardware
+				\item This is a complete rewrite of the poorly coded drivers provided by Robotis
+			\end{itemize}
+		
+		\item Platform::Darwin::MotionManager
+			\begin{itemize}
+				\item This is a wrapper around the hardware and allows queuing of waypoints
+				\item This module replaces the Actionators from the old system
+			\end{itemize}
+		
+		\item Platform::Darwin::LinuxCameraStreamer
+			\begin{itemize}
+				\item Gets a stream of images from the camera using V4L2
+				\item Is an upgraded version of the camera class from the old system
+			\end{itemize}
+		\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Ported Modules}
+	\begin{itemize}
+		\item ConfigSystem
+			\begin{itemize}
+				\item Given JSON configuration files, loads them in and distributes them
+				\item Based on the new config system in the existing system, however uses NUClear as a transport rather then its callback method
+			\end{itemize}
+			
+		\item ConsoleLogHandler
+			\begin{itemize}
+				\item A log handler which handles logs by printing them to the console
+				\item This corresponds to using cout in the old system
+			\end{itemize}
+			
+		\item NUBugger
+			\begin{itemize}
+				\item Streams NUBugger events the the NUBugger web ui
+				\item This is a port of the NUBugger system in the existing code
+			\end{itemize}
+		\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Ported Modules}
+	\begin{itemize}
+		\item ScriptEngine
+			\begin{itemize}
+				\item Given a script, it feeds the waypoints to run it into 
+				\item This corresponds to the script engine in the existing code
+			\end{itemize}
+
+		\item ScriptTuner
+			\begin{itemize}
+				\item By running this you are able to move the
+				\item This is a port of the Script Tuner in the existing system to an NCurses ui
+			\end{itemize}
+			
+		\item SignalCatcher
+			\begin{itemize}
+				\item When this module is installed, segfaults and sigints are converted to exceptions and shutdown commands
+				\item The existing robot system also captured these signals
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+			
+\begin{frame}
+	\frametitle{New Modules}
+	\begin{itemize}
+		\item AudioFileInput
+			\begin{itemize}
+				\item Reads a file given by the config system in chunks and emits it in real time
+			\end{itemize}
+			
+		\item AudioInput
+			\begin{itemize}
+				\item Listens to the audio input from the microphone
+			\end{itemize}
+			
+		\item BeatDetector
+			\begin{itemize}
+				\item Using a stream of audio, detects the beat frequency of the music
+			\end{itemize}
+			
+		\item eSpeak
+			\begin{itemize}
+				\item By emitting a Say event, this uses eSpeak to perform text to speech
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+			
+\begin{frame}
+	\frametitle{New Modules}
+	\begin{itemize}
+		\item PartyDarwin
+			\begin{itemize}
+				\item This module constantly flashes the Eye LEDs randomly for testing if the program has crashed
+			\end{itemize}
+
+		\item ScriptRunner
+			\begin{itemize}
+				\item This is the UI for the script-runner hat, which allows chaining scripts to be run by name
+			\end{itemize}
+			
+		\item DanceEngine
+			\begin{itemize}
+				\item This is the controller to make the darwin perform dances. It randomly selects a dance from its bank of scripts
+			\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \end{document} 
