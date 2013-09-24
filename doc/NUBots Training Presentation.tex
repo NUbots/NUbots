@@ -938,6 +938,15 @@
 
 \begin{frame}[fragile]
     \frametitle{Smart Types - Every}
+	\begin{itemize}
+		\item The every smart type is used to have an event triggered at a regular interval
+		\item The first argument is the number of time units to wait
+		\item The second argument is the time unit that we are using
+		\begin{itemize}
+			\item This is a member of std::chrono::duration (milliseconds, microseconds etc...)
+		\end{itemize}
+	\end{itemize}
+
 	\begin{lstlisting}[language=nuclear]
 	using std::chrono::milliseconds;
 	on<Trigger<Every<100, milliseconds>>>(
@@ -998,7 +1007,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Key Functions Log}
+    \frametitle{Project Directory Structure}
 	Project Directory Structure
 \end{frame}
 
