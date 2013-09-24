@@ -706,7 +706,32 @@
 	\end{lstlisting}
 \end{frame}
 
-\subsection{Lambdas}
+\subsection{Auto, Range-Based For and Lambdas}
+\begin{frame}[fragile]
+	\frametitle{Auto}
+	\begin{itemize}
+		\item C++11 repurposed auto to do automatic type deduction.
+		\item Similar to javascript or C\#'s var.
+		\item You should almost always use auto.
+	\end{itemize}
+
+	\begin{lstlisting}[language=nuclear]
+		int main() {
+		    std::vector<int> vecr = {1,2,3,4,5};
+
+		    // No more std::vector<int>::iterator!
+		    // Not with auto though!
+		    for(auto v = vec.begin(); v != vec.end(); ++v) {
+		        // Do stuff with v.
+		    }
+
+		    // Auto finds the type and saves you the hassle!
+		    // Normally you'd need to type std::map<std::complex, SomeLongTemplateType<int>>
+		    auto complexType = getSomeComplexType();
+		}
+	\end{lstlisting}
+\end{frame}
+
 \begin{frame}
 	\frametitle{Lambdas}
 	\begin{itemize}
@@ -718,6 +743,22 @@
 		\item Otherwise lambdas are an easy way to make simple callbacks
 	\end{itemize}
 \end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Lambdas}
+	\begin{lstlisting}[language=nuclear]
+		// A lambda has three parts. The capture, arguments and body.
+		// Capture: [...] access outside variables.
+		// Arguments: (...) a standard C++ argument list.
+		// Body: { ... } the function implementation.
+
+		int main() {
+		    int something = 5;
+		    auto myLambda = [something](int
+		}
+	\end{lstlisting}
+\end{frame}
+
 
 %----------------------------------------------------------------------------------------
 \section{NUClear Architecture}
