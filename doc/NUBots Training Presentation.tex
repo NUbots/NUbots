@@ -966,6 +966,14 @@
 
 \begin{frame}[fragile]
 	\frametitle{Smart Types - Last}
+	\begin{itemize}
+		\item The last smart type will get you the last N emitted values of a type
+		\item The first argument is the number of elements to get (at most)
+		\item The second argument is the type of data to get
+		\item It will give you as many as the system has (up to a max)
+		\item The type of data that you get back is a vector of pointers (the LastList$<$type$>$ is there for convenience)
+	\end{itemize}
+	
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Last<5, Image>>>(
 	[](const LastList<Image>& list) {
@@ -976,6 +984,12 @@
 
 \begin{frame}[fragile]
 	\frametitle{Smart Types - Network}
+	\begin{itemize}
+		\item The Network smart type will get you network events of a particular type
+		\item The data will come from all of the other systems on your network
+		\item Each Network object contains both the data, and the source of the data
+	\end{itemize}
+	
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Network<BallLocation>>>(
 	[](const Network<BallLocation>& ball) {
@@ -986,6 +1000,12 @@
 
 \begin{frame}[fragile]
 	\frametitle{Smart Types - Configuration}
+	\begin{itemize}
+		\item Configuration is a smart type that will read Configuration files from the config directory
+		\item Configurations will trigger every time the file is modified
+		\item They contain a datatype called config which can be automagically typed to any data it knows about
+	\end{itemize}
+	
 	\begin{lstlisting}[language=nuclear]
 	struct MyConfigPath {
 	    static constexpr char* path = "Mine.json";
@@ -1001,6 +1021,13 @@
 
 \begin{frame}[fragile]
 	\frametitle{Smart Types - Configuration}
+	
+	\begin{itemize}
+		\item Configurations can also be set as directories
+		\item In this case they will emit an event for every item in the directory
+		\item They will emit events whenever an element is added or modified in that directory
+	\end{itemize}
+	
 	\begin{lstlisting}[language=nuclear]
 	struct Scripts {
 	    static constexpr char* path = "scripts/";
