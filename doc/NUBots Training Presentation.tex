@@ -1422,10 +1422,11 @@
 \begin{frame}[fragile]
 	\frametitle{Key Functions - Log}
 	\begin{itemize}
+		\item Q: I'm using std::cout and my output is garbled. (thansk thraeding!)
+		\item A: Use Log!
 		\item NUClear provides logging out of the box.
-		\item The major benifit is you can see logs on a per-reaction basis.
-		\item If you use std::cout/std::clog you'll get garbled output (thansk thraeding!)
-		\item Luckily log is easy to use! It supports anything that std::cout can stream.
+		\item You can view logs on a per-reaction basis and they won't be garbled!
+		\item Log is easy to use! It supports anything that std::cout can stream.
 			Including classes with custom operator$<<$'s
 		\item Log levels are set at compile time using a CMake flag.
 		\item If you're not using a particular log level there is no performance hit.
