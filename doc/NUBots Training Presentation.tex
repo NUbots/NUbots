@@ -375,7 +375,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Existing Architecture - Dependency Diagram}
+	\frametitle{Existing Architecture - Dependency Graph}
 	\begin{adjustbox}{max totalsize={\textwidth}{.9\textheight},center}
 	\begin{tikzpicture}[
 		reactor/.style={draw, circle, ultra thick}
@@ -386,12 +386,46 @@
 		, dependent/.style={->}
 		, codependent/.style={<->}]
 
-		%% Draw all of our components in a circle
+		%%% Legend
+		\coordinate (legendpoint) at (4.6, 2);
+
+		%% Public Interface Dependency
+		\node [below=of legendpoint,anchor=east] (publicinterfacelabel) {\small Public Interface Dependency};
+		\draw [publicinterface] (publicinterfacelabel.mid west) -- ++(-33pt, 0pt);
+
+		%% Blackboard Dependency
+		\node [below=12pt of publicinterfacelabel.south west,anchor=south west] (blackboardlabel) {\small Dependency through Blackboard};
+		\draw[blackboard] (blackboardlabel.mid west) -- ++(-33pt, 0pt);
+
+		%% Jobs Dependency
+		\node [below=12pt of blackboardlabel.south west,anchor=south west] (joblabel) {\small Dependency through Job System};
+		\draw[jobs] (joblabel.mid west) -- ++(-33pt, 0pt);
+
+		%% Dependancy Type: Depends on
+		\node[below=20pt of joblabel.south west,anchor=south west] (dependencylabel) {\small X depends on Y};
+		\node (dependencynodeY) at ([yshift=1pt]dependencylabel.mid west) {\tiny Y};
+		\node[left=19pt of dependencynodeY] (dependencynodeX) {\tiny X};
+		\draw[basearrow, dependent] (dependencynodeX) edge (dependencynodeY);
+
+		%% Dependancy Type: Codependent
+		\node[below=12pt of dependencylabel.south west,anchor=south west] (codependencylabel) {\small X, Y depend on each other};
+		\node (codependencynodeY) at ([yshift=1pt]codependencylabel.mid west) {\tiny Y};
+		\node[left=19pt of codependencynodeY] (codependencynodeX) {\tiny X};
+		\draw[basearrow, codependent] (codependencynodeX) edge (codependencynodeY);
+
+		%% Legend Header
+		\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
+
+		%%% Draw all of our components in a circle
 		\foreach [count=\i] \reactor in {Camera, Vision, Localization, Behavior, Network, Sensors, Kinematics, Motion, Actionators, Walk Engine} {
 		
 			% Draw the reactors around the central star
 			\node[reactor] (\reactor) at ({360/10 * (\i - 1)}:7cm) {$\reactor$};
 		};
+
+		%% Legend Border
+		\node[fit=(legendheader)(publicinterfacelabel)(blackboardlabel)
+				(joblabel)(dependencylabel)(codependencynodeX)(codependencynodeY),rectangle,draw](legendgroup){};
 
 		%%% Dependencies
 		%% Vision
@@ -403,7 +437,7 @@
 		\path[blackboard, dependent] (Localization) edge (Vision);
 
 		%% Behavior
-		\path[blackboard, dependent] (Behavior) edge (Localization);
+		\path[blackboard, codependent] (Behavior) edge (Localization);
 		\path[blackboard, dependent] (Behavior) edge (Kinematics);
 		\path[blackboard, dependent] (Behavior) edge (Vision);
 		\path[blackboard, dependent] (Behavior) edge (Sensors);
