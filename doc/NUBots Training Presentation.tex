@@ -13,20 +13,22 @@
 \usepackage{color}
 \usepackage{listings}
 \usetikzlibrary{
-    positioning				% Allows 5px above/below of x style positioning
-    , arrows				% Allows <-, ->, <-> style arrows.
-    , fit					% Allows fitting lines to shapes
-    , decorations.pathreplacing	% Allows decoration that affect line paths.
+	positioning				% Allows 5px above/below of x style positioning
+	, arrows				% Allows <-, ->, <-> style arrows.
+	, fit					% Allows fitting lines to shapes
+	, decorations.pathreplacing	% Allows decoration that affect line paths.
+	, backgrounds
 	, shapes
-    , shapes.multipart
+	, shapes.multipart
 	, calc
+	, chains
 }
 
 \definecolor{dblue}{rgb}{0,0,0.545}
 \definecolor{lgrey}{rgb}{0.9,0.9,0.9}
 \definecolor{darkblue}{rgb}{0.0,0.0,0.6}
 \lstdefinelanguage{nuclear}{
-	backgroundcolor=\color{grey!10},  
+	backgroundcolor=\color{gray!10},  
 	basicstyle=\footnotesize \ttfamily \color{black} \bfseries,   
 	breakatwhitespace=false,       
 	breaklines=true,               
@@ -293,44 +295,44 @@
 \section{NUClear Architecture}
 %----------------------------------------------------------------------------------------
 \subsection{Architectural Overview}
-\begin{frame}
+\begin{frame}[fragile]
     \frametitle{NUClear Architecure}
 	\begin{adjustbox}{max totalsize={\textwidth}{.9\textheight},center}
 	\begin{tikzpicture}[
-		old inner xsep/.estore in=\oldinnerxsep
-		, old inner ysep/.estore in=\oldinnerysep
-		, double circle/.style 2 args={
-			circle
-			, old inner xsep=\pgfkeysvalueof{/pgf/inner xsep}
-			, old inner ysep=\pgfkeysvalueof{/pgf/inner ysep}
-			, /pgf/inner xsep=\oldinnerxsep+#1
-			, /pgf/inner ysep=\oldinnerysep+#1
-			, alias=sourcenode
-			, append after command={
-			let \p1 = (sourcenode.center)
-			    , \p2 = (sourcenode.east)
-			    , \n1 = {\x2-\x1-#1-0.5*\pgflinewidth}
+		old inner xsep/.estore in=\oldinnerxsep,
+		old inner ysep/.estore in=\oldinnerysep,
+		double circle/.style 2 args={
+			circle,
+			old inner xsep=\pgfkeysvalueof{/pgf/inner xsep},
+			old inner ysep=\pgfkeysvalueof{/pgf/inner ysep},
+			/pgf/inner xsep=\oldinnerxsep+#1,
+			/pgf/inner ysep=\oldinnerysep+#1,
+			alias=sourcenode,
+			append after command={
+			let \p1 = (sourcenode.center),
+			    \p2 = (sourcenode.east),
+			    \n1 = {\x2-\x1-#1-0.5*\pgflinewidth}
 			in
 				node [inner sep=0pt, draw, circle, minimum width=2*\n1,at=(\p1),#2] {}
 			}
 		}
-		, double circle/.default={-3pt}{black!80}
-		, reactor/.style={draw,double circle}
-		, readwrite/.style={<->, thick}]
+		, double circle/.default={2pt}{black}
+		, reactor/.style={draw, double circle}
+		, readwrite/.style={<->, thick}
+	]
 	
-		% Draw our central Power Plant star
-		\node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge \gls{Powerplant}};
+	% Draw our central Power Plant star
+	\node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge powerplant};
 	
-		% Loop through each of our reactors
-		\foreach [count=\i] \reactor in
-		{Vision,Localisation,Behaviour,Sensors,Kinematics,Movement} {
+	% Loop through each of our reactors
+	\foreach [count=\i] \reactor in {Vision,Localisation,Behaviour,Sensors,Kinematics,Movement} {
 	
-			% Draw the reactors around the central star
-			\node[draw,reactor] (reactorcircle) at ({360/6 * (\i - 1)}:6cm) {$\reactor$};
+		% Draw the reactors around the central star
+		\node[draw,reactor] (reactorcircle) at ({360/6 * (\i - 1)}:6cm) {$\reactor$};
 	
-			% Draw a line from our reactor to our powerplant
-			\path[readwrite] (reactorcircle) edge (powerplant);
-		};
+		% Draw a line from our reactor to our powerplant
+		\path[readwrite] (reactorcircle) edge (powerplant);
+	};
 	\end{tikzpicture}
 	\end{adjustbox}
 
