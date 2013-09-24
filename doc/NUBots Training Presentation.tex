@@ -98,7 +98,7 @@
 %----------------------------------------------------------------------------------------
 \subsection{Existing Components}
 \begin{frame}
-	\frametitle{Existing Modules}
+	\frametitle{Existing Components}
 	\begin{itemize}
 		\item Blackboard
 			\begin{itemize}
@@ -121,7 +121,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Existing Modules}
+	\frametitle{Existing Components}
 	\begin{itemize}
 		\item Game Controller Network
 			\begin{itemize}
@@ -144,7 +144,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Existing Modules}
+	\frametitle{Existing Components}
 	\begin{itemize}
 		\item Camera
 			\begin{itemize}
@@ -168,7 +168,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Existing Modules}
+	\frametitle{Existing Components}
 	\begin{itemize}
 		\item Behaviour
 			\begin{itemize}
@@ -192,7 +192,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Existing Modules}
+	\frametitle{Existing Components}
 	\begin{itemize}
 		\item Motion
 			\begin{itemize}
@@ -546,10 +546,10 @@
 %----------------------------------------------------------------------------------------
 \subsection{Smart Pointers and Move Semantics}
 \begin{frame}
-	\frametitle{C++ Review: Smart Pointers}
+	\frametitle{C++ Review - Smart Pointers}
 	\begin{itemize}
-		\item Smart Pointers automatically handle releasing pointer memory for you.
-		\item Different smart pointers decide who deletes data and when it gets deleted.
+		\item Smart Pointers automatically release pointer memory for you.
+		\item There are different smart pointers that decide when and how data is deleted.
 		\item As of C++11 there is almost never a reason to use new/delete or raw pointers.
 		\item Instead you should use std::unique\_ptr and std::shared\_ptr with std::make\_shared and std::make\_unique
 		\item In NUClear you will primarily use std::unique\_ptr to send messages.
@@ -557,7 +557,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{C++ Review: std::unique\_ptr}
+	\frametitle{C++ Review - std::unique\_ptr}
 	\begin{itemize}
 		\item Only one unique\_ptr is allowed to point to a particular address.
 		\item When copied the unique\_ptr transfers ownership to the new unique\_ptr and the old one becomes invalid.
@@ -569,7 +569,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{C++ Review: std::move}
+	\frametitle{C++ Review - std::move}
 	\begin{itemize}
 		\item Data stealing in C++ is known as "move semantics"
 		\item It's a fancy way of expressing transfer of ownership.
@@ -581,7 +581,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle{C++ Review: std::move}
+	\frametitle{C++ Review - std::move}
 	\begin{lstlisting}[language=nuclear]
 		// We don't use raw pointers but this is a slide!
 		int* chump = new data(5);
@@ -601,7 +601,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle{C++ Review: std::unique\_ptr}
+	\frametitle{C++ Review - std::unique\_ptr}
 
 	std::unique\_ptr uses move semantics!	
 
@@ -625,7 +625,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle{C++ Review: std::shared\_ptr}
+	\frametitle{C++ Review - std::shared\_ptr}
 	\begin{itemize}
 		\item shared\_ptr is a reference counting pointer.
 		\item When no shared\_ptr's point to a particular bit of data it will be deleted.
@@ -639,7 +639,7 @@
 
 \subsection{Templates}
 \begin{frame}
-	\frametitle{C++ Review: Templates}
+	\frametitle{C++ Review - Templates}
 	\begin{itemize}
 		\item Templates let you write type-agnostic code.
 		\item Briefly touched on in SENG1120.
@@ -652,7 +652,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle{C++ Review: Templates}
+	\frametitle{C++ Review - Templates}
 	\begin{lstlisting}[language=nuclear]
 		// Works on anything that has an operator+
 		template <typename T>
@@ -676,7 +676,7 @@
 
 \subsection{Template Metaprogramming}
 \begin{frame}
-	\frametitle{C++ Review: Template Metaprogramming}
+	\frametitle{C++ Review - Template Metaprogramming}
 	\begin{itemize}
 		\item Clever people realized that templates are actually turing complete.
 		\item You can write some really interesting programs with templates and perform logic at compile time.
@@ -688,7 +688,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle{C++ Review: Calling template functions}
+	\frametitle{C++ Review - Calling template functions}
 	\begin{itemize}
 		\item NUClear's On and Emit functions look weird to new C++ programmers as they contain a lot of arguments in angle brackets 
 			$<>$ instead of the expected round braces ().
@@ -839,7 +839,7 @@
 %----------------------------------------------------------------------------------------
 \subsection{Architectural Overview}
 \begin{frame}
-	\frametitle{Message Passing}
+	\frametitle{NUClear Architecture}
 	\begin{itemize}
 		\item NUClear is a message passing system
 		\item Rather then directly interacting with each-other, indirectly interact through common data
@@ -986,7 +986,7 @@
 
 \subsection{Key Functions}
 \begin{frame}[fragile]
-	\frametitle {Key Functions: On and Trigger}
+	\frametitle {Key Functions - On and Trigger}
 	\begin{itemize}
 		\item Q: "I want to do something when new data is available"
 		\item A: Use On and Trigger!
@@ -1006,7 +1006,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle {Key Functions: With}
+	\frametitle {Key Functions - With}
 	\begin{itemize}
 		\item Q: "I want to access data other then the one I triggered on"
 		\item A: Use With!
@@ -1030,7 +1030,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle {Key Functions: With}
+	\frametitle {Key Functions - With}
 	\begin{itemize}
 		\item Q: "I need more then one data!"
 		\item A: With can take multiple arguments!
@@ -1053,7 +1053,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle {Key Functions: Options}
+	\frametitle {Key Functions - Options}
 \end{frame}
 
 \begin{frame}
