@@ -1511,8 +1511,8 @@
 	\end{itemize}
 	
 	\begin{lstlisting}[language=nuclear]
-	on<Trigger<Last<5, Image>>>(
-	[](const LastList<Image>& list) {
+	on<Trigger<Last<5, Image>>>
+	([](const LastList<Image>& list) {
 	    // LastList is a vector of const pointers to the last 5 Images
 	});
 	\end{lstlisting}
