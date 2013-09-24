@@ -770,12 +770,69 @@
 		// Body: { ... } the function implementation.
 
 		int main() {
-		    int something = 5;
-		    auto myLambda = [something](int
+		    int data = 5;
+		    auto myLambda = [data](int arg){ 
+		        // do something with data and arg.
+		        // data is copied so you can access is even if it goes out of scope.
+		    };
+		    
+		    // Calls myLambda with arg=100. data will be 5.
+		    myLambda(100);
 		}
 	\end{lstlisting}
 \end{frame}
 
+\begin{frame}
+	\frametitle{Lambdas}
+	\begin{itemize}
+		\item The difference between [] and () is when the argument is bound.
+		\item Things in [] are bound when the lambda is created.
+		\item Things in () are bound when the lambda is called. This can be much later then it's creation
+		\item You can use [=] to bind everything in scope to the lambda by copy.
+		\item Or you can use [\&] to bind by reference.
+		\item If you're in a class you can use [this] to give the lambda access to the class members.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Lambdas}
+	\begin{lstlisting}[language=nuclear]
+		int a = 5;
+		SomeClass c;
+
+		// Lambda with a copy of a and c.
+		[=]() { /* body */ };
+
+		// Lambda with a reference to a and c. Will segfault if called and a or c are destructed.
+		[&]() { /* body */ };
+
+		// Lambda with a copy of a and a reference to c. Will segfault if called and c is destructed.
+		[a, &c]() { /* body */};
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Lambdas}
+	\begin{lstlisting}[language=nuclear]
+		class Example {
+		private:
+		    std::vector<int> data;
+		    std::function<void (int)> callback;
+		public:
+		    Example() {
+		        callback = [this](int arg) {
+		            // We can only access data due to [this]
+		            data.push_back(arg);
+		        };
+		    }
+
+		    void doCallback() {
+		        // Runs our lambda we bound from before.
+		        callback(100);
+		    }
+		};
+	\end{lstlisting}
+\end{frame}
 
 %----------------------------------------------------------------------------------------
 \section{NUClear Architecture}
