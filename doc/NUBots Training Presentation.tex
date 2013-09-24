@@ -100,23 +100,119 @@
 \subsection{Existing Components}
 \begin{frame}
     \frametitle{Existing Modules}
-	Blackboard
-	Jobs
-	Hardware Input (CM730)
-	Actionators
-	Camera
-	Vision
-	Localization
-	Behaviour
-	Kinematics
-	Team Network
-	Game Controller Network
-	Configuration System
-	Motion
-		Scripts
-		Head Motion
-		Walk Engine
-	
+	\begin{itemize}
+		\item Blackboard
+			\begin{itemize}
+				\item Is the central data store of the system
+				\item Most components who communicate put their data on this object
+			\end{itemize}
+		\item Jobs
+			\begin{itemize}
+				\item Is a form of message passing system
+				\item Is used by Behaviour to communicate with motion
+				\item Is also used by several systems to provide communication
+			\end{itemize}
+		\item Team Network
+			\begin{itemize}
+				\item The network that is used to communicate between robots
+				\item Is based on streaming strings and then later interpreting them
+				\item Each module must read all incoming data and decide if it is for them
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Existing Modules}
+	\begin{itemize}
+		\item Game Controller Network
+			\begin{itemize}
+				\item The system that is used by the referees to communicate with teams
+				\item Exists as functionality within blackboard
+			\end{itemize}
+		\item Hardware Input (CM730)
+			\begin{itemize}
+				\item Reads from the CM730 (Accelerometer, Gyroscope etc.)
+				\item Reads from the MX28s (Motors)
+				\item Reads from the FSR (Force Sensitive Resistors)
+			\end{itemize}
+		\item Actionators
+			\begin{itemize}
+				\item A wrapper layer around the hardware output
+				\item Interpolates movements by sending all intervening points to the motors
+				\item Handles communication to the LEDs
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Existing Modules}
+	\begin{itemize}
+		\item Camera
+			\begin{itemize}
+				\item Reads the camera frames from the camera and writes them to blackboard
+			\end{itemize}
+		\item Vision
+			\begin{itemize}
+				\item Takes input images and finds objects
+				\item Classifies images into colour classifications
+				\item Uses RANSAC to find lines and circles in the classified image
+			\end{itemize}
+		\item Localisation
+			\begin{itemize}
+				\item Takes data from almost every other sensor that helps provide location
+				\item Uses a multimodal Kalman filter to build many world models
+				\item Takes the most probable one as the state of the world
+				\item Also handles filtering of incoming data to clean it
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Existing Modules}
+	\begin{itemize}
+		\item Behaviour
+			\begin{itemize}
+				\item Takes all of the available data and makes high level action plans
+				\item Handles tasks from deciding roles to drawing walk paths
+			\end{itemize}
+		\item Kinematics
+			\begin{itemize}
+				\item Describes the robots model of itself
+				\item Is used to go from motor angles to a self model
+				\item Also contains reverse kinematics which go from a self model to motor angles
+			\end{itemize}
+		\item Configuration System
+			\begin{itemize}
+				\item Is the new system designed to configure components
+				\item Uses a callback method to inform when the global config has changed
+				\item Loads from JSON files in a specific format
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Existing Modules}
+	\begin{itemize}
+		\item Motion
+			\begin{itemize}
+				\item Scripts
+					\begin{itemize}
+						\item Handles execution of Scripts (a series of waypoints)
+						\item Sends these to the Actionators to be executed
+					\end{itemize}
+				\item Head Motion
+					\begin{itemize}
+						\item Handles controlling where the head is looking
+						\item Uses machine learning to optimise where it looks
+					\end{itemize}
+				\item Walk Engine
+					\begin{itemize}
+						\item Handles all of the motor positions required to walk
+						\item Logically part of motion but technically implemented separately
+						\item Motion instead of running the walk engine, hands over control to it
+					\end{itemize}
+			\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \subsection{Existing Architecture}
