@@ -1,9 +1,9 @@
 \documentclass{beamer}
 \mode<presentation> {
-    \usetheme{Malmoe}
-    \usecolortheme{whale}
-    \setbeamertemplate{footline}[page number]
-    \setbeamertemplate{navigation symbols}{}
+	\usetheme{Malmoe}
+	\usecolortheme{whale}
+	\setbeamertemplate{footline}[page number]
+	\setbeamertemplate{navigation symbols}{}
 }
 
 \usepackage{graphicx} 	% Allows including images
@@ -30,27 +30,27 @@
 \lstdefinelanguage{nuclear}{
 	backgroundcolor=\color{gray!10},  
 	basicstyle=\footnotesize \ttfamily \color{black} \bfseries,   
-	breakatwhitespace=false,       
-	breaklines=true,               
-	captionpos=b,                   
+	breakatwhitespace=false,	   
+	breaklines=true,			   
+	captionpos=b,				   
 	commentstyle=\color{green!50!black},   
-	deletekeywords={...},          
-	escapeinside={\%*}{*)},                  
-	frame=single,                  
-	language=C++,                
+	deletekeywords={...},		  
+	escapeinside={\%*}{*)},				  
+	frame=single,				  
+	language=C++,				
 	keywordstyle=\color{violet},  
 	morekeywords={constexpr}, 
 	identifierstyle=\color{black},
-	stringstyle=\color{red},      
-	numbers=left,                 
-	numbersep=5pt,                  
+	stringstyle=\color{red},	  
+	numbers=left,				 
+	numbersep=5pt,				  
 	numberstyle=\tiny\color{black}, 
-	rulecolor=\color{black},        
-	showspaces=false,               
-	showstringspaces=false,        
-	showtabs=false,                
-	stepnumber=1,                   
-	tabsize=5,                     
+	rulecolor=\color{black},		
+	showspaces=false,			   
+	showstringspaces=false,		
+	showtabs=false,				
+	stepnumber=1,				   
+	tabsize=5,					 
 	title=\lstname, 
 	emph={on, emit, Trigger, With, Options},
 	emphstyle={\color{blue}}
@@ -63,14 +63,14 @@
 \title[Short title]{Project NUClear - NUBots Training}
 
 \author{
-    Trent Houliston \and Jake Woods
+	Trent Houliston \and Jake Woods
 }
 
 \institute[UoN]
 {
-    University of Newcastle \\ % Your institution for the title page
-    \medskip
-    \textit{Trent.Houliston@uon.edu.au, Jake.f.woods@gmail.com} % Email address
+	University of Newcastle \\ % Your institution for the title page
+	\medskip
+	\textit{Trent.Houliston@uon.edu.au, Jake.f.woods@gmail.com} % Email address
 }
 
 \date{\today}
@@ -82,7 +82,7 @@
 % Title Slide 
 %----------------------------------------------------------------------------------------
 \begin{frame}
-    \titlepage % Print the title page as the first slide
+	\titlepage % Print the title page as the first slide
 \end{frame}
 
 
@@ -90,8 +90,8 @@
 % Overview (Table of Contents
 %----------------------------------------------------------------------------------------
 \begin{frame}
-    \frametitle{Overview}
-    \tableofcontents
+	\frametitle{Overview}
+	\tableofcontents
 \end{frame}
 
 %----------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@
 %----------------------------------------------------------------------------------------
 \subsection{Existing Components}
 \begin{frame}
-    \frametitle{Existing Modules}
+	\frametitle{Existing Modules}
 	\begin{itemize}
 		\item Blackboard
 			\begin{itemize}
@@ -122,7 +122,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Existing Modules}
+	\frametitle{Existing Modules}
 	\begin{itemize}
 		\item Game Controller Network
 			\begin{itemize}
@@ -145,7 +145,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Existing Modules}
+	\frametitle{Existing Modules}
 	\begin{itemize}
 		\item Camera
 			\begin{itemize}
@@ -169,7 +169,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Existing Modules}
+	\frametitle{Existing Modules}
 	\begin{itemize}
 		\item Behaviour
 			\begin{itemize}
@@ -193,7 +193,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Existing Modules}
+	\frametitle{Existing Modules}
 	\begin{itemize}
 		\item Motion
 			\begin{itemize}
@@ -218,7 +218,7 @@
 
 \subsection{Existing Architecture - Diagrams}
 \begin{frame}
-    \frametitle{Existing Architecture}
+	\frametitle{Existing Architecture}
 	\begin{itemize}
 		\item The system runs in a synchronised dual pipeline architecture
 			\begin{itemize}
@@ -233,17 +233,17 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Existing Architecture - Data Flow Diagram}
-    \begin{tikzpicture}[
-            x=10.5em,y=4.75em,
-            component/.style={
-                rectangle
+	\frametitle{Existing Architecture - Data Flow Diagram}
+	\begin{tikzpicture}[
+			x=10.5em,y=4.75em,
+			component/.style={
+				rectangle
 				, rounded corners
-                , draw=black, very thick
-                , text width=7em
-                , minimum height=2.4em
-                , text centered
-            }
+				, draw=black, very thick
+				, text width=7em
+				, minimum height=2.4em
+				, text centered
+			}
 			, splitcomponent/.style={
 				component
 				, rectangle split
@@ -254,44 +254,44 @@
 			, jobconfig/.style={ color=blue!75!black }
 			, hardcodedconfig/.style={ color=black }
 			, publicinterface/.style={ color=orange!75!black}
-            , write/.style={ ->, thick}
-            , read/.style={<-, thick}
-            , readwrite/.style={<->, thick}
-            , >=latex
-        ]
+			, write/.style={ ->, thick}
+			, read/.style={<-, thick}
+			, readwrite/.style={<->, thick}
+			, >=latex
+		]
 
-        %\node at (0.5,2.5) {$P_{1}$};
+		%\node at (0.5,2.5) {$P_{1}$};
 
-        %%% Nodes
-        %% Left hand Side
-        \node at (0,3) [component] (vision) {Vision};
-        \node at (0,2) [component] (localization) {Localization};
-        \node at (0,1) [component] (behavior) {Behavior};
+		%%% Nodes
+		%% Left hand Side
+		\node at (0,3) [component] (vision) {Vision};
+		\node at (0,2) [component] (localization) {Localization};
+		\node at (0,1) [component] (behavior) {Behavior};
 
-        %% Center
-        \node at (1, 3) [splitcomponent] (blackboard) {Blackboard \nodepart{two} Game Network\\Team Network};
+		%% Center
+		\node at (1, 3) [splitcomponent] (blackboard) {Blackboard \nodepart{two} Game Network\\Team Network};
 		\node at (1, 2) [component] (kinematics) {Kinematics};
 		\node at (1, 1) [component] (jobs) {Jobs};
 		\node at (1, 0) [component] (actionators) {Actionators (Hardware)};
 
-        %% Right hand side
-        \node at(2,3) [component] (sensors) {Sensors (Hardware)};
-        \node at(2,2) [component] (camera) {Camera (Hardware)};
-        \node at(2,1) [splitcomponent] (motion) {Motion \nodepart{two} Scripts\\Head Motion\\Walk Engine};
+		%% Right hand side
+		\node at(2,3) [component] (sensors) {Sensors (Hardware)};
+		\node at(2,2) [component] (camera) {Camera (Hardware)};
+		\node at(2,1) [splitcomponent] (motion) {Motion \nodepart{two} Scripts\\Head Motion\\Walk Engine};
 
-        %%% Connections
-        %% Left side connections
-        \path [readwrite, out=10, in=170] (vision) edge (blackboard);
-        \path [readwrite, out=20, in=185] (localization) edge (blackboard);
-        \path [read, out=10, in=200] (behavior) edge (blackboard);
+		%%% Connections
+		%% Left side connections
+		\path [readwrite, out=10, in=170] (vision) edge (blackboard);
+		\path [readwrite, out=20, in=185] (localization) edge (blackboard);
+		\path [read, out=10, in=200] (behavior) edge (blackboard);
 		\path [write, out=5, in=185] (behavior) edge (jobs);
 		\path [write, out=-5, in=160] (behavior) edge (actionators);
 		
 		%% Center connections
-        \path [readwrite] (kinematics) edge (blackboard);
+		\path [readwrite] (kinematics) edge (blackboard);
 
-        %% Right side connections
-        \path [write, out=170, in=10] (sensors) edge (blackboard);
+		%% Right side connections
+		\path [write, out=170, in=10] (sensors) edge (blackboard);
 		\path [write, out=185, in=-20] (camera) edge (blackboard);
 		\path [write, out=-10, in=190] (jobs) edge (motion);
 		\path [write, out=10, in=190] (jobs) edge (camera);
@@ -364,24 +364,24 @@
 		\node [below=0.8em of jobconfiglabel.south west,anchor=south west] (configsystemconfiglabel) {\tiny Configured by Configuration System};
 		\filldraw[configsystemconfig] ([yshift=.5pt]configsystemconfiglabel.west) circle (3pt);
 		
-        %%% Decorations
-        %% SeeThink header
-        \node[fit=(vision)(localization)(behavior)](leftgroup){};
-        \draw[rounded corners] 
-        (leftgroup.north west)--(leftgroup.south west) -- ++(0.10,0);            
-        \draw[decorate,decoration={amplitude=7pt,brace}] % Header line
-        (leftgroup.north west) -- (leftgroup.north east);
+		%%% Decorations
+		%% SeeThink header
+		\node[fit=(vision)(localization)(behavior)](leftgroup){};
+		\draw[rounded corners] 
+		(leftgroup.north west)--(leftgroup.south west) -- ++(0.10,0);			
+		\draw[decorate,decoration={amplitude=7pt,brace}] % Header line
+		(leftgroup.north west) -- (leftgroup.north east);
 
-        \node[above=1.1em of leftgroup,anchor=center]{SeeThink Loop};
+		\node[above=1.1em of leftgroup,anchor=center]{SeeThink Loop};
 
-        %% SenseMove header
-        \node[fit=(sensors)(camera)(motion)](rightgroup){};
-        \draw[rounded corners] 
-        (rightgroup.north east) -- (rightgroup.south east) -- ++(-0.10,0);
-        \draw[decorate,decoration={amplitude=7pt,brace}]
-        (rightgroup.north west) -- (rightgroup.north east);
-        \node[above=1.1em of rightgroup,anchor=center]{SenseMove Loop};
-    \end{tikzpicture}
+		%% SenseMove header
+		\node[fit=(sensors)(camera)(motion)](rightgroup){};
+		\draw[rounded corners] 
+		(rightgroup.north east) -- (rightgroup.south east) -- ++(-0.10,0);
+		\draw[decorate,decoration={amplitude=7pt,brace}]
+		(rightgroup.north west) -- (rightgroup.north east);
+		\node[above=1.1em of rightgroup,anchor=center]{SenseMove Loop};
+	\end{tikzpicture}
 
 \end{frame}
 
@@ -468,7 +468,7 @@
 
 \subsection{Justification for Change}
 \begin{frame}
-    \frametitle{Problems in Existing System}
+	\frametitle{Problems in Existing System}
 	\begin{itemize}
 		\item Hidden Dependencies
 			\begin{itemize}
@@ -487,7 +487,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Problems in Existing System}
+	\frametitle{Problems in Existing System}
 	\begin{itemize}			
 		\item Network Communication
 			\begin{itemize}
@@ -505,7 +505,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Useful Features}
+	\frametitle{Useful Features}
 	\begin{itemize}
 		\item Modular Design
 			\begin{itemize}
@@ -525,7 +525,7 @@
 \end{frame}
 			
 \begin{frame}
-    \frametitle{Useful Features}
+	\frametitle{Useful Features}
 	\begin{itemize}
 		\item Runtime Statistics
 			\begin{itemize}
@@ -547,7 +547,7 @@
 %----------------------------------------------------------------------------------------
 \subsection{Architectural Overview}
 \begin{frame}
-    \frametitle{Message Passing}
+	\frametitle{Message Passing}
 	\begin{itemize}
 		\item NUClear is a message passing system
 		\item Rather then directly interacting with each-other, indirectly interact through common data
@@ -557,7 +557,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Multi Threading}
+	\frametitle{Multi Threading}
 	\begin{itemize}
 		\item NUClear is a multi threaded framework
 		\item It will transparently multithread any code that is given to it
@@ -567,7 +567,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Powerplant}
+	\frametitle{Powerplant}
 	\begin{itemize}
 		\item The Powerplant is the core component of the NUClear system
 		\item It is the central datapoint for the whole system
@@ -583,7 +583,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Reactor}
+	\frametitle{Reactor}
 	\begin{itemize}
 		\item A Reactor is the primary method that you will interact with the system
 		\item It is a class that extends from NUClear::Reactor
@@ -598,7 +598,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Reaction}
+	\frametitle{Reaction}
 	\begin{itemize}
 		\item A reaction is a single function that is run in response to new data
 		\item They take as arguments constant references to the data that they use
@@ -611,7 +611,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Smart Types}
+	\frametitle{Smart Types}
 	\begin{itemize}
 		\item Smart Types are special types that when used in an on statement will cause different behaviour
 		\item Built into NUClear there are the smart types Every, Last, and Network
@@ -620,7 +620,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Extension}
+	\frametitle{Extension}
 	\begin{itemize}
 		\item The creation of new Smart Types is done through extension
 		\item Extension allows you to change the way specific datatypes are handled when:
@@ -636,7 +636,7 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Service Thread}
+	\frametitle{Service Thread}
 	\begin{itemize}
 		\item Sometimes a whole thread is needed to listen to an external blocking source
 			\begin{itemize}
@@ -650,7 +650,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{NUClear Architecure}
+	\frametitle{NUClear Architecure}
 	\begin{adjustbox}{max totalsize={\textwidth}{.9\textheight},center}
 	\begin{tikzpicture}[
 		old inner xsep/.estore in=\oldinnerxsep,
@@ -664,8 +664,8 @@
 			alias=sourcenode,
 			append after command={
 			let \p1 = (sourcenode.center),
-			    \p2 = (sourcenode.east),
-			    \n1 = {\x2-\x1-#1-0.5*\pgflinewidth}
+				\p2 = (sourcenode.east),
+				\n1 = {\x2-\x1-#1-0.5*\pgflinewidth}
 			in
 				node [inner sep=0pt, draw, circle, minimum width=2*\n1,at=(\p1),#2] {}
 			}
@@ -757,17 +757,17 @@
 		#include <memory> // unique_ptr & shared_ptr
 
 		void processImage(const Image& image) {
-		    std::unique_ptr<MyData> chump = 
-		        std::make_unique<MyData>();
+			std::unique_ptr<MyData> chump = 
+				std::make_unique<MyData>();
 
-		    chump->something; // Access pointer-style:* and ->
-		    
-		    // theif has stolen chump's pointer.
-		    // you can't use chump to get to the
-		    // data since he doesn't have it.
-		    std::unique_ptr<MyData> thief = std::move(data); 
-		    thief->something; // No problem!
-		    chump->something; // Error. Bad chump!
+			chump->something; // Access pointer-style:* and ->
+			
+			// theif has stolen chump's pointer.
+			// you can't use chump to get to the
+			// data since he doesn't have it.
+			std::unique_ptr<MyData> thief = std::move(data); 
+			thief->something; // No problem!
+			chump->something; // Error. Bad chump!
 		} // thief automatically releases memory here. 
 	\end{lstlisting}
 \end{frame}
@@ -804,7 +804,7 @@
 		// Works on anything that has an operator+
 		template <typename T>
 		T add(const T& first, const T& second) {
-		    return first + second;
+			return first + second;
 		}
 		
 		// Generates a "int" version of add at compile time.
@@ -816,7 +816,7 @@
 		// Behind the scenes C++ generates something like this
 		// for add<int>
 		int add(const int& first, const int& second) {
-		    return first + second;
+			return first + second;
 		}
 	\end{lstlisting}
 \end{frame}
@@ -846,7 +846,7 @@
 \begin{frame}[fragile]
 	\frametitle{C++ Review: Calling template functions}
 	\begin{lstlisting}[language=nuclear]
-		//       <Compile>(Runtime)
+		//	   <Compile>(Runtime)
 		something<1, 2, 3>(4, 5, 6);
 
 		// 1, 2 and 3 will be evaluated when the program 
@@ -867,7 +867,7 @@
 	\begin{lstlisting}[language=nuclear]
 		// Make sure to take arguments by const reference!
 		void processImage(const Image& data) {
-		    // Do something with the image data here.
+			// Do something with the image data here.
 		}
 
 		// Tells PowerPlant to call processImage when new
@@ -888,9 +888,9 @@
 		// Order of arguments needs to match the order of 
 		// Trigger and With arguments.
 		void processData(
-		    const Image& image,
-		    const SensorData& sensors) {
-		    // Do something with image and sensors
+			const Image& image,
+			const SensorData& sensors) {
+			// Do something with image and sensors
 		}
 
 		// Calls process data when a new image frame is 
@@ -909,21 +909,21 @@
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{Key Functions: On}
+	\frametitle{Key Functions: On}
 	\begin{lstlisting}[language=nuclear]
 	// Vision.cpp
 	Vision::Vision() {
-	    using messages::Image;
-	    on<Trigger<Image>>([this](const Image& image) {
-	        auto classifedImage = classifyImage(image);
-	        emit(std::move(classifiedImage));
-	    });
+		using messages::Image;
+		on<Trigger<Image>>([this](const Image& image) {
+			auto classifedImage = classifyImage(image);
+			emit(std::move(classifiedImage));
+		});
 	}
 	\end{lstlisting}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Key Functions Emit}
+	\frametitle{Key Functions Emit}
 	Default
 	Scopes
 	Unique Pointers
@@ -931,13 +931,13 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Key Functions Log}
+	\frametitle{Key Functions Log}
 	Stream operator overload
 	variardic
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{Smart Types - Every}
+	\frametitle{Smart Types - Every}
 	\begin{itemize}
 		\item The every smart type is used to have an event triggered at a regular interval
 		\item The first argument is the number of time units to wait
@@ -951,69 +951,69 @@
 	using std::chrono::milliseconds;
 	on<Trigger<Every<100, milliseconds>>>(
 	[](const time_t& t) {
-	    // Do something every 100 milliseconds!
+		// Do something every 100 milliseconds!
 	});
 	\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{Smart Types - Last}
+	\frametitle{Smart Types - Last}
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Last<5, Image>>>(
 	[](const LastList<Image>& list) {
-	    // LastList is a vector of pointers to the last 5 Images
+		// LastList is a vector of pointers to the last 5 Images
 	});
 	\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{Smart Types - Network}
+	\frametitle{Smart Types - Network}
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Network<BallLocation>>>(
 	[](const Network<BallLocation>& ball) {
-	    // We get all the ball locations emitted to the network
+		// We get all the ball locations emitted to the network
 	});
 	\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{Smart Types - Configuration}
+	\frametitle{Smart Types - Configuration}
 	\begin{lstlisting}[language=nuclear]
 	struct MyConfigPath {
-	    static constexpr char* path = "Mine.json";
+		static constexpr char* path = "Mine.json";
 	}
 	
 	on<Trigger<Configuration<MyConfigPath>>>(
 	[](const Configuration<MyConfigPath>& config) {
-	    // config.name has the name of the file
-	    // config.config has our configuration
+		// config.name has the name of the file
+		// config.config has our configuration
 	});
 	\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{Smart Types - Configuration}
+	\frametitle{Smart Types - Configuration}
 	\begin{lstlisting}[language=nuclear]
 	struct Scripts {
-	    static constexpr char* path = "scripts/";
+		static constexpr char* path = "scripts/";
 	}
 	
 	on<Trigger<Configuration<Scripts>>>(
 	[](const Configuration<MyConfigPath>& config) {
-	    // config.name has the name of the script
-	    // config.config has the script configuration
+		// config.name has the name of the script
+		// config.config has the script configuration
 	});
 	\end{lstlisting}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Project Directory Structure}
+	\frametitle{Project Directory Structure}
 	Project Directory Structure
 \end{frame}
 
 \subsection{Antipatterns}
 \begin{frame}[fragile]
-    \frametitle{Infinite Looping Reaction}
+	\frametitle{Infinite Looping Reaction}
 
 	\begin{itemize}
 		\item Never do an infinite loop in a reaction
@@ -1024,16 +1024,16 @@
 
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<MyData>>([](const MyData& data) {
-	    // Bad! You've killed a thread pool thread!
-	    while(true) {
-	        doSomething(data);
-	    }
+		// Bad! You've killed a thread pool thread!
+		while(true) {
+			doSomething(data);
+		}
 	}
 	\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
-    \frametitle{Data Hog}
+	\frametitle{Data Hog}
 
 	\begin{itemize}
 		\item Whenever it makes sense, emit data rather then using it
@@ -1045,18 +1045,18 @@
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Image>>([](const Image& image) {
 	
-	    // This could be emitted for others to use
-	    // Saving them the trouble of recoding or copying code
-	    auto classified = makeClassifiedImage(image);
+		// This could be emitted for others to use
+		// Saving them the trouble of recoding or copying code
+		auto classified = makeClassifiedImage(image);
 		
-	    auto seenObjects = findObjects(classified)
+		auto seenObjects = findObjects(classified)
 	}
 	\end{lstlisting}
 \end{frame}
 
 \subsection{Module Examples}
 \begin{frame}
-    \frametitle{Some title}
+	\frametitle{Some title}
 	Config System
 	Party Darwin
 	Show examples
@@ -1064,7 +1064,7 @@
 
 \subsection{Current Porting Status}
 \begin{frame}
-    \frametitle{Current Porting Status}
+	\frametitle{Current Porting Status}
 	What has been ported
 \end{frame}
 
