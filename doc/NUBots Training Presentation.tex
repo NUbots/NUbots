@@ -240,21 +240,21 @@
 		%% Public Interface
 		\node [below=3pt of legendpoint,anchor=south east] (publicinterfacelabel) {\tiny Provides a Singleton Public Interface};
 		\filldraw[publicinterface] ([yshift=-3pt,xshift=-3pt]publicinterfacelabel.west) rectangle ++(6pt, 6pt);
-		
-		%% Job Config
-		\node [below=0.9em of publicinterfacelabel.south west,anchor=south west] (jobconfiglabel) {\tiny Configured by Job System};
-		\filldraw[jobconfig] ([yshift=.5pt]jobconfiglabel.west) circle (3pt);
-		
-		%% File Config
-		\node [below=0.8em of jobconfiglabel.south west,anchor=south west] (fileconfiglabel) {\tiny Configured by Custom Files};
-		\filldraw[fileconfig] ([yshift=.5pt]fileconfiglabel.west) circle (3pt);
-		
+
 		%% Hard Coded Config
-		\node [below=0.8em of fileconfiglabel.south west,anchor=south west] (hardcodedconfiglabel) {\tiny Configured by Hardcoding Values};
+		\node [below=0.9em of publicinterfacelabel.south west,anchor=south west] (hardcodedconfiglabel) {\tiny Configured by Hardcoding Values};
 		\filldraw[hardcodedconfig] ([yshift=.5pt]hardcodedconfiglabel.west) circle (3pt);
 		
+		%% File Config
+		\node [below=0.8em of hardcodedconfiglabel.south west,anchor=south west] (fileconfiglabel) {\tiny Configured by Custom Files};
+		\filldraw[fileconfig] ([yshift=.5pt]fileconfiglabel.west) circle (3pt);
+
+		%% Job Config
+		\node [below=0.8em of fileconfiglabel.south west,anchor=south west] (jobconfiglabel) {\tiny Configured by Job System};
+		\filldraw[jobconfig] ([yshift=.5pt]jobconfiglabel.west) circle (3pt);
+
 		%% Config System Config
-		\node [below=0.8em of hardcodedconfiglabel.south west,anchor=south west] (configsystemconfiglabel) {\tiny Configured by Configuration System};
+		\node [below=0.8em of jobconfiglabel.south west,anchor=south west] (configsystemconfiglabel) {\tiny Configured by Configuration System};
 		\filldraw[configsystemconfig] ([yshift=.5pt]configsystemconfiglabel.west) circle (3pt);
 		
         %%% Decorations
