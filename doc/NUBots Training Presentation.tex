@@ -610,17 +610,17 @@
 		#include <memory> // unique_ptr & shared_ptr
 
 		void processImage(const Image& image) {
-			std::unique_ptr<MyData> chump = 
-				std::make_unique<MyData>();
+		    std::unique_ptr<MyData> chump = 
+		        std::make_unique<MyData>();
 
-			chump->something; // Access pointer-style:* and ->
+		    chump->something; // Access pointer-style:* and ->
 			
-			// theif has stolen chump's pointer.
-			// you can't use chump to get to the
-			// data since he doesn't have it.
-			std::unique_ptr<MyData> thief = std::move(data); 
-			thief->something; // No problem!
-			chump->something; // Error. Bad chump!
+		    // theif has stolen chump's pointer.
+		    // you can't use chump to get to the
+		    // data since he doesn't have it.
+		    std::unique_ptr<MyData> thief = std::move(data); 
+		    thief->something; // No problem!
+		    chump->something; // Error. Bad chump!
 		} // thief automatically releases memory here. 
 	\end{lstlisting}
 \end{frame}
@@ -658,7 +658,7 @@
 		// Works on anything that has an operator+
 		template <typename T>
 		T add(const T& first, const T& second) {
-			return first + second;
+		    return first + second;
 		}
 		
 		// Generates a "int" version of add at compile time.
@@ -670,7 +670,7 @@
 		// Behind the scenes C++ generates something like this
 		// for add<int>
 		int add(const int& first, const int& second) {
-			return first + second;
+		    return first + second;
 		}
 	\end{lstlisting}
 \end{frame}
@@ -701,7 +701,7 @@
 \begin{frame}[fragile]
 	\frametitle{C++ Review: Calling template functions}
 	\begin{lstlisting}[language=nuclear]
-		//	   <Compile>(Runtime)
+		//	     <Compile>(Runtime)
 		something<1, 2, 3>(4, 5, 6);
 
 		// 1, 2 and 3 will be evaluated when the program 
@@ -874,7 +874,7 @@
 	\begin{lstlisting}[language=nuclear]
 		// Make sure to take arguments by const reference!
 		void processImage(const Image& data) {
-			// Do something with the image data here.
+		    // Do something with the image data here.
 		}
 
 		// Tells PowerPlant to call processImage when new
@@ -895,9 +895,9 @@
 		// Order of arguments needs to match the order of 
 		// Trigger and With arguments.
 		void processData(
-			const Image& image,
-			const SensorData& sensors) {
-			// Do something with image and sensors
+		    const Image& image,
+		    const SensorData& sensors) {
+		    // Do something with image and sensors
 		}
 
 		// Calls process data when a new image frame is 
@@ -920,12 +920,12 @@
 	\begin{lstlisting}[language=nuclear]
 	// Vision.cpp
 	Vision::Vision() {
-		using messages::Image;
-		on<Trigger<Image>>([this](const Image& image) {
-			auto classifedImage = classifyImage(image);
-			emit(std::move(classifiedImage));
-		});
-	}
+	    using messages::Image;
+	    on<Trigger<Image>>([this](const Image& image) {
+	        auto classifedImage = classifyImage(image);
+	        emit(std::move(classifiedImage));
+	    });
+	};
 	\end{lstlisting}
 \end{frame}
 
@@ -959,7 +959,7 @@
 	using std::chrono::milliseconds;
 	on<Trigger<Every<100, milliseconds>>>(
 	[](const time_t& t) {
-		// Do something every 100 milliseconds!
+	    // Do something every 100 milliseconds!
 	});
 	\end{lstlisting}
 \end{frame}
@@ -969,7 +969,7 @@
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Last<5, Image>>>(
 	[](const LastList<Image>& list) {
-		// LastList is a vector of pointers to the last 5 Images
+	    // LastList is a vector of pointers to the last 5 Images
 	});
 	\end{lstlisting}
 \end{frame}
@@ -979,7 +979,7 @@
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Network<BallLocation>>>(
 	[](const Network<BallLocation>& ball) {
-		// We get all the ball locations emitted to the network
+	    // We get all the ball locations emitted to the network
 	});
 	\end{lstlisting}
 \end{frame}
@@ -988,13 +988,13 @@
 	\frametitle{Smart Types - Configuration}
 	\begin{lstlisting}[language=nuclear]
 	struct MyConfigPath {
-		static constexpr char* path = "Mine.json";
+	    static constexpr char* path = "Mine.json";
 	}
 	
 	on<Trigger<Configuration<MyConfigPath>>>(
 	[](const Configuration<MyConfigPath>& config) {
-		// config.name has the name of the file
-		// config.config has our configuration
+	    // config.name has the name of the file
+	    // config.config has our configuration
 	});
 	\end{lstlisting}
 \end{frame}
@@ -1003,13 +1003,13 @@
 	\frametitle{Smart Types - Configuration}
 	\begin{lstlisting}[language=nuclear]
 	struct Scripts {
-		static constexpr char* path = "scripts/";
+	    static constexpr char* path = "scripts/";
 	}
 	
 	on<Trigger<Configuration<Scripts>>>(
 	[](const Configuration<MyConfigPath>& config) {
-		// config.name has the name of the script
-		// config.config has the script configuration
+	    // config.name has the name of the script
+	    // config.config has the script configuration
 	});
 	\end{lstlisting}
 \end{frame}
@@ -1035,10 +1035,10 @@
 
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<MyData>>([](const MyData& data) {
-		// Bad! You've killed a thread pool thread!
-		while(true) {
-			doSomething(data);
-		}
+	    // Bad! You've killed a thread pool thread!
+	    while(true) {
+	        doSomething(data);
+	    }
 	}
 	\end{lstlisting}
 \end{frame}
@@ -1056,11 +1056,11 @@
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Image>>([](const Image& image) {
 	
-		// This could be emitted for others to use
-		// Saving them the trouble of recoding or copying code
-		auto classified = makeClassifiedImage(image);
+	    // This could be emitted for others to use
+	    // Saving them the trouble of recoding or copying code
+	    auto classified = makeClassifiedImage(image);
 		
-		auto seenObjects = findObjects(classified)
+	    auto seenObjects = findObjects(classified)
 	}
 	\end{lstlisting}
 \end{frame}
