@@ -90,7 +90,6 @@
 % Overview (Table of Contents
 %----------------------------------------------------------------------------------------
 \begin{frame}
-	\frametitle{Overview}
 	\tableofcontents
 \end{frame}
 
@@ -705,6 +704,19 @@
 		// is compiled and as such can't change based on
 		// user input. 4, 5 and 6 are regular parameters.
 	\end{lstlisting}
+\end{frame}
+
+\subsection{Lambdas}
+\begin{frame}
+	\frametitle{Lambdas}
+	\begin{itemize}
+		\item Lambdas are functions that have no name. 
+		\item They are useful in callback system as they allow you to write a function without providing the full boilerplate
+			to define a new function in a class.
+		\item First introduced in C++11 they are a conveinient way to provide NUClear callbacks.
+		\item If you want to test your callback or have a lot of arguments you should use a proper member function.
+		\item Otherwise lambdas are an easy way to make simple callbacks
+	\end{itemize}
 \end{frame}
 
 %----------------------------------------------------------------------------------------
