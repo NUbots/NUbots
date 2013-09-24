@@ -300,9 +300,8 @@
 		
 		%%% Configuration Colours
 		%% Vision
-		\filldraw[jobconfig] ([yshift=-.5em,xshift=.5em]vision.north west) circle(3pt);
-		\filldraw[fileconfig] ([yshift=-1.25em,xshift=.5em]vision.north west) circle (3pt);
-		\filldraw[hardcodedconfig] ([yshift=-2em,xshift=.5em]vision.north west) circle(3pt);
+		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]vision.north west) circle (3pt);
+		\filldraw[hardcodedconfig] ([yshift=-1.25em,xshift=.5em]vision.north west) circle(3pt);
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]vision.north east) rectangle ++(6pt, 6pt);	
 		
 		%% Localization
@@ -331,8 +330,9 @@
 		\filldraw[hardcodedconfig] ([yshift=-.5em,xshift=.5em]sensors.north west) circle(3pt);
 		
 		%% Camera
-		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]camera.north west) circle(3pt);
-		\filldraw[hardcodedconfig] ([yshift=-1.25em,xshift=.5em]camera.north west) circle (3pt);
+		\filldraw[jobconfig] ([yshift=-.5em,xshift=.5em]camera.north west) circle(3pt);
+		\filldraw[fileconfig] ([yshift=-1.25em,xshift=.5em]camera.north west) circle(3pt);
+		\filldraw[hardcodedconfig] ([yshift=-2em,xshift=.5em]camera.north west) circle (3pt);
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]camera.north east) rectangle ++(6pt, 6pt);
 		
 		%% Motion
@@ -458,8 +458,8 @@
 		\path[jobs, dependent] (Behavior) edge (Camera);
 
 		%% Motion
-		\path[blackboard, codependent] (Motion.65) edge (Behavior.285);
-		\path[jobs, dependent] (Motion.100) edge (Behavior.260);
+		\path[blackboard, codependent] (Motion.80) edge (Behavior.300);
+		\path[jobs, dependent] (Motion.120) edge (Behavior.280);
 		\path[publicinterface, dependent] (Motion) edge  (Actionators);
 		\path[publicinterface, dependent] (Motion) edge (Kinematics);
 	\end{tikzpicture}
