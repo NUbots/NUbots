@@ -692,19 +692,62 @@
 
 \end{frame}
 
-\subsection{C++ Smart Pointers and Templates Recap}
+\subsection{C++ Smart Pointers and Templates Review}
 \begin{frame}
-	\frametitle{Smart Pointers}
+	\frametitle{C++ Review: Smart Pointers}
 	\begin{itemize}
 		\item Smart Pointers automatically handle releasing pointer memory for you.
-		\item Different Smart Pointers mean different things regarding memory ownership (who is responsible for deleting this pointer).
+		\item Different smart pointers decide who deletes data and when it gets deleted.
 		\item As of C++11 there is almost never a reason to use new/delete or raw pointers.
-		\item Instead you should use std::unique\_ptr and std::shared\_ptr
+		\item Instead you should use std::unique\_ptr and std::shared\_ptr with std::make\_shared and std::make\_unique
 		\item In NUClear you will primarily use std::unique\_ptr to send messages.
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
+	\frametitle{C++ Review: std::unique\_ptr}
+	\begin{itemize}
+		\item Only one unique\_ptr is allowed to point to a particular address.
+		\item When copied the unique\_ptr transfers ownership to the new unique\_ptr and the old one becomes invalid.
+		\item When you pass a unique\_ptr to a function you are giving away it's ownership.
+		\item Don't use a unique\_ptr after it has been passed or copied. It will be null!
+		\item unique\_ptr deletes it's data when it goes out of scope. 
+	\end{itemize}
+\end{frame}
 
+\begin{frame}[fragile]
+	\frametitle{C++ Review: std::unique\_ptr}
+	
+	\begin{lstlisting}[language=nuclear]
+		#include <memory> // unique_ptr & shared_ptr
+
+		void processImage(const Image& image) {
+		    std::unique_ptr<MyData> data = 
+		        std::make_unique<MyData>();
+
+		    data->something; // Access like a pointer * or ->.
+		    
+		    // theif now owns the data pointed at by data.
+		    // data is now invalid. unique_ptr can only be
+		    // copied using std::move(...).
+		    std::unique_ptr<MyData> thief = std::move(data); 
+		    thief->something; // Fine
+		    data->something; // Error and very bad!
+		} // thief releases memory here. 
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}
+	\frametitle{C++ Review: std::move}
+	\begin{itemize}
+		\item Data stealing in C++ is known as "move semantics"
+		\item It's a fancy way of expressing transfer of ownership.
+		\item When something is "moved" it can't be used after moving.
+		\item Compilers automatically move things that don't have a name.
+		\item Some classes can only be constructed by moving data into them. Like std::unique\_ptr!
+		\item When something has a name you use std::move(...) to move it!
+	\end{itemize}
+\end{frame}
 
 \subsection{Key Functions}
 \begin{frame}[fragile]
