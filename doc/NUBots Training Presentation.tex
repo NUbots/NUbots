@@ -975,7 +975,18 @@
 
 \begin{frame}
 	\frametitle{Networking}
-	Todo
+	\begin{itemize}
+		\item The networking system in NUClear uses ZMQ under the hood
+		\begin{itemize}
+			\item ZMQ is a transport agnostic middle man that allows us to do things like publish/subscribe and auto reconnection
+		\end{itemize}
+		\item We also use google protocol buffers as our message packing format
+		\item The messages are sent over the ePGM transport
+		\begin{itemize}
+			\item The ePGM transport is a multicast transport with reliability built in (think tcp)
+		\end{itemize}
+		\item Messages that are sent can be anything that has a method to serialise (protocol buffers do by default)
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -1261,7 +1272,7 @@
 \begin{frame}[fragile]
 	\frametitle{Key Functions - Emit}
 	\begin{itemize}
-		\item Q: "No seriously... I meant "The Word", like all of it"
+		\item Q: "No seriously... I meant "The World", like all of it"
 		\item A: You mean the network? Then you need a scope!
 		\item When you emit, you can specify scopes. These define where the messages go.
 		\item For example, we will demonstrate the network scope
