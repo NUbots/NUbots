@@ -623,6 +623,7 @@ void VisionBlackboard::debugPublish() const
 #endif
 
     wrapper->debugPublish(DBID_IMAGE, original_image);
+    wrapper->debugPublish(DBID_CLASSED_IMAGE);
     
     //horizon
     pts.clear();

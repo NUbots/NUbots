@@ -30,6 +30,11 @@ public:
       */
     void set(unsigned char* vals);
 
+    inline void setPixel(Pixel p, char v)
+    {
+        LUT[LUTTools::getLUTIndex(p)] = v;
+    }
+
     /*!
       @brief Loads a new LUT from a given file.
       @param filename The filename std::string.
@@ -58,7 +63,8 @@ public:
     void zero();
 
 private:
-    const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
+    //const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
+    unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
     unsigned char* LUTbuffer;           //! @variable temp LUT for loading.
 };
 

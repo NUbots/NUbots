@@ -1213,6 +1213,7 @@ std::ostream& operator<< (std::ostream& output, const NUSensorsData& p_data)
 std::istream& operator>> (std::istream& input, NUSensorsData& p_data)
 {
     //input >> p_data.m_common_ids;
+    if(!input.good()) throw std::exception();
     readIdList(input, p_data.m_common_ids);
     //input >> p_data.m_ids_copy;
     readIdList(input, p_data.m_ids_copy);
@@ -1223,6 +1224,7 @@ std::istream& operator>> (std::istream& input, NUSensorsData& p_data)
     input >> numsensors;
     double lastUpdateTime = 0;
     Sensor tempSensor("temp");
+    if(!input.good()) throw std::exception();
     for (int i=0; i<numsensors; i++)
     {
         if(!input.good()) throw std::exception();

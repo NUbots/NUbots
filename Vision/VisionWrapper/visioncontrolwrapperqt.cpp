@@ -184,6 +184,8 @@ int VisionControlWrapper::run()
                     delete wrapper;
                     wrapper = new DataWrapper(&gui, ok, method, istrm, sstrm, cfg, lname);
                     DataWrapper::instance = wrapper;
+                    frame = 1;
+                    error = 0;
                 }
                 else {
                     finished = true;

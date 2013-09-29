@@ -443,6 +443,25 @@ void DataWrapper::debugPublish(DEBUG_ID id, const SegmentedRegion& region)
     }
 }
 
+void DataWrapper::debugPublish(DEBUG_ID id) {
+    if(id == DBID_CLASSED_IMAGE) {
+        QImage qimg(m_current_image.getWidth(), m_current_image.getHeight(), QImage::Format_RGB888);
+        unsigned char r, g, b;
+
+        for(int y=0; y<m_current_image.getHeight(); y++) {
+            for(int x=0; x<m_current_image.getWidth(); x++) {
+                Colour c = LUT.classifyPixel(m_current_image(x,y));
+                getColourAsRGB(c, r, g, b);
+                qimg.setPixel(x, y, qRgb(r, g, b));
+            }
+        }
+        gui->addToLayer(id, qimg, 1);
+    }
+    else {
+        errorlog << "DataWrapper::debugPublish - Called with invalid id" << std::endl;
+    }
+}
+
 void DataWrapper::debugPublish(DEBUG_ID id, NUImage const* const img)
 {
     //for all images
@@ -660,10 +679,12 @@ bool DataWrapper::updateFrame(bool forward, int frame_no)
                 errorlog << "No image stream - " << streamname << std::endl;
                 return false;
             }
+
             if(using_sensors && !sensorstrm.is_open()) {
                 errorlog << "No sensor stream - " << sensorstreamname << std::endl;
                 return false;
             }
+
             try {
                 if(!forward)
                     imagestrm.seekg(-2 * (sizeof(NUImage::Header) + 2*sizeof(int) + sizeof(double) + sizeof(bool) + m_current_image.getWidth()*m_current_image.getHeight()*sizeof(Pixel)), std::ios_base::cur);
@@ -672,15 +693,16 @@ bool DataWrapper::updateFrame(bool forward, int frame_no)
             catch(std::exception& e) {
                 return false;
             }
+
             if(using_sensors) {
                 try {
-
                     if(!forward) {
                         sensorstrm.seekg(0, std::ios_base::beg);
                         for(int i=0; i<frame_no; i++)
                             sensorstrm >> m_sensor_data;
                     }
                     else {
+                        sensorstrm.peek();
                         sensorstrm >> m_sensor_data;
                     }
                 }
