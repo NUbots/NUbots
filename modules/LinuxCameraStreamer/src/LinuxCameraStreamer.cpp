@@ -39,8 +39,10 @@ namespace modules {
         // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
         on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
 
-            // Get an image and emit it
-            emit(std::unique_ptr<messages::Image>(m->camera.getImage()));
+            // If the camera is ready, get an image and emit it
+            if (m->camera.isStreaming()) {
+                emit(m->camera.getImage());
+            }
         });
 
         // When we shutdown, we must tell our camera class to close (stop streaming)
@@ -65,10 +67,15 @@ namespace modules {
                 // Set all other camera settings
                 for(auto& setting : camera.getSettings()) {
                     int value = settings.config[setting.first];
-                    setting.second.set(value);
+                    if(setting.second.set(value) == false) {
+                        log("Failed to set " + setting.first + " on camera");
+                    }
                 }
+
+                // Start the camera streaming video
+                m->camera.startStreaming();
             } catch(const std::exception& e) {
-                std::cout << "Exception while setting camera configuration: " << e.what() << std::endl;
+                log(std::string("Exception while setting camera configuration: ") + e.what());
             }
         });
     }

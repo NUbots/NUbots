@@ -67,6 +67,9 @@ namespace modules {
 
         /// @brief The name of the device to read camera data from
         std::string deviceID;
+
+        /// @brief Whether the camera is currently in streaming mode
+        bool streaming;
     public:
 
         /// @brief this enum holds important constants (we are c++ we don't use defines for this kind of thing)
@@ -85,17 +88,23 @@ namespace modules {
         /**
          * @brief Gets a pointer to the latest image from the camera so that it can be sent out to the rest of the system
          *
+         * @details
+         *   This function blocks until the camera device provides a new frame of video
+         *   data, at which point it copies the frame into a new Image and returns. The
+         *   camera device must already be set up (using resetCamera) and 
+         *
          * @return a pointer to the latest image from the camera
          */
-        messages::Image* getImage();
+        std::unique_ptr<messages::Image> getImage();
 
         /**
          * @brief Sets up the camera at a given resolution
          *
+         * @param name the name of the camera device
          * @param w the image's width
          * @param h the image's height
          */
-        void resetCamera(std::string name, size_t w, size_t h);
+        void resetCamera(const std::string& name, size_t w, size_t h);
 
         /**
          * @brief Returns a map of all configurable settings
@@ -115,12 +124,27 @@ namespace modules {
         /**
          * @brief Returns the device id that is currently used as the camera
          */
-        std::string getDeviceID() const;
+        const std::string& getDeviceID() const;
 
         /**
          * @brief This method is to be called when shutting down the system. It does cleanup on the cameras resources
          */
         void closeCamera();
+
+        /**
+         * @brief Starts the camera streaming video
+         */
+        void startStreaming();
+
+        /**
+         * @brief Check whether the camera is actively streaming video
+         */
+        bool isStreaming() const;
+
+        /**
+         * @brief Stops the camera streaming video
+         */
+        void stopStreaming();
     };
 }
 
