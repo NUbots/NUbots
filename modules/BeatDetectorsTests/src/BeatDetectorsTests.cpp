@@ -15,6 +15,7 @@
  * Copyright 2013 Joshua Kearns <joshau-k@hotmail.com>
  */
 
+#include "BeatDetectorsTests.h"
 #include <chrono>
 #include <ctime>
 #include "messages/Beat.h"
@@ -25,14 +26,13 @@ namespace modules {
 
 
     BeatDetectorsTests::BeatDetectorsTests(NUClear::PowerPlant* plant) : Reactor(plant) {
-        
 
-        
-        on<Trigger<messages::SoundChunk>> ([this](const messages::SoundChunk& chunk) {
+        on<Trigger<messages::Beat>> ([this](const messages::Beat& beat) {
             
+            std::time_t time = std::chrono::system_clock::to_time_t(beat.time);
+            std::cout << "Beat found at: " << ctime(&time) << "Period: " << (0.0 + beat.period.count())/1000000000 << " seconds" << std::endl << std::endl;
         });
- 
-        
+
     }
     
     BeatDetectorsTests::~BeatDetectorsTests()

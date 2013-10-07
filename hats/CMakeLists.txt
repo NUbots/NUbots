@@ -52,7 +52,7 @@ ADD_HAT(
         ConfigSystem
         AudioFileInput
         BeatDetector
-        #BeatDetectorsTests
+        BeatDetectorsTests
         )
 
 ADD_HAT(
@@ -61,7 +61,7 @@ ADD_HAT(
         ConfigSystem
         AudioFileInput
         AubioBeatDetector
-        #BeatDetectorsTests
+        BeatDetectorsTests
         )
 
 # The ADD_HAT function appends itself to the ${hats} variable.

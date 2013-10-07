@@ -29,9 +29,15 @@ namespace modules {
     static const int HOP_SIZE = 512; //number of frames to input to beat detection at one time
 
 
-    struct resizedChunk {
+    //used to hold chunk data resized to HOP_SIZE
+    struct ResizedChunk { 
             std::vector<int16_t> resizedChunk;
             NUClear::clock::time_point endTime;
+    };
+    
+    // Holds beat value without a period, used to create a Beat objects with a period by comparing the last 2 beatTime's
+    struct BeatTime {
+            NUClear::clock::time_point time;
     };
         
     AubioBeatDetector::AubioBeatDetector(NUClear::PowerPlant* plant) : Reactor(plant) {
@@ -61,9 +67,10 @@ namespace modules {
         
         on<Trigger<messages::SoundChunk>> ([this](const messages::SoundChunk& chunk) {
             if (allowBeat == true) {
+                //if (chunk.endTime == NULL) This hasn't been provided so far, but comparing to NULL doesn't work
+                //chunk.endTime = NUClear::clock::now(); //also chunk is const so this doesn't work either
                 
-                
-                auto outputChunk = std::make_unique<resizedChunk>();
+                auto outputChunk = std::make_unique<ResizedChunk>();
                 int chunkWindowSize = chunkWindow.size();
                 for (int i =0; i < (int) chunk.data.size(); ++i) 
                 {
@@ -74,29 +81,25 @@ namespace modules {
                     {
                         
                         outputChunk->resizedChunk = chunkWindow;
-                        outputChunk->endTime = chunk.endTime - std::chrono::microseconds( (int) (1000000.0*(chunk.data.size() - i)/sampleRate));
+                        outputChunk->endTime = NUClear::clock::now() - std::chrono::microseconds( (int) (1000000.0*(chunk.data.size() - i)/sampleRate));
                         //This ^ calculates the time the resized chunk ends given the time the chunk received by the trigger ends and how far through the received chunk we are
                         emit(std::move(outputChunk));
                         chunkWindow.clear();
                         chunkWindowSize = 0;
-                        auto outputChunk = std::make_unique<resizedChunk>();
+                        auto outputChunk = std::make_unique<ResizedChunk>();
                     }
                 }
                 
             }
         });
         
-        on<Trigger<resizedChunk>> ([this](const resizedChunk& resizedChunk) {
+        on<Trigger<ResizedChunk>> ([this](const ResizedChunk& resizedChunk) {
             // The last resized chunk of size HOP_SIZE (512) of sound data that were recorded are received and processed by aubio tempo track
-            
-            callCount++; //used to calculate numMilliseconds (probably redundant due to SoundChunk being able to keep track of time in terms of system clock)
 
             std::vector<int16_t> chunk = resizedChunk.resizedChunk;
             //chunk.insert( chunk.end(), resizedChunk.resizedChunk.begin(), resizedChunk.resizedChunk.end() );
 
-            float numMilliseconds = (1000.0 * HOP_SIZE * callCount) /  sampleRate ;
             std::vector<int> results;
-
 
             for (int i = 0; i < HOP_SIZE; ++i)
             {
@@ -106,24 +109,39 @@ namespace modules {
                 }
             }
 
+            auto beatTime = std::make_unique<BeatTime>();
             aubio_tempo(att, tempo_input_data, out);     
             for (int i =0; i < out->data[0][0]; ++i)
             {
-                //std::cout << "Beats this call: " << out->data[0][0] << std::endl;
-                beatCount += 1;
-                std::cout << "Beat value " << beatCount << " : " << (out->data[0][i+1] + HOP_SIZE*(callCount-1))/(HOP_SIZE*callCount) * (numMilliseconds/1000) << "s \n";
+                beatTime = std::make_unique<BeatTime>();
+                beatTime->time = resizedChunk.endTime - std::chrono::microseconds( (int) ((HOP_SIZE - out->data[0][i] + 0.0) / sampleRate));
+                //We start with the time at the end of the chunk. Beat time is found from the time at the start of the chunk plus the number of frames into the chunk that the beat is found. 
+                        
+                emit(std::move(beatTime));        
             }
 
        });    
+       
+       on<Trigger<Last<2, BeatTime>>> ([this](const std::vector<std::shared_ptr<const BeatTime>>& lastTwoBeats) {
+           
+           if(lastTwoBeats.size() > 1) {
+                auto beat = std::make_unique<messages::Beat>();
+                beat->time = lastTwoBeats[0]->time; //apparently the latest one is 0
+                beat->period = lastTwoBeats[0]->time - lastTwoBeats[1]->time;
+
+                emit(std::move(beat));  
+           }
+       }); 
 
 
         
     }
-            AubioBeatDetector::~AubioBeatDetector()
-        {
-              del_aubio_tempo(att);
-              del_fvec(tempo_input_data);
-              del_fvec(out);
-        }
+    
+    AubioBeatDetector::~AubioBeatDetector()
+    {
+          del_aubio_tempo(att);
+          del_fvec(tempo_input_data);
+          del_fvec(out);
+    }
 
 }
