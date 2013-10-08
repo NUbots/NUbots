@@ -18,31 +18,17 @@
 #ifndef MODULES_AUBIOBEATDETECTOR_H
 #define	MODULES_AUBIOBEATDETECTOR_H
 
-#include <aubio/aubio.h>
 #include <NUClear.h>
-
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
 
     class AubioBeatDetector : public NUClear::Reactor {
     private:
-        
-        //Chunk resizing variables
-        std::vector<int16_t> chunkWindow;
-        
-        //Beat Detection Trigger Variables
-        aubio_tempo_t * att;// =  new_aubio_tempo (aubio_onset_kl, WINDOW_SIZE, HOP_SIZE, NUM_CHANNELS); //aubio_onset_kl or aubio_onset_complex (may be others too)
-        fvec_t * out; //= new_fvec(HOP_SIZE , NUM_CHANNELS);
-        fvec_t * tempo_input_data; //= new_fvec(WINDOW_SIZE , NUM_CHANNELS);
-        int beatCount;
-        long callCount;
-        int sampleRate;
-        int channels;
-        int chunkSize;
-        bool allowBeat;
+        class impl;
+        utility::idiom::pimpl<impl> m;
     public:
         explicit AubioBeatDetector(NUClear::PowerPlant* plant);
-        ~AubioBeatDetector();
     };
 }
 

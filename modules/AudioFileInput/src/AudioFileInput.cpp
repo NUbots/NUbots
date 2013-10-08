@@ -66,6 +66,7 @@ namespace modules {
 
             chunk->data.resize(chunkSize);
             file.read(chunk->data.data(), chunkSize);
+            chunk->endTime = NUClear::clock::now();
             emit(std::move(chunk));
         });
     }

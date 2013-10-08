@@ -28,13 +28,16 @@ namespace modules {
     BeatDetectorsTests::BeatDetectorsTests(NUClear::PowerPlant* plant) : Reactor(plant) {
 
         on<Trigger<messages::Beat>> ([this](const messages::Beat& beat) {
-            
+
             std::time_t time = std::chrono::system_clock::to_time_t(beat.time);
-            std::cout << "Beat found at: " << ctime(&time) << "Period: " << (0.0 + beat.period.count())/1000000000 << " seconds" << std::endl << std::endl;
+
+            std::cout << "Beat found at: " << ctime(&time)
+                    << "Period: " << 60 / (double(beat.period.count()) / double(NUClear::clock::period::den)) << "bpm"
+                    << std::endl << std::endl;
         });
 
     }
-    
+
     BeatDetectorsTests::~BeatDetectorsTests()
     {
 

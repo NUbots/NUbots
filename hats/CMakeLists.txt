@@ -50,19 +50,17 @@ ADD_HAT(
     NAME beatdetectortests
     MODULES
         ConfigSystem
-        AudioFileInput
+        AudioInput
         BeatDetector
-        BeatDetectorsTests
-        )
+        BeatDetectorsTests)
 
 ADD_HAT(
     NAME aubiobeatdetectortests
     MODULES
         ConfigSystem
-        AudioFileInput
+        AudioInput
         AubioBeatDetector
-        BeatDetectorsTests
-        )
+        BeatDetectorsTests)
 
 # The ADD_HAT function appends itself to the ${hats} variable.
 # We need to expose this to our parent scope so the DarwinSend.cmake
