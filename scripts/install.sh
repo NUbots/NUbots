@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # File:   install.sh
-# Authors: 
+# Authors:
 #   Trent Houliston <trent@houliston.me>
 #   Jake Woods <jake.f.woods@gmail.com>
 #
@@ -19,8 +19,8 @@ else
     config=""
 fi
 
-# Copy our robocup binary over
-for file in `find hats -executable -type f`; do
+# Copy our binaries over
+for file in `find hats -type f -executable -exec sh -c "file -i '{}' | grep -q 'x-executable; charset=binary'" \; -print`; do
     scp -C "$file" "darwin@$robotIP:/home/darwin/"
 done
 
