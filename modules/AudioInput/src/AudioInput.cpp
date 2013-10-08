@@ -73,6 +73,7 @@ namespace modules {
 
             chunk->data.resize(nBufferFrames * CHANNELS);
             chunk->data.assign(data, data + (nBufferFrames * CHANNELS));
+            chunk->endTime = NUClear::clock::now();
             udata->powerPlant->emit(std::move(chunk));
 
             return 0;
