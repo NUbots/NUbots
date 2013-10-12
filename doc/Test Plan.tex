@@ -51,8 +51,46 @@
 \section{Modules}
 	\subsection{AubioBeatDetector}
 		\subsubsection{Description}
-			The AubioBeatDetector detects beats in a supplied audio stream.
+			AubioBeatDetector detects beats in a supplied audio stream using the Aubio library.
 			Beats are reported as the time the beat occured and the tempo.
+		\subsubsection{Testing Method}
+			AubioBeatDetector can be automatically unit tested using the AudioFileInput reactor to supply mock sound from a known sound file. 
+			We can then check that the detected beat is "close enough" to the known value for the supplied data.
 		\subsubsection{Inputs}
+			AubioBeatDetector expected to be initialized with a SoundChunkSettings message that informs it of information relating to the input device.
+			It also expects a periodic SoundChunk message containing the data that was recorded.
+		\subsubsection{Outputs}
+			AubioBeatDetector should emit a Beat message every time it detects a beat in the sound sample.
 
+	\subsection{AudioFileInput}
+		\subsubsection{Description}
+			AudioFileInput reads from a wav file specified in it's configuration. 
+			It the emits SoundChunk messages periodically as if it was listening to the file through the input device.
+		\subsubsection{Testing Method}
+			Can't test, fill in details later. Consider unchunking it's output to see if it forms the same file? Not worth it probably.
+
+	\subsection{AudioInput}
+		\subsubsection{Description}
+			AudioInput reads from the default audio input device.
+			It emits SoundChunk messages periodically as more data is read in from the input device.
+		\subsubsection{Testing Method}
+			Can't test, fill in details later.
+
+	\subsection{BeatDetector}
+		\subsubsection{Description}
+			BeatDetector detects beats in a supplied audio stream using the a custom algorithm [FILL IN DETAILS].
+			Beats are reported as the time the beat occured and the tempo.
+		\subsubsection{Testing Method}
+			BeatDetector can be automatically unit tested using the AudioFileInput reactor to supply mock sound from a known sound file. 
+			We can then check that the detected beat is "close enough" to the known value for the supplied data.
+		\subsubsection{Inputs}
+			BeatDetector expected to be initialized with a SoundChunkSettings message that informs it of information relating to the input device.
+			It also expects a periodic SoundChunk message containing the data that was recorded.
+		\subsubsection{Outputs}
+			BeatDetector should emit a Beat message every time it detects a beat in the sound sample.
+
+	\subsection{ConfigSystem}
+		\subsubsection{Description}
+
+		
 \end{document}
