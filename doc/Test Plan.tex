@@ -1,10 +1,11 @@
 \documentclass[a4paper]{article}
 
-\usepackage{itemize}
-
 \title{Title}
 \author{Jake Woods, Trent Houliston}
 \date{\today}
+
+\usepackage{tikz}
+
 
 \begin{document}
 
@@ -36,9 +37,22 @@
 		\item AudioFileInput, (AubioBeatDetector or BeatDetector)
 	\end{itemize}
 
-	MORE HERE
-
+	These modules require manual testing because they depend on robot hardware that we can't emulate:
+	\begin{itemize}
+		\item AudioInput
+		\item eSpeak
+		\item LinuxCameraStreamer
+		\item NUBugger
+		\item Platform/Darwin/HardwareIO
+		\item Platform/Darwin/MotionManager
+	\end{itemize}
+	
+	
 \section{Modules}
-
+	\subsection{AubioBeatDetector}
+		\subsubsection{Description}
+			The AubioBeatDetector detects beats in a supplied audio stream.
+			Beats are reported as the time the beat occured and the tempo.
+		\subsubsection{Inputs}
 
 \end{document}
