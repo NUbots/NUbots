@@ -1,13 +1,44 @@
 \documentclass[a4paper]{article}
 
+\usepackage{itemize}
+
 \title{Title}
-\author{Author}
+\author{Jake Woods, Trent Houliston}
 \date{\today}
 
 \begin{document}
 
 \maketitle
 
-Content
+\section{Introduction}
+	This document outlines the scope of testing applied to the implementation of the new architecture for the robocup codebase. 
+	The original architecture relied on purely manual processes for all testing. 
+	We believe that the new architecture should utilize automated testing whenever feasible while using manual testing as a last-resort backup.
+	
+	In the new architecture functionality is seperate into discrete modules that communicate through messages. 
+	Accordingly we can seperate our unit tests into per-module tests providing clean seperation of concerns and simple mechanisms for mocking and validating inputs/outputs.
+	We have also identitfied a number of cases where integration tests can be performed on module subsets further reducing the complexity of testing the system.
+	End-to-end testing will still require manual validation as fully automated end-to-end testing would require an emulation layer for the robots hardware that was outside the scope of this project.
+
+\section{Scope}
+	The following modules can be automatically unit tested:
+	\begin{itemize}
+		\item AubioBeatDetector
+		\item BeatDetector
+		\item ConfigSystem
+		\item PartyDarwin
+		\item ScriptEngine
+		\item ScriptRunner
+	\end{itemize}
+
+	The following module combinations can be combined into automatic integration tests:
+	\begin{itemize}
+		\item AudioFileInput, (AubioBeatDetector or BeatDetector)
+	\end{itemize}
+
+	MORE HERE
+
+\section{Modules}
+
 
 \end{document}
