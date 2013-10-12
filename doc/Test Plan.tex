@@ -181,16 +181,32 @@
 
 		\subsubsection{Tests}
 			\test{The Config system is able to load from a JSON file.}
-			\todo[inline]{Write test steps}
+			\begin{enumerate}
+				\item Use the configuration system with a known test configuration file.
+				\item Validate that the loaded configuration matches the file values.
+			\end{enumerate}
 			
 			\test{The Config system ensures that configurations only go to interested modules.}
-			\todo[inline]{Write test steps}
+			\begin{enumerate}
+				\item Set up multiple (3 or more) mock reactors that ask for different configuration files.
+				\item Initialize the configuration system with a subset of these files.
+				\item Validate that the configuration data is available in the appropriate reactor.
+				\item Validate that other reactors don't have variables defined in files they didn't ask for.
+			\end{enumerate}
 			
 			\test{The Config system is able to load directories.}
-			\todo[inline]{Write test steps}
+			\begin{enumerate}
+				\item Use the configuration system with a known directory containing test files
+				\item Validate that all files are loaded and accessible by interested reactors.
+			\end{enumerate}
 			
 			\test{The Config system is able to respond to modifications to loaded files.}
-			\todo[inline]{Write test steps}
+			\begin{enumerate}
+				\item Use the configuration system with a known file.
+				\item Validate the contents of the file.
+				\item Modify the file programatically to change it's values.
+				\item Validate that the configuration is reloaded and the values have changed.
+			\end{enumerate}
 			
 	\subsection{DanceEngine}
 		\subsubsection{Description}
