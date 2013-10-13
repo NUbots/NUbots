@@ -1,13 +1,106 @@
 \documentclass[a4paper]{article}
 
-\title{Title}
-\author{Author}
-\date{\today}
+\usepackage{tabularx} % For tables
+\usepackage{pgfgantt} % For Gantt charts. See http://ctan.unsw.edu.au/graphics/pgf/contrib/pgfgantt/pgfgantt.pdf
+\usepackage{import} % To include files
+
+\title{Project Proposal}
+\author{Joshua Kearns,Trent Houliston, Jake Woods}
+\date{11/10/13}
 
 \begin{document}
 
-\maketitle
+	\maketitle
+	
+	\clearpage
+	\tableofcontents
+	\clearpage
 
-Content
+	\section{Terms of Reference}
+		\subsection {Goals}
+			\begin{enumerate}
+				\item Measurably improve robot architecture.
+				\item Make robot dance, possibly in response to some stimulus.
+			\end{enumerate}
+		\subsection {Objectives}
+			\begin{enumerate}
+				\item Decrease the time it takes to add a new component to the system.
+				\item Increase the performance of the system
+				\item Improve diagnostics/monitoring tools by providing increased visibility into the state of the system.
+				\item Decrease the time it takes to induct a new team member into the system.
+				\item Improve utilization of existing and future robot hardware.
+				\item Improve the consistency of interfaces between components.
+				\item Improve the ability to move the architecture between different robot platforms.
+				\item Investigate the possibilities of making the robot dance according to a predetermined script, in response to music or a detected human’s movements. Also implementing these possibilities if practical.
+			\end{enumerate}
+		\subsection {Scope}
+			The project aims to measurably improve the effectiveness of the NUBots through the introduction of a new software architecture. This will involve modifications to the existing NUBots codebase. The project will not modify any hardware on the NUbots but must be able to accommodate changes in hardware. The project will not change any existing algorithms beyond restructuring them to fit the new architecture.
+			\\Additional we aim to give the robot the ability to dance in some form for marketing purposes. This dancing will be according to a predetermined script, or in response to some stimulus such as music or human movement detected in a camera.
+		\subsection {Acceptance Criteria}
+			The acceptance criteria will consist of achieving measurable improvements on the characteristics of the system outlined in section 1.2 (Objectives). Specific measurements need to be negotiated with the client at a later time.
+	
+	\section{Resources}
+		\subsection{Organisation and Team Information}
+		\subsection{People and Responsibilities}
+			\subsubsection{People}
+				\paragraph{Project Team}
+					\begin{itemize}
+						\item Joshua Kearns
+						\item Jake Woods
+						\item Michael Burton
+						\item Liam Jones
+						\item Daniel Gault
+						\item Trent Houliston
+					\end{itemize}
+				\paragraph{Nubots Liason}
+					\begin{itemize}
+						\item Josiah Walker
+					\end{itemize}
+				\paragraph{Supervisor}
+					\begin{itemize}
+						\item Yuqing Lin
+					\end{itemize}
+				\paragraph{Technical Advisor}
+					\begin{itemize}
+						\item Stephan Chalup
+					\end{itemize}
+			\subsubsection{Responsibilites}
+				\paragraph{Re-Architecturing Focus Group}
+					\begin{itemize}
+						\item Jake Woods
+						\item Michael Burton
+						\item Trent Houliston
+					\end{itemize}
+				\paragraph{Dance Focus Group}
+					\begin{itemize}
+						\item Joshua Kearns
+						\item Liam Jones
+						\item Daniel Gault
+					\end{itemize}
+		\subsection{Equipment, Tools and Materials}
+
+	\section{Risks}
+		\begin{tabularx}{\linewidth}{l  X  X X  X  X X}
+			\hline
+			Rank & Name & Chance & Severity & Mitigation Strategy & Contingency \\ \hline
+			1 & Project not completed by dealine & Low & High & Do our work & Remove features. Finish after deadline. NUBot team finished project. \\ \hline
+			2 & Documentation not completed by deadline & Medium & Medium & Assign specific tasks for completion of documentation & Negotiate extension. \\ \hline
+			3 & Conflict in Team & Medium & Medium & Listen to all group members opinions. & Attempt to accomodate group memebers opinions. Make group decision on difficult choices \\ \hline
+			4 & Jake can no longer do the project, losing his c++ skills. & Low & High & Other term members gain understanding of his c++ code. & Less ambitious use of c++. Possibly designing a different architecture that is easier to implement. \\ \hline
+			5 & NUBot team cancelled & Very Low & Very High & None & Make project more general, as an architecture with no implentation in the NUBots \\ \hline
+			\hline
+		\end{tabularx}
+
+	\section{Schedule}
+		\subsection{Delivery Phases}
+			\subsubsection{Overview}
+			\subsubsection{Delivery Phase 1 - Proof of Concept}			
+			\subsubsection{Delivery Phase 2 -NUClear Framework Integration}
+		\subsection{External Dependancies}
+		\subsection{Assumptions}
+			We assume that there is an existing robot for the architecture to run on. We also assume that this robot will be in reasonable working condition.
+		\subsection{Gantt Chart}
+			\subimport{ProjectProposalResources/}{GanttChart}
+
 
 \end{document}
