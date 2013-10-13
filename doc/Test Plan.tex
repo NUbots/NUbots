@@ -215,30 +215,6 @@
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
-					\item \todo[inline]{INPUT}
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item \todo[inline]{OUTPUT}
-				\end{itemize}
-    		\end{tabular}
-
-		\subsubsection{Tests}
-			\test{The dance engine scales the scripts to an apropraite length.}
-			\todo[inline]{Write test steps}
-			
-			\test{The dance engine ensures that dance scripts execute such that they begin and end on beats.}
-			\todo[inline]{Write test steps}
-		
-	\subsection{eSpeak}
-		\subsubsection{Description}
-			The eSpeak module takes a string command and performs a text to speech conversion on it.
-			This sound data is then outputted through the speaker of the system.
-			\todo[inline]{Description}
-			
-			\begin{tabular}{p{5cm}|p{5cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
 					\item A Dance configuration describing the available dance scripts.
 					\item A stream of beat detections describing the time of detection and tempo.
 					\item A notification when all motors have completed their assigned tasks.
@@ -250,8 +226,43 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
+			\test{The dance engine scales the scripts to an apropraite length.}
+			\begin{enumerate}
+				\item Input a pre-generated beat stream with a known tempo and predictable beat period.
+				\item Input a known script.
+				\item Validate that the script was scaled to the appropriate length and timing.
+			\end{enumerate}
+			
+			\test{The dance engine ensures that dance scripts execute such that they begin and end on beats.}
+			\begin{enumerate}
+				\item Input a pre-generated beat stream with a known tempo and predictable beat period.
+				\item Input a known script.
+				\item Validate that the outputted script starts near a beat point
+			\end{enumerate}
+		
+	\subsection{eSpeak}
+		\subsubsection{Description}
+			The eSpeak module takes a string command and performs a text to speech conversion on it.
+			This sound data is then outputted through the speaker of the system.
+			\todo[inline]{Description}
+			
+			\begin{tabular}{p{5cm}|p{5cm}}
+    			Input Data & Output Data \\ \hline
+				\begin{itemize}
+					\item A message containing the string to speak.
+				\end{itemize}
+				&
+				\begin{itemize}
+					\item None
+				\end{itemize}
+    		\end{tabular}
+
+		\subsubsection{Tests}
 			\test{eSpeak performs text to speach when a Say command is emitted.}
-			\todo[inline]{Write test steps}
+			\begin{enumerate}
+				\item Send a string message to the module.
+				\item Ensure the test platform outputs the sound on it's default audio output device.
+			\end{enumerate}
 		
 	\subsection{LinuxCameraStreamer}
 		\subsubsection{Description}
