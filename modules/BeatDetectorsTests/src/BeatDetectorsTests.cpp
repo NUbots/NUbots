@@ -64,13 +64,11 @@ namespace modules {
             float secs, millis;
             millis = (std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime)).count();
             secs = millis /1000;
-            //millis = millis % 1000;
-            //mins = secs / 60;
-            //secs = secs % 60;
 
-            //std::cout << "Beat found at: " << ctime(&time) << "Time since start of Audio: " << secs << "s" << std::endl
-            //        << "Period: " << 60 / (double(beat.period.count()) / double(NUClear::clock::period::den)) << "bpm"
-            //        << std::endl << std::endl;
+            std::cout << "Beat found at: " << secs
+                    << "Period: " << 60 / (double(beat.period.count()) / double(NUClear::clock::period::den)) << "bpm"
+                    << std::endl << std::endl;
+
             
             myfile << secs << std::endl;
             myfile.flush();

@@ -65,7 +65,7 @@ namespace modules {
             
             std::cout << "sample rate: " <<  m->sampleRate << std::endl;
             std::cout << "channels: " <<  m->channels << std::endl;
-            std::cout << "chunkSize: " <<  m->channels << std::endl;
+            std::cout << "chunkSize: " <<  m->chunkSize << std::endl;
 
             // Build our audio tempo tracker  can set to (aubio_onset_kl or aubio_onset_complex onset tracking)
             m->tempoTracker = new_aubio_tempo(aubio_onset_kl, WINDOW_SIZE, HOP_SIZE, m->channels);
@@ -75,20 +75,8 @@ namespace modules {
 
         });
         
-        on<Trigger<messages::SoundFileStart>, Options<Single>> ([this](const messages::SoundFileStart& soundFileStart) {
-            std::cout << "AubioBeatDetector: File Start info received" << std::endl;
-            
-            //del_aubio_tempo(m->tempoTracker);
-            m->outputData = new_fvec(HOP_SIZE, m->channels);
-            m->inputData = new_fvec(HOP_SIZE, m->channels);
-            m->tempoTracker = new_aubio_tempo(aubio_onset_kl, WINDOW_SIZE, HOP_SIZE, m->channels);
-            
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-        });
-
         on<Trigger<messages::SoundChunk>>([this](const messages::SoundChunk& chunk) {
-
+            
             for (size_t i = 0; i < m->chunkSize; ++i) {
 
                 // Write to our vector

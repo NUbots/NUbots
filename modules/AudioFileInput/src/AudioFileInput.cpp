@@ -32,93 +32,65 @@ namespace modules {
 
     class AudioFileInput::impl {
         public:
-            SndfileHandle currentFile;
-            std::vector<std::string> files;
+            SndfileHandle file;
+            //std::vector<std::string> files;
             int currentFileIndex = 0;
             bool fileStartSent = false; //indicates whether a SoundFileStart message has been emitted to indicate the start of a new sound file
     };
-
+    
     struct AudioFileConfiguration {
         static constexpr const char* CONFIGURATION_PATH = "AudioFileInput.json";
     };
+
     
-    struct AudioFileEnd {
-        int something;
-    };
 
     AudioFileInput::AudioFileInput(NUClear::PowerPlant* plant) : Reactor(plant) {
         // Load our file name configuration.
-        on<Trigger<messages::Configuration<AudioFileConfiguration>>>([this](const messages::Configuration<AudioFileConfiguration>& configfile) {
-                //m->files = configfile.config["files"]; //This doesn't work for some reason
-                std::vector<std::string> files1 = configfile.config["files"];
-                m->files = files1;
-                log("Loading sound file: ", m->files[0]);
-                m->currentFile = SndfileHandle(m->files[0].c_str());
-                m->fileStartSent = false;
+        on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
+                
+            std::string filePath = args[0];//configfile.config["file"];
+            log("Loading sound file: ", filePath);
+            m->file = SndfileHandle(filePath.c_str());
 
-                auto settings = std::make_unique<messages::SoundChunkSettings>();
 
-                settings->sampleRate = m->currentFile.samplerate();
-                settings->channels = m->currentFile.channels();
+            auto settings = std::make_unique<messages::SoundChunkSettings>();
 
-                settings->chunkSize = m->currentFile.samplerate() / CHUNKS_PER_SECOND;
+            settings->sampleRate = m->file.samplerate();
+            settings->channels = m->file.channels();
 
-                emit<Scope::DIRECT>(std::move(settings));
+            settings->chunkSize = m->file.samplerate() / CHUNKS_PER_SECOND;
+
+            emit<Scope::DIRECT>(std::move(settings));
                 
         });
 
         on<Trigger<Every<(NUClear::clock::period::den / CHUNKS_PER_SECOND), NUClear::clock::duration>>>([this](const time_t&) {
-            auto& file = m->currentFile;
+            auto& file = m->file;
 
             auto chunk = std::make_unique<messages::SoundChunk>();
 
             // Find out how much of our file to read to get our sample
             size_t chunkSize = (file.samplerate() / CHUNKS_PER_SECOND) * file.channels();
             
+                        
             if (m->fileStartSent == false)
             {
+                m->fileStartSent = true;
                 //Measures the start time of the Sound File
                 auto audioStartTime = std::make_unique<messages::SoundFileStart>(); 
-                audioStartTime->time = NUClear::clock::now() - NUClear::clock::duration(int(NUClear::clock::period::den * (chunkSize / m->currentFile.samplerate())));
-                std::cout << "Index: " << m->currentFileIndex << std::endl;
-                audioStartTime->fileName = m->files[m->currentFileIndex];
+                audioStartTime->time = NUClear::clock::now() - NUClear::clock::duration(int(NUClear::clock::period::den * (chunkSize / m->file.samplerate())));
+                //audioStartTime->fileName = filePath;//m->file[m->currentFileIndex];
                 emit(std::move(audioStartTime));
-                m->fileStartSent++;
+                
             }
 
             chunk->data.resize(chunkSize);
-            int framesRead = file.read(chunk->data.data(), chunkSize);
+            
+            file.read(chunk->data.data(), chunkSize);
             chunk->endTime = NUClear::clock::now();
             emit(std::move(chunk));
             
-            if (framesRead < (int) chunkSize) //reached end of file
-            {
-                auto audioFileEnd = std::make_unique<AudioFileEnd>(); 
-                emit(std::move(audioFileEnd));
-            }
         });
-        
-        on<Trigger<AudioFileEnd>, Options<Single>>([this](const AudioFileEnd& audioFileEnd) {
 
-                if (m->currentFileIndex + 1 < (int) m->files.size())
-                {
-                    std::cout << "reached end of file: " << m->files[m->currentFileIndex] << std::endl;
-                    m->currentFileIndex++;
-                    
-                    m->currentFile = SndfileHandle(m->files[m->currentFileIndex].c_str());
-                    
-                    auto settings = std::make_unique<messages::SoundChunkSettings>();
-
-                    settings->sampleRate = m->currentFile.samplerate();
-                    settings->channels = m->currentFile.channels();
-
-                    settings->chunkSize = m->currentFile.samplerate() / CHUNKS_PER_SECOND;
-
-                    emit<Scope::DIRECT>(std::move(settings));
-          
-                    m->fileStartSent = false; //makes sure on the next trigger, a SoundFileStart message will be emitted to indicate the start time of the new sound file
-                    
-                }
-        });
     }
 }
