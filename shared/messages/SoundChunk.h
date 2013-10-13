@@ -38,6 +38,18 @@ namespace messages {
         /// The number of frames (a frame is a single sample for all channels) that each emitted chunk will have
         size_t chunkSize;
     };
+    
+     /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
+    struct SoundFileStart{
+        //The time at which the first sound chunk started
+        NUClear::clock::time_point time;
+        std::string fileName;
+    };
+    
 
     /**
      * TODO document
@@ -49,6 +61,8 @@ namespace messages {
         NUClear::clock::time_point endTime;
         std::vector<int16_t> data;
     };
+    
+
 }
 
 #endif  // MESSAGES_SOUNDCHUNK_H

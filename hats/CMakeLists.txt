@@ -50,7 +50,7 @@ ADD_HAT(
     NAME beatdetectortests
     MODULES
         ConfigSystem
-        AudioInput
+        AudioFileInput
         BeatDetector
         BeatDetectorsTests)
 
@@ -58,7 +58,7 @@ ADD_HAT(
     NAME aubiobeatdetectortests
     MODULES
         ConfigSystem
-        AudioInput
+        AudioFileInput
         AubioBeatDetector
         BeatDetectorsTests)
 

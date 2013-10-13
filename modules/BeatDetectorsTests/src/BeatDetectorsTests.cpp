@@ -16,31 +16,71 @@
  */
 
 #include "BeatDetectorsTests.h"
+#include "utility/idiom/pimpl_impl.h"
+
+#include "messages/Beat.h"
+#include "messages/SoundChunk.h"
+
 #include <chrono>
 #include <ctime>
-#include "messages/Beat.h"
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 namespace modules {
 
-
+    class BeatDetectorsTests::impl {
+    public:
+        //Records start time of Audio
+        NUClear::clock::time_point startTime;
+        std::string fileName;
+        std::ofstream myfile;
+    };
+    
+    std::ofstream myfile;
 
     BeatDetectorsTests::BeatDetectorsTests(NUClear::PowerPlant* plant) : Reactor(plant) {
-
+        
+        on<Trigger<messages::SoundFileStart>, Options<Single>> ([this](const messages::SoundFileStart& soundFileStart) {
+            std::cout << "BeatDetectorTests: File Start info received" << std::endl;
+            
+            myfile.close();
+            
+            m->startTime = soundFileStart.time;
+            m->fileName = soundFileStart.fileName;
+            
+            myfile.open (std::string(m->fileName) + std::string(".txt"), std::ios::out);
+            myfile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
+                
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        });
+        
         on<Trigger<messages::Beat>> ([this](const messages::Beat& beat) {
 
-            std::time_t time = std::chrono::system_clock::to_time_t(beat.time);
+            NUClear::clock::duration relativeTime = beat.time - m->startTime;
+            //std::time_t time = std::chrono::system_clock::to_time_t(beat.time);
+            //std::time_t relativeTime = std::chrono::system_clock::to_time_t(relativeTimeDuration);
+            
+            float secs, millis;
+            millis = (std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime)).count();
+            secs = millis /1000;
+            //millis = millis % 1000;
+            //mins = secs / 60;
+            //secs = secs % 60;
 
-            std::cout << "Beat found at: " << ctime(&time)
-                    << "Period: " << 60 / (double(beat.period.count()) / double(NUClear::clock::period::den)) << "bpm"
-                    << std::endl << std::endl;
+            //std::cout << "Beat found at: " << ctime(&time) << "Time since start of Audio: " << secs << "s" << std::endl
+            //        << "Period: " << 60 / (double(beat.period.count()) / double(NUClear::clock::period::den)) << "bpm"
+            //        << std::endl << std::endl;
+            
+            myfile << secs << std::endl;
+            myfile.flush();
         });
-
+        
+       on<Trigger<Shutdown>>([this](const Shutdown&) {
+            myfile.close();
+       });
     }
+    
 
-    BeatDetectorsTests::~BeatDetectorsTests()
-    {
-
-    }
 
 }

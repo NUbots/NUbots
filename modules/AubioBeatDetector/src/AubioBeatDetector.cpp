@@ -36,8 +36,6 @@ namespace modules {
 
     class AubioBeatDetector::impl {
     public:
-        //Chunk resizing variables
-        std::vector<int16_t> chunkWindow;
 
         //Beat Detection Trigger Variables
         aubio_tempo_t* tempoTracker;
@@ -64,12 +62,28 @@ namespace modules {
             m->sampleRate = settings.sampleRate;
             m->channels = settings.channels;
             m->chunkSize = settings.chunkSize;
+            
+            std::cout << "sample rate: " <<  m->sampleRate << std::endl;
+            std::cout << "channels: " <<  m->channels << std::endl;
+            std::cout << "chunkSize: " <<  m->channels << std::endl;
 
             // Build our audio tempo tracker  can set to (aubio_onset_kl or aubio_onset_complex onset tracking)
             m->tempoTracker = new_aubio_tempo(aubio_onset_kl, WINDOW_SIZE, HOP_SIZE, m->channels);
             m->outputData = new_fvec(HOP_SIZE, m->channels);
             m->inputData = new_fvec(HOP_SIZE, m->channels);
 
+
+        });
+        
+        on<Trigger<messages::SoundFileStart>, Options<Single>> ([this](const messages::SoundFileStart& soundFileStart) {
+            std::cout << "AubioBeatDetector: File Start info received" << std::endl;
+            
+            //del_aubio_tempo(m->tempoTracker);
+            m->outputData = new_fvec(HOP_SIZE, m->channels);
+            m->inputData = new_fvec(HOP_SIZE, m->channels);
+            m->tempoTracker = new_aubio_tempo(aubio_onset_kl, WINDOW_SIZE, HOP_SIZE, m->channels);
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
         });
 
@@ -109,7 +123,13 @@ namespace modules {
                 auto beat = std::make_unique<messages::Beat>();
                 beat->time = lastTwoBeats[0]->time; //apparently the latest one is 0
                 beat->period = lastTwoBeats[0]->time - lastTwoBeats[1]->time;
-
+                emit(std::move(beat));
+           }
+           else if (lastTwoBeats.size() == 1) //First one has no period
+           {
+                auto beat = std::make_unique<messages::Beat>();
+                beat->time = lastTwoBeats[0]->time; //apparently the latest one is 0
+                beat->period = NUClear::clock::duration(0);
                 emit(std::move(beat));
            }
        });
