@@ -244,7 +244,6 @@
 		\subsubsection{Description}
 			The eSpeak module takes a string command and performs a text to speech conversion on it.
 			This sound data is then outputted through the speaker of the system.
-			\todo[inline]{Description}
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
@@ -267,25 +266,29 @@
 	\subsection{LinuxCameraStreamer}
 		\subsubsection{Description}
 			The LinuxCameraStreamer uses the V4L2 Linux Kernel API in order to read live data from the webcam of a computer.
-			\todo[inline]{Description}
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
-					\item \todo[inline]{INPUT}
+					\item A Camera configuration describing the camera settings.
 				\end{itemize}
 				&
 				\begin{itemize}
-					\item \todo[inline]{OUTPUT}
+					\item The raw video frames as they are recorded.
 				\end{itemize}
     		\end{tabular}
 
 		\subsubsection{Tests}
 			\test{The LinuxCameraStreamer is able to read an incoming video stream from the camera.}
-			\todo[inline]{Write test steps}
+			\begin{enumerate}
+				\item Use the NUBugger module to manually verify incoming image data.
+			\end{enumerate}
 			
 			\test{The LinuxCameraStreamer will respond and update settings on the camera when needed.}
-			\todo[inline]{Write test steps}
+			\begin{enumerate}
+				\item Change and save the camera configuration file.
+				\item Validate that the changes were applied.
+			\end{enumerate}
 		
 	\subsection{NUBugger}
 		\subsubsection{Description}
@@ -296,17 +299,21 @@
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
-					\item \todo[inline]{INPUT}
+					\item Realtime sensor information.
+					\item Realtime image data.
 				\end{itemize}
 				&
 				\begin{itemize}
-					\item \todo[inline]{OUTPUT}
+					\item Networked packets containing sensor and image data.
 				\end{itemize}
     		\end{tabular}
 
 		\subsubsection{Tests}
 			\test{NUBugger sends out diagnostic data to the web server.}
-			\todo[inline]{Write test steps}
+			\begin{enumerate}
+				\item Run the robot and NUBugger binaries.
+				\item Manually ensure data is sent and visualized properly.
+			\end{enumerate}
 		
 	\subsection{Platform Darwin HardwareIO}
 		\subsubsection{Description}
@@ -316,11 +323,11 @@
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
-					\item \todo[inline]{INPUT}
+					\item Servo motor commands describing a target point the motor needs to move to.
 				\end{itemize}
 				&
 				\begin{itemize}
-					\item \todo[inline]{OUTPUT}
+					\item Sensor information
 				\end{itemize}
     		\end{tabular}
 
@@ -364,11 +371,12 @@
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
-					\item \todo[inline]{INPUT}
+					\item A script configuration object describing the available scripts.
+					\item A execute script command detailing the script to execute.
 				\end{itemize}
 				&
 				\begin{itemize}
-					\item \todo[inline]{OUTPUT}
+					\item A series of servo waypoint commands representing the script.
 				\end{itemize}
     		\end{tabular}
 
