@@ -48,7 +48,8 @@ namespace modules {
         // Load our file name configuration.
         on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
                 
-            std::string filePath = args[0];//configfile.config["file"];
+            std::string filePath = args[1];//configfile.config["file"]; //args[0] is the command to run the file... so args[1] is the arg we want
+            std::cout << "reading file: " << filePath << std::endl;
             log("Loading sound file: ", filePath);
             m->file = SndfileHandle(filePath.c_str());
 
@@ -61,6 +62,7 @@ namespace modules {
             settings->chunkSize = m->file.samplerate() / CHUNKS_PER_SECOND;
 
             emit<Scope::DIRECT>(std::move(settings));
+            //emit(std::move(settings));
                 
         });
 
@@ -78,6 +80,7 @@ namespace modules {
                 m->fileStartSent = true;
                 //Measures the start time of the Sound File
                 auto audioStartTime = std::make_unique<messages::SoundFileStart>(); 
+                std::cout << "test 0" << std::endl;
                 audioStartTime->time = NUClear::clock::now() - NUClear::clock::duration(int(NUClear::clock::period::den * (chunkSize / m->file.samplerate())));
                 //audioStartTime->fileName = filePath;//m->file[m->currentFileIndex];
                 emit(std::move(audioStartTime));
