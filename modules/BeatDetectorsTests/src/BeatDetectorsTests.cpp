@@ -35,47 +35,55 @@ namespace modules {
         NUClear::clock::time_point startTime;
         std::string fileName;
         std::ofstream myfile;
+        bool soundFileStarted = false;
     };
     
-    std::ofstream myfile;
+    
 
     BeatDetectorsTests::BeatDetectorsTests(NUClear::PowerPlant* plant) : Reactor(plant) {
         
         on<Trigger<messages::SoundFileStart>, Options<Single>> ([this](const messages::SoundFileStart& soundFileStart) {
-            std::cout << "BeatDetectorTests: File Start info received" << std::endl;
-            
-            myfile.close();
+            m->myfile.close();
             
             m->startTime = soundFileStart.time;
             m->fileName = soundFileStart.fileName;
             
-            myfile.open (std::string(m->fileName) + std::string(".txt"), std::ios::out);
-            myfile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
+            m->myfile.open (std::string(m->fileName) + std::string(".txt"), std::ios::out);
+            m->myfile.exceptions(std::ofstream::badbit | std::ofstream::failbit);
                 
+            m->soundFileStarted = true;
+            
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            
+            
         });
         
         on<Trigger<messages::Beat>> ([this](const messages::Beat& beat) {
 
-            NUClear::clock::duration relativeTime = beat.time - m->startTime;
-            //std::time_t time = std::chrono::system_clock::to_time_t(beat.time);
-            //std::time_t relativeTime = std::chrono::system_clock::to_time_t(relativeTimeDuration);
-            
-            float secs, millis;
-            millis = (std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime)).count();
-            secs = millis /1000;
+            //while (m->soundFileStarted == false)
+            //{}
+            if (m->soundFileStarted == true)
+            {
+                NUClear::clock::duration relativeTime = beat.time - m->startTime;
+                //std::time_t time = std::chrono::system_clock::to_time_t(beat.time);
+                //std::time_t relativeTime = std::chrono::system_clock::to_time_t(relativeTimeDuration);
 
-            std::cout << "Beat found at: " << secs
-                    << "Period: " << 60 / (double(beat.period.count()) / double(NUClear::clock::period::den)) << "bpm"
-                    << std::endl << std::endl;
+                float secs, millis;
+                millis = (std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime)).count();
+                secs = millis /1000;
 
-            
-            myfile << secs << std::endl;
-            myfile.flush();
+                //std::cout << "Beat found at: " << secs
+                //        << "Period: " << 60 / (double(beat.period.count()) / double(NUClear::clock::period::den)) << "bpm"
+                //        << std::endl << std::endl;
+
+
+                m->myfile << secs << std::endl;
+                m->myfile.flush();
+            }
         });
         
        on<Trigger<Shutdown>>([this](const Shutdown&) {
-            myfile.close();
+            m->myfile.close();
        });
     }
     
