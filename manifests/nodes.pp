@@ -40,8 +40,16 @@ class gcc48 {
   }
 }
 
+class catch {
+  wget::fetch { 'catch.hpp':
+    destination => '/usr/local/include/catch.hpp',
+    source => 'https://raw.github.com/philsquared/Catch/master/single_include/catch.hpp',
+  }
+}
+
 class nuclear {
-  require 'gcc48'
+  include gcc48
+  include catch
 
   file { '/home/mitchell/NUbots':
     ensure => directory,
@@ -51,7 +59,7 @@ class nuclear {
     provider => 'git',
     source => "https://github.com/Fastcode/NUClear.git",
     require => Package['git'],
-  } 
+  }
 }
 
 class nuclearport {
