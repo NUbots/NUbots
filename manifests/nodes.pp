@@ -53,16 +53,12 @@ class nuclear {
 
   $nuclear_build_dir = '/home/mitchell/NUbots/NUClear/build'
 
-  file { 'nubots_dir':
-    path => '/home/mitchell/NUbots',
-    ensure => directory,
-  } ->
   vcsrepo { 'nuclear_repo':
+    require => [File['nubots_dir'], Package['git']],
     path => '/home/mitchell/NUbots/NUClear',
-    ensure => present,
-    provider => 'git',
     source => "https://github.com/Fastcode/NUClear.git",
-    require => Package['git'],
+    provider => 'git',
+    ensure => present,
   } ->
   file { 'nuclear_build_dir':
     path => $nuclear_build_dir,
@@ -71,7 +67,13 @@ class nuclear {
     force => true,
   } ~>
   exec { 'nuclear_cmake':
-    require => [Package['cmake'], Package['libzmq-dev'], Package['protobuf-compiler']],
+    require => [
+        Class['gcc48'],
+        Class['catch'],
+        Package['cmake'],
+        Package['libzmq-dev'],
+        Package['protobuf-compiler'],
+      ],
     command => 'cmake ..',
     cwd => $nuclear_build_dir,
     path => $path,
@@ -96,14 +98,67 @@ class nuclear {
 
 class nuclearport {
   require 'nuclear'
+
+  $nuclearport_build_dir = '/home/mitchell/NUbots/NUClearPort/build'
+
+  vcsrepo { 'nuclearport_repo':
+    require => [File['nubots_dir'], Package['git']],
+    path => '/home/mitchell/NUbots/NUClearPort',
+    source => "https://github.com/nubots/NUClearPort.git",
+    provider => 'git',
+    ensure => present,
+  } ->
+  file { 'nuclearport_build_dir':
+    path => $nuclearport_build_dir,
+    ensure => directory,
+    purge => true,
+    force => true,
+  } ~>
+  exec { 'nuclearport_cmake':
+    require => [
+        Package['libespeak-dev'],
+        Package['librtaudio-dev'],
+        Package['libncurses5-dev'],
+        Package['libjpeg-dev'],
+        Package['libfftw3-dev'],
+        Package['libaubio-dev'],
+      ],
+    command => 'cmake ..',
+    cwd => $nuclearport_build_dir,
+    path => $path,
+    # refreshonly => true,
+    logoutput => "on_failure",
+  } ~>
+  exec { 'nuclearport_make':
+    command => 'make -j',
+    cwd => $nuclearport_build_dir,
+    path => $path,
+    refreshonly => true,
+    logoutput => "on_failure",
+  }
 }
 
-node default {
+class nubots_nuclearport_dev_vm {
+  file { 'nubots_dir':
+    path => '/home/mitchell/NUbots',
+    ensure => directory,
+  }
+
   package { 'cmake': ensure => latest }
   package { 'git': ensure => latest }
   package { 'openssh-server': ensure => latest }
   package { 'libzmq-dev': ensure => latest }
   package { ['libprotobuf-dev', 'protobuf-compiler']: ensure => latest }
+  package { 'libespeak-dev': ensure => latest }
+  package { 'librtaudio-dev': ensure => latest }
+  package { 'libncurses5-dev': ensure => latest }
+  package { 'libjpeg-dev': ensure => latest }
+  package { 'libfftw3-dev': ensure => latest }
+  package { 'libaubio-dev': ensure => latest }
   include vim
   include nuclearPort
+}
+
+node default {
+  include nubots_nuclearport_dev_vm
 }
