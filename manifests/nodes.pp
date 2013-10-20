@@ -107,6 +107,7 @@ class nuclearport {
     source => "https://github.com/nubots/NUClearPort.git",
     provider => 'git',
     ensure => present,
+    owner => 'mitchell',
   } ->
   file { 'nuclearport_build_dir':
     path => $nuclearport_build_dir,
@@ -126,7 +127,7 @@ class nuclearport {
     command => 'cmake ..',
     cwd => $nuclearport_build_dir,
     path => $path,
-    # refreshonly => true,
+    refreshonly => true,
     logoutput => "on_failure",
   } ~>
   exec { 'nuclearport_make':
