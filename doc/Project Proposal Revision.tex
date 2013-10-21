@@ -17,44 +17,42 @@
 	\clearpage
 
 	\section{Overview of Document}
-	This document seeks to review our original Project Proposal and explain how it has been implemented. It will explore the decisions our team has taken to respond to problem and how this has effected the implementation of the Project Plan.
+	This document seeks to update our original Project Proposa, explain how it has been implemented and how the plan has changed. It will explore the decisions our team has taken to respond to problem and how this has effected the implementation of the Project Plan.
 
 	\section{Terms of Reference}
 		\subsection {Goals}
 			\begin{enumerate}
 				\item Measurably improve robot architecture.
-				\item Make robot dance, possibly in response to some stimulus.
+				\item Prove the significance of the improvements of the new architecture by using it to make the robots dance.
 			\end{enumerate}
 		\subsection {Objectives}
 			\begin{enumerate}
-				\item Decrease the time it takes to add a new component to the system.
-				\item Increase the performance of the system
-				\item Improve diagnostics/monitoring tools by providing increased visibility into the state of the system.
-				\item Decrease the time it takes to induct a new team member into the system.
-				\item Improve utilization of existing and future robot hardware.
-				\item Improve the consistency of interfaces between components.
-				\item Improve the ability to move the architecture between different robot platforms.
-				\item Investigate the possibilities of making the robot dance according to a predetermined script, in response to music or a detected human’s movements. Also implementing these possibilities if practical.
+				\item Decrease the time it takes to add a new component to the system from 1-2 weeks to less than 1 day.
+				\item Decouple performance of behaviour and localisation so they are no longer restricted by the performance of vision.
+				\item Decrease the time it takes to induct a new team member into the system from 1 month to 1 week.
+				\item Reduce the number of component needed to be changed to move the architecture between different robot platforms from 4 components to 2.
+				\item Make the robot dance according to a predetermined script and in response to music or detected human’s movements. These feature is to be implemented by changing only 1 component each, rather than 4 each which would be needed to implement this in the current system. 
+
+				\item Improve visibility into the state of the system through diagnostics/monitoring tools. Improve on current basic timing and logging to include detailed debugging at the time of the system errors.
+				\item Improve utilization of existing and future robot hardware to allow for higher resolution on the camera, better use of low level controllers and increasing control over threading.
+				\item Improve the consistency of interfaces between components. Reducing the use of multiple different interface for each component to a single unified interface for all components. The unified interface must have a convention for describing so that it can minimise mis-understanding and redundancy.
+				
+
 			\end{enumerate}
 		\subsection {Scope}
 			The project aims to measurably improve the effectiveness of the NUBots through the introduction of a new software architecture. This will involve modifications to the existing NUBots codebase. The project will not modify any hardware on the NUbots but must be able to accommodate changes in hardware. The project will not change any existing algorithms beyond restructuring them to fit the new architecture.
 			\\Additional we aim to give the robot the ability to dance in some form for marketing purposes. This dancing will be according to a predetermined script, or in response to some stimulus such as music or human movement detected in a camera.
-		\subsection {Acceptance Criteria}
-			The acceptance criteria will consist of achieving measurable improvements on the characteristics of the system outlined in section 1.2 (Objectives). Specific measurements need to be negotiated with the client at a later time.
 		\subsection {Review of changes to Goals, Objectives, Scope and Acceptance Criteria}
 			An review of how these categories have changed since the original Project Proposal.
 			\subsubsection{Goals}
-				The goals of the project remain unchanged since the initial Project Proposal.
+				The objectives of the project are unchanged.
 			\subsubsection{Objectives}
-				The objectives of the project are unchanged with the exception of objective 8. Due to team members leaving, the objective of making the robot dance to according to visual stimuli has been abandoned.
+				 Due to team members leaving objective 8. , the objective of making the robot dance to according to visual stimuli has been abandoned.
 			\subsubsection{Scope}
-				The scope of the project remains unchanged since the initial Project Proposal, except the refinement of the dance to being only scripted and in response to music.
+				The project will no longer involve making the robot dance according to movement detected in a camera.
 			%TODO
-			\subsubsection{Acceptance Criteria}
-				The Acceptance Criteria remans the same.
 
 	\section{Resources}
-		\subsection{Organisation and Team Information}
 		\subsection{People and Responsibilities}
 			\subsubsection{People}
 				\paragraph{Project Team}
@@ -92,6 +90,7 @@
 						\item Daniel Gault
 					\end{itemize}
 		\subsection{Equipment, Tools and Materials}
+			The team will have access to the NUBots robots under the supervision of members of the NUBots team.
 		\subsection {Review of Resources}
 			An review of how our resources have changed since the original Project Proposal.
 			\subsubsection{Current Project Team}
@@ -110,7 +109,7 @@
 			1 & Project not completed by dealine & Low & High & Do our work & Remove features. Finish after deadline. NUBot team finished project. \\ \hline
 			2 & Documentation not completed by deadline & Medium & Medium & Assign specific tasks for completion of documentation & Negotiate extension. \\ \hline
 			3 & Conflict in Team & Medium & Medium & Listen to all group members opinions. & Attempt to accomodate group memebers opinions. Make group decision on difficult choices \\ \hline
-			4 & Jake can no longer do the project, losing his c++ skills. & Low & High & Other term members gain understanding of his c++ code. & Less ambitious use of c++. Possibly designing a different architecture that is easier to implement. \\ \hline
+			4 & Group members with unique vital skills can longer do the project, such as Jake with his ability to do template meta-programming in c++. & Low & High & Team members will work together to teach eachother these vital skills so one vital member leaving has less of an impact. & Redesigning the architecture so that it can be implemented without the skills that were lost. \\ \hline
 			5 & NUBot team cancelled & Very Low & Very High & None & Make project more general, as an architecture with no implentation in the NUBots \\ \hline
 			\hline
 		\end{tabularx}
@@ -122,19 +121,42 @@
 			\subsubsection{Anticipated Risks}
 				\paragraph{Transferring to New Architecture behind schedule}  
 					Due to failing to anticipate how time consuming tranferring the old system to the new architechure would be, it was realised that it could not be completed in time. Fortunately the team had considered this possibility and was ready to deal with it. It was decided, as according to our contingency plan, that we would simply do the best we could and leave the rest for the NUBots team to complete.
+
 	\section{Schedule}
-		\subsection{Delivery Phases}
-			\subsubsection{Overview}
-			\subsubsection{Delivery Phase 1 - Proof of Concept}			
-			\subsubsection{Delivery Phase 2 -NUClear Framework Integration}
-		\subsection{External Dependancies}
-		\subsection{Assumptions}
-			We assume that there is an existing robot for the architecture to run on. We also assume that this robot will be in reasonable working condition.
 		\subsection{Gantt Chart}
 			\subimport{ProjectProposalResources/}{GanttChart}
+			\subsubsection{Task Definition}
+				\paragraph{Design Nuclear}
+					This is the research and design documents that will need to be created before the architecture framework, NUClear, can be implemented.
+				\paragraph{Prototype Nuclear}
+					This is an evolutionary prototype that will be used to assist in the design of NUClear.
+				\paragraph{Implement Nuclear}
+					NUClear will be implemented which provide the framework from which the NUBots system will be redesigned around.
+				\paragraph{Convert NUBots to NUClear}
+					The NUBots soccer playing system will be converted from the old architecture to the new one. This will be completed when all original functionality is operating on the new architecture.
+				\paragraph{Design Robot Dance}
+					The design of the robot dance, will need to be based around the design of NUClear and will alow for the robot dance to be implemented.
+				\paragraph{Implement Robot Dance}
+					The robot dance will be implemented.
 		\subsection{Gantt Chart - Actual}
 			Shows how the schedule of tasks has actually occured. \\
 			\subimport{ProjectProposalResources/}{GanttChart_actual}
-
+			\subsubsection{Changes to tasks}
+				\paragraph{Convert NUBots to NUClear}
+					Due to running out of time, this task will not be completed but only the vital components will be converted which will make it easier for the NUBots team to finish the task themselves. This task will end in week 7 to allow time for other tasks to be completed.
+				\paragraph{New Tasks}
+					\begin{enumerate}
+						\item Test NUClear
+						\item Test Robot Dance
+						\item NUClear User Documentation
+					\end{enumerate}
+			\subsubsection{New Task Definition}
+				\paragraph{Test NUClear}
+					We failed to take into account testing in the original schedule. This testing will ensure that the NUClear architectural framework meets the objectives.
+				\paragraph{Test Robot Dance}
+					This testing will ensure that the Robot dance function correctly.
+				\paragraph{NUClear User Documentation}
+					This documentation will describe how to use the NUClear framework. It will be neccessary for the NUBots team to finish the task of converting the NUBots system to work using NUClear.
+					
 
 \end{document}
