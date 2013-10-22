@@ -59,12 +59,16 @@ class nuclear {
     source => "https://github.com/Fastcode/NUClear.git",
     provider => 'git',
     ensure => present,
+    user => 'mitchell',
+    owner => 'mitchell',
   } ->
   file { 'nuclear_build_dir':
     path => $nuclear_build_dir,
     ensure => directory,
     purge => true,
     force => true,
+    owner => 'mitchell',
+    group => 'mitchell',
   } ~>
   exec { 'nuclear_cmake':
     require => [
@@ -79,6 +83,7 @@ class nuclear {
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
+    user => 'mitchell',
   } ~>
   exec { 'nuclear_make':
     command => 'make -j',
@@ -86,6 +91,7 @@ class nuclear {
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
+    user => 'mitchell',
   } ~>
   exec { 'nuclear_install':
     command => 'make install',
@@ -97,7 +103,7 @@ class nuclear {
 }
 
 class nuclearport {
-  require 'nuclear'
+  include 'nuclear'
 
   $nuclearport_build_dir = '/home/mitchell/NUbots/NUClearPort/build'
 
@@ -107,16 +113,21 @@ class nuclearport {
     source => "https://github.com/nubots/NUClearPort.git",
     provider => 'git',
     ensure => present,
+    user => 'mitchell',
     owner => 'mitchell',
+    # group => 'mitchell',
   } ->
   file { 'nuclearport_build_dir':
     path => $nuclearport_build_dir,
     ensure => directory,
     purge => true,
     force => true,
+    owner => 'mitchell',
+    group => 'mitchell',
   } ~>
   exec { 'nuclearport_cmake':
     require => [
+        Class['nuclear'],
         Package['libespeak-dev'],
         Package['librtaudio-dev'],
         Package['libncurses5-dev'],
@@ -129,6 +140,7 @@ class nuclearport {
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
+    user => 'mitchell',
   } ~>
   exec { 'nuclearport_make':
     command => 'make -j',
@@ -136,6 +148,7 @@ class nuclearport {
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
+    user => 'mitchell',
   }
 }
 
@@ -143,6 +156,8 @@ class nubots_nuclearport_dev_vm {
   file { 'nubots_dir':
     path => '/home/mitchell/NUbots',
     ensure => directory,
+    owner => 'mitchell',
+    group => 'mitchell',
   }
 
   package { 'cmake': ensure => latest }
